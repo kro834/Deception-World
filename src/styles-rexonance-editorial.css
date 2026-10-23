@@ -803,3 +803,292 @@ html[data-family="special"]
     background: CanvasText;
   }
 }
+
+/* ================================================================
+   The auto transformation movie's control (owner, 2026-10-23:
+   「自動変身ムービーも速度調整機能付きでつけて」; rexonance-assembly-movie.tsx,
+   src/lib/assembly-movie.ts). An instrument of the ZENITH runway's HUD,
+   fixed at the viewport's foot: the runway's ice on its dark glass, the
+   stamp's cut corners, the HUD face for its kicker, the display face for
+   its Japanese. Shown while the frame is pinned (data-shown) or while it
+   holds focus; hidden in the still tiers (data-load="static" — reduced
+   motion, forced colours, economy — the runway is one still there and
+   has no sequence to play) and under reduced motion outright.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+  --rzn-ice: 121 232 255;
+  --rzn-gold: 242 216 150;
+  --rzn-pink: 255 143 216;
+  position: fixed;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: grid;
+  gap: 8px;
+  box-sizing: border-box;
+  width: min(calc(100vw - 24px), 640px);
+  margin: 0;
+  padding: 10px 16px 12px;
+  color: #f2f7fb;
+  background: rgb(3 7 13 / 84%);
+  border: 1px solid rgb(var(--rzn-ice) / 28%);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+  clip-path: polygon(
+    14px 0,
+    100% 0,
+    100% calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    0 100%,
+    0 14px
+  );
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  visibility: hidden;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 0s linear 180ms;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie[data-shown],
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie:focus-within {
+  visibility: visible;
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie[data-load="static"],
+html[data-family="special"][data-world-effects="economy"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie {
+  display: none;
+}
+
+/* The menu or a dialog over the page: the control steps back. */
+html[data-side-menu-open] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie,
+html[data-dialog-open] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+  visibility: hidden;
+  opacity: 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin: 0;
+  color: rgb(var(--rzn-ice));
+  font: 400 10px / 1.3 var(--dx-hud);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-kicker > span + span {
+  color: #b9cbd6;
+  font: 500 11px / 1.3 var(--dx-display);
+  letter-spacing: 0.1em;
+  text-transform: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-row > button,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-speeds > button {
+  box-sizing: border-box;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid rgb(var(--rzn-ice) / 60%);
+  border-radius: 0;
+  color: #f2f7fb;
+  font: 600 13px / 1.2 var(--dx-display);
+  letter-spacing: 0.08em;
+  background: #101d27;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-play {
+  min-width: 108px;
+  color: #02050a;
+  background: rgb(var(--rzn-ice));
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie[data-state="playing"]
+  .rzn-movie-play {
+  color: rgb(var(--rzn-ice));
+  background: rgb(var(--rzn-ice) / 12%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-row > button:disabled,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-seek > input:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The speed: one segmented instrument, the chosen notch lit. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-speeds {
+  display: inline-flex;
+  margin-inline-start: auto;
+  border: 1px solid rgb(var(--rzn-ice) / 30%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-speeds > button {
+  min-width: 48px;
+  padding: 0 10px;
+  border: 0;
+  border-inline-start: 1px solid rgb(var(--rzn-ice) / 20%);
+  color: #c9dde6;
+  font: 600 12px / 1 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  background: transparent;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-speeds > button:first-child {
+  border-inline-start: 0;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie-speeds
+  > button[aria-checked="true"] {
+  color: #fff;
+  background: rgb(var(--rzn-ice) / 18%);
+  box-shadow: inset 0 -2px 0 rgb(var(--rzn-ice));
+}
+
+/* The seek: the progress rail, laid flat. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-seek {
+  display: block;
+  margin: 0;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-seek > input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  accent-color: rgb(var(--rzn-ice));
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie-seek
+  > input::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(90deg, rgb(var(--rzn-ice)), rgb(var(--rzn-pink)) 70%, rgb(var(--rzn-gold)));
+  opacity: 0.7;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie-seek
+  > input::-moz-range-track {
+  height: 2px;
+  background: linear-gradient(90deg, rgb(var(--rzn-ice)), rgb(var(--rzn-pink)) 70%, rgb(var(--rzn-gold)));
+  opacity: 0.7;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie-seek
+  > input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: 1px solid #02050a;
+  border-radius: 0;
+  background: rgb(var(--rzn-ice));
+  transform: rotate(45deg);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rzn-movie-seek
+  > input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 1px solid #02050a;
+  border-radius: 0;
+  background: rgb(var(--rzn-ice));
+  transform: rotate(45deg);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie :is(button, input):focus-visible {
+  outline: 2px solid rgb(var(--rzn-gold));
+  outline-offset: 3px;
+}
+
+@media (max-width: 639.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+    gap: 6px;
+    width: calc(100vw - 16px);
+    padding: 8px 12px 10px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-kicker > span:first-child {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-row > button {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-play {
+    min-width: 92px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-speeds > button {
+    min-width: 44px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+    display: none;
+  }
+}

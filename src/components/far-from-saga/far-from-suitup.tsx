@@ -21,6 +21,7 @@ import {
 } from "@/lib/far-from-suit";
 import { farFromUltraSrc } from "@/lib/far-from-ultra-art";
 import { FAR_FROM_SAGA } from "@/components/final-stage/final-stage-data";
+import { AssemblyMovie } from "@/components/rexonance-saga/rexonance-assembly-movie";
 
 /* FAR FROM SAGA — #suitup, the scroll suit-up (2026-10-22).
 
@@ -213,6 +214,9 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
         </span>
       </header>
       <FarFromAssemblyGuide runwayRef={runwayRef} />
+      {/* The auto transformation movie's control (owner, 2026-10-23), the
+          Rexonance runway's, in this HUD's grammar (styles-far-from-suitup.css). */}
+      <AssemblyMovie runwayRef={runwayRef} site="far-from" />
       <div
         ref={runwayRef}
         className="ffs-runway rzn-suitup"

@@ -341,6 +341,13 @@ function scrollAssemblyEnvironment() {
     listeners.get("window:scroll")?.();
     return frame();
   };
+  // The frames after a scroll, until the playhead has settled on it (the
+  // spring's follow-through, scroll-playhead.js): their calls, in order.
+  const settle = () => {
+    const all = [];
+    for (let k = 0; k < 40 && frames.size; k += 1) all.push(...frame());
+    return all;
+  };
   return {
     env,
     runway,
@@ -350,6 +357,7 @@ function scrollAssemblyEnvironment() {
     frames,
     frame,
     scroll,
+    settle,
     imageSources,
     mutationObservers,
   };
@@ -481,7 +489,10 @@ test("reactor glow waits for sealed armor and advanced art waits for the ignitio
     assert.equal(t.runway.dataset.rznState, "live");
     const seal = t.scroll(0.89);
     assert.equal(seal.filter((c) => c.method === "createRadialGradient").length, 0);
-    const ignition = t.scroll(0.905);
+    // The playhead follows the scroll here too (2026-10-23): the ignition
+    // wave is drawn by the frame that crosses .9 on the way to .905.
+    t.scroll(0.905);
+    const ignition = t.settle();
     assert.equal(ignition.filter((c) => c.method === "createRadialGradient").length, 1);
     assert.equal(t.runway.dataset.rznPhase, "ignite");
     assert.deepEqual(
@@ -490,6 +501,7 @@ test("reactor glow waits for sealed armor and advanced art waits for the ignitio
       "fully lit advanced art cannot cover ignition",
     );
     t.scroll(0.916);
+    t.settle();
     assert.equal(t.runway.dataset.rznPhase, "evolve");
     assert.deepEqual(t.imageSources, ["/figure", "/undersuit", "/max", "/ultra"]);
     await new Promise((resolve) => setTimeout(resolve, 0));

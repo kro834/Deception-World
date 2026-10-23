@@ -130,9 +130,13 @@ test("assembly instructions and retry remain outside the decorative hidden runwa
     (node) => ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node),
   );
   assert.equal(siblings[0], guideNode);
-  assert.equal(attribute(siblings[1], "className"), "rzn-suitup");
-  assert.equal(attribute(siblings[1], "aria-hidden"), "true");
-  assert.equal(siblings[2].tagName.getText(), "RexonanceAssemblyReplay");
+  // The guide, the movie's control (2026-10-23; outside the hidden runway
+  // too), the runway, the replay.
+  const runwayAt = siblings.findIndex((node) => attribute(node, "className") === "rzn-suitup");
+  assert.ok(runwayAt > 0, "the runway follows the guide");
+  assert.equal(attribute(siblings[runwayAt], "aria-hidden"), "true");
+  assert.equal(siblings[runwayAt - 1].tagName.getText(), "AssemblyMovie");
+  assert.equal(siblings[runwayAt + 1].tagName.getText(), "RexonanceAssemblyReplay");
   const events = [];
   const { RexonanceAssemblyGuide } = component("rexonance-assembly-guide", "error");
   const guide = RexonanceAssemblyGuide({

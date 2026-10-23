@@ -17,6 +17,7 @@ import {
 import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import { FIELD_WAKE, REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
+import { PLAYHEAD, ScrollPlayhead } from "./scroll-playhead.js";
 import {
   createReactorLayers,
   deferReactorPieces,
@@ -4129,12 +4130,15 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       : null;
   formObserver?.observe(runway, { attributes: true, attributeFilter: ["data-form"] });
 
-  // Follow-through (owner, 2026-10-16: fine and dynamic at every notch):
-  // the displayed progress chases the scroll's, so one wheel notch plays as
-  // a short animation rather than a jump cut. A jump (over .06), the last
-  // few ten-thousandths, and everything from the ignition on (.9) snap; the
-  // HUD reads the scroll itself.
-  let lastTarget = -1;
+  // Follow-through (owner, 2026-10-16: fine and dynamic at every notch;
+  // 2026-10-23: 「スクロールに伴ってより滑らかに変身されるようにし」): the
+  // displayed progress is the playhead (scroll-playhead.js), a critically
+  // damped spring chasing the scroll's progress in closed form over each
+  // frame's time — one notch plays as a short motion, notch after notch
+  // blends into one, a fling is followed at most PLAYHEAD.lag behind and
+  // caught up in one ease, a cut (a link, a restore) snaps. The HUD reads
+  // the scroll itself.
+  const head = new ScrollPlayhead();
   let lastStamp = 0;
   let force = false;
   // The fire at rest (review of 2ce6712): a fire that sits still is the
@@ -4171,8 +4175,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (fresh) lastStamp = stamp;
     let shown = progress;
     if (lastProgress >= 0) {
-      const settledHere = lastProgress === lastTarget;
-      if (!force && settledHere && Math.abs(progress - lastProgress) < 0.0005) {
+      if (!force && head.settled && Math.abs(progress - lastProgress) < 0.0005) {
         if (!burningAt(lastProgress)) return;
         // At rest the fire keeps flowing (the HUD, the governor and the
         // calm timer stay as the last moving frame left them).
@@ -4184,23 +4187,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         schedule();
         return;
       }
-      const gap = progress - lastProgress;
-      if (
-        Math.abs(gap) <= 0.06 &&
-        Math.abs(gap) >= 0.0004 &&
-        progress < ASSEMBLY_BEATS.light[0] &&
-        lastProgress < ASSEMBLY_BEATS.light[0]
-      ) {
-        const tau = fresh ? (coarse.matches ? 24 : 34) : coarse.matches ? 40 : 60;
-        const snap = fresh ? 0.0008 : 0.0004;
-        shown = lastProgress + gap * (1 - Math.exp(-dt / tau));
-        if (Math.abs(progress - shown) < snap) shown = progress;
-      }
-    }
+      shown = head.follow(progress, dt, coarse.matches ? PLAYHEAD.omegaTouch : PLAYHEAD.omega);
+    } else head.snap(progress);
     force = false;
     const step = lastProgress >= 0 ? Math.min(0.01, Math.abs(shown - lastProgress)) : 0;
     lastProgress = shown;
-    lastTarget = progress;
     // The governor: a slow frame (over 7 ms) draws the far band as rects from
     // the next one on, and it stays so until the scroll rests or 30 frames in
     // a row come in under 4 ms — never alternating frame by frame, which
@@ -4574,7 +4565,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     goldReverse.at = 0;
     buffers = null;
     view = null;
-    lastTarget = -1;
+    head.reset();
     force = false;
   };
 

@@ -1,6 +1,7 @@
 import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
+import { AssemblyMovie } from "./rexonance-assembly-movie";
 import {
   REXONANCE_ASSEMBLY_PHASES,
   RexonanceAssemblyGuide,
@@ -494,6 +495,10 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
   return (
     <>
       <RexonanceAssemblyGuide runwayRef={runwayRef} calls={REXONANCE_ENTRY_CALLS} />
+      {/* The auto transformation movie's control (owner, 2026-10-23): fixed
+          at the viewport's foot while the frame is pinned; it drives the
+          scroll, so the runway plays it as any scroll. */}
+      <AssemblyMovie runwayRef={runwayRef} site="rexonance" />
       <div
         ref={runwayRef}
         className="rzn-suitup"
