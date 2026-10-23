@@ -188,6 +188,37 @@ export function MetaUnitasSaga() {
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
 
+  // The page's top reserve follows the bar's real height (a larger text
+  // size wraps it), as the other special sites keep it: measured on layout
+  // and font changes, never on scroll.
+  useEffect(() => {
+    const page = pageRef.current;
+    const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
+    if (!page || !nav) return;
+    let frame = 0;
+    const sync = () => {
+      frame = 0;
+      const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
+      if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve)
+        page.style.setProperty("--rxs-local-nav-reserve", reserve);
+    };
+    const queue = () => {
+      if (!frame) frame = window.requestAnimationFrame(sync);
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(queue);
+    observer?.observe(nav);
+    window.addEventListener("resize", queue, { passive: true });
+    document.fonts?.addEventListener("loadingdone", queue);
+    sync();
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", queue);
+      document.fonts?.removeEventListener("loadingdone", queue);
+      if (frame) window.cancelAnimationFrame(frame);
+      page.style.removeProperty("--rxs-local-nav-reserve");
+    };
+  }, []);
+
   // ウルトラ's key visual, decoded in idle time once #stages is near.
   useEffect(() => {
     const target = document.getElementById("stages");

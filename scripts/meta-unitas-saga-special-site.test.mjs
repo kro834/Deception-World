@@ -20,9 +20,8 @@ const gate = read("src/components/load-gate.tsx");
 const owner = read("design/meta-unitas-saga-20261023/owner-text.md");
 const comparison = read("design/meta-unitas-saga-20261023/comparison-owner-20261023.md");
 
-const { META_UNITAS_SAGA, META_UNITAS_PERFORMANCE } = await import(
-  "../src/components/meta-unitas-saga/meta-unitas-data.ts"
-);
+const { META_UNITAS_SAGA, META_UNITAS_PERFORMANCE } =
+  await import("../src/components/meta-unitas-saga/meta-unitas-data.ts");
 const sections = await import("../src/lib/special-site-sections.ts");
 const artwork = await import("../src/lib/meta-unitas-saga-artwork.ts");
 const suit = await import("../src/lib/meta-unitas-suit.ts");
@@ -58,7 +57,9 @@ test("every section the menu and the search list is a real anchor on the page", 
     assert.ok(source.includes(`id="${hash}"`), hash);
   }
   // The bar: five chapters, in the page's order.
-  const bar = [...page.matchAll(/<a href="#([a-z]+)"[^>]*>\s*<span aria-hidden="true">(\d\d)<\/span>/g)];
+  const bar = [
+    ...page.matchAll(/<a href="#([a-z]+)"[^>]*>\s*<span aria-hidden="true">(\d\d)<\/span>/g),
+  ];
   assert.deepEqual(
     bar.map((m) => m[1]),
     ["overview", "suitup", "system", "stages", "arsenal"],
@@ -105,7 +106,8 @@ test("the words are the owner's: generated from the record, current, every line 
   const data = JSON.stringify({ ...META_UNITAS_SAGA });
   for (const line of owner.split("\n")) {
     const text = line.trim();
-    if (text.length > 40) assert.ok(data.includes(JSON.stringify(text).slice(1, -1)), text.slice(0, 30));
+    if (text.length > 40)
+      assert.ok(data.includes(JSON.stringify(text).slice(1, -1)), text.slice(0, 30));
   }
   // ミドル／ウルトラ side by side, split only where both sides are one quantity.
   const dual = META_UNITAS_SAGA.specs.filter((row) => "middle" in row).map((row) => row.key);
@@ -113,7 +115,11 @@ test("the words are the owner's: generated from the record, current, every line 
   for (const row of META_UNITAS_SAGA.specs)
     if ("middle" in row) assert.equal(`${row.middle}／${row.ultra}`, row.value);
   const processors = META_UNITAS_SAGA.specs.find((row) => row.key === "副演算");
-  assert.deepEqual(processors.more, ["『Paranormal Realizer Ultra』", "『Neural Resonancer Ultra』", "『P16』"]);
+  assert.deepEqual(processors.more, [
+    "『Paranormal Realizer Ultra』",
+    "『Neural Resonancer Ultra』",
+    "『P16』",
+  ]);
   // Headings print the record's own brackets and readings.
   assert.match(parts, /<span className="mus-bracket">『 <\/span>/);
   assert.equal(META_UNITAS_SAGA.abilities[0].title, "『 DIVISIBILITY GRANT 』（可分性付与）");
@@ -127,7 +133,10 @@ test("the comparison: Meta Unitas's parts, no Rexonance, no provisos, removal on
   // Each paragraph is one of the owner's with passages removed and nothing
   // else changed: it is a subsequence of a source paragraph, and every run
   // removed names Rexonance or is a proviso.
-  const sourceParagraphs = comparison.split("\n").map((line) => line.trim()).filter(Boolean);
+  const sourceParagraphs = comparison
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
   const removedRuns = (paragraph, source) => {
     const runs = [];
     let i = 0;
@@ -152,15 +161,31 @@ test("the comparison: Meta Unitas's parts, no Rexonance, no provisos, removal on
       for (const run of candidates[0])
         assert.match(run, /レクソナンス|暫定|設定案|確定していない|未確定/, run);
     }
-  const compute = META_UNITAS_PERFORMANCE.chapters.find((c) => c.title === "統合演算・加速機構比較");
+  const compute = META_UNITAS_PERFORMANCE.chapters.find(
+    (c) => c.title === "統合演算・加速機構比較",
+  );
   assert.deepEqual(
     compute.table.rows.map((row) => row[0]),
-    ["ヴィンクルム", "エクスプリーム", "イリュージョンクルム", "メタ・ウニタス", "メタ・ウニタスULTRA", "ファーフロム"],
+    [
+      "ヴィンクルム",
+      "エクスプリーム",
+      "イリュージョンクルム",
+      "メタ・ウニタス",
+      "メタ・ウニタスULTRA",
+      "ファーフロム",
+    ],
   );
   // ULTRA keeps the standard form's computation (the owner's own words).
-  assert.deepEqual(compute.table.rows[4], ["メタ・ウニタスULTRA", "50000〜YOPS", "9000TOPS", "P16"]);
+  assert.deepEqual(compute.table.rows[4], [
+    "メタ・ウニタスULTRA",
+    "50000〜YOPS",
+    "9000TOPS",
+    "P16",
+  ]);
   const p16 = META_UNITAS_PERFORMANCE.chapters.find((c) => c.title.startsWith("P14"));
-  assert.ok(p16.body.some((p) => p.startsWith("P16はP14 Extreme Tuning比で実効演算加速性能50%向上")));
+  assert.ok(
+    p16.body.some((p) => p.startsWith("P16はP14 Extreme Tuning比で実効演算加速性能50%向上")),
+  );
 });
 
 test("no secondary labels: no kicker, caption, counter or hint on the page", () => {
@@ -189,8 +214,12 @@ test("the suit-up is cut by SAM: every plate's mask is versioned, the module mat
     const manifest = JSON.parse(read(`${dir}/manifest.json`));
     assert.equal(manifest.generatedBy, "scripts/sam/make_masks.py");
     assert.equal(manifest.model.id, "facebook/sam2.1-hiera-large");
-    const masks = readdirSync(new URL(`../${dir}/plates`, import.meta.url)).map((f) => f.replace(/\.png$/, ""));
-    const plates = suit.META_UNITAS_PLATES[form].map((plate) => plate.id).filter((id) => id !== "driver");
+    const masks = readdirSync(new URL(`../${dir}/plates`, import.meta.url)).map((f) =>
+      f.replace(/\.png$/, ""),
+    );
+    const plates = suit.META_UNITAS_PLATES[form]
+      .map((plate) => plate.id)
+      .filter((id) => id !== "driver");
     assert.deepEqual([...plates].sort(), [...masks].sort());
     for (const plate of suit.META_UNITAS_PLATES[form]) {
       assert.ok(plate.ax + plate.w <= suit.META_UNITAS_SUIT[form].atlas.width, plate.id);
@@ -198,11 +227,14 @@ test("the suit-up is cut by SAM: every plate's mask is versioned, the module mat
     }
   }
   // Each ウルトラ armour plate turns over from its ミドル counterpart.
-  const middleBody = new Set(suit.META_UNITAS_PLATES.middle.filter((p) => p.group === "body").map((p) => p.id));
+  const middleBody = new Set(
+    suit.META_UNITAS_PLATES.middle.filter((p) => p.group === "body").map((p) => p.id),
+  );
   for (const plate of suit.META_UNITAS_PLATES.ultra.filter((p) => p.group === "body"))
     assert.ok(middleBody.has(plate.id), plate.id);
   // The satellites the scene animates are all there.
-  const groups = (form, group) => suit.META_UNITAS_PLATES[form].filter((p) => p.group === group).length;
+  const groups = (form, group) =>
+    suit.META_UNITAS_PLATES[form].filter((p) => p.group === group).length;
   assert.equal(groups("middle", "bits"), 4);
   assert.equal(groups("middle", "halo"), 1);
   assert.equal(groups("middle", "tail"), 8);
@@ -211,7 +243,10 @@ test("the suit-up is cut by SAM: every plate's mask is versioned, the module mat
   assert.equal(groups("ultra", "tail"), 3);
   // The delivered suit stays within its budget.
   const folder = new URL("../public/meta-unitas-suit-20261023/", import.meta.url);
-  const total = readdirSync(folder).reduce((sum, name) => sum + statSync(new URL(name, folder)).size, 0);
+  const total = readdirSync(folder).reduce(
+    (sum, name) => sum + statSync(new URL(name, folder)).size,
+    0,
+  );
   assert.ok(total < 1_600_000, `suit-up files ${total}`);
   // The same wearer: Rexonance's undersuit, composited by the build.
   assert.match(read("scripts/build-meta-unitas-suit.mjs"), /REXONANCE_SUIT_UNDERSUIT/);
@@ -245,7 +280,12 @@ test("the score: calls in order, the brightest change slow, ウルトラ after �
 
 test("the still tiers and the motion gate", () => {
   const gateModule = read("src/lib/meta-unitas-assembly.ts");
-  for (const term of ["prefers-reduced-motion: reduce", "forced-colors: active", "saveData", "economy"])
+  for (const term of [
+    "prefers-reduced-motion: reduce",
+    "forced-colors: active",
+    "saveData",
+    "economy",
+  ])
     assert.ok(gateModule.includes(term), term);
   assert.match(gateModule, /import\("\.\/meta-unitas-assembly-engine"\)/);
   assert.match(styles, /\.mus-runway\[data-mus-load="static"\] \.mus-still \{\s*display: block;/);

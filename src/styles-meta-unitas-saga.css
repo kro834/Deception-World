@@ -158,6 +158,8 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     0 0 0 1px var(--mus-hair),
     0 40px 120px -40px rgb(55 198 192 / 40%);
   background: #0c1013;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 3.5%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 3.5%, #000 93%, transparent 100%);
 }
 
 /* Four columns of the one picture, each its own plate: at rest a few px
