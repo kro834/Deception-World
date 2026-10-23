@@ -31,6 +31,24 @@ function visibleParagraph(scroller: HTMLDivElement | null) {
 
 type Pin = { no: number; top: number } | null;
 type ReadingAnchor = { text: Text; offset: number; top: number } | { end: true } | null;
+type ReadingOrigin = { top: number; width: number; height: number; pathname: string } | null;
+
+// Releasing the body lock restores its old scrollY. If the page reflowed
+// behind the room, return its opener to the saved screen position instead.
+function restoreReadingOrigin(trigger: HTMLButtonElement | null, origin: ReadingOrigin) {
+  if (!trigger?.isConnected || !origin || window.location.pathname !== origin.pathname) return;
+  if (window.innerWidth === origin.width && window.innerHeight === origin.height) return;
+  const rect = trigger.getBoundingClientRect();
+  const top = Math.max(16, Math.min(origin.top, window.innerHeight - rect.height - 16));
+  const delta = rect.top - top;
+  if (Math.abs(delta) > 1) {
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + delta),
+      left: window.scrollX,
+      behavior: "instant",
+    });
+  }
+}
 
 // Keep the actual line being read when type size or leading changes. A raw
 // scrollTop (or even a paragraph number) loses the reader inside long paragraphs.
@@ -63,6 +81,67 @@ function captureReadingAnchor(scroller: HTMLDivElement | null): ReadingAnchor {
   range.setStart(text, low);
   range.setEnd(text, low + 1);
   return { text, offset: low, top: range.getBoundingClientRect().top - top };
+}
+
+function restoreReadingAnchor(scroller: HTMLDivElement, anchor: ReadingAnchor) {
+  if (!anchor) return;
+  if ("end" in anchor) scroller.scrollTop = scroller.scrollHeight;
+  else {
+    if (!anchor.text.isConnected) return;
+    const range = document.createRange();
+    range.setStart(anchor.text, anchor.offset);
+    range.setEnd(anchor.text, anchor.offset + 1);
+    scroller.scrollTop +=
+      range.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.top;
+  }
+}
+
+// ResizeObserver runs after reflow, when reading the old line is already too
+// late. Remember it after ordinary scrolling, and restore that text offset
+// before refreshing the paragraph count for the new viewport dimensions.
+function watchReadingViewport(
+  scroller: HTMLDivElement,
+  pin: { current: Pin },
+  onParagraph: (no: number) => void,
+) {
+  let frame = 0;
+  let disposed = false;
+  let width = scroller.clientWidth;
+  let height = scroller.clientHeight;
+  let anchor = captureReadingAnchor(scroller);
+  const remember = () => {
+    width = scroller.clientWidth;
+    height = scroller.clientHeight;
+    anchor = captureReadingAnchor(scroller);
+  };
+  const sync = () => {
+    frame = 0;
+    if (disposed) return;
+    if (width !== scroller.clientWidth || height !== scroller.clientHeight) {
+      restoreReadingAnchor(scroller, anchor);
+      if (pin.current) pin.current.top = scroller.scrollTop;
+    }
+    onParagraph(readParagraph(scroller, pin));
+    remember();
+  };
+  const queue = () => {
+    if (!disposed && !frame) frame = requestAnimationFrame(sync);
+  };
+  scroller.addEventListener("scroll", queue, { passive: true });
+  window.addEventListener("resize", queue, { passive: true });
+  const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(queue);
+  observer?.observe(scroller);
+  queue();
+  return {
+    remember,
+    dispose() {
+      disposed = true;
+      scroller.removeEventListener("scroll", queue);
+      window.removeEventListener("resize", queue);
+      observer?.disconnect();
+      cancelAnimationFrame(frame);
+    },
+  };
 }
 
 /** An explicit landing (a paragraph pill, the saved bookmark) holds until the
@@ -101,6 +180,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   const firstLanding = useRef(initial.bookmark?.paragraph ?? 1);
   const pinned = useRef<Pin>(null);
   const readingAnchor = useRef<ReadingAnchor>(null);
+  const readingViewport = useRef<ReturnType<typeof watchReadingViewport> | null>(null);
   const closing = useRef(false);
   onCloseRef.current = onClose;
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
@@ -116,6 +196,14 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     if (!modal) return;
     const html = document.documentElement;
     const previousFlag = html.dataset.dreamDialogOpen;
+    const origin: ReadingOrigin = trigger?.isConnected
+      ? {
+          top: trigger.getBoundingClientRect().top,
+          width: window.innerWidth,
+          height: window.innerHeight,
+          pathname: window.location.pathname,
+        }
+      : null;
     const releaseScroll = acquireViewportScrollLock({ freezeBody: true });
     html.dataset.dreamDialogOpen = "true";
     modal.showModal();
@@ -129,6 +217,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       releaseScroll();
       if (previousFlag === undefined) delete html.dataset.dreamDialogOpen;
       else html.dataset.dreamDialogOpen = previousFlag;
+      if (closing.current && !historyDismissed) restoreReadingOrigin(trigger, origin);
     };
     const stopHistory = router.history.subscribe(({ action }) => {
       if (!["BACK", "FORWARD", "GO"].includes(action.type)) return;
@@ -139,7 +228,9 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     return () => {
       stopHistory();
       release();
-      if (!historyDismissed && trigger?.isConnected) trigger.focus({ preventScroll: true });
+      if (window.location.pathname === origin?.pathname) {
+        if (!historyDismissed && trigger?.isConnected) trigger.focus({ preventScroll: true });
+      }
     };
   }, [close, router, trigger]);
 
@@ -162,37 +253,18 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     const anchor = readingAnchor.current;
     readingAnchor.current = null;
     if (!scroller || !anchor) return;
-    if ("end" in anchor) scroller.scrollTop = scroller.scrollHeight;
-    else {
-      if (!anchor.text.isConnected) return;
-      const range = document.createRange();
-      range.setStart(anchor.text, anchor.offset);
-      range.setEnd(anchor.text, anchor.offset + 1);
-      scroller.scrollTop +=
-        range.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.top;
-    }
+    restoreReadingAnchor(scroller, anchor);
     if (pinned.current) pinned.current.top = scroller.scrollTop;
   }, [size, spacing]);
 
   useEffect(() => {
     const scroller = viewport.current;
     if (!scroller) return;
-    let frame = 0;
-    const sync = () => {
-      frame = 0;
-      setParagraph(readParagraph(scroller, pinned));
-    };
-    const queue = () => {
-      if (!frame) frame = requestAnimationFrame(sync);
-    };
-    scroller.addEventListener("scroll", queue, { passive: true });
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(queue);
-    observer?.observe(scroller);
-    queue();
+    const controller = watchReadingViewport(scroller, pinned, setParagraph);
+    readingViewport.current = controller;
     return () => {
-      scroller.removeEventListener("scroll", queue);
-      observer?.disconnect();
-      cancelAnimationFrame(frame);
+      controller.dispose();
+      if (readingViewport.current === controller) readingViewport.current = null;
     };
   }, [chapter, size, spacing]);
 
@@ -207,6 +279,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       scroller.scrollTop +=
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
       pinned.current = { no: targetNo, top: scroller.scrollTop };
+      readingViewport.current?.remember();
     }
     setParagraph(targetNo);
   };
@@ -224,7 +297,6 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       setStatus("このブラウザーでは保存できません。読書室はこのまま利用できます。");
     }
   };
-  const totalChars = episode.paragraphs.join("").length;
 
   return (
     <dialog
@@ -261,7 +333,6 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       <div className="dream-reading-shell">
         <header className="dream-reading-topbar">
           <div>
-            <small lang="en">DREAM CHAPTER</small>
             <h2>読書室</h2>
           </div>
           <button ref={closeButton} type="button" onClick={close} aria-label="読書室を閉じる">
@@ -291,7 +362,6 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                 >
                   <span>0{item.no}</span>
                   {item.title}
-                  <small>{item.reading}</small>
                 </button>
               ))}
             </nav>
@@ -358,12 +428,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
           >
             <article className="dream-reading-paper" key={chapter}>
               <header>
-                <p lang="en">
-                  CASE 0{chapter} / {episode.reading}
-                </p>
-                <small className="dream-reading-char-count">
-                  全{episode.paragraphs.length}段落 · {totalChars}字
-                </small>
+                <p lang="en">CASE 0{chapter}</p>
                 <h3>{episode.title}</h3>
                 <span>{episode.lead}</span>
               </header>
@@ -377,11 +442,9 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
               ))}
               <footer>
                 <span aria-hidden="true">◇</span>
-                <p>
-                  {index === DREAM_CASES.length - 1
-                    ? "公開されているあらすじはここまでです。"
-                    : "次の章へ、物語を辿る。"}
-                </p>
+                {index === DREAM_CASES.length - 1 ? (
+                  <p>公開されているあらすじはここまでです。</p>
+                ) : null}
                 <div>
                   <button
                     type="button"
@@ -430,9 +493,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
           <button type="button" onClick={save}>
             しおりを保存
           </button>
-          <p role="status">
-            {status || "保存したしおりは、通常表示の「続きから読む」にも反映されます。"}
-          </p>
+          <p role="status">{status}</p>
         </footer>
       </div>
     </dialog>

@@ -223,12 +223,13 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
       <div className="dream-screening-shell">
         <header className="dream-screening-header">
           <div className="dream-screening-title">
-            <span lang="en">DREAM CHAPTER · POSTER SCREENING</span>
             <h2>映写室</h2>
           </div>
-          <span className="dream-screening-count" aria-live="polite">
-            {String(index + 1).padStart(2, "0")} <span aria-hidden="true">/</span>{" "}
-            {String(DREAM_POSTERS.length).padStart(2, "0")}
+          {/* The reel bar shows the place in the reel; the figures are for assistive tech. */}
+          <span className="dream-screening-count">
+            <span className="dream-visually-hidden" aria-live="polite">
+              {String(index + 1).padStart(2, "0")} / {String(DREAM_POSTERS.length).padStart(2, "0")}
+            </span>
             <i className="dream-screening-reel-bar" aria-hidden="true">
               <b style={{ width: `${((index + 1) / DREAM_POSTERS.length) * 100}%` }} />
             </i>
@@ -293,21 +294,10 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
 
         <div className="dream-screening-controls">
           <p className="dream-screening-caption" aria-live="polite">
-            <small className="dream-screening-spec" lang={zoomed ? undefined : "en"}>
-              {zoomed ? (
-                <>
-                  <span className="dream-screening-zoom-state">拡大鑑賞</span>
-                  <span className="dream-screening-pan-hint"> · スクロールで移動</span>
-                </>
-              ) : (
-                <>
-                  REEL {String(index + 1).padStart(2, "0")} · {poster.width}×{poster.height}
-                </>
-              )}
-            </small>
             <span>{poster.alt}</span>
           </p>
           <div className="dream-screening-actions">
+            {/* One switch, one name: pressed, the house lights go down. */}
             <button
               type="button"
               className="dream-screening-ambience"
@@ -316,7 +306,7 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
                 setAmbience((current) => (current === "theatre" ? "darkroom" : "theatre"))
               }
             >
-              {ambience === "darkroom" ? "照明：暗室" : "照明：劇場灯"}
+              暗室
             </button>
             <button
               ref={zoomRef}
@@ -371,7 +361,6 @@ export function DreamScreeningRoom({ initialIndex, trigger, onClose }: DreamScre
                 loading="lazy"
                 decoding="async"
               />
-              <span>{String(itemIndex + 1).padStart(2, "0")}</span>
             </button>
           ))}
         </div>

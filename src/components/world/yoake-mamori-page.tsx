@@ -31,8 +31,10 @@ export function YoakeMamoriPage() {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel="CHARACTER FILE // 05"
+        fileLabel="夜明護尊の資料"
         returnHash="manager-archive-other"
         returnLabel="その他の人物一覧へ戻る"
       />
@@ -53,20 +55,19 @@ export function YoakeMamoriPage() {
               fetchPriority="high"
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
-            <span className="manager-numeral">05</span>
           </div>
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">CHARACTER FILE // 05</p>
+            {/* The file's numeral in outline over the name (decorative). */}
+            <span className="dossier-file-numeral" aria-hidden="true">
+              05
+            </span>
             <h1>
               <small>よあけまもりのみこと</small>
               <span className="manager-display-name">夜明護尊</span>
             </h1>
             <p className="manager-title">武、風、理解の神</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           <dl className="manager-facts">
             {facts.map(([label, value]) => (
@@ -80,10 +81,6 @@ export function YoakeMamoriPage() {
       </section>
       <DossierReader name="夜明護尊" />
       <section className="manager-dossier" id="dossier-index" aria-label="夜明護尊の人物資料">
-        <div className="manager-section-index">
-          <span>05</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents sections={sections} />
         <div className="manager-sections">
           {sections.map((section) => (
@@ -118,7 +115,6 @@ export function YoakeMamoriPage() {
               to: "/managers/shuza",
               assets: ["/manager-shuza.jpeg"],
               title: "シュザ",
-              context: "性格と闘い方の章に登場する人物の資料",
             },
           ]}
         />

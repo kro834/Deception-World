@@ -111,9 +111,11 @@ async function programmeAndCompanion(page, label, keyboard) {
   await ready(page);
   assert.equal(await page.locator(".dream-programme-ticket").count(), 3);
   assert.equal(await page.locator(".dream-reader-index > ol > li").count(), DREAM_CASES.length);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — a chapter plate is its
+  // numeral and its title (no paragraph tally).
   for (const episode of DREAM_CASES) {
     const guide = page.locator(`.dream-reader-index a[href="#dream-case-${episode.no}"]`);
-    assert.match(await guide.innerText(), new RegExp(`${episode.paragraphs.length}段落`));
+    assert.match(await guide.innerText(), new RegExp(`${episode.no}\\s*${episode.title}`));
   }
   for (const hash of ["#posters", "#dream-chapter-index", "#dream-record-explorer"]) {
     const ticket = page.locator(`.dream-programme-ticket[href="${hash}"]`);

@@ -6,7 +6,7 @@ import { DREAM_CHRONICLE } from "../src/components/dream-chapter/dream-chapter-e
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("the three programme entrances resolve to existing records and use live counts", () => {
+test("the three programme entrances resolve to existing records without tallies", () => {
   const desk = read("src/components/dream-chapter/dream-programme-desk.tsx");
   const chapter = read("src/components/dream-chapter/dream-chapter.tsx");
   const explorer = read("src/components/dream-chapter/dream-record-explorer.tsx");
@@ -18,8 +18,10 @@ test("the three programme entrances resolve to existing records and use live cou
   assert.match(desk, /href: "#posters"/);
   assert.match(desk, /href: "#dream-chapter-index"/);
   assert.match(desk, /href: "#dream-record-explorer"/);
-  assert.match(desk, /DREAM_POSTERS\.length/);
-  assert.match(desk, /DREAM_CHRONICLE\.length/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The tickets name their way in; the counts (15点の絵看板, 53件の出来事) are gone.
+  assert.doesNotMatch(desk, /DREAM_POSTERS\.length|DREAM_CHRONICLE\.length/);
+  assert.doesNotMatch(desk, /dream-programme-ledger/);
   assert.match(chapter, /id="posters"/);
   assert.match(navigation, /id="dream-chapter-index"/);
   assert.match(explorer, /id="dream-record-explorer"/);
@@ -40,7 +42,9 @@ test("each chapter companion can link only to its own canonical chronicle events
   assert.match(navigation, /DREAM_CHRONICLE\.filter\(\(event\) => event\.case === no\)/);
   assert.match(navigation, /#dream-chronicle-event-\$\{event\.no\}/);
   assert.match(chronicle, /id=\{`dream-chronicle-event-\$\{event\.no\}`\}/);
-  assert.match(navigation, /episode\.paragraphs\.length\}段落/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The index and the paragraph guide no longer print paragraph tallies.
+  assert.doesNotMatch(navigation, /episode\.paragraphs\.length\}段落/);
   assert.match(navigation, /aria-current=\{location\.current === episode\.no \? "location"/);
 });
 

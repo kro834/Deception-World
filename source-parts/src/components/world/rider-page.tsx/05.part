@@ -1,3 +1,20 @@
+          </div>
+        </div>
+        <div className="manager-introduction">
+          <header className="dossier-identity">
+            {/* The file's numeral, drawn in outline over the name as on the
+                end card (decorative: the name is the heading). */}
+            <span className="dossier-file-numeral" aria-hidden="true">
+              {rider.no}
+            </span>
+            <h1>
+              <span className="manager-display-name">
+                <NameText value={rider.civilian.name} />
+              </span>
+            </h1>
+            <p className="manager-title"># {rider.epithet}</p>
+          </header>
+          <div className="manager-quotes">
             {rider.quotes.map((q) => (
               <q key={q}>{q}</q>
             ))}
@@ -36,7 +53,6 @@
               decoding="async"
               fetchPriority="low"
             />
-            <span>BEFORE</span>
             <i className="rider-archive-civilian-shade" />
           </div>
           <figcaption>
@@ -59,7 +75,6 @@
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>PARTNER</span>
               <i className="rider-archive-civilian-shade" />
             </div>
             <figcaption>
@@ -68,7 +83,6 @@
               <h2>
                 <NameText value={rider.partner.name} />
               </h2>
-              <p className="rider-partner-en-name">{rider.partner.enName}</p>
               <q className="rider-partner-call">{rider.partner.call}</q>
               <div className="rider-partner-copy">
                 {rider.partner.body.map((paragraph) => (
@@ -98,12 +112,9 @@
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
             </div>
             <div className="rider-nightmare-card-copy">
-              <p>{rider.nightmare.kicker}</p>
-              <small>PICKUP</small>
               <h2>
                 <span>{rider.nightmare.name}</span>
               </h2>
@@ -123,10 +134,6 @@
         id="dossier-index"
         aria-label={`${rider.civilian.name}の人物資料`}
       >
-        <div className="manager-section-index">
-          <span>{rider.no}</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents sections={rider.sections} />
         <div className="manager-sections">
           {rider.sections.map((s) => (
@@ -201,11 +208,9 @@
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>SPECIAL SITE</span>
             </div>
             <div className="rider-special-site-copy">
               <p>{rider.special.kicker}</p>
-              <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
                 <b>
@@ -231,7 +236,6 @@
       {rider.partner && partnerForms.length ? (
         <section className="rider-partner-forms" aria-labelledby="rider-partner-forms-title">
           <header>
-            <p>SKILLED DUO / SECOND RIDER RECORD</p>
             <h2 id="rider-partner-forms-title">
               <NameText value={rider.partner.name} />
               の変身記録
@@ -262,7 +266,7 @@
           </div>
         </section>
       ) : null}
-      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="EIGHT RIDERS" />
+      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} />
       {rider.nightmare ? (
         <dialog
           ref={nightmareRef}
@@ -287,16 +291,11 @@
               aria-label="閉じる"
             >
               <LiquidPointerGlow />
-              <span>CLOSE</span>
               <i aria-hidden="true">
-                <UiVectorIcon kind="close" size={16} />
+                <UiVectorIcon kind="close" size={18} />
               </i>
             </button>
             <div className="rider-nightmare-dialog-heading">
-              <p>
-                <span>NIGHTMARE PICKUP</span>
-              </p>
-              <small>{rider.nightmare.kicker}</small>
               <h2>
                 <span>{rider.nightmare.name}</span>
               </h2>
@@ -313,10 +312,6 @@
                   decoding="async"
                   fetchPriority="low"
                 />
-                <figcaption>
-                  <span>FORM VISUAL</span>
-                  <b>MACHIAVEL GORE NIGHTMARE</b>
-                </figcaption>
               </figure>
               <div className="rider-nightmare-dialog-record">
                 <dl>

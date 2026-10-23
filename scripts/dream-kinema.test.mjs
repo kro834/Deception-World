@@ -141,10 +141,10 @@ test("generated text is silent: HUD numerals and counters with an empty alternat
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g)) {
     assert.match(value.trim(), /^(?:""|"\d{2}" \/ ""|counter\(kn-[\w-]+, decimal-leading-zero\) \/ "")$/, value);
   }
-  const index = rules
-    .filter(({ body }) => /content: "\d{2}" \/ ""/.test(body))
-    .map(({ selector, body }) => `${selector.match(/#(\w+)/)[1]}:${body.match(/"(\d{2})"/)[1]}`);
-  assert.deepEqual(index, ["chronicle:01", "atlas:02", "relations:03", "arsenal:04"]);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The corners' 01–04 chips are gone with their kickers.
+  const index = rules.filter(({ body }) => /content: "\d{2}" \/ ""/.test(body));
+  assert.deepEqual(index, []);
 });
 
 test("keyframes move only opacity and transforms, and scroll-linked ones never clip or paint", () => {
@@ -198,9 +198,11 @@ test("scroll-linked motion runs on named timelines under the full gate", () => {
     assert.match(declaration(body, "animation-range"), /^(?:entry|cover) \d+% (?:entry|cover) \d+(?:%|px)$/, selector);
     names.add(body.match(/animation: (kn-[\w-]+)/)[1]);
   }
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // kn-press went with the Dolminence cards' number seals.
   assert.deepEqual(
     [...names].sort(),
-    ["kn-brush", "kn-case-press", "kn-drawer", "kn-hang", "kn-lock", "kn-press", "kn-stamp", "kn-tie", "kn-unfurl"],
+    ["kn-brush", "kn-case-press", "kn-drawer", "kn-hang", "kn-lock", "kn-stamp", "kn-tie", "kn-unfurl"],
   );
   // Every view timeline this sheet declares is named, block-axis and fully gated.
   const declared = rules.filter(({ body }) => declaration(body, "view-timeline"));
@@ -252,8 +254,9 @@ test("forced colours drop the band, the panels and the ornaments and keep the nu
   ]) {
     assert.ok(text.includes(selector), selector);
   }
-  assert.match(text, /\.dream-atlas-kicker::before[\s\S]*?-webkit-text-fill-color: CanvasText;/);
-  assert.match(text, /\.dream-arsenal-list dt::before/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The atlas and arsenal counters are gone, and their system-colour rules with them.
+  assert.doesNotMatch(text, /\.dream-atlas-kicker::before|\.dream-arsenal-list dt::before/);
   assert.match(text, /\.dream-chronicle-list::before \{ background: CanvasText; \}/);
 });
 

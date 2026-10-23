@@ -45,7 +45,6 @@ export function DreamReaderSupport({
     >
       <div className="dream-reader-support-heading">
         <p>読書の支度</p>
-        <span>このブラウザーに保存</span>
       </div>
       <div className="dream-reader-settings">
         <fieldset>
@@ -98,7 +97,6 @@ export function DreamReaderSupport({
               <small>{reader.bookmark.paragraph}段落目</small>
             </p>
             <blockquote className="dream-reader-bookmark-excerpt">
-              <small>しおりの段落より</small>
               {paragraphExcerpt(savedCase.paragraphs[reader.bookmark.paragraph - 1])}
             </blockquote>
             <div className="dream-reader-bookmark-actions">
@@ -250,39 +248,32 @@ export function DreamStoryIndex() {
       >
         <div className="dream-reader-index-head">
           <p>六章を辿る</p>
-          <span>CASE 0–5</span>
         </div>
+        {/* A chapter's numeral is lit while its fold is open; the bookmark tag is the
+            index's only small type (Owner, 2026-10-23: no paragraph / event / character
+            tallies, no 開いている / あらすじ status words). */}
         <ol>
-          {DREAM_CASES.map((episode) => {
-            const eventCount = DREAM_CHRONICLE.filter((event) => event.case === episode.no).length;
-            const charCount = episode.paragraphs.reduce((sum, p) => sum + p.length, 0);
-            return (
-              <li key={episode.no}>
-                <a
-                  href={`#dream-case-${episode.no}`}
-                  aria-current={location.current === episode.no ? "location" : undefined}
-                >
-                  <span className="dream-reader-index-number">{episode.no}</span>
-                  <span className="dream-reader-index-title">
-                    <strong>{episode.title}</strong>
-                    <span lang="en">{episode.reading}</span>
-                  </span>
+          {DREAM_CASES.map((episode) => (
+            <li key={episode.no}>
+              <a
+                href={`#dream-case-${episode.no}`}
+                aria-current={location.current === episode.no ? "location" : undefined}
+                data-open={location.open.includes(episode.no) ? "true" : "false"}
+              >
+                <span className="dream-reader-index-number">{episode.no}</span>
+                <span className="dream-reader-index-title">
+                  <strong>{episode.title}</strong>
+                </span>
+                {reader.bookmark?.caseNo === episode.no ? (
                   <span className="dream-reader-index-meta">
-                    <small>{episode.paragraphs.length}段落</small>
-                    <small>
-                      {eventCount}件 · {charCount.toLocaleString("ja-JP")}字
+                    <small className="dream-reader-index-bookmark">
+                      しおり · {reader.bookmark.paragraph}段落
                     </small>
-                    {reader.bookmark?.caseNo === episode.no ? (
-                      <small className="dream-reader-index-bookmark">
-                        しおり · {reader.bookmark.paragraph}段落
-                      </small>
-                    ) : null}
-                    <small>{location.open.includes(episode.no) ? "開いている" : "あらすじ"}</small>
                   </span>
-                </a>
-              </li>
-            );
-          })}
+                ) : null}
+              </a>
+            </li>
+          ))}
         </ol>
         {/* The bulk toggles follow the six links in the focus order (the keyboard
             reaches the chapters first); the sheet sets them as the index's foot,
@@ -298,7 +289,6 @@ export function DreamStoryIndex() {
         <details className="dream-reader-paragraph-guide">
           <summary>
             <span>段落から読む</span>
-            <small>本文の書き出しを手掛かりに</small>
           </summary>
           <div className="dream-reader-paragraph-guide-body">
             <label>
@@ -306,12 +296,11 @@ export function DreamStoryIndex() {
               <select value={guideCase.no} onChange={(event) => setGuideChoice(event.target.value)}>
                 {DREAM_CASES.map((episode) => (
                   <option key={episode.no} value={episode.no}>
-                    CASE {episode.no}「{episode.title}」 · {episode.paragraphs.length}段落
+                    CASE {episode.no}「{episode.title}」
                   </option>
                 ))}
               </select>
             </label>
-            <p>本文の一部を表示しています。段落を選ぶと、その章を開いて本文へ移動します。</p>
             <ol aria-label={`CASE ${guideCase.no}「${guideCase.title}」の段落`}>
               {guideCase.paragraphs.map((text, index) => {
                 const no = index + 1;
@@ -319,14 +308,19 @@ export function DreamStoryIndex() {
                   reader.bookmark?.caseNo === guideCase.no && reader.bookmark.paragraph === no;
                 return (
                   <li key={`${guideCase.no}-${no}`}>
-                    <a href={`#dream-case-${guideCase.no}-paragraph-${no}`}>
-                      <span className="dream-reader-paragraph-guide-number">
+                    <a
+                      href={`#dream-case-${guideCase.no}-paragraph-${no}`}
+                      aria-label={`${no}段落目${saved ? "（しおり）" : ""}：${paragraphExcerpt(text)}`}
+                    >
+                      <span className="dream-reader-paragraph-guide-number" aria-hidden="true">
                         {String(no).padStart(2, "0")}
                       </span>
                       <span className="dream-reader-paragraph-guide-copy">
-                        <strong>
-                          {no}段落目{saved ? <em>しおり</em> : null}
-                        </strong>
+                        {saved ? (
+                          <strong>
+                            <em>しおり</em>
+                          </strong>
+                        ) : null}
                         <span>{paragraphExcerpt(text)}</span>
                       </span>
                     </a>
@@ -358,9 +352,6 @@ export function DreamChapterCompanion({ no }: { no: string }) {
     <details className="dream-chapter-companion">
       <summary>
         <span>この章の出来事・登場人物</span>
-        <small>
-          {events.length}件の記録 · {appearingCast.length}名
-        </small>
       </summary>
       <div className="dream-chapter-companion-body">
         <p className="dream-chapter-companion-places">
@@ -368,12 +359,14 @@ export function DreamChapterCompanion({ no }: { no: string }) {
           {places.join("・")}
         </p>
         {appearingCast.length ? (
-          <div className="dream-chapter-companion-cast" aria-label={`CASE ${no}の主な登場人物`}>
-            <span>主な登場人物</span>
+          <div
+            className="dream-chapter-companion-cast"
+            role="group"
+            aria-label={`CASE ${no}の主な登場人物`}
+          >
             <div>
               {appearingCast.map((person) => (
                 <a key={person.href} href={person.href}>
-                  <small lang="en">{person.kind}</small>
                   <b>{person.label}</b>
                 </a>
               ))}
@@ -384,7 +377,6 @@ export function DreamChapterCompanion({ no }: { no: string }) {
           {events.map((event) => (
             <li key={event.no}>
               <a href={`#dream-chronicle-event-${event.no}`}>
-                <span>{String(event.no).padStart(2, "0")}</span>
                 <strong>{event.title.text}</strong>
                 <small>{event.place}</small>
               </a>
@@ -406,14 +398,12 @@ export function DreamStoryNavigation({ no }: { no: string }) {
   return (
     <div className="dream-reader-footer">
       <nav className="dream-reader-related" aria-label={`CASE ${no}の章資料`}>
-        <span>この章の資料</span>
         <a href={`#dream-case-note-${no}`}>章の言葉</a>
         <a href={`#dream-chronicle-case-${no}`}>出来事</a>
       </nav>
       <nav className="dream-reader-pagination" aria-label={`CASE ${no}から章を移動`}>
         {previous ? (
-          <a href={`#dream-case-${previous.no}`}>
-            <small>前の章</small>
+          <a href={`#dream-case-${previous.no}`} aria-label={`前の章：${previous.title}`}>
             <span>← {previous.title}</span>
           </a>
         ) : (
@@ -423,12 +413,11 @@ export function DreamStoryNavigation({ no }: { no: string }) {
           章の目次
         </a>
         {next ? (
-          <a href={`#dream-case-${next.no}`}>
-            <small>次の章</small>
+          <a href={`#dream-case-${next.no}`} aria-label={`次の章：${next.title}`}>
             <span>{next.title} →</span>
           </a>
         ) : (
-          <span className="dream-reader-end">CASE 0–5</span>
+          <span aria-hidden="true" />
         )}
       </nav>
     </div>

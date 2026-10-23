@@ -33,7 +33,10 @@ test("the zenith sheet is linked last: after the stage sheet, and after the sove
   assert.match(head, /import dossierZenithCssUrl from "@\/styles-dossier-zenith\.css\?url";/);
   const dossier = head.slice(head.indexOf("export const DOSSIER_STYLESHEET_LINKS"));
   const list = dossier.slice(0, dossier.indexOf("];"));
-  assert.match(list, /STAGE_DOSSIER_STYLESHEET_LINK,\s*DOSSIER_ZENITH_STYLESHEET_LINK,\s*$/);
+  assert.match(
+    list,
+    /STAGE_DOSSIER_STYLESHEET_LINK,\s*TABLET_DOSSIER_STYLESHEET_LINK,\s*DOSSIER_ZENITH_STYLESHEET_LINK,\s*$/,
+  );
   const world = head.slice(head.indexOf("export const WORLD_STYLESHEET_LINKS"));
   assert.doesNotMatch(world.slice(0, world.indexOf("];")), /ZENITH/);
   const zeus = await read("src/routes/managers/zeus.tsx");
@@ -206,8 +209,10 @@ test("the next file's numeral takes the card's first row, sized by the screen's 
     .filter(Boolean);
   assert.ok(sizes.length >= 2, String(sizes.length));
   for (const size of sizes) assert.match(size, /min\(\d+vw, \d+svh\)/);
-  assert.match(css, /> a:last-child:not\(:first-child\)::before \{\s*grid-row: 2;/);
-  assert.match(css, /> a:last-child:not\(:first-child\)\s*> b \{\s*grid-row: 3;/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // No NEXT FILE or NEXT / RIDER 03 line: the name and its arrow take the second row.
+  assert.doesNotMatch(css, /> a:last-child:not\(:first-child\)::before \{\s*grid-row/);
+  assert.match(css, /> a:last-child:not\(:first-child\)\s*> b \{\s*grid-row: 2;/);
 });
 
 test("the next file's numeral is decorative and hidden in forced colours", async () => {
@@ -241,8 +246,11 @@ test("the index reads as a way back: an arrow ring, and on the split stage a pla
   const ring = css.match(/> \.dossier-index-return\s*> \.dossier-index-arrow \{([^}]*)\}/)?.[1];
   assert.ok(ring, "arrow ring rule");
   assert.match(ring, /width: 44px;\s*height: 44px;/);
-  assert.match(css, /grid-template-rows: auto auto minmax\(28px, 1fr\) auto;/);
-  // Phones keep the count as the only place marker.
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // No list name or count: the way back and the place rule stand mid-plate.
+  assert.doesNotMatch(link, /<i>|indexLabel/);
+  assert.match(css, /grid-template-rows: minmax\(0, 1fr\) auto auto minmax\(0, 1fr\);/);
+  // Phones: the roster's lit tile marks the place (no meter).
   assert.match(css, /> \.dossier-index-meter \{\s*display: none;/);
 });
 
@@ -274,7 +282,9 @@ test("六詠's Roman numerals take the site's Roman face (Cinzel) on the end car
   const roman = [...css.matchAll(/\[data-numerals="roman"\][^{]*\{([^}]*)\}/g)].map(
     ([, body]) => body,
   );
-  assert.equal(roman.length, 2);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The file's cover numeral (over the name) takes the same face.
+  assert.equal(roman.length, 3);
   for (const body of roman) assert.match(body, /font-family: "Cinzel", "Times New Roman", serif;/);
   // The site already loads Cinzel with its core fonts: no new font request.
   assert.match(await read("src/lib/site-fonts.ts"), /family=Cinzel:wght@400\.\.700/);

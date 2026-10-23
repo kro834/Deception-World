@@ -4,11 +4,11 @@
 // the screen. Checks, at phone, tablet and desktop sizes, on a middle file, a
 // first, a last and a list of one: no block overlaps another, every link is
 // the element under its own centre (nothing covers it), the links' DOM order
-// reads down the screen, and the next file's numeral stays above NEXT FILE.
+// reads down the screen, and the next file's numeral stays above its name.
 // Then, at 390px on a middle file, the return link and a roster tile are
 // pressed and land where they say. Last, while a form card's words hold
-// beside the art on a short split stage, TRANSFORMATION RECORD stays clear of
-// the sticky chapter ruler.
+// beside the art on a short split stage, its first line stays clear of the
+// sticky chapter ruler.
 //
 //   BASE_URL=http://127.0.0.1:8713 PW_BROWSER_CHANNEL=chrome node scripts/verify-dossier-end-card.mjs
 import assert from "node:assert/strict";
@@ -90,14 +90,11 @@ async function checkEnd(page, label) {
     if (numeral && getComputedStyle(numeral).display !== "none") {
       const numeralBox = numeral.getBoundingClientRect();
       const name = next.querySelector(":scope > b").getBoundingClientRect();
-      const before = getComputedStyle(next, "::before");
-      const labelTop =
-        name.top -
-        parseFloat(getComputedStyle(next).rowGap) -
-        parseFloat(before.lineHeight) -
-        parseFloat(before.marginBottom);
-      if (numeralBox.bottom > labelTop + 1) {
-        problems.push(`numeral ends at ${numeralBox.bottom}, under NEXT FILE at ${labelTop}`);
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+      // No NEXT FILE caption: the numeral and its rule stand over the name.
+      const nameTop = name.top - parseFloat(getComputedStyle(next).rowGap);
+      if (numeralBox.bottom > nameTop + 1) {
+        problems.push(`numeral ends at ${numeralBox.bottom}, under the name at ${nameTop}`);
       }
     }
     if (document.documentElement.scrollWidth > innerWidth + 1) problems.push("horizontal scroll");

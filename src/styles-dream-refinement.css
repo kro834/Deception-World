@@ -25,10 +25,6 @@
   text-shadow: none;
 }
 
-.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-  color: #655766;
-}
-
 .dream-page.dream-page .dream-prologue-card::before,
 .dream-page.dream-page .dream-prologue-card::after {
   color: #8b6b32;
@@ -83,30 +79,6 @@
 
 .dream-page.dream-page .dream-dolminence-intro {
   color: #d9cfc1;
-}
-
-/* The whole dossier remains one button. Its existing open label becomes
-   a paper ticket, so the portrait reads as a file that can be opened. */
-.dream-page.dream-page .dream-dolminence-copy em {
-  color: #382638;
-  border-bottom-color: #b58c47;
-  background: #e8dcc5;
-  box-shadow: inset 0 1px rgb(255 255 255 / 35%);
-}
-
-.dream-page.dream-page .dream-dolminence-copy em::after {
-  color: #79353c;
-}
-
-.dream-page.dream-page .dream-dolminence-grid button:focus-visible .dream-dolminence-copy em {
-  background: #f4ecdc;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .dream-page.dream-page .dream-dolminence-grid button:hover .dream-dolminence-copy em {
-    background: #f4ecdc;
-    border-bottom-color: #79353c;
-  }
 }
 
 .dream-page.dream-page .dream-faction {
@@ -170,16 +142,13 @@
   text-shadow: none;
 }
 
-.dream-page.dream-page
-  .dream-story-case[open]
-  :is(.dream-story-case-number, .dream-story-case-heading > small) {
+.dream-page.dream-page .dream-story-case[open] :is(.dream-story-case-number) {
   color: #6e5d6b;
 }
 
 .dream-page.dream-page
   .dream-story-case[open]
-  :is(.dream-story-case-number b, .dream-story-case-toggle),
-.dream-page.dream-page .dream-story-case[open] .dream-story-case-number::before {
+  :is(.dream-story-case-number b, .dream-story-case-toggle) {
   color: #79353c;
 }
 
@@ -235,8 +204,8 @@
   white-space: nowrap;
 }
 
-/* The synopsis keeps its vertical columns on portrait phones. Place its
-   title and signature above and below them so neither leaves the paper. */
+/* The synopsis keeps its vertical columns on portrait phones. Its title
+   stands above them so it never leaves the paper. */
 @media (max-width: 480px) and (min-height: 521px) {
   .dream-page.dream-page .dream-prologue-card {
     flex-direction: column;
@@ -254,20 +223,6 @@
 
   .dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
     flex: none;
-  }
-
-  .dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-    writing-mode: horizontal-tb;
-    flex-direction: column;
-    align-self: center;
-    gap: 8px;
-    width: 100%;
-    height: auto;
-    padding: 16px 8px 0;
-    border-top: 1px solid rgb(110 44 53 / 24%);
-    color: #655766;
-    text-align: center;
-    text-wrap: balance;
   }
 }
 
@@ -312,22 +267,9 @@
       #glossary
     )
     :is(h2, h3, p, dt, dd, span, small, b),
-  .dream-page.dream-page .dream-dolminence-intro,
-  .dream-page.dream-page .dream-story-case[open] .dream-story-case-number::before {
+  .dream-page.dream-page .dream-dolminence-intro {
     color: CanvasText;
     -webkit-text-fill-color: currentColor;
-  }
-
-  .dream-page.dream-page .dream-dolminence-copy em,
-  .dream-page.dream-page .dream-dolminence-grid button:focus-visible .dream-dolminence-copy em {
-    color: ButtonText;
-    border-color: ButtonText;
-    background: ButtonFace;
-    box-shadow: none;
-  }
-
-  .dream-page.dream-page .dream-dolminence-copy em::after {
-    color: ButtonText;
   }
 }
 

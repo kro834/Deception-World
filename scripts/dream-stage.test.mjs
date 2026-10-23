@@ -191,15 +191,17 @@ test("the one-sheet keeps its finite settle beside the drift, and the copy block
   assert.doesNotMatch(drift.body, /scale|opacity/);
 });
 
-test("the act numerals and the file spine are HUD codes with an empty alternative", () => {
+test("the act numerals and the file numeral are HUD codes with an empty alternative", () => {
   for (const numeral of ["I", "II", "III", "IV"]) {
     assert.match(page, new RegExp(`<header className="dream-section-heading" data-film-reveal data-ts-numeral="${numeral}">`));
   }
   assert.match(stage, /\.dream-section-heading\[data-ts-numeral\]::after \{[^}]*content: attr\(data-ts-numeral\) \/ "";/);
   assert.match(stage, /\.dream-dossier-visuals\[data-ts-order\]::before \{[^}]*content: attr\(data-ts-order\) \/ "";/);
-  assert.match(stage, /\.dream-dossier-visuals\[data-ts-roman\]::after \{[^}]*content: attr\(data-ts-roman\) \/ "";/);
   assert.equal(page.match(/data-ts-order=\{(?:character|record)\.order\}/g)?.length, 2);
-  assert.equal(page.match(/data-ts-roman=\{(?:character|record)\.roman\}/g)?.length, 2);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The vertical roman spine repeated the file's name; the ghost numeral stays.
+  assert.doesNotMatch(stage, /data-ts-roman/);
+  assert.doesNotMatch(page, /data-ts-roman/);
   // Only the ghosts and the rail mark are new markup: textless, aria-hidden.
   assert.equal(
     page.match(/<i className="dream-dossier-rail-mark" aria-hidden="true" \/>/g)?.length,
@@ -266,7 +268,6 @@ test("no text under 12px, no !important, no filters on hot paths, forced colours
   for (const selector of [
     ".dream-section-heading[data-ts-numeral]::after",
     ".dream-dossier-visuals[data-ts-order]::before",
-    ".dream-dossier-visuals[data-ts-roman]::after",
     ".dream-dossier-rail-mark",
   ]) {
     assert.ok(forced.includes(selector), selector);
