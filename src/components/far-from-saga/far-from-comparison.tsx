@@ -45,31 +45,23 @@ const BENCHMARK_LEDE = sentence(
   "暫定指数となる",
 );
 
-/** The ※ note: ヴィンクルムの身体値は提示された推定値. */
-const BODY_ROWS = new Set(["パンチ力", "キック力", "ジャンプ力", "100m走力"]);
-
 const accentStyle = (key: FormKey) =>
   ({ ["--ffs-col-accent" as string]: form(key).accent }) as CSSProperties;
 const barStyle = (fraction: number) =>
   ({ ["--ffs-bar" as string]: Math.max(0, Math.min(1, fraction)) }) as CSSProperties;
 
-/** 推定値 / 下限値 marks, from the basic table's ※ note. */
-function CellMark({
-  metric,
-  formKey,
-  cell,
-}: {
-  metric: BasicMetric;
-  formKey: FormKey;
-  cell: CellValue;
-}) {
+/** 推定値 / 下限値 marks, from the cells themselves: 「〜」 is a lower bound
+ * (the ※ note's エクスプリームの打撃力, and the 主演算 of レクソナンス and
+ * ファーフロム), 「（est.）」 a 推定値 (the ※ note's ヴィンクルムの身体値).
+ * The cell prints without its （est.）; the mark says it. */
+function CellMark({ cell }: { cell: CellValue }) {
   if (cell.floor)
     return (
       <span className="ffs-cell-mark" data-mark="floor">
         下限値
       </span>
     );
-  if (formKey === "vinculum" && BODY_ROWS.has(metric.label))
+  if (cell.estimate)
     return (
       <span className="ffs-cell-mark" data-mark="estimate">
         推定値
@@ -93,7 +85,10 @@ function PairMetric({ metric, baseline }: { metric: BasicMetric; baseline: Basel
       <header>
         <div>
           <small>{metric.label}</small>
-          <strong>{farFrom.text}</strong>
+          <strong>
+            {farFrom.figure}
+            <CellMark cell={farFrom} />
+          </strong>
         </div>
         <p className="ffs-metric-result">
           <i>{time ? "速さの比" : "基準比"}</i>
@@ -114,8 +109,8 @@ function PairMetric({ metric, baseline }: { metric: BasicMetric; baseline: Basel
       <p className="ffs-metric-base">
         <span>{base.label}</span>
         <span>
-          {other.text}
-          <CellMark metric={metric} formKey={baseline} cell={other} />
+          {other.figure}
+          <CellMark cell={other} />
         </span>
         {result.timeCut !== null ? (
           <span>100mの所要時間 {formatPercent(result.timeCut)}短縮</span>
@@ -148,8 +143,8 @@ function AllMetric({ metric }: { metric: BasicMetric }) {
             <li key={item.key} style={accentStyle(item.key)}>
               <span>{item.label}</span>
               <b>
-                {cell.text}
-                <CellMark metric={metric} formKey={item.key} cell={cell} />
+                {cell.figure}
+                <CellMark cell={cell} />
               </b>
               <span className="ffs-all-bar" aria-hidden="true">
                 <i style={barStyle(score(cell) / top)} />

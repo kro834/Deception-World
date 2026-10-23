@@ -191,7 +191,7 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
     ["ジャンプ力", "8000m"],
     ["走力", "0.00018s／100m"],
     ["飛行速度", "測定不能"],
-    ["主演算", "60000YOPS／∞Core『KHAOS DeuX』"],
+    ["主演算", "60000〜YOPS／∞Core『KHAOS DeuX』"],
     ["副演算", "9000TOPS／300Core『KOSMOS DeuX』"],
     ["統合OS", "『SA-GA OS 6.1』"],
     ["EMP", "無制限"],
@@ -229,7 +229,7 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
   assert.match(record, /name: "デウスシフト・ファー・グランドフィナーレ"/);
   assert.match(record, /"FAR！GRAND FINALE！！"/);
   assert.match(record, /title: "SA-GA OS 6.1"/);
-  assert.match(record, /表記の60000YOPSは標準稼働時の基準値にあたる/);
+  assert.match(record, /表記の60000〜YOPSは標準稼働時の基準値にあたる/);
   // The Final Stage's own chapter no longer prints a provisional note.
   assert.doesNotMatch(read("src/components/final-stage/final-stage.tsx"), /specNote/);
   assert.match(read("src/components/search/search-data.ts"), /description: "SA-GA OS 6\.1"/);
@@ -496,9 +496,12 @@ const section = (id, next) =>
 test("the owner's comparison text is kept verbatim and read whole into the two documents", () => {
   // sha256 of the owner's text as supplied (2026-10-22). Any edit fails here.
   // Owner (2026-10-23): the two sentences naming レックス・ロワ and ゼウス are removed.
+  // Owner (2026-10-23): spec notation unified — ヴィンクルム's body values carry
+  // （est.）, ジャンプ力 reads 5000.0m, and the main compute of レクソナンス /
+  // ファーフロム reads 50000〜YOPS / 60000〜YOPS (lower bounds).
   assert.equal(
     createHash("sha256").update(TEXT).digest("hex"),
-    "6ab2aaa989fcb13f567b142a9873f33dc6442a23cd6764fcddb3dddb534f678c",
+    "41e50e109597c2e869ec4ac26f2ead6c838155add8f3b70a2b43097424ab69ed",
   );
   const [first, second] = report.REPORT_PARTS;
   assert.equal(first.title, "対レクソナンスサーガ・性能比較及び効率改善");
@@ -611,11 +614,11 @@ test("#performance draws on the owner's two tables only, and each keeps its ※ 
   assert.deepEqual(
     basic.rows.map((row) => [row.label, ...row.values]),
     [
-      ["パンチ力", "98.8t", "205.6t〜", "372.2t", "405.5t"],
-      ["キック力", "198.8t", "308.9t〜", "483.5t", "502.9t"],
-      ["ジャンプ力", "5000m", "1033.5m", "6000m", "8000m"],
-      ["100m走力", "0.1秒", "0.002秒", "0.00021秒", "0.00018秒"],
-      ["主演算", "10000YOPS", "20000YOPS", "50000YOPS", "60000YOPS"],
+      ["パンチ力", "98.8t（est.）", "205.6t〜", "372.2t", "405.5t"],
+      ["キック力", "198.8t（est.）", "308.9t〜", "483.5t", "502.9t"],
+      ["ジャンプ力", "5000.0m（est.）", "1033.5m", "6000m", "8000m"],
+      ["100m走力", "0.1秒（est.）", "0.002秒", "0.00021秒", "0.00018秒"],
+      ["主演算", "10000YOPS", "20000YOPS", "50000〜YOPS", "60000〜YOPS"],
       ["副演算", "300TOPS", "5000TOPS", "9000TOPS", "9000TOPS"],
       ["加速機構", "P2", "個別比較値未確定", "P14", "P16"],
       ["戦闘OS", "従来型", "従来型", "SA-GA OS 5.5", "SA-GA OS 6.1"],
@@ -1062,7 +1065,7 @@ test("the HUD rebuilds the owner's interfaces as vector panels placed by the ref
     "KOSMOS DeuX",
     "FARFROM DRIVE",
     "P16",
-    "60000YOPS",
+    "60000〜YOPS",
     "9000TOPS",
     "300Core",
     "60秒",

@@ -234,7 +234,7 @@ export const FAR_FROM_ULTRA_HUD_FONT =
  * wide): terms from the record only. */
 export const FAR_FROM_ULTRA_READOUTS: Record<FarFromUltraPanelKind, readonly string[]> = {
   dial: ["FARFROM", "DRIVE LINK", "SYNC"],
-  bars: ["60000 YOPS", "INF CORE", "EMP: FREE"],
+  bars: ["60000+ YOPS", "INF CORE", "EMP: FREE"],
   text: ["PARANORMAL", "REALIZER", "NEURAL", "RESONANCER", "P16 ONLINE"],
   graph: ["9000 TOPS", "300 CORE", "SA-GA OS"],
 };
