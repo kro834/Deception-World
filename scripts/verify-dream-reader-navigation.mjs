@@ -147,20 +147,17 @@ try {
     await landed(page, "dream-case-3");
     await page.keyboard.press("Space");
     await page.waitForFunction(() => !document.getElementById("dream-case-3")?.open);
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the index shows a
+    // closed fold by its unlit numeral (data-open), not by the word あらすじ.
     await page.waitForFunction(
       () =>
-        document.querySelector(
-          '.dream-reader-index a[href="#dream-case-3"] .dream-reader-index-meta small:last-child',
-        )?.textContent === "あらすじ",
+        document.querySelector('.dream-reader-index a[href="#dream-case-3"]')?.dataset.open ===
+        "false",
     );
     await current(page, "3");
     assert.equal(
-      await page
-        .locator(
-          '.dream-reader-index a[href="#dream-case-3"] .dream-reader-index-meta small:last-child',
-        )
-        .innerText(),
-      "あらすじ",
+      await page.locator('.dream-reader-index a[href="#dream-case-3"]').getAttribute("data-open"),
+      "false",
     );
     assert.equal(await page.locator("#dream-case-2").getAttribute("open"), "");
 

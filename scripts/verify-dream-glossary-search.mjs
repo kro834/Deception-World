@@ -103,7 +103,9 @@ try {
       ];
     });
     assert.equal(await links.count(), 13);
-    assert.match(await search.getByRole("status").textContent(), /全 13 語/);
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+    // Idle, the status is silent; the thirteen term plates are the index.
+    assert.equal((await search.getByRole("status").textContent()).trim(), "");
     await assertCanonical(page);
     const geometry = await search.evaluate((node) => ({
       overflow: document.documentElement.scrollWidth - innerWidth,

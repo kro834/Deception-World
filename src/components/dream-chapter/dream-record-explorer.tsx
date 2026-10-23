@@ -202,9 +202,7 @@ export function DreamRecordExplorer() {
       data-dream-reveal
     >
       <header className="dream-record-explorer-heading">
-        <p lang="en">FIELD INDEX / CHRONICLE</p>
         <h3 id="dream-record-explorer-title">記録を探す</h3>
-        <span>全{DREAM_CHRONICLE.length}件の出来事から、言葉と手掛かりを辿る</span>
       </header>
 
       <div className="dream-record-collection" aria-labelledby="dream-record-collection-title">
@@ -212,7 +210,6 @@ export function DreamRecordExplorer() {
           <h4 id="dream-record-collection-title">記録の手控え</h4>
           <span>{collectionReady ? `${collection.ids.length}件` : "準備中"}</span>
         </div>
-        <p>気になる出来事を残して、あとから辿れます。手控えはこのブラウザーだけに保存されます。</p>
         <div className="dream-record-collection-views" role="group" aria-label="記録の表示範囲">
           <button
             type="button"
@@ -234,7 +231,7 @@ export function DreamRecordExplorer() {
               setVisibleCount(PAGE_SIZE);
             }}
           >
-            手控えを見る（{collection.ids.length}件）
+            手控えを見る
           </button>
         </div>
         {!collection.available ? (
@@ -267,11 +264,12 @@ export function DreamRecordExplorer() {
             spellCheck={false}
           />
         </div>
-        <p id="dream-record-search-help">
+        {/* How the field searches stays with the field for assistive tech; the
+            placeholder and the tags show it to the eye (Owner, 2026-10-23). */}
+        <p id="dream-record-search-help" className="dream-visually-hidden">
           見出し・本文・人物・舞台を検索。空白で区切ると、すべての言葉を含む記録に絞ります。
         </p>
         <div className="dream-record-quick-tags" role="group" aria-label="注目キーワード">
-          <span className="dream-record-quick-label">注目語句</span>
           {DREAM_RECORD_QUICK_TAGS.map((tag) => {
             const active = filters.query.trim() === tag;
             return (
@@ -288,7 +286,7 @@ export function DreamRecordExplorer() {
         </div>
       </div>
 
-      <p className="dream-record-facet-help" id="dream-record-facet-help">
+      <p className="dream-record-facet-help dream-visually-hidden" id="dream-record-facet-help">
         件数は、ほかの条件を保って選んだときの記録数です。
         {savedOnly ? "手控えの中から数えています。" : ""}
       </p>
@@ -485,7 +483,6 @@ export function DreamRecordExplorer() {
                         role="navigation"
                         aria-label={`${record.title.text}の前後の出来事`}
                       >
-                        <p>出来事全体の前後を辿る</p>
                         {neighbours.previous ? (
                           <a href={`#dream-chronicle-event-${neighbours.previous.no}`} rel="prev">
                             <small>前の記録 · CASE {neighbours.previous.case}</small>

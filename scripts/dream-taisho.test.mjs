@@ -125,8 +125,12 @@ test("type never drops below 12px", async () => {
 
 test("the page reads as a four-act film programme", async () => {
   const source = await read("src/components/dream-chapter/dream-chapter.tsx");
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // Each act card hangs a wordless 幟; the ghost numeral (data-ts-numeral) numbers the act
+  // and the 目次 keeps the act names.
+  assert.equal(source.match(/<i className="dream-act-mark" aria-hidden="true" \/>/g)?.length, 4);
   for (const act of ["第一幕", "第二幕", "第三幕", "第四幕"]) {
-    assert.match(source, new RegExp(`className="dream-act-mark" aria-hidden="true">\\s*${act}`));
+    assert.match(source, new RegExp(`act: "${act}"`));
   }
   assert.match(source, /<div className="dream-hero-title" aria-hidden="true">/);
   assert.match(

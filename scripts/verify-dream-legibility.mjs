@@ -182,7 +182,8 @@ try {
     const checks = [];
     report.current = { width, checks };
     await view(page, ".dream-prologue-card");
-    for (const selector of ["h2", "> p:not(.dream-prologue-sign)", ".dream-prologue-sign"]) {
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the sign is gone.
+    for (const selector of ["h2", "> p"]) {
       checks.push(await contrast(page, `.dream-prologue-card ${selector}`, ".dream-prologue-card"));
     }
     await page.screenshot({ path: `${output}/${width}-prologue.png` });
@@ -195,17 +196,20 @@ try {
     for (let i = 0; i < (await chips.count()); i += 1) {
       const selector = `.dream-programme-dossier-strip > li:nth-child(${i + 1}) > .dream-programme-dossier-chip`;
       await view(page, selector);
-      checks.push(await contrast(page, `${selector} small`, selector));
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the chip is its name.
+      checks.push(await contrast(page, `${selector} strong`, selector));
     }
 
     for (let i = 0; i < 6; i += 1) {
       const selector = `#dream-case-${i}`;
-      await page.locator(`.dream-karakuri-footer a[href="${selector}"]`).click();
+      // The cabinet's direct row is gone; the chapter index opens each fold the same way.
+      await page.locator(`.dream-reader-index a[href="${selector}"]`).click();
       await page.waitForFunction((selector) => document.querySelector(selector)?.open, selector);
       await view(page, `${selector} > summary`);
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the English reading
+      // under the title is gone.
       for (const child of [
         ".dream-story-case-heading > span",
-        ".dream-story-case-heading > small",
         ".dream-story-case-number",
         ".dream-story-case-toggle",
       ]) {
@@ -271,18 +275,13 @@ try {
         "#glossary .dream-archive-fold > summary",
       ),
     );
-    checks.push(
-      await contrast(
-        page,
-        "#glossary .dream-archive-fold-count",
-        "#glossary .dream-archive-fold > summary",
-      ),
-    );
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the fold has no tally;
+    // its name is checked again in the open state instead.
     await page.locator("#glossary .dream-archive-fold > summary").click();
     checks.push(
       await contrast(
         page,
-        "#glossary .dream-archive-fold-count",
+        "#glossary .dream-archive-fold-mark",
         "#glossary .dream-archive-fold > summary",
       ),
     );

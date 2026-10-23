@@ -4,11 +4,28 @@ import test from "node:test";
 import vm from "node:vm";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "../src/lib/ipad-standalone-viewport.js";
 
-function run(userAgent, maxTouchPoints, standalone, displayMode = false, preference = null) {
-  let content =
-    "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content";
+function run(
+  userAgent,
+  maxTouchPoints,
+  standalone,
+  displayMode = false,
+  preference = null,
+  initialContents = [
+    "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content",
+  ],
+) {
+  let viewports = initialContents.map((content) => ({ content }));
   const attributes = {};
   let onHeadChange;
+  let viewportWrites = 0;
+  const viewportNodes = () =>
+    viewports.map((viewport) => ({
+      getAttribute: () => viewport.content,
+      setAttribute: (_, value) => {
+        viewport.content = value;
+        viewportWrites += 1;
+      },
+    }));
   vm.runInNewContext(IPAD_STANDALONE_VIEWPORT_SCRIPT, {
     window: {
       navigator: { userAgent, maxTouchPoints, standalone },
@@ -25,12 +42,7 @@ function run(userAgent, maxTouchPoints, standalone, displayMode = false, prefere
       },
     },
     document: {
-      querySelector: () => ({
-        getAttribute: () => content,
-        setAttribute: (_, value) => {
-          content = value;
-        },
-      }),
+      querySelectorAll: (selector) => (selector === 'meta[name="viewport"]' ? viewportNodes() : []),
       documentElement: {
         setAttribute: (key, value) => {
           attributes[key] = value;
@@ -39,12 +51,30 @@ function run(userAgent, maxTouchPoints, standalone, displayMode = false, prefere
     },
   });
   return {
-    content,
+    get content() {
+      return viewports[0]?.content;
+    },
+    get contents() {
+      return viewports.map((viewport) => viewport.content);
+    },
     attributes,
-    navigate: (next = "width=device-width, viewport-fit=cover") => {
-      content = next;
+    get viewportWrites() {
+      return viewportWrites;
+    },
+    navigate: (next = "width=device-width, viewport-fit=cover", added = []) => {
+      if (Array.isArray(next)) {
+        viewports = next.map((content) => ({ content }));
+      } else {
+        if (viewports.length) viewports[0].content = next;
+        else viewports.push({ content: next });
+        viewports.push(...added.map((content) => ({ content })));
+      }
       onHeadChange?.();
-      return content;
+      return viewports.map((viewport) => viewport.content);
+    },
+    observeAgain: () => {
+      onHeadChange?.();
+      return viewports.map((viewport) => viewport.content);
     },
   };
 }
@@ -57,7 +87,7 @@ test("installed iPad reserves the status area, including desktop-mode UA", () =>
     assert.equal(result.attributes["data-ipad-standalone-viewport"], "contained");
     assert.equal(result.attributes["data-ipad-viewport"], "contained");
     assert.equal(result.attributes["data-ipad-menu"], "compact");
-    assert.match(result.navigate(), /viewport-fit=contain/);
+    assert.match(result.navigate()[0], /viewport-fit=contain/);
   }
   assert.match(run("Macintosh", 5, undefined, true).content, /viewport-fit=contain/);
 });
@@ -68,14 +98,39 @@ test("ordinary iPad tabs reserve the same native area, including desktop-mode UA
     assert.match(result.content, /viewport-fit=contain/);
     assert.equal(result.attributes["data-ipad-viewport"], "contained");
     assert.equal(result.attributes["data-ipad-standalone-viewport"], undefined);
-    assert.match(result.navigate(), /viewport-fit=contain/);
-    assert.match(result.navigate("width=device-width"), /viewport-fit=contain/);
-    assert.match(result.navigate("width=device-width, viewport-fit=auto"), /viewport-fit=contain/);
+    assert.match(result.navigate()[0], /viewport-fit=contain/);
+    assert.match(result.navigate("width=device-width")[0], /viewport-fit=contain/);
+    assert.match(
+      result.navigate("width=device-width, viewport-fit=auto")[0],
+      /viewport-fit=contain/,
+    );
     assert.equal(
-      result.navigate("width=device-width, viewport-fit=contain"),
+      result.navigate("width=device-width, viewport-fit=contain")[0],
       "width=device-width, viewport-fit=contain",
     );
   }
+});
+
+test("all viewport metadata is contained initially and after router replacement without repeat writes", () => {
+  const result = run("Macintosh Intel Mac OS X", 5, false, false, null, [
+    "width=device-width, initial-scale=1, viewport-fit=cover",
+    "width=device-width, initial-scale=1, viewport-fit=contain",
+  ]);
+  assert.equal(result.contents.length, 2);
+  assert.match(result.contents[0], /viewport-fit=contain/);
+  assert.match(result.contents[1], /viewport-fit=contain/);
+  const initialWrites = result.viewportWrites;
+  assert.equal(initialWrites, 1);
+
+  const navigated = result.navigate("width=device-width, initial-scale=1, viewport-fit=cover", [
+    "width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content",
+  ]);
+  assert.equal(navigated.length, 3);
+  assert.ok(navigated.every((content) => /viewport-fit=contain/.test(content)));
+  const navigationWrites = result.viewportWrites;
+  assert.equal(navigationWrites, initialWrites + 2);
+  assert.deepEqual(result.observeAgain(), navigated);
+  assert.equal(result.viewportWrites, navigationWrites);
 });
 
 test("iPhone, Mac and Android retain the existing viewport", () => {

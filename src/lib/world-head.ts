@@ -10,6 +10,7 @@ import dossierReadingCssUrl from "@/styles-dossier-reading.css?url";
 import stageDossierCssUrl from "@/styles-stage-dossier.css?url";
 import formSignatureCssUrl from "@/styles-form-signature.css?url";
 import dossierZenithCssUrl from "@/styles-dossier-zenith.css?url";
+import tabletDossierCssUrl from "@/styles-tablet-dossier.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -73,6 +74,10 @@ export const DOSSIER_ZENITH_STYLESHEET_LINK: RouteStylesheetLink = {
   rel: "stylesheet",
   href: dossierZenithCssUrl,
 };
+export const TABLET_DOSSIER_STYLESHEET_LINK: RouteStylesheetLink = {
+  rel: "stylesheet",
+  href: tabletDossierCssUrl,
+};
 export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   ...WORLD_STYLESHEET_LINKS,
   { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
@@ -81,6 +86,7 @@ export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   PICKUP_CINEMA_STYLESHEET_LINK,
   { rel: "stylesheet", href: dossierReadingCssUrl },
   STAGE_DOSSIER_STYLESHEET_LINK,
+  TABLET_DOSSIER_STYLESHEET_LINK,
   DOSSIER_ZENITH_STYLESHEET_LINK,
 ];
 

@@ -10,6 +10,7 @@ import galleryImageFallbackCssUrl from "@/styles-gallery-image-fallback.css?url"
 import exhibitionStudioCssUrl from "@/styles-exhibition-studio.css?url";
 import galleryRefinementCssUrl from "@/styles-gallery-refinement.css?url";
 import galleryPresentCssUrl from "@/styles-gallery-present.css?url";
+import tabletGalleryCssUrl from "@/styles-tablet-gallery.css?url";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
 export const Route = createFileRoute("/gallery")({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/gallery")({
         { rel: "stylesheet", href: galleryImageFallbackCssUrl },
         { rel: "stylesheet", href: exhibitionStudioCssUrl },
         { rel: "stylesheet", href: galleryRefinementCssUrl },
+        { rel: "stylesheet", href: tabletGalleryCssUrl },
         { rel: "stylesheet", href: galleryPresentCssUrl },
       ],
     });
