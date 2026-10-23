@@ -593,3 +593,51 @@
 .ice-entry-plate[style*="--from: right"] {
   --clip0: inset(0 0 0 100%);
 }
+
+.ice-entry-surge {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  top: 8%;
+  bottom: 4%;
+  background:
+    radial-gradient(40% 18% at 50% 30%, rgb(230 248 255 / 70%), transparent 70%),
+    linear-gradient(180deg, transparent, rgb(166 230 255 / 32%) 30%, rgb(169 131 255 / 26%) 70%, transparent);
+  filter: blur(6px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform-origin: 50% 30%;
+  animation: ice-surge 1100ms cubic-bezier(0.3, 0.6, 0.2, 1) 280ms both;
+}
+
+@keyframes ice-surge {
+  0% {
+    opacity: 0;
+    scale: 0.3 0.2;
+  }
+  35% {
+    opacity: 0.75;
+    scale: 1 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.1 1.05;
+  }
+}
+
+.ice-entry-chips > i {
+  width: 6px;
+  height: 6px;
+}
+
+@media (max-width: 760px) {
+  .ice-entry-chips > i:nth-child(n + 61) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ice-entry-surge {
+    display: none;
+  }
+}

@@ -30,7 +30,7 @@ import {
 /** The nanite chips that stream in to form the plates: where each lands on
  * the armour's (raised) place, where it comes from, its tone and its delay —
  * a fixed, hashed spread, so every play is the same. */
-const CHIPS = Array.from({ length: 36 }, (_, i) => {
+const CHIPS = Array.from({ length: 96 }, (_, i) => {
   const h = (n: number) => {
     const v = Math.sin((i + 1) * 12.9898 + n * 78.233) * 43758.5453;
     return v - Math.floor(v);
@@ -44,7 +44,7 @@ const CHIPS = Array.from({ length: 36 }, (_, i) => {
     Math.round(Math.cos(angle) * 60),
     Math.round(Math.sin(angle) * 60),
     i % 3,
-    Math.round(h(4) * 700),
+    Math.round(80 + h(4) * 1300),
   ] as const;
 });
 
@@ -96,6 +96,9 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
           <img className="ice-entry-under" src={REXONANCE_SUIT_UNDERSUIT} alt="" decoding="async" />
           {/* The armour generated from nanite cells away from the body
               (forward and above), then flown in and locked on. */}
+          {/* The nanites' source: an ice surge out of the reactor up and down
+              the undersuit (this suit's, not fire), before the cells pour. */}
+          <span className="ice-entry-surge" />
           <span className="ice-entry-chips">
             {CHIPS.map(([x, y, fx, fy, tone, delay], index) => (
               <i
