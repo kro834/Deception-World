@@ -57,7 +57,7 @@ const out = process.env.OUT_DIR || "/tmp/movie-reliability";
 const runs = Number(process.env.RUNS || 5);
 const runFrom = Number(process.env.RUN_FROM || 1);
 const concurrency = Number(process.env.CONCURRENCY || 2);
-const taskMs = Number(process.env.TASK_MS || 300000);
+const taskMs = Number(process.env.TASK_MS || 420000);
 const budgetMs = Number(process.env.BUDGET_MS || 0);
 const resume = process.env.RESUME === "1";
 const pages = (process.env.PAGES || "rexonance-saga,far-from-saga").split(",");
@@ -90,7 +90,7 @@ const PLAY_WAIT = Number(process.env.PLAY_WAIT || 90000);
 // clicks wait for a busy main thread.
 const CLICK = { force: true, timeout: 45000 };
 /** How long a whole movie at `speed` may take here. */
-const endWithin = (speed) => (MOVIE_MS / speed) * 4 + 30000;
+const endWithin = (speed) => (MOVIE_MS / speed) * 8 + 60000;
 await mkdir(out, { recursive: true });
 const logFile = join(out, "runs.jsonl");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -134,6 +134,8 @@ const snapshot = () => {
     busy: control.getAttribute("aria-busy"),
     scrollY,
     url: location.pathname,
+    // The movie's own clock (the pill's ring, set every frame it plays).
+    p: (Number.parseFloat(control.style.getPropertyValue("--rzn-movie-p")) || 0) / 100,
   };
 };
 
@@ -300,43 +302,49 @@ async function playing(page, timeout, message = "再生 never started the movie"
   await waitFor(page, () => document.querySelector(".rzn-movie")?.dataset.state === "playing", null, timeout, message);
 }
 
-/** Samples the movie while it plays, until it ends (or `until` of progress):
- * the frame stays pinned, the state never leaves playing by itself, the
- * progress only moves forward. (A layout change — a resize, a section
- * above settling — moves the runway under the page until the movie's next
- * frame puts the page back: one frame on a phone, seconds of software
- * WebGL here. A sample between the two is skipped; an unpinned frame that
- * lasts is a failure.) */
-const UNPINNED_MS = 10000;
+/** Samples the movie while it plays, until it ends (or `until` of its
+ * progress). The movie's own clock (p) only moves forward and never stalls;
+ * the state never leaves playing by itself; the page follows the clock (the
+ * frame pinned, the runway's progress q at p). A layout change — a resize, a
+ * section above settling — moves the runway under the page until the
+ * movie's next frame puts the page back: one frame on a phone, seconds of
+ * software WebGL here, so a sample between the two is a lag, and only a lag
+ * that lasts is a failure. */
+const LAG_MS = 12000;
+const STALL_MS = 45000;
 async function watch(page, { until = 1, timeout, label = "the movie" }) {
   const start = Date.now();
-  let last = -1;
-  let unpinned = 0;
-  let unpinnedSince = 0;
+  let lastP = -1;
+  let movedAt = Date.now();
+  let lags = 0;
+  let lagSince = 0;
   for (;;) {
     const s = await state(page);
     must(s, "the control or runway vanished");
     const pinned = Math.abs(s.frameTop - s.pin) <= 2;
-    // (The end is the state's: the last frames of the runway still play.)
-    const reached = s.state === "ended" || (until < 1 && s.q >= until - 0.002);
-    if (pinned && reached) {
+    const follows = pinned && Math.abs(s.q - s.p) <= 0.02;
+    const reached = s.state === "ended" || (until < 1 && s.p >= until - 0.002);
+    if (reached && follows) {
       if (until >= 1) must(s.q >= 0.985, `${label} ended at ${s.q.toFixed(3)}, not the runway's end`);
-      return { ms: Date.now() - start, unpinned };
+      return { ms: Date.now() - start, lags };
     }
-    must(s.state === "playing", `${label} left playing by itself (${s.state}) at ${s.q.toFixed(3)}`);
-    if (!pinned) {
-      unpinned += 1;
-      unpinnedSince ||= Date.now();
+    must(
+      s.state === "playing" || s.state === "ended",
+      `${label} left playing by itself (${s.state}) at ${s.p.toFixed(3)}`,
+    );
+    must(s.p >= lastP - 0.0015, `${label} ran backwards ${lastP.toFixed(3)} → ${s.p.toFixed(3)}`);
+    if (s.p > lastP + 0.0005) movedAt = Date.now();
+    lastP = Math.max(lastP, s.p);
+    must(Date.now() - movedAt < STALL_MS, `${label} stalled at ${s.p.toFixed(3)} for ${STALL_MS} ms`);
+    if (!follows) {
+      lags += 1;
+      lagSince ||= Date.now();
       must(
-        Date.now() - unpinnedSince < UNPINNED_MS,
-        `${label}: the sticky frame stayed unpinned (top ${s.frameTop} vs ${s.pin}, q ${s.q.toFixed(3)})`,
+        Date.now() - lagSince < LAG_MS,
+        `${label}: the page stayed away from the movie (q ${s.q.toFixed(3)} vs p ${s.p.toFixed(3)}, frame top ${s.frameTop} vs ${s.pin})`,
       );
-    } else {
-      unpinnedSince = 0;
-      must(s.q >= last - 0.01, `${label} ran backwards ${last.toFixed(3)} → ${s.q.toFixed(3)}`);
-      last = s.q;
-    }
-    must(Date.now() - start < timeout, `${label} did not reach ${until} within ${timeout} ms (at ${s.q.toFixed(3)})`);
+    } else lagSince = 0;
+    must(Date.now() - start < timeout, `${label} did not reach ${until} within ${timeout} ms (at ${s.p.toFixed(3)})`);
     await sleep(200);
   }
 }
@@ -362,18 +370,34 @@ async function pinnedAgain(page, label) {
  * scene just made ready are slow under software WebGL, so this waits for
  * the progress rather than timing a window). */
 async function advances(page, label, by = 0.06, timeout = 60000) {
-  const from = (await state(page)).q;
+  const from = (await state(page)).p;
   const start = Date.now();
   for (;;) {
     const s = await state(page);
-    if (s.q >= Math.min(from + by, 0.999) || s.state === "ended") return;
-    must(s.state === "playing", `${label}: the movie left playing by itself (${s.state}) at ${s.q.toFixed(3)}`);
+    if (s.p >= Math.min(from + by, 0.999) || s.state === "ended") break;
+    must(s.state === "playing", `${label}: the movie left playing by itself (${s.state}) at ${s.p.toFixed(3)}`);
     must(
       Date.now() - start < timeout,
-      `${label}: the movie does not advance (${from.toFixed(3)} → ${s.q.toFixed(3)} in ${timeout} ms)`,
+      `${label}: the movie does not advance (${from.toFixed(3)} → ${s.p.toFixed(3)} in ${timeout} ms)`,
     );
     await sleep(250);
   }
+  // …and the page goes with it.
+  await waitFor(
+    page,
+    () => {
+      const control = document.querySelector(".rzn-movie");
+      const runway = document.querySelector(".rzn-suitup");
+      const frame = runway.querySelector(".rzn-frame");
+      const pin = parseFloat(getComputedStyle(frame).top) || 0;
+      const q = (pin - runway.getBoundingClientRect().top) / (runway.offsetHeight - frame.offsetHeight);
+      const p = (Number.parseFloat(control.style.getPropertyValue("--rzn-movie-p")) || 0) / 100;
+      return Math.abs(frame.getBoundingClientRect().top - pin) <= 2 && Math.abs(q - p) <= 0.02;
+    },
+    null,
+    LAG_MS,
+    `${label}: the page does not follow the movie`,
+  );
 }
 
 /* The playhead's own clock: the movie scrolls the page once a frame, from
