@@ -14,6 +14,7 @@ import {
   META_UNITAS_RX_SIZE,
   META_UNITAS_RX_UNDERSUIT,
 } from "@/lib/meta-unitas-rx-suit";
+import { AssemblyMovie } from "@/components/rexonance-saga/rexonance-assembly-movie";
 import { META_UNITAS_SAGA } from "./meta-unitas-data";
 
 /* META UNITAS SAGA — #suitup, the scroll suit-up (2026-10-23).
@@ -146,6 +147,10 @@ export const MetaUnitasSuitUp = memo(function MetaUnitasSuitUp({
         <h2 id="mus-suitup-title">変身</h2>
       </header>
       <SuitUpStatus runwayRef={runwayRef} />
+      {/* The auto transformation movie (the Rexonance and Far From pages'
+          control): it drives the page's scroll, so the engine draws the
+          movie's frames as it draws a scroll's, ending on the chosen form. */}
+      <AssemblyMovie runwayRef={runwayRef} site="meta-unitas" />
       <div
         ref={runwayRef}
         id="meta-unitas-runway"
