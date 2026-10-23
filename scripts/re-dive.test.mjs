@@ -117,7 +117,9 @@ test("the shader, the stage and the section draw the same ground", async () => {
 test("RE DIVE is a classified archive; the public manager archive stays separate", async () => {
   const section = await read("src/components/world/re-dive-section.tsx");
   const home = await read("src/components/world/world-home.tsx");
-  assert.match(section, /CLASSIFIED ARCHIVE/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The heading 機密ファイル names the archive (no CLASSIFIED ARCHIVE eyebrow).
+  assert.doesNotMatch(section, /CLASSIFIED ARCHIVE|RE DIVE \/ FILE/);
   assert.match(section, /<h3 id="re-dive-title">機密ファイル<\/h3>/);
   assert.match(section, /aria-haspopup="dialog"/);
   assert.match(section, /onLeave\(\);\s*setFileOpen\(true\);/);

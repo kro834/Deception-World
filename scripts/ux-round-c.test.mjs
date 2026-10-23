@@ -202,12 +202,17 @@ test("the dossier reader lets short screens be and keeps its mark in forced colo
 });
 
 test("a rider dossier's first screen names the rider", () => {
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The CHARACTER FILE // 01 SAGA strip is gone: the cover is the file's
+  // numeral over the person's name (the end card's grammar); the rider's
+  // name stays in the page title and on the forms.
+  assert.doesNotMatch(rider, /CHARACTER FILE/);
   assert.match(
     rider,
-    /<p className="manager-file-number">\s*CHARACTER FILE \/\/ \{rider\.no\} \{rider\.name\}\s*<\/p>/,
+    /<span className="dossier-file-numeral" aria-hidden="true">\s*\{rider\.no\}\s*<\/span>\s*<h1>\s*<span className="manager-display-name">\s*<NameText value=\{rider\.civilian\.name\} \/>/,
   );
-  // The header's label (and the brand's name) stays the file number.
-  assert.match(rider, /fileLabel=\{`CHARACTER FILE \/\/ \$\{rider\.no\}`\}/);
+  // The header's label names the brand link's way back from this file.
+  assert.match(rider, /fileLabel=\{`\$\{rider\.civilian\.name\}の資料`\}/);
 });
 
 test("the Form Archive's nav, hero actions and detail arrows show keyboard focus", () => {

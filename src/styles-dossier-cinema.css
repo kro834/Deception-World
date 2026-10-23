@@ -203,6 +203,7 @@ html[data-world-effects="economy"]
     main.manager-page:not(.is-sovereign)
     :is(
       .manager-eyebrow,
+      .dossier-identity .dossier-file-numeral,
       .dossier-identity h1 small,
       .dossier-identity .manager-title,
       .dossier-identity .dossier-read-link
