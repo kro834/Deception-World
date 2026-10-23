@@ -44,6 +44,8 @@ import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 // way it plays Rexonance's, through one light module (the sequence's chunk
 // and the warm-up are its dynamic imports).
 import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-entry-timings";
+import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
+import { IllusionculumEntrySequence } from "@/components/illusionculum-saga/illusionculum-entry-sequence";
 import {
   prefetchFarFromEntry,
   prepareFarFromTransition,
@@ -61,6 +63,7 @@ type RiderDiveVariant =
   | "rexonance"
   | "extreme"
   | "far-from"
+  | "illusionculum"
   | "final-stage";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher" | "ciel";
 type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
@@ -138,6 +141,7 @@ const RIDER_DIVE_ROUTES = {
   "/rexonance-saga": "rexonance",
   "/extreme-saga": "extreme",
   "/far-from-saga": "far-from",
+  "/illusionculum-saga": "illusionculum",
   "/final-stage": "final-stage",
 } as const satisfies Record<string, RiderDiveVariant>;
 
@@ -170,6 +174,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   rexonance: REXONANCE_ENTRY_TIMINGS,
   extreme: { cover: 380, reveal: 480 },
   "far-from": FAR_FROM_ENTRY_TIMINGS,
+  illusionculum: ILLUSIONCULUM_ENTRY_TIMINGS,
   "final-stage": { cover: 380, reveal: 480 },
 };
 
@@ -188,6 +193,7 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
   rexonance: { no: "P14", name: "REXONANCE", label: "レクソナンスサーガ" },
   extreme: { no: "EX", name: "EXTREME", label: "エクスプリームサーガ" },
   "far-from": { no: "FF", name: "FAR FROM", label: "ファーフロムサーガ" },
+  illusionculum: { no: "IC", name: "ILLUSIONCULUM", label: "イリュージョンクルムサーガ" },
   "final-stage": { no: "FS", name: "FINAL STAGE", label: "ファイナルステージ" },
 };
 
@@ -1634,7 +1640,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             }
             // Mobile Safari may coalesce the state update with route/module work.
             // Paint both cinematic entries before loading their route chunk.
-            if (diveVariant === "dream" || diveVariant === "rexonance" || diveVariant === "far-from") {
+            if (
+              diveVariant === "dream" ||
+              diveVariant === "rexonance" ||
+              diveVariant === "far-from" ||
+              diveVariant === "illusionculum"
+            ) {
               await nextFrame();
               await nextFrame();
               if (!isCurrent()) return;
@@ -1642,6 +1653,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               // from the click (which may have included a long layout task).
               if (diveVariant === "rexonance") startedAt = performance.now();
               if (diveVariant === "far-from") startedAt = performance.now();
+              if (diveVariant === "illusionculum") startedAt = performance.now();
             }
             // Images warm independently of the route chunk. A stalled chunk
             // releases the cover before navigation, rather than locking the page.
@@ -1952,6 +1964,7 @@ function LoadOverlay({
     variant === "rexonance" ||
     variant === "extreme" ||
     variant === "far-from" ||
+    variant === "illusionculum" ||
     variant === "final-stage";
   if (isRiderDive) {
     return (
@@ -2066,6 +2079,9 @@ function RiderRouteDive({
   const revealing = phase === "revealing";
   const rexonance = variant === "rexonance" && Boolean(RexonanceCallSequence);
   const farFrom = variant === "far-from" && Boolean(FarFromCallSequence);
+  // ILLUSIONCULUM's entry (illusionculum-entry-sequence.tsx): its projections
+  // resolving into the figure, under the cover, on the full tier only.
+  const illusionculum = variant === "illusionculum" && scene?.tier === "full";
   // FAR FROM's call is skippable (owner, 2026-10-22): the button, or Escape
   // while it covers.
   const farFromSkippable = farFrom && !revealing && scene?.tier === "full" && Boolean(onSkip);
@@ -2079,7 +2095,7 @@ function RiderRouteDive({
   }, [farFromSkippable, onSkip]);
   return (
     <div
-      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}${farFrom ? " is-far-from-calls" : ""}`}
+      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}${farFrom ? " is-far-from-calls" : ""}${illusionculum ? " is-illusionculum-calls" : ""}`}
       style={sceneStyle(scene)}
       role="status"
       aria-live="polite"
@@ -2113,6 +2129,8 @@ function RiderRouteDive({
             </button>
           ) : null}
         </>
+      ) : illusionculum ? (
+        <IllusionculumEntrySequence phase={phase} />
       ) : (
         <>
           <CineLayers scene={scene} />
@@ -2136,6 +2154,8 @@ function RiderRouteDive({
               ? "EXTREME // SUPREME SITE"
               : variant === "far-from"
                 ? "FAR FROM // FINAL FORM SITE"
+                : variant === "illusionculum"
+                ? "ILLUSIONCULUM // SPECIAL SITE"
                 : variant === "final-stage"
                 ? "FINAL STAGE // STORY SITE"
                 : variant === "dream"

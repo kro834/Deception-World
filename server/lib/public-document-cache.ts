@@ -12,6 +12,7 @@ export const PUBLIC_DOCUMENT_PATHS = new Set([
   "/rexonance-saga",
   "/extreme-saga",
   "/far-from-saga",
+  "/illusionculum-saga",
 ]);
 
 export const PUBLIC_DOCUMENT_CDN_CONTROL = "max-age=60, stale-while-revalidate=300";

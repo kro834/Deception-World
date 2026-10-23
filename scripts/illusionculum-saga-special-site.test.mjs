@@ -209,3 +209,28 @@ test("no secondary labels: no English kickers, counters or helper text on the pa
     assert.doesNotMatch(source, /タップ|スワイプ|長押し|SCROLL/);
   }
 });
+
+test("the entry transformation plays in the route transition screen, the owner's calls, once", async () => {
+  const gate = read("src/components/load-gate.tsx");
+  assert.match(gate, /"\/illusionculum-saga": "illusionculum"/);
+  assert.match(gate, /illusionculum: ILLUSIONCULUM_ENTRY_TIMINGS,/);
+  assert.match(gate, /const illusionculum = variant === "illusionculum" && scene\?\.tier === "full";/);
+  assert.match(gate, /<IllusionculumEntrySequence phase=\{phase\} \/>/);
+  const entry = await import("../src/lib/illusionculum-entry.ts");
+  assert.deepEqual([...entry.ILLUSIONCULUM_ENTRY_CALLS], [...ILLUSIONCULUM_SAGA.calls]);
+  const css = read("src/styles-illusionculum-entry.css");
+  assert.doesNotMatch(css, /\binfinite\b/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\.ice-entry,\s*\.ice-entry \* \{\s*animation: none !important;/);
+  assert.match(read("src/routes/__root.tsx"), /href: illusionculumEntryCss/);
+  assert.match(read("src/styles-route-transitions.css") + css, /\.is-illusionculum-dive/);
+});
+
+test("the site is registered wherever the other special sites are", () => {
+  assert.match(read("src/components/search/search-ui-helpers.ts"), /"\/illusionculum-saga"\) return "ILLUSIONCULUM SAGA"/);
+  assert.match(read("src/components/search/search-data.ts"), /to: "\/illusionculum-saga",/);
+  assert.match(read("src/lib/library-data.ts"), /path: "\/illusionculum-saga"/);
+  assert.match(read("src/lib/record-art.ts"), /"\/illusionculum-saga": \{/);
+  assert.match(read("server/lib/public-document-cache.ts"), /"\/illusionculum-saga"/);
+  assert.match(read("scripts/verify-public-deployment.mjs"), /"\/illusionculum-saga"/);
+  assert.match(read("scripts/verify-site-health.mjs"), /"\/illusionculum-saga"/);
+});

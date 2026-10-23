@@ -41,6 +41,7 @@ import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
 import farFromEntryCss from "../styles-far-from-entry.css?url";
+import illusionculumEntryCss from "../styles-illusionculum-entry.css?url";
 import viewportChromeCss from "../styles-viewport-chrome.css?url";
 import stageCss from "../styles-stage.css?url";
 import stageShellCss from "../styles-stage-shell.css?url";
@@ -197,6 +198,8 @@ export const Route = createRootRoute({
       // FAR FROM's entry rides the same call sheet with its own differences,
       // on the departure route too (load-gate.tsx, far-from-entry-gate.ts).
       { rel: "stylesheet", href: farFromEntryCss },
+      // ILLUSIONCULUM's entry (illusionculum-entry-sequence.tsx), the same way.
+      { rel: "stylesheet", href: illusionculumEntryCss },
       { rel: "stylesheet", href: viewportChromeCss },
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []

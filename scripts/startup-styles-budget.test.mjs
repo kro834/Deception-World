@@ -45,6 +45,8 @@ const original = [
   // Owner (2026-10-22): FAR FROM's entry call plays in the transition screen
   // too, so its differences ride beside the call sheet on every page.
   "../styles-far-from-entry.css?url",
+  // Owner (2026-10-23): ILLUSIONCULUM's entry plays in the transition screen too.
+  "../styles-illusionculum-entry.css?url",
   "../styles-viewport-chrome.css?url",
   "@/styles-inquiry-navigation.css?url",
   "../styles-stage.css?url",

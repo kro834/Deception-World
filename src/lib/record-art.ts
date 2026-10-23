@@ -170,6 +170,14 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
     edition: "final",
     code: "FAR FROM",
   },
+  // ILLUSIONCULUM SAGA's own site (2026-10-23): its key visual, in the
+  // Rexonance edition's light (the site follows that site's structure).
+  "/illusionculum-saga": {
+    src: "/illusionculum-saga-20261023/standard-640.webp",
+    pos: "50% 14%",
+    edition: "rexonance",
+    code: "ILLUSIONCULUM",
+  },
   "/final-stage": {
     src: "/rider-far-from-saga-max-delivery-640.webp",
     pos: "50% 18%",
@@ -180,7 +188,7 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
 
 export function editionOf(path: string): RecordEdition {
   if (path === "/dream-chapter") return "dream";
-  if (path === "/rexonance-saga") return "rexonance";
+  if (path === "/rexonance-saga" || path === "/illusionculum-saga") return "rexonance";
   if (path === "/extreme-saga") return "extreme";
   if (path === "/final-stage" || path === "/far-from-saga") return "final";
   if (path === "/gallery") return "gallery";
@@ -275,6 +283,11 @@ const SITE_ART: Record<string, readonly Picture[]> = {
     PAGES["/far-from-saga"],
     { src: "/far-from-saga-20261022/ultra-640.webp", pos: "50% 14%" },
     { src: "/far-from-saga-20261022/max-640.webp", pos: "50% 14%" },
+  ],
+  "/illusionculum-saga": [
+    PAGES["/illusionculum-saga"],
+    { src: "/illusionculum-saga-20261023/ultra-640.webp", pos: "50% 14%" },
+    { src: "/illusionculum-saga-20261023/more-640.webp", pos: "50% 14%" },
   ],
   "/final-stage": [PAGES["/final-stage"], formThumb("realm", "royal")],
 };

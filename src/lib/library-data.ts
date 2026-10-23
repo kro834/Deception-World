@@ -81,6 +81,14 @@ export const LIBRARY_ENTRIES: readonly LibraryEntry[] = [
     aliases: ["far from saga", "ファーフロム・サーガ", "ファーフロム"],
   },
   {
+    id: "illusionculum",
+    title: "イリュージョンクルムサーガ",
+    path: "/illusionculum-saga",
+    kind: "page",
+    description: "変身、形態、性能、装甲、武装、能力の資料。",
+    aliases: ["illusionculum saga", "イリュージョンクルム・サーガ", "イリュージョンクルム"],
+  },
+  {
     id: "final",
     title: "ファイナルステージ",
     path: "/final-stage",

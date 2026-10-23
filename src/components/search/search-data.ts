@@ -22,6 +22,7 @@ import {
 } from "../dream-chapter/dream-chapter-data";
 import { CAST, FAR_FROM_SAGA, REALM_ROYAL, STORY } from "../final-stage/final-stage-data";
 import { FAR_FROM_REPORT_TEXT } from "../far-from-saga/far-from-report-text";
+import { ILLUSIONCULUM_SAGA } from "../illusionculum-saga/illusionculum-data";
 import { REPORT_PART_TITLES } from "../far-from-saga/far-from-report-data";
 import { P16_DESCRIPTIONS, P16_MAIN, P16_SUMMARY } from "../far-from-saga/far-from-p16-official";
 import { LIBRARY_ENTRIES } from "../../lib/library-data";
@@ -811,6 +812,34 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     ],
     to: "/final-stage",
     hash: "far-from-saga",
+  },
+  {
+    // ILLUSIONCULUM SAGA (2026-10-23): the owner's record, searchable in full;
+    // a hit opens its special site.
+    id: "illusionculum-saga",
+    title: ILLUSIONCULUM_SAGA.name,
+    category: "riders",
+    description: ILLUSIONCULUM_SAGA.ultraName,
+    body: [
+      ...ILLUSIONCULUM_SAGA.overview,
+      ...[...ILLUSIONCULUM_SAGA.armour, ...ILLUSIONCULUM_SAGA.arsenal, ...ILLUSIONCULUM_SAGA.abilities].flatMap(
+        (article) => [article.title, ...article.body],
+      ),
+      ...ILLUSIONCULUM_SAGA.finishers.flatMap((finisher) => [finisher.name, ...finisher.body]),
+    ].join("\n"),
+    keywords: [
+      "ILLUSIONCULUM",
+      "OVER CRYSTAL",
+      "リアクター・モア",
+      "オーバーレッグ・リアクター",
+      "ASTRA-16 Ultra",
+      "ゴッドゲート・イリュージョンクルム",
+      ...ILLUSIONCULUM_SAGA.calls,
+      ...ILLUSIONCULUM_SAGA.finishers.map((finisher) => finisher.name),
+    ],
+    aliases: ["illusionculum saga", "イリュージョンクルム"],
+    to: "/illusionculum-saga",
+    hash: "top",
   },
   {
     // The owner's comparison text (2026-10-22), searchable in full; a hit

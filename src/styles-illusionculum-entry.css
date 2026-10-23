@@ -1,0 +1,359 @@
+/* ================================================================
+   ILLUSIONCULUM SAGA — the entry transformation in the route transition
+   screen (illusionculum-entry-sequence.tsx; load-gate.tsx's
+   "illusionculum" dive, 2.7 s cover then the reveal). Linked on every
+   route, as the other entry sheets are: the cover plays over the
+   departure page. Every rule is scoped to .ice-entry or the dive.
+
+   One clock, once: the sigil draws (0–0.9 s); the calls come in at 0.1,
+   0.55, 1.0 and 1.55 s; three projections stand apart and close in
+   (0.25–1.7 s) while the real figure resolves out of them (1.0–1.9 s);
+   the orbs rise from above the shoulders to their seats (1.7–2.4 s); the
+   reactor lights, small and slow (2.0–2.6 s). Only the full tier renders
+   this (the gate gives economy and reduced motion its calm shutter); the
+   reveal fades the whole layer. No loop, no flash, no red.
+   ================================================================ */
+
+.load-gate.rider-route-dive.is-illusionculum-dive {
+  --rider-dive-primary: 166 230 255;
+  --rider-dive-secondary: 255 143 210;
+  --rider-dive-shadow: 2 3 10;
+  background:
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.08), transparent 10%),
+    radial-gradient(circle at 40% 46%, rgb(47 79 216 / 0.34), transparent 30%),
+    radial-gradient(circle at 62% 56%, rgb(169 131 255 / 0.22), transparent 32%),
+    linear-gradient(145deg, rgb(2 3 10 / 0.99), #02030a 70%);
+}
+
+/* The status line is for assistive tech: the scene says it. */
+.load-gate.rider-route-dive.is-illusionculum-calls .rider-dive-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ice-entry {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.ice-entry-ground {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 50% at 50% 42%, rgb(47 79 216 / 30%), transparent 72%),
+    radial-gradient(30% 24% at 50% 30%, rgb(233 184 102 / 10%), transparent 72%), #02030a;
+}
+
+.ice-entry-sigil {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(78vmin, 640px);
+  translate: -50% -58%;
+  fill: none;
+  stroke: rgb(233 184 102 / 42%);
+  stroke-width: 0.8;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ice-sigil-draw 900ms cubic-bezier(0.3, 0.6, 0.2, 1) 60ms both;
+}
+
+.ice-entry-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.ice-entry-figure {
+  position: relative;
+  height: min(84svh, 860px);
+  aspect-ratio: 2 / 3;
+  max-width: 92vw;
+}
+
+.ice-entry-ghost,
+.ice-entry-real {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ice-entry-ghost {
+  display: block;
+  background:
+    repeating-linear-gradient(0deg, rgb(2 3 10 / 70%) 0 2px, transparent 2px 4px),
+    linear-gradient(180deg, var(--ice-a, rgb(255 143 210)), var(--ice-b, rgb(169 131 255)));
+  mask: var(--ice-cutout) 50% 0 / contain no-repeat;
+  -webkit-mask: var(--ice-cutout) 50% 0 / contain no-repeat;
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: ice-ghost-a 1600ms cubic-bezier(0.2, 0.7, 0.1, 1) 250ms both;
+}
+
+.ice-entry-ghost.is-b {
+  --ice-a: rgb(166 230 255);
+  --ice-b: rgb(47 79 216);
+  animation-name: ice-ghost-b;
+  animation-delay: 320ms;
+}
+
+.ice-entry-ghost.is-c {
+  --ice-a: rgb(169 131 255);
+  --ice-b: rgb(255 143 210);
+  animation-name: ice-ghost-c;
+  animation-delay: 390ms;
+}
+
+.ice-entry-real {
+  object-fit: contain;
+  object-position: 50% 0;
+  opacity: 0;
+  animation: ice-real 900ms cubic-bezier(0.2, 0.7, 0.1, 1) 1000ms both;
+}
+
+.ice-entry-core {
+  position: absolute;
+  left: 50%;
+  top: 29.4%;
+  width: 16%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(230 248 255 / 75%), rgb(166 230 255 / 0) 68%);
+  opacity: 0;
+  animation: ice-core 640ms ease-out 2000ms both;
+}
+
+.ice-entry-orb {
+  position: absolute;
+  left: var(--ice-orb-x);
+  top: var(--ice-orb-y);
+  width: var(--ice-orb-d);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  opacity: 0;
+  animation: ice-orb-l 700ms cubic-bezier(0.25, 0.8, 0.2, 1) 1700ms both;
+}
+
+.ice-entry-orb.is-right {
+  animation-name: ice-orb-r;
+  animation-delay: 1780ms;
+}
+
+.ice-entry-orb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ice-entry-calls {
+  position: absolute;
+  left: max(20px, calc(50% - min(84svh, 860px) / 3 - 300px));
+  top: 50%;
+  display: grid;
+  gap: 10px;
+  width: min(300px, 40vw);
+  margin: 0;
+  padding: 0;
+  translate: 0 -50%;
+  list-style: none;
+}
+
+.ice-entry-calls > li {
+  padding: 8px 12px 7px;
+  border-left: 2px solid rgb(166 230 255);
+  background: rgb(6 8 20 / 70%);
+  color: #f0f8ff;
+  font:
+    600 clamp(13px, 1.3vw, 17px) / 1.4 "Rexonance Forge",
+    "Oxanium",
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  animation: ice-call 420ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+  animation-delay: calc(100ms + var(--ice-call) * 480ms);
+}
+
+.ice-entry-calls > li:last-child {
+  border-left-color: rgb(255 143 210);
+}
+
+/* Phones: the calls stand over the figure's feet, one column. */
+@media (max-width: 760px) {
+  .ice-entry-figure {
+    height: min(70svh, 640px);
+    translate: 0 -8%;
+  }
+
+  .ice-entry-calls {
+    top: auto;
+    right: 16px;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    left: 16px;
+    width: auto;
+    gap: 6px;
+    translate: none;
+  }
+
+  .ice-entry-calls > li {
+    font-size: 13px;
+  }
+}
+
+@keyframes ice-sigil-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ice-ghost-a {
+  0% {
+    opacity: 0;
+    translate: -26% 2%;
+  }
+  22%,
+  38% {
+    opacity: 0.36;
+    translate: -26% 2%;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes ice-ghost-b {
+  0% {
+    opacity: 0;
+    translate: 24% -2%;
+  }
+  22%,
+  38% {
+    opacity: 0.3;
+    translate: 24% -2%;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes ice-ghost-c {
+  0% {
+    opacity: 0;
+    translate: -12% -6%;
+    scale: 1.08;
+  }
+  22%,
+  38% {
+    opacity: 0.24;
+    translate: -12% -6%;
+    scale: 1.08;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@keyframes ice-real {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ice-core {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.25;
+    scale: 1.2;
+  }
+}
+
+@keyframes ice-orb-l {
+  0% {
+    opacity: 0;
+    translate: calc(-50% + 110%) calc(-50% + 190%);
+    scale: 0.42;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    translate: -50% -50%;
+    scale: 1;
+  }
+}
+
+@keyframes ice-orb-r {
+  0% {
+    opacity: 0;
+    translate: calc(-50% - 110%) calc(-50% + 190%);
+    scale: 0.42;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    translate: -50% -50%;
+    scale: 1;
+  }
+}
+
+@keyframes ice-call {
+  from {
+    opacity: 0;
+    translate: -12px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ice-entry,
+  .ice-entry * {
+    animation: none !important;
+  }
+
+  .ice-entry :is(.ice-entry-real, .ice-entry-orb, .ice-entry-calls > li) {
+    opacity: 1;
+  }
+
+  .ice-entry-sigil {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .ice-entry-ghost,
+  .ice-entry-core {
+    display: none;
+  }
+}

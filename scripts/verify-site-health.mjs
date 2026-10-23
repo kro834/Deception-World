@@ -32,6 +32,7 @@ const routes = [
   "/rexonance-saga",
   "/extreme-saga",
   "/far-from-saga",
+  "/illusionculum-saga",
   "/final-stage",
   "/download",
   "/no-such-record",
