@@ -1,6 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
-import { META_UNITAS_ENTRY_TIMINGS } from "@/lib/meta-unitas-entry-gate";
 import {
   META_UNITAS_RX_DRIVER_STANDIN,
   META_UNITAS_RX_SIZE,
@@ -53,6 +52,7 @@ const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
 .mus-entry .rzn-line[data-chant]{flex-direction:column;font-size:clamp(30px,4.4vw,76px)}
 .mus-entry .rzn-line:not([data-chant]) .rzn-chip{display:flex;flex-direction:column}
 .mus-entry .rzn-chip>span{white-space:nowrap}
+.mus-entry .rzn-suitup:not([data-rzn-state]) .rzn-line:first-child{opacity:1;transform:translateY(-50%)}
 .mus-entry .rzn-line[data-on]{opacity:1;transform:translateY(-50%);transition-delay:.12s}
 .mus-entry .rzn-line[data-done]:not([data-on]){opacity:0;transform:translateY(-62%);transition-duration:.16s,.3s}
 .mus-entry .rzn-line:last-child[data-on],.mus-entry .rzn-line:last-child[data-done]{opacity:1;transform:translateY(-50%)}
@@ -70,7 +70,31 @@ const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
 .mus-entry .rzn-line:not([data-chant]) .rzn-chip{align-items:center}}`;
 
 /** How long the build waits for the scene to be ready before its clock runs. */
-const READY_WAIT_MS = 2200;
+const READY_WAIT_MS = 1500;
+
+/** The entry's clock (owner, 2026-10-24: 「装着が駆け足すぎる」), set to the
+ * Rexonance entry's pacing: the scan, the fire, each part's landing a call's
+ * stage long, the bits and the head, the seal and the light — [ms, p] keys
+ * along the engine's scroll beats (ASSEMBLY_BEATS). */
+const CLOCK: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [420, 0.07],
+  [1020, 0.16],
+  [1600, 0.275],
+  [2180, 0.39],
+  [2760, 0.505],
+  [3340, 0.62],
+  [4060, 0.85],
+  [4700, 0.95],
+];
+const progressAt = (ms: number) => {
+  for (let i = 1; i < CLOCK.length; i += 1) {
+    const [t1, p1] = CLOCK[i];
+    const [t0, p0] = CLOCK[i - 1];
+    if (ms <= t1) return p0 + ((p1 - p0) * (ms - t0)) / (t1 - t0);
+  }
+  return CLOCK[CLOCK.length - 1][1];
+};
 
 export function MetaUnitasEntrySequence({
   phase,
@@ -97,10 +121,9 @@ export function MetaUnitasEntrySequence({
         if (disposed) return;
         const ready = runway.dataset.rznLoad === "ready";
         if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
-        const span = Math.max(1200, META_UNITAS_ENTRY_TIMINGS.cover - (started - mounted) - 240);
-        const t = started ? Math.min(1, (now - started) / span) : 0;
-        // Eased, ending past the seal so ミドル stands finished, lit.
-        const p = (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2) * 0.95;
+        const elapsed = started ? now - started : 0;
+        const p = progressAt(elapsed);
+        const t = elapsed >= CLOCK[CLOCK.length - 1][0] ? 1 : 0;
         const travel = runway.offsetHeight - layer.clientHeight;
         layer.scrollTop = Math.round(travel * p);
         window.dispatchEvent(new Event("scroll"));
