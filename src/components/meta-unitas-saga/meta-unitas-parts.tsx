@@ -13,7 +13,7 @@ export function Bracketed({ text }: { text: string }) {
   return (
     <>
       <span className="mus-bracket">{match[1]}</span>
-      {match[2]}
+      {jp(match[2])}
       <span className="mus-bracket">{match[3]}</span>
     </>
   );
@@ -38,6 +38,25 @@ export function CallLine({ units }: { units: readonly string[] }) {
       <span className="mus-bracket">】</span>
     </span>
   );
+}
+
+/** A heading, a name or a cell, kept in its phrases (2026-10-23, owner:
+ * 「改行も改善して」): a line may break only between the record's own units —
+ * after 「・」「／」「、」「。」, a closing bracket or a run of 「！」, and before
+ * an opening bracket — never inside a word, so no line opens with 「／」 or
+ * ends on one stray character. Each unit is one run (.mus-unit, nowrap);
+ * the words are unchanged. */
+export function jp(text: string): ReactNode {
+  const units = text
+    .match(/[（「『〈【]?[^・／、。）」』〉】！（「『〈【]*(?:[・／、。）」』〉】]|！+)*/gu)
+    ?.filter(Boolean);
+  if (!units || units.length < 2 || units.join("") !== text) return text;
+  return units.map((unit, index) => (
+    <Fragment key={index}>
+      {index > 0 ? <wbr /> : null}
+      <span className="mus-unit">{unit}</span>
+    </Fragment>
+  ));
 }
 
 /** Line breaks only after the record's own separators (「／」, 「・」 stay

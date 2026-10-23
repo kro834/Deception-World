@@ -97,6 +97,25 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   border: 0;
 }
 
+/* Line breaks (owner, 2026-10-23: 「改行も改善して」): headings, names and
+   cells break between their phrases only (.mus-unit, from jp()); prose
+   breaks at phrase boundaries where the engine knows them and never leaves
+   one character alone on its last line. */
+.mus-unit {
+  white-space: nowrap;
+}
+
+.mus-page :is(h1, h2, h3, th, td, li, .mus-hero-ultra, .mus-end-names p) {
+  word-break: keep-all;
+  line-break: strict;
+}
+
+.mus-page .mus-copy p {
+  line-break: strict;
+  word-break: auto-phrase;
+  text-wrap: pretty;
+}
+
 .mus-bracket {
   color: var(--mus-orange);
   font-weight: 400;
@@ -128,6 +147,24 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   padding: clamp(28px, 4vw, 56px) var(--mus-gutter) clamp(40px, 6vw, 80px);
   max-width: 1440px;
   margin: 0 auto;
+  isolation: isolate;
+}
+
+/* Depth behind the hero: the key visual's light spread as a field, and a
+   fine grid fading out (materials, not words). */
+.mus-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background:
+    radial-gradient(50% 70% at 28% 52%, rgb(255 154 74 / 12%), transparent 70%),
+    radial-gradient(40% 60% at 30% 40%, rgb(55 198 192 / 14%), transparent 72%),
+    linear-gradient(rgb(233 239 242 / 4%) 1px, transparent 1px) 0 0 / 100% 64px,
+    linear-gradient(90deg, rgb(233 239 242 / 4%) 1px, transparent 1px) 0 0 / 64px 100%;
+  -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+  mask-image: linear-gradient(180deg, #000 60%, transparent);
+  pointer-events: none;
 }
 
 .mus-hero-visual {
@@ -458,26 +495,47 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   margin-bottom: 0;
 }
 
-/* 01 — the overview: two columns of the record at desktop width. */
+/* 01 — the overview: the record beside a pinned art column at desktop
+   width (the Rexonance site's sticky key visual). */
 .mus-overview-copy {
   max-width: 76ch;
+}
+
+.mus-overview-art {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .mus-overview-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 80px);
+    align-items: start;
+  }
+  .mus-overview-art {
+    position: sticky;
+    top: calc(var(--rxs-local-nav-reserve, 62px) + 28px);
+    display: block;
+    margin: 0;
+    aspect-ratio: 2 / 3;
+    max-height: calc(100svh - var(--rxs-local-nav-reserve, 62px) - 56px);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--mus-hair),
+      0 40px 100px -40px rgb(240 222 255 / 30%);
+  }
+  .mus-overview-art img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .mus-overview-copy p:first-child {
   color: var(--mus-silver);
   font-size: clamp(16px, 1.3vw, 18.5px);
-}
-
-@media (min-width: 1100px) {
-  .mus-overview-copy {
-    max-width: none;
-    column-count: 2;
-    column-gap: 64px;
-    column-rule: 1px solid var(--mus-hair);
-  }
-  .mus-overview-copy p {
-    break-inside: avoid-column;
-  }
 }
 
 /* The specs: ミドル and ウルトラ side by side; one value spans both. */
@@ -550,12 +608,24 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow-wrap: anywhere;
 }
 
+/* The two forms' figures, set large in the Latin display face (the
+   Rexonance site's read-out numerals). */
+.mus-specs tbody tr[data-dual] td {
+  font-family: var(--mus-latin);
+  font-size: clamp(17px, 1.7vw, 26px);
+  font-weight: 640;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
 .mus-specs tbody tr[data-dual] td:nth-child(2) {
   color: #e6fbf9;
+  text-shadow: 0 0 24px rgb(55 198 192 / 35%);
 }
 
 .mus-specs tbody tr[data-dual] td:nth-child(3) {
   color: #f6eeff;
+  text-shadow: 0 0 24px rgb(240 222 255 / 30%);
   border-left: 1px solid var(--mus-hair);
 }
 
@@ -713,7 +783,9 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 
 /* The engine's read-outs stay for it and never show (no secondary labels);
    the calls take this page's light, the stamp its outlined name. */
-.mus-page .rzn-suitup :is(.rzn-kicker, .rzn-phase, .rzn-hint, .rzn-readout, .rzn-nanites, .rzn-parts) {
+.mus-page
+  .rzn-suitup
+  :is(.rzn-kicker, .rzn-phase, .rzn-hint, .rzn-readout, .rzn-nanites, .rzn-parts) {
   display: none !important;
 }
 
@@ -1169,6 +1241,27 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   overflow: hidden;
 }
 
+/* The end card's halo: rings behind the figure (marks). */
+.mus-footer::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  right: max(-8%, calc((100% - 1240px) / 2 - 8%));
+  bottom: 12%;
+  width: min(62%, 720px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 154 74 / 10%), transparent 62%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 154 74 / 24%),
+    0 0 0 42px transparent,
+    0 0 0 43px rgb(55 198 192 / 16%),
+    0 0 0 96px transparent,
+    0 0 0 97px rgb(240 222 255 / 12%);
+  transform: scaleY(0.42);
+  pointer-events: none;
+}
+
 .mus-end-figure {
   position: absolute;
   z-index: 0;
@@ -1330,20 +1423,14 @@ html[data-world-effects="economy"] .mus-page *::after {
   }
   /* The comparison fits the phone: names wrap, the values stay whole. */
   .mus-table {
-    min-width: 0;
     font-size: 12.5px;
   }
   .mus-table th,
   .mus-table td {
     padding: 10px 6px;
   }
-  .mus-table tbody th {
-    white-space: normal;
-    min-width: 6.4em;
-  }
   .mus-table thead th {
     font-size: 12px;
-    white-space: normal;
     letter-spacing: 0.02em;
   }
   .mus-table td[data-bar]::after {
@@ -1370,4 +1457,27 @@ html[data-world-effects="economy"] .mus-page *::after {
   }
 }
 
+/* The run's distance (（100m）) reads as the figure's unit, a size down. */
+.mus-specs tbody tr[data-dual] td .mus-unit ~ .mus-unit {
+  font-size: 0.62em;
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+}
 
+@media (max-width: 560px) {
+  /* The comparison keeps every name and figure whole: the table scrolls in
+     its own frame, the forms' column pinned at its left. */
+  .mus-page .mus-table {
+    min-width: 500px;
+  }
+  .mus-page .mus-table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #050d11;
+    box-shadow: 1px 0 0 var(--mus-hair);
+  }
+  .mus-page .mus-table tbody tr[data-self] th:first-child {
+    background: linear-gradient(90deg, #1c140d, #0b1214);
+  }
+}

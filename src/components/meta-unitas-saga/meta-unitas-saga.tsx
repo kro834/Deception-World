@@ -19,7 +19,7 @@ import {
 } from "@/lib/meta-unitas-saga-artwork";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "./meta-unitas-data";
-import { Articles, Bracketed, CallLine } from "./meta-unitas-parts";
+import { Articles, Bracketed, CallLine, jp } from "./meta-unitas-parts";
 import { MetaUnitasPerformance } from "./meta-unitas-performance";
 import { FORM_ACCENTS, FORM_LABELS, MetaUnitasSuitUp } from "./meta-unitas-suitup";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
@@ -81,12 +81,12 @@ function SpecTable() {
               <th scope="row">{row.key}</th>
               {"middle" in row ? (
                 <>
-                  <td>{row.middle}</td>
-                  <td>{row.ultra}</td>
+                  <td>{jp(row.middle)}</td>
+                  <td>{jp(row.ultra)}</td>
                 </>
               ) : (
                 <td colSpan={2}>
-                  <span>{row.value}</span>
+                  <span>{jp(row.value)}</span>
                   {"more" in row && row.more
                     ? row.more.map((line) => (
                         <span key={line} className="mus-spec-more">
@@ -324,9 +324,9 @@ export function MetaUnitasSaga() {
         <div className="mus-hero-copy">
           <h1 id="mus-title">
             <span className="mus-hero-rider">仮面ライダー</span>
-            <span className="mus-hero-name">{riderName.replace(/^仮面ライダー/, "")}</span>
+            <span className="mus-hero-name">{jp(riderName.replace(/^仮面ライダー/, ""))}</span>
           </h1>
-          <p className="mus-hero-ultra">{ultraName}</p>
+          <p className="mus-hero-ultra">{jp(ultraName)}</p>
           <ol className="mus-calls" aria-label="変身音声">
             {META_UNITAS_CALL_LINES.map((units, index) => (
               <li key={index} data-chant={units.length > 1 || undefined}>
@@ -356,10 +356,29 @@ export function MetaUnitasSaga() {
         <header className="mus-head rxs-reveal">
           <h2 id="mus-overview-title">概要</h2>
         </header>
-        <div className="mus-copy mus-overview-copy rxs-reveal">
-          {META_UNITAS_SAGA.overview.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
+        <div className="mus-overview-body">
+          {/* The art column stays beside the record while it reads (the
+              Rexonance site's pinned key visual; decorative). */}
+          <figure className="mus-overview-art" aria-hidden="true">
+            <img
+              src={META_UNITAS_ARTWORK.ultra.src}
+              srcSet={metaUnitasImage("ultra").srcSet}
+              sizes="(max-width: 1099px) 0px, 34vw"
+              alt=""
+              width={META_UNITAS_ARTWORK.ultra.width}
+              height={META_UNITAS_ARTWORK.ultra.height}
+              loading="lazy"
+              decoding="async"
+            />
+            <i className="mus-hero-seam" style={{ ["--seam" as string]: 1 }} />
+            <i className="mus-hero-seam" style={{ ["--seam" as string]: 2 }} />
+            <i className="mus-hero-seam" style={{ ["--seam" as string]: 3 }} />
+          </figure>
+          <div className="mus-copy mus-overview-copy rxs-reveal">
+            {META_UNITAS_SAGA.overview.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -380,7 +399,7 @@ export function MetaUnitasSaga() {
         aria-labelledby="mus-performance-title"
       >
         <header className="mus-head rxs-reveal">
-          <h2 id="mus-performance-title">{META_UNITAS_PERFORMANCE.title}</h2>
+          <h2 id="mus-performance-title">{jp(META_UNITAS_PERFORMANCE.title)}</h2>
         </header>
         <MetaUnitasPerformance />
       </section>
@@ -509,7 +528,7 @@ export function MetaUnitasSaga() {
         </header>
         <ul className="mus-weapons rxs-reveal" aria-label="専用武装">
           {META_UNITAS_SAGA.arsenal.map((weapon) => (
-            <li key={weapon}>{weapon}</li>
+            <li key={weapon}>{jp(weapon)}</li>
           ))}
         </ul>
         <div className="mus-copy mus-arsenal-note rxs-reveal">
@@ -529,7 +548,7 @@ export function MetaUnitasSaga() {
         <div className="mus-finisher-list">
           {META_UNITAS_SAGA.finishers.map((finisher, index) => (
             <article key={finisher.name} className="mus-finisher rxs-reveal" data-tier={index}>
-              <h3>{finisher.name}</h3>
+              <h3>{jp(finisher.name)}</h3>
               <ol className="mus-finisher-calls" aria-label={`${finisher.name} 発動音声`}>
                 {finisher.calls.map((call) => (
                   <li key={call}>
@@ -561,8 +580,8 @@ export function MetaUnitasSaga() {
           decoding="async"
         />
         <div className="mus-end-names">
-          <p>{riderName}</p>
-          <p>{ultraName}</p>
+          <p>{jp(riderName)}</p>
+          <p>{jp(ultraName)}</p>
         </div>
         <nav className="mus-end-doors" aria-label="ほかのページへ">
           <a href="#top">
