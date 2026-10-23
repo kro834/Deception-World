@@ -99,10 +99,12 @@ test("reactor sheets crop only the two exact atlas masks and retain the dark soc
     { x: layers.x, y: layers.y, w: layers.w, h: layers.h },
     { x, y, w: Math.ceil(right - x), h: Math.ceil(bottom - y) },
   );
-  assert.equal(layers.x, 227);
-  assert.equal(layers.y, 218);
-  assert.equal(layers.w, 115);
-  assert.equal(layers.h, 139);
+  // Owner (2026-10-23): SAMで切り抜きを改善 — the coil is its blades and pendant
+  // now (SAM's mask), no longer a 97 px circle: a box a pixel or four smaller.
+  assert.equal(layers.x, 228);
+  assert.equal(layers.y, 219);
+  assert.equal(layers.w, 114);
+  assert.equal(layers.h, 135);
   // Owner (2026-10-18): a fourth, temporary sheet carries the bare disc;
   // it is released (0×0) once laid into the primed socket.
   assert.equal(canvases.length, 4);
