@@ -131,12 +131,6 @@
   font-size: 12px;
 }
 
-.dream-page.dream-page .dream-back-link small {
-  color: var(--ts-ginnezu);
-  font-size: 12px;
-  line-height: 1.2;
-}
-
 .dream-page.dream-page .dream-site-header .side-panel-trigger.ios26-glass {
   border: 1px solid var(--ts-hair);
   background: var(--ts-velvet) !important;
@@ -177,14 +171,6 @@
   border-inline-end: 1px solid var(--ts-hair-soft);
 }
 
-.dream-page.dream-page .dream-chapter-nav a small {
-  color: var(--ts-kin);
-  font-family: var(--ts-display);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-}
-
 .dream-page.dream-page .dream-chapter-nav a > span {
   font-family: var(--ts-display);
   font-size: 15px;
@@ -200,10 +186,6 @@
     linear-gradient(var(--ts-shu) 0 0) 50% calc(100% - 3px) / calc(100% - 28px) 2px no-repeat,
     linear-gradient(180deg, rgb(110 44 53 / 22%), transparent 70%);
   box-shadow: none;
-}
-
-.dream-page.dream-page .dream-chapter-nav a[aria-current="location"] small {
-  color: var(--ts-kin-light);
 }
 
 .dream-page.dream-page .dream-chapter-nav a:focus-visible,
@@ -634,23 +616,6 @@
   letter-spacing: 0.4em;
 }
 
-.dream-page.dream-page .dream-section-heading > p {
-  grid-area: kicker;
-  margin: 0 0 10px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-  text-shadow: none;
-  padding-left: 0;
-  border-left: 0;
-}
-
-.dream-page.dream-page .dream-section-heading > p::before {
-  display: none;
-}
-
 .dream-page.dream-page .dream-section-heading h2 {
   grid-area: title;
   margin: 0;
@@ -666,19 +631,6 @@
   letter-spacing: 0.12em;
   text-shadow: none;
   word-break: auto-phrase;
-}
-
-/* The count reads on the kicker's line, set off by a hairline. */
-.dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
-  grid-area: count;
-  align-self: start;
-  margin: 0 0 10px;
-  padding-left: 14px;
-  border-left: 1px solid var(--ts-hair);
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.24em;
 }
 
 .dream-page.dream-page .dream-section-heading > .film-boundary-line {
@@ -904,32 +856,6 @@
   display: none;
 }
 
-.dream-page.dream-page .dream-character-number {
-  position: relative;
-  inset: auto;
-  z-index: 1;
-  grid-column: 1;
-  grid-row: 1;
-  align-self: end;
-  justify-self: start;
-  margin: 0 0 14px 14px;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border: 0;
-  border-radius: 3px;
-  color: var(--ts-kinari);
-  background: var(--ts-shu-deep);
-  box-shadow:
-    inset 0 0 0 2px var(--ts-shu-deep),
-    inset 0 0 0 3px rgb(244 236 220 / 70%);
-  font-family: var(--ts-display);
-  font-size: 13px;
-  font-weight: 800;
-}
-
 .dream-page.dream-page .dream-character-copy {
   display: contents;
 }
@@ -996,47 +922,6 @@
   word-break: auto-phrase;
 }
 
-.dream-page.dream-page .dream-character-copy i {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  margin: 4px 0 0;
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-style: normal;
-  letter-spacing: 0.24em;
-}
-
-.dream-page.dream-page .dream-character-copy em {
-  grid-column: 1 / -1;
-  grid-row: 4;
-  justify-self: start;
-  margin: 14px 0 0;
-  padding: 6px 0 4px;
-  border-bottom: 1px solid var(--ts-kin);
-  color: var(--ts-kin-light);
-  font-family: var(--ts-text);
-  font-size: 13px;
-  font-style: normal;
-  letter-spacing: 0.2em;
-}
-
-.dream-page.dream-page .dream-character-copy em::before {
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 8px;
-  background: var(--ts-shu);
-  rotate: 45deg;
-  vertical-align: 1px;
-}
-
-.dream-page.dream-page .dream-character-copy em::after {
-  content: " ›";
-  color: var(--ts-kin);
-}
-
 /* The ring is drawn inside the arch: the grid touches the section edges, and
    the section's content-visibility clips anything painted outside it. */
 .dream-page.dream-page .dream-character-grid button:focus-visible {
@@ -1046,11 +931,6 @@
 .dream-page.dream-page .dream-character-grid button:focus-visible img {
   outline: 3px solid var(--ts-fuji);
   outline-offset: -5px;
-}
-
-.dream-page.dream-page .dream-character-grid button:focus-visible .dream-character-copy em {
-  border-bottom-color: var(--ts-fuji);
-  color: var(--ts-kinari);
 }
 
 .dream-page.dream-page [data-dream-reveal][data-dream-visible="true"] {
@@ -1163,24 +1043,6 @@
   transform: none;
 }
 
-/* The file number is an 海老茶 seal, like the cast numbers. */
-.dream-page.dream-page .dream-dolminence-number {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--ts-kin);
-  border-radius: 2px;
-  color: var(--ts-kin-hi);
-  background: var(--ts-ebicha-deep);
-  box-shadow: inset 0 0 0 1px rgb(244 236 220 / 30%);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-}
-
 .dream-page.dream-page .dream-dolminence-copy {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1210,33 +1072,6 @@
   letter-spacing: 0.08em;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
-}
-
-.dream-page.dream-page .dream-dolminence-copy i {
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-style: normal;
-  letter-spacing: 0.18em;
-  overflow-wrap: anywhere;
-}
-
-.dream-page.dream-page .dream-dolminence-copy em {
-  justify-self: start;
-  margin-top: 8px;
-  padding-bottom: 3px;
-  border-bottom: 1px solid var(--ts-hair);
-  color: var(--ts-zoge);
-  font-family: var(--ts-text);
-  font-size: 13px;
-  font-style: normal;
-  letter-spacing: 0.16em;
-  white-space: nowrap;
-}
-
-.dream-page.dream-page .dream-dolminence-copy em::after {
-  content: " ›";
-  color: var(--ts-kin);
 }
 
 .dream-page.dream-page .dream-dolminence-grid button:focus-visible {
@@ -1712,7 +1547,7 @@
 
 .dream-page.dream-page
   .dream-dossier-copy
-  :is(.dream-dossier-title > p, .dream-profile-grid dt, .dream-ability-list h4) {
+  :is( .dream-profile-grid dt, .dream-ability-list h4) {
   color: var(--ts-kin-light);
   font-family: var(--ts-latin);
 }
@@ -1731,17 +1566,6 @@
 
 .dream-page.dream-page .dream-dossier-copy :is(.dream-ability-list p, .dream-dossier-title small) {
   color: var(--ts-zoge);
-}
-
-.dream-page.dream-page .dream-dossier-sections section > header span {
-  color: var(--ts-kin-light);
-}
-
-.dream-page.dream-page .dream-dossier-title b {
-  color: var(--ts-ginnezu);
-  font-size: 12px;
-  font-family: var(--ts-latin);
-  letter-spacing: 0.24em;
 }
 
 .dream-page.dream-page .dream-dossier-sections h3 {
@@ -2104,13 +1928,6 @@
     max-width: 38em;
     line-height: 2;
   }
-
-  .dream-page.dream-page .dream-dossier-visuals figcaption {
-    overflow: hidden;
-    letter-spacing: 0.08em;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 @media (max-width: 800px) {
@@ -2169,19 +1986,9 @@
     padding-bottom: 9px;
   }
 
-  /* The film name alone where the centre column is short; the kicker line
-     returns from 761px. */
-  .dream-page.dream-page .dream-site-header > p > span {
-    display: none;
-  }
-
   .dream-page.dream-page .dream-site-header > p b {
     font-size: 14px;
     letter-spacing: 0.18em;
-  }
-
-  .dream-page.dream-page .dream-dolminence-copy em {
-    white-space: normal;
   }
 
   .dream-page.dream-page .dream-chapter-nav {
@@ -2191,11 +1998,6 @@
   .dream-page.dream-page .dream-chapter-nav a > span {
     font-size: 13px;
     letter-spacing: 0.04em;
-  }
-
-  .dream-page.dream-page .dream-chapter-nav a small {
-    font-size: 12px;
-    letter-spacing: 0.12em;
   }
 
   .dream-page.dream-page .dream-chapter-nav a[aria-current="location"] {
@@ -2211,10 +2013,6 @@
       "act title"
       "act count"
       "rule rule";
-  }
-
-  .dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
-    margin: 8px 0 0;
   }
 
   /* ドルミネンス must hold one line inside the framed playbill. */
@@ -2343,14 +2141,6 @@
     padding: 4px 4px 4px 0;
   }
 
-  /* The seal stays inside the portrait's inner frame on the narrow slip. */
-  .dream-page.dream-page .dream-dolminence-number {
-    top: 16px;
-    left: 16px;
-    width: 30px;
-    height: 30px;
-  }
-
   .dream-page.dream-page .dream-dolminence-grid button img {
     outline-offset: -4px;
   }
@@ -2367,10 +2157,6 @@
 
   .dream-page.dream-page .dream-dolminence-copy {
     gap: 4px;
-  }
-
-  .dream-page.dream-page .dream-dolminence-copy i {
-    letter-spacing: 0.1em;
   }
 
   .dream-page.dream-page .dream-dolminence-copy small {
@@ -2553,8 +2339,6 @@
   .dream-page.dream-page
     :is(
       .dream-story-case-status,
-      .dream-character-number,
-      .dream-dolminence-number,
       .dream-character-copy b,
       .dream-act-mark
     ) {

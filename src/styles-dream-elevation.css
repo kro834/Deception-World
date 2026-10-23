@@ -84,16 +84,6 @@
     object-fit: cover;
   }
 
-  .dream-page.dream-page .dream-dossier-visuals figcaption {
-    position: static;
-    padding: 10px 14px;
-    border-top: 1px solid var(--ts-hair-soft);
-    color: var(--ts-zoge);
-    background: var(--ts-ink);
-    font-family: var(--ts-latin);
-    font-size: 12px;
-  }
-
   .dream-page.dream-page .dream-dossier-visuals figure::after {
     display: none;
   }
@@ -285,13 +275,7 @@
   .dream-page.dream-page
     :is(
       .dream-character-copy b,
-      .dream-character-number,
-      .dream-character-copy em,
-      .dream-dolminence-grid button img,
-      .dream-dolminence-number,
-      .dream-hero-actions small,
-      .dream-footer > a small
-    ) {
+      .dream-dolminence-grid button img) {
     transition:
       outline-color 220ms ease,
       border-color 220ms ease,
@@ -317,26 +301,12 @@
     translate: 0 6px;
   }
 
-  .dream-page.dream-page .dream-character-grid button:hover .dream-character-number {
-    background-color: var(--ts-shu);
-  }
-
-  .dream-page.dream-page .dream-character-grid button:hover .dream-character-copy em {
-    border-bottom-color: var(--ts-kin-light);
-    color: var(--ts-kin-light);
-  }
-
   .dream-page.dream-page .dream-dolminence-grid > article:hover {
     border-color: var(--ts-kin);
   }
 
   .dream-page.dream-page .dream-dolminence-grid > article:hover button img {
     outline-color: rgb(200 164 92 / 60%);
-  }
-
-  .dream-page.dream-page .dream-dolminence-grid > article:hover .dream-dolminence-number {
-    color: var(--ts-kinari);
-    background-color: var(--ts-shu-deep);
   }
 
   .dream-page.dream-page :is(.dream-hero-actions a, .dream-footer > a):hover {
@@ -386,12 +356,7 @@
   .dream-page.dream-page
     :is(
       .dream-character-copy b,
-      .dream-character-number,
-      .dream-character-copy em,
       .dream-dolminence-grid button img,
-      .dream-dolminence-number,
-      .dream-hero-actions small,
-      .dream-footer > a small,
       .dream-poster-controls button b
     ) {
     transition: none;
@@ -402,12 +367,7 @@ html[data-world-effects="economy"]
   .dream-page.dream-page
   :is(
     .dream-character-copy b,
-    .dream-character-number,
-    .dream-character-copy em,
     .dream-dolminence-grid button img,
-    .dream-dolminence-number,
-    .dream-hero-actions small,
-    .dream-footer > a small,
     .dream-poster-controls button b
   ) {
   transition: none;

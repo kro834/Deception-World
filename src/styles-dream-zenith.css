@@ -946,7 +946,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-record-card nav a:fi
   /* 人物一覧's filters show from 1101px — an iPad on its side (36px). */
   html[data-family="dream"]
     main.dream-page.dream-page
-    :is(.dream-roster-filters button, .dream-roster-bulk) {
+    :is(.dream-roster-filters button) {
     min-height: 44px;
   }
 }
@@ -1133,21 +1133,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-ch
 }
 
 /* ----------------------------------------------------------------
-   24. ドルミネンス cards in four columns (1101px and up, and an iPad on
-       its side): the spec badge sat at the top right at its full length
-       and ran over the file's number seal at the top left (by 11–43px on
-       the three PUNCH · KICK cards). The badge keeps clear of the seal and
-       wraps after the dot (or the colon) when the card is too narrow.
-   ---------------------------------------------------------------- */
-html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-spec-badge {
-  max-width: calc(100% - 84px);
-  line-height: 1.45;
-  text-align: end;
-  /* 「DEVICE: ルパンガンナー」 breaks after the colon, never inside the name. */
-  word-break: keep-all;
-}
-
-/* ----------------------------------------------------------------
    25. A glossary term beside a longer neighbour: its dd (a grid) was
        stretched to the row and shared the spare height between its
        passages, so カオスカプセム's two lines stood 60px apart. The
@@ -1183,15 +1168,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-glossary dd {
     .dream-roster
     article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"]) {
     grid-template-columns: auto minmax(0, 1fr) clamp(180px, 26vw, 260px);
-  }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-roster
-    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
-    .dream-roster-seal {
-    /* inside the record's column, clear of the art's edge */
-    right: calc(clamp(180px, 26vw, 260px) + clamp(16px, 1.8vw, 22px) + 10px);
   }
 
   html[data-family="dream"]

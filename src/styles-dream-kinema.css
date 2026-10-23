@@ -43,10 +43,6 @@
   .dream-page.dream-page .dream-section-heading {
     grid-template-columns: auto auto minmax(0, 1fr);
   }
-
-  .dream-page.dream-page .dream-section-heading > span:not(.film-text-scan) {
-    justify-self: start;
-  }
 }
 
 /* ---------- 1b. The world guide band ---------- */
@@ -607,12 +603,13 @@
   cursor: pointer;
 }
 
-.dream-page.dream-page .dream-dossier-switcher button small {
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+/* Two companies, read by the gap between them: the three cast files, then
+   the four agents (Owner, 2026-10-23: no CAST 0N / AGENT 0N codes). */
+.dream-page.dream-page
+  .dream-dossier-switcher
+  button[data-kind="cast"]
+  + button[data-kind="agent"] {
+  margin-inline-start: 14px;
 }
 
 .dream-page.dream-page .dream-dossier-switcher button[aria-current="true"] {
@@ -644,15 +641,6 @@
   padding: 9px 12px;
   border: 1px solid rgb(200 164 92 / 34%);
   background: rgb(22 14 27 / 86%);
-}
-
-.dream-page.dream-page .dream-dossier-plate-controls > span {
-  margin-right: 4px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
 }
 
 .dream-page.dream-page .dream-dossier-plate-controls button {
@@ -1014,19 +1002,6 @@
       animation-range: entry 10% entry 75%;
     }
 
-    /* 第三幕: each file's number is pressed like a seal. */
-    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
-        [data-dialog-open]
-      )
-      .dream-page.dream-page
-      .dream-dolminence-grid
-      > article
-      .dream-dolminence-number {
-      animation: kn-press linear both;
-      animation-timeline: --ts-in;
-      animation-range: entry 30% entry 85%;
-    }
-
     /* An opened chapter can be many screens tall. Its entry progress
        must not keep the whole reading sheet dim until its top scrolls away.
        Retain the named view timeline for the child's scale-only seal. */
@@ -1194,17 +1169,6 @@
   from {
     opacity: 0;
     scale: 1.06;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-
-@keyframes kn-press {
-  from {
-    opacity: 0;
-    scale: 1.45;
   }
   to {
     opacity: 1;

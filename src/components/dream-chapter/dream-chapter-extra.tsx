@@ -37,8 +37,6 @@ const CORNERS = Object.fromEntries(
   DREAM_ARCHIVE_CORNERS.map((corner) => [corner.id, corner]),
 ) as Record<DreamArchiveCornerId, DreamArchiveCorner>;
 
-const pad2 = (value: number) => String(value).padStart(2, "0");
-
 const KANJI_DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"] as const;
 
 /** 1 → 一, 12 → 十二, 40 → 四十: the seals' numerals (as the programme's captions). */
@@ -174,34 +172,29 @@ function CornerHeading({ id }: { id: DreamArchiveCornerId }) {
   );
 }
 
-/** A fold's 48px row: HUD mark, title (with its reading), count and the drawn ＋ cell. */
+/** A fold's 48px row: its mark (a chapter numeral, or a leaf's name), its title and the
+ *  drawn ＋ cell. No tallies (Owner, 2026-10-23). */
 function FoldSummary({
   mark,
   title,
   titleId,
-  reading,
-  count,
 }: {
-  mark: string;
+  mark?: string;
   title?: string;
   titleId?: string;
-  reading?: string;
-  count: string;
 }) {
   return (
     <summary>
-      <span className="dream-archive-fold-mark" lang="en">
-        {mark}
-      </span>
+      {mark ? (
+        <span className="dream-archive-fold-mark" lang="en">
+          {mark}
+        </span>
+      ) : null}
       {title ? (
         <span className="dream-archive-fold-title" id={titleId}>
           {title}
-          {reading ? <small lang="en">{reading}</small> : null}
         </span>
       ) : null}
-      <span className="dream-archive-fold-count" lang="en">
-        {count}
-      </span>
       <i aria-hidden="true" />
     </summary>
   );
@@ -228,12 +221,7 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
                 id={`dream-chronicle-case-${episode.no}`}
                 open={index === 0}
               >
-                <FoldSummary
-                  mark={`CASE ${episode.no}`}
-                  title={episode.title}
-                  reading={episode.reading}
-                  count={`${pad2(events.length)} EVENTS`}
-                />
+                <FoldSummary mark={episode.no} title={episode.title} />
                 <DreamStoryBacklinks no={episode.no} from="chronicle" />
                 <ol className="dream-chronicle-list">
                   {events.map((event) => (
@@ -311,12 +299,7 @@ export function DreamRelations({ id }: { id: "relations" }) {
           const titleId = `dream-relations-c${index + 1}`;
           return (
             <details key={circle} className="dream-archive-fold" open={index === 0}>
-              <FoldSummary
-                mark={`CIRCLE ${pad2(index + 1)}`}
-                title={circle}
-                titleId={titleId}
-                count={`${pad2(ties.length)} TIES`}
-              />
+              <FoldSummary title={circle} titleId={titleId} />
               <ol className="dream-relations-list" aria-labelledby={titleId}>
                 {ties.map((tie) => (
                   <li key={`${tie.a}/${tie.b}/${tie.label.lines}`} className="dream-relations-tie">
@@ -350,11 +333,7 @@ export function DreamArsenal({ id }: { id: "arsenal" }) {
       <div className="dream-arsenal-groups" data-dream-reveal>
         {DREAM_ARSENAL.map((group) => (
           <details key={group.group} className="dream-archive-fold">
-            <FoldSummary
-              mark={group.kicker}
-              title={group.group}
-              count={`${pad2(group.entries.length)} ENTRIES`}
-            />
+            <FoldSummary title={group.group} />
             <dl className="dream-arsenal-list">
               {group.entries.map((entry) => (
                 <div key={entry.name}>
@@ -379,18 +358,11 @@ export function DreamArsenal({ id }: { id: "arsenal" }) {
 export function VoicesLeaf() {
   return (
     <div className="dream-voices">
-      <p className="dream-archive-leaf-label" lang="en">
-        {DREAM_ARCHIVE_LABELS.voices} — {pad2(DREAM_VOICES.length)} SPEAKERS
-      </p>
       <ol className="dream-voices-grid" data-dream-reveal>
         {DREAM_VOICES.map((voice, index) => (
           <li key={voice.speaker}>
             <details className="dream-archive-fold" open={index === 0}>
-              <FoldSummary
-                mark={pad2(index + 1)}
-                title={voice.speaker}
-                count={`${pad2(voice.quotes.length)} LINES`}
-              />
+              <FoldSummary title={voice.speaker} />
               <ol className="dream-voices-list">
                 {voice.quotes.map((quote) => (
                   <li key={quote.lines}>
@@ -422,9 +394,8 @@ export function DossierSupplement({ id, after }: { id: string; after: number }) 
   const passages = DREAM_DOSSIER_SUPPLEMENT[id as keyof typeof DREAM_DOSSIER_SUPPLEMENT];
   if (!passages?.length) return null;
   return (
-    <section className="dream-archive-record">
+    <section className="dream-archive-record" data-after={after}>
       <header>
-        <span>{pad2(after + 1)}</span>
         <h3 lang="en">{DREAM_ARCHIVE_LABELS.record}</h3>
       </header>
       {passages.map((passage) => (
@@ -440,9 +411,6 @@ export function RosterSupplement({ id }: { id: string }) {
   if (!passages?.length) return null;
   return (
     <div className="dream-archive-add dream-roster-archive">
-      <p className="dream-archive-eyebrow" lang="en">
-        {DREAM_ARCHIVE_LABELS.record}
-      </p>
       {passages.map((passage) => (
         <ArchivePassage key={passage.lines} passage={passage} className="dream-roster-profile" />
       ))}
@@ -494,15 +462,11 @@ export function AgentAdditions() {
   return (
     <div className="dream-archive-additions" data-dream-reveal>
       <details className="dream-archive-fold is-leaf">
-        <FoldSummary
-          mark={DREAM_ARCHIVE_LABELS.additions}
-          count={`${pad2(DREAM_AGENT_ADDITIONS.length)} CODES`}
-        />
+        <FoldSummary mark={DREAM_ARCHIVE_LABELS.additions} />
         <ol className="dream-agent-roster">
           {DREAM_AGENT_ADDITIONS.map((agent) => (
             <li key={agent.code}>
               <span className="dream-agent-code">
-                <small>CODE</small>
                 <b className={agent.code.length > 2 ? "is-long" : undefined}>
                   {agentCode(agent.code)}
                 </b>
@@ -567,9 +531,6 @@ export function FactionSupplement({ id }: { id: string }) {
   if (!statements?.length && !members?.length && !paragraphs?.length) return null;
   return (
     <div className="dream-archive-add dream-faction-archive">
-      <p className="dream-archive-eyebrow" lang="en">
-        {DREAM_ARCHIVE_LABELS.record}
-      </p>
       {statements?.map((passage) => (
         <ArchivePassage
           key={passage.lines}
@@ -613,10 +574,7 @@ export function GlossaryIndex() {
   return (
     <div className="dream-glossary-index" data-dream-reveal>
       <details className="dream-archive-fold is-leaf">
-        <FoldSummary
-          mark={DREAM_ARCHIVE_LABELS.index}
-          count={`${pad2(DREAM_GLOSSARY_INDEX.length)} WORDS`}
-        />
+        <FoldSummary mark={DREAM_ARCHIVE_LABELS.index} />
         <dl className="dream-glossary">
           {DREAM_GLOSSARY_INDEX.map((entry) => (
             <div key={entry.term}>

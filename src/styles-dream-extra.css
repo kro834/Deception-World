@@ -21,35 +21,6 @@
   color: var(--ts-zoge);
 }
 
-.dream-page.dream-page .dream-archive-eyebrow {
-  margin: 0 0 6px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.24em;
-}
-
-/* A leaf's label: the HUD word, a count and a rule to the edge. */
-.dream-page.dream-page .dream-archive-leaf-label {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 16px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.3em;
-}
-
-.dream-page.dream-page .dream-archive-leaf-label::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--ts-hair-soft);
-}
-
 /* Speech in a narrative run: the speaker in gilt before the words. */
 .dream-page.dream-page .dream-archive-said {
   white-space: pre-line;
@@ -800,9 +771,14 @@
   }
 }
 
-/* ---------- VOICES leaf (inside 名台詞) ---------- */
+/* ---------- VOICES leaf (inside 名台詞) ----------
+   The speakers' folds follow the tanzaku band across a hairline: the band
+   is the owner's selection, the folds the source's (Owner, 2026-10-23: no
+   VOICES — 16 SPEAKERS label). */
 .dream-page.dream-page .dream-voices {
   margin-top: clamp(28px, 4vw, 44px);
+  padding-top: clamp(20px, 2.6vw, 28px);
+  border-top: 1px solid var(--ts-hair-soft);
 }
 
 /* Open folds do not shift their neighbours' summaries (align start). */
@@ -1480,14 +1456,9 @@ html[data-world-effects="economy"] .dream-page.dream-page .dream-archive-fold > 
   .dream-page.dream-page
     :is(
       .dream-archive-add,
-      .dream-archive-leaf-label::after,
       .dream-arsenal-list > div,
       .dream-atlas-wave
     ) {
     border-color: CanvasText;
-  }
-
-  .dream-page.dream-page .dream-archive-leaf-label::after {
-    background: CanvasText;
   }
 }

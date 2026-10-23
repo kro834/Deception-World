@@ -274,18 +274,13 @@ try {
         "#glossary .dream-archive-fold > summary",
       ),
     );
-    checks.push(
-      await contrast(
-        page,
-        "#glossary .dream-archive-fold-count",
-        "#glossary .dream-archive-fold > summary",
-      ),
-    );
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the fold has no tally;
+    // its name is checked again in the open state instead.
     await page.locator("#glossary .dream-archive-fold > summary").click();
     checks.push(
       await contrast(
         page,
-        "#glossary .dream-archive-fold-count",
+        "#glossary .dream-archive-fold-mark",
         "#glossary .dream-archive-fold > summary",
       ),
     );

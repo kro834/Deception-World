@@ -198,9 +198,11 @@ test("scroll-linked motion runs on named timelines under the full gate", () => {
     assert.match(declaration(body, "animation-range"), /^(?:entry|cover) \d+% (?:entry|cover) \d+(?:%|px)$/, selector);
     names.add(body.match(/animation: (kn-[\w-]+)/)[1]);
   }
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // kn-press went with the Dolminence cards' number seals.
   assert.deepEqual(
     [...names].sort(),
-    ["kn-brush", "kn-case-press", "kn-drawer", "kn-hang", "kn-lock", "kn-press", "kn-stamp", "kn-tie", "kn-unfurl"],
+    ["kn-brush", "kn-case-press", "kn-drawer", "kn-hang", "kn-lock", "kn-stamp", "kn-tie", "kn-unfurl"],
   );
   // Every view timeline this sheet declares is named, block-axis and fully gated.
   const declared = rules.filter(({ body }) => declaration(body, "view-timeline"));

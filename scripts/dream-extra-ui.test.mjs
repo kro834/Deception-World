@@ -291,12 +291,15 @@ test("the supplements sit after the owner's text at every mount point", () => {
     /\{entry\.said \? <QuoteFigure text=\{entry\.said\} by=\{entry\.by\} \/> : null\}\s*<GlossarySupplement term=\{entry\.term\} \/>/,
   );
   assert.match(page, /<\/dl>\s*<GlossaryIndex \/>\s*<\/section>/);
-  // The archive's eyebrows are the data file's HUD labels, in English.
-  for (const label of ["record", "voices", "additions", "index"]) {
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // Only the labels that name something remain: the dossier's RECORD section and the two
+  // folds (ADDITIONAL AGENTS, INDEX). The RECORD eyebrows and the VOICES leaf label gave way
+  // to hairlines.
+  for (const label of ["record", "additions", "index"]) {
     assert.match(extra, new RegExp(`DREAM_ARCHIVE_LABELS\\.${label}`));
   }
-  assert.match(extra, /<p className="dream-archive-eyebrow" lang="en">/);
-  assert.match(extra, /<p className="dream-archive-leaf-label" lang="en">/);
+  assert.doesNotMatch(extra, /DREAM_ARCHIVE_LABELS\.voices/);
+  assert.doesNotMatch(extra, /dream-archive-eyebrow|dream-archive-leaf-label/);
 });
 
 test("the 目次 closes 第四幕 with the four corners and keeps 附録; phones get three link rows", () => {

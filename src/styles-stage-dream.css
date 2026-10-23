@@ -1160,38 +1160,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-character-copy small
     font-size: 13px;
     letter-spacing: 0.06em;
   }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-character-grid
-    > article:not(:first-child)
-    .dream-character-copy
-    i {
-    grid-row: 4;
-    letter-spacing: 0.12em;
-  }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-character-grid
-    > article:not(:first-child)
-    .dream-character-copy
-    em {
-    grid-row: 5;
-    margin-top: 8px;
-    letter-spacing: 0.08em;
-  }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-character-grid
-    > article:not(:first-child)
-    .dream-character-number {
-    width: 30px;
-    height: 30px;
-    margin: 0 0 10px 10px;
-    font-size: 12px;
-  }
 }
 
 /* The thumbnails hang as small frames on the same wall. */
@@ -1297,22 +1265,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-grid butt
     letter-spacing: 0.02em;
     line-height: 1.5;
   }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy i {
-    letter-spacing: 0.06em;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-copy em {
-    white-space: normal;
-    letter-spacing: 0.06em;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-dolminence-number {
-    top: 12px;
-    left: 12px;
-    width: 28px;
-    height: 28px;
-  }
 }
 
 /* ----------------------------------------------------------------
@@ -1410,15 +1362,6 @@ html[data-family="dream"]
   article[aria-labelledby="dream-roster-machiavel"] {
   --dr-art: url("/dream-chapter-poster-thumb-15.jpeg");
   --dr-art-pos: 50% 0;
-}
-
-/* The seal sits on the art's foot, clear of the face. */
-html[data-family="dream"]
-  main.dream-page.dream-page
-  .dream-roster
-  article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
-  .dream-roster-seal {
-  top: calc(var(--dr-band) - 34px);
 }
 
 @media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
@@ -1554,10 +1497,6 @@ html[data-family="dream"] main.dream-page.dream-page .dream-agent-code {
   background:
     radial-gradient(75% 65% at 50% 25%, rgb(224 102 79 / 22%), transparent 75%), rgb(74 29 39 / 75%);
   box-shadow: inset 0 1px 0 rgb(243 224 176 / 16%);
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-agent-code small {
-  color: var(--dr-shu-text);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-agent-code b {
@@ -2162,15 +2101,6 @@ html[data-family="dream"]
     --dr-art-wide:
       linear-gradient(90deg, rgb(27 17 32 / 40%), transparent 30%),
       url("/dream-chapter-poster-15-delivery.webp") 50% 50% / cover no-repeat;
-  }
-
-  html[data-family="dream"]
-    main.dream-page.dream-page
-    .dream-roster
-    article:is([aria-labelledby="dream-roster-bell"], [aria-labelledby="dream-roster-machiavel"])
-    .dream-roster-seal {
-    top: clamp(16px, 1.8vw, 22px);
-    right: calc(clamp(104px, 11vw, 150px) + 14px);
   }
 
   html[data-family="dream"]
