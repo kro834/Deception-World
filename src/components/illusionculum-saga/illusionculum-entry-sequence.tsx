@@ -42,6 +42,16 @@ const CHIPS = Array.from({ length: 36 }, (_, i) => {
   ] as const;
 });
 
+/** The plate groups as bands of the figure (top %, bottom %, start ms):
+ * legs, waist, chest and arms, shoulders, head and halo — bottom first. */
+const BANDS = [
+  [62, 100, 150],
+  [41, 63, 520],
+  [24, 42, 860],
+  [14, 25, 1160],
+  [0, 15, 1420],
+] as const;
+
 const seat = (side: "left" | "right") => {
   const orb = ILLUSIONCULUM_ORBS[side];
   return {
@@ -86,18 +96,26 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
               />
             ))}
           </span>
-          <span
-            className="ice-entry-cells"
-            style={{ ["--ice-cutout" as string]: `url("${ILLUSIONCULUM_ENTRY_FIGURE}")` }}
-          />
-          <img
-            className="ice-entry-real"
-            src={ILLUSIONCULUM_ENTRY_FIGURE}
-            alt=""
-            width={960}
-            height={1440}
-            decoding="async"
-          />
+          {/* The plates, group by group from the legs up (the calls' order):
+              each band's nanite cells build up from its bottom off the body,
+              the formed plate drops onto the undersuit and locks with a line
+              of light. */}
+          {BANDS.map(([top, bottom, start], index) => (
+            <span
+              key={index}
+              className="ice-entry-band"
+              style={{
+                ["--top" as string]: `${top}%`,
+                ["--bottom" as string]: `${100 - bottom}%`,
+                ["--start" as string]: `${start}ms`,
+                ["--ice-cutout" as string]: `url("${ILLUSIONCULUM_ENTRY_FIGURE}")`,
+              }}
+            >
+              <span className="ice-entry-band-cells" />
+              <img src={ILLUSIONCULUM_ENTRY_FIGURE} alt="" width={960} height={1440} decoding="async" />
+              <i className="ice-entry-band-lock" />
+            </span>
+          ))}
           <span className="ice-entry-core" />
           {(["left", "right"] as const).map((side) => (
             <span key={side} className={`ice-entry-orb is-${side}`} style={seat(side)}>

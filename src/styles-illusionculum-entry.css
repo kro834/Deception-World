@@ -167,7 +167,7 @@
   object-position: 50% 0;
   opacity: 0;
   transform-origin: 50% 40%;
-  animation: ice-real 760ms cubic-bezier(0.5, 0, 0.2, 1) 1050ms both;
+  animation: ice-whole 300ms ease 2000ms both;
 }
 
 .ice-entry-core {
@@ -388,6 +388,127 @@
   .ice-entry-cells,
   .ice-entry-chips,
   .ice-entry-core {
+    display: none;
+  }
+}
+
+/* ---------- The plates forming, group by group ---------- */
+.ice-entry-band {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(var(--top) -10% var(--bottom) -10%);
+}
+
+.ice-entry-band-cells,
+.ice-entry-band > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The cells: dark chips with lit edges inside the plates' silhouette,
+   built up from the band's bottom, held forward of the body. */
+.ice-entry-band-cells {
+  display: block;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 4px, rgb(2 3 10) 4px 6px),
+    repeating-linear-gradient(0deg, transparent 0 4px, rgb(2 3 10) 4px 6px),
+    repeating-linear-gradient(90deg, rgb(166 230 255 / 70%) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(0deg, rgb(233 184 102 / 60%) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #1b2236, #2a2418 50%, #2b1a2a);
+  mask: var(--ice-cutout) 50% 0 / contain no-repeat;
+  -webkit-mask: var(--ice-cutout) 50% 0 / contain no-repeat;
+  opacity: 0;
+  animation: ice-band-cells 900ms cubic-bezier(0.3, 0.6, 0.2, 1) var(--start) both;
+}
+
+.ice-entry-band > img {
+  object-fit: contain;
+  object-position: 50% 0;
+  opacity: 0;
+  animation: ice-band-plate 520ms cubic-bezier(0.5, 0, 0.2, 1) calc(var(--start) + 620ms) both;
+}
+
+.ice-entry-band-lock {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: calc(100% - var(--bottom));
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgb(166 230 255 / 85%), rgb(233 184 102 / 85%), transparent);
+  opacity: 0;
+  animation: ice-band-lock 420ms ease-out calc(var(--start) + 1040ms) both;
+}
+
+@keyframes ice-band-cells {
+  0% {
+    opacity: 0.85;
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(-5%) scale(1.06);
+  }
+  55% {
+    opacity: 0.95;
+    clip-path: inset(0 0 0 0);
+    transform: translateY(-5%) scale(1.06);
+  }
+  85% {
+    opacity: 0.6;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+@keyframes ice-band-plate {
+  from {
+    opacity: 0;
+    transform: translateY(-5%) scale(1.06);
+  }
+  45% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ice-band-lock {
+  0% {
+    opacity: 0;
+    scale: 0.4 1;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.1 1;
+  }
+}
+
+@keyframes ice-whole {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ice-entry-band {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ice-entry-band-cells,
+  .ice-entry-band-lock {
     display: none;
   }
 }

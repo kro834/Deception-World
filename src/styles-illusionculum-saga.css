@@ -1958,13 +1958,42 @@
   }
 }
 
-.rxs-page.rxs-page.ics-page .ics-heading-plate {
-  display: none;
-}
-
-@media (min-width: 1100px) {
+/* Phones and tablets: the same plate, smaller, at the head's right end. */
+@media (max-width: 1099.98px) {
   .rxs-page.rxs-page.ics-page .ics-heading-plate {
-    display: block;
+    position: relative;
+    flex: none;
+    width: clamp(88px, 22vw, 168px);
+    aspect-ratio: 3 / 2;
+    margin-left: auto;
+    align-self: center;
+    border: 1px solid var(--ics-line);
+    background: url("/illusionculum-saga-20261023/cutout-standard-480.webp") no-repeat var(--ics-plate-pos, 50% 30%) /
+        var(--ics-plate-size, 220%) auto,
+      radial-gradient(80% 90% at 50% 40%, rgb(47 79 216 / 30%), transparent 70%), var(--ics-ink-2);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-heading-plate[data-plate="figure"] {
+    --ics-plate-pos: 50% 12%;
+    --ics-plate-size: 90%;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-heading-plate[data-plate="helm"] {
+    --ics-plate-pos: 50% 8%;
+    --ics-plate-size: 300%;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-heading-plate[data-plate="orb"] {
+    background-image: url("/illusionculum-saga-20261023/orb-left-standard-256.webp"),
+      radial-gradient(80% 90% at 50% 40%, rgb(47 79 216 / 30%), transparent 70%);
+    --ics-plate-pos: 50% 50%;
+    --ics-plate-size: auto 120%;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-heading-plate[data-plate="reactor"] {
+    --ics-plate-pos: 50% 29%;
+    --ics-plate-size: 340%;
   }
 }
 
@@ -2021,4 +2050,11 @@
 
 .rxs-page.rxs-page.ics-page .ics-nb {
   white-space: nowrap;
+}
+
+@media (max-width: 1099.98px) {
+  .rxs-page.rxs-page.ics-page .ics-heading h2 {
+    font-size: clamp(30px, 6.6vw, 52px);
+    white-space: nowrap;
+  }
 }
