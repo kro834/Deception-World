@@ -31,7 +31,7 @@ import {
   farFromChipPose,
   planFarFromSwarm,
 } from "@/lib/far-from-entry-swarm.js";
-import { farFromEntryPlan } from "./far-from-entry-plan";
+import { farFromEntryPlan, T } from "./far-from-entry-plan";
 import { FAR_FROM_WIREFRAME_ENTRY } from "@/lib/far-from-wireframe-entry";
 import { WIRE_UNIT, decodeWireMesh, triangulateWireMesh } from "@/lib/far-from-wireframe-mesh";
 
@@ -57,9 +57,10 @@ import { WIRE_UNIT, decodeWireMesh, triangulateWireMesh } from "@/lib/far-from-w
      suit-up's (far-from-wireframe-layer.ts): its real outline traced from its
      seam, its mesh (far-from-wireframe-entry.ts, made from this cut by
      scripts/build-far-from-wireframe.mjs) drawn out as its micro-tiles come
-     due, the tiles (9 px squares of the artwork, in dark glass: the crystals'
-     light held back) locking in place under it, the wire fading as the plate
-     fits — plate after plate in the cascade's order (far-from-entry-calls) —
+     due, and the micro-tiles (9 px squares of the artwork, in dark glass:
+     the crystals' light held back) streaming in along it from the seam side
+     as nanites and locking (owner, 2026-10-24: 「ナノマシンによる生成をワイヤー
+     フレームと組み合わせて」), the wire fading as the plate fits — plate after plate in the cascade's order (far-from-entry-calls) —
      and a seated plate is painted whole onto the settled canvas;
    - on FAR FROM DEUS！ the reactor ignites and the crystals' light
      (lights.webp) runs out through the whole body from it, with a bloom
@@ -104,7 +105,7 @@ export type FarFromEntryEngine = {
  * FADE from FADE_AT before the plate fits. */
 export const FAR_FROM_ENTRY_WIRE = Object.freeze({
   trace: 140,
-  lead: 90,
+  lead: 200,
   grow: 30,
   fadeAt: 50,
   fade: 90,
@@ -136,6 +137,9 @@ const RING_ARCS = 48;
 /** The body's occupancy grid, for the chips behind it. */
 const OCC_W = 64;
 const OCC_H = 116;
+/** A flying tile's own light under it (the tiles' tone rows: ice, pink,
+ * white, gold). */
+const TONE_CSS = ["#79e8ff", "#ff8fd8", "#f4fbff", "#ffce78"] as const;
 /** The kits' cells: the tumble cell, the mip cell, the mip's x/y per tone,
  * flat by kit (4 tones each). */
 const KIT_CELL = Int16Array.from(FAR_FROM_ENTRY_KITS, (kit) => kit.cell);
@@ -514,6 +518,57 @@ export function createFarFromEntryEngine({
         counters[0] += 1;
       }
       flight.restore();
+      for (let i = first; i < past; i += 1) {
+        const land = plan.land[i];
+        const from = plan.start[i];
+        const u = (t - from) / (land - from);
+        if (u <= 0 || u >= 1) continue;
+        if (counters[0] >= budget) return;
+        const e = 1 - (1 - u) * (1 - u) * (1 - u);
+        const x = (plan.dx[i] + plan.ox[i] * (1 - e)) * s;
+        const y = (plan.dy[i] + plan.oy[i] * (1 - e)) * s;
+        const tw = plan.tw[i];
+        const th = plan.th[i];
+        if (u < 0.62) {
+          // A nanite mote, streaming in: its own tile of the art, small, with
+          // its light under it, so even now the suit's edge is the artwork's.
+          const size = T * s * (0.3 + 0.4 * (u / 0.62));
+          const w = size * (tw / T);
+          const h = size * (th / T);
+          const px = x + (tw * s - w) / 2;
+          const py = y + (th * s - h) / 2;
+          flight.globalAlpha = Math.min(1, u * 5) * 0.55;
+          flight.fillStyle = TONE_CSS[plan.tone[i]];
+          flight.fillRect(
+            Math.round(px) - 1,
+            Math.round(py) - 1,
+            Math.round(w) + 2,
+            Math.round(h) + 2,
+          );
+          flight.globalAlpha = Math.min(1, u * 5) * 0.9;
+          flight.drawImage(atlas, plan.sx[i], plan.sy[i], tw, th, px, py, w, h);
+          counters[0] += 2;
+        } else {
+          // It turns into its piece of the plate and locks: whole and on the
+          // pixel grid, fading up.
+          const v = (u - 0.62) / 0.38;
+          const x0 = Math.round(x);
+          const y0 = Math.round(y);
+          flight.globalAlpha = 0.55 + 0.45 * v;
+          flight.drawImage(
+            atlas,
+            plan.sx[i],
+            plan.sy[i],
+            tw,
+            th,
+            x0,
+            y0,
+            Math.round(x + tw * s) - x0,
+            Math.round(y + th * s) - y0,
+          );
+          counters[0] += 1;
+        }
+      }
       // The wire over it: the lines drawn by now (those being drawn bright),
       // fading as the plate fits.
       const wire = wireOf(p);

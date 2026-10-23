@@ -91,6 +91,14 @@ export const FAR_FROM_WIRE_TIMING = Object.freeze({
   helmAhead: 0.022,
 });
 
+/** The same over the nanite build: the interior a cell's flight ahead of
+ * the tiles it bounds (ASSEMBLY_BEATS' flight .05), the outline ahead of it. */
+export const FAR_FROM_WIRE_OVERLAY_TIMING = Object.freeze({
+  ...FAR_FROM_WIRE_TIMING,
+  lead: 0.056,
+  helmAhead: 0,
+});
+
 /** The wire's look: line widths (CSS px) and the light of each kind. */
 export const FAR_FROM_WIRE_STYLE = Object.freeze({
   outline: 1.15,
@@ -226,6 +234,10 @@ export type FarFromWireInput = {
   readonly gold?: CanvasImageSource | null;
   /** The form meshes to prepare (the chain's keys and "standard"). */
   readonly forms?: readonly string[];
+  /** Over the nanite build (FAR FROM, 2026-10-24: 「ナノマシンによる生成を
+   * ワイヤーフレームと組み合わせて」): only the wire, the facets' light, the
+   * scans' lines, the ribs and the rim; the swarm paints the plates. */
+  readonly overlay?: boolean;
 };
 
 export type FarFromWireLayer = {
@@ -344,7 +356,9 @@ function tileMesh(piece: Piece, plan: Plan): WireMesh | null {
 export function* prepareFarFromWireframe(
   input: FarFromWireInput,
 ): Generator<undefined, FarFromWireLayer | null, unknown> {
-  const T = FAR_FROM_WIRE_TIMING;
+  // Over the swarm the wire leads the cells' whole flight, so they stream
+  // in along it.
+  const T = input.overlay ? FAR_FROM_WIRE_OVERLAY_TIMING : FAR_FROM_WIRE_TIMING;
   const { plan, pieces, document } = input;
   const { cols, rows, tile } = plan;
   // The plan's tiles by cell: when each lands, and whose it is.
@@ -699,8 +713,9 @@ export function* prepareFarFromWireframe(
   }
   const make = (w: number, h: number) =>
     Object.assign(document.createElement("canvas"), { width: w, height: h });
-  const rawSheet = make(atlasW, atlasH);
-  const finSheet = make(atlasW, atlasH);
+  // (Over the swarm no art is cut: the nanites paint it.)
+  const rawSheet = input.overlay ? make(1, 1) : make(atlasW, atlasH);
+  const finSheet = input.overlay ? make(1, 1) : make(atlasW, atlasH);
   const scratch = make(1, 1);
   const rc = rawSheet.getContext("2d");
   const fc = finSheet.getContext("2d");
@@ -723,7 +738,7 @@ export function* prepareFarFromWireframe(
       context.closePath();
     }
   };
-  for (const plate of plates) {
+  for (const plate of input.overlay ? [] : plates) {
     yield;
     const { x, y, w, h, ax, ay } = plate;
     for (const [target, raw] of [
@@ -1087,7 +1102,7 @@ export function* prepareFarFromWireframe(
     // The art: finished plates whole; plates whose group is being scanned,
     // finished behind the front and raw ahead; plates filling, through
     // their filled facets.
-    for (let k = 0; k < plates.length; k += 1) {
+    for (let k = 0; k < (input.overlay ? 0 : plates.length); k += 1) {
       const plate = plates[k];
       if (q < plate.fillStart) continue;
       const group = groups[groupOf[k]];
@@ -1305,8 +1320,8 @@ export function* prepareFarFromWireframe(
     reset();
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = 1;
-    context.drawImage(from, 0, 0, W, H);
-    if (fill > 0) {
+    if (!input.overlay) context.drawImage(from, 0, 0, W, H);
+    if (fill > 0 && !input.overlay) {
       context.save();
       context.beginPath();
       let any = false;
@@ -1385,5 +1400,7 @@ export function* prepareFarFromWireframe(
 
 /** The engine's generation hook (RexonanceAssemblyConfig.generation). */
 export const farFromWireGeneration = Object.freeze({
+  // Over the nanite build (owner, 2026-10-24): the swarm stays.
+  overlay: true,
   prepare: prepareFarFromWireframe,
 });
