@@ -1151,7 +1151,8 @@ html[data-family="world"]:root
 
 /* ----------------------------------------------------------------
    7. HUD plates: corner ticks and a lit hairline on the consoles that
-      had none (the rider console, the world column, the end card)
+      had none (the rider console and the end card; the world column's
+      plate already carries its own)
    ---------------------------------------------------------------- */
 @media (forced-colors: none) {
   html[data-family="world"]:root
@@ -1162,42 +1163,36 @@ html[data-family="world"]:root
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
-    > #story
-    > .world-column
-    > .world-column-content::after,
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
     > .finale-section
     .finale-content::after {
     content: "";
     position: absolute;
     inset: -1px;
     z-index: 3;
+    display: block;
     background: var(--ws-ticks);
     pointer-events: none;
+    /* The Mirage sheet's lock-on (mr-lock) rides these pseudo-elements;
+       the ticks stay still on every tier. */
+    animation: none;
   }
 
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
-    > .rider-console::before,
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > #story
-    > .world-column
-    > .world-column-content::before {
+    > .rider-console::before {
     content: "";
     position: absolute;
     top: -1px;
     left: 22px;
     z-index: 3;
+    display: block;
     width: min(420px, 46%);
     height: 1px;
     background: var(--ws-prism);
     pointer-events: none;
+    animation: none;
   }
 
   /* The end card's frame stands a little off its words. */
@@ -1208,4 +1203,115 @@ html[data-family="world"]:root
     .finale-content::after {
     inset: clamp(-36px, -3vw, -18px) clamp(-56px, -4vw, -20px);
   }
+}
+
+/* ----------------------------------------------------------------
+   8. The rider rail's gesture note: at rest it is read to assistive
+      technology only (the tabs read as tabs; tapping one is plain); while a
+      finger holds the rail, the live status rises under it as the hold's
+      own feedback, then goes again.
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selector {
+  position: relative;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selection-guide:not(#ws-none),
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selection-guide:not(#ws-none)
+  > p:first-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selector:has([data-liquid-held="true"])
+  .rider-selection-guide:not(#ws-none) {
+  top: calc(100% + 8px);
+  right: var(--rider-liquid-safe-inline, 18px);
+  left: var(--rider-liquid-safe-inline, 18px);
+  z-index: 6;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 10px 14px;
+  overflow: visible;
+  border: 1px solid #b9eaff;
+  background: rgb(12 22 30 / 94%);
+  clip-path: none;
+  white-space: normal;
+  pointer-events: none;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-selector:has([data-liquid-held="true"])
+  .rider-selection-guide
+  > [data-rider-selection-status] {
+  min-height: 0;
+  margin: 0;
+  color: #fff;
+  font: 600 13px / 1.6 var(--sw-body);
+}
+
+/* ----------------------------------------------------------------
+   9. The cast wall's exit: the file's chevron cell alone at the foot (the
+      face opens the file too)
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-open
+  > span {
+  justify-content: flex-end;
+}
+
+/* ----------------------------------------------------------------
+   10. The episode pickup: each file is its art, its name and an arrow
+       cell on the name's line (the caption row it replaced read OPEN
+       DOSSIER; the link keeps its aria-label)
+   ---------------------------------------------------------------- */
+html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-item > div {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 14px;
+}
+
+html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-item > div > h3 {
+  grid-column: 1;
+}
+
+html[data-family="world"]:root body #episode-pickup-dialog .episode-pickup-open {
+  grid-column: 2;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }

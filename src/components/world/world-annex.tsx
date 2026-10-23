@@ -242,7 +242,6 @@ function CastPortrait({ entry }: { entry: WorldCastEntry }) {
         <b>
           <NameText value={entry.name} />
         </b>
-        <small lang="en">NO FILE</small>
       </span>
     );
   return (
@@ -314,16 +313,13 @@ function CastFiles() {
         <ChapterOpener no="04" />
         <AnnexHeading id="cast-roster-title" title="人物一覧" />
         <ol className="wa-roster">
-          {WORLD_CAST_ROSTER.map((entry, index) => (
+          {WORLD_CAST_ROSTER.map((entry) => (
             <li key={entry.id}>
               <article
                 className={`wa-plate wa-person is-${kindOf(entry)}`}
                 aria-labelledby={`wa-person-${entry.id}`}
               >
                 <CastPortrait entry={entry} />
-                <span className="wa-index" aria-hidden="true">
-                  {pad(index + 1)}
-                </span>
                 <div className="wa-person-body">
                   {/* A rider name breaks after 仮面ライダー, never inside it
                       (アルゲノ / ム), and keeps its dash company. */}
@@ -359,7 +355,7 @@ function CastFiles() {
                     assets={DOSSIER_ASSETS.get(entry.to) ?? []}
                     aria-label={`${entry.name}の個別資料を開く`}
                   >
-                    <span>OPEN DOSSIER</span>
+                    <span aria-hidden="true" />
                   </GuardedLink>
                 ) : null}
               </article>
@@ -584,7 +580,9 @@ function QuoteRail({ children }: { children: ReactNode }) {
       <div className="wa-transcript-toolbar">
         <p id="world-transcript-help">
           声の記録を綴る。ときどき、その輪郭が乱れる。
-          <small>軽量設定・動きを減らす設定では、全文を表示します。</small>
+          <small className="visually-hidden">
+            軽量設定・動きを減らす設定では、全文を表示します。
+          </small>
         </p>
         <button
           type="button"
@@ -624,7 +622,9 @@ function QuoteRail({ children }: { children: ReactNode }) {
           <output aria-live="polite" aria-atomic="true" aria-label="表示中の名台詞">
             {pad(active + 1)} / {pad(WORLD_QUOTES.length)}
           </output>
-          <span id="world-quotes-help">スワイプ・左右キーで切替</span>
+          <span id="world-quotes-help" className="visually-hidden">
+            スワイプ・左右キーで切替
+          </span>
         </div>
         <button
           type="button"

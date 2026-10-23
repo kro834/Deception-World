@@ -1,3 +1,34 @@
+      const wrapped = ((n % POSTERS.length) + POSTERS.length) % POSTERS.length;
+      if (wrapped !== p) setPrevPoster(p);
+      return wrapped;
+    });
+  };
+
+  const shufflePoster = () => {
+    if (ambientPaused || shuffleActive.current) return;
+    shuffleActive.current = true;
+    setShuffling(true);
+    setLocked(true);
+    const runId = ++shuffleRunId.current;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+
+    const randomBelow = (upperBound: number) => {
+      if (typeof window.crypto?.getRandomValues !== "function") {
+        return Math.floor(Math.random() * upperBound);
+      }
+      const values = new Uint32Array(1);
+      const rejectionLimit = Math.floor(0x1_0000_0000 / upperBound) * upperBound;
+      do {
+        window.crypto.getRandomValues(values);
+      } while (values[0] >= rejectionLimit);
+      return values[0] % upperBound;
+    };
+    const posterSequence = POSTERS.map((_, index) => index).filter((index) => index !== poster);
+    for (let index = posterSequence.length - 1; index > 0; index -= 1) {
+      const swapIndex = randomBelow(index + 1);
+      [posterSequence[index], posterSequence[swapIndex]] = [
+        posterSequence[swapIndex],
         posterSequence[index],
       ];
     }
@@ -298,9 +329,6 @@
               </i>
             </b>
           </p>
-          <span className="film-edition-mark" aria-hidden="true">
-            02
-          </span>
         </div>
         <div className="hero-copy">
           <p className="eyebrow">
@@ -334,12 +362,6 @@
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
-          <div className="film-visual-caption" aria-hidden="true">
-            <span>KEY VISUAL</span>
-            <span>
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </span>
-          </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
             aria-busy={shuffling}
@@ -482,37 +504,3 @@
                 }
                 data-liquid-pointer="true"
                 aria-pressed={locked}
-                aria-label={
-                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
-                }
-                onClick={() => {
-                  cancelPosterShuffle();
-                  setLocked((v) => !v);
-                }}
-              >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  {locked ? (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 8 0v2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
-                        height="10"
-                        rx="2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 7.5-2"

@@ -1,3 +1,24 @@
+                {COLUMNS.map((item, index) => (
+                  <p
+                    key={item.no}
+                    className={`world-column-number world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    コラム{item.no}
+                  </p>
+                ))}
+              </div>
+              <div className="world-column-heading-stack">
+                {COLUMNS.map((item, index) => (
+                  <h3
+                    key={item.no}
+                    id={`world-column-${item.no}`}
+                    className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}
+                    aria-hidden={index !== columnTab}
+                  >
+                    {item.title}
+                  </h3>
+                ))}
               </div>
               <div className="world-column-summary-stack">
                 {COLUMNS.map((item, index) => (
@@ -28,14 +49,9 @@
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index" data-film-reveal>
           <span>02</span>
-          <small>EIGHT RIDERS</small>
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
-          <p className="eyebrow">
-            <span>EIGHT RIDERS / ONE WORLD</span>
-            <i />
-          </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
             <FilmTextScan />
             <RevealText>{RIDERS_TITLE}</RevealText>
@@ -77,7 +93,6 @@
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
             </div>
-            <div className="rider-number">RIDER / {rider.no}</div>
             <div className="rider-copy-block">
               <p className="rider-person">
                 <NameText value={rider.person} />
@@ -90,9 +105,8 @@
                 </span>
               </h3>
               <p className="rider-description">{rider.desc}</p>
-              <div className="rider-line">
+              <div className="rider-line" aria-hidden="true">
                 <span />
-                <b>{rider.name}</b>
               </div>
               <SlideOpenControl
                 className="rider-dossier-open"
@@ -117,14 +131,9 @@
       <section className="records-section" id="records" data-performance-region>
         <div className="section-index" data-film-reveal>
           <span>03</span>
-          <small>NEW RECORDS</small>
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="records-heading">
-          <p className="eyebrow">
-            <span>POWER BEYOND THE BORDER</span>
-            <i />
-          </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RECORDS_TITLE)}>
             <FilmTextScan />
             <RevealText>{RECORDS_TITLE}</RevealText>
@@ -133,14 +142,9 @@
         <section className="episode-archive" aria-labelledby="episode-archive-title">
           <div className="episode-archive-heading">
             <div>
-              <span>EPISODE ARCHIVE</span>
               <h3 id="episode-archive-title">判明済みエピソード</h3>
             </div>
             <div className="episode-archive-meta">
-              <p>
-                <strong>{String(EPISODES.length).padStart(2, "0")}</strong>
-                <span>RECORDS FOUND</span>
-              </p>
               <div className="episode-controls" aria-label="エピソードの表示操作">
                 <button
                   type="button"
@@ -218,12 +222,7 @@
                     <i aria-hidden="true" />
                   </div>
                   <div className="episode-card-copy">
-                    <p>
-                      <span>EPISODE</span>
-                      <b>{ep.no}</b>
-                    </p>
                     <h4>{ep.title}</h4>
-                    <small>IDENTIFIED RECORD</small>
                   </div>
                 </div>
                 <button
@@ -275,7 +274,6 @@
             />
           </div>
           <div className="finale-content">
-            <span>THE WORLD IS WAITING.</span>
             <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(FINALE_TITLE)}>
               <FilmTextScan />
               <RevealText>{FINALE_TITLE}</RevealText>
@@ -365,9 +363,8 @@
         </button>
         <div className="episode-pickup-panel">
           <header className="episode-pickup-heading">
-            <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
+            <small>EPISODE {selectedEpisodePickup?.no ?? "--"}</small>
             <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>
-            <p>IDENTIFIED CHARACTER / RIDER RECORDS</p>
           </header>
           <div className="episode-pickup-grid">
             {selectedEpisodePickup?.pickups
@@ -393,10 +390,8 @@
                         decoding="async"
                         fetchPriority={index === 0 ? "high" : "low"}
                       />
-                      <span>{String(index + 1).padStart(2, "0")}</span>
                     </figure>
                     <div>
-                      <small>EP.{selectedEpisodePickup.no} / PICKUP</small>
                       <h3>
                         {item.displayLines?.map((line) => (
                           <span className="episode-pickup-name-line" key={line}>
@@ -405,7 +400,7 @@
                         )) ?? <NameText value={item.label} />}
                       </h3>
                       <span className="episode-pickup-open" aria-hidden="true">
-                        OPEN DOSSIER <UiVectorIcon kind="arrow-right" size={15} />
+                        <UiVectorIcon kind="arrow-right" size={15} />
                       </span>
                     </div>
                   </GuardedLink>
@@ -470,14 +465,7 @@
           </i>
         </button>
         <div className="world-column-dialog-card">
-          <div className="world-column-dialog-toolbar">
-            <p>
-              WORLD COLUMN
-              <i>FIELD NOTES</i>
-            </p>
-          </div>
           <div className="world-column-dialog-heading">
-            <small>ARCHIVE / {column.kicker}</small>
             <h2 id="world-column-pickup-title">世界観コラム</h2>
           </div>
           <PickupRail ref={pickupRail} />

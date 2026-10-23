@@ -565,9 +565,7 @@ function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" 
       role="img"
       aria-label={`未判明の資料スロット ${index}`}
     >
-      <span>{String(index).padStart(2, "0")}</span>
       <i aria-hidden="true" />
-      <small>UNRESOLVED</small>
       <b>？？？</b>
     </div>
   );
@@ -594,7 +592,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-0"
           style={{ ["--liquid-accent" as string]: "var(--cyan)" }}
         >
-          <small>FRONT / 01</small>
           <b>六詠</b>
         </button>
         <button
@@ -606,7 +603,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-1"
           style={{ ["--liquid-accent" as string]: "var(--red)" }}
         >
-          <small>REVERSE / 02</small>
           <b>管理外</b>
         </button>
         <button
@@ -618,7 +614,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-2"
           style={{ ["--liquid-accent" as string]: "#69df74" }}
         >
-          <small>RELATED / 03</small>
           <b>その他</b>
         </button>
         <button
@@ -630,7 +625,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-3"
           style={{ ["--liquid-accent" as string]: "#ed667e" }}
         >
-          <small>DOGS / 04</small>
           <b>犬</b>
         </button>
       </div>
@@ -1853,9 +1847,6 @@ export function WorldHome() {
               </i>
             </b>
           </p>
-          <span className="film-edition-mark" aria-hidden="true">
-            02
-          </span>
         </div>
         <div className="hero-copy">
           <p className="eyebrow">
@@ -1889,12 +1880,6 @@ export function WorldHome() {
         </div>
 
         <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
-          <div className="film-visual-caption" aria-hidden="true">
-            <span>KEY VISUAL</span>
-            <span>
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </span>
-          </div>
           <div
             className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
             aria-busy={shuffling}
@@ -2089,10 +2074,7 @@ export function WorldHome() {
                     </svg>
                   )}
                 </span>
-                <b>
-                  <small>{locked ? "LOCKED" : "AUTO"}</small>
-                  {locked ? "固定中" : "自動切替"}
-                </b>
+                <b>{locked ? "固定中" : "自動切替"}</b>
               </button>
             </div>
             <output
@@ -2111,20 +2093,6 @@ export function WorldHome() {
             <br />
             6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
           </p>
-          <div className="hero-metadata" aria-label="作品情報">
-            <span>
-              <small>FORMAT</small>
-              <b>ORIGINAL MOVIE</b>
-            </span>
-            <span>
-              <small>WORLD</small>
-              <b>SAGA / REALITY</b>
-            </span>
-            <span>
-              <small>STATUS</small>
-              <b>THE STORY CONTINUES</b>
-            </span>
-          </div>
         </div>
         <a className="scroll-cue" href="#story">
           <span>SCROLL TO DESCEND</span>
@@ -2139,15 +2107,10 @@ export function WorldHome() {
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>
           <span>01</span>
-          <small>WORLD / STORY</small>
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="story-layout">
           <div className="story-heading">
-            <p className="eyebrow">
-              <span>THIS IS NOT A DREAM</span>
-              <i />
-            </p>
             <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(STORY_TITLE)}>
               <FilmTextScan />
               <RevealText>{STORY_TITLE}</RevealText>
@@ -2193,7 +2156,6 @@ export function WorldHome() {
             aria-hidden="true"
           />
           <div className="threat-copy" data-film-reveal>
-            <span className="system-label">MANAGER ARCHIVE</span>
             <h3>
               {managerTab === 0 ? (
                 <>
@@ -2265,7 +2227,6 @@ export function WorldHome() {
                     />
                     <span>I</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>ゼウス</b>
                     <em className="signal-apex" aria-hidden="true">
                       <svg viewBox="0 0 24 24" focusable="false">
@@ -2292,7 +2253,6 @@ export function WorldHome() {
                     />
                     <span>II</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>レックス・ロワ</b>
                   </GuardedLink>
                   <GuardedLink
@@ -2314,7 +2274,6 @@ export function WorldHome() {
                     />
                     <span>III</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>シュザ</b>
                   </GuardedLink>
                   <GuardedLink
@@ -2336,7 +2295,6 @@ export function WorldHome() {
                     />
                     <span>IV</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>レジャス</b>
                   </GuardedLink>
                   <GuardedLink
@@ -2358,7 +2316,6 @@ export function WorldHome() {
                     />
                     <span>V</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>オパス</b>
                   </GuardedLink>
                   <GuardedLink
@@ -2380,7 +2337,6 @@ export function WorldHome() {
                     />
                     <span>VI</span>
                     <i />
-                    <small>OPEN DOSSIER</small>
                     <b>リームー</b>
                   </GuardedLink>
                 </div>
@@ -2412,10 +2368,8 @@ export function WorldHome() {
                       />
                     </span>
                     <span className="dante-copy">
-                      <small>ANOMALOUS RECORD</small>
                       <b>ダンテ／ヴァルグ</b>
                       <em>管理人殺し ／ 第二の犬</em>
-                      <i>ACCESS //</i>
                     </span>
                   </GuardedLink>
                   {Array.from({ length: 5 }, (_, index) => (
@@ -2440,10 +2394,23 @@ export function WorldHome() {
                     assets={["/character-varg-20261021-720.webp"]}
                     aria-label="第二の犬 ダンテ／ヴァルグの人物資料を開く"
                   >
-                    <img src="/character-varg-20261021-360.webp" srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w" sizes="(max-width: 760px) 45vw, 360px" alt="第二の犬・ヴァルグの本来形態" width={1088} height={1445} style={{ objectFit: "contain" }} loading="lazy" decoding="async" />
+                    <img
+                      src="/character-varg-20261021-360.webp"
+                      srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
+                      sizes="(max-width: 760px) 45vw, 360px"
+                      alt="第二の犬・ヴァルグの本来形態"
+                      width={1088}
+                      height={1445}
+                      style={{ objectFit: "contain" }}
+                      loading="lazy"
+                      decoding="async"
+                    />
                     <span className="other-card-shade" aria-hidden="true" />
-                    <span className="other-card-code">SECOND DOG / 02</span>
-                    <span className="other-card-copy"><small>第二の犬・ヴァルグ</small><b>ダンテ／ヴァルグ</b><i>始原的管理外存在</i></span>
+                    <span className="other-card-copy">
+                      <small>第二の犬・ヴァルグ</small>
+                      <b>ダンテ／ヴァルグ</b>
+                      <i>始原的管理外存在</i>
+                    </span>
                   </GuardedLink>
                 </div>
               </div>
@@ -2479,9 +2446,7 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
-                    <span className="other-card-code">RELATED / 01</span>
                     <span className="other-card-copy">
-                      <small>TERRA ALAIN</small>
                       <b>
                         <NameText value="テラ・アレイン" />
                       </b>
@@ -2509,9 +2474,7 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
-                    <span className="other-card-code">RELATED / 02</span>
                     <span className="other-card-copy">
-                      <small>LUNA ALAIN</small>
                       <b>
                         <NameText value="ルナ・アレイン" />
                       </b>
@@ -2538,11 +2501,9 @@ export function WorldHome() {
                       decoding="async"
                     />
                     <span className="other-card-shade" aria-hidden="true" />
-                    <span className="other-card-code">RELATED / 05</span>
                     <span className="other-card-copy">
                       <small>よあけまもりのみこと</small>
                       <b>夜明護尊</b>
-                      <i>人物資料を開く</i>
                     </span>
                   </GuardedLink>
                   {Array.from({ length: 1 }, (_, index) => (
@@ -2557,7 +2518,6 @@ export function WorldHome() {
         <section className="world-column" aria-label="世界観コラム" data-performance-region>
           <div className="world-column-content">
             <div className="world-column-index">
-              <span>WORLD COLUMN</span>
               <ColumnRail ref={columnRail} />
             </div>
             <div
@@ -2619,14 +2579,9 @@ export function WorldHome() {
         <span id="riders-return" className="riders-return-anchor" aria-hidden="true" />
         <div className="section-index" data-film-reveal>
           <span>02</span>
-          <small>EIGHT RIDERS</small>
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="section-title">
-          <p className="eyebrow">
-            <span>EIGHT RIDERS / ONE WORLD</span>
-            <i />
-          </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RIDERS_TITLE)}>
             <FilmTextScan />
             <RevealText>{RIDERS_TITLE}</RevealText>
@@ -2668,7 +2623,6 @@ export function WorldHome() {
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
             </div>
-            <div className="rider-number">RIDER / {rider.no}</div>
             <div className="rider-copy-block">
               <p className="rider-person">
                 <NameText value={rider.person} />
@@ -2681,9 +2635,8 @@ export function WorldHome() {
                 </span>
               </h3>
               <p className="rider-description">{rider.desc}</p>
-              <div className="rider-line">
+              <div className="rider-line" aria-hidden="true">
                 <span />
-                <b>{rider.name}</b>
               </div>
               <SlideOpenControl
                 className="rider-dossier-open"
@@ -2708,14 +2661,9 @@ export function WorldHome() {
       <section className="records-section" id="records" data-performance-region>
         <div className="section-index" data-film-reveal>
           <span>03</span>
-          <small>NEW RECORDS</small>
           <i className="film-boundary-line" aria-hidden="true" />
         </div>
         <div className="records-heading">
-          <p className="eyebrow">
-            <span>POWER BEYOND THE BORDER</span>
-            <i />
-          </p>
           <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(RECORDS_TITLE)}>
             <FilmTextScan />
             <RevealText>{RECORDS_TITLE}</RevealText>
@@ -2724,14 +2672,9 @@ export function WorldHome() {
         <section className="episode-archive" aria-labelledby="episode-archive-title">
           <div className="episode-archive-heading">
             <div>
-              <span>EPISODE ARCHIVE</span>
               <h3 id="episode-archive-title">判明済みエピソード</h3>
             </div>
             <div className="episode-archive-meta">
-              <p>
-                <strong>{String(EPISODES.length).padStart(2, "0")}</strong>
-                <span>RECORDS FOUND</span>
-              </p>
               <div className="episode-controls" aria-label="エピソードの表示操作">
                 <button
                   type="button"
@@ -2809,12 +2752,7 @@ export function WorldHome() {
                     <i aria-hidden="true" />
                   </div>
                   <div className="episode-card-copy">
-                    <p>
-                      <span>EPISODE</span>
-                      <b>{ep.no}</b>
-                    </p>
                     <h4>{ep.title}</h4>
-                    <small>IDENTIFIED RECORD</small>
                   </div>
                 </div>
                 <button
@@ -2866,7 +2804,6 @@ export function WorldHome() {
             />
           </div>
           <div className="finale-content">
-            <span>THE WORLD IS WAITING.</span>
             <h2 data-film-reveal data-text-reveal="heading" aria-label={revealLabel(FINALE_TITLE)}>
               <FilmTextScan />
               <RevealText>{FINALE_TITLE}</RevealText>
@@ -2956,9 +2893,8 @@ export function WorldHome() {
         </button>
         <div className="episode-pickup-panel">
           <header className="episode-pickup-heading">
-            <small>EPISODE {selectedEpisodePickup?.no ?? "--"} / PICKUP</small>
+            <small>EPISODE {selectedEpisodePickup?.no ?? "--"}</small>
             <h2 id="episode-pickup-title">{selectedEpisodePickup?.title ?? "EPISODE PICKUP"}</h2>
-            <p>IDENTIFIED CHARACTER / RIDER RECORDS</p>
           </header>
           <div className="episode-pickup-grid">
             {selectedEpisodePickup?.pickups
@@ -2984,10 +2920,8 @@ export function WorldHome() {
                         decoding="async"
                         fetchPriority={index === 0 ? "high" : "low"}
                       />
-                      <span>{String(index + 1).padStart(2, "0")}</span>
                     </figure>
                     <div>
-                      <small>EP.{selectedEpisodePickup.no} / PICKUP</small>
                       <h3>
                         {item.displayLines?.map((line) => (
                           <span className="episode-pickup-name-line" key={line}>
@@ -2996,7 +2930,7 @@ export function WorldHome() {
                         )) ?? <NameText value={item.label} />}
                       </h3>
                       <span className="episode-pickup-open" aria-hidden="true">
-                        OPEN DOSSIER <UiVectorIcon kind="arrow-right" size={15} />
+                        <UiVectorIcon kind="arrow-right" size={15} />
                       </span>
                     </div>
                   </GuardedLink>
@@ -3061,14 +2995,7 @@ export function WorldHome() {
           </i>
         </button>
         <div className="world-column-dialog-card">
-          <div className="world-column-dialog-toolbar">
-            <p>
-              WORLD COLUMN
-              <i>FIELD NOTES</i>
-            </p>
-          </div>
           <div className="world-column-dialog-heading">
-            <small>ARCHIVE / {column.kicker}</small>
             <h2 id="world-column-pickup-title">世界観コラム</h2>
           </div>
           <PickupRail ref={pickupRail} />

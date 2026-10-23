@@ -1,3 +1,15 @@
+        displayLines: ["仮面ライダールーラー", "ポラリスモード"],
+        src: "/rider-ruler-polaris.webp",
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・ポラリスモード",
+        width: 1023,
+        height: 1537,
+        to: "/characters/dante",
+        hash: "ruler-polaris",
+        assets: ["/character-dante.webp", "/rider-ruler-polaris.webp"],
+      },
+    ],
+  },
   {
     no: "05",
     title: "FARCE",
@@ -47,9 +59,7 @@ function ArchivePlaceholder({ index, tone }: { index: number; tone: "unmanaged" 
       role="img"
       aria-label={`未判明の資料スロット ${index}`}
     >
-      <span>{String(index).padStart(2, "0")}</span>
       <i aria-hidden="true" />
-      <small>UNRESOLVED</small>
       <b>？？？</b>
     </div>
   );
@@ -76,7 +86,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-0"
           style={{ ["--liquid-accent" as string]: "var(--cyan)" }}
         >
-          <small>FRONT / 01</small>
           <b>六詠</b>
         </button>
         <button
@@ -88,7 +97,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-1"
           style={{ ["--liquid-accent" as string]: "var(--red)" }}
         >
-          <small>REVERSE / 02</small>
           <b>管理外</b>
         </button>
         <button
@@ -100,7 +108,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-2"
           style={{ ["--liquid-accent" as string]: "#69df74" }}
         >
-          <small>RELATED / 03</small>
           <b>その他</b>
         </button>
         <button
@@ -112,7 +119,6 @@ const ManagerRail = memo(
           aria-controls="manager-panel-3"
           style={{ ["--liquid-accent" as string]: "#ed667e" }}
         >
-          <small>DOGS / 04</small>
           <b>犬</b>
         </button>
       </div>
@@ -498,21 +504,3 @@ export function WorldHome() {
     riderTabRef.current = returnIndex;
     setInitialRiderTab(returnIndex);
     setRiderTab(returnIndex);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-other") return;
-    setManagerTab(2);
-    syncRail(managerRail.current, 2);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-unmanaged") return;
-    setManagerTab(1);
-    syncRail(managerRail.current, 1);
-  }, [locationHash]);
-
-  useLayoutEffect(() => {
-    if (locationHash !== "manager-archive-dogs") return;
-    setManagerTab(3);
-    syncRail(managerRail.current, 3);

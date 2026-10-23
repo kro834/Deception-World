@@ -316,11 +316,11 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     .map((match) => match[1].replace(/\s+/g, " ").trim())
     .filter((text) => text && !/^[=&|;)(,.:?]/.test(text) && !/=>/.test(text));
   assert.deepEqual(texts, [
-    // rx14 F6: an honest, decorative unpublished-file label; no new lore.
-    "NO FILE",
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — NO FILE on
+    // the vacant plate and OPEN DOSSIER on the exits are gone (the sealed plate
+    // and the chevron cell say them; each exit keeps its aria-label).
     "PROFILE",
     "item.by ? (",
-    "OPEN DOSSIER",
     // 2026-10-12: distinguish the original order from the latest exoneration report.
     "派遣時の任務",
     "件名",
@@ -361,12 +361,15 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
   assert.equal(count('aria-controls="world-quotes-rail"'), 3);
   // rx14 F6 adds only lang=en on the decorative NO FILE tab.
   // Owner (2026-10-21): 06.2 opens on a term index (its nav's aria-label and one href per term).
-  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 74);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — NO FILE's lang
+  // goes with it (74 → 73); the cast numbers' aria-hidden gives way to the exit
+  // chevron's.
+  assert.equal(attrs.filter((attr) => !searchAnchors.includes(attr)).length, 73);
   assert.equal(count('aria-label="用語の索引"'), 1);
   assert.equal(count("href={`#wa-term-${entry.term}`}"), 1);
   assert.equal(count('aria-hidden="true"'), 12);
   assert.equal(count('alt=""'), 5);
-  assert.equal(count('lang="en"'), 6);
+  assert.equal(count('lang="en"'), 5);
   for (const attr of [
     'aria-labelledby="cast-roster-title"',
     'title="人物一覧"',

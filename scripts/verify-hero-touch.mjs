@@ -10,7 +10,9 @@ const browser = await (engine === "webkit" ? webkit : chromium).launch(
 );
 const surfaces = [
   ".hero h1", ".hero-lead", ".hero .primary-action", ".hero .text-action",
-  ".hero-metadata", ".poster-frame", ".film-visual-caption", ".poster-shuffle",
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the metadata strip and
+  // the KEY VISUAL caption are gone from the title stage.
+  ".poster-frame", ".poster-shuffle",
   ".poster-controls button:last-child", ".hero-copy", ".brand",
   ".side-panel-trigger", ".zeus-button",
 ];
