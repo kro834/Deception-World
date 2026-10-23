@@ -259,7 +259,10 @@ test("the per-frame work is bounded (Android): batched strokes and fills, one cl
 test("the engine takes a page's generation; Rexonance has none and keeps its swarm and field", () => {
   assert.match(resonance, /const armourGeneration = config\.generation \?\? null;/);
   assert.match(resonance, /const replaceArmour = Boolean\(armourGeneration && !armourGeneration\.overlay\);/);
-  assert.match(resonance, /replaceArmour\n\s+\? null\n\s+: boundedImage\(import\("\.\/rexonance-assembly-nanites\.js"\)/);
+  assert.match(
+    resonance,
+    /replaceArmour\n\s+\? null\n\s+: boundedImage\(\n\s+importWithRetry\(\(\) => import\("\.\/rexonance-assembly-nanites\.js"\)/,
+  );
   assert.match(resonance, /if \(wire && replaceArmour && seal < 1\) \{/);
   assert.match(resonance, /if \(wire && !replaceArmour\)\n\s+wire\.form\(/);
   // Owner (2026-10-23): ILLUSIONCULUM's opt-in formChange shares the call.
