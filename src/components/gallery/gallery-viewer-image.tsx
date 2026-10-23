@@ -91,7 +91,14 @@ export function GalleryViewerImage({
     const observer = new ResizeObserver(() => {
       const next = readViewport(viewport);
       const previous = viewingPositionRef.current;
-      if (previous && previous.width === next.width && previous.height === next.height) return;
+      if (
+        previous &&
+        previous.width === next.width &&
+        previous.height === next.height &&
+        previous.scrollWidth === next.scrollWidth &&
+        previous.scrollHeight === next.scrollHeight
+      )
+        return;
       viewport.scrollTo({
         ...galleryImageResizePosition(previous, next, artwork),
         behavior: "instant",
@@ -99,6 +106,10 @@ export function GalleryViewerImage({
       viewingPositionRef.current = readViewport(viewport);
     });
     observer.observe(viewport);
+    // WebKit can expose the enlarged canvas one layout after the viewport.
+    // The viewport itself keeps its size, so observe its contents as well.
+    const canvas = viewport.querySelector(".gallery-image-canvas");
+    if (canvas) observer.observe(canvas);
     return () => observer.disconnect();
   }, [zoomed, work.width, work.height]);
 
@@ -155,7 +166,13 @@ export function GalleryViewerImage({
           const previous = viewingPositionRef.current;
           // A browser can clamp scrolling before ResizeObserver runs. Keep the
           // previous geometry until the observer has restored the artwork point.
-          if (previous && (previous.width !== next.width || previous.height !== next.height))
+          if (
+            previous &&
+            (previous.width !== next.width ||
+              previous.height !== next.height ||
+              previous.scrollWidth !== next.scrollWidth ||
+              previous.scrollHeight !== next.scrollHeight)
+          )
             return;
           viewingPositionRef.current = next;
         }}

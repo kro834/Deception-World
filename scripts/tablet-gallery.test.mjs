@@ -17,7 +17,7 @@ function matchesTarget(width, height) {
   return (
     width >= 560 &&
     width <= 1100 &&
-    height >= 501 &&
+    height >= 320 &&
     height <= 650 &&
     width > height &&
     width / height <= 2
@@ -30,10 +30,12 @@ test("tablet viewer CSS parses and targets the intended landscape band", () => {
   );
   assert.match(
     css,
-    /@media \(min-width:\s*560px\)[\s\S]*?\(max-width:\s*1100px\)[\s\S]*?\(min-height:\s*501px\)[\s\S]*?\(max-height:\s*650px\)[\s\S]*?\(orientation:\s*landscape\)[\s\S]*?\(max-aspect-ratio:\s*2\s*\/\s*1\)/,
+    /@media \(min-width:\s*560px\)[\s\S]*?\(max-width:\s*1100px\)[\s\S]*?\(min-height:\s*320px\)[\s\S]*?\(max-height:\s*650px\)[\s\S]*?\(orientation:\s*landscape\)[\s\S]*?\(max-aspect-ratio:\s*2\s*\/\s*1\)/,
   );
   assert.equal(matchesTarget(900, 600), true);
   assert.equal(matchesTarget(639, 540), true);
+  assert.equal(matchesTarget(639, 375), true);
+  assert.equal(matchesTarget(667, 375), true);
   assert.equal(matchesTarget(720, 540), true);
   assert.equal(matchesTarget(390, 844), false);
   assert.equal(matchesTarget(1024, 768), false);

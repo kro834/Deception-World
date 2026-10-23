@@ -144,6 +144,9 @@ try {
         ".gallery-viewer-footer button",
       ];
       selectors.push(
+        ".search-result-card",
+        ".search-result-title",
+        ".dxl-art",
         ".dream-reading-room button",
         ".dream-reading-room select",
         ".dream-reading-room summary",

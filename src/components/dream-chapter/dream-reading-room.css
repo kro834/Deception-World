@@ -78,6 +78,24 @@
     background-color 180ms ease,
     box-shadow 180ms ease;
 }
+/* Native WebKit menulists ignore min-height on phones as well as tablets.
+   Keep native selection, but paint the surface so its hit box respects the
+   existing 44px base and the tablet's 48px minimum. */
+.dream-reading-room select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+.dream-reading-room :is(.dream-reading-position-select, .dream-reading-chapter-select) select {
+  padding-inline: 12px 32px;
+}
 .dream-reading-room button:disabled {
   opacity: 0.4;
   cursor: default;

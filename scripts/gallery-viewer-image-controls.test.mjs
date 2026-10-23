@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import {
   galleryImagePanPosition,
   galleryImageResizePosition,
@@ -14,6 +15,20 @@ const viewport = {
   left: 150,
   top: 250,
 };
+
+test("zoom observes the canvas and waits for extent changes before remembering position", () => {
+  const source = readFileSync(
+    new URL("../src/components/gallery/gallery-viewer-image.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /observer\.observe\(viewport\)/);
+  assert.match(source, /querySelector\("\.gallery-image-canvas"\)/);
+  assert.match(source, /if \(canvas\) observer\.observe\(canvas\)/);
+  assert.match(source, /previous\.scrollWidth === next\.scrollWidth/);
+  assert.match(source, /previous\.scrollHeight === next\.scrollHeight/);
+  assert.match(source, /previous\.scrollWidth !== next\.scrollWidth/);
+  assert.match(source, /previous\.scrollHeight !== next\.scrollHeight/);
+});
 
 test("enlargement centres measured scrollable artwork even when extents are not exactly double", () => {
   assert.deepEqual(galleryImageResizePosition(null, viewport), { left: 150, top: 250 });

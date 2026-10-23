@@ -19,6 +19,20 @@ function parse(name, source) {
   return media;
 }
 
+function styleRules(name, source) {
+  const styles = [];
+  transform({
+    filename: name,
+    code: Buffer.from(source),
+    visitor: {
+      Rule(rule) {
+        if (rule.type === "style") styles.push(rule.value);
+      },
+    },
+  });
+  return styles;
+}
+
 function features(condition, result = []) {
   if (condition.type === "operation") {
     assert.equal(condition.operator, "and", "tablet guard must require every feature");
@@ -113,31 +127,6 @@ function hasPxDeclaration(rule, property, expected) {
   );
 }
 
-function assertTabletGuard(block) {
-  const required = new Map([
-    ["width:greater-than-equal", 560],
-    ["width:less-than-equal", 1366],
-    ["height:greater-than-equal", 501],
-  ]);
-  let coarse = false;
-  for (const query of block.query.mediaQueries) {
-    for (const feature of features(query.condition)) {
-      if (feature.type === "plain" && feature.name === "any-pointer") {
-        coarse ||= feature.value.value === "coarse";
-      }
-      if (feature.type === "range") {
-        const key = `${feature.name}:${feature.operator}`;
-        if (required.has(key)) {
-          assert.equal(pxValue(feature.value), required.get(key), `${key} tablet guard`);
-          required.delete(key);
-        }
-      }
-    }
-  }
-  assert.equal(required.size, 0, "select override carries the complete viewport guard");
-  assert.ok(coarse, "select override requires any-pointer: coarse");
-}
-
 const galleryCss = read("styles-tablet-gallery.css");
 const gallery = parse("styles-tablet-gallery.css", galleryCss);
 const readingCss = read("styles-tablet-reading.css");
@@ -162,6 +151,17 @@ test("touch target overrides parse and require the tablet pointer guard", () => 
       );
     }
   }
+  const dreamSelectTargets = scopedRules(
+    reading,
+    "dream",
+    ["dream-reading-room"],
+    "select",
+    "min-height",
+  );
+  assert.ok(
+    dreamSelectTargets.some((rule) => hasPxDeclaration(rule, "min-height", 48)),
+    "Dream select's 48px minimum stays inside the tablet touch guard",
+  );
 });
 
 test("Dream position label stays 12px", () => {
@@ -173,32 +173,23 @@ test("Dream position label stays 12px", () => {
   );
 });
 
-test("Dream select replaces native menulist under the tablet touch guard", () => {
-  const candidates = [];
-  for (const block of reading) {
-    for (const rule of block.rules) {
-      if (rule.type !== "style") continue;
-      for (const selector of rule.value.selectors) {
+test("Dream select keeps a base custom arrow while its 48px minimum stays tablet-gated", () => {
+  const roomCss = read("components/dream-chapter/dream-reading-room.css");
+  const roomRules = styleRules("dream-reading-room.css", roomCss);
+  const scopedSelectRules = roomRules
+    .filter((rule) =>
+      rule.selectors.some((selector) => {
         const names = selectorText(selector);
-        if (
-          names.includes("dream") &&
-          names.includes("dream-reading-room") &&
-          names.includes("select")
-        ) {
-          candidates.push({ block, declarations: rule.value.declarations.declarations });
-        }
-      }
-    }
-  }
-  const target = candidates.find(({ declarations }) =>
+        return names.includes("dream-reading-room") && names.includes("select");
+      }),
+    )
+    .map((rule) => rule.declarations.declarations);
+  const arrow = scopedSelectRules.find((declarations) =>
     declarations.some((declaration) => declaration.property === "background-image"),
   );
-  assert.ok(target, "Dream reader select has a custom arrow treatment");
-  assertTabletGuard(target.block);
+  assert.ok(arrow, "Dream room select has a component-scoped custom arrow");
 
-  const appearances = target.declarations.filter(
-    (declaration) => declaration.property === "appearance",
-  );
+  const appearances = arrow.filter((declaration) => declaration.property === "appearance");
   assert.ok(
     appearances.some(
       (declaration) => declaration.vendorPrefix?.includes("webkit") && declaration.value === "none",
@@ -210,15 +201,24 @@ test("Dream select replaces native menulist under the tablet touch guard", () =>
     ),
   );
 
-  const padding = target.declarations.find(
+  const paddedSelect = roomRules.find((rule) =>
+    rule.selectors.some((selector) => {
+      const names = selectorText(selector);
+      return (
+        names.includes("dream-reading-position-select") &&
+        names.includes("dream-reading-room") &&
+        names.includes("select")
+      );
+    }),
+  );
+  assert.ok(paddedSelect, "position selector keeps room for the arrow");
+  const padding = paddedSelect.declarations.declarations.find(
     (declaration) => declaration.property === "padding-inline",
   )?.value;
   assert.equal(pxValue(padding.inlineStart), 12);
   assert.equal(pxValue(padding.inlineEnd), 32);
 
-  const arrows = target.declarations.find(
-    (declaration) => declaration.property === "background-image",
-  )?.value;
+  const arrows = arrow.find((declaration) => declaration.property === "background-image")?.value;
   assert.equal(arrows.length, 2, "both chevron strokes are present");
   assert.ok(arrows.every((image) => image.type === "gradient"));
 });

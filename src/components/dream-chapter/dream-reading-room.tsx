@@ -109,7 +109,11 @@ function watchReadingViewport(
   let width = scroller.clientWidth;
   let height = scroller.clientHeight;
   let anchor = captureReadingAnchor(scroller);
+  let resizingAnchor: ReadingAnchor = null;
+  let settling = 0;
   const remember = () => {
+    settling = 0;
+    resizingAnchor = null;
     width = scroller.clientWidth;
     height = scroller.clientHeight;
     anchor = captureReadingAnchor(scroller);
@@ -118,11 +122,22 @@ function watchReadingViewport(
     frame = 0;
     if (disposed) return;
     if (width !== scroller.clientWidth || height !== scroller.clientHeight) {
-      restoreReadingAnchor(scroller, anchor);
+      if (!settling) resizingAnchor = anchor;
+      settling = 3;
+      width = scroller.clientWidth;
+      height = scroller.clientHeight;
+    }
+    if (settling) {
+      // WebKit can finish wrapping the paper after its scrollport has
+      // reached the new size. Keep the old glyph through those layouts;
+      // capturing the intermediate line would silently replace it.
+      restoreReadingAnchor(scroller, resizingAnchor);
       if (pin.current) pin.current.top = scroller.scrollTop;
+      settling -= 1;
     }
     onParagraph(readParagraph(scroller, pin));
-    remember();
+    if (settling) queue();
+    else remember();
   };
   const queue = () => {
     if (!disposed && !frame) frame = requestAnimationFrame(sync);

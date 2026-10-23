@@ -444,6 +444,34 @@ async function gallery(page, add) {
   const originalWorkNumber = await viewer
     .locator("#gallery-viewer-title")
     .evaluate((node) => node.firstChild.textContent.trim());
+  if (process.env.PW_VERIFY_ZOOM === "1") {
+    await viewer.getByRole("button", { name: "2倍で鑑賞", exact: true }).click();
+    await page.waitForFunction(() => {
+      const node = document.querySelector(
+        '.gallery-viewer-image[data-zoomed="true"] .gallery-image-viewport',
+      );
+      return (
+        node &&
+        node.scrollWidth > node.clientWidth &&
+        node.scrollHeight > node.clientHeight &&
+        Math.abs(node.scrollLeft - (node.scrollWidth - node.clientWidth) / 2) <= 2 &&
+        Math.abs(node.scrollTop - (node.scrollHeight - node.clientHeight) / 2) <= 2
+      );
+    });
+    const image = viewer.locator(".gallery-image-viewport");
+    await image.press("ArrowRight");
+    await image.press("ArrowDown");
+    assert.equal(
+      await viewer
+        .locator("#gallery-viewer-title")
+        .evaluate((node) => node.firstChild.textContent.trim()),
+      originalWorkNumber,
+      "zoom arrows pan rather than selecting another work",
+    );
+    await viewer.getByRole("button", { name: "全体を表示", exact: true }).click();
+    await viewer.locator('.gallery-viewer-image[data-zoomed="false"]').waitFor();
+    add({ zoomCentre: "verified", keyboardPan: "same artwork" });
+  }
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     await settle(page);

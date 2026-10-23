@@ -311,7 +311,42 @@ test("ordinary scrolling refreshes the line retained through portrait and split 
     f.flush();
     assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1, `${width}x${height}`);
     assert.equal(f.counts.at(-1), anchor.text.index + 1);
+    f.flush();
+    f.flush();
   }
+  controller.dispose();
+});
+
+test("a late paper reflow keeps the pre-resize glyph after the scrollport stops changing", () => {
+  const f = resizingFixture();
+  f.land(7);
+  const controller = f.mount();
+  f.flush();
+  const anchor = f.captureReadingAnchor(f.scroller);
+  f.resize(900, 454);
+  f.flush();
+  // WebKit may wrap the paper one layout after exposing its final viewport.
+  f.enlargeType();
+  f.flush();
+  assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1);
+  f.flush();
+  assert.equal(f.frames.size, 0, "resize correction stops after settling");
+  controller.dispose();
+});
+
+test("an explicit paragraph jump cancels a pending resize correction", () => {
+  const f = resizingFixture();
+  f.land(7);
+  const controller = f.mount();
+  f.flush();
+  f.resize(900, 454);
+  f.flush();
+  f.land(3);
+  controller.remember();
+  const landing = f.scroller.scrollTop;
+  f.flush();
+  assert.equal(f.scroller.scrollTop, landing);
+  assert.equal(f.counts.at(-1), 3);
   controller.dispose();
 });
 
