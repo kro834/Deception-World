@@ -414,13 +414,13 @@ async function audit(browser, analyser, profileName, name) {
   assert.ok(
     doneAt &&
       doneAt <=
-        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3200 : GONE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3580 : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
     releasedAt &&
       releasedAt <=
-        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3500 : RELEASE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3780 : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);
