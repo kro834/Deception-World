@@ -792,7 +792,7 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <p>05 / ABILITY</p>
-          <h2 id="ffs-authority-title">神の力は、借りない。</h2>
+          <h2 id="ffs-authority-title">究極が極まる</h2>
           <span>FAR FROM DEUSと、Exception World。</span>
         </header>
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="能力" />
