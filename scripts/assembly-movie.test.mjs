@@ -911,6 +911,20 @@ test("placement rules: hidden in the still tiers and with the menu or a dialog o
   assert.match(css, /conic-gradient\(\s*var\(--mc-accent\) calc\(var\(--rzn-movie-p, 0\) \* 1%\)/);
   assert.match(css, /\.rzn-movie\[data-state="playing"\]\s*\.rzn-movie-mini::after/);
   assert.match(css, /\.rzn-movie-toggle\[aria-expanded="true"\]\s*\.rzn-movie-chevron/);
+  // The pill says 読み込み中 and 再読み込み in words beside its glyph (the
+  // buttons' names already: silent to assistive tech), and turns its glyph to
+  // a turning ring and a reload arrow.
+  for (const [state, words] of [
+    ["loading", MOVIE_PLAY_LABELS.loading],
+    ["error", MOVIE_PLAY_LABELS.retry],
+  ]) {
+    const rule = new RegExp(
+      `\\.rzn-movie\\[data-state="${state}"\\]\\s*\\.rzn-movie-pill::after \\{\\s*content: "${words}";\\s*content: "${words}" / "";`,
+    );
+    assert.match(css, rule, state);
+    assert.match(css, new RegExp(`\\.rzn-movie\\[data-state="${state}"\\]\\s*\\.rzn-movie-mini::after \\{`), state);
+  }
+  assert.match(css, /\.rzn-movie\[data-state="error"\]\s*\.rzn-movie-mini::after \{\s*content: "\\21bb";/);
   // The page sheets draw the sheet only: no fixed positioning left in them,
   // and nothing of the old phone dock.
   for (const sheet of ["src/styles-rexonance-editorial.css", "src/styles-far-from-suitup.css"]) {

@@ -257,6 +257,51 @@ html[data-family="special"]
   transform: translate(-50%, -54%);
 }
 
+/* The pill says so in words too, beside its glyph: 読み込み中 while a 再生
+   waits for the scene, 再読み込み when the retries ran out (the sheet's
+   再生 button reads the same). The words are the buttons' names already:
+   the caption is silent to assistive tech (the empty alternative; a
+   browser without it shows the words all the same). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-toggle {
+  order: 2;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:is([data-state="loading"], [data-state="error"])
+  .rzn-movie-pill::after {
+  order: 1;
+  padding: 0 0 0 6px;
+  color: var(--mc-ink);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="loading"]
+  .rzn-movie-pill::after {
+  content: "読み込み中";
+  content: "読み込み中" / "";
+  animation: rzn-movie-wait 1.2s ease-in-out infinite alternate;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="error"]
+  .rzn-movie-pill::after {
+  content: "再読み込み";
+  content: "再読み込み" / "";
+  color: var(--mc-lit);
+}
+
 @property --mc-spin {
   syntax: "<angle>";
   inherits: false;
