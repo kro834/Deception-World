@@ -269,7 +269,8 @@ export function IllusionculumSaga() {
   // The other forms' pictures, decoded in idle time once #forms is near.
   useEffect(() => {
     const target = document.getElementById("forms");
-    if (!target) return;
+    // Phones fetch a form's picture only when it is chosen (memory margin).
+    if (!target || window.matchMedia("(max-width: 767px)").matches) return;
     const sources = FORM_WARM_ORDER.map((key) => ILLUSIONCULUM_ARTWORK[key].src);
     return warmRexonanceStages(target, sources, (source) => {
       const key = FORM_WARM_ORDER.find(
@@ -700,6 +701,8 @@ export function IllusionculumSaga() {
         <img
           className="ics-end-figure"
           src={illusionculumCutout("ultraMore", 960)}
+          srcSet={`${illusionculumCutout("ultraMore", 480)} 480w, ${illusionculumCutout("ultraMore", 960)} 960w`}
+          sizes="(max-width: 767px) 160px, 40vw"
           alt=""
           aria-hidden="true"
           width={ILLUSIONCULUM_CUTOUT_SIZE.width}
