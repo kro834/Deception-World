@@ -1459,7 +1459,7 @@ html[data-world-effects="economy"] .mus-page *::after {
 
 /* The run's distance (（100m）) reads as the figure's unit, a size down. */
 .mus-specs tbody tr[data-dual] td .mus-unit ~ .mus-unit {
-  font-size: 0.62em;
+  font-size: max(12px, 0.62em);
   letter-spacing: 0.04em;
   opacity: 0.78;
 }
