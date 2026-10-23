@@ -302,6 +302,20 @@ html[data-family="special"]
   color: var(--mc-lit);
 }
 
+/* The controller itself could not be loaded (data-failed): only 再読み込み is
+   live, so only it shows — no disabled speeds, seek or 最初から beside it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-failed]
+  :is(.rzn-movie-restart, .rzn-movie-speeds, .rzn-movie-seek, .rzn-movie-toggle) {
+  display: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-failed] .rzn-movie-pill::after {
+  padding-inline-end: 14px;
+}
+
 @property --mc-spin {
   syntax: "<angle>";
   inherits: false;

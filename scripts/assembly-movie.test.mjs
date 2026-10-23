@@ -932,6 +932,11 @@ test("placement rules: hidden in the still tiers and with the menu or a dialog o
     assert.match(css, new RegExp(`\\.rzn-movie\\[data-state="${state}"\\]\\s*\\.rzn-movie-mini::after \\{`), state);
   }
   assert.match(css, /\.rzn-movie\[data-state="error"\]\s*\.rzn-movie-mini::after \{\s*content: "\\21bb";/);
+  // Without its controller only 再読み込み is live, and only it shows.
+  assert.match(
+    css,
+    /\.rzn-movie\[data-failed\]\s*:is\(\.rzn-movie-restart, \.rzn-movie-speeds, \.rzn-movie-seek, \.rzn-movie-toggle\) \{\s*display: none;/,
+  );
   // The page sheets draw the sheet only: no fixed positioning left in them,
   // and nothing of the old phone dock.
   for (const sheet of ["src/styles-rexonance-editorial.css", "src/styles-far-from-suitup.css"]) {
