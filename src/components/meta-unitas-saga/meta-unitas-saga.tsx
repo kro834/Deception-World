@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GuardedLink } from "@/components/load-gate";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import {
@@ -444,32 +444,20 @@ export function MetaUnitasSaga() {
           className="mus-stage-switcher rxs-reveal"
           style={{ ["--mus-accent" as string]: FORM_ACCENTS[stage] }}
         >
-          <div
+          <FormSlider
             ref={stageTabsRef}
-            className="rxs-stage-tabs liquid-swipe-tabs mus-tabs"
-            role="tablist"
-            aria-label="メタ・ウニタスサーガの形態段階"
-            data-liquid-glass="true"
-            data-stage={stage}
-          >
-            <LiquidLens />
-            {META_UNITAS_STAGE_ORDER.map((key) => (
-              <button
-                key={key}
-                id={`mus-stage-tab-${key}`}
-                type="button"
-                role="tab"
-                aria-selected={stage === key}
-                aria-controls="mus-stage-panel"
-                tabIndex={stage === key ? 0 : -1}
-                className={stage === key ? "is-active" : ""}
-                style={{ ["--liquid-accent" as string]: FORM_ACCENTS[key] }}
-                onClick={() => selectStage(key)}
-              >
-                <span>{FORM_LABELS[key]}</span>
-              </button>
-            ))}
-          </div>
+            className="mus-tabs"
+            items={META_UNITAS_STAGE_ORDER.map((key) => ({
+              key,
+              label: FORM_LABELS[key],
+              accent: FORM_ACCENTS[key],
+            }))}
+            value={stage}
+            onSelect={(key) => selectStage(key)}
+            idPrefix="mus-stage-tab"
+            panelId="mus-stage-panel"
+            ariaLabel="メタ・ウニタスサーガの形態段階"
+          />
           <div
             ref={stagePanelRef}
             id="mus-stage-panel"

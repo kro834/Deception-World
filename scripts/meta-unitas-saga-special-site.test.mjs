@@ -276,7 +276,8 @@ test("a11y floors: labels 12 px and up, 44 px targets, focus rings", () => {
     assert.ok(min >= 44, selector);
   }
   assert.match(styles, /\.mus-suitup-error button,\s*\.mus-watch \{\s*min-height: 46px;/);
-  assert.match(styles, /button\[role="tab"\] \{\s*min-height: 48px;/);
+  // Owner (2026-10-24): 「スライダーの形も統一させて」 — both selectors are the shared FormSlider.
+  assert.equal((page + suitup).match(/<FormSlider/g)?.length, 2);
   // The runway is a picture; its calls are read from a list.
   assert.match(suitup, /aria-hidden="true"\s*data-form=\{runwayForm\(stage\)\}/);
   assert.match(suitup, /<ol aria-label="変身音声">/);

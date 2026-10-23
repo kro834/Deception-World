@@ -854,16 +854,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.mus-page .mus-tabs.rxs-stage-tabs > button[role="tab"] {
-  min-height: 48px;
-}
-
-.mus-page .mus-tabs.rxs-stage-tabs > button[role="tab"] span {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-}
-
 .mus-ending-panel {
   display: grid;
   justify-items: center;
@@ -1480,4 +1470,10 @@ html[data-world-effects="economy"] .mus-page *::after {
   .mus-page .mus-table tbody tr[data-self] th:first-child {
     background: linear-gradient(90deg, #1c140d, #0b1214);
   }
+}
+
+/* The auto movie's pill keeps the 44 px touch floor on this page. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.mus-page .rzn-movie :is(.rzn-movie-mini, .rzn-movie-toggle, .rzn-movie-play, .rzn-movie-restart, .rzn-movie-speeds > button) {
+  min-width: 44px;
+  min-height: 44px;
 }
