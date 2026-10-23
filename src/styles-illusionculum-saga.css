@@ -279,30 +279,20 @@
   word-break: keep-all;
 }
 
-/* The shared hero styles every span in the title as its Latin kicker:
-   the name's words are plain text here. */
-.rxs-page.rxs-page.ics-page .ics-hero h1 > span .name-word {
-  display: inline;
-  margin: 0;
-  background: none;
-  filter: none;
-  color: inherit;
-  -webkit-text-fill-color: currentColor;
-  font-size: inherit;
-  font-weight: inherit;
-  letter-spacing: inherit;
-}
-
 .rxs-page.rxs-page.ics-page .ics-hero .ics-title-name {
   color: var(--ics-text-1);
+  font-weight: 800;
   font-size: clamp(34px, 4.2vw, 62px);
   line-height: 1.12;
 }
 
-.rxs-page.rxs-page.ics-page .ics-hero .ics-title-name .name-word:first-child {
+.rxs-page.rxs-page.ics-page .ics-hero .ics-title-prefix {
   display: block;
-  margin-bottom: 0.5em;
+  margin: 0 0 0.5em;
+  background: none;
+  filter: none;
   color: var(--ics-gold-hi);
+  -webkit-text-fill-color: currentColor;
   font-size: 0.42em;
   letter-spacing: 0.32em;
 }
@@ -317,8 +307,15 @@
   line-height: 1.5;
 }
 
-.rxs-page.rxs-page.ics-page .ics-hero .ics-title-ultra .name-word:last-child {
+.rxs-page.rxs-page.ics-page :is(.ics-hero, .ics-footer) .ics-ultra-word {
+  display: inline;
+  margin: 0;
+  background: none;
+  filter: none;
   color: var(--ics-crimson-hi);
+  -webkit-text-fill-color: currentColor;
+  font-size: inherit;
+  letter-spacing: inherit;
 }
 
 /* The calls: a numbered sequence of chips (order is the call's own). */
@@ -907,6 +904,13 @@
   background: rgb(255 255 255 / 3%);
 }
 
+.rxs-page.rxs-page.ics-page .ics-table :is(thead th:first-child, tbody th) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: #070914;
+}
+
 .rxs-page.rxs-page.ics-page .ics-table tbody th {
   color: var(--ics-text-2);
   font-size: 14px;
@@ -939,7 +943,7 @@
 .rxs-page.rxs-page.ics-page .ics-table tr[data-self] th,
 .rxs-page.rxs-page.ics-page .ics-table tr[data-self] td {
   color: var(--ics-text-1);
-  background: linear-gradient(90deg, rgb(47 79 216 / 22%), rgb(47 79 216 / 6%));
+  background: linear-gradient(90deg, rgb(47 79 216 / 22%), rgb(47 79 216 / 6%)), #070914;
 }
 
 .rxs-page.rxs-page.ics-page .ics-table tr[data-self] th {
@@ -954,7 +958,7 @@
 
 .rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] th,
 .rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] td {
-  background: linear-gradient(90deg, rgb(184 31 58 / 22%), rgb(184 31 58 / 6%));
+  background: linear-gradient(90deg, rgb(184 31 58 / 22%), rgb(184 31 58 / 6%)), #070914;
 }
 
 .rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] th {
@@ -1362,10 +1366,6 @@
   text-shadow: 0 2px 24px #000;
 }
 
-.rxs-page.rxs-page.ics-page .ics-footer h2 .name-word:last-of-type {
-  color: var(--ics-crimson-hi);
-}
-
 .rxs-page.rxs-page.ics-page .ics-footer > a {
   min-width: 0;
   min-height: 48px;
@@ -1428,7 +1428,7 @@
     gap: 8px;
     min-height: 0;
     padding-top: 12px;
-    padding-bottom: 88px;
+    padding-bottom: 104px;
   }
 
   .rxs-page.rxs-page.ics-page .ics-hero-visual {
@@ -1441,7 +1441,11 @@
     justify-self: stretch;
     max-width: 620px;
     margin-inline: auto;
-    margin-top: -12%;
+    margin-top: -36px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-figure {
+    mask-image: linear-gradient(180deg, #000 82%, transparent 99%);
   }
 
   .rxs-page.rxs-page.ics-page .ics-overview-body {

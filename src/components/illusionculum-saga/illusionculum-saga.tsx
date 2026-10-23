@@ -81,6 +81,12 @@ const FORM_WARM_ORDER = ["more", "ultra", "ultraMore"] as const;
 
 const isUltra = (key: IllusionculumFormKey) => key === "ultra" || key === "ultraMore";
 
+/** The names' parts for the type: 「仮面ライダー」 set small over the name, and
+ * 「ウルトラ」 in its crimson (the owner's names, never reworded). */
+const RIDER_PREFIX = "仮面ライダー";
+const ULTRA_WORD = "ウルトラ";
+const ultraStem = ILLUSIONCULUM_SAGA.ultraName.slice(0, -ULTRA_WORD.length);
+
 /** A record's articles (装甲・外観, 専用武装, 能力): the title, then the
  * owner's paragraphs; the first article of a chapter may carry a detail. */
 function Articles({
@@ -340,11 +346,15 @@ export function IllusionculumSaga() {
         </div>
         <div className="rxs-hero-copy">
           <h1 id="ics-title">
+            {/* The owner's two names, unchanged: the prefix set small over
+                the name, ウルトラ in its crimson (the words stay one text). */}
             <span className="ics-title-name">
-              <DisplayName value={ILLUSIONCULUM_SAGA.name} />
+              <span className="ics-title-prefix">{RIDER_PREFIX}</span>
+              <DisplayName value={ILLUSIONCULUM_SAGA.name.slice(RIDER_PREFIX.length)} />
             </span>
             <span className="ics-title-ultra">
-              <DisplayName value={ILLUSIONCULUM_SAGA.ultraName} />
+              <DisplayName value={ultraStem} />
+              <span className="ics-ultra-word">{ULTRA_WORD}</span>
             </span>
           </h1>
           <Calls
@@ -658,7 +668,8 @@ export function IllusionculumSaga() {
         </p>
         <div>
           <h2>
-            <DisplayName value={ILLUSIONCULUM_SAGA.ultraName} />
+            <DisplayName value={ultraStem} />
+            <span className="ics-ultra-word">{ULTRA_WORD}</span>
           </h2>
         </div>
         <GuardedLink to="/riders/saga" assets={[]}>
