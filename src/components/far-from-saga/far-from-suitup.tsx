@@ -275,7 +275,6 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
           <div className="rzn-call">
             <p className="rzn-kicker">
               <span>SUIT-UP</span>
-              <span>NANITE ASSEMBLY</span>
             </p>
             <p className="rzn-phase">
               {FAR_FROM_ASSEMBLY_PHASES.map(({ phase, step, label }) => (
@@ -305,10 +304,6 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
             <p className="rzn-readout">
               <b className="rzn-percent">100</b>
               <span>%</span>
-            </p>
-            <p className="rzn-nanites">
-              <small>NANITES</small>
-              <span className="rzn-count">ONLINE</span>
             </p>
             <ol className="rzn-parts">
               {FAR_FROM_ASSEMBLY_PARTS.map((part) => (

@@ -658,7 +658,7 @@ test("budgets and the touch tier are the engine's; the markup is the Rexonance r
     'className="rzn-chip"',
     'className="rzn-part"',
     'className="rzn-percent"',
-    'className="rzn-count"',
+    // Owner (2026-10-23): ファーフロムのランウェイから NANITES / NANITE ASSEMBLY を削除（ワイヤーフレーム生成）。
     'className="rzn-stamp"',
     "src={STILLS[stage]}",
     'src={FAR_FROM_SUIT_UNDERSUIT}',
