@@ -122,7 +122,7 @@ export const P16_STATED = {
   /** P16 against P14 Standard: 140% (2.4倍), then four reductions. */
   standard: (() => {
     const sentence = line("P14 Standardとの比較では");
-    const figures = [...sentence.matchAll(/(\d+(?:\.\d+)?)%/g)].map((match) => Number(match[1]));
+    const figures = (sentence.match(/\d+(?:\.\d+)?(?=%)/g) ?? []).map(Number);
     const times = Number(sentence.match(/(\d+(?:\.\d+)?)倍/)?.[1]);
     return { sentence, figures, times };
   })(),
@@ -179,7 +179,7 @@ export const P16_DESCRIPTIONS: readonly {
 /** The owner's short reading of each unit (the opening lines), quoted. */
 export const ACCEL_TAGLINES: Record<AccelUnitKey, string> = (() => {
   const source = line("単純な処理速度だけでなく");
-  const quoted = [...source.matchAll(/「([^」]+)」/g)].map((match) => match[1]);
+  const quoted = (source.match(/「[^」]+」/g) ?? []).map((item) => item.slice(1, -1));
   const standard = line("第14世代の標準演算加速機構").match(/^(第14世代の標準演算加速機構)/)?.[1];
   if (quoted.length !== 2 || !standard) throw new Error("The unit readings moved");
   return { standard, tuning: quoted[0], p16: quoted[1] };
