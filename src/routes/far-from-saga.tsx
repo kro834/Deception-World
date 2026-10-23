@@ -59,6 +59,18 @@ export const Route = createFileRoute("/far-from-saga")({
         fetchPriority: "high",
         type: "image/webp",
       },
+      // The Latin display face (the title's Latin line, the name's ghost,
+      // the read-outs), 20 KB, ready at first paint so nothing re-sets when
+      // it lands, as the Rexonance route preloads it. The Japanese display
+      // face stays off the first paint's path (the page applies it after
+      // paint, as text= subsets).
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/rexonance-forge-20261016.woff2",
+        crossOrigin: "anonymous",
+      },
     ],
   }),
 });

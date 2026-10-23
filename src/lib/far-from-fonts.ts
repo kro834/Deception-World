@@ -15,7 +15,9 @@
    asks for exactly those, one request a weight: tens of kilobytes rather
    than the unicode-range slices' hundreds. When a view adds characters
    (a console view, the comparison drawer), one refreshed subset replaces
-   the old once it has loaded. Never on the first paint's path; until the
+   the old once it has loaded: the subsets are FontFace objects that join
+   document.fonts loaded (polish sweep, 2026-10-23), so no refresh shows
+   the fallback in between. Never on the first paint's path; until the
    face arrives, and on Save-Data or 2G, the Japanese draws in the system
    gothic behind it in the stack (styles-far-from-saga.css
    --fft-jp-display). */
@@ -62,24 +64,86 @@ export function collectFarFromGlyphs(root: Element): Record<Weight, Set<string>>
 }
 
 type SavingConnection = { saveData?: boolean; effectiveType?: string };
-const applied = new Map<Weight, { glyphs: Set<string>; link: HTMLLinkElement }>();
+type Applied = { glyphs: Set<string>; faces: FontFace[]; link: HTMLLinkElement | null };
+const applied = new Map<Weight, Applied>();
+
+/** The faces a Google Fonts stylesheet declares: each @font-face's first
+ * src url and its unicode-range (a text= subset is one face a weight). */
+export function parseFontFaces(css: string): { url: string; unicodeRange?: string }[] {
+  const faces: { url: string; unicodeRange?: string }[] = [];
+  for (const block of css.match(/@font-face\s*\{[^}]*\}/g) ?? []) {
+    const url = /src:[^;]*?url\(["']?([^"')]+)["']?\)/.exec(block)?.[1];
+    if (!url) continue;
+    const unicodeRange = /unicode-range:\s*([^;]+);/.exec(block)?.[1].trim();
+    faces.push(unicodeRange ? { url, unicodeRange } : { url });
+  }
+  return faces;
+}
+
+/** Retires the subset a successor has replaced (its faces, or its link). */
+function retire(doc: Document, previous: Applied | undefined) {
+  if (!previous) return;
+  for (const face of previous.faces) doc.fonts.delete(face);
+  previous.link?.remove();
+}
 
 /** Applies a subset holding these glyphs (and every earlier one); false
- * when the current subset already holds them all. */
+ * when the current subset already holds them all.
+ *
+ * A text= subset is fetched as a stylesheet's text (the CSS endpoint
+ * allows cross-origin reads) and set as FontFace objects that join
+ * document.fonts only once they have loaded, so a refresh never re-sets
+ * the page's titles in the fallback gothic while the successor is on its
+ * way (a <link> re-declared the face: the hero grew and shrank by a line
+ * each time, a layout shift of 0.1). The first subset shows the fallback
+ * until it lands, as display=swap did. The whole family (past MAX_GLYPHS)
+ * stays a <link>, its unicode-range slices fetched as the text needs
+ * them; so does a subset whose stylesheet could not be read. */
 function apply(doc: Document, weight: Weight, glyphs: Set<string>): boolean {
   const current = applied.get(weight);
   if (current && [...glyphs].every((char) => current.glyphs.has(char))) return false;
   const union = new Set([...(current?.glyphs ?? []), ...glyphs]);
   const text = [...union].sort().join("");
-  const link = doc.createElement("link");
-  link.rel = "stylesheet";
-  link.href = farFromDisplayFontsUrl(weight, union.size > MAX_GLYPHS ? undefined : text);
-  link.dataset.farFromFonts = String(weight);
-  // The previous subset stays until its successor has loaded: no flash.
-  const previous = current?.link;
-  if (previous) link.onload = () => previous.remove();
-  doc.head.append(link);
-  applied.set(weight, { glyphs: union, link });
+  const subset = union.size <= MAX_GLYPHS && typeof FontFace === "function";
+  const href = farFromDisplayFontsUrl(weight, subset ? text : undefined);
+  const next: Applied = { glyphs: union, faces: [], link: null };
+  applied.set(weight, next);
+  const link = () => {
+    const element = doc.createElement("link");
+    element.rel = "stylesheet";
+    element.href = href;
+    element.dataset.farFromFonts = String(weight);
+    // The previous subset stays until its successor has loaded: no flash.
+    element.onload = () => retire(doc, current);
+    doc.head.append(element);
+    next.link = element;
+  };
+  if (!subset) {
+    link();
+    return true;
+  }
+  fetch(href, { mode: "cors" })
+    .then((response) => (response.ok ? response.text() : Promise.reject(response.status)))
+    .then((css) => {
+      const faces = parseFontFaces(css).map(
+        ({ url, unicodeRange }) =>
+          new FontFace(FAR_FROM_DISPLAY_FAMILY, `url(${url}) format("woff2")`, {
+            weight: String(weight),
+            display: "swap",
+            ...(unicodeRange ? { unicodeRange } : {}),
+          }),
+      );
+      if (!faces.length) return Promise.reject(new Error("no faces"));
+      return Promise.all(faces.map((face) => face.load())).then(() => {
+        for (const face of faces) doc.fonts.add(face);
+        next.faces = faces;
+        retire(doc, current);
+      });
+    })
+    .catch(() => {
+      // The stylesheet could not be read or loaded: the browser's own way.
+      if (applied.get(weight) === next) link();
+    });
   return true;
 }
 
