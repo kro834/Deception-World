@@ -113,8 +113,11 @@ test("Extreme P14 stays focused on its own expansion and fixation architecture",
   assert.match(component, /可能性は増やす。/);
   assert.match(component, /答えは一つ。/);
   assert.doesNotMatch(component, /同じP14。|到達点は、異なる。/);
-  assert.match(component, /P14 \/ EXPANSION/);
-  assert.match(component, /P14 \/ FIXATION/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the pair reads
+  // by its arrow and its two titles (the P14 / EXPANSION, P14 / FIXATION chips went).
+  assert.doesNotMatch(component, /P14 \/ EXPANSION|P14 \/ FIXATION/);
+  assert.match(component, /勝ち筋を、実行できる形へ。/);
+  assert.match(component, /<span className="exo-arrow" aria-hidden="true">/);
   assert.match(component, /変換効率・応答・安定率の個別数値は未公表/);
   assert.match(component, /変換効率・応答・安定率の個別数値は未公表です/);
   assert.match(component, /20,000YOPS/);

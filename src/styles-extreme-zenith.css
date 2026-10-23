@@ -1634,3 +1634,70 @@ html[data-family="special"]
     text-shadow: none;
   }
 }
+
+/* ================================================================
+   LABELS (owner, 2026-10-23: 「不要なセカンダリラベルや説明を避ける。
+   レイアウトに説明させるようにUIリライトして。」) — the fight card once the
+   English kickers, codes and captions are gone: each bout is its plate and
+   its title; each control names its choice alone.
+   ================================================================ */
+
+/* The card after the hero: the bout's number plate, its name, the way in.
+   With the line under the name gone the strip runs a little shorter. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
+  grid-template-rows: auto auto;
+  align-content: center;
+  min-height: 124px;
+}
+
+/* A form's tab holds its name alone, at a size that carries the tab. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  .exs-stage-tabs
+  > button[role="tab"] {
+  justify-content: center;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #stages
+  .exs-stage-tabs
+  > button[role="tab"]
+  > span {
+  font-size: 15px;
+  letter-spacing: 0.08em;
+}
+
+/* The opponent plates hold the challenger's name alone, centred on the
+   plate's height. */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button {
+  align-content: center;
+}
+
+/* The core's flow: three steps and their arrows, each step's words centred
+   on its plate (their English captions went). */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > span {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    > #stages
+    .exs-stage-tabs
+    > button[role="tab"]
+    > span {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a {
+    min-height: 96px;
+  }
+}
