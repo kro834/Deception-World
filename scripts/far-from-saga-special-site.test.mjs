@@ -173,9 +173,9 @@ test("the record carries the owner's 2026-10-22 values, verbatim, and none of th
     data.indexOf("export const REALM_ROYAL"),
   );
   for (const call of [
-    "Ultra SUPERIOR DEUS！",
+    "FAR FROM DEUS！",
     "REXONANCE！",
-    "SUPER SPECIAL！",
+    "SUPERIOR！",
     "RIDER！FAR FROM！",
     "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！！！",
     "FAR FROM！FAR FROM！FAR FROM！FAR FROM！",

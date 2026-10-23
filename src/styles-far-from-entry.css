@@ -102,7 +102,7 @@ html body .load-gate.is-far-from-dive.is-far-from-calls > .rider-dive-status {
 }
 
 /* The opening calls are longer lines than Rexonance's: a size that keeps
-   them in the calls' zone (measured: Ultra SUPERIOR DEUS！ ≈ 13.6 em). */
+   them in the calls' zone (measured on the longest opening call). */
 .ffe-sequence[data-mode="entry"] .rx-call-opening:first-child {
   font-size: max(22px, min(6.2vw, 84px, 11vh));
 }

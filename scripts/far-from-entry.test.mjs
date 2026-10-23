@@ -39,9 +39,9 @@ test("the seven calls are the record's own, verbatim, on six contiguous beats in
   assert.deepEqual(
     [...calls.FAR_FROM_CALLS],
     [
-      "Ultra SUPERIOR DEUS！",
+      "FAR FROM DEUS！",
       "REXONANCE！",
-      "SUPER SPECIAL！",
+      "SUPERIOR！",
       "RIDER！FAR FROM！",
       "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！！！",
       "FAR FROM！FAR FROM！FAR FROM！FAR FROM！",
@@ -71,7 +71,7 @@ test("the seven calls are the record's own, verbatim, on six contiguous beats in
   assert.equal("FAR FROM！".repeat(4), calls.FAR_FROM_CALLS[5]);
   assert.match(sequence, /<span>FAR FROM<\/span>\s*<span>DEUS！<\/span>/);
   assert.equal("FAR FROM" + " " + "DEUS！", calls.FAR_FROM_CALLS[6]);
-  assert.equal(calls.beatCall(calls.FAR_FROM_ENTRY_BEATS[0]), "Ultra SUPERIOR DEUS！\nREXONANCE！");
+  assert.equal(calls.beatCall(calls.FAR_FROM_ENTRY_BEATS[0]), "FAR FROM DEUS！\nREXONANCE！");
   assert.match(sequence, /data-call=\{beatCall\(beat\)\}/);
   // No audio, no browser reads in render.
   for (const banned of ["AudioContext", "new Audio", "speechSynthesis", "Math.random"])

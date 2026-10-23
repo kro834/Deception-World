@@ -42,7 +42,7 @@ import { farFromEntryPlan, T } from "./far-from-entry-plan";
    - the shared body fire (src/lib/rexonance-flame.js) burns on the
      Rexonance undersuit, registered inside this figure (FAR_FROM_ENTRY_UNDER),
      in its gold end tone (FIRE_TONES.gold): it kindles at the soles under
-     SUPER SPECIAL！, engulfs the undersuit, turns gold and bursts (爆散)
+     SUPERIOR！, engulfs the undersuit, turns gold and bursts (爆散)
      under RIDER！FAR FROM！;
    - the fragments cool into chips of both nanite kits (far-from-entry-swarm:
      kit A, Rexonance's hex kit, and kit B, each chip by its kit index through

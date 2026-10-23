@@ -220,9 +220,9 @@ export const FAR_FROM_SAGA = {
   en: "FAR FROM SAGA",
   stagesLine: "ミドル／ハイ／エックスハイ／マックス／ウルトラ",
   calls: [
-    "Ultra SUPERIOR DEUS！",
+    "FAR FROM DEUS！",
     "REXONANCE！",
-    "SUPER SPECIAL！",
+    "SUPERIOR！",
     "RIDER！FAR FROM！",
     "SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！SA-GA！DEUS！！！",
     "FAR FROM！FAR FROM！FAR FROM！FAR FROM！",

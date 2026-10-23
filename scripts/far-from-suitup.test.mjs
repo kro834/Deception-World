@@ -776,5 +776,5 @@ test("the call stays clear of the figure's box at every tier that stands it besi
   assert.match(flat, /\.rzn-line:first-child \{ font-size: max\( 17px,/);
   assert.match(flat, /var\(--ffs-fig-top, 9999px\) - 76px\) \/ 3\.9/);
   // The owner's calls stay verbatim: the first three are one line's three calls.
-  assert.equal(FAR_FROM_SUIT_CALLS[0], "Ultra SUPERIOR DEUS！\nREXONANCE！\nSUPER SPECIAL！");
+  assert.equal(FAR_FROM_SUIT_CALLS[0], "FAR FROM DEUS！\nREXONANCE！\nSUPERIOR！");
 });
