@@ -46,6 +46,12 @@ const FIREBRANDS = 24;
 const FIREBRANDS_TOUCH = 8;
 const clamp01 = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u) => u * u * (3 - 2 * u);
+// A machine's insertion stroke: 0 → 1 from rest to rest, its speed peaking
+// a fifth of the way in, then a long brake onto the key ((1 − u)⁴(1 + 4u)).
+const insertStroke = (u) => {
+  const r = 1 - u;
+  return 1 - r * r * r * r * (1 + 4 * u);
+};
 const easeOut = (u) => 1 - (1 - u) * (1 - u) * (1 - u);
 
 /** Staged shell distance from its seat: approach, magnetic capture, lock.
@@ -2957,10 +2963,14 @@ export function createAssemblyNanites({
       fr += helm ? rate * 1.5 * dive * span : rate * (2 * 0.55 * span + 0.5 * 0.25 * span);
       const w = (u - dive) / (1 - dive);
       // N14, leaders and followers: a plate's first tiles dive at once; the
-      // rest hesitate at the hover point — backing off a breath along the
-      // plate's normal, sniffing sideways — then dart in, faster, to land at
-      // the same moment. (Rank: when the tile lands within its plate's
-      // flights; the hesitation grows with it, per-chip varied.)
+      // rest hold at the hover point, then dart in, faster, to land at the
+      // same moment. (Rank: when the tile lands within its plate's flights;
+      // the hold grows with it, per-chip varied.) The hold is dead still
+      // and the insertion one decelerating stroke onto the key (owner,
+      // 2026-10-23: precise machines — no sideways sniff or mid-stroke
+      // stop, which read as jitter): from rest it accelerates hard, spends
+      // most of its time braking, and touches the socket at rest, where the
+      // lock's recoil takes over.
       let hes = 0;
       if (!helm && p >= 0) {
         const pc = P[p];
@@ -2968,31 +2978,16 @@ export function createAssemblyNanites({
         hes = (0.12 + 0.16 * HSH[i]) * smooth(clamp01((rank - 0.12) / 0.3));
       }
       if (w < hes) {
-        const sn = w / hes;
-        const bob = Math.sin(Math.PI * sn);
-        const sniff = 2.5 * Math.sin(TAU * (sn + HSH[i])) * bob;
-        x = hx + nx * 6 * bob + qx * sniff;
-        y = hy + ny * 6 * bob + qy * sniff;
+        x = hx;
+        y = hy;
       } else {
         const wd = hes > 0 ? (w - hes) / (1 - hes) : w;
-        const e = helm
-          ? hes > 0
-            ? wd * wd * wd
-            : wd * wd * wd * wd
-          : wd < 0.7
-            ? 0.8 * smooth(wd / 0.7)
-            : 0.8 + 0.2 * smooth((wd - 0.7) / 0.3);
+        const e = helm ? (hes > 0 ? wd * wd * wd : wd * wd * wd * wd) : insertStroke(wd);
         x = hx + (cx - hx) * e;
         y = hy + (cy - hy) * e;
         // N16: its tracer, as long as it is fast.
         const wb = wd > 0.1 ? wd - 0.1 : 0;
-        const eb = helm
-          ? hes > 0
-            ? wb * wb * wb
-            : wb * wb * wb * wb
-          : wb < 0.7
-            ? 0.8 * smooth(wb / 0.7)
-            : 0.8 + 0.2 * smooth((wb - 0.7) / 0.3);
+        const eb = helm ? (hes > 0 ? wb * wb * wb : wb * wb * wb * wb) : insertStroke(wb);
         const tx = hx + (cx - hx) * eb;
         const ty = hy + (cy - hy) * eb;
         if (Math.abs(x - tx) + Math.abs(y - ty) > 2) {
