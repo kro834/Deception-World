@@ -11,7 +11,7 @@ import type { MetaUnitasEntrySequence } from "../components/meta-unitas-saga/met
 
 /** The gate covers the page this long (the five calls, ミドル complete),
  * then reveals it over `reveal`. */
-export const META_UNITAS_ENTRY_TIMINGS = { cover: 3800, reveal: 520 } as const;
+export const META_UNITAS_ENTRY_TIMINGS = { cover: 4400, reveal: 520 } as const;
 
 export type MetaUnitasTransitionRenderer = typeof MetaUnitasEntrySequence;
 type CallModule = { MetaUnitasEntrySequence: MetaUnitasTransitionRenderer };

@@ -49,9 +49,10 @@ const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
 .mus-entry .mus-entry-orbit{position:absolute;left:calc(var(--rzn-fig-x) * 100%);top:50%;width:min(110vh,90vw);aspect-ratio:1;border:1px solid rgb(255 154 74 / 18%);border-radius:50%;transform:translate(-50%,-50%) rotate(-12deg) scaleY(.38)}
 .mus-entry .mus-entry-orbit.is-b{width:min(78vh,70vw);border-color:rgb(55 198 192 / 20%);transform:translate(-50%,-56%) rotate(18deg) scaleY(.52)}
 .mus-entry .mus-entry-calls{position:absolute;left:clamp(24px,6vw,96px);top:50%;width:min(52vw,760px);height:0;margin:0;padding:0;list-style:none}
-.mus-entry .rzn-line{position:absolute;left:0;top:0;transform:translateY(-40%);display:flex;flex-wrap:wrap;gap:0 .32em;font:640 clamp(34px,4.3vw,80px)/1.08 "Rexonance Forge","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;color:#f4f8fa;opacity:0;transition:opacity .28s ease,transform .5s cubic-bezier(.2,.7,.1,1)}
-.mus-entry .rzn-line[data-chant]{flex-direction:column;font-size:clamp(30px,4.2vw,72px)}
-.mus-entry .rzn-chip{white-space:nowrap}
+.mus-entry .rzn-line{position:absolute;left:0;top:0;transform:translateY(-40%);display:flex;flex-wrap:wrap;gap:0 .32em;font:640 clamp(36px,5.6vw,104px)/1.06 "Rexonance Forge","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;color:#f4f8fa;opacity:0;transition:opacity .28s ease,transform .5s cubic-bezier(.2,.7,.1,1)}
+.mus-entry .rzn-line[data-chant]{flex-direction:column;font-size:clamp(30px,4.4vw,76px)}
+.mus-entry .rzn-line:not([data-chant]) .rzn-chip{display:flex;flex-direction:column}
+.mus-entry .rzn-chip>span{white-space:nowrap}
 .mus-entry .rzn-line[data-on]{opacity:1;transform:translateY(-50%);transition-delay:.12s}
 .mus-entry .rzn-line[data-done]:not([data-on]){opacity:0;transform:translateY(-62%);transition-duration:.16s,.3s}
 .mus-entry .rzn-line:last-child[data-on],.mus-entry .rzn-line:last-child[data-done]{opacity:1;transform:translateY(-50%)}
@@ -60,13 +61,16 @@ const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
 .mus-entry .rzn-line[data-chant] .rzn-chip[data-on],.mus-entry .rzn-line[data-chant] .rzn-chip[data-done]{opacity:1}
 .mus-entry .rzn-line:last-child .rzn-chip{background:linear-gradient(100deg,#fff,#9ff0ea 60%,#37c6c0);-webkit-background-clip:text;background-clip:text}
 @media (max-width:760px),(orientation:portrait){
-.mus-entry .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.62;--rzn-fig-b:.04}
-.mus-entry .mus-entry-calls{left:20px;right:20px;top:18%;width:auto}
-.mus-entry .rzn-line{font-size:clamp(30px,9vw,56px)}
-.mus-entry .rzn-line[data-chant]{font-size:clamp(22px,6.4vw,40px)}}`;
+.mus-entry .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.6;--rzn-fig-b:.3}
+.mus-entry .mus-entry-fig{bottom:30%;height:60%}
+.mus-entry .mus-entry-calls{left:20px;right:20px;top:auto;bottom:16%;width:auto}
+.mus-entry .rzn-line{left:0;right:0;justify-content:center;text-align:center;transform:translateY(-20%);font-size:clamp(30px,8.4vw,72px)}
+.mus-entry .rzn-line[data-on],.mus-entry .rzn-line:last-child[data-on],.mus-entry .rzn-line:last-child[data-done]{transform:translateY(-50%)}
+.mus-entry .rzn-line[data-chant]{align-items:center;font-size:clamp(22px,6vw,52px)}
+.mus-entry .rzn-line:not([data-chant]) .rzn-chip{align-items:center}}`;
 
 /** How long the build waits for the scene to be ready before its clock runs. */
-const READY_WAIT_MS = 1100;
+const READY_WAIT_MS = 2200;
 
 export function MetaUnitasEntrySequence({
   phase,
@@ -142,9 +146,14 @@ export function MetaUnitasEntrySequence({
               <li key={index} className="rzn-line" data-chant={units.length > 1 || undefined}>
                 {units.map((unit, unitIndex) => (
                   <span key={`${unit}-${unitIndex}`} className="rzn-chip">
-                    {unitIndex === 0 ? "【" : ""}
-                    {unit}
-                    {unitIndex === units.length - 1 ? "】" : ""}
+                    {(units.length > 1
+                      ? [
+                          `${unitIndex === 0 ? "【" : ""}${unit}${unitIndex === units.length - 1 ? "】" : ""}`,
+                        ]
+                      : (`【${unit}】`.match(/[^！]+！+】?|[^！]+$/g) ?? [unit])
+                    ).map((part, partIndex) => (
+                      <span key={partIndex}>{part}</span>
+                    ))}
                   </span>
                 ))}
               </li>
