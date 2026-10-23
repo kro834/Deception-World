@@ -660,3 +660,84 @@ test("the runway's assistive script stays visually hidden on this page", () => {
   const sheet = readFileSync(new URL("../src/styles-far-from-suitup.css", import.meta.url), "utf8");
   assert.match(sheet, /\.ffs-page \.ffs-assembly-guide \.rxk-sr \{[^}]*clip-path: inset\(50%\)/);
 });
+
+test("the call stays clear of the figure's box at every tier that stands it beside the figure", () => {
+  const flat = sheet.replace(/\s+/g, " ");
+  // The frame is a size container, so the call can take the frame's own
+  // units (cqw / cqh) and the tier's --rzn-fig-* shares.
+  assert.match(flat, /\.rzn-suitup > \.rzn-frame \{[^}]*container-type: size;/);
+  // The figure's left edge is farFromFigureBox's arithmetic: its height is
+  // the lesser of the height share and the width share's worth (the cutout's
+  // aspect), its centre is --rzn-fig-x, its width is height x aspect.
+  assert.ok(
+    flat.includes(`calc(100cqw * var(--rzn-fig-w) * ${STAGE_SIZE.height} / ${STAGE_SIZE.width})`),
+  );
+  assert.ok(
+    flat.includes(
+      `--ffs-fig-left: calc(100cqw * var(--rzn-fig-x) - var(--ffs-fig-h) * ${STAGE_SIZE.width} / ${
+        STAGE_SIZE.height * 2
+      });`,
+    ),
+  );
+  // The same arithmetic in script agrees with farFromFigureBox on the tiers
+  // that stand the call beside the figure and a spread of frames, and the
+  // call's width (its tier share and cap, the gutter and a breath out of the
+  // figure's left edge) never passes the figure.
+  const tierCall = {
+    desktop: { share: 0.34, max: 460 },
+    tablet: { share: 0.33, max: 340 },
+  };
+  for (const [tier, call] of Object.entries(tierCall)) {
+    const placement = FAR_FROM_STAGE_TIERS[tier];
+    for (const [width, height] of [
+      [1100, 620],
+      [1280, 724],
+      [1440, 824],
+      [1920, 1000],
+      [2560, 1100],
+      [1024, 692],
+      [800, 620],
+    ]) {
+      const box = farFromFigureBox(width, height, placement);
+      const figureHeight = Math.min(
+        height * placement.height,
+        (width * placement.width * STAGE_SIZE.height) / STAGE_SIZE.width,
+      );
+      const left =
+        width * placement.x - (figureHeight * STAGE_SIZE.width) / (STAGE_SIZE.height * 2);
+      assert.ok(Math.abs(left - box.x) < 1e-6, `${tier} ${width}x${height}`);
+      const gutter = Math.min(Math.max(20, 0.034 * width), 56);
+      const breath = Math.min(Math.max(14, 0.016 * width), 28);
+      const room = left - gutter - breath;
+      const callWidth = Math.max(140, Math.min(call.share * width, call.max, room));
+      // Under the 140 px floor the stylesheet lets the call wrap rather than
+      // shrink further; no tier checked here gets that tight.
+      assert.ok(room >= 140, `${tier} ${width}x${height} room ${room}`);
+      assert.ok(gutter + callWidth < box.x, `${tier} ${width}x${height}`);
+    }
+  }
+  // The width is the call's own custom property at the side-by-side tiers,
+  // declared after every tier's fixed width.
+  const supports = flat.indexOf(
+    "@supports (width: 1cqw) { @media (min-width: 761px) and ((min-width: 1100px) or (orientation: landscape)),",
+  );
+  assert.ok(supports > 0);
+  assert.ok(supports > flat.lastIndexOf("width: 31%;"));
+  assert.ok(supports > flat.lastIndexOf("width: min(33%, 340px);"));
+  assert.match(
+    flat.slice(supports, supports + 500),
+    /\.rzn-suitup \.rzn-call \{ width: var\(--ffs-call-w\); \}/,
+  );
+  // The lines never run on past the call: a chip breaks at a space only where
+  // the width leaves it no room (the first line's three calls, one to a
+  // line), and every size is held to the call's width.
+  assert.match(flat, /\.rzn-suitup \.rzn-chip \{ display: inline-block; [^}]*white-space: pre-line; \}/);
+  assert.doesNotMatch(flat, /\.rzn-suitup \.rzn-chip \{[^}]*white-space: nowrap/);
+  assert.match(flat, /\.rzn-line \{[^}]*var\(--ffs-call-w, 9999px\) \/ 17/);
+  assert.match(flat, /\.rzn-line:last-child \{[^}]*var\(--ffs-call-w, 9999px\) \/ 14/);
+  // The stacked tiers hold the first call's three lines above the figure.
+  assert.match(flat, /\.rzn-line:first-child \{ font-size: max\( 17px,/);
+  assert.match(flat, /var\(--ffs-fig-top, 9999px\) - 76px\) \/ 3\.9/);
+  // The owner's calls stay verbatim: the first three are one line's three calls.
+  assert.equal(FAR_FROM_SUIT_CALLS[0], "Ultra SUPERIOR DEUS！\nREXONANCE！\nSUPER SPECIAL！");
+});
