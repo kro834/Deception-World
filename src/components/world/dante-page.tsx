@@ -140,7 +140,7 @@ export function DantePage() {
           </div>
         ))}
       </div>
-      <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" indexLabel="犬" returnHash="manager-archive-dogs" />
+      <DossierNav items={UNMANAGED_NAV} currentHref="/characters/dante" returnHash="manager-archive-dogs" />
     </main>
   );
 }

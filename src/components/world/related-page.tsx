@@ -260,11 +260,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
       <div id="form-records">
         <FormPickup rider={person.rider} />
       </div>
-      <DossierNav
-        items={RELATED_NAV}
-        currentHref={`/characters/${person.id}`}
-        indexLabel="RELATED"
-      />
+      <DossierNav items={RELATED_NAV} currentHref={`/characters/${person.id}`} />
     </main>
   );
 }

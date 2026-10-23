@@ -325,7 +325,7 @@ export function LejasPage() {
           }}
         />
       </div>
-      <DossierNav items={RIKUEI_NAV} currentHref="/managers/lejas" indexLabel="RIKUEI" />
+      <DossierNav items={RIKUEI_NAV} currentHref="/managers/lejas" />
     </main>
   );
 }

@@ -274,7 +274,9 @@ test("六詠's Roman numerals take the site's Roman face (Cinzel) on the end car
   const roman = [...css.matchAll(/\[data-numerals="roman"\][^{]*\{([^}]*)\}/g)].map(
     ([, body]) => body,
   );
-  assert.equal(roman.length, 2);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The file's cover numeral (over the name) takes the same face.
+  assert.equal(roman.length, 3);
   for (const body of roman) assert.match(body, /font-family: "Cinzel", "Times New Roman", serif;/);
   // The site already loads Cinzel with its core fonts: no new font request.
   assert.match(await read("src/lib/site-fonts.ts"), /family=Cinzel:wght@400\.\.700/);

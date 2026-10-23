@@ -345,8 +345,3 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       hash: "far-from-saga",
       assets: FINAL_STAGE_ENTER_ASSETS,
       label: "特設サイトへ",
-    },
-  },
-  {
-    id: "realm",
-    no: "02",

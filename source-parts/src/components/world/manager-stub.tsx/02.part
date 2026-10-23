@@ -316,7 +316,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
           <FormPickup rider={profile.rider} />
         </div>
       ) : null}
-      <DossierNav items={RIKUEI_NAV} currentHref={`/managers/${profile.id}`} indexLabel="RIKUEI" />
+      <DossierNav items={RIKUEI_NAV} currentHref={`/managers/${profile.id}`} />
     </main>
   );
 }

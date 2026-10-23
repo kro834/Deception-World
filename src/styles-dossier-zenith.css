@@ -2064,3 +2064,335 @@ html[data-family="dossier"] main.manager-page .manager-facts dd {
   overflow-wrap: anywhere;
   white-space: normal;
 }
+
+/* ----------------------------------------------------------------
+   6. The layout explains (2026-10-23)
+   不要なセカンダリラベルを削除（レイアウトで説明）. The file strip, the
+   English names under the Japanese ones, the read link, the record cards'
+   captions (BEFORE, PARTNER, NIGHTMARE, PICKUP, SPECIAL SITE), the
+   dossier's index line and the end card's PREV / NEXT / list / count
+   captions are gone. Each file opens on its cover, the end card's
+   grammar: the numeral in outline, the name, its line. Place, scale and
+   the file's light carry the rest.
+   ---------------------------------------------------------------- */
+
+/* The top bar names no file: the cover under it does. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page
+  > header.manager-topbar
+  .brand
+  small {
+  display: none;
+}
+
+/* The file's numeral, over the name (decorative; the name is the
+   heading). Short screens: in the name block, sized by the height. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .dossier-identity
+  > .dossier-file-numeral {
+  position: relative;
+  display: block;
+  width: max-content;
+  margin: 0 0 clamp(14px, 2.4svh, 22px);
+  color: transparent;
+  font: 400 clamp(48px, min(15vw, 14svh), 96px) / 0.86 var(--sd-hud);
+  font-style: normal;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  /* Its light in the stroke (not opacity: the arrival's rise ends at 1). */
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--sd-accent) 58%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Under it, the end card's short rule in the file's light. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .dossier-identity
+  > .dossier-file-numeral::after {
+  content: "";
+  display: block;
+  width: 36%;
+  min-width: 28px;
+  height: 2px;
+  margin: 0.16em auto 0 0;
+  background: linear-gradient(90deg, var(--sd-accent), transparent);
+  opacity: 0.6;
+}
+
+/* 六詠's (and シエル's) Roman numerals in the site's Roman face. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #dossier-profile
+  .dossier-identity
+  > .dossier-file-numeral[data-numerals="roman"] {
+  font-family: "Cinzel", "Times New Roman", serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* Phones and portrait tablets: the numeral is the stage's slate, set in
+   the headroom over the figure (the headroom keeps the carried art clear
+   of the top of the screen: its height stays). */
+@media (max-width: 1099px) and (min-height: 501px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .dossier-identity
+    > .dossier-file-numeral {
+    position: absolute;
+    z-index: 2;
+    top: calc(var(--sd-head) + var(--sd-headroom) / 2);
+    left: max(var(--sd-pad), calc((100% - var(--sd-read)) / 2));
+    margin: 0;
+    font-size: min(clamp(56px, 22vw, 124px), calc(var(--sd-headroom) * 0.6));
+    transform: translateY(-50%);
+  }
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .dossier-identity
+      > .dossier-file-numeral {
+      position: relative;
+      top: auto;
+      left: auto;
+      margin: 0 0 clamp(16px, 2.8svh, 28px);
+      font-size: clamp(64px, min(8vw, 16svh), 144px);
+      transform: none;
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .dossier-identity
+    > .dossier-file-numeral {
+    display: none;
+  }
+}
+
+/* The ruler: one line of names, its order its own (no numbers). */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links
+  a {
+  align-items: center;
+  text-align: center;
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .dossier-reader
+      .dossier-reader-links
+      a {
+      justify-content: flex-start;
+      padding-inline: 2px;
+    }
+  }
+}
+
+/* The before-and-after card: its two captions (変身者 and 変身前の姿)
+   read as one line over the name; the partner's role and tag the same. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  > .rider-archive-civilian
+  > figcaption {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  > .rider-archive-civilian
+  > figcaption
+  > * {
+  grid-column: 1 / -1;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  > .rider-archive-civilian
+  > figcaption
+  > p:first-child {
+  grid-row: 1;
+  grid-column: 1;
+  align-self: center;
+  margin-top: 0;
+  padding-top: 0;
+  background: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  #identity-records
+  > .rider-archive-civilian
+  > figcaption
+  > p:first-child
+  + small {
+  grid-row: 1;
+  grid-column: 2;
+  align-self: center;
+  justify-self: start;
+  padding-left: 12px;
+  border-left: 1px solid var(--sd-line-2);
+}
+
+/* Wide screens: the file slip's prism rule (edition sheet) runs over that
+   whole line, and over the nightmare's name, which now opens her card;
+   her words sit level with the middle of her art. */
+@media (min-width: 761px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records
+    > .rider-nightmare-card
+    > .rider-nightmare-card-copy {
+    align-content: center;
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records:not(.has-partner)
+    > .rider-archive-civilian
+    > figcaption::before,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records:not(.has-partner)
+    > .rider-nightmare-card
+    > .rider-nightmare-card-copy::before {
+    content: "";
+    grid-row: 1;
+    grid-column: 1 / -1;
+    display: block;
+    width: min(100%, 240px);
+    height: 1px;
+    margin: 0 0 10px;
+    background: var(--dm-prism);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #identity-records:not(.has-partner)
+    > .rider-archive-civilian
+    > figcaption
+    > :is(p:first-child, p:first-child + small) {
+    grid-row: 2;
+  }
+}
+
+/* The end of a file. The previous file: its arrow and its name. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:first-child:not(:last-child)
+  > b {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+/* The way back: its arrow ring and its words, the file's place in the
+   list lit under them on the split stage. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > .manager-pagination-index
+  > .dossier-index-return
+  > b {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index
+      > .dossier-index-return {
+      grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
+      row-gap: 0;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index
+      > .dossier-index-return
+      > :is(.dossier-index-arrow, b) {
+      grid-row: 2;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > .manager-pagination
+      > .manager-pagination-index
+      > .dossier-index-return
+      > .dossier-index-meter {
+      grid-row: 3;
+      margin-top: 20px;
+    }
+  }
+}
+
+/* The next file: the numeral, then the name beside its arrow. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child) {
+  grid-template-rows: auto auto;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > b,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  > .manager-pagination
+  > a:last-child:not(:first-child)
+  > span:last-child {
+  grid-row: 2;
+  align-self: center;
+}
+
+
+/* The nightmare record: its close plate is the cross alone (the control
+   keeps its 閉じる), its heading opens on her name, her art has no
+   caption. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-nightmare-dialog
+  .rider-nightmare-dialog-close {
+  justify-content: center;
+  width: var(--pc-close, 44px);
+  padding: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-nightmare-dialog
+  .rider-nightmare-dialog-heading
+  > h2:first-child {
+  margin-top: 0;
+}

@@ -945,7 +945,6 @@ html[data-family="dossier"]
   max-width: var(--sd-read);
   margin: 0 auto;
   padding: 0;
-  counter-reset: sd-ruler;
   background: none;
   border: 0;
 }
@@ -955,7 +954,6 @@ html[data-family="dossier"]
   > .dossier-reader
   .dossier-reader-links
   a {
-  counter-increment: sd-ruler;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -963,9 +961,9 @@ html[data-family="dossier"]
   justify-content: center;
   gap: 2px;
   min-width: 0;
-  min-height: 52px;
+  min-height: 48px;
   margin: 0;
-  padding: 6px 2px 4px;
+  padding: 0 2px;
   border: 0;
   border-top: 2px solid rgb(255 255 255 / 12%);
   border-radius: 0;
@@ -984,16 +982,8 @@ html[data-family="dossier"]
   > .dossier-reader
   .dossier-reader-links
   a::before {
-  content: counter(sd-ruler, decimal-leading-zero) / "";
-  position: static;
-  display: block;
-  width: auto;
-  height: auto;
-  color: inherit;
-  background: none;
-  font: 400 12px/1.2 var(--sd-mono);
-  letter-spacing: 0.1em;
-  opacity: 0.8;
+  /* 2026-10-23: no chapter numbers; the ruler's order is its own. */
+  content: none;
 }
 
 html[data-family="dossier"]
@@ -2226,19 +2216,9 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
   > a:last-child:not(:first-child)::before {
-  content: "NEXT FILE" / "";
-  position: relative;
-  z-index: 2;
-  grid-column: 1 / -1;
-  grid-row: 1;
-  display: block;
-  width: auto;
-  height: auto;
-  margin: 0 0 8px;
-  color: var(--sd-accent);
-  background: none;
-  font: 400 12px/1.4 var(--sd-hud);
-  letter-spacing: 0.22em;
+  /* 2026-10-23: no NEXT FILE caption; the card's numeral, name and
+     arrow say where it leads. */
+  content: none;
 }
 
 html[data-family="dossier"]
@@ -3160,7 +3140,7 @@ html[data-family="dossier"]
   }
 }
 
-/* Phones: the ruler's number sits over its label. */
+/* Phones: the ruler's labels at their compact size. */
 @media (max-width: 420px) {
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
