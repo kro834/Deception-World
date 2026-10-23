@@ -1,7 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import type { GalleryCollectionArtwork } from "./gallery-community-client";
 import { galleryImagePresentation, type GalleryImageLoadStatus } from "./gallery-image-state";
-import { gallerySwipeStep } from "./gallery-viewer-state";
+import {
+  galleryImagePanPosition,
+  galleryImageResizePosition,
+  galleryImageRetrySource,
+  gallerySwipeStep,
+  type GalleryImageViewport,
+} from "./gallery-viewer-state";
+
+function readViewport(viewport: HTMLDivElement): GalleryImageViewport {
+  return {
+    width: viewport.clientWidth,
+    height: viewport.clientHeight,
+    scrollWidth: viewport.scrollWidth,
+    scrollHeight: viewport.scrollHeight,
+    left: viewport.scrollLeft,
+    top: viewport.scrollTop,
+  };
+}
 
 /** Remounted per artwork: stale loads and zoom state cannot leak into the next work. */
 export function GalleryViewerImage({
@@ -18,16 +35,29 @@ export function GalleryViewerImage({
   const [fullStatus, setFullStatus] = useState<GalleryImageLoadStatus>("loading");
   const [mediumStatus, setMediumStatus] = useState<GalleryImageLoadStatus>("loading");
   const [attempt, setAttempt] = useState(0);
+  const [mediumAttempt, setMediumAttempt] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
+  const mediumRef = useRef<HTMLImageElement>(null);
+  const zoomRef = useRef<HTMLButtonElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const viewingPositionRef = useRef<GalleryImageViewport | null>(null);
+  const wasZoomedRef = useRef(false);
   const touchRef = useRef<{ x: number; y: number; at: number } | null>(null);
   const hasSeparateMedium = work.medium !== work.full;
   const { showingMedium, waitingForMedium, imageUnavailable, busy, canZoom } =
     galleryImagePresentation(fullStatus, mediumStatus, hasSeparateMedium);
-  const source = attempt
-    ? `${work.full}${work.full.includes("?") ? "&" : "?"}retry=${attempt}`
-    : work.full;
+  const source = galleryImageRetrySource(work.full, attempt);
+  const mediumSource = galleryImageRetrySource(work.medium, mediumAttempt);
+
+  const retry = () => {
+    setFullStatus("loading");
+    setAttempt((current) => current + 1);
+    if (mediumStatus === "error") {
+      setMediumStatus("loading");
+      setMediumAttempt((current) => current + 1);
+    }
+  };
 
   useEffect(() => {
     const img = imageRef.current;
@@ -35,15 +65,42 @@ export function GalleryViewerImage({
   }, [source]);
 
   useEffect(() => {
+    const img = mediumRef.current;
+    if (img?.complete) setMediumStatus(img.naturalWidth ? "ready" : "error");
+  }, [mediumSource]);
+
+  useEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
+    if (!zoomed) {
+      viewport.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      viewingPositionRef.current = null;
+      if (wasZoomedRef.current) zoomRef.current?.focus({ preventScroll: true });
+      wasZoomedRef.current = false;
+      return;
+    }
+    wasZoomedRef.current = true;
+    const artwork = { width: work.width, height: work.height };
     viewport.scrollTo({
-      top: zoomed ? viewport.clientHeight / 2 : 0,
-      left: zoomed ? viewport.clientWidth / 2 : 0,
+      ...galleryImageResizePosition(null, readViewport(viewport), artwork),
       behavior: "instant",
     });
-    if (zoomed) viewport.focus({ preventScroll: true });
-  }, [zoomed]);
+    viewingPositionRef.current = readViewport(viewport);
+    viewport.focus({ preventScroll: true });
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      const next = readViewport(viewport);
+      const previous = viewingPositionRef.current;
+      if (previous && previous.width === next.width && previous.height === next.height) return;
+      viewport.scrollTo({
+        ...galleryImageResizePosition(previous, next, artwork),
+        behavior: "instant",
+      });
+      viewingPositionRef.current = readViewport(viewport);
+    });
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [zoomed, work.width, work.height]);
 
   useEffect(() => {
     if (
@@ -69,11 +126,12 @@ export function GalleryViewerImage({
     <div className="gallery-viewer-image" data-zoomed={zoomed}>
       <div className="gallery-image-toolbar">
         <span id="gallery-image-help">
-          {zoomed ? "画像をスクロールして鑑賞" : "左右スワイプ・← → キーで作品移動"}
+          {zoomed ? "スクロール・↑ ↓ ← → キーで鑑賞" : "左右スワイプ・← → キーで作品移動"}
         </span>
         <button
           type="button"
           className="gallery-viewer-close"
+          ref={zoomRef}
           disabled={!canZoom}
           aria-pressed={zoomed}
           onClick={() => {
@@ -88,10 +146,28 @@ export function GalleryViewerImage({
         ref={viewportRef}
         aria-busy={busy}
         aria-describedby="gallery-image-help"
+        role={zoomed ? "region" : undefined}
+        aria-label={zoomed ? "拡大した作品画像" : undefined}
         tabIndex={zoomed ? 0 : -1}
+        onScroll={(event) => {
+          if (!zoomed) return;
+          const next = readViewport(event.currentTarget);
+          const previous = viewingPositionRef.current;
+          // A browser can clamp scrolling before ResizeObserver runs. Keep the
+          // previous geometry until the observer has restored the artwork point.
+          if (previous && (previous.width !== next.width || previous.height !== next.height))
+            return;
+          viewingPositionRef.current = next;
+        }}
         onKeyDown={(event) => {
-          if (zoomed && (event.key === "ArrowLeft" || event.key === "ArrowRight"))
-            event.stopPropagation();
+          if (!zoomed || event.target !== event.currentTarget) return;
+          const position = galleryImagePanPosition(readViewport(event.currentTarget), event.key);
+          if (!position) return;
+          event.stopPropagation();
+          if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+          event.preventDefault();
+          event.currentTarget.scrollTo({ ...position, behavior: "instant" });
+          viewingPositionRef.current = readViewport(event.currentTarget);
         }}
         onTouchStart={(event) => {
           const touch = event.touches[0];
@@ -129,9 +205,11 @@ export function GalleryViewerImage({
         <div className="gallery-image-canvas">
           {hasSeparateMedium && fullStatus !== "ready" && (
             <img
+              key={mediumSource}
+              ref={mediumRef}
               className="gallery-image-preview"
               data-ready={mediumStatus === "ready"}
-              src={work.medium}
+              src={mediumSource}
               alt={showingMedium ? work.alt : ""}
               aria-hidden={!showingMedium}
               width={work.width}
@@ -170,14 +248,7 @@ export function GalleryViewerImage({
         {fullStatus === "error" && showingMedium && (
           <div className="gallery-image-fallback" role="status">
             <p>高画質画像を読み込めませんでした。標準画像を表示しています。</p>
-            <button
-              type="button"
-              className="gallery-viewer-close"
-              onClick={() => {
-                setFullStatus("loading");
-                setAttempt((current) => current + 1);
-              }}
-            >
+            <button type="button" className="gallery-viewer-close" onClick={retry}>
               高画質を再読み込み
             </button>
           </div>
@@ -186,14 +257,7 @@ export function GalleryViewerImage({
           <div className="gallery-image-error" role="alert">
             <p>画像を読み込めませんでした。</p>
             <p className="gallery-image-description">{work.alt}</p>
-            <button
-              type="button"
-              className="gallery-viewer-close"
-              onClick={() => {
-                setFullStatus("loading");
-                setAttempt((current) => current + 1);
-              }}
-            >
+            <button type="button" className="gallery-viewer-close" onClick={retry}>
               再読み込み
             </button>
             <a href={work.medium} target="_blank" rel="noreferrer">
