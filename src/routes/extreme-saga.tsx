@@ -30,7 +30,7 @@ export const Route = createFileRoute("/extreme-saga")({
       {
         name: "description",
         content:
-          "殴り合い、歓迎。戦うほど勝ち筋が増すエクスプリームサーガの公式特設サイト。標準性能と専用P14、ディルクルムサーガ／ヴィンクルムサーガとのカタログ比較を、負けた欄まで隠さず並べています。",
+          "殴り合い、歓迎。戦うほど勝ち筋が増すエクスプリームサーガの公式特設サイト。標準性能とP14 Standard、ディルクルムサーガ／ヴィンクルムサーガとのカタログ比較を、負けた欄まで隠さず並べています。",
       },
       { property: "og:title", content: "エクスプリームサーガ｜Deception World" },
       {

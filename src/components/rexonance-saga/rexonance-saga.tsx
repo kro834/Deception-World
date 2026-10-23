@@ -208,7 +208,11 @@ const PERFORMANCE_BASELINES: Record<
     ],
     processing: {
       baseline: ["50,000〜TOPS / 200Core", "URANUS X", "TAMAYURA X（アクセラレータ）", "P1"],
-      rexonance: ["50,000〜YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
+      rexonance: [
+        "50,000〜YOPS / ∞Core · KHAOS DeuX",
+        "9,000TOPS / 300Core · KOSMOS DeuX",
+        "P14 Extreme Tuning",
+      ],
       verdict:
         "URANUS XのTOPS値とKHAOS DeuXのYOPS値は単位・演算系統が異なります。KOSMOS DeuXを含めた総合演算倍率への単純換算は行わず、公開スペックを並列表示しています。",
     },
@@ -266,7 +270,7 @@ const PERFORMANCE_BASELINES: Record<
       rexonance: [
         "50,000〜YOPS / ∞Core · KHAOS DeuX",
         "9,000TOPS / 300Core · KOSMOS DeuX",
-        "P14",
+        "P14 Extreme Tuning",
         "Paranormal Realizer Ultra",
         "Neural Resonancer Ultra",
       ],
@@ -320,9 +324,13 @@ const PERFORMANCE_BASELINES: Record<
       baseline: [
         "20,000YOPS / ∞Core · KHAOS Ultra",
         "5,000TOPS / 300Core · KOSMOS Ultra",
-        "P14（Extreme tuning）",
+        "P14 Standard",
       ],
-      rexonance: ["50,000〜YOPS / ∞Core · KHAOS DeuX", "9,000TOPS / 300Core · KOSMOS DeuX", "P14"],
+      rexonance: [
+        "50,000〜YOPS / ∞Core · KHAOS DeuX",
+        "9,000TOPS / 300Core · KOSMOS DeuX",
+        "P14 Extreme Tuning",
+      ],
       verdict:
         "基準値比ではKHAOS系YOPSが2.5倍、KOSMOS系TOPSが1.8倍です。KHAOSの50,000〜YOPSは標準稼働時の基準値で、固定された最大性能を示しません。YOPSとTOPSを合算した総合倍率には換算していません。",
     },
@@ -2060,10 +2068,10 @@ export function RexonanceSaga() {
               P1の9倍。
             </h2>
             <span>
-              P14は、出力変換・位相制御・能力間調停を
+              『P14 Extreme Tuning』は、出力変換・位相制御・能力間調停を
               <span className="rxp-nowrap">一体化した</span>
               <span className="rxp-nowrap">第14世代</span>
-              演算基盤です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
+              演算基盤を、第五の犬の能力へ特化させた専用仕様です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
             </span>
           </header>
 
@@ -2073,7 +2081,7 @@ export function RexonanceSaga() {
                 src="/rexonance-p14-core.jpg"
                 {...rexonanceImage("/rexonance-p14-core.jpg", true)}
                 ref={p14ImageRef}
-                alt="青い回路に接続されたP14演算コア"
+                alt="青い回路に接続されたP14 Extreme Tuning演算コア"
                 width="1000"
                 height="1000"
                 loading="lazy"
@@ -2085,9 +2093,12 @@ export function RexonanceSaga() {
             <div className="rxs-p14-copy">
               <h3>最大出力を支える、安定性。</h3>
               <p>
-                入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14を完全加速して全神飾の連続実装を支えます。
+                P14の基本設計を維持しながら、神性、終焉、超自己進化、自己共鳴へ特化した調整を施したレクソナンス専用仕様です。演算資源を終焉の適用判断、超自己進化の構造生成、共鳴機構の同期へ最適化し、神性出力と演算加速の同期を優先します。
               </p>
-              <dl aria-label="P14の主要指標">
+              <p>
+                入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14 Extreme Tuningを完全加速して全神飾の連続実装を支えます。
+              </p>
+              <dl aria-label="P14 Extreme Tuningの主要指標">
                 <div>
                   <dt>実効変換率</dt>
                   <dd data-rsn-count="">

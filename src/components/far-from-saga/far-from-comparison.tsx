@@ -22,7 +22,13 @@ import {
   type FormKey,
 } from "./far-from-comparison-data";
 import { UnitName } from "./far-from-p16";
-import { P16_VS_EXTREME, p16ChangeAgainstExtremeFigure } from "./far-from-p16-data";
+import {
+  P16_BENCHMARK_NOTE,
+  P16_OFFICIAL_METRICS,
+  accelUnit,
+  p16ChangeAgainst,
+  signedPercent,
+} from "./far-from-p16-official";
 import { reportChapter, sentence } from "./far-from-report-data";
 
 /* #performance — the comparison console (owner's comparison text, 2026-10-22).
@@ -33,10 +39,10 @@ import { reportChapter, sentence } from "./far-from-report-data";
    【同条件ベンチマーク・暫定評価】 indices as a bar chart (レクソナンス・ハイ =
    100; 熱負荷 reads lower = better). Every figure on screen is one of the
    owner's cells or the ratio of two cells in the same row; each table's ※
-   note is printed under it, verbatim. The one exception is labelled as such:
-   in the エクスプリーム view, 加速機構 adds P16 / P14（Extreme tuning）, the
-   暫定ベンチマーク／設定案 the owner asked for (far-from-p16-data.ts), with
-   its ※ notes; the same figures, in the same form, as #p16's comparator. */
+   note is printed under it, verbatim. In the エクスプリーム and レクソナンス
+   views, 加速機構 adds P16 against that form's unit (P14 Standard / P14
+   Extreme Tuning), from the owner's 公式設定 暫定ベンチマーク
+   (far-from-p16-official.ts): the same figures as #p16's comparator. */
 
 type View = BaselineKey | "all";
 
@@ -177,53 +183,55 @@ function TextRows({ baseline }: { baseline: BaselineKey | null }) {
               <div key={item.key} style={accentStyle(item.key)}>
                 <dt>{item.label}</dt>
                 <dd>
-                  <UnitName value={row.shown[item.key]} />
+                  <UnitName value={row.values[item.key]} />
                 </dd>
               </div>
             ))}
           </dl>
         </article>
       ))}
-      {baseline === "extreme" ? <AccelVsExtreme /> : null}
+      {baseline === "extreme" || baseline === "rexonance" ? (
+        <AccelCompare base={baseline === "extreme" ? "standard" : "tuning"} />
+      ) : null}
     </div>
   );
 }
 
-/** 加速機構, エクスプリームと比較: P16 against P14（Extreme tuning）, the
- * 暫定ベンチマーク／設定案 of far-from-p16-data.ts (not the owner's text),
- * in a text row's frame: its label, then the pair, then the four changes. */
-function AccelVsExtreme() {
+/** 加速機構の性能差: P16 against the form's unit (エクスプリーム's P14
+ * Standard, レクソナンス's P14 Extreme Tuning), the owner's 公式設定 暫定
+ * ベンチマーク (P14 Standard = 100), in a text row's frame: its label, then
+ * the pair, then the five changes with their indices. */
+function AccelCompare({ base }: { base: "standard" | "tuning" }) {
+  const unit = accelUnit(base);
   return (
     <article className="ffs-accel-compare" aria-labelledby="ffs-accel-compare-title">
       <header>
         <div>
           <h4 id="ffs-accel-compare-title">{ACCEL_LABEL}の性能差</h4>
           <p>
-            P16 / <UnitName value={`${P16_VS_EXTREME.name}比`} />
+            P16 / <UnitName value={`${unit.name}比`} />
           </p>
         </div>
-        <span className="ffs-provisional-tag">暫定ベンチマーク／設定案</span>
+        <span className="ffs-provisional-tag">暫定ベンチマーク</span>
       </header>
       <dl>
-        {P16_VS_EXTREME.metrics.map((metric) => (
+        {P16_OFFICIAL_METRICS.map((metric) => (
           <div key={metric.key}>
             <dt>{metric.label}</dt>
             <dd>
               <b>
-                {p16ChangeAgainstExtremeFigure(metric)}
+                {signedPercent(p16ChangeAgainst(metric, base))}
                 <small>{metric.verb}</small>
               </b>
               <small>
-                指数 {metric.extreme} → {metric.p16}
+                指数 {metric.values[base]} → {metric.values.p16}
               </small>
             </dd>
           </div>
         ))}
       </dl>
-      <ul aria-label="設定案の注意">
-        {P16_VS_EXTREME.notes.map((note) => (
-          <li key={note}>{note}</li>
-        ))}
+      <ul aria-label="暫定ベンチマークの注意">
+        <li>指数は、P14 Standardを100とした値です。{P16_BENCHMARK_NOTE}</li>
       </ul>
     </article>
   );

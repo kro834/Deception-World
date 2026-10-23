@@ -143,7 +143,7 @@ const COMPARISONS: Record<
       "ジャンプ 1033.5m / 100m 0.002秒",
       "20,000YOPS / ∞Core · KHAOS Ultra",
       "5,000TOPS / 300Core · KOSMOS Ultra",
-      "P14（Extreme tuning）",
+      "P14 Standard",
     ],
     verdict:
       "物理カタログ値では、エクスプリームが打撃・跳躍・地上速度で上回ります。演算はYOPSとTOPSを合算せず、同じTOPS表記でも役割の異なる系統として並列表示しています。",
@@ -213,7 +213,7 @@ const COMPARISONS: Record<
       "ジャンプ 1033.5m / 100m 0.002秒",
       "20,000YOPS / ∞Core · KHAOS Ultra",
       "5,000TOPS / 300Core · KOSMOS Ultra",
-      "P14（Extreme tuning）",
+      "P14 Standard",
     ],
     verdict:
       "同一単位・同系統では、KHAOS系YOPSが2.0倍、KOSMOS系TOPSが約16.67倍です。物理値は跳躍のみヴィンクルムが上回るため、優劣を一つの総合倍率にはまとめていません。",
@@ -703,7 +703,7 @@ export function ExtremeSaga() {
         </a>
         <a href="#p14">
           <small aria-hidden="true">02</small>
-          <span>演算コア</span>
+          <span>演算加速機構</span>
           <i aria-hidden="true">↗</i>
         </a>
         <a href="#stages">
@@ -728,8 +728,8 @@ export function ExtremeSaga() {
             <span className="exo-line">答えは一つ。</span>
           </h2>
           <span>
-            エクスプリーム専用のP14は、勝利経路の増殖と結果固定へ最適化された先行世代の演算コアです。KHAOS
-            UltraとKOSMOS Ultraを統合し、増え続ける可能性を一つの実行可能な結果へ収束させます。
+            エクスプリームの『P14 Standard』は、第14世代の標準演算加速機構です。演算帯域の配分、優先処理の加速、神経同期、熱負荷の管理を統合し、KHAOS
+            UltraとKOSMOS Ultraによる膨大な演算と高出力戦闘を安定して支えます。
           </span>
         </header>
 
@@ -747,7 +747,7 @@ export function ExtremeSaga() {
             </i>
             <img
               src="/extreme-p14-core.jpg"
-              alt="青い回路に接続されたP14演算コア"
+              alt="青い回路に接続されたP14 Standard演算コア"
               width="1000"
               height="1000"
               loading="lazy"
@@ -757,10 +757,10 @@ export function ExtremeSaga() {
           <div className="rxs-p14-copy">
             <h3>選んだ結果を、勝利に固定する。</h3>
             <p>
-              KHAOS UltraとKOSMOS
-              Ultraを束ね、学習によって増えた可能性を実行可能な勝利経路へ整えます。競合や破綻を除外しながら経路を再評価し、最短の勝利条件へ収束させます。変換効率・応答・安定率の個別数値は未公表です。
+              戦闘状況に応じて必要な演算を選択的に加速し、全処理を一律に高速化する方式より、不要な消費EMPと発熱を抑えます。高出力攻撃、複雑な能力処理、身体駆動を並行して支える、汎用性と高負荷耐性に優れた構造です。後継世代の演算加速機構は、このP14
+              Standardを100とした暫定ベンチマークで比較されます。変換効率・応答・安定率の個別数値は未公表です。
             </p>
-            <dl aria-label="エクスプリームのP14構成" data-exi-hit="" data-exi-line="mid">
+            <dl aria-label="エクスプリームのP14 Standard構成" data-exi-hit="" data-exi-line="mid">
               <div className="exo-read">
                 <dt>KHAOS Ultra</dt>
                 <dd>
@@ -782,8 +782,8 @@ export function ExtremeSaga() {
                 </dd>
               </div>
               <div className="exo-read">
-                <dt>TUNING</dt>
-                <dd>結果固定</dd>
+                <dt>TYPE</dt>
+                <dd>標準</dd>
               </div>
             </dl>
           </div>
@@ -791,7 +791,7 @@ export function ExtremeSaga() {
 
         {/* The flow reads by its arrows (the English captions over each
             step went: owner, 2026-10-23). */}
-        <div className="exs-core-flow" aria-label="P14の処理の流れ">
+        <div className="exs-core-flow" aria-label="P14 Standardの処理の流れ">
           <span>戦況を学習</span>
           <i aria-hidden="true">→</i>
           <span>勝利経路を生成</span>
@@ -817,7 +817,7 @@ export function ExtremeSaga() {
           </article>
         </div>
         <p className="rxs-comparison-note rxs-reveal">
-          P14は二つの演算系統を直列の役割として接続します。
+          P14 Standardは二つの演算系統を直列の役割として接続します。
         </p>
       </section>
 
