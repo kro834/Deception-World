@@ -2,10 +2,19 @@
 // rx12 (2026-10-10): the Rexonance suit-up's raster parts, cut from the
 // owner's approved full-body artwork (design/rexonance-suit/). Reproducible:
 //
-//   node scripts/build-rexonance-suit.mjs [--debug=<dir>]
+//   node scripts/build-rexonance-suit.mjs [--debug=<dir>] [--polygons] [--sam-prompts]
 //
-// writes public/rexonance-suit-20261010/*.webp, src/lib/rexonance-suit.ts and
+// writes public/rexonance-suit-20261023/*.webp, src/lib/rexonance-suit.ts and
 // (rx17) src/lib/rexonance-suit-gold.ts.
+// 2026-10-23 (owner: 「SAMを用いて、切り抜きが甘い部分などをブラッシュアップする事で
+// 装着を改善して」): the plates are cut by SAM 2.1's masks
+// (design/rexonance-suit/sam-masks-20261023/, made by scripts/sam/make_masks.py
+// from the polygons below, which --sam-prompts exports as its prompts): each
+// plate follows the art's own edges, the base figure keeps every black plate
+// (its alpha is the figure's less only what SAM sees as ornament), the
+// reactor's coil is its blades, and the silhouette's colours are
+// decontaminated of the black they were painted on. --polygons (or no masks)
+// cuts by the polygons as before.
 // The figure keeps the artwork's own pixels: the black background is flood-
 // filled away from the image edges (never entering the body, so the black
 // armour stays opaque) and the edge is feathered by a pixel. The armour is
@@ -25,7 +34,16 @@
 // scripts/build-rexonance-undersuit.mjs) over this build's body polygon,
 // whose delivery-size raster this build writes to design/rexonance-suit/
 // as the registration contract. This build keeps that file and registers it.
-import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,9 +53,12 @@ const sharp = require(process.env.SHARP_MODULE || "sharp");
 
 const VERSION = "20261010";
 // The published assets' folder (2026-10-16: the armour plates are cut from
-// the owner's figure without its ornaments; a new folder, so a cached atlas
-// never meets the new module).
-const ASSET_VERSION = "20261016";
+// the owner's figure without its ornaments; 2026-10-23: cut by SAM's masks;
+// each time a new folder, so a cached atlas never meets the new module).
+const ASSET_VERSION = "20261023";
+// The folder before it: the undersuit (Blender's, packed by its own script)
+// carries over from it unchanged.
+const PREVIOUS_ASSETS = "20261016";
 const BASE_SOURCE = fileURLToPath(
   new URL("../design/rexonance-suit/rexonance-base-20261016.jpg", import.meta.url),
 );
@@ -705,6 +726,67 @@ const MARKS = {
   ],
 };
 
+// --- SAM (owner, 2026-10-23: 「SAMを用いて、切り抜きが甘い部分などをブラッシュ
+// アップする事で装着を改善して」) ------------------------------------------------
+// The polygons above are rough traces; they are now SAM's PROMPTS. With
+// --sam-prompts this build writes them (and the pictures they refer to) to
+// SAM_DIR/prompts.json and stops; scripts/sam/make_masks.py segments the art
+// from them and writes the plates' masks there (with manifest.json: the exact
+// boxes and points). Without the flag the build reads those PNG masks, so it
+// stays reproducible without SAM; with no masks it cuts by the polygons.
+const SAM_VERSION = "20261023";
+const SAM_DIR = fileURLToPath(
+  new URL(`../design/rexonance-suit/sam-masks-${SAM_VERSION}/`, import.meta.url),
+);
+if (process.argv.includes("--sam-prompts")) {
+  mkdirSync(SAM_DIR, { recursive: true });
+  const prompts = {
+    site: "rexonance",
+    generatedBy: "scripts/build-rexonance-suit.mjs --sam-prompts",
+    frame: [1055, 2000],
+    images: {
+      full: `design/rexonance-suit/rexonance-full-${VERSION}.jpg`,
+      // Both share the owner's cut-out's frame, placed on the artwork here.
+      base: { src: "design/rexonance-suit/rexonance-base-20261016.jpg", size: [999, 1835], at: [30, 51] },
+      cutout: { src: "design/rexonance-suit/rexonance-cutout-20261011.webp", size: [999, 1835], at: [30, 51] },
+    },
+    ornamentGroups: ["tail", "ribbon"],
+    regions: PIECES.map(({ id, group, poly, seat }) => ({ id, group, poly, seat })),
+    splits: Object.fromEntries(
+      Object.entries(SPLITS).map(([id, plates]) => [
+        id,
+        plates.map(({ id: plate, clip, dir, group }) => ({ id: plate, clip, dir, group })),
+      ]),
+    ),
+    body: BODY,
+    face: FACE_GLOW,
+    enclosed: ENCLOSED,
+    marks: MARKS,
+  };
+  writeFileSync(join(SAM_DIR, "prompts.json"), `${JSON.stringify(prompts)}\n`);
+  console.log(`wrote ${join(SAM_DIR, "prompts.json")}`);
+  process.exit(0);
+}
+// SAM's masks, when they are there (--polygons cuts by the polygons instead).
+const samManifest =
+  !process.argv.includes("--polygons") && existsSync(join(SAM_DIR, "manifest.json"))
+    ? JSON.parse(readFileSync(join(SAM_DIR, "manifest.json"), "utf8"))
+    : null;
+/** One of SAM's 8-bit masks (the artwork's frame) as its bytes. */
+async function samShare(name) {
+  const { data, info } = await sharp(join(SAM_DIR, name))
+    .extractChannel(0)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  if (info.width !== 1055 || info.height !== 2000)
+    throw new Error(`${name}: ${info.width} x ${info.height}, not the artwork's frame`);
+  // A share within a level or two of whole (or of none) is whole (none): the
+  // 8-bit rounding would otherwise leave a faint grain in every plate's alpha.
+  for (let i = 0; i < data.length; i += 1) data[i] = data[i] >= 252 ? 255 : data[i] <= 3 ? 0 : data[i];
+  return data;
+}
+console.log(samManifest ? `cut by SAM's masks (${SAM_DIR})` : "cut by the polygons");
+
 // --- Raster helpers ------------------------------------------------------
 const { data: rgb, info } = await sharp(SOURCE)
   .removeAlpha()
@@ -1037,6 +1119,41 @@ const alpha = Float32Array.from({ length: N }, (_, i) =>
       rgb[i * 3 + c] = Math.min(255, Math.round(smooth[i * 3 + c] * k));
   }
 }
+// The silhouette's colours (2026-10-23): a pixel the edge half covers carries
+// the black it was painted on, a dark rim once the figure stands on anything
+// lighter. In the band along the solid figure its colour is its own light
+// unpremultiplied against the black and, the fainter it is, the nearer the
+// solid colour beside it (a normalised blur of the solid pixels): the edge
+// fades in alpha alone. The haze keeps its own treatment above; translucent
+// glows away from the solid figure keep their light.
+async function decontaminate(colours, coverage, skip = null) {
+  const solid = Float32Array.from(coverage, (a) => (a >= 0.96 ? 1 : 0));
+  const weight = await blurField(solid, 1.6);
+  const near = [];
+  for (let c = 0; c < 3; c += 1)
+    near.push(
+      await blurField(
+        Float32Array.from({ length: N }, (_, i) => (solid[i] * colours[i * 3 + c]) / 255),
+        1.6,
+      ),
+    );
+  let changed = 0;
+  for (let i = 0; i < N; i += 1) {
+    const a = coverage[i];
+    if (a >= 0.96 || a <= 0.01 || weight[i] < 0.04 || (skip && skip[i])) continue;
+    const k = Math.min(2.4, 1 / Math.max(a, 0.25));
+    const t = Math.min(1, Math.max(0, (a - 0.3) / 0.6));
+    const firm = t * t * (3 - 2 * t);
+    for (let c = 0; c < 3; c += 1) {
+      const own = Math.min(255, colours[i * 3 + c] * k);
+      const beside = Math.min(255, (near[c][i] / weight[i]) * 255);
+      colours[i * 3 + c] = Math.round(beside + (own - beside) * firm);
+    }
+    changed += 1;
+  }
+  return changed;
+}
+console.log(`figure: ${await decontaminate(rgb, alpha, haze)} edge colours decontaminated`);
 
 // The delivery crop: the figure's bounds, padded, scaled to DELIVERY_H.
 const PAD = 10;
@@ -1270,6 +1387,21 @@ const alphaBase = await (async () => {
   );
 })();
 const ornamentMask = Float32Array.from(same, (s) => (s ? 0 : 1));
+// SAM (2026-10-23): the ornaments' zone is what SAM segments as tail and
+// ribbons in the artwork, and the base figure is the figure wherever no
+// ornament is, and under one only where SAM sees armour in the base picture —
+// no longer a flood of its black ground, which also ate the black plates
+// connected to it (holes through the armour while it formed:
+// 「生成途中で穴が空いてボロボロに見える」).
+if (samManifest) {
+  const zone = await samShare("ornaments.png");
+  const shown = await samShare("base.png");
+  for (let i = 0; i < N; i += 1) {
+    ornamentMask[i] = zone[i] / 255;
+    alphaBase[i] = alpha[i] * (shown[i] / 255);
+  }
+}
+console.log(`base: ${await decontaminate(rgbBase, alphaBase)} edge colours decontaminated`);
 const goldBase = await goldLayersOf(rgbBase);
 const unlitBase = unlitOf(rgbBase);
 
@@ -1278,6 +1410,39 @@ const unlitBase = unlitOf(rgbBase);
 // off as a hard-edged slab: near its edge (a ~16 px band inside the body) a
 // piece keeps only the lit armour, and the dark suit there stays with the
 // body layer. Deeper inside, a piece keeps its black plates.
+const isOrnament = (piece) => ORNAMENT_GROUPS.has(piece.group);
+const claimed = new Float32Array(N);
+const plates = [];
+if (samManifest) {
+  // SAM's plates (2026-10-23): each plate's share of its layer — the armour's
+  // of the base figure, the ornaments' of the ornament zone — renormalised
+  // (the 8-bit shares sum to a level or two either side of one). What the
+  // armour's shares leave of the base figure is the bodysuit.
+  const sums = { armour: new Float32Array(N), ornaments: new Float32Array(N) };
+  const shares = [];
+  for (const region of PIECES) {
+    const layer = isOrnament(region) ? "ornaments" : "armour";
+    for (const split of SPLITS[region.id]) {
+      const entry = samManifest.plates[split.id];
+      if (!entry) throw new Error(`${split.id}: no SAM mask (run scripts/sam/make_masks.py)`);
+      if (entry.layer !== layer) throw new Error(`${split.id}: a mask of the ${entry.layer} layer`);
+      const share = await samShare(`plates/${split.id}.png`);
+      for (let i = 0; i < N; i += 1) sums[layer][i] += share[i] / 255;
+      shares.push({ region, split, layer, share });
+    }
+  }
+  for (const { region, split, layer, share } of shares) {
+    const sum = sums[layer];
+    const field = new Float32Array(N);
+    for (let i = 0; i < N; i += 1) {
+      if (!share[i]) continue;
+      const w = share[i] / 255 / Math.max(1, sum[i]);
+      field[i] = (layer === "ornaments" ? alpha[i] * ornamentMask[i] : alphaBase[i]) * w;
+      claimed[i] += field[i];
+    }
+    plates.push({ ...split, region: region.id, field });
+  }
+} else {
 const bodyCore = await rasterise([BODY]);
 const armourOf = (colours) =>
   blurField(
@@ -1295,8 +1460,6 @@ const armourBase = await armourOf(rgbBase);
 const remaining = new Float32Array(N).fill(1);
 const remainingBase = new Float32Array(N).fill(1);
 const pieceFields = [];
-const claimed = new Float32Array(N);
-const isOrnament = (piece) => ORNAMENT_GROUPS.has(piece.group);
 for (const piece of PIECES) {
   const poly = await rasterise([piece.poly]);
   const depth = await blurField(poly, 9);
@@ -1372,11 +1535,7 @@ for (const [index, piece] of PIECES.entries()) {
   }
   console.log(`base: ornament pixels beyond every polygon's reach ${strays}`);
 }
-const body = new Float32Array(N);
-for (let i = 0; i < N; i += 1) body[i] = Math.max(0, alpha[i] - claimed[i]);
-
 // Each region splits into its plates (first clip claims; the last takes the rest).
-const plates = [];
 for (const [index, region] of PIECES.entries()) {
   const splits = SPLITS[region.id];
   if (!splits) throw new Error(`${region.id}: no split`);
@@ -1394,10 +1553,24 @@ for (const [index, region] of PIECES.entries()) {
     plates.push({ ...split, region: region.id, field: plate });
   }
 }
+}
+const body = new Float32Array(N);
+// (A remainder under 4% is the plates' 8-bit shares rounding, not bodysuit.)
+for (let i = 0; i < N; i += 1) {
+  const left = alpha[i] - claimed[i];
+  body[i] = left < 0.04 ? 0 : left;
+}
 
 // --- Outputs ------------------------------------------------------------------
 mkdirSync(OUT_DIR, { recursive: true });
 for (const file of readdirSync(OUT_DIR)) if (file !== UNDERSUIT_FILE) rmSync(join(OUT_DIR, file));
+if (!existsSync(`${OUT_DIR}${UNDERSUIT_FILE}`))
+  copyFileSync(
+    fileURLToPath(
+      new URL(`../public/rexonance-suit-${PREVIOUS_ASSETS}/${UNDERSUIT_FILE}`, import.meta.url),
+    ),
+    `${OUT_DIR}${UNDERSUIT_FILE}`,
+  );
 const files = [];
 async function writeWebp(name, raw, width, height, options = {}) {
   const path = `${OUT_DIR}${name}`;
@@ -1428,7 +1601,12 @@ const UNDERSUIT = `${PUBLIC_PATH}/${UNDERSUIT_FILE}`;
 files.push({ name: UNDERSUIT_FILE, bytes: statSync(`${OUT_DIR}${UNDERSUIT_FILE}`).size });
 
 // The bodysuit between the plates (what no piece claims), as painted.
-const bodyBox = deliveryBox(bounds(body), 2);
+// (SAM's plates leave no bodysuit between them in this art: then the layer is
+// what the plates' soft edges leave, or a single transparent pixel.)
+const bodyBox = deliveryBox(
+  bounds(body) ?? { x0: CROP.left + 2, y0: CROP.top + 2, x1: CROP.left + 2, y1: CROP.top + 2 },
+  2,
+);
 const BODY_LAYER = await writeWebp(
   "body.webp",
   extractRaw(await toDelivery(rgba(body)), bodyBox),
@@ -1563,6 +1741,8 @@ for (const [index, plate] of plates.entries()) {
     }
   }
   // The seam it grows from: the middle of the box's edge behind its growth.
+  // (The seats stay the box edges' middles here: the call's fittings are
+  // registered on them; FAR FROM's build snaps an off-plate seat.)
   const seat = {
     up: [box.left + w / 2, box.top + h],
     down: [box.left + w / 2, box.top],

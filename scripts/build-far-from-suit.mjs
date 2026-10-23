@@ -4,11 +4,19 @@
 // 1024 x 1536), the way scripts/build-rexonance-suit.mjs cuts Rexonance's.
 // Reproducible:
 //
-//   node scripts/build-far-from-suit.mjs [--debug=<dir>]
+//   node scripts/build-far-from-suit.mjs [--debug=<dir>] [--polygons] [--sam-prompts]
 //
-// writes public/far-from-suit-20261022/*.webp and the generated modules
+// writes public/far-from-suit-20261023/*.webp and the generated modules
 // src/lib/far-from-suit.ts, src/lib/far-from-suit-gold.ts and
 // src/lib/far-from-suit-nanites.ts.
+// 2026-10-23 (owner: 「SAMを用いて、切り抜きが甘い部分などをブラッシュアップする事で
+// 装着を改善して」): the plates are cut by SAM 2.1's masks
+// (design/far-from-suit-20261022/sam-masks-20261023/, made by
+// scripts/sam/make_masks.py from the polygons below, which --sam-prompts
+// exports as its prompts): each plate follows the art's own edges and its cuts
+// run between the art's own parts. The driver keeps its traced outline.
+// --polygons (or no masks) cuts by the polygons as before. The modules' shapes
+// are unchanged (the same exports, fields and seam encoding).
 //
 // The whole cutout frame is delivered at 1040 px tall (src/lib/far-from-stage.ts:
 // FAR_FROM_SUIT_SIZE, 693 x 1040), never cropped, so every form (ハイ,
@@ -40,7 +48,7 @@
 // conduit is script-made from the gold's alpha (rails lit from the upper
 // left, an ice channel inside); `--blender` rendering as Rexonance's can
 // replace guide.webp later without touching the module's contract.
-import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -59,8 +67,11 @@ const { BELT_OUTLINE } = await import(pathToFileURL(join(ROOT, "scripts/far-from
 
 const VERSION = "20261022";
 const DESIGN = join(ROOT, `design/far-from-suit-${VERSION}`);
-const OUT_DIR = join(ROOT, `public/far-from-suit-${VERSION}/`);
-const PUBLIC_PATH = `/far-from-suit-${VERSION}`;
+// The published assets' folder (2026-10-23: cut by SAM's masks; a new folder,
+// so a cached atlas never meets the new module).
+const ASSET_VERSION = "20261023";
+const OUT_DIR = join(ROOT, `public/far-from-suit-${ASSET_VERSION}/`);
+const PUBLIC_PATH = `/far-from-suit-${ASSET_VERSION}`;
 const MODULE = join(ROOT, "src/lib/far-from-suit.ts");
 const GOLD_MODULE = join(ROOT, "src/lib/far-from-suit-gold.ts");
 const NANITES_MODULE = join(ROOT, "src/lib/far-from-suit-nanites.ts");
@@ -627,6 +638,61 @@ const DRIVER = ["belt-l2", "belt-r2", "belt-l1", "belt-r1", "belt-jewel"];
 const BELT_OVERLAP = 5;
 const ORNAMENT_GROUPS = new Set(["tail", "ribbon", "bits"]);
 
+// --- SAM (owner, 2026-10-23: 「SAMを用いて、切り抜きが甘い部分などをブラッシュ
+// アップする事で装着を改善して」) ------------------------------------------------
+// The polygons above are rough traces; they are now SAM's PROMPTS. With
+// --sam-prompts this build writes them to SAM_DIR/prompts.json and stops;
+// scripts/sam/make_masks.py segments ミドル from them and writes the plates'
+// masks there (with manifest.json: the exact boxes and points). Without the
+// flag the build reads those PNG masks, so it stays reproducible without
+// SAM; with no masks it cuts by the polygons. The driver keeps its traced
+// outline (BELT_OUTLINE): SAM only partitions the rest.
+const SAM_VERSION = "20261023";
+const SAM_DIR = join(DESIGN, `sam-masks-${SAM_VERSION}`);
+if (process.argv.includes("--sam-prompts")) {
+  mkdirSync(SAM_DIR, { recursive: true });
+  const prompts = {
+    site: "far-from",
+    generatedBy: "scripts/build-far-from-suit.mjs --sam-prompts",
+    frame: [W, H],
+    images: { full: `design/far-from-suit-${VERSION}/middle.webp` },
+    ornamentGroups: [...ORNAMENT_GROUPS],
+    regions: REGIONS.map(({ id, group, poly, seat }) => ({ id, group, poly, seat })),
+    splits: Object.fromEntries(
+      Object.entries(SPLITS).map(([id, plates]) => [
+        id,
+        plates.map(({ id: plate, clip, dir, group }) => ({ id: plate, clip, dir, group })),
+      ]),
+    ),
+    belt: { region: "belt", outline: BELT_OUTLINE, driver: DRIVER },
+    face: FACE_GLOW,
+    reactor: REACTOR_GLOW,
+    marks: MARKS,
+  };
+  writeFileSync(join(SAM_DIR, "prompts.json"), `${JSON.stringify(prompts)}\n`);
+  console.log(`wrote ${join(SAM_DIR, "prompts.json")}`);
+  process.exit(0);
+}
+// SAM's masks, when they are there (--polygons cuts by the polygons instead).
+const samManifest =
+  !process.argv.includes("--polygons") && existsSync(join(SAM_DIR, "manifest.json"))
+    ? JSON.parse(readFileSync(join(SAM_DIR, "manifest.json"), "utf8"))
+    : null;
+/** One of SAM's 8-bit masks (the cutout's frame) as its bytes. */
+async function samShare(name) {
+  const { data, info } = await sharp(join(SAM_DIR, name))
+    .extractChannel(0)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  if (info.width !== W || info.height !== H)
+    throw new Error(`${name}: ${info.width} x ${info.height}, not the cutout's frame`);
+  // A share within a level or two of whole (or of none) is whole (none): the
+  // 8-bit rounding would otherwise leave a faint grain in every plate's alpha.
+  for (let i = 0; i < data.length; i += 1) data[i] = data[i] >= 252 ? 255 : data[i] <= 3 ? 0 : data[i];
+  return data;
+}
+console.log(samManifest ? `cut by SAM's masks (${SAM_DIR})` : "cut by the polygons");
+
 // --- The source ----------------------------------------------------------------
 const source = await sharp(join(DESIGN, "middle.webp"))
   .ensureAlpha()
@@ -937,7 +1003,43 @@ const beltColours = await (async () => {
   }
   return out;
 })();
-for (const index of [BELT_INDEX, ...REGIONS.keys()].filter((v, k, a) => a.indexOf(v) === k)) {
+// SAM (2026-10-23): the driver still claims first by its outline; every other
+// plate takes its share (scripts/sam/make_masks.py, renormalised) of what the
+// belt leaves. Without the masks the polygons claim, front first, below.
+const samPlateFields = new Map();
+if (samManifest) {
+  const sum = new Float32Array(N);
+  const shares = [];
+  for (const [index, region] of REGIONS.entries()) {
+    if (index === BELT_INDEX) continue;
+    for (const split of SPLITS[region.id]) {
+      // A plate SAM's partition left empty (behind a front piece) has no mask.
+      if (!samManifest.plates[split.id]) continue;
+      const share = await samShare(`plates/${split.id}.png`);
+      for (let i = 0; i < N; i += 1) sum[i] += share[i] / 255;
+      shares.push({ id: split.id, share });
+    }
+  }
+  const belt = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) belt[i] = beltMask[i] * alpha[i];
+  regionFields[BELT_INDEX] = belt;
+  for (let i = 0; i < N; i += 1) claimed[i] = belt[i];
+  for (const { id, share } of shares) {
+    const field = new Float32Array(N);
+    for (let i = 0; i < N; i += 1) {
+      if (!share[i]) continue;
+      field[i] = alpha[i] * (1 - beltMask[i]) * (share[i] / 255 / Math.max(1, sum[i]));
+      claimed[i] += field[i];
+    }
+    samPlateFields.set(id, field);
+  }
+  let unshared = 0;
+  for (let i = 0; i < N; i += 1) if (alpha[i] > 0.03 && alpha[i] - claimed[i] > 0.03) unshared += 1;
+  console.log(`partition: SAM's masks; pixels no mask shares ${unshared}`);
+}
+for (const index of samManifest
+  ? []
+  : [BELT_INDEX, ...REGIONS.keys()].filter((v, k, a) => a.indexOf(v) === k)) {
   const region = REGIONS[index];
   const poly = index === BELT_INDEX ? beltMask : await rasterise([region.poly]);
   const field = new Float32Array(N);
@@ -952,7 +1054,7 @@ for (const index of [BELT_INDEX, ...REGIONS.keys()].filter((v, k, a) => a.indexO
 }
 // What no polygon reaches: the nearest region's, by its polygon's reach
 // (ornaments reach farther: a wing's strand beside the arm), then by seat.
-for (const [index, region] of REGIONS.entries()) {
+for (const [index, region] of samManifest ? [] : REGIONS.entries()) {
   if (index === BELT_INDEX) continue; // the driver takes only its outline
   const ornament = ORNAMENT_GROUPS.has(region.group);
   const reach = await blurField(await rasterise([region.poly]), ornament ? 24 : 14);
@@ -965,7 +1067,7 @@ for (const [index, region] of REGIONS.entries()) {
     claimed[i] += take;
   }
 }
-{
+if (!samManifest) {
   let strays = 0;
   for (let i = 0; i < N; i += 1) {
     if (!remaining[i] || alpha[i] < 0.03) continue;
@@ -994,6 +1096,11 @@ const plates = [];
 for (const [index, region] of REGIONS.entries()) {
   const splits = SPLITS[region.id];
   if (!splits) throw new Error(`${region.id}: no split`);
+  if (samManifest && index !== BELT_INDEX) {
+    for (const split of splits)
+      plates.push({ ...split, region: region.id, field: samPlateFields.get(split.id) ?? new Float32Array(N) });
+    continue;
+  }
   const left = Float32Array.from(regionFields[index]);
   let lastRight = 0;
   for (const split of splits) {
@@ -1116,6 +1223,27 @@ const UNDERSUIT = await writeWebp("undersuit.webp", undersuitRaw, FIG_W, FIG_H, 
   alphaQuality: 100,
 });
 
+// The seat on the plate itself (2026-10-23): a cut that follows the art can
+// leave the middle of the box's edge in the air (the plume rising from behind
+// the shoulder): a seat more than SEAT_SNAP px off the plate moves to its
+// nearest pixel, so the plate still grows from that edge (the scroll plan
+// lands a plate's tiles from its seat outward).
+const SEAT_SNAP = 4;
+function seatOnArt(seat, art, box) {
+  const [sx, sy] = seat;
+  let best = null;
+  let nearest = Infinity;
+  for (let y = 0; y < box.height; y += 1)
+    for (let x = 0; x < box.width; x += 1) {
+      if (art[(y * box.width + x) * 4 + 3] < 128) continue;
+      const d = Math.hypot(box.left + x + 0.5 - sx, box.top + y + 0.5 - sy);
+      if (d < nearest) {
+        nearest = d;
+        best = [box.left + x + 0.5, box.top + y + 0.5];
+      }
+    }
+  return best && nearest > SEAT_SNAP ? best : seat;
+}
 // The plates: one atlas of their art; each plate's gold, unformed, at the
 // same place in gold.webp; its gold cells; its micro-tiles.
 const MARGIN = 2;
@@ -1136,6 +1264,11 @@ for (const plate of plates) {
   const box = deliveryBox(found, Math.ceil(MARGIN / SCALE) + 1);
   const colours = plate.region === "helmet" ? unlit : plate.region === "belt" ? beltColours : rgb;
   const art = extractRaw(await toDelivery(rgba(plate.field, colours)), box);
+  // The driver is the belt and nothing else: the resampling's faintest ripple
+  // past its outline (under 6%) is cleared, so the lossy alpha's quantisation
+  // never lifts it into a visible pixel (2026-10-23: a re-packed atlas did).
+  if (plate.region === "belt")
+    for (let i = 3; i < art.length; i += 4) if (art[i] < 16) art[i] = 0;
   const { width: w, height: h } = box;
   const gold = extractRaw(
     await toDelivery(rgba(Float32Array.from(plate.field, (v, i) => v * goldSoft[i]), rawGold)),
@@ -1161,12 +1294,16 @@ for (const plate of plates) {
   }
   const seat = plate.root
     ? [plate.root[0] * SCALE, plate.root[1] * SCALE]
-    : {
-    up: [box.left + w / 2, box.top + h],
-    down: [box.left + w / 2, box.top],
-    left: [box.left + w, box.top + h / 2],
-    right: [box.left, box.top + h / 2],
-  }[plate.dir];
+    : seatOnArt(
+        {
+          up: [box.left + w / 2, box.top + h],
+          down: [box.left + w / 2, box.top],
+          left: [box.left + w, box.top + h / 2],
+          right: [box.left, box.top + h / 2],
+        }[plate.dir],
+        art,
+        box,
+      );
   const cols = Math.ceil(w / TILE);
   const rows = Math.ceil(h / TILE);
   const bits = new Uint8Array(Math.ceil((cols * rows) / 8));

@@ -1459,7 +1459,9 @@ function* layOutBuild(L: Layout, all: Plate[], gold: Cells) {
           const r = row[k] + dy;
           if ((!dx && !dy) || c < 0 || r < 0 || c >= cols || r >= rows) continue;
           const j = grid[r * cols + c];
-          if (j < 0 || !skeleton[j] || dist[j] >= dist[k] || dist[j] <= prevDist) continue;
+          // (Built before it by more than the float32 sums' rounding: two
+          // paths of 1s and 1.41s to one length can differ by an ulp.)
+          if (j < 0 || !skeleton[j] || dist[j] >= dist[k] - 1e-3 || dist[j] <= prevDist) continue;
           prev = j;
           prevDist = dist[j];
         }

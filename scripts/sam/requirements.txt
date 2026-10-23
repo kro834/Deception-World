@@ -1,0 +1,12 @@
+# scripts/sam/make_masks.py — SAM 2.1 through Hugging Face transformers, on the
+# system Python 3.9 (macOS) in a venv outside the repository. Exact versions
+# the committed masks were made with (2026-10-23, Apple M5, MPS).
+torch==2.8.0
+torchvision==0.23.0
+transformers==4.57.6
+huggingface_hub==0.36.2
+safetensors==0.7.0
+numpy==2.0.2
+scipy==1.13.1
+opencv-python-headless==5.0.0.93
+pillow==11.3.0
