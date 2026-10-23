@@ -25,10 +25,6 @@
   text-shadow: none;
 }
 
-.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-  color: #655766;
-}
-
 .dream-page.dream-page .dream-prologue-card::before,
 .dream-page.dream-page .dream-prologue-card::after {
   color: #8b6b32;
@@ -235,8 +231,8 @@
   white-space: nowrap;
 }
 
-/* The synopsis keeps its vertical columns on portrait phones. Place its
-   title and signature above and below them so neither leaves the paper. */
+/* The synopsis keeps its vertical columns on portrait phones. Its title
+   stands above them so it never leaves the paper. */
 @media (max-width: 480px) and (min-height: 521px) {
   .dream-page.dream-page .dream-prologue-card {
     flex-direction: column;
@@ -254,20 +250,6 @@
 
   .dream-page.dream-page .dream-prologue-card > p:not(.dream-prologue-sign) {
     flex: none;
-  }
-
-  .dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-    writing-mode: horizontal-tb;
-    flex-direction: column;
-    align-self: center;
-    gap: 8px;
-    width: 100%;
-    height: auto;
-    padding: 16px 8px 0;
-    border-top: 1px solid rgb(110 44 53 / 24%);
-    color: #655766;
-    text-align: center;
-    text-wrap: balance;
   }
 }
 

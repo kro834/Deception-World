@@ -237,10 +237,13 @@ test("the corners mount as annexes between 章の言葉 and 用語集; VOICES is
     assert.match(body, /<CornerHeading id=\{id\}/);
     assert.match(body, /data-dream-reveal/);
   }
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The corner's head is its source word alone (no HUD kicker, no tally).
   assert.match(
     extra,
-    /<header className="dream-annex-heading">\s*<p lang="en">\{corner\.kicker\}<\/p>\s*<h2 id=\{`\$\{id\}-title`\}>/,
+    /<header className="dream-annex-heading">\s*<h2 id=\{`\$\{id\}-title`\}>\{CORNERS\[id\]\.title\.text\}<\/h2>\s*<\/header>/,
   );
+  assert.doesNotMatch(extra, /corner\.kicker|corner\.unit/);
   assert.doesNotMatch(page, /id="voices"/);
   assert.doesNotMatch(extra, /id="voices"/);
   const quotes = slice(page, '<section id="quotes"', "<footer");

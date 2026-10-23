@@ -96,63 +96,6 @@
   pointer-events: none;
 }
 
-/* The index: 01–04 before each corner's kicker, a vermilion-edged chip in
-   Oxanium. HUD numerals with an empty alternative (the kicker and title
-   already name the corner). */
-.dream-page.dream-page
-  :is(#chronicle, #atlas, #relations, #arsenal)
-  .dream-annex-heading
-  > p::before {
-  display: inline-block;
-  margin-right: 14px;
-  padding: 1px 7px 0;
-  border: 1px solid rgb(204 73 59 / 72%);
-  color: var(--ts-shu-text);
-  font-family: var(--kn-num);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0.14em;
-  vertical-align: 1px;
-}
-
-.dream-page.dream-page #chronicle .dream-annex-heading > p::before {
-  content: "01" / "";
-}
-
-.dream-page.dream-page #atlas .dream-annex-heading > p::before {
-  content: "02" / "";
-}
-
-.dream-page.dream-page #relations .dream-annex-heading > p::before {
-  content: "03" / "";
-}
-
-.dream-page.dream-page #arsenal .dream-annex-heading > p::before {
-  content: "04" / "";
-}
-
-/* Under 360px the chip and CHRONICLE share a 150px kicker cell: a little
-   less tracking keeps the index and the word on one line. */
-@media (max-width: 359px) {
-  .dream-page.dream-page :is(#chronicle, #atlas, #relations, #arsenal) .dream-annex-heading > p {
-    letter-spacing: 0.22em;
-  }
-
-  .dream-page.dream-page
-    :is(#chronicle, #atlas, #relations, #arsenal)
-    .dream-annex-heading
-    > p::before {
-    margin-right: 10px;
-  }
-}
-
-/* Counts read as instrument figures. */
-.dream-page.dream-page .dream-annex-heading > span {
-  font-family: var(--kn-num);
-  letter-spacing: 0.2em;
-}
-
 /* ---------- 2. Folds: plates on the band ---------- */
 .dream-page.dream-page .dream-archive-fold {
   border-color: rgb(200 164 92 / 38%);

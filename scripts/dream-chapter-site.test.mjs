@@ -180,7 +180,8 @@ test("Dream Chapter data contains fifteen posters and three mapped characters", 
   assert.match(characters, /アルフィクトのなり損ない/);
   assert.match(characters, /portrait:\s*["']\/dream-chapter-kaisaku\.jpeg["']/);
   assert.match(pageSource, /DREAM_CHARACTERS\.map/);
-  assert.match(pageSource, />03 FILES</);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  assert.doesNotMatch(pageSource, />03 FILES</);
 });
 
 test("Dolminence contains exactly the four requested agents and identities", () => {
@@ -359,7 +360,8 @@ test("seven added shuffle images preserve their composition and declared dimensi
     assert.ok(Math.max(thumbnail.width, thumbnail.height) <= 320);
     assert.ok(Math.abs(thumbnail.width / thumbnail.height - poster.width / poster.height) < 0.01);
   }
-  assert.match(pageSource, /01 — \{String\(DREAM_POSTERS\.length\)/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  assert.doesNotMatch(pageSource, /01 — \{String\(DREAM_POSTERS\.length\)/);
 });
 
 test("Dream Chapter styles cover phone, tablet, safe-area, and reduced motion", () => {

@@ -208,13 +208,11 @@
   }
 }
 
-/* ---------- Heading: a kicker, a gilt title and a count on one rule ---------- */
+/* ---------- Heading: a 栞 and a gilt title on one rule ---------- */
 .dream-page.dream-page .dream-annex-heading {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "mark kicker count"
-    "mark title title";
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "mark title";
   align-items: end;
   column-gap: clamp(12px, 1.4vw, 18px);
   margin: 0 0 clamp(28px, 4vw, 44px);
@@ -248,16 +246,6 @@
   pointer-events: none;
 }
 
-.dream-page.dream-page .dream-annex-heading > p {
-  grid-area: kicker;
-  margin: 0 0 8px;
-  color: var(--ts-kin-light);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-}
-
 .dream-page.dream-page .dream-annex-heading h2 {
   grid-area: title;
   margin: 0;
@@ -271,17 +259,6 @@
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: 0.14em;
-}
-
-.dream-page.dream-page .dream-annex-heading > span {
-  grid-area: count;
-  margin: 0 0 8px;
-  padding-left: 14px;
-  border-left: 1px solid var(--ts-hair);
-  color: var(--ts-ginnezu);
-  font-family: var(--ts-latin);
-  font-size: 12px;
-  letter-spacing: 0.24em;
 }
 
 /* ---------- Shared: a spoken line with its speaker ---------- */

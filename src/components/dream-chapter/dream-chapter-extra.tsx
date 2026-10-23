@@ -165,15 +165,11 @@ function ArchivePassage({
   return <Lines text={passage.text} className={className} leadClassName={leadClassName} />;
 }
 
-function CornerHeading({ id, count }: { id: DreamArchiveCornerId; count: number }) {
-  const corner = CORNERS[id];
+/** The corner's source word over its gilt rule, the same head as every annex. */
+function CornerHeading({ id }: { id: DreamArchiveCornerId }) {
   return (
     <header className="dream-annex-heading">
-      <p lang="en">{corner.kicker}</p>
-      <h2 id={`${id}-title`}>{corner.title.text}</h2>
-      <span lang="en">
-        {pad2(count)} {corner.unit}
-      </span>
+      <h2 id={`${id}-title`}>{CORNERS[id].title.text}</h2>
     </header>
   );
 }
@@ -220,7 +216,7 @@ export function DreamChronicle({ id }: { id: "chronicle" }) {
       className="dream-annex dream-archive dream-chronicle"
       aria-labelledby="chronicle-title"
     >
-      <CornerHeading id={id} count={DREAM_CHRONICLE.length} />
+      <CornerHeading id={id} />
       <DreamRecordExplorer />
       <ol className="dream-chronicle-cases" data-dream-reveal>
         {DREAM_CASES.map((episode, index) => {
@@ -278,7 +274,7 @@ export function DreamAtlas({ id }: { id: "atlas" }) {
       className="dream-annex dream-archive dream-atlas"
       aria-labelledby="atlas-title"
     >
-      <CornerHeading id={id} count={DREAM_ATLAS.length} />
+      <CornerHeading id={id} />
       <ol className="dream-atlas-grid" data-dream-reveal>
         {DREAM_ATLAS.map((place, index) => (
           <li key={place.name}>
@@ -308,7 +304,7 @@ export function DreamRelations({ id }: { id: "relations" }) {
       className="dream-annex dream-archive dream-relations"
       aria-labelledby="relations-title"
     >
-      <CornerHeading id={id} count={DREAM_RELATIONS.length} />
+      <CornerHeading id={id} />
       <div className="dream-relations-circles" data-dream-reveal>
         {DREAM_RELATION_CIRCLES.map((circle, index) => {
           const ties = DREAM_RELATIONS.filter((tie) => tie.circle === circle);
@@ -344,14 +340,13 @@ export function DreamRelations({ id }: { id: "relations" }) {
 }
 
 export function DreamArsenal({ id }: { id: "arsenal" }) {
-  const total = DREAM_ARSENAL.reduce((sum, group) => sum + group.entries.length, 0);
   return (
     <section
       id={id}
       className="dream-annex dream-archive dream-arsenal"
       aria-labelledby="arsenal-title"
     >
-      <CornerHeading id={id} count={total} />
+      <CornerHeading id={id} />
       <div className="dream-arsenal-groups" data-dream-reveal>
         {DREAM_ARSENAL.map((group) => (
           <details key={group.group} className="dream-archive-fold">

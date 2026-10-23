@@ -141,10 +141,10 @@ test("generated text is silent: HUD numerals and counters with an empty alternat
   for (const [, value] of css.matchAll(/(?<![\w-])content:\s*([^;]+);/g)) {
     assert.match(value.trim(), /^(?:""|"\d{2}" \/ ""|counter\(kn-[\w-]+, decimal-leading-zero\) \/ "")$/, value);
   }
-  const index = rules
-    .filter(({ body }) => /content: "\d{2}" \/ ""/.test(body))
-    .map(({ selector, body }) => `${selector.match(/#(\w+)/)[1]}:${body.match(/"(\d{2})"/)[1]}`);
-  assert.deepEqual(index, ["chronicle:01", "atlas:02", "relations:03", "arsenal:04"]);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The corners' 01–04 chips are gone with their kickers.
+  const index = rules.filter(({ body }) => /content: "\d{2}" \/ ""/.test(body));
+  assert.deepEqual(index, []);
 });
 
 test("keyframes move only opacity and transforms, and scroll-linked ones never clip or paint", () => {

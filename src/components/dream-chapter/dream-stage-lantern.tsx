@@ -28,7 +28,6 @@ export function DreamStageLantern() {
       </span>
       <span className="dream-stage-lantern-label">
         <strong>夢灯り</strong>
-        <span>{lit ? "灯りを落とす" : "灯りをともす"}</span>
       </span>
     </button>
   );

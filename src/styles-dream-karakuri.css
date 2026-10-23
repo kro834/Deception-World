@@ -39,10 +39,11 @@ html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: fit-content;
   min-height: 60px;
   max-width: 100%;
   margin-top: 20px;
-  padding: 8px 14px 12px;
+  padding: 8px 22px 12px 14px;
   border: 1px solid rgb(214 180 123 / 40%);
   border-radius: 2px;
   background: #1b1120;
@@ -121,13 +122,6 @@ html[data-family="dream"]
 
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card h2 {
   color: #79353c;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card > p.dream-prologue-sign {
-  color: #655766;
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  line-height: 1.8;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-prologue-card::before,

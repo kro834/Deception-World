@@ -183,10 +183,7 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-s
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "act"
-    "kicker"
     "title"
-    "count"
     "rule";
   justify-items: center;
   align-content: center;
@@ -313,46 +310,34 @@ html[data-family="dream"]
   pointer-events: none;
 }
 
-/* The act's seal: 第一幕 set down a vermilion 落款. */
+/* The act's 幟: a vermilion banner with two gilt threads and a swallowtail
+   foot, hung from the card's frame (the cast banners' cut). No words — the
+   ghost numeral behind the title numbers the act (Owner, 2026-10-23). */
 html[data-family="dream"]
   main.dream-page.dream-page
   > .dream-section
   > .dream-section-heading
   > .dream-act-mark {
-  grid-area: act;
-  align-self: center;
-  justify-self: center;
-  margin: 0 0 clamp(16px, 2vw, 24px);
-  padding: 12px 9px;
-  border: 1px solid rgb(243 224 176 / 68%);
-  outline: 1px solid var(--dr-shu);
-  outline-offset: 3px;
-  writing-mode: vertical-rl;
-  color: var(--dr-text);
+  position: absolute;
+  top: clamp(10px, 1.6vw, 22px);
+  left: 50%;
+  display: block;
+  width: 24px;
+  height: clamp(46px, 5.4vw, 68px);
+  translate: -50% 0;
   background:
+    linear-gradient(
+      90deg,
+      transparent 3px,
+      rgb(243 224 176 / 78%) 3px 4px,
+      transparent 4px calc(100% - 4px),
+      rgb(243 224 176 / 78%) calc(100% - 4px) calc(100% - 3px),
+      transparent 0
+    ),
     radial-gradient(70% 60% at 50% 25%, rgb(224 102 79 / 32%), transparent 75%),
     linear-gradient(180deg, #b83a30 0%, var(--dr-shu-deep) 60%, #7d231c 100%);
-  clip-path: none;
-  box-shadow:
-    inset 0 0 0 1px rgb(243 224 176 / 20%),
-    0 12px 28px -12px rgb(0 0 0 / 92%);
-  font-family: var(--dr-display);
-  font-size: clamp(16px, 1.4vw, 19px);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 0.32em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading > p {
-  grid-area: kicker;
-  margin: 0 0 clamp(8px, 1vw, 12px);
-  padding: 0;
-  border: 0;
-  color: var(--dr-gold-hi);
-  font-family: var(--dr-latin);
-  font-size: clamp(12px, 1vw, 14px);
-  font-weight: 600;
-  letter-spacing: 0.42em;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 9px), 0 100%);
+  pointer-events: none;
 }
 
 html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-section-heading h2 {
@@ -363,42 +348,6 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-section > .dream-s
   font-size: clamp(30px, 8.4vw, 108px);
   line-height: 1.1;
   letter-spacing: 0.24em;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  > .dream-section
-  > .dream-section-heading
-  > span:not(.film-text-scan) {
-  grid-area: count;
-  align-self: center;
-  justify-self: center;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: clamp(10px, 1.4vw, 16px) 0 0;
-  padding: 0;
-  border: 0;
-  color: var(--dr-text-2);
-  font-family: var(--dr-latin);
-  font-size: 12px;
-  letter-spacing: 0.3em;
-}
-
-html[data-family="dream"]
-  main.dream-page.dream-page
-  > .dream-section
-  > .dream-section-heading
-  > span:not(.film-text-scan)::before,
-html[data-family="dream"]
-  main.dream-page.dream-page
-  > .dream-section
-  > .dream-section-heading
-  > span:not(.film-text-scan)::after {
-  content: "";
-  width: clamp(28px, 4vw, 56px);
-  height: 1px;
-  background: var(--dr-gold);
 }
 
 html[data-family="dream"]
@@ -472,18 +421,18 @@ html[data-family="dream"]
 }
 
 /* ----------------------------------------------------------------
-   3. The scene head: numbered seal, HUD kicker, Japanese title
+   3. The scene head: a wordless 栞 and the Japanese title on a gilt rule
+   (Owner, 2026-10-23: no kicker, seal number or tally — the act card
+   before it places the scene; its own title names it.)
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "mark kicker count"
-    "mark title count";
-  align-items: center;
-  column-gap: clamp(12px, 1.6vw, 20px);
-  margin: 0 0 clamp(20px, 2.6vw, 32px);
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "mark title";
+  align-items: end;
+  column-gap: clamp(14px, 1.6vw, 20px);
+  margin: 0 0 clamp(22px, 2.8vw, 34px);
   padding: 0 0 clamp(12px, 1.4vw, 16px);
   background:
     linear-gradient(90deg, var(--dr-gold-hi), var(--dr-gold) 45%, var(--dr-rule)) 0 100% / 100%
@@ -491,114 +440,38 @@ html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
     linear-gradient(var(--dr-rule-2) 0 0) 0 calc(100% - 4px) / 100% 1px no-repeat;
 }
 
-/* The seal: the act's numeral over the scene's number. */
+/* The vermilion 栞 hangs from above the title to the rule: two gilt threads
+   and a swallowtail foot, no words (the older sheet's ribbon, in 朱). */
 html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::before {
   grid-area: mark;
   align-self: stretch;
-  display: grid;
-  place-items: center;
-  width: auto;
-  min-width: 52px;
+  width: 14px;
   min-height: 52px;
-  margin: 0;
-  padding: 6px 8px;
-  border: 1px solid rgb(243 224 176 / 62%);
-  outline: 1px solid var(--dr-shu);
-  outline-offset: 2px;
-  color: var(--dr-text);
+  margin: 0 0 -8px;
+  padding: 0;
+  border: 0;
+  outline: 0;
   background:
-    radial-gradient(75% 65% at 50% 25%, rgb(224 102 79 / 28%), transparent 75%),
+    linear-gradient(
+      90deg,
+      transparent 2px,
+      rgb(243 224 176 / 78%) 2px 3px,
+      transparent 3px calc(100% - 3px),
+      rgb(243 224 176 / 78%) calc(100% - 3px) calc(100% - 2px),
+      transparent 0
+    ),
     linear-gradient(180deg, #b83a30 0%, var(--dr-shu-deep) 65%, #7d231c 100%);
-  box-shadow:
-    inset 0 0 0 1px rgb(243 224 176 / 18%),
-    0 8px 20px -10px rgb(0 0 0 / 85%);
-  clip-path: none;
-  font-family: var(--dr-num);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: 0.08em;
-  text-align: center;
-  white-space: pre;
-}
-
-html[data-family="dream"] main.dream-page.dream-page #cast-roster > .dream-annex-heading::before {
-  content: "II\A 02" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #factions > .dream-annex-heading::before {
-  content: "III\A 02" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #case-notes > .dream-annex-heading::before {
-  content: "IV\A 02" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #chronicle > .dream-annex-heading::before {
-  content: "IV\A 03" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #atlas > .dream-annex-heading::before {
-  content: "IV\A 04" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #relations > .dream-annex-heading::before {
-  content: "IV\A 05" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #arsenal > .dream-annex-heading::before {
-  content: "IV\A 06" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #glossary > .dream-annex-heading::before {
-  content: "附\A 01" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page #quotes > .dream-annex-heading::before {
-  content: "附\A 02" / "";
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > p {
-  grid-area: kicker;
-  align-self: end;
-  margin: 0 0 4px;
-  color: var(--dr-gold-hi);
-  font-family: var(--dr-latin);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.36em;
-}
-
-/* One numbering: the seal carries it, the corners' old chips stand down. */
-html[data-family="dream"]
-  main.dream-page.dream-page
-  :is(#chronicle, #atlas, #relations, #arsenal)
-  .dream-annex-heading
-  > p::before {
-  content: none;
-  display: none;
+  box-shadow: 0 8px 20px -10px rgb(0 0 0 / 85%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 7px), 0 100%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading h2 {
   grid-area: title;
-  align-self: start;
+  align-self: end;
   margin: 0;
-  font-size: clamp(28px, 3.2vw, 44px);
+  font-size: clamp(30px, 3.4vw, 46px);
   line-height: 1.16;
   letter-spacing: 0.14em;
-}
-
-html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > span {
-  grid-area: count;
-  align-self: end;
-  margin: 0 0 4px;
-  padding: 4px 0 4px 14px;
-  border-left: 1px solid var(--dr-rule);
-  color: var(--dr-text-3);
-  font-family: var(--dr-latin);
-  font-size: 12px;
-  letter-spacing: 0.24em;
-  white-space: nowrap;
 }
 
 /* ----------------------------------------------------------------
@@ -1933,22 +1806,14 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
     flex: none;
   }
 
-  /* Scene heads: the title takes the whole line under the kicker. */
+  /* Scene heads: the 栞 and the title share one line. */
   html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
-    grid-template-areas:
-      "mark kicker count"
-      "mark title title";
     column-gap: 12px;
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading h2 {
-    font-size: clamp(24px, 7.4vw, 32px);
+    font-size: clamp(26px, 7.8vw, 34px);
     letter-spacing: 0.1em;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > span {
-    padding-left: 10px;
-    letter-spacing: 0.16em;
   }
 
   /* The atlas boards' names keep one line on a phone's rail plate. */
@@ -2151,28 +2016,6 @@ html[data-family="dream"] main.dream-page.dream-page > .dream-footer > a {
   }
 }
 
-/* Narrow phones: a scene head's count steps under its title, clear of a
-   long kicker (ORGANIZATION, CHARACTERS). */
-@media (max-width: 374px) {
-  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      "mark kicker"
-      "mark title"
-      "mark count";
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading::before {
-    align-self: start;
-  }
-
-  html[data-family="dream"] main.dream-page.dream-page .dream-annex-heading > span {
-    justify-self: start;
-    margin: 6px 0 0;
-    padding: 0;
-    border-left: 0;
-  }
-}
 
 /* The four Dolminence slips lie on their side again, portrait left and
    billing right, so the katakana names keep their width. */
@@ -2997,15 +2840,13 @@ html[data-family="dream"] main.dream-page.dream-page #quotes {
     background: Canvas;
   }
 
+  /* The wordless 幟 is paint only; system colours leave it unpainted. */
   html[data-family="dream"]
     main.dream-page.dream-page
     > .dream-section
     > .dream-section-heading
     > .dream-act-mark {
-    border-color: CanvasText;
-    outline-color: CanvasText;
-    color: CanvasText;
-    background: Canvas;
+    background: none;
   }
 
   html[data-family="dream"]

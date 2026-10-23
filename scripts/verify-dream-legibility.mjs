@@ -182,7 +182,8 @@ try {
     const checks = [];
     report.current = { width, checks };
     await view(page, ".dream-prologue-card");
-    for (const selector of ["h2", "> p:not(.dream-prologue-sign)", ".dream-prologue-sign"]) {
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the sign is gone.
+    for (const selector of ["h2", "> p"]) {
       checks.push(await contrast(page, `.dream-prologue-card ${selector}`, ".dream-prologue-card"));
     }
     await page.screenshot({ path: `${output}/${width}-prologue.png` });

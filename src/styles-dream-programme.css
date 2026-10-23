@@ -1451,7 +1451,7 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
     main.dream-page.dream-page
     > section[data-film-reveal]
     > .dream-section-heading
-    > b.dream-act-mark {
+    > .dream-act-mark {
     animation: dr-prog-seal-stamp 560ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both;
   }
 
