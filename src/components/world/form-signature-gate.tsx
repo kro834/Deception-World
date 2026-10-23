@@ -459,10 +459,9 @@ function RexonanceGateArt() {
           <b>R</b>
         </div>
       </div>
+      {/* The wordmark alone: no status line under it (2026-10-23). */}
       <div className="rexonance-gate-copy" aria-hidden="true">
-        <small>ORDER × DIVINITY × WILL</small>
         <strong>REXONANCE</strong>
-        <span>TRINITY SOVEREIGN LINK ESTABLISHED</span>
       </div>
     </>
   );

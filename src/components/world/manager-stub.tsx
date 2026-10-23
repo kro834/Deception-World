@@ -276,7 +276,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             fetchPriority="auto"
             loading="lazy"
           />
-          <span>RIDER</span>
           <SlideOpenControl
             buttonRef={opener}
             className="form-pickup-plus"
@@ -285,9 +284,8 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             onOpen={open}
           />
         </div>
+        {/* The name leads: no kicker restates the card's role (2026-10-23). */}
         <div className="form-pickup-copy">
-          <p>TRANSFORMATION RECORD</p>
-          <small>PICKUP</small>
           <h2>
             <span>{riderPrefix}</span>
             <b>{formName}</b>
@@ -300,13 +298,19 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               <DisplayName value={rider.sub} />
             </em>
           ) : null}
-          <q>{rider.quote ?? rider.system}</q>
+          {/* A quote reads as a quote; a form without one shows its system
+              as the plain line it is. */}
+          {rider.quote ? (
+            <q>{rider.quote}</q>
+          ) : (
+            <p className="form-pickup-system">{rider.system}</p>
+          )}
           {/* The record strip (2026-10-21): the transformation calls as a
               numbered sequence and the spec sheet, on the card itself, the
-              same on every file; the full record stays behind HOLD + SLIDE. */}
+              same on every file; the full record stays behind the control.
+              Their shapes say what they are: no captions. */}
           <div className="form-pickup-record">
             <div className="form-pickup-record-calls">
-              <small>CALL SEQUENCE</small>
               <ol className="form-pickup-calls" aria-label="変身音声">
                 {rider.calls.map((call, index) => (
                   <li key={`${call}-${index}`}>
@@ -318,7 +322,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </div>
             {stats.length ? (
               <div className="form-pickup-record-spec">
-                <small>SPEC SHEET</small>
                 <dl className="form-pickup-spec" aria-label="スペック">
                   {stats.map((s) => (
                     <div key={s.dt}>
@@ -372,9 +375,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </div>
           ) : null}
           <div className="form-pickup-heading">
-            <p>
-              <span>RIDER PICKUP</span>
-            </p>
             <small>{rider.system}</small>
             <h2>
               <span>{riderPrefix}</span>
@@ -409,20 +409,10 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 loading="lazy"
                 fetchPriority="auto"
               />
-              <figcaption>
-                <span>FORM VISUAL</span>
-                <b>
-                  <DisplayName value={record.name} />
-                </b>
-              </figcaption>
             </figure>
             <div>
               {overview.length ? (
                 <section className="form-pickup-overview" aria-label="フォーム概要">
-                  <header>
-                    <span>00</span>
-                    <p>{isRexonance ? "OVERVIEW / SELF RESONANCE" : "OVERVIEW"}</p>
-                  </header>
                   <div>
                     {overview.map((paragraph) => (
                       <p key={paragraph.slice(0, 32)}>{paragraph}</p>
@@ -442,11 +432,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               ) : null}
               <div className="form-pickup-sections">
                 {abilities.length ? (
-                  <section className="is-ability">
-                    <header>
-                      <span>01</span>
-                      <p>ABILITY</p>
-                    </header>
+                  <section className="is-ability" aria-label="能力">
                     {abilities.map((a) => (
                       <div key={a.name}>
                         <h3>
@@ -458,11 +444,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   </section>
                 ) : null}
                 {arsenal.length ? (
-                  <section className="is-arsenal">
-                    <header>
-                      <span>02</span>
-                      <p>ARSENAL</p>
-                    </header>
+                  <section className="is-arsenal" aria-label="武装">
                     {arsenal.map((a) => (
                       <div key={a.name}>
                         <h3>
@@ -474,11 +456,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   </section>
                 ) : null}
                 {finishers.length ? (
-                  <section className="is-finisher">
-                    <header>
-                      <span>03</span>
-                      <p>FINISHER</p>
-                    </header>
+                  <section className="is-finisher" aria-label="必殺技">
                     {finishers.map((a) => (
                       <div key={a.name}>
                         <h3>
@@ -503,7 +481,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                         loading="lazy"
                       />
                       <figcaption>
-                        <span>{f.sub ?? "FORM"}</span>
+                        {f.sub ? <span>{f.sub}</span> : null}
                         <b>
                           <DisplayName value={f.name} />
                         </b>
@@ -517,11 +495,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
           {weaponGallery.length ? (
             <section className="rexonance-weapon-gallery" aria-label="レクソナンス追加武装">
               <header>
-                <div>
-                  <small>LINKED ARMAMENTS / REXONANCE DRIVE</small>
-                  <h3>共鳴武装群</h3>
-                </div>
-                <span>{String(weaponGallery.length).padStart(2, "0")} SYSTEMS</span>
+                <h3>共鳴武装群</h3>
               </header>
               <div className="rexonance-weapon-grid">
                 {weaponGallery.map((weapon, index) => (
@@ -545,7 +519,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                       <b>
                         <DisplayName value={weapon.name} />
                       </b>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                     </figcaption>
                   </figure>
                 ))}

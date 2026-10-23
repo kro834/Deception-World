@@ -298,18 +298,19 @@ test("forced colours get plain ink, opaque plates and system buttons", () => {
 
 test("the form records carry their section hooks, class names only", async () => {
   const stub = await read("src/components/world/manager-stub.tsx");
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the groups' captions
+  // (01 ABILITY …) go; their shapes tell them apart and each keeps its name for assistive tech.
   for (const [hook, label] of [
-    ["is-ability", "ABILITY"],
-    ["is-arsenal", "ARSENAL"],
-    ["is-finisher", "FINISHER"],
+    ["is-ability", "能力"],
+    ["is-arsenal", "武装"],
+    ["is-finisher", "必殺技"],
   ]) {
-    assert.match(
-      stub,
-      new RegExp(
-        `<section className="${hook}">\\s*<header>\\s*<span>0\\d</span>\\s*<p>${label}</p>`,
-      ),
-    );
+    assert.match(stub, new RegExp(`<section className="${hook}" aria-label="${label}">`));
   }
+  assert.doesNotMatch(stub, /<p>(?:ABILITY|ARSENAL|FINISHER)<\/p>/);
+  // Powers as tiles, arms as blade plates, the finisher as the closing gold plate.
+  assert.match(source, /section\.is-ability \{\s*grid-template-columns: repeat\(auto-fit,/);
+  assert.match(source, /section\.is-arsenal\s*> div \{[^}]*border-top: 2px solid var\(--pc-lock\);/);
   // The finishers' cards take the gold edge.
   assert.match(
     source,

@@ -1,16 +1,10 @@
-                      <dt>{s.dt}</dt>
-                      <dd>{s.dd}</dd>
                     </div>
                   ))}
                 </dl>
               ) : null}
               <div className="form-pickup-sections">
                 {abilities.length ? (
-                  <section className="is-ability">
-                    <header>
-                      <span>01</span>
-                      <p>ABILITY</p>
-                    </header>
+                  <section className="is-ability" aria-label="能力">
                     {abilities.map((a) => (
                       <div key={a.name}>
                         <h3>
@@ -22,11 +16,7 @@
                   </section>
                 ) : null}
                 {arsenal.length ? (
-                  <section className="is-arsenal">
-                    <header>
-                      <span>02</span>
-                      <p>ARSENAL</p>
-                    </header>
+                  <section className="is-arsenal" aria-label="武装">
                     {arsenal.map((a) => (
                       <div key={a.name}>
                         <h3>
@@ -38,11 +28,7 @@
                   </section>
                 ) : null}
                 {finishers.length ? (
-                  <section className="is-finisher">
-                    <header>
-                      <span>03</span>
-                      <p>FINISHER</p>
-                    </header>
+                  <section className="is-finisher" aria-label="必殺技">
                     {finishers.map((a) => (
                       <div key={a.name}>
                         <h3>
@@ -67,7 +53,7 @@
                         loading="lazy"
                       />
                       <figcaption>
-                        <span>{f.sub ?? "FORM"}</span>
+                        {f.sub ? <span>{f.sub}</span> : null}
                         <b>
                           <DisplayName value={f.name} />
                         </b>
@@ -81,11 +67,7 @@
           {weaponGallery.length ? (
             <section className="rexonance-weapon-gallery" aria-label="レクソナンス追加武装">
               <header>
-                <div>
-                  <small>LINKED ARMAMENTS / REXONANCE DRIVE</small>
-                  <h3>共鳴武装群</h3>
-                </div>
-                <span>{String(weaponGallery.length).padStart(2, "0")} SYSTEMS</span>
+                <h3>共鳴武装群</h3>
               </header>
               <div className="rexonance-weapon-grid">
                 {weaponGallery.map((weapon, index) => (
@@ -109,7 +91,7 @@
                       <b>
                         <DisplayName value={weapon.name} />
                       </b>
-                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                     </figcaption>
                   </figure>
                 ))}
@@ -435,3 +417,12 @@ export const REX_LOI: Profile = {
     ],
     abilities: [
       {
+        name: "SCANNING",
+        body: "一撃を見た時点で、重心、意図、発動条件、癖、精神状態、さらに相手の未来まで読み取り、最適な戦法を提示する。",
+      },
+      {
+        name: "SPECIAL",
+        body: "スペシャルコアを押し込んで発動。最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない攻撃と防御へ転用する。",
+      },
+    ],
+    arsenal: [

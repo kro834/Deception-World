@@ -276,7 +276,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             fetchPriority="auto"
             loading="lazy"
           />
-          <span>RIDER</span>
           <SlideOpenControl
             buttonRef={opener}
             className="form-pickup-plus"
@@ -285,9 +284,8 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             onOpen={open}
           />
         </div>
+        {/* The name leads: no kicker restates the card's role (2026-10-23). */}
         <div className="form-pickup-copy">
-          <p>TRANSFORMATION RECORD</p>
-          <small>PICKUP</small>
           <h2>
             <span>{riderPrefix}</span>
             <b>{formName}</b>
@@ -300,13 +298,19 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               <DisplayName value={rider.sub} />
             </em>
           ) : null}
-          <q>{rider.quote ?? rider.system}</q>
+          {/* A quote reads as a quote; a form without one shows its system
+              as the plain line it is. */}
+          {rider.quote ? (
+            <q>{rider.quote}</q>
+          ) : (
+            <p className="form-pickup-system">{rider.system}</p>
+          )}
           {/* The record strip (2026-10-21): the transformation calls as a
               numbered sequence and the spec sheet, on the card itself, the
-              same on every file; the full record stays behind HOLD + SLIDE. */}
+              same on every file; the full record stays behind the control.
+              Their shapes say what they are: no captions. */}
           <div className="form-pickup-record">
             <div className="form-pickup-record-calls">
-              <small>CALL SEQUENCE</small>
               <ol className="form-pickup-calls" aria-label="変身音声">
                 {rider.calls.map((call, index) => (
                   <li key={`${call}-${index}`}>
@@ -318,7 +322,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </div>
             {stats.length ? (
               <div className="form-pickup-record-spec">
-                <small>SPEC SHEET</small>
                 <dl className="form-pickup-spec" aria-label="スペック">
                   {stats.map((s) => (
                     <div key={s.dt}>
@@ -372,9 +375,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </div>
           ) : null}
           <div className="form-pickup-heading">
-            <p>
-              <span>RIDER PICKUP</span>
-            </p>
             <small>{rider.system}</small>
             <h2>
               <span>{riderPrefix}</span>
@@ -409,20 +409,10 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 loading="lazy"
                 fetchPriority="auto"
               />
-              <figcaption>
-                <span>FORM VISUAL</span>
-                <b>
-                  <DisplayName value={record.name} />
-                </b>
-              </figcaption>
             </figure>
             <div>
               {overview.length ? (
                 <section className="form-pickup-overview" aria-label="フォーム概要">
-                  <header>
-                    <span>00</span>
-                    <p>{isRexonance ? "OVERVIEW / SELF RESONANCE" : "OVERVIEW"}</p>
-                  </header>
                   <div>
                     {overview.map((paragraph) => (
                       <p key={paragraph.slice(0, 32)}>{paragraph}</p>
@@ -434,3 +424,5 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                 <dl className="form-pickup-stats">
                   {stats.map((s) => (
                     <div key={s.dt}>
+                      <dt>{s.dt}</dt>
+                      <dd>{s.dd}</dd>

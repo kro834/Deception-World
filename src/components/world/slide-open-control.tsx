@@ -525,8 +525,9 @@ export function SlideOpenControl({
       onDragStart={(event) => event.preventDefault()}
     >
       <span className="ios-slide-open-fill" aria-hidden="true" />
+      {/* The thumb and its chevrons show the slide (and a tap opens it too):
+          no instruction line (2026-10-23). The description keeps it for AT. */}
       <span className="ios-slide-open-label" aria-hidden="true">
-        <small>HOLD + SLIDE</small>
         <b>{label}</b>
       </span>
       <span className="ios-slide-open-arrows" aria-hidden="true">
