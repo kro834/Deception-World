@@ -20,7 +20,8 @@ try {
     page.on("pageerror", (error) => errors.push(error.message));
     let blocked = mode === "network-recovery";
     let aborted = 0;
-    await page.route("**/rexonance-suit-20261016/figure.webp", (route) => {
+    // Owner (2026-10-23): SAMで切り抜きを改善 (the suit's new folder).
+    await page.route("**/rexonance-suit-20261023/figure.webp", (route) => {
       if (blocked) {
         aborted++;
         return route.abort();

@@ -1130,8 +1130,10 @@ export function* assemblyNanitePlanSteps({
       }
       let most = 0;
       let last = 0;
+      // (Of cells tied for last, the one the build order lists last — the
+      // chain's next segment starts nearest it.)
       for (let k = 0; k < count; k += 1)
-        if (dist[k] > most) {
+        if (dist[k] >= most && dist[k] > 0) {
           most = dist[k];
           last = k;
         }

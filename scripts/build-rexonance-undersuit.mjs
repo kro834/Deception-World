@@ -30,7 +30,9 @@ const render = resolve(
   process.env.REXONANCE_UNDERSUIT_RENDER || "output/playwright/undersuit-production/undersuit.png",
 );
 const maskFile = resolve(root, "design/rexonance-suit/rexonance-undersuit-mask-20261016.png");
-const file = resolve(root, "public/rexonance-suit-20261016/undersuit-20261021.webp");
+// The suit's folder (2026-10-23: the suit re-cut by SAM's masks moved to a new
+// folder; the undersuit carries over into it unchanged).
+const file = resolve(root, "public/rexonance-suit-20261023/undersuit-20261021.webp");
 const WIDTH = 571;
 const HEIGHT = 1040;
 // The rx12/rx13 set (figure, undersuit, body, face, plates) stays under
