@@ -864,3 +864,36 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-mo
     font-size: 12px;
   }
 }
+
+/* The driver is worn from the first frame (owner: 「最初からドライバーを
+   装着」): before the engine is live (waiting, preparing) the motion tiers
+   show the bare undersuit with the driver on it, never the finished suit;
+   the still tiers keep the finished figure. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup:not([data-rzn-load="static"]):not([data-rzn-state="live"])
+    > .rzn-frame
+    > :is(.rzn-under, .rzn-driver-standin) {
+    display: block;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup:not([data-rzn-load="static"]):not([data-rzn-state="live"])
+    > .rzn-frame
+    > .rzn-under {
+    opacity: 0.55;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup:not([data-rzn-load="static"]):not([data-rzn-state="live"])
+    > .rzn-frame
+    > .rzn-still {
+    visibility: hidden;
+  }
+}

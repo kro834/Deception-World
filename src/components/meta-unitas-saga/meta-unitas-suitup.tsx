@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState, type RefObject } from "react";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { initRail } from "@/lib/liquid/boot.js";
 import {
   META_UNITAS_CALL_LINES,
@@ -234,32 +234,20 @@ export const MetaUnitasSuitUp = memo(function MetaUnitasSuitUp({
         data-stage={stage}
         style={{ ["--mus-accent" as string]: FORM_ACCENTS[stage] }}
       >
-        <div
+        <FormSlider
           ref={tabsRef}
-          className="rxs-stage-tabs liquid-swipe-tabs mus-tabs"
-          role="tablist"
-          aria-label="変身後の形態"
-          data-liquid-glass="true"
-          data-stage={stage}
-        >
-          <LiquidLens />
-          {META_UNITAS_FORMS.map((key) => (
-            <button
-              key={key}
-              id={`mus-ending-tab-${key}`}
-              type="button"
-              role="tab"
-              aria-selected={stage === key}
-              aria-controls="mus-ending-panel"
-              tabIndex={stage === key ? 0 : -1}
-              className={stage === key ? "is-active" : ""}
-              style={{ ["--liquid-accent" as string]: FORM_ACCENTS[key] }}
-              onClick={() => onChoose(key)}
-            >
-              <span>{FORM_LABELS[key]}</span>
-            </button>
-          ))}
-        </div>
+          className="mus-tabs"
+          items={META_UNITAS_FORMS.map((key) => ({
+            key,
+            label: FORM_LABELS[key],
+            accent: FORM_ACCENTS[key],
+          }))}
+          value={stage}
+          onSelect={onChoose}
+          idPrefix="mus-ending-tab"
+          panelId="mus-ending-panel"
+          ariaLabel="変身後の形態"
+        />
         <div
           id="mus-ending-panel"
           className="mus-ending-panel"

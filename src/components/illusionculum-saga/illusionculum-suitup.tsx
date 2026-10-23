@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState, type RefObject } from "react";
 import { DisplayName } from "@/components/name-text";
-import { LiquidLens } from "@/components/world/liquid-rail";
+import { FormSlider } from "@/components/special/form-slider";
 import { AssemblyMovie } from "@/components/rexonance-saga/rexonance-assembly-movie";
 import { initRail } from "@/lib/liquid/boot.js";
 import {
@@ -126,6 +126,13 @@ function Guide({ runwayRef }: { runwayRef: RefObject<HTMLDivElement | null> }) {
   );
 }
 
+/** The four forms as the shared slider's items (each its own light). */
+const FORM_ITEMS = ILLUSIONCULUM_FORM_ORDER.map((key) => ({
+  key,
+  label: ILLUSIONCULUM_FORMS[key].label,
+  accent: ILLUSIONCULUM_FORMS[key].accent,
+}));
+
 export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
   form,
   onChoose,
@@ -204,7 +211,7 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
             alt=""
             width={ILLUSIONCULUM_SUIT_SIZE.width}
             height={ILLUSIONCULUM_SUIT_SIZE.height}
-            loading="lazy"
+            loading="eager"
             decoding="async"
           />
           <img
@@ -213,7 +220,7 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
             alt=""
             width={ILLUSIONCULUM_SUIT_SIZE.width}
             height={ILLUSIONCULUM_SUIT_SIZE.height}
-            loading="lazy"
+            loading="eager"
             decoding="async"
           />
           <canvas className="rzn-canvas" width={0} height={0} />
@@ -251,35 +258,16 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
         <h3 id="ics-ending-title" className="ics-sr">
           変身後の形態
         </h3>
-        <div
+        <FormSlider
           ref={tabsRef}
-          className="rxs-stage-tabs liquid-swipe-tabs ics-form-tabs ics-ending-tabs"
-          role="tablist"
-          aria-labelledby="ics-ending-title"
-          data-liquid-glass="true"
-          data-stage={form}
-        >
-          <LiquidLens />
-          {ILLUSIONCULUM_FORM_ORDER.map((key) => (
-            <button
-              key={key}
-              id={`ics-ending-tab-${key}`}
-              type="button"
-              role="tab"
-              aria-selected={form === key}
-              aria-controls="ics-ending-panel"
-              tabIndex={form === key ? 0 : -1}
-              className={form === key ? "is-active" : ""}
-              data-form={key}
-              style={{ ["--liquid-accent" as string]: ILLUSIONCULUM_FORMS[key].accent }}
-              onClick={() => onChoose(key)}
-            >
-              <span>
-                <DisplayName value={ILLUSIONCULUM_FORMS[key].label} />
-              </span>
-            </button>
-          ))}
-        </div>
+          className="ics-form-tabs ics-ending-tabs"
+          items={FORM_ITEMS}
+          value={form}
+          onSelect={onChoose}
+          idPrefix="ics-ending-tab"
+          panelId="ics-ending-panel"
+          ariaLabelledBy="ics-ending-title"
+        />
         <div
           id="ics-ending-panel"
           className="ics-ending-panel"

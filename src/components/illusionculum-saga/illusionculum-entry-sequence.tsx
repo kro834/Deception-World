@@ -53,14 +53,14 @@ const SIZE = ILLUSIONCULUM_SUIT_SIZE;
 const ATLAS = ILLUSIONCULUM_SUIT_ATLAS;
 /** The groups' start (ms) in the calls' order, and each plate's stagger. */
 const GROUP_START: Record<string, number> = {
-  legs: 150,
-  waist: 480,
-  arms: 760,
-  chest: 820,
-  shoulders: 1080,
-  tail: 1220,
-  helm: 1380,
-  bits: 1460,
+  legs: 190,
+  waist: 600,
+  arms: 950,
+  chest: 1030,
+  shoulders: 1350,
+  tail: 1530,
+  helm: 1730,
+  bits: 1830,
 };
 const PLATES = (() => {
   const seen: Record<string, number> = {};
@@ -69,7 +69,7 @@ const PLATES = (() => {
   ).map((piece) => {
     const k = (seen[piece.group] = (seen[piece.group] ?? -1) + 1);
     const from = { up: "bottom", down: "top", left: "right", right: "left" }[piece.dir];
-    return { ...piece, start: (GROUP_START[piece.group] ?? 900) + k * 60, from };
+    return { ...piece, start: (GROUP_START[piece.group] ?? 1100) + k * 75, from };
   });
 })();
 
@@ -106,7 +106,12 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
         <div className="ice-entry-figure">
           <img className="ice-entry-under" src={REXONANCE_SUIT_UNDERSUIT} alt="" decoding="async" />
           {/* The driver, on the undersuit from the first frame (owner). */}
-          <img className="ice-entry-driver" src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN} alt="" decoding="async" />
+          <img
+            className="ice-entry-driver"
+            src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN}
+            alt=""
+            decoding="async"
+          />
           {/* The armour generated from nanite cells away from the body
               (forward and above), then flown in and locked on. */}
           {/* The nanites' source: an ice surge out of the reactor up and down

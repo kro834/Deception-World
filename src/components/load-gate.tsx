@@ -1580,26 +1580,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (rexonanceCoverCancel.current === preparation.cancel)
               rexonanceCoverCancel.current = null;
             if (!isCurrent()) return;
-            if (metaUnitasCall) {
-              setSignal("running");
-              // A short window: the call plays whether or not the pictures
-              // are in (its scene holds the wearer meanwhile), so a slow
-              // connection never leaves the press without a cover for long.
-              const entry = prepareRexonanceEntry({
-                decoded: warm,
-                prepare: () => Promise.resolve(true),
-                deadlineMs: 600,
-              });
-              rexonanceCoverCancel.current = entry.cancel;
-              const ready = await entry.promise;
-              if (rexonanceCoverCancel.current === entry.cancel)
-                rexonanceCoverCancel.current = null;
-              if (!isCurrent()) return;
-              // Pictures still on their way: the call plays regardless (its
-              // scene holds the wearer until the engine is ready).
-              void ready;
-              setSignal("idle");
-            }
+            // Nothing more blocks the cover (owner, 2026-10-24: 「遷移開始が遅すぎる」):
+            // the pictures keep decoding under it (the scene holds the wearer,
+            // driver on, until the engine is ready).
+            void warm;
             startedAt = performance.now();
           }
           // PREV / NEXT between dossiers flips the file; entry from anywhere
