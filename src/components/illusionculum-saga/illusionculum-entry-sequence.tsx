@@ -1,12 +1,9 @@
-import { ILLUSIONCULUM_ENTRY_CALLS, ILLUSIONCULUM_ENTRY_FIGURE } from "@/lib/illusionculum-entry";
-import { ILLUSIONCULUM_ORBS, illusionculumOrb } from "@/lib/illusionculum-saga-artwork";
-import { ILLUSIONCULUM_ENTRY_UNDERSUIT as REXONANCE_SUIT_UNDERSUIT } from "@/lib/illusionculum-entry";
+import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
+import { ILLUSIONCULUM_ENTRY_CALLS } from "@/lib/illusionculum-entry";
 import {
-  ILLUSIONCULUM_SUIT_ATLAS,
-  ILLUSIONCULUM_SUIT_DRIVER,
   ILLUSIONCULUM_SUIT_DRIVER_STANDIN,
-  ILLUSIONCULUM_SUIT_PIECES,
   ILLUSIONCULUM_SUIT_SIZE,
+  ILLUSIONCULUM_SUIT_UNDERSUIT,
 } from "@/lib/illusionculum-suit";
 
 /* ILLUSIONCULUM SAGA's entry transformation: the route transition screen of
@@ -18,71 +15,110 @@ import {
    come in one after another; over the bare undersuit (the same wearer as
    Rexonance) the armour is generated from nanite cells away from the body
    (owner, 2026-10-23: 「ナノマシンで生成された装甲をしてから装着する方式」),
-   then flies in and locks on;
-   the two リアクター・モア rise from above the shoulders to their seats; the
-   reactor lights. Then the gate reveals the page.
+   then flies in and locks on — the scroll suit-up's own engine (below);
+   the reactor surges and lights. Then the gate reveals the page.
 
    Decorative (aria-hidden); the gate owns the tier (only "full" plays this;
    economy and reduced motion get the gate's short calm shutter), the
-   timing and the reveal. The figure is the page's hero file, which the gate
-   warms as the link's asset, so the cover never waits on a picture. Runs
+   timing and the reveal. The clock runs even if the scene is late, so the
+   cover never waits. Runs
    once: no loop, no flash (the reactor's light is a small, slow glow). */
 
-/** The nanite chips that stream in to form the plates: where each lands on
- * the armour's (raised) place, where it comes from, its tone and its delay —
- * a fixed, hashed spread, so every play is the same. */
-const CHIPS = Array.from({ length: 96 }, (_, i) => {
-  const h = (n: number) => {
-    const v = Math.sin((i + 1) * 12.9898 + n * 78.233) * 43758.5453;
-    return v - Math.floor(v);
-  };
-  const x = 28 + h(1) * 44;
-  const y = 8 + h(2) * 80;
-  const angle = h(3) * Math.PI * 2;
-  return [
-    Math.round(x * 10) / 10,
-    Math.round(y * 10) / 10,
-    Math.round(Math.cos(angle) * 60),
-    Math.round(Math.sin(angle) * 60),
-    i % 3,
-    Math.round(80 + h(4) * 1300),
-  ] as const;
-});
-
+/* The engine's runway (owner, 2026-10-24: 「イリュージョンクルムの遷移アニメー
+   ションでも、ナノマシン装着される様にして」): the same scene as #suitup — the
+   Rexonance scroll engine with this suit (illusionculum-assembly-engine.ts),
+   mounted on a runway in a full-screen layer whose own scroll the clock
+   drives, as Meta Unitas' entry does: the plates built by nanite cells off
+   the body, then flown in and attached onto the undersuit, the driver on it
+   from frame one. Inline styles: the gate is global. */
 const SIZE = ILLUSIONCULUM_SUIT_SIZE;
-const ATLAS = ILLUSIONCULUM_SUIT_ATLAS;
-/** The groups' start (ms) in the calls' order, and each plate's stagger. */
-const GROUP_START: Record<string, number> = {
-  legs: 190,
-  waist: 600,
-  arms: 950,
-  chest: 1030,
-  shoulders: 1350,
-  tail: 1530,
-  helm: 1730,
-  bits: 1830,
+const LAYER: CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  overflowX: "hidden",
+  overflowY: "scroll",
+  scrollbarWidth: "none",
+  pointerEvents: "none",
 };
-const PLATES = (() => {
-  const seen: Record<string, number> = {};
-  return ILLUSIONCULUM_SUIT_PIECES.filter(
-    (piece) => !ILLUSIONCULUM_SUIT_DRIVER.includes(piece.id),
-  ).map((piece) => {
-    const k = (seen[piece.group] = (seen[piece.group] ?? -1) + 1);
-    const from = { up: "bottom", down: "top", left: "right", right: "left" }[piece.dir];
-    return { ...piece, start: (GROUP_START[piece.group] ?? 1100) + k * 75, from };
-  });
-})();
+const RUNWAY: CSSProperties = { position: "relative", height: "600vh" };
+const FRAME: CSSProperties = { position: "sticky", top: 0, height: "100vh", overflow: "hidden" };
+const FILL: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%" };
 
-const seat = (side: "left" | "right") => {
-  const orb = ILLUSIONCULUM_ORBS[side];
-  return {
-    ["--ice-orb-x" as string]: `${(orb.cx / 1024) * 100}%`,
-    ["--ice-orb-y" as string]: `${(orb.cy / 1536) * 100}%`,
-    ["--ice-orb-d" as string]: `${((orb.r * 2) / 1024) * 100}%`,
-  };
+/* The figure where the old stage stood (right of centre on wide screens,
+   raised over the calls on phones and portrait tablets). */
+const STAGING = `.ice-entry-engine::-webkit-scrollbar{display:none}
+.ice-entry-engine .rzn-frame{--rzn-fig-x:.64;--rzn-fig-h:.84;--rzn-fig-b:.08}
+.ice-entry-engine .ice-entry-fig{position:absolute;left:calc(var(--rzn-fig-x) * 100% - 50%);bottom:calc(var(--rzn-fig-b) * 100%);width:100%;height:calc(var(--rzn-fig-h) * 100%);object-fit:contain;object-position:50% 100%}
+@media (max-width:760px){.ice-entry-engine .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.62;--rzn-fig-b:.25}}
+@media (min-width:761px) and (max-width:1099.98px) and (orientation:portrait){.ice-entry-engine .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.66;--rzn-fig-b:.22}}`;
+
+/** How long the clock waits for the scene before it runs regardless. */
+const READY_WAIT_MS = 420;
+
+/** The clock, inside the ≈3.1 s cover (Rexonance's pacing): the scan, the
+ * cells building each group off the body and landing a call's stage long,
+ * the head, the seal and the light — [ms, p] along the engine's beats. */
+const CLOCK: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [240, 0.07],
+  [600, 0.16],
+  [950, 0.275],
+  [1300, 0.39],
+  [1650, 0.505],
+  [2000, 0.62],
+  [2380, 0.85],
+  [2620, 0.95],
+];
+const progressAt = (ms: number) => {
+  for (let i = 1; i < CLOCK.length; i += 1) {
+    const [t1, p1] = CLOCK[i];
+    const [t0, p0] = CLOCK[i - 1];
+    if (ms <= t1) return p0 + ((p1 - p0) * (ms - t0)) / (t1 - t0);
+  }
+  return CLOCK[CLOCK.length - 1][1];
 };
+
+function useEngineClock(
+  layerRef: RefObject<HTMLDivElement | null>,
+  runwayRef: RefObject<HTMLDivElement | null>,
+) {
+  useEffect(() => {
+    const layer = layerRef.current;
+    const runway = runwayRef.current;
+    if (!layer || !runway) return;
+    let disposed = false;
+    let dispose: (() => void) | null = null;
+    let raf = 0;
+    const mounted = performance.now();
+    void import("@/lib/illusionculum-assembly-engine").then((module) => {
+      if (disposed) return;
+      dispose = module.mountIllusionculumAssemblyEngine(runway, window);
+      let started = 0;
+      const frame = (now: number) => {
+        raf = 0;
+        if (disposed) return;
+        const ready = runway.dataset.rznLoad === "ready";
+        if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
+        const elapsed = started ? now - started : 0;
+        const travel = runway.offsetHeight - layer.clientHeight;
+        layer.scrollTop = Math.round(travel * progressAt(elapsed));
+        window.dispatchEvent(new Event("scroll"));
+        if (elapsed < CLOCK[CLOCK.length - 1][0]) raf = window.requestAnimationFrame(frame);
+      };
+      raf = window.requestAnimationFrame(frame);
+    });
+    return () => {
+      disposed = true;
+      if (raf) window.cancelAnimationFrame(raf);
+      dispose?.();
+    };
+  }, [layerRef, runwayRef]);
+}
 
 export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "revealing" }) {
+  const layerRef = useRef<HTMLDivElement | null>(null);
+  const runwayRef = useRef<HTMLDivElement | null>(null);
+  useEngineClock(layerRef, runwayRef);
   return (
     <div className="ice-entry" data-phase={phase} aria-hidden="true">
       <span className="ice-entry-ground" />
@@ -102,71 +138,34 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
         <path d="M200 10 L364 295 L36 295 Z" pathLength="1" />
         <path d="M200 390 L36 105 L364 105 Z" pathLength="1" />
       </svg>
+      <div ref={layerRef} className="ice-entry-engine" style={LAYER}>
+        <style>{STAGING}</style>
+        <div ref={runwayRef} className="rzn-suitup" data-form="standard" style={RUNWAY}>
+          <div className="rzn-frame" style={FRAME}>
+            <img
+              className="rzn-under ice-entry-fig"
+              src={ILLUSIONCULUM_SUIT_UNDERSUIT}
+              alt=""
+              width={SIZE.width}
+              height={SIZE.height}
+            />
+            {/* The driver, on the undersuit from the first frame (owner). */}
+            <img
+              className="rzn-driver-standin ice-entry-fig"
+              src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN}
+              alt=""
+              width={SIZE.width}
+              height={SIZE.height}
+            />
+            <canvas className="rzn-canvas" width={0} height={0} style={FILL} />
+          </div>
+        </div>
+      </div>
       <div className="ice-entry-stage">
         <div className="ice-entry-figure">
-          <img className="ice-entry-under" src={REXONANCE_SUIT_UNDERSUIT} alt="" decoding="async" />
-          {/* The driver, on the undersuit from the first frame (owner). */}
-          <img
-            className="ice-entry-driver"
-            src={ILLUSIONCULUM_SUIT_DRIVER_STANDIN}
-            alt=""
-            decoding="async"
-          />
-          {/* The armour generated from nanite cells away from the body
-              (forward and above), then flown in and locked on. */}
-          {/* The nanites' source: an ice surge out of the reactor up and down
-              the undersuit (this suit's, not fire), before the cells pour. */}
+          {/* The reactor's ice surge and its core, over the engine's figure. */}
           <span className="ice-entry-surge" />
-          <span className="ice-entry-chips">
-            {CHIPS.map(([x, y, fx, fy, tone, delay], index) => (
-              <i
-                key={index}
-                style={{
-                  ["--x" as string]: `${x}%`,
-                  ["--y" as string]: `${y}%`,
-                  ["--fx" as string]: `${fx}vmax`,
-                  ["--fy" as string]: `${fy}vmax`,
-                  ["--d" as string]: `${delay}ms`,
-                }}
-                data-tone={tone}
-              />
-            ))}
-          </span>
-          {/* The plates, group by group in the calls' order, each cut by its
-              SAM outline (the suit's plate atlas): its nanite cells build up
-              from its seat off the body, the formed plate drops on and locks,
-              each plate a beat after the last within its group. */}
-          {PLATES.map((plate) => (
-            <span
-              key={plate.id}
-              className="ice-entry-plate"
-              data-driver={plate.start < 0 || undefined}
-              style={{
-                left: `${(plate.x / SIZE.width) * 100}%`,
-                top: `${(plate.y / SIZE.height) * 100}%`,
-                width: `${(plate.w / SIZE.width) * 100}%`,
-                height: `${(plate.h / SIZE.height) * 100}%`,
-                ["--atlas" as string]: `url("${ATLAS.src}")`,
-                ["--ax" as string]: `${(-plate.ax / ATLAS.width) * 100}%`,
-                ["--ay" as string]: `${(-plate.ay / ATLAS.height) * 100}%`,
-                ["--aw" as string]: `${(ATLAS.width / plate.w) * 100}%`,
-                ["--ah" as string]: `${(ATLAS.height / plate.h) * 100}%`,
-                ["--start" as string]: `${plate.start}ms`,
-                ["--from" as string]: plate.from,
-              }}
-            >
-              {/* The atlas at the plate's own scale, shifted so its cell
-                  fills the box (overflow clips the neighbours). */}
-              <i className="ice-entry-plate-cells" />
-              <i className="ice-entry-plate-art" />
-            </span>
-          ))}
           <span className="ice-entry-core" />
-          {(["left", "right"] as const).map((side) => (
-            <span key={side} className={`ice-entry-orb is-${side}`} style={seat(side)}>
-              <img src={illusionculumOrb(side)} alt="" width={256} height={256} decoding="async" />
-            </span>
-          ))}
         </div>
       </div>
       {/* The calls, one at a time, large and centred under the figure (as
