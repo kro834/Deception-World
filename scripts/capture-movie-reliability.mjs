@@ -1011,6 +1011,18 @@ async function runScenario(browser, { run, scenario, path, size }, errors, tag) 
     isMobile: touch,
     hasTouch: touch,
   });
+  // Chromium estimates the connection from the traffic it sees, and a local
+  // server answering slowly on a busy machine can read as 2g — the site's
+  // still tier, rightly without a movie. Outside the network scenarios the
+  // connection is pinned to what it is (local, fast), so each run measures
+  // the movie, not the estimate.
+  if (!NETWORK_SCENARIOS.has(scenario))
+    await context.addInitScript(() => {
+      const connection = navigator.connection;
+      if (!connection) return;
+      for (const [key, value] of Object.entries({ effectiveType: "4g", rtt: 50, downlink: 10, saveData: false }))
+        Object.defineProperty(connection, key, { configurable: true, get: () => value });
+    });
   const page = await context.newPage();
   page.__touch = touch;
   const cdp = await context.newCDPSession(page);
@@ -1032,6 +1044,8 @@ async function runScenario(browser, { run, scenario, path, size }, errors, tag) 
   }
 }
 
+// The scenarios whose subject is the network (throttled through CDP).
+const NETWORK_SCENARIOS = new Set(["throttled", "stilltier"]);
 // Runs that wait through a whole backoff, or a slow network, get longer.
 const LONG_SCENARIOS = new Set(["depfail", "throttled"]);
 
