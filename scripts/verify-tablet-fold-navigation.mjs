@@ -438,7 +438,12 @@ async function gallery(page, add) {
   await trigger.press("Enter");
   const viewer = page.locator("#gallery-viewer[open]");
   await viewer.waitFor({ state: "visible" });
-  const originalTitle = await viewer.locator("#gallery-viewer-title").innerText();
+  // Shared titles can arrive after the static artwork opens. The immutable
+  // work number (the heading's first text node) identifies next/previous,
+  // without mistaking that asynchronous title update for a different work.
+  const originalWorkNumber = await viewer
+    .locator("#gallery-viewer-title")
+    .evaluate((node) => node.firstChild.textContent.trim());
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     await settle(page);
@@ -456,16 +461,18 @@ async function gallery(page, add) {
     assert.equal(await next.isDisabled(), false);
     await next.click();
     await page.waitForFunction(
-      (title) => document.querySelector("#gallery-viewer-title")?.innerText !== title,
-      originalTitle,
+      (number) =>
+        document.querySelector("#gallery-viewer-title")?.firstChild?.textContent.trim() !== number,
+      originalWorkNumber,
     );
     assert.equal(await previous.isDisabled(), false);
     await previous.click();
     await page.waitForFunction(
-      (title) => document.querySelector("#gallery-viewer-title")?.innerText === title,
-      originalTitle,
+      (number) =>
+        document.querySelector("#gallery-viewer-title")?.firstChild?.textContent.trim() === number,
+      originalWorkNumber,
     );
-    add({ viewport, restoredWork: originalTitle });
+    add({ viewport, restoredWork: originalWorkNumber });
   }
   await viewer.locator(".gallery-close-primary").click();
   await viewer.waitFor({ state: "hidden" });
