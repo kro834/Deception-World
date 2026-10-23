@@ -79,7 +79,8 @@
   max-width: 92vw;
 }
 
-.ice-entry-ghost,
+.ice-entry-under,
+.ice-entry-cells,
 .ice-entry-real {
   position: absolute;
   inset: 0;
@@ -87,37 +88,35 @@
   height: 100%;
 }
 
-.ice-entry-ghost {
+/* The undersuit (in the suit's 693 x 1040 frame, the same as the cutout's). */
+.ice-entry-under {
+  object-fit: contain;
+  object-position: 50% 0;
+  opacity: 0.55;
+  animation: ice-under 2400ms ease both;
+}
+
+/* The nanite cells: a grid of small squares in ice, gold and pink inside
+   the armour's silhouette, gathering forward of the body. */
+.ice-entry-cells {
   display: block;
   background:
-    repeating-linear-gradient(0deg, rgb(2 3 10 / 70%) 0 2px, transparent 2px 4px),
-    linear-gradient(180deg, var(--ice-a, rgb(255 143 210)), var(--ice-b, rgb(169 131 255)));
+    repeating-linear-gradient(90deg, rgb(2 3 10 / 85%) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(0deg, rgb(2 3 10 / 85%) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, rgb(166 230 255), rgb(233 184 102) 46%, rgb(255 143 210));
   mask: var(--ice-cutout) 50% 0 / contain no-repeat;
   -webkit-mask: var(--ice-cutout) 50% 0 / contain no-repeat;
-  mix-blend-mode: screen;
   opacity: 0;
-  animation: ice-ghost-a 1800ms cubic-bezier(0.2, 0.7, 0.1, 1) 0ms both;
-}
-
-.ice-entry-ghost.is-b {
-  --ice-a: rgb(166 230 255);
-  --ice-b: rgb(47 79 216);
-  animation-name: ice-ghost-b;
-  animation-delay: 60ms;
-}
-
-.ice-entry-ghost.is-c {
-  --ice-a: rgb(169 131 255);
-  --ice-b: rgb(255 143 210);
-  animation-name: ice-ghost-c;
-  animation-delay: 120ms;
+  transform-origin: 50% 40%;
+  animation: ice-cells 1500ms cubic-bezier(0.2, 0.7, 0.1, 1) 0ms both;
 }
 
 .ice-entry-real {
   object-fit: contain;
   object-position: 50% 0;
   opacity: 0;
-  animation: ice-real 900ms cubic-bezier(0.2, 0.7, 0.1, 1) 1000ms both;
+  transform-origin: 50% 40%;
+  animation: ice-real 760ms cubic-bezier(0.5, 0, 0.2, 1) 1050ms both;
 }
 
 .ice-entry-core {
@@ -217,65 +216,48 @@
   }
 }
 
-@keyframes ice-ghost-a {
+/* The cells gather into the armour forward of the body (larger, higher). */
+@keyframes ice-cells {
   0% {
-    opacity: 0.18;
-    translate: -26% 2%;
+    opacity: 0.45;
+    transform: translateY(-7%) scale(1.14);
   }
-  22%,
-  38% {
-    opacity: 0.36;
-    translate: -26% 2%;
+  55% {
+    opacity: 0.7;
+    transform: translateY(-7%) scale(1.14);
+  }
+  80% {
+    opacity: 0.4;
+    transform: translateY(-1%) scale(1.02);
   }
   100% {
     opacity: 0;
-    translate: 0 0;
-    scale: 1;
+    transform: none;
   }
 }
 
-@keyframes ice-ghost-b {
-  0% {
-    opacity: 0.18;
-    translate: 24% -2%;
-  }
-  22%,
-  38% {
-    opacity: 0.3;
-    translate: 24% -2%;
-  }
-  100% {
-    opacity: 0;
-    translate: 0 0;
-    scale: 1;
-  }
-}
-
-@keyframes ice-ghost-c {
-  0% {
-    opacity: 0.18;
-    translate: -12% -6%;
-    scale: 1.08;
-  }
-  22%,
-  38% {
-    opacity: 0.24;
-    translate: -12% -6%;
-    scale: 1.08;
-  }
-  100% {
-    opacity: 0;
-    translate: 0 0;
-    scale: 1;
-  }
-}
-
+/* The finished armour flies in from there and locks onto the undersuit. */
 @keyframes ice-real {
   from {
     opacity: 0;
+    transform: translateY(-7%) scale(1.14);
+  }
+  40% {
+    opacity: 1;
   }
   to {
     opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ice-under {
+  0%,
+  60% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
@@ -352,7 +334,7 @@
 }
 
 @media (forced-colors: active) {
-  .ice-entry-ghost,
+  .ice-entry-cells,
   .ice-entry-core {
     display: none;
   }

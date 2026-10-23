@@ -260,7 +260,8 @@ test("the engine takes a page's generation; Rexonance has none and keeps its swa
   assert.match(resonance, /const armourGeneration = config\.generation \?\? null;/);
   assert.match(resonance, /armourGeneration\n\s+\? null\n\s+: boundedImage\(import\("\.\/rexonance-assembly-nanites\.js"\)/);
   assert.match(resonance, /if \(wire && seal < 1\) \{/);
-  assert.match(resonance, /!wire\?\.form\(/);
+  // Owner (2026-10-23): ILLUSIONCULUM's opt-in formChange shares the call (FAR FROM's wire first).
+  assert.match(resonance, /!\(wire \?\? formChange\)\?\.form\(/);
   const rexonance = read("src/components/rexonance-saga/rexonance-saga.tsx");
   assert.doesNotMatch(rexonance, /generation/);
   assert.equal(farFromAssemblyConfig().nanites, undefined);

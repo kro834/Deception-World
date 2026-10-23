@@ -3,7 +3,7 @@
 // (design/illusionculum-saga-20261023/sam-masks/) — do not edit by hand.
 // Figure coordinates are delivery px of the 693 x 1040 figure (the owner's
 // whole 1024 x 1536 cutout frame).
-// 7 files, 1065920 bytes (standard.webp 189526, more.webp 165170, ultra.webp 168344, ultra-more.webp 180062, undersuit.webp 45110, plates.webp 290670, driver-standin.webp 27038).
+// 9 files, 1385990 bytes (standard.webp 189526, more.webp 165170, ultra.webp 168344, ultra-more.webp 180062, undersuit.webp 45110, gold.webp 161312, plates.webp 290670, driver-standin.webp 27038, guide.webp 158758).
 
 export const ILLUSIONCULUM_SUIT_SIZE = { width: 693, height: 1040 } as const;
 
@@ -92,7 +92,11 @@ export type IllusionculumSuitPiece = {
 /** The scene's micro-tile, in delivery px (6430 tiles in all). */
 export const ILLUSIONCULUM_SUIT_TILE = 9;
 /** The plates' atlas (each plate's art, its alpha the plate's share). */
-export const ILLUSIONCULUM_SUIT_ATLAS = { src: "/illusionculum-suit-20261023/plates.webp", width: 1024, height: 1237 } as const;
+export const ILLUSIONCULUM_SUIT_ATLAS = {
+  src: "/illusionculum-suit-20261023/plates.webp",
+  width: 1024,
+  height: 1237,
+} as const;
 /** The plates, front first; they tile the figure (SAM's masks). */
 export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
   {
@@ -103,13 +107,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 422,
     w: 217,
     h: 69,
-    seat: [
-      346.5,
-      491
-    ],
+    seat: [346.5, 491],
     tiles: "AH4A/v///f//+///9///7///3+9/PwAeAA==",
     ax: 622,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "reactor-disc",
@@ -119,13 +120,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 256,
     w: 89,
     h: 95,
-    seat: [
-      346.5,
-      351
-    ],
+    seat: [346.5, 351],
     tiles: "ePDj3/////////7xgQM=",
     ax: 914,
-    ay: 925
+    ay: 925,
   },
   {
     id: "reactor-frame",
@@ -135,13 +133,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 241,
     w: 141,
     h: 156,
-    seat: [
-      347.5,
-      397
-    ],
+    seat: [347.5, 397],
     tiles: "4Af+P/5/Pn4feA/4D/AP8A94Hnw+fv5//j/8H/AP4APAAYAA",
     ax: 738,
-    ay: 726
+    ay: 726,
   },
   {
     id: "helmet-crest",
@@ -151,13 +146,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 41,
     w: 133,
     h: 106,
-    seat: [
-      346.5,
-      147
-    ],
+    seat: [346.5, 147],
     tiles: "BBADmAHMAGYAc8A94J/z/7////9f7A0=",
     ax: 650,
-    ay: 925
+    ay: 925,
   },
   {
     id: "helmet-visor",
@@ -167,13 +159,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 134,
     w: 127,
     h: 106,
-    seat: [
-      346.5,
-      240
-    ],
+    seat: [346.5, 240],
     tiles: "/7//3//P/8P/4f/wf/gf+A/8A/wAGAA=",
     ax: 785,
-    ay: 925
+    ay: 925,
   },
   {
     id: "collar",
@@ -183,13 +172,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 192,
     w: 125,
     h: 68,
-    seat: [
-      346.5,
-      192
-    ],
+    seat: [346.5, 192],
     tiles: "BpgD58D//P//////G2A=",
     ax: 841,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "medallion-l",
@@ -199,13 +185,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 249,
     w: 51,
     h: 66,
-    seat: [
-      226.5,
-      315
-    ],
+    seat: [226.5, 315],
     tiles: "/v///+8B",
     ax: 0,
-    ay: 1171
+    ay: 1171,
   },
   {
     id: "shoulder-l",
@@ -215,13 +198,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 185,
     w: 150,
     h: 185,
-    seat: [
-      108,
-      277.5
-    ],
+    seat: [108, 277.5],
     tiles: "DAB4AOCBw/+/////v/9////8n/gf4B+AfwD/CP4f/h/8P/h/+A/wD3AIIAAA",
     ax: 252,
-    ay: 726
+    ay: 726,
   },
   {
     id: "medallion-r",
@@ -231,13 +211,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 247,
     w: 51,
     h: 68,
-    seat: [
-      467.5,
-      315
-    ],
+    seat: [467.5, 315],
     tiles: "z/f///cx",
     ax: 968,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "shoulder-r",
@@ -247,13 +224,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 173,
     w: 159,
     h: 197,
-    seat: [
-      586,
-      271.5
-    ],
+    seat: [586, 271.5],
     tiles: "BgA4APEAxwceP378/+z/v/9//v+R/wP8D/AfwD8Af8D+A/8P+H/g/wH/B+A/ANAAAAY=",
     ax: 792,
-    ay: 491
+    ay: 491,
   },
   {
     id: "fist-l",
@@ -263,13 +237,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 532,
     w: 85,
     h: 89,
-    seat: [
-      155.5,
-      532
-    ],
+    seat: [155.5, 532],
     tiles: "fvzz33///f//f//xAQ==",
     ax: 127,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "fist-r",
@@ -279,13 +250,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 533,
     w: 85,
     h: 88,
-    seat: [
-      538.5,
-      533
-    ],
+    seat: [538.5, 533],
     tiles: "/Pj333////fff/7xAQ==",
     ax: 214,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "cuff-l",
@@ -295,13 +263,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 509,
     w: 79,
     h: 40,
-    seat: [
-      153.5,
-      509
-    ],
+    seat: [153.5, 509],
     tiles: "vv/9vxcA",
     ax: 148,
-    ay: 1171
+    ay: 1171,
   },
   {
     id: "cuff-r",
@@ -311,13 +276,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 500,
     w: 93,
     h: 53,
-    seat: [
-      532.5,
-      500
-    ],
+    seat: [532.5, 500],
     tiles: "Bvjf//73PwcB",
     ax: 53,
-    ay: 1171
+    ay: 1171,
   },
   {
     id: "forearm-l",
@@ -327,13 +289,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 387,
     w: 147,
     h: 136,
-    seat: [
-      181.5,
-      387
-    ],
+    seat: [181.5, 387],
     tiles: "WAD8D/j/+//3/+//3/+f/z//f/5/+D/wf+B/wH+AfwAAAA==",
     ax: 239,
-    ay: 925
+    ay: 925,
   },
   {
     id: "forearm-r",
@@ -343,13 +302,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 390,
     w: 146,
     h: 128,
-    seat: [
-      513,
-      390
-    ],
+    seat: [513, 390],
     tiles: "ADj+//z/+//3/+//n/8//3/8//D/wf8B/wP8B/APAAA=",
     ax: 502,
-    ay: 925
+    ay: 925,
   },
   {
     id: "arm-l",
@@ -359,13 +315,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 322,
     w: 125,
     h: 93,
-    seat: [
-      188.5,
-      322
-    ],
+    seat: [188.5, 322],
     tiles: "AA7AB/v5f/+f/+f/+f/8P8APAAA=",
     ax: 0,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "arm-r",
@@ -375,13 +328,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 335,
     w: 117,
     h: 72,
-    seat: [
-      510.5,
-      335
-    ],
+    seat: [510.5, 335],
     tiles: "Hsj/////+//+3//7Pw==",
     ax: 503,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "chest-l",
@@ -391,13 +341,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 195,
     w: 98,
     h: 223,
-    seat: [
-      281,
-      418
-    ],
+    seat: [281, 418],
     tiles: "wAAHHvjABz74wx9+8IMPfOCDP/zhD3/4x//+/3//+99/BgA=",
     ax: 446,
-    ay: 491
+    ay: 491,
   },
   {
     id: "chest-r",
@@ -407,13 +354,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 195,
     w: 107,
     h: 223,
-    seat: [
-      417.5,
-      418
-    ],
+    seat: [417.5, 418],
     tiles: "GIAP+AEf8AEf+AM/8AM/4AM+4AN/8A//8I///vd///d//+c/AAM=",
     ax: 546,
-    ay: 491
+    ay: 491,
   },
   {
     id: "abdomen",
@@ -423,13 +367,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 365,
     w: 200,
     h: 76,
-    seat: [
-      347,
-      441
-    ],
+    seat: [347, 441],
     tiles: "AGEAgBkAwA8A4A/g///5///9///+539xgCM=",
     ax: 301,
-    ay: 1076
+    ay: 1076,
   },
   {
     id: "tasset-front",
@@ -439,13 +380,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 471,
     w: 114,
     h: 187,
-    seat: [
-      348,
-      471
-    ],
+    seat: [348, 471],
     tiles: "Buz//b//9/////////////0//+f//J//43/8B//gD6ABMAA=",
     ax: 136,
-    ay: 726
+    ay: 726,
   },
   {
     id: "tasset-l",
@@ -455,13 +393,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 455,
     w: 109,
     h: 149,
-    seat: [
-      253.5,
-      455
-    ],
+    seat: [253.5, 455],
     tiles: "GIAD+L//93/+z//5P//n//gf/sf/8B/8A34ABw==",
     ax: 0,
-    ay: 925
+    ay: 925,
   },
   {
     id: "tasset-r",
@@ -471,13 +406,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 452,
     w: 106,
     h: 156,
-    seat: [
-      441,
-      452
-    ],
+    seat: [441, 452],
     tiles: "gAA4x/d//+///u///ud//vc///Ef//AHDwAA",
     ax: 881,
-    ay: 726
+    ay: 726,
   },
   {
     id: "thigh-l",
@@ -487,13 +419,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 561,
     w: 126,
     h: 149,
-    seat: [
-      271,
-      710
-    ],
+    seat: [271, 710],
     tiles: "BoQD88H8M//P//f//f/////v//v//p//5//5PwAO",
     ax: 111,
-    ay: 925
+    ay: 925,
   },
   {
     id: "thigh-r",
@@ -503,13 +432,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 579,
     w: 112,
     h: 130,
-    seat: [
-      424,
-      709
-    ],
+    seat: [424, 709],
     tiles: "AAf48T/+5//83//7///v//2//+f//B8jAw==",
     ax: 388,
-    ay: 925
+    ay: 925,
   },
   {
     id: "shin-l",
@@ -519,13 +445,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 689,
     w: 135,
     h: 214,
-    seat: [
-      249.5,
-      903
-    ],
+    seat: [249.5, 903],
     tiles: "QAD4P/4f/8f/8//7//3//j//n//v//f/8//4f/w//4//w//h//B/4D8AB4AA",
     ax: 655,
-    ay: 491
+    ay: 491,
   },
   {
     id: "shin-r",
@@ -535,13 +458,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 689,
     w: 134,
     h: 197,
-    seat: [
-      445,
-      886
-    ],
+    seat: [445, 886],
     tiles: "oIH/w//B/+H/+f/9//5//j//n//P/+f/8//x//h/+H/4P/wf/g//A/gA",
     ax: 0,
-    ay: 726
+    ay: 726,
   },
   {
     id: "boot-l",
@@ -551,13 +471,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 866,
     w: 165,
     h: 174,
-    seat: [
-      205.5,
-      1040
-    ],
+    seat: [205.5, 1040],
     tiles: "wAEA/h3wf4D/B/w/4P+B/w/8H/D/gP8H/j/w/4H/D/5/+P/n/z////j/gP8DAAAA",
     ax: 571,
-    ay: 726
+    ay: 726,
   },
   {
     id: "boot-r",
@@ -567,13 +484,10 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 863,
     w: 165,
     h: 177,
-    seat: [
-      488.5,
-      1040
-    ],
+    seat: [488.5, 1040],
     tiles: "AAzwc8D/A/4f8P+A/w/8f8D/A/w/4P8B/x/4/8D/B/5/8P/H/z/8/4P/H/D/APgB",
     ax: 404,
-    ay: 726
+    ay: 726,
   },
   {
     id: "halo",
@@ -583,13 +497,11 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 0,
     w: 444,
     h: 233,
-    seat: [
-      347,
-      233
-    ],
-    tiles: "AAAAAQAAAAAABAAAAAAAEAAAAAAAwAAAAAAAgAMAAAAAwP8AAAAw4LsPGACA4f3/cAAAzP//7wAA8N1//wEAgH///wMAAP795w8AAPzzn38AAPCfIX8DAOB/APwPAID/AeBrAAD7B4D/AQD8HwD/BwD+/wD+/8D//wf4/3+A/x/g/wMA/H+A3wcAsP8AfB8AgP4B4GgAAOIBAIAAAAABAAAAAA==",
+    seat: [347, 233],
+    tiles:
+      "AAAAAQAAAAAABAAAAAAAEAAAAAAAwAAAAAAAgAMAAAAAwP8AAAAw4LsPGACA4f3/cAAAzP//7wAA8N1//wEAgH///wMAAP795w8AAPzzn38AAPCfIX8DAOB/APwPAID/AeBrAAD7B4D/AQD8HwD/BwD+/wD+/8D//wf4/3+A/x/g/wMA/H+A3wcAsP8AfB8AgP4B4GgAAOIBAIAAAAABAAAAAA==",
     ax: 0,
-    ay: 491
+    ay: 491,
   },
   {
     id: "cape-l",
@@ -599,13 +511,11 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 492,
     w: 222,
     h: 473,
-    seat: [
-      118,
-      492
-    ],
-    tiles: "AAAwAABwAADgAADAAwCABwAADwAAPgAA+AAA8AEA4AEAwAMAgAMAgw8A/h8A/D8A/H8A+P8A+P8B8P8D8P8H4P8f4P8/wP9/gP//gP//Af//Af//Af7/Af7/A/z/B/z/D/j/D/j/H/D/P/D/f+D//8D//8H//4P//wf//w/+/w/8/x/4/z+4/38w//8gfv8Bfv4DfPwHePgBcHgAcHAAYCAAQAAAAA==",
+    seat: [118, 492],
+    tiles:
+      "AAAwAABwAADgAADAAwCABwAADwAAPgAA+AAA8AEA4AEAwAMAgAMAgw8A/h8A/D8A/H8A+P8A+P8B8P8D8P8H4P8f4P8/wP9/gP//gP//Af//Af//Af7/Af7/A/z/B/z/D/j/D/j/H/D/P/D/f+D//8D//8H//4P//wf//w/+/w/8/x/4/z+4/38w//8gfv8Bfv4DfPwHePgBcHgAcHAAYCAAQAAAAA==",
     ax: 233,
-    ay: 0
+    ay: 0,
   },
   {
     id: "cape-r",
@@ -615,13 +525,11 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 476,
     w: 231,
     h: 489,
-    seat: [
-      570.5,
-      476
-    ],
-    tiles: "DAAAYAAAgAMAAA4AABgAACAAAMABAAAPAAA+AAD4AADwAwDADwAAPwAA+AAAwAcBAP8PAPw/APD/AcD/BwD/PwD8/wDw/wPg/x+A/38A/v8D+P8P4P9/AP//Afj/D8D/PwD//wH8/wfw/z/A//8A/v8H+P8f4P9/gP//A/7/D/j/P+D//4D//wf+/x/4/3/g//+B//8G/P8z8N+PwH8+AP7xAcCHBwAcHADgYAAAAgMAAAA=",
+    seat: [570.5, 476],
+    tiles:
+      "DAAAYAAAgAMAAA4AABgAACAAAMABAAAPAAA+AAD4AADwAwDADwAAPwAA+AAAwAcBAP8PAPw/APD/AcD/BwD/PwD8/wDw/wPg/x+A/38A/v8D+P8P4P9/AP//Afj/D8D/PwD//wH8/wfw/z/A//8A/v8H+P8f4P9/gP//A/7/D/j/P+D//4D//wf+/x/4/3/g//+B//8G/P8z8N+PwH8+AP7xAcCHBwAcHADgYAAAAgMAAAA=",
     ax: 0,
-    ay: 0
+    ay: 0,
   },
   {
     id: "cape-centre",
@@ -631,15 +539,194 @@ export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = [
     y: 623,
     w: 153,
     h: 342,
-    seat: [
-      347.5,
-      623
-    ],
-    tiles: "wAaADwAfAH4A/AD8AfgH+A/wH/A/4P/A/4H/A/8H/Af8H/g/8H/g/8D/wf+H/4//P/9//v////////////////9f+A/gB4APAA4AHAA4ACAA",
+    seat: [347.5, 623],
+    tiles:
+      "wAaADwAfAH4A/AD8AfgH+A/wH/A/4P/A/4H/A/8H/Af8H/g/8H/g/8D/wf+H/4//P/9//v////////////////9f+A/gB4APAA4AHAA4ACAA",
     ax: 457,
-    ay: 0
-  }
+    ay: 0,
+  },
 ];
+/** The gold atlas (each plate's raw gunmetal channel, alpha the trims' mask),
+ * at the plates' atlas places, and the gold cell size and each plate's cells. */
+export const ILLUSIONCULUM_SUIT_GOLD_ATLAS = {
+  src: "/illusionculum-suit-20261023/gold.webp",
+  width: 1024,
+  height: 1237,
+} as const;
+export const ILLUSIONCULUM_SUIT_GOLD_CELL = 4;
+export const ILLUSIONCULUM_SUIT_GOLD_CELLS: Readonly<Record<string, string>> = {
+  "reactor-disc":
+    "AAAAgBkAYBAADCAAAyDAACwwAC4IACMCABABAJgAAEgAABQAAAoAIAkAsAAAHAAADgAABwAAAAAAAAIAAAIAAAIAAAAA",
+  "reactor-frame":
+    "AAACAAAA/AEAAOQ/AAD8//8BwP//PwD+j/8D8D/AD4D7AHgYnAcAz8E9AOAd/gEA/OMfAMA//gAA+OMPAIA//gAA+OcPAIA/fAAA+MEHAIAP8AAAeAAPAIAD4AEAvMEfAOAf+AMA/oF/APgP+A/A/4D/A/4P8H/wfwB///cH4P+/PwD8//8BAP/vBwDgfz8AAPj7AAAA3wcAAOA/AAAA/AEAAIAPAAAAcAAAAAACAAA=",
+  "helmet-crest":
+    "AAAAAIAAAGAAAwAAAQwAAAQwAAAwwAAA4IADAIADDgAADjgAADjgAADggAcAgAMeAAAOeAAAPOABAPCADwDAgz8AgDf+AQD++Ac5uMOdgfEP9wfwHZwHgHdgHg7PofN9Pp/P/38+Pv7/8ACAoQMAAAAAAA==",
+  "helmet-visor":
+    "AAAAAD7eC3w+fj90fnw+PDx4Hj40cA8+KOAHHBjAARgQAAAMIAAABGAAAAfgAAAH4AGAD+ADwA+AB+wNAB/8DAA+fAAAPD4AgHgeAIDwDwAA4AcAAOADAACAAQAAgAEAAAAAAAAAAAAAAAAA",
+  collar:
+    "AAAAABgAAAw4AAAeOAAAHvgAAB/4AAAP8ACAB+ABwAfwD+AH4A/4B+Af/APhP/4TwP//H/B7/w/wA8gP8ACADwAAAAA=",
+  "medallion-l": "AAD+4D8O58AM0AE4QAfIgDk4j8f/8A/8AAcAAA==",
+  "shoulder-l":
+    "AAAAAAAAAAAAABAAAAAAHAAAAAAPAAAAgA8AgADgBwAkAPAHABgA/AMEDgD+AYBnAH8A8HnAHwB8/uAPAB8/8B/Axz/8D/fh///jf/j/f/wP/P+fnwP//2cAgP//HwDA//8DAPDHfwAA+OAfAAAA8AMAAAD8AAAAgH8AAADwHwAAAP4PAACA9wMAAHD+gQAAzP8wAAD4/wMAgP9vAADg/wEAAPg/AACY/w8AAPf/AQDA/38AAPD/DwAA//EBAMA/PAAA+IEHAAAewAAAwAEAAAAwAAAAAAAAAAAAAAAAAAA=",
+  "medallion-r": "IIA/+I/Hc3AEnIATYAJMwBk8h+d5/Ad/gAcAAA==",
+  "shoulder-r":
+    "AAAAAAAwAAAAAHgAAAAAfAAAAAB8AAAAAH4AAMAAfgAA4AB+AABwAH8AAHwAfwMAPwB+A4A/AH4wwB8AfADgDwC4AOAPYPgB+Ad8+AD4Bz/4AP+HP/CC/+Mf8J///x/wP/7/DzAw/v8PAGD//wcAwP//AwCA//sDAID/+AEAgH/4AQCAPwAAAIAfAAAAgH8AAACAfwAAAMD/AAAA4O8BAGDwnwMAwPg/AwAA/38AAAD4/wAAAPD/MQAA7P8zAADM/3cAAMD/7wAAwP9/AACA//8AAAA//wEAAD78AQAAPHADAAAAAAcAAAAABgAAAAAMAAAAAAAAAAAAAA==",
+  "fist-l":
+    "AAAAuAHAfwz4DwbshwHjAWB4AAAeAIAHAPABAHwAiA8A5gOA/wDgPwD4DwD+AIAfAMADAGAAAMAAAGAAAAAAAA==",
+  "fist-r": "ADAAgH8Axn/A4T8gfAQADwPAQwDwAAA8AAAfAIAHAOAjAPgMAH4DgP8A4D8AwA8A4AMAYAAAAQDgAAAAAA==",
+  "cuff-l": "AACAAAD8/8D/H/7/4P8f/v/hAx4OgAEAAA==",
+  "cuff-r": "AAAAAAAAAAAAgPwbgP8fgP8fgP8/wP8/wP8/wHd+wAF4QAAgAAAAAAAA",
+  "forearm-l":
+    "AAAAAAAAAAAAAPgBAAAEPwMAgOHvAAA4+B0AAA//AwDg4X8AAHz4DwCAD/+BA8Djf34AePzfBwAe/v+AgLP/DwDw5/8BAPz8PwCAH/8BAPDjHwAAPv4AAMDHDwAA/HwAAIDPDwAA8/kAAGC+DwAAyPcBAAB7HwAA4O8DAAD4PQwAAL/HAQDg8wwAANzeAQCA/BkAAOC/AwAAACAAAAA=",
+  "forearm-r":
+    "AAAAAAAAAAAAAACQHwAAAPeDAQDwfzgAAP4PBwDg//AAAPwfHoAJ/8MH8ON/PAD+/8+Dgf//eQDg/7MHAPh/dwAA//8PAMD//QAA4B8fAAD44wMAAP58AAAAPx8AAODnAwAA+H0AAAC+HwAAgPcbAADwfQMAALw/AACG7wcAgPF9AABgvA8AAIzHAAAA8CMAAAAAAA==",
+  "arm-l":
+    "AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAABADCAAAAc4AAABmAAAGAAAABgAAAAcAAAAPAAAAD4AQAA+AMAAPhzAADwdwAA8HcAAABwBAAAAAAAAAAAAAAAAAAAAAAA",
+  "arm-r":
+    "AAAAAAAAAAAAAGAAAAA+AOCABwA4gAEADMQAAIADAADgAAAAeAAAAB4AAMAPAAD4AwBw/gAA3B8AAPcHAMANAAAAAAA=",
+  "chest-l":
+    "AAAAAAADAAAEAAADAIAGAMADAMADAKADAGAAAMAAAICBAAADAQAGAAAMBgA8BAD4AADwAwDgDwDgPwDA/wGA/wMAxwcAjAcAHAwAOBAAMAAA4AEAwI8AAB8AAH4AAPgDAOAfAAg/AAB8AADgAcCAA4ABBgAACAAAAAAAfgAA/gMA/A8A/AAA+AAA8AAA4AAAgAEAABkAACIDAAAHAAAOAAAcAAB4AAAAAAAAAAAAAA==",
+  "chest-r":
+    "AAAAAAgAAEAAAAAMAABgHwAA/AEAwAsAAMgAAAAGAAA4AACAAwAAHAAAwAAADgcAcHgAAOADAMAfAAD/AAD8BwD4PwDA/wEA/A4A4HEAAIYDABAcAADAAACADwAAfgAA+AEA4A8AgH8AAHwAAPwRAOADAAADAAAYAABgAAAAAwAASAAA4A8AgH8AAP4DAAA+AADgAwAAHgAAcAAAAAMAYBgAAMcAABwAAGAAAAAHAAAYAAAAAAAAAAAAAAAA",
+  abdomen:
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAIBgAAAAAADMAAAAAgGgAAAAAAMYAAAAAABgAAAAAAAAAAAAAAAYAwAAAADgACAMAANwQMEgAAHjDgKADAMAP/sAPAAA+uMcfAPz5BwB//nj+BwD83QcAAQAAAwA=",
+  "tasset-front":
+    "AAAAgAEAcPABgA/+h//B/39v8PDDjzw+PJEP4SfyA3xE/sCPyA/4EfgAPyI+4IfcD3yc+4HPcz7wecYHPs/4wMcIH/gw4AMPInjgQQwPPgzjwcdhPPA4mA+fB/PxcUB8Pg+c/+cB8f88YP6fA8z/8YD3Px7g/ucD3H88APOfB2D++QCc3w8A8/sBQH4/AIjHAwDzfABAjAcAgOEAADAMAADAAQAAGAAAAAAA",
+  "tasset-l":
+    "AAAAAAAAAAAAAAAAAAAAAAAAgAA+ANz3A8B/HAD44wGADx8AIPgBAMAfAAD+AQDwHwCA/wEA/B8A8P8AgP8fAPj3AMB/DwDe8wDgng8A8PkAwJ8fAPzwAeAHHwB/8AHwDzwAf8AD8AQ4AEaAAwBkMABADwcA8HEAAB8GAMAhAAAAAAAAAA==",
+  "tasset-r":
+    "AAAAAAAAAAAAAAAAAAAAAAACAAD4AAPA8x8AHP8A4PEHAB8+APghAMAPAAD+AQDwDwCA/wEA+B8AwP8DAP4/APD/AYD3DgA8ZwDg8QCAjw8AfPgA4MMPAA/+ADjwD8CBfwAG7AM4YA7AAWMAjjkAMN4BwPgDAMQfACAeAAAwAAAAAAAA",
+  "thigh-l":
+    "AAAAAAAAgAAgAIAB8ACAAfAAgAF4AIABOAAAATggAAGM8QEDzvmDA+Y9hwfiH4cH8A+HB8APjg/ABw4PgAMOH4ABXB6AAXw+gAF8PsABfDzAAX448AF+OPABPhDwAT8A8AM/AMCDHwDAgx8AwMMPAODDBwDg5wcA4OdDAOD34QDg9+EAwP/gAEB+AABgOAAAAAAAAAAAAAA=",
+  "thigh-r":
+    "AAAAAAAACAAAgAEAGDIA4HMCgHtHYBh/AMbhByAcfgDDwAcQDvgA4YAPmA/wgHwABowHYED4AAbGD/AA+AA/AB/wA/ABH4A/8AHwAwcAPvgAwAcPAPz4AICPDWDwGQAO3wfA4P8ADP4NgIDPAAAwCAAAAAA=",
+  "shin-l":
+    "AAAAAAAAAwAAAB4AAAD8AwAA+A8AAPAfBgDw/zwAwP//AoD//28Afv//Afr4/wfs4f8P4Af/P4AP+H8GP+D/GXwA/3PwA/znwA/4zwM/4D8P/MD/HviD/z3gHf53wXf87wTf+f0R/O/zA+D/xwHA/w8HAP8fDAD4PwMA4H8+AID/eAAA+PMDAODfDwDA/z8AQP9/AADv/wEAvP+nAWD8/weA4f8PgAP/HwAO/H8AOOD/AHCA/w3AAf43AA/87wA48N8BgOD/BwCA/w8AAI8PAAAAHgAAADgAAABwAAAAwAAAAAAAAAA=",
+  "shin-r":
+    "AAAAAAAAMAAAgOEAAADoBwAA4D8AAAz/AAD4/BsA+PPvAPz//wPw/98dgP8//gH+//AG+P+BGdj/A35w/g/wgfsfwAfOfwAfcP4DfsD7H/gBz3/gB3D/gx+A+x9+APz93AHw53MeCJ3faSDw+L8BwOP/BgAO/x8AgPt/AACf/wEAfPgDAPDxCwDg7x8AAP9/AQD8/wUA4P8PAIP/MwD4/8cA4P8PBgD+PzgA+H/gAeD/AAdA/wMcgPsPcADuf8ABcP+BAcD/DwAAAH4AAACAAQAAAAAA",
+  "boot-l":
+    "AAAAAAAAAA4AAAAAeAAAAADgAQ4GAIDPLwwAAD6/CAAA+H4SAADg/zwAAID/8QAAAP6HAwAA3A8eAABwHzgwAMA44PABAPPA+QcA4IHgDwDID4cHAPB/HgcA4P//HACA//97AAD+//cAAPz53wMA8MP/BwDgB/4OAIAH+DsAAA7g7wAAPAD+AwBwAPwHAMAAwH8AAAAA/wAAAAD4MQAeAP7/APyA//8D8AP/8w/gH//Pf4D5/z//AeP/8/0DnP/A9wf4/fHfB+D///8AgH///wMA/P3/AwDA//8AAAD4BwAAAAAAAAAA",
+  "boot-r":
+    "AAAAAAAAAAAMAAAAADwAAPwH8AAA8P/DAwAAv58PAAD4fD4AAIDz+wAAAJ7/AwAAePwfAADw4H8AAMCD3wEADg58BwD4OOAZAODvgA8AAD8YfgAA8OD4GwAAx/d/AAA8//8DAPD8/w8AgP//PwAA/P/8AADw/8EHAID/Bz4AAO4f8AAA+D+AAwDA/wAcAED/AWAAAP8BgAEA8AcAAADeLwAgAPifB8AD4H//gB/Af/4PfgD/+f98A/zn+/8B4N+H/0MAfz/wxwPg/bf/DwDw//8/AMD/f/8AAPz//wEAAP//AAAAAHgAAAAAAAAA",
+  halo: "AAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAIABAAAAAAAAAAAAAAAAwAEAAAAAAAAAAAAAAADgAAAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAAAAfAAAAAAAAAAAAAAAAPD/AwAAAAAAAAAAAACA//8/AAAAAAAAAAAAANjAD1gAAAAAAAAAIAAAD+AP4AEACAAAAAAgAOAA/B/AAwACAAAAACAAHOD//wAHwAAAAAAAYAAHHHrDAQcwAAAAAABw4ECAeQMEDgwAAAAAAHA4OOD/AQ6OBwAAAAAA8AYH8P8BHO4BAAAAAADwwwA/pwcYfgAAAAAAAPj/B//nwP8/AAAAAAAA+AbD//dhsA8AAAAAAAD+AeHv9wDwDwAAAAAAgP8nMP9zIP8HAAAAAADAfj/A5x/4fgYAAAAAADD+AXDAB+A/BgAAAAAADPsDGAAB+BsCAAAAAADGdQ4AAIBzHwMAAAAAgKH6BwAAwL0LAQAAAABAyPwBAADAj4wBAAAAADDEfQAAAMBVhAAAAAAAGOF+AAAA8DvGAAAAAACEeCcAAADIPUIAAAAAAGPuGQAAAOw7YwAAAACA0eEGAAAA7HAxAAAAAEA4+AkAAAD84BgAAAAAMAf+BQAAwP/gCQAAAAD4gScHAAAw++APAAAAAL94kwYAACDdoQ8AAAD+z/9PAwAAkt+X/wPA//////8DAID//////wcA+JN/EwEAAGTv5A8AAADgDz+JAAAAkxf+AAAAAODHn3wAAODpATcAAAAAIOffPgAAcHboCAAAAAAQ/38eAAA4OzwEAAAAAAj9PwcAANwOEgMAAAAAjPw3AAAAZAeIAQAAAABG/DMAAADYA0YAAAAAACL+CwAAAPQBIAAAAAAAA/4BAAAAMAAYAAAAAIABfwAAAAAAAAQAAAAAAAAHAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "cape-l":
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAwAAABgAAAOAAAAcAEABgAAAPAHAAMAAAC4DwADAAAAuAfAAQAAAPwH4AcAAADcB+ADAAAA3AfwAwAAAO4H8AMAAADuA/ABAAAA7wP4AQAAAP8D2AAAAID/A+wAAACA/wHsAAAAwPsBcAAAAMD/AXAAAADA/wFwAAAA4P8AOAAAAOD/ADwAAADw/wA+AAAAcH8AHwAAAHh/AB8AAAC4fwAfAAAAvD8ADwAAAPw/gA8AAADcP8APAAAA/h/ABxAAAO4fwAcIAAD/D8AHCAAA/w/AAwQAgP8PwAMHAID/B8ADAQDA/wfgAwAAwPsD8AEAAOD9A/ABAADg/wPwAAAA8P8B+AAAAPD/AfgAAAD4/wB4AAAA+P8AeAAAAPz/AHwAAAD8fwA8QAAA/n8APEAAAP4/AB5AAAD/PwAeAAAA/x8AHwAAgP8fgA8AAID/D4APAADA/w/ADwAAwP8H4A8AAMD/B+APAADg3wPgBwAA4N8B8AcAAOD/AfAjAADw/wDwc0AA8P8A+DBAAPB/APwwAADwf4B9OAAA8D/AfzgAAPAf4H8YAAD4H+B/HBAA+A/gfzwQAPgP8H8+EAD4B/h/fhAA+CP4P34QAPhx/B/+EAD8cf4f/xEA/Hj/H/8RADyc/x//EwAczv+f/xcADv7/n/8PAAb+/4//HwAC/h+I/x8AAP4PzP8PAAD+B9z/DwAA/gPs/w8AAP8B7P8PAAD/AP7/AwAAfwD+fwAAAD8A/g8AAAA/AP4DAACAHwD/AAAAgA8APwAAAIAHAA8AAADAAwAHAAAAwAEAAwAAAMAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+  "cape-r":
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAADgAAAAAAADgAAAAAAADwAQAAAAAAAAcAAAAAAAAYAAAAAAAAwAAAAAAAAAADAAAAAAAAGAAAAAAAAGAAAAAAAAAAAwBAAAAAABgAIAMAAADgAPAJAAAAAAPANwAAAAAcAN8BAAAA4AD4BwAAAMAH4DsAAAAAP4D/AAAAAPwA/gcAAADgA/AfAAAAgB/A/wAAAAB+AP8DAAAAcAP8HwAAAMAF8H8AAAAABoD/AQAAADgA/g8AAADgAPg/AAAAAAPA/wEAAAA8AP8HAAAA8AH8PwAAAIAH8P8AAAAAPoC/AwAAAPgA/h8AAADAA/h/AAAAAB/A/wMAAAB8AP8OAAAI8AP4fwAAAIAP4P8BAAABPoD/DwAAAPgA/D8AAADAA/D/AQAAAA/A/wcAAAB8AP4fAAAA4AP4/wAAAIAPwP8DAAAAPgD/HwAAAPAB+H8AAADAB+D/AwAAAB+A/w8AAAB4APx/AAAA4APw/wMAAAAPgP8PAAAAPAD+fwAAAPAB8P8BAACAB8D7DwAAAB4A/j8AAAD4APj/AQAAwAfA/wcAAAA/AP8fAAAA+AH4/wAAAPAH4P8DAACAHwDvDwAAAP4AvH8AAADxA+D+AQACjA+A/wcAADB+APw/AADA8AHg/wAAAIcPgP8DAAAc/gP8DwAAYPwP8D8AgMChf4D/AAACj/8B/AcACDz+D/AfACD4uX+IfwCA8Mf/YfwBAMIf/o/hBwCI//h/nh8AAP7j/3v8AAD8j///wwMA+D/+/x0OAOD/+f93eADA/8f//8EBgP8/gf8HBgD8/wT8HwAA8P8z4H8AAMD/3wD/AQAA//8D+AcAAPD/H8A/AAAA/n8A/wAAAMD/AfgDAAAA/AfADwAAAMAfAD4AAAAA/ADwAQAAAOADgAcAAAAADgAcAAAAADAA4AAAAAAAAAADAAAAAAAACAAAAAAAAAAAAAAAAAAAAA==",
+  "cape-centre":
+    "AAAAAAAAAAgAAACABAAAAEACAAAAwAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAQAAAAAAAAAAAAAAAAAAAAADAAgAAAEAAgAAAIABAAAAQAGAAAAQAIAAAAAAQAAAAABAAAAAAAABgAAAEADACAAAAGAEAAAAMMMACAAQYYAMABBxwA4IADDwBw4IEDADjwwQEAHPjgAAAcfnAAAA5/PAAAxz8eAIDnvwcAwP/fAwDg/f8BAOD+/wAA8P8/AAD4/x8AAPz/DwAA/P8HAAD+/wMAAP/vAQCA/38AgMH/P3Dgwf8fHPjh/4cf/PD/ww9++P/hB3/4f/gB/vy/fwD8//8PAPj//wEA8P8/AADw/w8AAOD/AQAAwD8AAADgHwAAAPAPAAAA8AMAAAD4AQAAAPwAAAAAPAAAAAAeAAAAAA8AAAAAAwAAAIABAAAAAAAAAAAAAAAA",
+};
+/** The nanite engine's derivations: the guideway conduit (atlas space), each
+ * plate's real outline (Int16 LE quarter-px loops, base64) and gold box. */
+export const ILLUSIONCULUM_SUIT_GUIDE = {
+  src: "/illusionculum-suit-20261023/guide.webp",
+  width: 1024,
+  height: 1237,
+} as const;
+export const ILLUSIONCULUM_SUIT_SEAMS: Readonly<Record<string, string>> = {
+  "reactor-disc":
+    "AQAVAGoFbAVSBXEFOgVrBRYFVAXpBCIFygTyBMQExgTMBJIE6QReBBoFMwROBRQEegUMBMYFOAT3BWoEEAaiBBAG3gTqBSMF0wUqBbIFSAWSBVgFggVsBQ==",
+  "reactor-frame":
+    "AQAcAGoFKQYOBdEFAgXQBd4EsQW6BJ0FmAR+BXkEFgV7BAoFYASiBJIECASiBAcE1gT1AyYF5wNuBc8DfgXXA4YF1AOmBecD/gX0A0YGCAR8BqYEYQb6BGAGFgVUBjIFTAZeBTsGggXqBcAF3gXCBcoF0AU=",
+  "helmet-crest":
+    "AQBHAHYFLgJmBSYCPgU5AjIFMQIaBS4C1gQuAsYEJAKeBDECegQpAnQEIgJyBAYChgQVApMEDgKIBOYBgQTeAXYElgF6BJABggSbAY0EngGJBKYBkgSzAZsErgGaBJoBlASWAZkEjgGUBDoBnwTyALYEswC5BPYAxQRWAewEwgH+BNoBLgXFATYFxgFSBbQBbgWuAY4FuQHOBdkB4QXWAQAGlgH/BYoBCAZ+ARMGVgEhBuYAHgazACQGugA4BvIAQgY2AUMGhgE8BqoBRgavAUsGngFaBpABXwaWAVsGvgFNBvYBRAYGAk4GEgJaBgYCZAYKAl8GKgJaBjECUgYxAi4GLwIOBiYC+gU0AvIFMgLiBT8CpgU0ApIFPAKCBS8C",
+  "helmet-visor":
+    "AQAkAGoFsQMiBYwDEgV5AwIFdAPkBE4DwQQKA8gE0gLEBMICkARqAngELgJ6BCgCogQwAsYEIwLWBCwCGgUtAkIFOAJSBSsCagUlAoIFLQKSBTsCpgUzAtYFPgLmBTwC8gUwAvoFMwIOBiUCXAYyAkUGagIQBsICEAbWAigG5gInBg4DDgYYA/gFUgPVBXYDrgWQAw==",
+  collar:
+    "AQAcABIFeAMiBYoDbgWvA9QFdgP2BVIDDgYXAyYGDgMzBhoDNQY2A1gGqgNYBr4DNgYDBCYGBAT+BfUD2gX0A74F6AOmBegDhgXVA34F2ANuBdADJgXoA6IEBAR8BLIDlARuA6YEFgPCBAwD5QROAwIFcwM=",
+  "medallion-l":
+    "AQAbAIoD3wR2A9UEQQOeBDADcgQwA0YENQM2BD8DLgQ9AyYESgMZBE4DGwRNAxIEYgMABGoDAwRuA/0DgQP+A3wD9gOGA/ADmgP0A74D8QPSA/sD5QMSBOQDIgTaAzIE3wOeBM4DugSyA9AElgPfBA==",
+  "shoulder-l":
+    "AQBVAAwCJgS9AYoDFgKmA0wCrgM4AoYDGgL0ApYCRwO/Al4D7gJuAyYDdQNKA24DjQNOA7IDLAO2AzkDygM+A9oDYgPyA3cD+wN2A/cD5gPyA9sD5gMFBN4DCAS+A/MDpgPzA5oD+wOaA/YDhgPxA30D9gOEA/oDggMABG4DAARqAwUEZgMABGEDAgRiAwsEVgMJBFADEgRWAx4ETgMlBEYDHgRGAy4EPgMnBEADLgQ2AzYEMgNGBDYDTgQwA2IEOAOKBFUDtgR/A9oElgPdBKoD1ATSA7YEwQPyBKwDCgWvAyoFkgMrBWYDGAVWAzUFRgM1BS4DVQUcA1oF2gKXBdQClgXUAooFygKGBcICbgXCAloFsgJYBYYChAV2AoYFYgJ8BVICfgUmApIFGwKaBRoCogUOAqUFAgKwBeoBtgUyAjQFNQIqBTICJgUqAiwFKAImBWEClgQ=",
+  "medallion-r":
+    "AQAQAE4H3wQyB9gEBge4BPcGpgT6BkYE8gYiBPQGDgQOB/UDPgfoA1YH7AN6BwAEmAciBKgHTgSoB24EmweWBHoHwAQ=",
+  "shoulder-r":
+    "AgA7ANoICQSfCGIEdAiWBK8IJgWuCC0FoggqBbgIVgW0CFoFughtBa4IZAWWCHcFigh2BV4IhQUaCGwFAgh+Bd4HgAWeB1UFegdLBVIHSwVIBy4FEAfaBAYHugQWB78EPgfdBFIH3QRiB9MEhgeyBJ8HigSnB2oEpwdKBI4HFgRqB/UDVgftAzIH7AMqB/IDDwf2A/oGBwT2BgIE6wbaA+8GzgPcBqYD2QaGA7cGTgPEBhYD3QbeAvYGwwICB8ACDAfKAh0HEgM2B0ADdgdlA7IHdgPqB28DFghfA74I9QKcCIoDjQiuA7IIqgMYCYoDCADGCHQF4AieBeoIuQXWCLEFzgihBa8IigW3CIoFughzBQ==",
+  "fist-l":
+    "AQAYAGoCWwiuAnAIxgJ/CM4CgQjSAnkI1gJ+CP8C0ggMAyoJ/AJmCe4CdQmmAp8JggKpCVICqQkiApwJBgKFCfIBhAncAWoJ0wHuCOYBlgjXAX4I4gGFCOoBfAj+AXgIMgJeCA==",
+  "fist-r":
+    "AQAXAGoIZgiCCGAIoghhCOYIeQjuCIII/AiCCPEImggFCe4I+ghCCfwIXgnzCHYJ5giDCdIIiAmyCJ0JegipCVYIqQkuCJ4J7gd3CdkHYgnLByoJ2AfOCO0HmggeCHQI",
+  "cuff-l":
+    "AQAaAG4CEgieAhQIrgIfCLoCIAjKAhEI0gISCNoCBAjiAgII6AIWCOQCNgj5AkoI+QJSCOICYAjOAoIImgJpCGoCXAgyAmAI/gF6COoBfgjiAYcI1wF6COQBNgjwASYI9gENCA4CHAguAhQI",
+  "cuff-r":
+    "AQAfAEYIAQhSCAcIbggECIIICAiSCAEInggKCLoIDAjOCAwI3ggDCOUIJgjzCDoI/wh+CO4IhAjmCHsIughvCKoIZAiCCGEIHgh1CPIHlwjWB5QIygeLCLIHUgiiB0YIqgcuCKcHEgi+B/IH2gfcB/YH9wf6B/IHJgj6BzIIAgg=",
+  "forearm-l":
+    "AQArAM4COAbeAkUGJgNNBk4DYwZuA1sGwgNvBt4DaQbqA3oG8APSBsYD3gbDAyoHlgNPB2gDagcwA7oHCgPRB+ICAgjZAgYI0gIUCMoCEgi6AiEIjgIUCC4CFQgKAhwI9QEKCPYBzgfgAZoHzwFSB70BJgfkAUIG6wFCBgICcQYHAm4GIAImBi4CHgY2AiEGPgIaBkYCMQZSAi0GXgIzBooCMwaSAi4GngI3BrYCPAY=",
+  "forearm-r":
+    "AQAiAAIIQwYeCEUGigg6BrIIIwbSCHIG7AhCBvMIRgYYCSYH8wiiB+IIygfgCP4HzggNCJ4ICwiSCAMIhggECIIICghuCAUIUggICP4H9Af2B/gH1gfbB8cHwge2B7YHkgeGB4IHfAdqB10HEAceBw4H3gbsBtYG7QZ6BhoHRQZWB0UGngdOBqoHSAY=",
+  "arm-l":
+    "AQA1AB4DVwUuA1QFRgM0BVYDNAVmAxcFdgMhBawDLgW3A1IFtAOGBcQD4gXEA/4F2AM+BtwDagbCA3AGbgNdBk4DZAYeA0wG3gJHBs4COga2Aj4GngI5BpICMAaKAjQGXgI0BlICLgZGAjMGPgIcBjYCIwYyAh4GKgIlBiMCIgZQAq4FVgKmBV4CsQVkApYFXgKSBUoClQUKAqwFDgKkBRkCogUZApoFUgJ8BVoCfwViAnsFdgKFBYYCgwWyAlcFxAJaBcYCdgXMAnoFzAKGBdYCigXWApYF",
+  "arm-r":
+    "AQAhABYIbAUmCGwFXgiEBYoIdQWSCHgFrghjBbYIaAWzCFoFvAhaBckIcgW5CHYFtQiOBc4InwXSCLAFmgiZBXYIkgVxCJYFdgizBX4IpwWCCKkFlAjKBbQIIgaKCDwGHghHBqoHSQaeB08GHQdCBiUH1gVRB0oFegdJBZ4HVAXeB38FAgh8BQ==",
+  "chest-l":
+    "AQA0AG4EWAZaBEcGSgRJBu4DegbcA2YG1gM+BsYDDgbDA+IFuAOyBbMDhgW1A1IFrQM6BasDCgXAA/IE0AOyBN0DngTYAzIE4wMiBN8DBgTnAwIE8QPWA/YD1gP5A5oDAQSSAwQEggMmBGwDSgRhA1oEUwNmBF0DewRWA30EUgN0BEoDfgRBA4oERAONBDIDogQaA6UELgOgBEYDfQSyA6QEBgSRBAoEYQSqBGwEwgR7BBYFmgR+BboEnAX2BMMFFwXmBRwF9gX6BFsGygRZBroEYAY=",
+  "chest-r":
+    "AQAwAGoGWAYaBlwG6gVXBuIFXAbWBUoG0gUuBrsF9gW7Be4F8wW2BS0GjgU/BnoFXwYWBWAG+gR4BrYEegamBEcGCgQ3BgYEVwa+A1gGrgMyBi4DNgYYA0gGMgNNBkYDVgZAA2EGSgNbBlYDbgZcA34GTwOeBlQDtgZMA9sGhgPdBqYD8AbOA+wG2gP5BgYE9AYeBPwGRgT4BqYEBAeyBB4H8ARMBzIFUAdCBSkHygUkByYGGwdGBu4GegaOBkkGfgZHBg==",
+  abdomen:
+    "AQAqAH4FqwZiBaUGrgTYBkYExgYyBMUG8gPVBukDfgYeBFwGUgRFBloERgZqBFQGegRYBooEVga6BF4GygRYBvkEWgYbBfYFFQXmBQMF0gUGBc8FDgXPBWoFKAbHBdIF4gXABeYFwgXjBcoFvAXyBdQFLgbUBUIG4gVaBuoFVQYKBlUGGgZbBmoGVgZ+BkUGhgZFBu0GegbwBrYG6gbWBqIGxQaOBsYGKgbZBg==",
+  "tasset-front":
+    "AQAxAH4FmwfaBYsHKgZqBzMGpgc2Bu4HRQYyCEQGcgg8BpYIPwaaCDEGtggzBtoIKwYOCR0GLgkgBlYJJwZiCRwGcgn0BeYJ5gX6CdcFJgrKBTwKugU5CrMFLgqrBeYJmgXLCYgF1glzBQ4KagUYClAF2glCBc0JOgXMCTAF1gkpBeYJKgX9CRsF9gkKBcIJ9QSiCeIEaQnaBGYJ0gRWCccEGgnNBA4JyQTyCKwEygiZBHoInwTyB6cEqge2BHAH+gSKB14FnQc=",
+  "tasset-l":
+    "AQAhAMQDLgfGA3gHQgSIB6IEage0BG4HoATyB5oEdgioBKYIpQSuCLME0gi1BPYIwwQ2CcMESgm2BFsJigRlCWYEZAlGBFEJ/gMzCfYDNQnOAyAJtwMOCbUDAgmjA/YIlgPgCIUD2gh7A7oIbgOtCEkDmggoA+oHKQPCB2YDageVA04HwgMqBw==",
+  "tasset-r":
+    "AQAgABAHIgcaByQHagdbB30HbgeNB54HqAfGB6sH3gd9B3IIZQeuCFIHxghQB9oIMwfuCCcHFgkeByAJ5gY6CZ4GTwlmBnQJOgZrCSUGYgkcBjoJKgYMCTIG2ggwBrYIPQaeCEQGRgg0Bu4HNwbeBy0GngcsBm4HMgZqB5IGiAcOB3gH",
+  "thigh-l":
+    "AQA4AEIE/womBP8KGgT5Cg4EBAvuA/kK1gPsCsYD1AqiA/8KgwMCC4IDqgpzA34KYQMmCmEDtglaA5wJUAOSCVkDbglNA0oJXwMuCVkDIglcAxoJZgMQCXIDDgl1A/oIhgPbCJYD3wikA/YItwMCCbgDDgnWAyMJRgRQCWYEYwmKBGQJugRXCcEESgmxBN4ItgTTCMsE8gjQBBYJygQUCcgEGgnUBFYJ3ARmCeMEZgn3BKIJDAXCCR0F9gknBfYJJwUSChkFOgoXBWoKDAWOCuQE0grmBOYK1gQKC8IEDAtmBPkK",
+  "thigh-r":
+    "AQAoAJoG9gqSBvEKggb/CnYG+QpuBv8KOgYJCx4GCQsGBv8K/AXWCtEFbgrLBT4K5AX6Cf4FygkZBnYJJgZkCWYGcgmeBk0JCgcrCSYHGAlOBzIJagdiCWgHhglvB7IJcwcKCmsHWgpwB3YKaAd+CmoHjgpaB6IKXgeyClgH0gpaB/4KUgcJCzoHBAsOB9EK9gb+CuoG/ArOBgkLrgbpCqIG5Qo=",
+  "shin-l":
+    "AQA7AM8DBg7EAw4OzgPGDcYDuQ3CA70NugO2DZYDzQ2CA8YNegPODWYDyg1eA88NXQPKDVIDyQ1GA9ANLgPIDRIDrA3yAqEN5QKSDeUCXg0AAwINAAOuDPgCYgwIAxYMFgPyCxADvgsgA4ILLgNlCz4DegtGA3cLUQNGC2oDJgt5Ax4LgAMGC6ED/grGA9MK1gPrCg4EAgsaBPgKJgT9CmYE+ArOBAoL0gQSC8UELgvIBFILwASCC8gElgvoBKILwwQCDL0EVgygBLoMaAQaDV8ERg1hBHoNVAS6DU4Evg0+BLcNMgS5DSoExA0iBMMN",
+  "shin-r":
+    "AQA6APYGtA3aBq8NvgayDaoGqg2iBrANmgasDYMGrg19BpoNfQZ+DYYGZg2DBkYNawYGDVAG4gwsBpoMGQZKDBcGAgz0BaYL+gWcCw4GmAsXBoYLEQZKCxcGPgsJBhoLCgYACx4GCAs6BggLdgb4CoIG/QqOBvEKngbyCqIG5AquBugKzgYIC+oG+wr5BvoKDgfQCjYHAAtXBwoLYAceC3kHMguWB2YLqwdmC8AHjgvJB74LxgfyC98HYgzUB/IM7AdKDfQHig3uB5EN5geKDboHrg2uB8YNngfMDS4Hvw0aB7ENEge4DQoHrw0=",
+  "boot-l":
+    "AQA6ADIDIBDaAisQdgIwECYCGBD6Af4PEALCDxwCtg88AnoPTgJmD1gCYg9wAj4PeQIWD5IC4g6lAqoOtQKKDscCdg7cAiYO3QISDuMCCg7oAuIN5gKWDeoClQ3yAqANCgOlDS4Dxg1GA84NUgPIDXoDzA2CA8QNlgPKDboDtQ3CA7wNxgO4DdADwg3EA/4NxgMODiIEwQ0qBMINNgS1DUIEtg1RBMINSQTqDVAECg5mBBAOagQWDnEEYg5uBGgOFASODioE3g4UBBYPFQQ2DxoEUg8kBFoPOAS6DwIE2A+iA+8PoQMCEI4DCxA=",
+  "boot-r":
+    "AQA5AKYHIRBKBwwQNQcCEDcH8g8yB+0P9gbjD8oG1A+dBroPsQZeD7oGVQ/ABjYPwwYWD6wG3g64BqIOwgaODmUGYg5uBuoNYwbiDWoG3g2OBv4NkAbiDYUGvg2KBrANmgarDaIGrw2qBqgNvgawDdoGrQ3uBrMNCgetDRIHtg0aB7ANLge9DUoHvw1WB8YNngfLDa4HxA24B64N5geIDfEHkg33B/4NAgg6DgsITg4ECFYOEQh+Dh0Ihg4rCJ4OVwgKD2QIOg9+CGUPhghkD5wIfg/ICMoP3Aj+D7oIExBeCDAQ+gcsEA==",
+  halo: "AwAvAMMECgOOBDEDdQS+AlIEvgJmBCIDVAQSA30EQgNGBBQDVwRWA/4DlQPKA0ADpgM6A7EDFgOGAwEDkgNIA1oD6QI+A+YCUgNoAyMD2gIKArYCKgOOAqQDigE2A/AAzgNgAaIE4wDmA2oBKgRzAZIENgE9BHIBlgSFAS4EfgEHBJ4BdwSqAXoExAEKBLIBiQTmAV8EbgKCBIACkARqAp0EjgJ9BK4CqgSdAsQExgJ+BL0CgATWAo4E8ALGBNUCLQAoBg4DKAbmAkYG9wJXBsICFAa2AlYGrwJOBooCMQaSAkYGawJ2Bm4CTAbqAZsGzgFeBsIBYganAc8GngGqBn4BRgaIAZsGcgE/BjoBrgZ0AfEGagE2BucABgdeAaEH8gAwB4oBpweKAs8ItgLCB9ICggdpA5YH3wJZB/oCRgdEA04HBgMcBxIDUwfqAlIHwAISB+AC9gbEAp4GVgN9Bk4DsgbAAmIGSAOGBr8CXgbBAkYGMgMkAM4F2wFuBbABFAXSAV4FqgFWBYMBLAWmAUwFqgH+BNoB8wTGAWIFQgHmBLABBQVuAdgEhgEIBWYBzgRuAQYFWQEqBRYBvwQqATYFAgFGBdUAtwTiAEcFwgBqBQoAigXBACMG3gCNBdYAogUIARkGJgGrBRoBygVWAQkGbgHSBWIB+wWeAe4FtwF0BUIB5AXKAQ==",
+  "cape-l":
+    "AQBJAOMCAggKA88HLgO9ByoD6gdIA5IITgOfCHIDsAiEA8oIhAPmCHYD+gh0Aw4JXgMaCWADLglPA0oJWgNuCVEDkglbA5oJYwO2CWUDNgp0A34KgwOmCoQDAgt6Ax4LagMoC1IDSAtIA3YLPgN7Cy4DZgsqA2oLEQO+CxgD8gsKAxYM+QJmDAMD0gwBAwIN5gJiDekC4g3TAkoOygJRDmYCbg4SApUOmgHlDswBAg6mAfkNbgH9DaIA3Q56AAIPpwBSDrcAyg22AJ8NigC4DUIAAg4sABIOTwCGDW0A0gywADIMKgE+C+0BggkGAoQJIgKbCT4CowmCAqgJrgKbCe4Ccwn7AmYJCwMaCfsCygjSAnoI4gJeCPcCUgj4AkoI4wI2COcCFgg=",
+  "cape-r":
+    "AQBUANcH1gfWB94HvAf2B7YHBgioBxIIrAcuCKQHRgi0B1IIyweKCNYHkwjxB5YI2QfOCNcH7gjMBxIJzAcuCdoHYQnmB3AJIgiXCVoIqAmSCKUJsgicCdYIhAnpCIYJsglOC0AKagxrCtoMhgqCDakKDg6mChMOogoPDk4KuQ0eCqANIAriDS4KTg5aCv4OVgoBD2oJ/Q02CfkNCQkCDjcJwg4+CeIOOgnmDsYIlQ5mCGoODghRDgAIOg72B/4N8AdiDdMH8gzdB2IMxQfyC8gHvgu/B44LqgdnC5QHZgt3BzILXgceC1MHBgtYB/4KVgfSCl0HsgpYB6IKaAeOCmcHfgpvB3YKagdaCnEHCgpnB4YJaQdiCU4HMwklBxYJMQfuCEwH3ghUB74IYweuCJYHJginB+YHpwfGB4wHngeEB4oHhgd9B5QHhge2B7UHxQe+Bw==",
+  "cape-centre":
+    "AQBAAIoF0wmaBckJqAXaCbQFLgq6BTcKzAU+CtEFagr9BdYKCwYaCxcGOgsTBkoLGAZuCxUGkgsKBpwL9gWhC/UFqgsYBgIMGwZKDC0GmgxGBs4MdAYWDYcGTg1/BpoNkQbyDZAG/g2KBgAOZgbgDWIG6A0yBgQOsQVKDo8Frg5qBQQPJgVKDm4E5A1pBOYNagQODlYEDw5NBAYOSATmDWAEeg1dBEYNZgQaDZ8Eugy8BFYMwQQCDOcEogvOBJwLwgSSC78EggvHBFILxAQuC+IE7griBNIKCgWOChQFbgoYBToKIAUuCisF+gkpBeIJNgXNCT4FyQlFBc4JUQXaCWoFFgo=",
+};
+export const ILLUSIONCULUM_SUIT_GOLD_BOXES: Readonly<
+  Record<string, readonly [number, number, number, number]>
+> = {
+  "reactor-disc": [302, 260, 88, 88],
+  "reactor-frame": [281, 241, 136, 156],
+  "helmet-crest": [284, 45, 128, 100],
+  "helmet-visor": [287, 138, 120, 92],
+  collar: [284, 196, 116, 60],
+  "medallion-l": [201, 253, 48, 60],
+  "shoulder-l": [112, 193, 144, 172],
+  "medallion-r": [442, 247, 48, 64],
+  "shoulder-r": [427, 177, 156, 188],
+  "fist-l": [117, 536, 64, 84],
+  "fist-r": [512, 533, 64, 84],
+  "cuff-l": [118, 513, 64, 32],
+  "cuff-r": [510, 512, 68, 36],
+  "forearm-l": [116, 395, 136, 128],
+  "forearm-r": [440, 398, 140, 116],
+  "arm-l": [130, 338, 76, 64],
+  "arm-r": [504, 343, 60, 60],
+  "chest-l": [244, 199, 64, 208],
+  "chest-r": [388, 199, 64, 208],
+  abdomen: [251, 377, 192, 64],
+  "tasset-front": [295, 475, 108, 180],
+  "tasset-l": [231, 475, 76, 124],
+  "tasset-r": [388, 472, 76, 132],
+  "thigh-l": [212, 565, 116, 140],
+  "thigh-r": [372, 583, 104, 124],
+  "shin-l": [182, 693, 132, 208],
+  "shin-r": [378, 693, 132, 192],
+  "boot-l": [127, 870, 160, 168],
+  "boot-r": [410, 867, 156, 172],
+  halo: [129, 4, 436, 228],
+  "cape-l": [11, 600, 208, 360],
+  "cape-r": [455, 568, 228, 392],
+  "cape-centre": [279, 627, 136, 332],
+};
 /** The driver's plates: on the body from the start. */
 export const ILLUSIONCULUM_SUIT_DRIVER: readonly string[] = ["belt"];
 /** Alignment marks (figure px): the reactor (the light's origin), the visor. */
@@ -655,6 +742,8 @@ export const ILLUSIONCULUM_SUIT_ASSETS = [
   "/illusionculum-suit-20261023/ultra.webp",
   "/illusionculum-suit-20261023/ultra-more.webp",
   "/illusionculum-suit-20261023/undersuit.webp",
+  "/illusionculum-suit-20261023/gold.webp",
   "/illusionculum-suit-20261023/plates.webp",
-  "/illusionculum-suit-20261023/driver-standin.webp"
+  "/illusionculum-suit-20261023/driver-standin.webp",
+  "/illusionculum-suit-20261023/guide.webp",
 ] as const;

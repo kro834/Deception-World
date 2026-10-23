@@ -21,6 +21,8 @@ import {
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { ILLUSIONCULUM_FORMS, ILLUSIONCULUM_SAGA, type IcArticle } from "./illusionculum-data";
 import { IllusionculumComparison } from "./illusionculum-comparison";
+import { phrase } from "./illusionculum-phrase";
+import { withCallBreaks } from "@/components/far-from-saga/far-from-phrase";
 import { IllusionculumSuitUp } from "./illusionculum-suitup";
 import { IllusionculumEntryTransition } from "./illusionculum-entry-transition";
 import { IllusionculumOrbs, IllusionculumProjection } from "./illusionculum-figures";
@@ -126,7 +128,7 @@ function Articles({
             <div className="ics-article-copy">
               <h3 lang={/^[\x20-\x7e]+$/.test(item.title) ? "en" : undefined}>
                 <i aria-hidden="true">『</i>
-                {item.title}
+                {phrase(item.title)}
                 <i aria-hidden="true">』</i>
               </h3>
               {item.body.map((paragraph, paragraphIndex) => (
@@ -154,7 +156,7 @@ function Calls({
     <ol className={`ics-calls ${className}`.trim()} aria-label={label}>
       {calls.map((call, index) => (
         <li key={`${index}-${call}`} lang="en">
-          <b>{call}</b>
+          <b>{withCallBreaks(call)}</b>
         </li>
       ))}
     </ol>
@@ -387,6 +389,18 @@ export function IllusionculumSaga() {
             label="イリュージョンクルムサーガ 変身音声"
             className="ics-hero-calls"
           />
+          {/* The two doors, as the Rexonance hero's: into the suit-up and
+              the four forms. */}
+          <p className="ics-hero-doors">
+            <a href="#suitup" className="is-primary">
+              <span>変身を見る</span>
+              <i aria-hidden="true">↓</i>
+            </a>
+            <a href="#forms">
+              <span>四つの形態を見る</span>
+              <i aria-hidden="true">↗</i>
+            </a>
+          </p>
           {/* The name's ghost behind the copy (decorative). */}
           <span className="ics-mark" aria-hidden="true">
             ILLUSIONCULUM

@@ -1,4 +1,5 @@
 import { ILLUSIONCULUM_COMPARISON, type IcPassage } from "./illusionculum-data";
+import { phrase } from "./illusionculum-phrase";
 
 /* ILLUSIONCULUM SAGA — #comparison, the owner's 究極形態総合性能比較 for this
    form (2026-10-23): the two tables, then the four passages (性能評価, 支援・
@@ -52,14 +53,14 @@ function ComparisonTable({
   const numeric = table.head.map((_, column) => column > 0 && scale[column].some(Boolean));
   return (
     <div className="ics-table-block rxs-reveal">
-      <h3 id={`${id}-title`}>{table.title}</h3>
+      <h3 id={`${id}-title`}>{phrase(table.title)}</h3>
       <div className="ics-table-scroll">
         <table className="ics-table" aria-labelledby={`${id}-title`}>
           <thead>
             <tr>
               {table.head.map((title, column) => (
                 <th key={title} scope="col" data-numeric={numeric[column] || undefined}>
-                  {title}
+                  {phrase(title)}
                 </th>
               ))}
             </tr>
@@ -73,7 +74,7 @@ function ComparisonTable({
                   data-self={SELF.test(name) || undefined}
                   data-ultra={(SELF.test(name) && ULTRA.test(name)) || undefined}
                 >
-                  <th scope="row">{name}</th>
+                  <th scope="row">{phrase(name)}</th>
                   {cells.map((cell, cellIndex) => (
                     <td key={cellIndex} data-numeric={numeric[cellIndex + 1] || undefined}>
                       <span lang="en">{cell}</span>
@@ -113,7 +114,7 @@ export function IllusionculumComparison() {
       aria-labelledby="ics-comparison-title"
     >
       <header className="rxs-section-heading ics-heading rxs-reveal">
-        <h2 id="ics-comparison-title">{title}</h2>
+        <h2 id="ics-comparison-title">{phrase(title)}</h2>
         <p className="ics-partners" lang="en">
           {partners}
         </p>
@@ -125,7 +126,7 @@ export function IllusionculumComparison() {
       <div className="ics-evaluations">
         {sections.map((section) => (
           <article key={section.title} className="ics-evaluation rxs-reveal">
-            <h3>{section.title}</h3>
+            <h3>{phrase(section.title)}</h3>
             {section.body.map((passage, index) => (
               <p key={index}>{text(passage)}</p>
             ))}

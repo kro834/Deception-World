@@ -18,3 +18,7 @@ export const ILLUSIONCULUM_ENTRY_CALLS = Object.freeze([
 ] as const);
 
 export const ILLUSIONCULUM_ENTRY_FIGURE = ILLUSIONCULUM_HERO.src;
+
+/** The bare undersuit the armour locks onto: this suit's (Rexonance's, set
+ * into this frame by scripts/build-illusionculum-suit.mjs). */
+export const ILLUSIONCULUM_ENTRY_UNDERSUIT = "/illusionculum-suit-20261023/undersuit.webp";

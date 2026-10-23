@@ -1,5 +1,6 @@
 import { ILLUSIONCULUM_ENTRY_CALLS, ILLUSIONCULUM_ENTRY_FIGURE } from "@/lib/illusionculum-entry";
 import { ILLUSIONCULUM_ORBS, illusionculumOrb } from "@/lib/illusionculum-saga-artwork";
+import { ILLUSIONCULUM_ENTRY_UNDERSUIT as REXONANCE_SUIT_UNDERSUIT } from "@/lib/illusionculum-entry";
 
 /* ILLUSIONCULUM SAGA's entry transformation: the route transition screen of
    an in-site navigation to /illusionculum-saga (load-gate.tsx, the
@@ -7,9 +8,10 @@ import { ILLUSIONCULUM_ORBS, illusionculumOrb } from "@/lib/illusionculum-saga-a
 
    Under the cover, on one clock (styles-illusionculum-entry.css, the gate's
    ILLUSIONCULUM_ENTRY_TIMINGS): the gold sigil draws; the owner's four calls
-   come in one after another; three projections of the figure — its own
-   silhouette as scanned light in the light paths' colours — stand apart and
-   close in on where it really is, and the real figure resolves out of them;
+   come in one after another; over the bare undersuit (the same wearer as
+   Rexonance) the armour is generated from nanite cells away from the body
+   (owner, 2026-10-23: 「ナノマシンで生成された装甲をしてから装着する方式」),
+   then flies in and locks on;
    the two リアクター・モア rise from above the shoulders to their seats; the
    reactor lights. Then the gate reveals the page.
 
@@ -40,13 +42,18 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
       </svg>
       <div className="ice-entry-stage">
         <div className="ice-entry-figure">
-          {(["a", "b", "c"] as const).map((key) => (
-            <span
-              key={key}
-              className={`ice-entry-ghost is-${key}`}
-              style={{ ["--ice-cutout" as string]: `url("${ILLUSIONCULUM_ENTRY_FIGURE}")` }}
-            />
-          ))}
+          <img
+            className="ice-entry-under"
+            src={REXONANCE_SUIT_UNDERSUIT}
+            alt=""
+            decoding="async"
+          />
+          {/* The armour generated from nanite cells away from the body
+              (forward and above), then flown in and locked on. */}
+          <span
+            className="ice-entry-cells"
+            style={{ ["--ice-cutout" as string]: `url("${ILLUSIONCULUM_ENTRY_FIGURE}")` }}
+          />
           <img
             className="ice-entry-real"
             src={ILLUSIONCULUM_ENTRY_FIGURE}

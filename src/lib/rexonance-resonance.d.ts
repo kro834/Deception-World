@@ -279,6 +279,23 @@ export interface RexonanceAssemblyGeneration {
   }): Generator<undefined, RexonanceAssemblyGenerationLayer | null, unknown>;
 }
 
+/** A page's own drawing of one change of its chain of forms (ILLUSIONCULUM),
+ * the same contract as RexonanceAssemblyGenerationLayer.form. */
+export interface RexonanceAssemblyFormChange {
+  form(
+    context: CanvasRenderingContext2D,
+    from: CanvasImageSource,
+    to: CanvasImageSource,
+    fromKey: string,
+    toKey: string,
+    u: number,
+    tone: string,
+    calm: boolean,
+    vs: number,
+    ratio: number,
+  ): boolean;
+}
+
 export interface RexonanceAssemblyConfig {
   figure: string;
   undersuit: string;
@@ -298,6 +315,8 @@ export interface RexonanceAssemblyConfig {
   fireTone?: number;
   /** False: the suit-up has no fire (ILLUSIONCULUM). Unset: it burns. */
   fire?: boolean;
+  /** A page's own drawing of each change of its chain (ILLUSIONCULUM). */
+  formChange?: RexonanceAssemblyFormChange;
   palette?: RexonanceAssemblyPalette;
   accents?: RexonanceAssemblyAccents;
   /** A page's own armour generation (FAR FROM: the wireframe). Without it

@@ -1819,3 +1819,72 @@
     -webkit-text-stroke: 0;
   }
 }
+
+/* ================================================================
+   Line breaks (owner, 2026-10-23: 「改行も改善して」): headings, names,
+   table cells and calls break only at their phrase seams (<wbr>, the calls
+   after a 「！」); the owner's prose breaks at phrase boundaries where the
+   engine knows them (auto-phrase) and never leaves one character alone.
+   ================================================================ */
+.rxs-page.rxs-page.ics-page
+  :is(h1, h2, h3, .ics-table th, .ics-form-with, .ics-footer h2, .rzn-stamp) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-break: strict;
+  text-wrap: balance;
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-prose p, .ics-article-copy p, .ics-evaluation p, .ics-form-copy p, .ics-note) {
+  word-break: auto-phrase;
+  line-break: strict;
+  text-wrap: pretty;
+}
+
+.rxs-page.rxs-page.ics-page .ffs-phrase-unit {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tbody th {
+  white-space: normal;
+  min-width: 9.5em;
+  overflow-wrap: normal;
+}
+
+/* The hero's two doors (the Rexonance hero's pair, in this page's light). */
+.rxs-page.rxs-page.ics-page .ics-hero-doors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: clamp(24px, 3vw, 36px) 0 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-doors > a {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid rgb(233 184 102 / 40%);
+  background: rgb(3 4 12 / 70%);
+  color: var(--ics-text-1);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  transition: background-color 200ms ease, border-color 200ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-doors > a.is-primary {
+  border-color: transparent;
+  background: linear-gradient(90deg, var(--ics-ice), #d9f4ff);
+  color: #050816;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-doors > a:hover {
+  border-color: var(--ics-ice);
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-doors > a > i {
+  font-style: normal;
+}

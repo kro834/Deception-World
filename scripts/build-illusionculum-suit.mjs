@@ -494,6 +494,176 @@ async function samShare(name) {
   return data;
 }
 
+async function blurField(field, sigma, width = W, height = H) {
+  const bytes = Buffer.alloc(width * height);
+  for (let i = 0; i < bytes.length; i += 1)
+    bytes[i] = Math.round(Math.min(1, Math.max(0, field[i])) * 255);
+  const { data } = await sharp(bytes, { raw: { width, height, channels: 1 } })
+    .blur(sigma)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const out = new Float32Array(width * height);
+  const step = data.length / out.length;
+  for (let i = 0; i < out.length; i += 1) out[i] = data[i * step] / 255;
+  return out;
+}
+
+// --- The gold trims (the Rexonance classifier, on this art's colours) ----------
+const GOLD_CELL = 4;
+const boxFraction = (mask, radius) => {
+  const stride = W + 1;
+  const sums = new Float64Array(stride * (H + 1));
+  for (let y = 0; y < H; y += 1) {
+    let row = 0;
+    for (let x = 0; x < W; x += 1) {
+      row += mask[y * W + x];
+      sums[(y + 1) * stride + x + 1] = sums[y * stride + x + 1] + row;
+    }
+  }
+  const out = new Float32Array(N);
+  for (let y = 0; y < H; y += 1) {
+    const y0 = Math.max(0, y - radius);
+    const y1 = Math.min(H, y + radius + 1);
+    for (let x = 0; x < W; x += 1) {
+      const x0 = Math.max(0, x - radius);
+      const x1 = Math.min(W, x + radius + 1);
+      out[y * W + x] =
+        (sums[y1 * stride + x1] -
+          sums[y0 * stride + x1] -
+          sums[y1 * stride + x0] +
+          sums[y0 * stride + x0]) /
+        ((x1 - x0) * (y1 - y0));
+    }
+  }
+  return out;
+};
+async function goldLayersOf(colours) {
+  const hue = new Float32Array(N);
+  const sat = new Float32Array(N);
+  const val = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    const r = colours[i * 3] / 255;
+    const g = colours[i * 3 + 1] / 255;
+    const b = colours[i * 3 + 2] / 255;
+    const max = Math.max(r, g, b);
+    const d = max - Math.min(r, g, b);
+    let h = 0;
+    if (d > 1e-6) {
+      h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+      h = h * 60 + (h < 0 ? 360 : 0);
+    }
+    hue[i] = h;
+    sat[i] = max ? d / max : 0;
+    val[i] = max;
+  }
+  const gold = new Float32Array(N);
+  for (let i = 0; i < N; i += 1) {
+    if (alpha[i] < 0.5) continue;
+    const warm = hue[i] >= 17 && hue[i] <= 54;
+    if (warm && ((sat[i] >= 0.3 && val[i] >= 0.16) || (sat[i] >= 0.42 && val[i] >= 0.07)))
+      gold[i] = 1;
+    else if (hue[i] >= 9 && hue[i] < 17 && sat[i] >= 0.5 && val[i] >= 0.07 && val[i] < 0.45)
+      gold[i] = 1;
+  }
+  const near = boxFraction(gold, 3);
+  for (let i = 0; i < N; i += 1) {
+    if (gold[i] || alpha[i] < 0.5) continue;
+    const [r, g, b] = [colours[i * 3], colours[i * 3 + 1], colours[i * 3 + 2]];
+    const notPink = !(hue[i] > 280 || hue[i] < 12) || sat[i] < 0.16;
+    if (val[i] > 0.42 && sat[i] < 0.36 && b <= r * 1.02 && b <= g * 1.08 && notPink && near[i] > 0.3)
+      gold[i] = 1;
+    else if (hue[i] >= 12 && hue[i] <= 60 && sat[i] >= 0.16 && val[i] >= 0.12 && near[i] > 0.25)
+      gold[i] = 1;
+  }
+  {
+    const depth = new Uint8Array(N).fill(255);
+    const queue = new Int32Array(N);
+    let head = 0;
+    let tail = 0;
+    for (let i = 0; i < N; i += 1) {
+      if (!gold[i]) continue;
+      depth[i] = 0;
+      queue[tail++] = i;
+    }
+    const pale = (i) =>
+      alpha[i] >= 0.5 &&
+      val[i] > 0.62 &&
+      sat[i] < 0.3 &&
+      colours[i * 3 + 2] <= colours[i * 3] + 12 &&
+      colours[i * 3 + 2] <= colours[i * 3 + 1] + 14;
+    while (head < tail) {
+      const i = queue[head++];
+      if (depth[i] >= 7) continue;
+      const x = i % W;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
+        if (j < 0 || j >= N || depth[j] !== 255 || !pale(j)) continue;
+        depth[j] = depth[i] + 1;
+        gold[j] = 1;
+        queue[tail++] = j;
+      }
+    }
+  }
+  for (let pass = 0; pass < 4; pass += 1) {
+    const around = boxFraction(gold, 2);
+    const wide = boxFraction(gold, 4);
+    for (let i = 0; i < N; i += 1) {
+      if (gold[i] || alpha[i] < 0.5) continue;
+      const cool = sat[i] > 0.28 && hue[i] > 170 && hue[i] < 300;
+      const pink = sat[i] > 0.28 && (hue[i] >= 300 || hue[i] < 12);
+      const mauve = (hue[i] >= 300 || hue[i] < 17) && sat[i] < 0.5 && val[i] < 0.45;
+      if (!cool && !pink && (around[i] > 0.55 || (val[i] < 0.3 && wide[i] > 0.6))) gold[i] = 1;
+      else if (pink && sat[i] < 0.55 && val[i] > 0.5 && around[i] > 0.7) gold[i] = 1;
+      else if (mauve && wide[i] > 0.34) gold[i] = 1;
+    }
+  }
+  const specks = boxFraction(gold, 2);
+  for (let i = 0; i < N; i += 1) if (gold[i] && specks[i] < 0.2) gold[i] = 0;
+  const goldSoft = await (async () => {
+    const nearTrim = boxFraction(gold, 4);
+    const grown = boxFraction(gold, 1);
+    const field = new Float32Array(N);
+    for (let i = 0; i < N; i += 1) {
+      const r = colours[i * 3];
+      const g = colours[i * 3 + 1];
+      const b = colours[i * 3 + 2];
+      const warm = Math.max(r, g, b) > 50 && r > b * 1.2 && g > b * 1.02;
+      field[i] = grown[i] > 0 || (nearTrim[i] > 0 && warm) ? 1 : 0;
+    }
+    const soft = await blurField(field, 0.8);
+    return Float32Array.from(soft, (v) => Math.min(1, v * 1.6));
+  })();
+  const goldLight = await blurField(
+    Float32Array.from(
+      { length: N },
+      (_, i) =>
+        (0.2126 * colours[i * 3] + 0.7152 * colours[i * 3 + 1] + 0.0722 * colours[i * 3 + 2]) / 255,
+    ),
+    2,
+  );
+  const rawGold = Buffer.alloc(N * 3);
+  for (let y = 1; y < H - 1; y += 1) {
+    for (let x = 1; x < W - 1; x += 1) {
+      const i = y * W + x;
+      const m = goldSoft[i];
+      if (!m) continue;
+      const k = Math.min(1, goldLight[i] ** 0.9);
+      const wall = Math.min(
+        1,
+        Math.hypot(goldSoft[i + 1] - goldSoft[i - 1], goldSoft[i + W] - goldSoft[i - W]) * 0.9,
+      );
+      const local =
+        (0.2126 * colours[i * 3] + 0.7152 * colours[i * 3 + 1] + 0.0722 * colours[i * 3 + 2]) / 255;
+      const detail = Math.max(-5, Math.min(6, (local - goldLight[i]) * 20));
+      const base = [31 + 38 * k + detail, 36 + 41 * k + detail, 43 + 46 * k + detail];
+      const steel = [112, 126, 144];
+      for (let c = 0; c < 3; c += 1)
+        rawGold[i * 3 + c] = Math.round(base[c] + (steel[c] - base[c]) * wall);
+    }
+  }
+  return { goldTrim: gold, goldSoft, rawGold };
+}
+const { goldTrim, goldSoft, rawGold } = await goldLayersOf(rgb);
+
 // --- Partition: the belt by its outline, the rest by SAM's shares --------------
 const beltMask = await rasterise(BELT_OUTLINE);
 const plateIds = REGIONS.flatMap((region) => SPLITS[region.id].map((split) => ({ ...split, region: region.id })));
@@ -689,6 +859,8 @@ const UNDERSUIT = await writeWebp("undersuit.webp", undersuitRaw, FIG_W, FIG_H, 
 const TILE = 9;
 const MARGIN = 2;
 let tileCount = 0;
+let goldCount = 0;
+const goldCells = {};
 const pieces = [];
 const cells = [];
 for (const plate of plateIds) {
@@ -699,6 +871,25 @@ for (const plate of plateIds) {
   const art = extractRaw(await toDelivery(rgba(field)), box);
   if (plate.region === "belt") for (let i = 3; i < art.length; i += 4) if (art[i] < 16) art[i] = 0;
   const { width: w, height: h } = box;
+  // Its gold, unformed (the raw gunmetal under the trims' soft mask), at the
+  // same atlas place, and its gold cells: the nanite engine's pour.
+  const gold = extractRaw(await toDelivery(rgba(Float32Array.from(field, (v, i) => v * goldSoft[i]), rawGold)), box);
+  if (plate.region !== "belt") {
+    const gcols = Math.ceil(w / GOLD_CELL);
+    const grows = Math.ceil(h / GOLD_CELL);
+    const gbits = new Uint8Array(Math.ceil((gcols * grows) / 8));
+    for (let row = 0; row < grows; row += 1)
+      for (let col = 0; col < gcols; col += 1) {
+        let total = 0;
+        for (let y = row * GOLD_CELL; y < Math.min(h, (row + 1) * GOLD_CELL); y += 1)
+          for (let x = col * GOLD_CELL; x < Math.min(w, (col + 1) * GOLD_CELL); x += 1) total += gold[(y * w + x) * 4 + 3] / 255;
+        if (total < 2) continue;
+        const bit = row * gcols + col;
+        gbits[bit >> 3] |= 1 << (bit & 7);
+        goldCount += 1;
+      }
+    if (gbits.some(Boolean)) goldCells[plate.id] = Buffer.from(gbits).toString("base64");
+  }
   const seat = {
     up: [box.left + w / 2, box.top + h],
     down: [box.left + w / 2, box.top],
@@ -723,7 +914,7 @@ for (const plate of plateIds) {
         tileCount += 1;
       }
     }
-  cells.push({ w, h, art });
+  cells.push({ w, h, art, gold });
   pieces.push({
     id: plate.id,
     group: plate.group,
@@ -758,10 +949,15 @@ const GUTTER = 2;
   var ATLAS_H = shelfY + shelfH;
 }
 const atlasRaw = Buffer.alloc(ATLAS_W * ATLAS_H * 4);
-for (const [i, { w, h, art }] of cells.entries()) {
+const goldAtlasRaw = Buffer.alloc(ATLAS_W * ATLAS_H * 4);
+for (const [i, { w, h, art, gold }] of cells.entries()) {
   const { ax, ay } = pieces[i];
-  for (let y = 0; y < h; y += 1) art.copy(atlasRaw, ((ay + y) * ATLAS_W + ax) * 4, y * w * 4, (y + 1) * w * 4);
+  for (let y = 0; y < h; y += 1) {
+    art.copy(atlasRaw, ((ay + y) * ATLAS_W + ax) * 4, y * w * 4, (y + 1) * w * 4);
+    gold.copy(goldAtlasRaw, ((ay + y) * ATLAS_W + ax) * 4, y * w * 4, (y + 1) * w * 4);
+  }
 }
+const GOLD_ATLAS = await writeWebp("gold.webp", goldAtlasRaw, ATLAS_W, ATLAS_H, { quality: 60, alphaQuality: 70 });
 const ATLAS = await writeWebp("plates.webp", atlasRaw, ATLAS_W, ATLAS_H, { quality: 80, alphaQuality: 90 });
 
 // The driver stand-in: the belt whole (the loading stand-in under the canvas).
@@ -775,6 +971,252 @@ const ATLAS = await writeWebp("plates.webp", atlasRaw, ATLAS_W, ATLAS_H, { quali
   await writeWebp("driver-standin.webp", driverRaw, FIG_W, FIG_H, { lossless: true });
 }
 const DRIVER_STANDIN = `${PUBLIC_PATH}/driver-standin.webp`;
+
+// --- The nanite engine's derivations (as scripts/build-rexonance-nanites.mjs) ----
+const CASES = [
+  null,
+  [[3, 2]],
+  [[2, 1]],
+  [[3, 1]],
+  [[1, 0]],
+  [
+    [3, 0],
+    [1, 2],
+  ],
+  [[2, 0]],
+  [[3, 0]],
+  [[0, 3]],
+  [[0, 2]],
+  [
+    [0, 1],
+    [2, 3],
+  ],
+  [[0, 1]],
+  [[1, 3]],
+  [[1, 2]],
+  [[2, 3]],
+  null,
+];
+function traceContours(field, w, h, iso) {
+  const stride = w + 2;
+  const value = (i, j) => (i < 0 || j < 0 || i >= w || j >= h ? 0 : field[j * w + i]);
+  const next = new Map();
+  const at = new Map();
+  const hKey = (i, j) => ((j + 1) * stride + (i + 1)) * 2;
+  const vKey = (i, j) => ((j + 1) * stride + (i + 1)) * 2 + 1;
+  const cut = (a, b) => (iso - a) / (b - a);
+  for (let j = -1; j < h; j += 1) {
+    for (let i = -1; i < w; i += 1) {
+      const a = value(i, j);
+      const b = value(i + 1, j);
+      const c = value(i + 1, j + 1);
+      const d = value(i, j + 1);
+      const index = (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
+      const segments = CASES[index];
+      if (!segments) continue;
+      const side = (s) => {
+        let key;
+        let point;
+        if (s === 0) [key, point] = [hKey(i, j), () => [i + 0.5 + cut(a, b), j + 0.5]];
+        else if (s === 1) [key, point] = [vKey(i + 1, j), () => [i + 1.5, j + 0.5 + cut(b, c)]];
+        else if (s === 2) [key, point] = [hKey(i, j + 1), () => [i + 0.5 + cut(d, c), j + 1.5]];
+        else [key, point] = [vKey(i, j), () => [i + 0.5, j + 0.5 + cut(a, d)]];
+        if (!at.has(key)) at.set(key, point());
+        return key;
+      };
+      for (const [from, to] of segments) next.set(side(from), side(to));
+    }
+  }
+  const seen = new Set();
+  const loops = [];
+  for (const start of next.keys()) {
+    if (seen.has(start)) continue;
+    const loop = [];
+    let key = start;
+    while (key !== undefined && !seen.has(key)) {
+      seen.add(key);
+      loop.push(at.get(key));
+      key = next.get(key);
+    }
+    if (loop.length >= 3) loops.push(loop);
+  }
+  return loops;
+}
+const shoelace = (loop) => {
+  let sum = 0;
+  for (let i = 0; i < loop.length; i += 1) {
+    const [x0, y0] = loop[i];
+    const [x1, y1] = loop[(i + 1) % loop.length];
+    sum += x0 * y1 - x1 * y0;
+  }
+  return sum / 2;
+};
+const segmentDistance = ([px, py], [ax, ay], [bx, by]) => {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const length = dx * dx + dy * dy;
+  const t = length ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / length)) : 0;
+  return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+};
+function simplifyRun(points, epsilon) {
+  const keep = new Uint8Array(points.length);
+  keep[0] = keep[points.length - 1] = 1;
+  const stack = [[0, points.length - 1]];
+  while (stack.length) {
+    const [a, b] = stack.pop();
+    let best = -1;
+    let at = -1;
+    for (let i = a + 1; i < b; i += 1) {
+      const d = segmentDistance(points[i], points[a], points[b]);
+      if (d > best) [best, at] = [d, i];
+    }
+    if (best > epsilon) {
+      keep[at] = 1;
+      stack.push([a, at], [at, b]);
+    }
+  }
+  return points.filter((_, i) => keep[i]);
+}
+function simplifyLoop(loop, epsilon) {
+  if (loop.length <= 3) return loop.slice();
+  let far = 1;
+  for (let i = 1; i < loop.length; i += 1)
+    if (
+      Math.hypot(loop[i][0] - loop[0][0], loop[i][1] - loop[0][1]) >
+      Math.hypot(loop[far][0] - loop[0][0], loop[far][1] - loop[0][1])
+    )
+      far = i;
+  const first = simplifyRun(loop.slice(0, far + 1), epsilon);
+  const second = simplifyRun([...loop.slice(far), loop[0]], epsilon);
+  return [...first, ...second.slice(1, -1)];
+}
+const rotateToNearest = (loop, [sx, sy]) => {
+  let best = 0;
+  let distance = Infinity;
+  for (let i = 0; i < loop.length; i += 1) {
+    const d = Math.hypot(loop[i][0] - sx, loop[i][1] - sy);
+    if (d < distance) [distance, best] = [d, i];
+  }
+  return [...loop.slice(best), ...loop.slice(0, best)];
+};
+const SEAM_ALPHA = 96;
+const SEAM_EPSILON = 0.9;
+const SEAM_POINTS = 128;
+const SEAM_ISLAND = 40;
+const NON_DRIVER = pieces.filter((piece) => !DRIVER.includes(piece.id));
+function buildSeams() {
+  const seams = {};
+  for (const piece of NON_DRIVER) {
+    const { ax, ay, w, h, x, y, seat } = piece;
+    const field = new Uint8Array(w * h);
+    for (let j = 0; j < h; j += 1)
+      for (let i = 0; i < w; i += 1) field[j * w + i] = atlasRaw[((ay + j) * ATLAS_W + ax + i) * 4 + 3];
+    const outlines = traceContours(field, w, h, SEAM_ALPHA)
+      .map((loop) => loop.map(([px, py]) => [px + x, py + y]))
+      .map((loop) => ({ loop, area: shoelace(loop) }))
+      .filter(({ area }) => area > 0)
+      .sort((a, b) => b.area - a.area);
+    if (!outlines.length) throw new Error(`${piece.id}: no outline in its atlas cell`);
+    const chosen = [
+      outlines[0],
+      ...outlines.slice(1).filter(({ area }) => area > SEAM_ISLAND).slice(0, 2),
+    ];
+    const anchored = chosen.map(({ loop }) => rotateToNearest(loop, seat));
+    let epsilon = SEAM_EPSILON;
+    let loops;
+    for (;;) {
+      loops = anchored
+        .map((loop) => simplifyLoop(loop, epsilon))
+        .filter((loop, i) => i === 0 || (loop.length >= 3 && shoelace(loop) > SEAM_ISLAND));
+      const total = loops.reduce((sum, loop) => sum + loop.length, 0);
+      if (total <= SEAM_POINTS) break;
+      epsilon *= 1.1;
+    }
+    const words = [loops.length];
+    for (const loop of loops) {
+      words.push(loop.length);
+      for (const [px, py] of loop) words.push(Math.round(px * 4), Math.round(py * 4));
+    }
+    const bytes = Buffer.alloc(words.length * 2);
+    words.forEach((word, i) => bytes.writeInt16LE(word, i * 2));
+    seams[piece.id] = bytes.toString("base64");
+  }
+  return seams;
+}
+function buildGoldBoxes() {
+  const boxes = {};
+  for (const piece of NON_DRIVER) {
+    const encoded = goldCells[piece.id];
+    if (!encoded) continue;
+    const bits = Buffer.from(encoded, "base64");
+    const cols = Math.ceil(piece.w / GOLD_CELL);
+    const rows = Math.ceil(piece.h / GOLD_CELL);
+    let [c0, r0, c1, r1] = [Infinity, Infinity, -1, -1];
+    for (let row = 0; row < rows; row += 1)
+      for (let col = 0; col < cols; col += 1) {
+        const bit = row * cols + col;
+        if (!(bits[bit >> 3] & (1 << (bit & 7)))) continue;
+        c0 = Math.min(c0, col);
+        r0 = Math.min(r0, row);
+        c1 = Math.max(c1, col);
+        r1 = Math.max(r1, row);
+      }
+    if (c1 < 0) continue;
+    const left = c0 * GOLD_CELL;
+    const top = r0 * GOLD_CELL;
+    const right = Math.min(piece.w, (c1 + 1) * GOLD_CELL);
+    const bottom = Math.min(piece.h, (r1 + 1) * GOLD_CELL);
+    boxes[piece.id] = [piece.x + left, piece.y + top, right - left, bottom - top];
+  }
+  return boxes;
+}
+// The guideway conduit, script-made in atlas space: the gold's alpha (> 32,
+// within the non-driver cells) gives each trim; its edge is the rail — lit
+// gold where the edge faces the upper left, dark gold where it faces away —
+// a second rail inside it, and the ice channel glowing within.
+function buildGuide() {
+  const inCell = new Uint8Array(ATLAS_W * ATLAS_H);
+  for (const { ax, ay, w, h } of NON_DRIVER)
+    for (let y = ay; y < ay + h; y += 1) inCell.fill(1, y * ATLAS_W + ax, y * ATLAS_W + ax + w);
+  const solid = new Uint8Array(ATLAS_W * ATLAS_H);
+  for (let i = 0; i < solid.length; i += 1) solid[i] = inCell[i] && goldAtlasRaw[i * 4 + 3] > 32 ? 1 : 0;
+  const inside = (x, y) => x >= 0 && y >= 0 && x < ATLAS_W && y < ATLAS_H && solid[y * ATLAS_W + x];
+  // Depth: how many pixels in from the edge (0..4).
+  const depth = new Uint8Array(ATLAS_W * ATLAS_H);
+  for (let y = 0; y < ATLAS_H; y += 1)
+    for (let x = 0; x < ATLAS_W; x += 1) {
+      if (!solid[y * ATLAS_W + x]) continue;
+      let d = 4;
+      for (let r = 1; r <= 4 && d === 4; r += 1)
+        if (!inside(x - r, y) || !inside(x + r, y) || !inside(x, y - r) || !inside(x, y + r))
+          d = r - 1;
+      depth[y * ATLAS_W + x] = d;
+    }
+  const raw = Buffer.alloc(ATLAS_W * ATLAS_H * 4);
+  for (let y = 0; y < ATLAS_H; y += 1)
+    for (let x = 0; x < ATLAS_W; x += 1) {
+      const i = y * ATLAS_W + x;
+      if (!solid[i]) continue;
+      const d = depth[i];
+      const lit = !inside(x - 1, y) || !inside(x, y - 1) || !inside(x - 1, y - 1);
+      // A hologram's weight, not a plate's: the rails thin and the channel
+      // a translucent ice glass (the formed gold is the art's own).
+      let colour;
+      if (d === 0) colour = lit ? [255, 228, 158, 214] : [168, 118, 48, 196];
+      else if (d === 1) colour = lit ? [236, 196, 112, 120] : [124, 86, 34, 110];
+      else if (d === 2) colour = [150, 222, 255, 56];
+      else if (d === 3) colour = [184, 238, 255, 78];
+      else colour = [214, 247, 255, 96];
+      raw.set(colour, i * 4);
+    }
+  return raw;
+}
+const seams = buildSeams();
+const goldBoxes = buildGoldBoxes();
+const GUIDE = await writeWebp("guide.webp", buildGuide(), ATLAS_W, ATLAS_H, {
+  quality: 72,
+  alphaQuality: 65,
+});
 
 // --- The module ---------------------------------------------------------------------
 const point = ([x, y]) => `[${fx(x)}, ${fy(y)}]`;
@@ -841,6 +1283,16 @@ export const ILLUSIONCULUM_SUIT_ATLAS = { src: "${ATLAS}", width: ${ATLAS_W}, he
 export const ILLUSIONCULUM_SUIT_PIECES: readonly IllusionculumSuitPiece[] = ${JSON.stringify(pieces, null, 2)
   .replace(/"(\w+)":/g, "$1:")
   .replace(/\n/g, "\n")};
+/** The gold atlas (each plate's raw gunmetal channel, alpha the trims' mask),
+ * at the plates' atlas places, and the gold cell size and each plate's cells. */
+export const ILLUSIONCULUM_SUIT_GOLD_ATLAS = { src: "${GOLD_ATLAS}", width: ${ATLAS_W}, height: ${ATLAS_H} } as const;
+export const ILLUSIONCULUM_SUIT_GOLD_CELL = ${GOLD_CELL};
+export const ILLUSIONCULUM_SUIT_GOLD_CELLS: Readonly<Record<string, string>> = ${JSON.stringify(goldCells, null, 2)};
+/** The nanite engine's derivations: the guideway conduit (atlas space), each
+ * plate's real outline (Int16 LE quarter-px loops, base64) and gold box. */
+export const ILLUSIONCULUM_SUIT_GUIDE = ${JSON.stringify({ src: GUIDE, width: ATLAS_W, height: ATLAS_H })} as const;
+export const ILLUSIONCULUM_SUIT_SEAMS: Readonly<Record<string, string>> = ${JSON.stringify(seams, null, 2)};
+export const ILLUSIONCULUM_SUIT_GOLD_BOXES: Readonly<Record<string, readonly [number, number, number, number]>> = ${JSON.stringify(goldBoxes)};
 /** The driver's plates: on the body from the start. */
 export const ILLUSIONCULUM_SUIT_DRIVER: readonly string[] = ${JSON.stringify(DRIVER)};
 /** Alignment marks (figure px): the reactor (the light's origin), the visor. */

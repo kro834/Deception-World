@@ -1630,6 +1630,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // \`forms.paths\`, each form's keys in order. Without it a form runs the
   // chain up to itself (FAR FROM), exactly as before.
   const formPaths = config.forms?.paths ?? null;
+  // A page's own drawing of each change of its chain (ILLUSIONCULUM: the
+  // orbs deploying, ウルトラ from the reactor out) while the nanites build the
+  // armour: \`formChange\`. Without it the scene's square cells draw it.
+  const formChange = config.formChange ?? null;
   // A page's own armour generation (FAR FROM, 2026-10-23: 「ファーフロムは
   // ワイヤーフレーム風の生成方式を採るように」 — its wireframe layer,
   // far-from-wireframe-layer.ts): prepared with the plan, it draws the armour
@@ -3629,7 +3633,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // A page's own generation draws the change its way (FAR FROM: the
           // next form's wireframe over the last, then its facets filling).
           if (
-            !wire?.form(
+            !(wire ?? formChange)?.form(
               context,
               from,
               forms.sheets[key],

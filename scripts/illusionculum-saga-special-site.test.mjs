@@ -181,16 +181,24 @@ test("the engine's new options are opt-in: Rexonance and FAR FROM pass none of t
   assert.doesNotMatch(read("src/components/rexonance-saga/rexonance-saga.tsx"), /\bfire: false|\bpaths:/);
   const own = read("src/lib/illusionculum-assembly-engine.ts");
   assert.match(own, /fire: false,/);
-  assert.match(own, /generation: createIllusionculumProjection\(/);
+  // Owner (2026-10-23): 「ナノマシンで生成された装甲をしてから装着する方式」 —
+  // the Rexonance nanite engine builds the armour (no generation layer).
+  assert.doesNotMatch(own, /generation:/);
+  assert.match(own, /nanites: loadIllusionculumNanites,/);
+  assert.match(own, /gold: \{/);
+  assert.match(own, /formChange: createIllusionculumFormChange\(/);
+  assert.match(engine, /!\(wire \?\? formChange\)\?\.form\(/);
+  assert.doesNotMatch(farFrom, /formChange/);
   assert.match(own, /paths: ILLUSIONCULUM_FORM_PATHS,/);
   assert.match(own, /reactorRadius: 0,/);
 });
 
-test("the projection draws closed-form, allocating nothing in a frame", () => {
-  const layer = read("src/lib/illusionculum-projection.ts");
-  const frame = layer.slice(layer.indexOf("draw(context, progress, calm)"), layer.indexOf("release() {"));
-  assert.ok(frame.length > 1000);
-  assert.doesNotMatch(frame, /\bnew\b|create(Linear|Radial)Gradient|\[\]|\{\s*\w+:|Array\.from|\.map\(|\.filter\(|performance\.now|Date\.now|Math\.random/);
+test("the change of form draws closed-form, allocating nothing in a frame", () => {
+  const layer = read("src/lib/illusionculum-form-change.ts");
+  const frame = layer.slice(layer.indexOf("form(context"), layer.lastIndexOf("};"));
+  const body = frame.replace(/orbGhosts \?\?= [\s\S]*?\}\);/, "");
+  assert.ok(body.length > 800);
+  assert.doesNotMatch(body, /\bnew\b|create(Linear|Radial)Gradient|Array\.from|\.filter\(|performance\.now|Date\.now|Math\.random/);
 });
 
 test("the sheets: motion once and only where allowed, no loops, the 12px floor", () => {
