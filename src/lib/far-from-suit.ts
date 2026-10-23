@@ -2,7 +2,7 @@
 // design/far-from-suit-20261022/middle.webp — do not edit by hand.
 // Figure coordinates are delivery pixels of the 693 x 1040 figure (the
 // owner's whole 1024 x 1536 cutout frame: src/lib/far-from-stage.ts).
-// 9 files, 1313402 bytes (figure.webp 183750, high.webp 166678, xhigh.webp 166596, max.webp 177652, undersuit.webp 45476, plates.webp 265464, gold.webp 140754, driver-standin.webp 37726, guide.webp 129306).
+// 9 files, 1314376 bytes (figure.webp 183750, high.webp 166708, xhigh.webp 166596, max.webp 177604, undersuit.webp 45434, plates.webp 266094, gold.webp 140936, driver-standin.webp 37726, guide.webp 129528).
 
 export const FAR_FROM_SUIT_SIZE = { width: 693, height: 1040 } as const;
 
@@ -21,44 +21,48 @@ export const FAR_FROM_SUIT_FORMS = {
 
 /** The face's lights' outline, for the final call's pixel squares. */
 export const FAR_FROM_SUIT_FACE_GLOW: readonly (readonly [number, number])[] = [
-  [306, 120.5],
-  [318.2, 123.2],
-  [331.8, 135.4],
-  [346.7, 150.3],
-  [361.6, 135.4],
-  [375.1, 123.2],
-  [387.3, 120.5],
-  [383.2, 135.4],
-  [371, 150.3],
-  [358.9, 163.9],
-  [346.7, 173.3],
-  [334.5, 163.9],
-  [322.3, 150.3],
-  [310.1, 135.4],
+  [293.9, 105.6],
+  [304.7, 108.3],
+  [318.2, 112.4],
+  [331.8, 120.5],
+  [341.9, 128.6],
+  [346.7, 132],
+  [351.4, 128.6],
+  [361.6, 120.5],
+  [375.1, 112.4],
+  [388.6, 108.3],
+  [399.5, 105.6],
+  [398.1, 115.1],
+  [388.6, 119.2],
+  [375.1, 125.9],
+  [361.6, 133.4],
+  [352.1, 139.5],
+  [349.4, 144.9],
+  [348.7, 157.1],
+  [346.7, 161.1],
+  [344.6, 157.1],
+  [344, 144.9],
+  [341.3, 139.5],
+  [331.8, 133.4],
+  [318.2, 125.9],
+  [304.7, 119.2],
+  [295.2, 115.1],
 ];
 /** The reactor's outline: it completes like the compound eyes (owner),
  * pixel squares filling it, then scattering. */
 export const FAR_FROM_SUIT_REACTOR_GLOW: readonly (readonly [number, number])[] = [
-  [377.8, 274.2],
-  [376.5, 283.7],
-  [371.7, 292.5],
-  [364.9, 299.3],
-  [356.1, 304],
-  [346.7, 305.4],
-  [337.2, 304],
-  [328.4, 299.3],
-  [321.6, 292.5],
-  [316.9, 283.7],
-  [315.5, 274.2],
-  [316.9, 264.7],
-  [321.6, 255.9],
-  [328.4, 249.2],
-  [337.2, 244.4],
-  [346.7, 243.1],
-  [356.1, 244.4],
-  [364.9, 249.2],
-  [371.7, 255.9],
-  [376.5, 264.7],
+  [295.2, 238.3],
+  [318.2, 243.8],
+  [338.5, 251.9],
+  [346.7, 247.8],
+  [354.8, 251.9],
+  [375.1, 243.8],
+  [398.1, 238.3],
+  [387.3, 260],
+  [371, 280.3],
+  [346.7, 300.6],
+  [322.3, 280.3],
+  [306, 260],
 ];
 
 export type FarFromSuitGroup =
@@ -80,13 +84,13 @@ export type FarFromSuitPiece = {
    * row-major over its box, LSB-first bitmask, base64). */
   readonly tiles: string;
 };
-/** The nanite micro-tile, in delivery px (6170 tiles in all). */
+/** The nanite micro-tile, in delivery px (6182 tiles in all). */
 export const FAR_FROM_SUIT_TILE = 9;
 /** The plates' atlas (art only). */
 export const FAR_FROM_SUIT_ATLAS = {
   src: "/far-from-suit-20261022/plates.webp",
   width: 1024,
-  height: 1027,
+  height: 1030,
 } as const;
 /** The plates, front first; they tile the figure. */
 export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
@@ -191,7 +195,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 57,
     seat: [350.5, 163],
     tiles: "/j//h//j//P/+f8AAAA=",
-    ax: 68,
+    ax: 136,
     ay: 961,
   },
   {
@@ -204,7 +208,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 29,
     seat: [346.5, 186],
     tiles: "//d//AEA",
-    ax: 541,
+    ax: 609,
     ay: 961,
   },
   {
@@ -221,20 +225,20 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     ay: 793,
   },
   {
-    id: "core-disc",
+    id: "crystal-core",
     group: "chest",
     dir: "up",
-    x: 314,
-    y: 241,
-    w: 66,
-    h: 66,
-    seat: [347, 307],
-    tiles: "Pn9/f39/PgA=",
-    ax: 0,
-    ay: 961,
+    x: 292,
+    y: 235,
+    w: 109,
+    h: 69,
+    seat: [346.5, 304],
+    tiles: "B+7/+R//wz/wAzwAAw==",
+    ax: 878,
+    ay: 884,
   },
   {
-    id: "core-swirl",
+    id: "crystal-mount",
     group: "chest",
     dir: "up",
     x: 287,
@@ -242,7 +246,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     w: 120,
     h: 131,
     seat: [347, 346],
-    tiles: "+Mf/9//9fx/fg/fgPXgfn//Df+Af+AN4AAQA",
+    tiles: "+Mf/9//9f6fYAffgfXy/n//Df+Af+AN4AAQA",
     ax: 629,
     ay: 406,
   },
@@ -412,7 +416,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 47,
     seat: [168.5, 438],
     tiles: "/vPff/7zHwAA",
-    ax: 240,
+    ax: 308,
     ay: 961,
   },
   {
@@ -464,7 +468,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 47,
     seat: [525.5, 438],
     tiles: "//GP//znPwAA",
-    ax: 333,
+    ax: 401,
     ay: 961,
   },
   {
@@ -490,8 +494,8 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 69,
     seat: [257, 251],
     tiles: "Hh8fP39/fjw=",
-    ax: 878,
-    ay: 884,
+    ax: 0,
+    ay: 961,
   },
   {
     id: "shoulder-upper-l",
@@ -542,8 +546,8 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 69,
     seat: [436, 251],
     tiles: "OHh8fn5/fxw=",
-    ax: 946,
-    ay: 884,
+    ax: 68,
+    ay: 961,
   },
   {
     id: "shoulder-upper-r",
@@ -646,7 +650,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 40,
     seat: [242.5, 519],
     tiles: "g8fn9wM=",
-    ax: 426,
+    ax: 494,
     ay: 961,
   },
   {
@@ -672,7 +676,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 40,
     seat: [451, 519],
     tiles: "MJzv9wM=",
-    ax: 483,
+    ax: 551,
     ay: 961,
   },
   {
@@ -828,7 +832,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     y: 551,
     w: 160,
     h: 232,
-    seat: [151, 551],
+    seat: [227.5, 556.6],
     tiles: "AMABgA8APgD8APgD4AfAB4APAH8AfAH4AfAA4AHAB4APAB4AfBj4YOCDgQcGHwA8AHAAwAEAAwAEAAA=",
     ax: 0,
     ay: 0,
@@ -841,7 +845,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     y: 551,
     w: 158,
     h: 232,
-    seat: [542, 551],
+    seat: [465.8, 556.6],
     tiles: "BgA8APABwA8APwD8AYAPAD4A+AHADwB6AMADAB8AeADAAwAfIPiAwQMGHxh4AOABAAcAPADgAAADAAw=",
     ax: 162,
     ay: 0,
@@ -895,57 +899,57 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
     h: 52,
     seat: [558.5, 166],
     tiles: "7zmOEQ==",
-    ax: 197,
+    ax: 265,
     ay: 961,
   },
   {
     id: "ribbon-upper-l",
     group: "ribbon",
-    dir: "down",
+    dir: "left",
     x: 18,
     y: 153,
     w: 147,
     h: 162,
-    seat: [91.5, 153],
+    seat: [166.6, 177.4],
     tiles: "AP4A/4H/g/+B/4H/g/8D/wf/D34efDB4AHAA4ADEBRgPAB4AMB8A",
     ax: 0,
     ay: 406,
   },
   {
-    id: "ribbon-lower-l",
-    group: "ribbon",
-    dir: "down",
-    x: 3,
-    y: 308,
-    w: 127,
-    h: 173,
-    seat: [66.5, 308],
-    tiles: "gD/gH/wP/4P/4X/4//x//7//3//v//X/Ov8cfww+BhwGABAAAAA=",
-    ax: 322,
-    ay: 0,
-  },
-  {
     id: "ribbon-upper-r",
     group: "ribbon",
-    dir: "down",
+    dir: "right",
     x: 540,
     y: 146,
     w: 134,
     h: 169,
-    seat: [607, 146],
+    seat: [526.8, 177.4],
     tiles: "OAAeAAeAA4ABwAfgD/AP+B/8D/4P+A/AB+AP8Af4AHgEHD4O",
     ax: 280,
     ay: 234,
   },
   {
+    id: "ribbon-lower-l",
+    group: "ribbon",
+    dir: "left",
+    x: 3,
+    y: 308,
+    w: 127,
+    h: 173,
+    seat: [132.7, 320.9],
+    tiles: "gD/gH/wP/4P/4X/4//x//7//3//v//X/Ov8cfww+BhwGABAAAAA=",
+    ax: 322,
+    ay: 0,
+  },
+  {
     id: "ribbon-lower-r",
     group: "ribbon",
-    dir: "down",
+    dir: "right",
     x: 563,
     y: 308,
     w: 127,
     h: 173,
-    seat: [626.5, 308],
+    seat: [560.6, 320.9],
     tiles: "f4f/wf/A/8B/4H/8f/Y/+7//3/+v/9f/88/543xwDhgABiAAAAA=",
     ax: 451,
     ay: 0,
@@ -958,7 +962,7 @@ export const FAR_FROM_SUIT_PIECES: readonly FarFromSuitPiece[] = [
 export const FAR_FROM_SUIT_GOLD_ATLAS = {
   src: "/far-from-suit-20261022/gold.webp",
   width: 1024,
-  height: 1027,
+  height: 1030,
 } as const;
 
 /** The driver's plates: on the body from the start, never assembled. */
@@ -975,7 +979,7 @@ export const FAR_FROM_SUIT_ORNAMENTS: readonly string[] = ["tail", "ribbon", "bi
 
 export const FAR_FROM_SUIT_MARKS = {
   core: [346.7, 274.2],
-  visor: [346.7, 143.5],
+  visor: [346.7, 135.4],
   belt: [346.7, 400.8],
   joints: [
     [346.7, 274.2],

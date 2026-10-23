@@ -3,7 +3,7 @@
 // FAR FROM SAGA's entry transformation: the owner's ミドル cutout (1024 x
 // 1536) at the Rexonance delivery height, cut into plates along authored
 // zones. Figure coordinates are delivery pixels of the 693 x 1040 figure.
-// 3 files, 729048 bytes.
+// 3 files, 729302 bytes.
 
 export const FAR_FROM_ENTRY_SIZE = { width: 693, height: 1040 } as const;
 
@@ -537,25 +537,52 @@ export const FAR_FROM_ENTRY_MARKS = {
 /** The eyes' glow (a chevron on the visor), for the last call's pixel
  * squares: they fill it, hold, then scatter from the visor. */
 export const FAR_FROM_ENTRY_EYES_GLOW: readonly (readonly [number, number])[] = [
+  [293.9, 105.6],
   [304.7, 108.3],
-  [326.4, 108.3],
-  [346.7, 138.8],
-  [367, 108.3],
+  [318.2, 112.4],
+  [331.8, 120.5],
+  [341.9, 128.6],
+  [346.7, 132],
+  [351.4, 128.6],
+  [361.6, 120.5],
+  [375.1, 112.4],
   [388.6, 108.3],
-  [346.7, 163.9],
+  [399.5, 105.6],
+  [398.1, 115.1],
+  [388.6, 119.2],
+  [375.1, 125.9],
+  [361.6, 133.4],
+  [352.1, 139.5],
+  [349.4, 144.9],
+  [348.7, 157.1],
+  [346.7, 161.1],
+  [344.6, 157.1],
+  [344, 144.9],
+  [341.3, 139.5],
+  [331.8, 133.4],
+  [318.2, 125.9],
+  [304.7, 119.2],
+  [295.2, 115.1],
 ];
 /** The eyes' box, a little wider than the glow. */
-export const FAR_FROM_ENTRY_EYES_BOX = { x: 304.7, y: 108.3, w: 83.9, h: 55.6 };
+export const FAR_FROM_ENTRY_EYES_BOX = { x: 293.9, y: 105.6, w: 105.6, h: 55.5 };
 /** The reactor's crystal: it completes as the eyes do (owner, 2026-10-22:
  * 「リアクターも複眼と同じくピクセル拡充からの拡散で完了します」). */
 export const FAR_FROM_ENTRY_REACTOR_GLOW: readonly (readonly [number, number])[] = [
-  [295.2, 241],
-  [398.1, 241],
-  [375.8, 272.2],
-  [346.7, 295.2],
-  [317.6, 272.2],
+  [295.2, 238.3],
+  [318.2, 243.8],
+  [338.5, 251.9],
+  [346.7, 247.8],
+  [354.8, 251.9],
+  [375.1, 243.8],
+  [398.1, 238.3],
+  [387.3, 260],
+  [371, 280.3],
+  [346.7, 300.6],
+  [322.3, 280.3],
+  [306, 260],
 ];
-export const FAR_FROM_ENTRY_REACTOR_BOX = { x: 295.2, y: 241, w: 102.9, h: 54.2 };
+export const FAR_FROM_ENTRY_REACTOR_BOX = { x: 295.2, y: 238.3, w: 102.9, h: 62.3 };
 
 /** Every file the entry paints, in the order its warm-up fetches them. */
 export const FAR_FROM_ENTRY_ASSETS = [
@@ -565,8 +592,8 @@ export const FAR_FROM_ENTRY_ASSETS = [
 ] as const;
 /** The files' bytes. */
 export const FAR_FROM_ENTRY_BYTES = {
-  figure: 270952,
-  plates: 244292,
-  lights: 213804,
-  total: 729048,
+  figure: 271058,
+  plates: 244282,
+  lights: 213962,
+  total: 729302,
 } as const;

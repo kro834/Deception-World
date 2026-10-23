@@ -80,29 +80,47 @@ const rect = (x0, y0, x1, y1) => [
 ];
 const ALL = null;
 
-// The face's lights: the V of ice under the crest.
+// The face's lights: the two streaks of ice under the crest, meeting at the
+// visor's centre, and the thin line of light below where they meet (owner,
+// 2026-10-23: 「複眼のピクセル拡散位置がずれている」 — the old chevron reached
+// 30 px lower, over the dark visor and into the scarf; traced again over a
+// gridded crop of the cutout).
 const FACE_GLOW = [
-  [452, 178],
-  [470, 182],
-  [490, 200],
-  [512, 222],
-  [534, 200],
-  [554, 182],
-  [572, 178],
-  [566, 200],
-  [548, 222],
-  [530, 242],
-  [512, 256],
-  [494, 242],
-  [476, 222],
-  [458, 200],
+  [434, 156],
+  [450, 160],
+  [470, 166],
+  [490, 178],
+  [505, 190],
+  [512, 195],
+  [519, 190],
+  [534, 178],
+  [554, 166],
+  [574, 160],
+  [590, 156],
+  [588, 170],
+  [574, 176],
+  [554, 186],
+  [534, 197],
+  [520, 206],
+  [516, 214],
+  [515, 232],
+  [512, 238],
+  [509, 232],
+  [508, 214],
+  [504, 206],
+  [490, 197],
+  [470, 186],
+  [450, 176],
+  [436, 170],
 ];
 
 // Alignment marks (cutout px): the chest core (the reactor; the nanites'
 // source and the light's origin), the visor and the belt's core.
 const MARKS = {
   core: [512, 405],
-  visor: [512, 212],
+  // The eyes' centre, where their streaks meet (owner, 2026-10-23): the
+  // squares scatter from it, and the helmet forms in toward it.
+  visor: [512, 200],
   belt: [512, 592],
   joints: [
     [512, 405],
@@ -115,8 +133,23 @@ const MARKS = {
   ],
 };
 // The reactor's outline, for the final call's pixel squares (owner: the
-// reactor completes like the compound eyes, pixels filling, then scattering).
-const REACTOR_GLOW = circle(MARKS.core[0], MARKS.core[1], 46, 20);
+// reactor completes like the compound eyes, pixels filling, then scattering):
+// the chest's crystal itself, its two wings and its point (owner,
+// 2026-10-23: the old 46 px circle sat over the crystal as a foreign shape).
+const REACTOR_GLOW = [
+  [436, 352],
+  [470, 360],
+  [500, 372],
+  [512, 366],
+  [524, 372],
+  [554, 360],
+  [588, 352],
+  [572, 384],
+  [548, 414],
+  [512, 444],
+  [476, 414],
+  [452, 384],
+];
 
 const GAUNTLET_L = [
   [183, 422],
@@ -461,12 +494,16 @@ const REGIONS = [
 // Each region splits into its plates by clips (first claims; null = the
 // rest), so the plates still tile the figure exactly once. dir: the way the
 // plate grows from its seam ("up" | "down" | "left" | "right").
+// root (optional, cutout px of the left side): where the plate grows from,
+// when that is not the middle of an edge (the scarf's streamers grow from
+// behind the shoulder and the arm, the body side).
 const sided = (side, plates) =>
-  plates.map(([id, clip, dir, group]) => ({
+  plates.map(([id, clip, dir, group, root]) => ({
     id: `${id}-${side}`,
     clip: clip && side === "r" ? mirror(clip) : clip,
     dir: side === "r" && dir === "left" ? "right" : side === "r" && dir === "right" ? "left" : dir,
     group,
+    ...(root ? { root: side === "r" ? [MID - root[0], root[1]] : root } : {}),
   }));
 const SPLITS = {
   ...Object.fromEntries(
@@ -481,9 +518,15 @@ const SPLITS = {
     { id: "helmet-jaw", clip: ALL, dir: "up", group: "helm" },
   ],
   collar: [{ id: "collar", clip: ALL, dir: "down", group: "chest" }],
+  // The chest's crystal and its mount: chest plates like the rest (owner,
+  // 2026-10-23: 「胸のリアクター周りが急に生成されたり、周りと比べて違和感がある」).
+  // Not the engine's "core-disc"/"core-swirl" ids: those are Rexonance's
+  // reactor (a turning coil over its own socket, formed late in the scroll),
+  // which held FAR FROM's chest centre back as a dark socket over the
+  // Rexonance disc and then spun the crystal in.
   core: [
-    { id: "core-disc", clip: circle(MARKS.core[0], MARKS.core[1], 44), dir: "up", group: "chest" },
-    { id: "core-swirl", clip: ALL, dir: "up", group: "chest" },
+    { id: "crystal-core", clip: REACTOR_GLOW, dir: "up", group: "chest" },
+    { id: "crystal-mount", clip: ALL, dir: "up", group: "chest" },
   ],
   belt: [
     { id: "belt-l2", clip: rect(0, 0, 420, H), dir: "left", group: "waist" },
@@ -547,11 +590,14 @@ const SPLITS = {
       [
         `ribbon-${side}`,
         sided(side, [
-          ["ribbon-upper", rect(0, 0, W, 460), "down", "ribbon"],
-          ["ribbon-lower", ALL, "down", "ribbon"],
+          // The scarf's streamers (owner, 2026-10-23: マフラーの生成) grow
+          // from their roots by the body outward to their tips.
+          ["ribbon-upper", rect(0, 0, W, 460), "left", "ribbon", [246, 262]],
+          ["ribbon-lower", ALL, "left", "ribbon", [196, 474]],
         ]),
       ],
-      [`blade-${side}`, sided(side, [["blade", ALL, "down", "ribbon"]])],
+      // The blades grow from their hilts by the hip, down to their points.
+      [`blade-${side}`, sided(side, [["blade", ALL, "down", "ribbon", [336, 822]]])],
     ]),
   ),
   chest: [
@@ -921,6 +967,16 @@ for (const [index, region] of REGIONS.entries()) {
     plates.push({ ...split, region: region.id, field: plate });
   }
 }
+// The scarf's streamers land in pairs, both sides together, the upper pair
+// before the lower (owner, 2026-10-23): the engine lands a beat's plates in
+// list order, so their slots are re-dealt in that order (the partition is
+// already made; only the landing order changes).
+{
+  const streamer = ["ribbon-upper-l", "ribbon-upper-r", "ribbon-lower-l", "ribbon-lower-r"];
+  const slots = plates.flatMap((plate, index) => (streamer.includes(plate.id) ? [index] : []));
+  const dealt = streamer.map((id) => plates.find((plate) => plate.id === id)).filter(Boolean);
+  if (dealt.length === slots.length) slots.forEach((slot, k) => (plates[slot] = dealt[k]));
+}
 
 // --- Outputs ---------------------------------------------------------------------------
 mkdirSync(OUT_DIR, { recursive: true });
@@ -1045,7 +1101,9 @@ for (const plate of plates) {
     }
     if (bits.some(Boolean)) goldCells[plate.id] = Buffer.from(bits).toString("base64");
   }
-  const seat = {
+  const seat = plate.root
+    ? [plate.root[0] * SCALE, plate.root[1] * SCALE]
+    : {
     up: [box.left + w / 2, box.top + h],
     down: [box.left + w / 2, box.top],
     left: [box.left + w, box.top + h / 2],

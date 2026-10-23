@@ -250,6 +250,7 @@ const ZONES = [
 // the belt's core; the joints the alignment brackets bite on.
 const MARKS = {
   core: [512, 390],
+  // The eyes' centre, where their streaks meet: the squares scatter from it.
   visor: [512, 200],
   belt: [512, 592],
   joints: [
@@ -264,20 +265,52 @@ const MARKS = {
 };
 // The eyes' glow (a chevron on the visor) and the reactor's crystal, for
 // the final call's pixel squares (fill, then scatter).
+// Owner (2026-10-23): 「複眼のピクセル拡散位置がずれている」 — the eyes are the
+// two streaks of ice meeting at the visor's centre and the thin line below,
+// traced over the cutout (the old chevron reached 40 px lower, into the
+// scarf); the same outline as the scroll suit-up's (build-far-from-suit.mjs).
 const EYES_GLOW = [
+  [434, 156],
   [450, 160],
-  [482, 160],
-  [512, 205],
-  [542, 160],
+  [470, 166],
+  [490, 178],
+  [505, 190],
+  [512, 195],
+  [519, 190],
+  [534, 178],
+  [554, 166],
   [574, 160],
-  [512, 242],
+  [590, 156],
+  [588, 170],
+  [574, 176],
+  [554, 186],
+  [534, 197],
+  [520, 206],
+  [516, 214],
+  [515, 232],
+  [512, 238],
+  [509, 232],
+  [508, 214],
+  [504, 206],
+  [490, 197],
+  [470, 186],
+  [450, 176],
+  [436, 170],
 ];
+// The chest's crystal, its wings and its point (as the scroll suit-up's).
 const REACTOR_GLOW = [
-  [436, 356],
-  [588, 356],
-  [555, 402],
-  [512, 436],
-  [469, 402],
+  [436, 352],
+  [470, 360],
+  [500, 372],
+  [512, 366],
+  [524, 372],
+  [554, 360],
+  [588, 352],
+  [572, 384],
+  [548, 414],
+  [512, 444],
+  [476, 414],
+  [452, 384],
 ];
 
 // --- Raster helpers --------------------------------------------------------

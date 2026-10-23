@@ -644,11 +644,12 @@ test("the delivered suit data is current: 36 plates partition the figure, the fi
     }
     return hit;
   };
-  // The chevron's left arm (its centre is the notch between the arms).
+  // The left eye's streak (the visor mark is where the streaks meet).
+  // Owner (2026-10-23): the eyes' outline traced again over the cutout's streaks.
   assert.ok(
     inside(suit.FAR_FROM_ENTRY_EYES_GLOW, [
       suit.FAR_FROM_ENTRY_MARKS.visor[0] - 30,
-      suit.FAR_FROM_ENTRY_MARKS.visor[1] - 20,
+      suit.FAR_FROM_ENTRY_MARKS.visor[1] - 12,
     ]),
   );
   assert.ok(inside(suit.FAR_FROM_ENTRY_REACTOR_GLOW, suit.FAR_FROM_ENTRY_MARKS.core));

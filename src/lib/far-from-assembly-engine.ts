@@ -11,7 +11,9 @@
  *   chips, the mosaic, the pixel squares, the core's rings and glow, the
  *   field's particles and the swarm's batched chips;
  * - the reactor completes like the compound eyes (owner): on FAR FROM
- *   DEUS！ pixel squares fill it, then scatter (`reactorGlow`);
+ *   DEUS！ pixel squares fill the chest's crystal, then scatter
+ *   (`reactorGlow`); the crystal itself lands with the chest plates, never
+ *   as Rexonance's turning coil (`reactorRadius` 0, plate ids of its own);
  * - two kinds of nanite, mixed (owner): kit A is Rexonance's hex chips
  *   (src/lib/rexonance-nanites.ts), kit B Far From's Blender crystal
  *   (src/lib/far-from-nanites.ts, FAR_FROM_NANITE_CELLS, the same layout
@@ -119,8 +121,12 @@ export const FAR_FROM_PALETTE = Object.freeze({
   },
 } as const satisfies NonNullable<RexonanceAssemblyConfig["palette"]>);
 
-/** The reactor's radius in figure px (the chest core's disc). */
-export const FAR_FROM_REACTOR_RADIUS = 30;
+/** The reactor's radius in figure px: none (owner, 2026-10-23). FAR FROM's
+ * reactor is the chest's crystal, a chest plate landing with the rest; the
+ * engine's round disc (the undersuit's Rexonance socket drawn over the chest
+ * until the coil forms) is Rexonance's alone. The crystal still completes by
+ * pixel squares on the last call (reactorGlow). */
+export const FAR_FROM_REACTOR_RADIUS = 0;
 
 /** The fire ends gold (owner: 「炎は最終的に金色になります」): the shared
  * fire's end tone, rexonance-fire/fire-tuning.js FIRE_TONES.gold. */

@@ -170,9 +170,12 @@ test("the plates partition the figure in the engine's groups, every one with its
   );
   assert.deepEqual([...FAR_FROM_SUIT_ORNAMENTS].sort(), ["bits", "ribbon", "tail"]);
   assert.match(resonance, /\n {2}bits: 4,\n/);
-  // The reactor's two plates by the engine's ids; the driver's five on from the start.
-  for (const id of ["core-disc", "core-swirl", "helmet-crest", "helmet-visor", "helmet-jaw"])
+  // Owner (2026-10-23): the chest's crystal is two chest plates of FAR FROM's
+  // own (never the engine's Rexonance reactor ids, which hold the chest centre
+  // back as a turning coil); the helmet's three; the driver's five on from the start.
+  for (const id of ["crystal-core", "crystal-mount", "helmet-crest", "helmet-visor", "helmet-jaw"])
     assert.ok(ids.has(id), id);
+  for (const id of ["core-disc", "core-swirl"]) assert.ok(!ids.has(id), id);
   assert.deepEqual([...FAR_FROM_SUIT_DRIVER].sort(), [
     "belt-jewel",
     "belt-l1",
@@ -381,11 +384,22 @@ test("the plan is deterministic and closed-form: every tile lands in its group's
   assert.equal(eyes.length, 120);
   assert.equal(reactor.length, 96);
   assert.deepEqual(reactor, glowPixels(FAR_FROM_SUIT_REACTOR_GLOW, FAR_FROM_SUIT_MARKS.core, 2011, 96));
+  // Owner (2026-10-23): the reactor's outline is the chest's crystal (its wings
+  // and point), no longer a 30 px disc: every square starts inside it.
+  const insideOf = (polygon, [px, py]) => {
+    let hit = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+      const [xi, yi] = polygon[i];
+      const [xj, yj] = polygon[j];
+      if (yi > py !== yj > py && ((xj - xi) * (py - yi)) / (yj - yi) + xi - px > 0) hit = !hit;
+    }
+    return hit;
+  };
   for (const square of reactor)
-    assert.ok(
-      Math.hypot(square.x - FAR_FROM_SUIT_MARKS.core[0], square.y - FAR_FROM_SUIT_MARKS.core[1]) < 32,
-      "inside the reactor",
-    );
+    assert.ok(insideOf(FAR_FROM_SUIT_REACTOR_GLOW, [square.x, square.y]), "inside the reactor");
+  for (const square of eyes)
+    assert.ok(insideOf(FAR_FROM_SUIT_FACE_GLOW, [square.x, square.y]), "inside the eyes");
+  assert.ok(insideOf(FAR_FROM_SUIT_REACTOR_GLOW, FAR_FROM_SUIT_MARKS.core), "the core is the crystal's");
   assert.match(resonance, /drawPixelBurst\(context, buffers\.reactorFaces, config\.core\[0\], config\.core\[1\], fill, burst\)/);
 });
 
@@ -396,7 +410,8 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   assert.deepEqual(config.size, FAR_FROM_SUIT_SIZE);
   assert.equal(config.pieces.length, FAR_FROM_SUIT_PIECES.length);
   assert.equal(config.reactorGlow, FAR_FROM_SUIT_REACTOR_GLOW);
-  assert.equal(config.reactorRadius, 30);
+  // Owner (2026-10-23): no engine disc over the crystal (Rexonance's socket).
+  assert.equal(config.reactorRadius, 0);
   // The fire ends gold: the shared fire's end tone, passed to every draw.
   assert.equal(config.fireTone, FIRE_TONES.gold);
   assert.match(resonance, /const FIRE_TONE = config\.fireTone \?\? 0;/);
