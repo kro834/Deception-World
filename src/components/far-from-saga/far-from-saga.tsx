@@ -791,11 +791,11 @@ export function FarFromSaga() {
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p>05 / AUTHORITY</p>
+          <p>05 / ABILITY</p>
           <h2 id="ffs-authority-title">神の力は、借りない。</h2>
           <span>FAR FROM DEUSと、Exception World。</span>
         </header>
-        <Articles items={FAR_FROM_SAGA.powers} columns={2} label="神属権限・継承能力" />
+        <Articles items={FAR_FROM_SAGA.powers} columns={2} label="能力" />
       </section>
 
       {/* 05, continued — the weapons, numbered. */}

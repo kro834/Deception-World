@@ -729,7 +729,7 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
     "04 / STAGES",
     "05 / MECHANISM",
     "05 / ARMOR & OS",
-    "05 / AUTHORITY",
+    "05 / ABILITY", // Owner (2026-10-23): 神属権限 → 能力
     "05 / WEAPONS",
     "05 / FINISHER",
   ])
