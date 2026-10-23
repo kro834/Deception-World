@@ -104,27 +104,24 @@ function SpecTable() {
   );
 }
 
-/** The key visual's frame, partitioned into bands along orange seams. */
+/** The key visual, whole; thin orange boundaries trace across it once. */
 function HeroVisual() {
   const image = metaUnitasImage("middle");
   return (
     <div className="mus-hero-visual" aria-hidden="true">
       <i className="mus-hero-halo" />
       <div className="mus-hero-bands">
-        {[0, 1, 2, 3].map((band) => (
-          <span key={band} className="mus-hero-band" style={{ ["--band" as string]: band }}>
-            <img
-              src={META_UNITAS_KEY_VISUAL.src}
-              srcSet={image.srcSet}
-              sizes={image.sizes}
-              alt=""
-              width={META_UNITAS_KEY_VISUAL.width}
-              height={META_UNITAS_KEY_VISUAL.height}
-              decoding="async"
-              fetchPriority={band === 0 ? "high" : "auto"}
-            />
-          </span>
-        ))}
+        <img
+          className="mus-hero-art"
+          src={META_UNITAS_KEY_VISUAL.src}
+          srcSet={image.srcSet}
+          sizes={image.sizes}
+          alt=""
+          width={META_UNITAS_KEY_VISUAL.width}
+          height={META_UNITAS_KEY_VISUAL.height}
+          decoding="async"
+          fetchPriority="high"
+        />
         {[1, 2, 3].map((seam) => (
           <i key={seam} className="mus-hero-seam" style={{ ["--seam" as string]: seam }} />
         ))}
