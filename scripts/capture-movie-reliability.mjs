@@ -261,15 +261,46 @@ async function openSheet(page) {
 }
 
 async function chooseSpeed(page, speed) {
-  await openSheet(page);
-  await press(page, `.rzn-movie [role="radio"][data-speed="${speed}"]`);
-  await waitFor(
-    page,
-    (v) => document.querySelector(`.rzn-movie [role="radio"][data-speed="${v}"]`)?.getAttribute("aria-checked") === "true",
-    speed,
-    REACT_MS,
-    `the ${speed}× radio did not take`,
-  );
+  const radio = `.rzn-movie [role="radio"][data-speed="${speed}"]`;
+  const taken = (timeout) =>
+    page
+      .waitForFunction(
+        (v) => document.querySelector(`.rzn-movie [role="radio"][data-speed="${v}"]`)?.getAttribute("aria-checked") === "true",
+        speed,
+        { timeout, polling: 100 },
+      )
+      .then(
+        () => true,
+        () => false,
+      );
+  for (let attempt = 1; ; attempt += 1) {
+    await openSheet(page);
+    // Where each press lands (a press the page never received is told
+    // apart from one the control ignored).
+    await page.evaluate(() => {
+      window.__presses = [];
+      if (window.__pressListen) return;
+      window.__pressListen = true;
+      addEventListener("click", (e) => window.__presses.push(`${e.target?.tagName}.${String(e.target?.className || e.target?.getAttribute?.("role") || "")}`), true);
+    });
+    await press(page, radio);
+    if (await taken(REACT_MS)) return;
+    const seen = await page.evaluate((selector) => {
+      const element = document.querySelector(selector);
+      return {
+        open: document.querySelector(".rzn-movie").dataset.open ?? null,
+        disabled: element?.disabled,
+        presses: window.__presses,
+      };
+    }, radio);
+    // The sheet closed under a press a busy main thread had not yet taken
+    // (its idle wait ran out first): pressed again, once, and noted.
+    if (attempt === 1 && !seen.open && !seen.presses.some((target) => /radio/.test(target))) {
+      page.__notes?.push(`the ${speed}× press landed after the sheet closed; pressed again`);
+      continue;
+    }
+    throw new Fail(`the ${speed}× radio did not take (${JSON.stringify(seen)})`);
+  }
 }
 
 /** 最初から: the movie plays again from the runway's start. */
@@ -1040,6 +1071,8 @@ async function runScenario(browser, { run, scenario, path, size }, errors, tag) 
     });
   const page = await context.newPage();
   page.__touch = touch;
+  // Retries the harness itself made, recorded with the run.
+  page.__notes = errors;
   const cdp = await context.newCDPSession(page);
   page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`.slice(0, 300)));
   page.on("crash", () => errors.push("the page crashed"));
