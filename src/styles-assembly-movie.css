@@ -1,0 +1,427 @@
+/* ================================================================
+   The auto transformation movie's control: where it stands
+   (owner, 2026-10-23: 「速度調整インターフェースが全身にかぶらない様にスマホ
+   では展開式にして、iPadなどでは工夫して」; rexonance-assembly-movie.tsx,
+   src/lib/assembly-movie.ts). One sheet for /rexonance-saga and
+   /far-from-saga: the sheets of each page (styles-rexonance-editorial.css,
+   styles-far-from-suitup.css) draw the control's sheet in their HUD's
+   grammar; this one places it, and draws the pill.
+
+   The control is a fixed, click-through layer over the viewport holding two
+   surfaces, and the figure's body (the frame's --rzn-fig-* box, centred, a
+   column of the screen) is never under either:
+
+   - Wide, tall windows (>= 1100px, taller than 820px, wider than 13:10:
+     desktops, iPad Pro landscape): the whole sheet is docked at the foot of
+     the column left of the figure, as wide as that column (the controller
+     measures it: --mc-left-room), under the HUD's call.
+   - Everything else (phones, tablets, short windows) keeps a small pill:
+     再生／一時停止 with a progress ring, and the speed, whose tap opens the
+     sheet. The sheet then stands where the figure is not:
+       phones         bottom-right pill; the sheet over the top of the frame
+                      (the HUD's call), above the figure's head;
+       stacked tablets (portrait, 641-1099px): bottom-right pill; the sheet a
+                      narrow rail in the column right of the figure
+                      (--mc-right-room), from the figure's top down;
+       landscape tablets, short windows: bottom-left pill; the sheet above it
+                      in the column left of the figure.
+   The controller closes the sheet after a choice, a few seconds untouched,
+   a scroll or a touch outside, Escape, or focus leaving.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie {
+  --mc-gutter: 12px;
+  --mc-pill: 44px;
+  --mc-safe-left: env(safe-area-inset-left, 0px);
+  --mc-safe-right: env(safe-area-inset-right, 0px);
+  --mc-safe-bottom: env(safe-area-inset-bottom, 0px);
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity 180ms ease,
+    visibility 0s linear 180ms;
+}
+
+/* The pill's palette, by page. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site="far-from"] {
+  --mc-ink: #eaf7fb;
+  --mc-bg: rgb(2 5 11 / 86%);
+  --mc-line: rgb(127 230 255 / 36%);
+  --mc-accent: #7fe6ff;
+  --mc-track: rgb(127 230 255 / 22%);
+  --mc-disc: #05121c;
+  --mc-lit: #ffd77a;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-site="rexonance"] {
+  --mc-ink: #f2f7fb;
+  --mc-bg: rgb(3 7 13 / 86%);
+  --mc-line: rgb(121 232 255 / 34%);
+  --mc-accent: rgb(121 232 255);
+  --mc-track: rgb(255 143 216 / 24%);
+  --mc-disc: #08131c;
+  --mc-lit: rgb(242 216 150);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-shown],
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:focus-within {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie > * {
+  pointer-events: auto;
+}
+
+/* The still tiers (data-load="static": reduced motion, forced colours,
+   economy) have no sequence to play: no control. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-load="static"],
+html[data-family="special"][data-world-effects="economy"] body .rxs-page.rxs-page.rxs-page .rzn-movie {
+  display: none;
+}
+
+/* The menu or a dialog over the page: the control steps back. */
+html[data-side-menu-open] body .rxs-page.rxs-page.rxs-page .rzn-movie,
+html[data-dialog-open] body .rxs-page.rxs-page.rxs-page .rzn-movie {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie {
+    display: none;
+  }
+}
+
+/* ---------------- The sheet, docked (wide, tall windows) ---------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
+  position: absolute;
+  left: calc(var(--mc-gutter) + var(--mc-safe-left));
+  bottom: calc(14px + var(--mc-safe-bottom));
+  /* The column left of the figure, less its gutters (before the controller
+     has measured it: a third of the window). */
+  width: clamp(300px, calc(var(--mc-left-room, 33vw) - 2 * var(--mc-gutter) - 8px), 560px);
+  max-width: calc(100vw - 2 * var(--mc-gutter));
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
+  display: none;
+}
+
+/* ---------------- The pill ---------------- */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
+  position: absolute;
+  left: calc(var(--mc-gutter) + var(--mc-safe-left));
+  bottom: calc(14px + var(--mc-safe-bottom));
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--mc-pill);
+  color: var(--mc-ink);
+  background: var(--mc-bg);
+  border: 1px solid var(--mc-line);
+  border-radius: 999px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* 再生／一時停止, in its progress ring (--rzn-movie-p: the share played). */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: calc(var(--mc-pill) - 2px);
+  height: calc(var(--mc-pill) - 2px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--mc-accent);
+  background: conic-gradient(
+    var(--mc-accent) calc(var(--rzn-movie-p, 0) * 1%),
+    var(--mc-track) 0
+  );
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--mc-disc);
+}
+
+/* The glyph: a play triangle, two bars while playing. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent currentcolor;
+  transform: translate(-36%, -50%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="playing"]
+  .rzn-movie-mini::after {
+  width: 4px;
+  height: 12px;
+  border-width: 0 3px;
+  border-color: currentcolor;
+  transform: translate(-50%, -50%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini:disabled,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-toggle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The speed, which opens and closes the sheet. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-sizing: border-box;
+  height: calc(var(--mc-pill) - 2px);
+  margin: 0;
+  padding: 0 14px 0 8px;
+  border: 0;
+  border-radius: 0 999px 999px 0;
+  color: var(--mc-ink);
+  font: 600 12px / 1 var(--dx-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-speed-now {
+  min-width: 2.4em;
+  color: var(--mc-lit);
+  text-align: center;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-chevron {
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid currentcolor;
+  border-left: 2px solid currentcolor;
+  transform: translateY(2px) rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie
+  .rzn-movie-toggle[aria-expanded="true"]
+  .rzn-movie-chevron {
+  transform: translateY(-2px) rotate(225deg);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie :is(button, input):focus-visible {
+  outline: 2px solid var(--mc-lit);
+  outline-offset: 3px;
+}
+
+/* ---------------- Pill layouts: the sheet opens on a tap ---------------- */
+/* Landscape tablets, short windows (and the base of the layouts below): the
+   pill bottom-left, the sheet above it in the column left of the figure. */
+@media (max-width: 1099.98px), (max-height: 820px), (max-aspect-ratio: 13/10) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
+    display: flex;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
+    display: none;
+    bottom: calc(14px + var(--mc-pill) + 8px + var(--mc-safe-bottom));
+    width: clamp(
+      280px,
+      calc(var(--mc-left-room, 33vw) - 2 * var(--mc-gutter) - 8px),
+      520px
+    );
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page
+    .rzn-movie[data-open]
+    .rzn-movie-sheet {
+    display: grid;
+    animation: rzn-movie-sheet-in 160ms ease-out;
+  }
+
+  /* The kicker is a label for the docked sheet; the pill names the control,
+     and the sheet is kept short so it stays under the HUD's call. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-kicker {
+    display: none;
+  }
+}
+
+@keyframes rzn-movie-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Stacked layouts (phones, portrait tablets): the pill bottom-right, in the
+   free corner under the figure's side; the sheet a rail in the column right
+   of the figure, from the figure's top down (under the call, which crosses
+   the top). */
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
+    right: calc(var(--mc-gutter) + var(--mc-safe-right));
+    left: auto;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
+    top: max(
+      var(--mc-fig-top, 30svh),
+      calc(var(--mc-call-bottom, 0px) + 10px),
+      calc(var(--dxs-nav, 77px) + 12px)
+    );
+    right: calc(var(--mc-gutter) + var(--mc-safe-right));
+    bottom: auto;
+    left: auto;
+    width: clamp(148px, calc(var(--mc-right-room, 172px) - 2 * var(--mc-gutter) - 4px), 232px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row {
+    display: grid;
+    grid-template-columns: 100%;
+    gap: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row > button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-speeds {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 100%;
+    margin-inline-start: 0;
+    box-sizing: border-box;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page
+    .rzn-movie
+    .rzn-movie-speeds
+    > button {
+    min-width: 0;
+    border-inline-start: 0;
+  }
+}
+
+/* Phones: the sheet over the top of the frame, where the HUD's call is (the
+   figure's head stands lower; the controller's tap on the pill, the sheet
+   closing on the next scroll, give the call back at once). */
+@media (max-width: 639.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
+    top: calc(var(--dxs-nav, 62px) + 8px);
+    right: calc(var(--mc-gutter) + var(--mc-safe-right));
+    left: calc(var(--mc-gutter) + var(--mc-safe-left));
+    width: auto;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row > button {
+    width: auto;
+    min-width: 0;
+    padding-inline: 10px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-play {
+    min-width: 72px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-speeds {
+    display: inline-flex;
+    gap: 2px;
+    width: auto;
+    margin-inline-start: auto;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page
+    .rzn-movie
+    .rzn-movie-speeds
+    > button {
+    min-width: 34px;
+    padding-inline: 4px;
+  }
+}
+
+/* Short landscapes (phones on their side): the pill bottom-left, the sheet
+   above it, the figure standing between the columns. */
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
+    right: auto;
+    left: calc(var(--mc-gutter) + var(--mc-safe-left));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
+    top: auto;
+    right: auto;
+    bottom: calc(14px + var(--mc-pill) + 8px + var(--mc-safe-bottom));
+    left: calc(var(--mc-gutter) + var(--mc-safe-left));
+    width: clamp(
+      260px,
+      calc(var(--mc-left-room, 33vw) - 2 * var(--mc-gutter) - 8px),
+      420px
+    );
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row > button {
+    width: auto;
+    padding-inline: 12px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-speeds {
+    display: inline-flex;
+    width: auto;
+    margin-inline-start: auto;
+  }
+}

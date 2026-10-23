@@ -56,6 +56,10 @@ export const MOVIE_SCROLL_KEYS: ReadonlySet<string> = new Set([
   " ",
   "Spacebar",
 ]);
+/** How long (ms) the opened sheet waits, untouched, before it closes. */
+export const MOVIE_IDLE_COLLAPSE_MS = 4000;
+/** The figure's picture: height over width (the canvas and the stills). */
+export const MOVIE_FIGURE_ASPECT = 1040 / 693;
 /** The play button's label by state. */
 export const MOVIE_PLAY_LABELS = Object.freeze({ play: "再生", pause: "一時停止" });
 
@@ -85,9 +89,16 @@ export function mountAssemblyMovie(
   environment: MovieEnvironment = window,
 ): () => void {
   if (!control || !runway) return () => {};
+  // (function declarations below do not keep the guard's narrowing)
+  const host: HTMLElement = control;
   const { document } = environment;
   const frame = runway.querySelector<HTMLElement>(".rzn-frame");
   const play = control.querySelector<HTMLButtonElement>(".rzn-movie-play");
+  // The pill (phones, tablets, short windows): 再生／一時停止 with the
+  // progress ring, and the speed, whose tap opens the sheet.
+  const mini = control.querySelector<HTMLButtonElement>(".rzn-movie-mini");
+  const toggle = control.querySelector<HTMLButtonElement>(".rzn-movie-toggle");
+  const speedNow = control.querySelector<HTMLElement>(".rzn-movie-speed-now");
   const restart = control.querySelector<HTMLButtonElement>(".rzn-movie-restart");
   const radios = [...control.querySelectorAll<HTMLButtonElement>('[role="radio"]')];
   const seek = control.querySelector<HTMLInputElement>(".rzn-movie-seek input");
@@ -115,20 +126,13 @@ export function mountAssemblyMovie(
   let travel = 0;
   let top = 0;
 
-  const dock = control.parentElement;
   const setState = (next: MovieState) => {
     if (state === next) return;
-    // On phones the control leaves the page for the viewport's foot while a
-    // movie is on: its dock keeps its height, so the page never moves.
-    if (dock) {
-      if (next === "idle") dock.style.removeProperty("height");
-      else if (state === "idle" && environment.getComputedStyle(control).position === "static")
-        dock.style.height = `${control.offsetHeight}px`;
-    }
     state = next;
     control.dataset.state = next;
     const label = next === "playing" ? MOVIE_PLAY_LABELS.pause : MOVIE_PLAY_LABELS.play;
     if (play.textContent !== label) play.textContent = label;
+    if (mini && mini.getAttribute("aria-label") !== label) mini.setAttribute("aria-label", label);
   };
   control.dataset.state = state;
 
@@ -137,6 +141,37 @@ export function mountAssemblyMovie(
     pinTop = Number.parseFloat(environment.getComputedStyle(frame).top) || 0;
     travel = runway.offsetHeight - frame.offsetHeight;
     top = runway.getBoundingClientRect().top + environment.scrollY - pinTop;
+  };
+  /** The room beside the figure, from its box (the frame's --rzn-fig-*: the
+   * picture's height is the smaller of fig-h of the frame and fig-w of its
+   * width, standing on fig-x with its foot fig-b above the frame's), for the
+   * sheet's width and the rail's place: custom properties on the control. */
+  const place = () => {
+    const style = control.style;
+    if (!style) return;
+    const styles = environment.getComputedStyle(frame);
+    const read = (name: string) => Number.parseFloat(styles.getPropertyValue?.(name) ?? "");
+    const h = read("--rzn-fig-h");
+    const w = read("--rzn-fig-w");
+    const x = read("--rzn-fig-x");
+    const b = read("--rzn-fig-b");
+    const width = frame.offsetWidth || document.documentElement?.clientWidth || 0;
+    const height = frame.offsetHeight;
+    if (![h, w, x, b].every(Number.isFinite) || width <= 0 || height <= 0) return;
+    const figureHeight = Math.min(height * h, width * w * MOVIE_FIGURE_ASPECT);
+    const figureWidth = figureHeight / MOVIE_FIGURE_ASPECT;
+    const left = width * x - figureWidth / 2;
+    const frameLeft = frame.getBoundingClientRect?.().left ?? 0;
+    const viewportWidth = document.documentElement?.clientWidth || width;
+    const pin = Number.parseFloat(styles.top) || 0;
+    const set = (name: string, value: number) =>
+      style.setProperty(name, `${Math.max(0, Math.round(value))}px`);
+    set("--mc-left-room", frameLeft + left);
+    set("--mc-right-room", viewportWidth - (frameLeft + left + figureWidth));
+    set("--mc-fig-top", pin + height * (1 - b) - figureHeight);
+    // Where the HUD's call ends (the stacked tiers' rail starts below it).
+    const call = runway.querySelector<HTMLElement>(".rzn-call");
+    if (call) set("--mc-call-bottom", call.getBoundingClientRect().bottom);
   };
   const readProgress = () => {
     if (travel <= 0) return 1;
@@ -154,6 +189,8 @@ export function mountAssemblyMovie(
 
   /* ---------------- the scrubber ---------------- */
   const syncSeek = (q: number) => {
+    // The pill's progress ring (a share of 100).
+    control.style?.setProperty("--rzn-movie-p", String(Math.round(q * 1000) / 10));
     if (!seek || scrubbing) return;
     const value = String(Math.round(q * MOVIE_SEEK_STEPS));
     if (seek.value !== value) seek.value = value;
@@ -202,14 +239,16 @@ export function mountAssemblyMovie(
     scrollTo(progress);
     syncSeek(progress);
     setState("playing");
-    // The control may have left the page (phones): the runway is measured
-    // again on the first frame.
+    // The page may settle its layout as the movie starts: the runway is
+    // measured again on the first frame.
     remeasure = true;
     strays = 0;
     stop();
     rafId = environment.requestAnimationFrame(tick);
   };
   const onPlay = () => {
+    // A choice made in the sheet closes it (the pill's own 再生 has none open).
+    collapse(true);
     if (state === "playing") {
       pause();
       return;
@@ -220,8 +259,79 @@ export function mountAssemblyMovie(
     start(state === "ended" || at >= 1 ? 0 : at);
   };
   const onRestart = () => {
+    collapse(true);
     if (!ready()) return;
     start(0);
+  };
+
+  /* ---------------- the sheet's opening (pill layouts) ---------------- */
+  // Where the sheet would stand over the figure (phones, tablets, short
+  // windows) the control is a pill; its speed button opens the sheet, and the
+  // sheet closes after a choice, a few seconds untouched, a scroll or a touch
+  // outside, Escape, or focus leaving. Wide screens show the sheet docked
+  // beside the figure and never use any of this (the pill is not drawn).
+  let open = false;
+  let idleTimer: ReturnType<typeof setTimeout> | 0 = 0;
+  // A keyboard user's open sheet waits for them (no idle timer takes the
+  // focused control away).
+  let keyboardDriven = false;
+  const clearIdle = () => {
+    if (idleTimer) globalThis.clearTimeout(idleTimer);
+    idleTimer = 0;
+  };
+  function setOpen(next: boolean) {
+    if (open === next) return;
+    open = next;
+    toggle?.setAttribute("aria-expanded", next ? "true" : "false");
+    if (next) {
+      host.dataset.open = "true";
+      place();
+      bump();
+    } else {
+      delete host.dataset.open;
+      clearIdle();
+    }
+  }
+  function collapse(restoreFocus = false) {
+    if (!open) return;
+    setOpen(false);
+    // The sheet takes its controls with it: focus returns to the toggle.
+    if (restoreFocus && toggle && host.contains(document.activeElement ?? null))
+      toggle.focus({ preventScroll: true });
+  }
+  /** Any use of the open sheet restarts its idle wait. */
+  function bump() {
+    clearIdle();
+    if (!open) return;
+    idleTimer = globalThis.setTimeout(() => {
+      idleTimer = 0;
+      if (!open || disposed) return;
+      if (scrubbing || (keyboardDriven && host.contains(document.activeElement ?? null))) {
+        bump();
+        return;
+      }
+      collapse(true);
+    }, MOVIE_IDLE_COLLAPSE_MS);
+  }
+  const onToggle = () => setOpen(!open);
+  const onControlPointer = () => {
+    keyboardDriven = false;
+    bump();
+  };
+  const onControlKey = (event: KeyboardEvent) => {
+    keyboardDriven = true;
+    bump();
+    if (event.key === "Escape" && open) {
+      event.stopPropagation?.();
+      collapse(true);
+    }
+  };
+  const onControlFocusOut = (event: FocusEvent) => {
+    const next = event.relatedTarget as Node | null;
+    if (open && !(next && control.contains(next))) collapse(false);
+  };
+  const onOutsidePointer = (event: Event) => {
+    if (open && !control.contains(event.target as Node | null)) collapse(false);
   };
 
   /* ---------------- the speed ---------------- */
@@ -235,11 +345,17 @@ export function mountAssemblyMovie(
       element.setAttribute("aria-checked", checked ? "true" : "false");
       element.tabIndex = checked ? 0 : -1;
     });
+    // The pill shows the speed chosen.
+    const shown = `${speed}×`;
+    if (speedNow && speedNow.textContent !== shown) speedNow.textContent = shown;
+    toggle?.setAttribute("aria-label", `速度 ${shown} と操作`);
     if (focus) radio.focus();
   };
   const onRadioClick = (event: Event) => {
     const index = radios.indexOf(event.currentTarget as HTMLButtonElement);
-    if (index >= 0) choose(index);
+    if (index < 0) return;
+    choose(index);
+    collapse(true);
   };
   const onRadioKey = (event: KeyboardEvent) => {
     const index = radios.indexOf(event.currentTarget as HTMLButtonElement);
@@ -276,19 +392,27 @@ export function mountAssemblyMovie(
 
   /* ---------------- the reader's own input ---------------- */
   const outside = (event: Event) => !control.contains(event.target as Node | null);
-  const onWheel = () => pause();
+  const onWheel = () => {
+    collapse(false);
+    pause();
+  };
   const onTouch = (event: Event) => {
-    if (outside(event)) pause();
+    if (!outside(event)) return;
+    collapse(false);
+    pause();
   };
   const onKey = (event: KeyboardEvent) => {
     if (state === "playing" && outside(event) && MOVIE_SCROLL_KEYS.has(event.key)) pause();
   };
   const onScroll = () => {
+    const y = environment.scrollY;
+    const ours =
+      Math.abs(y - expectedY) <= MOVIE_SCROLL_TOLERANCE ||
+      Math.abs(y - previousY) <= MOVIE_SCROLL_TOLERANCE;
+    // A scroll that is the reader's own closes the open sheet (the movie's
+    // own scrolling, and the seek's, do not).
+    if (!ours && open) collapse(false);
     if (state === "playing") {
-      const y = environment.scrollY;
-      const ours =
-        Math.abs(y - expectedY) <= MOVIE_SCROLL_TOLERANCE ||
-        Math.abs(y - previousY) <= MOVIE_SCROLL_TOLERANCE;
       if (ours) strays = 0;
       else if ((strays += 1) >= 2) {
         pause();
@@ -304,6 +428,7 @@ export function mountAssemblyMovie(
   const onResize = () => {
     if (state === "playing") measure();
     else travel = 0;
+    if (shown) place();
   };
   const onVisibility = () => {
     if (document.hidden) pause();
@@ -315,6 +440,9 @@ export function mountAssemblyMovie(
     if (control.dataset.load !== load) control.dataset.load = load;
     const enabled = load === "ready";
     play.disabled = !enabled;
+    if (mini) mini.disabled = !enabled;
+    // The toggle needs only this controller.
+    if (toggle) toggle.disabled = false;
     if (restart) restart.disabled = !enabled;
     if (seek) seek.disabled = !enabled;
     if (!enabled) pause();
@@ -329,11 +457,13 @@ export function mountAssemblyMovie(
     if (next) {
       control.dataset.shown = "true";
       travel = 0;
+      place();
       onScroll();
     } else {
       delete control.dataset.shown;
-      // The frame unpinned: the movie's turn is over (on phones the control
-      // returns to the page; 再生 then plays from wherever the page stands).
+      collapse(false);
+      // The frame unpinned: the movie's turn is over (再生 then plays from
+      // wherever the page stands).
       if (state === "playing") pause();
       setState("idle");
     }
@@ -355,6 +485,13 @@ export function mountAssemblyMovie(
   choose(initial < 0 ? radios.findIndex((radio) => speedOf(radio) === 1) : initial);
   syncLoad();
   play.addEventListener("click", onPlay);
+  mini?.addEventListener("click", onPlay);
+  toggle?.addEventListener("click", onToggle);
+  control.addEventListener("pointerdown", onControlPointer);
+  control.addEventListener("keydown", onControlKey);
+  control.addEventListener("input", bump);
+  control.addEventListener("focusout", onControlFocusOut);
+  environment.addEventListener("pointerdown", onOutsidePointer, { passive: true });
   restart?.addEventListener("click", onRestart);
   for (const radio of radios) {
     radio.addEventListener("click", onRadioClick);
@@ -376,7 +513,15 @@ export function mountAssemblyMovie(
     stop();
     loadObserver?.disconnect();
     showObserver?.disconnect();
+    clearIdle();
     play.removeEventListener("click", onPlay);
+    mini?.removeEventListener("click", onPlay);
+    toggle?.removeEventListener("click", onToggle);
+    control.removeEventListener("pointerdown", onControlPointer);
+    control.removeEventListener("keydown", onControlKey);
+    control.removeEventListener("input", bump);
+    control.removeEventListener("focusout", onControlFocusOut);
+    environment.removeEventListener("pointerdown", onOutsidePointer);
     restart?.removeEventListener("click", onRestart);
     for (const radio of radios) {
       radio.removeEventListener("click", onRadioClick);
@@ -394,6 +539,8 @@ export function mountAssemblyMovie(
     document.removeEventListener("visibilitychange", onVisibility);
     delete control.dataset.shown;
     delete control.dataset.load;
+    delete control.dataset.open;
+    toggle?.setAttribute("aria-expanded", "false");
     control.dataset.state = "idle";
   };
 }

@@ -29,6 +29,7 @@ import rexonanceApexCssUrl from "@/styles-rexonance-apex.css?url";
 import rexonanceLayoutCssUrl from "@/styles-rexonance-layout-20261021.css?url";
 import rexonanceTypeCssUrl from "@/styles-rexonance-type-20261021.css?url";
 import rexonanceKineticCssUrl from "@/styles-rexonance-motion-20261021.css?url";
+import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_SITE_ARTWORK } from "@/lib/rexonance-site-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
@@ -86,6 +87,10 @@ export const Route = createFileRoute("/rexonance-saga")({
       // engines' grammar — chips, guideways, molten gold (styles-rexonance-forge.css).
       { rel: "stylesheet", href: rexonanceForgeCssUrl },
       { rel: "stylesheet", href: rexonanceEditorialCssUrl },
+      // The auto transformation movie's control: where it stands, clear of
+      // the figure (styles-assembly-movie.css; the editorial sheet draws its
+      // sheet; no later sheet touches it).
+      { rel: "stylesheet", href: assemblyMovieCssUrl },
       { rel: "stylesheet", href: p14CalibrationCssUrl },
       // APEX (rx19): the page interface around the suit-up as one HUD
       // instrument — chapter index, numbered bar, plates, rows, floors

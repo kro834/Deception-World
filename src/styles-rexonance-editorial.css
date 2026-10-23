@@ -807,26 +807,22 @@ html[data-family="special"]
 /* ================================================================
    The auto transformation movie's control (owner, 2026-10-23:
    「自動変身ムービーも速度調整機能付きでつけて」; rexonance-assembly-movie.tsx,
-   src/lib/assembly-movie.ts). An instrument of the ZENITH runway's HUD,
-   fixed at the viewport's foot: the runway's ice on its dark glass, the
-   stamp's cut corners, the HUD face for its kicker, the display face for
-   its Japanese. Shown while the frame is pinned (data-shown) or while it
-   holds focus; hidden in the still tiers (data-load="static" — reduced
-   motion, forced colours, economy — the runway is one still there and
-   has no sequence to play) and under reduced motion outright.
+   src/lib/assembly-movie.ts). An instrument of the ZENITH runway's HUD:
+   the runway's ice on its dark glass, the stamp's cut corners, the HUD
+   face for its kicker, the display face for its Japanese. This sheet
+   draws the control's sheet; where it stands (clear of the figure's
+   body), its pill, and the layer's showing (while the frame is pinned, or
+   while it holds focus) and hiding (the still tiers, data-load="static":
+   reduced motion, forced colours, economy; and reduced motion outright)
+   are styles-assembly-movie.css's.
    ================================================================ */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-sheet {
   --rzn-ice: 121 232 255;
   --rzn-gold: 242 216 150;
   --rzn-pink: 255 143 216;
-  position: fixed;
-  left: 50%;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  z-index: 40;
   display: grid;
   gap: 8px;
   box-sizing: border-box;
-  width: min(calc(100vw - 24px), 640px);
   margin: 0;
   padding: 10px 16px 12px;
   color: #f2f7fb;
@@ -843,36 +839,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movi
   );
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   backdrop-filter: blur(14px) saturate(140%);
-  visibility: hidden;
-  opacity: 0;
-  transform: translate(-50%, 10px);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease,
-    visibility 0s linear 180ms;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie[data-shown],
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie:focus-within {
-  visibility: visible;
-  opacity: 1;
-  transform: translate(-50%, 0);
-  transition-delay: 0s;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie[data-load="static"],
-html[data-family="special"][data-world-effects="economy"]
-  body
-  .rxs-page.rxs-page.rxs-rexonance-page
-  .rzn-movie {
-  display: none;
-}
-
-/* The menu or a dialog over the page: the control steps back. */
-html[data-side-menu-open] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie,
-html[data-dialog-open] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
-  visibility: hidden;
-  opacity: 0;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-kicker {
@@ -1049,15 +1015,9 @@ html[data-family="special"]
   transform: rotate(45deg);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie :is(button, input):focus-visible {
-  outline: 2px solid rgb(var(--rzn-gold));
-  outline-offset: 3px;
-}
-
 @media (max-width: 639.98px) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-sheet {
     gap: 6px;
-    width: calc(100vw - 16px);
     padding: 8px 12px 10px;
   }
 
@@ -1082,56 +1042,5 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movi
     min-width: 38px;
     padding: 0 4px;
     font-size: 11px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
-    display: none;
-  }
-}
-
-@media (forced-colors: active) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
-    display: none;
-  }
-}
-
-/* Phones: the frame's foot is the HUD's (the parts, the read-out), so the
-   control stands in the page before the runway and takes the viewport's
-   foot only while a movie is on (playing, paused or ended) and the frame
-   is pinned; when the frame unpins, the controller returns it to the page. */
-@media (max-width: 639.98px) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie {
-    position: static;
-    width: auto;
-    margin: 0 20px 18px;
-    visibility: visible;
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  html[data-family="special"]
-    body
-    .rxs-page.rxs-page.rxs-rexonance-page
-    .rzn-movie[data-shown]:is([data-state="playing"], [data-state="paused"], [data-state="ended"]) {
-    position: fixed;
-    width: calc(100vw - 16px);
-    margin: 0;
-    transform: translate(-50%, 0);
-  }
-}
-
-/* The dock: nothing on wide layouts (the control is fixed); on phones the
-   control's place in the page, whose height the controller keeps while the
-   control is at the viewport's foot. */
-html[data-family="special"] body .rxs-page .rzn-movie-dock {
-  display: contents;
-}
-
-@media (max-width: 639.98px) {
-  html[data-family="special"] body .rxs-page .rzn-movie-dock {
-    display: block;
   }
 }

@@ -1814,20 +1814,16 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-ass
    「自動変身ムービーも速度調整機能付きでつけて」; rexonance-assembly-movie.tsx,
    src/lib/assembly-movie.ts), an instrument of this page's cyber HUD:
    the ice and gold of #suitup's controls (.ffs-assembly-controls' pills),
-   Michroma for its kicker, the body face for its Japanese, fixed at the
-   viewport's foot while the runway's frame is pinned (data-shown) or
-   while it holds focus. The still tiers (data-load="static": reduced
-   motion, forced colours, economy) have no sequence to play and hide it.
+   Michroma for its kicker, the body face for its Japanese. This sheet
+   draws the control's sheet; where it stands, its pill, and the layer's
+   showing (while the runway's frame is pinned, or while it holds focus)
+   and hiding (the still tiers) are styles-assembly-movie.css's, which
+   keeps it clear of the figure's body.
    ================================================================ */
-html[data-family="special"] body .rxs-page.ffs-page .rzn-movie {
-  position: fixed;
-  left: 50%;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  z-index: 40;
+html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-sheet {
   display: grid;
   gap: 8px;
   box-sizing: border-box;
-  width: min(calc(100vw - 24px), 640px);
   margin: 0;
   padding: 10px 16px 12px;
   color: #eaf7fb;
@@ -1839,32 +1835,6 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie {
     0 12px 40px rgb(0 0 0 / 45%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   backdrop-filter: blur(14px) saturate(140%);
-  visibility: hidden;
-  opacity: 0;
-  transform: translate(-50%, 10px);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease,
-    visibility 0s linear 180ms;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .rzn-movie[data-shown],
-html[data-family="special"] body .rxs-page.ffs-page .rzn-movie:focus-within {
-  visibility: visible;
-  opacity: 1;
-  transform: translate(-50%, 0);
-  transition-delay: 0s;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .rzn-movie[data-load="static"],
-html[data-family="special"][data-world-effects="economy"] body .rxs-page.ffs-page .rzn-movie {
-  display: none;
-}
-
-html[data-side-menu-open] body .rxs-page.ffs-page .rzn-movie,
-html[data-dialog-open] body .rxs-page.ffs-page .rzn-movie {
-  visibility: hidden;
-  opacity: 0;
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker {
@@ -2015,15 +1985,9 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-seek > input::-mo
   background: #7fe6ff;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .rzn-movie :is(button, input):focus-visible {
-  outline: 2px solid rgb(255 215 122);
-  outline-offset: 3px;
-}
-
 @media (max-width: 639.98px) {
-  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-sheet {
     gap: 6px;
-    width: calc(100vw - 16px);
     padding: 8px 12px 10px;
   }
 
@@ -2048,56 +2012,5 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie :is(button, input
     min-width: 38px;
     padding: 0 4px;
     font-size: 11px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie {
-    display: none;
-  }
-}
-
-@media (forced-colors: active) {
-  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie {
-    display: none;
-  }
-}
-
-/* Phones: the frame's foot is the HUD's (the parts, the read-out), so the
-   control stands in the section before the runway and takes the viewport's
-   foot only while a movie is on (playing, paused or ended) and the frame
-   is pinned; when the frame unpins, the controller returns it to the page. */
-@media (max-width: 639.98px) {
-  html[data-family="special"] body .rxs-page.ffs-page .rzn-movie {
-    position: static;
-    width: auto;
-    margin: 0 0 18px;
-    visibility: visible;
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  html[data-family="special"]
-    body
-    .rxs-page.ffs-page
-    .rzn-movie[data-shown]:is([data-state="playing"], [data-state="paused"], [data-state="ended"]) {
-    position: fixed;
-    width: calc(100vw - 16px);
-    margin: 0;
-    transform: translate(-50%, 0);
-  }
-}
-
-/* The dock: nothing on wide layouts (the control is fixed); on phones the
-   control's place in the page, whose height the controller keeps while the
-   control is at the viewport's foot. */
-html[data-family="special"] body .rxs-page .rzn-movie-dock {
-  display: contents;
-}
-
-@media (max-width: 639.98px) {
-  html[data-family="special"] body .rxs-page .rzn-movie-dock {
-    display: block;
   }
 }
