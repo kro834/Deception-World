@@ -331,9 +331,26 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<FarFromHeroRail />",
     'className="ffs-mark" aria-hidden="true"',
     '<a className="rxs-scroll-cue" href="#overview">',
-    "{FAR_FROM_SAGA.stagesLine}",
+    // The stage line breaks only after its 「／」 (withSlashBreaks: each unit
+    // up to its slash is one unbreakable run; keep-all alone let a line
+    // open with 「／」).
+    '<span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>',
   ])
     assert.ok(hero.includes(piece), piece);
+  const phrase = read("src/components/far-from-saga/far-from-phrase.tsx");
+  assert.match(phrase, /export function withSlashBreaks\(text: string\): ReactNode\[\]/);
+  assert.match(phrase, /className="ffs-phrase-unit"/);
+  assert.doesNotMatch(phrase, /<wbr/);
+  // The calls' chips break after a 「！」 alone (FAR FROM！ never splits at its space).
+  assert.match(phrase, /export function withCallBreaks\(call: string\): ReactNode\[\]/);
+  assert.match(component, /<b key=\{`\$\{call\}-\$\{index\}`\} role="listitem">\s*\{withCallBreaks\(call\)\}/);
+  assert.match(editorial, /<em>\{withSlashBreaks\(chapter\.detail\)\}<\/em>/);
+  assert.match(component, /<h3 className="ffs-phrase">\{withSlashBreaks\(item\.title\)\}<\/h3>/);
+  assert.match(styles, /\.ffs-page \.ffs-phrase-unit \{\s*white-space: nowrap;\s*\}/);
+  assert.doesNotMatch(styles, /word-break: keep-all;\s*overflow-wrap: anywhere;/);
+  // The 5 STAGES tag alone is a chip; the names after it stay plain text.
+  assert.match(styles, /\.ffs-stages-line > span\[lang="en"\] \{/);
+  assert.doesNotMatch(styles, /\.ffs-stages-line > span \{/);
   assert.match(editorial, /<a className="ffs-hero-primary" href="#suitup">/);
   assert.match(editorial, /<a className="ffs-hero-secondary" href="#stages">/);
   // The read-outs are the owner's spec values, never typed in.
@@ -393,9 +410,14 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<footer",
   ].map((mark) => component.indexOf(mark.startsWith("<") ? mark : `id="${mark}"`));
   assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), "chapter order");
-  // Owner (2026-10-23): the Rexonance site's five chapters; the chapter heads carry its index.
-  for (const mark of ["01 / OVERVIEW", "01 / SPECS", "01 / PERFORMANCE", "01 / REPORT", "02 / PROCESSOR"])
-    assert.ok(component.includes(`<p>${mark}</p>`), mark);
+  // Owner (2026-10-23): the Rexonance site's five chapters; the chapter heads
+  // carry its index. The kickers name the chapter (its CONTENTS code) and,
+  // for a sub-chapter, its section after a slash: the number stands in the
+  // forged numeral and the index alone (polish sweep, 2026-10-23: it stood
+  // three times in a head).
+  for (const mark of ["OVERVIEW", "OVERVIEW / SPECS", "OVERVIEW / PERFORMANCE", "OVERVIEW / REPORT", "PROCESSING CORE / P16"])
+    assert.ok(component.includes(`<p lang="en">${mark}</p>`), mark);
+  assert.doesNotMatch(component, /<p(?: lang="en")?>\d\d \/ [A-Z]/);
   assert.equal((component.match(/className="ffs-index" aria-hidden="true"/g) || []).length, 4);
   // The stage chapter: the form-sequence status and the five-form drawer
   // beside the liquid rail, the outlined form code behind the copy.
@@ -723,29 +745,33 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
   // Owner (2026-10-23): 「変身スクロールの後にミドルからウルトラまでのセレクターを置いて、
   // 一気にマックスまで変身したりウルトラが別枠なのを修正し、レクソナンスの特設ページと同様の仕組み」.
   assert.doesNotMatch(sections, /\["ultra", "ウルトラ", "ULTRA"\]/);
-  assert.match(sections, /\["suitup", "変身シークエンス", "SUIT-UP"\],\s*\["stages"/);
+  // The side menu names the chapters as the bar and CONTENTS do (変身, and
+  // 中核機構 under its CONTENTS code SYSTEM).
+  assert.match(sections, /\["suitup", "変身", "SUIT-UP"\],\s*\["stages", "形態", "5 STAGES"\],\s*\["theories", "中核機構", "SYSTEM"\]/);
   assert.doesNotMatch(component, /FarFromUltra|id="ultra"/);
   assert.doesNotMatch(styles, /styles-far-from-ultra\.css/);
   const suitupSource = read("src/components/far-from-saga/far-from-suitup.tsx");
   const suitup = component.indexOf("<FarFromSuitUp stage={stage} onChoose={chooseQuietly} />");
   const stages = component.indexOf('id="stages"');
   assert.ok(suitup > 0 && stages > suitup, "suitup, then stages");
-  // Owner (2026-10-23): numbered as the Rexonance site's five chapters.
-  assert.match(suitupSource, /<p>03 \/ SUIT-UP<\/p>/);
+  // Owner (2026-10-23): the Rexonance site's five chapters. Each head's
+  // kicker is its chapter's CONTENTS code (a sub-chapter's: the chapter's,
+  // a slash, its own); the chapter's number is the numeral's and the index's.
+  assert.match(suitupSource, /<p lang="en">SUIT-UP<\/p>/);
   for (const mark of [
-    "01 / OVERVIEW",
-    "01 / SPECS",
-    "01 / PERFORMANCE",
-    "01 / REPORT",
-    "02 / PROCESSOR",
-    "04 / STAGES",
-    "05 / MECHANISM",
-    "05 / ARMOR & OS",
-    "05 / ABILITY", // Owner (2026-10-23): 神属権限 → 能力
-    "05 / WEAPONS",
-    "05 / FINISHER",
+    "OVERVIEW",
+    "OVERVIEW / SPECS",
+    "OVERVIEW / PERFORMANCE",
+    "OVERVIEW / REPORT",
+    "PROCESSING CORE / P16",
+    "FIVE STAGES",
+    "SYSTEM",
+    "SYSTEM / ARMOR & OS",
+    "SYSTEM / ABILITY", // Owner (2026-10-23): 神属権限 → 能力
+    "SYSTEM / WEAPONS",
+    "SYSTEM / FINISHER",
   ])
-    assert.ok(component.includes(`<p>${mark}</p>`), mark);
+    assert.ok(component.includes(`<p lang="en">${mark}</p>`), mark);
   // The selector comes right after the runway, as a tablist over the five forms.
   const runwayAt = suitupSource.indexOf('id="far-from-assembly-runway"');
   const selectorAt = suitupSource.indexOf('role="tablist"');
@@ -1701,7 +1727,14 @@ test("the cyber type: no Mincho, one route-only display face as text= subsets af
   assert.match(fonts, /&text=\$\{encodeURIComponent\(text\)\}/);
   assert.match(fonts, /requestIdleCallback/);
   assert.match(fonts, /saveData === true/);
-  assert.match(component, /useEffect\(\(\) => mountFarFromFonts\(pageRef\.current\), \[\]\)/);
+  // Seeded with the five forms' names, so a switch never fetches a refreshed
+  // subset that re-sets every display label once it lands (a layout shift).
+  assert.match(
+    component,
+    /useEffect\(\(\) => mountFarFromFonts\(pageRef\.current, FAR_FROM_SAGA\.stagesLine\), \[\]\)/,
+  );
+  assert.match(fonts, /export function mountFarFromFonts\(root: HTMLElement \| null, seed = ""\)/);
+  assert.match(fonts, /for \(const char of seed\)/);
   assert.doesNotMatch(route, /M\+PLUS|far-from-fonts/, "no head link: nothing blocks first paint");
   assert.doesNotMatch(read("src/lib/site-fonts.ts"), /M\+PLUS/, "never site-wide");
 });
@@ -1932,7 +1965,7 @@ test("加速機構 reads the canon everywhere: P2 / P14 Standard / P14 Extreme T
   ])
     assert.doesNotMatch(source, /Extreme tuning|設定案|P16_VS_EXTREME|EXTREME_P14_NAME|先行世代/);
   assert.doesNotMatch(compareStyles, /ffs-p16-strength|ffs-p16-reading|data-unit="extreme"/);
-  assert.match(component, /レクソナンスサーガの『P14 Extreme Tuning』を基礎とした、第16世代演算加速機構です。/);
+  assert.match(component, /レクソナンスサーガの『P14 Extreme Tuning』を基礎とした、\s*<span className="ffs-nowrap">第16世代<\/span>演算加速機構です。/);
   // The Extreme and Rexonance sites name their units the same way.
   const extremeSite = read("src/components/extreme-saga/extreme-saga.tsx");
   assert.match(extremeSite, /"P14 Standard"/);

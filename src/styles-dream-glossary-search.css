@@ -14,28 +14,6 @@
   scroll-margin-top: 164px;
 }
 
-.dream-page.dream-page .dream-glossary-search-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 16px;
-  margin-bottom: 18px;
-}
-
-.dream-page.dream-page .dream-glossary-search-heading p {
-  margin: 0;
-  color: #f5ecd9;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.dream-page.dream-page .dream-glossary-search-heading > span {
-  color: #d6bf95;
-  font-size: 14px;
-}
-
 .dream-page.dream-page .dream-glossary-search label {
   display: block;
   margin-bottom: 8px;
@@ -100,12 +78,17 @@
   letter-spacing: 0.02em;
 }
 
+/* The count speaks only while searching; idle, the field sits on the list. */
 .dream-page.dream-page .dream-glossary-search-count {
-  margin: 18px 0 10px;
+  margin: 14px 0 10px;
   color: #ead2a2;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.7;
+}
+
+.dream-page.dream-page .dream-glossary-search-count:empty {
+  margin: 0 0 16px;
 }
 
 .dream-page.dream-page .dream-glossary-search > .dream-glossary-jump {
@@ -149,14 +132,6 @@
   overflow-wrap: anywhere;
 }
 
-.dream-page.dream-page .dream-glossary-search-number {
-  flex-shrink: 0;
-  color: #dbc18b;
-  font-family: var(--ts-latin, sans-serif);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
 .dream-page.dream-page .dream-glossary-search-word {
   flex: 1;
   min-width: 0;
@@ -187,12 +162,13 @@
   line-height: 1.9;
 }
 
+/* The link's arrow: a term plate jumps to its entry below. */
 .dream-page.dream-page .dream-glossary-search-open {
   flex-shrink: 0;
-  align-self: flex-end;
+  align-self: center;
   color: #e6cd9e;
-  font-size: 13px;
-  white-space: nowrap;
+  font-size: 15px;
+  line-height: 1;
 }
 
 .dream-page.dream-page .dream-glossary-search mark {
@@ -236,10 +212,6 @@
 @media (max-width: 640px) {
   .dream-page.dream-page .dream-glossary-search-results {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .dream-page.dream-page .dream-glossary-search-open {
-    font-size: 12px;
   }
 }
 

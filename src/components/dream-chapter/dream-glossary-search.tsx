@@ -30,10 +30,6 @@ export function DreamGlossarySearch() {
 
   return (
     <div className="dream-glossary-search" id="dream-glossary-search">
-      <div className="dream-glossary-search-heading">
-        <p>言葉を手掛かりに</p>
-        <span>用語本文への索引</span>
-      </div>
       <form role="search" aria-label="用語集を検索" onSubmit={(event) => event.preventDefault()}>
         <label htmlFor={`${id}-query`}>語句・読み・説明から探す</label>
         <div className="dream-glossary-search-field">
@@ -59,7 +55,9 @@ export function DreamGlossarySearch() {
             検索をクリア
           </button>
         </div>
-        <p id={`${id}-help`} className="dream-glossary-search-help">
+        {/* How the field matches stays with it for assistive tech; the placeholder
+            shows it to the eye (Owner, 2026-10-23). */}
+        <p id={`${id}-help`} className="dream-glossary-search-help dream-visually-hidden">
           ひらがな・カタカナのどちらでも検索できます。空白で区切ると、すべての言葉を含む用語を探せます。
         </p>
       </form>
@@ -69,9 +67,7 @@ export function DreamGlossarySearch() {
         role="status"
         aria-atomic="true"
       >
-        {searching
-          ? `検索結果 ${results.length} / ${ENTRIES.length} 語`
-          : `全 ${ENTRIES.length} 語の索引`}
+        {searching ? `検索結果 ${results.length} / ${ENTRIES.length} 語` : ""}
       </p>
       <nav id={`${id}-results`} className="dream-glossary-jump" aria-label="用語集の索引">
         {results.length ? (
@@ -98,9 +94,6 @@ export function DreamGlossarySearch() {
                     focusDreamGlossaryTerm(entry.href.slice(1), event.currentTarget.ownerDocument);
                   }}
                 >
-                  <span className="dream-glossary-search-number" aria-hidden="true">
-                    {String(entry.number).padStart(2, "0")}
-                  </span>
                   <span className="dream-glossary-search-word">
                     <strong>
                       <MatchedText text={entry.term} query={query} />
@@ -116,8 +109,8 @@ export function DreamGlossarySearch() {
                       </span>
                     ) : null}
                   </span>
-                  <span className="dream-glossary-search-open">
-                    本文へ<span aria-hidden="true"> ↗</span>
+                  <span className="dream-glossary-search-open" aria-hidden="true">
+                    ↗
                   </span>
                 </a>
               </li>

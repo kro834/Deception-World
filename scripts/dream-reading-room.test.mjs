@@ -150,7 +150,10 @@ test("room renders every canonical paragraph in its original order and restores 
         }),
     });
     const html = renderToStaticMarkup(React.createElement(Room, { trigger: null, onClose() {} }));
-    assert.ok(html.includes(`CASE 0${episode.no} / ${episode.reading}`));
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+    // The sheet heads with its chapter numeral and title; the English reading is not repeated.
+    assert.ok(html.includes(`CASE 0${episode.no}</p>`));
+    assert.ok(!html.includes(episode.reading));
     assert.equal(
       (html.match(/data-room-paragraph="\d+"/g) ?? []).length,
       episode.paragraphs.length,

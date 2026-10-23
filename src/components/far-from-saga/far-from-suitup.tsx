@@ -144,8 +144,9 @@ function FarFromAssemblyGuide({ runwayRef }: { runwayRef: RefObject<HTMLDivEleme
           ))}
         </ol>
         <ol aria-label="変身音声">
-          {FAR_FROM_SAGA.calls.map((call) => (
-            <li key={call}>{call}</li>
+          {/* The call opens and closes on FAR FROM DEUS！: keyed by place. */}
+          {FAR_FROM_SAGA.calls.map((call, index) => (
+            <li key={`${index}-${call}`}>{call}</li>
           ))}
         </ol>
         <p role="status" aria-live="polite" aria-atomic="true">
@@ -207,7 +208,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
           <b>03</b>
           {" / 05"}
         </small>
-        <p>03 / SUIT-UP</p>
+        <p lang="en">SUIT-UP</p>
         <h2 id="ffs-suitup-title">一瞬で、果てまで纏う。</h2>
         <span>
           スクロールの速さに合わせて装着が進みます。炎の到達から爆散、ナノマシンの集結、装甲の固定、出力の起動、選んだ形態への移行までを、自分のペースで確認できます。
@@ -385,19 +386,20 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
             ))}
           </ol>
           <p className="ffs-ending-line">{endingLine(stage)}</p>
-          {/* The ウルトラ note keeps its place for every form (hidden, not
-              removed): #suitup's height never changes with the selected
-              form, so Safari (no scroll anchoring) never jumps on a switch. */}
-          <div
-            className="ffs-ending-ultra"
-            data-hidden={stage !== "ultra" || undefined}
-            aria-hidden={stage !== "ultra" || undefined}
-          >
-            <p>
-              マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
-            </p>
-            <p className="ffs-note">補助インターフェースの表示内容はイメージです。</p>
-          </div>
+          {/* ウルトラ's note, only with ウルトラ: the panel is as tall as its
+              form's words (a blank reserved for the note stood under every
+              other form's one line). A switch made from #stages, below, keeps
+              that panel where it was (far-from-saga.tsx measures it across
+              the commit), so the page never jumps, with or without scroll
+              anchoring. */}
+          {stage === "ultra" ? (
+            <div className="ffs-ending-ultra">
+              <p>
+                マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
+              </p>
+              <p className="ffs-note">補助インターフェースの表示内容はイメージです。</p>
+            </div>
+          ) : null}
           <div className="ffs-assembly-controls">
             <button type="button" onClick={() => watchEnding(runwayRef.current)}>
               {form.label}への変身を見る

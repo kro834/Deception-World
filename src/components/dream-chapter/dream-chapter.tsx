@@ -81,11 +81,11 @@ const archiveCornerTitle = (id: DreamArchiveCornerId) =>
 
 type DreamSectionId = "posters" | "characters" | "dolminence" | "cases";
 
-const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string; act: string }[] = [
-  { id: "posters", label: "絵看板", act: "第一幕" },
-  { id: "characters", label: "登場人物", act: "第二幕" },
-  { id: "dolminence", label: "ドルミネンス", act: "第三幕" },
-  { id: "cases", label: "物語", act: "第四幕" },
+const DREAM_SECTION_LINKS: readonly { id: DreamSectionId; label: string }[] = [
+  { id: "posters", label: "絵看板" },
+  { id: "characters", label: "登場人物" },
+  { id: "dolminence", label: "ドルミネンス" },
+  { id: "cases", label: "物語" },
 ];
 
 // Scroll position belongs to the small act index, not the entire programme.
@@ -149,9 +149,8 @@ const DreamSectionNav = memo(function DreamSectionNav() {
 
   return (
     <nav className="dream-chapter-nav" aria-label="DREAM CHAPTER セクション">
-      {DREAM_SECTION_LINKS.map(({ id, label, act }) => (
+      {DREAM_SECTION_LINKS.map(({ id, label }) => (
         <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}>
-          <small>{act}</small>
           <span>{label}</span>
         </a>
       ))}
@@ -217,16 +216,6 @@ function QuoteFigure({ text, by }: { text: string; by?: string }) {
   );
 }
 
-const KANJI_DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"] as const;
-
-/** 1 → 一, 12 → 十二: Japanese numerals for ornamental captions. */
-function toKanjiNumber(value: number) {
-  if (value < 10) return KANJI_DIGITS[value];
-  const tens = Math.floor(value / 10);
-  const ones = value % 10;
-  return `${tens === 1 ? "" : KANJI_DIGITS[tens]}十${ones ? KANJI_DIGITS[ones] : ""}`;
-}
-
 // Shared by the opening prologue; the story section keeps the spoiler note.
 const DREAM_STORY_INTRO =
   "人の心を蝕む悪夢が、シエルを東風谷慶弥と探偵・怪作へ引き合わせる。追手を逃れて辿り着いた幻想郷では、怪作を狙うドルミネンスが人里を襲い、霊夢たちも戦いへ巻き込まれていく。家族を案じる慶弥と、誰にも頼れずにいるシエルは、夢の中で流れた血と、守ろうとした想いの重さを知る。";
@@ -267,11 +256,11 @@ function resolveSpecMeter(label: string, value: string): number | null {
 }
 
 const ROSTER_FILTERS = [
-  { id: "all", label: "全て", count: DREAM_CAST_ROSTER.length },
-  { id: "shrine", label: "神社・森・山", count: 5 },
-  { id: "nether", label: "冥界・紅魔・地底", count: 3 },
-  { id: "village", label: "人里・永守組・同行", count: 5 },
-  { id: "dream", label: "夢境・深層", count: 3 },
+  { id: "all", label: "全て" },
+  { id: "shrine", label: "神社・森・山" },
+  { id: "nether", label: "冥界・紅魔・地底" },
+  { id: "village", label: "人里・永守組・同行" },
+  { id: "dream", label: "夢境・深層" },
 ] as const;
 
 type RosterFilterId = (typeof ROSTER_FILTERS)[number]["id"];
@@ -291,23 +280,6 @@ function matchesRosterFilter(affiliation: string, filter: RosterFilterId): boole
     return /ベルベットルーム|悪夢/.test(affiliation);
   }
   return true;
-}
-
-function resolveCharacterCardSpec(item: DreamCharacter): string {
-  const totalEntries = item.sections.reduce(
-    (sum, section) => sum + (section.items?.length ?? section.paragraphs?.length ?? 0),
-    0,
-  );
-  return `${item.sections.length} SECTIONS · ${totalEntries} RECORDS`;
-}
-
-function resolveDolminenceCardSpec(record: DreamDolminence): string {
-  const punch = record.profile.find((row) => row.label === "PUNCH")?.value.replace(/（.*?）/g, "");
-  const kick = record.profile.find((row) => row.label === "KICK")?.value.replace(/（.*?）/g, "");
-  // The no-break space keeps the dot on the PUNCH line when a narrow card wraps the badge.
-  if (punch && kick) return `PUNCH ${punch}\u00a0· KICK ${kick}`;
-  const device = record.profile.find((row) => row.label === "DEVICE")?.value;
-  return device ? `DEVICE: ${device}` : `${record.items.length}CLASSIFIED SPECS`;
 }
 
 const DOSSIER_CHRONICLE_CAST: Record<string, readonly string[]> = {
@@ -364,7 +336,6 @@ function DossierContent({
       <div
         className={`dream-dossier-visuals${character.secondary ? "" : " is-single"}`}
         data-ts-order={character.order}
-        data-ts-roman={character.roman}
         data-plate-focus={character.secondary ? plateFocus : undefined}
       >
         <figure>
@@ -377,7 +348,6 @@ function DossierContent({
             style={{ objectPosition: character.portraitPosition }}
             decoding="async"
           />
-          <figcaption>PERSON / {character.roman}</figcaption>
         </figure>
         {character.secondary ? (
           <figure>
@@ -390,9 +360,6 @@ function DossierContent({
               style={{ objectPosition: character.secondaryPosition }}
               decoding="async"
             />
-            <figcaption>
-              {character.id === "ciel" ? "RIDER / DILUCULUM SAGA" : "DIVINITY / YOAKE-MAMORI"}
-            </figcaption>
           </figure>
         ) : null}
       </div>
@@ -405,10 +372,10 @@ function DossierContent({
               <button
                 key={item.id}
                 type="button"
+                data-kind="cast"
                 aria-current={item.id === character.id ? "true" : undefined}
                 onClick={() => onSelect(item)}
               >
-                <small>CAST {item.order}</small>
                 <span>{item.name}</span>
               </button>
             ))}
@@ -417,9 +384,9 @@ function DossierContent({
                   <button
                     key={item.id}
                     type="button"
+                    data-kind="agent"
                     onClick={() => onSelectDolminence(item)}
                   >
-                    <small>AGENT {item.order}</small>
                     <span>{item.name}</span>
                   </button>
                 ))
@@ -429,7 +396,6 @@ function DossierContent({
 
         {character.secondary ? (
           <div className="dream-dossier-plate-controls" role="group" aria-label="図版表示モード">
-            <span lang="en">VISUAL PLATE</span>
             <button
               type="button"
               aria-pressed={plateFocus === "split"}
@@ -457,10 +423,8 @@ function DossierContent({
         <DreamDossierGuide scope={dossierRef} recordId={character.id} name={character.name} />
 
         <header className="dream-dossier-title">
-          <p>CHARACTER FILE / {character.order}</p>
           <span>{character.tagline}</span>
           <h2>{character.name}</h2>
-          <b>{character.roman}</b>
           <small>{character.role}</small>
         </header>
 
@@ -486,10 +450,9 @@ function DossierContent({
         </dl>
 
         <div className="dream-dossier-sections">
-          {character.sections.map((section, index) => (
+          {character.sections.map((section) => (
             <section key={section.title}>
               <header>
-                <span>{String(index + 1).padStart(2, "0")}</span>
                 <h3>{section.title}</h3>
               </header>
               {section.lead ? <p className="dream-section-lead">{section.lead}</p> : null}
@@ -512,8 +475,7 @@ function DossierContent({
           {relationTies.length ? (
             <section className="dream-dossier-relations-links">
               <header>
-                <span>RELATIONS</span>
-                <h3>因縁・関係性の記録（{relationTies.length}件）</h3>
+                <h3>因縁・関係性の記録</h3>
               </header>
               <ol className="dream-dossier-relations-grid">
                 {relationTies.map((tie) => (
@@ -533,16 +495,13 @@ function DossierContent({
           {chronicleEvents.length ? (
             <section className="dream-dossier-chronicle-links">
               <header>
-                <span>CHRONICLE</span>
-                <h3>登場する出来事の記録（{chronicleEvents.length}件）</h3>
+                <h3>登場する出来事の記録</h3>
               </header>
               <ol className="dream-dossier-chronicle-grid">
                 {chronicleEvents.slice(0, 12).map((event) => (
                   <li key={event.no}>
                     <a href={`#dream-chronicle-event-${event.no}`} onClick={() => onClose?.()}>
-                      <small>
-                        #{event.no} · CASE {event.case}
-                      </small>
+                      <small>CASE {event.case}</small>
                       <strong>{event.title.text}</strong>
                       <span>{event.place}</span>
                     </a>
@@ -649,7 +608,6 @@ function CharacterDialog({
           }}
         >
           <LiquidPointerGlow />
-          <span>CLOSE</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
@@ -693,7 +651,6 @@ function DolminenceContent({
       <div
         className={`dream-dossier-visuals dream-dolminence-visuals${record.secondary ? "" : " is-single"}`}
         data-ts-order={record.order}
-        data-ts-roman={record.roman}
         data-plate-focus={record.secondary ? plateFocus : undefined}
       >
         <figure>
@@ -706,7 +663,6 @@ function DolminenceContent({
             style={{ objectPosition: record.imagePosition }}
             decoding="async"
           />
-          <figcaption>DOLMINENCE / {record.roman}</figcaption>
         </figure>
         {record.secondary ? (
           <figure>
@@ -719,7 +675,6 @@ function DolminenceContent({
               style={{ objectPosition: record.secondaryPosition }}
               decoding="async"
             />
-            <figcaption>CLASSIFIED DESIGN RECORD</figcaption>
           </figure>
         ) : null}
       </div>
@@ -733,9 +688,9 @@ function DolminenceContent({
                   <button
                     key={item.id}
                     type="button"
+                    data-kind="cast"
                     onClick={() => onSelectCharacter(item)}
                   >
-                    <small>CAST {item.order}</small>
                     <span>{item.name}</span>
                   </button>
                 ))
@@ -744,10 +699,10 @@ function DolminenceContent({
               <button
                 key={item.id}
                 type="button"
+                data-kind="agent"
                 aria-current={item.id === record.id ? "true" : undefined}
                 onClick={() => onSelect(item)}
               >
-                <small>AGENT {item.order}</small>
                 <span>{item.name}</span>
               </button>
             ))}
@@ -756,7 +711,6 @@ function DolminenceContent({
 
         {record.secondary ? (
           <div className="dream-dossier-plate-controls" role="group" aria-label="図版表示モード">
-            <span lang="en">VISUAL PLATE</span>
             <button
               type="button"
               aria-pressed={plateFocus === "split"}
@@ -784,10 +738,10 @@ function DolminenceContent({
         <DreamDossierGuide scope={dossierRef} recordId={record.id} name={record.name} />
 
         <header className="dream-dossier-title">
-          <p>DOLMINENCE FILE / {record.order}</p>
-          <span>CLASSIFIED AGENT RECORD</span>
-          <h2>{record.name}</h2>
-          <b>{record.roman}</b>
+          {/* The name breaks at its seam (仮面ライダー / ルパン), never before its last kana. */}
+          <h2>
+            <DisplayName value={record.name} />
+          </h2>
           <small>{record.agent}</small>
         </header>
 
@@ -811,7 +765,6 @@ function DolminenceContent({
         <div className="dream-dossier-sections">
           <section>
             <header>
-              <span>01</span>
               <h3>機密記録</h3>
             </header>
             {record.paragraphs.map((paragraph) => (
@@ -820,7 +773,6 @@ function DolminenceContent({
           </section>
           <section>
             <header>
-              <span>02</span>
               <h3>装備・機能</h3>
             </header>
             <div className="dream-ability-list">
@@ -836,8 +788,7 @@ function DolminenceContent({
           {relationTies.length ? (
             <section className="dream-dossier-relations-links">
               <header>
-                <span>RELATIONS</span>
-                <h3>因縁・関係性の記録（{relationTies.length}件）</h3>
+                <h3>因縁・関係性の記録</h3>
               </header>
               <ol className="dream-dossier-relations-grid">
                 {relationTies.map((tie) => (
@@ -857,16 +808,13 @@ function DolminenceContent({
           {chronicleEvents.length ? (
             <section className="dream-dossier-chronicle-links">
               <header>
-                <span>CHRONICLE</span>
-                <h3>交戦・出現の記録（{chronicleEvents.length}件）</h3>
+                <h3>交戦・出現の記録</h3>
               </header>
               <ol className="dream-dossier-chronicle-grid">
                 {chronicleEvents.slice(0, 12).map((event) => (
                   <li key={event.no}>
                     <a href={`#dream-chronicle-event-${event.no}`} onClick={() => onClose?.()}>
-                      <small>
-                        #{event.no} · CASE {event.case}
-                      </small>
+                      <small>CASE {event.case}</small>
                       <strong>{event.title.text}</strong>
                       <span>{event.place}</span>
                     </a>
@@ -972,7 +920,6 @@ function DolminenceDialog({
           }}
         >
           <LiquidPointerGlow />
-          <span>CLOSE</span>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
@@ -1486,15 +1433,12 @@ export function DreamChapter() {
           hash="top"
           assets={WORLD_ENTER_ASSETS}
           transition="dream"
+          aria-label="ディセプションワールドへ戻る"
         >
           <span aria-hidden="true">←</span>
-          <span>
-            <small>RETURN TO</small>
-            DECEPTION WORLD
-          </span>
+          <span>DECEPTION WORLD</span>
         </GuardedLink>
         <p>
-          <span>KAMEN RIDER SAGA · THE MOVIE I</span>
           <b>ドリームチャプター</b>
         </p>
         <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
@@ -1550,24 +1494,18 @@ export function DreamChapter() {
           />
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
             <a href="#posters">
-              <small>壱</small>
               <span>絵看板を見る</span>
-              <b>POSTERS</b>
             </a>
             <a href="#characters">
-              <small>弐</small>
               <span>登場人物へ</span>
-              <b>CAST</b>
             </a>
           </nav>
           <DreamStageLantern />
         </div>
         <div className="dream-hero-obi">
-          <span>仮面ライダーサーガ × 東方Project</span>
-          <i aria-hidden="true" />
-          <span>映画第一作 THE MOVIE I</span>
           <i aria-hidden="true" />
           <span>劇場版第二作『ディセプションワールド』へ続く</span>
+          <i aria-hidden="true" />
         </div>
       </section>
 
@@ -1575,10 +1513,6 @@ export function DreamChapter() {
         <div className="dream-prologue-card" data-dream-reveal>
           <h2 id="prologue-title">口上</h2>
           <p>{DREAM_STORY_INTRO}</p>
-          <p className="dream-prologue-sign">
-            <span>仮面ライダーサーガ × 東方Project</span>
-            <span>映画第一作</span>
-          </p>
         </div>
       </section>
 
@@ -1619,12 +1553,8 @@ export function DreamChapter() {
             height={DREAM_POSTERS[9].height}
           />
           <FilmTextScan />
-          <b className="dream-act-mark" aria-hidden="true">
-            第一幕
-          </b>
-          <p>ACT I — KEY VISUALS</p>
+          <i className="dream-act-mark" aria-hidden="true" />
           <h2 id="poster-title">絵看板</h2>
-          <span>01 — {String(DREAM_POSTERS.length).padStart(2, "0")}</span>
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
 
@@ -1684,7 +1614,6 @@ export function DreamChapter() {
                 aria-hidden="true"
                 style={{ width: `${((posterIndex + 1) / DREAM_POSTERS.length) * 100}%` }}
               />
-              <span>其ノ{toKanjiNumber(posterIndex + 1)}</span>
               <b>{activePoster.alt}</b>
               <DreamScreeningLauncher
                 index={posterIndex}
@@ -1704,21 +1633,6 @@ export function DreamChapter() {
                   : ""}
             </p>
             <div className="dream-poster-hud">
-              <div className="dream-poster-hud-status" aria-hidden="true">
-                <i
-                  className={
-                    posterShuffling ? "is-shuffling" : posterLocked ? "is-locked" : "is-live"
-                  }
-                />
-                <b>
-                  REEL {String(posterIndex + 1).padStart(2, "0")} /{" "}
-                  {String(DREAM_POSTERS.length).padStart(2, "0")}
-                </b>
-                <span>{posterShuffling ? "SHUFFLING" : posterLocked ? "LOCKED" : "AUTO CYCLE"}</span>
-                <small>
-                  {activePoster.width}×{activePoster.height}PX · {activePoster.fit.toUpperCase()}
-                </small>
-              </div>
               <div className="dream-poster-hud-step" role="group" aria-label="ポスター送り">
                 <button
                   type="button"
@@ -1730,7 +1644,6 @@ export function DreamChapter() {
                   }}
                 >
                   <span aria-hidden="true">◀</span>
-                  <small lang="en">PREV</small>
                 </button>
                 <button
                   type="button"
@@ -1741,7 +1654,6 @@ export function DreamChapter() {
                     if (event.detail !== 0) event.currentTarget.blur();
                   }}
                 >
-                  <small lang="en">NEXT</small>
                   <span aria-hidden="true">▶</span>
                 </button>
               </div>
@@ -1754,6 +1666,7 @@ export function DreamChapter() {
                 type="button"
                 role="tab"
                 id={`dream-poster-tab-${index}`}
+                aria-label={`${index + 1}番: ${poster.alt}`}
                 aria-controls="dream-poster-panel"
                 aria-selected={posterIndex === index}
                 tabIndex={posterIndex === index ? 0 : -1}
@@ -1796,7 +1709,6 @@ export function DreamChapter() {
                   loading="lazy"
                   decoding="async"
                 />
-                <span>{String(index + 1).padStart(2, "0")}</span>
               </button>
             ))}
           </div>
@@ -1875,12 +1787,8 @@ export function DreamChapter() {
             height={DREAM_POSTERS[3].height}
           />
           <FilmTextScan />
-          <b className="dream-act-mark" aria-hidden="true">
-            第二幕
-          </b>
-          <p>ACT II — CAST</p>
+          <i className="dream-act-mark" aria-hidden="true" />
           <h2 id="character-title">登場人物</h2>
-          <span>03 FILES</span>
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <div className="dream-character-grid" data-dream-reveal>
@@ -1912,15 +1820,9 @@ export function DreamChapter() {
                   decoding="async"
                 />
                 <span className="dream-character-shade" aria-hidden="true" />
-                <span className="dream-character-number">{item.order}</span>
-                <span className="dream-character-spec-badge" aria-hidden="true">
-                  {resolveCharacterCardSpec(item)}
-                </span>
                 <span className="dream-character-copy">
                   <b>{item.name}</b>
                   <small>{item.tagline}</small>
-                  <i>{item.roman}</i>
-                  <em>人物資料を開く</em>
                 </span>
               </button>
             </article>
@@ -1930,9 +1832,7 @@ export function DreamChapter() {
 
       <section id="cast-roster" className="dream-annex" aria-labelledby="cast-roster-title">
         <header className="dream-annex-heading">
-          <p>CHARACTERS</p>
           <h2 id="cast-roster-title">人物一覧</h2>
-          <span>{String(DREAM_CAST_ROSTER.length).padStart(2, "0")} PERSONS</span>
         </header>
         <div className="dream-roster-toolbar" role="toolbar" aria-label="人物一覧の絞り込み">
           <div className="dream-roster-filters">
@@ -1944,7 +1844,6 @@ export function DreamChapter() {
                 onClick={() => setRosterFilter(group.id)}
               >
                 <span>{group.label}</span>
-                <small>{group.count}</small>
               </button>
             ))}
           </div>
@@ -1965,7 +1864,7 @@ export function DreamChapter() {
           </button>
         </div>
         <ol className="dream-roster" data-dream-reveal>
-          {DREAM_CAST_ROSTER.map((entry, index) => (
+          {DREAM_CAST_ROSTER.map((entry) => (
             <li
               key={entry.id}
               data-roster-dimmed={
@@ -1973,9 +1872,6 @@ export function DreamChapter() {
               }
             >
               <article aria-labelledby={`dream-roster-${entry.id}`}>
-                <span className="dream-roster-seal" aria-hidden="true">
-                  {toKanjiNumber(index + 1)}
-                </span>
                 <p className="dream-roster-affiliation">{entry.affiliation}</p>
                 <h3 id={`dream-roster-${entry.id}`}>{entry.name}</h3>
                 <QuoteFigure text={entry.line} />
@@ -2034,12 +1930,8 @@ export function DreamChapter() {
             height={DREAM_POSTERS[12].height}
           />
           <FilmTextScan />
-          <b className="dream-act-mark" aria-hidden="true">
-            第三幕
-          </b>
-          <p>ACT III — DOLMINENCE</p>
+          <i className="dream-act-mark" aria-hidden="true" />
           <h2 id="dolminence-title">ドルミネンス</h2>
-          <span>04 FILES</span>
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <p className="dream-dolminence-intro" data-dream-reveal>
@@ -2074,17 +1966,11 @@ export function DreamChapter() {
                   decoding="async"
                 />
                 <span className="dream-character-shade" aria-hidden="true" />
-                <span className="dream-dolminence-number">{record.order}</span>
-                <span className="dream-dolminence-spec-badge" aria-hidden="true">
-                  {resolveDolminenceCardSpec(record)}
-                </span>
                 <span className="dream-dolminence-copy">
                   <small>{record.agent}</small>
                   <b>
                     <DisplayName value={record.name} />
                   </b>
-                  <i>{record.roman}</i>
-                  <em>機密記録を開く</em>
                 </span>
               </button>
             </article>
@@ -2094,19 +1980,14 @@ export function DreamChapter() {
 
       <section id="factions" className="dream-annex" aria-labelledby="factions-title">
         <header className="dream-annex-heading">
-          <p>ORGANIZATION</p>
           <h2 id="factions-title">組織と勢力</h2>
-          <span>{String(DREAM_FACTIONS.length + 1).padStart(2, "0")} FACTIONS</span>
         </header>
         <div className="dream-factions">
           <section
             className="dream-faction is-dolminence"
             aria-labelledby="dream-faction-dolminence"
           >
-            <h3 id="dream-faction-dolminence">
-              <small>機密概要</small>
-              ドルミネンス
-            </h3>
+            <h3 id="dream-faction-dolminence">ドルミネンス</h3>
             <dl className="dream-record-sheet">
               {DREAM_DOLMINENCE_RECORD.map((row) => (
                 <div key={row.label}>
@@ -2128,7 +2009,6 @@ export function DreamChapter() {
                 return (
                   <li key={agent.code} className={filed ? "is-filed" : undefined}>
                     <span className="dream-agent-code">
-                      <small>CODE</small>
                       <b className={agent.code.length > 2 ? "is-long" : undefined}>
                         {agentCode(agent.code)}
                       </b>
@@ -2226,12 +2106,8 @@ export function DreamChapter() {
             height={DREAM_POSTERS[13].height}
           />
           <FilmTextScan />
-          <b className="dream-act-mark" aria-hidden="true">
-            第四幕
-          </b>
-          <p>ACT IV — STORY</p>
+          <i className="dream-act-mark" aria-hidden="true" />
           <h2 id="case-title">物語の記録</h2>
-          <span>CASE 0–5 / DREAM CHAPTER</span>
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <div className="dream-story-intro">
@@ -2246,18 +2122,14 @@ export function DreamChapter() {
         <DreamStoryIndex />
         <div className="dream-story-layout">
           <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
-            <p className="dream-story-eyebrow">SAGA × TOUHOU PROJECT</p>
             <h3 id="dream-crossings-title">幻想郷との交差</h3>
             <p className="dream-story-crossings-lead">
               怪作を狙う追撃は人里を襲い、神社と竹林を戦場に変える。迎え撃つ霊夢たちとの共闘は、シエルと慶弥にも、守られる側になる戸惑いをもたらす。
             </p>
             <dl>
-              {DREAM_STORY_CROSSINGS.map((place, index) => (
+              {DREAM_STORY_CROSSINGS.map((place) => (
                 <div key={place.name}>
-                  <dt>
-                    <span aria-hidden="true">0{index + 1}</span>
-                    {place.name}
-                  </dt>
+                  <dt>{place.name}</dt>
                   <dd>
                     <strong>{place.role}</strong>
                     <p>{place.body}</p>
@@ -2280,11 +2152,10 @@ export function DreamChapter() {
                 >
                   <summary>
                     <span className="dream-story-case-number">
-                      CASE <b>{episode.no}</b>
+                      <b>{episode.no}</b>
                     </span>
                     <span className="dream-story-case-heading">
                       <span>{episode.title}</span>
-                      <small>{episode.reading}</small>
                     </span>
                     <span className="dream-story-case-toggle" aria-hidden="true">
                       ＋
@@ -2317,9 +2188,7 @@ export function DreamChapter() {
 
       <section id="case-notes" className="dream-annex" aria-labelledby="case-notes-title">
         <header className="dream-annex-heading">
-          <p>CASE NOTES</p>
           <h2 id="case-notes-title">章の言葉</h2>
-          <span>CASE 0–5</span>
         </header>
         <ol className="dream-case-notes" data-dream-reveal>
           {DREAM_CASE_NOTES.map((note) => {
@@ -2328,10 +2197,9 @@ export function DreamChapter() {
               <li key={note.no} id={`dream-case-note-${note.no}`} tabIndex={-1}>
                 <p className="dream-case-note-head">
                   <span>
-                    CASE <b>{note.no}</b>
+                    <b>{note.no}</b>
                   </span>
                   <strong>{episode?.title}</strong>
-                  <small>{episode?.reading}</small>
                 </p>
                 {note.motto ? (
                   <p className="dream-case-note-motto" lang="en">
@@ -2353,9 +2221,7 @@ export function DreamChapter() {
 
       <section id="glossary" className="dream-annex" aria-labelledby="glossary-title">
         <header className="dream-annex-heading">
-          <p>KEYWORDS</p>
           <h2 id="glossary-title">用語集</h2>
-          <span>{String(DREAM_GLOSSARY.length).padStart(2, "0")} TERMS</span>
         </header>
         <DreamGlossarySearch />
         <dl className="dream-glossary" data-dream-reveal>
@@ -2377,9 +2243,7 @@ export function DreamChapter() {
 
       <section id="quotes" className="dream-annex dream-quotes" aria-labelledby="quotes-title">
         <header className="dream-annex-heading">
-          <p>QUOTES</p>
           <h2 id="quotes-title">名台詞</h2>
-          <span>{String(DREAM_QUOTES.length).padStart(2, "0")} LINES</span>
         </header>
         <ol className="dream-quote-band" data-dream-reveal>
           {DREAM_QUOTES.map((quote) => (
@@ -2392,13 +2256,8 @@ export function DreamChapter() {
       </section>
 
       <footer className="dream-footer">
-        <p>
-          <span>仮面ライダーサーガ × 東方Project</span>
-          <span>映画第一作</span>
-        </p>
         <h2>
           <span>ドリームチャプター</span>
-          <small>DREAM CHAPTER</small>
         </h2>
         <dl className="dream-credits" aria-label="登場記録">
           <div>
@@ -2434,17 +2293,16 @@ export function DreamChapter() {
         </dl>
         <nav className="dream-footer-nav" aria-label="幕間クイック移動">
           <a href="#top">↑ 巻頭へ戻る</a>
-          <a href="#posters">第一幕・絵看板</a>
-          <a href="#characters">第二幕・登場人物</a>
-          <a href="#dolminence">第三幕・ドルミネンス</a>
-          <a href="#cases">第四幕・物語の記録</a>
+          <a href="#posters">絵看板</a>
+          <a href="#characters">登場人物</a>
+          <a href="#dolminence">ドルミネンス</a>
+          <a href="#cases">物語の記録</a>
         </nav>
         <span className="dream-footer-end" aria-hidden="true">
           終
         </span>
         <GuardedLink to="/world" hash="top" assets={WORLD_ENTER_ASSETS} transition="dream">
           <span>ディセプションワールドへ戻る</span>
-          <small>DECEPTION WORLD</small>
         </GuardedLink>
       </footer>
 

@@ -70,9 +70,11 @@ export const FarFromFormComparison = memo(function FarFromFormComparison({
                     onChoose(key);
                     const keyboard = event.detail === 0;
                     // The selected panel precedes this drawer: show the result
-                    // without sweeping back through the page.
+                    // without sweeping back through the page. #stages' own
+                    // rail (the suit-up's ending selector, earlier in the
+                    // page, is another .ffs-stage-tabs).
                     requestAnimationFrame(() => {
-                      const rail = document.querySelector(".ffs-stage-tabs");
+                      const rail = document.querySelector("#stages .ffs-stage-tabs");
                       const header = document.querySelector(".rxs-local-nav");
                       if (rail)
                         scrollBy({
