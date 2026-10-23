@@ -18,7 +18,9 @@ test("only Explom and Kemonohen opt into their distinct presentation", () => {
   assert.match(forms.slice(forms.indexOf("partnerForms.map")), /theme: form.theme/);
   assert.equal(pickup.match(/data-form-theme=\{rider.theme\}/g)?.length, 2);
   assert.match(pickup, /data-form-theme=\{f.theme\}/);
-  assert.match(pickup, /if \(!isRexonance\) \{\s*showDialog\(source\);\s*return;/);
+  // Owner (2026-10-23): Explom and 犭 open through their own covers too; only ungated forms open at once.
+  assert.match(pickup, /if \(!gate\) \{\s*showDialog\(source\);\s*return;/);
+  assert.match(pickup, /const gate = formGate\(rider\.theme\)/);
 });
 
 test("signature arrivals are local, finite, disposable, and never hide the art", () => {

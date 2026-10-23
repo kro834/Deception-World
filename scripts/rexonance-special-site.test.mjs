@@ -280,7 +280,9 @@ test("P14 comparison preserves every value and uses native iOS selection with a 
   assert.match(component, /<option value="p1">P1比<\/option>/);
   assert.match(component, /<option value="p2">P2比<\/option>/);
   assert.match(component, /aria-describedby="rxs-p14-baseline-help"/);
-  assert.match(component, /<p id="rxs-p14-baseline-help">/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: how to move the slider
+  // is read to assistive tech only (its ends name the choice on screen).
+  assert.match(component, /<p id="rxs-p14-baseline-help" className="visually-hidden">/);
   assert.match(component, /event\.currentTarget\.value as P14Baseline/);
   // COPY.md R8, R12: the visible labels name the choice, not the widget.
   assert.match(component, /比較する相手/);

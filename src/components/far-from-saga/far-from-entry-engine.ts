@@ -31,7 +31,9 @@ import {
   farFromChipPose,
   planFarFromSwarm,
 } from "@/lib/far-from-entry-swarm.js";
-import { farFromEntryPlan, T } from "./far-from-entry-plan";
+import { farFromEntryPlan } from "./far-from-entry-plan";
+import { FAR_FROM_WIREFRAME_ENTRY } from "@/lib/far-from-wireframe-entry";
+import { WIRE_UNIT, decodeWireMesh, triangulateWireMesh } from "@/lib/far-from-wireframe-mesh";
 
 /* FAR FROM SAGA's entry engine (owner, 2026-10-22): the canvases inside the
    figure's box that carry everything the DOM cannot — modelled on
@@ -50,10 +52,15 @@ import { farFromEntryPlan, T } from "./far-from-entry-plan";
      of each ring hidden behind the body) and drain into the plates as their
      tiles fly; the free chips gather round the reactor and implode into it
      as the last call strikes;
-   - each plate's micro-tiles (9 px squares of the artwork, in dark glass:
-     the crystals' light held back) stream in from the seam side and lock,
-     plate after plate in the cascade's order (far-from-entry-calls), and a
-     seated plate is painted whole onto the settled canvas;
+   - each plate is constructed as a wireframe (owner, 2026-10-23: 「また、
+     ファーフロムはワイヤーフレーム風の生成方式を採るように。」), as the scroll
+     suit-up's (far-from-wireframe-layer.ts): its real outline traced from its
+     seam, its mesh (far-from-wireframe-entry.ts, made from this cut by
+     scripts/build-far-from-wireframe.mjs) drawn out as its micro-tiles come
+     due, the tiles (9 px squares of the artwork, in dark glass: the crystals'
+     light held back) locking in place under it, the wire fading as the plate
+     fits — plate after plate in the cascade's order (far-from-entry-calls) —
+     and a seated plate is painted whole onto the settled canvas;
    - on FAR FROM DEUS！ the reactor ignites and the crystals' light
      (lights.webp) runs out through the whole body from it, with a bloom
      that settles; at the end the finished figure is painted whole, so the
@@ -91,6 +98,20 @@ export type FarFromEntryEngine = {
   stop: () => void;
 };
 
+/** The wire's times (ms of the entry clock): the outline is traced from the
+ * plate's first moment over at most TRACE; an interior edge is drawn GROW
+ * long, LEAD before the tiles under its later end lock; the wire fades over
+ * FADE from FADE_AT before the plate fits. */
+export const FAR_FROM_ENTRY_WIRE = Object.freeze({
+  trace: 140,
+  lead: 90,
+  grow: 30,
+  fadeAt: 50,
+  fade: 90,
+});
+const WIRE_ICE = "#7fe6ff";
+const WIRE_WHITE = "#f4fbff";
+
 /** The engine takes over only if it is ready before the first tile is due. */
 export const FAR_FROM_ENTRY_START_BY = 420;
 const FIG = FAR_FROM_ENTRY_SIZE;
@@ -115,9 +136,6 @@ const RING_ARCS = 48;
 /** The body's occupancy grid, for the chips behind it. */
 const OCC_W = 64;
 const OCC_H = 116;
-/** A flying tile's own light under it (the tiles' tone rows: ice, pink,
- * white, gold). */
-const TONE_CSS = ["#79e8ff", "#ff8fd8", "#f4fbff", "#ffce78"] as const;
 /** The kits' cells: the tumble cell, the mip cell, the mip's x/y per tone,
  * flat by kit (4 tones each). */
 const KIT_CELL = Int16Array.from(FAR_FROM_ENTRY_KITS, (kit) => kit.cell);
@@ -251,6 +269,132 @@ export function createFarFromEntryEngine({
     let last = -1;
     let lit = false;
     settled.setTransform(1, 0, 0, 1, ox, oy);
+    // Each plate's wire, made the first time the plate is drawn (one plate
+    // at a time, so no frame triangulates the suit): its vertices, its
+    // edges (from the earlier end) and when each is drawn.
+    type EntryWire = {
+      vx: Float32Array;
+      vy: Float32Array;
+      ea: Int32Array;
+      eb: Int32Array;
+      e0: Float32Array;
+      e1: Float32Array;
+      eo: Uint8Array;
+    };
+    const wires: (EntryWire | null | undefined)[] = Array.from({ length: plates }, () => undefined);
+    const wireOf = (p: number): EntryWire | null => {
+      const known = wires[p];
+      if (known !== undefined) return known;
+      const piece = plan.pieces[p];
+      const mesh = decodeWireMesh(FAR_FROM_WIREFRAME_ENTRY[piece.id]);
+      if (!mesh) return (wires[p] = null);
+      const tri = triangulateWireMesh(mesh);
+      const n = mesh.xs.length;
+      const vx = new Float32Array(n);
+      const vy = new Float32Array(n);
+      for (let v = 0; v < n; v += 1) {
+        vx[v] = mesh.xs[v] / WIRE_UNIT;
+        vy[v] = mesh.ys[v] / WIRE_UNIT;
+      }
+      const W = FAR_FROM_ENTRY_WIRE;
+      const first = plan.plateTiles[p];
+      const past = plan.plateTiles[p + 1];
+      const spawn = plan.spawn[p];
+      // An interior vertex: a lead before its nearest tile locks.
+      const vt = new Float32Array(n);
+      for (let v = mesh.outline; v < n; v += 1) {
+        let best = Infinity;
+        let land = plan.fit[p];
+        for (let i = first; i < past; i += 1) {
+          const d =
+            (plan.dx[i] + plan.tw[i] / 2 - vx[v]) ** 2 + (plan.dy[i] + plan.th[i] / 2 - vy[v]) ** 2;
+          if (d < best) {
+            best = d;
+            land = plan.land[i];
+          }
+        }
+        vt[v] = Math.max(spawn, land - W.lead);
+      }
+      // The outline: two pens from its point nearest the seam side's first
+      // tile, round both ways.
+      let sx = piece.seat[0];
+      let sy = piece.seat[1];
+      let early = Infinity;
+      for (let i = first; i < past; i += 1)
+        if (plan.land[i] < early) {
+          early = plan.land[i];
+          sx = plan.dx[i] + plan.tw[i] / 2;
+          sy = plan.dy[i] + plan.th[i] / 2;
+        }
+      const trace = Math.max(40, Math.min(W.trace, (plan.fit[p] - spawn) * 0.5));
+      for (let L = 0; L < mesh.loopStart.length; L += 1) {
+        const start = mesh.loopStart[L];
+        const count = mesh.loopCount[L];
+        let nearest = 0;
+        let best = Infinity;
+        for (let k = 0; k < count; k += 1) {
+          const d = (vx[start + k] - sx) ** 2 + (vy[start + k] - sy) ** 2;
+          if (d < best) {
+            best = d;
+            nearest = k;
+          }
+        }
+        const along = new Float32Array(count);
+        for (let step = 1; step < count; step += 1) {
+          const a = start + ((nearest + step - 1) % count);
+          const b = start + ((nearest + step) % count);
+          along[step] = along[step - 1] + Math.hypot(vx[b] - vx[a], vy[b] - vy[a]);
+        }
+        const close = start + ((nearest + count - 1) % count);
+        const total =
+          along[count - 1] + Math.hypot(vx[start + nearest] - vx[close], vy[start + nearest] - vy[close]);
+        for (let step = 0; step < count; step += 1)
+          vt[start + ((nearest + step) % count)] =
+            spawn + (Math.min(along[step], total - along[step]) / Math.max(1, total / 2)) * trace;
+      }
+      const seen = new Map<number, number>();
+      const us: number[] = [];
+      const ws: number[] = [];
+      for (let t = 0; t < tri.length; t += 3)
+        for (let k = 0; k < 3; k += 1) {
+          const a = tri[t + k];
+          const b = tri[t + ((k + 1) % 3)];
+          const key = a < b ? a * 65536 + b : b * 65536 + a;
+          if (seen.has(key)) continue;
+          seen.set(key, us.length);
+          us.push(a);
+          ws.push(b);
+        }
+      const loopEdge = new Set<number>();
+      for (let L = 0; L < mesh.loopStart.length; L += 1)
+        for (let k = 0; k < mesh.loopCount[L]; k += 1) {
+          const a = mesh.loopStart[L] + k;
+          const b = mesh.loopStart[L] + ((k + 1) % mesh.loopCount[L]);
+          loopEdge.add(a < b ? a * 65536 + b : b * 65536 + a);
+        }
+      const ne = us.length;
+      const wire: EntryWire = {
+        vx,
+        vy,
+        ea: new Int32Array(ne),
+        eb: new Int32Array(ne),
+        e0: new Float32Array(ne),
+        e1: new Float32Array(ne),
+        eo: new Uint8Array(ne),
+      };
+      for (let e = 0; e < ne; e += 1) {
+        const later = vt[ws[e]] < vt[us[e]];
+        const a = later ? ws[e] : us[e];
+        const b = later ? us[e] : ws[e];
+        const onOutline = loopEdge.has(a < b ? a * 65536 + b : b * 65536 + a);
+        wire.ea[e] = a;
+        wire.eb[e] = b;
+        wire.eo[e] = onOutline ? 1 : 0;
+        wire.e0[e] = onOutline ? vt[a] : Math.max(vt[a], vt[b] - W.grow);
+        wire.e1[e] = onOutline ? Math.max(vt[b], vt[a] + 4) : vt[b] + 1;
+      }
+      return (wires[p] = wire);
+    };
     const settle = (p: number) => {
       const piece = plan.pieces[p];
       settled.globalAlpha = 1;
@@ -370,57 +514,38 @@ export function createFarFromEntryEngine({
         counters[0] += 1;
       }
       flight.restore();
-      for (let i = first; i < past; i += 1) {
-        const land = plan.land[i];
-        const from = plan.start[i];
-        const u = (t - from) / (land - from);
-        if (u <= 0 || u >= 1) continue;
-        if (counters[0] >= budget) return;
-        const e = 1 - (1 - u) * (1 - u) * (1 - u);
-        const x = (plan.dx[i] + plan.ox[i] * (1 - e)) * s;
-        const y = (plan.dy[i] + plan.oy[i] * (1 - e)) * s;
-        const tw = plan.tw[i];
-        const th = plan.th[i];
-        if (u < 0.62) {
-          // A nanite mote, streaming in: its own tile of the art, small, with
-          // its light under it, so even now the suit's edge is the artwork's.
-          const size = T * s * (0.3 + 0.4 * (u / 0.62));
-          const w = size * (tw / T);
-          const h = size * (th / T);
-          const px = x + (tw * s - w) / 2;
-          const py = y + (th * s - h) / 2;
-          flight.globalAlpha = Math.min(1, u * 5) * 0.55;
-          flight.fillStyle = TONE_CSS[plan.tone[i]];
-          flight.fillRect(
-            Math.round(px) - 1,
-            Math.round(py) - 1,
-            Math.round(w) + 2,
-            Math.round(h) + 2,
-          );
-          flight.globalAlpha = Math.min(1, u * 5) * 0.9;
-          flight.drawImage(atlas, plan.sx[i], plan.sy[i], tw, th, px, py, w, h);
-          counters[0] += 2;
-        } else {
-          // It turns into its piece of the plate and locks: whole and on the
-          // pixel grid, fading up.
-          const v = (u - 0.62) / 0.38;
-          const x0 = Math.round(x);
-          const y0 = Math.round(y);
-          flight.globalAlpha = 0.55 + 0.45 * v;
-          flight.drawImage(
-            atlas,
-            plan.sx[i],
-            plan.sy[i],
-            tw,
-            th,
-            x0,
-            y0,
-            Math.round(x + tw * s) - x0,
-            Math.round(y + th * s) - y0,
-          );
-          counters[0] += 1;
+      // The wire over it: the lines drawn by now (those being drawn bright),
+      // fading as the plate fits.
+      const wire = wireOf(p);
+      if (!wire) return;
+      const W = FAR_FROM_ENTRY_WIRE;
+      const light = 1 - Math.min(1, Math.max(0, (t - (plan.fit[p] - W.fadeAt)) / W.fade));
+      if (light <= 0) return;
+      for (let pass = 0; pass < 2; pass += 1) {
+        flight.beginPath();
+        let any = false;
+        for (let e = 0; e < wire.ea.length; e += 1) {
+          const t0 = wire.e0[e];
+          if (t < t0) continue;
+          const drawing = t < wire.e1[e];
+          if (drawing !== (pass === 1)) continue;
+          const a = wire.ea[e];
+          const b = wire.eb[e];
+          const g = drawing ? (t - t0) / (wire.e1[e] - t0) : 1;
+          const x0 = wire.vx[a];
+          const y0 = wire.vy[a];
+          flight.moveTo(x0 * s, y0 * s);
+          flight.lineTo((x0 + (wire.vx[b] - x0) * g) * s, (y0 + (wire.vy[b] - y0) * g) * s);
+          any = true;
         }
+        if (!any) continue;
+        flight.globalAlpha = (pass ? 0.95 : 0.6) * light;
+        flight.strokeStyle = pass ? WIRE_WHITE : WIRE_ICE;
+        flight.lineWidth = (pass ? 1.2 : 0.75) * s;
+        flight.stroke();
+        counters[0] += 1;
       }
+      flight.globalAlpha = 1;
     };
     // The suit is whole: the reactor ignites and the crystals' light runs
     // out through the body; a bloom rides it and settles.

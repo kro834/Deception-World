@@ -105,7 +105,9 @@ async function assertManagerRailReadable(page, viewport) {
       }),
     );
   // Owner (2026-10-21): Dogs is the fourth manager tab (FRONT, REVERSE, RELATED, DOGS; two labels each).
-  assert.equal(text.length, 8, `${viewport.name}: manager rail labels render`);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — each tab is its
+  // Japanese name alone (六詠, 管理外, その他, 犬); the English codes are gone.
+  assert.equal(text.length, 4, `${viewport.name}: manager rail labels render`);
   for (const label of text) {
     assert.ok(label.text, `${viewport.name}: manager rail label has text`);
     assert.ok(
@@ -142,22 +144,9 @@ async function verifyWorld(page, viewport) {
   assert.equal(overlaps(title, cta), false, `${viewport.name}: title overlaps CTA`);
   assert.ok(cta.width >= 44 && cta.height >= 44, `${viewport.name}: CTA target is below 44px`);
 
-  const metadata = await page.locator(".hero-metadata > span").evaluateAll((nodes) =>
-    nodes.map((node) => {
-      const rect = node.getBoundingClientRect();
-      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
-    }),
-  );
-  assert.equal(metadata.length, 3, `${viewport.name}: three metadata items render`);
-  for (let index = 0; index < metadata.length; index += 1) {
-    for (let next = index + 1; next < metadata.length; next += 1) {
-      assert.equal(
-        overlaps(metadata[index], metadata[next]),
-        false,
-        `${viewport.name}: metadata ${index + 1} overlaps ${next + 1}`,
-      );
-    }
-  }
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the title stage's faux
+  // metadata (FORMAT / WORLD / STATUS) is gone.
+  assert.equal(await page.locator(".hero-metadata").count(), 0, `${viewport.name}: no metadata strip`);
 
   const storyColors = await page.locator(".story-layout").evaluate((node) => ({
     background: getComputedStyle(node).backgroundColor,

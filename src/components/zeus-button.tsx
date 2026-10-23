@@ -368,10 +368,29 @@ const movesWords = (animation: Animation, effect: KeyframeEffect) => {
     .getKeyframes()
     .some((frame) => Object.keys(frame).some((key) => ZEUS_ENTRANCE_PROPERTY.test(key)));
 };
+/* The animations of the elements under the spots, each element's own list.
+   Not document.getAnimations(): WebKit crashed the page ("Page crashed")
+   sorting the document's whole list, which can hold stale animations of
+   pseudo-elements (a record dialog's ::after) after a record has been opened
+   and closed (2026-10-23). An element's own list leaves its pseudo-elements
+   out, and only the elements whose box meets a spot are asked. */
+function spotAnimations(button: HTMLElement, zones: ZeusRect[]): Animation[] {
+  const body = document.body;
+  if (!body || typeof body.querySelectorAll !== "function") {
+    return typeof document.getAnimations === "function" ? document.getAnimations() : [];
+  }
+  const found: Animation[] = [];
+  for (const element of body.querySelectorAll("*")) {
+    if (element === button || button.contains(element)) continue;
+    if (typeof element.getAnimations !== "function") continue;
+    if (!meetsAny(element.getBoundingClientRect(), zones)) continue;
+    found.push(...element.getAnimations());
+  }
+  return found;
+}
 function readEntrance(button: HTMLElement, zones: ZeusRect[]) {
-  if (typeof document.getAnimations !== "function") return 0;
   let remaining = 0;
-  for (const animation of document.getAnimations()) {
+  for (const animation of spotAnimations(button, zones)) {
     if (animation.playState !== "running" || animation.timeline !== document.timeline) continue;
     const effect = animation.effect as KeyframeEffect | null;
     const target = effect?.target;

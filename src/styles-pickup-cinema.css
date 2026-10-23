@@ -797,52 +797,6 @@ html[data-mode="world"]
   border-radius: 0;
 }
 
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  .form-pickup-layout
-  > figure
-  > figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 4px 16px;
-  box-sizing: border-box;
-  width: 100%;
-  margin: 0;
-  padding: 12px 16px 14px;
-  border-top: 1px solid var(--pc-line);
-  background: rgb(3 7 13 / 88%);
-}
-
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  .form-pickup-layout
-  > figure
-  > figcaption
-  > span {
-  min-width: 0;
-  color: var(--pc-lock);
-  font: 400 12px/1.5 var(--pc-hud);
-  letter-spacing: 0.16em;
-}
-
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  .form-pickup-layout
-  > figure
-  > figcaption
-  > b {
-  min-width: 0;
-  color: var(--pc-text);
-  font-family: var(--pc-display);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.5;
-  letter-spacing: 0.04em;
-  overflow-wrap: anywhere;
-}
-
 /* ダンテ's forms are drawn on paper: the stage is that paper. */
 html[data-mode="world"]
   .dante-page
@@ -902,57 +856,6 @@ html[data-mode="world"]
   > p {
   margin: 0;
   color: var(--pc-text-2);
-}
-
-/* Section heads: an outlined numeral, the HUD label, a rule to the edge. */
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  :is(.form-pickup-overview, .form-pickup-sections > section)
-  > header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-}
-
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  :is(.form-pickup-overview, .form-pickup-sections > section)
-  > header::after {
-  content: "";
-  flex: 1 1 auto;
-  height: 1px;
-  background: linear-gradient(90deg, var(--pc-line-strong), transparent);
-}
-
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  :is(.form-pickup-overview, .form-pickup-sections > section)
-  > header
-  > span {
-  flex: 0 0 auto;
-  margin: 0;
-  color: transparent;
-  font-family: var(--pc-mono);
-  font-size: 30px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  -webkit-text-stroke: 1px var(--pc-lock);
-  text-shadow: 0.07em 0.07em 0 rgb(255 95 200 / 34%);
-}
-
-html[data-mode="world"]
-  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
-  :is(.form-pickup-overview, .form-pickup-sections > section)
-  > header
-  > p {
-  flex: 0 1 auto;
-  min-width: 0;
-  margin: 0;
-  color: var(--pc-lock);
-  font: 400 12px/1.4 var(--pc-hud);
-  letter-spacing: 0.18em;
 }
 
 /* Stat plates: the label, then the figure in Oxanium on a lit baseline. */
@@ -1098,22 +1001,81 @@ html[data-mode="world"]
   background: linear-gradient(90deg, rgb(240 207 134 / 7%), transparent 42%), var(--pc-plate);
 }
 
+/* The record's three kinds read by their shapes, not by captions
+   (2026-10-23): the powers are name-led tiles side by side where there is
+   room, the arms long plates with the blade's rule along their top, the
+   finisher the gold plate that closes the record. Their names stay for
+   assistive tech (aria-label on each group). */
 html[data-mode="world"]
   .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
   .form-pickup-sections
-  > section.is-finisher
-  > header
-  > span {
-  -webkit-text-stroke-color: var(--pc-gold);
+  > section.is-ability {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 248px), 1fr));
+}
+
+html[data-mode="world"]
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-sections
+  > section.is-ability
+  h3 {
+  color: color-mix(in srgb, var(--pc-lock) 28%, #ffffff);
+  font-size: 19px;
+}
+
+html[data-mode="world"]
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-sections
+  > section.is-arsenal
+  > div {
+  display: grid;
+  grid-template-columns: minmax(0, 12em) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 22px;
+  padding: 16px 18px 17px;
+  border-left: 1px solid var(--pc-line);
+  border-top: 2px solid var(--pc-lock);
+  border-radius: 0 0 2px 2px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-lock) 8%, transparent), transparent 64%),
+    var(--pc-plate);
+}
+
+html[data-mode="world"]
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-sections
+  > section.is-arsenal
+  > div
+  > h3 {
+  margin: 0;
 }
 
 html[data-mode="world"]
   .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
   .form-pickup-sections
   > section.is-finisher
-  > header
-  > p {
-  color: var(--pc-gold);
+  > div {
+  padding: 18px 20px 20px 22px;
+  border-color: rgb(240 207 134 / 30%);
+  border-left-width: 3px;
+}
+
+html[data-mode="world"]
+  .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-sections
+  > section.is-finisher
+  h3 {
+  color: #f7e6bd;
+  font-size: clamp(19px, 1.7vw, 23px);
+}
+
+@media (max-width: 760px) {
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-sections
+    > section.is-arsenal
+    > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ================================================================
@@ -1428,16 +1390,7 @@ html[data-mode="world"] .form-pickup-dialog.is-rexonance-dialog .rexonance-panel
 
 html[data-mode="world"]
   .form-pickup-dialog.is-rexonance-dialog
-  :is(
-    .form-pickup-heading > p,
-    .form-pickup-overview header span,
-    .form-pickup-overview header p,
-    .form-pickup-sections > section > header span,
-    .form-pickup-sections > section > header p,
-    .form-pickup-stats dt,
-    .form-pickup-layout > figure figcaption span,
-    .rider-call b
-  ) {
+  :is(.form-pickup-stats dt, .rider-call b) {
   font-size: 12px;
 }
 
@@ -1448,12 +1401,7 @@ html[data-mode="world"] .form-pickup-dialog.is-rexonance-dialog .form-pickup-hea
 
 html[data-mode="world"]
   .form-pickup-dialog.is-rexonance-dialog
-  :is(
-    .form-pickup-heading > em,
-    .rexonance-weapon-gallery > header small,
-    .rexonance-weapon-gallery > header > span,
-    .rexonance-weapon-grid figcaption small
-  ) {
+  :is(.form-pickup-heading > em, .rexonance-weapon-grid figcaption small) {
   font-size: 12px;
 }
 
@@ -1462,22 +1410,6 @@ html[data-mode="world"] .form-pickup-dialog.is-rexonance-dialog .form-pickup-hea
   font-size: max(12px, 0.34em);
 }
 
-html[data-mode="world"]
-  .form-pickup-dialog.is-rexonance-dialog
-  .form-pickup-layout
-  > figure
-  figcaption
-  b {
-  font-size: 13px;
-}
-
-/* The resonance gate that opens it: its two HUD lines were 6-8px. */
-html[data-mode="world"] .rexonance-gate .rexonance-gate-copy :is(small, span) {
-  max-width: calc(100vw - 32px);
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  line-height: 1.5;
-}
 
 /* The weapon frames' scan line holds still. */
 html[data-mode="world"]

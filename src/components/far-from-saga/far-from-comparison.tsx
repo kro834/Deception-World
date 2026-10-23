@@ -371,7 +371,6 @@ export function FarFromComparison() {
 
       <section className="ffs-panel" aria-labelledby="ffs-basic-title">
         <header className="ffs-panel-head">
-          <small lang="en">BASIC SPEC</small>
           <h3 id="ffs-basic-title">{BASIC_TABLE.title}</h3>
         </header>
         <div className="ffs-metric-grid" data-view={view} aria-live="polite" aria-atomic="false">
@@ -389,7 +388,6 @@ export function FarFromComparison() {
 
       <section className="ffs-panel ffs-panel-bench" aria-labelledby="ffs-bench-title">
         <header className="ffs-panel-head">
-          <small lang="en">PROVISIONAL INDEX</small>
           <h3 id="ffs-bench-title">{BENCHMARK_TABLE.title}</h3>
           <p className="ffs-bench-badges">
             <span className="ffs-provisional-tag">暫定指数</span>

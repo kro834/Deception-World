@@ -96,7 +96,9 @@ try {
       assert.ok(label.font >= 12);
     }
     if (width === 320) {
-      for (const text of ["ウルトラ", "ULTRA / 50 SEC"]) {
+      // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: a tab holds its
+      // form's name alone (the English code under it went).
+      for (const text of ["ウルトラ"]) {
         const label = labels.find((item) => item.text?.trim() === text);
         assert.ok(label, `320px ULTRA tab is missing ${text}`);
         assert.ok(

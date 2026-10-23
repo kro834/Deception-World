@@ -362,89 +362,6 @@ html[data-family="special"]
   text-wrap: pretty;
 }
 
-/* The existing LiquidLens remains the primary form control. This ledger
-   makes its place in the three-form sequence legible at a glance. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
-  display: grid;
-  gap: 9px;
-  width: min(100%, 780px);
-  margin: 0 auto clamp(24px, 3vw, 40px);
-  padding: 16px 18px;
-  contain: layout style;
-  border-block: 1px solid rgb(121 232 255 / 22%);
-  color: #eaf3f7;
-  background: rgb(4 10 17 / 62%);
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  color: #a8cbd4;
-  font: 500 11px / 1.4 var(--dx-hud);
-  letter-spacing: 0.15em;
-}
-
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.rxs-rexonance-page
-  .rxe-form-status-heading
-  span:last-child {
-  color: #f2d896;
-  white-space: nowrap;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 5px;
-  height: 3px;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
-  display: block;
-  background: rgb(121 232 255 / 17%);
-}
-
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.rxs-rexonance-page
-  .rxe-form-status-track
-  i.is-reached {
-  background: var(--rxs-stage-accent, #79e8ff);
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 3px 12px;
-  margin: 0;
-  font: 400 12px / 1.5 var(--dx-body);
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p > span {
-  color: #acbac2;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p strong {
-  color: #f2f7fb;
-  font: 700 17px / 1.4 var(--dx-display);
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p small {
-  color: var(--rxs-stage-accent, #79e8ff);
-  font: 500 11px / 1.4 var(--dx-hud);
-  letter-spacing: 0.08em;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p em {
-  flex-basis: 100%;
-  color: #d5e3e9;
-  font: 500 13px / 1.5 var(--dx-display);
-  font-style: normal;
-}
-
 /* The transformation guide and replay footer are direct children of the
    desktop page grid. Give them explicit rows so DOM, chapter navigation and
    the visual sequence remain the same. */
@@ -786,21 +703,12 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a em {
     font-size: 11px;
   }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
-    padding: 14px 12px;
-  }
 }
 
 @media (forced-colors: active) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a,
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a {
     border: 1px solid CanvasText;
     background: Canvas;
-  }
-
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
-    background: CanvasText;
   }
 }
 
@@ -853,9 +761,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movi
   text-transform: uppercase;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-kicker > span + span {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movie-kicker > span {
   color: #b9cbd6;
-  font: 500 11px / 1.3 var(--dx-display);
+  font: 500 12px / 1.3 var(--dx-display);
   letter-spacing: 0.1em;
   text-transform: none;
 }

@@ -30,13 +30,14 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
       onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary>
-        <span lang="en">FORM COMPARISON</span>
         <strong>三つの形態を並べて比較</strong>
-        {/* LAYOUT (2026-10-21): the drawer's bar lists what it holds. */}
+        {/* LAYOUT (2026-10-21): the drawer's bar shows what it holds — the
+            three forms in their lights, named as the tabs name them (owner,
+            2026-10-23: no FORM COMPARISON eyebrow, no English codes). */}
         <span className="rxe-comparison-codes" aria-hidden="true">
           {forms.map((form) => (
             <b key={form.key} style={{ ["--rxe-code-accent" as string]: form.accent }}>
-              {form.code}
+              {form.label}
             </b>
           ))}
         </span>
@@ -53,7 +54,6 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
             >
               <p>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <b lang="en">{form.code}</b>
               </p>
               <img
                 src={form.image}

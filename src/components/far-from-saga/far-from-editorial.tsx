@@ -1,53 +1,33 @@
-import { FAR_FROM_SAGA } from "@/components/final-stage/final-stage-data";
-import { FAR_FROM_SAGA_STAGE_ORDER, type FarFromStageKey } from "@/lib/far-from-saga-artwork";
-import { withSlashBreaks } from "./far-from-phrase";
-
 /* FAR FROM SAGA — the page's editorial furniture (2026-10-22 redesign).
 
-   The same pieces the Rexonance site carries (rexonance-editorial.tsx):
-   the hero's two doors, the CONTENTS map under the hero, the key visual's
-   slate and read-outs, and the form-sequence status beside the stage
-   rail. Static markup only: real anchors, no listeners, no startup work.
-   Every line of copy here is the site's own plain Japanese; the record's
-   figures (the read-outs) come from the owner's spec table. */
+   The same pieces the Rexonance site carries (rexonance-editorial.tsx): the
+   hero's two doors and the chapter map under the hero. Static markup only:
+   real anchors, no listeners, no startup work.
+
+   Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。レイアウトに
+   説明させるようにUIリライトして。」 The map is five numbered doors — the
+   numeral and the chapter's name, as the bar numbers them; its CONTENTS
+   heading, count, codes and descriptions went, and so did the key visual's
+   slate and read-outs and the form status beside the rail. */
 
 /** The five chapters as the page numbers them (the Rexonance site's five,
- * owner 2026-10-23), each with the sections it holds. The codes match the
- * side menu's. */
+ * owner 2026-10-23). */
 export const FAR_FROM_CHAPTERS = [
-  {
-    href: "#overview",
-    number: "01",
-    code: "OVERVIEW",
-    label: "概要・性能",
-    detail: "変身音声と概要、スペック、比較コンソールと設定資料の全文",
-  },
-  { href: "#p16", number: "02", code: "P16", label: "演算加速機構", detail: "第16世代演算加速機構" },
-  { href: "#suitup", number: "03", code: "SUIT-UP", label: "変身", detail: "スクロールで装着、ミドルからウルトラまで" },
-  { href: "#stages", number: "04", code: "5 STAGES", label: "形態", detail: FAR_FROM_SAGA.stagesLine },
-  {
-    href: "#theories",
-    number: "05",
-    code: "SYSTEM",
-    label: "中核機構",
-    detail: "4つの新規理論・中核機構、装甲・OS、能力、武装、必殺技",
-  },
+  { href: "#overview", number: "01", label: "概要・性能" },
+  { href: "#p16", number: "02", label: "演算加速機構" },
+  { href: "#suitup", number: "03", label: "変身" },
+  { href: "#stages", number: "04", label: "形態" },
+  { href: "#theories", number: "05", label: "中核機構" },
 ] as const;
 
 /** Static page map under the hero: real anchors, no scroll listeners. */
 export function FarFromChapterMap() {
   return (
     <nav className="rxs-chapter-index ffs-chapter-map" aria-label="ファーフロムサーガの見どころ">
-      <p className="ffs-chapter-map-heading">
-        <span lang="en">CONTENTS</span>
-        <small>01 — 05</small>
-      </p>
       {FAR_FROM_CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>
           <b aria-hidden="true">{chapter.number}</b>
-          <small lang="en">{chapter.code}</small>
           <span>{chapter.label}</span>
-          <em>{withSlashBreaks(chapter.detail)}</em>
           <i aria-hidden="true">↗</i>
         </a>
       ))}
@@ -68,51 +48,6 @@ export function FarFromHeroRail() {
         <i aria-hidden="true">↗</i>
       </a>
     </div>
-  );
-}
-
-/** The key visual's slate: what the frame holds (decorative). */
-export function FarFromStageSlate() {
-  return (
-    <span className="ffs-stage-slate">
-      <b>01</b>
-      <span>
-        ミドル <span lang="en">/ STANDARD</span>
-      </span>
-      <small lang="en">KEY VISUAL</small>
-    </span>
-  );
-}
-
-/** Three read-outs beside the key visual, from the owner's spec table
- * (パンチ力, ジャンプ力, 認識・制御の『P16』); decorative, the table below
- * is the record. */
-export function FarFromCallouts() {
-  const spec = (dt: string) => FAR_FROM_SAGA.specs.find((row) => row.dt === dt)?.dd ?? "";
-  return (
-    <span className="ffs-callouts">
-      <span className="ffs-callout is-punch">
-        <span>
-          <i />
-          <b>{spec("パンチ力")}</b>
-          <em lang="en">PUNCH</em>
-        </span>
-      </span>
-      <span className="ffs-callout is-jump">
-        <span>
-          <i />
-          <b>{spec("ジャンプ力")}</b>
-          <em lang="en">JUMP</em>
-        </span>
-      </span>
-      <span className="ffs-callout is-core">
-        <span>
-          <i />
-          <b>P16</b>
-          <em lang="en">PROCESSING CORE</em>
-        </span>
-      </span>
-    </span>
   );
 }
 
@@ -148,34 +83,5 @@ export function FarFromAperture() {
         <path d="M186 762h348m-300 8h252m-196 8h140" />
       </g>
     </svg>
-  );
-}
-
-/** Read-only context beside the stage rail; the tablist owns input. */
-export function FarFromFormStatus({ stage }: { stage: FarFromStageKey }) {
-  const index = FAR_FROM_SAGA_STAGE_ORDER.indexOf(stage) + 1;
-  const form = FAR_FROM_SAGA.stages[stage];
-  return (
-    <div
-      className="ffs-form-status"
-      data-stage={stage}
-      style={{ ["--ffs-accent" as string]: form.accent }}
-    >
-      <div className="ffs-form-status-heading">
-        <span lang="en">FORM SEQUENCE</span>
-        <span>
-          {String(index).padStart(2, "0")} / {String(FAR_FROM_SAGA_STAGE_ORDER.length).padStart(2, "0")}
-        </span>
-      </div>
-      <div className="ffs-form-status-track" aria-hidden="true">
-        {FAR_FROM_SAGA_STAGE_ORDER.map((key, at) => (
-          <i key={key} className={at < index ? "is-reached" : ""} />
-        ))}
-      </div>
-      <p>
-        <span>選択中の形態</span>
-        <strong>{form.label}</strong>
-      </p>
-    </div>
   );
 }

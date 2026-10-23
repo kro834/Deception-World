@@ -25,14 +25,7 @@ import { FarFromSuitUp } from "./far-from-suitup";
 import { FarFromFormComparison } from "./far-from-form-comparison";
 import { FAR_FROM_STAGE_CALL_MS, FarFromFormCall, FarFromSwitchFx } from "./far-from-stage-switch";
 import { FarFromInterfaceDeploy } from "./far-from-ultra-deploy";
-import {
-  FarFromAperture,
-  FarFromCallouts,
-  FarFromChapterMap,
-  FarFromFormStatus,
-  FarFromHeroRail,
-  FarFromStageSlate,
-} from "./far-from-editorial";
+import { FarFromAperture, FarFromChapterMap, FarFromHeroRail } from "./far-from-editorial";
 import { withCallBreaks, withSlashBreaks } from "./far-from-phrase";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
@@ -126,7 +119,9 @@ function CallOuts({ calls, label }: { calls: readonly string[]; label: string })
   );
 }
 
-/** The record's articles (theories, armour and OS, authority): plates. */
+/** The record's articles (theories, armour and OS, authority): plates, each
+ * marked by its numeral alone (owner, 2026-10-23: no secondary labels — the
+ * "CORE 01" codes that restated the numeral went). */
 function Articles({
   items,
   columns,
@@ -140,9 +135,8 @@ function Articles({
     <div className={`ffs-articles ffs-articles-${columns}`} role="list" aria-label={label}>
       {items.map((item, index) => (
         <article key={item.title} className="rxs-reveal" role="listitem">
-          <header>
+          <header aria-hidden="true">
             <span>{String(index + 1).padStart(2, "0")}</span>
-            {item.code ? <small lang="en">{item.code}</small> : null}
           </header>
           <h3 className="ffs-phrase">{withSlashBreaks(item.title)}</h3>
           {item.body.map((paragraph, paragraphIndex) => (
@@ -517,12 +511,13 @@ export function FarFromSaga() {
           <i />
           <i />
         </div>
+        {/* Owner (2026-10-23): no secondary labels — the name leads the copy
+            (no eyebrow, no Latin duplicate: the FAR FROM ghost behind it is
+            the Latin mark), the five forms run on one etched line, and the
+            stage holds the figure alone (no slate, no read-outs: the spec
+            table below is the record). */}
         <div className="rxs-hero-copy">
-          <p lang="en">
-            FINAL STAGE <span className="rxs-hero-kicker-tail">/ SPECIAL SITE</span>
-          </p>
           <h1 id="ffs-title">
-            <span lang="en">{FAR_FROM_SAGA.en}</span>
             <DisplayName value={FAR_FROM_SAGA.name} />
           </h1>
           <p className="rxs-hero-lede">
@@ -532,7 +527,6 @@ export function FarFromSaga() {
             </span>
           </p>
           <p className="ffs-stages-line">
-            <span lang="en">5 STAGES</span>
             <span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>
           </p>
           <FarFromHeroRail />
@@ -542,7 +536,6 @@ export function FarFromSaga() {
           </span>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
-          <FarFromStageSlate />
           <FarFromAperture />
           <i className="ffs-ring is-ice" />
           <i className="ffs-ring is-gold" />
@@ -558,10 +551,11 @@ export function FarFromSaga() {
             decoding="async"
             fetchPriority="high"
           />
-          <FarFromCallouts />
         </div>
+        {/* The cue is its line: the way down; its words name it for
+            assistive tech only (as on the Rexonance page). */}
         <a className="rxs-scroll-cue" href="#overview">
-          <span>まず、概要から。</span>
+          <span className="visually-hidden">まず、概要から。</span>
           <i aria-hidden="true" />
         </a>
       </section>
@@ -575,15 +569,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-overview-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <small className="ffs-index" aria-hidden="true">
-            <b>01</b>
-            {" / 05"}
-          </small>
-          <p lang="en">OVERVIEW</p>
-          <h2 id="ffs-overview-title">届かない距離は、もう無い。</h2>
-          <span>
-            ファイナルステージ限定の超究極フォーム。変身音声と、記録の概要を掲載します。
-          </span>
+          <h2 id="ffs-overview-title">届かない<wbr />距離は、<wbr />もう<wbr />無い。</h2>
         </header>
         <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
         <div className="ffs-copy rxs-reveal">
@@ -600,8 +586,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-specs-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">OVERVIEW / SPECS</p>
-          <h2 id="ffs-specs-title">数字が、追いつかない。</h2>
+          <h2 id="ffs-specs-title">数字が、<wbr />追いつかない。</h2>
           <span>標準稼働時の数値です。</span>
         </header>
         <dl className="ffs-specs rxs-reveal" aria-label="ファーフロムサーガ スペック">
@@ -621,11 +606,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-performance-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">OVERVIEW / PERFORMANCE</p>
-          <h2 id="ffs-performance-title">レクソナンス？通過点だ。</h2>
-          <span>
-            ファーフロムサーガを、ヴィンクルムサーガ、エクスプリームサーガ、レクソナンスサーガと比較します。
-          </span>
+          <h2 id="ffs-performance-title">レクソナンス？<wbr />通過点だ。</h2>
         </header>
         <FarFromComparison />
       </section>
@@ -638,9 +619,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-report-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">OVERVIEW / REPORT</p>
-          <h2 id="ffs-report-title">差は、桁で見せる。</h2>
-          <span>性能比較の設定資料を、全文で掲載します。</span>
+          <h2 id="ffs-report-title">差は、<wbr />桁で<wbr />見せる。</h2>
         </header>
         <FarFromReport />
       </section>
@@ -648,16 +627,7 @@ export function FarFromSaga() {
       {/* 02 — #p16: the owner's two P16 chapters (far-from-p16.tsx). */}
       <section id="p16" className="rxs-section ffs-p16" aria-labelledby="ffs-p16-title">
         <header className="rxs-section-heading rxs-reveal">
-          <small className="ffs-index" aria-hidden="true">
-            <b>02</b>
-            {" / 05"}
-          </small>
-          <p lang="en">PROCESSING CORE / P16</p>
-          <h2 id="ffs-p16-title">韋駄天？遅過ぎる</h2>
-          <span>
-            レクソナンスサーガの『P14 Extreme Tuning』を基礎とした、
-            <span className="ffs-nowrap">第16世代</span>演算加速機構です。
-          </span>
+          <h2 id="ffs-p16-title">韋駄天？<wbr />遅過ぎる</h2>
         </header>
         <FarFromP16 />
       </section>
@@ -669,13 +639,7 @@ export function FarFromSaga() {
       {/* 04 — the five forms. */}
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
-          <small className="ffs-index" aria-hidden="true">
-            <b>04</b>
-            {" / 05"}
-          </small>
-          <p lang="en">FIVE STAGES</p>
-          <h2 id="ffs-stages-title">選べ。どこまで遠くへ行くか。</h2>
-          <span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>
+          <h2 id="ffs-stages-title">選べ。<wbr />どこまで<wbr />遠くへ<wbr />行くか。</h2>
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
@@ -707,10 +671,11 @@ export function FarFromSaga() {
               </button>
             ))}
           </div>
-          <p id="ffs-stage-hint" className="rxs-stage-hint">
+          {/* The rail says what it is; its gestures stay named for assistive
+              tech (owner, 2026-10-23: no secondary labels). */}
+          <p id="ffs-stage-hint" className="rxs-stage-hint visually-hidden">
             タップ・長押し・左右スライド・矢印キーで切り替え
           </p>
-          <FarFromFormStatus stage={stage} />
 
           <div
             ref={stagePanelRef}
@@ -776,13 +741,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-theories-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <small className="ffs-index" aria-hidden="true">
-            <b>05</b>
-            {" / 05"}
-          </small>
-          <p lang="en">SYSTEM</p>
-          <h2 id="ffs-theories-title">離れた力を、一つの拳に。</h2>
-          <span>FARFROM DRIVEをはじめとする、4つの新規理論・中核機構。</span>
+          <h2 id="ffs-theories-title">離れた<wbr />力を、<wbr />一つの<wbr />拳に。</h2>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
@@ -794,9 +753,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-system-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">SYSTEM / ARMOR & OS</p>
-          <h2 id="ffs-system-title">鎧も頭脳も、最終版。</h2>
-          <span>浮遊ユニット『ファーフロムビット』と、統合OS『SA-GA OS 6.1』。</span>
+          <h2 id="ffs-system-title">鎧も<wbr />頭脳も、<wbr />最終版。</h2>
         </header>
         <Articles
           items={[FAR_FROM_SAGA.bits, FAR_FROM_SAGA.os]}
@@ -812,9 +769,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-authority-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">SYSTEM / ABILITY</p>
-          <h2 id="ffs-authority-title">究極が極まる</h2>
-          <span>FAR FROM DEUSと、Exception World。</span>
+          <h2 id="ffs-authority-title">究極が<wbr />極まる</h2>
         </header>
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="能力" />
       </section>
@@ -826,9 +781,7 @@ export function FarFromSaga() {
         aria-labelledby="ffs-arsenal-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">SYSTEM / WEAPONS</p>
-          <h2 id="ffs-arsenal-title">届く場所すべてが、射程。</h2>
-          <span>追加武装は全10種。</span>
+          <h2 id="ffs-arsenal-title">届く<wbr />場所すべてが、<wbr />射程。</h2>
         </header>
         <ul className="ffs-weapons rxs-reveal" aria-label="ファーフロムサーガ 追加武装">
           {FAR_FROM_SAGA.arsenal.map((weapon, index) => (
@@ -848,14 +801,11 @@ export function FarFromSaga() {
         aria-labelledby="ffs-finishers-title"
       >
         <header className="rxs-section-heading rxs-reveal">
-          <p lang="en">SYSTEM / FINISHER</p>
-          <h2 id="ffs-finishers-title">終幕は、彼方から。</h2>
-          <span>最高位必殺技は2種。発動音声とともに掲載します。</span>
+          <h2 id="ffs-finishers-title">終幕は、<wbr />彼方から。</h2>
         </header>
         <div className="ffs-finisher-list">
           {FAR_FROM_SAGA.finishers.map((finisher) => (
             <article key={finisher.name} className="ffs-finisher rxs-reveal">
-              <small lang="en">{finisher.code}</small>
               <h3>{finisher.name}</h3>
               <CallOuts calls={finisher.calls} label={`${finisher.name} 発動音声`} />
               <div className="ffs-copy">
@@ -891,7 +841,6 @@ export function FarFromSaga() {
           </a>
         </p>
         <div>
-          <p lang="en">FAR FROM SAGA / FINAL STAGE</p>
           <h2>
             ファーフロムサーガの活躍は、
             <br />

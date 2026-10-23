@@ -19,6 +19,16 @@ const styles = readFileSync(
   new URL("../src/styles-world/rexonance-pickup.css", import.meta.url),
   "utf8",
 );
+// Owner (2026-10-23): the covers' art (Rexonance's among them) lives in form-signature-gate.tsx,
+// their timing in form-signature-state.ts; FormPickup keeps the lifecycle.
+const gateArt = readFileSync(
+  new URL("../src/components/world/form-signature-gate.tsx", import.meta.url),
+  "utf8",
+);
+const gateSpec = readFileSync(
+  new URL("../src/components/world/form-signature-state.ts", import.meta.url),
+  "utf8",
+);
 function readParts(path) {
   const directory = new URL(`../source-parts/${path}/`, import.meta.url);
   return readdirSync(directory)
@@ -97,8 +107,13 @@ test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.match(pickup, /gatePending\.current = true/);
   assert.match(pickup, /new window\.Image\(\)/);
   assert.match(pickup, /preload\.decode\?\.\(\)/);
-  assert.match(pickup, /window\.setTimeout\(finishGate, reducedMotion \? 180 : 1400\)/);
-  assert.match(pickup, /event\.animationName !== "rexonanceGateLife"/);
+  assert.match(
+    pickup,
+    /window\.setTimeout\(\s*finishGate,\s*reducedMotion \? 180 : economy \? gate\.calmCap : gate\.cap,?\s*\)/,
+  );
+  assert.match(gateSpec, /rexonance: \{\s*life: "rexonanceGateLife",\s*cap: 1400,/);
+  assert.match(gateArt, /event\.animationName !== life/);
+  assert.match(pickup, /life=\{gate\.life\}/);
   assert.match(pickup, /createPortal\(/);
   assert.match(pickup, /if \(gatePending\.current\) return/);
   assert.match(pickup, /aria-busy=\{gateActive\}/);
@@ -106,11 +121,11 @@ test("Rexonance opens through an isolated cyan-pink spiral gate", () => {
   assert.doesNotMatch(pickup, /fetchPriority=\{isRexonance \? "high" : "auto"\}/);
   assert.doesNotMatch(pickup, /loading=\{isRexonance \? "eager" : "lazy"\}/);
   assert.match(pickup, /preload\.fetchPriority = "high"/);
-  assert.match(pickup, /rexonance-gate-spiral is-cyan/);
-  assert.match(pickup, /rexonance-gate-spiral is-pink/);
-  assert.match(pickup, /rexonance-gate-stars/);
-  assert.match(pickup, /rexonance-gate-prism/);
-  assert.match(pickup, /rexonance-gate-horizon/);
+  assert.match(gateArt, /rexonance-gate-spiral is-cyan/);
+  assert.match(gateArt, /rexonance-gate-spiral is-pink/);
+  assert.match(gateArt, /rexonance-gate-stars/);
+  assert.match(gateArt, /rexonance-gate-prism/);
+  assert.match(gateArt, /rexonance-gate-horizon/);
   assert.match(pickup, /className="rexonance-weapon-gallery"/);
   assert.match(styles, /\.is-rexonance-pickup/);
   assert.match(styles, /\.is-rexonance-dialog/);
@@ -141,5 +156,5 @@ test("generated and reconstructable source retain the Rexonance feature markers"
     assert.match(source, /rexonance/i);
   }
   assert.match(reconstructedRider, /rider-rexonance-saga-pickup-20260922\.webp/);
-  assert.match(reconstructedPickup, /rexonance-gate-spiral is-cyan/);
+  assert.match(reconstructedPickup, /<FormGate\b/);
 });
