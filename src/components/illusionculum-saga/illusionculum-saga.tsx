@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { withWordBreaks } from "@/lib/name-breaks";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
 import { FormSlider } from "@/components/special/form-slider";
@@ -181,7 +182,8 @@ function Calls({
 /** The four forms as the shared slider's items (each its own light). */
 const FORM_ITEMS = ILLUSIONCULUM_FORM_ORDER.map((key) => ({
   key,
-  label: ILLUSIONCULUM_FORMS[key].label,
+  // The name breaks only at its seams (イリュージョン｜クルム), never mid-word.
+  label: withWordBreaks(ILLUSIONCULUM_FORMS[key].label),
   accent: ILLUSIONCULUM_FORMS[key].accent,
 }));
 

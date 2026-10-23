@@ -897,3 +897,50 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-mo
     visibility: hidden;
   }
 }
+
+/* ---------- Brush-up (2026-10-24, after Rexonance's runway) ----------
+   On the stacked tiers the lit call is the stage's headline (set at
+   Rexonance's scale over the figure), and the stamp the scroll ends on
+   moves to the left edge, clear of the movie's pill and the Zeus button. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 760px),
+  (prefers-reduced-motion: no-preference) and (forced-colors: none) and (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line {
+    padding: 22px 0 0;
+    font-size: clamp(24px, 6.6vw, 40px);
+    line-height: 1.12;
+    letter-spacing: 0.02em;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line::before {
+    top: 0;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup[data-rzn-state]
+    .rzn-line:is(:nth-child(3), :nth-child(4)) {
+    font-size: clamp(18px, 4.9vw, 30px);
+  }
+}
+
+@media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-hud {
+    right: auto;
+    left: var(--rzn-gutter);
+  }
+
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b {
+    font-size: clamp(15px, 4vw, 20px);
+  }
+}
