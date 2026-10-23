@@ -104,6 +104,45 @@ function SpecTable() {
   );
 }
 
+/** The figures that read at a glance (the Extreme site's read-out cards):
+ * the record's own ミドル／ウルトラ values, large, each pair drawn as two
+ * bars on one scale (ウルトラ's the longer). Decorative over the table
+ * below, which stays the record. */
+const READOUT_KEYS = ["パンチ力", "キック力", "ジャンプ力"] as const;
+function SpecReadouts() {
+  const rows = META_UNITAS_SAGA.specs.filter(
+    (row) => (READOUT_KEYS as readonly string[]).includes(row.key) && "middle" in row,
+  ) as readonly { key: string; middle: string; ultra: string }[];
+  return (
+    <div className="mus-readouts rxs-reveal" aria-hidden="true">
+      {rows.map((row) => {
+        const middle = Number.parseFloat(row.middle);
+        const ultra = Number.parseFloat(row.ultra);
+        const unit = row.middle.replace(/^[\d.]+/, "");
+        return (
+          <div key={row.key} className="mus-readout">
+            <p className="mus-readout-key">{row.key}</p>
+            <p className="mus-readout-values">
+              <b>
+                {String(middle)}
+                <small>{unit}</small>
+              </b>
+              <b className="is-ultra">
+                {String(ultra)}
+                <small>{unit}</small>
+              </b>
+            </p>
+            <i
+              className="mus-readout-bar"
+              style={{ ["--share" as string]: (middle / ultra).toFixed(3) }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /** The key visual, whole; thin orange boundaries trace across it once. */
 function HeroVisual() {
   const image = metaUnitasImage("middle");
@@ -390,6 +429,7 @@ export function MetaUnitasSaga() {
         <h2 id="mus-specs-title" className="visually-hidden">
           スペック
         </h2>
+        <SpecReadouts />
         <SpecTable />
       </section>
 
