@@ -331,11 +331,21 @@ test("the page follows the Rexonance structure: numbered bar, split hero, CONTEN
     "<FarFromHeroRail />",
     'className="ffs-mark" aria-hidden="true"',
     '<a className="rxs-scroll-cue" href="#overview">\n          <span className="visually-hidden">まず、概要から。</span>',
-    "{FAR_FROM_SAGA.stagesLine}",
+    '<span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>',
   ])
     assert.ok(hero.includes(piece), piece);
   for (const gone of ["<FarFromStageSlate", "<FarFromCallouts", "SPECIAL SITE", "5 STAGES", "FAR_FROM_SAGA.en"])
     assert.ok(!hero.includes(gone), gone);
+  const phrase = read("src/components/far-from-saga/far-from-phrase.tsx");
+  assert.match(phrase, /export function withSlashBreaks\(text: string\): ReactNode\[\]/);
+  assert.match(phrase, /className="ffs-phrase-unit"/);
+  assert.doesNotMatch(phrase, /<wbr/);
+  // The calls' chips break after a 「！」 alone (FAR FROM！ never splits at its space).
+  assert.match(phrase, /export function withCallBreaks\(call: string\): ReactNode\[\]/);
+  assert.match(component, /<b key=\{`\$\{call\}-\$\{index\}`\} role="listitem">\s*\{withCallBreaks\(call\)\}/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）: the map's doors carry no detail line.
+  assert.match(component, /<h3 className="ffs-phrase">\{withSlashBreaks\(item\.title\)\}<\/h3>/);
+  assert.match(styles, /\.ffs-page \.ffs-phrase-unit \{\s*white-space: nowrap;\s*\}/);
   assert.match(editorial, /<a className="ffs-hero-primary" href="#suitup">/);
   assert.match(editorial, /<a className="ffs-hero-secondary" href="#stages">/);
   // No figure is typed into the furniture: the record holds them.
@@ -728,7 +738,9 @@ test("ウルトラ is one of #suitup's forms: the selector after the runway pick
   // Owner (2026-10-23): 「変身スクロールの後にミドルからウルトラまでのセレクターを置いて、
   // 一気にマックスまで変身したりウルトラが別枠なのを修正し、レクソナンスの特設ページと同様の仕組み」.
   assert.doesNotMatch(sections, /\["ultra", "ウルトラ", "ULTRA"\]/);
-  assert.match(sections, /\["suitup", "変身シークエンス", "SUIT-UP"\],\s*\["stages"/);
+  // The side menu names the chapters as the bar and CONTENTS do (変身, and
+  // 中核機構 under its CONTENTS code SYSTEM).
+  assert.match(sections, /\["suitup", "変身", "SUIT-UP"\],\s*\["stages", "形態", "5 STAGES"\],\s*\["theories", "中核機構", "SYSTEM"\]/);
   assert.doesNotMatch(component, /FarFromUltra|id="ultra"/);
   assert.doesNotMatch(styles, /styles-far-from-ultra\.css/);
   const suitupSource = read("src/components/far-from-saga/far-from-suitup.tsx");
@@ -1700,7 +1712,14 @@ test("the cyber type: no Mincho, one route-only display face as text= subsets af
   assert.match(fonts, /&text=\$\{encodeURIComponent\(text\)\}/);
   assert.match(fonts, /requestIdleCallback/);
   assert.match(fonts, /saveData === true/);
-  assert.match(component, /useEffect\(\(\) => mountFarFromFonts\(pageRef\.current\), \[\]\)/);
+  // Seeded with the five forms' names, so a switch never fetches a refreshed
+  // subset that re-sets every display label once it lands (a layout shift).
+  assert.match(
+    component,
+    /useEffect\(\(\) => mountFarFromFonts\(pageRef\.current, FAR_FROM_SAGA\.stagesLine\), \[\]\)/,
+  );
+  assert.match(fonts, /export function mountFarFromFonts\(root: HTMLElement \| null, seed = ""\)/);
+  assert.match(fonts, /for \(const char of seed\)/);
   assert.doesNotMatch(route, /M\+PLUS|far-from-fonts/, "no head link: nothing blocks first paint");
   assert.doesNotMatch(read("src/lib/site-fonts.ts"), /M\+PLUS/, "never site-wide");
 });

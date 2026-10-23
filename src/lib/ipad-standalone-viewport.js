@@ -8,17 +8,18 @@ export const IPAD_STANDALONE_VIEWPORT_SCRIPT = `(function () {
     Boolean(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   if (!ipad) return;
   function reserveStatusArea() {
-    var viewport = document.querySelector('meta[name="viewport"]');
-    if (!viewport) return;
-    var content = viewport.getAttribute("content") || "";
-    var contained = /viewport-fit\\s*=/i.test(content)
-      ? content.replace(/viewport-fit\\s*=\\s*[^,;\\s]+/i, "viewport-fit=contain")
-      : content + ", viewport-fit=contain";
-    if (contained !== content) viewport.setAttribute("content", contained);
+    var viewports = document.querySelectorAll('meta[name="viewport"]');
+    viewports.forEach(function (viewport) {
+      var content = viewport.getAttribute("content") || "";
+      var contained = /viewport-fit\\s*=/i.test(content)
+        ? content.replace(/viewport-fit\\s*=\\s*[^,;\\s]+/i, "viewport-fit=contain")
+        : content + ", viewport-fit=contain";
+      if (contained !== content) viewport.setAttribute("content", contained);
+    });
   }
   reserveStatusArea();
-  // The router may replace head metadata on soft navigation. Reapply in the
-  // mutation microtask, without changing scroll positions or creating a loop.
+  // The router may replace or add viewport metadata on soft navigation. Align
+  // every viewport tag in the mutation microtask without creating a loop.
   if (window.MutationObserver) {
     new window.MutationObserver(reserveStatusArea).observe(document.head, {
       subtree: true, childList: true, attributes: true, attributeFilter: ["content"]

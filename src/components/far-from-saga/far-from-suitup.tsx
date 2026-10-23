@@ -153,8 +153,9 @@ function FarFromAssemblyGuide({ runwayRef }: { runwayRef: RefObject<HTMLDivEleme
           ))}
         </ol>
         <ol aria-label="変身音声">
-          {FAR_FROM_SAGA.calls.map((call) => (
-            <li key={call}>{call}</li>
+          {/* The call opens and closes on FAR FROM DEUS！: keyed by place. */}
+          {FAR_FROM_SAGA.calls.map((call, index) => (
+            <li key={`${index}-${call}`}>{call}</li>
           ))}
         </ol>
         <p role="status" aria-live="polite" aria-atomic="true">
@@ -376,44 +377,40 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
           role="tabpanel"
           aria-labelledby={`ffs-ending-tab-${stage}`}
         >
-          {/* The frame holds the route and the ways to watch it; the ウルトラ
-              note reads under it, so its reserved space is the gap before
-              the next chapter, never a hole inside the frame. */}
-          <div className="ffs-ending-frame">
-            {/* Forms are named in katakana only (owner, 2026-10-23). */}
-            <ol className="ffs-ending-route" aria-label="移行の順序">
-              {FAR_FROM_ASSEMBLY_FORMS.map((key, index) => (
-                <li
-                  key={key}
-                  data-reached={index <= reached || undefined}
-                  data-current={index === reached || undefined}
-                  style={{ ["--ffs-node" as string]: FAR_FROM_SAGA.stages[key].accent }}
-                >
-                  <span>{FAR_FROM_SAGA.stages[key].label}</span>
-                </li>
-              ))}
-            </ol>
-            {/* The route says it on screen; the sentence says it to assistive tech. */}
-            <p className="ffs-ending-line visually-hidden">{endingLine(stage)}</p>
-            <div className="ffs-assembly-controls">
-              <button type="button" onClick={() => watchEnding(runwayRef.current)}>
-                {form.label}への変身を見る
-              </button>
-              <a href="#suitup">最初から装着を確認</a>
+          {/* Forms are named in katakana only (owner, 2026-10-23). */}
+          <ol className="ffs-ending-route" aria-label="移行の順序">
+            {FAR_FROM_ASSEMBLY_FORMS.map((key, index) => (
+              <li
+                key={key}
+                data-reached={index <= reached || undefined}
+                data-current={index === reached || undefined}
+                style={{ ["--ffs-node" as string]: FAR_FROM_SAGA.stages[key].accent }}
+              >
+                <span>{FAR_FROM_SAGA.stages[key].label}</span>
+              </li>
+            ))}
+          </ol>
+          {/* The route says it on screen; the sentence says it to assistive tech. */}
+          <p className="ffs-ending-line visually-hidden">{endingLine(stage)}</p>
+          {/* ウルトラ's note, only with ウルトラ: the panel is as tall as its
+              form's words (a blank reserved for the note stood under every
+              other form's one line). A switch made from #stages, below, keeps
+              that panel where it was (far-from-saga.tsx measures it across
+              the commit), so the page never jumps, with or without scroll
+              anchoring. */}
+          {stage === "ultra" ? (
+            <div className="ffs-ending-ultra">
+              <p>
+                マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
+              </p>
+              <p className="ffs-note">補助インターフェースの表示内容はイメージです。</p>
             </div>
-          </div>
-          {/* The ウルトラ note keeps its place for every form (hidden, not
-              removed): #suitup's height never changes with the selected
-              form, so Safari (no scroll anchoring) never jumps on a switch. */}
-          <div
-            className="ffs-ending-ultra"
-            data-hidden={stage !== "ultra" || undefined}
-            aria-hidden={stage !== "ultra" || undefined}
-          >
-            <p>
-              マックスから移行する、60秒間の最上位形態。全身が白に染まった後、ウルトラ専用のナノマシンが追加機構を生成し、腕の外側などに補助インターフェースが展開します。
-            </p>
-            <p className="ffs-note">補助インターフェースの表示内容はイメージです。</p>
+          ) : null}
+          <div className="ffs-assembly-controls">
+            <button type="button" onClick={() => watchEnding(runwayRef.current)}>
+              {form.label}への変身を見る
+            </button>
+            <a href="#suitup">最初から装着を確認</a>
           </div>
         </div>
       </div>

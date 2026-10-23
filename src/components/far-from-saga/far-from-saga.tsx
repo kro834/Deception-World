@@ -26,6 +26,8 @@ import { FarFromFormComparison } from "./far-from-form-comparison";
 import { FAR_FROM_STAGE_CALL_MS, FarFromFormCall, FarFromSwitchFx } from "./far-from-stage-switch";
 import { FarFromInterfaceDeploy } from "./far-from-ultra-deploy";
 import { FarFromAperture, FarFromChapterMap, FarFromHeroRail } from "./far-from-editorial";
+import { withCallBreaks, withSlashBreaks } from "./far-from-phrase";
+import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 
 /* FAR FROM SAGA special site (owner's record of 2026-10-22; redesigned on
    the Rexonance / Extreme structure, 2026-10-22).
@@ -97,12 +99,20 @@ const STAGE_LINK = /^#stages-(middle|high|xhigh|max|ultra)$/;
 /** Values that run long (the processors, the recognisers) read a size down. */
 const LONG_SPEC = 12;
 
+/** The pictures a switch can call for, warmed in the rail's order after the
+ * hero's ミドル: the three middle forms, then ウルトラ's base (what the panel
+ * shows first where motion is allowed) and ウルトラ painted. */
+const STAGE_WARM_ORDER = ["high", "xhigh", "max", "ultraBase", "ultra"] as const;
+const STAGE_WARM_ART = { ...FAR_FROM_SAGA_ARTWORK, ultraBase: FAR_FROM_SAGA_ULTRA_BASE };
+
+/** The record's calls as chips; a chip's line breaks after a 「！」 alone,
+ * so FAR FROM！ never splits at its space on a phone. */
 function CallOuts({ calls, label }: { calls: readonly string[]; label: string }) {
   return (
     <div className="ffs-calls" role="list" aria-label={label}>
       {calls.map((call, index) => (
         <b key={`${call}-${index}`} role="listitem">
-          {call}
+          {withCallBreaks(call)}
         </b>
       ))}
     </div>
@@ -128,7 +138,7 @@ function Articles({
           <header aria-hidden="true">
             <span>{String(index + 1).padStart(2, "0")}</span>
           </header>
-          <h3>{item.title}</h3>
+          <h3 className="ffs-phrase">{withSlashBreaks(item.title)}</h3>
           {item.body.map((paragraph, paragraphIndex) => (
             <p key={paragraphIndex}>{paragraph}</p>
           ))}
@@ -231,11 +241,14 @@ export function FarFromSaga() {
     [selectStage],
   );
 
-  // The panel keeps its place through a switch. Its own height is reserved
-  // (every form's copy sizes its cell, below), but the selector after the
-  // runway, above it, grows for ウルトラ's note; where the browser has no
-  // scroll anchoring (Safari) that pushed the page down and back. Measured
-  // after the commit and before paint, so nothing is ever seen to move.
+  // The panel keeps its place through a switch. Its copy is as long as the
+  // form's (ウルトラ's four paragraphs, ミドル's two: the cell is never padded
+  // to the longest, which left a blank screen under the shorter copies on
+  // phones), and the selector after the runway, above it, grows for
+  // ウルトラ's note; where the browser has no scroll anchoring (Safari)
+  // either would push the page down and back. Measured after the commit
+  // and before paint, so nothing is ever seen to move: only what lies
+  // below the panel's top edge changes.
   useLayoutEffect(() => {
     const before = panelAnchor.current;
     panelAnchor.current = null;
@@ -299,8 +312,24 @@ export function FarFromSaga() {
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
 
-  // The Japanese display face, applied after paint (src/lib/far-from-fonts.ts).
-  useEffect(() => mountFarFromFonts(pageRef.current), []);
+  // The Japanese display face, applied after paint (src/lib/far-from-fonts.ts),
+  // seeded with the five forms' names: a switch writes them into the HUD's
+  // stamp and the panel, and a subset fetched only then would re-set every
+  // display label on the page once it arrived (a layout shift per switch).
+  useEffect(() => mountFarFromFonts(pageRef.current, FAR_FROM_SAGA.stagesLine), []);
+
+  // The other forms' pictures, decoded in idle time once #stages is near
+  // (the Rexonance stage warm-up, on its own connection terms), so a switch
+  // shows the new form at once instead of an empty frame while it loads.
+  useEffect(() => {
+    const target = document.getElementById("stages");
+    if (!target) return;
+    const sources = STAGE_WARM_ORDER.map((key) => STAGE_WARM_ART[key].src);
+    return warmRexonanceStages(target, sources, (source) => {
+      const key = STAGE_WARM_ORDER.find((candidate) => STAGE_WARM_ART[candidate].src === source);
+      return key ? farFromImage(key) : {};
+    });
+  }, []);
 
   // The liquid rail owns tap, long-press, drag and keyboard selection; React
   // only mirrors the chosen index back into state.
@@ -497,7 +526,9 @@ export function FarFromSaga() {
               <span>ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。</span>
             </span>
           </p>
-          <p className="ffs-stages-line">{FAR_FROM_SAGA.stagesLine}</p>
+          <p className="ffs-stages-line">
+            <span className="ffs-phrase">{withSlashBreaks(FAR_FROM_SAGA.stagesLine)}</span>
+          </p>
           <FarFromHeroRail />
           {/* The name's ghost behind the copy (decorative). */}
           <span className="ffs-mark" aria-hidden="true">
@@ -696,17 +727,6 @@ export function FarFromSaga() {
                 {activeStage.label}
               </i>
             </div>
-            {/* The copy's cell is as tall as the longest form's, at every
-                width (hidden copies, stacked in the same cell), so no switch
-                changes the panel's height. */}
-            {FAR_FROM_SAGA_STAGE_ORDER.map((key) => (
-              <div key={`sizer-${key}`} className="ffs-stage-sizer" aria-hidden="true" inert>
-                <h3>{FAR_FROM_SAGA.stages[key].label}</h3>
-                {FAR_FROM_SAGA.stages[key].body.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
-            ))}
           </div>
         </div>
         <FarFromFormComparison selected={stage} onChoose={selectStage} />

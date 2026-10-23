@@ -1543,7 +1543,13 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-guide {
   text-align: center;
 }
 
+/* Two lines reserved (as the Rexonance page reserves them): the status
+   runs one line while the suit loads and two once it is ready (準備完了。
+   下へ進むと…), and the change moved every chapter below it by a line
+   while the reader was in #stages. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-status {
+  min-height: 3.2em;
+  min-height: 2lh;
   margin: 0;
   color: #d7edf2;
   font: 500 12px / 1.6 var(--dx-body);
@@ -1690,33 +1696,26 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li[data-
   box-shadow: 0 -6px 14px -8px var(--ffs-node);
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route b {
-  font: 400 12px / 1.2 var(--dx-hud);
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li[data-current] b {
-  color: var(--ffs-node);
-}
-
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
   font: 500 12px / 1.45 var(--dx-body);
   letter-spacing: 0.02em;
 }
 
-/* ウルトラ's note: a caption under the frame, on the frame's left edge. */
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-line {
+  margin: 0;
+  color: #e6f1f5;
+  font: 500 15px / 1.8 var(--dx-body);
+  text-wrap: pretty;
+}
+
+/* The panel is as tall as its form's words (the sentence, and ウルトラ's note
+   with ウルトラ alone): no space is reserved for the longest. A switch made
+   from #stages, below, keeps that panel where it was (far-from-saga.tsx),
+   so the page never jumps, with or without scroll anchoring. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra {
   display: grid;
   gap: 6px;
   padding: 2px clamp(16px, 2.6vw, 26px) 0;
-}
-
-/* Any other form: the note keeps its space, unseen (never display: none —
-   the section's height would change with the form, and Safari, with no
-   scroll anchoring, would jump on a switch). */
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra[data-hidden] {
-  visibility: hidden;
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > p {
@@ -1754,19 +1753,16 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-ass
   }
 }
 
-/* Phones: the forms' codes give way to their names in the order. */
+/* Phones: the order's five names on their bars. */
 @media (max-width: 560px) {
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route {
     gap: 4px;
   }
 
-  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route b {
-    display: none;
-  }
-
+  /* 11px: エックスハイ (the widest name) fits a 70px column at 441px. */
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
-    word-break: normal;
-    overflow-wrap: anywhere;
+    font-size: 11px;
+    word-break: keep-all;
   }
 
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls {
@@ -1776,6 +1772,35 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-ass
 
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls > :is(a, button) {
     justify-content: center;
+  }
+}
+
+/* Narrow phones (five columns under 68px): the names would break inside
+   (エックス／ハイ), so the bars alone keep the order — the rail above names
+   every form in the same order and light — and the chosen form's name
+   stands under its bar. The other names stay for assistive technology. */
+@media (max-width: 440px) {
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li:not([data-current]) span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li {
+    position: relative;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route > li[data-current] span {
+    color: var(--ffs-node);
+    font-weight: 700;
+    white-space: nowrap;
   }
 }
 

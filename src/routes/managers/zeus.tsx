@@ -4,6 +4,7 @@ import { ManagerStub, ZEUS } from "@/components/world/manager-stub";
 import {
   DOSSIER_ZENITH_STYLESHEET_LINK,
   STAGE_DOSSIER_STYLESHEET_LINK,
+  TABLET_DOSSIER_STYLESHEET_LINK,
   WORLD_STYLESHEET_LINKS,
   createWorldHead,
 } from "@/lib/world-head";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/managers/zeus")({
         ...WORLD_STYLESHEET_LINKS,
         STAGE_DOSSIER_STYLESHEET_LINK,
         { rel: "stylesheet", href: sovereignFileCssUrl },
+        TABLET_DOSSIER_STYLESHEET_LINK,
         DOSSIER_ZENITH_STYLESHEET_LINK,
       ],
     }),

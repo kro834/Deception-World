@@ -642,6 +642,12 @@ export function SideMenuLayer({
       const focusTarget = sideMenuRestoreFocusRef.current
         ? panel.querySelector<HTMLElement>(".side-panel-close")
         : panel;
+      // WebKit can reveal the sheet one frame before its sticky head. A
+      // hidden close button silently rejects focus, even in reduced motion.
+      if (focusTarget && window.getComputedStyle(focusTarget).visibility !== "visible") {
+        focusFrame = window.requestAnimationFrame(focusPanel);
+        return;
+      }
       focusTarget?.focus({ preventScroll: true });
     };
     focusFrame = window.requestAnimationFrame(focusPanel);

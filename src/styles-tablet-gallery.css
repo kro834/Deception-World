@@ -1,0 +1,25 @@
+@media (min-width: 701px) and (max-width: 1100px) and (min-height: 561px) and (max-height: 650px) and (orientation: landscape) and (max-aspect-ratio: 2 / 1) {
+  html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-shell {
+    padding: 12px;
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-header {
+    min-height: 44px;
+    max-height: 30dvh;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-tools:not([open]) {
+    flex-basis: auto;
+    order: 1;
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-close-primary {
+    order: 2;
+  }
+
+  html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-tools[open] {
+    order: 3;
+  }
+}

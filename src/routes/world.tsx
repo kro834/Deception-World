@@ -28,6 +28,7 @@ import worldReadingCssUrl from "@/styles-world-reading.css?url";
 import worldZenithCssUrl from "@/styles-world-zenith.css?url";
 import worldArchiveToolsCssUrl from "@/styles-world-archive-tools.css?url";
 import worldSpecialCssUrl from "@/styles-world-special.css?url";
+import tabletWorldCssUrl from "@/styles-tablet-world.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -79,6 +80,7 @@ export const Route = createFileRoute("/world")({
         // map, slates, dot rail, plates, doors), after zenith and the archive
         // tools, before the HUD face.
         { rel: "stylesheet", href: worldSpecialCssUrl },
+        { rel: "stylesheet", href: tabletWorldCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],

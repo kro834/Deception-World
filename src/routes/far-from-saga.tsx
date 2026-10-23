@@ -14,9 +14,10 @@ import farFromSuitupCssUrl from "@/styles-far-from-suitup.css?url";
 import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "@/lib/far-from-saga-artwork";
 
-// Provisional (2026-10-22): the FAR FROM SAGA special site's scaffold. The
-// shared special-site sheets draw the chrome; styles-far-from-saga.css is this
-// page's own and loads last before the cinematic sheet.
+// The FAR FROM SAGA special site (owner's record, 2026-10-22; the Rexonance
+// site's structure since 2026-10-23). The shared special-site sheets draw the
+// chrome; styles-far-from-saga.css is this page's own and loads last before
+// the cinematic sheet.
 export const Route = createFileRoute("/far-from-saga")({
   component: FarFromSaga,
   head: () => ({
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/far-from-saga")({
       {
         name: "description",
         content:
-          "ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガの特設サイト。変身音声、スペック、5つの形態、中核機構、神属権限、武装、必殺技を掲載。",
+          "ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガの特設サイト。変身音声、スペック、性能比較、P16、変身、5つの形態、中核機構、能力、武装、必殺技を掲載。",
       },
       { property: "og:title", content: "ファーフロムサーガ｜FAR FROM SAGA — Deception World" },
       {
@@ -57,6 +58,18 @@ export const Route = createFileRoute("/far-from-saga")({
         imageSizes: farFromImage("middle").sizes,
         fetchPriority: "high",
         type: "image/webp",
+      },
+      // The Latin display face (the title's Latin line, the name's ghost,
+      // the read-outs), 20 KB, ready at first paint so nothing re-sets when
+      // it lands, as the Rexonance route preloads it. The Japanese display
+      // face stays off the first paint's path (the page applies it after
+      // paint, as text= subsets).
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: "/fonts/rexonance-forge-20261016.woff2",
+        crossOrigin: "anonymous",
       },
     ],
   }),
