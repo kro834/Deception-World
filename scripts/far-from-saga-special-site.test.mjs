@@ -1803,7 +1803,7 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
   // sha256 of the owner's 公式設定 as sent (2026-10-23). Any edit fails here.
   assert.equal(
     createHash("sha256").update(OFFICIAL).digest("hex"),
-    "156c96eb7c9a625fb368505e16e151d50997afb7d2d219f04bb149b5fb7e2ffe",
+    "cf796c17c1e2d7988f5be204712d167b15fedebff6e19efb5743bccf4bca365e",
   );
   assert.deepEqual(
     official.ACCEL_UNITS.map((unit) => [unit.key, unit.name, unit.form]),
@@ -1881,11 +1881,11 @@ test("the owner's official P14 / P16 setting is kept verbatim and its figures ad
     p16.P16_METRICS.map((m) => m.change),
     ["accel", "delay", "phase", "heat"].map((key) => official.p16ChangeAgainst(byKey[key], "tuning")),
   );
-  // 主演算性能との関係: 20,000 / 50,000 / 60,000YOPS; 3倍 and 1.2倍; the caution.
+  // 主演算性能との関係: 20,000YOPS / 50,000〜YOPS / 60,000〜YOPS; 3倍 and 1.2倍; the caution.
   assert.deepEqual(official.P16_MAIN.table.rows, [
     ["エクスプリーム", "20,000YOPS", "P14 Standard"],
-    ["レクソナンス", "50,000YOPS", "P14 Extreme Tuning"],
-    ["ファーフロム", "60,000YOPS", "P16"],
+    ["レクソナンス", "50,000〜YOPS", "P14 Extreme Tuning"],
+    ["ファーフロム", "60,000〜YOPS", "P16"],
   ]);
   assert.match(official.P16_MAIN.after.join(""), /エクスプリームの3倍、レクソナンスの1\.2倍/);
   assert.equal(B.main(ff) / B.main("extreme"), 3);
