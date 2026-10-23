@@ -2130,3 +2130,16 @@
     font-size: 12px;
   }
 }
+
+/* #forms on wide screens (as Rexonance's #stages): the copy starts level with
+   the figure's top beside it, never left at the panel's foot. */
+@media (min-width: 901px) {
+  .rxs-page.rxs-page.ics-page .ics-form-panel {
+    align-items: start;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-form-copy {
+    align-content: start;
+    padding-top: clamp(12px, 3vw, 48px);
+  }
+}
