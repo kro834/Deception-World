@@ -1618,11 +1618,9 @@ test("#p16 prints the owner's P16 chapters, with 暫定ベンチマーク on eve
   assert.match(p16View, /\{ key: "p2", label: "P2比" \}/);
   assert.match(p16View, /\{ key: "extreme", label: "エクスプリーム" \}/);
   assert.match(p16View, /type="radio"/);
-  // No P16 artwork yet: a drawn core, labelled as such.
-  assert.match(p16View, /<figcaption>イメージ図（P16のビジュアルは準備中です）<\/figcaption>/);
-  assert.doesNotMatch(p16View, /<img/);
-  assert.match(compareStyles, /\.ffs-p16-ring \{[^}]*animation: ffs-p16-ring/);
-  assert.match(compareStyles, /\.ffs-page \.ffs-p16-ring \{\s*animation: none;/);
+  // Owner (2026-10-23): the owner's P16 artwork replaces the drawn core.
+  assert.match(p16View, /src="\/far-from-p16-core-20261023-720\.webp"/);
+  assert.doesNotMatch(p16View, /P16のビジュアルは準備中です/);
 });
 
 // Owner (2026-10-23): 「ファーフロムのページのフォントは未来風なサイバー風なものにして。」
