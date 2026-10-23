@@ -24,8 +24,9 @@ export type FarFromDeployPanel = {
    * (the layer's type keeps a 9 px floor on screen, so a phone's panel is
    * five or six capitals wide). */
   short: string;
-  /** The read-out rows under the glyph, drawn as data strips as wide as
-   * their words (text at this size could not be read). */
+  /** The read-out rows under the glyph, in the record's own notation
+   * (60000〜YOPS, ∞Core), drawn as data strips as wide as their words
+   * (text at this size could not be read). */
   lines: readonly string[];
 };
 
@@ -69,7 +70,7 @@ export const FAR_FROM_ULTRA_DEPLOY_PANELS: readonly FarFromDeployPanel[] = [
     at: 90,
     title: "KHAOS DEUX",
     short: "KHAOS",
-    lines: ["60000+ YOPS", "INF CORE"],
+    lines: ["60000〜YOPS", "∞Core"],
   },
   {
     id: "l2",
@@ -107,7 +108,7 @@ export const FAR_FROM_ULTRA_DEPLOY_PANELS: readonly FarFromDeployPanel[] = [
     at: 340,
     title: "KOSMOS DEUX",
     short: "KOSMOS",
-    lines: ["9000 TOPS", "300 CORE"],
+    lines: ["9000TOPS", "300Core"],
   },
 ];
 
@@ -128,12 +129,16 @@ export const FAR_FROM_ULTRA_DEPLOY_MS = 2000;
    pixel each, so a 10-unit read-out was 3.6 px tall. The layer measures
    its own width (far-from-ultra-deploy.tsx) and sets its titles and the
    crown's label in units that come to 9 px and 12 px on screen at least;
-   a title that would then run past its panel reads its short code, and
-   the read-out rows under the glyphs are data strips, one per line of the
-   record, as wide as its words. */
+   a title that would then run past its panel reads its short code, a size
+   down (to 7 px) where the head is narrower still — never squeezed into a
+   panel it cannot fit: then the head bar stands alone — and the read-out
+   rows under the glyphs are data strips, one per line of the record, as
+   wide as its words. */
 
-/** The title's and the crown label's size on screen, at least (CSS px). */
+/** The title's and the crown label's size on screen, at least (CSS px),
+ * and the least a short code may read at. */
 export const FAR_FROM_DEPLOY_TITLE_PX = 9;
+export const FAR_FROM_DEPLOY_TITLE_MIN_PX = 7;
 export const FAR_FROM_DEPLOY_CROWN_PX = 12;
 /** Picture units per CSS px before the layer has measured itself (a
  * desktop stage figure; the first measure runs before paint). */
@@ -142,19 +147,31 @@ export const FAR_FROM_DEPLOY_UNITS_PER_PX = 1.72;
 export const FAR_FROM_DEPLOY_PAD = 8;
 export const FAR_FROM_DEPLOY_TITLE_PAD = 6;
 
-/** Michroma's capitals and digits run about 0.78 em wide, a space 0.3 em. */
+/** Michroma is a wide face: its capitals run about one em, its digits
+ * 0.85 em, a space 0.3 em, a point 0.25 em (measured on the page: KHAOS
+ * came to 5.35 em with the title's 0.02 em tracking, P16 to 2.9 em). */
+const latinEm = (char: string) => {
+  if (char === " ") return 0.3;
+  if (char === ".") return 0.25;
+  if (char === "-") return 0.5;
+  if (/[0-9]/.test(char)) return 0.85;
+  if (/[A-Z]/.test(char)) return 1;
+  return 0.8;
+};
 export const latinWidth = (text: string, size: number) =>
-  Array.from(text).reduce((sum, char) => sum + (char === " " ? 0.3 : 0.78), 0) * size;
-/** The crown's label mixes katakana (one em) with digits and capitals. */
+  Array.from(text).reduce((sum, char) => sum + latinEm(char) + 0.02, 0) * size;
+/** The crown's label mixes katakana (one em) with digits and capitals
+ * (0.95 em: ウルトラ 60S measured 7.3 em). */
 export const labelWidth = (text: string, size: number) =>
   Array.from(text).reduce(
-    (sum, char) => sum + (char === " " ? 0.3 : char > "\u007f" ? 1 : 0.72),
+    (sum, char) => sum + (char === " " ? 0.3 : char > "\u007f" ? 1 : 0.95),
     0,
   ) * size;
 
 export type FarFromDeployType = {
-  /** The title's size (picture units). */
+  /** The title's size (picture units), and the least a short code may read at. */
   title: number;
+  titleMin: number;
   /** The head bar: the title with a little air. */
   head: number;
   /** A read-out strip's height, and the gap between strips. */
@@ -169,6 +186,7 @@ export function deployType(unitsPerPx: number): FarFromDeployType {
   const title = Math.max(10, Math.ceil(FAR_FROM_DEPLOY_TITLE_PX * unitsPerPx));
   return {
     title,
+    titleMin: Math.min(title, Math.max(8, Math.ceil(FAR_FROM_DEPLOY_TITLE_MIN_PX * unitsPerPx))),
     head: Math.round(title * 1.3 + 5),
     strip: Math.max(3, Math.round(title * 0.34)),
     gap: Math.max(3, Math.round(title * 0.2)),
@@ -185,13 +203,18 @@ const GLYPH_HEIGHT: Record<FarFromDeployPanel["kind"], number> = {
 };
 
 /** The panel's title as it fits: the record's name where there is room,
- * its short code where there is not; past that, the text is fitted. */
-export function panelTitle(panel: FarFromDeployPanel, type: FarFromDeployType) {
+ * its short code where there is not, the code a size down (to titleMin)
+ * where the head is narrower still. A code that would not fit even then
+ * is left off (null) rather than squeezed illegible; the head bar stands
+ * alone. */
+export function panelTitle(
+  panel: FarFromDeployPanel,
+  type: FarFromDeployType,
+): { text: string; size: number } | null {
   const room = panel.w - FAR_FROM_DEPLOY_TITLE_PAD * 2;
-  const full = latinWidth(panel.title, type.title);
-  if (full <= room) return { text: panel.title, fit: undefined };
-  const short = latinWidth(panel.short, type.title);
-  return { text: panel.short, fit: short <= room ? undefined : room };
+  if (latinWidth(panel.title, type.title) <= room) return { text: panel.title, size: type.title };
+  const size = Math.min(type.title, Math.floor(room / latinWidth(panel.short, 1)));
+  return size >= type.titleMin ? { text: panel.short, size } : null;
 }
 
 /** The read-out strips a panel has room for under its glyph, from the

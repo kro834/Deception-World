@@ -2046,8 +2046,19 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     padding-inline: 12px;
   }
 
+  /* Two cards a row: the buttons of a row share one height (エックスハイを
+     表示中 runs to two lines on a 360px phone where ミドルを表示 keeps one),
+     and the label reads a size down so it keeps one line from 390px. */
   .rxs-page.rxs-page.ffs-page .ffs-comparison-card {
+    grid-template-rows: auto auto auto 1fr;
     padding: 10px;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-comparison-card button {
+    align-self: stretch;
+    padding: 10px 8px;
+    font-size: 11px;
+    letter-spacing: 0.02em;
   }
 }
 

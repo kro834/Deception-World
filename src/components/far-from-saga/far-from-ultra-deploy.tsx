@@ -42,7 +42,9 @@ import {
    layer measures its own width once on mount (and on resize) and sets its
    titles and the crown's label in units that come to 9 px and 12 px on
    screen at least; a title that would then run past its panel reads its
-   short code (OS 6.1, KHAOS, KOSMOS). The read-out rows under the glyphs
+   short code (OS 6.1, KHAOS, KOSMOS), a size down to 7 px where the head
+   is narrower still, and is left off rather than squeezed illegible where
+   not even that fits. The read-out rows under the glyphs
    are drawn as data strips — one per line of the record, as wide as its
    words — rather than text no one could read. Read-outs are the record's
    own terms. */
@@ -83,7 +85,6 @@ function Typed({
   start,
   className,
   size,
-  fit,
 }: {
   text: string;
   x: number;
@@ -91,17 +92,9 @@ function Typed({
   start: number;
   className: string;
   size: number;
-  fit?: number;
 }) {
   return (
-    <text
-      className={className}
-      x={x}
-      y={y}
-      style={v({ fontSize: `${size}px` })}
-      textLength={fit}
-      lengthAdjust={fit ? "spacingAndGlyphs" : undefined}
-    >
+    <text className={className} x={x} y={y} style={v({ fontSize: `${size}px` })}>
       {Array.from(text).map((char, index) => (
         <tspan key={index} style={v({ "--ffd-c": start + index * 26 })}>
           {char}
@@ -205,15 +198,16 @@ function Panel({ panel, hex, type }: { panel: FarFromDeployPanel; hex: string; t
             className="ffd-corners"
             d={`M ${x - 4} ${y + 12} V ${y - 4} H ${x + 12} M ${x + w - 12} ${y - 4} H ${x + w + 4} V ${y + 12} M ${x + w + 4} ${y + h - 12} V ${y + h + 4} H ${x + w - 12} M ${x + 12} ${y + h + 4} H ${x - 4} V ${y + h - 12}`}
           />
-          <Typed
-            className="ffd-title"
-            text={title.text}
-            fit={title.fit}
-            size={type.title}
-            x={x + TITLE_PAD}
-            y={Math.round(y + type.head / 2 + type.title * 0.36)}
-            start={780}
-          />
+          {title ? (
+            <Typed
+              className="ffd-title"
+              text={title.text}
+              size={title.size}
+              x={x + TITLE_PAD}
+              y={Math.round(y + type.head / 2 + title.size * 0.36)}
+              start={780}
+            />
+          ) : null}
           <PanelContent panel={panel} body={body} />
           {strips.map((strip, index) => (
             <rect
