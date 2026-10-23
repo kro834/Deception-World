@@ -2218,3 +2218,35 @@
     left: auto;
   }
 }
+
+/* Chapter heads (Extreme's grammar): a lit rule under each head, ice to
+   gold, fading out. */
+.rxs-page.rxs-page.ics-page .ics-chapter > .ics-heading,
+.rxs-page.rxs-page.ics-page .ics-form-switcher > .ics-heading {
+  position: relative;
+  padding-bottom: clamp(16px, 2.2vw, 28px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-chapter > .ics-heading::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, rgb(166 230 255 / 90%), rgb(233 184 102 / 70%) 40%, transparent 85%);
+}
+
+/* The comparison's tables as machined plates: a cut corner and a lit rail. */
+.rxs-page.rxs-page.ics-page .ics-table-scroll {
+  position: relative;
+  border-color: rgb(233 184 102 / 30%);
+  background: linear-gradient(160deg, rgb(18 24 46 / 94%), rgb(6 8 18 / 98%));
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+  box-shadow: inset 0 2px 0 rgb(166 230 255 / 70%);
+}
+
+/* The overview's lead: a gold rule before it, Rexonance's opening. */
+.rxs-page.rxs-page.ics-page .ics-lead {
+  position: relative;
+  padding-left: clamp(16px, 2vw, 26px);
+  border-left: 2px solid var(--ics-gold);
+}
