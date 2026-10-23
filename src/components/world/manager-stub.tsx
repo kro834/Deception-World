@@ -162,6 +162,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     if (srcSet) preload.srcset = srcSet;
     preload.src = rider.img;
     gateImage.current = preload;
+    // The record's own figure loads with the cover (not at page load), so it
+    // is laid out when the cover's light comes to rest on it.
+    dlg.current?.querySelector?.(".form-pickup-layout > figure > img")?.setAttribute("loading", "eager");
     const decoded = () => {
       if (gateImage.current !== preload) return;
       gateDecoded.current = true;
@@ -265,7 +268,6 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
           </div>
         ) : null}
         <div className="form-pickup-visual">
-          <FormSignature theme={rider.theme} />
           <img
             src={rider.img}
             {...dossierImage(rider.img)}
@@ -286,6 +288,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
         </div>
         {/* The name leads: no kicker restates the card's role (2026-10-23). */}
         <div className="form-pickup-copy">
+          {/* The signature lies behind the words: under the (opaque) art it
+              was never seen. */}
+          <FormSignature theme={rider.theme} />
           <h2>
             <span>{riderPrefix}</span>
             <b>{formName}</b>
@@ -412,7 +417,12 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
             </figure>
             <div>
               {overview.length ? (
-                <section className="form-pickup-overview" aria-label="フォーム概要">
+                <section
+                  className={`form-pickup-overview${
+                    overview.length === 1 && [...overview[0]].length <= 12 ? " is-motto" : ""
+                  }`}
+                  aria-label="フォーム概要"
+                >
                   <div>
                     {overview.map((paragraph) => (
                       <p key={paragraph.slice(0, 32)}>{paragraph}</p>
