@@ -523,7 +523,7 @@ async function arriveFromHome(page, path) {
   await sleep(800);
   // The menu open (a busy main thread may take its time), its link on screen.
   const trigger = page.locator(".side-panel-trigger").first();
-  const link = page.locator(`.side-panel-links a[href^="/${path}"]`).first();
+  const link = page.locator(`.side-panel-links a[href^="/${path}"]:visible`).first();
   for (let k = 0; k < 3 && !(await link.isVisible().catch(() => false)); k += 1) {
     await trigger.click({ force: true, timeout: 45000 }).catch(() => {});
     await link.waitFor({ state: "visible", timeout: 20000 }).catch(() => {});
