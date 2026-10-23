@@ -1,0 +1,124 @@
+/* Tablet and compact landscape adjustments. Linked before Mirage: its
+   paint and motion remain the final layer. Viewport geometry determines
+   the layout; touch-specific card density also checks any-pointer so an
+   attached mouse does not discard a tablet's touch accommodations. */
+
+/* A short, broad window has enough room beside the print, but not above
+   it. Keep the title and introduction beside it and let the page grow. */
+@media (min-width: 700px) and (max-width: 980px) and (min-height: 501px) and (max-height: 650px) and (orientation: landscape) {
+  html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero {
+    grid-template:
+      "identity visual" auto
+      "copy visual" auto
+      "context visual" auto
+      / minmax(0, 1.08fr) minmax(0, 0.92fr);
+    align-content: start;
+    min-height: 100svh;
+    padding-top: calc(var(--film-topbar-height, 64px) + 24px);
+    padding-bottom: 32px;
+    gap: 20px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    .anime-work-title
+    b {
+    font-size: clamp(44px, 6vw, 60px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-copy
+    h1 {
+    font-size: clamp(28px, 4vw, 36px);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .poster-stage {
+    --poster-width: min(36vw, 300px, max(256px, calc((100svh - 220px) * 2 / 3)));
+    align-self: start;
+    margin-top: 0;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .hero-context {
+    margin-top: 0;
+  }
+}
+
+/* Six portraits keep their names and faces readable at the middle touch
+   widths rather than crossing directly from three columns to six. */
+@media (min-width: 861px) and (max-width: 1100px) and (min-height: 501px) and (max-height: 1400px) and (min-aspect-ratio: 2/3) and (max-aspect-ratio: 2/1) and (any-pointer: coarse) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > #manager-archive
+    .manager-slot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Split windows keep a useful text measure. The roster's six shared row
+   tracks and full-width opened profiles retain their existing geometry. */
+@media (min-width: 560px) and (max-width: 699px) and (min-height: 501px) and (orientation: portrait) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1366px) and (min-height: 700px) and (max-height: 1100px) and (orientation: landscape) and (max-aspect-ratio: 8/5) and (any-pointer: coarse) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-roster {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* The selected rider shares a narrower stage with the unchanged rail.
+   Give its copy more of that stage, retaining the full-height art lane. */
+@media (min-width: 1121px) and (max-width: 1366px) and (min-height: 700px) and (max-height: 1100px) and (orientation: landscape) and (max-aspect-ratio: 8/5) and (any-pointer: coarse) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-detail {
+    min-height: max(600px, min(78svh, 760px));
+    padding: 40px 24px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-detail
+    > .rider-visual {
+    width: 52%;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders
+    .rider-detail
+    > .rider-copy-block {
+    width: min(46%, 360px);
+  }
+}

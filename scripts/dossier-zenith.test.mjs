@@ -33,7 +33,10 @@ test("the zenith sheet is linked last: after the stage sheet, and after the sove
   assert.match(head, /import dossierZenithCssUrl from "@\/styles-dossier-zenith\.css\?url";/);
   const dossier = head.slice(head.indexOf("export const DOSSIER_STYLESHEET_LINKS"));
   const list = dossier.slice(0, dossier.indexOf("];"));
-  assert.match(list, /STAGE_DOSSIER_STYLESHEET_LINK,\s*DOSSIER_ZENITH_STYLESHEET_LINK,\s*$/);
+  assert.match(
+    list,
+    /STAGE_DOSSIER_STYLESHEET_LINK,\s*TABLET_DOSSIER_STYLESHEET_LINK,\s*DOSSIER_ZENITH_STYLESHEET_LINK,\s*$/,
+  );
   const world = head.slice(head.indexOf("export const WORLD_STYLESHEET_LINKS"));
   assert.doesNotMatch(world.slice(0, world.indexOf("];")), /ZENITH/);
   const zeus = await read("src/routes/managers/zeus.tsx");

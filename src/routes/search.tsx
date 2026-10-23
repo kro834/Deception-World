@@ -5,6 +5,7 @@ import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import searchCssUrl from "@/styles-search.css?url";
 import stageLibraryCssUrl from "@/styles-stage-library.css?url";
 import zenithLibraryCssUrl from "@/styles-library-zenith.css?url";
+import tabletReadingCssUrl from "@/styles-tablet-reading.css?url";
 
 export const Route = createFileRoute("/search")({
   validateSearch: validateSearchState,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/search")({
         { rel: "stylesheet", href: stageLibraryCssUrl },
         // ZENITH (2026-10-21): the brush-up on top of STAGE, same scope.
         { rel: "stylesheet", href: zenithLibraryCssUrl },
+        { rel: "stylesheet", href: tabletReadingCssUrl },
       ],
     }),
 });

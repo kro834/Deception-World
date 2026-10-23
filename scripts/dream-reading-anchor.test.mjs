@@ -18,7 +18,7 @@ const ast = ts.createSourceFile(
 const capture = ast.statements.find(
   (node) => ts.isFunctionDeclaration(node) && node.name?.text === "captureReadingAnchor",
 );
-assert.ok(capture, "the reader captures a line only when its typography changes");
+assert.ok(capture, "the reader captures the text line before typography or viewport changes");
 const code = ts.transpileModule(capture.getText(ast), {
   compilerOptions: { target: ts.ScriptTarget.ES2022 },
 }).outputText;
@@ -106,4 +106,271 @@ test("reader typography reflows synchronously despite global reduced-motion tran
     /\.dream-reading-paper > \[data-room-paragraph\]\s*\{[^}]*transition: none !important;/,
   );
   assert.match(css, /\.dream-reading-scroll\s*\{[^}]*overflow-anchor: none;/);
+});
+
+const viewportCode = ts.transpileModule(
+  ast.statements
+    .filter(
+      (node) =>
+        ts.isFunctionDeclaration(node) &&
+        [
+          "visibleParagraph",
+          "captureReadingAnchor",
+          "restoreReadingAnchor",
+          "readParagraph",
+          "watchReadingViewport",
+        ].includes(node.name?.text),
+    )
+    .map((node) => node.getText(ast))
+    .join("\n"),
+  { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
+).outputText;
+
+function resizingFixture({ observer = true } = {}) {
+  let width = 360;
+  let height = 537;
+  let lineHeight = 24;
+  let scrollTop = 0;
+  let nextFrame = 0;
+  const frames = new Map();
+  const scrollListeners = new Set();
+  const resizeListeners = new Set();
+  const observers = [];
+  const perLine = () => Math.max(1, Math.floor((width - 64) / 17));
+  const paragraphHeight = () => Math.ceil(500 / perLine()) * lineHeight + 24;
+  const paragraphTop = (index) => 200 + index * paragraphHeight();
+  const texts = Array.from({ length: 12 }, (_, index) => ({
+    nodeType: 3,
+    textContent: "文".repeat(500),
+    length: 500,
+    isConnected: true,
+    index,
+  }));
+  const paragraphs = texts.map((text, index) => ({
+    childNodes: [{ nodeType: 1, textContent: String(index + 1) }, text],
+    dataset: { roomParagraph: String(index + 1) },
+    getBoundingClientRect: () => ({
+      top: 60 + paragraphTop(index) - scrollTop,
+      bottom: 60 + paragraphTop(index + 1) - 24 - scrollTop,
+    }),
+  }));
+  const scroller = {
+    get clientWidth() {
+      return width;
+    },
+    get clientHeight() {
+      return height;
+    },
+    get scrollHeight() {
+      return paragraphTop(12) + 100;
+    },
+    get scrollTop() {
+      return scrollTop;
+    },
+    set scrollTop(value) {
+      scrollTop = Math.max(0, Math.min(value, this.scrollHeight - height));
+    },
+    getBoundingClientRect: () => ({ top: 60 }),
+    querySelectorAll: () => paragraphs,
+    addEventListener(_name, callback) {
+      scrollListeners.add(callback);
+    },
+    removeEventListener(_name, callback) {
+      scrollListeners.delete(callback);
+    },
+  };
+  const document = {
+    createRange() {
+      let text;
+      let offset;
+      return {
+        setStart(node, value) {
+          text = node;
+          offset = value;
+        },
+        setEnd() {},
+        getBoundingClientRect() {
+          const top =
+            60 + paragraphTop(text.index) + Math.floor(offset / perLine()) * lineHeight - scrollTop;
+          return { top, bottom: top + lineHeight };
+        },
+      };
+    },
+  };
+  const api = runInNewContext(
+    `${viewportCode}\n({ watchReadingViewport, captureReadingAnchor, restoreReadingAnchor })`,
+    {
+      document,
+      Node: { TEXT_NODE: 3 },
+      window: {
+        addEventListener(_name, callback) {
+          resizeListeners.add(callback);
+        },
+        removeEventListener(_name, callback) {
+          resizeListeners.delete(callback);
+        },
+      },
+      requestAnimationFrame(callback) {
+        frames.set(++nextFrame, callback);
+        return nextFrame;
+      },
+      cancelAnimationFrame(id) {
+        frames.delete(id);
+      },
+      ResizeObserver: observer
+        ? class {
+            constructor(callback) {
+              this.callback = callback;
+              observers.push(this);
+            }
+            observe() {}
+            disconnect() {
+              this.disconnected = true;
+            }
+          }
+        : undefined,
+    },
+  );
+  const pin = { current: null };
+  const counts = [];
+  return {
+    ...api,
+    scroller,
+    paragraphs,
+    pin,
+    counts,
+    frames,
+    scrollListeners,
+    resizeListeners,
+    observers,
+    mount: () => api.watchReadingViewport(scroller, pin, (no) => counts.push(no)),
+    land(no) {
+      scroller.scrollTop = paragraphTop(no - 1) - 24;
+      pin.current = { no, top: scroller.scrollTop };
+    },
+    scroll(delta) {
+      scroller.scrollTop += delta;
+      for (const callback of scrollListeners) callback();
+    },
+    resize(nextWidth, nextHeight) {
+      width = nextWidth;
+      height = nextHeight;
+      for (const callback of resizeListeners) callback();
+      for (const entry of observers) if (!entry.disconnected) entry.callback();
+    },
+    flush() {
+      const pending = [...frames.values()];
+      frames.clear();
+      for (const callback of pending) callback();
+    },
+    glyphTop(anchor) {
+      const range = document.createRange();
+      range.setStart(anchor.text, anchor.offset);
+      return range.getBoundingClientRect().top - 60;
+    },
+    enlargeType() {
+      lineHeight = 32;
+    },
+  };
+}
+
+test("viewport reflow restores the saved glyph and moves the explicit paragraph pin", () => {
+  const f = resizingFixture();
+  f.land(7);
+  const controller = f.mount();
+  f.flush();
+  const anchor = f.captureReadingAnchor(f.scroller);
+  const oldScroll = f.scroller.scrollTop;
+  f.resize(900, 454);
+  f.resize(900, 454);
+  assert.equal(f.frames.size, 1, "window and observer notifications share one frame");
+  f.flush();
+  assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1);
+  assert.notEqual(f.scroller.scrollTop, oldScroll);
+  assert.equal(f.pin.current.top, f.scroller.scrollTop);
+  assert.equal(f.counts.at(-1), 7);
+  assert.ok(f.paragraphs[6].getBoundingClientRect().bottom > 60);
+  controller.dispose();
+});
+
+test("ordinary scrolling refreshes the line retained through portrait and split reflows", () => {
+  const f = resizingFixture();
+  f.land(7);
+  const controller = f.mount();
+  f.flush();
+  f.scroll(1200);
+  f.flush();
+  assert.equal(f.pin.current, null, "the reader can leave an explicit paragraph landing");
+  for (const [width, height] of [
+    [760, 1180],
+    [443, 834],
+    [900, 454],
+  ]) {
+    const anchor = f.captureReadingAnchor(f.scroller);
+    f.resize(width, height);
+    f.flush();
+    assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1, `${width}x${height}`);
+    assert.equal(f.counts.at(-1), anchor.text.index + 1);
+  }
+  controller.dispose();
+});
+
+test("a deliberate jump updates the remembered line even before its scroll event", () => {
+  const f = resizingFixture();
+  const controller = f.mount();
+  f.flush();
+  f.land(7);
+  controller.remember();
+  const anchor = f.captureReadingAnchor(f.scroller);
+  f.resize(900, 454);
+  f.flush();
+  assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1);
+  assert.equal(f.counts.at(-1), 7);
+  controller.dispose();
+});
+
+test("the top and foot survive viewport changes, including the no-observer fallback", () => {
+  for (const atEnd of [false, true]) {
+    const f = resizingFixture({ observer: false });
+    if (atEnd) f.scroller.scrollTop = f.scroller.scrollHeight;
+    const controller = f.mount();
+    f.flush();
+    f.resize(900, 454);
+    f.flush();
+    assert.equal(
+      f.scroller.scrollTop,
+      atEnd ? f.scroller.scrollHeight - f.scroller.clientHeight : 0,
+    );
+    assert.equal(f.counts.at(-1), atEnd ? 12 : 1);
+    controller.dispose();
+  }
+});
+
+test("disposal cancels pending work and Strict Mode remounts one live watcher", () => {
+  const f = resizingFixture();
+  f.land(7);
+  const first = f.mount();
+  first.dispose();
+  assert.equal(f.frames.size, 0);
+  assert.equal(f.scrollListeners.size, 0);
+  assert.equal(f.resizeListeners.size, 0);
+  assert.equal(f.observers[0].disconnected, true);
+  f.observers[0].callback();
+  assert.equal(f.frames.size, 0, "an already delivered observer cannot revive disposed work");
+  const second = f.mount();
+  assert.equal(f.scrollListeners.size, 1);
+  assert.equal(f.resizeListeners.size, 1);
+  f.flush();
+  assert.equal(f.counts.length, 1);
+  second.dispose();
+});
+
+test("typography and viewport changes share the same glyph restoration", () => {
+  const f = resizingFixture();
+  f.land(7);
+  const anchor = f.captureReadingAnchor(f.scroller);
+  f.enlargeType();
+  f.restoreReadingAnchor(f.scroller, anchor);
+  assert.ok(Math.abs(f.glyphTop(anchor) - anchor.top) < 1);
+  assert.match(source, /restoreReadingAnchor\(scroller, anchor\);[\s\S]*?\[size, spacing\]/);
 });

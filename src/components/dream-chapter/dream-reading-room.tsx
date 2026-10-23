@@ -65,6 +65,67 @@ function captureReadingAnchor(scroller: HTMLDivElement | null): ReadingAnchor {
   return { text, offset: low, top: range.getBoundingClientRect().top - top };
 }
 
+function restoreReadingAnchor(scroller: HTMLDivElement, anchor: ReadingAnchor) {
+  if (!anchor) return;
+  if ("end" in anchor) scroller.scrollTop = scroller.scrollHeight;
+  else {
+    if (!anchor.text.isConnected) return;
+    const range = document.createRange();
+    range.setStart(anchor.text, anchor.offset);
+    range.setEnd(anchor.text, anchor.offset + 1);
+    scroller.scrollTop +=
+      range.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.top;
+  }
+}
+
+// ResizeObserver runs after reflow, when reading the old line is already too
+// late. Remember it after ordinary scrolling, and restore that text offset
+// before refreshing the paragraph count for the new viewport dimensions.
+function watchReadingViewport(
+  scroller: HTMLDivElement,
+  pin: { current: Pin },
+  onParagraph: (no: number) => void,
+) {
+  let frame = 0;
+  let disposed = false;
+  let width = scroller.clientWidth;
+  let height = scroller.clientHeight;
+  let anchor = captureReadingAnchor(scroller);
+  const remember = () => {
+    width = scroller.clientWidth;
+    height = scroller.clientHeight;
+    anchor = captureReadingAnchor(scroller);
+  };
+  const sync = () => {
+    frame = 0;
+    if (disposed) return;
+    if (width !== scroller.clientWidth || height !== scroller.clientHeight) {
+      restoreReadingAnchor(scroller, anchor);
+      if (pin.current) pin.current.top = scroller.scrollTop;
+    }
+    onParagraph(readParagraph(scroller, pin));
+    remember();
+  };
+  const queue = () => {
+    if (!disposed && !frame) frame = requestAnimationFrame(sync);
+  };
+  scroller.addEventListener("scroll", queue, { passive: true });
+  window.addEventListener("resize", queue, { passive: true });
+  const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(queue);
+  observer?.observe(scroller);
+  queue();
+  return {
+    remember,
+    dispose() {
+      disposed = true;
+      scroller.removeEventListener("scroll", queue);
+      window.removeEventListener("resize", queue);
+      observer?.disconnect();
+      cancelAnimationFrame(frame);
+    },
+  };
+}
+
 /** An explicit landing (a paragraph pill, the saved bookmark) holds until the
     reader scrolls on: a sheet clamped at its foot could not bring the chosen
     paragraph up to the reading line, and the count fell back a paragraph. */
@@ -101,6 +162,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   const firstLanding = useRef(initial.bookmark?.paragraph ?? 1);
   const pinned = useRef<Pin>(null);
   const readingAnchor = useRef<ReadingAnchor>(null);
+  const readingViewport = useRef<ReturnType<typeof watchReadingViewport> | null>(null);
   const closing = useRef(false);
   onCloseRef.current = onClose;
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
@@ -162,37 +224,18 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
     const anchor = readingAnchor.current;
     readingAnchor.current = null;
     if (!scroller || !anchor) return;
-    if ("end" in anchor) scroller.scrollTop = scroller.scrollHeight;
-    else {
-      if (!anchor.text.isConnected) return;
-      const range = document.createRange();
-      range.setStart(anchor.text, anchor.offset);
-      range.setEnd(anchor.text, anchor.offset + 1);
-      scroller.scrollTop +=
-        range.getBoundingClientRect().top - scroller.getBoundingClientRect().top - anchor.top;
-    }
+    restoreReadingAnchor(scroller, anchor);
     if (pinned.current) pinned.current.top = scroller.scrollTop;
   }, [size, spacing]);
 
   useEffect(() => {
     const scroller = viewport.current;
     if (!scroller) return;
-    let frame = 0;
-    const sync = () => {
-      frame = 0;
-      setParagraph(readParagraph(scroller, pinned));
-    };
-    const queue = () => {
-      if (!frame) frame = requestAnimationFrame(sync);
-    };
-    scroller.addEventListener("scroll", queue, { passive: true });
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(queue);
-    observer?.observe(scroller);
-    queue();
+    const controller = watchReadingViewport(scroller, pinned, setParagraph);
+    readingViewport.current = controller;
     return () => {
-      scroller.removeEventListener("scroll", queue);
-      observer?.disconnect();
-      cancelAnimationFrame(frame);
+      controller.dispose();
+      if (readingViewport.current === controller) readingViewport.current = null;
     };
   }, [chapter, size, spacing]);
 
@@ -207,6 +250,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
       scroller.scrollTop +=
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
       pinned.current = { no: targetNo, top: scroller.scrollTop };
+      readingViewport.current?.remember();
     }
     setParagraph(targetNo);
   };
