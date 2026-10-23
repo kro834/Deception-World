@@ -31,6 +31,10 @@
 //   switch       the other site's movie first, then this site's (in-site)
 //   stilltier    the DevTools Slow 3G preset (2 s round trip: effectiveType
 //                2g, the site's still tier) → no control on screen, none dead
+//   depfail      a chunk the engine's chunk imports aborted once: it stays
+//                failed for the document (no query on the importer's URL
+//                reaches it), the retries run out → 再読み込み → a press
+//                reloads the page, at the same place → it plays
 //
 // While the movie plays the harness samples the sticky frame (pinned within
 // 2 px of its top) and the state (no pause the reader did not ask for). The
@@ -74,6 +78,7 @@ const ALL = [
   "hidden",
   "switch",
   "stilltier",
+  "depfail",
 ];
 const scenarios = (process.env.SCENARIOS || ALL.join(",")).split(",");
 const MOVIE_MS = 24000;
@@ -83,7 +88,7 @@ const MAX_STEP_MS = 1000;
 const PLAY_WAIT = Number(process.env.PLAY_WAIT || 90000);
 // Software WebGL (swiftshader) draws the scene at a few frames a second, so
 // clicks wait for a busy main thread.
-const CLICK = { force: true, timeout: 20000 };
+const CLICK = { force: true, timeout: 45000 };
 /** How long a whole movie at `speed` may take here. */
 const endWithin = (speed) => (MOVIE_MS / speed) * 4 + 30000;
 await mkdir(out, { recursive: true });
@@ -609,6 +614,51 @@ const SCENARIOS = {
     await advances(page, `after a failed chunk`);
     return { aborted: failed.size };
   },
+  async depfail(page, { path, context }) {
+    // A dependency of the engine's chunk (FAR FROM: the engine itself, under
+    // far-from-assembly-engine; Rexonance: the field, under the swarm's chunk).
+    const pattern = path === "far-from-saga" ? "**/assets/rexonance-resonance-*.js" : "**/assets/rexonance-field-*.js";
+    let aborted = 0;
+    await context.route(pattern, (route) => {
+      if (aborted) return route.continue();
+      aborted += 1;
+      return route.abort("failed");
+    });
+    await arriveDirect(page, path);
+    await toRunway(page);
+    await controlShown(page, 60000);
+    await pressPlay(page);
+    must(aborted === 1, `nothing was aborted (${pattern})`);
+    await waitFor(
+      page,
+      () => {
+        const control = document.querySelector(".rzn-movie");
+        return control.dataset.state === "error" || control.dataset.state === "playing";
+      },
+      null,
+      240000,
+      "with a dependency failed for the document the movie neither played nor offered 再読み込み",
+    );
+    let s = await state(page);
+    if (s.state === "playing") {
+      // (Already loaded before the abort could matter: nothing to recover.)
+      await advances(page, "depfail (nothing failed)");
+      return { recovered: "in-page" };
+    }
+    must(/再読み込み/.test(s.label ?? ""), `the error state reads ${s.label}`);
+    const before = s.q;
+    await Promise.all([page.waitForNavigation({ timeout: 120000 }), pressPlay(page)]);
+    await settled(page);
+    await sleep(800);
+    s = await state(page);
+    const kept = Math.abs(s.q - before) < 0.05 && Math.abs(s.frameTop - s.pin) <= 2;
+    if (!kept) await toRunway(page, Math.max(0.004, Math.min(0.9, before)));
+    await controlShown(page, 60000);
+    await pressPlay(page);
+    await playing(page, PLAY_WAIT, "after 再読み込み 再生 never played");
+    await advances(page, "after 再読み込み");
+    return { recovered: "reload", positionKept: kept };
+  },
   async early(page, { path }) {
     await arriveDirect(page, path, "domcontentloaded");
     await toRunway(page);
@@ -921,6 +971,9 @@ async function runScenario(browser, { run, scenario, path, size }, errors, tag) 
   }
 }
 
+// Runs that wait through a whole backoff, or a slow network, get longer.
+const LONG_SCENARIOS = new Set(["depfail", "throttled"]);
+
 async function runTask(task) {
   const { run, scenario, path, size } = task;
   const [width, height] = size;
@@ -933,7 +986,8 @@ async function runTask(task) {
   try {
     browser = await launch();
     const limit = new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Fail(`the run took longer than ${taskMs} ms`)), taskMs);
+      const limit = taskMs * (LONG_SCENARIOS.has(scenario) ? 1.6 : 1);
+      timer = setTimeout(() => reject(new Fail(`the run took longer than ${limit} ms`)), limit);
     });
     const detail = await Promise.race([runScenario(browser, task, errors, tag), limit]);
     result = { pass: true, detail };
