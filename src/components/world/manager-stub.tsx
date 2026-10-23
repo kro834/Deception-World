@@ -766,7 +766,6 @@ export const REX_LOI: Profile = {
     { dt: "DIVINITY", dd: "秩序の神" },
     { dt: "AUTHORITY", dd: "秩序／破壊・固定管轄なし" },
     { dt: "RIDER", dd: "仮面ライダーヴァンダール" },
-    { dt: "STATUS", dd: "ACCESS GRANTED" },
   ],
   sections: [
     {
