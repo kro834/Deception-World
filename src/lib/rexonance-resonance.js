@@ -1471,7 +1471,7 @@ const facePixels = (glow, visor) => glowPixels(glow, visor);
 // a moment before the light runs out from the core, hold while it lights
 // under them, then scatter outward (the BURSTS' scales and turns) behind
 // the wipe, so the whole body reads as one wave out from the reactor.
-const LIGHT_PIXELS = { lead: 0.014, fill: 0.006, hold: 0.004, burst: 0.014, drift: 9 };
+const LIGHT_PIXELS = { lead: 0.014, fill: 0.006, hold: 0.004, burst: 0.014, drift: 16 };
 const lightPixels = (lights, core, W, H, document) => {
   if (!lights?.width || !core) return [];
   const cell = 6;
@@ -1521,12 +1521,12 @@ const lightPixels = (lights, core, W, H, document) => {
   return squares;
 };
 const BURSTS = [
-  [3.4, -14],
-  [4.6, 10],
-  [3, 22],
-  [5.2, -6],
-  [3.9, -24],
-  [4.8, 16],
+  [1.42, -6],
+  [1.68, 4],
+  [1.34, 9],
+  [1.82, -3],
+  [1.55, -10],
+  [1.74, 7],
 ];
 
 // The same combustion choreography as the entrance's 2400 ms clock, mapped
@@ -1575,6 +1575,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const restPercent = percent?.textContent ?? "";
   const restCount = counter?.textContent ?? "";
   // The read-outs change every frame of a scrub: rewrite their text node's
+// Each burst group's scatter: how far it opens (scale about its centre) and
+// its turn (degrees). Owner (2026-10-23): the eyes' squares flew out up to
+// 5.2× — far past the face; they now open just beyond the outline they
+// formed, a crisp release rather than an explosion.
   // data (as RESONANCE's count-ups do) rather than the element's content.
   // A replaced node is a tree change, and the shell's :has() rules then
   // restyle <html> and <body> on every frame.
