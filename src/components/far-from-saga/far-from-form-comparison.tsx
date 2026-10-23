@@ -25,7 +25,6 @@ export const FarFromFormComparison = memo(function FarFromFormComparison({
   return (
     <details className="ffs-form-comparison" onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary>
-        <span lang="en">FORM COMPARISON</span>
         <strong>五つの形態を並べて比較</strong>
         <span className="ffs-comparison-codes" aria-hidden="true">
           {FAR_FROM_SAGA_STAGE_ORDER.map((key) => (

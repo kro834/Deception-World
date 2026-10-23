@@ -1623,7 +1623,10 @@ html[data-family="special"]
 /* ---------- The form the scroll ends on (owner, 2026-10-23) ----------
    Right after the runway: ミドル … ウルトラ as the #stages rail draws them
    (the same liquid rail), then the ending — the order the end of the scroll
-   overwrites the figure in, its sentence and the way back to watch it. */
+   overwrites the figure in, and the way back to watch it, in one frame.
+   No eyebrow, title, hint or sentence on screen (owner, 2026-10-23: 「不要な
+   セカンダリラベルや説明を避ける」): the rail under the figure is the choice,
+   the route's lit bars are the answer. ウルトラ's note reads under the frame. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending {
   display: grid;
   justify-items: center;
@@ -1633,41 +1636,24 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending {
   margin: clamp(30px, 4.4vw, 56px) auto 0;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-head {
-  display: grid;
-  gap: 6px;
-  justify-items: center;
-  text-align: center;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-head > p {
-  margin: 0;
-  color: var(--ffs-accent);
-  font: 400 12px / 1.2 var(--dx-hud);
-  letter-spacing: 0.28em;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-head > h3 {
-  margin: 0;
-  color: var(--dx-text);
-  font: 700 clamp(20px, 2.3vw, 26px) / 1.35 var(--dx-display);
-  letter-spacing: 0.04em;
-}
-
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending > .ffs-ending-tabs {
   margin: 0 auto;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending > .rxs-stage-hint {
-  margin: -4px auto 0;
-}
-
+/* The rail and its frame read as one control: the frame hangs from it. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel {
   display: grid;
   gap: 14px;
   box-sizing: border-box;
   width: 100%;
-  padding: clamp(16px, 2.4vw, 22px) clamp(16px, 2.6vw, 26px);
+}
+
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame {
+  display: grid;
+  gap: clamp(16px, 2vw, 20px);
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(18px, 2.4vw, 24px) clamp(16px, 2.6vw, 26px) clamp(16px, 2.2vw, 22px);
   border: 1px solid color-mix(in srgb, var(--ffs-accent) 32%, transparent);
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 9%, transparent), transparent 62%),
@@ -1719,27 +1705,11 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
   letter-spacing: 0.02em;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-line {
-  margin: 0;
-  color: #e6f1f5;
-  font: 500 15px / 1.8 var(--dx-body);
-  text-wrap: pretty;
-}
-
-/* Narrow layouts: the sentence wraps to one, two or three lines by form;
-   its space is the longest's, so #suitup's height never changes with the
-   selected form (Safari has no scroll anchoring). */
-@media (max-width: 1099.98px) {
-  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-line {
-    min-height: 5.4em;
-  }
-}
-
+/* ウルトラ's note: a caption under the frame, on the frame's left edge. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra {
   display: grid;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--ffs-accent) 24%, transparent);
+  gap: 6px;
+  padding: 2px clamp(16px, 2.6vw, 26px) 0;
 }
 
 /* Any other form: the note keeps its space, unseen (never display: none —
@@ -1762,11 +1732,11 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > .ffs-not
   font-size: 12px;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls {
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls {
   justify-content: flex-start;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls > button {
+html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls > button {
   border-color: color-mix(in srgb, var(--ffs-accent) 60%, transparent);
   background: color-mix(in srgb, var(--ffs-accent) 16%, transparent);
 }
@@ -1799,12 +1769,12 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-ass
     overflow-wrap: anywhere;
   }
 
-  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls {
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls {
     display: grid;
     justify-content: stretch;
   }
 
-  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel > .ffs-assembly-controls > :is(a, button) {
+  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls > :is(a, button) {
     justify-content: center;
   }
 }

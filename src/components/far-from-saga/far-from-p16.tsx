@@ -166,7 +166,6 @@ function P16Comparator() {
     <div className="ffs-p16-comparator rxs-reveal">
       <header>
         <div>
-          <small lang="en">GENERATION COMPARISON</small>
           <h3>P16 / {TITLES[baseline]}</h3>
         </div>
         <ProvisionalTag />
@@ -283,7 +282,6 @@ export function FarFromP16() {
       <div className="ffs-p16-overview rxs-reveal">
         <P16Core />
         <div className="ffs-p16-copy">
-          <small lang="en">P16 / SIXTEENTH GENERATION</small>
           <h3>第16世代演算加速機構</h3>
           <p>{P16_INTRO.basis}</p>
           <p>{P16_INTRO.generations}</p>
@@ -316,7 +314,6 @@ export function FarFromP16() {
 
       <section className="ffs-p16-lineage rxs-reveal" aria-labelledby="ffs-p16-lineage-title">
         <header>
-          <small lang="en">LINEAGE</small>
           <h3 id="ffs-p16-lineage-title">P2からP16へ</h3>
         </header>
         <ol>
@@ -333,9 +330,8 @@ export function FarFromP16() {
       <div className="ffs-p16-topics" role="list" aria-label="P16の機能">
         {P16_TOPICS.map((topic, index) => (
           <article key={topic.key} className="rxs-reveal" role="listitem">
-            <header>
+            <header aria-hidden="true">
               <span>{String(index + 1).padStart(2, "0")}</span>
-              <small lang="en">{topic.code}</small>
             </header>
             <h3>{topic.title}</h3>
             {topic.body.map((paragraph) => (
