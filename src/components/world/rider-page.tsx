@@ -1363,8 +1363,10 @@ export function RiderPage({ id }: { id: string }) {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel={`CHARACTER FILE // ${rider.no}`}
+        fileLabel={`${rider.civilian.name}の資料`}
         returnHash="riders-return"
         returnLabel="ライダー一覧へ戻る"
       />
@@ -1386,24 +1388,21 @@ export function RiderPage({ id }: { id: string }) {
               fetchPriority="high"
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
-            <span className="manager-numeral">{rider.no}</span>
           </div>
         </div>
         <div className="manager-introduction">
           <header className="dossier-identity">
-            <p className="manager-file-number">
-              CHARACTER FILE // {rider.no} {rider.name}
-            </p>
+            {/* The file's numeral, drawn in outline over the name as on the
+                end card (decorative: the name is the heading). */}
+            <span className="dossier-file-numeral" aria-hidden="true">
+              {rider.no}
+            </span>
             <h1>
-              <small>{rider.enPerson}</small>
               <span className="manager-display-name">
                 <NameText value={rider.civilian.name} />
               </span>
             </h1>
             <p className="manager-title"># {rider.epithet}</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
           </header>
           <div className="manager-quotes">
             {rider.quotes.map((q) => (
@@ -1444,7 +1443,6 @@ export function RiderPage({ id }: { id: string }) {
               decoding="async"
               fetchPriority="low"
             />
-            <span>BEFORE</span>
             <i className="rider-archive-civilian-shade" />
           </div>
           <figcaption>
@@ -1467,7 +1465,6 @@ export function RiderPage({ id }: { id: string }) {
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>PARTNER</span>
               <i className="rider-archive-civilian-shade" />
             </div>
             <figcaption>
@@ -1476,7 +1473,6 @@ export function RiderPage({ id }: { id: string }) {
               <h2>
                 <NameText value={rider.partner.name} />
               </h2>
-              <p className="rider-partner-en-name">{rider.partner.enName}</p>
               <q className="rider-partner-call">{rider.partner.call}</q>
               <div className="rider-partner-copy">
                 {rider.partner.body.map((paragraph) => (
@@ -1506,12 +1502,9 @@ export function RiderPage({ id }: { id: string }) {
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>NIGHTMARE</span>
               <i className="rider-nightmare-card-shade" />
             </div>
             <div className="rider-nightmare-card-copy">
-              <p>{rider.nightmare.kicker}</p>
-              <small>PICKUP</small>
               <h2>
                 <span>{rider.nightmare.name}</span>
               </h2>
@@ -1531,10 +1524,6 @@ export function RiderPage({ id }: { id: string }) {
         id="dossier-index"
         aria-label={`${rider.civilian.name}の人物資料`}
       >
-        <div className="manager-section-index">
-          <span>{rider.no}</span>
-          <small>CHARACTER DOSSIER</small>
-        </div>
         <DossierContents sections={rider.sections} />
         <div className="manager-sections">
           {rider.sections.map((s) => (
@@ -1609,11 +1598,9 @@ export function RiderPage({ id }: { id: string }) {
                 decoding="async"
                 fetchPriority="low"
               />
-              <span>SPECIAL SITE</span>
             </div>
             <div className="rider-special-site-copy">
               <p>{rider.special.kicker}</p>
-              <small>{rider.special.en}</small>
               <h2 id="rider-special-site-title">
                 <span>仮面ライダー</span>
                 <b>
@@ -1639,7 +1626,6 @@ export function RiderPage({ id }: { id: string }) {
       {rider.partner && partnerForms.length ? (
         <section className="rider-partner-forms" aria-labelledby="rider-partner-forms-title">
           <header>
-            <p>SKILLED DUO / SECOND RIDER RECORD</p>
             <h2 id="rider-partner-forms-title">
               <NameText value={rider.partner.name} />
               の変身記録
@@ -1670,7 +1656,7 @@ export function RiderPage({ id }: { id: string }) {
           </div>
         </section>
       ) : null}
-      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} indexLabel="EIGHT RIDERS" />
+      <DossierNav items={RIDER_NAV} currentHref={`/riders/${rider.id}`} />
       {rider.nightmare ? (
         <dialog
           ref={nightmareRef}
@@ -1695,16 +1681,11 @@ export function RiderPage({ id }: { id: string }) {
               aria-label="閉じる"
             >
               <LiquidPointerGlow />
-              <span>CLOSE</span>
               <i aria-hidden="true">
-                <UiVectorIcon kind="close" size={16} />
+                <UiVectorIcon kind="close" size={18} />
               </i>
             </button>
             <div className="rider-nightmare-dialog-heading">
-              <p>
-                <span>NIGHTMARE PICKUP</span>
-              </p>
-              <small>{rider.nightmare.kicker}</small>
               <h2>
                 <span>{rider.nightmare.name}</span>
               </h2>
@@ -1721,10 +1702,6 @@ export function RiderPage({ id }: { id: string }) {
                   decoding="async"
                   fetchPriority="low"
                 />
-                <figcaption>
-                  <span>FORM VISUAL</span>
-                  <b>MACHIAVEL GORE NIGHTMARE</b>
-                </figcaption>
               </figure>
               <div className="rider-nightmare-dialog-record">
                 <dl>

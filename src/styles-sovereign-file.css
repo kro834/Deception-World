@@ -262,16 +262,10 @@ main.manager-page.is-sovereign .manager-topbar .brand small {
   color: rgb(240 207 134 / 72%);
 }
 
-/* The node label, in the HUD face at 12px; it is decoration, so silent. */
+/* No node label in the bar (2026-10-23: 不要なセカンダリラベルを削除). */
 @media (min-width: 1040px) {
   main.manager-page.is-sovereign .manager-topbar::before {
-    content: "AUTHORITY NODE // 01" / "";
-    color: rgb(240 207 134 / 78%);
-    font-family: var(--sv-hud);
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    white-space: nowrap;
+    content: none;
   }
 }
 

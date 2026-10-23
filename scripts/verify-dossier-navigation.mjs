@@ -77,7 +77,9 @@ try {
 
     await page.goto(`${base}/managers/lejas`);
     await ready(page);
-    await page.locator(".dossier-read-link").click();
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+    // No 人物資料を読む link in the hero: the ruler's 人物資料 is the same jump.
+    await page.locator('.dossier-reader a[href="#dossier-index"]').click();
     await page.waitForURL("**#dossier-index");
     const contents = page.locator(".dossier-contents a");
     assert.equal(await contents.count(), 3);
