@@ -54,13 +54,6 @@ main.manager-page:not(.is-sovereign)
   min-width: 0;
 }
 
-.character-chapter-next-copy small {
-  color: var(--sd-accent, var(--manager-accent, #86d9ff));
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.6;
-}
-
 .character-chapter-next-copy b,
 .character-related-copy b {
   color: var(--sd-text, #eef4fa);

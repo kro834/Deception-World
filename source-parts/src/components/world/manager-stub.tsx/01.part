@@ -434,5 +434,3 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   </section>
                 ) : null}
                 {finishers.length ? (
-                  <section className="is-finisher">
-                    <header>

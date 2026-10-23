@@ -1,3 +1,17 @@
+          { name: "インパクトオーバーバニッシュ", body: "フィジカムインパクトの超必殺技。" },
+        ],
+      },
+      {
+        img: "/rider-over-zeztz-explom-20261019-v2.jpeg",
+        pos: "50% 8%",
+        system: "ゼッツドライバー",
+        name: "オーバーゼッツ",
+        sub: "エクスプロム",
+        theme: "explom",
+        calls: [
+          "アメイジング！ ライダー！",
+          "ゼッツ！ゼッツ！ゼッツ！",
+          "オーバー！",
           "エクスプロム！",
         ],
         overview: [
@@ -307,8 +321,10 @@ export function RiderPage({ id }: { id: string }) {
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
       <DossierTopbar
-        fileLabel={`CHARACTER FILE // ${rider.no}`}
+        fileLabel={`${rider.civilian.name}の資料`}
         returnHash="riders-return"
         returnLabel="ライダー一覧へ戻る"
       />
@@ -330,23 +346,3 @@ export function RiderPage({ id }: { id: string }) {
               fetchPriority="high"
             />
             <i className="dossier-arrive-scan" aria-hidden="true" />
-            <span className="manager-numeral">{rider.no}</span>
-          </div>
-        </div>
-        <div className="manager-introduction">
-          <header className="dossier-identity">
-            <p className="manager-file-number">
-              CHARACTER FILE // {rider.no} {rider.name}
-            </p>
-            <h1>
-              <small>{rider.enPerson}</small>
-              <span className="manager-display-name">
-                <NameText value={rider.civilian.name} />
-              </span>
-            </h1>
-            <p className="manager-title"># {rider.epithet}</p>
-            <a className="dossier-read-link" href="#dossier-index">
-              人物資料を読む <span aria-hidden="true">↓</span>
-            </a>
-          </header>
-          <div className="manager-quotes">

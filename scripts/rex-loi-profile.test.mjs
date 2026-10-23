@@ -19,7 +19,8 @@ test("Rex Loi profile keeps the requested identity, authority, and core facts", 
   assert.match(profile, /DIVINITY", dd: "秩序の神"/);
   assert.match(profile, /AUTHORITY", dd: "秩序／破壊・固定管轄なし"/);
   assert.match(profile, /RIDER", dd: "仮面ライダーヴァンダール"/);
-  assert.match(profile, /STATUS", dd: "ACCESS GRANTED"/);
+  // Owner (2026-10-23): STATUS: ACCESS GRANTED は不要なセカンダリラベルとして削除。
+  assert.doesNotMatch(profile, /ACCESS GRANTED/);
   for (const value of [
     "185.0cm",
     "80.1kg",

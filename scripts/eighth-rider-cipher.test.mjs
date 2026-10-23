@@ -17,7 +17,10 @@ test("Cipher is the eighth rider everywhere the rider index is exposed", () => {
   assert.match(home, /EIGHT RIDERS \/ ONE WORLD/);
   assert.match(nav, /href: "\/riders\/cipher"/);
   assert.match(nav, /kicker: "RIDER 08"/);
-  assert.match(dossier, /indexLabel="EIGHT RIDERS"/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
+  // The end card's EIGHT RIDERS caption is gone: its roster lists the eight.
+  assert.match(dossier, /<DossierNav items=\{RIDER_NAV\} currentHref=\{`\/riders\/\$\{rider\.id\}`\} \/>/);
+  assert.equal((nav.slice(nav.indexOf("export const RIDER_NAV"), nav.indexOf("export const RELATED_NAV")).match(/href: "\/riders\//g) ?? []).length, 8);
 });
 
 test("Lucien and both Cipher forms use the supplied records and assets", () => {
