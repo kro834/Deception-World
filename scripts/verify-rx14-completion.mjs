@@ -213,7 +213,9 @@ try {
     .first()
     .evaluate((node) => node.scrollIntoView({ block: "center", behavior: "instant" }));
   assert.equal(await page.locator(".wa-person.is-none img").count(), 0);
-  assert.match(await page.locator(".wa-person.is-none .is-vacant").first().innerText(), /NO FILE/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the sealed plate
+  // carries the vacancy itself; its NO FILE chip is gone.
+  assert.doesNotMatch(await page.locator(".wa-person.is-none .is-vacant").first().innerText(), /NO FILE/);
   await shot(page, "1440-world-azato");
   await page.goto(`${base}/riders/saga`, { waitUntil: "domcontentloaded" });
   await ready(page);

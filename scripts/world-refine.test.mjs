@@ -353,7 +353,9 @@ test("the annex locator is one appended block, gated, silent and opacity-only", 
     ["05", "WORLD FILES"],
     ["06", "ARCHIVE LOG"],
   ]) {
-    assert.ok(annex.includes(`<ChapterOpener no="${no}" label="${label}" />`), no);
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the opener
+    // shows its numeral alone; the header chip keeps the chapter's words.
+    assert.ok(annex.includes(`<ChapterOpener no="${no}" />`), `${no} ${label}`);
   }
   // Named view timelines on the annex ids, scoped to the World root.
   for (const [id, name] of [

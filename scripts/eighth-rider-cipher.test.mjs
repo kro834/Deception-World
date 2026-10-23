@@ -14,7 +14,9 @@ const cutInCss = read("src/styles-world/22.css");
 test("Cipher is the eighth rider everywhere the rider index is exposed", () => {
   assert.match(home, /id: "cipher",\s*no: "08"/);
   assert.match(home, /aria-label="八人のメインライダー"/);
-  assert.match(home, /EIGHT RIDERS \/ ONE WORLD/);
+  // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the English
+  // eyebrow over 八人の戦いが交わる。 is gone; the heading and the eight tabs say it.
+  assert.doesNotMatch(home, /EIGHT RIDERS \/ ONE WORLD/);
   assert.match(nav, /href: "\/riders\/cipher"/);
   assert.match(nav, /kicker: "RIDER 08"/);
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
@@ -47,14 +49,33 @@ test("Lucien and both Cipher forms use the supplied records and assets", () => {
 });
 
 test("Cipher calls and comparisons follow the revised September record", () => {
-  const cipher = dossier.slice(dossier.indexOf('id: "cipher"'), dossier.indexOf('export function RiderPage'));
-  const calls = [...cipher.matchAll(/calls: \[([\s\S]*?)\]/g)].map((match) => [...match[1].matchAll(/"([^"]+)"/g)].map((item) => item[1]));
+  const cipher = dossier.slice(
+    dossier.indexOf('id: "cipher"'),
+    dossier.indexOf("export function RiderPage"),
+  );
+  const calls = [...cipher.matchAll(/calls: \[([\s\S]*?)\]/g)].map((match) =>
+    [...match[1].matchAll(/"([^"]+)"/g)].map((item) => item[1]),
+  );
   assert.deepEqual(calls, [
     ["CIPHER IN!", "ROLLOUT!", "CIPHER!", "ON EARTH!?"],
     ["CIPHER IN!", "ROLLOUT!", "ERASE THE TRACE!", "BLACKSITE!", "FOCUS ON!"],
   ]);
-  for (const value of ["ディルクルムサーガやヴィンクルムサーガ", "エクスプリームサーガやレルムレジェンズ", "エクスプリームサーガ・ウルトラを大幅に下回る", "CIPHER ENTER！", "CIPHER CONQUER！", "7200TOPS / 96Core", "18000TOPS / 144Core", "2400E", "5200E"]) assert.ok(cipher.includes(value), value);
-  assert.doesNotMatch(cipher, /DEAD DROP|NO TRACE|CIPHER BLACK!|REALMSフランス本部からSCARSへ潜入|インテグラルサーガやヴァーテックス/);
+  for (const value of [
+    "ディルクルムサーガやヴィンクルムサーガ",
+    "エクスプリームサーガやレルムレジェンズ",
+    "エクスプリームサーガ・ウルトラを大幅に下回る",
+    "CIPHER ENTER！",
+    "CIPHER CONQUER！",
+    "7200TOPS / 96Core",
+    "18000TOPS / 144Core",
+    "2400E",
+    "5200E",
+  ])
+    assert.ok(cipher.includes(value), value);
+  assert.doesNotMatch(
+    cipher,
+    /DEAD DROP|NO TRACE|CIPHER BLACK!|REALMSフランス本部からSCARSへ潜入|インテグラルサーガやヴァーテックス/,
+  );
   assert.doesNotMatch(gate, /NO TRACE \/\/ DEAD DROP/);
 });
 

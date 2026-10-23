@@ -23,7 +23,6 @@ export function WorldRecordContext({ episodeNo }: { episodeNo: string }) {
 
   return (
     <nav className="wr-record-context" aria-label={`EP.${episodeNo}の関連資料`}>
-      <p className="wr-record-context-title">関連資料</p>
       {context.groups.map((group) => (
         <div className="wr-record-group" key={group.label}>
           <p className="wr-record-group-label">{group.label}</p>

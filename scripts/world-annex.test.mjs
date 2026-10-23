@@ -52,7 +52,11 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner supplied Varg's artwork: responsive, uncropped, distinct from Dante.
     // Owner: Dogs is the fourth tab; Related remains the third tab.
     // Owner (2026-10-21): the hero gains an aria-hidden light layer (.zn-hero-light: two streamline trails and a bloom, styles-world-zenith.css); copy and records unchanged.
-    markup: "e7ff13e9e76c3d5509faf771c66c8cc1a95b25d4c3d6ad70c65a4abd6e339396",
+    // Owner (2026-10-23): the special sites' grammar on /world — the CONTENTS map (chapter headings moved, not reworded), "0N / 06" slate counts, the hero HUD layer, the footer billing and SPECIAL SITES doors, the chapter rail (world-special.tsx); copy and records unchanged.
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the chapter map keeps only the chapters' own headings and numerals (no readouts, codes or counts), the slates lose their "0N / 06", the doors their captions, the footer its END OF RECORD endmark and the title stage its SYNC readout.
+    // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the UI label layer (hero 02 mark, KEY VISUAL caption, AUTO/LOCKED, faux metadata; chapter captions and English eyebrows; MANAGER ARCHIVE, tab codes, OPEN DOSSIER/ACCESS captions, card codes, English name duplicates, UNRESOLVED; WORLD COLUMN; RIDER / NN and the English name line; EPISODE ARCHIVE, RECORDS FOUND, IDENTIFIED RECORD, the card kicker; the pickups' PICKUP codes and captions; THE WORLD IS WAITING.) is gone; the rider note speaks only while a hold runs.
+    // Owner (2026-10-23, ruling): the cards' RELATED / 01·02·05 and SECOND DOG / 02 codes and the archive slots' numbers stay (they pair with the artwork cards' RELATED / 03·04); the column pickup shows its own kicker (data) without the ARCHIVE prefix.
+    markup: "5f5ade5752dd2db376ba7974c637e1173e5256b82324950abc75f8c06f3956ac",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

@@ -203,30 +203,19 @@ function AnnexQuote({
   );
 }
 
-/* A still copy of the chapter numeral, rule and label (.section-index). */
-function ChapterOpener({ no, label }: { no: string; label: string }) {
+/* A still copy of the chapter numeral and rule (.section-index). The
+   numeral and the heading under it carry the chapter (owner, 2026-10-23:
+   不要なセカンダリラベルを削除（レイアウトで説明）). */
+function ChapterOpener({ no }: { no: string }) {
   return (
     <div className={`wa-chapter wa-chapter-${no}`} aria-hidden="true">
       <span>{no}</span>
-      <small>{label}</small>
       <i />
     </div>
   );
 }
 
-function AnnexHeading({
-  id,
-  no,
-  code,
-  title,
-  count,
-}: {
-  id: string;
-  no?: string;
-  code: string;
-  title: string;
-  count: string;
-}) {
+function AnnexHeading({ id, no, title }: { id: string; no?: string; title: string }) {
   return (
     <header className={no ? "wa-heading has-no" : "wa-heading"}>
       {no ? (
@@ -234,9 +223,7 @@ function AnnexHeading({
           {no}
         </span>
       ) : null}
-      <p className="wa-code">{code}</p>
       <h2 id={id}>{title}</h2>
-      <span className="wa-count">{count}</span>
     </header>
   );
 }
@@ -259,7 +246,6 @@ function CastPortrait({ entry }: { entry: WorldCastEntry }) {
         <b>
           <NameText value={entry.name} />
         </b>
-        <small lang="en">NO FILE</small>
       </span>
     );
   return (
@@ -329,25 +315,17 @@ function CastFiles() {
       aria-labelledby="cast-roster-title"
     >
       <div className="wa-inner">
-        <ChapterOpener no="04" label="CAST FILES" />
-        <AnnexHeading
-          id="cast-roster-title"
-          code="CHARACTERS"
-          title="人物一覧"
-          count={`${pad(WORLD_CAST_ROSTER.length)} PERSONS`}
-        />
+        <ChapterOpener no="04" />
+        <AnnexHeading id="cast-roster-title" title="人物一覧" />
         <WorldCastDirectory filter={filter} onChange={setFilter} />
         <ol className="wa-roster">
-          {WORLD_CAST_ROSTER.map((entry, index) => (
+          {WORLD_CAST_ROSTER.map((entry) => (
             <li key={entry.id} hidden={!matchesCastDirectoryFilter(entry, filter)}>
               <article
                 className={`wa-plate wa-person is-${kindOf(entry)}`}
                 aria-labelledby={`wa-person-${entry.id}`}
               >
                 <CastPortrait entry={entry} />
-                <span className="wa-index" aria-hidden="true">
-                  {pad(index + 1)}
-                </span>
                 <div className="wa-person-body">
                   {/* A rider name breaks after 仮面ライダー, never inside it
                       (アルゲノ / ム), and keeps its dash company. */}
@@ -383,7 +361,7 @@ function CastFiles() {
                     assets={DOSSIER_ASSETS.get(entry.to) ?? []}
                     aria-label={`${entry.name}の個別資料を開く`}
                   >
-                    <span>OPEN DOSSIER</span>
+                    <span aria-hidden="true" />
                   </GuardedLink>
                 ) : null}
               </article>
@@ -404,13 +382,8 @@ function WorldFiles() {
       aria-labelledby="world-brief-title"
     >
       <div className="wa-inner">
-        <ChapterOpener no="05" label="WORLD FILES" />
-        <AnnexHeading
-          id="world-brief-title"
-          code="WORLD BRIEF"
-          title="世界と組織"
-          count={`${pad(WORLD_BRIEF.length)} FILES`}
-        />
+        <ChapterOpener no="05" />
+        <AnnexHeading id="world-brief-title" title="世界と組織" />
         <div className="wa-brief-stage">
           <WorldBriefArt />
           <div className="wa-brief-documents">
@@ -493,7 +466,6 @@ function WorldFiles() {
               ))}
             </div>
             <section className="wa-locations" aria-labelledby="wa-locations-title">
-              <p className="wa-code">LOCATIONS</p>
               <h3 id="wa-locations-title">舞台</h3>
               <ol>
                 {WORLD_LOCATIONS.map((place, index) => (
@@ -615,7 +587,9 @@ function QuoteRail({ children }: { children: ReactNode }) {
       <div className="wa-transcript-toolbar">
         <p id="world-transcript-help">
           声の記録を綴る。ときどき、その輪郭が乱れる。
-          <small>軽量設定・動きを減らす設定では、全文を表示します。</small>
+          <small className="visually-hidden">
+            軽量設定・動きを減らす設定では、全文を表示します。
+          </small>
         </p>
         <button
           type="button"
@@ -655,7 +629,9 @@ function QuoteRail({ children }: { children: ReactNode }) {
           <output aria-live="polite" aria-atomic="true" aria-label="表示中の名台詞">
             {pad(active + 1)} / {pad(WORLD_QUOTES.length)}
           </output>
-          <span id="world-quotes-help">スワイプ・左右キーで切替</span>
+          <span id="world-quotes-help" className="visually-hidden">
+            スワイプ・左右キーで切替
+          </span>
         </div>
         <button
           type="button"
@@ -690,14 +666,8 @@ function ArchiveLog() {
         aria-labelledby="episode-notes-title"
       >
         <div className="wa-inner">
-          <ChapterOpener no="06" label="ARCHIVE LOG" />
-          <AnnexHeading
-            id="episode-notes-title"
-            no="06.1"
-            code="EPISODE RECORDS"
-            title="エピソードの記録"
-            count={`EP.${WORLD_EPISODE_NOTES[0].no}–${WORLD_EPISODE_NOTES[WORLD_EPISODE_NOTES.length - 1].no}`}
-          />
+          <ChapterOpener no="06" />
+          <AnnexHeading id="episode-notes-title" no="06.1" title="エピソードの記録" />
           <p className="wa-prose">EP.01〜03の展開を含みます。</p>
           <WorldEpisodeIndex />
           <ol className="wa-episodes">
@@ -732,7 +702,10 @@ function ArchiveLog() {
                     </span>
                     <strong lang="en">{episode.title}</strong>
                     <small>
-                      <i lang="en">STAGE</i> {episode.stage}
+                      <i lang="en" className="visually-hidden">
+                        STAGE
+                      </i>
+                      {episode.stage}
                     </small>
                   </p>
                   {/* The notes and the lines as one column beside the art on
@@ -760,13 +733,7 @@ function ArchiveLog() {
 
       <section id="glossary" className="world-annex" aria-labelledby="glossary-title">
         <div className="wa-inner">
-          <AnnexHeading
-            id="glossary-title"
-            no="06.2"
-            code="KEYWORDS"
-            title="用語集"
-            count={`${pad(WORLD_GLOSSARY.length)} TERMS`}
-          />
+          <AnnexHeading id="glossary-title" no="06.2" title="用語集" />
           {/* The terms as a register (numbered from styles-world-zenith.css),
               each a jump to its entry below. */}
           <nav className="wa-term-index" aria-label="用語の索引">
@@ -798,13 +765,7 @@ function ArchiveLog() {
 
       <section id="quotes" className="world-annex wa-quotes" aria-labelledby="quotes-title">
         <div className="wa-inner">
-          <AnnexHeading
-            id="quotes-title"
-            no="06.3"
-            code="QUOTES"
-            title="名台詞"
-            count={`${pad(WORLD_QUOTES.length)} LINES`}
-          />
+          <AnnexHeading id="quotes-title" no="06.3" title="名台詞" />
           {/* A snap rail on phones (the region scrolls sideways; a vertical
               swipe still scrolls the page), a plate-less log from 700px. */}
           <QuoteRail>
@@ -834,8 +795,9 @@ export function WorldAnnexRecords() {
     <>
       <nav className="wa-contents" aria-labelledby="wa-contents-title">
         <div className="wa-contents-inner">
-          <p className="wa-code">ARCHIVE INDEX</p>
-          <h2 id="wa-contents-title">資料目次</h2>
+          <h2 id="wa-contents-title" className="visually-hidden">
+            資料目次
+          </h2>
           <ol>
             {ANNEX_CONTENTS.map(({ href, code, label }) => (
               <li key={href}>
