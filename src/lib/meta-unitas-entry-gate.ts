@@ -75,3 +75,39 @@ export function warmMetaUnitasEntry(): Promise<boolean> {
       );
   return warm;
 }
+
+/** On intent (a hover, a focus, a touch on a link to the page): the call's
+ * chunk, the engine and the suit's pictures, so the entry is ready when the
+ * press lands (owner, 2026-10-24: 「メタ・ウニタスの遷移が一瞬で変わるので修正して」 —
+ * a cold call missed its deadline and fell back to the plain dive). */
+export function prefetchMetaUnitasEntry() {
+  void fetchModule();
+  void import("./meta-unitas-rx-engine.ts").catch(() => {});
+  void warmMetaUnitasEntry();
+}
+
+/** After a page's load, in idle time: the code only (the chunk and the
+ * engine, small), never the pictures. Returns the canceller. */
+export function scheduleMetaUnitasEntryPrefetch(): () => void {
+  if (typeof window === "undefined") return () => {};
+  let id = 0;
+  let timer = 0;
+  const run = () => {
+    id = 0;
+    timer = 0;
+    void fetchModule();
+    void import("./meta-unitas-rx-engine.ts").catch(() => {});
+  };
+  const start = () => {
+    if (typeof window.requestIdleCallback === "function")
+      id = window.requestIdleCallback(run, { timeout: 4000 });
+    else timer = window.setTimeout(run, 1500);
+  };
+  if (document.readyState === "complete") start();
+  else window.addEventListener("load", start, { once: true });
+  return () => {
+    window.removeEventListener("load", start);
+    if (id) window.cancelIdleCallback?.(id);
+    if (timer) window.clearTimeout(timer);
+  };
+}

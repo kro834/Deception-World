@@ -57,7 +57,9 @@ import {
 // under the same cover (src/lib/meta-unitas-entry-gate.ts).
 import {
   META_UNITAS_ENTRY_TIMINGS,
+  prefetchMetaUnitasEntry,
   prepareMetaUnitasTransition,
+  scheduleMetaUnitasEntryPrefetch,
   warmMetaUnitasEntry,
   type MetaUnitasTransitionRenderer,
 } from "@/lib/meta-unitas-entry-gate";
@@ -949,6 +951,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // after that destination's own load; route changes cancel stale idle jobs.
   // rx17 (owner): soon after each page's load, with the call's own chunk.
   useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
+  // META UNITAS's call chunk and engine, after each page's load (code only).
+  useEffect(
+    () => (pathname === "/meta-unitas-saga" ? undefined : scheduleMetaUnitasEntryPrefetch()),
+    [pathname],
+  );
   // Owner (2026-10-11): the Rexonance page itself (chunk, styles, hero) too.
   useEffect(
     () => scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" })),
@@ -1565,7 +1572,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               markRouteCover("covering");
             }
             const warm = warmMetaUnitasEntry();
-            const preparation = prepareMetaUnitasTransition();
+            // A cold chunk gets a longer window: the call is the page's
+            // entry, never skipped for a slow first load.
+            const preparation = prepareMetaUnitasTransition(4000);
             rexonanceCoverCancel.current = preparation.cancel;
             metaUnitasCall = await preparation.promise;
             if (rexonanceCoverCancel.current === preparation.cancel)
@@ -1573,17 +1582,22 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (!isCurrent()) return;
             if (metaUnitasCall) {
               setSignal("running");
+              // A short window: the call plays whether or not the pictures
+              // are in (its scene holds the wearer meanwhile), so a slow
+              // connection never leaves the press without a cover for long.
               const entry = prepareRexonanceEntry({
                 decoded: warm,
                 prepare: () => Promise.resolve(true),
-                deadlineMs: 1800,
+                deadlineMs: 600,
               });
               rexonanceCoverCancel.current = entry.cancel;
               const ready = await entry.promise;
               if (rexonanceCoverCancel.current === entry.cancel)
                 rexonanceCoverCancel.current = null;
               if (!isCurrent()) return;
-              if (!ready) metaUnitasCall = null;
+              // Pictures still on their way: the call plays regardless (its
+              // scene holds the wearer until the engine is ready).
+              void ready;
               setSignal("idle");
             }
             startedAt = performance.now();
@@ -2481,6 +2495,7 @@ export function GuardedLink({
     if (to === "/rexonance-saga") void warmRexonanceSuit("high");
     // FAR FROM's call chunk and images, the same way (never on a still tier).
     if (to === "/far-from-saga") prefetchFarFromEntry();
+    if (to === "/meta-unitas-saga") prefetchMetaUnitasEntry();
     if (preloadedRoute.current !== to) {
       preloadedRoute.current = to;
       void router.preloadRoute({ to }).catch(() => {
