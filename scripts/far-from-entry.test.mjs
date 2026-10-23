@@ -77,8 +77,8 @@ test("the seven calls are the record's own, verbatim, on six contiguous beats in
   for (const banned of ["AudioContext", "new Audio", "speechSynthesis", "Math.random"])
     assert.equal(sequence.includes(banned), false, banned);
   // Plain HUD copy from the page's own facts.
-  assert.deepEqual(calls.FAR_FROM_SUIT_SYSTEMS[2], ["KHAOS DeuX", "60000YOPS / ∞Core"]);
-  assert.match(FAR_FROM_SAGA.specs.find((row) => row.dt === "主演算").dd, /60000YOPS／∞Core/);
+  assert.deepEqual(calls.FAR_FROM_SUIT_SYSTEMS[2], ["KHAOS DeuX", "60000〜YOPS / ∞Core"]);
+  assert.match(FAR_FROM_SAGA.specs.find((row) => row.dt === "主演算").dd, /60000〜YOPS／∞Core/);
   // A form is named in katakana only (owner, 2026-10-23).
   assert.deepEqual([...calls.FAR_FROM_ENTRY_CAPTION], ["FARFROM DRIVE", "SA-GA OS 6.1 / ミドル"]);
 });
