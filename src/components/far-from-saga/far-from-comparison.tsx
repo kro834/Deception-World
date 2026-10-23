@@ -1,5 +1,6 @@
 import { useId, useState, type CSSProperties } from "react";
 import {
+  ACCEL_LABEL,
   BASELINES,
   BASIC_METRICS,
   BASIC_TABLE,
@@ -20,6 +21,7 @@ import {
   type CellValue,
   type FormKey,
 } from "./far-from-comparison-data";
+import { P16_VS_EXTREME, p16ChangeAgainstExtremeText } from "./far-from-p16-data";
 import { reportChapter, sentence } from "./far-from-report-data";
 
 /* #performance — the comparison console (owner's comparison text, 2026-10-22).
@@ -30,7 +32,9 @@ import { reportChapter, sentence } from "./far-from-report-data";
    【同条件ベンチマーク・暫定評価】 indices as a bar chart (レクソナンス・ハイ =
    100; 熱負荷 reads lower = better). Every figure on screen is one of the
    owner's cells or the ratio of two cells in the same row; each table's ※
-   note is printed under it, verbatim. */
+   note is printed under it, verbatim. The one exception is labelled as such:
+   in the エクスプリーム view, 加速機構 adds P16 / P14（Extreme tuning）, the
+   暫定ベンチマーク／設定案 the owner asked for (far-from-p16-data.ts). */
 
 type View = BaselineKey | "all";
 
@@ -170,15 +174,45 @@ function TextRows({ baseline }: { baseline: BaselineKey | null }) {
             {shown.map((item) => (
               <div key={item.key} style={accentStyle(item.key)}>
                 <dt>{item.label}</dt>
-                <dd data-pending={row.values[item.key] === "個別比較値未確定" || undefined}>
-                  {row.values[item.key]}
-                </dd>
+                <dd>{row.shown[item.key]}</dd>
               </div>
             ))}
           </dl>
         </article>
       ))}
+      {baseline === "extreme" ? <AccelVsExtreme /> : null}
     </div>
+  );
+}
+
+/** 加速機構, エクスプリームと比較: P16 against P14（Extreme tuning）, the
+ * 暫定ベンチマーク／設定案 of far-from-p16-data.ts (not the owner's text). */
+function AccelVsExtreme() {
+  return (
+    <article className="ffs-accel-compare" aria-labelledby="ffs-accel-compare-title">
+      <header>
+        <h4 id="ffs-accel-compare-title">
+          {ACCEL_LABEL}：P16 / {P16_VS_EXTREME.name}
+        </h4>
+        <span className="ffs-provisional-tag">暫定ベンチマーク／設定案</span>
+      </header>
+      <dl>
+        {P16_VS_EXTREME.metrics.map((metric) => {
+          return (
+            <div key={metric.key}>
+              <dt>{metric.label}</dt>
+              <dd>
+                <b>{p16ChangeAgainstExtremeText(metric)}</b>
+                <small>
+                  {metric.extreme} → {metric.p16}
+                </small>
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+      <p>値はレクソナンスのP14＝100。{P16_VS_EXTREME.note}</p>
+    </article>
   );
 }
 
