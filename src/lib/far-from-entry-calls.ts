@@ -24,7 +24,7 @@ export type FarFromEntryBeat = {
   readonly role: FarFromEntryRole;
 };
 /** The beats: the two opening calls share the first (as Rexonance's do),
- * SUPER SPECIAL！ cuts in, RIDER！FAR FROM！ carries the fire, the chant and
+ * SUPERIOR！ cuts in, RIDER！FAR FROM！ carries the fire, the chant and
  * the repetition the armour, and FAR FROM DEUS！ the completion. */
 export const FAR_FROM_ENTRY_BEATS: readonly FarFromEntryBeat[] = [
   { calls: [0, 1], start: 0, duration: 340, role: "opening" },
