@@ -144,6 +144,9 @@ function Articles({
               </figure>
             ) : null}
             <div className="ics-article-copy">
+              <span className="ics-card-no" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <h3 lang={/^[\x20-\x7e]+$/.test(item.title) ? "en" : undefined}>
                 {bracketed(item.title)}
               </h3>
@@ -659,6 +662,9 @@ export function IllusionculumSaga() {
         <div className="ics-finisher-list">
           {ILLUSIONCULUM_SAGA.finishers.map((finisher, index) => (
             <article key={finisher.name} className="ics-finisher rxs-reveal" data-rank={index + 1}>
+              <span className="ics-card-no" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <h3>
                 <DisplayName value={finisher.name} />
               </h3>

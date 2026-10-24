@@ -2119,21 +2119,30 @@
   counter-increment: ics-plate;
 }
 
-/* Owner (2026-10-24): 「他と同じく大きな番号は振って」 — the plate numerals stay. */
-.rxs-page.rxs-page.ics-page :is(.ics-finisher, .ics-article)::after {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  content: counter(ics-plate, decimal-leading-zero);
-  color: transparent;
-  font: 700 clamp(36px, 4vw, 64px) / 1 var(--ics-forge);
-  -webkit-text-stroke: 1px rgb(233 184 102 / 38%);
+/* Owner (2026-10-24): 「他と同じく大きな番号は振って」 — Extreme's solid
+   numbered badge (size, weight, slant, top left), in this page's gold. */
+.rxs-page.rxs-page.ics-page .ics-card-no {
+  display: grid;
+  place-items: center;
+  justify-self: start;
+  width: fit-content;
+  min-width: 54px;
+  height: 46px;
+  margin: 0 0 14px;
+  padding: 0 14px 0 10px;
+  color: #050816;
+  background: linear-gradient(180deg, var(--ics-gold-hi), var(--ics-gold) 52%, var(--ics-gold-deep));
+  font-family: var(--ics-forge);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 8px 20px rgb(233 184 102 / 28%);
   pointer-events: none;
 }
 
 .rxs-page.rxs-page.ics-page .ics-finisher h3,
 .rxs-page.rxs-page.ics-page .ics-article-copy h3 {
-  padding-right: 2.6em;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--ics-line);
 }
