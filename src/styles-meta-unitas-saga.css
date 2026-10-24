@@ -1109,7 +1109,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 }
 
 .mus-finisher-calls li {
-  padding: 8px 14px;
+  padding: 0;
   border: 1px solid rgb(255 154 74 / 36%);
   border-radius: 999px;
   background: rgb(255 154 74 / 8%);
@@ -1691,4 +1691,81 @@ html:not([data-world-effects="economy"])
 
 .mus-table tbody tr:is(:hover, :focus-within) th {
   color: var(--mus-orange, #ff9a4a);
+}
+
+/* The finishers' calls step on one at a time (each call is its button). */
+.mus-finisher-calls li {
+  display: flex;
+  opacity: 0.62;
+  transition:
+    opacity 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.mus-finisher-calls[data-step="-1"] li,
+.mus-finisher-calls li[data-lit] {
+  opacity: 1;
+}
+
+.mus-finisher-calls li[data-lit] {
+  border-color: var(--mus-orange-hot);
+  background: rgb(255 154 74 / 22%);
+  box-shadow: 0 0 22px rgb(255 154 74 / 24%);
+}
+
+.mus-finisher-calls button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The comparison follows the page's form: its row and bars light. */
+.mus-compare-pick {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 clamp(20px, 3vw, 32px);
+}
+
+.mus-compare-pick button {
+  min-width: 112px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--mus-hair);
+  border-radius: 999px;
+  background: none;
+  color: var(--mus-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.mus-compare-pick button[aria-pressed="true"] {
+  border-color: var(--mus-accent);
+  background: color-mix(in srgb, var(--mus-accent) 16%, transparent);
+  color: var(--mus-silver);
+}
+
+.mus-performance[data-stage="middle"] .mus-table tr[data-self]:not([data-ultra]),
+.mus-performance[data-stage="ultra"] .mus-table tr[data-ultra] {
+  background: rgb(255 154 74 / 12%);
+  box-shadow: inset 3px 0 0 var(--mus-orange);
+}
+
+.mus-performance[data-stage="ultra"] .mus-table tr[data-self]:not([data-ultra]),
+.mus-performance[data-stage="middle"] .mus-table tr[data-ultra] {
+  opacity: 0.6;
 }

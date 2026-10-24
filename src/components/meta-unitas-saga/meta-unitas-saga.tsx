@@ -19,7 +19,7 @@ import {
 } from "@/lib/meta-unitas-saga-artwork";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "./meta-unitas-data";
-import { Articles, Bracketed, CallLine, Lead, jp } from "./meta-unitas-parts";
+import { Articles, Bracketed, CallLine, FinisherCalls, Lead, jp } from "./meta-unitas-parts";
 import { MetaUnitasPerformance } from "./meta-unitas-performance";
 import { FORM_ACCENTS, FORM_LABELS, MetaUnitasSuitUp } from "./meta-unitas-suitup";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
@@ -402,7 +402,7 @@ export function MetaUnitasSaga() {
         <header className="mus-head rxs-reveal">
           <h2 id="mus-performance-title">{jp(META_UNITAS_PERFORMANCE.title)}</h2>
         </header>
-        <MetaUnitasPerformance />
+        <MetaUnitasPerformance stage={stage} onChoose={chooseQuietly} />
       </section>
 
       {/* 02 — the scroll suit-up and the form it ends on. */}
@@ -530,13 +530,7 @@ export function MetaUnitasSaga() {
           {META_UNITAS_SAGA.finishers.map((finisher, index) => (
             <article key={finisher.name} className="mus-finisher rxs-reveal" data-tier={index}>
               <h3>{jp(finisher.name)}</h3>
-              <ol className="mus-finisher-calls" aria-label={`${finisher.name} 発動音声`}>
-                {finisher.calls.map((call) => (
-                  <li key={call}>
-                    <Bracketed text={call} />
-                  </li>
-                ))}
-              </ol>
+              <FinisherCalls name={finisher.name} calls={finisher.calls} />
               <Lead body={finisher.body} />
             </article>
           ))}

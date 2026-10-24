@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import type { MetaUnitasArticle } from "./meta-unitas-data";
 
 /* META UNITAS SAGA — small shared pieces of the page (2026-10-23). Every
@@ -245,3 +245,24 @@ const DIAGRAMS: Record<string, ReactNode> = {
     </g>
   ),
 };
+
+/** A finisher's calls as a sequence: each call steps it on, the calls up to
+ * the chosen one stay lit (owner's words only; the calls are the buttons). */
+export function FinisherCalls({ name, calls }: { name: string; calls: readonly string[] }) {
+  const [step, setStep] = useState(-1);
+  return (
+    <ol className="mus-finisher-calls" aria-label={`${name} 発動音声`} data-step={step}>
+      {calls.map((call, index) => (
+        <li key={call} data-lit={index <= step || undefined}>
+          <button
+            type="button"
+            aria-pressed={index <= step}
+            onClick={() => setStep(index === step ? index - 1 : index)}
+          >
+            <Bracketed text={call} />
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}

@@ -1,4 +1,6 @@
+import type { MetaUnitasStageKey } from "@/lib/meta-unitas-saga-artwork";
 import { META_UNITAS_PERFORMANCE } from "./meta-unitas-data";
+import { FORM_ACCENTS, FORM_LABELS } from "./meta-unitas-suitup";
 import { Lead, jp } from "./meta-unitas-parts";
 
 /* META UNITAS SAGA — #performance: the owner's comparison (2026-10-23), its
@@ -102,10 +104,30 @@ function withFigures(text: string) {
   );
 }
 
-export function MetaUnitasPerformance() {
+export function MetaUnitasPerformance({
+  stage,
+  onChoose,
+}: {
+  stage: MetaUnitasStageKey;
+  onChoose: (stage: MetaUnitasStageKey) => void;
+}) {
   const { chapters, lineup } = META_UNITAS_PERFORMANCE;
   return (
-    <div className="mus-performance">
+    <div className="mus-performance" data-stage={stage}>
+      {/* The page's form, chosen here too: its row and bars light. */}
+      <div className="mus-compare-pick" role="group" aria-label="比較する形態">
+        {(["middle", "ultra"] as const).map((key) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={stage === key}
+            style={{ ["--mus-accent" as string]: FORM_ACCENTS[key] }}
+            onClick={() => onChoose(key)}
+          >
+            {FORM_LABELS[key]}
+          </button>
+        ))}
+      </div>
       <p className="mus-lineup" lang="en">
         {jp(lineup)}
       </p>
