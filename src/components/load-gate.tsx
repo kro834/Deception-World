@@ -47,6 +47,7 @@ import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-e
 import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
 import { IllusionculumEntrySequence } from "@/components/illusionculum-saga/illusionculum-entry-sequence";
 import {
+  afterFarFromEntry,
   prefetchFarFromEntry,
   prefetchFarFromEntryWhenIdle,
   prepareFarFromTransition,
@@ -2555,17 +2556,26 @@ export function GuardedLink({
     // FAR FROM's call chunk and images, the same way (never on a still tier).
     if (to === "/far-from-saga") prefetchFarFromEntry();
     if (to === "/meta-unitas-saga") prefetchMetaUnitasEntry?.();
+    // FAR FROM's page route and art are needed only after its call, under
+    // the cover: they wait for the call's own files (or 1.5 s), so the
+    // first frame does not share a slow connection with them (2026-10-24).
+    const later = to === "/far-from-saga" ? afterFarFromEntry() : null;
+    const after = (work: () => void) => (later ? void later.then(work) : work());
     if (preloadedRoute.current !== to) {
       preloadedRoute.current = to;
-      void router.preloadRoute({ to }).catch(() => {
-        if (preloadedRoute.current === to) preloadedRoute.current = null;
+      after(() => {
+        void router.preloadRoute({ to }).catch(() => {
+          if (preloadedRoute.current === to) preloadedRoute.current = null;
+        });
       });
     }
     const assetKey = assets.join("\n");
     if (!assetKey || preloadedAssetKey.current === assetKey) return;
     preloadedAssetKey.current = assetKey;
-    void preloadAssets(assets, () => undefined).catch(() => {
-      if (preloadedAssetKey.current === assetKey) preloadedAssetKey.current = null;
+    after(() => {
+      void preloadAssets(assets, () => undefined).catch(() => {
+        if (preloadedAssetKey.current === assetKey) preloadedAssetKey.current = null;
+      });
     });
   }, [assets, router, to]);
 

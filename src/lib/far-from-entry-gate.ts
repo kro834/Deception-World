@@ -107,10 +107,23 @@ export function warmFarFromEntry(priority: Priority = "high"): Promise<boolean> 
 
 /** Intent (a hover, a focus, a touch on a link to /far-from-saga): the
  * sequence's chunk and the images start now, so the tap finds them. */
-export function prefetchFarFromEntry(priority: Priority = "high") {
-  if (isFarFromEntryStill()) return;
-  void prepareFarFromTransition.prefetch();
-  void warmFarFromEntry(priority);
+export function prefetchFarFromEntry(priority: Priority = "high"): Promise<boolean> {
+  if (isFarFromEntryStill()) return Promise.resolve(false);
+  const chunk = prepareFarFromTransition.prefetch();
+  const images = warmFarFromEntry(priority);
+  return Promise.all([chunk, images]).then(([module, decoded]) => Boolean(module) && decoded);
+}
+
+/** The call's own files come first on intent: the destination's route and
+ * art (needed only after the call, under its cover) wait until the call is
+ * ready, or `capMs` at most, so they never share the first frame's
+ * bandwidth on a slow connection. */
+export function afterFarFromEntry(capMs = 1500): Promise<void> {
+  if (isFarFromEntryStill()) return Promise.resolve();
+  return Promise.race([
+    prefetchFarFromEntry("high").then(() => undefined),
+    new Promise<void>((resolve) => setTimeout(resolve, capMs)),
+  ]);
 }
 
 type IdleWindow = Window & {
