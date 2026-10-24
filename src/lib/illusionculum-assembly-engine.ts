@@ -49,6 +49,7 @@ import {
   ILLUSIONCULUM_SUIT_UNDERSUIT,
 } from "./illusionculum-suit.ts";
 import { createIllusionculumFormChange } from "./illusionculum-form-change.ts";
+import { createIllusionculumImageLoader } from "./illusionculum-image-loader.js";
 import { ILLUSIONCULUM_FORM_CHAIN, ILLUSIONCULUM_FORM_PATHS } from "./illusionculum-assembly.ts";
 
 /** Each form's light (the scene's overwrite tone, unused by the projection
@@ -93,12 +94,12 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
 /** The nanite kit, loaded with the scene's pictures: Rexonance's hex chips,
  * comets and effects (src/lib/rexonance-nanites.ts), with this suit's own
  * guideway conduit, plate outlines and gold boxes. */
-export const loadIllusionculumNanites = () =>
+export const loadIllusionculumNanites = (compact = false) =>
   import("./rexonance-nanites.ts").then((kit) => ({
     cells: kit.REXONANCE_NANITE_CELLS,
     comets: kit.REXONANCE_NANITE_COMETS,
     fx: kit.REXONANCE_NANITE_FX,
-    guide: ILLUSIONCULUM_SUIT_GUIDE,
+    guide: compact ? undefined : ILLUSIONCULUM_SUIT_GUIDE,
     seams: ILLUSIONCULUM_SUIT_SEAMS,
     goldBoxes: ILLUSIONCULUM_SUIT_GOLD_BOXES,
   }));
@@ -157,6 +158,36 @@ export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
 export function mountIllusionculumAssemblyEngine(
   runway: HTMLElement,
   environment: typeof globalThis = window,
+  options: { entry?: boolean; progress?: () => number } = {},
 ): () => void {
-  return mountRexonanceAssembly(runway, illusionculumAssemblyConfig(), environment);
+  const config = illusionculumAssemblyConfig();
+  const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
+  const loader = compact ? createIllusionculumImageLoader(environment) : null;
+  if (loader) config.loadImage = loader.load;
+  // Prepare in short yielding tasks on phones, instead of waiting for
+  // separate idle windows for each phase of the page's suit-up.
+  config.eager = compact || Boolean(options.entry);
+  config.progress = options.progress;
+  if (compact) {
+    config.prewarm = !options.entry;
+    if (options.entry) {
+      // The short entry keeps the armour's complete 2D nanite assembly,
+      // without two extra GPU contexts or figure-sized gold/conduit
+      // surfaces alongside the departing page. The scroll scene retains
+      // its full field and separately generated gold.
+      config.field = false;
+      config.gold = undefined;
+      config.nanites = () => loadIllusionculumNanites(true);
+    }
+  }
+  try {
+    const dispose = mountRexonanceAssembly(runway, config, environment);
+    return () => {
+      loader?.dispose();
+      dispose();
+    };
+  } catch (error) {
+    loader?.dispose();
+    throw error;
+  }
 }

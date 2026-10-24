@@ -37,6 +37,7 @@ import {
   pauseRexonanceSuitWarmup,
   scheduleRexonancePagePreload,
   scheduleRexonanceSuitWarm,
+  suspendRexonancePreparationForIllusionculum,
   warmRexonanceSuit,
 } from "@/lib/rexonance-suit-warmup";
 import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
@@ -997,9 +998,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const delayRetryRef = useRef<HTMLAnchorElement>(null);
   const scrollMotionReleases = useRef(new Set<() => void>());
   const suitWarmReleases = useRef(new Set<() => void>());
-  const holdSuitWarmup = useCallback((preserveIntent = false) => {
+  const holdSuitWarmup = useCallback((preserveIntent = false, illusionculumEntry = false) => {
     const releases = suitWarmReleases.current;
-    const resume = pauseRexonanceSuitWarmup(preserveIntent);
+    const resume = illusionculumEntry
+      ? suspendRexonancePreparationForIllusionculum()
+      : pauseRexonanceSuitWarmup(preserveIntent);
     let released = false;
     const release = () => {
       if (released) return;
@@ -1301,7 +1304,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       focusDestination,
     }: GoOptions) => {
       if (!transitionCovered && busy.current) return;
-      const releaseSuitWarmup = holdSuitWarmup(to === "/rexonance-saga");
+      const releaseSuitWarmup = holdSuitWarmup(
+        to === "/rexonance-saga",
+        to === "/illusionculum-saga" &&
+          window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches,
+      );
       try {
         const navigationSearch = search ? () => search : undefined;
         if (transitionCovered) {

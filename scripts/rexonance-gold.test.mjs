@@ -330,7 +330,7 @@ test("rx17: the call's chunk, layers and plan are prepared ahead of the tap", ()
   );
   assert.match(
     warmup,
-    /import\("\.\.\/components\/rexonance-saga\/rexonance-suit-plan"\)\.then\(\s*\(plan\) => \{[^]*?if \(document\.hidden \|\| backgroundPauses\) \{\s*planWaiting = true;\s*return;\s*\}[^]*?return plan\.prepareRexonanceSuit\(\);/,
+    /import\("\.\.\/components\/rexonance-saga\/rexonance-suit-plan"\)\s*\.then\(\s*\(plan\) => \{[^]*?if \(document\.hidden \|\| backgroundPauses \|\| heldBySuitPage\(\)\) \{\s*planWaiting = true;\s*return;\s*\}[^]*?return plan\.prepareRexonanceSuit\(\);/,
   );
   // On every route (the owner's [pathname] schedule; leaving /rexonance-saga warms it).
   assert.match(gate, /useEffect\(\(\) => scheduleRexonanceSuitWarm\(\), \[pathname\]\);/);

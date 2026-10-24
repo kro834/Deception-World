@@ -1,3 +1,4 @@
+import { preloadIllusionculumAssembly } from "./illusionculum-preload.ts";
 import { rexonanceImage } from "./rexonance-images.ts";
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
@@ -303,6 +304,9 @@ export async function preloadAssets(
   onProgress: (percent: number) => void,
   priority: AssetPriority = "auto",
 ): Promise<void> {
+  // Navigation intent warms compressed assembly bytes alongside the existing
+  // first-frame images; it never extends the navigation progress deadline.
+  if (urls.includes(ILLUSIONCULUM_HERO.src)) void preloadIllusionculumAssembly();
   const unique = [...new Set(urls.filter(Boolean))];
   if (unique.length === 0) {
     onProgress(100);

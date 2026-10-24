@@ -16,6 +16,8 @@ const source = readFileSync(
 // image decoding and CPU-throttled first-paint checks belong to browser QA.
 function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {}) {
   let now = 0;
+  let suspended = false;
+  let releasePreparation;
   let closeCount = 0;
   let taskId = 0;
   const queued = [];
@@ -134,7 +136,13 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
           },
         };
       if (name === "@/lib/rexonance-suit-warmup")
-        return { rexonanceSuitSource: (url) => sources.get(url) ?? null };
+        return {
+          rexonanceSuitSource: (url) => sources.get(url) ?? null,
+          isRexonancePreparationSuspended: () => suspended,
+          registerRexonancePreparationRelease: (release) => {
+            releasePreparation = release;
+          },
+        };
       throw new Error(`unexpected module ${name}`);
     },
   };
@@ -145,6 +153,13 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
   }
   runInNewContext(code, runtime);
   return {
+    suspend() {
+      suspended = true;
+      releasePreparation();
+    },
+    resume() {
+      suspended = false;
+    },
     plan: exports,
     queued,
     cancelled,
@@ -804,4 +819,40 @@ test("a finite entry timeout may fire between pixel slices without cancelling th
   assert.equal(ui.queued.length, 0);
   assert.equal(ui.plan.isRexonanceSuitPlanReady(), true);
   assert.equal(ui.closed(), 0);
+});
+
+test("Illusionculum suspension cancels a private light job and stale slices cannot publish", async () => {
+  const f = planRuntime({ canCancelIdle: false });
+  const pending = f.plan.prepareRexonanceSuit();
+  f.flushUntil(() => f.lightJobs.length > 0);
+  f.suspend();
+  assert.equal(await pending, false);
+  assert.ok(f.lightJobs[0].cancelled);
+  f.flush();
+  assert.equal(f.plan.work.canvas, null);
+  assert.equal(f.plan.plateLights(), null);
+  assert.equal(await f.plan.prepareRexonanceSuit(), false);
+  f.resume();
+  assert.equal(await f.prepare(), true);
+});
+
+test("Illusionculum suspension releases prepared atlases but preserves a live drawing call", async () => {
+  const f = planRuntime();
+  assert.equal(await f.prepare(), true);
+  const atlas = f.plan.work.canvas;
+  const layers = f.plan.plateLights();
+  f.plan.work.drawing = 1;
+  f.suspend();
+  assert.equal(f.plan.work.canvas, atlas);
+  assert.equal(f.plan.plateLights(), layers);
+  assert.notEqual(atlas.width, 0);
+  f.plan.work.drawing = 0;
+  f.suspend();
+  assert.equal(atlas.width, 0);
+  assert.equal(atlas.height, 0);
+  for (const canvas of Object.values(layers)) assert.equal(canvas.width, 0);
+  assert.equal(f.plan.work.canvas, null);
+  assert.equal(f.plan.plateLights(), null);
+  f.resume();
+  assert.equal(await f.prepare(), true);
 });

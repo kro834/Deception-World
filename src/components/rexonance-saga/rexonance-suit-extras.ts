@@ -23,7 +23,11 @@ import {
 } from "@/lib/rexonance-nanites-warmup";
 import { registerSuitExtras } from "./rexonance-suit-extras-hook";
 import { createRexonanceCallRetention } from "@/lib/rexonance-call-retention";
-import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
+import {
+  rexonanceSuitSource,
+  isRexonancePreparationSuspended,
+  registerRexonancePreparationRelease,
+} from "@/lib/rexonance-suit-warmup";
 import { reactorCoilAngle, reactorCoilScale } from "@/lib/rexonance-reactor.js";
 import {
   NANITE_FIRE_PHASES,
@@ -827,8 +831,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       // FLIGHT_SPREAD of FLIGHT, within its plate's spawn, never before the
       // first metal can emerge.
       const flight =
-        FLIGHT *
-        (FLIGHT_SPREAD[0] + (FLIGHT_SPREAD[1] - FLIGHT_SPREAD[0]) * hash(i * 13 + 7, 733));
+        FLIGHT * (FLIGHT_SPREAD[0] + (FLIGHT_SPREAD[1] - FLIGHT_SPREAD[0]) * hash(i * 13 + 7, 733));
       L.flightStart[i] = Math.max(FIRE_BIRTH, L.land[i] - flight);
       L.flightMs[i] = L.land[i] - L.flightStart[i];
       if (L.land[i] <= plate.fit - SW.seat) landedBy += 1;
@@ -1901,6 +1904,8 @@ function goldClamps(fx: CanvasImageSource) {
 
 let READY = false;
 let preparation: Promise<boolean> | null = null;
+let cancelPreparation: (() => void) | null = null;
+let preparationEpoch = 0;
 let promotePreparation: (() => void) | null = null;
 let resumePreparation: (() => void) | null = null;
 
@@ -1927,6 +1932,7 @@ type Stage =
  * lights are prepared and the nanite kit is decoded. Never while a call
  * draws. Resolves true once ready (false if a layer is unavailable). */
 export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
+  if (isRexonancePreparationSuspended?.()) return Promise.resolve(false);
   if (READY) return Promise.resolve(true);
   if (preparation) {
     resumePreparation?.();
@@ -1961,6 +1967,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
       }
       resolve(ready);
     };
+    cancelPreparation = () => settle(false);
     const schedule = () => {
       const ticket = generation;
       const resume = (deadline?: IdleDeadline) => {
@@ -2179,6 +2186,7 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
       preparation = null;
       promotePreparation = null;
       resumePreparation = null;
+      cancelPreparation = null;
     }
   });
   return pending;
@@ -2189,9 +2197,11 @@ export function prepareRexonanceNanites(priority: "low" | "high" = "low") {
 // at all once a call has begun (its own instance is warm by then).
 let calls = 0;
 let primed = false;
+let cancelPriming: (() => void) | null = null;
 function primeNanites() {
   if (primed || calls) return;
   primed = true;
+  const epoch = preparationEpoch;
   const canvas = Object.assign(globalThis.document.createElement("canvas"), {
     width: 1,
     height: 1,
@@ -2200,13 +2210,19 @@ function primeNanites() {
   // in the slice that publishes the sheets, which stays short).
   let extras: SuitExtras | null = null;
   let k = 0;
+  const stop = () => {
+    canvas.width = canvas.height = 0;
+    extras = null;
+    if (cancelPriming === stop) cancelPriming = null;
+  };
+  cancelPriming = stop;
   const queue = () => {
     if (globalThis.requestIdleCallback) globalThis.requestIdleCallback(step, { timeout: 2000 });
     else globalThis.requestAnimationFrame(() => step());
   };
   const step = () => {
-    if (calls) {
-      canvas.width = canvas.height = 0;
+    if (calls || epoch !== preparationEpoch || isRexonancePreparationSuspended?.()) {
+      stop();
       return;
     }
     if (work.drawing > 0) return queue();
@@ -2231,13 +2247,13 @@ function primeNanites() {
           )
         : null;
       if (!extras) {
-        canvas.width = canvas.height = 0;
+        stop();
         return;
       }
       return queue();
     }
     if (extras.prime(k)) {
-      canvas.width = canvas.height = 0;
+      stop();
       return;
     }
     k += 1;
@@ -5248,4 +5264,19 @@ registerSuitExtras({
   ready: isRexonanceNaniteReady,
   create: (env) => createSuitExtras(env),
   release: releaseRexonanceNanites,
+});
+
+registerRexonancePreparationRelease?.(() => {
+  preparationEpoch += 1;
+  cancelPriming?.();
+  cancelPriming = null;
+  cancelPreparation?.();
+  preparation = null;
+  promotePreparation = resumePreparation = cancelPreparation = null;
+  if (work.drawing > 0) return;
+  retention?.acquire();
+  disposeRexonanceNanites();
+  // Partial decoding may exist without a published extras canvas.
+  releaseRexonanceNaniteSources();
+  primed = false;
 });

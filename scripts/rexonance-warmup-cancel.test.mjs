@@ -598,7 +598,7 @@ test("rx17: LoadGate owns warmup pause before every go and releases on settle, h
     gate.indexOf("const go = useCallback"),
     gate.indexOf("const api = useMemo"),
   );
-  const pauseAt = go.indexOf('holdSuitWarmup(to === "/rexonance-saga")');
+  const pauseAt = go.search(/holdSuitWarmup\(\s*to === "\/rexonance-saga"[,)]/);
   assert.ok(pauseAt >= 0, "only Rexonance go preserves its own high-priority intent");
   assert.ok(pauseAt < go.indexOf("router.preloadRoute"));
   assert.ok(pauseAt < go.indexOf('warmRexonanceSuit("high")'));
@@ -760,3 +760,56 @@ for (const reason of ["go", "hidden"]) {
     }
   });
 }
+
+test("Illusionculum-only preparation hold calls registered releases without importing renderers", async () => {
+  const f = await fixture();
+  try {
+    let releases = 0;
+    f.module.registerRexonancePreparationRelease(() => releases++);
+    assert.equal(f.module.isRexonancePreparationSuspended(), false);
+    const resume = f.module.suspendRexonancePreparationForIllusionculum();
+    assert.equal(releases, 1);
+    assert.equal(f.module.isRexonancePreparationSuspended(), true);
+    let lateRelease = 0;
+    f.module.registerRexonancePreparationRelease(() => lateRelease++);
+    assert.equal(lateRelease, 1);
+    const resumeSecond = f.module.suspendRexonancePreparationForIllusionculum();
+    resume();
+    resume();
+    assert.equal(f.module.isRexonancePreparationSuspended(), true);
+    resumeSecond();
+    assert.equal(f.module.isRexonancePreparationSuspended(), false);
+    assert.equal(f.requests.length, 0);
+    assert.equal(f.images.length, 0);
+    assert.equal(f.idles.size, 0);
+  } finally {
+    f.restore();
+  }
+});
+
+test("Illusionculum arrival retains deferred rebuild until a later World route", async () => {
+  const f = await fixture();
+  try {
+    const warm = f.module.warmRexonanceSuit();
+    f.requests.forEach((request) => request.resolve());
+    f.loadImages();
+    await settle();
+    f.loadImages();
+    await settle();
+    assert.equal(await warm, true);
+    const resume = f.module.suspendRexonancePreparationForIllusionculum();
+    f.win.location.pathname = "/illusionculum-saga";
+    f.win.matchMedia = () => ({ matches: true });
+    // A queued plan slice must also observe the route, rather than rebuilding.
+    while (f.idles.size) f.runIdle();
+    resume();
+    assert.equal(f.idles.size, 0);
+    assert.equal(f.timers.size, 0);
+    f.win.location.pathname = "/world";
+    const cancel = f.module.scheduleRexonanceSuitWarm();
+    assert.equal(f.idles.size, 1, "returning to World can resume deferred preparation");
+    cancel();
+  } finally {
+    f.restore();
+  }
+});

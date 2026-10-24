@@ -19,6 +19,7 @@
 
 import { ILLUSIONCULUM_SAGA } from "../components/illusionculum-saga/illusionculum-data.ts";
 import type { IllusionculumFormKey } from "./illusionculum-saga-artwork.ts";
+import { preloadIllusionculumAssembly } from "./illusionculum-preload.ts";
 
 /** The call on the runway, one line per call (the owner's four, verbatim),
  * on the engine's beats: 【ULTRA！VINCULUM！】 with the scan,【ROLLOUT！】 with
@@ -71,10 +72,14 @@ export function mountIllusionculumAssembly(
   const html = host.ownerDocument.documentElement;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forced = environment.matchMedia("(forced-colors: active)");
+  const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)");
+  const document = host.ownerDocument;
+  let pageHidden = false;
   const connection = (environment.navigator as Navigator & { connection?: Connection })?.connection;
   const load = options.load ?? (() => import("./illusionculum-assembly-engine"));
   let disposed = false;
   let loading = false;
+  let warmed = false;
   let dispose: (() => void) | null = null;
   let idleId = 0;
   let idleTimer: ReturnType<typeof setTimeout> | 0 = 0;
@@ -84,20 +89,26 @@ export function mountIllusionculumAssembly(
     !connection?.saveData &&
     !/^(slow-)?2g$/.test(connection?.effectiveType || "") &&
     html.dataset.worldEffects !== "economy";
+  // A route cover already owns an assembly scene. Give it the phone's
+  // memory budget first, then let the page's original early preloader run
+  // immediately, well before the reader reaches the runway.
+  const canStart = () =>
+    motionAllowed() &&
+    (!compact.matches || (!pageHidden && !document.hidden && !html.dataset.routeCover));
   const start = () => {
-    if (disposed || dispose || loading || !motionAllowed()) return;
+    if (disposed || dispose || loading || !canStart()) return;
     loading = true;
-    load().then(
-      (module) => {
+    void Promise.resolve()
+      .then(load)
+      .then((module) => {
         loading = false;
-        if (disposed) return;
+        if (disposed || !canStart()) return;
         dispose = module.mountIllusionculumAssemblyEngine(host, environment);
-      },
-      () => {
+      })
+      .catch(() => {
         loading = false;
-        if (!disposed) host.dataset.rznLoad = "error";
-      },
-    );
+        if (!disposed && canStart()) host.dataset.rznLoad = "error";
+      });
   };
   const cancelIdle = () => {
     if (idleId) environment.cancelIdleCallback?.(idleId);
@@ -106,14 +117,27 @@ export function mountIllusionculumAssembly(
     idleTimer = 0;
   };
   const sync = () => {
-    if (disposed || dispose) return;
-    if (!motionAllowed()) {
+    if (disposed) return;
+    if (!canStart()) {
       cancelIdle();
-      host.dataset.rznLoad = "static";
+      if (compact.matches && dispose) {
+        dispose();
+        dispose = null;
+      }
+      host.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
       return;
     }
+    if (dispose) return;
     host.dataset.rznLoad = "waiting";
     if (idleId || idleTimer || loading) return;
+    if (compact.matches) {
+      if (!warmed) {
+        warmed = true;
+        void preloadIllusionculumAssembly();
+      }
+      start();
+      return;
+    }
     if (typeof environment.requestIdleCallback === "function")
       idleId = environment.requestIdleCallback(
         () => {
@@ -132,7 +156,22 @@ export function mountIllusionculumAssembly(
     typeof environment.MutationObserver === "function"
       ? new environment.MutationObserver(sync)
       : null;
-  observer?.observe(html, { attributes: true, attributeFilter: ["data-world-effects"] });
+  observer?.observe(html, {
+    attributes: true,
+    attributeFilter: ["data-world-effects", "data-route-cover"],
+  });
+  const onPageHide = () => {
+    pageHidden = true;
+    sync();
+  };
+  const onPageShow = () => {
+    pageHidden = false;
+    sync();
+  };
+  environment.addEventListener("pagehide", onPageHide);
+  environment.addEventListener("pageshow", onPageShow);
+  document.addEventListener("visibilitychange", sync);
+  compact.addEventListener?.("change", sync);
   reduced.addEventListener?.("change", sync);
   forced.addEventListener?.("change", sync);
   sync();
@@ -140,6 +179,10 @@ export function mountIllusionculumAssembly(
     disposed = true;
     cancelIdle();
     observer?.disconnect();
+    environment.removeEventListener("pagehide", onPageHide);
+    environment.removeEventListener("pageshow", onPageShow);
+    document.removeEventListener("visibilitychange", sync);
+    compact.removeEventListener?.("change", sync);
     reduced.removeEventListener?.("change", sync);
     forced.removeEventListener?.("change", sync);
     if (dispose) dispose();
