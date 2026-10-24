@@ -385,21 +385,13 @@
     border-right: 1px solid rgb(var(--ffz-ice) / 0.18);
   }
 
-  /* The figure fills the stage's height; the stage crops its sides, so
-     the plate never shows as a letterboxed rectangle at 1100-1300px. */
+  /* Owner (2026-10-24, iPad): 「画像表示に余白があるので直して。」 The
+     figure fills its pinned column edge to edge (cover, held on the
+     figure's head and chest), as the Rexonance stage does: no empty band
+     above it, no gap at its sides. */
   .rxs-page.rxs-page.ffs-page > .ffs-hero > .rxs-hero-visual {
     overflow: hidden;
   }
-  .rxs-page.rxs-page.ffs-page > .ffs-hero > .rxs-hero-visual img {
-    max-width: none;
-    height: 92%;
-    translate: -50% 0;
-    mask-image:
-      linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent),
-      linear-gradient(180deg, transparent, #000 10%);
-    mask-composite: intersect;
-  }
-
   /* The ghost sits over the name, not through it. */
   .rxs-page.rxs-page.ffs-page > .ffs-hero .ffs-mark {
     translate: 0 -118%;
@@ -496,4 +488,28 @@
 }
 @keyframes ffz-stage-rise {
   from { opacity: 0; scale: 0.965; }
+}
+
+/* -- q-ff2 (2026-10-24, owner iPad report): the hero figure fills its
+   frame at every width — the pinned column (1100px and up) and the
+   stacked stage below 1100px (iPad portrait and Mini/iPad landscape), where
+   a height-capped 3:4 frame had letterboxed it. Cover, centred on the
+   figure; the frame crops, never pads. */
+.rxs-page.rxs-page.ffs-page > .ffs-hero > .rxs-hero-visual img {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  bottom: auto;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  translate: none;
+  object-fit: cover;
+  object-position: 50% 22%;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.rxs-page.rxs-page.ffs-page > .ffs-hero > .rxs-hero-visual {
+  overflow: hidden;
 }
