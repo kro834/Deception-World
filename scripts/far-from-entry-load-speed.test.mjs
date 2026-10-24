@@ -41,8 +41,10 @@ test("the call's chunk and the warm-up's chunk retry under a fresh URL (chunk-re
 test("prefetch: intent first for the call's own files, then idle, in-view, side-menu and /final-stage warm-ups at low priority", () => {
   assert.match(gateModule, /export function prefetchFarFromEntry\(priority: Priority = "high"\)/);
   assert.match(gateModule, /if \(isFarFromEntryStill\(\)\) return Promise\.resolve\(false\);/);
-  assert.match(gateModule, /export function prefetchFarFromEntryWhenIdle\(delayMs = 0\)/);
-  assert.match(gateModule, /connection\?\.effectiveType === "3g"/);
+  assert.match(gateModule, /export function prefetchFarFromEntryWhenIdle\(delayMs = 0, priority: Priority = "low"\)/);
+  // The chunk at once (a slow connection is where a cold chunk misses).
+  assert.match(gateModule, /isFarFromEntryStill\(\)\) return \(\) => \{\};\s*void prepareFarFromTransition\.prefetch\(\);/);
+  assert.match(gate, /prefetchFarFromEntryWhenIdle\(0, "high"\)/);
   assert.match(gateModule, /export function afterFarFromEntry\(capMs = 1500\)/);
   // The page's route and art wait for the call's files on intent.
   assert.match(gate, /const later = to === "\/far-from-saga" \? afterFarFromEntry\(\) : null;/);

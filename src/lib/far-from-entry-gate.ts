@@ -131,17 +131,17 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (id: number) => void;
 };
 /** Speculative prefetch (a link to /far-from-saga near the viewport, the
- * side menu opened, /final-stage settled): the chunk and the images at low
- * priority once the main thread is idle, never on a still tier or a 3G
- * connection. Returns the cancel. */
-export function prefetchFarFromEntryWhenIdle(delayMs = 0) {
+ * side menu opened, /final-stage settled): the chunk at once (it is small,
+ * and a slow connection is exactly where a cold chunk misses the gate's
+ * deadline), the images once the main thread is idle; never on a still
+ * tier (Save-Data, 2G, reduced motion, economy). Returns the cancel. */
+export function prefetchFarFromEntryWhenIdle(delayMs = 0, priority: Priority = "low") {
   if (typeof window === "undefined" || isFarFromEntryStill()) return () => {};
-  const connection = (navigator as Navigator & { connection?: Connection }).connection;
-  if (connection?.effectiveType === "3g") return () => {};
+  void prepareFarFromTransition.prefetch();
   const idle = window as IdleWindow;
   let handle = 0;
   const timer = window.setTimeout(() => {
-    const run = () => prefetchFarFromEntry("low");
+    const run = () => prefetchFarFromEntry(priority);
     if (idle.requestIdleCallback) handle = idle.requestIdleCallback(run, { timeout: 2500 });
     else handle = window.setTimeout(run, 200);
   }, delayMs);

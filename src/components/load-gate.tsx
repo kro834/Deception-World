@@ -2524,7 +2524,8 @@ export function GuardedLink({
     let panelWatch: MutationObserver | null = null;
     const start = () => {
       if (cancel) return;
-      cancel = prefetchFarFromEntryWhenIdle(300);
+      // An opened side menu is near-intent: its images start at once, high.
+      cancel = panel ? prefetchFarFromEntryWhenIdle(0, "high") : prefetchFarFromEntryWhenIdle(300);
       observer.disconnect();
       panelWatch?.disconnect();
     };
