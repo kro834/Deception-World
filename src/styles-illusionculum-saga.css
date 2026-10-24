@@ -2119,9 +2119,21 @@
   counter-increment: ics-plate;
 }
 
-/* Owner (2026-10-24): 不要なセカンダリラベルを削除（レイアウトで説明） — no plate numerals. */
+/* Owner (2026-10-24): 「他と同じく大きな番号は振って」 — the plate numerals stay. */
+.rxs-page.rxs-page.ics-page :is(.ics-finisher, .ics-article)::after {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  content: counter(ics-plate, decimal-leading-zero);
+  color: transparent;
+  font: 700 clamp(36px, 4vw, 64px) / 1 var(--ics-forge);
+  -webkit-text-stroke: 1px rgb(233 184 102 / 38%);
+  pointer-events: none;
+}
+
 .rxs-page.rxs-page.ics-page .ics-finisher h3,
 .rxs-page.rxs-page.ics-page .ics-article-copy h3 {
+  padding-right: 2.6em;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--ics-line);
 }
