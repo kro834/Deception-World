@@ -12,7 +12,7 @@ import {
 // title name the way in (no route number, HUD kind or tally).
 const routes = [
   { title: "絵看板を見る", href: "#posters", mark: "観る" },
-  { title: "六章を読む", href: "#dream-chapter-index", mark: "読む" },
+  { title: "六章を読む", href: "#dream-chapter-stage", mark: "読む" },
   { title: "記録を探す", href: "#dream-record-explorer", mark: "探す" },
 ] as const;
 

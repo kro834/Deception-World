@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import type { MetaUnitasArticle } from "./meta-unitas-data";
 
 /* META UNITAS SAGA — small shared pieces of the page (2026-10-23). Every
@@ -82,8 +82,33 @@ export function Articles({
   label: string;
   variant: "system" | "ability" | "armor";
 }) {
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  // An opened 「詳しく」 widens its whole row to full width, in order, so no
+  // neighbouring plate stands over a blank on the multi-column widths.
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const plates = () => Array.from(grid.children) as HTMLElement[];
+    const relayout = () => {
+      const all = plates();
+      all.forEach((plate) => plate.removeAttribute("data-wide"));
+      const tops = all.map((plate) => plate.offsetTop);
+      const openTops = new Set(
+        all.filter((plate) => plate.querySelector("details[open]")).map((plate) => plate.offsetTop),
+      );
+      all.forEach((plate, i) => {
+        if (openTops.has(tops[i])) plate.setAttribute("data-wide", "");
+      });
+    };
+    grid.addEventListener("toggle", relayout, true);
+    window.addEventListener("resize", relayout);
+    return () => {
+      grid.removeEventListener("toggle", relayout, true);
+      window.removeEventListener("resize", relayout);
+    };
+  }, []);
   return (
-    <div className={`mus-articles is-${variant}`} role="list" aria-label={label}>
+    <div ref={gridRef} className={`mus-articles is-${variant}`} role="list" aria-label={label}>
       {items.map((item, index) => (
         <article key={item.title} className="mus-article rxs-reveal" role="listitem">
           <span className="mus-article-no" aria-hidden="true">
