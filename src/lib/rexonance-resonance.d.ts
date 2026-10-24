@@ -301,6 +301,8 @@ export interface RexonanceAssemblyFormChange {
 }
 
 export interface RexonanceAssemblyConfig {
+  /** Optional scene-owned decoder; compressed fetch and bounded bitmap decoding. */
+  loadImage?: (source: string) => Promise<CanvasImageSource>;
   /** Prepare in back-to-back yielding tasks, not idle periods (an entry under a route cover). */
   eager?: boolean;
   /** False: use the 2D armour particles without the extra WebGL field. */

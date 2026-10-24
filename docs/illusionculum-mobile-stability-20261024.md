@@ -61,3 +61,21 @@ navigation, has an eight-second abort deadline and can retry failures.
 
 Local diagnostic scripts and images are in the ignored `output/playwright/`
 directory. Source tests are committed under `scripts/illusionculum-*.test.mjs`.
+
+## Follow-up: bounded direct bitmap decode
+
+After the owner reported occasional remaining loading pressure, the scope was
+explicitly limited to Illusionculum. Its compact entrance and scroll scene now
+decode compressed responses directly into ImageBitmaps, with at most two active
+requests/decodes. They no longer keep a separate Image preload/decode alongside
+each bitmap. Original source resolution, nanite assembly, gold and the page's
+field remain unchanged. Other sites use the original decoder.
+
+The scene-owned loader deduplicates pending URLs, bounds queued/stalled work to
+eight seconds, supports Image fallback, aborts on scene disposal, and closes
+bitmaps that finish after cancellation. Six behavioral tests cover concurrency,
+retry, timeout, fallback and disposal. Five production-preview mobile WebKit
+loads all reached ready in about 1.1 seconds, without document reloads or page
+errors; instrumentation confirmed seven direct Blob decodes, a peak concurrency
+of two, and no Image.decode calls on that preparation path. These local timings
+are not physical-iPhone or slow-network guarantees.

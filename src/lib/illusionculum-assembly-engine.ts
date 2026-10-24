@@ -49,6 +49,7 @@ import {
   ILLUSIONCULUM_SUIT_UNDERSUIT,
 } from "./illusionculum-suit.ts";
 import { createIllusionculumFormChange } from "./illusionculum-form-change.ts";
+import { createIllusionculumImageLoader } from "./illusionculum-image-loader.js";
 import { ILLUSIONCULUM_FORM_CHAIN, ILLUSIONCULUM_FORM_PATHS } from "./illusionculum-assembly.ts";
 
 /** Each form's light (the scene's overwrite tone, unused by the projection
@@ -161,6 +162,8 @@ export function mountIllusionculumAssemblyEngine(
 ): () => void {
   const config = illusionculumAssemblyConfig();
   const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
+  const loader = compact ? createIllusionculumImageLoader(environment) : null;
+  if (loader) config.loadImage = loader.load;
   // Prepare in short yielding tasks on phones, instead of waiting for
   // separate idle windows for each phase of the page's suit-up.
   config.eager = compact || Boolean(options.entry);
@@ -177,5 +180,14 @@ export function mountIllusionculumAssemblyEngine(
       config.nanites = () => loadIllusionculumNanites(true);
     }
   }
-  return mountRexonanceAssembly(runway, config, environment);
+  try {
+    const dispose = mountRexonanceAssembly(runway, config, environment);
+    return () => {
+      loader?.dispose();
+      dispose();
+    };
+  } catch (error) {
+    loader?.dispose();
+    throw error;
+  }
 }

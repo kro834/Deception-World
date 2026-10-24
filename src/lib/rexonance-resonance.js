@@ -1951,6 +1951,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     modules().then(
       ([, nanites]) => {
         if (disposed || images) return;
+        // A scene-owned loader already warms compressed bytes without
+        // allocating an additional Image for every bitmap.
+        if (config.loadImage) return;
         for (const src of sheetSources(nanites))
           if (!fetched.has(src))
             fetched.set(
@@ -1990,7 +1993,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       fetched.delete(src);
       return early ? early.then((image) => image ?? picture(src, "high")) : picture(src, "high");
     };
-    const decode = (src) =>
+    const defaultDecode = (src) =>
       take(src)
         .then((image) =>
           image.decode
@@ -2014,7 +2017,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
                 true,
               )
             : image,
-        )
+        );
+    const decode = (src) =>
+      (config.loadImage ? config.loadImage(src) : defaultDecode(src))
         .then((image) => {
           if (failed || disposed) image?.close?.();
           else decoded.push(image);
@@ -2022,7 +2027,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         });
     // The nanite kit (owner, 2026-10-16): each sheet optional; touch
     // screens draw no comets.
-    const optional = (src) => (src ? boundedImage(decode(src), null, 2000, true) : null);
+    const optional = (src) =>
+      src ? boundedImage(decode(src), null, config.loadImage ? 8000 : 2000, true) : null;
     return Promise.all([
       decode(config.figure),
       decode(config.undersuit),
