@@ -1,4 +1,9 @@
-import { ILLUSIONCULUM_COMPARISON, type IcPassage } from "./illusionculum-data";
+import {
+  ILLUSIONCULUM_FORM_ORDER,
+  type IllusionculumFormKey,
+} from "@/lib/illusionculum-saga-artwork";
+import { ILLUSIONCULUM_COMPARISON, ILLUSIONCULUM_FORMS, type IcPassage } from "./illusionculum-data";
+import { IcLead } from "./illusionculum-parts";
 import { phrase, prose } from "./illusionculum-phrase";
 
 /* ILLUSIONCULUM SAGA — #comparison, the owner's 究極形態総合性能比較 for this
@@ -37,11 +42,20 @@ function bars(rows: readonly Row[], head: readonly string[]) {
   });
 }
 
+/** The row the chosen form reads from: ウルトラ's own, or the standard's. */
+const rowFor = (form: IllusionculumFormKey, rows: readonly Row[]) => {
+  const ultra = form === "ultra" || form === "ultraMore";
+  const own = rows.find((row) => SELF.test(row.cells[0]) && ULTRA.test(row.cells[0]) === ultra);
+  return (own ?? rows.find((row) => SELF.test(row.cells[0])))?.cells[0];
+};
+
 function ComparisonTable({
   id,
   table,
+  form,
 }: {
   id: string;
+  form: IllusionculumFormKey;
   table: {
     readonly title: string;
     readonly head: readonly string[];
@@ -50,6 +64,7 @@ function ComparisonTable({
   };
 }) {
   const scale = bars(table.rows, table.head);
+  const current = rowFor(form, table.rows);
   const numeric = table.head.map((_, column) => column > 0 && scale[column].some(Boolean));
   return (
     <div className="ics-table-block rxs-reveal">
@@ -73,6 +88,7 @@ function ComparisonTable({
                   key={name}
                   data-self={SELF.test(name) || undefined}
                   data-ultra={(SELF.test(name) && ULTRA.test(name)) || undefined}
+                  data-current={name === current || undefined}
                 >
                   <th scope="row">{phrase(name)}</th>
                   {cells.map((cell, cellIndex) => (
@@ -105,7 +121,13 @@ function ComparisonTable({
 
 const text = (passage: IcPassage) => passage.fragments.join("");
 
-export function IllusionculumComparison() {
+export function IllusionculumComparison({
+  form,
+  onChoose,
+}: {
+  form: IllusionculumFormKey;
+  onChoose: (form: IllusionculumFormKey) => void;
+}) {
   const { title, partners, basic, compute, sections } = ILLUSIONCULUM_COMPARISON;
   return (
     <section
@@ -119,17 +141,29 @@ export function IllusionculumComparison() {
           {partners}
         </p>
       </header>
+      {/* The page's form, chosen here too: its rows light in its colour. */}
+      <div className="ics-compare-pick rxs-reveal" role="group" aria-label="比較する形態">
+        {ILLUSIONCULUM_FORM_ORDER.map((key) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={form === key}
+            style={{ ["--ics-pick" as string]: ILLUSIONCULUM_FORMS[key].accent }}
+            onClick={() => onChoose(key)}
+          >
+            {ILLUSIONCULUM_FORMS[key].label}
+          </button>
+        ))}
+      </div>
       <div className="ics-tables">
-        <ComparisonTable id="ics-basic" table={basic} />
-        <ComparisonTable id="ics-compute" table={compute} />
+        <ComparisonTable id="ics-basic" table={basic} form={form} />
+        <ComparisonTable id="ics-compute" table={compute} form={form} />
       </div>
       <div className="ics-evaluations">
         {sections.map((section) => (
           <article key={section.title} className="ics-evaluation rxs-reveal">
             <h3>{phrase(section.title)}</h3>
-            {section.body.map((passage, index) => (
-              <p key={index}>{prose(text(passage))}</p>
-            ))}
+            <IcLead body={section.body.map(text)} />
           </article>
         ))}
       </div>
