@@ -1,3 +1,20 @@
+        ["--future-hud-primary" as string]: rider.tone,
+      }}
+    >
+      <div className="manager-ambient" aria-hidden="true">
+        <div className="manager-grid" />
+        <div className="manager-glow" />
+      </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
+      <DossierTopbar
+        fileLabel={`${rider.civilian.name}の資料`}
+        returnHash="riders-return"
+        returnLabel="ライダー一覧へ戻る"
+      />
+      <section className="manager-hero" id="dossier-profile">
+        <div className="manager-portrait-column">
+          <div className="manager-portrait-frame">
             <img
               src={rider.civilianImg}
               srcSet={

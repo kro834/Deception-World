@@ -361,3 +361,20 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
     pos: "50% 8%",
     civilianImg: "/civilian-bell-20260826.jpeg",
     civilianPos: "50% 10%",
+    title: "REALMSが誇る完全適合者、ベル・アレイン。",
+    quotes: ["ああ…処理しといて", "良い人だった事は間違い無い！", "いや、仕留める"],
+    facts: [
+      { dt: "NAME", dd: "ベル・アレイン" },
+      { dt: "AGE", dd: "26歳" },
+      { dt: "GENDER", dd: "男性" },
+      { dt: "NATIONALITY", dd: "フランス" },
+      { dt: "HEIGHT", dd: "183cm" },
+      { dt: "WEIGHT", dd: "76kg" },
+    ],
+    sections: [
+      {
+        no: "01",
+        kicker: "REALMSでの役割",
+        title: "前線で戦いながら、部隊の戦況を管理する。",
+        body: [
+          "ベル・アレインは、検体災害と高危険度異常存在へ対抗するREALMSの元日本支部リーダー。創設者ソル・アレインと英国人の母の息子で、レルムズドライバー唯一の完全適合者である。",

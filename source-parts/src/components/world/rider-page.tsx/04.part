@@ -1,3 +1,37 @@
+          "エクスプロム！",
+        ],
+        overview: [
+          "炸ける",
+        ],
+        stats: [
+          { dt: "HEIGHT", dd: "205.9cm（est.）" },
+          { dt: "WEIGHT", dd: "110.0kg（est.）" },
+          { dt: "PUNCH", dd: "77.7〜t（est.）" },
+          { dt: "KICK", dd: "77.7〜t（est.）" },
+          { dt: "JUMP", dd: "50.5m（ひと跳び est.）" },
+          { dt: "100m", dd: "1.0秒（100m est.）" },
+        ],
+        finishers: [
+          { name: "エクスプロムスマッシュ", body: "蓄積されていた全ての衝撃を炸裂させ、圧倒的な破壊力をさらに最大化する必殺技。" },
+        ],
+        arsenal: [
+          {
+            name: "エクスプロムカプセム",
+            body: "ジェームズ・スミスが自らのナイトメアの力から生み出した炸裂を司る夢を叶える特殊なカプセム。",
+          },
+          {
+            name: "ゼッツドライバー",
+            body: "仮面ライダーオーバーゼッツのドライバー。エクスプロムカプセムを使用することで、従来型カプセムの壁を超えた固有能力を引き出して仮面ライダーオーバーゼッツ エクスプロムへの変身を可能とする。",
+          },
+        ],
+        abilities: [
+          {
+            name: "エクスプロムマスク — クリムゾンオブザームロッド",
+            body: "エクスプロムマスクの観測装置。変身者に内在するナイトメアの持つ超感覚器を利用して任務遂行を最適化するための周辺環境情報を収集する。",
+          },
+          {
+            name: "エクスプロムマスク — ベリルオプチカム",
+            body: "エクスプロムマスクの複眼。変身者に内在するナイトメアの視覚を利用した超視力により対象が持つ根源的な力場を感知し、崩壊点を見極めることが可能。",
           },
           {
             name: "エクスプロムマスク — ベリルシグナム",
@@ -345,20 +379,3 @@ export function RiderPage({ id }: { id: string }) {
         ["--rider-tone" as string]: rider.tone,
         ["--archive-accent" as string]: rider.tone,
         ["--archive-accent-soft" as string]: rider.tone,
-        ["--future-hud-primary" as string]: rider.tone,
-      }}
-    >
-      <div className="manager-ambient" aria-hidden="true">
-        <div className="manager-grid" />
-        <div className="manager-glow" />
-      </div>
-      {/* A file shows no file line in its top bar (2026-10-23, the dossier
-          sheets); the label names the brand link's way back. */}
-      <DossierTopbar
-        fileLabel={`${rider.civilian.name}の資料`}
-        returnHash="riders-return"
-        returnLabel="ライダー一覧へ戻る"
-      />
-      <section className="manager-hero" id="dossier-profile">
-        <div className="manager-portrait-column">
-          <div className="manager-portrait-frame">
