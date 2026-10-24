@@ -271,7 +271,8 @@ test("a11y floors: labels 12 px and up, 44 px targets, focus rings", () => {
   for (const match of styles.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g))
     assert.ok(Number(match[1]) >= 12, `font-size ${match[1]}px`);
   assert.match(styles, /\.mus-page :focus-visible \{\s*outline: 2px solid/);
-  for (const selector of [".mus-hero-doors a {", ".mus-end-doors a {", ".mus-weapons li {"]) {
+  // Owner (2026-10-24): 不要なセカンダリラベルを削除（レイアウトで説明） — the hero doors repeated the bar.
+  for (const selector of [".mus-end-doors a {", ".mus-weapons li {"]) {
     const rule = styles.slice(styles.indexOf(selector));
     const min = Number(/min-height: (\d+)px/.exec(rule.slice(0, rule.indexOf("}")))?.[1] ?? 0);
     assert.ok(min >= 44, selector);
