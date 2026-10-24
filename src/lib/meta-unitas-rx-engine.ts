@@ -108,6 +108,8 @@ export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
     reactorGlow: META_UNITAS_RX_REACTOR_GLOW,
     // The helix is a chest plate landing with the rest (no Rexonance coil).
     reactorRadius: 0,
+    // The driver stays in front of the plates built around it.
+    driverFront: true,
     atlas: META_UNITAS_RX_ATLAS.src,
     gold: {
       atlas: META_UNITAS_RX_GOLD_ATLAS.src,

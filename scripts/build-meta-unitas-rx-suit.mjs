@@ -467,6 +467,11 @@ const claimed = new Float32Array(N);
 // plates it belongs to, below.
 const BELT_INDEX = REGIONS.findIndex((region) => region.id === "belt");
 const beltMask = await rasterise(BELT_OUTLINE, 0, 0.5, true);
+// The belt's margin (2026-10-24, as ILLUSIONCULUM's): the soft gold measure
+// let the plates bordering the traced outline take the driver's gold rim, so
+// their gold and guideway traced the belt while they assembled. No plate but
+// the driver takes gold within this margin of the outline.
+const beltMargin = Float32Array.from(await blurField(beltMask, 2.5), (v) => (v > 0.02 ? 1 : 0));
 // The driver's colours at its soft edge are the belt's own: a half-covered
 // pixel of the cutout carries the dark glow or the neighbouring armour it was
 // cut from, which reads as a fringe once the belt stands alone. Where the
@@ -753,7 +758,12 @@ for (const plate of plates) {
     for (let i = 3; i < art.length; i += 4) if (art[i] < 16) art[i] = 0;
   const { width: w, height: h } = box;
   const gold = extractRaw(
-    await toDelivery(rgba(Float32Array.from(plate.field, (v, i) => v * goldSoft[i]), rawGold)),
+    await toDelivery(
+      rgba(
+        Float32Array.from(plate.field, (v, i) => v * goldSoft[i] * (plate.region === "belt" ? 1 : 1 - beltMargin[i])),
+        rawGold,
+      ),
+    ),
     box,
   );
   {

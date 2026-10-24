@@ -2,7 +2,7 @@
 // design/meta-unitas-saga-20261023/cutouts/middle.webp — do not edit by hand.
 // Figure coordinates are delivery pixels of the 693 x 1040 figure (the
 // owner's whole 1024 x 1536 cutout frame: src/lib/far-from-stage.ts).
-// 7 files, 1002578 bytes (figure.webp 167074, ultra.webp 183542, undersuit.webp 48012, plates.webp 239808, gold.webp 170122, driver-standin.webp 27658, guide.webp 166362).
+// 7 files, 997974 bytes (figure.webp 167074, ultra.webp 183566, undersuit.webp 48044, plates.webp 239808, gold.webp 167646, driver-standin.webp 27658, guide.webp 164178).
 
 export const META_UNITAS_RX_SIZE = { width: 693, height: 1040 } as const;
 

@@ -9,6 +9,8 @@ import {
   ILLUSIONCULUM_SUIT_ATLAS,
   ILLUSIONCULUM_SUIT_DRIVER,
   ILLUSIONCULUM_SUIT_DRIVER_STANDIN,
+  ILLUSIONCULUM_SUIT_GOLD_ATLAS,
+  ILLUSIONCULUM_SUIT_GUIDE,
   ILLUSIONCULUM_SUIT_PIECES,
   ILLUSIONCULUM_SUIT_SIZE,
 } from "../src/lib/illusionculum-suit.ts";
@@ -16,9 +18,11 @@ import {
   META_UNITAS_RX_ATLAS,
   META_UNITAS_RX_DRIVER,
   META_UNITAS_RX_DRIVER_STANDIN,
+  META_UNITAS_RX_GOLD_ATLAS,
   META_UNITAS_RX_PIECES,
   META_UNITAS_RX_SIZE,
 } from "../src/lib/meta-unitas-rx-suit.ts";
+import { META_UNITAS_RX_GUIDE } from "../src/lib/meta-unitas-rx-suit-nanites.ts";
 
 /* イリュージョンクルム and メタ・ウニタス — the transformation belt's cutout
    (owner, 2026-10-24: 「変身ベルトの切り抜きが甘い」). The driver is the
@@ -72,6 +76,9 @@ const PAGES = [
     driver: ILLUSIONCULUM_SUIT_DRIVER,
     pieces: ILLUSIONCULUM_SUIT_PIECES,
     builds: ["build-illusionculum-suit.mjs", "illusionculum-belt-outline.mjs"],
+    gold: ILLUSIONCULUM_SUIT_GOLD_ATLAS,
+    guide: ILLUSIONCULUM_SUIT_GUIDE,
+    engine: "../src/lib/illusionculum-assembly-engine.ts",
     // [cx, cy] of the core's centre, the crown, the point and both wings' gems.
     marks: [
       [512.5, 690],
@@ -92,6 +99,9 @@ const PAGES = [
     driver: META_UNITAS_RX_DRIVER,
     pieces: META_UNITAS_RX_PIECES,
     builds: ["build-meta-unitas-rx-suit.mjs", "meta-unitas-belt-outline.mjs"],
+    gold: META_UNITAS_RX_GOLD_ATLAS,
+    guide: META_UNITAS_RX_GUIDE,
+    engine: "../src/lib/meta-unitas-rx-engine.ts",
     marks: [
       [512, 676],
       [512, 630],
@@ -221,6 +231,87 @@ for (const page of PAGES) {
         if (wellInside(cx, cy) && source(cx, cy) >= 250 && sheet[(y * width + x) * 4 + 3] < 235) holes += 1;
       }
     assert.ok(holes <= 12, `${holes} translucent pixels inside the composited belt`);
+  });
+
+  // 2026-10-24 (owner: 「イリュージョンクルムのドライバーが遷移アニメーション時
+  // 変なことになっています」「スクロールの時も。変なものがかぶさっています」):
+  // the plates around the re-cut belt carried its gold rim, and their gold
+  // and guideway drew over the driver while they assembled.
+  const otherPieces = page.pieces.filter((piece) => !page.driver.includes(piece.id));
+  const sheetScan = async (src, threshold, reject) => {
+    const sheet = await loadRaw(publicFile(src));
+    const found = [];
+    for (const piece of otherPieces)
+      for (let y = 0; y < piece.h; y += 1)
+        for (let x = 0; x < piece.w; x += 1) {
+          if (sheet.data[((piece.ay + y) * sheet.width + piece.ax + x) * 4 + 3] <= threshold) continue;
+          const cx = (piece.x + x + 0.5) / SCALE;
+          const cy = (piece.y + y + 0.5) / SCALE;
+          if (reject(cx, cy)) found.push(piece.id);
+        }
+    return found;
+  };
+  const summary = (ids) => [...new Set(ids)].map((id) => `${id} ${ids.filter((v) => v === id).length}`).join(", ");
+
+  test(`${page.name}: no plate but the driver has opaque pixels inside the belt outline`, async () => {
+    const found = await sheetScan(page.atlas.src, 64, (cx, cy) => inside(page.outline[0], cx, cy) && edgeDistance(page.outline[0], cx, cy) > REACH);
+    assert.equal(found.length, 0, `plates inside the belt: ${summary(found)}`);
+  });
+
+  test(`${page.name}: no other plate's gold or guideway traces or crosses the belt`, async () => {
+    // Inside the outline or within 2 cutout px of it.
+    const near = (cx, cy) => inside(page.outline[0], cx, cy) || edgeDistance(page.outline[0], cx, cy) < 2;
+    const gold = await sheetScan(page.gold.src, 32, near);
+    assert.equal(gold.length, 0, `gold on the belt: ${summary(gold)}`);
+    const guide = await sheetScan(page.guide.src, 32, near);
+    assert.equal(guide.length, 0, `guideway on the belt: ${summary(guide)}`);
+  });
+
+  test(`${page.name}: the composited suit is the driver's art inside the belt`, async () => {
+    // Every plate laid on the figure, front first, against the driver's
+    // plates alone (the same atlas): inside the outline they are the same.
+    const { width, height } = page.size;
+    const compose = async (pieces) =>
+      sharp({ create: { width, height, channels: 4, background: "#00000000" } })
+        .composite(
+          await Promise.all(
+            pieces
+              .slice()
+              .reverse()
+              .map(async (piece) => ({
+                input: await sharp(publicFile(page.atlas.src))
+                  .extract({ left: piece.ax, top: piece.ay, width: piece.w, height: piece.h })
+                  .png()
+                  .toBuffer(),
+                left: piece.x,
+                top: piece.y,
+              })),
+          ),
+        )
+        .raw()
+        .toBuffer();
+    const suit = await compose(page.pieces);
+    const belt = await compose(driverPieces);
+    let checked = 0;
+    let off = 0;
+    for (let y = 0; y < height; y += 1)
+      for (let x = 0; x < width; x += 1) {
+        const cx = (x + 0.5) / SCALE;
+        const cy = (y + 0.5) / SCALE;
+        if (!inside(page.outline[0], cx, cy) || edgeDistance(page.outline[0], cx, cy) <= REACH) continue;
+        const i = (y * width + x) * 4;
+        checked += 1;
+        const diff = Math.max(...[0, 1, 2, 3].map((c) => Math.abs(suit[i + c] - belt[i + c])));
+        if (diff > 2) off += 1;
+      }
+    assert.ok(checked > 8000, `${checked} px checked`);
+    assert.equal(off, 0, `${off} of ${checked} pixels inside the belt are not the driver's art`);
+  });
+
+  test(`${page.name}: the engine keeps the driver in front of the build`, () => {
+    assert.match(readFileSync(new URL(page.engine, import.meta.url), "utf8"), /driverFront: true/);
+    const engine = readFileSync(new URL("../src/lib/rexonance-resonance.js", import.meta.url), "utf8");
+    assert.match(engine, /nanites\.freePass\(context\);\s*\}\s*(\/\/[^\n]*\n\s*)*if \(DRIVER_FRONT && driver && seal < 1\)/);
   });
 
   test(`${page.name}: the build is wired to the traced outline`, () => {

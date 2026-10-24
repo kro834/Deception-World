@@ -130,6 +130,7 @@ export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
     reactorGlow: ILLUSIONCULUM_SUIT_REACTOR_GLOW,
     reactorRadius: 0,
     fire: false,
+    driverFront: true,
     atlas: ILLUSIONCULUM_SUIT_ATLAS.src,
     palette: ILLUSIONCULUM_PALETTE,
     gold: {

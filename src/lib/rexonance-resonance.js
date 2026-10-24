@@ -1626,6 +1626,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // is projected, not forged): \`fire: false\`. Rexonance and FAR FROM leave
   // it unset and burn exactly as before.
   const FIRE = config.fire !== false;
+  const DRIVER_FRONT = config.driverFront === true;
   // A page's own route through its chain to each form (ILLUSIONCULUM: ウルトラ
   // straight from the base figure, ウルトラ + リアクター・モア through ウルトラ):
   // \`forms.paths\`, each form's keys in order. Without it a form runs the
@@ -3930,6 +3931,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       nanites.goldPass(context);
       nanites.frontPass(context);
       nanites.freePass(context);
+    }
+    // The driver is on the body from the first frame, in front of the plates
+    // built, flown and locked around it (config.driverFront), until the seal.
+    if (DRIVER_FRONT && driver && seal < 1) {
+      context.globalAlpha = 1 - seal;
+      context.drawImage(driver, 0, 0, W, H);
+      context.globalAlpha = 1;
     }
 
     // The disc forms without rotating; only its surrounding coil turns.

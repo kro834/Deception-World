@@ -329,6 +329,11 @@ export interface RexonanceAssemblyConfig {
   fireTone?: number;
   /** False: the suit-up has no fire (ILLUSIONCULUM). Unset: it burns. */
   fire?: boolean;
+  /** True: the driver stays in front of the build — the guideways, the
+   * staged plates and the conduit pass behind it (ILLUSIONCULUM, META UNITAS:
+   * the belt cut by its traced outline borders the plates around it, whose
+   * build would otherwise draw over it). Unset: as Rexonance's. */
+  driverFront?: boolean;
   /** A page's own drawing of each change of its chain (ILLUSIONCULUM). */
   formChange?: RexonanceAssemblyFormChange;
   palette?: RexonanceAssemblyPalette;

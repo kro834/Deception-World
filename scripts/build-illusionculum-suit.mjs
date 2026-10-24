@@ -769,6 +769,17 @@ const beltColours = await (async () => {
   return out;
 })();
 
+// The belt's margin (owner, 2026-10-24: 「ドライバーが遷移アニメーション時変なことに
+// なっています」): the gold measure is soft (blurred), so the plates that now
+// border the traced outline picked up the driver's own gold rim along it, and
+// their gold, its cells and the guideway rails drawn from it traced the belt
+// over the driver while those plates assembled. No plate but the driver takes
+// gold within this margin of the outline (its art is unchanged).
+const beltMargin = await (async () => {
+  const near = await blurField(beltMask, 2.5);
+  return Float32Array.from(near, (v) => (v > 0.02 ? 1 : 0));
+})();
+
 // --- Delivery (the whole frame at 693 x 1040) ----------------------------------
 const FIG_W = 693;
 const FIG_H = 1040;
@@ -905,7 +916,11 @@ for (const plate of plateIds) {
   const { width: w, height: h } = box;
   // Its gold, unformed (the raw gunmetal under the trims' soft mask), at the
   // same atlas place, and its gold cells: the nanite engine's pour.
-  const gold = extractRaw(await toDelivery(rgba(Float32Array.from(field, (v, i) => v * goldSoft[i]), rawGold)), box);
+  const offBelt = plate.region === "belt" ? null : beltMargin;
+  const gold = extractRaw(
+    await toDelivery(rgba(Float32Array.from(field, (v, i) => v * goldSoft[i] * (offBelt ? 1 - offBelt[i] : 1)), rawGold)),
+    box,
+  );
   if (plate.region !== "belt") {
     const gcols = Math.ceil(w / GOLD_CELL);
     const grows = Math.ceil(h / GOLD_CELL);
