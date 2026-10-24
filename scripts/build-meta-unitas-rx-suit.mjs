@@ -35,7 +35,7 @@ const { separateDriverPixels } = await import(
 const { META_UNITAS_REGIONS, META_UNITAS_BELTS } = await import(
   pathToFileURL(join(ROOT, "scripts/meta-unitas-suit-regions.mjs")).href
 );
-const BELT_OUTLINE = [META_UNITAS_BELTS.middle];
+const { BELT_OUTLINE } = await import(pathToFileURL(join(ROOT, "scripts/meta-unitas-belt-outline.mjs")).href);
 
 const VERSION = "20261023";
 const DESIGN = join(ROOT, `design/meta-unitas-saga-${VERSION}`);
