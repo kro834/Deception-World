@@ -14,6 +14,7 @@ import { rexonanceImage } from "@/lib/rexonance-images";
 import { FORM_RECORD_IMAGES } from "@/lib/record-form-images";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
+import { prefetchFarFromEntryWhenIdle } from "@/lib/far-from-entry-gate";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import {
   CAST,
@@ -370,6 +371,12 @@ export function FinalStage() {
   const [castIndex, setCastIndex] = useState(0);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
+
+  // FAR FROM SAGA is this page's door (2026-10-24): once the page has
+  // settled, its entry's chunk and images warm at low priority when idle,
+  // so the door's tap starts the call from its first frame (never on a
+  // still tier or a slow connection).
+  useEffect(() => prefetchFarFromEntryWhenIdle(2500), []);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const formTabsRef = useRef<HTMLDivElement | null>(null);
   const castTabsRef = useRef<HTMLDivElement | null>(null);

@@ -48,6 +48,7 @@ import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
 import { IllusionculumEntrySequence } from "@/components/illusionculum-saga/illusionculum-entry-sequence";
 import {
   prefetchFarFromEntry,
+  prefetchFarFromEntryWhenIdle,
   prepareFarFromTransition,
   releaseFarFromEntry,
   warmFarFromEntry,
@@ -2503,7 +2504,48 @@ export function GuardedLink({
   const router = useRouter();
   const preloadedRoute = useRef<string | null>(null);
   const preloadedAssetKey = useRef<string | null>(null);
+  const anchor = useRef<HTMLAnchorElement>(null);
   const href = guardedHref(to, hash, search);
+
+  // FAR FROM's entry, speculatively (2026-10-24): a link to /far-from-saga
+  // that comes near the viewport (the side menu opening, a door scrolled
+  // into view) warms the call's chunk and images at low priority when the
+  // main thread is idle, so the tap finds them decoded. Never on the page
+  // itself, a still tier or a slow connection (prefetchFarFromEntryWhenIdle).
+  useEffect(() => {
+    const link = anchor.current;
+    if (to !== "/far-from-saga" || !link || typeof IntersectionObserver !== "function") return;
+    if (window.location.pathname === to) return;
+    let cancel: (() => void) | null = null;
+    // A closed side menu's links may sit in the viewport unseen: those warm
+    // when the menu opens (its data-open), not before.
+    const panel = link.closest<HTMLElement>(".side-panel");
+    let panelWatch: MutationObserver | null = null;
+    const start = () => {
+      if (cancel) return;
+      cancel = prefetchFarFromEntryWhenIdle(300);
+      observer.disconnect();
+      panelWatch?.disconnect();
+    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting) || cancel) return;
+        if (!panel || panel.dataset.open === "true") return start();
+        if (panelWatch) return;
+        panelWatch = new MutationObserver(() => {
+          if (panel.dataset.open === "true") start();
+        });
+        panelWatch.observe(panel, { attributes: true, attributeFilter: ["data-open"] });
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(link);
+    return () => {
+      observer.disconnect();
+      panelWatch?.disconnect();
+      cancel?.();
+    };
+  }, [to]);
 
   const preloadDestination = useCallback(() => {
     // rx12: the Rexonance call's suit-up pieces decode on intent.
@@ -2541,6 +2583,7 @@ export function GuardedLink({
 
   return (
     <a
+      ref={anchor}
       href={href}
       className={className}
       style={style}

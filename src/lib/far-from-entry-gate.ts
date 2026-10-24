@@ -1,4 +1,5 @@
 import type { FarFromEntrySequence } from "../components/far-from-saga/far-from-entry-sequence";
+import { importWithRetry } from "./chunk-retry.js";
 
 /* FAR FROM SAGA's entry transformation, as the route transition screen
    sees it (owner, 2026-10-22: 「遷移画面にもレクソナンスと同じ様に変身アニメ
@@ -55,8 +56,12 @@ export function createFarFromTransitionLoader(load: () => Promise<CallModule>) {
   return Object.assign(prepare, { prefetch: fetchModule });
 }
 
-export const prepareFarFromTransition = createFarFromTransitionLoader(
-  () => import("../components/far-from-saga/far-from-entry-sequence"),
+/** A failed or stalled chunk is retried under a fresh URL (chunk-retry.js),
+ * a few times and briefly: the gate's own deadline still bounds the cover,
+ * and a later entry tries again. */
+const loadSequence = () => import("../components/far-from-saga/far-from-entry-sequence");
+export const prepareFarFromTransition = createFarFromTransitionLoader(() =>
+  importWithRetry(loadSequence, { attempts: 3, delays: [250, 900], timeoutMs: 8000 }),
 );
 
 type Connection = { saveData?: boolean; effectiveType?: string };
@@ -77,7 +82,11 @@ export function isFarFromEntryStill() {
 let warmModule: Promise<WarmModule | null> | null = null;
 const loadWarm = () => {
   if (!warmModule)
-    warmModule = import("./far-from-entry-warmup.ts").then(
+    warmModule = importWithRetry(() => import("./far-from-entry-warmup.ts"), {
+      attempts: 3,
+      delays: [250, 900],
+      timeoutMs: 8000,
+    }).then(
       (module) => module,
       () => {
         warmModule = null;
@@ -98,13 +107,41 @@ export function warmFarFromEntry(priority: Priority = "high"): Promise<boolean> 
 
 /** Intent (a hover, a focus, a touch on a link to /far-from-saga): the
  * sequence's chunk and the images start now, so the tap finds them. */
-export function prefetchFarFromEntry() {
+export function prefetchFarFromEntry(priority: Priority = "high") {
+  if (isFarFromEntryStill()) return;
   void prepareFarFromTransition.prefetch();
-  void warmFarFromEntry("high");
+  void warmFarFromEntry(priority);
 }
 
-/** After the reveal: the decoded images are let go (the next navigation
- * decodes them again, from the browser's cache). */
+type IdleWindow = Window & {
+  requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+  cancelIdleCallback?: (id: number) => void;
+};
+/** Speculative prefetch (a link to /far-from-saga near the viewport, the
+ * side menu opened, /final-stage settled): the chunk and the images at low
+ * priority once the main thread is idle, never on a still tier or a 3G
+ * connection. Returns the cancel. */
+export function prefetchFarFromEntryWhenIdle(delayMs = 0) {
+  if (typeof window === "undefined" || isFarFromEntryStill()) return () => {};
+  const connection = (navigator as Navigator & { connection?: Connection }).connection;
+  if (connection?.effectiveType === "3g") return () => {};
+  const idle = window as IdleWindow;
+  let handle = 0;
+  const timer = window.setTimeout(() => {
+    const run = () => prefetchFarFromEntry("low");
+    if (idle.requestIdleCallback) handle = idle.requestIdleCallback(run, { timeout: 2500 });
+    else handle = window.setTimeout(run, 200);
+  }, delayMs);
+  return () => {
+    window.clearTimeout(timer);
+    if (!handle) return;
+    if (idle.cancelIdleCallback) idle.cancelIdleCallback(handle);
+    else window.clearTimeout(handle);
+  };
+}
+
+/** After the reveal (far-from-entry-warmup: kept for the session, let go
+ * on a low-memory device). */
 export function releaseFarFromEntry() {
   if (!warmModule) return;
   void warmModule.then((module) => module?.releaseFarFromEntry());
