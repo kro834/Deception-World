@@ -15,12 +15,19 @@ const source = readFileSync(
   new URL("../src/components/dream-chapter/dream-story-navigation.tsx", import.meta.url),
   "utf8",
 );
-function navigation() {
+function navigation(componentSource = source) {
   const exports = {};
   const context = createContext({
     exports,
     require(name) {
       if (name === "./dream-chapter-data") return data;
+      if (name === "./dream-chapter-stage")
+        return navigation(
+          readFileSync(
+            new URL("../src/components/dream-chapter/dream-chapter-stage.tsx", import.meta.url),
+            "utf8",
+          ),
+        );
       if (name === "./dream-chapter-extra-data") return extra;
       if (name === "@/lib/dream-reader-state.js") return reader;
       if (name === "@/lib/dream-chapter-navigation.js")
@@ -29,7 +36,7 @@ function navigation() {
     },
   });
   new Script(
-    ts.transpileModule(source, {
+    ts.transpileModule(componentSource, {
       compilerOptions: {
         module: ts.ModuleKind.CommonJS,
         jsx: ts.JsxEmit.ReactJSX,
@@ -44,7 +51,10 @@ test("paragraph guide starts folded and links literal canonical prefixes to the 
   const { DreamStoryIndex } = navigation();
   const html = renderToStaticMarkup(React.createElement(DreamStoryIndex));
   assert.match(html, /<details class="dream-reader-paragraph-guide">/);
-  assert.equal((html.match(/href="#dream-case-[0-5]"/g) ?? []).length, data.DREAM_CASES.length);
+  const index = html.match(/<nav[^>]*id="dream-chapter-index"[\s\S]*?<\/nav>/)?.[0];
+  assert.ok(index);
+  assert.equal((index.match(/href="#dream-case-[0-5]"/g) ?? []).length, data.DREAM_CASES.length);
+  assert.match(html, /aria-label="六章の舞台"/);
   const first = data.DREAM_CASES[0];
   for (const [index, text] of first.paragraphs.entries()) {
     const prefix = Array.from(text).slice(0, 72).join("");

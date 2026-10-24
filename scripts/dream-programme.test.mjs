@@ -16,7 +16,7 @@ test("the three programme entrances resolve to existing records without tallies"
   assert.equal(DREAM_CASES.length, 6);
   assert.ok(DREAM_CHRONICLE.length > 0);
   assert.match(desk, /href: "#posters"/);
-  assert.match(desk, /href: "#dream-chapter-index"/);
+  assert.match(desk, /href: "#dream-chapter-stage"/);
   assert.match(desk, /href: "#dream-record-explorer"/);
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
   // The tickets name their way in; the counts (15点の絵看板, 53件の出来事) are gone.
