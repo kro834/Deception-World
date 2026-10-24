@@ -2019,7 +2019,7 @@ html[data-family]
   + .side-panel-group
   > .side-panel-links
   > a[href^="/illusionculum-saga"] {
-  --sh-art: url("/illusionculum-saga-20261023/standard-tile-400.webp");
+  --sh-art: url("/illusionculum-saga-20261023/hero-tile-400.webp");
   --sh-art-pos: 50% 24%;
 }
 

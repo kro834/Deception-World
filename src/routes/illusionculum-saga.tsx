@@ -16,7 +16,7 @@ import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
 import {
   ILLUSIONCULUM_HERO,
   ILLUSIONCULUM_KEY_VISUAL,
-  illusionculumCutoutImage,
+  illusionculumHeroImage,
 } from "@/lib/illusionculum-saga-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
 
@@ -70,8 +70,8 @@ export const Route = createFileRoute("/illusionculum-saga")({
         rel: "preload",
         as: "image",
         href: ILLUSIONCULUM_HERO.src,
-        imageSrcSet: illusionculumCutoutImage("standard").srcSet,
-        imageSizes: illusionculumCutoutImage("standard").sizes,
+        imageSrcSet: illusionculumHeroImage().srcSet,
+        imageSizes: illusionculumHeroImage().sizes,
         fetchPriority: "high",
         type: "image/webp",
       },

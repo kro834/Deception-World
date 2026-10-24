@@ -2919,3 +2919,96 @@ html:not([data-world-effects="economy"])
     align-items: start;
   }
 }
+
+/* The hero's key visual (owner, 2026-10-24: 「他みたいに表示する様改善して」):
+   the framed stage the Rexonance, Extreme and Far From heroes use, the
+   picture covering it with the head kept in view (object-position). The
+   painted halo and sky are the picture's own, so the floor ring, the sigil
+   and the ghost projections no longer draw here. */
+.rxs-page.rxs-page.ics-page .ics-hero-visual {
+  isolation: isolate;
+  overflow: hidden;
+  width: min(100%, 600px);
+  aspect-ratio: 4 / 5;
+  min-height: 0;
+  max-height: calc(100svh - 120px);
+  border: 1px solid rgb(233 184 102 / 34%);
+  background: radial-gradient(circle at 50% 40%, rgb(47 79 216 / 24%), transparent 62%), #02030a;
+}
+
+/* The frame's corners. */
+.rxs-page.rxs-page.ics-page .ics-hero-visual::before {
+  position: absolute;
+  inset: 10px;
+  bottom: 10px;
+  left: 10px;
+  z-index: 4;
+  width: auto;
+  height: auto;
+  translate: none;
+  content: "";
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 0 0 / 18px 1px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 0 0 / 1px 18px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 100% 0 / 18px 1px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 100% 0 / 1px 18px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 0 100% / 18px 1px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 0 100% / 1px 18px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 100% 100% / 18px 1px no-repeat,
+    linear-gradient(var(--ics-gold), var(--ics-gold)) 100% 100% / 1px 18px no-repeat;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  width: auto;
+  height: auto;
+  aspect-ratio: auto;
+  translate: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  mix-blend-mode: normal;
+  background:
+    linear-gradient(180deg, transparent 62%, rgb(2 3 10 / 40%) 82%, #02030a 100%),
+    radial-gradient(circle at 50% 34%, transparent 40%, rgb(0 0 0 / 16%) 84%);
+  content: "";
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-visual .ics-hero-figure {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 8%;
+  filter: saturate(1.06) contrast(1.04) brightness(0.97);
+  mask-image: none;
+}
+
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-hero-visual {
+    width: min(100%, 520px);
+    max-height: none;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-visual::before,
+  .rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+    inset: 0;
+    z-index: 4;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-visual::before {
+    inset: 10px;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-hero-visual .ics-hero-figure {
+    mask-image: none;
+  }
+}

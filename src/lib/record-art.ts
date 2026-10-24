@@ -174,7 +174,7 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
   // Rexonance edition's light (the site follows that site's structure).
   "/illusionculum-saga": {
     // The head-and-torso tile, framed as the other special sites' figures.
-    src: "/illusionculum-saga-20261023/standard-tile-400.webp",
+    src: "/illusionculum-saga-20261023/hero-tile-400.webp",
     pos: "50% 24%",
     edition: "rexonance",
     code: "ILLUSIONCULUM",

@@ -2,7 +2,7 @@ import { preloadIllusionculumAssembly } from "./illusionculum-preload.ts";
 import { rexonanceImage } from "./rexonance-images.ts";
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
-import { ILLUSIONCULUM_HERO, illusionculumCutoutImage } from "./illusionculum-saga-artwork.ts";
+import { ILLUSIONCULUM_ENTRY_CUTOUT, ILLUSIONCULUM_HERO, illusionculumCutoutImage, illusionculumHeroImage } from "./illusionculum-saga-artwork.ts";
 import { META_UNITAS_KEY_VISUAL, metaUnitasImage } from "./meta-unitas-saga-artwork.ts";
 import { META_UNITAS_RX_DRIVER_STANDIN, META_UNITAS_RX_UNDERSUIT } from "./meta-unitas-rx-suit.ts";
 import { dossierImage } from "./dossier-images.ts";
@@ -36,7 +36,8 @@ const KNOWN_BYTES: Record<string, number> = {
   "/saga-extreme-middle-20261006.webp": 332708,
   "/final-stage-logo.webp": 106600,
   [FAR_FROM_SAGA_KEY_VISUAL.src]: 475884,
-  [ILLUSIONCULUM_HERO.src]: 315494,
+  [ILLUSIONCULUM_HERO.src]: 434218,
+  [ILLUSIONCULUM_ENTRY_CUTOUT.src]: 315494,
   "/illusionculum-suit-20261023/undersuit.webp": 45110,
   "/illusionculum-suit-20261023/driver-standin.webp": 27038,
   "/illusionculum-saga-20261023/orb-left-standard-256.webp": 19416,
@@ -67,6 +68,7 @@ export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as cons
 // undersuit the armour locks onto, the two orbs), so its first play is not late.
 export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [
   ILLUSIONCULUM_HERO.src,
+  ILLUSIONCULUM_ENTRY_CUTOUT.src,
   "/illusionculum-suit-20261023/undersuit.webp",
   "/illusionculum-suit-20261023/driver-standin.webp",
   "/illusionculum-saga-20261023/orb-left-standard-256.webp",
@@ -93,7 +95,8 @@ export const MANAGER_ASSETS = {
 // Every width set the site publishes, keyed by its canonical file.
 function responsiveImage(url: string) {
   if (url === FAR_FROM_SAGA_KEY_VISUAL.src) return farFromImage("middle");
-  if (url === ILLUSIONCULUM_HERO.src) return illusionculumCutoutImage("standard");
+  if (url === ILLUSIONCULUM_HERO.src) return illusionculumHeroImage();
+  if (url === ILLUSIONCULUM_ENTRY_CUTOUT.src) return illusionculumCutoutImage("standard");
   if (url === META_UNITAS_KEY_VISUAL.src) return metaUnitasImage("middle");
   return { ...dossierImage(url), ...rexonanceImage(url) };
 }

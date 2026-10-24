@@ -45,11 +45,34 @@ export const ILLUSIONCULUM_ARTWORK: Record<IllusionculumFormKey, IllusionculumAr
   ultraMore: art("ultraMore"),
 };
 
-/** The hero, the preload, the share image and the menu tile: the standard form. */
-export const ILLUSIONCULUM_KEY_VISUAL = ILLUSIONCULUM_ARTWORK.standard;
+/** The page's hero key visual (owner, 2026-10-24: 「他みたいに表示する様改善して」):
+ * the armoured figure on its halo and cosmic sky, framed as the other special
+ * sites frame theirs. One more file stem ("hero"), the same widths and byte
+ * caps as the form visuals (design/ key-hero.jpg, scripts/build-illusionculum-saga.mjs). */
+export const ILLUSIONCULUM_HERO_STEM = "hero";
+export const ILLUSIONCULUM_HERO: IllusionculumArtwork = {
+  src: `${ILLUSIONCULUM_ARTWORK_FOLDER}/${ILLUSIONCULUM_HERO_STEM}-1280.webp`,
+  width: 1280,
+  height: 1920,
+};
+
+/** The hero, the preload, the share image and the menu tile. */
+export const ILLUSIONCULUM_KEY_VISUAL = ILLUSIONCULUM_HERO;
+
+/** srcset / sizes for the hero (shared by the HTML preload, the hero and the
+ * asset loader so they all fetch the same candidate), as farFromImage does. */
+export function illusionculumHeroImage() {
+  return {
+    srcSet: ILLUSIONCULUM_ARTWORK_WIDTHS.map(
+      (width) =>
+        `${ILLUSIONCULUM_ARTWORK_FOLDER}/${ILLUSIONCULUM_HERO_STEM}-${width}.webp ${width}w`,
+    ).join(", "),
+    sizes: "(max-width: 899px) 100vw, 46vw",
+  };
+}
 
 /** The side menu's SPECIAL tile and the World's door (400 px, same script). */
-export const ILLUSIONCULUM_MENU_TILE = `${ILLUSIONCULUM_ARTWORK_FOLDER}/standard-tile-400.webp`;
+export const ILLUSIONCULUM_MENU_TILE = `${ILLUSIONCULUM_ARTWORK_FOLDER}/${ILLUSIONCULUM_HERO_STEM}-tile-400.webp`;
 export const ILLUSIONCULUM_MENU_TILE_SIZE = [400, 533] as const;
 
 /** The transparent cutouts' delivery widths (1024 x 1536 frame, 2:3). */
@@ -72,9 +95,9 @@ export function illusionculumCutoutImage(key: IllusionculumFormKey) {
   };
 }
 
-/** The hero's figure: the standard form's cutout, on the page's own stage
- * (the key visuals, with their painted grounds, stand in #forms). */
-export const ILLUSIONCULUM_HERO = {
+/** The entry transformation's figure: the standard form's cutout (the gate
+ * resolves it over the undersuit). Not the hero any more. */
+export const ILLUSIONCULUM_ENTRY_CUTOUT = {
   src: illusionculumCutout("standard", 960),
   ...ILLUSIONCULUM_CUTOUT_SIZE,
 } as const;

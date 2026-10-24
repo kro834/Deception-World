@@ -13,8 +13,8 @@ import {
   ILLUSIONCULUM_CUTOUT_SIZE,
   ILLUSIONCULUM_FORM_ORDER,
   ILLUSIONCULUM_HERO,
+  illusionculumHeroImage,
   illusionculumCutout,
-  illusionculumCutoutImage,
   illusionculumDetail,
   illusionculumImage,
   type IllusionculumFormKey,
@@ -27,7 +27,7 @@ import { IllusionculumRail } from "./illusionculum-rail";
 import { withCallBreaks } from "@/components/far-from-saga/far-from-phrase";
 import { IllusionculumSuitUp } from "./illusionculum-suitup";
 import { IllusionculumEntryTransition } from "./illusionculum-entry-transition";
-import { IllusionculumOrbs, IllusionculumProjection } from "./illusionculum-figures";
+import { IllusionculumProjection } from "./illusionculum-figures";
 
 /* ILLUSIONCULUM SAGA special site (owner, 2026-10-23: 「イリュージョンクルム
    サーガを追加。レクソナンスを参考に。」).
@@ -422,42 +422,19 @@ export function IllusionculumSaga() {
             ILLUSIONCULUM
           </span>
         </div>
+        {/* The key visual in its framed stage, as the other special sites
+            show theirs (owner, 2026-10-24); the head stays in view. */}
         <div className="rxs-hero-visual ics-hero-visual" aria-hidden="true">
-          <svg className="ics-sigil" viewBox="0 0 400 400">
-            <circle cx="200" cy="200" r="190" />
-            <circle cx="200" cy="200" r="150" />
-            <circle cx="200" cy="200" r="96" />
-            <path d="M200 10 L364 295 L36 295 Z" />
-            <path d="M200 390 L36 105 L364 105 Z" />
-            <path d="M10 200 H390 M200 10 V390" />
-          </svg>
-          <div className="ics-hero-frame">
-            {/* Two projections first, under the real figure: displaced
-                images of the same frame that resolve into it once. */}
-            <span
-              className="ics-hero-ghost is-a"
-              style={{
-                ["--ics-cutout" as string]: `url("${illusionculumCutout("standard", 480)}")`,
-              }}
-            />
-            <span
-              className="ics-hero-ghost is-b"
-              style={{
-                ["--ics-cutout" as string]: `url("${illusionculumCutout("standard", 480)}")`,
-              }}
-            />
-            <img
-              className="ics-hero-figure"
-              src={ILLUSIONCULUM_HERO.src}
-              {...illusionculumCutoutImage("standard")}
-              alt=""
-              width={ILLUSIONCULUM_HERO.width}
-              height={ILLUSIONCULUM_HERO.height}
-              decoding="async"
-              fetchPriority="high"
-            />
-            <IllusionculumOrbs />
-          </div>
+          <img
+            className="ics-hero-figure"
+            src={ILLUSIONCULUM_HERO.src}
+            {...illusionculumHeroImage()}
+            alt=""
+            width={ILLUSIONCULUM_HERO.width}
+            height={ILLUSIONCULUM_HERO.height}
+            decoding="async"
+            fetchPriority="high"
+          />
         </div>
         <a className="rxs-scroll-cue ics-scroll-cue" href="#overview" aria-label="概要へ">
           <i aria-hidden="true" />

@@ -40,7 +40,7 @@ test("the site has a route, its sheets in order, a menu tile, a route family and
     assert.match(component + suitup + comparison, new RegExp(`id="${hash}"`), hash);
   }
   assert.match(read("src/lib/route-family.js"), /path === "\/illusionculum-saga"/);
-  assert.match(read("src/lib/asset-loader.ts"), /export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[\s*ILLUSIONCULUM_HERO\.src,\s*"\/illusionculum-suit-20261023\/undersuit\.webp"/);
+  assert.match(read("src/lib/asset-loader.ts"), /export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[\s*ILLUSIONCULUM_HERO\.src,\s*ILLUSIONCULUM_ENTRY_CUTOUT\.src,\s*"\/illusionculum-suit-20261023\/undersuit\.webp"/);
   assert.match(read("src/styles-stage-shell.css"), /a\[href\^="\/illusionculum-saga"\]/);
 });
 
@@ -145,7 +145,7 @@ test("the four key visuals, cutouts, details and orbs are one versioned, budgete
     assert.ok(existsSync(new URL(`../design/illusionculum-saga-20261023/key-${stem}.jpg`, import.meta.url)));
     assert.ok(existsSync(new URL(`../design/illusionculum-saga-20261023/cutout-${stem}.webp`, import.meta.url)));
   }
-  assert.ok(statSync(new URL("../public/illusionculum-saga-20261023/standard-tile-400.webp", import.meta.url)).size <= 80_000);
+  assert.ok(statSync(new URL("../public/illusionculum-saga-20261023/hero-tile-400.webp", import.meta.url)).size <= 80_000);
   for (const side of ["left", "right"])
     for (const form of ["standard", "ultra"])
       assert.ok(existsSync(new URL(`../public/illusionculum-saga-20261023/orb-${side}-${form}-256.webp`, import.meta.url)));
@@ -244,4 +244,31 @@ test("the site is registered wherever the other special sites are", () => {
   assert.match(read("server/lib/public-document-cache.ts"), /"\/illusionculum-saga"/);
   assert.match(read("scripts/verify-public-deployment.mjs"), /"\/illusionculum-saga"/);
   assert.match(read("scripts/verify-site-health.mjs"), /"\/illusionculum-saga"/);
+});
+
+// Owner (2026-10-24): 「一番上が他とは違って直立画像になっているので、こっちを他みたいに表示する様改善して」
+test("the hero is a key visual in the framed stage, like the other special sites", () => {
+  const caps = { 640: 200_000, 960: 350_000, 1280: 480_000 };
+  for (const [width, cap] of Object.entries(caps)) {
+    const file = new URL(`../public/illusionculum-saga-20261023/hero-${width}.webp`, import.meta.url);
+    assert.ok(statSync(file).size <= cap, `hero-${width}`);
+  }
+  assert.ok(existsSync(new URL("../design/illusionculum-saga-20261023/key-hero.jpg", import.meta.url)));
+  const art = read("src/lib/illusionculum-saga-artwork.ts");
+  assert.match(art, /ILLUSIONCULUM_HERO: IllusionculumArtwork = \{\s*src: `\$\{ILLUSIONCULUM_ARTWORK_FOLDER\}\/\$\{ILLUSIONCULUM_HERO_STEM\}-1280\.webp`/);
+  assert.match(art, /ILLUSIONCULUM_KEY_VISUAL = ILLUSIONCULUM_HERO/);
+  assert.match(art, /ILLUSIONCULUM_HERO_STEM\}-tile-400\.webp/);
+  // The hero is the picture in the split stage; no upright cutout, ghosts or orbs.
+  const hero = component.slice(component.indexOf('className="rxs-hero ics-hero"'), component.indexOf('id="overview"'));
+  assert.match(hero, /rxs-hero-visual ics-hero-visual/);
+  assert.match(hero, /\{\.\.\.illusionculumHeroImage\(\)\}/);
+  assert.doesNotMatch(hero, /illusionculumCutout|ics-hero-ghost|IllusionculumOrbs/);
+  // The route preloads and shares the same file; the loader knows its srcset.
+  assert.match(route, /imageSrcSet: illusionculumHeroImage\(\)\.srcSet/);
+  assert.match(read("src/lib/asset-loader.ts"), /url === ILLUSIONCULUM_HERO\.src\) return illusionculumHeroImage\(\)/);
+  // The head stays in view: the stage covers, anchored near the top.
+  const css = read("src/styles-illusionculum-saga.css");
+  assert.match(css, /\.ics-hero-visual \.ics-hero-figure \{[^}]*object-fit: cover;[^}]*object-position: 50% 8%/);
+  // The entry gate keeps the standing cutout.
+  assert.match(read("src/lib/illusionculum-entry.ts"), /ILLUSIONCULUM_ENTRY_FIGURE = ILLUSIONCULUM_ENTRY_CUTOUT\.src/);
 });

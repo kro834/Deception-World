@@ -20,6 +20,8 @@ import {
   ILLUSIONCULUM_DETAIL_CROPS,
   ILLUSIONCULUM_FORM_ORDER,
   ILLUSIONCULUM_FORM_STEMS,
+  ILLUSIONCULUM_HERO,
+  ILLUSIONCULUM_HERO_STEM,
   ILLUSIONCULUM_MENU_TILE,
   ILLUSIONCULUM_ORBS,
   ILLUSIONCULUM_ORB_SIZE,
@@ -53,8 +55,13 @@ const tile = async (input, output) => {
   return result;
 };
 
-for (const key of ILLUSIONCULUM_FORM_ORDER) {
-  const stem = ILLUSIONCULUM_FORM_STEMS[key];
+// The four form visuals, then the hero's own key visual (stem "hero", which
+// also gives the side menu's tile).
+const JOBS = [
+  ...ILLUSIONCULUM_FORM_ORDER.map((key) => [ILLUSIONCULUM_FORM_STEMS[key], ILLUSIONCULUM_ARTWORK[key]]),
+  [ILLUSIONCULUM_HERO_STEM, ILLUSIONCULUM_HERO],
+];
+for (const [stem, expected] of JOBS) {
   const input = fileURLToPath(new URL(`key-${stem}.jpg`, designDir));
   const metadata = await sharp(input).metadata();
   console.log(`${stem}: original ${metadata.width}x${metadata.height}`);
@@ -74,16 +81,15 @@ for (const key of ILLUSIONCULUM_FORM_ORDER) {
     console.log(
       `  ${width}w: ${result.width}x${result.height}, ${result.size} bytes (q${quality})${over}`,
     );
-    const expected = ILLUSIONCULUM_ARTWORK[key];
     if (
       width === ILLUSIONCULUM_ARTWORK_WIDTHS.at(-1) &&
       (expected.width !== result.width || expected.height !== result.height)
     )
       throw new Error(
-        `${key} is ${expected.width}x${expected.height}; file is ${result.width}x${result.height}`,
+        `${stem} is ${expected.width}x${expected.height}; file is ${result.width}x${result.height}`,
       );
   }
-  if (key === "standard")
+  if (stem === ILLUSIONCULUM_HERO_STEM)
     await tile(input, fileURLToPath(new URL(ILLUSIONCULUM_MENU_TILE.split("/").pop(), publicDir)));
 }
 
