@@ -293,3 +293,35 @@
 .rxs-page.rxs-page.ffs-page .ffs-footer strong {
   text-shadow: 0 0 30px rgb(var(--ffz-ice) / 0.3);
 }
+
+/* -- q-ff2 (2026-10-24): the sub-chapter heads at a head's scale -----------
+   They read as captions at 32px after a full chapter gap. A step up in
+   scale and a shorter run-in make each one its chapter's continuation. */
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter:not(.ffs-report-section) {
+  padding-top: clamp(64px, 7vw, 96px);
+}
+.rxs-page.rxs-page.ffs-page > .ffs-subchapter > .rxs-section-heading > h2 {
+  font-size: clamp(30px, 2.2vw + 16px, 48px);
+  line-height: 1.22;
+  letter-spacing: 0.02em;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* No flat black bands between the plated chapters: the late chapters run
+   on one ink, so the seam is the chapter's lit rule, not a tone jump. */
+.rxs-page.rxs-page.ffs-page > .ffs-system,
+.rxs-page.rxs-page.ffs-page > .ffs-arsenal {
+  background: var(--fft-ink-2);
+}
+
+/* A readable measure inside wide single-column plates (tablet, desktop). */
+.rxs-page.rxs-page.ffs-page .ffs-articles article p {
+  max-width: 46em;
+}
+
+/* The end card: break between phrases only. */
+.rxs-page.rxs-page.ffs-page .ffs-footer h2 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}

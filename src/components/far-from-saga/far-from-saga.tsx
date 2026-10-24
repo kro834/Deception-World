@@ -830,7 +830,7 @@ export function FarFromSaga() {
         </p>
         <div>
           <h2>
-            ファーフロムサーガの活躍は、
+            ファーフロムサーガの<wbr />活躍は、
             <br />
             ファイナルステージで。
           </h2>

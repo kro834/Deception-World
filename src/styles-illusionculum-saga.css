@@ -2156,24 +2156,6 @@
   border-bottom: 1px solid var(--ics-line);
 }
 
-/* A finisher's numeral sits under its name and calls (the prose column
-   stays clear). */
-.rxs-page.rxs-page.ics-page .ics-finisher::after {
-  top: auto;
-  right: auto;
-  bottom: 18px;
-  left: clamp(24px, 3.4vw, 44px);
-}
-
-@media (max-width: 1099.98px) {
-  .rxs-page.rxs-page.ics-page .ics-finisher::after {
-    top: 14px;
-    right: 18px;
-    bottom: auto;
-    left: auto;
-  }
-}
-
 /* Chapter heads (Extreme's grammar): a lit rule under each head, ice to
    gold, fading out. */
 .rxs-page.rxs-page.ics-page .ics-chapter > .ics-heading,
@@ -2322,28 +2304,6 @@
   margin: 0;
 }
 
-.rxs-page.rxs-page.ics-page .ics-footer > div::before,
-.rxs-page.rxs-page.ics-page .ics-footer > div::after {
-  position: absolute;
-  top: 50%;
-  left: clamp(-120px, -8vw, -40px);
-  z-index: -1;
-  width: clamp(420px, 52vw, 760px);
-  aspect-ratio: 1;
-  translate: 0 -50%;
-  border: 1px solid rgb(233 184 102 / 22%);
-  border-radius: 50%;
-  content: "";
-  pointer-events: none;
-}
-
-.rxs-page.rxs-page.ics-page .ics-footer > div::after {
-  left: clamp(-40px, -2vw, -8px);
-  width: clamp(300px, 36vw, 520px);
-  border-color: rgb(166 230 255 / 16%);
-  border-style: dashed;
-}
-
 .rxs-page.rxs-page.ics-page .ics-footer > a {
   gap: 18px;
   padding-inline: 20px;
@@ -2366,18 +2326,6 @@
 
 .rxs-page.rxs-page.ics-page .ics-footer > a:hover {
   border-color: var(--ics-ice);
-}
-
-@media (max-width: 900px) {
-  .rxs-page.rxs-page.ics-page .ics-footer > div::before {
-    left: -30vw;
-    width: 120vw;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-footer > div::after {
-    left: -8vw;
-    width: 84vw;
-  }
 }
 
 /* Phones and stacked tablets (owner, 2026-10-24: 「それも修正して」): the floor
@@ -2752,5 +2700,84 @@ html:not([data-world-effects="economy"])
   .rxs-page.rxs-page.ics-page :is(.ics-more-body, .ics-dg-step, .ics-more > summary i::after) {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* ================================================================
+   q-ic2 (2026-10-24): finisher badges top left like every other plate
+   (the badge had no area and fell into a row under the calls), and a
+   wrapped call stays one chip.
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .ics-finisher {
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "no prose"
+    "name prose"
+    "calls prose";
+}
+
+.rxs-page.rxs-page.ics-page .ics-finisher > .ics-card-no {
+  grid-area: no;
+  margin-bottom: 0;
+}
+
+@media (max-width: 1099.98px) {
+  .rxs-page.rxs-page.ics-page .ics-finisher {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      "no"
+      "name"
+      "calls"
+      "prose";
+  }
+}
+
+.rxs-page.rxs-page.ics-page .ics-calls b {
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* q-ic2 (2026-10-24): the end card, recomposed. With its name gone (the
+   label pass), the figure is the card: ウルトラ centred on the sigil's two
+   gold orbits, standing on a lit floor line, the exits directly under its
+   feet. No empty half. */
+.rxs-page.rxs-page.ics-page .ics-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  gap: 14px;
+  min-height: 0;
+  padding: clamp(72px, 7vw, 104px) var(--ics-gutter) clamp(56px, 6vw, 88px);
+  background:
+    radial-gradient(circle at 50% 42%, transparent calc(clamp(150px, 19vw, 270px) - 1px), rgb(233 184 102 / 26%) clamp(150px, 19vw, 270px), transparent calc(clamp(150px, 19vw, 270px) + 1px)),
+    radial-gradient(circle at 50% 42%, transparent calc(clamp(210px, 27vw, 380px) - 1px), rgb(166 230 255 / 14%) clamp(210px, 27vw, 380px), transparent calc(clamp(210px, 27vw, 380px) + 1px)),
+    radial-gradient(40% 46% at 50% 42%, rgb(184 31 58 / 22%), transparent 72%),
+    radial-gradient(60% 40% at 50% 100%, rgb(47 79 216 / 16%), transparent 70%), var(--ics-ink);
+}
+
+.rxs-page.rxs-page.ics-page .ics-footer > .ics-end-figure {
+  position: relative;
+  inset: auto;
+  flex: 0 0 100%;
+  width: 100%;
+  height: clamp(380px, 64vh, 660px);
+  margin: 0 0 clamp(8px, 2vw, 20px);
+  opacity: 1;
+  object-fit: contain;
+  object-position: 50% 100%;
+  mask-image: linear-gradient(180deg, #000 82%, transparent 100%);
+  filter: drop-shadow(0 30px 60px rgb(184 31 58 / 26%));
+}
+
+
+.rxs-page.rxs-page.ics-page .ics-footer > a {
+  flex: 0 1 auto;
+}
+
+@media (max-width: 560px) {
+  .rxs-page.rxs-page.ics-page .ics-footer > a {
+    flex: 1 1 100%;
   }
 }
