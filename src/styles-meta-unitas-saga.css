@@ -1479,26 +1479,30 @@ html[data-family="special"]
   }
 }
 
-/* The cards' outlined numbers (the Extreme site's; marks). */
+/* The cards' numbers: Extreme's solid badge, top left (owner, 2026-10-24:
+   「他と同じく大きな番号は振って」 — every site the same), in this page's orange. */
 .mus-article {
   position: relative;
 }
 
 .mus-article-no {
-  position: absolute;
-  top: clamp(14px, 1.6vw, 22px);
-  right: clamp(16px, 2vw, 26px);
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(255 154 74 / 55%);
+  display: grid;
+  place-items: center;
+  justify-self: start;
+  width: fit-content;
+  min-width: 54px;
+  height: 46px;
+  margin: 0 0 14px;
+  padding: 0 14px 0 10px;
+  color: var(--mus-ink);
+  background: linear-gradient(180deg, var(--mus-orange-hot), var(--mus-orange) 60%, #d9712a);
   font-family: var(--mus-latin);
-  font-size: clamp(28px, 3vw, 44px);
-  font-weight: 300;
+  font-size: 28px;
+  font-weight: 800;
   line-height: 1;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  box-shadow: 0 8px 20px rgb(255 154 74 / 28%);
   pointer-events: none;
-}
-
-.mus-article h3 {
-  padding-right: clamp(44px, 4.4vw, 64px);
 }
 
 /* The end card's watermark: the name, huge, under everything (Extreme's). */
