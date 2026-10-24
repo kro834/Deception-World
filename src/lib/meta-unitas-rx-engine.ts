@@ -128,6 +128,11 @@ export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
 export function mountMetaUnitasAssemblyEngine(
   runway: HTMLElement,
   environment: typeof globalThis = window,
+  options: { eager?: boolean } = {},
 ): () => void {
-  return mountRexonanceAssembly(runway, metaUnitasAssemblyConfig(), environment);
+  return mountRexonanceAssembly(
+    runway,
+    { ...metaUnitasAssemblyConfig(), eager: options.eager },
+    environment,
+  );
 }

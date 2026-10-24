@@ -215,7 +215,7 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
   // Owner (2026-10-23): 「メタ・ウニタスはレクソナンスと同じ装着です」.
   const engine = read("src/lib/meta-unitas-rx-engine.ts");
   assert.match(engine, /import \{ mountRexonanceAssembly/);
-  assert.match(engine, /mountRexonanceAssembly\(runway, metaUnitasAssemblyConfig\(\), environment\)/);
+  assert.match(engine, /mountRexonanceAssembly\(\s*runway,\s*\{ \.\.\.metaUnitasAssemblyConfig\(\), eager: options\.eager \},\s*environment,?\s*\)/);
   assert.ok(!/fire: false|generation:/.test(engine), "the fire and the nanites stay Rexonance's");
   assert.match(read("src/lib/meta-unitas-assembly.ts"), /import\("\.\/meta-unitas-rx-engine"\)/);
   assert.match(suitup, /className="mus-runway rzn-suitup"/);
@@ -242,7 +242,7 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
   assert.ok(total < 1_200_000, `suit-up files ${total}`);
   // The entry plays the same scene on a clock.
   const entry = read("src/components/meta-unitas-saga/meta-unitas-entry-sequence.tsx");
-  assert.match(entry, /mountMetaUnitasAssemblyEngine\(runway, window\)/);
+  assert.match(entry, /mountMetaUnitasAssemblyEngine\(runway, window(, \{ eager: true \})?\)/);
 });
 
 test("the still tiers and the motion gate", () => {

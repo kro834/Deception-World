@@ -103,6 +103,8 @@ const CLOCK: readonly (readonly [number, number])[] = [
  * units light one by one (Rexonance's entry staging). */
 const CALL_AT = [0, 389, 860, 1384, 2468] as const;
 const CHANT_STEP = 250;
+/** The plates' shortest run once the engine is live (ms). */
+const ASSEMBLY_MIN_MS = 2000;
 const progressAt = (ms: number) => {
   for (let i = 1; i < CLOCK.length; i += 1) {
     const [t1, p1] = CLOCK[i];
@@ -153,12 +155,13 @@ export function MetaUnitasEntrySequence({
     void import("@/lib/meta-unitas-rx-engine")
       .then((module) => {
         if (disposed || settled()) return;
-        dispose = module.mountMetaUnitasAssemblyEngine(runway, window);
+        dispose = module.mountMetaUnitasAssemblyEngine(runway, window, { eager: true });
       })
       .catch(() => {
         if (!disposed) playback.fail();
       });
     let finishing = false;
+    let liveAt: number | null = null;
     const frame = (now: number) => {
       raf = 0;
       if (disposed || settled()) return;
@@ -179,12 +182,30 @@ export function MetaUnitasEntrySequence({
         if (t >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
         else delete chip.dataset.cue;
       });
-      const travel = runway.offsetHeight - layer.clientHeight;
-      layer.scrollTop = Math.round(travel * progressAt(t));
-      window.dispatchEvent(new Event("scroll"));
       // The live engine has removed its stand-in and painted its canvas.
       const ready = runway.dataset.rznState === "live" && !runway.dataset.rznArming;
-      if (elapsed < META_UNITAS_ENTRY_DURATION_MS || !ready || finishing) {
+      // Owner (2026-10-24): the whole assembly is seen. The plates' clock
+      // starts when the engine goes live (the calls and the scan run from
+      // frame 1); a late engine gets at least ASSEMBLY_MIN_MS, so the scene
+      // ends at max(3.09 s, live + 2.0 s) — Rexonance's pacing when warm.
+      if (ready && liveAt === null) liveAt = elapsed;
+      const end =
+        liveAt === null
+          ? Infinity
+          : Math.max(META_UNITAS_ENTRY_DURATION_MS, liveAt + ASSEMBLY_MIN_MS);
+      const p =
+        liveAt === null
+          ? 0
+          : progressAt(
+              Math.min(
+                META_UNITAS_ENTRY_DURATION_MS,
+                ((elapsed - liveAt) * META_UNITAS_ENTRY_DURATION_MS) / (end - liveAt),
+              ),
+            );
+      const travel = runway.offsetHeight - layer.clientHeight;
+      layer.scrollTop = Math.round(travel * p);
+      window.dispatchEvent(new Event("scroll"));
+      if (elapsed < end || finishing) {
         // Past the clock without the engine: hold the last beat under the
         // cover (never cut short) until it joins or the watchdog fails.
         if (!finishing) raf = window.requestAnimationFrame(frame);

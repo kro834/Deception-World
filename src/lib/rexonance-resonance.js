@@ -2147,6 +2147,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // burst of separately yielding tasks; another timer yields to paint/input
   // after 4 ms. Individual preparation slices keep their existing budgets.
   let fallbackUntil = 0;
+  let eagerUntil = 0;
   let chain = null;
   const chained = [];
   const chainDeadline = {
@@ -2189,6 +2190,29 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           reject(error);
         }
       };
+      // An entry played under a route cover (config.eager; owner
+      // 2026-10-24: Meta Unitas' assembly started late on phones) prepares
+      // in back-to-back yielding tasks — 10 ms bursts, then a timer so the
+      // clock's frames still paint — instead of waiting on idle periods the
+      // running scene never leaves.
+      if (config.eager) {
+        const eagerPort = clock() < eagerUntil ? chainPort() : null;
+        if (eagerPort) {
+          chained.push(() => run(null));
+        } else {
+          watchdog = environment.setTimeout(() => {
+            watchdog = 0;
+            eagerUntil = clock() + 10;
+            run(null);
+          }, 0);
+        }
+        if (eagerPort) eagerPort.port2.postMessage(0);
+        idleJobs.set(key, () => {
+          if (watchdog) environment.clearTimeout(watchdog);
+          resolve(null);
+        });
+        return;
+      }
       const idle =
         typeof environment.requestIdleCallback === "function" &&
         idleFallbackGeneration !== generation;

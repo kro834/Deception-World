@@ -301,6 +301,8 @@ export interface RexonanceAssemblyFormChange {
 }
 
 export interface RexonanceAssemblyConfig {
+  /** Prepare in back-to-back yielding tasks, not idle periods (an entry under a route cover). */
+  eager?: boolean;
   figure: string;
   undersuit: string;
   size: { readonly width: number; readonly height: number };

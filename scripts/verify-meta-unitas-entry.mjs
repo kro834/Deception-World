@@ -103,6 +103,7 @@ try {
           path: location.pathname,
           scroll: document.querySelector(".mus-entry")?.scrollTop ?? null,
           phase: document.querySelector(".mus-entry")?.dataset.playback ?? null,
+          calls: document.querySelectorAll('.mus-entry [data-cue="done"]').length,
         }));
         assert.ok(intercepted > 0, "the cold dependency really was held");
         if (baseline) {
@@ -118,7 +119,10 @@ try {
         // (never cut short) until the slow engine joins.
         assert.equal(before.path, source, "must not navigate while the engine is still missing");
         assert.equal(before.phase, "playing");
-        assert.ok(before.scroll > 0, "the transformation moves without waiting for readiness");
+        assert.ok(before.calls > 0, "the calls move without waiting for readiness");
+        // Owner (2026-10-24): the plates' clock starts when the engine is
+        // live, so the whole assembly is seen.
+        assert.equal(before.scroll, 0, "the assembly waits for the live engine");
         await page.screenshot({ path: `${out}/${name}-held.png` });
         release();
         await page.locator('.mus-entry[data-playback="playing"]').waitFor();

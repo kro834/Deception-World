@@ -107,6 +107,9 @@ test("the route gate awaits scene completion and the renderer waits for a painte
   // Owner (2026-10-24): readiness gates completion, never the first motion.
   assert.match(entry, /rznState === "live" && !runway\.dataset\.rznArming/);
   assert.match(entry, /playback\.frame\(now\)/);
-  assert.match(entry, /elapsed < META_UNITAS_ENTRY_DURATION_MS \|\| !ready/);
+  // Owner (2026-10-24): under the cover the engine prepares eagerly, not in idle periods.
+  assert.match(entry, /mountMetaUnitasAssemblyEngine\(runway, window, \{ eager: true \}\)/);
+  assert.match(entry, /if \(ready && liveAt === null\) liveAt = elapsed/);
+  assert.match(entry, /if \(elapsed < end \|\| finishing\)/);
   assert.doesNotMatch(entry, /READY_WAIT_MS/);
 });
