@@ -349,16 +349,6 @@ export function MetaUnitasSaga() {
               </li>
             ))}
           </ol>
-          <div className="mus-hero-doors">
-            <a className="is-primary" href="#suitup">
-              <span>変身</span>
-              <i aria-hidden="true">↘</i>
-            </a>
-            <a href="#stages">
-              <span>形態段階</span>
-              <i aria-hidden="true">↘</i>
-            </a>
-          </div>
         </div>
       </section>
 
@@ -586,10 +576,6 @@ export function MetaUnitasSaga() {
           loading="lazy"
           decoding="async"
         />
-        <div className="mus-end-names">
-          <p>{jp(riderName)}</p>
-          <p>{jp(ultraName)}</p>
-        </div>
         <nav className="mus-end-doors" aria-label="ほかのページへ">
           <a href="#top">
             <span>ページの先頭へ</span>

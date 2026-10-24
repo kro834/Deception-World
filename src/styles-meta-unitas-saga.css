@@ -105,7 +105,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   white-space: nowrap;
 }
 
-.mus-page :is(h1, h2, h3, th, td, li, .mus-hero-ultra, .mus-end-names p) {
+.mus-page :is(h1, h2, h3, th, td, li, .mus-hero-ultra, .mus-end-doors span) {
   word-break: keep-all;
   line-break: strict;
 }
@@ -327,45 +327,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 
 .mus-call-text {
   min-width: 0;
-}
-
-.mus-hero-doors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.mus-hero-doors a {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 48px;
-  padding: 0 22px;
-  border: 1px solid rgb(233 239 242 / 22%);
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.mus-hero-doors a.is-primary {
-  border-color: rgb(255 154 74 / 62%);
-  background: linear-gradient(120deg, rgb(255 154 74 / 22%), rgb(55 198 192 / 14%));
-}
-
-.mus-hero-doors a i {
-  color: var(--mus-orange);
-  font-style: normal;
-}
-
-@media (hover: hover) {
-  .mus-hero-doors a:hover {
-    border-color: var(--mus-orange-hot);
-    background-color: rgb(255 154 74 / 12%);
-  }
 }
 
 /* The hero's one-shot: one picture, then the seams draw and the plates
@@ -1172,9 +1133,9 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
   gap: 32px;
-  align-items: end;
+  align-items: center;
   max-width: 1240px;
-  min-height: min(92svh, 860px);
+  min-height: min(80svh, 760px);
   margin: clamp(80px, 10vw, 140px) auto 0;
   padding: 0 var(--mus-gutter) clamp(48px, 6vw, 80px);
   overflow: hidden;
@@ -1214,29 +1175,8 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   pointer-events: none;
 }
 
-.mus-end-names {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 8px;
-}
 
-.mus-end-names p {
-  margin: 0;
-  font-size: clamp(1.4rem, 3.4vw, 2.6rem);
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  line-height: 1.25;
-}
 
-.mus-end-names p + p {
-  width: fit-content;
-  font-size: clamp(1rem, 2vw, 1.5rem);
-  background: var(--mus-iris);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
 
 .mus-end-doors {
   position: relative;
@@ -1520,10 +1460,6 @@ html[data-family="special"]
 
 /* ---------- The end card (the Extreme site's closing: a large line, the
    doors in one row) ---------- */
-.mus-end-names p {
-  font-size: clamp(1.8rem, 4.6vw, 3.6rem);
-  text-shadow: 0 0 48px rgb(255 154 74 / 20%);
-}
 
 @media (min-width: 861px) {
   .mus-end-doors {
@@ -1593,4 +1529,11 @@ html[data-family="special"]
    its name for assistive technology). */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page.mus-page .rzn-movie .rzn-movie-kicker {
   display: none;
+}
+
+/* Owner (2026-10-24): 不要なセカンダリラベルを削除（レイアウトで説明）.
+   The runway's form stamp repeats the selector under it: the engine keeps
+   its element, never shown. */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp[hidden] {
+  display: none !important;
 }
