@@ -69,7 +69,7 @@ function ComparisonTable({
   return (
     <div className="ics-table-block rxs-reveal">
       <h3 id={`${id}-title`}>{phrase(table.title)}</h3>
-      <div className="ics-table-scroll">
+      <div className="ics-table-scroll" tabIndex={0} role="region" aria-labelledby={`${id}-title`}>
         <table className="ics-table" aria-labelledby={`${id}-title`}>
           <thead>
             <tr>

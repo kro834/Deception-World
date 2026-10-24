@@ -848,6 +848,10 @@
 
 .rxs-page.rxs-page.ics-page .ics-tables {
   display: grid;
+  /* minmax(0, 1fr) and a 0 min-width keep the tables' 560px minimum from
+     widening the grid track past the phone; the page clips horizontally,
+     so a blown-out track left the scroller nothing to scroll (Android). */
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(36px, 5vw, 56px);
 }
 
@@ -873,8 +877,13 @@
   rotate: 45deg;
 }
 
+.rxs-page.rxs-page.ics-page .ics-table-block {
+  min-width: 0;
+}
+
 .rxs-page.rxs-page.ics-page .ics-table-scroll {
   overflow-x: auto;
+  touch-action: pan-x pan-y pinch-zoom;
   border: 1px solid var(--ics-line);
   background: rgb(6 8 18 / 70%);
   overscroll-behavior-x: contain;

@@ -44,7 +44,7 @@ function ComparisonTable({ chapter }: { chapter: Chapter }) {
     column === 0 ? null : columnShares(table.rows, column, head),
   );
   return (
-    <div className="mus-table-wrap rxs-reveal">
+    <div className="mus-table-wrap rxs-reveal" tabIndex={0} role="region" aria-label={chapter.title}>
       <table className="mus-table">
         <caption className="visually-hidden">{chapter.title}</caption>
         <thead>
