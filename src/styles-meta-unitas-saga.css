@@ -516,6 +516,7 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 }
 .mus-performance > .mus-lineup {
   margin-top: calc(-1 * clamp(44px, 5vw, 72px) + 14px);
+  margin-bottom: calc(-1 * clamp(44px, 5vw, 72px) + 36px);
 }
 
 .mus-overview-copy p:first-child {
