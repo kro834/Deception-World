@@ -1,0 +1,251 @@
+/* A finite, user-driven paper theatre. Its animation never moves the reading page. */
+.dream-page .dream-chapter-stage {
+  --stage-gold: #e5c185;
+  --stage-ink: #fff1d9;
+  --stage-direction: 1;
+  color: var(--stage-ink);
+  margin-block: 18px 28px;
+  border: 1px solid #a38257;
+  background: #17121e;
+  isolation: isolate;
+  scroll-margin-top: 150px;
+}
+.dream-page .dream-chapter-stage[data-direction="-1"] {
+  --stage-direction: -1;
+}
+.dream-page .dream-chapter-stage-scene {
+  position: relative;
+  overflow: hidden;
+  min-height: 330px;
+  perspective: 1100px;
+  background: radial-gradient(ellipse at 55% 0%, #5c395a, transparent 65%), #17121e;
+  border-bottom: 1px solid #a38257;
+}
+.dream-page .dream-chapter-stage-scene::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 32px;
+  border-top: 1px solid #a3825770;
+  background: repeating-linear-gradient(90deg, transparent 0 40px, #e5c18518 41px 42px);
+  transform: perspective(100px) rotateX(35deg);
+  transform-origin: bottom;
+  pointer-events: none;
+}
+.dream-page .dream-chapter-stage-wings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.dream-page .dream-chapter-stage-wings > span {
+  position: absolute;
+  left: calc(50% - 110px);
+  top: 26px;
+  width: 220px;
+  height: calc(100% - 48px);
+  border: 1px solid #d4ac6e80;
+  background: linear-gradient(100deg, #a9754938, #271c32 40%, #4a3044);
+  box-shadow:
+    -14px 4px 24px #0007,
+    inset 5px 0 #e5c18518;
+  transform: translateX(calc(var(--wing-offset) * 92px))
+    translateZ(calc(var(--wing-offset) * -12px)) rotateY(-38deg);
+  opacity: 0.55;
+}
+.dream-page .dream-chapter-stage-wings b {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  font:
+    40px Georgia,
+    serif;
+  color: #e5c185;
+}
+.dream-page .dream-chapter-stage-wings > [data-selected="true"] {
+  opacity: 0;
+}
+.dream-page .dream-chapter-stage-sheet {
+  position: relative;
+  min-height: 330px;
+  display: grid;
+  grid-template-columns: minmax(100px, 0.65fr) minmax(0, 1fr);
+  align-items: center;
+  padding: 32px clamp(24px, 5vw, 64px) 42px;
+  gap: 24px;
+  background: linear-gradient(100deg, #17121e66, #17121ef5 56%, #17121ecc);
+  transform-origin: 50% 100%;
+}
+.dream-page .dream-chapter-stage-numeral {
+  font:
+    clamp(130px, 17vw, 220px)/1 Georgia,
+    serif;
+  color: #e5c185;
+  text-align: center;
+  text-shadow:
+    2px 2px #251525,
+    4px 4px #8e6840,
+    18px 20px 26px #0008;
+}
+.dream-page .dream-chapter-stage-copy {
+  position: relative;
+  min-width: 0;
+}
+.dream-page .dream-chapter-stage-case {
+  margin: 0 0 8px;
+  color: var(--stage-gold);
+  font:
+    14px/1.5 Georgia,
+    serif;
+  letter-spacing: 0.2em;
+}
+.dream-page .dream-chapter-stage-copy h3 {
+  margin: 0;
+  color: var(--stage-ink);
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+.dream-page .dream-chapter-stage-lead {
+  margin: 16px 0 22px;
+  max-width: 26em;
+  font-size: 16px;
+  line-height: 1.9;
+  color: #f0deca;
+}
+.dream-page .dream-chapter-stage-enter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: 48px;
+  padding: 8px 18px;
+  border: 1px solid var(--stage-gold);
+  color: var(--stage-ink);
+  background: #382435;
+  text-decoration: none;
+  font-size: 16px;
+}
+.dream-page .dream-chapter-stage-console {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+}
+.dream-page .dream-chapter-stage-console button {
+  min-height: 48px;
+  width: 48px;
+  padding: 0;
+  font-size: 24px;
+  color: var(--stage-ink);
+  border: 1px solid #a38257;
+  background: #302335;
+  cursor: pointer;
+}
+.dream-page .dream-chapter-stage-console button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.dream-page .dream-chapter-stage-slider {
+  display: block;
+  min-width: 0;
+  color: #f0deca;
+  font-size: 14px;
+}
+.dream-page .dream-chapter-stage-slider > span:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.dream-page .dream-chapter-stage-slider input {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  accent-color: #e5c185;
+  cursor: ew-resize;
+}
+.dream-page .dream-chapter-stage-ticks {
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 4px;
+  color: #e5c185;
+}
+.dream-page .dream-chapter-stage-ticks i {
+  font:
+    12px/1 Georgia,
+    serif;
+}
+.dream-page .dream-chapter-stage :is(a, button, input):focus-visible {
+  outline: 3px solid #ffedbe;
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-world-effects="static"]):not(
+      [data-world-effects="saver"]
+    ):not([data-motion-enabled="false"])
+    .dream-chapter-stage[data-operated="true"]
+    .dream-chapter-stage-sheet {
+    animation: dream-chapter-stage-turn 560ms cubic-bezier(0.18, 0.7, 0.22, 1) both;
+  }
+  html:not([data-world-effects="economy"]):not([data-world-effects="static"]):not(
+      [data-world-effects="saver"]
+    ):not([data-motion-enabled="false"])
+    .dream-chapter-stage-wings
+    > span {
+    transition:
+      transform 560ms cubic-bezier(0.18, 0.7, 0.22, 1),
+      opacity 280ms;
+  }
+}
+@keyframes dream-chapter-stage-turn {
+  from {
+    opacity: 0.3;
+    transform: translateX(calc(var(--stage-direction) * 32px))
+      rotateY(calc(var(--stage-direction) * -12deg));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 600px) {
+  .dream-page .dream-chapter-stage-sheet {
+    grid-template-columns: 1fr;
+    min-height: 360px;
+    padding: 28px 22px 44px;
+    gap: 0;
+  }
+  .dream-page .dream-chapter-stage-numeral {
+    position: absolute;
+    right: 14px;
+    top: 0;
+    font-size: 200px;
+    opacity: 0.14;
+  }
+  .dream-page .dream-chapter-stage-copy h3 {
+    font-size: 42px;
+  }
+  .dream-page .dream-chapter-stage-lead {
+    min-height: 4em;
+  }
+  .dream-page .dream-chapter-stage-console {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    padding: 16px 12px;
+    gap: 10px;
+  }
+  .dream-page .dream-chapter-stage-console button {
+    width: 44px;
+  }
+}
+@media (forced-colors: active) {
+  .dream-page .dream-chapter-stage-wings,
+  .dream-page .dream-chapter-stage-numeral {
+    display: none;
+  }
+  .dream-page .dream-chapter-stage-sheet {
+    grid-template-columns: 1fr;
+  }
+}
