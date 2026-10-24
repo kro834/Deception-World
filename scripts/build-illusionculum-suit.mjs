@@ -36,6 +36,7 @@ const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const importTs = (path) => import(pathToFileURL(join(ROOT, path)).href);
 const { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_UNDERSUIT } = await importTs("src/lib/rexonance-suit.ts");
 
+const { BELT_OUTLINE } = await import(pathToFileURL(join(ROOT, "scripts/illusionculum-belt-outline.mjs")).href);
 const DESIGN = join(ROOT, "design/illusionculum-saga-20261023");
 const SAM_DIR = join(DESIGN, "sam-masks");
 const VERSION = "20261023";
@@ -217,7 +218,7 @@ const CAPE_L = [
 // SAM segments it like the other plates now, from this generous outline (the
 // medallion's point and the side gems included); the build then decontaminates
 // its edge colours, as FAR FROM's belt.
-const BELT_OUTLINE = [
+const BELT_PROMPT = [
   [
     [350, 640],
     [400, 628],
@@ -250,7 +251,7 @@ const side = (id, poly, group, seat, dir) => [
   },
 ];
 const REGIONS = [
-  { id: "belt", group: "waist", poly: BELT_OUTLINE[0], seat: [512, 720], dir: "up" },
+  { id: "belt", group: "waist", poly: BELT_PROMPT[0], seat: [512, 720], dir: "up" },
   {
     id: "reactor",
     group: "chest",
@@ -669,20 +670,14 @@ const { goldTrim, goldSoft, rawGold } = await goldLayersOf(rgb);
 
 // --- Partition: the belt by its outline, the rest by SAM's shares --------------
 // The driver's own SAM mask (decontaminated below), claiming first.
+// The driver claims first by its own traced outline (scripts/illusionculum-
+// belt-outline.mjs), feathered half a pixel: no armour of the body or cape
+// rides on the belt, no polygon of another plate cuts through it, and what the
+// outline leaves goes to the plates it belongs to.
 const beltMask = await (async () => {
-  const outline = await rasterise(BELT_OUTLINE);
-  if (!manifest.plates.belt) return outline;
-  // SAM's mask, inside the prompt's outline, without the dark bodysuit and
-  // cape it reaches into: a pixel stays the driver where the metal is lit or
-  // within 3 px of lit metal (the belt's dark gaps between its plates).
-  const sam = await samShare("plates/belt.png");
-  const lit = new Float32Array(N);
-  for (let i = 0; i < N; i += 1) {
-    const v = Math.max(src[i * 4], src[i * 4 + 1], src[i * 4 + 2]) / 255;
-    lit[i] = v > 0.3 ? 1 : 0;
-  }
-  const near = await blurField(lit, 1.6);
-  return Float32Array.from(sam, (v, i) => (v / 255) * outline[i] * (lit[i] || near[i] > 0.3 ? 1 : 0));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#000"/>${BELT_OUTLINE.map((poly) => `<path d="${svgPath(poly)}" fill="#fff"/>`).join("")}</svg>`;
+  const { data } = await sharp(Buffer.from(svg)).greyscale().blur(0.5).raw().toBuffer({ resolveWithObject: true });
+  return Float32Array.from({ length: N }, (_, i) => data[i] / 255);
 })();
 const plateIds = REGIONS.flatMap((region) => SPLITS[region.id].map((split) => ({ ...split, region: region.id })));
 const fields = new Map();
@@ -719,6 +714,9 @@ for (const { plate, share } of shares) {
   const owner = new Int16Array(N).fill(-1);
   const ids = [...fields.keys()];
   ids.forEach((id, k) => {
+    // The driver takes nothing but its outline: what it leaves is the other
+    // plates'.
+    if (id === "belt") return;
     const field = fields.get(id);
     for (let i = 0; i < N; i += 1) if (field[i] > 0.5 * alpha[i] && alpha[i] > 0.02) owner[i] = k;
   });
