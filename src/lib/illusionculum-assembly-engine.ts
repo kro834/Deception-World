@@ -160,9 +160,11 @@ export function mountIllusionculumAssemblyEngine(
   options: { entry?: boolean; progress?: () => number } = {},
 ): () => void {
   const config = illusionculumAssemblyConfig();
-  config.eager = Boolean(options.entry);
-  config.progress = options.progress;
   const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
+  // Prepare in short yielding tasks on phones, instead of waiting for
+  // separate idle windows for each phase of the page's suit-up.
+  config.eager = compact || Boolean(options.entry);
+  config.progress = options.progress;
   if (compact) {
     config.prewarm = !options.entry;
     if (options.entry) {

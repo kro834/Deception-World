@@ -22,8 +22,10 @@ Unused flame preparation is skipped only for configurations that disable fire.
 On phones, the page engine waits for the entrance cover to finish so both scenes
 do not prepare simultaneously. It starts immediately afterwards, preserves its
 resources across offscreen scrolling, and releases them on hidden/pagehide and
-unmount. Its original warmup remains active, with idle preparation before the
+unmount. Its original warmup remains active, with preparation before the
 first scroll. Reduced-motion and saving tiers keep their existing static paths.
+Phone preparation uses the existing bounded yielding queue rather than separate
+idle windows, while the desktop scroll scene keeps its previous scheduling.
 
 Navigation intent and direct phone entry warm the engine module and six
 compressed resources in the HTTP cache. Streams are drained without image decode,
@@ -45,6 +47,13 @@ navigation, has an eight-second abort deadline and can retry failures.
   preparation completed in about 2.2–2.4 seconds in WebKit and 0.7 seconds in
   Chrome; subsequent chapter click/check took 42–96 ms. These are local desktop
   browser measurements, not iPhone timing guarantees.
+- Final phone queue adjustment, production build: another eight WebKit loads
+  pass with preparation at the top in 1.0–1.1 seconds and prepared chapter
+  clicks in 52–79 ms. A cold Chrome run with 4x CPU throttling, 120 ms latency
+  and 1.6 Mbit/s download still completes preparation at the top and retains it
+  for the chapter jump, with no document reload or pageerror. Its roughly
+  eleven-second preparation wait shows that slow-network acquisition is not
+  eliminated by queue scheduling.
 - WebKit entrance sampling: 47 samples, 43 ready frames, phases from preparation
   through assembly/seal/ignition/completion, scrollHeight equals clientHeight.
   Early and assembled frames visually reviewed. The measured tracked canvas pixel
