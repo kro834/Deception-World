@@ -1774,3 +1774,33 @@ html:not([data-world-effects="economy"])
 .mus-performance[data-stage="middle"] .mus-table tr[data-ultra] {
   opacity: 0.6;
 }
+
+/* q-mu2 (2026-10-24): an opened 「詳しく」 takes its own full row on the
+   multi-column widths, so the neighbouring plate no longer stands over a
+   blank; the remaining plates close up around it. */
+.mus-article[data-wide] {
+  grid-column: 1 / -1;
+}
+
+/* q-mu2: the specs fit a 390 phone — both forms' figures stay whole. */
+@media (max-width: 520px) {
+  .mus-specs {
+    table-layout: fixed;
+    font-size: 13px;
+  }
+  .mus-specs thead td,
+  .mus-specs tbody th {
+    width: 26%;
+  }
+  .mus-specs tbody th,
+  .mus-specs tbody td,
+  .mus-specs thead th {
+    padding-right: 6px;
+    padding-left: 8px;
+    overflow-wrap: anywhere;
+  }
+  .mus-specs tbody tr[data-dual] td {
+    font-size: 15px;
+    letter-spacing: 0;
+  }
+}
