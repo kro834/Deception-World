@@ -5,6 +5,7 @@ import {
   mountDreamReader,
   type DreamReaderState,
 } from "@/lib/dream-reader-state.js";
+import { DreamChapterStage } from "./dream-chapter-stage";
 import { DREAM_CASES, DREAM_CAST_ROSTER } from "./dream-chapter-data";
 import { DREAM_CHRONICLE, type DreamChronicleEvent } from "./dream-chapter-extra-data";
 
@@ -238,6 +239,7 @@ export function DreamStoryIndex() {
   return (
     <>
       <DreamReaderSupport onChange={setReader} />
+      <DreamChapterStage />
       <nav
         ref={navRef}
         id="dream-chapter-index"

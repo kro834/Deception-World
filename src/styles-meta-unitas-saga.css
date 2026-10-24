@@ -466,20 +466,29 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   display: none;
 }
 
+/* q-mu2: at desktop width 01 (overview, specs, comparison) becomes the
+   Rexonance split — the art pinned in a left rail across the whole
+   chapter, the record scrolling beside it. */
 @media (min-width: 1100px) {
-  .mus-overview-body {
+  .mus-rail {
     display: grid;
-    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
-    gap: clamp(40px, 5vw, 80px);
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    gap: clamp(40px, 4vw, 72px);
     align-items: start;
+    max-width: 1520px;
+    margin: 0 auto;
+    padding-inline: var(--mus-gutter);
+  }
+  .mus-rail-flow > .mus-chapter {
+    max-width: none;
+    padding-inline: 0;
   }
   .mus-overview-art {
     position: sticky;
     top: calc(var(--rxs-local-nav-reserve, 62px) + 28px);
     display: block;
-    margin: 0;
-    aspect-ratio: 2 / 3;
-    max-height: calc(100svh - var(--rxs-local-nav-reserve, 62px) - 56px);
+    margin: clamp(48px, 5vw, 80px) 0 0;
+    height: calc(100svh - var(--rxs-local-nav-reserve, 62px) - 56px);
     border-radius: 4px;
     overflow: hidden;
     box-shadow:
@@ -491,7 +500,23 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: 50% 22%;
   }
+}
+
+/* q-mu2: the hero hands straight to 01 — no empty band between them. */
+.mus-page .mus-chapter.mus-overview {
+  padding-top: clamp(40px, 4.5vw, 72px);
+}
+
+/* q-mu2: the form pick and the lineup read as one control strip above
+   the tables, not as islands in an empty band. */
+.mus-performance > .mus-compare-pick {
+  margin-bottom: 0;
+}
+.mus-performance > .mus-lineup {
+  margin-top: calc(-1 * clamp(44px, 5vw, 72px) + 14px);
+  margin-bottom: calc(-1 * clamp(44px, 5vw, 72px) + 36px);
 }
 
 .mus-overview-copy p:first-child {

@@ -353,57 +353,61 @@ export function MetaUnitasSaga() {
       </section>
 
       {/* 01 — the overview, the specs and the comparison. */}
-      <section
-        id="overview"
-        className="mus-chapter mus-overview"
-        aria-labelledby="mus-overview-title"
-      >
-        <header className="mus-head rxs-reveal">
-          <h2 id="mus-overview-title">概要</h2>
-        </header>
-        <div className="mus-overview-body">
-          {/* The art column stays beside the record while it reads (the
-              Rexonance site's pinned key visual; decorative). */}
-          <figure className="mus-overview-art" aria-hidden="true">
-            <img
-              src={META_UNITAS_ARTWORK.ultra.src}
-              srcSet={metaUnitasImage("ultra").srcSet}
-              sizes="(max-width: 1099px) 0px, 34vw"
-              alt=""
-              width={META_UNITAS_ARTWORK.ultra.width}
-              height={META_UNITAS_ARTWORK.ultra.height}
-              loading="lazy"
-              decoding="async"
-            />
-            <i className="mus-hero-seam" style={{ ["--seam" as string]: 1 }} />
-            <i className="mus-hero-seam" style={{ ["--seam" as string]: 2 }} />
-            <i className="mus-hero-seam" style={{ ["--seam" as string]: 3 }} />
-          </figure>
-          <Lead body={META_UNITAS_SAGA.overview} className="mus-overview-copy rxs-reveal" />
+      <div className="mus-rail">
+        {/* The art rail stays pinned beside 01's record while it reads (the
+          Rexonance site's pinned key visual; decorative). */}
+        <figure className="mus-overview-art" aria-hidden="true">
+          <img
+            src={META_UNITAS_ARTWORK.ultra.src}
+            srcSet={metaUnitasImage("ultra").srcSet}
+            sizes="(max-width: 1099px) 0px, 38vw"
+            alt=""
+            width={META_UNITAS_ARTWORK.ultra.width}
+            height={META_UNITAS_ARTWORK.ultra.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <i className="mus-hero-seam" style={{ ["--seam" as string]: 1 }} />
+          <i className="mus-hero-seam" style={{ ["--seam" as string]: 2 }} />
+          <i className="mus-hero-seam" style={{ ["--seam" as string]: 3 }} />
+        </figure>
+        <div className="mus-rail-flow">
+          <section
+            id="overview"
+            className="mus-chapter mus-overview"
+            aria-labelledby="mus-overview-title"
+          >
+            <header className="mus-head rxs-reveal">
+              <h2 id="mus-overview-title">概要</h2>
+            </header>
+            <div className="mus-overview-body">
+              <Lead body={META_UNITAS_SAGA.overview} className="mus-overview-copy rxs-reveal" />
+            </div>
+          </section>
+
+          <section
+            id="specs"
+            className="mus-chapter mus-sub mus-specs-section"
+            aria-labelledby="mus-specs-title"
+          >
+            <h2 id="mus-specs-title" className="visually-hidden">
+              スペック
+            </h2>
+            <SpecTable />
+          </section>
+
+          <section
+            id="performance"
+            className="mus-chapter mus-sub mus-performance-section"
+            aria-labelledby="mus-performance-title"
+          >
+            <header className="mus-head rxs-reveal">
+              <h2 id="mus-performance-title">{jp(META_UNITAS_PERFORMANCE.title)}</h2>
+            </header>
+            <MetaUnitasPerformance stage={stage} onChoose={chooseQuietly} />
+          </section>
         </div>
-      </section>
-
-      <section
-        id="specs"
-        className="mus-chapter mus-sub mus-specs-section"
-        aria-labelledby="mus-specs-title"
-      >
-        <h2 id="mus-specs-title" className="visually-hidden">
-          スペック
-        </h2>
-        <SpecTable />
-      </section>
-
-      <section
-        id="performance"
-        className="mus-chapter mus-sub mus-performance-section"
-        aria-labelledby="mus-performance-title"
-      >
-        <header className="mus-head rxs-reveal">
-          <h2 id="mus-performance-title">{jp(META_UNITAS_PERFORMANCE.title)}</h2>
-        </header>
-        <MetaUnitasPerformance stage={stage} onChoose={chooseQuietly} />
-      </section>
+      </div>
 
       {/* 02 — the scroll suit-up and the form it ends on. */}
       <MetaUnitasSuitUp stage={stage} onChoose={chooseQuietly} />
