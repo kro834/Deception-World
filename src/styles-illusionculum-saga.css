@@ -1134,16 +1134,7 @@
   transition: border-color 1600ms ease;
 }
 
-.rxs-page.rxs-page.ics-page .ics-form-with {
-  margin: -6px 0 0;
-  color: var(--ics-accent);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  transition: color 1600ms ease;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-copy p:not(.ics-form-with) {
+.rxs-page.rxs-page.ics-page .ics-form-copy p {
   margin: 0;
   color: var(--ics-text-2);
   font-size: 15.5px;
@@ -1345,23 +1336,6 @@
 .rxs-page.rxs-page.ics-page .ics-footer > :not(img) {
   position: relative;
   z-index: 1;
-}
-
-.rxs-page.rxs-page.ics-page .ics-footer > div {
-  flex: 1 0 100%;
-  margin-bottom: 18px;
-}
-
-.rxs-page.rxs-page.ics-page .ics-footer h2 {
-  max-width: 620px;
-  margin: 0;
-  color: var(--ics-text-1);
-  font-size: clamp(26px, 3.4vw, 46px);
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  line-height: 1.3;
-  word-break: keep-all;
-  text-shadow: 0 2px 24px #000;
 }
 
 .rxs-page.rxs-page.ics-page .ics-footer > a {
@@ -1825,7 +1799,7 @@
    engine knows them (auto-phrase) and never leaves one character alone.
    ================================================================ */
 .rxs-page.rxs-page.ics-page
-  :is(h1, h2, h3, .ics-table th, .ics-form-with, .ics-footer h2, .rzn-stamp) {
+  :is(h1, h2, h3, .ics-table th, .rzn-stamp) {
   word-break: keep-all;
   overflow-wrap: anywhere;
   line-break: strict;
@@ -1849,44 +1823,6 @@
   white-space: normal;
   min-width: 9.5em;
   overflow-wrap: normal;
-}
-
-/* The hero's two doors (the Rexonance hero's pair, in this page's light). */
-.rxs-page.rxs-page.ics-page .ics-hero-doors {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: clamp(24px, 3vw, 36px) 0 0;
-}
-
-.rxs-page.rxs-page.ics-page .ics-hero-doors > a {
-  display: inline-flex;
-  gap: 14px;
-  align-items: center;
-  min-height: 48px;
-  padding: 0 20px;
-  border: 1px solid rgb(233 184 102 / 40%);
-  background: rgb(3 4 12 / 70%);
-  color: var(--ics-text-1);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-  transition: background-color 200ms ease, border-color 200ms ease;
-}
-
-.rxs-page.rxs-page.ics-page .ics-hero-doors > a.is-primary {
-  border-color: transparent;
-  background: linear-gradient(90deg, var(--ics-ice), #d9f4ff);
-  color: #050816;
-}
-
-.rxs-page.rxs-page.ics-page .ics-hero-doors > a:hover {
-  border-color: var(--ics-ice);
-}
-
-.rxs-page.rxs-page.ics-page .ics-hero-doors > a > i {
-  font-style: normal;
 }
 
 /* ================================================================
@@ -2183,20 +2119,9 @@
   counter-increment: ics-plate;
 }
 
-.rxs-page.rxs-page.ics-page :is(.ics-finisher, .ics-article)::after {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  content: counter(ics-plate, decimal-leading-zero);
-  color: transparent;
-  font: 700 clamp(36px, 4vw, 64px) / 1 var(--ics-forge);
-  -webkit-text-stroke: 1px rgb(233 184 102 / 38%);
-  pointer-events: none;
-}
-
+/* Owner (2026-10-24): 不要なセカンダリラベルを削除（レイアウトで説明） — no plate numerals. */
 .rxs-page.rxs-page.ics-page .ics-finisher h3,
 .rxs-page.rxs-page.ics-page .ics-article-copy h3 {
-  padding-right: 2.6em;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--ics-line);
 }
@@ -2257,14 +2182,6 @@
    it, the name's ghost kept on phones (under the figure, as Rexonance's
    wordmark), and the doors given their own air under the calls.
    ================================================================ */
-.rxs-page.rxs-page.ics-page .rxs-hero-copy > p.ics-hero-doors {
-  margin: clamp(28px, 3vw, 40px) 0 0;
-}
-
-.rxs-page.rxs-page.ics-page .rxs-hero-copy > p.ics-hero-doors::before {
-  display: none;
-}
-
 .rxs-page.rxs-page.ics-page .ics-hero .rxs-hero-ambient::after {
   position: absolute;
   inset: 0;
@@ -2395,12 +2312,6 @@
   width: clamp(300px, 36vw, 520px);
   border-color: rgb(166 230 255 / 16%);
   border-style: dashed;
-}
-
-.rxs-page.rxs-page.ics-page .ics-footer h2 {
-  max-width: 760px;
-  font-size: clamp(30px, 4.4vw, 64px);
-  line-height: 1.18;
 }
 
 .rxs-page.rxs-page.ics-page .ics-footer > a {

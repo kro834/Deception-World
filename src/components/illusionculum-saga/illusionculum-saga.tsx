@@ -415,18 +415,6 @@ export function IllusionculumSaga() {
             label="イリュージョンクルムサーガ 変身音声"
             className="ics-hero-calls"
           />
-          {/* The two doors, as the Rexonance hero's: into the suit-up and
-              the four forms. */}
-          <p className="ics-hero-doors">
-            <a href="#suitup" className="is-primary">
-              <span>変身を見る</span>
-              <i aria-hidden="true">↓</i>
-            </a>
-            <a href="#forms">
-              <span>四つの形態を見る</span>
-              <i aria-hidden="true">↗</i>
-            </a>
-          </p>
           {/* The name's ghost behind the copy (decorative). */}
           <span className="ics-mark" aria-hidden="true">
             ILLUSIONCULUM
@@ -601,14 +589,9 @@ export function IllusionculumSaga() {
               <i className="ics-form-scan" aria-hidden="true" />
             </figure>
             <div key={`${form}-copy`} className="ics-form-copy">
-              <h3>
-                <DisplayName value={active.name} />
-              </h3>
-              {form === "more" || form === "ultraMore" ? (
-                <p className="ics-form-with">
-                  <DisplayName value="リアクター・モア" />
-                </p>
-              ) : null}
+              {/* The selector names the form, the hero the rider: the name
+                  stays for assistive tech only. */}
+              <h3 className="ics-sr">{active.name}</h3>
               {active.body.map((paragraph, index) => (
                 <p key={index}>{prose(paragraph)}</p>
               ))}
@@ -716,12 +699,8 @@ export function IllusionculumSaga() {
             <i aria-hidden="true">↑</i>
           </a>
         </p>
-        <div>
-          <h2>
-            <DisplayName value={ultraStem} />
-            <span className="ics-ultra-word">{ULTRA_WORD}</span>
-          </h2>
-        </div>
+        {/* The hero carries the names; the end card keeps only its doors. */}
+        <h2 className="ics-sr">{ILLUSIONCULUM_SAGA.ultraName}</h2>
         <GuardedLink to="/riders/saga" assets={[]}>
           <span>仮面ライダーサーガのページへ</span>
           <i aria-hidden="true">↗</i>
