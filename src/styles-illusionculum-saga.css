@@ -2156,24 +2156,6 @@
   border-bottom: 1px solid var(--ics-line);
 }
 
-/* A finisher's numeral sits under its name and calls (the prose column
-   stays clear). */
-.rxs-page.rxs-page.ics-page .ics-finisher::after {
-  top: auto;
-  right: auto;
-  bottom: 18px;
-  left: clamp(24px, 3.4vw, 44px);
-}
-
-@media (max-width: 1099.98px) {
-  .rxs-page.rxs-page.ics-page .ics-finisher::after {
-    top: 14px;
-    right: 18px;
-    bottom: auto;
-    left: auto;
-  }
-}
-
 /* Chapter heads (Extreme's grammar): a lit rule under each head, ice to
    gold, fading out. */
 .rxs-page.rxs-page.ics-page .ics-chapter > .ics-heading,
@@ -2322,28 +2304,6 @@
   margin: 0;
 }
 
-.rxs-page.rxs-page.ics-page .ics-footer > div::before,
-.rxs-page.rxs-page.ics-page .ics-footer > div::after {
-  position: absolute;
-  top: 50%;
-  left: clamp(-120px, -8vw, -40px);
-  z-index: -1;
-  width: clamp(420px, 52vw, 760px);
-  aspect-ratio: 1;
-  translate: 0 -50%;
-  border: 1px solid rgb(233 184 102 / 22%);
-  border-radius: 50%;
-  content: "";
-  pointer-events: none;
-}
-
-.rxs-page.rxs-page.ics-page .ics-footer > div::after {
-  left: clamp(-40px, -2vw, -8px);
-  width: clamp(300px, 36vw, 520px);
-  border-color: rgb(166 230 255 / 16%);
-  border-style: dashed;
-}
-
 .rxs-page.rxs-page.ics-page .ics-footer > a {
   gap: 18px;
   padding-inline: 20px;
@@ -2366,18 +2326,6 @@
 
 .rxs-page.rxs-page.ics-page .ics-footer > a:hover {
   border-color: var(--ics-ice);
-}
-
-@media (max-width: 900px) {
-  .rxs-page.rxs-page.ics-page .ics-footer > div::before {
-    left: -30vw;
-    width: 120vw;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-footer > div::after {
-    left: -8vw;
-    width: 84vw;
-  }
 }
 
 /* Phones and stacked tablets (owner, 2026-10-24: 「それも修正して」): the floor
