@@ -114,10 +114,12 @@ try {
           results.push({ name, reproduced: true, before, intercepted });
           continue;
         }
-        assert.equal(before.path, source, "must not navigate while the scene is still preparing");
-        assert.equal(before.phase, "preparing");
-        assert.equal(before.scroll, 0, "preparation must not spend any assembly progress");
-        await page.screenshot({ path: `${out}/${name}-preparing.png` });
+        // Owner (2026-10-24): the scene moves at once and holds its cover
+        // (never cut short) until the slow engine joins.
+        assert.equal(before.path, source, "must not navigate while the engine is still missing");
+        assert.equal(before.phase, "playing");
+        assert.ok(before.scroll > 0, "the transformation moves without waiting for readiness");
+        await page.screenshot({ path: `${out}/${name}-held.png` });
         release();
         await page.locator('.mus-entry[data-playback="playing"]').waitFor();
         await page.waitForTimeout(1000);

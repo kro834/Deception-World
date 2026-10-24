@@ -24,6 +24,7 @@ import {
   WORLD_ENTER_ASSETS,
 } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
+import { prefetchMetaUnitasEntry } from "@/lib/meta-unitas-entry-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { RE_DIVE_RIKUEI_NAV, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
@@ -435,6 +436,11 @@ export function SideMenuLayer({
   // RE DIVE (rising-world.tsx) joins the World's sections once reached this
   // session; read when the menu opens.
   const [reDiveReached, setReDiveReached] = useState(false);
+  // Owner (2026-10-24): 「他と同じく、事前にデータを読み込む方式にして」 — the Meta
+  // Unitas entry's chunk, engine and suit warm when the menu opens.
+  useEffect(() => {
+    if (isOpen && pathname !== "/meta-unitas-saga") prefetchMetaUnitasEntry?.();
+  }, [isOpen, pathname]);
   useEffect(() => {
     if (!isOpen) return;
     try {

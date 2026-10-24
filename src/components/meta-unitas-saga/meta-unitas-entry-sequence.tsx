@@ -146,56 +146,61 @@ export function MetaUnitasEntrySequence({
     const chips = [
       ...layer.querySelectorAll<HTMLElement>(".mus-entry-calls > li[data-chant] .rzn-chip"),
     ];
+    // Owner (2026-10-24): the transformation moves from the cover's first
+    // frame; the engine (warmed ahead by the gate) joins the running clock
+    // as soon as it is in, and completion waits for it.
+    const settled = () => playback.state !== "preparing" && playback.state !== "playing";
     void import("@/lib/meta-unitas-rx-engine")
       .then((module) => {
-        if (disposed || playback.state !== "preparing") return;
+        if (disposed || settled()) return;
         dispose = module.mountMetaUnitasAssemblyEngine(runway, window);
-        const frame = (now: number) => {
-          raf = 0;
-          if (disposed) return;
-          if (runway.dataset.rznLoad === "error") playback.fail();
-          if (runway.dataset.rznLoad === "static") playback.skip();
-          // `ready` can precede the canvas's first paint. Wait for the live
-          // engine to remove its stand-in before advancing even the first call.
-          const ready = runway.dataset.rznState === "live" && !runway.dataset.rznArming;
-          const elapsed = playback.frame(now, ready);
-          if (elapsed === null) {
-            if (playback.state === "preparing") raf = window.requestAnimationFrame(frame);
-            return;
-          }
-          if (layer.dataset.playback !== "playing") layer.dataset.playback = "playing";
-          let line = 0;
-          CALL_AT.forEach((at, index) => {
-            if (elapsed >= at) line = index;
-          });
-          lines.forEach((element, index) => {
-            element.dataset.cue = index === line ? "on" : index < line ? "done" : "";
-          });
-          chips.forEach((chip, index) => {
-            if (elapsed >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
-            else delete chip.dataset.cue;
-          });
-          const p = progressAt(elapsed);
-          const travel = runway.offsetHeight - layer.clientHeight;
-          layer.scrollTop = Math.round(travel * p);
-          window.dispatchEvent(new Event("scroll"));
-          if (elapsed < META_UNITAS_ENTRY_DURATION_MS) raf = window.requestAnimationFrame(frame);
-          else {
-            // Give the engine the scroll frame and a paint before uncovering.
-            raf = window.requestAnimationFrame(() => {
-              raf = window.requestAnimationFrame(() => {
-                if (disposed) return;
-                layer.dataset.playback = "complete";
-                playback.complete();
-              });
-            });
-          }
-        };
-        raf = window.requestAnimationFrame(frame);
       })
       .catch(() => {
         if (!disposed) playback.fail();
       });
+    let finishing = false;
+    const frame = (now: number) => {
+      raf = 0;
+      if (disposed || settled()) return;
+      if (runway.dataset.rznLoad === "error") playback.fail();
+      if (runway.dataset.rznLoad === "static") playback.skip();
+      const elapsed = playback.frame(now);
+      if (elapsed === null) return;
+      if (layer.dataset.playback !== "playing") layer.dataset.playback = "playing";
+      const t = Math.min(elapsed, META_UNITAS_ENTRY_DURATION_MS);
+      let line = 0;
+      CALL_AT.forEach((at, index) => {
+        if (t >= at) line = index;
+      });
+      lines.forEach((element, index) => {
+        element.dataset.cue = index === line ? "on" : index < line ? "done" : "";
+      });
+      chips.forEach((chip, index) => {
+        if (t >= CALL_AT[3] + index * CHANT_STEP) chip.dataset.cue = "on";
+        else delete chip.dataset.cue;
+      });
+      const travel = runway.offsetHeight - layer.clientHeight;
+      layer.scrollTop = Math.round(travel * progressAt(t));
+      window.dispatchEvent(new Event("scroll"));
+      // The live engine has removed its stand-in and painted its canvas.
+      const ready = runway.dataset.rznState === "live" && !runway.dataset.rznArming;
+      if (elapsed < META_UNITAS_ENTRY_DURATION_MS || !ready || finishing) {
+        // Past the clock without the engine: hold the last beat under the
+        // cover (never cut short) until it joins or the watchdog fails.
+        if (!finishing) raf = window.requestAnimationFrame(frame);
+        return;
+      }
+      finishing = true;
+      // Give the engine the scroll frame and a paint before uncovering.
+      raf = window.requestAnimationFrame(() => {
+        raf = window.requestAnimationFrame(() => {
+          if (disposed) return;
+          layer.dataset.playback = "complete";
+          playback.complete();
+        });
+      });
+    };
+    raf = window.requestAnimationFrame(frame);
     return () => {
       disposed = true;
       if (raf) window.cancelAnimationFrame(raf);

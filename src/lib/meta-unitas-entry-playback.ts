@@ -1,5 +1,9 @@
 /** One navigation owns both the scene's clock and the cover's lifetime.
- * Preparation is not playback: slow downloads must never spend the call.
+ * Owner (2026-10-24): 「他と同じく、事前にデータを読み込む方式にして」 — the
+ * clock starts on the renderer's first frame, as Rexonance/Illusionculum;
+ * the engine is warmed ahead (menu open, hover, idle) and joins the running
+ * scene when ready. A slow download never cuts the scene short: completion
+ * waits for the live engine (the cover is held), bounded by the watchdog.
  * A failed/stalled scene returns to the source page with a retry link;
  * only completion or an explicit skip may advance to the destination. */
 export const META_UNITAS_ENTRY_DURATION_MS = 3090;
@@ -30,14 +34,14 @@ export function createMetaUnitasEntryPlayback(
     get state() {
       return state;
     },
-    frame(now: number, ready: boolean): number | null {
+    frame(now: number): number | null {
       if (state === "preparing") {
-        if (!ready) return null;
         state = "playing";
         started = now;
         clock.clearTimeout(timer);
-        // A stopped renderer must not leave navigation locked indefinitely.
-        timer = clock.setTimeout(() => settle("unavailable"), 10_000);
+        // A stalled scene (an engine that never goes live) must not leave
+        // navigation locked indefinitely.
+        timer = clock.setTimeout(() => settle("unavailable"), META_UNITAS_ENTRY_PREPARE_MS);
       }
       return state === "playing" && started !== null ? Math.max(0, now - started) : null;
     },

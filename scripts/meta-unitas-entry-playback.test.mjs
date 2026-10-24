@@ -34,24 +34,25 @@ function setup() {
   };
 }
 
-test("a cold phone does not spend any call time waiting for its first live canvas frame", async () => {
-  const { playback, advance, jobs } = setup();
-  advance(6000);
-  assert.equal(playback.frame(6000, false), null);
+// Owner (2026-10-24): 「他と同じく、事前にデータを読み込む方式にして」 — the clock
+// starts on the first frame (no readiness hold); completion still waits.
+test("the clock starts on the renderer's first frame, ready or not", async () => {
+  const { playback, jobs } = setup();
   assert.equal(playback.state, "preparing");
-  assert.equal(playback.frame(6500, true), 0);
-  assert.equal(playback.frame(7500, true), 1000);
-  assert.equal(playback.frame(9590, true), 3090);
+  assert.equal(playback.frame(6000), 0);
+  assert.equal(playback.state, "playing");
+  assert.equal(playback.frame(7000), 1000);
+  assert.equal(playback.frame(9090), 3090);
   assert.equal(playback.state, "playing", "the final frame must paint before the cover releases");
   playback.complete();
   assert.equal(await playback.promise, "complete");
   assert.equal(jobs.size, 0);
 });
 
-test("readiness at timestamp zero is valid and a warm scene has no artificial delay", () => {
+test("timestamp zero is a valid first frame", () => {
   const { playback } = setup();
-  assert.equal(playback.frame(0, true), 0);
-  assert.equal(playback.frame(100, true), 100);
+  assert.equal(playback.frame(0), 0);
+  assert.equal(playback.frame(100), 100);
   playback.cancel();
 });
 
@@ -63,10 +64,10 @@ for (const stage of ["preparing", "playing"]) {
   ]) {
     test(`${action} during ${stage} settles once and rejects stale readiness/completion`, async () => {
       const { playback, jobs, advance } = setup();
-      if (stage === "playing") playback.frame(100, true);
+      if (stage === "playing") playback.frame(100);
       playback[action]();
       assert.equal(await playback.promise, result);
-      assert.equal(playback.frame(9000, true), null);
+      assert.equal(playback.frame(9000), null);
       playback.complete();
       advance(60_000);
       assert.equal(playback.state, result);
@@ -85,13 +86,13 @@ test("stalled preparation is bounded and reports failure, never a completed or s
   assert.equal(jobs.size, 0);
 });
 
-test("the playback watchdog starts from readiness, not the navigation press", async () => {
+// Owner (2026-10-24): a scene held for a slow engine is bounded from its start.
+test("the watchdog bounds a held scene from its first frame", async () => {
   const { playback, advance } = setup();
-  advance(19_000);
-  playback.frame(19_000, true);
-  advance(9000);
+  playback.frame(0);
+  advance(META_UNITAS_ENTRY_PREPARE_MS - 1);
   assert.equal(playback.state, "playing");
-  advance(1000);
+  advance(1);
   assert.equal(await playback.promise, "unavailable");
 });
 
@@ -103,7 +104,9 @@ test("the route gate awaits scene completion and the renderer waits for a painte
   assert.match(gate, /!metaUnitasPlayback && coverTimeLeft > 0/);
   assert.match(gate, /metaUnitasPlayback\.skip/);
   assert.match(gate, /metaUnitasTransition\.current !== null/);
+  // Owner (2026-10-24): readiness gates completion, never the first motion.
   assert.match(entry, /rznState === "live" && !runway\.dataset\.rznArming/);
-  assert.match(entry, /playback\.frame\(now, ready\)/);
+  assert.match(entry, /playback\.frame\(now\)/);
+  assert.match(entry, /elapsed < META_UNITAS_ENTRY_DURATION_MS \|\| !ready/);
   assert.doesNotMatch(entry, /READY_WAIT_MS/);
 });
