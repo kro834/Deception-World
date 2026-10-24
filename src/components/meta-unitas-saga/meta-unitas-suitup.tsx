@@ -219,7 +219,7 @@ export const MetaUnitasSuitUp = memo(function MetaUnitasSuitUp({
             <p className="rzn-readout" hidden>
               <b className="rzn-percent">100</b>
             </p>
-            <p className="rzn-stamp">
+            <p className="rzn-stamp" hidden>
               <b>{FORM_LABELS[stage]}</b>
             </p>
           </div>
