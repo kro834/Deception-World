@@ -33,7 +33,7 @@ import {
 } from "@/lib/far-from-entry-suit";
 import { REXONANCE_SUIT_UNDERSUIT } from "@/lib/rexonance-suit";
 import { FAR_FROM_ENTRY_KITS } from "@/lib/far-from-entry-kits";
-import { farFromEntrySource } from "@/lib/far-from-entry-warmup";
+import { farFromEntrySource, farFromEntryUrl } from "@/lib/far-from-entry-warmup";
 import {
   FAR_FROM_ENTRY_START_BY,
   createFarFromEntryEngine,
@@ -397,10 +397,18 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
         {/* The opening calls scan the bare undersuit top to bottom; the
             finished figure stands in the scan when the pieces were not ready. */}
         <i className="rx-suit-scan">
-          <i className="rx-suit-under" style={UNDER_STYLE} />
+          {/* The warm-up's own bytes where it has them (never a second
+              download of the figure or the undersuit). */}
+          <i
+            className="rx-suit-under"
+            style={{
+              ...UNDER_STYLE,
+              backgroundImage: `url("${farFromEntryUrl(REXONANCE_SUIT_UNDERSUIT)}")`,
+            }}
+          />
           <i
             className="rx-suit-whole"
-            style={{ backgroundImage: `url("${FAR_FROM_ENTRY_FIGURE}")` }}
+            style={{ backgroundImage: `url("${farFromEntryUrl(FAR_FROM_ENTRY_FIGURE)}")` }}
           />
         </i>
         {FAR_FROM_ENTRY_MARKS.joints.map((joint, index) => (

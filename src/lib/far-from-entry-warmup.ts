@@ -27,6 +27,7 @@ type Priority = "low" | "high";
 type Connection = { saveData?: boolean; effectiveType?: string };
 
 const sources = new Map<string, CanvasImageSource>();
+const urls = new Map<string, string>();
 let pending: Promise<boolean> | null = null;
 let controller: AbortController | null = null;
 let decoded = false;
@@ -87,6 +88,10 @@ async function decodeOnce(source: string, priority: Priority, signal: AbortSigna
         return false;
       }
       sources.set(source, bitmap);
+      // The call's DOM layers (the finished figure, the undersuit) paint
+      // from the same bytes, never a second download of the file.
+      if (typeof URL.createObjectURL === "function" && !urls.has(source))
+        urls.set(source, URL.createObjectURL(blob));
       return true;
     }
     const image = new Image();
@@ -163,6 +168,10 @@ export function warmFarFromEntry(priority: Priority = "high"): Promise<boolean> 
 /** A decoded source (null until the warm-up has it). */
 export const farFromEntrySource = (source: string) => sources.get(source) ?? null;
 
+/** A file's URL for a DOM layer: the warm-up's own bytes (an object URL)
+ * once fetched, else the file's path. */
+export const farFromEntryUrl = (source: string) => urls.get(source) ?? source;
+
 /** Whether every file is decoded. */
 export const isFarFromEntryDecoded = () => decoded;
 
@@ -187,5 +196,7 @@ export function releaseFarFromEntry(force = false) {
   }
   for (const source of sources.values()) close(source);
   sources.clear();
+  for (const url of urls.values()) URL.revokeObjectURL(url);
+  urls.clear();
   decoded = false;
 }
