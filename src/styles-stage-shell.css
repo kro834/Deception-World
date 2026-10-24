@@ -2052,7 +2052,11 @@ html[data-family]
     > a[href^="/far-from-saga"] {
     grid-column: 1 / -1;
     min-height: calc(var(--sh-tile-h) + 28px);
-    --sh-art-pos: 50% 22%;
+    /* The tile spans both columns, so it is wide and short and the 400x549
+       plate overflows it vertically: at 22% the helmet (the top ~22% of the
+       plate) lost over half its height. 0% keeps the whole head in frame
+       (measured >= 90% at 360, 390 and 430 wide; owner 2026-10-24). */
+    --sh-art-pos: 50% 0%;
   }
 }
 
