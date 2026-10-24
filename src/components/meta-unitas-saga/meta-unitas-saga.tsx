@@ -19,7 +19,7 @@ import {
 } from "@/lib/meta-unitas-saga-artwork";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "./meta-unitas-data";
-import { Articles, Bracketed, CallLine, jp } from "./meta-unitas-parts";
+import { Articles, Bracketed, CallLine, FinisherCalls, Lead, jp } from "./meta-unitas-parts";
 import { MetaUnitasPerformance } from "./meta-unitas-performance";
 import { FORM_ACCENTS, FORM_LABELS, MetaUnitasSuitUp } from "./meta-unitas-suitup";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
@@ -349,16 +349,6 @@ export function MetaUnitasSaga() {
               </li>
             ))}
           </ol>
-          <div className="mus-hero-doors">
-            <a className="is-primary" href="#suitup">
-              <span>変身</span>
-              <i aria-hidden="true">↘</i>
-            </a>
-            <a href="#stages">
-              <span>形態段階</span>
-              <i aria-hidden="true">↘</i>
-            </a>
-          </div>
         </div>
       </section>
 
@@ -389,11 +379,7 @@ export function MetaUnitasSaga() {
             <i className="mus-hero-seam" style={{ ["--seam" as string]: 2 }} />
             <i className="mus-hero-seam" style={{ ["--seam" as string]: 3 }} />
           </figure>
-          <div className="mus-copy mus-overview-copy rxs-reveal">
-            {META_UNITAS_SAGA.overview.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
+          <Lead body={META_UNITAS_SAGA.overview} className="mus-overview-copy rxs-reveal" />
         </div>
       </section>
 
@@ -416,7 +402,7 @@ export function MetaUnitasSaga() {
         <header className="mus-head rxs-reveal">
           <h2 id="mus-performance-title">{jp(META_UNITAS_PERFORMANCE.title)}</h2>
         </header>
-        <MetaUnitasPerformance />
+        <MetaUnitasPerformance stage={stage} onChoose={chooseQuietly} />
       </section>
 
       {/* 02 — the scroll suit-up and the form it ends on. */}
@@ -514,11 +500,7 @@ export function MetaUnitasSaga() {
               <h3>
                 <Bracketed text={`《 ${activeStage.title} 》`} />
               </h3>
-              <div className="mus-copy">
-                {activeStage.body.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
+              <Lead body={activeStage.body} />
             </div>
           </div>
         </div>
@@ -534,11 +516,7 @@ export function MetaUnitasSaga() {
             <li key={weapon}>{jp(weapon)}</li>
           ))}
         </ul>
-        <div className="mus-copy mus-arsenal-note rxs-reveal">
-          {META_UNITAS_SAGA.arsenalNote.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
+        <Lead body={META_UNITAS_SAGA.arsenalNote} className="mus-arsenal-note rxs-reveal" />
       </section>
       <section
         id="finishers"
@@ -552,18 +530,8 @@ export function MetaUnitasSaga() {
           {META_UNITAS_SAGA.finishers.map((finisher, index) => (
             <article key={finisher.name} className="mus-finisher rxs-reveal" data-tier={index}>
               <h3>{jp(finisher.name)}</h3>
-              <ol className="mus-finisher-calls" aria-label={`${finisher.name} 発動音声`}>
-                {finisher.calls.map((call) => (
-                  <li key={call}>
-                    <Bracketed text={call} />
-                  </li>
-                ))}
-              </ol>
-              <div className="mus-copy">
-                {finisher.body.map((paragraph, paragraphIndex) => (
-                  <p key={paragraphIndex}>{paragraph}</p>
-                ))}
-              </div>
+              <FinisherCalls name={finisher.name} calls={finisher.calls} />
+              <Lead body={finisher.body} />
             </article>
           ))}
         </div>
@@ -586,10 +554,6 @@ export function MetaUnitasSaga() {
           loading="lazy"
           decoding="async"
         />
-        <div className="mus-end-names">
-          <p>{jp(riderName)}</p>
-          <p>{jp(ultraName)}</p>
-        </div>
         <nav className="mus-end-doors" aria-label="ほかのページへ">
           <a href="#top">
             <span>ページの先頭へ</span>
