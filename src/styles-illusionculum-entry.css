@@ -900,3 +900,27 @@
   object-fit: contain;
   object-position: 50% 0;
 }
+
+/* The entry shares the phone's rendering budget with the departure page.
+   Keep all six rings, but bound their backing surfaces by the short viewport
+   side; blur and screen blending otherwise add large intermediate surfaces. */
+@media (any-pointer: coarse), (max-width: 767px) {
+  .ice-entry-vortex > i {
+    width: calc(min(110vmin, 640px) * (1 - var(--ring) * 0.14));
+    filter: none;
+    mix-blend-mode: normal;
+  }
+
+  .ice-entry-vortex > i:nth-child(even) {
+    filter: none;
+  }
+
+  .ice-entry-vortex::before {
+    width: min(60vmin, 420px);
+    mix-blend-mode: normal;
+  }
+
+  .ice-entry-near {
+    filter: none;
+  }
+}

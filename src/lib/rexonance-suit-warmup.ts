@@ -27,6 +27,30 @@ let planIdlePending = false;
 let kitWaiting = false;
 const completed = new Set<string>();
 const schedules = new Set<{ suspend: () => void; resume: () => void }>();
+// Only an Illusionculum route entry opts into releasing unused prepared
+// canvases. Registration avoids importing either heavy renderer to clean up.
+let illusionculumPreparationHolds = 0;
+const preparationReleases = new Set<() => void>();
+export const isRexonancePreparationSuspended = () => illusionculumPreparationHolds > 0;
+export function registerRexonancePreparationRelease(release: () => void) {
+  preparationReleases.add(release);
+  if (illusionculumPreparationHolds) release();
+}
+export function suspendRexonancePreparationForIllusionculum() {
+  illusionculumPreparationHolds += 1;
+  const resumeWarmup = pauseRexonanceSuitWarmup();
+  preparationReleases.forEach((release) => release());
+  // Rebuild discarded canvases when a later eligible route resumes.
+  if (ready) planWaiting = true;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    illusionculumPreparationHolds = Math.max(0, illusionculumPreparationHolds - 1);
+    resumeWarmup();
+  };
+}
+
 // The decoded images stay referenced, so the CSS layers stay warm for the call.
 const held: HTMLImageElement[] = [];
 // CSS can decode successfully while its canvas bitmap fails. Keep one
@@ -65,29 +89,32 @@ const idle = (run: () => void, timeout: number) => {
 };
 
 function warmPlanWhenIdle() {
-  if (!planWaiting || planIdlePending || document.hidden || backgroundPauses) return;
+  if (!planWaiting || planIdlePending || document.hidden || backgroundPauses || heldBySuitPage())
+    return;
   planIdlePending = true;
   idle(() => {
     planIdlePending = false;
-    if (document.hidden || backgroundPauses) return;
+    if (document.hidden || backgroundPauses || heldBySuitPage()) return;
     planWaiting = false;
-    void import("../components/rexonance-saga/rexonance-suit-plan").then(
-      (plan) => {
-        // Importing cannot be aborted. A page may hide or go() may acquire
-        // the network while its chunk resolves; retain the deferred work.
-        if (document.hidden || backgroundPauses) {
-          planWaiting = true;
-          return;
-        }
-        return plan.prepareRexonanceSuit();
-      },
-      () => undefined,
-    ).then((prepared) => {
-      // Then the nanite kit, after the plan (2026-10-16).
-      if (prepared !== true || saving() || still()) return;
-      kitWaiting = true;
-      resumeKit();
-    });
+    void import("../components/rexonance-saga/rexonance-suit-plan")
+      .then(
+        (plan) => {
+          // Importing cannot be aborted. A page may hide or go() may acquire
+          // the network while its chunk resolves; retain the deferred work.
+          if (document.hidden || backgroundPauses || heldBySuitPage()) {
+            planWaiting = true;
+            return;
+          }
+          return plan.prepareRexonanceSuit();
+        },
+        () => undefined,
+      )
+      .then((prepared) => {
+        // Then the nanite kit, after the plan (2026-10-16).
+        if (prepared !== true || saving() || still()) return;
+        kitWaiting = true;
+        resumeKit();
+      });
   }, 2000);
 }
 
@@ -95,7 +122,16 @@ function warmPlanWhenIdle() {
 // go() holds the network: then on the resume (round 3, review 45: it used
 // to be skipped, and nothing kicked the kit again until a classic call).
 function resumeKit() {
-  if (!kitWaiting || !ready || document.hidden || backgroundPauses || saving() || still()) return;
+  if (
+    !kitWaiting ||
+    !ready ||
+    document.hidden ||
+    backgroundPauses ||
+    heldBySuitPage() ||
+    saving() ||
+    still()
+  )
+    return;
   kitWaiting = false;
   void import("./rexonance-nanites-warmup.ts").then(
     (kit) => kit.warmRexonanceNanites(),
@@ -343,7 +379,7 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
     if (released) return;
     released = true;
     backgroundPauses = Math.max(0, backgroundPauses - 1);
-    if (!backgroundPauses) {
+    if (!backgroundPauses && !heldBySuitPage()) {
       schedules.forEach((schedule) => schedule.resume());
       warmPlanWhenIdle();
       resumeKit();
@@ -371,7 +407,7 @@ function heldBySuitPage() {
   return (
     window.location.pathname.startsWith("/illusionculum-saga") &&
     typeof window.matchMedia === "function" &&
-    window.matchMedia("(max-width: 767px)").matches
+    window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches
   );
 }
 
@@ -387,7 +423,7 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
     let resumeId = 0;
     const resumeWarm = () => {
       resumeId = 0;
-      if (backgroundPauses || document.hidden || saving() || still()) return;
+      if (backgroundPauses || document.hidden || heldBySuitPage() || saving() || still()) return;
       warmPlanWhenIdle();
       resumeKit();
       naniteWarm?.warm("low");
@@ -432,6 +468,7 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
     }, delayMs);
   };
   const resume = () => {
+    if (heldBySuitPage()) return;
     if (loaded && !ready) afterLoad();
     if (ready) {
       warmPlanWhenIdle();
@@ -491,7 +528,8 @@ export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, de
         // not used" warnings there for Rexonance-only sheets, so the route
         // chunk stays warm and its stylesheets/fonts are left to load on
         // arrival.
-        if (/^\/(extreme-saga|far-from-saga|illusionculum-saga)/.test(window.location.pathname)) return;
+        if (/^\/(extreme-saga|far-from-saga|illusionculum-saga)/.test(window.location.pathname))
+          return;
         const list = Array.isArray(matches) ? matches : [];
         for (const match of list as {
           links?: {

@@ -16,7 +16,11 @@ import {
 } from "@/lib/rexonance-suit";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import { createSplitLightsJob, splitLights } from "@/lib/rexonance-unlit.js";
-import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
+import {
+  rexonanceSuitSource,
+  isRexonancePreparationSuspended,
+  registerRexonancePreparationRelease,
+} from "@/lib/rexonance-suit-warmup";
 
 /* rx17: the nanite engine's plan and working atlas (rexonance-suit-nanites
    draws them): each plate's micro-tiles and when they land, its gold cells
@@ -422,6 +426,7 @@ export function forming(art: CanvasImageSource, gold: CanvasImageSource) {
 export const moteSheet = (art: CanvasImageSource): CanvasImageSource => LIGHTS?.motes ?? art;
 
 let preparation: Promise<boolean> | null = null;
+let cancelPreparation: (() => void) | null = null;
 let promotePreparation: (() => void) | null = null;
 /** rx17: builds the engine's plan and its working atlas in idle time, a
  * few plates a slice. When completed before the call, its first frame needs
@@ -431,6 +436,7 @@ let promotePreparation: (() => void) | null = null;
  * Navigation deadlines/cancellation belong to the awaiting caller: this
  * shared plan may still be useful for the next intent. */
 export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
+  if (isRexonancePreparationSuspended?.()) return Promise.resolve(false);
   // Intent, the page's idle warm-up and a call can overlap. They must share
   // one sliced build, not start several idle queues against the same plan.
   if (preparation) {
@@ -461,6 +467,7 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
       preparingLights = false;
       resolve(prepared);
     };
+    cancelPreparation = () => settle(false);
     const finish = (until: number, deadline?: IdleDeadline) => {
       const art = rexonanceSuitSource(REXONANCE_SUIT_ATLAS.src);
       const gold = rexonanceSuitSource(REXONANCE_SUIT_GOLD_ATLAS.src);
@@ -582,7 +589,23 @@ export function prepareRexonanceSuit(priority: "low" | "high" = "low") {
     if (preparation === pending) {
       preparation = null;
       promotePreparation = null;
+      cancelPreparation = null;
     }
   });
   return pending;
 }
+
+// No live call may lose its working atlas or light layers. Immutable plate
+// geometry remains available; a later intent can rebuild the canvas layers.
+registerRexonancePreparationRelease?.(() => {
+  cancelPreparation?.();
+  preparation = null;
+  promotePreparation = cancelPreparation = null;
+  if (work.drawing > 0) return;
+  if (work.canvas) work.canvas.width = work.canvas.height = 0;
+  work.canvas = null;
+  work.dirty = true;
+  if (LIGHTS)
+    for (const canvas of Object.values(LIGHTS)) if (canvas) canvas.width = canvas.height = 0;
+  LIGHTS = null;
+});

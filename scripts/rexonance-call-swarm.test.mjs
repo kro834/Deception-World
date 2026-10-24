@@ -250,7 +250,10 @@ test("the draw passes keep per-frame values in typed slots, not boxed lets", () 
     "READY",
     "SHEETS",
     "calls",
+    "cancelPreparation",
+    "cancelPriming",
     "preparation",
+    "preparationEpoch",
     "primed",
     "promotePreparation",
     "resumePreparation",
@@ -329,8 +332,8 @@ test("the kit warms with ImageBitmaps only, after the plan, under the suit's ski
   );
   assert.doesNotMatch(planStage, /import\("\.\/rexonance-nanites-warmup\.ts"\)/);
   assert.match(
-    kitStage,
-    /if \(!kitWaiting \|\| !ready \|\| document\.hidden \|\| backgroundPauses \|\| saving\(\) \|\| still\(\)\)\s*return;/,
+    kitStage.replace(/\s+/g, " "),
+    /if \(!kitWaiting \|\| !ready \|\| document\.hidden \|\| backgroundPauses \|\| heldBySuitPage\(\) \|\| saving\(\) \|\| still\(\)\)\s*return;/,
   );
   assert.match(
     kitStage,
@@ -399,29 +402,37 @@ function recorder() {
 }
 
 // The real plan and extras, in a sandbox with recording canvases.
-async function extrasRuntime({ touch }) {
+async function extrasRuntime({ touch, prepare = true }) {
   const queued = [];
+  const canvases = [];
+  let suspended = false;
+  let releasePreparation;
+  let sourceReleases = 0;
   let now = 0;
-  const canvas = (kind, width = 0, height = 0) => ({
-    kind,
-    width,
-    height,
-    getContext() {
-      return {
-        drawImage() {},
-        clearRect() {},
-        getImageData: (x, y, w, h) => ({ data: new Uint8ClampedArray(w * h * 4).fill(255) }),
-        createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
-        putImageData() {},
-        beginPath() {},
-        moveTo() {},
-        lineTo() {},
-        stroke() {},
-        rect() {},
-        fill() {},
-      };
-    },
-  });
+  const canvas = (kind, width = 0, height = 0) => {
+    const result = {
+      kind,
+      width,
+      height,
+      getContext() {
+        return {
+          drawImage() {},
+          clearRect() {},
+          getImageData: (x, y, w, h) => ({ data: new Uint8ClampedArray(w * h * 4).fill(255) }),
+          createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+          putImageData() {},
+          beginPath() {},
+          moveTo() {},
+          lineTo() {},
+          stroke() {},
+          rect() {},
+          fill() {},
+        };
+      },
+    };
+    canvases.push(result);
+    return result;
+  };
 
   const sources = new Map(
     Object.values({
@@ -551,9 +562,20 @@ async function extrasRuntime({ touch }) {
         return { naniteMetalRow() {}, naniteGuideRow() {}, naniteMoltenRow() {} };
 
       if (name === "@/lib/rexonance-nanites-warmup")
-        return { rexonanceNaniteSource: (url) => sources.get(url) ?? null };
+        return {
+          rexonanceNaniteSource: (url) => sources.get(url) ?? null,
+          releaseRexonanceNaniteSources: () => {
+            sourceReleases++;
+          },
+        };
       if (name === "@/lib/rexonance-suit-warmup")
-        return { rexonanceSuitSource: (url) => suitSources.get(url) ?? null };
+        return {
+          rexonanceSuitSource: (url) => suitSources.get(url) ?? null,
+          isRexonancePreparationSuspended: () => suspended,
+          registerRexonancePreparationRelease: (release) => {
+            releasePreparation = release;
+          },
+        };
       if (name === "./rexonance-suit-plan")
         return { ...plan, prepareRexonanceSuit: () => Promise.resolve(true) };
       // Round 3: the extras register with the call's hook once loaded.
@@ -562,6 +584,21 @@ async function extrasRuntime({ touch }) {
       throw new Error(`unexpected module ${name}`);
     },
   });
+  const controls = {
+    plan,
+    extras,
+    queued,
+    canvases,
+    suspend() {
+      suspended = true;
+      releasePreparation();
+    },
+    resume() {
+      suspended = false;
+    },
+    sourceReleases: () => sourceReleases,
+  };
+  if (!prepare) return controls;
   const preparing = extras.prepareRexonanceNanites("high");
   for (let i = 0; i < 400 && queued.length; i += 1) {
     queued.shift()();
@@ -570,7 +607,7 @@ async function extrasRuntime({ touch }) {
   }
   assert.equal(await preparing, true, "the extras prepare");
   assert.equal(extras.isRexonanceNaniteReady(), true);
-  return { plan, extras };
+  return controls;
 }
 
 async function playCall(touch) {
@@ -1730,4 +1767,45 @@ test("the weld head runs the trims' channels as a thread, not a band of squares"
   // A thread: far fewer cells than the trims' gold.
   assert.ok(channel < cells * 0.6, `${channel} channel cells of ${cells}`);
   assert.ok(channel > cells * 0.1, `${channel} channel cells of ${cells}`);
+});
+
+test("Illusionculum suspends private extras preparation without stale publication", async () => {
+  const f = await extrasRuntime({ touch: true, prepare: false });
+  const pending = f.extras.prepareRexonanceNanites("high");
+  for (let i = 0; !f.canvases.some((canvas) => canvas.width > 1); i++) {
+    assert.ok(i < 400 && f.queued.length, "private layer preparation starts");
+    f.queued.shift()();
+    await Promise.resolve();
+    await Promise.resolve();
+  }
+  const privateCanvases = f.canvases.filter((canvas) => canvas.width > 1);
+  f.suspend();
+  assert.equal(await pending, false);
+  assert.ok(privateCanvases.every((canvas) => canvas.width === 0 && canvas.height === 0));
+  for (let i = 0; f.queued.length && i < 400; i++) {
+    f.queued.shift()();
+    await Promise.resolve();
+  }
+  assert.equal(f.extras.isRexonanceNaniteReady(), false);
+  assert.equal(await f.extras.prepareRexonanceNanites(), false);
+  assert.ok(f.sourceReleases() > 0);
+});
+
+test("Illusionculum frees prepared extras only when no live call draws", async () => {
+  const f = await extrasRuntime({ touch: true });
+  const prepared = f.canvases.filter((canvas) => canvas.width > 1 && canvas.height > 1);
+  assert.ok(prepared.length > 0);
+  const sizes = prepared.map((canvas) => [canvas.width, canvas.height]);
+  f.plan.work.drawing = 1;
+  f.suspend();
+  assert.deepEqual(
+    prepared.map((canvas) => [canvas.width, canvas.height]),
+    sizes,
+  );
+  assert.equal(f.sourceReleases(), 0);
+  f.plan.work.drawing = 0;
+  f.suspend();
+  assert.equal(f.extras.isRexonanceNaniteReady(), false);
+  assert.ok(prepared.some((canvas) => canvas.width === 0 && canvas.height === 0));
+  assert.ok(f.sourceReleases() > 0);
 });

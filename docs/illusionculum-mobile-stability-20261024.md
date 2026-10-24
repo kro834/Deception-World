@@ -79,3 +79,29 @@ loads all reached ready in about 1.1 seconds, without document reloads or page
 errors; instrumentation confirmed seven direct Blob decodes, a peak concurrency
 of two, and no Image.decode calls on that preparation path. These local timings
 are not physical-iPhone or slow-network guarantees.
+
+## Follow-up: first World-to-Illusionculum entry
+
+The owner narrowed the remaining failure to the first animation frame while
+leaving World. The old page stays mounted during that cover. Two additional
+allocations overlapped it: six 150vmax CSS vortex rings with masks, blur and
+screen blending, and Rexonance's already-generated idle preparation canvases.
+
+Compact Illusionculum entry now limits all six vortex rings to 110vmin/640px,
+uses their existing gradients without blur/screen intermediate surfaces, and
+bounds the glow core similarly. Armour generation, calls and timing remain.
+At that specific navigation, registered Rexonance preparation modules cancel
+their unfinished jobs and release unused generated canvas/nanite resources.
+Live drawing resources are protected; no renderer is imported just to clean up.
+The hold uses the gate's existing cancellation/finally ownership. It does not
+rebuild the discarded work on Illusionculum arrival; returning to World can
+prepare it again. Normal World/Rexonance retention is unchanged.
+
+Three independent mobile WebKit browser contexts exercised first entry, one
+immediately and two after seven seconds on World. All arrived and prepared the
+scroll transformation without a document reload, crash or pageerror. The warm
+cases' weakly tracked canvas backing changed from 31,432,160 bytes before the
+click to 180,000 bytes at cover attachment. This measures canvas pixels only,
+not WebKit's total process/GPU usage. Computed styles confirmed the six compact
+rings were bounded and unfiltered; sampled entrance frames were visually
+reviewed. Physical iPhone crash recovery has not been directly reproduced.
