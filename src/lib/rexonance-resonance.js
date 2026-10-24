@@ -1915,7 +1915,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       ),
       // The field's module is optional: without it the scene plays as before.
       // (A page's own generation plays without it.)
-      replaceArmour
+      replaceArmour || config.field === false
         ? null
         : boundedImage(
             import("./rexonance-field/index.js").catch(() => null),
@@ -2056,7 +2056,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           return null;
         }
         images = { figure, undersuit, gold, atlas, base, cells, comets, fx, guide, cellsB };
-        prepareBodyFlame(undersuit, config.size, environment);
+        if (FIRE) prepareBodyFlame(undersuit, config.size, environment);
         return images;
       })
       .catch((error) => {
@@ -3102,6 +3102,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     travel = runway.offsetHeight - frameBox.offsetHeight;
   };
   const readProgress = () => {
+    if (config.progress) {
+      const progress = config.progress();
+      return Number.isFinite(progress) ? clamp01(progress) : 0;
+    }
     if (travel <= 0) return 1;
     return clamp01((pinTop - runway.getBoundingClientRect().top) / travel);
   };
@@ -4930,7 +4934,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (disposed || !pageActive || live || !motionAllowed() || document.hidden) return;
     // Load alongside this scene's existing warm-up, never on global startup
     // and never as a prerequisite for its plates, call clock or navigation.
-    void warmNaniteFlame(environment);
+    if (FIRE) void warmNaniteFlame(environment);
     // (The stand-in is the near observer's and sync's, round 4: the warm
     // preparation far away never changes the picture.)
     if (plan && settled && buffers) {
@@ -5112,7 +5116,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // preload's roundtrip pin), so the sheets wait for the past-hero scroll.
     modules().catch(() => {});
     if (eager) return;
-    if (pastHero()) goEager();
+    if (config.prewarm || pastHero()) goEager();
     else listenEarly();
   };
   const scheduleEarly = () => {
@@ -5189,6 +5193,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   document.addEventListener("visibilitychange", sync);
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   runway.addEventListener?.("rexonance:assembly-wake", wakeAssembly);
+  runway.addEventListener?.("rexonance:assembly-frame", schedule);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
   environment.addEventListener("online", onOnline);
@@ -5225,6 +5230,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     document.removeEventListener("visibilitychange", sync);
     runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);
     runway.removeEventListener?.("rexonance:assembly-wake", wakeAssembly);
+    runway.removeEventListener?.("rexonance:assembly-frame", schedule);
     inflight.clear();
     if (restLoad === undefined) delete runway.dataset.rznLoad;
     else runway.dataset.rznLoad = restLoad;

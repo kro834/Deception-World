@@ -139,7 +139,7 @@ export interface RexonanceAssemblyNanites {
       readonly centre: readonly number[];
     };
   };
-  readonly guide: { readonly src: string };
+  readonly guide?: { readonly src: string };
   /** Each plate's real outline (base64 Int16 LE loops, quarter figure px). */
   readonly seams: Readonly<Record<string, string>>;
   /** Each plate's gold box [x, y, w, h], figure px. */
@@ -303,6 +303,12 @@ export interface RexonanceAssemblyFormChange {
 export interface RexonanceAssemblyConfig {
   /** Prepare in back-to-back yielding tasks, not idle periods (an entry under a route cover). */
   eager?: boolean;
+  /** False: use the 2D armour particles without the extra WebGL field. */
+  field?: boolean;
+  /** Prepare after page load in bounded idle slices, before the first scroll. */
+  prewarm?: boolean;
+  /** A covered entry can supply its clock directly without a synthetic scroll runway. */
+  progress?: () => number;
   figure: string;
   undersuit: string;
   size: { readonly width: number; readonly height: number };

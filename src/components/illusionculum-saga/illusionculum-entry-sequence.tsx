@@ -27,21 +27,19 @@ import {
 /* The engine's runway (owner, 2026-10-24: 「イリュージョンクルムの遷移アニメー
    ションでも、ナノマシン装着される様にして」): the same scene as #suitup — the
    Rexonance scroll engine with this suit (illusionculum-assembly-engine.ts),
-   mounted on a runway in a full-screen layer whose own scroll the clock
-   drives, as Meta Unitas' entry does: the plates built by nanite cells off
+   mounted on one full-screen layer whose progress the clock drives
+   directly: the plates built by nanite cells off
    the body, then flown in and attached onto the undersuit, the driver on it
    from frame one. Inline styles: the gate is global. */
 const SIZE = ILLUSIONCULUM_SUIT_SIZE;
 const LAYER: CSSProperties = {
   position: "absolute",
   inset: 0,
-  overflowX: "hidden",
-  overflowY: "scroll",
-  scrollbarWidth: "none",
+  overflow: "hidden",
   pointerEvents: "none",
 };
-const RUNWAY: CSSProperties = { position: "relative", height: "600vh" };
-const FRAME: CSSProperties = { position: "sticky", top: 0, height: "100vh", overflow: "hidden" };
+const RUNWAY: CSSProperties = { position: "relative", height: "100%" };
+const FRAME: CSSProperties = { position: "absolute", inset: 0, height: "100%", overflow: "hidden" };
 const FILL: CSSProperties = { position: "absolute", inset: 0, width: "100%", height: "100%" };
 
 /* The figure where the old stage stood (right of centre on wide screens,
@@ -78,47 +76,49 @@ const progressAt = (ms: number) => {
   return CLOCK[CLOCK.length - 1][1];
 };
 
-function useEngineClock(
-  layerRef: RefObject<HTMLDivElement | null>,
-  runwayRef: RefObject<HTMLDivElement | null>,
-) {
+function useEngineClock(runwayRef: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
-    const layer = layerRef.current;
     const runway = runwayRef.current;
-    if (!layer || !runway) return;
+    if (!runway) return;
     let disposed = false;
     let dispose: (() => void) | null = null;
     let raf = 0;
+    let progress = 0;
     const mounted = performance.now();
-    void import("@/lib/illusionculum-assembly-engine").then((module) => {
-      if (disposed) return;
-      dispose = module.mountIllusionculumAssemblyEngine(runway, window);
-      let started = 0;
-      const frame = (now: number) => {
-        raf = 0;
+    void import("@/lib/illusionculum-assembly-engine")
+      .then((module) => {
         if (disposed) return;
-        const ready = runway.dataset.rznLoad === "ready";
-        if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
-        const elapsed = started ? now - started : 0;
-        const travel = runway.offsetHeight - layer.clientHeight;
-        layer.scrollTop = Math.round(travel * progressAt(elapsed));
-        window.dispatchEvent(new Event("scroll"));
-        if (elapsed < CLOCK[CLOCK.length - 1][0]) raf = window.requestAnimationFrame(frame);
-      };
-      raf = window.requestAnimationFrame(frame);
-    });
+        dispose = module.mountIllusionculumAssemblyEngine(runway, window, {
+          entry: true,
+          progress: () => progress,
+        });
+        let started = 0;
+        const frame = (now: number) => {
+          raf = 0;
+          if (disposed) return;
+          const ready = runway.dataset.rznLoad === "ready";
+          if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
+          const elapsed = started ? now - started : 0;
+          progress = progressAt(elapsed);
+          runway.dispatchEvent(new Event("rexonance:assembly-frame"));
+          if (elapsed < CLOCK[CLOCK.length - 1][0]) raf = window.requestAnimationFrame(frame);
+        };
+        raf = window.requestAnimationFrame(frame);
+      })
+      .catch(() => {
+        if (!disposed) runway.dataset.rznLoad = "error";
+      });
     return () => {
       disposed = true;
       if (raf) window.cancelAnimationFrame(raf);
       dispose?.();
     };
-  }, [layerRef, runwayRef]);
+  }, [runwayRef]);
 }
 
 export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "revealing" }) {
-  const layerRef = useRef<HTMLDivElement | null>(null);
   const runwayRef = useRef<HTMLDivElement | null>(null);
-  useEngineClock(layerRef, runwayRef);
+  useEngineClock(runwayRef);
   return (
     <div className="ice-entry" data-phase={phase} aria-hidden="true">
       <span className="ice-entry-ground" />
@@ -138,7 +138,7 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
         <path d="M200 10 L364 295 L36 295 Z" pathLength="1" />
         <path d="M200 390 L36 105 L364 105 Z" pathLength="1" />
       </svg>
-      <div ref={layerRef} className="ice-entry-engine" style={LAYER}>
+      <div className="ice-entry-engine" style={LAYER}>
         <style>{STAGING}</style>
         <div ref={runwayRef} className="rzn-suitup" data-form="standard" style={RUNWAY}>
           <div className="rzn-frame" style={FRAME}>
