@@ -22,7 +22,7 @@ import {
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { ILLUSIONCULUM_FORMS, ILLUSIONCULUM_SAGA, type IcArticle } from "./illusionculum-data";
 import { IllusionculumComparison } from "./illusionculum-comparison";
-import { phrase, prose } from "./illusionculum-phrase";
+import { IcDiagram, IcFinisherCalls, IcLead } from "./illusionculum-parts";
 import { IllusionculumRail } from "./illusionculum-rail";
 import { withCallBreaks } from "@/components/far-from-saga/far-from-phrase";
 import { IllusionculumSuitUp } from "./illusionculum-suitup";
@@ -147,9 +147,8 @@ function Articles({
               <h3 lang={/^[\x20-\x7e]+$/.test(item.title) ? "en" : undefined}>
                 {bracketed(item.title)}
               </h3>
-              {item.body.map((paragraph, paragraphIndex) => (
-                <p key={paragraphIndex}>{prose(paragraph)}</p>
-              ))}
+              <IcDiagram name={item.title} />
+              <IcLead body={item.body} />
             </div>
           </article>
         );
@@ -476,17 +475,15 @@ export function IllusionculumSaga() {
           <span className="ics-heading-plate" data-plate="figure" aria-hidden="true" />
         </header>
         <div className="ics-overview-body">
+          {/* The owner's first sentence leads; the rest, complete and in
+              order, opens under 「詳しく」. The two pictures carry the idea:
+              the dream's boundary and the way back, the projection split
+              from the real body. */}
           <div className="ics-prose ics-lead rxs-reveal">
-            {ILLUSIONCULUM_SAGA.overview.slice(0, 4).map((paragraph, index) => (
-              <p key={index}>{prose(paragraph)}</p>
-            ))}
+            <IcLead body={ILLUSIONCULUM_SAGA.overview} />
+            <IcDiagram name="DREAM" className="is-wide" />
           </div>
           <IllusionculumProjection />
-          <div className="ics-prose rxs-reveal">
-            {ILLUSIONCULUM_SAGA.overview.slice(4).map((paragraph, index) => (
-              <p key={index}>{prose(paragraph)}</p>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -522,7 +519,7 @@ export function IllusionculumSaga() {
       </section>
 
       {/* 01, continued — the comparison (the owner's tables and evaluation). */}
-      <IllusionculumComparison />
+      <IllusionculumComparison form={form} onChoose={selectForm} />
 
       {/* 02 — 変身: the scroll suit-up, ending on the form chosen in the
           selector right after its runway. */}
@@ -592,9 +589,7 @@ export function IllusionculumSaga() {
               {/* The selector names the form, the hero the rider: the name
                   stays for assistive tech only. */}
               <h3 className="ics-sr">{active.name}</h3>
-              {active.body.map((paragraph, index) => (
-                <p key={index}>{prose(paragraph)}</p>
-              ))}
+              <IcLead body={active.body} />
             </div>
           </div>
         </div>
@@ -667,11 +662,9 @@ export function IllusionculumSaga() {
               <h3>
                 <DisplayName value={finisher.name} />
               </h3>
-              <Calls calls={finisher.calls} label={`${finisher.name} 発動音声`} />
+              <IcFinisherCalls name={finisher.name} calls={finisher.calls} />
               <div className="ics-prose">
-                {finisher.body.map((paragraph, paragraphIndex) => (
-                  <p key={paragraphIndex}>{prose(paragraph)}</p>
-                ))}
+                <IcLead body={finisher.body} />
               </div>
             </article>
           ))}

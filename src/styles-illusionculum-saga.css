@@ -2415,3 +2415,312 @@
 .rxs-page.rxs-page.ics-page .ics-form-tabs > button:nth-of-type(3) {
   flex-grow: 0.8;
 }
+
+/* ================================================================
+   The layout explains (owner, 2026-10-24: 「不要なセカンダリラベルや説明を
+   避ける。レイアウトに説明させるようにUIリライトして。」, after Meta Unitas):
+   the owner's first sentence as the lead, the rest behind 「詳しく」, the
+   mechanisms drawn without words, the comparison following the chosen
+   form, the finishers' calls stepped through.
+   ================================================================ */
+.rxs-page.rxs-page.ics-page .ics-lead-block {
+  display: grid;
+  gap: 14px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-lead-block p {
+  margin: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-lead-line {
+  color: var(--ics-text-1);
+  font-weight: 600;
+  line-height: 1.95;
+}
+
+.rxs-page.rxs-page.ics-page .ics-more > summary {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(166 230 255 / 36%);
+  border-radius: 999px;
+  color: var(--ics-ice);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  list-style: none;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-more > summary:focus-visible {
+  outline: 2px solid var(--ics-gold-hi);
+  outline-offset: 3px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-more > summary i {
+  position: relative;
+  width: 10px;
+  height: 10px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-more > summary i::before,
+.rxs-page.rxs-page.ics-page .ics-more > summary i::after {
+  position: absolute;
+  top: 4.5px;
+  left: 0;
+  width: 10px;
+  height: 1px;
+  content: "";
+  background: currentColor;
+  transition: transform 250ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-more > summary i::after {
+  transform: rotate(90deg);
+}
+
+.rxs-page.rxs-page.ics-page .ics-more[open] > summary i::after {
+  transform: rotate(0deg);
+}
+
+.rxs-page.rxs-page.ics-page .ics-more[open] > summary {
+  border-color: rgb(233 184 102 / 50%);
+  background: rgb(233 184 102 / 8%);
+}
+
+@media (hover: hover) {
+  .rxs-page.rxs-page.ics-page .ics-more > summary:hover {
+    background: rgb(166 230 255 / 10%);
+  }
+}
+
+.rxs-page.rxs-page.ics-page .ics-more-body {
+  display: grid;
+  gap: 1em;
+  margin-top: 16px;
+  padding: 4px 0 0 18px;
+  border-left: 1px solid rgb(166 230 255 / 30%);
+}
+
+html:not([data-world-effects="economy"])
+  .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+  .ics-more[open]
+  .ics-more-body {
+  animation: ics-more-open 400ms ease both;
+}
+
+@keyframes ics-more-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* The diagrams: hairlines in the form's ice, gold and iridescent light. */
+.rxs-page.rxs-page.ics-page .ics-diagram {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  margin: 2px 0 6px;
+  fill: none;
+  stroke: rgb(166 230 255 / 70%);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rxs-page.rxs-page.ics-page .ics-diagram.is-wide {
+  max-width: 420px;
+  margin-top: 8px;
+}
+
+.ics-page .ics-diagram .ics-dg-ghost {
+  stroke: rgb(255 143 210 / 55%);
+  stroke-dasharray: 2 3;
+}
+
+.ics-page .ics-diagram .ics-dg-real {
+  fill: rgb(233 184 102 / 30%);
+  stroke: var(--ics-gold);
+}
+
+.ics-page .ics-diagram .ics-dg-target {
+  stroke: rgb(245 247 252 / 60%);
+}
+
+.ics-page .ics-diagram .ics-dg-seen {
+  stroke: rgb(245 247 252 / 22%);
+  stroke-dasharray: 3 4;
+}
+
+.ics-page .ics-diagram .ics-dg-route {
+  stroke: var(--ics-ice);
+}
+
+.ics-page .ics-diagram .ics-dg-jump {
+  stroke: var(--ics-violet);
+  stroke-dasharray: 1 4;
+}
+
+.ics-page .ics-diagram .ics-dg-back {
+  stroke: var(--ics-gold);
+}
+
+.ics-page .ics-diagram .ics-dg-boundary {
+  stroke: rgb(245 247 252 / 40%);
+  stroke-dasharray: 5 4;
+}
+
+.ics-page .ics-diagram .ics-dg-reality {
+  stroke: none;
+  fill: rgb(166 230 255 / 5%);
+}
+
+.ics-page .ics-diagram .ics-dg-dream {
+  stroke: none;
+  fill: rgb(169 131 255 / 12%);
+}
+
+.ics-page .ics-diagram .ics-dg-anchor,
+.ics-page .ics-diagram .ics-dg-orb {
+  fill: rgb(166 230 255 / 22%);
+  stroke: var(--ics-ice);
+}
+
+.ics-page .ics-diagram .ics-dg-core {
+  fill: rgb(166 230 255 / 34%);
+  stroke: var(--ics-ice);
+}
+
+.ics-page .ics-diagram .ics-dg-node {
+  fill: #070914;
+  stroke: var(--ics-gold);
+}
+
+.ics-page .ics-diagram .ics-dg-leg {
+  fill: rgb(233 184 102 / 8%);
+  stroke: rgb(233 184 102 / 60%);
+}
+
+.ics-page[data-ultra] .ics-diagram :is(.ics-dg-route, .ics-dg-core, .ics-dg-orb) {
+  stroke: var(--ics-crimson-hi);
+}
+
+html:not([data-world-effects="economy"])
+  .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+  .is-visible
+  .ics-dg-step {
+  animation: ics-dg-step 600ms ease both;
+  animation-delay: calc(var(--d, 0) * 140ms + 200ms);
+}
+
+@keyframes ics-dg-step {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The comparison follows the page's form: its pick, then its row lit. */
+.rxs-page.rxs-page.ics-page .ics-compare-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 clamp(20px, 3vw, 32px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-compare-pick button {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--ics-line-ice);
+  border-radius: 999px;
+  background: none;
+  color: var(--ics-text-2);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    color 200ms ease,
+    background-color 200ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-compare-pick button[aria-pressed="true"] {
+  border-color: var(--ics-pick);
+  background: color-mix(in srgb, var(--ics-pick) 16%, transparent);
+  color: var(--ics-text-1);
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-compare-pick button, .ics-step-calls button):focus-visible {
+  outline: 2px solid var(--ics-gold-hi);
+  outline-offset: 3px;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tbody tr th,
+.rxs-page.rxs-page.ics-page .ics-table tbody tr td {
+  transition: background-color 200ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tbody tr:is(:hover, :focus-within) :is(th, td) {
+  background-color: rgb(166 230 255 / 9%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self]:not([data-current]) :is(th, td) {
+  opacity: 0.62;
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-current] th {
+  color: var(--ics-gold-hi);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-current] td > i {
+  height: 4px;
+}
+
+/* The finishers' calls step on one at a time (each call is its button; the
+   order numbers stay the list's). */
+.rxs-page.rxs-page.ics-page .ics-step-calls > li {
+  opacity: 0.6;
+  transition: opacity 250ms ease;
+}
+
+.rxs-page.rxs-page.ics-page .ics-step-calls[data-step="-1"] > li,
+.rxs-page.rxs-page.ics-page .ics-step-calls > li[data-lit] {
+  opacity: 1;
+}
+
+.rxs-page.rxs-page.ics-page .ics-step-calls button {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rxs-page.rxs-page.ics-page .ics-step-calls > li[data-lit] b {
+  border-color: var(--ics-gold);
+  background: rgb(233 184 102 / 18%);
+  box-shadow: 0 0 22px rgb(233 184 102 / 22%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rxs-page.rxs-page.ics-page :is(.ics-more-body, .ics-dg-step, .ics-more > summary i::after) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
