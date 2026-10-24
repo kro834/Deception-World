@@ -1,0 +1,86 @@
+// ILLUSIONCULUM SAGA: the エクスサーガドライバー's real outline in the owner's
+// cutouts (design/illusionculum-saga-20261023/cutout-standard.webp, 1024 x 1536
+// px; the other forms share the frame), used by scripts/build-illusionculum-suit.mjs
+// (the stand-in and the driver plate) and its tests.
+//
+/** The driver's outline (owner, 2026-10-24: 「イリュージョンクルムの変身ベルト
+ * の切り抜きが甘い」): traced over gridded 6x crops of the cutout (cutout px)
+ * — the two wings (outer lug, gem box, strap, ring), the crown's spikes, the
+ * gem pods and the medallion down to its point. Edges that border other armour
+ * run through the art's own dark outline; the silhouette side hugs the cutout's
+ * alpha. One closed polygon, left to right, mirrored about x = 512.5 and tuned
+ * per side where the art is not symmetric. */
+export const BELT_OUTLINE = [
+  [
+  [512.5,626],
+  [486,642.5],
+  [466.7,639.5],
+  [468.7,647.5],
+  [452,648.7],
+  [430,648],
+  [424,650],
+  [410,638],
+  [403,634.7],
+  [397,641.7],
+  [385.8,633.7],
+  [381.7,635.8],
+  [374,641.7],
+  [372.5,648],
+  [362.5,660],
+  [360.8,670],
+  [355,687.5],
+  [359,696.7],
+  [358.3,713],
+  [360,733],
+  [365.8,723.3],
+  [374,730.8],
+  [380,728.3],
+  [400,720],
+  [405,706.7],
+  [408,705],
+  [416.7,705.8],
+  [419,706.7],
+  [423,711.7],
+  [437,716],
+  [450,714],
+  [454,706.7],
+  [461.7,714],
+  [476.7,716.7],
+  [490,718],
+  [512.5,736.7],
+  [535,718],
+  [548.3,716.7],
+  [563.3,714],
+  [571,706.7],
+  [575,714],
+  [588,716],
+  [602,711.7],
+  [606,706.7],
+  [608.3,705.8],
+  [617,705],
+  [620,706.7],
+  [625,720],
+  [645,728.3],
+  [651,730.8],
+  [659.2,723.3],
+  [665,733],
+  [666.7,713],
+  [666,696.7],
+  [670,687.5],
+  [664.2,670],
+  [662.5,660],
+  [652.5,648],
+  [651,641.7],
+  [643.3,635.8],
+  [639.2,633.7],
+  [628,641.7],
+  [622,634.7],
+  [615,638],
+  [601,650],
+  [595,648],
+  [573,648.7],
+  [556.3,647.5],
+  [558.3,639.5],
+  [539,642.5]
+  ],
+];

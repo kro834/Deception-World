@@ -2,7 +2,7 @@
 // design/meta-unitas-saga-20261023/cutouts/middle.webp — do not edit by hand.
 // Figure coordinates are delivery pixels of the 693 x 1040 figure (the
 // owner's whole 1024 x 1536 cutout frame: src/lib/far-from-stage.ts).
-// 7 files, 998606 bytes (figure.webp 167074, ultra.webp 183542, undersuit.webp 48012, plates.webp 237282, gold.webp 168152, driver-standin.webp 30362, guide.webp 164182).
+// 7 files, 1002578 bytes (figure.webp 167074, ultra.webp 183542, undersuit.webp 48012, plates.webp 239808, gold.webp 170122, driver-standin.webp 27658, guide.webp 166362).
 
 export const META_UNITAS_RX_SIZE = { width: 693, height: 1040 } as const;
 
@@ -74,13 +74,13 @@ export type MetaUnitasRxPiece = {
    * row-major over its box, LSB-first bitmask, base64). */
   readonly tiles: string;
 };
-/** The nanite micro-tile, in delivery px (6153 tiles in all). */
+/** The nanite micro-tile, in delivery px (6193 tiles in all). */
 export const META_UNITAS_RX_TILE = 9;
 /** The plates' atlas (art only). */
 export const META_UNITAS_RX_ATLAS = {
   src: "/meta-unitas-rx-suit-20261023/plates.webp",
   width: 1024,
-  height: 1026,
+  height: 1072,
 } as const;
 /** The plates, front first; they tile the figure. */
 export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
@@ -95,7 +95,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [346.5, 80.5],
     tiles: "AAIAYAAYh/H/f///9/9/HM+BYRAAAgAgAA==",
     ax: 176,
-    ay: 868,
+    ay: 914,
   },
   {
     id: "bit-1",
@@ -108,7 +108,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [139.5, 316.5],
     tiles:
       "AEAAADAAABwAAA8AwAMA8IEB/PyAv2/g/wD4PwD+DwD/A4D/AcD/AOB/APAfAPgHAP4BAH8AwB8A4A8A+A8A/AcAfgMAOgMAjQOAgwPAwAFgwAEwAAAQAAAA",
-    ax: 0,
+    ax: 129,
     ay: 0,
   },
   {
@@ -121,7 +121,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 260,
     seat: [80.5, 533.5],
     tiles: "AAJgAA74AT/AA3zAD/zBP/yH//Af/sN/+B//w//5PB/j43yYH3AHzsF5GB6CB8AB",
-    ax: 201,
+    ax: 454,
     ay: 0,
   },
   {
@@ -134,7 +134,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 249,
     seat: [626.5, 393.5],
     tiles: "DMAH8APwAfgAfAA/wB/wD/wH/sF/8B/8B/6Bf4AfwAfwAXgAHoAH4AH4AD7ABDABBA==",
-    ax: 556,
+    ax: 568,
     ay: 0,
   },
   {
@@ -147,7 +147,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 247,
     seat: [614.5, 576.5],
     tiles: "BIABcAAewAfwAD6AD/AD/sA/+Af/8B/8w3/8z/t9vsd3/IIfnMNzPO6HDTAABA==",
-    ax: 680,
+    ax: 692,
     ay: 0,
   },
   {
@@ -161,7 +161,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [482.5, 107.5],
     tiles: "fAB+gD/AH+AP8G/4//77/wH8ACwA",
     ax: 390,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "tail-2",
@@ -174,7 +174,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [493.5, 8.5],
     tiles: "cAA+gB/wB/zAH/7nf/7v//2f/4EfAA==",
     ax: 746,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "tail-3",
@@ -186,8 +186,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 166,
     seat: [556.5, 46.5],
     tiles: "GAAOgAfgAXgAf8Af+A//w/+Bf8A/4A/wA/ABeAAeAAYAAA==",
-    ax: 239,
-    ay: 278,
+    ax: 263,
+    ay: 307,
   },
   {
     id: "tail-4",
@@ -200,7 +200,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [114.5, 582.5],
     tiles: "AAYA4AEAfzjwnwf///j/H///8/8////n/x/8/wH/HwDwAAAcAA==",
     ax: 198,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "tail-5",
@@ -212,8 +212,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 157,
     seat: [77.5, 676.5],
     tiles: "jgD4B/D/wP8H/w/8P/D/wP8D/x/8//D/g/8//v/5f8x/AH8A8AAAAQA=",
-    ax: 359,
-    ay: 278,
+    ax: 383,
+    ay: 307,
   },
   {
     id: "tail-6",
@@ -226,7 +226,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [124.5, 781.5],
     tiles: "AH4A8P8w/n/c/x///4f//8H/f+D/H/D/H/j/D/z/A/5/AP4fAPACAAAA",
     ax: 0,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "tail-7",
@@ -239,7 +239,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [300.5, 811.5],
     tiles: "cODDH//++/fPP//8AwA=",
     ax: 828,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "tail-8",
@@ -251,8 +251,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 75,
     seat: [363.5, 825.5],
     tiles: "H/Af/uf///9///EDAAA=",
-    ax: 549,
-    ay: 868,
+    ax: 770,
+    ay: 914,
   },
   {
     id: "helmet-horns",
@@ -265,7 +265,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [379.5, 106.5],
     tiles: "A5AB2AAMAAAAAAAAwA5wB7gD3APvgQeAAQ==",
     ax: 860,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "helmet-face",
@@ -278,7 +278,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [332.5, 209.5],
     tiles: "AGDA8f///P/////w/x/4/wf4/wH+fwD/H8D/C+D/A/BvAPgBADwAAAYA",
     ax: 369,
-    ay: 479,
+    ay: 525,
   },
   {
     id: "chest-helix",
@@ -291,7 +291,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [350.5, 361.5],
     tiles: "8AH/4f/8P//f///////+n//H/+APQAA=",
     ax: 0,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "chest-l",
@@ -299,11 +299,11 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     dir: "up",
     x: 243,
     y: 186,
-    w: 116,
-    h: 251,
-    seat: [302.5, 431.5],
-    tiles: "wAB8wB/8x//4D//BP/iHH/ABPuADfMAP+AP/4B/8l//n//wf/8N/8A/++X/7Aw==",
-    ax: 438,
+    w: 122,
+    h: 261,
+    seat: [311.5, 437.5],
+    tiles: "wAD4AH/gP/wP/8F/4B/4Bz/AB/ABPoAP8AP8Af/AP/Bf/D/+j//D/+A/8A/84//936ED",
+    ax: 330,
     ay: 0,
   },
   {
@@ -312,11 +312,12 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     dir: "up",
     x: 331,
     y: 184,
-    w: 121,
-    h: 253,
-    seat: [390.5, 431.5],
-    tiles: "4AF8gB/wD/7H//F//B//A/wD/gA+gA/AB/ABfIA/8A//+X/+n//j//gf/oP/4H/wPwAA",
-    ax: 315,
+    w: 127,
+    h: 305,
+    seat: [401.5, 475.5],
+    tiles:
+      "4AH4AH6Af+B/+D/8H/4P/wP4B/gD8AH4APgAfAA+gD/gH/zH/+P/8X/4P/wP/gP/gf+B/4MbA4ABgABGgAMEAA==",
+    ax: 0,
     ay: 0,
   },
   {
@@ -330,7 +331,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [232, 304],
     tiles: "fP79///Pnx8A",
     ax: 0,
-    ay: 960,
+    ay: 1006,
   },
   {
     id: "pauldron-top-l",
@@ -343,7 +344,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [196.5, 251.5],
     tiles: "AMAAABwc4MMHPvzwh/9/+//3/z/4/wP+GA==",
     ax: 0,
-    ay: 868,
+    ay: 914,
   },
   {
     id: "pauldron-l",
@@ -356,7 +357,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [187.5, 353.5],
     tiles: "BwDwADD+g+M/ePwDxz9g+AcB/xz4/8H/H/z/wP8P/GfAPwCeAWAAAA==",
     ax: 193,
-    ay: 479,
+    ay: 525,
   },
   {
     id: "pauldron-disc-r",
@@ -368,8 +369,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 71,
     seat: [459.5, 300.5],
     tiles: "fPz9+/fv3z8P",
-    ax: 878,
-    ay: 868,
+    ax: 875,
+    ay: 914,
   },
   {
     id: "pauldron-top-r",
@@ -382,7 +383,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [492.5, 257.5],
     tiles: "PgDwfwD/j+H/H///8f8f/v/P/w/8HwBwAAAAAA==",
     ax: 651,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "pauldron-r",
@@ -395,7 +396,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [511.5, 355.5],
     tiles: "AMAHAPzh4D88/A8H/sGAPwDwDwH+cfj/Hv7/g/8f4P0HMP8BgH8AwDwAAAw=",
     ax: 0,
-    ay: 479,
+    ay: 525,
   },
   {
     id: "arm-upper-l",
@@ -408,7 +409,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [207.5, 330.5],
     tiles: "AA7Ag//z//4//+//+X//z//BfgAfgAMAAA==",
     ax: 618,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "arm-fore-l",
@@ -416,12 +417,12 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     dir: "down",
     x: 104,
     y: 398,
-    w: 123,
+    w: 148,
     h: 150,
-    seat: [169.5, 405.5],
-    tiles: "noD/4H/4//7///f//X/+3//z//gf/AN/4B/4B4YB",
-    ax: 641,
-    ay: 278,
+    seat: [170.5, 405.5],
+    tiles: "ngD8B/gf8P/h//v/8/+n/w/+H/4f/D/wP8A/gD+AfwD/AIYBAA==",
+    ax: 665,
+    ay: 307,
   },
   {
     id: "arm-upper-r",
@@ -434,7 +435,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [489.5, 330.5],
     tiles: "HAAP8D/8H//P//P/+X/+H/+P/+MDeAAIAA==",
     ax: 382,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "arm-fore-r",
@@ -446,8 +447,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 152,
     seat: [526.5, 406.5],
     tiles: "QA78g//9f//f//f//X/+n//D/+A/8A/8A//gP/AP",
-    ax: 521,
-    ay: 278,
+    ax: 545,
+    ay: 307,
   },
   {
     id: "hand-cuff-l",
@@ -460,7 +461,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [162.5, 538.5],
     tiles: "APbv/w8=",
     ax: 353,
-    ay: 960,
+    ay: 1006,
   },
   {
     id: "hand-l",
@@ -472,8 +473,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 78,
     seat: [162.5, 543],
     tiles: "/////////////sdveAA=",
-    ax: 442,
-    ay: 868,
+    ax: 663,
+    ay: 914,
   },
   {
     id: "hand-cuff-r",
@@ -486,7 +487,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [493.5, 537.5],
     tiles: "dwM=",
     ax: 458,
-    ay: 960,
+    ay: 1006,
   },
   {
     id: "hand-r",
@@ -499,46 +500,46 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [539.5, 542.5],
     tiles: "/vn3////////f/wAAA==",
     ax: 352,
-    ay: 868,
+    ay: 914,
   },
   {
     id: "waist-l",
     group: "waist",
     dir: "down",
     x: 193,
-    y: 479,
+    y: 457,
     w: 119,
-    h: 199,
-    seat: [252.5, 483.5],
-    tiles: "4A/4A/7gP/yP/+P/8D/+j//j//g//p//9//9f/9f/8f/8D/4D/ADAAA=",
-    ax: 0,
-    ay: 278,
+    h: 221,
+    seat: [240.5, 461.5],
+    tiles: "IACIAfKBP+AP/IP/+D/+j//D//g//o//4//5f/7f//f//X/8D//D/4A/AAc=",
+    ax: 807,
+    ay: 0,
   },
   {
     id: "waist-c",
     group: "waist",
     dir: "down",
     x: 287,
-    y: 484,
+    y: 473,
     w: 116,
-    h: 190,
-    seat: [344.5, 494.5],
-    tiles: "v+//+J//8T/+x//4H//n//k//+f//B//83sez+N7fA9vwAEA",
-    ax: 121,
-    ay: 278,
+    h: 201,
+    seat: [335.5, 489.5],
+    tiles: "Btz3/R//43/+x//4H//hf/yf/+f//J//439+z+95fI/v8R04AAA=",
+    ax: 145,
+    ay: 307,
   },
   {
     id: "waist-r",
     group: "waist",
     dir: "down",
     x: 362,
-    y: 479,
+    y: 464,
     w: 143,
-    h: 201,
-    seat: [433.5, 483.5],
-    tiles: "+Af8A/4D/gf+B/8P/y//P/8f/h/8H/g//D/8f/x//P/83/gf+B/4H/gP+AEAAA==",
-    ax: 795,
-    ay: 0,
+    h: 216,
+    seat: [451.5, 468.5],
+    tiles: "IAZ4BvwH/AP+A/4H/gf/D/8//z//H/4f/D/4P/x//H/8//z/+N/4H/gf+B/4B/gA",
+    ax: 0,
+    ay: 307,
   },
   {
     id: "thigh-upper-l",
@@ -551,7 +552,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [253.5, 688.5],
     tiles: "B/jD/z+f52EMAAAA",
     ax: 236,
-    ay: 960,
+    ay: 1006,
   },
   {
     id: "thigh-l",
@@ -564,7 +565,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [264.5, 796.5],
     tiles: "AAfgA/7j//wf//f//X////////1//h/uABgA",
     ax: 724,
-    ay: 479,
+    ay: 525,
   },
   {
     id: "thigh-upper-r",
@@ -577,7 +578,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [457.5, 661.5],
     tiles: "AMAAAAMA2ABmBxw8IGAAAA==",
     ax: 80,
-    ay: 960,
+    ay: 1006,
   },
   {
     id: "thigh-r",
@@ -589,8 +590,8 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     h: 147,
     seat: [429.5, 795.5],
     tiles: "wAP/w//h//B/8H/4P/x//r//3//P/+f/0//BHcAMAAA=",
-    ax: 766,
-    ay: 278,
+    ax: 815,
+    ay: 307,
   },
   {
     id: "knee-l",
@@ -603,7 +604,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [231.5, 856.5],
     tiles: "BgDP+f/f/+//8//5f/wf/g//gQ0AAAA=",
     ax: 257,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "shin-l",
@@ -616,7 +617,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [237.5, 928.5],
     tiles: "AA7gB/wB/sA/8P/9//4H/4P/wT4ABgA=",
     ax: 127,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "knee-r",
@@ -629,7 +630,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [447.5, 851.5],
     tiles: "M9yd9+/9//+f/+f/8X/8E3wAAAA=",
     ax: 527,
-    ay: 754,
+    ay: 800,
   },
   {
     id: "shin-r",
@@ -642,7 +643,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [471.5, 938.5],
     tiles: "gDN85/d//+d//sd//M///M//wAAI",
     ax: 509,
-    ay: 625,
+    ay: 671,
   },
   {
     id: "foot-l",
@@ -655,7 +656,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [196.5, 1032.5],
     tiles: "QADA54H/A/8H/w/+H/4//H/8//3/+///////4/8BDgA=",
     ax: 852,
-    ay: 479,
+    ay: 525,
   },
   {
     id: "foot-r",
@@ -668,20 +669,20 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
     seat: [496.5, 1032.5],
     tiles: "AAQMH/w/+H/g/8D/g/8H/x//f/7//P/7/8//H/4/wB8=",
     ax: 569,
-    ay: 479,
+    ay: 525,
   },
   {
     id: "belt",
     group: "waist",
     dir: "up",
-    x: 236,
-    y: 422,
-    w: 222,
-    h: 75,
-    seat: [347, 497],
-    tiles: "fHx+/P///f//+///////////////f/D/AwAYAAA=",
-    ax: 654,
-    ay: 868,
+    x: 237,
+    y: 419,
+    w: 219,
+    h: 81,
+    seat: [346.5, 500],
+    tiles: "ABgA/Pv++P//+///9///7///3///v4d/eAM4wAA=",
+    ax: 442,
+    ay: 914,
   },
 ];
 
@@ -691,7 +692,7 @@ export const META_UNITAS_RX_PIECES: readonly MetaUnitasRxPiece[] = [
 export const META_UNITAS_RX_GOLD_ATLAS = {
   src: "/meta-unitas-rx-suit-20261023/gold.webp",
   width: 1024,
-  height: 1026,
+  height: 1072,
 } as const;
 
 /** The driver's plates: on the body from the start, never assembled. */
