@@ -1,3 +1,4 @@
+                    ))}
                   </div>
                 </section>
               ) : null}
@@ -427,4 +428,3 @@ export const REX_LOI: Profile = {
       {
         name: "SPECIAL",
         body: "スペシャルコアを押し込んで発動。最高位の管理権限をさらに強化し、管理人殺しの力すら干渉できない攻撃と防御へ転用する。",
-      },

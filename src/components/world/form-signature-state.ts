@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export type FormTheme = "rexonance" | "explom" | "kemonohen";
+export type FormTheme = "rexonance" | "explom" | "kemonohen" | "custom";
 export const isSignatureForm = (theme?: FormTheme) => theme === "explom" || theme === "kemonohen";
 
 /** A single, local entrance; never a scroll loop. */

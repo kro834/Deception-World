@@ -14,3 +14,16 @@ Subsets delivered by the Google Fonts CSS2 text API on 2026-10-18 with
 display=swap and a modern browser User-Agent. No full font or third-party
 font request is needed by the deployed site. Original name/copyright tables
 are preserved; the aliases Explom Display and Kemonohen Brush are CSS names.
+
+Over Zeztz Custom display subsets (2026-10-24)
+
+custom-mech-latin-20261024.woff2: Orbitron, ExtraBold (800).
+Upstream: https://github.com/google/fonts/tree/main/ofl/orbitron
+License: custom-mech-latin-OFL.txt (SIL Open Font License 1.1).
+Subset text: A-Z 0-9 . -
+
+custom-mech-jp-20261024.woff2: M PLUS 1 Code, Bold (700).
+Upstream: https://github.com/google/fonts/tree/main/ofl/mplus1code
+License: custom-mech-jp-OFL.txt (SIL Open Font License 1.1).
+Subset text: the form's names (カタカナ, 仮面, ・, ー) and CUSTOMOVERZEZTZ.
+"Custom Mech" is a CSS alias; name tables are preserved.

@@ -30,6 +30,7 @@ type RiderDossierForm = {
   overview?: string[];
   featuredPickup?: boolean;
   theme?: FormTheme;
+  recordImg?: string;
   stats?: { dt: string; dd: string }[];
   abilities?: { name: string; body: string }[];
   arsenal?: { name: string; body: string }[];
@@ -345,3 +346,18 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       hash: "far-from-saga",
       assets: FINAL_STAGE_ENTER_ASSETS,
       label: "特設サイトへ",
+    },
+  },
+  {
+    id: "realm",
+    no: "02",
+    name: "REALM",
+    ja: "レルム",
+    person: "ベル・アレイン",
+    enPerson: "BELL ALAIN",
+    epithet: "完成品",
+    tone: "#f14a60",
+    img: "/rider-profile-realm.jpeg",
+    pos: "50% 8%",
+    civilianImg: "/civilian-bell-20260826.jpeg",
+    civilianPos: "50% 10%",

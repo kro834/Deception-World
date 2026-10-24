@@ -31,6 +31,8 @@ export const dossierImageSources = [
   "/rider-profile-argenome.jpeg",
   "/rider-profile-over-zeztz.jpeg",
   "/rider-over-zeztz-explom-20261019-v2.jpeg",
+  "/overzetts-custom-20261024/rider-over-zeztz-custom.jpeg",
+  "/overzetts-custom-20261024/rider-over-zeztz-custom-action.jpeg",
   "/rider-leddic-ishihen.jpeg",
   "/rider-leddic-hoko.jpeg",
   "/rider-leddic-rekka-20260829.jpeg",

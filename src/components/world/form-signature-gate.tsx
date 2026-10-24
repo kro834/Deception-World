@@ -485,6 +485,8 @@ const ROOT: Record<FormTheme, string> = {
   rexonance: "rexonance-gate",
   explom: "form-gate explom-gate",
   kemonohen: "form-gate kemonohen-gate",
+  // Custom has no cover (it is not in FORM_GATES); the entry keeps the map total.
+  custom: "form-gate",
 };
 
 /** The cover itself (portalled to the body by FormPickup). Its own life

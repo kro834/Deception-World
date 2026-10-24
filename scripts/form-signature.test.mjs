@@ -47,7 +47,16 @@ test("special type is small, local, licensed, and loaded on only the two rider r
     assert.match(read(`public/fonts/${face}-OFL.txt`), /SIL OPEN FONT LICENSE/);
   }
   assert.ok(total < 12_000, `local subsets are ${total} bytes`);
-  assert.equal(css.match(/font-display: swap/g)?.length, 2);
+  // オーバーゼッツ カスタム's mechanical face (2026-10-24): two more subsets.
+  let custom = 0;
+  for (const face of ["custom-mech-latin", "custom-mech-jp"]) {
+    const bytes = readFileSync(new URL(`../public/fonts/${face}-20261024.woff2`, import.meta.url));
+    assert.equal(bytes.subarray(0, 4).toString(), "wOF2");
+    custom += bytes.length;
+    assert.match(read(`public/fonts/${face}-OFL.txt`), /SIL OPEN FONT LICENSE/);
+  }
+  assert.ok(custom < 10_000, `custom subsets are ${custom} bytes`);
+  assert.equal(css.match(/font-display: swap/g)?.length, 4);
   assert.doesNotMatch(css, /https?:\/\//);
   const head = read("src/lib/world-head.ts");
   assert.match(

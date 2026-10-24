@@ -314,7 +314,13 @@ test("the Rexonance pickup: card, record and gate warm-up on one candidate", () 
     stub.match(
       /src=\{rider\.img\}\s*\{\.\.\.dossierImage\(rider\.img\)\}\s*\{\.\.\.formPickupImage\(rider\.img\)\}/g,
     )?.length,
-    2,
+    1,
+  );
+  // The record's figure takes the form's second visual when it has one
+  // (オーバーゼッツ カスタム, 2026-10-24), on the same candidate path.
+  assert.match(
+    stub,
+    /src=\{rider\.recordImg \?\? rider\.img\}\s*\{\.\.\.dossierImage\(rider\.recordImg \?\? rider\.img\)\}\s*\{\.\.\.formPickupImage\(rider\.recordImg \?\? rider\.img\)\}/,
   );
   assert.match(
     stub,

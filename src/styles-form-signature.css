@@ -16,6 +16,36 @@
   font-display: swap;
 }
 
+/* オーバーゼッツ カスタム (owner, 2026-10-24: 「メカメカしいフォント」).
+   Orbitron ExtraBold for the Latin and figures, M PLUS 1 Code Bold for the
+   kana: Google Fonts text= subsets of the form's own names, 7.3 kB in all
+   (fonts/custom-mech-*-OFL.txt). */
+@font-face {
+  font-family: "Custom Mech";
+  src: url("/fonts/custom-mech-latin-20261024.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  unicode-range: U+0020-007F;
+}
+
+@font-face {
+  font-family: "Custom Mech";
+  src: url("/fonts/custom-mech-jp-20261024.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  unicode-range: U+3000-30FF, U+4E00-9FFF;
+}
+
+[data-form-theme="custom"] {
+  --signature-face: "Custom Mech", "Zen Kaku Gothic New", sans-serif;
+  --signature-light: #4ff3ff;
+  --signature-hot: #1fb8d6;
+  --signature-ink: #05090d;
+  --signature-wash: rgb(79 243 255 / 10%);
+}
+
 [data-form-theme="explom"] {
   --signature-face: "Explom Display", "Zen Kaku Gothic New", sans-serif;
   --signature-light: #72f2ec;
@@ -2154,4 +2184,64 @@ html[data-world-effects="economy"]
     text-shadow: none;
     border-color: CanvasText;
   }
+}
+
+/* ── オーバーゼッツ カスタム: the names in the mechanical face, cut by a
+   cyan instrument line; reading text keeps the site's gothic. ── */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  h2
+  > b,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  font-family: var(--signature-face);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  display: inline-block;
+  padding: 2px 0 8px;
+  border-bottom: 2px solid var(--signature-light);
+  color: var(--signature-light);
+  font-size: clamp(28px, 5vw, 52px);
+  text-shadow: 0 0 18px rgb(79 243 255 / 35%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-calls b, .rider-call b, .form-pickup-sections h3),
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-gallery
+  > figure[data-form-theme="custom"]
+  figcaption
+  > span {
+  font-family: var(--signature-face);
+  letter-spacing: 0.03em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  .form-pickup-sections
+  h3 {
+  color: #dffbff;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-gallery
+  > figure[data-form-theme="custom"] {
+  border-color: var(--signature-light);
 }

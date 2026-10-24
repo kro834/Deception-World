@@ -42,6 +42,8 @@ export type RiderForm = {
   finishers?: { name: string; body: string }[];
   extraForms?: { img: string; pos: string; name: string; sub?: string; theme?: FormTheme }[];
   theme?: FormTheme;
+  /** A second supplied visual for the record's own figure (the card keeps img). */
+  recordImg?: string;
   weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
 };
 
@@ -402,11 +404,11 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
           <div className="form-pickup-layout">
             <figure>
               <img
-                src={rider.img}
-                {...dossierImage(rider.img)}
-                {...formPickupImage(rider.img)}
+                src={rider.recordImg ?? rider.img}
+                {...dossierImage(rider.recordImg ?? rider.img)}
+                {...formPickupImage(rider.recordImg ?? rider.img)}
                 alt=""
-                style={{ objectPosition: rider.pos }}
+                style={{ objectPosition: rider.recordImg ? "50% 30%" : rider.pos }}
                 decoding="async"
                 // The record's own figure waits like every other: the gate's
                 // warm-up (open) fetches the Rexonance file at high priority
@@ -426,4 +428,3 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   <div>
                     {overview.map((paragraph) => (
                       <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-                    ))}

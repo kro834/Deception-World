@@ -1,3 +1,18 @@
+            <img
+              src={rider.civilianImg}
+              srcSet={
+                rider.id === "over-zeztz"
+                  ? "/character-james-20260829.webp"
+                  : dossierImage(rider.civilianImg).srcSet
+              }
+              sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
+              alt={`${rider.civilian.name}の変身前ビジュアル`}
+              style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+            <i className="dossier-arrive-scan" aria-hidden="true" />
           </div>
         </div>
         <div className="manager-introduction">
@@ -169,6 +184,7 @@
                 quote: form.quote,
                 overview: form.overview,
                 theme: form.theme,
+                recordImg: form.recordImg,
                 stats: form.stats,
                 abilities: form.abilities,
                 arsenal: form.arsenal,
