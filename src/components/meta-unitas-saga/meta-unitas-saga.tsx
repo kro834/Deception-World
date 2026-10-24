@@ -19,7 +19,7 @@ import {
 } from "@/lib/meta-unitas-saga-artwork";
 import { warmRexonanceStages } from "@/lib/warm-rexonance-stages";
 import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "./meta-unitas-data";
-import { Articles, Bracketed, CallLine, jp } from "./meta-unitas-parts";
+import { Articles, Bracketed, CallLine, Lead, jp } from "./meta-unitas-parts";
 import { MetaUnitasPerformance } from "./meta-unitas-performance";
 import { FORM_ACCENTS, FORM_LABELS, MetaUnitasSuitUp } from "./meta-unitas-suitup";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
@@ -379,11 +379,7 @@ export function MetaUnitasSaga() {
             <i className="mus-hero-seam" style={{ ["--seam" as string]: 2 }} />
             <i className="mus-hero-seam" style={{ ["--seam" as string]: 3 }} />
           </figure>
-          <div className="mus-copy mus-overview-copy rxs-reveal">
-            {META_UNITAS_SAGA.overview.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
+          <Lead body={META_UNITAS_SAGA.overview} className="mus-overview-copy rxs-reveal" />
         </div>
       </section>
 
@@ -504,11 +500,7 @@ export function MetaUnitasSaga() {
               <h3>
                 <Bracketed text={`《 ${activeStage.title} 》`} />
               </h3>
-              <div className="mus-copy">
-                {activeStage.body.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </div>
+              <Lead body={activeStage.body} />
             </div>
           </div>
         </div>
@@ -524,11 +516,7 @@ export function MetaUnitasSaga() {
             <li key={weapon}>{jp(weapon)}</li>
           ))}
         </ul>
-        <div className="mus-copy mus-arsenal-note rxs-reveal">
-          {META_UNITAS_SAGA.arsenalNote.map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
-        </div>
+        <Lead body={META_UNITAS_SAGA.arsenalNote} className="mus-arsenal-note rxs-reveal" />
       </section>
       <section
         id="finishers"
@@ -549,11 +537,7 @@ export function MetaUnitasSaga() {
                   </li>
                 ))}
               </ol>
-              <div className="mus-copy">
-                {finisher.body.map((paragraph, paragraphIndex) => (
-                  <p key={paragraphIndex}>{paragraph}</p>
-                ))}
-              </div>
+              <Lead body={finisher.body} />
             </article>
           ))}
         </div>

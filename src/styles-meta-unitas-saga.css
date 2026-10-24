@@ -1175,9 +1175,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   pointer-events: none;
 }
 
-
-
-
 .mus-end-doors {
   position: relative;
   z-index: 1;
@@ -1536,4 +1533,162 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.mus-page .rzn-movie
    its element, never shown. */
 html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-stamp[hidden] {
   display: none !important;
+}
+
+/* ================================================================
+   Owner (2026-10-24): 「説明多過ぎるので、洗練させて」「説明のためのUIも
+   洗練して拡充させます」. Each item leads with the owner's first sentence;
+   the rest of the owner's text is behind one disclosure (complete, in
+   order, found by the browser's search). The mechanisms carry a small
+   drawn diagram (no text).
+   ================================================================ */
+.mus-lead-block {
+  display: grid;
+  gap: 14px;
+}
+
+.mus-page .mus-lead {
+  margin: 0;
+  color: var(--mus-silver);
+  font-size: clamp(15px, 1.15vw, 17px);
+  font-weight: 600;
+  line-height: 1.95;
+}
+
+.mus-more > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgb(255 154 74 / 42%);
+  border-radius: 999px;
+  color: var(--mus-orange, #ff9a4a);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  list-style: none;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.mus-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mus-more > summary i {
+  position: relative;
+  width: 10px;
+  height: 10px;
+}
+
+.mus-more > summary i::before,
+.mus-more > summary i::after {
+  content: "";
+  position: absolute;
+  top: 4.5px;
+  left: 0;
+  width: 10px;
+  height: 1px;
+  background: currentColor;
+  transition: transform 0.25s ease;
+}
+
+.mus-more > summary i::after {
+  transform: rotate(90deg);
+}
+
+.mus-more[open] > summary i::after {
+  transform: rotate(0deg);
+}
+
+.mus-more[open] > summary {
+  border-color: rgb(55 198 192 / 48%);
+  background: rgb(55 198 192 / 8%);
+}
+
+@media (hover: hover) {
+  .mus-more > summary:hover {
+    background: rgb(255 154 74 / 10%);
+  }
+}
+
+.mus-more-body {
+  margin-top: 16px;
+  padding: 4px 0 0 18px;
+  border-left: 1px solid rgb(255 154 74 / 40%);
+}
+
+.mus-more-body p {
+  margin: 0 0 1em;
+}
+
+html:not([data-world-effects="economy"])
+  .mus-page[data-motion-ready="true"]
+  .mus-more[open]
+  .mus-more-body {
+  animation: mus-more-open 0.4s ease both;
+}
+
+@keyframes mus-more-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* The diagrams: hairline strokes in the form's orange/teal light. */
+.mus-diagram {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin: -4px 0 -8px;
+  fill: none;
+  stroke: rgb(255 154 74 / 72%);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mus-diagram .mus-dg-alt {
+  stroke: rgb(55 198 192 / 70%);
+}
+
+.mus-diagram .mus-dg-core {
+  fill: rgb(255 154 74 / 30%);
+}
+
+.mus-diagram .mus-dg-link {
+  stroke: rgb(233 239 242 / 40%);
+}
+
+html:not([data-world-effects="economy"])
+  .mus-page[data-motion-ready="true"]
+  .is-visible
+  .mus-dg-step {
+  animation: mus-dg-step 0.6s ease both;
+  animation-delay: calc(var(--d, 0) * 0.14s + 0.2s);
+}
+
+@keyframes mus-dg-step {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The comparison: the row under the pointer or focus lights in the form's
+   colour, its bars at full strength. */
+.mus-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.mus-table tbody tr:is(:hover, :focus-within) {
+  background: rgb(55 198 192 / 9%);
+}
+
+.mus-table tbody tr:is(:hover, :focus-within) th {
+  color: var(--mus-orange, #ff9a4a);
 }
