@@ -72,8 +72,8 @@ test("the Zeus button returns home after a dodge and steps off the closing contr
   assert.match(zeus, /const preferredPosition = useRef\(position\);/);
   assert.match(zeus, /preferredPosition\.current = position;/);
   assert.match(
-    zeus,
-    /placementFrame\.current = null;\s*if \(activePointer\.current != null\) return;\s*placeButton\(preferredPosition\.current\);/,
+    zeus.replace(/\/\/[^\n]*/g, ""),
+    /placementFrame\.current = null;\s*if \(activePointer\.current != null\) return;\s*if \(placementSuspended \|\| document\.hidden\) return;\s*if \(railLocked\(\)\) \{\s*railPlacementPending = true;\s*return;\s*\}\s*placeButton\(preferredPosition\.current\);/,
   );
   assert.match(zeus, /\{ x: preferred\.x, y: preferred\.y - lift \* 2 \},/);
   const avoid = zeus.slice(zeus.indexOf("const ZEUS_AVOID_SELECTOR"), zeus.indexOf('].join(",")'));

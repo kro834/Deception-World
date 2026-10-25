@@ -31,6 +31,9 @@ button's collision search. That automatic search now waits while a rail owns
 `data-rail-lock`, then reconciles once on release; suspended/hidden/unmounted
 work is discarded. The rail's own gesture rules and performance threshold stay
 unchanged.
+WebKit's scroll-linked scale of the interactive rider console is also disabled:
+bringing a pressed tab into view must not resize its hit box. Portraits,
+selection lenses and the surrounding chapter choreography retain their motion.
 
 ## Data repair discovered during integration
 
@@ -46,6 +49,16 @@ tablet sizes and desktop widths. Integration checks use actual emitted
 stylesheets, not temporary injected CSS. Browser results, final test/build
 counts and the release identity are recorded by the integration turn; screenshots
 and local browser diagnostics stay under `output/` and are not publication data.
+
+The integrated drag audit measured zero additional geometry reads through 20
+touch moves at both 390px and 1280px (the existing limit remains two). WebKit's
+hero/touch audit passed 390x844, 1024x768 and 1280x960 with all eight riders,
+unchanged 74px tab geometry and native scrolling. The shared menu's 36 links
+were keyboard checked at five widths, including Escape focus restoration.
+The integrated component test run passed 3,297 tests with five intentional
+skips; types, 15 source-part groups and production build passed. Lint reported
+zero errors and 32 existing warnings. Subsequent main-only content updates are
+validated again before publication.
 
 Publication follows `docs/production-release.md`. Gallery checks are read-only;
 no sample artwork is posted and no public title or user setting is changed.

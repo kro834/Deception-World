@@ -1,6 +1,19 @@
 /* World: a film programme with a full-width manuscript between its visual
    stages. Scoped to this route; native rails, art crops and gesture code stay
    owned by their original components. No continuous motion or new assets. */
+/* A scroll-timeline lift changed the tab grid's hit boxes as WebKit scrolled
+   a tapped tab into view. Keep the interactive stage grounded; the portrait,
+   lens and decorative chapter entrances retain their own motion. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  #riders
+  > .rider-console {
+  animation: none;
+  scale: none;
+  translate: none;
+  transform: none;
+}
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition {
   --astra-gold: #d9bc80;
   --astra-rule: rgb(217 188 128 / 32%);
