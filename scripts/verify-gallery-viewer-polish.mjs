@@ -6,6 +6,8 @@ import { GALLERY_ARTWORKS } from "../src/components/gallery/gallery-data.ts";
 const base = process.env.BASE_URL ?? "http://127.0.0.1:4413";
 const output = process.env.OUTPUT_DIR ?? "output/playwright/gallery-viewer-polish";
 const work = GALLERY_ARTWORKS[0];
+const navigationWork = GALLERY_ARTWORKS[19];
+const nextNavigationWork = GALLERY_ARTWORKS[20];
 const results = [];
 await mkdir(output, { recursive: true });
 
@@ -23,7 +25,13 @@ for (const engine of ["chromium", "webkit"]) {
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.goto(`${base}/gallery`, { waitUntil: "networkidle" });
-      const opener = page.locator(`[data-gallery-artwork="${work.id}"] .gallery-work-open`);
+      await page.locator(".gallery-search input").fill("020-022");
+      await page.waitForFunction(
+        () => document.querySelectorAll(".gallery-work-open").length === 3,
+      );
+      const opener = page.locator(
+        `[data-gallery-artwork="${navigationWork.id}"] .gallery-work-open`,
+      );
       await opener.scrollIntoViewIfNeeded();
       await opener.focus();
       const readingPosition = await page.evaluate(() => scrollY);
@@ -36,7 +44,11 @@ for (const engine of ["chromium", "webkit"]) {
       );
       // Wait for the dialog entrance to settle before measuring touch targets.
       await page.getByRole("button", { name: "2倍で鑑賞", exact: true }).click({ trial: true });
-      assert.equal(await image.getAttribute("src"), work.full, "original artwork source changed");
+      assert.equal(
+        await image.getAttribute("src"),
+        navigationWork.full,
+        "original artwork source changed",
+      );
       assert.equal(await image.evaluate((node) => getComputedStyle(node).objectFit), "contain");
       assert.ok(await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth + 1));
       const toolbarTarget = await dialog
@@ -87,7 +99,7 @@ for (const engine of ["chromium", "webkit"]) {
                 imageHeight,
             };
           },
-          { width: work.width, height: work.height },
+          { width: navigationWork.width, height: navigationWork.height },
         );
       const beforeResize = await artworkPoint();
       await page.setViewportSize({ width: 844, height: width });
@@ -104,6 +116,42 @@ for (const engine of ["chromium", "webkit"]) {
         await dialog
           .locator(".gallery-image-toolbar button")
           .evaluate((node) => node === document.activeElement),
+      );
+      // Returning from zoom focuses an image control that is remounted for the
+      // next artwork. Both arrows must keep working across that unmount.
+      const frozenPosition = await page.evaluate(() => ({
+        scroll: scrollY,
+        bodyTop: document.body.style.top,
+      }));
+      for (const [key, expected] of [
+        ["ArrowRight", nextNavigationWork],
+        ["ArrowLeft", navigationWork],
+      ]) {
+        await page.keyboard.press(key);
+        assert.equal(await image.getAttribute("src"), expected.full);
+        assert.ok(
+          await dialog.evaluate((node) => node === document.activeElement),
+          `focus left the persistent dialog after ${key}`,
+        );
+      }
+      // Navigation from stable header/footer buttons must retain those controls.
+      for (const control of [
+        dialog.locator(".gallery-viewer-footer button").last(),
+        page.getByRole("button", { name: "閉じる", exact: true }),
+      ]) {
+        await control.focus();
+        for (const [key, expected] of [
+          ["ArrowRight", nextNavigationWork],
+          ["ArrowLeft", navigationWork],
+        ]) {
+          await page.keyboard.press(key);
+          assert.equal(await image.getAttribute("src"), expected.full);
+          assert.ok(await control.evaluate((node) => node === document.activeElement));
+        }
+      }
+      assert.deepEqual(
+        await page.evaluate(() => ({ scroll: scrollY, bodyTop: document.body.style.top })),
+        frozenPosition,
       );
       await page.screenshot({ path: `${output}/${engine}-${width}-viewer.png` });
       await page.getByRole("button", { name: "閉じる", exact: true }).click();
@@ -196,6 +244,8 @@ for (const engine of ["chromium", "webkit"]) {
         checks: [
           "fit",
           "zoom-pan",
+          "unzoom-right-left-focus",
+          "header-footer-navigation-focus",
           "resize",
           "pinch-contract",
           "close-focus",

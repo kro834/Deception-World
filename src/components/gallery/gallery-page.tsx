@@ -739,6 +739,11 @@ export function GalleryPage() {
       viewerModeRef.current,
     );
     if (next) {
+      // The artwork's keyed image controls disappear on navigation. Hand their
+      // focus to the persistent dialog so the next arrow key still reaches it.
+      const dialog = dialogRef.current;
+      if (dialog?.querySelector(".gallery-viewer-image")?.contains(document.activeElement))
+        dialog.focus({ preventScroll: true });
       resetEditor();
       viewerIdRef.current = next;
       setSelectedId(next);
