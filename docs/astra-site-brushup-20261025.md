@@ -60,6 +60,16 @@ skips; types, 15 source-part groups and production build passed. Lint reported
 zero errors and 32 existing warnings. Subsequent main-only content updates are
 validated again before publication.
 
+The final integrated health run passed 102/102 page-width checks (34 routes at
+320/768/1440), with no horizontal overflow, broken images, duplicate IDs,
+missing anchors, empty buttons, JS errors or subresource HTTP failures.
+Independent mobile WebKit contexts entered Illusionculum, Rexonance, Far From
+and Meta Unitas from World in the same document, with no crash or pageerror;
+Illusionculum also reached its prepared scroll scene after a seven-second
+World warm-up. Gallery's six Chrome/WebKit journeys retained original contain
+rendering, zoom/pan/reset, next/previous keyboard focus and zero-pixel scroll
+return. Integrated Library/Search and Exhibition/Tours owner checks also passed.
+
 Publication follows `docs/production-release.md`. Gallery checks are read-only;
 no sample artwork is posted and no public title or user setting is changed.
 Physical iPhone/iPad behaviour remains distinct from desktop WebKit emulation.
