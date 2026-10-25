@@ -80,7 +80,10 @@ export function CielPage() {
               {CIEL.id}
             </span>
             <h1>
-              <span className="manager-display-name">
+              <span
+                className="manager-display-name"
+                style={{ ["--name-len" as string]: [...CIEL.name].length }}
+              >
                 <NameText value={CIEL.name} />
               </span>
             </h1>

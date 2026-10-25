@@ -203,7 +203,10 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
               {person.code}
             </span>
             <h1>
-              <span className="manager-display-name">
+              <span
+                className="manager-display-name"
+                style={{ ["--name-len" as string]: [...person.name].length }}
+              >
                 <NameText value={person.name} />
               </span>
             </h1>

@@ -1,5 +1,3 @@
-          {
-            name: "オーバーゼッツゲイムライン",
             body: "オーバーゼッツ エクスプロムの能力増強路。ゼッツドライバーに装填されたエクスプロムカプセムの固有能力を次元流体化した「エクスプロムゲイム」を全身に供給し、変身者に負荷がかかるほどの肉体強化を施しつつ、変換された衝撃を蓄える。",
           },
           {
@@ -383,3 +381,5 @@ export function RiderPage({ id }: { id: string }) {
         ["--manager-accent-soft" as string]: rider.tone,
         ["--rider-tone" as string]: rider.tone,
         ["--archive-accent" as string]: rider.tone,
+        ["--archive-accent-soft" as string]: rider.tone,
+        ["--future-hud-primary" as string]: rider.tone,

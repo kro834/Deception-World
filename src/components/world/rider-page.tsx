@@ -1583,7 +1583,10 @@ export function RiderPage({ id }: { id: string }) {
               {rider.no}
             </span>
             <h1>
-              <span className="manager-display-name">
+              <span
+                className="manager-display-name"
+                style={{ ["--name-len" as string]: [...rider.civilian.name].length }}
+              >
                 <NameText value={rider.civilian.name} />
               </span>
             </h1>
