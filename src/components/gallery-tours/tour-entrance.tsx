@@ -15,11 +15,21 @@ export function GalleryTourEntrance({
   onReset,
   storageMessage,
 }: GalleryTourEntranceProps) {
-  const openingTour = GALLERY_TOURS[0];
-  const openingArtwork = openingTour && getTourArtwork(openingTour.coverId);
-  const savedTourCount = GALLERY_TOURS.filter((tour) =>
+  const savedTours = GALLERY_TOURS.filter((tour) =>
     tour.stops.some((stop) => stop.artworkId === progress[tour.id]?.workId),
-  ).length;
+  );
+  const recentTour = savedTours.reduce<(typeof GALLERY_TOURS)[number] | undefined>(
+    (latest, candidate) =>
+      !latest || progress[candidate.id].updatedAt > progress[latest.id].updatedAt
+        ? candidate
+        : latest,
+    undefined,
+  );
+  const openingTour = recentTour ?? GALLERY_TOURS[0];
+  const openingWorkId = recentTour ? progress[recentTour.id].workId : openingTour?.coverId;
+  const openingArtwork = openingWorkId ? getTourArtwork(openingWorkId) : undefined;
+  const openingIndex = openingTour ? getTourStopIndex(openingTour, openingWorkId) : 0;
+  const recentReachedEnd = Boolean(recentTour && openingIndex === recentTour.stops.length - 1);
 
   function startSurprise() {
     const tour = GALLERY_TOURS[Math.floor(Math.random() * GALLERY_TOURS.length)];
@@ -30,22 +40,41 @@ export function GalleryTourEntrance({
     <div className="gallery-tour-entrance">
       <section className="gallery-tour-introduction" aria-labelledby="gallery-tour-heading">
         <div className="gallery-tour-introduction-copy">
-          <p className="gallery-tour-eyebrow">A DIFFERENT WAY TO LOOK</p>
+          <p className="gallery-tour-eyebrow">
+            GUIDED EXHIBITIONS · {GALLERY_TOURS.length} COURSES
+          </p>
           <h1 id="gallery-tour-heading" tabIndex={-1}>
             光景を、旅する。
           </h1>
           <p className="gallery-tour-introduction-lead">
             ひとつの光、ひとつの横顔から、次の一枚へ。色や構図でつながる作品を、小さな鑑賞ツアーで巡ります。
           </p>
-          <p className="gallery-tour-introduction-note">
-            気になるコースを選び、自分のペースで進んでください。それぞれの作品に添えた見どころが、いつもとは違う眺め方への入口になります。
-          </p>
+          {recentTour && (
+            <div className="gallery-tour-recent">
+              <p className="gallery-tour-recent-label">
+                {recentReachedEnd ? "最後に眺めた景色" : "前回の景色から"}
+              </p>
+              <p className="gallery-tour-recent-title">{recentTour.title}</p>
+              <p className="gallery-tour-recent-position">
+                {openingIndex + 1} / {recentTour.stops.length} 点目 · {openingArtwork?.title}
+              </p>
+              <button
+                className="gallery-tour-action gallery-tour-action-primary"
+                type="button"
+                onClick={() => onStart(recentTour.id, openingWorkId)}
+                aria-label={`鑑賞を再開：${recentTour.title}`}
+              >
+                {recentReachedEnd ? "最後の一枚に戻る" : "鑑賞を再開する"}
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          )}
           <div className="gallery-tour-introduction-actions">
             <a
-              className="gallery-tour-action gallery-tour-action-primary"
+              className={`gallery-tour-action ${recentTour ? "gallery-tour-action-text" : "gallery-tour-action-primary"}`}
               href="#gallery-tour-catalogue"
             >
-              コースを選ぶ <span aria-hidden="true">↓</span>
+              {recentTour ? "別のコースを選ぶ" : "コースを選ぶ"} <span aria-hidden="true">↓</span>
             </a>
             <button
               className="gallery-tour-action gallery-tour-action-text"
@@ -55,10 +84,6 @@ export function GalleryTourEntrance({
               おまかせで選ぶ <span aria-hidden="true">↗</span>
             </button>
           </div>
-          <p className="gallery-tour-introduction-facts">
-            <span>{GALLERY_TOURS.length}つの鑑賞コース</span>
-            <span>途中からでも再開できます</span>
-          </p>
         </div>
         {openingArtwork && (
           <figure className="gallery-tour-opening-artwork">
@@ -75,7 +100,7 @@ export function GalleryTourEntrance({
               />
             </div>
             <figcaption>
-              <span>EXHIBITION PREVIEW</span>
+              <span>{openingArtwork.title}</span>
               <span>「{openingTour.title}」より</span>
             </figcaption>
           </figure>
@@ -92,12 +117,16 @@ export function GalleryTourEntrance({
             <p className="gallery-tour-eyebrow">CHOOSE YOUR PATH</p>
             <h2 id="gallery-tour-catalogue-heading">いま惹かれる景色から。</h2>
           </div>
-          <p>
-            {savedTourCount > 0
-              ? `${savedTourCount}つのコースに再開位置が残っています。途中の一枚に戻ることも、最初から巡ることもできます。`
-              : "どのコースからでも、好きな順番で。作品の全体を眺めながら、一枚ずつ進みます。"}
-          </p>
+          <p>気になる光や仕草を入口に、全体を眺めながら一枚ずつ。途中の作品からも巡れます。</p>
         </div>
+        <nav className="gallery-tour-course-index" aria-label="鑑賞コース">
+          {GALLERY_TOURS.map((tour, index) => (
+            <a href={`#gallery-tour-course-${tour.id}`} key={tour.id}>
+              <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+              {tour.title}
+            </a>
+          ))}
+        </nav>
         {storageMessage && (
           <p className="gallery-tour-entrance-message" role="status">
             {storageMessage}
@@ -120,10 +149,13 @@ export function GalleryTourEntrance({
             const previewIndexes = [
               ...new Set([0, Math.floor(tour.stops.length / 2), tour.stops.length - 1]),
             ];
+            const resumeArtwork = hasSavedPosition ? getTourArtwork(saved.workId) : undefined;
 
             return (
               <article
                 className="gallery-tour-course"
+                id={`gallery-tour-course-${tour.id}`}
+                data-tour-id={tour.id}
                 key={tour.id}
                 style={{ "--gallery-tour-course-accent": tour.accent } as CSSProperties}
                 aria-labelledby={`gallery-tour-title-${tour.id}`}
@@ -148,29 +180,47 @@ export function GalleryTourEntrance({
                 </div>
                 <div className="gallery-tour-course-body">
                   <p className="gallery-tour-course-kicker">{tour.kicker}</p>
-                  <h3 id={`gallery-tour-title-${tour.id}`}>{tour.title}</h3>
+                  <h3 id={`gallery-tour-title-${tour.id}`} tabIndex={-1}>
+                    {tour.title}
+                  </h3>
                   <p className="gallery-tour-course-description">{tour.description}</p>
-                  <div className="gallery-tour-course-previews" aria-hidden="true">
+                  <div
+                    className="gallery-tour-course-previews"
+                    role="group"
+                    aria-label={`${tour.title}の作品から巡る`}
+                  >
                     {previewIndexes.map((index) => {
                       const preview = getTourArtwork(tour.stops[index].artworkId);
                       return preview ? (
-                        <div className="gallery-tour-course-preview" key={preview.id}>
-                          <img
-                            src={preview.thumb}
-                            width={preview.width}
-                            height={preview.height}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
+                        <button
+                          className="gallery-tour-course-preview"
+                          type="button"
+                          key={preview.id}
+                          onClick={() => onStart(tour.id, preview.id)}
+                          aria-label={`${tour.title}の${index + 1}点目「${preview.title}」から巡る`}
+                        >
+                          <span className="gallery-tour-course-preview-image">
+                            <img
+                              src={preview.thumb}
+                              width={preview.width}
+                              height={preview.height}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </span>
+                          <span className="gallery-tour-course-preview-caption">
+                            <span>{String(index + 1).padStart(2, "0")}</span>
+                            <span>{preview.title}</span>
+                          </span>
+                        </button>
                       ) : null;
                     })}
                   </div>
-                  <div className="gallery-tour-course-observation">
-                    <span>最初の見どころ</span>
+                  <details className="gallery-tour-course-observation">
+                    <summary>最初の一枚の見どころ</summary>
                     <p>{tour.stops[0]?.note}</p>
-                  </div>
+                  </details>
                   <div className="gallery-tour-course-bottom">
                     <div className="gallery-tour-course-position">
                       <span>全{tour.stops.length}点</span>
@@ -179,9 +229,14 @@ export function GalleryTourEntrance({
                           ? reachedEnd
                             ? "最後の作品まで到達"
                             : `再開位置 ${stopIndex + 1} / ${tour.stops.length}`
-                          : "ゆっくり、一枚ずつ"}
+                          : "最初の一枚から"}
                       </span>
                     </div>
+                    {resumeArtwork && (
+                      <p className="gallery-tour-course-resume-work">
+                        再開する作品：{resumeArtwork.title}
+                      </p>
+                    )}
                     {hasSavedPosition && (
                       <progress
                         className="gallery-tour-course-progress"

@@ -4,7 +4,7 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { GalleryTourEntrance } from "./tour-entrance";
 import { GalleryTourTheatre } from "./tour-theatre";
-import { getGalleryTour, getTourStopIndex } from "./tour-data";
+import { GALLERY_TOURS, getGalleryTour, getTourStopIndex } from "./tour-data";
 import {
   clearTourProgress,
   readTourProgressState,
@@ -97,7 +97,11 @@ export function GalleryToursPage({
   const [storageMessage, setStorageMessage] = useState("");
   const mainRef = useRef<HTMLElement>(null);
   const focusAfterNavigation = useRef(false);
+  const returnTourIdRef = useRef<string | null>(null);
   const tour = getGalleryTour(tourId);
+  const nextTour = tour
+    ? GALLERY_TOURS[(GALLERY_TOURS.indexOf(tour) + 1) % GALLERY_TOURS.length]
+    : undefined;
   const index = tour ? getTourStopIndex(tour, workId) : 0;
   const activeWorkId = tour?.stops[index].artworkId;
   const activePositionRef = useRef({ tourId: tour?.id, workId: activeWorkId });
@@ -141,8 +145,21 @@ export function GalleryToursPage({
   useEffect(() => {
     if (!focusAfterNavigation.current) return;
     focusAfterNavigation.current = false;
+    const returnId = returnTourIdRef.current;
+    returnTourIdRef.current = null;
+    if (!tour && returnId) {
+      // Restore the course after the router has applied its navigation scroll reset.
+      const frame = window.requestAnimationFrame(() => {
+        const heading = mainRef.current?.querySelector<HTMLElement>(
+          `#gallery-tour-title-${returnId}`,
+        );
+        heading?.focus({ preventScroll: true });
+        heading?.closest(".gallery-tour-course")?.scrollIntoView({ block: "start" });
+      });
+      return () => window.cancelAnimationFrame(frame);
+    }
     mainRef.current?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
-  }, [tour?.id]);
+  }, [tour]);
 
   const remember = useCallback(
     (id: string) => {
@@ -195,7 +212,14 @@ export function GalleryToursPage({
               suspended={menuOpen}
               onExit={() => {
                 focusAfterNavigation.current = true;
+                returnTourIdRef.current = tour.id;
                 onExit();
+              }}
+              nextTour={nextTour}
+              onNextTour={() => {
+                if (!nextTour) return;
+                focusAfterNavigation.current = true;
+                onSelect(nextTour.id, nextTour.stops[0].artworkId, false);
               }}
               onArtworkReady={remember}
               actions={
@@ -227,9 +251,7 @@ export function GalleryToursPage({
         )}
       </main>
       <div className="gallery-tours-colophon">
-        <p>
-          画像に映る光や構図を手がかりに巡る、小さな展示ツアー。再開位置はこのブラウザーに保存されます。
-        </p>
+        <p>再開位置はこのブラウザーに保存されます。気になる一枚から、いつでも続きを。</p>
         <Link to="/gallery">
           すべての作品を見る <span aria-hidden="true">↗</span>
         </Link>

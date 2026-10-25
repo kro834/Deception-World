@@ -80,10 +80,12 @@ test("the immersive room only accepts known artwork IDs, never a supplied textur
     "@tanstack/react-router": { createFileRoute: () => (config) => config, Link() {} },
     "@/components/gallery/gallery-data": { GALLERY_ARTWORKS: [{ id: "g19" }, { id: "g80" }] },
     "@/components/exhibition/exhibition-studio": { ExhibitionStudio() {} },
+    "@/components/exhibition/exhibition-artwork-browser": { ExhibitionArtworkBrowser() {} },
     "@/lib/use-exhibition-artwork-ready": { useExhibitionArtworkReady() {} },
     "@/lib/gallery-route-search": { normalizeExhibitionSearch },
     "@/lib/world-head": { createWorldHead: (head) => head, WORLD_CORE_STYLESHEET_LINKS: [] },
     "@/styles-exhibition-studio.css?url": "studio.css",
+    "@/styles-exhibition-room.css?url": "room.css",
   });
   assert.equal(Route.validateSearch({ work: "g19" }).work, "g19");
   assert.equal(Route.validateSearch({ work: "g80" }).work, "g80");
