@@ -474,7 +474,7 @@ const EPISODES: EpisodeRecord[] = [
   },
   {
     no: "04",
-    title: "殺す",
+    title: "癒えぬ傷を負った者共",
     src: "/episode-04-kill.jpeg",
     pos: "50% 16%",
     alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",

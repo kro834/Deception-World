@@ -42,7 +42,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // dossier behind its plus slider); all other records retained.
     // 2026-10-19: remove 06 from the ordinary columns; preserve it in the RE DIVE book.
     // Owner 2026-10-19: only EP6's title, thumbnail and alt change to 来訪 / ERROR; markup stays pinned.
-    records: "22ab243d973ad8f6619fddeaf1ebfe891f61f2fcfdd09adad4bb2039e064d7f2",
+    // Owner 2026-10-26: EP4 title becomes 癒えぬ傷を負った者共.
+    records: "feec9c3168b011fa02ad08349e1380969a2e63e1974197054c4d6e482631ed00",
     // rx14 F3/F29: responsive poster and WebP related-image attributes only.
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.
