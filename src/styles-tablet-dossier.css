@@ -33,3 +33,39 @@
     padding-block: 28px 48px;
   }
 }
+
+/* James's supplied portrait is unusually tall (791 × 1280). The shared
+   tablet frame is sized for broader portrait art, so `cover` cuts off his
+   head/legs on a stacked iPad stage. Match the frame to this asset's ratio
+   while stacked; in the narrow split-stage column, contain the complete art
+   instead of cropping its sides. */
+@media (max-width: 1099px) {
+  html[data-family="dossier"][data-ipad-viewport="contained"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-frame:has(> img[src*="character-james"]) {
+    width: auto;
+    max-width: 100%;
+    aspect-ratio: 791 / 1280;
+  }
+
+  html[data-family="dossier"][data-ipad-viewport="contained"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-frame:has(> img[src*="character-james"])
+    > img {
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1366px) and (min-height: 600px) and (orientation: landscape) {
+  html[data-family="dossier"][data-ipad-viewport="contained"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-portrait-frame:has(> img[src*="character-james"]) {
+    width: 100%;
+    aspect-ratio: auto;
+  }
+
+}
