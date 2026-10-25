@@ -1,3 +1,7 @@
+            : primaryForm
+              ? [primaryForm]
+              : [];
+  return (
     <main
       className="manager-page rider-dossier-page"
       style={{
