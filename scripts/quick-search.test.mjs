@@ -2,6 +2,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { runInNewContext } from "node:vm";
+import ts from "typescript";
 import {
   isQuickSearchShortcut,
   isTypingTarget,
@@ -21,6 +23,7 @@ import {
   nextChapter,
 } from "../src/lib/library-hub.ts";
 import { LIBRARY_ENTRIES } from "../src/lib/library-data.ts";
+import * as searchHelpers from "../src/components/search/search-ui-helpers.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const key = (overrides) => ({
@@ -31,6 +34,196 @@ const key = (overrides) => ({
   shiftKey: false,
   defaultPrevented: false,
   ...overrides,
+});
+
+// Execute the component's rendered event handlers, keeping hook state between
+// renders. Route loading and DOM focus are owned by the shared gate; this tests
+// that each activation hands it the right keyboard intent after closing.
+const compiledDialog = ts.transpileModule(read("src/components/search/quick-search-dialog.tsx"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+}).outputText;
+
+function quickSearchFixture() {
+  const states = [];
+  const refs = [];
+  const frames = [];
+  const events = [];
+  let stateIndex = 0;
+  let refIndex = 0;
+  let tree;
+  const exports = {};
+  const result = { document: { id: "zeus", category: "people", to: "/managers/zeus" } };
+  runInNewContext(compiledDialog, {
+    exports,
+    performance: { now: () => 1000 },
+    window: { requestAnimationFrame: (action) => frames.push(action) },
+    require: (name) => {
+      if (name === "react")
+        return {
+          useState: (initial) => {
+            const index = stateIndex++;
+            if (!(index in states)) states[index] = initial;
+            return [
+              states[index],
+              (value) => {
+                states[index] = typeof value === "function" ? value(states[index]) : value;
+              },
+            ];
+          },
+          useRef: (current) => (refs[refIndex++] ??= { current }),
+          useMemo: (calculate) => calculate(),
+          useDeferredValue: (value) => value,
+          useEffect() {},
+        };
+      if (name === "react/jsx-runtime")
+        return {
+          jsx: (type, props) => ({ type, props }),
+          jsxs: (type, props) => ({ type, props }),
+        };
+      if (name === "@/components/load-gate")
+        return { useLoadGate: () => ({ go: (options) => events.push(["go", options]) }) };
+      if (name === "@tanstack/react-router")
+        return { useRouter: () => ({ navigate: (options) => events.push(["router", options]) }) };
+      if (name === "./search-data")
+        return { SEARCH_DOCUMENTS: [], SEARCH_CATEGORIES: [{ id: "all" }, { id: "people" }] };
+      if (name === "./search-engine")
+        return {
+          searchDocuments: (_, query) => (query === "ゼウス" ? [result] : []),
+          suggestSearchQueries: () => [],
+          groupSearchResults: (results) => [{ category: "people", results }],
+        };
+      if (name === "./search-recent")
+        return {
+          useRecentSearches: () => [],
+          rememberSearch: (query) => events.push(["remember", query]),
+        };
+      if (name === "./search-ui-helpers") return searchHelpers;
+      if (name === "./use-open-result") return { useOpenResult: () => () => {} };
+      if (name === "@/lib/record-art") return { documentArt: () => ({}) };
+      if (name === "./search-ui" || name === "@/lib/record-images" || name.endsWith("?url"))
+        return {};
+      throw new Error(`Unexpected quick-search dependency: ${name}`);
+    },
+  });
+  function render() {
+    stateIndex = refIndex = 0;
+    tree = exports.default({ open: true, onClose: () => events.push(["close"]) });
+  }
+  function find(predicate) {
+    function visit(node) {
+      if (!node || typeof node !== "object") return undefined;
+      if (predicate(node)) return node;
+      for (const child of [node.props?.children].flat(Infinity)) {
+        const found = visit(child);
+        if (found) return found;
+      }
+    }
+    return visit(tree);
+  }
+  function press(key, native = {}) {
+    find((node) => node.type === "input").props.onKeyDown({
+      key,
+      nativeEvent: { key, ...native },
+      preventDefault() {},
+    });
+    render();
+  }
+  render();
+  return {
+    events,
+    frames,
+    find,
+    press,
+    type(query) {
+      find((node) => node.type === "input").props.onChange({ target: { value: query } });
+      render();
+    },
+    click(predicate, overrides = {}) {
+      let prevented = false;
+      find(predicate).props.onClick({
+        detail: 1,
+        ...overrides,
+        preventDefault: () => {
+          prevented = true;
+        },
+      });
+      return prevented;
+    },
+    flushFrame() {
+      assert.equal(frames.length, 1);
+      frames.shift()();
+    },
+  };
+}
+
+for (const selection of ["query Enter", "all-results arrow selection"]) {
+  test(`${selection} requests destination focus only after the quick dialog closes`, () => {
+    const dialog = quickSearchFixture();
+    dialog.type("  ゼウス  ");
+    if (selection === "all-results arrow selection") {
+      dialog.press("ArrowUp");
+      assert.equal(
+        dialog.find((node) => node.type === "input").props["aria-activedescendant"],
+        "qs-all",
+      );
+    }
+    dialog.press("Enter");
+    assert.deepEqual(dialog.events, [["remember", "ゼウス"], ["close"]]);
+    dialog.flushFrame();
+    const [kind, options] = dialog.events.at(-1);
+    assert.equal(kind, "go");
+    assert.equal(options.to, "/search");
+    assert.equal(options.search.q, "ゼウス");
+    assert.equal(options.focusDestination, true);
+  });
+}
+
+for (const [query, target] of [
+  ["ゼウス", "all"],
+  ["", "footer"],
+  ["未登録の検索語", "footer"],
+]) {
+  for (const detail of [0, 1]) {
+    test(`${target} search link with ${JSON.stringify(query)} keeps activation detail ${detail}`, () => {
+      const dialog = quickSearchFixture();
+      dialog.type(query);
+      const predicate =
+        target === "all"
+          ? (node) => node.props?.id === "qs-all"
+          : (node) => node.props?.className === "quick-search-full";
+      assert.equal(dialog.click(predicate, { detail }), true);
+      assert.equal(dialog.events.at(-1)[0], "close");
+      dialog.flushFrame();
+      const [kind, options] = dialog.events.at(-1);
+      assert.equal(kind, "go");
+      assert.equal(options.to, "/search");
+      assert.equal(options.search.q, query);
+      assert.equal(options.focusDestination, detail === 0);
+    });
+  }
+}
+
+test("modified all-results links preserve native navigation and leave the dialog open", () => {
+  for (const modifier of ["metaKey", "ctrlKey", "shiftKey", "altKey"]) {
+    const dialog = quickSearchFixture();
+    dialog.type("ゼウス");
+    const predicate = (node) => node.props?.id === "qs-all";
+    assert.equal(dialog.find(predicate).props.href, `/search?q=${encodeURIComponent("ゼウス")}`);
+    assert.equal(dialog.click(predicate, { [modifier]: true }), false);
+    assert.deepEqual(dialog.events, []);
+    assert.equal(dialog.frames.length, 0);
+  }
+});
+
+test("IME confirmation and Enter without results do not launch all-results navigation", () => {
+  const dialog = quickSearchFixture();
+  dialog.type("ゼウス");
+  dialog.press("Enter", { isComposing: true });
+  assert.deepEqual(dialog.events, []);
+  dialog.type("未登録の検索語");
+  dialog.press("Enter");
+  assert.deepEqual(dialog.events, []);
+  assert.equal(dialog.frames.length, 0);
 });
 
 test('"/" and Ctrl/⌘+K open it; other keys, IME and repeats do not', () => {

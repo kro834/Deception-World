@@ -34,6 +34,10 @@ export const SAGA_CINEMA_FILMS = [
 ] as const;
 
 export const SAGA_CINEMA_LOGO = "/saga-cinema-assets/saga-logo-original.webp";
+export const SAGA_CINEMA_LOGO_SRCSET = `/saga-cinema-assets/saga-logo-640.webp 640w, ${SAGA_CINEMA_LOGO} 1536w`;
+// Match the hero's phone width, desktop grid/minimum poster column and 760px copy cap.
+export const SAGA_CINEMA_LOGO_SIZES =
+  "(max-width: 760px) 93.28vw, (max-width: 1100px) min(calc(90.3vw - 357px), calc(56.4375vw - 19.6875px)), min(52.5vw, 798px)";
 export const SAGA_CINEMA_TITLE = "映画『仮面ライダーサーガ』4部作 公式サイト";
 export const cinemaNumber = (index: number) => String(index + 1).padStart(2, "0");
 export const cinemaWrap = (index: number) =>

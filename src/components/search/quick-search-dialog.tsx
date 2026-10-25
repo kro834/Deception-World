@@ -7,7 +7,6 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { useRouter } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
 import { SEARCH_CATEGORIES, SEARCH_DOCUMENTS } from "./search-data";
 import {
@@ -66,7 +65,6 @@ export default function QuickSearchDialog({
   const [recentNotice, setRecentNotice] = useState("");
   const openResult = useOpenResult();
   const { go } = useLoadGate();
-  const router = useRouter();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -166,7 +164,9 @@ export default function QuickSearchDialog({
           ),
       );
     else if (option.kind === "all")
-      closeThen(() => void router.navigate({ to: "/search", search: { q: trimmed } }));
+      closeThen(
+        () => void go({ to: "/search", search: { q: trimmed }, focusDestination: fromKeyboard }),
+      );
     else closeThen(() => void go({ to: option.to, focusDestination: fromKeyboard }));
   };
 
