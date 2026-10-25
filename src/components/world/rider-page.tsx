@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { FINAL_STAGE_ENTER_ASSETS } from "@/lib/asset-loader";
 import { dossierImage } from "@/lib/dossier-images";
@@ -1607,7 +1607,10 @@ export function RiderPage({ id }: { id: string }) {
               }
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
-              style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
+              style={{
+                objectPosition: `var(--dossier-portrait-position, ${rider.civilianPos ?? "center"})`,
+                objectFit: "var(--dossier-portrait-fit, cover)" as CSSProperties["objectFit"],
+              }}
               loading="eager"
               decoding="async"
               fetchPriority="high"

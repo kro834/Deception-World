@@ -1,5 +1,3 @@
-            name: "エクスプロムマスク — ベリルシグナム",
-            body: "エクスプロムマスクの精密測定装置。ナイトメアの力との融合係数を測定して変身継続性を診断する。その結果、変身解除を実行する場合もある。",
           },
           {
             name: "エクスプロムマスク — ロバストクラッシャム",
@@ -391,3 +389,5 @@ export function RiderPage({ id }: { id: string }) {
           ? rider.forms
           : rider.id === "over-zeztz"
             ? rider.forms
+            : primaryForm
+              ? [primaryForm]
