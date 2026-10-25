@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const rider = read("src/components/world/rider-page.tsx");
-const riderParts = ["01.part", "03.part", "04.part", "05.part"]
+const riderParts = ["01.part", "02.part", "03.part", "04.part", "05.part"]
   .map((part) => read(`source-parts/src/components/world/rider-page.tsx/${part}`))
   .join("\n");
 const gate = read("src/components/load-gate.tsx");

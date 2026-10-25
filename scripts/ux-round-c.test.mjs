@@ -209,7 +209,7 @@ test("a rider dossier's first screen names the rider", () => {
   assert.doesNotMatch(rider, /CHARACTER FILE/);
   assert.match(
     rider,
-    /<span className="dossier-file-numeral" aria-hidden="true">\s*\{rider\.no\}\s*<\/span>\s*<h1>\s*<span className="manager-display-name">\s*<NameText value=\{rider\.civilian\.name\} \/>/,
+    /<span className="dossier-file-numeral" aria-hidden="true">\s*\{rider\.no\}\s*<\/span>\s*<h1>\s*<span\s+className="manager-display-name"\s+style=\{\{[^}]*\}\}\s*>\s*<NameText value=\{rider\.civilian\.name\} \/>/,
   );
   // The header's label names the brand link's way back from this file.
   assert.match(rider, /fileLabel=\{`\$\{rider\.civilian\.name\}の資料`\}/);

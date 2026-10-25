@@ -35,7 +35,7 @@ test("his page keeps 月城悠真's record from the eight riders, without マキ
   assert.doesNotMatch(page, /<small>CIEL<\/small>|CHARACTER FILE/);
   assert.match(
     page,
-    /className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">\s*\{CIEL\.id\}\s*<\/span>\s*<h1>\s*<span className="manager-display-name">\s*<NameText value=\{CIEL\.name\} \/>/,
+    /className="dossier-file-numeral" data-numerals="roman" aria-hidden="true">\s*\{CIEL\.id\}\s*<\/span>\s*<h1>\s*<span\s+className="manager-display-name"\s+style=\{\{[^}]*\}\}\s*>\s*<NameText value=\{CIEL\.name\} \/>/,
   );
   assert.match(page, /alt="シエルのキャラクタービジュアル"/);
   assert.match(page, /\{\.\.\.cielPortrait\(\)\}/);
