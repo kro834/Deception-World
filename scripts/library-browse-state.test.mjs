@@ -620,7 +620,11 @@ test("Back/Forward cancels pending text, and reload starts from validated URL st
 test("kind and saved facets write the latest draft atomically and reset explicitly", () => {
   const h = mount({}, { saved: { version: 1, bookmarks: ["saga"], recent: [] } });
   h.input("saga");
-  h.button("人物資料").props.onClick();
+  const facets = nodes(h.tree(), (node) => node.props?.className === "library-filter-row")[0];
+  nodes(
+    facets,
+    (node) => node.type === "button" && text(node).startsWith("人物資料"),
+  )[0].props.onClick();
   assert.deepEqual(plain(h.writes.at(-1)), {
     selection: { q: "saga", kind: "person", scope: "all" },
     options: { replace: false },
@@ -635,6 +639,27 @@ test("kind and saved facets write the latest draft atomically and reset explicit
   );
   h.button("条件をリセット").props.onClick();
   assert.deepEqual(plain(h.writes.at(-1).selection), { q: "", kind: "all", scope: "all" });
+});
+
+test("visual kind entrances preserve the current words and saved scope, then focus the results", () => {
+  for (const kind of Object.keys(LIBRARY_KINDS)) {
+    const h = mount({ scope: "saved" }, { saved: { version: 1, bookmarks: ["saga"], recent: [] } });
+    h.input("ＳＡＧＡ");
+    h.attachResults();
+    h.window.requestAnimationFrame = (callback) => callback();
+    h.window.matchMedia = () => ({ matches: false });
+    const entrance = nodes(
+      h.tree(),
+      (node) => node.type === "button" && node.props["data-kind"] === kind,
+    )[0];
+    assert.ok(entrance, kind);
+    entrance.props.onClick();
+    assert.deepEqual(plain(h.writes.at(-1)), {
+      selection: { q: "ＳＡＧＡ", kind, scope: "saved" },
+      options: { replace: false },
+    });
+    assert.deepEqual(plain(h.focused.at(-1)), { id: "results", options: { preventScroll: true } });
+  }
 });
 
 test("saved loading and storage failures are never reported as a genuine zero-result shelf", () => {

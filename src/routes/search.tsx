@@ -6,6 +6,7 @@ import searchCssUrl from "@/styles-search.css?url";
 import stageLibraryCssUrl from "@/styles-stage-library.css?url";
 import zenithLibraryCssUrl from "@/styles-library-zenith.css?url";
 import tabletReadingCssUrl from "@/styles-tablet-reading.css?url";
+import searchObservatoryCssUrl from "@/styles-search-observatory.css?url";
 
 export const Route = createFileRoute("/search")({
   validateSearch: validateSearchState,
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/search")({
         // ZENITH (2026-10-21): the brush-up on top of STAGE, same scope.
         { rel: "stylesheet", href: zenithLibraryCssUrl },
         { rel: "stylesheet", href: tabletReadingCssUrl },
+        { rel: "stylesheet", href: searchObservatoryCssUrl },
       ],
     }),
 });
