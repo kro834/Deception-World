@@ -24,7 +24,7 @@ test("both archives link the deck sheet last, after the armour layer", () => {
 
 test("every form chip has its portrait, and the map is current", () => {
   const forms = archiveForms();
-  assert.equal(forms.filter((form) => form.archive === "saga").length, 17);
+  assert.equal(forms.filter((form) => form.archive === "saga").length, 22);
   assert.equal(forms.filter((form) => form.archive === "realm").length, 9);
   for (const { thumb } of forms)
     assert.ok(existsSync(new URL(`../public${thumb}`, import.meta.url)), thumb);
