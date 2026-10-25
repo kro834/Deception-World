@@ -1103,9 +1103,6 @@ html[data-world-effects="economy"] .export-page h1 {
 }
 
 /* Reading edition: the archive's scope is a readable receipt below the action. */
-.export-page {
-  grid-template-columns: min(100%, 540px);
-}
 .export-page small#export-scope {
   justify-self: stretch;
   padding: 20px clamp(16px, 4vw, 28px);

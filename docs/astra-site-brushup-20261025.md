@@ -70,6 +70,14 @@ World warm-up. Gallery's six Chrome/WebKit journeys retained original contain
 rendering, zoom/pan/reset, next/previous keyboard focus and zero-pixel scroll
 return. Integrated Library/Search and Exhibition/Tours owner checks also passed.
 
+A final landscape audit caught the optional single-column download override
+creating implicit tracks over the established named two-panel grid. Removing
+that override retains the readable receipt without moving its navigation over
+the ZIP action. Chrome and WebKit each passed 320x740, 390x844, 667x375,
+834x390, 1024x768 and 1440x900: all five actions received their own hit tests
+at 20/50/80 percent of their height, with zero document overflow. The 22
+download/recovery/opening tests, source sync and rebuilt production bundle passed.
+
 Publication follows `docs/production-release.md`. Gallery checks are read-only;
 no sample artwork is posted and no public title or user setting is changed.
 Physical iPhone/iPad behaviour remains distinct from desktop WebKit emulation.
