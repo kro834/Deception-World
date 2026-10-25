@@ -1,3 +1,4 @@
+import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { FarFromSaga } from "@/components/far-from-saga/far-from-saga";
 import {
@@ -41,7 +42,8 @@ export const Route = createFileRoute("/far-from-saga")({
       { property: "og:title", content: "ファーフロムサーガ｜FAR FROM SAGA — Deception World" },
       {
         property: "og:description",
-        content: "どこまで離れても、この拳の一部だ。ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。",
+        content:
+          "どこまで離れても、この拳の一部だ。ファイナルステージ限定の超究極フォーム、仮面ライダーファーフロムサーガ。",
       },
       { property: "og:image", content: FAR_FROM_SAGA_KEY_VISUAL.src },
     ],
@@ -64,6 +66,7 @@ export const Route = createFileRoute("/far-from-saga")({
       { rel: "stylesheet", href: farFromZenithCssUrl },
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
+      { rel: "stylesheet", href: visualAstraCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

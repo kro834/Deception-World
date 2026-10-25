@@ -110,7 +110,9 @@ test("special routes append their CSS after world base and addon styles", () => 
     finalStage.indexOf("...WORLD_STYLESHEET_LINKS") < finalStageRexonanceLink &&
       finalStageRexonanceLink < finalStageLink,
   );
-  assert.match(archive, /links:\s*\[\.\.\.WORLD_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: formArchiveCssUrl \},?\s*\]/); // The archive route appends its chrome sheet after the World links.
+  // Astra refines only the archive wrapper after its original chrome;
+  // the iframe and the ordered World styles remain intact.
+  assert.match(archive, /links:\s*\[\s*\.\.\.WORLD_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: formArchiveCssUrl \},\s*\{ rel: "stylesheet", href: cinemaArchiveAstraCssUrl \},?\s*\]/);
   // The download page gets the dossier HUD subset and its own sheet after the addon sheet.
   assert.match(
     download,

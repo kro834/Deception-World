@@ -1,3 +1,4 @@
+import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { RexonanceSaga } from "@/components/rexonance-saga/rexonance-saga";
 import {
@@ -110,6 +111,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       // the tokens, the kickers' one voice — after the layout sheet; only
       // the motion sheet follows it (the cinematic skin follows every
       // feature's sheet).
+      { rel: "stylesheet", href: visualAstraCssUrl },
       { rel: "stylesheet", href: rexonanceTypeCssUrl },
       // KINETIC (rxk, 2026-10-21): the chapters' entrances, the reading rail,
       // hover and press, the end card (styles-rexonance-motion-20261021.css;

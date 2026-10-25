@@ -1,0 +1,185 @@
+/* The film's plum and warm paper remain; hierarchy is carried by type and rules. */
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
+  border: 1px solid #876b58;
+  background: #211925;
+  box-shadow: 0 12px 28px #0003;
+  margin-bottom: 24px;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
+  padding: clamp(20px, 3.2vw, 36px);
+  background: linear-gradient(110deg, #3a2735, #241c2d);
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-heading > span {
+  font-size: clamp(21px, 2.5vw, 31px);
+  line-height: 1.65;
+  letter-spacing: 0.06em;
+  color: #fff0d7;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
+  padding: clamp(22px, 4vw, 52px) clamp(18px, 4vw, 56px);
+  background: #211925;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > h3 {
+  max-width: 34em;
+  margin: 0 auto 2em;
+  padding-bottom: 1.3em;
+  border-bottom: 1px solid #876b58;
+  color: #f3d9ac;
+  font-size: clamp(18px, 2vw, 23px);
+  line-height: 1.9;
+  text-wrap: pretty;
+}
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-story-case-body
+  > [data-dream-reading-paragraph] {
+  max-width: 36em;
+  margin: 0 auto 1.8em;
+  color: #eee5d9;
+  font-size: 17px;
+  line-height: 2.15;
+  letter-spacing: 0.035em;
+  overflow-wrap: anywhere;
+}
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-reader[data-dream-reader-size="large"]
+  .dream-story-case-body
+  > [data-dream-reading-paragraph] {
+  font-size: 19px;
+}
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-reader[data-dream-reader-spacing="comfortable"]
+  .dream-story-case-body
+  > [data-dream-reading-paragraph] {
+  line-height: 2.3;
+  margin-block: 1.4em;
+  margin-inline: auto;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] > summary {
+  border-bottom: 2px solid #c3a171;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-footer {
+  max-width: 44em;
+  margin-inline: auto;
+  padding-top: 28px;
+  border-top: 1px solid #876b58;
+}
+@media (max-width: 380px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
+    padding-inline: 15px;
+  }
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-story-case-body
+    > [data-dream-reading-paragraph] {
+    font-size: 16px;
+    letter-spacing: 0.01em;
+  }
+}
+@media (prefers-contrast: more) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
+    border-color: currentColor;
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(.dream-story-case, .dream-story-case > summary, .dream-story-case-body) {
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    :is(
+      .dream-story-case-body > h3,
+      .dream-story-case-heading > span,
+      [data-dream-reading-paragraph]
+    ) {
+    color: CanvasText;
+  }
+}
+
+/* Six chapter entrances read as an ordered contents page, without extra labels. */
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 28px;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol > li > a {
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  min-height: 88px;
+  padding: 16px 10px;
+  gap: 14px;
+  border: 0;
+  border-bottom: 1px solid #80694f;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-number {
+  width: 42px;
+  height: 50px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font:
+    36px/1.2 Georgia,
+    serif;
+  color: #c3a171;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-title strong {
+  font-size: 19px;
+  line-height: 1.7;
+}
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-reader-index
+  > ol
+  > li
+  > a[aria-current="location"] {
+  border-bottom: 3px solid #f1d39e;
+  background: #382735;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary-search-results {
+  gap: 14px;
+}
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-glossary-search
+  .dream-glossary-jump
+  .dream-glossary-search-results
+  a {
+  padding: 20px;
+  border-width: 0 0 1px;
+  border-color: #947c5c;
+  border-radius: 0;
+  background: #2b2230;
+}
+html[data-family="dream"] main.dream-page.dream-page .dream-glossary-search-word strong {
+  font-size: 20px;
+}
+@media (max-width: 600px) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol > li > a {
+    min-height: 76px;
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-number {
+    color: CanvasText;
+  }
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-reader-index
+    > ol
+    > li
+    > a[aria-current="location"] {
+    background: Canvas;
+    border-color: Highlight;
+  }
+}

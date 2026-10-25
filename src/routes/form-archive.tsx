@@ -1,3 +1,4 @@
+import cinemaArchiveAstraCssUrl from "@/styles-cinema-archive-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { validateInquirySearch } from "@/lib/inquiry-guides";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -54,7 +55,11 @@ export const Route = createFileRoute("/form-archive")({
     ],
     // The route chrome sheet goes after the World sheets; the Michroma HUD
     // subset it names is already loaded root-wide.
-    links: [...WORLD_STYLESHEET_LINKS, { rel: "stylesheet", href: formArchiveCssUrl }],
+    links: [
+      ...WORLD_STYLESHEET_LINKS,
+      { rel: "stylesheet", href: formArchiveCssUrl },
+      { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
+    ],
   }),
 });
 

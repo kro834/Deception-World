@@ -1101,3 +1101,34 @@ html[data-world-effects="economy"] .export-page h1 {
     outline-color: Highlight;
   }
 }
+
+/* Reading edition: the archive's scope is a readable receipt below the action. */
+.export-page {
+  grid-template-columns: min(100%, 540px);
+}
+.export-page small#export-scope {
+  justify-self: stretch;
+  padding: 20px clamp(16px, 4vw, 28px);
+  margin-inline: var(--dl-inset);
+  border-block: 1px solid #496071;
+  color: #d0dce6;
+  font-size: 14px;
+  line-height: 1.9;
+  text-align: left;
+}
+.export-page small#export-scope > span + span {
+  margin-top: 8px;
+}
+.export-page .export-page-btn {
+  min-height: 56px;
+  line-height: 1.7;
+}
+.export-page .export-page-navigation {
+  gap: 12px;
+}
+@media (forced-colors: active) {
+  .export-page small#export-scope {
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+}

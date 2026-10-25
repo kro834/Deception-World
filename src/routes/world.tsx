@@ -25,6 +25,7 @@ import worldAtmosphereCssUrl from "@/styles-world-atmosphere.css?url";
 import worldTranscriptCssUrl from "@/styles-world-transcript.css?url";
 import stageWorldCssUrl from "@/styles-stage-world.css?url";
 import worldReadingCssUrl from "@/styles-world-reading.css?url";
+import worldAstraCssUrl from "@/styles-world-astra.css?url";
 import worldZenithCssUrl from "@/styles-world-zenith.css?url";
 import worldArchiveToolsCssUrl from "@/styles-world-archive-tools.css?url";
 import worldSpecialCssUrl from "@/styles-world-special.css?url";
@@ -81,6 +82,7 @@ export const Route = createFileRoute("/world")({
         // tools, before the HUD face.
         { rel: "stylesheet", href: worldSpecialCssUrl },
         { rel: "stylesheet", href: tabletWorldCssUrl },
+        { rel: "stylesheet", href: worldAstraCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],

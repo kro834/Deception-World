@@ -1,0 +1,222 @@
+/* Shared Astra edition. Opaque chrome and static lighting keep the iPad
+   status bar and first mobile route entry within their existing budget. */
+@media (forced-colors: none) {
+  html[data-family] {
+    --astra-paper: #f2eadd;
+    --astra-gold: #cfb77d;
+    --astra-rule: rgb(207 183 125 / 28%);
+    --astra-surface: #0b1119;
+  }
+
+  html[data-family]
+    body
+    :is(
+      .topbar,
+      .manager-topbar,
+      .dream-site-header,
+      .library-topbar,
+      .search-topbar,
+      .form-archive-toolbar,
+      .rxs-local-nav
+    ) {
+    border-bottom-color: var(--astra-rule);
+    background-color: #070b11;
+    box-shadow:
+      0 1px 0 #000,
+      inset 0 1px 0 rgb(255 255 255 / 5%);
+  }
+
+  html[data-family] body :is(.topbar, .manager-topbar) .brand b {
+    color: var(--astra-paper);
+    letter-spacing: 0.12em;
+  }
+
+  html[data-family] body :is(.topbar, .manager-topbar) .brand small {
+    color: #acbac5;
+    letter-spacing: 0.16em;
+  }
+
+  html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+    background-color: #080d14;
+    background-image: linear-gradient(135deg, rgb(207 183 125 / 5%), transparent 36%);
+    color: var(--astra-paper);
+    column-gap: clamp(20px, 3vw, 48px);
+    row-gap: clamp(24px, 3vw, 40px);
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head {
+    border-bottom: 1px solid var(--astra-rule);
+    padding-bottom: 22px;
+    background-color: #080d14;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div > b {
+    color: var(--astra-paper);
+    font-size: clamp(18px, 2.5vw, 32px);
+    letter-spacing: 0.09em;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div > p,
+  html[data-family] body #site-side-panel.side-panel > .side-panel-group > p {
+    color: #cfb77d;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    line-height: 1.6;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::after {
+    background: var(--astra-rule);
+  }
+
+  html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button) {
+    border-color: #33404d;
+    border-radius: 3px;
+    color: #f4f0e7;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button):is([aria-current="page"], [aria-current="location"]) {
+    border-color: #e2c989;
+    box-shadow: inset 0 -3px #e2c989;
+  }
+
+  html[data-family] body #site-side-panel.side-panel :is(a, button):focus-visible {
+    outline: 2px solid #fff0b5;
+    outline-offset: 4px;
+  }
+
+  html[data-family] body #site-side-panel.side-panel .side-panel-quick-search {
+    background: linear-gradient(120deg, #1d2c39, #111a24);
+    border-color: #7c948e;
+  }
+
+  html[data-family] body #site-side-panel.side-panel .side-panel-riders .side-panel-links > a {
+    min-height: 150px;
+    padding: 80px 14px 14px;
+    align-items: end;
+    isolation: isolate;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-riders
+    .side-panel-links
+    > a
+    > span {
+    position: relative;
+    inset: auto;
+    width: auto;
+    max-width: 100%;
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+    color: #fff8ea;
+    font-size: 15px;
+    line-height: 1.55;
+    letter-spacing: 0.03em;
+    text-shadow: 0 1px 5px #000;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-riders
+    .side-panel-links
+    > a::after {
+    background: linear-gradient(transparent 30%, rgb(4 8 13 / 94%));
+  }
+
+  html[data-family="dossier"] body .manager-page .manager-copy {
+    border-top-color: var(--astra-rule);
+    padding-block: clamp(36px, 5vw, 72px);
+  }
+
+  html[data-family="dossier"] body .manager-page .manager-copy-body {
+    max-width: 68ch;
+  }
+
+  html[data-family="dossier"] body .manager-page .manager-copy-body > p {
+    font-size: clamp(15px, 1.1vw, 17px);
+    line-height: 2.05;
+    color: #e0e4e7;
+    overflow-wrap: break-word;
+  }
+
+  html[data-family="dossier"] body .manager-page .manager-copy-heading h2 {
+    color: #f4eddd;
+    letter-spacing: 0.05em;
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+
+  html[data-family="dossier"] body .manager-page :is(.form-pickup-card, .rider-special-site-card) {
+    border-color: #45505a;
+    background-color: #0a111a;
+  }
+
+  html[data-family="opening"] body .cine-stage .cine-btn {
+    min-height: 48px;
+    padding-inline: clamp(22px, 4vw, 44px);
+    font-size: clamp(12px, 1.15vw, 15px);
+    letter-spacing: 0.13em;
+  }
+
+  html[data-family="opening"] body .cine-stage .cine-btn-primary {
+    border-color: #e2d2a9;
+    background: linear-gradient(120deg, #f3ebdc, #c9e4e8);
+    color: #0b1720;
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 8px 30px rgb(0 0 0 / 28%);
+  }
+
+  html[data-family="opening"] body .cine-stage .cine-btn-secondary {
+    border-color: #6d7f8c;
+    background: #0d1721;
+    color: #e6edf1;
+  }
+
+  @media (min-width: 761px) {
+    html[data-family] body #site-side-panel.side-panel .side-panel-riders .side-panel-links {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 760px) {
+    html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+      row-gap: 26px;
+    }
+
+    html[data-family] body #site-side-panel.side-panel .side-panel-riders .side-panel-links {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    html[data-family] body #site-side-panel.side-panel .side-panel-riders .side-panel-links > a {
+      min-height: 142px;
+      padding: 76px 10px 12px;
+    }
+
+    html[data-family]
+      body
+      #site-side-panel.side-panel
+      .side-panel-riders
+      .side-panel-links
+      > a
+      > span {
+      font-size: 14px;
+    }
+
+    html[data-family="opening"] body .cine-stage .cine-replay-slot {
+      gap: 10px;
+      padding-inline: 16px;
+    }
+  }
+}

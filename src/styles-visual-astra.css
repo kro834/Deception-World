@@ -1,0 +1,186 @@
+/* Artwork and reading rhythm. Route-local, static finishes: no changes to
+   suit-up geometry, form sliders, image ratios, or saved gallery state. */
+/* Individual chapter treatments: each work keeps its own visual language. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid {
+  gap: clamp(16px, 2vw, 28px);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article:nth-child(n) {
+  border-top: 2px solid #b4d9ee;
+  padding: clamp(24px, 3vw, 44px);
+  background: linear-gradient(155deg, #11202b, #080e17 70%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article
+  p {
+  color: #d0dce5;
+  line-height: 1.95;
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-system-grid
+  > article:nth-child(n) {
+  border-top: 3px solid #f4cc7b;
+  padding: clamp(24px, 3vw, 40px);
+  background: linear-gradient(135deg, #292114, #101013 72%);
+}
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page
+  > #system
+  .rxs-system-grid
+  > article
+  p {
+  color: #e2d9c8;
+  line-height: 1.9;
+}
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-copy {
+  max-width: 46em;
+  padding-block: clamp(12px, 2vw, 30px);
+}
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-copy p {
+  font-size: clamp(16px, 1.45vw, 19px);
+  line-height: 2.15;
+  color: #ece2d3;
+}
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-subheading {
+  margin-top: clamp(48px, 6vw, 88px);
+  padding-bottom: 24px;
+  border-bottom: 1px solid #d9bc8259;
+}
+html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-article-copy p {
+  font-size: 16px;
+  line-height: 1.95;
+  color: #d7deeb;
+}
+html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-finisher {
+  border-left: 3px solid #b2cfff;
+  padding: clamp(24px, 3vw, 44px);
+  background: linear-gradient(110deg, #11223a, #080d19 78%);
+}
+html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article {
+  padding: clamp(24px, 3vw, 44px);
+  gap: 24px;
+}
+html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article-name {
+  font-size: clamp(20px, 2vw, 27px);
+  line-height: 1.45;
+}
+html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article .mus-copy p {
+  color: #d1e2e2;
+  font-size: 16px;
+  line-height: 1.95;
+}
+html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-articles > article {
+  border-top: 2px solid #b5b4ee;
+  padding: clamp(24px, 3vw, 40px);
+  background: linear-gradient(150deg, #19192c, #080c17 70%);
+}
+html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-articles > article p {
+  color: #dadbed;
+  font-size: 16px;
+  line-height: 1.95;
+}
+html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-finisher {
+  padding-block: clamp(28px, 4vw, 52px);
+  border-top-color: #b8b4df70;
+}
+/* The quiet story opening is a reading page; the mechanical chapters retain
+   their own panels and the assembly remains the full-width visual climax. */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-layout {
+  background: linear-gradient(110deg, #211b14, #11100f 72%);
+  border-block: 1px solid #d9bc8240;
+}
+html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-finisher h3 {
+  font-size: clamp(22px, 2.5vw, 34px);
+  line-height: 1.5;
+}
+html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-finisher h3 {
+  font-size: clamp(22px, 2.5vw, 34px);
+  line-height: 1.5;
+}
+html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-finisher h3 {
+  font-size: clamp(22px, 2.5vw, 34px);
+  line-height: 1.5;
+}
+@media (min-width: 1100px) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page > #system .rxs-system-grid {
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 24px;
+  }
+  html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-theories .ffs-articles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.ffs-page
+    .ffs-theories
+    .ffs-articles
+    > article:first-child {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    column-gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.ffs-page
+    .ffs-theories
+    .ffs-articles
+    > article:first-child
+    > h3 {
+    grid-column: 1;
+  }
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.ffs-page
+    .ffs-theories
+    .ffs-articles
+    > article:first-child
+    > p {
+    grid-column: 2;
+  }
+}
+
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.ffs-page
+    .ffs-theories
+    .ffs-articles
+    > article:first-child
+    > p:first-of-type {
+    grid-row: 1 / span 2;
+  }
+}
+/* Keep the final punctuation with the heading at the narrowest phone width. */
+@media (max-width: 380px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-section-heading
+    h2 {
+    --rxt-step-5: 28px;
+    --rxt-lead-display: 1.5;
+    font-size: 28px;
+    line-height: 1.5;
+    line-break: strict;
+  }
+}

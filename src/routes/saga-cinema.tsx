@@ -1,3 +1,4 @@
+import cinemaArchiveAstraCssUrl from "@/styles-cinema-archive-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { SagaCinema } from "@/components/saga-cinema/saga-cinema";
 import { WORLD_CORE_STYLESHEET_LINKS, CINEMATIC_STYLESHEET_LINK } from "@/lib/world-head";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/saga-cinema")({
       ...WORLD_CORE_STYLESHEET_LINKS,
       CINEMATIC_STYLESHEET_LINK,
       { rel: "stylesheet", href: cinemaCss },
+      { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
       { rel: "preload", as: "image", href: "/saga-cinema-assets/chapter-4.jpg" },
       { rel: "preload", as: "image", href: "/saga-cinema-assets/saga-logo-original.webp" },
     ],
