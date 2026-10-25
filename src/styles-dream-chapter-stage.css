@@ -1,114 +1,180 @@
-/* A finite, user-driven paper theatre. Its animation never moves the reading page. */
+/* Six cut-paper portals. Only explicit chapter changes set the scenery in motion. */
 .dream-page .dream-chapter-stage {
-  --stage-gold: #e5c185;
+  --stage-gold: #d8bd8c;
   --stage-ink: #fff1d9;
   --stage-direction: 1;
   color: var(--stage-ink);
-  margin-block: 18px 28px;
+  margin-block: 24px 36px;
   border: 1px solid #a38257;
   background: #17121e;
   isolation: isolate;
-  scroll-margin-top: 150px;
+  scroll-margin-top: calc(var(--dream-nav-offset, 160px) + 20px);
 }
 .dream-page .dream-chapter-stage[data-direction="-1"] {
   --stage-direction: -1;
 }
 .dream-page .dream-chapter-stage-scene {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-areas: "theatre copy" "controls copy";
+  align-items: center;
   overflow: hidden;
-  min-height: 330px;
-  perspective: 1100px;
-  background: radial-gradient(ellipse at 55% 0%, #5c395a, transparent 65%), #17121e;
-  border-bottom: 1px solid #a38257;
+  min-height: 410px;
+  background: radial-gradient(ellipse at 28% 52%, #51405d 0, #292032 38%, #17121e 72%);
+  border-bottom: 1px solid #a3825780;
 }
-.dream-page .dream-chapter-stage-scene::after {
-  content: "";
+.dream-page .dream-chapter-stage-theatre {
+  grid-area: theatre;
+  position: relative;
+  height: 410px;
+  perspective: 900px;
+  min-width: 0;
+}
+.dream-page .dream-chapter-stage-corridor {
   position: absolute;
-  inset: auto 0 0;
-  height: 32px;
-  border-top: 1px solid #a3825770;
-  background: repeating-linear-gradient(90deg, transparent 0 40px, #e5c18518 41px 42px);
-  transform: perspective(100px) rotateX(35deg);
-  transform-origin: bottom;
-  pointer-events: none;
+  inset: 32px 10% 38px 12%;
+  transform: rotateY(-16deg) rotateX(7deg);
+  transform-style: preserve-3d;
 }
 .dream-page .dream-chapter-stage-wings {
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  transform-style: preserve-3d;
 }
 .dream-page .dream-chapter-stage-wings > span {
   position: absolute;
-  left: calc(50% - 110px);
-  top: 26px;
-  width: 220px;
-  height: calc(100% - 48px);
-  border: 1px solid #d4ac6e80;
-  background: linear-gradient(100deg, #a9754938, #271c32 40%, #4a3044);
+  inset: calc(var(--layer) * 16px) calc(var(--layer) * 17px) calc(var(--layer) * 9px);
+  border: 16px solid;
+  border-color: color-mix(in srgb, #e8d9bc calc(100% - var(--layer) * 12%), var(--stage-accent));
+  border-radius: 47% 47% 2px 2px;
   box-shadow:
-    -14px 4px 24px #0007,
-    inset 5px 0 #e5c18518;
-  transform: translateX(calc(var(--wing-offset) * 92px))
-    translateZ(calc(var(--wing-offset) * -12px)) rotateY(-38deg);
-  opacity: 0.55;
+    4px 1px 0 #766149,
+    9px 7px 0 #17121e88,
+    inset 5px 3px 12px #100a1dcc;
+  transform: translateZ(calc(var(--layer) * -19px));
+  background: transparent;
 }
 .dream-page .dream-chapter-stage-wings b {
   position: absolute;
-  right: 14px;
-  top: 12px;
+  left: -12px;
+  bottom: 7px;
+  color: #35283d;
   font:
-    40px Georgia,
+    11px/1 Georgia,
     serif;
-  color: #e5c185;
+  transform: rotate(-90deg);
 }
-.dream-page .dream-chapter-stage-wings > [data-selected="true"] {
-  opacity: 0;
+.dream-page .dream-chapter-stage-moon {
+  position: absolute;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: #fff1d9;
+  box-shadow: 0 0 38px #e5c18538;
+  left: calc(50% - 33px);
+  top: 31%;
+  transform: translateZ(-125px);
 }
-.dream-page .dream-chapter-stage-sheet {
-  position: relative;
-  min-height: 330px;
-  display: grid;
-  grid-template-columns: minmax(100px, 0.65fr) minmax(0, 1fr);
-  align-items: center;
-  padding: 32px clamp(24px, 5vw, 64px) 42px;
-  gap: 24px;
-  background: linear-gradient(100deg, #17121e66, #17121ef5 56%, #17121ecc);
-  transform-origin: 50% 100%;
+.dream-page .dream-chapter-stage-horizon {
+  position: absolute;
+  inset: 55% 14% 4%;
+  background:
+    repeating-linear-gradient(0deg, #d8bd8c38 0 1px, transparent 1px 21px),
+    linear-gradient(90deg, transparent 49.7%, #e8d9bc66 50%, transparent 50.3%);
+  transform: translateZ(-118px) rotateX(42deg);
+  transform-origin: center bottom;
+}
+.dream-page .dream-chapter-stage-door {
+  position: absolute;
+  inset: 25% 31% 9%;
+  display: flex;
+  perspective: 450px;
+  transform: translateZ(-108px);
+}
+.dream-page .dream-chapter-stage-door i {
+  flex: 1;
+  background: linear-gradient(90deg, #b29b7a, #e7d5b2);
+  border: 1px solid #ac8b60;
+  box-shadow:
+    inset 0 0 0 5px #c0a680,
+    inset 0 0 0 6px #f4e6c5;
+  transform-origin: left center;
+  transform: rotateY(-70deg);
+}
+.dream-page .dream-chapter-stage-door i + i {
+  transform-origin: right center;
+  transform: rotateY(70deg);
 }
 .dream-page .dream-chapter-stage-numeral {
-  font:
-    clamp(130px, 17vw, 220px)/1 Georgia,
-    serif;
-  color: #e5c185;
+  position: absolute;
+  inset: auto 0 8%;
   text-align: center;
+  font:
+    clamp(100px, 10vw, 150px)/1 Georgia,
+    serif;
+  color: #fff1d9;
   text-shadow:
-    2px 2px #251525,
-    4px 4px #8e6840,
-    18px 20px 26px #0008;
+    2px 1px #665078,
+    4px 3px #291c37,
+    8px 9px 0 #100a1d66;
+  transform: translateZ(25px);
+}
+.dream-page .dream-chapter-stage-plinth {
+  position: absolute;
+  inset: auto 6% 21px 9%;
+  height: 20px;
+  border: 1px solid #a98c64;
+  border-bottom: 7px solid #4d3a35;
+  background: #bfa682;
+  transform: rotate(-2deg) skewX(-20deg);
+  box-shadow: 10px 16px 20px #0006;
+}
+.dream-page .dream-chapter-stage-controls {
+  grid-area: controls;
+  min-width: 0;
+  align-self: start;
+}
+.dream-page .dream-chapter-stage-sheet {
+  grid-area: copy;
+  position: relative;
+  min-width: 0;
+  padding: 40px clamp(24px, 4vw, 52px) 40px 12px;
 }
 .dream-page .dream-chapter-stage-copy {
-  position: relative;
   min-width: 0;
 }
 .dream-page .dream-chapter-stage-case {
-  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 18px;
   color: var(--stage-gold);
   font:
-    14px/1.5 Georgia,
+    13px/1.5 Georgia,
     serif;
   letter-spacing: 0.2em;
+}
+.dream-page .dream-chapter-stage-case::after {
+  content: "";
+  height: 1px;
+  width: 48px;
+  background: #a38257;
 }
 .dream-page .dream-chapter-stage-copy h3 {
   margin: 0;
   color: var(--stage-ink);
-  font-size: clamp(36px, 5vw, 64px);
-  line-height: 1.35;
-  letter-spacing: 0.08em;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: clamp(36px, 4.4vw, 64px);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
   overflow-wrap: anywhere;
 }
 .dream-page .dream-chapter-stage-lead {
-  margin: 16px 0 22px;
+  margin: 20px 0 26px;
   max-width: 26em;
+  min-height: 3.8em;
   font-size: 16px;
   line-height: 1.9;
   color: #f0deca;
@@ -117,21 +183,62 @@
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
+  gap: 32px;
   min-height: 48px;
-  padding: 8px 18px;
-  border: 1px solid var(--stage-gold);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--stage-gold);
   color: var(--stage-ink);
-  background: #382435;
   text-decoration: none;
   font-size: 16px;
+}
+.dream-page .dream-chapter-stage-enter span {
+  color: var(--stage-gold);
+  font-size: 24px;
+}
+.dream-page .dream-chapter-stage-chapters {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  padding: 0 20px;
+  gap: 5px;
+}
+.dream-page .dream-chapter-stage-chapters button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 86px;
+  padding: 13px 4px 12px;
+  border: 1px solid #8b7455;
+  border-top: 0;
+  color: #ead9be;
+  background: linear-gradient(90deg, #302535, #473442);
+  box-shadow: 0 4px 0 #0c0912;
+  cursor: pointer;
+}
+.dream-page .dream-chapter-stage-chapters button[aria-pressed="true"] {
+  color: #302339;
+  background: #ebddc1;
+  box-shadow: 0 4px 0 #ac926b;
+}
+.dream-page .dream-chapter-stage-chapters span {
+  font:
+    24px/1 Georgia,
+    serif;
+}
+.dream-page .dream-chapter-stage-chapters b {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+  overflow-wrap: anywhere;
 }
 .dream-page .dream-chapter-stage-console {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) 48px;
   align-items: center;
   gap: 18px;
-  padding: 18px 24px;
+  padding: 16px 24px;
 }
 .dream-page .dream-chapter-stage-console button {
   min-height: 48px;
@@ -139,7 +246,7 @@
   padding: 0;
   font-size: 24px;
   color: var(--stage-ink);
-  border: 1px solid #a38257;
+  border: 1px solid #8b7455;
   background: #302335;
   cursor: pointer;
 }
@@ -150,14 +257,14 @@
 .dream-page .dream-chapter-stage-slider {
   display: block;
   min-width: 0;
-  color: #f0deca;
-  font-size: 14px;
 }
-.dream-page .dream-chapter-stage-slider > span:first-child {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+.dream-page .dream-chapter-stage-range-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .dream-page .dream-chapter-stage-slider input {
   display: block;
@@ -167,73 +274,142 @@
   accent-color: #e5c185;
   cursor: ew-resize;
 }
-.dream-page .dream-chapter-stage-ticks {
-  display: flex;
-  justify-content: space-between;
-  padding-inline: 4px;
-  color: #e5c185;
-}
-.dream-page .dream-chapter-stage-ticks i {
-  font:
-    12px/1 Georgia,
-    serif;
-}
 .dream-page .dream-chapter-stage :is(a, button, input):focus-visible {
   outline: 3px solid #ffedbe;
   outline-offset: 4px;
+  z-index: 1;
+}
+@media (hover: hover) {
+  .dream-page .dream-chapter-stage-chapters button:hover {
+    border-color: #ffe3b7;
+  }
+  .dream-page .dream-chapter-stage-enter:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+  }
 }
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]):not([data-world-effects="static"]):not(
       [data-world-effects="saver"]
     ):not([data-motion-enabled="false"])
-    .dream-chapter-stage[data-operated="true"]
-    .dream-chapter-stage-sheet {
-    animation: dream-chapter-stage-turn 560ms cubic-bezier(0.18, 0.7, 0.22, 1) both;
-  }
-  html:not([data-world-effects="economy"]):not([data-world-effects="static"]):not(
-      [data-world-effects="saver"]
-    ):not([data-motion-enabled="false"])
-    .dream-chapter-stage-wings
-    > span {
-    transition:
-      transform 560ms cubic-bezier(0.18, 0.7, 0.22, 1),
-      opacity 280ms;
+    .dream-chapter-stage[data-operated="true"] {
+    & .dream-chapter-stage-wings > span {
+      animation: dream-stage-unfold 680ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+      animation-delay: calc(var(--layer) * 24ms);
+    }
+    & .dream-chapter-stage-door i {
+      animation: dream-stage-door-left 760ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+    }
+    & .dream-chapter-stage-door i + i {
+      animation-name: dream-stage-door-right;
+    }
+    & .dream-chapter-stage-numeral {
+      animation: dream-stage-number 620ms ease-out both;
+    }
   }
 }
-@keyframes dream-chapter-stage-turn {
+@keyframes dream-stage-unfold {
   from {
-    opacity: 0.3;
-    transform: translateX(calc(var(--stage-direction) * 32px))
-      rotateY(calc(var(--stage-direction) * -12deg));
+    transform: translateX(calc(var(--stage-direction) * 22px)) translateZ(calc(var(--layer) * -8px))
+      rotateY(calc(var(--stage-direction) * 18deg));
+  }
+  to {
+    transform: translateZ(calc(var(--layer) * -19px));
+  }
+}
+@keyframes dream-stage-door-left {
+  from {
+    transform: rotateY(0);
+  }
+  to {
+    transform: rotateY(-70deg);
+  }
+}
+@keyframes dream-stage-door-right {
+  from {
+    transform: rotateY(0);
+  }
+  to {
+    transform: rotateY(70deg);
+  }
+}
+@keyframes dream-stage-number {
+  from {
+    opacity: 0;
+    transform: translateZ(-35px) translateY(12px);
   }
   to {
     opacity: 1;
-    transform: none;
+    transform: translateZ(25px);
   }
 }
-@media (max-width: 600px) {
-  .dream-page .dream-chapter-stage-sheet {
+@media (max-width: 700px) {
+  .dream-page .dream-chapter-stage-scene {
     grid-template-columns: 1fr;
-    min-height: 360px;
-    padding: 28px 22px 44px;
-    gap: 0;
+    grid-template-areas: "theatre" "controls" "copy";
+  }
+  .dream-page .dream-chapter-stage-theatre {
+    width: min(100%, 350px);
+    height: 290px;
+    margin-inline: auto;
+  }
+  .dream-page .dream-chapter-stage-corridor {
+    inset: 22px 13% 30px;
+  }
+  .dream-page .dream-chapter-stage-wings > span {
+    inset: calc(var(--layer) * 10px) calc(var(--layer) * 12px) calc(var(--layer) * 6px);
+    border-width: 12px;
+  }
+  .dream-page .dream-chapter-stage-wings b {
+    left: -9px;
+    font-size: 9px;
+  }
+  .dream-page .dream-chapter-stage-moon {
+    width: 42px;
+    height: 42px;
+    left: calc(50% - 21px);
   }
   .dream-page .dream-chapter-stage-numeral {
-    position: absolute;
-    right: 14px;
-    top: 0;
-    font-size: 200px;
-    opacity: 0.14;
+    font-size: 100px;
+  }
+  .dream-page .dream-chapter-stage-plinth {
+    bottom: 16px;
+    height: 16px;
+  }
+  .dream-page .dream-chapter-stage-sheet {
+    padding: 24px 26px 28px;
+    border-top: 1px solid #a3825766;
+  }
+  .dream-page .dream-chapter-stage-case {
+    margin-bottom: 10px;
   }
   .dream-page .dream-chapter-stage-copy h3 {
-    font-size: 42px;
+    font-size: 40px;
   }
   .dream-page .dream-chapter-stage-lead {
-    min-height: 4em;
+    margin-block: 14px 14px;
+  }
+  .dream-page .dream-chapter-stage-chapters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+    padding: 0 14px;
+  }
+  .dream-page .dream-chapter-stage-chapters button {
+    min-height: 52px;
+    flex-direction: row;
+    justify-content: center;
+    gap: 9px;
+    padding: 10px 4px;
+  }
+  .dream-page .dream-chapter-stage-chapters button:nth-child(n + 4) {
+    border-top: 1px solid #8b7455;
+  }
+  .dream-page .dream-chapter-stage-chapters span {
+    font-size: 21px;
   }
   .dream-page .dream-chapter-stage-console {
     grid-template-columns: 44px minmax(0, 1fr) 44px;
-    padding: 16px 12px;
+    padding: 8px 14px;
     gap: 10px;
   }
   .dream-page .dream-chapter-stage-console button {
@@ -241,11 +417,18 @@
   }
 }
 @media (forced-colors: active) {
-  .dream-page .dream-chapter-stage-wings,
-  .dream-page .dream-chapter-stage-numeral {
+  .dream-page .dream-chapter-stage-theatre {
     display: none;
   }
-  .dream-page .dream-chapter-stage-sheet {
+  .dream-page .dream-chapter-stage-scene {
     grid-template-columns: 1fr;
+    grid-template-areas: "controls" "copy";
+  }
+  .dream-page .dream-chapter-stage-sheet {
+    padding: 24px;
+  }
+  .dream-page .dream-chapter-stage-chapters button[aria-pressed="true"] {
+    outline: 3px solid Highlight;
+    outline-offset: -4px;
   }
 }
