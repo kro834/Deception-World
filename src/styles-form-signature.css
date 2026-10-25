@@ -2245,3 +2245,23 @@ html[data-family="dossier"]
   > figure[data-form-theme="custom"] {
   border-color: var(--signature-light);
 }
+
+/* Attribute groups (e.g. Over Zeztz Custom's four dream attributes). */
+.form-pickup-sections .form-pickup-group {
+  grid-column: 1 / -1;
+  margin: 1.4em 0 0.2em;
+  padding: 0.35em 0 0.35em 0.75em;
+  border-left: 4px solid var(--group-tone);
+  color: var(--group-tone) !important;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--group-tone) 45%, transparent);
+}
+.form-pickup-sections .is-grouped {
+  border-left: 3px solid var(--group-tone) !important;
+  padding-left: 0.85em;
+}
+.form-pickup-sections .is-grouped h4 {
+  margin: 0 0 0.3em;
+  color: color-mix(in srgb, var(--group-tone) 75%, white) !important;
+}

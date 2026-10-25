@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
@@ -37,7 +37,8 @@ export type RiderForm = {
   quote?: string;
   overview?: string[];
   stats?: { dt: string; dd: string }[];
-  abilities?: { name: string; body: string }[];
+  /** group/tone render a coloured attribute heading before each new group. */
+  abilities?: { name: string; body: string; group?: string; tone?: string }[];
   arsenal?: { name: string; body: string }[];
   finishers?: { name: string; body: string }[];
   extraForms?: { img: string; pos: string; name: string; sub?: string; theme?: FormTheme }[];
@@ -428,3 +429,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   <div>
                     {overview.map((paragraph) => (
                       <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+              {stats.length ? (
+                <dl className="form-pickup-stats">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import { useWorldMode } from "./use-world-mode";
@@ -37,7 +37,8 @@ export type RiderForm = {
   quote?: string;
   overview?: string[];
   stats?: { dt: string; dd: string }[];
-  abilities?: { name: string; body: string }[];
+  /** group/tone render a coloured attribute heading before each new group. */
+  abilities?: { name: string; body: string; group?: string; tone?: string }[];
   arsenal?: { name: string; body: string }[];
   finishers?: { name: string; body: string }[];
   extraForms?: { img: string; pos: string; name: string; sub?: string; theme?: FormTheme }[];
@@ -445,13 +446,32 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
               <div className="form-pickup-sections">
                 {abilities.length ? (
                   <section className="is-ability" aria-label="能力">
-                    {abilities.map((a) => (
-                      <div key={a.name}>
-                        <h3>
-                          <DisplayName value={a.name} />
-                        </h3>
-                        <p>{a.body}</p>
-                      </div>
+                    {abilities.map((a, i) => (
+                      <Fragment key={a.name}>
+                        {a.group && a.group !== abilities[i - 1]?.group ? (
+                          <h3
+                            className="form-pickup-group"
+                            style={{ "--group-tone": a.tone } as CSSProperties}
+                          >
+                            {a.group}
+                          </h3>
+                        ) : null}
+                        <div
+                          className={a.group ? "is-grouped" : undefined}
+                          style={a.tone ? ({ "--group-tone": a.tone } as CSSProperties) : undefined}
+                        >
+                          {a.group ? (
+                            <h4>
+                              <DisplayName value={a.name} />
+                            </h4>
+                          ) : (
+                            <h3>
+                              <DisplayName value={a.name} />
+                            </h3>
+                          )}
+                          <p>{a.body}</p>
+                        </div>
+                      </Fragment>
                     ))}
                   </section>
                 ) : null}

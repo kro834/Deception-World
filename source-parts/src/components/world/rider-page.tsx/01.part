@@ -32,7 +32,7 @@ type RiderDossierForm = {
   theme?: FormTheme;
   recordImg?: string;
   stats?: { dt: string; dd: string }[];
-  abilities?: { name: string; body: string }[];
+  abilities?: { name: string; body: string; group?: string; tone?: string }[];
   arsenal?: { name: string; body: string }[];
   finishers?: { name: string; body: string }[];
   weaponGallery?: { img: string; pos?: string; name: string; label: string }[];
@@ -386,3 +386,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         kicker: "人物と判断基準",
         title: "軽口を絶やさず、共存できるかを見極める。",
         body: [
+          "明るく親しみやすく、冗談や軽口で場を動かす一方、意思と理性を不可逆的に失った災害は、過去の善性にかかわらず排除する。外見や出自に惑わされず、共存できるかどうかで判断する。",
+        ],
+      },
+      {
