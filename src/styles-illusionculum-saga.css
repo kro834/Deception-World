@@ -3019,3 +3019,94 @@ html:not([data-world-effects="economy"])
     mask-image: none;
   }
 }
+
+/* ================================================================
+   2026-10-25 polish pass (「洗練させて」)
+   ================================================================ */
+
+/* Specs: every tile reads label, then value, from the top, so a row's
+   values share one line whatever wraps; the headline row keeps its larger
+   figures and bright bar, the second row the same bar, quieter. */
+.rxs-page.rxs-page.ics-page .ics-specs > div {
+  align-content: start;
+  gap: clamp(14px, 1.8vw, 26px);
+  min-height: 0;
+  padding: clamp(16px, 1.8vw, 24px) clamp(16px, 1.9vw, 24px) clamp(20px, 2.2vw, 28px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) {
+  min-height: 0;
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs dd > b {
+  overflow-wrap: normal;
+}
+
+.rxs-page.rxs-page.ics-page .ics-spec-part {
+  white-space: nowrap;
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs > div[data-long] dd > b {
+  font-size: clamp(18px, 1.75vw, 25px);
+}
+
+.rxs-page.rxs-page.ics-page .ics-specs > div:not([data-wide]):nth-child(n + 5) dd::after {
+  display: block;
+  height: 3px;
+  margin-top: 10px;
+  content: "";
+  background: repeating-linear-gradient(90deg, var(--ics-ice) 0 6px, transparent 6px 9px);
+  opacity: 0.28;
+}
+
+.rxs-page.rxs-page.ics-page .ics-spec-sub > span {
+  color: var(--ics-ice-hi);
+}
+
+/* Comparison tables on phones: a soft lit edge says the table goes on to
+   the right; it lifts once the last column is reached. */
+@media (max-width: 640px) {
+  .rxs-page.rxs-page.ics-page .ics-table-scroll {
+    background:
+      linear-gradient(270deg, rgb(7 9 20) 45%, rgb(7 9 20 / 0%)) right center / 40px 100% no-repeat local,
+      radial-gradient(farthest-side at 100% 50%, rgb(166 230 255 / 26%), transparent) right center / 16px 100% no-repeat scroll,
+      linear-gradient(160deg, rgb(18 24 46 / 94%), rgb(6 8 18 / 98%));
+  }
+}
+
+/* The mobile hero's ghost name: kept at the frame's edges, faded where it
+   would cross the figure's waist. */
+@media (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-hero .ics-mark {
+    -webkit-text-stroke-color: rgb(166 230 255 / 18%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 36%, transparent 64%, #000 84%, #000);
+    mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 36%, transparent 64%, #000 84%, #000);
+  }
+}
+
+/* 専用武装 with art: the copy centres on the picture beside it, and tablets
+   keep the two side by side instead of a half-width picture over the text. */
+@media (min-width: 641px) {
+  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail {
+    align-items: center;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail:nth-child(even) {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail:nth-child(even) .ics-detail {
+    order: 2;
+  }
+}
+
+/* The page's other form rows stay quieter than the chosen one, but legible. */
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self]:not([data-current]) :is(th, td) {
+  opacity: 0.74;
+}

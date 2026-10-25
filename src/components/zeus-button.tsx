@@ -237,6 +237,9 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".library-intro-copy > p",
   // Illusionculum's hero call chips (04 ILLUSIONCULUM! at 1024x768).
   ".ics-calls > li",
+  // 2026-10-25 polish: its spec values and evaluation lines (390, mid-scroll).
+  ".ics-specs dd",
+  ".ics-evaluation p",
 ].join(",");
 /* Where no spot is clear of words on the Rexonance page (a full-width
    instrument table, the chapter map's rows), the button steps aside in place

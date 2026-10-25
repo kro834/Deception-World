@@ -479,10 +479,21 @@ export function IllusionculumSaga() {
         </h2>
         <dl className="ics-specs rxs-reveal" aria-labelledby="ics-specs-title">
           {specs.map((row) => (
-            <div key={row.dt} data-wide={row.sub.length ? "true" : undefined}>
+            <div
+              key={row.dt}
+              data-wide={row.sub.length ? "true" : undefined}
+              data-long={!row.sub.length && row.dd.length > 11 ? "true" : undefined}
+            >
               <dt>{row.dt}</dt>
               <dd>
-                <b>{row.dd}</b>
+                {/* The value breaks only after its ／, never mid-figure. */}
+                <b>
+                  {row.dd.split(/(?<=／)/).map((part) => (
+                    <span key={part} className="ics-spec-part">
+                      {part}
+                    </span>
+                  ))}
+                </b>
                 {row.sub.length ? (
                   <span className="ics-spec-sub">
                     {row.sub.map((item) => (
