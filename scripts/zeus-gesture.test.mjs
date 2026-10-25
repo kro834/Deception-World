@@ -273,9 +273,9 @@ test("compact-menu geometry changes reconcile without a scroll timer and disconn
   const settledReads = ui.reads();
   ui.mutateRoot("data-ipad-menu-scrolled", "true");
   assert.equal(ui.reads(), settledReads, "identical effective footprints do not repeat work");
-  assert.equal(ui.observers.length, 1);
+  assert.equal(ui.observers.length, 2, "compact-menu and rail locks have independent observers");
   ui.unmount();
-  assert.equal(ui.observers[0].targets.size, 0);
+  assert.ok(ui.observers.every((observer) => observer.targets.size === 0));
   ui.mutateRoot("data-viewport-chrome", "dream");
   assert.equal(ui.reads(), settledReads, "unmounted observers cannot reposition the button");
 });

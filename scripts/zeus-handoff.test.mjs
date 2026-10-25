@@ -36,6 +36,8 @@ function mount({ reduced = false, control = null, animations = null, page = fals
     delays = new Map(),
     saved = [];
   let serial = 0;
+  let controlScans = 0;
+  const observers = new Set();
   class Element extends EventTarget {
     dataset = {};
     attributes = new Map();
@@ -114,7 +116,11 @@ function mount({ reduced = false, control = null, animations = null, page = fals
     documentElement: new Element(),
     scrollingElement: { scrollTop: 0, scrollHeight: 4000 },
     // Only the critical controls answer; the words and art lists are empty.
-    querySelectorAll: (selector) => (selector.includes(".episode-pickup-plus") ? controls : []),
+    querySelectorAll: (selector) => {
+      if (!selector.includes(".episode-pickup-plus")) return [];
+      controlScans += 1;
+      return controls;
+    },
     // The Rexonance page, where a crowded settle steps the button aside.
     querySelector: (selector) => (page && selector === ".rxs-rexonance-page" ? {} : null),
     activeElement: null,
@@ -135,8 +141,17 @@ function mount({ reduced = false, control = null, animations = null, page = fals
     HTMLElement: Element,
     HTMLButtonElement: Element,
     MutationObserver: class {
-      observe() {}
-      disconnect() {}
+      constructor(callback) {
+        this.callback = callback;
+      }
+      observe(target, options) {
+        this.target = target;
+        this.options = options;
+        observers.add(this);
+      }
+      disconnect() {
+        observers.delete(this);
+      }
     },
     require(name) {
       if (name === "react")
@@ -193,6 +208,18 @@ function mount({ reduced = false, control = null, animations = null, page = fals
     delays,
     center,
     handlers: element.props,
+    controlScans: () => controlScans,
+    rootAttribute(name, value) {
+      if (value === null) doc.documentElement.attributes.delete(name);
+      else doc.documentElement.setAttribute(name, value);
+      for (const observer of observers) {
+        if (
+          observer.target === doc.documentElement &&
+          observer.options.attributeFilter?.includes(name)
+        )
+          observer.callback([{ type: "attributes", attributeName: name }]);
+      }
+    },
     flushFrames: () => flush(frames),
     flushTimers: () => flush(timers),
     // Controls under the spots (each a full-width band under 45% of the screen).
@@ -471,4 +498,62 @@ test("off the Rexonance page, or with keyboard focus, it does not step aside", (
     source,
     /if \(report && !droppedHere\.current\) report\.crowded = true;\s*return fallback\?\.candidate \?\? candidates\[0\] \?\? preferred;/,
   );
+});
+
+test("rail locks defer collision scans and coalesce one placement when released", () => {
+  const ui = mount();
+  const before = ui.controlScans();
+  ui.rootAttribute("data-rail-lock", "true");
+  ui.settle();
+  ui.settle();
+  assert.equal(ui.controlScans(), before, "settled rail work must not scan controls");
+  ui.rootAttribute("data-rail-lock", null);
+  assert.equal(ui.frames.size, 1, "release schedules one reconciliation");
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before + 1);
+  ui.rootAttribute("data-rail-lock", null);
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before + 1, "no duplicate release placement");
+  ui.unmount();
+});
+
+test("a rail acquired after frame reservation still defers, and suspension cancels pending work", () => {
+  const ui = mount();
+  const before = ui.controlScans();
+  ui.win.dispatchEvent(new Event("scroll"));
+  ui.flushTimers();
+  ui.rootAttribute("data-rail-lock", "true");
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before);
+  ui.win.dispatchEvent(new Event("pagehide"));
+  ui.rootAttribute("data-rail-lock", null);
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before, "a suspended page does not place on unlock");
+  ui.win.dispatchEvent(new Event("pageshow"));
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before + 1, "resume reconciles once");
+  ui.rootAttribute("data-rail-lock", "true");
+  ui.settle();
+  ui.unmount();
+  ui.rootAttribute("data-rail-lock", null);
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before + 1, "unmount disconnects the rail observer");
+});
+
+test("hidden-page rail release stays idle until visibility resumes", () => {
+  const ui = mount();
+  const before = ui.controlScans();
+  ui.rootAttribute("data-rail-lock", "true");
+  ui.settle();
+  ui.doc.hidden = true;
+  ui.doc.dispatchEvent(new Event("visibilitychange"));
+  ui.rootAttribute("data-rail-lock", null);
+  ui.flushTimers();
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before);
+  ui.doc.hidden = false;
+  ui.doc.dispatchEvent(new Event("visibilitychange"));
+  ui.flushFrames();
+  assert.equal(ui.controlScans(), before + 1);
+  ui.unmount();
 });
