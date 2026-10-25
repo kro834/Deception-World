@@ -1,0 +1,427 @@
+/* World: a film programme with a full-width manuscript between its visual
+   stages. Scoped to this route; native rails, art crops and gesture code stay
+   owned by their original components. No continuous motion or new assets. */
+/* A scroll-timeline lift changed the tab grid's hit boxes as WebKit scrolled
+   a tapped tab into view. Keep the interactive stage grounded; the portrait,
+   lens and decorative chapter entrances retain their own motion. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  #riders
+  > .rider-console {
+  animation: none;
+  scale: none;
+  translate: none;
+  transform: none;
+}
+html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition {
+  --astra-gold: #d9bc80;
+  --astra-rule: rgb(217 188 128 / 32%);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .film-hero-identity {
+  border-bottom-color: var(--astra-rule);
+  padding-bottom: clamp(22px, 3vw, 42px);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .film-hero-identity::after {
+  width: 38%;
+  background: linear-gradient(90deg, #d9bc80, transparent);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .hero-copy {
+  border-left-color: var(--astra-gold);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .hero-copy
+  h1 {
+  letter-spacing: 0.045em;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-frame {
+  border-color: rgb(217 188 128 / 55%);
+  box-shadow:
+    0 0 0 6px #06090e,
+    0 0 0 7px rgb(217 188 128 / 28%),
+    0 30px 70px -25px #000;
+}
+/* A quiet, warm page is a deliberate break from the illuminated stages.
+   Existing reveal spans inherit the reading colour, including their final
+   opacity. The paragraphs and their order are unchanged. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout {
+  position: relative;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 6vw, 100px);
+  padding: clamp(28px, 5vw, 80px);
+  border: 0;
+  border-top: 3px solid #d9bc80;
+  border-radius: 0;
+  background: #e7e2d6;
+  color: #202725;
+  box-shadow: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout
+  > .story-heading
+  h2 {
+  color: #172321;
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+  font-size: clamp(32px, 3.5vw, 58px);
+  line-height: 1.55;
+  letter-spacing: 0.06em;
+  text-shadow: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout
+  > .story-copy {
+  gap: 1.65em;
+  padding-left: 0;
+  border: 0;
+  color: #303832;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout
+  > .story-copy
+  > p {
+  color: #303832;
+  font-size: clamp(15px, 1.22vw, 17px);
+  line-height: 2.15;
+  letter-spacing: 0.035em;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout
+  > .story-copy
+  > .story-lead-sequel {
+  padding: 0 0 16px;
+  border: 0;
+  border-bottom: 1px solid #aaa48f;
+  border-radius: 0;
+  background: transparent;
+  color: #303832;
+  font-size: 13px;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout
+  > .story-copy
+  > .story-lead-sequel
+  > span
+  + span {
+  color: #705829;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  #manager-archive {
+  margin-top: clamp(64px, 10vw, 150px);
+  padding-top: clamp(28px, 4vw, 58px);
+  border-top: 1px solid var(--astra-rule);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  #manager-archive
+  .threat-copy
+  h3 {
+  font-size: clamp(32px, 4vw, 68px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  #manager-archive
+  .signal {
+  border-radius: 0;
+  border-color: rgb(217 188 128 / 25%);
+  box-shadow: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  #manager-archive
+  .signal
+  > b {
+  padding-block: 12px;
+  letter-spacing: 0.1em;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-detail {
+  border-radius: 0;
+  border-color: var(--astra-rule);
+  background: #080c12;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-copy-block
+  > .rider-person {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--astra-rule);
+  line-height: 1.8;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #riders
+  .rider-copy-block
+  > .rider-description {
+  line-height: 2.1;
+  max-width: 28em;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-directory {
+  padding-block: 24px;
+  border-color: var(--astra-rule);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-directory-controls
+  button {
+  border-radius: 0;
+  background: transparent;
+  border-color: #54616a;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-directory-controls
+  button[aria-pressed="true"] {
+  background: #d9bc80;
+  border-color: #d9bc80;
+  color: #12191e;
+  box-shadow: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person {
+  border: 0;
+  border-top: 1px solid var(--astra-rule);
+  border-radius: 0;
+  background: #0a1017;
+  box-shadow: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person::before {
+  content: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-index {
+  background: #d9bc80;
+  color: #171b1d;
+  clip-path: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-open {
+  background: transparent;
+  border-top-color: var(--astra-rule);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster
+  .wa-person
+  .wa-profile
+  summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #records
+  .episode-card-surface {
+  border-radius: 0;
+  border-color: var(--astra-rule);
+  box-shadow: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #records
+  .episode-card-copy {
+  padding-block: 24px;
+}
+@media (min-width: 1100px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout
+    > .story-heading {
+    padding-top: 12px;
+  }
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-roster {
+    column-gap: clamp(24px, 3vw, 48px);
+    --wa-row-gap: 36px;
+    row-gap: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 28px 22px 34px;
+    gap: 28px;
+  }
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout
+    > .story-heading {
+    position: static;
+  }
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout
+    > .story-heading
+    h2 {
+    font-size: clamp(27px, 6.8vw, 40px);
+    line-height: 1.6;
+  }
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout
+    > .story-copy
+    > p {
+    font-size: 15px;
+    line-height: 2.05;
+  }
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster
+    .wa-directory-controls {
+    gap: 8px;
+  }
+}
+@media (max-width: 359px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout {
+    padding-inline: 18px;
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout
+    > .story-heading
+    h2,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    > .story-layout
+    > .story-copy
+    > p {
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .story-layout
+  .story-heading
+  h2
+  em {
+  color: #765724;
+  -webkit-text-fill-color: currentColor;
+  background: none;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > #manager-archive {
+  background: #0a0e14;
+  border-color: rgb(217 188 128 / 32%);
+  box-shadow: none;
+}

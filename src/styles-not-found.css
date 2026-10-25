@@ -1129,3 +1129,29 @@
     color: LinkText;
   }
 }
+
+/* Reading edition: a clear recovery page, with room for its complete explanation. */
+.app-not-found.app-not-found > h1 {
+  line-height: 1.6;
+  text-wrap: balance;
+}
+.app-not-found.app-not-found > #not-found-description {
+  color: #d0dce6;
+  font-size: 16px;
+  line-height: 1.95;
+  max-width: 34em;
+}
+.app-not-found.app-not-found > nav.recovery-tiles > a {
+  min-height: 76px;
+  padding-block: 20px;
+}
+@media (max-width: 380px) {
+  .app-not-found.app-not-found > #not-found-description {
+    font-size: 15px;
+  }
+}
+@media (forced-colors: active) {
+  .app-not-found.app-not-found > #not-found-description {
+    color: CanvasText;
+  }
+}

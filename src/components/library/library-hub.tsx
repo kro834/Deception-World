@@ -145,12 +145,24 @@ export function LibraryHub({
       }}
     >
       <header className="library-hub-heading">
-        <p className="library-eyebrow">MY LIBRARY</p>
         <h2 id="library-hub-title" ref={hubTitleRef} tabIndex={-1}>
           マイライブラリー
         </h2>
         <p>しおり・閲覧履歴・検索履歴は、このブラウザーにだけ保存されます。</p>
       </header>
+      {ready && now !== null && !empty ? (
+        <nav className="library-shelf-overview" aria-label="マイライブラリー内の移動">
+          <a href="#library-shelf-title">
+            しおり <b>{bookmarks.length}</b>
+          </a>
+          <a href="#library-history-title">
+            閲覧履歴 <b>{saved.recent.length}</b>
+          </a>
+          <a href="#library-searches-title">
+            最近の検索 <b>{searches.length}</b>
+          </a>
+        </nav>
+      ) : null}
       {error ? <p className="library-error">{error}</p> : null}
       {!ready || now === null ? (
         <p className="library-hub-loading" role="status">
@@ -159,9 +171,7 @@ export function LibraryHub({
       ) : (
         <div className="library-hub-grid">
           <article className="library-continue" aria-labelledby="library-continue-title">
-            <h3 id="library-continue-title">
-              <span>CONTINUE</span>続きから
-            </h3>
+            <h3 id="library-continue-title">続きから</h3>
             {resume ? (
               <>
                 <RecordArtFrame
@@ -193,20 +203,24 @@ export function LibraryHub({
                 </div>
               </>
             ) : (
-              <p className="library-hub-empty">
-                {error
-                  ? "保存データを確認できないため、続きから読む資料を表示できません。"
-                  : "人物資料や章のページを開くと、ここから続きを読めます。"}
-              </p>
+              <div className="library-start-reading">
+                <p className="library-hub-empty">
+                  {error
+                    ? "保存データを確認できないため、続きから読む資料を表示できません。"
+                    : "人物資料や章のページを開くと、ここから続きを読めます。"}
+                </p>
+                <a href="#library-browser">
+                  資料を探す <span aria-hidden="true">↗</span>
+                </a>
+              </div>
             )}
           </article>
 
           <section className="library-shelf" aria-labelledby="library-shelf-title">
             <div className="library-hub-subhead">
               <h3 id="library-shelf-title" ref={shelfTitleRef} tabIndex={-1}>
-                <span>SAVED</span>しおり
+                しおり
               </h3>
-              <b>{bookmarks.length}</b>
             </div>
             {bookmarks.length ? (
               <ul className="library-rows" id="library-saved-list">
@@ -301,10 +315,7 @@ export function LibraryHub({
 
           <section className="library-history" aria-labelledby="library-history-title">
             <div className="library-hub-subhead">
-              <h3 id="library-history-title">
-                <span>HISTORY</span>閲覧履歴
-              </h3>
-              <b>{saved.recent.length}</b>
+              <h3 id="library-history-title">閲覧履歴</h3>
             </div>
             {groups.length ? (
               groups.map((group) => (
@@ -356,10 +367,7 @@ export function LibraryHub({
 
           <section className="library-searches" aria-labelledby="library-searches-title">
             <div className="library-hub-subhead">
-              <h3 id="library-searches-title">
-                <span>SEARCHES</span>最近の検索
-              </h3>
-              <b>{searches.length}</b>
+              <h3 id="library-searches-title">最近の検索</h3>
             </div>
             {searches.length ? (
               <ul className="library-search-chips">

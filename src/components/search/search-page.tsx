@@ -258,7 +258,11 @@ export function SearchPage({
   const visibleCount = options.filter((option) => option.kind === "result").length;
 
   return (
-    <div className="world search-page" data-search-page="true">
+    <div
+      className="world search-page search-observatory"
+      data-search-page="true"
+      data-search-mode={trimmed ? "find" : "browse"}
+    >
       <header className="search-topbar">
         <GuardedLink to="/world" assets={[]} className="search-brand">
           DECEPTION WORLD<span>RECORD INDEX</span>
@@ -266,178 +270,177 @@ export function SearchPage({
         <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
       </header>
       <main className="search-main">
-        <section className="search-intro" aria-labelledby="search-title">
-          <div>
-            <p className="search-eyebrow">THE RECORDS / CROSS-REFERENCE</p>
-            <h1 id="search-title">
-              記録の先へ。<span>資料検索</span>
-            </h1>
-            <p className="search-lede">
-              名前から、物語から、気になる言葉から。
-              <br />
-              散らばる記録をつなぎ、読みたい場所へ。
-            </p>
-          </div>
-          <div
-            className="search-index-mark"
-            aria-label={`${SEARCH_DOCUMENTS.length}件の公開資料を検索できます`}
-          >
-            <span>RECORDS</span>
-            <strong>{String(SEARCH_DOCUMENTS.length).padStart(3, "0")}</strong>
-            <span className="search-index-wide">ONE CONNECTED WORLD</span>
-          </div>
-        </section>
+        <div className="search-observatory-desk">
+          <section className="search-intro" aria-labelledby="search-title">
+            <div>
+              <p className="search-eyebrow">資料検索</p>
+              <h1 id="search-title">記録の先へ。</h1>
+              <p className="search-lede">
+                名前から、物語から、気になる言葉から。散らばる記録をつなぎ、読みたい場所へ。
+              </p>
+              <GuardedLink to="/library" assets={[]} className="search-library-door">
+                <span>
+                  資料室へ<span>しおり・最近読んだ資料</span>
+                </span>
+                <span aria-hidden="true">↗</span>
+              </GuardedLink>
+            </div>
+          </section>
 
-        <section className="search-workbench" aria-label="資料を絞り込む">
-          <form
-            className="search-form"
-            role="search"
-            action="/search"
-            method="get"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (composing || performance.now() - compositionEndedRef.current < 50) return;
-              if (draft.trim()) rememberSearch(draft);
-              flushQuery();
-              resultsRef.current?.focus({ preventScroll: true });
-              resultsRef.current?.scrollIntoView({ block: "start" });
-            }}
-          >
-            <label htmlFor="record-query">どの記録を探しますか？</label>
-            <div className="search-input-row">
-              <SearchGlyph />
-              <input
-                ref={inputRef}
-                id="record-query"
-                name="q"
-                type="search"
-                role="combobox"
-                aria-expanded={options.length > 0}
-                aria-controls={listboxId}
-                aria-autocomplete="list"
-                aria-activedescendant={activeOption?.id}
-                value={draft}
-                maxLength={120}
-                placeholder="人物名・ライダー名・用語を入力"
-                autoComplete="off"
-                autoCapitalize="off"
-                spellCheck={false}
-                enterKeyHint="search"
-                aria-describedby="record-query-help"
-                onChange={(event) => setDraft(event.target.value)}
-                onCompositionStart={() => setComposing(true)}
-                onCompositionEnd={(event) => {
-                  setComposing(false);
-                  compositionEndedRef.current = performance.now();
-                  setDraft(event.currentTarget.value);
-                }}
-                onKeyDown={onKeyDown}
-              />
-              {draft && (
-                <button
-                  className="search-clear"
-                  type="button"
-                  aria-label="検索語を消す"
-                  onClick={() => setQuery("")}
-                >
-                  ×
-                </button>
-              )}
-              <button className="search-submit" type="submit">
-                検索<span aria-hidden="true">↗</span>
-              </button>
-            </div>
-            {category !== "all" && <input type="hidden" name="category" value={category} />}
-            <p id="record-query-help">
-              ひらがな・カタカナ・ローマ字でも検索できます。複数の言葉はスペースで区切ってください。
-              <span className="search-key-hint">↑↓で選んでEnterで開く。Escで消去。</span>
-            </p>
-          </form>
-          {recent.length ? (
-            <div className="search-suggestions search-recent" aria-label="最近の検索">
-              <span>最近の検索</span>
-              {recent.map((term) => (
-                <div key={term} className="search-recent-term">
-                  <button type="button" onClick={() => setQuery(term)}>
-                    {term}
-                  </button>
+          <section className="search-workbench" aria-label="資料を絞り込む">
+            <form
+              className="search-form"
+              role="search"
+              action="/search"
+              method="get"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (composing || performance.now() - compositionEndedRef.current < 50) return;
+                if (draft.trim()) rememberSearch(draft);
+                flushQuery();
+                resultsRef.current?.focus({ preventScroll: true });
+                resultsRef.current?.scrollIntoView({ block: "start" });
+              }}
+            >
+              <label htmlFor="record-query">どの記録を探しますか？</label>
+              <div className="search-input-row">
+                <SearchGlyph />
+                <input
+                  ref={inputRef}
+                  id="record-query"
+                  name="q"
+                  type="search"
+                  role="combobox"
+                  aria-expanded={options.length > 0}
+                  aria-controls={listboxId}
+                  aria-autocomplete="list"
+                  aria-activedescendant={activeOption?.id}
+                  value={draft}
+                  maxLength={120}
+                  placeholder="人物名・ライダー名・用語を入力"
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  enterKeyHint="search"
+                  aria-describedby="record-query-help"
+                  onChange={(event) => setDraft(event.target.value)}
+                  onCompositionStart={() => setComposing(true)}
+                  onCompositionEnd={(event) => {
+                    setComposing(false);
+                    compositionEndedRef.current = performance.now();
+                    setDraft(event.currentTarget.value);
+                  }}
+                  onKeyDown={onKeyDown}
+                />
+                {draft && (
                   <button
+                    className="search-clear"
                     type="button"
-                    className="search-recent-remove"
-                    aria-label={`最近の検索から「${term}」を削除`}
-                    onClick={() => {
-                      const persisted = forgetSearch(term);
-                      setRecentNotice(
-                        persisted
-                          ? `最近の検索から「${term}」を削除しました。`
-                          : "この画面の履歴から削除しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
-                      );
-                      inputRef.current?.focus({ preventScroll: true });
-                    }}
+                    aria-label="検索語を消す"
+                    onClick={() => setQuery("")}
                   >
-                    <span aria-hidden="true">×</span>
+                    ×
                   </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                className="search-recent-clear"
-                onClick={() => {
-                  const persisted = clearRecentSearches();
-                  setRecentNotice(
-                    persisted
-                      ? "検索履歴を消去しました。"
-                      : "この画面の履歴を消去しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
-                  );
-                  inputRef.current?.focus({ preventScroll: true });
-                }}
-              >
-                履歴を消す
-              </button>
-            </div>
-          ) : (
-            <div className="search-suggestions" aria-label="検索のヒント">
-              <span>例えば</span>
-              {STARTING_QUERIES.map((term) => (
-                <button key={term} type="button" onClick={() => setQuery(term)}>
-                  {term}
-                  <span aria-hidden="true">↗</span>
+                )}
+                <button className="search-submit" type="submit">
+                  検索<span aria-hidden="true">↗</span>
+                </button>
+              </div>
+              {category !== "all" && <input type="hidden" name="category" value={category} />}
+              <p id="record-query-help">
+                ひらがな・カタカナ・ローマ字でも検索できます。複数の言葉はスペースで区切ってください。
+                <span className="search-key-hint">↑↓で選んでEnterで開く。Escで消去。</span>
+              </p>
+            </form>
+            {recent.length ? (
+              <div className="search-suggestions search-recent" aria-label="最近の検索">
+                <span>最近の検索</span>
+                {recent.map((term) => (
+                  <div key={term} className="search-recent-term">
+                    <button type="button" onClick={() => setQuery(term)}>
+                      {term}
+                    </button>
+                    <button
+                      type="button"
+                      className="search-recent-remove"
+                      aria-label={`最近の検索から「${term}」を削除`}
+                      onClick={() => {
+                        const persisted = forgetSearch(term);
+                        setRecentNotice(
+                          persisted
+                            ? `最近の検索から「${term}」を削除しました。`
+                            : "この画面の履歴から削除しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
+                        );
+                        inputRef.current?.focus({ preventScroll: true });
+                      }}
+                    >
+                      <span aria-hidden="true">×</span>
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="search-recent-clear"
+                  onClick={() => {
+                    const persisted = clearRecentSearches();
+                    setRecentNotice(
+                      persisted
+                        ? "検索履歴を消去しました。"
+                        : "この画面の履歴を消去しました。保存先を更新できないため、再読み込みすると戻る場合があります。",
+                    );
+                    inputRef.current?.focus({ preventScroll: true });
+                  }}
+                >
+                  履歴を消す
+                </button>
+              </div>
+            ) : (
+              <div className="search-suggestions" aria-label="検索のヒント">
+                <span>例えば</span>
+                {STARTING_QUERIES.map((term) => (
+                  <button key={term} type="button" onClick={() => setQuery(term)}>
+                    {term}
+                    <span aria-hidden="true">↗</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {recentNotice ? (
+              <p className="search-recent-notice" role="status">
+                {recentNotice}
+              </p>
+            ) : null}
+            <div className="search-categories" role="group" aria-label="資料の分類">
+              {SEARCH_CATEGORIES.filter(
+                (item) =>
+                  !trimmed || item.id === "all" || item.id === category || counts.has(item.id),
+              ).map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  aria-pressed={category === item.id}
+                  onClick={() => onCategoryChange(item.id)}
+                >
+                  {item.label}
+                  <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
                 </button>
               ))}
             </div>
-          )}
-          {recentNotice ? (
-            <p className="search-recent-notice" role="status">
-              {recentNotice}
-            </p>
-          ) : null}
-          <div className="search-categories" role="group" aria-label="資料の分類">
-            {SEARCH_CATEGORIES.map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                aria-pressed={category === item.id}
-                onClick={() => onCategoryChange(item.id)}
-              >
-                {item.label}
-                <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
-              </button>
-            ))}
-          </div>
-          {category !== "all" ? (
-            <div className="search-active-filter">
-              <span>分類で絞り込み中</span>
-              <button
-                type="button"
-                aria-label={`${selectedLabel}の絞り込みを解除`}
-                onClick={() => onCategoryChange("all")}
-              >
-                {selectedLabel}
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-          ) : null}
-        </section>
+            {category !== "all" ? (
+              <div className="search-active-filter">
+                <span>分類で絞り込み中</span>
+                <button
+                  type="button"
+                  aria-label={`${selectedLabel}の絞り込みを解除`}
+                  onClick={() => onCategoryChange("all")}
+                >
+                  {selectedLabel}
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+            ) : null}
+          </section>
+        </div>
 
         <section className="search-results" aria-labelledby="record-results-heading">
           <div className="search-results-heading">
@@ -459,6 +462,26 @@ export function SearchPage({
                   : "すべての検索結果を表示しています。"}
             </p>
           ) : null}
+          {groups.length > 1 ? (
+            <nav className="search-section-nav" aria-label="結果の分類へ移動">
+              {groups.map((group) => (
+                <a
+                  key={group.category}
+                  href={`#${listboxId}-${group.category}-label`}
+                  onClick={(event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                    event.preventDefault();
+                    const heading = document.getElementById(`${listboxId}-${group.category}-label`);
+                    heading?.focus({ preventScroll: true });
+                    heading?.scrollIntoView({ block: "start" });
+                  }}
+                >
+                  {categoryLabel(group.category)}
+                  <span aria-hidden="true">↓</span>
+                </a>
+              ))}
+            </nav>
+          ) : null}
           <div
             id={listboxId}
             role="listbox"
@@ -475,7 +498,7 @@ export function SearchPage({
                 data-category={group.category}
               >
                 <div className="search-group-head" role="presentation">
-                  <span id={`${listboxId}-${group.category}-label`}>
+                  <span id={`${listboxId}-${group.category}-label`} tabIndex={-1}>
                     {categoryLabel(group.category)}
                   </span>
                   <i aria-hidden="true">{categoryCode(group.category)}</i>
@@ -591,21 +614,23 @@ const ResultCard = memo(function ResultCard({
         art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
         title={document.title}
       />
-      <span className="search-result-meta">
-        <span>{categoryLabel(document.category)}</span>
-        {place ? <span>{place}</span> : null}
-      </span>
-      <span className="search-result-title" style={titleRunStyle(document.title)}>
-        <HighlightedName text={document.title} ranges={result.titleRanges} />
-      </span>
-      {result.via ? <span className="search-result-via">{result.via}</span> : null}
-      {result.section ? <span className="search-result-section">{result.section}</span> : null}
-      <span className="search-result-snippet">
-        <Highlighted text={result.snippet} ranges={result.snippetRanges} />
-      </span>
-      <span className="search-result-open">
-        {result.section ? "この章を読む" : result.hash ? "該当箇所を読む" : "資料を読む"}
-        <span aria-hidden="true">↗</span>
+      <span className="search-result-body">
+        <span className="search-result-meta">
+          <span>{categoryLabel(document.category)}</span>
+          {place ? <span>{place}</span> : null}
+        </span>
+        <span className="search-result-title" style={titleRunStyle(document.title)}>
+          <HighlightedName text={document.title} ranges={result.titleRanges} />
+        </span>
+        {result.via ? <span className="search-result-via">{result.via}</span> : null}
+        {result.section ? <span className="search-result-section">{result.section}</span> : null}
+        <span className="search-result-snippet">
+          <Highlighted text={result.snippet} ranges={result.snippetRanges} />
+        </span>
+        <span className="search-result-open">
+          {result.section ? "この章を読む" : result.hash ? "該当箇所を読む" : "資料を読む"}
+          <span aria-hidden="true">↗</span>
+        </span>
       </span>
     </ResultOption>
   );

@@ -5,6 +5,7 @@ import libraryCssUrl from "@/styles-library.css?url";
 import inquiryCssUrl from "@/styles-library-inquiry.css?url";
 import stageLibraryCssUrl from "@/styles-stage-library.css?url";
 import zenithLibraryCssUrl from "@/styles-library-zenith.css?url";
+import atelierLibraryCssUrl from "@/styles-library-atelier.css?url";
 import { getInquiryGuide } from "@/lib/inquiry-guides";
 import { validateLibraryBrowseSearch } from "@/lib/library-browse-state";
 
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/library")({
         { rel: "stylesheet", href: stageLibraryCssUrl },
         // ZENITH (2026-10-21): the brush-up on top of STAGE, same scope.
         { rel: "stylesheet", href: zenithLibraryCssUrl },
+        // Route-local editorial layout, after every shared index skin.
+        { rel: "stylesheet", href: atelierLibraryCssUrl },
       ],
     }),
 });

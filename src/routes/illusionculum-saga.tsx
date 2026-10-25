@@ -1,3 +1,4 @@
+import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { IllusionculumSaga } from "@/components/illusionculum-saga/illusionculum-saga";
 import {
@@ -65,6 +66,7 @@ export const Route = createFileRoute("/illusionculum-saga")({
       { rel: "stylesheet", href: assemblyMovieCssUrl },
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
+      { rel: "stylesheet", href: visualAstraCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

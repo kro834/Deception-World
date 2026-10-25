@@ -54,6 +54,8 @@ const original = [
   // Owner (2026-10-16): the new key visual's pink light trails, site-wide except the title.
   "../styles-saga-streamline.css?url",
   "@/styles-interaction-choreography.css?url",
+  // The requested Astra site-wide chrome uses one static, scoped sheet.
+  "../styles-site-astra.css?url",
   fonts.SITE_CORE_FONTS_URL,
   fonts.SITE_DISPLAY_FONTS_URL,
   "hud-fonts",

@@ -250,7 +250,8 @@ const ZEUS_AVOID_ART_SELECTOR = ".rxs-hero-visual img";
    rider files. Weighed as art, not stepped off as controls: on a phone the
    grid fills the screen's foot, and as controls they would block every spot
    and pin the button home on a tile; as art the least-covering spot wins. */
-const ZEUS_AVOID_TILE_SELECTOR = ".dossier-roster > li, #manager-archive .manager-slot-grid > .signal";
+const ZEUS_AVOID_TILE_SELECTOR =
+  ".dossier-roster > li, #manager-archive .manager-slot-grid > .signal";
 const ZEUS_DISPLAY_TEXT_SELECTOR = "strong, b";
 const ZEUS_DISPLAY_TEXT_MIN_PX = 24;
 // At the end of the page nothing more scrolls out from under the button, so
@@ -1552,14 +1553,38 @@ function ZeusButton({
       scrollRevealTimer = null;
       if (buttonRef.current) delete buttonRef.current.dataset.scrolling;
     };
+    let railPlacementPending = false;
+    let placementSuspended = document.hidden;
+    const railLocked = () => document.documentElement.getAttribute("data-rail-lock") !== null;
     const schedulePlacement = () => {
+      if (placementSuspended || document.hidden) return;
+      if (railLocked()) {
+        railPlacementPending = true;
+        return;
+      }
       if (activePointer.current != null || placementFrame.current != null) return;
+      railPlacementPending = false;
       placementFrame.current = window.requestAnimationFrame(() => {
         placementFrame.current = null;
         if (activePointer.current != null) return;
+        if (placementSuspended || document.hidden) return;
+        // The rail can acquire its lock after this frame was requested.
+        if (railLocked()) {
+          railPlacementPending = true;
+          return;
+        }
         placeButton(preferredPosition.current);
       });
     };
+    // Rail dragging owns the moving controls. Reconcile their final geometry
+    // once on release, rather than measuring every control during the gesture.
+    const railObserver = new MutationObserver(() => {
+      if (railPlacementPending && !railLocked()) schedulePlacement();
+    });
+    railObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-rail-lock"],
+    });
     lookAgain.current = () => {
       glideNext.current = true;
       schedulePlacement();
@@ -1670,6 +1695,7 @@ function ZeusButton({
     // on return, without persisting this temporary safety placement.
     const onResume = () => {
       if (document.hidden) return;
+      placementSuspended = false;
       revealAfterScroll();
       cancelPointer.current();
       cancelPlacement();
@@ -1679,11 +1705,15 @@ function ZeusButton({
     };
     const onVisibility = () => {
       if (document.hidden) {
+        placementSuspended = true;
+        railPlacementPending = false;
         revealAfterScroll();
         cancelPlacement();
       } else onResume();
     };
     const onSuspend = () => {
+      placementSuspended = true;
+      railPlacementPending = false;
       revealAfterScroll();
       cancelPlacement();
     };
@@ -1726,7 +1756,8 @@ function ZeusButton({
       if (activePointer.current != null) return;
       cancelPlacement();
       glideNext.current = false;
-      placeButton(preferredPosition.current);
+      if (railLocked() || placementSuspended || document.hidden) schedulePlacement();
+      else placeButton(preferredPosition.current);
     };
     const compactMenuObserver = new MutationObserver(reconcileCompactMenu);
     compactMenuObserver.observe(root, {
@@ -1746,6 +1777,9 @@ function ZeusButton({
     document.addEventListener(ZEUS_SURFACE_EVENT, onLayoutChange);
     document.addEventListener("scroll", onInnerScroll, { capture: true, passive: true });
     return () => {
+      placementSuspended = true;
+      railPlacementPending = false;
+      railObserver.disconnect();
       compactMenuObserver.disconnect();
       dockObserver?.disconnect();
       if (dockTimer != null) window.clearTimeout(dockTimer);

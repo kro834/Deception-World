@@ -1,3 +1,4 @@
+import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { MetaUnitasSaga } from "@/components/meta-unitas-saga/meta-unitas-saga";
 import {
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/meta-unitas-saga")({
       { rel: "stylesheet", href: assemblyMovieCssUrl },
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
+      { rel: "stylesheet", href: visualAstraCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

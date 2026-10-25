@@ -1,0 +1,548 @@
+/* Search observatory. Route-local, after the shared index sheets. The
+   instrument and its complete category index lead directly into readable
+   art-and-text records; no extra artwork, effects or animated layers. */
+html[data-family="library"] .search-page.search-observatory {
+  --search-ink: #ecf1f2;
+  --search-muted: #aebcc6;
+  --search-accent: #bcebf1;
+  --search-gold: #e6c27f;
+  color: var(--search-ink);
+  background: #080f16;
+}
+html[data-family="library"] .search-page.search-observatory .search-main {
+  max-width: 1480px;
+  padding: 0 clamp(16px, 4vw, 64px) 72px;
+}
+html[data-family="library"] .search-observatory .search-observatory-desk {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: start;
+  padding-block: clamp(32px, 5vw, 64px) 36px;
+  border-bottom: 1px solid #31414e;
+}
+html[data-family="library"] .search-page.search-observatory .search-intro {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+}
+html[data-family="library"] .search-page.search-observatory .search-intro > div:first-child {
+  display: block;
+}
+html[data-family="library"] .search-page.search-observatory .search-eyebrow {
+  margin: 0 0 22px;
+  color: var(--search-accent);
+  font: 600 14px / 1.5 var(--dx-body);
+  letter-spacing: 0.12em;
+  text-align: left;
+}
+html[data-family="library"] .search-page.search-observatory h1 {
+  display: block;
+  font-size: clamp(32px, 3.5vw, 52px);
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-align: left;
+}
+html[data-family="library"] .search-page.search-observatory .search-lede {
+  max-width: 24em;
+  margin: 22px 0 0;
+  color: var(--search-muted);
+  font-size: 15px;
+  line-height: 2;
+  text-wrap: pretty;
+}
+html[data-family="library"] .search-observatory .search-library-door {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  margin-top: 30px;
+  padding-block: 14px;
+  border-block: 1px solid #31414e;
+  color: var(--search-ink);
+  text-decoration: none;
+  font-size: 15px;
+}
+html[data-family="library"] .search-observatory .search-library-door > span > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--search-muted);
+  font-size: 12px;
+}
+html[data-family="library"] .search-observatory .search-library-door > span:last-child {
+  color: var(--search-accent);
+  font-size: 24px;
+}
+html[data-family="library"] .search-page.search-observatory .search-workbench {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-workbench::before {
+  display: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-form > label {
+  margin-bottom: 14px;
+  color: var(--search-ink);
+  font-size: 15px;
+  text-align: left;
+  letter-spacing: 0;
+}
+html[data-family="library"] .search-page.search-observatory .search-input-row {
+  min-height: 76px;
+  padding: 6px 8px 6px 18px;
+  border: 1px solid #91bbc6;
+  border-radius: 8px;
+  background: #14222e;
+  box-shadow: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-input-row:focus-within {
+  border-color: var(--search-accent);
+  box-shadow: 0 0 0 2px var(--search-accent);
+}
+html[data-family="library"] .search-page.search-observatory .search-input-row input {
+  min-height: 60px;
+  font-size: clamp(16px, 1.5vw, 20px);
+}
+html[data-family="library"] .search-page.search-observatory .search-submit {
+  min-height: 52px;
+  color: #10222c;
+  background: var(--search-accent);
+  box-shadow: none;
+}
+html[data-family="library"] .search-page.search-observatory #record-query-help {
+  color: var(--search-muted);
+  text-align: left;
+}
+html[data-family="library"] .search-page.search-observatory .search-suggestions {
+  justify-content: flex-start;
+  padding-top: 10px;
+}
+html[data-family="library"] .search-page.search-observatory .search-categories {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 24px 0 0;
+  padding: 0;
+  overflow: visible;
+  border-top: 1px solid #455762;
+}
+html[data-family="library"] .search-page.search-observatory .search-categories button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 60px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid #31414e;
+  border-radius: 0;
+  color: var(--search-ink);
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+html[data-family="library"] .search-page.search-observatory .search-categories button span {
+  color: var(--search-muted);
+  font-size: 13px;
+}
+html[data-family="library"]
+  .search-page.search-observatory
+  .search-categories
+  button[aria-pressed="true"] {
+  color: var(--search-accent);
+  background: #1c303b;
+  box-shadow: inset 0 -2px var(--search-accent);
+}
+html[data-family="library"] .search-page.search-observatory .search-results {
+  padding-top: 32px;
+}
+html[data-family="library"] .search-page.search-observatory .search-results-heading {
+  min-width: 0;
+  padding-bottom: 12px;
+  border-bottom: 0;
+  margin-bottom: 10px;
+  background: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-results-heading h2 {
+  font-size: clamp(22px, 2.5vw, 32px);
+}
+html[data-family="library"] .search-page.search-observatory .search-results-heading > p strong {
+  color: var(--search-accent);
+  font-size: 28px;
+}
+html[data-family="library"] .search-observatory .search-section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 22px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #31414e;
+}
+html[data-family="library"] .search-observatory .search-section-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  color: var(--search-accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+html[data-family="library"] .search-page.search-observatory .search-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #455762;
+  background: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-group-head::before {
+  display: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-group-head > i {
+  display: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-group-head > b {
+  margin-left: auto;
+}
+html[data-family="library"] .search-observatory .search-group-head > span {
+  scroll-margin-top: 110px;
+}
+html[data-family="library"] .search-observatory .search-group-head > span:focus-visible {
+  outline: 2px solid var(--search-accent);
+  outline-offset: 5px;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-grid {
+  --dxl-cols: 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+}
+html[data-family="library"]
+  .search-page.search-observatory
+  .search-result-grid
+  > .search-result-card:nth-child(n) {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  grid-column: auto;
+  grid-auto-rows: auto;
+  align-content: stretch;
+  min-height: 222px;
+  padding: 0;
+  border: 0;
+  border-block: 1px solid #31414e;
+  border-radius: 0;
+  background: #101b25;
+  box-shadow: none;
+  container-type: normal;
+  container-name: none;
+  transform: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-card::before {
+  display: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-card > .dxl-art {
+  position: relative;
+  inset: auto;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  width: 100%;
+  min-height: 180px;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  border: 0;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-card > .dxl-art > i {
+  display: none;
+}
+html[data-family="library"]
+  .search-page.search-observatory
+  .search-result-card
+  > .dxl-art[data-plate="type"]
+  > b {
+  padding: 16px 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+html[data-family="library"]
+  .search-page.search-observatory
+  .search-result-card
+  > .search-result-body {
+  display: flex;
+  flex-direction: column;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 16px 18px 0;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-meta {
+  margin: 0 0 7px;
+  color: var(--search-muted);
+  letter-spacing: 0;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-meta > span:last-child {
+  color: var(--search-accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-title {
+  margin: 0;
+  color: var(--search-ink);
+  font-size: 18px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-title .name-word {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-snippet {
+  margin: 8px 0 14px;
+  color: #bfcbd3;
+  font-size: 14px;
+  line-height: 1.85;
+}
+html[data-family="library"] .search-page.search-observatory .search-result-open {
+  min-height: 44px;
+  margin-top: auto;
+  color: var(--search-accent);
+  border-color: #31414e;
+}
+html[data-family="library"]
+  .search-page.search-observatory
+  .search-result-grid
+  > .search-more-option:nth-child(n) {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 64px;
+  padding: 14px 18px;
+  border: 1px solid #455762;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-more-option > .search-more-peek,
+html[data-family="library"] .search-page.search-observatory .search-more-option::before,
+html[data-family="library"] .search-page.search-observatory .search-more-option::after {
+  display: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-empty {
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid #455762;
+  border-radius: 0;
+  background: #101b25;
+  box-shadow: none;
+}
+html[data-family="library"] .search-page.search-observatory .search-empty::before {
+  display: none;
+}
+html[data-family="library"]
+  .search-page.search-observatory
+  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"]) {
+  background: #192c37;
+  box-shadow: inset 3px 0 var(--search-accent);
+  transform: none;
+}
+/* Once a query is entered, the instrument yields space to its answers. */
+html[data-family="library"]
+  .search-page.search-observatory[data-search-mode="find"]
+  :is(.search-lede, .search-suggestions, #record-query-help) {
+  display: none;
+}
+html[data-family="library"]
+  .search-page.search-observatory[data-search-mode="find"]
+  .search-observatory-desk {
+  padding-block: 32px 26px;
+}
+html[data-family="library"] .search-page.search-observatory .search-display-summary {
+  margin-bottom: 8px;
+}
+@media (max-width: 999px) {
+  html[data-family="library"] .search-observatory .search-observatory-desk {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-intro > div:first-child {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.65fr);
+    gap: 0 32px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-eyebrow {
+    margin-bottom: 10px;
+  }
+  html[data-family="library"] .search-page.search-observatory h1 {
+    grid-column: 1;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-lede {
+    grid-column: 1;
+    margin-top: 14px;
+  }
+  html[data-family="library"] .search-observatory .search-library-door {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    align-self: center;
+    width: 100%;
+    margin: 0;
+  }
+}
+@media (max-width: 760px) {
+  html[data-family="library"] .search-page.search-observatory .search-result-grid {
+    --dxl-cols: 1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 559px) {
+  html[data-family="library"]
+    .search-observatory[data-search-mode="find"]
+    :is(
+      .search-lede,
+      .search-library-door,
+      .search-suggestions,
+      #record-query-help,
+      .search-form > label
+    ) {
+    display: none;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory[data-search-mode="find"]
+    .search-observatory-desk {
+    gap: 18px;
+    padding-block: 22px;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory[data-search-mode="find"]
+    .search-intro
+    > div:first-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+  }
+  html[data-family="library"] .search-page.search-observatory[data-search-mode="find"] h1 {
+    font-size: 26px;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory[data-search-mode="find"]
+    .search-eyebrow {
+    margin: 0;
+    font-size: 13px;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory[data-search-mode="find"]
+    .search-categories
+    button {
+    min-height: 44px;
+    padding-block: 8px;
+  }
+  html[data-family="library"] .search-observatory .search-observatory-desk {
+    padding-top: 26px;
+    gap: 24px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-intro > div:first-child {
+    display: block;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-lede {
+    max-width: none;
+    font-size: 14px;
+  }
+  html[data-family="library"] .search-observatory .search-library-door {
+    min-height: 48px;
+    margin-top: 16px;
+    padding-block: 8px;
+    border-top: 0;
+  }
+  html[data-family="library"] .search-observatory .search-library-door > span > span {
+    display: inline;
+    margin-left: 12px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-input-row {
+    min-height: 64px;
+    gap: 6px;
+    padding-left: 10px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-input-row > svg {
+    width: 18px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-input-row input {
+    min-height: 52px;
+    font-size: 16px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-submit {
+    min-height: 48px;
+    padding-inline: 12px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-categories {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 18px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-categories button {
+    min-height: 48px;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-result-grid
+    > .search-result-card:nth-child(n) {
+    grid-template-columns: 84px minmax(0, 1fr);
+    min-height: 222px;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-result-card
+    > .search-result-body {
+    padding: 14px 12px 0;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-result-title {
+    font-size: 16px;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-results-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="library"] .search-page.search-observatory {
+    --search-ink: CanvasText;
+    --search-muted: CanvasText;
+    --search-accent: LinkText;
+    color: CanvasText;
+    background: Canvas;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory
+    :is(
+      .search-input-row,
+      .search-empty,
+      .search-result-grid > .search-result-card:nth-child(n),
+      .search-result-grid > .search-more-option:nth-child(n)
+    ) {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-categories
+    button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -3px;
+  }
+}

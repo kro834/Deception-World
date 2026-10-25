@@ -1,5 +1,11 @@
+import cinemaArchiveAstraCssUrl from "@/styles-cinema-archive-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { SagaCinema } from "@/components/saga-cinema/saga-cinema";
+import {
+  SAGA_CINEMA_LOGO,
+  SAGA_CINEMA_LOGO_SIZES,
+  SAGA_CINEMA_LOGO_SRCSET,
+} from "@/components/saga-cinema/saga-cinema-data";
 import { WORLD_CORE_STYLESHEET_LINKS, CINEMATIC_STYLESHEET_LINK } from "@/lib/world-head";
 import cinemaCss from "@/components/saga-cinema/saga-cinema.css?url";
 
@@ -20,8 +26,15 @@ export const Route = createFileRoute("/saga-cinema")({
       ...WORLD_CORE_STYLESHEET_LINKS,
       CINEMATIC_STYLESHEET_LINK,
       { rel: "stylesheet", href: cinemaCss },
+      { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
       { rel: "preload", as: "image", href: "/saga-cinema-assets/chapter-4.jpg" },
-      { rel: "preload", as: "image", href: "/saga-cinema-assets/saga-logo-original.webp" },
+      {
+        rel: "preload",
+        as: "image",
+        href: SAGA_CINEMA_LOGO,
+        imageSrcSet: SAGA_CINEMA_LOGO_SRCSET,
+        imageSizes: SAGA_CINEMA_LOGO_SIZES,
+      },
     ],
   }),
 });

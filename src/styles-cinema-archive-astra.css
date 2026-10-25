@@ -1,0 +1,174 @@
+/* Route-local finishing for the cinema programme and archive toolbar.
+   No iframe rules, rail dimensions, animation or loading state changes. */
+.saga-cinema.saga-cinema #introduction .intro-layout {
+  gap: clamp(32px, 7vw, 110px);
+  align-items: center;
+}
+.saga-cinema.saga-cinema #introduction .intro-copy {
+  padding: clamp(24px, 4vw, 60px);
+  border-top: 2px solid #d9bc80;
+  background: #e7e2d6;
+  color: #26302e;
+}
+.saga-cinema.saga-cinema #introduction .intro-copy h3 {
+  margin-top: 0;
+  font-size: clamp(25px, 2.6vw, 40px);
+  line-height: 1.65;
+  letter-spacing: 0.04em;
+  color: #172321;
+}
+.saga-cinema.saga-cinema #introduction .intro-paragraphs {
+  color: #303832;
+}
+.saga-cinema.saga-cinema #introduction .intro-paragraphs p {
+  font-size: clamp(15px, 1.15vw, 17px);
+  line-height: 2.05;
+  color: #303832;
+}
+.saga-cinema.saga-cinema #introduction .intro-copy > .text-button {
+  min-height: 48px;
+  color: #55401d;
+  border-color: #96805a;
+  font-size: 13px;
+}
+.saga-cinema.saga-cinema #films .film-card {
+  padding: 16px 0 0;
+  border-top: 1px solid rgb(217 188 128 / 52%);
+}
+.saga-cinema.saga-cinema #films .film-card-top {
+  margin-bottom: 18px;
+  color: #d9bc80;
+}
+.saga-cinema.saga-cinema #films .film-card-top span {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+.saga-cinema.saga-cinema #films .film-name {
+  padding-block: 4px 20px;
+  border-bottom: 1px solid rgb(217 188 128 / 25%);
+}
+.saga-cinema.saga-cinema #films .film-name h4 {
+  font-size: clamp(34px, 3.4vw, 54px);
+  letter-spacing: 0.18em;
+  line-height: 1.4;
+}
+.saga-cinema.saga-cinema .film-dialog .dialog-copy {
+  padding: clamp(28px, 4vw, 64px);
+  background: #e7e2d6;
+  color: #26302e;
+}
+.saga-cinema.saga-cinema .film-dialog .dialog-copy h2 {
+  font-size: clamp(42px, 5vw, 72px);
+  color: #172321;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+}
+.saga-cinema.saga-cinema .film-dialog .dialog-part {
+  color: #765724;
+  font-size: 13px;
+}
+.saga-cinema.saga-cinema .film-dialog .dialog-project {
+  color: #303832;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.saga-cinema.saga-cinema .film-dialog .detail-data > div {
+  padding-block: 18px;
+  border-color: #b5ac95;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.saga-cinema.saga-cinema .film-dialog .detail-data dt {
+  color: #615744;
+}
+.saga-cinema.saga-cinema .film-dialog .dialog-copy .text-button,
+.saga-cinema.saga-cinema .film-dialog .detail-navigation {
+  color: #55401d;
+  border-color: #96805a;
+  font-size: 13px;
+}
+.saga-cinema.saga-cinema .film-dialog .detail-navigation button {
+  min-width: 48px;
+  min-height: 48px;
+  color: #26302e;
+  border-color: #96805a;
+}
+.saga-cinema.saga-cinema .film-dialog .close-button {
+  background: #071018;
+  color: #f4eddd;
+  border: 1px solid #d9bc80;
+  min-width: 44px;
+  min-height: 44px;
+}
+.saga-cinema.saga-cinema #introduction .intro-copy a:focus-visible,
+.saga-cinema.saga-cinema .film-dialog .dialog-copy :is(a, button):focus-visible {
+  outline: 2px solid #70521d;
+  outline-offset: 4px;
+}
+html[data-family]
+  body
+  main.form-archive-page[data-archive-kind]
+  > header.form-archive-toolbar.form-archive-toolbar {
+  background: #080f17;
+  border-bottom: 1px solid #bda573;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
+}
+html
+  body
+  main.form-archive-page[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > .liquid-rail-surface {
+  border-color: #54616c;
+  background: #050a10 !important;
+  box-shadow: none !important;
+}
+html
+  body
+  main.form-archive-page[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border-color: #d9bc80;
+  background: #23323e !important;
+  box-shadow: inset 0 -2px #d9bc80 !important;
+}
+html
+  body
+  main.form-archive-page[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > button[role="tab"]
+  b {
+  font-size: 14px;
+  letter-spacing: 0.12em;
+}
+html
+  body
+  main.form-archive-page[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > button[aria-selected="true"]
+  b {
+  color: #fff2d3;
+}
+@media (max-width: 620px) {
+  .saga-cinema.saga-cinema #introduction .intro-copy {
+    padding: 26px 20px;
+  }
+  .saga-cinema.saga-cinema .film-dialog .dialog-copy {
+    padding: 26px 22px;
+  }
+  .saga-cinema.saga-cinema .film-dialog .detail-data > div {
+    gap: 12px;
+    font-size: 13px;
+  }
+}
+@media (forced-colors: active) {
+  .saga-cinema.saga-cinema #introduction .intro-copy,
+  .saga-cinema.saga-cinema .film-dialog .dialog-copy {
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+.saga-cinema.saga-cinema .film-dialog .detail-navigation > span {
+  color: #615744;
+  font-size: 12px;
+}

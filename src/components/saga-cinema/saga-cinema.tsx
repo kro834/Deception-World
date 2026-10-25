@@ -17,6 +17,8 @@ import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import {
   SAGA_CINEMA_FILMS,
   SAGA_CINEMA_LOGO,
+  SAGA_CINEMA_LOGO_SIZES,
+  SAGA_CINEMA_LOGO_SRCSET,
   SAGA_CINEMA_TITLE,
   cinemaDownload,
   cinemaNumber,
@@ -345,6 +347,8 @@ export function SagaCinema() {
                   <h1 className="logo-crop">
                     <img
                       src={SAGA_CINEMA_LOGO}
+                      srcSet={SAGA_CINEMA_LOGO_SRCSET}
+                      sizes={SAGA_CINEMA_LOGO_SIZES}
                       width="1536"
                       height="1024"
                       alt="仮面ライダーサーガ"
@@ -488,9 +492,7 @@ export function SagaCinema() {
               </div>
             </section>
             <section className="intro section" id="introduction">
-              <SectionLabel number="01">
-                作品について
-              </SectionLabel>
+              <SectionLabel number="01">作品について</SectionLabel>
               <div className="intro-layout" data-reveal>
                 <div className="intro-art">
                   <div className="intro-art-image">
@@ -540,9 +542,7 @@ export function SagaCinema() {
               </div>
             </section>
             <section className="films section" id="films">
-              <SectionLabel number="02">
-                映画4部作
-              </SectionLabel>
+              <SectionLabel number="02">映画4部作</SectionLabel>
               <div className="section-heading" data-reveal>
                 <h3>邂逅から、終末へ。</h3>
               </div>
@@ -580,9 +580,7 @@ export function SagaCinema() {
               </div>
             </section>
             <section className="visuals section" id="visuals">
-              <SectionLabel number="03">
-                ビジュアル
-              </SectionLabel>
+              <SectionLabel number="03">ビジュアル</SectionLabel>
               <div className="visual-layout" data-reveal>
                 <div className="visual-copy">
                   <h3>
@@ -620,9 +618,7 @@ export function SagaCinema() {
               </div>
             </section>
             <section className="information section" id="information">
-              <SectionLabel number="04">
-                公開情報
-              </SectionLabel>
+              <SectionLabel number="04">公開情報</SectionLabel>
               <div className="information-content" data-reveal>
                 <h3>
                   映画『仮面ライダーサーガ』
@@ -714,6 +710,7 @@ export function SagaCinema() {
               <img
                 id="dialog-image"
                 src={detail.image}
+                loading={detailOpen ? "eager" : "lazy"}
                 width="853"
                 height="1280"
                 alt={cinemaPosterAlt(detailIndex)}
@@ -824,6 +821,7 @@ export function SagaCinema() {
             <img
               id="gallery-image"
               src={gallery.image}
+              loading={galleryOpen ? "eager" : "lazy"}
               width="853"
               height="1280"
               alt={cinemaPosterAlt(galleryIndex)}

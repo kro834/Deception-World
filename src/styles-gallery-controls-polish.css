@@ -1,0 +1,178 @@
+/* Search and personal display controls, scoped to the gallery. */
+.gallery-page .gallery-search > label,
+.gallery-page .gallery-search-description,
+.gallery-page .gallery-search-tips > summary {
+  font-size: 13px;
+}
+
+.gallery-page .gallery-search input {
+  font-size: 14px;
+}
+
+.gallery-page .gallery-search input::placeholder {
+  color: #b5aea1;
+  opacity: 1;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-search-input-row input,
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-search-clear,
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-choice,
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-reset {
+  border-color: #706b61;
+}
+
+.gallery-page .gallery-search-examples {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding-block: 4px 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+.gallery-page .gallery-search-examples > div {
+  display: grid;
+  grid-template-columns: minmax(9.5em, 0.8fr) minmax(0, 1.8fr);
+  gap: 6px 16px;
+}
+
+.gallery-page .gallery-search-examples dt {
+  color: #f4f1ea;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.gallery-page .gallery-search-examples dd {
+  min-width: 0;
+  margin: 0;
+  color: #c9c2b6;
+  overflow-wrap: anywhere;
+}
+
+.gallery-page .gallery-display-settings > summary {
+  min-height: 48px;
+  padding-block: 14px;
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.gallery-page .gallery-display-settings > summary > .gallery-display-heading {
+  margin: 0;
+  color: #f4f1ea;
+  font: inherit;
+}
+
+.gallery-page .gallery-display-settings > summary > .gallery-display-current {
+  display: inline-block;
+  margin-inline-start: 16px;
+  color: #c9c2b6;
+  font-size: 13px;
+}
+
+.gallery-page .gallery-display-description,
+.gallery-page .gallery-display-feedback {
+  color: #c9c2b6;
+  font-size: 13px;
+  line-height: 1.85;
+}
+
+.gallery-page .gallery-display-feedback.is-error {
+  color: #ffb5a4;
+}
+
+.gallery-page .gallery-display-field > legend {
+  font-size: 14px;
+}
+
+.gallery-page .gallery-display-choice {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-color: #706b61;
+  color: #e7dcc7;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.gallery-page .gallery-display-choice input {
+  width: 18px;
+  height: 18px;
+}
+
+.gallery-page .gallery-display-reset {
+  min-height: 44px;
+  max-width: 100%;
+  border-color: #706b61;
+  color: #e7dcc7;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.gallery-page .gallery-search-tips summary:focus-visible,
+.gallery-page .gallery-display-settings > summary:focus-visible,
+.gallery-page .gallery-display-choice:has(input:focus-visible),
+.gallery-page .gallery-display-reset:focus-visible {
+  outline: 2px solid #f0d18d;
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .gallery-page .gallery-search input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-page .gallery-search-examples > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .gallery-page .gallery-display-settings > summary > .gallery-display-current {
+    display: block;
+    margin-inline-start: 1.2em;
+  }
+}
+
+@media (max-width: 390px) {
+  .gallery-page .gallery-display-choices {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gallery-page .gallery-display-choice {
+    justify-content: flex-start;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-search-input-row input,
+  html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-search-clear,
+  html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-choice,
+  html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-reset {
+    border-color: ButtonText;
+    color: ButtonText;
+    forced-color-adjust: auto;
+  }
+
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page]
+    .gallery-display-choice:has(input:checked) {
+    border-color: Highlight;
+    color: HighlightText;
+    background: Highlight;
+  }
+
+  .gallery-page .gallery-search-examples dt,
+  .gallery-page .gallery-search-examples dd,
+  .gallery-page .gallery-display-description,
+  .gallery-page .gallery-display-feedback,
+  .gallery-page .gallery-display-settings > summary > span {
+    color: CanvasText;
+  }
+}

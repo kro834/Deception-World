@@ -35,6 +35,7 @@ const paths = [
   "/saga-cinema-assets/chapter-3.jpg",
   "/saga-cinema-assets/chapter-4.jpg",
   "/saga-cinema-assets/saga-logo-original.webp",
+  "/saga-cinema-assets/saga-logo-640.webp",
   "/saga-cinema-assets/menu-thumbnail.webp",
   "/saga-cinema-assets/menu-thumbnail-20261012.webp",
   "/saga-cinema-assets/michroma-latin.woff2",

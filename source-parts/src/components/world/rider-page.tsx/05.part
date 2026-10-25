@@ -1,5 +1,3 @@
-            : primaryForm
-              ? [primaryForm]
               : [];
   return (
     <main
@@ -36,7 +34,10 @@
               }
               sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
               alt={`${rider.civilian.name}の変身前ビジュアル`}
-              style={{ objectPosition: rider.civilianPos, objectFit: "cover" }}
+              style={{
+                objectPosition: `var(--dossier-portrait-position, ${rider.civilianPos ?? "center"})`,
+                objectFit: "var(--dossier-portrait-fit, cover)" as CSSProperties["objectFit"],
+              }}
               loading="eager"
               decoding="async"
               fetchPriority="high"

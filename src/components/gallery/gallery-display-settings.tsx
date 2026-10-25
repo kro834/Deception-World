@@ -1,4 +1,5 @@
 import { useId, type KeyboardEvent } from "react";
+import { galleryRevealDelta } from "./gallery-viewer-state";
 import type {
   GalleryBackground,
   GalleryDensity,
@@ -17,8 +18,28 @@ const BACKGROUNDS: ReadonlyArray<{ value: GalleryBackground; label: string }> = 
 ];
 
 function keepRadioNavigationLocal(event: KeyboardEvent<HTMLFieldSetElement>) {
-  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key))
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
     event.stopPropagation();
+    return;
+  }
+  if (event.key !== "Home" && event.key !== "End") return;
+  const target = event.target as HTMLInputElement;
+  if (target.tagName !== "INPUT" || target.type !== "radio") return;
+  const choices = event.currentTarget.querySelectorAll<HTMLInputElement>(
+    'input[type="radio"]:not(:disabled)',
+  );
+  const choice = choices[event.key === "Home" ? 0 : choices.length - 1];
+  if (!choice) return;
+  event.preventDefault();
+  event.stopPropagation();
+  choice.focus({ preventScroll: true });
+  choice.click();
+  const header = choice.closest<HTMLElement>(".gallery-viewer-header");
+  if (header) {
+    const control = choice.closest("label") ?? choice;
+    const top = galleryRevealDelta(control.getBoundingClientRect(), header.getBoundingClientRect());
+    if (top) header.scrollBy({ top, behavior: "instant" });
+  }
 }
 
 function DisplayFeedback({ status = "", error = "" }: { status?: string; error?: string }) {
@@ -97,8 +118,8 @@ export function GalleryDisplaySettings({
   return (
     <details className="gallery-display-settings">
       <summary>
-        鑑賞の設定
-        <span>
+        <span className="gallery-display-heading">鑑賞の設定</span>
+        <span className="gallery-display-current">
           {DENSITIES.find((choice) => choice.value === value.density)?.label}・
           {BACKGROUNDS.find((choice) => choice.value === value.background)?.label}
         </span>

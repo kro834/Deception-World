@@ -227,7 +227,7 @@ for (const [engine, type] of [
             );
             await visibleText(
               page,
-              ".gallery-feature-settings [role=alert]",
+              ".gallery-feature-feedback[role=alert]",
               "保存済みのトップ作品を読み込めません。変更はこの画面に反映できます。",
             );
           } else await pressed(page, "g09", true);
@@ -293,7 +293,7 @@ for (const [engine, type] of [
           if (mode !== "normal")
             await visibleText(page, "[data-gallery-favorite-feedback]", favoriteUnsaved);
           if (featureFails)
-            await visibleText(page, ".gallery-feature-settings [role=alert]", featureUnsaved);
+            await visibleText(page, ".gallery-feature-feedback[role=alert]", featureUnsaved);
           await open(page, "g02");
           if (mode !== "normal")
             await visibleText(page, "dialog [data-gallery-favorite-feedback]", favoriteUnsaved);
@@ -342,7 +342,7 @@ for (const [engine, type] of [
             await pressed(page, "g01", true);
             await visibleText(page, "[data-gallery-favorite-feedback]", favoriteUnsaved);
             if (featureFails)
-              await visibleText(page, ".gallery-feature-settings [role=alert]", featureUnsaved);
+              await visibleText(page, ".gallery-feature-feedback[role=alert]", featureUnsaved);
             await page.evaluate(() => {
               window.__personalStorageMode = "none";
             });
@@ -369,7 +369,7 @@ for (const [engine, type] of [
             await feature(page);
             await close(page);
             assert.equal(
-              await page.locator(".gallery-feature-settings [role=alert]").count(),
+              await page.locator(".gallery-feature-feedback[role=alert]").count(),
               0,
               "explicit successful feature action clears warning",
             );

@@ -630,3 +630,168 @@ dialog.quick-search :is(button, a):focus-visible {
     --qs-zeus: 72px;
   }
 }
+
+/* Observatory palette: a quiet, compact companion to the full index.
+   Published art identifies a result before the name and its destination;
+   no new global styles or additional image assets are required. */
+dialog.quick-search {
+  --qs-ink: #080f16;
+  --qs-ink-2: #14222e;
+  --qs-text: #ecf1f2;
+  --qs-muted: #bfcbd3;
+  --qs-faint: #aebcc6;
+  --qs-ice: #bcebf1;
+  width: min(760px, calc(100vw - 32px));
+}
+dialog.quick-search .quick-search-panel {
+  overflow: hidden;
+  border-color: rgb(var(--qs-ice-rgb) / 0.35);
+  border-radius: 12px;
+  background: var(--qs-ink);
+  box-shadow: 0 28px 80px rgb(0 0 0 / 0.5);
+}
+dialog.quick-search .quick-search-panel::before,
+dialog.quick-search .quick-search-panel::after,
+dialog.quick-search .quick-search-head > p::before {
+  display: none;
+}
+dialog.quick-search .quick-search-head {
+  padding: 14px 16px 0 22px;
+}
+dialog.quick-search .quick-search-head > p {
+  display: block;
+  font-size: 17px;
+}
+dialog.quick-search .quick-search-head > p > span {
+  display: none;
+}
+dialog.quick-search .quick-search-field {
+  min-height: 66px;
+  margin: 14px 18px 18px;
+  border-radius: 6px;
+  background: var(--qs-ink-2);
+  box-shadow: none;
+}
+dialog.quick-search .quick-search-field:focus-within {
+  border-color: var(--qs-ice);
+  box-shadow: 0 0 0 2px rgb(var(--qs-ice-rgb) / 0.25);
+}
+dialog.quick-search .quick-search-list {
+  padding-inline: 12px;
+}
+dialog.quick-search .quick-search-group-label {
+  padding: 16px 10px 8px;
+  color: var(--qs-muted);
+  font-size: 13px;
+  letter-spacing: 0.03em;
+}
+dialog.quick-search .quick-search-group-label::before,
+dialog.quick-search .quick-search-group-label::after {
+  display: none;
+}
+dialog.quick-search .quick-search-option {
+  padding: 12px;
+  border-radius: 6px;
+}
+dialog.quick-search .quick-search-option.is-record {
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  min-height: 92px;
+}
+dialog.quick-search .quick-search-art {
+  display: grid;
+  align-items: center;
+  width: 48px;
+  height: 64px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.22);
+  border-radius: 3px;
+  color: var(--qs-ice);
+  background: var(--qs-ink-2);
+  font-size: 12px;
+  text-align: center;
+}
+dialog.quick-search .quick-search-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+dialog.quick-search .quick-search-option-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
+  min-width: 0;
+}
+dialog.quick-search .quick-search-option-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+dialog.quick-search .quick-search-option-body .quick-search-option-place {
+  text-align: left;
+}
+dialog.quick-search .quick-search-option-body .quick-search-option-snippet {
+  font-size: 13px;
+  line-height: 1.8;
+}
+dialog.quick-search .quick-search-group[data-kind="link"] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-bottom: 6px;
+}
+dialog.quick-search .quick-search-group[data-kind="link"] > .quick-search-group-label {
+  grid-column: 1 / -1;
+}
+dialog.quick-search .quick-search-option.is-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 76px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.18);
+  background: var(--qs-ink-2);
+}
+dialog.quick-search .quick-search-option.is-link .quick-search-option-place {
+  display: none;
+}
+dialog.quick-search .quick-search-foot {
+  padding: 10px 18px;
+  background: var(--qs-ink-2);
+}
+@media (max-width: 640px) {
+  dialog.quick-search {
+    width: calc(100vw - 24px);
+  }
+  dialog.quick-search .quick-search-field {
+    margin: 12px;
+    padding-inline: 12px;
+    gap: 8px;
+  }
+  dialog.quick-search .quick-search-field input {
+    font-size: 16px;
+  }
+  dialog.quick-search .quick-search-option.is-record {
+    gap: 10px;
+    padding-inline: 8px;
+  }
+  dialog.quick-search .quick-search-option-title {
+    font-size: 15px;
+  }
+}
+@media (forced-colors: active) {
+  dialog.quick-search .quick-search-panel,
+  dialog.quick-search .quick-search-field,
+  dialog.quick-search .quick-search-option.is-link,
+  dialog.quick-search .quick-search-foot {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  dialog.quick-search .quick-search-art {
+    border-color: CanvasText;
+  }
+}

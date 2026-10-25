@@ -1,3 +1,4 @@
+import readingAstraCssUrl from "@/styles-reading-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { DreamChapter } from "@/components/dream-chapter/dream-chapter";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO } from "@/lib/asset-loader";
@@ -82,6 +83,7 @@ export const Route = createFileRoute("/dream-chapter")({
       { rel: "stylesheet", href: dreamDossierGuideCssUrl },
       { rel: "stylesheet", href: tabletReadingCssUrl },
       { rel: "stylesheet", href: dreamChapterStageCssUrl },
+      { rel: "stylesheet", href: readingAstraCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       // The same files the dive warms and the hero shows.
       { rel: "preload", as: "image", href: DREAM_CHAPTER_HERO_ART },

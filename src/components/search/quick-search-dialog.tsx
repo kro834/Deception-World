@@ -7,7 +7,6 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { useRouter } from "@tanstack/react-router";
 import { useLoadGate } from "@/components/load-gate";
 import { SEARCH_CATEGORIES, SEARCH_DOCUMENTS } from "./search-data";
 import {
@@ -20,6 +19,8 @@ import { clearRecentSearches, rememberSearch, useRecentSearches } from "./search
 import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
 import { isSearchCompositionKey, placeLabel, stepActive } from "./search-ui-helpers";
 import { useOpenResult } from "./use-open-result";
+import { documentArt } from "@/lib/record-art";
+import { recordImage } from "@/lib/record-images";
 import quickSearchCssUrl from "../../styles-quick-search.css?url";
 
 const PER_GROUP = 3;
@@ -64,7 +65,6 @@ export default function QuickSearchDialog({
   const [recentNotice, setRecentNotice] = useState("");
   const openResult = useOpenResult();
   const { go } = useLoadGate();
-  const router = useRouter();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -164,7 +164,9 @@ export default function QuickSearchDialog({
           ),
       );
     else if (option.kind === "all")
-      closeThen(() => void router.navigate({ to: "/search", search: { q: trimmed } }));
+      closeThen(
+        () => void go({ to: "/search", search: { q: trimmed }, focusDestination: fromKeyboard }),
+      );
     else closeThen(() => void go({ to: option.to, focusDestination: fromKeyboard }));
   };
 
@@ -292,6 +294,7 @@ export default function QuickSearchDialog({
               role="group"
               aria-label={section.label || undefined}
               className="quick-search-group"
+              data-kind={section.items[0]?.kind}
             >
               {section.label ? (
                 <div className="quick-search-group-label" role="presentation" aria-hidden="true">
@@ -302,23 +305,47 @@ export default function QuickSearchDialog({
                 const isActive = activeOption?.id === option.id;
                 if (option.kind === "result") {
                   const { result } = option;
+                  const art = documentArt(result.document, 0);
                   return (
                     <ResultOption
                       key={option.id}
                       id={option.id}
                       result={result}
                       active={isActive}
-                      className="quick-search-option"
+                      className="quick-search-option is-record"
                       onOpen={(_, fromKeyboard) => choose(option, fromKeyboard)}
                     >
-                      <span className="quick-search-option-title">
-                        <HighlightedName text={result.document.title} ranges={result.titleRanges} />
+                      <span
+                        className="quick-search-art"
+                        aria-hidden="true"
+                        data-edition={art.edition}
+                      >
+                        {art.src ? (
+                          <img
+                            {...recordImage(art.src, "row")}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            style={art.pos ? { objectPosition: art.pos } : undefined}
+                          />
+                        ) : (
+                          <span>{categoryLabel(result.document.category)}</span>
+                        )}
                       </span>
-                      <span className="quick-search-option-place">
-                        {result.section ?? placeLabel(result.document)}
-                      </span>
-                      <span className="quick-search-option-snippet">
-                        <Highlighted text={result.snippet} ranges={result.snippetRanges} />
+                      <span className="quick-search-option-body">
+                        <span className="quick-search-option-title">
+                          <HighlightedName
+                            text={result.document.title}
+                            ranges={result.titleRanges}
+                          />
+                        </span>
+                        <span className="quick-search-option-place">
+                          {placeLabel(result.document)}
+                          {result.section ? ` · ${result.section}` : ""}
+                        </span>
+                        <span className="quick-search-option-snippet">
+                          <Highlighted text={result.snippet} ranges={result.snippetRanges} />
+                        </span>
                       </span>
                     </ResultOption>
                   );

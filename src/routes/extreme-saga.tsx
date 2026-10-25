@@ -1,3 +1,4 @@
+import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { validateInquirySearch } from "@/lib/inquiry-guides";
 import { ExtremeSaga } from "@/components/extreme-saga/extreme-saga";
@@ -64,6 +65,7 @@ export const Route = createFileRoute("/extreme-saga")({
       { rel: "stylesheet", href: extremeZenithCssUrl },
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
+      { rel: "stylesheet", href: visualAstraCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

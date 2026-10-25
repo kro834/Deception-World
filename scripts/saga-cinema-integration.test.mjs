@@ -76,10 +76,15 @@ test("route loads a scoped stylesheet and all chapter art is addressed by local 
 });
 
 test("cinema menu uses native-resolution poster art without loading it while closed", async () => {
-  const asset = new URL("../public/saga-cinema-assets/menu-thumbnail-20261012.webp", import.meta.url);
+  const asset = new URL(
+    "../public/saga-cinema-assets/menu-thumbnail-20261012.webp",
+    import.meta.url,
+  );
   const bytes = readFileSync(asset);
   const meta = await sharp(bytes).metadata();
-  const original = await sharp(fileURLToPath(new URL("../public/saga-cinema-assets/chapter-4.jpg", import.meta.url))).metadata();
+  const original = await sharp(
+    fileURLToPath(new URL("../public/saga-cinema-assets/chapter-4.jpg", import.meta.url)),
+  ).metadata();
   assert.equal(meta.format, "webp");
   assert.equal(meta.width, original.width);
   assert.equal(meta.height, original.height);
@@ -87,6 +92,52 @@ test("cinema menu uses native-resolution poster art without loading it while clo
   assert.ok(bytes.length < 300_000, "native-resolution menu image stays under 300KB");
   assert.match(menuStyles, /\[data-open="true"\][\s\S]*menu-thumbnail-20261012/u);
   assert.doesNotMatch(menu, /menu-thumbnail|rel="preload"/u);
+});
+
+test("cinema logo shares responsive candidates with its preload and keeps the original fallback", () => {
+  assert.match(data, /SAGA_CINEMA_LOGO = "\/saga-cinema-assets\/saga-logo-original\.webp"/u);
+  assert.match(data, /saga-logo-640\.webp 640w, \$\{SAGA_CINEMA_LOGO\} 1536w/u);
+  assert.doesNotMatch(data, /saga-logo-960/u);
+  assert.match(page, /src=\{SAGA_CINEMA_LOGO\}/u);
+  assert.match(page, /srcSet=\{SAGA_CINEMA_LOGO_SRCSET\}/u);
+  assert.match(page, /sizes=\{SAGA_CINEMA_LOGO_SIZES\}/u);
+  assert.match(route, /href: SAGA_CINEMA_LOGO,/u);
+  assert.match(route, /imageSrcSet: SAGA_CINEMA_LOGO_SRCSET,/u);
+  assert.match(route, /imageSizes: SAGA_CINEMA_LOGO_SIZES,/u);
+});
+
+test("the smaller cinema logo preserves source alpha and profile while reducing transferred bytes", async () => {
+  const original = readFileSync(
+    new URL("../public/saga-cinema-assets/saga-logo-original.webp", import.meta.url),
+  );
+  const candidate = readFileSync(
+    new URL("../public/saga-cinema-assets/saga-logo-640.webp", import.meta.url),
+  );
+  const sourceMeta = await sharp(original).metadata();
+  const meta = await sharp(candidate).metadata();
+  assert.equal(meta.format, "webp");
+  assert.equal(meta.width, 640);
+  assert.equal(meta.height, Math.round((sourceMeta.height * 640) / sourceMeta.width));
+  assert.equal(meta.hasAlpha, true);
+  assert.deepEqual(meta.icc, sourceMeta.icc);
+  assert.ok(candidate.length < original.length, "a delivery candidate must save bytes");
+  const expectedAlpha = await sharp(original)
+    .resize({ width: 640, kernel: "lanczos3" })
+    .extractChannel("alpha")
+    .raw()
+    .toBuffer();
+  const deliveredAlpha = await sharp(candidate).extractChannel("alpha").raw().toBuffer();
+  assert.deepEqual(deliveredAlpha, expectedAlpha, "resized alpha boundaries stay exact");
+});
+
+test("closed catalogue dialogs do not preload posters and open dialogs request them immediately", () => {
+  const detailImage = page.match(/<img\s+id="dialog-image"[\s\S]*?\/>/u)?.[0] ?? "";
+  const galleryImage = page.match(/<img\s+id="gallery-image"[\s\S]*?\/>/u)?.[0] ?? "";
+  assert.match(detailImage, /src=\{detail\.image\}/u);
+  assert.match(detailImage, /loading=\{detailOpen \? "eager" : "lazy"\}/u);
+  assert.match(galleryImage, /src=\{gallery\.image\}/u);
+  assert.match(galleryImage, /loading=\{galleryOpen \? "eager" : "lazy"\}/u);
+  assert.doesNotMatch(route, /href: "\/saga-cinema-assets\/chapter-1\.jpg"/u);
 });
 
 test("reduced-motion preferences and animated resources are cleaned up", () => {

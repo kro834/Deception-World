@@ -232,15 +232,42 @@ test("Zeus reconciles compact launcher changes immediately without changing the 
   const end = zeus.indexOf("const compactMenuObserver =", marker);
   assert.ok(start >= 0 && end > marker);
   const logic = zeus.slice(start, end);
-  assert.doesNotMatch(
+  assert.doesNotMatch(logic, /requestAnimationFrame|setTimeout|onPositionChange|localStorage/);
+  assert.match(
     logic,
-    /requestAnimationFrame|setTimeout|schedulePlacement|onPositionChange|localStorage/,
+    /if \(railLocked\(\) \|\| placementSuspended \|\| document\.hidden\) schedulePlacement\(\);\s*else placeButton\(preferredPosition\.current\);/,
   );
+  const schedulingStart = zeus.indexOf("let railPlacementPending = false;");
+  const schedulingEnd = zeus.indexOf("lookAgain.current =", schedulingStart);
+  assert.ok(schedulingStart > 0 && schedulingEnd > schedulingStart);
+  const scheduling = zeus.slice(schedulingStart, schedulingEnd);
+  const frames = new Map();
+  let nextFrame = 0;
+  let railChanged;
   const attributes = new Map();
   const calls = [];
   const position = { x: 0.95, y: 0.82 };
   const context = {
-    document: { documentElement: { getAttribute: (key) => attributes.get(key) ?? null } },
+    document: {
+      hidden: false,
+      documentElement: { getAttribute: (key) => attributes.get(key) ?? null },
+    },
+    placementFrame: { current: null },
+    window: {
+      requestAnimationFrame(callback) {
+        frames.set(++nextFrame, callback);
+        return nextFrame;
+      },
+    },
+    MutationObserver: class {
+      constructor(callback) {
+        railChanged = callback;
+      }
+      observe(target, options) {
+        assert.equal(target, context.document.documentElement);
+        assert.deepEqual(Array.from(options.attributeFilter), ["data-rail-lock"]);
+      }
+    },
     activePointer: { current: null },
     preferredPosition: { current: position },
     glideNext: { current: true },
@@ -255,7 +282,10 @@ test("Zeus reconciles compact launcher changes immediately without changing the 
       calls.push("place");
     },
   };
-  vm.runInNewContext(`${logic}\nglobalThis.reconcile = reconcileCompactMenu;`, context);
+  vm.runInNewContext(
+    `${scheduling}\n${logic}\nglobalThis.reconcile = reconcileCompactMenu;`,
+    context,
+  );
   context.reconcile();
   attributes.set("data-viewport-chrome", "world");
   context.reconcile();
@@ -278,10 +308,32 @@ test("Zeus reconciles compact launcher changes immediately without changing the 
   attributes.set("data-ipad-menu", "compact");
   context.reconcile();
   assert.equal(calls.length, 6, "an active pointer keeps ownership of its position");
+  context.activePointer.current = null;
+  attributes.set("data-rail-lock", "true");
+  attributes.set("data-viewport-chrome", "gallery");
+  context.reconcile();
+  attributes.set("data-viewport-chrome", "world");
+  context.reconcile();
+  assert.deepEqual(calls.slice(6), ["cancel", "cancel"], "locked changes defer collision scans");
+  assert.equal(frames.size, 0, "the lock does not poll layout with animation frames");
+  attributes.delete("data-rail-lock");
+  railChanged();
+  railChanged();
+  assert.equal(frames.size, 1, "unlock coalesces both footprint changes into one placement");
+  for (const [id, callback] of frames) {
+    frames.delete(id);
+    callback();
+  }
+  assert.deepEqual(calls.slice(6), ["cancel", "cancel", "place"]);
+  railChanged();
+  assert.equal(frames.size, 0, "a repeated notification does not schedule another scan");
   assert.equal(context.preferredPosition.current, position);
   assert.match(
     zeus,
     /compactMenuObserver\.observe\(root,\s*\{\s*attributes: true,\s*attributeFilter: \["data-ipad-menu", "data-ipad-menu-scrolled", "data-viewport-chrome"\]/,
   );
-  assert.match(zeus, /return \(\) => \{\s*compactMenuObserver\.disconnect\(\);/);
+  assert.match(
+    zeus,
+    /return \(\) => \{\s*placementSuspended = true;\s*railPlacementPending = false;\s*railObserver\.disconnect\(\);\s*compactMenuObserver\.disconnect\(\);/,
+  );
 });

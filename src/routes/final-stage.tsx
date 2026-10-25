@@ -1,3 +1,4 @@
+import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { FinalStage } from "@/components/final-stage/final-stage";
 import {
@@ -56,6 +57,7 @@ export const Route = createFileRoute("/final-stage")({
       // call sequence, the end card and the bar's chapter links on
       // tablets and phones (styles-final-stage-zenith.css).
       { rel: "stylesheet", href: finalStageZenithCssUrl },
+      { rel: "stylesheet", href: visualAstraCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

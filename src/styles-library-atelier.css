@@ -1,0 +1,889 @@
+/* Library atelier: a visible cast index, useful shelves, and a quiet reading table.
+   This final route-local layer never changes search, shared art, or navigation. */
+html[data-family="library"] .library-page.library-atelier {
+  --atelier-line: rgb(188 215 228 / 20%);
+  --atelier-paper: #101b25;
+  --atelier-muted: #aebcc6;
+  --dxl-wrap: 1400px;
+  --dx-text: #ecf1f2;
+  --dx-text-2: #c5d0d8;
+  --dx-text-3: #aebcc6;
+  background: radial-gradient(ellipse at 70% 0, #152b39 0, transparent 850px), #080f16;
+}
+
+html[data-family="library"] .library-page.library-atelier main#library-main {
+  padding-inline: clamp(16px, 4.2vw, 72px);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-intro {
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.25fr);
+  align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+  padding-block: clamp(36px, 5vw, 76px) 40px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-intro-copy {
+  display: block;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-intro h1 {
+  margin-block: 24px;
+  font-size: clamp(34px, 3.8vw, 64px);
+  line-height: 1.35;
+  letter-spacing: -0.035em;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-eyebrow {
+  color: #bcebf1;
+  font: 600 15px / 1.6 var(--dx-body);
+  letter-spacing: 0.2em;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-intro-copy
+  > p:not(.library-eyebrow) {
+  max-width: 29em;
+  margin: 0;
+  color: var(--dx-text-2);
+  font-size: 15px;
+  line-height: 2;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-summary {
+  margin: 22px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-summary::before,
+html[data-family="library"] .library-page.library-atelier .library-cast::after,
+html[data-family="library"] .library-page.library-atelier .library-hub::before,
+html[data-family="library"] .library-page.library-atelier .library-card::before {
+  content: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-summary > span {
+  color: var(--atelier-muted);
+  font: 400 13px / 1.6 var(--dx-body);
+  letter-spacing: 0.02em;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-index-summary
+  > span:first-child
+  > b {
+  margin-right: 8px;
+  font: 500 28px / 1 var(--dx-body);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-jump-links {
+  gap: 10px 20px;
+  margin-top: 26px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-jump-links a {
+  min-height: 48px;
+  font-size: 14px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-jump-links a:first-child {
+  flex-basis: 100%;
+  justify-content: space-between;
+  max-width: 290px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  color: #071c25;
+  background: #bcebf1;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-fulltext-link {
+  gap: 16px;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  color: #bcebf1;
+  background: none;
+  box-shadow: none;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-board {
+  min-width: 0;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--atelier-line);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-heading h2 {
+  margin: 0;
+  font: 600 18px / 1.5 var(--dx-display);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-heading > span {
+  color: var(--atelier-muted);
+  font-size: 12px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  gap: 18px 12px;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  scroll-snap-type: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-tile {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  animation: none;
+  transform: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-art {
+  aspect-ratio: 1 / 1.02;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0b141c;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-art::after {
+  background: linear-gradient(90deg, var(--cast-tone), transparent) 0 100% / 100% 2px no-repeat;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-no {
+  margin: 10px 0 0;
+  color: var(--atelier-muted);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-cast-name {
+  margin: 4px 0 0;
+  font: 600 14px / 1.55 var(--dx-display);
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Three real facets replace the count dashboard. Their images are existing records. */
+html[data-family="library"] .library-page.library-atelier .library-discovery {
+  margin-bottom: clamp(48px, 6vw, 88px);
+  padding-block: 22px 0;
+  border-top: 1px solid var(--atelier-line);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-discovery > h2 {
+  margin: 0 0 18px;
+  font: 600 18px / 1.5 var(--dx-display);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-meter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-meter > button {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 20px;
+  grid-template-rows: 1fr 1fr;
+  align-items: end;
+  gap: 4px 16px;
+  min-height: 106px;
+  padding: 12px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 12px;
+  color: var(--dx-text);
+  background: var(--atelier-paper);
+  box-shadow: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-meter > button::before {
+  content: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-index-meter > button > .dxl-art {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: stretch;
+  width: 76px;
+  height: 82px;
+  aspect-ratio: auto;
+  border-radius: 6px;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-index-meter
+  > button
+  > .dxl-art
+  > i {
+  display: none;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-index-meter
+  > button
+  > .library-kind-name {
+  grid-column: 2;
+  grid-row: 1;
+  font: 600 17px / 1.5 var(--dx-display);
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-index-meter
+  > button
+  > .library-kind-count {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  color: var(--atelier-muted);
+  font: 400 13px / 1.6 var(--dx-body);
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-index-meter
+  > button
+  > .library-kind-arrow {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
+  color: #bcebf1;
+  font-size: 22px;
+}
+
+/* Section rhythm is carried by typography and space, without another HUD frame. */
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading) {
+  display: block;
+  margin-bottom: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)::before {
+  content: none;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+  h2 {
+  font-size: clamp(25px, 3vw, 38px);
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
+  > p:last-child {
+  max-width: 48em;
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.85;
+  text-align: left;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-hub {
+  margin-bottom: clamp(56px, 7vw, 96px);
+  padding: clamp(20px, 3vw, 36px);
+  border: 1px solid var(--atelier-line);
+  border-radius: 18px;
+  background: linear-gradient(125deg, #17252e, #101a23 65%);
+  box-shadow: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-shelf-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-shelf-overview a {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 6px;
+  color: var(--dx-text-2);
+  font-size: 14px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-shelf-overview b {
+  color: var(--dx-gold);
+}
+
+html[data-family="library"] .library-page.library-atelier .library-hub-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 36px;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-hub-grid
+  > :is(.library-continue, .library-shelf, .library-history, .library-searches) {
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+  border: 0 !important;
+  border-radius: 0;
+  background: none !important;
+  box-shadow: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-hub-subhead,
+html[data-family="library"] .library-page.library-atelier .library-continue > h3 {
+  position: static;
+  min-height: 0;
+  margin: 0 0 16px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--atelier-line);
+  background: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-hub h3 {
+  font-size: 19px;
+}
+html[data-family="library"] .library-page.library-atelier .library-hub-subhead > b {
+  font-size: 20px;
+}
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(.library-hub-empty, .library-hub-note) {
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-continue
+  > .library-start-reading {
+  grid-column: 1 / -1;
+  padding: 22px;
+  border-left: 2px solid #bcebf1;
+  background: #0b151e;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-start-reading p {
+  margin: 0;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-start-reading a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 48px;
+  margin-top: 14px;
+  color: #bcebf1;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-data-controls {
+  grid-column: 1 / -1;
+  margin-top: 0;
+  padding: 18px 0 0;
+  border: 0;
+  border-top: 1px solid var(--atelier-line);
+  border-radius: 0;
+  background: none;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(#library-shelf-title, #library-history-title, #library-searches-title) {
+  scroll-margin-top: 110px;
+}
+
+/* Pictures sit above the questions; Japanese is no longer laid over faces. */
+html[data-family="library"] .library-page.library-atelier .inquiry-choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+html[data-family="library"] .library-page.library-atelier .inquiry-choice {
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 0;
+  padding: 0 0 20px;
+  border: 0;
+  border-bottom: 1px solid var(--atelier-line);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .inquiry-choice::before {
+  content: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .inquiry-choice-art {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  height: 170px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+html[data-family="library"] .library-page.library-atelier .inquiry-choice-art::after {
+  background: none;
+}
+html[data-family="library"] .library-page.library-atelier .inquiry-choice-title {
+  font-size: clamp(19px, 1.8vw, 26px);
+  line-height: 1.6;
+}
+html[data-family="library"] .library-page.library-atelier .inquiry-choice-intro {
+  color: var(--dx-text-2);
+  font-size: 14px;
+  line-height: 1.9;
+}
+html[data-family="library"] .library-page.library-atelier .inquiry-choice-action {
+  margin-top: auto;
+  min-height: 48px;
+  font-size: 14px;
+}
+
+html[data-family="library"] .library-page.library-atelier .inquiry-choice[aria-pressed="true"] {
+  outline: 2px solid #bcebf1;
+  outline-offset: 6px;
+  color: var(--dx-text);
+  background: #101b25;
+}
+
+/* A working table: a generous field followed by consistent, readable record rows. */
+html[data-family="library"] .library-page.library-atelier .library-browse-controls {
+  margin-bottom: 28px;
+  padding: clamp(18px, 3vw, 32px);
+  border: 1px solid var(--atelier-line);
+  border-radius: 16px;
+  background: var(--atelier-paper);
+  box-shadow: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-search {
+  min-height: 56px;
+  background: #080f16;
+}
+html[data-family="library"] .library-page.library-atelier .library-search input {
+  font-size: 17px;
+}
+html[data-family="library"] .library-page.library-atelier .library-search-note {
+  font-size: 13px;
+  line-height: 1.85;
+}
+html[data-family="library"]
+  .library-page.library-atelier
+  :is(.library-filter-row, .library-scope-row)
+  button {
+  min-height: 48px;
+  font-size: 14px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-grid > .library-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr auto;
+  grid-column: auto;
+  gap: 5px 16px;
+  min-height: 210px;
+  padding: 16px;
+  border: 1px solid var(--atelier-line);
+  border-radius: 12px;
+  background: #101a23;
+  box-shadow: none;
+  container: none;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-grid > .library-card > .dxl-art {
+  position: relative;
+  inset: auto;
+  grid-column: 1;
+  grid-row: 1 / 4;
+  width: 92px;
+  height: 138px;
+  min-height: 0;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 6px;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-grid
+  > .library-card
+  > :not(.dxl-art) {
+  grid-column: 2;
+  margin: 0;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-card h3 {
+  font: 600 18px / 1.65 var(--dx-display);
+  letter-spacing: 0;
+  white-space: normal;
+  word-break: normal;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-card-description {
+  display: block;
+  overflow: visible;
+  font-size: 13px;
+  line-height: 1.85;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+html[data-family="library"]
+  .library-page.library-atelier
+  .library-grid
+  > .library-card
+  > .library-card-actions {
+  grid-column: 1 / -1;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 0 0;
+}
+
+html[data-family="library"] .library-page.library-atelier .library-card-actions :is(a, button) {
+  min-height: 48px;
+  font-size: 13px;
+}
+html[data-family="library"] .library-page.library-atelier .library-card > .dxl-art > i {
+  display: none;
+}
+html[data-family="library"] .library-page.library-atelier .library-shelf-title {
+  margin-block: 30px 18px;
+  font-size: 21px;
+}
+
+@media (hover: hover) {
+  html[data-family="library"] .library-page.library-atelier .library-cast-tile:hover {
+    box-shadow: none;
+    transform: none;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-cast-tile:hover
+    .library-cast-name {
+    color: #bcebf1;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    :is(.library-card, .library-index-meter > button):hover {
+    border-color: #bcebf1;
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 1179px) {
+  html[data-family="library"] .library-page.library-atelier .library-intro {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: 28px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-tile {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 3px 10px;
+    align-content: center;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-art {
+    grid-row: 1 / 3;
+    width: 64px;
+    height: 88px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-no {
+    align-self: end;
+    margin: 0;
+    font-size: 12px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-name {
+    margin: 0;
+    font-size: 13px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-index-meter > button {
+    grid-template-columns: 60px minmax(0, 1fr) 16px;
+    gap: 4px 12px;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-index-meter
+    > button
+    > .dxl-art {
+    width: 60px;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-index-meter
+    > button
+    > .library-kind-name {
+    font-size: 15px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 899px) {
+  html[data-family="library"] .library-page.library-atelier .library-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-intro h1 {
+    font-size: clamp(34px, 6vw, 54px);
+    margin-block: 14px 20px;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-intro-copy
+    > p:not(.library-eyebrow) {
+    max-width: 38em;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-tile {
+    display: flex;
+    gap: 0;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-art {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1.2;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-no {
+    align-self: start;
+    margin-top: 10px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-name {
+    margin-top: 4px;
+    font-size: 14px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-index-meter {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-index-meter > button {
+    grid-template-columns: 64px minmax(0, 1fr) 24px;
+    min-height: 84px;
+    padding: 10px 16px 10px 10px;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-index-meter
+    > button
+    > .dxl-art {
+    width: 64px;
+    height: 64px;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-index-meter
+    > button
+    > .library-kind-name {
+    font-size: 18px;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choices {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice {
+    display: grid;
+    grid-template-columns: 40% minmax(0, 1fr);
+    gap: 8px 22px;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice-art {
+    grid-row: 1 / 5;
+    height: 100%;
+    min-height: 190px;
+    margin: 0;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice-title {
+    font-size: 23px;
+  }
+}
+
+@media (max-width: 599px) {
+  html[data-family="library"] .library-page.library-atelier .library-intro {
+    padding-top: 30px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-art {
+    aspect-ratio: 1.45;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-name {
+    font-size: 14px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-cast-no {
+    margin-top: 8px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-hub {
+    margin-inline: -4px;
+    padding: 20px 16px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-hub-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-shelf-overview {
+    gap: 6px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-shelf-overview a {
+    gap: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice {
+    display: flex;
+    gap: 10px;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice-art {
+    height: 170px;
+    min-height: 0;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice-title {
+    font-size: 23px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-family="library"] .library-page.library-atelier .library-grid > .library-card {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 5px 14px;
+    padding: 14px;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    .library-grid
+    > .library-card
+    > .dxl-art {
+    width: 80px;
+    height: 128px;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-card h3 {
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="library"]
+    .library-page.library-atelier
+    :is(.library-cast-tile, .library-card, .inquiry-choice, .library-index-meter > button),
+  html[data-family="library"]
+    .library-page.library-atelier
+    :is(.library-cast-art, .dxl-art, .inquiry-choice-art)
+    img {
+    animation: none;
+    transition: none;
+    transform: none;
+  }
+}
+
+html[data-world-effects="economy"][data-family="library"]
+  .library-page.library-atelier
+  :is(.library-cast-tile, .library-card, .inquiry-choice) {
+  animation: none;
+  transition: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-family="library"] .library-page.library-atelier {
+    background: #080f16;
+  }
+  html[data-family="library"] .library-page.library-atelier .library-hub {
+    background: #14212b;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"] .library-page.library-atelier {
+    color: CanvasText;
+    background: Canvas;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    :is(
+      .library-hub,
+      .library-card,
+      .library-browse-controls,
+      .library-index-meter > button,
+      .library-start-reading
+    ) {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+  html[data-family="library"]
+    .library-page.library-atelier
+    :is(
+      .library-jump-links a:first-child,
+      .library-kind-arrow,
+      .library-shelf-overview b,
+      .library-start-reading a,
+      .library-fulltext-link
+    ) {
+    color: LinkText;
+    background: Canvas;
+  }
+  html[data-family="library"] .library-page.library-atelier :is(a, button, input):focus-visible {
+    outline: 2px solid Highlight;
+  }
+  html[data-family="library"] .library-page.library-atelier .inquiry-choice[aria-pressed="true"] {
+    outline-color: Highlight;
+    color: CanvasText;
+    background: Canvas;
+  }
+}

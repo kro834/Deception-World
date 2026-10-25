@@ -32,6 +32,8 @@ try {
   for (const route of ["/gallery-tours?tour=starlight&work=g05", "/gallery-tours", "/exhibition"]) {
     await page.goto(`${base}${route}`);
     await page.locator("main h1").waitFor();
+    await page.waitForLoadState("networkidle");
+    if (route.includes("work=")) await ready(page);
     for (const width of [320, 390, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.evaluate(
@@ -185,6 +187,7 @@ try {
     };
   }, key);
   await denied.goto(`${base}/gallery-tours`);
+  await denied.waitForLoadState("networkidle");
   const warning = denied.getByText(
     "このブラウザーでは再開位置を保存できません。ツアーはそのまま鑑賞できます。",
     { exact: true },
@@ -255,6 +258,7 @@ try {
   const reduced = await newPage({ reducedMotion: "reduce" });
   await reduced.goto(`${base}/exhibition`);
   await reduced.locator(".exhibition-room-source").waitFor();
+  await reduced.waitForLoadState("networkidle");
   // Prove client hydration completed, rather than counting the SSR fallback.
   await reduced.getByRole("combobox", { name: "展示する原画" }).selectOption("g19");
   await reduced.waitForURL((url) => url.searchParams.get("work") === "g19");
