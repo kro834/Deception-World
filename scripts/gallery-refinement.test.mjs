@@ -129,7 +129,7 @@ test("public-posting warning and compact limits stay visible before the optional
 
 test("pending selection still requires an explicit public-post confirmation", () => {
   const start = page.indexOf("{pendingImages.length > 0 && (");
-  const end = page.indexOf("\n          {!communityLoaded", start);
+  const end = page.indexOf("\n          {communityMessage", start);
   assert.ok(start >= 0 && end > start);
   const pending = page.slice(start, end);
   assert.match(pending, /すべての訪問者に公開されます/);

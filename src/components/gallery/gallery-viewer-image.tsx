@@ -40,6 +40,8 @@ export function GalleryViewerImage({
   const imageRef = useRef<HTMLImageElement>(null);
   const mediumRef = useRef<HTMLImageElement>(null);
   const zoomRef = useRef<HTMLButtonElement>(null);
+  const retryRef = useRef<HTMLButtonElement>(null);
+  const retryFocusRef = useRef(false);
   const viewportRef = useRef<HTMLDivElement>(null);
   const viewingPositionRef = useRef<GalleryImageViewport | null>(null);
   const wasZoomedRef = useRef(false);
@@ -51,6 +53,10 @@ export function GalleryViewerImage({
   const mediumSource = galleryImageRetrySource(work.medium, mediumAttempt);
 
   const retry = () => {
+    // Both error controls disappear during a retry. Keep keyboard focus inside
+    // the image until a useful control returns, unless the reader moves on.
+    retryFocusRef.current = true;
+    viewportRef.current?.focus({ preventScroll: true });
     setFullStatus("loading");
     setAttempt((current) => current + 1);
     if (mediumStatus === "error") {
@@ -68,6 +74,18 @@ export function GalleryViewerImage({
     const img = mediumRef.current;
     if (img?.complete) setMediumStatus(img.naturalWidth ? "ready" : "error");
   }, [mediumSource]);
+
+  useEffect(() => {
+    if (
+      !retryFocusRef.current ||
+      fullStatus === "loading" ||
+      (fullStatus === "error" && !imageUnavailable && !showingMedium)
+    )
+      return;
+    retryFocusRef.current = false;
+    if (document.activeElement !== viewportRef.current) return;
+    (fullStatus === "ready" ? zoomRef.current : retryRef.current)?.focus({ preventScroll: true });
+  }, [fullStatus, imageUnavailable, showingMedium]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -157,8 +175,8 @@ export function GalleryViewerImage({
         ref={viewportRef}
         aria-busy={busy}
         aria-describedby="gallery-image-help"
-        role={zoomed ? "region" : undefined}
-        aria-label={zoomed ? "拡大した作品画像" : undefined}
+        role="region"
+        aria-label={zoomed ? "拡大した作品画像" : "作品画像"}
         tabIndex={zoomed ? 0 : -1}
         onScroll={(event) => {
           if (!zoomed) return;
@@ -265,7 +283,7 @@ export function GalleryViewerImage({
         {fullStatus === "error" && showingMedium && (
           <div className="gallery-image-fallback" role="status">
             <p>高画質画像を読み込めませんでした。標準画像を表示しています。</p>
-            <button type="button" className="gallery-viewer-close" onClick={retry}>
+            <button type="button" className="gallery-viewer-close" ref={retryRef} onClick={retry}>
               高画質を再読み込み
             </button>
           </div>
@@ -274,7 +292,7 @@ export function GalleryViewerImage({
           <div className="gallery-image-error" role="alert">
             <p>画像を読み込めませんでした。</p>
             <p className="gallery-image-description">{work.alt}</p>
-            <button type="button" className="gallery-viewer-close" onClick={retry}>
+            <button type="button" className="gallery-viewer-close" ref={retryRef} onClick={retry}>
               再読み込み
             </button>
             <a href={work.medium} target="_blank" rel="noreferrer">

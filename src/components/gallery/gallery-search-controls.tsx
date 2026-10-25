@@ -41,6 +41,7 @@ export function GallerySearchControls({ query, onQueryChange }: GallerySearchCon
               return;
             }
             event.preventDefault();
+            event.stopPropagation();
             onQueryChange("");
           }}
           placeholder="青 金 ／ 003 ／ 080–089"
@@ -65,10 +66,20 @@ export function GallerySearchControls({ query, onQueryChange }: GallerySearchCon
       </p>
       <details className="gallery-search-tips">
         <summary>検索のヒント</summary>
-        <p className="gallery-search-help">
-          空白で区切ると、すべての語を含む作品を検索します（例：青 金）。番号は完全一致で、
-          080–089のような範囲も指定できます。投稿の番号はU001の形式です。
-        </p>
+        <dl className="gallery-search-examples">
+          <div>
+            <dt>青 金</dt>
+            <dd>空白で区切ると、すべての語を含む作品</dd>
+          </div>
+          <div>
+            <dt>003 ／ 080–089</dt>
+            <dd>番号の完全一致、または番号の範囲</dd>
+          </div>
+          <div>
+            <dt>U001</dt>
+            <dd>投稿された作品の番号</dd>
+          </div>
+        </dl>
       </details>
     </div>
   );

@@ -10,6 +10,8 @@ import galleryImageFallbackCssUrl from "@/styles-gallery-image-fallback.css?url"
 import exhibitionStudioCssUrl from "@/styles-exhibition-studio.css?url";
 import galleryRefinementCssUrl from "@/styles-gallery-refinement.css?url";
 import galleryPresentCssUrl from "@/styles-gallery-present.css?url";
+import galleryCurationCssUrl from "@/styles-gallery-curation.css?url";
+import galleryControlsPolishCssUrl from "@/styles-gallery-controls-polish.css?url";
 import tabletGalleryCssUrl from "@/styles-tablet-gallery.css?url";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
@@ -30,6 +32,8 @@ export const Route = createFileRoute("/gallery")({
         { rel: "stylesheet", href: exhibitionStudioCssUrl },
         { rel: "stylesheet", href: galleryRefinementCssUrl },
         { rel: "stylesheet", href: tabletGalleryCssUrl },
+        { rel: "stylesheet", href: galleryCurationCssUrl },
+        { rel: "stylesheet", href: galleryControlsPolishCssUrl },
         { rel: "stylesheet", href: galleryPresentCssUrl },
       ],
     });
