@@ -550,6 +550,13 @@
   padding-top: clamp(28px, 4vw, 60px);
 }
 
+/* A chapter that continues into a sub-chapter closes tight, so the pair
+   reads as one chapter instead of two separated blocks (overview → specs →
+   comparison, 能力 → 必殺技). */
+.rxs-page.rxs-page.ics-page .ics-chapter:has(+ .ics-subchapter) {
+  padding-bottom: clamp(28px, 4vw, 60px);
+}
+
 .rxs-page.rxs-page.ics-page .ics-chapter + .ics-chapter:not(.ics-subchapter)::before {
   position: absolute;
   top: 0;
