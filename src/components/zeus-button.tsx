@@ -232,6 +232,11 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   ".rxs-stage-panel ul > li",
   // Extreme's architecture cards' codes (the same chip words, iPad portrait).
   ".rxs-system-grid article > header > small",
+  // 2026-10-25 iPad sweep: the library hero's eyebrow and lead line, which the button
+  // settled on at 1024x768 (the rider tiles fill the right-hand spots).
+  ".library-intro-copy > p",
+  // Illusionculum's hero call chips (04 ILLUSIONCULUM! at 1024x768).
+  ".ics-calls > li",
 ].join(",");
 /* Where no spot is clear of words on the Rexonance page (a full-width
    instrument table, the chapter map's rows), the button steps aside in place
@@ -357,7 +362,9 @@ const drawn = (element: Element) =>
    last one ends, so the spot is looked at again then (2026-10-21 sweep F05).
    Scroll-driven and endless animations are left out: they rest when the
    page does, or never end. */
-const ZEUS_ENTRANCE_MAX_MS = 1600;
+// 2000: Illusionculum's hero call cascade ends at 1610ms, just past 1600, so
+// a placement at first paint never looked again (iPad 1024x768, 2026-10-25).
+const ZEUS_ENTRANCE_MAX_MS = 2000;
 // Only what moves, reveals or resizes words; a colour change leaves them be.
 const ZEUS_ENTRANCE_PROPERTY =
   /^(?:transform|translate|scale|rotate|opacity|clip|visibility|inset|left|top|right|bottom|width|height|margin)/i;
