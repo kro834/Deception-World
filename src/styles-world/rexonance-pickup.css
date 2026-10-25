@@ -1173,6 +1173,12 @@
     font-size: clamp(40px, 5.2vw, 62px);
     line-height: 1.02;
   }
+
+  /* 2026-10-25 iPad sweep: beside the sticky art, two text columns fell to
+     ~170px (768) and ~230px (1024); one column reads at the column's width. */
+  .is-rexonance-dialog .form-pickup-sections > section {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 900px) {

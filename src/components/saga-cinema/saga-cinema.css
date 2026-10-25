@@ -54,6 +54,8 @@
 .saga-cinema.saga-cinema .hero-poster-area{width:min(100%,375px)}
 .saga-cinema.saga-cinema .hero-poster{box-shadow:0 28px 90px #000b,0 0 45px rgba(var(--saga-accent-rgb),.13);border-color:rgba(var(--saga-accent-rgb),.48)}
 .saga-cinema.saga-cinema .hero-poster img{object-fit:contain;background:#05070a}.saga-cinema.saga-cinema .poster-zoom{width:44px;height:44px}
+/* Touch tablets (iPad, 761px+) have no hover: show the zoom mark as the film cards do. */
+@media (hover:none){.saga-cinema.saga-cinema .poster-zoom{opacity:1}}
 .saga-cinema.saga-cinema .poster-controls>button,.saga-cinema.saga-cinema .chapter-switch button{min-width:44px;min-height:44px}
 .saga-cinema.saga-cinema .chapter-switch button{font-size:12px}
 .saga-cinema.saga-cinema .chapter-switch button[aria-pressed=true]::after{background:var(--saga-accent)}
