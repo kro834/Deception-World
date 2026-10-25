@@ -1,12 +1,3 @@
-              : [];
-  return (
-    <main
-      className="manager-page rider-dossier-page"
-      style={{
-        ["--manager-accent" as string]: rider.tone,
-        ["--manager-accent-soft" as string]: rider.tone,
-        ["--rider-tone" as string]: rider.tone,
-        ["--archive-accent" as string]: rider.tone,
         ["--archive-accent-soft" as string]: rider.tone,
         ["--future-hud-primary" as string]: rider.tone,
       }}
