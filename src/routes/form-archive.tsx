@@ -8,6 +8,7 @@ import { useWorldMode } from "@/components/world/use-world-mode";
 import { initRail } from "@/lib/liquid/boot.js";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import formArchiveCssUrl from "@/styles-form-archive.css?url";
+import commandArchiveCssUrl from "@/styles-command-archive.css?url";
 
 type ArchiveKind = "saga" | "realm";
 
@@ -59,6 +60,7 @@ export const Route = createFileRoute("/form-archive")({
       ...WORLD_STYLESHEET_LINKS,
       { rel: "stylesheet", href: formArchiveCssUrl },
       { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
+      { rel: "stylesheet", href: commandArchiveCssUrl },
     ],
   }),
 });
@@ -329,7 +331,7 @@ function FormArchive() {
     // data-archive-ready lets the toolbar's status lamp say LINKING until the
     // frame reports ready, then LINKED (styles-form-archive.css).
     <main
-      className="form-archive-page"
+      className="form-archive-page command-archive dg-focus-scope"
       data-archive-kind={archive}
       data-archive-ready={loaded ? "true" : "false"}
     >
@@ -352,7 +354,7 @@ function FormArchive() {
           <button
             type="button"
             role="tab"
-            className={isSaga ? "is-active" : ""}
+            className={`dg-control${isSaga ? " is-active" : ""}`}
             tabIndex={isSaga ? 0 : -1}
             aria-selected={isSaga}
             aria-controls="form-archive-frame"
@@ -369,7 +371,7 @@ function FormArchive() {
           <button
             type="button"
             role="tab"
-            className={!isSaga ? "is-active" : ""}
+            className={`dg-control${!isSaga ? " is-active" : ""}`}
             tabIndex={!isSaga ? 0 : -1}
             aria-selected={!isSaga}
             aria-controls="form-archive-frame"

@@ -191,7 +191,10 @@ export function GalleryToursPage({
   }
 
   return (
-    <div className="world gallery-page gallery-tours-page" data-gallery-tours="true">
+    <div
+      className="world gallery-page gallery-tours-page command-support-tours"
+      data-gallery-tours="true"
+    >
       <header className="gallery-topbar">
         <Link className="gallery-brand" to="/gallery">
           DECEPTION WORLD<span>GUIDED EXHIBITIONS</span>

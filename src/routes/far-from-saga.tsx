@@ -1,3 +1,4 @@
+import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { FarFromSaga } from "@/components/far-from-saga/far-from-saga";
@@ -67,6 +68,7 @@ export const Route = createFileRoute("/far-from-saga")({
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
       { rel: "stylesheet", href: visualAstraCssUrl },
+      { rel: "stylesheet", href: commandSpecialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

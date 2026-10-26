@@ -42,12 +42,11 @@ export function ExhibitionArtworkBrowser({
     <section className="exhibition-shelf" aria-labelledby="exhibition-shelf-heading">
       <div className="exhibition-shelf-heading">
         <div>
-          <p className="exhibition-room-eyebrow">COLLECTION</p>
           <h2 id="exhibition-shelf-heading" ref={headingRef} tabIndex={-1}>
             次に飾る一枚を。
           </h2>
         </div>
-        <a className="exhibition-shelf-return" href="#exhibition-current-work">
+        <a className="exhibition-shelf-return dg-control" href="#exhibition-current-work">
           <span>展示室へ戻る ↑</span>
           <span>
             {String(currentIndex + 1).padStart(3, "0")} {GALLERY_ARTWORKS[currentIndex].title}
@@ -85,7 +84,7 @@ export function ExhibitionArtworkBrowser({
         </label>
         <button
           type="button"
-          className="exhibition-shelf-current"
+          className="exhibition-shelf-current dg-control"
           onClick={() => {
             setQuery("");
             setFormat("all");
@@ -106,7 +105,7 @@ export function ExhibitionArtworkBrowser({
             <li key={artwork.id}>
               <button
                 type="button"
-                className="exhibition-shelf-work"
+                className="exhibition-shelf-work dg-control"
                 aria-pressed={index === currentIndex}
                 aria-label={`${String(index + 1).padStart(3, "0")} ${artwork.title}を展示${index === currentIndex ? "（展示中）" : ""}`}
                 onClick={() => onSelect(artwork.id)}

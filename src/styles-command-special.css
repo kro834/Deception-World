@@ -1,0 +1,331 @@
+/* The special sites' command-deck finish. Route-local, paint-first: the
+   suit-up, IMPACT entrance, gesture tracks, artwork and movie geometry are
+   owned by their existing sheets. Existing reveals keep their choreography;
+   controls opt into the shared dynamic GUI, with no second runtime. */
+html[data-family="special"] body #top.rxs-page[data-command-special] {
+  --cs-key: #a6e7f4;
+  --cs-key-rgb: 166 231 244;
+  --cs-secondary: #f0d39c;
+  --cs-text: #e8eff4;
+  --cs-muted: #b5c3cf;
+  --cs-edge: rgb(197 220 232 / 30%);
+  --cs-face:
+    linear-gradient(125deg, rgb(var(--cs-key-rgb) / 7%), transparent 42%),
+    linear-gradient(180deg, #18232f, #101823 48%, #0b111b);
+  --cs-metal:
+    linear-gradient(118deg, transparent 22%, rgb(233 240 241 / 13%) 22.2%, transparent 46%),
+    linear-gradient(
+      180deg,
+      rgb(233 240 241 / 14%),
+      transparent 47%,
+      rgb(0 0 0 / 28%) 48%,
+      transparent
+    );
+  --cs-shadow:
+    inset 0 1px 0 rgb(240 250 255 / 11%), inset 0 -1px 0 rgb(0 0 0 / 75%),
+    0 12px 28px -16px rgb(0 0 0 / 80%);
+  --dg-key: var(--cs-key);
+  --dg-key-rgb: var(--cs-key-rgb);
+}
+html[data-family="special"] body #top.exs-page[data-command-special] {
+  --cs-key: #f3d092;
+  --cs-key-rgb: 243 208 146;
+  --cs-secondary: #dce5f2;
+}
+html[data-family="special"] body #top.ffs-page[data-command-special] {
+  --cs-key: #b6d9ff;
+  --cs-key-rgb: 182 217 255;
+  --cs-secondary: #d8c5ff;
+}
+html[data-family="special"] body #top.fst-page[data-command-special] {
+  --cs-key: #d7c6fa;
+  --cs-key-rgb: 215 198 250;
+  --cs-secondary: #f1d9a4;
+}
+
+@media (forced-colors: none) {
+  /* Recessed chapter keys: the local bar keeps its responsive layout,
+     safe-area reserve and active-chapter underline. */
+  html[data-family="special"] body #top.rxs-page[data-command-special] .rxs-local-nav nav a {
+    border: 1px solid rgb(215 231 239 / 17%);
+    border-radius: 3px;
+    background: var(--cs-metal), #111b27;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 7%),
+      0 2px 0 #03070d;
+    color: var(--cs-text);
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    .rxs-local-nav
+    nav
+    a[aria-current] {
+    border-color: rgb(var(--cs-key-rgb) / 65%);
+    background:
+      linear-gradient(180deg, rgb(var(--cs-key-rgb) / 20%), rgb(var(--cs-key-rgb) / 5%)), #101b27;
+    color: var(--cs-key);
+    box-shadow:
+      inset 0 1px 0 rgb(var(--cs-key-rgb) / 40%),
+      0 2px 0 #03070d;
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(.rxs-menu-trigger, .rxs-footer-return, .fst-site-door a, .fst-cast-copy > a) {
+    border: 1px solid rgb(219 235 244 / 47%);
+    border-radius: 3px;
+    background: var(--cs-metal), #18232e;
+    color: var(--cs-text);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 23%),
+      inset 0 -2px 0 #03070d,
+      3px 3px 0 rgb(var(--cs-key-rgb) / 12%);
+    text-shadow: 0 1px 1px #000;
+  }
+
+  /* Chapter destinations become individual keys; no new labels or
+     altered index grids. The decorative existing numeral stays intact. */
+  html[data-family="special"] body #top.rxs-page[data-command-special] .rxs-chapter-index a {
+    border: 1px solid var(--cs-edge);
+    border-radius: 3px;
+    background: var(--cs-metal), var(--cs-face);
+    box-shadow: var(--cs-shadow);
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    .rxs-chapter-index
+    :is(strong, b) {
+    color: var(--cs-text);
+  }
+
+  /* Instrument enclosures. Borders and depth do not clip focus rings,
+     long Japanese prose or the animations within a panel. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .rxs-comparison,
+      .rxs-p14-comparator,
+      .rxs-stage-switcher,
+      .ffs-form-comparison,
+      .fst-cast-console,
+      .fst-pickup-card
+    ) {
+    border: 1px solid var(--cs-edge);
+    border-radius: 4px;
+    background: var(--cs-face);
+    box-shadow:
+      var(--cs-shadow),
+      4px 4px 0 rgb(var(--cs-key-rgb) / 5%);
+  }
+
+  /* Individually legible data plates, using the page's current grids and
+     fixed comparison-column widths. Artwork remains unfiltered. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .rxs-system-grid > article,
+      .rxs-specs > div,
+      .ffs-specs > div,
+      .ffs-articles > article,
+      .ffs-weapons > li,
+      .ffs-finisher,
+      .fst-specs > div,
+      .fst-articles > article
+    ) {
+    border: 1px solid var(--cs-edge);
+    border-radius: 3px;
+    clip-path: none;
+    background:
+      linear-gradient(90deg, var(--cs-key), var(--cs-secondary) 40%, transparent 90%) 0 0 / 100% 2px
+        no-repeat,
+      var(--cs-face);
+    box-shadow: var(--cs-shadow);
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .rxs-system-grid > article p,
+      .ffs-articles > article p,
+      .ffs-finisher .ffs-copy,
+      .fst-articles > article p
+    ) {
+    color: var(--cs-text);
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .ffs-specs dt,
+      .fst-specs dt,
+      .rxs-specs dt,
+      .rxs-comparison-key,
+      .rxs-comparison-note,
+      .rxs-p14-method-note
+    ) {
+    color: var(--cs-muted);
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(.ffs-specs dd, .fst-specs dd, .rxs-specs dd) {
+    color: var(--cs-text);
+    text-shadow: 0 2px 0 #000;
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .rxs-comparison-metrics > article,
+      .rxs-p14-metrics > article,
+      .rxs-processing-comparison > div
+    ) {
+    border-bottom-color: rgb(var(--cs-key-rgb) / 24%);
+    background-image: linear-gradient(90deg, rgb(var(--cs-key-rgb) / 5%), transparent 78%);
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    .rxs-comparison-selector
+    select {
+    color: var(--cs-text);
+    border-color: rgb(var(--cs-key-rgb) / 45%);
+    border-radius: 3px;
+    background-color: #111c29;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 10%),
+      0 2px 0 #03070d;
+    color-scheme: dark;
+  }
+
+  /* Final Stage's story and record keep the lamp/rail identity, with a
+     quieter reading surface inside the console. */
+  html[data-family="special"] body #top.fst-page[data-command-special] .fst-story-layout {
+    border: 1px solid var(--cs-edge);
+    border-radius: 4px;
+    background: linear-gradient(105deg, rgb(var(--cs-key-rgb) / 7%), transparent 65%), #0d1420;
+    box-shadow: var(--cs-shadow);
+  }
+  html[data-family="special"] body #top.fst-page[data-command-special] .fst-cast-copy {
+    background: linear-gradient(135deg, rgb(var(--cs-key-rgb) / 7%), transparent 64%);
+  }
+  html[data-family="special"]
+    body
+    #top.fst-page[data-command-special]
+    :is(.fst-cast-copy p, .fst-story-copy p) {
+    color: var(--cs-text);
+  }
+  html[data-family="special"] body #top.fst-page[data-command-special] .fst-pickup-copy {
+    background: linear-gradient(115deg, rgb(var(--cs-key-rgb) / 9%), transparent 80%);
+    border-inline-start-color: var(--cs-edge);
+  }
+  html[data-family="special"] body #top.fst-page[data-command-special] .fst-pickup-heading {
+    border-bottom: 1px solid var(--cs-edge);
+    background: linear-gradient(90deg, rgb(var(--cs-key-rgb) / 8%), transparent 80%);
+  }
+}
+
+/* Native focus remains usable on every control, including the existing
+   sliders. Only a paint change: no pointer-event or gesture interference. */
+html[data-family="special"]
+  body
+  #top.rxs-page[data-command-special]
+  :is(a, button, select, input, summary):focus-visible {
+  outline: 2px solid var(--dg-focus, #fff0b5);
+  outline-offset: 4px;
+}
+html[data-family="special"]
+  body
+  #top.rxs-page[data-command-special]
+  :is(.rxs-comparison-selector select, .fst-site-door a, .fst-cast-copy > a) {
+  min-height: 44px;
+}
+
+/* The deck's hover is the shared dg-control response. Other existing links
+   answer with an edge only, so their engine-owned transforms stay intact. */
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(.rxs-chapter-index a, .fst-site-door a, .fst-cast-copy > a):hover {
+    border-color: var(--cs-key);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 22%),
+      var(--cs-shadow);
+  }
+}
+
+/* At narrow widths, material remains equally crisp and data uses the full
+   existing content width. Never resize a form rail or transformation stage. */
+@media (max-width: 480px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .rxs-system-grid > article,
+      .ffs-articles > article,
+      .ffs-finisher,
+      .fst-articles > article
+    ) {
+    border-radius: 2px;
+    box-shadow:
+      inset 0 1px 0 rgb(240 250 255 / 10%),
+      inset 0 -1px 0 rgb(0 0 0 / 70%);
+  }
+  html[data-family="special"] body #top.ffs-page[data-command-special] .ffs-specs > div[data-long] {
+    grid-column: 1 / -1;
+  }
+}
+
+/* No motion is introduced here. Reduced/economy keep the same legible,
+   static material and the shared kit owns their control-motion gates. */
+html[data-world-effects="economy"][data-family="special"] body #top.rxs-page[data-command-special] {
+  --cs-shadow: inset 0 1px 0 rgb(240 250 255 / 10%);
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"] body #top.rxs-page[data-command-special] .dg-control {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(
+      .rxs-local-nav nav a,
+      .rxs-menu-trigger,
+      .rxs-footer-return,
+      .rxs-chapter-index a,
+      .rxs-comparison,
+      .rxs-stage-switcher,
+      .ffs-specs > div,
+      .ffs-articles > article,
+      .fst-cast-console,
+      .fst-pickup-card,
+      .fst-story-layout,
+      .fst-specs > div
+    ) {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    clip-path: none;
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    .rxs-local-nav
+    nav
+    a[aria-current] {
+    outline: 2px solid Highlight;
+    outline-offset: -3px;
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(a, button, select, input, summary):focus-visible {
+    outline-color: Highlight;
+  }
+}

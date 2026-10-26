@@ -547,6 +547,7 @@ export function FinalStage() {
     <main
       ref={pageRef}
       id="top"
+      data-command-special=""
       className="rxs-page fst-page"
       data-motion-ready={motionReady ? "true" : "false"}
     >
@@ -563,12 +564,12 @@ export function FinalStage() {
             <b>ファイナルステージ</b>
           </GuardedLink>
           <nav aria-label="ファイナルステージ ページ内ナビゲーション">
-            <a href="#story">あらすじ</a>
-            <a href="#characters">人物</a>
-            <a href="#riders">ライダー</a>
+            <a href="#story" className="dg-control dg-focus">あらすじ</a>
+            <a href="#characters" className="dg-control dg-focus">人物</a>
+            <a href="#riders" className="dg-control dg-focus">ライダー</a>
           </nav>
           <SideMenuTrigger
-            className="rxs-menu-trigger"
+            className="rxs-menu-trigger dg-control dg-focus"
             open={menuOpen}
             onOpenChange={setMenuOpen}
           />
@@ -994,7 +995,7 @@ export function FinalStage() {
           to="/world"
           hash="top"
           assets={WORLD_ENTER_ASSETS}
-          className="rxs-footer-return"
+          className="rxs-footer-return dg-control dg-focus"
         >
           <span>メインサイトへ戻る</span>
           <i aria-hidden="true">←</i>

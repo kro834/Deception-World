@@ -7,6 +7,7 @@ import { normalizeExhibitionSearch } from "@/lib/gallery-route-search";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import studioCssUrl from "@/styles-exhibition-studio.css?url";
 import roomCssUrl from "@/styles-exhibition-room.css?url";
+import commandArchiveCssUrl from "@/styles-command-archive.css?url";
 
 export const Route = createFileRoute("/exhibition")({
   validateSearch: normalizeExhibitionSearch,
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/exhibition")({
         ...WORLD_CORE_STYLESHEET_LINKS,
         { rel: "stylesheet", href: studioCssUrl },
         { rel: "stylesheet", href: roomCssUrl },
+        { rel: "stylesheet", href: commandArchiveCssUrl },
       ],
     }),
 });
@@ -37,16 +39,22 @@ function ExhibitionRoom() {
     void navigate({ search: { work: id }, replace: true, resetScroll: false });
 
   return (
-    <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
-      <header className="exhibition-room-heading">
+    <main
+      className="exhibition-room exhibition-room-curated command-exhibition dg-focus-scope"
+      id="main"
+    >
+      <header className="exhibition-room-heading dg-reveal">
         <div>
-          <p className="exhibition-room-eyebrow">DECEPTION WORLD / EXHIBITION</p>
           <h1>原画のある、展示室。</h1>
           <p className="exhibition-room-lead">光と素材に囲まれて、一枚と向き合う。</p>
         </div>
         <div className="exhibition-room-entrances">
-          <Link to="/gallery">ギャラリーに戻る ↗</Link>
-          <Link to="/gallery-tours">展示を巡る ↗</Link>
+          <Link className="dg-control" to="/gallery">
+            ギャラリーに戻る ↗
+          </Link>
+          <Link className="dg-control" to="/gallery-tours">
+            展示を巡る ↗
+          </Link>
         </div>
       </header>
       <section
@@ -105,6 +113,7 @@ function ExhibitionRoom() {
         <nav className="exhibition-room-adjacent" aria-label="展示する作品">
           <button
             type="button"
+            className="dg-control"
             disabled={index === 0}
             onClick={() => select(GALLERY_ARTWORKS[index - 1].id)}
           >
@@ -116,6 +125,7 @@ function ExhibitionRoom() {
           </span>
           <button
             type="button"
+            className="dg-control"
             disabled={index === GALLERY_ARTWORKS.length - 1}
             onClick={() => select(GALLERY_ARTWORKS[index + 1].id)}
           >

@@ -37,8 +37,11 @@ export function GalleryTourEntrance({
   }
 
   return (
-    <div className="gallery-tour-entrance">
-      <section className="gallery-tour-introduction" aria-labelledby="gallery-tour-heading">
+    <div className="gallery-tour-entrance dg-focus-scope">
+      <section
+        className="gallery-tour-introduction dg-reveal"
+        aria-labelledby="gallery-tour-heading"
+      >
         <div className="gallery-tour-introduction-copy">
           <p className="gallery-tour-eyebrow">
             GUIDED EXHIBITIONS · {GALLERY_TOURS.length} COURSES

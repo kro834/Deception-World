@@ -1904,6 +1904,7 @@ export function RexonanceSaga() {
     <main
       ref={setPageRef}
       id="top"
+      data-command-special=""
       className="rxs-page rxs-rexonance-page"
       data-motion-ready={motionReady ? "true" : "false"}
     >
@@ -1931,18 +1932,18 @@ export function RexonanceSaga() {
             </b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
-            <a href="#performance">性能</a>
-            <a href="#p14">P14</a>
+            <a href="#performance" className="dg-control dg-focus">性能</a>
+            <a href="#p14" className="dg-control dg-focus">P14</a>
             {/* APEX (rx19): the bar lists all five chapters, numbered as the
                 chapter index; 03 stays lit through the runway and the replay. */}
-            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay">
+            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay" className="dg-control dg-focus">
               変身
             </a>
-            <a href="#stages">形態</a>
-            <a href="#system">システム</a>
+            <a href="#stages" className="dg-control dg-focus">形態</a>
+            <a href="#system" className="dg-control dg-focus">システム</a>
           </nav>
           <SideMenuTrigger
-            className="rxs-menu-trigger"
+            className="rxs-menu-trigger dg-control dg-focus"
             open={menuOpen}
             onOpenChange={setMenuOpen}
           />
@@ -2354,7 +2355,7 @@ export function RexonanceSaga() {
               to="/world"
               hash="top"
               assets={WORLD_ENTER_ASSETS}
-              className="rxs-footer-return"
+              className="rxs-footer-return dg-control dg-focus"
             >
               <span>メインサイトへ戻る</span>
               <i aria-hidden="true">←</i>
