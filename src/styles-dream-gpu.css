@@ -33,3 +33,15 @@ html[data-family="dream"] main.dream-page.dream-page canvas.dream-gpu-desk {
 html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
   display: none;
 }
+
+/* Tier A: a hovered ticket carries a gold rim light that the desk shader blooms. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-ticket:hover,
+  html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-dossier-chip:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(243 224 176 / 30%),
+      0 0 0 1px rgb(255 204 120 / 55%),
+      0 0 18px rgb(255 190 96 / 45%),
+      0 18px 38px rgb(0 0 0 / 46%);
+  }
+}

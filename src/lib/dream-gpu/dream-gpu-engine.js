@@ -10,15 +10,15 @@
 //     fringe, scanlines, a lens warp and click glitches. The DOM keeps the hit
 //     testing and the accessibility tree; geometry is synced every frame.
 //
-// Photosensitivity: no full-area flash; the click glitch only shifts slices and
-// fringes (luminance stays put), the vermilion stays a slow ambient ramp.
+// Photosensitivity: no full-area flash; the click is a film-gate slip and a paper
+// tear (geometry moves, luminance stays put); vermilion is only a slow ambient ramp.
 
 const COMMON_WGSL = /* wgsl */ `
 struct U {
   res: vec2f, time: f32, dpr: f32,
   mouse: vec2f, click: f32, energy: f32,
   rect: vec4f,
-  scroll: f32, small: f32, pad0: f32, pad1: f32,
+  scroll: f32, small: f32, seed: f32, pad1: f32,
 };
 @group(0) @binding(0) var<uniform> u: U;
 struct VO { @builtin(position) pos: vec4f, @location(0) uv: vec2f };
@@ -36,18 +36,21 @@ fn hash22(p: vec2f) -> vec2f {
 const GOLD = vec3f(1.0, .80, .47);
 const LAMP = vec3f(1.0, .63, .34);
 const VERMILION = vec3f(.86, .30, .20);
-const INDIGO = vec3f(.36, .42, .86);
-// One layer of drifting lamp dust: cells of size s, motes rise and sway.
-fn dust(px: vec2f, s: f32, speed: f32, t: f32, seed: f32) -> f32 {
-  let q = px / s + vec2f(0., t * speed + u.scroll / s * (.15 + seed * .2));
+const CREAM = vec3f(1.0, .93, .80);
+// One depth layer of lamp dust. Cells of size s; motes rise, sway and twinkle.
+// rad = mote radius (cell units), soft = edge softness (0 = pin-sharp far motes,
+// large = out-of-focus bokeh discs near the lens).
+fn dust(px: vec2f, s: f32, speed: f32, t: f32, seed: f32, rad: f32, soft: f32) -> f32 {
+  let q = px / s + vec2f(0., t * speed + u.scroll / s * (.12 + seed * .18));
   let id = floor(q);
   let f = fract(q) - .5;
   let r = hash22(id + seed * 17.);
-  if (r.x > .38) { return 0.; }
-  let off = (r - .5) * .6 + vec2f(sin(t * .6 + r.y * 6.28) * .12, 0.);
+  if (r.x > .34 - seed * .05) { return 0.; }
+  let off = (r - .5) * .62 + vec2f(sin(t * .5 + r.y * 6.28) * .14, cos(t * .37 + r.x * 6.28) * .05);
   let d = length(f - off);
-  let tw = .55 + .45 * sin(t * (1.2 + r.y * 2.) + r.x * 40.);
-  return smoothstep(.05 + r.y * .04, 0., d) * tw;
+  let tw = .5 + .5 * sin(t * (.9 + r.y * 2.2) + r.x * 40.);
+  let rr = rad * (.6 + r.y * .8);
+  return smoothstep(rr + soft, rr - soft * .4, d) * (.35 + .65 * tw);
 }
 `;
 
@@ -58,60 +61,108 @@ fn sdBox(p: vec2f, b: vec2f) -> f32 {
   let d = abs(p) - b;
   return length(max(d, vec2f(0.))) + min(max(d.x, d.y), 0.);
 }
+// 0..1 along the rectangle's perimeter (clockwise from the top-left corner).
+fn perim(p: vec2f, h: vec2f) -> f32 {
+  let q = p / h;
+  var s = 0.;
+  if (abs(q.y) >= abs(q.x)) {
+    if (q.y < 0.) { s = p.x + h.x; } else { s = 2. * h.x + 2. * h.y + (h.x - p.x); }
+  } else {
+    if (q.x > 0.) { s = 2. * h.x + (p.y + h.y); } else { s = 4. * h.x + 2. * h.y + (h.y - p.y); }
+  }
+  return s / (4. * (h.x + h.y));
+}
+// A stage lamp: a soft wedge of light from a point just off-screen, with a gobo
+// breakup so it reads as a real beam and not a gradient.
+fn beam(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32) -> f32 {
+  let asp = u.res.x / u.res.y;
+  let rel = (uv - src) * vec2f(asp, 1.);
+  let ang = atan2(rel.y, rel.x);
+  let w = exp(-pow((ang - theta) / width, 2.));
+  let fall = exp(-length(rel) * 1.1);
+  let gobo = .78 + .22 * sin(ang * 46. + t * .35) * sin(length(rel) * 9. - t * .5);
+  return w * fall * gobo;
+}
 @fragment fn fs(in: VO) -> @location(0) vec4f {
   let px = in.uv * u.res;
   let t = u.time;
   var c = vec3f(0.);
   var a = 0.;
-  // three parallax layers of dust (fewer on small screens)
-  let d1 = dust(px, 46. * u.dpr, .05, t, 1.);
-  let d2 = dust(px + vec2f((u.mouse.x - .5) * 18. * u.dpr, 0.), 82. * u.dpr, .03, t, 2.);
+  // --- lamp dust, three depths with parallax from the pointer ---------------
+  let par = (u.mouse - .5) * u.dpr;
+  let d1 = dust(px + par * vec2f(6., 3.), 36. * u.dpr, .045, t, 1., .055, .025);
+  let d2 = dust(px + par * vec2f(20., 9.), 66. * u.dpr, .03, t, 2., .06, .04);
   var d3 = 0.;
-  if (u.small < .5) { d3 = dust(px + vec2f((u.mouse.x - .5) * 36. * u.dpr, 0.), 140. * u.dpr, .018, t, 3.); }
-  c += GOLD * (d1 * .55 + d2 * .75 + d3 * .9);
-  a += d1 * .4 + d2 * .5 + d3 * .6;
+  if (u.small < .5) { d3 = dust(px + par * vec2f(48., 22.), 128. * u.dpr, .02, t, 3., .11, .09); }
+  // the desk's own lamp keeps the paper mostly clear of motes
+  var deskIn = 0.;
+  if (u.rect.z > 0.) {
+    let dIn = sdBox(px - u.rect.xy - u.rect.zw * .5, u.rect.zw * .5);
+    deskIn = smoothstep(20. * u.dpr, -20. * u.dpr, dIn) * .6;
+  }
+  let dk = 1. - deskIn;
+  c += (CREAM * d1 * .6 + GOLD * d2 * .55 + LAMP * d3 * .38) * dk;
+  a += (d1 * .5 + d2 * .42 + d3 * .3) * dk;
 
-  // the pointer's lantern
+  // --- stage lamps: a slow swinging key light from above-left, a vermilion
+  //     fill from above-right. Low amplitude, wide, never a flash. ---------
+  let key = beam(in.uv, vec2f(-.08, -.22), 1.05 + .22 * sin(t * .09), .13, t) * .085;
+  let fill = beam(in.uv, vec2f(1.1, -.3), 2.25 + .18 * sin(t * .07 + 2.), .18, t) * .045;
+  c += GOLD * key + mix(VERMILION, LAMP, .5 + .5 * sin(t * .05)) * fill;
+  a += key * .5 + fill * .4;
+  // a warm vermilion breath pooling at the floor
+  let floorAmb = pow(in.uv.y, 3.) * (.012 + .008 * sin(t * .11));
+  c += VERMILION * floorAmb;
+  a += floorAmb;
+
+  // --- the pointer's lantern ------------------------------------------------
   let m = u.mouse * u.res;
-  let ld = length(px - m) / (220. * u.dpr);
-  let lantern = exp(-ld * ld * 2.2) * (.10 + .06 * u.energy);
+  let ld = length(px - m) / (240. * u.dpr);
+  let lantern = exp(-ld * ld * 2.) * (.09 + .07 * u.energy) * (.97 + .03 * sin(t * 7.3));
   c += LAMP * lantern;
   a += lantern * .6;
 
-  // click ripple: a thin gold ring, small area, fades in 1.2s
+  // --- click: two thin gold rings ride out, fade within 1.2s ---------------
   let ck = clamp(u.click, 0., 1.);
   if (ck > 0.) {
-    let ring = abs(length(px - m) - (1. - ck) * 260. * u.dpr);
-    let rv = exp(-ring * ring / (18. * u.dpr * u.dpr)) * ck * .5;
+    let dist = length(px - m);
+    let e = 1. - ck * ck;
+    let r1 = abs(dist - e * 280. * u.dpr);
+    let r2 = abs(dist - e * 180. * u.dpr - 20. * u.dpr);
+    let rv = (exp(-r1 * r1 / (10. * u.dpr * u.dpr)) + exp(-r2 * r2 / (6. * u.dpr * u.dpr)) * .6) * ck * .55;
     c += GOLD * rv;
     a += rv * .5;
   }
 
-  // slow diagonal sweep of stage light, every ~11s; low amplitude, wide
-  let sweepPos = fract(t / 11.) * 2.4 - .7;
-  let diag = in.uv.x * .7 + in.uv.y * .3;
-  let sw = exp(-pow((diag - sweepPos) * 9., 2.)) * .05;
-  c += mix(GOLD, VERMILION, .5 + .5 * sin(t * .07)) * sw;
-  a += sw * .5;
-
-  // the programme desk: a running light round its frame + a faint scanline veil
+  // --- the programme desk: a brass frame with two comets of light running
+  //     round it, corner glints, and a soft halo ------------------------------
   if (u.rect.z > 0.) {
-    let center = u.rect.xy + u.rect.zw * .5;
+    let h = u.rect.zw * .5;
+    let center = u.rect.xy + h;
     let p = px - center;
-    let d = sdBox(p, u.rect.zw * .5);
-    let edge = exp(-abs(d) / (3. * u.dpr)) ;
-    let ang = atan2(p.y, p.x);
-    let run = pow(.5 + .5 * cos(ang - t * .9), 18.) + pow(.5 + .5 * cos(ang + t * .6 + 2.), 24.) * .6;
-    let halo = exp(-max(d, 0.) / (26. * u.dpr)) * step(0., d) * .06;
-    let e = edge * (.10 + run * .55) + halo * (.6 + run);
-    c += mix(GOLD, LAMP, run) * e;
+    let d = sdBox(p, h);
+    let s = perim(p, h);
+    let f1 = fract(s - t * .055);
+    let f2 = fract(-s - t * .035 + .5);
+    let c1 = exp(-f1 * 16.) * smoothstep(0., .02, f1);
+    let c2 = exp(-f2 * 22.) * smoothstep(0., .015, f2) * .55;
+    let run = c1 + c2;
+    let line = exp(-abs(d) / (1.6 * u.dpr));
+    let soft = exp(-abs(d) / (9. * u.dpr));
+    let halo = exp(-max(d, 0.) / (34. * u.dpr)) * step(0., d);
+    let e = line * (.08 + run * .7) + soft * run * .25 + halo * (.03 + run * .09);
+    c += mix(GOLD, CREAM, run * .5) * e;
     a += e * .7;
-    if (d < 0.) {
-      let sl = .5 + .5 * sin(px.y * 3.14159 / (2. * u.dpr) );
-      let bar = exp(-pow(fract((px.y - u.rect.y) / u.rect.w - t * .08) * 8. - 4., 2.)) * .035;
-      c += GOLD * (sl * .012 + bar);
-      a += sl * .01 + bar * .4;
-    }
+    // corner glints: four small brass stars, slowly breathing out of phase
+    let q = abs(p) - h;
+    let cornerD = length(q);
+    let star = exp(-cornerD / (3. * u.dpr)) + exp(-abs(q.x) / (1.2 * u.dpr)) * exp(-abs(q.y) / (14. * u.dpr)) * .5
+             + exp(-abs(q.y) / (1.2 * u.dpr)) * exp(-abs(q.x) / (14. * u.dpr)) * .5;
+    let phase = select(0., 1.6, p.x > 0.) + select(0., 3.1, p.y > 0.);
+    let breathe = .55 + .45 * sin(t * .8 + phase);
+    let glint = star * breathe * .5;
+    c += CREAM * glint;
+    a += glint * .6;
   }
   // film grain (very low)
   let g = hash21(floor(px / u.dpr) + fract(t * 23.) * 91.) - .5;
@@ -130,54 +181,75 @@ fn tap(uv: vec2f) -> vec4f { return textureSampleLevel(dom, samp, uv, 0.); }
 // Only saturated lamp-coloured light blooms (gold rails, seals, accents), not the paper.
 fn bright(c: vec3f) -> vec3f {
   let sat = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
-  return c * smoothstep(.28, .55, sat) * smoothstep(.45, .8, max(c.r, c.g));
+  return c * smoothstep(.24, .5, sat) * smoothstep(.4, .8, max(c.r, c.g));
 }
 @fragment fn fs(in: VO) -> @location(0) vec4f {
   // The element sits at u.rect (device px) inside the canvas; its texture covers just that box.
   let luv = (in.pos.xy - u.rect.xy) / u.rect.zw;
   if (any(luv < vec2f(0.)) || any(luv > vec2f(1.))) { return vec4f(0.); }
   let t = u.time;
-  var uv = luv;
   let m = u.mouse;
-  // glitch: horizontal slices shift for ~0.45s after a click (no luminance flash)
+  let pxs = u.dpr / u.rect.zw;   // one device pixel in local uv
+  var uv = luv;
+  // --- click: film-gate jitter + a paper tear. The gate slips a few pixels and
+  //     settles in ~0.35s; the paper below a ragged seam slides sideways and a
+  //     shadow falls under the lip. Luminance never jumps. ----------------------
   let g = clamp(u.click, 0., 1.);
-  let gg = g * g * g;
-  let row = floor(uv.y * 38.);
-  let rh = hash21(vec2f(row, floor(t * 24.)));
-  if (rh > .72) { uv.x += (rh - .86) * .06 * gg; }
-  // lens warp toward the pointer (very small; hit testing stays visually aligned)
+  let jit = pow(g, 7.);
+  uv.y += jit * sin(g * 110.) * 9. * pxs.y;
+  uv.x += jit * sin(g * 73. + 1.) * 2.5 * pxs.x;
+  let seamY = .28 + .44 * u.seed;
+  let rag = (hash21(vec2f(floor(luv.x * 90.), u.seed * 7.)) - .5) * 4. * pxs.y;
+  let seam = seamY + rag;
+  let below = step(seam, luv.y);
+  let tearDir = select(-1., 1., u.seed > .5);
+  uv.x += below * jit * tearDir * 14. * pxs.x;
+  let lip = exp(-(luv.y - seam) / (7. * pxs.y)) * below * jit;
+  // --- lens: a gentle lamp bulge under the pointer (hit testing stays aligned) --
   let dm = uv - m;
-  let pull = exp(-dot(dm * u.rect.zw, dm * u.rect.zw) / (90000. * u.dpr * u.dpr)) * (.0025 + .004 * u.energy);
+  let dpx = dm * u.rect.zw;
+  let pull = exp(-dot(dpx, dpx) / (120000. * u.dpr * u.dpr)) * (.002 + .004 * u.energy);
   uv -= dm * pull * 6.;
-  // chromatic fringe grows toward the edges and with the glitch
-  let ca = (length(luv - .5) * .9 + gg * 3.) * 1.6 / u.rect.z;
+  // --- chromatic fringe: faint at the edges, a brief flare at the tear --------
+  // (two printing plates slipping, warm and cool, rather than an RGB split)
+  let ca = (length(luv - .5) * .45 + jit * 1.4 + lip * 1.2) * 1.3;
   let dir = normalize(luv - .5 + vec2f(1e-4));
-  let cr = tap(uv + dir * ca * u.dpr);
-  let cg = tap(uv);
-  let cb = tap(uv - dir * ca * u.dpr);
+  let cr = tap(uv + dir * ca * pxs);
+  let cg = tap(uv + dir * ca * pxs * .35);
+  let cb = tap(uv - dir * ca * pxs);
   var col = vec4f(cr.r, cg.g, cb.b, cg.a);
-  // bloom: 12-tap ring of the bright part
+  // --- bloom: two rings of 12 taps on the bright part, plus a short
+  //     anamorphic streak so brass rails and seals catch the lamp ----------------
   var bloom = vec3f(0.);
-  let br = 7. * u.dpr / u.rect.zw;
+  let br = 8. * pxs;
   for (var i = 0; i < 12; i++) {
-    let an = f32(i) * .5236 + t * .2;
+    let an = f32(i) * .5236 + t * .15;
     let o = vec2f(cos(an), sin(an));
-    let s1 = tap(luv + o * br).rgb;
-    let s2 = tap(luv + o * br * 2.6).rgb;
-    bloom += bright(s1) + bright(s2) * .6;
+    bloom += bright(tap(luv + o * br).rgb) + bright(tap(luv + o * br * 2.8).rgb) * .55;
   }
-  bloom *= (.045 + .03 * u.energy) * vec3f(1., .86, .66);
-  // scanlines + a slow rolling bar
+  var streak = vec3f(0.);
+  for (var k = 1; k <= 3; k++) {
+    let ox = vec2f(f32(k) * 9. * pxs.x, 0.);
+    streak += (bright(tap(luv + ox).rgb) + bright(tap(luv - ox).rgb)) / f32(k);
+  }
+  bloom = bloom * (.055 + .035 * u.energy) * vec3f(1., .88, .66) + streak * .03 * GOLD;
+  // --- the paper: a faint weave, a slow projector breath, a gold sheen that
+  //     crosses the desk every ~9s like a lamp swung past it --------------------
   let px = in.pos.xy;
-  let sl = .965 + .035 * sin(px.y * 3.14159 / (1.5 * u.dpr));
-  let roll = 1. + exp(-pow(fract(luv.y - t * .06) * 10. - 5., 2.)) * .025;
-  var rgb = col.rgb * sl * roll + bloom;
-  // lamplight from the pointer: warm, never a flash
-  let ld = length((luv - m) * u.rect.zw) / (300. * u.dpr);
-  rgb += LAMP * exp(-ld * ld) * .03 * col.a;
-  // edge vignette in the desk
-  let v = smoothstep(.85, .25, length((luv - .5) * vec2f(1., .8)));
-  rgb *= mix(.82, 1., v);
+  let weave = .982 + .018 * sin(px.y * 3.14159 / (1.5 * u.dpr));
+  let breath = 1. + .01 * sin(t * .6) ;
+  let sheenPos = fract(t / 9.) * 1.9 - .45;
+  let sheen = exp(-pow((luv.x * .6 + luv.y * .4 - sheenPos) * 7., 2.)) * .045 * col.a;
+  var rgb = col.rgb * weave * breath + bloom + GOLD * sheen;
+  // --- lamplight from the pointer: a warm pool, a hair of contrast ----------
+  let ld = length((luv - m) * u.rect.zw) / (320. * u.dpr);
+  let pool = exp(-ld * ld) * (.03 + .03 * u.energy) * col.a;
+  rgb += LAMP * pool;
+  // the tear's shadow
+  rgb *= 1. - lip * .4;
+  // --- warm vignette (the paper stays cream, the dark wood goes amber) --------
+  let v = smoothstep(.9, .3, length((luv - .5) * vec2f(1., .8)));
+  rgb *= mix(vec3f(.86, .80, .76), vec3f(1.), v);
   let a = max(col.a, clamp(max(bloom.r, bloom.g) * 1.2, 0., 1.));
   return vec4f(rgb, a);
 }
@@ -196,7 +268,7 @@ async function getDevice() {
 }
 
 function makePointer() {
-  const state = { x: 0.5, y: 0.35, tx: 0.5, ty: 0.35, cx: -1, cy: -1, click: 0, energy: 0 };
+  const state = { x: 0.5, y: 0.35, tx: 0.5, ty: 0.35, cx: -1, cy: -1, click: 0, energy: 0, seed: 0.5 };
   const move = (e) => {
     state.tx = e.clientX / Math.max(1, innerWidth);
     state.ty = e.clientY / Math.max(1, innerHeight);
@@ -207,6 +279,7 @@ function makePointer() {
   const down = (e) => {
     move(e);
     state.click = 1;
+    state.seed = Math.random();
   };
   addEventListener("pointermove", move, { passive: true });
   addEventListener("pointerdown", down, { passive: true });
@@ -308,7 +381,7 @@ export async function startLamplightOverlay(canvas, { getDeskRect } = {}) {
     if (r && r.bottom > -80 && r.top < innerHeight + 80) {
       u.set([r.left * s, r.top * s, r.width * s, r.height * s], 8);
     } else u.set([0, 0, 0, 0], 8);
-    u.set([scrollY * s, small ? 1 : 0, 0, 0], 12);
+    u.set([scrollY * s, small ? 1 : 0, pointer.state.seed, 0], 12);
     device.queue.writeBuffer(ubuf, 0, u);
     const enc = device.createCommandEncoder();
     const pass = enc.beginRenderPass({
@@ -450,6 +523,7 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
     ]);
     const sx = canvas.width / Math.max(1, rect.width);
     u.set([(er.left - rect.left) * sx, (er.top - rect.top) * sx, er.width * sx, er.height * sx], 8);
+    u.set([0, 0, pointer.state.seed, 0], 12);
     device.queue.writeBuffer(ubuf, 0, u);
     const enc = device.createCommandEncoder();
     const pass = enc.beginRenderPass({
