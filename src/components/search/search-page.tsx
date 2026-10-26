@@ -259,7 +259,7 @@ export function SearchPage({
 
   return (
     <div
-      className="world search-page search-observatory"
+      className="world search-page search-observatory command-records"
       data-search-page="true"
       data-search-mode={trimmed ? "find" : "browse"}
     >

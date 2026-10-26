@@ -82,6 +82,7 @@ function EntryCard({
       className="library-card"
       data-kind={entry.kind}
       data-library-entry={entry.id}
+      data-record-saved={bookmarked ? "true" : undefined}
       onClickCapture={(event) => {
         if (
           event.defaultPrevented ||
@@ -465,7 +466,7 @@ export function LibraryPage({
   return (
     <>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
-      <div className="world library-page library-atelier">
+      <div className="world library-page library-atelier command-records">
         <header className="library-topbar">
           <GuardedLink to="/world" assets={[]}>
             DECEPTION WORLD
@@ -557,7 +558,13 @@ export function LibraryPage({
             <h2 id="library-discovery-title">種類から探す</h2>
             <div className="library-index-meter" role="group" aria-label="種類から探す">
               {KIND_COUNTS.map(([id, count]) => (
-                <button key={id} type="button" data-kind={id} onClick={() => openKind(id)}>
+                <button
+                  key={id}
+                  type="button"
+                  data-kind={id}
+                  aria-pressed={kind === id}
+                  onClick={() => openKind(id)}
+                >
                   <RecordArtFrame
                     art={pathArt(KIND_ART[id])}
                     title={LIBRARY_KINDS[id]}

@@ -30,6 +30,7 @@ import worldZenithCssUrl from "@/styles-world-zenith.css?url";
 import worldArchiveToolsCssUrl from "@/styles-world-archive-tools.css?url";
 import worldSpecialCssUrl from "@/styles-world-special.css?url";
 import tabletWorldCssUrl from "@/styles-tablet-world.css?url";
+import commandDirectoryCssUrl from "@/styles-command-directory.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -83,6 +84,8 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldSpecialCssUrl },
         { rel: "stylesheet", href: tabletWorldCssUrl },
         { rel: "stylesheet", href: worldAstraCssUrl },
+        // Section-scoped command material outranks the final Mirage sheet.
+        { rel: "stylesheet", href: commandDirectoryCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
       ],

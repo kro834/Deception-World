@@ -1,0 +1,668 @@
+/* The World directories continue the Command Deck's ink, titanium edges and
+   silver selections. No rider rail size, touch-action, capture, transform, overflow
+   or interaction contract is changed. Existing artwork and crop rules win. */
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  :is(#manager-archive, #riders, #cast-roster) {
+  --directory-ink: #050b12;
+  --directory-panel: #0d1d2b;
+  --directory-text: #e9f6fb;
+  --directory-muted: #b6cbd7;
+  --directory-cyan: #74d9ec;
+  --directory-seam: rgb(145 189 215 / 28%);
+  --directory-metal: linear-gradient(155deg, #eaf5fa, #acc2ce 46%, #8ca6b5 47%, #dcecf4);
+}
+
+/* A complete heading row, then classification, then the artwork. The previous
+   nested two-column header squeezed the Japanese description into 45px. */
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  padding: clamp(20px, 3.4vw, 48px);
+  border: 1px solid var(--directory-seam);
+  border-top: 3px solid #b2c6d2;
+  background:
+    linear-gradient(115deg, rgb(233 246 251 / 8%), transparent 36%),
+    linear-gradient(155deg, #0d1d2b, #050b12 60%);
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 30%),
+    8px 8px 0 rgb(2 7 13 / 52%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  > .threat-copy {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 24px 40px;
+  min-width: 0;
+  margin: 0;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .threat-copy
+  h3 {
+  margin: 0;
+  max-width: 100%;
+  color: var(--directory-text);
+  font-size: clamp(28px, 3.1vw, 48px);
+  font-style: italic;
+  line-height: 1.16;
+  letter-spacing: 0.015em;
+  text-shadow: 0 3px 0 rgb(0 0 0 / 28%);
+  overflow-wrap: anywhere;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .threat-copy
+  > p {
+  min-width: 0;
+  max-width: 34em;
+  margin: 0;
+  padding: 12px 0 12px 20px;
+  border-left: 2px solid var(--directory-cyan);
+  color: var(--directory-muted);
+  font-size: 15px;
+  line-height: 1.85;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .signal-column {
+  display: contents;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  :is(.manager-archive-tabs, .manager-archive-panel) {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 0;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-archive-tabs {
+  border-color: var(--directory-seam) !important;
+  background: #03080e !important;
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 40%) !important;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-archive-tabs
+  .liquid-selection-surface {
+  border-color: #d7e9f2 !important;
+  background: var(--directory-metal) !important;
+  box-shadow:
+    inset 3px 0 0 var(--directory-cyan),
+    inset 0 1px 0 white !important;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-archive-tabs
+  button[aria-selected="true"] {
+  color: #07131d !important;
+  text-shadow: none;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid {
+  gap: 16px;
+  align-items: stretch;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > :is(.signal, .dante-archive, .other-archive-card, .archive-placeholder) {
+  border-radius: 2px;
+  border-color: rgb(145 189 215 / 40%);
+  border-top: 3px solid #a6bdca;
+  background-color: var(--directory-ink);
+  box-shadow:
+    inset 0 0 0 3px rgb(2 7 13 / 18%),
+    0 5px 0 #02070d,
+    0 6px 0 rgb(145 189 215 / 26%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > .signal {
+  min-height: 300px;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > .signal
+  > b {
+  color: var(--directory-text);
+  font-size: clamp(14px, 1.3vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 5px #000;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > .signal
+  > span:first-of-type {
+  padding: 5px 8px;
+  border: 1px solid rgb(var(--rk-light) / 55%);
+  background: rgb(2 7 13 / 82%);
+  box-shadow: inset 0 1px 0 rgb(233 246 251 / 20%);
+  text-shadow: none;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .other-card-code {
+  color: #07131d;
+  background: var(--directory-metal);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  :is(.other-card-copy, .dante-copy) {
+  text-shadow: 0 2px 5px #000;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  :is(.other-card-copy i, .other-card-copy small, .dante-copy em) {
+  color: var(--directory-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* The rider rail keeps its exact measured cells and long-press lens. Only
+   the surface paints change; the selected rider's own colour stays on it. */
+html[data-family="world"] main.site-shell.film-edition.mirage-edition #riders#riders {
+  background: linear-gradient(155deg, rgb(13 29 43 / 96%), #050b12 74%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  > .rider-console {
+  border: 1px solid var(--directory-seam);
+  border-top: 3px solid #aec6d3;
+  background: var(--directory-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 28%),
+    8px 8px 0 rgb(2 7 13 / 70%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  > .rider-console
+  > .rider-selector {
+  border-color: var(--directory-seam);
+  background: linear-gradient(135deg, #132533, #050b12 60%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-tabs.liquid-swipe-tabs {
+  border-color: var(--directory-seam) !important;
+  background: #02070d !important;
+  box-shadow: inset 0 2px 8px rgb(0 0 0 / 60%) !important;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-tabs
+  .liquid-selection-surface {
+  background: var(--directory-metal) !important;
+  box-shadow:
+    inset 3px 0 0 var(--directory-cyan),
+    inset 0 1px 0 white,
+    0 4px 0 #02070d !important;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-tabs
+  > button[aria-selected="true"],
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-tabs
+  > button[aria-selected="true"]
+  > small {
+  color: #07131d !important;
+  text-shadow: none;
+}
+html[data-family="world"] main.site-shell.film-edition.mirage-edition #riders#riders .rider-detail {
+  background:
+    radial-gradient(
+      ellipse at 80% 0,
+      color-mix(in srgb, var(--rider-tone) 14%, transparent),
+      transparent 64%
+    ),
+    linear-gradient(125deg, #0e1b27, #050b12 64%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-copy-block {
+  box-sizing: border-box;
+  padding: clamp(18px, 2vw, 28px);
+  border: 1px solid var(--directory-seam);
+  border-left: 3px solid var(--directory-cyan);
+  background: linear-gradient(135deg, rgb(233 246 251 / 6%), transparent 48%), rgb(5 11 18 / 94%);
+  box-shadow: 6px 6px 0 rgb(2 7 13 / 50%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-copy-block
+  > h3 {
+  color: var(--directory-text);
+  font-size: clamp(27px, 2.8vw, 42px);
+  line-height: 1.25;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-copy-block
+  > :is(.rider-person, .rider-description) {
+  color: var(--directory-muted);
+  line-height: 1.9;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders
+  .rider-dossier-open {
+  border-color: rgb(145 189 215 / 60%);
+  box-shadow: inset 0 1px 0 rgb(233 246 251 / 22%);
+}
+
+/* A five-part facet dock and portrait dossiers. Keep the existing subgrid,
+   disclosure expansion, portrait link hitbox and return-position contracts. */
+html[data-family="world"] main.site-shell.film-edition.mirage-edition #cast-roster#cast-roster {
+  background: linear-gradient(145deg, #0d1d2b, #050b12 55%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-heading
+  h2 {
+  color: var(--directory-text);
+  text-shadow: 0 4px 0 rgb(0 0 0 / 25%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-directory {
+  margin-bottom: 30px;
+  padding: 7px;
+  border: 1px solid var(--directory-seam);
+  border-top: 2px solid #aac2cf;
+  background: #02070d;
+  box-shadow: inset 0 2px 8px rgb(0 0 0 / 54%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-directory-controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-directory-controls
+  button {
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 12px;
+  border-color: transparent;
+  border-radius: 1px;
+  background: linear-gradient(180deg, rgb(233 246 251 / 7%), transparent);
+  color: var(--directory-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-directory-controls
+  button[aria-pressed="true"] {
+  border-color: #d9eaf3;
+  background: var(--directory-metal);
+  color: #07131d;
+  box-shadow:
+    inset 3px 0 0 var(--directory-cyan),
+    0 3px 0 #02070d;
+  font-weight: 700;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-directory-badge {
+  display: grid;
+  min-width: 24px;
+  min-height: 24px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-roster {
+  --wa-row-gap: 24px;
+  column-gap: 20px;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person {
+  border: 1px solid var(--directory-seam);
+  border-top: 3px solid #9ab2c0;
+  border-radius: 2px;
+  background: linear-gradient(150deg, #132532, #050b12 60%);
+  box-shadow:
+    5px 5px 0 #02070d,
+    6px 6px 0 rgb(145 189 215 / 16%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person:has(.wa-profile[open]) {
+  border-color: var(--directory-cyan);
+  background: linear-gradient(150deg, #193444, #08131d 55%);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person-body {
+  padding: 16px 16px 0;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person
+  h3 {
+  margin-top: 7px;
+  color: var(--directory-text);
+  line-height: 1.45;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person
+  .wa-quote.is-signature {
+  margin-block: 12px;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person
+  .wa-profile
+  > summary {
+  min-height: 48px;
+  padding-block: 10px;
+  border-color: var(--directory-seam);
+  color: var(--directory-text);
+  background: linear-gradient(180deg, rgb(233 246 251 / 6%), transparent);
+  font-size: 12px;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person
+  .wa-profile[open]
+  > summary {
+  color: #07131d;
+  background: var(--directory-metal);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-person
+  .wa-open {
+  min-height: 48px;
+  border-color: var(--directory-seam);
+  color: var(--directory-cyan);
+  background: linear-gradient(120deg, rgb(116 217 236 / 9%), transparent);
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-profile-body {
+  padding: 8px 0 16px;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-profile-body
+  .wa-prose {
+  color: var(--directory-muted);
+  font-size: 15px;
+  line-height: 1.95;
+}
+
+@media (min-width: 761px) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > .signal:nth-child(even) {
+    margin-top: 18px;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > .signal:nth-child(odd) {
+    margin-bottom: 18px;
+  }
+}
+@media (max-width: 899px) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    > .threat-copy {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-directory-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-directory-controls
+    button:first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 560px) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #riders#riders
+    > .section-title
+    h2 {
+    font-size: clamp(25px, 8vw, 32px);
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive {
+    padding: 16px 12px 22px;
+    gap: 20px;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid {
+    gap: 14px 10px;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > .signal {
+    min-height: 230px;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > .signal
+    > b {
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-directory-controls
+    button {
+    padding: 10px 8px;
+    gap: 5px;
+    font-size: 12px;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-person-body {
+    padding: 12px 12px 0;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-roster {
+    --wa-row-gap: 18px;
+    column-gap: 12px;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > :is(.signal, .dante-archive, .other-archive-card):hover,
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-person:has(.wa-open:hover) {
+    border-color: var(--directory-cyan);
+    box-shadow:
+      inset 0 0 0 1px rgb(233 246 251 / 24%),
+      5px 5px 0 #02070d,
+      6px 6px 0 rgb(116 217 236 / 60%);
+  }
+}
+@media (forced-colors: active) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    :is(#manager-archive, #riders, #cast-roster) {
+    --directory-cyan: LinkText;
+    --directory-text: CanvasText;
+    --directory-muted: CanvasText;
+    --directory-seam: ButtonText;
+    --directory-metal: linear-gradient(Canvas, Canvas);
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-directory-controls
+    button[aria-pressed="true"],
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-person
+    .wa-profile[open]
+    > summary {
+    outline: 2px solid Highlight;
+    color: Highlight;
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #riders#riders
+    .rider-tabs
+    > button[aria-selected="true"],
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-archive-tabs
+    button[aria-selected="true"] {
+    color: Highlight !important;
+    outline: 2px solid Highlight;
+  }
+}
+/* No new motion: reduced-motion and economy retain the same static surfaces. */
+
+/* Reset the old two-column named tracks as well as its explicit child rows. */
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive {
+  grid-template-areas: none;
+  grid-auto-flow: row;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  > .threat-copy {
+  grid-row: 1;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-archive-tabs {
+  grid-row: 2;
+  width: 100%;
+  max-width: 100%;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-archive-panel {
+  grid-row: 3;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > :is(.signal, .dante-archive, .other-archive-card, .archive-placeholder) {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster
+  .wa-directory-controls
+  button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  text-align: left;
+}

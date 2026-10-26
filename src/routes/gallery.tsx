@@ -13,6 +13,7 @@ import galleryPresentCssUrl from "@/styles-gallery-present.css?url";
 import galleryCurationCssUrl from "@/styles-gallery-curation.css?url";
 import galleryControlsPolishCssUrl from "@/styles-gallery-controls-polish.css?url";
 import tabletGalleryCssUrl from "@/styles-tablet-gallery.css?url";
+import commandGalleryCssUrl from "@/styles-command-gallery.css?url";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
 export const Route = createFileRoute("/gallery")({
@@ -49,6 +50,7 @@ export const Route = createFileRoute("/gallery")({
           type: "image/webp",
           href,
         })),
+        { rel: "stylesheet", href: commandGalleryCssUrl },
       ],
     };
   },

@@ -6,6 +6,7 @@ import inquiryCssUrl from "@/styles-library-inquiry.css?url";
 import stageLibraryCssUrl from "@/styles-stage-library.css?url";
 import zenithLibraryCssUrl from "@/styles-library-zenith.css?url";
 import atelierLibraryCssUrl from "@/styles-library-atelier.css?url";
+import commandRecordsCssUrl from "@/styles-command-records.css?url";
 import { getInquiryGuide } from "@/lib/inquiry-guides";
 import { validateLibraryBrowseSearch } from "@/lib/library-browse-state";
 
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/library")({
         { rel: "stylesheet", href: zenithLibraryCssUrl },
         // Route-local editorial layout, after every shared index skin.
         { rel: "stylesheet", href: atelierLibraryCssUrl },
+        { rel: "stylesheet", href: commandRecordsCssUrl },
       ],
     }),
 });
