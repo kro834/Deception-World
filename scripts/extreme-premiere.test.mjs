@@ -392,7 +392,10 @@ test("the component adds only textless, hidden ornaments, line wrappers and the 
   assert.equal((component.match(/<div className="exo-read">/g) ?? []).length, 3);
   assert.match(component, /<span className="exo-arrow" aria-hidden="true">\s*→\s*<\/span>/);
   assert.match(component, /<span className="exo-frame" aria-hidden="true" \/>/);
-  assert.match(component, /<span className="exo-number">\{system\.number\}<\/span>/);
+  assert.match(
+    component,
+    /<span className="exo-number(?: dg-numeral dg-reveal)?">\{system\.number\}<\/span>/,
+  );
   assert.equal((component.match(/assets=\{\[\]\} className="exo-door"/g) ?? []).length, 2);
   // Every headline keeps its two lines, each in a wrapper and unchanged.
   for (const [first, second] of [

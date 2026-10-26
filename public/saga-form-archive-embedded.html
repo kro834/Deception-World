@@ -7192,6 +7192,40 @@ html:not(.saga-compare-ready) #saga-form-compare-ios .compare-sync-rail span { a
 }
 </style>
 <link rel="stylesheet" href="/archive-elevation.css?v=20261006-elev4">
+<style id="dg-archive-kit">
+/* Dynamic GUI kit, archive subset (CSS only: the archives load neither
+   src/styles-dynamic-gui.css nor src/lib/dynamic-gui.js). Mirrors the kit's
+   .dg-control lit hover, .dg-focus ring and a scroll-linked draw-in of the
+   real ratio bars (their widths are the data; only scale animates). Resting
+   state is the full bar; no view() support, reduced motion or economy keep it. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]) .ratio-track > .ratio-fill {
+      animation: dg-archive-fill linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+  }
+}
+@keyframes dg-archive-fill {
+  from { scale: 0.04 1; }
+  to { scale: 1 1; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .spec-item,
+  .compare-form-card { transition: box-shadow 180ms ease, filter 180ms ease; }
+  .spec-item:hover,
+  .compare-form-card:hover {
+    box-shadow: inset 0 0 0 1px rgb(122 232 255 / 34%), 0 0 18px rgb(122 232 255 / 12%);
+    filter: brightness(1.06);
+  }
+}
+:is(a, button, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid #f0cf86;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgb(122 232 255 / 22%);
+}
+</style>
 <link rel="stylesheet" href="/archive-armour.css?v=20261010-armour">
 <link rel="stylesheet" href="/archive-deck.css?v=20261010-deck">
 <link rel="stylesheet" href="/archive-cockpit.css?v=20261010-rx9">

@@ -66,7 +66,7 @@ test("Final Stage component wires the shared chrome, section anchors, and hero t
   assert.ok(component, "src/components/final-stage/final-stage.tsx should exist");
   assert.match(component, /<SideMenuLayer context="final-stage"/);
   assert.match(component, /id="top"/);
-  assert.match(component, /className="rxs-page fst-page"/);
+  assert.match(component, /className="rxs-page fst-page(?: dg-focus-scope)?"/);
   assert.match(component, /aria-labelledby="fst-title"/);
   assert.match(component, /id="story"/);
   assert.match(component, /id="characters"/);

@@ -1904,7 +1904,7 @@ export function RexonanceSaga() {
     <main
       ref={setPageRef}
       id="top"
-      className="rxs-page rxs-rexonance-page"
+      className="rxs-page rxs-rexonance-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       {stageCall && (
@@ -1931,15 +1931,15 @@ export function RexonanceSaga() {
             </b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
-            <a href="#performance">性能</a>
-            <a href="#p14">P14</a>
+            <a href="#performance" className="dg-control">性能</a>
+            <a href="#p14" className="dg-control">P14</a>
             {/* APEX (rx19): the bar lists all five chapters, numbered as the
                 chapter index; 03 stays lit through the runway and the replay. */}
-            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay">
+            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay" className="dg-control">
               変身
             </a>
-            <a href="#stages">形態</a>
-            <a href="#system">システム</a>
+            <a href="#stages" className="dg-control">形態</a>
+            <a href="#system" className="dg-control">システム</a>
           </nav>
           <SideMenuTrigger
             className="rxs-menu-trigger"

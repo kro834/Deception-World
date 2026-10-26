@@ -293,7 +293,7 @@ export function MetaUnitasSaga() {
     <main
       ref={pageRef}
       id="top"
-      className="rxs-page mus-page"
+      className="rxs-page mus-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       <header className="rxs-local-nav">
@@ -308,19 +308,19 @@ export function MetaUnitasSaga() {
             <b>メタ・ウニタスサーガ</b>
           </GuardedLink>
           <nav aria-label="メタ・ウニタスサーガ ページ内ナビゲーション">
-            <a href="#overview" data-local-nav-through="specs performance">
+            <a href="#overview" data-local-nav-through="specs performance" className="dg-control">
               <span aria-hidden="true">01</span> 概要
             </a>
-            <a href="#suitup" data-local-nav-through="meta-unitas-runway">
+            <a href="#suitup" data-local-nav-through="meta-unitas-runway" className="dg-control">
               <span aria-hidden="true">02</span> 変身
             </a>
-            <a href="#system" data-local-nav-through="abilities armor">
+            <a href="#system" data-local-nav-through="abilities armor" className="dg-control">
               <span aria-hidden="true">03</span> 機構
             </a>
-            <a href="#stages">
+            <a href="#stages" className="dg-control">
               <span aria-hidden="true">04</span> 形態
             </a>
-            <a href="#arsenal" data-local-nav-through="finishers">
+            <a href="#arsenal" data-local-nav-through="finishers" className="dg-control">
               <span aria-hidden="true">05</span> 武装
             </a>
           </nav>

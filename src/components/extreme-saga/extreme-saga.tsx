@@ -582,7 +582,7 @@ export function ExtremeSaga() {
     <main
       ref={pageRef}
       id="top"
-      className="rxs-page exs-page"
+      className="rxs-page exs-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       <header className="rxs-local-nav">
@@ -600,16 +600,16 @@ export function ExtremeSaga() {
             </b>
           </GuardedLink>
           <nav aria-label="エクスプリームサーガ ページ内ナビゲーション">
-            <a href="#performance">
+            <a href="#performance" className="dg-control">
               <span aria-hidden="true">01</span> 比較
             </a>
-            <a href="#p14">
+            <a href="#p14" className="dg-control">
               <span aria-hidden="true">02</span> P14
             </a>
-            <a href="#stages">
+            <a href="#stages" className="dg-control">
               <span aria-hidden="true">03</span> 形態
             </a>
-            <a href="#system">
+            <a href="#system" className="dg-control">
               <span aria-hidden="true">04</span> システム
             </a>
           </nav>
@@ -696,23 +696,23 @@ export function ExtremeSaga() {
           number), its name and the way in (owner, 2026-10-23: no English
           codes or descriptions on the card). */}
       <nav className="rxs-chapter-index exs-chapter-index" aria-label="エクスプリームの見どころ">
-        <a href="#performance">
-          <small aria-hidden="true">01</small>
+        <a href="#performance" className="dg-control dg-control-sweep">
+          <small className="dg-numeral" aria-hidden="true">01</small>
           <span>性能を比べる</span>
           <i aria-hidden="true">↗</i>
         </a>
-        <a href="#p14">
-          <small aria-hidden="true">02</small>
+        <a href="#p14" className="dg-control dg-control-sweep">
+          <small className="dg-numeral" aria-hidden="true">02</small>
           <span>演算加速機構</span>
           <i aria-hidden="true">↗</i>
         </a>
-        <a href="#stages">
-          <small aria-hidden="true">03</small>
+        <a href="#stages" className="dg-control dg-control-sweep">
+          <small className="dg-numeral" aria-hidden="true">03</small>
           <span>二つの形態</span>
           <i aria-hidden="true">↗</i>
         </a>
-        <a href="#system">
-          <small aria-hidden="true">04</small>
+        <a href="#system" className="dg-control dg-control-sweep">
+          <small className="dg-numeral" aria-hidden="true">04</small>
           <span>中核システム</span>
           <i aria-hidden="true">↗</i>
         </a>
@@ -957,7 +957,7 @@ export function ExtremeSaga() {
           {CORE_SYSTEMS.map((system) => (
             <article key={system.number} className="rxs-reveal">
               <header>
-                <span className="exo-number">{system.number}</span>
+                <span className="exo-number dg-numeral dg-reveal">{system.number}</span>
                 <small>{system.code}</small>
               </header>
               <h3>{system.title}</h3>

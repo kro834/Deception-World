@@ -338,7 +338,7 @@ export function IllusionculumSaga() {
     <main
       ref={pageRef}
       id="top"
-      className="rxs-page ics-page"
+      className="rxs-page ics-page dg-focus-scope"
       data-motion-ready={motionReady === null ? undefined : String(motionReady)}
       data-form={form}
       data-ultra={isUltra(form) ? "true" : undefined}
@@ -363,22 +363,22 @@ export function IllusionculumSaga() {
           {/* The six chapters, numbered; a chapter stays lit through its
               sub-chapters. The side menu lists every section. */}
           <nav aria-label="イリュージョンクルムサーガ ページ内ナビゲーション">
-            <a href="#overview" data-local-nav-through="specs comparison">
+            <a href="#overview" data-local-nav-through="specs comparison" className="dg-control">
               <span aria-hidden="true">01</span> 概要
             </a>
-            <a href="#suitup" data-local-nav-through="illusionculum-assembly-runway">
+            <a href="#suitup" data-local-nav-through="illusionculum-assembly-runway" className="dg-control">
               <span aria-hidden="true">02</span> 変身
             </a>
-            <a href="#forms">
+            <a href="#forms" className="dg-control">
               <span aria-hidden="true">03</span> 形態
             </a>
-            <a href="#armour">
+            <a href="#armour" className="dg-control">
               <span aria-hidden="true">04</span> 装甲
             </a>
-            <a href="#arsenal">
+            <a href="#arsenal" className="dg-control">
               <span aria-hidden="true">05</span> 武装
             </a>
-            <a href="#abilities" data-local-nav-through="finishers">
+            <a href="#abilities" data-local-nav-through="finishers" className="dg-control">
               <span aria-hidden="true">06</span> 能力
             </a>
           </nav>

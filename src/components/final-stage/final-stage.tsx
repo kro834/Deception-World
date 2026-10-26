@@ -547,7 +547,7 @@ export function FinalStage() {
     <main
       ref={pageRef}
       id="top"
-      className="rxs-page fst-page"
+      className="rxs-page fst-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       <header className="rxs-local-nav">
@@ -563,9 +563,9 @@ export function FinalStage() {
             <b>ファイナルステージ</b>
           </GuardedLink>
           <nav aria-label="ファイナルステージ ページ内ナビゲーション">
-            <a href="#story">あらすじ</a>
-            <a href="#characters">人物</a>
-            <a href="#riders">ライダー</a>
+            <a href="#story" className="dg-control">あらすじ</a>
+            <a href="#characters" className="dg-control">人物</a>
+            <a href="#riders" className="dg-control">ライダー</a>
           </nav>
           <SideMenuTrigger
             className="rxs-menu-trigger"
