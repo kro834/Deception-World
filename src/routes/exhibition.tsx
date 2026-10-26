@@ -37,7 +37,7 @@ function ExhibitionRoom() {
     void navigate({ search: { work: id }, replace: true, resetScroll: false });
 
   return (
-    <main className="exhibition-room exhibition-room-curated" id="main">
+    <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
       <header className="exhibition-room-heading">
         <div>
           <p className="exhibition-room-eyebrow">DECEPTION WORLD / EXHIBITION</p>

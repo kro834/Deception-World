@@ -87,7 +87,14 @@ type RiderDiveVariant =
   | "meta-unitas"
   | "final-stage";
 type RiderCutInVariant = "leddic" | "argenome" | "over-zeztz" | "cipher" | "ciel";
-type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant;
+// The plain file shutter (owner, 2026-10-26: 「ディセプションの遷移アニメーションなどを
+// 復活させ」): the 六詠 and character files that have no dive or cut-in of
+// their own, and the World itself, are covered like every other dossier
+// route instead of changing at once behind the prism signal. "file" closes
+// onto the pressed card and opens from the destination's portrait; "world"
+// closes onto the pressed control and opens from the whole screen.
+type FileTransitionVariant = "file" | "world";
+type RiderTransitionVariant = RiderDiveVariant | RiderCutInVariant | FileTransitionVariant;
 
 type GateState = {
   active: boolean;
@@ -207,6 +214,12 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
 
 // Dossier to dossier (PREV / NEXT): a lateral file flip, shorter than a dive.
 const FILE_FLIP_TIMINGS = { cover: 300, reveal: 440 };
+// The plain file shutter: a dossier's cover paced as a cut-in's, the
+// World's return a little quicker (it has no portrait to land on).
+const FILE_TIMINGS: Record<FileTransitionVariant, { cover: number; reveal: number }> = {
+  file: { cover: 320, reveal: 540 },
+  world: { cover: 280, reveal: 460 },
+};
 const SOVEREIGN_TIMINGS = { cover: 440, reveal: 400 };
 // Economy rendering: one opacity shutter, no travel.
 const CALM_TIMINGS = { cover: 180, reveal: 240 };
@@ -769,9 +782,10 @@ function CineLayers({ scene }: { scene: CineScene | null | undefined }) {
   );
 }
 
-// Routes without a cover (the other dossiers, returns to the World) change
-// at once. This prism signal paints before the route's work and runs on the
-// compositor while the old page is busy, so the press is answered in a frame.
+// Routes without a cover (the library, the search, the galleries' indexes)
+// change at once. This prism signal paints before the route's work and runs
+// on the compositor while the old page is busy, so the press is answered in
+// a frame. The dossiers and the World take the file shutter (FileTransitionVariant).
 function RouteSignal({ state }: { state: "idle" | "running" | "done" }) {
   if (state === "idle") return null;
   return <span className={`route-signal is-${state}`} aria-hidden="true" />;
@@ -1389,7 +1403,18 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         const cutInVariant = changesDocument
           ? RIDER_CUT_IN_ROUTES[to as keyof typeof RIDER_CUT_IN_ROUTES]
           : undefined;
-        const riderTransitionVariant = diveVariant ?? cutInVariant;
+        // The other dossiers and the World take the plain file shutter. The
+        // opening's own handoff (transitionCovered, above) and Zeus's seal
+        // keep theirs; a section jump within the page stays uncovered.
+        const fileVariant: FileTransitionVariant | undefined =
+          !changesDocument || diveVariant || cutInVariant || isZeusTransition
+            ? undefined
+            : DETAIL_ROUTE.test(to)
+              ? "file"
+              : to === "/world" && pathname !== "/"
+                ? "world"
+                : undefined;
+        const riderTransitionVariant = diveVariant ?? cutInVariant ?? fileVariant;
         const requestId = ++transitionId.current;
         const isCurrent = () => transitionId.current === requestId;
         const warmCoveredDestination = async () => {
@@ -1635,14 +1660,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                         : RIDER_DIVE_TIMINGS[diveVariant]
                   : cutInVariant
                     ? RIDER_CUT_IN_TIMINGS[cutInVariant]
-                    : CALM_TIMINGS;
+                    : fileVariant
+                      ? FILE_TIMINGS[fileVariant]
+                      : CALM_TIMINGS;
           const scene =
             cutInVariant === "ciel"
               ? null
               : composeScene({
                   tier,
                   kind: flip ? "flip" : "iris",
-                  frameKind: diveVariant || flip ? "file" : "screen",
+                  frameKind:
+                    diveVariant || flip || fileVariant === "file" ? "file" : "screen",
                   timings,
                   assets,
                   to,
@@ -1780,6 +1808,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (!isCurrent()) return;
             const callOnly = Boolean(rexonanceCall);
             let landed = scene;
+            // The World's return lands on its list (the roster, the cast)
+            // while the shutter is still closed, so the jump is never seen.
+            if (fileVariant === "world" && hash) {
+              await Promise.race([settleRouteHash(hash), wait(240)]);
+              if (!isCurrent()) return;
+            }
             // The call renderer has no carried portrait or docking layers. Keep
             // its tier/timing metadata without measuring unused destination art.
             if (!callOnly) {
@@ -2109,6 +2143,28 @@ function LoadOverlay({
       >
         <CineLayers scene={scene} />
         <RiderRouteCutIn variant={variant} />
+      </div>
+    );
+  }
+  if (variant === "file" || variant === "world") {
+    return (
+      <div
+        className={`load-gate dossier-route-file is-${variant}-shutter is-${phase}${cineClass(scene)}`}
+        style={sceneStyle(scene)}
+        role="status"
+        aria-live="polite"
+        aria-busy={phase === "covering"}
+        aria-label={
+          variant === "world"
+            ? phase === "revealing"
+              ? "資料室へ戻りました"
+              : "資料室へ移動中"
+            : phase === "revealing"
+              ? "個別資料を展開しました"
+              : "個別資料を展開中"
+        }
+      >
+        <CineLayers scene={scene} />
       </div>
     );
   }

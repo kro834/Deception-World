@@ -243,3 +243,32 @@ test("the covered page keeps its scrollbar gutter and the Zeus button waits for 
     /if \(root\.dataset\.routeCover === "settling"\) delete root\.dataset\.routeCover;/,
   );
 });
+
+test("the other dossiers and the World take the plain file shutter (owner, 2026-10-26)", () => {
+  // The 六詠 and character files without a dive or cut-in, and the World's
+  // return, are covered like every other dossier route; Zeus's seal, the
+  // opening's handoff and in-page jumps keep their own paths.
+  assert.match(gate, /type FileTransitionVariant = "file" \| "world";/);
+  assert.match(
+    gate,
+    /const fileVariant: FileTransitionVariant \| undefined =\s*!changesDocument \|\| diveVariant \|\| cutInVariant \|\| isZeusTransition\s*\? undefined\s*: DETAIL_ROUTE\.test\(to\)\s*\? "file"\s*: to === "\/world" && pathname !== "\/"\s*\? "world"\s*: undefined;/,
+  );
+  assert.match(gate, /const riderTransitionVariant = diveVariant \?\? cutInVariant \?\? fileVariant;/);
+  assert.match(gate, /file: \{ cover: 320, reveal: 540 \},\s*world: \{ cover: 280, reveal: 460 \},/);
+  // A dossier lifts the pressed card into a file frame; the World opens from the screen.
+  assert.match(
+    gate,
+    /frameKind:\s*diveVariant \|\| flip \|\| fileVariant === "file" \? "file" : "screen",/,
+  );
+  // The World's hash landing happens under the closed shutter.
+  assert.match(
+    gate,
+    /if \(fileVariant === "world" && hash\) \{\s*await Promise\.race\(\[settleRouteHash\(hash\), wait\(240\)\]\);/,
+  );
+  assert.match(
+    gate,
+    /className=\{`load-gate dossier-route-file is-\$\{variant\}-shutter is-\$\{phase\}\$\{cineClass\(scene\)\}`\}/,
+  );
+  assert.match(css, /html body \.load-gate\.has-cine\.dossier-route-file \{/);
+  assert.match(css, /\.dossier-route-file\.is-world-shutter \{[^}]*--dwc-close: 280ms;/);
+});

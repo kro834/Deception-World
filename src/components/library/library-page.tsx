@@ -476,7 +476,7 @@ export function LibraryPage({
             <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
           </div>
         </header>
-        <main id="library-main">
+        <main id="library-main" className="dg-focus-scope">
           <section className="library-intro">
             <div className="library-intro-copy">
               <p className="library-eyebrow">資料室</p>

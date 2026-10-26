@@ -1,3 +1,6 @@
+              ) : null}
+              {stats.length ? (
+                <dl className="form-pickup-stats">
                   {stats.map((s) => (
                     <div key={s.dt}>
                       <dt>{s.dt}</dt>
@@ -152,7 +155,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
   useWorldMode();
   return (
     <main
-      className={`manager-page${profile.sovereign ? " is-sovereign" : ""}`}
+      className={`manager-page${profile.sovereign ? " is-sovereign" : ""} dg-focus-scope`}
       style={{
         ["--manager-accent" as string]: profile.accent,
         ["--manager-accent-soft" as string]: profile.accent,
@@ -178,6 +181,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         returnHash="manager-archive"
         returnLabel="六詠一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -293,7 +297,11 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         <DossierContents sections={profile.sections} />
         <div className="manager-sections">
           {profile.sections.map((s) => (
-            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
+            <article
+              className={`manager-copy-section${profile.sovereign ? "" : " dg-reveal"}`}
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -431,7 +439,3 @@ export const REX_LOI: Profile = {
       { dt: "PUNCH", dd: "262.9t" },
       { dt: "KICK", dd: "372.2t" },
       { dt: "JUMP", dd: "5000m" },
-      { dt: "100m", dd: "0.01sec" },
-    ],
-    abilities: [
-      {

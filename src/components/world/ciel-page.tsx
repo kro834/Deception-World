@@ -34,7 +34,7 @@ export function CielPage() {
   const portrait = CIEL_PORTRAIT.variants[CIEL_PORTRAIT.variants.length - 1];
   return (
     <main
-      className="manager-page rider-dossier-page ciel-dossier-page"
+      className="manager-page rider-dossier-page ciel-dossier-page dg-focus-scope"
       style={{
         ["--manager-accent" as string]: CIEL_EMERALD,
         ["--manager-accent-soft" as string]: CIEL_AQUA,
@@ -55,6 +55,7 @@ export function CielPage() {
         returnHash={RE_DIVE_HASH}
         returnLabel="六詠一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -140,7 +141,7 @@ export function CielPage() {
         <div className="manager-sections">
           {SAGA.sections.map((section) => (
             <article
-              className="manager-copy-section"
+              className="manager-copy-section dg-reveal"
               id={`character-section-${section.no}`}
               key={section.no}
             >

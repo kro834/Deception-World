@@ -27,7 +27,7 @@ export const Route = createFileRoute("/download")({
 
 function DownloadPage() {
   return (
-    <main className="export-page" aria-labelledby="export-heading">
+    <main className="export-page dg-focus-scope" aria-labelledby="export-heading">
       <span className="export-page-sigil" aria-hidden="true">
         <i>DW</i>
       </span>

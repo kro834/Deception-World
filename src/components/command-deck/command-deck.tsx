@@ -364,7 +364,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
         </nav>
       </header>
 
-      <main id="command-deck-main" className="command-deck-main" tabIndex={-1}>
+      <main id="command-deck-main" className="command-deck-main dg-focus-scope" tabIndex={-1}>
         <div className="command-deck-title" key={`title-${scene.id}`}>
           <h1>
             <span>{scene.title[0]}</span>

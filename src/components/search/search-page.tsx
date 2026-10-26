@@ -269,7 +269,7 @@ export function SearchPage({
         </GuardedLink>
         <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
       </header>
-      <main className="search-main">
+      <main className="search-main dg-focus-scope">
         <div className="search-observatory-desk">
           <section className="search-intro" aria-labelledby="search-title">
             <div>

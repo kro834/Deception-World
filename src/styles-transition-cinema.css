@@ -114,6 +114,22 @@ html body .load-gate.has-cine.rider-route-cutin {
   --dwc-close: 260ms;
 }
 
+/* The plain file shutter (load-gate.tsx, FileTransitionVariant): the 六詠 and
+   character files without a stage of their own, and the World's return. The
+   dossier grammar's ice and gold; the World's return in ice alone, and its
+   ink closes a little quicker since there is no file to lift. */
+html body .load-gate.has-cine.dossier-route-file {
+  --dwc-accent: #7ae8ff;
+  --dwc-gold: #f0cf86;
+  --dwc-lock: #b4f1ff;
+}
+
+html body .load-gate.has-cine.dossier-route-file.is-world-shutter {
+  --dwc-gold: #9eeeff;
+  --dwc-lock: #dff9ff;
+  --dwc-close: 280ms;
+}
+
 html body .load-gate.has-cine.is-sovereign-gate {
   --dwc-accent: #f0cf86;
   --dwc-gold: #ffe29e;

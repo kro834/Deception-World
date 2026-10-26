@@ -1,7 +1,3 @@
-            body: "オーバーゼッツ エクスプロムの能力増強路。ゼッツドライバーに装填されたエクスプロムカプセムの固有能力を次元流体化した「エクスプロムゲイム」を全身に供給し、変身者に負荷がかかるほどの肉体強化を施しつつ、変換された衝撃を蓄える。",
-          },
-          {
-            name: "エクスプロムアーム",
             body: "オーバーゼッツ エクスプロムの腕部。ナイトメアの力から生まれた破壊力を衝動のままに発揮して拳1つで対象を崩壊させる。また、圧倒的な破壊力をさらに最大化する必殺技「エクスプロムスマッシュ」の発動により、蓄積されていた全ての衝撃を炸裂させる。",
           },
         ],
@@ -26,7 +22,10 @@
           { dt: "100m", dd: "1.5秒（100m est.）" },
         ],
         finishers: [
-          { name: "カスタム・オーバーカミング", body: "仮面ライダーオーバーゼッツ カスタムの必殺技。" },
+          {
+            name: "カスタム・オーバーカミング",
+            body: "仮面ライダーオーバーゼッツ カスタムの必殺技。",
+          },
         ],
         arsenal: [
           {
@@ -375,7 +374,7 @@ export function RiderPage({ id }: { id: string }) {
               : [];
   return (
     <main
-      className="manager-page rider-dossier-page"
+      className="manager-page rider-dossier-page dg-focus-scope"
       style={{
         ["--manager-accent" as string]: rider.tone,
         ["--manager-accent-soft" as string]: rider.tone,
@@ -383,3 +382,6 @@ export function RiderPage({ id }: { id: string }) {
         ["--archive-accent" as string]: rider.tone,
         ["--archive-accent-soft" as string]: rider.tone,
         ["--future-hud-primary" as string]: rider.tone,
+      }}
+    >
+      <div className="manager-ambient" aria-hidden="true">
