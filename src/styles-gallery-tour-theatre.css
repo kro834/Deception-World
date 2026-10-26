@@ -362,12 +362,22 @@
 }
 
 .gallery-tour-playback-label select {
+  -webkit-appearance: none;
+  appearance: none;
   flex: 0 0 auto;
   min-height: 44px;
-  padding: 8px 12px;
+  padding: 8px 38px 8px 12px;
   border: 1px solid rgb(218 197 157 / 0.3);
   border-radius: 2px;
-  background: #171614;
+  background-color: #171614;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
   color: var(--gallery-tour-text);
   font: inherit;
   font-size: 13px;
@@ -647,5 +657,13 @@
   .gallery-tour-time-fill {
     animation: none;
     transform: scaleX(1);
+  }
+}
+
+@media (forced-colors: active) {
+  .gallery-tour-playback-label select {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background-image: none;
   }
 }

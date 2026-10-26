@@ -239,7 +239,7 @@ function scene(reference, { pageEnd = false, dialog = false, unsupported = false
     }),
   );
   const expectedWords = [title.rect, nested.rect, both.rect, pending.rect];
-  if (pageEnd && !dialog) expectedWords.push(paragraph.rect, paragraph.children[0].rect);
+  if (pageEnd || dialog) expectedWords.push(paragraph.rect, paragraph.children[0].rect);
   return {
     words,
     expectedWords,
@@ -308,7 +308,7 @@ for (const pageEnd of [false, true]) {
       const newReads = current.all.reduce((count, element) => count + element.reads, 0);
       assert.equal(
         oldReads - newReads,
-        pageEnd && !dialog ? 9 : 7,
+        pageEnd || dialog ? 9 : 7,
         "each redundant box read is removed in both glyph passes, plus the undrawn control",
       );
       for (const element of current.all)
@@ -346,4 +346,23 @@ test("non-drawn child text and 1px screen-reader text remain excluded", () => {
     "holder is checked in each of the text and placement passes",
   );
   assert.ok(!current.words.some((box) => box.width === 1));
+});
+
+test("dialog body text counts before page end without scanning the covered page", () => {
+  const sheet = scene(false, { dialog: true, pageEnd: false });
+  const page = scene(false, { dialog: false, pageEnd: false });
+  assert.ok(
+    sheet.words.some((box) => box.top === 395),
+    "the paragraph's actual glyphs count",
+  );
+  assert.ok(
+    sheet.words.some((box) => box.top === 421),
+    "its nested inline copy counts once",
+  );
+  assert.equal(sheet.words.filter((box) => box.top === 421).length, 1);
+  assert.equal(
+    page.words.some((box) => box.top === 395),
+    false,
+    "ordinary page prose is unchanged",
+  );
 });

@@ -33,7 +33,7 @@ test("the Zeus button steps off titles and control labels, measured by their gly
   );
   // Display figures count as titles; at the end of the page every word does.
   assert.match(zeus, /const ZEUS_DISPLAY_TEXT_MIN_PX = 24;/);
-  assert.match(zeus, /if \(pageEnd && root === document\) collect\(ZEUS_END_TEXT_SELECTOR\);/);
+  assert.match(zeus, /if \(root !== document \|\| pageEnd\) collect\(ZEUS_END_TEXT_SELECTOR\);/);
   // Words kept for screen readers only (a clipped 1px box) do not count.
   assert.match(zeus, /if \(holder && \(holder\.width < 2 \|\| holder\.height < 2\)\) continue;/);
   // A spot the reader has just dropped it on is theirs until the page scrolls.

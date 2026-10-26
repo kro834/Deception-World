@@ -41,8 +41,8 @@ test("the Zeus text pass checks that a word is drawn before it measures it", () 
   const holder = pass.indexOf("node.parentElement?.getBoundingClientRect()");
   assert.ok(nodeSkip > 0 && holder > nodeSkip, "drawn(parent) comes before the holder's box");
   assert.ok(pass.indexOf("range.getClientRects()") > nodeSkip, "and before the glyph boxes");
-  // What the pass collects is unchanged: the end of a page still counts all text.
-  assert.match(pass, /if \(pageEnd && root === document\) collect\(ZEUS_END_TEXT_SELECTOR\);/);
+  // A page end and the active dialog count body copy; the covered page is never scanned.
+  assert.match(pass, /if \(root !== document \|\| pageEnd\) collect\(ZEUS_END_TEXT_SELECTOR\);/);
 });
 
 test("only words that are not drawn at all are passed over", () => {
@@ -71,7 +71,10 @@ test("the World keeps its sections laid out, so its anchors land where they did"
   const annex = read("src/components/world/world-annex.tsx");
   // The disclosures stay native, so a closed one reads as not drawn.
   assert.match(annex, /<details className="wa-profile" onToggle=\{keepProfileInPlace\}>/);
-  assert.match(annex, /<details key=\{doc\.office\} className="wa-doc" aria-label=\{doc\.office\}>/);
+  assert.match(
+    annex,
+    /<details key=\{doc\.office\} className="wa-doc" aria-label=\{doc\.office\}>/,
+  );
   for (const [href, id] of [
     ["#cast-roster", 'id="cast-roster"'],
     ["#world-brief", 'id="world-brief"'],

@@ -464,7 +464,11 @@ function readAvoidText(button: HTMLElement, zones: ZeusRect[], pageEnd: boolean)
     (element) =>
       Number.parseFloat(window.getComputedStyle(element).fontSize) >= ZEUS_DISPLAY_TEXT_MIN_PX,
   );
-  if (pageEnd && root === document) collect(ZEUS_END_TEXT_SELECTOR);
+  // A dossier sheet scrolls independently. Its small body copy must count
+  // before the document's end too; otherwise the button can settle on a
+  // paragraph after an inner scroll. Keep this broader pass inside the
+  // active dialog so covered page text never displaces its controls.
+  if (root !== document || pageEnd) collect(ZEUS_END_TEXT_SELECTOR);
   // A framed archive's words, as it last reported them.
   if (root === document) {
     for (const word of readFrameAvoid((entry) => entry.words)) {

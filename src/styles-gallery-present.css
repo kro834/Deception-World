@@ -12,9 +12,7 @@ html[data-family="gallery"] .gallery-page {
   --gallery-muted: #a7a095;
   --gallery-brass: #d7c4a2;
   --gallery-rule: rgb(255 255 255 / 10%);
-  background:
-    radial-gradient(ellipse at 70% -10%, rgb(255 255 255 / 4%), transparent 42%),
-    #07080c;
+  background: radial-gradient(ellipse at 70% -10%, rgb(255 255 255 / 4%), transparent 42%), #07080c;
   color: #f4f1ea;
 }
 
@@ -129,6 +127,21 @@ html[data-family="gallery"] .gallery-page .gallery-search input {
   color: #f4f1ea;
 }
 
+/* Paint the native select surface so WebKit retains the 46px target. */
+html[data-family="gallery"] .gallery-page .gallery-order select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-inline-end: 38px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
 html[data-family="gallery"] .gallery-page .gallery-filters button[aria-pressed="true"],
 html[data-family="gallery"] .gallery-page .gallery-favorites-filter[aria-pressed="true"],
 html[data-family="gallery"] .gallery-page .gallery-favorite-toggle[aria-pressed="true"] {
@@ -217,7 +230,10 @@ html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-
   transform: none;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-personal-add:disabled {
+html[data-family="gallery"]
+  .gallery-page
+  .gallery-personal-controls
+  > .gallery-personal-add:disabled {
   border-color: rgb(255 255 255 / 14%);
   background: #1a1c22;
   color: #a7a095;
@@ -291,7 +307,10 @@ html[data-family="gallery"] .gallery-page .gallery-display-choice input {
     color: #fff;
   }
 
-  html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-personal-add:hover:not(:disabled) {
+  html[data-family="gallery"]
+    .gallery-page
+    .gallery-personal-controls
+    > .gallery-personal-add:hover:not(:disabled) {
     border-color: #fff;
     background: #fff;
     box-shadow: none;
@@ -307,6 +326,12 @@ html[data-family="gallery"] .gallery-page .gallery-display-choice input {
 }
 
 @media (forced-colors: active) {
+  html[data-family="gallery"] .gallery-page .gallery-order select {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background-image: none;
+  }
+
   html[data-family="gallery"] .gallery-page,
   html[data-family="gallery"] .gallery-page .gallery-topbar,
   html[data-family="gallery"] .gallery-page .gallery-work-frame,

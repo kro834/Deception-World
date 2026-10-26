@@ -24,7 +24,7 @@ test("the present sheet is last on the gallery route only", async () => {
 test("present rules stay on the gallery page and keep readable type", () => {
   let count = 0;
   for (const match of css.matchAll(/(?:^|[{};])\s*([^{}@;]+)\{/g)) {
-    const selector = match[1].trim();
+    const selector = match[1].trim().replace(/\s+/g, " ");
     if (!selector || selector.startsWith("@")) continue;
     count += 1;
     assert.match(selector, /^html\[data-family="gallery"\] \.gallery-page\b/, selector);

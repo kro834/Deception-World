@@ -27,6 +27,7 @@ import { GuardedLink } from "@/components/load-gate";
 import { prefetchMetaUnitasEntry } from "@/lib/meta-unitas-entry-gate";
 import { ZeusButtonToggle } from "@/components/zeus-button";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
+import { watchSideMenuSwipeLifecycle } from "@/lib/side-menu-swipe-lifecycle.js";
 import { RE_DIVE_RIKUEI_NAV, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";
 import { launcherTile } from "@/lib/thumbnail-images";
 import { LiquidPointerGlow } from "./liquid-rail";
@@ -613,6 +614,15 @@ export function SideMenuLayer({
     }
     root.dataset.sideMenuOpen = "true";
     const releaseViewportScrollLock = acquireViewportScrollLock();
+    const stopSwipeLifecycle = watchSideMenuSwipeLifecycle(() => {
+      const pointerId = swipeRef.current?.id;
+      swipeRef.current = null;
+      panel.style.removeProperty("translate");
+      panel.style.removeProperty("transition");
+      if (pointerId !== undefined && panel.hasPointerCapture(pointerId)) {
+        panel.releasePointerCapture(pointerId);
+      }
+    });
     const containBackgroundScroll = (event: TouchEvent | WheelEvent) => {
       if (!(event.target instanceof Node)) {
         event.preventDefault();
@@ -690,9 +700,7 @@ export function SideMenuLayer({
       // Released before focus returns: an inert opener cannot take it.
       for (const element of inerted) element.inert = false;
       window.cancelAnimationFrame(focusFrame);
-      swipeRef.current = null;
-      panel.style.removeProperty("translate");
-      panel.style.removeProperty("transition");
+      stopSwipeLifecycle();
       document.removeEventListener("touchmove", containBackgroundScroll, true);
       document.removeEventListener("wheel", containBackgroundScroll, true);
       document.removeEventListener("focusin", containBackgroundFocus, true);
@@ -1010,9 +1018,9 @@ export function SideMenuLayer({
                             ? "ILLUSIONCULUM SAGA"
                             : context === "meta-unitas"
                               ? "META UNITAS SAGA"
-                            : context === "final-stage"
-                              ? "FINAL STAGE"
-                              : "DECEPTION WORLD"}
+                              : context === "final-stage"
+                                ? "FINAL STAGE"
+                                : "DECEPTION WORLD"}
             </b>
           </div>
           <button

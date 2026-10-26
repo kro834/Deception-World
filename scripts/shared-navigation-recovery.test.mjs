@@ -6,6 +6,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
+import { watchSideMenuSwipeLifecycle } from "../src/lib/side-menu-swipe-lifecycle.js";
 
 const nativeRequire = createRequire(import.meta.url);
 function load(path, require, globals = {}) {
@@ -35,6 +36,7 @@ function mountMenu({ pageTop = null, locationTop = null, groupHeight = 600 } = {
   const cleanups = [];
   const changes = [];
   const window = new EventTarget();
+  window.innerWidth = 834;
   const document = {
     documentElement: { dataset: {} },
     addEventListener() {},
@@ -44,7 +46,11 @@ function mountMenu({ pageTop = null, locationTop = null, groupHeight = 600 } = {
   };
   class Element {
     isConnected = true;
-    style = { removeProperty() {} };
+    style = {
+      removeProperty(name) {
+        delete this[name];
+      },
+    };
     children = [];
     focus(options) {
       this.focusOptions = options;
@@ -58,6 +64,14 @@ function mountMenu({ pageTop = null, locationTop = null, groupHeight = 600 } = {
   const close = new Element();
   const panel = new Element();
   panel.scrollTop = 0;
+  let capturedPointer = null;
+  panel.setPointerCapture = (id) => {
+    capturedPointer = id;
+  };
+  panel.hasPointerCapture = (id) => capturedPointer === id;
+  panel.releasePointerCapture = () => {
+    capturedPointer = null;
+  };
   panel.getBoundingClientRect = () => ({ top: 0, bottom: 320 });
   panel.contains = (node) => node === panel || node === close;
   panel.ownerDocument = document;
@@ -112,6 +126,11 @@ function mountMenu({ pageTop = null, locationTop = null, groupHeight = 600 } = {
           useRouterState: ({ select }) =>
             select({ location: { pathname: "/world", hash: "records" } }),
         };
+      if (name === "@/lib/side-menu-swipe-lifecycle.js")
+        return {
+          watchSideMenuSwipeLifecycle: (cancel) =>
+            watchSideMenuSwipeLifecycle(cancel, window, document),
+        };
       if (name === "@/lib/viewport-scroll-lock.js")
         return { acquireViewportScrollLock: () => () => {} };
       if (name === "./dossier-nav")
@@ -130,6 +149,8 @@ function mountMenu({ pageTop = null, locationTop = null, groupHeight = 600 } = {
   }
   return {
     panel,
+    window,
+    menuProps: walk(tree, (node) => node.props?.id === "site-side-panel").props,
     pageRow,
     locationRow,
     close,
@@ -255,4 +276,28 @@ test("download explains source-code scope without changing archive or retry dest
   assert.match(html, /公開サイトの配信版とは異なる場合があります/);
   assert.match(html, /ギャラリーに投稿した画像・しおり・個人設定・node_modules は含みません/);
   assert.match(Route.head().title, /ソースコードの取得/);
+});
+
+test("rotation drops the captured menu offset and ignores the stale touch release", () => {
+  const menu = mountMenu();
+  const pointer = {
+    pointerId: 7,
+    pointerType: "touch",
+    isPrimary: true,
+    clientX: 50,
+    clientY: 200,
+    timeStamp: 10,
+  };
+  menu.menuProps.onPointerDown(pointer);
+  menu.menuProps.onPointerMove({ ...pointer, clientX: 115, timeStamp: 60 });
+  assert.equal(menu.panel.style.translate, "65px 0");
+  assert.equal(menu.panel.hasPointerCapture(7), true);
+  menu.window.innerWidth = 1194;
+  menu.window.dispatchEvent(new Event("resize"));
+  assert.equal(menu.panel.style.translate, undefined);
+  assert.equal(menu.panel.style.transition, undefined);
+  assert.equal(menu.panel.hasPointerCapture(7), false);
+  menu.menuProps.onPointerUp({ ...pointer, clientX: 250, timeStamp: 80 });
+  assert.deepEqual(menu.changes, []);
+  menu.unmount();
 });

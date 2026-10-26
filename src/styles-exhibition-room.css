@@ -146,6 +146,21 @@
   font-size: 16px;
   line-height: 1.5;
 }
+/* WebKit's native menulist otherwise reduces these 46px fields to 29px. */
+.exhibition-room-curated :is(.exhibition-room-choose, .exhibition-shelf-filters) select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-inline-end: 38px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
 .exhibition-room-curated .exhibition-room-view .exhibition-studio-stage {
   height: clamp(300px, 67svh, 820px);
   border-color: #d1cbbb;
@@ -581,6 +596,12 @@
   }
 }
 @media (forced-colors: active) {
+  .exhibition-room-curated :is(.exhibition-room-choose, .exhibition-shelf-filters) select {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background-image: none;
+  }
+
   .exhibition-room-curated .exhibition-shelf-work[aria-pressed="true"] .exhibition-shelf-image,
   .exhibition-room-curated .exhibition-studio-tools button[aria-pressed="true"] {
     border: 2px solid Highlight;

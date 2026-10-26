@@ -97,6 +97,22 @@
   opacity: 1;
 }
 
+/* Native WebKit menulists collapse the existing 48px touch surface. Keep
+   native selection while painting the field and its disclosure arrow. */
+.dream-page.dream-page .dream-archive-explore select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-inline-end: 38px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+
 .dream-page.dream-page .dream-archive-explore > p {
   margin: 0 0 9px;
   color: var(--ts-zoge);
@@ -217,5 +233,11 @@
   .dream-page.dream-page .dream-archive-related a,
   .dream-page.dream-page .dream-archive-explore :is(input, select) {
     forced-color-adjust: auto;
+  }
+
+  .dream-page.dream-page .dream-archive-explore select {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background-image: none;
   }
 }

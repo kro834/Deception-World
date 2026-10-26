@@ -1279,6 +1279,15 @@ html[data-world-effects="economy"] .mus-page *::after {
 /* ================================================================
    LAYOUT TIERS
    ================================================================ */
+/* The long finisher phrase remains one unit. On an iPad landscape lane,
+   the prose-heavy desktop ratio leaves that unit wider than its heading
+   column; share the available width before the single-column layout. */
+@media (min-width: 861px) and (max-width: 1366px) {
+  .mus-finisher {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
   .mus-hero {
     grid-template-columns: 1fr;
@@ -1296,7 +1305,16 @@ html[data-world-effects="economy"] .mus-page *::after {
     justify-self: center;
   }
   .mus-finisher {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Keep each phrase together when it fits, but let a phrase longer than
+     a narrow split/phone card wrap rather than enlarge the grid track. */
+  .mus-finisher h3 .mus-unit {
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
   .mus-finisher > .mus-copy {
     grid-column: 1;

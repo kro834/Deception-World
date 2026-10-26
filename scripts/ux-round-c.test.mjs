@@ -116,7 +116,11 @@ test("a touch swipe to the right closes the menu, and only a clear one", () => {
   );
   assert.match(chrome, /onPointerCancel=\{onPanelPointerCancel\}/);
   assert.match(chrome, /onLostPointerCapture=\{onPanelPointerCancel\}/);
-  assert.match(cleanup, /panel\.style\.removeProperty\("translate"\);/);
+  assert.match(cleanup, /stopSwipeLifecycle\(\);/);
+  assert.match(
+    openEffect,
+    /watchSideMenuSwipeLifecycle\(\(\) => \{[\s\S]*?swipeRef\.current = null;\s*panel\.style\.removeProperty\("translate"\);\s*panel\.style\.removeProperty\("transition"\);/,
+  );
 });
 
 test("the page behind the open menu leaves the accessibility tree, and comes back first", () => {
