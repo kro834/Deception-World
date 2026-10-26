@@ -25,6 +25,7 @@ import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
+import { watchDynamicGui } from "@/lib/dynamic-gui.js";
 import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
@@ -49,6 +50,7 @@ import openingShellCss from "../styles-opening-shell.css?url";
 import sagaStreamlineCss from "../styles-saga-streamline.css?url";
 import siteAstraCss from "../styles-site-astra.css?url";
 import commandChromeCss from "../styles-command-chrome.css?url";
+import dynamicGuiCss from "../styles-dynamic-gui.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -75,6 +77,13 @@ function DialogOpenFlag() {
    (src/lib/press-feedback.js, src/styles-press-feedback.css). */
 function PressFeedback() {
   useEffect(() => watchPresses(), []);
+  return null;
+}
+
+/* html[data-dg-ready] + .dg-reveal[data-dg-seen] / --dg-progress: the shared
+   dynamic GUI kit (src/lib/dynamic-gui.js, src/styles-dynamic-gui.css). */
+function DynamicGui() {
+  useEffect(() => watchDynamicGui(), []);
   return null;
 }
 
@@ -226,6 +235,8 @@ export const Route = createRootRoute({
           ]),
       { rel: "stylesheet", href: siteAstraCss },
       { rel: "stylesheet", href: commandChromeCss },
+      // The dynamic GUI kit (.dg-* classes), on every family, last.
+      { rel: "stylesheet", href: dynamicGuiCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -265,6 +276,7 @@ function RootDocument() {
               <LibrarySession />
               <Outlet />
               <InquiryNavigation />
+              <DynamicGui />
               <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />

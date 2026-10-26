@@ -1,0 +1,591 @@
+/* ================================================================
+   Dynamic GUI kit — the one shared motion grammar for every page.
+   Root sheet, linked last (after styles-command-chrome.css) in
+   src/routes/__root.tsx; driven by src/lib/dynamic-gui.js, which puts
+   html[data-dg-ready] on the document and keeps the attributes below.
+
+   HOW TO USE (opt-in classes; nothing here touches an element without one)
+
+   .dg-reveal          Scroll-linked reveal. The element arrives (rises 14px,
+                       fades, un-blurs) the first time it enters the viewport.
+                       Add .dg-reveal-left / .dg-reveal-right for a sideways
+                       arrival, .dg-reveal-scale for a lens arrival.
+                       data-dg-seen is written by the helper; before the helper
+                       runs (SSR, no script) everything is visible at rest.
+   .dg-stagger         On a PARENT: its direct children that are .dg-reveal
+                       arrive 55 ms apart (first eight; the rest together).
+                       Or set --dg-i on a child yourself.
+   .dg-control         A lit pointer response on any control: ice edge and a
+                       brightness lift on hover (mouse only, per the house rule
+                       (hover: hover) and (pointer: fine)), the press itself is
+                       already answered site-wide by data-press. Add
+                       .dg-control-sweep for a one-shot light sweep across the
+                       control on hover.
+   .dg-focus           HUD focus ring on :focus-visible: a gold line and an ice
+                       halo that locks on in three steps. Or put .dg-focus-scope
+                       on a container and every focusable inside gets it.
+   .dg-numeral         Section numeral: on reveal it punches in (wide tracking,
+                       blur, chrome flash) and settles; its prism underline
+                       draws in. Text stays as written. Pair with .dg-reveal
+                       (or it plays on mount under html[data-dg-ready]).
+   .dg-rule            A horizontal rule that draws itself from the left on
+                       reveal (works on any element with a border-top or on an
+                       <hr>; it scales the element's own box).
+   .dg-rail            Reading-progress rail: a 2px prism line whose fill
+                       follows the document scroll. Use as
+                         <i class="dg-rail" aria-hidden="true"></i>
+                       (fixed to the top by default; .dg-rail-static keeps it in
+                       flow, e.g. inside a header). Scroll-driven where the
+                       browser has scroll() timelines; else the helper writes
+                       --dg-progress (0..1) on <html>.
+   .dg-dialog          On a <dialog>: smooth open (lens-in, slight rise) and
+                       close (fade/shrink) with a fading ::backdrop, through
+                       @starting-style + transition-behavior where supported,
+                       animation on [open] otherwise.
+   .dg-lit             A still "powered" chip/plate: a faint ice edge and inner
+                       light. No motion.
+   .dg-ticker          A short inline "settling" animation on text whose VALUE
+                       changed (the helper does not drive this; toggle it from
+                       the page when a readout updates): a 300 ms chrome flash.
+
+   GATES. Every motion rule here sits behind
+     @media (prefers-reduced-motion: no-preference)
+     html:not([data-world-effects="economy"])
+   and the scroll-linked rules also behind html:not([data-dialog-open]) (a
+   locked body becomes a scroll container, src/lib/dialog-open-flag.js).
+   Reduced motion and economy still get the lit hover, the focus ring and the
+   resting progress fill (the rail then shows the progress without easing).
+   Nothing loops. Only compositor properties move (opacity, translate, scale,
+   filter, clip-path) except the dialog's transform.
+
+   TOKENS (override per page if the family needs another key):
+     --dg-key   ice #7ae8ff   --dg-gold #f0cf86   --dg-pink #ff5fc8
+     --dg-ease  the house curve   --dg-dur  420ms   --dg-rise 14px
+   ================================================================ */
+
+:root {
+  --dg-key: var(--dwc-ice, #7ae8ff);
+  --dg-key-rgb: var(--dwc-ice-rgb, 122 232 255);
+  --dg-gold: var(--dwc-gold, #f0cf86);
+  --dg-gold-rgb: var(--dwc-gold-rgb, 240 207 134);
+  --dg-pink: var(--dwc-pink, #ff5fc8);
+  --dg-pink-rgb: var(--dwc-pink-rgb, 255 95 200);
+  --dg-focus: var(--dwc-focus, #fff0b5);
+  --dg-ease: var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  --dg-ease-lock: steps(3, jump-end);
+  --dg-dur: 420ms;
+  --dg-dur-fast: 180ms;
+  --dg-rise: 14px;
+  --dg-progress: 0;
+  --dg-prism: var(
+    --dwc-prism,
+    linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%)
+  );
+}
+
+/* ================================================================
+   1. Reveal
+   The resting state is visible: with no script, with reduced motion, on
+   economy renderers and before the helper has run, nothing is hidden.
+   Only once the helper is ready AND motion is allowed is an unseen element
+   held back; the helper marks it seen the moment it enters the viewport
+   (and marks everything already in view on the first pass), so the hold
+   lasts one frame at most for content above the fold.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal:not([data-dg-seen]) {
+    opacity: 0;
+    translate: 0 var(--dg-rise);
+    /* A held element must not take the keyboard's attention through its
+       controls while invisible; it is restored on data-dg-seen. */
+    visibility: hidden;
+    transition: none;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"])
+    .dg-reveal.dg-reveal-left:not([data-dg-seen]) {
+    translate: calc(-1 * var(--dg-rise) * 1.4) 0;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"])
+    .dg-reveal.dg-reveal-right:not([data-dg-seen]) {
+    translate: calc(var(--dg-rise) * 1.4) 0;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"])
+    .dg-reveal.dg-reveal-scale:not([data-dg-seen]) {
+    translate: 0 0;
+    scale: 0.96;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal[data-dg-seen] {
+    animation: dg-reveal var(--dg-dur) var(--dg-ease) calc(var(--dg-i, 0) * 55ms) both;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal.dg-reveal-left[data-dg-seen] {
+    animation-name: dg-reveal-left;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal.dg-reveal-right[data-dg-seen] {
+    animation-name: dg-reveal-right;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal.dg-reveal-scale[data-dg-seen] {
+    animation-name: dg-reveal-scale;
+  }
+
+  /* Stagger: the first eight children a beat apart. */
+  .dg-stagger > .dg-reveal:nth-child(2) {
+    --dg-i: 1;
+  }
+  .dg-stagger > .dg-reveal:nth-child(3) {
+    --dg-i: 2;
+  }
+  .dg-stagger > .dg-reveal:nth-child(4) {
+    --dg-i: 3;
+  }
+  .dg-stagger > .dg-reveal:nth-child(5) {
+    --dg-i: 4;
+  }
+  .dg-stagger > .dg-reveal:nth-child(6) {
+    --dg-i: 5;
+  }
+  .dg-stagger > .dg-reveal:nth-child(7) {
+    --dg-i: 6;
+  }
+  .dg-stagger > .dg-reveal:nth-child(n + 8) {
+    --dg-i: 7;
+  }
+}
+
+@keyframes dg-reveal {
+  from {
+    opacity: 0;
+    translate: 0 var(--dg-rise);
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes dg-reveal-left {
+  from {
+    opacity: 0;
+    translate: calc(-1 * var(--dg-rise) * 1.4) 0;
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes dg-reveal-right {
+  from {
+    opacity: 0;
+    translate: calc(var(--dg-rise) * 1.4) 0;
+    filter: blur(6px);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes dg-reveal-scale {
+  from {
+    opacity: 0;
+    scale: 0.96;
+    filter: blur(8px) brightness(1.4);
+  }
+  60% {
+    filter: blur(0) brightness(1.06);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0) brightness(1);
+  }
+}
+
+/* ================================================================
+   2. Lit control (hover is a mouse answer only; the press is data-press)
+   ================================================================ */
+.dg-control {
+  --dg-lit: 0;
+  position: relative;
+  isolation: isolate;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dg-control {
+    transition:
+      filter var(--dg-dur-fast) var(--dg-ease),
+      box-shadow var(--dg-dur-fast) var(--dg-ease),
+      border-color var(--dg-dur-fast) var(--dg-ease);
+  }
+
+  html:not([data-world-effects="economy"]) .dg-control:hover {
+    --dg-lit: 1;
+    filter: brightness(1.08);
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--dg-key-rgb) / 0.42),
+      0 0 0 1px rgb(var(--dg-key-rgb) / 0.14),
+      0 8px 24px -12px rgb(var(--dg-key-rgb) / 0.55);
+  }
+
+  /* Economy keeps the edge and drops the filter pass, as the press does. */
+  html[data-world-effects="economy"] .dg-control:hover {
+    --dg-lit: 1;
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--dg-key-rgb) / 0.42),
+      0 0 0 1px rgb(var(--dg-key-rgb) / 0.14);
+  }
+
+  /* A one-shot light sweep across the face: clipped to the control, drawn
+     only while hovered, on the compositor. */
+  .dg-control.dg-control-sweep {
+    overflow: hidden;
+  }
+
+  .dg-control.dg-control-sweep::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: -1px;
+    pointer-events: none;
+    background: linear-gradient(
+      105deg,
+      transparent 38%,
+      rgb(var(--dg-key-rgb) / 0.16) 50%,
+      transparent 62%
+    );
+    translate: -120% 0;
+    opacity: 0;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dg-control.dg-control-sweep:hover::after {
+    animation: dg-sweep 620ms var(--dg-ease) both;
+  }
+}
+
+@keyframes dg-sweep {
+  from {
+    translate: -120% 0;
+    opacity: 1;
+  }
+  to {
+    translate: 120% 0;
+    opacity: 1;
+  }
+}
+
+/* A still powered plate. */
+.dg-lit {
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--dg-key-rgb) / 0.26),
+    inset 0 1px 0 rgb(var(--dg-key-rgb) / 0.12),
+    inset 0 0 18px -8px rgb(var(--dg-key-rgb) / 0.3);
+}
+
+/* ================================================================
+   3. HUD focus ring
+   ================================================================ */
+.dg-focus:focus-visible,
+.dg-focus-scope :is(a[href], button, summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--dg-focus);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 6px rgb(var(--dg-key-rgb) / 0.18),
+    0 0 22px -4px rgb(var(--dg-key-rgb) / 0.55);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dg-focus:focus-visible,
+  html:not([data-world-effects="economy"])
+    .dg-focus-scope
+    :is(a[href], button, summary, input, select, textarea, [tabindex]):focus-visible {
+    animation: dg-focus-lock 240ms var(--dg-ease-lock) both;
+  }
+}
+
+@keyframes dg-focus-lock {
+  from {
+    outline-offset: 12px;
+    outline-color: rgb(var(--dg-key-rgb) / 0.6);
+  }
+  to {
+    outline-offset: 3px;
+    outline-color: var(--dg-focus);
+  }
+}
+
+@media (forced-colors: active) {
+  .dg-focus:focus-visible,
+  .dg-focus-scope :is(a[href], button, summary, input, select, textarea, [tabindex]):focus-visible {
+    box-shadow: none;
+    outline-color: Highlight;
+  }
+}
+
+/* ================================================================
+   4. Section numeral and drawn rule
+   ================================================================ */
+.dg-numeral {
+  position: relative;
+  display: inline-block;
+}
+
+.dg-numeral::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.14em;
+  height: 2px;
+  background: var(--dg-prism);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* With .dg-reveal the numeral waits for its reveal; alone, it plays once
+     the helper is ready (so SSR never paints a mid-animation frame). */
+  html[data-dg-ready]:not([data-world-effects="economy"])
+    :is(
+      .dg-numeral.dg-reveal[data-dg-seen],
+      .dg-reveal[data-dg-seen] .dg-numeral,
+      .dg-numeral:not(.dg-reveal, .dg-reveal *)
+    ) {
+    animation: dg-numeral-punch 560ms var(--dg-ease) calc(var(--dg-i, 0) * 55ms) both;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"])
+    :is(
+      .dg-numeral.dg-reveal[data-dg-seen],
+      .dg-reveal[data-dg-seen] .dg-numeral,
+      .dg-numeral:not(.dg-reveal, .dg-reveal *)
+    )::after {
+    animation: dg-rule-draw 520ms var(--dg-ease) calc(var(--dg-i, 0) * 55ms + 160ms) both;
+  }
+
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal.dg-rule[data-dg-seen],
+  html[data-dg-ready]:not([data-world-effects="economy"]) .dg-reveal[data-dg-seen] .dg-rule {
+    transform-origin: left center;
+    animation: dg-rule-draw 640ms var(--dg-ease) calc(var(--dg-i, 0) * 55ms) both;
+  }
+}
+
+@keyframes dg-numeral-punch {
+  from {
+    opacity: 0;
+    letter-spacing: 0.3em;
+    filter: blur(8px) brightness(2);
+    scale: 1.12;
+  }
+  45% {
+    opacity: 1;
+    filter: blur(0) brightness(1.5);
+  }
+  to {
+    /* letter-spacing is left out here: it eases to the element's own value. */
+    opacity: 1;
+    filter: blur(0) brightness(1);
+    scale: 1;
+  }
+}
+
+@keyframes dg-rule-draw {
+  from {
+    scale: 0 1;
+    opacity: 0.4;
+  }
+  to {
+    scale: 1 1;
+    opacity: 1;
+  }
+}
+
+/* A readout whose value changed: flash chrome once (toggle the class). */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .dg-ticker {
+    animation: dg-ticker 300ms var(--dg-ease) both;
+  }
+}
+
+@keyframes dg-ticker {
+  from {
+    filter: brightness(2.2) blur(1px);
+    translate: 0 -2px;
+  }
+  to {
+    filter: brightness(1) blur(0);
+    translate: 0 0;
+  }
+}
+
+/* ================================================================
+   5. Progress rail
+   ================================================================ */
+.dg-rail {
+  position: fixed;
+  z-index: 2147482000; /* under the skip link and the covers */
+  top: 0;
+  left: 0;
+  right: 0;
+  display: block;
+  height: 2px;
+  pointer-events: none;
+  background: rgb(var(--dg-key-rgb) / 0.1);
+}
+
+.dg-rail.dg-rail-static {
+  position: relative;
+  z-index: auto;
+  inset: auto;
+  width: 100%;
+}
+
+.dg-rail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--dg-prism);
+  transform-origin: left center;
+  scale: var(--dg-progress) 1;
+  box-shadow: 0 0 10px rgb(var(--dg-key-rgb) / 0.5);
+}
+
+/* Compositor-driven where the browser has scroll timelines (the helper
+   still writes --dg-progress for the other browsers); off while a dialog
+   has locked the body, since the root would stop scrolling. */
+@supports (animation-timeline: scroll(root block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-dialog-open])
+      .dg-rail:not(.dg-rail-static)::before {
+      animation: dg-rail-fill linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes dg-rail-fill {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}
+
+/* ================================================================
+   6. Dialog open and close
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) dialog.dg-dialog {
+    transition:
+      opacity var(--dg-dur-fast) var(--dg-ease),
+      transform var(--dg-dur) var(--dg-ease),
+      filter var(--dg-dur-fast) var(--dg-ease),
+      overlay var(--dg-dur) allow-discrete,
+      display var(--dg-dur) allow-discrete;
+  }
+
+  html:not([data-world-effects="economy"]) dialog.dg-dialog::backdrop {
+    transition:
+      opacity var(--dg-dur) var(--dg-ease),
+      overlay var(--dg-dur) allow-discrete,
+      display var(--dg-dur) allow-discrete;
+  }
+
+  /* Closed: the sheet shrinks and sinks away. */
+  html:not([data-world-effects="economy"]) dialog.dg-dialog:not([open]) {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    filter: blur(4px);
+  }
+
+  html:not([data-world-effects="economy"]) dialog.dg-dialog:not([open])::backdrop {
+    opacity: 0;
+  }
+
+  html:not([data-world-effects="economy"]) dialog.dg-dialog[open] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  html:not([data-world-effects="economy"]) dialog.dg-dialog[open]::backdrop {
+    opacity: 1;
+  }
+
+  /* Opening: from a lens, brighter and a little low. */
+  @starting-style {
+    html:not([data-world-effects="economy"]) dialog.dg-dialog[open] {
+      opacity: 0;
+      transform: translateY(16px) scale(0.97);
+      filter: blur(6px) brightness(1.3);
+    }
+
+    html:not([data-world-effects="economy"]) dialog.dg-dialog[open]::backdrop {
+      opacity: 0;
+    }
+  }
+}
+
+/* Browsers without @starting-style still get the open. */
+@supports not (transition-behavior: allow-discrete) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]) dialog.dg-dialog[open] {
+      animation: dg-dialog-open var(--dg-dur) var(--dg-ease) both;
+    }
+  }
+}
+
+@keyframes dg-dialog-open {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    filter: blur(6px) brightness(1.3);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ================================================================
+   Forced colours: edges and rings in system colours, no light.
+   ================================================================ */
+@media (forced-colors: active) {
+  .dg-control:hover,
+  .dg-lit {
+    box-shadow: none;
+    filter: none;
+    outline: 1px solid Highlight;
+  }
+
+  .dg-rail,
+  .dg-rail::before,
+  .dg-numeral::after {
+    background: CanvasText;
+    box-shadow: none;
+  }
+}

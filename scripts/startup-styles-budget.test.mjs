@@ -58,6 +58,8 @@ const original = [
   "../styles-site-astra.css?url",
   // The requested dashboard shares its metal panels with the existing chrome.
   "../styles-command-chrome.css?url",
+  // Owner (2026-10-26): the dynamic GUI kit (.dg-*) on every page, last.
+  "../styles-dynamic-gui.css?url",
   fonts.SITE_CORE_FONTS_URL,
   fonts.SITE_DISPLAY_FONTS_URL,
   "hud-fonts",
