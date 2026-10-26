@@ -733,8 +733,10 @@ for (const to of ["/rexonance-saga", "/riders/saga"]) {
 }
 
 test("Back before an immediate route's first frame also cancels its navigation", async () => {
+  // The dossiers take the file shutter since 2026-10-26; the library is
+  // still an immediate route.
   const ui = mount();
-  const pending = ui.go({ to: "/characters/dante" });
+  const pending = ui.go({ to: "/library" });
   ui.history("BACK");
   await ui.flushFrames();
   await settleGo(ui, pending);
