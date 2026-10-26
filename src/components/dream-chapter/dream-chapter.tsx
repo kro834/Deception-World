@@ -64,6 +64,7 @@ import {
 import { DreamScreeningLauncher } from "./dream-screening-launcher";
 import { DreamReadingLauncher } from "./dream-reading-launcher";
 import { DreamProgrammeDesk } from "./dream-programme-desk";
+import { DreamGpuStage } from "./dream-gpu-stage";
 import { DreamKarakuriCabinet } from "./dream-karakuri-cabinet";
 import { DreamStageLantern } from "./dream-stage-lantern";
 import { DreamGlossarySearch } from "./dream-glossary-search";
@@ -1517,7 +1518,9 @@ export function DreamChapter() {
       </section>
 
       <DreamKarakuriCabinet />
-      <DreamProgrammeDesk />
+      <DreamGpuStage>
+        <DreamProgrammeDesk />
+      </DreamGpuStage>
       <nav className="dream-contents" aria-labelledby="dream-contents-title" data-dream-reveal>
         <h2 id="dream-contents-title">目次</h2>
         <ol>

@@ -1,0 +1,35 @@
+/* Dream chapter GPU tiers (src/components/dream-chapter/dream-gpu-stage.tsx).
+   Tier C never renders these elements. */
+html[data-family="dream"] main.dream-page .dream-gpu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+html[data-family="dream"] main.dream-page .dream-gpu-overlay[data-ready="true"] {
+  opacity: 1;
+}
+
+html[data-family="dream"] main.dream-page.dream-page canvas.dream-gpu-desk {
+  display: block;
+  position: relative;
+  max-width: none;
+  padding: 0;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="dream"] main.dream-page .dream-gpu-overlay {
+    display: none;
+  }
+}
+
+html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
+  display: none;
+}
