@@ -453,7 +453,7 @@ export function FarFromSaga() {
       ref={pageRef}
       id="top"
       data-command-special=""
-      className="rxs-page ffs-page"
+      className="rxs-page ffs-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       {/* Entry transition: prepared, renders nothing, never blocks paint. */}

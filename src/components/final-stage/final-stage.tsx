@@ -548,7 +548,7 @@ export function FinalStage() {
       ref={pageRef}
       id="top"
       data-command-special=""
-      className="rxs-page fst-page"
+      className="rxs-page fst-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       <header className="rxs-local-nav">

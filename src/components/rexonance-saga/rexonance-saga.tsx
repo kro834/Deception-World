@@ -1905,7 +1905,7 @@ export function RexonanceSaga() {
       ref={setPageRef}
       id="top"
       data-command-special=""
-      className="rxs-page rxs-rexonance-page"
+      className="rxs-page rxs-rexonance-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
       {stageCall && (

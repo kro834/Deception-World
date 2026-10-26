@@ -323,7 +323,8 @@ export function SagaCinema() {
             </WorldReturn>
             <SideMenuTrigger className="menu-button" open={menuOpen} onOpenChange={setMenuOpen} />
           </header>
-          <main id="main">
+          <main id="main" className="dg-focus-scope">
+            <i className="dg-rail" aria-hidden="true" />
             <section
               ref={heroRef}
               className="hero"
@@ -670,7 +671,7 @@ export function SagaCinema() {
         <dialog
           ref={detailRef}
           id="film-dialog"
-          className="film-dialog"
+          className="film-dialog dg-dialog"
           aria-labelledby="dialog-title"
           onClose={() => setDetailOpen(false)}
           onKeyDown={(event) => {
