@@ -1,0 +1,1244 @@
+/* Command chrome: the title deck's silver instrument material follows the
+   reader through navigation and dialogs. Paint and decorative children only:
+   panel translate, sticky/safe-area geometry, focus and scroll stay owned by
+   their existing sheets. No images, added copy, blur or JavaScript runtime. */
+
+html[data-family] {
+  --command-silver: #e9f0f1;
+  --command-gold: #f2cf8d;
+  --command-edge: rgb(var(--sh-l1-rgb) / 46%);
+  --command-metal:
+    linear-gradient(118deg, transparent 22%, rgb(233 240 241 / 12%) 22.15%, transparent 47%),
+    linear-gradient(
+      180deg,
+      rgb(233 240 241 / 16%),
+      rgb(233 240 241 / 2%) 45%,
+      rgb(0 0 0 / 34%) 46%,
+      transparent 100%
+    );
+  --command-ribs: repeating-linear-gradient(0deg, rgb(233 240 241 / 3%) 0 1px, transparent 1px 3px);
+  --command-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (forced-colors: none) {
+  /* A solid machined rail above every edition, including its safe area.
+     Progress pseudo-elements and route-specific header heights stay intact. */
+  html[data-family]
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      main.dream-page.dream-page > header.dream-site-header,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar,
+      .gallery-page > header.gallery-topbar,
+      .saga-cinema .site-header
+    ),
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
+    border-bottom-color: var(--command-edge);
+    background-color: var(--sh-ink);
+    background-image:
+      linear-gradient(90deg, var(--sh-l1) 0 4px, transparent 4px),
+      linear-gradient(
+        90deg,
+        transparent 0 72%,
+        rgb(var(--sh-l2-rgb) / 32%) 72% 87%,
+        transparent 87%
+      ),
+      var(--command-metal), var(--command-ribs);
+    background-size:
+      100% 100%,
+      100% 2px,
+      100% 100%,
+      100% 100%;
+    background-position:
+      0 0,
+      0 100%,
+      0 0,
+      0 0;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(233 240 241 / 28%),
+      0 4px 18px rgb(0 0 0 / 28%);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* The English instrument name carries the deck's forward lean; Japanese
+     titles, reading headings and every font size retain their own design. */
+  html[data-family]
+    body
+    :is(
+      .topbar .brand-copy strong,
+      .manager-topbar .brand-copy strong,
+      .rxs-local-nav .rxs-brand > span,
+      #site-side-panel.side-panel .side-panel-head b
+    ) {
+    font-style: italic;
+    text-shadow: 1px 1px 0 rgb(0 0 0 / 60%);
+  }
+
+  /* The trigger's 48px hit box remains square. Its bevel and clipped silver
+     reflection make the corner cut without clipping its focus outline. */
+  html[data-family]:not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger.side-panel-trigger {
+    border: 0 !important;
+    border-radius: 2px !important;
+    color: var(--sh-on-l1) !important;
+    background:
+      linear-gradient(135deg, var(--command-silver) 0 6px, transparent 6px),
+      linear-gradient(315deg, var(--sh-ink) 0 7px, transparent 7px),
+      linear-gradient(120deg, transparent 40%, rgb(255 255 255 / 44%) 40.5%, transparent 75%),
+      linear-gradient(180deg, rgb(233 240 241 / 68%), transparent 68%), var(--sh-l1) !important;
+    box-shadow:
+      inset 0 0 0 1px rgb(233 240 241 / 66%),
+      3px 3px 0 rgb(var(--sh-l1-rgb) / 22%) !important;
+  }
+
+  /* The sheet is still opaque. Large diagonal strata and fine brushed lines
+     replace the old all-over grid, keeping the published art on its tiles. */
+  html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+    background:
+      linear-gradient(
+        120deg,
+        transparent 0 62%,
+        rgb(var(--sh-l1-rgb) / 7%) 62.1% 78%,
+        transparent 78.1%
+      ),
+      linear-gradient(
+        300deg,
+        transparent 0 73%,
+        rgb(var(--sh-l2-rgb) / 9%) 73.1% 88%,
+        transparent 88.1%
+      ),
+      radial-gradient(ellipse 80% 55% at 0 0, rgb(233 240 241 / 10%), transparent 70%),
+      var(--command-ribs), var(--sh-ink) !important;
+  }
+
+  /* Sticky head stays solid through its entire safe-area band. Keep its
+     existing fade pseudo-element; only the bracket plate changes material. */
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head {
+    background:
+      linear-gradient(90deg, var(--sh-l1), var(--command-silver) 42%, var(--sh-l2) 74%, transparent)
+        var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 2px no-repeat,
+      var(--command-metal),
+      var(--sh-ink);
+    box-shadow: 0 1px 0 rgb(0 0 0 / 70%);
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head::after {
+    --dwc-lock: var(--command-silver);
+    --dwc-gold: var(--sh-l2);
+    opacity: 0.72;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-head > div::before,
+  html[data-family] body #site-announcement-dialog .site-announcement-header > div::before {
+    border-color: rgb(233 240 241 / 70%);
+    background:
+      linear-gradient(225deg, var(--sh-l1) 0 8px, transparent 8px),
+      linear-gradient(135deg, #f8fcfc, #a7bdc5 47%, #334651 48%, #1a2933 75%, #dce9eb);
+    color: var(--sh-ink);
+    text-shadow: 0 1px 0 rgb(255 255 255 / 44%);
+    box-shadow: inset 0 0 0 3px rgb(0 0 0 / 24%);
+  }
+
+  html[data-family] body #site-side-panel.side-panel .side-panel-close.side-panel-close,
+  html[data-family] body #site-announcement-dialog .site-announcement-close.ios26-glass {
+    border-color: rgb(233 240 241 / 52%);
+    border-radius: 2px;
+    background:
+      linear-gradient(135deg, rgb(233 240 241 / 34%) 0 5px, transparent 5px), var(--command-metal),
+      var(--sh-ink-2) !important;
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 50%),
+      3px 3px 0 rgb(var(--sh-l1-rgb) / 12%) !important;
+    color: var(--sh-text);
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-group > p {
+    color: var(--sh-text-2);
+    font-style: italic;
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::before {
+    height: 5px;
+    background: linear-gradient(115deg, var(--sh-l1) 0 42%, transparent 43% 58%, var(--sh-l2) 59%);
+  }
+
+  html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::after {
+    height: 3px;
+    background:
+      linear-gradient(90deg, rgb(233 240 241 / 35%), transparent 84%) 0 0 / 100% 1px no-repeat,
+      linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 26%), transparent 62%) 0 100% / 100% 1px
+        no-repeat;
+  }
+
+  /* All rows are mechanical plates. Tile art remains on ::before; ::after
+     is a transparent, pointer-free reflection and never contains content. */
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button) {
+    overflow: hidden;
+    border-radius: 2px;
+    border-color: rgb(233 240 241 / 26%);
+    background:
+      linear-gradient(135deg, rgb(233 240 241 / 48%) 0 6px, transparent 6px),
+      linear-gradient(315deg, rgb(var(--sh-l1-rgb) / 35%) 0 7px, transparent 7px),
+      var(--command-metal), var(--sh-ink-2);
+    box-shadow:
+      inset 0 1px 0 rgb(233 240 241 / 15%),
+      inset 0 -3px 0 rgb(0 0 0 / 38%);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button)::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: 2;
+    display: block;
+    width: auto;
+    height: auto;
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 22%,
+      rgb(233 240 241 / 20%) 38%,
+      rgb(233 240 241 / 3%) 51%,
+      transparent 68%
+    );
+    opacity: 0;
+    transform: translateX(-110%);
+    pointer-events: none;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button)
+    > i {
+    box-shadow: inset 0 -1px 0 rgb(var(--sh-l1-rgb) / 46%);
+  }
+
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+    border-color: var(--sh-l1);
+    background:
+      linear-gradient(135deg, var(--command-silver) 0 6px, transparent 6px),
+      linear-gradient(110deg, rgb(var(--sh-l1-rgb) / 26%), transparent 64%), var(--sh-ink-2);
+    box-shadow:
+      inset 4px 0 0 var(--sh-l1),
+      inset 0 -2px 0 rgb(var(--sh-l2-rgb) / 60%);
+  }
+
+  /* Dialog content keeps its layout and Japanese typography. Only its
+     surrounding shell, header, cards and search frame carry the material. */
+  html[data-family] body #site-announcement-dialog {
+    --dwc-ice: var(--sh-l1);
+    --dwc-ice-rgb: var(--sh-l1-rgb);
+    --dwc-pink: var(--sh-l2);
+    --dwc-pink-rgb: var(--sh-l2-rgb);
+    --dwc-lock: var(--sh-l1);
+    --dwc-gold: var(--sh-l2);
+  }
+
+  html[data-family] body #site-announcement-dialog .site-announcement-hub,
+  html[data-family] body dialog.quick-search .quick-search-panel {
+    border-color: rgb(233 240 241 / 54%);
+    border-radius: 3px;
+    background:
+      linear-gradient(125deg, rgb(233 240 241 / 13%), transparent 38%),
+      linear-gradient(305deg, rgb(var(--sh-l2-rgb) / 8%), transparent 40%), var(--command-ribs),
+      var(--sh-ink);
+    box-shadow:
+      inset 0 0 0 5px rgb(233 240 241 / 3%),
+      8px 8px 0 rgb(var(--sh-l1-rgb) / 14%),
+      0 28px 80px rgb(0 0 0 / 60%);
+  }
+
+  html[data-family] body #site-announcement-dialog .site-announcement-header,
+  html[data-family] body dialog.quick-search .quick-search-head {
+    background:
+      linear-gradient(90deg, var(--sh-l1), var(--command-silver) 52%, var(--sh-l2)) 0 100% / 100%
+        2px no-repeat,
+      var(--command-metal),
+      var(--sh-ink);
+  }
+
+  html[data-family] body #site-announcement-dialog .site-announcement-list-item {
+    border-radius: 2px;
+    border-color: rgb(233 240 241 / 24%);
+    background:
+      linear-gradient(135deg, rgb(233 240 241 / 42%) 0 6px, transparent 6px), var(--command-metal),
+      var(--sh-ink-2);
+    box-shadow: inset 0 -3px 0 rgb(0 0 0 / 28%);
+  }
+
+  html[data-family] body dialog.quick-search .quick-search-field {
+    border-radius: 2px;
+    border-color: rgb(var(--sh-l1-rgb) / 45%);
+    background: var(--sh-ink-2);
+    box-shadow:
+      inset 3px 0 0 var(--sh-l1),
+      inset 0 1px 0 rgb(233 240 241 / 12%);
+  }
+
+  /* The old clip reveal hid entire groups before their stagger elapsed.
+     The chrome now remains readable and tappable throughout its arrival. */
+  html[data-family] body #site-side-panel.side-panel[data-open="true"] > .side-panel-group {
+    animation: none;
+  }
+}
+
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-head
+    > div {
+    animation: command-head-seat 580ms var(--command-ease);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group
+    > p {
+    animation: command-rule-seat 520ms var(--command-ease);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button)::after {
+    animation: command-reflect 820ms var(--command-ease);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-announcement-dialog[open]
+    .site-announcement-hub {
+    animation: command-dialog-seat 620ms var(--command-ease);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    dialog.quick-search[open]
+    .quick-search-head {
+    animation: command-head-seat 500ms var(--command-ease);
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):active::after {
+    animation: none;
+    transform: none;
+    opacity: 0.65;
+  }
+}
+
+@media (forced-colors: none) and (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):hover,
+  html[data-family] body #site-announcement-dialog .site-announcement-list-item:hover {
+    border-color: var(--sh-l1);
+    box-shadow:
+      inset 3px 0 0 var(--sh-l1),
+      inset 0 1px 0 rgb(233 240 241 / 38%);
+  }
+}
+
+/* Each movement ends in its original box. No animation delay, hidden
+   interaction, persistent layer promotion or movement on the swipe sheet. */
+@keyframes command-head-seat {
+  from {
+    opacity: 0.72;
+    transform: perspective(800px) translate3d(-12px, 3px, 0) rotateY(5deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes command-rule-seat {
+  from {
+    opacity: 0.68;
+    transform: translate3d(-9px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes command-reflect {
+  0% {
+    opacity: 0;
+    transform: translateX(-110%);
+  }
+  20% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(110%);
+  }
+}
+
+@keyframes command-dialog-seat {
+  from {
+    opacity: 0.72;
+    transform: perspective(1000px) translate3d(0, 16px, 0) rotateX(3deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Command atlas. The doubled ID deliberately clears the legacy launcher's
+   positional selectors. The direct groups stay in DOM order, and the sheet's
+   transform/translate, viewport lock and native vertical pan stay untouched. */
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
+  --atlas-ink: #050b12;
+  --atlas-raised: #0d1d2b;
+  --atlas-light: #e9f6fb;
+  --atlas-line: rgb(145 189 215 / 28%);
+  --atlas-accent: var(--sh-l1);
+  --sp-pad-inline: max(clamp(16px, 3.2vw, 52px), calc((100vw - 1600px) / 2));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "head" "find" "sec" "spe" "sto" "rid" "rik" "rel" "unm" "inf" "sys";
+  gap: 28px;
+  background:
+    linear-gradient(135deg, rgb(var(--sh-l1-rgb) / 7%), transparent 40%),
+    linear-gradient(90deg, transparent 49.95%, rgb(145 189 215 / 5%) 50%, transparent 50.05%),
+    var(--atlas-ink) !important;
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 16px 20px;
+  padding-bottom: 12px;
+  background:
+    linear-gradient(90deg, var(--atlas-accent), rgb(233 246 251 / 68%) 38%, transparent 88%)
+      var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px no-repeat,
+    var(--atlas-ink);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-head::after {
+  display: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-head::before {
+  background: linear-gradient(180deg, var(--atlas-ink) 0 40%, transparent);
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-head b {
+  font-size: clamp(15px, 2vw, 26px);
+  letter-spacing: 0.09em;
+  color: var(--atlas-light);
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-close {
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+  padding: 5px;
+  border: 1px solid var(--atlas-line);
+  background: #02070d;
+  box-shadow: inset 0 2px 9px rgb(0 0 0 / 60%);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-index
+  button {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 5px;
+  border: 1px solid transparent;
+  border-radius: 1px;
+  background: linear-gradient(180deg, rgb(233 246 251 / 5%), transparent);
+  color: #c1d4df;
+  font-family: var(--sh-body);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-index
+  button:focus-visible {
+  outline: 2px solid var(--sh-focus);
+  outline-offset: 1px;
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  animation: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-group
+  > p {
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #c1d4df;
+  font-style: normal;
+  letter-spacing: 0.22em;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-group
+  > p::before {
+  width: 18px;
+  height: 6px;
+  flex-basis: 18px;
+  background: linear-gradient(110deg, var(--atlas-accent) 0 40%, transparent 42% 56%, #e9f6fb 58%);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="find"] {
+  grid-area: find;
+  margin-top: 8px;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="find"]
+  > p {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="find"]
+  .side-panel-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-links
+  > :is(a, button.side-panel-link-button) {
+  border-radius: 2px;
+  border-color: var(--atlas-line);
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 10%),
+    0 4px 0 #02070d;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)::after {
+  animation: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-links
+  > :is(a, button.side-panel-link-button)
+  > i {
+  box-shadow: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"] {
+  grid-area: sec;
+  align-self: start;
+  overflow: visible;
+  padding: 8px 8px 12px;
+  border: 1px solid var(--atlas-line);
+  background: linear-gradient(145deg, #172c3b, #09131e 45%, #050b12);
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 22%),
+    6px 6px 0 rgb(1 5 9 / 65%);
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: end;
+  min-height: 176px;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid rgb(145 189 215 / 20%);
+  background: radial-gradient(ellipse at 70% 20%, rgb(var(--sh-l1-rgb) / 22%), #02070d 75%);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, transparent 28%, rgb(2 7 13 / 46%) 60%, #02070d),
+    linear-gradient(90deg, rgb(2 7 13 / 30%), transparent 60%);
+  pointer-events: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-scene
+  img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 24%;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-scene
+  figcaption {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  padding: 22px 18px;
+  color: #eef8fc;
+  font-family: var(--sh-display);
+  font-size: clamp(19px, 2vw, 30px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 10px #000;
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-orbit {
+  position: absolute;
+  right: -13%;
+  top: -50%;
+  width: 76%;
+  aspect-ratio: 1;
+  border: 1px solid rgb(233 246 251 / 32%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 16px rgb(2 7 13 / 18%),
+    0 0 0 17px rgb(233 246 251 / 10%);
+  transform: rotate(-26deg) scaleY(0.76);
+  pointer-events: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  > p {
+  margin-inline: 10px;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  .side-panel-links {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  border: 0;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  .side-panel-links
+  > a {
+  grid-template-columns: 28px minmax(0, 1fr);
+  min-height: 60px;
+  padding: 8px;
+  border: 0;
+  border-bottom: 1px solid var(--atlas-line);
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  .side-panel-links
+  > a::before {
+  font-size: 13px;
+  color: var(--atlas-accent);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  .side-panel-links
+  > a
+  > i {
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: #91adbe;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="special"] {
+  grid-area: spe;
+}
+
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] [data-special-tiles] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  align-items: stretch;
+  gap: 12px;
+  padding: 12px 0 8px;
+  border-top: 1px solid var(--atlas-line);
+  border-bottom: 1px solid var(--atlas-line);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-special-tiles]
+  > a {
+  grid-column: auto;
+  grid-row: auto;
+  min-height: 218px;
+  padding: 14px 10px;
+  border-color: rgb(145 189 215 / 45%);
+  border-top: 3px solid #94b0c0;
+  background: #06111b;
+  box-shadow:
+    inset 0 0 0 4px rgb(2 7 13 / 20%),
+    0 5px 0 #02070d,
+    0 6px 0 rgb(145 189 215 / 26%);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-special-tiles]
+  > a:last-child {
+  grid-column: 1 / -1;
+  min-height: 200px;
+  --sh-art-pos: 50% 18%;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-special-tiles]
+  > a
+  > span {
+  font-size: clamp(13px, 1.15vw, 17px);
+  text-align: left;
+  text-wrap: balance;
+  color: var(--atlas-light);
+  line-height: 1.5;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="stories"] {
+  grid-area: sto;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="stories"]
+  .side-panel-links {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  grid-auto-flow: row;
+  grid-auto-rows: auto;
+  gap: 12px;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="stories"]
+  .side-panel-links
+  > a {
+  min-height: 170px;
+  padding: 18px;
+  border-left: 3px solid var(--atlas-accent);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="stories"]
+  .side-panel-links
+  > a
+  > span {
+  font-size: clamp(13px, 1vw, 17px);
+  line-height: 1.5;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="riders"] {
+  grid-area: rid;
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="rikuei"] {
+  grid-area: rik;
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="related"] {
+  grid-area: rel;
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="unmanaged"] {
+  grid-area: unm;
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="information"] {
+  grid-area: inf;
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="system"] {
+  grid-area: sys;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-files
+  .side-panel-links {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-files
+  .side-panel-links
+  > a {
+  min-height: 160px;
+  padding-top: 90px;
+  border-top: 2px solid rgb(233 246 251 / 44%);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="system"] {
+  margin-top: 4px;
+  padding-top: 22px;
+  border-top: 1px solid var(--atlas-line);
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-links
+  > a:is([aria-current="page"], [aria-current="location"]) {
+  border-color: #dceff8;
+  box-shadow:
+    inset 4px 0 0 var(--atlas-accent),
+    0 0 0 1px rgb(233 246 251 / 52%);
+}
+
+@media (min-width: 761px) {
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "head head" "find find" "sec sec" "spe spe" "sto sto" "rid rid" "rik rik" "rel rel" "unm inf" "sys sys";
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="find"]
+    .side-panel-links {
+    grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 1fr));
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-quick-search {
+    grid-column: auto;
+    min-width: 0;
+    gap: 8px;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-quick-search
+    > i {
+    display: none;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    column-gap: 18px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {
+    grid-row: 1 / 3;
+    min-height: 230px;
+    margin: 0;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"]
+    > p {
+    margin-top: 12px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] [data-special-tiles] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-special-tiles]
+    > a {
+    min-height: clamp(240px, 28vw, 330px);
+    margin-bottom: 20px;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-special-tiles]
+    > a:nth-child(even) {
+    margin-top: 20px;
+    margin-bottom: 0;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-special-tiles]
+    > a:last-child {
+    grid-column: auto;
+    min-height: clamp(240px, 28vw, 330px);
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-files
+    .side-panel-links {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-rikuei
+    .side-panel-links {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1180px) {
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
+    grid-template-columns: minmax(260px, 0.75fr) minmax(0, 2fr);
+    grid-template-areas: "head head" "find find" "sec spe" "sec sto" "rid rid" "rik rik" "rel rel" "unm inf" "sys sys";
+    column-gap: 28px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head {
+    grid-template-columns: minmax(240px, 1fr) minmax(520px, 1.6fr) 48px;
+    gap: 20px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-close {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"] {
+    display: block;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {
+    min-height: 242px;
+    margin-bottom: 20px;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"]
+    .side-panel-links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-special-tiles]
+    > a,
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-special-tiles]
+    > a:last-child {
+    min-height: clamp(280px, 28vw, 390px);
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-files
+    .side-panel-links
+    > a {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 760px) {
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-head
+    > div {
+    grid-template-columns: 36px minmax(0, 1fr);
+    column-gap: 10px;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-head
+    > div::before {
+    display: grid;
+    width: 36px;
+    height: 40px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-head p {
+    font-size: 12px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-head b {
+    font-size: 14px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head {
+    grid-template-columns: minmax(0, 1fr) 48px;
+    gap: 8px 14px;
+    padding-bottom: 8px;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"]
+    .side-panel-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-files
+    .side-panel-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button:hover {
+    border-color: rgb(233 246 251 / 50%);
+    background: linear-gradient(160deg, #edf7fb, #94adbc);
+    color: #07111b;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-special-tiles]
+    > a:hover {
+    border-color: var(--atlas-accent);
+    box-shadow:
+      inset 0 0 0 3px rgb(var(--sh-l1-rgb) / 22%),
+      0 6px 0 #02070d,
+      0 7px 0 var(--atlas-accent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    .command-atlas-orbit {
+    animation: command-atlas-orbit-arrive 720ms var(--command-ease) both;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    [data-special-tiles]
+    > a::after {
+    animation: command-reflect 880ms var(--command-ease);
+  }
+}
+
+@keyframes command-atlas-orbit-arrive {
+  from {
+    opacity: 0;
+    transform: rotate(-40deg) scaleY(0.76) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-26deg) scaleY(0.76) scale(1);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas],
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head,
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+    background: Canvas !important;
+  }
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button,
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"] {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    background: Canvas;
+  }
+  html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-orbit {
+    display: none;
+  }
+}
+
+/* Contexts without the World dossier groups must not reserve their tracks. */
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
+  grid-template-areas: "head" "find" "sec" "spe" "sto" "unm" "inf" "sys";
+}
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
+    grid-template-areas: "head head" "find find" "sec sec" "spe spe" "sto sto" "unm inf" "sys sys";
+  }
+}
+@media (min-width: 1180px) {
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
+    grid-template-areas: "head head" "find find" "sec spe" "sec sto" "unm inf" "sys sys";
+  }
+}
+
+/* Same artwork as the archived 240x320 chips. The large atlas uses the
+   source picture (400px) / existing 960px derivative, retaining its crop.
+   The newer Extreme pickup is a different drawing and is not substituted. */
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+  [data-special-tiles]
+  > a[href^="/extreme-saga"] {
+  --sh-art: url("/archive-media/saga-34c49e1c8d5b01a9.webp");
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+  [data-special-tiles]
+  > a[href^="/rexonance-saga"] {
+  --sh-art: url("/record-art/saga-rexonance-960.webp");
+}

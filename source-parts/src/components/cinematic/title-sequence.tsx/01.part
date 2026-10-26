@@ -53,9 +53,9 @@ const REPLAY_GUARD_MS = 600;
 const OPENING_SEEN_KEY = "dw-opening-seen";
 const OPENING_REPLAY_KEY = "dw-opening-replay";
 
-// A reload of "/" asks for the opening again. The navigation entry belongs to
-// the document, so it is read for the first title of the document only; a later
-// Back to the title in the same document is still a return.
+// A reload or a new document opened at an explicit opening URL asks to play.
+// This component only mounts for validated opening queries. Consume the document
+// entry once: Back to this title must still show its settled state.
 let documentReloadChecked = false;
 function consumeTitleReload() {
   if (documentReloadChecked) return false;
@@ -63,7 +63,13 @@ function consumeTitleReload() {
   try {
     const entry = performance.getEntriesByType("navigation")[0] as
       PerformanceNavigationTiming | undefined;
-    return entry?.type === "reload" && new URL(entry.name).pathname === "/";
+    if (!entry) return false;
+    const initial = new URL(entry.name);
+    return (
+      initial.pathname === "/" &&
+      (entry.type === "reload" ||
+        (entry.type === "navigate" && initial.search === window.location.search))
+    );
   } catch {
     return false;
   }

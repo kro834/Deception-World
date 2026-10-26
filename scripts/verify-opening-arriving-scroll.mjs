@@ -25,7 +25,7 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    await page.goto(origin);
+    await page.goto(new URL("/?opening=1", origin).href);
     await page.locator(".cine-stage.is-complete").waitFor();
     await page.getByRole("button", { name: "ディセプションワールドへ入る", exact: true }).tap();
     await page.waitForURL(/\/world$/);

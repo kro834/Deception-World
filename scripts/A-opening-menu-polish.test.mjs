@@ -101,10 +101,10 @@ test("a return to the title in the same tab skips the opening; asked-for replays
   assert.match(title, /window\.sessionStorage\.setItem\(OPENING_SEEN_KEY, "1"\)/);
   assert.match(title, /skipIntroRef\.current = seen && !replayRequested && !reloaded;/);
   assert.match(title, /if \(reduced \|\| \(replayKey === 0 && skipIntroRef\.current\)\) \{/);
-  assert.match(title, /entry\?\.type === "reload" && new URL\(entry\.name\)\.pathname === "\/"/);
+  assert.match(title, /initial\.pathname === "\/"[\s\S]*?entry\.type === "reload"/);
   assert.match(
     chrome,
-    /<Link\s+to="\/"\s+onClick=\{\(e\) => \{[\s\S]*?if \(e\.button === 0 && !e\.metaKey && !e\.ctrlKey && !e\.shiftKey && !e\.altKey\) \{\s*try \{\s*window\.sessionStorage\.setItem\("dw-opening-replay", "1"\)/,
+    /<Link\s+to="\/"\s+search=\{\{ opening: true \}\}\s+onClick=\{\(e\) => \{[\s\S]*?if \(e\.button === 0 && !e\.metaKey && !e\.ctrlKey && !e\.shiftKey && !e\.altKey\) \{\s*try \{\s*window\.sessionStorage\.setItem\("dw-opening-replay", "1"\)/,
   );
   // The idle hint does not fade over the settled logo on a Back.
   assert.match(

@@ -27,7 +27,7 @@ function dirnameOfScript() {
   return fileURLToPath(new URL(".", import.meta.url));
 }
 
-const home = new URL("/", base).href;
+const home = new URL("/?opening=1", base).href;
 const enterName = "ディセプションワールドへ入る";
 
 function collectErrors(page, errors, diagnostics) {
