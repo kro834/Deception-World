@@ -117,7 +117,7 @@ async function programmeAndCompanion(page, label, keyboard) {
     const guide = page.locator(`.dream-reader-index a[href="#dream-case-${episode.no}"]`);
     assert.match(await guide.innerText(), new RegExp(`${episode.no}\\s*${episode.title}`));
   }
-  for (const hash of ["#posters", "#dream-chapter-index", "#dream-record-explorer"]) {
+  for (const hash of ["#posters", "#dream-chapter-stage", "#dream-record-explorer"]) {
     const ticket = page.locator(`.dream-programme-ticket[href="${hash}"]`);
     assert.equal(await ticket.getAttribute("href"), hash);
     await nativeArrival(page, ticket, hash, keyboard);
