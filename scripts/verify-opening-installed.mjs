@@ -55,7 +55,7 @@ for (const engine of engines) {
         const page = await context.newPage();
         const errors = [];
         page.on("pageerror", (error) => errors.push(error.message));
-        await page.goto(base);
+        await page.goto(new URL("/?opening=1", base).href);
         const enter = page.getByRole("button", { name: "ディセプションワールドへ入る" });
         await enter.waitFor({ timeout: 45000 });
         await page.waitForTimeout(1800);

@@ -120,7 +120,7 @@ try {
         return Reflect.apply(play, this, args);
       };
     });
-    await page.goto(new URL("/", base).href);
+    await page.goto(new URL("/?opening=1", base).href);
     await page.locator(".cine-stage").waitFor();
     await assertOpeningHitTargets(page);
     assert.equal(await page.locator(".cine-always, audio, [aria-keyshortcuts='M']").count(), 0);

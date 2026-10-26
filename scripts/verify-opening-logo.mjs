@@ -16,7 +16,7 @@ try {
     const page = await browser.newPage({ viewport: { width, height }, hasTouch: true });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
-    await page.goto(origin);
+    await page.goto(new URL("/?opening=1", origin).href);
     await page.locator(".cine-stage.is-complete").waitFor({ timeout: 15000 });
     await page.waitForTimeout(700);
     const logo = page.locator(".cine-logo-core");

@@ -48,6 +48,7 @@ import stageShellCss from "../styles-stage-shell.css?url";
 import openingShellCss from "../styles-opening-shell.css?url";
 import sagaStreamlineCss from "../styles-saga-streamline.css?url";
 import siteAstraCss from "../styles-site-astra.css?url";
+import commandChromeCss from "../styles-command-chrome.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
@@ -224,6 +225,7 @@ export const Route = createRootRoute({
             { rel: "stylesheet", href: interactionChoreographyCss },
           ]),
       { rel: "stylesheet", href: siteAstraCss },
+      { rel: "stylesheet", href: commandChromeCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -244,12 +246,7 @@ function RootDocument() {
   const chrome = getViewportChrome(pathname);
   const family = getRouteFamily(pathname);
   return (
-    <html
-      lang="ja"
-      data-viewport-chrome={chrome}
-      data-family={family}
-      suppressHydrationWarning
-    >
+    <html lang="ja" data-viewport-chrome={chrome} data-family={family} suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

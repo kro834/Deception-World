@@ -178,6 +178,28 @@ const YOAKE_MAMORI_LINK = {
   assets: ["/character-yoake-mamori.jpeg"],
 } as const;
 
+// The atlas uses the published art, never a generated stand-in. Loading stays
+// tied to the open menu; file portraits use their small launcher candidate.
+const COMMAND_ATLAS_SCENES: Record<string, { title: string; image: string }> = {
+  world: { title: "DECEPTION WORLD", image: "/episode-03-deception-world-delivery-600.webp" },
+  archive: { title: "FORM ARCHIVE", image: "/archive-media/thumbs/realm-royal.webp" },
+  cinema: { title: "SAGA CINEMA", image: "/episode-03-deception-world-delivery-600.webp" },
+  movie: { title: "DREAM CHAPTER", image: "/dream-chapter-poster-05-delivery.webp" },
+  gallery: { title: "GALLERY", image: "/gallery/g03-480.webp" },
+  rexonance: { title: "REXONANCE SAGA", image: "/record-art/saga-rexonance-960.webp" },
+  extreme: { title: "EXTREME SAGA", image: "/archive-media/saga-34c49e1c8d5b01a9.webp" },
+  "far-from": { title: "FAR FROM SAGA", image: "/far-from-saga-20261022/middle-tile-400.webp" },
+  illusionculum: {
+    title: "ILLUSIONCULUM SAGA",
+    image: "/illusionculum-saga-20261023/hero-tile-400.webp",
+  },
+  "meta-unitas": {
+    title: "META UNITAS SAGA",
+    image: "/meta-unitas-saga-20261023/middle-tile-400.webp",
+  },
+  "final-stage": { title: "FINAL STAGE", image: "/final-stage-logo-delivery-640.webp" },
+};
+
 const SIDE_MENU_OPEN_INPUT_EVENT = "deception-world:side-menu-open-input";
 
 // A finger swipe to the right closes the menu (touch only). The first 10px
@@ -434,6 +456,40 @@ export function SideMenuLayer({
   // The dossier the reader is on is marked in the menu (aria-current).
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const locationHash = useRouterState({ select: (state) => state.location.hash });
+  const atlasFile = [
+    ...RIDER_NAV,
+    ...RIKUEI_NAV,
+    ...RE_DIVE_RIKUEI_NAV,
+    ...RELATED_NAV,
+    YOAKE_MAMORI_LINK,
+  ].find((file) => file.href === pathname);
+  const atlasScene = atlasFile
+    ? { title: atlasFile.name, image: launcherTile(pathname) ?? COMMAND_ATLAS_SCENES.world.image }
+    : pathname === "/characters/dante"
+      ? { title: "ダンテ／ヴァルグ", image: "/character-dante-thumb.webp" }
+      : COMMAND_ATLAS_SCENES[context];
+  // A jump scrolls this dialog only. Keyboard users land on the destination's
+  // first control; pointer users keep their focus and can immediately pan.
+  const jumpAtlasGroup = (group: string, keyboard: boolean) => {
+    const panel = panelRef.current;
+    const target = panel?.querySelector<HTMLElement>(`[data-atlas-group="${group}"]`);
+    const head = panel?.querySelector<HTMLElement>(".side-panel-head");
+    if (!panel || !target || !head) return;
+    panel.scrollTop +=
+      target.getBoundingClientRect().top -
+      head.getBoundingClientRect().bottom -
+      SIDE_MENU_GROUP_CLEARANCE_PX;
+    if (keyboard) {
+      const control = target.querySelector<HTMLElement>("a, button:not([disabled])");
+      if (!control) return;
+      // A short landscape screen may not fit the scene above the links.
+      // Keep keyboard focus visible without moving the locked document.
+      const overflow =
+        control.getBoundingClientRect().bottom - panel.getBoundingClientRect().bottom + 16;
+      if (overflow > 0) panel.scrollTop += overflow;
+      control.focus({ preventScroll: true });
+    }
+  };
   // RE DIVE (rising-world.tsx) joins the World's sections once reached this
   // session; read when the menu opens.
   const [reDiveReached, setReDiveReached] = useState(false);
@@ -976,6 +1032,7 @@ export function SideMenuLayer({
         id="site-side-panel"
         className="side-panel"
         data-liquid-pointer="true"
+        data-command-atlas="true"
         data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
         role="dialog"
@@ -1049,8 +1106,30 @@ export function SideMenuLayer({
               />
             </svg>
           </button>
+          <nav className="command-atlas-index" aria-label="メニューの領域">
+            {[
+              ["sections", "ページ内"],
+              ["special", "サーガ"],
+              ["stories", "物語"],
+              [
+                context === "world" ? "riders" : "information",
+                context === "world" ? "人物" : "ギャラリー・お知らせ",
+              ],
+              ["find", "資料"],
+              ["system", "設定"],
+            ].map(([group, label]) => (
+              <button
+                key={group}
+                type="button"
+                aria-controls={`command-atlas-${group}`}
+                onClick={(event) => jumpAtlasGroup(group, event.detail === 0)}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
         </div>
-        <div className="side-panel-group">
+        <div className="side-panel-group" data-atlas-group="find" id="command-atlas-find">
           <p>FIND A RECORD</p>
           <div className="side-panel-links">
             <button
@@ -1091,7 +1170,17 @@ export function SideMenuLayer({
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
           </div>
         </div>
-        <div className="side-panel-group" data-side-menu-sections>
+        <div
+          className="side-panel-group"
+          data-side-menu-sections
+          data-atlas-group="sections"
+          id="command-atlas-sections"
+        >
+          <figure className="command-atlas-scene">
+            {isOpen ? <img src={atlasScene.image} alt="" decoding="async" /> : null}
+            <span className="command-atlas-orbit" aria-hidden="true" />
+            <figcaption>{atlasScene.title}</figcaption>
+          </figure>
           <p>SECTIONS</p>
           <div className="side-panel-links">
             {context === "world" && fileChapters.length > 0 ? (
@@ -1275,7 +1364,7 @@ export function SideMenuLayer({
             )}
           </div>
         </div>
-        <div className="side-panel-group">
+        <div className="side-panel-group" data-atlas-group="special" id="command-atlas-special">
           <p>SPECIAL</p>
           {/* The order (owner, 2026-10-23: 「ファーフロムは一番最後です。」):
               エクスプリーム, レクソナンス, イリュージョンクルム, メタ・ウニタス,
@@ -1343,7 +1432,7 @@ export function SideMenuLayer({
             every engine (WebKit has no auto-phrase): 映画第一作 /
             「ドリームチャプター」, ディセプション / ワールド. The names are
             unchanged, and so are the links' accessible names. */}
-        <div className="side-panel-group">
+        <div className="side-panel-group" data-atlas-group="stories" id="command-atlas-stories">
           <p>STORIES</p>
           <div className="side-panel-links">
             <CinemaLink beforeNavigate={close} active={context === "cinema"} />
@@ -1424,7 +1513,11 @@ export function SideMenuLayer({
           </div>
         </div>
         {context === "world" ? (
-          <div className="side-panel-group side-panel-riders">
+          <div
+            className="side-panel-group side-panel-riders"
+            data-atlas-group="riders"
+            id="command-atlas-riders"
+          >
             <p>RIDERS</p>
             <div className="side-panel-links">
               {RIDER_NAV.map((r, i) =>
@@ -1446,7 +1539,11 @@ export function SideMenuLayer({
         ) : null}
         {context === "world" ? (
           <>
-            <div className="side-panel-group side-panel-files side-panel-rikuei">
+            <div
+              className="side-panel-group side-panel-files side-panel-rikuei"
+              data-atlas-group="rikuei"
+              id="command-atlas-rikuei"
+            >
               <p>RIKUEI</p>
               <div className="side-panel-links">
                 {RIKUEI_NAV.map((file) => (
@@ -1466,7 +1563,11 @@ export function SideMenuLayer({
                 ))}
               </div>
             </div>
-            <div className="side-panel-group side-panel-files side-panel-related">
+            <div
+              className="side-panel-group side-panel-files side-panel-related"
+              data-atlas-group="related"
+              id="command-atlas-related"
+            >
               <p>RELATED</p>
               <div className="side-panel-links">
                 {[
@@ -1494,7 +1595,7 @@ export function SideMenuLayer({
             </div>
           </>
         ) : null}
-        <div className="side-panel-group">
+        <div className="side-panel-group" data-atlas-group="unmanaged" id="command-atlas-unmanaged">
           <p>UNMANAGED</p>
           <div className="side-panel-links">
             <GuardedLink
@@ -1508,7 +1609,11 @@ export function SideMenuLayer({
             </GuardedLink>
           </div>
         </div>
-        <div className="side-panel-group">
+        <div
+          className="side-panel-group"
+          data-atlas-group="information"
+          id="command-atlas-information"
+        >
           <p>INFORMATION</p>
           <div className="side-panel-links">
             <GuardedLink
@@ -1533,7 +1638,7 @@ export function SideMenuLayer({
             </button>
           </div>
         </div>
-        <div className="side-panel-group">
+        <div className="side-panel-group" data-atlas-group="system" id="command-atlas-system">
           <p>SYSTEM</p>
           <div className="side-panel-links">
             {context === "archive" ? (
@@ -1555,8 +1660,13 @@ export function SideMenuLayer({
             )}
             <ZeusButtonToggle />
             <IpadMenuToggle />
+            <GuardedLink to="/" assets={[]} beforeNavigate={close}>
+              <span>トップ</span>
+              <i>DECEPTION WORLD</i>
+            </GuardedLink>
             <Link
               to="/"
+              search={{ opening: true }}
               onClick={(e) => {
                 // The title skips an opening already seen this session (a
                 // browser Back); asked for from here, it plays in full. A

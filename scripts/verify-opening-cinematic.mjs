@@ -110,7 +110,7 @@ async function openTitle(browser, name, { audit = false, init = [], reducedMotio
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   if (audit) await page.clock.install();
-  await page.goto(new URL(audit ? "/?opening-audit" : "/", base).href);
+  await page.goto(new URL(audit ? "/?opening-audit" : "/?opening=1", base).href);
   await page.waitForSelector(".cine-stage");
   return { context, page, errors };
 }
