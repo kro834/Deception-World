@@ -157,7 +157,7 @@ test("the end of a file reads down the screen in the source's (and the Tab) orde
   // they shared row 3 with it (hidden, untappable) and on wider screens Tab skipped the card.
   const nav = await read("src/components/world/dossier-nav.tsx");
   // Owner (2026-10-22): the <nav> now also carries data-numerals, so its tag spans lines.
-  const render = nav.slice(nav.indexOf('<nav\n      className="manager-pagination"'));
+  const render = nav.slice(nav.indexOf('<nav\n      className="manager-pagination'));
   assert.ok(render.length < nav.length, "the nav element");
   const prev = render.indexOf("to={prev.href}");
   const index = render.indexOf('<div className="manager-pagination-index">');
@@ -235,7 +235,7 @@ test("related records stack their art over their words in a narrow reading colum
 test("the index reads as a way back: an arrow ring, and on the split stage a plate with the file's place", async () => {
   // Owner (2026-10-22): the stage side of the index row stood empty under two small lines.
   const nav = await read("src/components/world/dossier-nav.tsx");
-  const index = nav.slice(nav.indexOf('className="dossier-index-return"'));
+  const index = nav.slice(nav.indexOf('className="dossier-index-return'));
   const link = index.slice(0, index.indexOf("</GuardedLink>"));
   // Decorative: the link keeps its name (人物一覧へ戻る) and its text.
   assert.match(link, /<em className="dossier-index-arrow" aria-hidden="true">/);

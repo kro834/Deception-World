@@ -1,6 +1,3 @@
-      }}
-    >
-      <div className="manager-ambient" aria-hidden="true">
         <div className="manager-grid" />
         <div className="manager-glow" />
       </div>
@@ -11,6 +8,7 @@
         returnHash="riders-return"
         returnLabel="ライダー一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -174,7 +172,11 @@
         <DossierContents sections={rider.sections} />
         <div className="manager-sections">
           {rider.sections.map((s) => (
-            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
+            <article
+              className="manager-copy-section dg-reveal"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -308,7 +310,7 @@
       {rider.nightmare ? (
         <dialog
           ref={nightmareRef}
-          className="rider-nightmare-dialog"
+          className="rider-nightmare-dialog dg-focus-scope"
           tabIndex={-1}
           aria-label={rider.nightmare.name}
           onClose={resetNightmareScroll}

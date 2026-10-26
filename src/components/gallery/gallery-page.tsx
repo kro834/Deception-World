@@ -1009,7 +1009,7 @@ export function GalleryPage() {
           <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
         </div>
       </header>
-      <main id="gallery-main">
+      <main id="gallery-main" className="dg-focus-scope">
         {linkNotice && (
           <div className="gallery-link-notice">
             <p role="status">

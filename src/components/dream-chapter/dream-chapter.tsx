@@ -1426,7 +1426,12 @@ export function DreamChapter() {
   }, [cancelShuffle, commitPoster, loadPoster, posterIndex, previousPosterIndex]);
 
   return (
-    <main ref={pageRef} id="top" className="dream-page" onClickCapture={revisitDossier}>
+    <main
+      ref={pageRef}
+      id="top"
+      className="dream-page dg-focus-scope"
+      onClickCapture={revisitDossier}
+    >
       <header className="dream-site-header">
         <GuardedLink
           className="dream-back-link"

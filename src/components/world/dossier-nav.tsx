@@ -383,13 +383,14 @@ export function DossierNav({
 
   return (
     <nav
-      className="manager-pagination"
+      className="manager-pagination dg-focus-scope"
       aria-label="前後の資料"
       data-numerals={romanList(items) ? "roman" : undefined}
     >
       {prev?.href ? (
         <GuardedLink
           to={prev.href}
+          className="dg-control dg-control-sweep"
           search={originSearch}
           assets={prev.assets}
           aria-label={`${prev.name}の資料へ`}
@@ -410,7 +411,7 @@ export function DossierNav({
           to="/world"
           hash={returnHash}
           assets={[]}
-          className="dossier-index-return"
+          className="dossier-index-return dg-control"
           aria-label="人物一覧へ戻る"
         >
           {/* The way back, in a ring like PREV's arrow (decorative). */}
@@ -427,6 +428,7 @@ export function DossierNav({
       {next?.href ? (
         <GuardedLink
           to={next.href}
+          className="dg-control dg-control-sweep"
           search={originSearch}
           assets={next.assets}
           aria-label={`${next.name}の資料へ`}

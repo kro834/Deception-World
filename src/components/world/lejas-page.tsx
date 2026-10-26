@@ -54,7 +54,7 @@ export function LejasPage() {
 
   return (
     <main
-      className="manager-page"
+      className="manager-page dg-focus-scope"
       id="top"
       style={{
         ["--manager-accent" as string]: "#78b69b",
@@ -73,6 +73,8 @@ export function LejasPage() {
         returnHash="manager-archive"
         returnLabel="六詠一覧へ戻る"
       />
+
+      <i className="dg-rail" aria-hidden="true" />
 
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
@@ -207,7 +209,7 @@ export function LejasPage() {
           ]}
         />
         <div className="manager-sections">
-          <article className="manager-copy-section" id="character-section-01">
+          <article className="manager-copy-section dg-reveal" id="character-section-01">
             <div className="manager-copy-heading">
               <span>01</span>
               <p>盤面と勝敗の管轄</p>
@@ -224,7 +226,7 @@ export function LejasPage() {
               </p>
             </div>
           </article>
-          <article className="manager-copy-section" id="character-section-02">
+          <article className="manager-copy-section dg-reveal" id="character-section-02">
             <div className="manager-copy-heading">
               <span>02</span>
               <p>人物と情報の提示</p>
@@ -238,7 +240,7 @@ export function LejasPage() {
               </p>
             </div>
           </article>
-          <article className="manager-copy-section" id="character-section-03">
+          <article className="manager-copy-section dg-reveal" id="character-section-03">
             <div className="manager-copy-heading">
               <span>03</span>
               <p>戦い方</p>

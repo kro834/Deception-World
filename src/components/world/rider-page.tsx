@@ -1099,9 +1099,7 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           "オーバー！",
           "エクスプロム！",
         ],
-        overview: [
-          "炸ける",
-        ],
+        overview: ["炸ける"],
         stats: [
           { dt: "HEIGHT", dd: "205.9cm（est.）" },
           { dt: "WEIGHT", dd: "110.0kg（est.）" },
@@ -1111,7 +1109,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "1.0秒（100m est.）" },
         ],
         finishers: [
-          { name: "エクスプロムスマッシュ", body: "蓄積されていた全ての衝撃を炸裂させ、圧倒的な破壊力をさらに最大化する必殺技。" },
+          {
+            name: "エクスプロムスマッシュ",
+            body: "蓄積されていた全ての衝撃を炸裂させ、圧倒的な破壊力をさらに最大化する必殺技。",
+          },
         ],
         arsenal: [
           {
@@ -1182,7 +1183,10 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
           { dt: "100m", dd: "1.5秒（100m est.）" },
         ],
         finishers: [
-          { name: "カスタム・オーバーカミング", body: "仮面ライダーオーバーゼッツ カスタムの必殺技。" },
+          {
+            name: "カスタム・オーバーカミング",
+            body: "仮面ライダーオーバーゼッツ カスタムの必殺技。",
+          },
         ],
         arsenal: [
           {
@@ -1531,7 +1535,7 @@ export function RiderPage({ id }: { id: string }) {
               : [];
   return (
     <main
-      className="manager-page rider-dossier-page"
+      className="manager-page rider-dossier-page dg-focus-scope"
       style={{
         ["--manager-accent" as string]: rider.tone,
         ["--manager-accent-soft" as string]: rider.tone,
@@ -1552,6 +1556,7 @@ export function RiderPage({ id }: { id: string }) {
         returnHash="riders-return"
         returnLabel="ライダー一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -1715,7 +1720,11 @@ export function RiderPage({ id }: { id: string }) {
         <DossierContents sections={rider.sections} />
         <div className="manager-sections">
           {rider.sections.map((s) => (
-            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
+            <article
+              className="manager-copy-section dg-reveal"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -1849,7 +1858,7 @@ export function RiderPage({ id }: { id: string }) {
       {rider.nightmare ? (
         <dialog
           ref={nightmareRef}
-          className="rider-nightmare-dialog"
+          className="rider-nightmare-dialog dg-focus-scope"
           tabIndex={-1}
           aria-label={rider.nightmare.name}
           onClose={resetNightmareScroll}

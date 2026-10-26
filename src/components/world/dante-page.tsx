@@ -17,7 +17,7 @@ export function DantePage() {
   useWorldMode();
   return (
     <main
-      className="manager-page related-character-page dante-page"
+      className="manager-page related-character-page dante-page dg-focus-scope"
       style={{
         ["--manager-accent" as string]: "#ed667e",
         ["--manager-accent-soft" as string]: "#ed667e",
@@ -40,6 +40,7 @@ export function DantePage() {
         returnHash="manager-archive-dogs"
         returnLabel="犬の一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -99,7 +100,7 @@ export function DantePage() {
         <div className="manager-sections">
           {DANTE_SECTIONS.map((section) => (
             <article
-              className="manager-copy-section"
+              className="manager-copy-section dg-reveal"
               id={`character-section-${section.no}`}
               key={section.no}
             >

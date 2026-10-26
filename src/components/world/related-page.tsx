@@ -161,7 +161,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
   const person = RELATED.find((p) => p.id === id) ?? RELATED[0];
   return (
     <main
-      className="manager-page related-character-page"
+      className="manager-page related-character-page dg-focus-scope"
       style={{
         ["--manager-accent" as string]: person.accent,
         ["--manager-accent-soft" as string]: person.accent,
@@ -179,6 +179,7 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         returnHash="manager-archive-other"
         returnLabel="その他の人物一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -238,7 +239,11 @@ export function RelatedPage({ id }: { id: "terra" | "luna" }) {
         <DossierContents sections={person.sections} />
         <div className="manager-sections">
           {person.sections.map((s) => (
-            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
+            <article
+              className="manager-copy-section dg-reveal"
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>

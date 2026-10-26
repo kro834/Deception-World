@@ -383,3 +383,5 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
       },
       {
         no: "02",
+        kicker: "人物と判断基準",
+        title: "軽口を絶やさず、共存できるかを見極める。",

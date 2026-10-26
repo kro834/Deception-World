@@ -154,7 +154,11 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     gateSource.current = source;
     gateLifeEnded.current = false;
     gateDecoded.current = false;
-    gateScene.current = measureGateScene(rider.theme as FormTheme, opener.current, signatureRef.current);
+    gateScene.current = measureGateScene(
+      rider.theme as FormTheme,
+      opener.current,
+      signatureRef.current,
+    );
     setGateActive(true);
     const preload = new window.Image();
     preload.decoding = "async";
@@ -167,7 +171,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
     gateImage.current = preload;
     // The record's own figure loads with the cover (not at page load), so it
     // is laid out when the cover's light comes to rest on it.
-    dlg.current?.querySelector?.(".form-pickup-layout > figure > img")?.setAttribute("loading", "eager");
+    dlg.current
+      ?.querySelector?.(".form-pickup-layout > figure > img")
+      ?.setAttribute("loading", "eager");
     const decoded = () => {
       if (gateImage.current !== preload) return;
       gateDecoded.current = true;
@@ -345,7 +351,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
       </article>
       <dialog
         ref={dlg}
-        className={`form-pickup-dialog${isRexonance ? " is-rexonance-dialog" : ""}`}
+        className={`form-pickup-dialog dg-focus-scope${isRexonance ? " is-rexonance-dialog" : ""}`}
         data-form-theme={rider.theme}
         tabIndex={-1}
         aria-label={`${riderPrefix}${record.name}`}
@@ -589,7 +595,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
   useWorldMode();
   return (
     <main
-      className={`manager-page${profile.sovereign ? " is-sovereign" : ""}`}
+      className={`manager-page${profile.sovereign ? " is-sovereign" : ""} dg-focus-scope`}
       style={{
         ["--manager-accent" as string]: profile.accent,
         ["--manager-accent-soft" as string]: profile.accent,
@@ -615,6 +621,7 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         returnHash="manager-archive"
         returnLabel="六詠一覧へ戻る"
       />
+      <i className="dg-rail" aria-hidden="true" />
       <section className="manager-hero" id="dossier-profile">
         <div className="manager-portrait-column">
           <div className="manager-portrait-frame">
@@ -730,7 +737,11 @@ function ManagerDossier({ profile }: { profile: Profile }) {
         <DossierContents sections={profile.sections} />
         <div className="manager-sections">
           {profile.sections.map((s) => (
-            <article className="manager-copy-section" id={`character-section-${s.no}`} key={s.no}>
+            <article
+              className={`manager-copy-section${profile.sovereign ? "" : " dg-reveal"}`}
+              id={`character-section-${s.no}`}
+              key={s.no}
+            >
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>

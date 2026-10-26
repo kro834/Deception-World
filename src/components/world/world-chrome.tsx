@@ -1131,7 +1131,7 @@ export function SideMenuLayer({
         </div>
         <div className="side-panel-group" data-atlas-group="find" id="command-atlas-find">
           <p>FIND A RECORD</p>
-          <div className="side-panel-links">
+          <div className="side-panel-links dg-focus-scope">
             <button
               type="button"
               className="side-panel-link-button side-panel-quick-search"
@@ -1182,7 +1182,7 @@ export function SideMenuLayer({
             <figcaption>{atlasScene.title}</figcaption>
           </figure>
           <p>SECTIONS</p>
-          <div className="side-panel-links">
+          <div className="side-panel-links dg-focus-scope">
             {context === "world" && fileChapters.length > 0 ? (
               <>
                 {fileChapters.map(({ id, label }) => (
@@ -1370,7 +1370,7 @@ export function SideMenuLayer({
               エクスプリーム, レクソナンス, イリュージョンクルム, メタ・ウニタス,
               then ファーフロム, a little larger (styles-stage-shell.css). Each
               tile is its form's art and its name. */}
-          <div className="side-panel-links" data-special-tiles="">
+          <div className="side-panel-links dg-focus-scope" data-special-tiles="">
             <GuardedLink
               to="/extreme-saga"
               hash="top"
@@ -1434,7 +1434,7 @@ export function SideMenuLayer({
             unchanged, and so are the links' accessible names. */}
         <div className="side-panel-group" data-atlas-group="stories" id="command-atlas-stories">
           <p>STORIES</p>
-          <div className="side-panel-links">
+          <div className="side-panel-links dg-focus-scope">
             <CinemaLink beforeNavigate={close} active={context === "cinema"} />
             {context === "movie" ? (
               <>
@@ -1519,7 +1519,7 @@ export function SideMenuLayer({
             id="command-atlas-riders"
           >
             <p>RIDERS</p>
-            <div className="side-panel-links">
+            <div className="side-panel-links dg-focus-scope">
               {RIDER_NAV.map((r, i) =>
                 r.href ? (
                   <GuardedLink
@@ -1545,7 +1545,7 @@ export function SideMenuLayer({
               id="command-atlas-rikuei"
             >
               <p>RIKUEI</p>
-              <div className="side-panel-links">
+              <div className="side-panel-links dg-focus-scope">
                 {RIKUEI_NAV.map((file) => (
                   <GuardedLink
                     key={file.href}
@@ -1569,7 +1569,7 @@ export function SideMenuLayer({
               id="command-atlas-related"
             >
               <p>RELATED</p>
-              <div className="side-panel-links">
+              <div className="side-panel-links dg-focus-scope">
                 {[
                   ...(reDiveReached || pathname === "/characters/ciel"
                     ? RE_DIVE_RIKUEI_NAV.filter((file) => file.href === "/characters/ciel")
@@ -1597,7 +1597,7 @@ export function SideMenuLayer({
         ) : null}
         <div className="side-panel-group" data-atlas-group="unmanaged" id="command-atlas-unmanaged">
           <p>UNMANAGED</p>
-          <div className="side-panel-links">
+          <div className="side-panel-links dg-focus-scope">
             <GuardedLink
               to="/characters/dante"
               assets={["/character-dante.webp"]}
@@ -1615,7 +1615,7 @@ export function SideMenuLayer({
           id="command-atlas-information"
         >
           <p>INFORMATION</p>
-          <div className="side-panel-links">
+          <div className="side-panel-links dg-focus-scope">
             <GuardedLink
               to="/gallery"
               assets={GALLERY_CURTAIN_STICKERS}
@@ -1640,7 +1640,7 @@ export function SideMenuLayer({
         </div>
         <div className="side-panel-group" data-atlas-group="system" id="command-atlas-system">
           <p>SYSTEM</p>
-          <div className="side-panel-links">
+          <div className="side-panel-links dg-focus-scope">
             {context === "archive" ? (
               <GuardedLink
                 to="/form-archive"
