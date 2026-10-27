@@ -267,3 +267,95 @@ test("the shaders' lens is silent at the swap frames", async () => {
   assert.equal(diveUniformsAt(0).uDive, 0);
   assert.equal(diveUniformsAt(OPENING_DIVE.glEnd).uWorld, 1);
 });
+
+// The holographic boot (2026-10-27): the power-on, the raster, the grid
+// planes, the lock-on, the two sweeps and the data-stream in the cinema
+// sheet, and the dust canvas assembling the ice logo with a sliced hologram.
+test("the holographic boot: textless planes, assembly from the logo's own art, finite beats", async () => {
+  const title = await read("src/components/cinematic/title-sequence.tsx");
+  const holo = title.slice(
+    title.indexOf("const CinematicHolo = memo("),
+    title.indexOf("const CinematicLight = memo("),
+  );
+  assert.ok(holo.length > 0, "CinematicHolo is defined");
+  for (const plane of ["cine-holo-back", "cine-holo-front"]) {
+    assert.match(holo, new RegExp(`className="cine-cinema cine-holo ${plane}" aria-hidden="true"`));
+  }
+  for (const name of [
+    "cine-holo-floor",
+    "cine-holo-ceil",
+    "cine-holo-sweep-a",
+    "cine-holo-sweep-b",
+    "cine-holo-lock",
+    "cine-holo-boot",
+    "cine-holo-raster",
+  ]) {
+    assert.ok(holo.includes(name), name);
+  }
+  assert.doesNotMatch(holo, />\s*[^\s<{][^<{]*</, "no text in the boot");
+  assert.match(title, /<CinematicLight \/>\s*<CinematicHolo \/>/);
+  // The dust assembles onto the lockup from the ice logo already on the page:
+  // no new asset, and nothing when the title is economy, audited or still.
+  assert.match(
+    title,
+    /<Particles active=\{!audit && !economyOpening && phase === "playing"\} lockupRef=\{lockupRef\} logoRef=\{firstLogoRef\} \/>/,
+  );
+  const particles = await read("src/components/cinematic/particles.tsx");
+  assert.doesNotMatch(particles, /fetch\(|new Image\(|import\(|url\(/);
+  assert.match(particles, /const ASSEMBLE = \{ start: 0\.2, end: 1\.46 \}/);
+  assert.match(particles, /const HOLO = \{ start: 0\.85, lock: 1\.5, end: 1\.95 \}/);
+  assert.match(particles, /getContext\("2d", \{ willReadFrequently: true \}\)/);
+  assert.match(particles, /image\.complete && image\.naturalWidth > 0/);
+
+  const css = await readCss("src/styles-opening-cinema.css");
+  const all = rules(css);
+  const frames = Object.fromEntries(
+    all.filter((rule) => rule.keyframes).map((rule) => [rule.keyframes, rule.body]),
+  );
+  for (const name of [
+    "op-boot",
+    "op-raster",
+    "op-floor-in",
+    "op-ceil-in",
+    "op-grid-travel",
+    "op-grid-travel-up",
+    "op-lock-in",
+    "op-lock-ring",
+    "op-sweep",
+    "op-sweep-b",
+    "op-stream",
+  ]) {
+    assert.ok(frames[name], name);
+  }
+  // The grid planes rest on their tokens; the travel ends where the still
+  // grid stands; the boots that are gone end on opacity 0.
+  assert.match(frames["op-floor-in"], /to \{\s*opacity: var\(--op-floor-rest\);/);
+  assert.match(frames["op-ceil-in"], /to \{\s*opacity: var\(--op-ceil-rest\);/);
+  assert.match(frames["op-grid-travel"], /to \{\s*transform: translate3d\(0, 0, 0\);/);
+  assert.match(frames["op-grid-travel-up"], /to \{\s*transform: translate3d\(0, 0, 0\);/);
+  for (const name of ["op-boot", "op-raster", "op-lock-in", "op-sweep", "op-sweep-b", "op-stream"]) {
+    assert.match(frames[name], /100% \{\s*opacity: 0;/, name);
+  }
+  const rest = (selector) =>
+    all.find((rule) => rule.selector === selector && rule.context.length === 0)?.body;
+  assert.match(
+    rest(".cine-stage:not(.is-playing) .cine-holo-floor, .is-complete .cine-holo-floor"),
+    /opacity: var\(--op-floor-rest\);/,
+  );
+  assert.match(
+    rest('html[data-world-effects="economy"] .cine-stage.is-playing .cine-holo-floor'),
+    /opacity: var\(--op-floor-rest\);/,
+  );
+  // The lock closes at the impact (0.3 s + 60% of 2 s = 1.5 s), before the burn.
+  assert.match(css, /\.cine-holo-lock \{\s*animation: op-lock-in 2s cubic-bezier\([^)]*\) 0\.3s both;/);
+  assert.match(frames["op-lock-in"], /60% \{\s*opacity: 1;\s*transform: scale\(1\);/);
+  assert.ok(0.3 + 2 <= OPENING_BURN.start);
+  // The stream resolves the row once the title holds, and the plates stay above it.
+  assert.match(
+    css,
+    /\.cine-stage\.is-complete \.cine-replay-slot::after \{\s*animation: op-stream 0\.9s/,
+  );
+  assert.match(rest(".cine-replay-slot > .cine-btn"), /z-index: 1;/);
+  const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
+  assert.match(forced, /\.cine-replay-slot::after \{\s*display: none;/);
+});

@@ -197,6 +197,36 @@ const CinematicDepthField = memo(function CinematicDepthField() {
   );
 });
 
+// The holographic boot (styles-opening-cinema.css, "The holographic boot"):
+// the power-on line, the raster, the floor and ceiling grid planes that
+// travel under and over the title, the lock-on ring that closes on the
+// lockup at the impact, two volumetric sweeps (the burn's start, the prism
+// lock) and the data-stream that resolves the ENTER THE WORLD row once the
+// title holds. Textless ornament; every boot is finite and gated there.
+const CinematicHolo = memo(function CinematicHolo() {
+  return (
+    <>
+      <div className="cine-cinema cine-holo cine-holo-back" aria-hidden="true">
+        <i className="cine-holo-floor">
+          <b />
+        </i>
+        <i className="cine-holo-ceil">
+          <b />
+        </i>
+        <i className="cine-holo-sweep cine-holo-sweep-a" />
+        <i className="cine-holo-sweep cine-holo-sweep-b" />
+        <i className="cine-holo-lock">
+          <b />
+        </i>
+      </div>
+      <div className="cine-cinema cine-holo cine-holo-front" aria-hidden="true">
+        <i className="cine-holo-boot" />
+        <i className="cine-holo-raster" />
+      </div>
+    </>
+  );
+});
+
 // The cinema light (styles-opening-cinema.css): the pre-roll strike, the halo
 // and the god rays behind the title, the two streamline trails that race
 // through with the trace, the two anamorphic streaks over it and the frame
@@ -907,10 +937,11 @@ export function TitleSequence() {
       </div>
       <CinematicEditorialFrame />
       <CinematicLight />
+      <CinematicHolo />
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings rootRef={hudRef} />
-      <Particles active={!audit && !economyOpening && phase === "playing"} />
+      <Particles active={!audit && !economyOpening && phase === "playing"} lockupRef={lockupRef} logoRef={firstLogoRef} />
 
       <div ref={lineRef} className="cine-line" />
 

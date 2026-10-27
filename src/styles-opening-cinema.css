@@ -640,9 +640,490 @@ html[data-world-effects="economy"] .cine-stage.is-playing .cine-editorial-frame:
    embers, hot copy and light pool are styles.css's own green rules, which
    this sheet does not repaint (scripts/forest-green-fire.test.mjs). */
 
+/* The holographic boot (2026-10-27) ------------------------------------------
+   The title as a system coming online. Two more ornament planes (back, over
+   the depth field; front, over the title and under the vignette) and the
+   dust canvas (particles.tsx) add, on the same 7.2 s clock:
+     0-0.75    the power-on: one line of ice light opens across the centre and
+               expands into a sheet that is gone before the logo shows
+     0-7.2     the raster: scanlines over the whole frame while the signal is
+               being acquired, again for the prism lock, gone at rest
+     0.2-1.5   the dust gathers onto the ice logo's silhouette and the logo is
+               projected in sliced rows with a cyan/magenta split (the canvas)
+     0.3-2.3   the lock-on: a dashed ring with four ticks closes on the lockup
+               from scale 1.75 and locks at the impact (1.5 s)
+     0-7.2     the grid planes: a floor and a ceiling in perspective travel
+               toward the camera and settle under and over the held title
+     2.3-3.3   the first volumetric sweep crosses the stage as the trace begins
+     5.9-6.8   the second (gold) sweep as the prism locks
+     complete  the data-stream: columns of ice light resolve the ENTER THE
+               WORLD row top to bottom as the plate locks on
+   Same rules as the light above: opacity, transform and clip-path only, every
+   boot finite, gated twice, rest values on every still state. */
+.cine-stage {
+  --op-floor-rest: 0.5;
+  --op-ceil-rest: 0.16;
+}
+
+@media (orientation: portrait) {
+  .cine-stage {
+    --op-floor-rest: 0.4;
+    --op-ceil-rest: 0.12;
+  }
+}
+
+.cine-holo-back {
+  z-index: 2;
+}
+
+.cine-holo-front {
+  z-index: 5;
+}
+
+.cine-holo > i > b {
+  position: absolute;
+  display: block;
+  backface-visibility: hidden;
+}
+
+/* The grid planes: the plane is tilted in perspective and masked toward the
+   horizon; the grid inside is twice its height and travels toward the camera
+   (translate only), ending at its rest position so the held title never
+   sees a jump. */
+.cine-holo-floor,
+.cine-holo-ceil {
+  right: -40%;
+  left: -40%;
+  height: 58%;
+  overflow: hidden;
+  transform-style: flat;
+}
+
+.cine-holo-floor {
+  bottom: -6%;
+  transform: perspective(520px) rotateX(63deg);
+  transform-origin: 50% 100%;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, rgb(0 0 0 / 0.55) 38%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0, rgb(0 0 0 / 0.55) 38%, #000 100%);
+}
+
+.cine-holo-ceil {
+  top: -6%;
+  transform: perspective(520px) rotateX(-63deg);
+  transform-origin: 50% 0;
+  -webkit-mask-image: linear-gradient(0deg, transparent 0, rgb(0 0 0 / 0.55) 38%, #000 100%);
+  mask-image: linear-gradient(0deg, transparent 0, rgb(0 0 0 / 0.55) 38%, #000 100%);
+}
+
+.cine-holo-floor > b,
+.cine-holo-ceil > b {
+  inset: -100% 0 0 0;
+  background:
+    repeating-linear-gradient(180deg, rgb(122 232 255 / 0.42) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 0.28) 0 1px, transparent 1px 64px),
+    linear-gradient(180deg, transparent 0, rgb(74 137 214 / 0.08) 100%);
+}
+
+.cine-holo-ceil > b {
+  inset: 0 0 -100% 0;
+  background:
+    repeating-linear-gradient(180deg, rgb(164 139 255 / 0.22) 0 1px, transparent 1px 44px),
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 0.14) 0 1px, transparent 1px 64px);
+}
+
+@media (orientation: portrait) {
+  .cine-holo-floor,
+  .cine-holo-ceil {
+    height: 46%;
+  }
+}
+
+/* The lock-on: a dashed ring (the inner plane, rotating in) with four ticks,
+   concentric with the HUD rings; it rides the lifts with them. */
+.cine-holo-lock {
+  top: 50%;
+  left: 50%;
+  width: min(86vw, 940px);
+  aspect-ratio: 1;
+  margin: calc(min(86vw, 940px) / -2) 0 0 calc(min(86vw, 940px) / -2);
+  transform: scale(1.75);
+  background:
+    linear-gradient(var(--op-ice) 0 0) 50% 0 / 2px 28px,
+    linear-gradient(var(--op-ice) 0 0) 50% 100% / 2px 28px,
+    linear-gradient(var(--op-ice) 0 0) 0 50% / 28px 2px,
+    linear-gradient(var(--op-ice) 0 0) 100% 50% / 28px 2px;
+  background-repeat: no-repeat;
+}
+
+.cine-holo-lock > b {
+  inset: 4%;
+  border-radius: 50%;
+  transform: rotate(-48deg);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(198 245 255 / 0.92) 0deg 2.4deg,
+    transparent 2.4deg 7.2deg,
+    rgb(240 207 134 / 0.7) 7.2deg 7.8deg,
+    transparent 7.8deg 12deg
+  );
+  -webkit-mask-image: radial-gradient(
+    circle,
+    transparent 0 calc(50% - 3.5px),
+    #000 calc(50% - 2.5px) calc(50% - 0.5px),
+    transparent 50%
+  );
+  mask-image: radial-gradient(
+    circle,
+    transparent 0 calc(50% - 3.5px),
+    #000 calc(50% - 2.5px) calc(50% - 0.5px),
+    transparent 50%
+  );
+}
+
+/* The power-on line: centred, scaled open along its length and then up into
+   a sheet of light that fades. */
+.cine-holo-boot {
+  top: 50%;
+  left: 50%;
+  width: min(70vw, 760px);
+  height: 2px;
+  margin: -1px 0 0 calc(min(70vw, 760px) / -2);
+  transform: scale(0.02, 1);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(122 232 255 / 0.55) 22%,
+    rgb(255 255 255 / 0.98) 50%,
+    rgb(122 232 255 / 0.55) 78%,
+    transparent
+  );
+  box-shadow:
+    0 0 12px 2px rgb(198 245 255 / 0.6),
+    0 0 42px 8px rgb(122 232 255 / 0.3);
+}
+
+/* The raster: scanlines over the whole frame. */
+.cine-holo-raster {
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(122 232 255 / 0.085) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* The volumetric sweeps: one tall band of light, tilted, crossing the stage. */
+.cine-holo-sweep {
+  top: -30%;
+  bottom: -30%;
+  left: 50%;
+  width: max(22vw, 140px);
+  margin-left: calc(max(22vw, 140px) / -2);
+  transform: rotate(16deg) translateX(-260%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(198 245 255 / 0.06) 30%,
+    rgb(255 255 255 / 0.2) 50%,
+    rgb(122 232 255 / 0.06) 70%,
+    transparent
+  );
+}
+
+.cine-holo-sweep-b {
+  transform: rotate(-14deg) translateX(-260%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(240 207 134 / 0.06) 30%,
+    rgb(255 244 214 / 0.2) 50%,
+    rgb(255 92 200 / 0.06) 70%,
+    transparent
+  );
+}
+
+/* The data-stream over the ENTER THE WORLD row: columns of ice light, wiped
+   in from the top and out through the bottom (clip-path), as the plate locks. */
+.cine-replay-slot::after {
+  content: "";
+  position: absolute;
+  inset: -30px 4%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  background:
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 0.6) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, transparent, rgb(122 232 255 / 0.14) 50%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 25% 75%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 25% 75%, transparent);
+}
+
+/* The row's plates stay above the stream. */
+.cine-replay-slot > .cine-btn {
+  z-index: 1;
+}
+
+/* The lifted stage: the lock and the power-on ride with the HUD rings. */
+@media (max-width: 700px) and (orientation: portrait) {
+  .cine-holo-lock,
+  .cine-holo-boot {
+    translate: 0 calc(-1 * var(--op-lift));
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .cine-holo-lock,
+  .cine-holo-boot {
+    translate: 0 calc(-1 * var(--cine-lift));
+  }
+}
+
+/* Rest values: the grid planes hold under and over the held title; the
+   other boots are gone (their only base opacity is 0). */
+.cine-stage:not(.is-playing) .cine-holo-floor,
+.is-complete .cine-holo-floor {
+  opacity: var(--op-floor-rest);
+}
+
+.cine-stage:not(.is-playing) .cine-holo-ceil,
+.is-complete .cine-holo-ceil {
+  opacity: var(--op-ceil-rest);
+}
+
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-holo-floor {
+  opacity: var(--op-floor-rest);
+}
+
+html[data-world-effects="economy"] .cine-stage.is-playing .cine-holo-ceil {
+  opacity: var(--op-ceil-rest);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-boot {
+    animation: op-boot 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-raster {
+    animation: op-raster var(--seq) linear both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-floor {
+    animation: op-floor-in 2.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-ceil {
+    animation: op-ceil-in 2.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-floor > b {
+    animation: op-grid-travel var(--seq) cubic-bezier(0.1, 0.6, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-ceil > b {
+    animation: op-grid-travel-up var(--seq) cubic-bezier(0.1, 0.6, 0.2, 1) both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-lock {
+    animation: op-lock-in 2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-lock > b {
+    animation: op-lock-ring 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-sweep-a {
+    animation: op-sweep 1s cubic-bezier(0.3, 0, 0.2, 1) 2.3s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-holo-sweep-b {
+    animation: op-sweep-b 0.9s cubic-bezier(0.3, 0, 0.2, 1) 5.9s both;
+  }
+
+  html:not([data-world-effects="economy"]) .cine-stage.is-complete .cine-replay-slot::after {
+    animation: op-stream 0.9s cubic-bezier(0.3, 0, 0.2, 1) 0.05s both;
+  }
+}
+
+@keyframes op-boot {
+  0% {
+    opacity: 0;
+    transform: scale(0.02, 1);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1, 1);
+  }
+  42% {
+    opacity: 1;
+    transform: scale(1.02, 1);
+  }
+  72% {
+    opacity: 0.42;
+    transform: scale(1.06, 28);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1, 44);
+  }
+}
+
+@keyframes op-raster {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.75;
+  }
+  42% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 0;
+  }
+  86% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes op-floor-in {
+  from {
+    opacity: 0;
+    transform: perspective(520px) rotateX(63deg) translateY(12%);
+  }
+  to {
+    opacity: var(--op-floor-rest);
+    transform: perspective(520px) rotateX(63deg) translateY(0);
+  }
+}
+
+@keyframes op-ceil-in {
+  from {
+    opacity: 0;
+    transform: perspective(520px) rotateX(-63deg) translateY(-12%);
+  }
+  to {
+    opacity: var(--op-ceil-rest);
+    transform: perspective(520px) rotateX(-63deg) translateY(0);
+  }
+}
+
+@keyframes op-grid-travel {
+  from {
+    transform: translate3d(0, -50%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes op-grid-travel-up {
+  from {
+    transform: translate3d(0, 50%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes op-lock-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.75);
+  }
+  30% {
+    opacity: 0.7;
+    transform: scale(1.34);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  78% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes op-lock-ring {
+  from {
+    transform: rotate(-48deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes op-sweep {
+  0% {
+    opacity: 0;
+    transform: rotate(16deg) translateX(-260%);
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(16deg) translateX(260%);
+  }
+}
+
+@keyframes op-sweep-b {
+  0% {
+    opacity: 0;
+    transform: rotate(-14deg) translateX(-260%);
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-14deg) translateX(260%);
+  }
+}
+
+@keyframes op-stream {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  24% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  58% {
+    opacity: 0.9;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(100% 0 0 0);
+  }
+}
+
 /* Forced colours: the ornament goes; the title keeps its Canvas field. */
 @media (forced-colors: active) {
   .cine-cinema {
+    display: none;
+  }
+
+  .cine-replay-slot::after {
     display: none;
   }
 }
