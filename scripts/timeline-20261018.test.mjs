@@ -20,13 +20,13 @@ test("October 18 story distinguishes designs, hypotheses and unfinished battles"
   assert.match(dream, /シエル、慶弥、夕夏を伴って/);
   assert.match(dream, /全員の帰還も、まだ描かれていない/);
   assert.doesNotMatch(dream, /奪還に成功|全員が帰還|十二神将を全滅/);
-  assert.deepEqual(DREAM_CHRONICLE.slice(49).map(({ no, sourceRevision }) => [no, sourceRevision]),
+  assert.deepEqual(DREAM_CHRONICLE.slice(49, 53).map(({ no, sourceRevision }) => [no, sourceRevision]),
     [50, 51, 52, 53].map((no) => [no, "2026-10-18"]));
 });
 
 test("new archive excerpts match October 18 attachment exactly", { skip: !process.env.DREAM_OCT18_SOURCE }, () => {
   const lines = readFileSync(process.env.DREAM_OCT18_SOURCE, "utf8").split(/\r?\n/);
-  for (const event of DREAM_CHRONICLE.slice(49)) {
+  for (const event of DREAM_CHRONICLE.slice(49, 53)) {
     const text = event.text ?? event.segments.map(({ text }) => text).join("");
     assert.equal(text, lines[Number(event.lines) - 1].trim(), `event ${event.no}`);
     assert.ok(lines[Number(event.title.lines) - 1].includes(event.title.text));

@@ -18,7 +18,7 @@ const component = readFileSync(
 );
 
 test("atlas chapter links use only a precise canonical place match", () => {
-  assert.deepEqual(atlasChronicleCases(DREAM_CHRONICLE, "博麗神社"), ["2", "3", "4"]);
+  assert.deepEqual(atlasChronicleCases(DREAM_CHRONICLE, "博麗神社"), ["2", "3", "4", "5"]);
   assert.deepEqual(atlasChronicleCases(DREAM_CHRONICLE, "迷いの竹林・永遠亭"), []);
   for (const place of DREAM_ATLAS) {
     const chapters = atlasChronicleCases(DREAM_CHRONICLE, place.name);

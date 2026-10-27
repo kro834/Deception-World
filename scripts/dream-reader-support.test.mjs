@@ -309,7 +309,7 @@ test("versioned storage validates current chapter and paragraph bounds without i
     spacing: "comfortable",
     bookmark: saved.bookmark,
   });
-  const latestParagraph = { caseNo: "5", paragraph: 13 };
+  const latestParagraph = { caseNo: "5", paragraph: 19 };
   assert.deepEqual(
     validateDreamReaderState({ ...saved, bookmark: latestParagraph }, DREAM_CASES).bookmark,
     latestParagraph,
@@ -319,7 +319,7 @@ test("versioned storage validates current chapter and paragraph bounds without i
     null,
     {},
     { caseNo: "0", paragraph: 4 },
-    { caseNo: "5", paragraph: 14 },
+    { caseNo: "5", paragraph: 20 },
     { caseNo: "6", paragraph: 1 },
     { caseNo: "5", paragraph: "4" },
     { caseNo: "5", paragraph: -1 },

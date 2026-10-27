@@ -12,6 +12,9 @@
 // sourceRevision. Earlier lines shifted within that export; do not offset legacy anchors.
 // Chat dates identify source posts, not elapsed story days. The new endpoint is the
 // ongoing battles through 2026-10-18, without a rescue, final victory or return.
+// Events 54–58 use the 2026-10-27 attachment (60,120 physical lines; the 2026-10-18 anchors sit
+// eight lines lower there and keep their own revision). The endpoint is still the ongoing final
+// battle: Ciel walking alone to the left passage, with no rescue, victory or return.
 import type { DreamCharacter, DreamDolminence } from "./dream-chapter-data";
 
 /** Global line references into the source log, e.g. "2243,2247,2897". Not rendered. */
@@ -27,7 +30,7 @@ type DreamArchivePassageBase = {
   /** Caption for the whole passage when it is one speaker's words ("―― by"). */
   readonly by?: string;
   readonly lines: DreamSourceLines;
-  readonly sourceRevision?: "2026-10-12" | "2026-10-18";
+  readonly sourceRevision?: "2026-10-12" | "2026-10-18" | "2026-10-27";
 };
 
 /** A passage: one `text` ("\n" = line break) or speaker `segments`, never both. */
@@ -1087,6 +1090,71 @@ export const DREAM_CHRONICLE: readonly DreamChronicleEvent[] = [
     cast: ["風見幽香", "宮毘羅", "迷企羅"],
     text: "恐怖に歪んだ表情で後退する二人の武神を、幽香は底冷えするような美しい微笑みを浮かべながら見据える。",
     lines: "59531",
+  },
+  {
+    no: 54,
+    case: "5",
+    sourceRevision: "2026-10-27",
+    title: { text: "黒き扉の向こう", lines: "59553" },
+    place: "ドルミネンス本部",
+    cast: ["サヨ", "シエル", "東風谷慶弥", "暁夕夏"],
+    segments: [
+      {
+        text: "永遠亭の激戦を離れ、漆黒の空間を抜けた先――そこは、冷ややかな無機質な壁と幾重にも張り巡らされた配管が不気味にうねる、ドルミネンス本部の内部通路だった。",
+      },
+      { by: "シエル", text: "「……左には俺が行こう」" },
+      { by: "サヨ", text: "「無茶はしないで。全員で必ず.......無事に帰るのよ」" },
+    ],
+    lines: "59554,59598,59626",
+  },
+  {
+    no: 55,
+    case: "5",
+    sourceRevision: "2026-10-27",
+    title: { text: "絶望の包囲網", lines: "59633" },
+    place: "永遠亭",
+    cast: ["摩虎羅", "八意永琳"],
+    text: "夜空に妖しく浮かぶ赤い月を背負い、未知の気配を纏った影がゆっくりと地上へと降り立った。それは、二本の短剣を軽やかに携えた、兎の意匠を持つ不気味な式神――十二神将が一人、『摩虎羅』であった。",
+    lines: "59721",
+  },
+  {
+    no: 56,
+    case: "5",
+    sourceRevision: "2026-10-27",
+    title: { text: "万権・裁きの光", lines: "59810" },
+    place: "人里",
+    cast: ["伐折羅", "永守荘司"],
+    by: "伐折羅",
+    text: "「……消え去るがいい。――『万権・裁きの光』」",
+    lines: "59810",
+  },
+  {
+    no: 57,
+    case: "5",
+    sourceRevision: "2026-10-27",
+    title: { text: "静かな殺意", lines: "59970" },
+    place: "博麗神社",
+    cast: ["博麗霊夢", "如月狡"],
+    by: "博麗霊夢",
+    text: "「アンタは必ずここで祓ってやるわ」",
+    lines: "59983",
+  },
+  {
+    no: 58,
+    case: "5",
+    sourceRevision: "2026-10-27",
+    title: { text: "毘羯羅", lines: "59990" },
+    place: "命蓮寺",
+    cast: ["毘羯羅", "聖白蓮", "寅丸星", "秦こころ"],
+    segments: [
+      {
+        text: "暗雲から音もなく参道の中央へ舞い降りたのは、子の能力を宿す十二神将の一角――『毘羯羅』。",
+      },
+      {
+        text: "誰一人として命は落としていない――しかし、全員が寸前のところで息を繋ぐのみの、絶体絶命の重体に陥っていた。",
+      },
+    ],
+    lines: "59990,60114",
   },
 ] as const;
 

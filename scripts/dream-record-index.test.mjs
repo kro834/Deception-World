@@ -187,13 +187,13 @@ test("person link matching ignores whitespace only and preserves the Chronicle d
   );
 });
 
-test("the nine Chronicle entries including the latest departure resolve Keiya's canonical character link", () => {
+test("the ten Chronicle entries including the headquarters split resolve Keiya's canonical character link", () => {
   const canonical = DREAM_CHARACTERS.find((person) => person.name === "東風谷 慶弥");
   assert.ok(canonical);
 
   const matchingRecords = DREAM_CHRONICLE.filter((record) => record.cast.includes("東風谷慶弥"));
-  assert.equal(matchingRecords.length, 9);
-  assert.equal(matchingRecords.at(-1).no, 45, "the latest departure also links to Keiya");
+  assert.equal(matchingRecords.length, 10);
+  assert.equal(matchingRecords.at(-1).no, 54, "the headquarters split also links to Keiya");
   for (const record of matchingRecords) {
     assert.deepEqual(
       resolveDreamRecordLinks(record, {

@@ -28,7 +28,7 @@ test("new events identify their source revision and preserve the battle-opening 
   }
   assert.ok(DREAM_CHRONICLE.slice(0, 44).every((event) => event.sourceRevision === undefined));
   const synopsis = DREAM_CASES[5].paragraphs;
-  assert.equal(synopsis.length, 13);
+  assert.equal(synopsis.length, 19);
   assert.match(synopsis[6], /永遠亭へ向かう/);
   assert.match(synopsis[6], /後を追って/);
   assert.match(synopsis[6], /決戦へ向かうよう促す/);

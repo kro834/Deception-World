@@ -51,7 +51,8 @@ test("Dream preserves posters, headline dossiers and combat records outside appr
       .digest("hex"),
     // rx5 (2026-10-06, the owner's request to fix AI-sounding detail copy):
     // Dread's closing line reads 「…以外の詳細は未記録。」 like Lupin's (b70e000).
-    "f452c2f3213e6a279fbd1ba8864c3d1f352d1d92c0fec94404626db004a53254",
+    // 2026-10-27: the owner confirmed Keiya's divine name as 夜明護尊 (was 夜明守護命).
+    "d6bd3064a9ba506112b9dbe897681ffc0365967a5fd562a96482db690f144773",
   );
   assert.deepEqual(
     DREAM_CASES.map(({ no, title, reading }) => `${no}${title}${reading}`),
