@@ -4,6 +4,8 @@ import {
   useState,
   type CSSProperties,
   type PointerEvent,
+  type RefObject,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 import {
@@ -18,11 +20,14 @@ import {
 import { OPENING_LOGO_FIRST } from "@/lib/opening-logo";
 import { launcherTile, posterImage } from "@/lib/thumbnail-images";
 import { rexonanceImage } from "@/lib/rexonance-images";
-import { GuardedLink } from "@/components/load-gate";
+import { GuardedLink, useLoadGate } from "@/components/load-gate";
+import { useRouter } from "@tanstack/react-router";
+import { waitForVisualPaint } from "@/lib/visual-paint";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   FINAL_STAGE_ENTER_ASSETS,
   WORLD_ENTER_ASSETS,
+  preloadAssets,
 } from "@/lib/asset-loader";
 
 type Artwork = { src: string; alt: string; width: number; height: number; kind?: "final" };
@@ -177,11 +182,137 @@ function DeckLink({
   return <GuardedLink to={to} hash={hash} assets={assets} {...props} />;
 }
 
+/** The primary World door retains the title's existing covered dive. Other
+ * deck links keep their own route transitions and their native href fallback. */
+function DeckWorldEntry({
+  logoRef,
+  children,
+}: {
+  logoRef: RefObject<HTMLImageElement | null>;
+  children: ReactNode;
+}) {
+  const { beginOpeningHandoff, go } = useLoadGate();
+  const router = useRouter();
+  const pending = useRef(false);
+  const mounted = useRef(true);
+  const navigating = useRef(false);
+  const warmed = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      // History already cancels the provider; a query-only departure can
+      // unmount this door before go() takes ownership of its cover as well.
+      if (pending.current && !navigating.current) {
+        document.dispatchEvent(new CustomEvent("deception-world:cancel-route-transition"));
+      }
+    };
+  }, []);
+
+  const warmDestination = () => {
+    if (warmed.current) return;
+    warmed.current = true;
+    void Promise.all([
+      Promise.resolve().then(() => router.preloadRoute({ to: "/world" })),
+      Promise.resolve().then(() => preloadAssets(WORLD_ENTER_ASSETS, () => undefined)),
+    ]).catch(() => { warmed.current = false; });
+  };
+  const enterWorld = async (keyboard: boolean) => {
+    const logo = logoRef.current;
+    if (pending.current) return;
+    if (!logo) {
+      await go({ to: "/world", assets: WORLD_ENTER_ASSETS, focusDestination: keyboard }).catch(() => undefined);
+      return;
+    }
+    pending.current = true;
+    navigating.current = false;
+    const measured = logo.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const left = viewport?.offsetLeft ?? 0;
+    const top = viewport?.offsetTop ?? 0;
+    const width = Math.max(1, viewport?.width ?? window.innerWidth);
+    const height = Math.max(1, viewport?.height ?? window.innerHeight);
+    // The mobile logo panel sits below the door. Keep its measured origin
+    // when its ring is visible; otherwise let the same logo fade in quietly
+    // inside the visual viewport rather than diving toward an offscreen ring.
+    const ringX = measured.left + measured.width * 0.573;
+    const ringY = measured.top + measured.height * 0.315;
+    const visible = measured.width > 0 && measured.height > 0 &&
+      ringX >= left && ringX <= left + width && ringY >= top && ringY <= top + height;
+    const fallbackWidth = Math.min(208, width * 0.72);
+    const fallbackHeight = fallbackWidth * 2 / 3;
+    const logoRect = visible ? measured : {
+      left: left + width * 0.5 - fallbackWidth * 0.573,
+      top: top + height * 0.42 - fallbackHeight * 0.315,
+      width: fallbackWidth,
+      height: fallbackHeight,
+    };
+    const hudSize = Math.min(620, width * 0.84);
+    const started = beginOpeningHandoff({
+      logoRect,
+      // The CSS dial must expand around the same ring as the logo. Its
+      // default viewport-centred box belongs to the old centred title.
+      hudRect: {
+        left: logoRect.left + logoRect.width * 0.573 - hudSize / 2,
+        top: logoRect.top + logoRect.height * 0.315 - hudSize / 2,
+        width: hudSize,
+        height: hudSize,
+      },
+      logoSrc: logo.currentSrc || logo.src || undefined,
+      videoCurrentTime: 0,
+      videoPlaying: false,
+      reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      economy: document.documentElement.dataset.worldEffects === "economy",
+    });
+    if (!started) {
+      pending.current = false;
+      return;
+    }
+    try {
+      // Share the title's two-paint handoff, including its frozen-tab fail-safe.
+      await waitForVisualPaint();
+      if (!mounted.current) return;
+      navigating.current = true;
+      await go({
+        to: "/world",
+        assets: WORLD_ENTER_ASSETS,
+        transitionCovered: true,
+        focusDestination: keyboard,
+      });
+    } catch {
+      // LoadGate owns cancellation and releases the cover. A failed entry may
+      // be retried from the same dashboard without a local disabled state.
+    } finally {
+      pending.current = false;
+    }
+  };
+  const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.detail !== 0) event.currentTarget.blur();
+    void enterWorld(event.detail === 0);
+  };
+  return (
+    <a
+      href="/world"
+      className="command-deck-enter"
+      onPointerEnter={warmDestination}
+      onFocus={warmDestination}
+      onTouchStart={warmDestination}
+      onClick={onClick}
+    >
+      {children}
+    </a>
+  );
+}
+
 /** All navigation and artwork are server-rendered; the canvas layers only add light and depth. */
 export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
   const [sceneIndex, setSceneIndex] = useState(0);
   const [artIndex, setArtIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
   const rendererHost = useRef<HTMLDivElement>(null);
   const htmlHost = useRef<HTMLDivElement>(null);
   const renderer = useRef<Renderer | null>(null);
@@ -199,7 +330,8 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
     let inView = true;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pause = () => {
-      const paused = document.hidden || !inView || motion.matches;
+      const handoff = document.documentElement.dataset.openingHandoffActive === "true";
+      const paused = document.hidden || !inView || motion.matches || handoff;
       renderer.current?.setPaused(paused);
       htmlCanvas.current?.setPaused(paused);
     };
@@ -251,12 +383,14 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
       void mount();
     }, 180);
     document.addEventListener("visibilitychange", pause);
+    document.addEventListener("deception-world:opening-handoff", pause);
     motion.addEventListener("change", pause);
     return () => {
       disposed = true;
       window.clearTimeout(timer);
       observer?.disconnect();
       document.removeEventListener("visibilitychange", pause);
+      document.removeEventListener("deception-world:opening-handoff", pause);
       motion.removeEventListener("change", pause);
       renderer.current?.dispose();
       htmlCanvas.current?.dispose();
@@ -410,13 +544,23 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                 </a>
               ))}
             </div>
-            <DeckLink className="command-deck-enter" href={scene.href}>
-              <span>
-                {scene.japanese}
-                <strong>世界に入る</strong>
-              </span>
-              <ArrowRight size={31} aria-hidden="true" />
-            </DeckLink>
+            {scene.id === "world" ? (
+              <DeckWorldEntry logoRef={logoRef}>
+                <span>
+                  {scene.japanese}
+                  <strong>世界に入る</strong>
+                </span>
+                <ArrowRight size={31} aria-hidden="true" />
+              </DeckWorldEntry>
+            ) : (
+              <DeckLink className="command-deck-enter" href={scene.href}>
+                <span>
+                  {scene.japanese}
+                  <strong>世界に入る</strong>
+                </span>
+                <ArrowRight size={31} aria-hidden="true" />
+              </DeckLink>
+            )}
             <a className="command-deck-down" href="#command-deck-riders">
               ライダーを見る
               <ArrowDown size={15} aria-hidden="true" />
@@ -469,6 +613,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             <div className="command-deck-logo-panel">
               <img
                 {...OPENING_LOGO_FIRST}
+                ref={logoRef}
                 sizes="(max-width: 620px) 220px, 250px"
                 alt="仮面ライダーサーガ Deception World"
                 width="1536"

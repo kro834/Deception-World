@@ -9,6 +9,7 @@ import {
   type SyntheticEvent,
 } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { waitForVisualPaint } from "@/lib/visual-paint";
 import { RotateCcw, SkipForward } from "lucide-react";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { preloadOpeningDestinationStyles } from "@/lib/opening-destination-styles";
@@ -111,18 +112,6 @@ function whenIdle(callback: () => void, timeout = 900) {
 
 type SequencePhase = "idle" | "playing" | "complete" | "diving";
 
-function waitForVisualPaint() {
-  return new Promise<void>((resolve) => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      resolve();
-    };
-    window.setTimeout(finish, 96);
-    window.requestAnimationFrame(() => window.requestAnimationFrame(finish));
-  });
-}
 
 // The static scene layers are memoised: a phase change (for example the press
 // on ENTER THE WORLD) re-renders only what the phase changes.
