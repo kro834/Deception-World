@@ -23,7 +23,7 @@ const sourceEvidence = [
 test("episode 03 advances within its recorded chapter and keeps discoveries unresolved", () => {
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ no, title }) => `${no} ${title}`),
-    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD"],
+    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD", "04 癒えぬ傷を負った者共"],
   );
   const episode = WORLD_EPISODE_NOTES[2];
   assert.equal(episode.synopsis.length, 9);
@@ -53,6 +53,10 @@ test("episode 03 evidence matches physical lines in the private export", { skip:
     const passage = lines.slice(first - 1, last).join("\n");
     assert.ok(passage.includes(excerpt), `${first}-${last}: ${excerpt}`);
   }
-  const laterChapter = lines.slice(5072).join("\n");
-  assert.doesNotMatch(laterChapter, /トークルーム名を「[^\n]*[EeＥ𝑬𝐸𝙴][PpＰ𝑷𝑃𝙿][4４𝟒𝟺]/u);
+  // The 2026-10-27 export renames the room to EP4 at line 10486; episode 03
+  // ends on the line before it.
+  const ep4 = /トークルーム名を「[^\n]*[EeＥ𝑬𝐸𝙴][PpＰ𝑷𝑃𝙿][4４𝟒𝟺]/u;
+  const episodeThree = lines.slice(5072, lines.length >= 10486 ? 10485 : undefined).join("\n");
+  assert.doesNotMatch(episodeThree, ep4);
+  if (lines.length >= 10486) assert.match(lines[10485], ep4);
 });

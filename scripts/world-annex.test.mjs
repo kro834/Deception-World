@@ -87,14 +87,14 @@ test("the annex data is complete", () => {
   }
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ no, title }) => `${no} ${title}`),
-    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD"],
+    ["01 HIDE-AND-SEEK", "02 LEGENDS", "03 DECEPTION WORLD", "04 癒えぬ傷を負った者共"],
   );
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ lines }) => lines.length),
-    [3, 3, 5],
+    [3, 3, 5, 3],
   );
-  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9]);
-  assert.equal(WORLD_GLOSSARY.length, 15);
+  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 2]);
+  assert.equal(WORLD_GLOSSARY.length, 16);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
   assert.equal(WORLD_QUOTES.length, 17);
   // In-story text only: no chat handles, no ideographic indent spaces.

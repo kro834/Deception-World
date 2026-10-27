@@ -34,14 +34,24 @@ test("World episode lines follow reunion, intervention and resistance in source 
         { text: "頼む。お前の力が必要なんだ", by: "月城悠真" },
         { text: "生きていて良かった", by: "月城悠真" },
       ],
+      // 2026-10-27 export: EP4 opens at line 10486 (lines 10492, 10507, 10513).
+      [
+        { text: "ん…君たちは別の世界の人間？", by: "ハイク" },
+        { text: "足並み揃えて同時に攻めれば行けるかも知れない", by: "月城悠真" },
+        {
+          text: "ネクストピースは地球の核付近に存在していたが、乱獲のせいで枯渇した哀れな金属だ",
+          by: "ローア",
+        },
+      ],
     ],
   );
 });
 
 test("World records expand the three supplied episodes without inventing a resolved ending", () => {
   for (const episode of WORLD_EPISODE_NOTES) {
-    // The October 18 continuation expands only the ongoing EP3.
-    assert.equal(episode.synopsis.length, episode.no === "03" ? 9 : 3, episode.no);
+    // The October 18 continuation expands EP3; the October 27 export opens EP4.
+    const expected = { "03": 9, "04": 2 }[episode.no] ?? 3;
+    assert.equal(episode.synopsis.length, expected, episode.no);
     assert.ok(
       episode.synopsis.every((text) => text.length >= 80),
       episode.no,

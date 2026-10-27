@@ -74,9 +74,14 @@ test("selected dialogue matches the reviewed attachment's physical lines", { ski
 test("World episode records follow the actual chapter boundaries and later consequences", () => {
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ no, title }) => [no, title]),
-    [["01", "HIDE-AND-SEEK"], ["02", "LEGENDS"], ["03", "DECEPTION WORLD"]],
+    [
+      ["01", "HIDE-AND-SEEK"],
+      ["02", "LEGENDS"],
+      ["03", "DECEPTION WORLD"],
+      ["04", "癒えぬ傷を負った者共"],
+    ],
   );
-  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9]);
+  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 2]);
   for (const { synopsis } of WORLD_EPISODE_NOTES) {
     assert.ok(synopsis.every((paragraph) => paragraph.length > 80));
   }

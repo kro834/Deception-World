@@ -27,7 +27,7 @@ test("every related record resolves to an existing archive target and its unchan
     ...WORLD_GLOSSARY.map(({ term }) => [`#wa-term-${term}`, term]),
   ]);
   const episodeNumbers = new Set(WORLD_EPISODE_NOTES.map(({ no }) => no));
-  assert.deepEqual(WORLD_RECORD_CONTEXTS.map(({ no }) => no), ["01", "02", "03"]);
+  assert.deepEqual(WORLD_RECORD_CONTEXTS.map(({ no }) => no), ["01", "02", "03", "04"]);
   for (const context of WORLD_RECORD_CONTEXTS) {
     assert.ok(episodeNumbers.has(context.no), context.no);
     const hrefs = [];

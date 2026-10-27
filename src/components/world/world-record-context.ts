@@ -31,6 +31,11 @@ const EPISODE_REFERENCES: Readonly<Record<string, RecordReferences>> = {
     locations: ["天守閣", "悠真の夢"],
     terms: ["管理権限", "マキャベルゴアナイトメア", "夢への扉"],
   },
+  "04": {
+    brief: ["rikuei"],
+    locations: ["悠真の夢", "碧栄"],
+    terms: ["ネクストピース"],
+  },
 };
 
 const briefLinks = new Map(
