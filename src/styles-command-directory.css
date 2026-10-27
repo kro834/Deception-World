@@ -120,6 +120,23 @@ html[data-family="world"]
   gap: 16px;
   align-items: stretch;
 }
+/* The base sheet holds the signal grid at two fixed 178px rows inside a
+   366px panel. These signals are 300px+, so where the six wrap to two rows
+   of three (tablets, ~761-1023px) the second row spilled past the clipped
+   panel and lost its names. Let the rows and the panel size to the cards. */
+@media (min-width: 561px) and (max-width: 1023px) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-archive-panel.is-managers,
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid.signal-array {
+    grid-template-rows: none;
+    block-size: auto;
+  }
+}
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
   #manager-archive#manager-archive#manager-archive
