@@ -150,11 +150,12 @@ const cropStyle = (portrait: Portrait) =>
     ...(portrait.pale ? { "--veil": "34%" } : null),
   }) as CSSProperties;
 
-/* The records' key art for the same three episodes, at the archive's crops. */
+/* The records' key art for the same episodes, at the archive's crops. */
 const EPISODE_ART: Record<string, { src: string; width: number; height: number; pos: string }> = {
   "01": { src: "/episode-01-hide-and-seek.jpeg", width: 1086, height: 1448, pos: "50% 30%" },
   "02": { src: "/episode-02-legends.jpeg", width: 1448, height: 1086, pos: "50% 50%" },
   "03": { src: "/episode-03-deception-world.jpeg", width: 1086, height: 1448, pos: "50% 18%" },
+  "04": { src: "/episode-04-kill.jpeg", width: 1122, height: 1402, pos: "50% 16%" },
 };
 
 /* The six 六詠 card thumbnails, at the cards' own sizes (cache hits). */
