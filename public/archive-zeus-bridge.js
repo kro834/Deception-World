@@ -15,6 +15,10 @@
   // Mirrors ZEUS_AVOID_TEXT_SELECTOR (zeus-button.tsx); the P14 read-outs
   // never occur in an archive, so the two last entries match nothing here.
   const WORDS = 'h1, h2, h3, h4, [role="heading"], a[href], button, [role="tab"], summary, label, .rxs-p14-values strong, .rxs-p14-values b';
+  // The archive's own words (as ZEUS_AVOID_PAGE_TEXT_SELECTOR is the page's):
+  // the hero's lead line, which the button sat on at first paint at 360
+  // (2026-10-26 phone sweep).
+  const PAGE_WORDS = ".hero-lead";
   const DISPLAY = "strong, b";
   const DISPLAY_MIN_PX = 24;
   const END = "p, li, dt, dd, small, span, em, q, blockquote, figcaption, time";
@@ -84,6 +88,7 @@
       }
     };
     collect(WORDS);
+    collect(PAGE_WORDS);
     collect(
       DISPLAY,
       (element) => Number.parseFloat(window.getComputedStyle(element).fontSize) >= DISPLAY_MIN_PX,
@@ -125,6 +130,13 @@
       schedule("change", 0);
     }
   });
-  if (document.readyState === "complete") schedule("load", 300);
-  else window.addEventListener("load", () => schedule("load", 300), { once: true });
+  // The hero's words cascade in for about 1.3s after load and are skipped
+  // while still transparent, so the archive reports again once they rest
+  // (2026-10-26 phone sweep: the button sat on the hero lead at 360).
+  const onLoad = () => {
+    schedule("load", 300);
+    window.setTimeout(() => schedule("change", 0), 1600);
+  };
+  if (document.readyState === "complete") onLoad();
+  else window.addEventListener("load", onLoad, { once: true });
 })();
