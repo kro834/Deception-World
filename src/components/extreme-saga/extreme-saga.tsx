@@ -582,6 +582,7 @@ export function ExtremeSaga() {
     <main
       ref={pageRef}
       id="top"
+      data-command-special=""
       className="rxs-page exs-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
@@ -600,21 +601,21 @@ export function ExtremeSaga() {
             </b>
           </GuardedLink>
           <nav aria-label="エクスプリームサーガ ページ内ナビゲーション">
-            <a href="#performance" className="dg-control">
+            <a href="#performance" className="dg-control dg-focus">
               <span aria-hidden="true">01</span> 比較
             </a>
-            <a href="#p14" className="dg-control">
+            <a href="#p14" className="dg-control dg-focus">
               <span aria-hidden="true">02</span> P14
             </a>
-            <a href="#stages" className="dg-control">
+            <a href="#stages" className="dg-control dg-focus">
               <span aria-hidden="true">03</span> 形態
             </a>
-            <a href="#system" className="dg-control">
+            <a href="#system" className="dg-control dg-focus">
               <span aria-hidden="true">04</span> システム
             </a>
           </nav>
           <SideMenuTrigger
-            className="rxs-menu-trigger"
+            className="rxs-menu-trigger dg-control dg-focus"
             open={menuOpen}
             onOpenChange={setMenuOpen}
           />
@@ -1028,7 +1029,7 @@ export function ExtremeSaga() {
           to="/world"
           hash="top"
           assets={WORLD_ENTER_ASSETS}
-          className="rxs-footer-return"
+          className="rxs-footer-return dg-control dg-focus"
         >
           <span>メインサイトへ戻る</span>
           <i aria-hidden="true">←</i>

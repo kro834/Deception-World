@@ -1,3 +1,4 @@
+import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { FinalStage } from "@/components/final-stage/final-stage";
@@ -58,6 +59,7 @@ export const Route = createFileRoute("/final-stage")({
       // tablets and phones (styles-final-stage-zenith.css).
       { rel: "stylesheet", href: finalStageZenithCssUrl },
       { rel: "stylesheet", href: visualAstraCssUrl },
+      { rel: "stylesheet", href: commandSpecialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

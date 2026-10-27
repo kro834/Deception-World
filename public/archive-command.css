@@ -1,0 +1,184 @@
+/* The embedded archives opt into the command material. Existing artwork maps,
+   radio controls, filtering, comparison logic and single scroller stay intact. */
+html[data-embedded-archive] {
+  color-scheme: dark;
+  background: #060c15 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] {
+  --ar-text: #edf5fa;
+  --ar-text-2: #b6cbd9;
+  --ar-text-3: #a2bbcd;
+  --aa-card: linear-gradient(180deg, #192b3a, #0d1824 58%, #0a131e);
+  --aa-sheen: linear-gradient(120deg, #d8effb12, transparent 38% 78%, #9bcce908);
+  --aa-bevel: inset 0 1px #d8f2ff29, inset 0 -1px #02080e99;
+  --cmd-edge: #91bbd64d;
+  --cmd-metal: linear-gradient(120deg, #d8effb0f, transparent 38% 78%, #9bcce908), linear-gradient(180deg, #192b3a, #0d1824 58%, #0a131e);
+  background: radial-gradient(ellipse at 95% 0, #235d8026, transparent 42rem), #060c15 !important;
+  color: #edf5fa !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .archive-nav {
+  border-bottom: 1px solid #91bbd659 !important;
+  background: var(--cmd-metal) !important;
+  box-shadow: inset 0 1px #ddf6ff24, 0 6px 18px #0006 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .archive-hero {
+  border-color: var(--cmd-edge) !important;
+  box-shadow: inset 0 1px #daf3ff1a !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .hero-copy h1 {
+  color: #f0f7fb !important;
+  text-shadow: 0 2px 18px #0006 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .hero-lead {
+  color: #b8cedc !important;
+  line-height: 1.95 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .hero-action {
+  min-height: 48px !important;
+  border: 1px solid #91bbd66b !important;
+  border-radius: 3px !important;
+  background: var(--cmd-metal) !important;
+  color: #e4f6ff !important;
+  box-shadow: inset 0 1px #def6ff33, 0 4px 10px #0004 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .hero-action.is-primary {
+  border-color: #9be9fab3 !important;
+  background: linear-gradient(135deg, #9be9fa2b, transparent 65%), #1b3b50 !important;
+  box-shadow: inset 0 -2px #9be9fa, inset 0 1px #dffaff40 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.selector-console, .detail-card, .saga-compare-section) {
+  border-color: var(--cmd-edge) !important;
+  background-color: #0b1521 !important;
+  box-shadow: inset 0 1px #d9f2ff1f, 0 14px 30px #0004 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .selector-heading {
+  padding-bottom: 16px !important;
+  border-bottom-color: var(--cmd-edge) !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .selector-title h2 {
+  color: #e7f4fa !important;
+  font-size: clamp(20px, 2.5vw, 28px) !important;
+  letter-spacing: .035em !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .stage {
+  border-color: var(--cmd-edge) !important;
+  background-color: #09131e !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .stage-head {
+  border-color: var(--cmd-edge) !important;
+  background: linear-gradient(110deg, #b5dff414, transparent 75%), #0b1723 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .stage-label { color: #e5f4fc !important; font-size: 14px !important; }
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .form-chip {
+  min-height: 48px !important;
+  border: 1px solid #8db8d44d !important;
+  border-radius: 3px !important;
+  box-shadow: inset 0 1px #d9efff29, inset 0 -1px #0009, 0 4px 10px #0005 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .form-chip.is-selected {
+  border-color: #a9ecff !important;
+  box-shadow: inset 0 1px #e1f9ff66, inset 0 -3px #9be9fa, 0 0 0 1px #9be9fa29, 0 6px 16px #0007 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .form-chip .chip-name {
+  color: #e8f5fb !important;
+  font-size: max(12px, .78rem) !important;
+  line-height: 1.65 !important;
+  text-shadow: 0 1px 8px #000, 0 2px 3px #000 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .form-chip.is-selected .chip-name { color: #e0faff !important; }
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.selector-search input, .compare-native-select) {
+  min-height: 48px !important;
+  border: 1px solid #91bbd666 !important;
+  border-radius: 3px !important;
+  color: #e7f4fc !important;
+  background-color: #07121e !important;
+  box-shadow: inset 0 2px 6px #0006 !important;
+  font-size: 16px !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .selector-search input::placeholder { color: #9fb7c8 !important; opacity: 1 !important; }
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.selector-open, .selector-collapse, .search-clear, .selector-empty-reset, .compare-swap, .archive-sort, .inline-switch, .detail-nav button) {
+  min-height: 48px !important;
+  border-color: #91bbd661 !important;
+  color: #d4effa !important;
+  background-color: #122333 !important;
+  font-size: max(12px, .75rem) !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.detail-head, .compare-header) {
+  border-bottom-color: var(--cmd-edge) !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .detail-head h2 {
+  color: #f0f8fc !important;
+  font-weight: 750 !important;
+  line-height: 1.5 !important;
+  text-shadow: 0 2px 12px #0008 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.detail-overview, .detail-lead, .fact-list, .operation-panel, .ability-panel) {
+  color: #c0d3df !important;
+  line-height: 1.95 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.spec-item, .card, .ability-panel, .operation-panel, .realm-lore-grid > *) {
+  border-color: var(--cmd-edge) !important;
+  background-color: #0b1723 !important;
+  box-shadow: inset 0 1px #d5eeff14 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .spec-item {
+  padding: 14px 16px !important;
+  border-left: 2px solid #9be9fa5c !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .spec-value { color: #eef9ff !important; font-size: max(18px, 1.125rem) !important; }
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.compare-side, .compare-form-card, .archive-profile, .archive-versus-profile) {
+  border-color: #91bbd65c !important;
+  box-shadow: inset 0 1px #d7f0ff29, 0 8px 24px #0004 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.compare-toolbar, .compare-native-controls) {
+  border-color: var(--cmd-edge) !important;
+  background-color: #0b1825 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .table thead th {
+  background: #152938 !important;
+  color: #d5f2ff !important;
+  border-color: #91bbd659 !important;
+  font-size: max(12px, .75rem) !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .table :is(td, tbody th) {
+  border-color: #91bbd629 !important;
+  color: #c4d8e5 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .table tbody tr:nth-child(even) { background-color: #9bcfe907 !important; }
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .mobile-dock {
+  border-top-color: #91bbd680 !important;
+  background: #0b1724 !important;
+  box-shadow: inset 0 1px #e4f7ff17, 0 -8px 24px #0006 !important;
+}
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .mobile-dock :is(button, a) { min-height: 48px !important; }
+html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(a, button, input, select, label.form-chip, [tabindex]):focus-visible {
+  outline: 2px solid #b4efff !important;
+  outline-offset: 4px !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.form-chip, .hero-action, button, select):not(:disabled):hover {
+    border-color: #b7edffb3 !important;
+  }
+}
+@media (max-width: 620px) {
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .spec-item { padding: 12px !important; }
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .spec-value { font-size: 18px !important; }
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .progression .form-chip .chip-name { font-size: 12px !important; }
+}
+/* No new motion is required for material. Existing archive effects obey the
+   reader's preferences; these plates retain the same still affordances. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.form-chip, .hero-action, .spec-item) { transition: none !important; }
+}
+html[data-embedded-archive][data-world-effects="economy"] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5) :is(.form-chip, .hero-action, .spec-item) { transition: none !important; }
+@media (forced-colors: active) {
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] { color: CanvasText !important; background: Canvas !important; }
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(.archive-nav, .selector-console, .detail-card, .form-chip, .spec-item, .compare-side, .compare-toolbar, .hero-action, .mobile-dock, input, select, button) {
+    color: CanvasText !important;
+    background: Canvas !important;
+    border: 1px solid CanvasText !important;
+    box-shadow: none !important;
+  }
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] .form-chip.is-selected { outline: 2px solid Highlight !important; outline-offset: -4px !important; }
+  html[data-embedded-archive][data-archive-kind] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)[id] :is(a, button, input, select, label.form-chip, [tabindex]):focus-visible { outline-color: Highlight !important; }
+}

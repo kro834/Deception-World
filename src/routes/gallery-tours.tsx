@@ -6,6 +6,7 @@ import galleryCssUrl from "@/styles-gallery.css?url";
 import toursCssUrl from "@/styles-gallery-tours.css?url";
 import entranceCssUrl from "@/styles-gallery-tour-entrance.css?url";
 import theatreCssUrl from "@/styles-gallery-tour-theatre.css?url";
+import commandSupportCssUrl from "@/styles-command-support.css?url";
 
 export const Route = createFileRoute("/gallery-tours")({
   validateSearch: normalizeTourSearch,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/gallery-tours")({
         { rel: "stylesheet", href: toursCssUrl },
         { rel: "stylesheet", href: entranceCssUrl },
         { rel: "stylesheet", href: theatreCssUrl },
+        { rel: "stylesheet", href: commandSupportCssUrl },
       ],
     });
     return { ...head, meta: [...(head.meta ?? []), { name: "theme-color", content: "#171614" }] };

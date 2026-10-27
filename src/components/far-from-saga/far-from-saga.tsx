@@ -452,6 +452,7 @@ export function FarFromSaga() {
     <main
       ref={pageRef}
       id="top"
+      data-command-special=""
       className="rxs-page ffs-page dg-focus-scope"
       data-motion-ready={motionReady ? "true" : "false"}
     >
@@ -479,24 +480,24 @@ export function FarFromSaga() {
               stays lit through its sub-chapters. The side menu lists every
               section. */}
           <nav aria-label="ファーフロムサーガ ページ内ナビゲーション">
-            <a href="#overview" data-local-nav-through="specs performance report" className="dg-control">
+            <a href="#overview" data-local-nav-through="specs performance report" className="dg-control dg-focus">
               <span aria-hidden="true">01</span> 概要
             </a>
-            <a href="#p16" className="dg-control">
+            <a href="#p16" className="dg-control dg-focus">
               <span aria-hidden="true">02</span> P16
             </a>
-            <a href="#suitup" data-local-nav-through="far-from-assembly-runway" className="dg-control">
+            <a href="#suitup" data-local-nav-through="far-from-assembly-runway" className="dg-control dg-focus">
               <span aria-hidden="true">03</span> 変身
             </a>
-            <a href="#stages" className="dg-control">
+            <a href="#stages" className="dg-control dg-focus">
               <span aria-hidden="true">04</span> 形態
             </a>
-            <a href="#theories" data-local-nav-through="system authority arsenal finishers" className="dg-control">
+            <a href="#theories" data-local-nav-through="system authority arsenal finishers" className="dg-control dg-focus">
               <span aria-hidden="true">05</span> 機構
             </a>
           </nav>
           <SideMenuTrigger
-            className="rxs-menu-trigger"
+            className="rxs-menu-trigger dg-control dg-focus"
             open={menuOpen}
             onOpenChange={setMenuOpen}
           />

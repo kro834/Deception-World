@@ -1,0 +1,235 @@
+/* Route-owned command surfaces; the shared menu and 3D scene keep their owners. */
+main.command-archive[data-archive-kind],
+main.command-exhibition {
+  --command-paper: #edf5fa;
+  --command-muted: #a9becd;
+  --command-edge: #91bbd64d;
+  --command-key: #9be9fa;
+  --command-metal: linear-gradient(118deg, #d8effb0d, transparent 36% 75%, #6ab7d60a), linear-gradient(180deg, #192a39, #0d1722 55%, #0b131e);
+  color-scheme: dark;
+}
+main.command-archive[data-archive-kind] {
+  --fa-ink: #060c15;
+  --fa-text: var(--command-paper);
+  --fa-text-2: #b9cddd;
+  --fa-text-3: #9fb6c8;
+  --fa-accent: var(--command-key);
+  --fa-lock: #c8f7ff;
+  --archive-cyan: #9be9fa;
+  --archive-violet: #bccde9;
+  background: #060c15;
+}
+html[data-family] body main.command-archive[data-archive-kind] > header.form-archive-toolbar.form-archive-toolbar {
+  border-bottom: 1px solid var(--command-edge);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #e1f6ff1f, 0 8px 24px #0006;
+}
+html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
+  border-color: var(--command-edge);
+  background: #070e18 !important;
+  box-shadow: inset 0 1px 8px #000a !important;
+}
+html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
+  border-color: #a4e4f478;
+  background: linear-gradient(135deg, #bceafb26, transparent 50%), #203d50 !important;
+  box-shadow: inset 0 1px #ecfbff59, inset 0 -2px #7cc9e757, 0 2px 8px #0008 !important;
+}
+html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > button[role="tab"] {
+  min-width: 80px;
+  font-size: 14px;
+}
+html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > button[aria-selected="true"] b {
+  color: #e4fbff;
+}
+main.command-exhibition.exhibition-room-curated {
+  --room-ink: var(--command-paper);
+  --room-muted: var(--command-muted);
+  --room-rule: var(--command-edge);
+  --room-paper: #060b12;
+  padding-top: calc(clamp(28px, 4vw, 60px) + env(safe-area-inset-top, 0px));
+  background: radial-gradient(ellipse at 90% 0, #23658a25, transparent 45rem), linear-gradient(118deg, transparent 50%, #5aa1c00a 50.05% 66%, transparent 66.05%), #060b12;
+  color: var(--room-ink);
+}
+main.command-exhibition .exhibition-room-heading {
+  position: relative;
+  gap: 28px;
+  padding: clamp(24px, 4vw, 50px);
+  border: 1px solid var(--room-rule);
+  border-left: 3px solid var(--command-key);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #d7efff26, 0 20px 50px #0004;
+}
+main.command-exhibition .exhibition-room-heading h1 {
+  font-family: inherit;
+  font-weight: 650;
+  font-size: clamp(26px, 3.6vw, 48px);
+  letter-spacing: .015em;
+  line-height: 1.4;
+}
+main.command-exhibition .exhibition-room-heading .exhibition-room-lead {
+  color: #b7ccdb;
+  font-size: 14px;
+}
+main.command-exhibition .exhibition-room-entrances { gap: 10px; }
+main.command-exhibition :is(.exhibition-room-entrances a, .exhibition-room-choose > a, .exhibition-shelf-return) {
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--room-rule);
+  background: #09131f;
+  box-shadow: inset 0 1px #d9efff14;
+  color: #d4eff9;
+  text-decoration: none;
+  font-size: 12px;
+}
+main.command-exhibition .exhibition-room-current { padding-top: 40px; }
+main.command-exhibition .exhibition-room-work-heading {
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--room-rule);
+}
+main.command-exhibition .exhibition-room-work-number { font-size: 12px; }
+main.command-exhibition .exhibition-room-work-number > span {
+  color: var(--command-key);
+  font-family: var(--font-hud, "Michroma", sans-serif);
+  font-size: 26px;
+}
+main.command-exhibition .exhibition-room-work-title h2,
+main.command-exhibition .exhibition-shelf-heading h2 {
+  font-family: inherit;
+  font-weight: 650;
+  line-height: 1.5;
+}
+main.command-exhibition :is(.exhibition-room-choose, .exhibition-shelf-filters) label > span { font-size: 12px; }
+main.command-exhibition :is(.exhibition-room-choose, .exhibition-shelf-filters) :is(select, input) {
+  min-height: 48px;
+  border-color: #8db8d45c;
+  background-color: #0a1420;
+  box-shadow: inset 0 2px 6px #0005, inset 0 1px #c4edff0d;
+  color: var(--room-ink);
+}
+main.command-exhibition :is(select option, select optgroup) { background: #0a1420; color: #edf5fa; }
+main.command-exhibition input::placeholder { color: #90a9bb; opacity: 1; }
+main.command-exhibition .exhibition-room-view {
+  padding: clamp(8px, 1.2vw, 16px);
+  border: 1px solid var(--room-rule);
+  background: linear-gradient(135deg, #bbdbf51a, transparent 20% 80%, #bbdbf50d), #08101a;
+  box-shadow: inset 0 1px #d7efff33, 0 20px 45px #0005;
+}
+main.command-exhibition .exhibition-room-view .exhibition-studio-stage {
+  border-color: #7caac34d;
+  box-shadow: 0 1px #e4f8ff17;
+}
+main.command-exhibition .exhibition-room-source { background: #07101a; }
+main.command-exhibition .exhibition-studio-tools {
+  gap: 10px;
+  align-items: center;
+  padding-top: 2px;
+}
+main.command-exhibition .exhibition-studio-tools > [role="group"] button { min-height: 48px; font-size: 12px; }
+main.command-exhibition .exhibition-studio-tools > [role="group"] {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 4px;
+  border: 1px solid var(--room-rule);
+  background: #050c14;
+}
+main.command-exhibition .exhibition-studio-tools button,
+main.command-exhibition :is(.exhibition-shelf-current, .exhibition-shelf-empty button, .exhibition-studio-notice button, .exhibition-shelf-pagination button) {
+  min-height: 48px;
+  border: 1px solid var(--room-rule);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #ddf3ff24;
+  color: var(--room-ink);
+  font-size: 12px;
+}
+main.command-exhibition .exhibition-studio-tools button[aria-pressed="true"] {
+  border-color: #a4eaff;
+  color: #e5fbff;
+  background: linear-gradient(135deg, #9be9fa28, transparent 65%), #1b3c50;
+  box-shadow: inset 0 -2px var(--command-key), inset 0 1px #e7fbff40;
+}
+main.command-exhibition .exhibition-studio-tools button:disabled { opacity: .48; }
+main.command-exhibition .exhibition-studio-notice { color: #b7cbd9; font-size: 12px; }
+main.command-exhibition .exhibition-room-caption { padding: 4px 0 0; }
+main.command-exhibition .exhibition-room-caption a { display: flex; align-items: center; min-height: 48px; color: var(--command-key); }
+main.command-exhibition .exhibition-room-adjacent {
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
+  padding-block: 16px;
+}
+main.command-exhibition .exhibition-room-adjacent button {
+  padding: 14px 18px;
+  border: 1px solid var(--room-rule);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #ccecff1f;
+}
+main.command-exhibition .exhibition-room-adjacent button > span:first-child { font-size: 12px; color: #bdd5e3; }
+main.command-exhibition .exhibition-room-adjacent-number { font: 18px/1.4 "Michroma", sans-serif; color: #9cc8dd; }
+main.command-exhibition .exhibition-shelf { padding-top: clamp(48px, 6vw, 84px); }
+main.command-exhibition .exhibition-shelf-heading { padding-bottom: 24px; border-bottom: 1px solid var(--room-rule); }
+main.command-exhibition .exhibition-shelf-filters {
+  padding: clamp(16px, 2vw, 26px);
+  border: 1px solid var(--room-rule);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #d8f3ff24;
+}
+main.command-exhibition .exhibition-shelf-grid { gap: 20px; }
+main.command-exhibition .exhibition-shelf-work {
+  border: 1px solid var(--room-rule);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #d6efff1f, 0 8px 16px #0003;
+}
+main.command-exhibition .exhibition-shelf-image {
+  padding: clamp(12px, 2vw, 24px);
+  border: 0;
+  background: radial-gradient(ellipse at 50% 40%, #263b4e, #0a121d 78%);
+}
+main.command-exhibition .exhibition-shelf-work-caption { min-height: 68px; padding: 14px 12px; border-top: 1px solid var(--room-rule); }
+main.command-exhibition .exhibition-shelf-work-caption > span:first-child { font-family: "Michroma", sans-serif; font-size: 12px; color: #a9c8dc; }
+main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border-color: #9be9fa; box-shadow: inset 0 -2px #9be9fa; }
+main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] .exhibition-shelf-image { border-color: transparent; box-shadow: none; }
+main.command-exhibition .exhibition-shelf-selected { font-size: 12px; color: #dffaff; background: #15364b; border: 1px solid #9be9fa80; }
+main.command-exhibition .exhibition-shelf-pagination { gap: 16px; }
+main.command-exhibition :is(a, button, input, select, h2, [tabindex]):focus-visible,
+main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
+  outline: 2px solid #b2efff;
+  outline-offset: 4px;
+}
+@media (hover: hover) and (pointer: fine) {
+  main.command-exhibition :is(a, button):not(:disabled):hover { border-color: #b4ebffab; color: #e8fbff; }
+  main.command-exhibition .exhibition-shelf-work:hover .exhibition-shelf-image { background: radial-gradient(ellipse at 50% 40%, #2d485d, #0d1a28 80%); }
+}
+@media (max-width: 900px) {
+  main.command-exhibition .exhibition-room-heading { align-items: start; }
+  main.command-exhibition .exhibition-room-entrances { align-items: stretch; }
+  main.command-exhibition .exhibition-room-work-heading { align-items: start; }
+}
+@media (max-width: 620px) {
+  main.command-exhibition.exhibition-room-curated { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  main.command-exhibition .exhibition-room-heading { padding: 22px 18px; gap: 22px; }
+  main.command-exhibition .exhibition-room-entrances { width: 100%; }
+  main.command-exhibition .exhibition-room-entrances a { justify-content: space-between; width: 100%; }
+  main.command-exhibition .exhibition-room-choose { gap: 12px; }
+  main.command-exhibition .exhibition-room-adjacent { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+  main.command-exhibition .exhibition-room-adjacent-number { display: none; }
+  main.command-exhibition .exhibition-room-adjacent button { padding: 12px; }
+  main.command-exhibition .exhibition-shelf-grid { gap: 12px; }
+  main.command-exhibition .exhibition-shelf-work-caption { gap: 6px; padding: 12px 10px; grid-template-columns: minmax(0, 1fr) auto; }
+  main.command-exhibition .exhibition-shelf-work-caption > span:first-child { grid-column: 1 / -1; }
+  main.command-exhibition .exhibition-shelf-pagination { gap: 8px; }
+  main.command-exhibition .exhibition-shelf-pagination button { padding: 10px 8px; }
+  main.command-exhibition .exhibition-studio-tools { align-items: stretch; }
+  main.command-exhibition .exhibition-studio-tools > [role="group"] { width: 100%; }
+  main.command-exhibition .exhibition-studio-tools > [role="group"] button { flex: 1 1 auto; padding-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  main.command-exhibition *, main.command-archive[data-archive-kind] * { scroll-behavior: auto; }
+  main.command-exhibition .exhibition-shelf-image { transition: none; }
+}
+html[data-world-effects="economy"] main.command-exhibition .exhibition-shelf-image { transition: none; }
+@media (forced-colors: active) {
+  main.command-exhibition.exhibition-room-curated, main.command-archive[data-archive-kind] { background: Canvas; color: CanvasText; }
+  main.command-exhibition :is(.exhibition-room-heading, .exhibition-room-view, .exhibition-shelf-filters, .exhibition-shelf-work, button, a, input, select) { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
+  main.command-exhibition .exhibition-studio-tools button[aria-pressed="true"], main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border: 2px solid Highlight; }
+  main.command-exhibition :is(a, button, input, select, h2, [tabindex]):focus-visible { outline-color: Highlight; }
+}
