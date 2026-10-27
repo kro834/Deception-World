@@ -54,6 +54,204 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
+const flushTransport = async () => {
+  for (let i = 0; i < 250; i++) await Promise.resolve();
+};
+const smokeResponse = (path) =>
+  RETIRED_AI_ROUTES.includes(path)
+    ? new Response("not found", { status: 404 })
+    : new Response("Deception World");
+
+test("the authenticated curl adapter forwards the per-attempt abort signal without changing delivered bytes", async () => {
+  const source = readFileSync(new URL("./verify-public-deployment.mjs", import.meta.url), "utf8");
+  const adapter = source
+    .slice(
+      source.indexOf("export async function vercelCurlFetch"),
+      source.indexOf("export const PUBLIC_SMOKE_ROUTES"),
+    )
+    .replace("export async", "async");
+  const exports = {},
+    controller = new AbortController();
+  let observed;
+  runInNewContext(`${adapter}; exports.fetch = vercelCurlFetch;`, {
+    exports,
+    Response,
+    runFile: async (command, args, options) => {
+      observed = { command, args, options };
+      return { stdout: Buffer.from("delivered bytes\n200") };
+    },
+  });
+  const response = await exports.fetch("https://example.test/dream-chapter", {
+    signal: controller.signal,
+  });
+  assert.equal(observed.options.signal, controller.signal);
+  assert.equal(observed.command, "vercel");
+  assert.ok(observed.args.includes("--max-time"));
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), "delivered bytes");
+});
+
+test("transient transport failures retry twice with bounded backoff and independent live signals", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const attempts = [];
+  const pending = verifyPublicDeployment({
+    baseUrl: "https://example.test",
+    bypassToken: "preview-secret",
+    timeoutMs: 100,
+    fetchImpl: (url, init) => {
+      const path = new URL(url).pathname;
+      if (path === "/dream-chapter") {
+        attempts.push(init);
+        if (attempts.length <= 2) throw new Error("preview-secret: temporary failure");
+      }
+      return Promise.resolve(smokeResponse(path));
+    },
+  });
+  await flushTransport();
+  assert.equal(attempts.length, 1);
+  t.mock.timers.tick(249);
+  await flushTransport();
+  assert.equal(attempts.length, 1, "no immediate retry loop");
+  t.mock.timers.tick(1);
+  await flushTransport();
+  assert.equal(attempts.length, 2);
+  t.mock.timers.tick(749);
+  await flushTransport();
+  assert.equal(attempts.length, 2);
+  t.mock.timers.tick(1);
+  await flushTransport();
+  assert.equal(attempts.length, 3);
+  assert.equal((await pending).ok, true);
+  assert.equal(new Set(attempts.map(({ signal }) => signal)).size, 3);
+  assert.ok(
+    attempts.every(({ signal }) => !signal.aborted),
+    "failed attempt timers were cleared",
+  );
+  assert.ok(
+    attempts.every(({ headers }) => headers["x-vercel-protection-bypass"] === "preview-secret"),
+  );
+  t.mock.timers.tick(1000);
+  assert.ok(
+    attempts.every(({ signal }) => !signal.aborted),
+    "success clears its timeout too",
+  );
+});
+
+test("persistent transport failures stop at three attempts and report no raw secrets", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let attempts = 0;
+  const pending = verifyPublicDeployment({
+    baseUrl: "https://example.test",
+    bypassToken: "never-print-token",
+    fetchImpl: async (url) => {
+      const path = new URL(url).pathname;
+      if (path === "/dream-chapter") {
+        attempts++;
+        throw new Error("url?token=never-print-token; headers=secret-header");
+      }
+      return smokeResponse(path);
+    },
+  });
+  await flushTransport();
+  t.mock.timers.tick(250);
+  await flushTransport();
+  t.mock.timers.tick(750);
+  await flushTransport();
+  const report = await pending;
+  assert.equal(attempts, 3);
+  assert.equal(report.ok, false);
+  assert.deepEqual(
+    report.results.find(({ path }) => path === "/dream-chapter"),
+    {
+      path: "/dream-chapter",
+      ok: false,
+      status: null,
+      kind: "public",
+      error: "Error: Network request failed after 3 attempts",
+    },
+  );
+  assert.doesNotMatch(JSON.stringify(report), /never-print-token|secret-header/);
+  assert.equal(report.results.at(-1).path, RETIRED_AI_ROUTES.at(-1), "remaining checks still run");
+  t.mock.timers.tick(100000);
+  await flushTransport();
+  assert.equal(attempts, 3);
+});
+
+test("each timed-out attempt aborts independently and bounded retries end as a failure", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const signals = [];
+  const pending = verifyPublicDeployment({
+    baseUrl: "https://example.test",
+    timeoutMs: 10,
+    fetchImpl: async (url, { signal }) => {
+      const path = new URL(url).pathname;
+      if (path !== "/dream-chapter") return smokeResponse(path);
+      signals.push(signal);
+      return new Promise((_, reject) =>
+        signal.addEventListener("abort", () => reject(new Error("private timeout internals")), {
+          once: true,
+        }),
+      );
+    },
+  });
+  await flushTransport();
+  for (const [index, delay] of [250, 750, null].entries()) {
+    assert.equal(signals.length, index + 1);
+    assert.equal(signals[index].aborted, false);
+    t.mock.timers.tick(10);
+    await flushTransport();
+    assert.equal(signals[index].aborted, true);
+    if (delay !== null) {
+      t.mock.timers.tick(delay);
+      await flushTransport();
+    }
+  }
+  const report = await pending;
+  assert.equal(signals.length, 3);
+  assert.equal(report.ok, false);
+  assert.equal(
+    report.results.find(({ path }) => path === "/dream-chapter").error,
+    "Error: Request timed out after 3 attempts",
+  );
+  assert.doesNotMatch(JSON.stringify(report), /private timeout internals/);
+});
+
+test("HTTP failures and incorrect content, identity, JSON or artwork never retry", async () => {
+  for (const failure of ["http", "content", "identity", "json", "hash"]) {
+    const seen = new Map();
+    const expectedSha = "a".repeat(40);
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha,
+      fetchImpl: async (url) => {
+        const path = new URL(url).pathname;
+        seen.set(path, (seen.get(path) || 0) + 1);
+        if (path === "/release-identity.json") {
+          if (failure === "json") return new Response("invalid JSON");
+          return Response.json({
+            sha: failure === "identity" ? "b".repeat(40) : expectedSha,
+            assets:
+              failure === "hash"
+                ? [{ path: "/gallery/g69-1536.webp", sha256: "0".repeat(64) }]
+                : [],
+          });
+        }
+        if (path === "/gallery/g69-1536.webp") return new Response("wrong artwork");
+        if (path === "/dream-chapter" && failure === "http")
+          return new Response("Deception World", { status: 503 });
+        if (path === "/dream-chapter" && failure === "content")
+          return new Response("wrong document");
+        return smokeResponse(path);
+      },
+    });
+    assert.equal(report.ok, false, failure);
+    assert.ok(
+      [...seen.values()].every((count) => count === 1),
+      failure,
+    );
+  }
+});
+
 const RAIN_CITY_ASSET_PATHS = [
   "/rain-city-materials/concrete-albedo.webp",
   "/rain-city-materials/concrete-normal.png",

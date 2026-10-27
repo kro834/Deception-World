@@ -9,7 +9,7 @@ const GALLERY_UPLOAD_PROTOCOL = 2;
 const GALLERY_MAX_FILE_BYTES = 19 * 1024 * 1024;
 
 // The CLI supplies authenticated protection access without disabling protection.
-export async function vercelCurlFetch(url) {
+export async function vercelCurlFetch(url, init = {}) {
   const { stdout } = await runFile(
     "vercel",
     [
@@ -24,7 +24,7 @@ export async function vercelCurlFetch(url) {
       "--write-out",
       "\\n%{http_code}",
     ],
-    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024, signal: init.signal },
   );
   const status = Number(stdout.subarray(-3).toString());
   if (!Number.isInteger(status) || status < 100)
@@ -73,24 +73,37 @@ function normalizedOrigin(value) {
 }
 
 async function request(fetchImpl, url, bypassToken, timeoutMs) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetchImpl(url, {
-      redirect: "follow",
-      signal: controller.signal,
-      headers: {
-        accept: "text/html,application/json;q=0.8",
-        ...(bypassToken
-          ? {
-              "x-vercel-protection-bypass": bypassToken,
-              "x-vercel-set-bypass-cookie": "true",
-            }
-          : {}),
-      },
-    });
-  } finally {
-    clearTimeout(timer);
+  const retryDelays = [250, 750];
+  for (let attempt = 0; ; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetchImpl(url, {
+        redirect: "follow",
+        signal: controller.signal,
+        headers: {
+          accept: "text/html,application/json;q=0.8",
+          ...(bypassToken
+            ? {
+                "x-vercel-protection-bypass": bypassToken,
+                "x-vercel-set-bypass-cookie": "true",
+              }
+            : {}),
+        },
+      });
+    } catch {
+      // Only rejected transports retry. HTTP/content/identity/hash checks
+      // remain outside this boundary, and raw transport errors can hold secrets.
+      if (attempt === retryDelays.length)
+        throw new Error(
+          controller.signal.aborted
+            ? "Request timed out after 3 attempts"
+            : "Network request failed after 3 attempts",
+        );
+    } finally {
+      clearTimeout(timer);
+    }
+    await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
   }
 }
 
