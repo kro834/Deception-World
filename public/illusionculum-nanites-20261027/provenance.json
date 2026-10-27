@@ -1,0 +1,11 @@
+{
+  "renderer": "Blender 4.5.9 / Cycles CPU",
+  "samples": 24,
+  "renderSize": 96,
+  "frames": 120,
+  "scene": "scripts/blender/illusionculum_nanite_cells.py",
+  "sceneSha256": "a1763053dc9b6ab49b829bf42b32757e09aa19cd7a438dcd40afc52ff6a3af85",
+  "inheritedFxSha256": "9999064d4f05134ec8e63d708fffbcfbaf483e711a38b9c9b9b72f2fbea55745",
+  "atlasSha256": "8e3b1f0d50013774e2a364b6f579351b3ca905a4ae0ac4ad04b652ea2609caed",
+  "bytes": 91730
+}

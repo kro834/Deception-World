@@ -41,7 +41,8 @@ test("the site has a route, its sheets in order, a menu tile, a route family and
     assert.match(component + suitup + comparison, new RegExp(`id="${hash}"`), hash);
   }
   assert.match(read("src/lib/route-family.js"), /path === "\/illusionculum-saga"/);
-  assert.match(read("src/lib/asset-loader.ts"), /export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[\s*ILLUSIONCULUM_HERO\.src,\s*ILLUSIONCULUM_ENTRY_CUTOUT\.src,\s*"\/illusionculum-suit-20261023\/undersuit\.webp"/);
+  // Owner (2026-10-27): only rendered first-frame images decode alongside assembly.
+  assert.match(read("src/lib/asset-loader.ts"), /export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[\s*ILLUSIONCULUM_HERO\.src,\s*"\/illusionculum-suit-20261023\/undersuit\.webp"/);
   assert.match(read("src/styles-stage-shell.css"), /a\[href\^="\/illusionculum-saga"\]/);
 });
 
@@ -227,7 +228,7 @@ test("the entry transformation plays in the route transition screen, the owner's
   assert.match(gate, /"\/illusionculum-saga": "illusionculum"/);
   assert.match(gate, /illusionculum: ILLUSIONCULUM_ENTRY_TIMINGS,/);
   assert.match(gate, /const illusionculum = variant === "illusionculum" && scene\?\.tier === "full";/);
-  assert.match(gate, /<IllusionculumEntrySequence phase=\{phase\} \/>/);
+  assert.match(gate, /<IllusionculumEntrySequence phase=\{phase\} playback=\{illusionculumPlayback\} \/>/);
   const entry = await import("../src/lib/illusionculum-entry.ts");
   assert.deepEqual([...entry.ILLUSIONCULUM_ENTRY_CALLS], [...ILLUSIONCULUM_SAGA.calls]);
   const css = read("src/styles-illusionculum-entry.css");

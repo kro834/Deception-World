@@ -1,5 +1,12 @@
 import { useEffect, useRef, type CSSProperties, type RefObject } from "react";
-import { ILLUSIONCULUM_ENTRY_CALLS } from "@/lib/illusionculum-entry";
+import {
+  ILLUSIONCULUM_ENTRY_CALLS,
+  ILLUSIONCULUM_ENTRY_CALL_TIMES,
+  ILLUSIONCULUM_ENTRY_CLOCK,
+  ILLUSIONCULUM_ENTRY_HOLD_MS,
+  illusionculumEntryProgress,
+} from "@/lib/illusionculum-entry";
+import type { EntryPlayback } from "@/lib/entry-playback";
 import {
   ILLUSIONCULUM_SUIT_DRIVER_STANDIN,
   ILLUSIONCULUM_SUIT_SIZE,
@@ -20,9 +27,8 @@ import {
 
    Decorative (aria-hidden); the gate owns the tier (only "full" plays this;
    economy and reduced motion get the gate's short calm shutter), the
-   timing and the reveal. The clock runs even if the scene is late, so the
-   cover never waits. Runs
-   once: no loop, no flash (the reactor's light is a small, slow glow). */
+   timing and the reveal. Preparation never consumes the assembly clock;
+   the gate waits for completion, bounded by its watchdog. Runs once: no loop, no flash (the reactor's light is a small, slow glow). */
 
 /* The engine's runway (owner, 2026-10-24: 「イリュージョンクルムの遷移アニメー
    ションでも、ナノマシン装着される様にして」): the same scene as #suitup — the
@@ -50,33 +56,11 @@ const STAGING = `.ice-entry-engine::-webkit-scrollbar{display:none}
 @media (max-width:760px){.ice-entry-engine .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.62;--rzn-fig-b:.25}}
 @media (min-width:761px) and (max-width:1099.98px) and (orientation:portrait){.ice-entry-engine .rzn-frame{--rzn-fig-x:.5;--rzn-fig-h:.66;--rzn-fig-b:.22}}`;
 
-/** How long the clock waits for the scene before it runs regardless. */
-const READY_WAIT_MS = 420;
-
-/** The clock, inside the ≈3.1 s cover (Rexonance's pacing): the scan, the
- * cells building each group off the body and landing a call's stage long,
- * the head, the seal and the light — [ms, p] along the engine's beats. */
-const CLOCK: readonly (readonly [number, number])[] = [
-  [0, 0],
-  [240, 0.07],
-  [600, 0.16],
-  [950, 0.275],
-  [1300, 0.39],
-  [1650, 0.505],
-  [2000, 0.62],
-  [2380, 0.85],
-  [2620, 0.95],
-];
-const progressAt = (ms: number) => {
-  for (let i = 1; i < CLOCK.length; i += 1) {
-    const [t1, p1] = CLOCK[i];
-    const [t0, p0] = CLOCK[i - 1];
-    if (ms <= t1) return p0 + ((p1 - p0) * (ms - t0)) / (t1 - t0);
-  }
-  return CLOCK[CLOCK.length - 1][1];
-};
-
-function useEngineClock(runwayRef: RefObject<HTMLDivElement | null>) {
+function useEngineClock(
+  runwayRef: RefObject<HTMLDivElement | null>,
+  sceneRef: RefObject<HTMLDivElement | null>,
+  playback: EntryPlayback,
+) {
   useEffect(() => {
     const runway = runwayRef.current;
     if (!runway) return;
@@ -84,43 +68,82 @@ function useEngineClock(runwayRef: RefObject<HTMLDivElement | null>) {
     let dispose: (() => void) | null = null;
     let raf = 0;
     let progress = 0;
-    const mounted = performance.now();
+    const scene = sceneRef.current;
+    // CSS stays at frame zero while the engine prepares. Start every finite
+    // decoration once, on the renderer's clock, without per-frame DOM writes.
+    const decorations = scene?.getAnimations({ subtree: true }) ?? [];
+    for (const animation of decorations) animation.pause();
+    const settled = () => playback.state !== "preparing" && playback.state !== "playing";
     void import("@/lib/illusionculum-assembly-engine")
       .then((module) => {
-        if (disposed) return;
+        if (disposed || settled()) return;
         dispose = module.mountIllusionculumAssemblyEngine(runway, window, {
           entry: true,
           progress: () => progress,
         });
-        let started = 0;
-        const frame = (now: number) => {
-          raf = 0;
-          if (disposed) return;
-          const ready = runway.dataset.rznLoad === "ready";
-          if (!started && (ready || now - mounted > READY_WAIT_MS)) started = now;
-          const elapsed = started ? now - started : 0;
-          progress = progressAt(elapsed);
-          runway.dispatchEvent(new Event("rexonance:assembly-frame"));
-          if (elapsed < CLOCK[CLOCK.length - 1][0]) raf = window.requestAnimationFrame(frame);
-        };
-        raf = window.requestAnimationFrame(frame);
       })
       .catch(() => {
-        if (!disposed) runway.dataset.rznLoad = "error";
+        if (!disposed) playback.fail();
       });
+    let playing = false;
+    const frame = (now: number) => {
+      raf = 0;
+      if (disposed) return;
+      if (runway.dataset.rznLoad === "error") playback.fail();
+      if (runway.dataset.rznLoad === "static") playback.skip();
+      if (settled()) {
+        dispose?.();
+        dispose = null;
+        return;
+      }
+      // No elapsed time is consumed by decoding or preparation. The gate
+      // waits for complete (or the playback's bounded failure/explicit skip).
+      if (runway.dataset.rznLoad !== "ready") {
+        raf = window.requestAnimationFrame(frame);
+        return;
+      }
+      const elapsed = playback.frame(now);
+      if (elapsed === null) return;
+      if (!playing) {
+        playing = true;
+        for (const animation of decorations) {
+          animation.play();
+          animation.startTime = now;
+        }
+      }
+      progress = illusionculumEntryProgress(elapsed);
+      runway.dispatchEvent(new Event("rexonance:assembly-frame"));
+      const end = ILLUSIONCULUM_ENTRY_CLOCK[ILLUSIONCULUM_ENTRY_CLOCK.length - 1][0];
+      if (elapsed >= end + ILLUSIONCULUM_ENTRY_HOLD_MS) playback.complete();
+      else raf = window.requestAnimationFrame(frame);
+    };
+    raf = window.requestAnimationFrame(frame);
     return () => {
       disposed = true;
       if (raf) window.cancelAnimationFrame(raf);
       dispose?.();
     };
-  }, [runwayRef]);
+  }, [runwayRef, sceneRef, playback]);
 }
 
-export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "revealing" }) {
+export function IllusionculumEntrySequence({
+  phase,
+  playback,
+}: {
+  phase: "covering" | "revealing";
+  playback: EntryPlayback;
+}) {
   const runwayRef = useRef<HTMLDivElement | null>(null);
-  useEngineClock(runwayRef);
+  const sceneRef = useRef<HTMLDivElement | null>(null);
+  useEngineClock(runwayRef, sceneRef, playback);
   return (
-    <div className="ice-entry" data-phase={phase} aria-hidden="true">
+    <div
+      ref={sceneRef}
+      className="ice-entry"
+      data-clock="shared"
+      data-phase={phase}
+      aria-hidden="true"
+    >
       <span className="ice-entry-ground" />
       {/* The dream-dive vortex: rings of the light paths' colours, far and
           near, spinning in and converging into the reactor (the form's own
@@ -176,7 +199,13 @@ export function IllusionculumEntrySequence({ phase }: { phase: "covering" | "rev
           return (
             <li
               key={call}
-              style={{ ["--ice-call" as string]: index }}
+              style={
+                {
+                  "--ice-call-start": `${ILLUSIONCULUM_ENTRY_CALL_TIMES[index].start}ms`,
+                  "--ice-call-hold": `${ILLUSIONCULUM_ENTRY_CALL_TIMES[index].hold}ms`,
+                  "--ice-unit-step": `${ILLUSIONCULUM_ENTRY_CALL_TIMES[index].unit}ms`,
+                } as CSSProperties
+              }
               data-last={index === ILLUSIONCULUM_ENTRY_CALLS.length - 1 || undefined}
             >
               {units.map((unit, k) => (

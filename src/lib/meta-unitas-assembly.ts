@@ -75,22 +75,24 @@ export function mountMetaUnitasAssembly(
   let idleId = 0;
   let idleTimer: ReturnType<typeof setTimeout> | 0 = 0;
   const allowed = () => metaUnitasMotionAllowed(environment, options.reducedMotion);
+  // Page preparation waits behind the existing entry cover on every viewport.
+  const canStart = () => allowed() && !html.dataset.routeCover;
   const stop = () => {
     if (dispose) dispose();
     dispose = null;
   };
   const start = () => {
-    if (disposed || dispose || loading || !allowed()) return;
+    if (disposed || dispose || loading || !canStart()) return;
     loading = true;
     load().then(
       (module) => {
         loading = false;
-        if (disposed || !allowed()) return;
+        if (disposed || !canStart()) return;
         dispose = module.mountMetaUnitasAssemblyEngine(host, environment);
       },
       () => {
         loading = false;
-        if (!disposed) host.dataset.rznLoad = "error";
+        if (!disposed && canStart()) host.dataset.rznLoad = "error";
       },
     );
   };
@@ -106,6 +108,10 @@ export function mountMetaUnitasAssembly(
       cancelIdle();
       stop();
       host.dataset.rznLoad = "static";
+      return;
+    }
+    if (!canStart()) {
+      cancelIdle();
       return;
     }
     if (dispose || loading) return;
@@ -129,7 +135,7 @@ export function mountMetaUnitasAssembly(
     typeof environment.MutationObserver === "function"
       ? new environment.MutationObserver(sync)
       : null;
-  observer?.observe(html, { attributes: true, attributeFilter: ["data-world-effects"] });
+  observer?.observe(html, { attributes: true, attributeFilter: ["data-world-effects", "data-route-cover"] });
   reduced.addEventListener?.("change", sync);
   forced.addEventListener?.("change", sync);
   sync();

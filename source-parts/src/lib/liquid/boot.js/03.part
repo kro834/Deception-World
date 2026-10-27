@@ -1,11 +1,3 @@
-        lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
-      }
-      if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
-      contact(m.x, m.y);
-      return;
-    }
-
-    const px = (m.x - gesture.rect.left) / gesture.sx;
     const geos = gesture.geos, last = geos.length - 1;
     let raw = 0;
     for (let i = 0; i <= last; i++) {
@@ -268,3 +260,17 @@
   window.addEventListener('pointercancel', cancel, true);
   window.addEventListener('blur', cancel);
   window.addEventListener('pagehide', cancel);
+  const cancelOtherTouch = (event) => {
+    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
+  };
+  const cancelWithEscape = (event) => {
+    if (holdToDrag && gesture && event.key === 'Escape') {
+      event.preventDefault();
+      cancel();
+    }
+  };
+  window.addEventListener('pointerdown', cancelOtherTouch, true);
+  window.addEventListener('keydown', cancelWithEscape);
+  // Rotation invalidates captured coordinates. Toolbar height changes do not:
+  // cancelling on every visualViewport resize would interrupt normal iOS drags.
+  window.addEventListener('orientationchange', cancel);

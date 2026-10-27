@@ -61,7 +61,11 @@ export function armorSeatLift(piece, q) {
   if (q < piece.to)
     return 1 - piece.seatHold * smooth(clamp01((q - piece.from) / (piece.to - piece.from)));
   if (q >= piece.contact) return 0;
-  const u = clamp01((q - piece.to) / (piece.contact - piece.to));
+  // Optional completed-shell dwell: IC lets the eye read the generated
+  // plate before its separate seating stroke. Defaults retain Rexonance.
+  const depart = piece.depart ?? piece.to;
+  if (q < depart) return 1 - piece.seatHold;
+  const u = clamp01((q - depart) / (piece.contact - depart));
   if (piece.ornament) return (1 - piece.seatHold) * (1 - smooth(u));
   const at = piece.catchAt;
   const hold = piece.catchLift;
@@ -326,6 +330,7 @@ export function* assemblyNanitePlanSteps({
   goldBoxes = null,
   goldCell = 4,
   coarse = false,
+  staging = null,
 }) {
   const N = ASSEMBLY_NANITES;
   const { width: W, height: H } = size;
@@ -500,7 +505,9 @@ export function* assemblyNanitePlanSteps({
     // The staged plate hovers in front of the body (round 3, review: the lift
     // and tilt were imperceptible): armour lifts 16–36 px and tilts 24°; the
     // ornaments keep their own swing (their turn and skew already carry it).
-    const lift = helm ? 0 : ornament ? (10 + 12 * share) * 1.4 : 16 + 20 * share;
+    const lift =
+      (helm ? 0 : ornament ? (10 + 12 * share) * 1.4 : 16 + 20 * share) *
+      (ornament || fixed ? 1 : (staging?.lift ?? 1));
     const hx = Math.sign(seatX - W / 2) * Math.min(1, Math.abs(seatX - W / 2) / (0.25 * W));
     const side = seatX < W / 2 ? -1 : 1;
     // The shell arrives from the side of the anatomy it covers. Arms key
@@ -532,7 +539,10 @@ export function* assemblyNanitePlanSteps({
                 : -0.55;
     const accent = accentOf.includes(p);
     const isCrest = p === crest;
-    const contact = to + (helm ? 0.003 : N.seat);
+    const dwell = fixed || ornament ? 0 : (staging?.hold ?? 0);
+    const depart = to + dwell;
+    const contact =
+      depart + (helm ? 0.003 : fixed || ornament ? N.seat : (staging?.seat ?? N.seat));
     let reach = 1;
     for (const i of own) reach = Math.max(reach, Math.hypot(CX[i] - seatX, CY[i] - seatY));
     const box = goldBoxes?.[piece.id];
@@ -645,6 +655,9 @@ export function* assemblyNanitePlanSteps({
       from,
       to,
       contact,
+      depart,
+      contactDelay: fixed || ornament || !staging ? 0 : dwell + staging.seat - N.seat,
+      depthScale: staging?.depth ?? 1,
       stageEnd: contact + (kind === 1 || kind === 2 ? 0.012 : N.overshoot),
       accent,
       crest: isCrest,
@@ -883,7 +896,10 @@ export function* assemblyNanitePlanSteps({
       if (piece.goldEnd > piece.goldFirst) {
         // The pour runs from to + delay; flow = (lock − start) / span.
         // (ASSEMBLY_GOLD's delay; the helmet's helmDelay.)
-        piece.g0 = Math.min(piece.g0, done[piece.index] + (piece.helm ? 0.005 : 0.008));
+        piece.g0 = Math.min(
+          piece.g0,
+          done[piece.index] + (piece.helm ? 0.005 : 0.008) + piece.contactDelay,
+        );
         piece.recedeEnd = piece.g1 + 0.012;
         piece.releaseEnd = piece.recedeEnd + N.release;
         if (!piece.hasGoldBox) {
@@ -4354,10 +4370,11 @@ export function createAssemblyNanites({
           if (landedPath(ctx, p, src, q)) {
             ctx.clip();
             const wall = silhouette[src];
-            if (full && wall && jigged) {
+            if (wall && jigged && (full || (coarse && pc.depthScale > 1))) {
               ctx.globalAlpha = 0.9;
-              ctx.drawImage(wall, 1.6, 2.0, W, H);
-              ctx.drawImage(wall, 0.8, 1.0, W, H);
+              const depth = pc.depthScale;
+              ctx.drawImage(wall, 1.6 * depth, 2.0 * depth, W, H);
+              if (full) ctx.drawImage(wall, 0.8 * depth, 1.0 * depth, W, H);
             }
             ctx.globalAlpha = 1;
             ctx.drawImage(sheet, 0, 0, W, H);

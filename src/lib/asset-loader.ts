@@ -64,15 +64,13 @@ export const FINAL_STAGE_ENTER_ASSETS = ["/final-stage-logo.webp"] as const;
 
 export const FAR_FROM_SAGA_ENTER_ASSETS = [FAR_FROM_SAGA_KEY_VISUAL.src] as const;
 
-// The hero's figure, and the entry transformation's other art (the bare
-// undersuit the armour locks onto, the two orbs), so its first play is not late.
+// The destination hero and entry's first painted frame. The full cutout and
+// orbit sprites belong to later page views; decoding them beside assembly
+// delayed the first call even though the entry does not render them.
 export const ILLUSIONCULUM_SAGA_ENTER_ASSETS = [
   ILLUSIONCULUM_HERO.src,
-  ILLUSIONCULUM_ENTRY_CUTOUT.src,
   "/illusionculum-suit-20261023/undersuit.webp",
   "/illusionculum-suit-20261023/driver-standin.webp",
-  "/illusionculum-saga-20261023/orb-left-standard-256.webp",
-  "/illusionculum-saga-20261023/orb-right-standard-256.webp",
 ] as const;
 // META UNITAS SAGA (2026-10-23): its key visual, ミドル (meta-unitas-saga-artwork.ts).
 // The entry's first frame (the wearer and the driver) warm with the key
@@ -309,7 +307,7 @@ export async function preloadAssets(
 ): Promise<void> {
   // Navigation intent warms compressed assembly bytes alongside the existing
   // first-frame images; it never extends the navigation progress deadline.
-  if (urls.includes(ILLUSIONCULUM_HERO.src)) void preloadIllusionculumAssembly();
+  if (urls.includes(ILLUSIONCULUM_HERO.src)) void preloadIllusionculumAssembly({ entry: true });
   const unique = [...new Set(urls.filter(Boolean))];
   if (unique.length === 0) {
     onProgress(100);

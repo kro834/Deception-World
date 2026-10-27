@@ -20,9 +20,12 @@ export function createIllusionculumImageLoader(environment = globalThis) {
       const image = new ImageClass();
       image.decoding = "async";
       let done = false;
+      let decoding = false;
+      let decodeTimer = 0;
       const finish = (error) => {
         if (done) return;
         done = true;
+        if (decodeTimer) timers.clear(decodeTimer);
         image.onload = image.onerror = null;
         signal.removeEventListener("abort", abort);
         // A successful image is the source itself: retain its src until the
@@ -34,7 +37,21 @@ export function createIllusionculumImageLoader(environment = globalThis) {
       };
       const abort = () => finish(cancelError());
       signal.addEventListener("abort", abort, { once: true });
-      image.onload = () => finish(image.naturalWidth > 0 ? null : new Error("Empty image"));
+      const ready = () => finish(image.naturalWidth > 0 ? null : new Error("Empty image"));
+      image.onload = () => {
+        if (done || decoding) return;
+        if (image.naturalWidth <= 0 || typeof image.decode !== "function") {
+          ready();
+          return;
+        }
+        decoding = true;
+        // Safari may use the Image path when bitmap conversion is unavailable.
+        // Decode before the first canvas draw when possible, with the shared
+        // engine's 500ms optimisation deadline so a stalled decoder cannot
+        // hold an already loaded figure or the entry's clock indefinitely.
+        decodeTimer = timers.set(ready, 500);
+        void Promise.resolve().then(() => image.decode()).then(ready, ready);
+      };
       image.onerror = () => finish(new Error("Illusionculum image failed"));
       image.src = src;
     });

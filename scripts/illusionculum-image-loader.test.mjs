@@ -206,3 +206,51 @@ test("stalled fetch and queued requests all meet their deadline without starting
   assert.equal(timers.size, 0);
   loader.dispose();
 });
+
+test("the Image fallback decodes before its first canvas use and releases handlers afterwards", async () => {
+  FakeImage.instances = []; const decoded = defer(); let settled = false;
+  class DecodingImage extends FakeImage { decode() { return decoded.promise; } }
+  const loader = createIllusionculumImageLoader({ Image: DecodingImage });
+  const request = loader.load("figure").then((source) => { settled = true; return source; });
+  const image = FakeImage.instances[0]; image.onload(); await tick();
+  assert.equal(settled, false);
+  decoded.resolve(); assert.equal(await request, image);
+  assert.equal(image.onload, null); assert.equal(image.onerror, null);
+  loader.dispose();
+});
+
+test("a hung fallback decoder uses the existing engine's 500ms optimisation deadline", async () => {
+  FakeImage.instances = []; const timers = new Map(); let serial = 0;
+  class DecodingImage extends FakeImage { decode() { return new Promise(() => {}); } }
+  const loader = createIllusionculumImageLoader({ Image: DecodingImage,
+    setTimeout: (callback, ms) => { timers.set(++serial, { callback, ms }); return serial; },
+    clearTimeout: (id) => timers.delete(id),
+  });
+  const request = loader.load("figure"); const image = FakeImage.instances[0]; image.onload(); await tick();
+  const deadline = [...timers.values()].find((timer) => timer.ms === 500);
+  assert.ok(deadline); deadline.callback();
+  assert.equal(await request, image); assert.equal(timers.size, 0);
+  loader.dispose();
+});
+
+test("disposing during fallback decoding cancels its deadline and cannot publish a late image", async () => {
+  FakeImage.instances = []; const decoded = defer(), timers = new Map(); let serial = 0;
+  class DecodingImage extends FakeImage { decode() { return decoded.promise; } }
+  const loader = createIllusionculumImageLoader({ Image: DecodingImage,
+    setTimeout: (callback, ms) => { timers.set(++serial, { callback, ms }); return serial; },
+    clearTimeout: (id) => timers.delete(id),
+  });
+  const request = assert.rejects(loader.load("figure"), /cancelled/);
+  const image = FakeImage.instances[0]; image.onload(); await tick(); loader.dispose();
+  await request; assert.equal(timers.size, 0); assert.equal(image.url, "");
+  decoded.resolve(); await tick(); assert.equal(image.url, "");
+  assert.equal(image.onload, null); assert.equal(image.onerror, null);
+});
+
+test("a synchronous fallback decode error retains the already loaded image", async () => {
+  FakeImage.instances = [];
+  class DecodingImage extends FakeImage { decode() { throw new Error("decoder unavailable"); } }
+  const loader = createIllusionculumImageLoader({ Image: DecodingImage });
+  const request = loader.load("figure"); const image = FakeImage.instances[0]; image.onload();
+  assert.equal(await request, image); loader.dispose();
+});

@@ -45,6 +45,7 @@ import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 // way it plays Rexonance's, through one light module (the sequence's chunk
 // and the warm-up are its dynamic imports).
 import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-entry-timings";
+import { createEntryPlayback, type EntryPlayback } from "@/lib/entry-playback";
 import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
 import { IllusionculumEntrySequence } from "@/components/illusionculum-saga/illusionculum-entry-sequence";
 import {
@@ -111,6 +112,7 @@ type GateState = {
   // META UNITAS's call (meta-unitas-entry-sequence).
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   metaUnitasPlayback?: MetaUnitasEntryPlayback;
+  illusionculumPlayback?: EntryPlayback;
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -982,6 +984,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // Rexonance's is), and its skip: the button or Escape shortens the cover.
   const farFromTransition = useRef<number | null>(null);
   const metaUnitasTransition = useRef<number | null>(null);
+  const illusionculumTransition = useRef<number | null>(null);
   const farFromSkip = useRef<(() => void) | null>(null);
   const skipFarFrom = useCallback(() => farFromSkip.current?.(), []);
 
@@ -1059,10 +1062,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // scrollbar gutter, and the Zeus button waits for the page's entrance.
   const markRouteCover = useCallback((state: "covering" | "revealing" | "settling" | null) => {
     const root = document.documentElement;
-    syncRexonanceRouteCover(
-      document.querySelector("main.rxs-page.rxs-rexonance-page"),
-      root,
-    );
+    syncRexonanceRouteCover(document.querySelector("main.rxs-page.rxs-rexonance-page"), root);
     window.clearTimeout(arrivalTimer.current);
     // A menu that unmounts under the cover leaves html[data-side-menu-open]
     // (and its overflow lock) for the shutter. Every cover path releases it
@@ -1193,6 +1193,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       rexonanceTransition.current = null;
       farFromTransition.current = null;
       metaUnitasTransition.current = null;
+      illusionculumTransition.current = null;
       farFromSkip.current = null;
       rexonanceCoverCancel.current?.();
       rexonanceCoverCancel.current = null;
@@ -1232,7 +1233,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         document.hidden &&
         (rexonanceTransition.current !== null ||
           farFromTransition.current !== null ||
-          metaUnitasTransition.current !== null)
+          metaUnitasTransition.current !== null ||
+          illusionculumTransition.current !== null)
       ) {
         cancelTransition();
       }
@@ -1252,6 +1254,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       rexonanceTransition.current = null;
       farFromTransition.current = null;
       metaUnitasTransition.current = null;
+      illusionculumTransition.current = null;
       farFromSkip.current = null;
       rexonanceCoverCancel.current?.();
       rexonanceCoverCancel.current = null;
@@ -1627,6 +1630,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           // cover's lifetime. Downloads/CPU preparation never spend its clock.
           let metaUnitasCall: MetaUnitasTransitionRenderer | null = null;
           let metaUnitasPlayback: MetaUnitasEntryPlayback | undefined;
+          let illusionculumPlayback: EntryPlayback | undefined;
           if (diveVariant === "meta-unitas" && tier === "full") {
             metaUnitasTransition.current = requestId;
             if (document.documentElement.dataset.sideMenuOpen === "true") {
@@ -1637,6 +1641,11 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (!isCurrent()) return;
             metaUnitasPlayback = createMetaUnitasEntryPlayback();
             rexonanceCoverCancel.current = metaUnitasPlayback.cancel;
+          }
+          if (diveVariant === "illusionculum" && tier === "full") {
+            illusionculumTransition.current = requestId;
+            illusionculumPlayback = createEntryPlayback();
+            rexonanceCoverCancel.current = illusionculumPlayback.cancel;
           }
           // PREV / NEXT between dossiers flips the file; entry from anywhere
           // else keeps the rider's own dive or cut-in.
@@ -1693,6 +1702,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             farFromSuit,
             metaUnitasCall,
             metaUnitasPlayback,
+            illusionculumPlayback,
           });
           // The skip, from the first painted frame: before the hold it marks
           // the cover spent; during the hold it ends it (below).
@@ -1702,6 +1712,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             };
           }
           if (metaUnitasPlayback) farFromSkip.current = metaUnitasPlayback.skip;
+          if (illusionculumPlayback) farFromSkip.current = illusionculumPlayback.skip;
           try {
             if (assets.length) {
               void preloadAssets(assets, () => undefined).catch(() => undefined);
@@ -1778,8 +1789,19 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 return;
               }
             }
+            if (illusionculumPlayback) {
+              const result = await illusionculumPlayback.promise;
+              if (!isCurrent() || result === "cancelled") return;
+              if (result === "unavailable") {
+                setDelayedRoute({
+                  href: guardedHref(to, hash, search),
+                  focus: Boolean(focusDestination),
+                });
+                return;
+              }
+            }
             const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-            if (!metaUnitasPlayback && coverTimeLeft > 0) {
+            if (!metaUnitasPlayback && !illusionculumPlayback && coverTimeLeft > 0) {
               if (diveVariant === "rexonance" && rexonanceCall) {
                 const hold = waitForRexonanceCover(coverTimeLeft);
                 rexonanceCoverCancel.current = hold.cancel;
@@ -1842,6 +1864,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               farFromSuit,
               metaUnitasCall,
               metaUnitasPlayback,
+              illusionculumPlayback,
             });
             await revealRan(
               timings.reveal,
@@ -1852,6 +1875,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   },
             );
           } finally {
+            illusionculumPlayback?.cancel();
+            if (
+              illusionculumPlayback &&
+              rexonanceCoverCancel.current === illusionculumPlayback.cancel
+            )
+              rexonanceCoverCancel.current = null;
             metaUnitasPlayback?.cancel();
             if (metaUnitasPlayback && rexonanceCoverCancel.current === metaUnitasPlayback.cancel)
               rexonanceCoverCancel.current = null;
@@ -1863,6 +1892,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               if (rexonanceTransition.current === requestId) rexonanceTransition.current = null;
               if (farFromTransition.current === requestId) farFromTransition.current = null;
               if (metaUnitasTransition.current === requestId) metaUnitasTransition.current = null;
+              if (illusionculumTransition.current === requestId)
+                illusionculumTransition.current = null;
               farFromSkip.current = null;
               setDocumentLoading(false);
               markRouteCover("settling");
@@ -2018,6 +2049,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         farFromSuit={gate.farFromSuit}
         metaUnitasCall={gate.metaUnitasCall}
         metaUnitasPlayback={gate.metaUnitasPlayback}
+        illusionculumPlayback={gate.illusionculumPlayback}
         onSkip={skipFarFrom}
       />
       <RouteSignal state={signal} />
@@ -2058,6 +2090,7 @@ function LoadOverlay({
   farFromSuit,
   metaUnitasCall,
   metaUnitasPlayback,
+  illusionculumPlayback,
   onSkip,
 }: {
   active: boolean;
@@ -2070,6 +2103,7 @@ function LoadOverlay({
   farFromSuit?: GateState["farFromSuit"];
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   metaUnitasPlayback?: MetaUnitasEntryPlayback;
+  illusionculumPlayback?: EntryPlayback;
   onSkip?: () => void;
 }) {
   if (!active) return null;
@@ -2117,6 +2151,7 @@ function LoadOverlay({
         farFromSuit={farFromSuit}
         metaUnitasCall={metaUnitasCall}
         metaUnitasPlayback={metaUnitasPlayback}
+        illusionculumPlayback={illusionculumPlayback}
         onSkip={onSkip}
       />
     );
@@ -2241,6 +2276,7 @@ function RiderRouteDive({
   farFromSuit,
   metaUnitasCall: MetaUnitasCallSequence,
   metaUnitasPlayback,
+  illusionculumPlayback,
   onSkip,
 }: {
   variant: RiderDiveVariant;
@@ -2252,6 +2288,7 @@ function RiderRouteDive({
   farFromSuit?: GateState["farFromSuit"];
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   metaUnitasPlayback?: MetaUnitasEntryPlayback;
+  illusionculumPlayback?: EntryPlayback;
   onSkip?: () => void;
 }) {
   const meta = RIDER_DIVE_META[variant];
@@ -2265,9 +2302,9 @@ function RiderRouteDive({
   // FAR FROM's call is skippable (owner, 2026-10-22): the button, or Escape
   // while it covers. META UNITAS's the same way.
   const farFromSkippable = farFrom && !revealing && scene?.tier === "full" && Boolean(onSkip);
-  const metaUnitasSkippable =
-    metaUnitas && !revealing && scene?.tier === "full" && Boolean(onSkip);
-  const skippable = farFromSkippable || metaUnitasSkippable;
+  const metaUnitasSkippable = metaUnitas && !revealing && scene?.tier === "full" && Boolean(onSkip);
+  const illusionculumSkippable = Boolean(illusionculum && illusionculumPlayback && !revealing);
+  const skippable = farFromSkippable || metaUnitasSkippable || illusionculumSkippable;
   useEffect(() => {
     if (!skippable) return;
     const onKey = (event: KeyboardEvent) => {
@@ -2330,8 +2367,20 @@ function RiderRouteDive({
             </button>
           ) : null}
         </>
-      ) : illusionculum ? (
-        <IllusionculumEntrySequence phase={phase} />
+      ) : illusionculum && illusionculumPlayback ? (
+        <>
+          <IllusionculumEntrySequence phase={phase} playback={illusionculumPlayback} />
+          {illusionculumSkippable ? (
+            <button
+              type="button"
+              className="ffe-skip"
+              onClick={onSkip}
+              aria-label="変身演出をスキップ"
+            >
+              スキップ
+            </button>
+          ) : null}
+        </>
       ) : (
         <>
           <CineLayers scene={scene} />
@@ -2384,20 +2433,20 @@ function RiderRouteDive({
                   ? "超究極位相へ到着"
                   : "超究極位相へダイブ中"
                 : variant === "meta-unitas"
-                ? revealing
-                  ? "メタ・ウニタスサーガへ到着"
-                  : "メタ・ウニタスサーガへ移動中"
-                : variant === "final-stage"
                   ? revealing
-                    ? "最終位相へ到着"
-                    : "最終位相へダイブ中"
-                : variant === "dream"
-                  ? revealing
-                    ? "深層夢界へ沈降完了"
-                    : "夢界の液層へ沈降中"
-                  : revealing
-                    ? "個別資料へ到着"
-                    : "記録位相へダイブ中"}
+                    ? "メタ・ウニタスサーガへ到着"
+                    : "メタ・ウニタスサーガへ移動中"
+                  : variant === "final-stage"
+                    ? revealing
+                      ? "最終位相へ到着"
+                      : "最終位相へダイブ中"
+                    : variant === "dream"
+                      ? revealing
+                        ? "深層夢界へ沈降完了"
+                        : "夢界の液層へ沈降中"
+                      : revealing
+                        ? "個別資料へ到着"
+                        : "記録位相へダイブ中"}
         </span>
       </span>
     </div>
@@ -2855,7 +2904,9 @@ export function AppGuards() {
     };
     const isDossierSectionHash =
       /^#?character-section-/.test(locationHash) ||
-      /^#?(?:dossier-profile|dossier-index|identity-records|form-records|ruler-enigma|ruler-polaris)$/.test(locationHash);
+      /^#?(?:dossier-profile|dossier-index|identity-records|form-records|ruler-enigma|ruler-polaris)$/.test(
+        locationHash,
+      );
     const resetRouteTop =
       (DETAIL_ROUTE.test(pathname) && pathnameChanged && !isDossierSectionHash && !fromHistory) ||
       (pathname === "/world" && (!locationHash || locationHash === "top") && !fromHistory);

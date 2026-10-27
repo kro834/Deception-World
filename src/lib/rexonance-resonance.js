@@ -1395,7 +1395,8 @@ export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
       if (++work % 128 === 0) yield;
     }
     const helm = piece.group === "helm";
-    const from = done + (helm ? ASSEMBLY_GOLD.helmDelay : ASSEMBLY_GOLD.delay);
+    const from = done + (helm ? ASSEMBLY_GOLD.helmDelay : ASSEMBLY_GOLD.delay) +
+      (gold.seatDelay?.(piece) ?? 0);
     const span = helm ? ASSEMBLY_GOLD.helm : ASSEMBLY_GOLD.form;
     const random = seededRandom(7919 + index);
     for (let i = 0; i < n; i += 1) {
@@ -2820,6 +2821,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             core: config.core,
             visor: config.visor,
             gold: nextGold,
+            staging: kit?.staging,
             seams: kit?.seams,
             goldBoxes: kit?.goldBoxes,
             goldCell: config.gold?.cell ?? 4,

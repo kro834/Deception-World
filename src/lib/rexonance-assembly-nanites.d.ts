@@ -100,6 +100,9 @@ export interface NanitePlate {
   from: number;
   to: number;
   contact: number;
+  depart?: number;
+  contactDelay: number;
+  depthScale: number;
   stageEnd: number;
   accent: boolean;
   crest: boolean;
@@ -253,6 +256,7 @@ export interface NanitePlanOptions {
   /** The gold cells' size, figure px (4). */
   goldCell?: number;
   coarse?: boolean;
+  staging?: RexonanceAssemblyNanites["staging"] | null;
 }
 
 export function assemblyNanitePlanSteps(

@@ -27,6 +27,10 @@
  * build (scripts/build-illusionculum-suit.mjs).
  */
 
+import {
+  ILLUSIONCULUM_ARMOUR_STAGING,
+  illusionculumPlateDelay,
+} from "./illusionculum-choreography.ts";
 import { mountRexonanceAssembly, type RexonanceAssemblyConfig } from "./rexonance-resonance.js";
 import {
   ILLUSIONCULUM_SUIT_ATLAS,
@@ -96,10 +100,11 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
  * guideway conduit, plate outlines and gold boxes. */
 export const loadIllusionculumNanites = (compact = false) =>
   import("./rexonance-nanites.ts").then((kit) => ({
-    cells: kit.REXONANCE_NANITE_CELLS,
+    cells: { ...kit.REXONANCE_NANITE_CELLS, src: "/illusionculum-nanites-20261027/cells.webp" },
     comets: kit.REXONANCE_NANITE_COMETS,
     fx: kit.REXONANCE_NANITE_FX,
     guide: compact ? undefined : ILLUSIONCULUM_SUIT_GUIDE,
+    staging: ILLUSIONCULUM_ARMOUR_STAGING,
     seams: ILLUSIONCULUM_SUIT_SEAMS,
     goldBoxes: ILLUSIONCULUM_SUIT_GOLD_BOXES,
   }));
@@ -136,6 +141,7 @@ export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
     gold: {
       atlas: ILLUSIONCULUM_SUIT_GOLD_ATLAS.src,
       cell: ILLUSIONCULUM_SUIT_GOLD_CELL,
+      seatDelay: illusionculumPlateDelay,
       cells: ILLUSIONCULUM_SUIT_GOLD_CELLS,
     },
     nanites: loadIllusionculumNanites,
@@ -163,7 +169,7 @@ export function mountIllusionculumAssemblyEngine(
 ): () => void {
   const config = illusionculumAssemblyConfig();
   const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
-  const loader = compact ? createIllusionculumImageLoader(environment) : null;
+  const loader = compact || options.entry ? createIllusionculumImageLoader(environment) : null;
   if (loader) config.loadImage = loader.load;
   // Prepare in short yielding tasks on phones, instead of waiting for
   // separate idle windows for each phase of the page's suit-up.
