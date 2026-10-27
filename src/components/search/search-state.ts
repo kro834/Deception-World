@@ -1,13 +1,5 @@
-const SEARCH_CATEGORIES = [
-  "all",
-  "people",
-  "riders",
-  "forms",
-  "story",
-  "world",
-  "systems",
-  "pages",
-] as const;
+import { isSearchCategory } from "../../lib/search-categories.ts";
+
 const MIN_SHOWN = 24;
 const MAX_SHOWN = 144;
 const MAX_QUERY_LENGTH = 120;
@@ -20,7 +12,7 @@ export function validateSearchState(search: Record<string, unknown>): SearchStat
     query === null || ["string", "number", "boolean"].includes(typeof query)
       ? String(query).slice(0, MAX_QUERY_LENGTH)
       : undefined;
-  const category = SEARCH_CATEGORIES.includes(search.category as (typeof SEARCH_CATEGORIES)[number])
+  const category = isSearchCategory(search.category)
     ? String(search.category)
     : undefined;
 

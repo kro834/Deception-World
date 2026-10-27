@@ -199,3 +199,16 @@ test("dossier records carry the library's English spellings", () => {
   assert.ok(byId.get("rider-saga").aliases.includes("saga"));
   assert.ok(byId.get("manager-rex-loi").aliases.includes("rex loi"));
 });
+
+
+test("registered page entrances share the same titles and destinations in library and site search", () => {
+  const { SITE_PAGE_ENTRIES } = loadData("src/lib/site-page-registry.ts");
+  for (const entry of SITE_PAGE_ENTRIES.filter((page) => page.searchHash)) {
+    const document = byId.get(`page-${entry.id}`);
+    assert.ok(document, entry.id);
+    assert.equal(document.title, entry.title);
+    assert.equal(document.description, entry.description);
+    assert.equal(document.to, entry.path);
+    assert.equal(document.hash, entry.hash ?? entry.searchHash);
+  }
+});

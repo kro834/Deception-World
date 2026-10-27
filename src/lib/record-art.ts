@@ -153,6 +153,9 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
     code: "DREAM",
   },
   "/gallery": { src: "/gallery/g01-480.webp", pos: "50% 30%", edition: "gallery", code: "GALLERY" },
+  "/gallery-tours": { src: "/gallery/g113-480.webp", pos: "50% 50%", edition: "gallery", code: "GALLERY" },
+  "/exhibition": { src: "/gallery/g01-480.webp", pos: "50% 30%", edition: "gallery", code: "GALLERY" },
+  "/saga-cinema": { src: "/saga-cinema-assets/chapter-4.jpg", pos: "50% 30%", edition: "world", code: "SAGA" },
   // Realm Royal (a 1200px supplied file, so the window stays sharp at every
   // size; Vertex and Multi are 400px): the archive's own Saga form cards sit
   // next to it in /search, and the Realm side of the archive shows here.
@@ -199,7 +202,7 @@ export function editionOf(path: string): RecordEdition {
   if (path === "/rexonance-saga" || path === "/illusionculum-saga") return "rexonance";
   if (path === "/extreme-saga") return "extreme";
   if (path === "/final-stage" || path === "/far-from-saga") return "final";
-  if (path === "/gallery") return "gallery";
+  if (path === "/gallery" || path === "/gallery-tours" || path === "/exhibition") return "gallery";
   if (path === "/form-archive") return "archive";
   return "world";
 }

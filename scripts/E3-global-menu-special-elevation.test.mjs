@@ -154,9 +154,10 @@ test("wayfinding: the special sites show their way home", () => {
   };
   assert.equal(joined(dream), "映画第一作「ドリームチャプター」");
   assert.equal(joined(home), "ディセプションワールド");
+  // Owner (2026-10-27): local menus retain the World return in STORIES instead of their local chapters.
   assert.match(
     stories,
-    /\{isSpecialSite \|\| context === "cinema" \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>\s*<span className="side-panel-phrase">ディセプション<\/span>\s*<wbr \/>\s*<span className="side-panel-phrase">ワールド<\/span>\s*<\/span>\s*<i>MAIN SITE<\/i>/,
+    /\{isSpecialSite \|\| context === "cinema" \|\| Boolean\(menuPage\) \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>\s*<span className="side-panel-phrase">ディセプション<\/span>\s*<wbr \/>\s*<span className="side-panel-phrase">ワールド<\/span>\s*<\/span>\s*<i>MAIN SITE<\/i>/,
   );
   assert.match(
     chrome,
@@ -213,11 +214,10 @@ test("wayfinding: the menu lists the World's chapters in page order and marks th
     worldOrder.every((index, i) => index > 0 && (i === 0 || index > worldOrder[i - 1])),
     `world SECTIONS order ${worldOrder}`,
   );
-  const archive = chrome.match(/\) : context === "archive" \? \(\s*<>\s*\{\[([\s\S]*?)\]\.map/)[1];
-  assert.deepEqual(
-    [...archive.matchAll(/\["([\w-]+)"/g)].map((m) => m[1]),
-    ["top", "story", "manager-archive", "riders", "records"],
-  );
+  // Owner (2026-10-27): archive's page-local group now names its real switcher,
+  // rather than redirecting the reader into unrelated World chapters.
+  const archiveMenu = read("src/lib/menu-page-context.ts");
+  assert.match(archiveMenu, /"\/form-archive": \{[\s\S]*?sections: \[\["archive-switcher", "フォームアーカイブ"/);
   // Read from the World header when the menu opens; only /world# rows are touched.
   assert.match(
     chrome,

@@ -1,3 +1,4 @@
+import { SITE_PAGE_ENTRIES } from "../src/lib/site-page-registry.ts";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { test } from "node:test";
@@ -239,7 +240,9 @@ test("the entry transformation plays in the route transition screen, the owner's
 test("the site is registered wherever the other special sites are", () => {
   assert.match(read("src/components/search/search-ui-helpers.ts"), /"\/illusionculum-saga"\) return "ILLUSIONCULUM SAGA"/);
   assert.match(read("src/components/search/search-data.ts"), /to: "\/illusionculum-saga",/);
-  assert.match(read("src/lib/library-data.ts"), /path: "\/illusionculum-saga"/);
+  // Owner (2026-10-27): library page entries now share the published-page registry.
+  assert.ok(SITE_PAGE_ENTRIES.some((entry) => entry.path === "/illusionculum-saga"));
+  assert.match(read("src/lib/library-data.ts"), /SITE_PAGE_ENTRIES\.map/);
   assert.match(read("src/lib/record-art.ts"), /"\/illusionculum-saga": \{/);
   assert.match(read("server/lib/public-document-cache.ts"), /"\/illusionculum-saga"/);
   assert.match(read("scripts/verify-public-deployment.mjs"), /"\/illusionculum-saga"/);

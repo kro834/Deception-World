@@ -1,3 +1,4 @@
+import { SITE_PAGE_ENTRIES } from "../src/lib/site-page-registry.ts";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
@@ -40,7 +41,9 @@ test("FAR FROM special site has a route, menu entry, warmup asset, and dedicated
   assert.match(read("src/lib/route-family.js"), /path === "\/far-from-saga"/);
   assert.match(read("server/lib/public-document-cache.ts"), /"\/far-from-saga"/);
   assert.match(read("scripts/verify-public-deployment.mjs"), /"\/far-from-saga"/);
-  assert.match(read("src/lib/library-data.ts"), /path: "\/far-from-saga"/);
+  // Owner (2026-10-27): library page entries now share the published-page registry.
+  assert.ok(SITE_PAGE_ENTRIES.some((entry) => entry.path === "/far-from-saga"));
+  assert.match(read("src/lib/library-data.ts"), /SITE_PAGE_ENTRIES\.map/);
   assert.match(read("src/lib/record-art.ts"), /"\/far-from-saga": \{/);
   assert.match(
     read("src/components/search/search-ui-helpers.ts"),

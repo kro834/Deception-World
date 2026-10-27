@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import { DREAM_CHAPTERS } from "../src/lib/dream-chapter-index.ts";
 
 const source = readFileSync(new URL("../src/components/dream-chapter/dream-chapter.tsx", import.meta.url), "utf8");
 const file = ts.createSourceFile("dream-chapter.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -13,7 +14,14 @@ assert.ok(navigation, "direct record links are handled by the mounted route's cu
 const data = {};
 runInNewContext(ts.transpileModule(readFileSync(new URL("../src/components/dream-chapter/dream-chapter-data.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.CommonJS },
-}).outputText, { exports: data });
+}).outputText, {
+  exports: data,
+  require(specifier) {
+    // Shared identities stay real; this fixture still evaluates the dossier data.
+    assert.equal(specifier, "../../lib/dream-chapter-index.ts");
+    return { DREAM_CHAPTERS };
+  },
+});
 
 function openFragment(hash, { missing = false, outside = false } = {}) {
   class Button {}

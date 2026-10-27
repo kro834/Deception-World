@@ -55,7 +55,8 @@ const worldHomeSourceParts = worldHomeSourcePartNames
 test("the iPhone archive entry closes its menu and never waits for the full standalone document", () => {
   assert.match(
     worldChrome,
-    /<GuardedLink to="\/form-archive" assets=\{\[\]\} beforeNavigate=\{close\}>/,
+    // Owner (2026-10-27): the research-group link also marks its current page.
+    /<GuardedLink\s+to="\/form-archive"\s+assets=\{\[\]\}\s+beforeNavigate=\{close\}\s+aria-current=\{pathname === "\/form-archive" \? "page" : undefined\}\s*>/,
   );
   assert.doesNotMatch(loadGate, /preloadArchiveDocument/);
   assert.doesNotMatch(loadGate, /saga-form-archive-standalone\.html/);

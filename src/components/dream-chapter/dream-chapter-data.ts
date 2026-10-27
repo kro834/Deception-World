@@ -1,3 +1,5 @@
+import { DREAM_CHAPTERS } from "../../lib/dream-chapter-index.ts";
+
 // あらすじ・人物紹介・用語の説明は原文に基づく要約。
 // line / said / quotes と DREAM_QUOTES / DREAM_CASE_NOTES の台詞は原文の引用。
 export const DREAM_POSTERS = [
@@ -125,8 +127,7 @@ export const DREAM_POSTERS = [
 
 export const DREAM_CASES = [
   {
-    no: "0",
-    title: "交わる",
+    ...DREAM_CHAPTERS[0],
     reading: "INTERSECT",
     lead: "家族を守った戦いが、夢だと告げられる。",
     paragraphs: [
@@ -136,8 +137,7 @@ export const DREAM_CASES = [
     ],
   },
   {
-    no: "1",
-    title: "開く",
+    ...DREAM_CHAPTERS[1],
     reading: "OPEN",
     lead: "追手を退けても、眠れば悪夢が待っている。",
     paragraphs: [
@@ -147,8 +147,7 @@ export const DREAM_CASES = [
     ],
   },
   {
-    no: "2",
-    title: "開ける",
+    ...DREAM_CHAPTERS[2],
     reading: "UNLOCK",
     lead: "閉ざしてきた心の扉を、悪夢と共に開ける。",
     paragraphs: [
@@ -158,8 +157,7 @@ export const DREAM_CASES = [
     ],
   },
   {
-    no: "3",
-    title: "明ける",
+    ...DREAM_CHAPTERS[3],
     reading: "DAWN",
     lead: "死さえ退ける力が、シエルの身体を蝕む。",
     paragraphs: [
@@ -169,8 +167,7 @@ export const DREAM_CASES = [
     ],
   },
   {
-    no: "4",
-    title: "来たる",
+    ...DREAM_CHAPTERS[4],
     reading: "ARRIVAL",
     lead: "共に帰ると決めた矢先、怪作が奪われる。",
     paragraphs: [
@@ -180,8 +177,7 @@ export const DREAM_CASES = [
     ],
   },
   {
-    no: "5",
-    title: "叛く",
+    ...DREAM_CHAPTERS[5],
     reading: "REVOLT",
     lead: "失った仲間を取り戻すため、夢の真実に向き合う。",
     paragraphs: [

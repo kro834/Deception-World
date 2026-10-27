@@ -196,5 +196,6 @@ test("gallery menu trigger uses the shared SideMenuTrigger contract", () => {
     component,
     /<SideMenuLayer context="gallery" open=\{menuOpen\} onOpenChange=\{setMenuOpen\} \/>/,
   );
-  assert.match(chrome, /context === "gallery"[\s\S]*?\/gallery/);
+  // Owner (2026-10-27): gallery and tours resolve their own chapters by pathname.
+  assert.match(chrome, /const menuPage = getMenuPageContext\(pathname\)/);
 });

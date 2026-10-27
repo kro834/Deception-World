@@ -34,6 +34,8 @@ test("Dream preserves posters, headline dossiers and combat records outside appr
   assert.ok(cut > 0, "expansion marker");
   const existing = data
     .slice(0, cut)
+    // Owner (2026-10-27): metadata import changes no poster, name, quote or combat record.
+    .replace('import { DREAM_CHAPTERS } from "../../lib/dream-chapter-index.ts";\n\n', "")
     .replace(
       "// あらすじ・人物紹介・用語の説明は原文に基づく要約。\n" +
         "// line / said / quotes と DREAM_QUOTES / DREAM_CASE_NOTES の台詞は原文の引用。\n",

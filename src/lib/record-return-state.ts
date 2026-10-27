@@ -1,3 +1,4 @@
+import { isSearchCategory } from "./search-categories.ts";
 import { validateLibraryBrowseSearch } from "./library-browse-state.ts";
 
 /** A small, tab-local reading journey. Never imports the full search index. */
@@ -28,7 +29,6 @@ export type RecordReturnInput = {
   target: RecordReturnLocation;
 };
 
-const categories = new Set(["people", "riders", "forms", "story", "world", "systems", "pages"]);
 const phases = new Set(["leaving", "reading", "returning", "source"]);
 const internalPath = /^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*)(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)?$/;
 const cardPattern = /^record-return-(search|library)-[a-zA-Z0-9_-]{1,120}$/;
@@ -78,7 +78,7 @@ export function recordReturnSourceSearch(pathname: string, value: unknown): Quer
     if (q) query.q = q;
   }
   if (pathname === "/search") {
-    if (typeof value.category === "string" && categories.has(value.category))
+    if (isSearchCategory(value.category) && value.category !== "all")
       query.category = value.category;
     const shown =
       typeof value.shown === "number" || typeof value.shown === "string"

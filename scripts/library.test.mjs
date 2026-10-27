@@ -15,7 +15,7 @@ import {
 test("library metadata links to published routes and existing dream chapters", () => {
   assert.equal(new Set(LIBRARY_ENTRIES.map((entry) => entry.id)).size, LIBRARY_ENTRIES.length);
   const source = readFileSync(
-    new URL("../src/components/dream-chapter/dream-chapter-data.ts", import.meta.url),
+    new URL("../src/lib/dream-chapter-index.ts", import.meta.url),
     "utf8",
   );
   for (const entry of LIBRARY_ENTRIES) {
@@ -138,4 +138,15 @@ test("persistence preserves latest tab state and never replaces corrupt or denie
       (state) => state,
     ),
   );
+});
+
+
+test("paragraph and nested chapter anchors keep the correct chapter with complete ID boundaries", () => {
+  for (const fragment of ["#dream-case-2-paragraph-3", "dream-case-2-paragraph-1", "#dream-case-2-summary"]) {
+    assert.equal(findLibraryLocation("/dream-chapter", fragment)?.id, "dream-case-2");
+  }
+  for (const fragment of ["#dream-case-20-paragraph-3", "#dream-case-2x-paragraph-3", "#dream-case-99-paragraph-1"]) {
+    assert.equal(findLibraryLocation("/dream-chapter", fragment)?.id, "dream");
+  }
+  assert.equal(findLibraryLocation("/world", "#dream-case-2-paragraph-3")?.id, "world");
 });

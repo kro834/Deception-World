@@ -22,7 +22,7 @@ const archive = read("public/archive-mobile-stability.css");
 
 const openEffect = chrome.slice(
   chrome.indexOf("if (!controlled || !isOpen) return;"),
-  chrome.indexOf("}, [controlled, isOpen, onOpenChange, context]);"),
+  chrome.indexOf("}, [controlled, isOpen, onOpenChange, context, isSpecialSite, menuPage]);"),
 );
 const cleanup = openEffect.slice(openEffect.lastIndexOf("return () => {"));
 
@@ -33,7 +33,8 @@ test("the menu opens with the reader's own dossier row in view", () => {
   // rides on it), not a fixed 24px.
   assert.match(
     openEffect,
-    /panel\.scrollTop = 0;[\s\S]*?const current =[\s\S]*?context === "rexonance"[\s\S]*?\[data-side-menu-sections\][\s\S]*?panel\.querySelector<HTMLElement>\(\s*'\.side-panel-links > \[aria-current="page"\]',?\s*\) \?\?\s*panel\.querySelector<HTMLElement>\(\s*'\.side-panel-links > \[aria-current="location"\]',?\s*\);\s*if \(current\) \{\s*const clearance = parseFloat\(window\.getComputedStyle\(panel\)\.paddingBottom\) \|\| 24;\s*const overflow =\s*current\.getBoundingClientRect\(\)\.bottom \+ clearance - panel\.getBoundingClientRect\(\)\.bottom;\s*if \(overflow > 0\) panel\.scrollTop \+= overflow;\s*\}/,
+    // Owner (2026-10-27): current local chapter takes precedence over the site launcher.
+    /panel\.scrollTop = 0;[\s\S]*?const current = preferredMenuRow\(panel, isSpecialSite \|\| Boolean\(menuPage\)\);\s*if \(current\) \{\s*const clearance = parseFloat\(window\.getComputedStyle\(panel\)\.paddingBottom\) \|\| 24;\s*const overflow =\s*current\.getBoundingClientRect\(\)\.bottom \+ clearance - panel\.getBoundingClientRect\(\)\.bottom;\s*if \(overflow > 0\) panel\.scrollTop \+= overflow;\s*\}/,
   );
   assert.doesNotMatch(openEffect, /current\.scrollIntoView/);
   // The groups keep their order.

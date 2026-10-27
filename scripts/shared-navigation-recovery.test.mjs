@@ -1,3 +1,4 @@
+import * as menuPageContext from "../src/lib/menu-page-context.ts";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -135,6 +136,8 @@ function mountMenu({ pageTop = null, locationTop = null, groupHeight = 600 } = {
         return { acquireViewportScrollLock: () => () => {} };
       if (name === "./dossier-nav")
         return { RIDER_NAV: [], RIKUEI_NAV: [], RELATED_NAV: [], RE_DIVE_RIKUEI_NAV: [] };
+      // Owner (2026-10-27): exercise the real extracted menu helper in this fixture.
+      if (name === "@/lib/menu-page-context") return menuPageContext;
       if (name === "@/lib/thumbnail-images") return { launcherTile: () => undefined };
       return {};
     },

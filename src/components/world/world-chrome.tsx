@@ -40,6 +40,12 @@ import {
   type SpecialSiteId,
 } from "@/lib/special-site-sections";
 import { openQuickSearch, prefetchQuickSearch } from "@/components/search/quick-search-events";
+import {
+  getMenuPageContext,
+  markCurrentMenuSection,
+  preferredMenuRow,
+} from "@/lib/menu-page-context";
+import { focusMenuSectionAfterNavigation } from "@/lib/menu-section-focus";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { CinemaLink } from "./external-cinema-link";
 import {
@@ -409,6 +415,61 @@ export function DossierTopbar({
   );
 }
 
+/** A local fragment retains the router's parsed query and native-link
+ * serialization, including literal quotes, search filters and tour position. */
+function MenuSectionLink({
+  pathname,
+  id,
+  label,
+  code,
+  onNavigate,
+}: {
+  pathname: string;
+  id: string;
+  label: string;
+  code: string;
+  onNavigate: () => void;
+}) {
+  const router = useRouter();
+  const cancelFocus = useRef<(() => void) | null>(null);
+  useEffect(() => () => cancelFocus.current?.(), [pathname, id]);
+  return (
+    <Link
+      to={pathname}
+      hash={id}
+      search={(previous) => previous}
+      onClick={(event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return;
+        cancelFocus.current?.();
+        onNavigate();
+        if (event.detail !== 0) return;
+        event.preventDefault();
+        cancelFocus.current = focusMenuSectionAfterNavigation({
+          pathname,
+          id,
+          navigate: () =>
+            router.navigate({ to: pathname, hash: id, search: (previous) => previous }),
+          watchNavigation: (listener) =>
+            router.subscribe("onBeforeNavigate", ({ toLocation }) =>
+              listener(toLocation.pathname, toLocation.hash),
+            ),
+        });
+      }}
+    >
+      <span>{label}</span>
+      <i>{code}</i>
+    </Link>
+  );
+}
+
 export function SideMenuLayer({
   context = "world",
   open,
@@ -456,6 +517,14 @@ export function SideMenuLayer({
   // The dossier the reader is on is marked in the menu (aria-current).
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const locationHash = useRouterState({ select: (state) => state.location.hash });
+  const menuPage = getMenuPageContext(pathname);
+  const [availableSectionIds, setAvailableSectionIds] = useState<readonly string[] | null>(null);
+  useLayoutEffect(() => {
+    if (!isOpen || !menuPage) return;
+    setAvailableSectionIds(
+      menuPage.sections.filter(([id]) => document.getElementById(id)).map(([id]) => id),
+    );
+  }, [isOpen, menuPage]);
   const atlasFile = [
     ...RIDER_NAV,
     ...RIKUEI_NAV,
@@ -467,7 +536,7 @@ export function SideMenuLayer({
     ? { title: atlasFile.name, image: launcherTile(pathname) ?? COMMAND_ATLAS_SCENES.world.image }
     : pathname === "/characters/dante"
       ? { title: "ダンテ／ヴァルグ", image: "/character-dante-thumb.webp" }
-      : COMMAND_ATLAS_SCENES[context];
+      : (menuPage ?? COMMAND_ATLAS_SCENES[context]);
   // A jump scrolls this dialog only. Keyboard users land on the destination's
   // first control; pointer users keep their focus and can immediately pan.
   const jumpAtlasGroup = (group: string, keyboard: boolean) => {
@@ -564,6 +633,10 @@ export function SideMenuLayer({
       }
     });
   }, [isOpen]);
+  useLayoutEffect(() => {
+    if (!isOpen || !panelRef.current || (!isSpecialSite && !menuPage)) return;
+    markCurrentMenuSection(panelRef.current, pathname);
+  }, [isOpen, pathname, isSpecialSite, menuPage, availableSectionIds]);
   const close = () => onOpenChange?.(false);
   const selectedAnnouncement: SiteAnnouncement | null =
     SITE_ANNOUNCEMENTS.find((notice) => notice.id === selectedAnnouncementId) ?? null;
@@ -614,14 +687,9 @@ export function SideMenuLayer({
     // scrolls; scrollIntoView could also move the locked page behind it.
     // World chapters have a current location, not a current file. Keep that
     // row visible even when its whole SECTIONS group cannot fit in landscape.
-    const current =
-      // The special site's own chapters take precedence over its duplicate
-      // SPECIAL launcher row. Preserve the dossier/current-file rule elsewhere.
-      (context === "rexonance"
-        ? panel.querySelector<HTMLElement>("[data-side-menu-sections] .side-panel-links > a")
-        : null) ??
-      panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="page"]') ??
-      panel.querySelector<HTMLElement>('.side-panel-links > [aria-current="location"]');
+    // The chapter being read wins over the duplicate site launcher. Without
+    // a local chapter, a dossier still opens on its own file as before.
+    const current = preferredMenuRow(panel, isSpecialSite || Boolean(menuPage));
     if (current) {
       const clearance = parseFloat(window.getComputedStyle(panel).paddingBottom) || 24;
       const overflow =
@@ -770,7 +838,7 @@ export function SideMenuLayer({
       sideMenuRestoreFocusRef.current = false;
       sideMenuOpenerRef.current = null;
     };
-  }, [controlled, isOpen, onOpenChange, context]);
+  }, [controlled, isOpen, onOpenChange, context, isSpecialSite, menuPage]);
 
   useEffect(() => {
     const dialog = announcementRef.current;
@@ -1058,27 +1126,7 @@ export function SideMenuLayer({
         <div className="side-panel-head">
           <div>
             <p>NAVIGATION</p>
-            <b>
-              {context === "archive"
-                ? "FORM ARCHIVE"
-                : context === "cinema"
-                  ? "SAGA CINEMA"
-                  : context === "movie"
-                    ? "DREAM CHAPTER"
-                    : context === "rexonance"
-                      ? "REXONANCE SAGA"
-                      : context === "extreme"
-                        ? "EXTREME SAGA"
-                        : context === "far-from"
-                          ? "FAR FROM SAGA"
-                          : context === "illusionculum"
-                            ? "ILLUSIONCULUM SAGA"
-                            : context === "meta-unitas"
-                              ? "META UNITAS SAGA"
-                              : context === "final-stage"
-                                ? "FINAL STAGE"
-                                : "DECEPTION WORLD"}
-            </b>
+            <b>{atlasScene.title}</b>
           </div>
           <button
             className="side-panel-close ios26-glass"
@@ -1167,6 +1215,15 @@ export function SideMenuLayer({
               <span>資料室・しおり</span>
               <i>LIBRARY</i>
             </GuardedLink>
+            <GuardedLink
+              to="/form-archive"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/form-archive" ? "page" : undefined}
+            >
+              <span>フォームアーカイブ</span>
+              <i>SAGA / REALM</i>
+            </GuardedLink>
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
           </div>
         </div>
@@ -1183,7 +1240,20 @@ export function SideMenuLayer({
           </figure>
           <p>SECTIONS</p>
           <div className="side-panel-links dg-focus-scope">
-            {context === "world" && fileChapters.length > 0 ? (
+            {menuPage ? (
+              menuPage.sections
+                .filter(([id]) => !availableSectionIds || availableSectionIds.includes(id))
+                .map(([id, label, code]) => (
+                  <MenuSectionLink
+                    key={id}
+                    pathname={pathname}
+                    id={id}
+                    label={label}
+                    code={code}
+                    onNavigate={close}
+                  />
+                ))
+            ) : context === "world" && fileChapters.length > 0 ? (
               <>
                 {fileChapters.map(({ id, label }) => (
                   <GuardedLink key={id} to={pathname} hash={id} assets={[]} beforeNavigate={close}>
@@ -1230,47 +1300,6 @@ export function SideMenuLayer({
                     }
                     hash={hash}
                     assets={[]}
-                    beforeNavigate={close}
-                  >
-                    <span>{label}</span>
-                    <i>{code}</i>
-                  </GuardedLink>
-                ))}
-              </>
-            ) : context === "gallery" ? (
-              <>
-                <GuardedLink to="/gallery" hash="gallery-top" assets={[]} beforeNavigate={close}>
-                  <span>ギャラリートップ</span>
-                  <i>GALLERY</i>
-                </GuardedLink>
-                <GuardedLink
-                  to="/gallery"
-                  hash="gallery-collection"
-                  assets={[]}
-                  beforeNavigate={close}
-                >
-                  <span>作品一覧</span>
-                  <i>COLLECTION</i>
-                </GuardedLink>
-                <GuardedLink to="/world" assets={[]} beforeNavigate={close}>
-                  <span>ワールドへ戻る</span>
-                  <i>WORLD</i>
-                </GuardedLink>
-              </>
-            ) : context === "archive" ? (
-              <>
-                {[
-                  ["top", "トップ", "TOP"],
-                  ["story", "ストーリー", "STORY"],
-                  ["manager-archive", "六詠", "RIKUEI"],
-                  ["riders", "八人のライダー", "RIDERS"],
-                  ["records", "レコード", "RECORDS"],
-                ].map(([hash, label, code]) => (
-                  <GuardedLink
-                    key={hash}
-                    to="/world"
-                    hash={hash}
-                    assets={WORLD_ENTER_ASSETS}
                     beforeNavigate={close}
                   >
                     <span>{label}</span>
@@ -1483,7 +1512,7 @@ export function SideMenuLayer({
                 </GuardedLink>
                 {/* The special sites stand apart from the World: its way home
                     sits in story order, as it does on the Dream Chapter. */}
-                {isSpecialSite || context === "cinema" ? (
+                {isSpecialSite || context === "cinema" || Boolean(menuPage) ? (
                   <GuardedLink
                     to="/world"
                     hash="top"
@@ -1641,23 +1670,6 @@ export function SideMenuLayer({
         <div className="side-panel-group" data-atlas-group="system" id="command-atlas-system">
           <p>SYSTEM</p>
           <div className="side-panel-links dg-focus-scope">
-            {context === "archive" ? (
-              <GuardedLink
-                to="/form-archive"
-                hash="archive-switcher"
-                assets={[]}
-                beforeNavigate={close}
-                aria-current="page"
-              >
-                <span>フォームアーカイブ</span>
-                <i>SAGA / REALM</i>
-              </GuardedLink>
-            ) : (
-              <GuardedLink to="/form-archive" assets={[]} beforeNavigate={close}>
-                <span>フォームアーカイブ</span>
-                <i>SAGA / REALM</i>
-              </GuardedLink>
-            )}
             <ZeusButtonToggle />
             <IpadMenuToggle />
             <GuardedLink to="/" assets={[]} beforeNavigate={close}>

@@ -7,6 +7,7 @@ import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { defaultParseSearch, defaultStringifySearch } from "@tanstack/react-router";
 import * as state from "../src/lib/record-return-state.ts";
+import { isSearchCategory } from "../src/lib/search-categories.ts";
 import { getInquiryGuide, getInquiryStop } from "../src/lib/inquiry-guides.ts";
 import { validateLibraryBrowseSearch } from "../src/lib/library-browse-state.ts";
 
@@ -306,6 +307,7 @@ function openingHarness() {
     },
     document: eventTarget("document"),
     require: (name) => {
+      if (name === "./search-categories.ts") return { isSearchCategory };
       assert.equal(name, "./library-browse-state.ts");
       return { validateLibraryBrowseSearch };
     },
@@ -543,6 +545,7 @@ test("blocked session storage still supports a tab-local capture, return and dis
   runInNewContext(compile("src/lib/record-return-state.ts"), {
     exports,
     require: (name) => {
+      if (name === "./search-categories.ts") return { isSearchCategory };
       assert.equal(name, "./library-browse-state.ts");
       return { validateLibraryBrowseSearch };
     },

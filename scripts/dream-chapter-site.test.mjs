@@ -3,7 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { DREAM_POSTERS } from "../src/components/dream-chapter/dream-chapter-data.ts";
+import { DREAM_POSTERS, DREAM_CASES } from "../src/components/dream-chapter/dream-chapter-data.ts";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readProjectFile = (relativePath) =>
@@ -270,9 +270,8 @@ test("Dolminence catalog specifications retain the supplied exact values", () =>
 
 test("Dream Chapter cases preserve the six requested text-only records", () => {
   const cases = extractExportedArray(dataSource, "DREAM_CASES");
-  const caseRecords = [
-    ...cases.matchAll(/\{\s*no:\s*["'](\d)["'],\s*title:\s*["']([^"']+)["']/g),
-  ].map(([, no, title]) => ({ no, title }));
+  // Owner (2026-10-27): chapter identities are shared with the lightweight library index.
+  const caseRecords = DREAM_CASES.map(({ no, title }) => ({ no, title }));
 
   assert.deepEqual(caseRecords, [
     { no: "0", title: "交わる" },

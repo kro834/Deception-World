@@ -195,6 +195,10 @@ test("every destination is an existing public route with its actual heading anch
       ),
     "/form-archive": read("src/routes/form-archive.tsx"),
     "/gallery": read("src/components/gallery/gallery-page.tsx"),
+    // Owner (2026-10-27): public room/cinema entries now participate in site search.
+    "/saga-cinema": read("src/components/saga-cinema/saga-cinema.tsx"),
+    "/gallery-tours": read("src/components/gallery-tours/tours-page.tsx"),
+    "/exhibition": read("src/routes/exhibition.tsx"),
   };
   const actualWorldAnchors = new Set([
     ...world.WORLD_CAST_ROSTER.map((entry) => `wa-person-${entry.id}`),

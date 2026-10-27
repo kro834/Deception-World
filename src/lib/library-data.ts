@@ -1,3 +1,6 @@
+import { SITE_PAGE_ENTRIES } from "./site-page-registry.ts";
+import { DREAM_CHAPTERS } from "./dream-chapter-index.ts";
+
 export type LibraryKind = "page" | "person" | "chapter";
 export type LibraryEntry = {
   id: string;
@@ -23,86 +26,7 @@ const person = (id: string, title: string, path: string, aliases: string[] = [])
 });
 // Navigation metadata only: no story prose or large page modules are bundled here.
 export const LIBRARY_ENTRIES: readonly LibraryEntry[] = [
-  {
-    id: "world",
-    title: "ディセプションワールド",
-    path: "/world",
-    kind: "page",
-    description: "物語、六詠、八人のライダー、記録への入口。",
-    aliases: ["deception world", "世界", "本編"],
-  },
-  {
-    id: "dream",
-    title: "夢の章",
-    path: "/dream-chapter",
-    kind: "page",
-    description: "CASE 0–5、登場人物、出来事を辿る。",
-    aliases: ["dream chapter", "幻想郷"],
-  },
-  {
-    id: "gallery",
-    title: "ギャラリー",
-    path: "/gallery",
-    hash: "gallery-collection",
-    kind: "page",
-    description: "番号付きの展示作品を巡る。作品番号・題名の検索は展示室内から。",
-    aliases: ["gallery", "展示", "作品", "画像", "番号", "美術館"],
-  },
-  {
-    id: "forms",
-    title: "フォームアーカイブ",
-    path: "/form-archive",
-    kind: "page",
-    description: "サーガ／レルムの形態を検索し、スペックを比較する。",
-    aliases: ["form archive", "saga", "realm", "サーガ", "レルム", "比較", "フォーム"],
-  },
-  {
-    id: "rexonance",
-    title: "レクソナンスサーガ",
-    path: "/rexonance-saga",
-    kind: "page",
-    description: "形態、性能、システムの資料。",
-    aliases: ["rexonance saga", "レクソナンス・サーガ"],
-  },
-  {
-    id: "extreme",
-    title: "エクスプリームサーガ",
-    path: "/extreme-saga",
-    kind: "page",
-    description: "形態、性能、システムの資料。",
-    aliases: ["extreme saga", "エクスプリーム・サーガ", "エクストリームサーガ"],
-  },
-  {
-    id: "far-from",
-    title: "ファーフロムサーガ",
-    path: "/far-from-saga",
-    kind: "page",
-    description: "変身、形態、性能、中核機構の資料。",
-    aliases: ["far from saga", "ファーフロム・サーガ", "ファーフロム"],
-  },
-  {
-    id: "illusionculum",
-    title: "イリュージョンクルムサーガ",
-    path: "/illusionculum-saga",
-    kind: "page",
-    description: "変身、形態、性能、装甲、武装、能力の資料。",
-    aliases: ["illusionculum saga", "イリュージョンクルム・サーガ", "イリュージョンクルム"],
-  },
-  {
-    id: "final",
-    title: "ファイナルステージ",
-    path: "/final-stage",
-    kind: "page",
-    description: "ファーフロムサーガとレルムロイヤルの形態・性能資料。",
-    aliases: [
-      "realm royal",
-      "final stage",
-      "レルムロイヤル",
-      "レルム・ロイヤル",
-      "ファーフロムサーガ",
-      "far from saga",
-    ],
-  },
+  ...SITE_PAGE_ENTRIES.map((entry): LibraryEntry => ({ ...entry, kind: "page" })),
   person("saga", "仮面ライダーサーガ", "/riders/saga", ["saga", "サーガ"]),
   person("realm", "仮面ライダーレルム", "/riders/realm", ["realm", "レルム"]),
   person("lore", "仮面ライダーローア", "/riders/lore", ["lore", "ローア"]),
@@ -125,14 +49,14 @@ export const LIBRARY_ENTRIES: readonly LibraryEntry[] = [
   person("luna", "ルナ・アレイン", "/characters/luna", ["luna", "ルナアレイン"]),
   person("dante", "ダンテ／ヴァルグ", "/characters/dante", ["dante", "無管理", "ヴァルグ", "varg", "第二の犬", "原圧"]),
   person("yoake-mamori", "夜明護尊", "/characters/yoake-mamori", ["yoake mamori"]),
-  ...["交わる", "開く", "開ける", "明ける", "来たる", "叛く"].map((title, i): LibraryEntry => ({
-    id: `dream-case-${i}`,
-    title: `CASE ${i} ／ ${title}`,
+  ...DREAM_CHAPTERS.map(({ title, no }): LibraryEntry => ({
+    id: `dream-case-${no}`,
+    title: `CASE ${no} ／ ${title}`,
     path: "/dream-chapter",
-    hash: `dream-case-${i}`,
+    hash: `dream-case-${no}`,
     kind: "chapter",
     description: "夢の章のあらすじへ。",
-    aliases: [`case ${i}`, `case${i}`, "夢の章", "dream chapter"],
+    aliases: [`case ${no}`, `case${no}`, "夢の章", "dream chapter"],
   })),
 ];
 export function normalizeLibraryQuery(value: string): string {
@@ -158,6 +82,12 @@ export function findLibraryLocation(path: string, hash = ""): LibraryEntry | und
   const fragment = hash.replace(/^#/, "");
   return (
     LIBRARY_ENTRIES.find((entry) => entry.path === path && entry.hash === fragment) ??
+    // A chapter's paragraphs and nested reading anchors belong to that chapter.
+    // Match a complete hyphen boundary, longest first: CASE 2 is never CASE 20.
+    LIBRARY_ENTRIES.filter((entry) =>
+      entry.path === path && entry.kind === "chapter" && entry.hash &&
+      fragment.startsWith(`${entry.hash}-`),
+    ).sort((first, second) => (second.hash?.length ?? 0) - (first.hash?.length ?? 0))[0] ??
     LIBRARY_ENTRIES.find((entry) => entry.path === path && !entry.hash) ??
     LIBRARY_ENTRIES.find((entry) => entry.path === path)
   );

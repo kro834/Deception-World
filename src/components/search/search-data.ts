@@ -27,6 +27,7 @@ import { REPORT_PART_TITLES } from "../far-from-saga/far-from-report-data";
 import { P16_DESCRIPTIONS, P16_MAIN, P16_SUMMARY } from "../far-from-saga/far-from-p16-official";
 import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "../meta-unitas-saga/meta-unitas-data";
 import { LIBRARY_ENTRIES } from "../../lib/library-data";
+import { SITE_PAGE_ENTRIES } from "../../lib/site-page-registry.ts";
 import {
   SPECIAL_SITE_PATHS,
   SPECIAL_SITE_SECTIONS,
@@ -34,18 +35,8 @@ import {
   type SpecialSiteId,
 } from "../../lib/special-site-sections";
 
-export const SEARCH_CATEGORIES = [
-  { id: "all", label: "すべて", code: "ALL" },
-  { id: "people", label: "人物", code: "PEOPLE" },
-  { id: "riders", label: "ライダー", code: "RIDERS" },
-  { id: "forms", label: "フォーム", code: "FORMS" },
-  { id: "story", label: "物語", code: "STORY" },
-  { id: "world", label: "世界・用語", code: "WORLD" },
-  { id: "systems", label: "システム", code: "SYSTEMS" },
-  { id: "pages", label: "ページ", code: "PAGES" },
-] as const;
+export { SEARCH_CATEGORIES, type SearchCategory } from "../../lib/search-categories.ts";
 
-export type SearchCategory = (typeof SEARCH_CATEGORIES)[number]["id"];
 export type SearchCatalogueDocument = SearchDocument;
 
 // These small excerpts preserve the published dossiers without importing their UI,
@@ -539,11 +530,9 @@ const SPECIAL_SITE_DOCUMENTS = (Object.keys(SPECIAL_SITE_SECTIONS) as SpecialSit
       })),
 );
 
-const LIBRARY_PAGE_ANCHORS: Record<string, string> = {
-  world: "top",
-  dream: "top",
-  gallery: "gallery-collection",
-};
+const LIBRARY_PAGE_ANCHORS: Record<string, string> = Object.fromEntries(
+  SITE_PAGE_ENTRIES.flatMap((entry) => entry.searchHash ? [[entry.id, entry.searchHash]] : []),
+);
 
 /** The library's English and romaji spellings for the same destination. */
 const aliasesFor = (to: string): string[] =>

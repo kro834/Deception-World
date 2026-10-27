@@ -1242,3 +1242,21 @@ html[data-family]
   > a[href^="/rexonance-saga"] {
   --sh-art: url("/record-art/saga-rexonance-960.webp");
 }
+
+/* Keep every rider identifiable on compact menu cards. The established
+   two-column layout and gesture surface stay intact; only names wrap. */
+@media (max-width: 760px) {
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-riders
+    .side-panel-links
+    > a
+    > span {
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+}

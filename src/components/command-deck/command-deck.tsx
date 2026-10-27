@@ -690,7 +690,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
           </nav>
         </section>
         <nav className="command-deck-footer" aria-label="資料を探す">
-          <DeckLink href="/world#manager-archive-other">
+          <DeckLink href="/world#cast-roster">
             人物一覧
             <ArrowUpRight size={19} aria-hidden="true" />
           </DeckLink>
