@@ -1,0 +1,21 @@
+{
+  "sourceSha256": "cfb1fcccaafa52e23d428191ee66cb434984ddda7c2c3a29c3fbbfea88d596f5",
+  "sourceWidth": 1086,
+  "sourceHeight": 1448,
+  "delivery": [
+    {
+      "file": "ciel-768.webp",
+      "width": 768,
+      "height": 1024,
+      "bytes": 85330,
+      "sha256": "2f44b38268f03e024668b223ed72c3730fb512a375ef8f72383d698a79c4a051"
+    },
+    {
+      "file": "ciel-1536.webp",
+      "width": 1086,
+      "height": 1448,
+      "bytes": 133042,
+      "sha256": "1c6eb8307609c1444a437cca08bfe4032b6c132f96f6f3e12b22d436d8bcea0e"
+    }
+  ]
+}

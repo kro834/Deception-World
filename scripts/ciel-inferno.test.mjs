@@ -301,6 +301,12 @@ function mountInferno({ calm = false, nativeFailure = false, styleReady = true }
     contains(child) {
       return child === this || this.children.some((node) => node.contains(child));
     }
+    querySelectorAll() {
+      return this.children.flatMap((child) => [
+        ...(child.tagName === "BUTTON" ? [child] : []),
+        ...child.querySelectorAll(),
+      ]);
+    }
     focus() {
       doc.activeElement = this;
     }
@@ -433,6 +439,7 @@ function mountInferno({ calm = false, nativeFailure = false, styleReady = true }
         };
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx, Fragment: fragment };
       if (name === "react-dom") return { createPortal: (tree) => tree };
+      if (name === "@/components/ciel-sequin") return { default: "sequin-panel" };
       if (name === "@/lib/ciel-inferno-renderer")
         return {
           CIEL_INFERNO_DURATION: 9200,
@@ -524,6 +531,11 @@ function mountInferno({ calm = false, nativeFailure = false, styleReady = true }
     dispose() {
       for (const effect of effects) effect.cleanup?.();
     },
+    replayEffects() {
+      for (const effect of effects) effect.cleanup?.();
+      for (const effect of effects) effect.cleanup = effect.fn();
+      if (dirty) render();
+    },
   };
 }
 
@@ -535,12 +547,12 @@ function assertBurned(host) {
   assert.equal(host.modal.style.background, "#000");
   for (const tag of ["canvas", "img", "button"]) assert.equal(host.nodes(tag).length, 0, tag);
   assert.equal(host.frames.size, 0);
-  assert.equal(host.timers.size, 0);
+  assert.ok(host.timers.size <= 1, "only the bounded post-burn reveal may remain");
   assert.equal(host.app.inert, true);
   assert.deepEqual(host.storageWrites, []);
 }
 
-test("the actual component naturally becomes a GPU-free burned shell and does not expire after fourteen seconds", () => {
+test("the actual component keeps the page burned while revealing the new surface only after an empty interval", () => {
   const host = mountInferno();
   assert.equal(host.commits, 1);
   assert.equal(host.nodes("canvas").length, 2);
@@ -549,10 +561,95 @@ test("the actual component naturally becomes a GPU-free burned shell and does no
   host.advance(9200);
   assertBurned(host);
   assert.equal(host.disposals, 1);
+  assert.equal(host.nodes("sequin-panel").length, 0);
+  host.advance(749);
+  assert.equal(host.nodes("sequin-panel").length, 0, "black interval has no new surface");
+  host.advance(1);
+  assert.equal(host.nodes("sequin-panel").length, 1);
+  assert.equal(host.timers.size, 0);
   host.advance(14000);
   assertBurned(host);
   assert.equal(host.commits, 1);
   assert.equal(host.disposals, 1);
+  assert.equal(
+    host.nodes("sequin-panel").length,
+    1,
+    "burned surface persists with its new interaction",
+  );
+});
+
+test("disposing during the empty interval cancels the reveal without restoring stored site data", () => {
+  const host = mountInferno();
+  host.advance(9200);
+  assert.equal(host.timers.size, 1);
+  host.dispose();
+  assert.equal(host.timers.size, 0);
+  host.advance(1000);
+  assert.equal(host.nodes("sequin-panel").length, 0);
+  assert.deepEqual(host.storageWrites, []);
+});
+
+test("effect replay during an early burn still reveals once and never restarts the inferno", () => {
+  const host = mountInferno({ nativeFailure: true });
+  host.advance(300);
+  host.replayEffects();
+  assert.equal(host.timers.size, 1, "only the replacement reveal timer survives");
+  host.advance(750);
+  assert.equal(host.nodes("sequin-panel").length, 1);
+  assert.equal(host.timers.size, 0);
+  assert.equal(host.commits, 1);
+  host.dispose();
+});
+
+test("repeated burn events leave the revealed surface visible with no new clock or inferno", () => {
+  const host = mountInferno();
+  host.advance(9200);
+  host.advance(750);
+  const panel = host.nodes("sequin-panel")[0];
+  for (let i = 0; i < 3; i++) {
+    host.modal.dispatchEvent(new Event("cancel", { cancelable: true }));
+    host.doc.hidden = true;
+    host.doc.dispatchEvent(new Event("visibilitychange"));
+    host.doc.hidden = false;
+    host.doc.dispatchEvent(new Event("visibilitychange"));
+  }
+  assert.equal(panel.style.getPropertyValue("display"), "");
+  assert.equal(host.nodes("sequin-panel").length, 1);
+  assert.equal(host.timers.size, 0);
+  assert.equal(host.frames.size, 0);
+  assert.equal(host.disposals, 1);
+  assert.equal(host.app.inert, true);
+  host.dispose();
+});
+
+test("the dialog fallback cycles new controls without allowing Tab or Escape to reach the burned page", () => {
+  const host = mountInferno({ nativeFailure: true });
+  host.advance(750);
+  const Button = host.nodes("h2")[0].constructor;
+  const first = new Button("button"),
+    last = new Button("button");
+  host.modal.append(first);
+  host.modal.append(last);
+  const key = (shiftKey = false) => {
+    const event = new Event("keydown", { cancelable: true });
+    Object.assign(event, { key: "Tab", shiftKey });
+    host.doc.dispatchEvent(event);
+    assert.equal(event.defaultPrevented, true);
+  };
+  key();
+  assert.equal(host.doc.activeElement, first);
+  key();
+  assert.equal(host.doc.activeElement, last);
+  key();
+  assert.equal(host.doc.activeElement, first);
+  key(true);
+  assert.equal(host.doc.activeElement, last);
+  const cancel = new Event("cancel", { cancelable: true });
+  host.modal.dispatchEvent(cancel);
+  assert.equal(cancel.defaultPrevented, true);
+  assert.equal(host.app.inert, true);
+  assert.equal(host.nodes("sequin-panel").length, 1);
+  assert.equal(host.modal.children.at(-1).style.getPropertyValue("display"), "");
 });
 
 test("Escape, external close, visibility, pageshow and same-document routes cannot restore a committed burn", async () => {

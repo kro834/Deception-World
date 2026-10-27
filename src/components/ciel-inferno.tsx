@@ -6,6 +6,7 @@ import {
   type InfernoGeometry,
 } from "@/lib/ciel-inferno-renderer";
 import styles from "@/styles-ciel-inferno.css?url";
+import CielSequin from "@/components/ciel-sequin";
 
 type Props = {
   origin: { x: number; y: number };
@@ -68,6 +69,8 @@ export default function CielInferno({
   });
   const burnedRef = useRef(false);
   const [burned, setBurned] = useState(false);
+  const [sequin, setSequin] = useState(false);
+  const sequinRevealed = useRef(false);
   const id = useId();
 
   useEffect(() => {
@@ -115,6 +118,7 @@ export default function CielInferno({
     let started = 0;
     let phase = "";
     let fallback = false;
+    let revealTimer = 0;
 
     // Restore only on actual component disposal, never at the burned state.
     // Longhands preserve pre-existing values/priorities and unrelated styles.
@@ -217,9 +221,25 @@ export default function CielInferno({
       media.removeEventListener("change", changed);
       connection?.removeEventListener("change", changed);
     };
+    const revealAfterBlack = () => {
+      if (revealTimer || sequinRevealed.current) return;
+      revealTimer = window.setTimeout(() => {
+        revealTimer = 0;
+        if (!disposed) {
+          sequinRevealed.current = true;
+          setSequin(true);
+        }
+      }, 750);
+    };
     const settleBurned = () => {
       if (disposed) return;
-      if (!burnedRef.current) burnedRef.current = true;
+      if (burnedRef.current) {
+        stopEffects();
+        revealAfterBlack();
+        ensureModal();
+        return;
+      }
+      burnedRef.current = true;
       stopEffects();
       modal.dataset.phase = "burned";
       modal.dataset.ready = "true";
@@ -235,6 +255,9 @@ export default function CielInferno({
           child.style.setProperty("display", "none", "important");
       }
       setBurned(true);
+      // A real empty, black interval separates the extinguished page from
+      // the new surface. No sequin image or renderer is fetched before it.
+      revealAfterBlack();
       ensureModal();
       try {
         if (modal.open && !document.hidden) modal.focus({ preventScroll: true });
@@ -288,6 +311,18 @@ export default function CielInferno({
         event.preventDefault();
         settleBurned();
       } else if (event.key === "Tab" && burnedRef.current) {
+        const controls = Array.from(
+          modal.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"),
+        );
+        if (controls.length) {
+          const current = controls.indexOf(document.activeElement as HTMLButtonElement);
+          const next = event.shiftKey
+            ? (current <= 0 ? controls.length : current) - 1
+            : (current + 1) % controls.length;
+          event.preventDefault();
+          controls[next].focus({ preventScroll: true });
+          return;
+        }
         event.preventDefault();
         modal.focus({ preventScroll: true });
       }
@@ -388,6 +423,7 @@ export default function CielInferno({
 
     return () => {
       disposed = true;
+      clearTimeout(revealTimer);
       stopEffects();
       settle.current = () => {};
       openObserver.disconnect();
@@ -418,6 +454,7 @@ export default function CielInferno({
       data-calm={initial.current.calm ? "true" : "false"}
       data-ready={burned ? "true" : "false"}
       data-phase={burned ? "burned" : "awaken"}
+      data-sequin={sequin ? "true" : "false"}
       data-jet={initial.current.calm ? "unused" : "loading"}
       aria-labelledby={`${id}-title`}
       aria-describedby={`${id}-description`}
@@ -444,11 +481,13 @@ export default function CielInferno({
       }
     >
       <h2 id={`${id}-title`} className="ciel-inferno-sr" style={SR_ONLY}>
-        シエルの緑炎
+        {sequin ? "眠っているシエル" : "シエルの緑炎"}
       </h2>
       <p id={`${id}-description`} className="ciel-inferno-sr" style={SR_ONLY} aria-live="polite">
         {burned
-          ? "画面は焼失しました。ページを再読み込みすると元に戻ります。"
+          ? sequin
+            ? "画面は焼失しました。スパンコールをなでて裏返すと、眠っているシエルの絵が現れます。ページを再読み込みすると元に戻ります。"
+            : "画面は焼失しました。ページを再読み込みすると元に戻ります。"
           : "緑の炎が画面を包み、その後は焼失状態が残ります。再読み込みで元に戻ります。"}
       </p>
       {!burned && (
@@ -480,6 +519,7 @@ export default function CielInferno({
           </p>
         </>
       )}
+      {sequin && <CielSequin />}
     </dialog>,
     document.body,
   );
