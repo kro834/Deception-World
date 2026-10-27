@@ -45,3 +45,84 @@ html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
       0 18px 38px rgb(0 0 0 / 46%);
   }
 }
+
+/* Dynamic GUI (src/lib/dream-gpu/dream-gui-physics.js, Tier A + B only).
+   The solver writes the individual translate / rotate / scale properties;
+   the rows give them depth. Nothing here changes layout. */
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-routes,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-strip,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel {
+  perspective: 900px;
+}
+
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-window {
+  position: relative;
+  perspective: 1100px;
+  /* a horizontal drag flicks the reel; vertical swipes still scroll the page */
+  touch-action: pan-y;
+}
+
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-ticket,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-chip,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-frame {
+  transform-style: flat;
+  backface-visibility: hidden;
+}
+
+/* Keyboard focus lights the element as the pointer would. */
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-ticket,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-chip,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-frame,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes button,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls button {
+  transition: box-shadow 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* lamplight on a lit card: a vermilion hairline inside the gold rim, a warm
+   bloom outside, and the shadow drops deeper as the card lifts */
+html[data-dream-gui="on"] main.dream-page.dream-page [data-dream-gui-lit] {
+  box-shadow:
+    inset 0 0 0 1px rgb(214 64 46 / 22%),
+    inset 0 1px 0 rgb(255 240 200 / 34%),
+    0 0 0 1px rgb(255 204 120 / 66%),
+    0 0 22px rgb(255 190 96 / 36%),
+    0 0 48px rgb(255 150 70 / 14%),
+    0 18px 40px rgb(0 0 0 / 46%);
+}
+
+/* Tier B: the previous sheet leaves in slats (the CSS stand-in for Tier A's
+   previous-frame composite). */
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-gui-ghost {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 2;
+  pointer-events: none;
+  animation: none;
+  transform-origin: 50% 50%;
+  /* the same film-strip rhythm as Tier A's slats (7 / 11 / 16 px bands with a
+     hairline gap), so both tiers tear the same way */
+  -webkit-mask-image: repeating-linear-gradient(
+    0deg,
+    #000 0 7px,
+    #0000 7px 8.5px,
+    #000 8.5px 18px,
+    #0000 18px 19.5px,
+    #000 19.5px 34px,
+    #0000 34px 35.5px,
+    #000 35.5px 41px,
+    #0000 41px 42.5px
+  );
+  mask-image: repeating-linear-gradient(
+    0deg,
+    #000 0 7px,
+    #0000 7px 8.5px,
+    #000 8.5px 18px,
+    #0000 18px 19.5px,
+    #000 19.5px 34px,
+    #0000 34px 35.5px,
+    #000 35.5px 41px,
+    #0000 41px 42.5px
+  );
+}

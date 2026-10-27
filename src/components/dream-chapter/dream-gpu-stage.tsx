@@ -12,6 +12,9 @@ type Engine = typeof import("@/lib/dream-gpu/dream-gpu-engine.js");
 // The engine is fetched only once a GPU tier is confirmed.
 const loadEngine = (): Promise<Engine> => import("@/lib/dream-gpu/dream-gpu-engine.js");
 
+type Gui = typeof import("@/lib/dream-gpu/dream-gui-physics.js");
+const loadGui = (): Promise<Gui> => import("@/lib/dream-gpu/dream-gui-physics.js");
+
 const deskRect = () =>
   document.querySelector(".dream-programme-desk")?.getBoundingClientRect() ?? null;
 
@@ -162,6 +165,21 @@ export function DreamGpuStage({ children }: { children: ReactNode }) {
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener("resize", onResize);
+    };
+  }, [tier]);
+  // Tier A/B: the desk's controls move on springs (CSS transforms only).
+  useEffect(() => {
+    if (tier === "C") return;
+    let stop: (() => void) | null = null;
+    let alive = true;
+    loadGui()
+      .then((gui) => {
+        if (alive) stop = gui.startDreamGui({ tier });
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+      stop?.();
     };
   }, [tier]);
   useEffect(() => {
