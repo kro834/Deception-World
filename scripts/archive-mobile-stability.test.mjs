@@ -27,8 +27,9 @@ test("the app uses memory-safe embedded archives and recreates the iframe when s
   // Owner (2026-10-22): the round-2 review re-versions the sheet (zenith4).
   // Owner (2026-10-23): the 52px touch compare pickers re-version the sheet (zenith5).
   // Owner (2026-10-23): the 16px touch compare picker text (no iOS focus zoom) re-versions the sheet (zenith6).
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20261025-forms22/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20261023-zenith6/);
+  // Owner (2026-10-27): the phone Zeus-button fix changed both embedded archives, so both re-version (zeus).
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20261027-forms22-zeus/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20261027-zenith6-zeus/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   // A history step to another form of the same archive reopens it (reopen).
