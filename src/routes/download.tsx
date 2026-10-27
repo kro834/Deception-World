@@ -5,6 +5,7 @@ import {
   WORLD_ADDON_STYLESHEET_LINK,
 } from "@/lib/world-head";
 import downloadCssUrl from "@/styles-download.css?url";
+import commandSupportCssUrl from "@/styles-command-support.css?url";
 
 const MAIN_ARCHIVE_URL = "https://github.com/kro834/Deception-World/archive/refs/heads/main.zip";
 
@@ -21,23 +22,35 @@ export const Route = createFileRoute("/download")({
         WORLD_ADDON_STYLESHEET_LINK,
         { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
         { rel: "stylesheet", href: downloadCssUrl },
+        { rel: "stylesheet", href: commandSupportCssUrl },
       ],
     }),
 });
 
 function DownloadPage() {
   return (
-    <main className="export-page dg-focus-scope" aria-labelledby="export-heading">
+    <main
+      className="export-page command-support-download dg-focus-scope"
+      aria-labelledby="export-heading"
+    >
       <span className="export-page-sigil" aria-hidden="true">
         <i>DW</i>
       </span>
       <p>EXPORT</p>
       <h1 id="export-heading">Deception World</h1>
       <b>SOURCE CODE / MAIN</b>
-      <a className="export-page-btn" href={MAIN_ARCHIVE_URL} aria-describedby="export-scope">
+      <a
+        className="export-page-btn dg-control"
+        href={MAIN_ARCHIVE_URL}
+        aria-describedby="export-scope"
+      >
         最新mainのソースをZIPで保存する
       </a>
-      <a className="export-page-alt" href="/api/export" aria-describedby="export-retry-note">
+      <a
+        className="export-page-alt dg-control"
+        href="/api/export"
+        aria-describedby="export-retry-note"
+      >
         ダウンロードを再試行
       </a>
       {/* One line per sentence (the sheet sets each on its own line), so

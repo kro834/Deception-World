@@ -86,6 +86,8 @@ test("the immersive room only accepts known artwork IDs, never a supplied textur
     "@/lib/world-head": { createWorldHead: (head) => head, WORLD_CORE_STYLESHEET_LINKS: [] },
     "@/styles-exhibition-studio.css?url": "studio.css",
     "@/styles-exhibition-room.css?url": "room.css",
+    // Owner (2026-10-27): the exhibition command material follows its room sheet.
+    "@/styles-command-archive.css?url": "command-archive.css",
   });
   assert.equal(Route.validateSearch({ work: "g19" }).work, "g19");
   assert.equal(Route.validateSearch({ work: "g80" }).work, "g80");

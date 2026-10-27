@@ -1,0 +1,151 @@
+/* Scoped command surfaces for the export page and the tour entrance. */
+.command-support-download {
+  --dl-ice: #b9d9e5;
+  --dl-lock: #d7e6ea;
+  --dl-gold: #d8c9a6;
+  --dl-chrome: linear-gradient(180deg, #fff 0%, #cbd4da 45%, #8799a5 100%);
+  background: radial-gradient(ellipse at 50% 0%, #273441 0%, #0b1119 45%, #05080d 100%);
+}
+.command-support-download::after {
+  border-color: #8b9ba7;
+  border-radius: 2px;
+  box-shadow:
+    0 30px 70px #000b,
+    0 0 0 5px #101923,
+    0 0 0 6px #62717c,
+    inset 0 1px #fff5;
+}
+.command-support-download .export-page-sigil {
+  border-color: #cedde2;
+  background: linear-gradient(135deg, #71808b, #161f29 55%, #090e14);
+}
+.command-support-download :is(.export-page-btn, .export-page-alt, .export-page-navigation a) {
+  min-height: 44px;
+}
+.command-support-download .export-page-btn {
+  border-color: #c9d6dc;
+  background: linear-gradient(180deg, #e5edf0, #a5b7c0 48%, #788d99);
+  color: #101820;
+  box-shadow:
+    inset 0 1px #fff,
+    0 5px 0 #35424b,
+    0 10px 22px #0008;
+}
+.command-support-download :is(.export-page-alt, .export-page-navigation a):focus-visible,
+.command-support-download .export-page-btn:focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 4px;
+}
+
+.command-support-tours .gallery-tour-entrance {
+  --gallery-ivory: #eef4f5;
+  --gallery-muted: #c0cbd1;
+  --gallery-brass: #b7dce7;
+  --gallery-rule: #637581;
+}
+.command-support-tours:has(.gallery-tour-entrance) {
+  background: radial-gradient(ellipse at 50% 0%, #24313b, #0c1219 43%, #080c11 100%);
+}
+.command-support-tours .gallery-tour-introduction {
+  position: relative;
+  padding: clamp(22px, 3.5vw, 48px);
+  border: 1px solid #7a8b96;
+  background: linear-gradient(135deg, #293741 0%, #121b24 34%, #0a1017 100%);
+  box-shadow:
+    inset 0 1px #ffffff55,
+    0 20px 55px #0008,
+    0 0 0 5px #101922;
+}
+.command-support-tours .gallery-tour-introduction h1,
+.command-support-tours .gallery-tour-catalogue-heading h2,
+.command-support-tours .gallery-tour-course h3 {
+  color: #f3f6f6;
+}
+.command-support-tours .gallery-tour-opening-frame {
+  border: 1px solid #9aabb3;
+  background: radial-gradient(ellipse at 50% 25%, #273b48, #080d12 75%);
+  box-shadow:
+    inset 0 1px #fff5,
+    0 14px 30px #0009;
+}
+.command-support-tours .gallery-tour-catalogue {
+  margin-top: clamp(36px, 6vw, 80px);
+  border-color: #748792;
+}
+.command-support-tours .gallery-tour-course-index a {
+  padding-inline: 12px;
+  border: 1px solid #526675;
+  background: linear-gradient(180deg, #283843, #141f28);
+  box-shadow: inset 0 1px #ffffff26;
+}
+.command-support-tours .gallery-tour-course {
+  border: 1px solid #748791;
+  background: linear-gradient(155deg, #26343e, #101820 48%, #0c1219);
+  box-shadow:
+    inset 0 1px #ffffff45,
+    0 14px 30px #0007;
+}
+.command-support-tours .gallery-tour-course-visual {
+  border-bottom: 1px solid #7b8d97;
+  background: radial-gradient(ellipse at 50% 20%, #263c49, #090e14 75%);
+}
+.command-support-tours .gallery-tour-course-number {
+  border-color: #9caeb7;
+  background: #141e27;
+  color: #e6eff1;
+  font-size: 12px;
+}
+.command-support-tours .gallery-tour-course-kicker,
+.command-support-tours .gallery-tour-course-position,
+.command-support-tours .gallery-tour-course-preview-caption,
+.command-support-tours .gallery-tour-opening-artwork figcaption,
+.command-support-tours .gallery-tour-eyebrow {
+  font-size: 12px;
+}
+.command-support-tours .gallery-tour-course-preview-image {
+  border: 1px solid #4d606c;
+  background: #090f15;
+}
+.command-support-tours .gallery-tour-entrance .gallery-tour-action-primary {
+  border-color: #d9e5e8;
+  background: linear-gradient(180deg, #e4ecee, #aabdc6 48%, #8296a1);
+  color: #111a20;
+  box-shadow:
+    inset 0 1px #fff,
+    0 3px 0 #3d4d57;
+}
+.command-support-tours .gallery-tour-entrance .gallery-tour-action-text {
+  padding-inline: 14px;
+  border-color: #596e7b;
+  background: #18242d;
+  color: #e4edef;
+}
+.command-support-tours .gallery-tour-entrance :is(a, button, summary):focus-visible {
+  outline: 2px solid #fff0b5;
+  outline-offset: 4px;
+}
+.command-support-tours .gallery-tour-course-observation summary {
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  .command-support-tours .gallery-tour-introduction {
+    padding: 20px;
+  }
+  .command-support-tours .gallery-tour-course-index {
+    gap: 8px;
+  }
+  .command-support-tours .gallery-tour-course-index a {
+    padding-inline: 8px;
+  }
+}
+@media (forced-colors: active) {
+  .command-support-download :is(.export-page-btn, .export-page-alt, .export-page-navigation a),
+  .command-support-tours .gallery-tour-entrance :is(a, button, summary) {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+  }
+  .command-support-tours
+    :is(.gallery-tour-introduction, .gallery-tour-course, .gallery-tour-opening-frame) {
+    border: 1px solid CanvasText;
+  }
+}

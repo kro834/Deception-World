@@ -170,9 +170,10 @@ test("wayfinding: the special sites show their way home", () => {
     ["final-stage", finalStage],
   ]) {
     const footer = source.slice(source.lastIndexOf("<footer"), source.lastIndexOf("</footer>"));
+    // Owner (2026-10-27): shared GUI control/focus classes preserve the return link contract.
     assert.match(
       footer,
-      /<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+className="rxs-footer-return"\s*>\s*<span>メインサイトへ戻る<\/span>\s*<i aria-hidden="true">←<\/i>\s*<\/GuardedLink>\s*$/,
+      /<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+className="rxs-footer-return(?: dg-control dg-focus)?"\s*>\s*<span>メインサイトへ戻る<\/span>\s*<i aria-hidden="true">←<\/i>\s*<\/GuardedLink>\s*$/,
       `${name} footer ends on the way home`,
     );
   }

@@ -1,3 +1,4 @@
+import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { RexonanceSaga } from "@/components/rexonance-saga/rexonance-saga";
@@ -112,6 +113,7 @@ export const Route = createFileRoute("/rexonance-saga")({
       // the motion sheet follows it (the cinematic skin follows every
       // feature's sheet).
       { rel: "stylesheet", href: visualAstraCssUrl },
+      { rel: "stylesheet", href: commandSpecialCssUrl },
       { rel: "stylesheet", href: rexonanceTypeCssUrl },
       // KINETIC (rxk, 2026-10-21): the chapters' entrances, the reading rail,
       // hover and press, the end card (styles-rexonance-motion-20261021.css;
