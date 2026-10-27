@@ -94,8 +94,11 @@ fn inkField(px: vec2f) -> vec3f {
     let vel = a.zw;
     let side = sign(vel.x * d.y - vel.y * d.x + 1e-4);
     let swirl = vec2f(-d.y, d.x) / r * side;
-    v += (vel * .018 + swirl * 9. * u.dpr) * f;
-    dens += f;
+    // the splat curls into a pair of counter-rotating lobes as it ages, the way
+    // a drop of sumi opens in still water; the carry along the stroke fades first
+    let curl = 1. + age * .9;
+    v += (vel * .018 * exp(-age * 2.) + swirl * 9. * u.dpr * curl) * f;
+    dens += f * (1. + .35 * age);
   }
   return vec3f(v, dens);
 }
@@ -108,26 +111,43 @@ fn lensRing(px: vec2f, t: f32) -> f32 {
   let R = u.lens.z;
   let aa = u.dpr * .9;
   let ang = atan2(d.y, d.x);
-  let line = 1.1 * u.dpr;
-  // outer ring
-  var c = smoothstep(line + aa, line, abs(r - R)) * .75;
-  // inner ring of ticks, turning slowly
-  let rin = R * .78;
-  let tk = fract((ang + t * .18) / TAU * 36.);
-  let tick = smoothstep(.16, .06, abs(tk - .5) - .34) * step(abs(r - rin), 3.5 * u.dpr);
-  c += tick * .6;
-  // three aperture blade arcs counter-rotating just outside the ring
-  let ba = fract((ang - t * .3) / TAU * 3.);
-  let blade = smoothstep(.02, .0, abs(ba - .5) - .17) * smoothstep(line + aa, line, abs(r - R * 1.12));
-  c += blade * .55;
-  // corner brackets on the diagonals
-  let q = abs(d) - vec2f(R * .9);
-  let corner = step(0., q.x + 7. * u.dpr) * step(0., q.y + 7. * u.dpr) * step(q.x, 0.) * step(q.y, 0.);
-  let edge = 1. - step(1.2 * u.dpr, min(-q.x, -q.y));
-  c += corner * edge * .5 * step(R * 1.18, r);
-  // a press closes the iris for a moment
+  let line = .8 * u.dpr;
+  let hair = .55 * u.dpr;
+  // the lens barrel: a crisp outer ring and a hairline a little inside it
+  var c = smoothstep(line + aa, line, abs(r - R)) * .9;
+  c += smoothstep(hair + aa, hair, abs(r - R * .93)) * .4;
+  // the focus scale: 24 fine radial ticks, every 6th longer, turning slowly.
+  // Ticks are radial strokes (thin in angle), not blobs.
+  let nt = 24.;
+  let tk = fract((ang + t * .12) / TAU * nt + .5) - .5;
+  let tang = abs(tk) * TAU / nt * r;        // arc distance to the tick centre (px)
+  let idx = floor((ang + t * .12) / TAU * nt + .5);
+  let longT = step(abs(fract(idx / 6.)), .01);
+  let tlen = mix(3.5, 7., longT) * u.dpr;
+  let tick = smoothstep(hair + aa, hair, tang) * step(abs(r - (R * .93 - tlen * .5)), tlen * .5);
+  c += tick * mix(.5, .85, longT);
+  // the iris: three blade arcs counter-rotating outside the ring, each with a
+  // small claw at its head; a press closes them towards the centre
   let pr = u.turn.w;
-  c += smoothstep(line + aa, line, abs(r - R * (.45 + .3 * pr))) * (1. - pr) * step(.001, 1. - pr) * .6;
+  let closeK = (1. - pr) * step(.001, 1. - pr);
+  let Rb = R * mix(1.1, .62, closeK);
+  let bang = (ang - t * .22) / TAU * 3.;
+  let ba = fract(bang) - .5;
+  let bl = step(abs(ba), .2);
+  let blade = bl * smoothstep(line + aa, line, abs(r - Rb));
+  let claw = smoothstep(.0, .02, .2 - abs(ba)) * smoothstep(.2, .17, abs(ba)) *
+             step(abs(r - Rb), 5. * u.dpr) * step(r, Rb);
+  c += blade * .55 + claw * .5;
+  // the film gate: four L-shaped corner brackets on a square around the lens
+  let G = R * 1.26;
+  let q = abs(d);
+  let armL = R * .34;
+  let armX = step(abs(q.x - G), hair + aa) * step(G - armL, q.y) * step(q.y, G);
+  let armY = step(abs(q.y - G), hair + aa) * step(G - armL, q.x) * step(q.x, G);
+  c += max(armX, armY) * .6;
+  // a single registration dot at the top of the gate
+  let dotP = d - vec2f(0., -G - 5. * u.dpr);
+  c += smoothstep(1.6 * u.dpr, .6 * u.dpr, length(dotP)) * .7;
   return clamp(c, 0., 1.) * u.lens.w;
 }
 // 0..1 along the rectangle's perimeter (clockwise from the top-left corner).
@@ -382,15 +402,27 @@ fn shafts(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32, dens: f32) -> f
 
   // ink in the lamp beam: filaments where the wake is dense
   if (ink.z > .01) {
-    let fil = smoothstep(.42, .78, fbm(pxw / (24. * u.dpr) + vec2f(t * .12, -t * .08)));
-    let k = min(ink.z, 1.) * fil * .2;
-    c += mix(LAMP, CREAM, .35) * k;
+    // two scales of sumi tendril, stretched along the displacement so the
+    // threads trail the stroke; the finer scale only where the wake is thick
+    let wp = pxw - ink.xy * 1.2;
+    let fil = smoothstep(.44, .76, fbm(wp / (26. * u.dpr) + vec2f(t * .1, -t * .07)));
+    let fine = smoothstep(.5, .8, fbm(wp / (9. * u.dpr) - vec2f(t * .05, t * .09)));
+    let dk = min(ink.z, 1.);
+    let k = dk * (fil * .16 + fine * dk * .1);
+    c += mix(LAMP, CREAM, .3 + .4 * fine) * k;
     a += k * .8;
   }
-  // the projector lens ring (graphic marks only)
+  // the projector lens ring (graphic marks only): gold, with a cream core on
+  // the brightest marks and a soft halo so it reads over the paper too
   let lr = lensRing(px, t);
-  c += mix(GOLD, CREAM, .25) * lr * .85;
-  a += lr * .6;
+  c += mix(GOLD, CREAM, lr * .5) * lr;
+  a += lr * .8;
+  if (u.lens.w > .002) {
+    let hd = length(px - u.lens.xy) - u.lens.z;
+    let halo = exp(-abs(hd) / (14. * u.dpr)) * u.lens.w * .05;
+    c += LAMP * halo;
+    a += halo;
+  }
   // film grain (very low) and a hair of halation on everything bright
   let g = hash21(floor(px / u.dpr) + fract(t * 23.) * 91.) - .5;
   c += vec3f(g * .014) + c * c * .25 * vec3f(1., .7, .5);
@@ -552,8 +584,14 @@ fn tap(uv: vec2f) -> vec4f { return textureSampleLevel(dom, samp, uv, 0.); }
   rgb *= 1. - scratch * col.a;
   // sumi in the paper where the wake is dense
   if (ink.z > .01) {
-    let fil = smoothstep(.45, .8, fbm((in.pos.xy - ink.xy * 2.) / (22. * u.dpr) + t * .1));
-    rgb *= 1. - min(ink.z, 1.) * fil * .1 * col.a;
+    // sumi has a warm edge: the threads go sepia at their rims and only the
+    // cores go grey, so the wake reads as ink in the paper, not a dirt smudge
+    let wp = (in.pos.xy - ink.xy * 2.) / (22. * u.dpr);
+    let fil = smoothstep(.45, .8, fbm(wp + t * .1));
+    let rim = smoothstep(.38, .5, fbm(wp + t * .1)) - fil;
+    let dk = min(ink.z, 1.) * col.a;
+    rgb *= 1. - dk * fil * .11;
+    rgb *= 1. - dk * rim * .05 * vec3f(.2, .6, 1.);
   }
   // --- section / reel change: the previous frame leaves in glitched slats ---
   let tt = u.trans.x;
@@ -563,16 +601,33 @@ fn tap(uv: vec2f) -> vec4f { return textureSampleLevel(dom, samp, uv, 0.); }
       let lr = (px - u.trect.xy) / max(u.trect.zw, vec2f(1.));
       inR = step(0., lr.x) * step(lr.x, 1.) * step(0., lr.y) * step(lr.y, 1.);
     }
-    let slat = floor(px.y / (9. * u.dpr));
-    let thr = hash21(vec2f(slat, floor(u.seed * 97.))) * .55;
-    let e = clamp((tt - thr) / .45, 0., 1.);
+    // slats in a film-strip rhythm: bands of 7 / 11 / 16 px, grouped in fours
+    let sy = px.y / u.dpr;
+    let grp = floor(sy / 41.);
+    let ry = sy - grp * 41.;
+    var slat = grp * 4.;
+    var top = 0.;
+    var hgt = 7.;
+    if (ry >= 7.) { slat += 1.; top = 7.; hgt = 11.; }
+    if (ry >= 18.) { slat += 1.; top = 18.; hgt = 16.; }
+    if (ry >= 34.) { slat += 1.; top = 34.; hgt = 7.; }
+    let fr = (ry - top) / hgt;            // 0..1 inside the slat
+    let seed = hash21(vec2f(slat, floor(u.seed * 97.)));
+    // the sweep runs across the frame in the flick's direction, a little
+    // ragged per slat; the previous print holds its luminance until it goes
+    let along = select(1. - luv.x, luv.x, u.trans.z >= 0.);
+    let thr = along * .35 + seed * .3;
+    let e = clamp((tt - thr) / .4, 0., 1.);
     if (inR > .5 && e < 1.) {
-      let shift = e * e * u.trans.z * 36. * u.dpr / u.rect.z;
+      let shift = e * e * u.trans.z * (28. + 22. * seed) * u.dpr / u.rect.z;
       let pv = textureSampleLevel(prevTex, samp, uv - vec2f(shift, 0.), 0.);
-      // a hair of plate slip on the slat's leading edge, luminance held
-      let edgeK = exp(-abs(fract(px.y / (9. * u.dpr)) - .5) * 8.) * (1. - e) * .15;
-      let prgb = pv.rgb * weave * breath * (1. - edgeK) + GOLD * edgeK * .2;
-      rgb = mix(rgb, prgb, (1. - smoothstep(.0, 1., e)) * pv.a);
+      // a dark gap opens along the slat's upper edge and a gold hairline
+      // follows it: the print lifting off the gate
+      let gap = smoothstep(1.6, .0, (ry - top)) * e;
+      let hairline = smoothstep(1.4, .0, abs(ry - top - 1.8)) * e * (1. - e) * 4.;
+      let prgb = pv.rgb * weave * breath * (1. - gap * .5 - fr * e * .12) + GOLD * hairline * .55;
+      // the old print holds, then goes quickly: it slides, it does not dissolve
+      rgb = mix(rgb, prgb, (1. - e * e * e) * pv.a);
     }
   }
   // --- lens vignette (the paper stays cream, the dark wood goes amber) -------

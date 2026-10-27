@@ -43,8 +43,8 @@ export const gui = {
   active: false,
 };
 
-const K_STIFF = 190; // spring stiffness (1/s²)
-const K_DAMP = 15; // damping (1/s): under-damped so a release bounces
+const K_STIFF = 210; // spring stiffness (1/s²): a card, not a cushion
+const K_DAMP = 14; // damping (1/s): under-damped so a release bounces once, cleanly
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 function makeBody(el) {
@@ -74,10 +74,10 @@ function makeBody(el) {
 }
 
 const LIMITS = {
-  ticket: { lean: 6, tilt: 7, lift: 1.025 },
-  chip: { lean: 4, tilt: 9, lift: 1.04 },
+  ticket: { lean: 6, tilt: 6, lift: 1.022 }, // a paper ticket: wide, so it tilts less
+  chip: { lean: 4, tilt: 10, lift: 1.045 }, // a small chip turns freely under the finger
   button: { lean: 3, tilt: 8, lift: 1.03 },
-  panel: { lean: 0, tilt: 2.2, lift: 1 },
+  panel: { lean: 0, tilt: 1.8, lift: 1 }, // the reel frame barely breathes
 };
 
 export function startDreamGui({ tier } = {}) {
@@ -197,8 +197,9 @@ export function startDreamGui({ tier } = {}) {
     return Math.abs(c.to - c.v) > 0.004 || Math.abs(c.w) > 0.01;
   };
   const write = (b) => {
-    const sx = b.s.v * (1 + b.q.v * 0.035);
-    const sy = b.s.v * (1 - b.q.v * 0.07);
+    // squash: a card pressed into the desk goes wide and short (volume held)
+    const sx = b.s.v * (1 + b.q.v * 0.042);
+    const sy = b.s.v * (1 - b.q.v * 0.082);
     const idle =
       Math.abs(b.tx.v) < 0.01 &&
       Math.abs(b.ty.v) < 0.01 &&
