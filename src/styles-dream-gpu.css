@@ -45,3 +45,48 @@ html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
       0 18px 38px rgb(0 0 0 / 46%);
   }
 }
+
+/* Dynamic GUI (src/lib/dream-gpu/dream-gui-physics.js, Tier A + B only).
+   The solver writes the individual translate / rotate / scale properties;
+   the rows give them depth. Nothing here changes layout. */
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-routes,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-strip,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel {
+  perspective: 900px;
+}
+
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-window {
+  position: relative;
+  perspective: 1100px;
+  /* a horizontal drag flicks the reel; vertical swipes still scroll the page */
+  touch-action: pan-y;
+}
+
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-ticket,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-chip,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-frame {
+  transform-style: flat;
+  backface-visibility: hidden;
+}
+
+/* Keyboard focus lights the element as the pointer would. */
+html[data-dream-gui="on"] main.dream-page.dream-page [data-dream-gui-lit] {
+  box-shadow:
+    0 0 0 1px rgb(255 204 120 / 60%),
+    0 0 20px rgb(255 190 96 / 38%),
+    0 16px 34px rgb(0 0 0 / 42%);
+}
+
+/* Tier B: the previous sheet leaves in slats (the CSS stand-in for Tier A's
+   previous-frame composite). */
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-gui-ghost {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: 2;
+  pointer-events: none;
+  animation: none;
+  -webkit-mask-image: repeating-linear-gradient(0deg, #000 0 9px, #0000 9px 12px);
+  mask-image: repeating-linear-gradient(0deg, #000 0 9px, #0000 9px 12px);
+}

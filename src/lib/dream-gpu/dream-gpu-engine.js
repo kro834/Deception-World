@@ -21,9 +21,15 @@
 // the click is a film-gate slip and a paper tear (geometry moves, luminance
 // stays put); vermilion is only a slow ambient ramp.
 
+import { gui } from "./dream-gui-physics.js";
+
 const HOT_MAX = 16;
-// floats: 28 scalars/vec4 slots, then HOT_MAX rects + HOT_MAX states (vec4 each)
-const UNIFORM_FLOATS = 28 + HOT_MAX * 8;
+const INK_MAX = 12;
+// floats: 28 scalars/vec4 slots, then HOT_MAX rects + HOT_MAX states (vec4 each),
+// then INK_MAX ink splats (2 vec4 each), the lens and the turn (vec4 each).
+const INK_AT = 28 + HOT_MAX * 8;
+const LENS_AT = INK_AT + INK_MAX * 8;
+const UNIFORM_FLOATS = LENS_AT + 8;
 const UNIFORM_SIZE = UNIFORM_FLOATS * 4;
 
 const COMMON_WGSL = /* wgsl */ `
@@ -36,6 +42,9 @@ struct U {
   trect: vec4f,
   coarse: f32, hotN: f32, pad0: f32, pad1: f32,
   hot: array<vec4f, ${HOT_MAX * 2}>,
+  ink: array<vec4f, ${INK_MAX * 2}>,
+  lens: vec4f,
+  turn: vec4f,
 };
 @group(0) @binding(0) var<uniform> u: U;
 struct VO { @builtin(position) pos: vec4f, @location(0) uv: vec2f };
@@ -66,6 +75,60 @@ fn fbm(p: vec2f) -> f32 {
 fn sdBox(p: vec2f, b: vec2f) -> f32 {
   let d = abs(p) - b;
   return length(max(d, vec2f(0.))) + min(max(d.x, d.y), 0.);
+}
+// The ink field: the pointer's wake as a handful of decaying vortex splats
+// (ink dropped in water). Returns the displacement (device px) at px in xy and
+// the ink density in z. Splat positions are in this pass's device px.
+fn inkField(px: vec2f) -> vec3f {
+  var v = vec2f(0.);
+  var dens = 0.;
+  for (var i = 0; i < ${INK_MAX}; i++) {
+    let a = u.ink[i * 2];
+    let b = u.ink[i * 2 + 1];
+    if (b.y <= 0.) { continue; }
+    let age = b.x;
+    let r = (46. + age * 70.) * u.dpr;
+    let d = px - a.xy;
+    let f = exp(-dot(d, d) / (r * r)) * exp(-age * 1.5) * b.y;
+    if (f < .002) { continue; }
+    let vel = a.zw;
+    let side = sign(vel.x * d.y - vel.y * d.x + 1e-4);
+    let swirl = vec2f(-d.y, d.x) / r * side;
+    v += (vel * .018 + swirl * 9. * u.dpr) * f;
+    dens += f;
+  }
+  return vec3f(v, dens);
+}
+// The projector lens ring: graphic marks only (rings, ticks, aperture blades,
+// corner brackets). Returns coverage 0..1.
+fn lensRing(px: vec2f, t: f32) -> f32 {
+  if (u.lens.w <= .002) { return 0.; }
+  let d = px - u.lens.xy;
+  let r = length(d);
+  let R = u.lens.z;
+  let aa = u.dpr * .9;
+  let ang = atan2(d.y, d.x);
+  let line = 1.1 * u.dpr;
+  // outer ring
+  var c = smoothstep(line + aa, line, abs(r - R)) * .75;
+  // inner ring of ticks, turning slowly
+  let rin = R * .78;
+  let tk = fract((ang + t * .18) / TAU * 36.);
+  let tick = smoothstep(.16, .06, abs(tk - .5) - .34) * step(abs(r - rin), 3.5 * u.dpr);
+  c += tick * .6;
+  // three aperture blade arcs counter-rotating just outside the ring
+  let ba = fract((ang - t * .3) / TAU * 3.);
+  let blade = smoothstep(.02, .0, abs(ba - .5) - .17) * smoothstep(line + aa, line, abs(r - R * 1.12));
+  c += blade * .55;
+  // corner brackets on the diagonals
+  let q = abs(d) - vec2f(R * .9);
+  let corner = step(0., q.x + 7. * u.dpr) * step(0., q.y + 7. * u.dpr) * step(q.x, 0.) * step(q.y, 0.);
+  let edge = 1. - step(1.2 * u.dpr, min(-q.x, -q.y));
+  c += corner * edge * .5 * step(R * 1.18, r);
+  // a press closes the iris for a moment
+  let pr = u.turn.w;
+  c += smoothstep(line + aa, line, abs(r - R * (.45 + .3 * pr))) * (1. - pr) * step(.001, 1. - pr) * .6;
+  return clamp(c, 0., 1.) * u.lens.w;
 }
 // 0..1 along the rectangle's perimeter (clockwise from the top-left corner).
 fn perim(p: vec2f, h: vec2f) -> f32 {
@@ -182,10 +245,13 @@ fn shafts(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32, dens: f32) -> f
   var a = 0.;
   // --- lamp dust, three depths with parallax from the pointer and the scroll -
   let par = (u.mouse - .5) * u.dpr;
-  let d1 = dust(px + par * vec2f(6., 3.), 36. * u.dpr, .045, t, 1., .055, .025);
-  let d2 = dust(px + par * vec2f(20., 9.), 66. * u.dpr, .03, t, 2., .06, .04);
+  // the pointer's wake stirs the air: the dust is advected by the ink field
+  let ink = inkField(px);
+  let pxw = px - ink.xy * 1.6;
+  let d1 = dust(pxw + par * vec2f(6., 3.), 36. * u.dpr, .045, t, 1., .055, .025);
+  let d2 = dust(pxw + par * vec2f(20., 9.), 66. * u.dpr, .03, t, 2., .06, .04);
   var d3 = 0.;
-  if (u.small < .5) { d3 = dust(px + par * vec2f(48., 22.), 128. * u.dpr, .02, t, 3., .11, .09); }
+  if (u.small < .5) { d3 = dust(pxw + par * vec2f(48., 22.), 128. * u.dpr, .02, t, 3., .11, .09); }
   // the desk's own lamp keeps the paper mostly clear of motes
   var deskIn = 0.;
   if (u.rect.z > 0.) {
@@ -314,6 +380,17 @@ fn shafts(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32, dens: f32) -> f
     a += sw * .9;
   }
 
+  // ink in the lamp beam: filaments where the wake is dense
+  if (ink.z > .01) {
+    let fil = smoothstep(.42, .78, fbm(pxw / (24. * u.dpr) + vec2f(t * .12, -t * .08)));
+    let k = min(ink.z, 1.) * fil * .2;
+    c += mix(LAMP, CREAM, .35) * k;
+    a += k * .8;
+  }
+  // the projector lens ring (graphic marks only)
+  let lr = lensRing(px, t);
+  c += mix(GOLD, CREAM, .25) * lr * .85;
+  a += lr * .6;
   // film grain (very low) and a hair of halation on everything bright
   let g = hash21(floor(px / u.dpr) + fract(t * 23.) * 91.) - .5;
   c += vec3f(g * .014) + c * c * .25 * vec3f(1., .7, .5);
@@ -383,6 +460,7 @@ const DESK_WGSL =
 @group(0) @binding(1) var samp: sampler;
 @group(0) @binding(2) var dom: texture_2d<f32>;
 @group(0) @binding(3) var bloomTex: texture_2d<f32>;
+@group(0) @binding(4) var prevTex: texture_2d<f32>;
 fn tap(uv: vec2f) -> vec4f { return textureSampleLevel(dom, samp, uv, 0.); }
 @fragment fn fs(in: VO) -> @location(0) vec4f {
   // The element sits at u.rect (device px) inside the canvas; its texture covers just that box.
@@ -415,6 +493,12 @@ fn tap(uv: vec2f) -> vec4f { return textureSampleLevel(dom, samp, uv, 0.); }
   uv.y -= below * jit * 2. * pxs.y;
   let lip = exp(-(luv.y - seam) / (7. * pxs.y)) * below * jit;
   let fibre = exp(-abs(luv.y - seam) / (1.4 * pxs.y)) * jit * (.5 + .5 * hash21(vec2f(floor(luv.x * 300.), 1.)));
+  // --- ink in water: the pointer's wake bends the print (capped, transient) --
+  let ink = inkField(in.pos.xy);
+  var idisp = ink.xy;
+  let il = length(idisp);
+  if (il > 8. * u.dpr) { idisp *= 8. * u.dpr / il; }
+  uv -= idisp / u.rect.zw;
   // --- a lamp bulge under the pointer (hit testing stays aligned) -----------
   let dm = uv - m;
   let dpx = dm * u.rect.zw;
@@ -466,6 +550,31 @@ fn tap(uv: vec2f) -> vec4f { return textureSampleLevel(dom, samp, uv, 0.); }
   let scOn = step(hash21(vec2f(floor(t * 1.7), 9.)), .3);
   let scratch = exp(-abs(luv.x - sc) / (.7 * pxs.x)) * scOn * (.5 + .5 * sin(luv.y * 50. + t * 21.)) * .1;
   rgb *= 1. - scratch * col.a;
+  // sumi in the paper where the wake is dense
+  if (ink.z > .01) {
+    let fil = smoothstep(.45, .8, fbm((in.pos.xy - ink.xy * 2.) / (22. * u.dpr) + t * .1));
+    rgb *= 1. - min(ink.z, 1.) * fil * .1 * col.a;
+  }
+  // --- section / reel change: the previous frame leaves in glitched slats ---
+  let tt = u.trans.x;
+  if (u.turn.y > .5 && tt < 1.) {
+    var inR = 1.;
+    if (u.trans.y > 1.5) {
+      let lr = (px - u.trect.xy) / max(u.trect.zw, vec2f(1.));
+      inR = step(0., lr.x) * step(lr.x, 1.) * step(0., lr.y) * step(lr.y, 1.);
+    }
+    let slat = floor(px.y / (9. * u.dpr));
+    let thr = hash21(vec2f(slat, floor(u.seed * 97.))) * .55;
+    let e = clamp((tt - thr) / .45, 0., 1.);
+    if (inR > .5 && e < 1.) {
+      let shift = e * e * u.trans.z * 36. * u.dpr / u.rect.z;
+      let pv = textureSampleLevel(prevTex, samp, uv - vec2f(shift, 0.), 0.);
+      // a hair of plate slip on the slat's leading edge, luminance held
+      let edgeK = exp(-abs(fract(px.y / (9. * u.dpr)) - .5) * 8.) * (1. - e) * .15;
+      let prgb = pv.rgb * weave * breath * (1. - edgeK) + GOLD * edgeK * .2;
+      rgb = mix(rgb, prgb, (1. - smoothstep(.0, 1., e)) * pv.a);
+    }
+  }
   // --- lens vignette (the paper stays cream, the dark wood goes amber) -------
   let v = smoothstep(.95, .3, length((luv - .5) * vec2f(1., .8)));
   rgb *= mix(vec3f(.84, .78, .74), vec3f(1.), v);
@@ -648,6 +757,7 @@ function makeTheatre() {
   );
   // transitions
   const trans = { at: -1e9, kind: 1, dir: 1, el: null };
+  const listeners = new Set();
   const fire = (kind, dir, el) => {
     const now = performance.now();
     if (now - trans.at < 1000) return; // never two sweeps within a second
@@ -655,6 +765,7 @@ function makeTheatre() {
     trans.kind = kind;
     trans.dir = dir;
     trans.el = el;
+    for (const fn of listeners) fn(trans);
   };
   const onClick = (e) => {
     const t = e.target;
@@ -704,6 +815,7 @@ function makeTheatre() {
   addEventListener("hashchange", onHash);
   return {
     items,
+    listeners,
     step(dt) {
       const k = 1 - Math.exp(-dt * 9);
       for (const it of items) {
@@ -766,6 +878,38 @@ function acquireTheatre() {
   };
 }
 
+// The dynamic GUI's feed into the uniforms: the ink splats and the lens.
+// `map(x, y)` turns viewport CSS px into this pass's device px.
+function makeGuiFeed() {
+  const lens = { x: -1, y: -1, r: 34, a: 0 };
+  return (u, dt, map, scale, extra = 0) => {
+    const now = performance.now();
+    let n = 0;
+    for (const sp of gui.ink) {
+      const age = (now - sp.at) / 1000;
+      if (age > 2.2 || n >= INK_MAX) continue;
+      const [x, y] = map(sp.x, sp.y);
+      u.set([x, y, sp.vx * scale, sp.vy * scale, age, sp.s, 0, 0], INK_AT + n * 8);
+      n += 1;
+    }
+    for (; n < INK_MAX; n++) u.fill(0, INK_AT + n * 8, INK_AT + n * 8 + 8);
+    const g = gui.lens;
+    const to = gui.active && g.on ? 1 : 0;
+    if (lens.a < 0.02 && to) {
+      lens.x = g.x;
+      lens.y = g.y;
+    }
+    const k = 1 - Math.exp(-dt * (g.focus ? 10 : 16));
+    lens.x += (g.x - lens.x) * k;
+    lens.y += (g.y - lens.y) * k;
+    lens.r += ((g.focus ? Math.min(g.r, 160) : 34) - lens.r) * k;
+    lens.a += (to - lens.a) * (1 - Math.exp(-dt * 7));
+    const [lx, ly] = map(lens.x, lens.y);
+    const press = Math.min(1, Math.max(0, (now - g.pressed) / 450));
+    u.set([lx, ly, lens.r * scale, lens.a * 0.9, 0, extra, 0, press], LENS_AT);
+  };
+}
+
 function makeUniformBuffer(device) {
   return device.createBuffer({
     size: UNIFORM_SIZE,
@@ -806,6 +950,7 @@ export async function startLamplightOverlay(canvas, { getDeskRect } = {}) {
   const { th, release } = acquireTheatre();
   const small = isSmall();
   const coarse = isCoarse();
+  const feed = makeGuiFeed();
   // Phones and tablets render at ≤ 1 device px per CSS px (memory + fill rate).
   const scale = () => Math.min(devicePixelRatio || 1, small ? 1 : 1.5) * (small ? 0.75 : 1);
   let start = 0;
@@ -837,6 +982,7 @@ export async function startLamplightOverlay(canvas, { getDeskRect } = {}) {
         )
       : 0;
     u.set([coarse ? 1 : 0, n, 0, 0], 24);
+    feed(u, dt, (x, y) => [x * s, y * s], s);
     device.queue.writeBuffer(ubuf, 0, u);
     const enc = device.createCommandEncoder();
     fullscreenPass(device, enc, ctx.getCurrentTexture().createView(), pipeline, bind);
@@ -890,6 +1036,8 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
   const u = new Float32Array(UNIFORM_FLOATS);
   const ub = new Float32Array(UNIFORM_FLOATS);
   let tex = null;
+  let prev = null;
+  let prevValid = false;
   let bright = null;
   let blurA = null;
   let blurB = null;
@@ -907,15 +1055,23 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
     const ew = Math.max(1, Math.round(element.offsetWidth * dpr));
     const eh = Math.max(1, Math.round(element.offsetHeight * dpr));
     if (tex && tex.width === ew && tex.height === eh) return;
-    for (const t of [tex, bright, blurA, blurB]) t?.destroy();
+    for (const t of [tex, prev, bright, blurA, blurB]) t?.destroy();
     tex = device.createTexture({
       size: [ew, eh],
       format: "rgba8unorm",
       usage:
         GPUTextureUsage.TEXTURE_BINDING |
         GPUTextureUsage.COPY_DST |
+        GPUTextureUsage.COPY_SRC |
         GPUTextureUsage.RENDER_ATTACHMENT,
     });
+    // the previous frame, kept for section / reel transitions
+    prev = device.createTexture({
+      size: [ew, eh],
+      format: "rgba8unorm",
+      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+    });
+    prevValid = false;
     const bw = Math.max(1, Math.round(ew / 4));
     const bh = Math.max(1, Math.round(eh / 4));
     const small = () =>
@@ -954,6 +1110,7 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
         { binding: 1, resource: sampler },
         { binding: 2, resource: tex.createView() },
         { binding: 3, resource: blurB.createView() },
+        { binding: 4, resource: prev.createView() },
       ]),
     };
     captured = false;
@@ -983,6 +1140,17 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
   // The desk's own pointer: positions relative to the canvas.
   const pointer = makePointer();
   const { th, release } = acquireTheatre();
+  const feed = makeGuiFeed();
+  // A transition is starting: the desk's texture still holds the frame before
+  // the DOM changed (the next paint event has not come yet). Keep it.
+  const keepPrev = () => {
+    if (!tex || !prev || !captured) return;
+    const enc = device.createCommandEncoder();
+    enc.copyTextureToTexture({ texture: tex }, { texture: prev }, [tex.width, tex.height]);
+    queue.submit([enc.finish()]);
+    prevValid = true;
+  };
+  th.listeners.add(keepPrev);
   let start = 0;
   let firstAt = 0;
   const stopLoop = loop((t, dt) => {
@@ -1017,6 +1185,16 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
       b.height * sx,
     ]);
     u.set([0, n, 0, 0], 24);
+    const tr = th.trans();
+    u.set([tr.t, tr.kind, tr.dir, 0], 16);
+    const tre = tr.el && tr.t < 1 ? tr.el.getBoundingClientRect() : null;
+    u.set(
+      tre
+        ? [(tre.left - rect.left) * sx, (tre.top - rect.top) * sx, tre.width * sx, tre.height * sx]
+        : [0, 0, 0, 0],
+      20,
+    );
+    feed(u, dt, (x, y) => [(x - rect.left) * sx, (y - rect.top) * sx], sx, prevValid ? 1 : 0);
     queue.writeBuffer(ubuf, 0, u);
     const enc = device.createCommandEncoder();
     if (bloomDirty || pointer.state.energy > 0) {
@@ -1035,7 +1213,8 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
     release();
     ro.disconnect();
     canvas.removeEventListener("paint", onPaint);
-    for (const t of [tex, bright, blurA, blurB]) t?.destroy();
+    th.listeners.delete(keepPrev);
+    for (const t of [tex, prev, bright, blurA, blurB]) t?.destroy();
     for (const b of [ubuf, ubright, blurH, blurV]) b.destroy();
     device.destroy();
   };
