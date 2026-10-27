@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
+import * as touchGuard from "../src/lib/ciel-sequin-touch-guard.ts";
 
 const source = readFileSync(new URL("../src/components/ciel-sequin.tsx", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, {
@@ -59,6 +60,8 @@ function mount({ failure = false, reduced = false, economy = false } = {}) {
     },
   });
   media.matches = reduced;
+  document.defaultView = window;
+  window.innerWidth = 834;
   window.visualViewport = new Target();
   const module = {
     createCielSequinRenderer(options) {
@@ -92,9 +95,10 @@ function mount({ failure = false, reduced = false, economy = false } = {}) {
   };
   const jsx = (type, props) => {
     if (props.ref && !props.ref.current)
-      props.ref.current = {
+      props.ref.current = Object.assign(new Target(), {
         getBoundingClientRect: () => ({ width: 834, height: 1194 }),
-      };
+        ownerDocument: document,
+      });
     return { type, props };
   };
   const exports = {};
@@ -145,12 +149,16 @@ function mount({ failure = false, reduced = false, economy = false } = {}) {
           useEffect(fn) {
             if (!effects[effect++]) effects.push({ fn });
           },
+          useLayoutEffect(fn) {
+            if (!effects[effect++]) effects.push({ fn, layout: true });
+          },
         };
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
       if (name === "@/lib/ciel-sequin-renderer") {
         imports++;
         return module;
       }
+      if (name === "@/lib/ciel-sequin-touch-guard") return touchGuard;
       if (name.endsWith(".css?url")) return { default: "sequin.css" };
       throw new Error(name);
     },
@@ -182,6 +190,7 @@ function mount({ failure = false, reduced = false, economy = false } = {}) {
     resizeObservers,
     nodes,
     render,
+    effectKinds: effects.map((item) => (item.layout ? "layout" : "passive")),
     get tree() {
       return tree;
     },
@@ -300,6 +309,37 @@ test("unmount before the deferred import resolves cannot create a renderer or pu
   await host.ready();
   assert.equal(host.instances.length, 0);
   assert.equal(host.document.head.children.length, 0);
+});
+
+test("canvas edge guards precede the renderer import, survive preferences once, and dispose with the component", async () => {
+  const host = mount();
+  assert.deepEqual(
+    host.effectKinds,
+    ["layout", "passive"],
+    "small input guard runs before paint; heavy renderer remains passive",
+  );
+  const canvases = host.nodes("canvas").map((node) => node.props.ref.current);
+  const start = (target) => {
+    const event = new Event("touchstart", { cancelable: true });
+    Object.defineProperty(event, "touches", { value: [{ identifier: 1, clientX: 2 }] });
+    target.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+  assert.equal(host.instances.length, 0);
+  for (const canvas of canvases) {
+    assert.equal(start(canvas), true, "initial loading surface is guarded");
+    assert.equal(canvas.listeners.size, 3, "start/move/end callbacks registered once");
+  }
+  await host.ready();
+  host.document.documentElement.dataset.worldEffects = "economy";
+  host.observers[0].fn();
+  await host.ready();
+  for (const canvas of canvases) assert.equal(canvas.listeners.size, 3);
+  host.dispose();
+  for (const canvas of canvases) {
+    assert.equal(canvas.listeners.size, 0);
+    assert.equal(start(canvas), false);
+  }
 });
 
 test("controls used before renderer readiness are retained even when creation fails", async () => {

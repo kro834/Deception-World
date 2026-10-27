@@ -17,6 +17,7 @@
 .ciel-sequin-surface canvas {
   display: block;
   touch-action: none;
+  overscroll-behavior: none;
 }
 .ciel-sequin-surface img {
   object-fit: contain;

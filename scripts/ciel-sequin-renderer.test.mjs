@@ -6,6 +6,7 @@ import ts from "typescript";
 import * as THREE from "three";
 import * as physics from "../src/lib/ciel-sequin-physics.ts";
 import * as shaders from "../src/lib/ciel-sequin-shaders.ts";
+import { guardCielSequinTouch } from "../src/lib/ciel-sequin-touch-guard.ts";
 const {
   sampleSequinSpring,
   sequinGrid,
@@ -383,4 +384,42 @@ test("full to calm to full can reuse the same canvas without deliberate context 
   assert.equal(h.stats.lost, 0);
   assert.equal(h.canvas.listeners.size, 0);
   assert.equal(h.queue.size, 0);
+});
+
+test("edge touch cancellation leaves delivered touch pointers painting in GPU and calm fallback modes", () => {
+  for (const settings of [
+    { coarse: true },
+    { coarse: true, reducedMotion: true },
+    { coarse: true, webgl: false },
+  ]) {
+    const h = harness(settings);
+    h.load();
+    h.tick(0);
+    const surface = settings.reducedMotion || settings.webgl === false ? h.fallback : h.canvas;
+    surface.ownerDocument = { defaultView: { innerWidth: 320 } };
+    const release = guardCielSequinTouch(surface);
+    const sample = (type, x) => {
+      let prevented = false;
+      surface.listeners.get(type)({
+        touches: [{ identifier: 1, clientX: x }],
+        cancelable: true,
+        preventDefault() {
+          prevented = true;
+        },
+      });
+      assert.equal(prevented, true);
+    };
+    sample("touchstart", 2);
+    h.pointer("pointerdown", 2, 300, { target: surface, type: "touch" });
+    sample("touchmove", 250);
+    h.pointer("pointermove", 250, 300, { target: surface, type: "touch" });
+    h.tick(30);
+    assert.ok(
+      Number(surface.dataset.sequinBack) > 0,
+      "delivered touch Pointer Events still reveal local cells",
+    );
+    release();
+    h.api.dispose();
+    assert.equal(surface.listeners.size, 0);
+  }
 });

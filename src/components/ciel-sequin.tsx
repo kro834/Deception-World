@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { createCielSequinRenderer } from "@/lib/ciel-sequin-renderer";
+import { guardCielSequinTouch } from "@/lib/ciel-sequin-touch-guard";
 import styles from "@/styles-ciel-sequin.css?url";
 
 type Renderer = ReturnType<typeof createCielSequinRenderer>;
@@ -17,6 +18,13 @@ export default function CielSequin() {
   const [state, setState] = useState<State>("loading");
   const [plain, setPlain] = useState(false);
   const id = useId();
+
+  useLayoutEffect(() => {
+    if (!canvas.current || !fallback.current) return;
+    // Guard the first painted frame, before the stylesheet/Three effect runs.
+    const releases = [canvas.current, fallback.current].map(guardCielSequinTouch);
+    return () => releases.forEach((release) => release());
+  }, []);
 
   useEffect(() => {
     if (!root.current || !canvas.current || !fallback.current) return;

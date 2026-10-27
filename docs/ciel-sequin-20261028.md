@@ -55,3 +55,25 @@ context loss, full↔reduced and full↔economy three times, and reload restorin
 the original site. After springs settled, actual WebGL render calls stopped
 across a 700ms sample; a synthetic hidden signal paused rendering and return
 painted once. These are browser tests, not physical iPad/background-tab proof.
+
+## iOS standalone edge scratching
+
+The owner reported browser Back while scratching the left edge in a home-screen
+web app. `touch-action: none`, overflow locks and PointerEvent cancellation alone
+had left TouchEvent default handling uncancelled. A small layout effect now
+registers non-passive, capture-phase `touchstart` and `touchmove` listeners on
+both drawing canvases before the renderer effect. Only a single finger starting
+within 32 CSS px of either viewport edge is owned until end/cancel; central
+starts, controls and multi-touch are outside this guard. No history entry,
+`popstate` trap, navigation override or site-wide touch listener is added.
+
+Touch cancellation is a documented WebKit workaround, while native host gesture
+recognizers may still take precedence:
+- https://bugs.webkit.org/show_bug.cgi?id=240892
+- https://bugs.webkit.org/show_bug.cgi?id=182521
+- https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/ios/WKContentViewInteraction.mm
+
+Browser automation can verify cancellable touch events, continuing PointerEvents
+and brushing. Desktop WebKit emulation does not reproduce iOS standalone's OS
+edge navigation, so preventing that exact native gesture remains a physical-device
+verification item.
