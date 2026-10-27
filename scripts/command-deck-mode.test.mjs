@@ -53,6 +53,10 @@ test("dashboard head does not preload the opening; replay head retains its exact
   });
   const head = (search) =>
     exports.Route.head({ match: { search: mode.validateCommandDeckSearch(search) } });
+  // Owner (2026-10-27): the document that lands on "/" opens with the opening;
+  // once the title is left, "/" is the dashboard.
+  assert.ok(Array.from(head({}).links, (link) => link.href).includes("../styles-opening-cinema.css?url"));
+  mode.endDocumentEntryOpening();
   assert.deepEqual(
     Array.from(head({}).links, (link) => link.href),
     ["../styles-command-deck.css?url"],

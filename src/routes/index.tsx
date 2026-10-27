@@ -1,7 +1,13 @@
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { TitleSequence } from "@/components/cinematic/title-sequence";
 import { CommandDeck } from "@/components/command-deck/command-deck";
-import { showsOpening, validateCommandDeckSearch } from "@/lib/command-deck-mode";
+import {
+  endDocumentEntryOpening,
+  isDocumentEntryOpening,
+  showsOpening,
+  validateCommandDeckSearch,
+} from "@/lib/command-deck-mode";
 import { OPENING_LOGO_FIRST, OPENING_LOGO_SIZES } from "@/lib/opening-logo";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import openingElevationCssUrl from "../styles-opening-elevation.css?url";
@@ -9,11 +15,14 @@ import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
 import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
 import commandDeckCssUrl from "../styles-command-deck.css?url";
 
+const opensWith = (search: Parameters<typeof showsOpening>[0]) =>
+  isDocumentEntryOpening() || showsOpening(search);
+
 export const Route = createFileRoute("/")({
   validateSearch: validateCommandDeckSearch,
   component: Home,
   head: ({ match }) =>
-    showsOpening(match.search)
+    opensWith(match.search)
       ? {
           links: [
             // The ice logo is the first title (the prism logo emerges from its burn
@@ -55,7 +64,13 @@ export const Route = createFileRoute("/")({
 function Home() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  return showsOpening(search) ? (
+  useEffect(
+    () => () => {
+      endDocumentEntryOpening();
+    },
+    [],
+  );
+  return opensWith(search) ? (
     <TitleSequence />
   ) : (
     <CommandDeck
