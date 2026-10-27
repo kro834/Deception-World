@@ -125,6 +125,11 @@ function entryRuntime({
     beginOpeningHandoff: (options) => handoffs.push(options),
   };
   const jsx = (type, props) => ({ type, props });
+  // The title and command deck share the original two-paint clock.
+  const visualPaint = {};
+  runInNewContext(ts.transpileModule(read("src/lib/visual-paint.ts"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText, { exports: visualPaint, window: runtime });
   const exports = {};
   const code = ts.transpileModule(title, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
@@ -139,6 +144,7 @@ function entryRuntime({
     performance: { now: () => now, getEntriesByType: () => [] },
     URLSearchParams,
     require: (name) => {
+      if (name === "@/lib/visual-paint") return visualPaint;
       if (name === "react") return react;
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx, Fragment: "fragment" };
       if (name === "@tanstack/react-router") return { useRouter: () => router };
