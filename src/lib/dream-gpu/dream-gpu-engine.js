@@ -1093,6 +1093,7 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
   let tex = null;
   let prev = null;
   let prevValid = false;
+  let prevAt = -1e9;
   let bright = null;
   let blurA = null;
   let blurB = null;
@@ -1110,7 +1111,10 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
     const ew = Math.max(1, Math.round(element.offsetWidth * dpr));
     const eh = Math.max(1, Math.round(element.offsetHeight * dpr));
     if (tex && tex.width === ew && tex.height === eh) return;
-    for (const t of [tex, prev, bright, blurA, blurB]) t?.destroy();
+    // A reel turn often changes the desk's height: keep the previous frame
+    // (sampled in normalized uv) through the transition instead of dropping it.
+    const keep = prevValid && prev && performance.now() - prevAt < 1000;
+    for (const t of [tex, keep ? null : prev, bright, blurA, blurB]) t?.destroy();
     tex = device.createTexture({
       size: [ew, eh],
       format: "rgba8unorm",
@@ -1121,12 +1125,14 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
         GPUTextureUsage.RENDER_ATTACHMENT,
     });
     // the previous frame, kept for section / reel transitions
-    prev = device.createTexture({
-      size: [ew, eh],
-      format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-    });
-    prevValid = false;
+    if (!keep) {
+      prev = device.createTexture({
+        size: [ew, eh],
+        format: "rgba8unorm",
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+      });
+      prevValid = false;
+    }
     const bw = Math.max(1, Math.round(ew / 4));
     const bh = Math.max(1, Math.round(eh / 4));
     const small = () =>
@@ -1160,17 +1166,23 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
         { binding: 1, resource: sampler },
         { binding: 2, resource: blurA.createView() },
       ]),
-      comp: bg(compPipe, [
+      comp: compBind(),
+    };
+    captured = false;
+  };
+
+  function compBind() {
+    return device.createBindGroup({
+      layout: compPipe.getBindGroupLayout(0),
+      entries: [
         { binding: 0, resource: { buffer: ubuf } },
         { binding: 1, resource: sampler },
         { binding: 2, resource: tex.createView() },
         { binding: 3, resource: blurB.createView() },
         { binding: 4, resource: prev.createView() },
-      ]),
-    };
-    captured = false;
-  };
-
+      ],
+    });
+  }
   let bloomDirty = true;
   const capture = () => {
     ensureTexture();
@@ -1200,10 +1212,20 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
   // the DOM changed (the next paint event has not come yet). Keep it.
   const keepPrev = () => {
     if (!tex || !prev || !captured) return;
+    if (prev.width !== tex.width || prev.height !== tex.height) {
+      prev.destroy();
+      prev = device.createTexture({
+        size: [tex.width, tex.height],
+        format: "rgba8unorm",
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+      });
+      binds.comp = compBind();
+    }
     const enc = device.createCommandEncoder();
     enc.copyTextureToTexture({ texture: tex }, { texture: prev }, [tex.width, tex.height]);
     queue.submit([enc.finish()]);
     prevValid = true;
+    prevAt = performance.now();
   };
   th.listeners.add(keepPrev);
   let start = 0;
