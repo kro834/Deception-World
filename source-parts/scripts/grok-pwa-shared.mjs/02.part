@@ -1,3 +1,8 @@
+  const match = String(html ?? "").match(/<title\b[^>]*>([^<]*)<\/title>/i);
+  return match ? unescapeHtml(match[1]).trim() : "";
+}
+
+/** The document head's <meta> tags as { key, content }, keyed by property or name. */
 function documentMetaTags(html) {
   const head = String(html ?? "").split(/<\/head>/i)[0];
   const tags = [];
