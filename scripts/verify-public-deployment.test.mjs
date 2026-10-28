@@ -54,6 +54,68 @@ import {
   verifyPublicDeployment,
 } from "./verify-public-deployment.mjs";
 
+test("Ciel sequin release permits only the four attested artwork and Blender delivery paths", async () => {
+  const paths = [
+    "/ciel-sequin-20261028/ciel-768.webp",
+    "/ciel-sequin-20261028/ciel-1536.webp",
+    "/ciel-sequin-studio-20261028/studio.webp",
+    "/ciel-sequin-studio-20261028/provenance.json",
+  ];
+  const bodies = new Map(
+    paths.map((path) => [path, readFileSync(new URL(`../public${path}`, import.meta.url))]),
+  );
+  const assets = paths.map((path) => ({
+    path,
+    sha256: createHash("sha256").update(bodies.get(path)).digest("hex"),
+  }));
+  const run = async ({ changed, unknown } = {}) => {
+    const seen = [];
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha: "a".repeat(40),
+      fetchImpl: async (input) => {
+        const path = new URL(input).pathname;
+        seen.push(path);
+        if (path === "/release-identity.json")
+          return Response.json({
+            sha: "a".repeat(40),
+            assets: unknown ? [{ path: unknown, sha256: "0".repeat(64) }] : assets,
+          });
+        if (bodies.has(path)) return new Response(changed === path ? "changed" : bodies.get(path));
+        return smokeResponse(path);
+      },
+    });
+    return { report, seen };
+  };
+  const valid = await run();
+  assert.equal(valid.report.ok, true);
+  assert.deepEqual(
+    valid.report.results.filter(({ kind }) => kind === "asset").map(({ path }) => path),
+    paths,
+  );
+  for (const changed of paths) assert.equal((await run({ changed })).report.ok, false, changed);
+  for (const unknown of [
+    "/ciel-sequin-20261028/ciel-1086.webp",
+    "/ciel-sequin-studio-20261028/studio.png",
+    "/ciel-sequin-studio-20261028/source.blend",
+    ...paths.flatMap((path) =>
+      [".bak", "/extra", "?x=1", "#x", "\n", "%2fextra"].map((suffix) => path + suffix),
+    ),
+  ]) {
+    const { report, seen } = await run({ unknown });
+    assert.equal(report.ok, false, unknown);
+    assert.equal(
+      seen.slice(1).some((path) => path.startsWith("/ciel-sequin")),
+      false,
+      unknown,
+    );
+    assert.ok(
+      report.results.some((result) => result.error?.includes("Invalid release asset path")),
+      unknown,
+    );
+  }
+});
+
 const flushTransport = async () => {
   for (let i = 0; i < 250; i++) await Promise.resolve();
 };
