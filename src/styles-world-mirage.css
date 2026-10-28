@@ -1749,8 +1749,10 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   }
 
   /* Hold every boot target at frame 0 while a cover is up. The extra
-     :not() keeps these rules above the full-mode boot rules. */
-  html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"])
+     :not() keeps these rules above the full-mode boot rules. The opening's
+     handoff lets them go as its landing starts to fade into the page
+     (data-opening-handoff-arriving), so the HUD boot plays as the page arrives. */
+  html:is([data-loading], [data-opening-handoff-active]:not([data-opening-handoff-arriving])):not([data-world-effects="economy"])
     .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(
       [data-mirage-boot="standby"]
     )
@@ -1767,28 +1769,28 @@ html[data-mode="world"]:not([data-world-effects="economy"])
       .film-edition-mark,
       .hero-metadata > span
     ),
-  html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"])
+  html:is([data-loading], [data-opening-handoff-active]:not([data-opening-handoff-arriving])):not([data-world-effects="economy"])
     .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(
       [data-mirage-boot="standby"]
     )
     .hero::before,
-  html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"])
+  html:is([data-loading], [data-opening-handoff-active]:not([data-opening-handoff-arriving])):not([data-world-effects="economy"])
     .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(
       [data-mirage-boot="standby"]
     )
     .mr-word::after,
-  html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"])
+  html:is([data-loading], [data-opening-handoff-active]:not([data-opening-handoff-arriving])):not([data-world-effects="economy"])
     .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(
       [data-mirage-boot="standby"]
     )
     .mr-redact::after,
-  html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"])
+  html:is([data-loading], [data-opening-handoff-active]:not([data-opening-handoff-arriving])):not([data-world-effects="economy"])
     .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(
       [data-mirage-boot="standby"]
     )
     .mr-hero-readout
     i::after,
-  html:is([data-loading], [data-opening-handoff-active]):not([data-world-effects="economy"]):not(
+  html:is([data-loading], [data-opening-handoff-active]:not([data-opening-handoff-arriving])):not([data-world-effects="economy"]):not(
       [data-mirage-quiet]
     )
     .site-shell.film-edition.mirage-edition:not([data-mirage-boot="done"]):not(

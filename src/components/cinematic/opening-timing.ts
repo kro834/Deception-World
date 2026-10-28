@@ -27,7 +27,6 @@ const smooth = (a: number, b: number, value: number) => {
   const t = clamp01((value - a) / (b - a));
   return t * t * (3 - 2 * t);
 };
-const easeInCubic = (t: number) => t * t * t;
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 const easeInOutSine = (t: number) => -(Math.cos(Math.PI * clamp01(t)) - 1) / 2;
 
@@ -57,18 +56,27 @@ export function burnUniformsAt(T: number): BurnUniforms {
 }
 
 /**
- * The dive, in seconds from the moment GL is drawing. Everything before
- * `glEnd` is drawn by the shader on the main thread; the route changes after
- * it, under the still landing frame, so the route's work never drops a frame
- * of the dive.
+ * The dive, in seconds from the moment GL is drawing. One camera move: a
+ * small breath back on the title, an accelerating plunge into the logo's ring
+ * (the background drifts slower than the logo: depth), light trails and a
+ * spectral (chromatic) zoom blur at peak speed, the world opening through the
+ * ring as an iris, then a forward deceleration that overshoots the World
+ * page's framing by `landScale`. Everything up to `glEnd` is drawn by the
+ * shader on the main thread. From `glEnd` the compositor eases the landing
+ * frame back to the page's framing (`settle`) while the route mounts
+ * underneath, so the route's main-thread work never freezes the picture.
  */
 export const OPENING_DIVE = {
   /** The canvas fades in over the title (frame 0 is the title's own framing). */
-  fadeIn: [0, 0.2],
+  fadeIn: [0, 0.16],
   /** The camera breaks through the logo's ring into the world. */
   cut: 0.95,
   /** Last shader frame: the world at its landing framing. */
   glEnd: 1.45,
+  /** The forward overshoot past the page's framing at `glEnd` (a canvas scale). */
+  landScale: 1.1,
+  /** Seconds of the compositor-only settle from landScale to 1, after `glEnd`. */
+  settle: 1.4,
 } as const;
 
 /** GL (bitmaps + shader) must be ready this long after the press, or the dive is CSS. */
@@ -79,6 +87,9 @@ export type DiveUniforms = {
   uBlur: number;
   uDive: number;
   uWarp: number;
+  uChroma: number;
+  uIris: number;
+  uCenter: number;
   uWorld: number;
   uWorldZoom: number;
   uLand: number;
@@ -88,17 +99,33 @@ export type DiveUniforms = {
 
 /** Dive shader uniforms at T seconds after the dive started drawing. */
 export function diveUniformsAt(T: number): DiveUniforms {
-  const { cut, glEnd } = OPENING_DIVE;
+  const { cut, glEnd, landScale } = OPENING_DIVE;
   const pre = T < cut;
-  const diveT = clamp01(T / cut);
+  // A breath back (the camera draws in), then a curve that keeps
+  // accelerating until the ring fills the frame.
+  const breath = T < 0.26 ? Math.sin(Math.PI * clamp01(T / 0.26)) : 0;
+  const diveT = clamp01((T - 0.08) / (cut - 0.08));
+  // The world behind the ring: far while seen through it, then a forward
+  // deceleration past the page's framing, to landScale.
+  const worldMag = pre
+    ? 0.72 + 0.24 * smooth(cut - 0.3, cut, T)
+    : 0.96 + (landScale - 0.96) * easeOutCubic(clamp01((T - cut) / (glEnd - cut)));
   return {
-    uZoom: pre ? 1 - 0.88 * easeInCubic(diveT) : 0.12,
-    uBlur: pre ? 0.46 * diveT ** 3 : 0.3 * (1 - smooth(cut, cut + 0.42, T)),
-    uDive: pre ? smooth(0.08, cut, T) : Math.max(0, 1 - (T - cut) / 0.32),
-    // One amber swell into the breakthrough and one slow decay: never a strobe.
+    uZoom: pre ? (1 + 0.028 * breath) * (1 - 0.9 * diveT ** 2.2) : 0.1,
+    uBlur: pre ? 0.5 * diveT ** 2.4 : 0.36 * (1 - smooth(cut, cut + 0.42, T)),
+    uDive: pre ? smooth(0.08, cut, T) : Math.max(0, 1 - (T - cut) / 0.4),
+    // One swell into the breakthrough and one slow decay: never a strobe.
     uWarp: smooth(0.5, cut, T) * (1 - smooth(cut, glEnd, T)),
+    // The spectral split peaks with the speed and is gone well before landing.
+    uChroma: smooth(0.4, cut, T) * (1 - smooth(cut, cut + 0.4, T)),
+    // The world opens through the ring and fills the frame at the cut.
+    uIris: pre ? smooth(cut - 0.28, cut, T) : 1,
+    // The camera's axis drifts from the ring to the frame's centre.
+    uCenter: smooth(cut - 0.25, cut + 0.35, T),
     uWorld: pre ? 0 : 1,
-    uWorldZoom: pre ? 0.4 : 0.4 + 0.6 * easeOutCubic(clamp01((T - cut) / (glEnd - cut))),
+    // From glEnd the shader draws the page's framing and the canvas carries
+    // the overshoot (scale landScale): the same picture either side of it.
+    uWorldZoom: T >= glEnd ? 1 : 1 / worldMag,
     uLand: smooth(cut + 0.06, glEnd, T),
     // The letterbox bars of the title open as the camera moves.
     uBars: 1 - smooth(0.1, 0.55, T),
