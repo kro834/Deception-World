@@ -1224,6 +1224,14 @@ export function SideMenuLayer({
               <span>フォームアーカイブ</span>
               <i>SAGA / REALM</i>
             </GuardedLink>
+            <GuardedLink
+              to="/dogs-archive"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/dogs-archive" ? "page" : undefined}
+            >
+              <span>DOGS ARCHIVE</span>
+            </GuardedLink>
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
           </div>
         </div>

@@ -160,6 +160,7 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
   // size; Vertex and Multi are 400px): the archive's own Saga form cards sit
   // next to it in /search, and the Realm side of the archive shows here.
   "/form-archive": { ...formThumb("realm", "royal"), edition: "archive", code: "ARCHIVE" },
+  "/dogs-archive": { src: "/dogs-archive-20261028/guardian-480.webp", pos: "50% 40%", edition: "archive", code: "DOGS" },
   "/rexonance-saga": {
     ...formThumb("saga", "rexonance-ultra"),
     edition: "rexonance",
@@ -203,7 +204,7 @@ export function editionOf(path: string): RecordEdition {
   if (path === "/extreme-saga") return "extreme";
   if (path === "/final-stage" || path === "/far-from-saga") return "final";
   if (path === "/gallery" || path === "/gallery-tours" || path === "/exhibition") return "gallery";
-  if (path === "/form-archive") return "archive";
+  if (path === "/form-archive" || path === "/dogs-archive") return "archive";
   return "world";
 }
 

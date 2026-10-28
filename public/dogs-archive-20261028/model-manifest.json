@@ -1,0 +1,324 @@
+{
+  "version": 1,
+  "title": "第五の犬 / Forest Guardian",
+  "source": "Blender 4.5.9 LTS procedural sculpt",
+  "model": "guardian-v.glb",
+  "coordinateSystem": {
+    "up": "+Y",
+    "front": "+Z",
+    "unit": "meter"
+  },
+  "assetBytes": 17645300,
+  "assetSha256": "9f26669b43c270ceefdddf8ad164cc470523e5618e54af397235fe3417ea16c6",
+  "nodes": {
+    "body": "BodyPivot",
+    "head": "HeadPivot",
+    "jaw": "JawPivot",
+    "mouth": "MouthSocket",
+    "mouthAim": "MouthAim",
+    "tentacles": [
+      "TentaclePivot_00",
+      "TentaclePivot_01",
+      "TentaclePivot_02",
+      "TentaclePivot_03",
+      "TentaclePivot_04",
+      "TentaclePivot_05",
+      "TentaclePivot_06",
+      "TentaclePivot_07",
+      "TentaclePivot_08",
+      "TentaclePivot_09",
+      "TentaclePivot_10",
+      "TentaclePivot_11",
+      "TentaclePivot_12"
+    ]
+  },
+  "animations": [
+    "Rest",
+    "Exhale"
+  ],
+  "transitionSeconds": 1.6,
+  "poses": {
+    "rest": {
+      "BodyPivot": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "HeadPivot": {
+        "quaternion": [
+          -0.0,
+          -0.0,
+          0.11320317,
+          0.99357188
+        ]
+      },
+      "JawPivot": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_00": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_01": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_02": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_03": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_04": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_05": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_06": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_07": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_08": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_09": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_10": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_11": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_12": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      }
+    },
+    "exhale": {
+      "BodyPivot": {
+        "quaternion": [
+          -0.0,
+          -0.0,
+          0.03489954,
+          0.99939084
+        ]
+      },
+      "HeadPivot": {
+        "quaternion": [
+          -0.46802431,
+          0.03683433,
+          0.0692753,
+          0.88022578
+        ]
+      },
+      "JawPivot": {
+        "quaternion": [
+          0.5807029,
+          0.0,
+          -0.0,
+          0.81411552
+        ]
+      },
+      "TentaclePivot_00": {
+        "quaternion": [
+          0.07551361,
+          0.04800257,
+          0.05620379,
+          0.99440151
+        ]
+      },
+      "TentaclePivot_01": {
+        "quaternion": [
+          -0.06283151,
+          -0.04615695,
+          -0.04083622,
+          0.99611956
+        ]
+      },
+      "TentaclePivot_02": {
+        "quaternion": [
+          0.07551361,
+          0.04800257,
+          0.05620379,
+          0.99440151
+        ]
+      },
+      "TentaclePivot_03": {
+        "quaternion": [
+          -0.06283151,
+          -0.04615695,
+          -0.04083622,
+          0.99611956
+        ]
+      },
+      "TentaclePivot_04": {
+        "quaternion": [
+          0.07551361,
+          0.04800257,
+          0.05620379,
+          0.99440151
+        ]
+      },
+      "TentaclePivot_05": {
+        "quaternion": [
+          -0.06283151,
+          -0.04615695,
+          -0.04083622,
+          0.99611956
+        ]
+      },
+      "TentaclePivot_06": {
+        "quaternion": [
+          0.07551361,
+          0.04800257,
+          0.05620379,
+          0.99440151
+        ]
+      },
+      "TentaclePivot_07": {
+        "quaternion": [
+          -0.06283151,
+          -0.04615695,
+          -0.04083622,
+          0.99611956
+        ]
+      },
+      "TentaclePivot_08": {
+        "quaternion": [
+          0.05206477,
+          0.04931339,
+          0.05505726,
+          0.99590462
+        ]
+      },
+      "TentaclePivot_09": {
+        "quaternion": [
+          -0.04456716,
+          -0.04540088,
+          -0.04167518,
+          0.99710369
+        ]
+      },
+      "TentaclePivot_10": {
+        "quaternion": [
+          0.05206477,
+          0.04931339,
+          0.05505726,
+          0.99590462
+        ]
+      },
+      "TentaclePivot_11": {
+        "quaternion": [
+          -0.04456716,
+          -0.04540088,
+          -0.04167518,
+          0.99710369
+        ]
+      },
+      "TentaclePivot_12": {
+        "quaternion": [
+          0.05206477,
+          0.04931339,
+          0.05505726,
+          0.99590462
+        ]
+      }
+    }
+  },
+  "modeling": {
+    "referenceImages": [
+      "reference/guardian-rest.jpg",
+      "reference/guardian-exhale.jpg"
+    ],
+    "referenceImagesUsedAsTexture": false,
+    "actualPiercedGeometry": true,
+    "rearSculpted": true,
+    "mainSpiralCores": 3,
+    "secondaryReverseSpirals": 2,
+    "recurvedHeadHorns": 4,
+    "movableFronds": 13,
+    "textures": "textures/",
+    "blenderSource": "scripts/blender/dogs_guardian.py",
+    "blendArchive": "output/dogs-archive/guardian-v.blend"
+  },
+  "meshStats": {
+    "objects": 28,
+    "vertices": 336431,
+    "triangles": 660802
+  },
+  "buildSeconds": 5.87
+}
