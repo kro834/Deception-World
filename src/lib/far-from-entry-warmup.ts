@@ -75,41 +75,45 @@ async function decodeOnce(source: string, priority: Priority, signal: AbortSigna
   const attempt = new AbortController();
   const abort = () => attempt.abort();
   signal.addEventListener("abort", abort, { once: true });
+  if (signal.aborted) abort();
   const timer = setTimeout(abort, FAR_FROM_ENTRY_FETCH_TIMEOUT_MS);
+  let rejectOnAbort: (() => void) | undefined;
   try {
-    if (typeof createImageBitmap === "function" && typeof fetch === "function") {
-      const response = await fetch(source, { priority, signal: attempt.signal } as RequestInit);
-      if (!response.ok) throw new Error(String(response.status));
-      const blob = await response.blob();
-      if (attempt.signal.aborted) throw new Error("aborted");
-      const bitmap = await createImageBitmap(blob);
-      if (signal.aborted) {
-        bitmap.close?.();
-        return false;
+    const work = async () => {
+      if (typeof createImageBitmap === "function" && typeof fetch === "function") {
+        const response = await fetch(source, { priority, signal: attempt.signal } as RequestInit);
+        if (!response.ok) throw new Error(String(response.status));
+        const blob = await response.blob();
+        if (attempt.signal.aborted) throw new Error("aborted");
+        const bitmap = await createImageBitmap(blob);
+        if (attempt.signal.aborted) {
+          bitmap.close?.();
+          return false;
+        }
+        sources.set(source, bitmap);
+        // The call's DOM layers (the finished figure, the undersuit) paint
+        // from the same bytes, never a second download of the file.
+        if (typeof URL.createObjectURL === "function" && !urls.has(source))
+          urls.set(source, URL.createObjectURL(blob));
+        return true;
       }
-      sources.set(source, bitmap);
-      // The call's DOM layers (the finished figure, the undersuit) paint
-      // from the same bytes, never a second download of the file.
-      if (typeof URL.createObjectURL === "function" && !urls.has(source))
-        urls.set(source, URL.createObjectURL(blob));
+      const image = new Image();
+      image.decoding = "async";
+      image.src = source;
+      await image.decode();
+      if (attempt.signal.aborted) return false;
+      sources.set(source, image);
       return true;
-    }
-    const image = new Image();
-    image.decoding = "async";
-    image.src = source;
-    await Promise.race([
-      image.decode(),
-      new Promise((_, reject) =>
-        attempt.signal.addEventListener("abort", () => reject(new Error("aborted")), {
-          once: true,
-        }),
-      ),
-    ]);
-    if (signal.aborted) return false;
-    sources.set(source, image);
-    return true;
+    };
+    const aborted = new Promise<never>((_, reject) => {
+      rejectOnAbort = () => reject(new Error("aborted"));
+      if (attempt.signal.aborted) rejectOnAbort();
+      else attempt.signal.addEventListener("abort", rejectOnAbort, { once: true });
+    });
+    return await Promise.race([work(), aborted]);
   } finally {
     clearTimeout(timer);
+    if (rejectOnAbort) attempt.signal.removeEventListener("abort", rejectOnAbort);
     signal.removeEventListener("abort", abort);
   }
 }
