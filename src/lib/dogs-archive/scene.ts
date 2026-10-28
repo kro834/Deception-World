@@ -839,6 +839,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         submittedTriangles: renderer.info.render.triangles,
         camera: camera.position.toArray(),
         target: controls.target.toArray(),
+        floatingPosition: floating.position.toArray(),
+        floatingRotation: [floating.rotation.x, floating.rotation.y, floating.rotation.z],
         loading: { ...loading },
         draco: dracoLoader?.getDiagnostics() ?? dracoStats,
         geometryBytesEstimated,
