@@ -323,6 +323,75 @@ const RAIN_CITY_ASSET_PATHS = [
   "/rain-city-materials/asphalt-roughness.png",
   "/rain-city-materials/manifest.json",
 ];
+const DOGS_ARCHIVE_ASSET_PATHS = [
+  "/dogs-archive-20261028/guardian-v.glb",
+  "/dogs-archive-20261028/model-manifest.json",
+  "/dogs-archive-20261028/decoders/draco/draco_decoder.wasm",
+  "/dogs-archive-20261028/decoders/draco/draco_wasm_wrapper.js",
+  "/dogs-archive-20261028/decoders/draco/draco_decoder.js",
+  "/dogs-archive-20261028/decoders/draco/asset-manifest.json",
+];
+
+test("guardian release verification checks the model and local decoders without broadening asset access", async () => {
+  const payloads = new Map(
+    DOGS_ARCHIVE_ASSET_PATHS.map((path) => [path, Buffer.from(`asset:${path}`)]),
+  );
+  const assets = DOGS_ARCHIVE_ASSET_PATHS.map((path) => ({
+    path,
+    sha256: createHash("sha256").update(payloads.get(path)).digest("hex"),
+  }));
+  const run = async ({ changed, unknown } = {}) => {
+    const seen = [];
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha: SHA,
+      fetchImpl: async (input) => {
+        const path = new URL(input).pathname;
+        seen.push(path);
+        if (path === "/release-identity.json")
+          return Response.json({
+            sha: SHA,
+            assets: unknown ? [{ path: unknown, sha256: "0".repeat(64) }] : assets,
+          });
+        if (payloads.has(path))
+          return new Response(path === changed ? "wrong model or decoder" : payloads.get(path));
+        return smokeResponse(path);
+      },
+    });
+    return { report, seen };
+  };
+  const valid = await run();
+  assert.equal(valid.report.ok, true);
+  assert.deepEqual(
+    valid.report.results.filter(({ kind }) => kind === "asset").map(({ path }) => path),
+    DOGS_ARCHIVE_ASSET_PATHS,
+  );
+  assert.ok(valid.seen.includes("/dogs-archive"), "the new route is also checked before promotion");
+  for (const changed of DOGS_ARCHIVE_ASSET_PATHS)
+    assert.equal((await run({ changed })).report.ok, false, changed);
+  for (const unknown of [
+    "/dogs-archive-20261028/unknown.glb",
+    "/dogs-archive-20261028/decoders/draco/unknown.js",
+    "/dogs-archive-20261028/../secret",
+    ...["/extra", "?extra=1", "#extra", "%2fextra", "\n"].map(
+      (suffix) => `${DOGS_ARCHIVE_ASSET_PATHS[0]}${suffix}`,
+    ),
+  ]) {
+    const { report, seen } = await run({ unknown });
+    assert.equal(report.ok, false, unknown);
+    assert.ok(
+      report.results.some(
+        ({ kind, ok, error }) =>
+          kind === "identity" && !ok && error.includes("Invalid release asset path"),
+      ),
+      unknown,
+    );
+    assert.ok(
+      seen.every((path) => !path.startsWith("/dogs-archive-20261028/")),
+      "invalid paths are rejected before fetch",
+    );
+  }
+});
 const CIEL_BUTTON_PATHS = [144, 216, 360].map((width) => `/ciel-button-20261018-${width}.webp`);
 const CIEL_INFERNO_PATHS = [
   ...[216, 720, 1080].map((width) => `/ciel-inferno-20261019/ciel-${width}.webp`),
@@ -756,6 +825,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
     "/exhibition-studio/plaster-normal.png",
     "/exhibition-studio/plaster-roughness.png",
     ...RAIN_CITY_ASSET_PATHS,
+    ...DOGS_ARCHIVE_ASSET_PATHS,
   ]) {
     const asset = written.assets.find((item) => item.path === path);
     assert.ok(asset, `${path} must be attested before production promotion`);

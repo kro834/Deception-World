@@ -49,6 +49,7 @@ export const PUBLIC_SMOKE_ROUTES = [
   "/gallery",
   "/gallery-tours",
   "/exhibition",
+  "/dogs-archive",
   "/library",
   "/search",
   "/final-stage",
@@ -316,6 +317,9 @@ export async function verifyPublicDeployment({
             !/^\/ciel-button-20261018-(?:144|216|360)\.webp(?![\s\S])/u.test(asset.path) &&
             !/^\/ciel-sequin-20261028\/ciel-(?:768|1536)\.webp(?![\s\S])/u.test(asset.path) &&
             !/^\/ciel-sequin-studio-20261028\/(?:studio\.webp|provenance\.json)(?![\s\S])/u.test(
+              asset.path,
+            ) &&
+            !/^\/dogs-archive-20261028\/(?:guardian-v\.glb|model-manifest\.json|decoders\/draco\/(?:draco_decoder\.(?:js|wasm)|draco_wasm_wrapper\.js|asset-manifest\.json))(?![\s\S])/u.test(
               asset.path,
             ) &&
             !/^\/(?:gallery\/|saga-extreme-|rexonance-forms-20261011\/excelsior-cutout-20261012\.webp$|rider-rexonance-excelsior-cutout-20261012(?:-delivery-(?:640|960|1022))?\.webp$|saga-cinema-assets\/(?:chapter-[1-4]\.jpg|saga-logo-(?:original|640)\.webp|menu-thumbnail(?:-20261012)?\.webp|michroma-latin\.woff2)$|exhibition-metal\/(?:brushed-alloy-(?:normal|roughness)\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$|rain-city-materials\/(?:(?:concrete|asphalt)-(?:albedo\.webp|(?:normal|roughness)\.png)|manifest\.json)(?![\s\S]))/u.test(
