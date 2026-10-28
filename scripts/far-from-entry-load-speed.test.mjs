@@ -15,8 +15,8 @@ test("every image try is bounded and retried, so a stalled file never holds the 
   assert.match(warmup, /export const FAR_FROM_ENTRY_FETCH_RETRIES: readonly number\[\] = \[300, 1200\];/);
   assert.match(warmup, /const timer = setTimeout\(abort, FAR_FROM_ENTRY_FETCH_TIMEOUT_MS\);/);
   assert.match(warmup, /signal: attempt\.signal/);
-  // The <img> fallback is bounded by the same deadline.
-  assert.match(warmup, /await Promise\.race\(\[\s*image\.decode\(\),/);
+  // Fetch, blob conversion and either decode path share the same deadline.
+  assert.match(warmup, /Promise\.race\(\[work\(\), aborted\]\)/);
   // Decoded off the main thread, once per file.
   assert.match(warmup, /createImageBitmap\(blob\)/);
   assert.match(warmup, /if \(sources\.has\(source\)\) return true;/);

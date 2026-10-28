@@ -7,19 +7,27 @@
    the menu link's own warm-up (GuardedLink assets) still runs on intent. */
 
 const held: HTMLImageElement[] = [];
-let started = false;
+const ready = new Set<string>();
+const pending = new Set<string>();
 
-/** Fetch and decode every sticker once; later calls are no-ops. */
+/** Keep successful decodes; retry only failed sources on a later menu opening. */
 export function warmGalleryStickers(sources: readonly string[]) {
-  if (started || typeof Image === "undefined") return;
-  started = true;
+  if (typeof Image === "undefined") return;
   for (const source of sources) {
+    if (ready.has(source) || pending.has(source)) continue;
+    pending.add(source);
     const image = new Image();
     image.decoding = "async";
     image.fetchPriority = "low";
     image.src = source;
-    held.push(image);
-    image.decode().catch(() => undefined);
+    void image
+      .decode()
+      .then(() => {
+        ready.add(source);
+        held.push(image);
+      })
+      .catch(() => undefined)
+      .finally(() => pending.delete(source));
   }
 }
 
@@ -27,31 +35,45 @@ export function warmGalleryStickers(sources: readonly string[]) {
  * stickers, low priority, in an idle slot. Returns a cleanup. */
 export function scheduleGalleryStickerWarmup(sources: readonly string[]) {
   if (typeof window === "undefined") return () => undefined;
-  const connection = (
-    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-  ).connection;
-  if (connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType ?? "")) {
-    return () => undefined;
-  }
   const root = document.documentElement;
+  let disposed = false;
   let idle = 0;
   let timer = 0;
+  const warm = () => {
+    idle = timer = 0;
+    if (disposed || !root.hasAttribute("data-side-menu-open")) return;
+    const connection = (
+      navigator as Navigator & {
+        connection?: { saveData?: boolean; effectiveType?: string };
+      }
+    ).connection;
+    if (
+      navigator.onLine === false ||
+      connection?.saveData ||
+      ["slow-2g", "2g"].includes(connection?.effectiveType ?? "")
+    )
+      return;
+    warmGalleryStickers(sources);
+  };
   const run = () => {
+    if (disposed || idle || timer || !root.hasAttribute("data-side-menu-open")) return;
     if (window.requestIdleCallback) {
-      idle = window.requestIdleCallback(() => warmGalleryStickers(sources), { timeout: 600 });
+      idle = window.requestIdleCallback(warm, { timeout: 600 });
     } else {
-      timer = window.setTimeout(() => warmGalleryStickers(sources), 120);
+      timer = window.setTimeout(warm, 120);
     }
   };
   const observer = new MutationObserver(() => {
     if (root.hasAttribute("data-side-menu-open")) {
-      observer.disconnect();
       run();
     }
   });
   if (root.hasAttribute("data-side-menu-open")) run();
-  else observer.observe(root, { attributes: true, attributeFilter: ["data-side-menu-open"] });
+  observer.observe(root, { attributes: true, attributeFilter: ["data-side-menu-open"] });
+  window.addEventListener("online", run);
   return () => {
+    disposed = true;
+    window.removeEventListener("online", run);
     observer.disconnect();
     if (idle) window.cancelIdleCallback(idle);
     window.clearTimeout(timer);

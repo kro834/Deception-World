@@ -45,6 +45,9 @@ const UNIFORMS = [
   "uBlur",
   "uDive",
   "uWarp",
+  "uChroma",
+  "uIris",
+  "uCenter",
   "uWorld",
   "uWorldZoom",
   "uLand",
@@ -62,6 +65,9 @@ const UNIFORMS = [
 const COMPACT_BUDGET = 520_000;
 const WIDE_BUDGET = 1_300_000;
 const PRIME_TTL_MS = 1500;
+// Starts at rest (the shader's forward deceleration ended at rest), then a
+// long soft tail: most of the settle is done in the first half.
+const LANDING_EASING = "cubic-bezier(0.42, 0, 0.16, 1)";
 
 type DiveAssets = {
   logo: GlImage;
@@ -369,10 +375,16 @@ export function runOpeningDive({
       stats.drawSpanMs = firstDraw ? Number((performance.now() - firstDraw).toFixed(1)) : null;
       stats.running = false;
       if (canvas && !audit && typeof canvas.animate === "function") {
-        // A slow push-in on the compositor keeps the still frame alive.
-        landingMotion = canvas.animate([{ transform: "scale(1)" }, { transform: "scale(1.025)" }], {
-          duration: 1600,
-          easing: "ease-in-out",
+        // The landing frame is the page's framing; the canvas carries the
+        // camera's forward overshoot and eases it back on the compositor, so
+        // the picture keeps moving while the route mounts on the main thread.
+        const overshoot = `scale(${OPENING_DIVE.landScale})`;
+        // Same frame as the landing draw: the overshoot never pops.
+        const style = canvas.style as CSSStyleDeclaration | undefined;
+        if (style) style.transform = overshoot;
+        landingMotion = canvas.animate([{ transform: overshoot }, { transform: "scale(1)" }], {
+          duration: OPENING_DIVE.settle * 1000,
+          easing: LANDING_EASING,
           fill: "forwards",
         });
       }

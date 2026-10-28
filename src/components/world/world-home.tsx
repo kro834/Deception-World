@@ -910,6 +910,16 @@ const WorldSectionNav = memo(function WorldSectionNav() {
   );
 });
 
+// The opening's handoff holds the World's ambient motion until its landing
+// starts fading into the page (data-opening-handoff-arriving).
+function openingHandoffHolds() {
+  const root = document.documentElement;
+  return (
+    root.hasAttribute("data-opening-handoff-active") &&
+    !root.hasAttribute("data-opening-handoff-arriving")
+  );
+}
+
 export function WorldHome() {
   useWorldMode();
   // Opening already decoded the full poster for its WebGL handoff. Reuse
@@ -934,7 +944,7 @@ export function WorldHome() {
   const [ambientPaused, setAmbientPaused] = useState(
     () =>
       typeof document !== "undefined" &&
-      (document.hidden || document.documentElement.hasAttribute("data-opening-handoff-active")),
+      (document.hidden || openingHandoffHolds()),
   );
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
@@ -1094,12 +1104,12 @@ export function WorldHome() {
   }, [notifyOpeningDestination]);
 
   useEffect(() => {
-    let handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+    let handoffActive = openingHandoffHolds();
     const syncAmbientPause = () => {
       setAmbientPaused(document.hidden || handoffActive);
     };
     const handleVisibilityChange = () => {
-      handoffActive = document.documentElement.hasAttribute("data-opening-handoff-active");
+      handoffActive = openingHandoffHolds();
       syncAmbientPause();
     };
     const handleOpeningHandoff = (event: Event) => {
@@ -1107,7 +1117,7 @@ export function WorldHome() {
       handoffActive =
         typeof detail?.active === "boolean"
           ? detail.active
-          : document.documentElement.hasAttribute("data-opening-handoff-active");
+          : openingHandoffHolds();
       syncAmbientPause();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);

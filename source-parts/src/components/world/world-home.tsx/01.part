@@ -505,3 +505,4 @@ const EPISODES: EpisodeRecord[] = [
       {
         label: "仮面ライダールーラー・ポラリスモード",
         displayLines: ["仮面ライダールーラー", "ポラリスモード"],
+        src: "/rider-ruler-polaris.webp",

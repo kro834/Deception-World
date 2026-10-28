@@ -262,7 +262,11 @@ test("the shaders' lens is silent at the swap frames", async () => {
     lens,
     /float ana = smoothstep\(0\.02, 0\.22, uDive\) \* \(1\.0 - smoothstep\(0\.5, 0\.85, uDive\)\);/,
   );
-  assert.match(lens, /float fringe = 0\.007 \* smoothstep\(0\.1, 0\.9, uDive\);/);
+  // The chromatic warp is the zoom blur's spectral split, driven by uChroma
+  // alone: silent at frame 0 and at the landing frame.
+  assert.match(dive, /vec3 w = mix\(vec3\(1\.0\), [^;]*, uChroma \* 0\.75\);/);
+  assert.equal(diveUniformsAt(0).uChroma, 0);
+  assert.equal(diveUniformsAt(OPENING_DIVE.glEnd).uChroma, 0);
   // Frame 0 is the title's own framing; the landing frame is the world.
   assert.equal(diveUniformsAt(0).uDive, 0);
   assert.equal(diveUniformsAt(OPENING_DIVE.glEnd).uWorld, 1);

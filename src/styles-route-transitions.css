@@ -1538,7 +1538,9 @@ html[data-route-scroll-settling="true"] {
    ready in time (data-opening-handoff-tier="webgl"), otherwise the same
    storyboard on these layers with transform and opacity only ("css"). While
    the tier is still "pending" the root is transparent, so the title shows
-   through it. Both end on a still of the world; the arrival fades it out. */
+   through it. Both land just past the world's framing and settle back on the
+   compositor under the HUD lock while the route mounts; the arrival fades the
+   landing into the page. */
 
 [data-opening-handoff-root] {
   --opening-vv-left: 0px;
@@ -1612,8 +1614,19 @@ html[data-route-scroll-settling="true"] {
     [data-opening-handoff-tier="pending"],
     [data-opening-handoff-tier="webgl"]
   )
-  > :not([data-opening-handoff-gl]) {
+  > :not([data-opening-handoff-gl], [data-opening-handoff-lock]) {
   visibility: hidden;
+}
+
+/* Reduced motion: a cross-fade to the world's still, nothing in motion. */
+[data-opening-handoff-root][data-opening-handoff-tier="reduced"]::after,
+[data-opening-handoff-root][data-opening-handoff-tier="reduced"]
+  > :not([data-opening-handoff-world]) {
+  visibility: hidden;
+}
+
+[data-opening-handoff-root][data-opening-handoff-tier="reduced"] [data-opening-handoff-world] {
+  opacity: 1;
 }
 
 [data-opening-handoff-gl] {
@@ -1630,7 +1643,9 @@ html[data-route-scroll-settling="true"] {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transform-origin: 50% 52%;
+  /* The landing settle scales about the frame's centre, as the shader does. */
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
 }
 
 [data-opening-handoff-backdrop] {
@@ -1717,6 +1732,42 @@ html[data-route-scroll-settling="true"] {
     #000 16%,
     #000 46%,
     transparent 66%
+  );
+  transform-origin: var(--opening-speed-at);
+  will-change: transform, opacity;
+}
+
+/* The far light trails: finer, dimmer, slower than the speed lines (depth). */
+[data-opening-handoff-trails] {
+  --opening-speed-at: calc(50% + var(--opening-dive-x) - 50vw)
+    calc(50% + var(--opening-dive-y) - 50vh);
+  position: absolute;
+  z-index: 3;
+  inset: -20%;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    from 1deg at var(--opening-speed-at),
+    transparent 0deg 2.2deg,
+    rgb(214 248 255 / 0.4) 2.3deg 2.42deg,
+    transparent 2.52deg 5.1deg,
+    rgb(var(--opening-handoff-blue) / 0.34) 5.2deg 5.3deg,
+    transparent 5.4deg 6.6deg,
+    rgb(120 214 150 / 0.26) 6.7deg 6.8deg,
+    transparent 6.9deg 9deg
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--opening-speed-at),
+    transparent 2%,
+    #000 8%,
+    #000 22%,
+    transparent 40%
+  );
+  mask-image: radial-gradient(
+    circle at var(--opening-speed-at),
+    transparent 2%,
+    #000 8%,
+    #000 22%,
+    transparent 40%
   );
   transform-origin: var(--opening-speed-at);
   will-change: transform, opacity;
@@ -1865,8 +1916,9 @@ html[data-route-scroll-settling="true"] {
     linear-gradient(0deg, #04080f 0%, transparent 34%, rgb(4 8 15 / 48%) 100%);
 }
 
-/* One amber swell at the breakthrough, ringed by a subtle Mirage ice corona (never white). */
-[data-opening-handoff-bloom] {
+/* The chromatic warp at peak speed: a red ring just outside a cyan one,
+   flaring out of the ring as the camera passes through it. */
+[data-opening-handoff-warp] {
   position: absolute;
   z-index: 9;
   inset: 0;
@@ -1874,12 +1926,112 @@ html[data-route-scroll-settling="true"] {
   pointer-events: none;
   background: radial-gradient(
     circle at var(--opening-dive-x) var(--opening-dive-y),
-    rgb(255 204 140 / 0.65) 0%,
-    rgb(255 162 92 / 0.34) 30%,
-    rgb(var(--opening-handoff-blue) / 0.18) 50%,
-    rgb(var(--opening-handoff-pink) / 0.08) 64%,
-    transparent 76%
+    transparent 0 17%,
+    rgb(110 229 255 / 0.5) 19.5%,
+    rgb(var(--opening-handoff-blue) / 0.08) 22%,
+    rgb(255 72 120 / 0.42) 24%,
+    transparent 27.5%,
+    transparent 37%,
+    rgb(110 229 255 / 0.2) 39%,
+    rgb(255 72 120 / 0.16) 41.5%,
+    transparent 44%
   );
+  transform-origin: var(--opening-dive-x) var(--opening-dive-y);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+/* The iris: the ring opening onto the world, an ice core with a forest-green
+   corona that floods the frame once at the breakthrough (never white). */
+[data-opening-handoff-bloom] {
+  position: absolute;
+  z-index: 9;
+  left: calc(var(--opening-dive-x) - 32vmax);
+  top: calc(var(--opening-dive-y) - 32vmax);
+  width: 64vmax;
+  height: 64vmax;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  /* A disc that fades out inside its own box: no edge at any scale. */
+  background: radial-gradient(
+    circle closest-side,
+    rgb(214 248 255 / 0.6) 0%,
+    rgb(150 232 255 / 0.4) 22%,
+    rgb(var(--opening-handoff-blue) / 0.2) 46%,
+    rgb(64 166 82 / 0.12) 70%,
+    transparent 100%
+  );
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+/* The landing's HUD lock, over either tier: four ice brackets close on the
+   world and a scan sweeps it while the page mounts (startLanding). */
+[data-opening-handoff-lock] {
+  position: absolute;
+  z-index: 11;
+  inset: max(18px, 4vmin);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+[data-opening-handoff-lock] > i {
+  position: absolute;
+  width: clamp(18px, 4vmin, 34px);
+  height: clamp(18px, 4vmin, 34px);
+  border: 0 solid rgb(var(--opening-handoff-blue) / 0.62);
+  filter: drop-shadow(0 0 6px rgb(var(--opening-handoff-blue) / 0.45));
+}
+
+[data-opening-handoff-lock] > i:nth-of-type(1) {
+  top: 0;
+  left: 0;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+[data-opening-handoff-lock] > i:nth-of-type(2) {
+  top: 0;
+  right: 0;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+[data-opening-handoff-lock] > i:nth-of-type(3) {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+[data-opening-handoff-lock] > i:nth-of-type(4) {
+  right: 0;
+  bottom: 0;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+[data-opening-handoff-scan] {
+  position: absolute;
+  top: 0;
+  left: calc(-1 * max(18px, 4vmin));
+  right: calc(-1 * max(18px, 4vmin));
+  height: 22vh;
+  opacity: 0;
+  background:
+    linear-gradient(180deg, transparent 99%, rgb(214 248 255 / 0.3) 99.4%, transparent),
+    linear-gradient(
+      180deg,
+      transparent,
+      rgb(var(--opening-handoff-blue) / 0.03) 60%,
+      rgb(var(--opening-handoff-blue) / 0.08) 97%,
+      transparent
+    );
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  will-change: transform, opacity;
 }
 
 [data-opening-handoff-letterbox] {
@@ -1912,7 +2064,8 @@ html[data-route-scroll-settling="true"] {
   animation: none !important;
 }
 
-[data-opening-handoff-root][data-opening-handoff-mode="economy"] [data-opening-handoff-speed] {
+[data-opening-handoff-root][data-opening-handoff-mode="economy"]
+  :is([data-opening-handoff-speed], [data-opening-handoff-trails], [data-opening-handoff-lock]) {
   display: none;
 }
 
@@ -1963,8 +2116,11 @@ html :is(main, iframe)[data-skip-mark="true"][data-skip-mark] {
   }
 
   [data-opening-handoff-speed],
+  [data-opening-handoff-trails],
   [data-opening-handoff-tunnel],
-  [data-opening-handoff-bloom] {
+  [data-opening-handoff-warp],
+  [data-opening-handoff-bloom],
+  [data-opening-handoff-lock] {
     display: none !important;
   }
 }

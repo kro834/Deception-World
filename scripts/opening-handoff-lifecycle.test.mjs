@@ -32,6 +32,7 @@ function element() {
       removeProperty(name) { delete this[name]; },
     },
     contains(child) { return this.children.includes(child); },
+    querySelector() { return null; },
     querySelectorAll(selector) {
       if (selector === ":scope > *") return this.children;
       return this.children.filter((child) => child.dataset.openingHandoffLetterbox);
@@ -84,7 +85,7 @@ function runtime() {
   const jsx = (type, props) => ({ type, props });
   const exports = {};
   runInNewContext(code, {
-    exports, window, document, URLSearchParams,
+    exports, window, document, URLSearchParams, performance: { now: () => 0 },
     HTMLMediaElement: { HAVE_METADATA: 1 },
     require(name) {
       if (name === "react") return {
@@ -195,7 +196,9 @@ test("an early GPU loss continues the CSS flight without claiming a static landi
   assert.equal(ui.root.dataset.openingHandoffLanding, undefined);
   assert.equal(ui.root.animations.length, 1);
   assert.equal(ui.root.animations[0].currentTime, 200);
-  assert.equal(ui.world.animations.length, 1);
+  // The flight, and its landing settle scheduled on the compositor after it.
+  assert.equal(ui.world.animations.length, 2);
+  assert.ok(ui.world.animations[1].options.delay > 0);
   assert.deepEqual(ui.covered, []);
   assert.equal(ui.timers.size, 1);
   ui.unmount();

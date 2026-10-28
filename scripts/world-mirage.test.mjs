@@ -245,7 +245,8 @@ test("boot holds under covers, and its sentinel never disappears", async () => {
   assert.match(css, /\.mr-hero-hud \{\s*animation: mr-boot-seal 2200ms linear both;/);
   assert.match(
     css,
-    /html:is\(\[data-loading\], \[data-opening-handoff-active\]\)[\s\S]*?animation-play-state: paused;/,
+    // The opening's handoff releases the hold as its landing fades into the page.
+    /html:is\(\[data-loading\], \[data-opening-handoff-active\]:not\(\[data-opening-handoff-arriving\]\)\)[\s\S]*?animation-play-state: paused;/,
   );
   for (const { selector, body } of styleRules(css)) {
     if (!/display:\s*none|visibility:\s*hidden/.test(body)) continue;

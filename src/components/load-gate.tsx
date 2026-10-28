@@ -828,8 +828,10 @@ function createDeferred<T>(): Deferred<T> {
 function dispatchOpeningHandoffState(active: boolean) {
   if (active) {
     document.documentElement.dataset.openingHandoffActive = "true";
+    document.documentElement.removeAttribute("data-opening-handoff-arriving");
   } else {
     document.documentElement.removeAttribute("data-opening-handoff-active");
+    document.documentElement.removeAttribute("data-opening-handoff-arriving");
   }
   document.dispatchEvent(
     new CustomEvent("deception-world:opening-handoff", { detail: { active } }),

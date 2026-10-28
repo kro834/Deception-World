@@ -61,7 +61,7 @@ test("the stickers warm when the menu opens; the curtain paints them decoded; /g
   assert.match(warm, /requestIdleCallback/);
   assert.match(warm, /fetchPriority = "low"/);
   assert.match(warm, /held\.push\(image\)/);
-  assert.match(warm, /image\.decode\(\)/);
+  assert.match(warm, /image\s*\.decode\(\)/);
   assert.match(warm, /saveData/);
   assert.match(curtain, /decoding="sync"/);
   assert.match(
