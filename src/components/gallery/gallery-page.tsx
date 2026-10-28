@@ -56,6 +56,7 @@ import {
 } from "./gallery-viewer-state";
 import { GALLERY_TITLES_KEY, readGalleryTitles, type GalleryTitles } from "./gallery-titles";
 import { galleryGridImage } from "./gallery-grid-image";
+import { createGalleryCommunityRefresh } from "./gallery-community-refresh";
 
 function revealGalleryControl(control: HTMLElement | null) {
   const header = control?.closest<HTMLElement>(".gallery-viewer-header");
@@ -296,56 +297,45 @@ export function GalleryPage() {
   }, []);
 
   useEffect(() => {
-    let disposed = false;
-    let generation = 0;
-    const refresh = async () => {
-      const current = ++generation;
-      try {
-        const collection = await readCommunityGallery(session?.access_token);
-        if (disposed || current !== generation) return false;
+    const updates = createGalleryCommunityRefresh({
+      read: () => readCommunityGallery(session?.access_token),
+      onSuccess: (collection) => {
         setCommunityPosts(collection.posts);
         setDeletedPosts(collection.deletedPosts ?? []);
         setSharedTitles((current) => mergeCommunityGalleryTitles(current, collection.titles));
         setCommunityLoaded(true);
         setCommunityLoadError("");
-        return true;
-      } catch (error) {
-        if (!disposed && current === generation)
-          setCommunityLoadError(
-            error instanceof Error ? error.message : "共有作品を読み込めませんでした。",
-          );
-        return false;
-      }
-    };
-    communityReloadRef.current = refresh;
+      },
+      onError: (error) =>
+        setCommunityLoadError(
+          error instanceof Error ? error.message : "共有作品を読み込めませんでした。",
+        ),
+    });
+    communityReloadRef.current = () => updates.refresh("reload");
+    const canAutoRefresh = () =>
+      !document.hidden &&
+      navigator.onLine !== false &&
+      !communityBusyRef.current &&
+      !viewerActiveRef.current;
     const onFocus = () => {
-      if (!communityBusyRef.current && !viewerActiveRef.current) void refresh();
+      if (canAutoRefresh()) void updates.refresh("event");
     };
     const onVisibility = () => {
-      if (
-        document.visibilityState === "visible" &&
-        !communityBusyRef.current &&
-        !viewerActiveRef.current
-      )
-        void refresh();
+      if (canAutoRefresh()) void updates.refresh("event");
     };
     const timer = window.setInterval(() => {
-      if (
-        document.visibilityState === "visible" &&
-        !communityBusyRef.current &&
-        !viewerActiveRef.current
-      )
-        void refresh();
+      if (canAutoRefresh()) void updates.refresh("poll");
     }, 30_000);
     window.addEventListener("focus", onFocus);
+    window.addEventListener("online", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
-    void refresh();
+    if (canAutoRefresh()) void updates.refresh("poll");
     return () => {
-      disposed = true;
-      generation++;
+      updates.dispose();
       communityReloadRef.current = null;
       window.clearInterval(timer);
       window.removeEventListener("focus", onFocus);
+      window.removeEventListener("online", onFocus);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [session?.access_token]);
