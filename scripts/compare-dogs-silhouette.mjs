@@ -4,6 +4,8 @@
  */
 import sharp from "sharp";
 import { resolve } from "node:path";
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 
 const arg = (key) =>
   process.argv
@@ -101,6 +103,17 @@ console.log(
   JSON.stringify(
     {
       view,
+      source: {
+        reference,
+        referenceSha256: createHash("sha256")
+          .update(await readFile(reference))
+          .digest("hex"),
+        render: resolve(render),
+        renderSha256: createHash("sha256")
+          .update(await readFile(render))
+          .digest("hex"),
+        referenceCrop: crop,
+      },
       purpose: "outline alignment only; not a quality verdict",
       alignment: "same height, bounding-box centres aligned",
       intersectionOverUnion: intersection / union,

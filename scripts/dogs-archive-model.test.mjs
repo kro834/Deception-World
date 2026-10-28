@@ -1,19 +1,24 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
 import test from "node:test";
 import { Box3, Matrix4, Quaternion, Vector3 } from "three";
 
-const bytes = readFileSync(
-  new URL("../public/dogs-archive-20261028/guardian-v.glb", import.meta.url),
-);
-assert.equal(bytes.toString("ascii", 0, 4), "glTF");
+// The same contract also checks a Blender candidate before it is adopted as
+// the public model. Never substitute its results for another export's SHA.
+const modelDirectory = process.env.DOGS_MODEL_DIR
+  ? pathToFileURL(`${resolve(process.env.DOGS_MODEL_DIR)}/`)
+  : new URL("../public/dogs-archive-20261028/", import.meta.url);
 const manifest = JSON.parse(
   readFileSync(
-    new URL("../public/dogs-archive-20261028/model-manifest.json", import.meta.url),
+    new URL(process.env.DOGS_MODEL_MANIFEST ?? "model-manifest.json", modelDirectory),
     "utf8",
   ),
 );
+const bytes = readFileSync(new URL(manifest.model, modelDirectory));
+assert.equal(bytes.toString("ascii", 0, 4), "glTF");
 test("the model and its pose manifest identify the same complete export", () => {
   assert.equal(manifest.assetBytes, bytes.length);
   assert.equal(manifest.assetSha256, createHash("sha256").update(bytes).digest("hex"));
