@@ -180,7 +180,7 @@
   border-radius: 50%;
   background: radial-gradient(circle, rgb(230 248 255 / 75%), rgb(166 230 255 / 0) 68%);
   opacity: 0;
-  animation: ice-core 720ms ease-out 2480ms both;
+  animation: ice-core 900ms ease-out 4340ms both;
 }
 
 .ice-entry-orb {
@@ -237,20 +237,22 @@
     0 0 18px rgb(166 230 255 / 45%),
     0 2px 12px #000;
   opacity: 0;
-  animation: ice-call 560ms cubic-bezier(0.2, 0.7, 0.1, 1) calc(var(--ice-call) * 640ms) both;
+  animation: ice-call 560ms cubic-bezier(0.2, 0.7, 0.1, 1) var(--ice-call-start) both;
 }
 
 .ice-entry-calls > li:not([data-last]) {
   animation-name: ice-call, ice-call-out;
   animation-duration: 560ms, 200ms;
-  animation-delay: calc(var(--ice-call) * 640ms), calc(var(--ice-call) * 640ms + 500ms);
+  animation-delay:
+    var(--ice-call-start), calc(var(--ice-call-start) + var(--ice-call-hold) - 160ms);
   animation-fill-mode: both, forwards;
 }
 
 .ice-entry-calls > li > span {
   white-space: nowrap;
   opacity: 0.35;
-  animation: ice-unit 200ms ease calc(var(--ice-call) * 640ms + var(--ice-unit) * 110ms) forwards;
+  animation: ice-unit 200ms ease
+    calc(var(--ice-call-start) + var(--ice-unit) * var(--ice-unit-step)) forwards;
 }
 
 .ice-entry-calls > li:nth-child(3) > span:nth-child(even) {
@@ -332,7 +334,7 @@
   border: 1px solid rgb(166 230 255 / 60%);
   border-radius: 50%;
   opacity: 0;
-  animation: ice-lock 800ms ease-out 2560ms both;
+  animation: ice-lock 800ms ease-out 4470ms both;
 }
 
 @keyframes ice-lock {
@@ -602,7 +604,13 @@
   bottom: 4%;
   background:
     radial-gradient(40% 18% at 50% 30%, rgb(230 248 255 / 70%), transparent 70%),
-    linear-gradient(180deg, transparent, rgb(166 230 255 / 32%) 30%, rgb(169 131 255 / 26%) 70%, transparent);
+    linear-gradient(
+      180deg,
+      transparent,
+      rgb(166 230 255 / 32%) 30%,
+      rgb(169 131 255 / 26%) 70%,
+      transparent
+    );
   filter: blur(6px);
   mix-blend-mode: screen;
   opacity: 0;
@@ -712,16 +720,21 @@
     radial-gradient(1px 1px at 80% 30%, rgb(255 143 210 / 70%) 50%, transparent 51%);
   background-size: 140px 120px;
   opacity: 0.6;
-  animation: ice-far 2700ms linear both;
+  animation: ice-far 4740ms linear both;
 }
 
 .ice-entry-near {
   background-image:
-    linear-gradient(rgb(166 230 255 / 80%) 0 0),
-    linear-gradient(rgb(233 184 102 / 80%) 0 0),
+    linear-gradient(rgb(166 230 255 / 80%) 0 0), linear-gradient(rgb(233 184 102 / 80%) 0 0),
     linear-gradient(rgb(255 143 210 / 70%) 0 0);
-  background-size: 9px 9px, 7px 7px, 8px 8px;
-  background-position: 12% 30%, 84% 62%, 30% 82%;
+  background-size:
+    9px 9px,
+    7px 7px,
+    8px 8px;
+  background-position:
+    12% 30%,
+    84% 62%,
+    30% 82%;
   background-repeat: no-repeat;
   filter: blur(1.5px);
   opacity: 0;
@@ -762,7 +775,7 @@
   border-radius: 50%;
   transform: perspective(800px) rotateX(70deg);
   opacity: 0;
-  animation: ice-orbit 900ms ease-out 2000ms both;
+  animation: ice-orbit 1000ms ease-out 3640ms both;
 }
 
 @keyframes ice-orbit {
@@ -829,7 +842,13 @@
   translate: -50% -50%;
   content: "";
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(230 248 255 / 55%), rgb(166 230 255 / 22%) 40%, rgb(169 131 255 / 10%) 65%, transparent);
+  background: radial-gradient(
+    closest-side,
+    rgb(230 248 255 / 55%),
+    rgb(166 230 255 / 22%) 40%,
+    rgb(169 131 255 / 10%) 65%,
+    transparent
+  );
   mix-blend-mode: screen;
   opacity: 0;
   animation: ice-vortex-core 1500ms ease both;
@@ -923,4 +942,12 @@
   .ice-entry-near {
     filter: none;
   }
+}
+
+/* Canvas, calls and the small light accents are sought by the entry clock.
+   Paused from the first paint, including before the renderer is ready. */
+.ice-entry[data-clock="shared"] *,
+.ice-entry[data-clock="shared"] *::before,
+.ice-entry[data-clock="shared"] *::after {
+  animation-play-state: paused;
 }

@@ -1,9 +1,3 @@
-    let settling = false;
-    const target = this.targetGeometry;
-    if (target) {
-      const follow = 1 - Math.exp(-elapsed / 52);
-      const d = Math.abs(target.x - g0.x) + Math.abs(target.y - g0.y)
-              + Math.abs(target.width - g0.width) + Math.abs(target.height - g0.height);
       if (d < 0.12) this.geometry = target;
       else {
         this.geometry = {
@@ -103,9 +97,10 @@ function initRail(root) {
   const syncTabState = (i) => {
     tabs().forEach((tab, index) => {
       const selected = index === i;
-      tab.setAttribute('aria-selected', String(selected));
+      if (tab.getAttribute('aria-selected') !== String(selected)) tab.setAttribute('aria-selected', String(selected));
       tab.classList.toggle('is-active', selected);
-      tab.tabIndex = selected ? 0 : -1;
+      const tabIndex = selected ? 0 : -1;
+      if (tab.tabIndex !== tabIndex) tab.tabIndex = tabIndex;
     });
   };
   syncTabState(active);
@@ -123,12 +118,15 @@ function initRail(root) {
   const settle = (i, geos = measure()) => {
     const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
+    // Read the available space before changing the lens styles, avoiding
+    // another read-after-write layout inside the same settle.
+    const clientWidth = root.clientWidth, clientHeight = root.clientHeight;
+    const spareX = Math.max(0, Math.min(...geos.map(box => Math.min(box.x, clientWidth - box.x - box.width))) - 1) * 2;
+    const spareY = Math.max(0, Math.min(...geos.map(box => Math.min(box.y, clientHeight - box.y - box.height))) - 1) * 2;
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
     // Enlarge visibly without resizing the hit target or crossing the shell.
-    const spareX = Math.max(0, Math.min(...geos.map(box => Math.min(box.x, root.clientWidth - box.x - box.width))) - 1) * 2;
-    const spareY = Math.max(0, Math.min(...geos.map(box => Math.min(box.y, root.clientHeight - box.y - box.height))) - 1) * 2;
     lens.style.setProperty('--liquid-held-scale-x', String(1 + Math.min(20, spareX) / Math.max(1, g.width)));
     lens.style.setProperty('--liquid-held-scale-y', String(1 + Math.min(16, spareY) / Math.max(1, g.height)));
     lens.style.removeProperty('scale');
@@ -269,3 +267,11 @@ function initRail(root) {
         const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
         if (lens.style.width !== width) lens.style.width = width;
         if (lens.style.height !== height) lens.style.height = height;
+        lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
+      }
+      if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
+      contact(m.x, m.y);
+      return;
+    }
+
+    const px = (m.x - gesture.rect.left) / gesture.sx;

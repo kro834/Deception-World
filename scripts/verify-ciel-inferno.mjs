@@ -201,6 +201,19 @@ async function burned(page, dir, label) {
     { timeout: 15000 },
   );
   await page.waitForTimeout(200);
+  if (label === "burned") {
+    const black = await page.screenshot({ path: join(dir, "burned-black.png"), scale: "css" });
+    const stats = await sharp(black).removeAlpha().stats();
+    assert.ok(
+      stats.channels.slice(0, 3).every((channel) => channel.max <= 1),
+      "the initial burned surface is black",
+    );
+    assert.equal(stats.isOpaque, true);
+  }
+  await page.locator("section[data-ciel-sequin]").waitFor({ state: "visible", timeout: 10000 });
+  // The new surface may schedule its initial still frame while it loads.
+  // Wait for that finite work before checking that the former fire stays stopped.
+  await page.waitForFunction(() => window.__infernoQA.pending.size === 0, null, { timeout: 5000 });
   const state = await page.evaluate(
     (keys) => ({
       pending: window.__infernoQA.pending.size,
@@ -210,8 +223,16 @@ async function burned(page, dir, label) {
       open: document.querySelector("dialog.ciel-inferno")?.open,
       phase: document.querySelector("dialog.ciel-inferno")?.dataset.phase,
       renderer: document.querySelector("dialog.ciel-inferno")?.dataset.renderer,
-      canvasCount: document.querySelectorAll(".ciel-inferno canvas").length,
-      controls: [...document.querySelectorAll(".ciel-inferno button, button.ciel-button")].filter(
+      canvasCount: document.querySelectorAll(".ciel-inferno-field, .ciel-inferno-detail").length,
+      sequinControls: [...document.querySelectorAll("section[data-ciel-sequin] button")].filter(
+        (element) =>
+          element.getClientRects().length && getComputedStyle(element).visibility !== "hidden",
+      ).length,
+      controls: [
+        ...document.querySelectorAll(
+          "button.ciel-button, .ciel-inferno button:not(section[data-ciel-sequin] button)",
+        ),
+      ].filter(
         (element) =>
           element.getClientRects().length && getComputedStyle(element).visibility !== "hidden",
       ).length,
@@ -222,7 +243,8 @@ async function burned(page, dir, label) {
     }),
     settingKeys,
   );
-  assert.equal(state.canvasCount, 0, "burned removes both GPU and detail canvases");
+  assert.equal(state.canvasCount, 0, "burned removes the original fire and detail canvases");
+  assert.equal(state.sequinControls, 3, "the sequin surface offers its three controls");
   assert.equal(state.renderer, "stopped", "burned no longer owns an active graphics backend");
   assert.equal(state.controls, 0, "burned has no visible return, close or navigation controls");
   assert.equal(state.pending, 0, "burned leaves no inferno requestAnimationFrame work");
@@ -234,14 +256,7 @@ async function burned(page, dir, label) {
     "burned renderer cannot keep painting",
   );
   assert.equal(await page.evaluate(() => window.__infernoQA.jetDraws), state.draws);
-  const capture = await page.screenshot({ path: join(dir, `${label}.png`), scale: "css" });
-  const stats = await sharp(capture).removeAlpha().stats();
-  assert.ok(
-    stats.channels.slice(0, 3).every((channel) => channel.max <= 1),
-    "the entire viewport is pure black",
-  );
-  assert.equal(stats.isOpaque, true, "the black surface is opaque, not transparent PNG pixels");
-  state.blackPixelMax = Math.max(...stats.channels.slice(0, 3).map((channel) => channel.max));
+  await page.screenshot({ path: join(dir, `${label}.png`), scale: "css" });
   assert.ok(state.documentWidth <= state.viewportWidth, "no horizontal overflow behind the blank");
   return state;
 }
@@ -433,6 +448,21 @@ try {
         assert.equal(await page.locator("dialog.ciel-inferno").count(), 0);
         // A pause must discard those two ordinary taps before the deliberate burst.
         await page.waitForTimeout(650);
+        await page.waitForFunction(
+          () => document.querySelector("button.ciel-button")?.dataset.navigating === "false",
+          null,
+          { timeout: 15000 },
+        );
+        // The first ordinary tap may have entered World; let its route handoff
+        // finish before starting the timed ten-tap gesture.
+        await page.waitForFunction(
+          () =>
+            !document.documentElement.hasAttribute("data-loading") &&
+            !document.querySelector(".load-gate"),
+          null,
+          { timeout: 15000 },
+        );
+        await page.waitForTimeout(700);
         record.beforeBurst = await page.locator("button.ciel-button").evaluate((button) => ({
           now: performance.now(),
           navigating: button.dataset.navigating,

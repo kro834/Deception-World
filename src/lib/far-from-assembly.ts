@@ -174,8 +174,11 @@ export function mountFarFromAssembly(
     !connection?.saveData &&
     !/^(slow-)?2g$/.test(connection?.effectiveType || "") &&
     html.dataset.worldEffects !== "economy";
+  // The entry already owns an assembly scene. Its existing cover marker
+  // defers only this page's engine, never the transition renderer itself.
+  const canStart = () => motionAllowed() && !html.dataset.routeCover;
   const start = () => {
-    if (disposed || dispose || loading || !motionAllowed()) return;
+    if (disposed || dispose || loading || !canStart()) return;
     cancelIdle();
     loading = true;
     if (host.dataset.rznLoad === "error") host.dataset.rznLoad = "waiting";
@@ -187,7 +190,7 @@ export function mountFarFromAssembly(
     }).then(
       (module) => {
         loading = false;
-        if (disposed || dispose) return;
+        if (disposed || dispose || !canStart()) return;
         // The engine answers the retry and wake events from here on.
         stopListening();
         try {
@@ -204,7 +207,7 @@ export function mountFarFromAssembly(
       },
       (error) => {
         loading = false;
-        if (disposed) return;
+        if (disposed || !canStart()) return;
         console.error("[far-from suit-up] the engine chunk could not be loaded", error);
         host.dataset.rznLoad = "error";
       },
@@ -252,8 +255,16 @@ export function mountFarFromAssembly(
       host.dataset.rznLoad = "static";
       return;
     }
+    if (!canStart()) {
+      cancelIdle();
+      return;
+    }
     // (A failed import keeps its error until it is retried.)
     if (host.dataset.rznLoad === "error" && !loading) return;
+    if (woken) {
+      start();
+      return;
+    }
     host.dataset.rznLoad = "waiting";
     if (idleId || idleTimer || loading) return;
     if (typeof environment.requestIdleCallback === "function")
@@ -274,7 +285,7 @@ export function mountFarFromAssembly(
     typeof environment.MutationObserver === "function"
       ? new environment.MutationObserver(sync)
       : null;
-  observer?.observe(html, { attributes: true, attributeFilter: ["data-world-effects"] });
+  observer?.observe(html, { attributes: true, attributeFilter: ["data-world-effects", "data-route-cover"] });
   reduced.addEventListener?.("change", sync);
   forced.addEventListener?.("change", sync);
   sync();

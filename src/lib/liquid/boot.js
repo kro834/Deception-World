@@ -373,9 +373,10 @@ function initRail(root) {
   const syncTabState = (i) => {
     tabs().forEach((tab, index) => {
       const selected = index === i;
-      tab.setAttribute('aria-selected', String(selected));
+      if (tab.getAttribute('aria-selected') !== String(selected)) tab.setAttribute('aria-selected', String(selected));
       tab.classList.toggle('is-active', selected);
-      tab.tabIndex = selected ? 0 : -1;
+      const tabIndex = selected ? 0 : -1;
+      if (tab.tabIndex !== tabIndex) tab.tabIndex = tabIndex;
     });
   };
   syncTabState(active);
@@ -393,12 +394,15 @@ function initRail(root) {
   const settle = (i, geos = measure()) => {
     const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
+    // Read the available space before changing the lens styles, avoiding
+    // another read-after-write layout inside the same settle.
+    const clientWidth = root.clientWidth, clientHeight = root.clientHeight;
+    const spareX = Math.max(0, Math.min(...geos.map(box => Math.min(box.x, clientWidth - box.x - box.width))) - 1) * 2;
+    const spareY = Math.max(0, Math.min(...geos.map(box => Math.min(box.y, clientHeight - box.y - box.height))) - 1) * 2;
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
     // Enlarge visibly without resizing the hit target or crossing the shell.
-    const spareX = Math.max(0, Math.min(...geos.map(box => Math.min(box.x, root.clientWidth - box.x - box.width))) - 1) * 2;
-    const spareY = Math.max(0, Math.min(...geos.map(box => Math.min(box.y, root.clientHeight - box.y - box.height))) - 1) * 2;
     lens.style.setProperty('--liquid-held-scale-x', String(1 + Math.min(20, spareX) / Math.max(1, g.width)));
     lens.style.setProperty('--liquid-held-scale-y', String(1 + Math.min(16, spareY) / Math.max(1, g.height)));
     lens.style.removeProperty('scale');
@@ -865,29 +869,49 @@ function initRail(root) {
     settle(next);
   });
 
+  // Selection semantics update immediately; geometry waits until the
+  // route cover has released and bursts share one frame. Measuring here
+  // synchronously used to force the entire arriving page's first layout.
+  let ro = 0;
+  let pendingLayout = false;
+  const routeRoot = document.documentElement;
+  const covered = () => Boolean(routeRoot?.dataset.routeCover);
+  const scheduleLayout = () => {
+    if (disposed) return;
+    pendingLayout = true;
+    if (ro || covered()) return;
+    ro = requestAnimationFrame(() => {
+      ro = 0;
+      if (disposed || covered()) return;
+      pendingLayout = false;
+      if (gesture && gesture.hold !== 'armed') return;
+      settle(active);
+    });
+  };
   const relayout = () => {
     const i = tabs().findIndex((t) => t.getAttribute('aria-selected') === 'true');
     if (i >= 0) active = i;
     syncTabState(active);
-    // Keep the committed selection current without stealing a dragged lens.
-    if (gesture && gesture.hold !== 'armed') return;
-    settle(active);
+    scheduleLayout();
   };
-  let ro = 0;
-  const resizeObserver = new ResizeObserver(() => {
-    if (ro) return;
-    ro = requestAnimationFrame(() => { ro = 0; relayout(); });
-  });
+  const resizeObserver = new ResizeObserver(scheduleLayout);
   resizeObserver.observe(root);
+  const coverObserver = routeRoot && typeof MutationObserver === 'function'
+    ? new MutationObserver(() => {
+        if (!covered() && pendingLayout) scheduleLayout();
+      })
+    : null;
+  coverObserver?.observe(routeRoot, { attributes: true, attributeFilter: ['data-route-cover'] });
   on(root, 'liquidrelayout', relayout);
-  const initialFrame = requestAnimationFrame(() => settle(active));
+  scheduleLayout();
 
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     cancel();
     events.abort();
-    cancelAnimationFrame(initialFrame);
+    coverObserver?.disconnect();
+    pendingLayout = false;
     clearTimeout(holdTimer);
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;

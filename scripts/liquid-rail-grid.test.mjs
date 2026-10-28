@@ -67,13 +67,16 @@ function makeStyle() {
   };
 }
 
-function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
+function mountRail(boxes, { classes = ["liquid-swipe-tabs"], cover } = {}) {
   const source = readFileSync(new URL("../src/lib/liquid/boot.js", import.meta.url), "utf8");
   const initRailSource = extractFunction(source, "initRail");
   const win = new FakeTarget();
   win.innerWidth = 1024;
   const doc = new FakeTarget();
   doc.hidden = false;
+  doc.documentElement = { dataset: cover ? { routeCover: cover } : {} };
+  const coverObservers = [];
+  let measurements = 0;
   const tabs = boxes.map((box, index) => {
     const tab = new FakeTarget();
     const attributes = new Map([["aria-selected", String(index === 0)]]);
@@ -99,7 +102,7 @@ function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
     classList: { contains: (name) => classes.includes(name) },
     querySelector: (selector) => (selector === ":scope > .liquid-selection-lens" ? lens : null),
     querySelectorAll: (selector) => (selector === ':scope > button[role="tab"]' ? tabs : []),
-    getBoundingClientRect: () => ({ left: 0, top: 0, width, height }),
+    getBoundingClientRect: () => { measurements += 1; return { left: 0, top: 0, width, height }; },
     offsetWidth: width,
     offsetHeight: height,
     clientWidth: width,
@@ -149,6 +152,11 @@ function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
     },
     Math,
     REDUCED_MOTION: "(prefers-reduced-motion: reduce)",
+    MutationObserver: class MutationObserver {
+      constructor(callback) { this.callback = callback; coverObservers.push(this); }
+      observe() { this.active = true; }
+      disconnect() { this.active = false; }
+    },
     ResizeObserver: class ResizeObserver {
       observe() {}
       disconnect() {}
@@ -227,7 +235,15 @@ function mountRail(boxes, { classes = ["liquid-swipe-tabs"] } = {}) {
     return prevented;
   };
 
-  return { advance, dispose, flushFrames, lens, pointer, root, tabs, touchmove, win, doc };
+  return {
+    advance, dispose, flushFrames, lens, pointer, root, tabs, touchmove, win, doc,
+    get measurements() { return measurements; },
+    setCover(value) {
+      if (value) doc.documentElement.dataset.routeCover = value;
+      else delete doc.documentElement.dataset.routeCover;
+      for (const observer of coverObservers) if (observer.active) observer.callback();
+    },
+  };
 }
 
 const cell = (left, top) => ({ left, top, width: 50, height: 50 });
@@ -289,6 +305,7 @@ test("Extreme's controlled rollback resyncs the lens and permits the same keyboa
     ui.tabs[1].setAttribute("aria-selected", "false");
     ui.tabs[1].tabIndex = -1;
     ui.root.dispatch("liquidrelayout");
+    ui.flushFrames();
     assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
     assert.deepEqual(selections, [1], "a rollback itself must not request another form");
     ui.root.dispatch("keydown", { target: ui.tabs[0], key: "ArrowRight" });
@@ -312,6 +329,7 @@ test("a controlled rollback during a drag permits the same selection on release"
     ui.tabs[0].setAttribute("aria-selected", "true");
     ui.tabs[1].setAttribute("aria-selected", "false");
     ui.root.dispatch("liquidrelayout");
+    ui.flushFrames();
     assert.equal(ui.lens.style.transform, heldTransform, "relayout must not steal the dragged lens");
     assert.deepEqual(selections, [1], "rollback and drag preview must not commit a form");
     assert.equal(ui.tabs[0].tabIndex, 0, "roving focus follows the committed rollback");
@@ -339,6 +357,7 @@ for (const cancelEvent of ["pointercancel", "blur"]) {
       ui.tabs[0].setAttribute("aria-selected", "true");
       ui.tabs[1].setAttribute("aria-selected", "false");
       ui.root.dispatch("liquidrelayout");
+    ui.flushFrames();
       ui.win.dispatch(cancelEvent, { pointerId: 7 });
       ui.flushFrames();
       assert.deepEqual(selections, [1], "cancel must not emit another selection");
@@ -362,6 +381,7 @@ test("a controlled rollback while a rider touch is armed relayouts without engag
     ui.tabs[0].setAttribute("aria-selected", "true");
     ui.tabs[1].setAttribute("aria-selected", "false");
     ui.root.dispatch("liquidrelayout");
+    ui.flushFrames();
     assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
     assert.equal(ui.root.dataset.liquidArmed, "true", "rollback must not engage or cancel the touch");
     assert.equal(ui.root.dataset.railLock, undefined);
@@ -412,6 +432,7 @@ test("pointer, keyboard and drag commit once without waiting for a controlled re
     assert.deepEqual(selections, [1, 2], "drag only previews until release");
     assert.equal(ui.tabs[2].getAttribute("aria-selected"), "true");
     ui.root.dispatch("liquidrelayout");
+    ui.flushFrames();
     ui.pointer("pointerup", 25, 25, ui.tabs[0]);
     ui.flushFrames();
     ui.tabs[0].dispatch("click", { detail: 1 });
@@ -709,3 +730,27 @@ for (const [name, interrupt] of Object.entries({
     }
   });
 }
+
+
+test("arrival relayout bursts do not measure under the cover and settle once after release", () => {
+  const ui = mountRail([cell(0, 0), cell(50, 0)], { cover: "covering" });
+  try {
+    for (let i = 0; i < 8; i++) ui.root.dispatch("liquidrelayout");
+    ui.flushFrames();
+    assert.equal(ui.measurements, 0, "the arriving document is not forced to layout");
+    ui.setCover("revealing"); ui.flushFrames();
+    assert.equal(ui.measurements, 0, "reveal retains the cover's layout budget");
+    ui.setCover(null);
+    ui.root.dispatch("liquidrelayout"); ui.root.dispatch("liquidrelayout");
+    assert.equal(ui.measurements, 0, "event dispatch stays free of synchronous geometry reads");
+    ui.flushFrames();
+    assert.equal(ui.measurements, 1);
+    assert.equal(ui.lens.style.transform, "translate3d(0.00px,0.00px,0)");
+  } finally { ui.dispose(); }
+});
+
+test("disposing a covered rail cancels its deferred geometry work", () => {
+  const ui = mountRail([cell(0, 0)], { cover: "covering" });
+  ui.root.dispatch("liquidrelayout"); ui.dispose(); ui.setCover(null); ui.flushFrames();
+  assert.equal(ui.measurements, 0);
+});

@@ -1,0 +1,116 @@
+.ciel-sequin {
+  isolation: isolate;
+  touch-action: none;
+  animation: ciel-sequin-arrive 480ms ease-out both;
+}
+.ciel-sequin-surface,
+.ciel-sequin-surface canvas,
+.ciel-sequin-surface img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ciel-sequin-surface {
+  overflow: hidden;
+}
+.ciel-sequin-surface canvas {
+  display: block;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+.ciel-sequin-surface img {
+  object-fit: contain;
+}
+.ciel-sequin-surface [hidden] {
+  display: none !important;
+}
+.ciel-sequin-controls {
+  position: absolute;
+  z-index: 1;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.ciel-sequin-controls p {
+  flex-basis: 100%;
+  margin: 0;
+  color: #edf5ef;
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  text-align: center;
+  text-shadow:
+    0 1px 5px #000,
+    0 1px 12px #000;
+}
+.ciel-sequin-controls button {
+  min-height: 48px;
+  min-width: 0;
+  padding: 10px 16px;
+  border: 1px solid #92b4a3;
+  border-radius: 999px;
+  background: #071d17eb;
+  color: #edf5ef;
+  font:
+    500 14px/1.4 system-ui,
+    sans-serif;
+  letter-spacing: 0.05em;
+  box-shadow:
+    0 3px 22px #0008,
+    inset 0 1px #d6e4d426;
+  pointer-events: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.ciel-sequin-controls button:hover {
+  background: #173c2e;
+}
+.ciel-sequin-controls button:focus-visible {
+  outline: 3px solid #e6f3cf;
+  outline-offset: 4px;
+}
+@keyframes ciel-sequin-arrive {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ciel-sequin {
+    animation: none;
+  }
+}
+@media (max-width: 390px) {
+  .ciel-sequin-controls {
+    gap: 7px;
+    left: 12px;
+    right: 12px;
+  }
+  .ciel-sequin-controls button {
+    flex: 1;
+    padding-inline: 9px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .ciel-sequin-controls button:last-child {
+    flex: 1.2;
+  }
+}
+@media (forced-colors: active) {
+  .ciel-sequin-controls {
+    forced-color-adjust: auto;
+  }
+  .ciel-sequin-controls button {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+}

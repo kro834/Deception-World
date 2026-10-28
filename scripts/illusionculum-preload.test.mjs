@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   createIllusionculumPreloader,
   ILLUSIONCULUM_PRELOAD_URLS,
+  ILLUSIONCULUM_COMPACT_ENTRY_URLS,
 } from "../src/lib/illusionculum-preload.ts";
 
 const environment = (fetch, overrides = {}) => ({
@@ -50,7 +51,7 @@ test("intent warms exact compressed entry resources and code without decoding or
   const loader = readFileSync(new URL("../src/lib/asset-loader.ts", import.meta.url), "utf8");
   assert.match(
     loader,
-    /if \(urls.includes\(ILLUSIONCULUM_HERO.src\)\) void preloadIllusionculumAssembly\(\)/,
+    /if \(urls.includes\(ILLUSIONCULUM_HERO.src\)\) void preloadIllusionculumAssembly\(\{ entry: true \}\)/,
   );
 });
 
@@ -101,4 +102,63 @@ test("motion, economy and data-saving gates prevent speculative work", async () 
     };
     await createIllusionculumPreloader(environment(fail, gate), fail)();
   }
+});
+
+test("successful intent streams and code are reused across focus, click and page warming", async () => {
+  const requests = []; let imports = 0;
+  const warm = createIllusionculumPreloader(environment(async (url) => {
+    requests.push(url); return new Response(new Uint8Array([1]));
+  }), async () => { imports++; });
+  await warm(); await warm(); await warm();
+  assert.deepEqual(requests, [...ILLUSIONCULUM_PRELOAD_URLS]);
+  assert.equal(imports, 1);
+});
+
+test("compact entry warms only rendered sheets; the scroll scene still receives its gold and guide", async () => {
+  const requests = [];
+  const warm = createIllusionculumPreloader(environment(async (url) => {
+    requests.push(url); return new Response(new Uint8Array([1]));
+  }, { matchMedia: (query) => ({ matches: query.includes("coarse") }) }), async () => {});
+  await warm({ entry: true });
+  assert.deepEqual(requests, [...ILLUSIONCULUM_COMPACT_ENTRY_URLS]);
+  await warm();
+  assert.equal(requests.length, ILLUSIONCULUM_PRELOAD_URLS.length);
+  assert.equal(new Set(requests).size, requests.length, "shared entry sheets are not streamed twice");
+  assert.ok(ILLUSIONCULUM_PRELOAD_URLS.every((url) => requests.includes(url)));
+});
+
+test("a full-scene request upgrades an in-flight compact entry without duplicating its streams", async () => {
+  const requests = []; let release;
+  const ready = new Promise((resolve) => { release = resolve; });
+  const warm = createIllusionculumPreloader(environment(async (url) => {
+    requests.push(url); await ready; return new Response(new Uint8Array([1]));
+  }, { matchMedia: (query) => ({ matches: query.includes("coarse") }) }), async () => {});
+  const entry = warm({ entry: true }); const scroll = warm();
+  assert.equal(requests.length, ILLUSIONCULUM_COMPACT_ENTRY_URLS.length);
+  release(); await Promise.all([entry, scroll]);
+  assert.equal(requests.length, ILLUSIONCULUM_PRELOAD_URLS.length);
+  assert.equal(new Set(requests).size, requests.length);
+});
+
+test("partial failures retry only unfinished bytes while preserving successful code and sheets", async () => {
+  const requests = []; let failed = false, imports = 0;
+  const retryUrl = ILLUSIONCULUM_PRELOAD_URLS[3];
+  const warm = createIllusionculumPreloader(environment(async (url) => {
+    requests.push(url);
+    if (url === retryUrl && !failed) { failed = true; return new Response(null, { status: 503 }); }
+    return new Response(new Uint8Array([1]));
+  }), async () => { imports++; });
+  await warm(); await warm();
+  assert.equal(requests.length, ILLUSIONCULUM_PRELOAD_URLS.length + 1);
+  assert.equal(requests.at(-1), retryUrl);
+  assert.equal(imports, 1);
+});
+
+test("critical entry decoding excludes the unused full cutout and later orbit sprites", () => {
+  const loader = readFileSync(new URL("../src/lib/asset-loader.ts", import.meta.url), "utf8");
+  const critical = loader.match(/ILLUSIONCULUM_SAGA_ENTER_ASSETS = \[([\s\S]*?)\] as const/)[1];
+  assert.match(critical, /ILLUSIONCULUM_HERO\.src/);
+  assert.match(critical, /undersuit\.webp/);
+  assert.match(critical, /driver-standin\.webp/);
+  assert.doesNotMatch(critical, /ENTRY_CUTOUT|orb-/);
 });

@@ -1,17 +1,3 @@
-  const cancelOtherTouch = (event) => {
-    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
-  };
-  const cancelWithEscape = (event) => {
-    if (holdToDrag && gesture && event.key === 'Escape') {
-      event.preventDefault();
-      cancel();
-    }
-  };
-  window.addEventListener('pointerdown', cancelOtherTouch, true);
-  window.addEventListener('keydown', cancelWithEscape);
-  // Rotation invalidates captured coordinates. Toolbar height changes do not:
-  // cancelling on every visualViewport resize would interrupt normal iOS drags.
-  window.addEventListener('orientationchange', cancel);
   let viewportWidth = window.innerWidth;
   const handleViewportResize = () => {
     if (window.innerWidth === viewportWidth) return;
@@ -54,29 +40,49 @@
     settle(next);
   });
 
+  // Selection semantics update immediately; geometry waits until the
+  // route cover has released and bursts share one frame. Measuring here
+  // synchronously used to force the entire arriving page's first layout.
+  let ro = 0;
+  let pendingLayout = false;
+  const routeRoot = document.documentElement;
+  const covered = () => Boolean(routeRoot?.dataset.routeCover);
+  const scheduleLayout = () => {
+    if (disposed) return;
+    pendingLayout = true;
+    if (ro || covered()) return;
+    ro = requestAnimationFrame(() => {
+      ro = 0;
+      if (disposed || covered()) return;
+      pendingLayout = false;
+      if (gesture && gesture.hold !== 'armed') return;
+      settle(active);
+    });
+  };
   const relayout = () => {
     const i = tabs().findIndex((t) => t.getAttribute('aria-selected') === 'true');
     if (i >= 0) active = i;
     syncTabState(active);
-    // Keep the committed selection current without stealing a dragged lens.
-    if (gesture && gesture.hold !== 'armed') return;
-    settle(active);
+    scheduleLayout();
   };
-  let ro = 0;
-  const resizeObserver = new ResizeObserver(() => {
-    if (ro) return;
-    ro = requestAnimationFrame(() => { ro = 0; relayout(); });
-  });
+  const resizeObserver = new ResizeObserver(scheduleLayout);
   resizeObserver.observe(root);
+  const coverObserver = routeRoot && typeof MutationObserver === 'function'
+    ? new MutationObserver(() => {
+        if (!covered() && pendingLayout) scheduleLayout();
+      })
+    : null;
+  coverObserver?.observe(routeRoot, { attributes: true, attributeFilter: ['data-route-cover'] });
   on(root, 'liquidrelayout', relayout);
-  const initialFrame = requestAnimationFrame(() => settle(active));
+  scheduleLayout();
 
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     cancel();
     events.abort();
-    cancelAnimationFrame(initialFrame);
+    coverObserver?.disconnect();
+    pendingLayout = false;
     clearTimeout(holdTimer);
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;

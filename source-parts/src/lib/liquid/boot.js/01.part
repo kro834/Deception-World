@@ -268,3 +268,9 @@ class GlassRenderer {
     this.lastTime = time;
 
     // Droplet lag: chase the requested geometry instead of snapping to it.
+    let settling = false;
+    const target = this.targetGeometry;
+    if (target) {
+      const follow = 1 - Math.exp(-elapsed / 52);
+      const d = Math.abs(target.x - g0.x) + Math.abs(target.y - g0.y)
+              + Math.abs(target.width - g0.width) + Math.abs(target.height - g0.height);

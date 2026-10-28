@@ -33,6 +33,8 @@ export interface RexonanceAssemblyPiece {
 }
 
 export interface RexonanceAssemblyGold {
+  /** Additional completed-shell dwell and seating time, by plate. */
+  seatDelay?: (piece: RexonanceAssemblyPiece) => number;
   /** The gold atlas: each plate's raw gunmetal channel, alpha the trims' mask. */
   atlas: string;
   cell: number;
@@ -138,6 +140,13 @@ export interface RexonanceAssemblyNanites {
       readonly cols: number;
       readonly centre: readonly number[];
     };
+  };
+  /** Opt-in shell choreography; omitted preserves the original build. */
+  readonly staging?: {
+    readonly hold: number;
+    readonly seat: number;
+    readonly lift: number;
+    readonly depth: number;
   };
   readonly guide?: { readonly src: string };
   /** Each plate's real outline (base64 Int16 LE loops, quarter figure px). */

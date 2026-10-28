@@ -181,10 +181,11 @@ test("mobile prepares immediately after cover without proximity or idle delay", 
   assert.ok(f.observersDisconnected());
 });
 
-for (const reason of ["pagehide", "hidden", "covered", "disposed"]) {
-  test(`pending import never mounts after becoming ${reason}`, async () => {
+for (const mobile of [true, false]) for (const reason of ["pagehide", "hidden", "covered", "disposed"]) {
+  test(`${mobile ? "compact" : "desktop"} pending import never mounts after becoming ${reason}`, async () => {
     let finish;
     const f = fixture({
+      mobile,
       load: (module) =>
         new Promise((resolve) => {
           finish = () => resolve(module);
@@ -254,20 +255,45 @@ test("reduced motion never loads an engine", async () => {
   f.dispose();
 });
 
-test("desktop retains idle preparation and engine across distance, cover and visibility", async () => {
+test("desktop prepares after foreground cover release and retains its engine across later covers", async () => {
   const f = fixture({ mobile: false, cover: true });
   assert.equal(f.prewarms, 0);
   f.hidden(true);
   await settled();
+  // Owner (2026-10-27): the active entry owns preparation on every viewport.
   assert.equal(f.loads, 0);
-  assert.equal(f.queued, 1);
+  assert.equal(f.queued, 0);
+  await f.flush(); assert.equal(f.loads, 0);
+  f.cover(false); assert.equal(f.queued, 0, "hidden pages still defer preparation");
+  f.hidden(false); assert.equal(f.queued, 1);
   await f.flush();
   assert.equal(f.loads, 1);
   assert.equal(f.mounts, 1);
+  f.host.dataset.rznLoad = "ready";
   f.near(false);
   f.cover(true);
   f.hidden(true);
+  assert.equal(f.host.dataset.rznLoad, "ready", "a retained canvas keeps its readiness through cover pause");
   assert.equal(f.releases, 0);
   f.dispose();
   assert.equal(f.releases, 1);
+});
+
+
+test("desktop page preparation waits for the existing entry cover and resumes once after release", async () => {
+  const f = fixture({ mobile: false, cover: true });
+  assert.equal(f.queued, 0); await f.flush(); assert.equal(f.loads, 0);
+  f.cover(false); assert.equal(f.queued, 1); await f.flush();
+  assert.equal(f.loads, 1); assert.equal(f.mounts, 1);
+  f.cover(true); f.cover(false); await f.flush();
+  assert.equal(f.mounts, 1, "a release cannot mount a duplicate live page engine");
+  f.dispose(); assert.equal(f.releases, 1); assert.ok(f.observersDisconnected());
+});
+
+test("cancelled desktop preparation remains usable after Back or skip releases the cover", async () => {
+  let finish; const f = fixture({ mobile: false, load: (module) => new Promise((resolve) => { finish = () => resolve(module); }) });
+  await f.flush(); assert.equal(f.loads, 1);
+  f.cover(true); finish(); await settled(); assert.equal(f.mounts, 0);
+  f.cover(false); await f.flush(); finish(); await settled();
+  assert.equal(f.mounts, 1); f.dispose(); assert.equal(f.releases, 1);
 });

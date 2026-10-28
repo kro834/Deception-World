@@ -89,12 +89,11 @@ export function mountIllusionculumAssembly(
     !connection?.saveData &&
     !/^(slow-)?2g$/.test(connection?.effectiveType || "") &&
     html.dataset.worldEffects !== "economy";
-  // A route cover already owns an assembly scene. Give it the phone's
-  // memory budget first, then let the page's original early preloader run
-  // immediately, well before the reader reaches the runway.
+  // A route cover already owns an assembly scene. Do not prepare the page's
+  // second engine beside that active entry, including iPads reporting a fine
+  // pointer. The existing cover observer resumes preparation after release.
   const canStart = () =>
-    motionAllowed() &&
-    (!compact.matches || (!pageHidden && !document.hidden && !html.dataset.routeCover));
+    motionAllowed() && !pageHidden && !document.hidden && !html.dataset.routeCover;
   const start = () => {
     if (disposed || dispose || loading || !canStart()) return;
     loading = true;
@@ -124,7 +123,9 @@ export function mountIllusionculumAssembly(
         dispose();
         dispose = null;
       }
-      host.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
+      // A retained desktop engine already owns its ready/static state. Do not
+      // relabel that live canvas as pending merely because a cover paused it.
+      if (!dispose || !motionAllowed()) host.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
       return;
     }
     if (dispose) return;

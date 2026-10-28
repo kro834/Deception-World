@@ -9,7 +9,7 @@ const GALLERY_UPLOAD_PROTOCOL = 2;
 const GALLERY_MAX_FILE_BYTES = 19 * 1024 * 1024;
 
 // The CLI supplies authenticated protection access without disabling protection.
-export async function vercelCurlFetch(url) {
+export async function vercelCurlFetch(url, init = {}) {
   const { stdout } = await runFile(
     "vercel",
     [
@@ -24,7 +24,7 @@ export async function vercelCurlFetch(url) {
       "--write-out",
       "\\n%{http_code}",
     ],
-    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+    { encoding: "buffer", maxBuffer: 64 * 1024 * 1024, signal: init.signal },
   );
   const status = Number(stdout.subarray(-3).toString());
   if (!Number.isInteger(status) || status < 100)
@@ -73,24 +73,37 @@ function normalizedOrigin(value) {
 }
 
 async function request(fetchImpl, url, bypassToken, timeoutMs) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetchImpl(url, {
-      redirect: "follow",
-      signal: controller.signal,
-      headers: {
-        accept: "text/html,application/json;q=0.8",
-        ...(bypassToken
-          ? {
-              "x-vercel-protection-bypass": bypassToken,
-              "x-vercel-set-bypass-cookie": "true",
-            }
-          : {}),
-      },
-    });
-  } finally {
-    clearTimeout(timer);
+  const retryDelays = [250, 750];
+  for (let attempt = 0; ; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      return await fetchImpl(url, {
+        redirect: "follow",
+        signal: controller.signal,
+        headers: {
+          accept: "text/html,application/json;q=0.8",
+          ...(bypassToken
+            ? {
+                "x-vercel-protection-bypass": bypassToken,
+                "x-vercel-set-bypass-cookie": "true",
+              }
+            : {}),
+        },
+      });
+    } catch {
+      // Only rejected transports retry. HTTP/content/identity/hash checks
+      // remain outside this boundary, and raw transport errors can hold secrets.
+      if (attempt === retryDelays.length)
+        throw new Error(
+          controller.signal.aborted
+            ? "Request timed out after 3 attempts"
+            : "Network request failed after 3 attempts",
+        );
+    } finally {
+      clearTimeout(timer);
+    }
+    await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
   }
 }
 
@@ -301,6 +314,10 @@ export async function verifyPublicDeployment({
               asset.path,
             ) &&
             !/^\/ciel-button-20261018-(?:144|216|360)\.webp(?![\s\S])/u.test(asset.path) &&
+            !/^\/ciel-sequin-20261028\/ciel-(?:768|1536)\.webp(?![\s\S])/u.test(asset.path) &&
+            !/^\/ciel-sequin-studio-20261028\/(?:studio\.webp|provenance\.json)(?![\s\S])/u.test(
+              asset.path,
+            ) &&
             !/^\/(?:gallery\/|saga-extreme-|rexonance-forms-20261011\/excelsior-cutout-20261012\.webp$|rider-rexonance-excelsior-cutout-20261012(?:-delivery-(?:640|960|1022))?\.webp$|saga-cinema-assets\/(?:chapter-[1-4]\.jpg|saga-logo-(?:original|640)\.webp|menu-thumbnail(?:-20261012)?\.webp|michroma-latin\.woff2)$|exhibition-metal\/(?:brushed-alloy-(?:normal|roughness)\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$|rain-city-materials\/(?:(?:concrete|asphalt)-(?:albedo\.webp|(?:normal|roughness)\.png)|manifest\.json)(?![\s\S]))/u.test(
               asset.path,
             )) ||
@@ -378,7 +395,9 @@ async function main() {
   });
   console.log(`Public deployment smoke test: ${report.origin}`);
   for (const result of report.results) {
-    console.log(`${result.ok ? "PASS" : "FAIL"} ${result.path} (${result.status ?? "network"})`);
+    console.log(
+      `${result.ok ? "PASS" : "FAIL"} ${result.path} (${result.status ?? "verification error"})`,
+    );
   }
   if (!report.ok) process.exitCode = 1;
 }

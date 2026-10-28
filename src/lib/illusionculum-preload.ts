@@ -5,9 +5,19 @@ export const ILLUSIONCULUM_PRELOAD_URLS = [
   "/illusionculum-suit-20261023/plates.webp",
   "/illusionculum-suit-20261023/gold.webp",
   "/illusionculum-suit-20261023/guide.webp",
-  "/rexonance-nanites-20261023/cells.webp",
+  "/illusionculum-nanites-20261027/cells.webp",
   "/rexonance-nanites-20261023/fx.webp",
 ] as const;
+
+// Compact entry disables separate gold/conduit surfaces. The scroll scene
+// still prepares the full set, even on the same compact device.
+export const ILLUSIONCULUM_COMPACT_ENTRY_URLS = [
+  ILLUSIONCULUM_PRELOAD_URLS[0],
+  ILLUSIONCULUM_PRELOAD_URLS[1],
+  ILLUSIONCULUM_PRELOAD_URLS[4],
+  ILLUSIONCULUM_PRELOAD_URLS[5],
+] as const;
+type PreloadPurpose = { entry?: boolean };
 
 export function createIllusionculumPreloader(
   environment: Pick<Window, "matchMedia" | "document" | "navigator" | "fetch">,
@@ -15,7 +25,10 @@ export function createIllusionculumPreloader(
   timeoutMs = 8000,
 ) {
   let inFlight: Promise<void> | null = null;
-  return (): Promise<void> => {
+  let activeUrls: readonly string[] = [];
+  const completed = new Set<string>();
+  let codeReady = false;
+  const warm = ({ entry = false }: PreloadPurpose = {}): Promise<void> => {
     const connection = (
       environment.navigator as Navigator & {
         connection?: { saveData?: boolean; effectiveType?: string };
@@ -29,7 +42,16 @@ export function createIllusionculumPreloader(
       /^(slow-)?2g$/.test(connection?.effectiveType || "")
     )
       return Promise.resolve();
-    if (inFlight) return inFlight;
+    const compactEntry = entry && environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
+    const wanted = compactEntry ? ILLUSIONCULUM_COMPACT_ENTRY_URLS : ILLUSIONCULUM_PRELOAD_URLS;
+    const urls = wanted.filter((url) => !completed.has(url));
+    if (!urls.length && codeReady) return Promise.resolve();
+    if (inFlight) {
+      // An entry may finish warming while the page asks for its full scroll
+      // scene. Share current streams, then request only the two missing sheets.
+      return urls.every((url) => activeUrls.includes(url)) ? inFlight : inFlight.then(() => warm({ entry }));
+    }
+    activeUrls = urls;
     inFlight = new Promise<void>((resolve) => {
       const controller = new AbortController();
       let settled = false;
@@ -53,7 +75,10 @@ export function createIllusionculumPreloader(
         // Drain the stream into the HTTP cache without holding a full body or
         // asking the image decoder to allocate an uncompressed raster.
         const reader = response.body?.getReader();
-        if (!reader) return;
+        if (!reader) {
+          if (!controller.signal.aborted) completed.add(url);
+          return;
+        }
         if (controller.signal.aborted) {
           await reader.cancel();
           reader.releaseLock();
@@ -65,7 +90,10 @@ export function createIllusionculumPreloader(
         controller.signal.addEventListener("abort", cancel, { once: true });
         try {
           while (!controller.signal.aborted) {
-            if ((await reader.read()).done) break;
+            if ((await reader.read()).done) {
+              if (!controller.signal.aborted) completed.add(url);
+              break;
+            }
           }
         } finally {
           controller.signal.removeEventListener("abort", cancel);
@@ -73,19 +101,23 @@ export function createIllusionculumPreloader(
         }
       };
       void Promise.allSettled([
-        Promise.resolve().then(loadCode),
-        ...ILLUSIONCULUM_PRELOAD_URLS.map(pull),
+        codeReady ? Promise.resolve() : Promise.resolve().then(loadCode).then(() => {
+          if (!controller.signal.aborted) codeReady = true;
+        }),
+        ...urls.map(pull),
       ]).then(finish);
     }).finally(() => {
       inFlight = null;
+      activeUrls = [];
     });
     return inFlight;
   };
+  return warm;
 }
 
-let warm: (() => Promise<void>) | undefined;
-export function preloadIllusionculumAssembly(): Promise<void> {
+let warm: ((purpose?: PreloadPurpose) => Promise<void>) | undefined;
+export function preloadIllusionculumAssembly(purpose?: PreloadPurpose): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   warm ??= createIllusionculumPreloader(window);
-  return warm();
+  return warm(purpose);
 }
