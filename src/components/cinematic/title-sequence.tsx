@@ -22,6 +22,7 @@ import {
   OPENING_LOGO_WIDTH,
 } from "@/lib/opening-logo";
 import { useLoadGate } from "@/components/load-gate";
+import { armOpeningNotice, disarmOpeningNotice } from "@/lib/opening-notice";
 import { Particles } from "./particles";
 import { OPENING_BURN } from "./opening-timing";
 import type { BurnRun, BurnStats } from "./opening-burn";
@@ -759,15 +760,19 @@ export function TitleSequence() {
       // moving the title document or duplicating the transition locally.
       await waitForVisualPaint();
       if (!mountedRef.current || phaseRef.current !== "diving") return;
+      // Passing through the opening arms /world's notice (opening-notice.ts).
+      armOpeningNotice();
       await go({ to: "/world", assets: WORLD_ENTER_ASSETS, transitionCovered: true });
       // The covered route contract deliberately resolves cancellation and
       // timeout paths without throwing. If the title is still mounted, restore
       // its controls instead of leaving an inert `diving` frame behind.
       if (mountedRef.current && phaseRef.current === "diving" && window.location.pathname === "/") {
+        disarmOpeningNotice();
         phaseRef.current = "complete";
         setPhase("complete");
       }
     } catch {
+      disarmOpeningNotice();
       if (mountedRef.current) {
         phaseRef.current = "complete";
         setPhase("complete");

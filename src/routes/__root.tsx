@@ -18,6 +18,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
 import { ZeusButtonProvider } from "@/components/zeus-button";
+import { OpeningNotice } from "@/components/opening-notice";
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { IpadMenuMode } from "@/components/ipad-menu-mode";
@@ -280,6 +281,7 @@ function RootDocument() {
               <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />
+              <OpeningNotice />
             </ZeusButtonProvider>
           </LoadGateProvider>
         </AuthProvider>
