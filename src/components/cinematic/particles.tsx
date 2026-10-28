@@ -1,42 +1,46 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, type MutableRefObject, type RefObject } from "react";
 
 type ParticleTone = "ice" | "gold" | "prism";
 
 type Particle = {
   x: number;
   y: number;
-  // The scattered start and the logo point this particle assembles onto.
-  sx: number;
-  sy: number;
-  tx: number;
-  ty: number;
-  // Its own moment on the assembly clock (seconds) and its burst heading.
-  delay: number;
-  bx: number;
-  by: number;
-  r: number;
+  // The last drawn position: the streak between it and (x, y) is the motion blur.
+  px: number;
+  py: number;
   vx: number;
   vy: number;
+  // The logo point this particle condenses onto, and its moment on the clock.
+  tx: number;
+  ty: number;
+  delay: number;
+  // Its own curl-noise offset, so no two particles share a path.
+  nx: number;
+  ny: number;
+  r: number;
   a: number;
   phase: number;
-  sway: number;
   tone: ParticleTone;
+  // Plain dust after the burst.
+  dx: number;
+  dy: number;
+  sway: number;
 };
 
-// The assembly storyboard (seconds from the title's first playing frame; the
-// same clock as the CSS arrival in styles-opening-cinema.css):
-//   0.2-1.46  the dust gathers onto the ice logo's silhouette, point by point,
-//             while the DOM logo opens from its sliver (op-logo-arrive)
-//   0.85-1.5  the hologram: the logo projected in sliced rows that jitter in
-//             with a cyan/magenta chromatic split and lock at the impact
-//   1.5       the impact: the hologram snaps aligned, the points burst out
-//   1.5-1.95  the projection cools away; the DOM logo (open at 1.46) carries on
-//   after     the same drifting dust as before
+// The condensation storyboard (seconds from the title's first playing frame;
+// the same clock as the CSS depth push in styles-opening-cinema.css):
+//   0.2-1.46  the dust is drawn in from the dark along a curl-noise field and
+//             condenses onto the logo's silhouette while the DOM logo pushes
+//             in from depth at low light (op-logo-arrive)
+//   1.5       the lock: the DOM logo snaps to full light; the dust flashes,
+//             a shockwave ring leaves the lockup, the points are thrown out
+//   1.5-2.4   the burst slows into drifting dust, which stays
+// Audit mode (?opening-audit) seeks the same deterministic simulation.
 const ASSEMBLE = { start: 0.2, end: 1.46 } as const;
-const HOLO = { start: 0.85, lock: 1.5, end: 1.95 } as const;
-const HOLO_ROWS = 12;
+const LOCK = { at: 1.5, burstEnd: 2.4, waveEnd: 2.1 } as const;
 const SAMPLE_WIDTH = 168;
-const TINT_WIDTH = 1024;
+const FLASH_WIDTH = 1024;
+const STEP = 1 / 60;
 
 const TONE_RGB: Record<ParticleTone, string> = {
   gold: "240, 215, 138",
@@ -45,24 +49,42 @@ const TONE_RGB: Record<ParticleTone, string> = {
 };
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
-const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 const smooth = (a: number, b: number, value: number) => {
   const t = clamp01((value - a) / (b - a));
   return t * t * (3 - 2 * t);
 };
-// A cheap deterministic flicker: the same at the same clock on every device.
-const flicker = (t: number, row: number) =>
-  0.5 + 0.5 * Math.sin(t * 37 + row * 1.7) * Math.sin(t * 23 + row * 0.9);
+
+// A seeded generator: the same dust on every replay and on every audit frame.
+function mulberry32(seed: number) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// A cheap divergence-free field: the curl of a sum of drifting sines. Each
+// particle samples it at its own offset, so the flow reads as turbulence
+// without a noise table.
+function curlField(x: number, y: number, t: number, out: { x: number; y: number }) {
+  const s1 = Math.sin(x * 1.7 + t * 0.9) * Math.cos(y * 1.3 - t * 0.7);
+  const s2 = Math.sin(x * 3.1 - t * 1.3 + 1.7) * Math.cos(y * 2.6 + t * 1.1);
+  // d/dy of the potential gives the x velocity, -d/dx the y velocity.
+  const dpy =
+    -1.3 * Math.sin(x * 1.7 + t * 0.9) * Math.sin(y * 1.3 - t * 0.7) -
+    0.5 * 2.6 * Math.sin(x * 3.1 - t * 1.3 + 1.7) * Math.sin(y * 2.6 + t * 1.1);
+  const dpx =
+    1.7 * Math.cos(x * 1.7 + t * 0.9) * Math.cos(y * 1.3 - t * 0.7) +
+    0.5 * 3.1 * Math.cos(x * 3.1 - t * 1.3 + 1.7) * Math.cos(y * 2.6 + t * 1.1);
+  out.x = dpy + s2 * 0.1;
+  out.y = -dpx + s1 * 0.1;
+}
 
 type Box = { left: number; top: number; width: number; height: number };
-
-type Hologram = {
-  box: Box;
-  cyan: HTMLCanvasElement;
-  magenta: HTMLCanvasElement;
-  plain: HTMLCanvasElement;
-};
 
 function tinted(image: HTMLImageElement, width: number, height: number, fill: string | null) {
   const canvas = document.createElement("canvas");
@@ -79,8 +101,8 @@ function tinted(image: HTMLImageElement, width: number, height: number, fill: st
   return canvas;
 }
 
-/** The logo's silhouette as canvas points (the ice logo's alpha), in stage space. */
-function sampleLogo(image: HTMLImageElement, box: Box, count: number) {
+/** The logo's silhouette as canvas points (the logo's alpha), in stage space. */
+function sampleLogo(image: HTMLImageElement, box: Box, count: number, random: () => number) {
   const ratio = image.naturalHeight / image.naturalWidth || 2 / 3;
   const width = SAMPLE_WIDTH;
   const height = Math.max(1, Math.round(width * ratio));
@@ -96,55 +118,76 @@ function sampleLogo(image: HTMLImageElement, box: Box, count: number) {
   } catch {
     return null;
   }
+  // Edges first: a point next to transparency is where the light condenses.
   const solid: number[] = [];
+  const edge: number[] = [];
   for (let i = 3; i < data.length; i += 4) {
-    if (data[i] > 96) solid.push((i - 3) / 4);
+    if (data[i] <= 96) continue;
+    const index = (i - 3) / 4;
+    const x = index % width;
+    const y = Math.floor(index / width);
+    const neighbour =
+      x > 0 && data[i - 4] <= 96
+        ? true
+        : x < width - 1 && data[i + 4] <= 96
+          ? true
+          : y > 0 && data[i - width * 4] <= 96
+            ? true
+            : y < height - 1 && data[i + width * 4] <= 96;
+    (neighbour ? edge : solid).push(index);
   }
-  if (solid.length < 24) return null;
+  if (solid.length + edge.length < 24) return null;
   const points: Array<[number, number]> = [];
   for (let n = 0; n < count; n += 1) {
-    const index = solid[Math.floor(Math.random() * solid.length)];
-    const px = (index % width) + Math.random();
-    const py = Math.floor(index / width) + Math.random();
+    const pool = edge.length > 0 && random() < 0.45 ? edge : solid.length > 0 ? solid : edge;
+    const index = pool[Math.floor(random() * pool.length)];
+    const px = (index % width) + random();
+    const py = Math.floor(index / width) + random();
     points.push([box.left + (px / width) * box.width, box.top + (py / height) * box.height]);
   }
   return points;
 }
 
-function seed(count: number, w: number, h: number, targets: Array<[number, number]> | null) {
+function seed(
+  count: number,
+  w: number,
+  h: number,
+  targets: Array<[number, number]> | null,
+  random: () => number,
+) {
   const cx = w / 2;
   const cy = h / 2;
   return Array.from({ length: count }, (_, index): Particle => {
-    const roll = Math.random();
+    const roll = random();
     const tone: ParticleTone = roll > 0.84 ? "prism" : roll > 0.54 ? "gold" : "ice";
     const target = targets?.[index];
     // The scatter: a wide ring around the title, so the gather reads as
     // light drawn in from every side; without targets, plain dust.
-    const angle = Math.random() * Math.PI * 2;
-    const reach = (0.55 + Math.random() * 0.75) * Math.max(w, h);
-    const sx = target ? cx + Math.cos(angle) * reach : Math.random() * w;
-    const sy = target ? cy + Math.sin(angle) * reach * 0.7 : Math.random() * h;
+    const angle = random() * Math.PI * 2;
+    const reach = (0.6 + random() * 0.8) * Math.max(w, h);
+    const sx = target ? cx + Math.cos(angle) * reach : random() * w;
+    const sy = target ? cy + Math.sin(angle) * reach * 0.72 : random() * h;
     const tx = target ? target[0] : sx;
     const ty = target ? target[1] : sy;
-    const burstAngle = Math.atan2(ty - cy, tx - cx) + (Math.random() - 0.5) * 0.9;
-    const burstSpeed = 2.4 + Math.random() * 4.2;
     return {
       x: sx,
       y: sy,
-      sx,
-      sy,
+      px: sx,
+      py: sy,
+      vx: 0,
+      vy: 0,
       tx,
       ty,
-      delay: Math.random() * 0.5,
-      bx: Math.cos(burstAngle) * burstSpeed,
-      by: Math.sin(burstAngle) * burstSpeed - 0.6,
-      r: Math.random() * 1.55 + 0.35,
-      vx: (Math.random() - 0.5) * 0.2,
-      vy: -0.09 - Math.random() * 0.18,
-      a: 0.18 + Math.random() * 0.58,
-      phase: Math.random() * Math.PI * 2,
-      sway: 0.06 + Math.random() * 0.12,
+      delay: random() * 0.45,
+      nx: random() * 40,
+      ny: random() * 40,
+      r: random() * 1.5 + 0.4,
+      a: 0.18 + random() * 0.58,
+      phase: random() * Math.PI * 2,
       tone,
+      dx: (random() - 0.5) * 0.2,
+      dy: -0.09 - random() * 0.18,
+      sway: 0.06 + random() * 0.12,
     };
   });
 }
@@ -153,12 +196,15 @@ export function Particles({
   active,
   lockupRef,
   logoRef,
+  seekRef,
 }: {
   active: boolean;
-  /** The title lockup: the box the dust assembles onto and the hologram projects into. */
+  /** The title lockup: the box the dust condenses onto. */
   lockupRef?: RefObject<HTMLElement | null>;
-  /** The ice logo (decoded, same origin): the silhouette and the projection's art. */
+  /** The logo (decoded, same origin): the silhouette and the flash's art. */
   logoRef?: RefObject<HTMLImageElement | null>;
+  /** Audit hook: set, the canvas has no clock and draws the frame it is seeked to. */
+  seekRef?: MutableRefObject<((t: number) => void) | null>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -173,14 +219,22 @@ export function Particles({
       return;
     }
 
+    const audit = Boolean(seekRef);
     let raf = 0;
     let particles: Particle[] = [];
-    let hologram: Hologram | null = null;
+    let flash: { box: Box; art: HTMLCanvasElement } | null = null;
     let assembling = false;
+    let burstStarted = false;
     let running = true;
     let visible = !document.hidden;
     const startedAt = performance.now();
     let pausedAt = 0;
+    let clockOffset = 0;
+    // The simulation clock: fixed steps, so a seek and a frame agree.
+    let simulated = 0;
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    const flow = { x: 0, y: 0 };
 
     const stageBox = (): Box => {
       const stage = canvas.parentElement;
@@ -203,22 +257,19 @@ export function Particles({
       };
     };
 
-    const prepareHologram = (image: HTMLImageElement, box: Box) => {
+    const prepareFlash = (image: HTMLImageElement, box: Box) => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.min(TINT_WIDTH, Math.max(64, Math.round(box.width * dpr)));
+      const width = Math.min(FLASH_WIDTH, Math.max(64, Math.round(box.width * dpr)));
       const ratio = image.naturalHeight / image.naturalWidth || 2 / 3;
       const height = Math.max(1, Math.round(width * ratio));
-      const cyan = tinted(image, width, height, "rgb(122 232 255 / 0.9)");
-      const magenta = tinted(image, width, height, "rgb(255 92 200 / 0.85)");
-      const plain = tinted(image, width, height, null);
-      if (!cyan || !magenta || !plain) return null;
-      return { box, cyan, magenta, plain };
+      const art = tinted(image, width, height, "rgb(232 248 255 / 0.95)");
+      return art ? { box, art } : null;
     };
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      w = window.innerWidth;
+      h = window.innerHeight;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -226,18 +277,21 @@ export function Particles({
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const lowPower = (navigator.hardwareConcurrency || 4) <= 4;
       const small = w < 600 || lowPower;
-      // The assembly only exists while the title is still arriving; a resize
-      // later in the sequence reseeds plain dust (as before).
-      const elapsed = (performance.now() - startedAt) / 1000;
+      // The condensation only exists while the title is still arriving; a
+      // resize later in the sequence reseeds plain dust.
+      const elapsed = audit ? simulated : (performance.now() - startedAt - clockOffset) / 1000;
       const image = logoRef?.current ?? null;
       const box = lockupBox();
       const canAssemble =
         elapsed < ASSEMBLE.end && !!image && image.complete && image.naturalWidth > 0 && !!box;
-      const targets = canAssemble ? sampleLogo(image, box, small ? 420 : 760) : null;
+      const random = mulberry32(0x5a6a);
+      const targets = canAssemble ? sampleLogo(image, box, small ? 460 : 820, random) : null;
       assembling = targets !== null;
       const count = targets ? targets.length : small ? 38 : 72;
-      particles = seed(count, w, h, targets);
-      hologram = canAssemble && box ? prepareHologram(image, box) : null;
+      particles = seed(count, w, h, targets, random);
+      flash = canAssemble && box ? prepareFlash(image, box) : null;
+      burstStarted = false;
+      simulated = 0;
     };
 
     const onVisibilityChange = () => {
@@ -248,183 +302,193 @@ export function Particles({
       }
       // The clock does not run while hidden: the sequence resumes where it was.
       if (pausedAt) {
-        const away = performance.now() - pausedAt;
+        clockOffset += performance.now() - pausedAt;
         pausedAt = 0;
-        clockOffset += away;
       }
-      if (!raf) raf = requestAnimationFrame(tick);
+      if (!raf && !audit) raf = requestAnimationFrame(tick);
     };
-    let clockOffset = 0;
 
     resize();
     window.addEventListener("resize", resize);
 
-    const drawHologram = (t: number) => {
-      const holo = hologram;
-      if (!holo || t < HOLO.start || t > HOLO.end) return;
-      const { box, cyan, magenta, plain } = holo;
-      const rise = smooth(HOLO.start, HOLO.lock - 0.12, t);
-      const cool = 1 - smooth(HOLO.lock, HOLO.end, t);
-      const split = t < HOLO.lock ? (1 - rise) * 1 + 0.25 : 0;
-      const rowHeight = box.height / HOLO_ROWS;
-      const srcRow = cyan.height / HOLO_ROWS;
-      ctx.globalCompositeOperation = "lighter";
-      for (let row = 0; row < HOLO_ROWS; row += 1) {
-        const f = t < HOLO.lock ? flicker(t, row) : 1;
-        const alpha = (t < HOLO.lock ? rise * (0.35 + 0.65 * f) : cool) * 0.78;
-        if (alpha <= 0.01) continue;
-        const sign = row % 2 === 0 ? 1 : -1;
-        const jitter = t < HOLO.lock ? sign * (1 - rise) ** 2 * box.width * 0.06 : 0;
-        const dx = split * Math.min(14, box.width * 0.012);
-        const y = box.top + row * rowHeight;
-        const sy = row * srcRow;
-        ctx.globalAlpha = alpha * (t < HOLO.lock ? 0.42 : 0.3);
-        ctx.drawImage(
-          cyan,
-          0,
-          sy,
-          cyan.width,
-          srcRow,
-          box.left + jitter - dx,
-          y,
-          box.width,
-          rowHeight,
-        );
-        ctx.drawImage(
-          magenta,
-          0,
-          sy,
-          magenta.width,
-          srcRow,
-          box.left + jitter + dx,
-          y,
-          box.width,
-          rowHeight,
-        );
-        ctx.globalAlpha = alpha * (t < HOLO.lock ? 0.26 : 0.55);
-        ctx.drawImage(
-          plain,
-          0,
-          sy,
-          plain.width,
-          srcRow,
-          box.left + jitter,
-          y,
-          box.width,
-          rowHeight,
-        );
+    // One fixed step of the simulation at clock time `t`.
+    const step = (t: number) => {
+      const gather = assembling && t < LOCK.at;
+      const burst = assembling && t >= LOCK.at ? 1 - smooth(LOCK.at, LOCK.burstEnd, t) : 0;
+      const field = Math.min(w, h);
+      if (burst > 0 && !burstStarted) {
+        // Thrown out from the lock, away from the lockup's centre.
+        burstStarted = true;
+        for (const p of particles) {
+          const angle = Math.atan2(p.y - h / 2, p.x - w / 2) + (p.phase % 1) - 0.5;
+          const speed = (90 + (p.phase % 2) * 150) * (0.4 + p.r);
+          p.vx = Math.cos(angle) * speed;
+          p.vy = Math.sin(angle) * speed - 30;
+        }
       }
-      ctx.globalAlpha = 1;
+      for (const p of particles) {
+        p.px = p.x;
+        p.py = p.y;
+        p.phase += 0.018;
+        if (gather) {
+          const local = clamp01((t - ASSEMBLE.start - p.delay) / (ASSEMBLE.end - ASSEMBLE.start - 0.45));
+          if (local <= 0) continue;
+          // A spring to the target that stiffens as the lock nears, through a
+          // curl field that lets go as the point arrives: the dust streams in
+          // on turbulent paths and settles cleanly.
+          curlField(p.x / field * 4 + p.nx, p.y / field * 4 + p.ny, t, flow);
+          const k = 12 + 80 * local * local;
+          const ax = (p.tx - p.x) * k + flow.x * (1 - local) ** 1.5 * field * 2.2;
+          const ay = (p.ty - p.y) * k + flow.y * (1 - local) ** 1.5 * field * 2.2;
+          const drag = 1 - Math.min(0.5, (4.5 + 10 * local) * STEP);
+          p.vx = (p.vx + ax * STEP) * drag;
+          p.vy = (p.vy + ay * STEP) * drag;
+          p.x += p.vx * STEP;
+          p.y += p.vy * STEP;
+          continue;
+        }
+        if (burst > 0) {
+          p.x += p.vx * burst * burst * STEP + p.dx;
+          p.y += p.vy * burst * burst * STEP + p.dy;
+        } else {
+          p.x += p.dx + Math.sin(p.phase) * p.sway;
+          p.y += p.dy;
+        }
+        if (p.y < -6) {
+          p.y = h + 6;
+          p.py = p.y;
+        }
+        if (p.y > h + 6) {
+          p.y = -6;
+          p.py = p.y;
+        }
+        if (p.x < -6) {
+          p.x = w + 6;
+          p.px = p.x;
+        }
+        if (p.x > w + 6) {
+          p.x = -6;
+          p.px = p.x;
+        }
+      }
+    };
+
+    const advance = (t: number) => {
+      if (t < simulated) {
+        resize();
+      }
+      while (simulated + STEP <= t) {
+        simulated += STEP;
+        step(simulated);
+      }
+    };
+
+    const draw = (t: number) => {
+      ctx.clearRect(0, 0, w, h);
+      const gather = assembling && t < LOCK.at;
+      const burst = assembling && t >= LOCK.at ? 1 - smooth(LOCK.at, LOCK.burstEnd, t) : 0;
+      const glow = gather || burst > 0;
+      ctx.globalCompositeOperation = glow ? "lighter" : "source-over";
+      ctx.lineCap = "round";
+      for (const p of particles) {
+        const rgb = TONE_RGB[p.tone];
+        let alpha: number;
+        if (gather) {
+          const local = clamp01((t - ASSEMBLE.start - p.delay) / (ASSEMBLE.end - ASSEMBLE.start - 0.45));
+          if (local <= 0) continue;
+          alpha = (0.3 + 0.7 * local) * (0.6 + 0.4 * Math.sin(p.phase * 2.2) ** 2);
+        } else if (burst > 0) {
+          alpha = p.a * (0.5 + 0.5 * burst) * (0.78 + 0.22 * Math.sin(p.phase * 1.4));
+        } else {
+          alpha = p.a * (0.78 + 0.22 * Math.sin(p.phase * 1.4));
+        }
+        // Motion blur: the streak of this step, brighter and longer with speed.
+        const dx = p.x - p.px;
+        const dy = p.y - p.py;
+        const speed = Math.hypot(dx, dy);
+        if (glow && speed > 0.8) {
+          const tail = Math.min(2.4, 1 + speed * 0.25);
+          ctx.strokeStyle = `rgba(${rgb}, ${(alpha * 0.55).toFixed(3)})`;
+          ctx.lineWidth = Math.max(0.6, p.r * 0.95);
+          ctx.beginPath();
+          ctx.moveTo(p.x - dx * tail, p.y - dy * tail);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
+        if (!glow && p.r > 1.25) {
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(${rgb}, ${(alpha * 0.22).toFixed(3)})`;
+          ctx.arc(p.x, p.y, p.r * 2.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${rgb}, ${alpha.toFixed(3)})`;
+        ctx.arc(p.x, p.y, p.r * (gather ? 1.3 : 1), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // The lock: the logo's own light flashes once and a shockwave ring
+      // leaves the lockup.
+      if (flash && t >= LOCK.at - 0.03 && t < LOCK.waveEnd) {
+        const { box, art } = flash;
+        const u = clamp01((t - LOCK.at + 0.03) / (LOCK.waveEnd - LOCK.at + 0.03));
+        ctx.globalCompositeOperation = "lighter";
+        const k = 1 - easeOutCubic(clamp01(u * 2.2));
+        if (k > 0.01) {
+          ctx.globalAlpha = 0.42 * k;
+          ctx.drawImage(art, box.left, box.top, box.width, box.height);
+        }
+        const cx = box.left + box.width / 2;
+        const cy = box.top + box.height / 2;
+        const reach = easeOutCubic(u);
+        const rx = box.width * (0.42 + 0.75 * reach);
+        const ry = box.height * (0.5 + 1.1 * reach);
+        ctx.globalAlpha = (1 - u) ** 1.6 * 0.75;
+        ctx.lineWidth = 1 + 5 * (1 - u);
+        ctx.strokeStyle = "rgb(198 245 255)";
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgb(240 207 134)";
+        ctx.globalAlpha = (1 - u) ** 2 * 0.6;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx * 0.92, ry * 0.92, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
       ctx.globalCompositeOperation = "source-over";
     };
 
     const tick = () => {
       raf = 0;
-      if (!running) return;
-      if (!visible) return;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      if (!running || !visible) return;
       const t = (performance.now() - startedAt - clockOffset) / 1000;
-      ctx.clearRect(0, 0, w, h);
-      const gather = assembling && t < HOLO.lock;
-      const bursting = assembling && t >= HOLO.lock;
-      const burst = bursting ? 1 - smooth(HOLO.lock, HOLO.lock + 0.9, t) : 0;
-      if (gather || burst > 0) ctx.globalCompositeOperation = "lighter";
-      for (const p of particles) {
-        p.phase += 0.018;
-        let alpha: number;
-        if (gather) {
-          // Its own arrival: late points are still on the way at the impact.
-          const span = ASSEMBLE.end - ASSEMBLE.start - 0.5;
-          const u = easeOutExpo(clamp01((t - ASSEMBLE.start - p.delay) / span));
-          const px = p.x;
-          const py = p.y;
-          p.x = p.sx + (p.tx - p.sx) * u;
-          p.y = p.sy + (p.ty - p.sy) * u;
-          alpha = (0.35 + 0.65 * u) * (0.55 + 0.45 * Math.sin(p.phase * 2.2) ** 2);
-          const rgb = TONE_RGB[p.tone];
-          // A short comet tail while it is still travelling.
-          const speed = Math.hypot(p.x - px, p.y - py);
-          if (u < 0.985 && speed > 0.6) {
-            // Capped, so the fastest first frames draw sparks, not a web.
-            const tail = Math.min(2.2, 26 / speed);
-            const tx = p.x - (p.x - px) * tail;
-            const ty = p.y - (p.y - py) * tail;
-            ctx.strokeStyle = `rgba(${rgb}, ${alpha * 0.45})`;
-            ctx.lineWidth = Math.max(0.6, p.r * 0.9);
-            ctx.beginPath();
-            ctx.moveTo(tx, ty);
-            ctx.lineTo(p.x, p.y);
-            ctx.stroke();
-          }
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(${rgb}, ${alpha})`;
-          ctx.arc(p.x, p.y, p.r * (1 + 0.5 * u), 0, Math.PI * 2);
-          ctx.fill();
-          continue;
-        }
-        if (bursting) {
-          if (burst > 0) {
-            // Thrown out from the impact, slowing into dust.
-            p.x += p.bx * burst * burst + p.vx;
-            p.y += p.by * burst * burst + p.vy;
-          } else {
-            p.x += p.vx + Math.sin(p.phase) * p.sway;
-            p.y += p.vy;
-          }
-          alpha = p.a * (0.5 + 0.5 * burst) * (0.78 + 0.22 * Math.sin(p.phase * 1.4));
-        } else {
-          p.x += p.vx + Math.sin(p.phase) * p.sway;
-          p.y += p.vy;
-          alpha = p.a * (0.78 + 0.22 * Math.sin(p.phase * 1.4));
-        }
-        if (p.y < -6) {
-          p.y = h + 6;
-          p.x = Math.random() * w;
-        }
-        if (p.y > h + 6) p.y = -6;
-        if (p.x < -6) p.x = w + 6;
-        if (p.x > w + 6) p.x = -6;
-
-        const rgb = TONE_RGB[p.tone];
-
-        if (p.r > 1.25) {
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(${rgb}, ${alpha * 0.22})`;
-          ctx.arc(p.x, p.y, p.r * 2.6, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(${rgb}, ${alpha})`;
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalCompositeOperation = "source-over";
-      // The impact flash: one soft pulse of the logo's own light at the lock.
-      if (hologram && t >= HOLO.lock - 0.04 && t < HOLO.lock + 0.3) {
-        const k = 1 - easeOutCubic(clamp01((t - HOLO.lock + 0.04) / 0.34));
-        const { box } = hologram;
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.28 * k;
-        ctx.drawImage(hologram.plain, box.left, box.top, box.width, box.height);
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = "source-over";
-      }
-      drawHologram(t);
+      advance(t);
+      draw(t);
       raf = requestAnimationFrame(tick);
     };
+
     document.addEventListener("visibilitychange", onVisibilityChange);
-    raf = requestAnimationFrame(tick);
+    if (seekRef) {
+      seekRef.current = (t: number) => {
+        if (!running) return;
+        advance(t);
+        draw(t);
+      };
+      seekRef.current(0);
+    } else {
+      raf = requestAnimationFrame(tick);
+    }
 
     return () => {
       running = false;
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      hologram = null;
+      if (seekRef) seekRef.current = null;
+      flash = null;
     };
-  }, [active, lockupRef, logoRef]);
+  }, [active, lockupRef, logoRef, seekRef]);
 
   return (
     <canvas

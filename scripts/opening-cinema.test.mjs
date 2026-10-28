@@ -268,10 +268,13 @@ test("the shaders' lens is silent at the swap frames", async () => {
   assert.equal(diveUniformsAt(OPENING_DIVE.glEnd).uWorld, 1);
 });
 
-// The holographic boot (2026-10-27): the power-on, the raster, the grid
-// planes, the lock-on, the two sweeps and the data-stream in the cinema
-// sheet, and the dust canvas assembling the ice logo with a sliced hologram.
-test("the holographic boot: textless planes, assembly from the logo's own art, finite beats", async () => {
+// The depth boot (2026-10-28): one push from depth (op-logo-arrive), the
+// dust condensing onto the logo along a curl field and bursting at the lock
+// with a shockwave (the canvas), the power-on, the floor plane, the fire
+// light, the two specular sweeps over the chrome and the row's arrival in
+// the cinema sheet. The raster, the ceiling plane, the lock-on ring, the
+// volumetric sweeps, the sliced hologram and the data-stream were cut.
+test("the depth boot: textless planes, condensation from the logo's own art, finite beats", async () => {
   const title = await read("src/components/cinematic/title-sequence.tsx");
   const holo = title.slice(
     title.indexOf("const CinematicHolo = memo("),
@@ -281,31 +284,37 @@ test("the holographic boot: textless planes, assembly from the logo's own art, f
   for (const plane of ["cine-holo-back", "cine-holo-front"]) {
     assert.match(holo, new RegExp(`className="cine-cinema cine-holo ${plane}" aria-hidden="true"`));
   }
-  for (const name of [
-    "cine-holo-floor",
-    "cine-holo-ceil",
-    "cine-holo-sweep-a",
-    "cine-holo-sweep-b",
-    "cine-holo-lock",
-    "cine-holo-boot",
-    "cine-holo-raster",
-  ]) {
+  for (const name of ["cine-holo-floor", "cine-fire-light", "cine-holo-boot"]) {
     assert.ok(holo.includes(name), name);
+  }
+  for (const gone of ["cine-holo-ceil", "cine-holo-lock", "cine-holo-raster", "cine-holo-sweep"]) {
+    assert.ok(!title.includes(gone), `${gone} was cut`);
   }
   assert.doesNotMatch(holo, />\s*[^\s<{][^<{]*</, "no text in the boot");
   assert.match(title, /<CinematicLight \/>\s*<CinematicHolo \/>/);
-  // The dust assembles onto the lockup from the ice logo already on the page:
-  // no new asset, and nothing when the title is economy, audited or still.
+  // The specular sweeps live in the logo box, masked by the logo's alpha, and
+  // are not logo layers (the burn and the dive count those).
+  assert.match(title, /<i className="cine-spec cine-spec-a" aria-hidden="true">\s*<b \/>\s*<\/i>/);
+  assert.match(title, /<i className="cine-spec cine-spec-b" aria-hidden="true">\s*<b \/>\s*<\/i>/);
+  assert.ok(title.indexOf('className="cine-spec cine-spec-a"') < title.indexOf('className="cine-logo-frame"'));
+  // The dust condenses onto the lockup from the logo already on the page:
+  // no new asset, nothing on economy or a still title; the audit seeks it.
   assert.match(
     title,
-    /<Particles active=\{!audit && !economyOpening && phase === "playing"\} lockupRef=\{lockupRef\} logoRef=\{firstLogoRef\} \/>/,
+    /<Particles\s+active=\{!economyOpening && phase === "playing"\}\s+lockupRef=\{lockupRef\}\s+logoRef=\{firstLogoRef\}\s+seekRef=\{audit \? particleSeekRef : undefined\}\s*\/>/,
   );
+  assert.match(title, /particleSeekRef\.current\?\.\(t\);/);
   const particles = await read("src/components/cinematic/particles.tsx");
   assert.doesNotMatch(particles, /fetch\(|new Image\(|import\(|url\(/);
   assert.match(particles, /const ASSEMBLE = \{ start: 0\.2, end: 1\.46 \}/);
-  assert.match(particles, /const HOLO = \{ start: 0\.85, lock: 1\.5, end: 1\.95 \}/);
+  assert.match(particles, /const LOCK = \{ at: 1\.5, burstEnd: 2\.4, waveEnd: 2\.1 \}/);
   assert.match(particles, /getContext\("2d", \{ willReadFrequently: true \}\)/);
   assert.match(particles, /image\.complete && image\.naturalWidth > 0/);
+  // Deterministic (seeded) and fixed-step: a seek and a frame agree.
+  assert.match(particles, /mulberry32\(0x5a6a\)/);
+  assert.match(particles, /const STEP = 1 \/ 60;/);
+  assert.match(particles, /function curlField\(/);
+  assert.doesNotMatch(particles, /HOLO_ROWS|drawHologram/);
 
   const css = await readCss("src/styles-opening-cinema.css");
   const all = rules(css);
@@ -314,10 +323,19 @@ test("the holographic boot: textless planes, assembly from the logo's own art, f
   );
   for (const name of [
     "op-boot",
-    "op-raster",
     "op-floor-in",
-    "op-ceil-in",
     "op-grid-travel",
+    "op-fire-light",
+    "op-spec-plane",
+    "op-spec",
+    "op-rule-in",
+    "op-deck-in",
+  ]) {
+    assert.ok(frames[name], name);
+  }
+  for (const gone of [
+    "op-raster",
+    "op-ceil-in",
     "op-grid-travel-up",
     "op-lock-in",
     "op-lock-ring",
@@ -325,17 +343,16 @@ test("the holographic boot: textless planes, assembly from the logo's own art, f
     "op-sweep-b",
     "op-stream",
   ]) {
-    assert.ok(frames[name], name);
+    assert.ok(!frames[gone], `${gone} was cut`);
   }
-  // The grid planes rest on their tokens; the travel ends where the still
+  // The floor plane rests on its token; the travel ends where the still
   // grid stands; the boots that are gone end on opacity 0.
   assert.match(frames["op-floor-in"], /to \{\s*opacity: var\(--op-floor-rest\);/);
-  assert.match(frames["op-ceil-in"], /to \{\s*opacity: var\(--op-ceil-rest\);/);
   assert.match(frames["op-grid-travel"], /to \{\s*transform: translate3d\(0, 0, 0\);/);
-  assert.match(frames["op-grid-travel-up"], /to \{\s*transform: translate3d\(0, 0, 0\);/);
-  for (const name of ["op-boot", "op-raster", "op-lock-in", "op-sweep", "op-sweep-b", "op-stream"]) {
+  for (const name of ["op-boot", "op-fire-light", "op-spec-plane", "op-rule-in"]) {
     assert.match(frames[name], /100% \{\s*opacity: 0;/, name);
   }
+  assert.match(frames["op-deck-in"], /to \{\s*opacity: 1;\s*transform: translate3d\(0, 0, 0\);/);
   const rest = (selector) =>
     all.find((rule) => rule.selector === selector && rule.context.length === 0)?.body;
   assert.match(
@@ -346,16 +363,38 @@ test("the holographic boot: textless planes, assembly from the logo's own art, f
     rest('html[data-world-effects="economy"] .cine-stage.is-playing .cine-holo-floor'),
     /opacity: var\(--op-floor-rest\);/,
   );
-  // The lock closes at the impact (0.3 s + 60% of 2 s = 1.5 s), before the burn.
-  assert.match(css, /\.cine-holo-lock \{\s*animation: op-lock-in 2s cubic-bezier\([^)]*\) 0\.3s both;/);
-  assert.match(frames["op-lock-in"], /60% \{\s*opacity: 1;\s*transform: scale\(1\);/);
-  assert.ok(0.3 + 2 <= OPENING_BURN.start);
-  // The stream resolves the row once the title holds, and the plates stay above it.
+  // The push: the logo rises from depth and snaps to full light at the lock
+  // (0.34 s + 66% of 1.8 s = 1.53 s), before the burn; the dust locks at 1.5 s.
+  assert.match(frames["op-logo-arrive"], /0% \{\s*opacity: 0;\s*transform: translate3d\(0, 1\.6%, 0\) scale\(0\.6\);/);
+  assert.match(frames["op-logo-arrive"], /66% \{\s*opacity: 1;\s*transform: translate3d\(0, 0, 0\) scale\(1\.035\);/);
+  assert.ok(Math.abs(0.34 + 0.66 * 1.8 - 1.5) < 0.05);
+  assert.ok(0.34 + 1.8 <= OPENING_BURN.start);
+  // The specular sweeps are masked by the logo's alpha and move only the
+  // band inside the plane; the first rakes at the lock, the second after
+  // the burn's hand-off; the frosted sheet's shine does not also run.
+  assert.match(rest(".cine-spec"), /mask-image: var\(--cine-logo-mask, linear-gradient\(transparent, transparent\)\);/);
+  assert.match(rest(".cine-spec"), /opacity: 0;/);
+  assert.match(css, /\.cine-stage\.is-playing \.cine-spec-a > b \{\s*animation: op-spec 0\.8s cubic-bezier\([^)]*\) 1\.4s both;/);
+  assert.match(css, /\.cine-stage\.is-playing \.cine-spec-b > b \{\s*animation: op-spec 0\.9s cubic-bezier\([^)]*\) 6\.1s both;/);
+  assert.ok(6.1 >= OPENING_BURN.start + OPENING_BURN.handOff[0]);
+  assert.match(css, /\.cine-stage\.is-playing \.cine-logo-shine \{\s*display: none;/);
+  // The fire light rises with the burn and is gone before the title holds.
+  assert.match(css, /\.cine-stage\.is-playing \.cine-fire-light \{\s*animation: op-fire-light 3\.2s cubic-bezier\([^)]*\) 2\.7s both;/);
+  assert.ok(2.7 >= OPENING_BURN.start && 2.7 + 3.2 <= 7.2);
+  // The row rises in once the title holds; the hairline draws under it and
+  // the plates stay above it.
   assert.match(
     css,
-    /\.cine-stage\.is-complete \.cine-replay-slot::after \{\s*animation: op-stream 0\.9s/,
+    /\.cine-stage\.is-complete \.cine-replay-slot > \.cine-btn \{\s*animation: op-deck-in 0\.7s/,
+  );
+  assert.match(
+    css,
+    /\.cine-stage\.is-complete \.cine-replay-slot::after \{\s*animation: op-rule-in 1\.1s/,
   );
   assert.match(rest(".cine-replay-slot > .cine-btn"), /z-index: 1;/);
+  // The idle hint leaves at once when the sequence starts.
+  assert.match(rest(".cine-stage.is-playing .cine-enter-hint"), /transition: opacity 0\.18s ease;/);
   const forced = css.slice(css.indexOf("@media (forced-colors: active)"));
   assert.match(forced, /\.cine-replay-slot::after \{\s*display: none;/);
+  assert.match(forced, /\.cine-spec \{\s*display: none;/);
 });

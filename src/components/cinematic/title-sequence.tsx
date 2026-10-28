@@ -198,12 +198,10 @@ const CinematicDepthField = memo(function CinematicDepthField() {
   );
 });
 
-// The holographic boot (styles-opening-cinema.css, "The holographic boot"):
-// the power-on line, the raster, the floor and ceiling grid planes that
-// travel under and over the title, the lock-on ring that closes on the
-// lockup at the impact, two volumetric sweeps (the burn's start, the prism
-// lock) and the data-stream that resolves the ENTER THE WORLD row once the
-// title holds. Textless ornament; every boot is finite and gated there.
+// The depth boot (styles-opening-cinema.css, "The depth boot"): the power-on
+// line, the floor grid plane that travels toward the camera with the push
+// and holds under the held title, and the fire light the burn throws on the
+// stage. Textless ornament; every boot is finite and gated there.
 const CinematicHolo = memo(function CinematicHolo() {
   return (
     <>
@@ -211,18 +209,10 @@ const CinematicHolo = memo(function CinematicHolo() {
         <i className="cine-holo-floor">
           <b />
         </i>
-        <i className="cine-holo-ceil">
-          <b />
-        </i>
-        <i className="cine-holo-sweep cine-holo-sweep-a" />
-        <i className="cine-holo-sweep cine-holo-sweep-b" />
-        <i className="cine-holo-lock">
-          <b />
-        </i>
+        <i className="cine-fire-light" />
       </div>
       <div className="cine-cinema cine-holo cine-holo-front" aria-hidden="true">
         <i className="cine-holo-boot" />
-        <i className="cine-holo-raster" />
       </div>
     </>
   );
@@ -337,6 +327,8 @@ export function TitleSequence() {
   const lineRef = useRef<HTMLDivElement>(null);
   const enterRef = useRef<HTMLButtonElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
+  // ?opening-audit: the dust canvas draws the frame the title is seeked to.
+  const particleSeekRef = useRef<((t: number) => void) | null>(null);
   // A control pressed from the keyboard disables itself (SKIP when the title
   // settles, もう一度 when the replay starts), which would drop focus to <body>.
   // Focus goes on to the control that takes its place.
@@ -847,6 +839,7 @@ export function TitleSequence() {
         if (!stage || phaseRef.current !== "playing") return;
         if (t >= OPENING_BURN.start) startBurn(true);
         burnRunRef.current?.seek(t - OPENING_BURN.start);
+        particleSeekRef.current?.(t);
         for (const animation of stage.getAnimations({ subtree: true })) {
           animation.pause();
           // The burn's CSS animations start with the burn.
@@ -946,7 +939,12 @@ export function TitleSequence() {
       <div className="cine-scanline" aria-hidden="true" />
       <div className="cine-flare" aria-hidden="true" />
       <HudRings rootRef={hudRef} />
-      <Particles active={!audit && !economyOpening && phase === "playing"} lockupRef={lockupRef} logoRef={firstLogoRef} />
+      <Particles
+        active={!economyOpening && phase === "playing"}
+        lockupRef={lockupRef}
+        logoRef={firstLogoRef}
+        seekRef={audit ? particleSeekRef : undefined}
+      />
 
       <div ref={lineRef} className="cine-line" />
 
@@ -975,6 +973,13 @@ export function TitleSequence() {
               priority="high"
             />
             <div className="cine-logo-shine" />
+            {/* The specular sweeps: light raking across the chrome (masked by the logo's alpha). */}
+            <i className="cine-spec cine-spec-a" aria-hidden="true">
+              <b />
+            </i>
+            <i className="cine-spec cine-spec-b" aria-hidden="true">
+              <b />
+            </i>
             <span className="cine-logo-frame" aria-hidden="true" />
           </div>
           {/* The burn: the WebGL canvas is appended here; the other layers are the CSS tier. */}

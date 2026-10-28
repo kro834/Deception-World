@@ -628,7 +628,11 @@ test("WebGL preparation happens after a painted playing phase, not on a skipped 
   assert.match(burn, /settlePrime\("cancelled"\)/);
   assert.match(title, /phaseRef\.current !== "complete" \|\|\s*economyOpening/);
   assert.match(title, /\}, 900\);/, "the 1 MB atmosphere waits behind the first title frame");
-  assert.match(title, /Particles active=\{!audit && !economyOpening && phase === "playing"\}/);
+  // The dust runs on the clock only while the title plays (the audit seeks it).
+  assert.match(
+    title,
+    /<Particles\s+active=\{!economyOpening && phase === "playing"\}[\s\S]*?seekRef=\{audit \? particleSeekRef : undefined\}/,
+  );
 });
 
 test("the refined scene adds no image/video/font requests and rests without continual frames", () => {
