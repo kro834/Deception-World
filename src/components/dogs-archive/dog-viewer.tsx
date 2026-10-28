@@ -47,6 +47,9 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
         .then(({ createGuardianScene }) => {
           if (!allowed() || !host.current) return;
           runtime.current = createGuardianScene(host.current, {
+            modelUrl: "/dogs-archive-20261028/guardian-v.glb",
+            manifestUrl: "/dogs-archive-20261028/model-manifest.json",
+            lightingProfile: "sculpture",
             onStatus: report,
             onActionChange: (next) => {
               if (!cancelled) {

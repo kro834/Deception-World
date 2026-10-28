@@ -162,7 +162,8 @@ export function createMantle(
     if (
       options.excludeDeformingNeck &&
       node instanceof THREE.SkinnedMesh &&
-      (/neck|junction|bridge/i.test(node.name) ||
+      (face ||
+        /neck|junction|bridge|head|face|lattice|jaw/i.test(node.name) ||
         node.skeleton.bones.some((bone) => /^Neck(Base|Head)Joint$/.test(bone.name)))
     ) {
       // Rest-vertex particles do not follow skin weights. Keep this broad

@@ -10,7 +10,8 @@
 利用者が初期候補の品質不足を指摘し、正面・背面・左右の四面図を追加指定した。
 `reference/guardian-turnaround.png` を最優先の形状資料とし、
 `scripts/blender/dogs_guardian_v2.py` と `output/dogs-archive/rebuild-v2/` で再制作する。
-旧候補は比較・復元用に保全し、再制作のクレイを完成品として公開しない。
+旧候補は比較・復元用に保全した。配信用は `junction-09` のスキン付きモデル。
+再制作途中のクレイや、接続が不自然だった旧候補を配信用に混在させない。
 
 追加の立体資料は利用者指定の[最初のMeshy共有モデル](https://www.meshy.ai/s/TYSiYp)
 （Meshy上の表題: Emerald Abyss Leviathan）。公開viewerを四方向から確認した。
@@ -32,26 +33,33 @@
 
 `guardian_cavity_ao.py` は実形状への半球rayで陰影を作る任意のBlender helper。
 `lighting.ts` は孔内壁と厚みを読むための限定自己影・PBR保持を備えた照明。
-いずれも新しい形状・材質の確認を経て正式な表示へ接続する。
+立体の孔内壁・後頭部・角根を前後左右で確認し、正式な表示へ接続する。
 
 ## 制作物
 
-- `scripts/blender/dogs_guardian.py`: Blender 4.5 LTSで実行する編集可能な造形の生成元。
+- `scripts/blender/build_guardian_v2.py`: Blender 4.5 LTSで造形、材質、頭皮の接続、
+  配信用への軽量化を順に実行する生成入口。
+- `scripts/blender/dogs_guardian_v2*.py`: 四面図、接続の拡大図、Meshyの回転画像を
+  参考にした実体造形。旧 `dogs_guardian.py` は比較履歴として残す。
 - `public/dogs-archive-20261028/guardian-v.glb`: 背面を含むメッシュ、焼き込んだ法線、
-  独立した頭・顎・触手の階層、Rest／Exhaleの姿勢を内包する。
-- `public/dogs-archive-20261028/reference/`: 利用者が指定した2枚の原画。
-  モデル表面への写真投影や板状の代用品には使用しない。画面の「原画」で両方確認できる。
+  Rest／Exhaleの姿勢、可動する頭皮・額網を内包する。約4.85 MBのDraco圧縮。
+  頭皮の上端は胴側、鼻・頬・角は頭側に追従し、その間も連続して変形する。
+- `public/dogs-archive-20261028/reference/`: 原画2枚、四面図、接続の拡大図。
+  モデル表面への写真投影や板状の代用品には使用しない。画面の「原画」では最初の2枚を確認できる。
 - `src/lib/dogs-archive/scene.ts` と `fire.ts`: three.jsの視点操作、浮遊、姿勢遷移、
   口に追従する吐炎と身体の周囲の炎。炎は立体ノイズを使うボリュームとして描画する。
 
 再生成:
 
 ```sh
-blender --background --python scripts/blender/dogs_guardian.py
+python3 scripts/blender/build_guardian_v2.py --blender /path/to/blender
+node scripts/blender/validate_guardian_skin.mjs
 ```
 
-`-- --no-render` を末尾に追加すると確認用の静止画レンダーを省略できる。
-編集用 `.blend` と前・斜め・後・側・上・吐炎の確認画像は `output/dogs-archive/` に保存する。
+生成先は `output/dogs-archive/rebuild-v2/`。編集用の高密度モデルは
+`finish-study/guardian-v2-junction-sculpt.blend`、配信用は同フォルダーの
+`guardian-v2-browser-draco.glb`。前・斜め・後・左右・上・吐炎の確認画像も残す。
+空の作業ディレクトリで全工程を再実行し、通常・圧縮モデルともSHAの完全一致を確認した。
 大きい作業ファイルやブラウザー検証用画像はGitへの登録対象にしない。
 
 ## 操作と読み込み
@@ -63,6 +71,9 @@ blender --background --python scripts/blender/dogs_guardian.py
 第五の表示中かつ遷移幕が閉じてから3Dを読み込む。メニュー・原画ダイアログ・
 バックグラウンド中は時刻を停止し、閉じた後は同じモデルと視点から再開する。
 他の個体やページへ移動するとリクエスト・描画・イベント・GPU用データを破棄する。
+復号器は同じ配信元に置き、workerを1つに制限する。読み込み成功・中断のどちらでも
+workerを解放し、中断後に遅れて完成したデータも破棄する。モデルだけでなく復号器の
+配信SHAも、本番への切替前に照合する。
 WebGL読み込みに失敗した場合は原画と再試行ボタンを表示する。
 動きを減らす設定では自動的な浮遊を止め、利用者が選んだ吐炎のみ再生する。
 
@@ -82,7 +93,9 @@ PORT=8873 node scripts/preview-production.mjs
 ```
 
 3D構造テストはGLBの実バイナリ、全軸の厚み、頭に付随する口の座標、頭と顎の
-異なるアニメーション、内包テクスチャを検査する。形や材質が原画と同等かどうかは、
+異なるアニメーション、skinのbind行列とtrack、内包テクスチャを検査する。
+書出し済みの通常GLBでも、5段階の頭・胴への実頂点追従を検査する。
+形や材質が原画と同等かどうかは、
 この構造テストの合格やポリゴン数では判断せず、原画と実表示の比較で別に確認する。
 
 ブラウザー確認画像は `output/playwright/dogs-archive/`。320・390・834・1194pxの

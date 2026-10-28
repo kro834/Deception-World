@@ -47,7 +47,7 @@ function firstQuaternion(clip, name) {
   return new Quaternion(...[0, 1, 2, 3].map((i) => bytes.readFloatLE(start + 4 * i))).normalize();
 }
 
-test("the shipped Blender GLB has real, volumetric geometry on every viewing axis", () => {
+test("the Blender GLB has real, volumetric geometry on every viewing axis", () => {
   const bounds = new Box3();
   let meshes = 0;
   function walk(index, parentMatrix = new Matrix4()) {
@@ -82,6 +82,56 @@ test("the shipped Blender GLB has real, volumetric geometry on every viewing axi
   assert.ok(size.z > size.y * 0.25, "sculpt has a full modeled back, not a planar image");
   assert.ok(size.toArray().every((value) => Number.isFinite(value) && value > 0));
 });
+
+test(
+  "the flexible head attachment has complete bind data and moving pose tracks",
+  {
+    skip: !model.skins?.length && "legacy comparison asset has no deforming attachment",
+  },
+  () => {
+    for (const skin of model.skins) {
+      assert.ok(skin.joints.length >= 2, "attachment spans the body and head");
+      for (const index of skin.joints) assert.ok(model.nodes[index], "skin joint exists");
+      const accessor = model.accessors[skin.inverseBindMatrices];
+      assert.equal(accessor.count, skin.joints.length);
+      assert.equal(accessor.type, "MAT4");
+      assert.equal(accessor.componentType, 5126);
+      const view = model.bufferViews[accessor.bufferView];
+      const start = binaryStart + (view.byteOffset ?? 0) + (accessor.byteOffset ?? 0);
+      for (let i = 0; i < accessor.count; i++) {
+        const values = Array.from({ length: 16 }, (_, component) =>
+          bytes.readFloatLE(start + i * (view.byteStride ?? 64) + component * 4),
+        );
+        assert.ok(values.every(Number.isFinite), "bind transform is finite");
+        assert.ok(
+          Math.abs(new Matrix4().fromArray(values).determinant()) > 1e-8,
+          "bind transform is invertible",
+        );
+      }
+    }
+    for (const node of model.nodes.filter((item) => item.skin !== undefined)) {
+      assert.ok(model.skins[node.skin]);
+      for (const primitive of model.meshes[node.mesh].primitives) {
+        const positions = model.accessors[primitive.attributes.POSITION];
+        const joints = model.accessors[primitive.attributes.JOINTS_0];
+        const weights = model.accessors[primitive.attributes.WEIGHTS_0];
+        assert.ok(joints && weights, "every attachment primitive carries skin weights");
+        assert.equal(joints.count, positions.count);
+        assert.equal(weights.count, positions.count);
+        assert.equal(joints.type, "VEC4");
+        assert.equal(weights.type, "VEC4");
+        assert.ok([5121, 5123].includes(joints.componentType));
+      }
+    }
+    const rest = model.animations.find((clip) => clip.name === "Rest");
+    const exhale = model.animations.find((clip) => clip.name === "Exhale");
+    assert.ok(
+      firstQuaternion(rest, "NeckHeadJoint").angleTo(firstQuaternion(exhale, "NeckHeadJoint")) >
+        0.3,
+      "the attachment moves in the same two clips as the head",
+    );
+  },
+);
 
 test("mouth anchors belong to the moving head and both full articulation clips are embedded", () => {
   const head = byName.get("HeadPivot").index;

@@ -75,7 +75,9 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   };
   const canvas = document.createElement("canvas");
   canvas.className = "dogs-viewer__canvas";
-  canvas.dataset.engineVersion = "guardian-20261028-r14";
+  canvas.dataset.engineVersion = preserveAuthoredMaterials
+    ? "guardian-20261028-v2-skin"
+    : "guardian-20261028-r14";
   canvas.dataset.lightingProfile = "legacy";
   canvas.tabIndex = 0;
   canvas.setAttribute("role", "img");
@@ -163,6 +165,10 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   let poseSource = poseAvailable ? "procedural-fallback" : "none";
   let geometryBytesEstimated = 0,
     materialTextureBytesEstimated = 0;
+  let skinnedMeshes = 0,
+    skeletonsCount = 0,
+    morphMeshes = 0;
+  let animationSummary: { name: string; tracks: number }[] = [];
   if (options.diagnostics) renderer.info.autoReset = false;
   let mantle: ReturnType<typeof createMantle> | null = null;
   let mixer: THREE.AnimationMixer | null = null;
@@ -698,6 +704,10 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       });
       const rest = gltf.animations.find((clip) => /rest/i.test(clip.name));
       const exhale = gltf.animations.find((clip) => /exhale/i.test(clip.name));
+      animationSummary = gltf.animations.map((clip) => ({
+        name: clip.name,
+        tracks: clip.tracks.length,
+      }));
       if (rest && exhale) {
         mixer = new THREE.AnimationMixer(model);
         restAction = mixer.clipAction(rest).play();
@@ -715,6 +725,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         meshes = 0;
       const gpuAttributes = new Set<THREE.BufferAttribute | THREE.InterleavedBuffer>();
       const materialTextures = new Set<THREE.Texture>();
+      const modelSkeletons = new Set<THREE.Skeleton>();
       const ownAttribute = (
         attribute: THREE.BufferAttribute | THREE.InterleavedBufferAttribute,
       ) => {
@@ -728,6 +739,12 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         if (node instanceof THREE.Mesh) {
           const geometry = node.geometry as THREE.BufferGeometry;
           meshes++;
+          if (node instanceof THREE.SkinnedMesh) {
+            skinnedMeshes++;
+            modelSkeletons.add(node.skeleton);
+          }
+          if (Object.values(geometry.morphAttributes).some((attributes) => attributes?.length))
+            morphMeshes++;
           triangles +=
             (node.geometry.index?.count ?? node.geometry.getAttribute("position")?.count ?? 0) / 3;
           if (geometry.index) ownAttribute(geometry.index);
@@ -745,6 +762,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           }
         }
       });
+      skeletonsCount = modelSkeletons.size;
       for (const texture of materialTextures) {
         const image = texture.image as { width?: number; height?: number } | undefined;
         if (image?.width && image.height)
@@ -826,6 +844,16 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         geometryBytesEstimated,
         materialTextureBytesEstimated,
         authoredMaterialsPreserved: preserveAuthoredMaterials,
+        skinnedMeshes,
+        skeletons: skeletonsCount,
+        morphMeshes,
+        animationClips: animationSummary,
+        skinJointQuaternions: Object.fromEntries(
+          ["NeckBaseJoint", "NeckHeadJoint"].flatMap((name) => {
+            const bone = model?.getObjectByName(name);
+            return bone ? [[name, bone.quaternion.toArray()]] : [];
+          }),
+        ),
         mantle: mantle?.diagnostics ?? null,
         legacyLightsVisible: legacyLights.visible,
         sculptureLightsVisible: sculptureLighting?.root.visible ?? false,

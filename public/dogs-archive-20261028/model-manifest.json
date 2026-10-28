@@ -1,16 +1,17 @@
 {
-  "version": 1,
-  "title": "第五の犬 / Forest Guardian",
-  "source": "Blender 4.5.9 LTS procedural sculpt",
+  "stage": "browser delivery from Blender",
+  "version": 2,
+  "preservedSculpt": "guardian-v2-junction-sculpt.blend",
   "model": "guardian-v.glb",
+  "assetBytes": 4845424,
+  "assetSha256": "814eed150ea2c58e2aaa465f29e38d2bdc2b1aadfd24495dc06849d5a9154ead",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
     "unit": "meter"
   },
-  "assetBytes": 17645300,
-  "assetSha256": "9f26669b43c270ceefdddf8ad164cc470523e5618e54af397235fe3417ea16c6",
   "nodes": {
+    "root": "GuardianV_Root",
     "body": "BodyPivot",
     "head": "HeadPivot",
     "jaw": "JawPivot",
@@ -27,9 +28,12 @@
       "TentaclePivot_07",
       "TentaclePivot_08",
       "TentaclePivot_09",
-      "TentaclePivot_10",
-      "TentaclePivot_11",
-      "TentaclePivot_12"
+      "TentaclePivot_10"
+    ],
+    "neckRig": "NeckRig",
+    "joints": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
     ]
   },
   "animations": [
@@ -45,14 +49,19 @@
           0.0,
           -0.0,
           1.0
+        ],
+        "position": [
+          0.0,
+          0.0,
+          0.0
         ]
       },
       "HeadPivot": {
         "quaternion": [
-          -0.0,
-          -0.0,
-          0.11320317,
-          0.99357188
+          0.0,
+          0.0,
+          0.15643448,
+          0.98768836
         ]
       },
       "JawPivot": {
@@ -144,22 +153,6 @@
         ]
       },
       "TentaclePivot_10": {
-        "quaternion": [
-          0.0,
-          0.0,
-          -0.0,
-          1.0
-        ]
-      },
-      "TentaclePivot_11": {
-        "quaternion": [
-          0.0,
-          0.0,
-          -0.0,
-          1.0
-        ]
-      },
-      "TentaclePivot_12": {
         "quaternion": [
           0.0,
           0.0,
@@ -171,154 +164,517 @@
     "exhale": {
       "BodyPivot": {
         "quaternion": [
-          -0.0,
-          -0.0,
-          0.03489954,
-          0.99939084
+          0.03442569,
+          0.0165224,
+          0.02676586,
+          0.99891216
+        ],
+        "position": [
+          0.0,
+          0.08,
+          0.04
         ]
       },
       "HeadPivot": {
         "quaternion": [
-          -0.46802431,
-          0.03683433,
-          0.0692753,
-          0.88022578
+          -0.4788408,
+          0.07584094,
+          0.13682067,
+          0.86385173
         ]
       },
       "JawPivot": {
         "quaternion": [
-          0.5807029,
+          0.55919296,
           0.0,
           -0.0,
-          0.81411552
+          0.82903755
         ]
       },
       "TentaclePivot_00": {
         "quaternion": [
-          0.07551361,
-          0.04800257,
-          0.05620379,
-          0.99440151
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
         ]
       },
       "TentaclePivot_01": {
         "quaternion": [
-          -0.06283151,
-          -0.04615695,
-          -0.04083622,
-          0.99611956
+          0.05073415,
+          0.03253707,
+          0.04535783,
+          0.99715102
         ]
       },
       "TentaclePivot_02": {
         "quaternion": [
-          0.07551361,
-          0.04800257,
-          0.05620379,
-          0.99440151
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
         ]
       },
       "TentaclePivot_03": {
         "quaternion": [
-          -0.06283151,
-          -0.04615695,
-          -0.04083622,
-          0.99611956
+          0.05073415,
+          0.03253707,
+          0.04535783,
+          0.99715102
         ]
       },
       "TentaclePivot_04": {
         "quaternion": [
-          0.07551361,
-          0.04800257,
-          0.05620379,
-          0.99440151
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
         ]
       },
       "TentaclePivot_05": {
         "quaternion": [
-          -0.06283151,
-          -0.04615695,
-          -0.04083622,
-          0.99611956
+          0.05073415,
+          0.03253707,
+          0.04535783,
+          0.99715102
         ]
       },
       "TentaclePivot_06": {
         "quaternion": [
-          0.07551361,
-          0.04800257,
-          0.05620379,
-          0.99440151
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
         ]
       },
       "TentaclePivot_07": {
         "quaternion": [
-          -0.06283151,
-          -0.04615695,
-          -0.04083622,
-          0.99611956
+          0.03245281,
+          0.03336278,
+          0.04475397,
+          0.99791324
         ]
       },
       "TentaclePivot_08": {
         "quaternion": [
-          0.05206477,
-          0.04931339,
-          0.05505726,
-          0.99590462
+          -0.04753822,
+          -0.04588662,
+          -0.05025639,
+          0.99654847
         ]
       },
       "TentaclePivot_09": {
         "quaternion": [
-          -0.04456716,
-          -0.04540088,
-          -0.04167518,
-          0.99710369
+          0.03245281,
+          0.03336278,
+          0.04475397,
+          0.99791324
         ]
       },
       "TentaclePivot_10": {
         "quaternion": [
-          0.05206477,
-          0.04931339,
-          0.05505726,
-          0.99590462
-        ]
-      },
-      "TentaclePivot_11": {
-        "quaternion": [
-          -0.04456716,
-          -0.04540088,
-          -0.04167518,
-          0.99710369
-        ]
-      },
-      "TentaclePivot_12": {
-        "quaternion": [
-          0.05206477,
-          0.04931339,
-          0.05505726,
-          0.99590462
+          -0.04753822,
+          -0.04588662,
+          -0.05025639,
+          0.99654847
         ]
       }
     }
   },
-  "modeling": {
-    "referenceImages": [
-      "reference/guardian-rest.jpg",
-      "reference/guardian-exhale.jpg"
-    ],
-    "referenceImagesUsedAsTexture": false,
-    "actualPiercedGeometry": true,
-    "rearSculpted": true,
-    "mainSpiralCores": 3,
-    "secondaryReverseSpirals": 2,
-    "recurvedHeadHorns": 4,
-    "movableFronds": 13,
-    "textures": "textures/",
-    "blenderSource": "scripts/blender/dogs_guardian.py",
-    "blendArchive": "output/dogs-archive/guardian-v.blend"
+  "poseChecks": {
+    "Rest": {
+      "mouthSocket": [
+        -0.4100406,
+        -0.4630811,
+        0.8999999
+      ],
+      "mouthAim": [
+        -0.21845,
+        -1.052736,
+        1.5
+      ],
+      "direction": [
+        0.2220603,
+        -0.6834311,
+        0.6954215
+      ],
+      "jawTipSeparation": 0.020677650318832803
+    },
+    "Exhale": {
+      "mouthSocket": [
+        -0.3671849,
+        0.1855454,
+        1.6233339
+      ],
+      "mouthAim": [
+        -0.1577412,
+        0.3360847,
+        2.4466634
+      ],
+      "direction": [
+        0.2427527,
+        0.1744804,
+        0.9542681
+      ],
+      "jawTipSeparation": 0.3922798100642083
+    }
   },
+  "changes": [
+    {
+      "mesh": "Bone | overlapping coiled membrane lobes",
+      "ratio": 0.65,
+      "beforeFaces": 130536,
+      "afterFaces": 169696
+    },
+    {
+      "mesh": "Head | continuous asymmetric shield and cheek roots",
+      "ratio": 0.45,
+      "beforeFaces": 118836,
+      "afterFaces": 106952
+    },
+    {
+      "mesh": "Shell | fused S-shaped fenestrated organ",
+      "ratio": 0.45,
+      "beforeFaces": 154575,
+      "afterFaces": 139112
+    },
+    {
+      "mesh": "Frond_08 | toothed perforated feather",
+      "ratio": 0.12,
+      "beforeFaces": 59813,
+      "afterFaces": 14352
+    }
+  ],
+  "meshAudit": [
+    {
+      "mesh": "Bone | overlapping coiled membrane lobes",
+      "vertices": 86024,
+      "faces": 169696,
+      "triangles": 169696,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Face | integrated converging forehead lattice",
+      "vertices": 9030,
+      "faces": 9072,
+      "triangles": 17976,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Head | continuous asymmetric shield and cheek roots",
+      "vertices": 53480,
+      "faces": 106952,
+      "triangles": 106952,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Jaw | separate slim lower mandible",
+      "vertices": 330,
+      "faces": 322,
+      "triangles": 656,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Mouth | dark articulated inner membrane",
+      "vertices": 10,
+      "faces": 7,
+      "triangles": 16,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Shell | fused S-shaped fenestrated organ",
+      "vertices": 69324,
+      "faces": 139112,
+      "triangles": 139112,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Tail | continuous-edge long and short spines",
+      "vertices": 1820,
+      "faces": 1708,
+      "triangles": 3584,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_00 | toothed perforated feather",
+      "vertices": 4296,
+      "faces": 3526,
+      "triangles": 8676,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_01 | toothed perforated feather",
+      "vertices": 3454,
+      "faces": 2863,
+      "triangles": 6972,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_02 | toothed perforated feather",
+      "vertices": 2809,
+      "faces": 2351,
+      "triangles": 5670,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_03 | toothed perforated feather",
+      "vertices": 3477,
+      "faces": 2875,
+      "triangles": 7022,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_04 | toothed perforated feather",
+      "vertices": 2198,
+      "faces": 1826,
+      "triangles": 4436,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_05 | toothed perforated feather",
+      "vertices": 7001,
+      "faces": 5821,
+      "triangles": 14114,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_06 | toothed perforated feather",
+      "vertices": 6926,
+      "faces": 5590,
+      "triangles": 13960,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_07 | toothed perforated feather",
+      "vertices": 2226,
+      "faces": 1867,
+      "triangles": 4492,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_08 | toothed perforated feather",
+      "vertices": 7166,
+      "faces": 14352,
+      "triangles": 14352,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_09 | toothed perforated feather",
+      "vertices": 2102,
+      "faces": 1770,
+      "triangles": 4240,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_10 | toothed perforated feather",
+      "vertices": 2283,
+      "faces": 1897,
+      "triangles": 4606,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    }
+  ],
   "meshStats": {
-    "objects": 28,
-    "vertices": 336431,
-    "triangles": 660802
+    "objects": 18,
+    "vertices": 263956,
+    "triangles": 526532
   },
-  "buildSeconds": 5.87
+  "colorAttribute": "GuardianSurface COLOR_0 only, includes cavity AO once",
+  "faceEmission": {
+    "color": [
+      0.018,
+      0.11,
+      0.033
+    ],
+    "strength": 0.75,
+    "threadRadius": 0.0038,
+    "baseColor": [
+      0.06,
+      0.18,
+      0.07
+    ]
+  },
+  "secondsBeforeRender": 4.134484052658081,
+  "sourceScripts": [
+    "scripts/blender/dogs_guardian_v2.py",
+    "scripts/blender/dogs_guardian_v2_finish.py",
+    "scripts/blender/dogs_guardian_v2_head_junction.py",
+    "scripts/blender/dogs_guardian_v2_optimize.py",
+    "scripts/blender/guardian_cavity_ao.py"
+  ],
+  "skinMeshes": [
+    "Face | integrated converging forehead lattice",
+    "Head | continuous asymmetric shield and cheek roots"
+  ],
+  "skinCount": 1,
+  "jointNodes": [
+    {
+      "name": "NeckHeadJoint",
+      "rotation": [
+        0.698401153087616,
+        -0.11061587929725647,
+        -0.11061587929725647,
+        0.6984010934829712
+      ],
+      "translation": [
+        -0.5799999833106995,
+        -0.6000000238418579,
+        0.47999998927116394
+      ]
+    },
+    {
+      "children": [
+        1
+      ],
+      "name": "NeckBaseJoint",
+      "rotation": [
+        -0.7071067690849304,
+        0,
+        0,
+        0.7071067690849304
+      ]
+    }
+  ],
+  "inputBlendSha256": "9776c984469b7eeb9fb361fb3ae6367fa885240d9de8cae6fac777e7a69afa0a",
+  "sourceSha256": {
+    "scripts/blender/dogs_guardian_v2.py": "678e2d946244f268a4220c3bae132f5f9c7fc48b38960729c2acd9b98a79f3bd",
+    "scripts/blender/dogs_guardian_v2_finish.py": "df0ed7023e2666b1bcde5a5cac6bb5ebed177c036835242a07f609ba0a0bf5dd",
+    "scripts/blender/dogs_guardian_v2_head_junction.py": "eb7ad9810afb3423d9360bbdc864aedb199273d62f2b607894a4febdd0a4543d",
+    "scripts/blender/dogs_guardian_v2_optimize.py": "a7f6092ba3a0de39b824f9b0b904b01048a2e37a23beb081f171356f9d799080",
+    "scripts/blender/guardian_cavity_ao.py": "e9c8d1b09d5bcd5b99810df71306dd614c7e2284d5f83f383b9315217cbf6a4f"
+  },
+  "junctionValidation": {
+    "revision": 9,
+    "headSkin": true,
+    "faceSkin": true,
+    "inputBlendSha256": "e2517a670f8eecf65b57d84a3f3ca4f933bd3dad8cd1a8e3d4883ec8adec33c1",
+    "sourceSha256": "eb7ad9810afb3423d9360bbdc864aedb199273d62f2b607894a4febdd0a4543d",
+    "reference": "public/dogs-archive-20261028/reference/guardian-head-junction.jpg",
+    "headPivot": "rebased to upper rooted head; Rest child world positions preserved",
+    "jointNames": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
+    ],
+    "deformationChecks": [
+      {
+        "fraction": 0,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 2.5288109106536417e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 1.4600096599955427e-07
+          }
+        }
+      },
+      {
+        "fraction": 0.25,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 3.885747435809761e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 1.999200562387517e-07
+          }
+        }
+      },
+      {
+        "fraction": 0.5,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 3.03925246810483e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 1.7120130796843852e-07
+          }
+        }
+      },
+      {
+        "fraction": 0.75,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 2.862419592186592e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 2.686603327408849e-07
+          }
+        }
+      },
+      {
+        "fraction": 1,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 2.7677678497145637e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 2.6151431761360534e-07
+          }
+        }
+      }
+    ],
+    "meshAudit": [
+      {
+        "mesh": "Head | continuous asymmetric shield and cheek roots",
+        "vertices": 118840,
+        "faces": 118836,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0
+      },
+      {
+        "mesh": "Face | integrated converging forehead lattice",
+        "vertices": 9030,
+        "faces": 9072,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0
+      }
+    ],
+    "ao": {
+      "meshes": 16,
+      "vertices": 503609,
+      "rays": 6043308,
+      "minimum": 0.2605338791427213,
+      "maximum": 1.0,
+      "radius": 0.65,
+      "samples": 12,
+      "seconds": 8.082
+    },
+    "secondsBeforeRender": 11.324540138244629
+  },
+  "revision": "junction-09",
+  "title": "第五の“犬”",
+  "source": "Blender 4.5.9 LTS",
+  "referenceImages": [
+    "reference/guardian-rest.jpg",
+    "reference/guardian-exhale.jpg",
+    "reference/guardian-turnaround.png",
+    "reference/guardian-head-junction.jpg"
+  ],
+  "referenceImagesUsedAsTexture": false
 }
