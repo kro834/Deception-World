@@ -161,6 +161,8 @@ function entryRuntime({
       if (name === "@/lib/opening-destination-styles") return { preloadOpeningDestinationStyles() {} };
       if (name === "./opening-timing") return { OPENING_BURN: { start: 2.6 } };
       if (name === "./particles") return { Particles };
+      if (name === "@/lib/opening-notice")
+        return { armOpeningNotice() {}, disarmOpeningNotice() {} };
       if (name === "./opening-burn" || name === "./opening-dive") {
         chunkRequests.push(name);
         return name === "./opening-dive" ? diveImport ?? {} : {};

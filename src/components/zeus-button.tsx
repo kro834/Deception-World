@@ -157,6 +157,8 @@ const ZEUS_AVOID_SELECTOR = [
   // The load-error page's ways out (reload, home): on short phones the
   // panel fills the screen and its words left no clear spot but the buttons.
   ".app-load-error-actions :is(button, a)",
+  // 2026-10-28: the notice /world shows after the opening (opening-notice.tsx).
+  ".opening-notice :is(.opening-notice-open, .opening-notice-close)",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
