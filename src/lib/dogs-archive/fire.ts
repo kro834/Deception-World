@@ -132,7 +132,11 @@ void main(){float u=fract(aPhase+uTime*.42);float angle=aPhase*127.+u*7.;float s
   };
 }
 
-export function createMantle(model: THREE.Object3D, mobile: boolean) {
+export function createMantle(
+  model: THREE.Object3D,
+  mobile: boolean,
+  options: { suppressFaceEmission?: boolean; excludeDeformingNeck?: boolean } = {},
+) {
   model.updateMatrixWorld(true);
   const groups = new Map<THREE.Object3D, THREE.Vector3[]>();
   const flameSources = new Map<
@@ -140,6 +144,9 @@ export function createMantle(model: THREE.Object3D, mobile: boolean) {
     { position: THREE.Vector3; normal: THREE.Vector3 }[]
   >();
   const p = new THREE.Vector3();
+  let skippedEmissionMeshes = 0,
+    skippedDeformingMeshes = 0,
+    faceSamples = 0;
   model.traverse((node) => {
     if (!(node instanceof THREE.Mesh)) return;
     const position = node.geometry.getAttribute("position");
@@ -151,6 +158,29 @@ export function createMantle(model: THREE.Object3D, mobile: boolean) {
         break;
       }
     }
+    const face = /HeadPivot|JawPivot/.test(anchor.name);
+    if (
+      options.excludeDeformingNeck &&
+      node instanceof THREE.SkinnedMesh &&
+      (/neck|junction|bridge/i.test(node.name) ||
+        node.skeleton.bones.some((bone) => /^Neck(Base|Head)Joint$/.test(bone.name)))
+    ) {
+      // Rest-vertex particles do not follow skin weights. Keep this broad
+      // connective membrane clear instead of masking a moving seam with FX.
+      skippedDeformingMeshes++;
+      return;
+    }
+    const materials = Array.isArray(node.material) ? node.material : [node.material];
+    const pureEmission = materials.every((material) =>
+      /rune|ember|emission|glow|wisp|flame/i.test(material.name),
+    );
+    if (
+      options.suppressFaceEmission &&
+      (pureEmission || (face && /lattice|rune|woven|emission/i.test(node.name)))
+    ) {
+      skippedEmissionMeshes++;
+      return;
+    }
     const inv = anchor.matrixWorld.clone().invert();
     const normalTransform = new THREE.Matrix3().getNormalMatrix(
       inv.clone().multiply(node.matrixWorld),
@@ -161,10 +191,14 @@ export function createMantle(model: THREE.Object3D, mobile: boolean) {
       !/HeadPivot|JawPivot/.test(anchor.name);
     const candidates = groups.get(anchor) ?? [];
     groups.set(anchor, candidates);
-    const stride = Math.max(1, Math.floor(position.count / 160));
+    const stride = Math.max(
+      1,
+      Math.floor(position.count / (options.suppressFaceEmission && face ? 35 : 160)),
+    );
     for (let i = 0; i < position.count; i += stride) {
       p.fromBufferAttribute(position, i).applyMatrix4(node.matrixWorld).applyMatrix4(inv);
       candidates.push(p.clone());
+      if (face) faceSamples++;
       if (carriesFlame) {
         const normal = normals
           ? new THREE.Vector3()
@@ -298,6 +332,7 @@ if(sum.a<.008)discard;gl_FragColor=vec4(sum.rgb/max(sum.a,.001),sum.a);}`,
   }
   flameGeometry.dispose();
   return {
+    diagnostics: { skippedEmissionMeshes, skippedDeformingMeshes, faceSamples, candidates: total },
     points,
     update(time: number, strength: number, dpr: number) {
       uniforms.uTime.value = time;

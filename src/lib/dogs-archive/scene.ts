@@ -1,12 +1,21 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { createBreathVolume, createMantle } from "./fire.ts";
+import {
+  createGuardianSculptureLighting,
+  prepareGuardianMouthSpill,
+  type GuardianSurfaceAudit,
+  type GuardianLightingPalette,
+} from "./lighting.ts";
+import { GuardianDracoLoader } from "./draco.ts";
+
+export type GuardianLightingProfile = "legacy" | "sculpture";
 
 export type GuardianStatus = "loading" | "ready" | "error";
 export type GuardianScene = {
@@ -14,11 +23,21 @@ export type GuardianScene = {
   resetView(): void;
   togglePause(): boolean;
   setBlocked(blocked: boolean): void;
+  setLightingProfile(profile: GuardianLightingProfile): void;
+  setLightingPalette(palette: GuardianLightingPalette): void;
+  getDiagnostics(): Record<string, unknown>;
   dispose(): void;
 };
 type Options = {
   onStatus?: (status: GuardianStatus) => void;
   onActionChange?: (active: boolean) => void;
+  /** Internal, trusted preview inputs. Public DogViewer supplies none. */
+  modelUrl?: string;
+  manifestUrl?: string | null;
+  lightingProfile?: GuardianLightingProfile;
+  lightingPalette?: GuardianLightingPalette;
+  effects?: boolean;
+  diagnostics?: boolean;
 };
 type PoseManifest = {
   poses?: {
@@ -31,10 +50,33 @@ const ease = (a: number, b: number, t: number) => THREE.MathUtils.smoothstep(t, 
 // Every allocation belongs to this surface. Removing the fifth dog aborts its
 // request and releases its maps, buffers, context, listeners and animation loop.
 export function createGuardianScene(host: HTMLElement, options: Options = {}): GuardianScene {
+  const bootStartedAt = performance.now();
   const abort = new AbortController();
+  const gltfManager = new THREE.LoadingManager();
+  let dracoLoader: GuardianDracoLoader | null = null;
+  let dracoStats: ReturnType<GuardianDracoLoader["getDiagnostics"]> | null = null;
+  const preserveAuthoredMaterials = Boolean(options.modelUrl);
+  const loading = {
+    phase: "boot",
+    fetchMs: 0,
+    hashAndManifestMs: 0,
+    parseMs: 0,
+    readyMs: 0,
+    firstFrameTotalMs: 0,
+    firstFrameSubmitMs: 0,
+  };
+  let captureFirstFrame = false;
+  const releaseDecoder = (commit: boolean) => {
+    if (!dracoLoader) return;
+    if (commit) dracoLoader.commit();
+    dracoLoader.dispose();
+    dracoStats = dracoLoader.getDiagnostics();
+    dracoLoader = null;
+  };
   const canvas = document.createElement("canvas");
   canvas.className = "dogs-viewer__canvas";
   canvas.dataset.engineVersion = "guardian-20261028-r14";
+  canvas.dataset.lightingProfile = "legacy";
   canvas.tabIndex = 0;
   canvas.setAttribute("role", "img");
   canvas.setAttribute(
@@ -92,16 +134,19 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const floating = new THREE.Group();
   floating.name = "GuardianFloatingRoot";
   scene.add(floating);
-  scene.add(new THREE.HemisphereLight(0xc6ead5, 0x0a1b11, 1.05));
+  const legacyLights = new THREE.Group();
+  legacyLights.name = "GuardianLegacyLightRig";
+  scene.add(legacyLights);
+  legacyLights.add(new THREE.HemisphereLight(0xc6ead5, 0x0a1b11, 1.05));
   const key = new THREE.DirectionalLight(0xd4ffe0, 2.7);
   key.position.set(5, 8, 8);
-  scene.add(key);
+  legacyLights.add(key);
   const rim = new THREE.DirectionalLight(0x52d98e, 3.6);
   rim.position.set(-6, 3, -7);
-  scene.add(rim);
+  legacyLights.add(rim);
   const side = new THREE.DirectionalLight(0x647caa, 1.1);
   side.position.set(-7, -1, 5);
-  scene.add(side);
+  legacyLights.add(side);
   const breathLight = new THREE.PointLight(0x79ff8d, 0, 12, 1.6);
   scene.add(breathLight);
   const breath = createBreathVolume(mobile);
@@ -109,6 +154,16 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const surfaceTime = { value: 0 },
     surfaceStrength = { value: 0 };
   let model: THREE.Object3D | null = null;
+  let lightingProfile: GuardianLightingProfile = "legacy";
+  let lightingPalette: GuardianLightingPalette = options.lightingPalette ?? "forest";
+  let sculptureLighting: ReturnType<typeof createGuardianSculptureLighting> | null = null;
+  let restoreMouthSpill: (() => void) | null = null;
+  let surfaceAudit: GuardianSurfaceAudit | null = null;
+  let poseAvailable = !options.modelUrl;
+  let poseSource = poseAvailable ? "procedural-fallback" : "none";
+  let geometryBytesEstimated = 0,
+    materialTextureBytesEstimated = 0;
+  if (options.diagnostics) renderer.info.autoReset = false;
   let mantle: ReturnType<typeof createMantle> | null = null;
   let mixer: THREE.AnimationMixer | null = null;
   let restAction: THREE.AnimationAction | null = null;
@@ -152,6 +207,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     const geometries = new Set<THREE.BufferGeometry>(),
       materials = new Set<THREE.Material>(),
       textures = new Set<THREE.Texture>();
+    const skeletons = new Set<THREE.Skeleton>();
     root.traverse((node) => {
       if (!(
         node instanceof THREE.Mesh ||
@@ -160,6 +216,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       ))
         return;
       if (node instanceof THREE.InstancedMesh) node.dispose();
+      if (node instanceof THREE.SkinnedMesh) skeletons.add(node.skeleton);
       geometries.add(node.geometry);
       (Array.isArray(node.material) ? node.material : [node.material]).forEach((material) => {
         materials.add(material);
@@ -175,6 +232,27 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     });
     geometries.forEach((geometry) => geometry.dispose());
     materials.forEach((material) => material.dispose());
+    skeletons.forEach((skeleton) => skeleton.dispose());
+  };
+  const parseAbortably = async (task: Promise<GLTF>) => {
+    let rejectAbort: () => void = () => {};
+    const abortTask = new Promise<never>((_, reject) => {
+      rejectAbort = () => reject(new DOMException("Guardian parse cancelled", "AbortError"));
+      if (abort.signal.aborted) rejectAbort();
+      else abort.signal.addEventListener("abort", rejectAbort, { once: true });
+    });
+    const ownedTask = task.then((result) => {
+      if (disposed || abort.signal.aborted) {
+        disposeObject(result.scene);
+        throw new DOMException("Guardian late parse disposed", "AbortError");
+      }
+      return result;
+    });
+    try {
+      return await Promise.race([ownedTask, abortTask]);
+    } finally {
+      abort.signal.removeEventListener("abort", rejectAbort);
+    }
   };
   const canDraw = () => !disposed && !lost && !blocked && inViewport && !document.hidden;
   const request = () => {
@@ -254,7 +332,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         joint.node.quaternion.copy(joint.base).slerp(joint.exhale, actionPose);
         joint.applied.identity();
       }
-      if (joint.kind === "head" && anticipation > 0) {
+      if (!preserveAuthoredMaterials && joint.kind === "head" && anticipation > 0) {
         sway.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, -0.055 * anticipation);
         joint.node.quaternion.multiply(sway);
         joint.applied.multiply(sway);
@@ -294,7 +372,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         origin.set(0, 0.15, 2).applyMatrix4(floating.matrixWorld);
         direction.set(0, -0.12, 1).transformDirection(floating.matrixWorld);
       }
-      breath.update(time, strength, origin, direction);
+      const effectStrength = options.effects === false ? 0 : strength;
+      breath.update(time, effectStrength, origin, direction);
       canvas.dataset.mouthDirection = direction
         .toArray()
         .map((value) => value.toFixed(3))
@@ -306,11 +385,19 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           .map((value) => value.toFixed(4))
           .join(",");
       breathLight.position.copy(origin).addScaledVector(direction, 0.5);
-      breathLight.intensity = strength * 7.5;
-      mantle?.update(time, Math.max(strength, anticipation * 0.2), dpr);
+      breathLight.intensity = effectStrength * 7.5;
+      mantle?.update(time, Math.max(effectStrength, anticipation * 0.2), dpr);
     }
     controls.update();
+    sculptureLighting?.update(time, pose);
+    if (options.diagnostics) renderer.info.reset();
+    const submitStarted = captureFirstFrame ? performance.now() : 0;
     composer.render();
+    if (captureFirstFrame && model) {
+      loading.firstFrameSubmitMs = performance.now() - submitStarted;
+      loading.firstFrameTotalMs = performance.now() - bootStartedAt;
+      captureFirstFrame = false;
+    }
     canvas.dataset.pose = pose.toFixed(3);
     canvas.dataset.action = actionTime >= 0 ? "exhale" : "rest";
     if (animate || settleFrames-- > 0) request();
@@ -331,6 +418,38 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     if (!userOrbit) resetView();
+    request();
+  };
+  const setLightingProfile = (next: GuardianLightingProfile) => {
+    if (disposed || (next === lightingProfile && (next === "legacy" || sculptureLighting))) return;
+    sculptureLighting?.dispose();
+    sculptureLighting = null;
+    restoreMouthSpill?.();
+    restoreMouthSpill = null;
+    legacyLights.visible = next === "legacy";
+    if (next === "sculpture") {
+      sculptureLighting = createGuardianSculptureLighting(renderer, scene, floating, {
+        mobile,
+        palette: lightingPalette,
+      });
+      restoreMouthSpill = prepareGuardianMouthSpill(breathLight);
+      if (model) surfaceAudit = sculptureLighting.setModel(model);
+    }
+    lightingProfile = next;
+    canvas.dataset.lightingProfile = next;
+    measuredFrames = 0;
+    measuredSeconds = 0;
+    request();
+  };
+  const syncLightingModel = () => {
+    if (model && sculptureLighting) surfaceAudit = sculptureLighting.setModel(model);
+  };
+  const setLightingPalette = (next: GuardianLightingPalette) => {
+    if (disposed) return;
+    lightingPalette = next;
+    sculptureLighting?.setPalette(next);
+    measuredFrames = 0;
+    measuredSeconds = 0;
     request();
   };
   const change = () => {
@@ -398,6 +517,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       environmentTarget.dispose();
       environmentTarget = nextEnvironment;
       scene.environment = environmentTarget.texture;
+      sculptureLighting?.restoreAfterContextLoss();
       lost = false;
       last = 0;
       notify(model ? "ready" : "loading");
@@ -430,6 +550,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     { rootMargin: "80px" },
   );
   intersection.observe(host);
+  setLightingProfile(options.lightingProfile ?? "legacy");
   resetView();
   resize();
   notify("loading");
@@ -439,13 +560,27 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         signal: abort.signal,
         cache: import.meta.env.DEV ? "no-store" : "no-cache",
       };
-      const manifestRequest = fetch("/dogs-archive-20261028/model-manifest.json", requestOptions)
-        .then((response) => (response.ok ? (response.json() as Promise<PoseManifest>) : null))
-        .catch(() => null);
-      const response = await fetch("/dogs-archive-20261028/guardian-v.glb", requestOptions);
+      const fetchStarted = performance.now();
+      loading.phase = "fetch";
+      const modelUrl = options.modelUrl ?? "/dogs-archive-20261028/guardian-v.glb";
+      const manifestUrl =
+        options.manifestUrl === undefined
+          ? options.modelUrl
+            ? null
+            : "/dogs-archive-20261028/model-manifest.json"
+          : options.manifestUrl;
+      const manifestRequest = manifestUrl
+        ? fetch(manifestUrl, requestOptions)
+            .then((response) => (response.ok ? (response.json() as Promise<PoseManifest>) : null))
+            .catch(() => null)
+        : Promise.resolve(null);
+      const response = await fetch(modelUrl, requestOptions);
       if (!response.ok) throw new Error(`Guardian asset: ${response.status}`);
       const data = await response.arrayBuffer();
+      loading.fetchMs = performance.now() - fetchStarted;
       canvas.dataset.assetBytes = String(data.byteLength);
+      const hashStarted = performance.now();
+      loading.phase = "hash";
       const digestRequest = globalThis.crypto?.subtle
         ? globalThis.crypto.subtle
             .digest("SHA-256", data)
@@ -457,15 +592,28 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
             .catch(() => null)
         : Promise.resolve(null);
       const [manifest, assetSha256] = await Promise.all([manifestRequest, digestRequest]);
+      loading.hashAndManifestMs = performance.now() - hashStarted;
       if (assetSha256) canvas.dataset.assetSha256 = assetSha256;
       if (disposed) return;
-      const gltf = await new GLTFLoader().parseAsync(data, "/dogs-archive-20261028/");
+      const assetBase = new URL(".", new URL(modelUrl, document.baseURI)).href;
+      const parseStarted = performance.now();
+      loading.phase = "parse";
+      dracoLoader = new GuardianDracoLoader(abort.signal, gltfManager);
+      const gltfLoader = new GLTFLoader(gltfManager).setDRACOLoader(dracoLoader);
+      const gltf = await parseAbortably(gltfLoader.parseAsync(data, assetBase));
+      loading.parseMs = performance.now() - parseStarted;
+      releaseDecoder(true);
+      loading.phase = "prepare";
       if (disposed) {
         disposeObject(gltf.scene);
         return;
       }
       model = gltf.scene;
       model.name = "BlenderGuardianV";
+      model.updateMatrixWorld(true);
+      model.traverse((node) => {
+        if (node instanceof THREE.SkinnedMesh) node.skeleton.update();
+      });
       const box = new THREE.Box3().setFromObject(model),
         size = box.getSize(new THREE.Vector3()),
         center = box.getCenter(new THREE.Vector3());
@@ -507,12 +655,18 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           });
         }
         if (node instanceof THREE.Mesh) {
-          node.frustumCulled = true;
+          // A moving skin's rest bounding sphere can otherwise cull the neck
+          // in an authored intermediate pose. Rigid body parts keep culling.
+          node.frustumCulled = !(node instanceof THREE.SkinnedMesh);
           (Array.isArray(node.material) ? node.material : [node.material]).forEach((mat) => {
             if (mat instanceof THREE.MeshStandardMaterial) {
               mat.envMapIntensity = 0.55;
-              mat.emissiveIntensity = Math.min(mat.emissiveIntensity, 1.35);
-              if (/flame|wisp|ember|rune/i.test(`${node.name} ${mat.name}`)) {
+              if (!preserveAuthoredMaterials)
+                mat.emissiveIntensity = Math.min(mat.emissiveIntensity, 1.35);
+              if (
+                !preserveAuthoredMaterials &&
+                /flame|wisp|ember|rune/i.test(`${node.name} ${mat.name}`)
+              ) {
                 const displace = /flame|wisp/i.test(`${node.name} ${mat.name}`);
                 mat.onBeforeCompile = (shader) => {
                   shader.uniforms.guardianTime = surfaceTime;
@@ -549,23 +703,70 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         restAction = mixer.clipAction(rest).play();
         exhaleAction = mixer.clipAction(exhale).play();
         exhaleAction.setEffectiveWeight(0);
+        poseAvailable = true;
+        poseSource = "clips";
+      } else if (manifest?.poses?.exhale) {
+        poseAvailable = true;
+        poseSource = "manifest";
       }
+      canvas.dataset.poseContract = poseSource;
+      syncLightingModel();
       let triangles = 0,
         meshes = 0;
+      const gpuAttributes = new Set<THREE.BufferAttribute | THREE.InterleavedBuffer>();
+      const materialTextures = new Set<THREE.Texture>();
+      const ownAttribute = (
+        attribute: THREE.BufferAttribute | THREE.InterleavedBufferAttribute,
+      ) => {
+        const buffer =
+          attribute instanceof THREE.InterleavedBufferAttribute ? attribute.data : attribute;
+        if (gpuAttributes.has(buffer)) return;
+        gpuAttributes.add(buffer);
+        geometryBytesEstimated += buffer.array.byteLength;
+      };
       model.traverse((node) => {
         if (node instanceof THREE.Mesh) {
+          const geometry = node.geometry as THREE.BufferGeometry;
           meshes++;
           triangles +=
             (node.geometry.index?.count ?? node.geometry.getAttribute("position")?.count ?? 0) / 3;
+          if (geometry.index) ownAttribute(geometry.index);
+          Object.values(geometry.attributes).forEach(ownAttribute);
+          Object.values(
+            geometry.morphAttributes as Record<
+              string,
+              (THREE.BufferAttribute | THREE.InterleavedBufferAttribute)[] | undefined
+            >,
+          ).forEach((attributes) => attributes?.forEach(ownAttribute));
+          for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
+            Object.values(material).forEach((value) => {
+              if (value instanceof THREE.Texture) materialTextures.add(value);
+            });
+          }
         }
       });
+      for (const texture of materialTextures) {
+        const image = texture.image as { width?: number; height?: number } | undefined;
+        if (image?.width && image.height)
+          materialTextureBytesEstimated +=
+            image.width * image.height * 4 * (texture.generateMipmaps ? 4 / 3 : 1);
+      }
       canvas.dataset.meshes = String(meshes);
       canvas.dataset.triangles = String(Math.round(triangles));
       canvas.dataset.source = "blender-glb";
-      mantle = createMantle(model, mobile);
+      if (options.effects !== false)
+        mantle = createMantle(model, mobile, {
+          suppressFaceEmission: preserveAuthoredMaterials,
+          excludeDeformingNeck: preserveAuthoredMaterials,
+        });
+      loading.readyMs = performance.now() - bootStartedAt;
+      loading.phase = "ready";
+      captureFirstFrame = true;
       notify(lost ? "error" : "ready");
       request();
     } catch (error) {
+      releaseDecoder(false);
+      loading.phase = disposed ? "disposed" : "error";
       if (!disposed && !(error instanceof DOMException && error.name === "AbortError")) {
         console.error("Guardian viewer could not load its Blender model", error);
         notify("error");
@@ -574,7 +775,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   })();
   return {
     breathe() {
-      if (!model || actionTime >= 0) return;
+      if (!model || !poseAvailable || actionTime >= 0) return;
       paused = false;
       actionTime = 0;
       last = 0;
@@ -598,10 +799,47 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         frame = 0;
       } else request();
     },
+    setLightingProfile,
+    setLightingPalette,
+    getDiagnostics() {
+      return {
+        disposed,
+        modelUrl: options.modelUrl ?? "/dogs-archive-20261028/guardian-v.glb",
+        assetSha256: canvas.dataset.assetSha256 ?? null,
+        assetBytes: Number(canvas.dataset.assetBytes ?? 0),
+        lightingProfile,
+        lightingPalette,
+        mobile,
+        dpr,
+        poseSource,
+        poseAvailable,
+        fps: Number(canvas.dataset.fps ?? 0),
+        textures: renderer.info.memory.textures,
+        geometries: renderer.info.memory.geometries,
+        programs: renderer.info.programs?.length ?? 0,
+        drawCalls: renderer.info.render.calls,
+        submittedTriangles: renderer.info.render.triangles,
+        camera: camera.position.toArray(),
+        target: controls.target.toArray(),
+        loading: { ...loading },
+        draco: dracoLoader?.getDiagnostics() ?? dracoStats,
+        geometryBytesEstimated,
+        materialTextureBytesEstimated,
+        authoredMaterialsPreserved: preserveAuthoredMaterials,
+        mantle: mantle?.diagnostics ?? null,
+        legacyLightsVisible: legacyLights.visible,
+        sculptureLightsVisible: sculptureLighting?.root.visible ?? false,
+        shadows: sculptureLighting?.getDiagnostics() ?? null,
+        surfaces: surfaceAudit,
+      };
+    },
     dispose() {
       if (disposed) return;
       disposed = true;
+      loading.phase = "disposed";
       abort.abort();
+      gltfManager.abort();
+      releaseDecoder(false);
       cancelAnimationFrame(frame);
       resizer.disconnect();
       intersection.disconnect();
@@ -615,6 +853,10 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       controls.dispose();
       mixer?.stopAllAction();
       if (model) mixer?.uncacheRoot(model);
+      sculptureLighting?.dispose();
+      sculptureLighting = null;
+      restoreMouthSpill?.();
+      restoreMouthSpill = null;
       disposeObject(scene);
       environmentTarget.dispose();
       bloom.dispose();
