@@ -22,8 +22,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 88px;
-  padding: 14px var(--dogs-edge);
+  min-height: calc(88px + env(safe-area-inset-top, 0px));
+  padding: calc(14px + env(safe-area-inset-top, 0px)) var(--dogs-edge) 14px;
   border-bottom: 1px solid var(--dogs-line);
   background: #030b08;
   z-index: 3;
@@ -279,9 +279,10 @@ html[data-dogs-archive] .zeus-button {
 }
 @media (max-width: 700px) {
   .dogs-archive-header {
-    min-height: 76px;
+    min-height: calc(76px + env(safe-area-inset-top, 0px));
     gap: 9px;
-    padding-block: 12px;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    padding-bottom: 12px;
   }
   .dogs-archive-header h1 {
     font-size: 22px;
@@ -355,8 +356,9 @@ html[data-dogs-archive] .zeus-button {
 }
 @media (max-height: 550px) and (orientation: landscape) {
   .dogs-archive-header {
-    min-height: 62px;
-    padding-block: 9px;
+    min-height: calc(62px + env(safe-area-inset-top, 0px));
+    padding-top: calc(9px + env(safe-area-inset-top, 0px));
+    padding-bottom: 9px;
   }
   .dogs-archive-header h1 {
     font-size: 22px;
