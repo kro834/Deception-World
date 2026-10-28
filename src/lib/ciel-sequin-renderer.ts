@@ -6,6 +6,7 @@ import {
   InstancedBufferGeometry,
   Mesh,
   OrthographicCamera,
+  RepeatWrapping,
   Scene,
   ShaderMaterial,
   SRGBColorSpace,
@@ -23,6 +24,10 @@ import {
   sequinGrid,
   sequinImageRect,
   sequinStrokeTarget,
+  sequinBrushDelay,
+  sequinGridCenter,
+  sequinGridIndexAt,
+  SEQUIN_RADIUS_RATIO,
   type SequinFit,
 } from "./ciel-sequin-physics.ts";
 
@@ -37,46 +42,76 @@ export type CielSequinOptions = {
   onState?: (state: CielSequinState) => void;
 };
 
-/** Closed, bevel-thick discs share one geometry and one draw. The cap is
- * double-sided; its physical rim is visible while the cap turns edge-on. */
-function discGeometry() {
+/** A closed pressed disc: shallow dish, rounded bevel and physical thickness.
+ * Indexed rings share vertices within each material surface, still one draw. */
+function discGeometry(coarse: boolean) {
   const positions: number[] = [],
     normals: number[] = [],
-    walls: number[] = [];
-  const put = (
-    x: number,
-    y: number,
-    z: number,
-    nx: number,
-    ny: number,
-    nz: number,
-    wall: number,
-  ) => {
-    positions.push(x, y, z);
-    normals.push(nx, ny, nz);
-    walls.push(wall);
+    walls: number[] = [],
+    faces: number[] = [],
+    indices: number[] = [];
+  const segments = coarse ? 16 : 24;
+  const profile = [
+    [0, 0.005],
+    [0.94, 0.045],
+    [0.985, 0.034],
+    [1, 0.015],
+    [1, -0.005],
+    [0.985, -0.024],
+    [0.94, -0.035],
+    [0, -0.075],
+  ];
+  const ring = (p: number, face: number) => {
+    const [radius, z] = profile[p];
+    const before = profile[p - 1],
+      after = profile[p + 1];
+    const incoming = Math.hypot(radius - before[0], z - before[1]);
+    const outgoing = Math.hypot(after[0] - radius, after[1] - z);
+    const dr = (radius - before[0]) / incoming + (after[0] - radius) / outgoing;
+    const dz = (z - before[1]) / incoming + (after[1] - z) / outgoing;
+    const length = Math.hypot(dr, dz);
+    const start = positions.length / 3;
+    for (let i = 0; i < segments; i++) {
+      const angle = (i * Math.PI * 2) / segments,
+        c = Math.cos(angle),
+        s = Math.sin(angle);
+      positions.push(radius * c, radius * s, z);
+      normals.push((-dz / length) * c, (-dz / length) * s, dr / length);
+      walls.push(face === 0 ? 1 : 0);
+      faces.push(face);
+    }
+    return start;
   };
-  for (let i = 0; i < 12; i++) {
-    const a = (i * Math.PI) / 6,
-      b = ((i + 1) * Math.PI) / 6;
-    const x = Math.cos(a),
-      y = Math.sin(a),
-      xx = Math.cos(b),
-      yy = Math.sin(b);
-    put(0, 0, 0, 0, 0, 1, 0);
-    put(x, y, 0, 0, 0, 1, 0);
-    put(xx, yy, 0, 0, 0, 1, 0);
-    put(x, y, -0.035, x, y, 0, 1);
-    put(xx, yy, -0.035, xx, yy, 0, 1);
-    put(x, y, 0.035, x, y, 0, 1);
-    put(x, y, 0.035, x, y, 0, 1);
-    put(xx, yy, -0.035, xx, yy, 0, 1);
-    put(xx, yy, 0.035, xx, yy, 0, 1);
+  const cap = (back: boolean) => {
+    const face = back ? -1 : 1,
+      center = positions.length / 3;
+    positions.push(0, 0, profile[back ? 7 : 0][1]);
+    normals.push(0, 0, face);
+    walls.push(0);
+    faces.push(face);
+    const edge = ring(back ? 6 : 1, face);
+    for (let i = 0; i < segments; i++) {
+      const next = (i + 1) % segments;
+      indices.push(center, edge + (back ? next : i), edge + (back ? i : next));
+    }
+  };
+  cap(false);
+  let previous = ring(1, 0);
+  for (let p = 2; p <= 6; p++) {
+    const next = ring(p, 0);
+    for (let i = 0; i < segments; i++) {
+      const j = (i + 1) % segments;
+      indices.push(previous + i, next + i, previous + j, previous + j, next + i, next + j);
+    }
+    previous = next;
   }
+  cap(true);
   const geometry = new InstancedBufferGeometry();
+  geometry.setIndex(indices);
   geometry.setAttribute("position", new BufferAttribute(new Float32Array(positions), 3));
   geometry.setAttribute("normal", new BufferAttribute(new Float32Array(normals), 3));
   geometry.setAttribute("aWall", new BufferAttribute(new Float32Array(walls), 1));
+  geometry.setAttribute("aFace", new BufferAttribute(new Float32Array(faces), 1));
   return geometry;
 }
 
@@ -93,6 +128,8 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     pauseStamp = suspended ? epoch : 0;
   let raf = 0,
     activeUntil = 0,
+    lightUntil = 0,
+    lastFrameTime = 0,
     fit: SequinFit = "cover";
   let grid = sequinGrid(1, 1, coarse),
     motion = new Float32Array(4),
@@ -103,7 +140,9 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     geometry: InstancedBufferGeometry | null = null;
   let mesh: Mesh | null = null,
     material: ShaderMaterial | null = null,
-    texture: Texture | null = null;
+    texture: Texture | null = null,
+    studioTexture: Texture | null = null;
+  let studioImage: HTMLImageElement | null = null;
   let image: HTMLImageElement | null = null,
     imageReady = false,
     backCount = 0;
@@ -116,10 +155,12 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
   let dirtyFrom = Infinity,
     dirtyTo = -1;
   const scratch = new Float64Array(2),
+    centerScratch = new Float64Array(2),
     scene = new Scene();
   const camera = new OrthographicCamera(0, 1, 1, 0, 0.1, 1000);
   camera.position.z = 200;
   const light = new Vector3(0.5, 0.6, 300);
+  const lightTarget = light.clone();
   const uniforms = {
     uTime: { value: 0 },
     uRadius: { value: 1 },
@@ -128,6 +169,8 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     uImageReady: { value: 0 },
     uImageRect: { value: new Vector4(0, 0, 1, 1) },
     uLight: { value: light },
+    uStudio: { value: null as Texture | null },
+    uStudioReady: { value: 0 },
   };
   const clock = () => ((suspended ? pauseStamp : performance.now()) - epoch) / 1000;
   const state = (next: CielSequinState) => {
@@ -178,27 +221,19 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     const pitch = grid.pitch;
     for (let i = 0; i < grid.count; i++)
       if (motion[i * 4 + 2] < 1) {
-        const x = (i % grid.cols) * pitch,
-          y = Math.floor(i / grid.cols) * pitch;
-        ctx.fillStyle = "#07120e";
-        ctx.fillRect(x, y, pitch + 0.5, pitch + 0.5);
+        sequinGridCenter(grid, i, centerScratch);
+        const x = centerScratch[0],
+          y = centerScratch[1],
+          radius = pitch * SEQUIN_RADIUS_RATIO;
         const tone = (i * 37) % 13;
         ctx.fillStyle = tone < 3 ? "#a1c3aa" : tone < 7 ? "#557e68" : "#294c3b";
         ctx.beginPath();
-        ctx.ellipse(
-          x + pitch * 0.5,
-          y + pitch * 0.5,
-          pitch * 0.47,
-          pitch * 0.47,
-          0,
-          0,
-          Math.PI * 2,
-        );
+        ctx.ellipse(x, y, radius, radius, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "#172b21";
         ctx.fillRect(
-          x + pitch * 0.46,
-          y + pitch * 0.17,
+          x - pitch * 0.04,
+          y - radius * 0.74,
           Math.max(0.7, pitch * 0.08),
           Math.max(0.7, pitch * 0.08),
         );
@@ -209,6 +244,10 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     if (disposed || suspended) return;
     const time = (now - epoch) / 1000;
     if (renderer && material) {
+      const delta = Math.max(0, Math.min(0.05, time - lastFrameTime));
+      lastFrameTime = time;
+      if (time >= lightUntil) light.copy(lightTarget);
+      else light.lerp(lightTarget, 1 - Math.exp(-delta * 12));
       uniforms.uTime.value = time;
       if (dirtyTo >= dirtyFrom && motionAttribute && axisAttribute) {
         motionAttribute.clearUpdateRanges();
@@ -229,7 +268,8 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
         activateFallback();
         return;
       }
-      if (time < activeUntil) raf = requestAnimationFrame(render);
+      if (time < activeUntil || (time < lightUntil && light.distanceToSquared(lightTarget) > 0.04))
+        raf = requestAnimationFrame(render);
     } else drawFallback();
   };
   const wake = () => {
@@ -240,6 +280,15 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     geometry?.dispose();
     material?.dispose();
     texture?.dispose();
+    studioTexture?.dispose();
+    studioTexture = null;
+    uniforms.uStudio.value = null;
+    uniforms.uStudioReady.value = 0;
+    if (studioImage) {
+      studioImage.onload = studioImage.onerror = null;
+      studioImage.removeAttribute("src");
+      studioImage = null;
+    }
     renderer?.dispose();
     // The owner can change motion preferences and remount on this canvas.
     // Dispose resources without deliberately making its context unusable.
@@ -307,11 +356,14 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
       seeds = new Float32Array(grid.count);
     backCount = 0;
     for (let i = 0; i < grid.count; i++) {
-      const x = ((i % grid.cols) + 0.5) * grid.pitch,
-        y = (Math.floor(i / grid.cols) + 0.5) * grid.pitch;
-      const c = Math.min(old.cols - 1, Math.floor(((x / grid.width) * old.width) / old.pitch));
-      const r = Math.min(old.rows - 1, Math.floor(((y / grid.height) * old.height) / old.pitch));
-      const index = Math.max(0, r * old.cols + c),
+      sequinGridCenter(grid, i, centerScratch);
+      const x = centerScratch[0],
+        y = centerScratch[1];
+      const index = sequinGridIndexAt(
+          old,
+          (x / grid.width) * old.width,
+          (y / grid.height) * old.height,
+        ),
         offset = index * 4;
       const target = previous[offset + 2] ?? 0;
       sampleSequinSpring(
@@ -337,7 +389,7 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     if (renderer && material) {
       if (mesh) scene.remove(mesh);
       geometry?.dispose();
-      geometry = discGeometry();
+      geometry = discGeometry(coarse);
       motionAttribute = new InstancedBufferAttribute(motion, 4).setUsage(DynamicDrawUsage);
       axisAttribute = new InstancedBufferAttribute(axes, 2).setUsage(DynamicDrawUsage);
       geometry.setAttribute("aMotion", motionAttribute);
@@ -354,11 +406,13 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
       camera.top = grid.height;
       camera.updateProjectionMatrix();
       uniforms.uSize.value.set(grid.width, grid.height);
-      uniforms.uRadius.value = grid.pitch * 0.76;
+      uniforms.uRadius.value = grid.pitch * SEQUIN_RADIUS_RATIO;
     }
     fallback.width = Math.max(1, Math.round(grid.width * Math.min(1, ratio)));
     fallback.height = Math.max(1, Math.round(grid.height * Math.min(1, ratio)));
     light.set(grid.width * 0.5, grid.height * 0.65, Math.max(180, grid.width * 0.45));
+    lightTarget.copy(light);
+    lightUntil = lastFrameTime = time;
     dirtyFrom = Infinity;
     dirtyTo = -1;
     fitImage();
@@ -372,16 +426,18 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     ay: number,
     time: number,
     impulse: number,
+    delay = 0,
   ) => {
     const o = i * 4;
     sampleSequinSpring(motion[o], motion[o + 1], motion[o + 2], time - motion[o + 3], scratch);
+    const moving = Math.abs(scratch[1]) > 0.1 || Math.abs(scratch[0] - motion[o + 2]) > 0.02;
     if (motion[o + 2] > 1 !== target > 1) backCount += target > 1 ? 1 : -1;
     // Repeated strokes continue from the current angle and velocity, not a
     // reset to the last end pose. Thus even a mid-flight reversal is smooth.
     motion[o] = scratch[0];
     motion[o + 1] = Math.max(-24, Math.min(24, scratch[1] + impulse));
     motion[o + 2] = target;
-    motion[o + 3] = time;
+    motion[o + 3] = time + (moving ? 0 : delay);
     // Keep the axis while a tile is in flight; changing it would teleport
     // the 3D normal despite a continuous spring angle.
     if (Math.abs(Math.sin(scratch[0])) < 0.05) {
@@ -402,7 +458,8 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
   const move = (event: PointerEvent) => {
     if (disposed) return;
     const p = point(event);
-    light.set(p.x, grid.height - p.y, Math.max(180, grid.width * 0.45));
+    lightTarget.set(p.x, grid.height - p.y, Math.max(180, grid.width * 0.45));
+    lightUntil = clock() + 0.65;
     const hover = event.pointerType === "mouse" && !coarse && pointerId === null;
     if (hover && !hoverKnown) {
       hoverKnown = true;
@@ -422,9 +479,17 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
           direction = target > 1 ? 1 : -1;
         brushSequinGrid(grid, lastX, lastY, p.x, p.y, coarse ? 34 : 27, (i, weight) => {
           if (weight > 0.08)
-            retarget(i, target, dy / length, dx / length, time, direction * (2 + weight * 3));
+            retarget(
+              i,
+              target,
+              dy / length,
+              dx / length,
+              time,
+              direction * (2 + weight * 3),
+              calm ? 0 : sequinBrushDelay(weight),
+            );
         });
-        activeUntil = time + SEQUIN_SPRING.settle;
+        activeUntil = time + SEQUIN_SPRING.settle + 0.065;
         report();
         lastX = p.x;
         lastY = p.y;
@@ -445,7 +510,8 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     } catch {
       /* Detached or cancelled pointer. */
     }
-    light.set(p.x, grid.height - p.y, Math.max(180, grid.width * 0.45));
+    lightTarget.set(p.x, grid.height - p.y, Math.max(180, grid.width * 0.45));
+    lightUntil = clock() + 0.65;
     wake();
   };
   const leave = () => {
@@ -477,6 +543,27 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     if (!next) wake();
   };
   document.addEventListener("visibilitychange", updatePause);
+  if (renderer) {
+    studioImage = new Image();
+    studioImage.decoding = "async";
+    const loadingStudio = studioImage;
+    studioImage.onload = () => {
+      if (disposed || !renderer || !loadingStudio.naturalWidth || !loadingStudio.naturalHeight)
+        return;
+      studioTexture?.dispose();
+      studioTexture = new Texture(loadingStudio);
+      studioTexture.colorSpace = SRGBColorSpace;
+      studioTexture.wrapS = RepeatWrapping;
+      studioTexture.needsUpdate = true;
+      uniforms.uStudio.value = studioTexture;
+      uniforms.uStudioReady.value = 1;
+      wake();
+    };
+    studioImage.onerror = () => {
+      /* Procedural lighting remains available. */
+    };
+    studioImage.src = "/ciel-sequin-studio-20261028/studio.webp";
+  }
   image = new Image();
   image.decoding = "async";
   const loadingImage = image;

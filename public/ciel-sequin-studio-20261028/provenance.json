@@ -1,0 +1,15 @@
+{
+  "renderer": "Blender 4.5.9 LTS / Cycles CPU",
+  "samples": 96,
+  "seed": 28,
+  "projection": "equirectangular",
+  "colorSpace": "sRGB",
+  "width": 768,
+  "height": 384,
+  "scene": "scripts/blender/ciel_sequin_studio.py",
+  "sceneSha256": "21926e23cf15f0f6a7e8e9199b85d1f11b231f6a7df73025fcfd5146fa764365",
+  "renderSha256": "b13ea88caa0b8df4c3a86468aa0ba9e819ab247c84020d59c7dd1a522d599ebb",
+  "deliverySha256": "1637492142f4a4ab6352c4955658f60173d508e75c40a54d5ccb6f39fb08f19e",
+  "bytes": 5590,
+  "ownerArtworkIncluded": false
+}
