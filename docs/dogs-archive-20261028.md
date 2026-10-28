@@ -42,7 +42,7 @@
 - `scripts/blender/dogs_guardian_v2*.py`: 四面図、接続の拡大図、Meshyの回転画像を
   参考にした実体造形。旧 `dogs_guardian.py` は比較履歴として残す。
 - `public/dogs-archive-20261028/guardian-v.glb`: 背面を含むメッシュ、焼き込んだ法線、
-  Rest／Exhaleの姿勢、可動する頭皮・額網を内包する。約4.85 MBのDraco圧縮。
+  Rest／Exhaleの姿勢、可動する頭皮・額網を内包する。約4.53 MBのDraco圧縮。
   頭皮の上端は胴側、鼻・頬・角は頭側に追従し、その間も連続して変形する。
 - `public/dogs-archive-20261028/reference/`: 原画2枚、四面図、接続の拡大図。
   モデル表面への写真投影や板状の代用品には使用しない。画面の「原画」では最初の2枚を確認できる。
@@ -61,6 +61,38 @@ node scripts/blender/validate_guardian_skin.mjs
 `guardian-v2-browser-draco.glb`。前・斜め・後・左右・上・吐炎の確認画像も残す。
 空の作業ディレクトリで全工程を再実行し、通常・圧縮モデルともSHAの完全一致を確認した。
 大きい作業ファイルやブラウザー検証用画像はGitへの登録対象にしない。
+
+### 2026-10-29 材質の仕上げ
+
+主渦の240枚の葉面だけ、暗い緑の膜と淡緑の骨縁を区別する頂点色へ調整した。
+全身表示での変化は局所的であり、原画と同等の造形を達成したという扱いにはしない。
+細かな巻き、顔の発光、頭皮のskin、吐炎姿勢、法線・ORM画像は維持する。
+配信モデルは4,534,944 bytes（旧版より310,480 bytes削減）。Bone以外の圧縮データを
+保持し、Boneの再圧縮は元頂点IDと向き付き三角形を復号して照合した。
+描画用geometryバッファの量は従来と同じ。これは実機の最大メモリ量の測定ではない。
+
+再現は上記生成工程のcanonical Blendと通常GLBを入力にする。
+`recolor_guardian_r9_role.py` は研究用Blendに依存せず、COLOR以外のbytesを維持し、
+通常GLBのSHA `5115a77e…e350` を検査する。続いて固定版DracoでBoneのみ圧縮する。
+
+```sh
+blender --background --factory-startup --python-exit-code 1 \
+  --python scripts/blender/recolor_guardian_r9_role.py -- \
+  --canonical-blend /path/to/guardian-v2-junction-sculpt.blend \
+  --input-glb /path/to/original-raw-r9.glb --output-glb /tmp/guardian-role.glb
+git show 62d81b98:public/dogs-archive-20261028/guardian-v.glb > /tmp/guardian-baseline.glb
+# draco3dgltf@1.5.7を別の作業フォルダーへインストールして指定する。
+DOGS_DRACO_DEPS=/path/to/node_modules/draco3dgltf \
+  node scripts/blender/compress_guardian_bone_release.mjs \
+  --baseline-glb /tmp/guardian-baseline.glb --input-glb /tmp/guardian-role.glb \
+  --output-dir /tmp/guardian-release
+node scripts/blender/verify_guardian_release_decoder.mjs \
+  --baseline-glb /tmp/guardian-baseline.glb --input-glb /tmp/guardian-release/candidate.draco.glb \
+  --output-dir /tmp/guardian-release
+```
+
+最終SHAは `d6fd72c481157bd586383adca1b6dff799f524423e5002fd6e6901993e467272`。
+生成物と比較画像、5段階のskin検証は公開用ソースと分けてhandoffに保存する。
 
 ## 操作と読み込み
 
