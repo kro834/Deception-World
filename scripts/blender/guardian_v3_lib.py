@@ -156,6 +156,31 @@ BONE_ROOT = (0.07, 0.11, 0.07)      # bone darkening toward its root / cavity
 GLOW = (0.55, 1.0, 0.62)            # emissive pale green (also used as vertex tint)
 
 
+# v22 skin scales (owner 2026-10-30「体の素材をブラッシュアップ」): when SCALE_UV["on"], every tube / ribbon / patch
+# also records a scale parametrisation that finish() writes into MicroSurfaceUV (TEXCOORD_0) instead of the old
+# planar micro projection: v counts whole scales around the ring (an integer number of tiles, seam-free),
+# u counts scale lengths along the organ with the scale size proportional to the local perimeter, so the scales
+# shrink toward the thin ends. Vertices without it (knobs, poles, masked regions) get SCALE_UV["flat"], a texel of
+# the baked tile where the relief is flat. Per-face offsets keep the values small (Draco quantises the range).
+SCALE_UV = {"on": False, "width": 0.045, "aspect": 0.9, "cols": 8, "rows": 8, "nmin": 8, "nmax": 32, "wrap": 2.0,
+            "flat": (0.0625, 0.125), "min_frac": 0.3}
+
+
+def scale_ring_count(perim_max):
+    c = SCALE_UV
+    return int(min(c["nmax"], max(c["nmin"], c["rows"] * round(perim_max / (c["rows"] * c["width"])))))
+
+
+def scale_cells_along(centres, perims, nring):
+    """Cumulative scale lengths along a ring sequence (scale width = local perimeter / nring)."""
+    c = SCALE_UV
+    centres = np.asarray(centres, float); perims = np.asarray(perims, float)
+    w = np.maximum(perims, c["min_frac"] * perims.max()) / nring
+    ds = np.linalg.norm(np.diff(centres, axis=0), axis=1)
+    wm = 0.5 * (w[1:] + w[:-1])
+    return np.concatenate([[0.0], np.cumsum(ds / (wm * c["aspect"]))])
+
+
 def mix(a, b, t):
     t = min(1.0, max(0.0, t))
     return tuple(a[i] + (b[i] - a[i]) * t for i in range(3))
@@ -175,6 +200,7 @@ class MeshBuilder:
         self.fm = []  # material index per face
         self.vw = []  # per-vertex skin weights: list of (bone, weight) or None
         self.cur_w = None  # weights applied to vertices added while set
+        self.suv = {}  # v22: vertex index -> (tile u, tile v, tile v period) scale parametrisation (SCALE_UV)
 
     # -- low level
     def add_vertex(self, p_gltf, color, uv=(0.0, 0.0), weights=None):
@@ -187,6 +213,32 @@ class MeshBuilder:
     def add_face(self, idx, mat=0):
         self.f.append(tuple(idx))
         self.fm.append(mat)
+
+    # -- v22: scale parametrisation of a ring sequence just added (start .. start + n * sides)
+    def scale_rings(self, start, n, sides):
+        if not SCALE_UV["on"] or n < 2:
+            return
+        c = SCALE_UV
+        ring = np.asarray(self.v[start:start + n * sides], float).reshape(n, sides, 3)
+        perims = np.linalg.norm(ring - np.roll(ring, -1, axis=1), axis=2).sum(axis=1)
+        nring = scale_ring_count(perims.max())
+        U = scale_cells_along(ring.mean(axis=1), perims, nring) / c["cols"]
+        vper = nring / c["rows"]
+        for i in range(n):
+            for j in range(sides):
+                self.suv[start + i * sides + j] = (float(U[i]), j / sides * vper, vper)
+
+    def scale_patch(self, start, rows, cols):
+        if not SCALE_UV["on"]:
+            return
+        c = SCALE_UV
+        g = np.asarray(self.v[start:start + rows * cols], float).reshape(rows, cols, 3)
+        du = np.concatenate([np.zeros((1, cols)), np.cumsum(np.linalg.norm(np.diff(g, axis=0), axis=2), axis=0)], 0)
+        dv = np.concatenate([np.zeros((rows, 1)), np.cumsum(np.linalg.norm(np.diff(g, axis=1), axis=2), axis=1)], 1)
+        U = du / (c["width"] * c["aspect"] * c["cols"]); Vv = dv / (c["width"] * c["rows"])
+        for i in range(rows):
+            for j in range(cols):
+                self.suv[start + i * cols + j] = (float(U[i, j]), float(Vv[i, j]), 0.0)
 
     # -- swept tube with an elliptical (optionally flattened) section
     def tube(self, path, radii, sides=8, flat=1.0, color=BONE, color_fn=None, hint=(0, 0, 1),
@@ -226,6 +278,7 @@ class MeshBuilder:
         if cap:
             self.add_face(tuple(start + j for j in range(sides)), mat)
             self.add_face(tuple(start + (n - 1) * sides + j for j in reversed(range(sides))), mat)
+        self.scale_rings(start, n, sides)
         return start, len(self.v)
 
     # -- flat ribbon: a lens-shaped closed section (width along B, thickness along N)
@@ -261,6 +314,7 @@ class MeshBuilder:
                 self.add_face((a, a + sides, b + sides, b), mat)
         self.add_face(tuple(start + j for j in range(sides)), mat)
         self.add_face(tuple(start + (n - 1) * sides + j for j in reversed(range(sides))), mat)
+        self.scale_rings(start, n, sides)
         return (T, N, B), start
 
     # -- open quad patch from a grid of glTF points (rows x cols x 3)
@@ -281,6 +335,7 @@ class MeshBuilder:
                 a = start + i * cols + j
                 face = (a, a + cols, a + cols + 1, a + 1)
                 self.add_face(tuple(reversed(face)) if flip else face, mat)
+        self.scale_patch(start, rows, cols)
         return start
 
     # -- crosier hook as a tapered tube
@@ -322,7 +377,10 @@ class MeshBuilder:
         me.color_attributes.active_color_index = 0
         me.color_attributes.render_color_index = 0
         # authored UV (emissive / detail maps) in a second layer, micro projection first
-        write_micro_uv(me, micro_uv_scale)
+        if SCALE_UV["on"]:
+            write_scale_uv(me, self.suv)
+        else:
+            write_micro_uv(me, micro_uv_scale)
         if any(abs(u[0]) + abs(u[1]) > 0 for u in self.uv):
             layer = me.uv_layers.new(name="AuthoredUV")
             vals = np.zeros((len(me.loops), 2))
@@ -357,6 +415,26 @@ def write_micro_uv(me, scale=2.1):
         axes = ((1, 2), (0, 2), (0, 1))[axis]
         for li in p.loop_indices:
             vals[li] = co[me.loops[li].vertex_index, list(axes)] * scale
+    uv.data.foreach_set("uv", vals.ravel())
+
+
+def write_scale_uv(me, suv):
+    """v22: MicroSurfaceUV <- the scale parametrisation (per loop: the ring seam closes on a whole tile, and each
+    face is shifted by whole multiples of SCALE_UV["wrap"] so the values stay in a small range)."""
+    uv = me.uv_layers.get("MicroSurfaceUV") or me.uv_layers.new(name="MicroSurfaceUV")
+    K = SCALE_UV["wrap"]; flat = SCALE_UV["flat"]
+    vals = np.zeros((len(me.loops), 2)); vals[:] = flat
+    lv = np.empty(len(me.loops), np.int64); me.loops.foreach_get("vertex_index", lv)
+    for p in me.polygons:
+        li = list(p.loop_indices)
+        rec = [suv.get(int(lv[k])) for k in li]
+        if any(r is None for r in rec):
+            continue   # touches a vertex without the parametrisation: flat texel for the whole face
+        u = np.array([r[0] for r in rec]); v = np.array([r[1] for r in rec]); per = rec[0][2]
+        if per > 0 and v.max() - v.min() > 0.5 * per:
+            v = np.where(v < 0.5 * per, v + per, v)
+        vals[li, 0] = u - math.floor(u.min() / K) * K
+        vals[li, 1] = v - math.floor(v.min() / K) * K
     uv.data.foreach_set("uv", vals.ravel())
 
 

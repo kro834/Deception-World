@@ -28,7 +28,7 @@ from guardian_v3_lib import mesh_audit
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 opts = {"blend": "", "turnaround": "", "views": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8", "quality": "84",
-        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1", "illus": "0", "head_atlas": ""}
+        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1", "illus": "0", "head_atlas": "", "skin": "0"}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -178,11 +178,48 @@ def bake(ob, kind, size, name, normal_space="OBJECT"):
     return arr
 
 
+# v22 skin classes (owner 2026-10-30「素体はより黒っぽい」): which atlas texels belong to which dark-skin tile material
+SKIN_CLASS = {"Skin | v8 curl chains": 1.0, "Skin | v8 crescent combs": 0.75, "Skin | v8 veined membrane": 0.5, "Skin | v3 ink": 0.25}
+# 05's black skin, measured on the dark tentacle / arm / cluster interiors (darkest fifth of the dark pixels):
+# sRGB (12,16,13)-(14,18,15); the base is set a touch above that so the toon ramp keeps a visible dark-green body
+SKIN_BASE = np.array([0.0044, 0.0075, 0.0052])   # sRGB (14, 21, 16)
+
+
+def bake_skin_class(ob, size):
+    """EMIT bake of a per-material class value (SKIN_CLASS), 0 for every other material."""
+    saved = []
+    for mat in ob.data.materials:
+        nt = mat.node_tree; out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL" and n.is_active_output)
+        old = [l.from_socket for l in nt.links if l.to_socket == out.inputs["Surface"]]
+        em = nt.nodes.new("ShaderNodeEmission"); v = SKIN_CLASS.get(mat.name, 0.0)
+        em.inputs["Color"].default_value = (v, v, v, 1); em.inputs["Strength"].default_value = 1.0
+        nt.links.new(em.outputs[0], out.inputs["Surface"]); saved.append((nt, out, old, em))
+    arr = bake(ob, "EMIT", size, "bake-skin")
+    for nt, out, old, em in saved:
+        nt.nodes.remove(em)
+        for sock in old:
+            nt.links.new(sock, out.inputs["Surface"])
+    return arr[..., 0]
+
+
+def skin_darken(col, cls_mask, lum_ref=None, keep=(0.06, 0.20)):
+    """Dark skin tones -> the near-black base (relative darkness kept, at most 2x darker); pale pattern untouched."""
+    lum = 0.2126 * col[..., 0] + 0.7152 * col[..., 1] + 0.0722 * col[..., 2]
+    if lum_ref is None:
+        dark = cls_mask & (lum < 0.05)
+        lum_ref = float(np.median(lum[dark])) if dark.any() else 0.02
+    x = np.clip((lum - keep[0]) / (keep[1] - keep[0]), 0, 1); f = x * x * (3 - 2 * x)
+    tgt = SKIN_BASE[None, :] * np.clip(lum / max(lum_ref, 1e-5), 0.5, 1.0)[..., None]
+    new = tgt * (1 - f[..., None]) + col * f[..., None]
+    return np.where(cls_mask[..., None], new, col), lum_ref
+
+
 def paint_object(ob, size, side_weight):
     smart_uv(ob)
     pos = bake(ob, "POSITION", size, "bake-pos")
     nrm = bake(ob, "NORMAL", size, "bake-nrm")
     alb = bake(ob, "DIFFUSE", size, "bake-alb")
+    skin_cls = bake_skin_class(ob, size) if opts["skin"] == "1" else None
     log("BAKED", ob.name)
     covered = pos[..., 3] > 0.5
     # Blender bakes object-space positions (the object sits at identity under the root);
@@ -314,6 +351,18 @@ def paint_object(ob, size, side_weight):
     pal_l = 0.2126 * pal[..., 0] + 0.7152 * pal[..., 1] + 0.0722 * pal[..., 2]
     pal = pal * (lum / np.maximum(pal_l, 1e-6))[..., None]
     out = np.where(covered[..., None], out * (1 - strength) + pal * strength, out)
+    if skin_cls is not None:
+        # v22: the dark skin classes go near-black; on the head the galaxy domes (crescent class) keep their colours
+        classes = [1.0, 0.75, 0.5, 0.25] if ob.name.startswith("Serpent") or not ob.name.startswith("Head") else [1.0, 0.5, 0.25]
+        for cv in classes:
+            m_ = covered & (np.abs(skin_cls - cv) < 0.1)
+            if m_.any():
+                before = np.percentile(0.2126 * out[m_][:, 0] + 0.7152 * out[m_][:, 1] + 0.0722 * out[m_][:, 2], [20, 50, 80])
+                # the curl-chain and head-ink skins carry no pale pattern of their own (rims are Bone/Glass geometry,
+                # the dome rings are pale): everything up to mid-grey is skin there; the crescent / pit tiles keep their pale marks
+                out, ref = skin_darken(out, m_, keep=(0.25, 0.40) if cv in (1.0, 0.25) else (0.06, 0.20))
+                after = np.percentile(0.2126 * out[m_][:, 0] + 0.7152 * out[m_][:, 1] + 0.0722 * out[m_][:, 2], [20, 50, 80])
+                log("SKIN", ob.name[:8], cv, "texels", int(m_.sum()), "lum p20/50/80", np.round(before, 4).tolist(), "->", np.round(after, 4).tolist(), "ref", round(ref, 4))
     out = np.clip(out, 0, 1)
     out[~covered] = 0
     # fill the UV gutters from the islands so mipmaps never bleed black into the model
@@ -363,6 +412,26 @@ def make_image(name, arr):
 
 
 imA = make_image("serpent-paint-atlas", atlasA); imB = make_image("head-paint-atlas", atlasB)
+if opts["skin"] == "1":
+    # v22: the unpainted dorsal membrane (`Skin | v8 veined membrane` x COLOR_0) gets the same near-black skin in its tile
+    tm = bpy.data.images.get("tile-membrane-albedo")
+    if tm is not None:
+        w_, h_ = tm.size
+        px = np.array(tm.pixels[:], dtype=np.float32).reshape(h_, w_, 4)
+        lin = np.where(px[..., :3] <= 0.04045, px[..., :3] / 12.92, ((px[..., :3] + 0.055) / 1.055) ** 2.4)
+        lin2, _ = skin_darken(lin, np.ones((h_, w_), bool))
+        im2 = bpy.data.images.new("tile-membrane-albedo-v22", w_, h_, alpha=False, float_buffer=False)
+        im2.pixels.foreach_set(np.concatenate([linear_to_srgb(lin2), np.ones((h_, w_, 1))], -1).ravel().astype(np.float32))
+        tmp = OUT / "tile-membrane-albedo.webp"
+        scene.view_settings.view_transform = "Standard"; scene.view_settings.look = "None"
+        scene.render.image_settings.file_format = "WEBP"; scene.render.image_settings.quality = 88; scene.render.image_settings.color_mode = "RGB"
+        im2.save_render(str(tmp), scene=scene); bpy.data.images.remove(im2)
+        users = [node for mat in bpy.data.materials if mat.use_nodes for node in mat.node_tree.nodes if node.type == "TEX_IMAGE" and node.image is tm]
+        bpy.data.images.remove(tm)
+        tm = bpy.data.images.load(str(tmp)); tm.name = "tile-membrane-albedo"; tm.pack()
+        for node in users:
+            node.image = tm
+        log("SKIN membrane tile darkened", len(users))
 # the emissive face lattice is a colour image: store it as WebP too (budget)
 lat = bpy.data.images.get("face-lattice")
 if lat is not None:

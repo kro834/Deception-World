@@ -98,6 +98,38 @@ const GUARDIAN_RIM_GLSL = `{
  gRimBand=smoothstep(.4,.48,gFr)*(1.-.9*gThinness);
  gWrapLight=saturate((dot(normal,uKeyDir)+.6)/1.6);
 }`;
+// The face net (05/07): two mirrored families of curves X ± Y = integer around the bright
+// point F. X: the angle around F, opened up toward the border (the upward sector gets up to
+// 1+FACE_K times the lines, so they run nearly parallel up the face); Y: log distance from F,
+// stretched away from F so the cells lengthen into arches. Face-plane units (length = 1).
+const GUARDIAN_FACE_NET_GLSL = `
+#define FACE_N 16.
+#define FACE_M 13.
+#define FACE_F .3
+#define FACE_K 1.
+#define FACE_KR .6
+#define FACE_STR .3
+#define FACE_RE0 -2.7
+#define FACE_R0 .05
+#define FACE_LW .0075
+varying vec3 vFacePlane;
+vec2 gFaceNet(vec2 z){
+ vec2 a=vec2(z.x,z.y-FACE_F);
+ float r=sqrt(dot(a,a)+FACE_R0*FACE_R0);
+ float th=atan(a.x,a.y);
+ float k=1.+FACE_K*smoothstep(0.,FACE_KR,length(a));
+ float ph=2.*atan(k*tan(clamp(th*.5,-1.5707,1.5707)));
+ float re=log(r);float q=max(0.,re-FACE_RE0);
+ float h=re<FACE_RE0?re:FACE_RE0+log(1.+FACE_STR*q)/FACE_STR;
+ return vec2(ph*FACE_N,h*FACE_M)/6.2831853;
+}
+// one line's coverage of the pixel (exact box overlap), turning into the mean where its cells
+// are under a few pixels wide
+float gFaceLine(float d,float g,float pw){
+ float cov=clamp((min(d+pw*.5,FACE_LW)-max(d-pw*.5,-FACE_LW))/pw,0.,1.);
+ return mix(min(1.,2.*FACE_LW*g),cov,smoothstep(2.*pw,5.*pw,1./g));
+}
+`;
 const GUARDIAN_TONES_GLSL = `{
  // Anime shading: the PBR irradiance (every light, the key's shadow) is quantised into three
  // tones and recoloured from the family's palette; ridge or pit picks the palette.
@@ -227,6 +259,94 @@ export function applyGuardianInkSurface(
           material.envMapIntensity = 0;
           material.roughness = Math.min(material.roughness, 0.55);
           if (material.normalMap) material.normalScale.multiplyScalar(0.5);
+          // Face-plane coordinates for the pattern (05/07), from the region UV only (u around,
+          // 0.5 at the front centre; v along, either end may be the tip — the narrow end is):
+          // x = arc length across from the centre line, y = surface distance from the tip, both
+          // in units of the face's length, plus the distance to the region border. Bind pose,
+          // so they hold in every pose; any reshaped face keeping the UV convention works.
+          const geometry = node.geometry;
+          const position = geometry.getAttribute("position");
+          const faceUv = geometry.getAttribute("uv1") ?? geometry.getAttribute("uv");
+          if (position && faceUv && !geometry.getAttribute("aFacePlane")) {
+            const bins = 32;
+            const across = new Float64Array(bins),
+              along = new Float64Array(bins),
+              weight = new Float64Array(bins);
+            let uMin = Infinity,
+              uMax = -Infinity;
+            for (let i = 0; i < faceUv.count; i++) {
+              uMin = Math.min(uMin, faceUv.getX(i));
+              uMax = Math.max(uMax, faceUv.getX(i));
+            }
+            const pa = new THREE.Vector3(),
+              e1 = new THREE.Vector3(),
+              e2 = new THREE.Vector3(),
+              pu = new THREE.Vector3(),
+              pv = new THREE.Vector3();
+            const corners = geometry.index ? geometry.index.count : position.count;
+            for (let t = 0; t + 2 < corners; t += 3) {
+              const [a, b, c] = [0, 1, 2].map((k) => (geometry.index ? geometry.index.getX(t + k) : t + k));
+              pa.fromBufferAttribute(position, a);
+              e1.fromBufferAttribute(position, b).sub(pa);
+              e2.fromBufferAttribute(position, c).sub(pa);
+              const du1 = faceUv.getX(b) - faceUv.getX(a),
+                dv1 = faceUv.getY(b) - faceUv.getY(a),
+                du2 = faceUv.getX(c) - faceUv.getX(a),
+                dv2 = faceUv.getY(c) - faceUv.getY(a);
+              const det = du1 * dv2 - du2 * dv1;
+              if (Math.abs(det) < 1e-12) continue;
+              pu.copy(e1).multiplyScalar(dv2).addScaledVector(e2, -dv1).divideScalar(det);
+              pv.copy(e2).multiplyScalar(du1).addScaledVector(e1, -du2).divideScalar(det);
+              const vm = (faceUv.getY(a) + faceUv.getY(b) + faceUv.getY(c)) / 3;
+              const bin = Math.min(bins - 1, Math.max(0, Math.floor(vm * bins)));
+              const w = Math.abs(det);
+              across[bin] += pu.length() * w;
+              along[bin] += pv.length() * w;
+              weight[bin] += w;
+            }
+            const filled = [...weight].map((w) => w > 0);
+            if (filled.some(Boolean)) {
+              for (let i = 0; i < bins; i++)
+                if (filled[i]) {
+                  across[i] /= weight[i];
+                  along[i] /= weight[i];
+                }
+              for (let i = 0; i < bins; i++) {
+                if (filled[i]) continue;
+                let j = 1;
+                while (!filled[i - j] && !filled[i + j]) j++;
+                const k = filled[i - j] ? i - j : i + j;
+                across[i] = across[k];
+                along[i] = along[k];
+              }
+              // the tip is the narrow end
+              const tipAtZero = across[0] + across[1] + across[2] < across[bins - 1] + across[bins - 2] + across[bins - 3];
+              const acrossS = tipAtZero ? [...across] : [...across].reverse();
+              const alongS = tipAtZero ? [...along] : [...along].reverse();
+              const ys = [0];
+              for (let i = 0; i < bins; i++) ys.push(ys[i] + alongS[i] / bins);
+              const length = Math.max(ys[bins], 1e-6);
+              const uMid = (uMin + uMax) / 2,
+                uHalf = (uMax - uMin) / 2;
+              const plane = new Float32Array(faceUv.count * 3);
+              for (let i = 0; i < faceUv.count; i++) {
+                const v = THREE.MathUtils.clamp(faceUv.getY(i), 0, 1);
+                const sAlong = tipAtZero ? v : 1 - v;
+                const f = sAlong * bins;
+                const lo = Math.min(bins - 1, Math.floor(f));
+                const y = (ys[lo] + (ys[lo + 1] - ys[lo]) * (f - lo)) / length;
+                const g = THREE.MathUtils.clamp(f - 0.5, 0, bins - 1);
+                const g0 = Math.floor(g),
+                  g1 = Math.min(bins - 1, g0 + 1);
+                const width = (acrossS[g0] + (acrossS[g1] - acrossS[g0]) * (g - g0)) / length;
+                const du = faceUv.getX(i) - uMid;
+                plane[i * 3] = du * width;
+                plane[i * 3 + 1] = y;
+                plane[i * 3 + 2] = Math.min((uHalf - Math.abs(du)) * width, 1 - y);
+              }
+              geometry.setAttribute("aFacePlane", new THREE.BufferAttribute(plane, 3));
+            }
+          }
         }
         material.onBeforeCompile = (shader) => {
           Object.assign(shader.uniforms, uniforms, {
@@ -237,16 +357,16 @@ export function applyGuardianInkSurface(
           shader.vertexShader = shader.vertexShader
             .replace(
               "#include <common>",
-              "#include <common>\nvarying vec3 vGuardianWorld;varying vec2 vGuardianUv;",
+              "#include <common>\nvarying vec3 vGuardianWorld;varying vec2 vGuardianUv;attribute vec3 aFacePlane;varying vec3 vFacePlane;",
             )
             .replace(
               "#include <skinning_vertex>",
-              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;\n#ifdef USE_UV1\nvGuardianUv=uv1;\n#else\nvGuardianUv=uv;\n#endif",
+              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;vFacePlane=aFacePlane;\n#ifdef USE_UV1\nvGuardianUv=uv1;\n#else\nvGuardianUv=uv;\n#endif",
             );
           shader.fragmentShader = shader.fragmentShader
             .replace(
               "#include <common>",
-              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;uniform float uFaceMode,uFaceCells,uFaceRows;uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale;uniform vec3 uRimDir,uKeyDir,uRimColor;uniform vec2 uBoneRange;varying vec3 vGuardianWorld;varying vec2 vGuardianUv;float gBone=0.,gVein=0.,gRimBand=0.,gWrapLight=0.;",
+              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;uniform float uFaceMode,uFaceCells,uFaceRows;uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale;uniform vec3 uRimDir,uKeyDir,uRimColor;uniform vec2 uBoneRange;varying vec3 vGuardianWorld;varying vec2 vGuardianUv;float gBone=0.,gVein=0.,gRimBand=0.,gWrapLight=0.;\n" + GUARDIAN_FACE_NET_GLSL,
             )
             .replace(
               "#include <color_fragment>",
@@ -279,63 +399,57 @@ ${GUARDIAN_RIM_GLSL}
   vec3 gCells=vec3(.03,.24,.09)*(.35+.85*gT)*(1.-.8*gEdge);
   totalEmissiveRadiance=gCells+(vec3(.4,1.,.56)*gLine*gGrad*1.3+vec3(.8,1.,.86)*gLine*gHot*1.8+vec3(.78,1.,.84)*gHot*gHot*.45)*(1.-.6*gEdge);
  }else{
-  // The face pattern (owner, 10-30 「顔の模様が違う」): a lotus bud of overlapping pointed
-  // petals — rows of petal cells, each row shifted by half a cell (imbricate, not a crossing
-  // grid), each petal a pointed arch (rounded at the back, pointed toward the tip) outlined by
-  // a thin mint line, dark at its back and emerald toward its point; the whole bud brightens
-  // toward the tip, with a faint midrib. Built on the region's UV (u around, v border → tip),
-  // antialiased from a seam-free u derivative (a second estimate with the seam moved half a
-  // turn; the cell count is even, so both describe the same petals).
-  float gY=uFaceRows*(.75*gT+.25*gT*gT*gT);
-  float gRow=floor(gY);
-  float gCy=gY-gRow;
-  float gShift=mod(gRow,2.)*.5;
-  float gX=uFaceCells*gU+gShift,gX2=uFaceCells*fract(gU+.5)+gShift;
-  float gCx=fract(gX)-.5,gCx2=fract(gX2)-.5;
-  // the petal outline |x| = w(y): rounded at the back, pointed at the tip
-  float gWy=.5*pow(1.-gCy,.6);
-  float gD=abs(gCx)-gWy,gD2=abs(gCx2)-gWy;
-  float gAA=min(fwidth(gD),fwidth(gD2));
-  float gLineP=1.-smoothstep(.045-gAA,.045+gAA,abs(gD));
-  // the bud's midrib: a faint centre line toward the tip
-  float gMidrib=exp(-pow((gU-.5)*uFaceCells*3.,2.))*smoothstep(.4,1.,gT)*.35;
-  // The petals fade smoothly into the tip glow before they could degenerate into stripes.
-  // Along the region the glow is keyed to the geometric axis (HeadPivot = the region border,
-  // MouthSocket = the tip): the glow is the last fifth of the face in 05.
-  float gTip=smoothstep(.82,.96,gTa);
-  // Toward the tip the circumference shrinks, so the cells grow tall and thin on screen and
-  // read as stripes: fade the pattern where a cell is over ~3x taller than wide.
-  float gCu=min(fwidth(uFaceCells*gU),fwidth(uFaceCells*fract(gU+.5)));
-  float gTall=gCu/max(fwidth(gY),1e-5);
-  float gNet=(1.-smoothstep(2.5,4.,gTall))*(1.-smoothstep(.85,.97,gTa));
-  float gFade=(1.-smoothstep(.25,.6,gAA))*(1.-gTip)*gNet;
-  float gLines=max(gLineP,gMidrib)*gFade;
-  // inside a petal: dark at the back, emerald toward its point; between petals the dark skin
-  float gInside=1.-smoothstep(-.02,.02,gD);
-  float gPetal=mix(.08,1.,pow(gCy,1.5))*gInside;
-  // The face is the head's own dark skin with the pattern on it: near-black at the region
-  // border (the toon tones above), the petals warming to emerald toward the tip; the pattern
-  // fades in over the first stretch of the region (v 0–.15, axis t 0–.12), inside the dark
-  // outline band, so it has no hard edge. The tip glow, the cap and the star stay as before.
-  float gWarm=.3+.7*(smoothstep(.3,.8,gTa)*.25+.9*gTa*gTa*gTa*gTa);
-  float gIn=smoothstep(0.,.15,gT)*smoothstep(0.,.12,gTa);
-  vec3 gCells=vec3(.02,.17,.065)*gWarm*gPetal*gFade*(1.-.8*gEdge);
-  vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gTa,3.));
-  vec3 gRad=(gCells+gMint*gLines*gGrad*1.5*(1.-.6*gEdge))*gPulse*gIn;
-  gRad+=vec3(.3,1.,.5)*gTip*.9*gPulse;
-  gRad=min(gRad,vec3(mix(1.3,2.4,smoothstep(.7,1.,gTa))));
-  // a small star at the geometric tip only (the last 5% of the bud's length)
-  float gStar=exp(-pow((1.-gTa)/.05,2.));
-  totalEmissiveRadiance=gRad+vec3(.8,1.,.86)*gStar*(1.2+.5*pow(abs(cos(uFaceCells*3.1415927*gU)),6.))*gPulse;
+  // The face pattern (owner, 10-30 「顔の模様もだいぶ原画から離れている」; measured on 05/07,
+  // handoff/goal/ciel3d/face/notes.md): a net of two mirrored families of curves that cross in
+  // diamonds and all converge on one bright point F, 30 % of the face's length up from the tip
+  // — not on the tip. Around F the cells are small diamonds (16 around); upward the lines
+  // straighten and run nearly parallel to the axis, so the cells grow into tall pointed arches
+  // (aspect ~2.5, ~9 across the front at the widest, ~8 rows from F to the border). Lines
+  // ~1/100 of the face's length wide (constant in surface units), white-mint at F, mint and
+  // dimmer toward the border; cells saturated emerald around F, each lighter at its F-side
+  // corner, darkening to the black skin by mid-face; below F a few small cells, then the dark
+  // beak; the net fades out inside a dark band along the region border. Drawn on the face-plane
+  // coordinates (vFacePlane: arc length across, distance from the tip, distance to the border),
+  // antialiased by the exact coverage of each line in the pixel (no stripes, no shimmer); where
+  // the cells shrink under a few pixels (at F, and at page scale) the net turns into its mean.
+  vec2 gZ=vFacePlane.xy;
+  float gPw=max(length(fwidth(gZ))*.75,1e-5);
+  vec2 gXY=gFaceNet(gZ);
+  vec2 gXa=gFaceNet(gZ+vec2(.002,0.)),gXb=gFaceNet(gZ+vec2(0.,.002));
+  vec2 gDx=(gXa-gXY)/.002,gDy=(gXb-gXY)/.002;
+  gDx.x-=FACE_N*floor(gDx.x*.002/FACE_N+.5)/.002;gDy.x-=FACE_N*floor(gDy.x*.002/FACE_N+.5)/.002;
+  float gFa=gXY.x+gXY.y,gFb=gXY.x-gXY.y;
+  float gGa=max(length(vec2(gDx.x+gDx.y,gDy.x+gDy.y)),1e-4),gGb=max(length(vec2(gDx.x-gDx.y,gDy.x-gDy.y)),1e-4);
+  float gDa=abs(fract(gFa+.5)-.5)/gGa,gDb=abs(fract(gFb+.5)-.5)/gGb;
+  float gLines=max(gFaceLine(gDa,gGa,gPw),gFaceLine(gDb,gGb,gPw));
+  float gDmin=min(gDa,gDb);
+  vec2 gA=vec2(gZ.x,gZ.y-FACE_F);
+  float gR=length(gA);
+  // inside a cell: lighter at the corner toward F, darker at the far corner
+  float gCt=(fract(gFa)-fract(gFb)+1.)*.5;
+  float gG=gR>.2?.37*exp(-(gR-.2)/.07):.37+(.2-gR)*1.2;
+  vec3 gCellC=vec3(.07,1.,.22)*gG*(1.3-.8*gCt);
+  float gHot=1.-smoothstep(.03,.08,gR);
+  vec3 gLineC=(vec3(.34,1.05,.5)+vec3(.8,.3,.6)*gHot)*(1.-.35*smoothstep(.35,.75,gR));
+  float gTop=1.-.55*smoothstep(.55,1.,gZ.y);
+  float gHalo=exp(-gDmin/.014)*.35*exp(-gR/.4);
+  // the dark band along the border, the dark beak below F
+  float gNetIn=smoothstep(.015,.05,vFacePlane.z)*smoothstep(.1,.2,gZ.y);
+  vec3 gRad=gNetIn*(gCellC*(1.-gLines)+gLineC*(gLines*gTop+gHalo))*(1.-.6*gEdge);
+  // the burst at F: a small white core and a soft mint halo
+  gRad+=vec3(.85,1.,.88)*(1.6*exp(-pow(gR/.03,2.))+.3*exp(-pow(gR/.1,2.)))*smoothstep(0.,.05,vFacePlane.z+.03);
+  totalEmissiveRadiance=gRad*gPulse;
  }
 }`,
             )
             .replace(
               "#include <aomap_fragment>",
               `#include <aomap_fragment>\nif(uFaceMode>1.5)${GUARDIAN_TONES_GLSL}`,
-            );
+            )
+            // the face is smooth skin: the GLB's baked diamond relief would fight the drawn net
+            .replace("#include <normal_fragment_maps>", faceMode.value === 2 ? "" : "#include <normal_fragment_maps>");
         };
-        material.customProgramCacheKey = () => "guardian-face-lattice-v6";
+        material.customProgramCacheKey = () => "guardian-face-lattice-v7";
         material.needsUpdate = true;
         continue;
       }
