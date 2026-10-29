@@ -121,7 +121,8 @@ def join(names_prefixes, new_name):
     for o in obs:
         o.select_set(True)
     bpy.context.view_layer.objects.active = obs[0]
-    bpy.ops.object.join()
+    if len(obs) > 1:
+        bpy.ops.object.join()
     ob = bpy.context.view_layer.objects.active
     ob.name = new_name
     return ob
@@ -130,7 +131,7 @@ def join(names_prefixes, new_name):
 bpy.ops.object.mode_set(mode="OBJECT") if bpy.context.object and bpy.context.object.mode != "OBJECT" else None
 A = join(["Serpent |", "Tails |", "Arms |", "Frond_"], "Serpent | painted body, arms and tails")
 B = join(["Head |", "Jaw |", "Mouth |", "HeadBeads |"], "Head | painted head")
-FACE = next(o for o in bpy.data.objects if o.name.startswith("Face |"))
+FACE = next((o for o in bpy.data.objects if o.name.startswith("Face |")), None)   # v21: the face is a region of the head
 for ob in (A, B):
     mods = [m for m in ob.modifiers if m.type == "ARMATURE"]
     for m in mods[1:]:

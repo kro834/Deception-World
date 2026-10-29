@@ -326,8 +326,8 @@ def face_images(size=512):
     cell = np.sqrt(np.clip(d1 * d2, 0, 1)) * 2.0                        # 1 at a cell centre
     rim = np.clip((np.abs(un) - 0.84) / 0.12, 0, 1)
     h = (0.6 * cell * (1 - rim) + 0.5 * rim) * front
-    emerald = np.array([0.012, 0.060, 0.026]); mint = np.array([0.30, 0.56, 0.335]); dark = np.array([0.003, 0.010, 0.006])
-    lift = np.clip(0.35 * t ** 2.2 + 0.25 * np.exp(-(un / 0.5) ** 2) * t, 0, 1)
+    emerald = np.array([0.010, 0.036, 0.018]); mint = np.array([0.30, 0.56, 0.335]); dark = np.array([0.003, 0.010, 0.006])   # v21: the body's black-green
+    lift = np.clip(0.12 * t ** 3.0 + 0.08 * np.exp(-(un / 0.5) ** 2) * t ** 2, 0, 1)
     col = emerald[None, None, :] * (1.3 - 0.7 * cell)[..., None] + (mint - emerald)[None, None, :] * lift[..., None]
     col = col * (1 - rim[..., None]) + dark[None, None, :] * rim[..., None]
     col = np.where(front[..., None], col, (dark * 0.8)[None, None, :])
