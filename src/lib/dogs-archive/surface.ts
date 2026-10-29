@@ -232,7 +232,14 @@ export function applyGuardianInkSurface(
   float gLineB=1.-smoothstep(.0625-gWb,.0625+gWb,gDb);
   // The net fades smoothly into the tip glow before its cells could degenerate into stripes.
   float gTip=smoothstep(.65,.9,gTa);
-  float gFade=(1.-smoothstep(.25,.6,max(gWa,gWb)))*(1.-gTip);
+  // Toward the tip the bud's circumference shrinks, so the cells grow tall and thin on screen
+  // and both families read as vertical stripes. Fade the net where a cell is over ~3x taller
+  // than wide (seam-free u derivative), and in the last stretch of the bud's own UV.
+  float gCu=min(fwidth(uFaceCells*gU),fwidth(uFaceCells*gU2));
+  float gTall=gCu/max(fwidth(gH),1e-5);
+  float gNetT=uFaceMode>1.5?gT:gTa;
+  float gNet=(1.-smoothstep(2.5,4.,gTall))*(1.-smoothstep(.7,.92,gNetT));
+  float gFade=(1.-smoothstep(.25,.6,max(gWa,gWb)))*(1.-gTip)*gNet;
   float gLines=max(gLineA,gLineB)*gFade;
   float gDmin=min(gDa,gDb);
   // Each cell is darker at its centre and lighter toward its rim (an inner glow at the lines).
@@ -252,7 +259,7 @@ export function applyGuardianInkSurface(
 }`,
             );
         };
-        material.customProgramCacheKey = () => "guardian-face-lattice-v3";
+        material.customProgramCacheKey = () => "guardian-face-lattice-v4";
         material.needsUpdate = true;
         continue;
       }
