@@ -39,8 +39,8 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uKeyDir: { value: new THREE.Vector3(0.4, 0.7, 0.6).normalize() },
     uRimColor: { value: new THREE.Color(0.68, 1.0, 0.76) },
     uTransColor: { value: new THREE.Color(0.06, 0.42, 0.14) },
-    uRimStrength: { value: 0.75 },
-    uTransStrength: { value: 0.6 },
+    uRimStrength: { value: 0.55 },
+    uTransStrength: { value: 0.4 },
     // Linear albedo luminance: membranes sit below 0.035, bone rims above 0.11.
     uBoneRange: { value: new THREE.Vector2(0.035, 0.11) },
     uPaintedContrast: { value: 1 },
@@ -325,7 +325,7 @@ if(gPainted>.5){
  totalEmissiveRadiance+=uRimColor*gKey*gFres*gBone*.18;
  // Translucent ridges and bone glow a little from within, most where the key wraps around.
  float gWrap=saturate((dot(normal,uKeyDir)+.6)/1.6);
- totalEmissiveRadiance+=vec3(.72,.95,.76)*gBone*(.08+.22*gWrap)*uTranslucency;
+ totalEmissiveRadiance+=vec3(.78,.95,.82)*gBone*(.16+.34*gWrap)*uTranslucency;
 }`,
           )
           .replace(
@@ -334,7 +334,7 @@ if(gPainted>.5){
 {
  // Ink outline: membranes darken at grazing angles like a brush edge.
  float gNdV2=saturate(dot(normal,normalize(vViewPosition)));
- float gInk=1.-pow(1.-gNdV2,5.)*mix(.75,.4,gBone);
+ float gInk=1.-pow(1.-gNdV2,5.)*mix(.75,.25,gBone);
  reflectedLight.directDiffuse*=gInk;
  reflectedLight.indirectDiffuse*=gInk;
 }`,

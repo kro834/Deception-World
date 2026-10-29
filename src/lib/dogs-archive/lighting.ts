@@ -148,15 +148,15 @@ export function createGuardianSculptureLighting(
   // Three r186 removed PCFSoftShadowMap; PCFShadowMap now uses a soft disk.
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.shadowMap.autoUpdate = false;
-  scene.environmentIntensity = 0.18;
+  scene.environmentIntensity = 0.12;
   const root = new THREE.Group();
   root.name = "GuardianSculptureLightRig";
   floating.add(root);
   // The paintings' light: a dark ink sky over a fire bank below, a pale key from above and in
   // front, saturated green rims from behind where the fire is. The creature stays the darkest
   // element of the picture. Only the key casts shadows.
-  const hemi = new THREE.HemisphereLight(0x4a5650, 0x0c2a14, 0.35);
-  const key = new THREE.DirectionalLight(0xe6efe7, 1.9);
+  const hemi = new THREE.HemisphereLight(0x8a978c, 0x0a2012, 0.62);
+  const key = new THREE.DirectionalLight(0xf0f4ee, 3.4);
   key.position.set(5.8, 7.6, 6.4);
   key.target.position.set(0, 0.15, 0);
   key.castShadow = true;
@@ -166,11 +166,11 @@ export function createGuardianSculptureLighting(
   key.shadow.bias = -0.000025;
   key.shadow.normalBias = options.normalBias ?? 0.004;
   key.shadow.autoUpdate = false;
-  const rim = new THREE.DirectionalLight(0x39d977, 3.4);
+  const rim = new THREE.DirectionalLight(0x39d977, 2.4);
   rim.position.set(-5.5, -1.5, -7);
-  const rimRight = new THREE.DirectionalLight(0x2fb765, 1.4);
+  const rimRight = new THREE.DirectionalLight(0x2fb765, 1.0);
   rimRight.position.set(6.5, 1.5, -6.5);
-  const fill = new THREE.DirectionalLight(0x3b5a66, 0.22);
+  const fill = new THREE.DirectionalLight(0x6f8a8c, 0.35);
   fill.position.set(-6, 0.5, 3.5);
   root.add(hemi, key, key.target, rim, rimRight, fill);
   let palette: GuardianLightingPalette = options.palette ?? "forest";
@@ -205,17 +205,17 @@ export function createGuardianSculptureLighting(
       fill.color.set(0x88939f);
       fill.intensity = 0.32;
     } else {
-      hemi.color.set(0x4a5650);
-      hemi.groundColor.set(0x0c2a14);
-      hemi.intensity = 0.35;
-      key.color.set(0xe6efe7);
-      key.intensity = 1.9;
+      hemi.color.set(0x8a978c);
+      hemi.groundColor.set(0x0a2012);
+      hemi.intensity = 0.62;
+      key.color.set(0xf0f4ee);
+      key.intensity = 3.4;
       rim.color.set(0x39d977);
-      rim.intensity = 3.4;
+      rim.intensity = 2.4;
       rimRight.color.set(0x2fb765);
-      rimRight.intensity = 1.4;
-      fill.color.set(0x3b5a66);
-      fill.intensity = 0.22;
+      rimRight.intensity = 1.0;
+      fill.color.set(0x6f8a8c);
+      fill.intensity = 0.35;
     }
   };
   setPalette(palette);

@@ -17,7 +17,7 @@ export class GuardianInkGradePass extends ShaderPass {
         tDepth: { value: null },
         uGrain: { value: 0.03 },
         uVignette: { value: 0.3 },
-        uContour: { value: 0.75 },
+        uContour: { value: 0.6 },
         uHalo: { value: 12 },
         uNear: { value: camera.near },
         uFar: { value: camera.far },
@@ -34,9 +34,10 @@ void main(){
  // a thin ink line (one pixel at the render scale; the sky counts as the far plane).
  vec2 px=1./uResolution;
  float d0=linearDepth(vUv);
- float dx=max(abs(linearDepth(vUv+vec2(px.x,0.))-d0),abs(linearDepth(vUv-vec2(px.x,0.))-d0));
- float dy=max(abs(linearDepth(vUv+vec2(0.,px.y))-d0),abs(linearDepth(vUv-vec2(0.,px.y))-d0));
- float step_=max(dx,dy)/max(d0,1.);
+ // Only the far side of a step is inked: the line lies outside a pale part (on whatever is
+ // behind it), so thin ribs, teeth and rungs keep their full brightness.
+ float dn=min(min(linearDepth(vUv+vec2(px.x,0.)),linearDepth(vUv-vec2(px.x,0.))),min(linearDepth(vUv+vec2(0.,px.y)),linearDepth(vUv-vec2(0.,px.y))));
+ float step_=max(d0-dn,0.)/max(d0,1.);
  float contour=smoothstep(.012,.04,step_)*(1.-smoothstep(.85,1.,d0/uFar));
  c=mix(c,ink,contour*uContour);
  // Ink halo: the ground just outside the silhouette darkens, as ink pools around a figure,
@@ -55,8 +56,8 @@ void main(){
  vec3 lift=ink*.5;
  c=lift+c*(1.-lift);
  float l=dot(c,vec3(.2126,.7152,.0722));
- c=mix(c,c*vec3(.92,1.03,.96),.3);
- c=mix(c,vec3(l)*vec3(.9,1.,.94),(1.-smoothstep(0.,.32,l))*.12);
+ c=mix(c,c*vec3(.92,1.03,.96),.15);
+ c=mix(c,vec3(l)*vec3(.9,1.,.94),(1.-smoothstep(0.,.32,l))*.06);
  c=mix(c,vec3(.86,1.,.88)*l,smoothstep(.75,1.,l)*.1);
  vec2 v=(vUv-.5)*vec2(1.,1.08);
  float vig=smoothstep(1.3,.4,length(v)*1.45);
@@ -79,7 +80,7 @@ void main(){
   ) {
     const depth = this.depthSource?.sceneDepth ?? null;
     this.uniforms.tDepth.value = depth;
-    this.uniforms.uContour.value = depth ? 0.75 : 0;
+    this.uniforms.uContour.value = depth ? 0.6 : 0;
     super.render(renderer, writeBuffer, readBuffer, deltaTime, maskActive);
   }
 }
