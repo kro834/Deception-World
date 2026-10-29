@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
-  "version": 3,
-  "revision": "v3",
+  "version": 5,
+  "revision": "v5",
   "model": "guardian-v3.glb",
-  "assetBytes": 4439628,
-  "assetSha256": "3332ed3a960b88c5ed3ae2d6ab5de72f1b87a3e37e82b9bcd81e6cdaa419c9f7",
+  "assetBytes": 4509824,
+  "assetSha256": "bba2d36713d1cb1fb99661e7abef0a7df6079d03903aeb8006e9f7c8a86d383b",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -13,10 +13,82 @@
   "nodes": {
     "root": "GuardianV_Root",
     "body": "BodyPivot",
+    "rig": "SerpentRig",
     "head": "HeadPivot",
     "jaw": "JawPivot",
     "mouth": "MouthSocket",
     "mouthAim": "MouthAim",
+    "neck": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
+    ],
+    "spineRoot": "SpineRoot",
+    "spineUp": [
+      "SpineUp_00",
+      "SpineUp_01",
+      "SpineUp_02",
+      "SpineUp_03",
+      "SpineUp_04",
+      "SpineUp_05",
+      "SpineUp_06",
+      "SpineUp_07",
+      "SpineUp_08",
+      "SpineUp_09",
+      "SpineUp_10",
+      "SpineUp_11",
+      "SpineUp_12",
+      "SpineUp_13",
+      "SpineUp_14",
+      "SpineUp_15"
+    ],
+    "spineDown": [
+      "SpineDown_00",
+      "SpineDown_01",
+      "SpineDown_02",
+      "SpineDown_03",
+      "SpineDown_04",
+      "SpineDown_05",
+      "SpineDown_06",
+      "SpineDown_07",
+      "SpineDown_08",
+      "SpineDown_09"
+    ],
+    "tailA": [
+      "TailA_00",
+      "TailA_01",
+      "TailA_02",
+      "TailA_03",
+      "TailA_04",
+      "TailA_05",
+      "TailA_06",
+      "TailA_07"
+    ],
+    "tailB": [
+      "TailB_00",
+      "TailB_01",
+      "TailB_02",
+      "TailB_03",
+      "TailB_04"
+    ],
+    "armL": [
+      "ArmL_00",
+      "ArmL_01",
+      "ArmL_02",
+      "ArmL_03",
+      "ArmL_04",
+      "ArmL_05",
+      "ArmL_06",
+      "ArmL_07",
+      "ArmL_08",
+      "ArmL_09"
+    ],
+    "armR": [
+      "ArmR_00",
+      "ArmR_01",
+      "ArmR_02",
+      "ArmR_03",
+      "ArmR_04"
+    ],
     "tentacles": [
       "TentaclePivot_00",
       "TentaclePivot_01",
@@ -30,7 +102,53 @@
       "TentaclePivot_09",
       "TentaclePivot_10"
     ],
-    "neckRig": "NeckRig",
+    "fingers": {
+      "TentaclePivot_00": [
+        "Frond00_1",
+        "Frond00_2"
+      ],
+      "TentaclePivot_01": [
+        "Frond01_1",
+        "Frond01_2"
+      ],
+      "TentaclePivot_02": [
+        "Frond02_1",
+        "Frond02_2"
+      ],
+      "TentaclePivot_03": [
+        "Frond03_1",
+        "Frond03_2"
+      ],
+      "TentaclePivot_04": [
+        "Frond04_1",
+        "Frond04_2"
+      ],
+      "TentaclePivot_05": [
+        "Frond05_1",
+        "Frond05_2"
+      ],
+      "TentaclePivot_06": [
+        "Frond06_1",
+        "Frond06_2"
+      ],
+      "TentaclePivot_07": [
+        "Frond07_1",
+        "Frond07_2"
+      ],
+      "TentaclePivot_08": [
+        "Frond08_1",
+        "Frond08_2"
+      ],
+      "TentaclePivot_09": [
+        "Frond09_1",
+        "Frond09_2"
+      ],
+      "TentaclePivot_10": [
+        "Frond10_1",
+        "Frond10_2"
+      ]
+    },
+    "neckRig": "SerpentRig",
     "joints": [
       "NeckBaseJoint",
       "NeckHeadJoint"
@@ -38,255 +156,40 @@
   },
   "animations": [
     "Rest",
-    "Exhale"
+    "Exhale",
+    "Coil",
+    "Rear",
+    "Swim"
   ],
   "transitionSeconds": 1.6,
-  "poses": {
-    "rest": {
-      "BodyPivot": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ],
-        "position": [
-          0,
-          0,
-          0
-        ]
-      },
-      "HeadPivot": {
-        "quaternion": [
-          0,
-          0,
-          0.15643448,
-          0.98768836
-        ]
-      },
-      "JawPivot": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_00": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_01": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_02": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_03": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_04": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_05": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_06": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_07": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_08": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_09": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      },
-      "TentaclePivot_10": {
-        "quaternion": [
-          0,
-          0,
-          0,
-          1
-        ]
-      }
-    },
-    "exhale": {
-      "BodyPivot": {
-        "quaternion": [
-          0.03442569,
-          0.0165224,
-          0.02676586,
-          0.99891216
-        ],
-        "position": [
-          0,
-          0.08,
-          0.04
-        ]
-      },
-      "HeadPivot": {
-        "quaternion": [
-          -0.4788408,
-          0.07584094,
-          0.13682067,
-          0.86385173
-        ]
-      },
-      "JawPivot": {
-        "quaternion": [
-          0.55919296,
-          0,
-          0,
-          0.82903755
-        ]
-      },
-      "TentaclePivot_00": {
-        "quaternion": [
-          -0.07187184,
-          -0.04710079,
-          -0.04912028,
-          0.99508953
-        ]
-      },
-      "TentaclePivot_01": {
-        "quaternion": [
-          0.05073415,
-          0.03253707,
-          0.04535783,
-          0.99715102
-        ]
-      },
-      "TentaclePivot_02": {
-        "quaternion": [
-          -0.07187184,
-          -0.04710079,
-          -0.04912028,
-          0.99508953
-        ]
-      },
-      "TentaclePivot_03": {
-        "quaternion": [
-          0.05073415,
-          0.03253707,
-          0.04535783,
-          0.99715102
-        ]
-      },
-      "TentaclePivot_04": {
-        "quaternion": [
-          -0.07187184,
-          -0.04710079,
-          -0.04912028,
-          0.99508953
-        ]
-      },
-      "TentaclePivot_05": {
-        "quaternion": [
-          0.05073415,
-          0.03253707,
-          0.04535783,
-          0.99715102
-        ]
-      },
-      "TentaclePivot_06": {
-        "quaternion": [
-          -0.07187184,
-          -0.04710079,
-          -0.04912028,
-          0.99508953
-        ]
-      },
-      "TentaclePivot_07": {
-        "quaternion": [
-          0.03245281,
-          0.03336278,
-          0.04475397,
-          0.99791324
-        ]
-      },
-      "TentaclePivot_08": {
-        "quaternion": [
-          -0.04753822,
-          -0.04588662,
-          -0.05025639,
-          0.99654847
-        ]
-      },
-      "TentaclePivot_09": {
-        "quaternion": [
-          0.03245281,
-          0.03336278,
-          0.04475397,
-          0.99791324
-        ]
-      },
-      "TentaclePivot_10": {
-        "quaternion": [
-          -0.04753822,
-          -0.04588662,
-          -0.05025639,
-          0.99654847
-        ]
-      }
+  "poseClips": {
+    "Rest": "reference pose, all bones",
+    "Exhale": "neck/head/jaw only (NeckBaseJoint, NeckHeadJoint, HeadPivot, JawPivot); convert to additive against Rest to breathe from any pose",
+    "Coil": "coiled, all bones",
+    "Rear": "rearing threat, raised head, spread arms, all bones",
+    "Swim": "4 s undulation loop, all bones"
+  },
+  "breath": {
+    "bones": [
+      "NeckBaseJoint",
+      "NeckHeadJoint",
+      "HeadPivot",
+      "JawPivot"
+    ],
+    "additiveReference": "Rest",
+    "headRotationDegrees": {
+      "NeckBaseJoint": -14,
+      "NeckHeadJoint": -22,
+      "HeadPivot": -30,
+      "JawPivot": 62
     }
   },
   "poseChecks": {
     "Rest": {
       "mouthSocket": [
         -0.4100406,
-        -0.4630811,
-        0.8999999
+        -0.4630812,
+        0.9
       ],
       "mouthAim": [
         -0.21845,
@@ -294,40 +197,40 @@
         1.5
       ],
       "direction": [
-        0.2220603,
+        0.2220604,
         -0.6834311,
         0.6954215
       ],
-      "jawTipSeparation": 0.020677650318832803
+      "jawTipSeparation": 0.8861423188909546
     },
     "Exhale": {
       "mouthSocket": [
-        -0.3671849,
-        0.1855454,
-        1.6233339
+        -1.2194786,
+        0.087493,
+        0.8856231
       ],
       "mouthAim": [
-        -0.1577412,
-        0.3360847,
-        2.4466634
+        -1.5946918,
+        -0.0717208,
+        1.6460612
       ],
       "direction": [
-        0.2427527,
-        0.1744804,
-        0.9542681
+        -0.4348854,
+        -0.1845345,
+        0.8813749
       ],
-      "jawTipSeparation": 0.3922798100642083
+      "jawTipSeparation": 0.8636352451929808
     }
   },
-  "changes": [
-    {
-      "mesh": "Head | continuous asymmetric shield and cheek roots",
-      "ratio": 0.5,
-      "beforeFaces": 106952,
-      "afterFaces": 53476
-    }
-  ],
   "meshAudit": [
+    {
+      "mesh": "Arms | coiled arms",
+      "vertices": 31581,
+      "faces": 30477,
+      "triangles": 62266,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
     {
       "mesh": "Face | fused glowing lattice leaf",
       "vertices": 1035,
@@ -337,10 +240,98 @@
       "nonManifoldEdges": 132
     },
     {
+      "mesh": "Frond_00 | ink ribbon with crosier edge",
+      "vertices": 6216,
+      "faces": 6059,
+      "triangles": 12312,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_01 | ink ribbon with crosier edge",
+      "vertices": 5257,
+      "faces": 5115,
+      "triangles": 10406,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_02 | ink ribbon with crosier edge",
+      "vertices": 5061,
+      "faces": 4919,
+      "triangles": 10014,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_03 | ink ribbon with crosier edge",
+      "vertices": 5495,
+      "faces": 5348,
+      "triangles": 10878,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_04 | ink ribbon with crosier edge",
+      "vertices": 4431,
+      "faces": 4289,
+      "triangles": 8754,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_05 | ink ribbon with crosier edge",
+      "vertices": 9037,
+      "faces": 8880,
+      "triangles": 17954,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_06 | ink ribbon with crosier edge",
+      "vertices": 9135,
+      "faces": 8978,
+      "triangles": 18150,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_07 | ink ribbon with crosier edge",
+      "vertices": 3038,
+      "faces": 2936,
+      "triangles": 6000,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_08 | ink ribbon with crosier edge",
+      "vertices": 3143,
+      "faces": 3041,
+      "triangles": 6210,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_09 | ink ribbon with crosier edge",
+      "vertices": 2905,
+      "faces": 2803,
+      "triangles": 5734,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_10 | ink ribbon with crosier edge",
+      "vertices": 2849,
+      "faces": 2752,
+      "triangles": 5626,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
       "mesh": "Head | continuous asymmetric shield and cheek roots",
-      "vertices": 26742,
-      "faces": 53476,
-      "triangles": 53476,
+      "vertices": 53480,
+      "faces": 106952,
+      "triangles": 106952,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -369,196 +360,52 @@
       "nonManifoldEdges": 0
     },
     {
-      "mesh": "Shell | rib cage lattice",
-      "vertices": 29650,
-      "faces": 26538,
-      "triangles": 53364,
-      "boundaryEdges": 4162,
-      "nonManifoldEdges": 4162
-    },
-    {
-      "mesh": "Tail | ribbed ink tail and spines",
-      "vertices": 4424,
-      "faces": 4324,
-      "triangles": 8788,
+      "mesh": "Serpent | ribbed vertebral body",
+      "vertices": 44620,
+      "faces": 43338,
+      "triangles": 88212,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
-      "mesh": "Frond_00 | ink ribbon with crosier edge",
-      "vertices": 4508,
-      "faces": 4386,
-      "triangles": 8924,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_01 | ink ribbon with crosier edge",
-      "vertices": 3773,
-      "faces": 3666,
-      "triangles": 7466,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_02 | ink ribbon with crosier edge",
-      "vertices": 3647,
-      "faces": 3535,
-      "triangles": 7210,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_03 | ink ribbon with crosier edge",
-      "vertices": 4025,
-      "faces": 3908,
-      "triangles": 7962,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_04 | ink ribbon with crosier edge",
-      "vertices": 3318,
-      "faces": 3206,
-      "triangles": 6552,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_05 | ink ribbon with crosier edge",
-      "vertices": 6363,
-      "faces": 6246,
-      "triangles": 12638,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_06 | ink ribbon with crosier edge",
-      "vertices": 6482,
-      "faces": 6365,
-      "triangles": 12876,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_07 | ink ribbon with crosier edge",
-      "vertices": 2191,
-      "faces": 2114,
-      "triangles": 4326,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_08 | ink ribbon with crosier edge",
-      "vertices": 2338,
-      "faces": 2256,
-      "triangles": 4616,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_09 | ink ribbon with crosier edge",
-      "vertices": 2191,
-      "faces": 2109,
-      "triangles": 4322,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_10 | ink ribbon with crosier edge",
-      "vertices": 2149,
-      "faces": 2072,
-      "triangles": 4242,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Whorl_main | coiled segmented spiral",
-      "vertices": 47604,
-      "faces": 46268,
-      "triangles": 94168,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Whorl_mid | coiled segmented spiral",
-      "vertices": 33765,
-      "faces": 32801,
-      "triangles": 66778,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Whorl_small | coiled segmented spiral",
-      "vertices": 28068,
-      "faces": 27249,
-      "triangles": 55496,
+      "mesh": "Tails | forked spined tails",
+      "vertices": 6368,
+      "faces": 6220,
+      "triangles": 12648,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     }
   ],
   "meshStats": {
-    "objects": 21,
-    "vertices": 213621,
-    "triangles": 417492
+    "objects": 19,
+    "vertices": 194999,
+    "triangles": 386404
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 4439628,
-      "sha256": "3332ed3a960b88c5ed3ae2d6ab5de72f1b87a3e37e82b9bcd81e6cdaa419c9f7"
+      "bytes": 4509824,
+      "sha256": "bba2d36713d1cb1fb99661e7abef0a7df6079d03903aeb8006e9f7c8a86d383b"
     }
-  ],
-  "colorAttribute": "GuardianSurface COLOR_0: authored role colours per organ (bone/ink/membrane/glow)",
-  "secondsBeforeRender": 7.66654109954834,
-  "sourceScripts": [
-    "scripts/blender/guardian_v3_lib.py",
-    "scripts/blender/dogs_guardian_v3.py",
-    "scripts/blender/dogs_guardian_v3_export.py"
-  ],
-  "skinMeshes": [
-    "Face | fused glowing lattice leaf",
-    "Head | continuous asymmetric shield and cheek roots"
   ],
   "skinCount": 1,
-  "jointNodes": [
-    {
-      "name": "NeckHeadJoint",
-      "rotation": [
-        0.698401153087616,
-        -0.11061587929725647,
-        -0.11061587929725647,
-        0.6984010934829712
-      ],
-      "translation": [
-        -0.5799999833106995,
-        -0.6000000238418579,
-        0.47999998927116394
-      ]
-    },
-    {
-      "children": [
-        0
-      ],
-      "name": "NeckBaseJoint",
-      "rotation": [
-        -0.7071067690849304,
-        0,
-        0,
-        0.7071067690849304
-      ]
-    }
+  "skinJoints": 94,
+  "colorAttribute": "GuardianSurface COLOR_0: role colours (bone/ink/membrane/glow) with cavity AO multiplied once",
+  "sourceScripts": [
+    "scripts/blender/guardian_v3_lib.py",
+    "scripts/blender/dogs_guardian_v5.py"
   ],
   "sourceSha256": {
-    "scripts/blender/guardian_v3_lib.py": "f33768976c21e4de5f2c349255fdb30c92c91a05523ea9f255d8602654733963",
-    "scripts/blender/dogs_guardian_v3.py": "aece630860c47c6d1392b59c19a51254e197612182cd01ecedd681bd0c406402",
-    "scripts/blender/dogs_guardian_v3_export.py": "0c1d3ea4f582b8a876fa33853026aacd69536bd057f9dd59b727346ff5068852"
+    "scripts/blender/guardian_v3_lib.py": "b6b53ad12d3461fce09c8f865474c59abf716b815c92c0562da59d5911687634",
+    "scripts/blender/dogs_guardian_v5.py": "365c3fc1f93a91a4e78f203cc4134efc33a0c6b541d54e9e2d8f399c628b135f"
   },
   "referenceImagesUsedAsTexture": false,
+  "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
+  "secondsBeforeRender": 9.091700315475464,
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v3",
-    "stamp": "v3",
-    "rawGlbSha256": "1a6786c0621787d3e27dc12b683a63c2f6e766b1499ce82d2852a676dfe43d65"
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v5",
+    "stamp": "v5",
+    "rawGlbSha256": "fd2d14727a6963a5f87625019037178c4f119e2a131cf8371b6d517464933e20"
   }
 }

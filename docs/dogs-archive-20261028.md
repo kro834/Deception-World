@@ -123,6 +123,29 @@ TentaclePivot_00–10／NeckRig の 2 関節）、Rest／Exhale、頭の skin �
   差分の記録は `handoff/goal/ciel3d/model/gaps.md`、材質チャンネルは同 `delivery.md`。
   原画と同等の造形に達したとは言わない。残差は gaps.md の末尾に記す。
 
+## 2026-10-29 v5 蛇体と骨格（配信: 同フォルダー `guardian-v3.glb`、manifest revision `v5`）
+
+利用者の指示「胴体は細長くヘビの様です。顔の部分と、右隣の胴体らしきものは1繋ぎで、蛇の尻尾が二股に分かれ、
+顔の横から手が生えた様な形です。今の様に巨大な胴体ではありません。」「様々なポーズができる様に」に従い、
+v3／v4 の大きな外殻を捨てて体のつくりを読み直した（`handoff/goal/ciel3d/model/anatomy-v4.md`）。
+
+- 形: 細い肋付きの胴が一本。上端は右上で太く密なとぐろ（原画の大渦、中心が発光）、顔の右隣を下り、
+  腰で二股の棘付きの尾（長い左下、短い右下）に分かれる。顔は短い首で胴につながる。頭の左横から腕が出て
+  頭上で二度巻き（原画の小渦・中渦）、掌から五本の指（扇の触手）が開く。頭の左下と首の右から太い腕。
+  肋は胴の前面を横切る骨の弧、背側に小さな巻きの稜、腹側に櫛状の棘、尾に長い棘。材質系と顔の発光は v3 のまま。
+- 骨格 `SerpentRig`（94 関節、skin 1 つ）: SpineRoot → SpineUp_00–15（とぐろへ）／SpineDown_00–09（分岐点へ）→
+  TailA_00–07／TailB_00–04、NeckBaseJoint → NeckHeadJoint → HeadPivot → JawPivot（＋MouthSocket／MouthAim）、
+  ArmL_00–09、ArmR_00–04、TentaclePivot_00–10 と各指 2 節。重みは生成経路の弧長で隣接 2 骨に滑らかに配分、
+  頭の sculpt は従来の重みを首末端骨と HeadPivot に付け替えた。頭の回転軸は v2 と同じ。
+- クリップ: `Rest`／`Exhale`（首・頭・顎の 4 骨のみ。Rest に対する additive として重ねればどのポーズからでも吐炎）／
+  `Coil`／`Rear`／`Swim`（4 秒ループ）。契約は `handoff/goal/ciel3d/model/delivery.md` と manifest（`poseClips`, `breath`, `nodes`）。
+- 生成: `scripts/blender/dogs_guardian_v5.py`（`guardian_v3_lib.py` に重み付きの管・帯・patch を追加）。
+  配信 4,509,824 bytes（Draco、19 メッシュ、Blender 194,999 頂点／386,404 三角形、埋め込み画像 3 枚）。
+  現行ページは変更なしで動作（Rest/Exhale の crossfade、MouthSocket／MouthAim は骨ノード）。
+- 比較: `handoff/goal/ciel3d/model/compare/32-v5-serpent-turnaround.jpg`（原画／r9／v5 の 4 面＋¾）、
+  `33-v5-poses.jpg`（5 ポーズ × 正面・左）、`34-v5-page.jpg`（実ページ）。原画同等とは言わない。
+- `dogs_guardian_v4.py` は r9 形状＋v3 材質の中間案（コーディネーター講評用）。記録として残す。
+
 ## 操作と読み込み
 
 ドラッグで回転、ピンチまたはホイールで拡大縮小。キャンバスにフォーカスすると

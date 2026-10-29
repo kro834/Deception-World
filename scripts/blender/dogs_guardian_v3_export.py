@@ -16,6 +16,9 @@ def xyzw(q):
 
 
 stamp = opts["stamp"]
+SOURCE_SCRIPTS = globals().get("SOURCE_SCRIPTS") or [
+    "scripts/blender/guardian_v3_lib.py", "scripts/blender/dogs_guardian_v3.py", "scripts/blender/dogs_guardian_v3_export.py"]
+MANIFEST_STAGE = globals().get("MANIFEST_STAGE") or "v3 browser candidate"
 # ---- browser detail reduction (only meshes that are still dense)
 changes = []
 for ob in [o for o in root.children_recursive if o.type == "MESH"]:
@@ -154,7 +157,7 @@ for compressed, name in [(False, f"guardian-{stamp}.glb"), (True, f"guardian-{st
                               export_draco_texcoord_quantization=12, export_draco_color_quantization=10)
     lastg = inject_clips(staging); os.replace(staging, path)
     assets.append({"file": name, "draco": compressed, "bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
-report = {"stage": "v3 browser candidate", "version": 3, "revision": stamp,
+report = {"stage": MANIFEST_STAGE, "version": 3, "revision": stamp,
           "model": assets[-1]["file"], "assetBytes": assets[-1]["bytes"], "assetSha256": assets[-1]["sha256"],
           "coordinateSystem": {"up": "+Y", "front": "+Z", "unit": "meter"},
           "nodes": {"root": root.name, "body": body.name, "head": head.name, "jaw": jaw.name, "mouth": "MouthSocket", "mouthAim": "MouthAim",
@@ -167,12 +170,11 @@ report = {"stage": "v3 browser candidate", "version": 3, "revision": stamp,
           "assets": assets,
           "colorAttribute": "GuardianSurface COLOR_0: authored role colours per organ (bone/ink/membrane/glow)",
           "secondsBeforeRender": time.time() - START,
-          "sourceScripts": ["scripts/blender/guardian_v3_lib.py", "scripts/blender/dogs_guardian_v3.py", "scripts/blender/dogs_guardian_v3_export.py"],
+          "sourceScripts": SOURCE_SCRIPTS,
           "skinMeshes": [o.name for o in root.children_recursive if o.type == "MESH" and any(m.type == "ARMATURE" for m in o.modifiers)],
           "skinCount": len(lastg.get("skins", [])),
           "jointNodes": [n for n in lastg["nodes"] if n.get("name") in ("NeckBaseJoint", "NeckHeadJoint")],
-          "sourceSha256": {p: hashlib.sha256((HERE.parent.parent / p).read_bytes()).hexdigest() for p in
-                           ["scripts/blender/guardian_v3_lib.py", "scripts/blender/dogs_guardian_v3.py", "scripts/blender/dogs_guardian_v3_export.py"]},
+          "sourceSha256": {p: hashlib.sha256((HERE.parent.parent / p).read_bytes()).hexdigest() for p in SOURCE_SCRIPTS},
           "referenceImagesUsedAsTexture": False}
 (OUT / "model-manifest.json").write_text(json.dumps(report, indent=2))
 print("EXPORT_DONE", round(time.time() - START, 1), json.dumps(assets), flush=True)

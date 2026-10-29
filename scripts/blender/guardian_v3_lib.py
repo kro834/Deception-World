@@ -150,8 +150,8 @@ def noise1(x, seed=0.0):
 INK = (0.008, 0.020, 0.012)         # black-green body/tentacle ink
 MEMBRANE = (0.012, 0.045, 0.022)    # dark green membrane cells
 MEMBRANE_LIT = (0.045, 0.14, 0.07)  # membrane catching light near the glow
-BONE = (0.28, 0.345, 0.265)         # pale grey-green bone
-BONE_EDGE = (0.50, 0.59, 0.47)      # pale rim of a bone rib
+BONE = (0.22, 0.30, 0.21)           # pale grey-green bone
+BONE_EDGE = (0.42, 0.54, 0.40)      # pale rim of a bone rib
 BONE_ROOT = (0.07, 0.11, 0.07)      # bone darkening toward its root / cavity
 GLOW = (0.55, 1.0, 0.62)            # emissive pale green (also used as vertex tint)
 
@@ -173,12 +173,15 @@ class MeshBuilder:
         self.uv = []
         self.f = []
         self.fm = []  # material index per face
+        self.vw = []  # per-vertex skin weights: list of (bone, weight) or None
+        self.cur_w = None  # weights applied to vertices added while set
 
     # -- low level
-    def add_vertex(self, p_gltf, color, uv=(0.0, 0.0)):
+    def add_vertex(self, p_gltf, color, uv=(0.0, 0.0), weights=None):
         self.v.append(tuple(P(p_gltf)))
         self.c.append(tuple(color))
         self.uv.append(tuple(uv))
+        self.vw.append(weights if weights is not None else self.cur_w)
         return len(self.v) - 1
 
     def add_face(self, idx, mat=0):
@@ -187,7 +190,7 @@ class MeshBuilder:
 
     # -- swept tube with an elliptical (optionally flattened) section
     def tube(self, path, radii, sides=8, flat=1.0, color=BONE, color_fn=None, hint=(0, 0, 1),
-             cap=True, mat=0, uv_fn=None, frames=None, taper_end=False, profile=None):
+             cap=True, mat=0, uv_fn=None, frames=None, taper_end=False, profile=None, weights_fn=None):
         """path: (n,3) glTF points. radii: scalar or (n,). flat: scale along N (frame normal).
         color_fn(i, t, j, a) -> rgb per vertex (i: ring index, t: 0..1 along, j: side index, a: angle).
         profile(a) -> (x, y) multiplier pair in the (B, N) plane for custom sections."""
@@ -204,6 +207,7 @@ class MeshBuilder:
             r = rr[i]
             if taper_end and i == n - 1:
                 r = 0.0005
+            w = weights_fn(i, t) if weights_fn else None
             for j in range(sides):
                 a = j * math.tau / sides
                 if profile is not None:
@@ -213,7 +217,7 @@ class MeshBuilder:
                 p = path[i] + B[i] * (px * r) + N[i] * (py * r * flat)
                 col = color_fn(i, t, j, a) if color_fn else color
                 uv = uv_fn(i, t, j, a) if uv_fn else (t, j / sides)
-                self.add_vertex(p, col, uv)
+                self.add_vertex(p, col, uv, w)
         for i in range(n - 1):
             for j in range(sides):
                 a = start + i * sides + j
@@ -226,7 +230,7 @@ class MeshBuilder:
 
     # -- flat ribbon: a lens-shaped closed section (width along B, thickness along N)
     def ribbon(self, path, widths, thick, sides=14, color=INK, color_fn=None, hint=(0, 0, 1),
-               bulge=1.0, mat=0, uv_fn=None, edge_sharp=0.55):
+               bulge=1.0, mat=0, uv_fn=None, edge_sharp=0.55, weights_fn=None):
         widths = np.asarray(widths, float) if not np.isscalar(widths) else np.full(len(path), widths)
         thick = np.asarray(thick, float) if not np.isscalar(thick) else np.full(len(path), thick)
         path = np.asarray(path, float)
@@ -242,13 +246,14 @@ class MeshBuilder:
         n = len(path)
         for i in range(n):
             t = i / max(1, n - 1)
+            w = weights_fn(i, t) if weights_fn else None
             for j in range(sides):
                 a = j * math.tau / sides
                 px, py = prof(a)
                 p = path[i] + B[i] * (px * radii[i]) + N[i] * (py * thick[i] * 0.5)
                 col = color_fn(i, t, j, a) if color_fn else color
                 uv = uv_fn(i, t, j, a) if uv_fn else (t, j / sides)
-                self.add_vertex(p, col, uv)
+                self.add_vertex(p, col, uv, w)
         for i in range(n - 1):
             for j in range(sides):
                 a = start + i * sides + j
@@ -325,6 +330,19 @@ class MeshBuilder:
             for loop in me.loops:
                 vals[loop.index] = uvs[loop.vertex_index]
             layer.data.foreach_set("uv", vals.ravel())
+        # skin weights -> vertex groups (same vertex order as from_pydata)
+        if any(w for w in self.vw):
+            groups = {}
+            for idx, w in enumerate(self.vw):
+                if not w:
+                    continue
+                for bone, value in w:
+                    if value > 1e-4:
+                        groups.setdefault(bone, []).append((idx, value))
+            for bone, items in groups.items():
+                vg = ob.vertex_groups.new(name=bone)
+                for idx, value in items:
+                    vg.add([idx], float(value), "REPLACE")
         me.update()
         return ob
 
