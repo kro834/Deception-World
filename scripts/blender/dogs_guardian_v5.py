@@ -268,13 +268,14 @@ FRONDS = [
     ([(-.61, 1.42, 1.25), (-1.27, 1.63, 1.48), (-1.79, 2.19, 1.72), (-2.04, 2.54, 1.95)], .77, 1.05, +1, (.22, .27, .07)),
     ([(.03, 1.98, 1.10), (.32, 2.46, .93), (.28, 3.00, .77), (.40, 3.30, .60)], .61, 1.0, -1, (.18, .22, .05)),
     # big arms: v12's x/y arcs, behind the body (05/07 put them at the back)
-    ([(-.56, 1.07, .10), (-1.45, .85, -.70), (-2.15, .15, -1.25), (-2.18, -.55, -1.25), (-1.85, -1.05, -.95)], 1.35, 1.5, +1, (.44, .52, .12)),
-    ([(.76, 1.63, -.60), (1.70, 1.45, -1.05), (2.20, .70, -1.45), (2.15, -.10, -1.45), (1.72, -.65, -1.15)], 1.25, 1.5, +1, (.42, .50, .12)),
-    # curl clusters: deltas from the parent arm's tip (CLUSTER_PARENT)
-    ([(0, 0, 0), (0.25, -0.45, 0.10), (0.55, -0.80, 0.20), (0.70, -1.00, 0.25)], .75, 1.15, +1, (.42, .46, .11)),
-    ([(0, 0, 0), (-0.20, -0.55, 0.10), (-0.45, -1.00, 0.20), (-0.55, -1.40, 0.25)], .75, 1.15, +1, (.42, .46, .11)),
-    ([(0, 0, 0), (0.20, -0.50, 0.10), (0.40, -1.00, 0.20), (0.50, -1.45, 0.25)], .66, 1.1, +1, (.38, .42, .10)),
-    ([(0, 0, 0), (-0.15, -0.40, 0.10), (-0.35, -0.80, 0.20), (-0.40, -1.05, 0.25)], .66, 1.1, +1, (.38, .42, .10)),
+    ([(-.56, 1.07, .10), (-1.45, .85, -.70), (-2.15, .15, -1.25), (-2.18, -.55, -1.25), (-1.85, -1.05, -.95)], 2.4, 1.6, +1, (.44, .52, .12)),
+    ([(.76, 1.63, -.60), (1.70, 1.45, -1.05), (2.20, .70, -1.45), (2.15, -.10, -1.45), (1.72, -.65, -1.15)], 2.2, 1.6, +1, (.42, .50, .12)),
+    # curl clusters (05, crops/arm-rims.jpg): big fiddleheads growing straight out of the arm just before its own
+    # end curl, no stalks; deltas from that anchor (CLUSTER_PARENT), one in front of the arm and one behind
+    ([(0, 0, 0), (0.18, -0.22, 0.15), (0.32, -0.40, 0.22)], 1.9, 1.6, +1, (.18, .20, .06)),
+    ([(0, 0, 0), (-0.18, -0.22, 0.15), (-0.32, -0.40, 0.22)], 1.9, 1.6, -1, (.18, .20, .06)),
+    ([(0, 0, 0), (0.22, -0.18, -0.15), (0.40, -0.34, -0.22)], 1.4, 1.5, +1, (.15, .16, .05)),
+    ([(0, 0, 0), (-0.22, -0.18, -0.15), (-0.40, -0.34, -0.22)], 1.4, 1.5, -1, (.15, .16, .05)),
     ([(-.33, 1.85, 1.20), (-.85, 2.30, 1.37), (-1.20, 2.95, 1.53), (-1.32, 3.35, 1.70)], .72, 1.05, +1, (.22, .25, .06)),
     ([(-.95, 1.90, 1.30), (-1.35, 1.85, 1.53), (-1.70, 1.95, 1.77), (-1.85, 2.00, 2.00)], .68, 1.35, +1, (.22, .25, .06)),
 ]
@@ -286,11 +287,28 @@ def plane_normal(points):
     return unit(n if n[2] >= 0 else -n)
 
 
-def frond_path(controls, curl_len, curl_turns, side):
-    nrm = plane_normal(controls)
+def fiddlehead_path(base, direction, curl_toward, length, turns, a=0.36, n=None):
+    """A rolled-up fern fiddlehead: the heading turns as 2*pi*turns*(a*u + (1-a)*u^2), so the roll starts at a
+    large radius right away and tightens toward its centre (05's curl clusters); planar like crosier_path."""
+    d = unit(V(direction)); c = unit(V(curl_toward) - d * np.dot(V(curl_toward), d))
+    if n is None:
+        n = max(9, int(length / 0.017))
+    pts = []; pos = V(base).copy(); ds = length / (n - 1)
+    for i in range(n):
+        u = i / (n - 1); pts.append(pos.copy())
+        phi = math.tau * turns * (a * u + (1 - a) * u * u)
+        pos = pos + (d * math.cos(phi) + c * math.sin(phi)) * ds
+    return np.asarray(pts)
+
+
+def frond_path(controls, curl_len, curl_turns, side, roll=None, nrm_override=None):
+    nrm = plane_normal(controls) if nrm_override is None else unit(V(nrm_override))
     base = resample(catmull(controls, 20), spacing=0.02)
     tang = unit(base[-1] - base[-3]); lateral = unit(np.cross(nrm, tang)) * side
-    curl = crosier_path(base[-1], tang, lateral, curl_len, turns=max(curl_turns, 1.35), straight=0.10, bend_power=1.5)
+    if roll is not None:
+        curl = fiddlehead_path(base[-1], tang, lateral, curl_len, curl_turns, a=roll)
+    else:
+        curl = crosier_path(base[-1], tang, lateral, curl_len, turns=max(curl_turns, 1.35), straight=0.10, bend_power=1.5)
     path = resample(np.concatenate([base[:-1], curl], axis=0), spacing=0.018)
     base_len = sum(np.linalg.norm(np.diff(base, axis=0), axis=1))
     return path, nrm, lateral, base_len / (base_len + curl_len)
@@ -370,10 +388,13 @@ FINGER_PARENT = {0: ARML[-1][0], 1: ARML[-1][0], 2: ARML[-1][0], 3: ARML[-1][0],
 CLUSTER_PARENT = {7: 5, 10: 5, 8: 6, 9: 6}   # the lower-left / lower-right curl clusters hang from the big arms' tips
 for idx in range(len(FRONDS)):
     controls, cl, ct, side, widths = FRONDS[idx]
-    if idx in CLUSTER_PARENT:
-        tip = FROND_DATA[CLUSTER_PARENT[idx]][1][-1]
+    if idx in CLUSTER_PARENT:   # anchor: the parent arm just before its end curl begins (not the curl's end)
+        ppath = FROND_DATA[CLUSTER_PARENT[idx]][1]; s_end = FROND_DATA[CLUSTER_PARENT[idx]][4]
+        tip = ppath[int(max(0.0, s_end - 0.05) * (len(ppath) - 1))]
         shift = tip - V(controls[0]); controls = [tuple(V(c) + shift) for c in controls]
-    path, nrm, lateral, s_base_end = frond_path(controls, cl, ct, side)
+    # cluster curls lie in the picture plane like 05's (their three controls are nearly collinear, so the fitted plane is not usable)
+    path, nrm, lateral, s_base_end = frond_path(controls, cl, ct, side, roll=0.36 if (idx in CLUSTER_PARENT or widths[1] > 0.4) else None,
+                                                nrm_override=(0.0, 0.08, 1.0) if idx in CLUSTER_PARENT else None)
     names = ["TentaclePivot_%02d" % idx, "Frond%02d_1" % idx, "Frond%02d_2" % idx]
     stations = add_chain("Frond%02d" % idx, path, 3, FINGER_PARENT[idx], names=names)
     FROND_DATA.append((idx, path, nrm, lateral, s_base_end, widths, stations))
@@ -409,7 +430,8 @@ def attach(ob):
 # ================================================================ geometry
 def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.42, 0.015), ribs=True,
                    crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=12,
-                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False, crest_scale=1.0):
+                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False, crest_scale=1.0,
+                   uv_override=None):
     """A dark membrane tube with transverse bone arcs over its front, rows of crescent scales
     (hooked curls lying on the surface) across the front, a crosier crest on the side given by
     crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
@@ -428,7 +450,7 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
         return mix(c, GLOW, g * 0.6)
     f0 = len(mb.f)
     mb.tube(path, radii, sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02,
-            uv_fn=tube_uv(arc, radii, sides) if TILES else (lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0)))
+            uv_fn=uv_override if uv_override is not None else (tube_uv(arc, radii, sides) if TILES else (lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0))))
     if glow_fn is not None:   # rings deep in the glow use the emissive core material
         for i in range(n - 1):
             if glow_fn(i) > 0.5:
@@ -542,8 +564,18 @@ def body_scales_split(i):
 # the coil: thin ribs plus three rows of crescent scales tightening to the core; the descent: ribs,
 # two rows of scales and the comb spines
 i_split = int(np.searchsorted(S_MAIN, s_coil_end))
+# whorl scales (05): regular rows of scales following the spiral like a pinecone, shrinking toward the bright
+# centre. AuthoredUV u runs along the coil and v across it; the tile cell is proportional to the tube radius
+# (which itself shrinks with the coil radius), so the same number of rows runs around every turn and the scales
+# get smaller toward the core. The projection only modulates this.
+R_COIL = R_MAIN[:i_split + 2]; R_REF = float(R_COIL.max()); COIL_TILE = 1.15   # metres per tile at the outer turn
+k_coil = np.maximum(0.12, R_COIL / R_REF)
+seg_coil = np.linalg.norm(np.diff(MAIN[:i_split + 2], axis=0), axis=1)
+U_COIL = np.concatenate(([0.0], np.cumsum(seg_coil / (COIL_TILE * 0.5 * (k_coil[:-1] + k_coil[1:])))))
+PER_COIL = max(1, round(2 * math.pi * R_REF / COIL_TILE))
 segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.26, 0.010),
-               glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.6)
+               glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.6,
+               uv_override=(lambda i, t, j, a: (U_COIL[i], (1 - abs(2 * j / 12 - 1)) * PER_COIL / 2)) if TILES else None)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
                ribs=False, paired=True, scales=1, scale_size=0.8)
@@ -741,9 +773,14 @@ def rim_knobs(mb, path, ws, ts, frames, lateral, weights_fn, color=(0.30, 0.36, 
 for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     n = len(path); arcp = np.linspace(0, 1, n)
     w0, w1, w2 = widths
-    big = w1 > 0.4
+    big = w1 > 0.4; cluster = idx in CLUSTER_PARENT; fan = not big and not cluster
     base_w = w1 * (1.0 if big else 1.25); taper_exp = 1.4 if big else 1.15   # big arms: v12's width, a little fuller mid-arc
-    ws = np.array([base_w * ((0.30 if big else 0.33) + (0.70 if big else 0.67) * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
+    if cluster:   # fiddlehead: thick ribbon that only thins inside the roll
+        ws = np.array([base_w * (0.55 + 0.45 * (1 - t)) * (1 - 0.55 * max(0.0, (t - 0.75) / 0.25)) + 0.006 for t in arcp])
+    elif big:   # v12's arc width; the end roll keeps a thick band that only thins inside the roll (05's biggest curl)
+        ws = np.array([base_w * (0.36 + 0.64 * (1 - t) ** taper_exp) * (1 - 0.50 * max(0.0, (t - 0.85) / 0.15)) + 0.006 for t in arcp])
+    else:
+        ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
     ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.45 + 0.008
     mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT])
 
@@ -759,35 +796,63 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     ridge = np.asarray([path[i] + Nn[i] * (ts[i] * 0.5 * 1.2 * 0.92) for i in range(n)])
     mb.tube(ridge, 0.035 * ws + 0.004, sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=nrm, mat=1, taper_end=True,
             weights_fn=lambda i, t, st=stations: chain_weights(t, st))
-    # the comb of hooked teeth
+    # the comb of hooked teeth; on the fan (05, crops/arm-rims.jpg right) a broad, tightly packed pale-bone
+    # S-curl zipper about 40% of the tentacle's width, running into the tip curl
     s_acc = 0.0; last = -1.0
     for i in range(3, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
-        length = min(0.30, max(0.025, (0.55 if big else 0.48) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
-        if s_acc - last < max(0.024, 0.55 * length):
+        length = min(0.40 if fan else 0.30, max(0.025, (0.55 if big else (1.0 if fan else 0.48)) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
+        if s_acc - last < max(0.024, (0.30 if fan else 0.55) * length):
             continue
         last = s_acc
         edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
-        d0 = unit(edge_dir * 0.75 + T[i] * 0.65)
-        tp = crosier_path(path[i] + edge_dir * (w * 0.46), d0, T[i], length, turns=0.72, straight=0.28, bend_power=1.6)
+        d0 = unit(edge_dir * 0.6 + T[i] * 0.8) if fan else unit(edge_dir * 0.75 + T[i] * 0.65)
+        tp = crosier_path(path[i] + edge_dir * (w * (0.18 if fan else 0.46)) + (Nn[i] * (ts[i] * 0.35) if fan else 0), d0, T[i], length,
+                          turns=0.9 if fan else 0.72, straight=0.2 if fan else 0.28, bend_power=1.6)
         tt_ = np.linspace(0, 1, len(tp))
-        tw = (0.34 * length) * (1 - tt_) ** 0.8 + 0.004
-        tth = np.maximum(0.005, 0.10 * length) * (1 - 0.6 * tt_)
+        tw = ((0.68 if fan else 0.34) * length) * (1 - tt_) ** 0.8 + 0.004
+        tth = np.maximum(0.005, (0.18 if fan else 0.10) * length) * (1 - 0.6 * tt_)
         mb.cur_w = chain_weights(i / (n - 1), stations)
         mb.ribbon(tp, tw, tth, sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.4), BONE_EDGE, t1 ** 0.7),
                   hint=nrm, bulge=1.0, mat=1)
         mb.cur_w = None
+    # big arms (05, crops/arm-rims.jpg left): a pale translucent ladder along the inner edge, about 30% of the
+    # arm's width over the whole arc: a flat bone channel on the convex face, two rails and rungs across it
+    if big:
+        wfn = lambda i_, t_, st=stations: chain_weights(t_, st)
+        band_c = 0.31; band_w = 0.30
+        inner_of = lambda i_: unit(B[i_] * (np.sign(np.dot(B[i_], lateral)) if abs(np.dot(B[i_], lateral)) > 1e-6 else 1.0))
+        lift = lambda i_: ts[i_] * 0.55 + 0.006
+        i_end = int(0.93 * (n - 1))
+        chan = np.asarray([path[i] + inner_of(i) * (ws[i] * band_c) + Nn[i] * lift(i) for i in range(i_end)])
+        mb.ribbon(chan, ws[:i_end] * band_w, np.full(i_end, 0.010), sides=6, color=mix(BONE, BONE_EDGE, 0.45), hint=nrm, bulge=1.0, mat=1,
+                  weights_fn=wfn, edge_sharp=1.0)
+        for side_f in (band_c + band_w * 0.5, band_c - band_w * 0.5):
+            rail = np.asarray([path[i] + inner_of(i) * (ws[i] * side_f) + Nn[i] * (lift(i) + 0.004) for i in range(i_end)])
+            mb.tube(rail, 0.022 * ws[:i_end] + 0.004, sides=6, color=mix(BONE, BONE_EDGE, 0.7), hint=nrm, mat=1, taper_end=True, weights_fn=wfn)
+        s_acc = 0.0; last = -1.0
+        for i in range(2, i_end):
+            s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
+            if s_acc - last < max(0.03, 0.15 * w):
+                continue
+            last = s_acc
+            a_ = path[i] + inner_of(i) * (w * (band_c + band_w * 0.5)) + Nn[i] * (lift(i) + 0.004)
+            b_ = path[i] + inner_of(i) * (w * (band_c - band_w * 0.5)) + Nn[i] * (lift(i) + 0.004)
+            mid = (a_ + b_) * 0.5 + Nn[i] * (0.03 * w)
+            mb.cur_w = chain_weights(i / (n - 1), stations)
+            mb.tube(catmull([a_, mid, b_], 4), 0.032 * w + 0.004, sides=6, flat=0.6, color=mix(BONE_ROOT, BONE_EDGE, 0.6), hint=nrm, mat=1)
+            mb.cur_w = None
     # dark crenellated knob row along the outer edge, through the tip spiral
     rim_knobs(mb, path, ws, ts, (T, Nn, B), lateral, lambda t_: chain_weights(t_, stations))
-    # curl clusters: two extra spirals sprouting from each cluster frond (curls on curls), each with its own knob row
+    # curl clusters: one more fiddlehead sprouting from the short straight part of each cluster curl, with its own knob row
     if idx in CLUSTER_PARENT:
-        for fr_ in (0.35, 0.60, 0.82):
+        for fr_ in (0.14,):
             k = int(fr_ * (n - 1)); w = ws[k]
             inner = unit(B[k] * (np.sign(np.dot(B[k], lateral)) if abs(np.dot(B[k], lateral)) > 1e-6 else 1.0)); outer = -inner
             d0 = unit(outer * 0.7 + T[k] * 0.7)
-            sp = resample(crosier_path(path[k] + outer * (w * 0.45), d0, T[k], w * 2.4 + 0.12, turns=1.25, straight=0.3, bend_power=1.5), spacing=0.016)
+            sp = resample(fiddlehead_path(path[k] + outer * (w * 0.45), d0, T[k], 0.85, 1.4, a=0.4), spacing=0.016)
             m_ = len(sp); tt_ = np.linspace(0, 1, m_)
-            sw = (w * 0.55) * (1 - tt_) ** 1.1 + 0.006; sth = sw * 0.45 + 0.006
+            sw = (w * 0.70) * (1 - 0.6 * tt_) + 0.006; sth = sw * 0.45 + 0.006
             wfix = chain_weights(k / (n - 1), stations)
             fr2, _ = mb.ribbon(sp, sw, sth, sides=10, color_fn=rib_color, hint=nrm, bulge=1.2, mat=0, weights_fn=lambda i2, t2, wf=wfix: wf)
             rim_knobs(mb, sp, sw, sth, fr2, T[k], lambda t_, wf=wfix: wf, start=1)

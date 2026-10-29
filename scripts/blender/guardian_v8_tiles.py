@@ -73,21 +73,18 @@ def tile_crescent(n, rng):
         shape = 0.55 + 0.45 * np.cos(np.minimum(da, np.pi))        # scale body: full behind the ridge, thinner at the sides
         ring = np.exp(-((d - 1.12 * r) / (0.09 * r)) ** 2) * win   # ink outline just outside the ridge
         return ridge, dome * shape, ring
-    for layer, (rows, amp, rmul) in enumerate(((5, 1.0, 1.0), (4, 0.75, 0.8))):
-        for row in range(rows):
-            cy0 = (row + 0.5 + 0.5 * layer) / rows; x = rng.uniform(0, 0.08)
-            while x < 1.0:
-                r = 0.085 * rmul * rng.uniform(0.55, 1.5); cy = cy0 + rng.uniform(-0.045, 0.045)
-                ridge, dome, ring = crescent(x, cy, r, r * rng.uniform(0.12, 0.2), rng.uniform(-0.6, 0.6))
-                h += amp * (ridge + 0.35 * dome); bone = np.maximum(bone, amp * ridge)
-                scale = np.maximum(scale, dome); outline = np.maximum(outline, ring)
-                x += r * rng.uniform(1.3, 2.6)
-    for _ in range(40):
-        r = 0.042 * rng.uniform(0.6, 1.3)
-        ridge, dome, ring = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.18, rng.uniform(-0.5, 0.5))
-        h += 0.7 * ridge + 0.2 * dome; bone = np.maximum(bone, 0.8 * ridge)
-        scale = np.maximum(scale, 0.85 * dome); outline = np.maximum(outline, 0.85 * ring)
-    for _ in range(80):
+    # regular brick rows (05's whorl: rows of scales in register along the coil, like a pinecone); the rows run
+    # along u, every other row shifted by half a step, with only a little jitter in size, position and lean
+    rows = 6; r0 = 0.075; per_row = int(round(1.0 / (r0 * 1.75))); step = 1.0 / per_row
+    for row in range(rows):
+        cy0 = (row + 0.5) / rows
+        for col in range(per_row):
+            x = (col + 0.5 * (row % 2)) * step + rng.uniform(-0.012, 0.012)
+            r = r0 * rng.uniform(0.92, 1.08); cy = cy0 + rng.uniform(-0.008, 0.008)
+            ridge, dome, ring = crescent(x, cy, r, r * rng.uniform(0.14, 0.18), rng.uniform(-0.15, 0.15))
+            h += ridge + 0.35 * dome; bone = np.maximum(bone, ridge)
+            scale = np.maximum(scale, dome); outline = np.maximum(outline, ring)
+    for _ in range(50):
         r = 0.017 * rng.uniform(0.6, 1.4)
         ridge, _, _ = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.28, rng.uniform(-0.6, 0.6))
         h += 0.45 * ridge; bone = np.maximum(bone, 0.6 * ridge)
