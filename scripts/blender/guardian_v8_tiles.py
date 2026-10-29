@@ -76,7 +76,7 @@ def tile_crescent(n, rng):
         xr = x * cl + y * sl; yr = -x * sl + y * cl
         t = np.clip((xr + r) / (2 * r), 0, 1)                        # 0 at the base (-u) ... 1 at the tip (+u)
         yc = yr - bend * r * t * t                                    # the thorn curves toward +v as it nears its tip
-        hw = 0.55 * r * np.sin(np.pi * t ** 0.75) ** 0.8               # rounded base, pointed tip (thin thorn)
+        hw = 0.26 * r * np.sin(np.pi * t ** 0.75) ** 0.8               # v20 (runtime: pale area -> ~20%): thin thorn strokes
         span = (xr > -r) & (xr < r)
         inside = span & (np.abs(yc) < hw)
         edge = np.clip((hw - np.abs(yc)) / (0.22 * r), 0, 1)           # 0 at the boundary -> 1 inside (wide pale rim)
@@ -234,13 +234,13 @@ def _compose_scales(h, bone, scale, outline, mottle):
     def smooth(x):
         x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
     gap = EMERALD[None, None, :] * np.ones_like(m01)[..., None]   # v20: dark emerald between the arms / rows
-    body_col = MINT * 0.92   # v20: pale mint crescents, two tones only
+    body_col = MINT * 0.80   # v20: mint crescents a shade darker (runtime toon ramp), two tones only
     s = smooth((scale - 0.20) / 0.12)                     # scale body: the fan behind each ridge, up to the ridge
     body = (body_col + (MINT * 1.08 - body_col) * (0.5 * hn)[..., None]) * (1.0 * np.ones_like(m01))[..., None]   # flat, slight lift to the rim
     col = gap * (1 - s[..., None]) + body * s[..., None]
     b = np.clip(bone * 1.35, 0, 1) ** 0.9
     inner = smooth((scale - 0.26) / 0.08)                 # ridge split: inside half pale rim, outside half ink
-    edge = (MINT * 1.08)[None, None, :] * inner[..., None] + (EMERALD * 0.8)[None, None, :] * (1 - inner)[..., None]
+    edge = (MINT * 1.0)[None, None, :] * inner[..., None] + (EMERALD * 0.8)[None, None, :] * (1 - inner)[..., None]
     col = col * (1 - b[..., None]) + edge * b[..., None]
     o = np.clip(outline * 1.3, 0, 1)                      # the ink outline wins over any neighbour's body
     return col * (1 - o[..., None]) + (EMERALD * 0.8)[None, None, :] * o[..., None]

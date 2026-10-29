@@ -193,10 +193,11 @@ else:
     CRESCENT_MAT = CURL_MAT = MEMB_MAT = COMB_MAT
 
 
-def tube_uv(arc, radii, sides):
+def tube_uv(arc, radii, sides, tile_m=None):
     """AuthoredUV for a closed tube: u along the organ in tiles, v mirrored around (no wrap seam)."""
-    per = max(1, round(2 * math.pi * float(np.mean(radii)) / TILE_M))
-    return lambda i, t, j, a: (arc[i] / TILE_M, (1 - abs(2 * j / sides - 1)) * per / 2)
+    tm = tile_m or TILE_M
+    per = max(1, round(2 * math.pi * float(np.mean(radii)) / tm))
+    return lambda i, t, j, a: (arc[i] / tm, (1 - abs(2 * j / sides - 1)) * per / 2)
 WALL_DARK = (0.012, 0.032, 0.016); WALL_MID = (0.040, 0.080, 0.042)
 for ob in (headmesh, jawmesh):
     ob.data.materials.clear(); ob.data.materials.append(INK_MAT)
@@ -754,7 +755,7 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
         return mix(INK, mix(BONE, BONE_EDGE, 0.3), pale * (0.85 - 0.3 * t))
     mtail.tube(path, radii, sides=14, color_fn=tail_col, hint=(0, 0, 1), mat=0, taper_end=True,
                weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st),
-               uv_fn=tube_uv(arc, radii, 14) if TILES else (lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0)))
+               uv_fn=tube_uv(arc, radii, 14, tile_m=0.8) if TILES else (lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0)))   # v20: rows the atlas can resolve
     is_a = path is TAIL_A
     lengths = [1.13, 1.31, 1.28, 1.15, 1.04, .95, .87, .80, .85, .90, .83, .72, .60, .46] if is_a else [.95, 1.05, .95, .80, .62, .45]
     for ii, (t, le) in enumerate(zip(np.linspace(.07 if is_a else .12, .89, spines), lengths)):
@@ -835,7 +836,7 @@ def head_dome(mb, centre, R, H, bone, segs=48, rings=20, m_cos=5, m_sin=3):
     mb.cur_w = None
 
 
-mdome = MeshBuilder("Arms | head scale domes", body, [CRESCENT_MAT, CORE_MAT, MEMB_MAT])
+mdome = MeshBuilder("Head | galaxy domes", body, [CRESCENT_MAT, CORE_MAT, MEMB_MAT])   # v20: baked with the head atlas (2048), not the crowded body atlas
 head_dome(mdome, (-0.62, 0.80, 1.12), 0.34, 0.085, "ArmL_02", m_cos=2, m_sin=1)     # v20: flatter galaxy domes (H 0.25R)
 head_dome(mdome, (-0.43, 1.53, 1.00), 0.52, 0.13, "ArmL_06", m_cos=2, m_sin=1)
 attach(mdome.finish(micro_uv_scale=1.0))

@@ -16,6 +16,7 @@ Usage: Blender --background --python dogs_guardian_v7_paint.py -- --blend build/
 """
 import sys, math, json, time, hashlib, struct, os
 from pathlib import Path
+import re
 import bpy, bmesh
 import numpy as np
 from mathutils import Vector, Matrix, Quaternion
@@ -27,7 +28,7 @@ from guardian_v3_lib import mesh_audit
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 opts = {"blend": "", "turnaround": "", "views": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8", "quality": "84",
-        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1", "illus": "0"}
+        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1", "illus": "0", "head_atlas": ""}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -331,7 +332,7 @@ def paint_object(ob, size, side_weight):
 log("PAINT A")
 atlasA, confA, covA, iouA = paint_object(A, ATLAS, float(opts["side_weight"]))
 log("PAINT B")
-atlasB, confB, covB, iouB = paint_object(B, ATLAS // 2, float(opts["side_weight"]))
+atlasB, confB, covB, iouB = paint_object(B, int(opts["head_atlas"] or ATLAS // 2), float(opts["side_weight"]))
 log("confidence coverage A", float((confA[covA] > 0.5).mean()), "B", float((confB[covB] > 0.5).mean()))
 
 
@@ -406,6 +407,26 @@ for ob, image in ((A, imA), (B, imB)):
         if src is None or "Rune |" in src.name or "Glass |" in src.name or "Horn |" in src.name:
             continue   # the glow cores keep their emissive material; Glass and Horn keep their constant colours
         slot.material = painted_material(src, f"{src.name.split(' |')[0]} | painted {ob.name[:4]}", image)   # stable name across versions
+# v20: the head group now carries the galaxy domes (tile slots) - after painting every slot reads the same head atlas, so
+# duplicate names ("Skin | painted Head.001") are folded into the base slot to keep the material list stable (12)
+for ob in (B,):
+    names = [s.material.name if s.material else "" for s in ob.material_slots]
+    remap = {}
+    for idx, nm in enumerate(names):
+        base_nm = re.sub(r"\.\d{3}$", "", nm)   # (not `root`: that is the rig's root object below)
+        if base_nm != nm and base_nm in names:
+            remap[idx] = names.index(base_nm)
+    if remap:
+        for p in ob.data.polygons:
+            if p.material_index in remap:
+                p.material_index = remap[p.material_index]
+        bpy.ops.object.select_all(action="DESELECT"); ob.select_set(True); bpy.context.view_layer.objects.active = ob
+        bpy.ops.object.material_slot_remove_unused()
+        for idx in remap:
+            m = bpy.data.materials.get(names[idx])
+            if m is not None and m.users == 0:
+                bpy.data.materials.remove(m)
+        log("MATERIALS folded", {names[k]: names[v] for k, v in remap.items()})
 log("MATERIALS")
 
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / f"guardian-{STAMP}-painted.blend"))   # never over the builder's blend
