@@ -27,7 +27,7 @@ from guardian_v3_lib import mesh_audit
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 opts = {"blend": "", "turnaround": "", "views": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8", "quality": "84",
-        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1"}
+        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1", "illus": "0"}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -248,7 +248,9 @@ def paint_object(ob, size, side_weight):
     # compose: painted where seen, procedural albedo elsewhere, blended by confidence
     conf = np.clip(wsum / 0.25, 0, 1)
     painted = acc / np.maximum(wsum, 1e-6)[..., None]
-    if opts["hp"] == "1":
+    if opts["illus"] == "1":   # anime (owner 2026-10-30): the authored tiles carry the pattern; no projection, no grain
+        out = alb[..., :3].copy()
+    elif opts["hp"] == "1":
         # the projected field is a contrast ratio: modulate the clean tile base with it
         # gentle, in log space: a ridge brightens the tile base by at most x1.7, a pit darkens it by at most
         # x0.53 (the earlier linear x1.6 factor blew ridges to white and pits to black)
@@ -260,7 +262,7 @@ def paint_object(ob, size, side_weight):
         # procedural pale bone rims (which follow the real hooks) are never darkened by paint
         # whose own hooks sit elsewhere
         out = np.maximum(alb[..., :3], blend)
-    if opts["tone"] == "1" and ob.name.startswith("Serpent"):   # the runtime measured the body, not the head
+    if opts["tone"] == "1" and opts["illus"] != "1" and ob.name.startswith("Serpent"):   # the runtime measured the body, not the head
         # match the body's tone distribution to the originals (runtime measurement, sRGB on the body):
         # p50 ~ (63,68,60), p92 ~ (160,187,144) -> linear luminance targets
         T50, T92 = 0.0519, 0.416
@@ -272,7 +274,7 @@ def paint_object(ob, size, side_weight):
             lum2 = a * np.power(np.maximum(lum, 1e-6), g)
             out = out * np.where(sel, lum2 / np.maximum(lum, 1e-6), 1.0)[..., None]
             log("TONE", "p50", round(float(p50), 4), "p92", round(float(p92), 4), "gamma", round(g, 3), "gain", round(a, 3))
-    elif opts["tone"] == "3" and ob.name.startswith("Serpent"):
+    elif opts["tone"] == "3" and opts["illus"] != "1" and ob.name.startswith("Serpent"):
         # three-point match of the body luminance to the originals as the coordinator reads them:
         # pits near-black (p30 -> sRGB 30), 35-45% of the area pale (p60 -> sRGB 125) and a bright top
         # decile (p92 -> sRGB 180); piecewise power law through the three anchors in log space
@@ -287,7 +289,7 @@ def paint_object(ob, size, side_weight):
             ly = np.where(lx > xs[2], ys[2] + (ys[2] - ys[1]) / (xs[2] - xs[1]) * (lx - xs[2]), ly)
             out = out * np.where(sel, np.exp(ly) / np.maximum(lum, 1e-6), 1.0)[..., None]
             log("TONE3", "atlas p30/p60/p92", round(float(a30), 4), round(float(a50), 4), round(float(a92), 4), "-> 0.0137/0.23/0.50")
-    if opts["tone"] == "3" and ob.name.startswith("Head"):
+    if opts["tone"] == "3" and opts["illus"] != "1" and ob.name.startswith("Head"):
         # v18: the head atlas gets its own three-point match (05's head: emerald pits, mint ridges)
         T = np.array([0.0120, 0.16, 0.44])
         lum = 0.2126 * out[..., 0] + 0.7152 * out[..., 1] + 0.0722 * out[..., 2]
@@ -302,7 +304,7 @@ def paint_object(ob, size, side_weight):
             log("TONE3-HEAD", "atlas p30/p60/p92", round(float(a30), 4), round(float(a50), 4), round(float(a92), 4))
     # v18 (owner: 顔まわりの色合い): pull the chroma toward 05's palette - deep emerald in the pits, pale mint on the
     # ridges - instead of neutral grey/white; luminance is kept, only the hue/saturation moves
-    strength = 0.85 if ob.name.startswith("Head") else 0.7   # 05: the pale parts of the whole body are mint, not white
+    strength = 1.0 if opts["illus"] == "1" else (0.85 if ob.name.startswith("Head") else 0.7)   # anime: flat two-colour palette
     lum = 0.2126 * out[..., 0] + 0.7152 * out[..., 1] + 0.0722 * out[..., 2]
     f = np.clip(lum / 0.45, 0, 1) ** 0.6
     dark_em = np.array([0.0065, 0.042, 0.019]); mint = np.array([0.30, 0.56, 0.335])
