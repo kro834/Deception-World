@@ -216,26 +216,33 @@ export function applyGuardianInkSurface(
   // describe the same lines. Line width is 1/8 of a cell.
   // The row coordinate bends harder toward the tip, so the two families sweep around the
   // bud and converge there like a sunflower's seed spirals; lens-shaped cells follow the flow.
-  float gH=uFaceRows*(gT*gT+.6*gT*gT*gT)/1.6;
-  float gA=uFaceCells*gU+gH,gB=uFaceCells*gU-gH;
-  float gU2=fract(gU+.5);
+  float gH=uFaceRows*(gT*gT+1.2*gT*gT*gT)/2.2;
+  // an azimuthal drift that dies toward the tip, so no segment stays straight
+  float gDrift=.05*(1.-gT)*sin(12.566371*gU);
+  float gUd=gU+gDrift;
+  float gA=uFaceCells*gUd+gH,gB=uFaceCells*gUd-gH;
+  float gU2=fract(gU+.5)+gDrift;
   float gA2=uFaceCells*gU2+gH,gB2=uFaceCells*gU2-gH;
   float gWa=min(fwidth(gA),fwidth(gA2)),gWb=min(fwidth(gB),fwidth(gB2));
   float gFa=fract(gA),gFb=fract(gB);
   float gDa=min(gFa,1.-gFa),gDb=min(gFb,1.-gFb);
   float gLineA=1.-smoothstep(.0625-gWa,.0625+gWa,gDa);
   float gLineB=1.-smoothstep(.0625-gWb,.0625+gWb,gDb);
-  float gFade=1.-smoothstep(.25,.6,max(gWa,gWb));
+  // The net fades smoothly into the tip glow before its cells could degenerate into stripes.
+  float gTip=smoothstep(.8,.96,gTa);
+  float gFade=(1.-smoothstep(.25,.6,max(gWa,gWb)))*(1.-gTip);
   float gLines=max(gLineA,gLineB)*gFade;
   float gDmin=min(gDa,gDb);
   // Each cell is darker at its centre and lighter toward its rim (an inner glow at the lines).
   float gCellShade=mix(1.,.42,smoothstep(.05,.42,gDmin)*gFade);
   diffuseColor.rgb=vec3(.008,.07,.025)*(1.-.7*gEdge);
-  vec3 gCells=vec3(.015,.15,.055)*(.4+.6*gTa)*gCellShade*(1.-.8*gEdge);
+  // The bud glows from within: the cells brighten toward the tip and the cap rises there, so
+  // the tip third blooms softly while the base stays a readable lattice.
+  vec3 gCells=vec3(.015,.15,.055)*(.3+.5*gTa+1.4*gTa*gTa*gTa)*gCellShade*(1.-.8*gEdge);
   vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gTa,3.));
   vec3 gRad=gCells*gPulse+gMint*gLines*gGrad*1.5*gPulse*(1.-.6*gEdge);
-  // The bud stays below the bloom threshold everywhere but the tip: a small white-green star.
-  gRad=min(gRad,vec3(1.4));
+  gRad+=vec3(.3,1.,.5)*gTip*.9*gPulse;
+  gRad=min(gRad,vec3(mix(1.3,2.4,smoothstep(.7,1.,gTa))));
   // a small star at the geometric tip only (the last 5% of the bud's length)
   float gStar=exp(-pow((1.-gTa)/.05,2.));
   totalEmissiveRadiance=gRad+vec3(.8,1.,.86)*gStar*(1.2+.5*pow(abs(cos(uFaceCells*3.1415927*gU)),6.))*gPulse;
@@ -446,6 +453,15 @@ if(gPainted>.5){
  // Region colours of the anime atlas (sRGB): membrane (10,25,14), head skin (36,55,41),
  // pale bone and scales (125,166,132): the threshold sits between the head skin and the bone.
  gBone=smoothstep(.06,.16,gLum);
+ #ifdef USE_MAP
+ // The anime tiles are about 42 % pale where 05 is about 21 %: the pale regions are eroded
+ // by their own blurred level, so only the cores of the ridges stay light.
+ vec2 gTs=vec2(textureSize(map,0));
+ vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
+ float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
+ float gBlurL=dot(textureLod(map,vMapUv,gLod+2.).rgb*diffuse,vec3(.2126,.7152,.0722));
+ gBone*=smoothstep(.22,.33,gBlurL);
+ #endif
 }else{
  // Vertex-colour parts: bone is pale OR grey-green (low saturation); ink is saturated green.
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
@@ -489,17 +505,18 @@ if(gVein>.001){
  // tones and recoloured from the family's palette; ridge or pit picks the palette.
  float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
  float gN=gIrr/uToonRange;
- float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN);
- // pits: deep emerald / emerald / mint-green. ridges and bone: mint shadow / mint / near-white mint.
- vec3 gPit=mix(mix(vec3(.004,.018,.007),vec3(.012,.05,.02),gMid),vec3(.035,.11,.05),gHi);
- vec3 gRdg=mix(mix(vec3(.13,.26,.14),vec3(.286,.466,.273),gMid),vec3(.46,.66,.46),gHi);
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN),gHiSkin=smoothstep(.66,.8,gN);
+ // skin: near-black emerald (8,20,12) / (20,46,30), a narrow lit band (40,80,55); ridges and
+ // bone: mint shadow / mint (146,182,143) / near-white mint.
+ vec3 gPit=mix(mix(vec3(.0026,.0072,.0038),vec3(.0084,.0273,.0144),gMid),vec3(.0213,.0821,.0395),gHiSkin);
+ vec3 gRdg=mix(mix(vec3(.11,.22,.12),vec3(.25,.42,.24),gMid),vec3(.36,.54,.36),gHi);
  vec3 gTone=mix(gPit,gRdg,gBone);
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
  // a soft inner light on jade-like bone, not a realistic subsurface
  gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
 #endif
- gTone+=uRimColor*gRimBand*mix(.26,.08,gBone)*uRimStrength*1.8;
+ gTone+=uRimColor*gRimBand*mix(.16,.06,gBone)*uRimStrength*1.8;
  reflectedLight.directDiffuse=gTone;
  reflectedLight.indirectDiffuse=vec3(0.);
  // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
