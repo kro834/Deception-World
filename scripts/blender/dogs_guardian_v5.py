@@ -320,12 +320,14 @@ def fiddlehead_path(base, direction, curl_toward, length, turns, a=0.36, n=None)
     return np.asarray(pts)
 
 
-def frond_path(controls, curl_len, curl_turns, side, roll=None, nrm_override=None):
+def frond_path(controls, curl_len, curl_turns, side, roll=None, nrm_override=None, tip_spiral=False):
     nrm = plane_normal(controls) if nrm_override is None else unit(V(nrm_override))
     base = resample(catmull(controls, 20), spacing=0.02)
     tang = unit(base[-1] - base[-3]); lateral = unit(np.cross(nrm, tang)) * side
     if roll is not None:
         curl = fiddlehead_path(base[-1], tang, lateral, curl_len, curl_turns, a=roll)
+    elif tip_spiral:   # v20e (05): the fan tip rolls into a small tight spiral of ~1.5 turns
+        curl = crosier_path(base[-1], tang, lateral, curl_len, turns=1.5, straight=0.05, bend_power=1.3)
     else:
         curl = crosier_path(base[-1], tang, lateral, curl_len, turns=max(curl_turns, 1.35), straight=0.10, bend_power=1.5)
     path = resample(np.concatenate([base[:-1], curl], axis=0), spacing=0.018)
@@ -414,7 +416,8 @@ for idx in range(len(FRONDS)):
         shift = tip - V(controls[0]); controls = [tuple(V(c) + shift) for c in controls]
     # cluster curls lie in the picture plane like 05's (their three controls are nearly collinear, so the fitted plane is not usable)
     path, nrm, lateral, s_base_end = frond_path(controls, cl, ct, side, roll=0.36 if (idx in CLUSTER_PARENT or widths[1] > 0.4) else None,
-                                                nrm_override=(0.0, 0.08, 1.0) if idx in CLUSTER_PARENT else None)
+                                                nrm_override=(0.0, 0.08, 1.0) if idx in CLUSTER_PARENT else None,
+                                                tip_spiral=(idx not in CLUSTER_PARENT and widths[1] <= 0.4))
     names = ["TentaclePivot_%02d" % idx, "Frond%02d_1" % idx, "Frond%02d_2" % idx]
     stations = add_chain("Frond%02d" % idx, path, 3, FINGER_PARENT[idx], names=names)
     FROND_DATA.append((idx, path, nrm, lateral, s_base_end, widths, stations))
@@ -789,6 +792,22 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
             mtail.ribbon(cp, (0.30 * length) * (1 - tc) ** 0.8 + 0.003, np.full(len(cp), 0.006), sides=5, color=mix(BONE, BONE_EDGE, 0.5), hint=nrm_s, mat=1)
         mtail.cur_w = None
     is_a = path is TAIL_A
+    # v20e (05): a thin pale fin-ridge runs along the tail's inner curve, opposite the spines, thinning to the tip
+    fin_pts = []; fin_h = []
+    for i in range(n):
+        t = i / (n - 1); tang = T[i]
+        side = unit(np.cross(tang, V((0, 0, 1)))); normal = unit(np.cross(side, tang))
+        if is_a:
+            u = min(1, max(0, (t - .40) / .45)); roll = math.pi * (u * u * (3 - 2 * u))
+            edge = side * math.cos(roll) + normal * math.sin(roll)
+        else:
+            edge = unit(V((0.75, -0.45, 0.35)) + side * 0.2)
+        h = (0.10 * radii[i] + 0.012) * (1 - 0.7 * t ** 2)
+        fin_pts.append(path[i] - edge * (radii[i] * 0.92 + h * 0.5)); fin_h.append(h)
+    fin_pts = np.asarray(fin_pts); fin_h = np.asarray(fin_h)
+    fin_nrm = np.asarray([unit(np.cross(T[i], fin_pts[i] - path[i])) for i in range(n)])
+    mtail.ribbon(fin_pts, fin_h, np.full(n, 0.006), sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=fin_nrm[n // 2], mat=1,
+                 weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st))
     lengths = [1.13, 1.31, 1.28, 1.15, 1.04, .95, .87, .80, .85, .90, .83, .72, .60, .46] if is_a else [.95, 1.05, .95, .80, .62, .45]
     for ii, (t, le) in enumerate(zip(np.linspace(.07 if is_a else .12, .89, spines), lengths)):
         i = int(t * (n - 1)); p = path[i]; tang = T[i]
@@ -924,8 +943,8 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         ws = np.array([base_w * (0.55 + 0.45 * (1 - t)) * (1 - 0.55 * max(0.0, (t - 0.75) / 0.25)) + 0.006 for t in arcp])
     elif big:   # v12's arc width; the end roll keeps a thick band that only thins inside the roll (05's biggest curl)
         ws = np.array([base_w * (0.36 + 0.64 * (1 - t) ** taper_exp) * (1 - 0.50 * max(0.0, (t - 0.85) / 0.15)) + 0.006 for t in arcp])
-    else:
-        ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
+    else:   # fan: thins into the tip spiral (v20e)
+        ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** taper_exp) * (1 - 0.90 * max(0.0, (t - 0.78) / 0.22)) + 0.006 for t in arcp])
     ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp])
     ts = ws * (0.30 if cluster else (0.36 if big else 0.26)) + 0.008   # flat dark ribbons; the fan is a thin band so its chain stands proud
     mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT, GLASS_MAT])
@@ -1000,17 +1019,26 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         i0 = min(n - 2, max(2, int(s_base_end * (n - 1))))
         s0 = np.sign(np.dot(B[i0], lateral)) or 1.0          # the concave side, constant along the RMF frame (no flips in the curl)
         E = B * s0
+        # v20e: each link is a rounded loop bulging out past the edge (outer lobe 0.22w, inner 0.16w, flat-topped so it
+        # reads round), pinched to a 0.07w waist where it crosses to the next link - a row of interlocking "2"/S hooks
         pts = []; wid = []; thk = []; wts = []
-        s_cur = float(arcm[2]); ph = 0.0
-        while s_cur < float(arcm[-1]) - 1e-6:
-            w = float(np.interp(s_cur, arcm, ws)); lam = max(0.03, 0.5 * w)
-            p = np.array([np.interp(s_cur, arcm, path[:, k]) for k in range(3)])
-            e = unit(np.array([np.interp(s_cur, arcm, E[:, k]) for k in range(3)]))
-            pts.append(p + e * (0.50 * w + 0.24 * w * math.sin(ph)))      # centred on the edge, loops 0.24w outside it
-            wid.append(w * (0.12 + 0.10 * abs(math.sin(ph))) + 0.004)      # fat at the loops, slimmer at the crossings
-            thk.append(0.30 * w + 0.006)                                    # proud of both faces of the 0.26w band
-            wts.append(chain_weights(s_cur / float(arcm[-1]), stations))
-            ds = lam / 10.0; s_cur += ds; ph += ds / lam * math.tau
+        s_link = float(arcm[2]); s_end = float(arcm[-1]); NS = 14
+        while True:
+            w0 = float(np.interp(s_link, arcm, ws)); lam = max(0.03, 0.5 * w0)
+            if s_link + lam > s_end:   # whole links only: no pile-up of clamped samples at the tip
+                break
+            for j in range(NS):
+                ph = math.tau * j / NS
+                s_cur = min(s_end, s_link + lam * (ph - 0.30 * math.sin(2 * ph)) / math.tau)   # slow at the lobe tops, quick at the waists
+                w = float(np.interp(s_cur, arcm, ws))
+                p = np.array([np.interp(s_cur, arcm, path[:, k]) for k in range(3)])
+                e = unit(np.array([np.interp(s_cur, arcm, E[:, k]) for k in range(3)]))
+                sn = math.sin(ph); lobe = (0.22 if sn >= 0 else 0.16) * w * math.copysign(abs(sn) ** 0.7, sn)
+                pts.append(p + e * (0.50 * w + lobe))
+                wid.append(w * (0.07 + 0.16 * abs(sn) ** 1.5) + 0.004)
+                thk.append(0.30 * w + 0.006)
+                wts.append(chain_weights(s_cur / s_end, stations))
+            s_link += lam
         mb.ribbon(np.asarray(pts), np.asarray(wid), np.asarray(thk), sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=nrm, bulge=1.0,
                   mat=1, weights_fn=lambda i2, t2, W=wts: W[min(i2, len(W) - 1)])
     # curl clusters: one more fiddlehead sprouting from the short straight part of each cluster curl, with its own knob row
