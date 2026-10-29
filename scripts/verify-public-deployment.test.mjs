@@ -324,8 +324,9 @@ const RAIN_CITY_ASSET_PATHS = [
   "/rain-city-materials/manifest.json",
 ];
 const DOGS_ARCHIVE_ASSET_PATHS = [
-  "/dogs-archive-20261028/guardian-v.glb",
-  "/dogs-archive-20261028/model-manifest.json",
+  // Owner (2026-10-29): v3 model and manifest in dogs-archive-20261029; decoders unchanged.
+  "/dogs-archive-20261029/guardian-v3.glb",
+  "/dogs-archive-20261029/model-manifest.json",
   "/dogs-archive-20261028/decoders/draco/draco_decoder.wasm",
   "/dogs-archive-20261028/decoders/draco/draco_wasm_wrapper.js",
   "/dogs-archive-20261028/decoders/draco/draco_decoder.js",
@@ -370,9 +371,10 @@ test("guardian release verification checks the model and local decoders without 
   for (const changed of DOGS_ARCHIVE_ASSET_PATHS)
     assert.equal((await run({ changed })).report.ok, false, changed);
   for (const unknown of [
-    "/dogs-archive-20261028/unknown.glb",
+    "/dogs-archive-20261029/unknown.glb",
+    "/dogs-archive-20261028/guardian-v.glb",
     "/dogs-archive-20261028/decoders/draco/unknown.js",
-    "/dogs-archive-20261028/../secret",
+    "/dogs-archive-20261029/../secret",
     ...["/extra", "?extra=1", "#extra", "%2fextra", "\n"].map(
       (suffix) => `${DOGS_ARCHIVE_ASSET_PATHS[0]}${suffix}`,
     ),
@@ -387,7 +389,7 @@ test("guardian release verification checks the model and local decoders without 
       unknown,
     );
     assert.ok(
-      seen.every((path) => !path.startsWith("/dogs-archive-20261028/")),
+      seen.every((path) => !path.startsWith("/dogs-archive-2026")),
       "invalid paths are rejected before fetch",
     );
   }

@@ -94,6 +94,58 @@ node scripts/blender/verify_guardian_release_decoder.mjs \
 最終SHAは `d6fd72c481157bd586383adca1b6dff799f524423e5002fd6e6901993e467272`。
 生成物と比較画像、5段階のskin検証は公開用ソースと分けてhandoffに保存する。
 
+## 2026-10-29 v3 器官再構築（配信: `public/dogs-archive-20261029/`）
+
+原画の語彙（骨の格子と暗い膜、小さな巻きの連鎖、扇状の平たい触手、埋まった顔、棘の尾）を
+器官ごとに作り直した。rig（GuardianV_Root／BodyPivot／HeadPivot／JawPivot／MouthSocket／MouthAim／
+TentaclePivot_00–10／NeckRig の 2 関節）、Rest／Exhale、頭の skin 彫刻は v2 のまま維持する。
+
+- 生成: `scripts/blender/guardian_v3_lib.py`（回転最小フレームの管・帯・crosier・対数螺旋・パッチ・頂点色）、
+  `scripts/blender/dogs_guardian_v3.py`（器官ごとの構築、`--organs` で部分再生成、`--export 1` で書き出し）、
+  `scripts/blender/dogs_guardian_v3_export.py`（v2 と同じ Rest／Exhale 注入と Draco 書き出し、manifest）、
+  `scripts/blender/deliver_guardian_v3.mjs`（配信フォルダーへ複製し manifest の識別子を書く）。
+  入力は前任の配信用 blend（`handoff/goal/ciel3d/model/source/guardian-v2-browser.blend`）。
+- 触手 11 本: 平たい墨色の帯、先端は対数螺旋のカール、内縁に crosier（シダの若芽型の小さな巻き）の連鎖。貫通穴は廃止。
+- 渦 3 つ: 隙間を埋める暗い膜の管を螺旋に巻き、外縁と両面に骨の弧（内側の溝へ向かって細く暗く）、
+  外縁に crosier の連鎖、中心に発光球（`Rune | v3 whorl core`、strength 0.7）。
+- 外殻: S 字面に一次肋（平たい骨の帯、前後の背骨で高く脇で低いシダ状の傾き）＋二次脈＋背面・側面の支柱と
+  斜材、くぼんだ膜セル（一部は本当の穴）、背面は穴の開いた淡い骨板、個体の左脇（+x）で各肋が巻いて終わる
+  稜、内部に暗い芯（透けない）。尾は節のある墨の管と太い棘。
+- 顔: 頭の表面に密着させた発光格子の葉（`face-lattice` テクスチャ、BLEND）。Head から skin の重みを転写し、
+  Exhale 中も頭に追従する。4 本の触角に珠の列（HeadPivot の子）。
+- 色: 役割ごとの頂点色（骨＝淡、墨＝黒緑、膜＝深緑）に実形状の半球 AO を 1 回乗算。ORM テクスチャは廃止し
+  粗さはスカラー（前任は ORM の青で金属度が入り、墨が環境を映して灰色だった）。
+- 配信: `guardian-v3.glb` 4,439,628 bytes（Draco、21 メッシュ、337,932 頂点、417,492 三角形、
+  埋め込み画像 3 枚＝顔格子 1、微細法線 2）。
+  復号器は `dogs-archive-20261028/decoders/` のまま。読込側の既定 URL と release identity、
+  verify-public-deployment の許可パス、model テストの既定フォルダーを v3 へ切り替えた。
+- 確認画像と原画比較: `handoff/goal/ciel3d/model/renders/`、`handoff/goal/ciel3d/model/compare/`。
+  差分の記録は `handoff/goal/ciel3d/model/gaps.md`、材質チャンネルは同 `delivery.md`。
+  原画と同等の造形に達したとは言わない。残差は gaps.md の末尾に記す。
+
+## 2026-10-29 v5 蛇体と骨格（配信: 同フォルダー `guardian-v3.glb`、manifest revision `v5`）
+
+利用者の指示「胴体は細長くヘビの様です。顔の部分と、右隣の胴体らしきものは1繋ぎで、蛇の尻尾が二股に分かれ、
+顔の横から手が生えた様な形です。今の様に巨大な胴体ではありません。」「様々なポーズができる様に」に従い、
+v3／v4 の大きな外殻を捨てて体のつくりを読み直した（`handoff/goal/ciel3d/model/anatomy-v4.md`）。
+
+- 形: 細い肋付きの胴が一本。上端は右上で太く密なとぐろ（原画の大渦、中心が発光）、顔の右隣を下り、
+  腰で二股の棘付きの尾（長い左下、短い右下）に分かれる。顔は短い首で胴につながる。頭の左横から腕が出て
+  頭上で二度巻き（原画の小渦・中渦）、掌から五本の指（扇の触手）が開く。頭の左下と首の右から太い腕。
+  肋は胴の前面を横切る骨の弧、背側に小さな巻きの稜、腹側に櫛状の棘、尾に長い棘。材質系と顔の発光は v3 のまま。
+- 骨格 `SerpentRig`（94 関節、skin 1 つ）: SpineRoot → SpineUp_00–15（とぐろへ）／SpineDown_00–09（分岐点へ）→
+  TailA_00–07／TailB_00–04、NeckBaseJoint → NeckHeadJoint → HeadPivot → JawPivot（＋MouthSocket／MouthAim）、
+  ArmL_00–09、ArmR_00–04、TentaclePivot_00–10 と各指 2 節。重みは生成経路の弧長で隣接 2 骨に滑らかに配分、
+  頭の sculpt は従来の重みを首末端骨と HeadPivot に付け替えた。頭の回転軸は v2 と同じ。
+- クリップ: `Rest`／`Exhale`（首・頭・顎の 4 骨のみ。Rest に対する additive として重ねればどのポーズからでも吐炎）／
+  `Coil`／`Rear`／`Swim`（4 秒ループ）。契約は `handoff/goal/ciel3d/model/delivery.md` と manifest（`poseClips`, `breath`, `nodes`）。
+- 生成: `scripts/blender/dogs_guardian_v5.py`（`guardian_v3_lib.py` に重み付きの管・帯・patch を追加）。
+  配信 4,509,824 bytes（Draco、19 メッシュ、Blender 194,999 頂点／386,404 三角形、埋め込み画像 3 枚）。
+  現行ページは変更なしで動作（Rest/Exhale の crossfade、MouthSocket／MouthAim は骨ノード）。
+- 比較: `handoff/goal/ciel3d/model/compare/32-v5-serpent-turnaround.jpg`（原画／r9／v5 の 4 面＋¾）、
+  `33-v5-poses.jpg`（5 ポーズ × 正面・左）、`34-v5-page.jpg`（実ページ）。原画同等とは言わない。
+- `dogs_guardian_v4.py` は r9 形状＋v3 材質の中間案（コーディネーター講評用）。記録として残す。
+
 ## 操作と読み込み
 
 ドラッグで回転、ピンチまたはホイールで拡大縮小。キャンバスにフォーカスすると
