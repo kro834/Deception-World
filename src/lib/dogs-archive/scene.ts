@@ -1,12 +1,21 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
-import { createBreathVolume, createMantle } from "./fire.ts";
+import { FXAAPass } from "three/addons/postprocessing/FXAAPass.js";
+import { createBreathJet, createFlameMantle, FIRE_TIERS } from "./fire.ts";
+import { createInkBackdrop } from "./backdrop.ts";
+import { createInkEnvironment } from "./environment.ts";
+import { createNoiseVolume, NOISE_VOLUME_BYTES } from "./noise-volume.ts";
+import { createInkGradePass } from "./post.ts";
+import {
+  applyGuardianInkSurface,
+  createGuardianSurfaceUniforms,
+  type GuardianSurfaceHandles,
+} from "./surface.ts";
 import {
   createGuardianSculptureLighting,
   prepareGuardianMouthSpill,
@@ -16,6 +25,20 @@ import {
 import { GuardianDracoLoader } from "./draco.ts";
 
 export type GuardianLightingProfile = "legacy" | "sculpture";
+/** Counts, ray-march steps and pixel ratio only. Every tier keeps the full motion. */
+export type GuardianQualityTier = "high" | "mobile" | "low";
+
+export function detectGuardianQualityTier(nav: Navigator, mobile: boolean): GuardianQualityTier {
+  if (!mobile) return "high";
+  const cores = nav.hardwareConcurrency || 0;
+  const memory = (nav as Navigator & { deviceMemory?: number }).deviceMemory;
+  const connection = (nav as Navigator & { connection?: { saveData?: boolean } }).connection;
+  const constrained =
+    connection?.saveData === true ||
+    (memory !== undefined && memory <= 3) ||
+    (cores > 0 && cores <= 4 && /Android/i.test(nav.userAgent));
+  return constrained ? "low" : "mobile";
+}
 
 export type GuardianStatus = "loading" | "ready" | "error";
 export type GuardianScene = {
@@ -36,6 +59,7 @@ type Options = {
   manifestUrl?: string | null;
   lightingProfile?: GuardianLightingProfile;
   lightingPalette?: GuardianLightingPalette;
+  qualityTier?: GuardianQualityTier;
   effects?: boolean;
   diagnostics?: boolean;
 };
@@ -76,7 +100,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const canvas = document.createElement("canvas");
   canvas.className = "dogs-viewer__canvas";
   canvas.dataset.engineVersion = preserveAuthoredMaterials
-    ? "guardian-20261028-v2-skin"
+    ? "guardian-20261029-ink"
     : "guardian-20261028-r14";
   canvas.dataset.lightingProfile = "legacy";
   canvas.tabIndex = 0;
@@ -86,41 +110,49 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     "第五の犬の立体模型。ドラッグで全方向へ回転、ピンチで拡大。矢印キーで回転、プラスとマイナスで拡大縮小、Homeで視点を戻す。",
   );
   const mobile = matchMedia("(pointer: coarse)").matches;
+  const tier = options.qualityTier ?? detectGuardianQualityTier(navigator, mobile);
+  const fireTier = FIRE_TIERS[tier];
+  canvas.dataset.qualityTier = tier;
   const motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
   let reducedMotion = motionQuery.matches;
+  // Every frame goes through the composer, so the default framebuffer needs no multisampling.
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: false,
-    antialias: !mobile,
+    antialias: false,
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.18;
+  // Neutral keeps the fire's pale greens green; ACES rolled every wash to cream-white.
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 1.12;
   host.appendChild(canvas);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#020906");
-  scene.fog = new THREE.FogExp2("#04110b", 0.028);
+  scene.fog = new THREE.FogExp2("#03100a", 0.02);
+  const noise = createNoiseVolume();
+  const backdrop = createInkBackdrop(noise);
+  scene.add(backdrop.mesh);
   const camera = new THREE.PerspectiveCamera(36, 1, 0.08, 120);
-  const viewDirection = new THREE.Vector3(9.5, 3, 14.8).normalize();
+  const viewDirection = new THREE.Vector3(9.5, 2.3, 14.8).normalize();
   const viewRight = new THREE.Vector3().crossVectors(camera.up, viewDirection).normalize();
   const viewUp = new THREE.Vector3().crossVectors(viewDirection, viewRight).normalize();
   const viewBounds = new THREE.Box3(new THREE.Vector3(-3, -3.4, -2), new THREE.Vector3(3, 3.4, 2));
   const fitCorner = new THREE.Vector3();
-  const environmentScene = new RoomEnvironment();
-  const environmentGenerator = new THREE.PMREMGenerator(renderer);
-  let environmentTarget = environmentGenerator.fromScene(environmentScene, 0.06);
+  let environmentTarget = createInkEnvironment(renderer);
   scene.environment = environmentTarget.texture;
   scene.environmentIntensity = 0.34;
-  environmentScene.dispose();
-  environmentGenerator.dispose();
   const composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.46, 0.65, 1.1);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.38, 0.8, 0.9);
   const output = new OutputPass();
+  const antialiasPass = tier === "low" ? null : new FXAAPass();
+  const grade = createInkGradePass();
   composer.addPass(renderPass);
   composer.addPass(bloom);
   composer.addPass(output);
+  if (antialiasPass) composer.addPass(antialiasPass);
+  composer.addPass(grade);
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.065;
@@ -151,8 +183,19 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   legacyLights.add(side);
   const breathLight = new THREE.PointLight(0x79ff8d, 0, 12, 1.6);
   scene.add(breathLight);
-  const breath = createBreathVolume(mobile);
+  // A small light inside the head keeps the lattice's glow anchored in the skin around it.
+  const faceLight = new THREE.PointLight(0x8dffb0, 0, 2.2, 2);
+  faceLight.name = "GuardianFaceGlow";
+  scene.add(faceLight);
+  const breath = createBreathJet(noise, fireTier);
   scene.add(breath.mesh);
+  const surfaceUniforms = createGuardianSurfaceUniforms(noise);
+  let inkSurface: GuardianSurfaceHandles | null = null;
+  const rimWorld = new THREE.Vector3(),
+    keyWorld = new THREE.Vector3(),
+    facePosition = new THREE.Vector3();
+  const bodyBounds = new THREE.Box3(),
+    floatingInverse = new THREE.Matrix4();
   const surfaceTime = { value: 0 },
     surfaceStrength = { value: 0 };
   let model: THREE.Object3D | null = null;
@@ -170,7 +213,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     morphMeshes = 0;
   let animationSummary: { name: string; tracks: number }[] = [];
   if (options.diagnostics) renderer.info.autoReset = false;
-  let mantle: ReturnType<typeof createMantle> | null = null;
+  let mantle: ReturnType<typeof createFlameMantle> | null = null;
   let mixer: THREE.AnimationMixer | null = null;
   let restAction: THREE.AnimationAction | null = null;
   let exhaleAction: THREE.AnimationAction | null = null;
@@ -276,8 +319,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           const depth = fitCorner.dot(viewDirection);
           distance = Math.max(
             distance,
-            Math.abs(fitCorner.dot(viewRight)) / (tanH * 0.82) + depth,
-            Math.abs(fitCorner.dot(viewUp)) / (tanV * 0.82) + depth,
+            Math.abs(fitCorner.dot(viewRight)) / (tanH * 0.9) + depth,
+            Math.abs(fitCorner.dot(viewUp)) / (tanV * 0.9) + depth,
           );
         }
     distance = Math.max(8, distance);
@@ -379,7 +422,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         direction.set(0, -0.12, 1).transformDirection(floating.matrixWorld);
       }
       const effectStrength = options.effects === false ? 0 : strength;
-      breath.update(time, effectStrength, origin, direction);
+      breath.update(time, effectStrength, origin, direction, dpr);
       canvas.dataset.mouthDirection = direction
         .toArray()
         .map((value) => value.toFixed(3))
@@ -391,11 +434,45 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           .map((value) => value.toFixed(4))
           .join(",");
       breathLight.position.copy(origin).addScaledVector(direction, 0.5);
-      breathLight.intensity = effectStrength * 7.5;
-      mantle?.update(time, Math.max(effectStrength, anticipation * 0.2), dpr);
+      breathLight.intensity = effectStrength * 9;
+      facePosition
+        .copy(origin)
+        .addScaledVector(direction, -0.3)
+        .addScaledVector(THREE.Object3D.DEFAULT_UP, 0.4);
+      faceLight.position.copy(facePosition);
+      faceLight.intensity =
+        0.9 + 0.5 * Math.sin(time * 1.35) + anticipation * 2.2 + effectStrength * 1.4;
+      inkSurface?.update(time, effectStrength, anticipation);
     }
     controls.update();
     sculptureLighting?.update(time, pose);
+    camera.updateMatrixWorld();
+    if (model) {
+      const effectStrength = options.effects === false ? 0 : strength;
+      mantle?.update(time, effectStrength, anticipation, dpr, camera);
+      backdrop.update(
+        time,
+        effectStrength,
+        anticipation,
+        camera,
+        bodyBounds,
+        floating.matrixWorld,
+        origin,
+        direction,
+      );
+      surfaceUniforms.uTime.value = time;
+      surfaceUniforms.uStrength.value = effectStrength;
+      surfaceUniforms.uAnticipation.value = anticipation;
+      if (sculptureLighting) {
+        sculptureLighting.rimDirection(rimWorld);
+        sculptureLighting.keyDirection(keyWorld);
+      } else {
+        rimWorld.set(-6, 3, -7).normalize();
+        keyWorld.set(5, 8, 8).normalize();
+      }
+      surfaceUniforms.uRimDir.value.copy(rimWorld).transformDirection(camera.matrixWorldInverse);
+      surfaceUniforms.uKeyDir.value.copy(keyWorld).transformDirection(camera.matrixWorldInverse);
+    }
     if (options.diagnostics) renderer.info.reset();
     const submitStarted = captureFirstFrame ? performance.now() : 0;
     composer.render();
@@ -414,13 +491,22 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     if (!width || !height) return;
     dpr = Math.min(
       devicePixelRatio || 1,
-      mobile ? 1.4 : 1.75,
-      Math.sqrt(1850000 / (width * height)),
+      tier === "low" ? 1.2 : mobile ? 1.4 : 1.75,
+      Math.sqrt((tier === "low" ? 1200000 : 1850000) / (width * height)),
     );
     renderer.setPixelRatio(dpr);
     renderer.setSize(width, height, false);
     composer.setPixelRatio(dpr);
     composer.setSize(width, height);
+    backdrop.setSize(width * dpr, height * dpr);
+    grade.uniforms.uResolution.value.set(width * dpr, height * dpr);
+    // Resource estimate for device reports: two half-float composer targets plus the depth
+    // buffer, the bloom mip chain, the shadow map and the noise volume. Not a driver measure.
+    const pixels = Math.round(width * dpr) * Math.round(height * dpr);
+    const shadowSide = tier === "high" ? 1536 : 768;
+    canvas.dataset.renderTargetBytes = String(
+      pixels * (2 * 8 + 4) + 256 * 256 * 8 * 10 + shadowSide * shadowSide * 8 + NOISE_VOLUME_BYTES,
+    );
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     if (!userOrbit) resetView();
@@ -515,11 +601,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     try {
       // A render-target environment has no CPU pixels to upload after context
       // loss. Rebuild it rather than silently resuming with black reflections.
-      const room = new RoomEnvironment(),
-        generator = new THREE.PMREMGenerator(renderer);
-      const nextEnvironment = generator.fromScene(room, 0.06);
-      room.dispose();
-      generator.dispose();
+      const nextEnvironment = createInkEnvironment(renderer);
       environmentTarget.dispose();
       environmentTarget = nextEnvironment;
       scene.environment = environmentTarget.texture;
@@ -629,6 +711,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       floating.add(model);
       floating.updateMatrixWorld(true);
       viewBounds.setFromObject(model);
+      // Bounds in the floating root's space, so the backdrop's fire follows the float.
+      bodyBounds.copy(viewBounds).applyMatrix4(floatingInverse.copy(floating.matrixWorld).invert());
       if (!userOrbit) resetView();
       mouth = model.getObjectByName("MouthSocket");
       aim = model.getObjectByName("MouthAim");
@@ -721,6 +805,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       }
       canvas.dataset.poseContract = poseSource;
       syncLightingModel();
+      inkSurface = applyGuardianInkSurface(model, surfaceUniforms);
       let triangles = 0,
         meshes = 0;
       const gpuAttributes = new Set<THREE.BufferAttribute | THREE.InterleavedBuffer>();
@@ -772,11 +857,9 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       canvas.dataset.meshes = String(meshes);
       canvas.dataset.triangles = String(Math.round(triangles));
       canvas.dataset.source = "blender-glb";
-      if (options.effects !== false)
-        mantle = createMantle(model, mobile, {
-          suppressFaceEmission: preserveAuthoredMaterials,
-          excludeDeformingNeck: preserveAuthoredMaterials,
-        });
+      canvas.dataset.geometryBytes = String(geometryBytesEstimated);
+      canvas.dataset.materialTextureBytes = String(Math.round(materialTextureBytesEstimated));
+      if (options.effects !== false) mantle = createFlameMantle(model, noise, fireTier);
       loading.readyMs = performance.now() - bootStartedAt;
       loading.phase = "ready";
       captureFirstFrame = true;
@@ -827,6 +910,12 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         assetBytes: Number(canvas.dataset.assetBytes ?? 0),
         lightingProfile,
         lightingPalette,
+        qualityTier: tier,
+        fireTier,
+        noiseVolumeBytes: NOISE_VOLUME_BYTES,
+        inkSurface: inkSurface
+          ? { patched: inkSurface.patched, families: inkSurface.families }
+          : null,
         mobile,
         dpr,
         poseSource,
@@ -887,10 +976,18 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       sculptureLighting = null;
       restoreMouthSpill?.();
       restoreMouthSpill = null;
+      mantle?.dispose();
+      mantle = null;
+      inkSurface = null;
+      breath.dispose();
+      backdrop.dispose();
       disposeObject(scene);
+      noise.dispose();
       environmentTarget.dispose();
       bloom.dispose();
       output.dispose();
+      antialiasPass?.dispose();
+      grade.dispose();
       renderPass.dispose();
       composer.dispose();
       renderer.renderLists.dispose();

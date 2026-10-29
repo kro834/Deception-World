@@ -123,7 +123,7 @@ export function prepareGuardianSurfaces(model: THREE.Object3D): GuardianSurfaceA
         vertexColors: material.vertexColors,
       });
       material.envMapIntensity =
-        family === "skin" ? 0.28 : family === "cavity" ? 0.1 : family === "bone" ? 0.58 : 0.4;
+        family === "skin" ? 0.42 : family === "cavity" ? 0.1 : family === "bone" ? 0.85 : 0.4;
       // GLTFLoader already assigns NoColorSpace to normal/AO/ORM and preserves
       // texCoord + KHR_texture_transform. Do not retag these or generate UVs.
       material.needsUpdate = true;
@@ -148,12 +148,15 @@ export function createGuardianSculptureLighting(
   // Three r186 removed PCFSoftShadowMap; PCFShadowMap now uses a soft disk.
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.shadowMap.autoUpdate = false;
-  scene.environmentIntensity = 0.22;
+  scene.environmentIntensity = 0.18;
   const root = new THREE.Group();
   root.name = "GuardianSculptureLightRig";
   floating.add(root);
-  const hemi = new THREE.HemisphereLight(0xb8cbbf, 0x050a07, 0.38);
-  const key = new THREE.DirectionalLight(0xd7e5cf, 3.4);
+  // The paintings' light: a dark ink sky over a fire bank below, a pale key from above and in
+  // front, saturated green rims from behind where the fire is. The creature stays the darkest
+  // element of the picture. Only the key casts shadows.
+  const hemi = new THREE.HemisphereLight(0x4a5650, 0x0c2a14, 0.34);
+  const key = new THREE.DirectionalLight(0xe6efe7, 2.3);
   key.position.set(5.8, 7.6, 6.4);
   key.target.position.set(0, 0.15, 0);
   key.castShadow = true;
@@ -163,11 +166,13 @@ export function createGuardianSculptureLighting(
   key.shadow.bias = -0.000025;
   key.shadow.normalBias = options.normalBias ?? 0.004;
   key.shadow.autoUpdate = false;
-  const rim = new THREE.DirectionalLight(0x4aa879, 1.55);
-  rim.position.set(-5.5, 2.8, -6.8);
-  const fill = new THREE.DirectionalLight(0x7999ad, 0.32);
+  const rim = new THREE.DirectionalLight(0x39d977, 3.4);
+  rim.position.set(-5.5, -1.5, -7);
+  const rimRight = new THREE.DirectionalLight(0x2fb765, 1.4);
+  rimRight.position.set(6.5, 1.5, -6.5);
+  const fill = new THREE.DirectionalLight(0x3b5a66, 0.22);
   fill.position.set(-6, 0.5, 3.5);
-  root.add(hemi, key, key.target, rim, fill);
+  root.add(hemi, key, key.target, rim, rimRight, fill);
   let palette: GuardianLightingPalette = options.palette ?? "forest";
   const setPalette = (next: GuardianLightingPalette) => {
     palette = next;
@@ -175,22 +180,28 @@ export function createGuardianSculptureLighting(
       // Similar linear luminance to the forest rig. Read authored albedo
       // rather than painting every dielectric highlight with green light.
       hemi.color.set(0xc3c6c8);
+      hemi.groundColor.set(0x1a1c1b);
       hemi.intensity = 0.38;
       key.color.set(0xf1eadf);
       key.intensity = 3.08;
       rim.color.set(0xb4c3d0);
       rim.intensity = 0.9;
+      rimRight.color.set(0x9fb0ba);
+      rimRight.intensity = 0.5;
       fill.color.set(0x88939f);
       fill.intensity = 0.32;
     } else {
-      hemi.color.set(0xb8cbbf);
-      hemi.intensity = 0.38;
-      key.color.set(0xd7e5cf);
-      key.intensity = 3.4;
-      rim.color.set(0x4aa879);
-      rim.intensity = 1.55;
-      fill.color.set(0x7999ad);
-      fill.intensity = 0.32;
+      hemi.color.set(0x4a5650);
+      hemi.groundColor.set(0x0c2a14);
+      hemi.intensity = 0.34;
+      key.color.set(0xe6efe7);
+      key.intensity = 2.3;
+      rim.color.set(0x39d977);
+      rim.intensity = 3.4;
+      rimRight.color.set(0x2fb765);
+      rimRight.intensity = 1.4;
+      fill.color.set(0x3b5a66);
+      fill.intensity = 0.22;
     }
   };
   setPalette(palette);
@@ -204,7 +215,8 @@ export function createGuardianSculptureLighting(
   const meshState = new Map<THREE.Mesh, [boolean, boolean]>();
   const bounds = new THREE.Box3(),
     corner = new THREE.Vector3(),
-    center = new THREE.Vector3();
+    center = new THREE.Vector3(),
+    worldCentre = new THREE.Vector3();
 
   const fitShadow = () => {
     if (!model) return;
@@ -297,6 +309,18 @@ export function createGuardianSculptureLighting(
     },
     invalidate() {
       dirty = true;
+    },
+    /** World-space direction from the creature toward the main rim light. */
+    rimDirection(target: THREE.Vector3) {
+      rim.getWorldPosition(target);
+      key.target.getWorldPosition(worldCentre);
+      return target.sub(worldCentre).normalize();
+    },
+    /** World-space direction from the creature toward the key light. */
+    keyDirection(target: THREE.Vector3) {
+      key.getWorldPosition(target);
+      key.target.getWorldPosition(worldCentre);
+      return target.sub(worldCentre).normalize();
     },
     restoreAfterContextLoss() {
       if (disposed) return;
