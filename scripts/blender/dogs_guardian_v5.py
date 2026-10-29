@@ -105,6 +105,8 @@ def glass_material(name, rgb=(0.188, 0.578, 0.262)):
 
 
 GLASS_MAT = glass_material("Glass | arm ladder")
+HORN_MAT = glass_material("Horn | face crown", rgb=(0.0037, 0.0070, 0.0050))   # sRGB ~(12,20,16); roughness set below
+HORN_MAT.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.25
 set_principled(INK_MAT, Roughness=0.58); set_principled(BONE_MAT, Roughness=0.66)
 if opts["tiles"] == "1":   # budget: the micro normals (193 + 216 KB) are not worth it once the tiles and the atlas carry the detail
     for m_ in (INK_MAT, BONE_MAT):
@@ -392,7 +394,8 @@ nb = add_bone("NeckBaseJoint", tuple(NECK[0]), tuple(NECK[len(NECK) // 2]), "Spi
 add_bone("NeckHeadJoint", tuple(NECK[len(NECK) // 2]), tuple(NECK[-1]), "NeckBaseJoint", roll_z=neck_roll(NECK[len(NECK) // 2], NECK[-1]))
 add_bone("HeadPivot", None, None, "NeckHeadJoint", matrix=NEW_H, length=0.12)
 add_bone("JawPivot", None, None, "HeadPivot", matrix=NEW_H @ JAW_L, length=0.08)
-add_bone("MouthSocket", None, None, "HeadPivot", matrix=NEW_H @ SOCKET_L, length=0.04)
+TIP_B = ((OLD_H @ P((0.0, -1.0, 0.0))) - (OLD_H @ P((0.0, 0.0, 0.0)))).normalized()   # the bud's tip direction (body space)
+add_bone("MouthSocket", None, None, "HeadPivot", matrix=Matrix.Translation(TIP_B * 0.35) @ NEW_H @ SOCKET_L, length=0.04)
 add_bone("MouthAim", None, None, "HeadPivot", matrix=NEW_H @ AIM_L, length=0.04)
 NECK_STATIONS = [("NeckBaseJoint", 0.25), ("NeckHeadJoint", 0.75)]
 ARML = add_chain("ArmL", ARM_L, 10, "NeckHeadJoint")
@@ -461,20 +464,22 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
     def dark_col(i, t, j, a):
         g = glow_fn(i) if glow_fn else 0.0
         if TILES:   # the tile carries the colour; the vertex colour is only an AO/glow multiplier
-            return mix((0.92, 1.0, 0.92), (0.75, 1.0, 0.80), g)
+            return mix((0.92, 1.0, 0.92) if not paired else (0.50, 0.68, 0.54), (0.75, 1.0, 0.80), g)   # paired: recessed, darker
         c = mix(WALL_DARK, WALL_MID, 0.25 + 0.75 * max(0.0, math.sin(a)) ** 1.4)
         return mix(c, GLOW, g * 0.6)
     f0 = len(mb.f)
-    mb.tube(path, radii, sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02,
+    mb.tube(path, radii * (0.86 if paired else 1.0), sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02,
             uv_fn=uv_override if uv_override is not None else (tube_uv(arc, radii, sides) if TILES else (lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0))))
     if glow_fn is not None:   # rings deep in the glow use the emissive core material
         for i in range(n - 1):
             if glow_fn(i) > 0.5:
                 for j in range(sides):
                     mb.fm[f0 + i * sides + j] = mat_glow
-    if paired:   # a dark spine along the front face; the paired ribs grow from it at each station
+    if paired:   # 05: a pale bone spine along the front face; the paired ribs grow from it at each station
         spine = np.asarray([path[i] + Nn[i] * (radii[i] * 0.96) for i in range(n)])
-        mb.tube(spine, 0.06 * radii + 0.004, sides=6, flat=0.7, color=(0.02, 0.045, 0.025), hint=hint, weights_fn=wf, mat=mat_bone, taper_end=True)
+        srad = 0.075 * radii + 0.005
+        mb.tube(spine, srad, sides=6, flat=0.7, color_fn=lambda a1, t1, b1, c1: mix(BONE, BONE_EDGE, 0.45 + 0.4 * max(0.0, math.cos(c1))), hint=hint,
+                weights_fn=wf, mat=mat_bone, taper_end=True, uv_fn=tube_uv(arc, srad, 6))
     last = -1.0; count = 0
     for i in range(2, n - 2):
         sp = (spacing[0] * radii[i] + spacing[1]) * (1 + 0.18 * noise1(count * 1.9, 23))
@@ -502,15 +507,20 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
                 return mix(mix(WALL_DARK, c, 0.2 + 0.8 * rim ** 1.3), GLOW, g * 0.5)
             mb.tube(ring, height * prof, sides=7, flat=halfw / height, color_fn=rib_col, hint=flow, cap=True, mat=mat_glow if g > 0.5 else mat_bone)
         if paired and r > 0.03:
-            # paired ribs: from the spine, curving outward and sweeping toward the tail, tapering
+            # 05 (crops/face-neck.jpg): a pale fern frond / fish skeleton - broad flat ribs with paler rims curve outward
+            # from the spine and sweep back; the recessed dark membrane between them reads as oval holes.
+            # AuthoredUV on the ribs: u = body arc (m / TILE_M) + 0.5 x the rib's own arc, v = around the rib section.
             for side in (1, -1):
-                p0 = path[i] + front * (r * 0.92)
-                p1 = path[i] + (front * math.cos(0.75) + lat * (side * math.sin(0.75))) * (r * 1.04) + flow * (0.35 * sp)
-                p2 = path[i] + (front * math.cos(1.5) + lat * (side * math.sin(1.5))) * (r * 1.0) + flow * (0.95 * sp)
-                rp = catmull([p0, p1, p2], 6)
-                rr = (0.17 * sp + 0.004) * (1 - np.linspace(0, 1, len(rp))) ** 0.7 + 0.004
-                mb.tube(rp, rr, sides=7, flat=0.65, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.5), BONE_EDGE, (1 - t1) ** 0.6),
-                        hint=front, mat=mat_bone, taper_end=True)
+                p0 = path[i] + front * (r * 0.95)
+                p1 = path[i] + (front * math.cos(0.6) + lat * (side * math.sin(0.6))) * (r * 1.05) + flow * (0.25 * sp)
+                p2 = path[i] + (front * math.cos(1.3) + lat * (side * math.sin(1.3))) * (r * 1.04) + flow * (0.70 * sp)
+                p3 = path[i] + (front * math.cos(1.65) + lat * (side * math.sin(1.65))) * (r * 0.98) + flow * (1.0 * sp)
+                rp = resample(catmull([p0, p1, p2, p3], 8), spacing=max(0.012, sp * 0.08))
+                tr = np.linspace(0, 1, len(rp))
+                rw = (0.42 * sp + 0.006) * (0.45 + 0.55 * np.sin(np.pi * np.clip(tr * 0.85 + 0.1, 0, 1)) ** 0.6) * (1 - 0.5 * tr ** 2) + 0.005
+                rth = 0.008 + 0.04 * sp * (1 - tr)   # flat blades
+                mb.ribbon(rp, rw, rth, sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE, BONE_EDGE, 0.2), BONE_EDGE, abs(math.cos(c1)) ** 2.0),
+                          hint=front, mat=mat_bone, uv_fn=lambda i2, t2, j2, a2, u0=arc[i] / TILE_M: (u0 + t2 * 0.5, j2 / 8.0))
         # crescent scales: hooked curls lying on the surface across the front, curling with the flow
         if scales and r > 0.03:
             for k in range(scales):
@@ -528,9 +538,16 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
         if cd is not None and r > 0.03:
             big = count % 2 == 0
             hook_len = (sp * (3.6 if big else 2.4) + 0.06) * (1 + 0.12 * noise1(count * 2.1, 17)) * crest_scale
-            mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, (sp * (0.42 if big else 0.30) + 0.006) * (0.75 if crest_scale > 1 else 1.0), turns=1.05,
-                       straight=0.10, sides=6, color_root=mix(BONE_ROOT, BONE, 0.3), color_tip=mix(BONE_EDGE, GLOW, g),
-                       hint=unit(np.cross(cd, flow)), mat=mat_glow if g > 0.5 else mat_bone, bend_power=1.45)
+            if paired:   # 05: pale flame-shaped curling crests along the dorsal edge, flat in the plane of the hook
+                cp = crosier_path(path[i] + cd * (r * 0.9), cd, flow, hook_len, turns=0.85, straight=0.15, bend_power=1.5)
+                tc = np.linspace(0, 1, len(cp))
+                fw = hook_len * (0.34 if big else 0.26) * np.sin(np.pi * np.clip(tc, 0, 1) ** 0.65) ** 0.7 + 0.006
+                mb.ribbon(cp, fw, fw * 0.22 + 0.004, sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE, BONE_EDGE, 0.3), BONE_EDGE, abs(math.cos(c1)) ** 2.5),
+                          hint=unit(np.cross(cd, flow)), mat=mat_bone, uv_fn=lambda i2, t2, j2, a2, u0=arc[i] / TILE_M: (u0 + t2 * 0.6, j2 / 8.0))
+            else:
+                mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, (sp * (0.42 if big else 0.30) + 0.006) * (0.75 if crest_scale > 1 else 1.0), turns=1.05,
+                           straight=0.10, sides=6, color_root=mix(BONE_ROOT, BONE, 0.3), color_tip=mix(BONE_EDGE, GLOW, g),
+                           hint=unit(np.cross(cd, flow)), mat=mat_glow if g > 0.5 else mat_bone, bend_power=1.45)
         if comb_fn is not None:
             cm = comb_fn(i)
             if cm is not None:
@@ -593,11 +610,12 @@ segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, b
                glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.6,
                uv_override=(lambda i, t, j, a: (U_COIL[i], (1 - abs(2 * j / 12 - 1)) * PER_COIL / 2)) if TILES else None)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
-               lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
-               ribs=False, paired=True, scales=1, scale_size=0.8)
+               lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.30, 0.012), comb_fn=lambda i: body_comb(i + i_split),
+               ribs=False, paired=True, scales=0, mat_dark=3)
 # neck
 NECK_R = np.array([lerp(0.21, 0.16, t) for t in np.linspace(0, 1, len(NECK))])
-segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: None, ribs=True, crest=False, spacing=(0.55, 0.02), rib_scale=0.8, mat_dark=3)
+segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: unit(V((0.0, 1.0, 0.15))), ribs=False, crest=True, paired=True,
+               spacing=(0.30, 0.012), mat_dark=3)   # 07: the neck behind the head is the same fern skeleton with dorsal flame crests
 # --- subtle dorsal lattice (06/07/08): an irregular bone net close around the back and the +x flank of
 # the ribbed body, with flame fins; it never reaches in front of the ribs, so the front keeps v12's read
 desc = MAIN[i_split:]; n_d = len(desc)
@@ -637,7 +655,7 @@ def hole(u, v):
 mshield.patch(grid, color=(0.85, 0.95, 0.85) if TILES else mix(WALL_DARK, WALL_MID, 0.3), mat=0, skip_fn=hole)
 for vi in range(len(mshield.v)):
     mshield.vw[vi] = chain_weights((vi // NV) / (NU - 1), st_desc)
-RIDGE = mix(BONE_ROOT, BONE, 0.55)
+RIDGE = mix(BONE, BONE_EDGE, 0.3)   # 08: pale ridges framing the lattice holes
 
 
 def keep_bar(seed):
@@ -719,7 +737,7 @@ print("TAILS_DONE", round(time.time() - START, 1), flush=True)
 
 # --- arms (coiled left arm with the fan hand, right arm to the paddle)
 marm = MeshBuilder("Arms | coiled arms", body, [CURL_MAT, BONE_MAT, CORE_MAT])
-for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62, 0.80, 0.72)), V((-0.43, 1.53, 0.40)))), (ARM_R, ARMR, 0.11, 0.14, ())):
+for path, stations, r0, r1, glow_centre in ((ARM_R, ARMR, 0.11, 0.14, ()),):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = np.array([lerp(r0, r1, t) for t in tt]) * (1 + 0.04 * np.array([noise1(t * 30, 4) for t in tt]))
     for c in glow_centre:   # thinner as the arm winds into each coil centre, so the turns fill the spiral
@@ -743,6 +761,44 @@ for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62
         return g
     segmented_tube(marm, path, radii, stations, arm_crest, arc_ext=90, spacing=(0.45, 0.012), glow_fn=arm_glow, rib_scale=0.9,
                    scales=2, scale_size=0.95)
+# the head's two spirals (05/07): smooth dark-emerald domes sitting flush on the head, covered with spiral rows of small
+# pale-mint scales that wind into a softly bright centre. Conformal log-polar AuthoredUV rotated by phi makes the scale
+# rows log spirals and shrinks the scales toward the centre; the tile repeats (m cos phi, m sin phi) = (5, 3) times around
+# so the seam is invisible. Each dome rides one arm bone rigidly.
+def head_dome(mb, centre, R, H, bone, segs=48, rings=20, m_cos=5, m_sin=3):
+    c = V(centre); m = math.hypot(m_cos, m_sin); phi = math.atan2(m_sin, m_cos)
+    rhos = [0.035 * (1 / 0.035) ** (k / (rings - 1)) for k in range(rings)]   # geometric: even in log-polar
+    mb.cur_w = [(bone, 1.0)]
+    idx = []
+    for k, rho in enumerate(rhos):
+        ring = []
+        for j in range(segs + 1):
+            th = j / segs * math.tau
+            a, b = th, math.log(rho)
+            u = (math.cos(phi) * a - math.sin(phi) * b) * m / math.tau; v = (math.sin(phi) * a + math.cos(phi) * b) * m / math.tau
+            p = c + V((R * rho * math.cos(th), R * rho * math.sin(th), H * math.sqrt(max(0.0, 1 - rho * rho))))
+            ring.append(mb.add_vertex(p, (0.92, 1.0, 0.92), uv=(u, v)))
+        idx.append(ring)
+    top = mb.add_vertex(c + V((0, 0, H)), (0.75, 1.0, 0.80), uv=(0.0, 0.0))
+    for j in range(segs):
+        mb.add_face((top, idx[0][j], idx[0][j + 1]), 1)
+    for k in range(rings - 1):
+        for j in range(segs):
+            mat = 1 if rhos[k + 1] < 0.11 else 0
+            mb.add_face((idx[k][j], idx[k + 1][j], idx[k + 1][j + 1], idx[k][j + 1]), mat)
+    # back: a shallow dark cap closing the volume
+    back = [mb.add_vertex(c + V((R * math.cos(j / segs * math.tau), R * math.sin(j / segs * math.tau), 0.0)), (0.6, 0.8, 0.65), uv=(0.0, 0.0)) for j in range(segs + 1)]
+    bc = mb.add_vertex(c + V((0, 0, -0.15 * R)), (0.6, 0.8, 0.65), uv=(0.0, 0.0))
+    for j in range(segs):
+        mb.add_face((idx[-1][j], idx[-1][j + 1], back[j + 1], back[j]), 2)
+        mb.add_face((back[j + 1], bc, back[j]), 2)
+    mb.cur_w = None
+
+
+mdome = MeshBuilder("Arms | head scale domes", body, [CRESCENT_MAT, CORE_MAT, MEMB_MAT])
+head_dome(mdome, (-0.62, 0.80, 1.12), 0.34, 0.11, "ArmL_02")      # the lower dome, just above the face
+head_dome(mdome, (-0.43, 1.53, 1.00), 0.52, 0.17, "ArmL_06")      # the upper, larger dome at the top-left of the head
+attach(mdome.finish(micro_uv_scale=1.0))
 arms = attach(marm.finish(micro_uv_scale=2.4))
 clean(arms)
 print("ARMS_DONE", round(time.time() - START, 1), flush=True)
@@ -894,11 +950,16 @@ print("FRONDS_DONE", round(time.time() - START, 1), flush=True)
 
 
 # --- face leaf, beads, head/jaw skin
+FACE_SCALE = 1.3   # 05: the bud is the head's dominant element
+
+
 def facepoint(t, u, front=True):
-    w = np.interp(t, [0, .20, .50, .80, 1], [.30, .35, .255, .105, .001])
+    S = FACE_SCALE
+    w = np.interp(t, [0, .20, .50, .80, 1], [.32, .37, .28, .12, .001]) * S
     x = u * w + .018 * (1 - t) ** 2
-    y = .63 - 1.16 * t - .12 * u * (1 - t) ** 2 - .08 * abs(u) * (1 - t) ** 2
-    z = .02 + .09 * t + ((.145 * (1 - abs(u)) * (1 - .55 * t) - .15 * (1 - abs(u)) * (1 - t) ** 4) if front else -(.045 + .15 * (1 - abs(u) ** 2)) * (1 - t) ** .8)
+    y = .63 - 1.16 * S * t - (.12 * u + .08 * abs(u)) * S * (1 - t) ** 2
+    bulge = (1 - u * u) ** 0.7
+    z = .02 + .09 * t + ((.26 * S * bulge * (1 - .5 * t) - .15 * (1 - abs(u)) * (1 - t) ** 4) if front else -(.06 + .22 * bulge) * S * (1 - t) ** .8)
     if front:
         flow = u + .055 * math.sin(t * 4.7); crest = (.5 + .5 * math.cos(flow * math.pi * 12 + 1.2 * t)) ** 8
         z += .006 * (crest - .1) * (1 - abs(u)) * math.sin(math.pi * t)
@@ -931,7 +992,7 @@ def lattice_image(name="face-lattice", size=512):
     return img
 
 
-mat = v8.face_material() if TILES else bpy.data.materials.get("Rune | v3 face lattice")
+mat = v8.face_material("Rune | face lattice") if TILES else bpy.data.materials.get("Rune | v3 face lattice")
 if not mat:
     mat = bpy.data.materials.new("Rune | v3 face lattice"); mat.use_nodes = True
     nt = mat.node_tree; b = nt.nodes["Principled BSDF"]
@@ -941,71 +1002,77 @@ if not mat:
     nt.links.new(tex.outputs["Color"], b.inputs["Emission Color"]); nt.links.new(tex.outputs["Alpha"], b.inputs["Alpha"])
     b.inputs["Emission Strength"].default_value = 1.1; b.inputs["Roughness"].default_value = 0.5
     mat.blend_method = "BLEND"; mat.use_backface_culling = False
-mface = MeshBuilder("Face | fused glowing lattice leaf", body, [mat])
-rows, cols = 44, 22
-grid = [[Pinv(OLD_H @ facepoint(0.02 + 0.965 * i / rows, (-1 + 2 * j / cols) * 0.97)) for j in range(cols + 1)] for i in range(rows + 1)]
-mface.patch(np.asarray(grid), color=(1.0, 1.0, 1.0) if TILES else (0.4, 0.9, 0.5), uv_fn=lambda a, b_: ((b_ * 2 - 1) * 0.5 + 0.5, a))
+def budpoint(t, alpha):
+    """05's lotus bud: a closed almond, broad convex back, sharp point at the lower front. alpha runs around the
+    section (0 = back centre = the UV seam, pi = front centre); head-local frame of facepoint."""
+    S = FACE_SCALE
+    w = np.interp(t, [0, .20, .50, .80, 1], [.32, .37, .28, .12, .001]) * S
+    zf = .26 * S * (1 - .5 * t); zb = .28 * S * (1 - t) ** .8
+    sn, c = math.sin(alpha), math.cos(alpha)
+    x = w * sn + .018 * (1 - t) ** 2
+    y = .63 - 1.16 * S * t - (.12 * sn + .08 * abs(sn)) * S * (1 - t) ** 2
+    z = .02 + .09 * t - c * (zf if c < 0 else zb) * abs(c) ** 0.85
+    return P((x, y, z))
+
+
+mface = MeshBuilder("Face | fused glowing lattice leaf", body, [mat]); mface.cur_w = [("HeadPivot", 1.0)]
+B_ROWS, B_COLS = 48, 64
+bud_idx = []
+for i in range(B_ROWS + 1):
+    t = 0.02 + 0.975 * i / B_ROWS; ring = []
+    for j in range(B_COLS + 1):
+        alpha = j / B_COLS * math.tau
+        ring.append(mface.add_vertex(Pinv(OLD_H @ budpoint(t, alpha)), (1.0, 1.0, 1.0) if TILES else (0.4, 0.9, 0.5), uv=(j / B_COLS, t)))
+    bud_idx.append(ring)
+for i in range(B_ROWS):
+    for j in range(B_COLS):
+        mface.add_face((bud_idx[i][j], bud_idx[i + 1][j], bud_idx[i + 1][j + 1], bud_idx[i][j + 1]), 0)
 face = mface.finish(micro_uv_scale=1.0)
-bpy.context.view_layer.objects.active = face
-sw = face.modifiers.new("Fuse to head surface", "SHRINKWRAP")
-sw.target = headmesh; sw.wrap_method = "NEAREST_SURFACEPOINT"; sw.wrap_mode = "ABOVE_SURFACE"; sw.offset = 0.006
-bpy.ops.object.modifier_apply(modifier=sw.name)
-dt = face.modifiers.new("Copy neck weights", "DATA_TRANSFER")
-dt.object = headmesh; dt.use_vert_data = True; dt.data_types_verts = {"VGROUP_WEIGHTS"}
-dt.vert_mapping = "NEAREST"; dt.layers_vgroup_select_src = "ALL"; dt.layers_vgroup_select_dst = "NAME"
-for g_ in headmesh.vertex_groups:
-    face.vertex_groups.new(name=g_.name)
-bpy.ops.object.datalayout_transfer(modifier=dt.name); bpy.ops.object.modifier_apply(modifier=dt.name)
 attach(face)
 HORNS = [([(-.20, .29, .02), (-.43, .39, .02), (-.68, .64, -.04), (-.76, .96, -.10)], .080),
          ([(.21, .25, .025), (.44, .44, .01), (.49, .77, -.06), (.39, 1.06, -.14)], .088),
          ([(-.12, .025, .035), (-.32, .015, .045), (-.52, .00, .03), (-.84, .18, -.04), (-1.04, .39, -.11)], .095),
          ([(.12, .045, .035), (.32, .05, .045), (.57, .10, .025), (.93, .41, -.04), (1.04, .72, -.11)], .098)]
-mbead = MeshBuilder("HeadBeads | pearl chains on the tendrils", body, [BONE_MAT])
-mbead.cur_w = [("HeadPivot", 1.0)]
-bm = bmesh.new(); bmesh.ops.create_icosphere(bm, subdivisions=1, radius=1.0)
-sphere = [(v.co.x, v.co.y, v.co.z) for v in bm.verts]; sfaces = [tuple(v.index for v in f.verts) for f in bm.faces]; bm.free()
-for cs, radius in HORNS:
-    ps = catmull(cs, 14); n = len(ps); sg = 1 if cs[0][0] < 0 else -1; acc = 0.0; last = -1.0
-    for i in range(1, n - 1):
-        acc += np.linalg.norm(ps[i] - ps[i - 1]); t = i / (n - 1)
-        if t > 0.93:
-            break
-        if acc - last < 0.030 + 0.014 * (1 - t):
+# (v18: the pearl bead chains are gone; the face crown horns stand where the tendrils were)
+mhook = MeshBuilder("FacePetals | face crown horns", body, [HORN_MAT]); mhook.cur_w = [("HeadPivot", 1.0)]
+# 05 front: two long horns sweep up-left and up-right beside the bud, two go left / lower-left, shorter ones to the right;
+# each thick at the base, tapering, strongly curved, the tip curling outward into a small hook. Head-local frame of facepoint
+# (x across, +y toward the base, -y toward the tip, +z front); lengths 0.6-1.0x the bud (1.5).
+CROWN = [([(-.22, .40, -.05), (-.50, .62, -.07), (-.80, .95, -.13), (-.98, 1.30, -.22)], .110, -1),
+         ([(.20, .38, -.04), (.48, .60, -.06), (.62, .95, -.13), (.58, 1.30, -.22)], .110, +1),
+         ([(-.26, .20, -.03), (-.60, .22, -.01), (-.95, .32, -.07), (-1.25, .50, -.15)], .100, -1),
+         ([(-.24, .02, -.01), (-.55, -.08, .02), (-.90, -.10, -.03), (-1.15, .05, -.11)], .090, -1),
+         ([(.25, .18, -.03), (.55, .22, -.01), (.85, .38, -.07), (1.00, .62, -.13)], .090, +1),
+         ([(.24, .00, -.01), (.52, -.06, .01), (.78, -.02, -.03), (.92, .14, -.09)], .080, +1),
+         ([(-.12, .52, -.07), (-.30, .80, -.11), (-.42, 1.05, -.17)], .080, -1),
+         ([(.10, .52, -.07), (.28, .82, -.11), (.36, 1.05, -.17)], .080, +1)]
+HORN_KNOB = (0.0037, 0.0070, 0.0050)
+for cs, r0, sg in CROWN:
+    base_pts = catmull(cs, 10)
+    tang = unit(base_pts[-1] - base_pts[-3])
+    away = unit(V((sg, 0.25, 0.0)) - tang * np.dot(V((sg, 0.25, 0.0)), tang))         # outward from the bud
+    hook = crosier_path(base_pts[-1], tang, away, 0.16, turns=0.6, straight=0.2, bend_power=1.6)
+    local = resample(np.concatenate([base_pts[:-1], hook], axis=0), spacing=0.02)
+    pts = np.asarray([Pinv(OLD_H @ P(tuple(q))) for q in local]); n = len(pts); tt = np.linspace(0, 1, n)
+    radii = r0 * (1 - tt) ** 1.15 + 0.009
+    T, Nn, Bb = rmf_frames(pts, hint=(0, 0, 1))
+    mhook.tube(pts, radii, sides=10, color=HORN_KNOB, hint=(0, 0, 1), mat=0, taper_end=True)
+    # knob row along the OUTER convex edge (the side away from the bud), shrinking toward the tip
+    out_local = V((sg, 0.0, 0.0))
+    acc = 0.0; last = -1.0
+    for i in range(2, n - 2):
+        acc += np.linalg.norm(pts[i] - pts[i - 1])
+        if acc - last < 0.032 + 0.02 * (1 - tt[i]):
             continue
         last = acc
-        tang = unit(ps[i + 1] - ps[i - 1]); side = unit(np.cross(tang, V((0, 0, 1)))) * sg
-        w = radius * (1 - t) ** 1.1 * (1 + .28 * (1 - t) ** 3) + .0018
-        centre = ps[i] + side * (w * 0.98); br = 0.0065 + 0.006 * (1 - t); sv = len(mbead.v)
-        for (x, y, z) in sphere:
-            mbead.add_vertex(Pinv(OLD_H @ (P(centre) + Vector((x, y, z)) * br)), BONE_EDGE)
-        for f in sfaces:
-            mbead.add_face(tuple(sv + kk for kk in f), 0)
-attach(mbead.finish(micro_uv_scale=1.0))
-mhook = MeshBuilder("FacePetals | dark hooks framing the leaf", body, [INK_MAT]); mhook.cur_w = [("HeadPivot", 1.0)]
-for sgn in (-1, 1):
-    for t_ in np.linspace(0.10, 0.80, 6):
-        p0 = V(Pinv(OLD_H @ facepoint(t_, sgn * 0.98))); p1 = V(Pinv(OLD_H @ facepoint(t_ + 0.02, sgn * 0.98))); p2 = V(Pinv(OLD_H @ facepoint(t_, sgn * 0.80)))
-        out_ = unit(p0 - p2); flow_ = unit(p1 - p0)
-        mhook.crosier(p0, out_, flow_, 0.14 + 0.06 * (1 - t_), 0.014, turns=0.9, straight=0.25, sides=6,
-                      color_root=INK, color_tip=mix(INK, MEMBRANE, 0.6), hint=unit(np.cross(out_, flow_)), mat=0, bend_power=1.5)
-        # a dot row along one edge of each hook, like a comb's back (owner: 腕の淵の細部)
-        L_ = 0.14 + 0.06 * (1 - t_)
-        hp = crosier_path(p0, out_, flow_, L_, turns=0.9, straight=0.25, bend_power=1.5)
-        hT, hN, hB = rmf_frames(hp, hint=unit(np.cross(out_, flow_)))
-        acc_ = 0.0; last_ = -1.0
-        for k_ in range(1, len(hp) - 1):
-            acc_ += np.linalg.norm(hp[k_] - hp[k_ - 1])
-            if acc_ - last_ < 0.016:
-                continue
-            last_ = acc_
-            r_ = 0.014 * (1 - 0.8 * (k_ / len(hp)) ** 0.9) + 0.0008
-            knob_box(mhook, hp[k_] + hB[k_] * (r_ * 0.9), hT[k_], hB[k_], hN[k_], 0.009, 0.007, 0.006, (0.02, 0.045, 0.028), 0)
+        o = Pinv(OLD_H @ P(tuple(local[i] + out_local))) - pts[i]; o = unit(o - T[i] * np.dot(o, T[i]))
+        kr = 0.010 + 0.012 * (1 - tt[i])
+        knob_box(mhook, pts[i] + o * (radii[i] * 0.92), T[i], o, unit(np.cross(T[i], o)), kr * 1.6, kr * 1.3, kr * 1.4, HORN_KNOB, 0)
 attach(mhook.finish(micro_uv_scale=1.0))
 # head colours + skin; jaw and oral membrane ride the jaw bone
 g_, gn_ = (lambda me: (np.array([tuple(v.co) for v in me.vertices]), np.array([tuple(v.normal) for v in me.vertices])))(headmesh.data)
 front = np.clip(-gn_[:, 1], 0, 1)
-cols_ = np.array([mix(INK, (0.05, 0.11, 0.06), float(f) ** 1.5 * 0.8) for f in front])
+cols_ = np.array([mix((0.010, 0.050, 0.024), (0.10, 0.22, 0.12), float(f) ** 1.5 * 0.8) for f in front])   # emerald -> mint-ish front
 layer = headmesh.data.color_attributes.get("GuardianSurface")
 layer.data.foreach_set("color", np.c_[cols_, np.ones(len(cols_))].ravel()); headmesh.data.update()
 attach(headmesh)

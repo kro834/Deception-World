@@ -293,41 +293,31 @@ def tile_material(name, albedo, normal, strength=0.9, roughness=0.6):
 
 # ---------------------------------------------------------------- head mask
 def face_images(size=512):
-    ys, xs = np.mgrid[0:size, 0:size]; u = xs / (size - 1) * 2 - 1; t = ys / (size - 1)
-    width = np.interp(t, [0, .20, .50, .80, 1], [.30, .35, .255, .105, .001]) / .35
-    un = np.clip(u / np.maximum(width, 1e-3), -1.4, 1.4)
-    inside = (np.abs(un) < 1.0) & (t > 0.015) & (t < 0.985)
-    edge = np.clip((1.0 - np.abs(un)) / 0.04, 0, 1) * np.clip((t - 0.015) / 0.01, 0, 1) * np.clip((0.985 - t) / 0.01, 0, 1)
-    # emissive lattice (as before)
-    mask = np.zeros((size, size))
-    for u0 in np.linspace(-.92, .92, 9):
-        uu = u0 * (1 - .22 * t) + .12 * u0 * np.sin(np.pi * t)
-        mask = np.maximum(mask, np.exp(-((np.abs(un - uu) * np.maximum(width, 0.05)) / 0.0075) ** 2))
-    for direction in (-1, 1):
-        for j, base_t in enumerate([.02, .14, .26, .38, .50, .62, .74]):
-            tc = base_t + direction * .16 * un + .22 * (1 - un ** 2) + .012 * np.sin(un * 4 + j)
-            mask = np.maximum(mask, np.exp(-(np.abs(t - tc) / 0.0062) ** 2))
-    mask = mask * inside
-    tip_glow = np.exp(-(((t - 0.93) / 0.12) ** 2 + (un / 0.35) ** 2)) * inside
-    mask = np.clip(np.maximum(mask, tip_glow * 0.9), 0, 1)
-    lattice = np.stack([0.35 + 0.45 * mask, 0.95 * np.ones_like(mask), 0.55 + 0.3 * mask], -1) * mask[..., None]
-    # leaf relief: central ridge, two curved side ridges, fine veins, pointed tip, dark raised rim
-    h = np.exp(-(un / 0.05) ** 2) * 1.0
-    for s in (-1, 1):
-        h += 0.65 * np.exp(-((un - s * (0.52 - 0.18 * t)) / 0.045) ** 2)
-    for j in range(7):
-        tc = 0.10 + 0.12 * j
-        h += 0.22 * np.exp(-((t - tc - 0.08 * np.abs(un)) / 0.012) ** 2) * (np.abs(un) > 0.08)
-    rim = np.clip((np.abs(un) - 0.80) / 0.12, 0, 1)
-    h += 0.5 * rim
-    h = h * inside
-    tip = np.clip((t - 0.90) / 0.08, 0, 1)
-    ink = np.array([0.016, 0.040, 0.022]); pale = np.array([0.34, 0.42, 0.32]); dark = np.array([0.004, 0.010, 0.006])
-    hn = np.clip(h / 1.2, 0, 1)
-    col = ink[None, None, :] * (0.8 + 0.4 * hn)[..., None] + (pale - ink)[None, None, :] * (hn ** 1.6 * 0.9)[..., None]
+    """Fallback textures for the lotus bud in its around-UV (u around the bud, seam at the back, front half at
+    u 0.25-0.75; v from the back rim to the tip). The runtime draws the lattice procedurally from the same UV:
+    two families of diagonals -> lens/diamond cells that shrink toward the tip, ~8 cells across the front and
+    ~10 rows, thin bright mint lines, deep emerald cells darker at their centres, a white-green star at the tip."""
+    ys, xs = np.mgrid[0:size, 0:size]; u = xs / (size - 1); t = ys / (size - 1)
+    un = (u - 0.5) * 4.0; front = np.abs(un) < 1.0
+    Nu, Nv = 16.0, 10.0; tt = t ** 0.9
+    s1 = u * Nu + tt * Nv; s2 = -u * Nu + tt * Nv
+    d1 = np.abs((s1 % 1.0) - 0.5); d2 = np.abs((s2 % 1.0) - 0.5)        # 0.5 at a cell centre, 0 on a line
+    lw = 0.07
+    line = np.maximum(np.exp(-(d1 / lw) ** 2), np.exp(-(d2 / lw) ** 2))
+    mask = line * (0.15 + 0.85 * t ** 1.6) * front
+    tip = np.exp(-(((t - 0.95) / 0.10) ** 2 + (un / 0.35) ** 2)) * front
+    centre = np.exp(-(un / 0.5) ** 2) * t ** 2.2 * 0.5 * front
+    mask = np.clip(np.maximum(np.maximum(mask, tip), centre), 0, 1)
+    lattice = np.stack([0.30 + 0.40 * mask, 0.95 * np.ones_like(mask), 0.45 + 0.30 * mask], -1) * mask[..., None]
+    cell = np.sqrt(np.clip(d1 * d2, 0, 1)) * 2.0                        # 1 at a cell centre
+    rim = np.clip((np.abs(un) - 0.84) / 0.12, 0, 1)
+    h = (0.6 * cell * (1 - rim) + 0.5 * rim) * front
+    emerald = np.array([0.012, 0.060, 0.026]); mint = np.array([0.30, 0.56, 0.335]); dark = np.array([0.003, 0.010, 0.006])
+    lift = np.clip(0.35 * t ** 2.2 + 0.25 * np.exp(-(un / 0.5) ** 2) * t, 0, 1)
+    col = emerald[None, None, :] * (1.3 - 0.7 * cell)[..., None] + (mint - emerald)[None, None, :] * lift[..., None]
     col = col * (1 - rim[..., None]) + dark[None, None, :] * rim[..., None]
-    col = col + (pale * 0.8 - col) * (tip * 0.6)[..., None]
-    mask_img = _byte_image("face-mask-albedo", col, alpha=edge)
+    col = np.where(front[..., None], col, (dark * 0.8)[None, None, :])
+    mask_img = _byte_image("face-mask-albedo", col, alpha=np.ones_like(t))
     lattice_img = _byte_image("face-lattice", lattice)
     normal_img = _normal_image("face-mask-normal", h * 0.004, 1.0, downsample=1)
     return mask_img, lattice_img, normal_img
