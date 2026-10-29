@@ -169,7 +169,8 @@ smart UV で 2048²（胴・腕・尾）と 1024²（頭）のアトラスを作
 原画の密な細部は移らない。四面図角度では v6 とほぼ同じで、膜と渦の面にわずかな原画の斑が乗る程度
 （`compare/50-v7-vs-v6-turnaround.jpg`、`51-v7-inbetween-angles.jpg`、`52-v7-closeups.jpg`）。
 格子変形による厳密なシルエット合わせは行っていない（外接矩形合わせのみ）。原画同等とは言わない。
-v6 へ戻す場合: `node scripts/blender/deliver_guardian_v3.mjs --build handoff/goal/ciel3d/model/build/v6 --stamp v6 --dest public/dogs-archive-20261029`。
+公開物はコーディネーターの判断で v6（5,813,968 bytes、GPU テクスチャが軽い）に戻した。v7 の投影パイプラインは、
+高解像度の原画が届いたときに同じ手順で再実行する。
 
 ## 操作と読み込み
 

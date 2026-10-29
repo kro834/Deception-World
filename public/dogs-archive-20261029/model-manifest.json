@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
-  "version": 7,
-  "revision": "v7",
+  "version": 5,
+  "revision": "v6",
   "model": "guardian-v3.glb",
-  "assetBytes": 7643604,
-  "assetSha256": "49c35494877639225d308353163fd0b9b445f1d6b045018311993ef90a7b43e2",
+  "assetBytes": 5813968,
+  "assetSha256": "0b451a0ef3148fe3769c3322a71ffe1ebd6d4276e354a5f119438823969b7cb2",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -224,6 +224,14 @@
   },
   "meshAudit": [
     {
+      "mesh": "Arms | coiled arms",
+      "vertices": 39780,
+      "faces": 37910,
+      "triangles": 77784,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
       "mesh": "Face | fused glowing lattice leaf",
       "vertices": 1035,
       "faces": 968,
@@ -232,24 +240,144 @@
       "nonManifoldEdges": 132
     },
     {
-      "mesh": "Head | painted head",
-      "vertices": 54828,
-      "faces": 108961,
-      "triangles": 109304,
+      "mesh": "Frond_00 | ink ribbon with crosier edge",
+      "vertices": 6984,
+      "faces": 6812,
+      "triangles": 13804,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
-      "mesh": "Serpent | painted body, arms and tails",
-      "vertices": 165568,
-      "faces": 159466,
-      "triangles": 325408,
+      "mesh": "Frond_01 | ink ribbon with crosier edge",
+      "vertices": 5656,
+      "faces": 5504,
+      "triangles": 11168,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_02 | ink ribbon with crosier edge",
+      "vertices": 5368,
+      "faces": 5216,
+      "triangles": 10592,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_03 | ink ribbon with crosier edge",
+      "vertices": 6300,
+      "faces": 6136,
+      "triangles": 12444,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_04 | ink ribbon with crosier edge",
+      "vertices": 4878,
+      "faces": 4726,
+      "triangles": 9612,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_05 | ink ribbon with crosier edge",
+      "vertices": 10270,
+      "faces": 10102,
+      "triangles": 20380,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_06 | ink ribbon with crosier edge",
+      "vertices": 10338,
+      "faces": 10166,
+      "triangles": 20512,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_07 | ink ribbon with crosier edge",
+      "vertices": 3238,
+      "faces": 3130,
+      "triangles": 6376,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_08 | ink ribbon with crosier edge",
+      "vertices": 3214,
+      "faces": 3110,
+      "triangles": 6332,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_09 | ink ribbon with crosier edge",
+      "vertices": 3132,
+      "faces": 3024,
+      "triangles": 6164,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_10 | ink ribbon with crosier edge",
+      "vertices": 3226,
+      "faces": 3118,
+      "triangles": 6352,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Head | continuous asymmetric shield and cheek roots",
+      "vertices": 53480,
+      "faces": 106952,
+      "triangles": 106952,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "HeadBeads | pearl chains on the tendrils",
+      "vertices": 1008,
+      "faces": 1680,
+      "triangles": 1680,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Jaw | separate slim lower mandible",
+      "vertices": 330,
+      "faces": 322,
+      "triangles": 656,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Mouth | dark articulated inner membrane",
+      "vertices": 10,
+      "faces": 7,
+      "triangles": 16,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Serpent | ribbed vertebral body",
+      "vertices": 57272,
+      "faces": 54744,
+      "triangles": 112152,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Tails | forked spined tails",
+      "vertices": 5912,
+      "faces": 5768,
+      "triangles": 11736,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     }
   ],
   "meshStats": {
-    "objects": 3,
+    "objects": 19,
     "vertices": 221431,
     "triangles": 436648
   },
@@ -257,56 +385,27 @@
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 7643604,
-      "sha256": "49c35494877639225d308353163fd0b9b445f1d6b045018311993ef90a7b43e2"
+      "bytes": 5813968,
+      "sha256": "0b451a0ef3148fe3769c3322a71ffe1ebd6d4276e354a5f119438823969b7cb2"
     }
   ],
   "skinCount": 1,
   "skinJoints": 94,
-  "colorAttribute": "COLOR_0 only on the glow cores and the face leaf; the painted objects use the atlas",
+  "colorAttribute": "GuardianSurface COLOR_0: role colours (bone/ink/membrane/glow) with cavity AO multiplied once",
   "sourceScripts": [
     "scripts/blender/guardian_v3_lib.py",
-    "scripts/blender/dogs_guardian_v5.py",
-    "scripts/blender/dogs_guardian_v7_paint.py"
+    "scripts/blender/dogs_guardian_v5.py"
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "3d714a926581693d23ae2c4b8697ed41e998073f3238f22c0b3e9de31f9ba31a",
-    "scripts/blender/dogs_guardian_v7_paint.py": "c24d0c4f41589c0895c4feedec3181699bb9d8c775efa839ad37773ff7d53c87"
+    "scripts/blender/dogs_guardian_v5.py": "3d714a926581693d23ae2c4b8697ed41e998073f3238f22c0b3e9de31f9ba31a"
   },
-  "referenceImagesUsedAsTexture": true,
+  "referenceImagesUsedAsTexture": false,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 13.627660989761353,
-  "painting": {
-    "source": "public/dogs-archive-20261028/reference/guardian-turnaround.png (four views)",
-    "atlas": {
-      "body": 2048,
-      "head": 1024,
-      "uv": "AtlasUV (TEXCOORD after MicroSurfaceUV/AuthoredUV)"
-    },
-    "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
-    "confidenceCoverage": {
-      "body": 0.24935502303442034,
-      "head": 0.5621327581073953
-    },
-    "silhouetteIoU": {
-      "body": {
-        "front": 0.5633591411724644,
-        "back": 0.5697739299470823,
-        "left": 0.5641901834472385,
-        "right": 0.5774262587902097
-      },
-      "head": {
-        "front": 0.07564278725599748,
-        "back": 0.07700194373838563,
-        "left": 0.06636849781234808,
-        "right": 0.06419201786212671
-      }
-    }
-  },
+  "secondsBeforeRender": 9.80472183227539,
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v7",
-    "stamp": "v7",
-    "rawGlbSha256": null
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v6",
+    "stamp": "v6",
+    "rawGlbSha256": "8e15c66ceb9b6565bd7ae0ec3c381fb909073c0692e4d90f2c7575a3bd6e5fac"
   }
 }
