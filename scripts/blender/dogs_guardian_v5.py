@@ -178,13 +178,16 @@ E3 = unit(V((math.sin(YAW), 0, math.cos(YAW)))); E1 = unit(V((math.cos(YAW), 0, 
 C_WHORL = V((0.94, 2.62, -0.55))
 
 
-def whorl_outward(R_out=1.05, r_in=0.13, turns=2.5, start_deg=206, n=520, back=0.52):
-    """Spiral from the glowing centre outward (clockwise inward in the painting = reversed here)."""
+K_WHORL = 0.115   # log-spiral pitch: turns touch when the tube radius is half the radial gap
+
+
+def whorl_outward(R_out=1.05, turns=3.5, start_deg=206, n=640, back=0.52):
+    """Filled logarithmic spiral winding to the centre (clockwise inward in the painting)."""
     pts = []
     for i in range(n):
         f = i / (n - 1)                      # 0 at the outer end ... 1 at the centre
         th = f * math.tau * turns
-        r = R_out * (1 - f) ** 0.92 + r_in * f
+        r = R_out * math.exp(-K_WHORL * th)
         a = math.radians(start_deg) - th
         p = C_WHORL + E1 * (r * math.cos(a)) + E2 * (r * math.sin(a)) - E3 * (back * f ** 1.2)
         pts.append(p)
@@ -203,10 +206,20 @@ coil_len = sum(np.linalg.norm(np.diff(coil, axis=0), axis=1))
 s_coil_end = coil_len / arc_main[-1]
 J_POINT = V((0.30, 0.90, 0.22))
 s_J = S_MAIN[np.argmin(np.linalg.norm(MAIN - J_POINT, axis=1))]
+def coil_plane_radius(i):
+    rv = MAIN[i] - C_WHORL; rv = rv - E3 * np.dot(rv, E3)
+    return float(np.linalg.norm(rv))
+
+
+def coil_tube_radius(i):
+    # half the radial gap between turns (slightly more, so the turns touch and fill the spiral)
+    return min(0.27, 0.5 * coil_plane_radius(i) * (1 - math.exp(-math.tau * K_WHORL)) * 1.08 + 0.015)
+
+
 R_MAIN = np.array([
-    lerp(0.10, 0.27, (s / s_coil_end) ** 0.75) if s < s_coil_end
+    coil_tube_radius(i) if s < s_coil_end
     else (0.27 + 0.07 * math.sin(math.pi * min(1, (s - s_coil_end) / (1 - s_coil_end)))) * (1 - 0.28 * max(0, (s - 0.85) / 0.15))
-    for s in S_MAIN])
+    for i, s in enumerate(S_MAIN)])
 R_MAIN *= 1 + 0.03 * np.array([noise1(s * 40, 2) for s in S_MAIN])
 F_POINT = MAIN[-1]
 TAIL_A = resample(catmull([tuple(F_POINT), (0.08, -0.80, -0.26)] + [(.08 + .32 * math.sin(t * math.tau + math.pi) - .30 * t, -.80 - 2.95 * t, -.26 + .28 * math.sin(t * math.pi * 1.5)) for t in np.linspace(0.08, 1, 40)], 6), spacing=0.025)
@@ -227,9 +240,9 @@ def coil_path(center, r0, r1, turns, start_deg, z_step, n, cw=True):
 
 ARM_L = resample(np.concatenate([
     catmull([(-0.85, 0.78, 0.45), (-0.90, 0.95, 0.62)], 6),
-    coil_path((-0.62, 0.80, 0.72), 0.30, 0.10, 1.5, 150, 0.25, 70, cw=False)[1:],
+    coil_path((-0.62, 0.80, 0.72), 0.30, 0.035, 2.2, 150, 0.25, 110, cw=False)[1:],
     catmull([(-0.60, 0.88, 0.97), (-0.78, 1.12, 0.70), (-0.88, 1.35, 0.50)], 8)[1:],
-    coil_path((-0.43, 1.53, 0.40), 0.46, 0.12, 1.7, 190, -0.40, 90, cw=True)[1:],
+    coil_path((-0.43, 1.53, 0.40), 0.46, 0.045, 2.4, 190, -0.40, 130, cw=True)[1:],
     catmull([(-0.40, 1.60, 0.0), (-0.34, 1.76, -0.22), (-0.30, 1.85, -0.30)], 8)[1:]], axis=0), spacing=0.02)
 ARM_R = resample(catmull([(0.05, 1.00, 0.30), (0.25, 1.22, 0.10), (0.45, 1.45, -0.15), (0.76, 1.63, -0.38)], 12), spacing=0.02)
 
@@ -240,8 +253,8 @@ FRONDS = [
     ([(-.03, 2.02, -.28), (.03, 2.65, -.39), (-.16, 3.30, -.43), (-.36, 3.56, -.36)], .80, 1.0, +1, (.23, .28, .07)),
     ([(-.61, 1.42, -.13), (-1.27, 1.63, -.09), (-1.79, 2.19, -.04), (-2.04, 2.54, .01)], .90, 1.05, +1, (.25, .30, .08)),
     ([(.03, 1.98, -.30), (.32, 2.46, -.49), (.28, 3.00, -.59), (.40, 3.30, -.52)], .72, 1.0, -1, (.20, .24, .06)),
-    ([(-.56, 1.07, .24), (-1.31, .69, .43), (-1.88, -.03, .72), (-1.86, -.78, .95), (-1.50, -1.26, 1.12)], 1.35, 1.1, +1, (.44, .52, .11)),
-    ([(.76, 1.63, -.38), (1.62, 1.24, -.74), (1.99, .49, -.70), (1.84, -.23, -.38), (1.38, -.60, .08)], 1.25, 1.1, +1, (.42, .50, .11)),
+    ([(-.56, 1.07, .24), (-1.31, .69, .43), (-1.88, -.03, .72), (-1.86, -.78, .95), (-1.50, -1.26, 1.12)], 1.7, 1.5, +1, (.44, .52, .11)),
+    ([(.76, 1.63, -.38), (1.62, 1.24, -.74), (1.99, .49, -.70), (1.84, -.23, -.38), (1.38, -.60, .08)], 1.6, 1.5, +1, (.42, .50, .11)),
     ([(-1.41, -1.22, .40), (-1.27, -1.66, .43), (-.95, -1.90, .40)], .62, 1.05, +1, (.22, .25, .06)),
     ([(1.48, -.42, .30), (1.54, -.90, .39), (1.26, -1.22, .47)], .60, 1.05, +1, (.23, .26, .06)),
     ([(1.28, -1.04, .40), (1.57, -1.43, .43), (1.40, -1.78, .48)], .55, 1.0, +1, (.20, .23, .06)),
@@ -337,8 +350,12 @@ FROND_DATA = []
 FINGER_PARENT = {0: ARML[-1][0], 1: ARML[-1][0], 2: ARML[-1][0], 3: ARML[-1][0], 4: ARML[-1][0],
                  5: "NeckBaseJoint", 6: ARMR[-1][0], 7: "Frond05_2", 8: "Frond06_2", 9: "Frond06_2", 10: "Frond05_2",
                  11: ARML[-1][0]}
+CLUSTER_PARENT = {7: 5, 10: 5, 8: 6, 9: 6}   # the lower-left / lower-right curl clusters hang from the big arms' tips
 for idx in range(len(FRONDS)):
     controls, cl, ct, side, widths = FRONDS[idx]
+    if idx in CLUSTER_PARENT:
+        tip = FROND_DATA[CLUSTER_PARENT[idx]][1][-1]
+        shift = tip - V(controls[0]); controls = [tuple(V(c) + shift) for c in controls]
     path, nrm, lateral, s_base_end = frond_path(controls, cl, ct, side)
     names = ["TentaclePivot_%02d" % idx, "Frond%02d_1" % idx, "Frond%02d_2" % idx]
     stations = add_chain("Frond%02d" % idx, path, 3, FINGER_PARENT[idx], names=names)
@@ -375,7 +392,7 @@ def attach(ob):
 # ================================================================ geometry
 def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.42, 0.015), ribs=True,
                    crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=12,
-                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32):
+                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False):
     """A dark membrane tube with transverse bone arcs over its front, rows of crescent scales
     (hooked curls lying on the surface) across the front, a crosier crest on the side given by
     crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
@@ -392,8 +409,17 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
             return mix((0.92, 1.0, 0.92), (0.75, 1.0, 0.80), g)
         c = mix(WALL_DARK, WALL_MID, 0.25 + 0.75 * max(0.0, math.sin(a)) ** 1.4)
         return mix(c, GLOW, g * 0.6)
+    f0 = len(mb.f)
     mb.tube(path, radii, sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02,
             uv_fn=tube_uv(arc, radii, sides) if TILES else (lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0)))
+    if glow_fn is not None:   # rings deep in the glow use the emissive core material
+        for i in range(n - 1):
+            if glow_fn(i) > 0.5:
+                for j in range(sides):
+                    mb.fm[f0 + i * sides + j] = mat_glow
+    if paired:   # a dark spine along the front face; the paired ribs grow from it at each station
+        spine = np.asarray([path[i] + Nn[i] * (radii[i] * 0.96) for i in range(n)])
+        mb.tube(spine, 0.06 * radii + 0.004, sides=6, flat=0.7, color=(0.02, 0.045, 0.025), hint=hint, weights_fn=wf, mat=mat_bone, taper_end=True)
     last = -1.0; count = 0
     for i in range(2, n - 2):
         sp = (spacing[0] * radii[i] + spacing[1]) * (1 + 0.18 * noise1(count * 1.9, 23))
@@ -420,6 +446,16 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
                 c = mix(mix(BONE_ROOT, BONE, 0.45), BONE_EDGE, 0.2 + 0.7 * crest_ * rim)
                 return mix(mix(WALL_DARK, c, 0.2 + 0.8 * rim ** 1.3), GLOW, g * 0.5)
             mb.tube(ring, height * prof, sides=7, flat=halfw / height, color_fn=rib_col, hint=flow, cap=True, mat=mat_glow if g > 0.5 else mat_bone)
+        if paired and r > 0.03:
+            # paired ribs: from the spine, curving outward and sweeping toward the tail, tapering
+            for side in (1, -1):
+                p0 = path[i] + front * (r * 0.92)
+                p1 = path[i] + (front * math.cos(0.75) + lat * (side * math.sin(0.75))) * (r * 1.04) + flow * (0.35 * sp)
+                p2 = path[i] + (front * math.cos(1.5) + lat * (side * math.sin(1.5))) * (r * 1.0) + flow * (0.95 * sp)
+                rp = catmull([p0, p1, p2], 6)
+                rr = (0.17 * sp + 0.004) * (1 - np.linspace(0, 1, len(rp))) ** 0.7 + 0.004
+                mb.tube(rp, rr, sides=7, flat=0.65, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.5), BONE_EDGE, (1 - t1) ** 0.6),
+                        hint=front, mat=mat_bone, taper_end=True)
         # crescent scales: hooked curls lying on the surface across the front, curling with the flow
         if scales and r > 0.03:
             for k in range(scales):
@@ -478,8 +514,8 @@ def body_comb(i):
 
 
 def body_glow(i):
-    s = S_MAIN[i]
-    return smooth(1 - s / 0.09) if s < 0.09 else 0.0
+    # the innermost turns of the coil turn bright: a core of glowing coils, not a sphere
+    return smooth(1 - coil_plane_radius(i) / 0.34) if S_MAIN[i] < s_coil_end else 0.0
 
 
 def body_scales_split(i):
@@ -493,16 +529,7 @@ segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, b
                glow_fn=body_glow, rib_scale=0.8, scales=3, scale_size=1.1, rib_width=0.24)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
-               rib_scale=1.45, scales=2, scale_size=0.9, rib_width=0.28)
-# glowing bulb at the body's coiled end
-bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=9, radius=0.15)
-mbody.cur_w = [(UP[-1][0], 1.0)]
-sv = len(mbody.v)
-for v in bm.verts:
-    mbody.add_vertex(MAIN[0] + E1 * v.co.x + E2 * v.co.y + E3 * (v.co.z * 0.8), mix(GLOW, (1, 1, .95), .3))
-for f in bm.faces:
-    mbody.add_face(tuple(sv + v.index for v in f.verts), 2)
-bm.free(); mbody.cur_w = None
+               ribs=False, paired=True, scales=1, scale_size=0.8)
 # neck
 NECK_R = np.array([lerp(0.21, 0.16, t) for t in np.linspace(0, 1, len(NECK))])
 segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: None, ribs=True, crest=False, spacing=(0.55, 0.02), rib_scale=0.8, mat_dark=3)
@@ -552,6 +579,9 @@ marm = MeshBuilder("Arms | coiled arms", body, [CURL_MAT, BONE_MAT, CORE_MAT])
 for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62, 0.80, 0.72)), V((-0.43, 1.53, 0.40)))), (ARM_R, ARMR, 0.11, 0.14, ())):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = np.array([lerp(r0, r1, t) for t in tt]) * (1 + 0.04 * np.array([noise1(t * 30, 4) for t in tt]))
+    for c in glow_centre:   # thinner as the arm winds into each coil centre, so the turns fill the spiral
+        d = np.linalg.norm((path - c) * np.array([1, 1, 0.0]), axis=1)
+        radii = radii * np.clip(d / 0.42, 0.22, 1.0)
     T, Nn, B = rmf_frames(path, hint=(0, 0, 1))
 
     def arm_crest(i, path=path, T=T, B=B):
@@ -566,20 +596,10 @@ for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62
     def arm_glow(i, path=path):
         g = 0.0
         for c in glow_centre:
-            g = max(g, smooth(1 - np.linalg.norm(path[i] - c) / 0.16))
+            g = max(g, smooth(1 - np.linalg.norm((path[i] - c) * np.array([1, 1, 0.0])) / 0.24))
         return g
     segmented_tube(marm, path, radii, stations, arm_crest, arc_ext=90, spacing=(0.45, 0.012), glow_fn=arm_glow, rib_scale=0.9,
                    scales=2, scale_size=0.95)
-    for c, cr in zip(glow_centre, (0.06, 0.075)):
-        bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=cr)
-        i_near = int(np.argmin(np.linalg.norm(path - c, axis=1)))
-        marm.cur_w = chain_weights(i_near / (n - 1), stations)
-        sv = len(marm.v)
-        for v in bm.verts:
-            marm.add_vertex(c + V((v.co.x, v.co.y, v.co.z)), mix(GLOW, (1, 1, .95), .3))
-        for f in bm.faces:
-            marm.add_face(tuple(sv + v.index for v in f.verts), 2)
-        bm.free(); marm.cur_w = None
 arms = attach(marm.finish(micro_uv_scale=2.4))
 clean(arms)
 print("ARMS_DONE", round(time.time() - START, 1), flush=True)
@@ -590,8 +610,9 @@ print("ARMS_DONE", round(time.time() - START, 1), flush=True)
 for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     n = len(path); arcp = np.linspace(0, 1, n)
     w0, w1, w2 = widths
-    base_w = w1 * 1.25
-    ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** 1.15) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
+    big = w1 > 0.4
+    base_w = w1 * (1.0 if big else 1.25); taper_exp = 1.6 if big else 1.15
+    ws = np.array([base_w * ((0.22 if big else 0.33) + (0.78 if big else 0.67) * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
     ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.45 + 0.008
     mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT])
 
@@ -611,7 +632,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     s_acc = 0.0; last = -1.0
     for i in range(3, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
-        length = min(0.22, max(0.025, 0.48 * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
+        length = min(0.30, max(0.025, (0.55 if big else 0.48) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
         if s_acc - last < max(0.028, 0.72 * length):
             continue
         last = s_acc
