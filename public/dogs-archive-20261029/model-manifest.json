@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 5,
-  "revision": "v10",
+  "revision": "v11",
   "model": "guardian-v3.glb",
-  "assetBytes": 6880904,
-  "assetSha256": "2f94236b610674886590bbea9b20ca0957b61850b35a8bd157ac9f92b836ad40",
+  "assetBytes": 7321076,
+  "assetSha256": "77f6263ee31c47b6aacc5a08f13a197555bdfcc4c59b1ddab97e07aebf2208bc",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -230,9 +230,9 @@
   "meshAudit": [
     {
       "mesh": "Arms | coiled arms",
-      "vertices": 40908,
-      "faces": 39038,
-      "triangles": 80040,
+      "vertices": 51972,
+      "faces": 49402,
+      "triangles": 101536,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -294,17 +294,17 @@
     },
     {
       "mesh": "Frond_05 | ink ribbon with crosier edge",
-      "vertices": 8268,
-      "faces": 8018,
-      "triangles": 16372,
+      "vertices": 9896,
+      "faces": 9538,
+      "triangles": 19556,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_06 | ink ribbon with crosier edge",
-      "vertices": 8516,
-      "faces": 8254,
-      "triangles": 16860,
+      "vertices": 10060,
+      "faces": 9696,
+      "triangles": 19880,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -382,9 +382,9 @@
     },
     {
       "mesh": "Serpent | ribbed vertebral body",
-      "vertices": 58862,
-      "faces": 56334,
-      "triangles": 115332,
+      "vertices": 59323,
+      "faces": 56638,
+      "triangles": 116142,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -399,15 +399,15 @@
   ],
   "meshStats": {
     "objects": 21,
-    "vertices": 224161,
-    "triangles": 441964
+    "vertices": 238858,
+    "triangles": 470474
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 6880904,
-      "sha256": "2f94236b610674886590bbea9b20ca0957b61850b35a8bd157ac9f92b836ad40"
+      "bytes": 7321076,
+      "sha256": "77f6263ee31c47b6aacc5a08f13a197555bdfcc4c59b1ddab97e07aebf2208bc"
     }
   ],
   "skinCount": 1,
@@ -419,14 +419,14 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "6aeca4fefa6d65f57b3c63a824afd105af9474815b7a6ed807a095517bc1ce91"
+    "scripts/blender/dogs_guardian_v5.py": "7aabf427f3237f6b986c01f7e84236b371f88eb6c64aadf2cee3b6b054aa455c"
   },
   "referenceImagesUsedAsTexture": false,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 14.65716814994812,
+  "secondsBeforeRender": 15.799607992172241,
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v10",
-    "stamp": "v10",
-    "rawGlbSha256": "12c1aaf3c0015e16125af55a4bd1f74cc48516ab6bb268500c24a06cdf9128eb"
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v11",
+    "stamp": "v11",
+    "rawGlbSha256": "dbccb0d8e596eec68e0e4877a499193c070bfe3a8ca51fde20313880d430ed40"
   }
 }
