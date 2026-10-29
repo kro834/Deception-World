@@ -27,6 +27,8 @@ export type GuardianSurfaceUniforms = {
   uFaceTip: { value: THREE.Vector3 };
   /** Unsharp mask on painted albedo: 0 off, 1 full (ridges crisp, blotches flattened). */
   uClarity: { value: number };
+  /** World units per model unit: the bone veins are sized in world space. */
+  uVeinScale: { value: number };
 };
 
 export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): GuardianSurfaceUniforms {
@@ -49,6 +51,7 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uFaceTip: { value: new THREE.Vector3(0, 0, 1) },
     // Off until the v13 re-projection: on the v12 atlas it read as specks or darkened the body.
     uClarity: { value: 0 },
+    uVeinScale: { value: 1 },
   };
 }
 
@@ -141,43 +144,93 @@ export function applyGuardianInkSurface(
         } else lattice.push({ material, base: material.emissiveIntensity });
         // The face: a leaf-shaped lattice glowing saturated green over near-black gaps, the
         // lines brightening toward the tip, a white-hot point at the tip (05/07/08).
+        // Lattice source: 2 = the v18 bud's own UV0 (u around, v base→tip); 1 = a temporary
+        // parametrisation around the HeadPivot→MouthSocket axis; 0 = the authored mask.
+        const faceMode = {
+          value: /face lattice/i.test(material.name) && node.geometry.getAttribute("uv") ? 2 : 1,
+        };
+        // The v17 leaf shows about a quarter turn of the axis parametrisation, so it takes
+        // more cells per turn to show 6–8 across; the v18 bud's UV spans the whole bud.
+        const faceCells = { value: faceMode.value === 2 ? 8 : 28 };
+        const faceRows = { value: faceMode.value === 2 ? 10 : 12 };
         material.onBeforeCompile = (shader) => {
-          Object.assign(shader.uniforms, { uFaceBase: uniforms.uFaceBase, uFaceTip: uniforms.uFaceTip });
+          Object.assign(shader.uniforms, {
+            uFaceBase: uniforms.uFaceBase,
+            uFaceTip: uniforms.uFaceTip,
+            uFaceMode: faceMode,
+            uFaceCells: faceCells,
+            uFaceRows: faceRows,
+          });
           shader.vertexShader = shader.vertexShader
-            .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianWorld;")
+            .replace(
+              "#include <common>",
+              "#include <common>\nvarying vec3 vGuardianWorld;varying vec2 vGuardianUv;",
+            )
             .replace(
               "#include <skinning_vertex>",
-              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;",
+              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;vGuardianUv=uv;",
             );
           shader.fragmentShader = shader.fragmentShader
             .replace(
               "#include <common>",
-              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;varying vec3 vGuardianWorld;",
+              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;uniform float uFaceMode,uFaceCells,uFaceRows;varying vec3 vGuardianWorld;varying vec2 vGuardianUv;",
             )
             .replace(
               "#include <color_fragment>",
-              "#include <color_fragment>\n diffuseColor.rgb=mix(diffuseColor.rgb*vec3(.35,.7,.45),vec3(.02,.17,.06),.75);",
+              "#include <color_fragment>\n if(uFaceMode<.5)diffuseColor.rgb=mix(diffuseColor.rgb*vec3(.35,.7,.45),vec3(.02,.17,.06),.75);",
             )
             .replace(
               "#include <emissivemap_fragment>",
               `#include <emissivemap_fragment>
 {
  vec3 gAxis=uFaceTip-uFaceBase;float gLen=max(length(gAxis),1e-3);gAxis/=gLen;
- float gT=clamp(dot(vGuardianWorld-uFaceBase,gAxis)/gLen,0.,1.);
- float gLine=dot(totalEmissiveRadiance,vec3(.3333));
- float gGrad=mix(.35,1.2,pow(gT,1.5));
- float gHot=exp(-pow((1.-gT)/.16,2.));
- // The bud's outline stays dark; the cells themselves glow deep emerald.
+ vec3 gRel=vGuardianWorld-uFaceBase;
+ float gT=clamp(dot(gRel,gAxis)/gLen,0.,1.);
+ float gU=0.;
+ if(uFaceMode>1.5){gU=vGuardianUv.x;gT=clamp(vGuardianUv.y,0.,1.);}
+ else{
+  vec3 gPerp=gRel-gAxis*dot(gRel,gAxis);
+  vec3 gRef=normalize(cross(gAxis,abs(gAxis.y)<.9?vec3(0.,1.,0.):vec3(1.,0.,0.)));
+  vec3 gRef2=cross(gAxis,gRef);
+  gU=atan(dot(gPerp,gRef2),dot(gPerp,gRef))/6.2831853+.5;
+ }
  float gEdge=pow(1.-saturate(dot(normal,normalize(vViewPosition))),3.);
- diffuseColor.rgb*=1.-.7*gEdge;
- vec3 gCells=vec3(.03,.24,.09)*(.35+.85*gT)*(1.-.8*gEdge);
- // Lines are mint, not white: a saturated line colour at a lower intensity, so tone mapping
- // leaves them green; only the tip goes white-green.
- totalEmissiveRadiance=gCells+(vec3(.4,1.,.56)*gLine*gGrad*1.3+vec3(.8,1.,.86)*gLine*gHot*1.8+vec3(.78,1.,.84)*gHot*gHot*.45)*(1.-.6*gEdge);
+ float gHot=exp(-pow((1.-gT)/.14,2.));
+ float gPulse=dot(emissive,vec3(.3333))/1.4;
+ float gGrad=mix(.35,1.2,pow(gT,1.5));
+ if(uFaceMode<.5){
+  float gLine=dot(totalEmissiveRadiance,vec3(.3333));
+  diffuseColor.rgb*=1.-.7*gEdge;
+  vec3 gCells=vec3(.03,.24,.09)*(.35+.85*gT)*(1.-.8*gEdge);
+  totalEmissiveRadiance=gCells+(vec3(.4,1.,.56)*gLine*gGrad*1.3+vec3(.8,1.,.86)*gLine*gHot*1.8+vec3(.78,1.,.84)*gHot*gHot*.45)*(1.-.6*gEdge);
+ }else{
+  // Procedural net: two spiral families around the bud with the rows compressing toward
+  // the tip (a pinecone net). Antialiased from a seam-free derivative: the u seam is moved
+  // half a turn for the second estimate, and the cell count is even, so both estimates
+  // describe the same lines. Line width is 1/8 of a cell.
+  float gH=uFaceRows*pow(gT,2.);
+  float gA=uFaceCells*gU+gH,gB=uFaceCells*gU-gH;
+  float gU2=fract(gU+.5);
+  float gA2=uFaceCells*gU2+gH,gB2=uFaceCells*gU2-gH;
+  float gWa=min(fwidth(gA),fwidth(gA2)),gWb=min(fwidth(gB),fwidth(gB2));
+  float gFa=fract(gA),gFb=fract(gB);
+  float gDa=min(gFa,1.-gFa),gDb=min(gFb,1.-gFb);
+  float gLineA=1.-smoothstep(.0625-gWa,.0625+gWa,gDa);
+  float gLineB=1.-smoothstep(.0625-gWb,.0625+gWb,gDb);
+  float gFade=1.-smoothstep(.25,.6,max(gWa,gWb));
+  float gLines=max(gLineA,gLineB)*gFade;
+  float gDmin=min(gDa,gDb);
+  float gCellShade=1.-.6*smoothstep(.06,.4,gDmin)*gFade;
+  diffuseColor.rgb=vec3(.008,.07,.025)*(1.-.7*gEdge);
+  vec3 gCells=vec3(.02,.2,.075)*(.3+.9*gT)*gCellShade*(1.-.8*gEdge);
+  vec3 gMint=mix(vec3(.4,1.,.56),vec3(.86,1.,.9),pow(gT,3.));
+  vec3 gStar=vec3(.8,1.,.86)*gHot*(1.4+.6*pow(abs(cos(uFaceCells*3.1415927*gU)),6.));
+  totalEmissiveRadiance=gCells*gPulse+(gMint*gLines*gGrad*1.4+gStar+vec3(.78,1.,.84)*gHot*gHot*.4)*gPulse*(1.-.6*gEdge);
+ }
 }`,
             );
         };
-        material.customProgramCacheKey = () => "guardian-face-lattice-v2";
+        material.customProgramCacheKey = () => "guardian-face-lattice-v3";
         material.needsUpdate = true;
         continue;
       }
@@ -263,6 +316,16 @@ export function applyGuardianInkSurface(
             .replace(
               "#include <emissivemap_fragment>",
               `#include <emissivemap_fragment>
+#ifdef GUARDIAN_BONE
+if(gVein>.001){
+ // The veins also bend the normal a little (bump from screen-space derivatives).
+ vec3 gSp=-vViewPosition;vec3 gSx=dFdx(gSp),gSy=dFdy(gSp);
+ vec2 gHd=vec2(dFdx(gVein),dFdy(gVein))*.018;
+ vec3 gR1=cross(gSy,normal),gR2=cross(normal,gSx);
+ float gDet=dot(gSx,gR1)*(float(gl_FrontFacing)*2.-1.);
+ normal=normalize(abs(gDet)*normal-sign(gDet)*(gHd.x*gR1+gHd.y*gR2));
+}
+#endif
 {
  vec3 gV=normalize(vViewPosition);
  float gNdV=saturate(dot(normal,gV));
@@ -294,10 +357,10 @@ export function applyGuardianInkSurface(
       material.onBeforeCompile = (shader) => {
         Object.assign(shader.uniforms, uniforms);
         shader.vertexShader = shader.vertexShader
-          .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianWorld;")
+          .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianWorld;varying vec3 vGuardianLocal;")
           .replace(
             "#include <skinning_vertex>",
-            "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;",
+            "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;vGuardianLocal=position;",
           );
         shader.fragmentShader = shader.fragmentShader
           .replace(
@@ -311,11 +374,33 @@ varying vec3 vGuardianWorld;
 float gBone,gLum;
 const float gSkinFamily=${family === "bone" ? "0." : "1."};
 const float gPainted=${material.map ? "1." : "0."};
+${family === "bone" ? "#define GUARDIAN_BONE" : ""}
+varying vec3 vGuardianLocal;uniform float uVeinScale;float gVein;
+vec3 gvHash3(vec3 p){p=fract(p*vec3(.1031,.1030,.0973));p+=dot(p,p.yxz+33.33);return fract((p.xxy+p.yxx)*p.zyx);}
+float gvEdge(vec3 p){vec3 i=floor(p),f=fract(p);float f1=8.,f2=8.;
+ for(int z=-1;z<=1;z++)for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec3 g=vec3(float(x),float(y),float(z));vec3 o=gvHash3(i+g);float d=length(g+o-f);if(d<f1){f2=f1;f1=d;}else if(d<f2){f2=d;}}
+ return f2-f1;}
 const float gAtlas=${material.map && /painted/i.test(material.name) ? "1." : "0."};`,
           )
           .replace(
             "#include <color_fragment>",
             `#include <color_fragment>
+#ifdef GUARDIAN_BONE
+{
+ // Fine reticulation on bone: Voronoi edges at two scales in the bind-pose surface space
+ // (stable on the skin in every pose), each fading before it could alias.
+ vec3 gVp=vGuardianLocal*uVeinScale;
+ float gVfw=length(fwidth(gVp));
+ float gFade1=1.-smoothstep(.02,.06,gVfw),gFade2=1.-smoothstep(.008,.025,gVfw);
+ gVein=0.;
+ if(gFade1>.01){
+  float gE1=gvEdge(gVp*10.);float gV1=(1.-smoothstep(0.,.14,gE1))*gFade1;
+  float gV2=0.;
+  if(gFade2>.01){float gE2=gvEdge(gVp*25.);gV2=(1.-smoothstep(0.,.18,gE2))*gFade2;}
+  gVein=gV1*.55+gV2*.45;
+ }
+}
+#endif
 if(gPainted>.5){
  // Painted albedo (the 2026-10-30 tiles now, the projected originals later): the texture
  // already says where ridge and pit are, so it passes through with a luminance curve only.
@@ -378,7 +463,10 @@ if(gPainted>.5){
  // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
  float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  diffuseColor.rgb*=mix(1.,min(1.,.78/max(gOut,1e-4)),gBone);
-}`,
+}
+#ifdef GUARDIAN_BONE
+ diffuseColor.rgb*=mix(vec3(1.),vec3(.62,.82,.66),gVein);
+#endif`,
           )
           .replace(
             "#include <emissivemap_fragment>",

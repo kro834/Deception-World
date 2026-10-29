@@ -820,6 +820,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         center = box.getCenter(new THREE.Vector3());
       const scale = 6.8 / Math.max(size.y, size.x * 0.8, size.z * 0.8);
       model.scale.multiplyScalar(scale);
+      surfaceUniforms.uVeinScale.value = scale;
       model.position.addScaledVector(center, -scale);
       floating.add(model);
       floating.updateMatrixWorld(true);
@@ -983,7 +984,11 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         }
       });
       skeletonsCount = modelSkeletons.size;
+      // Oblique detail on the painted atlas and the tile maps stays crisp.
+      const anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
       for (const texture of materialTextures) {
+        texture.anisotropy = anisotropy;
+        texture.needsUpdate = true;
         const image = texture.image as { width?: number; height?: number } | undefined;
         if (image?.width && image.height)
           materialTextureBytesEstimated +=
