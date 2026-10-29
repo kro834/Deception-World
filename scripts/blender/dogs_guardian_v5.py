@@ -747,7 +747,7 @@ print("BODY_DONE", round(time.time() - START, 1), flush=True)
 
 # --- forked tails with spines
 # 05/06: the forked tails are pale grey-green with dark scale rows, like the flank, not ink membrane
-mtail = MeshBuilder("Tails | forked spined tails", body, [CRESCENT_MAT, BONE_MAT, CORE_MAT])
+mtail = MeshBuilder("Tails | forked spined tails", body, [MEMB_MAT, BONE_MAT, CORE_MAT, CRESCENT_MAT])   # v20d: dark pit base, crescent rows are geometry; the thin tips keep the crescent tile
 for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 0.20, 6)):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = rad0 * (1 - tt) ** 0.85 + 0.006
@@ -760,9 +760,34 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
         if TILES:
             return mix((0.78, 0.86, 0.78), (1.0, 1.0, 1.0), pale)
         return mix(INK, mix(BONE, BONE_EDGE, 0.3), pale * (0.85 - 0.3 * t))
+    f_tube0 = len(mtail.f)
     mtail.tube(path, radii, sides=14, color_fn=tail_col, hint=(0, 0, 1), mat=0, taper_end=True,
                weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st),
-               uv_fn=tube_uv(arc, radii, 14, tile_m=0.8) if TILES else (lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0)))   # v20: rows the atlas can resolve
+               uv_fn=tube_uv(arc, radii, 14, tile_m=0.5) if TILES else (lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0)))
+    # the thin tips (where the geometry rows stop) keep the fine crescent tile, so `Skin | painted Serp` stays in the contract
+    i_thin = next((k for k in range(n) if radii[k] < 0.025), n - 1)
+    for fk in range(f_tube0 + i_thin * 14, len(mtail.f)):
+        mtail.fm[fk] = 3
+    # v20d: crescent rows as real geometry - small pale bone hooks lying on the dark tube, hooking with the flow,
+    # alternating rows, denser while the tail is thick (about 530 hooks over both tails, 5-sided, ~27k tris)
+    s_acc = 0.0; last = -1.0; row = 0
+    for i in range(2, n - 2):
+        s_acc += np.linalg.norm(path[i] - path[i - 1]); r_ = radii[i]
+        step = 0.045 + 0.10 * r_
+        if s_acc - last < step or r_ < 0.025:
+            continue
+        last = s_acc; row += 1
+        nc = max(3, int(round(10 * r_ / 0.24)))
+        mtail.cur_w = chain_weights(ss[i], stations)
+        for k in range(nc):
+            a_ = (k + 0.5 * (row % 2)) / nc * math.tau
+            nrm_s = unit(Nn[i] * math.cos(a_) + B[i] * math.sin(a_))
+            side_ = unit(np.cross(nrm_s, T[i])) * (1 if (row + k) % 2 else -1)
+            length = step * 0.9
+            cp = crosier_path(path[i] + nrm_s * (r_ * 0.97), T[i], side_, length, turns=0.8, straight=0.2, n=6, bend_power=1.5)
+            tc = np.linspace(0, 1, len(cp))
+            mtail.ribbon(cp, (0.30 * length) * (1 - tc) ** 0.8 + 0.003, np.full(len(cp), 0.006), sides=5, color=mix(BONE, BONE_EDGE, 0.5), hint=nrm_s, mat=1)
+        mtail.cur_w = None
     is_a = path is TAIL_A
     lengths = [1.13, 1.31, 1.28, 1.15, 1.04, .95, .87, .80, .85, .90, .83, .72, .60, .46] if is_a else [.95, 1.05, .95, .80, .62, .45]
     for ii, (t, le) in enumerate(zip(np.linspace(.07 if is_a else .12, .89, spines), lengths)):
@@ -902,7 +927,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     else:
         ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
     ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp])
-    ts = ws * (0.30 if cluster else (0.36 if big else 0.45)) + 0.008   # 05's curls are flat dark ribbons, not round tubes
+    ts = ws * (0.30 if cluster else (0.36 if big else 0.26)) + 0.008   # flat dark ribbons; the fan is a thin band so its chain stands proud
     mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT, GLASS_MAT])
 
     def rib_color(i, t, j, a):
@@ -920,21 +945,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     for i in range(3, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
         edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
-        if fan:   # 05's zipper: S-hooks lying ACROSS the inner 40% of the tentacle, packed so they overlap into a
-                  # continuous pale-bone chain that runs into the tip curl; low-poly, they are small on screen
-            length = min(0.24, max(0.02, 0.58 * w)) * (1 + 0.12 * noise1(i * 0.9, idx))
-            if s_acc - last < max(0.02, 0.36 * length):
-                continue
-            last = s_acc
-            d0 = unit(edge_dir * 0.85 + T[i] * 0.45)
-            tp = crosier_path(path[i] + edge_dir * (w * 0.06) + Nn[i] * (ts[i] * 0.45), d0, T[i], length, turns=0.75, straight=0.25, n=7, bend_power=1.5)
-            tt_ = np.linspace(0, 1, len(tp))
-            tw = (0.50 * length) * (1 - tt_) ** 0.7 + 0.004
-            tth = np.maximum(0.005, 0.22 * length) * (1 - 0.5 * tt_)
-            mb.cur_w = chain_weights(i / (n - 1), stations)
-            mb.ribbon(tp, tw, tth, sides=6, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.4), BONE_EDGE, t1 ** 0.7),
-                      hint=nrm, bulge=1.0, mat=1)
-            mb.cur_w = None
+        if fan:   # v20d: no saw teeth on the fan; its pale accent is the S-chain zipper built below
             continue
         length = min(0.30, max(0.025, (0.55 if big else 0.48) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
         if s_acc - last < max(0.024, 0.55 * length):
@@ -976,8 +987,32 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
             mb.cur_w = chain_weights(i / (n - 1), stations)
             mb.tube(catmull([a_, mid, b_], 4), 0.032 * w + 0.004, sides=6, flat=0.6, color=mix(BONE_ROOT, BONE_EDGE, 0.6), hint=nrm, mat=2)
             mb.cur_w = None
-    # dark crenellated knob row along the outer edge, through the tip spiral
-    rim_knobs(mb, path, ws, ts, (T, Nn, B), lateral, lambda t_: chain_weights(t_, stations))
+    # dark crenellated knob row along the outer edge (big arms, clusters): dark emerald vertex colour x the tile = Skin, dark.
+    # 05's fan tentacles have a smooth dark outer edge, so the fan gets none.
+    if not fan:
+        rim_knobs(mb, path, ws, ts, (T, Nn, B), lateral, lambda t_: chain_weights(t_, stations), color=(0.03, 0.07, 0.04))
+    if fan:
+        # v20d (owner: 扇の触手の内縁の淡いファスナー…幅の広い淡い帯): a continuous chain of pale S-links along the INNER
+        # (concave) edge, protruding outside the ribbon's silhouette - a serpentine bone ribbon whose wavelength is half the
+        # local width (one "S" per 0.5w), amplitude 0.22w around a centre 0.46w from the axis, stroke thicker at the loops,
+        # flat section 0.14w thick (proud of both faces), shrinking with the taper and running into the tip curl.
+        arcm = np.concatenate(([0.0], np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1))))
+        i0 = min(n - 2, max(2, int(s_base_end * (n - 1))))
+        s0 = np.sign(np.dot(B[i0], lateral)) or 1.0          # the concave side, constant along the RMF frame (no flips in the curl)
+        E = B * s0
+        pts = []; wid = []; thk = []; wts = []
+        s_cur = float(arcm[2]); ph = 0.0
+        while s_cur < float(arcm[-1]) - 1e-6:
+            w = float(np.interp(s_cur, arcm, ws)); lam = max(0.03, 0.5 * w)
+            p = np.array([np.interp(s_cur, arcm, path[:, k]) for k in range(3)])
+            e = unit(np.array([np.interp(s_cur, arcm, E[:, k]) for k in range(3)]))
+            pts.append(p + e * (0.50 * w + 0.24 * w * math.sin(ph)))      # centred on the edge, loops 0.24w outside it
+            wid.append(w * (0.12 + 0.10 * abs(math.sin(ph))) + 0.004)      # fat at the loops, slimmer at the crossings
+            thk.append(0.30 * w + 0.006)                                    # proud of both faces of the 0.26w band
+            wts.append(chain_weights(s_cur / float(arcm[-1]), stations))
+            ds = lam / 10.0; s_cur += ds; ph += ds / lam * math.tau
+        mb.ribbon(np.asarray(pts), np.asarray(wid), np.asarray(thk), sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=nrm, bulge=1.0,
+                  mat=1, weights_fn=lambda i2, t2, W=wts: W[min(i2, len(W) - 1)])
     # curl clusters: one more fiddlehead sprouting from the short straight part of each cluster curl, with its own knob row
     if idx in CLUSTER_PARENT:
         for fr_ in (0.14,):
@@ -989,7 +1024,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
             sw = (w * 0.70) * (1 - 0.6 * tt_) + 0.006; sth = sw * 0.30 + 0.006
             wfix = chain_weights(k / (n - 1), stations)
             fr2, _ = mb.ribbon(sp, sw, sth, sides=10, color_fn=rib_color, hint=nrm, bulge=1.2, mat=0, weights_fn=lambda i2, t2, wf=wfix: wf)
-            rim_knobs(mb, sp, sw, sth, fr2, T[k], lambda t_, wf=wfix: wf, start=1)
+            rim_knobs(mb, sp, sw, sth, fr2, T[k], lambda t_, wf=wfix: wf, start=1, color=(0.03, 0.07, 0.04))
     fob = attach(mb.finish(micro_uv_scale=2.4)); clean(fob)
 print("FRONDS_DONE", round(time.time() - START, 1), flush=True)
 

@@ -275,7 +275,7 @@ def make_tiles(n, out_dir=None, seed=8):
     out["crescent"] = _byte_image("tile-crescent-albedo", _compose_scales(h, bone, scale, outline, mot), webp=True)
     out["crescent_n"] = _as_webp_lossless(_normal_image("tile-crescent-normal", h * 0.012, 1.0, downsample=1), quality=90)
     h, bone = tile_curl(n, rng)
-    out["curl"] = _byte_image("tile-curl-albedo", _compose(h, bone, mot, 0.35), webp=True)
+    out["curl"] = _byte_image("tile-curl-albedo", _compose(h, bone, mot, 0.35, 0.30), webp=True)   # v20d: dark tentacle bodies, chains mid-dark
     out["curl_n"] = _as_webp_lossless(_normal_image("tile-curl-normal", h * 0.010, 1.0, downsample=1), quality=90)
     m2 = n // 2; mot2 = mot[::2, ::2]; wr2 = wr[::2, ::2]
     h, col = tile_pits(m2)   # v19: oval pits in rows (whorl grooves, rib recesses)
