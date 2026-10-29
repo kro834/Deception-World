@@ -200,10 +200,9 @@ export function applyGuardianInkSurface(
         };
         // The v17 leaf shows about a quarter turn of the axis parametrisation, so it takes
         // more cells per turn to show 6–8 across; the v18 bud's UV spans the whole bud.
-        const faceCells = { value: faceMode.value === 2 ? 16 : 28 };
-        // 16 rows along the axis keep the cells about as wide as tall most of the way down (05's
-        // lattice reaches the tip; the tall-cell fade is a safety, not the design).
-        const faceRows = { value: faceMode.value === 2 ? 16 : 12 };
+        // 12 petals around (5–6 across the front half), 7 rows from the border to the tip
+        const faceCells = { value: faceMode.value === 2 ? 12 : 28 };
+        const faceRows = { value: faceMode.value === 2 ? 7 : 12 };
         if (faceMode.value === 2) {
           // The face is one structure with the dark head (owner, 10-30): it is lit exactly like
           // the head skin — same toon ramp, no reflections, the authored relief at half strength.
@@ -226,7 +225,7 @@ export function applyGuardianInkSurface(
             )
             .replace(
               "#include <skinning_vertex>",
-              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;vGuardianUv=uv;",
+              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;\n#ifdef USE_UV1\nvGuardianUv=uv1;\n#else\nvGuardianUv=uv;\n#endif",
             );
           shader.fragmentShader = shader.fragmentShader
             .replace(
@@ -264,52 +263,47 @@ ${GUARDIAN_RIM_GLSL}
   vec3 gCells=vec3(.03,.24,.09)*(.35+.85*gT)*(1.-.8*gEdge);
   totalEmissiveRadiance=gCells+(vec3(.4,1.,.56)*gLine*gGrad*1.3+vec3(.8,1.,.86)*gLine*gHot*1.8+vec3(.78,1.,.84)*gHot*gHot*.45)*(1.-.6*gEdge);
  }else{
-  // Procedural net: two spiral families around the bud with the rows compressing toward
-  // the tip (a pinecone net). Antialiased from a seam-free derivative: the u seam is moved
-  // half a turn for the second estimate, and the cell count is even, so both estimates
-  // describe the same lines. Line width is 1/8 of a cell.
-  // The row coordinate bends harder toward the tip, so the two families sweep around the
-  // bud and converge there like a sunflower's seed spirals; lens-shaped cells follow the flow.
-  // The rows run on the geometric axis (the bud's own v saturates to 1 over its lower part on
-  // v20, which would leave the lower face without a net); u still comes from the bud's UV.
-  // g(t)=.7t+.3t³: the rows compress toward the tip (slope 0.7 → 1.6), so the cells stay about
-  // isotropic as the bud narrows; the families never run nearly parallel.
-  float gH=uFaceRows*(.7*gTa+.3*gTa*gTa*gTa);
-  // an azimuthal drift that dies toward the tip, so no segment stays straight
-  float gDrift=.05*(1.-gTa)*sin(12.566371*gU);
-  float gUd=gU+gDrift;
-  float gA=uFaceCells*gUd+gH,gB=uFaceCells*gUd-gH;
-  float gU2=fract(gU+.5)+gDrift;
-  float gA2=uFaceCells*gU2+gH,gB2=uFaceCells*gU2-gH;
-  float gWa=min(fwidth(gA),fwidth(gA2)),gWb=min(fwidth(gB),fwidth(gB2));
-  float gFa=fract(gA),gFb=fract(gB);
-  float gDa=min(gFa,1.-gFa),gDb=min(gFb,1.-gFb);
-  float gLineA=1.-smoothstep(.0625-gWa,.0625+gWa,gDa);
-  float gLineB=1.-smoothstep(.0625-gWb,.0625+gWb,gDb);
-  // The net fades smoothly into the tip glow before its cells could degenerate into stripes.
-  // Along the region everything is keyed to the geometric axis (HeadPivot = the region border,
-  // MouthSocket = the tip): the bud's own v saturates early on v20, and the glow is the last
-  // fifth of the face in 05. The tall-cell fade below still catches stripes before that.
+  // The face pattern (owner, 10-30 「顔の模様が違う」): a lotus bud of overlapping pointed
+  // petals — rows of petal cells, each row shifted by half a cell (imbricate, not a crossing
+  // grid), each petal a pointed arch (rounded at the back, pointed toward the tip) outlined by
+  // a thin mint line, dark at its back and emerald toward its point; the whole bud brightens
+  // toward the tip, with a faint midrib. Built on the region's UV (u around, v border → tip),
+  // antialiased from a seam-free u derivative (a second estimate with the seam moved half a
+  // turn; the cell count is even, so both describe the same petals).
+  float gY=uFaceRows*(.75*gT+.25*gT*gT*gT);
+  float gRow=floor(gY);
+  float gCy=gY-gRow;
+  float gShift=mod(gRow,2.)*.5;
+  float gX=uFaceCells*gU+gShift,gX2=uFaceCells*fract(gU+.5)+gShift;
+  float gCx=fract(gX)-.5,gCx2=fract(gX2)-.5;
+  // the petal outline |x| = w(y): rounded at the back, pointed at the tip
+  float gWy=.5*pow(1.-gCy,.6);
+  float gD=abs(gCx)-gWy,gD2=abs(gCx2)-gWy;
+  float gAA=min(fwidth(gD),fwidth(gD2));
+  float gLineP=1.-smoothstep(.045-gAA,.045+gAA,abs(gD));
+  // the bud's midrib: a faint centre line toward the tip
+  float gMidrib=exp(-pow((gU-.5)*uFaceCells*3.,2.))*smoothstep(.4,1.,gT)*.35;
+  // The petals fade smoothly into the tip glow before they could degenerate into stripes.
+  // Along the region the glow is keyed to the geometric axis (HeadPivot = the region border,
+  // MouthSocket = the tip): the glow is the last fifth of the face in 05.
   float gTip=smoothstep(.82,.96,gTa);
-  // Toward the tip the bud's circumference shrinks, so the cells grow tall and thin on screen
-  // and both families read as vertical stripes. Fade the net where a cell is over ~3x taller
-  // than wide (seam-free u derivative), and in the last stretch of the bud's own UV.
-  float gCu=min(fwidth(uFaceCells*gU),fwidth(uFaceCells*gU2));
-  float gTall=gCu/max(fwidth(gH),1e-5);
+  // Toward the tip the circumference shrinks, so the cells grow tall and thin on screen and
+  // read as stripes: fade the pattern where a cell is over ~3x taller than wide.
+  float gCu=min(fwidth(uFaceCells*gU),fwidth(uFaceCells*fract(gU+.5)));
+  float gTall=gCu/max(fwidth(gY),1e-5);
   float gNet=(1.-smoothstep(2.5,4.,gTall))*(1.-smoothstep(.85,.97,gTa));
-  float gFade=(1.-smoothstep(.25,.6,max(gWa,gWb)))*(1.-gTip)*gNet;
-  float gLines=max(gLineA,gLineB)*gFade;
-  float gDmin=min(gDa,gDb);
-  // Each cell is darker at its centre and lighter toward its rim (an inner glow at the lines).
-  float gCellShade=mix(1.,.42,smoothstep(.05,.42,gDmin)*gFade);
-  // The face is the head's own dark skin with the pattern on it: the cells stay the near-black
-  // skin at the region border (the toon tones above) and warm to deep emerald only toward the
-  // tip, where the glow is; the lines fade in over the first stretch of the region (axis t
-  // 0–.12, v 0–.15 under the v21 convention), inside the dark outline band, so the pattern has
-  // no hard edge. The tip glow and the cap stay as before.
-  float gWarm=smoothstep(.3,.8,gTa)*.25+.9*gTa*gTa*gTa*gTa;
+  float gFade=(1.-smoothstep(.25,.6,gAA))*(1.-gTip)*gNet;
+  float gLines=max(gLineP,gMidrib)*gFade;
+  // inside a petal: dark at the back, emerald toward its point; between petals the dark skin
+  float gInside=1.-smoothstep(-.02,.02,gD);
+  float gPetal=mix(.08,1.,pow(gCy,1.5))*gInside;
+  // The face is the head's own dark skin with the pattern on it: near-black at the region
+  // border (the toon tones above), the petals warming to emerald toward the tip; the pattern
+  // fades in over the first stretch of the region (v 0–.15, axis t 0–.12), inside the dark
+  // outline band, so it has no hard edge. The tip glow, the cap and the star stay as before.
+  float gWarm=.3+.7*(smoothstep(.3,.8,gTa)*.25+.9*gTa*gTa*gTa*gTa);
   float gIn=smoothstep(0.,.15,gT)*smoothstep(0.,.12,gTa);
-  vec3 gCells=vec3(.015,.15,.055)*gWarm*gCellShade*(1.-.8*gEdge);
+  vec3 gCells=vec3(.02,.17,.065)*gWarm*gPetal*gFade*(1.-.8*gEdge);
   vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gTa,3.));
   vec3 gRad=(gCells+gMint*gLines*gGrad*1.5*(1.-.6*gEdge))*gPulse*gIn;
   gRad+=vec3(.3,1.,.5)*gTip*.9*gPulse;
@@ -325,7 +319,7 @@ ${GUARDIAN_RIM_GLSL}
               `#include <aomap_fragment>\nif(uFaceMode>1.5)${GUARDIAN_TONES_GLSL}`,
             );
         };
-        material.customProgramCacheKey = () => "guardian-face-lattice-v5";
+        material.customProgramCacheKey = () => "guardian-face-lattice-v6";
         material.needsUpdate = true;
         continue;
       }
@@ -729,6 +723,79 @@ function writeCoreRadius(model: THREE.Object3D) {
 // 0.072 of the dome's radius (the model's log-polar layout lights the centre below 0.08;
 // measured against the documented radii 0.34 / 0.52). The painted head gets a per-vertex dome weight (1 at a
 // centre, 0 at the rim and everywhere else), in the bind pose so it holds in every pose.
+// v21: the welded head has no core discs, so the dome centres are read from the head atlas —
+// each galaxy's centre is baked as a solid near-white spot, the brightest thing in the atlas —
+// and mapped to the mesh through the atlas UV; the dome's radius is the reach of its island.
+function domesFromAtlas(node: THREE.Mesh, material: THREE.MeshStandardMaterial) {
+  const domes: { centre: THREE.Vector3; radius: number }[] = [];
+  const map = material.map;
+  const image = map?.image as CanvasImageSource & { width?: number; height?: number };
+  if (!map || !image?.width || typeof document === "undefined") return domes;
+  const uv = node.geometry.getAttribute(map.channel === 2 ? "uv2" : map.channel === 1 ? "uv1" : "uv");
+  const position = node.geometry.getAttribute("position");
+  if (!uv || !position) return domes;
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return domes;
+  try {
+    context.drawImage(image, 0, 0, size, size);
+  } catch {
+    return domes;
+  }
+  const { data } = context.getImageData(0, 0, size, size);
+  const lum = (x: number, y: number) => {
+    const i = (y * size + x) * 4;
+    return data[i] * 0.2126 + data[i + 1] * 0.7152 + data[i + 2] * 0.0722;
+  };
+  const spots: { x: number; y: number; l: number }[] = [];
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const l = lum(x, y);
+    if (l > 200) spots.push({ x, y, l });
+  }
+  spots.sort((a, b) => b.l - a.l);
+  const centres: { x: number; y: number }[] = [];
+  for (const spot of spots) {
+    if (centres.every((c) => Math.hypot(c.x - spot.x, c.y - spot.y) > 24)) centres.push(spot);
+    if (centres.length === 2) break;
+  }
+  const p = new THREE.Vector3();
+  for (const c of centres) {
+    // the island's reach: rings around the centre stay about a third mint (the crescents) and
+    // drop to nothing on the flat dark skin beyond the island
+    let reach = 0;
+    for (let d = 2, misses = 0; d < size / 4 && misses < 3; d++) {
+      let hits = 0;
+      for (let k = 0; k < 24; k++) {
+        const x = Math.round(c.x + d * Math.cos((k / 24) * Math.PI * 2));
+        const y = Math.round(c.y + d * Math.sin((k / 24) * Math.PI * 2));
+        if (x >= 0 && y >= 0 && x < size && y < size && lum(x, y) > 90) hits++;
+      }
+      if (hits >= 6) { reach = d; misses = 0; } else misses++;
+    }
+    const cu = c.x / size, cv = c.y / size, ru = reach / size;
+    let best = -1, bestDistance = Infinity, radius = 0;
+    for (let v = 0; v < uv.count; v++) {
+      const distance = Math.hypot(uv.getX(v) - cu, uv.getY(v) - cv);
+      if (distance < bestDistance) { bestDistance = distance; best = v; }
+    }
+    if (best < 0 || bestDistance > 0.02) continue;
+    const centre = new THREE.Vector3().fromBufferAttribute(position, best);
+    for (let v = 0; v < uv.count; v++) {
+      if (Math.hypot(uv.getX(v) - cu, uv.getY(v) - cv) > ru) continue;
+      radius = Math.max(radius, p.fromBufferAttribute(position, v).distanceTo(centre));
+    }
+    // the documented domes are R 0.27 and 0.42 on the head: anything beyond is a merged island
+    if (radius > 0.05) domes.push({ centre, radius: Math.min(radius, 0.5) });
+  }
+  // The island's reach in the atlas only orders the domes; their radii are the documented
+  // ones (v21: the upper dome R 0.42, the lower R 0.27, measured along the head's axis).
+  domes.sort((a, b) => b.centre.y - a.centre.y);
+  domes.forEach((dome, i) => (dome.radius = i === 0 ? 0.42 : 0.27));
+  return domes;
+}
+
 function writeDomeWeight(model: THREE.Object3D) {
   const p = new THREE.Vector3();
   model.traverse((node) => {
@@ -746,6 +813,7 @@ function writeDomeWeight(model: THREE.Object3D) {
       for (const cluster of clusterCores(sibling.geometry.getAttribute("position"), members, 0.15).clusters)
         domes.push({ centre: cluster.centre, radius: cluster.max / 0.072 });
     }
+    if (!domes.length) domes.push(...domesFromAtlas(node, material));
     const weight = new Float32Array(position.count);
     for (let v = 0; v < position.count && domes.length; v++) {
       p.fromBufferAttribute(position, v);
