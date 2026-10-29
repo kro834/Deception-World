@@ -451,7 +451,7 @@ def attach(ob):
 def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.42, 0.015), ribs=True,
                    crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=12,
                    rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False, crest_scale=1.0,
-                   uv_override=None, bands=None, station_phase=None, blades=0, blade_back=1.0, front_sign=1.0):
+                   uv_override=None, bands=None, station_phase=None, blades=0, blade_back=1.0, front_sign=1.0, rib_flare=0.0):
     """A dark membrane tube with transverse bone arcs over its front, rows of crescent scales
     (hooked curls lying on the surface) across the front, a crosier crest on the side given by
     crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
@@ -482,7 +482,7 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
         for ang in bands:
             a_ = math.radians(ang)
             bp = np.asarray([path[i] + (B[i] * math.cos(a_) + Nn[i] * math.sin(a_)) * (radii[i] * 1.0) for i in range(n)])
-            br = 0.14 * radii + 0.004
+            br = 0.11 * radii + 0.004
             mb.tube(bp, br, sides=5, color_fn=lambda i2, t2, j2, a2: mix(mix(BONE, BONE_EDGE, 0.5), GLOW, (glow_fn(i2) if glow_fn else 0.0) * 0.6),
                     hint=hint, weights_fn=wf, mat=mat_bone, taper_end=True, uv_fn=tube_uv(arc, br, 5))
     if paired and not blades:   # 05: a pale bone spine along the front face; the paired ribs grow from it at each station
@@ -512,10 +512,16 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
             ext = math.radians(arc_ext + 16 * noise1(count * 0.77, 13)); segs = 18
             bend = 0.3 * sp * (1 + 0.4 * noise1(count * 0.61, 29))
             ring = []
+            cdv_ = crest_fn(i) if (crest and rib_flare > 0) else None
+            s_out = (1.0 if float(np.dot(lat, cdv_)) >= 0 else -1.0) if cdv_ is not None else 0.0
             for k in range(segs + 1):
                 a = -ext + 2 * ext * k / segs
                 wob = 1 + 0.05 * noise1(a * 2 + count, 5)
-                ring.append(path[i] + (front * math.cos(a) + lat * math.sin(a)) * (r * 1.0 * wob) + flow * (bend * math.cos(a) ** 2))
+                p_ = path[i] + (front * math.cos(a) + lat * math.sin(a)) * (r * 1.0 * wob) + flow * (bend * math.cos(a) ** 2)
+                if cdv_ is not None:   # v20c: the rim-side end of each rib flares outward toward the rim spikes
+                    fl = max(0.0, s_out * a / ext) ** 2.2 * rib_flare
+                    p_ = p_ + cdv_ * (r * fl) + lat * (s_out * r * 0.5 * fl)
+                ring.append(p_)
             ring = np.asarray(ring)
             height = (0.16 * sp + 0.004) * rib_scale; halfw = rib_width * sp * (1 + 0.18 * noise1(count * 1.3, 9)) * rib_scale
             prof = np.array([(0.25 + 0.75 * math.sin(math.pi * k / segs) ** 0.45) for k in range(segs + 1)])
@@ -535,13 +541,14 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
                 if cdv is not None and float(np.dot(d_k, cdv)) > math.cos(math.radians(30)):
                     continue
                 back = flow * blade_back
-                q0 = path[i] + d_k * (r * 0.95); q1 = path[i] + d_k * (r * 1.35) + back * (0.25 * sp)
-                q2 = path[i] + d_k * (r * 1.70) + back * (0.65 * sp); q3 = path[i] + d_k * (r * 1.85) + back * (1.05 * sp)
+                lm = 1.0 + (0.6 * max(0.0, float(np.dot(d_k, cdv))) if cdv is not None else 0.0)   # v20c: dorsal blades longer (05/07)
+                q0 = path[i] + d_k * (r * 0.95); q1 = path[i] + d_k * (r * (0.95 + 0.40 * lm)) + back * (0.25 * sp * lm)
+                q2 = path[i] + d_k * (r * (0.95 + 0.75 * lm)) + back * (0.65 * sp * lm); q3 = path[i] + d_k * (r * (0.95 + 0.90 * lm)) + back * (1.05 * sp * lm)
                 bp = resample(catmull([q0, q1, q2, q3], 8), spacing=max(0.012, sp * 0.1))
                 tipdir = unit(bp[-1] - bp[-2])
                 curl = crosier_path(bp[-1], tipdir, d_k, 0.3 * sp + 0.02, turns=0.55, straight=0.2, bend_power=1.5)
                 bp = np.concatenate([bp[:-1], curl], axis=0); tb = np.linspace(0, 1, len(bp))
-                bw = (0.42 * sp + 0.006) * (1 - 0.8 * tb ** 1.2) + 0.005
+                bw = (0.34 * sp + 0.006) * (1 - 0.8 * tb ** 1.2) + 0.005   # v20c: a little narrower
                 mb.ribbon(bp, bw, np.maximum(0.005, bw * 0.25), sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE, BONE_EDGE, 0.2), BONE_EDGE, abs(math.cos(c1)) ** 2.0),
                           hint=unit(np.cross(d_k, flow)), mat=mat_bone, uv_fn=lambda i2, t2, j2, a2, u0=arc[i] / TILE_M: (u0 + t2 * 0.5, j2 / 8.0))
         elif paired and r > 0.03:
@@ -648,7 +655,7 @@ PER_COIL = max(1, round(2 * math.pi * R_REF / COIL_TILE))
 # v20: the whorl is the neck's fern wound into the spiral - one pale rachis along the coil, short paired ribs across it every
 # quarter tube-width (phase-locked to the pit tile so a dark oval pit sits in every gap), spikes on the rim, glowing core
 segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, spacing=(0.5, 0.0),
-               glow_fn=body_glow, ribs=True, arc_ext=70, rib_scale=1.0, rib_width=0.12, scales=0, crest_scale=1.6, mat_dark=3,
+               glow_fn=body_glow, ribs=True, arc_ext=60, rib_scale=0.9, rib_width=0.10, rib_flare=0.45, scales=0, crest_scale=1.6, mat_dark=3,
                bands=(90,), station_phase=U_COIL * 7, front_sign=-1.0, uv_override=(lambda i, t, j, a: (U_COIL[i], (1 - abs(2 * j / 12 - 1)) * PER_COIL / 2)) if TILES else None)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.45, 0.012), comb_fn=lambda i: body_comb(i + i_split),
@@ -906,10 +913,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
                           weights_fn=lambda i, t, st=stations: chain_weights(t, st),
                           uv_fn=(lambda i, t, j, a: (i * 0.018 / TILE_M, (1 - abs(2 * j / 14 - 1)) * 1.0)) if TILES else None)
     T, Nn, B = frames
-    # pale ridge line along the convex face
-    ridge = np.asarray([path[i] + Nn[i] * (ts[i] * 0.5 * 1.2 * 0.92) for i in range(n)])
-    mb.tube(ridge, 0.035 * ws + 0.004, sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=nrm, mat=1, taper_end=True,
-            weights_fn=lambda i, t, st=stations: chain_weights(t, st))
+    # (v20c) no pale ridge line along the convex face: 05's tentacles are dark, their only pale accent is the inner zipper / ladder
     # the comb of hooked teeth; on the fan (05, crops/arm-rims.jpg right) a broad, tightly packed pale-bone
     # S-curl zipper about 40% of the tentacle's width, running into the tip curl
     s_acc = 0.0; last = -1.0
