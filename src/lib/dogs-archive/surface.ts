@@ -224,7 +224,9 @@ const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
       const pulse = 0.5 + 0.5 * Math.sin(time * 1.35);
       const latticeScale = 1.25 + pulse * 0.3 + anticipation * 1.0 + strength * 0.5;
       for (const { material, base } of lattice) material.emissiveIntensity = base * latticeScale;
-      const coreScale = 0.9 + pulse * 0.1 + anticipation * 0.2 + strength * 0.15;
+      // The references' cores glow white-green; the authored strength is modest, so scale it
+      // up to the edge of the bloom threshold and let the breath push it over.
+      const coreScale = 2.0 + pulse * 0.3 + anticipation * 0.6 + strength * 0.4;
       for (const { material, base } of cores) material.emissiveIntensity = base * coreScale;
       for (const material of mouths) material.emissiveIntensity = strength * 4.5 + anticipation * 0.6;
     },

@@ -155,7 +155,7 @@ export function createGuardianSculptureLighting(
   // The paintings' light: a dark ink sky over a fire bank below, a pale key from above and in
   // front, saturated green rims from behind where the fire is. The creature stays the darkest
   // element of the picture. Only the key casts shadows.
-  const hemi = new THREE.HemisphereLight(0x4a5650, 0x0c2a14, 0.45);
+  const hemi = new THREE.HemisphereLight(0x4a5650, 0x0c2a14, 0.35);
   const key = new THREE.DirectionalLight(0xe6efe7, 1.9);
   key.position.set(5.8, 7.6, 6.4);
   key.target.position.set(0, 0.15, 0);
@@ -193,7 +193,7 @@ export function createGuardianSculptureLighting(
     } else {
       hemi.color.set(0x4a5650);
       hemi.groundColor.set(0x0c2a14);
-      hemi.intensity = 0.45;
+      hemi.intensity = 0.35;
       key.color.set(0xe6efe7);
       key.intensity = 1.9;
       rim.color.set(0x39d977);

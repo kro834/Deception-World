@@ -150,7 +150,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   host.appendChild(canvas);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#020906");
-  scene.fog = new THREE.FogExp2("#03100a", 0.012);
+  scene.fog = new THREE.FogExp2("#03100a", 0.009);
   const noise = createNoiseVolume();
   const backdrop = createInkBackdrop(noise);
   scene.add(backdrop.mesh);

@@ -79,14 +79,14 @@ void main(){
   float lobes=smoothstep(.32,.56,n*.7+n2*.4+(1.-z)*.12);
   float dens=env*head*lobes*2.2;
   float axis=exp(-r*r*(3.+z*7.))*(1.-z*.5)*head;
-  float fil=pow(1.-abs(2.*n2-1.),6.)*env*head;
+  float fil=pow(1.-abs(2.*n2-1.),5.)*env*head;
   float ink=smoothstep(.62,1.,1.-abs(2.*n2-1.))*dens+smoothstep(.7,1.,1.-abs(2.*n-1.))*dens*.6;
-  vec3 col=mix(vec3(.015,.07,.03),vec3(.14,.6,.22),smoothstep(0.,.4,dens));
-  col=mix(col,vec3(.62,.97,.64),smoothstep(.35,.8,dens+axis*.7));
-  col+=vec3(1.2,1.5,1.2)*(axis*1.3+fil*.9);
+  vec3 col=mix(vec3(.015,.07,.03),vec3(.08,.6,.18),smoothstep(0.,.4,dens));
+  col=mix(col,vec3(.45,.95,.5),smoothstep(.45,.9,dens+axis*.7));
+  col+=vec3(1.2,1.5,1.2)*(axis*1.3+fil*1.4);
   col*=1.-min(ink,.85);
-  // Dense: lobes saturate into opaque pale masses with dark gaps between them.
-  float a=1.-exp(-(dens*1.4+axis*2.+fil*1.)*uStrength*stepSize*1.3);
+  // Dense lobes with dark gaps; the axis and the filaments carry the white heat.
+  float a=1.-exp(-(dens*1.2+axis*2.+fil*1.6)*uStrength*stepSize*1.1);
   sum.rgb+=(1.-sum.a)*col*a;sum.a+=(1.-sum.a)*a;
   if(sum.a>.96)break;
  }
@@ -281,7 +281,7 @@ void tongue(float s,float side,float ph,out vec2 p,out vec2 t){
  if(s<=hs){p=e;t=et;return;}
  float k=(s-hs)/(1.-hs);
  vec2 n=vec2(-et.y,et.x)*(-side);
- float r0=.17,r=r0*(1.-.45*k),phi=k*2.7;
+ float r0=.17,r=r0*(1.-.45*k),phi=k*(2.4+.5*sin(uTime*.7+ph));
  vec2 c=e+n*r0;
  p=c+r*(-n*cos(phi)+et*sin(phi));
  t=normalize(n*sin(phi)+et*cos(phi));
@@ -299,7 +299,7 @@ void main(){
  float ph=iSeed*6.2831;
  vec2 p,t;
  tongue(s,side,ph,p,t);
- float L=iSize.y*(1.+uStrength*.3-uAnticipation*.25);
+ float L=iSize.y*(1.+uStrength*.3-uAnticipation*.25)*(.88+.12*sin(uTime*.6+ph));
  float w=iSize.x*pow(max(0.,1.-s),.55)*(.55+.45*smoothstep(0.,.25,s));
  vec2 perp=vec2(-t.y,t.x);
  vec3 wp=wo+wa*(p.x*L+perp.x*position.x*w)+right*(p.y*L+perp.y*position.x*w);
@@ -317,23 +317,28 @@ uniform highp sampler3D uNoise;uniform float uTime;
 in vec2 vQ;in float vSeed,vFade,vIntensity;out vec4 outColor;
 void main(){
  float x=vQ.x,s=vQ.y;
- float t=uTime*(.45+fract(vSeed*3.1)*.3);
+ float t=uTime*(.3+fract(vSeed*3.1)*.2);
  vec3 np=vec3(x*.8+vSeed*9.,s*1.6-t*.5,t*.08+vSeed*4.);
  float n=(texture(uNoise,np).r-.5)*1.6+.5;
  float n2=(texture(uNoise,np*2.3+vec3(3.3)).g-.5)*1.6+.5;
- // Frayed edge, a hard ink rim, a mid-green wash, a pale core line, soft marbling.
- float r=abs(x)+(n2-.5)*.28*(.3+s);
- float inside=(1.-smoothstep(.8,1.,r))*(1.-smoothstep(.9,1.,abs(x)));
- float rim=smoothstep(.56,.84,r)*inside;
+ // Erosion noise at card scale, warped by the mid noise: ragged holes, never a grid.
+ float n3=(texture(uNoise,np*1.7+vec3((n2-.5)*.6+1.7,5.2,0.)).r-.5)*1.6+.5;
+ // Torn fire: the fine noise erodes the alpha, harder toward the edge and the tip, so the
+ // rim frays and the tip breaks into separate wisps. Colour runs ink -> saturated green ->
+ // pale -> hot along the core.
+ float r=abs(x)+(n2-.5)*.3*(.3+s);
+ float shape=(1.-smoothstep(.75,1.,r))*(1.-smoothstep(.9,1.,abs(x)));
+ float tear=smoothstep(0.,.35,n3-(.08+r*.3+s*s*.5));
+ float inside=shape*tear;
+ float rim=smoothstep(.5,.8,r+.3-n3*.3)*inside;
  float wash=inside*(1.-rim);
- float core=exp(-x*x*5.)*(1.-s*.5)*(.45+n*.75)*vIntensity;
- float marb=smoothstep(.7,1.,1.-abs(2.*n2-1.))*.5;
- vec3 col=mix(vec3(.012,.04,.02),vec3(.12,.4,.17),wash);
- col=mix(col,vec3(.5,.78,.5),wash*smoothstep(.3,.8,core));
- col=mix(col,vec3(.86,1.,.82),wash*smoothstep(.8,1.15,core));
- col*=1.-marb*wash;
- col=mix(col,vec3(.01,.03,.015),rim);
- float a=(inside*.78+rim*.17)*vFade*smoothstep(0.,.06,s);
+ float core=exp(-x*x*12.)*(1.-s*.6)*(.4+n*.8)*vIntensity;
+ vec3 ink=vec3(.01,.035,.018),green=vec3(.08,.5,.17),pale=vec3(.55,.9,.55),hot=vec3(.9,1.,.84);
+ vec3 col=mix(ink,green,wash);
+ col=mix(col,pale,wash*smoothstep(.45,.9,core));
+ col=mix(col,hot,wash*smoothstep(1.,1.4,core));
+ col=mix(col,ink,rim);
+ float a=inside*.8*vFade*smoothstep(0.,.06,s);
  if(a<.01)discard;
  outColor=vec4(col,a);
 }`,
@@ -401,13 +406,13 @@ void main(){
         .multiplyScalar(axisBlend[i])
         .addScaledVector(anchorUp, 1)
         .normalize();
-      p.copy(source.position).addScaledVector(source.normal, 0.06).toArray(origins, i * 3);
+      p.copy(source.position).addScaledVector(source.normal, 0.22).toArray(origins, i * 3);
       growth.toArray(axes, i * 3);
       source.normal.toArray(normals, i * 3);
       // Tongues are a hand's length on a 6.8-unit creature; a few bigger ones lead the halo.
-      const big = seed > 0.78 ? 1 : 0;
-      sizes[i * 2] = (0.25 + ((seed * 13) % 1) * 0.18) * (1 + big * 0.5);
-      sizes[i * 2 + 1] = (0.58 + ((seed * 17) % 1) * 0.55) * (1 + big * 0.5);
+      const big = seed > 0.8 ? 1 : 0;
+      sizes[i * 2] = (0.2 + ((seed * 13) % 1) * 0.3) * (1 + big * 0.6);
+      sizes[i * 2 + 1] = (0.45 + ((seed * 17) % 1) * 0.85) * (1 + big * 0.6);
       seeds[i] = seed;
       // Embers share the anchor-space points, expressed in model space.
       p.copy(source.position).applyMatrix4(emberMatrix);
@@ -497,7 +502,7 @@ void main(){
           .multiplyScalar(group.axisBlend[slot])
           .addScaledVector(group.up, 1)
           .normalize();
-        p.addScaledVector(n, 0.06).toArray(group.origins, slot * 3);
+        p.addScaledVector(n, 0.22).toArray(group.origins, slot * 3);
         growth.toArray(group.axes, slot * 3);
         n.toArray(group.normals, slot * 3);
         p.applyMatrix4(toModel);

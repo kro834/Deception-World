@@ -51,11 +51,13 @@ void main(){
   }
  }
  c=mix(c,ink,halo*.6*uContour);
- c=ink+c*(1.-ink);
+ // A light black lift only: the pits between the ridges stay near-black.
+ vec3 lift=ink*.5;
+ c=lift+c*(1.-lift);
  float l=dot(c,vec3(.2126,.7152,.0722));
  c=mix(c,c*vec3(.92,1.03,.96),.3);
- c=mix(c,vec3(l)*vec3(.9,1.,.94),(1.-smoothstep(0.,.32,l))*.2);
- c=mix(c,vec3(.86,1.,.88)*l,smoothstep(.75,1.,l)*.2);
+ c=mix(c,vec3(l)*vec3(.9,1.,.94),(1.-smoothstep(0.,.32,l))*.12);
+ c=mix(c,vec3(.86,1.,.88)*l,smoothstep(.75,1.,l)*.1);
  vec2 v=(vUv-.5)*vec2(1.,1.08);
  float vig=smoothstep(1.3,.4,length(v)*1.45);
  c*=mix(1.-uVignette,1.,vig);
