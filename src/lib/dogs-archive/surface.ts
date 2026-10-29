@@ -469,7 +469,11 @@ if(gPainted>.5){
  vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
  float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
  float gBlurL=dot(textureLod(map,vMapUv,gLod+2.).rgb*diffuse,vec3(.2126,.7152,.0722));
+ // Bone geometry (zipper teeth, ribs, blades) keeps its full pale area: the erosion is for
+ // the skin tiles only.
+ #ifndef GUARDIAN_BONE
  gBone*=smoothstep(.22,.33,gBlurL);
+ #endif
  #endif
 }else{
  // Vertex-colour parts: bone is pale OR grey-green (low saturation); ink is saturated green.
@@ -514,20 +518,20 @@ if(gVein>.001){
  // tones and recoloured from the family's palette; ridge or pit picks the palette.
  float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
  float gN=gIrr/uToonRange;
- float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.6,.76,gN),gHiSkin=smoothstep(.66,.8,gN);
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN),gHiSkin=smoothstep(.66,.8,gN);
  // skin: near-black emerald (8,20,12) / (20,46,30), a narrow lit band (40,80,55); ridges and
  // bone: mint shadow / mint (146,182,143) / near-white mint.
  vec3 gPit=mix(mix(vec3(.0026,.0072,.0038),vec3(.0084,.0273,.0144),gMid),vec3(.0213,.0821,.0395),gHiSkin);
- // bone and ridges: mid-mint in shadow and mid (84,117,88) / (94,128,98), pale mint (155,190,155)
- // only in the lit band; the rim band adds the pale edge.
- vec3 gRdg=mix(mix(vec3(.085,.17,.095),vec3(.11,.21,.12),gMid),vec3(.33,.5,.33),gHi);
+ // bone and ridges are the brightest parts, as in 05: pale everywhere with soft shading —
+ // shadow (100,140,105), mid = 05's mint (146,182,143), light (178,208,178).
+ vec3 gRdg=mix(mix(vec3(.127,.262,.141),vec3(.286,.466,.273),gMid),vec3(.445,.624,.445),gHi);
  vec3 gTone=mix(gPit,gRdg,gBone);
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
  // a soft inner light on jade-like bone, not a realistic subsurface
  gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
 #endif
- gTone+=uRimColor*gRimBand*mix(.16,.1,gBone)*uRimStrength*1.8;
+ gTone+=uRimColor*gRimBand*mix(.2,.08,gBone)*uRimStrength*1.8;
  reflectedLight.directDiffuse=gTone;
  reflectedLight.indirectDiffuse=vec3(0.);
  // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
