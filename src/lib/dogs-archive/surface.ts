@@ -47,7 +47,8 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uTranslucency: { value: 1 },
     uFaceBase: { value: new THREE.Vector3(0, 1, 0) },
     uFaceTip: { value: new THREE.Vector3(0, 0, 1) },
-    uClarity: { value: 1 },
+    // Off until the v13 re-projection: on the v12 atlas it read as specks or darkened the body.
+    uClarity: { value: 0 },
   };
 }
 
@@ -243,14 +244,17 @@ if(gPainted>.5){
  // Clarity: the projection lands as pale low-frequency blotches. The map's own blurred
  // level (2.5 mips up) is the blotch; it is flattened toward the dark base and the detail
  // above it (ridges) is amplified, so ridges stay crisp pale lines and pits stay black.
- {
+ if(uClarity>.001){
   vec2 gTs=vec2(textureSize(map,0));
   vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
   float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
   vec3 gBlur=textureLod(map,vMapUv,gLod+2.5).rgb;
-  vec3 gDetail=sampledDiffuseColor.rgb-gBlur;
+  // The detail is read a little above the pixel's own level and soft-limited, so texel noise
+  // and compression grain are not amplified into white specks (seen at 1440 and on iPhone).
+  vec3 gDetail=textureLod(map,vMapUv,gLod+.9).rgb-gBlur;
+  gDetail/=1.+abs(gDetail)*3.;
   vec3 gDark=vec3(.012,.03,.016);
-  vec3 gClear=mix(gBlur,gDark,.65)+gDetail*2.4;
+  vec3 gClear=mix(gBlur,gDark,.5)+gDetail*1.6;
   diffuseColor.rgb=diffuse*mix(sampledDiffuseColor.rgb,max(gClear,vec3(0.)),uClarity);
   gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  }
