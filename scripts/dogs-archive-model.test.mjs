@@ -8,9 +8,10 @@ import { Box3, Matrix4, Quaternion, Vector3 } from "three";
 
 // The same contract also checks a Blender candidate before it is adopted as
 // the public model. Never substitute its results for another export's SHA.
+// Owner (2026-10-29): the public model is the v3 organ rebuild in its own versioned folder.
 const modelDirectory = process.env.DOGS_MODEL_DIR
   ? pathToFileURL(`${resolve(process.env.DOGS_MODEL_DIR)}/`)
-  : new URL("../public/dogs-archive-20261028/", import.meta.url);
+  : new URL("../public/dogs-archive-20261029/", import.meta.url);
 const manifest = JSON.parse(
   readFileSync(
     new URL(process.env.DOGS_MODEL_MANIFEST ?? "model-manifest.json", modelDirectory),

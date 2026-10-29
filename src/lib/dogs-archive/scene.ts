@@ -568,12 +568,12 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       };
       const fetchStarted = performance.now();
       loading.phase = "fetch";
-      const modelUrl = options.modelUrl ?? "/dogs-archive-20261028/guardian-v.glb";
+      const modelUrl = options.modelUrl ?? "/dogs-archive-20261029/guardian-v3.glb";
       const manifestUrl =
         options.manifestUrl === undefined
           ? options.modelUrl
             ? null
-            : "/dogs-archive-20261028/model-manifest.json"
+            : "/dogs-archive-20261029/model-manifest.json"
           : options.manifestUrl;
       const manifestRequest = manifestUrl
         ? fetch(manifestUrl, requestOptions)
@@ -822,7 +822,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     getDiagnostics() {
       return {
         disposed,
-        modelUrl: options.modelUrl ?? "/dogs-archive-20261028/guardian-v.glb",
+        modelUrl: options.modelUrl ?? "/dogs-archive-20261029/guardian-v3.glb",
         assetSha256: canvas.dataset.assetSha256 ?? null,
         assetBytes: Number(canvas.dataset.assetBytes ?? 0),
         lightingProfile,

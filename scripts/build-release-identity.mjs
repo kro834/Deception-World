@@ -25,8 +25,9 @@ const paths = [
   "/ciel-sequin-20261028/ciel-1536.webp",
   "/ciel-sequin-studio-20261028/studio.webp",
   "/ciel-sequin-studio-20261028/provenance.json",
-  "/dogs-archive-20261028/guardian-v.glb",
-  "/dogs-archive-20261028/model-manifest.json",
+  // Owner (2026-10-29): v3 organ rebuild lives in its own versioned folder; the decoders stay put.
+  "/dogs-archive-20261029/guardian-v3.glb",
+  "/dogs-archive-20261029/model-manifest.json",
   "/dogs-archive-20261028/decoders/draco/draco_decoder.wasm",
   "/dogs-archive-20261028/decoders/draco/draco_wasm_wrapper.js",
   "/dogs-archive-20261028/decoders/draco/draco_decoder.js",
