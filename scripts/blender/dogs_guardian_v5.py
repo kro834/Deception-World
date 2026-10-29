@@ -64,6 +64,31 @@ for ob in (jawmesh, mouthmesh):
         v.co = to_body @ v.co
     ob.parent = body; ob.matrix_parent_inverse = Matrix.Identity(4); ob.matrix_basis = Matrix.Identity(4)
     ob.data.update()
+# v13: re-pose the whole head group from the four hi-res planes (anatomy-v5.md): the face sits at the
+# front (+Z), turned to the left-front, snout a little forward, 15% larger; the pivot stays rigid.
+HEAD_PIVOT_NEW = P((-0.20, 0.55, 1.42))
+HEAD_ROT = Matrix.Rotation(math.radians(-45), 4, "Z") @ Matrix.Rotation(math.radians(-12), 4, "X")
+HEAD_SCALE = Vector((1.20, 1.20, 1.60))   # x, y, z (Blender; z is up): a taller bud than the sculpt
+_pivot_b = NEW_H.to_translation()
+
+
+def head_xform(v):
+    d = v - _pivot_b
+    return HEAD_PIVOT_NEW + HEAD_ROT.to_3x3() @ Vector((d.x * HEAD_SCALE.x, d.y * HEAD_SCALE.y, d.z * HEAD_SCALE.z))
+
+
+for ob in (headmesh, jawmesh, mouthmesh):
+    for v in ob.data.vertices:
+        v.co = head_xform(v.co)
+    ob.data.update()
+_M_rigid = Matrix.Translation(HEAD_PIVOT_NEW) @ HEAD_ROT @ Matrix.Translation(-_pivot_b)
+NEW_H = _M_rigid @ NEW_H
+OLD_H = _M_rigid @ OLD_H @ Matrix.Diagonal((HEAD_SCALE.x, HEAD_SCALE.y, HEAD_SCALE.z, 1.0))
+for _L in (JAW_L, SOCKET_L, AIM_L):
+    _t = _L.to_translation()
+    _L[0][3], _L[1][3], _L[2][3] = _t.x * HEAD_SCALE.x, _t.y * HEAD_SCALE.y, _t.z * HEAD_SCALE.z
+NOSE_LOCAL = Vector((NOSE_LOCAL.x * HEAD_SCALE.x, NOSE_LOCAL.y * HEAD_SCALE.y, NOSE_LOCAL.z * HEAD_SCALE.z))
+HEAD_ROOT_G = Pinv(head_xform(P((-0.52, 0.92, 0.42))))   # where the neck meets the head sculpt
 # drop the old organs, the old rig and the pivot empties (they become bones)
 for ob in list(bpy.data.objects):
     if ob.type == "MESH" and any(ob.name.startswith(p) for p in ("Shell |", "Bone |", "Frond_", "Tail |", "Face |")):
@@ -178,15 +203,16 @@ for ob in (headmesh, jawmesh):
         p.material_index = 0
 
 # ================================================================ paths (glTF axes)
-YAW = math.radians(30)
+YAW = math.radians(45)
 E3 = unit(V((math.sin(YAW), 0, math.cos(YAW)))); E1 = unit(V((math.cos(YAW), 0, -math.sin(YAW)))); E2 = V((0, 1, 0))
-C_WHORL = V((0.94, 2.62, -0.55))
+C_WHORL = V((1.25, 2.98, -0.76))
+WHORL_ELLIPSE = 1.30   # in-plane stretch along e1 so the 45-degree coil reads round from the front and the side
 
 
 K_WHORL = 0.115   # log-spiral pitch: turns touch when the tube radius is half the radial gap
 
 
-def whorl_outward(R_out=1.05, turns=3.5, start_deg=206, n=640, back=0.52):
+def whorl_outward(R_out=0.58, turns=4.0, start_deg=206, n=720, back=0.40):
     """Filled logarithmic spiral winding to the centre (clockwise inward in the painting)."""
     pts = []
     for i in range(n):
@@ -194,14 +220,14 @@ def whorl_outward(R_out=1.05, turns=3.5, start_deg=206, n=640, back=0.52):
         th = f * math.tau * turns
         r = R_out * math.exp(-K_WHORL * th)
         a = math.radians(start_deg) - th
-        p = C_WHORL + E1 * (r * math.cos(a)) + E2 * (r * math.sin(a)) - E3 * (back * f ** 1.2)
+        p = C_WHORL + E1 * (r * math.cos(a) * WHORL_ELLIPSE) + E2 * (r * math.sin(a)) - E3 * (back * f ** 1.2)
         pts.append(p)
     return np.asarray(pts[::-1])             # centre -> outer
 
 
 coil = whorl_outward()
-descent = catmull([tuple(coil[-1]), (-0.10, 1.80, -0.35), (0.12, 1.35, 0.02), (0.36, 0.90, 0.22), (0.34, 0.40, 0.30),
-                   (0.12, -0.10, 0.18), (-0.02, -0.55, -0.02)], 18)
+descent = catmull([tuple(coil[-1]), (0.65, 2.30, 0.20), (0.45, 1.80, 0.50), (0.30, 1.20, 0.55), (0.15, 0.50, 0.45),
+                   (0.10, -0.20, 0.30), (0.15, -0.80, 0.55)], 18)
 MAIN = resample(np.concatenate([coil, descent[1:]], axis=0), spacing=0.02)
 N_MAIN = len(MAIN)
 arc_main = np.concatenate(([0.0], np.cumsum(np.linalg.norm(np.diff(MAIN, axis=0), axis=1))))
@@ -209,7 +235,7 @@ S_MAIN = arc_main / arc_main[-1]
 # radius profile along the main path by position: centre 0.09 -> outer coil 0.22 -> ribbed 0.27 -> fork 0.20
 coil_len = sum(np.linalg.norm(np.diff(coil, axis=0), axis=1))
 s_coil_end = coil_len / arc_main[-1]
-J_POINT = V((0.30, 0.90, 0.22))
+J_POINT = V((0.30, 1.20, 0.55))
 s_J = S_MAIN[np.argmin(np.linalg.norm(MAIN - J_POINT, axis=1))]
 def coil_plane_radius(i):
     rv = MAIN[i] - C_WHORL; rv = rv - E3 * np.dot(rv, E3)
@@ -218,18 +244,19 @@ def coil_plane_radius(i):
 
 def coil_tube_radius(i):
     # half the radial gap between turns (slightly more, so the turns touch and fill the spiral)
-    return min(0.27, 0.5 * coil_plane_radius(i) * (1 - math.exp(-math.tau * K_WHORL)) * 1.08 + 0.015)
+    return min(0.32, 0.5 * coil_plane_radius(i) * (1 - math.exp(-math.tau * K_WHORL)) * 1.28 + 0.015)
 
 
 R_MAIN = np.array([
     coil_tube_radius(i) if s < s_coil_end
-    else (0.27 + 0.07 * math.sin(math.pi * min(1, (s - s_coil_end) / (1 - s_coil_end)))) * (1 - 0.28 * max(0, (s - 0.85) / 0.15))
+    else (0.30 + 0.06 * math.sin(math.pi * min(1, (s - s_coil_end) / (1 - s_coil_end)))) * (1 - 0.30 * max(0, (s - 0.85) / 0.15))
     for i, s in enumerate(S_MAIN)])
 R_MAIN *= 1 + 0.03 * np.array([noise1(s * 40, 2) for s in S_MAIN])
 F_POINT = MAIN[-1]
-TAIL_A = resample(catmull([tuple(F_POINT), (0.08, -0.80, -0.26)] + [(.08 + .32 * math.sin(t * math.tau + math.pi) - .30 * t, -.80 - 2.95 * t, -.26 + .28 * math.sin(t * math.pi * 1.5)) for t in np.linspace(0.08, 1, 40)], 6), spacing=0.025)
-TAIL_B = resample(catmull([tuple(F_POINT), (0.28, -0.78, 0.02), (0.68, -1.05, 0.14), (1.0, -1.45, 0.26), (1.12, -1.90, 0.36)], 10), spacing=0.025)
-NECK = resample(catmull([(0.30, 0.90, 0.22), (-0.12, 0.95, 0.40), (-0.52, 0.92, 0.42)], 12), spacing=0.02)
+TAIL_A = resample(catmull([tuple(F_POINT), (0.12, -1.10, 0.70), (0.10, -1.64, 0.85), (0.12, -2.44, 1.05), (-0.10, -2.95, 1.22),
+                           (-0.45, -3.40, 1.35), (-0.75, -3.72, 1.42)], 8), spacing=0.025)
+TAIL_B = resample(catmull([tuple(F_POINT), (0.40, -0.95, 0.62), (0.75, -1.30, 0.62), (0.98, -1.70, 0.55), (1.20, -2.05, 0.45), (1.33, -2.31, 0.40)], 10), spacing=0.025)
+NECK = resample(catmull([tuple(J_POINT), (0.05, 1.25, 1.00), HEAD_ROOT_G], 12), spacing=0.02)
 
 
 def coil_path(center, r0, r1, turns, start_deg, z_step, n, cw=True):
@@ -243,28 +270,29 @@ def coil_path(center, r0, r1, turns, start_deg, z_step, n, cw=True):
     return np.asarray(pts)
 
 
-ARM_L = resample(np.concatenate([
-    catmull([(-0.85, 0.78, 0.45), (-0.90, 0.95, 0.62)], 6),
-    coil_path((-0.62, 0.80, 0.72), 0.30, 0.035, 2.2, 150, 0.25, 110, cw=False)[1:],
-    catmull([(-0.60, 0.88, 0.97), (-0.78, 1.12, 0.70), (-0.88, 1.35, 0.50)], 8)[1:],
-    coil_path((-0.43, 1.53, 0.40), 0.46, 0.045, 2.4, 190, -0.40, 130, cw=True)[1:],
-    catmull([(-0.40, 1.60, 0.0), (-0.34, 1.76, -0.22), (-0.30, 1.85, -0.30)], 8)[1:]], axis=0), spacing=0.02)
-ARM_R = resample(catmull([(0.05, 1.00, 0.30), (0.25, 1.22, 0.10), (0.45, 1.45, -0.15), (0.76, 1.63, -0.38)], 12), spacing=0.02)
+# the left "arm" is now the stalk inside the crown: from the head root up the back of the head to the
+# crown top where the fan roots; the galaxy spirals are flush patches on the crown (built below)
+ARM_L = resample(catmull([HEAD_ROOT_G, (-0.72, 1.50, 1.10), (-0.65, 2.00, 1.25), (-0.60, 2.28, 1.30)], 12), spacing=0.02)
+ARM_R = resample(catmull([(0.30, 1.50, 0.45), (0.55, 1.95, 0.10), (0.75, 2.25, -0.25), (0.90, 2.30, -0.50)], 12), spacing=0.02)
 
 # fronds (v3 ribbon vocabulary with bigger curl chains); anchors are the v2 pivots
 FRONDS = [
-    ([(-.42, 1.73, -.35), (-1.18, 2.02, -.57), (-1.60, 2.75, -.77), (-1.76, 3.22, -.82)], .95, 1.05, +1, (.26, .32, .08)),
-    ([(-.23, 1.94, -.30), (-.57, 2.49, -.13), (-.84, 3.14, .12), (-1.00, 3.44, .22)], .85, 1.05, +1, (.25, .30, .08)),
-    ([(-.03, 2.02, -.28), (.03, 2.65, -.39), (-.16, 3.30, -.43), (-.36, 3.56, -.36)], .80, 1.0, +1, (.23, .28, .07)),
-    ([(-.61, 1.42, -.13), (-1.27, 1.63, -.09), (-1.79, 2.19, -.04), (-2.04, 2.54, .01)], .90, 1.05, +1, (.25, .30, .08)),
-    ([(.03, 1.98, -.30), (.32, 2.46, -.49), (.28, 3.00, -.59), (.40, 3.30, -.52)], .72, 1.0, -1, (.20, .24, .06)),
-    ([(-.56, 1.07, .24), (-1.31, .69, .43), (-1.88, -.03, .72), (-1.86, -.78, .95), (-1.50, -1.26, 1.12)], 1.7, 1.5, +1, (.44, .52, .11)),
-    ([(.76, 1.63, -.38), (1.62, 1.24, -.74), (1.99, .49, -.70), (1.84, -.23, -.38), (1.38, -.60, .08)], 1.6, 1.5, +1, (.42, .50, .11)),
-    ([(-1.41, -1.22, .40), (-1.27, -1.66, .43), (-.95, -1.90, .40)], .62, 1.05, +1, (.22, .25, .06)),
-    ([(1.48, -.42, .30), (1.54, -.90, .39), (1.26, -1.22, .47)], .60, 1.05, +1, (.23, .26, .06)),
-    ([(1.28, -1.04, .40), (1.57, -1.43, .43), (1.40, -1.78, .48)], .55, 1.0, +1, (.20, .23, .06)),
-    ([(-1.54, -1.18, .32), (-1.92, -1.44, .29), (-2.00, -1.84, .37)], .55, 1.0, +1, (.21, .24, .06)),
-    ([(-.33, 1.85, -.32), (-.85, 2.30, -.40), (-1.20, 2.95, -.45), (-1.32, 3.35, -.45)], .85, 1.05, +1, (.24, .28, .07)),
+    # fan (front-left, from the crown top), tips from anatomy-v5.md; the spiral end is appended by frond_path
+    ([(-0.90, 2.25, 1.45), (-1.35, 2.55, 1.75), (-1.70, 2.80, 1.95), (-1.81, 2.95, 2.00)], .85, 1.35, +1, (.36, .39, .09)),
+    ([(-0.78, 2.30, 1.40), (-1.05, 2.75, 1.60), (-1.25, 3.15, 1.75), (-1.31, 3.38, 1.80)], .85, 1.35, +1, (.36, .39, .09)),
+    ([(-0.65, 2.32, 1.33), (-0.75, 2.80, 1.42), (-0.80, 3.20, 1.48), (-0.82, 3.42, 1.50)], .85, 1.35, +1, (.36, .39, .09)),
+    ([(-0.52, 2.32, 1.25), (-0.45, 2.80, 1.18), (-0.38, 3.18, 1.10), (-0.35, 3.42, 1.07)], .82, 1.35, +1, (.35, .38, .09)),
+    ([(-0.40, 2.30, 1.15), (-0.25, 2.72, 0.95), (-0.10, 3.10, 0.80), (-0.01, 3.32, 0.70)], .80, 1.35, +1, (.34, .37, .08)),
+    # big arms: behind the body (z -0.4 .. -1.6), ending in the curl clusters
+    ([(-0.60, 1.50, 0.10), (-1.60, 1.25, -0.45), (-2.08, 0.70, -1.10), (-2.15, 0.10, -1.50), (-2.05, -0.55, -1.70)], 1.15, 1.5, +1, (.60, .64, .18)),
+    ([(0.90, 2.35, -0.50), (1.88, 2.50, -1.20), (2.05, 1.60, -1.50), (2.00, 0.80, -1.68), (1.90, 0.05, -1.75)], 1.15, 1.5, +1, (.59, .63, .18)),
+    # curl clusters (shifted to their arm's tip by CLUSTER_PARENT)
+    ([(0, 0, 0), (0.30, -0.55, 0.10), (0.70, -0.95, 0.20), (0.95, -1.25, 0.25)], .75, 1.15, +1, (.42, .46, .11)),
+    ([(0, 0, 0), (-0.25, -0.60, 0.10), (-0.55, -1.10, 0.20), (-0.70, -1.50, 0.25)], .75, 1.15, +1, (.42, .46, .11)),
+    ([(0, 0, 0), (0.05, -0.70, 0.10), (0.20, -1.35, 0.20), (0.10, -1.80, 0.25)], .66, 1.1, +1, (.38, .42, .10)),
+    ([(0, 0, 0), (-0.05, -0.65, 0.10), (-0.10, -1.20, 0.20), (0.05, -1.55, 0.25)], .66, 1.1, +1, (.38, .42, .10)),
+    ([(-0.30, 2.25, 1.05), (-0.05, 2.62, 0.80), (0.20, 2.98, 0.55), (0.31, 3.25, 0.37)], .78, 1.35, +1, (.34, .37, .08)),
+    ([(-0.95, 1.90, 1.50), (-1.35, 1.85, 1.75), (-1.70, 1.95, 1.90), (-1.85, 2.00, 1.95)], .75, 1.35, +1, (.34, .37, .08)),
 ]
 
 
@@ -354,7 +382,7 @@ ARMR = add_chain("ArmR", ARM_R, 5, "NeckBaseJoint")
 FROND_DATA = []
 FINGER_PARENT = {0: ARML[-1][0], 1: ARML[-1][0], 2: ARML[-1][0], 3: ARML[-1][0], 4: ARML[-1][0],
                  5: "NeckBaseJoint", 6: ARMR[-1][0], 7: "Frond05_2", 8: "Frond06_2", 9: "Frond06_2", 10: "Frond05_2",
-                 11: ARML[-1][0]}
+                 11: ARML[-1][0], 12: ARML[-1][0]}
 CLUSTER_PARENT = {7: 5, 10: 5, 8: 6, 9: 6}   # the lower-left / lower-right curl clusters hang from the big arms' tips
 for idx in range(len(FRONDS)):
     controls, cl, ct, side, widths = FRONDS[idx]
@@ -531,20 +559,93 @@ def body_scales_split(i):
 # two rows of scales and the comb spines
 i_split = int(np.searchsorted(S_MAIN, s_coil_end))
 segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.26, 0.010),
-               glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.6)
+               glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.0)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
                ribs=False, paired=True, scales=1, scale_size=0.8)
 # neck
-NECK_R = np.array([lerp(0.21, 0.16, t) for t in np.linspace(0, 1, len(NECK))])
+NECK_R = np.array([lerp(0.30, 0.24, t) for t in np.linspace(0, 1, len(NECK))])
 segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: None, ribs=True, crest=False, spacing=(0.55, 0.02), rib_scale=0.8, mat_dark=3)
+# --- dorsal lattice shield: a thin perforated shell wrapping the back and flanks of the ribbed body
+# (06/07/08): pale bone ridges around big oval holes, flame-shaped bony fins along the back midline
+desc = np.concatenate([MAIN[i_split:], TAIL_B[1:int(len(TAIL_B) * 0.35)]], axis=0); n_d = len(desc)
+T_d, N_d, B_d = rmf_frames(desc, hint=(0, 0, 1))
+st_desc = [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS
+
+
+def shield_point(u, v, lift=0.0, jitter=True):
+    """u 0..1 along the descent, v -1..1 around the back (0 = straight behind the body). A close
+    cloak around the back and flanks, with an organic wobble so the net never reads as a globe."""
+    k = (0.05 + 0.93 * u) * (n_d - 1); i = int(k); f = k - i
+    p = desc[i] * (1 - f) + desc[min(n_d - 1, i + 1)] * f
+    back = unit(-N_d[i]); lat = unit(B_d[i])
+    lat = lat if lat[0] > 0 else -lat            # +x side of the body
+    bell = math.sin(math.pi * min(1.0, max(0.0, (u + 0.08) / 1.1))) ** 0.75
+    a = v * math.radians(118)
+    d_back = (0.30 + 0.55 * bell * max(0.0, math.cos(a))) + lift
+    d_lat = (1.15 if v > 0 else 0.85) * bell * math.sin(a)
+    if jitter:
+        d_back += 0.05 * bell * noise1(u * 9 + v * 4, 3)
+        d_lat += 0.05 * bell * noise1(u * 7 - v * 5, 8)
+    return p + back * d_back + lat * d_lat
+
+
+mshield = MeshBuilder("Shield | dorsal lattice and fins", body, [MEMB_MAT, BONE_MAT])
+NU, NV = 14, 15
+# an irregular net: the grid lines wander (jittered parameters), so the lattice reads organic
+U_J = np.array([[i / (NU - 1) + (0.28 / (NU - 1)) * noise1(i * 1.3 + j * 0.7, 11) for j in range(NV)] for i in range(NU)])
+V_J = np.array([[-1 + 2 * j / (NV - 1) + (0.5 / (NV - 1)) * noise1(j * 1.1 + i * 0.6, 17) for j in range(NV)] for i in range(NU)])
+U_J[0, :] = 0.0; U_J[-1, :] = 1.0; V_J[:, 0] = -1.0; V_J[:, -1] = 1.0
+grid = np.asarray([[shield_point(float(np.clip(U_J[i, j], 0, 1)), float(np.clip(V_J[i, j], -1, 1))) for j in range(NV)] for i in range(NU)])
+print("SHIELD_EXTENT x", round(float(grid[..., 0].min()), 2), round(float(grid[..., 0].max()), 2), "y", round(float(grid[..., 1].min()), 2), round(float(grid[..., 1].max()), 2), "z", round(float(grid[..., 2].min()), 2), round(float(grid[..., 2].max()), 2), flush=True)
+
+
+def hole(u, v):
+    iu, iv = int(u * (NU - 1)), int(v * (NV - 1))
+    h = math.sin(iu * 12.9898 + iv * 78.233) * 43758.5453; h -= math.floor(h)
+    cu, cv = (u * (NU - 1)) % 1.0, (v * (NV - 1)) % 1.0
+    return h < 0.68 and ((cu - 0.5) / 0.44) ** 2 + ((cv - 0.5) / 0.42) ** 2 < 1.0
+
+
+mshield.patch(grid, color=(0.85, 0.95, 0.85) if TILES else mix(WALL_DARK, WALL_MID, 0.3), mat=0, skip_fn=hole)
+for vi in range(len(mshield.v)):
+    mshield.vw[vi] = chain_weights((vi // NV) / (NU - 1), st_desc)
+# thick, wavy bone ridges along both directions of the net (darker than the knobs, never white)
+RIDGE = mix(BONE_ROOT, BONE, 0.72)
+for iu in range(NU):
+    line = grid[iu]
+    rr = 0.030 * (1 + 0.45 * np.array([noise1(j * 0.9 + iu * 2.1, 5) for j in range(NV)])) * (0.6 + 0.4 * math.sin(math.pi * iu / (NU - 1)))
+    mshield.cur_w = chain_weights(iu / (NU - 1), st_desc)
+    mshield.tube(line, rr, sides=6, color=RIDGE, hint=(0, 0, 1), mat=1)
+for iv in range(NV):
+    line = grid[:, iv]
+    rr = 0.028 * (1 + 0.45 * np.array([noise1(i * 1.1 + iv * 1.7, 7) for i in range(NU)]))
+    pts_w = [chain_weights(iu / (NU - 1), st_desc) for iu in range(NU)]
+    mshield.tube(line, rr, sides=6, color=RIDGE, hint=(0, 0, 1), mat=1,
+                 weights_fn=lambda i2, t2, pw=pts_w: pw[min(NU - 1, int(round(t2 * (NU - 1))))])
+# flame-shaped bony fins: large along the back midline, smaller along the right flank edge
+for u in np.linspace(0.06, 0.94, 9):
+    for vv, scale in ((0.0, 1.25), (0.60, 0.8)):
+        base = shield_point(u, vv, jitter=False); out_ = unit(shield_point(u, vv, lift=0.3, jitter=False) - base)
+        k = int((0.05 + 0.93 * u) * (n_d - 1)); up = unit(-T_d[k])
+        length = (0.70 + 0.45 * math.sin(math.pi * u)) * scale
+        tip = base + out_ * (length * 0.75) + up * (length * 0.65)
+        fp = catmull([base, base + out_ * (length * 0.35) + up * (length * 0.15), tip], 8)
+        tt = np.linspace(0, 1, len(fp))
+        fw = (0.34 * scale) * (1 - tt) ** 0.7 * (0.55 + 0.45 * np.sin(3 * math.pi * tt) ** 2) + 0.01
+        ft = 0.03 * (1 - tt) + 0.006
+        mshield.cur_w = chain_weights(u, st_desc)
+        mshield.ribbon(fp, fw, ft, sides=10, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.6), BONE_EDGE, 0.5 * t1), hint=unit(np.cross(out_, up)), mat=1)
+mshield.cur_w = None
+shield = attach(mshield.finish(micro_uv_scale=2.0)); clean(shield)
+print("SHIELD_DONE", round(time.time() - START, 1), flush=True)
 serpent = attach(mbody.finish(micro_uv_scale=2.4))
 clean(serpent)
 print("BODY_DONE", round(time.time() - START, 1), flush=True)
 
 # --- forked tails with spines
 mtail = MeshBuilder("Tails | forked spined tails", body, [MEMB_MAT, BONE_MAT, CORE_MAT])
-for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 0.20, 6)):
+for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.40, 12), (TAIL_B, TAILB, 0.30, 6)):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = rad0 * (1 - tt) ** 0.85 + 0.006
     radii *= 1 + 0.022 * np.sin(tt * 150) + 0.012 * np.sin(tt * 37 + 1)
@@ -560,18 +661,26 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
                weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st),
                uv_fn=tube_uv(arc, radii, 14) if TILES else (lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0)))
     is_a = path is TAIL_A
-    lengths = [1.13, 1.31, 1.28, 1.15, 1.04, .95, .87, .80, .85, .90, .83, .72, .60, .46] if is_a else [.95, 1.05, .95, .80, .62, .45]
-    for ii, (t, le) in enumerate(zip(np.linspace(.07 if is_a else .12, .89, spines), lengths)):
+    lengths = [1.25, 1.20, 1.10, .95, .80, .70, .62, .56, .50, .45, .40, .35] if is_a else [1.10, 1.00, .85, .70, .55, .42]
+    for ii, (t, le) in enumerate(zip(np.linspace(.06 if is_a else .12, .90, spines), lengths)):
         i = int(t * (n - 1)); p = path[i]; tang = T[i]
         side = unit(np.cross(tang, V((0, 0, 1)))); normal = unit(np.cross(side, tang))
         if is_a:
-            u = min(1, max(0, (t - .40) / .45)); roll = math.pi * (u * u * (3 - 2 * u))
-            edge = side * math.cos(roll) + normal * math.sin(roll)
+            # the big needles near the fork point down-left and forward (05/07); further down the tail
+            # they fan around the tail's axis
+            base_dir = unit(V((-0.35, -0.85, 0.45)))
+            ang = math.radians(28 * ii)
+            edge = unit(base_dir * math.cos(ang) + unit(np.cross(tang, base_dir)) * math.sin(ang))
+            edge = unit(edge - tang * np.dot(edge, tang) * 0.6)
         else:
-            edge = unit(V((0.75, -0.45, 0.35)) + side * 0.2)
+            edge = unit(V((0.60, -0.70, 0.30)) + side * 0.15)
         tip = p + edge * (le * 1.25) + tang * (.12 + .16 * t)
+        if abs(tip[0]) > 2.25:
+            le = le * max(0.3, (2.25 - abs(p[0])) / max(1e-6, abs(tip[0]) - abs(p[0]))); tip = p + edge * (le * 1.25) + tang * (.12 + .16 * t)
+        if tip[1] < -3.82:
+            le = le * max(0.3, (-3.82 - p[1]) / max(1e-6, (tip[1] - p[1]))) ; tip = p + edge * (le * 1.25) + tang * (.12 + .16 * t)
         sp = catmull([p - edge * radii[i] * 0.4, p + edge * le * .30 + tang * .02, tip], 8)
-        rr = (.060 * (1 - t * .45)) * (1 - np.linspace(0, 1, len(sp))) ** .9 + .003
+        rr = (.095 * (1 - t * .45)) * (1 - np.linspace(0, 1, len(sp))) ** .9 + .003
         mtail.cur_w = chain_weights(ss[i], stations)
         mtail.tube(sp, rr, sides=8, flat=0.6, color_fn=lambda a1, t1, b1, c1: mix(BONE_ROOT, BONE_EDGE, t1 ** 0.6), hint=normal, mat=1, taper_end=True)
         mtail.cur_w = None
@@ -652,8 +761,8 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     n = len(path); arcp = np.linspace(0, 1, n)
     w0, w1, w2 = widths
     big = w1 > 0.4
-    base_w = w1 * (1.0 if big else 1.25); taper_exp = 1.6 if big else 1.15
-    ws = np.array([base_w * ((0.22 if big else 0.33) + (0.78 if big else 0.67) * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
+    base_w = w1 * (1.0 if big else 1.1); taper_exp = 1.25 if big else 1.15
+    ws = np.array([base_w * ((0.36 if big else 0.36) + (0.64 if big else 0.64) * (1 - t) ** taper_exp) * (1 - 0.55 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
     ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.45 + 0.008
     mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT])
 
@@ -691,7 +800,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     rim_knobs(mb, path, ws, ts, (T, Nn, B), lateral, lambda t_: chain_weights(t_, stations))
     # curl clusters: two extra spirals sprouting from each cluster frond (curls on curls), each with its own knob row
     if idx in CLUSTER_PARENT:
-        for fr_ in (0.42, 0.70):
+        for fr_ in (0.35, 0.60, 0.82):
             k = int(fr_ * (n - 1)); w = ws[k]
             inner = unit(B[k] * (np.sign(np.dot(B[k], lateral)) if abs(np.dot(B[k], lateral)) > 1e-6 else 1.0)); outer = -inner
             d0 = unit(outer * 0.7 + T[k] * 0.7)
@@ -703,6 +812,65 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
             rim_knobs(mb, sp, sw, sth, fr2, T[k], lambda t_, wf=wfix: wf, start=1)
     fob = attach(mb.finish(micro_uv_scale=2.4)); clean(fob)
 print("FRONDS_DONE", round(time.time() - START, 1), flush=True)
+
+# --- crown: a bud-shaped dome on top of the head carrying two flush galaxy spirals of small scales
+CROWN_C = V((-0.55, 1.55, 1.35)); CROWN_R = V((0.40, 0.80, 0.48))
+mcrown = MeshBuilder("Crown | head dome with galaxy spirals", body, [CRESCENT_MAT, BONE_MAT, CORE_MAT])
+mcrown.cur_w = [("NeckHeadJoint", 1.0)]
+bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=28, v_segments=20, radius=1.0)
+sv = len(mcrown.v)
+for v in bm.verts:
+    q = CROWN_C + V((v.co.x * CROWN_R[0], v.co.y * CROWN_R[1], v.co.z * CROWN_R[2]))
+    mcrown.add_vertex(q, (0.92, 1.0, 0.92) if TILES else mix(WALL_DARK, WALL_MID, 0.3), (v.co.x * 0.5 + 0.5, v.co.y * 0.5 + 0.5))
+for f in bm.faces:
+    mcrown.add_face(tuple(sv + v.index for v in f.verts), 0)
+bm.free()
+
+
+def on_crown(d):
+    """Point of the crown ellipsoid in direction d (glTF), and its outward normal."""
+    d = unit(V(d)); k = 1.0 / math.sqrt(sum((d[i] / CROWN_R[i]) ** 2 for i in range(3)))
+    p = CROWN_C + d * k
+    n = unit(V([(p[i] - CROWN_C[i]) / CROWN_R[i] ** 2 for i in range(3)]))
+    return p, n
+
+
+for centre_dir, R0 in ((V((-0.10, 0.95, 0.30)), 0.30), (V((-0.45, -0.55, 0.70)), 0.27)):
+    c, n = on_crown(centre_dir)
+    e1 = unit(np.cross(n, V((0, 1, 0)))); e2 = unit(np.cross(e1, n))
+    pts = []
+    for i in range(260):
+        f = i / 259; th = f * math.tau * 2.6; r = R0 * math.exp(-0.22 * th)
+        q = c + e1 * (r * math.cos(th)) + e2 * (r * math.sin(th))
+        q, _ = on_crown(q - CROWN_C)
+        pts.append(q)
+    pts = np.asarray(pts)
+    # crescent scales along the spiral, pale bone, glowing toward the centre
+    acc = 0.0; last = -1.0; cnt = 0
+    for i in range(1, len(pts) - 1):
+        acc += np.linalg.norm(pts[i] - pts[i - 1])
+        r_here = np.linalg.norm(pts[i] - c)
+        if acc - last < 0.028 + 0.06 * r_here / R0:
+            continue
+        last = acc; cnt += 1
+        g = smooth(1 - r_here / (R0 * 0.45))
+        _, nn = on_crown(pts[i] - CROWN_C)
+        flow = unit(pts[i + 1] - pts[i - 1]); side = unit(np.cross(nn, flow))
+        length = 0.035 + 0.05 * r_here / R0
+        hook = crosier_path(pts[i] - side * (length * 0.3), side, flow, length, turns=0.8, straight=0.25, bend_power=1.6)
+        rr = (0.006 + 0.004 * r_here / R0) * (1 - np.linspace(0, 1, len(hook)) * 0.6)
+        mcrown.tube(hook + nn * 0.004, rr, sides=6, color_fn=lambda a1, t1, b1, c1, g=g: mix(mix(BONE_ROOT, BONE_EDGE, 0.6), GLOW, g * 0.7),
+                    hint=nn, mat=2 if g > 0.5 else 1, taper_end=True)
+    # emissive core, flush
+    bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=1.0); sv = len(mcrown.v)
+    for v in bm.verts:
+        mcrown.add_vertex(c + e1 * (v.co.x * 0.05) + e2 * (v.co.y * 0.05) + n * (v.co.z * 0.015 + 0.004), mix(GLOW, (1, 1, .95), .3))
+    for f in bm.faces:
+        mcrown.add_face(tuple(sv + v.index for v in f.verts), 2)
+    bm.free()
+mcrown.cur_w = None
+crown = attach(mcrown.finish(micro_uv_scale=2.0)); clean(crown)
+print("CROWN_DONE", round(time.time() - START, 1), flush=True)
 
 
 # --- face leaf, beads, head/jaw skin

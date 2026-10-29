@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 7,
-  "revision": "v12",
+  "revision": "v13",
   "model": "guardian-v3.glb",
-  "assetBytes": 7889176,
-  "assetSha256": "a209cbc17d07083609d5baa232438db83c8296128205f8e4d74e35a4565797c1",
+  "assetBytes": 6068768,
+  "assetSha256": "829a75d1528c346862169983a399d3586f2211c80df28e23cae2fd1c48624e49",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -101,7 +101,8 @@
       "TentaclePivot_08",
       "TentaclePivot_09",
       "TentaclePivot_10",
-      "TentaclePivot_11"
+      "TentaclePivot_11",
+      "TentaclePivot_12"
     ],
     "fingers": {
       "TentaclePivot_00": [
@@ -151,6 +152,10 @@
       "TentaclePivot_11": [
         "Frond11_1",
         "Frond11_2"
+      ],
+      "TentaclePivot_12": [
+        "Frond12_1",
+        "Frond12_2"
       ]
     },
     "neckRig": "SerpentRig",
@@ -192,42 +197,50 @@
   "poseChecks": {
     "Rest": {
       "mouthSocket": [
-        -0.4100406,
-        -0.4630812,
-        0.9
+        -0.4412739,
+        -0.8354161,
+        2.1156733
       ],
       "mouthAim": [
-        -0.21845,
-        -1.052736,
-        1.5
+        -0.8612072,
+        -1.6085509,
+        2.9691265
       ],
       "direction": [
-        0.2220604,
-        -0.6834311,
-        0.6954215
+        -0.3425929,
+        -0.6307442,
+        0.69627
       ],
-      "jawTipSeparation": 0.8861423188909546
+      "jawTipSeparation": 1.7104604199625595
     },
     "Exhale": {
       "mouthSocket": [
-        -1.2194786,
-        0.087493,
-        0.8856231
+        -1.1836009,
+        1.0475097,
+        2.941191
       ],
       "mouthAim": [
-        -1.5946918,
-        -0.0717208,
-        1.6460612
+        -1.8902647,
+        1.4923153,
+        3.8385417
       ],
       "direction": [
-        -0.4348854,
-        -0.1845345,
-        0.8813749
+        -0.5765153,
+        0.3628843,
+        0.7320828
       ],
-      "jawTipSeparation": 0.8636352451929808
+      "jawTipSeparation": 1.6988161508958755
     }
   },
   "meshAudit": [
+    {
+      "mesh": "Crown | head dome with galaxy spirals",
+      "vertices": 3190,
+      "faces": 3052,
+      "triangles": 6184,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
     {
       "mesh": "Face | fused glowing lattice leaf",
       "vertices": 1035,
@@ -254,28 +267,36 @@
     },
     {
       "mesh": "Serpent | painted body, arms and tails",
-      "vertices": 212098,
-      "faces": 200792,
-      "triangles": 412000,
+      "vertices": 158666,
+      "faces": 150078,
+      "triangles": 307400,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Shield | dorsal lattice and fins",
+      "vertices": 5790,
+      "faces": 5376,
+      "triangles": 11084,
+      "boundaryEdges": 166,
+      "nonManifoldEdges": 166
     }
   ],
   "meshStats": {
-    "objects": 4,
-    "vertices": 269393,
-    "triangles": 525688
+    "objects": 6,
+    "vertices": 224941,
+    "triangles": 438356
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 7889176,
-      "sha256": "a209cbc17d07083609d5baa232438db83c8296128205f8e4d74e35a4565797c1"
+      "bytes": 6068768,
+      "sha256": "829a75d1528c346862169983a399d3586f2211c80df28e23cae2fd1c48624e49"
     }
   ],
   "skinCount": 1,
-  "skinJoints": 97,
+  "skinJoints": 100,
   "colorAttribute": "COLOR_0 only on the glow cores and the face leaf; the painted objects use the atlas",
   "sourceScripts": [
     "scripts/blender/guardian_v3_lib.py",
@@ -284,12 +305,12 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "38c6aea96c376b1222b0b2745e2bea39c0dcf7e693adb334403353f461d61c0c",
-    "scripts/blender/dogs_guardian_v7_paint.py": "8b041f5bec7d1f05626b6b75fddf6a645cdc77c896f476f565779438d58e9a42"
+    "scripts/blender/dogs_guardian_v5.py": "404f317732e1c458a05328dd9c8333b265a0ff5e4be0afdf9d7ec9420096d7f4",
+    "scripts/blender/dogs_guardian_v7_paint.py": "88ac75db25d812ff5c3514d0fafe79dedebf5f1b50580f018e45f0c79b690d9d"
   },
   "referenceImagesUsedAsTexture": true,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 15.38731598854065,
+  "secondsBeforeRender": 16.021196126937866,
   "painting": {
     "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
     "atlas": {
@@ -299,27 +320,27 @@
     },
     "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
     "confidenceCoverage": {
-      "body": 0.27917673269242466,
-      "head": 0.546711862990374
+      "body": 0.28891837921185004,
+      "head": 0.7299871356313774
     },
     "silhouetteIoU": {
       "body": {
-        "front": 0.4041981096533195,
-        "back": 0.4059247365083772,
-        "left": 0.40698677927353916,
-        "right": 0.434093048101137
+        "front": 0.4656870056092575,
+        "back": 0.48641400835649085,
+        "left": 0.47444734212829925,
+        "right": 0.4666289044492574
       },
       "head": {
-        "front": 0.06216902382428318,
-        "back": 0.06978868171228261,
-        "left": 0.054131484037598626,
-        "right": 0.05473699629587073
+        "front": 0.08217101625695183,
+        "back": 0.08492595291714412,
+        "left": 0.09999061117103734,
+        "right": 0.1101570873172052
       }
     }
   },
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v12",
-    "stamp": "v12",
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v13",
+    "stamp": "v13",
     "rawGlbSha256": null
   }
 }
