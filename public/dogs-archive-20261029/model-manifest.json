@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 7,
-  "revision": "v14",
+  "revision": "v15",
   "model": "guardian-v3.glb",
-  "assetBytes": 6934820,
-  "assetSha256": "fbe9eef9919564c50ab3b81437d380b357258e6091762756d563eac0863adbc2",
+  "assetBytes": 7041392,
+  "assetSha256": "21f1da061cb21aec319a74483964015eb17fdf5a71f852a8857f6219416797bc",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -259,9 +259,9 @@
     },
     {
       "mesh": "Serpent | painted body, arms and tails",
-      "vertices": 225833,
-      "faces": 213928,
-      "triangles": 438406,
+      "vertices": 225757,
+      "faces": 213632,
+      "triangles": 438062,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -276,15 +276,15 @@
   ],
   "meshStats": {
     "objects": 5,
-    "vertices": 287006,
-    "triangles": 559512
+    "vertices": 286930,
+    "triangles": 559168
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 6934820,
-      "sha256": "fbe9eef9919564c50ab3b81437d380b357258e6091762756d563eac0863adbc2"
+      "bytes": 7041392,
+      "sha256": "21f1da061cb21aec319a74483964015eb17fdf5a71f852a8857f6219416797bc"
     }
   ],
   "skinCount": 1,
@@ -297,12 +297,12 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "5ec4081ff7d2682f9179da445352ff6963ca4fd902314dc80a87b64b7535fa73",
-    "scripts/blender/dogs_guardian_v7_paint.py": "88ac75db25d812ff5c3514d0fafe79dedebf5f1b50580f018e45f0c79b690d9d"
+    "scripts/blender/dogs_guardian_v5.py": "a420e4f1a7c4724f04d38769b59bbcb57a50e2dfbc1009e78938358511273230",
+    "scripts/blender/dogs_guardian_v7_paint.py": "aa6dac785c1b40f5e9c2b8244423338836ea3ad78872dcf4bc7672b835a556e8"
   },
   "referenceImagesUsedAsTexture": true,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 15.492043018341064,
+  "secondsBeforeRender": 16.272764921188354,
   "painting": {
     "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
     "atlas": {
@@ -312,27 +312,27 @@
     },
     "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
     "confidenceCoverage": {
-      "body": 0.29656342478466685,
-      "head": 0.5971282265104825
+      "body": 0.2963828282076104,
+      "head": 0.5984546627229729
     },
     "silhouetteIoU": {
       "body": {
-        "front": 0.38891233007506415,
-        "back": 0.39818831279417316,
-        "left": 0.3872530553243681,
-        "right": 0.4001004860097391
+        "front": 0.38964716780792236,
+        "back": 0.39730521843221106,
+        "left": 0.3963108760489996,
+        "right": 0.4206551088521061
       },
       "head": {
-        "front": 0.055845714656458836,
-        "back": 0.06438267968457512,
-        "left": 0.034594850350705565,
-        "right": 0.03711180382778055
+        "front": 0.05216334688675763,
+        "back": 0.06201141473538568,
+        "left": 0.04048861075063179,
+        "right": 0.04196145080482152
       }
     }
   },
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v14",
-    "stamp": "v14",
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v15",
+    "stamp": "v15",
     "rawGlbSha256": null
   }
 }
