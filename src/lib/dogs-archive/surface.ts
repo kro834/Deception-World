@@ -117,6 +117,12 @@ const GUARDIAN_TONES_GLSL = `{
  gRdg=mix(mix(vec3(.08,.26,.12),vec3(.17,.5,.25),gMid),vec3(.3,.66,.38),gHi);
 #endif
  vec3 gTone=mix(gPit,gRdg,gBone);
+#ifdef GUARDIAN_SCALES
+ // The baked snake scales (v22 ORM, R = the free-edge outline): the rims step up a little
+ // toward a green-black rim, (16,24,19) on the shadow side and (30,42,33) where lit — one
+ // value step in the ramp, faded out before the mask's mip level would turn it into a grey veil.
+ gTone=mix(gTone,mix(vec3(.0257,.0292,.0269),vec3(.0407,.0498,.0427),gMid),.6*gScaleRim*(1.-gBone));
+#endif
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
  // a soft inner light on jade-like bone, not a realistic subsurface
@@ -134,9 +140,9 @@ const GUARDIAN_TONES_GLSL = `{
  float gSpec=pow(gNdH,48.);
  // Skin: a lacquer sheen like polished black jade — one broad soft band along the lit side of
  // each tube (a wide Blinn lobe, thresholded with a soft edge) and a small brighter core. The
- // GLB's roughness map (roughnessFactor, when baked) narrows and dims it on rough scale gaps;
- // its normal map makes the band break along the scale rims.
- float gGloss=clamp(1.3-roughnessFactor,.35,1.);
+ // GLB's roughness map (v22 ORM G: scales .28–.32 lacquer, rims .42, gaps .8) keeps it on
+ // the scales and off the gaps; the scale normals make the band break along the rims.
+ float gGloss=mix(.15,1.,1.-smoothstep(.3,.85,roughnessFactor));
  float gSheen=smoothstep(.26,.6,pow(gNdH,mix(4.,10.,gGloss)))*gGloss;
  vec3 gSkinSpec=vec3(.05,.08,.06)*gSheen+vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.12*gGloss;
  reflectedLight.directSpecular=mix(gSkinSpec,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
@@ -491,6 +497,10 @@ ${GUARDIAN_RIM_GLSL}
       material.envMapIntensity = 0;
       // The painted head carries the two galaxy domes (aDomeWeight, written per vertex below).
       const head = family === "skin" && /head/i.test(material.name);
+      // v22: Blender-baked snake scales (normal + ORM on TEXCOORD_0, R = outline, G = roughness).
+      // The roughness factor goes to 1 so G is the roughness itself.
+      const scales = family === "skin" && !!material.roughnessMap;
+      if (scales) material.roughness = 1;
       material.onBeforeCompile = (shader) => {
         Object.assign(shader.uniforms, uniforms);
         shader.vertexShader = shader.vertexShader
@@ -510,10 +520,11 @@ uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale,uTileNormal;
 uniform vec3 uRimDir,uKeyDir,uRimColor;
 uniform vec2 uBoneRange;
 varying vec3 vGuardianLocal;
-float gBone,gLum,gVein,gRimBand,gWrapLight;
+float gBone,gLum,gVein,gRimBand,gWrapLight,gScaleRim;
 const float gSkinFamily=${family === "bone" ? "0." : "1."};
 const float gPainted=${material.map ? "1." : "0."};
 ${family === "bone" ? "#define GUARDIAN_BONE" : ""}
+${scales ? "#define GUARDIAN_SCALES" : ""}
 ${head ? "#define GUARDIAN_HEAD\nvarying float vDomeWeight;" : ""}
 vec3 gvHash3(vec3 p){p=fract(p*vec3(.1031,.1030,.0973));p+=dot(p,p.yxz+33.33);return fract((p.xxy+p.yxx)*p.zyx);}
 float gvEdge(vec3 p){vec3 i=floor(p),f=fract(p);float f1=8.,f2=8.;
@@ -574,6 +585,19 @@ if(gPainted>.5){
 diffuseColor.rgb=vec3(.5);`,
           )
           .replace(
+            "#include <roughnessmap_fragment>",
+            `#include <roughnessmap_fragment>
+#ifdef GUARDIAN_SCALES
+{
+ // the outline mask, faded with the map's footprint (one scale ≈ 128 texels): full while a
+ // scale is 8 px or more, gone at 4 px, so the page view never shimmers
+ vec2 gRd=fwidth(vRoughnessMapUv)*1024.;
+ float gRLod=log2(max(max(gRd.x,gRd.y),1e-4));
+ gScaleRim=texelRoughness.r*(1.-smoothstep(4.,5.,gRLod));
+}
+#endif`,
+          )
+          .replace(
             "#include <normal_fragment_maps>",
             THREE.ShaderChunk.normal_fragment_maps.replace(
               "mapN.xy *= normalScale;",
@@ -613,7 +637,7 @@ ${GUARDIAN_RIM_GLSL}
 ${GUARDIAN_TONES_GLSL}`,
           );
       };
-      material.customProgramCacheKey = () => `guardian-toon-surface-v3:${family}${head ? ":head" : ""}`;
+      material.customProgramCacheKey = () => `guardian-toon-surface-v4:${family}${head ? ":head" : ""}${scales ? ":scales" : ""}`;
       material.needsUpdate = true;
       patched++;
     }
