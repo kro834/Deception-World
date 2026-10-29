@@ -29,7 +29,7 @@ from guardian_v3_lib import (P, V, unit, lerp, smooth, catmull, resample, rmf_fr
                              MeshBuilder, clean, mesh_audit, material_from, set_principled)
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-opts = {"source": "", "out": "", "export": "0", "stamp": "v5", "ao": "1"}
+opts = {"source": "", "out": "", "export": "0", "stamp": "v5", "ao": "1", "tiles": "0"}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -149,6 +149,23 @@ def comb_material(name, base_mat, strength=0.65):
 
 CORE_MAT = glow_material("Rune | v3 whorl core", (0.30, 0.95, 0.42), 1.0)
 COMB_MAT = comb_material("Skin | v6 ink comb", INK_MAT)
+TILES = opts["tiles"] == "1"
+TILE_M = 0.40   # metres of organ per tile along AuthoredUV u
+if TILES:
+    import guardian_v8_tiles as v8
+    TILE_IMGS = v8.make_tiles(1024, OUT)
+    CRESCENT_MAT = v8.tile_material("Skin | v8 crescent combs", TILE_IMGS["crescent"], TILE_IMGS["crescent_n"], 0.9)
+    CURL_MAT = v8.tile_material("Skin | v8 curl chains", TILE_IMGS["curl"], TILE_IMGS["curl_n"], 0.9)
+    MEMB_MAT = v8.tile_material("Skin | v8 veined membrane", TILE_IMGS["membrane"], TILE_IMGS["membrane_n"], 0.8)
+    print("TILES_DONE", round(time.time() - START, 1), flush=True)
+else:
+    CRESCENT_MAT = CURL_MAT = MEMB_MAT = COMB_MAT
+
+
+def tube_uv(arc, radii, sides):
+    """AuthoredUV for a closed tube: u along the organ in tiles, v mirrored around (no wrap seam)."""
+    per = max(1, round(2 * math.pi * float(np.mean(radii)) / TILE_M))
+    return lambda i, t, j, a: (arc[i] / TILE_M, (1 - abs(2 * j / sides - 1)) * per / 2)
 WALL_DARK = (0.012, 0.032, 0.016); WALL_MID = (0.040, 0.080, 0.042)
 for ob in (headmesh, jawmesh):
     ob.data.materials.clear(); ob.data.materials.append(INK_MAT)
@@ -369,10 +386,12 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
 
     def dark_col(i, t, j, a):
         g = glow_fn(i) if glow_fn else 0.0
+        if TILES:   # the tile carries the colour; the vertex colour is only an AO/glow multiplier
+            return mix((0.92, 1.0, 0.92), (0.75, 1.0, 0.80), g)
         c = mix(WALL_DARK, WALL_MID, 0.25 + 0.75 * max(0.0, math.sin(a)) ** 1.4)
         return mix(c, GLOW, g * 0.6)
     mb.tube(path, radii, sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02,
-            uv_fn=lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0))
+            uv_fn=tube_uv(arc, radii, sides) if TILES else (lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0)))
     last = -1.0; count = 0
     for i in range(2, n - 2):
         sp = (spacing[0] * radii[i] + spacing[1]) * (1 + 0.18 * noise1(count * 1.9, 23))
@@ -432,7 +451,7 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
 
 
 # --- serpent body (coil + ribbed descent)
-mbody = MeshBuilder("Serpent | ribbed vertebral body", body, [COMB_MAT, BONE_MAT, CORE_MAT])
+mbody = MeshBuilder("Serpent | ribbed vertebral body", body, [CRESCENT_MAT, BONE_MAT, CORE_MAT, MEMB_MAT])
 MAIN_FR = rmf_frames(MAIN, hint=(0, 0, 1))
 
 
@@ -484,13 +503,13 @@ for f in bm.faces:
 bm.free(); mbody.cur_w = None
 # neck
 NECK_R = np.array([lerp(0.21, 0.16, t) for t in np.linspace(0, 1, len(NECK))])
-segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: None, ribs=True, crest=False, spacing=(0.55, 0.02), rib_scale=0.8)
+segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: None, ribs=True, crest=False, spacing=(0.55, 0.02), rib_scale=0.8, mat_dark=3)
 serpent = attach(mbody.finish(micro_uv_scale=2.4))
 clean(serpent)
 print("BODY_DONE", round(time.time() - START, 1), flush=True)
 
 # --- forked tails with spines
-mtail = MeshBuilder("Tails | forked spined tails", body, [COMB_MAT, BONE_MAT, CORE_MAT])
+mtail = MeshBuilder("Tails | forked spined tails", body, [MEMB_MAT, BONE_MAT, CORE_MAT])
 for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 0.20, 6)):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = rad0 * (1 - tt) ** 0.85 + 0.006
@@ -500,10 +519,12 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
 
     def tail_col(i, t, j, a):
         pale = max(0.0, -math.cos(a)) ** 1.6
+        if TILES:
+            return mix((0.78, 0.86, 0.78), (1.0, 1.0, 1.0), pale)
         return mix(INK, mix(BONE, BONE_EDGE, 0.3), pale * (0.85 - 0.3 * t))
     mtail.tube(path, radii, sides=14, color_fn=tail_col, hint=(0, 0, 1), mat=0, taper_end=True,
                weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st),
-               uv_fn=lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0))
+               uv_fn=tube_uv(arc, radii, 14) if TILES else (lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0)))
     is_a = path is TAIL_A
     lengths = [1.13, 1.31, 1.28, 1.15, 1.04, .95, .87, .80, .85, .90, .83, .72, .60, .46] if is_a else [.95, 1.05, .95, .80, .62, .45]
     for ii, (t, le) in enumerate(zip(np.linspace(.07 if is_a else .12, .89, spines), lengths)):
@@ -525,7 +546,7 @@ clean(tails)
 print("TAILS_DONE", round(time.time() - START, 1), flush=True)
 
 # --- arms (coiled left arm with the fan hand, right arm to the paddle)
-marm = MeshBuilder("Arms | coiled arms", body, [COMB_MAT, BONE_MAT, CORE_MAT])
+marm = MeshBuilder("Arms | coiled arms", body, [CURL_MAT, BONE_MAT, CORE_MAT])
 for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62, 0.80, 0.72)), V((-0.43, 1.53, 0.40)))), (ARM_R, ARMR, 0.11, 0.14, ())):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = np.array([lerp(r0, r1, t) for t in tt]) * (1 + 0.04 * np.array([noise1(t * 30, 4) for t in tt]))
@@ -568,12 +589,15 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     ws = np.array([(w0 + (w1 - w0) * math.sin(math.pi * min(1, t / s_base_end * 0.9)) ** 0.8) if t < s_base_end
                    else lerp(w1 * 0.75, w2, ((t - s_base_end) / (1 - s_base_end)) ** 0.8) for t in arcp])
     ws *= 1 + 0.06 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.22 + 0.010
-    mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [INK_MAT, BONE_MAT])
+    mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT])
 
     def rib_color(i, t, j, a):
+        if TILES:
+            return (0.95, 1.0, 0.95)
         return mix(INK, (0.030, 0.062, 0.040), max(0.0, math.sin(a)) ** 1.5 * (0.5 + 0.5 * (1 - t)))
     frames, _ = mb.ribbon(path, ws, ts, sides=14, color_fn=rib_color, hint=nrm, bulge=1.35, mat=0,
-                          weights_fn=lambda i, t, st=stations: chain_weights(t, st))
+                          weights_fn=lambda i, t, st=stations: chain_weights(t, st),
+                          uv_fn=(lambda i, t, j, a: (i * 0.018 / TILE_M, (1 - abs(2 * j / 14 - 1)) * 1.0)) if TILES else None)
     T, Nn, B = frames
     # large, dense crosier chain on the curl edge (the fractal edge of the reference's tentacles)
     s_acc = 0.0; last = -1.0; count = 0
@@ -631,7 +655,7 @@ def lattice_image(name="face-lattice", size=512):
     return img
 
 
-mat = bpy.data.materials.get("Rune | v3 face lattice")
+mat = v8.face_material() if TILES else bpy.data.materials.get("Rune | v3 face lattice")
 if not mat:
     mat = bpy.data.materials.new("Rune | v3 face lattice"); mat.use_nodes = True
     nt = mat.node_tree; b = nt.nodes["Principled BSDF"]
@@ -644,7 +668,7 @@ if not mat:
 mface = MeshBuilder("Face | fused glowing lattice leaf", body, [mat])
 rows, cols = 44, 22
 grid = [[Pinv(OLD_H @ facepoint(0.02 + 0.965 * i / rows, (-1 + 2 * j / cols) * 0.97)) for j in range(cols + 1)] for i in range(rows + 1)]
-mface.patch(np.asarray(grid), color=(0.4, 0.9, 0.5), uv_fn=lambda a, b_: ((b_ * 2 - 1) * 0.5 + 0.5, a))
+mface.patch(np.asarray(grid), color=(1.0, 1.0, 1.0) if TILES else (0.4, 0.9, 0.5), uv_fn=lambda a, b_: ((b_ * 2 - 1) * 0.5 + 0.5, a))
 face = mface.finish(micro_uv_scale=1.0)
 bpy.context.view_layer.objects.active = face
 sw = face.modifiers.new("Fuse to head surface", "SHRINKWRAP")

@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 5,
-  "revision": "v6",
+  "revision": "v8",
   "model": "guardian-v3.glb",
-  "assetBytes": 5813968,
-  "assetSha256": "0b451a0ef3148fe3769c3322a71ffe1ebd6d4276e354a5f119438823969b7cb2",
+  "assetBytes": 7802436,
+  "assetSha256": "50df6b11756bb63aca2bcc7cd48bdd2b1b2040904f639589c4426e162b0cc3d7",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -385,8 +385,8 @@
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 5813968,
-      "sha256": "0b451a0ef3148fe3769c3322a71ffe1ebd6d4276e354a5f119438823969b7cb2"
+      "bytes": 7802436,
+      "sha256": "50df6b11756bb63aca2bcc7cd48bdd2b1b2040904f639589c4426e162b0cc3d7"
     }
   ],
   "skinCount": 1,
@@ -398,14 +398,14 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "3d714a926581693d23ae2c4b8697ed41e998073f3238f22c0b3e9de31f9ba31a"
+    "scripts/blender/dogs_guardian_v5.py": "30941b548c1d9a3162a712f75af3e1580b0903e4c6e0181368ab2960cfbf54b5"
   },
   "referenceImagesUsedAsTexture": false,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 9.80472183227539,
+  "secondsBeforeRender": 14.199625253677368,
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v6",
-    "stamp": "v6",
-    "rawGlbSha256": "8e15c66ceb9b6565bd7ae0ec3c381fb909073c0692e4d90f2c7575a3bd6e5fac"
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v8",
+    "stamp": "v8",
+    "rawGlbSha256": "d35351b3d1a6d06c71f2cc51d31acd6bb6dec75730953703afc969f84fdb1fa8"
   }
 }
