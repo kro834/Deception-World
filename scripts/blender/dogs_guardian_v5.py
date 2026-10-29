@@ -607,7 +607,7 @@ seg_coil = np.linalg.norm(np.diff(MAIN[:i_split + 2], axis=0), axis=1)
 U_COIL = np.concatenate(([0.0], np.cumsum(seg_coil / (COIL_TILE * 0.5 * (k_coil[:-1] + k_coil[1:])))))
 PER_COIL = max(1, round(2 * math.pi * R_REF / COIL_TILE))
 segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.26, 0.010),
-               glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.6,
+               glow_fn=body_glow, ribs=False, scales=0, crest_scale=1.6,   # anime: the scale tile carries the rows; no tiny surface hooks
                uv_override=(lambda i, t, j, a: (U_COIL[i], (1 - abs(2 * j / 12 - 1)) * PER_COIL / 2)) if TILES else None)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.30, 0.012), comb_fn=lambda i: body_comb(i + i_split),
@@ -1072,7 +1072,7 @@ attach(mhook.finish(micro_uv_scale=1.0))
 # head colours + skin; jaw and oral membrane ride the jaw bone
 g_, gn_ = (lambda me: (np.array([tuple(v.co) for v in me.vertices]), np.array([tuple(v.normal) for v in me.vertices])))(headmesh.data)
 front = np.clip(-gn_[:, 1], 0, 1)
-cols_ = np.array([mix((0.010, 0.050, 0.024), (0.10, 0.22, 0.12), float(f) ** 1.5 * 0.8) for f in front])   # emerald -> mint-ish front
+cols_ = np.array([mix((0.012, 0.058, 0.026), (0.05, 0.13, 0.07), float(f) ** 1.5 * 0.5) for f in front])   # anime: flat deep emerald, soft front lift
 layer = headmesh.data.color_attributes.get("GuardianSurface")
 layer.data.foreach_set("color", np.c_[cols_, np.ones(len(cols_))].ravel()); headmesh.data.update()
 attach(headmesh)

@@ -221,7 +221,7 @@ def _normal_image(name, h, strength, downsample=2):
 
 def _compose(h, bone, mottle, pit_dark=0.5, bone_tone=1.0):
     hn = np.clip(h / max(1e-6, np.percentile(h, 99.5)), 0, 1)
-    base = MEMB[None, None, :] * (0.65 + 0.7 * (mottle * 0.5 + 0.5))[..., None]
+    base = MEMB[None, None, :] * np.ones_like(mottle)[..., None]   # anime: flat, no mottle
     base = base + (MEMB_LIT - MEMB)[None, None, :] * (hn ** 1.5)[..., None] * 0.6
     pale = (BONE + (BONE_EDGE - BONE) * (hn ** 1.2)[..., None]) * bone_tone
     col = base * (1 - bone[..., None]) + pale * bone[..., None]
@@ -238,10 +238,10 @@ def _compose_scales(h, bone, scale, outline, mottle):
 
     def smooth(x):
         x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
-    gap = MEMB[None, None, :] * (0.55 + 0.75 * m01)[..., None]
+    gap = MEMB[None, None, :] * (0.9 * np.ones_like(m01))[..., None]   # anime: flat pits
     body_col = np.array([0.11, 0.21, 0.12])   # 05: mid-dark green scale bodies under pale rims
     s = smooth((scale - 0.20) / 0.12)                     # scale body: the fan behind each ridge, up to the ridge
-    body = (body_col + (BONE_EDGE - body_col) * (0.0 + 0.45 * hn)[..., None]) * (0.78 + 0.36 * m01)[..., None]
+    body = (body_col + (BONE_EDGE - body_col) * (0.0 + 0.45 * hn)[..., None]) * (0.96 * np.ones_like(m01))[..., None]   # anime: flat scale bodies
     col = gap * (1 - s[..., None]) + body * s[..., None]
     b = np.clip(bone * 1.35, 0, 1) ** 0.9
     inner = smooth((scale - 0.26) / 0.08)                 # ridge split: inside half pale rim, outside half ink
