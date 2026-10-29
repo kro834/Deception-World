@@ -97,8 +97,59 @@ def glow_material(name, color, strength):
     return m
 
 
-CORE_MAT = glow_material("Rune | v3 whorl core", (0.30, 0.95, 0.42), 0.8)
-WALL_DARK = (0.030, 0.062, 0.034); WALL_MID = (0.085, 0.130, 0.080)
+def comb_normal_image(name="serpent-comb-normal", size=512):
+    """Tileable fine-detail normal map: rows of small crescent combs over wrinkled membrane.
+    Authored for the tube UV (u along the body, v around it)."""
+    img = bpy.data.images.get(name)
+    if img:
+        return img
+    ys, xs = np.mgrid[0:size, 0:size]
+    u = xs / size; v = ys / size
+    h = np.zeros((size, size))
+    # six rows of crescent combs; each row is a chain of small arcs leaning with the flow
+    for row in range(6):
+        vc = (row + 0.5) / 6
+        phase = 0.5 * (row % 2)
+        xx = (u * 8 + phase + 0.35 * np.sin(2 * np.pi * v * 3 + row)) % 1.0
+        yy = (v - vc) * 6
+        crescent = np.exp(-((xx - 0.5) ** 2) / 0.045 - (yy ** 2) / 0.18) * (0.6 + 0.4 * np.cos(2 * np.pi * xx))
+        ridge = np.exp(-((((xx - 0.5) ** 2 + (yy * 0.55) ** 2) ** 0.5 - 0.22) ** 2) / 0.006)
+        h += 0.55 * crescent + 0.75 * ridge * (yy < 0.1)
+    # membrane wrinkles between the combs
+    wr = (np.sin(2 * np.pi * (u * 13 + 0.4 * np.sin(2 * np.pi * v * 5))) * np.sin(2 * np.pi * (v * 9 + 0.3 * np.sin(2 * np.pi * u * 7))))
+    h += 0.18 * wr + 0.08 * np.sin(2 * np.pi * u * 31) * np.sin(2 * np.pi * v * 27)
+    gx = (np.roll(h, -1, axis=1) - np.roll(h, 1, axis=1)) * size * 0.5
+    gy = (np.roll(h, -1, axis=0) - np.roll(h, 1, axis=0)) * size * 0.5
+    strength = 0.012
+    nx = -gx * strength; ny = -gy * strength; nz = np.ones_like(h)
+    ln = np.sqrt(nx ** 2 + ny ** 2 + nz ** 2); nx /= ln; ny /= ln; nz /= ln
+    rgba = np.zeros((size, size, 4)); rgba[..., 0] = nx * 0.5 + 0.5; rgba[..., 1] = ny * 0.5 + 0.5; rgba[..., 2] = nz * 0.5 + 0.5; rgba[..., 3] = 1
+    img = bpy.data.images.new(name, size, size, alpha=False, float_buffer=False)
+    img.colorspace_settings.name = "Non-Color"
+    img.pixels.foreach_set(rgba.ravel().astype(np.float32)); img.pack()
+    return img
+
+
+def comb_material(name, base_mat, strength=0.65):
+    """Copy of the ink material whose normal map is the generated comb tile on the authored tube UV."""
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = base_mat.copy(); m.name = name
+    nt = m.node_tree
+    for node in nt.nodes:
+        if node.type == "TEX_IMAGE":
+            node.image = comb_normal_image()
+        elif node.type == "UVMAP":
+            node.uv_map = "AuthoredUV"
+        elif node.type == "NORMAL_MAP":
+            node.inputs["Strength"].default_value = strength
+    return m
+
+
+CORE_MAT = glow_material("Rune | v3 whorl core", (0.30, 0.95, 0.42), 1.0)
+COMB_MAT = comb_material("Skin | v6 ink comb", INK_MAT)
+WALL_DARK = (0.012, 0.032, 0.016); WALL_MID = (0.040, 0.080, 0.042)
 for ob in (headmesh, jawmesh):
     ob.data.materials.clear(); ob.data.materials.append(INK_MAT)
     for p in ob.data.polygons:
@@ -304,10 +355,11 @@ def attach(ob):
 
 # ================================================================ geometry
 def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.42, 0.015), ribs=True,
-                   crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=14,
-                   rib_scale=1.0, hint=(0, 0, 1)):
-    """A dark membrane tube with transverse bone arcs over its front, a crosier crest on the side
-    given by crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
+                   crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=12,
+                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32):
+    """A dark membrane tube with transverse bone arcs over its front, rows of crescent scales
+    (hooked curls lying on the surface) across the front, a crosier crest on the side given by
+    crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
     path = np.asarray(path); n = len(path)
     T, Nn, B = rmf_frames(path, hint=hint)
     arc = np.concatenate(([0.0], np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1)))); ss = arc / arc[-1]
@@ -317,9 +369,10 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
 
     def dark_col(i, t, j, a):
         g = glow_fn(i) if glow_fn else 0.0
-        c = mix(WALL_DARK, WALL_MID, 0.35 + 0.65 * max(0.0, math.sin(a)) ** 1.2)
-        return mix(c, GLOW, g * 0.55)
-    mb.tube(path, radii, sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02)
+        c = mix(WALL_DARK, WALL_MID, 0.25 + 0.75 * max(0.0, math.sin(a)) ** 1.4)
+        return mix(c, GLOW, g * 0.6)
+    mb.tube(path, radii, sides=sides, color_fn=dark_col, hint=hint, weights_fn=wf, mat=mat_dark, taper_end=radii[-1] < 0.02,
+            uv_fn=lambda i, t, j, a: (arc[i] / 0.16, j / sides * 4.0))
     last = -1.0; count = 0
     for i in range(2, n - 2):
         sp = (spacing[0] * radii[i] + spacing[1]) * (1 + 0.18 * noise1(count * 1.9, 23))
@@ -338,20 +391,33 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
                 wob = 1 + 0.05 * noise1(a * 2 + count, 5)
                 ring.append(path[i] + (front * math.cos(a) + lat * math.sin(a)) * (r * 1.0 * wob) + flow * (bend * math.cos(a) ** 2))
             ring = np.asarray(ring)
-            height = (0.16 * sp + 0.004) * rib_scale; halfw = 0.32 * sp * (1 + 0.18 * noise1(count * 1.3, 9)) * rib_scale
+            height = (0.16 * sp + 0.004) * rib_scale; halfw = rib_width * sp * (1 + 0.18 * noise1(count * 1.3, 9)) * rib_scale
             prof = np.array([(0.25 + 0.75 * math.sin(math.pi * k / segs) ** 0.45) for k in range(segs + 1)])
 
             def rib_col(ii, tt, jj, aa, g=g):
                 rim = math.sin(math.pi * tt) ** 0.8; crest_ = max(0.0, math.cos(aa)) ** 1.1
-                c = mix(mix(BONE_ROOT, BONE, 0.5), BONE_EDGE, 0.25 + 0.65 * crest_ * rim)
-                return mix(mix(WALL_DARK, c, 0.3 + 0.7 * rim), GLOW, g * 0.5)
+                c = mix(mix(BONE_ROOT, BONE, 0.45), BONE_EDGE, 0.2 + 0.7 * crest_ * rim)
+                return mix(mix(WALL_DARK, c, 0.2 + 0.8 * rim ** 1.3), GLOW, g * 0.5)
             mb.tube(ring, height * prof, sides=7, flat=halfw / height, color_fn=rib_col, hint=flow, cap=True, mat=mat_glow if g > 0.5 else mat_bone)
+        # crescent scales: hooked curls lying on the surface across the front, curling with the flow
+        if scales and r > 0.03:
+            for k in range(scales):
+                a = (-0.62 + 1.24 * k / max(1, scales - 1)) * math.radians(78) + math.radians(9 * noise1(count * 1.1 + k, 41))
+                if scales == 1:
+                    a = math.radians(14 * noise1(count * 0.9, 43))
+                nrm_s = unit(front * math.cos(a) + lat * math.sin(a))
+                base = path[i] + nrm_s * (r * 0.96) + flow * (sp * 0.25 * ((count + k) % 2))
+                side = unit(np.cross(nrm_s, flow)) * (1 if (count + k) % 2 else -1)
+                length = (0.95 * sp + 0.02) * scale_size * (1 + 0.2 * noise1(count * 1.7 + k * 3, 47))
+                mb.crosier(base, flow, side, length, (0.17 * sp + 0.004) * scale_size, turns=0.95, straight=0.18, sides=6,
+                           color_root=mix(BONE_ROOT, BONE, 0.25), color_tip=mix(BONE_EDGE, GLOW, g), hint=nrm_s,
+                           mat=mat_glow if g > 0.5 else mat_bone, bend_power=1.5)
         cd = crest_fn(i) if crest else None
         if cd is not None and r > 0.03:
             big = count % 2 == 0
-            hook_len = (sp * (2.6 if big else 1.8) + 0.04) * (1 + 0.12 * noise1(count * 2.1, 17))
-            mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, sp * (0.40 if big else 0.28) + 0.006, turns=1.05,
-                       straight=0.10, sides=7, color_root=mix(BONE_ROOT, BONE, 0.3), color_tip=mix(BONE_EDGE, GLOW, g),
+            hook_len = (sp * (3.2 if big else 2.2) + 0.05) * (1 + 0.12 * noise1(count * 2.1, 17))
+            mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, sp * (0.42 if big else 0.30) + 0.006, turns=1.05,
+                       straight=0.10, sides=6, color_root=mix(BONE_ROOT, BONE, 0.3), color_tip=mix(BONE_EDGE, GLOW, g),
                        hint=unit(np.cross(cd, flow)), mat=mat_glow if g > 0.5 else mat_bone, bend_power=1.45)
         if comb_fn is not None:
             cm = comb_fn(i)
@@ -366,7 +432,7 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
 
 
 # --- serpent body (coil + ribbed descent)
-mbody = MeshBuilder("Serpent | ribbed vertebral body", body, [INK_MAT, BONE_MAT, CORE_MAT])
+mbody = MeshBuilder("Serpent | ribbed vertebral body", body, [COMB_MAT, BONE_MAT, CORE_MAT])
 MAIN_FR = rmf_frames(MAIN, hint=(0, 0, 1))
 
 
@@ -395,8 +461,18 @@ def body_glow(i):
     return smooth(1 - s / 0.09) if s < 0.09 else 0.0
 
 
-segmented_tube(mbody, MAIN, R_MAIN, MAIN_STATIONS, body_crest, arc_ext=110, spacing=(0.40, 0.014), comb_fn=body_comb,
-               glow_fn=body_glow, rib_scale=1.5)
+def body_scales_split(i):
+    return S_MAIN[i] < s_coil_end
+
+
+# the coil: thin ribs plus three rows of crescent scales tightening to the core; the descent: ribs,
+# two rows of scales and the comb spines
+i_split = int(np.searchsorted(S_MAIN, s_coil_end))
+segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.40, 0.014),
+               glow_fn=body_glow, rib_scale=0.8, scales=3, scale_size=1.1, rib_width=0.24)
+segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
+               lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
+               rib_scale=1.15, scales=2, scale_size=0.9, rib_width=0.20)
 # glowing bulb at the body's coiled end
 bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=9, radius=0.15)
 mbody.cur_w = [(UP[-1][0], 1.0)]
@@ -414,7 +490,7 @@ clean(serpent)
 print("BODY_DONE", round(time.time() - START, 1), flush=True)
 
 # --- forked tails with spines
-mtail = MeshBuilder("Tails | forked spined tails", body, [INK_MAT, BONE_MAT, CORE_MAT])
+mtail = MeshBuilder("Tails | forked spined tails", body, [COMB_MAT, BONE_MAT, CORE_MAT])
 for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 0.20, 6)):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = rad0 * (1 - tt) ** 0.85 + 0.006
@@ -425,8 +501,9 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
     def tail_col(i, t, j, a):
         pale = max(0.0, -math.cos(a)) ** 1.6
         return mix(INK, mix(BONE, BONE_EDGE, 0.3), pale * (0.85 - 0.3 * t))
-    mtail.tube(path, radii, sides=16, color_fn=tail_col, hint=(0, 0, 1), mat=0, taper_end=True,
-               weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st))
+    mtail.tube(path, radii, sides=14, color_fn=tail_col, hint=(0, 0, 1), mat=0, taper_end=True,
+               weights_fn=lambda i, t, ss=ss, st=stations: chain_weights(ss[i], st),
+               uv_fn=lambda i, t, j, a, arc=arc: (arc[i] / 0.16, j / 14 * 4.0))
     is_a = path is TAIL_A
     lengths = [1.13, 1.31, 1.28, 1.15, 1.04, .95, .87, .80, .85, .90, .83, .72, .60, .46] if is_a else [.95, 1.05, .95, .80, .62, .45]
     for ii, (t, le) in enumerate(zip(np.linspace(.07 if is_a else .12, .89, spines), lengths)):
@@ -448,7 +525,7 @@ clean(tails)
 print("TAILS_DONE", round(time.time() - START, 1), flush=True)
 
 # --- arms (coiled left arm with the fan hand, right arm to the paddle)
-marm = MeshBuilder("Arms | coiled arms", body, [INK_MAT, BONE_MAT, CORE_MAT])
+marm = MeshBuilder("Arms | coiled arms", body, [COMB_MAT, BONE_MAT, CORE_MAT])
 for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62, 0.80, 0.72)), V((-0.43, 1.53, 0.40)))), (ARM_R, ARMR, 0.11, 0.14, ())):
     n = len(path); tt = np.linspace(0, 1, n)
     radii = np.array([lerp(r0, r1, t) for t in tt]) * (1 + 0.04 * np.array([noise1(t * 30, 4) for t in tt]))
@@ -468,7 +545,8 @@ for path, stations, r0, r1, glow_centre in ((ARM_L, ARML, 0.095, 0.13, (V((-0.62
         for c in glow_centre:
             g = max(g, smooth(1 - np.linalg.norm(path[i] - c) / 0.16))
         return g
-    segmented_tube(marm, path, radii, stations, arm_crest, arc_ext=90, spacing=(0.45, 0.012), glow_fn=arm_glow, rib_scale=0.9)
+    segmented_tube(marm, path, radii, stations, arm_crest, arc_ext=90, spacing=(0.45, 0.012), glow_fn=arm_glow, rib_scale=0.9,
+                   scales=2, scale_size=0.95)
     for c, cr in zip(glow_centre, (0.06, 0.075)):
         bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=cr)
         i_near = int(np.argmin(np.linalg.norm(path - c, axis=1)))
@@ -497,18 +575,19 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     frames, _ = mb.ribbon(path, ws, ts, sides=14, color_fn=rib_color, hint=nrm, bulge=1.35, mat=0,
                           weights_fn=lambda i, t, st=stations: chain_weights(t, st))
     T, Nn, B = frames
+    # large, dense crosier chain on the curl edge (the fractal edge of the reference's tentacles)
     s_acc = 0.0; last = -1.0; count = 0
     for i in range(4, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
-        if s_acc - last < max(0.04, 0.42 * w):
+        if s_acc - last < max(0.035, 0.30 * w):
             continue
         last = s_acc; count += 1
         edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
         big = count % 2 == 0
-        length = (w * (1.0 if big else 0.62) + 0.04) * (1 + 0.18 * noise1(i * 0.7, idx))
+        length = (w * (1.45 if big else 0.95) + 0.05) * (1 + 0.18 * noise1(i * 0.7, idx))
         mb.cur_w = chain_weights(i / (n - 1), stations)
-        mb.crosier(path[i] + edge_dir * (w * 0.44), edge_dir, T[i], length, w * (0.14 if big else 0.10) + 0.007, turns=1.1,
-                   straight=0.10, sides=7, color_root=mix(BONE_ROOT, BONE, 0.25), color_tip=BONE_EDGE, hint=nrm, mat=1, bend_power=1.45)
+        mb.crosier(path[i] + edge_dir * (w * 0.42), edge_dir, T[i], length, w * (0.17 if big else 0.12) + 0.009, turns=1.15,
+                   straight=0.08, sides=6, color_root=mix(BONE_ROOT, BONE, 0.2), color_tip=BONE_EDGE, hint=nrm, mat=1, bend_power=1.4)
         mb.cur_w = None
     fob = attach(mb.finish(micro_uv_scale=2.4)); clean(fob)
 print("FRONDS_DONE", round(time.time() - START, 1), flush=True)
@@ -656,13 +735,13 @@ def pose_exhale(f=1.0):
 def pose_coil():
     out = {}
     for k, n in enumerate(chain_names("SpineUp", 16)):
-        out[n] = q(BZ, -9) @ q(BX, 4 * math.sin(k * 0.6))
+        out[n] = Quaternion()                       # the coil stays tight
     for k, n in enumerate(chain_names("SpineDown", 10)):
-        out[n] = q(BZ, 10) @ q(BX, -3)
+        out[n] = q(BZ, 15) @ q(BX, -4)
     for k, n in enumerate(chain_names("TailA", 8)):
-        out[n] = q(BZ, 11)
+        out[n] = q(BZ, 16) @ q(BX, 3)
     for k, n in enumerate(chain_names("TailB", 5)):
-        out[n] = q(BZ, -12)
+        out[n] = q(BZ, -17)
     for k, n in enumerate(chain_names("ArmL", 10)):
         out[n] = q(BZ, -5)
     for k, n in enumerate(chain_names("ArmR", 5)):
