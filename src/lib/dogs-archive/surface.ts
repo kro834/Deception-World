@@ -16,6 +16,11 @@ export type GuardianSurfaceUniforms = {
   uRimStrength: { value: number };
   uTransStrength: { value: number };
   uBoneRange: { value: THREE.Vector2 };
+  /** 1 = full luminance curve on painted albedo (the v8 tiles); lower it for an atlas that
+   * already carries the originals' ridge/pit contrast. */
+  uPaintedContrast: { value: number };
+  /** Translucent wrap glow on pale parts (ridges, bone): 0 disables. */
+  uTranslucency: { value: number };
 };
 
 export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): GuardianSurfaceUniforms {
@@ -32,6 +37,8 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uTransStrength: { value: 0.6 },
     // Linear albedo luminance: membranes sit below 0.035, bone rims above 0.11.
     uBoneRange: { value: new THREE.Vector2(0.035, 0.11) },
+    uPaintedContrast: { value: 1 },
+    uTranslucency: { value: 1 },
   };
 }
 
@@ -118,7 +125,12 @@ export function applyGuardianInkSurface(
         mouths.push(material);
         continue;
       }
-      material.roughness = Math.min(material.roughness, family === "bone" ? 0.82 : 0.9);
+      // Glassy bone and a subtle sheen on the painted skin (the authored 0.58–0.66 stays
+      // the upper bound).
+      material.roughness = Math.min(
+        material.roughness,
+        family === "bone" ? 0.5 : material.map ? 0.55 : 0.9,
+      );
       // Ink is a dielectric. The 2026-10-28 ORM's blue channel gave the membranes metalness,
       // which mirrored the studio and read as grey.
       material.metalness = 0;
@@ -136,17 +148,33 @@ export function applyGuardianInkSurface(
             "#include <common>",
             `#include <common>
 uniform highp sampler3D uNoise;
-uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength;
+uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength,uPaintedContrast,uTranslucency;
 uniform vec3 uRimDir,uKeyDir,uRimColor,uTransColor;
 uniform vec2 uBoneRange;
 varying vec3 vGuardianWorld;
 float gBone,gLum;
-const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
+const float gSkinFamily=${family === "bone" ? "0." : "1."};
+const float gPainted=${material.map ? "1." : "0."};`,
           )
           .replace(
             "#include <color_fragment>",
             `#include <color_fragment>
-{
+if(gPainted>.5){
+ // Painted albedo (the 2026-10-30 tiles now, the projected originals later): the texture
+ // already says where ridge and pit are, so it passes through with a luminance curve only.
+ // Pale ridges rise toward green-white and glow a little; pits stay near-black; no tint, no
+ // mottling. uPaintedContrast scales the curve (1 for the tiles, lower for an atlas).
+ gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ float gCurve=mix(gLum*.8,.15+.72*smoothstep(.05,.4,gLum),smoothstep(.03,.1,gLum));
+ float gL2=mix(gLum,gCurve,uPaintedContrast);
+ vec3 gHue=diffuseColor.rgb/max(gLum,1e-4);
+ // Pits are ink, not green: the darks lose most of their saturation; ridges go green-white.
+ gHue=mix(gHue,vec3(.9,1.,.95),smoothstep(.12,.02,gL2)*.7);
+ gHue=mix(gHue,vec3(.86,1.,.88),smoothstep(.3,.7,gL2));
+ diffuseColor.rgb=gHue*gL2;
+ gLum=gL2;
+ gBone=smoothstep(.22,.55,gL2);
+}else{
  // Bone is pale OR grey-green (low saturation); ink and membranes are saturated green.
  // Saturation survives an AO bake multiplied into the vertex colours.
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
@@ -163,13 +191,13 @@ const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
  float gFine=texture(uNoise,vGuardianWorld*.6+vec3(1.7)).g;
  // Membranes: black-green ink. Bone: pale grey-green, lifted toward ~0.22 linear when the
  // authored value is darker (the 2026-10-28 bone), left alone when it is already pale.
- float gLift=clamp(.4/max(gLum,.02),1.,1.8);
- vec3 gTint=mix(vec3(.2,.34,.24),vec3(1.,1.02,.98)*gLift,gBone);
+ float gLift=clamp(.5/max(gLum,.02),1.,2.);
+ vec3 gTint=mix(vec3(.2,.34,.24),vec3(.98,1.02,.96)*gLift,gBone);
  diffuseColor.rgb*=gTint*(.74+gMottle*.45)*(.9+gFine*.2);
  // Bone stays pale grey-green, never paper: an authored albedo that is already pale (the
  // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
  float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
- diffuseColor.rgb*=mix(1.,min(1.,.66/max(gOut,1e-4)),gBone);
+ diffuseColor.rgb*=mix(1.,min(1.,.78/max(gOut,1e-4)),gBone);
 }`,
           )
           .replace(
@@ -196,8 +224,9 @@ const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
  float gKey=saturate(dot(normal,uKeyDir));
  totalEmissiveRadiance+=uRimColor*gRim*(1.+uStrength*.25)+uTransColor*gTrans*(1.+uStrength*.4);
  totalEmissiveRadiance+=uRimColor*gKey*gFres*gBone*.18;
- // Bone is unpainted paper: a little pale green regardless of the light.
- totalEmissiveRadiance+=vec3(.6,.8,.64)*gBone*.14;
+ // Translucent ridges and bone glow a little from within, most where the key wraps around.
+ float gWrap=saturate((dot(normal,uKeyDir)+.6)/1.6);
+ totalEmissiveRadiance+=vec3(.72,.95,.76)*gBone*(.08+.22*gWrap)*uTranslucency;
 }`,
           )
           .replace(
@@ -206,7 +235,7 @@ const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
 {
  // Ink outline: membranes darken at grazing angles like a brush edge.
  float gNdV2=saturate(dot(normal,normalize(vViewPosition)));
- float gInk=1.-pow(1.-gNdV2,5.)*.75*(1.-gBone);
+ float gInk=1.-pow(1.-gNdV2,5.)*mix(.75,.4,gBone);
  reflectedLight.directDiffuse*=gInk;
  reflectedLight.indirectDiffuse*=gInk;
 }`,
@@ -226,7 +255,7 @@ const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
       for (const { material, base } of lattice) material.emissiveIntensity = base * latticeScale;
       // The references' cores glow white-green; the authored strength is modest, so scale it
       // up to the edge of the bloom threshold and let the breath push it over.
-      const coreScale = 2.0 + pulse * 0.3 + anticipation * 0.6 + strength * 0.4;
+      const coreScale = 2.5 + pulse * 0.3 + anticipation * 0.6 + strength * 0.4;
       for (const { material, base } of cores) material.emissiveIntensity = base * coreScale;
       for (const material of mouths) material.emissiveIntensity = strength * 4.5 + anticipation * 0.6;
     },
