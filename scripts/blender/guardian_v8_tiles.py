@@ -68,7 +68,7 @@ def tile_crescent(n, rng):
     the scale nearer the coil's centre (smaller u) lies over its outer neighbour's base."""
     u, v = _grid(n)
     h = np.zeros((n, n)); bone = np.zeros((n, n)); scale = np.zeros((n, n)); outline = np.zeros((n, n))
-    rows = 3; r0 = 0.19; per_row = int(round(1.0 / (r0 * 1.4))); step = 1.0 / per_row   # v19 (anime): few, large plates
+    rows = 11; r0 = 0.051; per_row = int(round(1.0 / (r0 * 1.4))); step = 1.0 / per_row   # v20: 11 rows (galaxy arms) of small crescents
 
     def thorn(cx, cy, r, lean, bend):
         x = _wrap(u - cx); y = _wrap(v - cy)
@@ -233,17 +233,17 @@ def _compose_scales(h, bone, scale, outline, mottle):
 
     def smooth(x):
         x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
-    gap = MEMB[None, None, :] * (0.9 * np.ones_like(m01))[..., None]   # anime: flat pits
-    body_col = EMERALD   # v19: deep-emerald plates under pale mint rims
+    gap = EMERALD[None, None, :] * np.ones_like(m01)[..., None]   # v20: dark emerald between the arms / rows
+    body_col = MINT * 0.92   # v20: pale mint crescents, two tones only
     s = smooth((scale - 0.20) / 0.12)                     # scale body: the fan behind each ridge, up to the ridge
-    body = (body_col + (MINT - body_col) * (0.0 + 0.12 * hn)[..., None]) * (1.0 * np.ones_like(m01))[..., None]   # anime: flat plates
+    body = (body_col + (MINT * 1.08 - body_col) * (0.5 * hn)[..., None]) * (1.0 * np.ones_like(m01))[..., None]   # flat, slight lift to the rim
     col = gap * (1 - s[..., None]) + body * s[..., None]
     b = np.clip(bone * 1.35, 0, 1) ** 0.9
     inner = smooth((scale - 0.26) / 0.08)                 # ridge split: inside half pale rim, outside half ink
-    edge = MINT[None, None, :] * inner[..., None] + (MEMB * 0.6)[None, None, :] * (1 - inner)[..., None]
+    edge = (MINT * 1.08)[None, None, :] * inner[..., None] + (EMERALD * 0.8)[None, None, :] * (1 - inner)[..., None]
     col = col * (1 - b[..., None]) + edge * b[..., None]
     o = np.clip(outline * 1.3, 0, 1)                      # the ink outline wins over any neighbour's body
-    return col * (1 - o[..., None]) + (MEMB * 0.5)[None, None, :] * o[..., None]
+    return col * (1 - o[..., None]) + (EMERALD * 0.8)[None, None, :] * o[..., None]
 
 
 def tile_pits(n):
@@ -251,13 +251,13 @@ def tile_pits(n):
     (4 rows per tile, 5 per row, half-offset), each with a thin slightly paler lip; no veins, no speckle."""
     u, v = _grid(n)
     col = np.ones((n, n, 3)) * EMERALD[None, None, :]; h = np.zeros((n, n))
-    rows, per = 4, 5
+    rows, per = 4, 7   # v20: 7 pits per tile along u = one per rib gap on the whorl
     lip = np.array([0.05, 0.14, 0.07])
     for row in range(rows):
         cy = (row + 0.5) / rows
         for k in range(per):
             cx = (k + 0.5 * (row % 2)) / per
-            x = _wrap(u - cx) / 0.075; y = _wrap(v - cy) / 0.052
+            x = _wrap(u - cx) / 0.050; y = _wrap(v - cy) / 0.048
             d = np.sqrt(x * x + y * y)
             inside = d < 1.0; ring = (d >= 1.0) & (d < 1.16)
             col[inside] = PIT; col[ring] = lip

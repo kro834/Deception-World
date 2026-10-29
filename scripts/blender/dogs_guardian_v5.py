@@ -185,9 +185,9 @@ TILE_M = 0.40   # metres of organ per tile along AuthoredUV u
 if TILES:
     import guardian_v8_tiles as v8
     TILE_IMGS = v8.make_tiles(1024, OUT)
-    CRESCENT_MAT = v8.tile_material("Skin | v8 crescent combs", TILE_IMGS["crescent"], TILE_IMGS["crescent_n"], 0.9)
-    CURL_MAT = v8.tile_material("Skin | v8 curl chains", TILE_IMGS["curl"], TILE_IMGS["curl_n"], 0.9)
-    MEMB_MAT = v8.tile_material("Skin | v8 veined membrane", TILE_IMGS["membrane"], TILE_IMGS["membrane_n"], 0.8)
+    CRESCENT_MAT = v8.tile_material("Skin | v8 crescent combs", TILE_IMGS["crescent"], TILE_IMGS["crescent_n"], 0.35)   # v20: low normal strength (toon ramp)
+    CURL_MAT = v8.tile_material("Skin | v8 curl chains", TILE_IMGS["curl"], TILE_IMGS["curl_n"], 0.6)
+    MEMB_MAT = v8.tile_material("Skin | v8 veined membrane", TILE_IMGS["membrane"], TILE_IMGS["membrane_n"], 0.3)
     print("TILES_DONE", round(time.time() - START, 1), flush=True)
 else:
     CRESCENT_MAT = CURL_MAT = MEMB_MAT = COMB_MAT
@@ -450,12 +450,14 @@ def attach(ob):
 def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.42, 0.015), ribs=True,
                    crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=12,
                    rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False, crest_scale=1.0,
-                   uv_override=None, bands=None):
+                   uv_override=None, bands=None, station_phase=None, blades=0, blade_back=1.0, front_sign=1.0):
     """A dark membrane tube with transverse bone arcs over its front, rows of crescent scales
     (hooked curls lying on the surface) across the front, a crosier crest on the side given by
     crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
     path = np.asarray(path); n = len(path)
     T, Nn, B = rmf_frames(path, hint=hint)
+    if front_sign < 0:   # the coil's RMF normal comes out facing the back; flip N and B together (handedness kept)
+        Nn = -Nn; B = -B
     arc = np.concatenate(([0.0], np.cumsum(np.linalg.norm(np.diff(path, axis=0), axis=1)))); ss = arc / arc[-1]
 
     def wf(i, t):
@@ -479,20 +481,29 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
         for ang in bands:
             a_ = math.radians(ang)
             bp = np.asarray([path[i] + (B[i] * math.cos(a_) + Nn[i] * math.sin(a_)) * (radii[i] * 1.0) for i in range(n)])
-            br = 0.11 * radii + 0.004
+            br = 0.14 * radii + 0.004
             mb.tube(bp, br, sides=5, color_fn=lambda i2, t2, j2, a2: mix(mix(BONE, BONE_EDGE, 0.5), GLOW, (glow_fn(i2) if glow_fn else 0.0) * 0.6),
                     hint=hint, weights_fn=wf, mat=mat_bone, taper_end=True, uv_fn=tube_uv(arc, br, 5))
-    if paired:   # 05: a pale bone spine along the front face; the paired ribs grow from it at each station
+    if paired and not blades:   # 05: a pale bone spine along the front face; the paired ribs grow from it at each station
         spine = np.asarray([path[i] + Nn[i] * (radii[i] * 0.96) for i in range(n)])
         srad = 0.075 * radii + 0.005
         mb.tube(spine, srad, sides=6, flat=0.7, color_fn=lambda a1, t1, b1, c1: mix(BONE, BONE_EDGE, 0.45 + 0.4 * max(0.0, math.cos(c1))), hint=hint,
                 weights_fn=wf, mat=mat_bone, taper_end=True, uv_fn=tube_uv(arc, srad, 6))
-    last = -1.0; count = 0
+    last = -1.0; count = 0; last_phase = None
     for i in range(2, n - 2):
-        sp = (spacing[0] * radii[i] + spacing[1]) * (1 + 0.18 * noise1(count * 1.9, 23))
-        if arc[i] - last < sp:
-            continue
-        last = arc[i]; count += 1
+        if station_phase is not None:   # v20: stations locked to the tile's pit phase (one rib per pit gap, no jitter)
+            ph = int(math.floor(station_phase[i] + 0.5))
+            if last_phase is None:
+                last_phase = ph; continue
+            if ph == last_phase:
+                continue
+            last_phase = ph; sp = spacing[0] * radii[i] + spacing[1]
+        else:
+            sp = (spacing[0] * radii[i] + spacing[1]) * (1 + 0.18 * noise1(count * 1.9, 23))
+            if arc[i] - last < sp:
+                continue
+            last = arc[i]
+        count += 1
         mb.cur_w = chain_weights(ss[i], stations)
         flow = T[i]; front = unit(Nn[i]); lat = unit(B[i]); r = radii[i]
         g = glow_fn(i) if glow_fn else 0.0
@@ -513,7 +524,26 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
                 c = mix(mix(BONE_ROOT, BONE, 0.45), BONE_EDGE, 0.2 + 0.7 * crest_ * rim)
                 return mix(mix(WALL_DARK, c, 0.2 + 0.8 * rim ** 1.3), GLOW, g * 0.5)
             mb.tube(ring, height * prof, sides=7, flat=halfw / height, color_fn=rib_col, hint=flow, cap=True, mat=mat_glow if g > 0.5 else mat_bone)
-        if paired and r > 0.03:
+        if paired and blades and r > 0.03:
+            # v20 (05/07 from every angle): a BOTTLE BRUSH - flat tapered pale blades radiating around the dark core at each
+            # station, each curving back toward the tail and ending in a small outward curl; the dorsal slot is the flame crest
+            cdv = crest_fn(i) if crest else None
+            for k in range(blades):
+                a_k = math.tau * (k + 0.5 * (count % 2)) / blades
+                d_k = unit(front * math.cos(a_k) + lat * math.sin(a_k))
+                if cdv is not None and float(np.dot(d_k, cdv)) > math.cos(math.radians(30)):
+                    continue
+                back = flow * blade_back
+                q0 = path[i] + d_k * (r * 0.95); q1 = path[i] + d_k * (r * 1.35) + back * (0.25 * sp)
+                q2 = path[i] + d_k * (r * 1.70) + back * (0.65 * sp); q3 = path[i] + d_k * (r * 1.85) + back * (1.05 * sp)
+                bp = resample(catmull([q0, q1, q2, q3], 8), spacing=max(0.012, sp * 0.1))
+                tipdir = unit(bp[-1] - bp[-2])
+                curl = crosier_path(bp[-1], tipdir, d_k, 0.3 * sp + 0.02, turns=0.55, straight=0.2, bend_power=1.5)
+                bp = np.concatenate([bp[:-1], curl], axis=0); tb = np.linspace(0, 1, len(bp))
+                bw = (0.42 * sp + 0.006) * (1 - 0.8 * tb ** 1.2) + 0.005
+                mb.ribbon(bp, bw, np.maximum(0.005, bw * 0.25), sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE, BONE_EDGE, 0.2), BONE_EDGE, abs(math.cos(c1)) ** 2.0),
+                          hint=unit(np.cross(d_k, flow)), mat=mat_bone, uv_fn=lambda i2, t2, j2, a2, u0=arc[i] / TILE_M: (u0 + t2 * 0.5, j2 / 8.0))
+        elif paired and r > 0.03:
             # 05 (crops/face-neck.jpg): a pale fern frond / fish skeleton - broad flat ribs with paler rims curve outward
             # from the spine and sweep back; the recessed dark membrane between them reads as oval holes.
             # AuthoredUV on the ribs: u = body arc (m / TILE_M) + 0.5 x the rib's own arc, v = around the rib section.
@@ -614,16 +644,18 @@ k_coil = np.maximum(0.12, R_COIL / R_REF)
 seg_coil = np.linalg.norm(np.diff(MAIN[:i_split + 2], axis=0), axis=1)
 U_COIL = np.concatenate(([0.0], np.cumsum(seg_coil / (COIL_TILE * 0.5 * (k_coil[:-1] + k_coil[1:])))))
 PER_COIL = max(1, round(2 * math.pi * R_REF / COIL_TILE))
-segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.26, 0.010),
-               glow_fn=body_glow, ribs=False, scales=0, crest_scale=1.6, mat_dark=3,   # v19: pit tile base + 8 ridge bands
-               bands=(0, 45, 90, 135, 180, 225, 270, 315), uv_override=(lambda i, t, j, a: (U_COIL[i], (1 - abs(2 * j / 12 - 1)) * PER_COIL / 2)) if TILES else None)
+# v20: the whorl is the neck's fern wound into the spiral - one pale rachis along the coil, short paired ribs across it every
+# quarter tube-width (phase-locked to the pit tile so a dark oval pit sits in every gap), spikes on the rim, glowing core
+segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, spacing=(0.5, 0.0),
+               glow_fn=body_glow, ribs=True, arc_ext=70, rib_scale=1.0, rib_width=0.12, scales=0, crest_scale=1.6, mat_dark=3,
+               bands=(90,), station_phase=U_COIL * 7, front_sign=-1.0, uv_override=(lambda i, t, j, a: (U_COIL[i], (1 - abs(2 * j / 12 - 1)) * PER_COIL / 2)) if TILES else None)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
-               lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.30, 0.012), comb_fn=lambda i: body_comb(i + i_split),
-               ribs=False, paired=True, scales=0, mat_dark=3)
+               lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.45, 0.012), comb_fn=lambda i: body_comb(i + i_split),
+               ribs=False, paired=True, blades=7, blade_back=1.0, scales=0, mat_dark=3)
 # neck
 NECK_R = np.array([lerp(0.21, 0.16, t) for t in np.linspace(0, 1, len(NECK))])
 segmented_tube(mbody, NECK, NECK_R, NECK_STATIONS, lambda i: unit(V((0.0, 1.0, 0.15))), ribs=False, crest=True, paired=True,
-               spacing=(0.30, 0.012), mat_dark=3)   # 07: the neck behind the head is the same fern skeleton with dorsal flame crests
+               blades=7, blade_back=-1.0, spacing=(0.45, 0.012), mat_dark=3)   # 07: the neck behind the head is the same fern skeleton with dorsal flame crests
 # --- subtle dorsal lattice (06/07/08): an irregular bone net close around the back and the +x flank of
 # the ribbed body, with flame fins; it never reaches in front of the ribs, so the front keeps v12's read
 desc = MAIN[i_split:]; n_d = len(desc)
@@ -792,7 +824,7 @@ def head_dome(mb, centre, R, H, bone, segs=48, rings=20, m_cos=5, m_sin=3):
         mb.add_face((top, idx[0][j], idx[0][j + 1]), 1)
     for k in range(rings - 1):
         for j in range(segs):
-            mat = 1 if rhos[k + 1] < 0.11 else 0
+            mat = 1 if rhos[k + 1] < 0.08 else 0
             mb.add_face((idx[k][j], idx[k + 1][j], idx[k + 1][j + 1], idx[k][j + 1]), mat)
     # back: a shallow dark cap closing the volume
     back = [mb.add_vertex(c + V((R * math.cos(j / segs * math.tau), R * math.sin(j / segs * math.tau), 0.0)), (0.6, 0.8, 0.65), uv=(0.0, 0.0)) for j in range(segs + 1)]
@@ -804,8 +836,8 @@ def head_dome(mb, centre, R, H, bone, segs=48, rings=20, m_cos=5, m_sin=3):
 
 
 mdome = MeshBuilder("Arms | head scale domes", body, [CRESCENT_MAT, CORE_MAT, MEMB_MAT])
-head_dome(mdome, (-0.62, 0.80, 1.12), 0.34, 0.11, "ArmL_02", m_cos=2, m_sin=1)      # v19: few large plates spiralling in
-head_dome(mdome, (-0.43, 1.53, 1.00), 0.52, 0.17, "ArmL_06", m_cos=2, m_sin=1)
+head_dome(mdome, (-0.62, 0.80, 1.12), 0.34, 0.085, "ArmL_02", m_cos=2, m_sin=1)     # v20: flatter galaxy domes (H 0.25R)
+head_dome(mdome, (-0.43, 1.53, 1.00), 0.52, 0.13, "ArmL_06", m_cos=2, m_sin=1)
 attach(mdome.finish(micro_uv_scale=1.0))
 arms = attach(marm.finish(micro_uv_scale=2.4))
 clean(arms)
