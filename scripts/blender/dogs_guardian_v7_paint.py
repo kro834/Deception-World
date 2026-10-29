@@ -26,7 +26,7 @@ sys.path.insert(0, str(HERE))
 from guardian_v3_lib import mesh_audit
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-opts = {"blend": "", "turnaround": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8"}
+opts = {"blend": "", "turnaround": "", "views": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8", "quality": "84"}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -41,12 +41,14 @@ def log(*a):
 
 
 # ---------------------------------------------------------------- the painted views
-img = bpy.data.images.load(opts["turnaround"]); W, H = img.size
-# read the raw sRGB bytes: with the default sRGB colourspace Blender hands back scene-linear
-# values, and converting those again would darken every sample twice
-img.colorspace_settings.name = "Non-Color"
-px = np.array(img.pixels[:], dtype=np.float32).reshape(H, W, 4)[::-1]   # top-down rows, raw sRGB floats
-img.user_clear(); bpy.data.images.remove(img)
+def load_rgb(path):
+    img = bpy.data.images.load(path); W, H = img.size
+    img.colorspace_settings.name = "Non-Color"   # raw sRGB bytes, converted once below
+    px = np.array(img.pixels[:], dtype=np.float32).reshape(H, W, 4)[::-1, :, :3]
+    bpy.data.images.remove(img)
+    return px
+
+
 PANELS = {"front": (0, 0, 532, 760), "back": (532, 0, 532, 760), "left": (0, 760, 532, 718), "right": (532, 760, 532, 718)}
 # model axes per view: (image-x axis, image-y axis, direction from surface toward camera)
 AXES = {"front": (np.array([1, 0, 0.]), np.array([0, 1, 0.]), np.array([0, 0, 1.])),
@@ -71,22 +73,28 @@ def erode(m, n=1):
     return m
 
 
-VIEWS = {}
-for name, (x0, y0, w, h) in PANELS.items():
-    panel = px[y0:y0 + h, x0:x0 + w, :3]
-    paper = (panel.min(axis=2) > 0.90)                       # white paper (and the view's caption)
+def make_view(panel, caption_cut=0.955):
+    """White paper -> mask of the painted creature; the caption row at the bottom never paints."""
+    paper = (panel.min(axis=2) > 0.90)
     creature = ~paper
-    creature = erode(dilate(creature, 2), 2)                  # close pinholes in the ink
-    creature = erode(creature, 1)                             # keep the paper's anti-aliased rim off the model
-    # drop the caption row at the bottom: keep the largest connected band of rows with ink
-    rows = creature.sum(axis=1)
-    ys = np.where(rows > 3)[0]
-    # ignore rows near the bottom of the panel where the 正面/背面 captions live
-    ys = ys[ys < h * 0.93]
+    creature = erode(dilate(creature, 2), 2)
+    creature = erode(creature, 1)
+    h, w = creature.shape
+    creature[int(h * caption_cut):, :] = False
+    rows = creature.sum(axis=1); ys = np.where(rows > 3)[0]
     xs = np.where(creature[ys].sum(axis=0) > 0)[0]
-    bbox = (xs.min(), xs.max(), ys.min(), ys.max())
-    VIEWS[name] = {"rgb": srgb_to_linear(panel), "mask": creature, "bbox": bbox, "size": (w, h)}
-    log("VIEW", name, "bbox", bbox)
+    return {"rgb": srgb_to_linear(panel), "mask": creature, "bbox": (int(xs.min()), int(xs.max()), int(ys.min()), int(ys.max())), "size": (w, h)}
+
+
+VIEWS = {}
+if opts.get("views"):
+    for item in opts["views"].split(","):
+        name, vpath = item.split("=", 1)
+        VIEWS[name] = make_view(load_rgb(vpath)); log("VIEW", name, VIEWS[name]["size"], "bbox", VIEWS[name]["bbox"])
+else:
+    px = load_rgb(opts["turnaround"])
+    for name, (x0, y0, w, h) in PANELS.items():
+        VIEWS[name] = make_view(px[y0:y0 + h, x0:x0 + w, :], 0.93); log("VIEW", name, "bbox", VIEWS[name]["bbox"])
 
 # ---------------------------------------------------------------- join the organs into two skinned objects
 def join(names_prefixes, new_name):
@@ -205,7 +213,7 @@ def paint_object(ob, size, side_weight):
         # silhouette IoU of this view (every covered texel, no visibility): a guide, not acceptance
         hit = np.zeros((h_img, w_img), bool)
         hit[np.clip(np.round(v[covered]).astype(int), 0, h_img - 1), np.clip(np.round(u[covered]).astype(int), 0, w_img - 1)] = True
-        hit = dilate(hit, 1)
+        hit = dilate(hit, 3 if w_img > 1000 else 1)   # texels are sparser than hi-res pixels
         ious[name] = float((hit & view["mask"]).sum() / max(1, (hit | view["mask"]).sum()))
         facing = Ng @ d
         base_w = np.clip(facing, 0, 1) ** 1.5 * (side_weight if name in ("left", "right") else 1.0) * ink
@@ -267,7 +275,7 @@ def make_image(name, arr):
     # as WebP while the normal maps stay lossless PNG
     tmp = OUT / f"{name}.webp"
     scene.view_settings.view_transform = "Standard"; scene.view_settings.look = "None"
-    scene.render.image_settings.file_format = "WEBP"; scene.render.image_settings.quality = 86
+    scene.render.image_settings.file_format = "WEBP"; scene.render.image_settings.quality = int(opts["quality"])
     scene.render.image_settings.color_mode = "RGB"
     im.save_render(str(tmp), scene=scene)
     bpy.data.images.remove(im)
@@ -276,12 +284,26 @@ def make_image(name, arr):
 
 
 imA = make_image("serpent-paint-atlas", atlasA); imB = make_image("head-paint-atlas", atlasB)
+# the emissive face lattice is a colour image: store it as WebP too (budget)
+lat = bpy.data.images.get("face-lattice")
+if lat is not None:
+    tmp = OUT / "face-lattice.webp"
+    scene.view_settings.view_transform = "Standard"; scene.view_settings.look = "None"
+    scene.render.image_settings.file_format = "WEBP"; scene.render.image_settings.quality = 90; scene.render.image_settings.color_mode = "RGB"
+    lat.save_render(str(tmp), scene=scene)
+    users = [(mat, node) for mat in bpy.data.materials if mat.use_nodes for node in mat.node_tree.nodes if node.type == "TEX_IMAGE" and node.image is lat]
+    bpy.data.images.remove(lat)
+    lat = bpy.data.images.load(str(tmp)); lat.name = "face-lattice"; lat.pack()
+    for mat, node in users:
+        node.image = lat
 # --- materials: baseColor from the atlas (no vertex colour multiply), keep the normal maps
 def painted_material(src, name, image):
     m = src.copy(); m.name = name; nt = m.node_tree; b = nt.nodes["Principled BSDF"]
     for node in list(nt.nodes):
         if node.type == "VERTEX_COLOR":
             nt.nodes.remove(node)
+        elif node.type == "TEX_IMAGE" and node.image and node.image.name == "skin-micro-normal":
+            nt.nodes.remove(node)   # the painted atlas carries the head's detail; drop the 193 KB micro normal
     tex = nt.nodes.new("ShaderNodeTexImage"); tex.image = image
     uvn = nt.nodes.new("ShaderNodeUVMap"); uvn.uv_map = "AtlasUV"
     nt.links.new(uvn.outputs["UV"], tex.inputs["Vector"]); nt.links.new(tex.outputs["Color"], b.inputs["Base Color"])
@@ -293,10 +315,10 @@ for ob, image in ((A, imA), (B, imB)):
         src = slot.material
         if src is None or "Rune |" in src.name:
             continue   # the glow cores keep their emissive material
-        slot.material = painted_material(src, f"{src.name.split(' |')[0]} | v7 painted {ob.name[:4]}", image)
+        slot.material = painted_material(src, f"{src.name.split(' |')[0]} | {STAMP} painted {ob.name[:4]}", image)
 log("MATERIALS")
 
-bpy.ops.wm.save_as_mainfile(filepath=str(OUT / f"guardian-{STAMP}.blend"))
+bpy.ops.wm.save_as_mainfile(filepath=str(OUT / f"guardian-{STAMP}-painted.blend"))   # never over the builder's blend
 
 # ---------------------------------------------------------------- export (same contract as v5/v6)
 HEAD_BONES = ["NeckBaseJoint", "NeckHeadJoint", "HeadPivot", "JawPivot"]
@@ -361,7 +383,7 @@ if opts["export"] == "1":
                    "assets": assets, "meshAudit": audit,
                    "meshStats": {"objects": len(audit), "vertices": sum(a["vertices"] for a in audit), "triangles": sum(a["triangles"] for a in audit)},
                    "poseChecks": {k: {**base.get("poseChecks", {}).get(k, {}), **v} for k, v in posechecks.items()},
-                   "painting": {"source": "public/dogs-archive-20261028/reference/guardian-turnaround.png (four views)",
+                   "painting": {"source": opts["views"] or "public/dogs-archive-20261028/reference/guardian-turnaround.png (four views)",
                                 "atlas": {"body": ATLAS, "head": ATLAS // 2, "uv": "AtlasUV (TEXCOORD after MicroSurfaceUV/AuthoredUV)"},
                                 "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x%s, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled" % opts["side_weight"],
                                 "confidenceCoverage": {"body": float((confA[covA] > 0.5).mean()), "head": float((confB[covB] > 0.5).mean())},

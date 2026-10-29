@@ -82,6 +82,11 @@ headmesh.vertex_groups["NeckBaseJoint"].name = "NeckHeadJoint"
 BONE_MAT = bpy.data.materials.get("Bone | v3 lattice") or material_from("Bone | v2 clay", "Bone | v3 lattice")
 INK_MAT = bpy.data.materials.get("Skin | v3 ink") or material_from("Skin | v2 clay", "Skin | v3 ink")
 set_principled(INK_MAT, Roughness=0.58); set_principled(BONE_MAT, Roughness=0.66)
+if opts["tiles"] == "1":   # budget: the micro normals (193 + 216 KB) are not worth it once the tiles and the atlas carry the detail
+    for m_ in (INK_MAT, BONE_MAT):
+        for node in list(m_.node_tree.nodes):
+            if node.type in ("TEX_IMAGE", "NORMAL_MAP", "UVMAP"):
+                m_.node_tree.nodes.remove(node)
 
 
 def glow_material(name, color, strength):
@@ -392,7 +397,7 @@ def attach(ob):
 # ================================================================ geometry
 def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.42, 0.015), ribs=True,
                    crest=True, comb_fn=None, glow_fn=None, mat_dark=0, mat_bone=1, mat_glow=2, sides=12,
-                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False):
+                   rib_scale=1.0, hint=(0, 0, 1), scales=0, scale_size=1.0, rib_width=0.32, paired=False, crest_scale=1.0):
     """A dark membrane tube with transverse bone arcs over its front, rows of crescent scales
     (hooked curls lying on the surface) across the front, a crosier crest on the side given by
     crest_fn(i) (unit vector or None) and optional comb spines from comb_fn(i)."""
@@ -472,8 +477,8 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
         cd = crest_fn(i) if crest else None
         if cd is not None and r > 0.03:
             big = count % 2 == 0
-            hook_len = (sp * (3.6 if big else 2.4) + 0.06) * (1 + 0.12 * noise1(count * 2.1, 17))
-            mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, sp * (0.42 if big else 0.30) + 0.006, turns=1.05,
+            hook_len = (sp * (3.6 if big else 2.4) + 0.06) * (1 + 0.12 * noise1(count * 2.1, 17)) * crest_scale
+            mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, (sp * (0.42 if big else 0.30) + 0.006) * (0.75 if crest_scale > 1 else 1.0), turns=1.05,
                        straight=0.10, sides=6, color_root=mix(BONE_ROOT, BONE, 0.3), color_tip=mix(BONE_EDGE, GLOW, g),
                        hint=unit(np.cross(cd, flow)), mat=mat_glow if g > 0.5 else mat_bone, bend_power=1.45)
         if comb_fn is not None:
@@ -525,8 +530,8 @@ def body_scales_split(i):
 # the coil: thin ribs plus three rows of crescent scales tightening to the core; the descent: ribs,
 # two rows of scales and the comb spines
 i_split = int(np.searchsorted(S_MAIN, s_coil_end))
-segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.40, 0.014),
-               glow_fn=body_glow, rib_scale=0.8, scales=3, scale_size=1.1, rib_width=0.24)
+segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, body_crest, arc_ext=100, spacing=(0.26, 0.010),
+               glow_fn=body_glow, rib_scale=0.7, scales=2, scale_size=1.0, rib_width=0.22, crest_scale=1.6)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
                ribs=False, paired=True, scales=1, scale_size=0.8)
@@ -564,9 +569,9 @@ for path, stations, rad0, spines in ((TAIL_A, TAILA, 0.24, 14), (TAIL_B, TAILB, 
             edge = side * math.cos(roll) + normal * math.sin(roll)
         else:
             edge = unit(V((0.75, -0.45, 0.35)) + side * 0.2)
-        tip = p + edge * le + tang * (.12 + .16 * t)
+        tip = p + edge * (le * 1.25) + tang * (.12 + .16 * t)
         sp = catmull([p - edge * radii[i] * 0.4, p + edge * le * .30 + tang * .02, tip], 8)
-        rr = (.085 * (1 - t * .45)) * (1 - np.linspace(0, 1, len(sp))) ** .85 + .004
+        rr = (.060 * (1 - t * .45)) * (1 - np.linspace(0, 1, len(sp))) ** .9 + .003
         mtail.cur_w = chain_weights(ss[i], stations)
         mtail.tube(sp, rr, sides=8, flat=0.6, color_fn=lambda a1, t1, b1, c1: mix(BONE_ROOT, BONE_EDGE, t1 ** 0.6), hint=normal, mat=1, taper_end=True)
         mtail.cur_w = None
@@ -604,6 +609,42 @@ arms = attach(marm.finish(micro_uv_scale=2.4))
 clean(arms)
 print("ARMS_DONE", round(time.time() - START, 1), flush=True)
 
+def knob_box(mb, centre, along, outward, normal, sa, so, st, color, mat):
+    """A rounded-looking 8-vertex knob (12 tris) standing on an edge: narrower and thinner at its top."""
+    sv = len(mb.v)
+    for a in (-1, 1):
+        for o in (0, 1):
+            for nn in (-1, 1):
+                shrink = 1.0 if o == 0 else 0.72
+                p = centre + along * (a * sa * 0.5 * shrink) + outward * (o * so) + normal * (nn * st * 0.5 * shrink)
+                mb.add_vertex(p, color)
+
+    def I(a, o, nn):
+        return sv + a * 4 + o * 2 + nn
+    for f in ((I(0, 0, 0), I(1, 0, 0), I(1, 0, 1), I(0, 0, 1)), (I(0, 1, 0), I(0, 1, 1), I(1, 1, 1), I(1, 1, 0)),
+              (I(0, 0, 0), I(0, 1, 0), I(1, 1, 0), I(1, 0, 0)), (I(0, 0, 1), I(1, 0, 1), I(1, 1, 1), I(0, 1, 1)),
+              (I(0, 0, 0), I(0, 0, 1), I(0, 1, 1), I(0, 1, 0)), (I(1, 0, 0), I(1, 1, 0), I(1, 1, 1), I(1, 0, 1))):
+        mb.add_face(f, mat)
+
+
+def rim_knobs(mb, path, ws, ts, frames, lateral, weights_fn, color=(0.30, 0.36, 0.30), mat=0, frac=1 / 9.0, start=2):
+    """Owner: 黒っぽい腕の淵の細部. A dense, even, continuous row of dark knobs along the OUTER edge
+    (the side away from the curl), each about 1/9 of the local width, following every turn."""
+    T, Nn, B = frames; n = len(path)
+    s_acc = 0.0; last = -1.0
+    for i in range(start, n - 1):
+        s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
+        size = max(0.010, w * frac)
+        if s_acc - last < size * 1.15:
+            continue
+        last = s_acc
+        inner = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
+        outer = -inner
+        mb.cur_w = weights_fn(i / (n - 1))
+        knob_box(mb, path[i] + outer * (w * 0.47), T[i], outer, Nn[i], size * 0.85, size * 0.9, max(0.006, ts[i] * 0.6), color, mat)
+        mb.cur_w = None
+
+
 # --- fronds (v10 silhouette pass): broad base with a strong taper, a 2:1 ribbon section with a
 # pale ridge line, the tip spiral baked into the rest pose, and a comb of real flat hooked teeth
 # along the inner (concave) edge, each about 1/3-1/2 of the local width, smaller toward the tip
@@ -633,7 +674,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     for i in range(3, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
         length = min(0.30, max(0.025, (0.55 if big else 0.48) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
-        if s_acc - last < max(0.028, 0.72 * length):
+        if s_acc - last < max(0.024, 0.55 * length):
             continue
         last = s_acc
         edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
@@ -646,6 +687,20 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         mb.ribbon(tp, tw, tth, sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.4), BONE_EDGE, t1 ** 0.7),
                   hint=nrm, bulge=1.0, mat=1)
         mb.cur_w = None
+    # dark crenellated knob row along the outer edge, through the tip spiral
+    rim_knobs(mb, path, ws, ts, (T, Nn, B), lateral, lambda t_: chain_weights(t_, stations))
+    # curl clusters: two extra spirals sprouting from each cluster frond (curls on curls), each with its own knob row
+    if idx in CLUSTER_PARENT:
+        for fr_ in (0.42, 0.70):
+            k = int(fr_ * (n - 1)); w = ws[k]
+            inner = unit(B[k] * (np.sign(np.dot(B[k], lateral)) if abs(np.dot(B[k], lateral)) > 1e-6 else 1.0)); outer = -inner
+            d0 = unit(outer * 0.7 + T[k] * 0.7)
+            sp = resample(crosier_path(path[k] + outer * (w * 0.45), d0, T[k], w * 2.4 + 0.12, turns=1.25, straight=0.3, bend_power=1.5), spacing=0.016)
+            m_ = len(sp); tt_ = np.linspace(0, 1, m_)
+            sw = (w * 0.55) * (1 - tt_) ** 1.1 + 0.006; sth = sw * 0.45 + 0.006
+            wfix = chain_weights(k / (n - 1), stations)
+            fr2, _ = mb.ribbon(sp, sw, sth, sides=10, color_fn=rib_color, hint=nrm, bulge=1.2, mat=0, weights_fn=lambda i2, t2, wf=wfix: wf)
+            rim_knobs(mb, sp, sw, sth, fr2, T[k], lambda t_, wf=wfix: wf, start=1)
     fob = attach(mb.finish(micro_uv_scale=2.4)); clean(fob)
 print("FRONDS_DONE", round(time.time() - START, 1), flush=True)
 
@@ -744,8 +799,20 @@ for sgn in (-1, 1):
     for t_ in np.linspace(0.10, 0.80, 6):
         p0 = V(Pinv(OLD_H @ facepoint(t_, sgn * 0.98))); p1 = V(Pinv(OLD_H @ facepoint(t_ + 0.02, sgn * 0.98))); p2 = V(Pinv(OLD_H @ facepoint(t_, sgn * 0.80)))
         out_ = unit(p0 - p2); flow_ = unit(p1 - p0)
-        mhook.crosier(p0, out_, flow_, 0.065 + 0.03 * (1 - t_), 0.010, turns=0.9, straight=0.2, sides=6,
+        mhook.crosier(p0, out_, flow_, 0.14 + 0.06 * (1 - t_), 0.014, turns=0.9, straight=0.25, sides=6,
                       color_root=INK, color_tip=mix(INK, MEMBRANE, 0.6), hint=unit(np.cross(out_, flow_)), mat=0, bend_power=1.5)
+        # a dot row along one edge of each hook, like a comb's back (owner: 腕の淵の細部)
+        L_ = 0.14 + 0.06 * (1 - t_)
+        hp = crosier_path(p0, out_, flow_, L_, turns=0.9, straight=0.25, bend_power=1.5)
+        hT, hN, hB = rmf_frames(hp, hint=unit(np.cross(out_, flow_)))
+        acc_ = 0.0; last_ = -1.0
+        for k_ in range(1, len(hp) - 1):
+            acc_ += np.linalg.norm(hp[k_] - hp[k_ - 1])
+            if acc_ - last_ < 0.016:
+                continue
+            last_ = acc_
+            r_ = 0.014 * (1 - 0.8 * (k_ / len(hp)) ** 0.9) + 0.0008
+            knob_box(mhook, hp[k_] + hB[k_] * (r_ * 0.9), hT[k_], hB[k_], hN[k_], 0.009, 0.007, 0.006, (0.02, 0.045, 0.028), 0)
 attach(mhook.finish(micro_uv_scale=1.0))
 # head colours + skin; jaw and oral membrane ride the jaw bone
 g_, gn_ = (lambda me: (np.array([tuple(v.co) for v in me.vertices]), np.array([tuple(v.normal) for v in me.vertices])))(headmesh.data)
