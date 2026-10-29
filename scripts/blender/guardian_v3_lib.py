@@ -124,7 +124,7 @@ def crosier_path(base, direction, curl_toward, length, turns=0.85, straight=0.30
     c = V(curl_toward) - d * np.dot(V(curl_toward), d)
     c = unit(c)
     if n is None:
-        n = max(10, int(length / 0.012))
+        n = max(9, int(length / 0.017))
     pts = []
     pos = V(base).copy()
     ds = length / (n - 1)
@@ -147,11 +147,11 @@ def noise1(x, seed=0.0):
 
 
 # ---------------------------------------------------------------- colours (linear RGB)
-INK = (0.008, 0.020, 0.012)         # black-green body/tentacle ink
-MEMBRANE = (0.012, 0.045, 0.022)    # dark green membrane cells
+INK = (0.005, 0.014, 0.008)         # black-green body/tentacle ink
+MEMBRANE = (0.009, 0.034, 0.017)    # dark green membrane cells
 MEMBRANE_LIT = (0.045, 0.14, 0.07)  # membrane catching light near the glow
-BONE = (0.22, 0.30, 0.21)           # pale grey-green bone
-BONE_EDGE = (0.42, 0.54, 0.40)      # pale rim of a bone rib
+BONE = (0.27, 0.35, 0.25)           # pale grey-green bone
+BONE_EDGE = (0.56, 0.68, 0.52)      # pale rim of a bone rib
 BONE_ROOT = (0.07, 0.11, 0.07)      # bone darkening toward its root / cavity
 GLOW = (0.55, 1.0, 0.62)            # emissive pale green (also used as vertex tint)
 
