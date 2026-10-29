@@ -31,6 +31,10 @@ test("material families follow the name prefix, so bone named after its lattice 
   assert.equal(family("Skin | v12 painted Head"), "skin");
   assert.equal(family("Bone | v12 painted Head"), "bone");
   assert.equal(family("Mouth | v12 painted Head"), "mouth");
+  // v17: translucent green glass parts (the big arms' ladder rungs and inner hooks)
+  assert.equal(family("Glass | arm ladder"), "glass");
+  assert.equal(family("Glass | v17 arm ladder"), "glass");
+  assert.equal(family("Bone | v17 fan zipper"), "bone");
   // Unknown names fall back to skin; a bare face material is the lattice.
   assert.equal(family("Membrane"), "skin");
   assert.equal(family("Face lattice leaf"), "lattice");

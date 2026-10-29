@@ -59,6 +59,7 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
 export const guardianSurfaceFamily = (material: THREE.Material) => {
   const name = material.name;
   const prefix = name.split(/[|:]/, 1)[0];
+  if (/glass|crystal/i.test(prefix)) return "glass";
   if (/bone|ivory|shell|carapace|ridge|teeth/i.test(prefix)) return "bone";
   if (/mouth|cavity/i.test(prefix)) return "mouth";
   if (/rune|emission|glow/i.test(prefix))
@@ -96,6 +97,10 @@ export function applyGuardianInkSurface(
       metalness: number;
       metalnessMap: THREE.Texture | null;
       vertexColors: boolean;
+      transparent: boolean;
+      opacity: number;
+      depthWrite: boolean;
+      side: THREE.Side;
     }
   >();
   let patched = 0;
@@ -116,6 +121,10 @@ export function applyGuardianInkSurface(
         metalness: material.metalness,
         metalnessMap: material.metalnessMap,
         vertexColors: material.vertexColors,
+        transparent: material.transparent,
+        opacity: material.opacity,
+        depthWrite: material.depthWrite,
+        side: material.side,
       });
       // A projected atlas (2026-10-30 "painted" materials) already carries the baked AO; any
       // vertex colour left on those primitives would darken it a second time.
@@ -197,6 +206,48 @@ export function applyGuardianInkSurface(
         material.emissive.set("#39ff7a");
         material.emissiveIntensity = 0;
         mouths.push(material);
+        continue;
+      }
+      if (family === "glass") {
+        // Pale translucent green glass (the big arms' ladder rungs and their flame-shaped
+        // hooks in 05): alpha-blended over what lies behind, more opaque and lighter at the
+        // edges (fresnel), wrap-lit with a faint inner glow, low roughness. No transmission
+        // pass, so phones pay only the blend.
+        material.transparent = true;
+        material.opacity = 0.74;
+        material.depthWrite = false;
+        material.side = THREE.DoubleSide;
+        material.roughness = Math.min(material.roughness, 0.3);
+        material.metalness = 0;
+        material.metalnessMap = null;
+        if (material.color.r > 0.9 && material.color.g > 0.9 && material.color.b > 0.9 && !material.map)
+          material.color.setRGB(0.42, 0.78, 0.5);
+        material.onBeforeCompile = (shader) => {
+          Object.assign(shader.uniforms, uniforms);
+          shader.fragmentShader = shader.fragmentShader
+            .replace(
+              "#include <common>",
+              "#include <common>\nuniform vec3 uKeyDir;uniform float uTranslucency;",
+            )
+            .replace(
+              "#include <emissivemap_fragment>",
+              `#include <emissivemap_fragment>
+{
+ vec3 gV=normalize(vViewPosition);
+ float gNdV=saturate(dot(normal,gV));
+ float gFres=pow(1.-gNdV,2.2);
+ float gWrap=saturate((dot(normal,uKeyDir)+.7)/1.7);
+ // inner glow (wrap-lit) and a lighter glass rim
+ totalEmissiveRadiance+=vec3(.55,.92,.62)*(.14+.26*gWrap)*uTranslucency;
+ totalEmissiveRadiance+=vec3(.78,1.,.84)*gFres*.5;
+ // edges denser than the middle, like a glass rod
+ diffuseColor.a*=.72+.28*gFres;
+}`,
+            );
+        };
+        material.customProgramCacheKey = () => "guardian-glass-v1";
+        material.needsUpdate = true;
+        patched++;
         continue;
       }
       // Glassy bone and a subtle sheen on the painted skin (the authored 0.58–0.66 stays
@@ -370,6 +421,10 @@ if(gPainted>.5){
         material.metalness = state.metalness;
         material.metalnessMap = state.metalnessMap;
         material.vertexColors = state.vertexColors;
+        material.transparent = state.transparent;
+        material.opacity = state.opacity;
+        material.depthWrite = state.depthWrite;
+        material.side = state.side;
         material.needsUpdate = true;
       });
       previous.clear();
