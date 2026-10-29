@@ -49,8 +49,8 @@ void main(){
  // but leaving the figure's own area darker so the ink body keeps its contrast
  float below=smoothstep(.45,-.6,p.y);
  float ring=smoothstep(2.6,1.0,d);
- float inside=smoothstep(.1,1.05,d);
- float mass=ring*(.4+.4*below)*mix(.3,.75,inside);
+ float inside=smoothstep(.3,1.15,d);
+ float mass=ring*(.4+.4*below)*mix(.12,.7,inside);
  vec2 jp=(vUv-uMouth)*vec2(aspect,1.);
  vec2 jd=normalize(uJet*vec2(aspect,1.)+vec2(1e-4,0.));
  float along=dot(jp,jd),across=abs(dot(jp,vec2(-jd.y,jd.x)));

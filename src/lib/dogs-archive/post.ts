@@ -18,12 +18,13 @@ export class GuardianInkGradePass extends ShaderPass {
         uGrain: { value: 0.03 },
         uVignette: { value: 0.3 },
         uContour: { value: 0.75 },
+        uHalo: { value: 12 },
         uNear: { value: camera.near },
         uFar: { value: camera.far },
         uResolution: { value: new THREE.Vector2(1, 1) },
       },
       vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-      fragmentShader: `uniform sampler2D tDiffuse,tDepth;uniform float uGrain,uVignette,uContour,uNear,uFar;uniform vec2 uResolution;varying vec2 vUv;
+      fragmentShader: `uniform sampler2D tDiffuse,tDepth;uniform float uGrain,uVignette,uContour,uHalo,uNear,uFar;uniform vec2 uResolution;varying vec2 vUv;
 float hash(vec2 p){p=fract(p*vec2(.1031,.1030));p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.x);}
 float linearDepth(vec2 uv){float d=texture2D(tDepth,uv).r;return -(uNear*uFar)/((uFar-uNear)*d-uFar);}
 void main(){
@@ -38,6 +39,18 @@ void main(){
  float step_=max(dx,dy)/max(d0,1.);
  float contour=smoothstep(.012,.04,step_)*(1.-smoothstep(.85,1.,d0/uFar));
  c=mix(c,ink,contour*uContour);
+ // Ink halo: the ground just outside the silhouette darkens, as ink pools around a figure,
+ // so the body reads against the fire. Background pixels only; the body keeps its colour.
+ float halo=0.;
+ if(d0>uFar*.9){
+  for(int i=0;i<6;i++){
+   float ang=float(i)*1.0472;vec2 o=vec2(cos(ang),sin(ang))*px*uHalo;
+   halo=max(halo,step(linearDepth(vUv+o),uFar*.9));
+   halo=max(halo,step(linearDepth(vUv+o*1.9),uFar*.9)*.62);
+   halo=max(halo,step(linearDepth(vUv+o*2.9),uFar*.9)*.3);
+  }
+ }
+ c=mix(c,ink,halo*.6*uContour);
  c=ink+c*(1.-ink);
  float l=dot(c,vec3(.2126,.7152,.0722));
  c=mix(c,c*vec3(.92,1.03,.96),.3);

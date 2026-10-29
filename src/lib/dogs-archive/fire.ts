@@ -8,9 +8,9 @@ export type FireTier = {
   sparks: number;
 };
 export const FIRE_TIERS: Record<"high" | "mobile" | "low", FireTier> = {
-  high: { jetSteps: 34, cards: 120, embers: 420, sparks: 420 },
-  mobile: { jetSteps: 24, cards: 80, embers: 260, sparks: 260 },
-  low: { jetSteps: 16, cards: 50, embers: 150, sparks: 150 },
+  high: { jetSteps: 34, cards: 88, embers: 420, sparks: 620 },
+  mobile: { jetSteps: 24, cards: 64, embers: 260, sparks: 380 },
+  low: { jetSteps: 16, cards: 44, embers: 150, sparks: 220 },
 };
 
 const GOLDEN = 0.61803398875;
@@ -70,14 +70,14 @@ void main(){
   float n=(texture(uNoise,fp+warp*.55).r-.5)*1.6+.5;
   float n2=(texture(uNoise,fp*2.2+vec3(5.)+warp.zxy*.35).g-.5)*1.6+.5;
   // Narrow at the mouth, widening into the turbulent cloud only well away from the body.
-  float radius=.07+pow(z,1.25)*.85;
+  float radius=.07+pow(z,1.1)*.95;
   vec2 c=warp.xy*z*.9;
   float r=length((p.xy-c)/radius);
   float env=1.-smoothstep(.4,.95,r+(n-.5)*.9);
   float head=1.-smoothstep(.6+uStrength*.35,1.,z+(n2-.5)*.25);
   // Turbulent lobes with hard dark gaps, a near-white axis and bright filaments.
-  float lobes=smoothstep(.44,.66,n*.7+n2*.4+(1.-z)*.12);
-  float dens=env*head*lobes*1.5;
+  float lobes=smoothstep(.32,.56,n*.7+n2*.4+(1.-z)*.12);
+  float dens=env*head*lobes*2.2;
   float axis=exp(-r*r*(3.+z*7.))*(1.-z*.5)*head;
   float fil=pow(1.-abs(2.*n2-1.),6.)*env*head;
   float ink=smoothstep(.62,1.,1.-abs(2.*n2-1.))*dens+smoothstep(.7,1.,1.-abs(2.*n-1.))*dens*.6;
@@ -86,7 +86,7 @@ void main(){
   col+=vec3(1.2,1.5,1.2)*(axis*1.3+fil*.9);
   col*=1.-min(ink,.85);
   // Dense: lobes saturate into opaque pale masses with dark gaps between them.
-  float a=1.-exp(-(dens*1.4+axis*2.+fil*1.)*uStrength*stepSize*1.1);
+  float a=1.-exp(-(dens*1.4+axis*2.+fil*1.)*uStrength*stepSize*1.3);
   sum.rgb+=(1.-sum.a)*col*a;sum.a+=(1.-sum.a)*a;
   if(sum.a>.96)break;
  }
@@ -118,7 +118,7 @@ void main(){
     vertexShader: `attribute float aPhase;uniform float uTime,uStrength,uDpr;varying float vLife,vHeat;
 void main(){float speed=.38+fract(aPhase*53.)*.3;float u=fract(aPhase+uTime*speed);float angle=aPhase*127.+u*5.;float spread=pow(u,1.3)*(.18+fract(aPhase*37.)*.75);
 vec3 p=vec3(cos(angle)*spread,sin(angle)*spread+u*u*.25,-.98+u*2.5);vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
-vHeat=fract(aPhase*7.);gl_PointSize=clamp((16.+vHeat*30.)*uDpr/max(1.,-mv.z),1.,8.);vLife=sin(u*3.14159)*uStrength;}`,
+vHeat=fract(aPhase*7.);gl_PointSize=clamp((18.+vHeat*34.)*uDpr/max(1.,-mv.z),1.,9.);vLife=sin(u*3.14159)*uStrength;}`,
     fragmentShader: `varying float vLife,vHeat;void main(){vec2 p=gl_PointCoord-.5;float a=exp(-dot(p,p)*20.)*vLife;if(a<.02)discard;gl_FragColor=vec4(mix(vec3(.3,1.3,.5),vec3(1.4,2.4,1.5),pow(vHeat,2.5)),a);}`,
     transparent: true,
     depthWrite: false,
@@ -151,7 +151,7 @@ vHeat=fract(aPhase*7.);gl_PointSize=clamp((16.+vHeat*30.)*uDpr/max(1.,-mv.z),1.,
       const length = 7.2 + strength * 1.5;
       mesh.position.copy(origin).addScaledVector(direction, length * 0.5 - 0.035);
       mesh.quaternion.setFromUnitVectors(z, direction);
-      mesh.scale.set(2.4, 2.4, length * 0.5);
+      mesh.scale.set(2.8, 2.8, length * 0.5);
       mesh.updateMatrixWorld(true);
       sparks.position.copy(mesh.position);
       sparks.quaternion.copy(mesh.quaternion);
@@ -269,62 +269,73 @@ export function createFlameMantle(model: THREE.Object3D, noise: THREE.Data3DText
     vertexShader: `in vec3 iOrigin,iAxis,iNormal;in vec2 iSize;in float iSeed;
 uniform float uTime,uStrength,uAnticipation;
 out vec2 vQ;out float vSeed,vFade,vIntensity;
+// A painted tongue's centreline in the (axis, right) plane, in units of its length: a stem
+// with an S bend, then a hook that curls back and tightens, like the licks in the painting.
+void tongue(float s,float side,float ph,out vec2 p,out vec2 t){
+ float sway=sin(uTime*1.1+ph)*.06+sin(uTime*2.1+ph*2.)*.025;
+ float hs=.62;
+ float ss=min(s,hs);
+ float v=side*(.17*sin(ss*3.1416)+.08*ss*ss)+sway*ss;
+ vec2 e=vec2(ss,v);
+ vec2 et=normalize(vec2(1.,side*(.17*3.1416*cos(ss*3.1416)+.16*ss)+sway));
+ if(s<=hs){p=e;t=et;return;}
+ float k=(s-hs)/(1.-hs);
+ vec2 n=vec2(-et.y,et.x)*(-side);
+ float r0=.17,r=r0*(1.-.45*k),phi=k*2.7;
+ vec2 c=e+n*r0;
+ p=c+r*(-n*cos(phi)+et*sin(phi));
+ t=normalize(n*sin(phi)+et*cos(phi));
+}
 void main(){
  vec3 wo=(modelMatrix*vec4(iOrigin,1.)).xyz;
  vec3 wa=normalize(mat3(modelMatrix)*iAxis);
  vec3 wn=normalize(mat3(modelMatrix)*iNormal);
  vec3 toCam=cameraPosition-wo;
- vec3 side=cross(wa,toCam);
- vec3 right=length(side)>1e-4?normalize(side):vec3(1.,0.,0.);
- float h=position.y+.5;
+ vec3 toCamDir=normalize(toCam);
+ vec3 sideV=cross(wa,toCam);
+ vec3 right=length(sideV)>1e-4?normalize(sideV):vec3(1.,0.,0.);
+ float s=position.y+.5;
+ float side=fract(iSeed*5.3)>.5?1.:-1.;
  float ph=iSeed*6.2831;
- float sway=sin(uTime*1.1+ph+h*2.5)*.16*h*h+sin(uTime*2.3+ph*2.)*.05*h;
- float lift=1.+uStrength*.3-uAnticipation*.25;
- vec3 wp=wo+right*((position.x+sway)*iSize.x)+wa*(h*iSize.y*lift);
- vQ=vec2(position.x,h);vSeed=iSeed;
- // Fire frames the figure: cards on surfaces that face the camera all but vanish, so tongues
- // live on the silhouette and peek out from behind the body.
- float facing=clamp(dot(wn,normalize(toCam)),0.,1.);
- vFade=1.-.95*smoothstep(.0,.55,facing);
- vIntensity=(.55+fract(iSeed*17.)*.45)*(1.+uStrength*.25);
+ vec2 p,t;
+ tongue(s,side,ph,p,t);
+ float L=iSize.y*(1.+uStrength*.3-uAnticipation*.25);
+ float w=iSize.x*pow(max(0.,1.-s),.55)*(.55+.45*smoothstep(0.,.25,s));
+ vec2 perp=vec2(-t.y,t.x);
+ vec3 wp=wo+wa*(p.x*L+perp.x*position.x*w)+right*(p.y*L+perp.y*position.x*w);
+ vQ=vec2(position.x*2.,s);vSeed=iSeed;
+ // Tongues frame the figure: they fade on surfaces that face the camera and when their own
+ // axis points at the camera (a ribbon seen end-on is a stick).
+ float facing=clamp(dot(wn,toCamDir),0.,1.);
+ float endOn=abs(dot(wa,toCamDir));
+ vFade=(1.-.95*smoothstep(0.,.55,facing))*(1.-smoothstep(.55,.85,endOn));
+ vIntensity=(.6+fract(iSeed*17.)*.4)*(1.+uStrength*.25);
  gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);
 }`,
     fragmentShader: `precision highp float;
 uniform highp sampler3D uNoise;uniform float uTime;
 in vec2 vQ;in float vSeed,vFade,vIntensity;out vec4 outColor;
 void main(){
- float h=vQ.y,x=vQ.x;
- float t=uTime*(.5+fract(vSeed*3.1)*.3);
- float side=fract(vSeed*5.3)>.5?1.:-1.;
- vec3 np=vec3(x*1.4+vSeed*9.,h-t*.5,t*.1+vSeed*4.);
- vec2 w=texture(uNoise,np*.7).ba-.5;
- float n=(texture(uNoise,np+vec3(w*.6,0.)).r-.5)*1.7+.5;
- float n2=(texture(uNoise,np*2.1+vec3(3.3)).g-.5)*1.6+.5;
- float n3=(texture(uNoise,np*3.2+vec3(7.1,1.3,0.)).g-.5)*1.6+.5;
- // A painted lick: a bulbous base narrowing into a thin tip that curls to one side, frayed by
- // the fine noise, with a hard ink outline, a translucent mid-green wash inside, a narrow
- // bright core line and soft dark marbling. The envelope stays inside the card.
- float taper=pow(max(0.,1.-h*.9),.7);
- float width=(.05+.26*taper)*(.8+n2*.4);
- float cx=(n-.5)*.2*h+side*h*h*.22;
- float fray=(n3-.5)*.3*(.4+h);
- float r=abs(x-cx)/max(width,.02)+fray;
- float env=(1.-smoothstep(.6,1.,r))*(1.-smoothstep(.42,.5,abs(x)));
- float tip=1.-smoothstep(.55,1.,h+(n-.5)*.35);
- float root=smoothstep(0.,.12,h);
- float d=env*tip*root*(.65+n*.45)*vIntensity;
- float body=smoothstep(.14,.3,d);
- float pale=smoothstep(.45,.85,d);
- float coreLine=exp(-pow((x-cx)/max(width*.3,.02),2.)*3.)*smoothstep(.3,.6,d)*(1.-h*.5);
- float inkEdge=smoothstep(.06,.13,d)*(1.-smoothstep(.13,.22,d));
- float marbling=smoothstep(.68,1.,1.-abs(2.*n2-1.))*body*.45;
- vec3 col=mix(vec3(.012,.04,.02),vec3(.1,.4,.16),body);
- col=mix(col,vec3(.4,.68,.42),pale);
- col=mix(col,vec3(.82,1.,.8),coreLine);
- col*=1.-marbling;
- float alpha=max(body*.55,inkEdge*.85)*vFade;
- if(alpha<.01)discard;
- outColor=vec4(col,alpha);
+ float x=vQ.x,s=vQ.y;
+ float t=uTime*(.45+fract(vSeed*3.1)*.3);
+ vec3 np=vec3(x*.8+vSeed*9.,s*1.6-t*.5,t*.08+vSeed*4.);
+ float n=(texture(uNoise,np).r-.5)*1.6+.5;
+ float n2=(texture(uNoise,np*2.3+vec3(3.3)).g-.5)*1.6+.5;
+ // Frayed edge, a hard ink rim, a mid-green wash, a pale core line, soft marbling.
+ float r=abs(x)+(n2-.5)*.28*(.3+s);
+ float inside=(1.-smoothstep(.8,1.,r))*(1.-smoothstep(.9,1.,abs(x)));
+ float rim=smoothstep(.56,.84,r)*inside;
+ float wash=inside*(1.-rim);
+ float core=exp(-x*x*5.)*(1.-s*.5)*(.45+n*.75)*vIntensity;
+ float marb=smoothstep(.7,1.,1.-abs(2.*n2-1.))*.5;
+ vec3 col=mix(vec3(.012,.04,.02),vec3(.12,.4,.17),wash);
+ col=mix(col,vec3(.5,.78,.5),wash*smoothstep(.3,.8,core));
+ col=mix(col,vec3(.86,1.,.82),wash*smoothstep(.8,1.15,core));
+ col*=1.-marb*wash;
+ col=mix(col,vec3(.01,.03,.015),rim);
+ float a=(inside*.78+rim*.17)*vFade*smoothstep(0.,.06,s);
+ if(a<.01)discard;
+ outColor=vec4(col,a);
 }`,
     transparent: true,
     depthWrite: false,
@@ -332,7 +343,7 @@ void main(){
     blending: THREE.NormalBlending,
     toneMapped: false,
   });
-  const plane = new THREE.PlaneGeometry(1, 1, 1, 6);
+  const plane = new THREE.PlaneGeometry(1, 1, 1, 18);
   type Group = {
     mesh: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.ShaderMaterial>;
     anchor: THREE.Object3D;
@@ -365,7 +376,7 @@ void main(){
     const selected: FlameSource[] = [];
     for (let attempt = 0; attempt < sources.length * 2 && selected.length < target; attempt++) {
       const source = sources[Math.floor(((attempt * GOLDEN) % 1) * sources.length)];
-      if (selected.every((other) => other.position.distanceToSquared(source.position) > 0.1))
+      if (selected.every((other) => other.position.distanceToSquared(source.position) > 0.2))
         selected.push(source);
     }
     const count = selected.length;
@@ -383,19 +394,20 @@ void main(){
     for (let i = 0; i < count; i++) {
       const source = selected[i];
       const seed = (i * GOLDEN + groups.length * 0.139) % 1;
-      // Tongues radiate from the silhouette and drift upward, like the halo in the painting.
-      axisBlend[i] = 0.8 + ((seed * 7) % 1) * 0.5;
+      // Tongues lick upward along the body, leaning only a little away from the surface.
+      axisBlend[i] = 0.25 + ((seed * 7) % 1) * 0.2;
       growth
         .copy(source.normal)
         .multiplyScalar(axisBlend[i])
-        .addScaledVector(anchorUp, 0.9)
+        .addScaledVector(anchorUp, 1)
         .normalize();
       p.copy(source.position).addScaledVector(source.normal, 0.06).toArray(origins, i * 3);
       growth.toArray(axes, i * 3);
       source.normal.toArray(normals, i * 3);
-      const big = seed > 0.75 ? 1 : 0;
-      sizes[i * 2] = (0.34 + ((seed * 13) % 1) * 0.26) * (1 + big * 0.5);
-      sizes[i * 2 + 1] = (0.6 + ((seed * 17) % 1) * 0.7) * (1 + big * 0.7);
+      // Tongues are a hand's length on a 6.8-unit creature; a few bigger ones lead the halo.
+      const big = seed > 0.78 ? 1 : 0;
+      sizes[i * 2] = (0.25 + ((seed * 13) % 1) * 0.18) * (1 + big * 0.5);
+      sizes[i * 2 + 1] = (0.58 + ((seed * 17) % 1) * 0.55) * (1 + big * 0.5);
       seeds[i] = seed;
       // Embers share the anchor-space points, expressed in model space.
       p.copy(source.position).applyMatrix4(emberMatrix);
@@ -483,7 +495,7 @@ void main(){
         growth
           .copy(n)
           .multiplyScalar(group.axisBlend[slot])
-          .addScaledVector(group.up, 0.9)
+          .addScaledVector(group.up, 1)
           .normalize();
         p.addScaledVector(n, 0.06).toArray(group.origins, slot * 3);
         growth.toArray(group.axes, slot * 3);

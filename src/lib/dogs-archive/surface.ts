@@ -140,7 +140,8 @@ uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength;
 uniform vec3 uRimDir,uKeyDir,uRimColor,uTransColor;
 uniform vec2 uBoneRange;
 varying vec3 vGuardianWorld;
-float gBone,gLum;`,
+float gBone,gLum;
+const float gSkinFamily=${family === "bone" ? "0." : "1."};`,
           )
           .replace(
             "#include <color_fragment>",
@@ -151,20 +152,24 @@ float gBone,gLum;`,
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  float gMax=max(diffuseColor.r,max(diffuseColor.g,diffuseColor.b));
  float gSat=(gMax-min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b)))/max(gMax,1e-4);
- // 2026-10-28 bone: luminance ≥ 0.12 at saturation ≈ 0.38. 2026-10-29 bone: saturation 0.2–0.3
- // at any luminance. Ink/membranes of both: saturation ≥ 0.5, so luminance never counts there.
- gBone=max(smoothstep(uBoneRange.x,uBoneRange.y,gLum)*(1.-smoothstep(.45,.6,gSat)),1.-smoothstep(.3,.5,gSat));
+ // Bone meshes: 2026-10-28 bone is luminance ≥ 0.12 at saturation ≈ 0.38; 2026-10-29 bone is
+ // saturation 0.2–0.3 at any luminance; ink of both is saturation ≥ 0.5. Skin meshes carry
+ // authored ink tiles (v8+) that are grey-green by design, so there only clearly pale texels
+ // (the painted combs) count as bone and saturation is ignored.
+ float gBoneMesh=max(smoothstep(uBoneRange.x,uBoneRange.y,gLum)*(1.-smoothstep(.45,.6,gSat)),1.-smoothstep(.3,.5,gSat));
+ float gSkinMesh=smoothstep(.2,.42,gLum);
+ gBone=mix(gBoneMesh,gSkinMesh,gSkinFamily);
  float gMottle=texture(uNoise,vGuardianWorld*.085+vec3(.3)).r;
  float gFine=texture(uNoise,vGuardianWorld*.6+vec3(1.7)).g;
  // Membranes: black-green ink. Bone: pale grey-green, lifted toward ~0.22 linear when the
  // authored value is darker (the 2026-10-28 bone), left alone when it is already pale.
- float gLift=clamp(.3/max(gLum,.02),1.,1.6);
+ float gLift=clamp(.4/max(gLum,.02),1.,1.8);
  vec3 gTint=mix(vec3(.2,.34,.24),vec3(1.,1.02,.98)*gLift,gBone);
  diffuseColor.rgb*=gTint*(.74+gMottle*.45)*(.9+gFine*.2);
  // Bone stays pale grey-green, never paper: an authored albedo that is already pale (the
  // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
  float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
- diffuseColor.rgb*=mix(1.,min(1.,.55/max(gOut,1e-4)),gBone);
+ diffuseColor.rgb*=mix(1.,min(1.,.66/max(gOut,1e-4)),gBone);
 }`,
           )
           .replace(
@@ -191,6 +196,8 @@ float gBone,gLum;`,
  float gKey=saturate(dot(normal,uKeyDir));
  totalEmissiveRadiance+=uRimColor*gRim*(1.+uStrength*.25)+uTransColor*gTrans*(1.+uStrength*.4);
  totalEmissiveRadiance+=uRimColor*gKey*gFres*gBone*.18;
+ // Bone is unpainted paper: a little pale green regardless of the light.
+ totalEmissiveRadiance+=vec3(.6,.8,.64)*gBone*.14;
 }`,
           )
           .replace(
@@ -215,7 +222,7 @@ float gBone,gLum;`,
     families,
     update(time, strength, anticipation) {
       const pulse = 0.5 + 0.5 * Math.sin(time * 1.35);
-      const latticeScale = 1 + pulse * 0.3 + anticipation * 1.0 + strength * 0.5;
+      const latticeScale = 1.25 + pulse * 0.3 + anticipation * 1.0 + strength * 0.5;
       for (const { material, base } of lattice) material.emissiveIntensity = base * latticeScale;
       const coreScale = 0.9 + pulse * 0.1 + anticipation * 0.2 + strength * 0.15;
       for (const { material, base } of cores) material.emissiveIntensity = base * coreScale;

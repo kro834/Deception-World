@@ -174,7 +174,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const renderPass = new RenderPass(scene, camera);
   // Only true emitters bloom (the lattice face, the breath's white core): pale bone sits just
   // under 1.0 and must not halo.
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.6, 1.35);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.6, 1.7);
   const output = new OutputPass();
   const antialiasPass = tier === "low" ? null : new FXAAPass();
   const grade = new GuardianInkGradePass(camera);
@@ -575,6 +575,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     composer.setSize(width, height);
     backdrop.setSize(width * dpr, height * dpr);
     grade.uniforms.uResolution.value.set(width * dpr, height * dpr);
+    grade.uniforms.uHalo.value = 9 * dpr;
     // Resource estimate for device reports: two half-float composer targets with their depth
     // textures, the half-float breath volume target, the bloom mip chain, the shadow map and
     // the noise volume. Not a driver measure.
