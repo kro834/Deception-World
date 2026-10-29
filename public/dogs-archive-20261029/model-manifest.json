@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 5,
-  "revision": "v8",
+  "revision": "v9",
   "model": "guardian-v3.glb",
-  "assetBytes": 7802436,
-  "assetSha256": "50df6b11756bb63aca2bcc7cd48bdd2b1b2040904f639589c4426e162b0cc3d7",
+  "assetBytes": 7973760,
+  "assetSha256": "2a74dd4165fcbc3bfa4954e3a128e8c75cad06ca8cfbcb5bdd9db04584174953",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -385,8 +385,8 @@
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 7802436,
-      "sha256": "50df6b11756bb63aca2bcc7cd48bdd2b1b2040904f639589c4426e162b0cc3d7"
+      "bytes": 7973760,
+      "sha256": "2a74dd4165fcbc3bfa4954e3a128e8c75cad06ca8cfbcb5bdd9db04584174953"
     }
   ],
   "skinCount": 1,
@@ -402,10 +402,10 @@
   },
   "referenceImagesUsedAsTexture": false,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 14.199625253677368,
+  "secondsBeforeRender": 14.234654903411865,
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v8",
-    "stamp": "v8",
-    "rawGlbSha256": "d35351b3d1a6d06c71f2cc51d31acd6bb6dec75730953703afc969f84fdb1fa8"
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v9",
+    "stamp": "v9",
+    "rawGlbSha256": "cc0f3e9417441650cea063f0eb7b9290b2eb331a501bd29725510bd87c798f4a"
   }
 }

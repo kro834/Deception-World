@@ -71,13 +71,14 @@ def tile_crescent(n, rng):
         ridge = np.exp(-((d - r) / w) ** 2) * win
         dome = np.exp(-(d / (r * 0.9)) ** 2) * win
         return ridge, dome
-    for row in range(5):
-        cy0 = (row + 0.5) / 5; x = rng.uniform(0, 0.06)
-        while x < 1.0:
-            r = 0.085 * rng.uniform(0.7, 1.3); cy = cy0 + rng.uniform(-0.035, 0.035)
-            ridge, dome = crescent(x, cy, r, r * 0.15, rng.uniform(-0.35, 0.35))
-            h += ridge + 0.35 * dome; bone = np.maximum(bone, ridge)
-            x += r * rng.uniform(1.5, 2.5)
+    for layer, (rows, amp, rmul) in enumerate(((5, 1.0, 1.0), (4, 0.75, 0.8))):
+        for row in range(rows):
+            cy0 = (row + 0.5 + 0.5 * layer) / rows; x = rng.uniform(0, 0.08)
+            while x < 1.0:
+                r = 0.085 * rmul * rng.uniform(0.55, 1.5); cy = cy0 + rng.uniform(-0.045, 0.045)
+                ridge, dome = crescent(x, cy, r, r * rng.uniform(0.12, 0.2), rng.uniform(-0.6, 0.6))
+                h += amp * (ridge + 0.35 * dome); bone = np.maximum(bone, amp * ridge)
+                x += r * rng.uniform(1.3, 2.6)
     for _ in range(40):
         r = 0.042 * rng.uniform(0.6, 1.3)
         ridge, dome = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.18, rng.uniform(-0.5, 0.5))
@@ -98,23 +99,27 @@ def _spiral(cx, cy, R, ang0, cw, turns=1.15, k=0.30, m=44):
 
 
 def tile_curl(n, rng):
+    """Continuous crosier chains along u: a ridge line with curls rising from it curl after curl,
+    and smaller curls sprouting from the outer side of the big ones (two nested scales). Rows at
+    y = 0.05 and 0.95 land on the ribbon edges under the mirrored v mapping; the middle row on
+    the faces."""
     h = np.zeros((n, n))
-
-    def curl(cx, cy, R, ang0, cw, width, amp, depth):
-        pts = _resample(_spiral(cx, cy, R, ang0, cw, m=60), width * 0.8)
-        _stroke(h, pts, width, amp, n, taper=0.45)
-        if depth < 1:
-            for k in range(6, 30, 8):
-                px, py = pts[min(k, len(pts) - 1)]; ox, oy = px - cx, py - cy; L = math.hypot(ox, oy) or 1e-6
-                Rs = R * 0.30
-                sx, sy = px + ox / L * Rs * 1.15, py + oy / L * Rs * 1.15
-                curl(sx, sy, Rs, math.atan2(-oy, -ox) + cw * 0.9, -cw, width * 0.6, amp * 0.8, depth + 1)
-    for row in range(4):
-        cy0 = (row + 0.5) / 4; x = rng.uniform(0, 0.08); cw = 1 if row % 2 == 0 else -1
-        while x < 1.0:
-            R = 0.072 * rng.uniform(0.8, 1.2)
-            curl(x, cy0 + rng.uniform(-0.02, 0.02), R, cw * np.pi * 0.5 + rng.uniform(-0.4, 0.4), cw, 0.0055, 1.0, 0)
-            x += R * rng.uniform(2.4, 3.0)
+    for row, cy0 in enumerate((0.05, 0.5, 0.95)):
+        x = rng.uniform(-0.05, 0.02); prev = (x, cy0)
+        while x < 1.05:
+            R = 0.055 * rng.uniform(0.75, 1.3); cy = cy0 + rng.uniform(-0.012, 0.012)
+            up = (1 if row == 0 else -1) if row != 1 else (1 if rng.random() < 0.5 else -1)
+            _stroke(h, _resample([prev, (x, cy), (x + 0.25 * R, cy)], 0.004), 0.0052, 0.9, n, taper=0.0)
+            pts = _resample(_spiral(x + 0.25 * R, cy + up * R, R, -up * np.pi / 2, up, turns=1.25, k=0.30, m=80), 0.0035)
+            _stroke(h, pts, 0.0055, 1.0, n, taper=0.5)
+            for k in (0.20, 0.46):
+                i = int(k * (len(pts) - 1)); px, py = pts[i]
+                ox, oy = px - (x + 0.25 * R), py - (cy + up * R); L = math.hypot(ox, oy) or 1e-6
+                Rs = R * 0.33; sx, sy = px + ox / L * Rs, py + oy / L * Rs
+                sp = _resample(_spiral(sx, sy, Rs, math.atan2(-oy, -ox), -up, turns=1.1, k=0.32, m=40), 0.003)
+                _stroke(h, sp, 0.0034, 0.85, n, taper=0.5)
+            prev = (x + 0.25 * R, cy)
+            x += R * rng.uniform(1.7, 2.3)
     return h, np.clip(h / 0.8, 0, 1)
 
 
@@ -182,6 +187,15 @@ def _as_webp(im, quality=88):
 _WEBP_DIR = None
 
 
+def _as_webp_lossless(im):
+    """Data image (normal map) stored as lossless WebP (Blender's encoder is lossless at 100)."""
+    path = str(_WEBP_DIR / f"{im.name}.webp"); name = im.name
+    im.file_format = "WEBP"; im.save(filepath=path, quality=100)
+    bpy.data.images.remove(im)
+    im = bpy.data.images.load(path); im.name = name; im.colorspace_settings.name = "Non-Color"; im.pack()
+    return im
+
+
 def _normal_image(name, h, strength, downsample=2):
     """Normal map from a height field; the tile normals ship at half the albedo resolution so
     the three PNGs stay inside the delivery budget."""
@@ -212,17 +226,14 @@ def make_tiles(n, out_dir=None, seed=8):
     out = {}
     h, bone = tile_crescent(n, rng)
     out["crescent"] = _byte_image("tile-crescent-albedo", _compose(h, bone ** 1.6, mot, 0.6, 0.8), webp=True)
-    out["crescent_n"] = _normal_image("tile-crescent-normal", h * 0.012 + wr * 0.0006, 1.0)
+    out["crescent_n"] = _as_webp_lossless(_normal_image("tile-crescent-normal", h * 0.012, 1.0, downsample=1))
     h, bone = tile_curl(n, rng)
     out["curl"] = _byte_image("tile-curl-albedo", _compose(h, bone, mot, 0.35), webp=True)
-    out["curl_n"] = _normal_image("tile-curl-normal", h * 0.010 + wr * 0.0006, 1.0)
-    h, bone = tile_membrane(n, rng)
-    out["membrane"] = _byte_image("tile-membrane-albedo", _compose(h, bone * 0.85, mot, 0.3, 0.85), webp=True)
-    out["membrane_n"] = _normal_image("tile-membrane-normal", h * 0.006 + wr * 0.0012 + mot * 0.0025, 1.0)
-    if out_dir is not None:
-        for k, im in out.items():
-            if k.endswith("_n"):
-                im.filepath_raw = str(out_dir / f"{im.name}.png"); im.file_format = "PNG"; im.save()
+    out["curl_n"] = _as_webp_lossless(_normal_image("tile-curl-normal", h * 0.010, 1.0, downsample=1))
+    m2 = n // 2; mot2 = mot[::2, ::2]; wr2 = wr[::2, ::2]
+    h, bone = tile_membrane(m2, rng)
+    out["membrane"] = _byte_image("tile-membrane-albedo", _compose(h, bone * 0.85, mot2, 0.3, 0.85), webp=True)
+    out["membrane_n"] = _as_webp_lossless(_normal_image("tile-membrane-normal", h * 0.006 + wr2 * 0.0012 + mot2 * 0.0025, 1.0, downsample=1))
     return out
 
 
