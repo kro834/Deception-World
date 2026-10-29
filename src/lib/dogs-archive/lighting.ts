@@ -8,7 +8,7 @@ export type GuardianLightingOptions = {
   mapSize?: number;
   palette?: GuardianLightingPalette;
 };
-export type GuardianLightingPalette = "forest" | "neutral";
+export type GuardianLightingPalette = "forest" | "neutral" | "reference";
 
 export type GuardianSurfaceAudit = {
   meshes: number;
@@ -176,7 +176,21 @@ export function createGuardianSculptureLighting(
   let palette: GuardianLightingPalette = options.palette ?? "forest";
   const setPalette = (next: GuardianLightingPalette) => {
     palette = next;
-    if (next === "neutral") {
+    if (next === "reference") {
+      // Even, neutral studio light for judging the materials against the white-ground
+      // originals: a bright sky-and-ground hemisphere, a soft key, pale rims and fill.
+      hemi.color.set(0xffffff);
+      hemi.groundColor.set(0xb9bdb8);
+      hemi.intensity = 0.95;
+      key.color.set(0xfdfcf8);
+      key.intensity = 1.5;
+      rim.color.set(0xdfe6df);
+      rim.intensity = 0.5;
+      rimRight.color.set(0xdfe6df);
+      rimRight.intensity = 0.4;
+      fill.color.set(0xe8ebe6);
+      fill.intensity = 0.6;
+    } else if (next === "neutral") {
       // Similar linear luminance to the forest rig. Read authored albedo
       // rather than painting every dielectric highlight with green light.
       hemi.color.set(0xc3c6c8);

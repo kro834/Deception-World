@@ -24,7 +24,10 @@ import {
   type GuardianPoseManifest,
 } from "./poses.ts";
 
+import { GUARDIAN_REFERENCE_DIRECTIONS, type GuardianLook } from "./look.ts";
+
 export type { GuardianPose } from "./poses.ts";
+export type { GuardianLook } from "./look.ts";
 import {
   createGuardianSculptureLighting,
   prepareGuardianMouthSpill,
@@ -77,6 +80,8 @@ type Options = {
   qualityTier?: GuardianQualityTier;
   effects?: boolean;
   diagnostics?: boolean;
+  /** Test-only reference look (see look.ts). The public page passes the parsed URL flag. */
+  look?: GuardianLook;
 };
 type PoseManifest = GuardianPoseManifest & {
   poses?: {
@@ -134,6 +139,12 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const tier = options.qualityTier ?? detectGuardianQualityTier(navigator, mobile);
   const fireTier = FIRE_TIERS[tier];
   canvas.dataset.qualityTier = tier;
+  // The reference look: creature alone on a white ground, even neutral light, one of the
+  // four turnaround directions. Fire, backdrop and grade are off; the materials are judged.
+  const look: GuardianLook = options.look ?? { look: "page" };
+  const referenceLook = look.look === "reference";
+  const effectsEnabled = options.effects !== false && !referenceLook;
+  canvas.dataset.look = look.look;
   const motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
   let reducedMotion = motionQuery.matches;
   // Every frame goes through the composer, so the default framebuffer needs no multisampling.
@@ -149,19 +160,24 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   renderer.toneMappingExposure = 1.12;
   host.appendChild(canvas);
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#020906");
-  scene.fog = new THREE.FogExp2("#03100a", 0.009);
+  scene.background = new THREE.Color(referenceLook ? "#f4f4f1" : "#020906");
+  scene.fog = referenceLook ? null : new THREE.FogExp2("#03100a", 0.009);
   const noise = createNoiseVolume();
   const backdrop = createInkBackdrop(noise);
+  backdrop.mesh.visible = !referenceLook;
   scene.add(backdrop.mesh);
   const camera = new THREE.PerspectiveCamera(36, 1, 0.08, 120);
-  const viewDirection = new THREE.Vector3(9.5, 2.3, 14.8).normalize();
+  const viewDirection = (
+    look.look === "reference"
+      ? new THREE.Vector3(...GUARDIAN_REFERENCE_DIRECTIONS[look.view])
+      : new THREE.Vector3(9.5, 2.3, 14.8)
+  ).normalize();
   const viewRight = new THREE.Vector3().crossVectors(camera.up, viewDirection).normalize();
   const viewUp = new THREE.Vector3().crossVectors(viewDirection, viewRight).normalize();
   const viewBounds = new THREE.Box3(new THREE.Vector3(-3, -3.4, -2), new THREE.Vector3(3, 3.4, 2));
   const fitCorner = new THREE.Vector3();
   let environmentTarget = createInkEnvironment(renderer);
-  scene.environment = environmentTarget.texture;
+  scene.environment = referenceLook ? null : environmentTarget.texture;
   scene.environmentIntensity = 0.34;
   const composer = new EffectComposer(renderer);
   // Depth textures replace the targets' depth renderbuffers (no extra memory): the breath
@@ -229,6 +245,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   composer.addPass(bloom);
   composer.addPass(output);
   if (antialiasPass) composer.addPass(antialiasPass);
+  grade.enabled = !referenceLook;
   composer.addPass(grade);
   const surfaceUniforms = createGuardianSurfaceUniforms(noise);
   let inkSurface: GuardianSurfaceHandles | null = null;
@@ -241,7 +258,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     surfaceStrength = { value: 0 };
   let model: THREE.Object3D | null = null;
   let lightingProfile: GuardianLightingProfile = "legacy";
-  let lightingPalette: GuardianLightingPalette = options.lightingPalette ?? "forest";
+  let lightingPalette: GuardianLightingPalette =
+    options.lightingPalette ?? (referenceLook ? "reference" : "forest");
   let sculptureLighting: ReturnType<typeof createGuardianSculptureLighting> | null = null;
   let restoreMouthSpill: (() => void) | null = null;
   let surfaceAudit: GuardianSurfaceAudit | null = null;
@@ -482,7 +500,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         origin.set(0, 0.15, 2).applyMatrix4(floating.matrixWorld);
         direction.set(0, -0.12, 1).transformDirection(floating.matrixWorld);
       }
-      const effectStrength = options.effects === false ? 0 : strength;
+      const effectStrength = effectsEnabled ? strength : 0;
       // The painting composes the breath sideways. A jet aimed within 60° of the camera would
       // put its cloud between the viewer and the body, so the jet (with its sparks, mouth light
       // and backdrop mass) is steered away from the view axis; the head still opens as authored.
@@ -523,7 +541,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     sculptureLighting?.update(time, pose);
     camera.updateMatrixWorld();
     if (model) {
-      const effectStrength = options.effects === false ? 0 : strength;
+      const effectStrength = effectsEnabled ? strength : 0;
       mantle?.update(time, effectStrength, anticipation, dpr, camera);
       backdrop.update(
         time,
@@ -688,7 +706,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       const nextEnvironment = createInkEnvironment(renderer);
       environmentTarget.dispose();
       environmentTarget = nextEnvironment;
-      scene.environment = environmentTarget.texture;
+      scene.environment = referenceLook ? null : environmentTarget.texture;
       sculptureLighting?.restoreAfterContextLoss();
       lost = false;
       last = 0;
@@ -965,7 +983,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       canvas.dataset.source = "blender-glb";
       canvas.dataset.geometryBytes = String(geometryBytesEstimated);
       canvas.dataset.materialTextureBytes = String(Math.round(materialTextureBytesEstimated));
-      if (options.effects !== false) mantle = createFlameMantle(model, noise, fireTier);
+      if (effectsEnabled) mantle = createFlameMantle(model, noise, fireTier);
       loading.readyMs = performance.now() - bootStartedAt;
       loading.phase = "ready";
       captureFirstFrame = true;

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { GuardianPose, GuardianScene, GuardianStatus } from "@/lib/dogs-archive/scene.ts";
 import { guardianPoseChooserVisible } from "@/lib/dogs-archive/poses.ts";
+import { parseGuardianLook } from "@/lib/dogs-archive/look.ts";
 import {
   isGuardianSceneBlocked,
   watchGuardianSceneVisibility,
@@ -58,6 +59,7 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
             modelUrl: "/dogs-archive-20261029/guardian-v3.glb",
             manifestUrl: "/dogs-archive-20261029/model-manifest.json",
             lightingProfile: "sculpture",
+            look: parseGuardianLook(window.location.search),
             onStatus: report,
             onActionChange: (next) => {
               if (!cancelled) {
