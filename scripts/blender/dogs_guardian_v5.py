@@ -259,6 +259,63 @@ TAIL_B = resample(catmull([tuple(F_POINT), (0.28, -0.78, 0.45), (0.68, -1.05, 0.
 NECK = resample(catmull([(0.30, 0.90, 0.42), (-0.12, 0.95, 0.70), (-0.52, 0.92, 0.77)], 12), spacing=0.02)
 
 
+# ================================================================ v21: the head as ONE continuous sculpted form
+# Owner: 「黒など体とひとつながりの顔に模様がある構造です」. One welded teardrop in the head's local frame (x across, +y crown,
+# -y tip, +z front): the two galaxy spirals are bulges of the same skin at the front, the face is the tapering lower front
+# of the same form (a material region), the horns root at the sides where the lower dome meets the face.
+def G2L(g):
+    return Pinv(OLD_H.inverted() @ P(g))
+
+
+def L2G(l):
+    return Pinv(OLD_H @ P(l))
+
+
+UD_G, LD_G = (-0.43, 1.53, 1.00), (-0.62, 0.80, 1.12)        # galaxy spiral centres on the front surface (as v18-v20)
+_ud = np.array(G2L(UD_G)); _ld = np.array(G2L(LD_G))
+HEAD_AXIS_L = [tuple(_ud + np.array([0.06, 0.62, -0.28])), tuple(_ud + np.array([0.0, 0.0, -0.30])), tuple(_ld + np.array([0.0, 0.0, -0.30])),
+               (0.018, 0.60, 0.01), (0.0, -0.15, 0.10), (0.0, -0.878, 0.195)]   # crown top ... old bud base ... old bud tip
+HEAD_AXIS = resample(catmull(HEAD_AXIS_L, 24), spacing=0.01)
+HT, HN, HB = rmf_frames(HEAD_AXIS, hint=(0, 0, 1))
+_harc = np.concatenate(([0.0], np.cumsum(np.linalg.norm(np.diff(HEAD_AXIS, axis=0), axis=1)))); HS = _harc / _harc[-1]
+HEAD_LEN = float(_harc[-1])
+
+
+def _s_of(pt):
+    return float(HS[int(np.argmin(np.linalg.norm(HEAD_AXIS - np.asarray(pt, float), axis=1)))])
+
+
+S_UD, S_LD, S_FB = _s_of(HEAD_AXIS_L[1]), _s_of(HEAD_AXIS_L[2]), _s_of(HEAD_AXIS_L[3])
+DOMES = [(S_UD, 0.42, 0.10), (S_LD, 0.27, 0.07)]              # (s, radius, height): gentle bulges of the same skin
+S_FACE = max(S_FB + 0.02, S_LD + 0.27 / HEAD_LEN + 0.01)       # the lattice region starts just under the lower spiral
+S_JAW = S_FACE + 0.55 * (1 - S_FACE)                           # from here the tip splits: upper beak (HeadPivot) / lower jaw (JawPivot)
+RX_K = ([0.0, S_UD, S_LD, S_FB, 0.5 * (S_FB + 1), 1.0], [0.03, 0.50, 0.46, 0.48, 0.30, 0.004])
+RZ_K = ([0.0, S_UD, S_LD, S_FB, 0.5 * (S_FB + 1), 1.0], [0.03, 0.40, 0.38, 0.36, 0.24, 0.004])
+
+
+def head_point(s, alpha, bulge=True):
+    """Local-frame point on the head surface + outward normal. alpha: 0 back, pi/2 left (-x), pi front."""
+    i = min(len(HS) - 1, max(0, int(round(s * (len(HS) - 1)))))
+    p0 = HEAD_AXIS[i]; N, Bv = HN[i], HB[i]
+    rx = float(np.interp(s, RX_K[0], RX_K[1])); rz = float(np.interp(s, RZ_K[0], RZ_K[1]))
+    sn, c = math.sin(alpha), -math.cos(alpha)
+    if s > S_FB:
+        rz *= 1.12 if c > 0 else 0.92                           # the face: fuller in front than at the back (the old bud)
+    p = p0 + Bv * (rx * sn) + N * (rz * c)
+    nrm = unit(Bv * (sn / max(rx, 1e-4)) + N * (c / max(rz, 1e-4)))
+    if bulge:
+        for (sd, R, H), pc in zip(DOMES, DOME_C):
+            d = float(np.linalg.norm(p - pc)) / R
+            if d < 1.0:
+                p = p + nrm * (H * (1 - d * d) ** 2)
+    return p, nrm
+
+
+DOME_C = [head_point(sd, math.pi, bulge=False)[0] for sd, R, H in DOMES]
+DOME_I = [min(len(HS) - 1, int(round(sd * (len(HS) - 1)))) for sd, R, H in DOMES]
+HEAD_TIP_G = L2G(HEAD_AXIS_L[-1])
+
+
 def coil_path(center, r0, r1, turns, start_deg, z_step, n, cw=True):
     c = V(center); pts = []
     for i in range(n):
@@ -399,8 +456,8 @@ nb = add_bone("NeckBaseJoint", tuple(NECK[0]), tuple(NECK[len(NECK) // 2]), "Spi
 add_bone("NeckHeadJoint", tuple(NECK[len(NECK) // 2]), tuple(NECK[-1]), "NeckBaseJoint", roll_z=neck_roll(NECK[len(NECK) // 2], NECK[-1]))
 add_bone("HeadPivot", None, None, "NeckHeadJoint", matrix=NEW_H, length=0.12)
 add_bone("JawPivot", None, None, "HeadPivot", matrix=NEW_H @ JAW_L, length=0.08)
-TIP_B = ((OLD_H @ P((0.0, -1.0, 0.0))) - (OLD_H @ P((0.0, 0.0, 0.0)))).normalized()   # the bud's tip direction (body space)
-add_bone("MouthSocket", None, None, "HeadPivot", matrix=Matrix.Translation(TIP_B * 0.35) @ NEW_H @ SOCKET_L, length=0.04)
+_M_SOCK = NEW_H @ SOCKET_L; _M_SOCK.translation = P(HEAD_TIP_G)   # v21: the socket sits at the sculpted head's tip
+add_bone("MouthSocket", None, None, "HeadPivot", matrix=_M_SOCK, length=0.04)
 add_bone("MouthAim", None, None, "HeadPivot", matrix=NEW_H @ AIM_L, length=0.04)
 NECK_STATIONS = [("NeckBaseJoint", 0.25), ("NeckHeadJoint", 0.75)]
 ARML = add_chain("ArmL", ARM_L, 10, "NeckHeadJoint")
@@ -855,44 +912,7 @@ for path, stations, r0, r1, glow_centre in ((ARM_R, ARMR, 0.11, 0.14, ()),):
         return g
     segmented_tube(marm, path, radii, stations, arm_crest, arc_ext=90, spacing=(0.45, 0.012), glow_fn=arm_glow, rib_scale=0.9,
                    scales=2, scale_size=0.95)
-# the head's two spirals (05/07): smooth dark-emerald domes sitting flush on the head, covered with spiral rows of small
-# pale-mint scales that wind into a softly bright centre. Conformal log-polar AuthoredUV rotated by phi makes the scale
-# rows log spirals and shrinks the scales toward the centre; the tile repeats (m cos phi, m sin phi) = (5, 3) times around
-# so the seam is invisible. Each dome rides one arm bone rigidly.
-def head_dome(mb, centre, R, H, bone, segs=48, rings=20, m_cos=5, m_sin=3):
-    c = V(centre); m = math.hypot(m_cos, m_sin); phi = math.atan2(m_sin, m_cos)
-    rhos = [0.035 * (1 / 0.035) ** (k / (rings - 1)) for k in range(rings)]   # geometric: even in log-polar
-    mb.cur_w = [(bone, 1.0)]
-    idx = []
-    for k, rho in enumerate(rhos):
-        ring = []
-        for j in range(segs + 1):
-            th = j / segs * math.tau
-            a, b = th, math.log(rho)
-            u = (math.cos(phi) * a - math.sin(phi) * b) * m / math.tau; v = (math.sin(phi) * a + math.cos(phi) * b) * m / math.tau
-            p = c + V((R * rho * math.cos(th), R * rho * math.sin(th), H * math.sqrt(max(0.0, 1 - rho * rho))))
-            ring.append(mb.add_vertex(p, (0.92, 1.0, 0.92), uv=(u, v)))
-        idx.append(ring)
-    top = mb.add_vertex(c + V((0, 0, H)), (0.75, 1.0, 0.80), uv=(0.0, 0.0))
-    for j in range(segs):
-        mb.add_face((top, idx[0][j], idx[0][j + 1]), 1)
-    for k in range(rings - 1):
-        for j in range(segs):
-            mat = 1 if rhos[k + 1] < 0.08 else 0
-            mb.add_face((idx[k][j], idx[k + 1][j], idx[k + 1][j + 1], idx[k][j + 1]), mat)
-    # back: a shallow dark cap closing the volume
-    back = [mb.add_vertex(c + V((R * math.cos(j / segs * math.tau), R * math.sin(j / segs * math.tau), 0.0)), (0.6, 0.8, 0.65), uv=(0.0, 0.0)) for j in range(segs + 1)]
-    bc = mb.add_vertex(c + V((0, 0, -0.15 * R)), (0.6, 0.8, 0.65), uv=(0.0, 0.0))
-    for j in range(segs):
-        mb.add_face((idx[-1][j], idx[-1][j + 1], back[j + 1], back[j]), 2)
-        mb.add_face((back[j + 1], bc, back[j]), 2)
-    mb.cur_w = None
-
-
-mdome = MeshBuilder("Head | galaxy domes", body, [CRESCENT_MAT, CORE_MAT, MEMB_MAT])   # v20: baked with the head atlas (2048), not the crowded body atlas
-head_dome(mdome, (-0.62, 0.80, 1.12), 0.34, 0.085, "ArmL_02", m_cos=2, m_sin=1)     # v20: flatter galaxy domes (H 0.25R)
-head_dome(mdome, (-0.43, 1.53, 1.00), 0.52, 0.13, "ArmL_06", m_cos=2, m_sin=1)
-attach(mdome.finish(micro_uv_scale=1.0))
+# (v21: the galaxy spirals are bulges of the sculpted head surface; see the head block below)
 arms = attach(marm.finish(micro_uv_scale=2.4))
 clean(arms)
 print("ARMS_DONE", round(time.time() - START, 1), flush=True)
@@ -1119,33 +1139,118 @@ if not mat:
     nt.links.new(tex.outputs["Color"], b.inputs["Emission Color"]); nt.links.new(tex.outputs["Alpha"], b.inputs["Alpha"])
     b.inputs["Emission Strength"].default_value = 1.1; b.inputs["Roughness"].default_value = 0.5
     mat.blend_method = "BLEND"; mat.use_backface_culling = False
-def budpoint(t, alpha):
-    """05's lotus bud: a closed almond, broad convex back, sharp point at the lower front. alpha runs around the
-    section (0 = back centre = the UV seam, pi = front centre); head-local frame of facepoint."""
-    S = FACE_SCALE
-    w = np.interp(t, [0, .20, .50, .80, 1], [.32, .37, .28, .12, .001]) * S
-    zf = .26 * S * (1 - .5 * t); zb = .28 * S * (1 - t) ** .8
-    sn, c = math.sin(alpha), math.cos(alpha)
-    x = w * sn + .018 * (1 - t) ** 2
-    y = .63 - 1.16 * S * t - (.12 * sn + .08 * abs(sn)) * S * (1 - t) ** 2
-    z = .02 + .09 * t - c * (zf if c < 0 else zb) * abs(c) ** 0.85
-    return P((x, y, z))
+MOUTH_MAT = mouthmesh.data.materials[0]
+FACE_MAT = mat
+mhead = MeshBuilder("Head | continuous sculpted head", body, [INK_MAT, CRESCENT_MAT, FACE_MAT, MOUTH_MAT])
+NT, NA = 150, 72
+INK_COL, BAND_COL, DOME_COL, MOUTH_COL = (0.012, 0.045, 0.022), (0.005, 0.018, 0.009), (0.92, 1.0, 0.92), (0.06, 0.03, 0.03)
+_mphi = math.atan2(1.0, 2.0); _mm = math.hypot(2.0, 1.0)
 
 
-mface = MeshBuilder("Face | fused glowing lattice leaf", body, [mat]); mface.cur_w = [("HeadPivot", 1.0)]
-B_ROWS, B_COLS = 48, 64
-bud_idx = []
-for i in range(B_ROWS + 1):
-    t = 0.02 + 0.975 * i / B_ROWS; ring = []
-    for j in range(B_COLS + 1):
-        alpha = j / B_COLS * math.tau
-        ring.append(mface.add_vertex(Pinv(OLD_H @ budpoint(t, alpha)), (1.0, 1.0, 1.0) if TILES else (0.4, 0.9, 0.5), uv=(j / B_COLS, t)))
-    bud_idx.append(ring)
-for i in range(B_ROWS):
-    for j in range(B_COLS):
-        mface.add_face((bud_idx[i][j], bud_idx[i + 1][j], bud_idx[i + 1][j + 1], bud_idx[i][j + 1]), 0)
-face = mface.finish(micro_uv_scale=1.0)
-attach(face)
+def head_uv(s, alpha, p):
+    for (sd, R, H), pc, ic in zip(DOMES, DOME_C, DOME_I):      # galaxy: conformal log-polar around the spiral centre (as v20)
+        d = p - pc; x = float(np.dot(d, HB[ic])); y = float(np.dot(d, HT[ic])); rho = max(0.03, math.hypot(x, y) / R)
+        if rho < 1.0:
+            th = math.atan2(y, x); lr = math.log(rho)
+            return ((math.cos(_mphi) * th - math.sin(_mphi) * lr) * _mm / math.tau, (math.sin(_mphi) * th + math.cos(_mphi) * lr) * _mm / math.tau)
+    return (0.5 + (alpha - math.pi) / math.tau, max(0.0, (s - S_FACE) / (1 - S_FACE)))   # face: u around (front 0.25-0.75), v border->tip
+
+
+def head_vcol(s, alpha, p):
+    for (sd, R, H), pc in zip(DOMES, DOME_C):
+        if float(np.linalg.norm(p - pc)) < R:
+            return DOME_COL
+    a = abs(alpha - math.pi)
+    if (S_FACE - 0.04 <= s < S_FACE + 0.01 and a < 0.58 * math.pi) or (s >= S_FACE and 0.46 * math.pi <= a <= 0.58 * math.pi):
+        return BAND_COL                                         # the dark outline band around the lattice region
+    return INK_COL
+
+
+def head_slot(s, alpha, p):
+    for (sd, R, H), pc in zip(DOMES, DOME_C):
+        if float(np.linalg.norm(p - pc)) < 0.95 * R:
+            return 1
+    if s >= S_FACE and abs(alpha - math.pi) < 0.48 * math.pi:
+        return 2
+    return 0
+
+
+def head_add(s, alpha, weights, shrink=None):
+    p, nrm = head_point(s, alpha)
+    if shrink is not None:
+        i = min(len(HS) - 1, max(0, int(round(s * (len(HS) - 1))))); p = HEAD_AXIS[i] + (p - HEAD_AXIS[i]) * shrink
+    return mhead.add_vertex(L2G(tuple(p)), MOUTH_COL if shrink is not None else head_vcol(s, alpha, p), uv=head_uv(s, alpha, p), weights=weights)
+
+
+W_HEAD = [("HeadPivot", 1.0)]; W_JAW = [("JawPivot", 1.0)]
+ALPHAS = [j / NA * math.tau for j in range(NA)]
+S_RINGS = [0.004 + (1 - 0.006) * (i / NT) for i in range(NT + 1)]
+k_jaw = next(i for i, sv in enumerate(S_RINGS) if sv >= S_JAW)
+welded = []
+for i in range(k_jaw + 1):
+    welded.append([head_add(S_RINGS[i], a, W_HEAD) for a in ALPHAS])
+crown_pole = mhead.add_vertex(L2G(tuple(HEAD_AXIS[0] - HT[0] * 0.02)), INK_COL, weights=W_HEAD)
+for j in range(NA):
+    mhead.add_face((crown_pole, welded[0][(j + 1) % NA], welded[0][j]), 0)
+faces_param = []   # (face index, s, alpha, point) to assign slots afterwards
+
+
+def quad(a, b, c, d, s, alpha, p):
+    mhead.add_face((a, b, c, d), 0); faces_param.append((len(mhead.f) - 1, s, alpha, p))
+
+
+def mid_param(i, j):
+    sm = 0.5 * (S_RINGS[i] + S_RINGS[min(NT, i + 1)]); am = ALPHAS[j] + 0.5 * math.tau / NA
+    return sm, am, head_point(sm, am)[0]
+
+
+for i in range(k_jaw):
+    for j in range(NA):
+        sm, am, pm = mid_param(i, j)
+        quad(welded[i][j], welded[i + 1][j], welded[i + 1][(j + 1) % NA], welded[i][(j + 1) % NA], sm, am, pm)
+# the tip splits into two half shells (front = upper beak on HeadPivot, back = lower jaw on JawPivot) sharing the same
+# surface equation; each half also gets an inner mouth-cavity shell and the thin cut walls along the split line
+jf = list(range(NA // 4, 3 * NA // 4 + 1)); jb = list(range(3 * NA // 4, NA + NA // 4 + 1))
+halves = []
+for js, wts, shift in ((jf, W_HEAD, 0.0), (jb, W_JAW, 0.0)):
+    outer = []; inner = []
+    for i in range(k_jaw, NT + 1):
+        outer.append([head_add(S_RINGS[i], ALPHAS[j % NA], wts) for j in js])
+        inner.append([head_add(S_RINGS[i], ALPHAS[j % NA], wts, shrink=0.78) for j in js])
+    halves.append((js, wts, outer, inner))
+    # join the last welded ring to the first half ring
+    for k in range(len(js) - 1):
+        j = js[k]; sm, am, pm = mid_param(k_jaw - 1, j % NA)
+        quad(welded[k_jaw][j % NA], outer[0][k], outer[0][k + 1], welded[k_jaw][(j + 1) % NA], sm, am, pm)
+    for i in range(len(outer) - 1):
+        for k in range(len(js) - 1):
+            sm, am, pm = mid_param(k_jaw + i, js[k] % NA)
+            quad(outer[i][k], outer[i + 1][k], outer[i + 1][k + 1], outer[i][k + 1], sm, am, pm)
+            mhead.add_face((inner[i][k + 1], inner[i + 1][k + 1], inner[i + 1][k], inner[i][k]), 3)
+        for k in (0, len(js) - 1):   # cut walls along the split line
+            if k == 0:
+                mhead.add_face((outer[i][k], inner[i][k], inner[i + 1][k], outer[i + 1][k]), 3)
+            else:
+                mhead.add_face((outer[i + 1][k], inner[i + 1][k], inner[i][k], outer[i][k]), 3)
+    tip_p, _ = head_point(1.0, math.pi if wts is W_HEAD else 0.0)
+    pole = mhead.add_vertex(L2G(tuple(tip_p + HT[-1] * 0.01)), INK_COL, weights=wts)
+    for k in range(len(js) - 1):
+        mhead.add_face((outer[-1][k], pole, outer[-1][k + 1]), 0)
+        mhead.add_face((inner[-1][k + 1], pole, inner[-1][k]), 3)
+# material regions on the same welded surface
+for fi, sv, av, pv in faces_param:
+    mhead.fm[fi] = head_slot(sv, av, pv)
+# the welded ring above the split needs a cut wall too (hidden inside when closed): skipped on purpose
+head_ob = mhead.finish(micro_uv_scale=1.0)
+# make the outer surface face outward: compare one crown quad's normal with the axis-outward direction
+me_ = head_ob.data; me_.calc_loop_triangles()
+_f = me_.polygons[NA + 5]; _c = np.array(_f.center); _ax = np.array(tuple(OLD_H @ P(tuple(HEAD_AXIS[int(0.1 * len(HEAD_AXIS))]))))
+if float(np.dot(np.array(_f.normal), _c - _ax)) < 0:
+    bpy.context.view_layer.objects.active = head_ob; head_ob.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT"); bpy.ops.mesh.flip_normals(); bpy.ops.object.mode_set(mode="OBJECT")
+    print("HEAD normals flipped", flush=True)
+attach(head_ob)
+HEAD_SURF_PTS = np.asarray([tuple(v.co) for v in head_ob.data.vertices])   # Blender body space, for the horn roots
 HORNS = [([(-.20, .29, .02), (-.43, .39, .02), (-.68, .64, -.04), (-.76, .96, -.10)], .080),
          ([(.21, .25, .025), (.44, .44, .01), (.49, .77, -.06), (.39, 1.06, -.14)], .088),
          ([(-.12, .025, .035), (-.32, .015, .045), (-.52, .00, .03), (-.84, .18, -.04), (-1.04, .39, -.11)], .095),
@@ -1166,13 +1271,19 @@ CROWN = [([(-.22, .40, -.05), (-.50, .62, -.07), (-.80, .95, -.13), (-.98, 1.30,
 HORN_KNOB = (0.0037, 0.0070, 0.0050)
 _bm = bmesh.new(); bmesh.ops.create_icosphere(_bm, subdivisions=1, radius=1.0)
 SPH = [(vv.co.x, vv.co.y, vv.co.z) for vv in _bm.verts]; SPHF = [tuple(vv.index for vv in f.verts) for f in _bm.faces]; _bm.free()
-for cs, r0, sg in CROWN:
+# v21: each horn roots INTO the sculpted head at the side where the lower spiral meets the face: the horn keeps its sweep
+# but is translated so its first control point sits 5 cm under the surface at (s_root, alpha_root)
+ROOTS = [(S_FACE - 0.03, 0.70), (S_FACE - 0.03, 1.30), (S_FACE + 0.02, 0.58), (S_FACE + 0.10, 0.55),
+         (S_FACE + 0.02, 1.42), (S_FACE + 0.10, 1.45), (S_FACE - 0.12, 0.80), (S_FACE - 0.12, 1.20)]
+for (cs, r0, sg), (s_root, a_root) in zip(CROWN, ROOTS):
+    rp, rn = head_point(s_root, a_root * math.pi)
+    shift = np.array(L2G(tuple(rp - rn * 0.05))) - np.array(L2G(cs[0]))
     base_pts = catmull(cs, 10)
     tang = unit(base_pts[-1] - base_pts[-3])
     away = unit(V((sg, 0.25, 0.0)) - tang * np.dot(V((sg, 0.25, 0.0)), tang))         # outward from the bud
     hook = crosier_path(base_pts[-1], tang, away, 0.16, turns=0.6, straight=0.2, bend_power=1.6)
     local = resample(np.concatenate([base_pts[:-1], hook], axis=0), spacing=0.02)
-    pts = np.asarray([Pinv(OLD_H @ P(tuple(q))) for q in local]); n = len(pts); tt = np.linspace(0, 1, n)
+    pts = np.asarray([Pinv(OLD_H @ P(tuple(q))) for q in local]) + shift; n = len(pts); tt = np.linspace(0, 1, n)
     radii = r0 * (1 - tt) ** 1.15 + 0.009
     T, Nn, Bb = rmf_frames(pts, hint=(0, 0, 1))
     mhook.tube(pts, radii, sides=10, color=HORN_KNOB, hint=(0, 0, 1), mat=0, taper_end=True)
@@ -1192,16 +1303,9 @@ for cs, r0, sg in CROWN:
         for f_ in SPHF:
             mhook.add_face(tuple(sv_ + k_ for k_ in f_), 0)
 attach(mhook.finish(micro_uv_scale=1.0))
-# head colours + skin; jaw and oral membrane ride the jaw bone
-g_, gn_ = (lambda me: (np.array([tuple(v.co) for v in me.vertices]), np.array([tuple(v.normal) for v in me.vertices])))(headmesh.data)
-front = np.clip(-gn_[:, 1], 0, 1)
-cols_ = np.array([mix((0.012, 0.058, 0.026), (0.05, 0.13, 0.07), float(f) ** 1.5 * 0.5) for f in front])   # anime: flat deep emerald, soft front lift
-layer = headmesh.data.color_attributes.get("GuardianSurface")
-layer.data.foreach_set("color", np.c_[cols_, np.ones(len(cols_))].ravel()); headmesh.data.update()
-attach(headmesh)
-for ob in (jawmesh, mouthmesh):
-    vg = ob.vertex_groups.new(name="JawPivot"); vg.add(list(range(len(ob.data.vertices))), 1.0, "REPLACE")
-    attach(ob)
+# v21: the v2 head sculpt, jaw and oral membrane are replaced by the welded head above
+for ob in (headmesh, jawmesh, mouthmesh):
+    bpy.data.objects.remove(ob, do_unlink=True)
 print("HEAD_DONE", round(time.time() - START, 1), flush=True)
 
 # --- cavity AO into the colours

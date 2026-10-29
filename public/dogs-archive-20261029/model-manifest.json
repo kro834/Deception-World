@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 7,
-  "revision": "v20",
+  "revision": "v21",
   "model": "guardian-v3.glb",
-  "assetBytes": 5821096,
-  "assetSha256": "b83e3b1fea77814199d7d749ea613a560ec60b118fecca447935261918016eb4",
+  "assetBytes": 5495172,
+  "assetSha256": "5a0fc3cdb90ba054c49ff97234ad031311af4b46345f271a211eaf293a1d7017",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -197,9 +197,9 @@
   "poseChecks": {
     "Rest": {
       "mouthSocket": [
-        -0.3018847,
-        -0.7959509,
-        1.25
+        -0.3086832,
+        -0.7750277,
+        1.2249999
       ],
       "mouthAim": [
         -0.21845,
@@ -207,17 +207,17 @@
         1.8499999
       ],
       "direction": [
-        0.1268097,
-        -0.3902802,
-        0.9119214
+        0.1308017,
+        -0.4025654,
+        0.9059978
       ],
       "jawTipSeparation": 0.8861420588705781
     },
     "Exhale": {
       "mouthSocket": [
-        -1.46532,
-        0.0668056,
-        1.5397191
+        -1.4532158,
+        0.0675336,
+        1.5087035
       ],
       "mouthAim": [
         -1.6558751,
@@ -225,22 +225,14 @@
         2.1446118
       ],
       "direction": [
-        -0.2896189,
-        0.266274,
-        0.919358
+        -0.2937742,
+        0.2529072,
+        0.9218106
       ],
       "jawTipSeparation": 0.8636351891174839
     }
   },
   "meshAudit": [
-    {
-      "mesh": "Face | fused glowing lattice leaf",
-      "vertices": 3185,
-      "faces": 3072,
-      "triangles": 6144,
-      "boundaryEdges": 224,
-      "nonManifoldEdges": 224
-    },
     {
       "mesh": "FacePetals | face crown horns",
       "vertices": 6332,
@@ -251,11 +243,11 @@
     },
     {
       "mesh": "Head | painted head",
-      "vertices": 55882,
-      "faces": 109393,
-      "triangles": 111656,
-      "boundaryEdges": 88,
-      "nonManifoldEdges": 88
+      "vertices": 13227,
+      "faces": 13292,
+      "triangles": 26368,
+      "boundaryEdges": 92,
+      "nonManifoldEdges": 92
     },
     {
       "mesh": "Serpent | painted body, arms and tails",
@@ -275,16 +267,16 @@
     }
   ],
   "meshStats": {
-    "objects": 5,
-    "vertices": 291700,
-    "triangles": 572576
+    "objects": 4,
+    "vertices": 245860,
+    "triangles": 481144
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 5821096,
-      "sha256": "b83e3b1fea77814199d7d749ea613a560ec60b118fecca447935261918016eb4"
+      "bytes": 5495172,
+      "sha256": "5a0fc3cdb90ba054c49ff97234ad031311af4b46345f271a211eaf293a1d7017"
     }
   ],
   "skinCount": 1,
@@ -297,12 +289,12 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "42be73da2eb0544d22296f14c1801d7b3400b6a27a32a11c455c8105c3461d84",
-    "scripts/blender/dogs_guardian_v7_paint.py": "7ff1ea9005b0a1c1614e7d9fd1ec2ec9e1fa1fe3651418c917e3c0fc25f484c2"
+    "scripts/blender/dogs_guardian_v5.py": "07f43e50b01ad0141e8cd85b2e18925e12c8052dc5eb71564fb152a93e569f2d",
+    "scripts/blender/dogs_guardian_v7_paint.py": "2e1d9f6e8cea4824caddd0344bb19348d54c2d9ee093acaa7211bba1f4669890"
   },
   "referenceImagesUsedAsTexture": true,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 25.68517518043518,
+  "secondsBeforeRender": 24.885989904403687,
   "painting": {
     "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
     "atlas": {
@@ -312,8 +304,8 @@
     },
     "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
     "confidenceCoverage": {
-      "body": 0.36266107767455114,
-      "head": 0.5465509533575073
+      "body": 0.3523017708600018,
+      "head": 0.6898429516435468
     },
     "silhouetteIoU": {
       "body": {
@@ -323,16 +315,16 @@
         "right": 0.488453468633324
       },
       "head": {
-        "front": 0.09150578909882068,
-        "back": 0.09381363756218958,
-        "left": 0.0625508984997574,
-        "right": 0.06463345986117712
+        "front": 0.08754432641543712,
+        "back": 0.08521983305551152,
+        "left": 0.11878372978128228,
+        "right": 0.11939758362916618
       }
     }
   },
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v20",
-    "stamp": "v20",
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v21",
+    "stamp": "v21",
     "rawGlbSha256": null
   }
 }
