@@ -21,6 +21,12 @@ export type GuardianSurfaceUniforms = {
   uPaintedContrast: { value: number };
   /** Translucent wrap glow on pale parts (ridges, bone): 0 disables. */
   uTranslucency: { value: number };
+  /** World-space base and tip of the face leaf (HeadPivot → MouthSocket): the lattice
+   * brightens toward the tip. */
+  uFaceBase: { value: THREE.Vector3 };
+  uFaceTip: { value: THREE.Vector3 };
+  /** Unsharp mask on painted albedo: 0 off, 1 full (ridges crisp, blotches flattened). */
+  uClarity: { value: number };
 };
 
 export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): GuardianSurfaceUniforms {
@@ -39,6 +45,9 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uBoneRange: { value: new THREE.Vector2(0.035, 0.11) },
     uPaintedContrast: { value: 1 },
     uTranslucency: { value: 1 },
+    uFaceBase: { value: new THREE.Vector3(0, 1, 0) },
+    uFaceTip: { value: new THREE.Vector3(0, 0, 1) },
+    uClarity: { value: 1 },
   };
 }
 
@@ -119,10 +128,68 @@ export function applyGuardianInkSurface(
           material.emissive.set("#bfffd0");
           lattice.push({ material, base: 1.2 });
         } else lattice.push({ material, base: material.emissiveIntensity });
+        // The face: a leaf-shaped lattice glowing saturated green over near-black gaps, the
+        // lines brightening toward the tip, a white-hot point at the tip (05/07/08).
+        material.onBeforeCompile = (shader) => {
+          Object.assign(shader.uniforms, { uFaceBase: uniforms.uFaceBase, uFaceTip: uniforms.uFaceTip });
+          shader.vertexShader = shader.vertexShader
+            .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianWorld;")
+            .replace(
+              "#include <skinning_vertex>",
+              "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;",
+            );
+          shader.fragmentShader = shader.fragmentShader
+            .replace(
+              "#include <common>",
+              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;varying vec3 vGuardianWorld;",
+            )
+            .replace(
+              "#include <color_fragment>",
+              "#include <color_fragment>\n diffuseColor.rgb*=vec3(.1,.2,.13);",
+            )
+            .replace(
+              "#include <emissivemap_fragment>",
+              `#include <emissivemap_fragment>
+{
+ vec3 gAxis=uFaceTip-uFaceBase;float gLen=max(length(gAxis),1e-3);gAxis/=gLen;
+ float gT=clamp(dot(vGuardianWorld-uFaceBase,gAxis)/gLen,0.,1.);
+ float gLine=dot(totalEmissiveRadiance,vec3(.3333));
+ float gGrad=mix(.3,1.15,pow(gT,1.6));
+ float gHot=exp(-pow((1.-gT)/.16,2.));
+ totalEmissiveRadiance=vec3(.3,1.,.45)*gLine*gGrad*1.6+vec3(1.,1.,.95)*gLine*gHot*2.2+vec3(.85,1.,.9)*gHot*gHot*.5;
+}`,
+            );
+        };
+        material.customProgramCacheKey = () => "guardian-face-lattice-v2";
+        material.needsUpdate = true;
         continue;
       }
       if (family === "core") {
         cores.push({ material, base: material.emissiveIntensity });
+        // The galaxy spirals glow from the centre outward along their arms, fading with
+        // radius (aCoreRadius, written per vertex below), with a hot centre; no flat disc.
+        material.onBeforeCompile = (shader) => {
+          shader.vertexShader = shader.vertexShader
+            .replace("#include <common>", "#include <common>\nattribute float aCoreRadius;varying float vCoreRadius;")
+            .replace("#include <begin_vertex>", "#include <begin_vertex>\nvCoreRadius=aCoreRadius;");
+          shader.fragmentShader = shader.fragmentShader
+            .replace("#include <common>", "#include <common>\nvarying float vCoreRadius;")
+            .replace(
+              "#include <color_fragment>",
+              "#include <color_fragment>\n diffuseColor.rgb*=mix(1.,.45,vCoreRadius);",
+            )
+            .replace(
+              "#include <emissivemap_fragment>",
+              `#include <emissivemap_fragment>
+{
+ float gFall=mix(1.5,.1,pow(clamp(vCoreRadius,0.,1.),.7));
+ totalEmissiveRadiance*=gFall;
+ totalEmissiveRadiance+=vec3(.8,1.,.85)*exp(-vCoreRadius*vCoreRadius*16.)*1.1;
+}`,
+            );
+        };
+        material.customProgramCacheKey = () => "guardian-whorl-core-v2";
+        material.needsUpdate = true;
         continue;
       }
       if (family === "mouth") {
@@ -154,7 +221,7 @@ export function applyGuardianInkSurface(
             "#include <common>",
             `#include <common>
 uniform highp sampler3D uNoise;
-uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength,uPaintedContrast,uTranslucency;
+uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength,uPaintedContrast,uTranslucency,uClarity;
 uniform vec3 uRimDir,uKeyDir,uRimColor,uTransColor;
 uniform vec2 uBoneRange;
 varying vec3 vGuardianWorld;
@@ -172,6 +239,22 @@ if(gPainted>.5){
  // Pale ridges rise toward green-white and glow a little; pits stay near-black; no tint, no
  // mottling. uPaintedContrast scales the curve (1 for the tiles, lower for an atlas).
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ #ifdef USE_MAP
+ // Clarity: the projection lands as pale low-frequency blotches. The map's own blurred
+ // level (2.5 mips up) is the blotch; it is flattened toward the dark base and the detail
+ // above it (ridges) is amplified, so ridges stay crisp pale lines and pits stay black.
+ {
+  vec2 gTs=vec2(textureSize(map,0));
+  vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
+  float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
+  vec3 gBlur=textureLod(map,vMapUv,gLod+2.5).rgb;
+  vec3 gDetail=sampledDiffuseColor.rgb-gBlur;
+  vec3 gDark=vec3(.012,.03,.016);
+  vec3 gClear=mix(gBlur,gDark,.65)+gDetail*2.4;
+  diffuseColor.rgb=diffuse*mix(sampledDiffuseColor.rgb,max(gClear,vec3(0.)),uClarity);
+  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ }
+ #endif
  // The projected atlas (gAtlas) already carries the originals' contrast: a third of the
  // curve and half the hue work; the procedural tiles take the full treatment.
  float gTouch=uPaintedContrast*mix(1.,.35,gAtlas);
@@ -258,6 +341,7 @@ if(gPainted>.5){
       patched++;
     }
   });
+  writeCoreRadius(model);
   return {
     patched,
     families,
@@ -287,4 +371,68 @@ if(gPainted>.5){
       previous.clear();
     },
   };
+}
+
+/** Per-vertex radial coordinate (0 at a core's centre, 1 at its edge) for the whorl-core
+ * primitives, so their glow can fade outward along the spiral arms in every pose. The
+ * core vertices are clustered in the rest pose (one cluster per whorl or coil centre). */
+function writeCoreRadius(model: THREE.Object3D) {
+  const p = new THREE.Vector3();
+  model.traverse((node) => {
+    if (!(node instanceof THREE.Mesh)) return;
+    const geometry = node.geometry;
+    const position = geometry.getAttribute("position");
+    if (!position || geometry.getAttribute("aCoreRadius")) return;
+    const materials = Array.isArray(node.material) ? node.material : [node.material];
+    const groups = geometry.groups.length
+      ? geometry.groups
+      : [{ start: 0, count: geometry.index ? geometry.index.count : position.count, materialIndex: 0 }];
+    const members = new Set<number>();
+    for (const group of groups) {
+      const material = materials[group.materialIndex ?? 0];
+      if (!material || guardianSurfaceFamily(material) !== "core") continue;
+      for (let i = group.start; i < group.start + group.count; i++)
+        members.add(geometry.index ? geometry.index.getX(i) : i);
+    }
+    if (!members.size) return;
+    const radius = new Float32Array(position.count).fill(1);
+    const clusters: { centre: THREE.Vector3; n: number; max: number }[] = [];
+    const merge = 0.55;
+    for (const v of members) {
+      p.fromBufferAttribute(position, v);
+      let best: (typeof clusters)[number] | null = null,
+        bestDistance = Infinity;
+      for (const cluster of clusters) {
+        const distance = cluster.centre.distanceTo(p);
+        if (distance < bestDistance) {
+          best = cluster;
+          bestDistance = distance;
+        }
+      }
+      if (best && bestDistance < merge) {
+        best.centre.multiplyScalar(best.n).add(p).divideScalar(best.n + 1);
+        best.n++;
+      } else clusters.push({ centre: p.clone(), n: 1, max: 0 });
+    }
+    const owner = new Map<number, (typeof clusters)[number]>();
+    for (const v of members) {
+      p.fromBufferAttribute(position, v);
+      let best = clusters[0],
+        bestDistance = Infinity;
+      for (const cluster of clusters) {
+        const distance = cluster.centre.distanceTo(p);
+        if (distance < bestDistance) {
+          best = cluster;
+          bestDistance = distance;
+        }
+      }
+      best.max = Math.max(best.max, bestDistance);
+      owner.set(v, best);
+    }
+    for (const [v, cluster] of owner) {
+      p.fromBufferAttribute(position, v);
+      radius[v] = Math.min(1, cluster.centre.distanceTo(p) / Math.max(cluster.max, 1e-4));
+    }
+    geometry.setAttribute("aCoreRadius", new THREE.BufferAttribute(radius, 1));
+  });
 }

@@ -540,6 +540,10 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         .addScaledVector(direction, -0.3)
         .addScaledVector(THREE.Object3D.DEFAULT_UP, 0.4);
       faceLight.position.copy(facePosition);
+      // The face leaf's axis for the lattice glow: HeadPivot (base) toward the mouth (tip).
+      if (headJoint) headJoint.node.getWorldPosition(surfaceUniforms.uFaceBase.value);
+      else surfaceUniforms.uFaceBase.value.copy(origin).addScaledVector(direction, -1.2);
+      surfaceUniforms.uFaceTip.value.copy(origin);
       faceLight.intensity =
         0.5 + 0.25 * Math.sin(time * 1.35) + anticipation * 0.9 + effectStrength * 0.5;
       inkSurface?.update(time, effectStrength, anticipation);
