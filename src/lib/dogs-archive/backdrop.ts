@@ -40,23 +40,24 @@ void main(){
  float d=length(e);
  // ink wash ground: broad slow washes, lighter toward the top, with dark blots
  float wash=nz(vec3(p*.5,uTime*.012+2.)).r;
- vec3 ink=vec3(.004,.011,.008),washDark=vec3(.02,.045,.03),washLight=vec3(.13,.17,.14);
+ vec3 ink=vec3(.004,.011,.008),washDark=vec3(.016,.036,.024),washLight=vec3(.09,.12,.1);
  vec3 base=mix(ink,washDark,smoothstep(.3,.65,wash));
  base=mix(base,washLight,smoothstep(.5,.88,wash)*smoothstep(-.4,.5,p.y)*.9);
  float blot=nz(vec3(p*2.1,7.)).a;
  base*=1.-.55*smoothstep(.8,.96,blot);
- // fire mass: strongest just outside the silhouette and below it, visible through holes
+ // fire mass: strongest just outside the silhouette and below it, visible through holes,
+ // but leaving the figure's own area darker so the ink body keeps its contrast
  float below=smoothstep(.45,-.6,p.y);
  float ring=smoothstep(2.6,1.0,d);
  float inside=smoothstep(.1,1.05,d);
- float mass=ring*(.35+.65*below)*mix(.4,.85,inside);
+ float mass=ring*(.4+.4*below)*mix(.3,.75,inside);
  vec2 jp=(vUv-uMouth)*vec2(aspect,1.);
  vec2 jd=normalize(uJet*vec2(aspect,1.)+vec2(1e-4,0.));
  float along=dot(jp,jd),across=abs(dot(jp,vec2(-jd.y,jd.x)));
  float jet=smoothstep(-.02,.14,along)*(1.-smoothstep(.08,.4+along*1.1,across))*(1.-smoothstep(.9,1.7,along));
  mass+=jet*uStrength*.2;
- mass*=1.+uStrength*.2-uAnticipation*.3;
- mass=min(mass,1.05);
+ mass*=1.+uStrength*.12-uAnticipation*.3;
+ mass=min(mass,.9);
  // two rising, domain-warped fbm layers plus a fine ragged edge
  // Tongues: the noise is compressed along y so features stretch upward.
  vec2 q=p*vec2(1.3,.85);q.y-=uTime*.08;
@@ -64,27 +65,29 @@ void main(){
  float f1=nz(vec3((q+w*.6)*1.2,uTime*.055+3.)).r;
  vec2 q2=p*vec2(2.7,1.9);q2.y-=uTime*.15;
  float f2=nz(vec3((q2+w.yx*.8)*1.,uTime*.09+9.)).g;
- float f3=nz(vec3(p*5.5+vec2(0.,-uTime*.25),uTime*.12+17.)).r;
- float fire=(f1*.6+f2*.4-.5)*1.7+.5+(f3-.5)*.3;
- float e1=fire*(.35+mass)-.5;
- // The painting's fire is a pale wash with hard ink edges, cut by dark veins and holes.
- float flame=smoothstep(0.,.12,e1);
- float core=smoothstep(.1,.26,e1);
- float hot=smoothstep(.26,.48,e1);
- float hotter=smoothstep(.5,.72,e1);
+ float f3=nz(vec3(p*vec2(5.5,3.8)+vec2(0.,-uTime*.25),uTime*.12+17.)).r;
+ // Tongues: the mid layer's ridges become licks separated by dark valleys; the fine layer
+ // frays every edge.
+ float licks=1.-abs(2.*f2-1.);
+ float fire=(f1*.5+licks*.5-.5)*1.7+.5+(f3-.5)*.5;
+ float e1=fire*(.3+mass)-.55;
+ // The painting's fire: pale tongue cores inside hard ink edges, cut by dark veins and holes.
+ float flame=smoothstep(0.,.1,e1);
+ float core=smoothstep(.1,.24,e1);
+ float hot=smoothstep(.3,.5,e1);
+ float hotter=smoothstep(.55,.75,e1);
  float edge=smoothstep(-.06,0.,e1)*(1.-smoothstep(0.,.03,e1));
- // Broad ink pools from the coarse ridge, finer veins from the mid one.
- float ridge=1.-abs(2.*f2-1.),ridge2=1.-abs(2.*f1-1.);
- float veins=min(.8,smoothstep(.6,1.,ridge2)*hot*.7+smoothstep(.72,1.,ridge)*core*.35);
- float wisps=smoothstep(.86,1.,ridge)*flame*(1.-hot)*.6;
- vec3 flameDeep=vec3(.04,.15,.06),flameMid=vec3(.17,.5,.2),flamePale=vec3(.44,.66,.42),flameCore=vec3(.78,.95,.72);
+ float ridge2=1.-abs(2.*f1-1.),fine=1.-abs(2.*f3-1.);
+ float veins=min(.85,smoothstep(.62,1.,ridge2)*hot*.7+smoothstep(.78,1.,fine)*core*.5);
+ float wisps=smoothstep(.84,1.,licks)*flame*(1.-hot)*.5;
+ vec3 flameDeep=vec3(.035,.13,.05),flameMid=vec3(.13,.42,.17),flamePale=vec3(.46,.68,.43),flameCore=vec3(.8,.96,.74);
  vec3 col=mix(base,flameDeep,flame);
  col=mix(col,flameMid,core);
  col=mix(col,flamePale,hot);
- col=mix(col,flameCore,hotter*.8);
+ col=mix(col,flameCore,hotter*.85);
  col=mix(col,flamePale,wisps);
  col*=1.-veins;
- col=mix(col,ink,edge*.85);
+ col=mix(col,ink,edge*.9);
  // fine particulate drifting upward; the lookup is warped so the specks leave the noise lattice
  vec2 s=p*17.;s.y-=uTime*.5;
  s+=(nz(vec3(p*1.4,uTime*.03+21.)).rg-.5)*2.5;

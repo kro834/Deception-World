@@ -8,9 +8,9 @@ export type FireTier = {
   sparks: number;
 };
 export const FIRE_TIERS: Record<"high" | "mobile" | "low", FireTier> = {
-  high: { jetSteps: 34, cards: 80, embers: 420, sparks: 300 },
-  mobile: { jetSteps: 24, cards: 56, embers: 260, sparks: 180 },
-  low: { jetSteps: 16, cards: 36, embers: 150, sparks: 110 },
+  high: { jetSteps: 34, cards: 120, embers: 420, sparks: 420 },
+  mobile: { jetSteps: 24, cards: 80, embers: 260, sparks: 260 },
+  low: { jetSteps: 16, cards: 50, embers: 150, sparks: 150 },
 };
 
 const GOLDEN = 0.61803398875;
@@ -25,6 +25,12 @@ export function createBreathJet(noise: THREE.Data3DTexture, tier: FireTier) {
     uStrength: { value: 0 },
     uWorldInverse: { value: new THREE.Matrix4() },
     uDpr: { value: 1 },
+    // Scene depth (from the volume pass): the march ends at the creature's surface.
+    uDepth: { value: null as THREE.Texture | null },
+    uResolution: { value: new THREE.Vector2(1, 1) },
+    uNear: { value: 0.1 },
+    uFar: { value: 100 },
+    uForward: { value: new THREE.Vector3(0, 0, -1) },
   };
   const material = new THREE.ShaderMaterial({
     uniforms,
@@ -33,15 +39,23 @@ export function createBreathJet(noise: THREE.Data3DTexture, tier: FireTier) {
     vertexShader: `out vec3 vWorld;void main(){vec4 p=modelMatrix*vec4(position,1.);vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}`,
     fragmentShader: `precision highp float;
 uniform highp sampler3D uNoise;
-uniform float uTime,uStrength;uniform mat4 uWorldInverse;
+uniform highp sampler2D uDepth;
+uniform float uTime,uStrength,uNear,uFar;uniform mat4 uWorldInverse;uniform vec2 uResolution;uniform vec3 uForward;
 in vec3 vWorld;out vec4 outColor;
 vec2 boxHit(vec3 ro,vec3 rd){vec3 a=(-vec3(1)-ro)/rd,b=(vec3(1)-ro)/rd;vec3 n=min(a,b),f=max(a,b);return vec2(max(max(n.x,n.y),n.z),min(min(f.x,f.y),f.z));}
 void main(){
  vec3 ro=(uWorldInverse*vec4(cameraPosition,1.)).xyz;
  bool inside=all(lessThanEqual(abs(ro),vec3(1.)));
  if(inside==gl_FrontFacing)discard;
- vec3 rd=normalize((uWorldInverse*vec4(normalize(vWorld-cameraPosition),0.)).xyz);
- vec2 hit=boxHit(ro,rd);float start=max(0.,hit.x),end=hit.y;if(end<=start)discard;
+ vec3 rdWorld=normalize(vWorld-cameraPosition);
+ vec3 rdLocal=(uWorldInverse*vec4(rdWorld,0.)).xyz;
+ float localPerWorld=length(rdLocal);
+ vec3 rd=rdLocal/localPerWorld;
+ vec2 hit=boxHit(ro,rd);float start=max(0.,hit.x),end=hit.y;
+ float sceneDepth=texture(uDepth,gl_FragCoord.xy/uResolution).r;
+ float viewZ=(uNear*uFar)/((uFar-uNear)*sceneDepth-uFar);
+ end=min(end,-viewZ/max(dot(rdWorld,uForward),1e-3)*localPerWorld);
+ if(end<=start)discard;
  float jitter=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);
  float stepSize=(end-start)/float(STEPS);
  float t=start+stepSize*jitter;
@@ -55,21 +69,24 @@ void main(){
   vec3 warp=texture(uNoise,fp*.5+vec3(0.,0.,uTime*.15)).rgb-.5;
   float n=(texture(uNoise,fp+warp*.55).r-.5)*1.6+.5;
   float n2=(texture(uNoise,fp*2.2+vec3(5.)+warp.zxy*.35).g-.5)*1.6+.5;
-  float radius=.1+pow(z,.85)*.8;
+  // Narrow at the mouth, widening into the turbulent cloud only well away from the body.
+  float radius=.07+pow(z,1.25)*.85;
   vec2 c=warp.xy*z*.9;
   float r=length((p.xy-c)/radius);
-  float env=1.-smoothstep(.35,1.05,r+(n-.5)*.9);
+  float env=1.-smoothstep(.4,.95,r+(n-.5)*.9);
   float head=1.-smoothstep(.6+uStrength*.35,1.,z+(n2-.5)*.25);
-  float lobes=smoothstep(.55,.85,n*.7+n2*.4+(1.-z)*.12);
-  float dens=env*head*lobes;
-  float axis=exp(-r*r*(3.+z*7.))*(1.-z*.55)*head;
-  float fil=pow(1.-abs(2.*n2-1.),7.)*env*head;
+  // Turbulent lobes with hard dark gaps, a near-white axis and bright filaments.
+  float lobes=smoothstep(.44,.66,n*.7+n2*.4+(1.-z)*.12);
+  float dens=env*head*lobes*1.5;
+  float axis=exp(-r*r*(3.+z*7.))*(1.-z*.5)*head;
+  float fil=pow(1.-abs(2.*n2-1.),6.)*env*head;
   float ink=smoothstep(.62,1.,1.-abs(2.*n2-1.))*dens+smoothstep(.7,1.,1.-abs(2.*n-1.))*dens*.6;
-  vec3 col=mix(vec3(.015,.07,.03),vec3(.1,.45,.18),smoothstep(0.,.45,dens));
-  col=mix(col,vec3(.42,.72,.46),smoothstep(.4,.85,dens+axis*.7));
-  col+=vec3(.7,.9,.72)*(axis*1.1+fil*.6);
+  vec3 col=mix(vec3(.015,.07,.03),vec3(.14,.6,.22),smoothstep(0.,.4,dens));
+  col=mix(col,vec3(.62,.97,.64),smoothstep(.35,.8,dens+axis*.7));
+  col+=vec3(1.2,1.5,1.2)*(axis*1.3+fil*.9);
   col*=1.-min(ink,.85);
-  float a=1.-exp(-(dens*.8+axis*1.4+fil*.5)*uStrength*stepSize*.8);
+  // Dense: lobes saturate into opaque pale masses with dark gaps between them.
+  float a=1.-exp(-(dens*1.4+axis*2.+fil*1.)*uStrength*stepSize*1.1);
   sum.rgb+=(1.-sum.a)*col*a;sum.a+=(1.-sum.a)*a;
   if(sum.a>.96)break;
  }
@@ -101,21 +118,25 @@ void main(){
     vertexShader: `attribute float aPhase;uniform float uTime,uStrength,uDpr;varying float vLife,vHeat;
 void main(){float speed=.38+fract(aPhase*53.)*.3;float u=fract(aPhase+uTime*speed);float angle=aPhase*127.+u*5.;float spread=pow(u,1.3)*(.18+fract(aPhase*37.)*.75);
 vec3 p=vec3(cos(angle)*spread,sin(angle)*spread+u*u*.25,-.98+u*2.5);vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
-vHeat=fract(aPhase*7.);gl_PointSize=clamp((14.+vHeat*26.)*uDpr/max(1.,-mv.z),1.,6.5);vLife=sin(u*3.14159)*uStrength;}`,
-    fragmentShader: `varying float vLife,vHeat;void main(){vec2 p=gl_PointCoord-.5;float a=exp(-dot(p,p)*22.)*vLife*.85;if(a<.02)discard;gl_FragColor=vec4(mix(vec3(.2,1.2,.4),vec3(1.2,2.2,1.4),pow(vHeat,3.)),a);}`,
+vHeat=fract(aPhase*7.);gl_PointSize=clamp((16.+vHeat*30.)*uDpr/max(1.,-mv.z),1.,8.);vLife=sin(u*3.14159)*uStrength;}`,
+    fragmentShader: `varying float vLife,vHeat;void main(){vec2 p=gl_PointCoord-.5;float a=exp(-dot(p,p)*20.)*vLife;if(a<.02)discard;gl_FragColor=vec4(mix(vec3(.3,1.3,.5),vec3(1.4,2.4,1.5),pow(vHeat,2.5)),a);}`,
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
     toneMapped: false,
   });
+  // The sparks live in the main scene (depth-tested against the body); the volume is drawn by
+  // the volume pass. Both share the jet's transform.
   const sparks = new THREE.Points(sparkGeometry, sparkMaterial);
   sparks.name = "DetachedForestFireEmbers";
   sparks.frustumCulled = false;
   sparks.renderOrder = 6;
-  mesh.add(sparks);
+  sparks.visible = false;
   const z = new THREE.Vector3(0, 0, 1);
   return {
     mesh,
+    sparks,
+    uniforms,
     update(
       time: number,
       strength: number,
@@ -126,12 +147,15 @@ vHeat=fract(aPhase*7.);gl_PointSize=clamp((14.+vHeat*26.)*uDpr/max(1.,-mv.z),1.,
       uniforms.uTime.value = time;
       uniforms.uStrength.value = strength;
       uniforms.uDpr.value = dpr;
-      mesh.visible = strength > 0.002;
-      const length = 5.6 + strength * 1.3;
+      mesh.visible = sparks.visible = strength > 0.002;
+      const length = 7.2 + strength * 1.5;
       mesh.position.copy(origin).addScaledVector(direction, length * 0.5 - 0.035);
       mesh.quaternion.setFromUnitVectors(z, direction);
-      mesh.scale.set(3.0, 3.0, length * 0.5);
+      mesh.scale.set(2.4, 2.4, length * 0.5);
       mesh.updateMatrixWorld(true);
+      sparks.position.copy(mesh.position);
+      sparks.quaternion.copy(mesh.quaternion);
+      sparks.scale.copy(mesh.scale);
       uniforms.uWorldInverse.value.copy(mesh.matrixWorld).invert();
     },
     dispose() {
@@ -258,10 +282,11 @@ void main(){
  float lift=1.+uStrength*.3-uAnticipation*.25;
  vec3 wp=wo+right*((position.x+sway)*iSize.x)+wa*(h*iSize.y*lift);
  vQ=vec2(position.x,h);vSeed=iSeed;
- // Fire reads behind and around the silhouette: cards on surfaces that face the camera fade.
+ // Fire frames the figure: cards on surfaces that face the camera all but vanish, so tongues
+ // live on the silhouette and peek out from behind the body.
  float facing=clamp(dot(wn,normalize(toCam)),0.,1.);
- vFade=1.-.9*smoothstep(.05,.7,facing);
- vIntensity=(.5+fract(iSeed*17.)*.45)*(1.+uStrength*.25);
+ vFade=1.-.95*smoothstep(.0,.55,facing);
+ vIntensity=(.55+fract(iSeed*17.)*.45)*(1.+uStrength*.25);
  gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.);
 }`,
     fragmentShader: `precision highp float;
@@ -270,30 +295,34 @@ in vec2 vQ;in float vSeed,vFade,vIntensity;out vec4 outColor;
 void main(){
  float h=vQ.y,x=vQ.x;
  float t=uTime*(.5+fract(vSeed*3.1)*.3);
+ float side=fract(vSeed*5.3)>.5?1.:-1.;
  vec3 np=vec3(x*1.4+vSeed*9.,h-t*.5,t*.1+vSeed*4.);
  vec2 w=texture(uNoise,np*.7).ba-.5;
  float n=(texture(uNoise,np+vec3(w*.6,0.)).r-.5)*1.7+.5;
  float n2=(texture(uNoise,np*2.1+vec3(3.3)).g-.5)*1.6+.5;
- // A soft wash tongue: wide base, a tip that bends with the noise, curled edges from the
- // fine noise, a thin ink rim, translucent so overlapping tongues build depth.
- float width=(.42-h*.34)*(.8+n2*.4);
- float cx=(n-.5)*.3*h;
- float curl=(n2-.5)*.18*(.3+h);
- float r=abs(x-cx)/max(width,.03)+curl;
- float env=(1.-smoothstep(.35,1.,r))*(1.-smoothstep(.38,.5,abs(x)));
- float tip=(1.-smoothstep(.4,1.,h+(n-.5)*.45))*(1.-smoothstep(.82,1.,h));
- float root=smoothstep(0.,.15,h);
- float d=env*tip*root*(.6+n*.5)*vIntensity;
- float body=smoothstep(.08,.42,d);
- float pale=smoothstep(.3,.72,d);
- float white=smoothstep(.66,.95,d);
- float inkEdge=smoothstep(.05,.11,d)*(1.-smoothstep(.11,.2,d));
- float shade=smoothstep(.75,1.,1.-abs(2.*n-1.))*pale*.25;
- vec3 col=mix(vec3(.015,.05,.025),vec3(.1,.36,.14),body);
- col=mix(col,vec3(.42,.68,.42),pale);
- col=mix(col,vec3(.74,.95,.72),white);
- col*=1.-shade;
- float alpha=max(body*.55,inkEdge*.45)*vFade;
+ float n3=(texture(uNoise,np*3.2+vec3(7.1,1.3,0.)).g-.5)*1.6+.5;
+ // A painted lick: a bulbous base narrowing into a thin tip that curls to one side, frayed by
+ // the fine noise, with a hard ink outline, a translucent mid-green wash inside, a narrow
+ // bright core line and soft dark marbling. The envelope stays inside the card.
+ float taper=pow(max(0.,1.-h*.9),.7);
+ float width=(.05+.26*taper)*(.8+n2*.4);
+ float cx=(n-.5)*.2*h+side*h*h*.22;
+ float fray=(n3-.5)*.3*(.4+h);
+ float r=abs(x-cx)/max(width,.02)+fray;
+ float env=(1.-smoothstep(.6,1.,r))*(1.-smoothstep(.42,.5,abs(x)));
+ float tip=1.-smoothstep(.55,1.,h+(n-.5)*.35);
+ float root=smoothstep(0.,.12,h);
+ float d=env*tip*root*(.65+n*.45)*vIntensity;
+ float body=smoothstep(.14,.3,d);
+ float pale=smoothstep(.45,.85,d);
+ float coreLine=exp(-pow((x-cx)/max(width*.3,.02),2.)*3.)*smoothstep(.3,.6,d)*(1.-h*.5);
+ float inkEdge=smoothstep(.06,.13,d)*(1.-smoothstep(.13,.22,d));
+ float marbling=smoothstep(.68,1.,1.-abs(2.*n2-1.))*body*.45;
+ vec3 col=mix(vec3(.012,.04,.02),vec3(.1,.4,.16),body);
+ col=mix(col,vec3(.4,.68,.42),pale);
+ col=mix(col,vec3(.82,1.,.8),coreLine);
+ col*=1.-marbling;
+ float alpha=max(body*.55,inkEdge*.85)*vFade;
  if(alpha<.01)discard;
  outColor=vec4(col,alpha);
 }`,
@@ -364,9 +393,9 @@ void main(){
       p.copy(source.position).addScaledVector(source.normal, 0.06).toArray(origins, i * 3);
       growth.toArray(axes, i * 3);
       source.normal.toArray(normals, i * 3);
-      const big = seed > 0.7 ? 1 : 0;
-      sizes[i * 2] = (0.4 + ((seed * 13) % 1) * 0.35) * (1 + big * 0.5);
-      sizes[i * 2 + 1] = (0.5 + ((seed * 17) % 1) * 0.55) * (1 + big * 0.6);
+      const big = seed > 0.75 ? 1 : 0;
+      sizes[i * 2] = (0.34 + ((seed * 13) % 1) * 0.26) * (1 + big * 0.5);
+      sizes[i * 2 + 1] = (0.6 + ((seed * 17) % 1) * 0.7) * (1 + big * 0.7);
       seeds[i] = seed;
       // Embers share the anchor-space points, expressed in model space.
       p.copy(source.position).applyMatrix4(emberMatrix);

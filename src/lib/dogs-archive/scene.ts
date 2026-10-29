@@ -10,7 +10,8 @@ import { createBreathJet, createFlameMantle, FIRE_TIERS } from "./fire.ts";
 import { createInkBackdrop } from "./backdrop.ts";
 import { createInkEnvironment } from "./environment.ts";
 import { createNoiseVolume, NOISE_VOLUME_BYTES } from "./noise-volume.ts";
-import { createInkGradePass } from "./post.ts";
+import { GuardianInkGradePass } from "./post.ts";
+import { GuardianVolumePass } from "./volume-pass.ts";
 import {
   applyGuardianInkSurface,
   createGuardianSurfaceUniforms,
@@ -149,7 +150,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   host.appendChild(canvas);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#020906");
-  scene.fog = new THREE.FogExp2("#03100a", 0.02);
+  scene.fog = new THREE.FogExp2("#03100a", 0.012);
   const noise = createNoiseVolume();
   const backdrop = createInkBackdrop(noise);
   scene.add(backdrop.mesh);
@@ -163,16 +164,22 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   scene.environment = environmentTarget.texture;
   scene.environmentIntensity = 0.34;
   const composer = new EffectComposer(renderer);
+  // Depth textures replace the targets' depth renderbuffers (no extra memory): the breath
+  // volume marches against the scene depth and the grade draws ink contours from it. The
+  // composer alternates its targets between frames, so both carry one.
+  for (const target of [composer.renderTarget1, composer.renderTarget2]) {
+    target.depthTexture = new THREE.DepthTexture(1, 1);
+    target.depthTexture.name = `${target.texture.name}.depth`;
+  }
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.38, 0.8, 0.95);
+  // Only true emitters bloom (the lattice face, the breath's white core): pale bone sits just
+  // under 1.0 and must not halo.
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.6, 1.35);
   const output = new OutputPass();
   const antialiasPass = tier === "low" ? null : new FXAAPass();
-  const grade = createInkGradePass();
-  composer.addPass(renderPass);
-  composer.addPass(bloom);
-  composer.addPass(output);
-  if (antialiasPass) composer.addPass(antialiasPass);
-  composer.addPass(grade);
+  const grade = new GuardianInkGradePass(camera);
+  const volumeScene = new THREE.Scene();
+  volumeScene.name = "GuardianBreathVolumeScene";
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.065;
@@ -208,7 +215,21 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   faceLight.name = "GuardianFaceGlow";
   scene.add(faceLight);
   const breath = createBreathJet(noise, fireTier);
-  scene.add(breath.mesh);
+  volumeScene.add(breath.mesh);
+  scene.add(breath.sparks);
+  const volumePass = new GuardianVolumePass(
+    volumeScene,
+    camera,
+    breath.uniforms,
+    tier === "high" ? 0.5 : 0.4,
+  );
+  grade.depthSource = volumePass;
+  composer.addPass(renderPass);
+  composer.addPass(volumePass);
+  composer.addPass(bloom);
+  composer.addPass(output);
+  if (antialiasPass) composer.addPass(antialiasPass);
+  composer.addPass(grade);
   const surfaceUniforms = createGuardianSurfaceUniforms(noise);
   let inkSurface: GuardianSurfaceHandles | null = null;
   const rimWorld = new THREE.Vector3(),
@@ -254,7 +275,9 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   }[] = [];
   const origin = new THREE.Vector3(),
     direction = new THREE.Vector3(),
-    aimPosition = new THREE.Vector3();
+    aimPosition = new THREE.Vector3(),
+    toCamera = new THREE.Vector3(),
+    steerPerp = new THREE.Vector3();
   const sway = new THREE.Quaternion(),
     euler = new THREE.Euler(),
     spherical = new THREE.Spherical();
@@ -460,6 +483,18 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         direction.set(0, -0.12, 1).transformDirection(floating.matrixWorld);
       }
       const effectStrength = options.effects === false ? 0 : strength;
+      // The painting composes the breath sideways. A jet aimed within 60° of the camera would
+      // put its cloud between the viewer and the body, so the jet (with its sparks, mouth light
+      // and backdrop mass) is steered away from the view axis; the head still opens as authored.
+      toCamera.subVectors(camera.position, origin).normalize();
+      const toward = direction.dot(toCamera);
+      if (toward > 0.5) {
+        steerPerp.copy(direction).addScaledVector(toCamera, -toward);
+        if (steerPerp.lengthSq() < 1e-6)
+          steerPerp.set(1, 0, 0).applyQuaternion(camera.quaternion);
+        steerPerp.normalize();
+        direction.copy(toCamera).multiplyScalar(0.5).addScaledVector(steerPerp, Math.sqrt(0.75));
+      }
       breath.update(time, effectStrength, origin, direction, dpr);
       canvas.dataset.mouthDirection = direction
         .toArray()
@@ -471,15 +506,17 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           .toArray()
           .map((value) => value.toFixed(4))
           .join(",");
-      breathLight.position.copy(origin).addScaledVector(direction, 0.5);
-      breathLight.intensity = effectStrength * 9;
+      // Candela: pale bone sits just under the bloom threshold, so the mouth light stays small
+      // (the fire itself carries the brightness, as in the breath painting).
+      breathLight.position.copy(origin).addScaledVector(direction, 0.6);
+      breathLight.intensity = effectStrength * 1.6;
       facePosition
         .copy(origin)
         .addScaledVector(direction, -0.3)
         .addScaledVector(THREE.Object3D.DEFAULT_UP, 0.4);
       faceLight.position.copy(facePosition);
       faceLight.intensity =
-        0.9 + 0.5 * Math.sin(time * 1.35) + anticipation * 2.2 + effectStrength * 1.4;
+        0.5 + 0.25 * Math.sin(time * 1.35) + anticipation * 0.9 + effectStrength * 0.5;
       inkSurface?.update(time, effectStrength, anticipation);
     }
     controls.update();
@@ -538,12 +575,20 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     composer.setSize(width, height);
     backdrop.setSize(width * dpr, height * dpr);
     grade.uniforms.uResolution.value.set(width * dpr, height * dpr);
-    // Resource estimate for device reports: two half-float composer targets plus the depth
-    // buffer, the bloom mip chain, the shadow map and the noise volume. Not a driver measure.
+    // Resource estimate for device reports: two half-float composer targets with their depth
+    // textures, the half-float breath volume target, the bloom mip chain, the shadow map and
+    // the noise volume. Not a driver measure.
     const pixels = Math.round(width * dpr) * Math.round(height * dpr);
     const shadowSide = tier === "high" ? 1536 : 768;
+    const volumeScale = tier === "high" ? 0.5 : 0.4;
     canvas.dataset.renderTargetBytes = String(
-      pixels * (2 * 8 + 4) + 256 * 256 * 8 * 10 + shadowSide * shadowSide * 8 + NOISE_VOLUME_BYTES,
+      Math.round(
+        pixels * (2 * 8 + 2 * 4) +
+          pixels * volumeScale * volumeScale * 8 +
+          256 * 256 * 8 * 10 +
+          shadowSide * shadowSide * 8 +
+          NOISE_VOLUME_BYTES,
+      ),
     );
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -1071,6 +1116,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       bloom.dispose();
       output.dispose();
       antialiasPass?.dispose();
+      volumePass.dispose();
       grade.dispose();
       renderPass.dispose();
       composer.dispose();

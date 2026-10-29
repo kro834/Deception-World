@@ -35,16 +35,21 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
   };
 }
 
-/** Families by material name. `lattice` is the face (pulse-driven glow), `core` any other
- * authored emission such as the whorl centres (kept as authored, gently breathing). */
-const surfaceFamily = (material: THREE.Material) => {
+/** Families by the material name's prefix (the part before `|`): `Bone`, `Skin`, `Mouth`,
+ * `Rune` (authored emission). Within `Rune`, `lattice` is the face (pulse-driven glow) and
+ * `core` any other emitter such as the whorl centres (kept as authored, gently breathing).
+ * The prefix decides: "Bone | v3 lattice" is bone, not the face. */
+export const guardianSurfaceFamily = (material: THREE.Material) => {
   const name = material.name;
-  if (/face|lattice|forehead/i.test(name)) return "lattice";
-  if (/rune|emission|glow|core/i.test(name)) return "core";
-  if (/mouth|cavity/i.test(name)) return "mouth";
-  if (/bone|ivory|shell|carapace|ridge|teeth/i.test(name.split(/[|:]/, 1)[0])) return "bone";
+  const prefix = name.split(/[|:]/, 1)[0];
+  if (/bone|ivory|shell|carapace|ridge|teeth/i.test(prefix)) return "bone";
+  if (/mouth|cavity/i.test(prefix)) return "mouth";
+  if (/rune|emission|glow/i.test(prefix))
+    return /face|forehead|lattice/i.test(name) ? "lattice" : "core";
+  if (/face|forehead/i.test(prefix)) return "lattice";
   return "skin";
 };
+const surfaceFamily = guardianSurfaceFamily;
 
 export type GuardianSurfaceHandles = {
   patched: number;
@@ -153,13 +158,13 @@ float gBone,gLum;`,
  float gFine=texture(uNoise,vGuardianWorld*.6+vec3(1.7)).g;
  // Membranes: black-green ink. Bone: pale grey-green, lifted toward ~0.22 linear when the
  // authored value is darker (the 2026-10-28 bone), left alone when it is already pale.
- float gLift=clamp(.22/max(gLum,.02),1.,1.5);
+ float gLift=clamp(.3/max(gLum,.02),1.,1.6);
  vec3 gTint=mix(vec3(.2,.34,.24),vec3(1.,1.02,.98)*gLift,gBone);
  diffuseColor.rgb*=gTint*(.74+gMottle*.45)*(.9+gFine*.2);
  // Bone stays pale grey-green, never paper: an authored albedo that is already pale (the
  // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
  float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
- diffuseColor.rgb*=mix(1.,min(1.,.45/max(gOut,1e-4)),gBone);
+ diffuseColor.rgb*=mix(1.,min(1.,.55/max(gOut,1e-4)),gBone);
 }`,
           )
           .replace(
@@ -184,7 +189,7 @@ float gBone,gLum;`,
  float gEdge=.12+.88*pow(1.-gNdV,2.5);
  float gTrans=pow(gThin,2.)*pow(gBack,1.5)*gEdge*(1.-gBone)*uTransStrength;
  float gKey=saturate(dot(normal,uKeyDir));
- totalEmissiveRadiance+=uRimColor*gRim*(1.+uStrength*.5)+uTransColor*gTrans*(1.+uStrength*.8);
+ totalEmissiveRadiance+=uRimColor*gRim*(1.+uStrength*.25)+uTransColor*gTrans*(1.+uStrength*.4);
  totalEmissiveRadiance+=uRimColor*gKey*gFres*gBone*.18;
 }`,
           )
@@ -210,9 +215,9 @@ float gBone,gLum;`,
     families,
     update(time, strength, anticipation) {
       const pulse = 0.5 + 0.5 * Math.sin(time * 1.35);
-      const latticeScale = 1 + pulse * 0.35 + anticipation * 1.4 + strength * 0.8;
+      const latticeScale = 1 + pulse * 0.3 + anticipation * 1.0 + strength * 0.5;
       for (const { material, base } of lattice) material.emissiveIntensity = base * latticeScale;
-      const coreScale = 0.92 + pulse * 0.16 + anticipation * 0.4 + strength * 0.3;
+      const coreScale = 0.9 + pulse * 0.1 + anticipation * 0.2 + strength * 0.15;
       for (const { material, base } of cores) material.emissiveIntensity = base * coreScale;
       for (const material of mouths) material.emissiveIntensity = strength * 4.5 + anticipation * 0.6;
     },
