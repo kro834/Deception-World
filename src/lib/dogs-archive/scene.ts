@@ -190,7 +190,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const renderPass = new RenderPass(scene, camera);
   // Only true emitters bloom (the lattice face, the breath's white core): pale bone sits just
   // under 1.0 and must not halo.
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.3, 0.6, 1.7);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.32, 0.35, 1.7);
   const output = new OutputPass();
   const antialiasPass = tier === "low" ? null : new FXAAPass();
   const grade = new GuardianInkGradePass(camera);
@@ -245,9 +245,12 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   composer.addPass(bloom);
   composer.addPass(output);
   if (antialiasPass) composer.addPass(antialiasPass);
-  grade.enabled = !referenceLook;
+  // The reference look keeps the ink outlines (the originals have them) but no grading.
+  grade.uniforms.uReferenceLook.value = referenceLook ? 1 : 0;
   composer.addPass(grade);
   const surfaceUniforms = createGuardianSurfaceUniforms(noise);
+  // Irradiance of a fully lit surface under each rig: the toon bands sit at fixed fractions.
+  surfaceUniforms.uToonRange.value = referenceLook ? 2.3 : 3.5;
   if (referenceLook) {
     // Even light judges the albedo: no green rim or transmission glow from an absent fire.
     surfaceUniforms.uRimColor.value.setRGB(0.7, 0.95, 0.72);
@@ -605,6 +608,11 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     backdrop.setSize(width * dpr, height * dpr);
     grade.uniforms.uResolution.value.set(width * dpr, height * dpr);
     grade.uniforms.uHalo.value = 9 * dpr;
+    // Ink outlines about 1.3 css px inside and 2.1 css px around the silhouette at 1440,
+    // scaled down with the viewport.
+    const outline = THREE.MathUtils.clamp(1.3 * dpr * Math.sqrt(width / 1440), 0.8, 4);
+    grade.uniforms.uOutlineIn.value = outline;
+    grade.uniforms.uOutlineOut.value = outline * 1.6;
     // Resource estimate for device reports: two half-float composer targets with their depth
     // textures, the half-float breath volume target, the bloom mip chain, the shadow map and
     // the noise volume. Not a driver measure.

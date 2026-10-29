@@ -155,9 +155,9 @@ export function createGuardianSculptureLighting(
   // The paintings' light: a dark ink sky over a fire bank below, a pale key from above and in
   // front, saturated green rims from behind where the fire is. The creature stays the darkest
   // element of the picture. Only the key casts shadows.
-  const hemi = new THREE.HemisphereLight(0x8a978c, 0x0a2012, 0.62);
+  const hemi = new THREE.HemisphereLight(0x5f8a6a, 0x0a2012, 0.62);
   const key = new THREE.DirectionalLight(0xf0f4ee, 3.4);
-  key.position.set(5.8, 7.6, 6.4);
+  key.position.set(-5.2, 8.2, 6.6);
   key.target.position.set(0, 0.15, 0);
   key.castShadow = true;
   const mapSize = options.mapSize ?? (options.mobile ? 768 : 1536);
@@ -166,11 +166,11 @@ export function createGuardianSculptureLighting(
   key.shadow.bias = -0.000025;
   key.shadow.normalBias = options.normalBias ?? 0.004;
   key.shadow.autoUpdate = false;
-  const rim = new THREE.DirectionalLight(0x39d977, 2.4);
+  const rim = new THREE.DirectionalLight(0x8fe8a8, 1.6);
   rim.position.set(-5.5, -1.5, -7);
-  const rimRight = new THREE.DirectionalLight(0x2fb765, 1.0);
+  const rimRight = new THREE.DirectionalLight(0x6fd08c, 0.8);
   rimRight.position.set(6.5, 1.5, -6.5);
-  const fill = new THREE.DirectionalLight(0x6f8a8c, 0.35);
+  const fill = new THREE.DirectionalLight(0x5f8a6a, 0.2);
   fill.position.set(-6, 0.5, 3.5);
   root.add(hemi, key, key.target, rim, rimRight, fill);
   let palette: GuardianLightingPalette = options.palette ?? "forest";
@@ -205,17 +205,19 @@ export function createGuardianSculptureLighting(
       fill.color.set(0x88939f);
       fill.intensity = 0.32;
     } else {
-      hemi.color.set(0x8a978c);
+      // Anime rig: a pale key from the upper front-left, a green sky fill so shadows stay
+      // emerald, mint rims from behind.
+      hemi.color.set(0x5f8a6a);
       hemi.groundColor.set(0x0a2012);
       hemi.intensity = 0.62;
       key.color.set(0xf0f4ee);
       key.intensity = 3.4;
-      rim.color.set(0x39d977);
-      rim.intensity = 2.4;
-      rimRight.color.set(0x2fb765);
-      rimRight.intensity = 1.0;
-      fill.color.set(0x6f8a8c);
-      fill.intensity = 0.35;
+      rim.color.set(0x8fe8a8);
+      rim.intensity = 1.6;
+      rimRight.color.set(0x6fd08c);
+      rimRight.intensity = 0.8;
+      fill.color.set(0x5f8a6a);
+      fill.intensity = 0.2;
     }
   };
   setPalette(palette);
@@ -240,7 +242,7 @@ export function createGuardianSculptureLighting(
     bounds.getCenter(center);
     root.worldToLocal(center);
     key.target.position.copy(center);
-    key.position.copy(center).add(new THREE.Vector3(5.8, 7.6, 6.4));
+    key.position.copy(center).add(new THREE.Vector3(-5.2, 8.2, 6.6));
     root.updateWorldMatrix(true, true);
     key.shadow.updateMatrices(key);
     const camera = key.shadow.camera;

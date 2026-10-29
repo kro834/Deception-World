@@ -29,6 +29,8 @@ export type GuardianSurfaceUniforms = {
   uClarity: { value: number };
   /** World units per model unit: the bone veins are sized in world space. */
   uVeinScale: { value: number };
+  /** Irradiance at which the toon ramp's light band is fully on (set per light rig). */
+  uToonRange: { value: number };
 };
 
 export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): GuardianSurfaceUniforms {
@@ -52,6 +54,7 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     // Off until the v13 re-projection: on the v12 atlas it read as specks or darkened the body.
     uClarity: { value: 0 },
     uVeinScale: { value: 1 },
+    uToonRange: { value: 3.5 },
   };
 }
 
@@ -105,6 +108,7 @@ export function applyGuardianInkSurface(
       opacity: number;
       depthWrite: boolean;
       side: THREE.Side;
+      envMapIntensity: number;
     }
   >();
   let patched = 0;
@@ -129,6 +133,7 @@ export function applyGuardianInkSurface(
         opacity: material.opacity,
         depthWrite: material.depthWrite,
         side: material.side,
+        envMapIntensity: material.envMapIntensity,
       });
       // A projected atlas (2026-10-30 "painted" materials) already carries the baked AO; any
       // vertex colour left on those primitives would darken it a second time.
@@ -151,7 +156,7 @@ export function applyGuardianInkSurface(
         };
         // The v17 leaf shows about a quarter turn of the axis parametrisation, so it takes
         // more cells per turn to show 6–8 across; the v18 bud's UV spans the whole bud.
-        const faceCells = { value: faceMode.value === 2 ? 8 : 28 };
+        const faceCells = { value: faceMode.value === 2 ? 16 : 28 };
         const faceRows = { value: faceMode.value === 2 ? 10 : 12 };
         material.onBeforeCompile = (shader) => {
           Object.assign(shader.uniforms, {
@@ -208,7 +213,9 @@ export function applyGuardianInkSurface(
   // the tip (a pinecone net). Antialiased from a seam-free derivative: the u seam is moved
   // half a turn for the second estimate, and the cell count is even, so both estimates
   // describe the same lines. Line width is 1/8 of a cell.
-  float gH=uFaceRows*pow(gT,2.);
+  // The row coordinate bends harder toward the tip, so the two families sweep around the
+  // bud and converge there like a sunflower's seed spirals; lens-shaped cells follow the flow.
+  float gH=uFaceRows*(gT*gT+.6*gT*gT*gT)/1.6;
   float gA=uFaceCells*gU+gH,gB=uFaceCells*gU-gH;
   float gU2=fract(gU+.5);
   float gA2=uFaceCells*gU2+gH,gB2=uFaceCells*gU2-gH;
@@ -220,12 +227,16 @@ export function applyGuardianInkSurface(
   float gFade=1.-smoothstep(.25,.6,max(gWa,gWb));
   float gLines=max(gLineA,gLineB)*gFade;
   float gDmin=min(gDa,gDb);
-  float gCellShade=1.-.6*smoothstep(.06,.4,gDmin)*gFade;
+  // Each cell is darker at its centre and lighter toward its rim (an inner glow at the lines).
+  float gCellShade=mix(1.,.42,smoothstep(.05,.42,gDmin)*gFade);
   diffuseColor.rgb=vec3(.008,.07,.025)*(1.-.7*gEdge);
-  vec3 gCells=vec3(.02,.2,.075)*(.3+.9*gT)*gCellShade*(1.-.8*gEdge);
-  vec3 gMint=mix(vec3(.4,1.,.56),vec3(.86,1.,.9),pow(gT,3.));
-  vec3 gStar=vec3(.8,1.,.86)*gHot*(1.4+.6*pow(abs(cos(uFaceCells*3.1415927*gU)),6.));
-  totalEmissiveRadiance=gCells*gPulse+(gMint*gLines*gGrad*1.4+gStar+vec3(.78,1.,.84)*gHot*gHot*.4)*gPulse*(1.-.6*gEdge);
+  vec3 gCells=vec3(.02,.2,.075)*(.35+.75*gT)*gCellShade*(1.-.8*gEdge);
+  vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gT,3.));
+  vec3 gRad=gCells*gPulse+gMint*gLines*gGrad*1.3*gPulse*(1.-.6*gEdge);
+  // The bud stays below the bloom threshold everywhere but the tip: a small white-green star.
+  gRad=min(gRad,vec3(1.1));
+  float gStar=exp(-pow((1.-gT)/.07,2.));
+  totalEmissiveRadiance=gRad+vec3(.8,1.,.86)*gStar*(1.3+.5*pow(abs(cos(uFaceCells*3.1415927*gU)),6.))*gPulse;
  }
 }`,
             );
@@ -252,9 +263,9 @@ export function applyGuardianInkSurface(
               "#include <emissivemap_fragment>",
               `#include <emissivemap_fragment>
 {
- float gFall=mix(1.1,.06,pow(clamp(vCoreRadius,0.,1.),.6));
+ float gFall=mix(1.,.04,pow(clamp(vCoreRadius,0.,1.),.6));
  totalEmissiveRadiance*=gFall;
- totalEmissiveRadiance+=vec3(.7,1.,.78)*exp(-vCoreRadius*vCoreRadius*9.)*.55;
+ totalEmissiveRadiance+=vec3(.7,1.,.78)*exp(-vCoreRadius*vCoreRadius*12.)*.7;
 }`,
             );
         };
@@ -276,18 +287,38 @@ export function applyGuardianInkSurface(
         material.roughness = Math.min(material.roughness, 0.18);
         material.metalness = 0;
         material.metalnessMap = null;
-        material.envMapIntensity = 0.7;
+        material.envMapIntensity = 0;
         material.onBeforeCompile = (shader) => {
-          shader.fragmentShader = shader.fragmentShader.replace(
-            "#include <emissivemap_fragment>",
-            `#include <emissivemap_fragment>
+          Object.assign(shader.uniforms, uniforms);
+          shader.fragmentShader = shader.fragmentShader
+            .replace(
+              "#include <common>",
+              "#include <common>\nuniform float uToonRange;uniform vec3 uKeyDir;",
+            )
+            .replace("#include <color_fragment>", "#include <color_fragment>\n diffuseColor.rgb=vec3(.5);")
+            .replace(
+              "#include <aomap_fragment>",
+              `#include <aomap_fragment>
 {
- float gNdV=saturate(dot(normal,normalize(vViewPosition)));
- totalEmissiveRadiance+=vec3(.1,.38,.16)*pow(1.-gNdV,3.)*.35;
+ // Lacquer: near-black in three tones, one crisp highlight band, a thin mint rim.
+ float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
+ float gN=gIrr/uToonRange;
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN);
+ vec3 gTone=mix(mix(vec3(.004,.006,.004),vec3(.012,.02,.013),gMid),vec3(.03,.05,.034),gHi);
+ vec3 gV=normalize(vViewPosition);
+ float gNdV=saturate(dot(normal,gV));
+ float gRim=smoothstep(.5,.58,pow(1.-gNdV,1.5));
+ gTone+=vec3(.18,.5,.26)*gRim*.6;
+ vec3 gH=normalize(uKeyDir+gV);
+ float gSpec=pow(saturate(dot(normal,gH)),96.);
+ reflectedLight.directDiffuse=gTone;
+ reflectedLight.indirectDiffuse=vec3(0.);
+ reflectedLight.directSpecular=vec3(.78,.95,.84)*smoothstep(.6,.7,gSpec)*.9*gMid;
+ reflectedLight.indirectSpecular=vec3(0.);
 }`,
-          );
+            );
         };
-        material.customProgramCacheKey = () => "guardian-horn-v1";
+        material.customProgramCacheKey = () => "guardian-horn-v2";
         material.needsUpdate = true;
         patched++;
         continue;
@@ -306,40 +337,46 @@ export function applyGuardianInkSurface(
         material.metalnessMap = null;
         if (material.color.r > 0.9 && material.color.g > 0.9 && material.color.b > 0.9 && !material.map)
           material.color.setRGB(0.42, 0.78, 0.5);
+        material.envMapIntensity = 0.25;
         material.onBeforeCompile = (shader) => {
           Object.assign(shader.uniforms, uniforms);
           shader.fragmentShader = shader.fragmentShader
             .replace(
               "#include <common>",
-              "#include <common>\nuniform vec3 uKeyDir;uniform float uTranslucency;",
+              "#include <common>\nuniform float uToonRange,uTranslucency;uniform vec3 uKeyDir;float gGlassFres;",
             )
+            .replace("#include <color_fragment>", "#include <color_fragment>\n diffuseColor.rgb=vec3(.5);")
             .replace(
               "#include <emissivemap_fragment>",
               `#include <emissivemap_fragment>
-#ifdef GUARDIAN_BONE
-if(gVein>.001){
- // The veins also bend the normal a little (bump from screen-space derivatives).
- vec3 gSp=-vViewPosition;vec3 gSx=dFdx(gSp),gSy=dFdy(gSp);
- vec2 gHd=vec2(dFdx(gVein),dFdy(gVein))*.018;
- vec3 gR1=cross(gSy,normal),gR2=cross(normal,gSx);
- float gDet=dot(gSx,gR1)*(float(gl_FrontFacing)*2.-1.);
- normal=normalize(abs(gDet)*normal-sign(gDet)*(gHd.x*gR1+gHd.y*gR2));
-}
-#endif
 {
  vec3 gV=normalize(vViewPosition);
  float gNdV=saturate(dot(normal,gV));
- float gFres=pow(1.-gNdV,2.2);
+ gGlassFres=pow(1.-gNdV,2.2);
  float gWrap=saturate((dot(normal,uKeyDir)+.7)/1.7);
- // inner glow (wrap-lit) and a lighter glass rim
- totalEmissiveRadiance+=vec3(.55,.92,.62)*(.14+.26*gWrap)*uTranslucency;
- totalEmissiveRadiance+=vec3(.78,1.,.84)*gFres*.5;
- // edges denser than the middle, like a glass rod
- diffuseColor.a*=.72+.28*gFres;
+ // a soft inner light and a lighter glass rim; the edges denser than the middle
+ totalEmissiveRadiance+=vec3(.5,.9,.58)*(.12+.22*gWrap)*uTranslucency;
+ totalEmissiveRadiance+=vec3(.78,1.,.84)*smoothstep(.35,.6,gGlassFres)*.45;
+ diffuseColor.a*=.72+.28*gGlassFres;
+}`,
+            )
+            .replace(
+              "#include <aomap_fragment>",
+              `#include <aomap_fragment>
+{
+ // Jade glass in three tones with one crisp highlight.
+ float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
+ float gN=gIrr/uToonRange;
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN);
+ reflectedLight.directDiffuse=mix(mix(vec3(.1,.26,.14),vec3(.24,.5,.28),gMid),vec3(.46,.76,.52),gHi);
+ reflectedLight.indirectDiffuse=vec3(0.);
+ vec3 gH=normalize(uKeyDir+normalize(vViewPosition));
+ reflectedLight.directSpecular=vec3(.7,.95,.78)*smoothstep(.6,.7,pow(saturate(dot(normal,gH)),64.))*.5*gMid;
+ reflectedLight.indirectSpecular*=.5;
 }`,
             );
         };
-        material.customProgramCacheKey = () => "guardian-glass-v1";
+        material.customProgramCacheKey = () => "guardian-glass-v2";
         material.needsUpdate = true;
         patched++;
         continue;
@@ -354,37 +391,34 @@ if(gVein>.001){
       // which mirrored the studio and read as grey.
       material.metalness = 0;
       material.metalnessMap = null;
+      // Anime shading: no environment reflections on the body.
+      material.envMapIntensity = 0;
       material.onBeforeCompile = (shader) => {
         Object.assign(shader.uniforms, uniforms);
         shader.vertexShader = shader.vertexShader
-          .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianWorld;varying vec3 vGuardianLocal;")
-          .replace(
-            "#include <skinning_vertex>",
-            "#include <skinning_vertex>\nvGuardianWorld=(modelMatrix*vec4(transformed,1.)).xyz;vGuardianLocal=position;",
-          );
+          .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianLocal;")
+          .replace("#include <skinning_vertex>", "#include <skinning_vertex>\nvGuardianLocal=position;");
         shader.fragmentShader = shader.fragmentShader
           .replace(
             "#include <common>",
             `#include <common>
-uniform highp sampler3D uNoise;
-uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength,uPaintedContrast,uTranslucency,uClarity;
-uniform vec3 uRimDir,uKeyDir,uRimColor,uTransColor;
+uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale;
+uniform vec3 uRimDir,uKeyDir,uRimColor;
 uniform vec2 uBoneRange;
-varying vec3 vGuardianWorld;
-float gBone,gLum;
+varying vec3 vGuardianLocal;
+float gBone,gLum,gVein,gRimBand,gWrapLight;
 const float gSkinFamily=${family === "bone" ? "0." : "1."};
 const float gPainted=${material.map ? "1." : "0."};
 ${family === "bone" ? "#define GUARDIAN_BONE" : ""}
-varying vec3 vGuardianLocal;uniform float uVeinScale;float gVein;
 vec3 gvHash3(vec3 p){p=fract(p*vec3(.1031,.1030,.0973));p+=dot(p,p.yxz+33.33);return fract((p.xxy+p.yxx)*p.zyx);}
 float gvEdge(vec3 p){vec3 i=floor(p),f=fract(p);float f1=8.,f2=8.;
  for(int z=-1;z<=1;z++)for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec3 g=vec3(float(x),float(y),float(z));vec3 o=gvHash3(i+g);float d=length(g+o-f);if(d<f1){f2=f1;f1=d;}else if(d<f2){f2=d;}}
- return f2-f1;}
-const float gAtlas=${material.map && /painted/i.test(material.name) ? "1." : "0."};`,
+ return f2-f1;}`,
           )
           .replace(
             "#include <color_fragment>",
             `#include <color_fragment>
+gVein=0.;
 #ifdef GUARDIAN_BONE
 {
  // Fine reticulation on bone: Voronoi edges at two scales in the bind-pose surface space
@@ -392,124 +426,94 @@ const float gAtlas=${material.map && /painted/i.test(material.name) ? "1." : "0.
  vec3 gVp=vGuardianLocal*uVeinScale;
  float gVfw=length(fwidth(gVp));
  float gFade1=1.-smoothstep(.02,.06,gVfw),gFade2=1.-smoothstep(.008,.025,gVfw);
- gVein=0.;
  if(gFade1>.01){
-  float gE1=gvEdge(gVp*10.);float gV1=(1.-smoothstep(0.,.14,gE1))*gFade1;
+  float gE1=gvEdge(gVp*10.);float gV1=(1.-smoothstep(0.,.16,gE1))*gFade1;
   float gV2=0.;
   if(gFade2>.01){float gE2=gvEdge(gVp*25.);gV2=(1.-smoothstep(0.,.18,gE2))*gFade2;}
-  gVein=gV1*.55+gV2*.45;
+  gVein=min(1.,gV1*.8+gV2*.35);
  }
 }
 #endif
 if(gPainted>.5){
- // Painted albedo (the 2026-10-30 tiles now, the projected originals later): the texture
- // already says where ridge and pit are, so it passes through with a luminance curve only.
- // Pale ridges rise toward green-white and glow a little; pits stay near-black; no tint, no
- // mottling. uPaintedContrast scales the curve (1 for the tiles, lower for an atlas).
+ // The atlas only places the ridges and the pits: thresholded into clean shapes (a soft
+ // edge), never used as photographic colour. Older atlases carry low-frequency blotches, so
+ // a ridge is also what rises above the map's own blurred level.
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ float gRidge=smoothstep(.07,.2,gLum);
  #ifdef USE_MAP
- // Clarity: the projection lands as pale low-frequency blotches. The map's own blurred
- // level (2.5 mips up) is the blotch; it is flattened toward the dark base and the detail
- // above it (ridges) is amplified, so ridges stay crisp pale lines and pits stay black.
- if(uClarity>.001){
-  vec2 gTs=vec2(textureSize(map,0));
-  vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
-  float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
-  vec3 gBlur=textureLod(map,vMapUv,gLod+2.5).rgb;
-  // The detail is read a little above the pixel's own level and soft-limited, so texel noise
-  // and compression grain are not amplified into white specks (seen at 1440 and on iPhone).
-  vec3 gDetail=textureLod(map,vMapUv,gLod+.9).rgb-gBlur;
-  gDetail/=1.+abs(gDetail)*3.;
-  vec3 gDark=vec3(.012,.03,.016);
-  vec3 gClear=mix(gBlur,gDark,.5)+gDetail*1.6;
-  diffuseColor.rgb=diffuse*mix(sampledDiffuseColor.rgb,max(gClear,vec3(0.)),uClarity);
-  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
- }
+ vec2 gTs=vec2(textureSize(map,0));
+ vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
+ float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
+ float gBlurL=dot(textureLod(map,vMapUv,gLod+2.5).rgb*diffuse,vec3(.2126,.7152,.0722));
+ gRidge=max(gRidge,smoothstep(-.005,.04,gLum-gBlurL*.7)*smoothstep(.04,.12,gLum));
  #endif
- // The projected atlas (gAtlas) already carries the originals' contrast: a third of the
- // curve and half the hue work; the procedural tiles take the full treatment.
- float gTouch=uPaintedContrast*mix(1.,.35,gAtlas);
- float gCurve=mix(gLum*.8,.12+.56*smoothstep(.05,.4,gLum),smoothstep(.03,.1,gLum));
- float gL2=mix(gLum,gCurve,gTouch);
- vec3 gHue=diffuseColor.rgb/max(gLum,1e-4);
- // 05 is green throughout: deep emerald darks (saturation kept, a little boosted) and pale
- // MINT ridges (146,182,143 sRGB → hue (.68,1.13,.66)), never white.
- gHue=mix(vec3(1.),gHue,1.2);
- gHue=mix(gHue,vec3(.68,1.13,.66),smoothstep(.3,.7,gL2)*mix(.9,.5,gAtlas));
- diffuseColor.rgb=gHue*gL2;
- gLum=gL2;
- gBone=smoothstep(.22,.55,gL2);
+ gBone=gRidge;
 }else{
- // Bone is pale OR grey-green (low saturation); ink and membranes are saturated green.
- // Saturation survives an AO bake multiplied into the vertex colours.
+ // Vertex-colour parts: bone is pale OR grey-green (low saturation); ink is saturated green.
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  float gMax=max(diffuseColor.r,max(diffuseColor.g,diffuseColor.b));
  float gSat=(gMax-min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b)))/max(gMax,1e-4);
- // Bone meshes: 2026-10-28 bone is luminance ≥ 0.12 at saturation ≈ 0.38; 2026-10-29 bone is
- // saturation 0.2–0.3 at any luminance; ink of both is saturation ≥ 0.5. Skin meshes carry
- // authored ink tiles (v8+) that are grey-green by design, so there only clearly pale texels
- // (the painted combs) count as bone and saturation is ignored.
  float gBoneMesh=max(smoothstep(uBoneRange.x,uBoneRange.y,gLum)*(1.-smoothstep(.45,.6,gSat)),1.-smoothstep(.3,.5,gSat));
  float gSkinMesh=smoothstep(.2,.42,gLum);
  gBone=mix(gBoneMesh,gSkinMesh,gSkinFamily);
- float gMottle=texture(uNoise,vGuardianWorld*.085+vec3(.3)).r;
- float gFine=texture(uNoise,vGuardianWorld*.6+vec3(1.7)).g;
- // Membranes: black-green ink. Bone: pale grey-green, lifted toward ~0.22 linear when the
- // authored value is darker (the 2026-10-28 bone), left alone when it is already pale.
- float gLift=clamp(.5/max(gLum,.02),1.,2.);
- vec3 gTint=mix(vec3(.2,.34,.24),vec3(.8,1.04,.78)*gLift,gBone);
- diffuseColor.rgb*=gTint*(.74+gMottle*.45)*(.9+gFine*.2);
- // Bone stays pale grey-green, never paper: an authored albedo that is already pale (the
- // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
- float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
- diffuseColor.rgb*=mix(1.,min(1.,.78/max(gOut,1e-4)),gBone);
 }
-#ifdef GUARDIAN_BONE
- diffuseColor.rgb*=mix(vec3(1.),vec3(.62,.82,.66),gVein);
-#endif`,
+// The tones come after the lights: a neutral albedo keeps the lit irradiance recoverable.
+diffuseColor.rgb=vec3(.5);`,
           )
           .replace(
             "#include <emissivemap_fragment>",
             `#include <emissivemap_fragment>
+#ifdef GUARDIAN_BONE
+if(gVein>.001){
+ // The veins also bend the normal a little (bump from screen-space derivatives).
+ vec3 gSp=-vViewPosition;vec3 gSx=dFdx(gSp),gSy=dFdy(gSp);
+ vec2 gHd=vec2(dFdx(gVein),dFdy(gVein))*.02;
+ vec3 gR1=cross(gSy,normal),gR2=cross(normal,gSx);
+ float gDet=dot(gSx,gR1)*(float(gl_FrontFacing)*2.-1.);
+ normal=normalize(abs(gDet)*normal-sign(gDet)*(gHd.x*gR1+gHd.y*gR2));
+}
+#endif
 {
  vec3 gV=normalize(vViewPosition);
  float gNdV=saturate(dot(normal,gV));
- // Rims belong to silhouettes of broad surfaces. On thin bars (the 2026-10-29 lattice) the
- // normal turns within a few pixels and nearly every pixel is grazing, so a plain fresnel
- // paints the whole bar: fwidth(normal) measures that thinness and suppresses the rim there.
- // Bone that is already pale needs less rim than ink.
+ // A clean rim band (thresholded fresnel toward the rim light), suppressed on thin bars.
  float gThinness=smoothstep(.08,.35,length(fwidth(normal)));
- float gFres=pow(1.-gNdV,3.)*(1.-.9*gThinness);
- float gRimFace=saturate(dot(normal,uRimDir))*.75+.25;
- float gPaleness=smoothstep(.12,.35,gLum);
- float gRim=min(gFres*gRimFace*(.22+.78*gBone)*mix(1.,.45,gPaleness)*uRimStrength,.4);
- // Thin membranes glow where the fire is behind the surface itself, and mostly at their
- // edges: without occlusion a broad back-lit term would wash the whole body green.
- float gBack=saturate(dot(-uRimDir,gV));
- float gThin=saturate(dot(normal,-uRimDir));
- float gEdge=.12+.88*pow(1.-gNdV,2.5);
- float gTrans=pow(gThin,2.)*pow(gBack,1.5)*gEdge*(1.-gBone)*uTransStrength;
- float gKey=saturate(dot(normal,uKeyDir));
- totalEmissiveRadiance+=uRimColor*gRim*(1.+uStrength*.25)+uTransColor*gTrans*(1.+uStrength*.4);
- totalEmissiveRadiance+=uRimColor*gKey*gFres*gBone*.18;
- // Translucent ridges and bone glow a little from within, most where the key wraps around.
- float gWrap=saturate((dot(normal,uKeyDir)+.6)/1.6);
- totalEmissiveRadiance+=vec3(.62,.98,.64)*gBone*(.16+.34*gWrap)*uTranslucency;
+ float gFr=pow(1.-gNdV,1.5)*(saturate(dot(normal,uRimDir))*.6+.4);
+ gRimBand=smoothstep(.4,.48,gFr)*(1.-.9*gThinness);
+ gWrapLight=saturate((dot(normal,uKeyDir)+.6)/1.6);
 }`,
           )
           .replace(
             "#include <aomap_fragment>",
             `#include <aomap_fragment>
 {
- // Ink outline: membranes darken at grazing angles like a brush edge.
- float gNdV2=saturate(dot(normal,normalize(vViewPosition)));
- float gInk=1.-pow(1.-gNdV2,5.)*mix(.75,.25,gBone);
- reflectedLight.directDiffuse*=gInk;
- reflectedLight.indirectDiffuse*=gInk;
+ // Anime shading: the PBR irradiance (every light, the key's shadow) is quantised into three
+ // tones and recoloured from the family's palette; ridge or pit picks the palette.
+ float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
+ float gN=gIrr/uToonRange;
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN);
+ // pits: deep emerald / emerald / mint-green. ridges and bone: mint shadow / mint / near-white mint.
+ vec3 gPit=mix(mix(vec3(.010,.045,.018),vec3(.035,.15,.06),gMid),vec3(.12,.34,.16),gHi);
+ vec3 gRdg=mix(mix(vec3(.16,.30,.17),vec3(.286,.466,.273),gMid),vec3(.46,.66,.46),gHi);
+ vec3 gTone=mix(gPit,gRdg,gBone);
+#ifdef GUARDIAN_BONE
+ gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
+ // a soft inner light on jade-like bone, not a realistic subsurface
+ gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
+#endif
+ gTone+=uRimColor*gRimBand*mix(.26,.08,gBone)*uRimStrength*1.8;
+ reflectedLight.directDiffuse=gTone;
+ reflectedLight.indirectDiffuse=vec3(0.);
+ // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
+ vec3 gV2=normalize(vViewPosition);
+ vec3 gH=normalize(uKeyDir+gV2);
+ float gSpec=pow(saturate(dot(normal,gH)),48.);
+ reflectedLight.directSpecular=mix(vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.3,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
+ reflectedLight.indirectSpecular=vec3(0.);
 }`,
           );
       };
-      material.customProgramCacheKey = () => `guardian-ink-surface-v1:${family}`;
+      material.customProgramCacheKey = () => `guardian-toon-surface-v1:${family}`;
       material.needsUpdate = true;
       patched++;
     }
@@ -520,11 +524,11 @@ if(gPainted>.5){
     families,
     update(time, strength, anticipation) {
       const pulse = 0.5 + 0.5 * Math.sin(time * 1.35);
-      const latticeScale = 1.25 + pulse * 0.3 + anticipation * 1.0 + strength * 0.5;
+      const latticeScale = 1.0 + pulse * 0.25 + anticipation * 0.8 + strength * 0.4;
       for (const { material, base } of lattice) material.emissiveIntensity = base * latticeScale;
       // The references' cores glow white-green; the authored strength is modest, so scale it
       // up to the edge of the bloom threshold and let the breath push it over.
-      const coreScale = 2.5 + pulse * 0.3 + anticipation * 0.6 + strength * 0.4;
+      const coreScale = 1.9 + pulse * 0.25 + anticipation * 0.5 + strength * 0.3;
       for (const { material, base } of cores) material.emissiveIntensity = base * coreScale;
       for (const material of mouths) material.emissiveIntensity = strength * 4.5 + anticipation * 0.6;
     },
@@ -543,6 +547,7 @@ if(gPainted>.5){
         material.opacity = state.opacity;
         material.depthWrite = state.depthWrite;
         material.side = state.side;
+        material.envMapIntensity = state.envMapIntensity;
         material.needsUpdate = true;
       });
       previous.clear();
