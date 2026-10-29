@@ -38,6 +38,9 @@ test("material families follow the name prefix, so bone named after its lattice 
   // v18: glossy black horns around the face
   assert.equal(family("Horn | face crown"), "horn");
   assert.equal(family("Horn | v18 face crown"), "horn");
+  // v20: the galaxy domes joined the head mesh; a Head prefix is skin (painted, atlas threshold)
+  assert.equal(family("Head | galaxy domes"), "skin");
+  assert.equal(family("Head | painted head"), "skin");
   // Unknown names fall back to skin; a bare face material is the lattice.
   assert.equal(family("Membrane"), "skin");
   assert.equal(family("Face lattice leaf"), "lattice");

@@ -386,7 +386,7 @@ export function applyGuardianInkSurface(
  float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
  float gN=gIrr/uToonRange;
  float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN);
- reflectedLight.directDiffuse=mix(mix(vec3(.1,.26,.14),vec3(.24,.5,.28),gMid),vec3(.46,.76,.52),gHi);
+ reflectedLight.directDiffuse=mix(mix(vec3(.08,.2,.11),vec3(.16,.36,.2),gMid),vec3(.46,.76,.52),smoothstep(.6,.76,gN));
  reflectedLight.indirectDiffuse=vec3(0.);
  vec3 gH=normalize(uKeyDir+normalize(vViewPosition));
  reflectedLight.directSpecular=vec3(.7,.95,.78)*smoothstep(.6,.7,pow(saturate(dot(normal,gH)),64.))*.5*gMid;
@@ -410,7 +410,7 @@ export function applyGuardianInkSurface(
       material.metalness = 0;
       material.metalnessMap = null;
       // Tile normal maps at half strength: the single crisp highlight must stay one clean shape.
-      if (material.normalMap) material.normalScale.multiplyScalar(0.5);
+      if (material.normalMap) material.normalScale.multiplyScalar(0.75);
       // Anime shading: no environment reflections on the body.
       material.envMapIntensity = 0;
       material.onBeforeCompile = (shader) => {
@@ -514,18 +514,20 @@ if(gVein>.001){
  // tones and recoloured from the family's palette; ridge or pit picks the palette.
  float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
  float gN=gIrr/uToonRange;
- float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN),gHiSkin=smoothstep(.66,.8,gN);
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.6,.76,gN),gHiSkin=smoothstep(.66,.8,gN);
  // skin: near-black emerald (8,20,12) / (20,46,30), a narrow lit band (40,80,55); ridges and
  // bone: mint shadow / mint (146,182,143) / near-white mint.
  vec3 gPit=mix(mix(vec3(.0026,.0072,.0038),vec3(.0084,.0273,.0144),gMid),vec3(.0213,.0821,.0395),gHiSkin);
- vec3 gRdg=mix(mix(vec3(.11,.22,.12),vec3(.25,.42,.24),gMid),vec3(.36,.54,.36),gHi);
+ // bone and ridges: mid-mint in shadow and mid (84,117,88) / (94,128,98), pale mint (155,190,155)
+ // only in the lit band; the rim band adds the pale edge.
+ vec3 gRdg=mix(mix(vec3(.085,.17,.095),vec3(.11,.21,.12),gMid),vec3(.33,.5,.33),gHi);
  vec3 gTone=mix(gPit,gRdg,gBone);
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
  // a soft inner light on jade-like bone, not a realistic subsurface
  gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
 #endif
- gTone+=uRimColor*gRimBand*mix(.16,.06,gBone)*uRimStrength*1.8;
+ gTone+=uRimColor*gRimBand*mix(.16,.1,gBone)*uRimStrength*1.8;
  reflectedLight.directDiffuse=gTone;
  reflectedLight.indirectDiffuse=vec3(0.);
  // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
