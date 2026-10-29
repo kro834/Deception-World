@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { GuardianScene, GuardianStatus } from "@/lib/dogs-archive/scene.ts";
+import type { GuardianPose, GuardianScene, GuardianStatus } from "@/lib/dogs-archive/scene.ts";
+import { guardianPoseChooserVisible } from "@/lib/dogs-archive/poses.ts";
 import {
   isGuardianSceneBlocked,
   watchGuardianSceneVisibility,
@@ -19,6 +20,8 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
   const [status, setStatus] = useState<GuardianStatus>("loading");
   const [action, setAction] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [poses, setPoses] = useState<GuardianPose[]>([]);
+  const [pose, setPose] = useState("Rest");
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!active || !host.current) return;
@@ -29,9 +32,14 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
     setStatus("loading");
     setAction(false);
     setPaused(false);
+    setPoses([]);
     const report = (next: GuardianStatus) => {
       if (cancelled) return;
       setStatus(next);
+      if (next === "ready" && runtime.current) {
+        setPoses(runtime.current.listPoses());
+        setPose(runtime.current.getPose());
+      }
       statusCallback.current?.(next);
     };
     const allowed = () => !cancelled && visible && !isGuardianSceneBlocked(document);
@@ -55,6 +63,12 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
               if (!cancelled) {
                 setAction(next);
                 if (next) setPaused(false);
+              }
+            },
+            onPoseChange: (next) => {
+              if (!cancelled) {
+                setPose(next);
+                setPaused(false);
               }
             },
           });
@@ -124,6 +138,24 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
           </svg>
           {action ? "吐炎中" : "炎を吐く"}
         </button>
+        {guardianPoseChooserVisible(poses) ? (
+          <select
+            className="dogs-viewer__pose"
+            aria-label="姿勢"
+            value={pose}
+            disabled={status !== "ready"}
+            onChange={(event) => {
+              const next = event.target.value;
+              if (runtime.current?.setPose(next)) setPose(next);
+            }}
+          >
+            {poses.map((item) => (
+              <option key={item.name} value={item.name}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        ) : null}
         <button
           type="button"
           disabled={status !== "ready"}

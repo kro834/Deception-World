@@ -17,6 +17,14 @@ import {
   type GuardianSurfaceHandles,
 } from "./surface.ts";
 import {
+  describeGuardianPoses,
+  guardianPoseFadeSeconds,
+  type GuardianPose,
+  type GuardianPoseManifest,
+} from "./poses.ts";
+
+export type { GuardianPose } from "./poses.ts";
+import {
   createGuardianSculptureLighting,
   prepareGuardianMouthSpill,
   type GuardianSurfaceAudit,
@@ -43,6 +51,11 @@ export function detectGuardianQualityTier(nav: Navigator, mobile: boolean): Guar
 export type GuardianStatus = "loading" | "ready" | "error";
 export type GuardianScene = {
   breathe(): void;
+  /** Selectable poses from the model's clips (Rest only on a Rest/Exhale model). */
+  listPoses(): GuardianPose[];
+  getPose(): string;
+  /** Crossfade to a pose; the breath, float and fire keep working on top of it. */
+  setPose(name: string): boolean;
   resetView(): void;
   togglePause(): boolean;
   setBlocked(blocked: boolean): void;
@@ -54,6 +67,7 @@ export type GuardianScene = {
 type Options = {
   onStatus?: (status: GuardianStatus) => void;
   onActionChange?: (active: boolean) => void;
+  onPoseChange?: (name: string) => void;
   /** Internal, trusted preview inputs. Public DogViewer supplies none. */
   modelUrl?: string;
   manifestUrl?: string | null;
@@ -63,11 +77,17 @@ type Options = {
   effects?: boolean;
   diagnostics?: boolean;
 };
-type PoseManifest = {
+type PoseManifest = GuardianPoseManifest & {
   poses?: {
     rest?: Record<string, { quaternion?: number[] }>;
     exhale?: Record<string, { quaternion?: number[] }>;
   };
+};
+type PoseLayer = GuardianPose & {
+  action: THREE.AnimationAction;
+  weight: number;
+  from: number;
+  to: number;
 };
 const ease = (a: number, b: number, t: number) => THREE.MathUtils.smoothstep(t, a, b);
 
@@ -144,7 +164,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   scene.environmentIntensity = 0.34;
   const composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.38, 0.8, 0.9);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.38, 0.8, 0.95);
   const output = new OutputPass();
   const antialiasPass = tier === "low" ? null : new FXAAPass();
   const grade = createInkGradePass();
@@ -215,8 +235,14 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   if (options.diagnostics) renderer.info.autoReset = false;
   let mantle: ReturnType<typeof createFlameMantle> | null = null;
   let mixer: THREE.AnimationMixer | null = null;
-  let restAction: THREE.AnimationAction | null = null;
   let exhaleAction: THREE.AnimationAction | null = null;
+  // Pose layers crossfade by weight (they always sum to one); the breath is an additive
+  // delta from Rest layered on top, so it plays from any pose.
+  const poseLayers: PoseLayer[] = [];
+  let currentPose = "Rest",
+    poseClock = 0,
+    poseFadeStart = -1,
+    poseFadeSeconds = 1.2;
   let mouth: THREE.Object3D | undefined, aim: THREE.Object3D | undefined;
   const joints: {
     node: THREE.Object3D;
@@ -348,8 +374,13 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       }
     }
     last = now;
-    const animate = Boolean(model) && !paused && (!reducedMotion || actionTime >= 0);
+    // Reduced motion: only what the visitor asked for moves (the breath, a chosen pose).
+    const poseMoving =
+      poseFadeStart >= 0 || Boolean(poseLayers.find((layer) => layer.name === currentPose)?.loop);
+    const animate =
+      Boolean(model) && !paused && (!reducedMotion || actionTime >= 0 || poseMoving);
     if (animate) time += dt;
+    if (!paused) poseClock += dt;
     if (!paused && actionTime >= 0) {
       actionTime += dt;
       if (actionTime > 8.4) {
@@ -371,9 +402,16 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         joint.node.quaternion.multiply(joint.applied.invert()).normalize();
         joint.applied.identity();
       }
-      restAction?.setEffectiveWeight(1 - actionPose);
+      if (poseFadeStart >= 0) {
+        const k = ease(0, 1, (poseClock - poseFadeStart) / poseFadeSeconds);
+        for (const layer of poseLayers) {
+          layer.weight = layer.from + (layer.to - layer.from) * k;
+          layer.action.setEffectiveWeight(layer.weight);
+        }
+        if (k >= 1) poseFadeStart = -1;
+      }
+      // Pose weights sum to one; the additive breath carries the head, jaw and body offsets.
       exhaleAction?.setEffectiveWeight(actionPose);
-      // Pose clips are sampled together; their weights carry the transition.
       mixer.update(animate ? dt : 0);
     }
     for (const joint of joints) {
@@ -794,8 +832,30 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       }));
       if (rest && exhale) {
         mixer = new THREE.AnimationMixer(model);
-        restAction = mixer.clipAction(rest).play();
-        exhaleAction = mixer.clipAction(exhale).play();
+        poseFadeSeconds = guardianPoseFadeSeconds(manifest);
+        const described = describeGuardianPoses(
+          gltf.animations.map((clip) => clip.name),
+          manifest,
+        );
+        for (const pose of described) {
+          const clip = gltf.animations.find((candidate) => candidate.name === pose.name);
+          if (!clip) continue;
+          const action = mixer.clipAction(clip);
+          action.setLoop(pose.loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
+          action.clampWhenFinished = true;
+          action.play();
+          const weight = clip === rest ? 1 : 0;
+          action.setEffectiveWeight(weight);
+          poseLayers.push({ ...pose, action, weight, from: weight, to: weight });
+        }
+        currentPose = rest.name;
+        canvas.dataset.poseName = currentPose;
+        // The breath as an additive delta from Rest: at Rest it reproduces the authored
+        // Exhale exactly; in any other pose the same head, jaw and body offsets apply on top.
+        exhaleAction = mixer.clipAction(
+          THREE.AnimationUtils.makeClipAdditive(exhale.clone(), 0, rest),
+        );
+        exhaleAction.play();
         exhaleAction.setEffectiveWeight(0);
         poseAvailable = true;
         poseSource = "clips";
@@ -883,6 +943,27 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       options.onActionChange?.(true);
       request();
     },
+    listPoses: () => poseLayers.map(({ name, label, loop }) => ({ name, label, loop })),
+    getPose: () => currentPose,
+    setPose(name) {
+      const target = poseLayers.find((layer) => layer.name === name);
+      if (!target || disposed) return false;
+      if (name === currentPose && poseFadeStart < 0) return true;
+      for (const layer of poseLayers) {
+        layer.from = layer.weight;
+        layer.to = layer === target ? 1 : 0;
+      }
+      target.action.reset().play();
+      target.action.setEffectiveWeight(target.weight);
+      currentPose = name;
+      poseFadeStart = poseClock;
+      paused = false;
+      last = 0;
+      canvas.dataset.poseName = name;
+      options.onPoseChange?.(name);
+      request();
+      return true;
+    },
     resetView,
     togglePause() {
       paused = !paused;
@@ -920,6 +1001,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
         dpr,
         poseSource,
         poseAvailable,
+        poseName: currentPose,
+        poses: poseLayers.map(({ name, loop, weight }) => ({ name, loop, weight })),
         fps: Number(canvas.dataset.fps ?? 0),
         textures: renderer.info.memory.textures,
         geometries: renderer.info.memory.geometries,
@@ -972,6 +1055,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       controls.dispose();
       mixer?.stopAllAction();
       if (model) mixer?.uncacheRoot(model);
+      poseLayers.length = 0;
       sculptureLighting?.dispose();
       sculptureLighting = null;
       restoreMouthSpill?.();

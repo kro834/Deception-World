@@ -128,6 +128,49 @@
   background: #173921e8;
   padding-inline: 19px;
 }
+/* Pose chooser: a native select dressed as the toolbar's pills (keyboard and screen reader
+   behaviour come from the control itself). */
+.dogs-viewer__toolbar .dogs-viewer__pose {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 34px 10px 15px;
+  border: 1px solid #bdd7be29;
+  border-radius: 999px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='m2.5 4.5 3.5 3.5 3.5-3.5' fill='none' stroke='%23c5d2c5' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 13px center / 12px 12px,
+    #07130ee0;
+  backdrop-filter: blur(18px);
+  color: #c5d2c5;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  box-shadow: 0 5px 18px #0003;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose:hover {
+  background-color: #122a1ce8;
+  border-color: #b5e4ba77;
+  color: #effff0;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose:focus-visible {
+  outline: 2px solid #bbe2bd;
+  outline-offset: 3px;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose option {
+  background: #07130e;
+  color: #dce9df;
+}
 .dogs-viewer__toolbar svg {
   width: 17px;
   height: 17px;
@@ -151,6 +194,15 @@
   .dogs-viewer__toolbar {
     gap: 6px;
     bottom: 19px;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 8px;
+  }
+  .dogs-viewer__toolbar .dogs-viewer__pose {
+    padding: 10px 30px 10px 12px;
+    background-position:
+      right 11px center,
+      0 0;
   }
   .dogs-viewer__toolbar button {
     min-height: 44px;

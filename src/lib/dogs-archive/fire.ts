@@ -143,7 +143,20 @@ vHeat=fract(aPhase*7.);gl_PointSize=clamp((14.+vHeat*26.)*uDpr/max(1.,-mv.z),1.,
   };
 }
 
-type FlameSource = { position: THREE.Vector3; normal: THREE.Vector3; facing: number };
+type FlameSkin = {
+  mesh: THREE.SkinnedMesh;
+  index: number;
+  rest: THREE.Vector3;
+  restNormal: THREE.Vector3;
+  toAnchor: THREE.Matrix4;
+};
+type FlameSource = {
+  position: THREE.Vector3;
+  normal: THREE.Vector3;
+  facing: number;
+  /** Set for vertices of a skinned mesh: the anchor follows the bones each frame. */
+  skin?: FlameSkin;
+};
 
 /** Fire around the body: large flame cards anchored on outward-facing surface points. Each
  * card is a cylindrical billboard (its growth axis fixed, turned about it to face the camera),
@@ -183,14 +196,15 @@ export function createFlameMantle(model: THREE.Object3D, noise: THREE.Data3DText
       skippedFace++;
       return;
     }
-    if (node instanceof THREE.SkinnedMesh) {
-      // Rest-pose samples would not follow the skin; keep the deforming neck clear.
+    const skinned = node instanceof THREE.SkinnedMesh ? node : null;
+    if (skinned && !(node.geometry.getAttribute("skinIndex") && node.geometry.getAttribute("skinWeight"))) {
       skippedDeforming++;
       return;
     }
     const inv = anchor.matrixWorld.clone().invert();
     const normalToWorld = new THREE.Matrix3().getNormalMatrix(node.matrixWorld);
     const normalToAnchor = new THREE.Matrix3().getNormalMatrix(inv);
+    const toAnchor = skinned ? inv.clone().multiply(node.matrixWorld) : null;
     const sources = sourcesByAnchor.get(anchor) ?? [];
     sourcesByAnchor.set(anchor, sources);
     const stride = Math.max(1, Math.floor(position.count / 400));
@@ -205,6 +219,16 @@ export function createFlameMantle(model: THREE.Object3D, noise: THREE.Data3DText
         position: p.clone().applyMatrix4(inv),
         normal: n.clone().applyMatrix3(normalToAnchor).normalize(),
         facing,
+        skin:
+          skinned && toAnchor
+            ? {
+                mesh: skinned,
+                index: i,
+                rest: new THREE.Vector3().fromBufferAttribute(position, i),
+                restNormal: new THREE.Vector3().fromBufferAttribute(normals, i),
+                toAnchor,
+              }
+            : undefined,
       });
     }
   });
@@ -289,6 +313,9 @@ void main(){
     sizes: Float32Array;
     seeds: Float32Array;
     count: number;
+    up: THREE.Vector3;
+    axisBlend: Float32Array;
+    skinned: { slot: number; skin: FlameSkin; emberMatrix: THREE.Matrix4; embers: number[] }[];
   };
   const groups: Group[] = [];
   const total = [...sourcesByAnchor.values()].reduce((sum, sources) => sum + sources.length, 0);
@@ -298,6 +325,7 @@ void main(){
   const emberOrigins: number[] = [],
     emberNormals: number[] = [];
   const emberMatrix = new THREE.Matrix4();
+  const emberRoots: { slot: number; group: number }[] = [];
   let cards = 0;
   for (const [anchor, sources] of sourcesByAnchor) {
     if (!sources.length) continue;
@@ -319,15 +347,18 @@ void main(){
       axes = new Float32Array(count * 3),
       normals = new Float32Array(count * 3),
       sizes = new Float32Array(count * 2),
-      seeds = new Float32Array(count);
+      seeds = new Float32Array(count),
+      axisBlend = new Float32Array(count);
+    const skinnedSlots: Group["skinned"] = [];
     emberMatrix.copy(anchor.matrixWorld).premultiply(model.matrixWorld.clone().invert());
     for (let i = 0; i < count; i++) {
       const source = selected[i];
       const seed = (i * GOLDEN + groups.length * 0.139) % 1;
       // Tongues radiate from the silhouette and drift upward, like the halo in the painting.
+      axisBlend[i] = 0.8 + ((seed * 7) % 1) * 0.5;
       growth
         .copy(source.normal)
-        .multiplyScalar(0.8 + ((seed * 7) % 1) * 0.5)
+        .multiplyScalar(axisBlend[i])
         .addScaledVector(anchorUp, 0.9)
         .normalize();
       p.copy(source.position).addScaledVector(source.normal, 0.06).toArray(origins, i * 3);
@@ -342,6 +373,14 @@ void main(){
       emberOrigins.push(p.x, p.y, p.z);
       n.copy(source.normal).applyQuaternion(anchor.getWorldQuaternion(new THREE.Quaternion()));
       emberNormals.push(n.x, n.y, n.z);
+      emberRoots.push({ slot: i, group: groups.length });
+      if (source.skin)
+        skinnedSlots.push({
+          slot: i,
+          skin: source.skin,
+          emberMatrix: emberMatrix.clone(),
+          embers: [],
+        });
     }
     const geometry = new THREE.InstancedBufferGeometry();
     geometry.index = plane.index;
@@ -366,6 +405,9 @@ void main(){
       sizes: sizes.slice(),
       seeds: seeds.slice(),
       count,
+      up: anchorUp.clone(),
+      axisBlend,
+      skinned: skinnedSlots,
     });
     cards += count;
   }
@@ -378,12 +420,57 @@ void main(){
     emberSeeds = new Float32Array(emberCount);
   const roots = Math.max(1, emberOrigins.length / 3);
   for (let i = 0; i < emberCount; i++) {
-    const root = Math.floor(((i * GOLDEN) % 1) * roots) * 3;
+    const rootIndex = Math.floor(((i * GOLDEN) % 1) * roots);
+    const root = rootIndex * 3;
     emberPositions.set(emberOrigins.slice(root, root + 3), i * 3);
     emberDirs.set(emberNormals.slice(root, root + 3), i * 3);
     emberPhases[i] = (i * 0.38196) % 1;
     emberSeeds[i] = ((i * 7.31) % 1) * 0.98 + 0.01;
+    const owner = emberRoots[rootIndex];
+    const entry = owner && groups[owner.group]?.skinned.find((item) => item.slot === owner.slot);
+    if (entry) entry.embers.push(i);
   }
+  const skinnedMeshes = new Set<THREE.SkinnedMesh>();
+  for (const group of groups) for (const entry of group.skinned) skinnedMeshes.add(entry.skin.mesh);
+  const skinVector = new THREE.Vector4();
+  const skinPoint = (skin: FlameSkin, out: THREE.Vector3) => {
+    skinVector.set(skin.rest.x, skin.rest.y, skin.rest.z, 1);
+    skin.mesh.applyBoneTransform(skin.index, skinVector);
+    return out.set(skinVector.x, skinVector.y, skinVector.z).applyMatrix4(skin.toAnchor);
+  };
+  const skinNormal = (skin: FlameSkin, out: THREE.Vector3) => {
+    skinVector.set(skin.restNormal.x, skin.restNormal.y, skin.restNormal.z, 0);
+    skin.mesh.applyBoneTransform(skin.index, skinVector);
+    return out.set(skinVector.x, skinVector.y, skinVector.z).transformDirection(skin.toAnchor);
+  };
+  /** Anchors on skinned meshes follow the bones, so the fire rides the body in every pose. */
+  const followSkins = () => {
+    if (!skinnedMeshes.size) return false;
+    for (const mesh of skinnedMeshes) mesh.skeleton.update();
+    for (const group of groups) {
+      for (const { slot, skin, emberMatrix: toModel, embers: owned } of group.skinned) {
+        skinPoint(skin, p);
+        skinNormal(skin, n).normalize();
+        growth
+          .copy(n)
+          .multiplyScalar(group.axisBlend[slot])
+          .addScaledVector(group.up, 0.9)
+          .normalize();
+        p.addScaledVector(n, 0.06).toArray(group.origins, slot * 3);
+        growth.toArray(group.axes, slot * 3);
+        n.toArray(group.normals, slot * 3);
+        p.applyMatrix4(toModel);
+        n.transformDirection(toModel);
+        for (const ember of owned) {
+          p.toArray(emberPositions, ember * 3);
+          n.toArray(emberDirs, ember * 3);
+        }
+      }
+    }
+    (emberGeometry.getAttribute("position") as THREE.BufferAttribute).needsUpdate = true;
+    (emberGeometry.getAttribute("aDir") as THREE.BufferAttribute).needsUpdate = true;
+    return true;
+  };
   emberGeometry.setAttribute("position", new THREE.BufferAttribute(emberPositions, 3));
   emberGeometry.setAttribute("aDir", new THREE.BufferAttribute(emberDirs, 3));
   emberGeometry.setAttribute("aPhase", new THREE.BufferAttribute(emberPhases, 1));
@@ -456,7 +543,8 @@ gl_PointSize=clamp((7.+vHeat*9.)*(.45+vLife*.55)*uDpr/max(1.,-mv.z),1.,6.);}`,
       uniforms.uAnticipation.value = anticipation;
       uniforms.uDpr.value = dpr;
       frames++;
-      if (camera.position.distanceToSquared(lastCamera) > 0.0025 || frames % 24 === 0) {
+      const followed = followSkins();
+      if (followed || camera.position.distanceToSquared(lastCamera) > 0.0025 || frames % 24 === 0) {
         lastCamera.copy(camera.position);
         sortGroups(camera);
       }

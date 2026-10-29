@@ -135,7 +135,7 @@ uniform float uTime,uStrength,uAnticipation,uRimStrength,uTransStrength;
 uniform vec3 uRimDir,uKeyDir,uRimColor,uTransColor;
 uniform vec2 uBoneRange;
 varying vec3 vGuardianWorld;
-float gBone;`,
+float gBone,gLum;`,
           )
           .replace(
             "#include <color_fragment>",
@@ -143,7 +143,7 @@ float gBone;`,
 {
  // Bone is pale OR grey-green (low saturation); ink and membranes are saturated green.
  // Saturation survives an AO bake multiplied into the vertex colours.
- float gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  float gMax=max(diffuseColor.r,max(diffuseColor.g,diffuseColor.b));
  float gSat=(gMax-min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b)))/max(gMax,1e-4);
  // 2026-10-28 bone: luminance ≥ 0.12 at saturation ≈ 0.38. 2026-10-29 bone: saturation 0.2–0.3
@@ -156,6 +156,10 @@ float gBone;`,
  float gLift=clamp(.22/max(gLum,.02),1.,1.5);
  vec3 gTint=mix(vec3(.2,.34,.24),vec3(1.,1.02,.98)*gLift,gBone);
  diffuseColor.rgb*=gTint*(.74+gMottle*.45)*(.9+gFine*.2);
+ // Bone stays pale grey-green, never paper: an authored albedo that is already pale (the
+ // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
+ float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ diffuseColor.rgb*=mix(1.,min(1.,.45/max(gOut,1e-4)),gBone);
 }`,
           )
           .replace(
@@ -164,11 +168,15 @@ float gBone;`,
 {
  vec3 gV=normalize(vViewPosition);
  float gNdV=saturate(dot(normal,gV));
- // Thin rims. Thin bone bars (2026-10-29 lattice) sit at grazing angles over most of their
- // pixels, so the rim is kept narrow and capped below the bloom threshold.
- float gFres=pow(1.-gNdV,3.5);
+ // Rims belong to silhouettes of broad surfaces. On thin bars (the 2026-10-29 lattice) the
+ // normal turns within a few pixels and nearly every pixel is grazing, so a plain fresnel
+ // paints the whole bar: fwidth(normal) measures that thinness and suppresses the rim there.
+ // Bone that is already pale needs less rim than ink.
+ float gThinness=smoothstep(.08,.35,length(fwidth(normal)));
+ float gFres=pow(1.-gNdV,3.)*(1.-.9*gThinness);
  float gRimFace=saturate(dot(normal,uRimDir))*.75+.25;
- float gRim=min(gFres*gRimFace*(.22+.78*gBone)*uRimStrength,.45);
+ float gPaleness=smoothstep(.12,.35,gLum);
+ float gRim=min(gFres*gRimFace*(.22+.78*gBone)*mix(1.,.45,gPaleness)*uRimStrength,.4);
  // Thin membranes glow where the fire is behind the surface itself, and mostly at their
  // edges: without occlusion a broad back-lit term would wash the whole body green.
  float gBack=saturate(dot(-uRimDir,gV));
