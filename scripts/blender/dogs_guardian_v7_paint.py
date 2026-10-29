@@ -287,6 +287,29 @@ def paint_object(ob, size, side_weight):
             ly = np.where(lx > xs[2], ys[2] + (ys[2] - ys[1]) / (xs[2] - xs[1]) * (lx - xs[2]), ly)
             out = out * np.where(sel, np.exp(ly) / np.maximum(lum, 1e-6), 1.0)[..., None]
             log("TONE3", "atlas p30/p60/p92", round(float(a30), 4), round(float(a50), 4), round(float(a92), 4), "-> 0.0137/0.23/0.50")
+    if opts["tone"] == "3" and ob.name.startswith("Head"):
+        # v18: the head atlas gets its own three-point match (05's head: emerald pits, mint ridges)
+        T = np.array([0.0120, 0.16, 0.44])
+        lum = 0.2126 * out[..., 0] + 0.7152 * out[..., 1] + 0.0722 * out[..., 2]
+        sel = covered & (lum > 1e-4)
+        a30, a50, a92 = np.percentile(lum[sel], [30, 60, 92])
+        if a92 > a50 > a30 > 1e-5:
+            xs = np.log(np.array([a30, a50, a92])); ys = np.log(T)
+            lx = np.log(np.maximum(lum, 1e-6)); ly = np.interp(lx, xs, ys)
+            ly = np.where(lx < xs[0], ys[0] + (ys[1] - ys[0]) / (xs[1] - xs[0]) * (lx - xs[0]), ly)
+            ly = np.where(lx > xs[2], ys[2] + (ys[2] - ys[1]) / (xs[2] - xs[1]) * (lx - xs[2]), ly)
+            out = out * np.where(sel, np.exp(ly) / np.maximum(lum, 1e-6), 1.0)[..., None]
+            log("TONE3-HEAD", "atlas p30/p60/p92", round(float(a30), 4), round(float(a50), 4), round(float(a92), 4))
+    # v18 (owner: 顔まわりの色合い): pull the chroma toward 05's palette - deep emerald in the pits, pale mint on the
+    # ridges - instead of neutral grey/white; luminance is kept, only the hue/saturation moves
+    strength = 0.85 if ob.name.startswith("Head") else 0.7   # 05: the pale parts of the whole body are mint, not white
+    lum = 0.2126 * out[..., 0] + 0.7152 * out[..., 1] + 0.0722 * out[..., 2]
+    f = np.clip(lum / 0.45, 0, 1) ** 0.6
+    dark_em = np.array([0.0065, 0.042, 0.019]); mint = np.array([0.30, 0.56, 0.335])
+    pal = dark_em[None, None, :] * (1 - f)[..., None] + mint[None, None, :] * f[..., None]
+    pal_l = 0.2126 * pal[..., 0] + 0.7152 * pal[..., 1] + 0.0722 * pal[..., 2]
+    pal = pal * (lum / np.maximum(pal_l, 1e-6))[..., None]
+    out = np.where(covered[..., None], out * (1 - strength) + pal * strength, out)
     out = np.clip(out, 0, 1)
     out[~covered] = 0
     # fill the UV gutters from the islands so mipmaps never bleed black into the model
@@ -378,8 +401,8 @@ if core is not None:
 for ob, image in ((A, imA), (B, imB)):
     for slot in ob.material_slots:
         src = slot.material
-        if src is None or "Rune |" in src.name or "Glass |" in src.name:
-            continue   # the glow cores keep their emissive material; the Glass family keeps its constant pale green
+        if src is None or "Rune |" in src.name or "Glass |" in src.name or "Horn |" in src.name:
+            continue   # the glow cores keep their emissive material; Glass and Horn keep their constant colours
         slot.material = painted_material(src, f"{src.name.split(' |')[0]} | painted {ob.name[:4]}", image)   # stable name across versions
 log("MATERIALS")
 
