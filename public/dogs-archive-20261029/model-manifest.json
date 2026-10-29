@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 7,
-  "revision": "v13",
+  "revision": "v14",
   "model": "guardian-v3.glb",
-  "assetBytes": 6068768,
-  "assetSha256": "829a75d1528c346862169983a399d3586f2211c80df28e23cae2fd1c48624e49",
+  "assetBytes": 6934820,
+  "assetSha256": "fbe9eef9919564c50ab3b81437d380b357258e6091762756d563eac0863adbc2",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -197,50 +197,42 @@
   "poseChecks": {
     "Rest": {
       "mouthSocket": [
-        -0.4412739,
-        -0.8354161,
-        2.1156733
+        -0.4100406,
+        -0.4630812,
+        1.25
       ],
       "mouthAim": [
-        -0.8612072,
-        -1.6085509,
-        2.9691265
+        -0.21845,
+        -1.0527363,
+        1.8499999
       ],
       "direction": [
-        -0.3425929,
-        -0.6307442,
-        0.69627
+        0.2220603,
+        -0.6834313,
+        0.6954213
       ],
-      "jawTipSeparation": 1.7104604199625595
+      "jawTipSeparation": 0.8861420588705781
     },
     "Exhale": {
       "mouthSocket": [
-        -1.1836009,
-        1.0475097,
-        2.941191
+        -1.3297329,
+        0.3281756,
+        1.3505054
       ],
       "mouthAim": [
-        -1.8902647,
-        1.4923153,
-        3.8385417
+        -1.6558751,
+        0.2420009,
+        2.1446118
       ],
       "direction": [
-        -0.5765153,
-        0.3628843,
-        0.7320828
+        -0.3780105,
+        -0.0998795,
+        0.9203978
       ],
-      "jawTipSeparation": 1.6988161508958755
+      "jawTipSeparation": 0.8636351891174839
     }
   },
   "meshAudit": [
-    {
-      "mesh": "Crown | head dome with galaxy spirals",
-      "vertices": 3190,
-      "faces": 3052,
-      "triangles": 6184,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
     {
       "mesh": "Face | fused glowing lattice leaf",
       "vertices": 1035,
@@ -267,32 +259,32 @@
     },
     {
       "mesh": "Serpent | painted body, arms and tails",
-      "vertices": 158666,
-      "faces": 150078,
-      "triangles": 307400,
+      "vertices": 225833,
+      "faces": 213928,
+      "triangles": 438406,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Shield | dorsal lattice and fins",
-      "vertices": 5790,
-      "faces": 5376,
-      "triangles": 11084,
-      "boundaryEdges": 166,
-      "nonManifoldEdges": 166
+      "vertices": 3878,
+      "faces": 3583,
+      "triangles": 7418,
+      "boundaryEdges": 90,
+      "nonManifoldEdges": 90
     }
   ],
   "meshStats": {
-    "objects": 6,
-    "vertices": 224941,
-    "triangles": 438356
+    "objects": 5,
+    "vertices": 287006,
+    "triangles": 559512
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 6068768,
-      "sha256": "829a75d1528c346862169983a399d3586f2211c80df28e23cae2fd1c48624e49"
+      "bytes": 6934820,
+      "sha256": "fbe9eef9919564c50ab3b81437d380b357258e6091762756d563eac0863adbc2"
     }
   ],
   "skinCount": 1,
@@ -305,12 +297,12 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "404f317732e1c458a05328dd9c8333b265a0ff5e4be0afdf9d7ec9420096d7f4",
+    "scripts/blender/dogs_guardian_v5.py": "5ec4081ff7d2682f9179da445352ff6963ca4fd902314dc80a87b64b7535fa73",
     "scripts/blender/dogs_guardian_v7_paint.py": "88ac75db25d812ff5c3514d0fafe79dedebf5f1b50580f018e45f0c79b690d9d"
   },
   "referenceImagesUsedAsTexture": true,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 16.021196126937866,
+  "secondsBeforeRender": 15.492043018341064,
   "painting": {
     "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
     "atlas": {
@@ -320,27 +312,27 @@
     },
     "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
     "confidenceCoverage": {
-      "body": 0.28891837921185004,
-      "head": 0.7299871356313774
+      "body": 0.29656342478466685,
+      "head": 0.5971282265104825
     },
     "silhouetteIoU": {
       "body": {
-        "front": 0.4656870056092575,
-        "back": 0.48641400835649085,
-        "left": 0.47444734212829925,
-        "right": 0.4666289044492574
+        "front": 0.38891233007506415,
+        "back": 0.39818831279417316,
+        "left": 0.3872530553243681,
+        "right": 0.4001004860097391
       },
       "head": {
-        "front": 0.08217101625695183,
-        "back": 0.08492595291714412,
-        "left": 0.09999061117103734,
-        "right": 0.1101570873172052
+        "front": 0.055845714656458836,
+        "back": 0.06438267968457512,
+        "left": 0.034594850350705565,
+        "right": 0.03711180382778055
       }
     }
   },
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v13",
-    "stamp": "v13",
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v14",
+    "stamp": "v14",
     "rawGlbSha256": null
   }
 }
