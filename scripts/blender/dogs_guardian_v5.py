@@ -326,8 +326,10 @@ def frond_path(controls, curl_len, curl_turns, side, roll=None, nrm_override=Non
     tang = unit(base[-1] - base[-3]); lateral = unit(np.cross(nrm, tang)) * side
     if roll is not None:
         curl = fiddlehead_path(base[-1], tang, lateral, curl_len, curl_turns, a=roll)
-    elif tip_spiral:   # v20e (05): the fan tip rolls into a small tight spiral of ~1.5 turns
+    elif tip_spiral:   # v20e (05): the fan tip rolls into a small tight spiral of ~1.5 turns; the collapsing core
+                       # (last 12% of the curl, radius below the ribbon width) is dropped so the end rings cannot splay
         curl = crosier_path(base[-1], tang, lateral, curl_len, turns=1.5, straight=0.05, bend_power=1.3)
+        curl = curl[: max(9, int(len(curl) * 0.88))]
     else:
         curl = crosier_path(base[-1], tang, lateral, curl_len, turns=max(curl_turns, 1.35), straight=0.10, bend_power=1.5)
     path = resample(np.concatenate([base[:-1], curl], axis=0), spacing=0.018)
@@ -951,7 +953,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
 
     def rib_color(i, t, j, a):
         if TILES:
-            return (0.95, 1.0, 0.95)
+            return (0.95, 1.0, 0.95) if t < 0.93 else (0.30, 0.40, 0.32)   # v20e: the very tip reads dark whatever texel it lands on
         return mix(INK, (0.030, 0.062, 0.040), max(0.0, math.sin(a)) ** 1.5 * (0.5 + 0.5 * (1 - t)))
     frames, _ = mb.ribbon(path, ws, ts, sides=14, color_fn=rib_color, hint=nrm, bulge=1.2, mat=0,
                           weights_fn=lambda i, t, st=stations: chain_weights(t, st),
@@ -1022,10 +1024,17 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         # v20e: each link is a rounded loop bulging out past the edge (outer lobe 0.22w, inner 0.16w, flat-topped so it
         # reads round), pinched to a 0.07w waist where it crosses to the next link - a row of interlocking "2"/S hooks
         pts = []; wid = []; thk = []; wts = []
+        # the chain sits on the concave side, so inside the tip spiral its centreline would collapse into the spiral's
+        # centre once the path's curvature radius drops below the chain's offset: stop there (the outer turn still gets links)
+        curv = np.zeros(n)
+        for i in range(1, n - 1):
+            curv[i] = float(np.linalg.norm(T[i + 1] - T[i - 1]) / max(1e-6, arcm[i + 1] - arcm[i - 1]))
+        curv[0] = curv[1]; curv[-1] = curv[-2]
         s_link = float(arcm[2]); s_end = float(arcm[-1]); NS = 14
         while True:
             w0 = float(np.interp(s_link, arcm, ws)); lam = max(0.03, 0.5 * w0)
-            if s_link + lam > s_end or w0 < 0.045:   # whole links only; the chain enters the spiral's outer turn and stops before the tight core (links would pile up there)
+            k0 = float(np.interp(s_link + lam, arcm, curv))
+            if s_link + lam > s_end or w0 < 0.03 or (k0 > 1e-6 and 1.0 / k0 < 1.6 * w0):
                 break
             for j in range(NS):
                 ph = math.tau * j / NS
