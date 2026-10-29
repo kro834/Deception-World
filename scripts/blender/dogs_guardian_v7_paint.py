@@ -378,8 +378,8 @@ if core is not None:
 for ob, image in ((A, imA), (B, imB)):
     for slot in ob.material_slots:
         src = slot.material
-        if src is None or "Rune |" in src.name:
-            continue   # the glow cores keep their emissive material
+        if src is None or "Rune |" in src.name or "Glass |" in src.name:
+            continue   # the glow cores keep their emissive material; the Glass family keeps its constant pale green
         slot.material = painted_material(src, f"{src.name.split(' |')[0]} | painted {ob.name[:4]}", image)   # stable name across versions
 log("MATERIALS")
 
@@ -435,9 +435,9 @@ if opts["export"] == "1":
                                   export_def_bones=False, export_rest_position_armature=True, export_skins=True,
                                   export_vertex_color="MATERIAL", export_all_vertex_colors=False,
                                   export_image_format="AUTO",
-                                  export_draco_mesh_compression_enable=compressed, export_draco_mesh_compression_level=7,
-                                  export_draco_position_quantization=14, export_draco_normal_quantization=10,
-                                  export_draco_texcoord_quantization=12, export_draco_color_quantization=10)
+                                  export_draco_mesh_compression_enable=compressed, export_draco_mesh_compression_level=10,
+                                  export_draco_position_quantization=12, export_draco_normal_quantization=9,
+                                  export_draco_texcoord_quantization=11, export_draco_color_quantization=8)
         lastg = strip_exhale(path)
         assets.append({"file": name, "draco": compressed, "bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     audit = [mesh_audit(o) for o in root.children_recursive if o.type == "MESH"]

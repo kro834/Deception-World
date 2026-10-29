@@ -89,6 +89,22 @@ headmesh.vertex_groups["NeckBaseJoint"].name = "NeckHeadJoint"
 # ---------------------------------------------------------------- materials (v3 system)
 BONE_MAT = bpy.data.materials.get("Bone | v3 lattice") or material_from("Bone | v2 clay", "Bone | v3 lattice")
 INK_MAT = bpy.data.materials.get("Skin | v3 ink") or material_from("Skin | v2 clay", "Skin | v3 ink")
+
+
+def glass_material(name, rgb=(0.188, 0.578, 0.262)):
+    """05's arm ladder and the flame hooks: pale translucent green glass (sRGB ~(120,200,140), alpha 1; the
+    runtime makes the `Glass` family translucent). Constant base colour, never painted, no vertex colours."""
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    m = bpy.data.materials.new(name); m.use_nodes = True
+    b = m.node_tree.nodes["Principled BSDF"]
+    b.inputs["Base Color"].default_value = (rgb[0], rgb[1], rgb[2], 1.0)
+    b.inputs["Roughness"].default_value = 0.3; b.inputs["Metallic"].default_value = 0.0
+    return m
+
+
+GLASS_MAT = glass_material("Glass | arm ladder")
 set_principled(INK_MAT, Roughness=0.58); set_principled(BONE_MAT, Roughness=0.66)
 if opts["tiles"] == "1":   # budget: the micro normals (193 + 216 KB) are not worth it once the tiles and the atlas carry the detail
     for m_ in (INK_MAT, BONE_MAT):
@@ -268,14 +284,14 @@ FRONDS = [
     ([(-.61, 1.42, 1.25), (-1.27, 1.63, 1.48), (-1.79, 2.19, 1.72), (-2.04, 2.54, 1.95)], .77, 1.05, +1, (.22, .27, .07)),
     ([(.03, 1.98, 1.10), (.32, 2.46, .93), (.28, 3.00, .77), (.40, 3.30, .60)], .61, 1.0, -1, (.18, .22, .05)),
     # big arms: v12's x/y arcs, behind the body (05/07 put them at the back)
-    ([(-.56, 1.07, .10), (-1.45, .85, -.70), (-2.15, .15, -1.25), (-2.18, -.55, -1.25), (-1.85, -1.05, -.95)], 2.4, 1.6, +1, (.44, .52, .12)),
-    ([(.76, 1.63, -.60), (1.70, 1.45, -1.05), (2.20, .70, -1.45), (2.15, -.10, -1.45), (1.72, -.65, -1.15)], 2.2, 1.6, +1, (.42, .50, .12)),
+    ([(-.56, 1.07, .10), (-1.45, .85, -.70), (-2.15, .15, -1.25), (-2.18, -.55, -1.25), (-1.85, -1.05, -.95)], 2.8, 1.6, +1, (.44, .52, .12)),
+    ([(.76, 1.63, -.60), (1.70, 1.45, -1.05), (2.20, .70, -1.45), (2.15, -.10, -1.45), (1.72, -.65, -1.15)], 2.6, 1.6, +1, (.42, .50, .12)),
     # curl clusters (05, crops/arm-rims.jpg): big fiddleheads growing straight out of the arm just before its own
     # end curl, no stalks; deltas from that anchor (CLUSTER_PARENT), one in front of the arm and one behind
-    ([(0, 0, 0), (0.18, -0.22, 0.15), (0.32, -0.40, 0.22)], 1.9, 1.6, +1, (.18, .20, .06)),
-    ([(0, 0, 0), (-0.18, -0.22, 0.15), (-0.32, -0.40, 0.22)], 1.9, 1.6, -1, (.18, .20, .06)),
-    ([(0, 0, 0), (0.22, -0.18, -0.15), (0.40, -0.34, -0.22)], 1.4, 1.5, +1, (.15, .16, .05)),
-    ([(0, 0, 0), (-0.22, -0.18, -0.15), (-0.40, -0.34, -0.22)], 1.4, 1.5, -1, (.15, .16, .05)),
+    ([(0, 0, 0), (0.18, -0.22, 0.15), (0.32, -0.40, 0.22)], 2.3, 1.6, +1, (.20, .23, .07)),
+    ([(0, 0, 0), (-0.18, -0.22, 0.15), (-0.32, -0.40, 0.22)], 2.3, 1.6, -1, (.20, .23, .07)),
+    ([(0, 0, 0), (0.22, -0.18, -0.15), (0.40, -0.34, -0.22)], 1.7, 1.5, +1, (.17, .18, .06)),
+    ([(0, 0, 0), (-0.22, -0.18, -0.15), (-0.40, -0.34, -0.22)], 1.7, 1.5, -1, (.17, .18, .06)),
     ([(-.33, 1.85, 1.20), (-.85, 2.30, 1.37), (-1.20, 2.95, 1.53), (-1.32, 3.35, 1.70)], .72, 1.05, +1, (.22, .25, .06)),
     ([(-.95, 1.90, 1.30), (-1.35, 1.85, 1.53), (-1.70, 1.95, 1.77), (-1.85, 2.00, 2.00)], .68, 1.35, +1, (.22, .25, .06)),
 ]
@@ -781,8 +797,9 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         ws = np.array([base_w * (0.36 + 0.64 * (1 - t) ** taper_exp) * (1 - 0.50 * max(0.0, (t - 0.85) / 0.15)) + 0.006 for t in arcp])
     else:
         ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** taper_exp) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
-    ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.45 + 0.008
-    mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT])
+    ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp])
+    ts = ws * (0.30 if cluster else (0.36 if big else 0.45)) + 0.008   # 05's curls are flat dark ribbons, not round tubes
+    mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT, GLASS_MAT])
 
     def rib_color(i, t, j, a):
         if TILES:
@@ -801,20 +818,36 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
     s_acc = 0.0; last = -1.0
     for i in range(3, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
-        length = min(0.40 if fan else 0.30, max(0.025, (0.55 if big else (1.0 if fan else 0.48)) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
-        if s_acc - last < max(0.024, (0.30 if fan else 0.55) * length):
+        edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
+        if fan:   # 05's zipper: S-hooks lying ACROSS the inner 40% of the tentacle, packed so they overlap into a
+                  # continuous pale-bone chain that runs into the tip curl; low-poly, they are small on screen
+            length = min(0.24, max(0.02, 0.58 * w)) * (1 + 0.12 * noise1(i * 0.9, idx))
+            if s_acc - last < max(0.02, 0.36 * length):
+                continue
+            last = s_acc
+            d0 = unit(edge_dir * 0.85 + T[i] * 0.45)
+            tp = crosier_path(path[i] + edge_dir * (w * 0.06) + Nn[i] * (ts[i] * 0.45), d0, T[i], length, turns=0.75, straight=0.25, n=7, bend_power=1.5)
+            tt_ = np.linspace(0, 1, len(tp))
+            tw = (0.50 * length) * (1 - tt_) ** 0.7 + 0.004
+            tth = np.maximum(0.005, 0.22 * length) * (1 - 0.5 * tt_)
+            mb.cur_w = chain_weights(i / (n - 1), stations)
+            mb.ribbon(tp, tw, tth, sides=6, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.4), BONE_EDGE, t1 ** 0.7),
+                      hint=nrm, bulge=1.0, mat=1)
+            mb.cur_w = None
+            continue
+        length = min(0.30, max(0.025, (0.55 if big else 0.48) * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
+        if s_acc - last < max(0.024, 0.55 * length):
             continue
         last = s_acc
-        edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
-        d0 = unit(edge_dir * 0.6 + T[i] * 0.8) if fan else unit(edge_dir * 0.75 + T[i] * 0.65)
-        tp = crosier_path(path[i] + edge_dir * (w * (0.18 if fan else 0.46)) + (Nn[i] * (ts[i] * 0.35) if fan else 0), d0, T[i], length,
-                          turns=0.9 if fan else 0.72, straight=0.2 if fan else 0.28, bend_power=1.6)
+        d0 = unit(edge_dir * 0.75 + T[i] * 0.65)
+        tp = crosier_path(path[i] + edge_dir * (w * 0.46), d0, T[i], length, turns=0.72, straight=0.28, bend_power=1.6)
         tt_ = np.linspace(0, 1, len(tp))
-        tw = ((0.68 if fan else 0.34) * length) * (1 - tt_) ** 0.8 + 0.004
-        tth = np.maximum(0.005, (0.18 if fan else 0.10) * length) * (1 - 0.6 * tt_)
+        # big arms (05): flame-shaped hooks of pale green glass along the inner edge; elsewhere bone hooks
+        tw = ((0.50 if big else 0.34) * length) * (1 - tt_) ** 0.8 + 0.004
+        tth = np.maximum(0.005, (0.12 if big else 0.10) * length) * (1 - 0.6 * tt_)
         mb.cur_w = chain_weights(i / (n - 1), stations)
         mb.ribbon(tp, tw, tth, sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.4), BONE_EDGE, t1 ** 0.7),
-                  hint=nrm, bulge=1.0, mat=1)
+                  hint=nrm, bulge=1.0, mat=2 if big else 1)
         mb.cur_w = None
     # big arms (05, crops/arm-rims.jpg left): a pale translucent ladder along the inner edge, about 30% of the
     # arm's width over the whole arc: a flat bone channel on the convex face, two rails and rungs across it
@@ -825,11 +858,11 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         lift = lambda i_: ts[i_] * 0.55 + 0.006
         i_end = int(0.93 * (n - 1))
         chan = np.asarray([path[i] + inner_of(i) * (ws[i] * band_c) + Nn[i] * lift(i) for i in range(i_end)])
-        mb.ribbon(chan, ws[:i_end] * band_w, np.full(i_end, 0.010), sides=6, color=mix(BONE, BONE_EDGE, 0.45), hint=nrm, bulge=1.0, mat=1,
+        mb.ribbon(chan, ws[:i_end] * band_w, np.full(i_end, 0.010), sides=6, color=mix(BONE, BONE_EDGE, 0.45), hint=nrm, bulge=1.0, mat=2,
                   weights_fn=wfn, edge_sharp=1.0)
         for side_f in (band_c + band_w * 0.5, band_c - band_w * 0.5):
             rail = np.asarray([path[i] + inner_of(i) * (ws[i] * side_f) + Nn[i] * (lift(i) + 0.004) for i in range(i_end)])
-            mb.tube(rail, 0.022 * ws[:i_end] + 0.004, sides=6, color=mix(BONE, BONE_EDGE, 0.7), hint=nrm, mat=1, taper_end=True, weights_fn=wfn)
+            mb.tube(rail, 0.022 * ws[:i_end] + 0.004, sides=6, color=mix(BONE, BONE_EDGE, 0.7), hint=nrm, mat=2, taper_end=True, weights_fn=wfn)
         s_acc = 0.0; last = -1.0
         for i in range(2, i_end):
             s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
@@ -840,7 +873,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
             b_ = path[i] + inner_of(i) * (w * (band_c - band_w * 0.5)) + Nn[i] * (lift(i) + 0.004)
             mid = (a_ + b_) * 0.5 + Nn[i] * (0.03 * w)
             mb.cur_w = chain_weights(i / (n - 1), stations)
-            mb.tube(catmull([a_, mid, b_], 4), 0.032 * w + 0.004, sides=6, flat=0.6, color=mix(BONE_ROOT, BONE_EDGE, 0.6), hint=nrm, mat=1)
+            mb.tube(catmull([a_, mid, b_], 4), 0.032 * w + 0.004, sides=6, flat=0.6, color=mix(BONE_ROOT, BONE_EDGE, 0.6), hint=nrm, mat=2)
             mb.cur_w = None
     # dark crenellated knob row along the outer edge, through the tip spiral
     rim_knobs(mb, path, ws, ts, (T, Nn, B), lateral, lambda t_: chain_weights(t_, stations))
@@ -850,9 +883,9 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
             k = int(fr_ * (n - 1)); w = ws[k]
             inner = unit(B[k] * (np.sign(np.dot(B[k], lateral)) if abs(np.dot(B[k], lateral)) > 1e-6 else 1.0)); outer = -inner
             d0 = unit(outer * 0.7 + T[k] * 0.7)
-            sp = resample(fiddlehead_path(path[k] + outer * (w * 0.45), d0, T[k], 0.85, 1.4, a=0.4), spacing=0.016)
+            sp = resample(fiddlehead_path(path[k] + outer * (w * 0.45), d0, T[k], 1.0, 1.4, a=0.4), spacing=0.016)
             m_ = len(sp); tt_ = np.linspace(0, 1, m_)
-            sw = (w * 0.70) * (1 - 0.6 * tt_) + 0.006; sth = sw * 0.45 + 0.006
+            sw = (w * 0.70) * (1 - 0.6 * tt_) + 0.006; sth = sw * 0.30 + 0.006
             wfix = chain_weights(k / (n - 1), stations)
             fr2, _ = mb.ribbon(sp, sw, sth, sides=10, color_fn=rib_color, hint=nrm, bulge=1.2, mat=0, weights_fn=lambda i2, t2, wf=wfix: wf)
             rim_knobs(mb, sp, sw, sth, fr2, T[k], lambda t_, wf=wfix: wf, start=1)

@@ -61,33 +61,42 @@ def _periodic_noise(n, rng, octaves=((2, 1.0), (5, 0.55), (11, 0.3), (23, 0.15))
 
 # ---------------------------------------------------------------- the three tiles
 def tile_crescent(n, rng):
-    u, v = _grid(n); h = np.zeros((n, n)); bone = np.zeros((n, n)); scale = np.zeros((n, n)); outline = np.zeros((n, n))
+    """05's whorl: rows of pointed, curved thorn-like scales lying like roof tiles, tips pointing along +u
+    (toward the outer rim of the coil), pale rims, dark pits between the rows. Returns the height field,
+    the pale-rim mask, the scale-body mask and the ink outline. Scales are composited one by one so that
+    the scale nearer the coil's centre (smaller u) lies over its outer neighbour's base."""
+    u, v = _grid(n)
+    h = np.zeros((n, n)); bone = np.zeros((n, n)); scale = np.zeros((n, n)); outline = np.zeros((n, n))
+    rows = 7; r0 = 0.075; per_row = int(round(1.0 / (r0 * 1.4))); step = 1.0 / per_row
 
-    def crescent(cx, cy, r, w, lean):
-        dx = _wrap(u - cx); dy = _wrap(v - cy); d = np.sqrt(dx * dx + dy * dy)
-        ang = np.arctan2(dy, dx)
-        da = np.abs(((ang - (np.pi + lean) + np.pi) % (2 * np.pi)) - np.pi)
-        win = np.clip((1.85 - da) / 0.55, 0, 1)
-        ridge = np.exp(-((d - r) / w) ** 2) * win
-        dome = np.exp(-(d / (r * 0.9)) ** 2) * win
-        shape = 0.55 + 0.45 * np.cos(np.minimum(da, np.pi))        # scale body: full behind the ridge, thinner at the sides
-        ring = np.exp(-((d - 1.12 * r) / (0.09 * r)) ** 2) * win   # ink outline just outside the ridge
-        return ridge, dome * shape, ring
-    # regular brick rows (05's whorl: rows of scales in register along the coil, like a pinecone); the rows run
-    # along u, every other row shifted by half a step, with only a little jitter in size, position and lean
-    rows = 6; r0 = 0.075; per_row = int(round(1.0 / (r0 * 1.75))); step = 1.0 / per_row
+    def thorn(cx, cy, r, lean, bend):
+        x = _wrap(u - cx); y = _wrap(v - cy)
+        cl, sl = math.cos(lean), math.sin(lean)
+        xr = x * cl + y * sl; yr = -x * sl + y * cl
+        t = np.clip((xr + r) / (2 * r), 0, 1)                        # 0 at the base (-u) ... 1 at the tip (+u)
+        yc = yr - bend * r * t * t                                    # the thorn curves toward +v as it nears its tip
+        hw = 0.55 * r * np.sin(np.pi * t ** 0.75) ** 0.8               # rounded base, pointed tip (thin thorn)
+        span = (xr > -r) & (xr < r)
+        inside = span & (np.abs(yc) < hw)
+        edge = np.clip((hw - np.abs(yc)) / (0.22 * r), 0, 1)           # 0 at the boundary -> 1 inside (wide pale rim)
+        ring = span & (np.abs(yc) >= hw) & (np.abs(yc) < hw + 0.12 * r)
+        dome = (0.55 + 0.45 * np.sqrt(np.clip(1 - (yc / np.maximum(hw, 1e-6)) ** 2, 0, 1))) * (0.65 + 0.35 * t)
+        return inside, edge, ring, dome
     for row in range(rows):
         cy0 = (row + 0.5) / rows
-        for col in range(per_row):
-            x = (col + 0.5 * (row % 2)) * step + rng.uniform(-0.012, 0.012)
-            r = r0 * rng.uniform(0.92, 1.08); cy = cy0 + rng.uniform(-0.008, 0.008)
-            ridge, dome, ring = crescent(x, cy, r, r * rng.uniform(0.14, 0.18), rng.uniform(-0.15, 0.15))
-            h += ridge + 0.35 * dome; bone = np.maximum(bone, ridge)
-            scale = np.maximum(scale, dome); outline = np.maximum(outline, ring)
-    for _ in range(50):
+        for col in reversed(range(per_row)):                          # outer-most first, inner scales on top
+            cx = (col + 0.5 * (row % 2)) * step + rng.uniform(-0.01, 0.01)
+            r = r0 * rng.uniform(0.92, 1.08); cy = cy0 + rng.uniform(-0.006, 0.006)
+            inside, edge, ring, dome = thorn(cx, cy, r, rng.uniform(-0.12, 0.12), rng.uniform(0.45, 0.75))
+            outline[ring] = 1.0
+            h[inside] = dome[inside]; scale[inside] = 1.0; outline[inside] = 0.0
+            bone[inside] = (1.0 - edge)[inside]
+    free = scale < 0.5
+    for _ in range(50):                                               # a few tiny hooks for texture between the rows
         r = 0.017 * rng.uniform(0.6, 1.4)
-        ridge, _, _ = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.28, rng.uniform(-0.6, 0.6))
-        h += 0.45 * ridge; bone = np.maximum(bone, 0.6 * ridge)
+        x = _wrap(u - rng.uniform(0, 1)); y = _wrap(v - rng.uniform(0, 1)); d = np.sqrt(x * x + y * y)
+        ridge = np.exp(-((d - r) / (r * 0.28)) ** 2) * (x < 0) * free
+        h += 0.35 * ridge; bone = np.maximum(bone, 0.5 * ridge)
     return h, np.clip(bone, 0, 1), np.clip(scale, 0, 1), np.clip(outline, 0, 1)
 
 
@@ -230,9 +239,9 @@ def _compose_scales(h, bone, scale, outline, mottle):
     def smooth(x):
         x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
     gap = MEMB[None, None, :] * (0.55 + 0.75 * m01)[..., None]
-    body_col = np.array([0.19, 0.34, 0.19])
+    body_col = np.array([0.11, 0.21, 0.12])   # 05: mid-dark green scale bodies under pale rims
     s = smooth((scale - 0.20) / 0.12)                     # scale body: the fan behind each ridge, up to the ridge
-    body = (body_col + (BONE_EDGE - body_col) * (0.05 + 0.30 * hn)[..., None]) * (0.78 + 0.36 * m01)[..., None]
+    body = (body_col + (BONE_EDGE - body_col) * (0.0 + 0.45 * hn)[..., None]) * (0.78 + 0.36 * m01)[..., None]
     col = gap * (1 - s[..., None]) + body * s[..., None]
     b = np.clip(bone * 1.35, 0, 1) ** 0.9
     inner = smooth((scale - 0.26) / 0.08)                 # ridge split: inside half pale rim, outside half ink
