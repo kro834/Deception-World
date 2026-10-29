@@ -187,10 +187,10 @@ def _as_webp(im, quality=88):
 _WEBP_DIR = None
 
 
-def _as_webp_lossless(im):
+def _as_webp_lossless(im, quality=100):
     """Data image (normal map) stored as lossless WebP (Blender's encoder is lossless at 100)."""
     path = str(_WEBP_DIR / f"{im.name}.webp"); name = im.name
-    im.file_format = "WEBP"; im.save(filepath=path, quality=100)
+    im.file_format = "WEBP"; im.save(filepath=path, quality=quality)
     bpy.data.images.remove(im)
     im = bpy.data.images.load(path); im.name = name; im.colorspace_settings.name = "Non-Color"; im.pack()
     return im
@@ -226,10 +226,10 @@ def make_tiles(n, out_dir=None, seed=8):
     out = {}
     h, bone = tile_crescent(n, rng)
     out["crescent"] = _byte_image("tile-crescent-albedo", _compose(h, bone ** 1.6, mot, 0.6, 0.8), webp=True)
-    out["crescent_n"] = _as_webp_lossless(_normal_image("tile-crescent-normal", h * 0.012, 1.0, downsample=1))
+    out["crescent_n"] = _as_webp_lossless(_normal_image("tile-crescent-normal", h * 0.012, 1.0, downsample=1), quality=90)
     h, bone = tile_curl(n, rng)
     out["curl"] = _byte_image("tile-curl-albedo", _compose(h, bone, mot, 0.35), webp=True)
-    out["curl_n"] = _as_webp_lossless(_normal_image("tile-curl-normal", h * 0.010, 1.0, downsample=1))
+    out["curl_n"] = _as_webp_lossless(_normal_image("tile-curl-normal", h * 0.010, 1.0, downsample=1), quality=90)
     m2 = n // 2; mot2 = mot[::2, ::2]; wr2 = wr[::2, ::2]
     h, bone = tile_membrane(m2, rng)
     out["membrane"] = _byte_image("tile-membrane-albedo", _compose(h, bone * 0.85, mot2, 0.3, 0.85), webp=True)
