@@ -216,7 +216,9 @@ export function applyGuardianInkSurface(
   // describe the same lines. Line width is 1/8 of a cell.
   // The row coordinate bends harder toward the tip, so the two families sweep around the
   // bud and converge there like a sunflower's seed spirals; lens-shaped cells follow the flow.
-  float gH=uFaceRows*(gT*gT+1.2*gT*gT*gT)/2.2;
+  // g(t)=.6t+.4t³: the families cross at 41° at the base and tighten toward the tip (89° at
+  // t=.9), never nearly parallel.
+  float gH=uFaceRows*(.6*gT+.4*gT*gT*gT);
   // an azimuthal drift that dies toward the tip, so no segment stays straight
   float gDrift=.05*(1.-gT)*sin(12.566371*gU);
   float gUd=gU+gDrift;
@@ -229,7 +231,7 @@ export function applyGuardianInkSurface(
   float gLineA=1.-smoothstep(.0625-gWa,.0625+gWa,gDa);
   float gLineB=1.-smoothstep(.0625-gWb,.0625+gWb,gDb);
   // The net fades smoothly into the tip glow before its cells could degenerate into stripes.
-  float gTip=smoothstep(.8,.96,gTa);
+  float gTip=smoothstep(.65,.9,gTa);
   float gFade=(1.-smoothstep(.25,.6,max(gWa,gWb)))*(1.-gTip);
   float gLines=max(gLineA,gLineB)*gFade;
   float gDmin=min(gDa,gDb);
