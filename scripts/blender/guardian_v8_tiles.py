@@ -61,7 +61,7 @@ def _periodic_noise(n, rng, octaves=((2, 1.0), (5, 0.55), (11, 0.3), (23, 0.15))
 
 # ---------------------------------------------------------------- the three tiles
 def tile_crescent(n, rng):
-    u, v = _grid(n); h = np.zeros((n, n)); bone = np.zeros((n, n))
+    u, v = _grid(n); h = np.zeros((n, n)); bone = np.zeros((n, n)); scale = np.zeros((n, n)); outline = np.zeros((n, n))
 
     def crescent(cx, cy, r, w, lean):
         dx = _wrap(u - cx); dy = _wrap(v - cy); d = np.sqrt(dx * dx + dy * dy)
@@ -70,24 +70,28 @@ def tile_crescent(n, rng):
         win = np.clip((1.85 - da) / 0.55, 0, 1)
         ridge = np.exp(-((d - r) / w) ** 2) * win
         dome = np.exp(-(d / (r * 0.9)) ** 2) * win
-        return ridge, dome
+        shape = 0.55 + 0.45 * np.cos(np.minimum(da, np.pi))        # scale body: full behind the ridge, thinner at the sides
+        ring = np.exp(-((d - 1.12 * r) / (0.09 * r)) ** 2) * win   # ink outline just outside the ridge
+        return ridge, dome * shape, ring
     for layer, (rows, amp, rmul) in enumerate(((5, 1.0, 1.0), (4, 0.75, 0.8))):
         for row in range(rows):
             cy0 = (row + 0.5 + 0.5 * layer) / rows; x = rng.uniform(0, 0.08)
             while x < 1.0:
                 r = 0.085 * rmul * rng.uniform(0.55, 1.5); cy = cy0 + rng.uniform(-0.045, 0.045)
-                ridge, dome = crescent(x, cy, r, r * rng.uniform(0.12, 0.2), rng.uniform(-0.6, 0.6))
+                ridge, dome, ring = crescent(x, cy, r, r * rng.uniform(0.12, 0.2), rng.uniform(-0.6, 0.6))
                 h += amp * (ridge + 0.35 * dome); bone = np.maximum(bone, amp * ridge)
+                scale = np.maximum(scale, dome); outline = np.maximum(outline, ring)
                 x += r * rng.uniform(1.3, 2.6)
     for _ in range(40):
         r = 0.042 * rng.uniform(0.6, 1.3)
-        ridge, dome = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.18, rng.uniform(-0.5, 0.5))
+        ridge, dome, ring = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.18, rng.uniform(-0.5, 0.5))
         h += 0.7 * ridge + 0.2 * dome; bone = np.maximum(bone, 0.8 * ridge)
+        scale = np.maximum(scale, 0.85 * dome); outline = np.maximum(outline, 0.85 * ring)
     for _ in range(80):
         r = 0.017 * rng.uniform(0.6, 1.4)
-        ridge, _ = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.28, rng.uniform(-0.6, 0.6))
+        ridge, _, _ = crescent(rng.uniform(0, 1), rng.uniform(0, 1), r, r * 0.28, rng.uniform(-0.6, 0.6))
         h += 0.45 * ridge; bone = np.maximum(bone, 0.6 * ridge)
-    return h, np.clip(bone, 0, 1)
+    return h, np.clip(bone, 0, 1), np.clip(scale, 0, 1), np.clip(outline, 0, 1)
 
 
 def _spiral(cx, cy, R, ang0, cw, turns=1.15, k=0.30, m=44):
@@ -218,14 +222,37 @@ def _compose(h, bone, mottle, pit_dark=0.5, bone_tone=1.0):
     return col * (1 - pit_dark + pit_dark * (0.35 + 0.65 * hn))[..., None]
 
 
+def _compose_scales(h, bone, scale, outline, mottle):
+    """05's whorl and flank read the other way round from the arms: rows of mint scales, each with
+    an ink outline on its outer edge and a paler rim just inside it, and the near-black membrane
+    only in the gaps between them (owner: pale green against near-black pits). Same height field
+    as the crescent comb, so the normal map is shared."""
+    hn = np.clip(h / max(1e-6, np.percentile(h, 99.5)), 0, 1)
+    m01 = mottle * 0.5 + 0.5
+
+    def smooth(x):
+        x = np.clip(x, 0, 1); return x * x * (3 - 2 * x)
+    gap = MEMB[None, None, :] * (0.55 + 0.75 * m01)[..., None]
+    body_col = np.array([0.19, 0.34, 0.19])
+    s = smooth((scale - 0.20) / 0.12)                     # scale body: the fan behind each ridge, up to the ridge
+    body = (body_col + (BONE_EDGE - body_col) * (0.05 + 0.30 * hn)[..., None]) * (0.78 + 0.36 * m01)[..., None]
+    col = gap * (1 - s[..., None]) + body * s[..., None]
+    b = np.clip(bone * 1.35, 0, 1) ** 0.9
+    inner = smooth((scale - 0.26) / 0.08)                 # ridge split: inside half pale rim, outside half ink
+    edge = BONE_EDGE[None, None, :] * inner[..., None] + (MEMB * 0.6)[None, None, :] * (1 - inner)[..., None]
+    col = col * (1 - b[..., None]) + edge * b[..., None]
+    o = np.clip(outline * 1.3, 0, 1)                      # the ink outline wins over any neighbour's body
+    return col * (1 - o[..., None]) + (MEMB * 0.5)[None, None, :] * o[..., None]
+
+
 def make_tiles(n, out_dir=None, seed=8):
     global _WEBP_DIR
     _WEBP_DIR = out_dir
     rng = np.random.default_rng(seed)
     mot = _periodic_noise(n, rng); wr = _periodic_noise(n, rng, ((17, 1.0), (37, 0.6), (71, 0.35)))
     out = {}
-    h, bone = tile_crescent(n, rng)
-    out["crescent"] = _byte_image("tile-crescent-albedo", _compose(h, bone ** 1.6, mot, 0.6, 0.8), webp=True)
+    h, bone, scale, outline = tile_crescent(n, rng)
+    out["crescent"] = _byte_image("tile-crescent-albedo", _compose_scales(h, bone, scale, outline, mot), webp=True)
     out["crescent_n"] = _as_webp_lossless(_normal_image("tile-crescent-normal", h * 0.012, 1.0, downsample=1), quality=90)
     h, bone = tile_curl(n, rng)
     out["curl"] = _byte_image("tile-curl-albedo", _compose(h, bone, mot, 0.35), webp=True)

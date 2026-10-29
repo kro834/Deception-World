@@ -26,7 +26,8 @@ sys.path.insert(0, str(HERE))
 from guardian_v3_lib import mesh_audit
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-opts = {"blend": "", "turnaround": "", "views": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8", "quality": "84"}
+opts = {"blend": "", "turnaround": "", "views": "", "out": "", "stamp": "v7", "atlas": "2048", "export": "1", "side_weight": "0.8", "quality": "84",
+        "hp": "0", "hp_radius": "24", "hp_k": "0.7", "tone": "1"}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -73,6 +74,14 @@ def erode(m, n=1):
     return m
 
 
+def box_blur(a, r):
+    """Mean over a (2r+1)^2 window via summed-area tables; a is (H,W) or (H,W,C)."""
+    pad = np.pad(a, ((r + 1, r), (r + 1, r)) + (((0, 0),) if a.ndim == 3 else ()), mode="edge")
+    c = pad.cumsum(0).cumsum(1)
+    out = c[2 * r + 1:, 2 * r + 1:] - c[:-2 * r - 1, 2 * r + 1:] - c[2 * r + 1:, :-2 * r - 1] + c[:-2 * r - 1, :-2 * r - 1]
+    return out / float((2 * r + 1) ** 2)
+
+
 def make_view(panel, caption_cut=0.955):
     """White paper -> mask of the painted creature; the caption row at the bottom never paints."""
     paper = (panel.min(axis=2) > 0.90)
@@ -83,7 +92,15 @@ def make_view(panel, caption_cut=0.955):
     creature[int(h * caption_cut):, :] = False
     rows = creature.sum(axis=1); ys = np.where(rows > 3)[0]
     xs = np.where(creature[ys].sum(axis=0) > 0)[0]
-    return {"rgb": srgb_to_linear(panel), "mask": creature, "bbox": (int(xs.min()), int(xs.max()), int(ys.min()), int(ys.max())), "size": (w, h)}
+    rgb = srgb_to_linear(panel)
+    if opts["hp"] == "1":
+        # local-contrast ratio: the painting's own low frequencies (shading, paper bleed) drop out and
+        # the ridge/pit pattern survives as a multiplier around 1
+        lum = 0.2126 * rgb[..., 0] + 0.7152 * rgb[..., 1] + 0.0722 * rgb[..., 2]
+        base = box_blur(np.where(creature, lum, np.nan_to_num(lum)), int(opts["hp_radius"]))
+        ratio = np.clip(lum / np.maximum(base, 0.004), 0.4, 2.2)
+        rgb = rgb * (ratio / np.maximum(lum, 1e-4))[..., None] * np.maximum(base, 0.004)[..., None] * 0 + ratio[..., None]
+    return {"rgb": rgb, "mask": creature, "bbox": (int(xs.min()), int(xs.max()), int(ys.min()), int(ys.max())), "size": (w, h)}
 
 
 VIEWS = {}
@@ -231,11 +248,46 @@ def paint_object(ob, size, side_weight):
     # compose: painted where seen, procedural albedo elsewhere, blended by confidence
     conf = np.clip(wsum / 0.25, 0, 1)
     painted = acc / np.maximum(wsum, 1e-6)[..., None]
-    blend = painted * conf[..., None] + alb[..., :3] * (1 - conf[..., None])
-    # lighten-only composite: the paint drives the membranes and the glow zones, while the
-    # procedural pale bone rims (which follow the real hooks) are never darkened by paint
-    # whose own hooks sit elsewhere
-    out = np.maximum(alb[..., :3], blend)
+    if opts["hp"] == "1":
+        # the projected field is a contrast ratio: modulate the clean tile base with it
+        # gentle, in log space: a ridge brightens the tile base by at most x1.7, a pit darkens it by at most
+        # x0.53 (the earlier linear x1.6 factor blew ridges to white and pits to black)
+        ratio = np.clip(np.where(conf[..., None] > 0, painted, 1.0), 0.4, 2.2)
+        out = alb[..., :3] * np.power(ratio, float(opts["hp_k"]) * conf[..., None])
+    else:
+        blend = painted * conf[..., None] + alb[..., :3] * (1 - conf[..., None])
+        # lighten-only composite: the paint drives the membranes and the glow zones, while the
+        # procedural pale bone rims (which follow the real hooks) are never darkened by paint
+        # whose own hooks sit elsewhere
+        out = np.maximum(alb[..., :3], blend)
+    if opts["tone"] == "1" and ob.name.startswith("Serpent"):   # the runtime measured the body, not the head
+        # match the body's tone distribution to the originals (runtime measurement, sRGB on the body):
+        # p50 ~ (63,68,60), p92 ~ (160,187,144) -> linear luminance targets
+        T50, T92 = 0.0519, 0.416
+        lum = 0.2126 * out[..., 0] + 0.7152 * out[..., 1] + 0.0722 * out[..., 2]
+        sel = covered & (lum > 1e-4)
+        p50, p92 = np.percentile(lum[sel], [50, 92])
+        if p92 > p50 > 1e-5:
+            g = math.log(T92 / T50) / math.log(p92 / p50); a = T50 / p50 ** g
+            lum2 = a * np.power(np.maximum(lum, 1e-6), g)
+            out = out * np.where(sel, lum2 / np.maximum(lum, 1e-6), 1.0)[..., None]
+            log("TONE", "p50", round(float(p50), 4), "p92", round(float(p92), 4), "gamma", round(g, 3), "gain", round(a, 3))
+    elif opts["tone"] == "3" and ob.name.startswith("Serpent"):
+        # three-point match of the body luminance to the originals as the coordinator reads them:
+        # pits near-black (p30 -> sRGB 30), 35-45% of the area pale (p60 -> sRGB 125) and a bright top
+        # decile (p92 -> sRGB 180); piecewise power law through the three anchors in log space
+        T = np.array([0.0137, 0.23, 0.50])
+        lum = 0.2126 * out[..., 0] + 0.7152 * out[..., 1] + 0.0722 * out[..., 2]
+        sel = covered & (lum > 1e-4)
+        a30, a50, a92 = np.percentile(lum[sel], [30, 60, 92])
+        if a92 > a50 > a30 > 1e-5:
+            xs = np.log(np.array([a30, a50, a92])); ys = np.log(T)
+            lx = np.log(np.maximum(lum, 1e-6)); ly = np.interp(lx, xs, ys)
+            ly = np.where(lx < xs[0], ys[0] + (ys[1] - ys[0]) / (xs[1] - xs[0]) * (lx - xs[0]), ly)
+            ly = np.where(lx > xs[2], ys[2] + (ys[2] - ys[1]) / (xs[2] - xs[1]) * (lx - xs[2]), ly)
+            out = out * np.where(sel, np.exp(ly) / np.maximum(lum, 1e-6), 1.0)[..., None]
+            log("TONE3", "atlas p30/p60/p92", round(float(a30), 4), round(float(a50), 4), round(float(a92), 4), "-> 0.0137/0.23/0.50")
+    out = np.clip(out, 0, 1)
     out[~covered] = 0
     # fill the UV gutters from the islands so mipmaps never bleed black into the model
     filled = covered.copy()
@@ -310,12 +362,25 @@ def painted_material(src, name, image):
     return m
 
 
+for ob in (A, B):   # the AO is baked into the atlas: no vertex colours may remain on painted primitives
+    for nm in [ca.name for ca in ob.data.color_attributes]:
+        try:
+            ob.data.color_attributes.remove(ob.data.color_attributes[nm])
+        except RuntimeError as exc:
+            log("COLOR_ATTR kept", nm, str(exc)[:70])
+core = bpy.data.materials.get("Rune | v3 whorl core")
+if core is not None:
+    nt = core.node_tree; b = nt.nodes["Principled BSDF"]
+    for node in list(nt.nodes):
+        if node.type == "VERTEX_COLOR":
+            nt.nodes.remove(node)
+    b.inputs["Base Color"].default_value = (0.18, 0.55, 0.26, 1)
 for ob, image in ((A, imA), (B, imB)):
     for slot in ob.material_slots:
         src = slot.material
         if src is None or "Rune |" in src.name:
             continue   # the glow cores keep their emissive material
-        slot.material = painted_material(src, f"{src.name.split(' |')[0]} | {STAMP} painted {ob.name[:4]}", image)
+        slot.material = painted_material(src, f"{src.name.split(' |')[0]} | painted {ob.name[:4]}", image)   # stable name across versions
 log("MATERIALS")
 
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / f"guardian-{STAMP}-painted.blend"))   # never over the builder's blend
