@@ -250,8 +250,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const surfaceUniforms = createGuardianSurfaceUniforms(noise);
   if (referenceLook) {
     // Even light judges the albedo: no green rim or transmission glow from an absent fire.
-    surfaceUniforms.uRimColor.value.setRGB(0.88, 0.93, 0.88);
-    surfaceUniforms.uTransColor.value.setRGB(0.18, 0.24, 0.2);
+    surfaceUniforms.uRimColor.value.setRGB(0.7, 0.95, 0.72);
+    surfaceUniforms.uTransColor.value.setRGB(0.16, 0.3, 0.19);
     surfaceUniforms.uRimStrength.value = 0.45;
     surfaceUniforms.uTransStrength.value = 0.25;
   }

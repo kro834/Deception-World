@@ -214,7 +214,7 @@ export function createFlameMantle(model: THREE.Object3D, noise: THREE.Data3DText
     const materials = Array.isArray(node.material) ? node.material : [node.material];
     if (
       /HeadPivot|JawPivot/.test(anchor.name) ||
-      /head|face|jaw|mouth|lattice|rune/i.test(node.name) ||
+      /head|face|jaw|mouth|lattice|rune|horn/i.test(node.name) ||
       materials.some((material) => /rune|mouth|cavity|emission/i.test(material.name))
     ) {
       skippedFace++;

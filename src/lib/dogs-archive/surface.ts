@@ -37,7 +37,7 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uAnticipation: { value: 0 },
     uRimDir: { value: new THREE.Vector3(-0.5, 0.2, -0.8).normalize() },
     uKeyDir: { value: new THREE.Vector3(0.4, 0.7, 0.6).normalize() },
-    uRimColor: { value: new THREE.Color(0.68, 1.0, 0.76) },
+    uRimColor: { value: new THREE.Color(0.6, 1.0, 0.64) },
     uTransColor: { value: new THREE.Color(0.06, 0.42, 0.14) },
     uRimStrength: { value: 0.55 },
     uTransStrength: { value: 0.4 },
@@ -60,6 +60,7 @@ export const guardianSurfaceFamily = (material: THREE.Material) => {
   const name = material.name;
   const prefix = name.split(/[|:]/, 1)[0];
   if (/glass|crystal/i.test(prefix)) return "glass";
+  if (/horn|lacquer|obsidian/i.test(prefix)) return "horn";
   if (/bone|ivory|shell|carapace|ridge|teeth/i.test(prefix)) return "bone";
   if (/mouth|cavity/i.test(prefix)) return "mouth";
   if (/rune|emission|glow/i.test(prefix))
@@ -155,7 +156,7 @@ export function applyGuardianInkSurface(
             )
             .replace(
               "#include <color_fragment>",
-              "#include <color_fragment>\n diffuseColor.rgb*=vec3(.1,.2,.13);",
+              "#include <color_fragment>\n diffuseColor.rgb=mix(diffuseColor.rgb*vec3(.35,.7,.45),vec3(.02,.17,.06),.75);",
             )
             .replace(
               "#include <emissivemap_fragment>",
@@ -164,9 +165,15 @@ export function applyGuardianInkSurface(
  vec3 gAxis=uFaceTip-uFaceBase;float gLen=max(length(gAxis),1e-3);gAxis/=gLen;
  float gT=clamp(dot(vGuardianWorld-uFaceBase,gAxis)/gLen,0.,1.);
  float gLine=dot(totalEmissiveRadiance,vec3(.3333));
- float gGrad=mix(.3,1.15,pow(gT,1.6));
+ float gGrad=mix(.35,1.2,pow(gT,1.5));
  float gHot=exp(-pow((1.-gT)/.16,2.));
- totalEmissiveRadiance=vec3(.3,1.,.45)*gLine*gGrad*1.6+vec3(1.,1.,.95)*gLine*gHot*2.2+vec3(.85,1.,.9)*gHot*gHot*.5;
+ // The bud's outline stays dark; the cells themselves glow deep emerald.
+ float gEdge=pow(1.-saturate(dot(normal,normalize(vViewPosition))),3.);
+ diffuseColor.rgb*=1.-.7*gEdge;
+ vec3 gCells=vec3(.03,.24,.09)*(.35+.85*gT)*(1.-.8*gEdge);
+ // Lines are mint, not white: a saturated line colour at a lower intensity, so tone mapping
+ // leaves them green; only the tip goes white-green.
+ totalEmissiveRadiance=gCells+(vec3(.4,1.,.56)*gLine*gGrad*1.3+vec3(.8,1.,.86)*gLine*gHot*1.8+vec3(.78,1.,.84)*gHot*gHot*.45)*(1.-.6*gEdge);
 }`,
             );
         };
@@ -186,15 +193,15 @@ export function applyGuardianInkSurface(
             .replace("#include <common>", "#include <common>\nvarying float vCoreRadius;")
             .replace(
               "#include <color_fragment>",
-              "#include <color_fragment>\n diffuseColor.rgb*=mix(1.,.45,vCoreRadius);",
+              "#include <color_fragment>\n diffuseColor.rgb*=mix(1.,.55,vCoreRadius);",
             )
             .replace(
               "#include <emissivemap_fragment>",
               `#include <emissivemap_fragment>
 {
- float gFall=mix(1.5,.1,pow(clamp(vCoreRadius,0.,1.),.7));
+ float gFall=mix(1.1,.06,pow(clamp(vCoreRadius,0.,1.),.6));
  totalEmissiveRadiance*=gFall;
- totalEmissiveRadiance+=vec3(.8,1.,.85)*exp(-vCoreRadius*vCoreRadius*16.)*1.1;
+ totalEmissiveRadiance+=vec3(.7,1.,.78)*exp(-vCoreRadius*vCoreRadius*9.)*.55;
 }`,
             );
         };
@@ -206,6 +213,30 @@ export function applyGuardianInkSurface(
         material.emissive.set("#39ff7a");
         material.emissiveIntensity = 0;
         mouths.push(material);
+        continue;
+      }
+      if (family === "horn") {
+        // Glossy black horns (lacquer / obsidian): near-black, low roughness for a sharp
+        // highlight, a faint green rim from the scene light. No lift, no ink tint.
+        if (material.color.r + material.color.g + material.color.b > 0.3 && !material.map)
+          material.color.setRGB(0.008, 0.011, 0.008);
+        material.roughness = Math.min(material.roughness, 0.18);
+        material.metalness = 0;
+        material.metalnessMap = null;
+        material.envMapIntensity = 0.7;
+        material.onBeforeCompile = (shader) => {
+          shader.fragmentShader = shader.fragmentShader.replace(
+            "#include <emissivemap_fragment>",
+            `#include <emissivemap_fragment>
+{
+ float gNdV=saturate(dot(normal,normalize(vViewPosition)));
+ totalEmissiveRadiance+=vec3(.1,.38,.16)*pow(1.-gNdV,3.)*.35;
+}`,
+          );
+        };
+        material.customProgramCacheKey = () => "guardian-horn-v1";
+        material.needsUpdate = true;
+        patched++;
         continue;
       }
       if (family === "glass") {
@@ -313,12 +344,13 @@ if(gPainted>.5){
  // The projected atlas (gAtlas) already carries the originals' contrast: a third of the
  // curve and half the hue work; the procedural tiles take the full treatment.
  float gTouch=uPaintedContrast*mix(1.,.35,gAtlas);
- float gCurve=mix(gLum*.8,.15+.72*smoothstep(.05,.4,gLum),smoothstep(.03,.1,gLum));
+ float gCurve=mix(gLum*.8,.12+.56*smoothstep(.05,.4,gLum),smoothstep(.03,.1,gLum));
  float gL2=mix(gLum,gCurve,gTouch);
  vec3 gHue=diffuseColor.rgb/max(gLum,1e-4);
- // Pits are ink, not green: the darks lose most of their saturation; ridges go green-white.
- gHue=mix(gHue,vec3(.9,1.,.95),smoothstep(.12,.02,gL2)*mix(.7,.35,gAtlas));
- gHue=mix(gHue,vec3(.86,1.,.88),smoothstep(.3,.7,gL2)*mix(1.,.5,gAtlas));
+ // 05 is green throughout: deep emerald darks (saturation kept, a little boosted) and pale
+ // MINT ridges (146,182,143 sRGB → hue (.68,1.13,.66)), never white.
+ gHue=mix(vec3(1.),gHue,1.2);
+ gHue=mix(gHue,vec3(.68,1.13,.66),smoothstep(.3,.7,gL2)*mix(.9,.5,gAtlas));
  diffuseColor.rgb=gHue*gL2;
  gLum=gL2;
  gBone=smoothstep(.22,.55,gL2);
@@ -340,14 +372,12 @@ if(gPainted>.5){
  // Membranes: black-green ink. Bone: pale grey-green, lifted toward ~0.22 linear when the
  // authored value is darker (the 2026-10-28 bone), left alone when it is already pale.
  float gLift=clamp(.5/max(gLum,.02),1.,2.);
- vec3 gTint=mix(vec3(.2,.34,.24),vec3(.98,1.02,.96)*gLift,gBone);
+ vec3 gTint=mix(vec3(.2,.34,.24),vec3(.8,1.04,.78)*gLift,gBone);
  diffuseColor.rgb*=gTint*(.74+gMottle*.45)*(.9+gFine*.2);
  // Bone stays pale grey-green, never paper: an authored albedo that is already pale (the
  // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
  float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  diffuseColor.rgb*=mix(1.,min(1.,.78/max(gOut,1e-4)),gBone);
- // Ink is near-black, not green-black: the darks lose most of their saturation.
- diffuseColor.rgb=mix(diffuseColor.rgb,vec3(gOut)*vec3(.95,1.,.97),smoothstep(.08,.015,gOut)*.6);
 }`,
           )
           .replace(
@@ -376,7 +406,7 @@ if(gPainted>.5){
  totalEmissiveRadiance+=uRimColor*gKey*gFres*gBone*.18;
  // Translucent ridges and bone glow a little from within, most where the key wraps around.
  float gWrap=saturate((dot(normal,uKeyDir)+.6)/1.6);
- totalEmissiveRadiance+=vec3(.78,.95,.82)*gBone*(.16+.34*gWrap)*uTranslucency;
+ totalEmissiveRadiance+=vec3(.62,.98,.64)*gBone*(.16+.34*gWrap)*uTranslucency;
 }`,
           )
           .replace(
