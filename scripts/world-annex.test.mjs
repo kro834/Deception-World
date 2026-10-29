@@ -57,7 +57,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the chapter map keeps only the chapters' own headings and numerals (no readouts, codes or counts), the slates lose their "0N / 06", the doors their captions, the footer its END OF RECORD endmark and the title stage its SYNC readout.
     // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the UI label layer (hero 02 mark, KEY VISUAL caption, AUTO/LOCKED, faux metadata; chapter captions and English eyebrows; MANAGER ARCHIVE, tab codes, OPEN DOSSIER/ACCESS captions, card codes, English name duplicates, UNRESOLVED; WORLD COLUMN; RIDER / NN and the English name line; EPISODE ARCHIVE, RECORDS FOUND, IDENTIFIED RECORD, the card kicker; the pickups' PICKUP codes and captions; THE WORLD IS WAITING.) is gone; the rider note speaks only while a hold runs.
     // Owner (2026-10-23, ruling): the cards' RELATED / 01·02·05 and SECOND DOG / 02 codes and the archive slots' numbers stay (they pair with the artwork cards' RELATED / 03·04); the column pickup shows its own kicker (data) without the ARCHIVE prefix.
-    markup: "5f5ade5752dd2db376ba7974c637e1173e5256b82324950abc75f8c06f3956ac",
+    // Owner (2026-10-30): film composition removes two decorative HUD layers; original copy and records stay.
+    markup: "89bfea58d379ab5d5395396e8acdd02f9f655e0b37b8563fcf9c98c07b6736ee",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the

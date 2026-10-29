@@ -8,11 +8,10 @@ import {
   DREAM_QUOTES,
 } from "./dream-chapter-data";
 
-// Three entrances, each its own colour on the ticket's edge; the seal and the
-// title name the way in (no route number, HUD kind or tally).
-const routes = [
-  { title: "絵看板を見る", href: "#posters", mark: "観る" },
+// One set of entrances at the title, with reading first for returning visitors.
+export const DREAM_PROGRAMME_ROUTES = [
   { title: "六章を読む", href: "#dream-chapter-stage", mark: "読む" },
+  { title: "絵看板を見る", href: "#posters", mark: "観る" },
   { title: "記録を探す", href: "#dream-record-explorer", mark: "探す" },
 ] as const;
 
@@ -87,20 +86,6 @@ export function DreamProgrammeDesk() {
       <header className="dream-programme-heading">
         <h2 id="dream-programme-title">劇場案内</h2>
       </header>
-      <nav className="dream-programme-routes" aria-label="ドリームチャプターの入口">
-        {routes.map((route) => (
-          <a className="dream-programme-ticket" href={route.href} key={route.href}>
-            <span className="dream-programme-ticket-main">
-              <span aria-hidden="true">{route.mark}</span>
-              <strong>{route.title}</strong>
-            </span>
-            <span className="dream-programme-ticket-foot" aria-hidden="true">
-              <span>↗</span>
-            </span>
-          </a>
-        ))}
-      </nav>
-
       <div className="dream-programme-dossiers" role="group" aria-label="人物資料・機密記録">
         <ul className="dream-programme-dossier-strip">
           {dossierQuickLinks.map((entry) => (

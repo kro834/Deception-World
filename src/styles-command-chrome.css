@@ -615,12 +615,11 @@ html[data-family]
   grid-area: sec;
   align-self: start;
   overflow: visible;
-  padding: 8px 8px 12px;
+  padding: 16px;
   border: 1px solid var(--atlas-line);
-  background: linear-gradient(145deg, #172c3b, #09131e 45%, #050b12);
-  box-shadow:
-    inset 0 1px 0 rgb(233 246 251 / 22%),
-    6px 6px 0 rgb(1 5 9 / 65%);
+  border-inline-start: 3px solid var(--atlas-accent);
+  background: var(--atlas-raised);
+  box-shadow: none;
 }
 
 html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {

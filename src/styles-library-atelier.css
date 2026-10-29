@@ -89,19 +89,6 @@ html[data-family="library"] .library-page.library-atelier .library-jump-links a 
   font-size: 14px;
 }
 
-html[data-family="library"] .library-page.library-atelier .library-jump-links a:first-child {
-  flex-basis: 100%;
-  justify-content: space-between;
-  max-width: 290px;
-  padding: 8px 18px;
-  border-radius: 8px;
-  color: #071c25;
-  background: #bcebf1;
-  font-size: 16px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
 html[data-family="library"] .library-page.library-atelier .library-fulltext-link {
   gap: 16px;
   margin-top: 8px;

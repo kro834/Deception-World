@@ -1,3 +1,6 @@
+        label: "仮面ライダールーラー・ポラリスモード",
+        displayLines: ["仮面ライダールーラー", "ポラリスモード"],
+        src: "/rider-ruler-polaris.webp",
         pos: "50% 0%",
         alt: "仮面ライダールーラー・ポラリスモード",
         width: 1023,
@@ -434,9 +437,7 @@ export function WorldHome() {
   const [posterControlsFocused, setPosterControlsFocused] = useState(false);
   const [shuffling, setShuffling] = useState(false);
   const [ambientPaused, setAmbientPaused] = useState(
-    () =>
-      typeof document !== "undefined" &&
-      (document.hidden || openingHandoffHolds()),
+    () => typeof document !== "undefined" && (document.hidden || openingHandoffHolds()),
   );
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
@@ -503,7 +504,3 @@ export function WorldHome() {
         RIDERS.map((rider) => rider.img),
         riderTabRef.current,
       ),
-    [],
-  );
-
-  useLayoutEffect(() => {

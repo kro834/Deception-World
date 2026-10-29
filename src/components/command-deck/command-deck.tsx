@@ -469,9 +469,9 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             ライブラリ
             <ArrowUpRight size={14} aria-hidden="true" />
           </DeckLink>
-          <DeckLink href="/search" aria-label="資料検索">
+          <DeckLink href="/search" aria-label="全文検索">
             <Search size={19} aria-hidden="true" />
-            <span>検索</span>
+            <span>全文検索</span>
           </DeckLink>
           <a
             href="/?opening=1"
@@ -703,7 +703,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             <ArrowUpRight size={19} aria-hidden="true" />
           </DeckLink>
           <DeckLink href="/search">
-            資料検索
+            全文検索
             <Search size={18} aria-hidden="true" />
           </DeckLink>
         </nav>

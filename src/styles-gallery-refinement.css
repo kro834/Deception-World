@@ -1,9 +1,4 @@
 /* Small, artwork-first refinements layered over the established gallery skin. */
-.gallery-page .gallery-intro {
-  gap: clamp(28px, 4vw, 64px);
-  padding-block: clamp(40px, 5vw, 72px) clamp(48px, 6vw, 88px);
-}
-
 .gallery-page .gallery-intro-description {
   font-size: clamp(14px, 1.2vw, 16px);
   line-height: 1.95;

@@ -73,5 +73,5 @@ test("the call yields before mount; decoded plan preparation is bounded and canc
   assert.ok(
     branch.indexOf("await entry.promise;") < branch.indexOf("startedAt = performance.now();"),
   );
-  assert.match(branch, /callOnly: Boolean\(rexonanceCall\)/);
+  assert.match(branch, /callOnly:\s*Boolean\(rexonanceCall\)/);
 });

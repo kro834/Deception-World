@@ -143,7 +143,10 @@ test("each annex renders as its own section, listed in the 目次", () => {
     "quotes",
   ]);
   for (const id of hrefs) assert.match(page, new RegExp(`id="${id}"`), id);
-  assert.match(page, /<nav className="dream-contents" aria-labelledby="dream-contents-title"/);
+  // Owner (2026-10-30): the complete index is a native, keyboard-operable disclosure.
+  assert.match(page, /<details className="dream-contents">/);
+  assert.match(page, /<summary id="dream-contents-title">目次<\/summary>/);
+  assert.match(page, /<nav aria-labelledby="dream-contents-title">/);
   // Filed agents open the existing dossier dialog.
   assert.match(page, /className="dream-agent-open"[\s\S]*?setDolminenceRecord\(filed\)/);
   assert.doesNotMatch(page, /\u3000/);
@@ -183,4 +186,14 @@ test("the annex sheet loads after the elevation sheet and keeps the page rules",
       group,
     );
   }
+});
+
+// Owner (2026-10-30): reading must not depend on observer delivery or motion readiness.
+test("Dream reading blocks remain visible while reveal observation is pending", () => {
+  const css = read("src/styles-dream-chapter.css");
+  const pending = css.match(/html\[data-dream-reveal-ready="true"\][^{]+\{([^}]+)\}/g) ?? [];
+  for (const rule of pending) {
+    assert.doesNotMatch(rule, /opacity:\s*0(?:[;\s])|visibility:\s*hidden/);
+  }
+  assert.match(css, /\[data-dream-reveal\]\s*\{\s*opacity:\s*1;\s*clip-path:\s*none;\s*transform:\s*none;/);
 });

@@ -1080,7 +1080,11 @@ html[data-route-scroll-settling="true"] {
   --rider-dive-shadow: 4 9 24;
   background:
     radial-gradient(ellipse 68% 24% at 50% 22%, rgb(176 220 252 / 0.14), transparent 56%),
-    radial-gradient(ellipse 58% 42% at 50% 56%, rgb(var(--rider-dive-primary) / 0.28), transparent 64%),
+    radial-gradient(
+      ellipse 58% 42% at 50% 56%,
+      rgb(var(--rider-dive-primary) / 0.28),
+      transparent 64%
+    ),
     radial-gradient(circle at 22% 74%, rgb(var(--rider-dive-secondary) / 0.16), transparent 44%),
     linear-gradient(180deg, #061024 0%, rgb(var(--rider-dive-shadow) / 0.99) 46%, #02050d 100%);
 }
@@ -2182,4 +2186,45 @@ body:has(.load-gate) .zeus-button:not([data-navigating="true"]) {
 .route-load-delay :is(a, button):focus-visible {
   outline: 3px solid #f9e5ad;
   outline-offset: 3px;
+}
+
+/* The skip belongs to the transition, above every decorative curtain. */
+.route-decoration-skip {
+  position: fixed;
+  z-index: 2147483600;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1px solid #c2e0ec;
+  border-radius: 6px;
+  background: #102631;
+  color: #f4f9ff;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.route-decoration-skip:focus-visible {
+  outline: 3px solid #f9e5ad;
+  outline-offset: 3px;
+}
+.route-decoration-skip kbd {
+  font-size: 12px;
+}
+.route-load-pending {
+  position: fixed;
+  z-index: 2147483500;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  max-width: calc(100vw - 32px);
+  padding: 12px 16px;
+  border: 1px solid #9fceda;
+  border-radius: 6px;
+  background: #102631;
+  color: #f4f9ff;
+  font-size: 14px;
+  pointer-events: none;
 }

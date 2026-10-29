@@ -1099,7 +1099,6 @@ export function SideMenuLayer({
         ref={panelRef}
         id="site-side-panel"
         className="side-panel"
-        data-liquid-pointer="true"
         data-command-atlas="true"
         data-react-controlled={controlled ? "true" : undefined}
         data-open={String(isOpen)}
@@ -1117,7 +1116,6 @@ export function SideMenuLayer({
         onLostPointerCapture={onPanelPointerCancel}
         onKeyDown={controlled ? onPanelKeyDown : undefined}
       >
-        <LiquidPointerGlow />
         <span className="side-panel-depth" aria-hidden="true">
           <i />
           <i />
@@ -1156,14 +1154,12 @@ export function SideMenuLayer({
           </button>
           <nav className="command-atlas-index" aria-label="メニューの領域">
             {[
+              ["find", "資料"],
               ["sections", "ページ内"],
               ["special", "サーガ"],
               ["stories", "物語"],
-              [
-                context === "world" ? "riders" : "information",
-                context === "world" ? "人物" : "ギャラリー・お知らせ",
-              ],
-              ["find", "資料"],
+              ["riders", "人物"],
+              ["information", "ギャラリー・お知らせ"],
               ["system", "設定"],
             ].map(([group, label]) => (
               <button
@@ -1203,7 +1199,7 @@ export function SideMenuLayer({
               beforeNavigate={close}
               aria-current={pathname === "/search" ? "page" : undefined}
             >
-              <span>資料を探す</span>
+              <span>全文検索</span>
               <i>SEARCH</i>
             </GuardedLink>
             <GuardedLink
@@ -1246,7 +1242,7 @@ export function SideMenuLayer({
             <span className="command-atlas-orbit" aria-hidden="true" />
             <figcaption>{atlasScene.title}</figcaption>
           </figure>
-          <p>SECTIONS</p>
+          <p>このページ</p>
           <div className="side-panel-links dg-focus-scope">
             {menuPage ? (
               menuPage.sections
@@ -1549,7 +1545,7 @@ export function SideMenuLayer({
             </GuardedLink>
           </div>
         </div>
-        {context === "world" ? (
+        <>
           <div
             className="side-panel-group side-panel-riders"
             data-atlas-group="riders"
@@ -1573,8 +1569,8 @@ export function SideMenuLayer({
               )}
             </div>
           </div>
-        ) : null}
-        {context === "world" ? (
+        </>
+        <>
           <>
             <div
               className="side-panel-group side-panel-files side-panel-rikuei"
@@ -1631,7 +1627,7 @@ export function SideMenuLayer({
               </div>
             </div>
           </>
-        ) : null}
+        </>
         <div className="side-panel-group" data-atlas-group="unmanaged" id="command-atlas-unmanaged">
           <p>UNMANAGED</p>
           <div className="side-panel-links dg-focus-scope">

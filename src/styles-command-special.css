@@ -126,16 +126,7 @@ html[data-family="special"] body #top.fst-page[data-command-special] {
   html[data-family="special"]
     body
     #top.rxs-page[data-command-special]
-    :is(
-      .rxs-system-grid > article,
-      .rxs-specs > div,
-      .ffs-specs > div,
-      .ffs-articles > article,
-      .ffs-weapons > li,
-      .ffs-finisher,
-      .fst-specs > div,
-      .fst-articles > article
-    ) {
+    :is(.rxs-specs > div, .ffs-specs > div, .ffs-weapons > li, .ffs-finisher, .fst-specs > div) {
     border: 1px solid var(--cs-edge);
     border-radius: 3px;
     clip-path: none;
@@ -144,6 +135,25 @@ html[data-family="special"] body #top.fst-page[data-command-special] {
         no-repeat,
       var(--cs-face);
     box-shadow: var(--cs-shadow);
+  }
+  /* Reading scenes breathe between the animated set pieces. No glass is
+     placed behind prose; controls and measured data remain separate. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(.rxs-system-grid > article, .ffs-articles > article, .fst-articles > article) {
+    border-inline: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]
+    :is(.rxs-system-grid > article p, .ffs-articles > article p, .fst-articles > article p) {
+    max-width: 68ch;
+    line-height: 2;
+    overflow-wrap: break-word;
   }
   html[data-family="special"]
     body

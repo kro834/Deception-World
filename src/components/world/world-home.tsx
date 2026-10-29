@@ -942,9 +942,7 @@ export function WorldHome() {
   const [posterControlsFocused, setPosterControlsFocused] = useState(false);
   const [shuffling, setShuffling] = useState(false);
   const [ambientPaused, setAmbientPaused] = useState(
-    () =>
-      typeof document !== "undefined" &&
-      (document.hidden || openingHandoffHolds()),
+    () => typeof document !== "undefined" && (document.hidden || openingHandoffHolds()),
   );
   const [managerTab, setManagerTab] = useState(0);
   const [columnTab, setColumnTab] = useState(0);
@@ -1114,10 +1112,7 @@ export function WorldHome() {
     };
     const handleOpeningHandoff = (event: Event) => {
       const detail = (event as CustomEvent<{ active?: boolean }>).detail;
-      handoffActive =
-        typeof detail?.active === "boolean"
-          ? detail.active
-          : openingHandoffHolds();
+      handoffActive = typeof detail?.active === "boolean" ? detail.active : openingHandoffHolds();
       syncAmbientPause();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -1826,24 +1821,11 @@ export function WorldHome() {
             />
           </span>
         </div>
-        <div className="mr-hero-hud" aria-hidden="true">
-          <i className="mr-hero-scan" />
-          <i className="mr-hero-beam" />
-          <span className="mr-hero-floor">
-            <i />
-          </span>
-        </div>
         {/* The key visual's streamlined light behind the stage (styles-world-zenith.css). */}
         <div className="zn-hero-light" aria-hidden="true">
           <i className="zn-trail zn-trail-a" />
           <i className="zn-trail zn-trail-b" />
           <i className="zn-bloom" />
-        </div>
-        {/* The special sites' HUD over the stage: a scan grid, corner
-            brackets and a scale bar (styles-world-special.css). */}
-        <div className="ws-hero-hud" aria-hidden="true">
-          <i className="ws-hero-bracket" />
-          <i className="ws-hero-scale" />
         </div>
         <div className="film-hero-identity" data-film-reveal>
           <FilmTextScan />

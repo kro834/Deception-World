@@ -232,9 +232,9 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   background: linear-gradient(180deg, transparent, var(--mr-ink));
 }
 
-/* Key art finally reads: brighter backdrop, left-weighted scrim. */
+/* The full-colour print is the hero. Its echo stays a low-contrast backdrop. */
 .site-shell.film-edition.mirage-edition .hero-backdrop {
-  opacity: 0.5;
+  opacity: 0.2;
 }
 
 .site-shell.film-edition.mirage-edition .hero-backdrop::after {
@@ -1145,6 +1145,13 @@ html[data-mode="world"]:not([data-world-effects="economy"])
   font-weight: 700;
   font-feature-settings: "palt";
   letter-spacing: 0.02em;
+}
+
+/* Records follow the rider showcase as a quieter reading chapter. The
+   owner's heading and typing reveal remain; its scale yields to the stills. */
+.site-shell.film-edition.mirage-edition .records-heading h2 {
+  font-size: clamp(30px, 3.8vw, 54px);
+  line-height: 1.4;
 }
 
 .site-shell.film-edition.mirage-edition .section-title > p {
@@ -2508,7 +2515,7 @@ html[data-mode="world"]:not([data-world-effects="economy"])
    ================================================================ */
 @media (max-width: 1023px) {
   .site-shell.film-edition.mirage-edition .hero-backdrop {
-    opacity: 0.34;
+    opacity: 0.2;
   }
 
   .site-shell.film-edition.mirage-edition .mr-hero-readout {

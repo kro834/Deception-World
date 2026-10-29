@@ -1,9 +1,3 @@
-                aria-label={
-                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
-                }
-                onClick={() => {
-                  cancelPosterShuffle();
-                  setLocked((v) => !v);
                 }}
               >
                 <LiquidPointerGlow />
@@ -507,3 +501,6 @@
               aria-labelledby={`column-tab-${columnTab}`}
               aria-label={`コラム${column.no} ${column.title}`}
             >
+              <div className="world-column-number-stack">
+                {COLUMNS.map((item, index) => (
+                  <p

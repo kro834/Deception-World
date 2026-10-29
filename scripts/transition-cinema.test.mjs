@@ -168,7 +168,7 @@ test("the hand-over: rendered under the still cover, two frames, then data-loadi
   assert.doesNotMatch(gate, /announceRouteCommit/);
   // The wrapper must release the global lock and local marker at the same reveal boundary.
   const branches = gate.match(
-    /await navigateUnderCover\(router, \(\) => navigate\(\{ to, hash, search: navigationSearch \}\), to\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?setDocumentLoading\(false\);[\s\S]*?phase: "revealing",[\s\S]*?await revealRan\(\s*timings\.reveal/g,
+    /await navigateUnderCover\(\s*router,\s*\(\) => navigate\(\{ to, hash, search: navigationSearch \}\),\s*to,?\s*\);\s*if \(!isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*await settleUnderCover\(\);\s*if \(!isCurrent\(\)\) return;\s*(?:const callOnly = Boolean\(rexonanceCall\);\s*let landed = scene;[\s\S]*?if \(!callOnly\) \{\s*const rects = landingRects\(\);\s*landed = scene && \{[\s\S]*?\};\s*\}|const landed = [^\n]*landingRects\(\) \};)[\s\S]*?setDocumentLoading\(false\);[\s\S]*?phase: "revealing",[\s\S]*?await clock\.wait\(\s*revealRan\(\s*timings\.reveal/g,
   );
   assert.equal(branches?.length, 2, "rider dives/cut-ins and the sovereign gate");
   // Only a prepared Rexonance renderer has no portrait to dock. A failed
@@ -183,7 +183,7 @@ test("the hand-over: rendered under the still cover, two frames, then data-loadi
   assert.match(branches[1], /await entranceLead\(\);/);
   assert.match(
     gate,
-    /await revealRan\(\s*timings\.reveal,\s*callOnly\s*\? undefined\s*: \(\) => \{\s*if \(landed\) handOverDockedFile\(landed\);/,
+    /await clock\.wait\(\s*revealRan\(\s*timings\.reveal,\s*callOnly\s*\? undefined\s*: \(\) => \{\s*if \(landed && !clock\.skipped && isCurrent\(\)\) handOverDockedFile\(landed\);/,
   );
   // The reveal's clock starts on its first painted frame.
   assert.match(
@@ -253,8 +253,14 @@ test("the other dossiers and the World take the plain file shutter (owner, 2026-
     gate,
     /const fileVariant: FileTransitionVariant \| undefined =\s*!changesDocument \|\| diveVariant \|\| cutInVariant \|\| isZeusTransition\s*\? undefined\s*: DETAIL_ROUTE\.test\(to\)\s*\? "file"\s*: to === "\/world" && pathname !== "\/"\s*\? "world"\s*: undefined;/,
   );
-  assert.match(gate, /const riderTransitionVariant = diveVariant \?\? cutInVariant \?\? fileVariant;/);
-  assert.match(gate, /file: \{ cover: 320, reveal: 540 \},\s*world: \{ cover: 280, reveal: 460 \},/);
+  assert.match(
+    gate,
+    /const riderTransitionVariant = diveVariant \?\? cutInVariant \?\? fileVariant;/,
+  );
+  assert.match(
+    gate,
+    /file: \{ cover: 320, reveal: 540 \},\s*world: \{ cover: 280, reveal: 460 \},/,
+  );
   // A dossier lifts the pressed card into a file frame; the World opens from the screen.
   assert.match(
     gate,

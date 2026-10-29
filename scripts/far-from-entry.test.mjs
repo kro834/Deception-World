@@ -437,7 +437,7 @@ test("the entry plays in the route transition screen as Rexonance's does: prepar
     /phase: "revealing",\s*scene: landed,\s*rexonanceCall,\s*rexonanceSuit,\s*farFromCall,\s*farFromSuit,/,
   );
   assert.match(gate, /diveVariant === "far-from" && !farFromCall\s*\? CALM_TIMINGS/);
-  assert.match(gate, /callOnly: Boolean\(rexonanceCall\) \|\| Boolean\(farFromCall\)/);
+  assert.match(gate, /callOnly:\s*Boolean\(rexonanceCall\) \|\| Boolean\(farFromCall\)/);
   assert.match(
     branch,
     /if \(farFromCall && tier === "full"\) setSignal\("running"\);\s*await nextFrame\(\);\s*await nextFrame\(\);\s*if \(!isCurrent\(\)\) return;/,
@@ -528,7 +528,7 @@ test("the still tiers, the skip, and the page: reduced motion and economy rest t
   assert.match(gate, /farFromSkip\.current = \(\) => \{\s*farFromSkipped = true;\s*\};/);
   assert.match(gate, /if \(!farFromSkipped\) \{/);
   assert.match(gate, /farFromSkip\.current = hold\.cancel;/);
-  assert.match(gate, /const skipFarFrom = useCallback\(\(\) => farFromSkip\.current\?\.\(\), \[\]\);/);
+  assert.match(gate, /const skipDecoration = useCallback\(\(\) => \{[\s\S]*?clock\.skip\(\);\s*farFromSkip\.current\?\.\(\);/);
   assert.match(sheet, /\.ffe-skip \{[\s\S]*?min-height: 44px;/);
   assert.match(sheet, /\.ffe-skip \{[\s\S]*?pointer-events: auto;/);
   // The gate's ground and status give way to the sequence, as Rexonance's.

@@ -736,9 +736,10 @@ function ManagerDossier({ profile }: { profile: Profile }) {
       >
         <DossierContents sections={profile.sections} />
         <div className="manager-sections">
-          {profile.sections.map((s) => (
+          {profile.sections.map((s, index) => (
             <article
               className={`manager-copy-section${profile.sovereign ? "" : " dg-reveal"}`}
+              data-record-role={index === 0 ? "lead" : "detail"}
               id={`character-section-${s.no}`}
               key={s.no}
             >

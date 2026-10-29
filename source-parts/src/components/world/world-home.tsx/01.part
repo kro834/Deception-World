@@ -503,6 +503,3 @@ const EPISODES: EpisodeRecord[] = [
         assets: ["/character-dante.webp", "/rider-ruler-enigma.webp"],
       },
       {
-        label: "仮面ライダールーラー・ポラリスモード",
-        displayLines: ["仮面ライダールーラー", "ポラリスモード"],
-        src: "/rider-ruler-polaris.webp",

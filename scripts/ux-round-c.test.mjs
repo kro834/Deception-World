@@ -37,16 +37,20 @@ test("the menu opens with the reader's own dossier row in view", () => {
     /panel\.scrollTop = 0;[\s\S]*?const current = preferredMenuRow\(panel, isSpecialSite \|\| Boolean\(menuPage\)\);\s*if \(current\) \{\s*const clearance = parseFloat\(window\.getComputedStyle\(panel\)\.paddingBottom\) \|\| 24;\s*const overflow =\s*current\.getBoundingClientRect\(\)\.bottom \+ clearance - panel\.getBoundingClientRect\(\)\.bottom;\s*if \(overflow > 0\) panel\.scrollTop \+= overflow;\s*\}/,
   );
   assert.doesNotMatch(openEffect, /current\.scrollIntoView/);
-  // The groups keep their order.
+  // Site destinations are common to every page. The local chapter index is
+  // a distinct region; its wording can differ without changing site order.
   const groups = [
-    "SECTIONS",
-    "SPECIAL",
-    "STORIES",
-    "RIDERS",
-    "UNMANAGED",
-    "INFORMATION",
-    "SYSTEM",
-  ].map((name) => chrome.indexOf(`<p>${name}</p>`));
+    "find",
+    "sections",
+    "special",
+    "stories",
+    "riders",
+    "rikuei",
+    "related",
+    "unmanaged",
+    "information",
+    "system",
+  ].map((name) => chrome.indexOf(`id="command-atlas-${name}"`));
   assert.ok(
     groups.every((index) => index > 0),
     String(groups),
@@ -54,6 +58,15 @@ test("the menu opens with the reader's own dossier row in view", () => {
   assert.deepEqual(
     [...groups].sort((a, b) => a - b),
     groups,
+  );
+  const commonPeople = chrome.slice(
+    chrome.indexOf('id="command-atlas-stories"'),
+    chrome.indexOf('id="command-atlas-unmanaged"'),
+  );
+  assert.doesNotMatch(commonPeople, /context === "world" \? \(/);
+  assert.match(
+    chrome,
+    /data-side-menu-sections[\s\S]*?data-atlas-group="sections"[\s\S]*?<p>このページ<\/p>/,
   );
 });
 

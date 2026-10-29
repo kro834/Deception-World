@@ -27,12 +27,6 @@ html[data-family="gallery"] .gallery-page .gallery-brand {
   letter-spacing: 0.04em;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-intro {
-  min-height: 0;
-  align-items: center;
-  padding-block: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 40px);
-}
-
 html[data-family="gallery"] .gallery-page .gallery-eyebrow {
   color: #d7c4a2;
   letter-spacing: 0.18em;

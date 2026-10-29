@@ -57,12 +57,16 @@ test("a keyboard activation focuses the destination in every navigation branch",
   );
   // Plain, gallery, rider dive / cut-in, Zeus and archive branches.
   assert.equal(
-    (loadGate.match(/if \(focusDestination\) focusRouteDestination\(hash\);/g) ?? []).length,
+    (
+      loadGate.match(
+        /if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);/g,
+      ) ?? []
+    ).length,
     5,
   );
   assert.match(
     loadGate,
-    /await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);\s*if \(!isCurrent\(\)\) return;\s*if \(focusDestination\) focusRouteDestination\(hash\);\s*if \(hash\) await settleRouteHash\(hash\);/,
+    /await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\);\s*if \(!isCurrent\(\)\) return;\s*setDestinationPending\(false\);\s*skipDestinationReady\.current = true;\s*if \(focusDestination \|\| skipFocusRequested\.current\) focusRouteDestination\(hash\);\s*if \(hash\) await settleRouteHash\(hash\);/,
   );
   assert.match(loadGate, /target\.focus\(\{ preventScroll: true \}\);/);
   assert.match(transitions, /\[data-route-focus="true"\]:focus \{\s*outline: none;\s*\}/);

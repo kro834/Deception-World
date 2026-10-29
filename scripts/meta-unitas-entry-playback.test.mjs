@@ -100,8 +100,8 @@ test("the route gate awaits scene completion and the renderer waits for a painte
   const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
   const gate = read("src/components/load-gate.tsx");
   const entry = read("src/components/meta-unitas-saga/meta-unitas-entry-sequence.tsx");
-  assert.match(gate, /await metaUnitasPlayback\.promise/);
-  assert.match(gate, /!metaUnitasPlayback && !illusionculumPlayback && coverTimeLeft > 0/);
+  assert.match(gate, /await clock\.wait\(metaUnitasPlayback\.promise\)/);
+  assert.match(gate, /!clock\.skipped &&\s*!metaUnitasPlayback &&\s*!illusionculumPlayback &&\s*coverTimeLeft > 0/);
   assert.match(gate, /metaUnitasPlayback\.skip/);
   assert.match(gate, /metaUnitasTransition\.current !== null/);
   // Owner (2026-10-24): readiness gates completion, never the first motion.

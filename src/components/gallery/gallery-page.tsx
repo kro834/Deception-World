@@ -1055,7 +1055,7 @@ export function GalleryPage() {
               <img
                 src={featured.medium}
                 srcSet={featured.srcSet}
-                sizes="(max-width: 760px) 90vw, 56vw"
+                sizes={`(max-width: 700px) 90vw, ${Math.min(1320, Math.round((680 * featured.width) / featured.height))}px`}
                 alt={featured.alt}
                 width={featured.width}
                 height={featured.height}
@@ -1063,21 +1063,22 @@ export function GalleryPage() {
                 decoding="async"
               />
             </a>
-            {!isCommunityGalleryId(featured.id) && (
-              <Link
-                className="exhibition-room-entry"
-                to="/exhibition"
-                search={{ work: featured.id }}
-              >
-                展示室を大きく開く <span aria-hidden="true">↗</span>
-              </Link>
-            )}
             <figcaption>
               <span>{numberFor(featured)}</span>
               {titles[featured.id] && <span>{titles[featured.id]}</span>}
             </figcaption>
             <details className="gallery-feature-settings">
-              <summary>トップ作品の設定</summary>
+              <summary>作品の表示と設定</summary>
+              {!isCommunityGalleryId(featured.id) && (
+                <Link
+                  className="exhibition-room-entry"
+                  to="/exhibition"
+                  search={{ work: featured.id }}
+                >
+                  展示室を大きく開く <span aria-hidden="true">↗</span>
+                </Link>
+              )}
+
               <a href="#gallery-collection">トップ作品を選ぶ</a>
               {featuredId && (
                 <button type="button" onClick={() => changeFeature(null)}>

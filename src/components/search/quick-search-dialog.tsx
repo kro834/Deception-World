@@ -29,7 +29,7 @@ const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as strin
 const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
 
 const SHORTCUTS = [
-  { to: "/search", label: "資料検索", code: "SEARCH" },
+  { to: "/search", label: "全文検索", code: "SEARCH" },
   { to: "/library", label: "資料室・しおり", code: "LIBRARY" },
   { to: "/world", label: "ディセプションワールド", code: "WORLD" },
   { to: "/dream-chapter", label: "夢の章", code: "DREAM CHAPTER" },
@@ -427,7 +427,7 @@ export default function QuickSearchDialog({
             href={trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search"}
             onClick={linkClick({ kind: "all", id: "qs-footer-search", count: results.length })}
           >
-            資料検索を開く<span aria-hidden="true">↗</span>
+            全文検索を開く<span aria-hidden="true">↗</span>
           </a>
           {!trimmed && recent.length ? (
             <button

@@ -298,37 +298,34 @@
 }
 
 /* ---------- 目次 ---------- */
-/* A framed contents card under the 口上: the title stands vertical at the
-   right edge, the five columns read right to left like the programme. */
+/* The full index is available on demand; returning readers can go straight
+   from the title's three entrances to a chapter, picture or record. */
 .dream-page.dream-page .dream-contents {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: clamp(16px, 3vw, 36px);
   width: min(1120px, calc(100% - 40px));
-  margin: clamp(40px, 6vw, 72px) auto 0;
-  padding: clamp(18px, 2.4vw, 28px);
-  border: 1px solid var(--ts-hair);
-  outline: 1px solid var(--ts-hair-soft);
-  outline-offset: -7px;
-  background:
-    linear-gradient(var(--ts-kin) 0 0) top / 100% 2px no-repeat,
-    linear-gradient(var(--ts-kin) 0 0) 0 3px / 100% 1px no-repeat,
-    var(--ts-velvet);
+  margin: 28px auto 0;
+  padding: 8px 18px;
+  border-block: 1px solid var(--ts-hair);
+  background: var(--ts-velvet);
 }
 
-.dream-page.dream-page .dream-contents h2 {
-  grid-column: 2;
-  grid-row: 1;
-  margin: 0;
-  padding: 10px 8px 16px;
-  writing-mode: vertical-rl;
+.dream-page.dream-page .dream-contents > summary {
+  min-height: 44px;
+  padding: 10px 4px;
+  cursor: pointer;
   color: var(--ts-kin-hi);
-  background: var(--ts-ebicha-deep);
   font-family: var(--ts-display);
   font-size: 16px;
   font-weight: 800;
-  letter-spacing: 0.5em;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 10px), 0 100%);
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-contents > summary:focus-visible {
+  outline: 2px solid var(--ts-fuji);
+  outline-offset: 2px;
+}
+
+.dream-page.dream-page .dream-contents > nav {
+  padding-block: 12px;
 }
 
 .dream-page.dream-page .dream-contents ol {
@@ -387,15 +384,6 @@
 @media (max-width: 760px) {
   .dream-page.dream-page .dream-contents {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .dream-page.dream-page .dream-contents h2 {
-    grid-column: 1;
-    padding: 8px 16px;
-    justify-self: start;
-    writing-mode: horizontal-tb;
-    letter-spacing: 0.4em;
-    clip-path: none;
   }
 
   /* One ruled row per act, like a programme's contents page: the act in

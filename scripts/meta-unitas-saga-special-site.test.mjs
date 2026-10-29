@@ -47,7 +47,7 @@ test("the route is registered wherever the other special sites are", () => {
   // Preparation does not consume playback; the live renderer releases its cover.
   assert.match(gate, /"\/meta-unitas-saga": "meta-unitas"/);
   assert.match(gate, /createMetaUnitasEntryPlayback\(\)/);
-  assert.match(gate, /await metaUnitasPlayback\.promise/);
+  assert.match(gate, /await clock\.wait\(metaUnitasPlayback\.promise\)/);
   assert.match(gate, /META_UNITAS_ENTRY_TIMINGS/);
 });
 
@@ -215,7 +215,10 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
   // Owner (2026-10-23): 「メタ・ウニタスはレクソナンスと同じ装着です」.
   const engine = read("src/lib/meta-unitas-rx-engine.ts");
   assert.match(engine, /import \{ mountRexonanceAssembly/);
-  assert.match(engine, /mountRexonanceAssembly\(\s*runway,\s*\{ \.\.\.metaUnitasAssemblyConfig\(\), eager: options\.eager \},\s*environment,?\s*\)/);
+  assert.match(
+    engine,
+    /mountRexonanceAssembly\(\s*runway,\s*\{ \.\.\.metaUnitasAssemblyConfig\(\), eager: options\.eager \},\s*environment,?\s*\)/,
+  );
   assert.ok(!/fire: false|generation:/.test(engine), "the fire and the nanites stay Rexonance's");
   assert.match(read("src/lib/meta-unitas-assembly.ts"), /import\("\.\/meta-unitas-rx-engine"\)/);
   assert.match(suitup, /className="mus-runway rzn-suitup"/);
@@ -224,7 +227,9 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
   const dir = "design/meta-unitas-saga-20261023/sam-masks/middle";
   const manifest = JSON.parse(read(`${dir}/manifest.json`));
   assert.equal(manifest.model.id, "facebook/sam2.1-hiera-large");
-  const masks = readdirSync(new URL(`../${dir}/plates`, import.meta.url)).map((f) => f.replace(/\.png$/, ""));
+  const masks = readdirSync(new URL(`../${dir}/plates`, import.meta.url)).map((f) =>
+    f.replace(/\.png$/, ""),
+  );
   const plates = suit.META_UNITAS_RX_PIECES.map((piece) => piece.id);
   assert.deepEqual(plates.filter((id) => id !== "belt").sort(), [...masks].sort());
   assert.deepEqual(suit.META_UNITAS_RX_DRIVER, ["belt"]);
@@ -238,7 +243,10 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
   // ウルトラ is the chain's one form, the owner's cutout in the same frame.
   assert.match(suit.META_UNITAS_RX_FORMS.ultra, /^\/meta-unitas-rx-suit-20261023\/ultra\.webp$/);
   const folder = new URL("../public/meta-unitas-rx-suit-20261023/", import.meta.url);
-  const total = readdirSync(folder).reduce((sum, name) => sum + statSync(new URL(name, folder)).size, 0);
+  const total = readdirSync(folder).reduce(
+    (sum, name) => sum + statSync(new URL(name, folder)).size,
+    0,
+  );
   assert.ok(total < 1_200_000, `suit-up files ${total}`);
   // The entry plays the same scene on a clock.
   const entry = read("src/components/meta-unitas-saga/meta-unitas-entry-sequence.tsx");
@@ -255,7 +263,10 @@ test("the still tiers and the motion gate", () => {
   ])
     assert.ok(gateModule.includes(term), term);
   assert.match(gateModule, /import\("\.\/meta-unitas-rx-engine"\)/);
-  assert.match(styles, /:is\(\.rzn-kicker, \.rzn-phase, \.rzn-hint, \.rzn-readout, \.rzn-nanites, \.rzn-parts\)/);
+  assert.match(
+    styles,
+    /:is\(\.rzn-kicker, \.rzn-phase, \.rzn-hint, \.rzn-readout, \.rzn-nanites, \.rzn-parts\)/,
+  );
   // Every animation in the sheet sits under the motion terms.
   const blocks = styles.split(/@media \(prefers-reduced-motion: no-preference\)/);
   for (const block of blocks.slice(0, 1))

@@ -1,3 +1,7 @@
+    [],
+  );
+
+  useLayoutEffect(() => {
     const returnId = readRiderReturn();
     const returnIndex = returnId == null ? -1 : RIDERS.findIndex((rider) => rider.id === returnId);
     if (returnIndex < 0) return;
@@ -97,10 +101,7 @@
     };
     const handleOpeningHandoff = (event: Event) => {
       const detail = (event as CustomEvent<{ active?: boolean }>).detail;
-      handoffActive =
-        typeof detail?.active === "boolean"
-          ? detail.active
-          : openingHandoffHolds();
+      handoffActive = typeof detail?.active === "boolean" ? detail.active : openingHandoffHolds();
       syncAmbientPause();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -503,6 +504,3 @@
   const current = POSTERS[poster];
   const previous = prevPoster != null ? POSTERS[prevPoster] : null;
   const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
-  const rider = RIDERS[riderTab];
-  const column = COLUMNS[columnTab];
-  const selectedEpisodePickup = episodePickup == null ? null : EPISODES[episodePickup];

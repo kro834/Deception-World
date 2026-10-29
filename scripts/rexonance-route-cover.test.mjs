@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { syncRexonanceRouteCover } from "../src/lib/rexonance-route-cover.js";
 
-const loadGateSource = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
+const loadGateSource = readFileSync(
+  new URL("../src/components/load-gate.tsx", import.meta.url),
+  "utf8",
+);
 const sagaSource = readFileSync(
   new URL("../src/components/rexonance-saga/rexonance-saga.tsx", import.meta.url),
   "utf8",
@@ -26,18 +29,19 @@ test("LoadGate wrapper preserves the true-valued global flag and synchronizes th
   };
   const document = {
     documentElement: root,
-    querySelector: (selector) =>
-      selector === "main.rxs-page.rxs-rexonance-page" ? page : null,
+    querySelector: (selector) => (selector === "main.rxs-page.rxs-rexonance-page" ? page : null),
   };
   const match = loadGateSource.match(
     /const setDocumentLoading = useCallback\(\(loading: boolean\) => \{([\s\S]*?)\n {2}\}, \[\]\);/,
   );
   assert.ok(match, "LoadGate's document-loading wrapper stays available to this regression pin");
+  const decoration = { current: null };
   const setDocumentLoading = new Function(
     "document",
     "syncRexonanceRouteCover",
+    "decoration",
     `return (loading) => {${match[1]}}`,
-  )(document, syncRexonanceRouteCover);
+  )(document, syncRexonanceRouteCover, decoration);
 
   setDocumentLoading(true);
   assert.equal(root.hasAttribute("data-loading"), true);
@@ -63,6 +67,15 @@ test("LoadGate wrapper preserves the true-valued global flag and synchronizes th
   setDocumentLoading(false);
   assert.equal(root.hasAttribute("data-loading"), false);
   assert.equal(pageAttributes.has("data-route-covered"), false);
+
+  // Once decoration is skipped, later decorative state updates cannot relock
+  // the current document or mark the destination's suit as covered again.
+  decoration.current = { skipped: true };
+  setDocumentLoading(true);
+  assert.equal(root.hasAttribute("data-loading"), false);
+  assert.equal(pageAttributes.has("data-route-covered"), false);
+  setDocumentLoading(false);
+  assert.equal(root.hasAttribute("data-loading"), false);
 });
 
 test("Rexonance mirrors the global cover state locally at commit and transition sync points", () => {

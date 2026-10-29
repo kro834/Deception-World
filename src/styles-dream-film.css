@@ -184,6 +184,7 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   background: rgb(42 19 35 / 86%);
 }
 .dream-hero-actions a:first-child {
+  grid-column: 1 / -1;
   background: #a42f2c;
   border-color: #d87866;
 }

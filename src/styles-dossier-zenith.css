@@ -1986,13 +1986,22 @@ html[data-family="dossier"] main.manager-page #dossier-profile .dossier-identity
   container-type: inline-size;
 }
 
-html[data-family="dossier"] main.manager-page #dossier-profile .dossier-identity .manager-display-name {
+html[data-family="dossier"]
+  main.manager-page
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name {
   white-space: nowrap;
 }
 
 /* The atoms take the name's own size (1em) unless the line is too short
    for every character (~1.08em each with the tracking). */
-html[data-family="dossier"] main.manager-page #dossier-profile .dossier-identity .manager-display-name .jp-atom {
+html[data-family="dossier"]
+  main.manager-page
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name
+  .jp-atom {
   font-size: min(1em, calc(100cqi / (var(--name-len, 4) * 1.08)));
 }
 
@@ -2400,4 +2409,16 @@ html[data-family="dossier"]
   #dossier-profile
   .sovereign-status {
   margin-top: clamp(24px, 5vw, 32px);
+}
+
+/* The opening record is the person’s introductory spread, before the
+   quieter detail pages. Copy, section anchors and the Japanese face stay. */
+html[data-family="dossier"]
+  main.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section[data-record-role="lead"]
+  .manager-copy-heading
+  h2 {
+  font-size: clamp(25px, 3.4vw, 42px);
+  line-height: 1.55;
+  text-wrap: pretty;
 }
