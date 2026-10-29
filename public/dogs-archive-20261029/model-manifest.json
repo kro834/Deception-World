@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
-  "version": 5,
-  "revision": "v11",
+  "version": 7,
+  "revision": "v12",
   "model": "guardian-v3.glb",
-  "assetBytes": 7321076,
-  "assetSha256": "77f6263ee31c47b6aacc5a08f13a197555bdfcc4c59b1ddab97e07aebf2208bc",
+  "assetBytes": 7960952,
+  "assetSha256": "123ae737568e3aa8958b00fb876e9fa51cf37e327b4a196026d5c3a71f4e6f8b",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -229,14 +229,6 @@
   },
   "meshAudit": [
     {
-      "mesh": "Arms | coiled arms",
-      "vertices": 51972,
-      "faces": 49402,
-      "triangles": 101536,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
       "mesh": "Face | fused glowing lattice leaf",
       "vertices": 1035,
       "faces": 968,
@@ -246,187 +238,88 @@
     },
     {
       "mesh": "FacePetals | dark hooks framing the leaf",
-      "vertices": 648,
-      "faces": 600,
-      "triangles": 1248,
+      "vertices": 696,
+      "faces": 648,
+      "triangles": 1344,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
-      "mesh": "Frond_00 | ink ribbon with crosier edge",
-      "vertices": 6292,
-      "faces": 6048,
-      "triangles": 12424,
+      "mesh": "Head | painted head",
+      "vertices": 54828,
+      "faces": 108961,
+      "triangles": 109304,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
-      "mesh": "Frond_01 | ink ribbon with crosier edge",
-      "vertices": 5232,
-      "faces": 5024,
-      "triangles": 10328,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_02 | ink ribbon with crosier edge",
-      "vertices": 5124,
-      "faces": 4910,
-      "triangles": 10108,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_03 | ink ribbon with crosier edge",
-      "vertices": 5648,
-      "faces": 5422,
-      "triangles": 11148,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_04 | ink ribbon with crosier edge",
-      "vertices": 4692,
-      "faces": 4490,
-      "triangles": 9252,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_05 | ink ribbon with crosier edge",
-      "vertices": 9896,
-      "faces": 9538,
-      "triangles": 19556,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_06 | ink ribbon with crosier edge",
-      "vertices": 10060,
-      "faces": 9696,
-      "triangles": 19880,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_07 | ink ribbon with crosier edge",
-      "vertices": 3172,
-      "faces": 3030,
-      "triangles": 6252,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_08 | ink ribbon with crosier edge",
-      "vertices": 3160,
-      "faces": 3024,
-      "triangles": 6232,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_09 | ink ribbon with crosier edge",
-      "vertices": 3132,
-      "faces": 2990,
-      "triangles": 6172,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_10 | ink ribbon with crosier edge",
-      "vertices": 3112,
-      "faces": 2970,
-      "triangles": 6132,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Frond_11 | ink ribbon with crosier edge",
-      "vertices": 5620,
-      "faces": 5388,
-      "triangles": 11088,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Head | continuous asymmetric shield and cheek roots",
-      "vertices": 53480,
-      "faces": 106952,
-      "triangles": 106952,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "HeadBeads | pearl chains on the tendrils",
-      "vertices": 1008,
-      "faces": 1680,
-      "triangles": 1680,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Jaw | separate slim lower mandible",
-      "vertices": 330,
-      "faces": 322,
-      "triangles": 656,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Mouth | dark articulated inner membrane",
-      "vertices": 10,
-      "faces": 7,
-      "triangles": 16,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Serpent | ribbed vertebral body",
-      "vertices": 59323,
-      "faces": 56638,
-      "triangles": 116142,
-      "boundaryEdges": 0,
-      "nonManifoldEdges": 0
-    },
-    {
-      "mesh": "Tails | forked spined tails",
-      "vertices": 5912,
-      "faces": 5768,
-      "triangles": 11736,
+      "mesh": "Serpent | painted body, arms and tails",
+      "vertices": 199444,
+      "faces": 190638,
+      "triangles": 391596,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     }
   ],
   "meshStats": {
-    "objects": 21,
-    "vertices": 238858,
-    "triangles": 470474
+    "objects": 4,
+    "vertices": 256003,
+    "triangles": 504180
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 7321076,
-      "sha256": "77f6263ee31c47b6aacc5a08f13a197555bdfcc4c59b1ddab97e07aebf2208bc"
+      "bytes": 7960952,
+      "sha256": "123ae737568e3aa8958b00fb876e9fa51cf37e327b4a196026d5c3a71f4e6f8b"
     }
   ],
   "skinCount": 1,
   "skinJoints": 97,
-  "colorAttribute": "GuardianSurface COLOR_0: role colours (bone/ink/membrane/glow) with cavity AO multiplied once",
+  "colorAttribute": "COLOR_0 only on the glow cores and the face leaf; the painted objects use the atlas",
   "sourceScripts": [
     "scripts/blender/guardian_v3_lib.py",
-    "scripts/blender/dogs_guardian_v5.py"
+    "scripts/blender/dogs_guardian_v5.py",
+    "scripts/blender/dogs_guardian_v7_paint.py"
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "7aabf427f3237f6b986c01f7e84236b371f88eb6c64aadf2cee3b6b054aa455c"
+    "scripts/blender/dogs_guardian_v5.py": "680d187564906ee1ba0274ae888a331373e7d87b77a88a964a411dd5e9698c10",
+    "scripts/blender/dogs_guardian_v7_paint.py": "8b041f5bec7d1f05626b6b75fddf6a645cdc77c896f476f565779438d58e9a42"
   },
-  "referenceImagesUsedAsTexture": false,
+  "referenceImagesUsedAsTexture": true,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 15.799607992172241,
+  "secondsBeforeRender": 17.45384907722473,
+  "painting": {
+    "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
+    "atlas": {
+      "body": 2048,
+      "head": 1024,
+      "uv": "AtlasUV (TEXCOORD after MicroSurfaceUV/AuthoredUV)"
+    },
+    "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
+    "confidenceCoverage": {
+      "body": 0.3062486008595058,
+      "head": 0.5529376739910478
+    },
+    "silhouetteIoU": {
+      "body": {
+        "front": 0.43764376750638345,
+        "back": 0.4408720970749572,
+        "left": 0.42761461780962623,
+        "right": 0.45812432355010374
+      },
+      "head": {
+        "front": 0.06216902382428318,
+        "back": 0.06978868171228261,
+        "left": 0.054131484037598626,
+        "right": 0.05473699629587073
+      }
+    }
+  },
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v11",
-    "stamp": "v11",
-    "rawGlbSha256": "dbccb0d8e596eec68e0e4877a499193c070bfe3a8ca51fde20313880d430ed40"
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v12",
+    "stamp": "v12",
+    "rawGlbSha256": null
   }
 }

@@ -233,7 +233,7 @@ def make_tiles(n, out_dir=None, seed=8):
     m2 = n // 2; mot2 = mot[::2, ::2]; wr2 = wr[::2, ::2]
     h, bone = tile_membrane(m2, rng)
     out["membrane"] = _byte_image("tile-membrane-albedo", _compose(h, bone * 0.85, mot2, 0.3, 0.85), webp=True)
-    out["membrane_n"] = _as_webp_lossless(_normal_image("tile-membrane-normal", h * 0.006 + wr2 * 0.0012 + mot2 * 0.0025, 1.0, downsample=1))
+    out["membrane_n"] = _as_webp_lossless(_normal_image("tile-membrane-normal", h * 0.006 + wr2 * 0.0012 + mot2 * 0.0025, 1.0, downsample=1), quality=90)
     return out
 
 
