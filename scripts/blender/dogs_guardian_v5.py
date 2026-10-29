@@ -1025,7 +1025,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         s_link = float(arcm[2]); s_end = float(arcm[-1]); NS = 14
         while True:
             w0 = float(np.interp(s_link, arcm, ws)); lam = max(0.03, 0.5 * w0)
-            if s_link + lam > s_end or w0 < 0.02:   # whole links only, and none below 2 cm width (they would be a pale blob in the spiral)
+            if s_link + lam > s_end or w0 < 0.045:   # whole links only; the chain enters the spiral's outer turn and stops before the tight core (links would pile up there)
                 break
             for j in range(NS):
                 ph = math.tau * j / NS

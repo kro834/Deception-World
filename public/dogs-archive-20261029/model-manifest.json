@@ -3,8 +3,8 @@
   "version": 7,
   "revision": "v20",
   "model": "guardian-v3.glb",
-  "assetBytes": 5905476,
-  "assetSha256": "9697cf2b6b238a0063bf167ec39a66be29f6b891da1e1205fdf23f0d6619ad51",
+  "assetBytes": 5873300,
+  "assetSha256": "faef959e34fc8fe77284ab5971869da27c1238f192ce620ac1e2146bb34b3347",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -259,9 +259,9 @@
     },
     {
       "mesh": "Serpent | painted body, arms and tails",
-      "vertices": 231452,
-      "faces": 222602,
-      "triangles": 453448,
+      "vertices": 229268,
+      "faces": 220418,
+      "triangles": 449080,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -276,15 +276,15 @@
   ],
   "meshStats": {
     "objects": 5,
-    "vertices": 300729,
-    "triangles": 590634
+    "vertices": 298545,
+    "triangles": 586266
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 5905476,
-      "sha256": "9697cf2b6b238a0063bf167ec39a66be29f6b891da1e1205fdf23f0d6619ad51"
+      "bytes": 5873300,
+      "sha256": "faef959e34fc8fe77284ab5971869da27c1238f192ce620ac1e2146bb34b3347"
     }
   ],
   "skinCount": 1,
@@ -297,12 +297,12 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "5e93929077516d5bb3b7d4dfe72d9968db067dd3d73153c421c5dcc005c28a1d",
+    "scripts/blender/dogs_guardian_v5.py": "9431630a469f49b1397b99fcf77074716af7ed5e5dc3f684553acd85c4f7d723",
     "scripts/blender/dogs_guardian_v7_paint.py": "7ff1ea9005b0a1c1614e7d9fd1ec2ec9e1fa1fe3651418c917e3c0fc25f484c2"
   },
   "referenceImagesUsedAsTexture": true,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 24.23853588104248,
+  "secondsBeforeRender": 24.23780608177185,
   "painting": {
     "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
     "atlas": {
@@ -312,15 +312,15 @@
     },
     "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
     "confidenceCoverage": {
-      "body": 0.3566247937540624,
+      "body": 0.36199392503205907,
       "head": 0.5465329766373599
     },
     "silhouetteIoU": {
       "body": {
-        "front": 0.4540271286202505,
-        "back": 0.46927842236035056,
-        "left": 0.4526623309893272,
-        "right": 0.4844263484469605
+        "front": 0.45848320647561136,
+        "back": 0.47293928778259225,
+        "left": 0.4559374373551426,
+        "right": 0.48900289917859224
       },
       "head": {
         "front": 0.09150578909882068,
