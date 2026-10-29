@@ -192,6 +192,7 @@ export function applyGuardianInkSurface(
  vec3 gRel=vGuardianWorld-uFaceBase;
  float gT=clamp(dot(gRel,gAxis)/gLen,0.,1.);
  float gU=0.;
+ float gTa=gT;
  if(uFaceMode>1.5){gU=vGuardianUv.x;gT=clamp(vGuardianUv.y,0.,1.);}
  else{
   vec3 gPerp=gRel-gAxis*dot(gRel,gAxis);
@@ -200,9 +201,9 @@ export function applyGuardianInkSurface(
   gU=atan(dot(gPerp,gRef2),dot(gPerp,gRef))/6.2831853+.5;
  }
  float gEdge=pow(1.-saturate(dot(normal,normalize(vViewPosition))),3.);
- float gHot=exp(-pow((1.-gT)/.14,2.));
+ float gHot=exp(-pow((1.-gTa)/.14,2.));
  float gPulse=dot(emissive,vec3(.3333))/1.4;
- float gGrad=mix(.35,1.2,pow(gT,1.5));
+ float gGrad=mix(.35,1.2,pow(gTa,1.5));
  if(uFaceMode<.5){
   float gLine=dot(totalEmissiveRadiance,vec3(.3333));
   diffuseColor.rgb*=1.-.7*gEdge;
@@ -230,13 +231,14 @@ export function applyGuardianInkSurface(
   // Each cell is darker at its centre and lighter toward its rim (an inner glow at the lines).
   float gCellShade=mix(1.,.42,smoothstep(.05,.42,gDmin)*gFade);
   diffuseColor.rgb=vec3(.008,.07,.025)*(1.-.7*gEdge);
-  vec3 gCells=vec3(.02,.2,.075)*(.35+.75*gT)*gCellShade*(1.-.8*gEdge);
-  vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gT,3.));
-  vec3 gRad=gCells*gPulse+gMint*gLines*gGrad*1.3*gPulse*(1.-.6*gEdge);
+  vec3 gCells=vec3(.015,.15,.055)*(.4+.6*gTa)*gCellShade*(1.-.8*gEdge);
+  vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gTa,3.));
+  vec3 gRad=gCells*gPulse+gMint*gLines*gGrad*1.5*gPulse*(1.-.6*gEdge);
   // The bud stays below the bloom threshold everywhere but the tip: a small white-green star.
-  gRad=min(gRad,vec3(1.1));
-  float gStar=exp(-pow((1.-gT)/.07,2.));
-  totalEmissiveRadiance=gRad+vec3(.8,1.,.86)*gStar*(1.3+.5*pow(abs(cos(uFaceCells*3.1415927*gU)),6.))*gPulse;
+  gRad=min(gRad,vec3(1.4));
+  // a small star at the geometric tip only (the last 5% of the bud's length)
+  float gStar=exp(-pow((1.-gTa)/.05,2.));
+  totalEmissiveRadiance=gRad+vec3(.8,1.,.86)*gStar*(1.2+.5*pow(abs(cos(uFaceCells*3.1415927*gU)),6.))*gPulse;
  }
 }`,
             );
@@ -391,6 +393,8 @@ export function applyGuardianInkSurface(
       // which mirrored the studio and read as grey.
       material.metalness = 0;
       material.metalnessMap = null;
+      // Tile normal maps at half strength: the single crisp highlight must stay one clean shape.
+      if (material.normalMap) material.normalScale.multiplyScalar(0.5);
       // Anime shading: no environment reflections on the body.
       material.envMapIntensity = 0;
       material.onBeforeCompile = (shader) => {
@@ -439,15 +443,9 @@ if(gPainted>.5){
  // edge), never used as photographic colour. Older atlases carry low-frequency blotches, so
  // a ridge is also what rises above the map's own blurred level.
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
- float gRidge=smoothstep(.07,.2,gLum);
- #ifdef USE_MAP
- vec2 gTs=vec2(textureSize(map,0));
- vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
- float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
- float gBlurL=dot(textureLod(map,vMapUv,gLod+2.5).rgb*diffuse,vec3(.2126,.7152,.0722));
- gRidge=max(gRidge,smoothstep(-.005,.04,gLum-gBlurL*.7)*smoothstep(.04,.12,gLum));
- #endif
- gBone=gRidge;
+ // Region colours of the anime atlas (sRGB): membrane (10,25,14), head skin (36,55,41),
+ // pale bone and scales (125,166,132): the threshold sits between the head skin and the bone.
+ gBone=smoothstep(.06,.16,gLum);
 }else{
  // Vertex-colour parts: bone is pale OR grey-green (low saturation); ink is saturated green.
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
@@ -493,8 +491,8 @@ if(gVein>.001){
  float gN=gIrr/uToonRange;
  float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN);
  // pits: deep emerald / emerald / mint-green. ridges and bone: mint shadow / mint / near-white mint.
- vec3 gPit=mix(mix(vec3(.010,.045,.018),vec3(.035,.15,.06),gMid),vec3(.12,.34,.16),gHi);
- vec3 gRdg=mix(mix(vec3(.16,.30,.17),vec3(.286,.466,.273),gMid),vec3(.46,.66,.46),gHi);
+ vec3 gPit=mix(mix(vec3(.004,.018,.007),vec3(.012,.05,.02),gMid),vec3(.035,.11,.05),gHi);
+ vec3 gRdg=mix(mix(vec3(.13,.26,.14),vec3(.286,.466,.273),gMid),vec3(.46,.66,.46),gHi);
  vec3 gTone=mix(gPit,gRdg,gBone);
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
