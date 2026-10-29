@@ -29,7 +29,7 @@ from guardian_v3_lib import (P, V, unit, lerp, smooth, catmull, resample, rmf_fr
                              MeshBuilder, clean, mesh_audit, material_from, set_principled)
 
 argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-opts = {"source": "", "out": "", "export": "0", "stamp": "v5", "ao": "1", "tiles": "0"}
+opts = {"source": "", "out": "", "export": "0", "stamp": "v5", "ao": "1", "tiles": "0", "skin": "0"}
 for i in range(0, len(argv), 2):
     opts[argv[i].lstrip("-")] = argv[i + 1]
 OUT = Path(opts["out"]); OUT.mkdir(parents=True, exist_ok=True)
@@ -189,6 +189,17 @@ if TILES:
     CURL_MAT = v8.tile_material("Skin | v8 curl chains", TILE_IMGS["curl"], TILE_IMGS["curl_n"], 0.6)
     MEMB_MAT = v8.tile_material("Skin | v8 veined membrane", TILE_IMGS["membrane"], TILE_IMGS["membrane_n"], 0.3)
     print("TILES_DONE", round(time.time() - START, 1), flush=True)
+    if opts["skin"] == "1":
+        # v22 (owner 2026-10-30「体の素材をブラッシュアップ」「blenderで質感素材は作って」): the snake-scale skin is a node
+        # tree baked to a tile (guardian_skin_scales); every skin tube records the scale parametrisation in MicroSurfaceUV
+        import guardian_v3_lib as v3lib
+        import guardian_skin_scales as skin
+        v3lib.SCALE_UV.update(aspect=skin.ASPECT, cols=skin.COLS, rows=skin.ROWS)
+        SKIN_IMGS, _flat, SKIN_STATS = skin.make_scale_maps(OUT)
+        v3lib.SCALE_UV["flat"] = _flat; v3lib.SCALE_UV["on"] = True
+        for m_ in (CRESCENT_MAT, CURL_MAT, MEMB_MAT, INK_MAT):
+            skin.attach_scale_maps(m_, SKIN_IMGS["normal"], SKIN_IMGS["orm"], normal_strength=1.0)
+        print("SKIN_DONE", json.dumps(SKIN_STATS), round(time.time() - START, 1), flush=True)
 else:
     CRESCENT_MAT = CURL_MAT = MEMB_MAT = COMB_MAT
 
@@ -291,6 +302,30 @@ S_FACE = max(S_FB + 0.02, S_LD + 0.27 / HEAD_LEN + 0.01)       # the lattice reg
 S_JAW = S_FACE + 0.55 * (1 - S_FACE)                           # from here the tip splits: upper beak (HeadPivot) / lower jaw (JawPivot)
 RX_K = ([0.0, S_UD, S_LD, S_FB, 0.5 * (S_FB + 1), 1.0], [0.03, 0.50, 0.46, 0.48, 0.30, 0.004])
 RZ_K = ([0.0, S_UD, S_LD, S_FB, 0.5 * (S_FB + 1), 1.0], [0.03, 0.40, 0.38, 0.36, 0.24, 0.004])
+# v22 (owner 2026-10-30「顔の形が少し違うので修正して」): the face is a leaf / bud-shaped almond (05, 07), not a triangle.
+# Below the region border the half-width swells (convex sides) to its widest at FACE_PEAK of the face's length, then
+# tapers in a concave-convex ogive cos(pi g / 2)^1.9 to a long sharp point; full length ~ FACE_RATIO x the widest width.
+# The depth follows the same almond so the side view is a forward-bulging shield, and the last stretch curls slightly
+# toward the viewer (a beak). The region's upper border is an arc: highest at the front centre, FACE_ARC lower at the sides.
+FACE_PEAK, FACE_RATIO, FACE_ARC, FACE_CURL = 0.38, 1.5, 0.07, 0.07
+_F_LEN = HEAD_LEN * (1 - S_FACE)
+_F_RX0 = float(np.interp(S_FACE, RX_K[0], RX_K[1])); _F_RZ0 = float(np.interp(S_FACE, RZ_K[0], RZ_K[1]))
+_F_RXM = max(_F_RX0 * 1.08, _F_LEN / (2 * FACE_RATIO)); _F_RZM = _F_RZ0 * 1.06
+print("FACE almond: length", round(_F_LEN, 3), "border half-width", round(_F_RX0, 3), "widest half-width", round(_F_RXM, 3),
+      "ratio", round(_F_LEN / (2 * _F_RXM), 2), flush=True)
+
+
+def _almond(f, w0, wm):
+    if f < FACE_PEAK:
+        return w0 + (wm - w0) * math.sin(0.5 * math.pi * f / FACE_PEAK)
+    g = (f - FACE_PEAK) / (1 - FACE_PEAK)
+    return wm * math.cos(0.5 * math.pi * g) ** 1.9 + 0.004 * g
+
+
+def face_border(alpha):
+    """s of the face region's upper border on the meridian alpha (an arc: highest at the front centre)."""
+    a = min(1.0, abs(alpha - math.pi) / (0.48 * math.pi))
+    return S_FACE + FACE_ARC * a * a
 
 
 def head_point(s, alpha, bulge=True):
@@ -298,10 +333,16 @@ def head_point(s, alpha, bulge=True):
     i = min(len(HS) - 1, max(0, int(round(s * (len(HS) - 1)))))
     p0 = HEAD_AXIS[i]; N, Bv = HN[i], HB[i]
     rx = float(np.interp(s, RX_K[0], RX_K[1])); rz = float(np.interp(s, RZ_K[0], RZ_K[1]))
+    curl = 0.0
+    if s > S_FACE:   # v22: the almond face
+        f = (s - S_FACE) / (1 - S_FACE)
+        rx = _almond(f, _F_RX0, _F_RXM); rz = _almond(f, _F_RZ0, _F_RZM)
+        curl = FACE_CURL * max(0.0, (f - FACE_PEAK) / (1 - FACE_PEAK)) ** 3
     sn, c = math.sin(alpha), -math.cos(alpha)
     if s > S_FB:
-        rz *= 1.12 if c > 0 else 0.92                           # the face: fuller in front than at the back (the old bud)
-    p = p0 + Bv * (rx * sn) + N * (rz * c)
+        fw = min(1.0, max(0.0, (s - S_FACE) / (0.25 * (1 - S_FACE))))
+        rz *= (1.12 + 0.10 * fw * fw * (3 - 2 * fw)) if c > 0 else 0.92   # the face: fuller in front (v22: a forward shield)
+    p = p0 + Bv * (rx * sn) + N * (rz * c + curl)
     nrm = unit(Bv * (sn / max(rx, 1e-4)) + N * (c / max(rz, 1e-4)))
     if bulge:
         for (sd, R, H), pc in zip(DOMES, DOME_C):
@@ -313,7 +354,7 @@ def head_point(s, alpha, bulge=True):
 
 DOME_C = [head_point(sd, math.pi, bulge=False)[0] for sd, R, H in DOMES]
 DOME_I = [min(len(HS) - 1, int(round(sd * (len(HS) - 1)))) for sd, R, H in DOMES]
-HEAD_TIP_G = L2G(HEAD_AXIS_L[-1])
+HEAD_TIP_G = L2G(tuple(head_point(1.0, math.pi, bulge=False)[0]))   # v22: the tip of the almond (curled toward the viewer)
 
 
 def coil_path(center, r0, r1, turns, start_deg, z_step, n, cw=True):
@@ -1153,7 +1194,23 @@ def head_uv(s, alpha, p):
         if rho < 1.0:
             th = math.atan2(y, x); lr = math.log(rho)
             return ((math.cos(_mphi) * th - math.sin(_mphi) * lr) * _mm / math.tau, (math.sin(_mphi) * th + math.cos(_mphi) * lr) * _mm / math.tau)
-    return (0.5 + (alpha - math.pi) / math.tau, max(0.0, (s - S_FACE) / (1 - S_FACE)))   # face: u around (front 0.25-0.75), v border->tip
+    return (0.5 + (alpha - math.pi) / math.tau, face_v(s, alpha))   # face: u around (front 0.26-0.74), v border->tip
+
+
+_FV = {}
+
+
+def face_v(s, alpha):
+    """v22: v = surface distance along the meridian from the region border (0) to the tip (1), so the lattice rows are
+    evenly spaced on the almond; 0 above the border."""
+    key = round(alpha % math.tau, 6)
+    if key not in _FV:
+        sb = face_border(alpha); ss = np.linspace(sb, 1.0, 241)
+        pts = np.array([head_point(x, alpha, bulge=False)[0] for x in ss])
+        d = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(pts, axis=0), axis=1))])
+        _FV[key] = (ss, d / max(d[-1], 1e-9))
+    ss, dv = _FV[key]
+    return float(np.interp(s, ss, dv))
 
 
 def head_vcol(s, alpha, p):
@@ -1161,7 +1218,8 @@ def head_vcol(s, alpha, p):
         if float(np.linalg.norm(p - pc)) < R:
             return DOME_COL
     a = abs(alpha - math.pi)
-    if (S_FACE - 0.04 <= s < S_FACE + 0.01 and a < 0.58 * math.pi) or (s >= S_FACE and 0.46 * math.pi <= a <= 0.58 * math.pi):
+    sb = face_border(alpha)
+    if (sb - 0.04 <= s < sb + 0.01 and a < 0.58 * math.pi) or (s >= sb and 0.46 * math.pi <= a <= 0.58 * math.pi):
         return BAND_COL                                         # the dark outline band around the lattice region
     return INK_COL
 
@@ -1170,16 +1228,31 @@ def head_slot(s, alpha, p):
     for (sd, R, H), pc in zip(DOMES, DOME_C):
         if float(np.linalg.norm(p - pc)) < 0.95 * R:
             return 1
-    if s >= S_FACE and abs(alpha - math.pi) < 0.48 * math.pi:
+    if s >= face_border(alpha) and abs(alpha - math.pi) < 0.48 * math.pi:
         return 2
     return 0
+
+
+HEAD_SCALE = None
+if opts["skin"] == "1":   # v22: the head skin's scale parametrisation (rings over s, whole scales around)
+    import guardian_v3_lib as v3lib
+    _ss = np.linspace(0.0, 1.0, 121)
+    _rings = np.array([[tuple(L2G(tuple(head_point(sv, j / NA * math.tau)[0]))) for j in range(NA)] for sv in _ss])
+    _per = np.linalg.norm(_rings - np.roll(_rings, -1, axis=1), axis=2).sum(axis=1)
+    _nr = v3lib.scale_ring_count(_per.max())
+    HEAD_SCALE = (_ss, v3lib.scale_cells_along(_rings.mean(axis=1), _per, _nr) / v3lib.SCALE_UV["cols"], _nr / v3lib.SCALE_UV["rows"])
+    print("HEAD_SCALE ring", _nr, "perimeter max", round(float(_per.max()), 3), flush=True)
 
 
 def head_add(s, alpha, weights, shrink=None):
     p, nrm = head_point(s, alpha)
     if shrink is not None:
         i = min(len(HS) - 1, max(0, int(round(s * (len(HS) - 1))))); p = HEAD_AXIS[i] + (p - HEAD_AXIS[i]) * shrink
-    return mhead.add_vertex(L2G(tuple(p)), MOUTH_COL if shrink is not None else head_vcol(s, alpha, p), uv=head_uv(s, alpha, p), weights=weights)
+    idx = mhead.add_vertex(L2G(tuple(p)), MOUTH_COL if shrink is not None else head_vcol(s, alpha, p), uv=head_uv(s, alpha, p), weights=weights)
+    if HEAD_SCALE is not None and shrink is None and not any(float(np.linalg.norm(p - pc)) < R for (sd, R, H), pc in zip(DOMES, DOME_C)):
+        ss, uu, vper = HEAD_SCALE   # the galaxy domes (and the mouth) keep the flat texel
+        mhead.suv[idx] = (float(np.interp(s, ss, uu)), (alpha % math.tau) / math.tau * vper, vper)
+    return idx
 
 
 W_HEAD = [("HeadPivot", 1.0)]; W_JAW = [("JawPivot", 1.0)]
