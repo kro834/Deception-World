@@ -1025,7 +1025,7 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
         s_link = float(arcm[2]); s_end = float(arcm[-1]); NS = 14
         while True:
             w0 = float(np.interp(s_link, arcm, ws)); lam = max(0.03, 0.5 * w0)
-            if s_link + lam > s_end:   # whole links only: no pile-up of clamped samples at the tip
+            if s_link + lam > s_end or w0 < 0.02:   # whole links only, and none below 2 cm width (they would be a pale blob in the spiral)
                 break
             for j in range(NS):
                 ph = math.tau * j / NS
@@ -1035,8 +1035,8 @@ for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
                 e = unit(np.array([np.interp(s_cur, arcm, E[:, k]) for k in range(3)]))
                 sn = math.sin(ph); lobe = (0.22 if sn >= 0 else 0.16) * w * math.copysign(abs(sn) ** 0.7, sn)
                 pts.append(p + e * (0.50 * w + lobe))
-                wid.append(w * (0.07 + 0.16 * abs(sn) ** 1.5) + 0.004)
-                thk.append(0.30 * w + 0.006)
+                wid.append(w * (0.07 + 0.16 * abs(sn) ** 1.5) + 0.002)
+                thk.append(0.30 * w + 0.002)                                    # everything scales with the width into the tip
                 wts.append(chain_weights(s_cur / s_end, stations))
             s_link += lam
         mb.ribbon(np.asarray(pts), np.asarray(wid), np.asarray(thk), sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=nrm, bulge=1.0,
