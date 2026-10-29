@@ -83,6 +83,50 @@ export type GuardianSurfaceHandles = {
   restore(): void;
 };
 
+// Shared by the body families and the face, so the face is lit exactly like the head skin:
+// the rim band (thresholded fresnel toward the rim light) and the three-tone recolouring.
+const GUARDIAN_RIM_GLSL = `{
+ vec3 gV=normalize(vViewPosition);
+ float gNdV=saturate(dot(normal,gV));
+ // A clean rim band (thresholded fresnel toward the rim light), suppressed on thin bars.
+ float gThinness=smoothstep(.08,.35,length(fwidth(normal)));
+ float gFr=pow(1.-gNdV,1.5)*(saturate(dot(normal,uRimDir))*.6+.4);
+ gRimBand=smoothstep(.4,.48,gFr)*(1.-.9*gThinness);
+ gWrapLight=saturate((dot(normal,uKeyDir)+.6)/1.6);
+}`;
+const GUARDIAN_TONES_GLSL = `{
+ // Anime shading: the PBR irradiance (every light, the key's shadow) is quantised into three
+ // tones and recoloured from the family's palette; ridge or pit picks the palette.
+ float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
+ float gN=gIrr/uToonRange;
+ float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN),gHiSkin=smoothstep(.66,.8,gN);
+ // skin: near-black emerald (8,20,12) / (20,46,30), a narrow lit band (40,80,55); ridges and
+ // bone: mint shadow / mint (146,182,143) / near-white mint.
+ vec3 gPit=mix(mix(vec3(.0026,.0072,.0038),vec3(.0084,.0273,.0144),gMid),vec3(.0213,.0821,.0395),gHiSkin);
+ // bone and ridges are the brightest parts, as in 05: pale everywhere with soft shading —
+ // shadow (100,140,105), mid = 05's mint (146,182,143), light (178,208,178).
+ vec3 gRdg=mix(mix(vec3(.127,.262,.141),vec3(.286,.466,.273),gMid),vec3(.445,.624,.445),gHi);
+#ifdef GUARDIAN_HEAD
+ // the galaxy crescents are saturated mint in 05, not pale bone
+ gRdg=mix(mix(vec3(.08,.26,.12),vec3(.17,.5,.25),gMid),vec3(.3,.66,.38),gHi);
+#endif
+ vec3 gTone=mix(gPit,gRdg,gBone);
+#ifdef GUARDIAN_BONE
+ gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
+ // a soft inner light on jade-like bone, not a realistic subsurface
+ gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
+#endif
+ gTone+=uRimColor*gRimBand*mix(.2,.08,gBone)*uRimStrength*1.8;
+ reflectedLight.directDiffuse=gTone;
+ reflectedLight.indirectDiffuse=vec3(0.);
+ // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
+ vec3 gV2=normalize(vViewPosition);
+ vec3 gH=normalize(uKeyDir+gV2);
+ float gSpec=pow(saturate(dot(normal,gH)),48.);
+ reflectedLight.directSpecular=mix(vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.3,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
+ reflectedLight.indirectSpecular=vec3(0.);
+}`;
+
 export function applyGuardianInkSurface(
   model: THREE.Object3D,
   uniforms: GuardianSurfaceUniforms,
@@ -157,11 +201,20 @@ export function applyGuardianInkSurface(
         // The v17 leaf shows about a quarter turn of the axis parametrisation, so it takes
         // more cells per turn to show 6–8 across; the v18 bud's UV spans the whole bud.
         const faceCells = { value: faceMode.value === 2 ? 16 : 28 };
-        const faceRows = { value: faceMode.value === 2 ? 10 : 12 };
+        // 16 rows along the axis keep the cells about as wide as tall most of the way down (05's
+        // lattice reaches the tip; the tall-cell fade is a safety, not the design).
+        const faceRows = { value: faceMode.value === 2 ? 16 : 12 };
+        if (faceMode.value === 2) {
+          // The face is one structure with the dark head (owner, 10-30): it is lit exactly like
+          // the head skin — same toon ramp, no reflections, the authored relief at half strength.
+          material.metalness = 0;
+          material.metalnessMap = null;
+          material.envMapIntensity = 0;
+          material.roughness = Math.min(material.roughness, 0.55);
+          if (material.normalMap) material.normalScale.multiplyScalar(0.5);
+        }
         material.onBeforeCompile = (shader) => {
-          Object.assign(shader.uniforms, {
-            uFaceBase: uniforms.uFaceBase,
-            uFaceTip: uniforms.uFaceTip,
+          Object.assign(shader.uniforms, uniforms, {
             uFaceMode: faceMode,
             uFaceCells: faceCells,
             uFaceRows: faceRows,
@@ -178,15 +231,16 @@ export function applyGuardianInkSurface(
           shader.fragmentShader = shader.fragmentShader
             .replace(
               "#include <common>",
-              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;uniform float uFaceMode,uFaceCells,uFaceRows;varying vec3 vGuardianWorld;varying vec2 vGuardianUv;",
+              "#include <common>\nuniform vec3 uFaceBase,uFaceTip;uniform float uFaceMode,uFaceCells,uFaceRows;uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale;uniform vec3 uRimDir,uKeyDir,uRimColor;uniform vec2 uBoneRange;varying vec3 vGuardianWorld;varying vec2 vGuardianUv;float gBone=0.,gVein=0.,gRimBand=0.,gWrapLight=0.;",
             )
             .replace(
               "#include <color_fragment>",
-              "#include <color_fragment>\n if(uFaceMode<.5)diffuseColor.rgb=mix(diffuseColor.rgb*vec3(.35,.7,.45),vec3(.02,.17,.06),.75);",
+              "#include <color_fragment>\n if(uFaceMode<.5)diffuseColor.rgb=mix(diffuseColor.rgb*vec3(.35,.7,.45),vec3(.02,.17,.06),.75);else if(uFaceMode>1.5)diffuseColor.rgb=vec3(.5);",
             )
             .replace(
               "#include <emissivemap_fragment>",
               `#include <emissivemap_fragment>
+${GUARDIAN_RIM_GLSL}
 {
  vec3 gAxis=uFaceTip-uFaceBase;float gLen=max(length(gAxis),1e-3);gAxis/=gLen;
  vec3 gRel=vGuardianWorld-uFaceBase;
@@ -216,11 +270,13 @@ export function applyGuardianInkSurface(
   // describe the same lines. Line width is 1/8 of a cell.
   // The row coordinate bends harder toward the tip, so the two families sweep around the
   // bud and converge there like a sunflower's seed spirals; lens-shaped cells follow the flow.
-  // g(t)=.6t+.4t³: the families cross at 41° at the base and tighten toward the tip (89° at
-  // t=.9), never nearly parallel.
-  float gH=uFaceRows*(.6*gT+.4*gT*gT*gT);
+  // The rows run on the geometric axis (the bud's own v saturates to 1 over its lower part on
+  // v20, which would leave the lower face without a net); u still comes from the bud's UV.
+  // g(t)=.7t+.3t³: the rows compress toward the tip (slope 0.7 → 1.6), so the cells stay about
+  // isotropic as the bud narrows; the families never run nearly parallel.
+  float gH=uFaceRows*(.7*gTa+.3*gTa*gTa*gTa);
   // an azimuthal drift that dies toward the tip, so no segment stays straight
-  float gDrift=.05*(1.-gT)*sin(12.566371*gU);
+  float gDrift=.05*(1.-gTa)*sin(12.566371*gU);
   float gUd=gU+gDrift;
   float gA=uFaceCells*gUd+gH,gB=uFaceCells*gUd-gH;
   float gU2=fract(gU+.5)+gDrift;
@@ -231,25 +287,31 @@ export function applyGuardianInkSurface(
   float gLineA=1.-smoothstep(.0625-gWa,.0625+gWa,gDa);
   float gLineB=1.-smoothstep(.0625-gWb,.0625+gWb,gDb);
   // The net fades smoothly into the tip glow before its cells could degenerate into stripes.
-  float gTip=smoothstep(.65,.9,gTa);
+  // Along the region everything is keyed to the geometric axis (HeadPivot = the region border,
+  // MouthSocket = the tip): the bud's own v saturates early on v20, and the glow is the last
+  // fifth of the face in 05. The tall-cell fade below still catches stripes before that.
+  float gTip=smoothstep(.82,.96,gTa);
   // Toward the tip the bud's circumference shrinks, so the cells grow tall and thin on screen
   // and both families read as vertical stripes. Fade the net where a cell is over ~3x taller
   // than wide (seam-free u derivative), and in the last stretch of the bud's own UV.
   float gCu=min(fwidth(uFaceCells*gU),fwidth(uFaceCells*gU2));
   float gTall=gCu/max(fwidth(gH),1e-5);
-  float gNetT=uFaceMode>1.5?gT:gTa;
-  float gNet=(1.-smoothstep(2.5,4.,gTall))*(1.-smoothstep(.7,.92,gNetT));
+  float gNet=(1.-smoothstep(2.5,4.,gTall))*(1.-smoothstep(.85,.97,gTa));
   float gFade=(1.-smoothstep(.25,.6,max(gWa,gWb)))*(1.-gTip)*gNet;
   float gLines=max(gLineA,gLineB)*gFade;
   float gDmin=min(gDa,gDb);
   // Each cell is darker at its centre and lighter toward its rim (an inner glow at the lines).
   float gCellShade=mix(1.,.42,smoothstep(.05,.42,gDmin)*gFade);
-  diffuseColor.rgb=vec3(.008,.07,.025)*(1.-.7*gEdge);
-  // The bud glows from within: the cells brighten toward the tip and the cap rises there, so
-  // the tip third blooms softly while the base stays a readable lattice.
-  vec3 gCells=vec3(.015,.15,.055)*(.3+.5*gTa+1.4*gTa*gTa*gTa)*gCellShade*(1.-.8*gEdge);
+  // The face is the head's own dark skin with the pattern on it: the cells stay the near-black
+  // skin at the region border (the toon tones above) and warm to deep emerald only toward the
+  // tip, where the glow is; the lines fade in over the first stretch of the region (axis t
+  // 0–.12, v 0–.15 under the v21 convention), inside the dark outline band, so the pattern has
+  // no hard edge. The tip glow and the cap stay as before.
+  float gWarm=smoothstep(.3,.8,gTa)*.25+.9*gTa*gTa*gTa*gTa;
+  float gIn=smoothstep(0.,.15,gT)*smoothstep(0.,.12,gTa);
+  vec3 gCells=vec3(.015,.15,.055)*gWarm*gCellShade*(1.-.8*gEdge);
   vec3 gMint=mix(vec3(.4,1.,.56),vec3(.8,1.,.86),pow(gTa,3.));
-  vec3 gRad=gCells*gPulse+gMint*gLines*gGrad*1.5*gPulse*(1.-.6*gEdge);
+  vec3 gRad=(gCells+gMint*gLines*gGrad*1.5*(1.-.6*gEdge))*gPulse*gIn;
   gRad+=vec3(.3,1.,.5)*gTip*.9*gPulse;
   gRad=min(gRad,vec3(mix(1.3,2.4,smoothstep(.7,1.,gTa))));
   // a small star at the geometric tip only (the last 5% of the bud's length)
@@ -257,9 +319,13 @@ export function applyGuardianInkSurface(
   totalEmissiveRadiance=gRad+vec3(.8,1.,.86)*gStar*(1.2+.5*pow(abs(cos(uFaceCells*3.1415927*gU)),6.))*gPulse;
  }
 }`,
+            )
+            .replace(
+              "#include <aomap_fragment>",
+              `#include <aomap_fragment>\nif(uFaceMode>1.5)${GUARDIAN_TONES_GLSL}`,
             );
         };
-        material.customProgramCacheKey = () => "guardian-face-lattice-v4";
+        material.customProgramCacheKey = () => "guardian-face-lattice-v5";
         material.needsUpdate = true;
         continue;
       }
@@ -510,15 +576,7 @@ if(gVein>.001){
  normal=normalize(abs(gDet)*normal-sign(gDet)*(gHd.x*gR1+gHd.y*gR2));
 }
 #endif
-{
- vec3 gV=normalize(vViewPosition);
- float gNdV=saturate(dot(normal,gV));
- // A clean rim band (thresholded fresnel toward the rim light), suppressed on thin bars.
- float gThinness=smoothstep(.08,.35,length(fwidth(normal)));
- float gFr=pow(1.-gNdV,1.5)*(saturate(dot(normal,uRimDir))*.6+.4);
- gRimBand=smoothstep(.4,.48,gFr)*(1.-.9*gThinness);
- gWrapLight=saturate((dot(normal,uKeyDir)+.6)/1.6);
-}
+${GUARDIAN_RIM_GLSL}
 #ifdef GUARDIAN_HEAD
 {
  // The galaxy domes: in 05 the two head spirals are the brightest thing after the face — the
@@ -535,38 +593,7 @@ if(gVein>.001){
           .replace(
             "#include <aomap_fragment>",
             `#include <aomap_fragment>
-{
- // Anime shading: the PBR irradiance (every light, the key's shadow) is quantised into three
- // tones and recoloured from the family's palette; ridge or pit picks the palette.
- float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
- float gN=gIrr/uToonRange;
- float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN),gHiSkin=smoothstep(.66,.8,gN);
- // skin: near-black emerald (8,20,12) / (20,46,30), a narrow lit band (40,80,55); ridges and
- // bone: mint shadow / mint (146,182,143) / near-white mint.
- vec3 gPit=mix(mix(vec3(.0026,.0072,.0038),vec3(.0084,.0273,.0144),gMid),vec3(.0213,.0821,.0395),gHiSkin);
- // bone and ridges are the brightest parts, as in 05: pale everywhere with soft shading —
- // shadow (100,140,105), mid = 05's mint (146,182,143), light (178,208,178).
- vec3 gRdg=mix(mix(vec3(.127,.262,.141),vec3(.286,.466,.273),gMid),vec3(.445,.624,.445),gHi);
-#ifdef GUARDIAN_HEAD
- // the galaxy crescents are saturated mint in 05, not pale bone
- gRdg=mix(mix(vec3(.08,.26,.12),vec3(.17,.5,.25),gMid),vec3(.3,.66,.38),gHi);
-#endif
- vec3 gTone=mix(gPit,gRdg,gBone);
-#ifdef GUARDIAN_BONE
- gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
- // a soft inner light on jade-like bone, not a realistic subsurface
- gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
-#endif
- gTone+=uRimColor*gRimBand*mix(.2,.08,gBone)*uRimStrength*1.8;
- reflectedLight.directDiffuse=gTone;
- reflectedLight.indirectDiffuse=vec3(0.);
- // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
- vec3 gV2=normalize(vViewPosition);
- vec3 gH=normalize(uKeyDir+gV2);
- float gSpec=pow(saturate(dot(normal,gH)),48.);
- reflectedLight.directSpecular=mix(vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.3,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
- reflectedLight.indirectSpecular=vec3(0.);
-}`,
+${GUARDIAN_TONES_GLSL}`,
           );
       };
       material.customProgramCacheKey = () => `guardian-toon-surface-v2:${family}${head ? ":head" : ""}`;
