@@ -413,11 +413,19 @@ export function applyGuardianInkSurface(
       if (material.normalMap) material.normalScale.multiplyScalar(0.75);
       // Anime shading: no environment reflections on the body.
       material.envMapIntensity = 0;
+      // The painted head carries the two galaxy domes (aDomeWeight, written per vertex below).
+      const head = family === "skin" && /head/i.test(material.name);
       material.onBeforeCompile = (shader) => {
         Object.assign(shader.uniforms, uniforms);
         shader.vertexShader = shader.vertexShader
-          .replace("#include <common>", "#include <common>\nvarying vec3 vGuardianLocal;")
-          .replace("#include <skinning_vertex>", "#include <skinning_vertex>\nvGuardianLocal=position;");
+          .replace(
+            "#include <common>",
+            `#include <common>\nvarying vec3 vGuardianLocal;${head ? "attribute float aDomeWeight;varying float vDomeWeight;" : ""}`,
+          )
+          .replace(
+            "#include <skinning_vertex>",
+            `#include <skinning_vertex>\nvGuardianLocal=position;${head ? "vDomeWeight=aDomeWeight;" : ""}`,
+          );
         shader.fragmentShader = shader.fragmentShader
           .replace(
             "#include <common>",
@@ -430,6 +438,7 @@ float gBone,gLum,gVein,gRimBand,gWrapLight;
 const float gSkinFamily=${family === "bone" ? "0." : "1."};
 const float gPainted=${material.map ? "1." : "0."};
 ${family === "bone" ? "#define GUARDIAN_BONE" : ""}
+${head ? "#define GUARDIAN_HEAD\nvarying float vDomeWeight;" : ""}
 vec3 gvHash3(vec3 p){p=fract(p*vec3(.1031,.1030,.0973));p+=dot(p,p.yxz+33.33);return fract((p.xxy+p.yxx)*p.zyx);}
 float gvEdge(vec3 p){vec3 i=floor(p),f=fract(p);float f1=8.,f2=8.;
  for(int z=-1;z<=1;z++)for(int y=-1;y<=1;y++)for(int x=-1;x<=1;x++){vec3 g=vec3(float(x),float(y),float(z));vec3 o=gvHash3(i+g);float d=length(g+o-f);if(d<f1){f2=f1;f1=d;}else if(d<f2){f2=d;}}
@@ -469,9 +478,10 @@ if(gPainted>.5){
  vec2 gDx=dFdx(vMapUv*gTs),gDy=dFdy(vMapUv*gTs);
  float gLod=.5*log2(max(max(dot(gDx,gDx),dot(gDy,gDy)),1e-8));
  float gBlurL=dot(textureLod(map,vMapUv,gLod+2.).rgb*diffuse,vec3(.2126,.7152,.0722));
- // Bone geometry (zipper teeth, ribs, blades) keeps its full pale area: the erosion is for
- // the skin tiles only.
- #ifndef GUARDIAN_BONE
+ // Bone geometry (zipper teeth, ribs, blades) keeps its full pale area, and so does the head:
+ // its atlas is clean (flat skin plus the galaxy crescents, which are thin and would be eaten).
+ // The erosion is for the serpent's skin tiles only.
+ #if !defined(GUARDIAN_BONE) && !defined(GUARDIAN_HEAD)
  gBone*=smoothstep(.22,.33,gBlurL);
  #endif
  #endif
@@ -508,7 +518,19 @@ if(gVein>.001){
  float gFr=pow(1.-gNdV,1.5)*(saturate(dot(normal,uRimDir))*.6+.4);
  gRimBand=smoothstep(.4,.48,gFr)*(1.-.9*gThinness);
  gWrapLight=saturate((dot(normal,uKeyDir)+.6)/1.6);
-}`,
+}
+#ifdef GUARDIAN_HEAD
+{
+ // The galaxy domes: in 05 the two head spirals are the brightest thing after the face — the
+ // mint crescents brighten toward a softly glowing centre. The arms glow with the crescents,
+ // the base only near the centre; both stay under the bloom threshold (the hot dot is the
+ // core disc's own).
+ float gRho=1.-vDomeWeight;
+ float gIn=1.-smoothstep(.9,1.,gRho);
+ float gArm=gBone*pow(1.-min(gRho,1.),2.)*gIn;
+ totalEmissiveRadiance+=vec3(.38,.85,.48)*gArm*.6+vec3(.22,.6,.3)*exp(-gRho*gRho*22.)*.45;
+}
+#endif`,
           )
           .replace(
             "#include <aomap_fragment>",
@@ -525,6 +547,10 @@ if(gVein>.001){
  // bone and ridges are the brightest parts, as in 05: pale everywhere with soft shading —
  // shadow (100,140,105), mid = 05's mint (146,182,143), light (178,208,178).
  vec3 gRdg=mix(mix(vec3(.127,.262,.141),vec3(.286,.466,.273),gMid),vec3(.445,.624,.445),gHi);
+#ifdef GUARDIAN_HEAD
+ // the galaxy crescents are saturated mint in 05, not pale bone
+ gRdg=mix(mix(vec3(.08,.26,.12),vec3(.17,.5,.25),gMid),vec3(.3,.66,.38),gHi);
+#endif
  vec3 gTone=mix(gPit,gRdg,gBone);
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
@@ -543,12 +569,13 @@ if(gVein>.001){
 }`,
           );
       };
-      material.customProgramCacheKey = () => `guardian-toon-surface-v1:${family}`;
+      material.customProgramCacheKey = () => `guardian-toon-surface-v2:${family}${head ? ":head" : ""}`;
       material.needsUpdate = true;
       patched++;
     }
   });
   writeCoreRadius(model);
+  writeDomeWeight(model);
   return {
     patched,
     families,
@@ -588,29 +615,37 @@ if(gVein>.001){
 /** Per-vertex radial coordinate (0 at a core's centre, 1 at its edge) for the whorl-core
  * primitives, so their glow can fade outward along the spiral arms in every pose. The
  * core vertices are clustered in the rest pose (one cluster per whorl or coil centre). */
-function writeCoreRadius(model: THREE.Object3D) {
+type CoreCluster = { centre: THREE.Vector3; n: number; max: number };
+
+/** The vertices a mesh draws with a core-family material (the glowing discs). */
+function coreMembers(node: THREE.Mesh): Set<number> {
+  const geometry = node.geometry;
+  const position = geometry.getAttribute("position");
+  const members = new Set<number>();
+  if (!position) return members;
+  const materials = Array.isArray(node.material) ? node.material : [node.material];
+  const groups = geometry.groups.length
+    ? geometry.groups
+    : [{ start: 0, count: geometry.index ? geometry.index.count : position.count, materialIndex: 0 }];
+  for (const group of groups) {
+    const material = materials[group.materialIndex ?? 0];
+    if (!material || guardianSurfaceFamily(material) !== "core") continue;
+    for (let i = group.start; i < group.start + group.count; i++)
+      members.add(geometry.index ? geometry.index.getX(i) : i);
+  }
+  return members;
+}
+
+/** Groups core vertices into discs (centre, vertex count, radius) in the bind pose. */
+function clusterCores(
+  position: THREE.BufferAttribute | THREE.InterleavedBufferAttribute,
+  members: Set<number>,
+  merge: number,
+): { clusters: CoreCluster[]; owner: Map<number, CoreCluster> } {
   const p = new THREE.Vector3();
-  model.traverse((node) => {
-    if (!(node instanceof THREE.Mesh)) return;
-    const geometry = node.geometry;
-    const position = geometry.getAttribute("position");
-    if (!position || geometry.getAttribute("aCoreRadius")) return;
-    const materials = Array.isArray(node.material) ? node.material : [node.material];
-    const groups = geometry.groups.length
-      ? geometry.groups
-      : [{ start: 0, count: geometry.index ? geometry.index.count : position.count, materialIndex: 0 }];
-    const members = new Set<number>();
-    for (const group of groups) {
-      const material = materials[group.materialIndex ?? 0];
-      if (!material || guardianSurfaceFamily(material) !== "core") continue;
-      for (let i = group.start; i < group.start + group.count; i++)
-        members.add(geometry.index ? geometry.index.getX(i) : i);
-    }
-    if (!members.size) return;
-    const radius = new Float32Array(position.count).fill(1);
-    const clusters: { centre: THREE.Vector3; n: number; max: number }[] = [];
-    const merge = 0.55;
-    for (const v of members) {
+  const clusters: CoreCluster[] = [];
+  const owner = new Map<number, CoreCluster>();
+  for (const v of members) {
       p.fromBufferAttribute(position, v);
       let best: (typeof clusters)[number] | null = null,
         bestDistance = Infinity;
@@ -625,26 +660,72 @@ function writeCoreRadius(model: THREE.Object3D) {
         best.centre.multiplyScalar(best.n).add(p).divideScalar(best.n + 1);
         best.n++;
       } else clusters.push({ centre: p.clone(), n: 1, max: 0 });
-    }
-    const owner = new Map<number, (typeof clusters)[number]>();
-    for (const v of members) {
-      p.fromBufferAttribute(position, v);
-      let best = clusters[0],
-        bestDistance = Infinity;
-      for (const cluster of clusters) {
-        const distance = cluster.centre.distanceTo(p);
-        if (distance < bestDistance) {
-          best = cluster;
-          bestDistance = distance;
-        }
+  }
+  for (const v of members) {
+    p.fromBufferAttribute(position, v);
+    let best = clusters[0],
+      bestDistance = Infinity;
+    for (const cluster of clusters) {
+      const distance = cluster.centre.distanceTo(p);
+      if (distance < bestDistance) {
+        best = cluster;
+        bestDistance = distance;
       }
-      best.max = Math.max(best.max, bestDistance);
-      owner.set(v, best);
     }
+    best.max = Math.max(best.max, bestDistance);
+    owner.set(v, best);
+  }
+  return { clusters, owner };
+}
+
+function writeCoreRadius(model: THREE.Object3D) {
+  const p = new THREE.Vector3();
+  model.traverse((node) => {
+    if (!(node instanceof THREE.Mesh)) return;
+    const geometry = node.geometry;
+    const position = geometry.getAttribute("position");
+    if (!position || geometry.getAttribute("aCoreRadius")) return;
+    const members = coreMembers(node);
+    if (!members.size) return;
+    const radius = new Float32Array(position.count).fill(1);
+    const { owner } = clusterCores(position, members, 0.55);
     for (const [v, cluster] of owner) {
       p.fromBufferAttribute(position, v);
       radius[v] = Math.min(1, cluster.centre.distanceTo(p) / Math.max(cluster.max, 1e-4));
     }
     geometry.setAttribute("aCoreRadius", new THREE.BufferAttribute(radius, 1));
+  });
+}
+
+// The head's galaxy domes: each dome's centre is its own small core disc (`Rune | v3 whorl
+// core`, a sibling primitive of the painted head), and the disc's outermost vertex sits at
+// 0.072 of the dome's radius (the model's log-polar layout lights the centre below 0.08;
+// measured against the documented radii 0.34 / 0.52). The painted head gets a per-vertex dome weight (1 at a
+// centre, 0 at the rim and everywhere else), in the bind pose so it holds in every pose.
+function writeDomeWeight(model: THREE.Object3D) {
+  const p = new THREE.Vector3();
+  model.traverse((node) => {
+    if (!(node instanceof THREE.Mesh)) return;
+    const material = Array.isArray(node.material) ? node.material[0] : node.material;
+    if (!material || guardianSurfaceFamily(material) !== "skin" || !/head/i.test(material.name)) return;
+    const geometry = node.geometry;
+    const position = geometry.getAttribute("position");
+    if (!position || geometry.getAttribute("aDomeWeight")) return;
+    const domes: { centre: THREE.Vector3; radius: number }[] = [];
+    for (const sibling of node.parent?.children ?? []) {
+      if (!(sibling instanceof THREE.Mesh) || sibling === node) continue;
+      const members = coreMembers(sibling);
+      if (!members.size) continue;
+      for (const cluster of clusterCores(sibling.geometry.getAttribute("position"), members, 0.15).clusters)
+        domes.push({ centre: cluster.centre, radius: cluster.max / 0.072 });
+    }
+    const weight = new Float32Array(position.count);
+    for (let v = 0; v < position.count && domes.length; v++) {
+      p.fromBufferAttribute(position, v);
+      let w = 0;
+      for (const dome of domes) w = Math.max(w, 1 - p.distanceTo(dome.centre) / dome.radius);
+      weight[v] = Math.max(0, w);
+    }
+    geometry.setAttribute("aDomeWeight", new THREE.BufferAttribute(weight, 1));
   });
 }
