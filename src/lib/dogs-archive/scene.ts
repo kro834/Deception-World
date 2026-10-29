@@ -248,6 +248,13 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   grade.enabled = !referenceLook;
   composer.addPass(grade);
   const surfaceUniforms = createGuardianSurfaceUniforms(noise);
+  if (referenceLook) {
+    // Even light judges the albedo: no green rim or transmission glow from an absent fire.
+    surfaceUniforms.uRimColor.value.setRGB(0.88, 0.93, 0.88);
+    surfaceUniforms.uTransColor.value.setRGB(0.18, 0.24, 0.2);
+    surfaceUniforms.uRimStrength.value = 0.45;
+    surfaceUniforms.uTransStrength.value = 0.25;
+  }
   let inkSurface: GuardianSurfaceHandles | null = null;
   const rimWorld = new THREE.Vector3(),
     keyWorld = new THREE.Vector3(),

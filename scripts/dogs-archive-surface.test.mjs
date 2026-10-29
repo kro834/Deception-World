@@ -23,6 +23,14 @@ test("material families follow the name prefix, so bone named after its lattice 
   assert.equal(family("Skin | v8 crescent combs"), "skin");
   assert.equal(family("Skin | v8 veined membrane"), "skin");
   assert.equal(family("Rune | v8 face mask"), "lattice");
+  // 2026-10-30 v12 (projected atlas; prefixes kept)
+  assert.equal(family("Skin | v12 painted Serp"), "skin");
+  assert.equal(family("Skin | v12 painted Serp.001"), "skin");
+  assert.equal(family("Skin | v12 painted Serp.002"), "skin");
+  assert.equal(family("Bone | v12 painted Serp"), "bone");
+  assert.equal(family("Skin | v12 painted Head"), "skin");
+  assert.equal(family("Bone | v12 painted Head"), "bone");
+  assert.equal(family("Mouth | v12 painted Head"), "mouth");
   // Unknown names fall back to skin; a bare face material is the lattice.
   assert.equal(family("Membrane"), "skin");
   assert.equal(family("Face lattice leaf"), "lattice");

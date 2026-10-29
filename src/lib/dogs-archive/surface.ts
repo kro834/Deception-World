@@ -85,6 +85,7 @@ export function applyGuardianInkSurface(
       roughness: number;
       metalness: number;
       metalnessMap: THREE.Texture | null;
+      vertexColors: boolean;
     }
   >();
   let patched = 0;
@@ -104,7 +105,12 @@ export function applyGuardianInkSurface(
         roughness: material.roughness,
         metalness: material.metalness,
         metalnessMap: material.metalnessMap,
+        vertexColors: material.vertexColors,
       });
+      // A projected atlas (2026-10-30 "painted" materials) already carries the baked AO; any
+      // vertex colour left on those primitives would darken it a second time.
+      if (material.map && /painted/i.test(material.name) && material.vertexColors)
+        material.vertexColors = false;
       if (family === "lattice") {
         // An authored emissive texture keeps its own colours and strength; only the pulse is
         // driven here. The legacy wire lattice gets the painting's white-green.
@@ -154,7 +160,8 @@ uniform vec2 uBoneRange;
 varying vec3 vGuardianWorld;
 float gBone,gLum;
 const float gSkinFamily=${family === "bone" ? "0." : "1."};
-const float gPainted=${material.map ? "1." : "0."};`,
+const float gPainted=${material.map ? "1." : "0."};
+const float gAtlas=${material.map && /painted/i.test(material.name) ? "1." : "0."};`,
           )
           .replace(
             "#include <color_fragment>",
@@ -165,12 +172,15 @@ if(gPainted>.5){
  // Pale ridges rise toward green-white and glow a little; pits stay near-black; no tint, no
  // mottling. uPaintedContrast scales the curve (1 for the tiles, lower for an atlas).
  gLum=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+ // The projected atlas (gAtlas) already carries the originals' contrast: a third of the
+ // curve and half the hue work; the procedural tiles take the full treatment.
+ float gTouch=uPaintedContrast*mix(1.,.35,gAtlas);
  float gCurve=mix(gLum*.8,.15+.72*smoothstep(.05,.4,gLum),smoothstep(.03,.1,gLum));
- float gL2=mix(gLum,gCurve,uPaintedContrast);
+ float gL2=mix(gLum,gCurve,gTouch);
  vec3 gHue=diffuseColor.rgb/max(gLum,1e-4);
  // Pits are ink, not green: the darks lose most of their saturation; ridges go green-white.
- gHue=mix(gHue,vec3(.9,1.,.95),smoothstep(.12,.02,gL2)*.7);
- gHue=mix(gHue,vec3(.86,1.,.88),smoothstep(.3,.7,gL2));
+ gHue=mix(gHue,vec3(.9,1.,.95),smoothstep(.12,.02,gL2)*mix(.7,.35,gAtlas));
+ gHue=mix(gHue,vec3(.86,1.,.88),smoothstep(.3,.7,gL2)*mix(1.,.5,gAtlas));
  diffuseColor.rgb=gHue*gL2;
  gLum=gL2;
  gBone=smoothstep(.22,.55,gL2);
@@ -198,6 +208,8 @@ if(gPainted>.5){
  // 2026-10-29 lattice, up to 0.5) would otherwise cross the bloom threshold under the key.
  float gOut=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
  diffuseColor.rgb*=mix(1.,min(1.,.78/max(gOut,1e-4)),gBone);
+ // Ink is near-black, not green-black: the darks lose most of their saturation.
+ diffuseColor.rgb=mix(diffuseColor.rgb,vec3(gOut)*vec3(.95,1.,.97),smoothstep(.08,.015,gOut)*.6);
 }`,
           )
           .replace(
@@ -269,6 +281,7 @@ if(gPainted>.5){
         material.roughness = state.roughness;
         material.metalness = state.metalness;
         material.metalnessMap = state.metalnessMap;
+        material.vertexColors = state.vertexColors;
         material.needsUpdate = true;
       });
       previous.clear();
