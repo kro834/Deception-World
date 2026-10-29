@@ -31,6 +31,9 @@ export type GuardianSurfaceUniforms = {
   uVeinScale: { value: number };
   /** Irradiance at which the toon ramp's light band is fully on (set per light rig). */
   uToonRange: { value: number };
+  /** Strength of the GLB's tile normal maps on the body families (Skin, painted, Bone): the
+   * baked scales must read as small value steps, not photographic noise. */
+  uTileNormal: { value: number };
 };
 
 export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): GuardianSurfaceUniforms {
@@ -55,6 +58,7 @@ export function createGuardianSurfaceUniforms(noise: THREE.Data3DTexture): Guard
     uClarity: { value: 0 },
     uVeinScale: { value: 1 },
     uToonRange: { value: 3.5 },
+    uTileNormal: { value: 0.75 },
   };
 }
 
@@ -100,9 +104,11 @@ const GUARDIAN_TONES_GLSL = `{
  float gIrr=dot(reflectedLight.directDiffuse+reflectedLight.indirectDiffuse,vec3(.2126,.7152,.0722))*PI*2.;
  float gN=gIrr/uToonRange;
  float gMid=smoothstep(.2,.34,gN),gHi=smoothstep(.56,.72,gN),gHiSkin=smoothstep(.66,.8,gN);
- // skin: near-black emerald (8,20,12) / (20,46,30), a narrow lit band (40,80,55); ridges and
- // bone: mint shadow / mint (146,182,143) / near-white mint.
- vec3 gPit=mix(mix(vec3(.0026,.0072,.0038),vec3(.0084,.0273,.0144),gMid),vec3(.0213,.0821,.0395),gHiSkin);
+ // skin: near-black with only a faint green tint, as 05 — on screen (4,8,6) / (10,18,13), a
+ // narrow lit band (28,46,34). The values are pre-compensated for NeutralToneMapping (×1.12
+ // exposure), whose dark-end offset subtracts the smallest channel and would otherwise leave a
+ // saturated green. Ridges and bone: mint shadow / mint (146,182,143) / near-white mint.
+ vec3 gPit=mix(mix(vec3(.0124,.0135,.013),vec3(.0197,.0224,.0206),gMid),vec3(.0385,.0525,.0424),gHiSkin);
  // bone and ridges are the brightest parts, as in 05: pale everywhere with soft shading —
  // shadow (100,140,105), mid = 05's mint (146,182,143), light (178,208,178).
  vec3 gRdg=mix(mix(vec3(.127,.262,.141),vec3(.286,.466,.273),gMid),vec3(.445,.624,.445),gHi);
@@ -116,14 +122,24 @@ const GUARDIAN_TONES_GLSL = `{
  // a soft inner light on jade-like bone, not a realistic subsurface
  gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
 #endif
- gTone+=uRimColor*gRimBand*mix(.2,.08,gBone)*uRimStrength*1.8;
+ // the skin rim is a little stronger since the skin went black: the silhouette must hold
+ // against the dark green backdrop
+ gTone+=uRimColor*gRimBand*mix(.27,.08,gBone)*uRimStrength*1.8;
  reflectedLight.directDiffuse=gTone;
  reflectedLight.indirectDiffuse=vec3(0.);
  // one crisp highlight on the glossy dark membranes, only a soft sheen on bone
  vec3 gV2=normalize(vViewPosition);
  vec3 gH=normalize(uKeyDir+gV2);
- float gSpec=pow(saturate(dot(normal,gH)),48.);
- reflectedLight.directSpecular=mix(vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.3,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
+ float gNdH=saturate(dot(normal,gH));
+ float gSpec=pow(gNdH,48.);
+ // Skin: a lacquer sheen like polished black jade — one broad soft band along the lit side of
+ // each tube (a wide Blinn lobe, thresholded with a soft edge) and a small brighter core. The
+ // GLB's roughness map (roughnessFactor, when baked) narrows and dims it on rough scale gaps;
+ // its normal map makes the band break along the scale rims.
+ float gGloss=clamp(1.3-roughnessFactor,.35,1.);
+ float gSheen=smoothstep(.26,.6,pow(gNdH,mix(4.,10.,gGloss)))*gGloss;
+ vec3 gSkinSpec=vec3(.05,.08,.06)*gSheen+vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.12*gGloss;
+ reflectedLight.directSpecular=mix(gSkinSpec,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
  reflectedLight.indirectSpecular=vec3(0.);
 }`;
 
@@ -469,8 +485,8 @@ ${GUARDIAN_RIM_GLSL}
       // which mirrored the studio and read as grey.
       material.metalness = 0;
       material.metalnessMap = null;
-      // Tile normal maps at half strength: the single crisp highlight must stay one clean shape.
-      if (material.normalMap) material.normalScale.multiplyScalar(0.75);
+      // Tile normal maps at uTileNormal (0.75): the sheen band must stay one clean shape, and
+      // baked scales read as small value steps in the toon ramp.
       // Anime shading: no environment reflections on the body.
       material.envMapIntensity = 0;
       // The painted head carries the two galaxy domes (aDomeWeight, written per vertex below).
@@ -490,7 +506,7 @@ ${GUARDIAN_RIM_GLSL}
           .replace(
             "#include <common>",
             `#include <common>
-uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale;
+uniform float uToonRange,uRimStrength,uTranslucency,uVeinScale,uTileNormal;
 uniform vec3 uRimDir,uKeyDir,uRimColor;
 uniform vec2 uBoneRange;
 varying vec3 vGuardianLocal;
@@ -558,6 +574,13 @@ if(gPainted>.5){
 diffuseColor.rgb=vec3(.5);`,
           )
           .replace(
+            "#include <normal_fragment_maps>",
+            THREE.ShaderChunk.normal_fragment_maps.replace(
+              "mapN.xy *= normalScale;",
+              "mapN.xy *= normalScale * uTileNormal;",
+            ),
+          )
+          .replace(
             "#include <emissivemap_fragment>",
             `#include <emissivemap_fragment>
 #ifdef GUARDIAN_BONE
@@ -590,7 +613,7 @@ ${GUARDIAN_RIM_GLSL}
 ${GUARDIAN_TONES_GLSL}`,
           );
       };
-      material.customProgramCacheKey = () => `guardian-toon-surface-v2:${family}${head ? ":head" : ""}`;
+      material.customProgramCacheKey = () => `guardian-toon-surface-v3:${family}${head ? ":head" : ""}`;
       material.needsUpdate = true;
       patched++;
     }
