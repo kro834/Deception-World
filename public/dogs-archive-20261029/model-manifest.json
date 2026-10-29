@@ -1,10 +1,10 @@
 {
   "stage": "browser delivery from Blender (v3 organ rebuild)",
   "version": 5,
-  "revision": "v9",
+  "revision": "v10",
   "model": "guardian-v3.glb",
-  "assetBytes": 7973760,
-  "assetSha256": "2a74dd4165fcbc3bfa4954e3a128e8c75cad06ca8cfbcb5bdd9db04584174953",
+  "assetBytes": 6880904,
+  "assetSha256": "2f94236b610674886590bbea9b20ca0957b61850b35a8bd157ac9f92b836ad40",
   "coordinateSystem": {
     "up": "+Y",
     "front": "+Z",
@@ -100,7 +100,8 @@
       "TentaclePivot_07",
       "TentaclePivot_08",
       "TentaclePivot_09",
-      "TentaclePivot_10"
+      "TentaclePivot_10",
+      "TentaclePivot_11"
     ],
     "fingers": {
       "TentaclePivot_00": [
@@ -146,6 +147,10 @@
       "TentaclePivot_10": [
         "Frond10_1",
         "Frond10_2"
+      ],
+      "TentaclePivot_11": [
+        "Frond11_1",
+        "Frond11_2"
       ]
     },
     "neckRig": "SerpentRig",
@@ -225,9 +230,9 @@
   "meshAudit": [
     {
       "mesh": "Arms | coiled arms",
-      "vertices": 39780,
-      "faces": 37910,
-      "triangles": 77784,
+      "vertices": 40908,
+      "faces": 39038,
+      "triangles": 80040,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -240,90 +245,106 @@
       "nonManifoldEdges": 132
     },
     {
+      "mesh": "FacePetals | dark hooks framing the leaf",
+      "vertices": 648,
+      "faces": 600,
+      "triangles": 1248,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
       "mesh": "Frond_00 | ink ribbon with crosier edge",
-      "vertices": 6984,
-      "faces": 6812,
-      "triangles": 13804,
+      "vertices": 6292,
+      "faces": 6048,
+      "triangles": 12424,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_01 | ink ribbon with crosier edge",
-      "vertices": 5656,
-      "faces": 5504,
-      "triangles": 11168,
+      "vertices": 5232,
+      "faces": 5024,
+      "triangles": 10328,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_02 | ink ribbon with crosier edge",
-      "vertices": 5368,
-      "faces": 5216,
-      "triangles": 10592,
+      "vertices": 5124,
+      "faces": 4910,
+      "triangles": 10108,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_03 | ink ribbon with crosier edge",
-      "vertices": 6300,
-      "faces": 6136,
-      "triangles": 12444,
+      "vertices": 5648,
+      "faces": 5422,
+      "triangles": 11148,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_04 | ink ribbon with crosier edge",
-      "vertices": 4878,
-      "faces": 4726,
-      "triangles": 9612,
+      "vertices": 4692,
+      "faces": 4490,
+      "triangles": 9252,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_05 | ink ribbon with crosier edge",
-      "vertices": 10270,
-      "faces": 10102,
-      "triangles": 20380,
+      "vertices": 8268,
+      "faces": 8018,
+      "triangles": 16372,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_06 | ink ribbon with crosier edge",
-      "vertices": 10338,
-      "faces": 10166,
-      "triangles": 20512,
+      "vertices": 8516,
+      "faces": 8254,
+      "triangles": 16860,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_07 | ink ribbon with crosier edge",
-      "vertices": 3238,
-      "faces": 3130,
-      "triangles": 6376,
+      "vertices": 3172,
+      "faces": 3030,
+      "triangles": 6252,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_08 | ink ribbon with crosier edge",
-      "vertices": 3214,
-      "faces": 3110,
-      "triangles": 6332,
+      "vertices": 3160,
+      "faces": 3024,
+      "triangles": 6232,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_09 | ink ribbon with crosier edge",
       "vertices": 3132,
-      "faces": 3024,
-      "triangles": 6164,
+      "faces": 2990,
+      "triangles": 6172,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
     {
       "mesh": "Frond_10 | ink ribbon with crosier edge",
-      "vertices": 3226,
-      "faces": 3118,
-      "triangles": 6352,
+      "vertices": 3112,
+      "faces": 2970,
+      "triangles": 6132,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_11 | ink ribbon with crosier edge",
+      "vertices": 5620,
+      "faces": 5388,
+      "triangles": 11088,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -361,9 +382,9 @@
     },
     {
       "mesh": "Serpent | ribbed vertebral body",
-      "vertices": 57272,
-      "faces": 54744,
-      "triangles": 112152,
+      "vertices": 58862,
+      "faces": 56334,
+      "triangles": 115332,
       "boundaryEdges": 0,
       "nonManifoldEdges": 0
     },
@@ -377,20 +398,20 @@
     }
   ],
   "meshStats": {
-    "objects": 19,
-    "vertices": 221431,
-    "triangles": 436648
+    "objects": 21,
+    "vertices": 224161,
+    "triangles": 441964
   },
   "assets": [
     {
       "file": "guardian-v3.glb",
       "draco": true,
-      "bytes": 7973760,
-      "sha256": "2a74dd4165fcbc3bfa4954e3a128e8c75cad06ca8cfbcb5bdd9db04584174953"
+      "bytes": 6880904,
+      "sha256": "2f94236b610674886590bbea9b20ca0957b61850b35a8bd157ac9f92b836ad40"
     }
   ],
   "skinCount": 1,
-  "skinJoints": 94,
+  "skinJoints": 97,
   "colorAttribute": "GuardianSurface COLOR_0: role colours (bone/ink/membrane/glow) with cavity AO multiplied once",
   "sourceScripts": [
     "scripts/blender/guardian_v3_lib.py",
@@ -398,14 +419,14 @@
   ],
   "sourceSha256": {
     "scripts/blender/guardian_v3_lib.py": "e99bc3348864447caa90c835aec4a998f582dbcd7fb7944ee6347410d23eff87",
-    "scripts/blender/dogs_guardian_v5.py": "30941b548c1d9a3162a712f75af3e1580b0903e4c6e0181368ab2960cfbf54b5"
+    "scripts/blender/dogs_guardian_v5.py": "6aeca4fefa6d65f57b3c63a824afd105af9474815b7a6ed807a095517bc1ce91"
   },
   "referenceImagesUsedAsTexture": false,
   "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
-  "secondsBeforeRender": 14.234654903411865,
+  "secondsBeforeRender": 14.65716814994812,
   "deliveredFrom": {
-    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v9",
-    "stamp": "v9",
-    "rawGlbSha256": "cc0f3e9417441650cea063f0eb7b9290b2eb331a501bd29725510bd87c798f4a"
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v10",
+    "stamp": "v10",
+    "rawGlbSha256": "12c1aaf3c0015e16125af55a4bd1f74cc48516ab6bb268500c24a06cdf9128eb"
   }
 }

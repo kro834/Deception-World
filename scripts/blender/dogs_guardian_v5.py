@@ -68,7 +68,7 @@ for ob in (jawmesh, mouthmesh):
 for ob in list(bpy.data.objects):
     if ob.type == "MESH" and any(ob.name.startswith(p) for p in ("Shell |", "Bone |", "Frond_", "Tail |", "Face |")):
         bpy.data.objects.remove(ob, do_unlink=True)
-for name in ["NeckRig", "MouthAim", "MouthSocket", "JawPivot", "HeadPivot"] + ["TentaclePivot_%02d" % i for i in range(11)]:
+for name in ["NeckRig", "MouthAim", "MouthSocket", "JawPivot", "HeadPivot"] + ["TentaclePivot_%02d" % i for i in range(11)]:  # the v2 blend has eleven
     ob = bpy.data.objects.get(name)
     if ob:
         bpy.data.objects.remove(ob, do_unlink=True)
@@ -246,6 +246,7 @@ FRONDS = [
     ([(1.48, -.42, .30), (1.54, -.90, .39), (1.26, -1.22, .47)], .60, 1.05, +1, (.23, .26, .06)),
     ([(1.28, -1.04, .40), (1.57, -1.43, .43), (1.40, -1.78, .48)], .55, 1.0, +1, (.20, .23, .06)),
     ([(-1.54, -1.18, .32), (-1.92, -1.44, .29), (-2.00, -1.84, .37)], .55, 1.0, +1, (.21, .24, .06)),
+    ([(-.33, 1.85, -.32), (-.85, 2.30, -.40), (-1.20, 2.95, -.45), (-1.32, 3.35, -.45)], .85, 1.05, +1, (.24, .28, .07)),
 ]
 
 
@@ -259,7 +260,7 @@ def frond_path(controls, curl_len, curl_turns, side):
     nrm = plane_normal(controls)
     base = resample(catmull(controls, 20), spacing=0.02)
     tang = unit(base[-1] - base[-3]); lateral = unit(np.cross(nrm, tang)) * side
-    curl = crosier_path(base[-1], tang, lateral, curl_len, turns=curl_turns, straight=0.12, bend_power=1.55)
+    curl = crosier_path(base[-1], tang, lateral, curl_len, turns=max(curl_turns, 1.35), straight=0.10, bend_power=1.5)
     path = resample(np.concatenate([base[:-1], curl], axis=0), spacing=0.018)
     base_len = sum(np.linalg.norm(np.diff(base, axis=0), axis=1))
     return path, nrm, lateral, base_len / (base_len + curl_len)
@@ -334,8 +335,9 @@ ARML = add_chain("ArmL", ARM_L, 10, "NeckHeadJoint")
 ARMR = add_chain("ArmR", ARM_R, 5, "NeckBaseJoint")
 FROND_DATA = []
 FINGER_PARENT = {0: ARML[-1][0], 1: ARML[-1][0], 2: ARML[-1][0], 3: ARML[-1][0], 4: ARML[-1][0],
-                 5: "NeckBaseJoint", 6: ARMR[-1][0], 7: "Frond05_2", 8: "Frond06_2", 9: "Frond06_2", 10: "Frond05_2"}
-for idx in (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10):
+                 5: "NeckBaseJoint", 6: ARMR[-1][0], 7: "Frond05_2", 8: "Frond06_2", 9: "Frond06_2", 10: "Frond05_2",
+                 11: ARML[-1][0]}
+for idx in range(len(FRONDS)):
     controls, cl, ct, side, widths = FRONDS[idx]
     path, nrm, lateral, s_base_end = frond_path(controls, cl, ct, side)
     names = ["TentaclePivot_%02d" % idx, "Frond%02d_1" % idx, "Frond%02d_2" % idx]
@@ -434,7 +436,7 @@ def segmented_tube(mb, path, radii, stations, crest_fn, arc_ext=100, spacing=(0.
         cd = crest_fn(i) if crest else None
         if cd is not None and r > 0.03:
             big = count % 2 == 0
-            hook_len = (sp * (3.2 if big else 2.2) + 0.05) * (1 + 0.12 * noise1(count * 2.1, 17))
+            hook_len = (sp * (3.6 if big else 2.4) + 0.06) * (1 + 0.12 * noise1(count * 2.1, 17))
             mb.crosier(path[i] + cd * (r * 0.9), cd, flow, hook_len, sp * (0.42 if big else 0.30) + 0.006, turns=1.05,
                        straight=0.10, sides=6, color_root=mix(BONE_ROOT, BONE, 0.3), color_tip=mix(BONE_EDGE, GLOW, g),
                        hint=unit(np.cross(cd, flow)), mat=mat_glow if g > 0.5 else mat_bone, bend_power=1.45)
@@ -491,7 +493,7 @@ segmented_tube(mbody, MAIN[:i_split + 2], R_MAIN[:i_split + 2], MAIN_STATIONS, b
                glow_fn=body_glow, rib_scale=0.8, scales=3, scale_size=1.1, rib_width=0.24)
 segmented_tube(mbody, MAIN[i_split:], R_MAIN[i_split:], [(nm, (sc - S_MAIN[i_split]) / (1 - S_MAIN[i_split])) for nm, sc in MAIN_STATIONS if sc >= S_MAIN[i_split] - 1e-9] or MAIN_STATIONS,
                lambda i: body_crest(i + i_split), arc_ext=110, spacing=(0.40, 0.014), comb_fn=lambda i: body_comb(i + i_split),
-               rib_scale=1.15, scales=2, scale_size=0.9, rib_width=0.20)
+               rib_scale=1.45, scales=2, scale_size=0.9, rib_width=0.28)
 # glowing bulb at the body's coiled end
 bm = bmesh.new(); bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=9, radius=0.15)
 mbody.cur_w = [(UP[-1][0], 1.0)]
@@ -582,36 +584,46 @@ arms = attach(marm.finish(micro_uv_scale=2.4))
 clean(arms)
 print("ARMS_DONE", round(time.time() - START, 1), flush=True)
 
-# --- fronds: ink ribbons with spiral tips and large crosier chains, skinned to their 3 bones
+# --- fronds (v10 silhouette pass): broad base with a strong taper, a 2:1 ribbon section with a
+# pale ridge line, the tip spiral baked into the rest pose, and a comb of real flat hooked teeth
+# along the inner (concave) edge, each about 1/3-1/2 of the local width, smaller toward the tip
 for idx, path, nrm, lateral, s_base_end, widths, stations in FROND_DATA:
-    anchor = V(FRONDS[idx][0][0]); n = len(path); arcp = np.linspace(0, 1, n)
+    n = len(path); arcp = np.linspace(0, 1, n)
     w0, w1, w2 = widths
-    ws = np.array([(w0 + (w1 - w0) * math.sin(math.pi * min(1, t / s_base_end * 0.9)) ** 0.8) if t < s_base_end
-                   else lerp(w1 * 0.75, w2, ((t - s_base_end) / (1 - s_base_end)) ** 0.8) for t in arcp])
-    ws *= 1 + 0.06 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.22 + 0.010
+    base_w = w1 * 1.25
+    ws = np.array([base_w * (0.33 + 0.67 * (1 - t) ** 1.15) * (1 - 0.62 * max(0.0, (t - 0.80) / 0.20)) + 0.006 for t in arcp])
+    ws *= 1 + 0.05 * np.array([noise1(t * 9, idx) for t in arcp]); ts = ws * 0.45 + 0.008
     mb = MeshBuilder("Frond_%02d | ink ribbon with crosier edge" % idx, body, [CURL_MAT if TILES else INK_MAT, BONE_MAT])
 
     def rib_color(i, t, j, a):
         if TILES:
             return (0.95, 1.0, 0.95)
         return mix(INK, (0.030, 0.062, 0.040), max(0.0, math.sin(a)) ** 1.5 * (0.5 + 0.5 * (1 - t)))
-    frames, _ = mb.ribbon(path, ws, ts, sides=14, color_fn=rib_color, hint=nrm, bulge=1.35, mat=0,
+    frames, _ = mb.ribbon(path, ws, ts, sides=14, color_fn=rib_color, hint=nrm, bulge=1.2, mat=0,
                           weights_fn=lambda i, t, st=stations: chain_weights(t, st),
                           uv_fn=(lambda i, t, j, a: (i * 0.018 / TILE_M, (1 - abs(2 * j / 14 - 1)) * 1.0)) if TILES else None)
     T, Nn, B = frames
-    # large, dense crosier chain on the curl edge (the fractal edge of the reference's tentacles)
-    s_acc = 0.0; last = -1.0; count = 0
-    for i in range(4, n - 2):
+    # pale ridge line along the convex face
+    ridge = np.asarray([path[i] + Nn[i] * (ts[i] * 0.5 * 1.2 * 0.92) for i in range(n)])
+    mb.tube(ridge, 0.035 * ws + 0.004, sides=6, color=mix(BONE, BONE_EDGE, 0.6), hint=nrm, mat=1, taper_end=True,
+            weights_fn=lambda i, t, st=stations: chain_weights(t, st))
+    # the comb of hooked teeth
+    s_acc = 0.0; last = -1.0
+    for i in range(3, n - 2):
         s_acc += np.linalg.norm(path[i] - path[i - 1]); w = ws[i]
-        if s_acc - last < max(0.035, 0.30 * w):
+        length = min(0.22, max(0.025, 0.48 * w)) * (1 + 0.15 * noise1(i * 0.9, idx))
+        if s_acc - last < max(0.028, 0.72 * length):
             continue
-        last = s_acc; count += 1
+        last = s_acc
         edge_dir = unit(B[i] * (np.sign(np.dot(B[i], lateral)) if abs(np.dot(B[i], lateral)) > 1e-6 else 1.0))
-        big = count % 2 == 0
-        length = (w * (1.45 if big else 0.95) + 0.05) * (1 + 0.18 * noise1(i * 0.7, idx))
+        d0 = unit(edge_dir * 0.75 + T[i] * 0.65)
+        tp = crosier_path(path[i] + edge_dir * (w * 0.46), d0, T[i], length, turns=0.72, straight=0.28, bend_power=1.6)
+        tt_ = np.linspace(0, 1, len(tp))
+        tw = (0.34 * length) * (1 - tt_) ** 0.8 + 0.004
+        tth = np.maximum(0.005, 0.10 * length) * (1 - 0.6 * tt_)
         mb.cur_w = chain_weights(i / (n - 1), stations)
-        mb.crosier(path[i] + edge_dir * (w * 0.42), edge_dir, T[i], length, w * (0.17 if big else 0.12) + 0.009, turns=1.15,
-                   straight=0.08, sides=6, color_root=mix(BONE_ROOT, BONE, 0.2), color_tip=BONE_EDGE, hint=nrm, mat=1, bend_power=1.4)
+        mb.ribbon(tp, tw, tth, sides=8, color_fn=lambda a1, t1, b1, c1: mix(mix(BONE_ROOT, BONE, 0.4), BONE_EDGE, t1 ** 0.7),
+                  hint=nrm, bulge=1.0, mat=1)
         mb.cur_w = None
     fob = attach(mb.finish(micro_uv_scale=2.4)); clean(fob)
 print("FRONDS_DONE", round(time.time() - START, 1), flush=True)
@@ -706,6 +718,14 @@ for cs, radius in HORNS:
         for f in sfaces:
             mbead.add_face(tuple(sv + kk for kk in f), 0)
 attach(mbead.finish(micro_uv_scale=1.0))
+mhook = MeshBuilder("FacePetals | dark hooks framing the leaf", body, [INK_MAT]); mhook.cur_w = [("HeadPivot", 1.0)]
+for sgn in (-1, 1):
+    for t_ in np.linspace(0.10, 0.80, 6):
+        p0 = V(Pinv(OLD_H @ facepoint(t_, sgn * 0.98))); p1 = V(Pinv(OLD_H @ facepoint(t_ + 0.02, sgn * 0.98))); p2 = V(Pinv(OLD_H @ facepoint(t_, sgn * 0.80)))
+        out_ = unit(p0 - p2); flow_ = unit(p1 - p0)
+        mhook.crosier(p0, out_, flow_, 0.065 + 0.03 * (1 - t_), 0.010, turns=0.9, straight=0.2, sides=6,
+                      color_root=INK, color_tip=mix(INK, MEMBRANE, 0.6), hint=unit(np.cross(out_, flow_)), mat=0, bend_power=1.5)
+attach(mhook.finish(micro_uv_scale=1.0))
 # head colours + skin; jaw and oral membrane ride the jaw bone
 g_, gn_ = (lambda me: (np.array([tuple(v.co) for v in me.vertices]), np.array([tuple(v.normal) for v in me.vertices])))(headmesh.data)
 front = np.clip(-gn_[:, 1], 0, 1)
@@ -771,7 +791,7 @@ def pose_coil():
     for k, n in enumerate(chain_names("ArmR", 5)):
         out[n] = q(BZ, 10)
     out.update({"NeckBaseJoint": q(BX, 10), "NeckHeadJoint": q(BX, 8), "HeadPivot": q(BX, 12)})
-    for i in range(11):
+    for i in range(len(FRONDS)):
         for n in ["TentaclePivot_%02d" % i, "Frond%02d_1" % i, "Frond%02d_2" % i]:
             out[n] = q(BZ, 7 if i % 2 else -6)
     return out
@@ -792,7 +812,7 @@ def pose_rear():
     for k, n in enumerate(chain_names("ArmR", 5)):
         out[n] = q(BZ, -14) @ q(BX, -6)
     out.update({"NeckBaseJoint": q(BX, -24), "NeckHeadJoint": q(BX, -24), "HeadPivot": q(BX, -16), "JawPivot": q(BX, 18)})
-    for i in range(11):
+    for i in range(len(FRONDS)):
         spread = 14 if i < 5 else 10
         for n in ["TentaclePivot_%02d" % i, "Frond%02d_1" % i, "Frond%02d_2" % i]:
             out[n] = q(BZ, spread if i % 2 else -spread) @ q(BX, -5)
@@ -814,7 +834,7 @@ def pose_swim(phase):
     for k, n in enumerate(chain_names("ArmR", 5)):
         out[n] = q(BZ, 4 * math.sin(phase + 2.0 + k * 0.4))
     out.update({"NeckBaseJoint": q(BX, 4 * math.sin(phase)), "NeckHeadJoint": q(BX, 3 * math.sin(phase + 0.5)), "HeadPivot": q(BX, 3 * math.sin(phase + 1.0))})
-    for i in range(11):
+    for i in range(len(FRONDS)):
         for kk, n in enumerate(["TentaclePivot_%02d" % i, "Frond%02d_1" % i, "Frond%02d_2" % i]):
             out[n] = q(BZ, 5 * math.sin(phase + i * 0.7 + kk * 0.5))
     return out
@@ -917,8 +937,8 @@ if opts["export"] == "1":
                         "mouth": "MouthSocket", "mouthAim": "MouthAim", "neck": ["NeckBaseJoint", "NeckHeadJoint"],
                         "spineRoot": "SpineRoot", "spineUp": chain_names("SpineUp", 16), "spineDown": chain_names("SpineDown", 10),
                         "tailA": chain_names("TailA", 8), "tailB": chain_names("TailB", 5), "armL": chain_names("ArmL", 10),
-                        "armR": chain_names("ArmR", 5), "tentacles": ["TentaclePivot_%02d" % i for i in range(11)],
-                        "fingers": {("TentaclePivot_%02d" % i): ["Frond%02d_1" % i, "Frond%02d_2" % i] for i in range(11)},
+                        "armR": chain_names("ArmR", 5), "tentacles": ["TentaclePivot_%02d" % i for i in range(len(FRONDS))],
+                        "fingers": {("TentaclePivot_%02d" % i): ["Frond%02d_1" % i, "Frond%02d_2" % i] for i in range(len(FRONDS))},
                         "neckRig": "SerpentRig", "joints": ["NeckBaseJoint", "NeckHeadJoint"]},
               "animations": list(CLIPS.keys()), "transitionSeconds": 1.6,
               "poseClips": {"Rest": "reference pose, all bones", "Exhale": "neck/head/jaw only (NeckBaseJoint, NeckHeadJoint, HeadPivot, JawPivot); convert to additive against Rest to breathe from any pose",
