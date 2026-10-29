@@ -115,7 +115,8 @@ TentaclePivot_00–10／NeckRig の 2 関節）、Rest／Exhale、頭の skin �
   Exhale 中も頭に追従する。4 本の触角に珠の列（HeadPivot の子）。
 - 色: 役割ごとの頂点色（骨＝淡、墨＝黒緑、膜＝深緑）に実形状の半球 AO を 1 回乗算。ORM テクスチャは廃止し
   粗さはスカラー（前任は ORM の青で金属度が入り、墨が環境を映して灰色だった）。
-- 配信: `guardian-v3.glb` 4,439,628 bytes（Draco、21 メッシュ、約 418k 三角形、埋め込み画像 5 枚）。
+- 配信: `guardian-v3.glb` 4,439,628 bytes（Draco、21 メッシュ、337,932 頂点、417,492 三角形、
+  埋め込み画像 3 枚＝顔格子 1、微細法線 2）。
   復号器は `dogs-archive-20261028/decoders/` のまま。読込側の既定 URL と release identity、
   verify-public-deployment の許可パス、model テストの既定フォルダーを v3 へ切り替えた。
 - 確認画像と原画比較: `handoff/goal/ciel3d/model/renders/`、`handoff/goal/ciel3d/model/compare/`。
