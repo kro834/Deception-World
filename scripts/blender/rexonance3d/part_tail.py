@@ -17,15 +17,26 @@ crest each segment's proximal crown laps over the segment below it (V toward
 the root), on the falling leg each distal crown laps over the next (V toward
 the tip); the keystone segment at the crest carries both. A crown is a
 four-point edge (dorsal, both flanks, ventral) that flares out over the next
-segment's neck, trimmed by a raised, ridged gold band. The black shells are
-tiled with grooved, domed diamond scale plates. Each segment carries a pair of
-ridged crystal fins growing out of its crown near the dorsal line, swept
-toward the tip; the largest sit on the crest's outer shoulder.
+segment's neck, trimmed by a heavy gold band (23 mm wide, 6 mm proud, bevelled
+shoulders and a ridge). The black shells are tiled with grooved, domed diamond
+scale plates.
+Crystal: every segment carries a pair of broad flame-shaped leaves on its
+flanks (the +B one faces front and out, the -B one back and in), growing from
+under its gold band, tilted ~35 deg off the shell with the dorsal edge raised
+and swept toward the tip (length 2.0-2.6 x the tube radius, width 1.15-1.4 x),
+larger and pinker toward the crest where they overlap like feathers and break
+the silhouette; so the front and back views read about half crystal around
+the black core. The keystone also grows the sheet's big pink crest blade: it
+stands on the dorsal line, rides the top of the falling leg and lifts off it,
+its point standing outside the falling leg (front-10 ~(0.57, 1.84)).
 Stinger: a gold V-cone collar (GoldDark body, bright raised Gold borders)
 whose rim rises in four horns and dips on the faces, its front and back plates
-running down to points on the blade; a fat crystal sickle blade (convex inner
-edge, tip hooking slightly outward and back, as all four views draw it) and
-two crescent barbs. Socket: a gold boot in a gold-rimmed black plate.
+running down to points over the blade root; a long, broad crystal sickle
+(0.30 m, 0.125 m wide, hanging plumb) whose front-inner edge bows out convex
+and whose point hooks back toward the back-outer side (an S in all four
+views); two broad crescent barbs bowing out past the collar, the inner one a
+second blade rising to Z ~1.76. Socket: a gold boot in a gold-rimmed black
+plate.
 
 Animation contract
   RX_Tail_Pivot00..12  empties, each parented to the previous one (Pivot00 at
@@ -711,6 +722,8 @@ def build(ctx):
                 s_r = sa + 0.30 * ln
                 scale = 0.78
             scale *= (1.0, 0.90)[(k + (sgn < 0)) % 2] * (0.94 + 0.12 * jit)
+            if k == 0 and sgn > 0:
+                scale *= 0.55        # faces the back right at the socket
             flen = r * (2.00 + 0.60 * bump) * scale
             fwid = r * (1.15 + 0.25 * bump) * scale
             bm = flank_fin(path, s_r, th, radius, flen, fwid)
