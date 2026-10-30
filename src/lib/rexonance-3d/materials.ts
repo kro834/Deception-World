@@ -328,12 +328,13 @@ const LOOKS: Record<RexonanceFamily, Look> = {
     },
     scales: 0.3,
   },
-  // Warm polished bronze-gold (#c8873e); its highlights are its own colour, never white.
+  // Polished champagne bronze (#cf9a62): on screen its median matches front-10's gold
+  // (~192/136/87); its highlights are its own colour, never white.
   Gold: {
-    params: { color: srgb(0xc8873e), metalness: 1, roughness: 0.2 },
+    params: { color: srgb(0xcf9a62), metalness: 1, roughness: 0.2 },
   },
   GoldDark: {
-    params: { color: srgb(0x7a4a1c), metalness: 1, roughness: 0.3 },
+    params: { color: srgb(0x7e5230), metalness: 1, roughness: 0.3 },
   },
   Silver: {
     params: { color: srgb(0xdfe2ea), metalness: 1, roughness: 0.16 },

@@ -91,13 +91,21 @@ test("the viewer loads three.js lazily, behind visibility, with status, retry an
   assert.ok(viewer.includes("再読み込み"), "retry after an error");
   assert.match(viewer, /REXONANCE_3D_POSTER = "\/rexonance-3d-20261030\/rexonance-3d-480\.webp"/u);
   for (const label of ["正面", "右側面", "背面", "左側面", "斜め"])
-    assert.ok(REXONANCE_VIEWS.some((view) => view.label === label), label);
+    assert.ok(
+      REXONANCE_VIEWS.some((view) => view.label === label),
+      label,
+    );
   assert.ok(viewer.includes("参照画像") && viewer.includes('id="rexonance-3d-reference"'));
   assert.ok(viewer.includes("自動回転") && viewer.includes("一時停止"));
   // The scene owns reduced motion, the decoder and full disposal.
   assert.match(scene, /prefers-reduced-motion: reduce/u);
   assert.match(scene, /setMeshoptDecoder\(MeshoptDecoder\)/u);
-  assert.match(scene, /from "three\/addons\/libs\/meshopt_decoder\.module\.js"/u);
+  assert.match(scene, /import\("three\/addons\/libs\/meshopt_decoder\.module\.js"\)/u);
+  assert.match(scene, /setDRACOLoader\(draco\)/u);
+  assert.match(
+    scene,
+    /REXONANCE_DRACO_DECODER_PATH = "\/dogs-archive-20261028\/decoders\/draco\/"/u,
+  );
   assert.match(scene, /renderer\.forceContextLoss\(\)/u);
   assert.match(scene, /abort\.abort\(\)/u);
 });
@@ -147,7 +155,10 @@ test("the fitted camera keeps the whole figure inside the band left by the toolb
             const depth = d[0] * forward[0] + d[1] * forward[1] + d[2] * forward[2];
             const ny = (d[0] * up[0] + d[1] * up[1] + d[2] * up[2]) / depth / tan;
             const nx = (d[0] * r[0] + d[1] * r[1] + d[2] * r[2]) / depth / (tan * (width / height));
-            assert.ok(Math.abs(ny) <= 1 - insets.top - insets.bottom + 1e-6, `${view.id} ${width}: ${ny}`);
+            assert.ok(
+              Math.abs(ny) <= 1 - insets.top - insets.bottom + 1e-6,
+              `${view.id} ${width}: ${ny}`,
+            );
             assert.ok(Math.abs(nx) <= 1 - insets.side * 2 + 1e-6, `${view.id} ${width}: ${nx}`);
           }
     }
@@ -186,7 +197,10 @@ test("the export contract is read tolerantly", () => {
 
 test("quality tiers cap the pixel ratio and the adaptive scale steps down and back", () => {
   assert.equal(detectRexonanceQualityTier({ hardwareConcurrency: 8 }, false), "high");
-  assert.equal(detectRexonanceQualityTier({ hardwareConcurrency: 8, deviceMemory: 8 }, true), "mobile");
+  assert.equal(
+    detectRexonanceQualityTier({ hardwareConcurrency: 8, deviceMemory: 8 }, true),
+    "mobile",
+  );
   assert.equal(
     detectRexonanceQualityTier({ hardwareConcurrency: 4, userAgent: "Android 14" }, true),
     "low",
@@ -265,6 +279,9 @@ test("the release attests the model's files and the deploy check accepts exactly
   ]) {
     const { report, seen } = await run({ unknown });
     assert.equal(report.ok, false, unknown);
-    assert.ok(seen.every((path) => !path.startsWith("/rexonance-3d-2026")), "rejected before fetch");
+    assert.ok(
+      seen.every((path) => !path.startsWith("/rexonance-3d-2026")),
+      "rejected before fetch",
+    );
   }
 });

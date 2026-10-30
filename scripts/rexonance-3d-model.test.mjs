@@ -13,7 +13,7 @@ import {
   rexonanceTailPivotIndex,
 } from "../src/lib/rexonance-3d/contract.ts";
 
-// The public REXONANCE 3D model (the Blender export, packed with meshopt) and its manifest.
+// The public REXONANCE 3D model (the Blender export, packed with Draco) and its manifest.
 // The same contract checks a candidate GLB before it replaces the public one:
 //   REXONANCE_MODEL_DIR=<folder with rexonance.glb + model-manifest.json> npm test
 const directory = process.env.REXONANCE_MODEL_DIR
@@ -60,8 +60,9 @@ test("the manifest describes exactly the shipped GLB", () => {
     assert.deepEqual(rebuilt[key], manifest[key], `${key} matches the GLB`);
 });
 
-test("the viewer can decode every required extension (meshopt, no Draco decoder needed)", () => {
+test("the viewer can decode every required extension (Draco or meshopt)", () => {
   const supported = new Set([
+    "KHR_draco_mesh_compression",
     "EXT_meshopt_compression",
     "KHR_mesh_quantization",
     "KHR_materials_clearcoat",
@@ -71,7 +72,6 @@ test("the viewer can decode every required extension (meshopt, no Draco decoder 
     "KHR_texture_transform",
   ]);
   for (const name of gltf.extensionsRequired ?? []) assert.ok(supported.has(name), name);
-  assert.ok(!(gltf.extensionsUsed ?? []).includes("KHR_draco_mesh_compression"));
   assert.equal(gltf.images, undefined, "materials are shader-built: no embedded textures");
 });
 
@@ -158,7 +158,10 @@ test("the tail's pivots form one contiguous chain of empties holding its segment
 test("the viewer's own assets ship beside the model", async () => {
   const folder = new URL("../public/rexonance-3d-20261030/", import.meta.url);
   const normal = await sharp(new URL("textures/scale-normal.webp", folder).pathname).metadata();
-  assert.deepEqual([normal.format, normal.width, normal.height, normal.channels], ["webp", 512, 512, 4]);
+  assert.deepEqual(
+    [normal.format, normal.width, normal.height, normal.channels],
+    ["webp", 512, 512, 4],
+  );
   for (const view of ["front-10", "right-07", "back-09", "left-08"]) {
     const file = new URL(`reference/${view}.webp`, folder).pathname;
     const meta = await sharp(file).metadata();

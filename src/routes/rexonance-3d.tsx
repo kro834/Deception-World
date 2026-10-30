@@ -43,7 +43,12 @@ function Rexonance3d() {
       <header className="rx3d-header">
         <h1>REXONANCE 3D</h1>
         <div className="rx3d-header-actions">
-          <GuardedLink to="/world" assets={[]} aria-label="Deception Worldへ戻る" className="rx3d-exit">
+          <GuardedLink
+            to="/world"
+            assets={[]}
+            aria-label="Deception Worldへ戻る"
+            className="rx3d-exit"
+          >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="m14 5-7 7 7 7M7 12h14"

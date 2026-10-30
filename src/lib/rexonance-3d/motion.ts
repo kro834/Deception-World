@@ -38,7 +38,10 @@ export function createRexonanceMotion(root: THREE.Object3D) {
     else tip.copy(positions[positions.length - 1]);
   }
   const weight = (i: number) => 0.45 + (0.55 * i) / Math.max(1, pivots.length - 1);
-  const lever = positions.reduce((sum, position, i) => sum + position.distanceTo(tip) * weight(i), 0);
+  const lever = positions.reduce(
+    (sum, position, i) => sum + position.distanceTo(tip) * weight(i),
+    0,
+  );
   // About 7 cm of travel at the tip whatever the chain's length and count (0.6-4 degrees a pivot).
   const base = THREE.MathUtils.clamp(lever > 0 ? 0.07 / lever : 0.03, 0.0105, 0.07);
   const rootQuaternion = new THREE.Quaternion();

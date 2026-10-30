@@ -134,5 +134,10 @@ RX_GLTF_DEPS=/path/to/node_modules node scripts/blender/rexonance3d/pack_release
 ```
 
 `RX_GLTF_DEPS` is a separate folder with `@gltf-transform/core`, `extensions`,
-`functions` 4.x and `meshoptimizer` installed (the site's dependencies stay as
-they are). three.js loads the result with `MeshoptDecoder`.
+`functions` 4.x, `meshoptimizer` and `draco3dgltf` installed (the site's
+dependencies stay as they are). The default codec is Draco (about 1.9 MB);
+`--codec meshopt` writes the meshopt version (about 4.4 MB). The viewer decodes
+Draco with the decoders in `public/dogs-archive-20261028/decoders/draco/`
+(WebAssembly, or the plain-JS build where WebAssembly cannot compile). Then run
+`node scripts/rexonance-3d-assets.mjs manifest` and the model test; see
+`docs/rexonance-3d-20261030.md`.

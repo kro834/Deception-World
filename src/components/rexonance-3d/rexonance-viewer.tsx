@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type {
-  RexonanceScene,
-  RexonanceStatus,
-  RexonanceViewId,
-} from "@/lib/rexonance-3d/scene.ts";
+import type { RexonanceScene, RexonanceStatus, RexonanceViewId } from "@/lib/rexonance-3d/scene.ts";
 import {
   REXONANCE_DEFAULT_VIEW,
   REXONANCE_VIEWS,

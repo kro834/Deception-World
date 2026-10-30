@@ -187,7 +187,14 @@ void main() {
   const blurPlane = new THREE.Mesh(planeGeometry);
   blurPlane.visible = false;
   group.add(blurPlane);
-  const camera = new THREE.OrthographicCamera(-width / 2, width / 2, depth / 2, -depth / 2, 0, height);
+  const camera = new THREE.OrthographicCamera(
+    -width / 2,
+    width / 2,
+    depth / 2,
+    -depth / 2,
+    0,
+    height,
+  );
   camera.rotation.x = Math.PI / 2;
   group.add(camera);
   const depthMaterial = new THREE.MeshDepthMaterial();

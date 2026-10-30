@@ -40,6 +40,8 @@ export type RexonanceQuality = {
   /** Crystal shader detail: 2 = facets, inner galaxy layer and sparkles; 1 = no inner layer. */
   crystalDetail: 1 | 2;
   anisotropy: number;
+  /** Draco decode workers (the model is ~100 small meshes, so a few run in parallel). */
+  dracoWorkers: number;
 };
 
 export const REXONANCE_QUALITY: Record<RexonanceQualityTier, RexonanceQuality> = {
@@ -52,6 +54,7 @@ export const REXONANCE_QUALITY: Record<RexonanceQualityTier, RexonanceQuality> =
     shadowSize: 512,
     crystalDetail: 2,
     anisotropy: 8,
+    dracoWorkers: 3,
   },
   mobile: {
     dprCap: 1.75,
@@ -62,6 +65,7 @@ export const REXONANCE_QUALITY: Record<RexonanceQualityTier, RexonanceQuality> =
     shadowSize: 256,
     crystalDetail: 2,
     anisotropy: 4,
+    dracoWorkers: 2,
   },
   low: {
     dprCap: 1.25,
@@ -72,6 +76,7 @@ export const REXONANCE_QUALITY: Record<RexonanceQualityTier, RexonanceQuality> =
     shadowSize: 256,
     crystalDetail: 1,
     anisotropy: 2,
+    dracoWorkers: 1,
   },
 };
 

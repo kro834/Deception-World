@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
-import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+import { GuardianDracoLoader } from "../dogs-archive/draco.ts";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
@@ -40,9 +40,16 @@ import {
 export type { RexonanceViewId } from "./views.ts";
 export type RexonanceStatus = "loading" | "ready" | "error";
 
+/** Draco decoders the site already serves for DOGS ARCHIVE (three r186, glTF build). */
+export const REXONANCE_DRACO_DECODER_PATH = "/dogs-archive-20261028/decoders/draco/";
+
 export type RexonanceSceneOptions = {
   modelUrl?: string;
   scaleMapUrl?: string;
+  /** Folder holding draco_decoder.js, draco_wasm_wrapper.js and draco_decoder.wasm. */
+  dracoDecoderPath?: string;
+  /** The GLB itself, when the page already holds it (the standalone build); no fetch. */
+  modelData?: ArrayBuffer;
   initialView?: RexonanceViewId;
   /** Turntable on load (forced off with prefers-reduced-motion). */
   autoRotate?: boolean;
@@ -74,6 +81,31 @@ export const REXONANCE_MODEL_URL = "/rexonance-3d-20261030/rexonance.glb";
 export const REXONANCE_SCALE_MAP_URL = "/rexonance-3d-20261030/textures/scale-normal.webp";
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
+
+/** extensionsUsed from a GLB's JSON chunk, so only the decoders the file needs start. */
+function glbExtensionsUsed(data: ArrayBuffer): string[] {
+  try {
+    const view = new DataView(data);
+    if (view.getUint32(0, true) !== 0x46546c67 || view.getUint32(16, true) !== 0x4e4f534a)
+      return [];
+    const json = new TextDecoder().decode(new Uint8Array(data, 20, view.getUint32(12, true)));
+    return (JSON.parse(json) as { extensionsUsed?: string[] }).extensionsUsed ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** A page whose policy forbids compiling WebAssembly still has the object; try a tiny module. */
+function webAssemblyCompiles(): boolean {
+  try {
+    return (
+      new WebAssembly.Module(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0])) instanceof
+      WebAssembly.Module
+    );
+  } catch {
+    return false;
+  }
+}
 
 /** The Rexonance viewer: a framework-free three.js surface inside `host`. Every resource it
  * makes is released by dispose(), including a request still in flight. */
@@ -604,15 +636,15 @@ export function createRexonanceScene(
     const local = mesh.worldToLocal(bodyAxis.clone());
     const lo = box.min.getComponent(along);
     const hi = box.max.getComponent(along);
-    const flip = Math.abs(local.getComponent(along) - hi) < Math.abs(local.getComponent(along) - lo);
+    const flip =
+      Math.abs(local.getComponent(along) - hi) < Math.abs(local.getComponent(along) - lo);
     const uv = new Float32Array(position.count * 2);
     const p = new THREE.Vector3();
     for (let i = 0; i < position.count; i++) {
       p.fromBufferAttribute(position, i);
       const t = (p.getComponent(along) - lo) / Math.max(1e-6, hi - lo);
       const s =
-        (p.getComponent(across) - box.min.getComponent(across)) /
-        Math.max(1e-6, size[across]);
+        (p.getComponent(across) - box.min.getComponent(across)) / Math.max(1e-6, size[across]);
       uv[i * 2] = s;
       uv[i * 2 + 1] = flip ? 1 - t : t;
     }
@@ -726,7 +758,7 @@ export function createRexonanceScene(
     try {
       const modelUrl = options.modelUrl ?? REXONANCE_MODEL_URL;
       const [data, texture] = await Promise.all([
-        fetchModel(modelUrl),
+        options.modelData ?? fetchModel(modelUrl),
         loadScaleMap(options.scaleMapUrl ?? REXONANCE_SCALE_MAP_URL),
       ]);
       if (disposed) {
@@ -744,10 +776,32 @@ export function createRexonanceScene(
       }
       stats.bytes = data.byteLength;
       canvas.dataset.assetBytes = String(data.byteLength);
-      await MeshoptDecoder.ready;
-      const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+      const used = glbExtensionsUsed(data);
+      const loader = new GLTFLoader();
+      if (used.includes("EXT_meshopt_compression")) {
+        // Imported on demand: the decoder compiles WebAssembly as soon as it loads.
+        const { MeshoptDecoder } = await import("three/addons/libs/meshopt_decoder.module.js");
+        await MeshoptDecoder.ready;
+        loader.setMeshoptDecoder(MeshoptDecoder);
+      }
+      let draco: GuardianDracoLoader | null = null;
+      if (used.includes("KHR_draco_mesh_compression")) {
+        draco = new GuardianDracoLoader(abort.signal, new THREE.LoadingManager());
+        draco.setDecoderPath(options.dracoDecoderPath ?? REXONANCE_DRACO_DECODER_PATH);
+        draco.setWorkerLimit(quality.dracoWorkers);
+        // Draco's plain-JS build decodes where WebAssembly may not be compiled.
+        if (!webAssemblyCompiles())
+          (draco as unknown as { decoderConfig: { type: string } }).decoderConfig = { type: "js" };
+        loader.setDRACOLoader(draco);
+      }
       const base = new URL(".", new URL(modelUrl, document.baseURI)).href;
-      const gltf: GLTF = await loader.parseAsync(data, base);
+      let gltf: GLTF;
+      try {
+        gltf = await loader.parseAsync(data, base);
+        draco?.commit();
+      } finally {
+        draco?.dispose();
+      }
       if (disposed) {
         disposeTree(gltf.scene);
         return;

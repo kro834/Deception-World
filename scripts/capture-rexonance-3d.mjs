@@ -40,7 +40,12 @@ function chromiumExecutable() {
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch({
   executablePath: chromiumExecutable(),
-  args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--no-sandbox"],
+  args: [
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--enable-unsafe-swiftshader",
+    "--no-sandbox",
+  ],
 });
 const report = { base, captures: [], errors: [] };
 
@@ -73,7 +78,12 @@ if (run("page")) {
     ["page-1440", { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 }],
     [
       "page-390",
-      { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
+      {
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
+      },
     ],
   ]) {
     const { context, page } = await open(profile);
