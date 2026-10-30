@@ -1129,6 +1129,17 @@ html[data-family]
   }
 }
 
+/* All seven destinations fit one control band on a short phone. The
+   previous six tracks put Settings alone on a second 48px row. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   html[data-family]
     body

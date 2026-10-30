@@ -22,6 +22,7 @@ import { OpeningNotice } from "@/components/opening-notice";
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { IpadMenuMode } from "@/components/ipad-menu-mode";
+import { PhoneLandscapeMenu } from "@/components/phone-landscape-menu";
 import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
@@ -281,6 +282,7 @@ function RootDocument() {
               <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />
+              <PhoneLandscapeMenu />
               <OpeningNotice />
             </ZeusButtonProvider>
           </LoadGateProvider>
