@@ -36,6 +36,7 @@ import {
   META_UNITAS_RX_SEAMS,
 } from "./meta-unitas-rx-suit-nanites.ts";
 import { farFromAccents } from "./far-from-assembly-accents.ts";
+import { mountMetaUnitasBoost } from "./meta-unitas-boost.ts";
 
 /** The form after ミドル: ウルトラ, in its crystal's pale light. */
 export const META_UNITAS_FORM_CHAIN = Object.freeze(["ultra"] as const);
@@ -132,9 +133,16 @@ export function mountMetaUnitasAssemblyEngine(
   environment: typeof globalThis = window,
   options: { eager?: boolean } = {},
 ): () => void {
-  return mountRexonanceAssembly(
+  const dispose = mountRexonanceAssembly(
     runway,
     { ...metaUnitasAssemblyConfig(), eager: options.eager },
     environment,
   );
+  // The page's scroll suit-up rides the nanite boost (meta-unitas-boost.ts);
+  // the entry (eager) mounts its own from its first frame.
+  const disposeBoost = options.eager ? null : mountMetaUnitasBoost(runway, environment);
+  return () => {
+    disposeBoost?.();
+    dispose();
+  };
 }
