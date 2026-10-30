@@ -157,18 +157,22 @@ function plateAt(u, v) {
 }
 
 function plateHeight(plate, xn, yn) {
-  // Heights in tile units (one tile is about 20 cm on the suit).
+  // Heights in tile units (one tile is about 11 cm on the suit: scales of 2-4 cm).
   const n = hexNorm(xn, yn);
-  const leanX = (hash2(plate.i, plate.j, 1) - 0.5) * 0.42;
-  const leanY = (hash2(plate.i, plate.j, 2) - 0.5) * 0.24;
-  const keel = 0.07 + hash2(plate.i, plate.j, 3) * 0.1;
+  const leanX = (hash2(plate.i, plate.j, 1) - 0.5) * 0.3;
+  const leanY = (hash2(plate.i, plate.j, 2) - 0.5) * 0.16;
+  const keel = 0.06 + hash2(plate.i, plate.j, 3) * 0.08;
   let h = 0;
   h += -yn * C * 0.2; // the lower tip stands proud: roof-tile overlap
   h += -Math.abs(xn) * A * keel; // two facets meeting on a keel
   h += leanX * xn * A + leanY * yn * C;
   h += (1 - Math.min(1, n) ** 2) * A * 0.1; // a little crown
-  const bevel = Math.min(1, Math.max(0, (n - 0.8) / 0.2));
-  h -= bevel * bevel * A * 0.24; // rounded rim into the seam
+  // A raised lip just inside the upper edges: it faces up and out, so every scale's upper
+  // rim catches the light from above, as the sheet draws them.
+  const upper = Math.min(1, Math.max(0, (yn + 0.15) / 0.5));
+  h += Math.exp(-(((n - 0.8) / 0.07) ** 2)) * A * 0.09 * upper;
+  const bevel = Math.min(1, Math.max(0, (n - 0.84) / 0.16));
+  h -= bevel * bevel * A * 0.26; // rounded rim into the seam
   return h;
 }
 

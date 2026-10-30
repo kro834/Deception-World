@@ -123,7 +123,10 @@ export function createRexonanceScene(
   scene.environmentIntensity = 1;
   const backdrop = createBackdrop();
   scene.add(backdrop.mesh);
-  scene.add(createLightRig());
+  const lightTarget = new THREE.Object3D();
+  lightTarget.name = "RexonanceLightTarget";
+  lightTarget.position.set(0, 1, 0);
+  scene.add(lightTarget);
   const figure = new THREE.Group();
   figure.name = "RexonanceFigure";
   scene.add(figure);
@@ -133,6 +136,8 @@ export function createRexonanceScene(
 
   const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 60);
   camera.position.set(2.5, 1.4, 6);
+  camera.add(createLightRig(lightTarget));
+  scene.add(camera);
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
@@ -156,7 +161,7 @@ export function createRexonanceScene(
   hdr.texture.name = "Rexonance.hdr";
   const composer = new EffectComposer(renderer, hdr);
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.35, 1.5);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.35, 1.7);
   bloom.enabled = quality.bloom;
   const output = new OutputPass();
   const fxaa = samples === 0 ? new FXAAPass() : null;
@@ -632,6 +637,7 @@ export function createRexonanceScene(
     figure.updateMatrixWorld(true);
     frameBox.setFromObject(root);
     orbitCenter.set(0, frameBox.getCenter(new THREE.Vector3()).y, 0);
+    lightTarget.position.copy(orbitCenter);
     uniforms.rxHeight.value = heightM;
     uniforms.rxChest.value.set(axis.x, all.min.y + heightM * 0.68, axis.z + 0.02);
     const bodyAxisWorld = new THREE.Vector3(0, frameBox.min.y + heightM * 0.55, 0);

@@ -269,21 +269,24 @@ void main() {
   };
 }
 
-/** Direct lights on top of the environment: a warm key for crisp lacquer highlights, a cool
- * fill, and the blue and pink rims that edge the silhouette as in the sheet. */
-export function createLightRig() {
+/** Direct lights on top of the environment, carried by the camera so the suit is drawn the
+ * same way from every side, as in the sheet: a warm key above the viewer's left for crisp
+ * lacquer highlights, a cool fill, a blue rim behind the figure's left edge and a pink one
+ * behind its right. (The PMREM room stays fixed in the world, so reflections still travel
+ * across the armour as it turns.) Add the rig to the camera; every light aims at `target`. */
+export function createLightRig(target: THREE.Object3D) {
   const rig = new THREE.Group();
   rig.name = "RexonanceLights";
-  const key = new THREE.DirectionalLight(0xfff1e2, 1.8);
-  key.position.set(-3, 6, 5);
-  const fill = new THREE.DirectionalLight(0xdfe8ff, 0.55);
-  fill.position.set(5, 2, 4);
-  const blue = new THREE.DirectionalLight(0x5b86ff, 1.9);
-  blue.position.set(-5, 2.5, -4.5);
-  const pink = new THREE.DirectionalLight(0xff63bd, 1.2);
-  pink.position.set(5, 2.5, -4.5);
-  const top = new THREE.DirectionalLight(0xffffff, 0.8);
-  top.position.set(0, 10, 0.5);
-  rig.add(key, fill, blue, pink, top);
+  const light = (color: number, intensity: number, x: number, y: number, z: number) => {
+    const directional = new THREE.DirectionalLight(color, intensity);
+    directional.position.set(x, y, z);
+    directional.target = target;
+    rig.add(directional);
+  };
+  light(0xfff1e2, 1.8, -3, 4, 1); // key
+  light(0xdfe8ff, 0.5, 4, 1, 1); // fill
+  light(0x5b86ff, 1.35, -7, 2.5, -14); // blue rim, behind the left edge
+  light(0xff63bd, 0.9, 7, 2.5, -14); // pink rim, behind the right edge
+  light(0xffffff, 0.7, 0, 9, -6); // top
   return rig;
 }

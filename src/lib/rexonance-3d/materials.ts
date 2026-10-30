@@ -232,7 +232,7 @@ const CRYSTAL_EMISSIVE = /* glsl */ `
   rxEmit += mix( vec3( 0.85, 0.92, 1.0 ), vec3( 1.0, 0.75, 0.95 ), rxSeedB ) * rxSpark * 6.0;
   rxEmit += mix( RX_ICE, RX_HOT, rxG ) * rxFres * 0.55;
   rxEmit += rxCol * smoothstep( 0.82, 1.0, rxVv ) * 0.45;
-  totalEmissiveRadiance += rxEmit * rxCrystalGlow;
+  totalEmissiveRadiance += rxEmit;
   diffuseColor.rgb = rxCol * 0.1;
 }
 `;
@@ -381,13 +381,11 @@ export function createRexonanceMaterial(
   const scales = family === "Suit" && Boolean(options.scales);
   const detail = options.crystalDetail ?? 2;
   const ribbonPhase = { value: options.phase ?? 0 };
-  const crystalGlow = { value: 1 };
+  // About 5 cm facets: the crystal reads as cut planes, not as a mesh of cracks.
   const facetDensity = { value: 19 };
-  material.userData.rexonance = { family, crystalGlow, facetDensity };
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms, {
       rxRibbonPhase: ribbonPhase,
-      rxCrystalGlow: crystalGlow,
       rxFacetDensity: facetDensity,
     });
     shader.defines = { ...shader.defines };
@@ -410,7 +408,7 @@ export function createRexonanceMaterial(
 
     let fragment = shader.fragmentShader.replace(
       "#include <common>",
-      `#include <common>\n${COMMON_PARS}\n${HASH}\nuniform sampler2D rxScaleMap;\nuniform float rxScaleTile;\nuniform float rxScaleStrength;\nuniform float rxCrystalGlow;\nuniform float rxFacetDensity;\n${
+      `#include <common>\n${COMMON_PARS}\n${HASH}\nuniform sampler2D rxScaleMap;\nuniform float rxScaleTile;\nuniform float rxScaleStrength;\nuniform float rxFacetDensity;\n${
         crystal ? "varying vec4 vRxTint;\nvarying vec2 vRxUv;\n" : ""
       }`,
     );
@@ -442,13 +440,4 @@ reflectedLight.directSpecular *= mix( 0.45, 1.0, rxCavity );
   material.customProgramCacheKey = () =>
     `rx3d-v1-${family}-${ribbon ? "r" : ""}${scales ? "s" : ""}${crystal ? detail : ""}`;
   return material;
-}
-
-/** Strength of the crystals' emission (the page dims it slightly while the reference panel
- * is open, so the sheet and the model read at the same brightness). */
-export function setRexonanceCrystalGlow(material: THREE.Material, value: number) {
-  const handles = material.userData.rexonance as
-    | { crystalGlow: { value: number } }
-    | undefined;
-  if (handles) handles.crystalGlow.value = value;
 }

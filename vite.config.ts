@@ -133,6 +133,9 @@ export default defineConfig(({ command }) => ({
     host: "0.0.0.0",
     port: 8080,
     strictPort: true,
+    // Dev only: the Blender builds write renders and GLBs under output/ every few seconds;
+    // watching them made the dev server full-reload open pages (2026-10-30).
+    watch: { ignored: ["**/output/**"] },
   },
   resolve: { tsconfigPaths: true },
   plugins: [
