@@ -27,6 +27,7 @@ import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
 import { watchDynamicGui } from "@/lib/dynamic-gui.js";
+import { watchFxMotion } from "@/lib/fx-motion.js";
 import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
@@ -52,6 +53,7 @@ import sagaStreamlineCss from "../styles-saga-streamline.css?url";
 import siteAstraCss from "../styles-site-astra.css?url";
 import commandChromeCss from "../styles-command-chrome.css?url";
 import dynamicGuiCss from "../styles-dynamic-gui.css?url";
+import fxMotionCss from "../styles-fx-motion.css?url";
 import futureSpectrumCss from "../styles-future-spectrum.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
 import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport";
@@ -91,6 +93,13 @@ function DynamicGui() {
 
 /* The gallery curtain's stickers, fetched and decoded on idle so they are on
    the cloth from the curtain's first frame (src/lib/gallery-sticker-warmup.ts). */
+/* html[data-fx-ready] + [data-fx-hover]: the desktop tilt and magnet on a
+   spring (src/lib/fx-motion.js, src/styles-fx-motion.css). */
+function FxMotion() {
+  useEffect(() => watchFxMotion(), []);
+  return null;
+}
+
 function GalleryStickerWarmup() {
   useEffect(() => scheduleGalleryStickerWarmup(GALLERY_CURTAIN_STICKERS), []);
   return null;
@@ -239,6 +248,8 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: commandChromeCss },
       // The dynamic GUI kit (.dg-* classes), on every family, last.
       { rel: "stylesheet", href: dynamicGuiCss },
+      // The future-motion layer (springs, scan arrivals, cascades), after the kit.
+      { rel: "stylesheet", href: fxMotionCss },
       // The future spectrum: colour and surfaces over the shared chrome and
       // the base families (paint only; special, Dream, gallery and the title
       // excluded, so the title does not load it).
@@ -285,6 +296,7 @@ function RootDocument() {
               <Outlet />
               <InquiryNavigation />
               <DynamicGui />
+              <FxMotion />
               <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />
