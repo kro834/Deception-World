@@ -180,36 +180,56 @@ def densify(outline, step):
 
 
 def _cap(ring2d, res):
-    """Triangulate a ring with interior grid points. Returns (extra_pts, tris)
-    where tri indices < len(ring) refer to the ring."""
-    import scipy.spatial
+    """Triangulate a simple polygon ring with interior grid points (constrained
+    Delaunay, so concave outlines keep their boundary edges). Returns
+    (extra_pts, tris) where tri indices < len(ring) refer to the ring."""
+    from mathutils import geometry
 
     ring = np.asarray(ring2d, dtype=float)
     n = len(ring)
-    pts = ring
+    grid = np.zeros((0, 2))
     if res and res > 0:
         x0, y0 = ring.min(axis=0)
         x1, y1 = ring.max(axis=0)
         gx, gy = np.meshgrid(np.arange(x0 + res * 0.5, x1, res), np.arange(y0 + res * 0.5, y1, res))
-        grid = np.stack([gx.ravel(), gy.ravel()], axis=1)
-        if len(grid):
-            inside = L.point_in_polygon(grid, ring)
-            grid = grid[inside]
-        if len(grid):
-            dmin = np.min(np.linalg.norm(grid[:, None, :] - ring[None, :, :], axis=2), axis=1)
-            grid = grid[dmin > res * 0.55]
-        if len(grid):
-            pts = np.vstack([ring, grid])
+        g = np.stack([gx.ravel(), gy.ravel()], axis=1)
+        if len(g):
+            g = g[L.point_in_polygon(g, ring)]
+        if len(g):
+            dmin = np.min(np.linalg.norm(g[:, None, :] - ring[None, :, :], axis=2), axis=1)
+            g = g[dmin > res * 0.55]
+        grid = g
+    pts = np.vstack([ring, grid]) if len(grid) else ring
     if len(pts) < 3:
         return np.zeros((0, 2)), []
-    tri = scipy.spatial.Delaunay(pts)
-    keep = []
-    cents = pts[tri.simplices].mean(axis=1)
-    inside = L.point_in_polygon(cents, ring)
-    for s, ok in zip(tri.simplices, inside):
-        if ok:
-            keep.append(tuple(int(i) for i in s))
-    return pts[n:], keep
+    coords = [Vector((float(x), float(y))) for x, y in pts]
+    edges = [(i, (i + 1) % n) for i in range(n)]
+    try:
+        vo, _eo, fo, orig_v, _oe, _of = geometry.delaunay_2d_cdt(coords, edges, [list(range(n))], 1, 1e-9, True)
+    except TypeError:
+        vo, _eo, fo, orig_v, _oe, _of = geometry.delaunay_2d_cdt(coords, edges, [list(range(n))], 1, 1e-9)
+    # map output vertices back to input indices (CDT may reorder; new
+    # intersection vertices only appear for self-intersecting rings)
+    remap = []
+    extra = []
+    for i, ids in enumerate(orig_v):
+        if ids:
+            remap.append(int(ids[0]))
+        else:
+            remap.append(len(pts) + len(extra))
+            extra.append((float(vo[i].x), float(vo[i].y)))
+    tris = []
+    for f in fo:
+        f = [remap[i] for i in f]
+        for k in range(1, len(f) - 1):
+            tri = (f[0], f[k], f[k + 1])
+            a, b, c = (pts[i] if i < len(pts) else np.asarray(extra[i - len(pts)]) for i in tri)
+            area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+            if abs(area) < 1e-14:
+                continue
+            tris.append(tri if area > 0 else (tri[0], tri[2], tri[1]))
+    rest = np.vstack([grid, np.asarray(extra)]) if extra else grid
+    return rest.reshape(-1, 2), tris
 
 
 class FlatMesh:
@@ -550,7 +570,7 @@ def blade_profile(edge=0.18):
 def blade(path, normals, width_fn, thick_fn, edge=0.18, bm=None):
     """Tapering blade along `path` (root first). normals: face normal per point
     (the blade's flat side). width_fn/thick_fn: t -> metres."""
-    prof = blade_profile(edge)
+    prof = L.ccw(blade_profile(edge))  # CCW profile -> outward faces from rx_lib.sweep
     out = L.sweep(path, prof, scale=lambda t: (max(thick_fn(t), 1e-4), max(width_fn(t), 1e-4)), normals=normals, bm=bm)
     return out
 

@@ -994,16 +994,17 @@ def solve_theta(body, z, x_target, lo, hi, lift):
 
 # lapel centre lines read off the sheet: (Z, X) in front-10 / back-09
 FRONT_LAPEL_X = [(1.153, 0.118), (1.100, 0.148), (1.060, 0.171), (1.020, 0.198), (0.980, 0.224)]
-BACK_LAPEL_X = [(1.153, 0.112), (1.100, 0.156), (1.060, 0.190), (1.025, 0.212)]
+BACK_LAPEL_X = [(1.153, 0.098), (1.100, 0.137), (1.060, 0.163), (1.017, 0.192), (0.975, 0.212)]
 JUNCTION_Z = 0.915
 JUNCTION_TH = math.radians(97.0)
 PANEL_T0, PANEL_T1 = 0.0090, 0.0145  # over the legs' thigh scales (3-8 mm)
-LAPEL_LIFT = 0.0140
+LAPEL_LIFT = 0.0140  # front lapel (over the hip plate)
+BACK_LAPEL_LIFT = 0.0200  # back lapel rides over the buttock blades
 
 
 def lapel_paths(body):
     fk = [(z, solve_theta(body, z, x, math.radians(15), math.radians(96), LAPEL_LIFT)) for z, x in FRONT_LAPEL_X]
-    bk = [(z, solve_theta(body, z, x, math.radians(98), math.radians(175), LAPEL_LIFT)) for z, x in BACK_LAPEL_X]
+    bk = [(z, solve_theta(body, z, x, math.radians(98), math.radians(175), BACK_LAPEL_LIFT)) for z, x in BACK_LAPEL_X]
     fk.append((JUNCTION_Z, JUNCTION_TH))
     bk.append((JUNCTION_Z, JUNCTION_TH))
     return SurfPath(body, fk), SurfPath(body, bk)
@@ -1124,15 +1125,16 @@ def hips(ctx, coll):
     suit.add(grid_slab(P, N, 0.0, 0.0055, bevel=0.0015))
 
     # --- gold lapels with a raised centre ridge, tapering into the clasp
-    for path in (fl, bl):
+    for path, lift in ((fl, LAPEL_LIFT), (bl, BACK_LAPEL_LIFT)):
         Pp, Nn = path.sample(44, z_top, JUNCTION_Z)
-        gold.add(surface_strip(Pp, Nn, 0.026, 0.0065, LAPEL_LIFT, width_fn=lambda t: 1.0 - 0.35 * t))
-        # dark-gold under-lip so the lapel reads as a layered edge
-        gdark.add(surface_strip(Pp, Nn, 0.033, 0.003, LAPEL_LIFT - 0.0018, width_fn=lambda t: 1.0 - 0.4 * t, ridge=0.0))
+        gold.add(surface_strip(Pp, Nn, 0.026, 0.0065, lift, width_fn=lambda t: 1.0 - 0.35 * t))
+        # dark-gold under-lip: a layered edge that also closes the gap down to the panel
+        lip0 = PANEL_T1 - 0.002
+        gdark.add(surface_strip(Pp, Nn, 0.033, lift + 0.0012 - lip0, lip0, width_fn=lambda t: 1.0 - 0.4 * t, ridge=0.0))
 
     # --- clasp at the junction: faceted gold diamond over a dark-gold seat
     rj = body_radial(body, JUNCTION_TH, JUNCTION_Z)
-    cj = rj[0] + rj[1] * (LAPEL_LIFT + 0.006)
+    cj = rj[0] + rj[1] * (BACK_LAPEL_LIFT + 0.004)
     Mj = L.frame_from_normal(cj, rj[1], (0.0, 0.0, 1.0))
     clasp = L.gem_kite(0.034, 0.058, 0.012, table=0.3)
     L.transform(clasp, Mj)
@@ -1192,7 +1194,7 @@ def hips(ctx, coll):
         suit.build("RX_Waist_HipPanel_L", coll, "Suit", 40),
         gold.build("RX_Waist_HipGold_L", coll, "Gold", 30),
         gdark.build("RX_Waist_HipGoldDark_L", coll, "GoldDark", 30),
-        black.build("RX_Waist_Feathers_L", coll, "Black", 32),
+        black.build("RX_Waist_Feathers_L", coll, "Black", 14),
     ]
     for ob in obs:
         if ob is not None:
@@ -1204,33 +1206,109 @@ def fl_x(path, body, z):
     return (r[0] + r[1] * LAPEL_LIFT).x
 
 
+def feather_blade(body, view, c_px, len_px, w_px, gap, d_px=(-0.6, 1.0), ridge=0.0050, edge=0.0012, tilt=0.0030,
+                  n_u=14):
+    """A long faceted blade (pointed at both ends, a raised centre ridge, thin
+    flat edges) centred on sheet pixel c_px, running along the sheet direction
+    d_px, snapped onto the body and lifted by gap (+ tilt toward its tip)."""
+    v = R.VIEWS[view]
+    S = R.S
+    ch, cz = R.px(view, *c_px)
+    hit = body.hit(view, ch, cz)
+    if hit is None:
+        return None
+    loc, n = hit
+    dpx = Vector(d_px).normalized()
+    # sheet px -> world direction (h along +x px is sign * S)
+    dh, dz = dpx.x * v["sign"], -dpx.y
+    if view in ("front", "back"):
+        d = Vector((dh, 0.0, dz))
+    else:
+        d = Vector((0.0, dh, dz))
+    d = (d - n * d.dot(n)).normalized()
+    sv = n.cross(d).normalized()
+    Lb, Wb = len_px * S, w_px * S
+
+    def halfw(t):
+        return 0.5 * Wb * max(0.0, math.sin(math.pi * min(1.0, max(0.0, t)) ** 0.85)) ** 0.9
+
+    def place(u, vv, h, t):
+        q = loc + d * u + sv * vv
+        p, nr = body.closest(q)
+        if nr.dot(n) < 0:
+            nr = -nr
+        return p + nr * (gap + h + tilt * t)
+
+    bm = bmesh.new()
+    rows = []
+    for i in range(n_u + 1):
+        t = i / n_u
+        u = (t - 0.5) * Lb
+        hw = halfw(t)
+        rr = edge + (ridge - edge) * min(1.0, 3.0 * min(t, 1.0 - t) + 0.15)
+        if i in (0, n_u):
+            p_top = place(u, 0.0, edge * 0.5, t)
+            tip = bm.verts.new(p_top)
+            rows.append((tip, tip, tip, tip, tip))
+            continue
+        rows.append((
+            bm.verts.new(place(u, hw, edge, t)),
+            bm.verts.new(place(u, 0.0, rr, t)),
+            bm.verts.new(place(u, -hw, edge, t)),
+            bm.verts.new(place(u, -hw, 0.0, t)),
+            bm.verts.new(place(u, hw, 0.0, t)),
+        ))
+
+    def quad(a_, b_, c_, d_):
+        vs = []
+        for x in (a_, b_, c_, d_):
+            if x not in vs:
+                vs.append(x)
+        if len(vs) >= 3:
+            try:
+                bm.faces.new(vs)
+            except ValueError:
+                pass
+
+    for i in range(n_u):
+        l0, r0, g0, gb0, lb0 = rows[i]
+        l1, r1, g1, gb1, lb1 = rows[i + 1]
+        quad(l0, l1, r1, r0)  # left top facet
+        quad(r0, r1, g1, g0)  # right top facet
+        quad(g0, g1, gb1, gb0)  # right wall
+        quad(lb0, lb1, l1, l0)  # left wall
+        quad(gb0, gb1, lb1, lb0)  # bottom
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    uv = bm.loops.layers.uv.verify()
+    for f in bm.faces:
+        for lp in f.loops:
+            co = lp.vert.co
+            lp[uv].uv = (co.x * 6.0, co.z * 6.0)
+    return bm
+
+
+# back-09 pixel layout of the buttock blades (centre x, y, length, width, gold?)
+FEATHERS = [
+    (437, 724, 98, 25, False),
+    (409, 766, 100, 25, False),
+    (376, 812, 106, 24, True),
+    (452, 800, 92, 24, False),
+    (424, 842, 96, 24, False),
+    (396, 880, 92, 23, False),
+    (458, 874, 80, 21, False),
+]
+
+
 def feathers(ctx, black, gold):
-    """Rows of overlapping pointed plates on the buttock, pointing down and in
-    (herringbone, back-09); the plate nearest the lapel in each row sits on a
-    slightly larger gold plate so it reads gold-edged."""
+    """Long faceted blades on the buttock between the back lapel and the back
+    tasset, running parallel to the lapel and stacked like shingles (upper
+    blades over lower ones); the one along the lapel is gold."""
     body = ctx.body
-    rows = [  # (y centre px, gap, x centres px) in back-09; upper rows overlap lower ones
-        (702, 0.0175, [446, 417]),
-        (774, 0.0150, [452, 422, 393]),
-        (846, 0.0125, [447, 418, 389, 360]),
-    ]
-    lapel_x = lambda y: 425 + (300 - 425) * (y - 650) / (820 - 650)  # noqa: E731
-    for y, gap, xs in rows:
-        outer = min(x for x in xs if not (x < lapel_x(y) + 10 and y < 820))
-        for x in xs:
-            if x < lapel_x(y) + 10 and y < 820:
-                continue
-            d = Vector((0.30, 1.0, 0.0)).normalized()  # px: down and toward the centre
-            nrm = Vector((-d.y, d.x, 0.0))
-            Lh, Wh = 50.0, 14.5
-            c = Vector((x, y, 0.0))
-            pts_px = [c - d * Lh, c + nrm * Wh - d * Lh * 0.30, c + nrm * Wh * 0.55 + d * Lh * 0.55, c + d * Lh * 1.12,
-                      c - nrm * Wh * 0.55 + d * Lh * 0.55, c - nrm * Wh - d * Lh * 0.30]
-            outline = L.ccw([R.back(p.x, p.y) for p in pts_px])
-            black.add(L.conform_plate(body, "back", outline, thickness=0.0038, gap=gap, res=0.012, bevel=0.0014))
-            if x == outer:
-                rim = L.ccw(L.offset_outline(outline, 0.0035))
-                gold.add(L.conform_plate(body, "back", rim, thickness=0.0030, gap=gap - 0.0012, res=0.012, bevel=0.0010))
+    for x, y, ln, w, is_gold in FEATHERS:
+        gap = 0.0104 + 0.0046 * max(0.0, min(1.0, (884 - y) / 160.0))
+        bm = feather_blade(body, "back", (x, y), ln, w, gap)
+        if bm is not None:
+            (gold if is_gold else black).add(bm)
 
 
 # ------------------------------------------------------------------ entry

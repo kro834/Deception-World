@@ -14,7 +14,7 @@ import math
 
 import bmesh
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 import rx_lib as L
 
@@ -27,7 +27,7 @@ class ArmSurf:
 
         pts = L.catmull_rom([Vector(p) for p in ctrl], 16)
         total = L.arc_lengths(pts)[-1]
-        n = int(round(total / ds)) + 1
+        n = round(total / ds) + 1
         self.A = L.resample(pts, n)
         self.n = n
         self.ds = total / (n - 1)
@@ -78,7 +78,7 @@ class ArmSurf:
         G = self.R if grid is None else grid
         i, f = self._idx(s)
         x = (phi % TAU) / TAU * self.nphi
-        j = int(math.floor(x)) % self.nphi
+        j = math.floor(x) % self.nphi
         g = x - math.floor(x)
         j2 = (j + 1) % self.nphi
         r0 = G[i, j] * (1 - g) + G[i, j2] * g
@@ -92,17 +92,17 @@ class ArmSurf:
         return r
 
     def dir(self, s, phi):
-        A, T, e1, e2 = self.axis(s)
+        _A, _T, e1, e2 = self.axis(s)
         return e1 * math.cos(phi) + e2 * math.sin(phi)
 
     def base(self, s, phi):
-        A, T, e1, e2 = self.axis(s)
+        A, _T, e1, e2 = self.axis(s)
         d = e1 * math.cos(phi) + e2 * math.sin(phi)
         return A + d * self.r_total(s, phi)
 
     def body_pt(self, s, phi, lift=0.0):
         """Point on the bare body (no build-up shell), lifted radially."""
-        A, T, e1, e2 = self.axis(s)
+        A, _T, e1, e2 = self.axis(s)
         d = e1 * math.cos(phi) + e2 * math.sin(phi)
         return A + d * (self.radius(s, phi) + lift)
 
@@ -144,7 +144,7 @@ class ArmSurf:
 
 
 # ------------------------------------------------------------------ slabs
-def slab_solid(top, bot, uvs=None, flip_check=None):
+def slab_solid(top, bot, uvs=None):
     """Closed solid from a top point grid [i along][j across] and the bottom
     edge points bot[i] = (left, right) (or a full row; only its two ends are
     used). The bottom is one quad per row (it is never seen against the body).
@@ -325,25 +325,19 @@ def revolve(profile, axis_origin, axis_dir, seg=48, ref=(1.0, 0.0, 0.0), closed_
             v0, v1 = j / m, (j + 1) / m
             for lp, t in zip(f.loops, ((u0, v0), (u0, v1), (u1, v1), (u1, v0))):
                 lp[uvl].uv = t
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
-    bm.normal_update()
-    # make normals point away from the axis on the outermost profile point
+    # the outermost profile vertex lies on the outer wall: its faces must face
+    # away from the axis (whatever the profile's winding)
     jmax = max(range(m), key=lambda j: profile[j][0])
-    f0 = None
-    for f in bm.faces:
-        f0 = f
-        break
-    if f0 is not None:
+    v = rings[0][jmax]
+    bm.normal_update()
+    if v.link_faces:
+        f0 = v.link_faces[0]
         c = f0.calc_center_median()
         radial = (c - o) - z * (c - o).dot(z)
-        # find a face that uses the outermost profile vertex of ring 0
-        v = rings[0][jmax]
-        if v.is_valid and v.link_faces:
-            f0 = v.link_faces[0]
-            c = f0.calc_center_median()
-            radial = (c - o) - z * (c - o).dot(z)
-            if f0.normal.dot(radial) < 0:
-                bmesh.ops.reverse_faces(bm, faces=bm.faces)
+        if f0.normal.dot(radial) < 0:
+            bmesh.ops.reverse_faces(bm, faces=bm.faces)
+    # merge the poles of profiles that touch the axis (studs, finials)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
     bm.normal_update()
     return bm
 
@@ -393,71 +387,6 @@ def bm_join(parts):
         bm.free()
     out.normal_update()
     return out
-
-
-def frame_m(origin, x, y, z):
-    m = Matrix.Identity(4)
-    for i in range(3):
-        m[i][0], m[i][1], m[i][2], m[i][3] = x[i], y[i], z[i], origin[i]
-    return m
-
-
-def box(sx, sy, sz, bevel=0.0, seg=1, matrix=None, taper=None):
-    """Box centred at the origin (sizes along local x, y, z) with optional
-    bevel; taper=(fx, fy) scales the +z face (wedge / frustum)."""
-    bm = bmesh.new()
-    bmesh.ops.create_cube(bm, size=1.0)
-    for v in bm.verts:
-        v.co.x *= sx
-        v.co.y *= sy
-        v.co.z *= sz
-        if taper is not None and v.co.z > 0:
-            v.co.x *= taper[0]
-            v.co.y *= taper[1]
-    if bevel > 0:
-        bmesh.ops.bevel(bm, geom=list(bm.edges), offset=bevel, segments=seg, affect="EDGES", profile=0.5, clamp_overlap=True)
-    uvl = bm.loops.layers.uv.verify()
-    for f in bm.faces:
-        for lp in f.loops:
-            lp[uvl].uv = (0.5 + lp.vert.co.x / max(sx, 1e-6), 0.5 + lp.vert.co.z / max(sz, 1e-6))
-    if matrix is not None:
-        bmesh.ops.transform(bm, matrix=matrix, verts=bm.verts)
-    bm.normal_update()
-    return bm
-
-
-def bipyramid(rx, ry, h_top, h_bot, n=4, bevel=0.0, matrix=None, phase=0.0, mid=None, star=0.0):
-    """Spike knob: an n-sided bipyramid (girdle in local xy, apexes on +-z).
-    star > 0 adds n inner girdle points at radius `star` (relative), giving
-    concave 4-point star flanges like the sheet's pendant knobs."""
-    bm = bmesh.new()
-    pts = []
-    for k in range(n):
-        a = TAU * k / n + phase
-        pts.append((rx * math.cos(a), ry * math.sin(a)))
-        if star > 0:
-            a2 = a + math.pi / n
-            pts.append((rx * star * math.cos(a2), ry * star * math.sin(a2)))
-    g = [bm.verts.new((x, y, 0.0)) for x, y in pts]
-    m = len(g)
-    top = bm.verts.new((0.0, 0.0, h_top))
-    bot = bm.verts.new((0.0, 0.0, -h_bot))
-    for k in range(m):
-        k2 = (k + 1) % m
-        bm.faces.new((g[k], g[k2], top))
-        bm.faces.new((g[k2], g[k], bot))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    if bevel > 0:
-        bmesh.ops.bevel(bm, geom=list(bm.edges), offset=bevel, segments=1, affect="EDGES", profile=0.5, clamp_overlap=True)
-    uvl = bm.loops.layers.uv.verify()
-    hh = max(h_top + h_bot, 1e-6)
-    for f in bm.faces:
-        for lp in f.loops:
-            lp[uvl].uv = (0.5 + lp.vert.co.x / (2 * max(rx, 1e-6)), (lp.vert.co.z + h_bot) / hh)
-    if matrix is not None:
-        bmesh.ops.transform(bm, matrix=matrix, verts=bm.verts)
-    bm.normal_update()
-    return bm
 
 
 def loft_plate(outer, inner, z_outer, z_inner, z_bottom, matrix=None):

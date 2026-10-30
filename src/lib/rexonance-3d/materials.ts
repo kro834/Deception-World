@@ -193,9 +193,13 @@ const CRYSTAL_EMISSIVE = /* glsl */ `
   float rxPinkBias = vRxTint.r;
   float rxSparkle = vRxTint.g;
   float rxEdgeGlow = vRxTint.b;
-  float rxG = clamp( rxVv + rxPinkBias * ( 1.0 - rxVv ), 0.0, 1.0 );
-  vec3 rxCol = mix( RX_BLUE, RX_VIOLET, smoothstep( 0.0, 0.55, rxG ) );
-  rxCol = mix( rxCol, RX_PINK, smoothstep( 0.42, 1.0, rxG ) );
+  // Blue holds the root half, violet comes in past the middle, pink only toward the tip;
+  // the pink bias then mixes toward pink throughout (1 = pink everywhere, README).
+  vec3 rxCol = mix( RX_BLUE, RX_VIOLET, smoothstep( 0.3, 0.72, rxVv ) );
+  rxCol = mix( rxCol, RX_PINK, smoothstep( 0.62, 1.0, rxVv ) );
+  float rxPinkMix = clamp( rxPinkBias * rxPinkBias * 0.85, 0.0, 1.0 );
+  rxCol = mix( rxCol, RX_PINK, rxPinkMix );
+  float rxG = max( smoothstep( 0.45, 1.0, rxVv ), rxPinkMix );
   float rxEdge = 1.0 - smoothstep( 0.0, 0.12, min( rxU, 1.0 - rxU ) );
   rxCol = mix( rxCol, RX_HOT, rxEdge * ( 0.25 + 0.5 * rxEdgeGlow ) );
   rxCol *= 0.7 + 0.6 * rxFacet;
@@ -374,7 +378,7 @@ export function createRexonanceMaterial(
   const detail = options.crystalDetail ?? 2;
   const ribbonPhase = { value: options.phase ?? 0 };
   const crystalGlow = { value: 1 };
-  const facetDensity = { value: 38 };
+  const facetDensity = { value: 27 };
   material.userData.rexonance = { family, crystalGlow, facetDensity };
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms, {

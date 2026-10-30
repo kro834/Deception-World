@@ -2,22 +2,25 @@
 fists and the elbow blades. Authored on the suit's left (+X, *_L) and mirrored.
 
 Read off front-10 / right-07 / back-09 and the 3/4 sheets (05, 06, 03, 04):
-  * upper arm and forearm: a twisted braid of gold straps and glossy black
-    ribbons spiralling down the arm (they descend from the back over the
-    outside to the front and inside), on a build-up that flares the forearm
-    toward the body and the back like the sheet's vambrace, with crystal
-    shards inlaid in the black ribbons;
-  * front-outer forearm: a faceted crystal "flame" panel that narrows to a
-    pink stem running into the bracer;
-  * outer forearm under the elbow: a tall gold-framed crystal diamond standing
-    off the arm on a black riser, small crystal fins under it;
-  * wrist: a thick two-tier gold bracer;
+  * upper arm (pauldron to elbow): a wrap of gold straps and scaled black
+    ribbons spiralling down the arm, crystal shards inlaid in the ribbons;
+  * forearm: the same braid as a vambrace whose bands end in raised spear
+    points over the elbow, on a build-up that flares the forearm toward the
+    body and the back; a gold-rimmed faceted crystal "flame" panel on the front
+    and a smaller one on the back-outer side, both narrowing to pink stems
+    that run into the bracer; a tall gold-framed crystal diamond standing off
+    the outer-front on a faceted black pedestal;
+  * wrist: a thick two-tier gold bracer with a dark groove;
   * fist: black faceted gauntlet, back of the hand facing out with a big
-    gold-framed kite gem, gold studs on the knuckles, curled segmented fingers
-    and the thumb across the front;
-  * elbow: a long gold-edged sickle blade and a crystal blade sweeping down
-    and out past the fist, a thin gold rod ending in a double-spike pendant,
-    and a crystal ribbon arcing from the back of the upper arm.
+    gold-framed kite gem on a faceted plate, three gold studs on the knuckles,
+    curled segmented fingers and the thumb across the front;
+  * elbow: from a black mount on the back-outer elbow, a long black sickle
+    with a gold outer edge and a crystal inner edge, and a long crystal ribbon
+    (RX_Ribbon_Arm2) sweeping down and out past the fist; a crystal ribbon
+    (RX_Ribbon_Arm1) arcing out from the back of the upper arm;
+  * asymmetric (front-10 and back-09 agree): the gold rod with the
+    double-spike pendant hangs from the suit's RIGHT arm only; the left arm
+    has a thin gold hook blade in its place.
 """
 
 import math
@@ -208,12 +211,14 @@ def build_shards(arm, coll):
 
 
 # ------------------------------------------------------------------ forearm crystals
-FLAME_PHI = 336.0 * DEG
+FLAME_PHI = 290.0 * DEG
+DIAMOND_PHI = 334.0 * DEG    # where the diamond's pedestal stands on the forearm
+DIAMOND_FACE = 318.0 * DEG   # the direction its face looks
 FLAME_HW = [(1.046, 0.0088), (1.080, 0.0092), (1.105, 0.0110), (1.125, 0.0180), (1.150, 0.0290),
             (1.180, 0.0360), (1.215, 0.0350), (1.245, 0.0240), (1.272, 0.0030)]
 
 
-FLAME_BACK_PHI = 78.0 * DEG
+FLAME_BACK_PHI = 48.0 * DEG
 FLAME_BACK_HW = [(1.046, 0.0075), (1.085, 0.0080), (1.110, 0.0100), (1.135, 0.0170),
                  (1.165, 0.0250), (1.195, 0.0255), (1.225, 0.0170), (1.252, 0.0025)]
 
@@ -278,12 +283,14 @@ def build_diamond(arm, coll):
     surf = arm.surf
     zc = 1.178
     s = arm.s(zc)
-    phi = 30.0 * DEG
-    A, T, e1, e2 = surf.axis(s)
-    radial = surf.dir(s, phi)
+    # sits on the outer-front of the forearm and faces front-outer, so it
+    # reads in front-10, right-07 and the 3/4 front sheets alike
+    phi = DIAMOND_PHI
+    _A, T, _e1, _e2 = surf.axis(s)
+    radial = surf.dir(s, DIAMOND_FACE)
     base_pt = surf.base(s, phi)
     up = -T
-    stand = 0.021
+    stand = 0.018
     o = base_pt + radial * stand
     M = L.frame_from_normal(o, radial, up)
     hh, hw = 0.078, 0.034
@@ -299,9 +306,19 @@ def build_diamond(arm, coll):
     g = L.from_bmesh(gem, "RX_Arms_DiamondCrystal_L", coll, "Crystal", angle=15)
     L.tint(g, pink=0.35, sparkle=0.9, edge=0.8)
     obs.append(g)
-    # black riser from inside the arm to the frame
-    riser_outline = L.offset_outline(L.ccw(outline), -0.0035)
-    riser = L.prism(riser_outline, stand + 0.020, bevel=0.0015, matrix=M @ Matrix.Translation((0.0, 0.0, -(stand + 0.020) + 0.0005)))
+    # black faceted pedestal from inside the arm up to the frame: an octagonal
+    # frustum (wide on the arm, the frame's footprint on top)
+    hb, wb = hh * 0.80, hw * 1.15
+    foot = [(0.0, hb), (-wb * 0.55, hb * 0.55), (-wb, 0.0), (-wb * 0.55, -hb * 0.55),
+            (0.0, -hb), (wb * 0.55, -hb * 0.55), (wb, 0.0), (wb * 0.55, hb * 0.55)]
+    top = []
+    for x, y in foot:
+        # the frame's kite at the same angle from the centre
+        a = math.atan2(y, x)
+        c, s_ = math.cos(a), math.sin(a)
+        k = 1.0 / (abs(c) / hw + abs(s_) / hh)
+        top.append((0.84 * k * c, 0.84 * k * s_))
+    riser = G.loft_plate(L.ccw(foot), L.ccw(top), -stand + 0.004, 0.0005, -stand - 0.020, matrix=M)
     obs.append(L.from_bmesh(riser, "RX_Arms_DiamondRiser_L", coll, "Black", angle=30))
     L.glint("Arms_Diamond_L", (M @ V(0.0, 0.0, 0.008)), 0.03, coll, 0.4)
     return obs
@@ -309,10 +326,11 @@ def build_diamond(arm, coll):
 
 # ------------------------------------------------------------------ bracer
 def build_bracer(arm, coll):
+    """Two-tier gold wrist ring (front-10 y ~725-760) with a dark groove."""
     surf = arm.surf
     zc = 1.030
     s = arm.s(zc)
-    A, T, e1, e2 = surf.axis(s)
+    A, T, e1, _e2 = surf.axis(s)
     up = -T
     o = A
     main = G.chamfer_ring_profile(0.0362, 0.0498, -0.0250, 0.0110, c_out=0.0032, c_in=0.0012, c_out_bot=0.0036)
@@ -327,8 +345,8 @@ def build_bracer(arm, coll):
 
 # ------------------------------------------------------------------ gauntlet
 class Hand:
-    """Hand frame at the wrist: u = back of the hand (out, turned 15 deg to the
-    front), v = thumb side (front), w = up the forearm."""
+    """Hand frame at the wrist: u = back of the hand (out, turned 22 deg toward
+    the front), v = thumb side (front), w = up the forearm."""
 
     def __init__(self, arm, z=1.004, turn=-22.0 * DEG):
         surf = arm.surf
@@ -347,53 +365,6 @@ class Hand:
 
     def d(self, u, v, w):
         return (self.u * u + self.v * v + self.w * w).normalized()
-
-    def matrix(self, origin_uvw, x_uvw, y_uvw):
-        o = self.p(*origin_uvw)
-        x = self.d(*x_uvw)
-        y = self.d(*y_uvw)
-        return L.frame(o, x, y)
-
-
-def facet_bar(p0, p1, up, w0, w1, h0, h1, ridge=0.28, chamfer=0.0022, end_scale=0.78):
-    """Faceted finger segment from p0 to p1: a 'house' section (flat palm side,
-    sloped dorsal roof with a ridge) facing `up`, chamfered ends."""
-    p0, p1 = Vector(p0), Vector(p1)
-    z = (p1 - p0)
-    ln = z.length
-    z.normalize()
-    y = Vector(up)
-    y = (y - z * y.dot(z)).normalized()
-    x = y.cross(z).normalized()
-
-    def section(w, h, sc):
-        hw, hh = 0.5 * w * sc, 0.5 * h * sc
-        r = hh * ridge * 2.0
-        return [(-hw, -hh), (hw, -hh), (hw, hh - r), (hw * 0.45, hh - r * 0.25), (0.0, hh), (-hw * 0.45, hh - r * 0.25), (-hw, hh - r)]
-
-    c = min(chamfer, ln * 0.3)
-    stations = [(0.0, end_scale), (c / ln, 1.0), (1.0 - c / ln, 1.0), (1.0, end_scale)]
-    bm = bmesh.new()
-    uvl = bm.loops.layers.uv.verify()
-    rings = []
-    for t, sc in stations:
-        w = w0 + (w1 - w0) * t
-        h = h0 + (h1 - h0) * t
-        o = p0 + (p1 - p0) * t
-        rings.append([bm.verts.new(o + x * px + y * py) for px, py in section(w, h, sc)])
-    m = len(rings[0])
-    for a in range(len(rings) - 1):
-        for j in range(m):
-            j2 = (j + 1) % m
-            f = bm.faces.new((rings[a][j], rings[a][j2], rings[a + 1][j2], rings[a + 1][j]))
-            for lp in f.loops:
-                lp[uvl].uv = (j / m, a / 3.0)
-    bm.faces.new(list(reversed(rings[0])))
-    bm.faces.new(rings[-1])
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
-    bm.normal_update()
-    return bm
 
 
 def pill_bar(p0, p1, up, w0, w1, h0, h1, p=2.8, n=12, chamfer=0.004, end_scale=0.80, crown=0.0):
@@ -440,6 +411,7 @@ def pill_bar(p0, p1, up, w0, w1, h0, h1, p=2.8, n=12, chamfer=0.004, end_scale=0
 
 
 def build_gauntlet(arm, coll):
+    """Clenched black gauntlet that encloses the body's fist blob."""
     H = Hand(arm)
     obs = []
     black = []
@@ -555,6 +527,8 @@ def blade_sweep(arm, pts, width_fn, thick_fn, samples=10, n=48, prof_n=10, offse
 
 
 def build_elbow(arm, coll):
+    """Elbow mount, the sickle (black core, gold outer edge, crystal inner
+    edge) and the long crystal ribbon down past the fist."""
     surf = arm.surf
     obs = []
     z0 = 1.236
@@ -712,7 +686,7 @@ def build(ctx):
     obs += build_braid(arm, coll)
     obs += build_shards(arm, coll)
     obs += build_flame(arm, coll)
-    obs += build_flame(arm, coll, FLAME_BACK_PHI, FLAME_BACK_HW, "RX_Arms_ForearmFlameBack_L", drift_deg=-6.0, rim=False)
+    obs += build_flame(arm, coll, FLAME_BACK_PHI, FLAME_BACK_HW, "RX_Arms_ForearmFlameBack_L", drift_deg=-6.0)
     obs += build_diamond(arm, coll)
     obs += build_bracer(arm, coll)
     obs += build_gauntlet(arm, coll)
@@ -725,13 +699,14 @@ def build(ctx):
     # the right arm only, the left arm carries a thin gold blade instead
     right_only = build_rod_pendant(arm, coll)
     for ob in right_only:
-        r = L.mirror_x(ob)
-        meshes.append(r)
+        meshes.append(L.mirror_x(ob))
+        me = ob.data
         bpy.data.objects.remove(ob, do_unlink=True)
+        bpy.data.meshes.remove(me)
     meshes += build_gold_blade(arm, coll)
     for e in [o for o in coll.objects if o.type == "EMPTY" and o.name.endswith("_L")]:
         L.mirror_x(e)
-    total = sum(G.tris(o) for o in meshes)
-    print("[arms] %d left-side meshes (+ mirrors), %d triangles on the left" % (len(meshes), total))
+    every = [o for o in coll.objects if o.type == "MESH"]
+    print("[arms] %d meshes, %d triangles (both arms)" % (len(every), sum(G.tris(o) for o in every)))
     for o in meshes:
         print("   %-32s %6d" % (o.name, G.tris(o)))

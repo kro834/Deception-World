@@ -142,15 +142,25 @@ def gem_rhombus_flat(c, hh, hw, tilt, depth, h0=0.0, sub=4):
         tri(v, b, rb)
         tri(ra, v, top)
         tri(v, rb, top)
-    # bottom (flat, at girdle height) so the piece is closed
-    tri4 = [(*corners[i], h0 - 0.0015) for i in range(4)]
-    cb = (0.0, 0.0, h0 - 0.0015)
+    # flat bottom + walls, subdivided like the girdle so the piece is closed
+    zb = h0 - 0.0015
+    cb = (0.0, 0.0, zb)
     for i in range(4):
-        tri(tri4[(i + 1) % 4], tri4[i], cb)
-    # walls from the bottom ring to the girdle
+        a = corners[i]
+        b = corners[(i + 1) % 4]
+        m = mids[i]
+        tri((*m, zb), (*a, zb), cb)
+        tri((*b, zb), (*m, zb), cb)
     for i in range(4):
-        a, b = corners[i], corners[(i + 1) % 4]
-        fm.f.append((V(*a, h0 - 0.0015), V(*b, h0 - 0.0015), V(*b, girdle_h), V(*a, girdle_h)))
+        a = corners[i]
+        b = corners[(i + 1) % 4]
+        m = mids[i]
+        for p0, p1 in ((a, m), (m, b)):
+            for k in range(sub):
+                t0, t1 = k / sub, (k + 1) / sub
+                q0 = (p0[0] + (p1[0] - p0[0]) * t0, p0[1] + (p1[1] - p0[1]) * t0)
+                q1 = (p0[0] + (p1[0] - p0[0]) * t1, p0[1] + (p1[1] - p0[1]) * t1)
+                fm.f.append((V(*q0, zb), V(*q1, zb), V(*q1, girdle_h), V(*q0, girdle_h)))
     return fm
 
 
@@ -386,12 +396,12 @@ def calf_strap(ctx, coll, out):
     out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_CalfStrap_L", coll, "Gold"))
 
 
-def flame_fin(cm, ph_root, z_root, ph_tip, z_tip, lift, w0, th0, bm, twist=0.35, sway=0.0, n=22):
-    """Crystal flame tongue radiating from the leg: the inner edge sits on the
-    surface at the root, the blade bulges, sways and curls out at the tip."""
+def flame_fin(cm, ph_root, z_root, ph_tip, z_tip, lift, w0, th0, bm, twist=0.35, sway=0.0, n=24, belly=0.45):
+    """Crystal flame tongue radiating from the leg: rooted inside the boot
+    cuff, it widens (belly), sways sideways and curls outward to a point."""
 
     def wfn(t):
-        return w0 * (1.0 - t) ** 0.62 * (0.62 + 0.55 * math.sin(math.pi * min(1.0, t * 1.25))) + 0.0004
+        return w0 * (1.0 - t) ** 0.55 * (0.55 + belly * math.sin(math.pi * min(1.0, t * 1.15))) + 0.0004
 
     path, nrms = [], []
     for i in range(n):
@@ -404,7 +414,7 @@ def flame_fin(cm, ph_root, z_root, ph_tip, z_tip, lift, w0, th0, bm, twist=0.35,
         c = cm.center(s)
         radial = p - c
         radial = (radial - cm.d * radial.dot(cm.d)).normalized()
-        out = lift * math.sin(0.5 * math.pi * t) ** 2.6 + 0.004 * math.sin(math.pi * t)
+        out = lift * math.sin(0.5 * math.pi * t) ** 2.4 + 0.005 * math.sin(math.pi * t)
         path.append(p + radial * (0.5 * wfn(t) + 0.002 + out))
         circ = cm.d.cross(radial).normalized()
         a = twist * t
@@ -413,21 +423,30 @@ def flame_fin(cm, ph_root, z_root, ph_tip, z_tip, lift, w0, th0, bm, twist=0.35,
 
 
 def calf_fins(ctx, coll, out):
-    """Crystal flame fins rising from the boot cuffs up both sides of the calf."""
+    """Crystal flame fins rising out of the boot cuff up both sides of the calf
+    (front-10 / back-09: a tall one up the back-lateral calf, a broad one
+    sweeping up and in on the medial side, slimmer ones beside the shin)."""
+    import part_legs_boot as BOOT
+
     cm = G.CylMap(ctx.body, KNEE + Vector((0.0, -0.004, 0.0)), ANKLE, r_ref=0.06)
     bms = bmesh.new()
-    # (phi root, z root, phi tip, z tip, lift, root width, thickness, twist, sway)
+
+    def root_z(ph):
+        return BOOT.saddle(math.radians(ph), *BOOT.RIM) - 0.014
+
+    # (phi root, phi tip, z tip, lift, root width, thickness, twist, sway, belly)
     specs = [
-        (118, 0.284, 132, 0.610, 0.066, 0.046, 0.011, 0.30, 8),     # outer back, tall
-        (150, 0.282, 162, 0.515, 0.058, 0.040, 0.010, -0.25, -7),   # outer back, short
-        (78, 0.294, 86, 0.560, 0.026, 0.028, 0.008, 0.20, 4),       # outer front, slim
-        (-104, 0.286, -96, 0.570, 0.080, 0.050, 0.012, -0.30, -7),  # inner, big
-        (-80, 0.296, -86, 0.480, 0.040, 0.032, 0.008, 0.25, 5),     # inner front
-        (-146, 0.282, -154, 0.500, 0.060, 0.042, 0.010, 0.25, 6),   # inner back
-        (178, 0.288, 182, 0.440, 0.036, 0.032, 0.008, 0.20, 0),     # back centre, small
+        (120, 132, 0.620, 0.060, 0.060, 0.012, 0.30, 8, 0.50),     # back-lateral, tall
+        (150, 163, 0.520, 0.056, 0.050, 0.011, -0.25, -8, 0.45),   # back-lateral, short
+        (84, 88, 0.565, 0.024, 0.034, 0.008, 0.20, 4, 0.35),       # beside the shin, slim
+        (102, 118, 0.500, 0.050, 0.046, 0.010, -0.20, 6, 0.45),    # lateral, outer
+        (-104, -94, 0.585, 0.096, 0.074, 0.012, -0.30, -10, 0.55),  # medial, big
+        (-82, -86, 0.490, 0.040, 0.040, 0.009, 0.25, 5, 0.40),     # medial front
+        (-146, -154, 0.515, 0.066, 0.056, 0.011, 0.25, 6, 0.50),   # medial back
+        (178, 182, 0.445, 0.036, 0.038, 0.009, 0.20, 0, 0.40),     # back centre, small
     ]
-    for pr, zr, pt, zt, lt, w0, th0, tw, sw in specs:
-        flame_fin(cm, pr, zr, pt, zt, lt, w0, th0, bms, twist=tw, sway=sw)
+    for pr, pt, zt, lt, w0, th0, tw, sw, bl in specs:
+        flame_fin(cm, pr, root_z(pr), pt, zt, lt, w0, th0, bms, twist=tw, sway=sw, belly=bl)
     ob = obj(bms, "RX_Legs_CalfFins_L", coll, "Crystal", angle=30.0)
     L.tint(ob, pink=0.2, sparkle=0.7, edge=0.8)
     out.append(ob)

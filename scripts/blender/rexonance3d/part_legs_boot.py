@@ -105,7 +105,7 @@ MED_W = [(-0.094, 0.0), (-0.088, 0.026), (-0.076, 0.042), (-0.052, 0.052), (-0.0
 # top line of the foot shell (the gem / toe cap sit on it)
 TOP_Z = [(-0.094, 0.100), (-0.082, 0.122), (-0.056, 0.134), (0.000, 0.150), (0.040, 0.166), (0.062, 0.166),
          (0.090, 0.140), (0.120, 0.112), (0.150, 0.094), (0.178, 0.084), (0.206, 0.075), (0.234, 0.064),
-         (0.256, 0.053), (0.266, 0.046)]
+         (0.256, 0.048), (0.266, 0.038)]
 Z_SOLE = 0.016  # top of the sole slab
 Z_WELT = 0.034  # top of the gold welt (forefoot)
 
@@ -133,7 +133,7 @@ def upper_point(u, th, p=2.6, inset=0.0):
     # forefoot: a peaked roof (central ridge) over boxy sides
     k = max(0.0, min(1.0, (u - 0.07) / 0.06))
     if k > 0:
-        roof = 1.0 - 0.42 * abs(th) / (math.pi / 2)
+        roof = 1.0 - 0.30 * abs(th) / (math.pi / 2)
         zs = (1 - k) * zs + k * min(abs(c) ** (2.0 / 4.0), roof)
         ws = (1 - k) * ws + k * math.copysign(abs(s) ** (2.0 / 4.0), s)
     w = hw * ws
@@ -521,18 +521,21 @@ def build_gem(coll, out):
 
 
 def build_toecap(coll, out):
-    """Gold arrowhead on the toe ridge pointing up at the instep gem (front-10
-    x~745-800, y~1440-1500): two flat facets meeting in a crisp crease."""
+    """Gold arrowhead on the toe ridge (front-10 x~728-800, y~1440-1500): a
+    straight-edged kite from the instep gem down to the toe point, two flat
+    facets meeting in a crisp crease."""
     um = UpperMap(r_ref=0.05)
-    u_top, u_bot = 0.148, U_TOE - 0.026
-    path = [(0.0, u_top + (u_bot - u_top) * i / 14) for i in range(15)]
+    u_top, u_bot = 0.146, U_TOE - 0.006
+    path = [(0.0, u_top + (u_bot - u_top) * i / 18) for i in range(19)]
 
     def hw(s):
-        return 0.0008 + 0.026 * min(1.0, s / 0.58) ** 0.85 * (1.0 - 0.22 * max(0.0, (s - 0.58) / 0.42))
+        if s < 0.6:
+            return 0.0008 + 0.031 * (s / 0.6)
+        return 0.0035 + (0.0318 - 0.0035) * (1.0 - (s - 0.6) / 0.4)
 
-    fm = G.ridge_ribbon(path, hw, h_edge=0.0040, h_ridge=0.0105, bevel=0.0013, nt=3)
+    fm = G.ridge_ribbon(path, hw, h_edge=0.0034, h_ridge=0.0080, bevel=0.0012, nt=3)
     mp = G.surface_mapper(um, 0.0012)
-    out.append(L.from_bmesh(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_BootToeArrow_L", coll, "Gold", 24.0))
+    out.append(L.from_bmesh(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_BootToeArrow_L", coll, "Gold", 14.0))
 
 
 def build_toe_plates(coll, out):
