@@ -60,6 +60,8 @@ const original = [
   "../styles-command-chrome.css?url",
   // Owner (2026-10-26): the dynamic GUI kit (.dg-*) on every page, last.
   "../styles-dynamic-gui.css?url",
+  // Owner (2026-10-30): the future-motion layer (springs, scan arrivals, cascades) after the kit.
+  "../styles-fx-motion.css?url",
   fonts.SITE_CORE_FONTS_URL,
   fonts.SITE_DISPLAY_FONTS_URL,
   "hud-fonts",
