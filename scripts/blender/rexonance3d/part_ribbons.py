@@ -67,12 +67,12 @@ RIBBONS = [
 ]
 
 ROOT_Z = 1.178  # inside the belt band (Z 1.152 .. 1.258): the ribbon emerges from under it
-EXIT_Z = 1.138  # first point below the band, clear of the hip panel (lift 0.0145)
 YC = 0.004
 # part_waist's band: inner surface 6 mm outside the widest body section over
 # Z 1.14 .. 1.264, 13 mm thick
 BAND_Z = (1.140, 1.264)
 BAND_MID = 0.006 + 0.0065
+WRAP_R = 0.15  # radius the root section is bent to (tighter than the waist: safe side)
 
 N_RINGS = 84
 N_PROF = 18
@@ -110,9 +110,8 @@ def root_point(body, theta_deg, lift, z=ROOT_Z):
     return loc + n * lift, n
 
 
-def band_root(body, theta_deg, z=ROOT_Z):
-    """A point inside the belt band's material at angle theta, and the radial
-    direction: the band wraps the widest body section over BAND_Z."""
+def band_rmax(body, theta_deg):
+    """Widest body radius over BAND_Z at angle theta (the band wraps it)."""
     th = math.radians(theta_deg)
     d = Vector((math.sin(th), -math.cos(th), 0.0))
     rmax = 0.0
@@ -121,7 +120,40 @@ def band_root(body, theta_deg, z=ROOT_Z):
         hit = body.ray(o, d, 1.0)
         if hit is not None:
             rmax = max(rmax, (hit[0] - o).length)
+    return rmax, d
+
+
+def band_root(body, theta_deg, z=ROOT_Z):
+    """A point inside the belt band's material at angle theta, and the radial
+    direction."""
+    rmax, d = band_rmax(body, theta_deg)
     return Vector((0.0, YC, z)) + d * (rmax + BAND_MID), d
+
+
+def body_hit(body, theta_deg, z):
+    """Body surface point and its true (unflattened) outward normal at angle
+    theta and height z, seen from the waist axis."""
+    th = math.radians(theta_deg)
+    d = Vector((math.sin(th), -math.cos(th), 0.0))
+    o = Vector((0.0, YC, z))
+    loc, n = body.ray(o, d, 1.0)
+    if n.dot(d) < 0:
+        n = -n
+    return loc, n.normalized()
+
+
+def exit_points(body, theta_deg):
+    """Where the ribbon leaves the band. Inside the band it stays under the
+    crystal cells (radius <= outer face - 3.5 mm); below the band's lower edge
+    it rides over the hip panel (body + 14.5 mm along the true normal) as the
+    pelvis flares out. The root is thinned to ~2 mm here (ribbon_mesh)."""
+    rmax, d = band_rmax(body, theta_deg)
+    c = lambda z: Vector((0.0, YC, z))  # noqa: E731
+    pts = [c(1.164) + d * (rmax + 0.0140), c(1.153) + d * (rmax + 0.0152)]
+    for z, off in ((1.143, 0.0192), (1.131, 0.0204), (1.116, 0.0214)):
+        loc, n = body_hit(body, theta_deg, z)
+        pts.append(loc + n * off)
+    return pts
 
 
 def ribbon_mesh(spec, body, n_rings=N_RINGS):
@@ -129,9 +161,8 @@ def ribbon_mesh(spec, body, n_rings=N_RINGS):
     # root hidden inside the belt band, exit just under the band's lower edge
     # (clear of the hip panel), then down the pelvis to the authored spine
     p0, n0 = band_root(body, th)
-    pe, _ne = root_point(body, th + 0.5, 0.023 + 0.25 * (lift - 0.022), z=EXIT_Z)
     p1, n1 = root_point(body, th + 2.0, lift + 0.010, z=1.088)
-    ctrl = [p0, pe, p1] + [Vector(p) for p in spec["ctrl"]]
+    ctrl = [p0] + exit_points(body, th) + [p1] + [Vector(p) for p in spec["ctrl"]]
     spine = L.catmull_rom(ctrl, 12)
     spine = L.resample(spine, n_rings)
     lens = L.arc_lengths(spine)
@@ -187,12 +218,17 @@ def ribbon_mesh(spec, body, n_rings=N_RINGS):
         prevW = W
         wl, wr = _interp_keys(spec["w"], t)
         th = spec["thick"] * (0.35 + 0.65 * math.sin(math.pi * min(1.0, t * 1.15 + 0.08)) ** 0.5) * (1.0 - 0.75 * t ** 4)
+        th *= min(1.0, 0.36 + 0.64 * (t / 0.07) ** 1.5)  # thin where it slips out from under the belt
         cup = spec["cup"] * math.sin(math.pi * min(t * 1.1, 1.0))
+        # near the root the section wraps around the waist (radius ~WRAP_R) so
+        # the edges stay as close to the body as the middle, under the belt cells
+        # and over the hip panel; the wrap fades out on the free ribbon
+        wrap = 1.0 - min(1.0, max(0.0, (t - 0.05) / 0.08))
         ring = []
         for x, y in sec:
             off = x * (wl if x >= 0 else wr)
-            # cup: edges bow toward +N; thin the very edges
-            q = p + W * off + Nn * (y * th + cup * (x * x - 0.33))
+            # cup: edges bow toward +N; wrap: edges bend toward -N
+            q = p + W * off + Nn * (y * th + cup * (x * x - 0.33) - wrap * off * off / (2.0 * WRAP_R))
             ring.append(bm.verts.new(q))
         rings.append(ring)
     uv = bm.loops.layers.uv.verify()

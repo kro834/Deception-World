@@ -600,7 +600,7 @@ PEND_C = Vector((0.2285, -0.104, 1.3837))
 
 def pendant_pieces():
     out = []
-    ex, ey, ez = med_axes()
+    _ex, ey, ez = med_axes()
     n = (MED_N * 0.75 + Vector((0, -1, 0)) * 0.25 + Vector((0, 0, 0.12))).normalized()
     m = L.frame_from_normal(PEND_C, n, (0, 0, 1))
     tips = [(0.0285, 0.0), (0.0, 0.045), (-0.0300, 0.0), (0.0, -0.037)]
@@ -761,7 +761,7 @@ PETALS = [
     dict(tip=(802, 186), rf=0.060, z=0.000, kind="crystal", w=0.060, pink=0.45),
     dict(tip=(860, 322), rf=0.085, z=0.000, kind="crystal", w=0.064, pink=0.70),
     dict(tip=(842, 386), rf=0.080, z=0.000, kind="black", w=0.052),
-    dict(tip=(836, 448), rf=0.075, z=0.000, kind="black", w=0.052),
+    dict(tip=(836, 448), rf=0.062, z=0.000, kind="black", w=0.052),
     dict(tip=(864, 515), rf=0.085, z=0.000, kind="crystal", w=0.056, pink=0.30),
     dict(tip=(776, 516), rf=0.050, z=0.000, kind="black", w=0.048, drape=True),
     dict(tip=(742, 528), rf=0.040, z=-0.012, kind="crystal", w=0.046, pink=0.40, drape=True),
@@ -790,11 +790,11 @@ SIDE = [
     dict(phi=18, L=0.175, kind="crystal", w=0.056, pink=0.55),
     dict(phi=-6, L=0.125, kind="black", w=0.050),
     dict(phi=-52, L=0.165, kind="crystal", w=0.054, pink=0.40),
-    dict(phi=-72, L=0.135, kind="black", w=0.050),
+    dict(phi=-72, L=0.135, kind="black", w=0.050, clear_add=0.008),
     # inner ring, shorter, on top
     dict(phi=2, L=0.110, kind="crystal", w=0.040, pink=0.45, layer=1),
     dict(phi=-30, L=0.105, kind="gold", w=0.032, layer=1),
-    dict(phi=-60, L=0.080, kind="black", w=0.038, layer=1),
+    dict(phi=-60, L=0.080, kind="black", w=0.038, layer=1, clear_add=0.028),
 ]
 
 # Back: crystal shell footprint in the back view (back-09 kite, suit's right
@@ -1005,7 +1005,7 @@ def blade_specs(body):
         root, tip, ez = petal_root_tip(p)
         hint = ez
         if p.get("drape") and BODY is not None:
-            loc, n = BODY.closest(tip)
+            _loc, n = BODY.closest(tip)
             hint = (Vector(n) + ez).normalized()
         out.append(("PETAL%02d" % k, root, tip, hint, p))
     for k, p in enumerate(WRAP):

@@ -7,6 +7,7 @@
 // OUT_DIR (default output/rexonance-3d/viewer) receives the PNGs and report.json.
 // Headless Chromium draws WebGL with SwiftShader (slow but complete); CHROMIUM may name
 // another executable.
+import { existsSync, readdirSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,9 +22,24 @@ const run = (name) => tasks.length === 0 || tasks.includes(name);
 const READY = '.rx3d-viewer[data-viewer-status="ready"]';
 const VIEWS = ["front", "right", "back", "left", "oblique"];
 
+/** Playwright's own build, or the newest headless shell already installed beside it (the
+ * package and the preinstalled browsers can be a build apart). */
+function chromiumExecutable() {
+  if (process.env.CHROMIUM) return process.env.CHROMIUM;
+  if (existsSync(chromium.executablePath())) return undefined;
+  const folder = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!folder || !existsSync(folder)) return undefined;
+  const shell = readdirSync(folder)
+    .filter((name) => /^chromium_headless_shell-\d+$/u.test(name))
+    .sort((a, b) => Number(b.split("-")[1]) - Number(a.split("-")[1]))
+    .map((name) => join(folder, name, "chrome-headless-shell-linux64", "chrome-headless-shell"))
+    .find((file) => existsSync(file));
+  return shell;
+}
+
 await mkdir(out, { recursive: true });
 const browser = await chromium.launch({
-  executablePath: process.env.CHROMIUM || undefined,
+  executablePath: chromiumExecutable(),
   args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--no-sandbox"],
 });
 const report = { base, captures: [], errors: [] };
@@ -42,6 +58,12 @@ async function open(profile, reducedMotion = "no-preference") {
   return { context, page };
 }
 
+// Clip screenshots: an element screenshot waits for the element to be "stable" over frames,
+// which a still WebGL page (reduced motion) never needs to draw.
+async function area(page) {
+  return page.locator(".rx3d-viewer__area").boundingBox();
+}
+
 async function diagnostics(page) {
   return page.evaluate(() => ({ ...document.querySelector(".rx3d-viewer__canvas")?.dataset }));
 }
@@ -57,7 +79,7 @@ if (run("page")) {
     const { context, page } = await open(profile);
     await page.waitForTimeout(2000);
     const file = join(out, `${name}.png`);
-    await page.screenshot({ path: file });
+    await page.screenshot({ path: file, timeout: 180_000 });
     report.captures.push({ name, file, canvas: await diagnostics(page) });
     await context.close();
   }
@@ -77,7 +99,7 @@ if (run("views")) {
     );
     await page.waitForTimeout(1800);
     const file = join(out, `view-${view}.png`);
-    await page.locator(".rx3d-viewer__area").screenshot({ path: file });
+    await page.screenshot({ path: file, clip: await area(page), timeout: 180_000 });
     report.captures.push({ name: `view-${view}`, file });
   }
   // The reference panel beside the model, on the front view.
@@ -85,7 +107,7 @@ if (run("views")) {
   await page.click(".rx3d-viewer__sheet-toggle");
   await page.waitForTimeout(2500);
   const file = join(out, "reference-panel.png");
-  await page.screenshot({ path: file });
+  await page.screenshot({ path: file, timeout: 180_000 });
   report.captures.push({ name: "reference-panel", file, canvas: await diagnostics(page) });
   await context.close();
 }
@@ -100,7 +122,7 @@ if (run("poster")) {
     content: ".rx3d-viewer__toolbar,.rx3d-record{visibility:hidden!important}",
   });
   await page.waitForTimeout(2500);
-  const shot = await page.locator(".rx3d-viewer__area").screenshot();
+  const shot = await page.screenshot({ clip: await area(page), timeout: 180_000 });
   const file = resolve(root, "public/rexonance-3d-20261030/rexonance-3d-480.webp");
   // The figure sits in the band above the toolbar: keep a 2:3 window centred on it.
   const meta = await sharp(shot).metadata();

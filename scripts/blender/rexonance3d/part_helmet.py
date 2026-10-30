@@ -345,29 +345,30 @@ def build_crown(ctx, base, coll):
 
 
 # Horn fan, suit's left (mirrored). Four gold blades rooted on the brow arm and the
-# top of the head, all sweeping BACK in profile (right-07: tips 8-14 cm behind the
-# visor front, blades leaning 25-48 deg from vertical) while front-10 sees the two
-# front blades as the crescent horn (inner edge (536,140) -> tip (568,12), outer
-# edge x ~572). Per blade: LE root, TE root (point specs on the shell), then LE and
-# TE control points (metres) up to the shared tip, ridge thickness (root, mid, tip),
-# and the dark recess groove (chord a0..a1, span s0..s1) or None.
+# top of the head, all sweeping BACK in profile (right-07: tips 8-15 cm behind the
+# visor front, blades leaning 20-45 deg from vertical) while front-10 sees the front
+# two as the crescent horn (inner edge (536,140) -> tip (568,12), outer edge x ~572).
+# Each blade's chord runs diagonally (out and back), so it shows its face in both
+# views. Per blade: LE root, TE root (point specs on the shell), LE and TE control
+# points (metres) up to the shared tip, ridge thickness (root, mid, tip), and the
+# dark recess groove (chord a0..a1, span s0..s1) or None.
 HORNS = [
     # front blade (right-07 T2: tip (566, 30))
-    ("Horn1", ("f", 521, 163), ("f", 537, 152),
-     [(0.050, -0.100, 1.862), (0.069, -0.074, 1.915)], [(0.071, -0.086, 1.850), (0.083, -0.062, 1.906)],
-     (0.086, -0.040, 1.960), (0.014, 0.010, 0.002), (0.18, 0.32, 0.05, 0.78)),
+    ("Horn1", ("f", 524, 161), ("f", 537, 152),
+     [(0.055, -0.092, 1.860), (0.071, -0.068, 1.915)], [(0.066, -0.072, 1.852), (0.080, -0.054, 1.905)],
+     (0.084, -0.042, 1.962), (0.014, 0.010, 0.002), (0.18, 0.32, 0.05, 0.78)),
     # main horn, tallest (front-10 tip (568, 12); right-07 T1 tip (536, 8))
-    ("Horn2", ("f", 537, 151), ("f", 556, 136),
-     [(0.068, -0.068, 1.902), (0.083, -0.034, 1.957)], [(0.093, -0.046, 1.890), (0.096, -0.020, 1.948)],
+    ("Horn2", ("f", 538, 151), ("f", 548, 143),
+     [(0.064, -0.066, 1.880), (0.078, -0.037, 1.940)], [(0.087, -0.046, 1.875), (0.095, -0.024, 1.935)],
      (0.090, -0.006, 1.994), (0.015, 0.010, 0.002), (0.16, 0.30, 0.06, 0.80)),
-    # short blade between the main horn and the rear blade (right-07 T4: tip (537, 78))
-    ("Horn3", ("f", 552, 141), ("f", 563, 129),
-     [(0.086, -0.050, 1.866)], [(0.097, -0.040, 1.858)],
-     (0.094, -0.004, 1.903), (0.012, 0.008, 0.002), None),
+    # short blade behind the main horn (right-07 T4: tip (537, 78))
+    ("Horn3", ("a", 60.0, 33.0), ("a", 72.0, 29.0),
+     [(0.086, -0.030, 1.862)], [(0.096, -0.018, 1.852)],
+     (0.096, 0.000, 1.905), (0.012, 0.008, 0.002), None),
     # rear blade off the top of the head (right-07 T3: tip (497, 28)); hidden behind
     # the horn from the front
-    ("Horn4", ("a", 46.0, 41.0), ("a", 64.0, 35.0),
-     [(0.073, -0.010, 1.908)], [(0.088, 0.002, 1.892)],
+    ("Horn4", ("a", 46.0, 50.0), ("a", 62.0, 46.0),
+     [(0.066, -0.010, 1.910)], [(0.080, 0.002, 1.896)],
      (0.081, 0.044, 1.958), (0.013, 0.009, 0.002), (0.18, 0.32, 0.08, 0.75)),
 ]
 
@@ -390,31 +391,35 @@ def build_horns(base, coll):
 # (595, 114); right-07 / left-08 show the fan continuing down the side of the head).
 # Tips stay at Y <= 0.066 to keep clear of the tail rising behind the left shoulder.
 FEATHERS = [
-    # root path, tip, bend, root width
-    ([("a", 58.0, 25.0), ("a", 70.0, 28.0), ("a", 81.0, 31.0)], (0.108, 0.040, 1.918), (0.004, -0.008, 0.014), 0.026),
-    ([("a", 60.0, 14.0), ("a", 73.0, 17.0), ("a", 85.0, 20.0)], (0.123, 0.052, 1.881), (0.005, -0.008, 0.014), 0.028),
-    ([("a", 63.0, 3.0), ("a", 77.0, 6.0), ("a", 89.0, 9.0)], (0.129, 0.060, 1.843), (0.006, -0.008, 0.014), 0.029),
-    ([("a", 67.0, -8.0), ("a", 81.0, -5.0), ("a", 94.0, -2.0)], (0.128, 0.064, 1.804), (0.006, -0.006, 0.012), 0.028),
-    ([("a", 72.0, -19.0), ("a", 86.0, -16.0), ("a", 99.0, -13.0)], (0.123, 0.066, 1.766), (0.006, -0.006, 0.012), 0.027),
-    ([("a", 78.0, -30.0), ("a", 92.0, -27.0), ("a", 105.0, -24.0)], (0.115, 0.064, 1.728), (0.005, -0.004, 0.010), 0.024),
+    # root path rising up-back along the side of the head, tip, bend, width
+    ([("a", 58.0, 19.0), ("a", 71.0, 28.0)], (0.110, 0.030, 1.906), (0.002, -0.004, 0.008), 0.030),
+    ([("a", 61.0, 8.0), ("a", 75.0, 18.0)], (0.125, 0.044, 1.874), (0.003, -0.004, 0.008), 0.032),
+    ([("a", 64.0, -3.0), ("a", 79.0, 8.0)], (0.131, 0.054, 1.846), (0.003, -0.004, 0.008), 0.033),
+    ([("a", 68.0, -14.0), ("a", 84.0, -3.0)], (0.131, 0.060, 1.815), (0.003, -0.004, 0.007), 0.032),
+    ([("a", 73.0, -25.0), ("a", 90.0, -14.0)], (0.126, 0.064, 1.783), (0.003, -0.003, 0.006), 0.030),
+    ([("a", 79.0, -35.0), ("a", 97.0, -24.0)], (0.118, 0.064, 1.750), (0.003, -0.003, 0.006), 0.027),
 ]
+FEATHER_SPLIT = 0.45      # gold upper facet a in [0, 0.45] (= the ridge), black lower facet beyond
+
+
+def smoothstep(e0, e1, x):
+    t = min(max((x - e0) / (e1 - e0), 0.0), 1.0)
+    return t * t * (3.0 - 2.0 * t)
 
 
 def build_temples(ctx, base, coll):
     for k, (root, tip, bend, w) in enumerate(FEATHERS, 1):
-        wf = lerp_fn([0, 0.4, 0.8, 1.0], [w, w * 0.9, w * 0.45, 0.0])
-        lift = 0.0030 + 0.0012 * (k - 1)          # each feather lies over the one above it
-        LE, TE, cen, sides, ss, nmean = G.swept_edges(base, root, tip, wf, bend=bend, lift=lift, n_root=9,
-                                                      n_free=14, twist=0.40)
-        bm = G.edge_blade(LE, TE, lerp_fn([0, 0.5, 1.0], [0.009, 0.007, 0.002]), n_span=len(LE), ridge_a=0.5,
-                          outward=tuple(nmean), samples=2)
-        add(bm, "RX_Helmet_Feather%d_L" % k, coll, "Black", angle=26.0, mirror=True)
-        # gold upper edge riding the vane's leading edge
-        ew = (0.0125, 0.0125, 0.0110, 0.0100, 0.0095, 0.0090)[k - 1]
-        spine = [np.asarray(p) - sides[i] * 0.0012 for i, p in enumerate(LE)]
-        bm = G.blade(spine, lerp_fn([0, 0.85, 1.0], [ew, ew * 0.6, 0.0]), lerp_fn([0, 1.0], [0.0105, 0.002]),
-                     lambda t, S_=sides: tuple(S_[min(int(t * (len(S_) - 1)), len(S_) - 1)]), n=32)
-        add(bm, "RX_Helmet_FeatherEdge%d_L" % k, coll, "Gold", angle=26.0, mirror=True)
+        # leaf outline: pointed root start tucked into the shell, full width over the
+        # middle, sharp tip; each lower feather lies over the one above it
+        wf = lambda s, w=w: w * (0.15 + 0.85 * smoothstep(0.0, 0.16, s)) * (1.0 - smoothstep(0.55, 1.0, s) * 0.999)
+        layer = 0.0030 + 0.0012 * (k - 1)
+        lift = lambda s, layer=layer: 0.0006 + layer * smoothstep(0.0, 0.18, s)
+        LE, TE, cen, sides, ss, nmean = G.swept_edges(base, root, tip, wf, bend=bend, lift=lift, n_root=10,
+                                                      n_free=14, twist=0.22)
+        tf = lerp_fn([0, 0.15, 0.5, 1.0], [0.004, 0.009, 0.007, 0.0015])
+        for nm, a0, a1, fam in (("FeatherEdge", 0.0, FEATHER_SPLIT, "Gold"), ("Feather", FEATHER_SPLIT, 1.0, "Black")):
+            bm = G.edge_blade_part(LE, TE, tf, a0, a1, ridge_a=FEATHER_SPLIT, outward=tuple(nmean))
+            add(bm, "RX_Helmet_%s%d_L" % (nm, k), coll, fam, angle=26.0, mirror=True)
 
 
 # ------------------------------------------------------------------ back of the head
@@ -426,12 +431,12 @@ def build_back(ctx, base, coll):
     add(bm, "RX_Helmet_CrownBand_L", coll, "Gold", angle=28.0, mirror=True)
 
     # back spike: a fin on the back of the crown, sweeping up and BACK like the horns
-    lead = sag_points(base, [102.0])[0]
-    trail = sag_points(base, [132.0])[0]
-    tip = np.array([0.0, trail[1] + 0.016, 1.930])
-    le = [lead - np.array([0, 0, 0.005]), lead + (tip - lead) * 0.5 + np.array([0, -0.004, 0.006]), tip]
-    te = [trail - np.array([0, 0.004, 0.003]), trail + (tip - trail) * 0.5 + np.array([0, 0.003, 0.0]), tip]
-    bm = G.edge_blade(le, te, lerp_fn([0, 0.5, 1.0], [0.022, 0.013, 0.002]), n_span=20, ridge_a=0.5,
+    lead = sag_points(base, [112.0])[0]
+    trail = sag_points(base, [134.0])[0]
+    tip = np.array([0.0, trail[1] + 0.014, 1.928])
+    le = [lead - np.array([0, 0, 0.004]), lead + (tip - lead) * 0.5 + np.array([0, -0.003, 0.004]), tip]
+    te = [trail - np.array([0, 0.004, 0.003]), trail + (tip - trail) * 0.5 + np.array([0, 0.002, 0.0]), tip]
+    bm = G.edge_blade(le, te, lerp_fn([0, 0.5, 1.0], [0.016, 0.010, 0.002]), n_span=20, ridge_a=0.5,
                       outward=(1.0, 0.0, 0.0), section="hex")
     add(bm, "RX_Helmet_BackSpike", coll, "Gold", angle=26.0)
 

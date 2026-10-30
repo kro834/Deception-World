@@ -978,3 +978,66 @@ def blade_inlay(LE, TE, thick_fn, a0, a1, s0, s1, outward, ridge_a=0.45, n_span=
             loop[uv].uv = (0.5, 0.5)
     bm.normal_update()
     return bm
+
+
+def edge_blade_part(LE, TE, thick_fn, a0=0.0, a1=1.0, ridge_a=0.5, outward=(1.0, 0.0, 0.0), samples=2):
+    """The chord range a0..a1 of an edge_blade (diamond section, same LE / TE /
+    thickness), closed with walls along any cut. Two parts split at the same a
+    share their boundary exactly, so one blade can carry two materials (e.g. a
+    gold upper facet and a black lower facet split along the ridge)."""
+    n_span = len(LE)
+    le = L.resample(L.catmull_rom([Vector(p) for p in LE], samples), n_span)
+    te = L.resample(L.catmull_rom([Vector(p) for p in TE], samples), n_span)
+    out_v = Vector(outward)
+    st = [a0] + ([ridge_a] if a0 < ridge_a < a1 else []) + [a1]
+    mid = [(a + b) * 0.5 for a, b in zip(le, te)]
+
+    def f(a):
+        return max(a / ridge_a if a <= ridge_a else (1.0 - a) / (1.0 - ridge_a), 0.0)
+
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.verify()
+    VA, VB = [], []
+    for i in range(n_span):
+        chord = te[i] - le[i]
+        span = mid[min(i + 1, n_span - 1)] - mid[max(i - 1, 0)]
+        nrm = chord.cross(span)
+        nrm = Vector(out_v) if nrm.length < 1e-9 else nrm.normalized()
+        if nrm.dot(out_v) < 0:
+            nrm = -nrm
+        th = max(thick_fn(i / (n_span - 1)), 0.0) * 0.5
+        va, vb = [], []
+        for a in st:
+            p = le[i].lerp(te[i], a)
+            v = bm.verts.new(p + nrm * (th * f(a)))
+            va.append(v)
+            vb.append(v if f(a) < 1e-9 else bm.verts.new(p - nrm * (th * f(a))))
+        VA.append(va)
+        VB.append(vb)
+    k = len(st)
+
+    def face(vs, uvs):
+        try:
+            fc = bm.faces.new(vs)
+        except ValueError:
+            return
+        for loop, c in zip(fc.loops, uvs):
+            loop[uv].uv = c
+
+    for i in range(n_span - 1):
+        sa, sb = i / (n_span - 1), (i + 1) / (n_span - 1)
+        for j in range(k - 1):
+            ua, ub = st[j], st[j + 1]
+            face((VA[i][j], VA[i][j + 1], VA[i + 1][j + 1], VA[i + 1][j]), ((ua, sa), (ub, sa), (ub, sb), (ua, sb)))
+            face((VB[i + 1][j], VB[i + 1][j + 1], VB[i][j + 1], VB[i][j]), ((ua, sb), (ub, sb), (ub, sa), (ua, sa)))
+        for j in (0, k - 1):                       # walls along cut sides
+            if VA[i][j] is not VB[i][j] or VA[i + 1][j] is not VB[i + 1][j]:
+                face((VA[i][j], VA[i + 1][j], VB[i + 1][j], VB[i][j]), ((st[j], sa), (st[j], sb), (st[j], sb), (st[j], sa)))
+    ring = VA[0] + [v for v in reversed(VB[0]) if v not in VA[0]]
+    face(ring, [(0.5, 0.0)] * len(ring))
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-7)
+    bmesh.ops.dissolve_degenerate(bm, dist=1e-7, edges=bm.edges)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bmesh.ops.triangulate(bm, faces=[fc for fc in bm.faces if len(fc.verts) > 4])
+    bm.normal_update()
+    return bm
