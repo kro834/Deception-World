@@ -954,13 +954,13 @@ def _norm_smooth(N, k=2):
 
 
 class SurfPath:
-    """A path on the body given by 3D control points; resolved radially around
-    hip_axis so it hugs the surface. theta(z) and z are interpolated."""
+    """A path on the body: theta(z) around hip_axis(z), resolved radially so it
+    hugs the surface. Built from (z, theta) keys."""
 
-    def __init__(self, body, ctrl):
-        ctrl = sorted(ctrl, key=lambda p: -p[2])
-        self.zs = [p[2] for p in ctrl]
-        self.th = [theta_of(p) for p in ctrl]
+    def __init__(self, body, keys):
+        keys = sorted(keys, key=lambda k: -k[0])
+        self.zs = [k[0] for k in keys]
+        self.th = [k[1] for k in keys]
         self.body = body
 
     def theta(self, z):
@@ -977,6 +977,47 @@ class SurfPath:
             P.append(r[0])
             N.append(r[1])
         return P, _norm_smooth(N, 3)
+
+
+def solve_theta(body, z, x_target, lo, hi, lift):
+    """Angle in [lo, hi] (radians, X monotonic there) whose surface point,
+    lifted along the normal, has world X = x_target (clamped to the range)."""
+
+    def X(th):
+        r = body_radial(body, th, z)
+        return (r[0] + r[1] * lift).x if r is not None else None
+
+    xl, xh = X(lo), X(hi)
+    inc = xh > xl
+    if x_target <= min(xl, xh):
+        return lo if inc else hi
+    if x_target >= max(xl, xh):
+        return hi if inc else lo
+    for _ in range(28):
+        mid = 0.5 * (lo + hi)
+        xm = X(mid)
+        if (xm < x_target) == inc:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+# lapel centre lines read off the sheet: (Z, X) in front-10 / back-09
+FRONT_LAPEL_X = [(1.153, 0.118), (1.100, 0.148), (1.060, 0.171), (1.020, 0.198), (0.980, 0.224)]
+BACK_LAPEL_X = [(1.153, 0.112), (1.100, 0.156), (1.060, 0.190), (1.025, 0.212)]
+JUNCTION_Z = 0.915
+JUNCTION_TH = math.radians(97.0)
+PANEL_T0, PANEL_T1 = 0.0090, 0.0145  # over the legs' thigh scales (3-8 mm)
+LAPEL_LIFT = 0.0140
+
+
+def lapel_paths(body):
+    fk = [(z, solve_theta(body, z, x, math.radians(15), math.radians(96), LAPEL_LIFT)) for z, x in FRONT_LAPEL_X]
+    bk = [(z, solve_theta(body, z, x, math.radians(98), math.radians(175), LAPEL_LIFT)) for z, x in BACK_LAPEL_X]
+    fk.append((JUNCTION_Z, JUNCTION_TH))
+    bk.append((JUNCTION_Z, JUNCTION_TH))
+    return SurfPath(body, fk), SurfPath(body, bk)
 
 
 def bar_profile(t, ridge=0.0016, chamfer=0.16):
@@ -1047,27 +1088,19 @@ def grid_slab(P, N, t0, t1, bevel=0.0015, thick_fn=None, uv_fn=None):
     return bm
 
 
-FRONT_LAPEL = [(0.118, -0.101, 1.153), (0.168, -0.086, 1.075), (0.214, -0.057, 0.995), (0.242, -0.022, 0.925),
-               (0.250, 0.006, 0.884)]
-BACK_LAPEL = [(0.108, 0.113, 1.153), (0.163, 0.101, 1.075), (0.211, 0.069, 0.995), (0.239, 0.036, 0.925),
-              (0.250, 0.006, 0.884)]
-JUNCTION_Z = 0.884
-
-
 def hips(ctx, coll):
     """Suit's left hip (mirrored): gold front and back lapels meeting at a
     clasp on the outer thigh, the scaled side panel between them that runs on
-    as a coat tail, overlapping feather plates over the buttock and the hip
-    pendant on its rod."""
+    as a short coat tail, a black front hip plate, overlapping feather plates
+    over the buttock and the hip pendant on its rod."""
     body = ctx.body
     gold, suit, black, gdark = Acc(), Acc(), Acc(), Acc()
-    fl = SurfPath(body, FRONT_LAPEL)
-    bl = SurfPath(body, BACK_LAPEL)
-    z_top = Z_BOT + 0.004
+    fl, bl = lapel_paths(body)
+    z_top = Z_BOT + 0.002
     nrows = 26
 
     # --- side panel between the lapels (scaled), down to the junction
-    zs = np.linspace(z_top, JUNCTION_Z + 0.004, nrows)
+    zs = np.linspace(z_top, JUNCTION_Z, nrows)
     P, N = [], []
     for z in zs:
         t0, t1 = fl.theta(z), bl.theta(z)
@@ -1078,55 +1111,59 @@ def hips(ctx, coll):
             row_n.append(r[1])
         P.append(row_p)
         N.append(row_n)
-    suit.add(grid_slab(P, N, 0.003, 0.0085, bevel=0.0015))
+    suit.add(grid_slab(P, N, PANEL_T0, PANEL_T1, bevel=0.0015))
 
-    # --- coat tail below the junction: a stiff scaled flap on the outer thigh
-    ct_z = np.linspace(JUNCTION_Z + 0.03, 0.60, 22)
+    # --- coat tail below the junction: a stiff scaled flap on the outer thigh,
+    # standing over the thigh scales and ending above the knee blades
+    ct_z = np.linspace(JUNCTION_Z + 0.035, 0.800, 16)
     P, N = [], []
-    th_c = math.radians(97.0)
     for k, z in enumerate(ct_z):
         f = k / (len(ct_z) - 1)
-        half = 0.058 * (1.0 - f ** 1.6) + 0.004
-        lift = 0.012 + 0.030 * f
+        half = 0.050 * (1.0 - f ** 1.5) + 0.003
+        lift = 0.016 + 0.012 * f
         row_p, row_n = [], []
         c = hip_axis(z)
-        r0 = body_radial(body, th_c, z)
+        r0 = body_radial(body, JUNCTION_TH, z)
         rad = (Vector((r0[0].x, r0[0].y, 0)) - Vector((c.x, c.y, 0))).length
         dth = half / max(rad, 0.05)
         for u in np.linspace(-1.0, 1.0, 9):
-            r = body_radial(body, th_c + dth * u, z)
-            # stand off the thigh, curving a little more at the edges
-            row_p.append(r[0] + r[1] * (lift - 0.006 * u * u))
+            r = body_radial(body, JUNCTION_TH + dth * u, z)
+            row_p.append(r[0] + r[1] * (lift - 0.004 * u * u))
             row_n.append(r[1])
         P.append(row_p)
         N.append(row_n)
-    suit.add(grid_slab(P, N, 0.0, 0.006, bevel=0.0015))
+    suit.add(grid_slab(P, N, 0.0, 0.0055, bevel=0.0015))
 
     # --- gold lapels with a raised centre ridge, tapering into the clasp
     for path in (fl, bl):
-        Pp, Nn = path.sample(40, z_top - 0.004, JUNCTION_Z)
-        gold.add(surface_strip(Pp, Nn, 0.019, 0.0065, 0.0075, width_fn=lambda t: 1.0 - 0.35 * t))
+        Pp, Nn = path.sample(44, z_top, JUNCTION_Z)
+        gold.add(surface_strip(Pp, Nn, 0.019, 0.0065, LAPEL_LIFT, width_fn=lambda t: 1.0 - 0.35 * t))
         # dark-gold under-lip so the lapel reads as a layered edge
-        gdark.add(surface_strip(Pp, Nn, 0.025, 0.003, 0.0060, width_fn=lambda t: 1.0 - 0.4 * t, ridge=0.0))
+        gdark.add(surface_strip(Pp, Nn, 0.025, 0.003, LAPEL_LIFT - 0.0018, width_fn=lambda t: 1.0 - 0.4 * t, ridge=0.0))
 
-    # --- clasp at the junction: faceted gold diamond
-    rj = body_radial(body, fl.theta(JUNCTION_Z), JUNCTION_Z)
-    cj = rj[0] + rj[1] * 0.018
+    # --- clasp at the junction: faceted gold diamond over a dark-gold seat
+    rj = body_radial(body, JUNCTION_TH, JUNCTION_Z)
+    cj = rj[0] + rj[1] * (LAPEL_LIFT + 0.006)
     Mj = L.frame_from_normal(cj, rj[1], (0.0, 0.0, 1.0))
-    clasp = L.gem_kite(0.034, 0.056, 0.012, table=0.3)
+    clasp = L.gem_kite(0.034, 0.058, 0.012, table=0.3)
     L.transform(clasp, Mj)
     gold.add(clasp)
+    seat = L.gem_kite(0.044, 0.070, 0.004, table=0.8)
+    bmesh.ops.translate(seat, vec=(0.0, 0.0, -0.003), verts=seat.verts)
+    L.transform(seat, Mj)
+    gdark.add(seat)
 
-    # --- hip pendant on a thin rod (front-10 ~ (232, 1055-1160), left-08 Y ~ +0.10)
-    rod_ctrl = [cj + rj[1] * 0.004, Vector((0.292, 0.040, 0.800)), Vector((0.330, 0.070, 0.690)),
-                Vector((0.348, 0.082, 0.625))]
-    rod = L.catmull_rom(rod_ctrl, 8)
-    gold.add(L.tube(rod, 0.0030, sides=10))
-    top = Vector((0.350, 0.083, 0.612))
+    # --- hip pendant on a thin rod (front-10 ~ (232, 1055-1160), left-08 Y ~ +0.10):
+    # the rod leaves the clasp outward and drops nearly vertically
+    hub_x, hub_y = 0.349, 0.084
     wide_z = R.front(232, 1095)[1]
     bot_z = R.front(232, 1160)[1]
-    hub = Vector((0.351, 0.084, wide_z))
-    gold.add(L.tube([rod[-1], top], 0.0030, sides=10))
+    top = Vector((hub_x, hub_y, 0.612))
+    rod_ctrl = [cj + rj[1] * 0.004, Vector((0.300, 0.040, 0.875)), Vector((0.333, 0.068, 0.800)),
+                Vector((0.344, 0.080, 0.700)), top]
+    rod = L.catmull_rom(rod_ctrl, 8)
+    gold.add(L.tube(rod, 0.0030, sides=10))
+    hub = Vector((hub_x, hub_y, wide_z))
     # square bipyramid turned 45 deg: a diamond outline from the front and the side
     bm = bmesh.new()
     w = 0.027
@@ -1149,6 +1186,14 @@ def hips(ctx, coll):
                     matrix=L.frame(hub + Vector((0.030 * sx, 0.0, 0.0)), (0.0, 0.0, 1.0), (sx, 0.0, 0.0)), tip_z=0.0)
         gold.add(tip)
 
+    # --- black front hip plate between the tasset and the front lapel (front-10:
+    # a big lacquer plate with a diagonal crease above the thigh diamond)
+    fx = [(1.152, 0.101), (1.152, fl_x(fl, body, 1.152) - 0.006), (1.060, fl_x(fl, body, 1.060) - 0.008),
+          (1.046, 0.150), (1.046, 0.090)]
+    outline = L.ccw([(x, z) for z, x in fx])
+    crease = lambda h, z: 0.0045 + 0.0025 * max(0.0, 1.0 - abs((h - 0.118) - (1.152 - z) * 0.55) / 0.03)  # noqa: E731
+    black.add(L.conform_plate(body, "front", outline, thickness=crease, gap=PANEL_T0, res=0.008, bevel=0.0015))
+
     # --- feather plates over the buttock (back-09), between back lapel and tasset
     feathers(ctx, black, gold)
 
@@ -1163,29 +1208,38 @@ def hips(ctx, coll):
             L.mirror_x(ob)
 
 
+def fl_x(path, body, z):
+    r = body_radial(body, path.theta(z), z)
+    return (r[0] + r[1] * LAPEL_LIFT).x
+
+
 def feathers(ctx, black, gold):
-    """Rows of overlapping pointed plates on the buttock, pointing down and in."""
+    """Rows of overlapping pointed plates on the buttock, pointing down and in
+    (herringbone, back-09); the plate nearest the lapel in each row sits on a
+    slightly larger gold plate so it reads gold-edged."""
     body = ctx.body
-    rows = [  # (y centre px, gap, list of x centres px) in back-09
-        (712, 0.0105, [452, 420]),
-        (785, 0.0080, [458, 426, 394]),
-        (858, 0.0055, [455, 423, 392, 362]),
+    rows = [  # (y centre px, gap, x centres px) in back-09; upper rows overlap lower ones
+        (702, 0.0175, [446, 417]),
+        (774, 0.0150, [452, 422, 393]),
+        (846, 0.0125, [447, 418, 389, 360]),
     ]
     lapel_x = lambda y: 425 + (300 - 425) * (y - 650) / (820 - 650)  # noqa: E731
     for y, gap, xs in rows:
+        outer = min(x for x in xs if not (x < lapel_x(y) + 10 and y < 820))
         for x in xs:
-            if x < lapel_x(y) + 6 and y < 820:
+            if x < lapel_x(y) + 10 and y < 820:
                 continue
             d = Vector((0.30, 1.0, 0.0)).normalized()  # px: down and toward the centre
             nrm = Vector((-d.y, d.x, 0.0))
-            Lh, Wh = 52.0, 15.0
-            pts_px = [Vector((x, y, 0.0)) - d * Lh, Vector((x, y, 0.0)) + nrm * Wh - d * Lh * 0.25,
-                      Vector((x, y, 0.0)) + d * Lh * 1.15, Vector((x, y, 0.0)) - nrm * Wh - d * Lh * 0.25]
-            outline = [R.back(p.x, p.y) for p in pts_px]
-            cx, cz = R.back(x, y)
-            ridge = lambda h, z, cx=cx, cz=cz: 0.0025 + 0.0025 * max(0.0, 1.0 - abs((h - cx) * 0.95 - (z - cz) * 0.3) / 0.018)  # noqa: E731
-            bm = L.conform_plate(body, "back", L.ccw(outline), thickness=ridge, gap=gap, res=0.010, bevel=0.0012)
-            black.add(bm)
+            Lh, Wh = 50.0, 14.5
+            c = Vector((x, y, 0.0))
+            pts_px = [c - d * Lh, c + nrm * Wh - d * Lh * 0.30, c + nrm * Wh * 0.55 + d * Lh * 0.55, c + d * Lh * 1.12,
+                      c - nrm * Wh * 0.55 + d * Lh * 0.55, c - nrm * Wh - d * Lh * 0.30]
+            outline = L.ccw([R.back(p.x, p.y) for p in pts_px])
+            black.add(L.conform_plate(body, "back", outline, thickness=0.0038, gap=gap, res=0.012, bevel=0.0014))
+            if x == outer:
+                rim = L.ccw(L.offset_outline(outline, 0.0035))
+                gold.add(L.conform_plate(body, "back", rim, thickness=0.0030, gap=gap - 0.0012, res=0.012, bevel=0.0010))
 
 
 # ------------------------------------------------------------------ entry

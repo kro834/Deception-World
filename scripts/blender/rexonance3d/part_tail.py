@@ -2,37 +2,50 @@
 metasoma rising from a socket on the upper back, arching over behind the left
 shoulder and hanging a hooked crystal stinger outside the shoulder.
 
-Read off the sheet (see README for the mapping):
-  front-10  arch: rising leg X ~0.15 (Z 1.70-1.82), crest Z ~1.915 at X ~0.30,
-            falling leg X ~0.50 (Z 1.80-1.72); collar Z 1.59-1.75; blade tip
-            ~(0.49, 1.41); barbs: a large one up/inward, a small one up/outward.
-  right-07  depth: rising leg Y ~0.10-0.13, crest Y ~0.17, falling leg
-            Y ~0.28 (left-08 says 0.34; right-07 decides depth).
+Read off the sheet (README mapping; checked by tracing the medial axis of the
+tail in front-10, right-07 and back-09):
+  front-10  rising leg X ~0.15 (Z 1.70-1.82), crest Z ~1.915 at X ~0.30,
+            falling leg X ~0.50; collar Z 1.59-1.77, ~0.14 m across its
+            horns; blade ~0.10 m wide, tip ~(0.49, 1.41); a large barb up and
+            inward, a small one up and outward. Tube ~0.072 m across.
+  right-07  depth: rising leg Y ~0.11, crest Y ~0.19, falling leg Y ~0.28
+            (left-08 draws everything ~5 cm further back; right-07 decides).
   back-09   agrees with front-10 on X/Z; the root vanishes behind the fan.
-On every sheet the gold chevrons sit centred on the visible face and point
-DOWN on both legs, like roof tiles: on the rising leg and the crest each
-segment's proximal crown laps over the segment below it (V toward the root),
-on the falling leg each distal crown laps over the next (V toward the tip);
-the keystone segment at the crest carries both. A crown is a four-point edge
-(dorsal, ventral, both flanks) trimmed by a raised, bevelled gold band. The
-black shells are tiled with inset diamond plates (the sheet's glossy scale
-plates); every segment carries a pair of long crystal fins on its dorsal side,
-swept toward the tip.
+Twelve segments. On every sheet the gold chevrons sit centred on the visible
+face and point DOWN on both legs, like roof tiles: on the rising leg and the
+crest each segment's proximal crown laps over the segment below it (V toward
+the root), on the falling leg each distal crown laps over the next (V toward
+the tip); the keystone segment at the crest carries both. A crown is a
+four-point edge (dorsal, both flanks, ventral) that flares out over the next
+segment's neck, trimmed by a raised, ridged gold band. The black shells are
+tiled with grooved, domed diamond scale plates. Each segment carries a pair of
+ridged crystal fins growing out of its crown near the dorsal line, swept
+toward the tip; the largest sit on the crest's outer shoulder.
+Stinger: a gold V-cone collar (GoldDark body, bright raised Gold borders)
+whose rim rises in four horns and dips on the faces, its front and back plates
+running down to points on the blade; a fat crystal sickle blade (convex inner
+edge, tip hooking slightly outward and back, as all four views draw it) and
+two crescent barbs. Socket: a gold boot in a gold-rimmed black plate.
 
 Animation contract
-  RX_Tail_Pivot00..NN  empties, each parented to the previous one (Pivot00 at
-  the socket), located at the joint centre on the axis, identity rotation.
-  Every mesh is a leaf child of its segment's pivot; the stinger hangs from
-  the last pivot. Custom properties on each pivot:
-    rx_bend_axis       local unit vector (Blender axes; the pivots carry no
+  RX_Tail_Pivot00..12  empties, each parented to the previous one (Pivot00 at
+  the socket, Pivot12 the stinger joint), located on the axis at the joint,
+  identity rotation, parent inverse = identity (local translation = offset
+  from the parent joint). Every mesh is a leaf child of its segment's pivot
+  (matrix_parent_inverse = pivot inverse, so it stays where it was built);
+  the stinger hangs from Pivot12. Custom properties on each pivot:
+    rx_bend_axis       local unit vector (Blender axes; pivots carry no
                        rotation, so local = world) about which the joint flexes
-                       in the plane of the arch
+                       in the plane of the arch: + opens the curl (stinger
+                       swings up and out), - curls it toward the shoulder
     rx_side_axis       local unit vector for side-to-side sway
     rx_bend_axis_gltf, rx_side_axis_gltf
                        the same vectors in glTF axes (x, z, -y)
     rx_segment         index;  rx_joint_radius  tail radius at the joint (m)
-  Crown tabs lap ~2-4 cm over a narrow neck, so a few degrees of rotation
-  either way never opens a joint.
+  Crown tabs lap 2-4 cm over a narrow neck: tested at +-4 deg on every joint
+  (bend and side) without opening a joint; ~1.5-2.5 deg per joint with a
+  phase lag along the chain gives a living sway that keeps the stinger clear
+  of the shoulder.
 """
 
 import math
@@ -50,14 +63,14 @@ import rx_lib as L
 # points after it continue down the stinger axis.
 CTRL = [
     (0.108, 0.088, 1.478),
-    (0.121, 0.120, 1.540),
-    (0.134, 0.136, 1.608),
-    (0.142, 0.133, 1.683),
-    (0.148, 0.125, 1.753),
-    (0.157, 0.121, 1.813),
-    (0.178, 0.128, 1.858),
-    (0.213, 0.145, 1.891),
-    (0.256, 0.164, 1.911),
+    (0.121, 0.112, 1.540),
+    (0.134, 0.125, 1.608),
+    (0.142, 0.119, 1.683),
+    (0.148, 0.110, 1.753),
+    (0.157, 0.107, 1.813),
+    (0.178, 0.116, 1.858),
+    (0.213, 0.137, 1.891),
+    (0.256, 0.159, 1.911),
     (0.303, 0.187, 1.918),
     (0.351, 0.211, 1.912),
     (0.399, 0.235, 1.893),
@@ -75,7 +88,7 @@ KEYSTONE = 7               # segments < KEYSTONE lap root-ward, > KEYSTONE tip-w
 SOCKET_S = 0.060           # arc length (m) of joint 0 (the socket)
 R_ROOT, R_END = 0.040, 0.032
 STING_DIR = 40.0           # deg: collar horns / barb plane, from +X toward +Y
-BLADE_DIR = 25.0           # deg: blade width direction
+BLADE_DIR = 30.0           # deg: blade width direction
 
 M_FACETS = 8               # diamond plates around a shell
 RINGS = 9
@@ -158,21 +171,14 @@ def zig(th, amps):
     return amps[k % 4] * (1.0 - 2.0 * d)
 
 
-def zig_slope(th, amps):
-    """Mean |d zig / d th| either side of th (radians^-1)."""
-    eps = 1e-4
-    a = (zig(th, amps) - zig(th - eps, amps)) / eps
-    b = (zig(th + eps, amps) - zig(th, amps)) / eps
-    return 0.5 * (abs(a) + abs(b))
-
-
 # ----------------------------------------------------------------- geometry
-def lattice_shell(path, s_lo, s_hi, radius, M=8, R=9, t=0.0024, th0=0.0, inset=None, uv_v=None):
+def lattice_shell(path, s_lo, s_hi, radius, M=8, R=9, t=0.0024, th0=0.0, inset=None):
     """Closed hollow tube between the curves s_lo(th) and s_hi(th) along the
     path, its outside tiled with diamond plates (rings alternate by half a
     column). radius(s, th) is the outer radius; the inside is offset by t.
     R must be odd so both end rings hold the vertex angles th0 + k 2pi/M.
-    inset(s) -> True insets that plate (thickness, depth) for a groove."""
+    inset = (thickness, depth, pick(s), dome): plates whose centre s passes
+    pick(s) are inset for a groove and their centres poked out by dome."""
     assert R % 2 == 1
     bm = bmesh.new()
     uvl = bm.loops.layers.uv.verify()
@@ -189,7 +195,7 @@ def lattice_shell(path, s_lo, s_hi, radius, M=8, R=9, t=0.0024, th0=0.0, inset=N
             d = N * math.cos(th) + B * math.sin(th)
             a = bm.verts.new(P + d * rr)
             b = bm.verts.new(P + d * max(rr - t, rr * 0.5))
-            uv = ((th - th0) / (2 * math.pi), v if uv_v is None else uv_v(s))
+            uv = ((th - th0) / (2 * math.pi), v)
             info[a] = (uv, s)
             info[b] = (uv, s)
             ro.append(a)
@@ -227,15 +233,19 @@ def lattice_shell(path, s_lo, s_hi, radius, M=8, R=9, t=0.0024, th0=0.0, inset=N
             lp[uvl].uv = info[lp.vert][0]
     if inset:
         th_, dp_ = inset[0], inset[1]
+        dome = inset[3] if len(inset) > 3 else 0.0
         pick = [f for f in plates if inset[2](sum(info[v][1] for v in f.verts) / 4.0)]
         if pick:
             bmesh.ops.inset_individual(bm, faces=pick, thickness=th_, depth=dp_, use_even_offset=True,
                                        use_interpolate=True)
+            if dome > 0.0:
+                # raise each plate's centre: domed scales, rounder silhouette
+                bmesh.ops.poke(bm, faces=pick, offset=dome, use_relative_offset=False)
     bm.normal_update()
     return bm
 
 
-def edge_band(path, s_rim, radius, amps, A, n=8, th0=0.0, w=0.016, h=0.0042, e=0.0018, t=0.0024,
+def edge_band(path, s_rim, radius, n=8, th0=0.0, w=0.016, h=0.0042, e=0.0018, t=0.0024,
               sink=0.0024, lip=0.0007, toward=1.0):
     """Raised gold trim riding the zigzag rim s_rim(th) of a shell, sampled at
     the shell's n vertex angles so it follows the plates exactly: a ridged bar
@@ -249,7 +259,8 @@ def edge_band(path, s_rim, radius, amps, A, n=8, th0=0.0, w=0.016, h=0.0042, e=0
         th = th0 + 2.0 * math.pi * k / n
         sr = s_rim(th)
         rho = radius(sr, th)
-        m = zig_slope(th - th0, amps) * A / max(rho, 1e-6)
+        eps = 1e-3
+        m = 0.5 * (abs(sr - s_rim(th - eps)) + abs(s_rim(th + eps) - sr)) / eps / max(rho, 1e-6)
         ws = w * math.sqrt(1.0 + m * m)
         ridge = -0.42 * ws
         prof = [(-ws, -sink), (-ws, 0.40 * h), (ridge, h), (e, 0.55 * h), (e, -(t + lip)),
@@ -292,7 +303,7 @@ def crystal_blade(spine, side_dirs, width, thick=0.38, n_sec=4):
     return bm
 
 
-def fin_spine(root, along, out, length, rise0, rise1, embed=0.007, steps=18, curl=0.0):
+def fin_spine(root, along, out, length, rise0, rise1, embed=0.007, steps=18):
     """Spine of a swept fin in the (along, out) plane: leaves the surface at
     rise0 deg above `along`, curls to rise1 at the tip; starts `embed` below
     the surface. Returns (points, width directions in the plane)."""
@@ -316,37 +327,6 @@ def fin_spine(root, along, out, length, rise0, rise1, embed=0.007, steps=18, cur
 
 def _bez(p0, c, p1, t):
     return p0 * ((1 - t) ** 2) + c * (2 * (1 - t) * t) + p1 * (t * t)
-
-
-def swept_fin(root, along, out, lean, chord, sweep, height, thick=0.0050, bevel=0.0013, embed=0.007, n=14):
-    """Crystal fin standing on a surface like a swept shark fin: its root chord
-    (`chord` m) lies along `along` from `root`, the tip sits `sweep` m further
-    along and `height` m out; convex leading edge, concave trailing edge (a
-    claw). `lean` (rad) tilts the fin plane about `along` (splay). Bevelled
-    prism; UV v = 0 at the root, 1 at the tip."""
-    along = Vector(along).normalized()
-    out = Vector(out)
-    out = (out - along * out.dot(along)).normalized()
-    side = along.cross(out)
-    out3 = out * math.cos(lean) + side * math.sin(lean)
-    tip = Vector((sweep, height))
-    lead = [_bez(Vector((0.0, 0.0)), Vector((0.18 * sweep, 0.92 * height)), tip, i / n) for i in range(n + 1)]
-    trail = [_bez(Vector((chord, 0.0)), Vector((0.72 * sweep, 0.10 * height)), tip, i / n) for i in range(n + 1)]
-    pts2 = [Vector((chord, -embed)), Vector((0.0, -embed))] + lead + list(reversed(trail[:-1]))
-    mid = Vector((0.5 * chord, -embed))
-    cy = (tip - mid).normalized()
-    cx = Vector((cy.y, -cy.x))
-    loc = [((q - mid).dot(cx), (q - mid).dot(cy)) for q in pts2]
-    xs = [q[0] for q in loc]
-    ys = [q[1] for q in loc]
-    bm = L.prism(loc, thick, bevel=bevel, bevel_seg=1, centered=True,
-                 uv_bounds=((min(xs), max(xs)), (min(ys), max(ys))))
-    X3 = along * cx.x + out3 * cx.y
-    Y3 = along * cy.x + out3 * cy.y
-    origin = Vector(root) + along * mid.x + out3 * mid.y
-    L.transform(bm, L.frame(origin, X3, Y3))
-    bm.normal_update()
-    return bm
 
 
 # ----------------------------------------------------------------- objects
@@ -399,20 +379,16 @@ def _end_factor(u, kind, tab):
 
 
 # ----------------------------------------------------------------- stinger
-def _rhomb(a, b, ph):
-    """Radius of a rhombus with half-diagonals a (ph = 0) and b (ph = 90 deg)."""
-    return 1.0 / (abs(math.cos(ph)) / a + abs(math.sin(ph)) / b)
-
-
-def build_stinger(coll, path, s_j, r_end, piv, ploc):
-    """Gold V-cone collar: a funnel over the end of the last segment whose rim
-    rises in two tall horns on the barb sides and dips front and back, closing
-    downward into a flat sheath whose faces end in V points lying on the
-    blade (front-10: ~0.14 m across the horns, Z 1.61-1.77). Below it the
-    fat hooked crystal blade (~0.10 m wide, convex inner edge, tip Z ~1.41)
-    and two crescent barbs in the plane STING_DIR (large one up/inward to
-    ~0.11 m off the axis, small one up/outward)."""
-    P, T, N, B = path.at(s_j)
+def build_stinger(coll, path, s_j, piv, ploc):
+    """Gold V-cone collar over the end of the last segment: its rim rises in
+    four horns on the diagonals and dips on the faces (every view sees a
+    V-notch with horns at its edges), and narrows into a flat sheath whose
+    front and back plates end in points lying on the blade (front-10: ~0.14 m
+    across the horns, Z 1.59-1.77). Below it the fat hooked crystal blade
+    (~0.11 m wide in front-10, convex inner edge, tip Z ~1.41) and two
+    crescent barbs in the plane STING_DIR (large one up/inward ~0.09 m off
+    the axis, small one up/outward)."""
+    _P, T, N, B = path.at(s_j)
     up = -T
 
     def hdir(deg):
@@ -422,7 +398,6 @@ def build_stinger(coll, path, s_j, r_end, piv, ploc):
     w = hdir(STING_DIR)            # barb plane
     p = T.cross(w).normalized()
     wb = hdir(BLADE_DIR)           # blade width direction
-    pb = T.cross(wb).normalized()
 
     def th_of(v):
         return math.atan2(v.dot(B), v.dot(N))
@@ -433,7 +408,7 @@ def build_stinger(coll, path, s_j, r_end, piv, ploc):
     th_X = th_of(X)
     th_Y = th_of(Y)
     Lc = 0.110                     # joint -> tips of the V plates
-    A_up = 0.050
+    A_up = 0.060
 
     def s_lo(th):
         # horns on the four diagonals, V-notch dips on the faces
@@ -452,14 +427,23 @@ def build_stinger(coll, path, s_j, r_end, piv, ploc):
         dv = d[2] * math.cos(th) + d[3] * math.sin(th)
         x, y = dv.dot(X), dv.dot(Y)
         if u < 0.0:
-            return 0.057 + 0.017 * min(-u / 0.45, 1.0)
-        a = 0.057 - 0.017 * _smooth(u)
-        b = max(0.057 - 0.046 * _smooth(u / 0.75), 0.0245)
-        return a * b / math.sqrt((b * x) ** 2 + (a * y) ** 2 + 1e-12)
+            return 0.061 + 0.019 * min(-u / 0.45, 1.0)
+        a = 0.061 - 0.020 * _smooth(u)
+        b = max(0.061 - 0.050 * _smooth(u / 0.75), 0.0285)
+        ell = a * b / math.sqrt((b * x) ** 2 + (a * y) ** 2 + 1e-12)
+        rho = 1.0 / (abs(x) / a + abs(y) / b + 1e-12)       # rhombus: ridge down each V plate
+        return _lerp(ell, max(rho, b), 0.75 * _smooth((u - 0.10) / 0.55))
 
-    bm = lattice_shell(path, s_lo, s_hi, radius, M=8, R=9, t=0.003, th0=th_X)
-    collar = L.from_bmesh(bm, "RX_Tail_Stinger_Collar", coll, "Gold", angle=38.0)
+    bm = lattice_shell(path, s_lo, s_hi, radius, M=16, R=9, t=0.003, th0=th_X)
+    collar = L.from_bmesh(bm, "RX_Tail_Stinger_Collar", coll, "GoldDark", angle=38.0)
     _parent(collar, piv, ploc)
+    # bright raised borders: the horned upper rim and the V edges of the plates
+    rims = []
+    for s_rim, tw in ((s_lo, -1.0), (s_hi, 1.0)):
+        bm = edge_band(path, s_rim, radius, n=16, th0=th_X, w=0.015, h=0.0040, t=0.003, toward=tw)
+        rims.append(L.from_bmesh(bm, "RX_Tail_Stinger_CollarRim", coll, "Gold", angle=30.0))
+    rim = L.join(rims, "RX_Tail_Stinger_CollarRim")
+    _parent(rim, piv, ploc)
 
     # blade: ridged hexagonal section, convex inner edge, tip hooking back out
     O = path.at(s_j + 0.020)[0]
@@ -467,28 +451,28 @@ def build_stinger(coll, path, s_j, r_end, piv, ploc):
     spine, dirs = [], []
     for i in range(49):
         t = i / 48.0
-        off = -0.020 * math.sin(math.pi * t ** 0.9) + 0.016 * max(0.0, (t - 0.62) / 0.38) ** 2
+        off = -0.013 * math.sin(math.pi * t ** 0.9) + 0.012 * max(0.0, (t - 0.62) / 0.38) ** 2
         spine.append(O + T * (Lb * t) + wb * off)
         dirs.append(wb)
 
     def bw(t):
-        if t < 0.22:
-            return 0.060 + 0.050 * _smooth(t / 0.22)
-        q = (t - 0.22) / 0.78
-        return 0.110 * max(1.0 - q ** 1.45, 0.0) ** 0.80
+        if t < 0.25:
+            return 0.060 + 0.070 * _smooth(t / 0.25)
+        q = (t - 0.25) / 0.75
+        return 0.130 * max(1.0 - q ** 1.40, 0.0) ** 0.78
 
-    bm = crystal_blade(spine, dirs, bw, thick=0.40, n_sec=6)
+    bm = crystal_blade(spine, dirs, bw, thick=0.32, n_sec=6)
     blade = L.from_bmesh(bm, "RX_Tail_Stinger_Blade", coll, "Crystal", angle=30.0)
     L.tint(blade, pink=0.30, sparkle=0.7, edge=0.7)
 
     barbs = [blade]
-    for sgn, s_off, reach, rise, bow, wid in ((-1.0, 0.072, 0.075, 0.145, 0.066, 0.036),
-                                              (1.0, 0.076, 0.080, 0.088, 0.064, 0.026)):
+    for sgn, s_off, reach, rise, bow, lift, wid in ((-1.0, 0.084, 0.050, 0.165, 0.068, 0.040, 0.036),
+                                                    (1.0, 0.090, 0.066, 0.100, 0.072, 0.026, 0.028)):
         th = th_w + (math.pi if sgn < 0 else 0.0)
-        root = path.point(s_j + s_off, th, radius(s_j + s_off, th) * 0.45)
+        root = path.point(s_j + s_off, th, radius(s_j + s_off, th) - 0.008)
         out = w * sgn
         p0 = root
-        c = root + out * bow + up * (0.08 * rise)
+        c = root + out * bow + up * lift
         p1 = root + out * reach + up * rise
         spine, dirs = [], []
         n = 24
@@ -498,8 +482,8 @@ def build_stinger(coll, path, s_j, r_end, piv, ploc):
             dq = (c - p0) * (2 * (1 - t)) + (p1 - c) * (2 * t)
             spine.append(q)
             dirs.append(p.cross(dq).normalized())
-        bm = crystal_blade(spine, dirs, lambda t, wd=wid: wd * (0.70 + 0.30 * math.sin(math.pi * min(t / 0.45, 1.0))) * (1.0 - t) ** 0.62,
-                           thick=0.30, n_sec=4)
+        bm = crystal_blade(spine, dirs, lambda t, wd=wid: wd * max(math.sin(math.pi * (0.1 + 0.9 * t) ** 0.9), 0.0) ** 0.8,
+                           thick=0.28, n_sec=4)
         ob = L.from_bmesh(bm, "RX_Tail_Stinger_Barb%s" % ("In" if sgn < 0 else "Out"), coll, "Crystal", angle=30.0)
         L.tint(ob, pink=0.35, sparkle=0.6, edge=0.7)
         barbs.append(ob)
@@ -508,7 +492,7 @@ def build_stinger(coll, path, s_j, r_end, piv, ploc):
 
 
 # ----------------------------------------------------------------- socket
-def build_socket(ctx, coll, path, s_j0, r0):
+def build_socket(ctx, coll, path, s_j0):
     """Static mount on the upper back: a gold boot flaring out of a
     gold-rimmed black plate; the first segment's crown laps over its top."""
     body = ctx.body
@@ -522,13 +506,14 @@ def build_socket(ctx, coll, path, s_j0, r0):
             break
     P, T, N, B = path.at(s_exit)
 
-    def radius(s, th):
-        u = (s - (s_exit - 0.03)) / max(s_j0 - (s_exit - 0.03), 1e-6)
-        return _lerp(0.064, 0.036, _smooth(u) ** 0.7)
+    s_base = s_exit - 0.050
 
-    bm = lattice_shell(path, lambda th: s_exit - 0.03, lambda th: s_j0 + 0.004, radius, M=8, R=5, t=0.003,
-                       inset=(0.0016, 0.0008, lambda s: True))
-    L.from_bmesh(bm, "RX_Tail_Socket_Boot", coll, "Gold", angle=25.0)
+    def radius(s, th):
+        u = (s - s_base) / max(s_j0 - s_base, 1e-6)
+        return _lerp(0.066, 0.0365, _smooth(min(max(u, 0.0), 1.0)) ** 0.75)
+
+    bm = lattice_shell(path, lambda th: s_base, lambda th: s_j0 + 0.004, radius, M=8, R=7, t=0.004)
+    L.from_bmesh(bm, "RX_Tail_Socket_Boot", coll, "Gold", angle=40.0)
 
     # plate footprint seen from the back, around the exit
     h0 = P.x
@@ -587,17 +572,18 @@ def build(ctx):
             s_hi = lambda th, sb=sb, A=A: sb + A * zig(th, TAB_AMPS)
         else:
             s_hi = lambda th, sb=sb, ln=ln: sb + NECK * ln
-        vis = lambda s, sa=sa, sb=sb, ln=ln: (sa - 0.6 * ln) < s < (sb + 0.02 * ln)
-        bm = lattice_shell(path, s_lo, s_hi, radius, M=M_FACETS, R=RINGS, t=SHELL_T, inset=(0.0020, 0.0012, vis))
+        top = sb + (A if dist == "crown" else 0.02 * ln)
+        vis = lambda s, sa=sa, ln=ln, top=top: (sa - 0.6 * ln) < s < top
+        bm = lattice_shell(path, s_lo, s_hi, radius, M=M_FACETS, R=RINGS, t=SHELL_T, inset=(0.0020, 0.0012, vis, 0.0016))
         shell = L.from_bmesh(bm, "RX_Tail_Seg%02d_Shell" % k, coll, "Black", angle=62.0)
         _parent(shell, piv, ploc)
 
         bands = []
         if prox == "crown":
-            bm = edge_band(path, s_lo, radius, TAB_AMPS, A, n=M_FACETS, t=SHELL_T, toward=-1.0)
+            bm = edge_band(path, s_lo, radius, n=M_FACETS, t=SHELL_T, toward=-1.0)
             bands.append(L.from_bmesh(bm, "RX_Tail_Seg%02d_CrownP" % k, coll, "Gold", angle=30.0))
         if dist == "crown":
-            bm = edge_band(path, s_hi, radius, TAB_AMPS, A, n=M_FACETS, t=SHELL_T, toward=1.0)
+            bm = edge_band(path, s_hi, radius, n=M_FACETS, t=SHELL_T, toward=1.0)
             bands.append(L.from_bmesh(bm, "RX_Tail_Seg%02d_CrownD" % k, coll, "Gold", angle=30.0))
         if bands:
             band = L.join(bands, "RX_Tail_Seg%02d_Chevron" % k)
@@ -614,29 +600,24 @@ def build(ctx):
             jit = _hash(k * 2 + (sgn < 0))
             th = sgn * math.radians(FIN_THETA + 6.0 * (jit - 0.5))
             if dist == "crown":
-                sr = s_hi(th)
-                sf = sr - 0.55 * 0.016
-                lift = 0.0
+                sf = s_hi(th) - 0.55 * 0.016
             elif prox == "crown":
-                sr = s_lo(th)
-                sf = sr + 0.55 * 0.016
-                lift = 0.0
+                sf = s_lo(th) + 0.55 * 0.016
             else:
                 sf = sa + 0.35 * ln
-                lift = 0.0
             P, T, N, B = path.at(sf)
             d = N * math.cos(th) + B * math.sin(th)
             e = T.cross(d)
             lean = math.radians(FIN_LEAN + 8.0 * (jit - 0.5))
             d2 = d * math.cos(lean) + e * (sgn * math.sin(lean))
-            root = path.point(sf, th, radius(sf, th) + lift)
+            root = path.point(sf, th, radius(sf, th))
             size = (1.0, 0.84)[(k + (sgn < 0)) % 2] * (0.92 + 0.16 * jit)
             flen = (0.060 + 0.105 * bump) * size
             fwid = (0.024 + 0.020 * bump) * size
             spine, dirs = fin_spine(root, T, d2, flen, 21.0 + 6.0 * jit, -13.0, embed=0.008)
             bm = crystal_blade(spine, dirs,
                                lambda t, fw=fwid: fw * (0.78 + 0.22 * math.sin(math.pi * min(t / 0.35, 1.0))) * (1.0 - t) ** 0.70,
-                               thick=0.24, n_sec=4)
+                               thick=0.26, n_sec=6)
             ob = L.from_bmesh(bm, "RX_Tail_Seg%02d_Fin%s" % (k, "A" if sgn > 0 else "B"), coll, "Crystal", angle=30.0)
             L.tint(ob, pink=0.10 + 0.30 * bump, sparkle=0.5, edge=0.6)
             fins.append(ob)
@@ -644,15 +625,12 @@ def build(ctx):
         _parent(fin, piv, ploc)
 
     piv, ploc = pivots[N_SEG]
-    build_stinger(coll, path, s_joint, radii[-1], piv, ploc)
-    build_socket(ctx, coll, path, joints[0], radii[0])
+    build_stinger(coll, path, s_joint, piv, ploc)
+    build_socket(ctx, coll, path, joints[0])
 
     tris = 0
     for o in coll.objects:
         if o.type == "MESH":
             o.data.calc_loop_triangles()
             tris += len(o.data.loop_triangles)
-    print("[tail] path %.3f m, %d triangles" % (path.length, tris))
-    for k, s in enumerate(joints):
-        P = path.at(s)[0]
-        print("[tail] joint %2d s=%.3f at (%.3f, %.3f, %.3f)" % (k, s, P.x, P.y, P.z))
+    print("[tail] %d segments + stinger, path %.3f m, %d triangles" % (N_SEG, path.length, tris))

@@ -156,7 +156,7 @@ export function createRexonanceScene(
   hdr.texture.name = "Rexonance.hdr";
   const composer = new EffectComposer(renderer, hdr);
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.62, 0.42, 1.15);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.42, 1.35);
   bloom.enabled = quality.bloom;
   const output = new OutputPass();
   const fxaa = samples === 0 ? new FXAAPass() : null;
@@ -183,6 +183,7 @@ export function createRexonanceScene(
   let last = 0;
   let time = 0;
   let settle = 0;
+  let frames = 0;
   let width = 1;
   let height = 1;
   let dpr = 1;
@@ -368,6 +369,8 @@ export function createRexonanceScene(
     uniforms.rxRootToView.value.setFromMatrix4(rootToView);
     glints?.update(time, motionAmount);
     composer.render(dt);
+    frames++;
+    canvas.dataset.frames = String(frames);
     if (animating || controls.autoRotate) {
       if (adaptive.sample(dt)) resize();
       if (dt > 0) canvas.dataset.fps = (1 / dt).toFixed(1);

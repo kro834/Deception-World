@@ -96,9 +96,26 @@ class Arm:
 
 
 # ------------------------------------------------------------------ braid
+Z_ELBOW = 1.250             # upper-arm wrap ends here, under the vambrace tips
+UPPER_SHIFT = 0.5           # upper-arm wrap phase offset (in pairs)
+
+
+def vambrace_top(arm, psi):
+    """s where a forearm band centred at psi ends in its pointed tip: the
+    tips stand higher over the outer/back elbow and lower in the crook."""
+    s0 = arm.s(1.285)
+    for _ in range(4):
+        phi = psi - K * s0
+        z = 1.282 + 0.022 * math.cos(phi - 50.0 * DEG)
+        s0 = arm.s(z)
+    return s0
+
+
 def build_braid(arm, coll):
+    """Upper-arm wrap (pauldron to elbow) and forearm vambrace (elbow to
+    bracer): gold straps and scaled black ribbons spiralling down the arm. The
+    vambrace bands end at the elbow in raised spear points over the wrap."""
     surf = arm.surf
-    s0, s1 = arm.s(Z_TOP), arm.s(Z_BOT)
     pair = TAU / N_PAIRS
     gold_w = pair * GOLD_FRAC
     gold, black = [], []
@@ -114,11 +131,37 @@ def build_braid(arm, coll):
             return 0.0022
         return 0.0041 + 0.0007 * (1.0 - a)
 
-    n_s = 64
+    # upper-arm wrap
+    s0, s1 = arm.s(Z_TOP), arm.s(Z_ELBOW)
+    n_s = 34
     for k in range(N_PAIRS):
-        p = PSI0 + k * pair
+        p = PSI0 + (k + UPPER_SHIFT) * pair
         gold.append(G.helix_band(surf, p, p + gold_w, s0, s1, K, n_s, gus, gold_lift, gap=0.0007))
         black.append(G.helix_band(surf, p + gold_w, p + pair, s0, s1, K, n_s, bus, black_lift, gap=0.0007))
+    # forearm vambrace: bands rise over the wrap near the elbow and end in points
+    s_bot = arm.s(Z_BOT)
+    s_lap = arm.s(Z_ELBOW + 0.012)
+
+    def raised(fn, extra):
+        def f(u, v, fn=fn):
+            return fn(u, v) + extra(v)
+        return f
+
+    for k in range(N_PAIRS):
+        p = PSI0 + k * pair
+        for lo, hi, fn, out, us_, tip_len, fl in ((p, p + gold_w, gold_lift, gold, gus, 0.040, 0.0030),
+                                                  (p + gold_w, p + pair, black_lift, black, bus, 0.022, 0.0)):
+            st = vambrace_top(arm, 0.5 * (lo + hi)) + (0.010 if fl == 0.0 else 0.0)
+            n = max(int((s_bot - st) / 0.0068), 12)
+
+            def extra(v, st=st, fl=fl):
+                s = st + (s_bot - st) * v
+                # lift over the wrap where they overlap, flick the gold points outward
+                lap = 1.0 - smoothstep(s_lap, s_lap + 0.03, s)
+                flick = (1.0 - smoothstep(st, st + 0.03, s)) ** 2
+                return 0.0040 * lap + fl * flick
+
+            out.append(G.helix_band(surf, lo, hi, st, s_bot, K, n, us_, raised(fn, extra), gap=0.0007, tip=(tip_len, 1.25)))
     obs = [
         L.from_bmesh(G.bm_join(gold), "RX_Arms_BraidGold_L", coll, "Gold", angle=30),
         L.from_bmesh(G.bm_join(black), "RX_Arms_BraidScale_L", coll, "Suit", angle=40),
@@ -141,7 +184,8 @@ def build_shards(arm, coll):
     ]
     out = []
     for rib, za, zb in spots:
-        psi = PSI0 + rib * pair + gold_w + 0.5 * (pair - gold_w)
+        shift = UPPER_SHIFT if za > Z_ELBOW + 0.02 else 0.0
+        psi = PSI0 + (rib + shift) * pair + gold_w + 0.5 * (pair - gold_w)
         sa, sb = arm.s(za), arm.s(zb)
 
         def c(v, sa=sa, sb=sb, psi=psi):
@@ -163,7 +207,7 @@ def build_shards(arm, coll):
 
 
 # ------------------------------------------------------------------ forearm crystals
-FLAME_PHI = 314.0 * DEG
+FLAME_PHI = 336.0 * DEG
 FLAME_HW = [(1.046, 0.0088), (1.080, 0.0092), (1.105, 0.0110), (1.125, 0.0180), (1.150, 0.0290),
             (1.180, 0.0360), (1.215, 0.0350), (1.245, 0.0240), (1.272, 0.0030)]
 
@@ -173,7 +217,7 @@ FLAME_BACK_HW = [(1.046, 0.0075), (1.085, 0.0080), (1.110, 0.0100), (1.135, 0.01
                  (1.165, 0.0250), (1.195, 0.0255), (1.225, 0.0170), (1.252, 0.0025)]
 
 
-def build_flame(arm, coll, phi_c=None, table=None, name="RX_Arms_ForearmFlame_L", drift_deg=6.0):
+def build_flame(arm, coll, phi_c=None, table=None, name="RX_Arms_ForearmFlame_L", drift_deg=6.0, rim=True):
     """Forearm crystal panel: wide faceted top, pink stem into the bracer."""
     surf = arm.surf
     phi_c = FLAME_PHI if phi_c is None else phi_c
@@ -202,7 +246,30 @@ def build_flame(arm, coll, phi_c=None, table=None, name="RX_Arms_ForearmFlame_L"
     bm = G.surf_patch(surf, sa, sb, phis, 48, us, lift)
     ob = L.from_bmesh(bm, name, coll, "Crystal", angle=22)
     L.tint(ob, fn=lambda co, uv: (smoothstep(0.35, 0.80, uv[1]), 0.75, 0.7))
-    return [ob]
+    obs = [ob]
+    if rim:
+        # gold frame around the panel (a wall from the body up past the crystal edge)
+        n = 40
+        loop = []
+        for i in range(n):
+            v = i / (n - 1)
+            loop.append((sa + (sb - sa) * v, phis(v)[1]))
+        for i in range(n - 1, -1, -1):
+            v = i / (n - 1)
+            loop.append((sa + (sb - sa) * v, phis(v)[0]))
+        path, nrm = [], []
+        for ss, ph in loop:
+            path.append(surf.point(ss, ph, 0.0048))
+            nrm.append(surf.normal(ss, ph))
+        clean_p, clean_n = [path[0]], [nrm[0]]
+        for q, nn in zip(path[1:], nrm[1:]):
+            if (q - clean_p[-1]).length > 0.0015:
+                clean_p.append(q)
+                clean_n.append(nn)
+        prof = L.rounded_rect_profile(0.0125, 0.0042, 0.0012, 1)
+        bmr = L.sweep(clean_p, prof, normals=clean_n, closed=True)
+        obs.append(L.from_bmesh(bmr, name.replace("Flame", "FlameRim"), coll, "Gold", angle=35))
+    return obs
 
 
 def build_diamond(arm, coll):
@@ -378,12 +445,13 @@ def build_gauntlet(arm, coll):
     # wrist sleeve between the bracer and the hand
     prof = [(0.0300, -0.020), (0.0400, -0.020), (0.0418, -0.012), (0.0405, 0.006), (0.0380, 0.022), (0.0300, 0.022)]
     black.append(G.revolve(prof, H.p(0, 0, 0), H.w, seg=32, ref=H.u))
-    # hand body: rounded block from inside the bracer down to the knuckles
-    path = [H.p(0.008, -0.002, 0.010), H.p(0.008, -0.002, -0.040), H.p(0.008, -0.002, -0.092)]
-    prof = L.superellipse_profile(32, 1.0, 1.0, 2.5)
+    # hand body: faceted (decagon) block from inside the bracer down to the knuckles
+    path = [H.p(0.008, -0.002, 0.012), H.p(0.008, -0.002, -0.040), H.p(0.008, -0.002, -0.092)]
+    prof = [(1.0, 0.0), (0.86, 0.62), (0.40, 0.98), (-0.40, 0.98), (-0.86, 0.62),
+            (-1.0, 0.0), (-0.86, -0.62), (-0.40, -0.98), (0.40, -0.98), (0.86, -0.62)]
 
     def hb_scale(t):
-        return (0.031 + 0.003 * t, 0.044 + 0.010 * t)
+        return (0.032 + 0.003 * t, 0.046 + 0.010 * t)
 
     black.append(L.sweep(path, prof, scale=hb_scale, up=H.u))
     # back-of-hand plate: faceted frustum (8 facets) rising from the shield
@@ -400,9 +468,13 @@ def build_gauntlet(arm, coll):
     outer = [(-0.010 + x, y) for x, y in [(0.0, 0.044), (-0.042, 0.036), (-0.053, 0.0), (-0.048, -0.040), (0.0, -0.062),
                                          (0.048, -0.040), (0.053, 0.0), (0.042, 0.036)]]
     black.append(G.loft_plate(L.ccw(outer), L.ccw(rh), -0.0075, 0.0, -0.020, matrix=Mg))
-    # pinky-side plate (hypothenar) and thenar pad (thumb base)
-    black.append(pill_bar(H.p(0.010, -0.052, 0.002), H.p(0.004, -0.058, -0.078), H.d(0, -1, 0),
-                          0.052, 0.050, 0.014, 0.016, p=3.2, chamfer=0.006, crown=0.35))
+    # pinky-side plate (hypothenar): faceted, local x = w (up), y = u (out), z = -v
+    side = [(0.006, -0.026), (0.006, 0.030), (-0.026, 0.040), (-0.074, 0.034), (-0.088, 0.004),
+            (-0.076, -0.028), (-0.030, -0.034)]
+    side_in = L.offset_outline(L.ccw(side), -0.0085)
+    Ms = L.frame(H.p(0.004, -0.0505, 0.0), H.w, H.u)
+    black.append(G.loft_plate(L.ccw(side), side_in, 0.0022, 0.0078, -0.014, matrix=Ms))
+    # thenar pad (thumb base)
     black.append(pill_bar(H.p(0.014, 0.050, -0.004), H.p(0.002, 0.058, -0.052), H.d(0.2, 1, 0),
                           0.046, 0.042, 0.026, 0.024, p=3.0, chamfer=0.005, crown=0.3))
     fingers = [0.0390, 0.0130, -0.0130, -0.0390]
@@ -446,11 +518,12 @@ def build_gauntlet(arm, coll):
 
     # gold knuckle studs on index, middle and ring
     studs = []
-    stud_prof = [(0.0, -0.004), (0.0098, -0.004), (0.0100, 0.0016), (0.0088, 0.0052), (0.0060, 0.0090), (0.0022, 0.0130), (0.0, 0.0136)]
+    stud_prof = [(0.0, -0.004), (0.0098, -0.004), (0.0100, 0.0010), (0.0094, 0.0040), (0.0078, 0.0068), (0.0054, 0.0092),
+                 (0.0028, 0.0112), (0.0010, 0.0126), (0.0, 0.0130)]
     for fv in fingers[:3]:
         o = H.p(0.046, fv - 0.006, -0.090)
         d = H.d(1.0, 0.0, -0.75)
-        studs.append(G.revolve(stud_prof, o, d, seg=8, ref=H.v, phase=math.pi / 8))
+        studs.append(G.revolve(stud_prof, o, d, seg=14, ref=H.v))
     obs.append(L.from_bmesh(G.bm_join(studs), "RX_Arms_KnuckleStuds_L", coll, "Gold", angle=28))
     return obs
 
@@ -499,11 +572,11 @@ def build_elbow(arm, coll):
     start = root + rdir * 0.004
 
     # sickle: black core, gold outer edge, crystal inner edge (front-10 both arms)
-    sickle = [start, V(0.462, 0.118, 1.150), V(0.528, 0.148, 1.035), V(0.562, 0.158, 0.930),
-              V(0.556, 0.148, 0.862), V(0.522, 0.128, 0.805)]
+    sickle = [start, V(0.470, 0.150, 1.140), V(0.528, 0.212, 1.030), V(0.552, 0.256, 0.940),
+              V(0.552, 0.280, 0.860), V(0.538, 0.290, 0.795)]
 
     def sk_w(t):
-        return 0.024 + 0.022 * math.sin(0.5 * math.pi * min(t / 0.5, 1.0)) - 0.046 * smoothstep(0.6, 1.0, t)
+        return 0.026 + 0.036 * math.sin(0.5 * math.pi * min(t / 0.5, 1.0)) - 0.062 * smoothstep(0.58, 1.0, t)
 
     def sk_th(t):
         return 0.0080 * (1.0 - 0.75 * smoothstep(0.6, 1.0, t))
@@ -518,11 +591,11 @@ def build_elbow(arm, coll):
     obs.append(iob)
 
     # long crystal ribbon: from the elbow behind the sickle, down past the fist
-    rib = [start + V(-0.004, 0.0, 0.006), V(0.445, 0.122, 1.120), V(0.468, 0.138, 1.000), V(0.472, 0.146, 0.880),
-           V(0.460, 0.148, 0.780), V(0.440, 0.140, 0.712)]
+    rib = [start + V(-0.004, 0.0, 0.006), V(0.445, 0.170, 1.120), V(0.478, 0.250, 1.000), V(0.492, 0.296, 0.900),
+           V(0.486, 0.296, 0.800), V(0.466, 0.270, 0.712)]
 
     def rb_w(t):
-        return 0.015 + 0.012 * math.sin(0.5 * math.pi * min(t / 0.5, 1.0)) - 0.027 * smoothstep(0.72, 1.0, t)
+        return 0.016 + 0.024 * math.sin(0.5 * math.pi * min(t / 0.45, 1.0)) - 0.040 * smoothstep(0.70, 1.0, t)
 
     rb = blade_sweep(arm, rib, rb_w, lambda t: 0.0062 * (1.0 - 0.6 * t), n=56, twist_deg=-30.0)
     rob = L.from_bmesh(rb, "RX_Ribbon_Arm2_L", coll, "Crystal", angle=30)
@@ -531,9 +604,9 @@ def build_elbow(arm, coll):
     obs.append(rob)
 
     # gold rod down to the double-spike pendant (it hangs plumb at the end)
-    top = V(0.497, 0.196, 0.905)
-    rod_pts = [start + V(0.0, 0.004, 0.002), V(0.448, 0.140, 1.125), V(0.488, 0.182, 1.020),
-               V(0.499, 0.196, 0.950), top]
+    top = V(0.494, 0.192, 0.912)
+    rod_pts = [start + V(0.0, 0.004, 0.002), V(0.440, 0.122, 1.125), V(0.472, 0.162, 1.020),
+               V(0.490, 0.186, 0.950), top]
     rod = blade_sweep(arm, rod_pts, lambda t: 0.0086 - 0.0012 * t, lambda t: 0.0060 - 0.0008 * t, n=40, prof_n=12, sharp=1.0)
     obs.append(L.from_bmesh(rod, "RX_Arms_Rod_L", coll, "Gold", angle=40))
     obs += build_pendant(top, coll)
@@ -610,7 +683,7 @@ def build(ctx):
     obs += build_braid(arm, coll)
     obs += build_shards(arm, coll)
     obs += build_flame(arm, coll)
-    obs += build_flame(arm, coll, FLAME_BACK_PHI, FLAME_BACK_HW, "RX_Arms_ForearmFlameBack_L", drift_deg=-6.0)
+    obs += build_flame(arm, coll, FLAME_BACK_PHI, FLAME_BACK_HW, "RX_Arms_ForearmFlameBack_L", drift_deg=-6.0, rim=False)
     obs += build_diamond(arm, coll)
     obs += build_bracer(arm, coll)
     obs += build_gauntlet(arm, coll)

@@ -121,18 +121,52 @@ def clearance(p):
     return 0.034 if p.z < ARM_TOP_Z else 0.022
 
 
-def push_out(p, add=0.0):
+ARM_AXIS = (Vector(R.LM["shoulder"]), Vector(R.LM["elbow"]))
+DRAPE_CLEAR = 0.027  # blades hanging in front of the arm: just clear of the braids (<= 0.021)
+LOW_Z = 1.51         # petals whose tips hang below this drape over the arm armour
+WIDTH_K = 1.12       # global blade width scale (the sheet's blades are broad)
+
+
+def _axis_point(p):
+    a, b = ARM_AXIS
+    ab = b - a
+    t = max(0.0, min(1.0, (p - a).dot(ab) / ab.length_squared))
+    return a + ab * t
+
+
+def radial_dir(p):
+    """Unit direction from the upper-arm axis to p and the distance."""
+    u = p - _axis_point(p)
+    r = u.length
+    return (u / r if r > 1e-9 else Vector((1.0, 0.0, 0.0))), r
+
+
+def push_out(p, add=0.0, u=None):
     """Displacement that lifts world point p to at least clearance(p) + add
-    off the suit."""
+    off the suit: radially from the upper-arm axis (shoulder joint -> elbow)
+    along u (default: p's own radial direction), measured with a ray cast,
+    which stays well defined in the armpit crease where nearest-surface
+    normals flip."""
+    zero = Vector((0.0, 0.0, 0.0))
     if BODY is None:
-        return Vector((0.0, 0.0, 0.0))
-    loc, n = BODY.closest(p)
-    if loc is None:
-        return Vector((0.0, 0.0, 0.0))
-    n = Vector(n)
-    d = (p - Vector(loc)).dot(n)
+        return zero
+    A = _axis_point(p)
+    if u is None:
+        u, r_p = radial_dir(p)
+    else:
+        r_p = (p - A).dot(u)
     c = clearance(p) + add
-    return n * (c - d) if d < c else Vector((0.0, 0.0, 0.0))
+    hit = BODY.ray(A, u, 1.0)
+    if hit is None:
+        return zero
+    r_s = (Vector(hit[0]) - A).length
+    if r_s > 0.20:      # the ray left the arm/shoulder (e.g. toward the head)
+        loc, n = BODY.closest(p)
+        n = Vector(n)
+        d = (p - Vector(loc)).dot(n)
+        return n * (c - d) if d < c else zero
+    need = r_s + c - r_p
+    return u * need if need > 0 else zero
 
 
 # ------------------------------------------------------------------ blades
@@ -147,7 +181,8 @@ def leaf_shape(root_w=0.78, peak=0.42, tip_p=0.80):
 
 def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=0.07, bow=0.08,
                  thick=0.0075, edge=0.0012, rim_w=0.0060, rim=("L", "R"), n_len=16,
-                 wshape=None, bot=0.6, rim_lift=0.0013, clear_from=0.12, clear_add=0.0):
+                 wshape=None, bot=0.6, rim_lift=0.0013, clear_from=0.12, clear_add=0.0,
+                 clear_ramp=0.28, clear_max=0.045):
     """A curved sickle blade from `root` to `tip` (world), face normal ~ face_hint.
 
     Local frame: y along the chord, z = face normal, x = y cross z. The spine
@@ -194,15 +229,30 @@ def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=
     R3 = M.to_3x3()
     Ri = R3.transposed()
     D = []
+    # one push direction per station: its own radial direction when it is
+    # clearly off the arm axis, else that of the blade's outer half
+    far_u = None
+    for i in range(n_len - 1, -1, -1):
+        w = M @ Vector((sp[i].x, sp[i].y, dz(T[i])))
+        u, r = radial_dir(w)
+        if r > 0.05:
+            far_u = u
+            break
     for i, t in enumerate(T):
         best = Vector((0.0, 0.0, 0.0))
+        wc = M @ Vector((sp[i].x, sp[i].y, dz(t)))
+        u, r = radial_dir(wc)
+        if r < 0.05 and far_u is not None:
+            u = (u * (r / 0.05) + far_u * (1.0 - r / 0.05)).normalized()
         for off in (0.0, 0.5 * wl[i], wl[i] + rim_w * 0.2, -0.5 * wr[i], -wr[i] - rim_w * 0.2):
             q = sp[i] + nrm[i] * off
             w = M @ Vector((q.x, q.y, dz(t) - th[i] * bot - rim_lift))
-            d = push_out(w, clear_add)
+            d = push_out(w, clear_add, u)
             if d.length > best.length:
                 best = d
-        D.append(best * _smoothstep(clear_from, clear_from + 0.18, t))
+        if best.length > clear_max:
+            best = best * (clear_max / best.length)
+        D.append(best * _smoothstep(clear_from, clear_from + clear_ramp, t))
     # max-filter then smooth, so a local push is not averaged away
     Dm = []
     for i in range(n_len):
@@ -409,7 +459,7 @@ def medallion_pieces():
     Rb = MED_R
     # black boss seating the medallion on the cap (the cap falls away under
     # the medallion's outer half)
-    out.append((_disc_solid(Rb * 0.93, -0.052, 0.058, chamfer=0.002, seg=48, r_back=Rb * 0.80), "Black"))
+    out.append((_disc_solid(Rb * 0.86, -0.050, 0.056, chamfer=0.002, seg=48, r_back=Rb * 0.70), "Black"))
     # thick gold bezel: 12 segments with thin dark gaps
     nseg = 12
     gap = math.radians(1.5)
@@ -463,7 +513,7 @@ def rays_pieces():
 
 # ------------------------------------------------------------------ pendant
 # front-10: centre (672.5, 473.3), tips top 34 px, bottom 28 px, sides 22 px.
-PEND_C = Vector((0.2285, -0.088, 1.3837))
+PEND_C = Vector((0.2285, -0.104, 1.3837))
 
 
 def pendant_pieces():
@@ -516,11 +566,17 @@ def cap_pieces(body):
 
     def el_range(th):
         f = abs(math.sin(th))
-        return math.radians(-13 + 9 * f), math.radians(76 - 6 * f)
+        lo = -13 + 9 * f
+        # in front, run the lower edge down behind the medallion boss
+        front = _smoothstep(math.radians(-35), math.radians(-75), th)
+        lo = lo * (1.0 - front) + (-26.0) * front
+        return math.radians(lo), math.radians(76 - 6 * f)
 
-    def gap(j):
-        # flare the lower edge out over the arm armour's top
-        return CAP_GAP + 0.014 * (1.0 - _smoothstep(0.0, 0.45, j / (nel - 1)))
+    def gap(i, j):
+        # flare the lower edge out over the arm armour's top (outer side only)
+        th = th0 + (th1 - th0) * i / (nth - 1)
+        side = 1.0 - _smoothstep(math.radians(-30), math.radians(-70), th)
+        return CAP_GAP + 0.014 * side * (1.0 - _smoothstep(0.0, 0.45, j / (nel - 1)))
 
     P = []
     for i in range(nth):
@@ -544,8 +600,8 @@ def cap_pieces(body):
                 n = -n
             row.append(n.normalized())
         N.append(row)
-    inner = [[P[i][j] + N[i][j] * gap(j) for j in range(nel)] for i in range(nth)]
-    outer = [[P[i][j] + N[i][j] * (gap(j) + CAP_THICK) for j in range(nel)] for i in range(nth)]
+    inner = [[P[i][j] + N[i][j] * gap(i, j) for j in range(nel)] for i in range(nth)]
+    outer = [[P[i][j] + N[i][j] * (gap(i, j) + CAP_THICK) for j in range(nel)] for i in range(nth)]
     bm = _new_bm()
     vi = [[bm.verts.new(p) for p in row] for row in inner]
     vo = [[bm.verts.new(p) for p in row] for row in outer]
@@ -587,8 +643,8 @@ PETALS = [
     dict(tip=(768, 166), rf=0.040, z=-0.026, kind="black", w=0.054),
     dict(tip=(838, 252), rf=0.070, z=-0.026, kind="black", w=0.056),
     dict(tip=(866, 352), rf=0.085, z=-0.026, kind="crystal", w=0.058, pink=0.55),
-    dict(tip=(852, 478), rf=0.095, z=-0.026, kind="crystal", w=0.054, pink=0.40),
-    dict(tip=(812, 522), rf=0.100, z=-0.026, kind="black", w=0.050),
+    dict(tip=(856, 472), rf=0.085, z=-0.026, kind="crystal", w=0.054, pink=0.40),
+    dict(tip=(842, 506), rf=0.075, z=-0.026, kind="black", w=0.050),
     # main ring (front-10 tips)
     dict(tip=(604, 204), rf=0.030, z=0.000, kind="black", w=0.044),
     dict(tip=(725, 152), rf=0.035, z=0.000, kind="crystal", w=0.058, pink=0.30),
@@ -614,14 +670,29 @@ WRAP = [
     dict(root=(-12, 44), tip=(0.330, 0.200, 1.690), kind="crystal", w=0.060, pink=0.45, rim_w=0.008),
     dict(root=(-16, 24), tip=(0.372, 0.232, 1.610), kind="black", w=0.056),
     dict(root=(-16, 4), tip=(0.385, 0.236, 1.505), kind="crystal", w=0.058, pink=0.55),
-    dict(root=(-10, -12), tip=(0.372, 0.222, 1.420), kind="black", w=0.054),
-    dict(root=(4, -6), tip=(0.392, 0.196, 1.452), kind="crystal", w=0.050, pink=0.35),
-    dict(root=(34, -6), tip=(0.312, 0.190, 1.425), kind="black", w=0.048),
+    dict(root=(-10, 0), tip=(0.372, 0.222, 1.420), kind="black", w=0.054),
+    dict(root=(4, 2), tip=(0.392, 0.196, 1.452), kind="crystal", w=0.050, pink=0.35),
+    dict(root=(34, 2), tip=(0.312, 0.190, 1.425), kind="black", w=0.048),
 ]
 
 # Back: crystal shell footprint in the back view (back-09 kite, suit's right
 # mirrored): bottom, outer, top, inner corners as back-09 pixels.
-SHELL_BACK = [(716, 400), (740, 330), (676, 274), (660, 352)]
+SHELL_BACK = [
+    dict(phi=84, L=0.165, rf=0.030, z=-0.004, kind="crystal", w=0.050, pink=0.5),
+    dict(phi=50, L=0.180, rf=0.040, z=-0.004, kind="black", w=0.054),
+    dict(phi=16, L=0.185, rf=0.050, z=-0.004, kind="crystal", w=0.054, pink=0.6),
+    dict(phi=-20, L=0.190, rf=0.050, z=-0.004, kind="black", w=0.054),
+    dict(phi=-54, L=0.200, rf=0.050, z=-0.004, kind="crystal", w=0.052, pink=0.35),
+    dict(phi=-86, L=0.200, rf=0.045, z=-0.004, kind="black", w=0.052),
+    dict(phi=-112, L=0.160, rf=0.035, z=-0.004, kind="black", w=0.046),
+    # second ring, shorter, between the first (lies on top)
+    dict(phi=67, L=0.125, rf=0.020, z=0.006, kind="black", w=0.042),
+    dict(phi=33, L=0.130, rf=0.025, z=0.006, kind="gold", w=0.030),
+    dict(phi=-2, L=0.135, rf=0.030, z=0.006, kind="black", w=0.044),
+    dict(phi=-37, L=0.140, rf=0.030, z=0.006, kind="gold", w=0.030),
+    dict(phi=-70, L=0.150, rf=0.030, z=0.006, kind="crystal", w=0.042, pink=0.5),
+    dict(phi=-99, L=0.135, rf=0.025, z=0.006, kind="black", w=0.040),
+]
 SHELL_SCALE = 1.0
 
 # Rosette fanning out from under the shell in a plane facing back (BACK_N);
@@ -636,6 +707,12 @@ BACK = [
     dict(phi=-54, L=0.190, rf=-0.025, z=-0.004, kind="crystal", w=0.050, pink=0.35),
     dict(phi=-86, L=0.190, rf=-0.020, z=-0.004, kind="black", w=0.050),
     dict(phi=-104, L=0.150, rf=-0.010, z=-0.004, kind="black", w=0.044),
+    # second ring, shorter, between the first (front layer)
+    dict(phi=66, L=0.120, rf=-0.012, z=0.006, kind="black", w=0.040, bow=0.02),
+    dict(phi=32, L=0.125, rf=-0.016, z=0.006, kind="gold", w=0.030, bow=0.02),
+    dict(phi=-2, L=0.130, rf=-0.016, z=0.006, kind="black", w=0.042, bow=0.02),
+    dict(phi=-38, L=0.135, rf=-0.014, z=0.006, kind="gold", w=0.030, bow=0.02),
+    dict(phi=-72, L=0.140, rf=-0.012, z=0.006, kind="crystal", w=0.040, pink=0.5, bow=0.02),
 ]
 
 
@@ -654,7 +731,22 @@ def petal_root_tip(p):
     b = (a11 * b2 - a21 * b1) / det
     tip = c + ex * a + ey * b
     d = (ex * a + ey * b).normalized()
-    root = FAN_C + ez * p["z"] + d * p.get("r0", 0.055)
+    c0 = FAN_C + ez * p["z"]
+    root = c0 + d * p.get("r0", 0.055)
+    if BODY is not None and not p.get("drape"):
+        # start where the petal's line leaves the suit, so it emerges from
+        # under the cap instead of running through the deltoid; petals that
+        # hang down start higher so they leave the deltoid above the arm armour
+        if tip.z < LOW_Z:
+            # hangs over the outer side of the arm: root it on the upper-outer
+            # cap (sunk under the shell) and let it drape down over the deltoid
+            th = math.degrees(math.atan2(tip.y - SHOULDER_C.y, tip.x - SHOULDER_C.x))
+            root, _n = cap_point(BODY, max(-30.0, min(55.0, th)), p.get("root_el", 34.0), lift=-0.014)
+        else:
+            dd = (tip - c0).normalized()
+            h = BODY.ray(c0, dd, (tip - c0).length * 0.7)
+            if h is not None and (Vector(h[1]).dot(dd) > 0.0):
+                root = Vector(h[0]) - dd * 0.025   # root face buried in the suit
     if p.get("drape") and BODY is not None:
         # hangs in front of the upper arm: keep the front-10 X/Z of the tip,
         # put it a standoff in front of the arm, root it behind the
@@ -662,8 +754,8 @@ def petal_root_tip(p):
         h = BODY.hit("front", X, Z, smooth=0.012)
         if h is not None:
             loc, n = Vector(h[0]), Vector(h[1])
-            tip = loc + n * (clearance(loc) + 0.012 + p.get("stand", 0.0))
-        root = (MED_C - ey * (MED_R * 0.55) - ez * (0.030 + 0.3 * max(0.0, -p["z"]))
+            tip = loc + n * (DRAPE_CLEAR + 0.006 + p.get("stand", 0.0))
+        root = (MED_C - ey * (MED_R * 0.62) - ez * (0.036 + 0.3 * max(0.0, -p["z"]))
                 + ex * p.get("rx", 0.0))
     return root, tip, ez
 
@@ -673,15 +765,26 @@ def _blade_spec_pieces(root, tip, hint, p):
     Lb = (tip - root).length
     rf = abs(p.get("rf", 0.03))
     bow = p.get("bow", 0.05 + 0.45 * rf / max(Lb, 1e-3))
-    low = tip.z < 1.47 and root.z < ARM_TOP_Z + 0.04
+    low = tip.z < LOW_Z
     layer = p.get("z", 0.0)
-    pcs = blade_pieces(root, tip, hint, p["w"], kind=kind, sickle=p.get("sickle", 0.07),
+    if p.get("drape"):
+        cf, add = 0.12, DRAPE_CLEAR - 0.034 + 0.004 * layer / 0.03   # root hidden in the medallion boss
+        p = dict(p)
+        p.setdefault("bow", 0.012)
+    elif low:
+        cf, add = 0.06, 0.007 + 0.26 * max(-0.026, min(0.03, layer))
+    else:
+        cf, add = 9.0, 0.0   # clear of the arm: no push
+    bow = p.get("bow", bow)
+    pcs = blade_pieces(root, tip, hint, p["w"] * WIDTH_K, kind=kind, sickle=p.get("sickle", 0.10),
                        bow=bow, skew=p.get("skew", 0.42),
-                       thick=p.get("thick", 0.0085 if kind == "crystal" else 0.0075),
+                       thick=p.get("thick", 0.0090 if kind == "crystal" else 0.0080),
                        rim=() if kind == "gold" else p.get("rim", ("L", "R")),
-                       rim_w=p.get("rim_w", 0.0062),
-                       clear_from=p.get("clear_from", -0.2 if low else 0.12),
-                       clear_add=p.get("clear_add", 0.007 + 0.26 * max(-0.026, min(0.03, layer))))
+                       rim_w=p.get("rim_w", 0.0085 if kind == "crystal" else 0.0075),
+                       clear_from=p.get("clear_from", cf),
+                       clear_add=p.get("clear_add", add),
+                       clear_ramp=0.22 if low and not p.get("drape") else 0.28,
+                       clear_max=0.065 if low and not p.get("drape") else 0.045)
     tint = p.get("pink", 0.35)
     return [(bm, fam, tint if fam == "Crystal" else None) for bm, fam in pcs]
 
@@ -803,9 +906,13 @@ def fan_pieces(body):
     out = []
     for p in PETALS:
         root, tip, ez = petal_root_tip(p)
-        out.extend(_blade_spec_pieces(root, tip, ez, p))
+        hint = ez
+        if p.get("drape") and BODY is not None:
+            loc, n = BODY.closest(tip)
+            hint = (Vector(n) + ez).normalized()
+        out.extend(_blade_spec_pieces(root, tip, hint, p))
     for p in WRAP:
-        root, n = cap_point(body, *p["root"], lift=0.002)
+        root, n = cap_point(body, *p["root"], lift=-0.014)   # root sunk under the cap shell
         tip = Vector(p["tip"])
         mid = (root + tip) * 0.5
         hint = (n + (mid - SHOULDER_C).normalized()).normalized()
@@ -815,10 +922,13 @@ def fan_pieces(body):
         a = math.radians(p["phi"])
         dr = bo * math.cos(a) + bu * math.sin(a)
         cc = c + bn * p["z"]
-        root = cc + dr * p.get("r0", 0.040)
+        root = cc + dr * p.get("r0", 0.040) - bn * 0.012     # tucked under the shell
         tip = cc + dr * p["L"] - bn * p["rf"]
         q = dict(p)
         q.setdefault("bow", 0.03)
+        # drape over the shoulder like scales, layered by ring
+        q.setdefault("clear_from", 0.10)
+        q.setdefault("clear_add", 0.002 + 0.9 * max(0.0, p["z"]))
         out.extend(_blade_spec_pieces(root, tip, bn, q))
     return out
 

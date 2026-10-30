@@ -67,9 +67,9 @@ MED_W = [(-0.104, 0.0), (-0.098, 0.022), (-0.085, 0.036), (-0.060, 0.045), (-0.0
          (0.050, 0.048), (0.100, 0.052), (0.140, 0.051), (0.180, 0.045), (0.215, 0.033), (0.245, 0.017),
          (0.262, 0.006), (0.272, 0.0)]
 # top line of the foot shell (the gem / toe cap sit on it)
-TOP_Z = [(-0.104, 0.105), (-0.090, 0.125), (-0.060, 0.135), (0.000, 0.150), (0.040, 0.168), (0.062, 0.172),
-         (0.090, 0.142), (0.120, 0.106), (0.150, 0.080), (0.180, 0.064), (0.210, 0.050), (0.240, 0.036),
-         (0.262, 0.024), (0.272, 0.018)]
+TOP_Z = [(-0.104, 0.105), (-0.090, 0.125), (-0.060, 0.135), (0.000, 0.150), (0.040, 0.166), (0.062, 0.166),
+         (0.090, 0.140), (0.120, 0.112), (0.150, 0.094), (0.180, 0.084), (0.210, 0.075), (0.240, 0.064),
+         (0.262, 0.053), (0.272, 0.046)]
 Z_SOLE = 0.016  # top of the sole slab
 Z_WELT = 0.034  # top of the gold welt (forefoot)
 
@@ -176,9 +176,9 @@ def phis(n_quarter=12):
 
 
 # cuff bands: (front apex z, side valley z, back apex z) of the band centre line
-BANDS = [(0.280, 0.206, 0.284), (0.234, 0.160, 0.238), (0.189, 0.118, 0.193)]
+BANDS = [(0.282, 0.198, 0.288), (0.236, 0.152, 0.240), (0.190, 0.110, 0.194)]
 BAND_HALF = 0.0180
-RIM = (0.300, 0.226, 0.304)  # shaft opening (just above band 1's top edge)
+RIM = (0.302, 0.218, 0.308)  # shaft opening (just above band 1's top edge)
 
 
 def grid(rows, wrap_i=False, wrap_j=False, bm=None, uv=None):
@@ -393,10 +393,10 @@ def build_sole(coll, out):
     path = lat + tip + med
 
     def zb(u, w):
-        return 0.022 - 0.008 * max(0.0, min(1.0, (u - 0.15) / 0.12))
+        return 0.024 - 0.012 * max(0.0, min(1.0, (u - 0.13) / 0.14))
 
     def zt(u, w):
-        full = 0.058 - 0.022 * max(0.0, min(1.0, (u - 0.02) / 0.25))
+        full = 0.064 - 0.008 * max(0.0, min(1.0, (u - 0.05) / 0.22))
         ramp = max(0.0, min(1.0, (u - 0.004) / 0.03))
         return zb(u, w) + max(0.002, (full - zb(u, w)) * ramp)
 
@@ -406,7 +406,9 @@ def build_sole(coll, out):
     hl = sorted([p for p in heel if p[1] >= 0], key=lambda p: -p[0])
     hm = sorted([p for p in heel if p[1] < 0], key=lambda p: p[0])
     hpath = hl + hm
-    wall_band(hpath, lambda u, w: 0.041, lambda u, w: 0.064 + 0.024 * max(0.0, 1.0 - abs(w) / 0.030) ** 1.2 * (u < -0.06),
+    wall_band(hpath, lambda u, w: 0.041,
+              lambda u, w: 0.060 + 0.026 * max(0.0, min(1.0, (-u - 0.025) / 0.075)) ** 1.3
+              + 0.012 * max(0.0, 1.0 - abs(w) / 0.028) * (u < -0.07),
               t=0.0065, b=0.0022, bm=gold)
     out.append(L.from_bmesh(gold, "RX_Legs_BootTrim_L", coll, "Gold", 30.0))
 
@@ -437,7 +439,7 @@ def build_side_plates(coll, out):
 
 def build_gem(coll, out):
     """Faceted crystal on the instep with a gold bezel, plus a star glint."""
-    u_c = 0.104
+    u_c = 0.098
     zc = top_z(u_c)
     e = 0.01
     slope = (top_z(u_c + e) - top_z(u_c - e)) / (2 * e)
@@ -452,14 +454,14 @@ def build_gem(coll, out):
     zl = Vector(LAT).cross(up)
     if zl.dot(nrm) < 0:
         m = L.frame(centre, -LAT, up)
-    hh, hw = 0.072, 0.034
+    hh, hw = 0.070, 0.040
     rh = [(0.0, hh), (-hw, 0.0), (0.0, -hh), (hw, 0.0)]
-    gem = G.faceted_gem(rh, 0.022, table=0.42, crown=0.72, back=0.4, matrix=m)
+    gem = G.faceted_gem(rh, 0.034, table=0.36, crown=0.70, back=0.5, matrix=m)
     ob = L.from_bmesh(gem, "RX_Legs_BootGem_L", coll, "Crystal", 15.0)
     L.tint(ob, pink=0.15, sparkle=0.8, edge=0.7)
     out.append(ob)
     core = G.faceted_gem([(0.0, 0.016), (-0.008, 0.0), (0.0, -0.016), (0.008, 0.0)], 0.005, table=0.4,
-                         matrix=m @ Matrix.Translation((0.0, 0.0, 0.0205)))
+                         matrix=m @ Matrix.Translation((0.0, 0.0, 0.0325)))
     out.append(L.from_bmesh(core, "RX_Legs_BootGemCore_L", coll, "Gem", 15.0))
     # gold bezel (band around the rhombus, local frame)
     fm = G.profile_mesh(G.poly_rings([(x * 1.0, y * 1.0) for x, y in rh], 0.01), G.band_profile(0.0075, 0.010, 0.002, 2, h0=-0.004, ridge=0.001),
@@ -469,35 +471,39 @@ def build_gem(coll, out):
                          closed_profile=True)
     out.append(L.from_bmesh(G.to_bmesh(fm2, G.rigid_mapper(m), G.planar_uv(fm2)), "RX_Legs_BootGemBezel_L", coll, "Black", 30.0))
     del fm
-    L.glint("Legs_Foot_L", m @ Vector((0.0, 0.0, 0.03)), 0.06, coll, hue=0.6)
+    L.glint("Legs_Foot_L", m @ Vector((0.0, 0.0, 0.042)), 0.06, coll, hue=0.6)
 
 
 def build_toecap(coll, out):
-    """Gold pointed toe cap: a ridged shell over the toe with a V-shaped back
-    edge whose apex meets the instep gem."""
-    nth, nv = 17, 16
-    th_s = 1.42
-    gap, t = 0.0015, 0.0055
+    """Gold arrowhead on the toe ridge pointing up at the instep gem (front-10
+    x~745-800, y~1440-1500), raised along its centre line."""
+    um = UpperMap(r_ref=0.05)
+    u_top, u_wide, u_bot = 0.150, 0.222, U_TOE - 0.003
+    a_w = 0.024
+    kite = L.ccw([(0.0, u_top), (-a_w, u_wide), (-0.6 * a_w, u_bot), (0.6 * a_w, u_bot), (a_w, u_wide)])
+    rings = G.poly_rings(kite, 0.006)
 
-    def u_edge(th):
-        return 0.140 - 0.042 * (abs(th) / th_s) ** 0.9
+    def ridge(a, b):
+        return 0.0045 * max(0.0, 1.0 - abs(a) / a_w)
 
-    outer, inner = [], []
-    for j in range(nth):
-        th = -th_s + 2 * th_s * j / (nth - 1)
-        ridge = 0.0045 * max(0.0, 1.0 - abs(th) / 0.55) ** 1.2
-        ro, ri = [], []
-        for i in range(nv):
-            v = i / (nv - 1)
-            u = u_edge(th) + (U_TOE - 0.0015 - u_edge(th)) * (v ** 0.9)
-            p, _ = upper_point(u, th)
-            n = upper_normal(u, th)
-            ro.append(p + n * (gap + t + ridge * (1.0 - 0.6 * v)))
-            ri.append(p + n * gap)
-        outer.append(ro)
-        inner.append(ri)
-    bm = G.shell_grid(outer, inner, chamfer=0.4, uv=lambda i, j: (i / (nth - 1), j / (nv - 1)))
-    out.append(L.from_bmesh(bm, "RX_Legs_BootToeCap_L", coll, "Gold", 28.0))
+    mp = G.surface_mapper(um, 0.0016, ridge)
+    fm = G.profile_mesh(rings, G.plate_profile(0.0055, 0.0018, 2), res=0.008)
+    out.append(L.from_bmesh(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_BootToeArrow_L", coll, "Gold", 24.0))
+
+
+def build_toe_plates(coll, out):
+    """Black faceted plates on the toe top beside the arrowhead."""
+    um = UpperMap(r_ref=0.05)
+    r = um.r_ref
+    fm = G.FlatMesh()
+    for side in (1.0, -1.0):
+        for (t0, t1, u0, u1, sl) in [(0.36, 0.78, 0.138, 0.188, 0.012), (0.40, 0.86, 0.196, 0.244, 0.010)]:
+            a0, a1 = side * r * t0, side * r * t1
+            quad = L.ccw([(a0, u0), (a0, u1), (a1, u1 + sl), (a1, u0 + sl)])
+            rings = G.poly_rings(quad, 0.008)
+            G.profile_mesh(lambda off, rings=rings: rings(off - 0.0012), G.plate_profile(0.0040, 0.0015, 2), res=0.012, fm=fm)
+    mp = G.surface_mapper(um, 0.0012)
+    out.append(L.from_bmesh(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_BootToePlates_L", coll, "Black", 30.0))
 
 
 def build_heel_back(coll, out):
@@ -571,4 +577,5 @@ def boot(ctx, coll, out):
     build_side_plates(coll, out)
     build_gem(coll, out)
     build_toecap(coll, out)
+    build_toe_plates(coll, out)
     build_heel_back(coll, out)

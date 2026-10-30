@@ -234,12 +234,14 @@ def band_on_surf(surf, center, halfw, n_along, us, lift_top, lift_bot=-0.0012, v
     return slab_solid(top, bot, uvs)
 
 
-def helix_band(surf, psi_lo, psi_hi, s0, s1, k, n_s, us, lift_top, sink=0.0012, gap=0.0):
+def helix_band(surf, psi_lo, psi_hi, s0, s1, k, n_s, us, lift_top, sink=0.0012, gap=0.0, tip=None):
     """A band between two helices phi = psi - k*s (psi in [psi_lo, psi_hi]),
     cut square at s0 and s1 (horizontal hems). The top follows the surface
     (body + shell) lifted by lift_top(u, v) along the normal; the bottom sits
     `sink` inside the bare body so no gap shows under a build-up.
-    gap: metres trimmed from each long edge. UV u across, v along s."""
+    gap: metres trimmed from each long edge. UV u across, v along s.
+    tip = (length_s, shape): the s0 end narrows to a point over length_s
+    (shape > 1 gives a concave spear point)."""
     top, bot, uvs = [], [], []
     for i in range(n_s):
         v = i / (n_s - 1)
@@ -247,6 +249,11 @@ def helix_band(surf, psi_lo, psi_hi, s0, s1, k, n_s, us, lift_top, sink=0.0012, 
         r = max(surf.r_total(s, 0.5 * (psi_lo + psi_hi) - k * s), 0.02)
         dg = gap / r
         lo, hi = psi_lo + dg, psi_hi - dg
+        if tip is not None:
+            f = min(max((s - s0) / tip[0], 0.0), 1.0) ** tip[1]
+            c, h = 0.5 * (lo + hi), 0.5 * (hi - lo)
+            h = max(h * f, 0.0006 / r)
+            lo, hi = c - h, c + h
         trow, brow, urow = [], [], []
         for u in us:
             psi = lo + (hi - lo) * (u + 1) * 0.5

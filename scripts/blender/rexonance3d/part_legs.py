@@ -158,8 +158,8 @@ def gem_rhombus_flat(c, hh, hw, tilt, depth, h0=0.0, sub=4):
 
 
 KNEE_C = F(650, 1018)
-KNEE_TILT = math.radians(4.9)
-KNEE_HH, KNEE_HW = 0.116, 0.066
+KNEE_TILT = math.radians(6.5)
+KNEE_HH, KNEE_HW = 0.116, 0.070
 
 
 def knee_lift(a, b):
@@ -169,7 +169,7 @@ def knee_lift(a, b):
     x = dx * ct + dy * st
     y = -dx * st + dy * ct
     rho2 = (x / KNEE_HW) ** 2 + (y / KNEE_HH) ** 2
-    return 0.007 + 0.013 * max(0.0, 1.0 - rho2)
+    return 0.005 + 0.011 * max(0.0, 1.0 - rho2)
 
 
 def knee_guard(ctx, coll, out):
@@ -184,17 +184,17 @@ def knee_guard(ctx, coll, out):
     out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_KneeShield_L", coll, "Black"))
 
     # outer gold almond
-    fm = G.profile_mesh(lens, G.band_profile(0.019, 0.0075, 0.002, 2, h0=base_t - 0.001, ridge=0.0018, inner_t=0.006),
+    fm = G.profile_mesh(lens, G.band_profile(0.017, 0.0075, 0.002, 2, h0=base_t - 0.001, ridge=0.0018, inner_t=0.006),
                         closed_profile=True)
     out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_KneeFrame_L", coll, "Gold"))
 
     # inner gold almond
-    fm = G.profile_mesh(lambda off: lens(off - 0.029), G.band_profile(0.013, 0.0068, 0.0016, 2, h0=base_t - 0.001, ridge=0.0012),
+    fm = G.profile_mesh(lambda off: lens(off - 0.025), G.band_profile(0.012, 0.0068, 0.0016, 2, h0=base_t - 0.001, ridge=0.0012),
                         closed_profile=True)
     out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_KneeFrameInner_L", coll, "Gold"))
 
     # recessed dark floor under the gem
-    fm = G.profile_mesh(lambda off: lens(off - 0.040), G.plate_profile(0.002, 0.0, 1, h0=base_t - 0.0005), res=0.008)
+    fm = G.profile_mesh(lambda off: lens(off - 0.036), G.plate_profile(0.002, 0.0, 1, h0=base_t - 0.0005), res=0.008)
     out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_KneeGemSeat_L", coll, "Dark"))
 
     # star gem: faceted almond, rigid, on the dome
@@ -202,10 +202,10 @@ def knee_guard(ctx, coll, out):
     centre = p + n * (gap + knee_lift(*KNEE_C) + base_t - 0.002)
     up = Vector((-math.sin(KNEE_TILT), 0.0, math.cos(KNEE_TILT)))
     m = L.frame_from_normal(centre, n, up)
-    ghh = KNEE_HH - 0.042 * 1.33
-    ghw = KNEE_HW - 0.042
+    ghh = KNEE_HH - 0.039 * 1.30
+    ghw = KNEE_HW - 0.039
     gl = [(x, y) for x, y in G.lens_outline((0.0, 0.0), ghh, ghw, 0.0, n=12, power=1.0)]
-    gb = G.faceted_gem(gl, 0.016, table=0.42, crown=0.7, matrix=m)
+    gb = G.faceted_gem(gl, 0.014, table=0.42, crown=0.7, matrix=m)
     out.append(obj(gb, "RX_Legs_KneeGem_L", coll, "Gem", angle=15.0))
     L.glint("Legs_Knee_L", centre + n * 0.018, 0.07, coll, hue=0.55)
 
@@ -239,9 +239,9 @@ def knee_blades(ctx, coll, out):
     # outside: long blades from under the shield's outer edge, rising up and
     # back along the knee (front-10 tips x~684/703/718, back-09 x~305/290)
     lat = [
-        ((0.256, -0.050, 0.690), (0.268, 0.010, 0.748), (0.254, 0.080, 0.800), 0.030),
-        ((0.264, -0.044, 0.634), (0.280, 0.020, 0.690), (0.276, 0.094, 0.738), 0.032),
-        ((0.270, -0.036, 0.578), (0.288, 0.030, 0.620), (0.292, 0.106, 0.664), 0.030),
+        ((0.256, -0.052, 0.688), (0.268, 0.012, 0.752), (0.250, 0.090, 0.806), 0.040),
+        ((0.264, -0.046, 0.632), (0.281, 0.022, 0.692), (0.274, 0.104, 0.742), 0.042),
+        ((0.270, -0.038, 0.576), (0.289, 0.032, 0.622), (0.292, 0.114, 0.666), 0.040),
     ]
     for root, mid, tip, w in lat:
         ctrl = [Vector(root), Vector(mid), Vector(tip)]
@@ -316,7 +316,7 @@ def shin_guard(ctx, coll, out):
     ridge = 0.0045
     b = 0.0016
     # half-width (arc metres) along s
-    prof_s = [(0.150, 0.004), (0.170, 0.026), (0.200, 0.046), (0.240, 0.054), (0.290, 0.052), (0.340, 0.049), (0.390, 0.047)]
+    prof_s = [(0.150, 0.004), (0.170, 0.024), (0.200, 0.040), (0.240, 0.047), (0.290, 0.046), (0.340, 0.044), (0.390, 0.043)]
 
     def half(s):
         if s <= prof_s[0][0]:
@@ -404,7 +404,7 @@ def flame_fin(cm, ph_root, z_root, ph_tip, z_tip, lift, w0, th0, bm, twist=0.35,
         c = cm.center(s)
         radial = p - c
         radial = (radial - cm.d * radial.dot(cm.d)).normalized()
-        out = lift * (t ** 1.7) + 0.006 * math.sin(math.pi * t)
+        out = lift * math.sin(0.5 * math.pi * t) ** 2.6 + 0.004 * math.sin(math.pi * t)
         path.append(p + radial * (0.5 * wfn(t) + 0.002 + out))
         circ = cm.d.cross(radial).normalized()
         a = twist * t
@@ -418,13 +418,13 @@ def calf_fins(ctx, coll, out):
     bms = bmesh.new()
     # (phi root, z root, phi tip, z tip, lift, root width, thickness, twist, sway)
     specs = [
-        (118, 0.286, 130, 0.600, 0.055, 0.056, 0.011, 0.30, 6),     # outer back, tall
-        (150, 0.284, 160, 0.505, 0.050, 0.046, 0.010, -0.25, -5),   # outer back, short
-        (78, 0.296, 86, 0.545, 0.020, 0.032, 0.008, 0.20, 4),       # outer front, slim
-        (-104, 0.288, -97, 0.555, 0.072, 0.062, 0.012, -0.30, -5),  # inner, big
-        (-80, 0.298, -86, 0.470, 0.034, 0.036, 0.008, 0.25, 4),     # inner front
-        (-146, 0.284, -153, 0.488, 0.052, 0.048, 0.010, 0.25, 5),   # inner back
-        (178, 0.290, 182, 0.430, 0.030, 0.036, 0.008, 0.20, 0),     # back centre, small
+        (118, 0.284, 132, 0.610, 0.066, 0.046, 0.011, 0.30, 8),     # outer back, tall
+        (150, 0.282, 162, 0.515, 0.058, 0.040, 0.010, -0.25, -7),   # outer back, short
+        (78, 0.294, 86, 0.560, 0.026, 0.028, 0.008, 0.20, 4),       # outer front, slim
+        (-104, 0.286, -96, 0.570, 0.080, 0.050, 0.012, -0.30, -7),  # inner, big
+        (-80, 0.296, -86, 0.480, 0.040, 0.032, 0.008, 0.25, 5),     # inner front
+        (-146, 0.282, -154, 0.500, 0.060, 0.042, 0.010, 0.25, 6),   # inner back
+        (178, 0.288, 182, 0.440, 0.036, 0.032, 0.008, 0.20, 0),     # back centre, small
     ]
     for pr, zr, pt, zt, lt, w0, th0, tw, sw in specs:
         flame_fin(cm, pr, zr, pt, zt, lt, w0, th0, bms, twist=tw, sway=sw)
@@ -443,7 +443,7 @@ def _inside_grown(poly, pt, grow):
 
 
 def scale_field(cm, z_top, z_bot, ph_lo, ph_hi, w, h, fm, exclude=None, t=0.0024, lift0=0.0010, tilt=0.0030,
-                bevel=0.0010, z_jitter=0.0):
+                bevel=0.0010, r_max=0.125):
     """Staggered rows of overlapping rhombic scales (shingles: the lower tip
     lifts off the surface) between z_top..z_bot and phi ph_lo..ph_hi (deg)."""
     count = 0
@@ -463,7 +463,9 @@ def scale_field(cm, z_top, z_bot, ph_lo, ph_hi, w, h, fm, exclude=None, t=0.0024
             da = 0.5 * w * 1.08 * cm.r_ref / r
             ds = 0.5 * h * 1.04
             p_c, _n = cm.at(a_c, sc)
-            if exclude is None or not exclude(p_c):
+            r_hit = cm.radius(a_c, sc)
+            ok = r_hit < r_max and p_c.x > 0.03
+            if ok and (exclude is None or not exclude(p_c)):
                 quad = [(a_c, sc - ds), (a_c - da, sc), (a_c, sc + ds), (a_c + da, sc)]
                 i0 = len(fm.v)
                 G.profile_mesh(G.poly_rings(L.ccw(quad), 0.02), G.plate_profile(t, bevel, 1), res=0.0, fm=fm,

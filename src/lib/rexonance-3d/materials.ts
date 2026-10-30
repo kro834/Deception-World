@@ -35,7 +35,7 @@ export function createRexonanceUniforms(): RexonanceUniforms {
     rxHeight: { value: 2 },
     rxChest: { value: new THREE.Vector3(0, 1.36, 0.02) },
     rxScaleMap: { value: null },
-    rxScaleTile: { value: 0.2 },
+    rxScaleTile: { value: 0.16 },
     rxScaleStrength: { value: 0.5 },
   };
 }
@@ -271,9 +271,10 @@ const LOOKS: Record<RexonanceFamily, Look> = {
   Suit: {
     params: {
       color: new THREE.Color().setRGB(0.012, 0.012, 0.016),
-      roughness: 0.42,
-      clearcoat: 0.75,
-      clearcoatRoughness: 0.09,
+      roughness: 0.5,
+      specularIntensity: 0.45,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.08,
       envMapIntensity: 0.85,
     },
   },
@@ -335,7 +336,7 @@ const LOOKS: Record<RexonanceFamily, Look> = {
       iridescence: 0.55,
       iridescenceIOR: 1.6,
       iridescenceThicknessRange: [220, 760],
-      envMapIntensity: 1.6,
+      envMapIntensity: 0.8,
     },
     emissive: GEM_EMISSIVE,
   },
@@ -413,11 +414,6 @@ export function createRexonanceMaterial(
       "#include <normal_fragment_maps>",
       `#include <normal_fragment_maps>\n${SCALE_FRAGMENT}\n${crystal ? CRYSTAL_NORMAL : ""}`,
     );
-    if (scales)
-      fragment = fragment.replace(
-        "#include <clearcoat_normal_fragment_begin>",
-        "#ifdef USE_CLEARCOAT\n  vec3 clearcoatNormal = normalize( mix( nonPerturbedNormal, normal, 0.18 ) );\n#endif",
-      );
     if (look.emissive)
       fragment = fragment.replace(
         "#include <emissivemap_fragment>",

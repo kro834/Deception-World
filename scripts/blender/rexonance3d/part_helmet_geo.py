@@ -87,12 +87,13 @@ class Base:
     body    : rx_lib.Body; the result is pushed out to body + margin.
     """
 
-    def __init__(self, C, shape_G, k_union=0.006, body=None, margin=0.005, k_body=0.006, rmax=0.40):
+    def __init__(self, C, shape_G, k_union=0.006, body=None, margin=0.005, k_body=0.006, rmax=0.40, margin_fn=None):
         self.C = np.asarray(C, float)
         self.shape_G = shape_G
         self.k_union = k_union
         self.body = body
         self.margin = margin
+        self.margin_fn = margin_fn
         self.k_body = k_body
         self.rmax = rmax
         self.bvh = None
@@ -131,7 +132,8 @@ class Base:
         if self.body is not None:
             rb = self.body_radius(D)
             ok = rb > 0
-            r = np.where(ok, smax(r, rb + self.margin, self.k_body), r)
+            m = self.margin if self.margin_fn is None else self.margin_fn(D)
+            r = np.where(ok, smax(r, rb + m, self.k_body), r)
         return r
 
     def points(self, D):
@@ -282,11 +284,12 @@ def plate_bmesh(pts2, tris, nb, P, N, thick, lift=0.0, bevel=0.0012, bevel_seg=2
     The outer rim gets a bevel. UV = normalised pts2."""
     n = len(pts2)
     th = np.full(n, float(thick)) if np.isscalar(thick) else np.asarray(thick, float)
-    il = lift if inner_lift is None else inner_lift
+    lf = np.full(n, float(lift)) if np.isscalar(lift) else np.asarray(lift, float)
+    il = lf if inner_lift is None else inner_lift
     il = np.full(n, float(il)) if np.isscalar(il) else np.asarray(il, float)
     bm = bmesh.new()
     inner = [bm.verts.new(Vector(P[i] + N[i] * il[i])) for i in range(n)]
-    outer = [bm.verts.new(Vector(P[i] + N[i] * (lift + th[i]))) for i in range(n)]
+    outer = [bm.verts.new(Vector(P[i] + N[i] * (lf[i] + th[i]))) for i in range(n)]
     for a, b, c in tris:
         fa = (outer[a], outer[b], outer[c])
         nn = (fa[1].co - fa[0].co).cross(fa[2].co - fa[0].co)
@@ -696,6 +699,11 @@ def rail(base, specs, profile, width_fn, height_fn, lift=0.0004, n=48, mitre_x0=
     D0 = spec_dirs(base, specs) if not isinstance(specs, np.ndarray) else specs
     Dp = slerp_path(D0, n)
     P, N = base.points_normals(Dp)
+    return rail_pts(P, N, profile, width_fn, height_fn, lift=lift, mitre_x0=mitre_x0, caps=caps)
+
+
+def rail_pts(P, N, profile, width_fn, height_fn, lift=0.0004, mitre_x0=False, caps=True):
+    """rail() on explicit path points P (n,3) and surface normals N (n,3)."""
     Pv = [Vector(p) for p in P]
     Nv = [Vector(q) for q in N]
     m = len(Pv)
@@ -900,3 +908,228 @@ def hug_blade(base, specs, width_fn, lift_fn, thick_fn, n=36, tip=None, ridge_a=
     out = tuple(np.mean(N, axis=0))
     return edge_blade(LE, TE, thick_fn, n_span=len(LE), n_chord=6, ridge_a=ridge_a, outward=out, samples=2,
                       section=section)
+
+
+# ------------------------------------------------------------------ neck (gorget) surface
+class NeckSurf:
+    """Surface around the neck: axis from A0 to A1 (lerped by Z), radius
+    r(theta, Z) = undersuit radius + clearance (ray casts from outside, capped),
+    smoothed. theta: 0 = front (-Y), +90 = suit left (+X)."""
+
+    def __init__(self, body, A0=(0.0, 0.012, 1.53), A1=(0.0, -0.002, 1.70), z0=1.56, z1=1.74,
+                 clearance=0.004, r_cap=0.105, n_theta=72, n_z=37):
+        self.A0 = np.asarray(A0, float)
+        self.A1 = np.asarray(A1, float)
+        self.th = np.linspace(-180.0, 180.0, n_theta + 1)
+        self.zs = np.linspace(z0, z1, n_z)
+        Rg = np.zeros((n_z, n_theta + 1))
+        for j, z in enumerate(self.zs):
+            a = self.axis(z)
+            for i, t in enumerate(self.th[:-1]):
+                d = np.array([math.sin(math.radians(t)), -math.cos(math.radians(t)), 0.0])
+                o = a + d * r_cap
+                h = body.ray(Vector(o), Vector(-d), r_cap)
+                r = r_cap - (h[0] - Vector(o)).length if h is not None else r_cap
+                Rg[j, i] = min(r, r_cap)
+            Rg[j, -1] = Rg[j, 0]
+        # smooth around theta and along z
+        from scipy.ndimage import gaussian_filter
+        Rw = np.concatenate([Rg[:, -9:-1], Rg, Rg[:, 1:9]], axis=1)
+        Rw = gaussian_filter(Rw, sigma=(1.0, 1.6))
+        self.R = Rw[:, 8:-8] + clearance
+
+    def axis(self, z):
+        t = (np.asarray(z, float) - 1.53) / 0.17
+        return self.A0 + (self.A1 - self.A0) * t[..., None] if np.ndim(z) else self.A0 + (self.A1 - self.A0) * t
+
+    def radius(self, th, z):
+        from scipy.interpolate import RegularGridInterpolator
+
+        if not hasattr(self, "_interp"):
+            self._interp = RegularGridInterpolator((self.zs, self.th), self.R, bounds_error=False, fill_value=None)
+        th = ((np.asarray(th, float) + 180.0) % 360.0) - 180.0
+        return self._interp(np.stack([np.clip(z, self.zs[0], self.zs[-1]), th], axis=-1))
+
+    def points(self, th, z):
+        th = np.asarray(th, float)
+        z = np.asarray(z, float)
+        r = self.radius(th, z)
+        a = np.stack([np.zeros_like(z), self.A0[1] + (self.A1[1] - self.A0[1]) * (z - 1.53) / 0.17, z], axis=-1)
+        t = np.radians(th)
+        d = np.stack([np.sin(t), -np.cos(t), np.zeros_like(t)], axis=-1)
+        return a + d * r[..., None]
+
+    def points_normals(self, th, z, eps_t=0.5, eps_z=0.002):
+        P = self.points(th, z)
+        Pt = self.points(th + eps_t, z) - self.points(th - eps_t, z)
+        Pz = self.points(th, z + eps_z) - self.points(th, z - eps_z)
+        N = np.cross(Pz, Pt)
+        N /= np.linalg.norm(N, axis=-1)[..., None]
+        t = np.radians(th)
+        d = np.stack([np.sin(t), -np.cos(t), np.zeros_like(t)], axis=-1)
+        flip = np.sum(N * d, axis=-1) < 0
+        N[flip] *= -1
+        return P, N
+
+
+def neck_plate(ns, outline, thick, lift_fn, res=0.006, bevel=0.0010, ridge=None, ridge_h=0.0, r_ref=0.068):
+    """Plate on the neck surface from an outline of (theta_deg, Z); triangulated in
+    (theta * r_ref, Z). lift_fn(Z) -> inner lift; ridge: (theta_c) adds a ridge."""
+    k = math.radians(1.0) * r_ref
+    poly = [(t * k, z) for t, z in outline]
+    extra = None
+    if ridge is not None:
+        zs = [z for _t, z in outline]
+        ext = np.linspace(min(zs), max(zs), 30)
+        extra = np.stack([np.full_like(ext, ridge * k), ext], axis=1)
+    pts2, tris, nb = triangulate_with(poly, res, extra)
+    th = pts2[:, 0] / k
+    zz = pts2[:, 1]
+    P, N = ns.points_normals(th, zz)
+    lift = np.asarray([lift_fn(z) for z in zz])
+    T = np.full(len(pts2), float(thick))
+    if ridge is not None and ridge_h > 0:
+        hw = max(np.ptp(pts2[:, 0]) * 0.5, 1e-6)
+        T = T + ridge_h * np.clip(1.0 - np.abs(pts2[:, 0] - ridge * k) / hw, 0.0, 1.0)
+    return plate_bmesh(pts2, tris, nb, P, N, T, lift=lift, bevel=bevel, inner_lift=lift)
+
+
+def offset_dirs(base, specs, n, d_fn, extend_x0=False, t_range=(0.0, 1.0)):
+    """Directions of a curve offset in the surface from a parent path (point specs):
+    point(t) = P(t) + B(t) * d_fn(t), B = N x T (for a path running out from the
+    centre along the brow, +B points up/inward). extend_x0 prepends the point where
+    the start tangent meets X = 0 (so mirrored copies meet on the centre line)."""
+    P, N, T, B = hug_frames(base, specs, n)
+    ts = np.linspace(0.0, 1.0, n)
+    keep = (ts >= t_range[0] - 1e-9) & (ts <= t_range[1] + 1e-9)
+    Q = P + B * np.asarray([d_fn(t) for t in ts])[:, None]
+    Q, Tk = Q[keep], T[keep]
+    if extend_x0 and abs(Q[0, 0]) > 1e-6:
+        t0 = Tk[0]
+        if abs(t0[0]) > 1e-6:
+            Q = np.vstack([Q[0] - t0 * (Q[0, 0] / t0[0]), Q])
+    D = Q - base.C
+    D /= np.linalg.norm(D, axis=1)[:, None]
+    return D
+
+
+def dirs(base, specs):
+    """spec list or direction array -> direction array"""
+    if isinstance(specs, np.ndarray):
+        return specs
+    return spec_dirs(base, specs)
+
+
+def chain(base, *parts):
+    """Concatenate outline parts (spec lists / direction arrays) into one direction array."""
+    return np.vstack([dirs(base, p) for p in parts if len(p)])
+
+
+def bezier(p0, p1, p2, n):
+    p0, p1, p2 = (np.asarray(p, float) for p in (p0, p1, p2))
+    t = np.linspace(0.0, 1.0, n)[:, None]
+    return (1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t ** 2 * p2
+
+
+def swept_blade(base, root_specs, tip, width_fn, thick_fn, bend=(0.0, 0.0, 0.0), lift=0.003, n_root=6,
+                n_free=14, ridge_a=0.45, twist=0.0, outward=None):
+    """Blade that hugs the shell along a short root path, then curves free to `tip`.
+    width_fn / thick_fn take t in 0..1 over the whole length (root start .. tip).
+    bend: offset of the free part's Bezier control point (makes it a sickle).
+    twist: radians the chord turns about the path toward the tip (0 = keeps the
+    in-surface chord direction of the root)."""
+    P, N, T, B = hug_frames(base, root_specs, n_root)
+    start = P[-1] + N[-1] * lift
+    tipv = np.asarray(tip, float)
+    ctrl = start + T[-1] * (np.linalg.norm(tipv - start) * 0.45) + np.asarray(bend, float)
+    free = bezier(start, ctrl, tipv, n_free + 1)[1:]
+    cen = np.vstack([P + N * lift, free])
+    m = len(cen)
+    seg = np.linalg.norm(np.diff(cen, axis=0), axis=1)
+    s = np.concatenate([[0.0], np.cumsum(seg)])
+    s /= s[-1]
+    side0 = B[-1]
+    nrm0 = N[-1]
+    LE, TE = [], []
+    for i in range(m):
+        if i < n_root:
+            side = B[i]
+            nn = N[i]
+        else:
+            k = (s[i] - s[n_root - 1]) / max(1.0 - s[n_root - 1], 1e-6)
+            a = twist * k
+            side = side0 * math.cos(a) + nrm0 * math.sin(a)
+            nn = nrm0
+        if 0 < i < m - 1:
+            tan = cen[i + 1] - cen[i - 1]
+        elif i == 0:
+            tan = cen[1] - cen[0]
+        else:
+            tan = cen[-1] - cen[-2]
+        tan = tan / np.linalg.norm(tan)
+        side = side - tan * np.dot(side, tan)
+        side /= max(np.linalg.norm(side), 1e-9)
+        w = width_fn(s[i]) * 0.5
+        LE.append(tuple(cen[i] + side * w))
+        TE.append(tuple(cen[i] - side * w))
+    out = tuple(outward) if outward is not None else tuple(np.mean(N, axis=0))
+    return edge_blade(LE, TE, thick_fn, n_span=m, n_chord=6, ridge_a=ridge_a, outward=out, samples=2)
+
+
+def blade_inlay(LE, TE, thick_fn, a0, a1, s0, s1, outward, ridge_a=0.45, n_span=24, samples=10, raise_=0.0004,
+                strip_th=0.0006):
+    """Thin strip lying on the outer face of an edge_blade between chord positions
+    a0..a1 and span s0..s1 (a GoldDark recess line on a horn). Same parameters as
+    the edge_blade it decorates."""
+    le = L.resample(L.catmull_rom([Vector(p) for p in LE], samples), 64)
+    te = L.resample(L.catmull_rom([Vector(p) for p in TE], samples), 64)
+    mid = [(a + b) * 0.5 for a, b in zip(le, te)]
+    out_v = Vector(outward)
+    rows = []
+    for k in range(n_span):
+        s = s0 + (s1 - s0) * k / (n_span - 1)
+        i = min(int(s * 63), 62)
+        f = s * 63 - i
+        pl = le[i].lerp(le[i + 1], f)
+        pt = te[i].lerp(te[i + 1], f)
+        chord = pt - pl
+        span = mid[i + 1] - mid[i]
+        nrm = chord.cross(span)
+        if nrm.length < 1e-12:
+            nrm = Vector(out_v)
+        nrm.normalize()
+        if nrm.dot(out_v) < 0:
+            nrm = -nrm
+        th = max(thick_fn(s), 0.0) * 0.5
+        taper = min(1.0, (s1 - s) / max((s1 - s0) * 0.25, 1e-6))
+        ring = []
+        for a in (a0, (a0 + a1) * 0.5, a1):
+            am = a0 + (a - a0) * 1.0
+            fa = am / ridge_a if am <= ridge_a else (1.0 - am) / (1.0 - ridge_a)
+            if a == (a0 + a1) * 0.5:
+                pass
+            p = pl.lerp(pt, am)
+            ring.append(p + nrm * (th * fa + raise_))
+        # narrow the strip toward its end
+        c = ring[1]
+        ring = [c + (ring[0] - c) * taper, c, c + (ring[2] - c) * taper]
+        rows.append((ring, nrm))
+    bm = bmesh.new()
+    vt, vb = [], []
+    for ring, nrm in rows:
+        vt.append([bm.verts.new(p) for p in ring])
+        vb.append([bm.verts.new(p - nrm * strip_th) for p in ring])
+    for k in range(n_span - 1):
+        for j in range(2):
+            bm.faces.new((vt[k][j], vt[k][j + 1], vt[k + 1][j + 1], vt[k + 1][j]))
+            bm.faces.new((vb[k + 1][j], vb[k + 1][j + 1], vb[k][j + 1], vb[k][j]))
+        bm.faces.new((vt[k][0], vt[k + 1][0], vb[k + 1][0], vb[k][0]))
+        bm.faces.new((vt[k + 1][2], vt[k][2], vb[k][2], vb[k + 1][2]))
+    bm.faces.new((vt[0][2], vt[0][1], vt[0][0], vb[0][0], vb[0][1], vb[0][2]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    uv = bm.loops.layers.uv.verify()
+    for f in bm.faces:
+        for loop in f.loops:
+            loop[uv].uv = (0.5, 0.5)
+    bm.normal_update()
+    return bm
