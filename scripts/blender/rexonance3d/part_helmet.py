@@ -6,10 +6,8 @@ undersuit head and neck), with the visible pieces layered on top of it.
 """
 
 import importlib
-import math
 
 import numpy as np
-from mathutils import Vector
 
 import rx_lib as L
 import rx_ref as R
@@ -25,7 +23,7 @@ C = (0.0, -0.010, 1.765)
 ZC = 1.765
 ZTOP = 1.884
 ZBOT = 1.590
-DOME = dict(W0=0.083, Y0=-0.006, F0=0.109, B0=0.100, PF=2.1, PB=2.3)
+DOME = dict(W0=0.083, Y0=-0.006, F0=0.109, B0=0.082, PF=2.1, PB=2.3)
 
 FACE_Z = [1.633, 1.638, 1.646, 1.658, 1.675, 1.700, 1.730, 1.760, 1.790, 1.815]
 FACE_YR = [-0.098, -0.106, -0.112, -0.117, -0.122, -0.128, -0.133, -0.131, -0.123, -0.107]
@@ -94,20 +92,6 @@ def fuv(x, y):
     return G.ref_uv("front", x, y)
 
 
-def buv(x, y):
-    """back-09 pixel -> back view-plane (u, v) = (-X, Z)"""
-    return G.ref_uv("back", x, y)
-
-
-def suv(x, y):
-    """right-07 pixel -> right view-plane (u, v) = (-Y, Z)"""
-    return G.ref_uv("right", x, y)
-
-
-def mirror_u(pts):
-    return [(-u, v) for u, v in pts]
-
-
 def sym_outline(half):
     """Full outline from the +u half (listed from the centre bottom, going
     around the +u side to the centre top): mirrored copy closes it."""
@@ -140,7 +124,8 @@ def add(bm, name, coll, family, angle=32.0, mirror=False):
 
 
 # ------------------------------------------------------------------ shell
-CREST_W = 0.0135
+CREST_W = 0.0135                     # half width of the sagittal crest strip
+PSI_FRONT, PSI_BACK = 36.0, 146.0    # its ends on the sagittal arc (deg from the front horizontal)
 
 
 def under_grid(base, n_theta=72, n_phi=40):
@@ -165,7 +150,6 @@ def under_grid(base, n_theta=72, n_phi=40):
     for j in range(n_theta):
         F.append(((n_phi - 1) * n_theta + j, (n_phi - 1) * n_theta + (j + 1) % n_theta, top))
     return V, F
-PSI_FRONT, PSI_BACK = 36.0, 146.0
 
 
 def build_shell(ctx, base, coll):
@@ -219,7 +203,7 @@ def build_shell(ctx, base, coll):
 # layers always nest (gold over blue over pink over the black plates).
 ARM = [("f", 500, 193), ("f", 515, 178), ("f", 530, 163), ("f", 545, 148), ("f", 556, 137), ("f", 563, 128)]
 ARM_W = ([0, 0.5, 0.8, 1.0], [0.029, 0.027, 0.024, 0.018])
-BLUE_W = ([0, 0.5, 1.0], [0.0135, 0.012, 0.008])
+BLUE_W = ([0, 0.5, 0.85, 1.0], [0.0135, 0.0140, 0.0125, 0.008])
 PINK_W = ([0, 0.3, 0.6, 0.85, 1.0], [0.020, 0.017, 0.011, 0.006, 0.004])
 SEAM_EAR = [("s", 556, 166), ("s", 551, 186), ("s", 547, 208), ("s", 545, 228)]
 JAW_LINE = [("s", 560, 238), ("s", 574, 248), ("s", 588, 259), ("f", 538, 280)]
@@ -292,10 +276,9 @@ def build_face(ctx, base, coll):
                  thick_fn=lambda P, Q, dr: facet(P, Q, dr, 0.0046, 0.0030, 0.013))
     add(bm, "RX_Helmet_Cheek_L", coll, "Black", angle=24.0, mirror=True)
 
-    # side jaw plate: from the cheek edge round to the ear, under the band's temple end
     # blue crystal accent in the cheek / jaw seam (front-10 x ~543-548, y 212-270)
     line = [("f", 549.5, 214), ("f", 549.5, 232), ("f", 548.5, 250), ("f", 546.5, 266)]
-    bm = G.rail(base, line, G.PROF_FLAT, lerp_fn([0, 0.5, 1.0], [0.0034, 0.0030, 0.0018]), lambda t: 0.0042,
+    bm = G.rail(base, line, G.PROF_FLAT, lerp_fn([0, 0.5, 1.0], [0.0038, 0.0034, 0.0020]), lambda t: 0.0068,
                 lift=0.0004, n=20)
     ob = add(bm, "RX_Helmet_CheekCrystal_L", coll, "Crystal")
     L.tint(ob, pink=0.15, sparkle=0.6, edge=0.9)
@@ -406,7 +389,7 @@ def build_temples(ctx, base, coll):
         # gold outer (upper) edge riding the vane
         cen, ss, B = feather_centre(base, root, tip, bend)
         edge = [cen[i] + B[min(i, 5)] * (wf(ss[i]) * 0.5 - 0.0012) for i in range(len(cen))]
-        ew = 0.0110 if k <= 2 else 0.0085
+        ew = (0.0140, 0.0140, 0.0105, 0.0090)[k - 1]   # upper feathers read mostly gold in front-10
         bm = G.blade(edge, lerp_fn([0, 0.8, 1.0], [ew, ew * 0.7, 0.0]), lerp_fn([0, 1.0], [0.0100, 0.002]),
                      lambda t, B=B: tuple(B[2]), n=30)
         add(bm, "RX_Helmet_FeatherEdge%d_L" % k, coll, "Gold", angle=26.0, mirror=True)
@@ -425,7 +408,7 @@ def build_back(ctx, base, coll):
     apex = sag_points(base, [146.0])[0]
     tip = np.array([0.0, 0.050, 1.938])
     le = [top - np.array([0, 0, 0.005]), top + np.array([0, 0.008, 0.022]), tip]
-    te = [apex - np.array([0, 0.004, 0.0]), apex + np.array([0, -0.004, 0.050]), tip]
+    te = [apex - np.array([0, 0.004, 0.0]), apex + np.array([0, -0.004, 0.050]), tip]   # rakes up off the band apex
     bm = G.edge_blade(le, te, lerp_fn([0, 0.5, 1.0], [0.024, 0.014, 0.002]), n_span=20, n_chord=8, ridge_a=0.5,
                       outward=(1.0, 0.0, 0.0), section="hex")
     add(bm, "RX_Helmet_BackSpike", coll, "Gold", angle=26.0)

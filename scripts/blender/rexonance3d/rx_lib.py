@@ -127,7 +127,8 @@ def from_bmesh(bm, name, coll, family=None, angle=35.0):
 
 def from_arrays(verts, faces, name, coll, family=None, angle=None):
     me = bpy.data.meshes.new(name)
-    me.from_pydata([tuple(v) for v in np.asarray(verts, dtype=float)], [], [tuple(f) for f in np.asarray(faces)])
+    # faces may mix triangles and quads, so never turn them into one array
+    me.from_pydata([tuple(v) for v in np.asarray(verts, dtype=float)], [], [tuple(int(i) for i in f) for f in faces])
     me.validate(clean_customdata=False)
     me.update()
     ob = bpy.data.objects.new(name, me)

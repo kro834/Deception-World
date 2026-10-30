@@ -141,7 +141,7 @@ def body_primitives():
         Ellipsoid((0, 0.045, 1.330), (0.105, 0.060, 0.150), k=0.05),  # spinal erectors
         # neck and head (the helmet module covers the head)
         RoundCone((0, 0.012, 1.530), (0, -0.002, 1.700), 0.068, 0.056, k=0.050),
-        Ellipsoid((0, -0.006, 1.768), (0.080, 0.098, 0.112), k=0.025),
+        Ellipsoid((0, -0.014, 1.768), (0.080, 0.088, 0.112), k=0.025),
     ]
     # Rectus abdominis: three rows of low paired pads.
     for z in (1.392, 1.330, 1.268):

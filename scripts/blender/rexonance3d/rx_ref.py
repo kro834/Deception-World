@@ -91,7 +91,7 @@ LM = {
     "chin_z": 1.650,
     "neck_base_z": 1.585,
     "shoulder": (0.215, 0.0, 1.554),
-    "chest_core": (0.0, -0.150, 1.514),
+    "chest_core": (0.0, -0.174, 1.477),  # orb centre front-10 (499, 403), frontmost Y
     "waist_z": 1.322,
     "belt_top_z": 1.262,
     "belt_z": 1.207,
