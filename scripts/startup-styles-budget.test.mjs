@@ -60,6 +60,10 @@ const original = [
   "../styles-command-chrome.css?url",
   // Owner (2026-10-26): the dynamic GUI kit (.dg-*) on every page, last.
   "../styles-dynamic-gui.css?url",
+  // Owner (2026-10-30): the future-motion layer (springs, scan arrivals, cascades) after the kit.
+  "../styles-fx-motion.css?url",
+  // Owner (2026-10-30): 未来的でダイナミックな色合い — the future spectrum's colour and surfaces, after the kit.
+  "../styles-future-spectrum.css?url",
   fonts.SITE_CORE_FONTS_URL,
   fonts.SITE_DISPLAY_FONTS_URL,
   "hud-fonts",
@@ -91,6 +95,8 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     .filter((href) => href !== fonts.SITE_DISPLAY_FONTS_URL)
     .filter((href) => href !== "../styles-saga-streamline.css?url")
     .filter((href) => href !== "@/styles-interaction-choreography.css?url")
+    // Owner (2026-10-30): the future spectrum paints no title surface, so the title skips it.
+    .filter((href) => href !== "../styles-future-spectrum.css?url")
     .map((href) =>
       href === "../styles-stage-shell.css?url" ? "../styles-opening-shell.css?url" : href,
     );

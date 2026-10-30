@@ -1,0 +1,1323 @@
+/* ================================================================
+   FUTURE SPECTRUM — colour and surfaces (2026-10-30)
+
+   The shared base turns from silver instrument metal into holo glass:
+   every family keeps its own first and second light (--sh-l1 / --sh-l2,
+   styles-stage-shell.css) and gains a third, violet, between them, so
+   each surface carries a three-stop neon spectrum instead of one flat
+   ink. Surfaces get depth (a lit top edge, a coloured under-bloom, a
+   neon rim) and a faint scan texture; hierarchy comes from how much
+   light a surface holds, not from added text.
+
+   Paint only. No copy, no labels, no transitions, no keyframes and no
+   backdrop-filter: every value below is static. The special sites, the
+   Dream Chapter and the gallery keep their own editions (the FX families
+   below exclude them); the title (opening) is untouched.
+
+   Animatable light (registered, so the motion layer can tween them on a
+   single element without restyling the page — never animate them on
+   <html> or a page root):
+   - --fx-angle  <angle>       the spectrum's direction (default 118deg)
+   - --fx-shift  <percentage>  the sheen's position along a surface (0%)
+   - --fx-glow   <number>      bloom strength, 0–1 (device tier sets it)
+   Device tiers (rendering-profile.js):
+   - economy and iOS 18 renderers: --fx-glow 0 and no scan texture;
+   - capable Android: --fx-glow 0.6 (its backdrop-filter is already off
+     in styles-android-performance.css; nothing here adds one).
+   ================================================================ */
+
+@property --fx-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 118deg;
+}
+
+@property --fx-shift {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+
+@property --fx-glow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+/* ---------- 0. Tokens ---------- */
+html[data-family] {
+  --fx-a: var(--sh-l1, #7ae8ff);
+  --fx-b: #9d86ff;
+  --fx-c: var(--sh-l2, #ff5fc8);
+  --fx-ink: #040a14;
+  --fx-ink-2: #071222;
+  --fx-scan: repeating-linear-gradient(180deg, rgb(233 246 251 / 2.6%) 0 1px, transparent 1px 3px);
+}
+
+html[data-family="dream"],
+html[data-family="gallery"] {
+  --fx-b: var(--sh-l2, #c9a15a);
+}
+
+html[data-family][data-world-effects="economy"],
+html[data-family][data-ios18-renderer="true"] {
+  --fx-glow: 0;
+  --fx-scan: linear-gradient(transparent, transparent);
+}
+
+html[data-family][data-android-renderer]:not([data-world-effects="economy"]) {
+  --fx-glow: 0.6;
+}
+
+/* The chrome's shared material (styles-command-chrome.css reads these):
+   the silver shard becomes a neon one, the ribs a faint scan. */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  ) {
+  --command-edge: color-mix(in srgb, var(--fx-a) 62%, transparent);
+  --command-metal:
+    linear-gradient(
+      var(--fx-angle),
+      transparent 20%,
+      color-mix(in srgb, var(--fx-a) 15%, transparent) 20.2%,
+      color-mix(in srgb, var(--fx-b) 9%, transparent) 33%,
+      transparent 46%
+    ),
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in srgb, var(--fx-c) 11%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(233 240 241 / 12%),
+      rgb(233 240 241 / 2%) 45%,
+      rgb(0 0 0 / 30%) 46%,
+      transparent 100%
+    );
+  --command-ribs: var(--fx-scan);
+}
+
+/* ---------- 1. The command bars ----------
+   The foot becomes a three-stop neon line with a soft bloom under the
+   bar; the seam on the left keeps the chapter's own light on /world. */
+@media (forced-colors: none) {
+  html:is(
+      [data-family="world"],
+      [data-family="dossier"],
+      [data-family="library"],
+      [data-family="archive"],
+      [data-family="utility"]
+    )
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar
+    ) {
+    border-bottom-color: color-mix(in srgb, var(--fx-a) 40%, transparent);
+    background-color: var(--fx-ink);
+    background-image:
+      linear-gradient(90deg, var(--sh-bar-light, var(--fx-a)) 0 4px, transparent 4px),
+      linear-gradient(
+        90deg,
+        transparent 0,
+        var(--sh-bar-light, var(--fx-a)) 14%,
+        var(--fx-b) 52%,
+        var(--fx-c) 84%,
+        transparent 100%
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sh-bar-light, var(--fx-a)) 16%, transparent),
+        color-mix(in srgb, var(--fx-b) 7%, transparent) 46%,
+        color-mix(in srgb, var(--fx-c) 13%, transparent)
+      ),
+      radial-gradient(
+        40% 180% at 100% 100%,
+        color-mix(in srgb, var(--fx-c) 14%, transparent),
+        transparent 70%
+      ),
+      var(--command-metal), var(--command-ribs);
+    background-size:
+      100% 100%,
+      100% 1px,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%;
+    background-position:
+      0 0,
+      0 100%,
+      0 0,
+      0 0,
+      0 0,
+      0 0;
+    background-repeat: no-repeat;
+    box-shadow:
+      inset 0 1px 0 rgb(233 240 241 / 18%),
+      0 1px 0 color-mix(in srgb, var(--fx-b) 28%, transparent),
+      0 14px 34px -20px
+        color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent),
+      0 4px 18px rgb(0 0 0 / 34%);
+  }
+
+  /* The launcher trigger: the family's light lit from inside, a violet
+     rim instead of the flat offset. */
+  html:is(
+      [data-family="world"],
+      [data-family="dossier"],
+      [data-family="library"],
+      [data-family="archive"],
+      [data-family="utility"]
+    ):not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger.side-panel-trigger {
+    background:
+      linear-gradient(135deg, #f4fbff 0 6px, transparent 6px),
+      linear-gradient(315deg, var(--fx-ink) 0 7px, transparent 7px),
+      linear-gradient(120deg, transparent 38%, rgb(255 255 255 / 46%) 38.5%, transparent 72%),
+      linear-gradient(
+        var(--fx-angle),
+        var(--fx-a) 0%,
+        color-mix(in srgb, var(--fx-a) 70%, var(--fx-b)) 52%,
+        color-mix(in srgb, var(--fx-c) 78%, var(--fx-a)) 100%
+      ) !important;
+    box-shadow:
+      inset 0 0 0 1px rgb(244 251 255 / 70%),
+      3px 3px 0 color-mix(in srgb, var(--fx-b) 40%, transparent),
+      0 0 22px -6px
+        color-mix(in srgb, var(--fx-a) calc(75% * var(--fx-glow)), transparent) !important;
+  }
+}
+
+/* ---------- 2. The launcher (side menu) ----------
+   An aurora sheet: the first light from the top right, the violet in the
+   middle, the second light from the lower left, over a fine lattice. */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas] {
+  --atlas-ink: var(--fx-ink);
+  --atlas-raised: #0a1728;
+  --atlas-line: color-mix(in srgb, var(--fx-a) 30%, rgb(145 189 215 / 20%));
+  background:
+    radial-gradient(ellipse 62% 50% at 100% 0%, color-mix(in srgb, var(--fx-a) 24%, transparent), transparent 72%),
+    radial-gradient(ellipse 46% 40% at 60% 50%, color-mix(in srgb, var(--fx-b) 15%, transparent), transparent 74%),
+    radial-gradient(ellipse 58% 48% at 0% 100%, color-mix(in srgb, var(--fx-c) 22%, transparent), transparent 72%),
+    linear-gradient(var(--fx-angle), transparent 30%, color-mix(in srgb, var(--fx-a) 5%, transparent) 30.2% 44%, transparent 44.2%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--fx-a) 6%, transparent) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 6%, transparent) 0 1px, transparent 1px 40px),
+    var(--fx-ink) !important;
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-head {
+  background:
+    linear-gradient(90deg, var(--fx-a), var(--fx-b) 46%, var(--fx-c) 78%, transparent)
+      var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 2px no-repeat,
+    radial-gradient(50% 120% at 100% 0%, color-mix(in srgb, var(--fx-a) 12%, transparent), transparent 70%),
+    var(--fx-ink);
+  box-shadow: 0 10px 26px -18px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-index {
+  border-color: color-mix(in srgb, var(--fx-a) 34%, transparent);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--fx-a) 8%, transparent), transparent 40%, color-mix(in srgb, var(--fx-c) 7%, transparent)),
+    var(--fx-scan),
+    #030810;
+  box-shadow:
+    inset 0 2px 9px rgb(0 0 0 / 60%),
+    0 0 0 1px color-mix(in srgb, var(--fx-b) 14%, transparent);
+}
+
+/* Rows: holo plates with a neon rim and an under-bloom. The tile art on
+   ::before and the reflection on ::after stay as they are. */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-group:not([data-atlas-group="sections"])
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button) {
+  border-color: color-mix(in srgb, var(--fx-a) 30%, rgb(233 240 241 / 14%));
+  background:
+    linear-gradient(135deg, var(--fx-a) 0 6px, transparent 6px),
+    linear-gradient(315deg, color-mix(in srgb, var(--fx-c) 60%, transparent) 0 7px, transparent 7px),
+    linear-gradient(var(--fx-angle), color-mix(in srgb, var(--fx-a) 11%, transparent), transparent 46%, color-mix(in srgb, var(--fx-b) 9%, transparent)),
+    linear-gradient(180deg, rgb(233 240 241 / 7%), transparent 48%),
+    var(--fx-scan),
+    var(--fx-ink-2);
+  box-shadow:
+    inset 0 1px 0 rgb(233 240 241 / 14%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-b) 10%, transparent),
+    0 4px 0 #02060c,
+    0 14px 26px -18px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  > .side-panel-group:not([data-atlas-group="sections"])
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+  border-color: var(--fx-a);
+  background:
+    linear-gradient(135deg, #f4fbff 0 6px, transparent 6px),
+    linear-gradient(105deg, color-mix(in srgb, var(--fx-a) 30%, transparent), color-mix(in srgb, var(--fx-b) 14%, transparent) 52%, transparent 80%),
+    var(--fx-ink-2);
+  box-shadow:
+    inset 4px 0 0 var(--fx-a),
+    inset 0 -2px 0 color-mix(in srgb, var(--fx-c) 70%, transparent),
+    0 0 26px -10px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html:is(
+      [data-family="world"],
+      [data-family="dossier"],
+      [data-family="library"],
+      [data-family="archive"],
+      [data-family="utility"]
+    )
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    > .side-panel-group:not([data-atlas-group="sections"])
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button):hover {
+    border-color: color-mix(in srgb, var(--fx-a) 72%, transparent);
+  }
+}
+
+/* The page's sections: a raised glass column, lit on its start edge in
+   the spectrum. */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"] {
+  border-color: color-mix(in srgb, var(--fx-a) 26%, transparent);
+  border-inline-start-color: var(--fx-a);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--fx-a) 10%, transparent), transparent 30%),
+    linear-gradient(0deg, color-mix(in srgb, var(--fx-c) 8%, transparent), transparent 40%),
+    var(--fx-scan),
+    #08142a;
+  box-shadow: 0 22px 44px -30px color-mix(in srgb, var(--fx-b) calc(90% * var(--fx-glow)), transparent);
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-scene {
+  border-color: color-mix(in srgb, var(--fx-a) 40%, transparent);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 40%),
+    0 0 0 1px color-mix(in srgb, var(--fx-b) 18%, transparent);
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel
+  > .side-panel-group
+  > p::after {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--fx-a) 60%, transparent), color-mix(in srgb, var(--fx-b) 30%, transparent) 40%, transparent 86%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, color-mix(in srgb, var(--fx-c) 30%, transparent), transparent 60%) 0 100% / 100% 1px no-repeat;
+}
+
+/* The menu's scrim tints toward the family's light rather than plain ink. */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  .side-panel-scrim {
+  background:
+    radial-gradient(70% 60% at 100% 50%, color-mix(in srgb, var(--fx-a) 10%, transparent), transparent 70%),
+    radial-gradient(60% 60% at 0% 100%, color-mix(in srgb, var(--fx-c) 8%, transparent), transparent 70%),
+    rgb(2 4 10 / 72%);
+}
+
+/* ---------- 3. Dialogs: notices and quick search ---------- */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  :is(#site-announcement-dialog .site-announcement-hub, dialog.quick-search .quick-search-panel) {
+  border-color: color-mix(in srgb, var(--fx-a) 46%, transparent);
+  background:
+    radial-gradient(70% 50% at 100% 0%, color-mix(in srgb, var(--fx-a) 13%, transparent), transparent 70%),
+    radial-gradient(60% 50% at 0% 100%, color-mix(in srgb, var(--fx-c) 10%, transparent), transparent 70%),
+    linear-gradient(var(--fx-angle), rgb(233 240 241 / 8%), transparent 36%),
+    var(--fx-scan),
+    var(--fx-ink);
+  box-shadow:
+    inset 0 0 0 5px rgb(233 240 241 / 3%),
+    8px 8px 0 color-mix(in srgb, var(--fx-b) 22%, transparent),
+    0 0 60px -24px color-mix(in srgb, var(--fx-a) calc(60% * var(--fx-glow)), transparent),
+    0 28px 80px rgb(0 0 0 / 60%);
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  :is(#site-announcement-dialog .site-announcement-header, dialog.quick-search .quick-search-head) {
+  background:
+    linear-gradient(90deg, var(--fx-a), var(--fx-b) 50%, var(--fx-c)) 0 100% / 100% 2px no-repeat,
+    var(--command-metal),
+    var(--fx-ink);
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  dialog.quick-search
+  .quick-search-field:focus-within {
+  border-color: var(--fx-a);
+  box-shadow:
+    inset 3px 0 0 var(--fx-a),
+    inset 0 1px 0 rgb(233 240 241 / 12%),
+    0 0 0 3px color-mix(in srgb, var(--fx-a) 18%, transparent),
+    0 0 24px -8px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+/* ---------- 4. /world: the shared plates ----------
+   The printed sections keep their chapter colours; the plates on them
+   trade the flat offset shadow for a neon rim and an under-bloom. */
+html[data-family="world"] body main.site-shell.film-edition {
+  --fx-a: #6fe9ff;
+  --fx-b: #9d86ff;
+  --fx-c: #ff5fc8;
+}
+
+/* Ambient neon: the hero and the chapter grounds hold coloured light at
+   their edges as inset glows, painted over each ground and under its
+   content, so no background (key art, grades, trails) is replaced. */
+html[data-family="world"] body main.site-shell.film-edition.mirage-edition > section.hero {
+  box-shadow:
+    inset 0 -220px 240px -170px color-mix(in srgb, var(--fx-c) calc(34% * var(--fx-glow)), transparent),
+    inset 320px 0 300px -260px color-mix(in srgb, var(--fx-a) calc(22% * var(--fx-glow)), transparent),
+    inset -280px 0 280px -240px color-mix(in srgb, var(--fx-b) calc(26% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"] body main.site-shell.film-edition.mirage-edition > :is(#riders, #records) {
+  box-shadow:
+    inset 0 200px 240px -200px color-mix(in srgb, var(--fx-b) calc(28% * var(--fx-glow)), transparent),
+    inset 0 -200px 240px -200px color-mix(in srgb, var(--fx-a) calc(16% * var(--fx-glow)), transparent);
+}
+
+/* The world sheets scope by ids (#riders, #manager-archive, …) and the
+   streamline sheet by :not(#saga); the repeated ids and :not(#fx) below
+   only match that weight so the paint lands. No element has id "fx". */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  .hero
+  a.primary-action:not(#fx):not(#fx) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    inset 0 0 0 1px rgb(255 255 255 / 20%),
+    0 12px 30px -14px color-mix(in srgb, var(--fx-a) calc(85% * var(--fx-glow)), transparent),
+    10px 14px 34px -20px color-mix(in srgb, var(--fx-c) calc(80% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-control-cluster
+  > button:not(#fx):not(#fx) {
+  border-color: color-mix(in srgb, var(--fx-a) 34%, transparent);
+  background:
+    linear-gradient(180deg, rgb(233 246 251 / 8%), transparent 52%),
+    linear-gradient(var(--fx-angle), color-mix(in srgb, var(--fx-a) 12%, transparent), transparent 50%, color-mix(in srgb, var(--fx-c) 11%, transparent)),
+    #07111f;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--fx-a) 40%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--fx-b) 26%, transparent);
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > .hero
+  > .poster-stage
+  .poster-frame:not(#fx):not(#fx) {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 0 0 1px color-mix(in srgb, var(--fx-a) 36%, transparent),
+    0 26px 64px -20px rgb(0 0 0 / 82%),
+    0 30px 80px -36px color-mix(in srgb, var(--fx-c) calc(95% * var(--fx-glow)), transparent),
+    -22px -10px 70px -40px color-mix(in srgb, var(--fx-a) calc(95% * var(--fx-glow)), transparent);
+}
+
+/* The contents tiles: glass with a spectrum wash rising from the foot. */
+html[data-family="world"] body main.site-shell.film-edition nav.ws-contents a {
+  border-color: color-mix(in srgb, var(--fx-a) 26%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 9%),
+    inset 0 -40px 60px -40px color-mix(in srgb, var(--fx-b) 30%, transparent),
+    0 18px 40px -30px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+/* The directories (styles-command-directory.css): the plates trade the
+   flat titanium offset for a neon rim, a violet offset and a bloom. */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive#manager-archive {
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 30%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 12%, transparent),
+    8px 8px 0 rgb(2 7 13 / 52%),
+    9px 9px 0 color-mix(in srgb, var(--fx-b) 30%, transparent),
+    0 30px 70px -40px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > :is(.signal, .dante-archive, .other-archive-card, .archive-placeholder) {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 16%, transparent),
+    0 5px 0 #02070d,
+    0 6px 0 color-mix(in srgb, var(--fx-a) 46%, transparent),
+    0 20px 34px -24px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #riders#riders#riders
+  > .rider-console {
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 28%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 12%, transparent),
+    8px 8px 0 rgb(2 7 13 / 70%),
+    9px 9px 0 color-mix(in srgb, var(--fx-b) 30%, transparent),
+    0 30px 70px -40px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-person {
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 10%),
+    5px 5px 0 #02070d,
+    6px 6px 0 color-mix(in srgb, #6ddfba 40%, transparent),
+    0 24px 44px -32px color-mix(in srgb, #6ddfba calc(80% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  > .world-column:not(#fx):not(#fx) {
+  box-shadow:
+    inset 0 1px 0 rgb(233 246 251 / 8%),
+    0 30px 60px -36px rgb(0 0 0 / 80%),
+    0 0 50px -30px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+/* ---------- 5. Dossiers: the rider's own light as the neon ----------
+   The file's tokens (styles-stage-dossier.css) take a tint of the rider's
+   light, so every plate and rule on the file inherits it; the page ground
+   gains the rider's aurora with violet and the key visual's pink. The
+   :is(…, #fx-boost) arguments only raise specificity over the file's
+   id-scoped rules; no element carries that id. */
+html[data-family="dossier"] body main.manager-page.manager-page.manager-page.manager-page {
+  --fx-a: var(--sd-accent);
+  --sd-plate: color-mix(in srgb, var(--sd-accent) 7%, #0a111c);
+  --sd-plate-2: color-mix(in srgb, var(--sd-accent) 10%, #0d1522);
+  --sd-line: color-mix(in srgb, var(--sd-accent) 22%, rgb(255 255 255 / 7%));
+  --sd-line-2: color-mix(in srgb, var(--sd-accent) 40%, rgb(255 255 255 / 10%));
+  --sd-glow-soft: color-mix(in srgb, var(--sd-accent) 22%, transparent);
+  background:
+    radial-gradient(90% 60% at 100% 0%, var(--sd-glow-soft), transparent 62%),
+    radial-gradient(60% 900px at 0% 40%, color-mix(in srgb, var(--fx-b) 10%, transparent), transparent 70%),
+    radial-gradient(70% 900px at 100% 85%, color-mix(in srgb, var(--fx-c) 8%, transparent), transparent 70%),
+    linear-gradient(180deg, var(--sd-ink-2) 0%, var(--sd-ink) 38%, var(--sd-ink) 100%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.rider-dossier-page {
+  --fx-c: var(--sd-accent-2);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  :is(.manager-copy-section, .rider-nightmare-card, .rider-archive-civilian, .manager-quotes, #fx-boost) {
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--fx-a) 40%, rgb(255 255 255 / 10%)),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 14%, transparent),
+    0 24px 50px -30px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  :is(.manager-copy-section, #fx-boost) {
+  background:
+    linear-gradient(90deg, var(--fx-a), color-mix(in srgb, var(--fx-a) 40%, var(--fx-b)) 56px, transparent 180px) 0 0 / 100% 2px no-repeat,
+    radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--fx-a) 12%, transparent), transparent 70%),
+    radial-gradient(60% 50% at 0% 100%, color-mix(in srgb, var(--fx-b) 9%, transparent), transparent 70%),
+    linear-gradient(rgb(255 255 255 / 4%), transparent 120px),
+    var(--fx-scan),
+    var(--sd-plate);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  > :is(.dossier-reader, #fx-boost) {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--fx-a) 14%, transparent), transparent 50%, color-mix(in srgb, var(--fx-b) 10%, transparent)),
+    #060b14;
+  box-shadow:
+    inset 0 -1px 0 color-mix(in srgb, var(--fx-a) 36%, transparent),
+    0 12px 24px -18px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  nav.manager-pagination
+  li {
+  box-shadow: 0 12px 26px -20px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+/* ---------- 6. Library and full-text search ----------
+   The records' panel token turns to holo glass; the page ground gains an
+   aurora; the main panels and cards gain a neon rim and bloom. */
+html[data-family="library"]
+  body
+  :is(.library-page.library-atelier, .search-page.search-observatory).command-records.command-records {
+  --fx-a: #8cecff;
+  --fx-b: #8f8bff;
+  --fx-c: #ff6fcf;
+  --records-line: color-mix(in srgb, #8cecff 34%, transparent);
+  --records-panel:
+    linear-gradient(var(--fx-angle), rgb(140 236 255 / 10%), transparent 34%),
+    radial-gradient(90% 70% at 100% 100%, rgb(143 139 255 / 11%), transparent 70%),
+    linear-gradient(135deg, #1d3247b8, #0b1a2bf0 46%, #11233a);
+  --library-prism: linear-gradient(90deg, #8cecff, #8f8bff 52%, #ff6fcf);
+  --search-prism: linear-gradient(90deg, #8cecff, #8f8bff 52%, #ff6fcf);
+  background:
+    radial-gradient(ellipse 70% 560px at 82% 0%, rgb(140 236 255 / 20%), transparent 72%),
+    radial-gradient(ellipse 50% 480px at 0% 22%, rgb(143 139 255 / 17%), transparent 72%),
+    radial-gradient(ellipse 60% 620px at 100% 70%, rgb(255 111 207 / 11%), transparent 72%),
+    radial-gradient(ellipse 50% 520px at 10% 100%, rgb(140 236 255 / 9%), transparent 72%),
+    repeating-linear-gradient(90deg, rgb(140 236 255 / 3.2%) 0 1px, transparent 1px 48px),
+    linear-gradient(125deg, #040a12, #0a1828 48%, #060c18);
+}
+
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  :is(
+    .search-workbench,
+    .library-browse-controls,
+    .library-hub,
+    .library-cast-board,
+    .search-result-card,
+    .library-card,
+    .inquiry-choice,
+    .search-library-door,
+    .search-more-option
+  ):nth-child(n):nth-child(n) {
+  border-color: color-mix(in srgb, var(--fx-a) 46%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--fx-a) 55%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-b) 14%, transparent),
+    4px 5px 0 rgb(1 8 16 / 70%),
+    5px 6px 0 color-mix(in srgb, var(--fx-a) 22%, transparent),
+    0 26px 50px -34px color-mix(in srgb, var(--fx-a) calc(75% * var(--fx-glow)), transparent);
+}
+
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  :is(.search-workbench, .library-browse-controls):nth-child(n):nth-child(n) {
+  box-shadow:
+    inset 0 1px 0 rgb(231 248 255 / 26%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-b) 12%, transparent),
+    8px 9px 0 rgb(2 9 17 / 73%),
+    9px 10px 0 color-mix(in srgb, var(--fx-b) 36%, transparent),
+    0 40px 80px -40px color-mix(in srgb, var(--fx-a) calc(60% * var(--fx-glow)), transparent);
+}
+
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  :is(.search-input-row, .library-search):focus-within {
+  border-color: var(--fx-a);
+  box-shadow:
+    inset 0 2px 14px rgb(0 0 0 / 40%),
+    0 0 0 3px color-mix(in srgb, var(--fx-a) 20%, transparent),
+    0 0 30px -8px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+html[data-family="library"]
+  body
+  .command-records.command-records
+  :is(.search-group-head, .library-results-heading) {
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--fx-a) 30%, transparent);
+}
+
+/* ---------- 7. The archives' frames ---------- */
+html[data-family="archive"] body .form-archive-page {
+  --fx-a: #82e9ff;
+  --fx-b: #a28bff;
+  --fx-c: #ff6fd0;
+}
+
+/* The Dogs Archive keeps its green; its frame gains a green-to-cyan neon
+   seam and a lit selector, never touching the viewer. */
+html[data-family="archive"] body main.dogs-archive {
+  --fx-a: #5effa6;
+  --fx-b: #45d6ff;
+  --fx-c: #c8ff73;
+}
+
+html[data-family="archive"]
+  body
+  main.dogs-archive
+  > :is(.dogs-archive-header, .dogs-archive-selector) {
+  background-image:
+    linear-gradient(90deg, transparent, var(--fx-a) 20%, var(--fx-b) 60%, transparent) 0 100% / 100% 1px no-repeat,
+    radial-gradient(50% 160% at 0% 0%, color-mix(in srgb, var(--fx-a) 10%, transparent), transparent 70%),
+    radial-gradient(40% 160% at 100% 100%, color-mix(in srgb, var(--fx-b) 7%, transparent), transparent 70%),
+    var(--fx-scan);
+  box-shadow: 0 12px 30px -22px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+/* ================================================================
+   9. Dynamic spectrum (coordinator review, 2026-10-30)
+   The first pass only tinted. This pass makes the light the subject:
+   nebula fields in cyan, violet and magenta on the grounds, a pastel
+   spectrum fill on every selected or primary control (dark text keeps
+   ≥ 7:1 on it), gradient edge light on the cards, and a spectrum sheen
+   on the hero title. Gradients are written inline (not as tokens) so
+   --fx-angle resolves on each element and the motion layer can turn it
+   per element. The :not(#fx) arguments only match the world sheets' id
+   weight; no element has id "fx".
+   ================================================================ */
+
+/* ---------- 9a. Grounds: nebula fields ---------- */
+@media (forced-colors: none) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero:not(#fx):not(#fx):not(#fx) {
+    background:
+      radial-gradient(34% 52% at 86% 22%, rgb(157 134 255 / 36%), transparent 70%),
+      radial-gradient(40% 46% at 70% 96%, rgb(255 95 200 / 32%), transparent 72%),
+      radial-gradient(30% 40% at 52% 8%, rgb(111 233 255 / 20%), transparent 70%),
+      radial-gradient(34% 44% at 4% 100%, rgb(111 233 255 / 18%), transparent 72%),
+      linear-gradient(
+        var(--fx-angle),
+        transparent 44%,
+        rgb(111 233 255 / 8%) 50%,
+        rgb(157 134 255 / 13%) 56%,
+        rgb(255 95 200 / 9%) 62%,
+        transparent 70%
+      ),
+      linear-gradient(90deg, rgb(3 6 12 / 92%) 0%, rgb(3 6 12 / 64%) 42%, rgb(3 6 12 / 18%) 100%);
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > nav.ws-contents:not(#fx):not(#fx):not(#fx) {
+    background:
+      linear-gradient(rgb(111 233 255 / 6%) 1px, transparent 1px) 0 0 / 40px 40px,
+      linear-gradient(90deg, rgb(111 233 255 / 6%) 1px, transparent 1px) 0 0 / 40px 40px,
+      radial-gradient(46% 70% at 12% 0%, rgb(111 233 255 / 24%), transparent 72%),
+      radial-gradient(40% 60% at 62% 46%, rgb(157 134 255 / 22%), transparent 72%),
+      radial-gradient(50% 70% at 92% 100%, rgb(255 95 200 / 24%), transparent 72%),
+      linear-gradient(170deg, #050b1a 0%, #0a1030 56%, #160b2c 100%);
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story:not(#fx):not(#fx):not(#fx) {
+    background:
+      radial-gradient(60% 620px at 50% 0, rgb(176 200 255 / 22%), transparent 72%),
+      radial-gradient(44% 560px at 100% 26%, rgb(157 134 255 / 26%), transparent 72%),
+      radial-gradient(40% 520px at 0% 62%, rgb(111 233 255 / 14%), transparent 72%),
+      radial-gradient(80% 420px at 50% 100%, rgb(214 120 236 / 24%), transparent 72%),
+      linear-gradient(180deg, #0a1126 0%, #0e1738 34%, #141c46 70%, #1f1446 100%);
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    #riders#riders#riders {
+    background:
+      radial-gradient(56% 540px at 100% 0%, rgb(111 233 255 / 20%), transparent 72%),
+      radial-gradient(40% 460px at 36% 46%, rgb(157 134 255 / 15%), transparent 72%),
+      radial-gradient(56% 540px at 0% 100%, rgb(255 95 200 / 18%), transparent 72%),
+      linear-gradient(155deg, #0c1b36 0%, #070d1f 58%, #120a26 100%);
+  }
+
+  /* The records keep their amber; a magenta and violet band rides over it. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records:not(#fx):not(#fx):not(#fx) {
+    background:
+      radial-gradient(50% 340px at 62% 0, rgb(255 95 200 / 24%), transparent 72%),
+      radial-gradient(40% 520px at 0% 58%, rgb(157 134 255 / 16%), transparent 72%),
+      radial-gradient(40% 480px at 100% 82%, rgb(255 140 90 / 14%), transparent 72%),
+      linear-gradient(rgb(22 26 32), rgb(22 26 32 / 0%) 316.8px),
+      radial-gradient(60% 560px at 50% 0, rgb(255 184 96 / 15%), transparent 72%),
+      linear-gradient(rgb(20 13 7) 0%, rgb(30 21 11) 46%, rgb(22 15 8) 100%);
+  }
+
+  /* The cast roster keeps the annex's green as its first light. */
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster {
+    background:
+      radial-gradient(50% 640px at 100% 0%, rgb(109 223 186 / 18%), transparent 72%),
+      radial-gradient(46% 640px at 0% 46%, rgb(157 134 255 / 16%), transparent 72%),
+      radial-gradient(50% 560px at 80% 100%, rgb(111 233 255 / 12%), transparent 72%),
+      linear-gradient(145deg, #0c1f2e, #060c18 55%, #0d0b22);
+  }
+
+  /* Dossier and library grounds: denser nebula. */
+  html[data-family="dossier"] body main.manager-page.manager-page.manager-page.manager-page {
+    background:
+      radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--sd-accent) 30%, transparent), transparent 62%),
+      radial-gradient(50% 900px at 0% 30%, rgb(157 134 255 / 18%), transparent 70%),
+      radial-gradient(60% 900px at 100% 70%, color-mix(in srgb, var(--fx-c) 16%, transparent), transparent 70%),
+      radial-gradient(50% 700px at 20% 100%, rgb(255 95 200 / 12%), transparent 70%),
+      linear-gradient(180deg, #08101f 0%, #050913 40%, #070816 100%);
+  }
+
+  html[data-family="library"]
+    body
+    :is(.library-page.library-atelier, .search-page.search-observatory).command-records.command-records {
+    background:
+      radial-gradient(ellipse 60% 640px at 88% 0%, rgb(140 236 255 / 34%), transparent 72%),
+      radial-gradient(ellipse 46% 620px at 0% 14%, rgb(143 139 255 / 32%), transparent 72%),
+      radial-gradient(ellipse 50% 720px at 100% 48%, rgb(255 111 207 / 16%), transparent 72%),
+      radial-gradient(ellipse 50% 720px at 0% 76%, rgb(140 236 255 / 13%), transparent 72%),
+      radial-gradient(ellipse 60% 720px at 70% 100%, rgb(143 139 255 / 16%), transparent 72%),
+      repeating-linear-gradient(90deg, rgb(140 236 255 / 3.4%) 0 1px, transparent 1px 48px),
+      linear-gradient(160deg, #050b18, #0b1630 48%, #100a26);
+  }
+
+    html[data-family="library"]
+    body
+    .command-records.command-records.command-records.command-records.search-page
+    .search-workbench:nth-child(n) {
+    background:
+      linear-gradient(var(--fx-angle), rgb(140 236 255 / 16%), transparent 34%),
+      radial-gradient(80% 80% at 100% 100%, rgb(143 139 255 / 26%), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, rgb(255 111 207 / 12%), transparent 70%),
+      linear-gradient(128deg, #14294bb0, #0a1830 48%, #1a1842);
+  }
+
+  /* The form archive's wrapper around its frame. */
+  html[data-family="archive"] body main.form-archive-page.command-archive.command-archive {
+    background:
+      radial-gradient(50% 60% at 100% 0%, rgb(130 233 255 / 16%), transparent 70%),
+      radial-gradient(50% 60% at 0% 100%, rgb(162 139 255 / 16%), transparent 70%),
+      #060c18;
+  }
+}
+
+/* ---------- 9b. Header: spectrum foot, lit current chapter ---------- */
+@media (forced-colors: none) {
+  html:is(
+      [data-family="world"],
+      [data-family="dossier"],
+      [data-family="library"],
+      [data-family="archive"],
+      [data-family="utility"]
+    )
+    body
+    :is(
+      main.site-shell.film-edition.mirage-edition > header.topbar,
+      .manager-page > header.manager-topbar,
+      .library-page > header.library-topbar,
+      .search-page > header.search-topbar,
+      .form-archive-page > header.form-archive-toolbar
+    ) {
+    background-size:
+      100% 100%,
+      100% 2px,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%;
+    box-shadow:
+      inset 0 1px 0 rgb(233 240 241 / 18%),
+      0 1px 0 color-mix(in srgb, var(--fx-b) 40%, transparent),
+      0 6px 18px -6px color-mix(in srgb, var(--fx-b) calc(55% * var(--fx-glow)), transparent),
+      0 18px 40px -22px color-mix(in srgb, var(--fx-c) calc(70% * var(--fx-glow)), transparent),
+      0 4px 18px rgb(0 0 0 / 34%);
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    nav
+    a:not(#fx):not(#fx)::after {
+    background: linear-gradient(90deg, var(--fx-a), var(--fx-b) 55%, var(--fx-c));
+    box-shadow: 0 0 12px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+  }
+
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition
+    > header.topbar
+    nav
+    a[aria-current="location"]:not(#fx):not(#fx) {
+    color: #fff;
+    background:
+      linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 22%, transparent), color-mix(in srgb, var(--fx-b) 8%, transparent) 60%, transparent);
+    text-shadow: 0 0 14px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent);
+  }
+}
+
+/* ---------- 9c. The launcher: a richer aurora ---------- */
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]:not(#fx) {
+  background:
+    radial-gradient(ellipse 52% 42% at 100% 0%, color-mix(in srgb, var(--fx-a) 34%, transparent), transparent 72%),
+    radial-gradient(ellipse 40% 36% at 64% 40%, color-mix(in srgb, var(--fx-b) 24%, transparent), transparent 74%),
+    radial-gradient(ellipse 54% 46% at 0% 100%, color-mix(in srgb, var(--fx-c) 30%, transparent), transparent 72%),
+    radial-gradient(ellipse 36% 30% at 18% 30%, color-mix(in srgb, var(--fx-b) 14%, transparent), transparent 74%),
+    linear-gradient(var(--fx-angle), transparent 30%, color-mix(in srgb, var(--fx-a) 7%, transparent) 30.2% 42%, color-mix(in srgb, var(--fx-c) 6%, transparent) 42.2% 50%, transparent 50.2%),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--fx-a) 6%, transparent) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 6%, transparent) 0 1px, transparent 1px 40px),
+    linear-gradient(170deg, #050b18, #0a0f2a 60%, #120a24) !important;
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]:not(#fx)
+  > .side-panel-group:not([data-atlas-group="sections"])
+  > .side-panel-links
+  > :is(a, button.side-panel-link-button) {
+  border-image: linear-gradient(var(--fx-angle), var(--fx-a), color-mix(in srgb, var(--fx-b) 70%, transparent) 50%, var(--fx-c)) 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html:is(
+      [data-family="world"],
+      [data-family="dossier"],
+      [data-family="library"],
+      [data-family="archive"],
+      [data-family="utility"]
+    )
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]:not(#fx)
+    > .side-panel-group:not([data-atlas-group="sections"])
+    > .side-panel-links
+    > :is(a, button.side-panel-link-button):hover {
+    box-shadow:
+      inset 0 1px 0 rgb(233 240 241 / 22%),
+      inset 0 0 24px -8px color-mix(in srgb, var(--fx-a) 50%, transparent),
+      0 4px 0 #02060c,
+      0 0 30px -8px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent);
+  }
+}
+
+/* ---------- 9d. Primary and selected controls: the pastel spectrum ----------
+   Dark text on a light cyan → lavender → pink fill (≥ 7:1), a spectrum
+   stroke and a two-colour glow. */
+/* world-exhibition paints this button with !important; forced colours
+   keep its ButtonFace (this rule is outside that mode). */
+@media (forced-colors: none) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    :is(.hero, .finale-content)
+    .primary-action.ios26-glass:not(#fx):not(#fx) {
+    border-color: transparent;
+    background:
+      linear-gradient(var(--fx-angle), #ecfcff 0%, #bdefff 34%, #d8cdff 66%, #ffd3f0 100%) padding-box,
+      linear-gradient(90deg, var(--fx-a), var(--fx-b) 50%, var(--fx-c)) border-box !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 70%),
+      0 0 0 1px color-mix(in srgb, var(--fx-b) 40%, transparent),
+      -8px 10px 30px -12px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent),
+      12px 14px 34px -14px color-mix(in srgb, var(--fx-c) calc(85% * var(--fx-glow)), transparent);
+  }
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  :is(
+    #manager-archive#manager-archive#manager-archive .manager-archive-tabs,
+    #riders#riders#riders .rider-tabs
+  )
+  .liquid-selection-surface {
+  background: linear-gradient(var(--fx-angle), #ecfcff 0%, #bdefff 34%, #d8cdff 66%, #ffd3f0 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%),
+    0 0 0 1px color-mix(in srgb, var(--fx-a) 70%, transparent),
+    0 0 26px -6px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent),
+    8px 10px 26px -12px color-mix(in srgb, var(--fx-c) calc(70% * var(--fx-glow)), transparent);
+}
+
+/* Light-text tabs (columns, the archive switcher): a dark spectrum glass. */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  .world-column-index
+  > .world-column-tabs
+  .liquid-selection-surface:not(#fx):not(#fx) {
+  background:
+    linear-gradient(90deg, var(--fx-a), var(--fx-b) 50%, var(--fx-c)) 0 100% / 100% 2px no-repeat,
+    linear-gradient(var(--fx-angle), color-mix(in srgb, var(--fx-a) 26%, transparent), color-mix(in srgb, var(--fx-b) 22%, transparent) 50%, color-mix(in srgb, var(--fx-c) 20%, transparent));
+  box-shadow: 0 0 22px -8px color-mix(in srgb, var(--fx-b) calc(80% * var(--fx-glow)), transparent);
+}
+
+html[data-family="archive"]
+  body
+  main.command-archive[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface:not(#fx) {
+  background:
+    linear-gradient(90deg, var(--fx-a), var(--fx-b) 50%, var(--fx-c)) 0 100% / 100% 2px no-repeat,
+    linear-gradient(var(--fx-angle), color-mix(in srgb, var(--fx-a) 34%, #0b1830), color-mix(in srgb, var(--fx-b) 30%, #0b1830) 55%, color-mix(in srgb, var(--fx-c) 26%, #0b1830));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 0 0 1px color-mix(in srgb, var(--fx-a) 50%, transparent),
+    0 0 22px -6px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+}
+
+/* Library and search: pressed chips, submit buttons. */
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  :is(
+    .search-categories button[aria-pressed="true"],
+    .library-scope-row button[aria-pressed="true"],
+    .library-filter-row button[aria-pressed="true"],
+    .search-submit,
+    .library-browse-submit
+  ):nth-child(n) {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--fx-angle), #ecfcff 0%, #bdefff 34%, #d8cdff 66%, #ffd3f0 100%) padding-box,
+    linear-gradient(90deg, var(--fx-a), var(--fx-b) 50%, var(--fx-c)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 70%),
+    -6px 8px 22px -12px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent),
+    8px 10px 24px -12px color-mix(in srgb, var(--fx-c) calc(80% * var(--fx-glow)), transparent);
+}
+
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  :is(
+    .search-categories button[aria-pressed="false"],
+    .library-scope-row button[aria-pressed="false"],
+    .library-filter-row button[aria-pressed="false"],
+    .search-suggestions button,
+    .search-section-nav a,
+    .library-jump-links a
+  ):nth-child(n) {
+  border-color: color-mix(in srgb, var(--fx-a) 42%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--fx-a) 30%, transparent),
+    inset 0 -12px 20px -14px color-mix(in srgb, var(--fx-b) 50%, transparent);
+}
+
+/* ---------- 9e. Cards: gradient edge light, hover lift in colour ---------- */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  > nav.ws-contents
+  a:not(#fx):not(#fx):not(#fx),
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #manager-archive#manager-archive#manager-archive#manager-archive
+  .manager-slot-grid
+  > :is(.signal, .dante-archive, .other-archive-card),
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster#cast-roster
+  .wa-person,
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  :is(
+    .search-result-card,
+    .library-card,
+    .inquiry-choice,
+    .search-library-door,
+    .search-more-option,
+    .library-cast-tile
+  ):nth-child(n) {
+  border-image: linear-gradient(
+      var(--fx-angle),
+      var(--fx-a) 0%,
+      color-mix(in srgb, var(--fx-b) 60%, transparent) 46%,
+      color-mix(in srgb, var(--fx-c) 85%, transparent) 100%
+    )
+    1;
+}
+
+/* The cast roster's plates take the annex green as their first light. */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster#cast-roster
+  .wa-person {
+  border-image: linear-gradient(var(--fx-angle), #6ddfba, rgb(157 134 255 / 60%) 50%, rgb(111 233 255 / 80%)) 1;
+}
+
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records {
+  --records-panel:
+    linear-gradient(var(--fx-angle), rgb(140 236 255 / 16%), transparent 32%),
+    radial-gradient(90% 80% at 100% 100%, rgb(143 139 255 / 22%), transparent 70%),
+    radial-gradient(60% 60% at 0% 100%, rgb(255 111 207 / 10%), transparent 70%),
+    linear-gradient(135deg, #18304cc4, #0b1830f2 46%, #14183a);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    > nav.ws-contents
+    a:not(#fx):not(#fx):not(#fx):hover,
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    #manager-archive#manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > :is(.signal, .dante-archive, .other-archive-card):hover,
+  html[data-family="world"]
+    body
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster#cast-roster
+    .wa-person:hover,
+  html[data-family="library"]
+    body
+    :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+    :is(
+      .search-result-card,
+      .library-card,
+      .inquiry-choice,
+      .search-library-door,
+      .search-more-option,
+      .library-cast-tile
+    ):nth-child(n):hover {
+    border-image: linear-gradient(var(--fx-angle), #ffffff, var(--fx-a) 30%, var(--fx-b) 64%, var(--fx-c)) 1;
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--fx-a) 70%, transparent),
+      inset 0 0 40px -14px color-mix(in srgb, var(--fx-b) 55%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--fx-a) 30%, transparent),
+      0 0 36px -10px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent),
+      10px 16px 40px -18px color-mix(in srgb, var(--fx-c) calc(80% * var(--fx-glow)), transparent);
+  }
+}
+
+/* Selected states that are not hovers: the current file and section. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  > .dossier-reader
+  a:is([aria-current="location"], [aria-current="page"], [aria-current="true"]) {
+  background: linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 26%, transparent), transparent 80%);
+  box-shadow:
+    inset 0 -2px 0 var(--fx-a),
+    0 8px 18px -10px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent);
+}
+
+/* ---------- 9f. Type accents ---------- */
+/* The hero title: the light-blue sheen becomes the full spectrum, kept
+   light enough that every stop is ≥ 7:1 on the ground. */
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  .anime-work-title
+  .mr-word:not(#fx):not(#fx)::before {
+  background: linear-gradient(
+    var(--fx-angle),
+    #ffffff 0%,
+    #c9f8ff 24%,
+    #8eeaff 40%,
+    #c3b3ff 62%,
+    #ff9fdc 84%,
+    #ffe0f4 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-family="world"]
+  body
+  main.site-shell.film-edition.mirage-edition
+  .anime-work-title
+  b:not(#fx):not(#fx) {
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-glow)), transparent));
+}
+
+/* Headings on the dark records pages take the spectrum as a neon edge. */
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  h2:nth-child(n) {
+  text-shadow:
+    0 0 1px color-mix(in srgb, var(--fx-a) 60%, transparent),
+    0 0 22px color-mix(in srgb, var(--fx-b) calc(55% * var(--fx-glow)), transparent);
+}
+
+html[data-family="library"]
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  h1:nth-child(n) {
+  background: linear-gradient(var(--fx-angle), #ffffff 0%, #c9f8ff 34%, #cdbfff 66%, #ffc8ec 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-glow)), transparent));
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .manager-display-name {
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--fx-a) calc(55% * var(--fx-glow)), transparent));
+}
+
+html:is(
+    [data-family="world"],
+    [data-family="dossier"],
+    [data-family="library"],
+    [data-family="archive"],
+    [data-family="utility"]
+  )
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .side-panel-head
+  b {
+  text-shadow:
+    1px 1px 0 rgb(0 0 0 / 60%),
+    0 0 18px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+}
+
+/* Economy, iOS 18 and Android: the drop-shadow filters cost a layer;
+   drop them (the spectrum fills stay). */
+html:is([data-world-effects="economy"], [data-ios18-renderer="true"], [data-android-renderer])
+  body
+  :is(.anime-work-title b, .manager-display-name, .command-records h1) {
+  filter: none !important;
+}
+
+/* ---------- 8. Reduced transparency and forced colours ---------- */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-family] {
+    --fx-glow: 0;
+  }
+}
