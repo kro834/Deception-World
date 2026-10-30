@@ -1616,6 +1616,44 @@ html[data-route-cover] .gallery-arrival {
   }
 }
 
+/* Phone landscape: the viewer is bounded by the notch, not just viewport
+   width. Keep the existing 44px controls while giving the artwork its height. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer {
+    left: max(8px, env(safe-area-inset-left, 0px));
+    right: max(8px, env(safe-area-inset-right, 0px));
+    width: calc(
+      100vw - max(8px, env(safe-area-inset-left, 0px)) - max(8px, env(safe-area-inset-right, 0px))
+    );
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer-shell {
+    padding: 8px;
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer-header {
+    min-height: 44px;
+    max-height: 30dvh;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer-tools:not([open]) {
+    flex-basis: auto;
+    order: 1;
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-close-primary {
+    order: 2;
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer-tools[open] {
+    order: 3;
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer-footer {
+    min-height: 44px;
+    padding-top: 6px;
+  }
+  html:not([data-ipad-viewport="contained"]) .gallery-viewer-stage {
+    padding-block: 6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gallery-page *,
   .gallery-page *::before,

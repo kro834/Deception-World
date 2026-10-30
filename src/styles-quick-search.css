@@ -783,6 +783,38 @@ dialog.quick-search .quick-search-foot {
     font-size: 15px;
   }
 }
+/* A phone rotated sideways keeps the sheet inside both notch insets. The
+   compact head/field leave a useful result row even with a 375px viewport. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search {
+    --qs-top: max(8px, env(safe-area-inset-top, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    width: min(
+      760px,
+      calc(
+        100vw - max(12px, env(safe-area-inset-left, 0px)) -
+          max(12px, env(safe-area-inset-right, 0px))
+      )
+    );
+    margin: var(--qs-top) auto auto;
+    max-height: calc(100dvh - var(--qs-top) - max(8px, env(safe-area-inset-bottom, 0px)));
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-panel {
+    max-height: calc(100dvh - var(--qs-top) - max(8px, env(safe-area-inset-bottom, 0px)));
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-head {
+    padding: 8px 12px 0;
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-field {
+    min-height: 44px;
+    margin: 8px 12px;
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-field input {
+    min-height: 44px;
+  }
+}
+
 @media (forced-colors: active) {
   dialog.quick-search .quick-search-panel,
   dialog.quick-search .quick-search-field,
