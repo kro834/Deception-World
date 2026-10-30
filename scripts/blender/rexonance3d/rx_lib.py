@@ -160,6 +160,8 @@ def mirror_x(ob, name=None):
     """Mirrored copy across X=0 (suit left <-> right). Keeps materials, UVs and colours."""
     if name is None:
         name = ob.name[:-2] + "_R" if ob.name.endswith("_L") else ob.name + "_R"
+    # A fresh object's matrix_world stays identity until the depsgraph updates.
+    bpy.context.view_layer.update()
     if ob.type == "EMPTY":
         out = ob.copy()
         out.name = name
