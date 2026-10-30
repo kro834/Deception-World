@@ -12,7 +12,8 @@ head / neck would poke through. Every visible piece is layered on it:
   * view_plate()   a plate whose outline is drawn in a view plane and projected;
   * rail()         a profiled bar swept along a surface path (bands, trims), with
                    an optional mitre on X = 0 so mirrored halves meet exactly;
-  * edge_blade() / swept_blade() / blade()   free-standing horns, feathers, fins;
+  * edge_blade() / edge_blade_part() / blade()   free-standing horns, feathers
+                   (swept_edges() gives a feather's edges: hug the shell, then curve free);
   * NeckSurf / neck_plate()   the gorget lamellae around the undersuit neck.
 
 Everything is built in world coordinates (identity transforms), metres.
@@ -214,6 +215,37 @@ def ccw(outline):
     return L.ccw([tuple(p) for p in outline])
 
 
+def orient_outward(bm):
+    """Flip any closed island whose signed volume is negative (inside-out).
+    recalc_face_normals guesses wrong on thin curved blades."""
+    bm.faces.ensure_lookup_table()
+    seen = set()
+    for f in bm.faces:
+        if f.index in seen:
+            continue
+        stack, isl = [f], []
+        seen.add(f.index)
+        while stack:
+            g = stack.pop()
+            isl.append(g)
+            for e in g.edges:
+                for h in e.link_faces:
+                    if h.index not in seen:
+                        seen.add(h.index)
+                        stack.append(h)
+        if not all(len(e.link_faces) == 2 for g in isl for e in g.edges):
+            continue
+        vol = 0.0
+        for g in isl:
+            vs = [lp.vert.co for lp in g.loops]
+            for i in range(1, len(vs) - 1):
+                vol += vs[0].dot(vs[i].cross(vs[i + 1]))
+        if vol < 0:
+            bmesh.ops.reverse_faces(bm, faces=isl)
+    bm.normal_update()
+    return bm
+
+
 def _dist_to_polyline(P, B, closed=True):
     P = np.asarray(P, float)
     A = B
@@ -283,6 +315,7 @@ def plate_bmesh(pts2, tris, nb, P, N, thick, lift=0.0, bevel=0.0012, bevel_seg=2
                 p = (x0, y0)
             loop[uv].uv = ((p[0] - x0) / max(x1 - x0, 1e-9), (p[1] - y0) / max(y1 - y0, 1e-9))
     bm.normal_update()
+    orient_outward(bm)
     return bm
 
 
@@ -426,6 +459,7 @@ def blade(spine, width_fn, thick_fn, side_ref, n=40):
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.normal_update()
+    orient_outward(bm)
     return bm
 
 
@@ -639,6 +673,7 @@ def rail_pts(P, N, profile, width_fn, height_fn, lift=0.0004, mitre_x0=False, ca
                 pass
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.normal_update()
+    orient_outward(bm)
     return bm
 
 
@@ -730,6 +765,7 @@ def edge_blade(LE, TE, thick_fn, n_span=28, ridge_a=0.5, outward=(1.0, 0.0, 0.0)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
     bm.normal_update()
+    orient_outward(bm)
     return bm
 
 
@@ -916,15 +952,6 @@ def swept_edges(base, root_specs, tip, width_fn, bend=(0.0, 0.0, 0.0), lift=0.00
     return LE, TE, cen, np.asarray(sides), s, np.mean(N, axis=0)
 
 
-def swept_blade(base, root_specs, tip, width_fn, thick_fn, bend=(0.0, 0.0, 0.0), lift=0.003, n_root=6,
-                n_free=14, ridge_a=0.45, twist=0.0, outward=None):
-    """Blade that hugs the shell along a short root path, then curves free to
-    `tip` (see swept_edges). thick_fn(s) is the ridge thickness."""
-    LE, TE, _c, _s, _t, nmean = swept_edges(base, root_specs, tip, width_fn, bend, lift, n_root, n_free, twist)
-    out = tuple(outward) if outward is not None else tuple(nmean)
-    return edge_blade(LE, TE, thick_fn, n_span=len(LE), ridge_a=ridge_a, outward=out, samples=2)
-
-
 def blade_inlay(LE, TE, thick_fn, a0, a1, s0, s1, outward, ridge_a=0.45, n_span=24, samples=10, raise_=0.0004,
                 strip_th=0.0006):
     """Thin strip lying on the outer face of an edge_blade between chord positions
@@ -977,6 +1004,7 @@ def blade_inlay(LE, TE, thick_fn, a0, a1, s0, s1, outward, ridge_a=0.45, n_span=
         for loop in f.loops:
             loop[uv].uv = (0.5, 0.5)
     bm.normal_update()
+    orient_outward(bm)
     return bm
 
 
@@ -1040,4 +1068,5 @@ def edge_blade_part(LE, TE, thick_fn, a0=0.0, a1=1.0, ridge_a=0.5, outward=(1.0,
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bmesh.ops.triangulate(bm, faces=[fc for fc in bm.faces if len(fc.verts) > 4])
     bm.normal_update()
+    orient_outward(bm)
     return bm
