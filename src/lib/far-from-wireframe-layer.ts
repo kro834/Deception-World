@@ -99,12 +99,31 @@ export const FAR_FROM_WIRE_OVERLAY_TIMING = Object.freeze({
   helmAhead: 0,
 });
 
+/** The boost (owner, 2026-10-30): debris drawn in to each forming plate (per
+ * plate by tier, from `reach` figure px round it, turning `swirl` radians as
+ * it closes over `span` of the progress, a streak `size` CSS px wide (ice,
+ * gold) trailing `tail` of its course), and each plate's
+ * lock: the flash and afterglow over `lock`, the shock outline growing
+ * `grow` of the plate's size over `shock`. Calm draws the afterglow only. */
+export const FAR_FROM_WIRE_BOOST = Object.freeze({
+  motes: { desktop: 40, touch: 14 },
+  reach: [30, 92] as const,
+  swirl: 2.6,
+  span: 0.036,
+  size: [1.1, 1.5] as const,
+  tail: 0.22,
+  lock: 0.022,
+  shock: 0.011,
+  grow: 0.1,
+});
+
 /** The wire's look: line widths (CSS px) and the light of each kind. */
 export const FAR_FROM_WIRE_STYLE = Object.freeze({
   outline: 1.15,
   edge: 0.6,
   front: 1.35,
   node: 1.8,
+  head: 8,
   scan: 1.4,
   scanBand: 5,
 });
@@ -838,6 +857,57 @@ export function* prepareFarFromWireframe(
   const nodes = new Float32Array(maxEdges * 2 + 16);
   const crossings = new Float64Array(Math.max(16, plates.reduce((n, p) => n + p.outline, 0) * 2 + 8));
   const scanSegs = new Float32Array(crossings.length * 2 + 8);
+  // The boost (owner, 2026-10-30: 「ナノマシンの装着遷移アニメーションと
+  // スクロールアニメーションを強化して」): debris drawn in to each plate as it
+  // forms, spiralling in from round its seat; each outline pen's head a
+  // scan head; and each plate's lock — its outline flashes and leaves an
+  // afterglow while a shock outline grows off it — then its group's lock at
+  // the scan's end, the whole group's outline at once. Made once, here.
+  const B = FAR_FROM_WIRE_BOOST;
+  const perPlate = input.coarse ? B.motes.touch : B.motes.desktop;
+  const moteTotal = perPlate * plates.length;
+  const moteX = new Float32Array(moteTotal);
+  const moteY = new Float32Array(moteTotal);
+  const moteA = new Float32Array(moteTotal);
+  const moteR = new Float32Array(moteTotal);
+  const moteT0 = new Float32Array(moteTotal);
+  const moteT1 = new Float32Array(moteTotal);
+  const moteTone = new Uint8Array(moteTotal);
+  const plateCX = new Float32Array(plates.length);
+  const plateCY = new Float32Array(plates.length);
+  let outlineMax = 0;
+  for (let k = 0; k < plates.length; k += 1) {
+    const plate = plates[k];
+    plateCX[k] = plate.x + plate.w / 2;
+    plateCY[k] = plate.y + plate.h / 2;
+    outlineMax += plate.outline;
+    const n = plate.vx.length;
+    const open = Math.max(plate.first, plate.fillStart - B.span * 0.4);
+    const close = Math.max(open + 0.002, plate.fillEnd);
+    for (let m = 0; m < perPlate; m += 1) {
+      const i = k * perPlate + m;
+      const h1 = hash(i, 101);
+      const h2 = hash(i, 202);
+      const h3 = hash(i, 303);
+      // Most land on the outline (the seams), the rest on the surface.
+      const v = Math.min(n - 1, Math.floor((h1 < 0.6 ? h1 / 0.6 : h1) * (h1 < 0.6 ? plate.outline : n)));
+      moteX[i] = plate.vx[v];
+      moteY[i] = plate.vy[v];
+      const out = Math.atan2(plate.vy[v] - plateCY[k], plate.vx[v] - plateCX[k]);
+      moteA[i] = out + (h2 - 0.5) * 1.4;
+      moteR[i] = B.reach[0] + (B.reach[1] - B.reach[0]) * h3;
+      moteT1[i] = open + (close - open) * hash(i, 404);
+      moteT0[i] = moteT1[i] - B.span * (0.7 + 0.6 * h2);
+      moteTone[i] = h3 < 0.2 ? 1 : 0;
+    }
+  }
+  // Each streak a curve of four points along its spiral.
+  const motes = [new Float32Array(moteTotal * 8), new Float32Array(moteTotal * 8)];
+  const moteCount = new Int32Array(2);
+  const heads = new Float32Array(maxEdges * 2 + 16);
+  // Lock lines: 0 the fresh flash and the shock outline, 1 the afterglow.
+  const locks = [new Float32Array(outlineMax * 8 + 16), new Float32Array(outlineMax * 8 + 16)];
+  const lockCount = new Int32Array(2);
   // The reactor's rim: its outline a little outside the crystal's own frame
   // (scaled about the outline's centre), so the ring reads over the frame.
   const reactor = input.reactorGlow?.length ? Float32Array.from(input.reactorGlow.flat()) : null;
@@ -1087,6 +1157,124 @@ export function* prepareFarFromWireframe(
     return hit;
   };
 
+  // A plate's outline into a lock bucket, grown `k` about its centre.
+  const pushLock = (bucket: number, k: number, grow: number) => {
+    const plate = plates[k];
+    const buffer = locks[bucket];
+    let at = lockCount[bucket];
+    const cx = plateCX[k];
+    const cy = plateCY[k];
+    const g = 1 + grow;
+    for (let L = 0; L < plate.loopStart.length; L += 1) {
+      const start = plate.loopStart[L];
+      const size = plate.loopCount[L];
+      for (let i = 0; i < size; i += 1) {
+        const a = start + i;
+        const b = start + ((i + 1) % size);
+        buffer[at] = cx + (plate.vx[a] - cx) * g;
+        buffer[at + 1] = cy + (plate.vy[a] - cy) * g;
+        buffer[at + 2] = cx + (plate.vx[b] - cx) * g;
+        buffer[at + 3] = cy + (plate.vy[b] - cy) * g;
+        at += 4;
+        if (at + 4 > buffer.length) {
+          lockCount[bucket] = at;
+          return;
+        }
+      }
+    }
+    lockCount[bucket] = at;
+  };
+  // The debris drawn in to the plates forming at q: each a streak closing
+  // on its point of the plate along a tightening spiral (its tail where it
+  // was a moment ago, so the flow reads as a vortex).
+  const spiralX = (i: number, u: number) => {
+    const left = 1 - u * u * (1.6 - 0.6 * u);
+    return moteX[i] + Math.cos(moteA[i] + B.swirl * left * (i % 2 ? 1 : -1)) * moteR[i] * left;
+  };
+  const spiralY = (i: number, u: number) => {
+    const left = 1 - u * u * (1.6 - 0.6 * u);
+    return moteY[i] + Math.sin(moteA[i] + B.swirl * left * (i % 2 ? 1 : -1)) * moteR[i] * left;
+  };
+  const gatherMotes = (q: number) => {
+    moteCount[0] = 0;
+    moteCount[1] = 0;
+    for (let i = 0; i < moteTotal; i += 1) {
+      const t0 = moteT0[i];
+      const t1 = moteT1[i];
+      if (q <= t0 || q >= t1) continue;
+      // Drawn in: slow at first, fastest as it strikes.
+      const u = (q - t0) / (t1 - t0);
+      const tail = u > B.tail ? u - B.tail : 0;
+      const tone = moteTone[i];
+      const at = moteCount[tone];
+      const buffer = motes[tone];
+      for (let k = 0; k < 4; k += 1) {
+        const w = tail + ((u - tail) * k) / 3;
+        buffer[at + k * 2] = spiralX(i, w);
+        buffer[at + k * 2 + 1] = spiralY(i, w);
+      }
+      moteCount[tone] = at + 8;
+    }
+  };
+  const flushMotes = (context: CanvasRenderingContext2D, px: number) => {
+    for (let tone = 0; tone < 2; tone += 1) {
+      const count = moteCount[tone];
+      if (!count) continue;
+      const buffer = motes[tone];
+      context.beginPath();
+      for (let i = 0; i < count; i += 8) {
+        context.moveTo(buffer[i], buffer[i + 1]);
+        context.lineTo(buffer[i + 2], buffer[i + 3]);
+        context.lineTo(buffer[i + 4], buffer[i + 5]);
+        context.lineTo(buffer[i + 6], buffer[i + 7]);
+      }
+      context.globalAlpha = tone ? 0.75 : 0.8;
+      context.strokeStyle = tone ? GOLD : ICE;
+      context.lineWidth = (tone ? B.size[1] : B.size[0]) * px;
+      context.stroke();
+    }
+  };
+  // The locks at q: a plate's at its last facet's fill, a group's at its
+  // scan's end; calm keeps the afterglow alone.
+  const gatherLocks = (q: number, calm: boolean) => {
+    lockCount[0] = 0;
+    lockCount[1] = 0;
+    for (let k = 0; k < plates.length; k += 1) {
+      const plate = plates[k];
+      const a = (q - plate.fillEnd) / B.lock;
+      if (a < 0 || a >= 1) continue;
+      if (a < 0.4) pushLock(0, k, 0);
+      else pushLock(1, k, 0);
+      if (!calm && a < B.shock / B.lock) pushLock(0, k, (B.grow * a * B.lock) / B.shock);
+    }
+    for (let g = 0; g < groups.length; g += 1) {
+      const group = groups[g];
+      const a = (q - group.to) / B.lock;
+      if (a < 0 || a >= 1) continue;
+      for (let m = 0; m < group.plates.length; m += 1) {
+        pushLock(a < 0.35 ? 0 : 1, group.plates[m], 0);
+        if (!calm && a < B.shock / B.lock)
+          pushLock(0, group.plates[m], (B.grow * 0.6 * a * B.lock) / B.shock);
+      }
+    }
+  };
+  const flushLocks = (context: CanvasRenderingContext2D, px: number) => {
+    for (let bucket = 0; bucket < 2; bucket += 1) {
+      const count = lockCount[bucket];
+      if (!count) continue;
+      const buffer = locks[bucket];
+      context.beginPath();
+      for (let i = 0; i < count; i += 4) {
+        context.moveTo(buffer[i], buffer[i + 1]);
+        context.lineTo(buffer[i + 2], buffer[i + 3]);
+      }
+      context.globalAlpha = bucket ? 0.55 : 0.9;
+      context.strokeStyle = bucket ? GOLD : WHITE;
+      context.lineWidth = (bucket ? 1.4 : 2.2) * px;
+      context.stroke();
+    }
+  };
+
   const draw = (
     context: CanvasRenderingContext2D,
     q: number,
@@ -1097,6 +1285,7 @@ export function* prepareFarFromWireframe(
     const px = ratio / Math.max(1e-6, vs);
     reset();
     let nodeCount = 0;
+    let headCount = 0;
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = 1;
     // The art: finished plates whole; plates whose group is being scanned,
@@ -1189,6 +1378,8 @@ export function* prepareFarFromWireframe(
           if (outline && !calm) {
             nodes[nodeCount++] = bx;
             nodes[nodeCount++] = by;
+            heads[headCount++] = bx;
+            heads[headCount++] = by;
           }
           continue;
         }
@@ -1233,6 +1424,12 @@ export function* prepareFarFromWireframe(
     context.lineCap = "round";
     context.lineJoin = "round";
     flushSegs(context, px, null);
+    gatherLocks(q, calm);
+    flushLocks(context, px);
+    if (!calm) {
+      gatherMotes(q);
+      flushMotes(context, px);
+    }
     // The reactor's rim: a wire ring traced with the crystal, held until its
     // pixel squares fill it, then gone with them.
     if (reactor && q >= RIM.from && q < RIM.gone) {
@@ -1271,6 +1468,16 @@ export function* prepareFarFromWireframe(
         context.rect(nodes[i] - size / 2, nodes[i + 1] - size / 2, size, size);
       context.globalAlpha = 0.95;
       context.fillStyle = WHITE;
+      context.fill();
+    }
+    // The pens' heads: a scan head's light round each.
+    if (headCount) {
+      const size = FAR_FROM_WIRE_STYLE.head * px;
+      context.beginPath();
+      for (let i = 0; i < headCount; i += 2)
+        context.rect(heads[i] - size / 2, heads[i + 1] - size / 2, size, size);
+      context.globalAlpha = 0.38;
+      context.fillStyle = ICE;
       context.fill();
     }
     // The scans: a line of gold light across each group being resolved.
