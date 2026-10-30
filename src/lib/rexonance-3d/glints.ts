@@ -111,7 +111,7 @@ varying float vLight;
 void main() {
   float size = rxParams.x;
   float phase = rxParams.z;
-  float speed = 1.1 + fract( phase * 7.31 ) * 1.3;
+  float speed = 0.55 + fract( phase * 7.31 ) * 0.7;
   float wave = 0.5 + 0.5 * sin( uTime * speed + phase * 6.2832 );
   float twinkle = mix( 0.78, 0.35 + 0.9 * wave * wave, uMotion );
   // A jewel turned away from the camera does not flash.
@@ -119,9 +119,9 @@ void main() {
   twinkle *= smoothstep( -0.05, 0.5, facing );
   vec4 mv = modelViewMatrix * vec4( position, 1.0 );
   mv.xyz += normalize( -mv.xyz ) * size * 1.2;
-  float angle = phase * 1.2 + uMotion * 0.18 * sin( uTime * 0.37 + phase * 9.0 );
+  float angle = phase * 1.2 + uMotion * 0.12 * sin( uTime * 0.25 + phase * 9.0 );
   mat2 turn = mat2( cos( angle ), sin( angle ), -sin( angle ), cos( angle ) );
-  mv.xy += turn * rxCorner * size * ( 1.5 + 0.5 * twinkle );
+  mv.xy += turn * rxCorner * size * ( 0.8 + 0.25 * twinkle );
   gl_Position = projectionMatrix * mv;
   vCorner = rxCorner;
   vHue = rxParams.y;
@@ -145,7 +145,7 @@ void main() {
   float core = exp( -r * r * 90.0 );
   float halo = exp( -r * r * 14.0 ) * 0.1;
   vec3 tint = mix( vec3( 0.55, 0.8, 1.0 ), vec3( 1.0, 0.48, 0.86 ), vHue );
-  vec3 color = tint * ( arms * 0.7 + diag * 0.45 + halo ) + vec3( 1.0 ) * core * 0.75;
+  vec3 color = tint * ( arms * 0.38 + diag * 0.24 + halo * 0.5 ) + vec3( 1.0 ) * core * 0.45;
   float fade = 1.0 - smoothstep( 0.75, 1.0, r );
   gl_FragColor = vec4( color * vLight * uStrength * fade, 1.0 );
 }`,

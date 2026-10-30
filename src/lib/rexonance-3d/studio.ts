@@ -3,10 +3,12 @@ import { HorizontalBlurShader } from "three/addons/shaders/HorizontalBlurShader.
 import { VerticalBlurShader } from "three/addons/shaders/VerticalBlurShader.js";
 
 /** The photo studio the suit is lit in, baked once with PMREM: a black room, a large warm
- * key box above the front left, a cooler fill, an overhead strip, two tall strip boxes
- * behind each shoulder (the long highlights that run down black lacquer), a blue rim panel
- * behind the left and a pink one behind the right, and a dim floor bounce so gold
- * undersides are never dead. The figure faces +Z. */
+ * key box above the front left and a cooler fill (broad reflections on gold), hard white
+ * strips (overhead, behind each shoulder, and one down the front left) that draw the
+ * sheet's crisp lines on black lacquer, a blue rim panel behind the left and a pink one
+ * behind the right, and a dim floor bounce so gold undersides are never dead. The figure
+ * faces +Z. Reflections are capped in the materials, so these can be bright without any
+ * of them blooming. */
 export function createStudioEnvironment(renderer: THREE.WebGLRenderer) {
   const scene = new THREE.Scene();
   const room = new THREE.Mesh(
@@ -19,8 +21,8 @@ void main() { vDir = normalize( position ); gl_Position = projectionMatrix * mod
       fragmentShader: /* glsl */ `varying vec3 vDir;
 void main() {
   float up = vDir.y;
-  vec3 c = mix( vec3( 0.012, 0.013, 0.02 ), vec3( 0.03, 0.03, 0.042 ), smoothstep( -0.1, 0.8, up ) );
-  c = mix( c, vec3( 0.016, 0.012, 0.012 ), smoothstep( -0.05, -0.6, up ) );
+  vec3 c = mix( vec3( 0.006, 0.0065, 0.01 ), vec3( 0.016, 0.016, 0.024 ), smoothstep( -0.1, 0.8, up ) );
+  c = mix( c, vec3( 0.009, 0.007, 0.007 ), smoothstep( -0.05, -0.6, up ) );
   gl_FragColor = vec4( c, 1.0 );
 }`,
     }),
@@ -56,29 +58,19 @@ void main() {
     mesh.lookAt(0, 1, 0);
     scene.add(mesh);
   };
-  panel(0xfff3e6, 5.5, [-7, 9, 9], [8, 5], true); // key, above front left
-  panel(0xe8f0ff, 2.4, [9, 4, 8], [5, 7], true); // fill, front right
-  panel(0xffffff, 5, [0, 14, 1], [14, 1.6]); // overhead strip
-  panel(0xf4f6ff, 6, [-8, 5, -3], [1.1, 12]); // strip behind the left shoulder
-  panel(0xf4f6ff, 6, [8, 5, -3], [1.1, 12]); // strip behind the right shoulder
-  panel(0x4a7dff, 4.2, [-9, 3, -9], [7, 9], true); // blue rim, behind left
-  panel(0xff4fb4, 2.8, [9, 3, -9], [7, 9], true); // pink rim, behind right
-  panel(0x3b2a26, 1, [0, -12, 0], [26, 26]); // floor bounce
-  // Small hard sources for the glints on gold and jewels.
-  for (const [x, y, z, k] of [
-    [3, 11, 10, 22],
-    [-12, 2, 6, 14],
-    [6, -2, 12, 9],
-  ] as const) {
-    const bulb = new THREE.Mesh(
-      new THREE.SphereGeometry(0.45, 12, 8),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffffff).multiplyScalar(k) }),
-    );
-    bulb.position.set(x, y, z);
-    scene.add(bulb);
-  }
+  // Soft boxes for the broad gold reflections, hard strips for the crisp white lines that
+  // run down black lacquer in the sheet. No point bulbs: they only flared on gold.
+  panel(0xfff3e6, 10, [-7, 9, 9], [8, 5], true); // key, above front left
+  panel(0xe8f0ff, 3.5, [9, 4, 8], [5, 7], true); // fill, front right
+  panel(0xffffff, 22, [0, 13, 1.5], [12, 0.9]); // overhead strip
+  panel(0xf6f8ff, 22, [-7.5, 5, -1.5], [0.7, 12]); // strip behind the left shoulder
+  panel(0xf6f8ff, 22, [7.5, 5, -1.5], [0.7, 12]); // strip behind the right shoulder
+  panel(0xffffff, 18, [-6.5, 4, 7], [0.6, 10]); // a front strip, down the left
+  panel(0x4a7dff, 3.6, [-9, 3, -9], [7, 9], true); // blue rim, behind left
+  panel(0xff6fd0, 1.6, [9, 3, -9], [7, 9], true); // pink rim, behind right
+  panel(0x3b2a26, 0.6, [0, -12, 0], [26, 26]); // floor bounce
   const generator = new THREE.PMREMGenerator(renderer);
-  const target = generator.fromScene(scene, 0.02);
+  const target = generator.fromScene(scene, 0.008);
   generator.dispose();
   scene.traverse((node) => {
     if (node instanceof THREE.Mesh) {
@@ -113,9 +105,9 @@ void main() {
   vec3 low = vec3( 0.0012, 0.0012, 0.0022 );
   vec3 c = mix( low, top, smoothstep( 0.05, 0.95, uv.y ) );
   float haze = exp( -dot( d * vec2( 1.3, 0.75 ), d * vec2( 1.3, 0.75 ) ) * 3.2 );
-  c += vec3( 0.014, 0.010, 0.036 ) * haze;
+  c += vec3( 0.008, 0.011, 0.03 ) * haze;
   c += vec3( 0.006, 0.010, 0.026 ) * exp( -dot( d - vec2( -0.35, 0.25 ), d - vec2( -0.35, 0.25 ) ) * 5.0 );
-  c += vec3( 0.014, 0.004, 0.014 ) * exp( -dot( d - vec2( 0.38, 0.18 ), d - vec2( 0.38, 0.18 ) ) * 6.0 );
+  c += vec3( 0.009, 0.003, 0.009 ) * exp( -dot( d - vec2( 0.38, 0.18 ), d - vec2( 0.38, 0.18 ) ) * 6.0 );
   // Dither: the 8-bit output would band this dark ramp.
   c += ( hash( gl_FragCoord.xy ) - 0.5 ) * 0.0016;
   gl_FragColor = vec4( max( c, 0.0 ), 1.0 );
@@ -283,10 +275,10 @@ export function createLightRig(target: THREE.Object3D) {
     directional.target = target;
     rig.add(directional);
   };
-  light(0xfff1e2, 1.8, -3, 4, 1); // key
-  light(0xdfe8ff, 0.5, 4, 1, 1); // fill
-  light(0x5b86ff, 1.35, -7, 2.5, -14); // blue rim, behind the left edge
-  light(0xff63bd, 0.9, 7, 2.5, -14); // pink rim, behind the right edge
-  light(0xffffff, 0.7, 0, 9, -6); // top
+  light(0xfff1e2, 1.0, -3, 4, 1); // key
+  light(0xdfe8ff, 0.35, 4, 1, 1); // fill
+  light(0x6f98ff, 1.3, -7, 2.5, -14); // cool rim, behind the left edge
+  light(0xc98cff, 0.4, 7, 2.5, -14); // soft lavender-pink rim, behind the right edge (pink on gold read red)
+  light(0xffffff, 0.5, 0, 9, -6); // top
   return rig;
 }

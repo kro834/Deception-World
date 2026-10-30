@@ -107,7 +107,7 @@ export function createRexonanceScene(
     powerPreference: "high-performance",
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 0.95;
   renderer.setClearColor(0x020206, 1);
   host.appendChild(canvas);
@@ -161,7 +161,9 @@ export function createRexonanceScene(
   hdr.texture.name = "Rexonance.hdr";
   const composer = new EffectComposer(renderer, hdr);
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.35, 1.7);
+  // Only true emitters bloom (the cores, the visor, jewel centres, sparkles): gold and lacquer
+  // highlights stay under the threshold.
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.38, 0.25, 3);
   bloom.enabled = quality.bloom;
   const output = new OutputPass();
   const fxaa = samples === 0 ? new FXAAPass() : null;
