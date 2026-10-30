@@ -1,0 +1,487 @@
+/* REXONANCE 3D (/rexonance-3d): the suit on a dark stage, full height, with the view
+   presets, the turntable and the owner's sheets beside it. */
+.rx3d {
+  --rx3d-ink: #030308;
+  --rx3d-text: #e7e5f2;
+  --rx3d-muted: #a3a0b9;
+  --rx3d-line: #b9a8ff24;
+  --rx3d-gold: #dcb57b;
+  --rx3d-edge: max(40px, env(safe-area-inset-left), env(safe-area-inset-right));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100svh;
+  height: 100dvh;
+  min-height: 360px;
+  margin: 0;
+  overflow: hidden;
+  background: var(--rx3d-ink);
+  color: var(--rx3d-text);
+  font-family: var(--font-sans, "Noto Sans JP", sans-serif);
+  isolation: isolate;
+}
+.rx3d-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: calc(80px + env(safe-area-inset-top, 0px));
+  padding: calc(12px + env(safe-area-inset-top, 0px)) var(--rx3d-edge) 12px;
+  border-bottom: 1px solid var(--rx3d-line);
+  background: #05050c;
+  z-index: 3;
+}
+.rx3d-header h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+}
+.rx3d-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.rx3d-exit {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 44px;
+  min-height: 44px;
+  color: #c4c1d6;
+  font-size: 12px;
+  text-decoration: none;
+}
+.rx3d-exit svg {
+  width: 20px;
+  height: 20px;
+}
+.rx3d-header .side-panel-trigger {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border: 1px solid #b7aee033;
+  border-radius: 50%;
+  background: #13122a;
+  box-shadow: none;
+}
+.rx3d-stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: #020206;
+}
+.rx3d-stage:focus {
+  outline: none;
+}
+.rx3d-record {
+  position: absolute;
+  z-index: 4;
+  left: var(--rx3d-edge);
+  top: 22px;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  pointer-events: none;
+  text-shadow: 0 2px 18px #000;
+}
+.rx3d-record h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: #e3e0f0;
+}
+.rx3d-record p {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--rx3d-muted);
+}
+.rx3d-record-link {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-top: -6px;
+  color: var(--rx3d-gold);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+.rx3d-record-link:hover {
+  color: #f3d8ad;
+}
+.rx3d a:focus-visible,
+.rx3d button:focus-visible {
+  outline: 2px solid #cfc4ff;
+  outline-offset: 3px;
+}
+
+/* The viewer: the 3D area, and the sheet panel beside it when it is open. */
+.rx3d-viewer {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #020206;
+}
+.rx3d-viewer[data-reference-open="true"] {
+  grid-template-columns: minmax(0, 1fr) min(36vw, 440px);
+}
+.rx3d-viewer__area {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.rx3d-viewer__surface {
+  position: absolute;
+  inset: 0;
+}
+.rx3d-viewer__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  outline: none;
+  cursor: grab;
+}
+.rx3d-viewer__canvas:active {
+  cursor: grabbing;
+}
+.rx3d-viewer__canvas:focus-visible {
+  outline: 1px solid #c9bdff;
+  outline-offset: -6px;
+}
+.rx3d-viewer__fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at 50% 48%, #15123299, transparent 62%), #020206;
+  transition: opacity 0.6s ease;
+}
+.rx3d-viewer__fallback > img {
+  width: 100%;
+  height: 100%;
+  padding: 72px 16px 120px;
+  box-sizing: border-box;
+  object-fit: contain;
+  opacity: 0.55;
+}
+.rx3d-viewer.is-ready .rx3d-viewer__fallback {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s 0.6s;
+}
+.rx3d-viewer__loading {
+  position: absolute;
+  inset: auto 20px 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #d6d3e6;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 0 2px 8px #000;
+}
+.rx3d-viewer__loading b {
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--rx3d-gold);
+}
+.rx3d-viewer__loading button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #8f86c2;
+  border-radius: 999px;
+  background: #100e22e6;
+  color: #e4defc;
+  font: inherit;
+  cursor: pointer;
+}
+.rx3d-viewer__toolbar {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 24px);
+}
+.rx3d-viewer__views,
+.rx3d-viewer__actions,
+.rx3d-viewer__sheets {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #c2b8ff26;
+  border-radius: 999px;
+  background: #0a0918e0;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 6px 20px #0006;
+}
+.rx3d-viewer__actions {
+  gap: 4px;
+}
+.rx3d button {
+  font: inherit;
+}
+.rx3d-viewer__toolbar button,
+.rx3d-viewer__sheets button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: #c9c6dc;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.rx3d-viewer__toolbar button:hover,
+.rx3d-viewer__sheets button:hover {
+  background: #1d1a3a;
+  color: #f4f1ff;
+}
+.rx3d-viewer__toolbar button[aria-pressed="true"],
+.rx3d-viewer__toolbar button[aria-expanded="true"],
+.rx3d-viewer__sheets button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #2b2a6e, #4a2459);
+  border-color: #dcb57b70;
+  color: #fff8ec;
+  box-shadow: inset 0 -1px #e9c58f;
+}
+.rx3d-viewer__toolbar button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.rx3d-viewer__toolbar svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* The owner's sheets: beside the model on wide screens, under it on narrow ones. */
+.rx3d-viewer__reference {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px 18px 18px;
+  border-left: 1px solid var(--rx3d-line);
+  background: #07071099;
+}
+.rx3d-viewer__reference[hidden] {
+  display: none;
+}
+.rx3d-viewer__reference header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rx3d-viewer__reference h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+.rx3d-viewer__reference header button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #c4bbec44;
+  border-radius: 50%;
+  background: transparent;
+  color: #ece8fb;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.rx3d-viewer__sheets {
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.rx3d-viewer__sheets button {
+  padding-inline: 12px;
+  font-size: 12px;
+}
+.rx3d-viewer__reference figure {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+}
+.rx3d-viewer__reference img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #f3f2f7;
+}
+.rx3d-viewer__reference figcaption {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--rx3d-muted);
+  text-align: center;
+}
+.rx3d-viewer__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+html[data-rexonance-3d] {
+  overscroll-behavior-x: none;
+  background: #030308;
+}
+html[data-rexonance-3d] body {
+  overscroll-behavior-x: none;
+  background: #030308;
+}
+html[data-rexonance-3d] .zeus-button {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .rx3d-viewer[data-reference-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 44%);
+  }
+  .rx3d-viewer__reference {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 10px 14px 14px;
+    border-left: 0;
+    border-top: 1px solid var(--rx3d-line);
+  }
+}
+@media (max-width: 700px) {
+  .rx3d-header {
+    min-height: calc(68px + env(safe-area-inset-top, 0px));
+    gap: 9px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    padding-bottom: 10px;
+  }
+  .rx3d-header h1 {
+    font-size: 21px;
+    letter-spacing: 0.06em;
+  }
+  .rx3d-exit span {
+    display: none;
+  }
+  .rx3d-header-actions {
+    gap: 8px;
+  }
+  .rx3d-record {
+    top: 16px;
+  }
+  .rx3d-record h2 {
+    font-size: 13px;
+  }
+}
+@media (max-width: 560px) {
+  .rx3d {
+    --rx3d-edge: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+  .rx3d-viewer__toolbar {
+    flex-direction: column;
+    gap: 8px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: calc(100% - 24px);
+  }
+  .rx3d-viewer__views {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .rx3d-viewer__views button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 4px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .rx3d-viewer__actions button span {
+    display: none;
+  }
+  .rx3d-viewer__loading {
+    bottom: 140px;
+    font-size: 12px;
+  }
+  .rx3d-viewer__fallback > img {
+    padding: 64px 12px 150px;
+  }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .rx3d-header {
+    min-height: calc(56px + env(safe-area-inset-top, 0px));
+    padding-top: calc(6px + env(safe-area-inset-top, 0px));
+    padding-bottom: 6px;
+  }
+  .rx3d-viewer__toolbar {
+    bottom: 10px;
+  }
+  .rx3d-viewer__actions button span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rx3d-viewer__fallback,
+  .rx3d-viewer.is-ready .rx3d-viewer__fallback,
+  .rx3d-viewer__toolbar button,
+  .rx3d-viewer__sheets button {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .rx3d-viewer__toolbar button,
+  .rx3d-viewer__sheets button,
+  .rx3d-viewer__reference header button {
+    border: 1px solid ButtonText;
+  }
+  .rx3d-viewer__toolbar button[aria-pressed="true"],
+  .rx3d-viewer__toolbar button[aria-expanded="true"],
+  .rx3d-viewer__sheets button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+}

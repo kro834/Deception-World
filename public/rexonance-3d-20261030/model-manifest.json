@@ -1,0 +1,30 @@
+{
+  "model": "rexonance.glb",
+  "assetBytes": 827428,
+  "assetSha256": "75b2c33d3c5eff3836a7c7a73c467f05ce9347886df584f89cb8fe3f6fd9f95a",
+  "units": "metres; glTF +Y up, the suit faces +Z, its left hand is +X",
+  "built": "2026-10-30T00:16:14Z",
+  "blender": "5.2.3 LTS",
+  "extensions": [
+    "EXT_meshopt_compression",
+    "KHR_mesh_quantization"
+  ],
+  "triangles": 150000,
+  "materials": [
+    "RX_Suit"
+  ],
+  "tailPivots": 0,
+  "nodes": [
+    {
+      "name": "RX_Body_Suit",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 150000,
+      "materials": [
+        "RX_Suit"
+      ],
+      "tint": false
+    }
+  ],
+  "glints": []
+}
