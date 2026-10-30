@@ -14,48 +14,36 @@
    Dream Chapter and the gallery keep their own editions (the FX families
    below exclude them); the title (opening) is untouched.
 
-   Animatable light (registered, so the motion layer can tween them on a
-   single element without restyling the page — never animate them on
-   <html> or a page root):
+   Light tokens (unregistered, see below; tween one only on the element
+   that shows it, never on <html> or a page root):
    - --fx-angle  <angle>       the spectrum's direction (default 118deg)
    - --fx-shift  <percentage>  the sheen's position along a surface (0%)
-   - --fx-glow   <number>      bloom strength, 0–1 (device tier sets it)
+   Tier numbers (plain, inherited from <html>):
+   - --fx-glow   0–1  glow of small controls and the menu
+   - --fx-bloom  0–1  glow of large surfaces, the bars, the title filters
    Device tiers (rendering-profile.js):
-   - economy and iOS 18 renderers: --fx-glow 0 and no scan texture;
+   - economy and iOS 18 renderers: both 0 and no scan texture;
+   - touch screens: --fx-bloom 0 (cheap first paint while scrolling);
    - capable Android: --fx-glow 0.6 (its backdrop-filter is already off
      in styles-android-performance.css; nothing here adds one).
    ================================================================ */
 
-@property --fx-angle {
-  syntax: "<angle>";
-  inherits: true;
-  initial-value: 118deg;
-}
+/* No @property registration: in WebKit any registered custom property
+   slowed every scroll-driven restyle on the files (p95 31 -> 37 ms on an
+   iPhone 13 profile with nothing else changed). --fx-angle / --fx-shift
+   are plain tokens read inline. A registration is global, so a tween of
+   them needs that cost measured on the files first. */
 
-@property --fx-shift {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 0%;
-}
-
-@property --fx-glow {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
-
-/* Bloom: the glow on large surfaces (plates, panels, cards, the poster,
-   the title). Separate from --fx-glow (small controls, bars, the menu),
-   because a big soft shadow or filter is what WebKit pays for when a
-   section is first painted during a scroll. */
-@property --fx-bloom {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
+/* --fx-glow (small controls, the menu) and --fx-bloom (large surfaces,
+   the bars, the current chapter) are plain inherited numbers set by the
+   device tier on <html> below; 1 when unset. */
 
 /* ---------- 0. Tokens ---------- */
 html[data-family] {
+  --fx-angle: 118deg;
+  --fx-shift: 0%;
+  --fx-glow: 1;
+  --fx-bloom: 1;
   --fx-a: var(--sh-l1, #7ae8ff);
   --fx-b: #9d86ff;
   --fx-c: var(--sh-l2, #ff5fc8);
