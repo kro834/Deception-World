@@ -1,5 +1,6 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { startTransition } from "react";
+import { animateSelectionArrival } from "@/lib/selection-arrival.js";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { assetsWarmed, MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -504,5 +505,3 @@ const EPISODES: EpisodeRecord[] = [
       },
       {
         label: "仮面ライダールーラー・ポラリスモード",
-        displayLines: ["仮面ライダールーラー", "ポラリスモード"],
-        src: "/rider-ruler-polaris.webp",

@@ -92,3 +92,59 @@ test("a temporarily empty group can be reached without inventing a focus target"
   assert.equal(state.target.getBoundingClientRect().top, 176);
   assert.equal(state.focusCalls.length, 0);
 });
+
+test("every atlas layout reserves named areas for the common groups on every page", () => {
+  const css = readFileSync(new URL("../src/styles-command-chrome.css", import.meta.url), "utf8");
+  const commonAreas = ["find", "sec", "spe", "sto", "rid", "rik", "rel", "unm", "inf", "sys"];
+  const layouts = [...css.matchAll(/grid-template-areas:\s*([^;]+);/g)];
+  assert.ok(layouts.length >= 3, "phone, tablet and desktop layouts are covered");
+  for (const [, layout] of layouts) {
+    const areas = new Set(layout.replaceAll('"', "").split(/\s+/));
+    for (const area of commonAreas) {
+      assert.ok(
+        areas.has(area),
+        `${area} needs an explicit track in ${layout}; otherwise CSS Grid creates implicit tracks`,
+      );
+    }
+  }
+  assert.doesNotMatch(css, /:not\(\[data-file-menu="true"\]\)[^{]*\{[^}]*grid-template-areas:/);
+});
+
+test("the atlas keeps its full-width shell without enabling a panel-wide pointer effect", () => {
+  const shell = readFileSync(new URL("../src/styles-stage-shell.css", import.meta.url), "utf8");
+  const layout = shell.match(
+    /#site-side-panel\.side-panel\[data-command-atlas\]\s*\{([^}]+)\}/,
+  )?.[1];
+  assert.ok(layout, "geometry must be attached to the menu marker, not an optional effect");
+  for (const declaration of [
+    /left: 0;/,
+    /right: 0;/,
+    /width: auto;/,
+    /max-width: none;/,
+    /display: grid;/,
+  ]) {
+    assert.match(layout, declaration);
+  }
+  let panel;
+  function findPanel(node) {
+    if (
+      ts.isJsxOpeningElement(node) &&
+      node.tagName.getText(tree) === "aside" &&
+      node.attributes.properties.some(
+        (attribute) =>
+          attribute.name?.getText(tree) === "id" &&
+          attribute.initializer?.getText(tree) === '"site-side-panel"',
+      )
+    )
+      panel = node;
+    ts.forEachChild(node, findPanel);
+  }
+  findPanel(tree);
+  assert.ok(panel);
+  const attributes = panel.attributes.properties.map((attribute) => attribute.name?.getText(tree));
+  assert.ok(attributes.includes("data-command-atlas"));
+  assert.ok(
+    !attributes.includes("data-liquid-pointer"),
+    "the full panel does not own a pointer effect",
+  );
+});

@@ -1,3 +1,12 @@
+import {
+  advanceCompactMenuSpring,
+  getCompactMenuPose,
+  paintCompactMenuShell,
+  captureCompactMenuStyles,
+  restoreCompactMenuStyles,
+} from "./compact-menu-motion.js";
+export { advanceCompactMenuSpring as advanceIpadMenuSpring } from "./compact-menu-motion.js";
+
 export const IPAD_MENU_STORAGE_KEY = "dw-ipad-compact-menu-v1";
 const CHANGE_EVENT = "dw-ipad-menu-change";
 export const IPAD_MENU_MOTION_SETTLE_MS = 900;
@@ -125,10 +134,15 @@ export function watchIpadMenuMode(win = window, doc = document) {
   let reconcileRequested = true;
   let motionTimer = 0;
   let motionGeneration = 0;
+  let motionFrame = 0;
+  let flight = null;
+  let headerScroll = 0;
   const reducedMotion =
     typeof win.matchMedia === "function"
       ? win.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
+  const forcedColors =
+    typeof win.matchMedia === "function" ? win.matchMedia("(forced-colors: active)") : null;
   let lastOverflow = root.style.overflow;
   let lastBodyPosition = doc.body.style.position;
   const isIpad = () => root.getAttribute("data-ipad-viewport") === "contained";
@@ -160,19 +174,76 @@ export function watchIpadMenuMode(win = window, doc = document) {
   };
   const clearMotion = () => {
     motionGeneration++;
+    if (motionFrame) win.cancelAnimationFrame(motionFrame);
+    motionFrame = 0;
+    if (flight) {
+      restoreCompactMenuStyles(flight.element, flight.originalStyles);
+    }
+    flight = null;
     if (motionTimer) win.clearTimeout(motionTimer);
     motionTimer = 0;
     root.removeAttribute("data-ipad-menu-motion");
     root.style.removeProperty("--ipad-menu-origin-x");
     root.style.removeProperty("--ipad-menu-origin-y");
   };
-  const startMotion = (direction, geometry) => {
+  const paintFlight = () => {
+    if (!flight) return;
+    paintCompactMenuShell(flight.element, flight.state, flight.host);
+  };
+  const tickFlight = (timestamp) => {
+    motionFrame = 0;
+    if (!flight || disposed) return;
+    // Timestamp-less test hosts still take a normal frame. Visibility and
+    // layout changes cancel the flight, so there is no hidden-tab catch-up.
+    const now = Number.isFinite(timestamp) ? timestamp : flight.lastTime + 1000 / 60;
+    const dt = flight.lastTime ? now - flight.lastTime : 1000 / 60;
+    flight.lastTime = now;
+    flight.state = advanceCompactMenuSpring(flight.state, flight.target, dt);
+    paintFlight();
+    motionFrame = win.requestAnimationFrame(tickFlight);
+  };
+  const startMotion = (direction, geometry, trigger, originRect, targetRect) => {
+    // Keep the in-flight world coordinates and momentum before clearing the
+    // old completion. The real 60px hit target never travels with this layer.
+    const previousFlight = flight;
     clearMotion();
-    if (!geometry || reducedMotion?.matches || doc.hidden || typeof win.setTimeout !== "function")
+    if (
+      !geometry ||
+      reducedMotion?.matches ||
+      forcedColors?.matches ||
+      root.getAttribute("data-world-effects") === "economy" ||
+      doc.hidden ||
+      typeof win.setTimeout !== "function"
+    )
       return;
     setPixels("--ipad-menu-origin-x", geometry.x);
     setPixels("--ipad-menu-origin-y", geometry.y);
-    root.setAttribute("data-ipad-menu-motion", direction);
+    const element = trigger?.querySelector?.(".side-panel-trigger-convergence");
+    if (element && originRect && targetRect) {
+      root.setAttribute("data-ipad-menu-motion", direction);
+      flight = {
+        element,
+        direction,
+        // The child is positioned in its button's padding box, not the
+        // viewport: Safari/route skins can establish a fixed containing block.
+        host: {
+          x: targetRect.left + (trigger.clientLeft || 0),
+          y: targetRect.top + (trigger.clientTop || 0),
+        },
+        originalStyles:
+          previousFlight?.element === element
+            ? previousFlight.originalStyles
+            : captureCompactMenuStyles(element),
+        state:
+          previousFlight?.element === element
+            ? previousFlight.state
+            : { pose: getCompactMenuPose(originRect, direction === "expand"), velocity: {} },
+        target: getCompactMenuPose(targetRect, direction === "converge"),
+        lastTime: previousFlight?.lastTime || 0,
+      };
+      paintFlight();
+      motionFrame = win.requestAnimationFrame(tickFlight);
+    }
     const generation = motionGeneration;
     motionTimer = win.setTimeout(() => {
       if (!disposed && generation === motionGeneration) clearMotion();
@@ -225,14 +296,28 @@ export function watchIpadMenuMode(win = window, doc = document) {
       return;
     }
     if (measureDirty) measure();
-    if (Number.isFinite(win.scrollY)) {
-      setPixels("--ipad-header-scroll", Math.min(exitDistance, Math.max(0, win.scrollY)));
-    }
     const nextScrolled = getIpadMenuScrolled(scrolled, win.scrollY, exitDistance);
     const animate =
-      scrollBoundary && nextScrolled !== scrolled && !reducedMotion?.matches && !doc.hidden;
+      scrollBoundary &&
+      nextScrolled !== scrolled &&
+      !reducedMotion?.matches &&
+      !forcedColors?.matches &&
+      root.getAttribute("data-world-effects") !== "economy" &&
+      !doc.hidden;
     const trigger = animate ? header?.querySelector?.(".side-panel-trigger") : null;
     const oldRect = trigger?.getBoundingClientRect?.();
+    // Capture the last painted header button before publishing this scroll's
+    // header displacement. A large gesture must not invent an off-screen origin.
+    if (Number.isFinite(win.scrollY)) {
+      const nextHeaderScroll = Math.min(exitDistance, Math.max(0, win.scrollY));
+      if (flight?.direction === "expand") {
+        const displacement = headerScroll - nextHeaderScroll;
+        flight.target.y += displacement;
+        flight.host.y += displacement;
+      }
+      headerScroll = nextHeaderScroll;
+      setPixels("--ipad-header-scroll", headerScroll);
+    }
     scrolled = nextScrolled;
     const value = scrolled ? "true" : "false";
     if (root.getAttribute("data-ipad-menu-scrolled") !== value) {
@@ -248,6 +333,9 @@ export function watchIpadMenuMode(win = window, doc = document) {
           width: win.innerWidth,
           height: win.innerHeight,
         }),
+        trigger,
+        oldRect,
+        newRect,
       );
     }
   };
@@ -299,6 +387,8 @@ export function watchIpadMenuMode(win = window, doc = document) {
         if (isIpad()) loadPreference();
         changed = true;
         measureDirty = true;
+      } else if (record.target === root && record.attributeName === "data-world-effects") {
+        changed = true;
       } else if (record.target === root && record.attributeName === "data-viewport-chrome") {
         changed = true;
         measureDirty = true;
@@ -318,7 +408,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
   });
   observer.observe(root, {
     attributes: true,
-    attributeFilter: ["style", "data-ipad-viewport", "data-viewport-chrome"],
+    attributeFilter: ["style", "data-ipad-viewport", "data-viewport-chrome", "data-world-effects"],
   });
   observer.observe(doc.body, { attributes: true, attributeFilter: ["style"] });
   // Lazy routes can commit their header after the pathname effect has already
@@ -345,6 +435,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
   };
   doc.addEventListener?.("visibilitychange", cancelMotion);
   reducedMotion?.addEventListener?.("change", cancelMotion);
+  forcedColors?.addEventListener?.("change", cancelMotion);
   signal();
   return () => {
     disposed = true;
@@ -359,5 +450,6 @@ export function watchIpadMenuMode(win = window, doc = document) {
     win.removeEventListener("resize", scheduleMeasure);
     doc.removeEventListener?.("visibilitychange", cancelMotion);
     reducedMotion?.removeEventListener?.("change", cancelMotion);
+    forcedColors?.removeEventListener?.("change", cancelMotion);
   };
 }

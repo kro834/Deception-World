@@ -21,8 +21,18 @@ test("Cipher is the eighth rider everywhere the rider index is exposed", () => {
   assert.match(nav, /kicker: "RIDER 08"/);
   // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明）
   // The end card's EIGHT RIDERS caption is gone: its roster lists the eight.
-  assert.match(dossier, /<DossierNav items=\{RIDER_NAV\} currentHref=\{`\/riders\/\$\{rider\.id\}`\} \/>/);
-  assert.equal((nav.slice(nav.indexOf("export const RIDER_NAV"), nav.indexOf("export const RELATED_NAV")).match(/href: "\/riders\//g) ?? []).length, 8);
+  assert.match(
+    dossier,
+    /<DossierNav items=\{RIDER_NAV\} currentHref=\{`\/riders\/\$\{rider\.id\}`\} \/>/,
+  );
+  assert.equal(
+    (
+      nav
+        .slice(nav.indexOf("export const RIDER_NAV"), nav.indexOf("export const RELATED_NAV"))
+        .match(/href: "\/riders\//g) ?? []
+    ).length,
+    8,
+  );
 });
 
 test("Lucien and both Cipher forms use the supplied records and assets", () => {
@@ -90,6 +100,6 @@ test("Cipher dossier navigation mounts the enhanced false-trace cut-in", () => {
   // Saga now takes the covered route path; keep ordinary navigation excluded from covers.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\);[\s\S]*?return;/,
   );
 });

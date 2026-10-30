@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useGallerySelectionMotion } from "./gallery-selection-motion";
 import { gallerySelectFocus } from "./gallery-select-focus";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -124,6 +125,9 @@ export function GalleryPage() {
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const restoreEditFocusRef = useRef(false);
   const gridRef = useRef<HTMLDivElement>(null);
+  const selectionFiltersRef = useRef<HTMLElement>(null);
+  const selectionStageRef = useRef<HTMLDivElement>(null);
+  const selectionDirectionRef = useRef(1);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const favoriteFeedbackRef = useRef<HTMLParagraphElement>(null);
   const featureFeedbackRef = useRef<HTMLParagraphElement>(null);
@@ -162,6 +166,15 @@ export function GalleryPage() {
     });
     return order === "newest" ? filtered.reverse() : filtered;
   }, [allArtworks, category, query, favoritesOnly, favorites, titles, order]);
+  useGallerySelectionMotion(
+    gridRef,
+    selectionFiltersRef,
+    selectionStageRef,
+    `${display.preferences.density}:${works.map((work) => work.id).join(",")}`,
+    category,
+    selectedId,
+    selectionDirectionRef,
+  );
   const discoverySummary = {
     query,
     categoryLabel:
@@ -729,6 +742,7 @@ export function GalleryPage() {
       viewerModeRef.current,
     );
     if (next) {
+      selectionDirectionRef.current = step < 0 ? -1 : 1;
       // The artwork's keyed image controls disappear on navigation. Hand their
       // focus to the persistent dialog so the next arrow key still reaches it.
       const dialog = dialogRef.current;
@@ -1055,7 +1069,7 @@ export function GalleryPage() {
               <img
                 src={featured.medium}
                 srcSet={featured.srcSet}
-                sizes="(max-width: 760px) 90vw, 56vw"
+                sizes={`(max-width: 700px) 90vw, ${Math.min(1320, Math.round((680 * featured.width) / featured.height))}px`}
                 alt={featured.alt}
                 width={featured.width}
                 height={featured.height}
@@ -1063,21 +1077,22 @@ export function GalleryPage() {
                 decoding="async"
               />
             </a>
-            {!isCommunityGalleryId(featured.id) && (
-              <Link
-                className="exhibition-room-entry"
-                to="/exhibition"
-                search={{ work: featured.id }}
-              >
-                展示室を大きく開く <span aria-hidden="true">↗</span>
-              </Link>
-            )}
             <figcaption>
               <span>{numberFor(featured)}</span>
               {titles[featured.id] && <span>{titles[featured.id]}</span>}
             </figcaption>
             <details className="gallery-feature-settings">
-              <summary>トップ作品の設定</summary>
+              <summary>作品の表示と設定</summary>
+              {!isCommunityGalleryId(featured.id) && (
+                <Link
+                  className="exhibition-room-entry"
+                  to="/exhibition"
+                  search={{ work: featured.id }}
+                >
+                  展示室を大きく開く <span aria-hidden="true">↗</span>
+                </Link>
+              )}
+
               <a href="#gallery-collection">トップ作品を選ぶ</a>
               {featuredId && (
                 <button type="button" onClick={() => changeFeature(null)}>
@@ -1170,7 +1185,8 @@ export function GalleryPage() {
                 </button>
               )}
             </div>
-            <nav className="gallery-filters" aria-label="展示の分類">
+            <nav className="gallery-filters" aria-label="展示の分類" ref={selectionFiltersRef}>
+              <span className="gallery-selection-marker" aria-hidden="true" />
               {GALLERY_CATEGORIES.map((item) => (
                 <button
                   type="button"
@@ -1785,7 +1801,7 @@ export function GalleryPage() {
                 </p>
               )}
             </header>
-            <div className="gallery-viewer-stage">
+            <div className="gallery-viewer-stage" ref={selectionStageRef}>
               <GalleryViewerImage
                 key={selected.id}
                 work={selected}

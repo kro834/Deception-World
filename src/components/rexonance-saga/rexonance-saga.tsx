@@ -2,6 +2,7 @@ import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useRef, useSta
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import { AssemblyMovie } from "./rexonance-assembly-movie";
+import { ScrollSurgeCanvas, useScrollSurge } from "./rexonance-suit-surge";
 import {
   REXONANCE_ASSEMBLY_PHASES,
   RexonanceAssemblyGuide,
@@ -500,6 +501,8 @@ const FORM_MESH = Array.from({ length: 12 }, (_, index) => (
 const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: RexonanceStage }) {
   const runwayRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
+  // The surge layer over the live scene (Rexonance's own; the engine is shared).
+  useScrollSurge(runwayRef);
   return (
     <>
       <RexonanceAssemblyGuide runwayRef={runwayRef} calls={REXONANCE_ENTRY_CALLS} />
@@ -524,6 +527,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           <i className="rzn-aura" />
           <i className="rzn-crown" />
           <i className="rzn-floor" />
+          <ScrollSurgeCanvas layer="back" />
           <img
             className="rzn-still"
             src={stage === "standard" ? REXONANCE_SUIT_FIGURE : REXONANCE_FORM_FIGURES[stage]}
@@ -554,6 +558,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
             decoding="async"
           />
           <canvas className="rzn-canvas" width={0} height={0} />
+          <ScrollSurgeCanvas layer="front" />
           <div className="rzn-call">
             <p className="rzn-kicker">
               <span>SUIT-UP</span>

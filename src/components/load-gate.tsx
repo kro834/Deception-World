@@ -24,6 +24,7 @@ import {
   type OpeningHandoffSource,
 } from "@/components/cinematic/opening-handoff";
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
+import { createTransitionDecorationClock } from "@/lib/transition-decoration-clock";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
 import {
   prepareRexonanceTransition,
@@ -356,16 +357,24 @@ function finiteRunning(animation: Animation) {
 // file then stays until its hand-over to the page's plate has run out (the
 // gate lets pointer events through by then). Capped, so a stalled page
 // never keeps the cover.
-async function revealRan(duration: number, onStart?: () => void, cap = 1400) {
+async function revealRan(
+  duration: number,
+  onStart?: () => void,
+  cap = 1400,
+  stopped = () => false,
+  pause: (duration: number) => Promise<unknown> = wait,
+) {
   let started = 0;
   for (let frame = 0; frame < 8 && !started; frame += 1) {
     await nextFrame();
+    if (stopped()) return;
     if (document.querySelector(".load-gate.is-revealing")) started = performance.now();
   }
+  if (stopped()) return;
   started ||= performance.now();
   onStart?.();
-  await wait(duration);
-  while (performance.now() - started < cap) {
+  await pause(duration);
+  while (!stopped() && performance.now() - started < cap) {
     // Only the docked file's own hand-over (script animations): the CSS
     // layers are timed to the reveal, and a stage's leftovers (Leddic's
     // motes) are already faded out with it.
@@ -980,6 +989,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     phase: "covering",
   });
   const busy = useRef(false);
+  const pendingIntent = useRef<string | null>(null);
+  const decoration = useRef<ReturnType<typeof createTransitionDecorationClock> | null>(null);
+  const [decorationSkipped, setDecorationSkipped] = useState(false);
+  const [destinationPending, setDestinationPending] = useState(false);
+  const pendingStatusRef = useRef<HTMLElement>(null);
+  const skipFocusRequested = useRef(false);
+  const skipDestinationReady = useRef(false);
+  const skipDestinationHash = useRef<string | undefined>(undefined);
   const transitionId = useRef(0);
   const rexonanceTransition = useRef<number | null>(null);
   // FAR FROM's call in flight (cancelled when the page hides, as
@@ -988,7 +1005,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const metaUnitasTransition = useRef<number | null>(null);
   const illusionculumTransition = useRef<number | null>(null);
   const farFromSkip = useRef<(() => void) | null>(null);
-  const skipFarFrom = useCallback(() => farFromSkip.current?.(), []);
 
   // Keep the suit ready on the public pages, but never compete with the
   // opening's title/video/World handoff. Leaving the opening schedules it
@@ -1063,6 +1079,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // the page has settled after the shutter: the scroll lock keeps its
   // scrollbar gutter, and the Zeus button waits for the page's entrance.
   const markRouteCover = useCallback((state: "covering" | "revealing" | "settling" | null) => {
+    if (decoration.current?.skipped && (state === "covering" || state === "revealing")) return;
     const root = document.documentElement;
     syncRexonanceRouteCover(document.querySelector("main.rxs-page.rxs-rexonance-page"), root);
     window.clearTimeout(arrivalTimer.current);
@@ -1088,6 +1105,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setDocumentLoading = useCallback((loading: boolean) => {
+    if (loading && decoration.current?.skipped) return;
     const root = document.documentElement;
     // Startup/lower-page guards read the literal "true", not just presence.
     if (loading) root.setAttribute("data-loading", "true");
@@ -1095,68 +1113,114 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     syncRexonanceRouteCover(document.querySelector("main.rxs-page.rxs-rexonance-page"), root);
   }, []);
 
-  const finishOpeningHandoff = useCallback((token: number, restoreFocus = true) => {
-    const runtime = openingHandoff.current;
-    if (!runtime || runtime.token !== token) return;
-    const destination = runtime.destinationValue;
-    for (const frame of openingFocusFrames.current) {
-      window.cancelAnimationFrame(frame);
-    }
-    openingFocusFrames.current = [];
-    runtime.covered.resolve(undefined);
-    runtime.destination.resolve(null);
-    runtime.animation.resolve(undefined);
-    openingHandoff.current = null;
-    setOpeningSnapshot(null);
+  const skipDecoration = useCallback(() => {
+    const clock = decoration.current;
+    if (!clock || clock.skipped) return;
+    // Only replace focus when the focused control is about to disappear.
+    // Escape from an existing link or other page control preserves its focus.
+    const focusedSkip = Boolean(
+      document.activeElement?.closest?.(".route-decoration-skip, .ffe-skip"),
+    );
+    skipFocusRequested.current = focusedSkip;
+    clock.skip();
+    farFromSkip.current?.();
+    rexonanceCoverCancel.current?.();
+    rexonanceCoverCancel.current = null;
+    setDecorationSkipped(true);
+    // Unmount the decorative renderer immediately. Its cleanup owns its engine.
+    // A pending route remains on the current page with an honest status below.
     setDocumentLoading(false);
-    dispatchOpeningHandoffState(false);
-    busy.current = false;
+    document.documentElement.removeAttribute("data-route-cover");
+    if (focusedSkip && skipDestinationReady.current)
+      focusRouteDestination(skipDestinationHash.current);
+  }, [setDocumentLoading]);
 
-    if (
-      !restoreFocus ||
-      destination?.path !== "/world" ||
-      !destination.focus?.isConnected ||
-      pathnameRef.current !== "/world" ||
-      document.visibilityState !== "visible"
-    ) {
-      return;
+  useLayoutEffect(() => {
+    if (decorationSkipped && destinationPending && skipFocusRequested.current) {
+      pendingStatusRef.current?.focus({ preventScroll: true });
     }
+  }, [decorationSkipped, destinationPending]);
 
-    const focusTarget = destination.focus;
-    const firstFrame = window.requestAnimationFrame(() => {
-      const secondFrame = window.requestAnimationFrame(() => {
-        openingFocusFrames.current = [];
-        if (
-          transitionId.current === token &&
-          pathnameRef.current === "/world" &&
-          focusTarget.isConnected &&
-          document.visibilityState === "visible"
-        ) {
-          focusTarget.focus({ preventScroll: true });
-        }
-      });
-      openingFocusFrames.current.push(secondFrame);
-    });
-    openingFocusFrames.current.push(firstFrame);
-  }, [setDocumentLoading]);
-
-  const beginOpeningHandoff = useCallback((source: OpeningHandoffSource) => {
-    if (busy.current || openingHandoff.current) return false;
-    busy.current = true;
-    const token = ++transitionId.current;
-    const runtime: OpeningHandoffRuntime = {
-      token,
-      source,
-      covered: createDeferred<void>(),
-      destination: createDeferred<OpeningHandoffDestination | null>(),
-      animation: createDeferred<void>(),
+  useEffect(() => {
+    if (!gate.active || decorationSkipped) return;
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      skipDecoration();
     };
-    openingHandoff.current = runtime;
-    setDocumentLoading(true);
-    dispatchOpeningHandoffState(true);
-    setOpeningSnapshot({ token, phase: "covering", source });
-    return true;
-  }, [setDocumentLoading]);
+    window.addEventListener("keydown", onEscape, true);
+    return () => window.removeEventListener("keydown", onEscape, true);
+  }, [gate.active, decorationSkipped, skipDecoration]);
+
+  const finishOpeningHandoff = useCallback(
+    (token: number, restoreFocus = true) => {
+      const runtime = openingHandoff.current;
+      if (!runtime || runtime.token !== token) return;
+      const destination = runtime.destinationValue;
+      for (const frame of openingFocusFrames.current) {
+        window.cancelAnimationFrame(frame);
+      }
+      openingFocusFrames.current = [];
+      runtime.covered.resolve(undefined);
+      runtime.destination.resolve(null);
+      runtime.animation.resolve(undefined);
+      openingHandoff.current = null;
+      setOpeningSnapshot(null);
+      setDocumentLoading(false);
+      dispatchOpeningHandoffState(false);
+      busy.current = false;
+
+      if (
+        !restoreFocus ||
+        destination?.path !== "/world" ||
+        !destination.focus?.isConnected ||
+        pathnameRef.current !== "/world" ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      const focusTarget = destination.focus;
+      const firstFrame = window.requestAnimationFrame(() => {
+        const secondFrame = window.requestAnimationFrame(() => {
+          openingFocusFrames.current = [];
+          if (
+            transitionId.current === token &&
+            pathnameRef.current === "/world" &&
+            focusTarget.isConnected &&
+            document.visibilityState === "visible"
+          ) {
+            focusTarget.focus({ preventScroll: true });
+          }
+        });
+        openingFocusFrames.current.push(secondFrame);
+      });
+      openingFocusFrames.current.push(firstFrame);
+    },
+    [setDocumentLoading],
+  );
+
+  const beginOpeningHandoff = useCallback(
+    (source: OpeningHandoffSource) => {
+      if (busy.current || openingHandoff.current) return false;
+      busy.current = true;
+      const token = ++transitionId.current;
+      const runtime: OpeningHandoffRuntime = {
+        token,
+        source,
+        covered: createDeferred<void>(),
+        destination: createDeferred<OpeningHandoffDestination | null>(),
+        animation: createDeferred<void>(),
+      };
+      openingHandoff.current = runtime;
+      setDocumentLoading(true);
+      dispatchOpeningHandoffState(true);
+      setOpeningSnapshot({ token, phase: "covering", source });
+      return true;
+    },
+    [setDocumentLoading],
+  );
 
   const notifyOpeningHandoffCovered = useCallback((token: number) => {
     const runtime = openingHandoff.current;
@@ -1191,6 +1255,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const pendingScrollReleases = scrollMotionReleases.current;
     const cancelTransition = () => {
+      decoration.current?.skip();
+      decoration.current = null;
+      setDecorationSkipped(false);
+      setDestinationPending(false);
       transitionId.current += 1;
       rexonanceTransition.current = null;
       farFromTransition.current = null;
@@ -1252,6 +1320,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     return () => {
       // A pending preload can settle after disposal (or router replacement).
       // Invalidate it before releasing the cover so it cannot navigate later.
+      decoration.current?.skip();
+      decoration.current = null;
       transitionId.current += 1;
       rexonanceTransition.current = null;
       farFromTransition.current = null;
@@ -1322,7 +1392,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       transitionCovered,
       focusDestination,
     }: GoOptions) => {
-      if (!transitionCovered && busy.current) return;
+      const intent = guardedHref(to, hash, search);
+      if (!transitionCovered && busy.current) {
+        if (pendingIntent.current === intent) return;
+        document.dispatchEvent(new Event("deception-world:cancel-route-transition"));
+      }
+      if (!transitionCovered) pendingIntent.current = intent;
       const releaseSuitWarmup = holdSuitWarmup(
         to === "/rexonance-saga",
         to === "/illusionculum-saga" &&
@@ -1421,14 +1496,26 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                 : undefined;
         const riderTransitionVariant = diveVariant ?? cutInVariant ?? fileVariant;
         const requestId = ++transitionId.current;
+        const clock = createTransitionDecorationClock(window);
+        decoration.current = clock;
+        skipFocusRequested.current = false;
+        skipDestinationReady.current = false;
+        skipDestinationHash.current = hash;
+        setDecorationSkipped(false);
+        setDestinationPending(false);
         const isCurrent = () => transitionId.current === requestId;
         const warmCoveredDestination = async () => {
+          setDestinationPending(true);
           const ready = await preloadRouteWithDeadline(() =>
             router.preloadRoute({ to: to as never }),
           );
           if (!isCurrent()) return false;
+          if (!ready) setDestinationPending(false);
           if (!ready)
-            setDelayedRoute({ href: guardedHref(to, hash, search), focus: Boolean(focusDestination) });
+            setDelayedRoute({
+              href: guardedHref(to, hash, search),
+              focus: Boolean(focusDestination || skipFocusRequested.current),
+            });
           return ready;
         };
         if (
@@ -1455,9 +1542,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             if (!isCurrent()) return;
             // A section jump stays in the current document, including its
             // selected archive. Only a new document starts with fresh search.
-            await navigate({ to, hash, search: navigationSearch ?? (changesDocument ? undefined : true) });
+            await navigate({
+              to,
+              hash,
+              search: navigationSearch ?? (changesDocument ? undefined : true),
+            });
             if (!isCurrent()) return;
-            if (focusDestination) focusRouteDestination(hash);
+            setDestinationPending(false);
+            skipDestinationReady.current = true;
+            if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
             if (hash) await settleRouteHash(hash);
           } finally {
             void assetWarmup;
@@ -1498,18 +1591,25 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             await nextFrame();
             const cinemaArt = isCinemaTransition
               ? Promise.race([
-                preloadAssets(assets, () => undefined).catch(() => undefined),
-                wait(1000),
-              ]) : null;
+                  preloadAssets(assets, () => undefined).catch(() => undefined),
+                  wait(1000),
+                ])
+              : null;
             if (!isCurrent() || !(await warmCoveredDestination())) return;
             if (cinemaArt) await cinemaArt;
             if (!isCurrent()) return;
             const remaining = timings.cover - (performance.now() - startedAt);
-            if (remaining > 0) await wait(remaining);
+            if (remaining > 0) await clock.delay(remaining);
             if (!isCurrent()) return;
-            await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+            await navigateUnderCover(
+              router,
+              () => navigate({ to, hash, search: navigationSearch }),
+              to,
+            );
             if (!isCurrent()) return;
-            if (focusDestination) focusRouteDestination(hash);
+            setDestinationPending(false);
+            skipDestinationReady.current = true;
+            if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
             await settleUnderCover();
             if (!isCurrent()) return;
             setDocumentLoading(false);
@@ -1521,7 +1621,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               phase: "revealing",
               scene: null,
             });
-            await revealRan(timings.reveal);
+            await clock.wait(
+              revealRan(
+                timings.reveal,
+                undefined,
+                1400,
+                () => clock.skipped || !isCurrent(),
+                clock.delay,
+              ),
+            );
           } finally {
             window.setTimeout(releaseScrollMotion, 360);
             if (isCurrent()) {
@@ -1680,12 +1788,12 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               : composeScene({
                   tier,
                   kind: flip ? "flip" : "iris",
-                  frameKind:
-                    diveVariant || flip || fileVariant === "file" ? "file" : "screen",
+                  frameKind: diveVariant || flip || fileVariant === "file" ? "file" : "screen",
                   timings,
                   assets,
                   to,
-                  callOnly: Boolean(rexonanceCall) || Boolean(farFromCall) || Boolean(metaUnitasCall),
+                  callOnly:
+                    Boolean(rexonanceCall) || Boolean(farFromCall) || Boolean(metaUnitasCall),
                 });
           setDocumentLoading(true);
           markRouteCover("covering");
@@ -1779,35 +1887,40 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             // releases the cover before navigation, rather than locking the page.
             if (!(await warmCoveredDestination())) return;
             if (metaUnitasPlayback) {
-              const result = await metaUnitasPlayback.promise;
+              const result = await clock.wait(metaUnitasPlayback.promise);
               if (!isCurrent() || result === "cancelled") return;
               if (result === "unavailable") {
                 // A genuine failure is visible and retryable, never a silent
                 // automatic skip. The existing link permits a direct visit.
                 setDelayedRoute({
                   href: guardedHref(to, hash, search),
-                  focus: Boolean(focusDestination),
+                  focus: Boolean(focusDestination || skipFocusRequested.current),
                 });
                 return;
               }
             }
             if (illusionculumPlayback) {
-              const result = await illusionculumPlayback.promise;
+              const result = await clock.wait(illusionculumPlayback.promise);
               if (!isCurrent() || result === "cancelled") return;
               if (result === "unavailable") {
                 setDelayedRoute({
                   href: guardedHref(to, hash, search),
-                  focus: Boolean(focusDestination),
+                  focus: Boolean(focusDestination || skipFocusRequested.current),
                 });
                 return;
               }
             }
             const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-            if (!metaUnitasPlayback && !illusionculumPlayback && coverTimeLeft > 0) {
+            if (
+              !clock.skipped &&
+              !metaUnitasPlayback &&
+              !illusionculumPlayback &&
+              coverTimeLeft > 0
+            ) {
               if (diveVariant === "rexonance" && rexonanceCall) {
                 const hold = waitForRexonanceCover(coverTimeLeft);
                 rexonanceCoverCancel.current = hold.cancel;
-                await hold.promise;
+                await clock.wait(hold.promise);
                 if (rexonanceCoverCancel.current === hold.cancel)
                   rexonanceCoverCancel.current = null;
               } else if (diveVariant === "far-from" && farFromCall) {
@@ -1817,17 +1930,23 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
                   const hold = waitForRexonanceCover(coverTimeLeft);
                   rexonanceCoverCancel.current = hold.cancel;
                   farFromSkip.current = hold.cancel;
-                  await hold.promise;
+                  await clock.wait(hold.promise);
                   if (farFromSkip.current === hold.cancel) farFromSkip.current = null;
                   if (rexonanceCoverCancel.current === hold.cancel)
                     rexonanceCoverCancel.current = null;
                 }
-              } else await wait(coverTimeLeft);
+              } else await clock.delay(coverTimeLeft);
             }
             if (!isCurrent()) return;
-            await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+            await navigateUnderCover(
+              router,
+              () => navigate({ to, hash, search: navigationSearch }),
+              to,
+            );
             if (!isCurrent()) return;
-            if (focusDestination) focusRouteDestination(hash);
+            setDestinationPending(false);
+            skipDestinationReady.current = true;
+            if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
             await settleUnderCover();
             if (!isCurrent()) return;
             const callOnly = Boolean(rexonanceCall);
@@ -1868,13 +1987,18 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               metaUnitasPlayback,
               illusionculumPlayback,
             });
-            await revealRan(
-              timings.reveal,
-              callOnly
-                ? undefined
-                : () => {
-                    if (landed) handOverDockedFile(landed);
-                  },
+            await clock.wait(
+              revealRan(
+                timings.reveal,
+                callOnly
+                  ? undefined
+                  : () => {
+                      if (landed && !clock.skipped && isCurrent()) handOverDockedFile(landed);
+                    },
+                1400,
+                () => clock.skipped || !isCurrent(),
+                clock.delay,
+              ),
             );
           } finally {
             illusionculumPlayback?.cancel();
@@ -1936,11 +2060,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             }
             if (!(await warmCoveredDestination())) return;
             const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-            if (coverTimeLeft > 0) await wait(coverTimeLeft);
+            if (coverTimeLeft > 0) await clock.delay(coverTimeLeft);
             if (!isCurrent()) return;
-            await navigateUnderCover(router, () => navigate({ to, hash, search: navigationSearch }), to);
+            await navigateUnderCover(
+              router,
+              () => navigate({ to, hash, search: navigationSearch }),
+              to,
+            );
             if (!isCurrent()) return;
-            if (focusDestination) focusRouteDestination(hash);
+            setDestinationPending(false);
+            skipDestinationReady.current = true;
+            if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
             await settleUnderCover();
             if (!isCurrent()) return;
             const landed = { ...scene, ...landingRects() };
@@ -1955,7 +2085,15 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               phase: "revealing",
               scene: landed,
             });
-            await revealRan(timings.reveal);
+            await clock.wait(
+              revealRan(
+                timings.reveal,
+                undefined,
+                1400,
+                () => clock.skipped || !isCurrent(),
+                clock.delay,
+              ),
+            );
           } finally {
             if (isCurrent()) {
               setDocumentLoading(false);
@@ -1994,19 +2132,29 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           // owner of its multi-megabyte document, avoiding duplicate downloads.
           if (!(await warmCoveredDestination())) return;
           const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
-          if (coverTimeLeft > 0) await wait(coverTimeLeft);
+          if (coverTimeLeft > 0) await clock.delay(coverTimeLeft);
           if (!isCurrent()) return;
           if (progressTimer) window.clearInterval(progressTimer);
           setGate({ active: true, percent: 100, variant: "archive", phase: "covering", scene });
           await navigate({ to, hash, search: navigationSearch });
           if (!isCurrent()) return;
-          if (focusDestination) focusRouteDestination(hash);
+          setDestinationPending(false);
+          skipDestinationReady.current = true;
+          if (focusDestination || skipFocusRequested.current) focusRouteDestination(hash);
           await settleUnderCover();
           if (!isCurrent()) return;
           setDocumentLoading(false);
           markRouteCover("revealing");
           setGate({ active: true, percent: 100, variant: "archive", phase: "revealing", scene });
-          await revealRan(timings.reveal);
+          await clock.wait(
+            revealRan(
+              timings.reveal,
+              undefined,
+              1400,
+              () => clock.skipped || !isCurrent(),
+              clock.delay,
+            ),
+          );
         } finally {
           if (progressTimer) window.clearInterval(progressTimer);
           if (isCurrent()) {
@@ -2037,11 +2185,20 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     [beginOpeningHandoff, go, notifyOpeningDestination],
   );
 
+  // These entry sequences already paint a skip control. Keep one visible
+  // control while the common controller also supplies Escape and reveal skip.
+  const entryHasSkip =
+    gate.phase === "covering" &&
+    gate.scene?.tier === "full" &&
+    ((gate.variant === "far-from" && Boolean(gate.farFromCall)) ||
+      (gate.variant === "meta-unitas" && Boolean(gate.metaUnitasCall && gate.metaUnitasPlayback)) ||
+      (gate.variant === "illusionculum" && Boolean(gate.illusionculumPlayback)));
+
   return (
     <LoadGateContext.Provider value={api}>
       {children}
       <LoadOverlay
-        active={gate.active}
+        active={gate.active && !decorationSkipped}
         variant={gate.variant}
         phase={gate.phase}
         scene={gate.scene}
@@ -2052,8 +2209,24 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         metaUnitasCall={gate.metaUnitasCall}
         metaUnitasPlayback={gate.metaUnitasPlayback}
         illusionculumPlayback={gate.illusionculumPlayback}
-        onSkip={skipFarFrom}
+        onSkip={skipDecoration}
       />
+      {gate.active && !decorationSkipped && !entryHasSkip && (
+        <button className="route-decoration-skip" type="button" onClick={skipDecoration}>
+          スキップ <kbd>Esc</kbd>
+        </button>
+      )}
+      {decorationSkipped && gate.active && destinationPending && (
+        <aside
+          ref={pendingStatusRef}
+          className="route-load-pending"
+          role="status"
+          aria-live="polite"
+          tabIndex={-1}
+        >
+          ページを読み込んでいます…
+        </aside>
+      )}
       <RouteSignal state={signal} />
       {delayedRoute && (
         <aside
@@ -2412,14 +2585,14 @@ function RiderRouteDive({
               : variant === "far-from"
                 ? "FAR FROM // FINAL FORM SITE"
                 : variant === "illusionculum"
-                ? "ILLUSIONCULUM // SPECIAL SITE"
-                : variant === "meta-unitas"
-                ? "META UNITAS"
-                : variant === "final-stage"
-                ? "FINAL STAGE // STORY SITE"
-                : variant === "dream"
-                  ? "DREAM CHAPTER // LIQUID ABYSS"
-                  : `${meta.name} // RIDER ${meta.no}`}
+                  ? "ILLUSIONCULUM // SPECIAL SITE"
+                  : variant === "meta-unitas"
+                    ? "META UNITAS"
+                    : variant === "final-stage"
+                      ? "FINAL STAGE // STORY SITE"
+                      : variant === "dream"
+                        ? "DREAM CHAPTER // LIQUID ABYSS"
+                        : `${meta.name} // RIDER ${meta.no}`}
         </small>
         <span>
           {variant === "rexonance"

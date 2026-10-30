@@ -63,7 +63,7 @@ import {
 } from "./dream-chapter-extra-data";
 import { DreamScreeningLauncher } from "./dream-screening-launcher";
 import { DreamReadingLauncher } from "./dream-reading-launcher";
-import { DreamProgrammeDesk } from "./dream-programme-desk";
+import { DreamProgrammeDesk, DREAM_PROGRAMME_ROUTES } from "./dream-programme-desk";
 import { DreamGpuStage } from "./dream-gpu-stage";
 import { DreamKarakuriCabinet } from "./dream-karakuri-cabinet";
 import { DreamStageLantern } from "./dream-stage-lantern";
@@ -1499,12 +1499,11 @@ export function DreamChapter() {
             decoding="async"
           />
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
-            <a href="#posters">
-              <span>絵看板を見る</span>
-            </a>
-            <a href="#characters">
-              <span>登場人物へ</span>
-            </a>
+            {DREAM_PROGRAMME_ROUTES.map((route) => (
+              <a key={route.href} href={route.href}>
+                <span>{route.title}</span>
+              </a>
+            ))}
           </nav>
           <DreamStageLantern />
         </div>
@@ -1522,25 +1521,23 @@ export function DreamChapter() {
         </div>
       </section>
 
-      <DreamKarakuriCabinet />
-      <DreamGpuStage>
-        <DreamProgrammeDesk />
-      </DreamGpuStage>
-      <nav className="dream-contents" aria-labelledby="dream-contents-title" data-dream-reveal>
-        <h2 id="dream-contents-title">目次</h2>
-        <ol>
-          {DREAM_CONTENTS.map(({ act, links }) => (
-            <li key={act}>
-              <small>{act}</small>
-              {links.map(({ href, label }) => (
-                <a key={href} href={href}>
-                  {label}
-                </a>
-              ))}
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <details className="dream-contents">
+        <summary id="dream-contents-title">目次</summary>
+        <nav aria-labelledby="dream-contents-title">
+          <ol>
+            {DREAM_CONTENTS.map(({ act, links }) => (
+              <li key={act}>
+                <small>{act}</small>
+                {links.map(({ href, label }) => (
+                  <a key={href} href={href}>
+                    {label}
+                  </a>
+                ))}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
 
       <section
         id="posters"
@@ -2262,6 +2259,11 @@ export function DreamChapter() {
         </ol>
         <VoicesLeaf />
       </section>
+
+      <DreamKarakuriCabinet />
+      <DreamGpuStage>
+        <DreamProgrammeDesk />
+      </DreamGpuStage>
 
       <footer className="dream-footer">
         <h2>

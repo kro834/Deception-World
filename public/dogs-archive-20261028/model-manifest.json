@@ -1,0 +1,799 @@
+{
+  "stage": "browser delivery from Blender",
+  "version": 2,
+  "preservedSculpt": "guardian-v2-junction-sculpt.blend",
+  "model": "guardian-v.glb",
+  "assetBytes": 4534944,
+  "assetSha256": "d6fd72c481157bd586383adca1b6dff799f524423e5002fd6e6901993e467272",
+  "coordinateSystem": {
+    "up": "+Y",
+    "front": "+Z",
+    "unit": "meter"
+  },
+  "nodes": {
+    "root": "GuardianV_Root",
+    "body": "BodyPivot",
+    "head": "HeadPivot",
+    "jaw": "JawPivot",
+    "mouth": "MouthSocket",
+    "mouthAim": "MouthAim",
+    "tentacles": [
+      "TentaclePivot_00",
+      "TentaclePivot_01",
+      "TentaclePivot_02",
+      "TentaclePivot_03",
+      "TentaclePivot_04",
+      "TentaclePivot_05",
+      "TentaclePivot_06",
+      "TentaclePivot_07",
+      "TentaclePivot_08",
+      "TentaclePivot_09",
+      "TentaclePivot_10"
+    ],
+    "neckRig": "NeckRig",
+    "joints": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
+    ]
+  },
+  "animations": [
+    "Rest",
+    "Exhale"
+  ],
+  "transitionSeconds": 1.6,
+  "poses": {
+    "rest": {
+      "BodyPivot": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ],
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "HeadPivot": {
+        "quaternion": [
+          0.0,
+          0.0,
+          0.15643448,
+          0.98768836
+        ]
+      },
+      "JawPivot": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_00": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_01": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_02": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_03": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_04": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_05": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_06": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_07": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_08": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_09": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      },
+      "TentaclePivot_10": {
+        "quaternion": [
+          0.0,
+          0.0,
+          -0.0,
+          1.0
+        ]
+      }
+    },
+    "exhale": {
+      "BodyPivot": {
+        "quaternion": [
+          0.03442569,
+          0.0165224,
+          0.02676586,
+          0.99891216
+        ],
+        "position": [
+          0.0,
+          0.08,
+          0.04
+        ]
+      },
+      "HeadPivot": {
+        "quaternion": [
+          -0.4788408,
+          0.07584094,
+          0.13682067,
+          0.86385173
+        ]
+      },
+      "JawPivot": {
+        "quaternion": [
+          0.55919296,
+          0.0,
+          -0.0,
+          0.82903755
+        ]
+      },
+      "TentaclePivot_00": {
+        "quaternion": [
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
+        ]
+      },
+      "TentaclePivot_01": {
+        "quaternion": [
+          0.05073415,
+          0.03253707,
+          0.04535783,
+          0.99715102
+        ]
+      },
+      "TentaclePivot_02": {
+        "quaternion": [
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
+        ]
+      },
+      "TentaclePivot_03": {
+        "quaternion": [
+          0.05073415,
+          0.03253707,
+          0.04535783,
+          0.99715102
+        ]
+      },
+      "TentaclePivot_04": {
+        "quaternion": [
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
+        ]
+      },
+      "TentaclePivot_05": {
+        "quaternion": [
+          0.05073415,
+          0.03253707,
+          0.04535783,
+          0.99715102
+        ]
+      },
+      "TentaclePivot_06": {
+        "quaternion": [
+          -0.07187184,
+          -0.04710079,
+          -0.04912028,
+          0.99508953
+        ]
+      },
+      "TentaclePivot_07": {
+        "quaternion": [
+          0.03245281,
+          0.03336278,
+          0.04475397,
+          0.99791324
+        ]
+      },
+      "TentaclePivot_08": {
+        "quaternion": [
+          -0.04753822,
+          -0.04588662,
+          -0.05025639,
+          0.99654847
+        ]
+      },
+      "TentaclePivot_09": {
+        "quaternion": [
+          0.03245281,
+          0.03336278,
+          0.04475397,
+          0.99791324
+        ]
+      },
+      "TentaclePivot_10": {
+        "quaternion": [
+          -0.04753822,
+          -0.04588662,
+          -0.05025639,
+          0.99654847
+        ]
+      }
+    }
+  },
+  "poseChecks": {
+    "Rest": {
+      "mouthSocket": [
+        -0.4100406,
+        -0.4630811,
+        0.8999999
+      ],
+      "mouthAim": [
+        -0.21845,
+        -1.052736,
+        1.5
+      ],
+      "direction": [
+        0.2220603,
+        -0.6834311,
+        0.6954215
+      ],
+      "jawTipSeparation": 0.020677650318832803
+    },
+    "Exhale": {
+      "mouthSocket": [
+        -0.3671849,
+        0.1855454,
+        1.6233339
+      ],
+      "mouthAim": [
+        -0.1577412,
+        0.3360847,
+        2.4466634
+      ],
+      "direction": [
+        0.2427527,
+        0.1744804,
+        0.9542681
+      ],
+      "jawTipSeparation": 0.3922798100642083
+    }
+  },
+  "changes": [
+    {
+      "mesh": "Bone | overlapping coiled membrane lobes",
+      "ratio": 0.65,
+      "beforeFaces": 130536,
+      "afterFaces": 169696
+    },
+    {
+      "mesh": "Head | continuous asymmetric shield and cheek roots",
+      "ratio": 0.45,
+      "beforeFaces": 118836,
+      "afterFaces": 106952
+    },
+    {
+      "mesh": "Shell | fused S-shaped fenestrated organ",
+      "ratio": 0.45,
+      "beforeFaces": 154575,
+      "afterFaces": 139112
+    },
+    {
+      "mesh": "Frond_08 | toothed perforated feather",
+      "ratio": 0.12,
+      "beforeFaces": 59813,
+      "afterFaces": 14352
+    }
+  ],
+  "meshAudit": [
+    {
+      "mesh": "Bone | overlapping coiled membrane lobes",
+      "vertices": 86024,
+      "faces": 169696,
+      "triangles": 169696,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Face | integrated converging forehead lattice",
+      "vertices": 9030,
+      "faces": 9072,
+      "triangles": 17976,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Head | continuous asymmetric shield and cheek roots",
+      "vertices": 53480,
+      "faces": 106952,
+      "triangles": 106952,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Jaw | separate slim lower mandible",
+      "vertices": 330,
+      "faces": 322,
+      "triangles": 656,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Mouth | dark articulated inner membrane",
+      "vertices": 10,
+      "faces": 7,
+      "triangles": 16,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Shell | fused S-shaped fenestrated organ",
+      "vertices": 69324,
+      "faces": 139112,
+      "triangles": 139112,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Tail | continuous-edge long and short spines",
+      "vertices": 1820,
+      "faces": 1708,
+      "triangles": 3584,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_00 | toothed perforated feather",
+      "vertices": 4296,
+      "faces": 3526,
+      "triangles": 8676,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_01 | toothed perforated feather",
+      "vertices": 3454,
+      "faces": 2863,
+      "triangles": 6972,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_02 | toothed perforated feather",
+      "vertices": 2809,
+      "faces": 2351,
+      "triangles": 5670,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_03 | toothed perforated feather",
+      "vertices": 3477,
+      "faces": 2875,
+      "triangles": 7022,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_04 | toothed perforated feather",
+      "vertices": 2198,
+      "faces": 1826,
+      "triangles": 4436,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_05 | toothed perforated feather",
+      "vertices": 7001,
+      "faces": 5821,
+      "triangles": 14114,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_06 | toothed perforated feather",
+      "vertices": 6926,
+      "faces": 5590,
+      "triangles": 13960,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_07 | toothed perforated feather",
+      "vertices": 2226,
+      "faces": 1867,
+      "triangles": 4492,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_08 | toothed perforated feather",
+      "vertices": 7166,
+      "faces": 14352,
+      "triangles": 14352,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_09 | toothed perforated feather",
+      "vertices": 2102,
+      "faces": 1770,
+      "triangles": 4240,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Frond_10 | toothed perforated feather",
+      "vertices": 2283,
+      "faces": 1897,
+      "triangles": 4606,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    }
+  ],
+  "meshStats": {
+    "objects": 18,
+    "vertices": 389794,
+    "triangles": 526530
+  },
+  "colorAttribute": "GuardianSurface COLOR_0. Main 240 laminae use authored role-v1 palette with original cavity AO once; remaining source colors retained before compression.",
+  "faceEmission": {
+    "color": [
+      0.018,
+      0.11,
+      0.033
+    ],
+    "strength": 0.75,
+    "threadRadius": 0.0038,
+    "baseColor": [
+      0.06,
+      0.18,
+      0.07
+    ]
+  },
+  "secondsBeforeRender": 4.134484052658081,
+  "sourceScripts": [
+    "scripts/blender/dogs_guardian_v2.py",
+    "scripts/blender/dogs_guardian_v2_finish.py",
+    "scripts/blender/dogs_guardian_v2_head_junction.py",
+    "scripts/blender/dogs_guardian_v2_optimize.py",
+    "scripts/blender/guardian_cavity_ao.py",
+    "scripts/blender/compress_guardian_bone_release.mjs",
+    "scripts/blender/recolor_guardian_r9_role.py",
+    "scripts/blender/guardian_triangle_fields.py",
+    "scripts/blender/verify_guardian_release_decoder.mjs"
+  ],
+  "skinMeshes": [
+    "Face | integrated converging forehead lattice",
+    "Head | continuous asymmetric shield and cheek roots"
+  ],
+  "skinCount": 1,
+  "jointNodes": [
+    {
+      "name": "NeckHeadJoint",
+      "rotation": [
+        0.698401153087616,
+        -0.11061587929725647,
+        -0.11061587929725647,
+        0.6984010934829712
+      ],
+      "translation": [
+        -0.5799999833106995,
+        -0.6000000238418579,
+        0.47999998927116394
+      ]
+    },
+    {
+      "children": [
+        1
+      ],
+      "name": "NeckBaseJoint",
+      "rotation": [
+        -0.7071067690849304,
+        0,
+        0,
+        0.7071067690849304
+      ]
+    }
+  ],
+  "inputBlendSha256": "9776c984469b7eeb9fb361fb3ae6367fa885240d9de8cae6fac777e7a69afa0a",
+  "sourceSha256": {
+    "scripts/blender/dogs_guardian_v2.py": "678e2d946244f268a4220c3bae132f5f9c7fc48b38960729c2acd9b98a79f3bd",
+    "scripts/blender/dogs_guardian_v2_finish.py": "df0ed7023e2666b1bcde5a5cac6bb5ebed177c036835242a07f609ba0a0bf5dd",
+    "scripts/blender/dogs_guardian_v2_head_junction.py": "eb7ad9810afb3423d9360bbdc864aedb199273d62f2b607894a4febdd0a4543d",
+    "scripts/blender/dogs_guardian_v2_optimize.py": "a7f6092ba3a0de39b824f9b0b904b01048a2e37a23beb081f171356f9d799080",
+    "scripts/blender/guardian_cavity_ao.py": "e9c8d1b09d5bcd5b99810df71306dd614c7e2284d5f83f383b9315217cbf6a4f",
+    "scripts/blender/compress_guardian_bone_release.mjs": "a95b6344ed7601296bc7df8d7677f62d7d413c0fd1395a05e0eec46d866f11a2",
+    "scripts/blender/recolor_guardian_r9_role.py": "394cc116f8c9b2fa6ff896e518f50992ec17e7ae6617981006d605c17a57187c",
+    "scripts/blender/guardian_triangle_fields.py": "1138e96aea248b4e6e5094fbffb779f42a04e7ede88fb3d954b962f7ac3ac1ec",
+    "scripts/blender/verify_guardian_release_decoder.mjs": "c04b5670d9f77d2e61998289dd64fff052bf243abc8be554b700f8e6f1bfd1a5"
+  },
+  "junctionValidation": {
+    "revision": 9,
+    "headSkin": true,
+    "faceSkin": true,
+    "inputBlendSha256": "e2517a670f8eecf65b57d84a3f3ca4f933bd3dad8cd1a8e3d4883ec8adec33c1",
+    "sourceSha256": "eb7ad9810afb3423d9360bbdc864aedb199273d62f2b607894a4febdd0a4543d",
+    "reference": "public/dogs-archive-20261028/reference/guardian-head-junction.jpg",
+    "headPivot": "rebased to upper rooted head; Rest child world positions preserved",
+    "jointNames": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
+    ],
+    "deformationChecks": [
+      {
+        "fraction": 0,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 2.5288109106536417e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 1.4600096599955427e-07
+          }
+        }
+      },
+      {
+        "fraction": 0.25,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 3.885747435809761e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 1.999200562387517e-07
+          }
+        }
+      },
+      {
+        "fraction": 0.5,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 3.03925246810483e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 1.7120130796843852e-07
+          }
+        }
+      },
+      {
+        "fraction": 0.75,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 2.862419592186592e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 2.686603327408849e-07
+          }
+        }
+      },
+      {
+        "fraction": 1,
+        "rootedHeadAndLattice": {
+          "Head | continuous asymmetric shield and cheek roots": {
+            "bodyEndpointError": 0.0,
+            "headEndpointError": 2.7677678497145637e-07
+          },
+          "Face | integrated converging forehead lattice": {
+            "bodyEndpointError": 0,
+            "headEndpointError": 2.6151431761360534e-07
+          }
+        }
+      }
+    ],
+    "meshAudit": [
+      {
+        "mesh": "Head | continuous asymmetric shield and cheek roots",
+        "vertices": 118840,
+        "faces": 118836,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0
+      },
+      {
+        "mesh": "Face | integrated converging forehead lattice",
+        "vertices": 9030,
+        "faces": 9072,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0
+      }
+    ],
+    "ao": {
+      "meshes": 16,
+      "vertices": 503609,
+      "rays": 6043308,
+      "minimum": 0.2605338791427213,
+      "maximum": 1.0,
+      "radius": 0.65,
+      "samples": 12,
+      "seconds": 8.082
+    },
+    "secondsBeforeRender": 11.324540138244629
+  },
+  "revision": "junction-09-role-01",
+  "title": "第五の“犬”",
+  "source": "Blender 4.5.9 LTS sculpt; role-v1 COLOR_0 projection; Bone-only Draco recompression",
+  "referenceImages": [
+    "reference/guardian-rest.jpg",
+    "reference/guardian-exhale.jpg",
+    "reference/guardian-turnaround.png",
+    "reference/guardian-head-junction.jpg"
+  ],
+  "referenceImagesUsedAsTexture": false,
+  "sourceMeshStats": {
+    "objects": 18,
+    "vertices": 263956,
+    "triangles": 526532
+  },
+  "meshAuditScope": "Original Blender editable/optimized mesh audit; exported primitive counts include UV/normal seams and are listed in meshStats.",
+  "assets": [
+    {
+      "file": "guardian-v.glb",
+      "draco": true,
+      "bytes": 4534944,
+      "sha256": "d6fd72c481157bd586383adca1b6dff799f524423e5002fd6e6901993e467272"
+    }
+  ],
+  "roleMaterialFinish": {
+    "version": "R9-main-role/v1 fixed symmetric rim, not variable rim-v2",
+    "sourceBlendSha256": "5efb037977fa6e4c6418236e40e74e4a4af3a56020d8bd51c78d794666bf1a4e",
+    "rawRoleSha256": "5115a77e0649a45aaabdca071cf50b331f63c9de862197c219e423e21628e350",
+    "changedMainLaminae": 240,
+    "rawChangedColorVertices": 62792,
+    "projectionMaximumDistanceMeters": 0.0006029626820236444,
+    "palette": {
+      "linearRGBEndpoints": [
+        [
+          0.004000000189989805,
+          0.014999999664723873,
+          0.007000000216066837
+        ],
+        [
+          0.15000000596046448,
+          0.25,
+          0.14000000059604645
+        ]
+      ],
+      "rampPositions": [
+        0.05000000074505806,
+        0.9399999976158142
+      ],
+      "rimPower": 0.75,
+      "ao": "Original GuardianCavityAO linear stored factor multiplied once into new palette; no original GuardianSurface RGB or occlusion map multiplication",
+      "cavityFactorRange": [
+        0.26225072145462036,
+        1.0
+      ]
+    },
+    "runtimeApproximationNotExactBlenderShader": true,
+    "limitations": [
+      "Existing normalTexture, metallicRoughnessTexture, scalar roughness/coat and other material settings are byte-preserved rather than matched to the Blender fixed shader.",
+      "The original baked cavity factor substitutes for the fixed shader fresh local AO; not a fresh AO bake or exact Cycles appearance.",
+      "Vertex interpolation and existing decimation limit edge fidelity. No new geometry or texture."
+    ],
+    "reproducibleCanonicalBlendSha256": "9776c984469b7eeb9fb361fb3ae6367fa885240d9de8cae6fac777e7a69afa0a",
+    "reproducibleRawSha256": "d323015f5d5c6b8c2c311ab382c7e059a76217ee21a2e6b8f038f43ee6b37655"
+  },
+  "releaseCompression": {
+    "codec": {
+      "package": "draco3dgltf",
+      "version": "1.5.7",
+      "method": "MESH_EDGEBREAKER_ENCODING, Bone only",
+      "quantization": {
+        "POSITION": 16,
+        "NORMAL": 12,
+        "TEXCOORD_0": 14,
+        "COLOR_0": 12,
+        "proofSourceId": "lossless generic int32; not exposed to glTF/Three GPU"
+      }
+    },
+    "previousPublicSha256": "814eed150ea2c58e2aaa465f29e38d2bdc2b1aadfd24495dc06849d5a9154ead",
+    "previousPublicBytes": 4845424,
+    "byteDeltaFromPublic": -310480,
+    "nonBoneDracoStreamsExact": true,
+    "skinStreamsExact": true,
+    "nodesClipsMaterialsImagesExact": true,
+    "sourceVertexCoverage": 133250,
+    "orientedTrianglesExactAfterMapping": true,
+    "attributeMaximumErrors": {
+      "POSITION": 2.658367156982422e-05,
+      "NORMAL": 0.0008840858936309814,
+      "TEXCOORD_0": 0.0003008842468261719,
+      "COLOR_0": 3.2551586627960205e-05
+    },
+    "runtimeGeometryPayloadBytes": 24793112,
+    "runtimeGeometryPayloadDeltaBytes": 0,
+    "transientProofAttributeBytes": 534248,
+    "proofAttributeNotExposedToThree": true
+  },
+  "releaseValidation": {
+    "productionDecoderWasmSha256": "a680d927bed9cb864ddbd63521868891af2bfbe755092761b4837487618df8ac",
+    "productionDecoderExactRoundtrip": true,
+    "skinPoseFractions": [
+      0,
+      0.25,
+      0.5,
+      0.75,
+      1
+    ],
+    "maximumSkinEndpointErrorMeters": 0.00014039126371104198,
+    "animations": [
+      {
+        "name": "Rest",
+        "tracks": 17
+      },
+      {
+        "name": "Exhale",
+        "tracks": 17
+      }
+    ],
+    "skinCount": 1,
+    "finalBrowserGate": "Production preview Chrome at 320/390/834px: five tabs, exhale, reference dialog and remount passed. Isolated production scene Chrome 390/834/1194 and WebKit 390 passed.",
+    "hardwareCoverage": "Automated desktop browser verification only. Owner separately reported no iOS back swipe; no new physical-device claim for this material release."
+  }
+}

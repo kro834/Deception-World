@@ -24,7 +24,7 @@ export function RecoveryTiles() {
     },
     {
       to: "/search",
-      title: "資料を探す",
+      title: "全文検索",
       code: "SEARCH",
       art: "/episode-03-deception-world-delivery-600.webp",
     },

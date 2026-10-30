@@ -261,20 +261,13 @@ html[data-page-scrolled] .dream-site-header {
   scroll-margin-top: max(164px, calc(136px + env(safe-area-inset-top)));
 }
 
-html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible="true"]) {
-  opacity: 0;
-  clip-path: inset(0 0 12% 0 round 20px);
-  transform: translate3d(0, 28px, 0) scale(0.99);
-}
-
+/* Reader content is visible before hydration and independently of observer
+   delivery. FilmTextScan, headings and scenery own the entrance motion; a
+   glossary, quote or search destination must never wait for an animation. */
 [data-dream-reveal] {
   opacity: 1;
-  clip-path: inset(0 0 0 0 round 0);
-  transform: translate3d(0, 0, 0) scale(1);
-  transition:
-    opacity 0.72s cubic-bezier(0.16, 1, 0.3, 1),
-    clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  clip-path: none;
+  transform: none;
 }
 
 .dream-hero-field,

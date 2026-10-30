@@ -615,12 +615,11 @@ html[data-family]
   grid-area: sec;
   align-self: start;
   overflow: visible;
-  padding: 8px 8px 12px;
+  padding: 16px;
   border: 1px solid var(--atlas-line);
-  background: linear-gradient(145deg, #172c3b, #09131e 45%, #050b12);
-  box-shadow:
-    inset 0 1px 0 rgb(233 246 251 / 22%),
-    6px 6px 0 rgb(1 5 9 / 65%);
+  border-inline-start: 3px solid var(--atlas-accent);
+  background: var(--atlas-raised);
+  box-shadow: none;
 }
 
 html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {
@@ -1130,6 +1129,17 @@ html[data-family]
   }
 }
 
+/* All seven destinations fit one control band on a short phone. The
+   previous six tracks put Settings alone on a second 48px row. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   html[data-family]
     body
@@ -1204,27 +1214,6 @@ html[data-family]
   }
 }
 
-/* Contexts without the World dossier groups must not reserve their tracks. */
-html[data-family]
-  body
-  #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
-  grid-template-areas: "head" "find" "sec" "spe" "sto" "unm" "inf" "sys";
-}
-@media (min-width: 761px) {
-  html[data-family]
-    body
-    #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
-    grid-template-areas: "head head" "find find" "sec sec" "spe spe" "sto sto" "unm inf" "sys sys";
-  }
-}
-@media (min-width: 1180px) {
-  html[data-family]
-    body
-    #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
-    grid-template-areas: "head head" "find find" "sec spe" "sec sto" "unm inf" "sys sys";
-  }
-}
-
 /* Same artwork as the archived 240x320 chips. The large atlas uses the
    source picture (400px) / existing 960px derivative, retaining its crop.
    The newer Extreme pickup is a different drawing and is not substituted. */
@@ -1258,5 +1247,106 @@ html[data-family]
     text-overflow: clip;
     overflow-wrap: anywhere;
     word-break: normal;
+  }
+}
+
+/* Atlas choreography uses the existing open state. Never transform the
+   sheet, groups or links: swipe coordinates, scroll targets and long-press
+   rider rails must retain their exact interactive boxes. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button) {
+    --atlas-seat-delay: 0ms;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):nth-child(2n) {
+    --atlas-seat-delay: 45ms;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):nth-child(3n) {
+    --atlas-seat-delay: 90ms;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button)
+    > span {
+    animation: command-atlas-label-seat 620ms var(--command-ease) var(--atlas-seat-delay) backwards;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    > .side-panel-head
+    > div {
+    animation: command-atlas-title-seat 680ms var(--command-ease);
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    .command-atlas-scene
+    img {
+    animation: command-atlas-scene-seat 900ms var(--command-ease);
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button {
+    transition:
+      background-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button:is(:hover, :focus-visible) {
+    box-shadow:
+      inset 0 -3px 0 var(--atlas-accent),
+      0 5px 20px rgb(var(--sh-l1-rgb) / 16%);
+  }
+}
+@keyframes command-atlas-label-seat {
+  from {
+    opacity: 0.55;
+    transform: translate3d(24px, 8px, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(-2px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes command-atlas-title-seat {
+  from {
+    opacity: 0.65;
+    transform: perspective(900px) translate3d(-32px, 10px, 0) rotateY(12deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes command-atlas-scene-seat {
+  from {
+    opacity: 0.6;
+    transform: scale(1.14) translateX(-2%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

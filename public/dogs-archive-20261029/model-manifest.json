@@ -1,0 +1,330 @@
+{
+  "stage": "browser delivery from Blender (v3 organ rebuild)",
+  "version": 7,
+  "revision": "v22",
+  "model": "guardian-v3.glb",
+  "assetBytes": 5252440,
+  "assetSha256": "abb840fdc9483b4fc19d0314da6d600d1f76f0519acee16182b50ab3a0e5d91d",
+  "coordinateSystem": {
+    "up": "+Y",
+    "front": "+Z",
+    "unit": "meter"
+  },
+  "nodes": {
+    "root": "GuardianV_Root",
+    "body": "BodyPivot",
+    "rig": "SerpentRig",
+    "head": "HeadPivot",
+    "jaw": "JawPivot",
+    "mouth": "MouthSocket",
+    "mouthAim": "MouthAim",
+    "neck": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
+    ],
+    "spineRoot": "SpineRoot",
+    "spineUp": [
+      "SpineUp_00",
+      "SpineUp_01",
+      "SpineUp_02",
+      "SpineUp_03",
+      "SpineUp_04",
+      "SpineUp_05",
+      "SpineUp_06",
+      "SpineUp_07",
+      "SpineUp_08",
+      "SpineUp_09",
+      "SpineUp_10",
+      "SpineUp_11",
+      "SpineUp_12",
+      "SpineUp_13",
+      "SpineUp_14",
+      "SpineUp_15"
+    ],
+    "spineDown": [
+      "SpineDown_00",
+      "SpineDown_01",
+      "SpineDown_02",
+      "SpineDown_03",
+      "SpineDown_04",
+      "SpineDown_05",
+      "SpineDown_06",
+      "SpineDown_07",
+      "SpineDown_08",
+      "SpineDown_09"
+    ],
+    "tailA": [
+      "TailA_00",
+      "TailA_01",
+      "TailA_02",
+      "TailA_03",
+      "TailA_04",
+      "TailA_05",
+      "TailA_06",
+      "TailA_07"
+    ],
+    "tailB": [
+      "TailB_00",
+      "TailB_01",
+      "TailB_02",
+      "TailB_03",
+      "TailB_04"
+    ],
+    "armL": [
+      "ArmL_00",
+      "ArmL_01",
+      "ArmL_02",
+      "ArmL_03",
+      "ArmL_04",
+      "ArmL_05",
+      "ArmL_06",
+      "ArmL_07",
+      "ArmL_08",
+      "ArmL_09"
+    ],
+    "armR": [
+      "ArmR_00",
+      "ArmR_01",
+      "ArmR_02",
+      "ArmR_03",
+      "ArmR_04"
+    ],
+    "tentacles": [
+      "TentaclePivot_00",
+      "TentaclePivot_01",
+      "TentaclePivot_02",
+      "TentaclePivot_03",
+      "TentaclePivot_04",
+      "TentaclePivot_05",
+      "TentaclePivot_06",
+      "TentaclePivot_07",
+      "TentaclePivot_08",
+      "TentaclePivot_09",
+      "TentaclePivot_10",
+      "TentaclePivot_11",
+      "TentaclePivot_12"
+    ],
+    "fingers": {
+      "TentaclePivot_00": [
+        "Frond00_1",
+        "Frond00_2"
+      ],
+      "TentaclePivot_01": [
+        "Frond01_1",
+        "Frond01_2"
+      ],
+      "TentaclePivot_02": [
+        "Frond02_1",
+        "Frond02_2"
+      ],
+      "TentaclePivot_03": [
+        "Frond03_1",
+        "Frond03_2"
+      ],
+      "TentaclePivot_04": [
+        "Frond04_1",
+        "Frond04_2"
+      ],
+      "TentaclePivot_05": [
+        "Frond05_1",
+        "Frond05_2"
+      ],
+      "TentaclePivot_06": [
+        "Frond06_1",
+        "Frond06_2"
+      ],
+      "TentaclePivot_07": [
+        "Frond07_1",
+        "Frond07_2"
+      ],
+      "TentaclePivot_08": [
+        "Frond08_1",
+        "Frond08_2"
+      ],
+      "TentaclePivot_09": [
+        "Frond09_1",
+        "Frond09_2"
+      ],
+      "TentaclePivot_10": [
+        "Frond10_1",
+        "Frond10_2"
+      ],
+      "TentaclePivot_11": [
+        "Frond11_1",
+        "Frond11_2"
+      ],
+      "TentaclePivot_12": [
+        "Frond12_1",
+        "Frond12_2"
+      ]
+    },
+    "neckRig": "SerpentRig",
+    "joints": [
+      "NeckBaseJoint",
+      "NeckHeadJoint"
+    ]
+  },
+  "animations": [
+    "Rest",
+    "Exhale",
+    "Coil",
+    "Rear",
+    "Swim"
+  ],
+  "transitionSeconds": 1.6,
+  "poseClips": {
+    "Rest": "reference pose, all bones",
+    "Exhale": "neck/head/jaw only (NeckBaseJoint, NeckHeadJoint, HeadPivot, JawPivot); convert to additive against Rest to breathe from any pose",
+    "Coil": "coiled, all bones",
+    "Rear": "rearing threat, raised head, spread arms, all bones",
+    "Swim": "4 s undulation loop, all bones"
+  },
+  "breath": {
+    "bones": [
+      "NeckBaseJoint",
+      "NeckHeadJoint",
+      "HeadPivot",
+      "JawPivot"
+    ],
+    "additiveReference": "Rest",
+    "headRotationDegrees": {
+      "NeckBaseJoint": -14,
+      "NeckHeadJoint": -22,
+      "HeadPivot": -30,
+      "JawPivot": 62
+    }
+  },
+  "poseChecks": {
+    "Rest": {
+      "mouthSocket": [
+        -0.2789954,
+        -0.7562477,
+        1.2911284
+      ],
+      "mouthAim": [
+        -0.21845,
+        -1.0527363,
+        1.8499999
+      ],
+      "direction": [
+        0.0952663,
+        -0.4665159,
+        0.8793675
+      ],
+      "jawTipSeparation": 0.8861420588705781
+    },
+    "Exhale": {
+      "mouthSocket": [
+        -1.4283255,
+        0.1081026,
+        1.5665107
+      ],
+      "mouthAim": [
+        -1.6558751,
+        0.2420009,
+        2.1446118
+      ],
+      "direction": [
+        -0.3580424,
+        0.2106851,
+        0.9096249
+      ],
+      "jawTipSeparation": 0.8636351891174839
+    }
+  },
+  "meshAudit": [
+    {
+      "mesh": "FacePetals | face crown horns",
+      "vertices": 6332,
+      "faces": 7596,
+      "triangles": 11968,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Head | painted head",
+      "vertices": 13227,
+      "faces": 13292,
+      "triangles": 26368,
+      "boundaryEdges": 92,
+      "nonManifoldEdges": 92
+    },
+    {
+      "mesh": "Serpent | painted body, arms and tails",
+      "vertices": 222423,
+      "faces": 213572,
+      "triangles": 435390,
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0
+    },
+    {
+      "mesh": "Shield | dorsal lattice and fins",
+      "vertices": 3878,
+      "faces": 3583,
+      "triangles": 7418,
+      "boundaryEdges": 90,
+      "nonManifoldEdges": 90
+    }
+  ],
+  "meshStats": {
+    "objects": 4,
+    "vertices": 245860,
+    "triangles": 481144
+  },
+  "assets": [
+    {
+      "file": "guardian-v3.glb",
+      "draco": true,
+      "bytes": 5252440,
+      "sha256": "abb840fdc9483b4fc19d0314da6d600d1f76f0519acee16182b50ab3a0e5d91d"
+    }
+  ],
+  "skinCount": 1,
+  "skinJoints": 100,
+  "colorAttribute": "COLOR_0 only on the glow cores and the face leaf; the painted objects use the atlas",
+  "sourceScripts": [
+    "scripts/blender/guardian_v3_lib.py",
+    "scripts/blender/dogs_guardian_v5.py",
+    "scripts/blender/dogs_guardian_v7_paint.py"
+  ],
+  "sourceSha256": {
+    "scripts/blender/guardian_v3_lib.py": "74d2720de6ff9d973a07b28c07fdde6197342b4b58d118f8c3fae61adf8c30b2",
+    "scripts/blender/dogs_guardian_v5.py": "62a0ddb06e6438ad2ecd061cdc195fa8a8638da4f6f02345cec77b60935e6efe",
+    "scripts/blender/dogs_guardian_v7_paint.py": "69bdc56ba7a268de6b9f313efed2ac87365c798dd9d3f1e564d3039ba138a744"
+  },
+  "referenceImagesUsedAsTexture": true,
+  "anatomy": "handoff/goal/ciel3d/model/anatomy-v4.md",
+  "secondsBeforeRender": 28.019996881484985,
+  "painting": {
+    "source": "front=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/05-hires-front.png,back=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/06-hires-back.png,left=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/07-hires-left.png,right=/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/references/08-hires-right.png",
+    "atlas": {
+      "body": 2048,
+      "head": 1024,
+      "uv": "AtlasUV (TEXCOORD after MicroSurfaceUV/AuthoredUV)"
+    },
+    "weights": "bbox-fitted orthographic views, bilinear, normal·view^1.5, sides x0.8, visibility ray, soft ink mask; lighten-only over the v6 procedural albedo (pale rims kept); gutters filled",
+    "confidenceCoverage": {
+      "body": 0.35182734295785545,
+      "head": 0.6889887979898347
+    },
+    "silhouetteIoU": {
+      "body": {
+        "front": 0.45798085439803776,
+        "back": 0.4736854230296099,
+        "left": 0.45512172604325474,
+        "right": 0.488453468633324
+      },
+      "head": {
+        "front": 0.09113994468341835,
+        "back": 0.09140363931684578,
+        "left": 0.12937103981177384,
+        "right": 0.1301985630848513
+      }
+    }
+  },
+  "deliveredFrom": {
+    "build": "/Users/hosicommon/Downloads/名称未設定フォルダ/handoff/goal/ciel3d/model/build/v22",
+    "stamp": "v22",
+    "rawGlbSha256": null
+  }
+}

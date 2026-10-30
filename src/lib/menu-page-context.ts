@@ -49,6 +49,14 @@ const MENU_PAGE_SECTIONS: Record<string, MenuPageContext> = {
     image: "/archive-media/thumbs/realm-royal.webp",
     sections: [["archive-switcher", "フォームアーカイブ", "SAGA / REALM"]],
   },
+  "/dogs-archive": {
+    title: "DOGS ARCHIVE",
+    image: "/dogs-archive-20261028/guardian-480.webp",
+    sections: [
+      ["dogs-selector", "個体を選ぶ", "DOGS"],
+      ["dogs-archive-panel", "個体記録", "ARCHIVE"],
+    ],
+  },
 };
 
 // Reuse the published names already used by search/library. The menu keeps

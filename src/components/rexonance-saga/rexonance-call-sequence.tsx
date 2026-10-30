@@ -28,6 +28,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { SuitNanites } from "./rexonance-suit-nanites";
+import { EntrySurge, EntrySurgeBack } from "./rexonance-suit-surge";
 import {
   NANITE_FIRE_PHASES,
   REXONANCE_ENTRY_SCAN,
@@ -557,6 +558,8 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
         <i className="rx-suit-floor" />
       </i>
       <div className="rx-suit-figure">
+        {/* The surge (2026-10-30): its back canvas under the figure. */}
+        {animate && suit === "build" ? <EntrySurgeBack /> : null}
         {/* The opening call pair scans the bare undersuit top to bottom: a frame that
             slides down over a picture that holds still (two transforms).
             The finished figure stands in it for the still tiers, or when
@@ -731,6 +734,8 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
           />
         ))}
         <i className="rx-suit-lock" style={at(visor)} />
+        {/* ... and its front canvas over it, with the layer's clock. */}
+        {animate && suit === "build" ? <EntrySurge /> : null}
       </div>
       <div className="rx-suit-callouts">
         {REXONANCE_SUIT_PARTS.map((part) => (

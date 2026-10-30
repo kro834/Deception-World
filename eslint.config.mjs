@@ -15,6 +15,8 @@ export default tseslint.config(
       ".nitro/**",
       "node_modules/**",
       "src/routeTree.gen.ts",
+      // Preserve the upstream decoder bytes and their recorded hashes.
+      "public/dogs-archive-20261028/decoders/**",
     ],
   },
   js.configs.recommended,

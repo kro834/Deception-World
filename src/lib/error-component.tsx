@@ -41,7 +41,7 @@ export function AppErrorComponent() {
           </button>
           <a href="/world">WORLD ARCHIVEへ戻る</a>
           <a href="/library">資料室・しおりを開く</a>
-          <a href="/search">資料を検索する</a>
+          <a href="/search">全文検索</a>
         </div>
       </div>
     </main>
@@ -66,7 +66,7 @@ export function NotFoundComponent() {
       <p>DECEPTION WORLD</p>
       <h1 id="not-found-heading">記録が見つかりません。</h1>
       <p id="not-found-description">
-        指定された資料は存在しないか、まだ公開されていません。URLを確認するか、下の「資料を探す」から検索してください。
+        指定された資料は存在しないか、まだ公開されていません。URLを確認するか、下の「全文検索」から検索してください。
       </p>
       <RecoveryTiles />
     </main>

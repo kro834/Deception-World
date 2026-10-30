@@ -51,6 +51,14 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     aliases: ["rexonance saga", "レクソナンス・サーガ"],
   },
   {
+    id: "dogs-archive",
+    title: "DOGS ARCHIVE",
+    path: "/dogs-archive",
+    searchHash: "dogs-selector",
+    description: "5体の“犬”の個体セレクター。第五の“犬”を立体で鑑賞する。",
+    aliases: ["dogs archive", "犬", "個体記録", "立体", "3D"],
+  },
+  {
     id: "extreme",
     title: "エクスプリームサーガ",
     path: "/extreme-saga",
@@ -90,7 +98,8 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     title: "メタ・ウニタスサーガ",
     path: "/meta-unitas-saga",
     searchHash: "top",
-    description: "仮面ライダーメタ・ウニタスサーガの特設サイト。変身音声、スペック、性能比較、変身、基幹システム、固有能力、装甲・支援機構、形態段階、専用武装、必殺技を掲載。",
+    description:
+      "仮面ライダーメタ・ウニタスサーガの特設サイト。変身音声、スペック、性能比較、変身、基幹システム、固有能力、装甲・支援機構、形態段階、専用武装、必殺技を掲載。",
     aliases: ["meta unitas saga", "メタウニタスサーガ", "メタ・ウニタスサーガ・ウルトラ"],
   },
   {
@@ -98,7 +107,8 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     title: "映画四部作『仮面ライダーサーガ』",
     path: "/saga-cinema",
     searchHash: "top",
-    description: "『仮面ライダーサーガ』本編をリメイクする映画4部作。邂逅、覚醒、激情、終末。ディセプションワールド内の映画特設ページ。",
+    description:
+      "『仮面ライダーサーガ』本編をリメイクする映画4部作。邂逅、覚醒、激情、終末。ディセプションワールド内の映画特設ページ。",
     aliases: ["saga cinema", "映画四部作", "邂逅", "覚醒", "激情", "終末"],
   },
   {
@@ -106,7 +116,8 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     title: "展示ツアー",
     path: "/gallery-tours",
     searchHash: "main",
-    description: "星の光、雨の動き、静かな横顔。テーマを選んで、ディセプションワールドの作品をゆっくり巡る展示ツアー。",
+    description:
+      "星の光、雨の動き、静かな横顔。テーマを選んで、ディセプションワールドの作品をゆっくり巡る展示ツアー。",
     aliases: ["gallery tours", "展示", "ツアー"],
   },
   {

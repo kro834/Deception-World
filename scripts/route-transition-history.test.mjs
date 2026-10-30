@@ -7,6 +7,7 @@ import {
   preloadRouteWithDeadline,
   ROUTE_WARMUP_DEADLINE_MS,
 } from "../src/lib/route-warmup-deadline.ts";
+import { createTransitionDecorationClock } from "../src/lib/transition-decoration-clock.ts";
 import { REXONANCE_ENTRY_TIMINGS } from "../src/lib/rexonance-calls.ts";
 
 const source = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
@@ -157,9 +158,8 @@ function mount(
   const root = {
     dataset: {},
     setAttribute(name, value) {
-      this.dataset[
-        name.slice(5).replace(/-([a-z])/g, (_, character) => character.toUpperCase())
-      ] = String(value);
+      this.dataset[name.slice(5).replace(/-([a-z])/g, (_, character) => character.toUpperCase())] =
+        String(value);
     },
     removeAttribute(name) {
       delete this.dataset[
@@ -256,6 +256,7 @@ function mount(
           },
         };
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
+      if (name === "@/lib/transition-decoration-clock") return { createTransitionDecorationClock };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       if (name === "@/lib/rexonance-calls")
         return { REXONANCE_ENTRY_TIMINGS, REXONANCE_SUIT_LATE_MS: 300 };
@@ -306,6 +307,7 @@ function mount(
   };
   return {
     go: tree.props.value.go,
+    skipDecoration: () => tree.props.children.find((child) => child?.props?.onSkip)?.props.onSkip(),
     root,
     navigations,
     gates,
@@ -1136,4 +1138,90 @@ test("the fixture rejects a stalled operation within its flush budget instead of
     /must settle without a stuck frame or hold/,
   );
   assert.equal(frames, 24);
+});
+
+for (const to of ["/gallery", "/managers/zeus", "/form-archive", "/characters/dante"]) {
+  test(`skip during ${to} warmup removes decoration but never resolves the route`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to });
+    await ui.flushFrames();
+    ui.skipDecoration();
+    assert.equal(
+      ui.root.dataset.loading,
+      undefined,
+      "skip immediately releases the decorative lock",
+    );
+    for (let i = 0; i < 6; i++) await ui.flushFrames();
+    assert.equal(ui.navigations.length, 0, "skip is not destination readiness");
+    ui.releaseWarmup();
+    await settleGo(ui, pending);
+    assert.deepEqual(
+      ui.navigations.map(({ to }) => to),
+      [to],
+    );
+    assert.equal(ui.root.dataset.loading, undefined);
+    ui.cleanup();
+  });
+}
+
+test("the final selected destination supersedes a pending cover without duplicate history", async () => {
+  const ui = mount();
+  const stale = ui.go({ to: "/gallery" });
+  await ui.flushFrames();
+  const latest = ui.go({ to: "/managers/zeus" });
+  ui.releaseWarmup();
+  await settleGo(ui, stale);
+  await settleGo(ui, latest);
+  assert.deepEqual(
+    ui.navigations.map(({ to }) => to),
+    ["/managers/zeus"],
+  );
+  assert.equal(ui.root.dataset.loading, undefined);
+  ui.cleanup();
+});
+
+for (const phase of ["hold", "reveal"]) {
+  test(`skip during gallery ${phase} settles once without waiting for decorative timers`, async () => {
+    const ui = mount();
+    const pending = ui.go({ to: "/gallery" });
+    ui.releaseWarmup();
+    if (phase === "hold") {
+      await flushUntil(ui, () => ui.pendingTimerDelays().includes(720), "cover hold starts");
+    } else {
+      await flushUntil(ui, () => ui.gates.at(-1)?.phase === "revealing", "reveal starts", {
+        timers: true,
+      });
+    }
+    ui.skipDecoration();
+    let done = false;
+    pending.then(() => {
+      done = true;
+    });
+    await flushUntil(
+      ui,
+      () => done,
+      "skip settles using frames, without advancing decorative timers",
+    );
+    assert.deepEqual(
+      ui.navigations.map(({ to }) => to),
+      ["/gallery"],
+    );
+    assert.equal(ui.root.dataset.loading, undefined);
+    ui.cleanup();
+  });
+}
+
+test("repeated selection of the same pending destination keeps one route request and history entry", async () => {
+  const ui = mount();
+  const pending = ui.go({ to: "/gallery" });
+  await ui.go({ to: "/gallery" });
+  await flushUntil(ui, () => ui.routePreloads.length === 1, "one shared route preload starts");
+  assert.equal(ui.routePreloads.length, 1);
+  ui.releaseWarmup();
+  await settleGo(ui, pending);
+  assert.deepEqual(
+    ui.navigations.map(({ to }) => to),
+    ["/gallery"],
+  );
+  ui.cleanup();
 });

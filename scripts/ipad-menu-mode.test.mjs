@@ -46,6 +46,7 @@ function fixture({
   denied = false,
   route = "world",
   motion = false,
+  decorated = motion,
 } = {}) {
   const attrs = new Map([
     ...(ipad ? [["data-ipad-viewport", "contained"]] : []),
@@ -76,12 +77,21 @@ function fixture({
   let notifyTree;
   let notifyResize;
   const sizes = { header: 76, nav: 63 };
+  const decoration = { style: {} };
   const trigger = {
+    clientLeft: 1,
+    clientTop: 1,
+    querySelector: () => (decorated ? decoration : null),
     getBoundingClientRect: () => {
       geometryReads++;
       return attrs.get("data-ipad-menu-scrolled") === "true"
         ? { left: 940, top: 596, width: 60, height: 60 }
-        : { left: 950, top: 16 - Math.min(76, win.scrollY), width: 44, height: 44 };
+        : {
+            left: 950,
+            top: 16 - parseFloat(variables.get("--ipad-header-scroll") || "0"),
+            width: 44,
+            height: 44,
+          };
     },
   };
   const header = {
@@ -204,6 +214,7 @@ function fixture({
     frames,
     observations,
     variables,
+    decoration,
     timers,
     timerHistory,
     reduced,
@@ -261,7 +272,7 @@ test("only actual scroll boundaries launch a measured one-shot convergence or ex
   assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
   assert.equal(f.attrs.get("data-ipad-menu-motion"), "converge");
   assert.equal(f.variables.get("--ipad-menu-origin-x"), "2px");
-  assert.equal(f.variables.get("--ipad-menu-origin-y"), "-664px");
+  assert.equal(f.variables.get("--ipad-menu-origin-y"), "-588px");
   assert.equal(f.geometryReads, 2, "two settled rectangles at the boundary only");
   const oldCompletion = f.timerHistory[0];
   scroll(400);
@@ -395,7 +406,7 @@ test("controller preserves compact state through lock/unlock, batches scrolling 
     f.observations
       .filter(({ options }) => options.attributes)
       .map(({ options }) => options.attributeFilter),
-    [["style", "data-ipad-viewport", "data-viewport-chrome"], ["style"]],
+    [["style", "data-ipad-viewport", "data-viewport-chrome", "data-world-effects"], ["style"]],
   );
   f.emit("scroll");
   dispose();
@@ -627,7 +638,9 @@ test("a failed storage write cannot restore the stale preference on controller r
   const oldWindow = globalThis.window;
   const oldDocument = globalThis.document;
   const f = fixture({ preference: "1" });
-  f.win.localStorage.setItem = () => { throw new Error("QuotaExceededError"); };
+  f.win.localStorage.setItem = () => {
+    throw new Error("QuotaExceededError");
+  };
   globalThis.window = f.win;
   globalThis.document = f.doc;
   let dispose = watchIpadMenuMode(f.win, f.doc);
@@ -690,4 +703,160 @@ test("root has one controller and sidebar toggle is accessible and hydration-saf
     source("src/lib/ipad-menu-mode.js"),
     /scrollTo\(|preventDefault\(|style\.overflow\s*=(?!=)/,
   );
+});
+
+test("a live decorative flight reverses without returning to its source and cancels on resize", () => {
+  const f = fixture({ motion: true, decorated: true });
+  f.win.scrollY = 0;
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  f.win.scrollY = 200;
+  f.emit("scroll");
+  f.flush();
+  const y = () =>
+    Number(f.decoration.style.transform.match(/translate3d\([^,]+, ([^p]+)px/)[1]) +
+    (f.attrs.get("data-ipad-menu-scrolled") === "true" ? 596 : 16 - Math.min(76, f.win.scrollY)) +
+    1;
+  const origin = y();
+  for (let frame = 0; frame < 8; frame++) f.flush();
+  const halfway = y();
+  assert.ok(halfway > origin + 100 && halfway < 600);
+  f.win.scrollY = 0;
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-motion"), "expand");
+  assert.ok(
+    Math.abs(y() - halfway) < 90,
+    "only one frame of travel; no reset to floating/header endpoints",
+  );
+  assert.doesNotMatch(f.decoration.style.transform, /NaN|Infinity/);
+  for (let frame = 0; frame < 54; frame++) f.flush();
+  assert.ok(
+    Math.abs(y() - 16) < 0.1,
+    "expansion seats at the measured header center minus half the shell",
+  );
+  f.emit("resize");
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.timers.size, 0);
+  assert.equal(f.decoration.style.transform, "");
+  assert.equal(f.decoration.style.opacity, "");
+  assert.equal(f.decoration.style.borderRadius, "");
+  assert.equal(f.frames.size, 0, "rotation/split view does not retain a stale decorative loop");
+  dispose();
+});
+
+test("an expanding flight follows the native header without per-frame layout reads", () => {
+  const f = fixture({ motion: true, decorated: true });
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  f.win.scrollY = 70;
+  f.emit("scroll");
+  f.flush();
+  const reads = f.geometryReads;
+  f.win.scrollY = 0;
+  f.emit("scroll");
+  f.flush();
+  for (let frame = 0; frame < 54; frame++) f.flush();
+  const y =
+    Number(f.decoration.style.transform.match(/translate3d\([^,]+, ([^p]+)px/)[1]) +
+    (f.attrs.get("data-ipad-menu-scrolled") === "true" ? 596 : 16 - Math.min(76, f.win.scrollY)) +
+    1;
+  assert.ok(Math.abs(y - 16) < 0.1);
+  assert.equal(f.geometryReads, reads, "scroll retargeting uses the known header displacement");
+  dispose();
+});
+
+test("completion and a modal lock restore the decorative element's pre-flight inline styles", () => {
+  const f = fixture({ motion: true, decorated: true });
+  f.decoration.style.transform = "none";
+  f.decoration.style.opacity = "0.7";
+  f.decoration.style.borderRadius = "10px";
+  f.win.scrollY = 0;
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  const scroll = (y) => {
+    f.win.scrollY = y;
+    f.emit("scroll");
+    f.flush();
+  };
+  scroll(200);
+  f.expireMotion();
+  assert.deepEqual(f.decoration.style, {
+    transform: "none",
+    opacity: "0.7",
+    borderRadius: "10px",
+    width: "",
+    height: "",
+    boxShadow: "",
+  });
+  scroll(0);
+  for (let frame = 0; frame < 4; frame++) f.flush();
+  f.doc.body.style.position = "fixed";
+  f.notifyStyle();
+  f.flush();
+  assert.deepEqual(f.decoration.style, {
+    transform: "none",
+    opacity: "0.7",
+    borderRadius: "10px",
+    width: "",
+    height: "",
+    boxShadow: "",
+  });
+  assert.equal(f.frames.size, 0);
+  assert.equal(f.timers.size, 0);
+  dispose();
+});
+
+test("economy keeps the settled target without starting a spring, and cancels an active flight", () => {
+  const f = fixture({ motion: true, decorated: true });
+  f.win.scrollY = 0;
+  f.attrs.set("data-world-effects", "economy");
+  const dispose = watchIpadMenuMode(f.win, f.doc);
+  f.flush();
+  f.win.scrollY = 200;
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.timers.size, 0);
+  assert.equal(f.frames.size, 0);
+  assert.equal(f.geometryReads, 0);
+  f.attrs.delete("data-world-effects");
+  f.notifyRoot("data-world-effects");
+  f.flush();
+  f.win.scrollY = 0;
+  f.emit("scroll");
+  f.flush();
+  assert.equal(f.attrs.get("data-ipad-menu-motion"), "expand");
+  f.attrs.set("data-world-effects", "economy");
+  f.notifyRoot("data-world-effects");
+  f.flush();
+  assert.equal(f.attrs.has("data-ipad-menu-motion"), false);
+  assert.equal(f.timers.size, 0);
+  assert.equal(f.frames.size, 0);
+  assert.equal(f.decoration.style.transform, "");
+  dispose();
+});
+
+test("convergence starts at the last painted header position before a large scroll or nav exit", () => {
+  for (const route of ["world", "gallery", "dream"]) {
+    for (const previousScroll of [0, 30]) {
+      const f = fixture({ route, motion: true });
+      f.win.scrollY = previousScroll;
+      const dispose = watchIpadMenuMode(f.win, f.doc);
+      f.flush();
+      f.win.scrollY = 240;
+      f.emit("scroll");
+      f.flush();
+      const translatedY = Number(
+        f.decoration.style.transform.match(/translate3d\([^,]+, ([^p]+)px/)[1],
+      );
+      const visibleTop = translatedY + 596 + 1;
+      assert.equal(visibleTop, 16 - previousScroll, `${route} preserves the last painted origin`);
+      assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+      assert.equal(f.geometryReads, 2, "only boundary endpoints need layout reads");
+      dispose();
+    }
+  }
 });

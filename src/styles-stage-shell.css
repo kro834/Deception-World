@@ -763,7 +763,8 @@ html[data-family="library"] body .search-page > header.search-topbar > a.search-
 /* ---------- The sheet: the whole screen ----------
    The areas follow the menu's own order (SPECIAL, then STORIES), so the
    Tab order and the reading order are the same at every width. */
-html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
+/* Layout belongs to the menu, independently of optional pointer effects. */
+html[data-family] body #site-side-panel.side-panel[data-command-atlas] {
   --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 18px);
   --sp-pad-inline: max(var(--sh-gutter), calc((100vw - 1680px) / 2));
   left: 0;

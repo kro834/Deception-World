@@ -1,5 +1,6 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { startTransition } from "react";
+import { animateSelectionArrival } from "@/lib/selection-arrival.js";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { assetsWarmed, MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -942,11 +943,19 @@ export function WorldHome() {
   const [posterControlsFocused, setPosterControlsFocused] = useState(false);
   const [shuffling, setShuffling] = useState(false);
   const [ambientPaused, setAmbientPaused] = useState(
-    () =>
-      typeof document !== "undefined" &&
-      (document.hidden || openingHandoffHolds()),
+    () => typeof document !== "undefined" && (document.hidden || openingHandoffHolds()),
   );
   const [managerTab, setManagerTab] = useState(0);
+  const previousManagerTab = useRef(0);
+  useLayoutEffect(() => {
+    const previous = previousManagerTab.current;
+    previousManagerTab.current = managerTab;
+    if (previous === managerTab) return;
+    return animateSelectionArrival(
+      shellRef.current?.querySelector<HTMLElement>(".manager-archive-panel") ?? null,
+      managerTab > previous ? 1 : -1,
+    );
+  }, [managerTab]);
   const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(0);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
@@ -1114,10 +1123,7 @@ export function WorldHome() {
     };
     const handleOpeningHandoff = (event: Event) => {
       const detail = (event as CustomEvent<{ active?: boolean }>).detail;
-      handoffActive =
-        typeof detail?.active === "boolean"
-          ? detail.active
-          : openingHandoffHolds();
+      handoffActive = typeof detail?.active === "boolean" ? detail.active : openingHandoffHolds();
       syncAmbientPause();
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -1826,24 +1832,11 @@ export function WorldHome() {
             />
           </span>
         </div>
-        <div className="mr-hero-hud" aria-hidden="true">
-          <i className="mr-hero-scan" />
-          <i className="mr-hero-beam" />
-          <span className="mr-hero-floor">
-            <i />
-          </span>
-        </div>
         {/* The key visual's streamlined light behind the stage (styles-world-zenith.css). */}
         <div className="zn-hero-light" aria-hidden="true">
           <i className="zn-trail zn-trail-a" />
           <i className="zn-trail zn-trail-b" />
           <i className="zn-bloom" />
-        </div>
-        {/* The special sites' HUD over the stage: a scan grid, corner
-            brackets and a scale bar (styles-world-special.css). */}
-        <div className="ws-hero-hud" aria-hidden="true">
-          <i className="ws-hero-bracket" />
-          <i className="ws-hero-scale" />
         </div>
         <div className="film-hero-identity" data-film-reveal>
           <FilmTextScan />

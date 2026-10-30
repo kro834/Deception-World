@@ -13,6 +13,32 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section {
   box-shadow: 0 12px 32px rgb(0 0 0 / 16%);
 }
 
+/* One opening spread per person; subsequent records are quiet reading pages.
+   The content and section anchors remain identical across both treatments. */
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section[data-record-role="lead"] {
+  padding-block: clamp(32px, 5vw, 72px);
+  border-inline: 0;
+  border-radius: 0;
+  background: linear-gradient(120deg, #f5f6f2, #e5ecea);
+  box-shadow: none;
+}
+main.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section[data-record-role="lead"]::before,
+main.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section[data-record-role="detail"]::before {
+  content: none;
+}
+
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section[data-record-role="detail"] {
+  border-inline: 0;
+  border-radius: 0;
+  background: #eaf0ee;
+  box-shadow: none;
+}
+main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-body {
+  max-width: 68ch;
+}
+
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section:target {
   border-color: var(--record-accent);
   box-shadow: 0 0 0 2px var(--record-accent);

@@ -27,8 +27,10 @@ dialog.quick-search {
   box-sizing: border-box;
   width: min(720px, calc(100vw - 32px));
   max-width: none;
-  max-height: min(680px, calc(100dvh - 48px));
-  margin: max(48px, 9vh) auto auto;
+  /* Reserve both the actual top offset and a bottom escape margin. */
+  --qs-top: max(48px, 9vh);
+  max-height: min(680px, calc(100dvh - var(--qs-top) - 24px));
+  margin: var(--qs-top) auto auto;
   padding: 0;
   overflow: visible;
   border: 0;
@@ -70,7 +72,7 @@ dialog.quick-search *::after {
   position: relative;
   display: flex;
   flex-direction: column;
-  max-height: min(680px, calc(100dvh - 48px));
+  max-height: min(680px, calc(100dvh - var(--qs-top) - 24px));
   border: 1px solid rgb(var(--qs-ice-rgb) / 0.3);
   border-radius: 6px;
   background:
@@ -561,7 +563,7 @@ dialog.quick-search :is(button, a):focus-visible {
    economy rendering. */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) dialog.quick-search[open] .quick-search-panel {
-    animation: quick-search-in 0.24s var(--qs-ease);
+    animation: quick-search-in 0.52s var(--qs-ease);
   }
   html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option {
     transition:
@@ -577,7 +579,7 @@ dialog.quick-search :is(button, a):focus-visible {
 @keyframes quick-search-in {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: perspective(1000px) translateY(-26px) rotateX(-6deg) scale(0.96);
   }
 }
 @media (forced-colors: active) {
@@ -781,6 +783,38 @@ dialog.quick-search .quick-search-foot {
     font-size: 15px;
   }
 }
+/* A phone rotated sideways keeps the sheet inside both notch insets. The
+   compact head/field leave a useful result row even with a 375px viewport. */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search {
+    --qs-top: max(8px, env(safe-area-inset-top, 0px));
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    width: min(
+      760px,
+      calc(
+        100vw - max(12px, env(safe-area-inset-left, 0px)) -
+          max(12px, env(safe-area-inset-right, 0px))
+      )
+    );
+    margin: var(--qs-top) auto auto;
+    max-height: calc(100dvh - var(--qs-top) - max(8px, env(safe-area-inset-bottom, 0px)));
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-panel {
+    max-height: calc(100dvh - var(--qs-top) - max(8px, env(safe-area-inset-bottom, 0px)));
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-head {
+    padding: 8px 12px 0;
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-field {
+    min-height: 44px;
+    margin: 8px 12px;
+  }
+  html:not([data-ipad-viewport="contained"]) dialog.quick-search .quick-search-field input {
+    min-height: 44px;
+  }
+}
+
 @media (forced-colors: active) {
   dialog.quick-search .quick-search-panel,
   dialog.quick-search .quick-search-field,
@@ -793,5 +827,75 @@ dialog.quick-search .quick-search-foot {
   }
   dialog.quick-search .quick-search-art {
     border-color: CanvasText;
+  }
+}
+
+/* The shared dg-dialog owns native top-layer entry/exit. Internal arrivals
+   only move painted content; the result list and its scroll boxes stay put. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html:not([data-world-effects="economy"]) dialog.quick-search.dg-dialog {
+    --dg-dur: 320ms;
+    --dg-dur-fast: 220ms;
+    transform-origin: 50% 0;
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search[open] .quick-search-group {
+    animation: quick-search-results-seat 440ms var(--qs-ease) backwards;
+  }
+  html:not([data-world-effects="economy"])
+    dialog.quick-search[open]
+    .quick-search-group:nth-child(2) {
+    animation-delay: 45ms;
+  }
+  html:not([data-world-effects="economy"])
+    dialog.quick-search[open]
+    .quick-search-group:nth-child(n + 3) {
+    animation-delay: 85ms;
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option {
+    transition:
+      background-color 160ms ease,
+      box-shadow 220ms ease;
+  }
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-option-title,
+  html:not([data-world-effects="economy"]) dialog.quick-search .quick-search-art img {
+    transition: transform 320ms var(--qs-ease);
+  }
+  html:not([data-world-effects="economy"])
+    dialog.quick-search
+    .quick-search-option[data-active="true"]
+    .quick-search-option-title {
+    transform: translateX(5px);
+  }
+  html:not([data-world-effects="economy"])
+    dialog.quick-search
+    .quick-search-option[data-active="true"]
+    .quick-search-art
+    img {
+    transform: scale(1.12);
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])
+    dialog.quick-search
+    .quick-search-option:hover
+    .quick-search-option-title {
+    transform: translateX(5px);
+  }
+  html:not([data-world-effects="economy"])
+    dialog.quick-search
+    .quick-search-option:hover
+    .quick-search-art
+    img {
+    transform: scale(1.12);
+  }
+}
+@keyframes quick-search-results-seat {
+  from {
+    opacity: 0.6;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

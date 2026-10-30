@@ -1,0 +1,400 @@
+/* ================================================================
+   Future motion — the site's physical motion layer (2026-10-30).
+   Root sheet, linked after styles-dynamic-gui.css in src/routes/__root.tsx;
+   the desktop tilt and magnet are driven by src/lib/fx-motion.js.
+
+   One language on every family except the special sites' own staging:
+   - Springs. Interactive motion (press settle, hover lean, in-page swaps)
+     runs on damped springs, sampled into linear() curves with the same
+     constants as the JS integrator: --fx-spring (ζ 0.76, ω 16: a small
+     2.5 % overshoot) and --fx-spring-bounce (ζ 0.58, ω 18: 10 %, for the
+     release of a press). Arrivals keep the house expo-out (--fx-ease-out).
+   - Scan arrivals. Content arrives through a scan edge: it is uncovered
+     from the top by a moving clip line while a brief light lift fades from
+     it, then the clip is dropped (backwards fill only, so focus rings and
+     shadows are never clipped at rest).
+   - Cascades. Lists that open (the side menu, quick search) arrive row by
+     row, 28 ms apart, each row's own reflection sweeping with it.
+   - Light follows the pointer. Tilted cards and the primary action carry a
+     soft sheen at the pointer (--fx-px / --fx-py from the helper).
+
+   Gates. Every animation sits behind
+     @media (prefers-reduced-motion: no-preference)
+     html:not([data-world-effects="economy"])
+   Reduced motion and economy keep the existing, calm behaviour (no tilt, no
+   spring, no scan). The scan's clip-path and light lift are also skipped on
+   Android renderers and iOS 18 (cheap fade and rise only there). Nothing
+   loops; the only light is a single one-shot lift on a small area, far below
+   one flash a second. Only transform, translate, scale, opacity, filter and
+   clip-path move; nothing animates layout.
+   The special sites (html[data-family="special"]) keep their own staging:
+   their suit-up transitions, IMPACT/VS and reveals are not touched here.
+
+   TOKENS
+     --fx-spring          UI spring (600 ms)        --fx-dur-spring
+     --fx-spring-bounce   press release (620 ms)    --fx-dur-bounce
+     --fx-ease-out        the house expo-out curve
+     --fx-key / --fx-accent / --fx-gold   light colours (follow the colour
+       layer's --dwc-* tokens through the dynamic GUI kit's --dg-*)
+     --fx-stagger         28 ms between cascading rows
+   ================================================================ */
+
+:root {
+  --fx-ease-out: var(--dw-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  /* Fallbacks for engines without linear(): close cubic approximations. */
+  --fx-spring: cubic-bezier(0.22, 1.12, 0.36, 1);
+  --fx-spring-bounce: cubic-bezier(0.3, 1.45, 0.4, 1);
+  --fx-dur-spring: 600ms;
+  --fx-dur-bounce: 620ms;
+  --fx-stagger: 28ms;
+  --fx-key: var(--dg-key, #7ae8ff);
+  --fx-key-rgb: var(--dg-key-rgb, 122 232 255);
+  --fx-accent: var(--dg-pink, #ff5fc8);
+  --fx-accent-rgb: var(--dg-pink-rgb, 255 95 200);
+  --fx-gold: var(--dg-gold, #f0cf86);
+  --fx-px: 50%;
+  --fx-py: 50%;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    /* ζ 0.76, ω 16 rad/s over 600 ms (src/lib/fx-motion.js integrates the same). */
+    --fx-spring: linear(
+      0, 0.043, 0.147, 0.279, 0.419, 0.551, 0.669, 0.767, 0.847, 0.908, 0.953, 0.985, 1.005,
+      1.017, 1.023, 1.025, 1.024, 1.022, 1.019, 1.015, 1.012, 1.009, 1.006, 1.004, 1.002, 1.001, 1
+    );
+    /* ζ 0.58, ω 18 rad/s over 620 ms. */
+    --fx-spring-bounce: linear(
+      0, 0.06, 0.203, 0.384, 0.571, 0.739, 0.878, 0.982, 1.051, 1.09, 1.106, 1.104, 1.091, 1.073,
+      1.053, 1.034, 1.018, 1.006, 0.997, 0.992, 0.989, 0.989, 0.99, 0.991, 0.994, 0.996, 0.997,
+      0.999, 1
+    );
+  }
+}
+
+/* ================================================================
+   1. Press: the sink stays quick; the release springs back.
+   src/styles-press-feedback.css swaps its transition list in only while
+   data-press is present ("touch"/"in" while held, "out" for the settle).
+   On the settle, scale rides the bounce spring, so a tapped control
+   rebounds a touch past rest and lands; the light still eases out.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-press-ready]:not([data-world-effects="economy"])
+    body
+    [data-press="out"][data-press][data-press] {
+    transition-duration:
+      var(--fx-dur-bounce), var(--dw-dur-settle, 320ms), var(--dw-dur-state, 180ms),
+      var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms),
+      var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms), var(--dw-dur-state, 180ms);
+    transition-timing-function:
+      var(--fx-spring-bounce), var(--fx-ease-out), var(--fx-ease-out), var(--fx-ease-out),
+      var(--fx-ease-out), var(--fx-ease-out), var(--fx-ease-out), var(--fx-ease-out),
+      var(--fx-ease-out);
+  }
+}
+
+/* ================================================================
+   2. Pointer light (desktop). The helper marks the hovered card or
+   control with data-fx-hover and writes its spring-driven transform and
+   --fx-px / --fx-py inline. Here: the sheen that follows the pointer, on
+   surfaces whose ::after is free. Mouse only.
+   ================================================================ */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-fx-ready]:not([data-world-effects="economy"])
+    body
+    :is(.search-result-card, .primary-action)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      circle 180px at var(--fx-px) var(--fx-py),
+      rgb(var(--fx-key-rgb) / 16%),
+      rgb(var(--fx-accent-rgb) / 6%) 45%,
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 260ms var(--fx-ease-out);
+  }
+
+  html[data-fx-ready]:not([data-world-effects="economy"])
+    body
+    :is(.search-result-card, .primary-action)[data-fx-hover]::after {
+    opacity: 1;
+  }
+
+  /* The tilted card turns about its own centre and keeps its art crisp. */
+  html[data-fx-ready]:not([data-world-effects="economy"])
+    body
+    :is(
+      .manager-slot-grid > .signal,
+      .other-archive-card,
+      .search-result-card,
+      .rider-special-site-card
+    )[data-fx-hover] {
+    transform-origin: 50% 50%;
+    backface-visibility: hidden;
+  }
+}
+
+/* ================================================================
+   3. Scan arrivals: the dynamic GUI kit's .dg-reveal (the dossiers,
+   records, download page). The element rises on the house curve while a
+   clip line uncovers it top to bottom and a light lift fades from it.
+   The kit's own hold and stagger (--dg-i) are kept.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"]):not(
+      [data-android-renderer]
+    ):not([data-ios18-renderer])
+    .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
+    animation: fx-scan-arrive 640ms var(--fx-ease-out) calc(var(--dg-i, 0) * 70ms) backwards;
+  }
+}
+
+/* Touch screens: the clip line and the light lift repaint the whole panel
+   every frame (WebKit composites neither clip-path nor filter), which read
+   as a hitch while scrolling a file on an iPhone. There the arrival keeps
+   its rise and fade only, on the compositor. */
+@media (prefers-reduced-motion: no-preference) and (hover: none) and (pointer: coarse) {
+  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"]):not(
+      [data-android-renderer]
+    ):not([data-ios18-renderer])
+    .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
+    animation-name: fx-rise-arrive;
+  }
+}
+
+@keyframes fx-rise-arrive {
+  0% {
+    opacity: 0;
+    translate: 0 var(--dg-rise, 14px);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes fx-scan-arrive {
+  0% {
+    opacity: 0;
+    translate: 0 var(--dg-rise, 14px);
+    clip-path: inset(0 0 100% 0);
+    filter: brightness(1.55) saturate(1.2);
+  }
+  45% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    clip-path: inset(0 0 0 0);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* ================================================================
+   4. The side menu: a cascade. Each row's label slides in a beat after
+   the one above (28 ms apart), group after group, and the special-site
+   tiles' reflection (the command chrome's ::after sweep) runs across the
+   tiles one after another, so a band of light travels through the menu
+   as it opens. Rows stay readable and tappable throughout (the
+   labels start at 55 % opacity, never hidden). The group rules seat in
+   the same order.
+   ================================================================ */
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button)
+    > span {
+    animation: fx-row-in 560ms var(--fx-spring) backwards;
+    animation-delay: calc(var(--fx-row, 0) * var(--fx-stagger) + var(--fx-group, 0) * 60ms);
+  }
+
+  /* The special-site tiles' reflection (styles-command-chrome.css) runs
+     across the tiles one after another, a beat behind their labels. */
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    [data-special-tiles]
+    > a::after {
+    animation-delay: calc(var(--fx-row, 0) * 45ms + var(--fx-group, 0) * 60ms + 60ms);
+    animation-fill-mode: backwards;
+  }
+
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel.side-panel[data-open="true"]
+    > .side-panel-group
+    > p {
+    animation-delay: calc(var(--fx-group, 0) * 60ms);
+    animation-fill-mode: backwards;
+  }
+}
+
+/* Row and group indices for the cascade (nine rows; later rows share the last beat). */
+#site-side-panel .side-panel-links > :nth-child(2) {
+  --fx-row: 1;
+}
+#site-side-panel .side-panel-links > :nth-child(3) {
+  --fx-row: 2;
+}
+#site-side-panel .side-panel-links > :nth-child(4) {
+  --fx-row: 3;
+}
+#site-side-panel .side-panel-links > :nth-child(5) {
+  --fx-row: 4;
+}
+#site-side-panel .side-panel-links > :nth-child(6) {
+  --fx-row: 5;
+}
+#site-side-panel .side-panel-links > :nth-child(7) {
+  --fx-row: 6;
+}
+#site-side-panel .side-panel-links > :nth-child(8) {
+  --fx-row: 7;
+}
+#site-side-panel .side-panel-links > :nth-child(n + 9) {
+  --fx-row: 8;
+}
+#site-side-panel > .side-panel-group:nth-of-type(3) {
+  --fx-group: 1;
+}
+#site-side-panel > .side-panel-group:nth-of-type(4) {
+  --fx-group: 2;
+}
+#site-side-panel > .side-panel-group:nth-of-type(n + 5) {
+  --fx-group: 3;
+}
+
+@keyframes fx-row-in {
+  from {
+    opacity: 0.55;
+    translate: 14px 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+/* ================================================================
+   5. Quick search: the sheet springs down into place, and its rows
+   follow it in a cascade, each through a scan edge.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) body dialog.quick-search[open] .quick-search-panel {
+    animation: fx-sheet-in 520ms var(--fx-spring);
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    dialog.quick-search[open]
+    .quick-search-group
+    :is(.quick-search-option) {
+    animation: fx-option-in 480ms var(--fx-ease-out) backwards;
+    animation-delay: calc(90ms + var(--fx-row, 0) * var(--fx-stagger));
+  }
+
+  html:not([data-world-effects="economy"]):not([data-android-renderer])
+    body
+    dialog.quick-search[open]
+    .quick-search-group
+    :is(.quick-search-option) {
+    animation-name: fx-option-scan;
+  }
+}
+
+dialog.quick-search .quick-search-group :nth-child(2 of .quick-search-option) {
+  --fx-row: 1;
+}
+dialog.quick-search .quick-search-group :nth-child(3 of .quick-search-option) {
+  --fx-row: 2;
+}
+dialog.quick-search .quick-search-group :nth-child(4 of .quick-search-option) {
+  --fx-row: 3;
+}
+dialog.quick-search .quick-search-group :nth-child(5 of .quick-search-option) {
+  --fx-row: 4;
+}
+dialog.quick-search .quick-search-group :nth-child(n + 6 of .quick-search-option) {
+  --fx-row: 5;
+}
+
+@keyframes fx-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fx-option-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes fx-option-scan {
+  0% {
+    opacity: 0;
+    translate: 0 8px;
+    clip-path: inset(0 100% 0 0);
+    filter: brightness(1.6);
+  }
+  50% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    clip-path: inset(0 0 0 0);
+    filter: brightness(1);
+  }
+}
+
+/* ================================================================
+   6. In-page switches on the World: the rider console, the world column
+   and the manager archive swap their content on the UI spring instead of
+   a plain ease, so a switch lands with a small, physical settle. Their
+   keyframes and durations are unchanged.
+   ================================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    :is(
+      .rider-visual,
+      .rider-copy-block,
+      .world-column-copy,
+      .world-column-stack-item.is-active,
+      .manager-archive-panel,
+      .threat-copy
+    ) {
+    animation-timing-function: var(--fx-spring);
+  }
+
+  /* The gallery viewer's stage settles on the same spring as it opens. */
+  html:not([data-world-effects="economy"])
+    .gallery-page
+    .gallery-viewer[open]
+    .gallery-viewer-stage {
+    animation-timing-function: var(--fx-spring);
+  }
+}

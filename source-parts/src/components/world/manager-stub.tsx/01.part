@@ -438,3 +438,4 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                     ))}
                   </div>
                 </section>
+              ) : null}

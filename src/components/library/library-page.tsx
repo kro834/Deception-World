@@ -485,18 +485,7 @@ export function LibraryPage({
                 <br />
                 資料を見つける。
               </h1>
-              <p>
-                人物の名前から、物語の章へ。公開された資料を横断して探し、気になるページにしおりを残せます。
-              </p>
-              <div className="library-index-summary">
-                <span>
-                  <b>{LIBRARY_ENTRIES.length}</b> 資料への入口
-                </span>
-              </div>
               <nav className="library-jump-links" aria-label="資料室内の移動">
-                <a href="#library-browser" onClick={quietFlush}>
-                  資料を探す <span aria-hidden="true">↓</span>
-                </a>
                 <a href="#my-library" onClick={quietFlush}>
                   しおり・履歴
                 </a>
@@ -505,102 +494,10 @@ export function LibraryPage({
                 </a>
               </nav>
               <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
-                本文から検索 <span aria-hidden="true">↗</span>
+                全文検索 <span aria-hidden="true">↗</span>
               </GuardedLink>
             </div>
-            <div className="library-cast-board">
-              <div className="library-cast-heading">
-                <h2>八人のライダー</h2>
-                <span>人物資料</span>
-              </div>
-              <nav
-                className="library-cast"
-                aria-label="ライダーの人物資料"
-                onFocus={(event) => {
-                  // Keep a keyboard-selected file fully visible on short screens.
-                  const tile = event.target;
-                  if (tile instanceof HTMLElement && tile.matches(":focus-visible"))
-                    tile.scrollIntoView({ block: "nearest", inline: "nearest" });
-                }}
-              >
-                {CAST.map(({ entry, no, tone, src, pos }, index) => (
-                  <GuardedLink
-                    key={entry.id}
-                    to={entry.path}
-                    assets={[]}
-                    className="library-cast-tile"
-                    style={{ "--cast-tone": tone } as CSSProperties}
-                    beforeNavigate={quietFlush}
-                  >
-                    <span className="library-cast-art" aria-hidden="true">
-                      {/* Reuse published delivery variants; later rows load lazily. */}
-                      <img
-                        {...recordImage(src, "cast")}
-                        alt=""
-                        loading={index < 2 ? undefined : "lazy"}
-                        decoding="async"
-                        draggable={false}
-                        style={{ objectPosition: pos }}
-                      />
-                    </span>
-                    <span className="library-cast-no" aria-hidden="true">
-                      RIDER {no}
-                    </span>
-                    <span className="library-cast-name">
-                      <DisplayName value={entry.title} />
-                    </span>
-                  </GuardedLink>
-                ))}
-              </nav>
-            </div>
           </section>
-          <section className="library-discovery" aria-labelledby="library-discovery-title">
-            <h2 id="library-discovery-title">種類から探す</h2>
-            <div className="library-index-meter" role="group" aria-label="種類から探す">
-              {KIND_COUNTS.map(([id, count]) => (
-                <button
-                  key={id}
-                  type="button"
-                  data-kind={id}
-                  aria-pressed={kind === id}
-                  onClick={() => openKind(id)}
-                >
-                  <RecordArtFrame
-                    art={pathArt(KIND_ART[id])}
-                    title={LIBRARY_KINDS[id]}
-                    slot="continue"
-                  />
-                  <span className="library-kind-name">{LIBRARY_KINDS[id]}</span>
-                  <span className="library-kind-count">
-                    <b>{count}</b> 件の資料
-                  </span>
-                  <span className="library-kind-arrow" aria-hidden="true">
-                    ↘
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-          <LibraryHub
-            saved={saved}
-            ready={ready}
-            error={error}
-            onBrowseSaved={() => {
-              changeScope("saved");
-              window.requestAnimationFrame(() => {
-                resultsRef.current?.scrollIntoView({ block: "start" });
-                resultsRef.current?.focus({ preventScroll: true });
-              });
-            }}
-          />
-          <LibraryInquiry
-            guide={guide}
-            onGuideChange={(id) => {
-              void flushQuery()
-                .then(() => onGuideChange(id))
-                .catch(() => undefined);
-            }}
-          />
           <section
             className="library-browser"
             id="library-browser"
@@ -608,7 +505,6 @@ export function LibraryPage({
           >
             <div className="library-browser-heading">
               <h2 id="library-browser-title">資料を探す</h2>
-              <p>{LIBRARY_ENTRIES.length}件の入口を、種類ごとに並べています。</p>
             </div>
             <form
               className="library-browse-controls"
@@ -625,9 +521,6 @@ export function LibraryPage({
                 resultsRef.current?.scrollIntoView({ block: "start" });
               }}
             >
-              <p className="library-search-note">
-                資料名や人物名から入口を探せます。本文の中の言葉は「本文から検索」へ。
-              </p>
               <label className="library-search-label" htmlFor="library-search">
                 資料名・人物名・キーワード
               </label>
@@ -796,7 +689,7 @@ export function LibraryPage({
                   className="library-fulltext-inline"
                   onClick={quietFlush}
                 >
-                  「{draft.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
+                  「{draft.trim()}」を全文検索 <span aria-hidden="true">↗</span>
                 </Link>
               ) : null}
             </div>
@@ -882,12 +775,106 @@ export function LibraryPage({
                       className="library-fulltext-inline"
                       onClick={quietFlush}
                     >
-                      「{draft.trim()}」を本文から検索 <span aria-hidden="true">↗</span>
+                      「{draft.trim()}」を全文検索 <span aria-hidden="true">↗</span>
                     </Link>
                   ) : null}
                 </div>
               </div>
             )}
+          </section>
+          <section className="library-discovery" aria-labelledby="library-discovery-title">
+            <h2 id="library-discovery-title">種類から探す</h2>
+            <div className="library-index-meter" role="group" aria-label="種類から探す">
+              {KIND_COUNTS.map(([id, count]) => (
+                <button
+                  key={id}
+                  type="button"
+                  data-kind={id}
+                  aria-pressed={kind === id}
+                  onClick={() => openKind(id)}
+                >
+                  <RecordArtFrame
+                    art={pathArt(KIND_ART[id])}
+                    title={LIBRARY_KINDS[id]}
+                    slot="continue"
+                  />
+                  <span className="library-kind-name">{LIBRARY_KINDS[id]}</span>
+                  <span className="library-kind-count">
+                    <b>{count}</b> 件の資料
+                  </span>
+                  <span className="library-kind-arrow" aria-hidden="true">
+                    ↘
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+          <LibraryHub
+            saved={saved}
+            ready={ready}
+            error={error}
+            onBrowseSaved={() => {
+              changeScope("saved");
+              window.requestAnimationFrame(() => {
+                resultsRef.current?.scrollIntoView({ block: "start" });
+                resultsRef.current?.focus({ preventScroll: true });
+              });
+            }}
+          />
+          <LibraryInquiry
+            guide={guide}
+            onGuideChange={(id) => {
+              void flushQuery()
+                .then(() => onGuideChange(id))
+                .catch(() => undefined);
+            }}
+          />
+          <section className="library-cast-directory" aria-label="ライダーの人物資料">
+            <div className="library-cast-board">
+              <div className="library-cast-heading">
+                <h2>八人のライダー</h2>
+                <span>人物資料</span>
+              </div>
+              <nav
+                className="library-cast"
+                aria-label="ライダーの人物資料"
+                onFocus={(event) => {
+                  // Keep a keyboard-selected file fully visible on short screens.
+                  const tile = event.target;
+                  if (tile instanceof HTMLElement && tile.matches(":focus-visible"))
+                    tile.scrollIntoView({ block: "nearest", inline: "nearest" });
+                }}
+              >
+                {CAST.map(({ entry, no, tone, src, pos }) => (
+                  <GuardedLink
+                    key={entry.id}
+                    to={entry.path}
+                    assets={[]}
+                    className="library-cast-tile"
+                    style={{ "--cast-tone": tone } as CSSProperties}
+                    beforeNavigate={quietFlush}
+                  >
+                    <span className="library-cast-art" aria-hidden="true">
+                      {/* Reuse published delivery variants; later rows load lazily. */}
+                      <img
+                        {...recordImage(src, "cast")}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        draggable={false}
+                        style={{ objectPosition: pos }}
+                      />
+                    </span>
+                    <span className="library-cast-no" aria-hidden="true">
+                      RIDER {no}
+                    </span>
+                    <span className="library-cast-name">
+                      <DisplayName value={entry.title} />
+                    </span>
+                  </GuardedLink>
+                ))}
+              </nav>
+            </div>
           </section>
         </main>
         <footer className="library-footer">

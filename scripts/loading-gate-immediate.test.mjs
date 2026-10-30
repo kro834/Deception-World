@@ -33,7 +33,7 @@ test("covered opening navigation is selected before immediate routes while rider
   // Direct-route behavior must continue excluding every route with a deliberate cover.
   assert.match(
     gate,
-    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\);[\s\S]*?return;/,
+    /if \(\s*!isArchiveTransition &&\s*!isZeusTransition &&\s*!isGalleryTransition &&\s*!isCinemaTransition &&\s*!riderTransitionVariant\s*\) \{[\s\S]*?await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\);[\s\S]*?return;/,
   );
   const directTail = goBlock.slice(directIndex).search(/\n\s+return;\n\s+\}/);
   const directEnd = directTail === -1 ? -1 : directIndex + directTail;
@@ -41,7 +41,7 @@ test("covered opening navigation is selected before immediate routes while rider
   const directBranch = goBlock.slice(directIndex, directEnd);
   assert.match(
     directBranch,
-    /await navigate\(\{ to, hash, search: navigationSearch \?\? \(changesDocument \? undefined : true\) \}\)/,
+    /await navigate\(\{\s*to,\s*hash,\s*search: navigationSearch \?\? \(changesDocument \? undefined : true\),?\s*\}\)/,
     "same-document section jumps preserve search while new documents clear it",
   );
   assert.match(directBranch, /preloadAssets\(assets, \(\) => undefined\)/);

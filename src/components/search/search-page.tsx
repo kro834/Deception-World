@@ -273,7 +273,7 @@ export function SearchPage({
         <div className="search-observatory-desk">
           <section className="search-intro" aria-labelledby="search-title">
             <div>
-              <p className="search-eyebrow">資料検索</p>
+              <p className="search-eyebrow">全文検索</p>
               <h1 id="search-title">記録の先へ。</h1>
               <p className="search-lede">
                 名前から、物語から、気になる言葉から。散らばる記録をつなぎ、読みたい場所へ。

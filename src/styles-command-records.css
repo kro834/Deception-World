@@ -72,10 +72,10 @@ html[data-family="library"] .command-records.search-page.search-observatory .sea
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-intro {
   position: relative;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: clamp(32px, 4.5vw, 72px);
-  padding-block: clamp(40px, 5.5vw, 86px) 52px;
+  padding-block: 24px 20px;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-intro-copy {
   position: relative;
@@ -107,9 +107,9 @@ html[data-family="library"] .command-records.search-page.search-observatory h1 {
   filter: drop-shadow(0 5px 1px #0005);
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-intro h1 {
-  font-size: clamp(35px, 3.75vw, 62px);
+  font-size: clamp(26px, 3.2vw, 40px);
   line-height: 1.4;
-  margin-block: 22px;
+  margin-block: 8px 12px;
 }
 html[data-family="library"]
   .command-records.library-page.library-atelier
@@ -120,32 +120,11 @@ html[data-family="library"]
   line-height: 1.95;
   max-width: 31em;
 }
-html[data-family="library"] .command-records.library-page.library-atelier .library-index-summary {
-  display: flex;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid var(--records-line);
-}
-html[data-family="library"]
-  .command-records.library-page.library-atelier
-  .library-index-summary
-  > span {
-  color: var(--records-muted);
-  font-size: 13px;
-}
-html[data-family="library"]
-  .command-records.library-page.library-atelier
-  .library-index-summary
-  > span:first-child
-  > b {
-  color: var(--records-gold);
-  font-size: 32px;
-}
 html[data-family="library"] .command-records.library-page.library-atelier .library-jump-links {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
-  margin-top: 22px;
+  margin-top: 12px;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-jump-links a {
   justify-content: center;
@@ -159,20 +138,6 @@ html[data-family="library"] .command-records.library-page.library-atelier .libra
   box-shadow:
     inset 0 1px #d9f5ff12,
     3px 4px 0 #02081088;
-}
-html[data-family="library"]
-  .command-records.library-page.library-atelier
-  .library-jump-links
-  a:first-child {
-  grid-column: 1 / -1;
-  justify-content: space-between;
-  max-width: none;
-  color: #0a1c29;
-  background: linear-gradient(120deg, #f2fcff, #afc7d5 49%, #dbeef7 70%);
-  border-color: #e8faff;
-  border-left: 4px solid var(--records-ice);
-  font-size: 16px;
-  font-weight: 800;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-fulltext-link {
   min-height: 48px;
@@ -853,7 +818,7 @@ html[data-family="library"]
 }
 @media (max-width: 1179px) {
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 28px;
   }
   html[data-family="library"] .command-records.library-page.library-atelier .library-cast-board {
@@ -913,13 +878,13 @@ html[data-family="library"]
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro {
     grid-template-columns: minmax(0, 1fr);
     gap: 36px;
-    padding-top: 40px;
+    padding-block: 24px 20px;
   }
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro-copy {
     max-width: 650px;
   }
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro h1 {
-    font-size: clamp(35px, 6vw, 54px);
+    font-size: clamp(26px, 3.2vw, 40px);
   }
   html[data-family="library"] .command-records.library-page.library-atelier .library-cast {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -939,16 +904,16 @@ html[data-family="library"]
 }
 @media (max-width: 599px) {
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro {
-    padding-block: 30px 34px;
+    padding-block: 24px 20px;
     gap: 28px;
   }
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro-copy {
     padding-left: 14px;
   }
   html[data-family="library"] .command-records.library-page.library-atelier .library-intro h1 {
-    font-size: clamp(30px, 7.9vw, 42px);
+    font-size: clamp(26px, 3.2vw, 40px);
     line-height: 1.45;
-    margin-block: 18px;
+    margin-block: 8px 12px;
   }
   html[data-family="library"]
     .command-records.library-page.library-atelier

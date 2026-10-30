@@ -101,7 +101,8 @@ test("the World page carries the edition hooks without new headings, paragraphs 
   const source = await read("src/components/world/world-home.tsx");
   assert.match(source, /className="site-shell motion-on film-edition mirage-edition"/);
   assert.match(source, /useMirageBoot\(shellRef\);/);
-  assert.match(source, /<div className="mr-hero-hud" aria-hidden="true">/);
+  // Owner (2026-10-30): the poster leads; the two ornamental HUD layers are removed.
+  assert.doesNotMatch(source, /className="(?:mr|ws)-hero-hud"/);
   assert.match(source, /<i className="mr-word" data-text="DECEPTION">\s*DECEPTION\s*<\/i>/);
   assert.match(source, /<i className="mr-word" data-text="WORLD">\s*WORLD\s*<\/i>/);
   assert.match(source, /<i className="mr-redact">欺瞞<\/i>でできている。/);

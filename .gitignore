@@ -15,3 +15,6 @@ attachments
 *.log
 public/release-identity.json
 output/playwright/
+output/dogs-archive/
+.playwright-cli/
+scripts/blender/__pycache__/

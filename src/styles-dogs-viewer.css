@@ -1,0 +1,228 @@
+.dogs-viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  overflow: hidden;
+  isolation: isolate;
+  background: #020906;
+  border-radius: inherit;
+}
+.dogs-viewer__surface {
+  position: absolute;
+  inset: 0;
+}
+.dogs-viewer__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  outline: none;
+  cursor: grab;
+}
+.dogs-viewer__canvas:active {
+  cursor: grabbing;
+}
+.dogs-viewer__canvas:focus-visible {
+  outline: 1px solid #a6e2bb;
+  outline-offset: -5px;
+}
+.dogs-viewer__fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: #020906;
+  transition: opacity 0.7s ease;
+  overflow: hidden;
+}
+.dogs-viewer__fallback > img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  opacity: 0.58;
+  filter: saturate(0.65);
+}
+.dogs-viewer.is-ready .dogs-viewer__fallback {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity 0.7s ease,
+    visibility 0s 0.7s;
+}
+.dogs-viewer__loading {
+  position: absolute;
+  inset: auto 20px 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #d0decf;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 0 2px 8px #000;
+}
+.dogs-viewer__loading button {
+  border: 1px solid #6a8d73;
+  border-radius: 999px;
+  background: #06160de6;
+  color: #c8e9d0;
+  min-height: 44px;
+  padding: 10px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+.dogs-viewer__toolbar {
+  position: absolute;
+  z-index: 3;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: calc(100% - 28px);
+}
+.dogs-viewer__toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 44px;
+  min-height: 44px;
+  white-space: nowrap;
+  border: 1px solid #bdd7be29;
+  border-radius: 999px;
+  background: #07130ee0;
+  backdrop-filter: blur(18px);
+  color: #c5d2c5;
+  padding: 10px 13px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+  box-shadow: 0 5px 18px #0003;
+}
+.dogs-viewer__toolbar button:hover {
+  background: #122a1ce8;
+  border-color: #b5e4ba77;
+  color: #effff0;
+}
+.dogs-viewer__toolbar button:focus-visible {
+  outline: 2px solid #bbe2bd;
+  outline-offset: 3px;
+}
+.dogs-viewer__toolbar button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.dogs-viewer__toolbar .dogs-viewer__breathe {
+  color: #d0f3ca;
+  border-color: #6ab47d66;
+  background: #173921e8;
+  padding-inline: 19px;
+}
+/* Pose chooser: a native select dressed as the toolbar's pills (keyboard and screen reader
+   behaviour come from the control itself). */
+.dogs-viewer__toolbar .dogs-viewer__pose {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 34px 10px 15px;
+  border: 1px solid #bdd7be29;
+  border-radius: 999px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='m2.5 4.5 3.5 3.5 3.5-3.5' fill='none' stroke='%23c5d2c5' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat right 13px center / 12px 12px,
+    #07130ee0;
+  backdrop-filter: blur(18px);
+  color: #c5d2c5;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  box-shadow: 0 5px 18px #0003;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose:hover {
+  background-color: #122a1ce8;
+  border-color: #b5e4ba77;
+  color: #effff0;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose:focus-visible {
+  outline: 2px solid #bbe2bd;
+  outline-offset: 3px;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+.dogs-viewer__toolbar .dogs-viewer__pose option {
+  background: #07130e;
+  color: #dce9df;
+}
+.dogs-viewer__toolbar svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.dogs-viewer__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (max-width: 560px) {
+  .dogs-viewer {
+    min-height: 390px;
+  }
+  .dogs-viewer__toolbar {
+    gap: 6px;
+    bottom: 19px;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 8px;
+  }
+  .dogs-viewer__toolbar .dogs-viewer__pose {
+    padding: 10px 30px 10px 12px;
+    background-position:
+      right 11px center,
+      0 0;
+  }
+  .dogs-viewer__toolbar button {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+  .dogs-viewer__toolbar button:not(.dogs-viewer__breathe) span {
+    display: none;
+  }
+  .dogs-viewer__toolbar .dogs-viewer__breathe {
+    padding-inline: 20px;
+  }
+  .dogs-viewer__loading {
+    font-size: 12px;
+    letter-spacing: 0.03em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dogs-viewer__fallback,
+  .dogs-viewer.is-ready .dogs-viewer__fallback,
+  .dogs-viewer__toolbar button {
+    transition: none;
+  }
+}

@@ -4,7 +4,11 @@ import {
   FAR_FROM_ENTRY_UNDER,
 } from "@/lib/far-from-entry-suit";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_SIZE } from "@/lib/rexonance-suit";
-import { FAR_FROM_ENTRY_SWARM, FAR_FROM_SUIT_LIGHT } from "@/lib/far-from-entry-calls";
+import {
+  FAR_FROM_ENTRY_SWARM,
+  FAR_FROM_SUIT_ACCENTS,
+  FAR_FROM_SUIT_LIGHT,
+} from "@/lib/far-from-entry-calls";
 import { FAR_FROM_ENTRY_KITS, FAR_FROM_ENTRY_KIT_B_SHARE } from "@/lib/far-from-entry-kits";
 import {
   drawBodyFlame,
@@ -111,6 +115,31 @@ export const FAR_FROM_ENTRY_WIRE = Object.freeze({
   fade: 90,
 });
 const WIRE_ICE = "#7fe6ff";
+const WIRE_GOLD = "#ffd77a";
+/** The boost (owner, 2026-10-30: 「ナノマシンの装着遷移アニメーションと
+ * スクロールアニメーションを強化して」): debris drawn in to each plate (per
+ * plate by tier; `low` for touch devices of four cores or fewer), spiralling
+ * in from `reach` figure px round its seat over `span` ms, `swirl` radians
+ * as it closes, a streak `size` figure px wide (ice, gold) trailing `tail`
+ * of its course, to strike its tile as the tile locks; the outline pens' heads
+ * lit as scan heads (`head` figure px); each plate's lock — its outline
+ * flashing and leaving an afterglow over `lock` ms (an accent's stronger),
+ * a shock outline growing `grow` of the plate off it over `shock` ms (not on
+ * touch); and on FAR FROM DEUS！ each seam lit gold for `seam` ms as the
+ * light's wave crosses it. Outlines only: no area flash. */
+export const FAR_FROM_ENTRY_BOOST = Object.freeze({
+  motes: { desktop: 40, touch: 14, low: 9 },
+  reach: [40, 110] as const,
+  span: 300,
+  swirl: 2.7,
+  size: [1.4, 2] as const,
+  tail: 0.24,
+  head: 7,
+  lock: 300,
+  shock: 170,
+  grow: 0.1,
+  seam: 260,
+});
 /** The driver's plates: worn from the start, never constructed. */
 const DRIVER: ReadonlySet<string> = new Set(["belt"]);
 const WIRE_WHITE = "#f4fbff";
@@ -401,6 +430,55 @@ export function createFarFromEntryEngine({
       }
       return (wires[p] = wire);
     };
+    // The boost's own data, made once (FAR_FROM_ENTRY_BOOST).
+    const BO = FAR_FROM_ENTRY_BOOST;
+    const lowEnd = coarse && (globalThis.navigator?.hardwareConcurrency ?? 8) <= 4;
+    const perPlate = coarse ? (lowEnd ? BO.motes.low : BO.motes.touch) : BO.motes.desktop;
+    const moteTotal = perPlate * plates;
+    const moteX = new Float32Array(moteTotal);
+    const moteY = new Float32Array(moteTotal);
+    const moteA = new Float32Array(moteTotal);
+    const moteR = new Float32Array(moteTotal);
+    const moteT0 = new Float32Array(moteTotal);
+    const moteT1 = new Float32Array(moteTotal);
+    const moteGold = new Uint8Array(moteTotal);
+    const plateCX = new Float32Array(plates);
+    const plateCY = new Float32Array(plates);
+    const accent = new Uint8Array(plates);
+    const seamAt = new Float32Array(plates);
+    const driver = new Uint8Array(plates);
+    const mix = (a: number, b: number) => {
+      let h = Math.imul((a + 1) ^ Math.imul(b + 0x2f1d, 0x9e3779b1), 0x85ebca6b);
+      h ^= h >>> 13;
+      h = Math.imul(h, 0xc2b2ae35);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    for (let p = 0; p < plates; p += 1) {
+      const piece = plan.pieces[p];
+      plateCX[p] = piece.x + piece.w / 2;
+      plateCY[p] = piece.y + piece.h / 2;
+      accent[p] = FAR_FROM_SUIT_ACCENTS.includes(piece.id) ? 1 : 0;
+      driver[p] = DRIVER.has(piece.id) ? 1 : 0;
+      // When the light's wave (drawLight's radius) reaches the plate's centre.
+      const d = Math.min(0.999, Math.hypot(plateCX[p] - CORE_X, plateCY[p] - CORE_Y) / reach);
+      seamAt[p] = FAR_FROM_SUIT_LIGHT.from + (1 - Math.cbrt(1 - d)) * FAR_FROM_SUIT_LIGHT.spread;
+      if (!driver[p] && seamAt[p] + BO.seam > end) end = seamAt[p] + BO.seam;
+      const first = plan.plateTiles[p];
+      const count = plan.plateTiles[p + 1] - first;
+      for (let m = 0; m < perPlate; m += 1) {
+        const i = p * perPlate + m;
+        const tile = first + Math.min(count - 1, Math.floor(mix(i, 1) * count));
+        moteX[i] = plan.dx[tile] + plan.tw[tile] / 2;
+        moteY[i] = plan.dy[tile] + plan.th[tile] / 2;
+        moteA[i] =
+          Math.atan2(moteY[i] - plateCY[p], moteX[i] - plateCX[p]) + (mix(i, 2) - 0.5) * 1.6;
+        moteR[i] = BO.reach[0] + (BO.reach[1] - BO.reach[0]) * mix(i, 3);
+        moteT1[i] = Math.max(FAR_FROM_ENTRY_MATERIAL + 60, plan.land[tile]);
+        moteT0[i] = moteT1[i] - BO.span * (0.65 + 0.7 * mix(i, 4));
+        moteGold[i] = mix(i, 6) < 0.24 ? 1 : 0;
+      }
+    }
+    const heads = new Float32Array(2048);
     const settle = (p: number) => {
       const piece = plan.pieces[p];
       settled.globalAlpha = 1;
@@ -578,6 +656,7 @@ export function createFarFromEntryEngine({
       const W = FAR_FROM_ENTRY_WIRE;
       const light = 1 - Math.min(1, Math.max(0, (t - (plan.fit[p] - W.fadeAt)) / W.fade));
       if (light <= 0) return;
+      let headCount = 0;
       for (let pass = 0; pass < 2; pass += 1) {
         flight.beginPath();
         let any = false;
@@ -591,8 +670,16 @@ export function createFarFromEntryEngine({
           const g = drawing ? (t - t0) / (wire.e1[e] - t0) : 1;
           const x0 = wire.vx[a];
           const y0 = wire.vy[a];
+          const hx = (x0 + (wire.vx[b] - x0) * g) * s;
+          const hy = (y0 + (wire.vy[b] - y0) * g) * s;
           flight.moveTo(x0 * s, y0 * s);
-          flight.lineTo((x0 + (wire.vx[b] - x0) * g) * s, (y0 + (wire.vy[b] - y0) * g) * s);
+          flight.lineTo(hx, hy);
+          // An outline pen's head: a scan head running the seam.
+          if (drawing && wire.eo[e] && headCount + 2 <= heads.length) {
+            heads[headCount] = hx;
+            heads[headCount + 1] = hy;
+            headCount += 2;
+          }
           any = true;
         }
         if (!any) continue;
@@ -600,6 +687,117 @@ export function createFarFromEntryEngine({
         flight.strokeStyle = pass ? WIRE_WHITE : WIRE_ICE;
         flight.lineWidth = (pass ? 1.2 : 0.75) * s;
         flight.stroke();
+        counters[0] += 1;
+      }
+      if (headCount) {
+        const size = BO.head * s;
+        flight.beginPath();
+        for (let i = 0; i < headCount; i += 2)
+          flight.rect(heads[i] - size / 2, heads[i + 1] - size / 2, size, size);
+        flight.globalAlpha = 0.34 * light;
+        flight.fillStyle = WIRE_ICE;
+        flight.fill();
+        const core = size * 0.36;
+        flight.beginPath();
+        for (let i = 0; i < headCount; i += 2)
+          flight.rect(heads[i] - core / 2, heads[i + 1] - core / 2, core, core);
+        flight.globalAlpha = light;
+        flight.fillStyle = WIRE_WHITE;
+        flight.fill();
+        counters[0] += 2;
+      }
+      flight.globalAlpha = 1;
+    };
+    // A plate's outline (its wire's outline edges), grown `grow` about its centre.
+    const outlinePath = (p: number, wire: EntryWire, grow: number) => {
+      const cx = plateCX[p];
+      const cy = plateCY[p];
+      const g = 1 + grow;
+      flight.beginPath();
+      for (let e = 0; e < wire.ea.length; e += 1) {
+        if (!wire.eo[e]) continue;
+        const a = wire.ea[e];
+        const b = wire.eb[e];
+        flight.moveTo((cx + (wire.vx[a] - cx) * g) * s, (cy + (wire.vy[a] - cy) * g) * s);
+        flight.lineTo((cx + (wire.vx[b] - cx) * g) * s, (cy + (wire.vy[b] - cy) * g) * s);
+      }
+    };
+    // The locks: each plate's outline flashes as it fits and leaves an
+    // afterglow, a shock outline growing off it; on FAR FROM DEUS！ each seam
+    // is lit gold as the light's wave crosses it. Only plates whose wire is
+    // already made (no frame triangulates).
+    const drawLocks = (t: number) => {
+      for (let p = 0; p < plates; p += 1) {
+        if (driver[p]) continue;
+        const wire = wires[p];
+        if (!wire) continue;
+        const a = (t - plan.fit[p]) / BO.lock;
+        if (a >= 0 && a < 1) {
+          const strength = accent[p] ? 1 : 0.72;
+          outlinePath(p, wire, 0);
+          flight.globalAlpha = 0.9 * strength * (1 - a) * (1 - a);
+          flight.strokeStyle = a < 0.3 ? WIRE_WHITE : WIRE_GOLD;
+          flight.lineWidth = (1.4 + 1.2 * (1 - a)) * s;
+          flight.stroke();
+          counters[0] += 1;
+          const k = (t - plan.fit[p]) / BO.shock;
+          if (!coarse && k < 1) {
+            outlinePath(p, wire, BO.grow * (accent[p] ? 1.6 : 1) * (1 - (1 - k) * (1 - k)));
+            flight.globalAlpha = 0.55 * strength * (1 - k);
+            flight.strokeStyle = WIRE_ICE;
+            flight.lineWidth = 1.1 * s;
+            flight.stroke();
+            counters[0] += 1;
+          }
+        }
+        const c = (t - seamAt[p]) / BO.seam;
+        if (c >= 0 && c < 1) {
+          outlinePath(p, wire, 0);
+          flight.globalAlpha = 0.6 * Math.sin(Math.PI * Math.min(1, c * 1.6)) * (1 - c * 0.5);
+          flight.strokeStyle = WIRE_GOLD;
+          flight.lineWidth = 1.3 * s;
+          flight.stroke();
+          counters[0] += 1;
+        }
+      }
+      flight.globalAlpha = 1;
+    };
+    // The debris drawn in: each a streak closing on its tile along a
+    // tightening spiral (its tail where it was a moment ago, so the flow
+    // reads as a vortex), striking as the tile locks (ice, a share gold).
+    const spiralX = (i: number, u: number) => {
+      const left = 1 - u * u * (1.6 - 0.6 * u);
+      return (moteX[i] + Math.cos(moteA[i] + BO.swirl * left * (i % 2 ? 1 : -1)) * moteR[i] * left) * s;
+    };
+    const spiralY = (i: number, u: number) => {
+      const left = 1 - u * u * (1.6 - 0.6 * u);
+      return (moteY[i] + Math.sin(moteA[i] + BO.swirl * left * (i % 2 ? 1 : -1)) * moteR[i] * left) * s;
+    };
+    const drawMotes = (t: number) => {
+      for (let tone = 0; tone < 2; tone += 1) {
+        flight.beginPath();
+        let any = false;
+        for (let i = 0; i < moteTotal; i += 1) {
+          if (moteGold[i] !== tone) continue;
+          const t0 = moteT0[i];
+          const t1 = moteT1[i];
+          if (t <= t0 || t >= t1) continue;
+          const u = (t - t0) / (t1 - t0);
+          const tail = u > BO.tail ? u - BO.tail : 0;
+          const third = (u - tail) / 3;
+          flight.moveTo(spiralX(i, tail), spiralY(i, tail));
+          flight.lineTo(spiralX(i, tail + third), spiralY(i, tail + third));
+          flight.lineTo(spiralX(i, tail + third * 2), spiralY(i, tail + third * 2));
+          flight.lineTo(spiralX(i, u), spiralY(i, u));
+          any = true;
+        }
+        if (!any) continue;
+        flight.globalAlpha = 0.8;
+        flight.strokeStyle = tone ? WIRE_GOLD : WIRE_ICE;
+        flight.lineWidth = (tone ? BO.size[1] : BO.size[0]) * s;
+        flight.lineCap = "round";
+        flight.stroke();
+        flight.lineCap = "butt";
         counters[0] += 1;
       }
       flight.globalAlpha = 1;
@@ -701,6 +899,8 @@ export function createFarFromEntryEngine({
         else drawPlate(p, t);
       }
       if (t >= FAR_FROM_SUIT_LIGHT.from) drawLight(t);
+      drawLocks(t);
+      if (t >= FAR_FROM_ENTRY_MATERIAL) drawMotes(t);
       if (t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 1);
       if (flame > 0) {
         fireTransform();
