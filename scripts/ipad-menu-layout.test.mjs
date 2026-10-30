@@ -128,8 +128,9 @@ test("the fixed 60px launcher stays still while its decorative copy converges an
   const engine = source("src/lib/ipad-menu-mode.js");
   assert.match(engine, /advanceIpadMenuSpring/);
   assert.match(engine, /previousFlight\.state/);
-  assert.match(engine, /pose\.x - flight\.host\.x/);
-  assert.match(engine, /pose\.y - flight\.host\.y/);
+  const sharedMotion = source("src/lib/compact-menu-motion.js");
+  assert.match(sharedMotion, /pose\.x - host\.x/);
+  assert.match(sharedMotion, /pose\.y - host\.y/);
   assert.match(engine, /reducedMotion\?\.matches/);
   assert.doesNotMatch(css, /@keyframes ipad-menu-(?:converge|expand|strip|ring|glyph)/);
   const flight = rules.find(
@@ -138,8 +139,8 @@ test("the fixed 60px launcher stays still while its decorative copy converges an
   );
   assert.ok(flight, "the decorative shell uses coordinates relative to its unchanged hitbox");
   assert.match(flight.body, /pointer-events:\s*none;/);
-  assert.match(flight.body, /width:\s*52px;/);
-  assert.match(flight.body, /height:\s*52px;/);
+  assert.match(flight.body, /width:\s*60px;/);
+  assert.match(flight.body, /height:\s*60px;/);
   assert.match(flight.body, /transition:\s*none;/);
   assert.doesNotMatch(flight.body, /filter:|animation:/);
 
@@ -163,9 +164,14 @@ test("the fixed 60px launcher stays still while its decorative copy converges an
 });
 
 test("both flight directions escape the liquid button clip without enlarging its hitbox", () => {
-  const host = bodyFor(
-    `${ipadScope}[data-ipad-menu-motion][data-viewport-chrome] ${headers} .side-panel-trigger`,
-  );
+  const host = rules
+    .filter(
+      ({ selector }) =>
+        selector ===
+        `${ipadScope}[data-ipad-menu-motion][data-viewport-chrome] ${headers} .side-panel-trigger`,
+    )
+    .map(({ body }) => body)
+    .join(";");
   assert.match(host, /overflow:\s*visible\s*!important;/);
   assert.match(host, /clip-path:\s*none\s*!important;/);
   assert.doesNotMatch(host, /(?:^|;)\s*(?:width|height|padding|transform|position)\s*:/);

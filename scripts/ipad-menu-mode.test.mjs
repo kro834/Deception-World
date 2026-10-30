@@ -46,7 +46,7 @@ function fixture({
   denied = false,
   route = "world",
   motion = false,
-  decorated = false,
+  decorated = motion,
 } = {}) {
   const attrs = new Map([
     ...(ipad ? [["data-ipad-viewport", "contained"]] : []),
@@ -86,7 +86,12 @@ function fixture({
       geometryReads++;
       return attrs.get("data-ipad-menu-scrolled") === "true"
         ? { left: 940, top: 596, width: 60, height: 60 }
-        : { left: 950, top: 16 - Math.min(76, win.scrollY), width: 44, height: 44 };
+        : {
+            left: 950,
+            top: 16 - parseFloat(variables.get("--ipad-header-scroll") || "0"),
+            width: 44,
+            height: 44,
+          };
     },
   };
   const header = {
@@ -267,7 +272,7 @@ test("only actual scroll boundaries launch a measured one-shot convergence or ex
   assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
   assert.equal(f.attrs.get("data-ipad-menu-motion"), "converge");
   assert.equal(f.variables.get("--ipad-menu-origin-x"), "2px");
-  assert.equal(f.variables.get("--ipad-menu-origin-y"), "-664px");
+  assert.equal(f.variables.get("--ipad-menu-origin-y"), "-588px");
   assert.equal(f.geometryReads, 2, "two settled rectangles at the boundary only");
   const oldCompletion = f.timerHistory[0];
   scroll(400);
@@ -727,7 +732,7 @@ test("a live decorative flight reverses without returning to its source and canc
   assert.doesNotMatch(f.decoration.style.transform, /NaN|Infinity/);
   for (let frame = 0; frame < 54; frame++) f.flush();
   assert.ok(
-    Math.abs(y() - 12) < 0.1,
+    Math.abs(y() - 16) < 0.1,
     "expansion seats at the measured header center minus half the shell",
   );
   f.emit("resize");
@@ -757,7 +762,7 @@ test("an expanding flight follows the native header without per-frame layout rea
     Number(f.decoration.style.transform.match(/translate3d\([^,]+, ([^p]+)px/)[1]) +
     (f.attrs.get("data-ipad-menu-scrolled") === "true" ? 596 : 16 - Math.min(76, f.win.scrollY)) +
     1;
-  assert.ok(Math.abs(y - 12) < 0.1);
+  assert.ok(Math.abs(y - 16) < 0.1);
   assert.equal(f.geometryReads, reads, "scroll retargeting uses the known header displacement");
   dispose();
 });
@@ -777,13 +782,27 @@ test("completion and a modal lock restore the decorative element's pre-flight in
   };
   scroll(200);
   f.expireMotion();
-  assert.deepEqual(f.decoration.style, { transform: "none", opacity: "0.7", borderRadius: "10px" });
+  assert.deepEqual(f.decoration.style, {
+    transform: "none",
+    opacity: "0.7",
+    borderRadius: "10px",
+    width: "",
+    height: "",
+    boxShadow: "",
+  });
   scroll(0);
   for (let frame = 0; frame < 4; frame++) f.flush();
   f.doc.body.style.position = "fixed";
   f.notifyStyle();
   f.flush();
-  assert.deepEqual(f.decoration.style, { transform: "none", opacity: "0.7", borderRadius: "10px" });
+  assert.deepEqual(f.decoration.style, {
+    transform: "none",
+    opacity: "0.7",
+    borderRadius: "10px",
+    width: "",
+    height: "",
+    boxShadow: "",
+  });
   assert.equal(f.frames.size, 0);
   assert.equal(f.timers.size, 0);
   dispose();
@@ -818,4 +837,26 @@ test("economy keeps the settled target without starting a spring, and cancels an
   assert.equal(f.frames.size, 0);
   assert.equal(f.decoration.style.transform, "");
   dispose();
+});
+
+test("convergence starts at the last painted header position before a large scroll or nav exit", () => {
+  for (const route of ["world", "gallery", "dream"]) {
+    for (const previousScroll of [0, 30]) {
+      const f = fixture({ route, motion: true });
+      f.win.scrollY = previousScroll;
+      const dispose = watchIpadMenuMode(f.win, f.doc);
+      f.flush();
+      f.win.scrollY = 240;
+      f.emit("scroll");
+      f.flush();
+      const translatedY = Number(
+        f.decoration.style.transform.match(/translate3d\([^,]+, ([^p]+)px/)[1],
+      );
+      const visibleTop = translatedY + 596 + 1;
+      assert.equal(visibleTop, 16 - previousScroll, `${route} preserves the last painted origin`);
+      assert.equal(f.attrs.get("data-ipad-menu-scrolled"), "true");
+      assert.equal(f.geometryReads, 2, "only boundary endpoints need layout reads");
+      dispose();
+    }
+  }
 });

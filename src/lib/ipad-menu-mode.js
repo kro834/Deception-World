@@ -1,3 +1,12 @@
+import {
+  advanceCompactMenuSpring,
+  getCompactMenuPose,
+  paintCompactMenuShell,
+  captureCompactMenuStyles,
+  restoreCompactMenuStyles,
+} from "./compact-menu-motion.js";
+export { advanceCompactMenuSpring as advanceIpadMenuSpring } from "./compact-menu-motion.js";
+
 export const IPAD_MENU_STORAGE_KEY = "dw-ipad-compact-menu-v1";
 const CHANGE_EVENT = "dw-ipad-menu-change";
 export const IPAD_MENU_MOTION_SETTLE_MS = 900;
@@ -48,35 +57,6 @@ export function getIpadMenuMotionGeometry(headerRect, floatingRect, viewport) {
     x: round(Math.max(-viewport.width, Math.min(viewport.width, x))),
     y: round(Math.max(-viewport.height - 120, Math.min(viewport.height + 120, y))),
   };
-}
-
-/** Exact damped-spring step: refresh-rate independent, and a retarget keeps
- * both position and velocity. Damping 0.84 limits a resting step's overshoot
- * to 0.77%; the 17 rad/s frequency seats a normal flight within 900 ms.
- * @param {{pose:Record<string,number>,velocity:Record<string,number>}} state
- * @param {Record<string,number>} target @param {number} elapsedMs
- */
-export function advanceIpadMenuSpring(state, target, elapsedMs) {
-  const dt = Math.max(0, Math.min(64, Number.isFinite(elapsedMs) ? elapsedMs : 0)) / 1000;
-  const frequency = 17;
-  const damping = 0.84 * frequency;
-  const oscillation = frequency * Math.sqrt(1 - 0.84 ** 2);
-  const decay = Math.exp(-damping * dt);
-  const cosine = Math.cos(oscillation * dt);
-  const sine = Math.sin(oscillation * dt);
-  const pose = {};
-  const velocity = {};
-  for (const key of Object.keys(target)) {
-    const displacement = state.pose[key] - target[key];
-    const speed = state.velocity[key] || 0;
-    pose[key] =
-      target[key] +
-      decay * (displacement * cosine + ((speed + damping * displacement) / oscillation) * sine);
-    velocity[key] =
-      decay *
-      (speed * cosine - ((damping * speed + frequency ** 2 * displacement) / oscillation) * sine);
-  }
-  return { pose, velocity };
 }
 
 /** @param {{ getItem: (key: string) => string | null }} storage @param {boolean} fallback */
@@ -161,6 +141,8 @@ export function watchIpadMenuMode(win = window, doc = document) {
     typeof win.matchMedia === "function"
       ? win.matchMedia("(prefers-reduced-motion: reduce)")
       : null;
+  const forcedColors =
+    typeof win.matchMedia === "function" ? win.matchMedia("(forced-colors: active)") : null;
   let lastOverflow = root.style.overflow;
   let lastBodyPosition = doc.body.style.position;
   const isIpad = () => root.getAttribute("data-ipad-viewport") === "contained";
@@ -195,9 +177,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
     if (motionFrame) win.cancelAnimationFrame(motionFrame);
     motionFrame = 0;
     if (flight) {
-      for (const [property, value] of Object.entries(flight.originalStyles)) {
-        flight.element.style[property] = value;
-      }
+      restoreCompactMenuStyles(flight.element, flight.originalStyles);
     }
     flight = null;
     if (motionTimer) win.clearTimeout(motionTimer);
@@ -208,12 +188,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
   };
   const paintFlight = () => {
     if (!flight) return;
-    const { pose, velocity } = flight.state;
-    const tiltX = Math.max(-16, Math.min(16, (velocity.y || 0) * -0.008));
-    const tiltY = Math.max(-10, Math.min(10, (velocity.x || 0) * 0.008));
-    flight.element.style.transform = `translate3d(${pose.x - flight.host.x - 26}px, ${pose.y - flight.host.y - 26}px, 0) perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${pose.sx}, ${pose.sy})`;
-    flight.element.style.borderRadius = `${8 + Math.max(0, Math.min(1, pose.fold)) * 18}px`;
-    flight.element.style.opacity = String(Math.max(0, Math.min(0.92, pose.alpha)));
+    paintCompactMenuShell(flight.element, flight.state, flight.host);
   };
   const tickFlight = (timestamp) => {
     motionFrame = 0;
@@ -223,12 +198,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
     const now = Number.isFinite(timestamp) ? timestamp : flight.lastTime + 1000 / 60;
     const dt = flight.lastTime ? now - flight.lastTime : 1000 / 60;
     flight.lastTime = now;
-    const { pose, velocity } = flight.state;
-    const seated =
-      Math.hypot(pose.x - flight.target.x, pose.y - flight.target.y) < 2 &&
-      Math.hypot(velocity.x || 0, velocity.y || 0) < 20;
-    flight.target.alpha = seated ? 0 : 0.92;
-    flight.state = advanceIpadMenuSpring(flight.state, flight.target, dt);
+    flight.state = advanceCompactMenuSpring(flight.state, flight.target, dt);
     paintFlight();
     motionFrame = win.requestAnimationFrame(tickFlight);
   };
@@ -240,6 +210,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
     if (
       !geometry ||
       reducedMotion?.matches ||
+      forcedColors?.matches ||
       root.getAttribute("data-world-effects") === "economy" ||
       doc.hidden ||
       typeof win.setTimeout !== "function"
@@ -247,17 +218,9 @@ export function watchIpadMenuMode(win = window, doc = document) {
       return;
     setPixels("--ipad-menu-origin-x", geometry.x);
     setPixels("--ipad-menu-origin-y", geometry.y);
-    root.setAttribute("data-ipad-menu-motion", direction);
     const element = trigger?.querySelector?.(".side-panel-trigger-convergence");
     if (element && originRect && targetRect) {
-      const poseAt = (rect, folded) => ({
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-        sx: Math.max(0.6, Math.min(4, (rect.width - 8) / 52)),
-        sy: Math.max(0.6, Math.min(2, (rect.height - 8) / 52)),
-        fold: folded ? 1 : 0,
-        alpha: 0.92,
-      });
+      root.setAttribute("data-ipad-menu-motion", direction);
       flight = {
         element,
         direction,
@@ -270,16 +233,12 @@ export function watchIpadMenuMode(win = window, doc = document) {
         originalStyles:
           previousFlight?.element === element
             ? previousFlight.originalStyles
-            : {
-                transform: element.style.transform || "",
-                opacity: element.style.opacity || "",
-                borderRadius: element.style.borderRadius || "",
-              },
+            : captureCompactMenuStyles(element),
         state:
           previousFlight?.element === element
             ? previousFlight.state
-            : { pose: poseAt(originRect, direction === "expand"), velocity: {} },
-        target: poseAt(targetRect, direction === "converge"),
+            : { pose: getCompactMenuPose(originRect, direction === "expand"), velocity: {} },
+        target: getCompactMenuPose(targetRect, direction === "converge"),
         lastTime: previousFlight?.lastTime || 0,
       };
       paintFlight();
@@ -337,6 +296,18 @@ export function watchIpadMenuMode(win = window, doc = document) {
       return;
     }
     if (measureDirty) measure();
+    const nextScrolled = getIpadMenuScrolled(scrolled, win.scrollY, exitDistance);
+    const animate =
+      scrollBoundary &&
+      nextScrolled !== scrolled &&
+      !reducedMotion?.matches &&
+      !forcedColors?.matches &&
+      root.getAttribute("data-world-effects") !== "economy" &&
+      !doc.hidden;
+    const trigger = animate ? header?.querySelector?.(".side-panel-trigger") : null;
+    const oldRect = trigger?.getBoundingClientRect?.();
+    // Capture the last painted header button before publishing this scroll's
+    // header displacement. A large gesture must not invent an off-screen origin.
     if (Number.isFinite(win.scrollY)) {
       const nextHeaderScroll = Math.min(exitDistance, Math.max(0, win.scrollY));
       if (flight?.direction === "expand") {
@@ -347,15 +318,6 @@ export function watchIpadMenuMode(win = window, doc = document) {
       headerScroll = nextHeaderScroll;
       setPixels("--ipad-header-scroll", headerScroll);
     }
-    const nextScrolled = getIpadMenuScrolled(scrolled, win.scrollY, exitDistance);
-    const animate =
-      scrollBoundary &&
-      nextScrolled !== scrolled &&
-      !reducedMotion?.matches &&
-      root.getAttribute("data-world-effects") !== "economy" &&
-      !doc.hidden;
-    const trigger = animate ? header?.querySelector?.(".side-panel-trigger") : null;
-    const oldRect = trigger?.getBoundingClientRect?.();
     scrolled = nextScrolled;
     const value = scrolled ? "true" : "false";
     if (root.getAttribute("data-ipad-menu-scrolled") !== value) {
@@ -473,6 +435,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
   };
   doc.addEventListener?.("visibilitychange", cancelMotion);
   reducedMotion?.addEventListener?.("change", cancelMotion);
+  forcedColors?.addEventListener?.("change", cancelMotion);
   signal();
   return () => {
     disposed = true;
@@ -487,5 +450,6 @@ export function watchIpadMenuMode(win = window, doc = document) {
     win.removeEventListener("resize", scheduleMeasure);
     doc.removeEventListener?.("visibilitychange", cancelMotion);
     reducedMotion?.removeEventListener?.("change", cancelMotion);
+    forcedColors?.removeEventListener?.("change", cancelMotion);
   };
 }

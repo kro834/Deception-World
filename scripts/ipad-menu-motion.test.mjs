@@ -169,3 +169,43 @@ test("a delayed frame is bounded, and invalid or negative elapsed time does not 
     advanceIpadMenuSpring(state, target, 64),
   );
 });
+
+test("the visible shell lands on the real button bounds without a translucent duplicate", async () => {
+  const { getCompactMenuPose, paintCompactMenuShell } =
+    await import("../src/lib/compact-menu-motion.js");
+  const element = { style: {} };
+  const host = { x: 941, y: 597 };
+  const target = getCompactMenuPose(rect(940, 596, 60, 60), true);
+  let state = { pose: getCompactMenuPose(rect(950, -60, 44, 44), false), velocity: {} };
+  for (let frame = 0; frame < 54; frame++) state = advanceIpadMenuSpring(state, target, 1000 / 60);
+  paintCompactMenuShell(element, state, host);
+  assert.ok(Math.abs(parseFloat(element.style.width) - 60) < 0.01);
+  assert.ok(Math.abs(parseFloat(element.style.height) - 60) < 0.01);
+  assert.ok(Math.abs(parseFloat(element.style.borderRadius) - 30) < 0.01);
+  const translated = [...element.style.transform.matchAll(/(-?[\d.]+)px/g)].map((value) =>
+    Number(value[1]),
+  );
+  assert.ok(Math.abs(translated[0] + 1) < 0.01);
+  assert.ok(Math.abs(translated[1] + 1) < 0.01);
+  assert.equal(element.style.opacity, "1");
+});
+
+test("native inline declarations including priority survive shell painting exactly", async () => {
+  const {
+    captureCompactMenuStyles,
+    restoreCompactMenuStyles,
+    paintCompactMenuShell,
+    getCompactMenuPose,
+  } = await import("../src/lib/compact-menu-motion.js");
+  const original = "transform: none !important; opacity: 0.7; --route-accent: gold;";
+  const element = { style: { cssText: original } };
+  const snapshot = captureCompactMenuStyles(element);
+  paintCompactMenuShell(
+    element,
+    { pose: getCompactMenuPose(rect(10, 20, 60, 60), true), velocity: {} },
+    { x: 0, y: 0 },
+  );
+  element.style.cssText = "width: 60px;";
+  restoreCompactMenuStyles(element, snapshot);
+  assert.equal(element.style.cssText, original);
+});

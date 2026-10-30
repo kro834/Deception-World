@@ -61,7 +61,7 @@ test("rapid reversal requires fresh intention, and does not reuse the opposite d
   assert.equal(state.hidden, false);
 });
 
-function fixture({ ua = "iPhone", landscape = true, dream = false } = {}) {
+function fixture({ ua = "iPhone", landscape = true, dream = false, motion = false } = {}) {
   const elements = () => {
     const attrs = new Map();
     return {
@@ -109,6 +109,15 @@ function fixture({ ua = "iPhone", landscape = true, dream = false } = {}) {
     parentElement: host,
     closest: (selector) => (selector === "header" ? header : null),
   };
+  const shell = elements();
+  trigger.querySelector = () => (motion ? shell : null);
+  if (motion)
+    trigger.getBoundingClientRect = () =>
+      root.getAttribute("data-phone-landscape-hidden") === "true"
+        ? { left: 772, top: 314, width: 60, height: 60 }
+        : { left: 730, top: 8, width: 90, height: 48 };
+  const timers = new Map();
+  const reducedMotion = { matches: false, addEventListener() {}, removeEventListener() {} };
   const frames = new Map();
   const events = new Map();
   const docEvents = new Map();
@@ -130,7 +139,17 @@ function fixture({ ua = "iPhone", landscape = true, dream = false } = {}) {
     innerWidth: 844,
     innerHeight: 390,
     scrollY: 0,
-    matchMedia: () => media,
+    matchMedia: (query) =>
+      query.includes("reduced-motion")
+        ? reducedMotion
+        : query.includes("forced-colors")
+          ? { matches: false }
+          : media,
+    setTimeout: (fn) => {
+      timers.set(++counter, fn);
+      return counter;
+    },
+    clearTimeout: (id) => timers.delete(id),
     getComputedStyle: () => ({ position: "fixed" }),
     requestAnimationFrame(fn) {
       frames.set(++counter, fn);
@@ -161,6 +180,9 @@ function fixture({ ua = "iPhone", landscape = true, dream = false } = {}) {
   };
   return {
     win,
+    shell,
+    timers,
+    reducedMotion,
     doc,
     root,
     header,
@@ -308,7 +330,7 @@ test("iPad and other devices have no markers, measurements, timers or scroll fra
   }
 });
 
-test("CSS keeps a 48px native target, safe-area edges and a motion-free reduced variant", () => {
+test("CSS keeps a 60px native target, safe-area edges and a motion-free reduced variant", () => {
   const css = readFileSync(
     new URL("../src/styles-phone-landscape-menu.css", import.meta.url),
     "utf8",
@@ -317,8 +339,8 @@ test("CSS keeps a 48px native target, safe-area edges and a motion-free reduced 
     new URL("../src/lib/phone-landscape-menu.js", import.meta.url),
     "utf8",
   );
-  assert.match(css, /width: 48px !important/);
-  assert.match(css, /height: 48px !important/);
+  assert.match(css, /width: 60px !important/);
+  assert.match(css, /height: 60px !important/);
   assert.match(css, /env\(safe-area-inset-right\)/);
   assert.match(css, /env\(safe-area-inset-left\)/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
@@ -328,10 +350,7 @@ test("CSS keeps a 48px native target, safe-area edges and a motion-free reduced 
     controller,
     /scrollTo\(|preventDefault\(|localStorage|style\.overflow\s*=(?!=)/,
   );
-  assert.doesNotMatch(
-    css,
-    /overflow:\s*(?:hidden|auto)|touch-action:\s*none|transform:\s*translate/,
-  );
+  assert.doesNotMatch(css, /overflow:\s*(?:hidden|auto)|touch-action:\s*none/);
 });
 
 test("identity transforms cannot trap fixed launchers, and portrait restores original inline priorities", () => {
@@ -356,4 +375,61 @@ test("identity transforms cannot trap fixed launchers, and portrait restores ori
   assert.equal(f.host.style.getPropertyPriority("scale"), "");
   assert.equal(f.host.style.getPropertyValue("transform"), "");
   dispose();
+});
+
+test("phone flight reverses in place and cleans its paint on rotation, route and lock", () => {
+  for (const cleanup of ["rotation", "route", "lock", "economy", "dispose"]) {
+    const f = fixture({ motion: true });
+    f.shell.style.setProperty("opacity", "0.3");
+    const dispose = watchPhoneLandscapeMenu(f.win, f.doc);
+    f.scroll(300);
+    assert.equal(f.root.getAttribute("data-phone-landscape-motion"), "converge");
+    f.flush();
+    const movingTransform = f.shell.style.transform;
+    f.scroll(288);
+    assert.equal(f.root.getAttribute("data-phone-landscape-motion"), "expand");
+    const displacement = Number(f.shell.style.transform.match(/translate3d\([^,]+, ([^p]+)px/)[1]);
+    assert.ok(
+      displacement > 0 && displacement < 306,
+      "reversal continues from the intermediate world position instead of restarting at the floating endpoint",
+    );
+    assert.notEqual(
+      f.shell.style.transform,
+      movingTransform,
+      "host offset follows the restored header",
+    );
+    if (cleanup === "rotation") {
+      f.media.matches = false;
+      f.emit("resize");
+    }
+    if (cleanup === "route") f.emit("dw-phone-landscape-menu-refresh");
+    if (cleanup === "lock") {
+      f.root.setAttribute("data-dialog-open", "true");
+      f.lockChanged();
+    }
+    if (cleanup === "economy") {
+      f.root.setAttribute("data-world-effects", "economy");
+      f.lockChanged();
+    }
+    if (cleanup === "dispose") dispose();
+    f.flush();
+    assert.equal(f.root.hasAttribute("data-phone-landscape-motion"), false, cleanup);
+    assert.equal(f.timers.size, 0, cleanup);
+    assert.equal(f.shell.style.opacity, "0.3", cleanup);
+    dispose();
+  }
+});
+
+test("reduced motion and economy keep the native target without scheduling flight", () => {
+  for (const reduced of [true, false]) {
+    const f = fixture({ motion: true });
+    f.reducedMotion.matches = reduced;
+    if (!reduced) f.root.setAttribute("data-world-effects", "economy");
+    const dispose = watchPhoneLandscapeMenu(f.win, f.doc);
+    f.scroll(300);
+    assert.equal(f.root.getAttribute("data-phone-landscape-hidden"), "true");
+    assert.equal(f.root.hasAttribute("data-phone-landscape-motion"), false);
+    assert.equal(f.timers.size, 0);
+    dispose();
+  }
 });

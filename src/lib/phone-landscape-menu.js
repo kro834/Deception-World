@@ -1,3 +1,11 @@
+import {
+  advanceCompactMenuSpring,
+  getCompactMenuPose,
+  paintCompactMenuShell,
+  captureCompactMenuStyles,
+  restoreCompactMenuStyles,
+} from "./compact-menu-motion.js";
+
 const CHANGE_EVENT = "dw-phone-landscape-menu-refresh";
 export const PHONE_LANDSCAPE_MEDIA =
   "(pointer: coarse) and (orientation: landscape) and (max-height: 540px)";
@@ -47,6 +55,77 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
   let frame = 0;
   let disposed = false;
   let active = false;
+  let motionFrame = 0;
+  let motionTimer = 0;
+  let flight = null;
+  const reducedMotion = win.matchMedia("(prefers-reduced-motion: reduce)");
+  const forcedColors = win.matchMedia("(forced-colors: active)");
+  const clearMotion = () => {
+    if (motionFrame) win.cancelAnimationFrame(motionFrame);
+    if (motionTimer) win.clearTimeout(motionTimer);
+    motionFrame = motionTimer = 0;
+    if (flight) restoreCompactMenuStyles(flight.element, flight.originalStyles);
+    flight = null;
+    root.removeAttribute("data-phone-landscape-motion");
+  };
+  const tickMotion = (timestamp) => {
+    motionFrame = 0;
+    if (!flight || disposed) return;
+    const now = Number.isFinite(timestamp) ? timestamp : flight.lastTime + 1000 / 60;
+    const dt = flight.lastTime ? now - flight.lastTime : 1000 / 60;
+    flight.lastTime = now;
+    flight.state = advanceCompactMenuSpring(flight.state, flight.target, dt);
+    paintCompactMenuShell(flight.element, flight.state, flight.host);
+    motionFrame = win.requestAnimationFrame(tickMotion);
+  };
+  const startMotion = (direction, origin, destination) => {
+    const element = trigger?.querySelector?.(".side-panel-trigger-convergence");
+    if (
+      !origin ||
+      !destination ||
+      [origin, destination].some(
+        (rect) =>
+          ![rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) ||
+          rect.width <= 0 ||
+          rect.height <= 0,
+      )
+    ) {
+      clearMotion();
+      return;
+    }
+    const originPose = getCompactMenuPose(origin, direction === "expand");
+    const target = getCompactMenuPose(destination, direction === "converge");
+    if (
+      !element ||
+      !originPose ||
+      !target ||
+      reducedMotion.matches ||
+      forcedColors.matches ||
+      root.getAttribute("data-world-effects") === "economy" ||
+      typeof win.setTimeout !== "function"
+    ) {
+      clearMotion();
+      return;
+    }
+    const previous = flight;
+    clearMotion();
+    flight = {
+      element,
+      originalStyles:
+        previous?.element === element ? previous.originalStyles : captureCompactMenuStyles(element),
+      state: previous?.element === element ? previous.state : { pose: originPose, velocity: {} },
+      target,
+      host: {
+        x: destination.left + (trigger.clientLeft || 0),
+        y: destination.top + (trigger.clientTop || 0),
+      },
+      lastTime: previous?.lastTime || 0,
+    };
+    root.setAttribute("data-phone-landscape-motion", direction);
+    paintCompactMenuShell(element, flight.state, flight.host);
+    motionFrame = win.requestAnimationFrame(tickMotion);
+    motionTimer = win.setTimeout(clearMotion, 900);
+  };
   let header = null;
   let trigger = null;
   let nav = null;
@@ -93,6 +172,7 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
     direction: 0,
   });
   const unmark = () => {
+    clearMotion();
     for (const [element, properties] of neutralized) {
       for (const { property, value, priority } of properties) {
         if (value) element.style.setProperty(property, value, priority);
@@ -176,6 +256,7 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
     active = true;
     const isLocked = locked();
     if (isLocked) {
+      clearMotion();
       wasLocked = true;
       scrollRequested = false;
       return;
@@ -185,23 +266,38 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
       discover();
       measureRequested = false;
     }
+    const previousHidden = state.hidden;
+    const motionBoundary = scrollRequested && !measuring && !resetRequested && !wasLocked;
     if (resetRequested || wasLocked || measuring)
       state = baseline(resetRequested ? false : state.hidden);
     else if (scrollRequested && header)
       state = advancePhoneLandscapeMenu(state, win.scrollY, chromeHeight);
+    const oldRect =
+      motionBoundary && previousHidden !== state.hidden ? trigger?.getBoundingClientRect?.() : null;
     resetRequested = false;
     wasLocked = false;
     scrollRequested = false;
+    if (previousHidden !== state.hidden && oldRect && !state.hidden)
+      root.setAttribute("data-phone-landscape-motion", "expand");
     if (header) root.setAttribute("data-phone-landscape-hidden", String(state.hidden));
+    if (previousHidden !== state.hidden && oldRect) {
+      startMotion(
+        state.hidden ? "converge" : "expand",
+        oldRect,
+        trigger?.getBoundingClientRect?.(),
+      );
+    }
   };
   const schedule = () => {
     if (!disposed && !frame) frame = win.requestAnimationFrame(update);
   };
   const measure = () => {
+    clearMotion();
     measureRequested = true;
     schedule();
   };
   const refresh = () => {
+    clearMotion();
     resetRequested = measureRequested = true;
     scrollRequested = false;
     schedule();
@@ -216,11 +312,18 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
     typeof win.ResizeObserver === "function" ? new win.ResizeObserver(measure) : null;
   const lockObserver = new win.MutationObserver(() => {
     const isLocked = locked();
+    if (root.getAttribute("data-world-effects") === "economy") clearMotion();
     if (active && (isLocked || wasLocked)) schedule();
   });
   lockObserver.observe(root, {
     attributes: true,
-    attributeFilter: ["style", "data-side-menu-open", "data-dialog-open", "data-loading"],
+    attributeFilter: [
+      "style",
+      "data-side-menu-open",
+      "data-dialog-open",
+      "data-loading",
+      "data-world-effects",
+    ],
   });
   lockObserver.observe(doc.body, { attributes: true, attributeFilter: ["style"] });
   const treeObserver = new win.MutationObserver(() => {
@@ -229,6 +332,7 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
   });
   treeObserver.observe(doc.body, { childList: true, subtree: true });
   const onVisibility = () => {
+    clearMotion();
     resetRequested = true;
     scrollRequested = false;
     schedule();
@@ -238,6 +342,8 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
   win.addEventListener(CHANGE_EVENT, refresh);
   media.addEventListener?.("change", measure);
   doc.addEventListener("visibilitychange", onVisibility);
+  reducedMotion.addEventListener?.("change", clearMotion);
+  forcedColors.addEventListener?.("change", clearMotion);
   update();
   return () => {
     disposed = true;
@@ -250,5 +356,7 @@ export function watchPhoneLandscapeMenu(win = window, doc = document) {
     win.removeEventListener(CHANGE_EVENT, refresh);
     media.removeEventListener?.("change", measure);
     doc.removeEventListener("visibilitychange", onVisibility);
+    reducedMotion.removeEventListener?.("change", clearMotion);
+    forcedColors.removeEventListener?.("change", clearMotion);
   };
 }
