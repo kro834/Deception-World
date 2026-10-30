@@ -2351,6 +2351,10 @@ export function RexonanceSaga() {
               <span>全形態を比較する</span>
               <i aria-hidden="true">↗</i>
             </GuardedLink>
+            <GuardedLink to="/rexonance-3d" assets={[]}>
+              <span>立体模型で見る</span>
+              <i aria-hidden="true">↗</i>
+            </GuardedLink>
             <GuardedLink
               to="/world"
               hash="top"

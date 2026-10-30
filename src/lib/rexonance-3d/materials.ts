@@ -182,7 +182,7 @@ normal = normalize( normal + rxRootToView * ( rxHash33( rxCell + 7.0 ) - 0.5 ) *
 
 const CRYSTAL_EMISSIVE = /* glsl */ `
 {
-  vec3 RX_BLUE = vec3( 0.0, 0.24, 1.0 );
+  vec3 RX_BLUE = vec3( 0.0, 0.15, 1.0 );
   vec3 RX_VIOLET = vec3( 0.2, 0.08, 1.0 );
   vec3 RX_PINK = vec3( 1.0, 0.1, 0.5 );
   vec3 RX_HOT = vec3( 1.0, 0.3, 0.7 );
@@ -324,10 +324,11 @@ const LOOKS: Record<RexonanceFamily, Look> = {
   Crystal: {
     params: {
       color: new THREE.Color().setRGB(0.02, 0.04, 0.12),
-      roughness: 0.08,
-      clearcoat: 1,
-      clearcoatRoughness: 0.04,
-      envMapIntensity: 0.6,
+      roughness: 0.1,
+      specularIntensity: 0.6,
+      clearcoat: 0.55,
+      clearcoatRoughness: 0.05,
+      envMapIntensity: 0.38,
       side: THREE.DoubleSide,
     },
     emissive: CRYSTAL_EMISSIVE,

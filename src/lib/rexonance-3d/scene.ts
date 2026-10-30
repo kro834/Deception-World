@@ -312,6 +312,12 @@ export function createRexonanceScene(
     request();
   };
 
+  /** A preset chosen by the visitor: the turntable stops so the view holds. */
+  const showView = (id: RexonanceViewId) => {
+    if (autoRotate) setAutoRotate(false);
+    goTo(id, true);
+  };
+
   const sphericalFrom = new THREE.Spherical();
   const sphericalTo = new THREE.Spherical();
   const offsetA = new THREE.Vector3();
@@ -431,7 +437,7 @@ export function createRexonanceScene(
     if (!keys.includes(event.key) || event.altKey || event.metaKey || event.ctrlKey) return;
     event.preventDefault();
     if (event.key === "Home") {
-      goTo(REXONANCE_DEFAULT_VIEW, true);
+      showView(REXONANCE_DEFAULT_VIEW);
       return;
     }
     onStart();
@@ -763,13 +769,10 @@ export function createRexonanceScene(
 
   return {
     setView(view) {
-      if (disposed) return;
-      if (autoRotate) setAutoRotate(false);
-      goTo(view, true);
+      if (!disposed) showView(view);
     },
     resetView() {
-      if (disposed) return;
-      goTo(REXONANCE_DEFAULT_VIEW, true);
+      if (!disposed) showView(REXONANCE_DEFAULT_VIEW);
     },
     setAutoRotate(on) {
       // A visitor may ask for the turntable even with reduced motion; it never starts itself.
