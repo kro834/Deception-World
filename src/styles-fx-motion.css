@@ -156,6 +156,30 @@
   }
 }
 
+/* Touch screens: the clip line and the light lift repaint the whole panel
+   every frame (WebKit composites neither clip-path nor filter), which read
+   as a hitch while scrolling a file on an iPhone. There the arrival keeps
+   its rise and fade only, on the compositor. */
+@media (prefers-reduced-motion: no-preference) and (hover: none) and (pointer: coarse) {
+  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"]):not(
+      [data-android-renderer]
+    ):not([data-ios18-renderer])
+    .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
+    animation-name: fx-rise-arrive;
+  }
+}
+
+@keyframes fx-rise-arrive {
+  0% {
+    opacity: 0;
+    translate: 0 var(--dg-rise, 14px);
+  }
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 @keyframes fx-scan-arrive {
   0% {
     opacity: 0;

@@ -44,6 +44,16 @@
   initial-value: 1;
 }
 
+/* Bloom: the glow on large surfaces (plates, panels, cards, the poster,
+   the title). Separate from --fx-glow (small controls, bars, the menu),
+   because a big soft shadow or filter is what WebKit pays for when a
+   section is first painted during a scroll. */
+@property --fx-bloom {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 /* ---------- 0. Tokens ---------- */
 html[data-family] {
   --fx-a: var(--sh-l1, #7ae8ff);
@@ -59,9 +69,18 @@ html[data-family="gallery"] {
   --fx-b: var(--sh-l2, #c9a15a);
 }
 
+/* Touch screens (phones, tablets) keep the controls' glow but not the
+   large surfaces' bloom: their first paint while scrolling stays cheap. */
+@media (hover: none) and (pointer: coarse) {
+  html[data-family] {
+    --fx-bloom: 0;
+  }
+}
+
 html[data-family][data-world-effects="economy"],
 html[data-family][data-ios18-renderer="true"] {
   --fx-glow: 0;
+  --fx-bloom: 0;
   --fx-scan: linear-gradient(transparent, transparent);
 }
 
@@ -164,7 +183,7 @@ html:is(
       inset 0 1px 0 rgb(233 240 241 / 18%),
       0 1px 0 color-mix(in srgb, var(--fx-b) 28%, transparent),
       0 14px 34px -20px
-        color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent),
+        color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent),
       0 4px 18px rgb(0 0 0 / 34%);
   }
 
@@ -465,22 +484,6 @@ html[data-family="world"] body main.site-shell.film-edition {
   --fx-c: #ff5fc8;
 }
 
-/* Ambient neon: the hero and the chapter grounds hold coloured light at
-   their edges as inset glows, painted over each ground and under its
-   content, so no background (key art, grades, trails) is replaced. */
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > section.hero {
-  box-shadow:
-    inset 0 -220px 240px -170px color-mix(in srgb, var(--fx-c) calc(34% * var(--fx-glow)), transparent),
-    inset 320px 0 300px -260px color-mix(in srgb, var(--fx-a) calc(22% * var(--fx-glow)), transparent),
-    inset -280px 0 280px -240px color-mix(in srgb, var(--fx-b) calc(26% * var(--fx-glow)), transparent);
-}
-
-html[data-family="world"] body main.site-shell.film-edition.mirage-edition > :is(#riders, #records) {
-  box-shadow:
-    inset 0 200px 240px -200px color-mix(in srgb, var(--fx-b) calc(28% * var(--fx-glow)), transparent),
-    inset 0 -200px 240px -200px color-mix(in srgb, var(--fx-a) calc(16% * var(--fx-glow)), transparent);
-}
-
 /* The world sheets scope by ids (#riders, #manager-archive, …) and the
    streamline sheet by :not(#saga); the repeated ids and :not(#fx) below
    only match that weight so the paint lands. No element has id "fx". */
@@ -523,8 +526,8 @@ html[data-family="world"]
     inset 0 1px 0 rgb(255 255 255 / 16%),
     0 0 0 1px color-mix(in srgb, var(--fx-a) 36%, transparent),
     0 26px 64px -20px rgb(0 0 0 / 82%),
-    0 30px 80px -36px color-mix(in srgb, var(--fx-c) calc(95% * var(--fx-glow)), transparent),
-    -22px -10px 70px -40px color-mix(in srgb, var(--fx-a) calc(95% * var(--fx-glow)), transparent);
+    0 30px 80px -36px color-mix(in srgb, var(--fx-c) calc(95% * var(--fx-bloom)), transparent),
+    -22px -10px 70px -40px color-mix(in srgb, var(--fx-a) calc(95% * var(--fx-bloom)), transparent);
 }
 
 /* The contents tiles: glass with a spectrum wash rising from the foot. */
@@ -533,7 +536,7 @@ html[data-family="world"] body main.site-shell.film-edition nav.ws-contents a {
   box-shadow:
     inset 0 1px 0 rgb(233 246 251 / 9%),
     inset 0 -40px 60px -40px color-mix(in srgb, var(--fx-b) 30%, transparent),
-    0 18px 40px -30px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+    0 18px 40px -30px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-bloom)), transparent);
 }
 
 /* The directories (styles-command-directory.css): the plates trade the
@@ -547,7 +550,7 @@ html[data-family="world"]
     inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 12%, transparent),
     8px 8px 0 rgb(2 7 13 / 52%),
     9px 9px 0 color-mix(in srgb, var(--fx-b) 30%, transparent),
-    0 30px 70px -40px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+    0 30px 70px -40px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="world"]
@@ -560,7 +563,7 @@ html[data-family="world"]
     inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 16%, transparent),
     0 5px 0 #02070d,
     0 6px 0 color-mix(in srgb, var(--fx-a) 46%, transparent),
-    0 20px 34px -24px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+    0 20px 34px -24px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="world"]
@@ -573,7 +576,7 @@ html[data-family="world"]
     inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 12%, transparent),
     8px 8px 0 rgb(2 7 13 / 70%),
     9px 9px 0 color-mix(in srgb, var(--fx-b) 30%, transparent),
-    0 30px 70px -40px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+    0 30px 70px -40px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="world"]
@@ -585,7 +588,7 @@ html[data-family="world"]
     inset 0 1px 0 rgb(233 246 251 / 10%),
     5px 5px 0 #02070d,
     6px 6px 0 color-mix(in srgb, #6ddfba 40%, transparent),
-    0 24px 44px -32px color-mix(in srgb, #6ddfba calc(80% * var(--fx-glow)), transparent);
+    0 24px 44px -32px color-mix(in srgb, #6ddfba calc(80% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="world"]
@@ -596,7 +599,7 @@ html[data-family="world"]
   box-shadow:
     inset 0 1px 0 rgb(233 246 251 / 8%),
     0 30px 60px -36px rgb(0 0 0 / 80%),
-    0 0 50px -30px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+    0 0 50px -30px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
 /* ---------- 5. Dossiers: the rider's own light as the neon ----------
@@ -632,7 +635,7 @@ html[data-family="dossier"]
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--fx-a) 40%, rgb(255 255 255 / 10%)),
     inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 14%, transparent),
-    0 24px 50px -30px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent);
+    0 24px 50px -30px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="dossier"]
@@ -657,7 +660,7 @@ html[data-family="dossier"]
     #060b14;
   box-shadow:
     inset 0 -1px 0 color-mix(in srgb, var(--fx-a) 36%, transparent),
-    0 12px 24px -18px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+    0 12px 24px -18px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="dossier"]
@@ -665,7 +668,7 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page.manager-page
   nav.manager-pagination
   li {
-  box-shadow: 0 12px 26px -20px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+  box-shadow: 0 12px 26px -20px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-bloom)), transparent);
 }
 
 /* ---------- 6. Library and full-text search ----------
@@ -713,7 +716,7 @@ html[data-family="library"]
     inset 0 0 0 1px color-mix(in srgb, var(--fx-b) 14%, transparent),
     4px 5px 0 rgb(1 8 16 / 70%),
     5px 6px 0 color-mix(in srgb, var(--fx-a) 22%, transparent),
-    0 26px 50px -34px color-mix(in srgb, var(--fx-a) calc(75% * var(--fx-glow)), transparent);
+    0 26px 50px -34px color-mix(in srgb, var(--fx-a) calc(75% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="library"]
@@ -725,7 +728,7 @@ html[data-family="library"]
     inset 0 0 0 1px color-mix(in srgb, var(--fx-b) 12%, transparent),
     8px 9px 0 rgb(2 9 17 / 73%),
     9px 10px 0 color-mix(in srgb, var(--fx-b) 36%, transparent),
-    0 40px 80px -40px color-mix(in srgb, var(--fx-a) calc(60% * var(--fx-glow)), transparent);
+    0 40px 80px -40px color-mix(in srgb, var(--fx-a) calc(60% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="library"]
@@ -736,7 +739,7 @@ html[data-family="library"]
   box-shadow:
     inset 0 2px 14px rgb(0 0 0 / 40%),
     0 0 0 3px color-mix(in srgb, var(--fx-a) 20%, transparent),
-    0 0 30px -8px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+    0 0 30px -8px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
 html[data-family="library"]
@@ -770,7 +773,7 @@ html[data-family="archive"]
     radial-gradient(50% 160% at 0% 0%, color-mix(in srgb, var(--fx-a) 10%, transparent), transparent 70%),
     radial-gradient(40% 160% at 100% 100%, color-mix(in srgb, var(--fx-b) 7%, transparent), transparent 70%),
     var(--fx-scan);
-  box-shadow: 0 12px 30px -22px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
+  box-shadow: 0 12px 30px -22px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
 /* ================================================================
@@ -939,8 +942,8 @@ html[data-family="archive"]
     box-shadow:
       inset 0 1px 0 rgb(233 240 241 / 18%),
       0 1px 0 color-mix(in srgb, var(--fx-b) 40%, transparent),
-      0 6px 18px -6px color-mix(in srgb, var(--fx-b) calc(55% * var(--fx-glow)), transparent),
-      0 18px 40px -22px color-mix(in srgb, var(--fx-c) calc(70% * var(--fx-glow)), transparent),
+      0 6px 18px -6px color-mix(in srgb, var(--fx-b) calc(55% * var(--fx-bloom)), transparent),
+      0 18px 40px -22px color-mix(in srgb, var(--fx-c) calc(70% * var(--fx-bloom)), transparent),
       0 4px 18px rgb(0 0 0 / 34%);
   }
 
@@ -951,7 +954,7 @@ html[data-family="archive"]
     nav
     a:not(#fx):not(#fx)::after {
     background: linear-gradient(90deg, var(--fx-a), var(--fx-b) 55%, var(--fx-c));
-    box-shadow: 0 0 12px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-bloom)), transparent);
   }
 
   html[data-family="world"]
@@ -963,7 +966,7 @@ html[data-family="archive"]
     color: #fff;
     background:
       linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 22%, transparent), color-mix(in srgb, var(--fx-b) 8%, transparent) 60%, transparent);
-    text-shadow: 0 0 14px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent);
+    text-shadow: 0 0 14px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-bloom)), transparent);
   }
 }
 
@@ -1218,8 +1221,8 @@ html[data-family="library"]
       inset 0 1px 0 color-mix(in srgb, var(--fx-a) 70%, transparent),
       inset 0 0 40px -14px color-mix(in srgb, var(--fx-b) 55%, transparent),
       0 0 0 1px color-mix(in srgb, var(--fx-a) 30%, transparent),
-      0 0 36px -10px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent),
-      10px 16px 40px -18px color-mix(in srgb, var(--fx-c) calc(80% * var(--fx-glow)), transparent);
+      0 0 36px -10px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-bloom)), transparent),
+      10px 16px 40px -18px color-mix(in srgb, var(--fx-c) calc(80% * var(--fx-bloom)), transparent);
   }
 }
 
@@ -1261,7 +1264,7 @@ html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
   .anime-work-title
   b:not(#fx):not(#fx) {
-  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-glow)), transparent));
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-bloom)), transparent));
 }
 
 /* Headings on the dark records pages take the spectrum as a neon edge. */
@@ -1281,14 +1284,32 @@ html[data-family="library"]
   background: linear-gradient(var(--fx-angle), #ffffff 0%, #c9f8ff 34%, #cdbfff 66%, #ffc8ec 100%);
   -webkit-background-clip: text;
   background-clip: text;
-  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-glow)), transparent));
+  /* The records' own lift stays first; the bloom is dropped with the tier. */
+  filter: drop-shadow(0 5px 1px #0005)
+    drop-shadow(0 0 18px color-mix(in srgb, var(--fx-b) calc(45% * var(--fx-bloom)), transparent));
+}
+
+html:is([data-world-effects="economy"], [data-ios18-renderer="true"], [data-android-renderer])
+  body
+  :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+  h1:nth-child(n) {
+  filter: drop-shadow(0 5px 1px #0005);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  html[data-family="library"]
+    body
+    :is(.library-page, .search-page).command-records.command-records.command-records.command-records
+    h1:nth-child(n) {
+    filter: drop-shadow(0 5px 1px #0005);
+  }
 }
 
 html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page
   .manager-display-name {
-  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--fx-a) calc(55% * var(--fx-glow)), transparent));
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--fx-a) calc(55% * var(--fx-bloom)), transparent));
 }
 
 html:is(
@@ -1307,12 +1328,18 @@ html:is(
     0 0 18px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-glow)), transparent);
 }
 
-/* Economy, iOS 18 and Android: the drop-shadow filters cost a layer;
-   drop them (the spectrum fills stay). */
+/* Economy, iOS 18, Android and touch screens: the drop-shadow filters
+   cost a layer; drop them (the spectrum fills stay). */
 html:is([data-world-effects="economy"], [data-ios18-renderer="true"], [data-android-renderer])
   body
-  :is(.anime-work-title b, .manager-display-name, .command-records h1) {
+  :is(.anime-work-title b, .manager-display-name) {
   filter: none !important;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  html[data-family] body :is(.anime-work-title b, .manager-display-name) {
+    filter: none !important;
+  }
 }
 
 /* ---------- 8. Reduced transparency and forced colours ---------- */
