@@ -343,8 +343,9 @@ test("the engine's draw passes allocate nothing, use no timers, randomness, filt
   assert.match(draw, /if \(counters\[0\] >= budget\) return;/);
   assert.match(engine, /const budget = coarse \? S\.budget\.touch : S\.budget\.desktop;/);
   assert.match(engine, /const chips = coarse \? S\.chips\.touch : S\.chips\.desktop;/);
-  assert.deepEqual({ ...calls.FAR_FROM_ENTRY_SWARM.budget }, { desktop: 2600, touch: 900 });
-  assert.deepEqual({ ...calls.FAR_FROM_ENTRY_SWARM.chips }, { desktop: 384, touch: 96 });
+  // Owner (2026-10-30): the suit-up boost — a denser swarm, the budget with it.
+  assert.deepEqual({ ...calls.FAR_FROM_ENTRY_SWARM.budget }, { desktop: 3100, touch: 980 });
+  assert.deepEqual({ ...calls.FAR_FROM_ENTRY_SWARM.chips }, { desktop: 512, touch: 112 });
   assert.match(plan, /const BLOCK = TOUCH \? 2 : 1;/);
   // Scrubbed back, the settled canvas resets; the finished frame is the artwork.
   assert.match(draw, /if \(t < last\) reset\(\);/);

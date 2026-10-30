@@ -213,7 +213,8 @@ export const FAR_FROM_ENTRY_CAPTION = ["FARFROM DRIVE", "SA-GA OS 6.1 / ミド�
  * reactor and their implosion into it as the last call strikes, and the
  * per-frame draw budget (drawImage calls) by tier. */
 export const FAR_FROM_ENTRY_SWARM = {
-  chips: { desktop: 384, touch: 96 },
+  // Denser (owner, 2026-10-30: the suit-up boost).
+  chips: { desktop: 512, touch: 112 },
   free: { desktop: 64, touch: 16 },
   firebrands: { desktop: 24, touch: 8 },
   rings: 6,
@@ -226,6 +227,6 @@ export const FAR_FROM_ENTRY_SWARM = {
   implode: [2250, FINAL + 10],
   size: [7, 14],
   tumble: 0.027,
-  budget: { desktop: 2600, touch: 900 },
+  budget: { desktop: 3100, touch: 980 },
   mipBelow: 12,
 } as const;
