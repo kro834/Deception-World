@@ -50,6 +50,35 @@ export function getIpadMenuMotionGeometry(headerRect, floatingRect, viewport) {
   };
 }
 
+/** Exact damped-spring step: refresh-rate independent, and a retarget keeps
+ * both position and velocity. Damping 0.84 limits a resting step's overshoot
+ * to 0.77%; the 17 rad/s frequency seats a normal flight within 900 ms.
+ * @param {{pose:Record<string,number>,velocity:Record<string,number>}} state
+ * @param {Record<string,number>} target @param {number} elapsedMs
+ */
+export function advanceIpadMenuSpring(state, target, elapsedMs) {
+  const dt = Math.max(0, Math.min(64, Number.isFinite(elapsedMs) ? elapsedMs : 0)) / 1000;
+  const frequency = 17;
+  const damping = 0.84 * frequency;
+  const oscillation = frequency * Math.sqrt(1 - 0.84 ** 2);
+  const decay = Math.exp(-damping * dt);
+  const cosine = Math.cos(oscillation * dt);
+  const sine = Math.sin(oscillation * dt);
+  const pose = {};
+  const velocity = {};
+  for (const key of Object.keys(target)) {
+    const displacement = state.pose[key] - target[key];
+    const speed = state.velocity[key] || 0;
+    pose[key] =
+      target[key] +
+      decay * (displacement * cosine + ((speed + damping * displacement) / oscillation) * sine);
+    velocity[key] =
+      decay *
+      (speed * cosine - ((damping * speed + frequency ** 2 * displacement) / oscillation) * sine);
+  }
+  return { pose, velocity };
+}
+
 /** @param {{ getItem: (key: string) => string | null }} storage @param {boolean} fallback */
 export function readIpadMenuPreference(storage, fallback = true) {
   try {
@@ -125,6 +154,9 @@ export function watchIpadMenuMode(win = window, doc = document) {
   let reconcileRequested = true;
   let motionTimer = 0;
   let motionGeneration = 0;
+  let motionFrame = 0;
+  let flight = null;
+  let headerScroll = 0;
   const reducedMotion =
     typeof win.matchMedia === "function"
       ? win.matchMedia("(prefers-reduced-motion: reduce)")
@@ -160,19 +192,99 @@ export function watchIpadMenuMode(win = window, doc = document) {
   };
   const clearMotion = () => {
     motionGeneration++;
+    if (motionFrame) win.cancelAnimationFrame(motionFrame);
+    motionFrame = 0;
+    if (flight) {
+      for (const [property, value] of Object.entries(flight.originalStyles)) {
+        flight.element.style[property] = value;
+      }
+    }
+    flight = null;
     if (motionTimer) win.clearTimeout(motionTimer);
     motionTimer = 0;
     root.removeAttribute("data-ipad-menu-motion");
     root.style.removeProperty("--ipad-menu-origin-x");
     root.style.removeProperty("--ipad-menu-origin-y");
   };
-  const startMotion = (direction, geometry) => {
+  const paintFlight = () => {
+    if (!flight) return;
+    const { pose, velocity } = flight.state;
+    const tiltX = Math.max(-16, Math.min(16, (velocity.y || 0) * -0.008));
+    const tiltY = Math.max(-10, Math.min(10, (velocity.x || 0) * 0.008));
+    flight.element.style.transform = `translate3d(${pose.x - flight.host.x - 26}px, ${pose.y - flight.host.y - 26}px, 0) perspective(600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${pose.sx}, ${pose.sy})`;
+    flight.element.style.borderRadius = `${8 + Math.max(0, Math.min(1, pose.fold)) * 18}px`;
+    flight.element.style.opacity = String(Math.max(0, Math.min(0.92, pose.alpha)));
+  };
+  const tickFlight = (timestamp) => {
+    motionFrame = 0;
+    if (!flight || disposed) return;
+    // Timestamp-less test hosts still take a normal frame. Visibility and
+    // layout changes cancel the flight, so there is no hidden-tab catch-up.
+    const now = Number.isFinite(timestamp) ? timestamp : flight.lastTime + 1000 / 60;
+    const dt = flight.lastTime ? now - flight.lastTime : 1000 / 60;
+    flight.lastTime = now;
+    const { pose, velocity } = flight.state;
+    const seated =
+      Math.hypot(pose.x - flight.target.x, pose.y - flight.target.y) < 2 &&
+      Math.hypot(velocity.x || 0, velocity.y || 0) < 20;
+    flight.target.alpha = seated ? 0 : 0.92;
+    flight.state = advanceIpadMenuSpring(flight.state, flight.target, dt);
+    paintFlight();
+    motionFrame = win.requestAnimationFrame(tickFlight);
+  };
+  const startMotion = (direction, geometry, trigger, originRect, targetRect) => {
+    // Keep the in-flight world coordinates and momentum before clearing the
+    // old completion. The real 60px hit target never travels with this layer.
+    const previousFlight = flight;
     clearMotion();
-    if (!geometry || reducedMotion?.matches || doc.hidden || typeof win.setTimeout !== "function")
+    if (
+      !geometry ||
+      reducedMotion?.matches ||
+      root.getAttribute("data-world-effects") === "economy" ||
+      doc.hidden ||
+      typeof win.setTimeout !== "function"
+    )
       return;
     setPixels("--ipad-menu-origin-x", geometry.x);
     setPixels("--ipad-menu-origin-y", geometry.y);
     root.setAttribute("data-ipad-menu-motion", direction);
+    const element = trigger?.querySelector?.(".side-panel-trigger-convergence");
+    if (element && originRect && targetRect) {
+      const poseAt = (rect, folded) => ({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        sx: Math.max(0.6, Math.min(4, (rect.width - 8) / 52)),
+        sy: Math.max(0.6, Math.min(2, (rect.height - 8) / 52)),
+        fold: folded ? 1 : 0,
+        alpha: 0.92,
+      });
+      flight = {
+        element,
+        direction,
+        // The child is positioned in its button's padding box, not the
+        // viewport: Safari/route skins can establish a fixed containing block.
+        host: {
+          x: targetRect.left + (trigger.clientLeft || 0),
+          y: targetRect.top + (trigger.clientTop || 0),
+        },
+        originalStyles:
+          previousFlight?.element === element
+            ? previousFlight.originalStyles
+            : {
+                transform: element.style.transform || "",
+                opacity: element.style.opacity || "",
+                borderRadius: element.style.borderRadius || "",
+              },
+        state:
+          previousFlight?.element === element
+            ? previousFlight.state
+            : { pose: poseAt(originRect, direction === "expand"), velocity: {} },
+        target: poseAt(targetRect, direction === "converge"),
+        lastTime: previousFlight?.lastTime || 0,
+      };
+      paintFlight();
+      motionFrame = win.requestAnimationFrame(tickFlight);
+    }
     const generation = motionGeneration;
     motionTimer = win.setTimeout(() => {
       if (!disposed && generation === motionGeneration) clearMotion();
@@ -226,11 +338,22 @@ export function watchIpadMenuMode(win = window, doc = document) {
     }
     if (measureDirty) measure();
     if (Number.isFinite(win.scrollY)) {
-      setPixels("--ipad-header-scroll", Math.min(exitDistance, Math.max(0, win.scrollY)));
+      const nextHeaderScroll = Math.min(exitDistance, Math.max(0, win.scrollY));
+      if (flight?.direction === "expand") {
+        const displacement = headerScroll - nextHeaderScroll;
+        flight.target.y += displacement;
+        flight.host.y += displacement;
+      }
+      headerScroll = nextHeaderScroll;
+      setPixels("--ipad-header-scroll", headerScroll);
     }
     const nextScrolled = getIpadMenuScrolled(scrolled, win.scrollY, exitDistance);
     const animate =
-      scrollBoundary && nextScrolled !== scrolled && !reducedMotion?.matches && !doc.hidden;
+      scrollBoundary &&
+      nextScrolled !== scrolled &&
+      !reducedMotion?.matches &&
+      root.getAttribute("data-world-effects") !== "economy" &&
+      !doc.hidden;
     const trigger = animate ? header?.querySelector?.(".side-panel-trigger") : null;
     const oldRect = trigger?.getBoundingClientRect?.();
     scrolled = nextScrolled;
@@ -248,6 +371,9 @@ export function watchIpadMenuMode(win = window, doc = document) {
           width: win.innerWidth,
           height: win.innerHeight,
         }),
+        trigger,
+        oldRect,
+        newRect,
       );
     }
   };
@@ -299,6 +425,8 @@ export function watchIpadMenuMode(win = window, doc = document) {
         if (isIpad()) loadPreference();
         changed = true;
         measureDirty = true;
+      } else if (record.target === root && record.attributeName === "data-world-effects") {
+        changed = true;
       } else if (record.target === root && record.attributeName === "data-viewport-chrome") {
         changed = true;
         measureDirty = true;
@@ -318,7 +446,7 @@ export function watchIpadMenuMode(win = window, doc = document) {
   });
   observer.observe(root, {
     attributes: true,
-    attributeFilter: ["style", "data-ipad-viewport", "data-viewport-chrome"],
+    attributeFilter: ["style", "data-ipad-viewport", "data-viewport-chrome", "data-world-effects"],
   });
   observer.observe(doc.body, { attributes: true, attributeFilter: ["style"] });
   // Lazy routes can commit their header after the pathname effect has already

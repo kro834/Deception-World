@@ -1203,27 +1203,6 @@ html[data-family]
   }
 }
 
-/* Contexts without the World dossier groups must not reserve their tracks. */
-html[data-family]
-  body
-  #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
-  grid-template-areas: "head" "find" "sec" "spe" "sto" "unm" "inf" "sys";
-}
-@media (min-width: 761px) {
-  html[data-family]
-    body
-    #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
-    grid-template-areas: "head head" "find find" "sec sec" "spe spe" "sto sto" "unm inf" "sys sys";
-  }
-}
-@media (min-width: 1180px) {
-  html[data-family]
-    body
-    #site-side-panel#site-side-panel[data-command-atlas]:not([data-file-menu="true"]) {
-    grid-template-areas: "head head" "find find" "sec spe" "sec sto" "unm inf" "sys sys";
-  }
-}
-
 /* Same artwork as the archived 240x320 chips. The large atlas uses the
    source picture (400px) / existing 960px derivative, retaining its crop.
    The newer Extreme pickup is a different drawing and is not substituted. */

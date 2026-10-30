@@ -27,8 +27,10 @@ dialog.quick-search {
   box-sizing: border-box;
   width: min(720px, calc(100vw - 32px));
   max-width: none;
-  max-height: min(680px, calc(100dvh - 48px));
-  margin: max(48px, 9vh) auto auto;
+  /* Reserve both the actual top offset and a bottom escape margin. */
+  --qs-top: max(48px, 9vh);
+  max-height: min(680px, calc(100dvh - var(--qs-top) - 24px));
+  margin: var(--qs-top) auto auto;
   padding: 0;
   overflow: visible;
   border: 0;
@@ -70,7 +72,7 @@ dialog.quick-search *::after {
   position: relative;
   display: flex;
   flex-direction: column;
-  max-height: min(680px, calc(100dvh - 48px));
+  max-height: min(680px, calc(100dvh - var(--qs-top) - 24px));
   border: 1px solid rgb(var(--qs-ice-rgb) / 0.3);
   border-radius: 6px;
   background:

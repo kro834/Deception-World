@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   getIpadMenuMotionGeometry,
+  advanceIpadMenuSpring,
   IPAD_MENU_MOTION_SETTLE_MS,
 } from "../src/lib/ipad-menu-mode.js";
 
@@ -122,8 +123,49 @@ test("motion geometry leaves measured layout objects untouched", () => {
   assert.deepEqual([header, trigger, viewport], before);
 });
 
-test("the root motion state outlives the longest decorative animation but remains short-lived", () => {
-  const latestDecorativeFinish = 720 + 76;
-  assert.ok(IPAD_MENU_MOTION_SETTLE_MS > latestDecorativeFinish);
-  assert.ok(IPAD_MENU_MOTION_SETTLE_MS <= 1000);
+test("spring travel agrees across 30, 60, 90 and 120 Hz and seats within the lifetime", () => {
+  const final = [];
+  for (const hz of [30, 60, 90, 120]) {
+    let state = { pose: { x: 972, y: -38 }, velocity: {} };
+    let furthest = -Infinity;
+    for (let frame = 0; frame < hz * 0.9; frame++) {
+      state = advanceIpadMenuSpring(state, { x: 970, y: 626 }, 1000 / hz);
+      furthest = Math.max(furthest, state.pose.y);
+    }
+    assert.ok(furthest > 626 && furthest < 632, "overshoot stays below 1% of a 664px flight");
+    assert.ok(Math.abs(state.pose.y - 626) < 0.01);
+    assert.ok(Math.abs(state.velocity.y) < 0.1);
+    final.push(state.pose.y);
+  }
+  assert.ok(Math.max(...final) - Math.min(...final) < 1e-8);
+  assert.equal(IPAD_MENU_MOTION_SETTLE_MS, 900);
+});
+
+test("a spring reversal preserves position and momentum and settles at the new destination", () => {
+  let state = { pose: { x: 0, y: 0, fold: 0 }, velocity: {} };
+  for (let frame = 0; frame < 9; frame++) {
+    state = advanceIpadMenuSpring(state, { x: 2, y: 664, fold: 1 }, 1000 / 60);
+  }
+  const before = structuredClone(state);
+  const reversed = advanceIpadMenuSpring(state, { x: 0, y: 0, fold: 0 }, 0);
+  assert.deepEqual(reversed, before, "retarget itself must not teleport or discard velocity");
+  assert.deepEqual(state, before, "the solver never mutates a captured frame");
+  for (let frame = 0; frame < 54; frame++) {
+    state = advanceIpadMenuSpring(state, { x: 0, y: 0, fold: 0 }, 1000 / 60);
+  }
+  assert.ok(Math.abs(state.pose.y) < 0.01);
+  assert.ok(Math.abs(state.velocity.y) < 0.1);
+  assert.ok(Math.abs(state.pose.fold) < 0.001);
+});
+
+test("a delayed frame is bounded, and invalid or negative elapsed time does not advance motion", () => {
+  const state = { pose: { y: 0 }, velocity: { y: 0 } };
+  const target = { y: 664 };
+  for (const dt of [0, -1, NaN, Infinity]) {
+    assert.deepEqual(advanceIpadMenuSpring(state, target, dt), state);
+  }
+  assert.deepEqual(
+    advanceIpadMenuSpring(state, target, 10_000),
+    advanceIpadMenuSpring(state, target, 64),
+  );
 });

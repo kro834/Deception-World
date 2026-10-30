@@ -125,44 +125,23 @@ test("the fixed 60px launcher stays still while its decorative copy converges an
   assert.match(launcher, /height:\s*60px;/);
   assert.match(launcher, /background:\s*var\(--viewport-chrome-color\)\s*!important;/);
 
-  const motion = css.match(
-    /@media \(prefers-reduced-motion: no-preference\) \{([\s\S]*?)\n\}/,
-  )?.[1];
-  assert.ok(motion);
-  assert.match(
-    motion,
-    /\.side-panel-trigger-convergence\s*\{\s*animation: ipad-menu-converge 720ms/,
+  const engine = source("src/lib/ipad-menu-mode.js");
+  assert.match(engine, /advanceIpadMenuSpring/);
+  assert.match(engine, /previousFlight\.state/);
+  assert.match(engine, /pose\.x - flight\.host\.x/);
+  assert.match(engine, /pose\.y - flight\.host\.y/);
+  assert.match(engine, /reducedMotion\?\.matches/);
+  assert.doesNotMatch(css, /@keyframes ipad-menu-(?:converge|expand|strip|ring|glyph)/);
+  const flight = rules.find(
+    ({ selector, body }) =>
+      selector.endsWith(".side-panel-trigger-convergence") && /position:\s*absolute/.test(body),
   );
-  assert.match(motion, /\.side-panel-trigger-convergence\s*\{\s*animation: ipad-menu-expand 720ms/);
-  assert.match(
-    motion,
-    /\.side-panel-trigger-convergence\s+i\s*\{\s*animation: ipad-menu-strip-fold 610ms/,
-  );
-  assert.match(
-    motion,
-    /\.side-panel-trigger-convergence\s+i\s*\{\s*animation: ipad-menu-strip-open 610ms/,
-  );
-  assert.match(motion, /\.side-panel-trigger-ring\s*\{\s*animation: ipad-menu-ring-arrive 720ms/);
-  assert.match(motion, /\.side-panel-trigger-ring\s*\{\s*animation: ipad-menu-ring-depart 720ms/);
-  assert.match(
-    motion,
-    /\.side-panel-trigger-glyph\s*\{\s*animation: ipad-menu-glyph-arrive 660ms 60ms/,
-  );
-  assert.match(motion, /animation-delay:\s*38ms/);
-  assert.match(motion, /animation-delay:\s*76ms/);
-  assert.match(
-    motion,
-    /data-ipad-menu="compact"\]:not\(\s*\[data-ipad-menu-scrolled="true"\]\s*\)\[data-ipad-menu-motion="expand"\]/,
-  );
-  assert.doesNotMatch(motion, /infinite|\.side-panel-trigger\s*\{/);
-  assert.match(
-    css,
-    /@keyframes ipad-menu-converge\s*\{[\s\S]*?translate\(var\(--ipad-menu-origin-x, 0px\), var\(--ipad-menu-origin-y, 0px\)\)[\s\S]*?translate\(0, 0\)/,
-  );
-  assert.match(
-    css,
-    /@keyframes ipad-menu-expand\s*\{[\s\S]*?calc\(-1 \* var\(--ipad-menu-origin-x, 0px\)\)[\s\S]*?calc\(-1 \* var\(--ipad-menu-origin-y, 0px\)\)[\s\S]*?translate\(0, 0\)/,
-  );
+  assert.ok(flight, "the decorative shell uses coordinates relative to its unchanged hitbox");
+  assert.match(flight.body, /pointer-events:\s*none;/);
+  assert.match(flight.body, /width:\s*52px;/);
+  assert.match(flight.body, /height:\s*52px;/);
+  assert.match(flight.body, /transition:\s*none;/);
+  assert.doesNotMatch(flight.body, /filter:|animation:/);
 
   const trigger = source("src/components/world/world-chrome.tsx").match(
     /<span className="side-panel-trigger-convergence" aria-hidden="true">([\s\S]*?)<\/span>/,
@@ -171,8 +150,8 @@ test("the fixed 60px launcher stays still while its decorative copy converges an
   assert.equal((trigger[1].match(/<i\s*\/>/g) ?? []).length, 3);
   assert.match(css, /data-ipad-menu-motion="converge"/);
   assert.match(css, /data-ipad-menu-motion="expand"/);
-  assert.match(css, /--ipad-menu-origin-x/);
-  assert.match(css, /--ipad-menu-origin-y/);
+  assert.match(engine, /--ipad-menu-origin-x/);
+  assert.match(engine, /--ipad-menu-origin-y/);
   const sharedHeader = rules.find(
     (rule) =>
       rule.selector === `html:root[data-viewport-chrome] ${headers}` &&
@@ -181,6 +160,15 @@ test("the fixed 60px launcher stays still while its decorative copy converges an
   assert.ok(sharedHeader);
   assert.match(sharedHeader, /-webkit-backdrop-filter:\s*none\s*!important;/);
   assert.match(sharedHeader, /(?:^|;)\s*backdrop-filter:\s*none\s*!important;/);
+});
+
+test("both flight directions escape the liquid button clip without enlarging its hitbox", () => {
+  const host = bodyFor(
+    `${ipadScope}[data-ipad-menu-motion][data-viewport-chrome] ${headers} .side-panel-trigger`,
+  );
+  assert.match(host, /overflow:\s*visible\s*!important;/);
+  assert.match(host, /clip-path:\s*none\s*!important;/);
+  assert.doesNotMatch(host, /(?:^|;)\s*(?:width|height|padding|transform|position)\s*:/);
 });
 
 test("reduced motion disables the fold, glyph arrival and their inherited transitions", () => {
