@@ -12,7 +12,7 @@ import math
 
 import bmesh
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 import part_torso_kit as K
 import rx_lib as L
@@ -39,12 +39,6 @@ def finish(bm, name, coll, family, angle=35.0, recalc=True):
     return L.from_bmesh(bm, name, coll, family, angle)
 
 
-def sweep_closed(path, profile, normals, scale, twist=None):
-    bm = L.sweep(path, profile, scale=scale, twist=twist, normals=normals)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return bm
-
-
 # ---------------------------------------------------------------- the orb
 ORB_BASE_R = 0.051  # outer edge of the dark-blue band (front-10: ~38 px)
 ORB_INNER_R = 0.038  # the white ring / start of the band
@@ -64,8 +58,9 @@ def orb_normal(r, th):
     return c.normalized()
 
 
-def sphere_zone(r0, r1, rings, seg, lift=0.0, back=None):
-    """Sphere-cap zone between projected radii r0 (0 = apex) and r1."""
+def sphere_zone(r0, r1, rings, seg, lift=0.0, back=None, radial_v=None):
+    """Sphere-cap zone between projected radii r0 (0 = apex) and r1.
+    UV is planar (x, z); radial_v=(v0, v1) instead maps v from r0 to r1."""
     bm = bmesh.new()
     uv = bm.loops.layers.uv.verify()
     rows = []
@@ -94,36 +89,91 @@ def sphere_zone(r0, r1, rings, seg, lift=0.0, back=None):
     for f in bm.faces:
         for lp in f.loops:
             co = lp.vert.co
-            lp[uv].uv = (0.5 + co.x / (2 * ORB_BASE_R), 0.5 + (co.z - CORE_Z) / (2 * ORB_BASE_R))
+            if radial_v:
+                r = math.hypot(co.x, co.z - CORE_Z)
+                t = min(max((r - r0) / max(r1 - r0, 1e-9), 0.0), 1.0)
+                lp[uv].uv = (math.atan2(co.z - CORE_Z, co.x) / (2 * math.pi) + 0.5, radial_v[0] + (radial_v[1] - radial_v[0]) * t)
+            else:
+                lp[uv].uv = (0.5 + co.x / (2 * ORB_BASE_R), 0.5 + (co.z - CORE_Z) / (2 * ORB_BASE_R))
+    return bm
+
+
+ORB_GLOW_R = 0.017  # the white-hot centre (front-10: ~13 px)
+N_FACET = 10
+
+
+def faceted_shell(r0, r1):
+    """Brilliant-cut crystal dome between projected radii r0 and r1: three
+    staggered vertex rings joined by flat triangles (crisp facets), with a
+    skirt down to the band behind."""
+    bm = bmesh.new()
+    n = N_FACET
+    ra, rb, rc = r0, r0 + (r1 - r0) * 0.55, r1
+    off = math.radians(90.0)
+
+    def ring(r, k, phase):
+        return [bm.verts.new(cpt(r, off + 2 * math.pi * (j + phase) / k, orb_depth(r))) for j in range(k)]
+
+    A = ring(ra, n, 0.0)
+    B = ring(rb, n, 0.5)
+    C = ring(rc, 2 * n, 0.0)
+    D = [bm.verts.new(cpt(rc, off + 2 * math.pi * j / (2 * n), ORB_D_BASE - 0.004)) for j in range(2 * n)]
+    for j in range(n):
+        j2 = (j + 1) % n
+        bm.faces.new((A[j], B[j], A[j2]))  # A-B band: alternating triangles
+        bm.faces.new((A[j], B[(j - 1) % n], B[j]))
+        c0, c1, c2 = C[2 * j], C[2 * j + 1], C[(2 * j + 2) % (2 * n)]
+        bm.faces.new((B[j], c0, c1))  # B-C band: kites split in two
+        bm.faces.new((B[j], c1, c2))
+        bm.faces.new((B[j], c2, B[j2]))
+    for j in range(2 * n):
+        j2 = (j + 1) % (2 * n)
+        bm.faces.new((C[j], D[j], D[j2], C[j2]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    for f in bm.faces:
+        f.normal_update()
+        c = f.calc_center_median()
+        if f.normal.dot(c - Vector((0.0, -ORB_DC, CORE_Z))) < 0:
+            f.normal_flip()
+    uv = bm.loops.layers.uv.verify()
+    for f in bm.faces:
+        for lp in f.loops:
+            co = lp.vert.co
+            lp[uv].uv = (0.5 + co.x / (2 * r1), 0.5 - (co.z - CORE_Z) / (2 * r1))  # v = 1 at the bottom (pink)
     return bm
 
 
 def build_orb(coll):
     out = []
-    # bright core: the inner cap (white-blue centre, pink below)
-    bm = sphere_zone(0.0, ORB_INNER_R, 9, 64, back=ORB_D_BASE - 0.012)
+    # white-hot centre, a little proud of the crystal shell so it shows through its opening
+    bm = sphere_zone(0.0, ORB_GLOW_R + 0.0015, 4, 40, lift=0.0016, back=ORB_D_APEX - 0.012)
     out.append(finish(bm, "RX_Torso_CoreOrb", coll, "Glow", angle=None))
-    # dark-blue band: the outer zone of the same sphere, a hair proud
-    bm = sphere_zone(ORB_INNER_R - 0.0015, ORB_BASE_R, 4, 64, lift=0.0004, back=ORB_D_BASE - 0.010)
+    # faceted crystal shell: blue above, pink below (front-10)
+    bm = faceted_shell(ORB_GLOW_R, ORB_INNER_R)
+    shell = finish(bm, "RX_Torso_CoreShell", coll, "Crystal", angle=1.0, recalc=False)
+    L.tint(shell, fn=lambda co, uv: (min(1.0, max(0.0, (uv[1] - 0.45) * 1.8)), 0.9, 0.7))
+    out.append(shell)
+    # dark-blue band: the outer zone of the same sphere
+    bm = sphere_zone(ORB_INNER_R - 0.0015, ORB_BASE_R, 4, 64, lift=0.0004, back=ORB_D_BASE - 0.010, radial_v=(0.0, 0.15))
     band = finish(bm, "RX_Torso_CoreBand", coll, "Crystal", angle=None)
-    L.tint(band, pink=0.0, sparkle=0.8, edge=0.2)
+    L.tint(band, pink=0.0, sparkle=0.35, edge=0.1)
     out.append(band)
-    # black bezel ring around the orb
+    # thin black bezel ring around the orb, covering the vane roots
     prof = [(0.0, -0.5), (0.7, -0.5), (1.0, -0.2), (1.0, 0.25), (0.6, 0.5), (0.0, 0.5)]
     seg = 72
-    rr = ORB_BASE_R + 0.0040
+    rr = ORB_BASE_R + 0.0018
     path = [cpt(rr, 2 * math.pi * j / seg, ORB_D_BASE + 0.003) for j in range(seg)]
     nrm = [(SPIN_AXIS * 0.9 + cdir(2 * math.pi * j / seg) * 0.35).normalized() for j in range(seg)]
-    bm = L.sweep(path, [(x * 0.0120 - 0.006, y * 0.0068) for x, y in prof], normals=nrm, closed=True)
+    bm = L.sweep(path, [(x * 0.0115 - 0.006, y * 0.0036) for x, y in prof], normals=nrm, closed=True)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     out.append(L.from_bmesh(bm, "RX_Torso_CoreBezel", coll, "Black", 30.0))
-    # the radial web: 10 spokes and a ring of white lines
+    # the radial web: 10 white spokes over the shell and a white ring at its rim
     web = bmesh.new()
     rib = [(-0.0006, -0.5), (0.0006, -0.5), (0.0010, -0.2), (0.0010, 0.2), (0.0006, 0.5), (-0.0006, 0.5)]
-    for k in range(10):
-        th = math.radians(90.0 + 36.0 * k)
-        rs = [0.004 + (ORB_BASE_R - 0.0025 - 0.004) * i / 13 for i in range(14)]
-        path = [cpt(r, th, orb_depth(r)) + orb_normal(r, th) * 0.0006 for r in rs]
+    for k in range(N_FACET):
+        th = math.radians(90.0) + 2 * math.pi * k / N_FACET
+        rs = [0.006 + (ORB_BASE_R - 0.0025 - 0.006) * i / 13 for i in range(14)]
+        path = [cpt(r, th, orb_depth(r)) + orb_normal(r, th) * 0.0010 for r in rs]
         nrm = [orb_normal(r, th) for r in rs]
         w0 = 0.0016
 
@@ -132,10 +182,10 @@ def build_orb(coll):
 
         L.sweep(path, rib, scale=wf, normals=nrm, bm=web)
     seg = 80
-    rr = ORB_INNER_R - 0.0012
-    path = [cpt(rr, 2 * math.pi * j / seg, orb_depth(rr)) + orb_normal(rr, 2 * math.pi * j / seg) * 0.0006 for j in range(seg)]
+    rr = ORB_INNER_R - 0.0004
+    path = [cpt(rr, 2 * math.pi * j / seg, orb_depth(rr)) + orb_normal(rr, 2 * math.pi * j / seg) * 0.0008 for j in range(seg)]
     nrm = [orb_normal(rr, 2 * math.pi * j / seg) for j in range(seg)]
-    L.sweep(path, rib, scale=lambda t: (1.0, 0.0017), normals=nrm, closed=True, bm=web)
+    L.sweep(path, rib, scale=lambda t: (1.2, 0.0020), normals=nrm, closed=True, bm=web)
     bmesh.ops.recalc_face_normals(web, faces=web.faces)
     out.append(L.from_bmesh(web, "RX_Torso_CoreWeb", coll, "Gem", 40.0))
     L.glint("TorsoCore", cpt(0.0, 0.0, ORB_D_APEX + 0.004), 0.07, coll, hue=0.45)
@@ -143,7 +193,7 @@ def build_orb(coll):
 
 
 # ---------------------------------------------------------------- the vanes
-N_VANES = 14
+N_VANES = 16
 VANE = dict(
     r_root=0.052,
     r_tip=0.109,
@@ -206,6 +256,7 @@ def build_vanes(coll, pivot):
     bmesh.ops.recalc_face_normals(crys, faces=crys.faces)
     bmesh.ops.recalc_face_normals(gold, faces=gold.faces)
     cob = L.from_bmesh(crys, "RX_Torso_CoreVanes", coll, "Crystal", 30.0)
+
     def vane_tint(co, uv):
         # pinker toward the tips, and every other blade a little pinker overall (front-10 mixes them)
         th = math.atan2(co.z - CORE_Z, co.x)
@@ -256,10 +307,11 @@ def build_core(ctx, coll):
     pivot.empty_display_type = "ARROWS"
     pivot.empty_display_size = 0.08
     pivot.location = (0.0, -0.13, CORE_Z)
-    pivot.rotation_euler = (math.pi / 2, 0.0, 0.0)  # local +Z = world -Y (out of the chest)
     pivot["rx_keep"] = 1
-    pivot["rx_spin_axis"] = "z"
-    pivot["rx_spin_rate"] = -0.35  # rad/s, clockwise seen from the front: the whirlpool draws inward
+    # Spin about the axis out of the chest: Blender -Y = glTF/three.js +Z. Positive =
+    # counter-clockwise seen from the front, which makes the trailing vanes flow inward.
+    pivot["rx_spin_axis_gltf"] = [0.0, 0.0, 1.0]
+    pivot["rx_spin_rate"] = 0.35  # rad/s
     coll.objects.link(pivot)
     bpy.context.view_layer.update()
     build_orb(coll)
@@ -289,7 +341,6 @@ def facet_kite(base, tip, side, normal, half_w, shoulder=0.38, height=0.008, bac
 
 
 def build_spikes(ctx, coll):
-    body = ctx.body
     # gold spike above the core: front-10 tip (499, 303), shoulders y 330
     zb, zt = R.front(499, 352)[1], R.front(499, 302)[1]
     base = Vector((0.0, -0.118, zb))
@@ -343,7 +394,7 @@ def emit(bm_by_fam, name, coll, mirror=True, tint=None):
     for fam, bm in bm_by_fam.items():
         ob = finish(bm, "RX_Torso_%s%s_L" % (name, fam), coll, fam, 30.0)
         if fam == CRYS:
-            L.tint(ob, fn=tint or (lambda co, uv: (0.15 + 0.75 * uv[1] ** 1.5, 0.7, 0.7)))
+            L.tint(ob, fn=tint or (lambda co, uv: (0.25 * uv[1] ** 2, 0.7, 0.6)))
         out.append(ob)
         if mirror:
             out.append(L.mirror_x(ob))
@@ -355,12 +406,13 @@ def build_front(ctx, coll):
     fam = {}
     # upper chest: gold strip and crystal streak fanning from the core to the shoulder
     add_strip(fam, body, "front", [(535, 334), (558, 311), (589, 288)], 0.015, 0.0050, "Gold", wf=K.pointed(a=0.08, b=0.75), profile=K.ridge_bar(0.0050))
-    add_strip(fam, body, "front", [(544, 354), (566, 337), (596, 316)], 0.014, 0.0045, CRYS, wf=K.pointed(a=0.2, b=0.65))
+    add_strip(fam, body, "front", [(544, 355), (566, 337), (598, 315)], 0.018, 0.0050, CRYS, wf=K.pointed(a=0.2, b=0.65))
     # pec / side streaks running up under the pauldron
-    add_strip(fam, body, "front", [(555, 447), (582, 421), (609, 396)], 0.013, 0.0045, CRYS, wf=K.pointed(a=0.25, b=0.6))
-    add_strip(fam, body, "front", [(570, 461), (596, 435), (622, 412)], 0.011, 0.0040, CRYS, wf=K.pointed(a=0.25, b=0.6))
+    add_strip(fam, body, "front", [(566, 412), (588, 392), (612, 372)], 0.012, 0.0042, CRYS, wf=K.pointed(a=0.25, b=0.6))
+    add_strip(fam, body, "front", [(555, 447), (582, 421), (610, 395)], 0.016, 0.0048, CRYS, wf=K.pointed(a=0.25, b=0.6))
+    add_strip(fam, body, "front", [(570, 461), (596, 435), (623, 411)], 0.014, 0.0045, CRYS, wf=K.pointed(a=0.25, b=0.6))
     # long abdomen streak curving down to the belt
-    add_strip(fam, body, "front", [(598, 454), (587, 474), (571, 502), (558, 532), (549, 563)], 0.016, 0.0048, CRYS, wf=K.pointed(a=0.12, b=0.62, p1=0.9))
+    add_strip(fam, body, "front", [(598, 454), (587, 474), (571, 502), (558, 532), (549, 563)], 0.019, 0.0052, CRYS, wf=K.pointed(a=0.12, b=0.62, p1=0.9))
     # gold blade on the flank
     add_strip(fam, body, "front", [(625, 445), (608, 467), (592, 491)], 0.013, 0.0045, "Gold", wf=K.taper(p=0.8, start=0.3), profile=K.ridge_bar(0.0045))
     # gold arch strap on the flank, rising from the belt (left-08), rays from between torso and arm
@@ -379,7 +431,7 @@ SPINE = [  # back-09: (tip y, top y, half-width px, arm width px)
 ]
 
 
-def v_chevron(gold, black, body, view, hw, z_top, z_tip, aw, cut=0.6, th=(0.0025, 0.0062), inner=True, xc=0.0, gap=0.0025):
+def v_chevron(gold, black, body, view, hw, z_top, z_tip, aw, cut=0.6, th=(0.0025, 0.0062), inner=True, xc=0.0, gap=0.0025, lift=None):
     """Faceted V chevron (ridged gold arms) with an optional black inner V."""
     outline, dz_in, dh = K.chevron_outline(hw, z_top, z_tip, aw, cut=cut, xc=xc)
     ridge = [
@@ -392,12 +444,14 @@ def v_chevron(gold, black, body, view, hw, z_top, z_tip, aw, cut=0.6, th=(0.0025
     def ramp(h, z):
         return 0.55 + 0.45 * min(1.0, max(0.0, (z_top - z) / (0.45 * H)))
 
-    rims = K.ridge_plate(gold, body, view, outline, ridge, th[0], th[1], gap=gap, step=0.005, scale_fn=ramp)
+    g_gold = (lambda h, z: gap + lift(z)) if lift else gap
+    g_black = (lambda h, z: gap - 0.0005 + lift(z)) if lift else gap - 0.0005
+    rims = K.ridge_plate(gold, body, view, outline, ridge, th[0], th[1], gap=g_gold, step=0.005, scale_fn=ramp)
     if inner:
         inset = 0.0016
         wi = hw - dh - inset
         tri = [(xc, z_tip + dz_in + inset * 2), (xc + wi, z_top + 0.005), (xc, z_top + 0.002), (xc - wi, z_top + 0.005)]
-        K.ridge_plate(black, body, view, tri, [(xc, z_top), (xc, z_tip + dz_in + inset * 3)], 0.0012, 0.0042, gap=gap - 0.0005, step=0.005)
+        K.ridge_plate(black, body, view, tri, [(xc, z_top), (xc, z_tip + dz_in + inset * 3)], 0.0012, 0.0042, gap=g_black, step=0.005)
     return rims
 
 
@@ -407,10 +461,18 @@ def build_spine(ctx, coll):
     black = bmesh.new()
     S = R.S
     rims = []
+    # the top chevron overlaps the collar's lower edge (back-09): ride over the
+    # helmet's gorget when that part is built, otherwise lie on the suit
+    helmet = [o for o in bpy.data.objects if o.type == "MESH" and o.name.startswith("RX_Helmet")]
     for i, (y_tip, y_top, hw_px, aw_px) in enumerate(SPINE):
         z_tip = R.back(510, y_tip)[1]
         z_top = R.back(510, y_top)[1]
-        r = v_chevron(gold, black, body, "back", hw_px * S, z_top, z_tip, aw_px * S)
+        lift = None
+        if i == 0 and helmet:
+            hs = [k * hw_px * S / 4 for k in range(-4, 5)]
+            lift = K.clearance_profile(body, "back", helmet, hs, z_tip, z_top + 0.004, pad=0.0015)
+            print("[torso] top chevron lift over the collar: %.1f mm at the tip, %.1f mm at the top" % (lift(z_tip) * 1000, lift(z_top) * 1000))
+        r = v_chevron(gold, black, body, "back", hw_px * S, z_top, z_tip, aw_px * S, lift=lift)
         rims += r or []
     K.finish_plates(gold, 0.0010, rims)
     K.finish_plates(black)
@@ -456,8 +518,8 @@ def build_back(ctx, coll):
     # upper-back gold blades reaching in under the second chevron
     add_strip(fam, body, "back", [(431, 315), (458, 337), (491, 369)], 0.019, 0.0058, "Gold", wf=K.taper(p=0.9, start=0.35), profile=K.ridge_bar(0.0058))
     # lat crystal streaks
-    add_strip(fam, body, "back", [(443, 360), (459, 388), (480, 422)], 0.013, 0.0042, CRYS, wf=K.pointed(a=0.2, b=0.6))
-    add_strip(fam, body, "back", [(416, 453), (437, 479), (455, 512), (468, 557)], 0.016, 0.0048, CRYS, wf=K.pointed(a=0.12, b=0.6, p1=0.9))
+    add_strip(fam, body, "back", [(443, 359), (459, 388), (481, 423)], 0.016, 0.0046, CRYS, wf=K.pointed(a=0.2, b=0.6))
+    add_strip(fam, body, "back", [(415, 452), (437, 479), (455, 512), (468, 558)], 0.020, 0.0052, CRYS, wf=K.pointed(a=0.12, b=0.6, p1=0.9))
     # gold arch strap rising from the belt on the back-side (twin of the front arch)
     add_strip(fam, body, "back", [(409, 584), (413, 556), (427, 535), (447, 529), (464, 540), (471, 572)], 0.017, 0.0062, "Gold", profile=K.ridge_bar(0.0062))
     emit(fam, "Back", coll)
@@ -474,7 +536,7 @@ def _dir_px(view, x0, y0, x1, y1):
 # plate fields (suit's left side; mirrored): (view, region px, tip angle, length px, width px)
 FIELDS = [
     # abdomen beside the centre ridge, feathers running down-inward along the long streak
-    ("front", [(522, 470), (560, 452), (612, 462), (630, 505), (612, 548), (596, 580), (516, 584), (514, 520)],
+    ("front", [(522, 470), (560, 452), (612, 462), (630, 505), (612, 548), (596, 580), (540, 584), (542, 520), (528, 500)],
      _dir_px("front", 598, 454, 549, 563), 50, 19),
     # side of the chest under the shoulder medallion: feathers fanning up-outward
     ("front", [(568, 372), (612, 384), (642, 420), (634, 462), (600, 470), (566, 452)],
@@ -486,7 +548,6 @@ FIELDS = [
     ("back", [(492, 250), (492, 586), (412, 586), (392, 470), (418, 372), (448, 262)],
      lambda h, z: _dir_px("back", 440, 360, 482, 420) if z > 1.40 else _dir_px("back", 437, 479, 468, 556), 60, 20),
 ]
-ABS_VS = [(530, 494, 36, 15), (557, 524, 35, 15)]  # front-10 black chevrons: tip y, top y, half-width, arm
 
 
 def build_scales(ctx, coll):
@@ -499,17 +560,22 @@ def build_scales(ctx, coll):
     K.finish_plates(bm, 0.0008, rims)
     ob = finish(bm, "RX_Torso_Scales_L", coll, "Black", 28.0, recalc=False)
     L.mirror_x(ob)
-    # abdomen ridge: nested black chevrons below the pink V
+    # abdomen centre (front-10 x 452-548, y 496-568): an upper V plate whose point sits at
+    # (500, 530), over two convex plates split by a central crease
     gold_dummy = bmesh.new()
     vb = bmesh.new()
-    rims = []
-    for y_tip, y_top, hw_px, aw_px in ABS_VS:
-        z_tip, z_top = R.front(500, y_tip)[1], R.front(500, y_top)[1]
-        r = v_chevron(vb, gold_dummy, body, "front", hw_px * R.S, z_top, z_tip, aw_px * R.S, cut=0.9, th=(0.0016, 0.0055), inner=False)
-        rims += r or []
+    z_tip, z_top = R.front(500, 531)[1], R.front(500, 497)[1]
+    rims = v_chevron(vb, gold_dummy, body, "front", 37 * R.S, z_top, z_tip, 19 * R.S, cut=0.9, th=(0.0020, 0.0052), inner=False, gap=0.0040) or []
     gold_dummy.free()
     K.finish_plates(vb, 0.0008, rims)
-    finish(vb, "RX_Torso_AbsChevrons", coll, "Black", 28.0, recalc=False)
+    finish(vb, "RX_Torso_AbsChevron", coll, "Black", 28.0, recalc=False)
+    vb = bmesh.new()
+    lower = K.hz("front", [(502, 526), (531, 508), (547, 525), (548, 552), (537, 569), (502, 569)])
+    ridge = K.hz("front", [(513, 528), (515, 548), (513, 566)])
+    rims = K.ridge_plate(vb, body, "front", lower, ridge, 0.0018, 0.0050, gap=0.0018, step=0.0045) or []
+    K.finish_plates(vb, 0.0008, rims)
+    ob = finish(vb, "RX_Torso_AbsPlate_L", coll, "Black", 28.0, recalc=False)
+    L.mirror_x(ob)
     # upper chest: a black chevron behind the gold spike, under the collar
     vb = bmesh.new()
     gold_dummy = bmesh.new()

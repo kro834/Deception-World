@@ -1,5 +1,5 @@
 """Builders for the torso module (part_torso.py): trims, crystal inlays,
-chevrons and faceted scale tiles laid on the undersuit.
+chevrons and keeled scale plates laid on the undersuit.
 
 Coordinates: paths and outlines are given in reference-sheet pixels of one
 view and converted with rx_ref.px(); everything is projected onto the body
@@ -28,10 +28,6 @@ def smooth_path(points_hz, samples=6):
         return [tuple(p) for p in points_hz]
     V = [Vector((h, z, 0.0)) for h, z in points_hz]
     return [(v.x, v.y) for v in L.catmull_rom(V, samples)]
-
-
-def mirror_hz(pts):
-    return [(-h, z) for h, z in pts]
 
 
 # ---------------------------------------------------------------- profiles
@@ -102,23 +98,6 @@ def taper(p=0.8, start=0.0, root=1.0):
 
 
 # ---------------------------------------------------------------- plates
-def plate(body, view, outline_hz, thickness, gap=0.002, res=0.006, bevel=0.0012):
-    bm = L.conform_plate(body, view, outline_hz, thickness=thickness, gap=gap, res=res, bevel=bevel)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return bm
-
-
-def seg_dist(p, a, b):
-    ax, az = a
-    bx, bz = b
-    px, pz = p
-    vx, vz = bx - ax, bz - az
-    L2 = vx * vx + vz * vz
-    t = 0.0 if L2 < 1e-12 else max(0.0, min(1.0, ((px - ax) * vx + (pz - az) * vz) / L2))
-    dx, dz = px - (ax + vx * t), pz - (az + vz * t)
-    return math.hypot(dx, dz), t
-
-
 def chevron_outline(hw, z_top, z_tip, aw, cut=0.35, xc=0.0):
     """Gold V (two arms meeting in a point) in (h, z): half-width hw at z_top,
     tip at (xc, z_tip), arm width aw (perpendicular). The arm ends are cut
@@ -161,68 +140,6 @@ def v_outline(A, T, B, aw):
     outline = [tuple(T), tuple(B), tuple(pB), tuple(inner), tuple(pA), tuple(A)]
     ridge = [tuple(A + nA * aw * 0.5 + dA * 0.002), tuple(T.lerp(inner, 0.5)), tuple(B + nB * aw * 0.5 + dB * 0.002)]
     return outline, ridge, tuple(inner), tuple(pA), tuple(pB)
-
-
-def scale_tile(bm, body, view, c_hz, length, width, angle, th_root=0.0012, th_tip=0.0045, keel=0.45, gap=0.0015, ns=6, tip_power=0.9, root_round=0.5):
-    """A faceted dragon scale: leaf outline pointing along `angle` (radians,
-    measured in the view plane from +h, e.g. -pi/2 points down), a keel ridge
-    down its middle, thin at the root (tucked under the row above) and
-    thick at the free tip. Appends to `bm`. Returns False when off the body."""
-    u = (math.cos(angle), math.sin(angle))
-    v = (-u[1], u[0])
-    rows = []
-    for i in range(ns + 1):
-        s = i / ns
-        if s < 0.4:
-            hwf = (s / 0.4) ** root_round if s > 0 else 0.0
-            hwf = max(hwf, 0.25)
-        else:
-            hwf = ((1 - s) / 0.6) ** tip_power
-        hw = 0.5 * width * hwf
-        row = []
-        for a in (-1.0, 0.0, 1.0):
-            if i == ns and a != 0.0:
-                a = 0.0
-            ph = c_hz[0] + u[0] * (s - 0.5) * length + v[0] * a * hw
-            pz = c_hz[1] + u[1] * (s - 0.5) * length + v[1] * a * hw
-            r = body.hit(view, ph, pz, smooth=0.006)
-            if r is None:
-                return False
-            row.append((r[0], r[1], s, a))
-        rows.append(row)
-    top, bot = [], []
-    for row in rows:
-        trow, brow = [], []
-        for p, n, s, a in row:
-            th = th_root + (th_tip - th_root) * s ** 0.8
-            h = gap + th * (1.0 - keel * abs(a))
-            trow.append(bm.verts.new(p + n * h))
-            brow.append(bm.verts.new(p + n * (gap * 0.5)))
-        top.append(trow)
-        bot.append(brow)
-    faces = []
-    for i in range(ns):
-        for j in range(2):
-            a0, a1, b0, b1 = top[i][j], top[i][j + 1], top[i + 1][j], top[i + 1][j + 1]
-            c0, c1, d0, d1 = bot[i][j], bot[i][j + 1], bot[i + 1][j], bot[i + 1][j + 1]
-            if i == ns - 1:
-                faces.append((a0, a1, b0))
-                faces.append((c0, d0, c1))
-            else:
-                faces.append((a0, a1, b1, b0))
-                faces.append((c0, d0, d1, c1))
-    # walls: left edge (j=0), right edge (j=2), root (i=0)
-    for i in range(ns):
-        faces.append((top[i][0], top[i + 1][0], bot[i + 1][0], bot[i][0]))
-        faces.append((top[i][2], bot[i][2], bot[i + 1][2], top[i + 1][2]))
-    faces.append((top[0][0], bot[0][0], bot[0][1], top[0][1]))
-    faces.append((top[0][1], bot[0][1], bot[0][2], top[0][2]))
-    for f in faces:
-        try:
-            bm.faces.new(f)
-        except ValueError:
-            pass
-    return True
 
 
 class SideBody:
@@ -303,8 +220,9 @@ def ridge_plate(bm, body, view, outline_hz, ridge_hz, th_edge, th_ridge, gap=0.0
         p, n = hits[i]
         k = scale_fn(h, z) if scale_fn else 1.0
         th = (th_edge if i < nb else th_ridge) * k
-        top.append(bm.verts.new(p + n * (gap + th)))
-        bot.append(bm.verts.new(p + n * gap))
+        g = gap(h, z) if callable(gap) else gap
+        top.append(bm.verts.new(p + n * (g + th)))
+        bot.append(bm.verts.new(p + n * g))
     centre = sum((Vector(hh[0]) for hh in hits), Vector()) / len(hits)
 
     def add(vs, want):
@@ -414,40 +332,7 @@ def leaf_outline(c, length, width, angle, root=0.35, n_side=5, tip_power=0.9, ro
     return outline, ridge
 
 
-def tile_row(bm, body, view, pts_px, n, length_px, width_px, th_root=0.0010, th_tip=0.0042, keel=2.4, gap=0.0018, flip=False, rims=None, mirror_view=False):
-    """n overlapping keeled leaf plates along a pixel path (tips point toward
-    the path's end, or its start with flip=True)."""
-    path = smooth_path(hz(view, pts_px), 8)
-    P = [Vector((h, z, 0.0)) for h, z in path]
-    P = L.resample(P, 64)
-    Lm, Wm = length_px * R.S, width_px * R.S
-    total = sum((P[i + 1] - P[i]).length for i in range(len(P) - 1))
-    ok = 0
-    for k in range(n):
-        f = (k + 0.5) / n
-        idx = min(int(f * (len(P) - 1)), len(P) - 2)
-        c = P[idx]
-        tdir = (P[idx + 1] - P[idx]).normalized()
-        if flip:
-            tdir = -tdir
-        ang = math.atan2(tdir.y, tdir.x)
-        outline, ridge = leaf_outline((c.x, c.y), Lm, Wm, ang)
-        root = Vector((c.x, c.y, 0.0)) - Vector((tdir.x, tdir.y, 0.0)) * (Lm * 0.5)
-
-        def ramp(h, z, root=root, tdir=tdir):
-            s_ = (Vector((h, z, 0.0)) - root).dot(Vector((tdir.x, tdir.y, 0.0))) / Lm
-            return 0.25 + 0.75 * min(max(s_, 0.0), 1.0) ** 0.8
-
-        r = ridge_plate(bm, body, view, outline, ridge, th_tip * 0.42, th_tip * keel * 0.42, gap=gap, step=0.0055, scale_fn=ramp)
-        if r is not None:
-            ok += 1
-            if rims is not None:
-                rims.extend(r)
-    _ = total
-    return ok
-
-
-def tile_field(bm, body, view, region_px, angle, length_px, width_px, row_step=0.50, col_step=0.92, th_tip=0.0042, keel=2.4, gap=0.0018, rims=None, jitter=0.0, phase=0.0, step=0.016, skip=None):
+def tile_field(bm, body, view, region_px, angle, length_px, width_px, row_step=0.50, col_step=0.92, th_tip=0.0042, keel=2.0, gap=0.0018, rims=None, step=0.016):
     """Fill a pixel polygon of `view` with staggered overlapping keeled plates.
     angle: tip direction in view coords (radians, from +h), constant or
     f(h, z) -> radians. Rows run across the mean direction; each row's tips
@@ -466,14 +351,14 @@ def tile_field(bm, body, view, region_px, angle, length_px, width_px, row_step=0
     du, dv = Lm * row_step, Wm * col_step
     n = 0
     i = 0
-    uu = min(us) - du * 0.5 + phase * du
+    uu = min(us) - du * 0.5
     while uu <= max(us) + du * 0.5:
         off = 0.5 * dv if i % 2 else 0.0
         vv = min(vs) - dv + off
         while vv <= max(vs) + dv:
             ch = c0[0] + u.x * uu + v.x * vv
             cz = c0[1] + u.y * uu + v.y * vv
-            if L.point_in_polygon([(ch, cz)], region)[0] and not (skip and skip(ch, cz)):
+            if L.point_in_polygon([(ch, cz)], region)[0]:
                 ang = angle(ch, cz) if callable(angle) else angle
                 outline, ridge = leaf_outline((ch, cz), Lm, Wm, ang)
                 tdir = Vector((math.cos(ang), math.sin(ang), 0.0))
@@ -494,31 +379,54 @@ def tile_field(bm, body, view, region_px, angle, length_px, width_px, row_step=0
     return n
 
 
-def merge_close(bm, dist=1e-6):
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=dist)
-    return bm
+def clearance_profile(body, view, objects, h_samples, z0, z1, n=12, pad=0.002):
+    """How far other parts' meshes (e.g. the helmet's gorget) stand off the body
+    along `view` rays: returns f(z) -> extra lift (metres), the max over the
+    h samples, padded and made monotone toward the top. Zero when `objects`
+    is empty or nothing covers the band."""
+    from mathutils.bvhtree import BVHTree
+    import bpy
 
+    if not objects:
+        return lambda z: 0.0
+    dg = bpy.context.evaluated_depsgraph_get()
+    trees = []
+    for o in objects:
+        ev = o.evaluated_get(dg)
+        me = ev.to_mesh()
+        verts = [o.matrix_world @ v.co for v in me.vertices]
+        polys = [tuple(p.vertices) for p in me.polygons]
+        if polys:
+            trees.append(BVHTree.FromPolygons(verts, polys))
+        ev.to_mesh_clear()
+    org, d = L.VIEW_RAY[view]
+    zs = [z0 + (z1 - z0) * i / (n - 1) for i in range(n)]
+    lift = []
+    for z in zs:
+        best = 0.0
+        for h in h_samples:
+            rb = body.ray(org(h, z), d)
+            if rb is None:
+                continue
+            for t in trees:
+                loc, _n, _i, _dist = t.ray_cast(org(h, z), d)
+                if loc is not None:
+                    stand = (rb[0] - loc).dot(d)  # >0 when the part is in front of the body
+                    best = max(best, stand)
+        lift.append(best + pad if best > 0 else 0.0)
+    # monotone non-decreasing toward the top (z1), so the plate rises smoothly onto the collar
+    for i in range(1, n):
+        lift[i] = max(lift[i], lift[i - 1]) if z1 > z0 else lift[i]
 
-def mirror_bm_x(bm):
-    """Mirror a bmesh across X=0 in place (and flip the winding)."""
-    for v in bm.verts:
-        v.co.x = -v.co.x
-    bmesh.ops.reverse_faces(bm, faces=bm.faces)
-    return bm
+    def f(z):
+        if z <= zs[0]:
+            return lift[0]
+        if z >= zs[-1]:
+            return lift[-1]
+        t = (z - zs[0]) / (zs[-1] - zs[0]) * (n - 1)
+        i = min(int(t), n - 2)
+        u = t - i
+        u = u * u * (3 - 2 * u)
+        return lift[i] * (1 - u) + lift[i + 1] * u
 
-
-def tri_count(ob):
-    ob.data.calc_loop_triangles()
-    return len(ob.data.loop_triangles)
-
-
-def np_hits(body, view, pts_hz):
-    out = []
-    for h, z in pts_hz:
-        r = body.hit(view, h, z)
-        out.append(r)
-    return out
-
-
-__all__ = [n for n in dir() if not n.startswith("_")]
-_ = np
+    return f
