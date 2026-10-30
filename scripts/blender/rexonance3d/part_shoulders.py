@@ -250,6 +250,21 @@ def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=
     # blade drapes over the cap / arm armour instead of cutting into them
     R3 = M.to_3x3()
     Ri = R3.transposed()
+    Zl = Vector((0.0, 0.0, 1.0))
+    W = [Vector((n.x, n.y, 0.0)) for n in nrm]     # section width direction (local)
+    Zs = [Zl.copy() for _ in T]                     # section normal (local)
+    if snap and BODY is not None:
+        # twist each section to lie along the suit (normal = radial direction),
+        # like a ribbon, so both edges keep the same standoff
+        angs = []
+        for i, t in enumerate(T):
+            u, _r = radial_dir(M @ Vector((sp[i].x, sp[i].y, dz(t))))
+            nl = Ri @ u
+            angs.append(max(-1.1, min(1.1, math.atan2(nl.dot(W[i]), max(nl.dot(Zl), 0.05)))))
+        angs = [(angs[max(i - 1, 0)] + 2.0 * angs[i] + angs[min(i + 1, n_len - 1)]) / 4.0 for i in range(n_len)]
+        for i, a in enumerate(angs):
+            ca, sa = math.cos(a), math.sin(a)
+            W[i], Zs[i] = W[i] * ca - Zl * sa, Zl * ca + W[i] * sa
     D = []
     # one push direction per station: its own radial direction when it is
     # clearly off the arm axis, else that of the blade's outer half
@@ -271,8 +286,8 @@ def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=
             # stacked rings of a draped set never cut through each other
             need = None
             for off in (0.0, 0.5 * wl[i], wl[i] + rim_w * 0.2, -0.5 * wr[i], -wr[i] - rim_w * 0.2):
-                q = sp[i] + nrm[i] * off
-                w = M @ Vector((q.x, q.y, dz(t) - th[i] * bot - rim_lift))
+                q = sp[i] + W[i] * off + Zs[i] * (-th[i] * bot - rim_lift) + Zl * dz(t)
+                w = M @ q
                 n_ = snap_need(w, clear_add, u)
                 if n_ is not None and (need is None or n_ > need):
                     need = n_
@@ -299,10 +314,9 @@ def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=
 
     def pos(i, s, top):
         off = s * (wl[i] if s >= 0 else wr[i])
-        p = sp[i] + nrm[i] * off
         a = 1.0 - abs(s)
         z = (edge + (th[i] - edge) * a) if top else -(edge + (th[i] * bot - edge) * a)
-        return Vector((p.x, p.y, z + dz(T[i]))) + Dl[i]
+        return sp[i] + W[i] * off + Zs[i] * z + Zl * dz(T[i]) + Dl[i]
 
     bm = _new_bm()
     lay = bm.loops.layers.uv.verify()
@@ -348,13 +362,12 @@ def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=
             rw = min(rim_w * (1.0 - 0.5 * t ** 2), w * 0.85)
             s_in = max(0.0, 1.0 - rw / w)
             rh = edge + (th[i] - edge) * (1.0 - s_in) + rim_lift
-            e = sp[i] + nrm[i] * (sgn * w)
-            inward = -nrm[i] * sgn
-            base = dz(t)
+            e = sp[i] + W[i] * (sgn * w)
+            inward = -W[i] * sgn
+            base = Zl * dz(t) + Dl[i]
             ring = []
             for a, b in _chamfer_rect(-0.0007, rw, -rh, rh, min(0.0010, rh * 0.45)):
-                p = e + inward * a
-                ring.append(rb.verts.new(Vector((p.x, p.y, base + b)) + Dl[i]))
+                ring.append(rb.verts.new(e + inward * a + Zs[i] * b + base))
             if sgn < 0:
                 ring.reverse()
             rings.append(ring)

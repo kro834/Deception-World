@@ -40,45 +40,63 @@ def obj(bm, name, coll, family, angle=40.0):
 # ====================================================================== thigh
 
 
-def thigh_diamond(ctx, coll, out):
-    vm = G.ViewMap(ctx.body, "front", eps=0.012)
-    c = F(602, 828)
-    tilt = math.radians(5.9)
-    H, W = 0.121, 0.052
-    rings = G.poly_rings(G.rhombus(c, H, W, tilt), 0.006)
+def framed_rhombus(ctx, coll, out, view, c, H, W, tilt, name, hb=None, frame_w=0.0095, depth=0.011,
+                   glint_size=0.05, tint_pink=0.12):
+    """Crystal rhombus in a double gold frame (gold band, thin black gap, inner
+    gold lip) laid on the body as seen from `view`. c, H (top half-height),
+    W (half-width) in view coordinates; hb = bottom half-height (default H)."""
+    hb = H if hb is None else hb
+    vm = G.ViewMap(ctx.body, view, eps=0.012)
+    top_frac = H / (H + hb)
+    half = 0.5 * (H + hb)
+    # centre of the (asymmetric) rhombus outline sits at c
+    rings = G.poly_rings(G.rhombus(c, half, W, tilt, top_frac), 0.006)
     gap = 0.0025
     mp = G.surface_mapper(vm, gap)
 
-    # dark seat plate (the thin black line between frame and crystal)
     fm = G.profile_mesh(rings, G.plate_profile(0.0035, 0.0008, 1), res=0.012)
-    out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_ThighSeat_L", coll, "Dark"))
-
-    # outer gold frame: chamfered ridge band
-    fm = G.profile_mesh(rings, G.band_profile(0.0095, 0.0062, 0.0018, 2, h0=0.0, ridge=0.0016, inner_t=0.0052),
+    out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_%sSeat_L" % name, coll, "Dark"))
+    fm = G.profile_mesh(rings, G.band_profile(frame_w, 0.0062, 0.0018, 2, h0=0.0, ridge=0.0016, inner_t=0.0052),
                         closed_profile=True)
-    out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_ThighFrame_L", coll, "Gold"))
+    out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_%sFrame_L" % name, coll, "Gold"))
+    fm = G.profile_mesh(lambda off: rings(off - (frame_w + 0.0017)), G.band_profile(0.0022, 0.0052, 0.0006, 1, h0=0.0),
+                        closed_profile=True)
+    out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_%sFrameInner_L" % name, coll, "Gold"))
 
-    # inner gold lip (second frame)
-    fm = G.profile_mesh(lambda off: rings(off - 0.0112), G.band_profile(0.0022, 0.0052, 0.0006, 1, h0=0.0), closed_profile=True)
-    out.append(obj(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_ThighFrameInner_L", coll, "Gold"))
-
-    # faceted crystal: rhombus pyramid with star facets, mapped onto the thigh
-    ins = 0.0136
-    hh = H - ins / math.sin(math.atan2(W, H))
-    hw = W - ins / math.cos(math.atan2(W, H))
-    crys = gem_rhombus_flat(c, hh, hw, tilt, depth=0.011, h0=0.0026)
-    uvf = G.planar_uv(crys)
-    out.append(obj(G.to_bmesh(crys, mp, uvf), "RX_Legs_ThighCrystal_L", coll, "Crystal", angle=20.0))
-    L.tint(out[-1], pink=0.12, sparkle=0.75, edge=0.6)
+    ins = frame_w + 0.0041
+    ang_t = math.atan2(W, H)
+    ang_b = math.atan2(W, hb)
+    hh = H - ins / math.sin(ang_t)
+    hbb = hb - ins / math.sin(ang_b)
+    hw = W - ins / math.cos(0.5 * (ang_t + ang_b))
+    crys = gem_rhombus_flat(c, hh, hw, tilt, depth=depth, h0=0.0026, hb=hbb)
+    out.append(obj(G.to_bmesh(crys, mp, G.planar_uv(crys)), "RX_Legs_%sCrystal_L" % name, coll, "Crystal", angle=20.0))
+    L.tint(out[-1], pink=tint_pink, sparkle=0.75, edge=0.6)
 
     p, n = vm.at(*c)
-    tip = p + n * (gap + 0.0026 + 0.011)
+    tip = p + n * (gap + 0.0026 + depth)
     gb = G.faceted_gem(G.rhombus((0, 0), 0.016, 0.008), 0.004, table=0.4, matrix=L.frame_from_normal(tip - n * 0.002, n))
-    out.append(obj(gb, "RX_Legs_ThighGem_L", coll, "Gem", angle=20.0))
-    L.glint("Legs_Thigh_L", tip + n * 0.004, 0.05, coll, hue=0.6)
+    out.append(obj(gb, "RX_Legs_%sGem_L" % name, coll, "Gem", angle=20.0))
+    L.glint("Legs_%s_L" % name, tip + n * 0.004, glint_size, coll, hue=0.6)
 
 
-def gem_rhombus_flat(c, hh, hw, tilt, depth, h0=0.0, sub=4):
+THIGH_C = F(602, 828)
+THIGH_TILT = math.radians(5.9)
+BACK_THIGH_C = R.back(370, 872)
+
+
+def thigh_diamond(ctx, coll, out):
+    framed_rhombus(ctx, coll, out, "front", THIGH_C, 0.121, 0.052, THIGH_TILT, "Thigh")
+
+
+def back_thigh_crystal(ctx, coll, out):
+    """Framed crystal on the back of the thigh (back-09 x~350-395, y~815-932;
+    back-03 shows it as a framed rhombus), long point down."""
+    framed_rhombus(ctx, coll, out, "back", BACK_THIGH_C, 0.066, 0.027, math.radians(-2.0), "ThighBack",
+                   hb=0.082, frame_w=0.0068, depth=0.008, glint_size=0.035, tint_pink=0.3)
+
+
+def gem_rhombus_flat(c, hh, hw, tilt, depth, h0=0.0, sub=4, hb=None):
     """FlatMesh rhombus crystal: 8 star facets meeting at a raised centre,
     with the corner ridges higher than the edge valleys."""
     ct, st = math.cos(tilt), math.sin(tilt)
@@ -86,7 +104,7 @@ def gem_rhombus_flat(c, hh, hw, tilt, depth, h0=0.0, sub=4):
     def P(x, y):
         return (c[0] + x * ct - y * st, c[1] + x * st + y * ct)
 
-    corners = [(0.0, hh), (-hw, 0.0), (0.0, -hh), (hw, 0.0)]
+    corners = [(0.0, hh), (-hw, 0.0), (0.0, -(hh if hb is None else hb)), (hw, 0.0)]
     fm = G.FlatMesh()
     # vertex helper with dedupe
     index = {}
@@ -506,7 +524,8 @@ def leg_scales(ctx, coll, out):
     thigh = G.CylMap(ctx.body, HIP + Vector((0.0, -0.01, 0.0)), KNEE, r_ref=0.08, eps=0.012)
     shin = G.CylMap(ctx.body, KNEE + Vector((0.0, -0.004, 0.0)), ANKLE, r_ref=0.06, eps=0.010)
 
-    diamond = G.rhombus(F(602, 828), 0.121, 0.052, math.radians(5.9))
+    diamond = G.rhombus(THIGH_C, 0.121, 0.052, THIGH_TILT)
+    back_crys = G.rhombus(BACK_THIGH_C, 0.074, 0.027, 0.0, 0.066 / 0.148)
     knee = G.lens_outline(KNEE_C, KNEE_HH, KNEE_HW, KNEE_TILT, n=32)
     chevron = [F(598, 1078), F(675, 1178), F(715, 1056), F(703, 1046), F(668, 1142), F(611, 1066)]
     back_v = [R.back(x, y) for x, y in [(329, 920), (366, 1038), (450, 951), (437, 944), (368, 1003), (344, 943)]]
@@ -518,7 +537,7 @@ def leg_scales(ctx, coll, out):
             if _inside_grown(diamond, fx, 0.016) or _inside_grown(knee, fx, 0.012):
                 return True
         else:
-            if _inside_grown(back_v, fx, 0.012):
+            if _inside_grown(back_v, fx, 0.012) or _inside_grown(back_crys, fx, 0.014):
                 return True
         return False
 
@@ -555,6 +574,7 @@ def build(ctx):
     out = []
     steps = [
         ("thigh", thigh_diamond),
+        ("thighback", back_thigh_crystal),
         ("knee", knee_guard),
         ("chevron", silver_v),
         ("shin", shin_guard),

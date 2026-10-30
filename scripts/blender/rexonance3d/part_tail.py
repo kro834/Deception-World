@@ -716,8 +716,8 @@ def build(ctx):
                 s_r = sa + 0.30 * ln
                 scale = 0.78
             scale *= (1.0, 0.90)[(k + (sgn < 0)) % 2] * (0.94 + 0.12 * jit)
-            flen = r * (2.00 + 0.80 * bump) * scale
-            fwid = r * (0.82 + 0.32 * bump) * scale
+            flen = r * (2.05 + 0.70 * bump) * scale
+            fwid = r * (0.98 + 0.30 * bump) * scale
             bm = flank_fin(path, s_r, th, radius, flen, fwid)
             ob = L.from_bmesh(bm, "RX_Tail_Seg%02d_Fin%s" % (k, "A" if sgn > 0 else "B"), coll, "Crystal", angle=30.0)
             L.tint(ob, pink=min(0.70, 0.12 + 0.50 * _smooth(tk / 0.62) + 0.08 * tk), sparkle=0.55, edge=0.65)
