@@ -752,7 +752,7 @@ export function mountMetaUnitasBoost(
         burst(coreX, coreY, budget.sparks * 3, 520, 0.9, (k) => (k % 4 === 0 ? 2 : k % 2 ? 4 : 0));
         afterglowAt = now;
         afterglowTone = GOLD;
-        camera.kick += 0.018;
+        camera.kick += 0.012;
         camera.shake = Math.min(budget.shake * 2.2, camera.shake + budget.shake * 1.8);
       }
       if (ultra() && lastP < B.form[0] + 0.01 && p >= B.form[0] + 0.01) {
@@ -831,7 +831,7 @@ export function mountMetaUnitasBoost(
     if (live)
       camScale =
         1 +
-        0.032 *
+        0.026 *
           smooth(span(p, B.deus[0] - 0.06, B.clamp)) *
           (1 - smooth(span(p, B.light[0], B.form[1])));
     camera.kick *= Math.exp(-dt / 0.3);
