@@ -77,6 +77,8 @@ test("the cold DOM coil uses the same reactor window and pivot behind the existi
         if (name === "@/lib/rexonance-suit") return suit;
         if (name === "@/lib/rexonance-ignition.js") return ignition;
         if (name === "./rexonance-suit-nanites") return { SuitNanites() {} };
+        // Owner (2026-10-30): the call mounts the surge layer (装着遷移の強化).
+        if (name === "./rexonance-suit-surge") return { EntrySurge() {}, EntrySurgeBack() {} };
         return require(name);
       },
     },
