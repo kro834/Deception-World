@@ -735,10 +735,21 @@ class Body:
         loc, nrm, _i, _d = self.bvh.ray_cast(Vector(origin), Vector(direction).normalized(), dist)
         return (loc, nrm) if loc is not None else None
 
-    def hit(self, view, h, z, smooth=0.008):
+    def hit(self, view, h, z, smooth=0.008, start=None):
         """First surface point seen from `view` at view coords (h, z), with a
-        normal averaged over a small cross of rays (radius `smooth`)."""
-        org, d = VIEW_RAY[view]
+        normal averaged over a small cross of rays (radius `smooth`).
+        start: optional distance of the ray origin from the mid-plane (metres),
+        e.g. start=0.2 on a "left"/"right" view begins inside the arms so the
+        ray lands on the flank instead of the arm."""
+        org0, d = VIEW_RAY[view]
+        if start is None:
+            org = org0
+        else:
+            def org(hh, zz):
+                o = org0(hh, zz)
+                axis = 1 if view in ("front", "back") else 0
+                o[axis] = math.copysign(start, o[axis])
+                return o
         first = self.ray(org(h, z), d)
         if first is None:
             return None

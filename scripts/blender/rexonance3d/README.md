@@ -101,7 +101,8 @@ The undersuit is cached in `output/rexonance-3d/cache/` (keyed by the source of
 * gems: `gem_kite(w, h, depth)`, `gem_round(r, depth, n)`
 * placement: `frame(origin, x_axis, y_axis)`, `frame_from_normal(origin, normal, up)`,
   `transform(bm, matrix)`
-* on the body: `conform_plate(body, view, outline_hz, thickness, gap)` (a shell
+* on the body: `Body.hit(view, h, z, start=None)` (`start` begins side rays inside the arms),
+  `conform_plate(body, view, outline_hz, thickness, gap)` (a shell
   plate whose footprint is drawn in a view and laid on the body),
   `conform_strip(body, view, path_hz, width, thickness, gap, width_fn)` (raised
   trim along a path drawn in a view), `surface_point(body, view, h, z, lift)`
