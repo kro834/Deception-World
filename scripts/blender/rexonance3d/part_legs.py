@@ -4,14 +4,19 @@ Authored on the suit's LEFT (+X, names *_L) and mirrored with rx_lib.mirror_x.
 Read off front-10 (widths, heights), right-07 / left-08 (depth) and back-09.
 
 Pieces (per side)
-  thigh   : vertical rhombus crystal in a bevelled double gold frame
+  thigh   : vertical rhombus crystal (star facets + gem + glint) in a bevelled
+            double gold frame on the front; a smaller framed crystal on the back
   knee    : proud almond shield (black) - outer gold almond, black ring,
-            inner gold almond, faceted star gem; gold side blades; silver V
-            chevron with a pink edge below it
+            inner gold almond, faceted star gem + glint; three outer and two
+            inner gold blades; silver V chevron with a pink crystal edge below
   shin    : black lacquer shin guard with a centre ridge
-  calf    : crystal flame fins up both sides, gold chevron straps at the back,
-            gold spiked plate behind the knee
+  calf    : crystal flame fins rising out of the boot cuff on both sides, gold
+            diagonal strap at the back, gold spiked V behind the knee
+  scales  : overlapping black rhombic scale plates (Suit) on thigh and calf,
+            skipping everything that sits on the leg
   boot    : see part_legs_boot.py
+Helpers live in part_legs_geo.py (surface maps, profile sweeps with built-in
+bevels, constrained caps, ridged ribbons, faceted gems, blades).
 """
 
 import math

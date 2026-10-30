@@ -372,8 +372,11 @@ def sweep(path, profile, scale=None, twist=None, up=(0.0, 0.0, 1.0), normals=Non
     normals : optional list of N vectors (one per path point) overriding the
               rotation-minimising frame, e.g. surface normals
     UV      : u runs around the profile (0..1), v along the path (0..1).
+    The profile is made counter-clockwise first, so faces always point out
+    (a clockwise loop would turn the tube inside out).
     """
     bm = bm or bmesh.new()
+    profile = ccw(profile)
     P = [Vector(p) for p in path]
     fr = rmf(P, up, closed=closed)
     if normals is not None:
@@ -786,7 +789,7 @@ def conform_plate(body, view, outline, thickness=0.006, gap=0.003, res=0.012, be
     thickness may be a float or f(h, z) -> float (e.g. thicker in the middle).
     Returns a bmesh; UV is planar in (h, z) with v = 0 at the lowest z.
     """
-    import scipy.spatial
+    from mathutils.geometry import delaunay_2d_cdt
 
     outline = ccw(outline)
     boundary = densify(outline, res * 0.75)
@@ -803,12 +806,21 @@ def conform_plate(body, view, outline, thickness=0.006, gap=0.003, res=0.012, be
             grid = grid[dmin > res * 0.45]
     pts2 = np.vstack([np.asarray(boundary), grid]) if len(grid) else np.asarray(boundary)
     nb = len(boundary)
-    tri = scipy.spatial.Delaunay(pts2)
-    simplices = []
-    for s in tri.simplices:
-        c = pts2[s].mean(axis=0)
-        if point_in_polygon([c], boundary)[0]:
-            simplices.append(s)
+    # Constrained triangulation of the inside of the outline: the boundary
+    # edges are kept, so the side walls below always meet the faces.
+    cdt_v, _e, cdt_f, orig_v, _oe, _of = delaunay_2d_cdt(
+        [Vector((float(x), float(y))) for x, y in pts2], [(i, (i + 1) % nb) for i in range(nb)], [list(range(nb))], 1, 1e-9
+    )
+    remap = {}
+    for out_i, ins in enumerate(orig_v):
+        if ins:
+            remap[out_i] = min(ins)
+    extra = [i for i in range(len(cdt_v)) if i not in remap]
+    if extra:
+        pts2 = np.vstack([pts2, np.asarray([[cdt_v[i].x, cdt_v[i].y] for i in extra])])
+        for k, i in enumerate(extra):
+            remap[i] = len(pts2) - len(extra) + k
+    simplices = [tuple(remap[i] for i in f) for f in cdt_f if len(f) == 3]
     # project
     hits = []
     last = None

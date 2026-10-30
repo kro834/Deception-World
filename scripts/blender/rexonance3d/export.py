@@ -43,6 +43,53 @@ def apply_modifiers():
                     o.modifiers.remove(m)
 
 
+def orient_closed_islands():
+    """Turn every closed (manifold) island of every mesh outward, measured by
+    signed volume. Open sheets are left as they are (the viewer draws thin
+    crystal sheets double-sided)."""
+    import bmesh
+
+    flipped = 0
+    for o in bpy.data.objects:
+        if o.type != "MESH":
+            continue
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bm.faces.ensure_lookup_table()
+        seen = set()
+        changed = False
+        for f0 in bm.faces:
+            if f0.index in seen:
+                continue
+            island, stack = [], [f0]
+            seen.add(f0.index)
+            while stack:
+                f = stack.pop()
+                island.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g.index not in seen:
+                            seen.add(g.index)
+                            stack.append(g)
+            edges = {e for f in island for e in f.edges}
+            if any(len(e.link_faces) != 2 for e in edges):
+                continue
+            vol = 0.0
+            for f in island:
+                vs = [v.co for v in f.verts]
+                for i in range(1, len(vs) - 1):
+                    vol += vs[0].dot(vs[i].cross(vs[i + 1]))
+            if vol < 0:
+                bmesh.ops.reverse_faces(bm, faces=island)
+                flipped += 1
+                changed = True
+        if changed:
+            bm.to_mesh(o.data)
+            o.data.update()
+        bm.free()
+    print("[export] reoriented %d inside-out closed islands" % flipped)
+
+
 def fill_tint():
     for o in bpy.data.objects:
         if o.type != "MESH":
@@ -149,6 +196,7 @@ def export_release(path):
         if o.type == "LIGHT":
             bpy.data.objects.remove(o)
     apply_modifiers()
+    orient_closed_islands()
     fill_tint()
     join_static()
     _gltf(path)

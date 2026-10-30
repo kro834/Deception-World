@@ -1,17 +1,20 @@
 """Rexonance boot (suit's left, +X; part_legs mirrors it).
 
 Read off front-10, right-07 / left-08 and back-09:
-  * the foot splays outward ~22 deg (toe tip front-10 x~805, right-07 x~690);
+  * the foot turns outward along a curved spine (10 deg at the heel, 28 deg
+    at the toe; toe tip front-10 x~800, right-07 x~690);
   * three stacked gold "saddle" chevron cuffs around the ankle: high at the
     front and back (^ in front/back views), low at the sides (V in side views);
   * gold horn spikes at the back-sides pointing up and out;
-  * black faceted foot shell, big faceted crystal on the instep, gold pointed
-    toe cap, black sole with a gold welt, block heel with a gold heel counter,
-    a crystal diamond on the back of the heel.
+  * black faceted foot shell with segment plates, a big faceted crystal on
+    the instep, a gold arrowhead on the toe, a gold rim that runs diagonally
+    from the arch round the toe, dark sole, block heel with a V-notched gold
+    heel cap and a lens crystal on the back of the heel.
 
-Frame: foot-local (u forward along the splayed foot, w lateral, z up) with
-origin under the ankle; shaft-local (phi around the ankle, 0 = front,
-+90 = lateral (+X), z up).
+Frame: foot-local (u forward along the spine, w lateral, z up) with origin
+under the ankle; shaft-local (phi around the ankle, 0 = front, +90 = lateral
+(+X), z up). splay_body_foot() bends the undersuit's straight foot bar along
+the same spine so it stays inside the boot.
 """
 
 import math
@@ -107,7 +110,6 @@ TOP_Z = [(-0.094, 0.100), (-0.082, 0.122), (-0.056, 0.134), (0.000, 0.150), (0.0
          (0.090, 0.140), (0.120, 0.112), (0.150, 0.094), (0.178, 0.084), (0.206, 0.075), (0.234, 0.064),
          (0.256, 0.048), (0.266, 0.038)]
 Z_SOLE = 0.016  # top of the sole slab
-Z_WELT = 0.034  # top of the gold welt (forefoot)
 
 
 def half_w(u, side):
@@ -435,7 +437,7 @@ def build_sole(coll, out):
 
     def zt(u, w):
         k = max(0.0, min(1.0, (u - 0.03) / 0.236))
-        full = 0.084 - 0.036 * k ** 1.1
+        full = 0.084 - 0.050 * k ** 1.25
         ramp = max(0.0, min(1.0, (u - 0.004) / 0.026))
         return zb(u, w) + max(0.002, (full - zb(u, w)) * ramp)
 
@@ -462,7 +464,6 @@ def build_side_plates(coll, out):
     """Black segment plates along both sides of the foot (two shingled rows)."""
     um = UpperMap(r_ref=0.05)
     r = um.r_ref
-    bm_all = []
     rows = [
         # (theta lo, theta hi, [u starts], length, slant)
         (1.02, 1.36, [0.010, 0.052, 0.094], 0.040, 0.012),
@@ -495,8 +496,8 @@ def build_gem(coll, out):
         nrm = -nrm
     centre = W(u_c, 0.0, zc) + nrm * 0.004
     up = -along  # local +y toward the shaft
-    m = L.frame(centre, LAT * -1.0 if False else LAT, up)
     # local frame: x = LAT, y = up the instep; z = x cross y must point out
+    m = L.frame(centre, LAT, up)
     zl = Vector(LAT).cross(up)
     if zl.dot(nrm) < 0:
         m = L.frame(centre, -LAT, up)
@@ -509,14 +510,11 @@ def build_gem(coll, out):
     core = G.faceted_gem([(0.0, 0.016), (-0.008, 0.0), (0.0, -0.016), (0.008, 0.0)], 0.005, table=0.4,
                          matrix=m @ Matrix.Translation((0.0, 0.0, 0.0325)))
     out.append(L.from_bmesh(core, "RX_Legs_BootGemCore_L", coll, "Gem", 15.0))
-    # gold bezel (band around the rhombus, local frame)
-    fm = G.profile_mesh(G.poly_rings([(x * 1.0, y * 1.0) for x, y in rh], 0.01), G.band_profile(0.0075, 0.010, 0.002, 2, h0=-0.004, ridge=0.001),
-                        closed_profile=True, fm=None)
+    # black bezel around the rhombus (local frame)
     # bezel ring sits outside the gem: outward offset
     fm2 = G.profile_mesh(lambda off: G.poly_rings(rh, 0.01)(off + 0.0045), G.band_profile(0.0045, 0.0105, 0.0016, 2, h0=-0.008),
                          closed_profile=True)
     out.append(L.from_bmesh(G.to_bmesh(fm2, G.rigid_mapper(m), G.planar_uv(fm2)), "RX_Legs_BootGemBezel_L", coll, "Black", 30.0))
-    del fm
     L.glint("Legs_Foot_L", m @ Vector((0.0, 0.0, 0.042)), 0.06, coll, hue=0.6)
 
 
@@ -529,9 +527,9 @@ def build_toecap(coll, out):
     path = [(0.0, u_top + (u_bot - u_top) * i / 18) for i in range(19)]
 
     def hw(s):
-        if s < 0.6:
-            return 0.0008 + 0.031 * (s / 0.6)
-        return 0.0035 + (0.0318 - 0.0035) * (1.0 - (s - 0.6) / 0.4)
+        if s < 0.5:
+            return 0.0008 + 0.037 * (s / 0.5)
+        return 0.0060 + (0.0378 - 0.0060) * (1.0 - (s - 0.5) / 0.5)
 
     fm = G.ridge_ribbon(path, hw, h_edge=0.0034, h_ridge=0.0080, bevel=0.0012, nt=3)
     mp = G.surface_mapper(um, 0.0012)
@@ -603,14 +601,14 @@ def splay_body_foot(ctx):
         z = P[:, 2]
         wgt = np.clip((0.130 - z) / (0.130 - 0.070), 0.0, 1.0)
         wgt = wgt * wgt * (3 - 2 * wgt)
-        u = (0.03 - P[:, 1]) * 0.97
-        w = (P[:, 0] - cx) * sx * 0.80
+        u = (0.03 - P[:, 1]) * 0.94
+        w = (P[:, 0] - cx) * sx * 0.70
         px = np.interp(u, _SPINE_U, _SPINE_P[:, 0])
         py = np.interp(u, _SPINE_U, _SPINE_P[:, 1])
         th = np.interp(u, _SPINE_U, th_tab)
         nx = px + np.cos(th) * w
         ny = py + np.sin(th) * w
-        zz = Z_SOLE + 0.004 + (z - 0.0) * 0.92
+        zz = Z_SOLE + 0.004 + z * 0.78
         P[:, 0] = (1 - wgt) * P[:, 0] + wgt * nx * sx
         P[:, 1] = (1 - wgt) * P[:, 1] + wgt * ny
         P[:, 2] = (1 - wgt) * z + wgt * np.maximum(zz, Z_SOLE + 0.004)

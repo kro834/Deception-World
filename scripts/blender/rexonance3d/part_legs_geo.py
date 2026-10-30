@@ -18,7 +18,7 @@ import math
 
 import bmesh
 import numpy as np
-from mathutils import Matrix, Vector
+from mathutils import Vector
 
 import rx_lib as L
 
@@ -573,24 +573,6 @@ def blade(path, normals, width_fn, thick_fn, edge=0.18, bm=None):
     prof = L.ccw(blade_profile(edge))  # CCW profile -> outward faces from rx_lib.sweep
     out = L.sweep(path, prof, scale=lambda t: (max(thick_fn(t), 1e-4), max(width_fn(t), 1e-4)), normals=normals, bm=bm)
     return out
-
-
-def bm_merge(dst, src):
-    """Append bmesh src into dst (uv kept)."""
-    me = bpy_mesh_from_bm(src)
-    dst.from_mesh(me)
-    import bpy
-
-    bpy.data.meshes.remove(me)
-    return dst
-
-
-def bpy_mesh_from_bm(bm):
-    import bpy
-
-    me = bpy.data.meshes.new("_tmp_legs")
-    bm.to_mesh(me)
-    return me
 
 
 def shell_grid(outer, inner, chamfer=0.35, bm=None, uv=None):
