@@ -1,5 +1,6 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
+import { mountMetaUnitasBoost } from "@/lib/meta-unitas-boost";
 import {
   META_UNITAS_ENTRY_DURATION_MS,
   type MetaUnitasEntryPlayback,
@@ -152,6 +153,9 @@ export function MetaUnitasEntrySequence({
     // frame; the engine (warmed ahead by the gate) joins the running clock
     // as soon as it is in, and completion waits for it.
     const settled = () => playback.state !== "preparing" && playback.state !== "playing";
+    // The nanite boost (meta-unitas-boost.ts): the swarm streams in from
+    // the first frame, then follows the engine's beats.
+    const disposeBoost = mountMetaUnitasBoost(runway, window, { entry: true });
     void import("@/lib/meta-unitas-rx-engine")
       .then((module) => {
         if (disposed || settled()) return;
@@ -227,6 +231,7 @@ export function MetaUnitasEntrySequence({
       if (raf) window.cancelAnimationFrame(raf);
       preferences.disconnect();
       motion.removeEventListener("change", preference);
+      disposeBoost();
       dispose?.();
     };
   }, [playback]);
