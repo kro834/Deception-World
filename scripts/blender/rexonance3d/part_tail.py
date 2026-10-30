@@ -65,10 +65,10 @@ CTRL = [
     (0.108, 0.088, 1.478),
     (0.121, 0.112, 1.540),
     (0.134, 0.125, 1.608),
-    (0.142, 0.119, 1.683),
-    (0.148, 0.110, 1.753),
-    (0.157, 0.107, 1.813),
-    (0.178, 0.116, 1.858),
+    (0.145, 0.119, 1.683),
+    (0.153, 0.110, 1.753),
+    (0.162, 0.107, 1.813),
+    (0.181, 0.116, 1.858),
     (0.213, 0.137, 1.891),
     (0.256, 0.159, 1.911),
     (0.303, 0.187, 1.918),
@@ -515,16 +515,58 @@ def build_socket(ctx, coll, path, s_j0):
     bm = lattice_shell(path, lambda th: s_base, lambda th: s_j0 + 0.004, radius, M=8, R=7, t=0.004)
     L.from_bmesh(bm, "RX_Tail_Socket_Boot", coll, "Gold", angle=40.0)
 
-    # plate footprint seen from the back, around the exit
-    h0 = P.x
+    # gold-rimmed black mount plate around the boot, seen from the back. It
+    # floats just above whatever back armour the torso part has laid there
+    # (measured at build time; the torso builds before the tail).
+    h0 = P.x - 0.002
     z0 = P.z - 0.012
-    outline = [(h0, z0 + 0.075), (h0 - 0.050, z0 + 0.030), (h0 - 0.046, z0 - 0.035), (h0, z0 - 0.070),
-               (h0 + 0.046, z0 - 0.035), (h0 + 0.050, z0 + 0.030)]
-    outline = L.densify(outline, 0.012)
-    bm = L.conform_plate(body, "back", outline, thickness=0.006, gap=0.004)
+    outline = [(h0, z0 + 0.068), (h0 - 0.042, z0 + 0.026), (h0 - 0.040, z0 - 0.032), (h0, z0 - 0.064),
+               (h0 + 0.040, z0 - 0.032), (h0 + 0.042, z0 + 0.026)]
+    gap = 0.004 + _armour_standoff(body, outline)
+    outline = L.densify(outline, 0.010)
+    bm = L.conform_plate(body, "back", outline, thickness=0.006, gap=gap)
     L.from_bmesh(bm, "RX_Tail_Socket_Plate", coll, "Black", angle=30.0)
-    rim = L.conform_strip(body, "back", outline + [outline[0]], 0.008, thickness=0.0045, gap=0.0085)
+    rim = L.conform_strip(body, "back", outline + [outline[0]], 0.008, thickness=0.0045, gap=gap + 0.0045)
     L.from_bmesh(rim, "RX_Tail_Socket_Rim", coll, "Gold", angle=30.0)
+
+
+def _armour_standoff(body, outline, prefix="RX_Torso"):
+    """Largest height (m, capped at 2 cm) by which meshes already built by the
+    torso part stand off the body inside `outline` (view 'back')."""
+    from mathutils.bvhtree import BVHTree
+    obs = [o for o in bpy.data.objects if o.type == "MESH" and o.name.startswith(prefix)]
+    if not obs:
+        return 0.0
+    dg = bpy.context.evaluated_depsgraph_get()
+    bm = bmesh.new()
+    for o in obs:
+        tmp = bmesh.new()
+        tmp.from_object(o, dg)
+        tmp.transform(o.matrix_world)
+        me = bpy.data.meshes.new("_rx_tail_tmp")
+        tmp.to_mesh(me)
+        tmp.free()
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+    xs = [p[0] for p in outline]
+    zs = [p[1] for p in outline]
+    best = 0.0
+    for i in range(9):
+        for j in range(9):
+            x = _lerp(min(xs), max(xs), (i + 0.5) / 9)
+            z = _lerp(min(zs), max(zs), (j + 0.5) / 9)
+            if not L.point_in_polygon([(x, z)], outline)[0]:
+                continue
+            o, d = Vector((x, 3.0, z)), Vector((0.0, -1.0, 0.0))
+            hb = body.ray(o, d)
+            ha = tree.ray_cast(o, d, 10.0)
+            if hb and ha[0] is not None:
+                h = ha[0].y - hb[0].y
+                if 0.0 < h < 0.02:
+                    best = max(best, h)
+    return best
 
 
 # ----------------------------------------------------------------- build
