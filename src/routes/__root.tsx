@@ -22,6 +22,7 @@ import { OpeningNotice } from "@/components/opening-notice";
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { IpadMenuMode } from "@/components/ipad-menu-mode";
+import { BUTTON_STYLE_SCRIPT } from "@/lib/button-style.js";
 import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
 import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
@@ -156,6 +157,7 @@ export const Route = createRootRoute({
       { children: IPAD_STANDALONE_VIEWPORT_SCRIPT },
       { children: DEVICE_PROFILE_SCRIPT },
       { children: RETIRED_ULTRA_MODE_SCRIPT },
+      { children: BUTTON_STYLE_SCRIPT },
       { children: REXONANCE_LAYOUT_BOOT_SCRIPT },
       { children: SIDE_MENU_EARLY_INPUT_SCRIPT },
     ],
