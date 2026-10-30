@@ -44,7 +44,7 @@ await document.transform(
   reorder({ encoder: MeshoptEncoder, target: "size" }),
   meshopt({
     encoder: MeshoptEncoder,
-    level: "medium",
+    level: "high",
     quantizePosition: 14,
     quantizeNormal: 10,
     quantizeTexcoord: 12,
