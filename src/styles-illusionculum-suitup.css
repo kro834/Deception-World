@@ -555,6 +555,53 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-rail > i {
   }
 }
 
+/* The camera on the scroll (2026-10-30): a restrained push in on the figure
+   as the plates lock in turn, a short kick at the seal (the engine's .86)
+   and the settle as the reactor lights — on the runway's own timeline, so
+   it is exactly where the scroll is and never runs by itself. Only the live
+   canvas and the field's layers (one box, inset 0, one origin: the chest). */
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+        [data-dialog-open]
+      )
+      body
+      .rxs-page.ics-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state="live"]
+      > .rzn-frame
+      > :is(.rzn-canvas, .rzn-field) {
+      transform-origin: calc(var(--rzn-fig-x, 0.5) * 100%)
+        calc((1 - var(--rzn-fig-b, 0.05) - var(--rzn-fig-h, 0.84) * 0.62) * 100%);
+      animation: ics-camera linear both;
+      animation-timeline: --ics-run;
+      animation-range: contain 0% contain 100%;
+    }
+  }
+}
+
+@keyframes ics-camera {
+  0%,
+  14% {
+    transform: scale(1);
+  }
+  84% {
+    transform: scale(1.035);
+  }
+  86% {
+    transform: scale(1.036);
+  }
+  87.2% {
+    transform: scale(1.052);
+  }
+  89% {
+    transform: scale(1.04);
+  }
+  94%,
+  100% {
+    transform: scale(1);
+  }
+}
+
 @keyframes ics-rail {
   from {
     transform: scaleY(0);
