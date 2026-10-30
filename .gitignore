@@ -18,3 +18,5 @@ output/playwright/
 output/dogs-archive/
 .playwright-cli/
 scripts/blender/__pycache__/
+output/rexonance-3d/
+scripts/blender/rexonance3d/__pycache__/
