@@ -465,6 +465,22 @@ html[data-family="world"] body main.site-shell.film-edition {
   --fx-c: #ff5fc8;
 }
 
+/* Ambient neon: the hero and the chapter grounds hold coloured light at
+   their edges as inset glows, painted over each ground and under its
+   content, so no background (key art, grades, trails) is replaced. */
+html[data-family="world"] body main.site-shell.film-edition.mirage-edition > section.hero {
+  box-shadow:
+    inset 0 -220px 240px -170px color-mix(in srgb, var(--fx-c) calc(34% * var(--fx-glow)), transparent),
+    inset 320px 0 300px -260px color-mix(in srgb, var(--fx-a) calc(22% * var(--fx-glow)), transparent),
+    inset -280px 0 280px -240px color-mix(in srgb, var(--fx-b) calc(26% * var(--fx-glow)), transparent);
+}
+
+html[data-family="world"] body main.site-shell.film-edition.mirage-edition > :is(#riders, #records) {
+  box-shadow:
+    inset 0 200px 240px -200px color-mix(in srgb, var(--fx-b) calc(28% * var(--fx-glow)), transparent),
+    inset 0 -200px 240px -200px color-mix(in srgb, var(--fx-a) calc(16% * var(--fx-glow)), transparent);
+}
+
 /* The world sheets scope by ids (#riders, #manager-archive, …) and the
    streamline sheet by :not(#saga); the repeated ids and :not(#fx) below
    only match that weight so the paint lands. No element has id "fx". */
