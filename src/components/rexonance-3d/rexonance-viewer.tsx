@@ -278,7 +278,7 @@ export function RexonanceViewer({ className = "" }: { className?: string }) {
               height={960}
               decoding="async"
             />
-            <figcaption>設定画　{activeSheet.label}</figcaption>
+            <figcaption>{activeSheet.label}の設定画</figcaption>
           </figure>
         ) : null}
       </aside>

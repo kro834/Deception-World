@@ -6,9 +6,18 @@ the shins (front-10 tips ~ (180, 1290) / (830, 1295); back-09 out to x ~110 /
 Each ribbon is one thin curved sheet: a lens section (thin rounded edges,
 fullest in the middle) swept along a 3D spine with its own width direction,
 asymmetric half-widths (the point of a sickle sits on one edge), a slight cup
-across the width and a little thickness. UV v = 0 at the root, 1 at the tip;
-u runs around the section. Each ribbon is its own object
-RX_Ribbon_<n>_L / _R with rx_keep = 1 so the viewer can animate it.
+across the width and a little thickness. The root starts hidden inside the
+belt band and slips out under its lower edge over the hip panel. UV v = 0 at
+the root, 1 at the tip; u runs across the ribbon (0 inner edge .. 1 outer
+edge) so the viewer's crystal shader lights both edges. Each ribbon is its own
+object RX_Ribbon_<n>_L / _R with rx_keep = 1 so the viewer can animate it
+(extras rx_root / rx_tip give the spine ends).
+
+Debug switches (environment): RX_RIBBON_DEBUG=1 prints each ribbon's clearance
+to the body and every mesh it intersects (contacts with RX_Waist_Belt and the
+cell frames are the hidden root inside the band); RX_WAIST_OVERLAP=1 lists
+waist pieces that intersect other parts (ribbons build last, so every part is
+present).
 """
 
 import math
@@ -31,7 +40,7 @@ RIBBONS = [
     dict(  # outer ribbon: faces front, passes behind the fist, ends in the front sickle
         # (front-10: outer edge X ~0.50 at Z 0.45-0.6, tip (180, 1290) -> X 0.42, Z 0.30)
         name="1",
-        root=(97.0, 0.022),
+        root=(95.0, 0.022),
         ctrl=[(0.250, 0.056, 1.040), (0.306, 0.088, 0.930), (0.362, 0.110, 0.830), (0.406, 0.124, 0.740),
               (0.448, 0.136, 0.640), (0.476, 0.146, 0.540), (0.480, 0.148, 0.450), (0.464, 0.142, 0.372),
               (0.438, 0.134, 0.316), (0.418, 0.128, 0.284)],
@@ -43,8 +52,8 @@ RIBBONS = [
     dict(  # main ribbon: the widest, between the outer and the back ribbon
         # (right-07: band Y ~0.17-0.27 at Z 0.5, tip Y ~0.18)
         name="2",
-        root=(105.0, 0.037),
-        ctrl=[(0.284, 0.118, 1.030), (0.312, 0.168, 0.925), (0.348, 0.205, 0.820), (0.382, 0.228, 0.720),
+        root=(106.5, 0.037),
+        ctrl=[(0.291, 0.127, 1.030), (0.314, 0.172, 0.925), (0.348, 0.205, 0.820), (0.382, 0.228, 0.720),
               (0.410, 0.240, 0.620), (0.426, 0.242, 0.520), (0.424, 0.234, 0.432), (0.406, 0.214, 0.362),
               (0.382, 0.192, 0.312), (0.362, 0.176, 0.290)],
         psi=[(0.0, "body"), (0.09, "body"), (0.30, -45.0), (0.55, -50.0), (0.80, -44.0), (1.0, -40.0)],
@@ -110,24 +119,27 @@ def root_point(body, theta_deg, lift, z=ROOT_Z):
     return loc + n * lift, n
 
 
-def band_rmax(body, theta_deg):
-    """Widest body radius over BAND_Z at angle theta (the band wraps it)."""
+def band_frame(body, theta_deg):
+    """The belt band wraps the widest body section over BAND_Z (part_waist's
+    contour): the body point there at angle theta and its horizontal outward
+    surface normal (not the radial direction: the waist section is an
+    ellipse, so near the back the two differ by 10-20 degrees)."""
     th = math.radians(theta_deg)
     d = Vector((math.sin(th), -math.cos(th), 0.0))
-    rmax = 0.0
+    best = None
     for zz in np.linspace(BAND_Z[0], BAND_Z[1], 13):
         o = Vector((0.0, YC, zz))
         hit = body.ray(o, d, 1.0)
-        if hit is not None:
-            rmax = max(rmax, (hit[0] - o).length)
-    return rmax, d
-
-
-def band_root(body, theta_deg, z=ROOT_Z):
-    """A point inside the belt band's material at angle theta, and the radial
-    direction."""
-    rmax, d = band_rmax(body, theta_deg)
-    return Vector((0.0, YC, z)) + d * (rmax + BAND_MID), d
+        if hit is None:
+            continue
+        r = (hit[0] - o).length
+        if best is None or r > best[0]:
+            best = (r, hit[0], hit[1])
+    _r, loc, n = best
+    n = Vector((n.x, n.y, 0.0)).normalized()
+    if n.dot(d) < 0:
+        n = -n
+    return Vector((loc.x, loc.y, 0.0)), n
 
 
 def body_hit(body, theta_deg, z):
@@ -142,27 +154,29 @@ def body_hit(body, theta_deg, z):
     return loc, n.normalized()
 
 
-def exit_points(body, theta_deg):
-    """Where the ribbon leaves the band. Inside the band it stays under the
-    crystal cells (radius <= outer face - 3.5 mm); below the band's lower edge
-    it rides over the hip panel (body + 14.5 mm along the true normal) as the
-    pelvis flares out. The root is thinned to ~2 mm here (ribbon_mesh)."""
-    rmax, d = band_rmax(body, theta_deg)
-    c = lambda z: Vector((0.0, YC, z))  # noqa: E731
-    pts = [c(1.164) + d * (rmax + 0.0140), c(1.153) + d * (rmax + 0.0152)]
+def root_frame(body, theta_deg):
+    """Root (inside the band's material), the band normal, and the exit points:
+    inside the band the ribbon stays under the crystal cells (<= outer face -
+    3.5 mm); below the band's lower edge it rides over the hip panel (body +
+    14.5 mm along the true normal) as the pelvis flares out. The root is
+    thinned to ~2 mm there (ribbon_mesh)."""
+    h, n = band_frame(body, theta_deg)
+    at = lambda off, z: Vector((h.x + n.x * off, h.y + n.y * off, z))  # noqa: E731
+    p0 = at(BAND_MID, ROOT_Z)
+    pts = [at(0.0140, 1.164), at(0.0152, 1.153)]
     for z, off in ((1.143, 0.0192), (1.131, 0.0204), (1.116, 0.0214)):
-        loc, n = body_hit(body, theta_deg, z)
-        pts.append(loc + n * off)
-    return pts
+        loc, nn = body_hit(body, theta_deg, z)
+        pts.append(loc + nn * off)
+    return p0, n, pts
 
 
 def ribbon_mesh(spec, body, n_rings=N_RINGS):
     th, lift = spec["root"]
     # root hidden inside the belt band, exit just under the band's lower edge
     # (clear of the hip panel), then down the pelvis to the authored spine
-    p0, n0 = band_root(body, th)
+    p0, n0, exits = root_frame(body, th)
     p1, n1 = root_point(body, th + 2.0, lift + 0.010, z=1.088)
-    ctrl = [p0] + exit_points(body, th) + [p1] + [Vector(p) for p in spec["ctrl"]]
+    ctrl = [p0] + exits + [p1] + [Vector(p) for p in spec["ctrl"]]
     spine = L.catmull_rom(ctrl, 12)
     spine = L.resample(spine, n_rings)
     lens = L.arc_lengths(spine)
@@ -170,7 +184,6 @@ def ribbon_mesh(spec, body, n_rings=N_RINGS):
     ts = [l / total for l in lens]
     psi_body = math.degrees(math.atan2(n0.y, n0.x))
     keys = [(t, psi_body if a == "body" else float(a)) for t, a in spec["psi"]]
-    # keep the root lying on the body: the body normal changes little over the first leg
     # unwrap so the interpolation takes the short way round
     for i in range(1, len(keys)):
         a0, a1 = keys[i - 1][1], keys[i][1]
@@ -317,6 +330,7 @@ def build(ctx):
 
     import bpy
 
+    debug = bool(os.environ.get("RX_RIBBON_DEBUG"))
     coll = ctx.coll("ribbons")
     for spec in RIBBONS:
         bm, spine = ribbon_mesh(spec, ctx.body)
@@ -326,19 +340,20 @@ def build(ctx):
         ob["rx_keep"] = 1
         ob["rx_root"] = [round(c, 4) for c in spine[0]]
         ob["rx_tip"] = [round(c, 4) for c in spine[-1]]
-        d, p = clearance(ctx.body, ob)
-        print("[ribbons] %s clearance to body %.3f m at %s" % (name, d, tuple(round(c, 3) for c in p)))
         mir = L.mirror_x(ob)
         mir["rx_root"] = [-ob["rx_root"][0], ob["rx_root"][1], ob["rx_root"][2]]
         mir["rx_tip"] = [-ob["rx_tip"][0], ob["rx_tip"][1], ob["rx_tip"][2]]
-        if os.environ.get("RX_RIBBON_DEBUG"):
+        if debug:
+            d, p = clearance(ctx.body, ob)
+            print("[ribbons] %s clearance to body %.3f m at %s" % (name, d, tuple(round(c, 3) for c in p)))
             others = [o for o in bpy.data.objects if o.type == "MESH" and o not in (ob, mir)]
-            for o2 in (ob,):
-                hits = overlaps(o2, others)
-                print("[ribbons] %s intersects: %s" % (o2.name, ", ".join("%s(%d)" % h for h in hits) or "nothing"))
+            hits = overlaps(ob, others)
+            print("[ribbons] %s intersects: %s" % (name, ", ".join("%s(%d)" % h for h in hits) or "nothing"))
     if os.environ.get("RX_WAIST_OVERLAP"):
-        mine = [o for o in bpy.data.objects if o.type == "MESH" and o.name.startswith("RX_Waist_") and o.name.endswith(("_L", "Tasset_Black", "Tasset_Gold", "Belt", "BeltGold", "CellFrames"))]
-        others = [o for o in bpy.data.objects if o.type == "MESH" and not o.name.startswith(("RX_Waist_", "RX_Ribbon_", "RX_Body"))]
+        mine = [o for o in bpy.data.objects if o.type == "MESH" and o.name.startswith("RX_Waist_")
+                and not o.name.endswith("_R")]
+        others = [o for o in bpy.data.objects if o.type == "MESH"
+                  and not o.name.startswith(("RX_Waist_", "RX_Ribbon_", "RX_Body"))]
         for o2 in mine:
             hits = overlaps(o2, others)
             if hits:

@@ -52,10 +52,6 @@ class Acc:
         return L.from_bmesh(self.bm, name, coll, family, angle)
 
 
-def _v(*a):
-    return Vector(a)
-
-
 def arc_resample(poly, n, start_angle=-math.pi / 2):
     """Closed polygon resampled to n points evenly by arc length, starting
     where the ray from the origin at start_angle crosses it (CCW order)."""
@@ -82,19 +78,6 @@ def arc_resample(poly, n, start_angle=-math.pi / 2):
         Q = [start] + P[i + 1:] + P[: i + 1] + [start]
     pts = L.resample(Q, n + 1)[:-1]
     return [(p.x, p.y) for p in pts]
-
-
-def lens_outline(a, b, n=32, pinch=1.0):
-    """Pointed lens (vesica): half-width a, half-height b (tips on +-y)."""
-    out = []
-    for k in range(n):
-        t = 2 * math.pi * k / n
-        s, c = math.sin(t), math.cos(t)
-        # x follows a circular-arc-ish bulge that pinches to points at the tips
-        y = b * s
-        x = a * math.copysign(abs(c) ** pinch, c) * (1.0 - 0.0 * s * s)
-        out.append((x, y))
-    return out
 
 
 def vesica(a, b, n=32):
@@ -390,7 +373,8 @@ def liner_mesh(C, body):
     """Dark liners that close the band's top and bottom to the body."""
     bm = bmesh.new()
     rings = []
-    for z_band, z_body, sgn in ((Z_TOP - 0.002, Z_TOP + 0.016, 1), (Z_BOT + 0.002, Z_BOT - 0.012, -1)):
+    # the top liner stops at belt_top_z (1.262), where the torso's plates begin
+    for z_band, z_body in ((Z_TOP - 0.002, Z_TOP + 0.003), (Z_BOT + 0.002, Z_BOT - 0.012)):
         a_ring, b_ring = [], []
         for i in range(0, len(C.P), 2):
             p, T, N = C.at(C.s[i], 0.0, z_band)
@@ -401,12 +385,16 @@ def liner_mesh(C, body):
             a_ring.append(bm.verts.new(p + N * 0.001))
             b_ring.append(bm.verts.new(q))
         rings.append((a_ring, b_ring))
-    for a_ring, b_ring in rings:
+    for k, (a_ring, b_ring) in enumerate(rings):
+        up = 1.0 if k == 0 else -1.0  # top liner is seen from above, bottom from below
         n = len(a_ring)
         for i in range(n):
             j = (i + 1) % n
-            bm.faces.new((a_ring[i], a_ring[j], b_ring[j], b_ring[i]))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+            f = bm.faces.new((a_ring[i], a_ring[j], b_ring[j], b_ring[i]))
+            f.normal_update()
+            if f.normal.z * up < 0:
+                f.normal_flip()
+    bm.normal_update()
     _planar_uv(bm)
     return bm
 
@@ -637,7 +625,7 @@ def belt(ctx, coll, C):
     L.tint(orb, pink=0.15, sparkle=0.7, edge=0.6)
     pinks = acc["CrystalPink"].build("RX_Waist_BuckleSpikes", coll, "Crystal", 30)
     L.tint(pinks, pink=1.0, sparkle=0.3, edge=0.8)
-    frames = cells_gold.build("RX_Waist_CellFrames", coll, "Gold", 30)
+    cells_gold.build("RX_Waist_CellFrames", coll, "Gold", 30)
     crys = cells_crystal.build("RX_Waist_CellCrystals", coll, "Crystal", 30)
     # cells: pink at both ends, blue in the middle (v runs bottom -> top)
     # blue middle (v = 0) -> pink at both tips (v = 1) comes from the UVs; a light
@@ -697,8 +685,9 @@ class HangSurface:
 
 def _tri_grid(outline, res, edge):
     """Boundary points (step `edge`) + interior grid (step `res`, None = none),
-    Delaunay triangles inside the outline."""
-    import scipy.spatial
+    triangulated with a constrained Delaunay (boundary edges kept, so the side
+    walls always meet the faces, concave V outlines included)."""
+    from mathutils.geometry import delaunay_2d_cdt
 
     outline = L.ccw(outline)
     boundary = L.densify(outline, edge)
@@ -714,10 +703,21 @@ def _tri_grid(outline, res, edge):
             dmin = np.min(np.linalg.norm(grid[:, None, :] - B[None, :, :], axis=2), axis=1)
             grid = grid[dmin > max(res, edge) * 0.55]
     pts = np.vstack([B, grid]) if len(grid) else B
-    tri = scipy.spatial.Delaunay(pts)
-    cent = pts[tri.simplices].mean(axis=1)
-    keep = L.point_in_polygon(cent, boundary)
-    return pts, tri.simplices[keep], len(B)
+    nb = len(B)
+    cdt_v, _e, cdt_f, orig_v, _oe, _of = delaunay_2d_cdt(
+        [Vector((float(x), float(y))) for x, y in pts], [(i, (i + 1) % nb) for i in range(nb)], [list(range(nb))], 1, 1e-9
+    )
+    remap = {}
+    for out_i, ins in enumerate(orig_v):
+        if ins:
+            remap[out_i] = min(ins)
+    extra = [i for i in range(len(cdt_v)) if i not in remap]
+    if extra:
+        pts = np.vstack([pts, np.asarray([[cdt_v[i].x, cdt_v[i].y] for i in extra])])
+        for k, i in enumerate(extra):
+            remap[i] = len(pts) - len(extra) + k
+    simp = np.asarray([tuple(remap[i] for i in f) for f in cdt_f if len(f) == 3], dtype=int)
+    return pts, simp, nb
 
 
 def sheet_plate(outline, surf, t0, thick, res=None, edge=0.008, bevel=0.0012, uv_fn=None, bevel_seg=2, back=False):
@@ -820,18 +820,6 @@ def _vband(view, outer_half, inner_half):
     right_inner = list(reversed(i))
     poly = right_outer + left_outer + left_inner + right_inner
     return L.ccw(poly)
-
-
-def _strip(view, outer_edge, inner_edge):
-    """Closed strip polygon between two edges (each top -> bottom, px)."""
-    v = R.VIEWS[view]
-    o = [(dx * R.S, (v["sole"] - y) * R.S) for dx, y in outer_edge]
-    i = [(dx * R.S, (v["sole"] - y) * R.S) for dx, y in inner_edge]
-    return L.ccw(o + list(reversed(i)))
-
-
-def _mirror2(poly):
-    return L.ccw([(-x, z) for x, z in poly])
 
 
 def tasset(ctx, coll, side):
@@ -977,11 +965,6 @@ def hip_axis(z):
     the torso centre above the hips, the thigh centre below."""
     t = _smooth01(0.95, 1.12, z)
     return Vector((0.125 * (1 - t), -0.006 * (1 - t) + YC * t, z))
-
-
-def theta_of(p):
-    c = hip_axis(p[2])
-    return math.atan2(p[0] - c.x, -(p[1] - c.y))
 
 
 def body_radial(body, theta, z):

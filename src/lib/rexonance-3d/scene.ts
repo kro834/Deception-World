@@ -14,7 +14,7 @@ import {
   rexonanceFamilyOf,
   type RexonanceFamily,
 } from "./contract.ts";
-import { createGlints, type GlintAnchor } from "./glints.ts";
+import { createGlints, estimateGlintNormals, type GlintAnchor } from "./glints.ts";
 import { createRexonanceMaterial, createRexonanceUniforms } from "./materials.ts";
 import { createRexonanceMotion } from "./motion.ts";
 import {
@@ -682,6 +682,10 @@ export function createRexonanceScene(
     }
     stats.glints = anchors.length;
     if (anchors.length) {
+      const jewels = meshes.filter((mesh) =>
+        /^RX_(Gem|Crystal|Glow|Visor)$/u.test((mesh.material as THREE.Material).name),
+      );
+      estimateGlintNormals(anchors, jewels, meshes, new THREE.Vector3(0, 0, 0));
       glints = createGlints(anchors);
       scene.add(glints.mesh);
     }

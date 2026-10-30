@@ -182,11 +182,11 @@ normal = normalize( normal + rxRootToView * ( rxHash33( rxCell + 7.0 ) - 0.5 ) *
 
 const CRYSTAL_EMISSIVE = /* glsl */ `
 {
-  vec3 RX_BLUE = vec3( 0.015, 0.1, 1.0 );
-  vec3 RX_VIOLET = vec3( 0.28, 0.05, 1.0 );
+  vec3 RX_BLUE = vec3( 0.0, 0.24, 1.0 );
+  vec3 RX_VIOLET = vec3( 0.2, 0.08, 1.0 );
   vec3 RX_PINK = vec3( 1.0, 0.1, 0.5 );
   vec3 RX_HOT = vec3( 1.0, 0.3, 0.7 );
-  vec3 RX_ICE = vec3( 0.55, 0.82, 1.0 );
+  vec3 RX_ICE = vec3( 0.4, 0.85, 1.0 );
   vec3 RX_NAVY = vec3( 0.003, 0.006, 0.045 );
   float rxU = clamp( vRxUv.x, 0.0, 1.0 );
   float rxVv = clamp( vRxUv.y, 0.0, 1.0 );
@@ -195,13 +195,13 @@ const CRYSTAL_EMISSIVE = /* glsl */ `
   float rxEdgeGlow = vRxTint.b;
   // Blue holds the root half, violet comes in past the middle, pink only toward the tip;
   // the pink bias then mixes toward pink throughout (1 = pink everywhere, README).
-  vec3 rxCol = mix( RX_BLUE, RX_VIOLET, smoothstep( 0.3, 0.72, rxVv ) );
-  rxCol = mix( rxCol, RX_PINK, smoothstep( 0.62, 1.0, rxVv ) );
-  float rxPinkMix = clamp( rxPinkBias * rxPinkBias * 0.85, 0.0, 1.0 );
+  vec3 rxCol = mix( RX_BLUE, RX_VIOLET, smoothstep( 0.4, 0.82, rxVv ) );
+  rxCol = mix( rxCol, RX_PINK, smoothstep( 0.72, 1.0, rxVv ) );
+  float rxPinkMix = clamp( rxPinkBias * rxPinkBias * 0.7, 0.0, 1.0 );
   rxCol = mix( rxCol, RX_PINK, rxPinkMix );
   float rxG = max( smoothstep( 0.45, 1.0, rxVv ), rxPinkMix );
   float rxEdge = 1.0 - smoothstep( 0.0, 0.12, min( rxU, 1.0 - rxU ) );
-  rxCol = mix( rxCol, RX_HOT, rxEdge * ( 0.25 + 0.5 * rxEdgeGlow ) );
+  rxCol = mix( rxCol, RX_HOT, rxEdge * ( 0.2 + 0.4 * rxEdgeGlow ) );
   rxCol *= 0.8 + 0.4 * rxFacet;
   vec3 rxV = normalize( vViewPosition );
   float rxNdV = clamp( dot( normal, rxV ), 0.0, 1.0 );
@@ -223,12 +223,12 @@ const CRYSTAL_EMISSIVE = /* glsl */ `
   float rxSpeck = rxStar( rxQ * 260.0, 0.22, 0.2, rxSeedA );
   rxEmit += mix( RX_ICE, vec3( 1.0 ), rxSeedA ) * rxSpeck * ( 0.4 + rxNavy ) * 1.2;
 #endif
-  rxEmit += mix( vec3( 0.55, 0.8, 1.0 ), RX_HOT, rxG ) * rxLine * ( 0.95 + 0.9 * rxEdge );
+  rxEmit += mix( vec3( 0.45, 0.85, 1.0 ), RX_HOT, rxG * 0.8 ) * rxLine * ( 0.95 + 0.9 * rxEdge );
   rxEmit += RX_HOT * rxEdge * rxEdgeGlow * 0.45;
   float rxSeedB;
   float rxSpark = rxStar( vRxRoot * 85.0, 0.03 + 0.2 * rxSparkle, 0.15, rxSeedB );
   float rxTw = 0.5 + 0.5 * sin( rxTime * ( 1.4 + 2.6 * rxSeedB ) + rxSeedB * 40.0 );
-  rxSpark *= mix( 0.45, pow( rxTw, 4.0 ) * 1.3, rxMotion );
+  rxSpark *= mix( 0.2, pow( rxTw, 4.0 ) * 1.3, rxMotion );
   rxEmit += mix( vec3( 0.85, 0.92, 1.0 ), vec3( 1.0, 0.75, 0.95 ), rxSeedB ) * rxSpark * 6.0;
   rxEmit += mix( RX_ICE, RX_HOT, rxG ) * rxFres * 0.55;
   rxEmit += rxCol * smoothstep( 0.82, 1.0, rxVv ) * 0.45;
