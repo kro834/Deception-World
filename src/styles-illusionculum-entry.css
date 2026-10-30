@@ -951,3 +951,93 @@
 .ice-entry[data-clock="shared"] *::after {
   animation-play-state: paused;
 }
+
+/* The camera (2026-10-30, owner: 「装着遷移アニメーション…を強化して」): a
+   restrained push in on the figure through the build, a small jolt as each
+   plate group locks (the legs, arms, chest, waist, tail on the shared clock:
+   1430, 2060, 2690, 3320, 4200 ms) and a firmer kick at the seal (4440 ms),
+   settling as the reactor lights. The engine's layer and the reactor's
+   overlay share one box (inset 0) and one origin, so they move as one. Runs
+   once; reduced motion has no animation here (above). */
+.ice-entry-engine,
+.ice-entry-stage {
+  transform-origin: 50% 46%;
+  animation: ice-camera 5000ms linear both;
+}
+
+@media (max-width: 760px) {
+  .ice-entry-engine,
+  .ice-entry-stage {
+    transform-origin: 50% 44%;
+  }
+}
+
+@keyframes ice-camera {
+  0%,
+  16% {
+    transform: translate3d(0, 0, 0) scale(1);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  28.6% {
+    transform: translate3d(0, 0, 0) scale(1.012);
+  }
+  29.4% {
+    transform: translate3d(0, 3px, 0) scale(1.016);
+  }
+  30.6% {
+    transform: translate3d(0, -1px, 0) scale(1.013);
+  }
+  41.2% {
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+  42% {
+    transform: translate3d(-2px, 2px, 0) scale(1.024);
+  }
+  43.2% {
+    transform: translate3d(1px, -1px, 0) scale(1.021);
+  }
+  53.8% {
+    transform: translate3d(0, 0, 0) scale(1.028);
+  }
+  54.6% {
+    transform: translate3d(2px, 2px, 0) scale(1.032);
+  }
+  55.8% {
+    transform: translate3d(-1px, -1px, 0) scale(1.029);
+  }
+  66.4% {
+    transform: translate3d(0, 0, 0) scale(1.034);
+  }
+  67.2% {
+    transform: translate3d(0, 3px, 0) scale(1.038);
+  }
+  68.4% {
+    transform: translate3d(0, -1px, 0) scale(1.035);
+  }
+  84% {
+    transform: translate3d(0, 0, 0) scale(1.042);
+  }
+  84.8% {
+    transform: translate3d(-2px, 2px, 0) scale(1.045);
+  }
+  86% {
+    transform: translate3d(0, 0, 0) scale(1.043);
+  }
+  88.8% {
+    transform: translate3d(0, 0, 0) scale(1.044);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  89.6% {
+    transform: translate3d(0, 4px, 0) scale(1.062);
+  }
+  90.6% {
+    transform: translate3d(-2px, -2px, 0) scale(1.052);
+  }
+  91.8% {
+    transform: translate3d(1px, 1px, 0) scale(1.046);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.03);
+  }
+}

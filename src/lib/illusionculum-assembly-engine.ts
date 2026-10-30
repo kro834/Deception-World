@@ -53,6 +53,10 @@ import {
   ILLUSIONCULUM_SUIT_UNDERSUIT,
 } from "./illusionculum-suit.ts";
 import { createIllusionculumFormChange } from "./illusionculum-form-change.ts";
+import {
+  createIllusionculumAccents,
+  illusionculumAccentBudget,
+} from "./illusionculum-assembly-accents.ts";
 import { createIllusionculumImageLoader } from "./illusionculum-image-loader.js";
 import { ILLUSIONCULUM_FORM_CHAIN, ILLUSIONCULUM_FORM_PATHS } from "./illusionculum-assembly.ts";
 
@@ -175,6 +179,17 @@ export function mountIllusionculumAssemblyEngine(
   // separate idle windows for each phase of the page's suit-up.
   config.eager = compact || Boolean(options.entry);
   config.progress = options.progress;
+  // This form's own accents (2026-10-30): the deep nanite vortex draining
+  // into the plates group by group, the seam scans, the locks and the
+  // seal's afterglow (illusionculum-assembly-accents.ts), at the device's
+  // budget.
+  config.accents = createIllusionculumAccents({
+    size: ILLUSIONCULUM_SUIT_SIZE,
+    pieces: ILLUSIONCULUM_SUIT_PIECES,
+    core: ILLUSIONCULUM_SUIT_MARKS.core,
+    seams: ILLUSIONCULUM_SUIT_SEAMS,
+    budget: illusionculumAccentBudget(environment, { compact, entry: Boolean(options.entry) }),
+  });
   if (compact) {
     config.prewarm = !options.entry;
     if (options.entry) {
