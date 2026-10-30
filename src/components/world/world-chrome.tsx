@@ -1228,6 +1228,14 @@ export function SideMenuLayer({
             >
               <span>DOGS ARCHIVE</span>
             </GuardedLink>
+            <GuardedLink
+              to="/rexonance-3d"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/rexonance-3d" ? "page" : undefined}
+            >
+              <span>REXONANCE 3D</span>
+            </GuardedLink>
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
           </div>
         </div>

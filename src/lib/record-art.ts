@@ -161,6 +161,7 @@ const PAGES: Record<string, Picture & { edition: RecordEdition; code: string }> 
   // next to it in /search, and the Realm side of the archive shows here.
   "/form-archive": { ...formThumb("realm", "royal"), edition: "archive", code: "ARCHIVE" },
   "/dogs-archive": { src: "/dogs-archive-20261028/guardian-480.webp", pos: "50% 40%", edition: "archive", code: "DOGS" },
+  "/rexonance-3d": { src: "/rexonance-3d-20261030/rexonance-3d-480.webp", pos: "50% 30%", edition: "archive", code: "REXONANCE 3D" },
   "/rexonance-saga": {
     ...formThumb("saga", "rexonance-ultra"),
     edition: "rexonance",
@@ -204,7 +205,8 @@ export function editionOf(path: string): RecordEdition {
   if (path === "/extreme-saga") return "extreme";
   if (path === "/final-stage" || path === "/far-from-saga") return "final";
   if (path === "/gallery" || path === "/gallery-tours" || path === "/exhibition") return "gallery";
-  if (path === "/form-archive" || path === "/dogs-archive") return "archive";
+  if (path === "/form-archive" || path === "/dogs-archive" || path === "/rexonance-3d")
+    return "archive";
   return "world";
 }
 

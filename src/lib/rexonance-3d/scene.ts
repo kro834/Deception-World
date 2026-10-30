@@ -108,7 +108,7 @@ export function createRexonanceScene(
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 0.95;
   renderer.setClearColor(0x020206, 1);
   host.appendChild(canvas);
 
@@ -156,7 +156,7 @@ export function createRexonanceScene(
   hdr.texture.name = "Rexonance.hdr";
   const composer = new EffectComposer(renderer, hdr);
   const renderPass = new RenderPass(scene, camera);
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.42, 1.35);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.4, 0.35, 1.5);
   bloom.enabled = quality.bloom;
   const output = new OutputPass();
   const fxaa = samples === 0 ? new FXAAPass() : null;

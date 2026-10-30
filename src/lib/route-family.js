@@ -34,6 +34,7 @@ export function getRouteFamily(pathname) {
   }
   if (path === "/gallery" || path === "/gallery-tours" || path === "/exhibition") return "gallery";
   if (path === "/library" || path === "/search") return "library";
-  if (path === "/form-archive" || path === "/dogs-archive") return "archive";
+  if (path === "/form-archive" || path === "/dogs-archive" || path === "/rexonance-3d")
+    return "archive";
   return "utility";
 }

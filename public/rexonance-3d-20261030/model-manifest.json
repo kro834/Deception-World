@@ -1,20 +1,91 @@
 {
   "model": "rexonance.glb",
-  "assetBytes": 827428,
-  "assetSha256": "75b2c33d3c5eff3836a7c7a73c467f05ce9347886df584f89cb8fe3f6fd9f95a",
+  "assetBytes": 5889424,
+  "assetSha256": "333a6fb09359bda94f712633967460e2b1afef524b07881608ec20bf89cac1dc",
   "units": "metres; glTF +Y up, the suit faces +Z, its left hand is +X",
-  "built": "2026-10-30T00:16:14Z",
+  "built": "2026-10-30T01:08:47Z",
   "blender": "5.2.3 LTS",
   "extensions": [
     "EXT_meshopt_compression",
+    "KHR_materials_clearcoat",
+    "KHR_materials_emissive_strength",
     "KHR_mesh_quantization"
   ],
-  "triangles": 150000,
+  "triangles": 553140,
   "materials": [
-    "RX_Suit"
+    "RX_Black",
+    "RX_Crystal",
+    "RX_Dark",
+    "RX_Gem",
+    "RX_Glow",
+    "RX_Gold",
+    "RX_GoldDark",
+    "RX_Silver",
+    "RX_Suit",
+    "RX_Visor"
   ],
-  "tailPivots": 0,
+  "tailPivots": 13,
   "nodes": [
+    {
+      "name": "RX_Arms_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 9276,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Arms_Crystal",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 14244,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Arms_Gem",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 60,
+      "materials": [
+        "RX_Gem"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Arms_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 22304,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Arms_GoldDark",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1536,
+      "materials": [
+        "RX_GoldDark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Arms_Suit",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 10736,
+      "materials": [
+        "RX_Suit"
+      ],
+      "tint": false
+    },
     {
       "name": "RX_Body_Suit",
       "type": "MESH",
@@ -24,7 +95,1474 @@
         "RX_Suit"
       ],
       "tint": false
+    },
+    {
+      "name": "RX_Helmet_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 30523,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Helmet_Crystal",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1664,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Helmet_Dark",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 5688,
+      "materials": [
+        "RX_Dark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Helmet_Glow",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1000,
+      "materials": [
+        "RX_Glow"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Helmet_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 11424,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Helmet_GoldDark",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 2120,
+      "materials": [
+        "RX_GoldDark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Helmet_Visor",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1752,
+      "materials": [
+        "RX_Visor"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Legs_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 20782,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Legs_Crystal",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 7664,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Legs_Dark",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 4448,
+      "materials": [
+        "RX_Dark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Legs_Gem",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 228,
+      "materials": [
+        "RX_Gem"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Legs_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 26454,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Legs_Silver",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1966,
+      "materials": [
+        "RX_Silver"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Legs_Suit",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 15960,
+      "materials": [
+        "RX_Suit"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Ribbon_1_L",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_root": [
+          0.1972,
+          0.0619,
+          1.146
+        ],
+        "rx_tip": [
+          0.444,
+          0.074,
+          0.278
+        ]
+      },
+      "triangles": 3020,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_1_R",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_root": [
+          -0.1972,
+          0.0619,
+          1.146
+        ],
+        "rx_tip": [
+          -0.444,
+          0.074,
+          0.278
+        ]
+      },
+      "triangles": 3020,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_2_L",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_root": [
+          0.1664,
+          0.1006,
+          1.146
+        ],
+        "rx_tip": [
+          0.4,
+          0.182,
+          0.282
+        ]
+      },
+      "triangles": 3020,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_2_R",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_root": [
+          -0.1664,
+          0.1006,
+          1.146
+        ],
+        "rx_tip": [
+          -0.4,
+          0.182,
+          0.282
+        ]
+      },
+      "triangles": 3020,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_3_L",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_root": [
+          0.1311,
+          0.1243,
+          1.146
+        ],
+        "rx_tip": [
+          0.262,
+          0.322,
+          0.296
+        ]
+      },
+      "triangles": 3020,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_3_R",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_root": [
+          -0.1311,
+          0.1243,
+          1.146
+        ],
+        "rx_tip": [
+          -0.262,
+          0.322,
+          0.296
+        ]
+      },
+      "triangles": 3020,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_Arm1_L",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1
+      },
+      "triangles": 1116,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_Arm1_R",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1
+      },
+      "triangles": 1116,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_Arm2_L",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1
+      },
+      "triangles": 1116,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Ribbon_Arm2_R",
+      "type": "MESH",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1
+      },
+      "triangles": 1116,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Shoulders_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 14344,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Shoulders_Crystal",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 6336,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Shoulders_Gem",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 64,
+      "materials": [
+        "RX_Gem"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Shoulders_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 41764,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 915,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1876,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Pivot00",
+      "type": "EMPTY",
+      "parent": null,
+      "extras": {
+        "rx_bend_axis": [
+          0.4965342879295349,
+          -0.8502184152603149,
+          0.1748782992362976
+        ],
+        "rx_side_axis": [
+          -0.8469041585922241,
+          -0.430358350276947,
+          0.3123221695423126
+        ],
+        "rx_bend_axis_gltf": [
+          0.4965342879295349,
+          0.1748782992362976,
+          0.8502184152603149
+        ],
+        "rx_side_axis_gltf": [
+          -0.8469041585922241,
+          0.3123221695423126,
+          0.430358350276947
+        ],
+        "rx_segment": 0,
+        "rx_joint_radius": 0.04
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot01",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot00",
+      "extras": {
+        "rx_bend_axis": [
+          0.459867924451828,
+          -0.8878014087677002,
+          -0.01817108690738678
+        ],
+        "rx_side_axis": [
+          -0.8754927515983582,
+          -0.45672300457954407,
+          0.15784978866577148
+        ],
+        "rx_bend_axis_gltf": [
+          0.459867924451828,
+          -0.01817108690738678,
+          0.8878014087677002
+        ],
+        "rx_side_axis_gltf": [
+          -0.8754927515983582,
+          0.15784978866577148,
+          0.45672300457954407
+        ],
+        "rx_segment": 1,
+        "rx_joint_radius": 0.03907564973439263
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot02",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot01",
+      "extras": {
+        "rx_bend_axis": [
+          0.4448593556880951,
+          -0.8848344087600708,
+          -0.13844990730285645
+        ],
+        "rx_side_axis": [
+          -0.8907465934753418,
+          -0.45320239663124084,
+          0.0343237966299057
+        ],
+        "rx_bend_axis_gltf": [
+          0.4448593556880951,
+          -0.13844990730285645,
+          0.8848344087600708
+        ],
+        "rx_side_axis_gltf": [
+          -0.8907465934753418,
+          0.0343237966299057,
+          0.45320239663124084
+        ],
+        "rx_segment": 2,
+        "rx_joint_radius": 0.038275101412905015
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot03",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot02",
+      "extras": {
+        "rx_bend_axis": [
+          0.44600653648376465,
+          -0.8854945302009583,
+          -0.13029807806015015
+        ],
+        "rx_side_axis": [
+          -0.8883396983146667,
+          -0.4557230472564697,
+          0.05629364028573036
+        ],
+        "rx_bend_axis_gltf": [
+          0.44600653648376465,
+          -0.13029807806015015,
+          0.8854945302009583
+        ],
+        "rx_side_axis_gltf": [
+          -0.8883396983146667,
+          0.05629364028573036,
+          0.4557230472564697
+        ],
+        "rx_segment": 3,
+        "rx_joint_radius": 0.03751546167901905
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot04",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot03",
+      "extras": {
+        "rx_bend_axis": [
+          0.4639183282852173,
+          -0.8843429684638977,
+          -0.05212871730327606
+        ],
+        "rx_side_axis": [
+          -0.8061330318450928,
+          -0.44582536816596985,
+          0.3890877664089203
+        ],
+        "rx_bend_axis_gltf": [
+          0.4639183282852173,
+          -0.05212871730327606,
+          0.8843429684638977
+        ],
+        "rx_side_axis_gltf": [
+          -0.8061330318450928,
+          0.3890877664089203,
+          0.44582536816596985
+        ],
+        "rx_segment": 4,
+        "rx_joint_radius": 0.03678122542237031
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot05",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot04",
+      "extras": {
+        "rx_bend_axis": [
+          0.5094696283340454,
+          -0.8602796196937561,
+          0.018964558839797974
+        ],
+        "rx_side_axis": [
+          -0.4929217994213104,
+          -0.2737084925174713,
+          0.8259005546569824
+        ],
+        "rx_bend_axis_gltf": [
+          0.5094696283340454,
+          0.018964558839797974,
+          0.8602796196937561
+        ],
+        "rx_side_axis_gltf": [
+          -0.4929217994213104,
+          0.8259005546569824,
+          0.2737084925174713
+        ],
+        "rx_segment": 5,
+        "rx_joint_radius": 0.03606531858247875
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot06",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot05",
+      "extras": {
+        "rx_bend_axis": [
+          0.4975075125694275,
+          -0.8674499988555908,
+          -0.004093728959560394
+        ],
+        "rx_side_axis": [
+          -0.20274418592453003,
+          -0.12086553871631622,
+          0.9717439413070679
+        ],
+        "rx_bend_axis_gltf": [
+          0.4975075125694275,
+          -0.004093728959560394,
+          0.8674499988555908
+        ],
+        "rx_side_axis_gltf": [
+          -0.20274418592453003,
+          0.9717439413070679,
+          0.12086553871631622
+        ],
+        "rx_segment": 6,
+        "rx_joint_radius": 0.03536368755557462
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot07",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot06",
+      "extras": {
+        "rx_bend_axis": [
+          0.44701722264289856,
+          -0.8945248126983643,
+          0.0010750479996204376
+        ],
+        "rx_side_axis": [
+          0.06579349935054779,
+          0.034077223390340805,
+          0.9972512125968933
+        ],
+        "rx_bend_axis_gltf": [
+          0.44701722264289856,
+          0.0010750479996204376,
+          0.8945248126983643
+        ],
+        "rx_side_axis_gltf": [
+          0.06579349935054779,
+          0.9972512125968933,
+          -0.034077223390340805
+        ],
+        "rx_segment": 7,
+        "rx_joint_radius": 0.03467371002911822
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot08",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot07",
+      "extras": {
+        "rx_bend_axis": [
+          0.44651246070861816,
+          -0.8947774767875671,
+          -0.000026032328605651855
+        ],
+        "rx_side_axis": [
+          0.3077329695224762,
+          0.153537780046463,
+          0.9390029907226562
+        ],
+        "rx_bend_axis_gltf": [
+          0.44651246070861816,
+          -0.000026032328605651855,
+          0.8947774767875671
+        ],
+        "rx_side_axis_gltf": [
+          0.3077329695224762,
+          0.9390029907226562,
+          -0.153537780046463
+        ],
+        "rx_segment": 8,
+        "rx_joint_radius": 0.033993554253503096
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot09",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot08",
+      "extras": {
+        "rx_bend_axis": [
+          0.4534589350223541,
+          -0.8912721276283264,
+          -0.0030180811882019043
+        ],
+        "rx_side_axis": [
+          0.5211897492408752,
+          0.2624194920063019,
+          0.8120942711830139
+        ],
+        "rx_bend_axis_gltf": [
+          0.4534589350223541,
+          -0.0030180811882019043,
+          0.8912721276283264
+        ],
+        "rx_side_axis_gltf": [
+          0.5211897492408752,
+          0.8120942711830139,
+          -0.2624194920063019
+        ],
+        "rx_segment": 9,
+        "rx_joint_radius": 0.03332187061755566
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot10",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot09",
+      "extras": {
+        "rx_bend_axis": [
+          0.43036380410194397,
+          -0.902424693107605,
+          0.020412832498550415
+        ],
+        "rx_side_axis": [
+          0.7492400407791138,
+          0.3697398006916046,
+          0.5494832992553711
+        ],
+        "rx_bend_axis_gltf": [
+          0.43036380410194397,
+          0.020412832498550415,
+          0.902424693107605
+        ],
+        "rx_side_axis_gltf": [
+          0.7492400407791138,
+          0.5494832992553711,
+          -0.3697398006916046
+        ],
+        "rx_segment": 10,
+        "rx_joint_radius": 0.03265762485253173
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot11",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot10",
+      "extras": {
+        "rx_bend_axis": [
+          0.4346550703048706,
+          -0.900590181350708,
+          0.003529764711856842
+        ],
+        "rx_side_axis": [
+          0.871946394443512,
+          0.42180490493774414,
+          0.248576357960701
+        ],
+        "rx_bend_axis_gltf": [
+          0.4346550703048706,
+          0.003529764711856842,
+          0.900590181350708
+        ],
+        "rx_side_axis_gltf": [
+          0.871946394443512,
+          0.248576357960701,
+          -0.42180490493774414
+        ],
+        "rx_segment": 11,
+        "rx_joint_radius": 0.032
+      }
+    },
+    {
+      "name": "RX_Tail_Pivot12",
+      "type": "EMPTY",
+      "parent": "RX_Tail_Pivot11",
+      "extras": {
+        "rx_bend_axis": [
+          0.43843838572502136,
+          -0.8984823822975159,
+          -0.022386422380805016
+        ],
+        "rx_side_axis": [
+          0.8966212868690491,
+          0.43554097414016724,
+          0.079839788377285
+        ],
+        "rx_bend_axis_gltf": [
+          0.43843838572502136,
+          -0.022386422380805016,
+          0.8984823822975159
+        ],
+        "rx_side_axis_gltf": [
+          0.8966212868690491,
+          0.079839788377285,
+          -0.43554097414016724
+        ],
+        "rx_segment": 12,
+        "rx_joint_radius": 0.032
+      }
+    },
+    {
+      "name": "RX_Tail_Seg00_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot00",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg00_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot00",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg00_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot00",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg01_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot01",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg01_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot01",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg01_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot01",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg02_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot02",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg02_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot02",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg02_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot02",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg03_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot03",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg03_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot03",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg03_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot03",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg04_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot04",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg04_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot04",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg04_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot04",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg05_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot05",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg05_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot05",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg05_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot05",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg06_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot06",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg06_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot06",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg06_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot06",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg07_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot07",
+      "triangles": 224,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg07_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot07",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg07_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot07",
+      "triangles": 848,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg08_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot08",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg08_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot08",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg08_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot08",
+      "triangles": 848,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg09_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot09",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg09_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot09",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg09_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot09",
+      "triangles": 848,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg10_Chevron",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot10",
+      "triangles": 112,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg10_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot10",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg10_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot10",
+      "triangles": 848,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Seg11_Fins",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot11",
+      "triangles": 448,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Seg11_Shell",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot11",
+      "triangles": 768,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Stinger_Blade",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot12",
+      "triangles": 976,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Tail_Stinger_Collar",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot12",
+      "triangles": 576,
+      "materials": [
+        "RX_GoldDark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Tail_Stinger_CollarRim",
+      "type": "MESH",
+      "parent": "RX_Tail_Pivot12",
+      "triangles": 448,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Torso_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 18688,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Torso_CorePivot",
+      "type": "EMPTY",
+      "parent": null,
+      "extras": {
+        "rx_keep": 1,
+        "rx_spin_axis_gltf": [
+          0,
+          0,
+          1
+        ],
+        "rx_spin_rate": 0.35
+      }
+    },
+    {
+      "name": "RX_Torso_CoreVaneRims",
+      "type": "MESH",
+      "parent": "RX_Torso_CorePivot",
+      "triangles": 5312,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Torso_CoreVanes",
+      "type": "MESH",
+      "parent": "RX_Torso_CorePivot",
+      "triangles": 6848,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Torso_Crystal",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 10208,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Torso_Gem",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 2600,
+      "materials": [
+        "RX_Gem"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Torso_Glow",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 398,
+      "materials": [
+        "RX_Glow"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Torso_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 8434,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_Black",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 17829,
+      "materials": [
+        "RX_Black"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_Crystal",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 4216,
+      "materials": [
+        "RX_Crystal"
+      ],
+      "tint": true
+    },
+    {
+      "name": "RX_Waist_Dark",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 896,
+      "materials": [
+        "RX_Dark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_Gem",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 30,
+      "materials": [
+        "RX_Gem"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_Glow",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 1454,
+      "materials": [
+        "RX_Glow"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_Gold",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 22763,
+      "materials": [
+        "RX_Gold"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_GoldDark",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 3720,
+      "materials": [
+        "RX_GoldDark"
+      ],
+      "tint": false
+    },
+    {
+      "name": "RX_Waist_Suit",
+      "type": "MESH",
+      "parent": null,
+      "triangles": 3776,
+      "materials": [
+        "RX_Suit"
+      ],
+      "tint": false
     }
   ],
-  "glints": []
+  "glints": [
+    {
+      "name": "RX_Glint_Arms_Diamond_L",
+      "size": 0.03,
+      "hue": 0.4
+    },
+    {
+      "name": "RX_Glint_Arms_Diamond_R",
+      "size": 0.03,
+      "hue": 0.4
+    },
+    {
+      "name": "RX_Glint_Arms_HandGem_L",
+      "size": 0.028,
+      "hue": 0.3
+    },
+    {
+      "name": "RX_Glint_Arms_HandGem_R",
+      "size": 0.028,
+      "hue": 0.3
+    },
+    {
+      "name": "RX_Glint_Legs_Foot_L",
+      "size": 0.06,
+      "hue": 0.6
+    },
+    {
+      "name": "RX_Glint_Legs_Foot_R",
+      "size": 0.06,
+      "hue": 0.6
+    },
+    {
+      "name": "RX_Glint_Legs_Heel_L",
+      "size": 0.045,
+      "hue": 0.7
+    },
+    {
+      "name": "RX_Glint_Legs_Heel_R",
+      "size": 0.045,
+      "hue": 0.7
+    },
+    {
+      "name": "RX_Glint_Legs_Knee_L",
+      "size": 0.07,
+      "hue": 0.55
+    },
+    {
+      "name": "RX_Glint_Legs_Knee_R",
+      "size": 0.07,
+      "hue": 0.55
+    },
+    {
+      "name": "RX_Glint_Legs_Thigh_L",
+      "size": 0.05,
+      "hue": 0.6
+    },
+    {
+      "name": "RX_Glint_Legs_Thigh_R",
+      "size": 0.05,
+      "hue": 0.6
+    },
+    {
+      "name": "RX_Glint_Shoulders_Medallion_L",
+      "size": 0.05,
+      "hue": 0.35
+    },
+    {
+      "name": "RX_Glint_Shoulders_Medallion_R",
+      "size": 0.05,
+      "hue": 0.35
+    },
+    {
+      "name": "RX_Glint_TorsoCore",
+      "size": 0.07,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_BackGem",
+      "size": 0.035,
+      "hue": 0.5
+    },
+    {
+      "name": "RX_Glint_Waist_Buckle",
+      "size": 0.07,
+      "hue": 0.3
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell1_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell1_R",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell2_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell2_R",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell3_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell3_R",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell5_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell5_R",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell6_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell6_R",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell7_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell7_R",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell8_L",
+      "size": 0.016,
+      "hue": 0.45
+    },
+    {
+      "name": "RX_Glint_Waist_Cell_cell8_R",
+      "size": 0.016,
+      "hue": 0.45
+    }
+  ]
 }

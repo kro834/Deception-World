@@ -32,6 +32,10 @@ const paths = [
   "/dogs-archive-20261028/decoders/draco/draco_wasm_wrapper.js",
   "/dogs-archive-20261028/decoders/draco/draco_decoder.js",
   "/dogs-archive-20261028/decoders/draco/asset-manifest.json",
+  // REXONANCE 3D (2026-10-30): the packed Blender model, its manifest and the scale normal map.
+  "/rexonance-3d-20261030/rexonance.glb",
+  "/rexonance-3d-20261030/model-manifest.json",
+  "/rexonance-3d-20261030/textures/scale-normal.webp",
   "/gallery/asset-manifest.json",
   ...gallery.items.map((item) => [...item.variants].sort((a, b) => b.width - a.width)[0].path),
   "/saga-extreme-middle-20261006.webp",

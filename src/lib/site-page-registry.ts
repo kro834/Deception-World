@@ -59,6 +59,14 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     aliases: ["dogs archive", "犬", "個体記録", "立体", "3D"],
   },
   {
+    id: "rexonance-3d",
+    title: "REXONANCE 3D",
+    path: "/rexonance-3d",
+    searchHash: "rexonance-3d-stage",
+    description: "レクソナンスサーガの立体模型。設定画と見比べながら、正面・側面・背面から鑑賞する。",
+    aliases: ["rexonance 3d", "レクソナンス", "立体模型", "設定画", "3D"],
+  },
+  {
     id: "extreme",
     title: "エクスプリームサーガ",
     path: "/extreme-saga",

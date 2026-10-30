@@ -57,6 +57,15 @@ const MENU_PAGE_SECTIONS: Record<string, MenuPageContext> = {
       ["dogs-archive-panel", "個体記録", "ARCHIVE"],
     ],
   },
+  "/rexonance-3d": {
+    title: "REXONANCE 3D",
+    image: "/rexonance-3d-20261030/rexonance-3d-480.webp",
+    sections: [
+      ["rexonance-3d-stage", "立体模型", "MODEL"],
+      ["rexonance-3d-views", "視点を選ぶ", "VIEWS"],
+      ["rexonance-3d-reference", "参照画像", "SHEETS"],
+    ],
+  },
 };
 
 // Reuse the published names already used by search/library. The menu keeps

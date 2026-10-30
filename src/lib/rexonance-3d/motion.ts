@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { rexonanceBendAxis, rexonanceTailPivotIndex, isRexonanceCorePivot } from "./contract.ts";
+import { isRexonanceCorePivot, rexonancePivotAxis, rexonanceTailPivotIndex } from "./contract.ts";
 
 type Joint = {
   node: THREE.Object3D;
@@ -47,13 +47,19 @@ export function createRexonanceMotion(root: THREE.Object3D) {
     const toward = (positions[i + 1] ?? tip).clone().sub(positions[i]);
     if (toward.lengthSq() < 1e-8) toward.set(0, 1, 0);
     toward.normalize();
-    const authored = rexonanceBendAxis(node.userData?.rx_bend_axis);
-    const sideRoot = authored
-      ? new THREE.Vector3(...authored)
+    // The tail's own axes when its pivots carry them (rx_bend_axis: about which the curl
+    // opens and closes; rx_side_axis: out of the curl's plane); otherwise a side-to-side
+    // axis from the chain's direction.
+    const bend = rexonancePivotAxis(node.userData, "rx_bend_axis");
+    const side = rexonancePivotAxis(node.userData, "rx_side_axis");
+    const sideRoot = bend
+      ? new THREE.Vector3(...bend)
       : new THREE.Vector3().crossVectors(toward, new THREE.Vector3(1, 0, 0));
     if (sideRoot.lengthSq() < 1e-6) sideRoot.set(0, 1, 0);
     sideRoot.normalize();
-    const curlRoot = new THREE.Vector3().crossVectors(sideRoot, toward);
+    const curlRoot = side
+      ? new THREE.Vector3(...side)
+      : new THREE.Vector3().crossVectors(sideRoot, toward);
     if (curlRoot.lengthSq() < 1e-6) curlRoot.set(1, 0, 0);
     curlRoot.normalize();
     // Axes into the pivot's own frame (its rest orientation relative to the root).
@@ -71,9 +77,15 @@ export function createRexonanceMotion(root: THREE.Object3D) {
   });
   const coreRest = core ? (core as THREE.Object3D).quaternion.clone() : null;
   const coreAxis = new THREE.Vector3(0, 0, 1);
+  let coreRate = 0.22;
   if (core) {
+    const node = core as THREE.Object3D;
+    const authored = rexonancePivotAxis(node.userData, "rx_spin_axis");
+    if (authored) coreAxis.set(...authored);
+    const rate = Number(node.userData?.rx_spin_rate);
+    if (Number.isFinite(rate)) coreRate = THREE.MathUtils.clamp(rate, -1.5, 1.5);
     const coreWorld = new THREE.Quaternion();
-    (core as THREE.Object3D).getWorldQuaternion(coreWorld);
+    node.getWorldQuaternion(coreWorld);
     coreAxis.applyQuaternion(coreWorld.invert().multiply(rootQuaternion)).normalize();
   }
   const sway = new THREE.Quaternion();
@@ -92,7 +104,7 @@ export function createRexonanceMotion(root: THREE.Object3D) {
         joint.node.quaternion.copy(joint.rest).multiply(sway).multiply(bend);
       }
       if (core && coreRest) {
-        sway.setFromAxisAngle(coreAxis, time * 0.22 * motion);
+        sway.setFromAxisAngle(coreAxis, time * coreRate * motion);
         (core as THREE.Object3D).quaternion.copy(coreRest).multiply(sway);
       }
     },

@@ -50,6 +50,7 @@ export const PUBLIC_SMOKE_ROUTES = [
   "/gallery-tours",
   "/exhibition",
   "/dogs-archive",
+  "/rexonance-3d",
   "/library",
   "/search",
   "/final-stage",
@@ -324,6 +325,10 @@ export async function verifyPublicDeployment({
               asset.path,
             ) &&
             !/^\/dogs-archive-20261028\/decoders\/draco\/(?:draco_decoder\.(?:js|wasm)|draco_wasm_wrapper\.js|asset-manifest\.json)(?![\s\S])/u.test(
+              asset.path,
+            ) &&
+            // REXONANCE 3D (2026-10-30): the model, its manifest and the scale normal map.
+            !/^\/rexonance-3d-20261030\/(?:rexonance\.glb|model-manifest\.json|textures\/scale-normal\.webp)(?![\s\S])/u.test(
               asset.path,
             ) &&
             !/^\/(?:gallery\/|saga-extreme-|rexonance-forms-20261011\/excelsior-cutout-20261012\.webp$|rider-rexonance-excelsior-cutout-20261012(?:-delivery-(?:640|960|1022))?\.webp$|saga-cinema-assets\/(?:chapter-[1-4]\.jpg|saga-logo-(?:original|640)\.webp|menu-thumbnail(?:-20261012)?\.webp|michroma-latin\.woff2)$|exhibition-metal\/(?:brushed-alloy-(?:normal|roughness)\.png|manifest\.json)$|exhibition-studio\/(?:studio-light\.hdr|plaster-(?:normal|roughness)\.png|manifest\.json)$|rain-city-materials\/(?:(?:concrete|asphalt)-(?:albedo\.webp|(?:normal|roughness)\.png)|manifest\.json)(?![\s\S]))/u.test(

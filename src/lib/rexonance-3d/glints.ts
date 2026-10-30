@@ -55,7 +55,7 @@ void main() {
   mv.xyz += normalize( -mv.xyz ) * size * 1.2;
   float angle = phase * 1.2 + uMotion * 0.18 * sin( uTime * 0.37 + phase * 9.0 );
   mat2 turn = mat2( cos( angle ), sin( angle ), -sin( angle ), cos( angle ) );
-  mv.xy += turn * rxCorner * size * ( 2.0 + 0.6 * twinkle );
+  mv.xy += turn * rxCorner * size * ( 1.5 + 0.5 * twinkle );
   gl_Position = projectionMatrix * mv;
   vCorner = rxCorner;
   vHue = rxParams.y;
@@ -79,7 +79,7 @@ void main() {
   float core = exp( -r * r * 90.0 );
   float halo = exp( -r * r * 14.0 ) * 0.1;
   vec3 tint = mix( vec3( 0.55, 0.8, 1.0 ), vec3( 1.0, 0.48, 0.86 ), vHue );
-  vec3 color = tint * ( arms * 1.25 + diag * 0.8 + halo ) + vec3( 1.0 ) * core * 1.3;
+  vec3 color = tint * ( arms * 0.8 + diag * 0.55 + halo ) + vec3( 1.0 ) * core * 0.9;
   float fade = 1.0 - smoothstep( 0.75, 1.0, r );
   gl_FragColor = vec4( color * vLight * uStrength * fade, 1.0 );
 }`,

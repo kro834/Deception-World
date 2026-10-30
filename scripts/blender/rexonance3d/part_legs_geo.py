@@ -617,3 +617,76 @@ def shell_grid(outer, inner, chamfer=0.35, bm=None, uv=None):
     bmesh.ops.recalc_face_normals(bm, faces=[f for f in bm.faces if f.is_valid])
     bm.normal_update()
     return bm
+
+
+def ridge_ribbon(path, hw, h_edge, h_ridge, bevel=0.0012, nt=2, nb=2, h_base=0.0, fm=None, miter_min=0.35):
+    """Closed solid along an open 2D polyline `path` [(a, b)]: flat bottom at
+    h_base, side walls up to h_edge (bevelled), and a roof whose two facets
+    meet in a crisp crease along the path at h_ridge.
+
+    hw: half-width (float or f(s), s = 0..1 by arc length). Sharp corners
+    in the path are mitred, so V-shaped chevrons keep straight creases."""
+    fm = fm if fm is not None else FlatMesh()
+    P = [Vector((float(x), float(y))) for x, y in path]
+    n = len(P)
+    Ls = [0.0]
+    for i in range(1, n):
+        Ls.append(Ls[-1] + (P[i] - P[i - 1]).length)
+    tot = max(Ls[-1], 1e-9)
+    hwf = hw if callable(hw) else (lambda s, v=hw: v)
+    # cross-section (t across -1..1, h) as a closed loop: right wall up, roof
+    # over the ridge, left wall down, bottom back
+    sec = [(1.0, h_base), (1.0, h_edge - bevel)]
+    for k in range(nt + 1):
+        t = 1.0 - k / nt  # 1 .. 0
+        sec.append((t, h_edge + (h_ridge - h_edge) * (1.0 - t)))
+    for k in range(1, nt + 1):
+        t = -k / nt
+        sec.append((t, h_edge + (h_ridge - h_edge) * (1.0 - abs(t))))
+    sec.append((-1.0, h_edge - bevel))
+    sec.append((-1.0, h_base))
+    for k in range(1, 2 * nb):
+        sec.append((-1.0 + k / nb, h_base))
+    rings = []
+    for i in range(n):
+        if i == 0:
+            d = (P[1] - P[0]).normalized()
+            nrm = Vector((-d.y, d.x))
+            sc = 1.0
+        elif i == n - 1:
+            d = (P[-1] - P[-2]).normalized()
+            nrm = Vector((-d.y, d.x))
+            sc = 1.0
+        else:
+            d0 = (P[i] - P[i - 1]).normalized()
+            d1 = (P[i + 1] - P[i]).normalized()
+            n0 = Vector((-d0.y, d0.x))
+            n1 = Vector((-d1.y, d1.x))
+            nrm = n0 + n1
+            if nrm.length < 1e-9:
+                nrm = n0
+            nrm.normalize()
+            sc = 1.0 / max(nrm.dot(n0), miter_min)
+        w = max(hwf(Ls[i] / tot), 1e-4) * sc
+        bev_t = min(bevel / max(w, 1e-6), 0.4)
+        pts = []
+        for t, h in sec:
+            tt = t
+            if abs(abs(t) - 1.0) < 1e-9 and abs(h - (h_edge - bevel)) > 1e-12 and h > h_base + 1e-12:
+                tt = t
+            pts.append((P[i].x + nrm.x * w * tt, P[i].y + nrm.y * w * tt, h))
+        # pull the first roof points in by the bevel so the edge is chamfered
+        ring = []
+        for (x, y, h), (t, _h) in zip(pts, sec):
+            if abs(abs(t) - 1.0) < 1e-9 and abs(_h - h_edge) < 1e-12:
+                x = P[i].x + nrm.x * w * t * (1.0 - bev_t)
+                y = P[i].y + nrm.y * w * t * (1.0 - bev_t)
+            ring.append((x, y, h))
+        i0 = len(fm.v)
+        fm.v.extend(ring)
+        rings.append(list(range(i0, len(fm.v))))
+    for i in range(n - 1):
+        fm.bridge(rings[i], rings[i + 1])
+    fm.f.append(tuple(reversed(rings[0])))
+    fm.f.append(tuple(rings[-1]))
+    return fm

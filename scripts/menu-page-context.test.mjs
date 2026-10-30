@@ -56,6 +56,7 @@ test("search, library, tours and archive resolve their own real local targets", 
     ["/gallery", ["gallery-top", "gallery-collection"]],
     ["/form-archive", ["archive-switcher"]],
     ["/dogs-archive", ["dogs-selector", "dogs-archive-panel"]],
+    ["/rexonance-3d", ["rexonance-3d-stage", "rexonance-3d-views", "rexonance-3d-reference"]],
   ]) {
     const page = getMenuPageContext(path);
     assert.deepEqual(

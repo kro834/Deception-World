@@ -238,16 +238,23 @@ def arm_offset(base, depth_fn, n=40, extend=True, t_range=(0.0, 1.0)):
 
 def build_face(ctx, base, coll):
     wa, wb, wp = lerp_fn(*ARM_W), lerp_fn(*BLUE_W), lerp_fn(*PINK_W)
+    # the glowing V sits in a dark recess: 1.2 mm under the gold arm, 1.8 mm above the plates
+    g1, g3 = 0.0012, 0.0018
     # blue crystal strip right under the gold arm
-    blue = arm_offset(base, lambda t: wa(t) * 0.5 + wb(t) * 0.5 + 0.0004, t_range=(0.0, 0.97))
+    blue = arm_offset(base, lambda t: wa(t) * 0.5 + g1 + wb(t) * 0.5, t_range=(0.0, 0.97))
     bm = G.rail(base, blue, G.PROF_FLAT, wb, lambda t: 0.0026, lift=0.0004, n=40, mitre_x0=True)
     ob = add(bm, "RX_Helmet_EyeBlue_L", coll, "Crystal")
     L.tint(ob, pink=0.0, sparkle=0.4, edge=0.8)
     L.mirror_x(ob)
     # pink glowing band under the blue
-    pink = arm_offset(base, lambda t: wa(t) * 0.5 + wb(t) + wp(t) * 0.5 + 0.0008, t_range=(0.0, 0.94))
+    pink = arm_offset(base, lambda t: wa(t) * 0.5 + g1 + wb(t) + wp(t) * 0.5, t_range=(0.0, 0.94))
     bm = G.rail(base, pink, G.PROF_FLAT, wp, lambda t: 0.0021, lift=0.0004, n=40, mitre_x0=True)
     add(bm, "RX_Helmet_EyePink_L", coll, "Visor", mirror=True)
+    # white-hot core line between the blue strip and the pink band
+    core = arm_offset(base, lambda t: wa(t) * 0.5 + g1 + wb(t), t_range=(0.0, 0.9))
+    bm = G.rail(base, core, G.PROF_FLAT, lerp_fn([0, 0.6, 1.0], [0.0042, 0.0034, 0.0012]), lambda t: 0.0030,
+                lift=0.0004, n=36, mitre_x0=True)
+    add(bm, "RX_Helmet_EyeCore_L", coll, "Glow", mirror=True)
     # pink drop down the prow (one symmetric inlay)
     half = [fuv(500, 280), fuv(502.5, 268), fuv(505, 256), fuv(508.5, 244), fuv(511, 236), fuv(508, 228),
             fuv(500, 224)]
@@ -256,7 +263,7 @@ def build_face(ctx, base, coll):
 
     # plates under the band: their top edge follows the band's lower edge
     def under(t):
-        return wa(t) * 0.5 + wb(t) + wp(t) + 0.0022
+        return wa(t) * 0.5 + g1 + wb(t) + wp(t) + g3
 
     top = arm_offset(base, under, n=40, extend=False)       # from the centre out to the temple
     th_, ph_ = G.angles_from_dirs(top)
@@ -298,11 +305,19 @@ def build_face(ctx, base, coll):
     bm = G.rail(base, trim, G.PROF_ROOF, lerp_fn([0, 1.0], [0.0032, 0.0022]), lambda t: 0.0064, lift=0.0004, n=20)
     add(bm, "RX_Helmet_MouthTrim_L", coll, "Gold", angle=30.0, mirror=True)
 
-    jaw = G.chain(base, top[i_cheek + 1:], SEAM_EAR, JAW_LINE, cheek_out[::-1][1:])
-    bm = G.panel(base, jaw, 0.005, res=0.007, bevel=0.0012, ridge=[("f", 559, 178), ("f", 556, 220),
-                                                                  ("s", 580, 252)],
-                 thick_fn=lambda P, Q, dr: facet(P, Q, dr, 0.0046, 0.0026, 0.016))
-    add(bm, "RX_Helmet_Jaw_L", coll, "Black", angle=24.0, mirror=True)
+    # side of the jaw: two angular plates split by a seam slanting forward-down (right-07)
+    i_split = int(np.argmin(np.abs(th_ - 47.0)))
+    split = [("s", 590, 226)]
+    jaw_front = G.chain(base, top[i_cheek + 1:i_split + 1], split, JAW_LINE[2:], cheek_out[::-1][1:])
+    bm = G.panel(base, jaw_front, 0.005, res=0.0065, gap=0.0012, bevel=0.0012,
+                 ridge=[("f", 553, 196), ("s", 596, 236), ("s", 597, 258)],
+                 thick_fn=lambda P, Q, dr: facet(P, Q, dr, 0.0046, 0.0024, 0.012))
+    add(bm, "RX_Helmet_JawFront_L", coll, "Black", angle=24.0, mirror=True)
+    jaw_rear = G.chain(base, top[i_split:], SEAM_EAR, JAW_LINE[:3], split)
+    bm = G.panel(base, jaw_rear, 0.005, res=0.007, gap=0.0012, bevel=0.0012,
+                 ridge=[("s", 568, 176), ("s", 570, 210), ("s", 576, 246)],
+                 thick_fn=lambda P, Q, dr: facet(P, Q, dr, 0.0046, 0.0026, 0.014))
+    add(bm, "RX_Helmet_JawRear_L", coll, "Black", angle=24.0, mirror=True)
 
 
 # ------------------------------------------------------------------ crown
@@ -367,8 +382,8 @@ FEATHERS = [
     # root path (azimuth, elevation), tip, bend, root width
     ([("a", 57.0, 25.0), ("a", 66.0, 28.0)], (0.114, 0.030, 1.899), (0.004, -0.010, 0.016), 0.024),
     ([("a", 60.0, 12.0), ("a", 70.0, 15.0)], (0.130, 0.050, 1.862), (0.004, -0.010, 0.016), 0.026),
-    ([("a", 64.0, 0.0), ("a", 76.0, 3.0)], (0.126, 0.072, 1.832), (0.006, -0.006, 0.018), 0.030),
-    ([("a", 71.0, -11.0), ("a", 85.0, -9.0)], (0.118, 0.094, 1.796), (0.006, -0.004, 0.016), 0.028),
+    ([("a", 64.0, 0.0), ("a", 76.0, 3.0)], (0.125, 0.060, 1.834), (0.006, -0.006, 0.018), 0.030),
+    ([("a", 71.0, -11.0), ("a", 85.0, -9.0)], (0.117, 0.070, 1.792), (0.006, -0.004, 0.016), 0.028),
 ]
 
 
@@ -391,7 +406,7 @@ def build_temples(ctx, base, coll):
         # gold outer (upper) edge riding the vane
         cen, ss, B = feather_centre(base, root, tip, bend)
         edge = [cen[i] + B[min(i, 5)] * (wf(ss[i]) * 0.5 - 0.0012) for i in range(len(cen))]
-        ew = 0.0080 if k <= 2 else 0.0065
+        ew = 0.0110 if k <= 2 else 0.0085
         bm = G.blade(edge, lerp_fn([0, 0.8, 1.0], [ew, ew * 0.7, 0.0]), lerp_fn([0, 1.0], [0.0100, 0.002]),
                      lambda t, B=B: tuple(B[2]), n=30)
         add(bm, "RX_Helmet_FeatherEdge%d_L" % k, coll, "Gold", angle=26.0, mirror=True)
@@ -401,7 +416,7 @@ def build_temples(ctx, base, coll):
 def build_back(ctx, base, coll):
     # gold crown chevron across the back of the head (apex up, mitred on X=0)
     band = [("b", 511, 141), ("b", 500, 148), ("b", 489, 158), ("b", 479, 171), ("b", 472, 189)]
-    bm = G.rail(base, band, G.PROF_ROOF, lerp_fn([0, 0.8, 1.0], [0.020, 0.019, 0.012]),
+    bm = G.rail(base, band, G.PROF_ROOF, lerp_fn([0, 0.8, 1.0], [0.023, 0.021, 0.013]),
                 lerp_fn([0, 1.0], [0.0085, 0.007]), lift=0.0004, n=36, mitre_x0=True)
     add(bm, "RX_Helmet_CrownBand_L", coll, "Gold", angle=28.0, mirror=True)
 
@@ -411,7 +426,7 @@ def build_back(ctx, base, coll):
     tip = np.array([0.0, 0.050, 1.938])
     le = [top - np.array([0, 0, 0.005]), top + np.array([0, 0.008, 0.022]), tip]
     te = [apex - np.array([0, 0.004, 0.0]), apex + np.array([0, -0.004, 0.050]), tip]
-    bm = G.edge_blade(le, te, lerp_fn([0, 0.5, 1.0], [0.017, 0.011, 0.002]), n_span=20, n_chord=8, ridge_a=0.5,
+    bm = G.edge_blade(le, te, lerp_fn([0, 0.5, 1.0], [0.024, 0.014, 0.002]), n_span=20, n_chord=8, ridge_a=0.5,
                       outward=(1.0, 0.0, 0.0), section="hex")
     add(bm, "RX_Helmet_BackSpike", coll, "Gold", angle=26.0)
 

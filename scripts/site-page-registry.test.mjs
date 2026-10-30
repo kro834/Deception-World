@@ -47,6 +47,7 @@ test("new library/search cards use the existing page artwork instead of anonymou
     ["/gallery-tours", "/gallery/g113-480.webp"],
     ["/exhibition", "/gallery/g01-480.webp"],
     ["/dogs-archive", "/dogs-archive-20261028/guardian-480.webp"],
+    ["/rexonance-3d", "/rexonance-3d-20261030/rexonance-3d-480.webp"],
   ]) {
     assert.equal(exports.pathArt(path).src, src);
     assert.ok(existsSync(new URL(`../public${src}`, import.meta.url)), src);

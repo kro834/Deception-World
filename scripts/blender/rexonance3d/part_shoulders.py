@@ -40,7 +40,7 @@ import rx_ref as R
 # face of the pauldron instead (front-10 decides). Normal: a compromise between
 # front-10 (circle) and the side sheets (ellipse, width/height ~0.5).
 MED_C = Vector((0.222, -0.108, 1.549))          # centre of the bezel's front face
-MED_N = Vector((0.44, -0.895, 0.06)).normalized()
+MED_N = Vector((0.50, -0.862, 0.07)).normalized()
 MED_R = 0.0711                                   # outer bezel radius (53.5 px)
 SHOULDER_C = Vector((0.192, 0.004, 1.530))       # inside the deltoid (ray origin for the cap)
 FAN_C = Vector((0.205, -0.030, 1.548))           # common centre of the petal planes
@@ -335,13 +335,21 @@ def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=
 
 
 # ------------------------------------------------------------------ round parts
-def _sector(r0, r1, a0, a1, h_in, h_out, z0, chamfer, n=8):
-    """Annular sector (bezel segment) in the local xy plane, top sloping from
-    h_in (inner edge) to h_out (outer edge)."""
+def _sector(r0, r1, a0, a1, h_in, h_out, z0, chamfer, n=8, crown=0.0035):
+    """Annular sector (bezel segment) in the local xy plane: walls h_in (inner)
+    and h_out (outer) high, joined by a convex polished top that bulges by
+    `crown` above the straight slope, with chamfered shoulders."""
     bm = _new_bm()
-    rings = []
     c = chamfer
-    prof = [(r0, z0), (r1, z0), (r1, z0 + h_out - c), (r1 - c, z0 + h_out), (r0 + c, z0 + h_in), (r0, z0 + h_in - c)]
+    top = []
+    k = 6
+    for i in range(k + 1):
+        t = i / k
+        r = (r0 + c) + (r1 - c - (r0 + c)) * t
+        h = (h_in + (h_out - h_in) * t) + crown * math.sin(math.pi * t)
+        top.append((r, z0 + h))
+    prof = [(r0, z0), (r1, z0), (r1, z0 + h_out - c)] + top[::-1] + [(r0, z0 + h_in - c)]
+    rings = []
     for i in range(n + 1):
         a = a0 + (a1 - a0) * i / n
         ca, sa = math.cos(a), math.sin(a)
@@ -471,9 +479,27 @@ def medallion_pieces():
     out.append((_ring_solid(0.0420, 0.0535, 0.004, 0.0080, 0.0008, seg=64), "Black"))
     out.append((_ring_solid(0.0384, 0.0434, 0.004, 0.0120, 0.0011, seg=64, crown=0.0007), "Gold"))
     out.append((_disc_solid(0.0390, 0.004, 0.0072, dome=0.0016, seg=48), "Black"))
-    # four-point star jewel
-    pts = star_outline(0.0470, 0.0175, 4, rot=0.0, r_inner=0.0105)
-    out.append((_star(pts, 0.0140, 0.0105, back=0.003), "Gem"))
+    # centre (front-10): a faceted gold four-point cross whose arms cross the
+    # inner ring, blue-white light rays on the diagonals (a smaller Gem star)
+    # and a glowing jewel core (+ glint)
+    diag = []
+    for i in range(4):
+        a = math.radians(45 + 90 * i)
+        diag.append((0.0340 * math.cos(a), 0.0340 * math.sin(a)))
+        a2 = math.radians(90 + 90 * i)
+        diag.append((0.0042 * math.cos(a2), 0.0042 * math.sin(a2)))
+    out.append((_star(diag, 0.0110, 0.0040, back=0.002), "Gem"))
+    cross = []
+    for i in range(4):
+        a = math.radians(90 * i)
+        r = 0.0478 if i % 2 else 0.0470
+        cross.append((r * math.cos(a), r * math.sin(a)))
+        a2 = math.radians(45 + 90 * i)
+        cross.append((0.0085 * math.cos(a2), 0.0085 * math.sin(a2)))
+    out.append((_star(cross, 0.0118, 0.0080, back=0.002), "Gold"))
+    core = L.gem_round(0.0072, 0.0042, n=12, table=0.45)
+    L.transform(core, L.frame((0.0, 0.0, 0.0185), (1, 0, 0), (0, 1, 0)))
+    out.append((core, "Gem"))
     return out
 
 
@@ -481,16 +507,16 @@ def rays_pieces():
     """Gold sunburst teeth from under the bezel (local medallion frame)."""
     out = []
     spec = [  # (angle, length beyond the bezel, base width)
-        (6, 0.036, 0.024), (30, 0.024, 0.020), (52, 0.032, 0.022), (75, 0.026, 0.020),
-        (98, 0.032, 0.022), (122, 0.024, 0.020), (146, 0.028, 0.020), (205, 0.018, 0.018),
-        (238, 0.024, 0.020), (270, 0.034, 0.022), (296, 0.026, 0.020), (318, 0.030, 0.022),
-        (340, 0.026, 0.020),
+        (6, 0.034, 0.028), (30, 0.022, 0.022), (52, 0.030, 0.026), (75, 0.024, 0.022),
+        (97, 0.032, 0.028), (122, 0.022, 0.022), (146, 0.026, 0.024), (205, 0.016, 0.020),
+        (238, 0.022, 0.022), (270, 0.030, 0.026), (296, 0.024, 0.022), (318, 0.028, 0.026),
+        (340, 0.024, 0.022),
     ]
     for ang, ln, w in spec:
         a = math.radians(ang)
         d = Vector((math.cos(a), math.sin(a), 0.0))
         side = Vector((-d.y, d.x, 0.0))
-        r0 = MED_R - 0.016
+        r0 = MED_R - 0.011
         tip = d * (MED_R + ln)
         b0 = d * r0 + side * (w / 2)
         b1 = d * r0 - side * (w / 2)
@@ -677,7 +703,14 @@ WRAP = [
 
 # Back: crystal shell footprint in the back view (back-09 kite, suit's right
 # mirrored): bottom, outer, top, inner corners as back-09 pixels.
-SHELL_BACK = [
+SHELL_BACK = [(716, 400), (740, 330), (676, 274), (660, 352)]
+SHELL_SCALE = 1.0
+
+# Rosette fanning out from under the shell in a plane facing back (BACK_N);
+# phi from the outward (+X) in-plane axis toward up; rf > 0 curls the tip
+# toward the shoulder, and the clearance pass drapes the petals over it.
+BACK_N = Vector((0.30, 0.93, 0.20)).normalized()
+BACK = [
     dict(phi=84, L=0.165, rf=0.030, z=-0.004, kind="crystal", w=0.050, pink=0.5),
     dict(phi=50, L=0.180, rf=0.040, z=-0.004, kind="black", w=0.054),
     dict(phi=16, L=0.185, rf=0.050, z=-0.004, kind="crystal", w=0.054, pink=0.6),
@@ -692,27 +725,6 @@ SHELL_BACK = [
     dict(phi=-37, L=0.140, rf=0.030, z=0.006, kind="gold", w=0.030),
     dict(phi=-70, L=0.150, rf=0.030, z=0.006, kind="crystal", w=0.042, pink=0.5),
     dict(phi=-99, L=0.135, rf=0.025, z=0.006, kind="black", w=0.040),
-]
-SHELL_SCALE = 1.0
-
-# Rosette fanning out from under the shell in a plane facing back (BACK_N);
-# phi from the outward (+X) in-plane axis toward up. rf < 0 lifts the tip off
-# the shoulder.
-BACK_N = Vector((0.30, 0.93, 0.20)).normalized()
-BACK = [
-    dict(phi=84, L=0.160, rf=-0.010, z=-0.004, kind="crystal", w=0.050, pink=0.5),
-    dict(phi=50, L=0.165, rf=-0.020, z=-0.004, kind="black", w=0.052),
-    dict(phi=16, L=0.165, rf=-0.030, z=-0.004, kind="crystal", w=0.052, pink=0.6),
-    dict(phi=-20, L=0.175, rf=-0.030, z=-0.004, kind="black", w=0.052),
-    dict(phi=-54, L=0.190, rf=-0.025, z=-0.004, kind="crystal", w=0.050, pink=0.35),
-    dict(phi=-86, L=0.190, rf=-0.020, z=-0.004, kind="black", w=0.050),
-    dict(phi=-104, L=0.150, rf=-0.010, z=-0.004, kind="black", w=0.044),
-    # second ring, shorter, between the first (front layer)
-    dict(phi=66, L=0.120, rf=-0.012, z=0.006, kind="black", w=0.040, bow=0.02),
-    dict(phi=32, L=0.125, rf=-0.016, z=0.006, kind="gold", w=0.030, bow=0.02),
-    dict(phi=-2, L=0.130, rf=-0.016, z=0.006, kind="black", w=0.042, bow=0.02),
-    dict(phi=-38, L=0.135, rf=-0.014, z=0.006, kind="gold", w=0.030, bow=0.02),
-    dict(phi=-72, L=0.140, rf=-0.012, z=0.006, kind="crystal", w=0.040, pink=0.5, bow=0.02),
 ]
 
 
@@ -964,6 +976,6 @@ def build(ctx):
     for ob in made:
         L.mirror_x(ob)
     # glints (mirror_x on empties reads a stale matrix_world, so place both directly)
-    star = MED_C + MED_N * 0.004
+    star = MED_C + MED_N * 0.0045
     L.glint("Shoulders_Medallion_L", star, 0.05, coll, 0.35)
     L.glint("Shoulders_Medallion_R", (-star.x, star.y, star.z), 0.05, coll, 0.35)

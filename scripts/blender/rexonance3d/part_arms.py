@@ -23,6 +23,7 @@ Read off front-10 / right-07 / back-09 and the 3/4 sheets (05, 06, 03, 04):
 import math
 
 import bmesh
+import bpy
 from mathutils import Matrix, Vector
 
 import part_arms_geo as G
@@ -395,7 +396,7 @@ def facet_bar(p0, p1, up, w0, w1, h0, h1, ridge=0.28, chamfer=0.0022, end_scale=
     return bm
 
 
-def pill_bar(p0, p1, up, w0, w1, h0, h1, p=2.8, n=16, chamfer=0.004, end_scale=0.80, crown=0.0):
+def pill_bar(p0, p1, up, w0, w1, h0, h1, p=2.8, n=12, chamfer=0.004, end_scale=0.80, crown=0.0):
     """Rounded finger segment: superellipse section (width along x, height
     along `up`), chamfered ends. crown > 0 pinches the dorsal top into a soft
     ridge (armour plate look)."""
@@ -603,14 +604,42 @@ def build_elbow(arm, coll):
     rob["rx_keep"] = 1
     obs.append(rob)
 
-    # gold rod down to the double-spike pendant (it hangs plumb at the end)
+    return obs
+
+
+def build_rod_pendant(arm, coll):
+    """Gold rod from the elbow down to the double-spike pendant. front-10 and
+    back-09 show it on the suit's RIGHT arm only (front-10 ~(130, 840-960)),
+    so it is authored on +X and only the mirrored copy is kept."""
+    surf = arm.surf
+    s0 = arm.s(1.236)
+    root = surf.point(s0, 58.0 * DEG, 0.004)
+    start = root + surf.normal(s0, 58.0 * DEG) * 0.004
     top = V(0.494, 0.192, 0.912)
     rod_pts = [start + V(0.0, 0.004, 0.002), V(0.440, 0.122, 1.125), V(0.472, 0.162, 1.020),
                V(0.490, 0.186, 0.950), top]
     rod = blade_sweep(arm, rod_pts, lambda t: 0.0086 - 0.0012 * t, lambda t: 0.0060 - 0.0008 * t, n=40, prof_n=12, sharp=1.0)
-    obs.append(L.from_bmesh(rod, "RX_Arms_Rod_L", coll, "Gold", angle=40))
+    obs = [L.from_bmesh(rod, "RX_Arms_Rod_L", coll, "Gold", angle=40)]
     obs += build_pendant(top, coll)
     return obs
+
+
+def build_gold_blade(arm, coll):
+    """Thin gold sickle on the suit's LEFT arm where the right arm carries the
+    pendant: front-10 shows it curving out past the fist and hooking back in to
+    a point at ~(822, 900)."""
+    surf = arm.surf
+    s0 = arm.s(1.236)
+    root = surf.point(s0, 58.0 * DEG, 0.004)
+    start = root + surf.normal(s0, 58.0 * DEG) * 0.006
+    pts = [start, V(0.446, 0.128, 1.130), V(0.478, 0.160, 1.030), V(0.490, 0.176, 0.960),
+           V(0.478, 0.176, 0.892), V(0.452, 0.166, 0.848), V(0.428, 0.156, 0.822)]
+
+    def w(t):
+        return 0.0090 + 0.0030 * math.sin(math.pi * min(t / 0.6, 1.0) * 0.5) - 0.0118 * smoothstep(0.62, 1.0, t)
+
+    bm = blade_sweep(arm, pts, w, lambda t: 0.0050 * (1.0 - 0.6 * smoothstep(0.6, 1.0, t)), n=48, prof_n=10, sharp=1.2)
+    return [L.from_bmesh(bm, "RX_Arms_GoldBlade_L", coll, "Gold", angle=35)]
 
 
 def concave_knob(length, rx, f=0.5, p=1.8, r_end=0.0035, steps=6):
@@ -692,9 +721,17 @@ def build(ctx):
     meshes = [o for o in obs if o.type == "MESH"]
     for ob in meshes:
         L.mirror_x(ob)
+    # genuinely asymmetric pieces (front-10 / back-09): the pendant hangs from
+    # the right arm only, the left arm carries a thin gold blade instead
+    right_only = build_rod_pendant(arm, coll)
+    for ob in right_only:
+        r = L.mirror_x(ob)
+        meshes.append(r)
+        bpy.data.objects.remove(ob, do_unlink=True)
+    meshes += build_gold_blade(arm, coll)
     for e in [o for o in coll.objects if o.type == "EMPTY" and o.name.endswith("_L")]:
         L.mirror_x(e)
     total = sum(G.tris(o) for o in meshes)
-    print("[arms] %d meshes per side, %d triangles per side" % (len(meshes), total))
+    print("[arms] %d left-side meshes (+ mirrors), %d triangles on the left" % (len(meshes), total))
     for o in meshes:
         print("   %-32s %6d" % (o.name, G.tris(o)))

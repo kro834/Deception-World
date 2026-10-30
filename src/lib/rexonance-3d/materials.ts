@@ -182,12 +182,12 @@ normal = normalize( normal + rxRootToView * ( rxHash33( rxCell + 7.0 ) - 0.5 ) *
 
 const CRYSTAL_EMISSIVE = /* glsl */ `
 {
-  vec3 RX_BLUE = vec3( 0.04, 0.16, 1.0 );
-  vec3 RX_VIOLET = vec3( 0.36, 0.1, 1.0 );
-  vec3 RX_PINK = vec3( 1.0, 0.2, 0.62 );
-  vec3 RX_HOT = vec3( 1.0, 0.42, 0.78 );
+  vec3 RX_BLUE = vec3( 0.015, 0.1, 1.0 );
+  vec3 RX_VIOLET = vec3( 0.28, 0.05, 1.0 );
+  vec3 RX_PINK = vec3( 1.0, 0.1, 0.5 );
+  vec3 RX_HOT = vec3( 1.0, 0.3, 0.7 );
   vec3 RX_ICE = vec3( 0.55, 0.82, 1.0 );
-  vec3 RX_NAVY = vec3( 0.006, 0.012, 0.07 );
+  vec3 RX_NAVY = vec3( 0.003, 0.006, 0.045 );
   float rxU = clamp( vRxUv.x, 0.0, 1.0 );
   float rxVv = clamp( vRxUv.y, 0.0, 1.0 );
   float rxPinkBias = vRxTint.r;
@@ -196,36 +196,36 @@ const CRYSTAL_EMISSIVE = /* glsl */ `
   float rxG = clamp( rxVv + rxPinkBias * ( 1.0 - rxVv ), 0.0, 1.0 );
   vec3 rxCol = mix( RX_BLUE, RX_VIOLET, smoothstep( 0.0, 0.55, rxG ) );
   rxCol = mix( rxCol, RX_PINK, smoothstep( 0.42, 1.0, rxG ) );
-  float rxEdge = 1.0 - smoothstep( 0.0, 0.2, min( rxU, 1.0 - rxU ) );
-  rxCol = mix( rxCol, RX_HOT, rxEdge * ( 0.3 + 0.6 * rxEdgeGlow ) );
+  float rxEdge = 1.0 - smoothstep( 0.0, 0.12, min( rxU, 1.0 - rxU ) );
+  rxCol = mix( rxCol, RX_HOT, rxEdge * ( 0.25 + 0.5 * rxEdgeGlow ) );
   rxCol *= 0.7 + 0.6 * rxFacet;
   vec3 rxV = normalize( vViewPosition );
   float rxNdV = clamp( dot( normal, rxV ), 0.0, 1.0 );
   float rxFres = pow( 1.0 - rxNdV, 3.0 );
   float rxLineD = rxF.y - rxF.x;
   float rxAA = fwidth( rxLineD ) + 1e-4;
-  float rxLine = 1.0 - smoothstep( 0.04 - rxAA, 0.04 + rxAA, rxLineD );
-  vec3 rxEmit = rxCol * 0.85;
+  float rxLine = 1.0 - smoothstep( 0.028 - rxAA, 0.028 + rxAA, rxLineD );
+  vec3 rxEmit = rxCol * 0.42;
 #if RX_CRYSTAL_DETAIL > 1
   // The inner layer, a little under the surface (parallax): navy clouds and still specks.
   vec3 rxVRoot = normalize( transpose( rxRootToView ) * rxV );
   vec3 rxQ = vRxRoot - rxVRoot * 0.012;
   float rxCloud = rxNoise3( rxQ * 23.0 ) * 0.6 + rxNoise3( rxQ * 61.0 ) * 0.4;
   float rxNavy = smoothstep( 0.42, 0.78, rxCloud );
-  rxEmit = mix( rxEmit, RX_NAVY, rxNavy * 0.7 );
+  rxEmit = mix( rxEmit, RX_NAVY, rxNavy * 0.8 );
   float rxSeedA;
   float rxSpeck = rxStar( rxQ * 260.0, 0.22, 0.2, rxSeedA );
-  rxEmit += mix( RX_ICE, vec3( 1.0 ), rxSeedA ) * rxSpeck * ( 0.5 + rxNavy ) * 1.6;
+  rxEmit += mix( RX_ICE, vec3( 1.0 ), rxSeedA ) * rxSpeck * ( 0.4 + rxNavy ) * 1.2;
 #endif
-  rxEmit += mix( vec3( 0.7, 0.88, 1.0 ), RX_HOT, rxG ) * rxLine * ( 1.4 + 1.4 * rxEdge );
-  rxEmit += RX_HOT * rxEdge * rxEdgeGlow * 0.8;
+  rxEmit += mix( vec3( 0.55, 0.8, 1.0 ), RX_HOT, rxG ) * rxLine * ( 0.95 + 0.9 * rxEdge );
+  rxEmit += RX_HOT * rxEdge * rxEdgeGlow * 0.45;
   float rxSeedB;
-  float rxSpark = rxStar( vRxRoot * 85.0, 0.08 + 0.42 * rxSparkle, 0.16, rxSeedB );
+  float rxSpark = rxStar( vRxRoot * 85.0, 0.03 + 0.2 * rxSparkle, 0.15, rxSeedB );
   float rxTw = 0.5 + 0.5 * sin( rxTime * ( 1.4 + 2.6 * rxSeedB ) + rxSeedB * 40.0 );
   rxSpark *= mix( 0.45, pow( rxTw, 4.0 ) * 1.3, rxMotion );
-  rxEmit += mix( vec3( 0.85, 0.92, 1.0 ), vec3( 1.0, 0.75, 0.95 ), rxSeedB ) * rxSpark * 9.0;
-  rxEmit += mix( RX_ICE, RX_HOT, rxG ) * rxFres * 1.2;
-  rxEmit += rxCol * smoothstep( 0.82, 1.0, rxVv ) * 0.7;
+  rxEmit += mix( vec3( 0.85, 0.92, 1.0 ), vec3( 1.0, 0.75, 0.95 ), rxSeedB ) * rxSpark * 6.0;
+  rxEmit += mix( RX_ICE, RX_HOT, rxG ) * rxFres * 0.55;
+  rxEmit += rxCol * smoothstep( 0.82, 1.0, rxVv ) * 0.45;
   totalEmissiveRadiance += rxEmit * rxCrystalGlow;
   diffuseColor.rgb = rxCol * 0.1;
 }
@@ -237,7 +237,7 @@ const GEM_EMISSIVE = /* glsl */ `
   float rxNdV = clamp( dot( normal, rxV ), 0.0, 1.0 );
   float rxFacet = rxHash13( floor( normalize( vRxRootNormal ) * 7.0 + 0.5 ) );
   vec3 rxHue = mix( vec3( 0.32, 0.5, 1.0 ), vec3( 0.95, 0.42, 1.0 ), rxFacet );
-  vec3 rxEmit = rxHue * ( 0.22 + 1.25 * pow( rxNdV, 3.0 ) ) + vec3( 1.0, 0.96, 1.0 ) * pow( rxNdV, 24.0 ) * 1.1;
+  vec3 rxEmit = rxHue * ( 0.16 + 0.85 * pow( rxNdV, 3.0 ) ) + vec3( 1.0, 0.96, 1.0 ) * pow( rxNdV, 24.0 ) * 0.6;
   totalEmissiveRadiance += rxEmit * ( 1.0 + 0.08 * rxPulse );
 }
 `;
@@ -248,7 +248,7 @@ const GLOW_EMISSIVE = /* glsl */ `
   float rxNdV = clamp( dot( normal, rxV ), 0.0, 1.0 );
   vec3 rxCore = mix( vec3( 0.25, 0.42, 1.0 ), vec3( 1.0, 0.9, 1.0 ), pow( rxNdV, 1.5 ) );
   rxCore = mix( rxCore, vec3( 1.0, 0.36, 0.84 ), pow( 1.0 - rxNdV, 2.0 ) * 0.55 );
-  totalEmissiveRadiance += rxCore * 2.6 * ( 1.0 + 0.16 * rxPulse );
+  totalEmissiveRadiance += rxCore * 2.0 * ( 1.0 + 0.16 * rxPulse );
 }
 `;
 
@@ -321,7 +321,7 @@ const LOOKS: Record<RexonanceFamily, Look> = {
       roughness: 0.08,
       clearcoat: 1,
       clearcoatRoughness: 0.04,
-      envMapIntensity: 0.9,
+      envMapIntensity: 0.6,
       side: THREE.DoubleSide,
     },
     emissive: CRYSTAL_EMISSIVE,

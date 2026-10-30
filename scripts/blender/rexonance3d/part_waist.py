@@ -23,7 +23,8 @@ Z_BOT, Z_TOP = 1.152, 1.258  # belt band
 Z_MID = 0.5 * (Z_BOT + Z_TOP)
 BAND_GAP = 0.006  # body -> inside of the band
 BAND_T = 0.013  # band thickness
-CELL_W, CELL_H, CELL_D = 0.030, 0.086, 0.016
+CELL_W, CELL_H, CELL_D = 0.0265, 0.092, 0.016
+CELL_PITCH = 0.0305
 CELL_Z = 1.200
 BUCKLE_Z = R.front(500, 610)[1]  # 1.2026
 
@@ -356,13 +357,13 @@ def cell_meshes(C, s, gold, crystal, coll, name, glints=True):
     """One crystal cell centred at arc length s: gold frame + faceted lens."""
     lift = BAND_T - 0.002
     M = C.matrix(s, lift, CELL_Z)
-    outer = arc_resample(L.rounded_rect_profile(CELL_W, CELL_H, 0.0055, 3), 32)
-    win = vesica(0.0088, 0.0345, 48)
+    outer = arc_resample(L.rounded_rect_profile(CELL_W, CELL_H, 0.0052, 3), 32)
+    win = vesica(0.0090, 0.0385, 48)
     inner = arc_resample(win, 32)
-    fr = frame_ring(outer, inner, 0.0, CELL_D, zi=0.0, bevel=0.0013)
+    fr = frame_ring(outer, inner, 0.0, CELL_D, zi=0.0, bevel=0.0012)
     L.transform(fr, M)
     gold.add(fr)
-    lens = faceted_lens(arc_resample(vesica(0.0088, 0.034, 24), 24), 0.001, 0.0105, ridge=0.62)
+    lens = faceted_lens(arc_resample(vesica(0.0087, 0.0378, 24), 24), 0.001, 0.0112, ridge=0.62)
     L.transform(lens, M)
     crystal.add(lens)
     if glints:
@@ -370,20 +371,21 @@ def cell_meshes(C, s, gold, crystal, coll, name, glints=True):
         L.glint("Waist_Cell_%s" % name, g, 0.016, coll, 0.45)
 
 
-def block_meshes(C, s, gold, dark, w=0.034, h=0.090):
-    """A plain gold block with a dark recessed panel (next to the buckle /
-    back plaque and at the hips)."""
+def block_meshes(C, s, gold, gdark, w=0.032, h=0.096):
+    """A solid gold block with a faceted vertical ridge (beside the buckle and
+    the back plaque) over a dark-gold base plate."""
     lift = BAND_T - 0.002
     M = C.matrix(s, lift, CELL_Z)
-    outer = arc_resample(L.rounded_rect_profile(w, h, 0.005, 3), 32)
-    inner = arc_resample(L.rounded_rect_profile(w - 0.013, h - 0.020, 0.003, 3), 32)
-    fr = frame_ring(outer, inner, 0.0, CELL_D + 0.002, zi=0.006, bevel=0.0014)
-    L.transform(fr, M)
-    gold.add(fr)
-    # recessed dark panel with a faint vertical ridge
-    pan = faceted_lens(arc_resample(L.rounded_rect_profile(w - 0.012, h - 0.019, 0.003, 2), 20), 0.004, 0.0085, ridge=0.8)
-    L.transform(pan, M)
-    dark.add(pan)
+    base = L.prism(arc_resample(L.rounded_rect_profile(w + 0.004, h + 0.004, 0.006, 3), 40), 0.008, bevel=0.0012)
+    L.transform(base, M)
+    gdark.add(base)
+    body = L.prism(arc_resample(L.rounded_rect_profile(w, h, 0.0055, 3), 40), CELL_D - 0.004, bevel=0.0018)
+    L.transform(body, M)
+    gold.add(body)
+    ridge = faceted_lens(arc_resample(L.rounded_rect_profile(w - 0.008, h - 0.010, 0.004, 2), 24), CELL_D - 0.0045,
+                         CELL_D + 0.0045, ridge=0.86)
+    L.transform(ridge, M)
+    gold.add(ridge)
 
 
 def buckle(C, coll, acc):
@@ -534,36 +536,24 @@ def back_plaque(C, coll, acc):
 def belt(ctx, coll, C):
     acc = {k: Acc() for k in ("Black", "Gold", "GoldDark", "Dark", "Glow", "Gem", "CrystalOrb", "CrystalPink")}
     cells_gold, cells_crystal = Acc(), Acc()
-    blocks_dark = Acc()
 
     acc["Black"].add(band_mesh(C))
     liner = liner_mesh(C, ctx.body)
 
-    M_buckle = buckle(C, coll, acc)
+    buckle(C, coll, acc)
     back_plaque(C, coll, acc)
 
-    # layout along one side (s > 0), mirrored by symmetry of the contour
-    s_side = C.s_of_side()
+    # layout along one side (s > 0), mirrored by symmetry of the contour:
+    # gold block beside the buckle, crystal cells all round, gold block beside the plaque
     s_back = C.s_back()
-    pitch = 0.0365
     layout = []  # (s, kind)
-    s_block_front = 0.0795
+    s_block_front = 0.0790
+    s_block_back = s_back - 0.0800
     layout.append((s_block_front, "block"))
-    s = s_block_front + 0.017 + 0.005 + CELL_W / 2
-    front_cells = []
-    while s < s_side - 0.026:
-        front_cells.append(s)
-        s += pitch
-    # spread the front cells evenly between the front block and the side block
-    nf = len(front_cells)
-    a0, a1 = s_block_front + 0.0185 + CELL_W / 2 + 0.003, s_side - 0.0185 - CELL_W / 2 - 0.003
-    front_cells = [a0 + (a1 - a0) * k / max(nf - 1, 1) for k in range(nf)]
-    layout += [(x, "cell") for x in front_cells]
-    layout.append((s_side, "block"))
-    s_block_back = s_back - 0.0795
-    b0, b1 = s_side + 0.0185 + CELL_W / 2 + 0.003, s_block_back - 0.0185 - CELL_W / 2 - 0.003
-    nb = max(2, int(round((b1 - b0) / pitch)) + 1)
-    layout += [(b0 + (b1 - b0) * k / (nb - 1), "cell") for k in range(nb)]
+    a0 = s_block_front + 0.016 + 0.0025 + CELL_W / 2
+    a1 = s_block_back - 0.016 - 0.0025 - CELL_W / 2
+    n = int(round((a1 - a0) / CELL_PITCH)) + 1
+    layout += [(a0 + (a1 - a0) * k / (n - 1), "cell") for k in range(n)]
     layout.append((s_block_back, "block"))
 
     for side in (1, -1):
@@ -573,13 +563,13 @@ def belt(ctx, coll, C):
             if kind == "cell":
                 cell_meshes(C, ss, cells_gold, cells_crystal, coll, tag)
             else:
-                block_meshes(C, ss, acc["Gold"], blocks_dark)
+                block_meshes(C, ss, acc["Gold"], acc["GoldDark"])
 
     out = {}
     out["band"] = acc["Black"].build("RX_Waist_Belt", coll, "Black", 40)
     out["liner"] = L.from_bmesh(liner, "RX_Waist_BeltLiner", coll, "Dark", 60)
     out["gold"] = acc["Gold"].build("RX_Waist_BeltGold", coll, "Gold", 30)
-    out["golddark"] = acc["GoldDark"].build("RX_Waist_BuckleStep", coll, "GoldDark", 30)
+    out["golddark"] = acc["GoldDark"].build("RX_Waist_BeltGoldDark", coll, "GoldDark", 30)
     out["dark"] = acc["Dark"].build("RX_Waist_BuckleGroove", coll, "Dark", 30)
     out["glow"] = acc["Glow"].build("RX_Waist_BuckleWeb", coll, "Glow", 60)
     out["gem"] = acc["Gem"].build("RX_Waist_BackGem", coll, "Gem", 20)
@@ -591,7 +581,6 @@ def belt(ctx, coll, C):
     crys = cells_crystal.build("RX_Waist_CellCrystals", coll, "Crystal", 30)
     # cells: pink at both ends, blue in the middle (v runs bottom -> top)
     L.tint(crys, fn=lambda co, uv: (min(1.0, abs(uv[1] - 0.5) * 2.0) ** 1.5 * 0.9, 0.8, 0.7))
-    blk = blocks_dark.build("RX_Waist_BlockPanels", coll, "Black", 30)
     return out
 
 
@@ -1137,9 +1126,9 @@ def hips(ctx, coll):
     # --- gold lapels with a raised centre ridge, tapering into the clasp
     for path in (fl, bl):
         Pp, Nn = path.sample(44, z_top, JUNCTION_Z)
-        gold.add(surface_strip(Pp, Nn, 0.019, 0.0065, LAPEL_LIFT, width_fn=lambda t: 1.0 - 0.35 * t))
+        gold.add(surface_strip(Pp, Nn, 0.026, 0.0065, LAPEL_LIFT, width_fn=lambda t: 1.0 - 0.35 * t))
         # dark-gold under-lip so the lapel reads as a layered edge
-        gdark.add(surface_strip(Pp, Nn, 0.025, 0.003, LAPEL_LIFT - 0.0018, width_fn=lambda t: 1.0 - 0.4 * t, ridge=0.0))
+        gdark.add(surface_strip(Pp, Nn, 0.033, 0.003, LAPEL_LIFT - 0.0018, width_fn=lambda t: 1.0 - 0.4 * t, ridge=0.0))
 
     # --- clasp at the junction: faceted gold diamond over a dark-gold seat
     rj = body_radial(body, JUNCTION_TH, JUNCTION_Z)
@@ -1188,10 +1177,12 @@ def hips(ctx, coll):
 
     # --- black front hip plate between the tasset and the front lapel (front-10:
     # a big lacquer plate with a diagonal crease above the thigh diamond)
-    fx = [(1.152, 0.101), (1.152, fl_x(fl, body, 1.152) - 0.006), (1.060, fl_x(fl, body, 1.060) - 0.008),
-          (1.046, 0.150), (1.046, 0.090)]
+    # (outline in front-view X, Z; notched over the legs' thigh diamond, whose
+    # top point sits at about (0.135, 1.035))
+    fx = [(1.151, 0.099), (1.151, fl_x(fl, body, 1.151) - 0.014), (1.080, fl_x(fl, body, 1.080) - 0.016),
+          (1.010, fl_x(fl, body, 1.010) - 0.017), (0.990, 0.180), (1.056, 0.1345), (1.000, 0.104), (1.030, 0.091)]
     outline = L.ccw([(x, z) for z, x in fx])
-    crease = lambda h, z: 0.0045 + 0.0025 * max(0.0, 1.0 - abs((h - 0.118) - (1.152 - z) * 0.55) / 0.03)  # noqa: E731
+    crease = lambda h, z: 0.0042 + 0.0028 * max(0.0, 1.0 - abs((h - 0.112) - (1.151 - z) * 0.62) / 0.03)  # noqa: E731
     black.add(L.conform_plate(body, "front", outline, thickness=crease, gap=PANEL_T0, res=0.008, bevel=0.0015))
 
     # --- feather plates over the buttock (back-09), between back lapel and tasset

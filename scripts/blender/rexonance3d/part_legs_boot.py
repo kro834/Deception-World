@@ -24,18 +24,54 @@ import part_legs_geo as G
 import rx_lib as L
 import rx_ref as R
 
-THETA = math.radians(25.0)
+THETA0, THETA1 = math.radians(10.0), math.radians(28.0)  # heel / toe splay
+THETA = 0.5 * (THETA0 + THETA1)  # mean splay (body foot)
 O = Vector((0.29, 0.03, 0.0))
-FWD = Vector((math.sin(THETA), -math.cos(THETA), 0.0))
-LAT = Vector((math.cos(THETA), math.sin(THETA), 0.0))
 UP = Vector((0.0, 0.0, 1.0))
 
 KNEE = Vector(R.LM["knee"])
 ANKLE = Vector(R.LM["ankle"])
 
 
+def theta_at(u):
+    """Splay along the foot: straight behind the ankle, turning out over the
+    instep (front-10: heel x~0.29, instep gem x~0.305, toe tip x~0.41)."""
+    t = max(0.0, min(1.0, u / 0.16))
+    return THETA0 + (THETA1 - THETA0) * t * t * (3 - 2 * t)
+
+
+def _spine_table():
+    us = np.linspace(-0.14, 0.32, 461)
+    i0 = int(np.argmin(np.abs(us)))
+    P = np.zeros((len(us), 2))
+    P[i0] = (O.x, O.y)
+    for i in range(i0 + 1, len(us)):
+        th = theta_at(0.5 * (us[i] + us[i - 1]))
+        d = us[i] - us[i - 1]
+        P[i] = P[i - 1] + d * np.array([math.sin(th), -math.cos(th)])
+    for i in range(i0 - 1, -1, -1):
+        th = theta_at(0.5 * (us[i] + us[i + 1]))
+        d = us[i + 1] - us[i]
+        P[i] = P[i + 1] - d * np.array([math.sin(th), -math.cos(th)])
+    return us, P
+
+
+_SPINE_U, _SPINE_P = _spine_table()
+
+
+def spine(u):
+    """(point on the foot centre line at z=0, forward, lateral)."""
+    x = float(np.interp(u, _SPINE_U, _SPINE_P[:, 0]))
+    y = float(np.interp(u, _SPINE_U, _SPINE_P[:, 1]))
+    th = theta_at(u)
+    fwd = Vector((math.sin(th), -math.cos(th), 0.0))
+    lat = Vector((math.cos(th), math.sin(th), 0.0))
+    return Vector((x, y, 0.0)), fwd, lat
+
+
 def W(u, w, z):
-    return O + FWD * u + LAT * w + UP * z
+    p, _f, lat = spine(u)
+    return p + lat * w + UP * z
 
 
 def interp(xs, ys, x):
@@ -59,17 +95,17 @@ def smooth_interp(pts, x):
 _SPL = {}
 
 # ------------------------------------------------------------------ foot shape
-U_HEEL, U_TOE = -0.104, 0.272
-LAT_W = [(-0.104, 0.0), (-0.098, 0.022), (-0.085, 0.036), (-0.060, 0.046), (-0.030, 0.049), (0.000, 0.050),
-         (0.050, 0.055), (0.100, 0.059), (0.140, 0.058), (0.180, 0.051), (0.215, 0.038), (0.245, 0.020),
-         (0.262, 0.007), (0.272, 0.0)]
-MED_W = [(-0.104, 0.0), (-0.098, 0.022), (-0.085, 0.036), (-0.060, 0.045), (-0.030, 0.047), (0.000, 0.046),
-         (0.050, 0.048), (0.100, 0.052), (0.140, 0.051), (0.180, 0.045), (0.215, 0.033), (0.245, 0.017),
-         (0.262, 0.006), (0.272, 0.0)]
+U_HEEL, U_TOE = -0.094, 0.266
+LAT_W = [(-0.094, 0.0), (-0.088, 0.026), (-0.076, 0.042), (-0.052, 0.052), (-0.026, 0.055), (0.000, 0.056),
+         (0.050, 0.060), (0.100, 0.063), (0.140, 0.062), (0.178, 0.055), (0.210, 0.041), (0.240, 0.022),
+         (0.256, 0.008), (0.266, 0.0)]
+MED_W = [(-0.094, 0.0), (-0.088, 0.026), (-0.076, 0.042), (-0.052, 0.052), (-0.026, 0.055), (0.000, 0.055),
+         (0.050, 0.056), (0.100, 0.057), (0.140, 0.055), (0.178, 0.048), (0.210, 0.035), (0.240, 0.018),
+         (0.256, 0.006), (0.266, 0.0)]
 # top line of the foot shell (the gem / toe cap sit on it)
-TOP_Z = [(-0.104, 0.105), (-0.090, 0.125), (-0.060, 0.135), (0.000, 0.150), (0.040, 0.166), (0.062, 0.166),
-         (0.090, 0.140), (0.120, 0.112), (0.150, 0.094), (0.180, 0.084), (0.210, 0.075), (0.240, 0.064),
-         (0.262, 0.053), (0.272, 0.046)]
+TOP_Z = [(-0.094, 0.100), (-0.082, 0.122), (-0.056, 0.134), (0.000, 0.150), (0.040, 0.166), (0.062, 0.166),
+         (0.090, 0.140), (0.120, 0.112), (0.150, 0.094), (0.178, 0.084), (0.206, 0.075), (0.234, 0.064),
+         (0.256, 0.053), (0.266, 0.046)]
 Z_SOLE = 0.016  # top of the sole slab
 Z_WELT = 0.034  # top of the gold welt (forefoot)
 
@@ -139,7 +175,7 @@ SHAFT_DY = 0.014
 
 def axis_at(z):
     """Shin axis point at height z (+ the shaft's backward offset)."""
-    t = (KNEE.z - z) / (KNEE.z - ANKLE.z)
+    t = min((KNEE.z - z) / (KNEE.z - ANKLE.z), 1.0)
     p = KNEE.lerp(ANKLE, t)
     return Vector((p.x, p.y + SHAFT_DY, z))
 
@@ -176,9 +212,9 @@ def phis(n_quarter=12):
 
 
 # cuff bands: (front apex z, side valley z, back apex z) of the band centre line
-BANDS = [(0.282, 0.198, 0.288), (0.236, 0.152, 0.240), (0.190, 0.110, 0.194)]
+BANDS = [(0.282, 0.212, 0.288), (0.236, 0.166, 0.240), (0.190, 0.124, 0.194)]
 BAND_HALF = 0.0180
-RIM = (0.302, 0.218, 0.308)  # shaft opening (just above band 1's top edge)
+RIM = (0.302, 0.232, 0.308)  # shaft opening (just above band 1's top edge)
 
 
 def grid(rows, wrap_i=False, wrap_j=False, bm=None, uv=None):
@@ -379,7 +415,7 @@ def build_sole(coll, out):
     fm = G.profile_mesh(L.ccw(plan(U_HEEL + 0.004, U_TOE, -0.003)), G.plate_profile(0.013, 0.002, 1, h0=0.014), res=0.03)
     out.append(L.from_bmesh(G.to_bmesh(fm, to_w, G.planar_uv(fm)), "RX_Legs_BootMidsole_L", coll, "Dark", 35.0))
     # block heel
-    fm = G.profile_mesh(L.ccw(plan(U_HEEL - 0.004, -0.012, -0.0045)), G.plate_profile(0.044, 0.003, 2), res=0.03)
+    fm = G.profile_mesh(L.ccw(plan(U_HEEL - 0.004, -0.012, -0.0045)), G.plate_profile(0.034, 0.003, 2), res=0.03)
     out.append(L.from_bmesh(G.to_bmesh(fm, to_w, G.planar_uv(fm)), "RX_Legs_BootHeel_L", coll, "Black", 35.0))
 
     gold = bmesh.new()
@@ -393,11 +429,14 @@ def build_sole(coll, out):
     path = lat + tip + med
 
     def zb(u, w):
-        return 0.024 - 0.012 * max(0.0, min(1.0, (u - 0.13) / 0.14))
+        # diagonal stripe (right-07): high under the arch, down to the sole at the toe
+        k = max(0.0, min(1.0, (u - 0.03) / 0.21))
+        return 0.040 - 0.028 * k ** 0.9
 
     def zt(u, w):
-        full = 0.064 - 0.008 * max(0.0, min(1.0, (u - 0.05) / 0.22))
-        ramp = max(0.0, min(1.0, (u - 0.004) / 0.03))
+        k = max(0.0, min(1.0, (u - 0.03) / 0.236))
+        full = 0.084 - 0.036 * k ** 1.1
+        ramp = max(0.0, min(1.0, (u - 0.004) / 0.026))
         return zb(u, w) + max(0.002, (full - zb(u, w)) * ramp)
 
     wall_band(path, zb, zt, t=0.0065, b=0.0022, bm=gold)
@@ -406,10 +445,16 @@ def build_sole(coll, out):
     hl = sorted([p for p in heel if p[1] >= 0], key=lambda p: -p[0])
     hm = sorted([p for p in heel if p[1] < 0], key=lambda p: p[0])
     hpath = hl + hm
-    wall_band(hpath, lambda u, w: 0.041,
-              lambda u, w: 0.060 + 0.026 * max(0.0, min(1.0, (-u - 0.025) / 0.075)) ** 1.3
-              + 0.012 * max(0.0, 1.0 - abs(w) / 0.028) * (u < -0.07),
-              t=0.0065, b=0.0022, bm=gold)
+
+    def heel_top(u, w):
+        back = max(0.0, min(1.0, (-u - 0.010) / 0.050))  # 0 at the arch .. 1 round the back
+        z = 0.066 + 0.038 * back ** 1.2
+        if u < -0.05:
+            z -= 0.042 * max(0.0, 1.0 - abs(w) / 0.024)  # V notch under the heel crystal
+            z += 0.012 * max(0.0, 1.0 - abs(abs(w) - 0.031) / 0.011)  # pointed peaks beside it
+        return z
+
+    wall_band(hpath, lambda u, w: 0.030, heel_top, t=0.0070, b=0.0024, bm=gold)
     out.append(L.from_bmesh(gold, "RX_Legs_BootTrim_L", coll, "Gold", 30.0))
 
 
@@ -443,6 +488,7 @@ def build_gem(coll, out):
     zc = top_z(u_c)
     e = 0.01
     slope = (top_z(u_c + e) - top_z(u_c - e)) / (2 * e)
+    _p, FWD, LAT = spine(u_c)
     along = (FWD * 1.0 + UP * slope).normalized()  # down-forward along the instep
     nrm = LAT.cross(along).normalized()
     if nrm.z < 0:
@@ -476,18 +522,16 @@ def build_gem(coll, out):
 
 def build_toecap(coll, out):
     """Gold arrowhead on the toe ridge pointing up at the instep gem (front-10
-    x~745-800, y~1440-1500), raised along its centre line."""
+    x~745-800, y~1440-1500): two flat facets meeting in a crisp crease."""
     um = UpperMap(r_ref=0.05)
-    u_top, u_wide, u_bot = 0.150, 0.222, U_TOE - 0.003
-    a_w = 0.024
-    kite = L.ccw([(0.0, u_top), (-a_w, u_wide), (-0.6 * a_w, u_bot), (0.6 * a_w, u_bot), (a_w, u_wide)])
-    rings = G.poly_rings(kite, 0.006)
+    u_top, u_bot = 0.148, U_TOE - 0.026
+    path = [(0.0, u_top + (u_bot - u_top) * i / 14) for i in range(15)]
 
-    def ridge(a, b):
-        return 0.0045 * max(0.0, 1.0 - abs(a) / a_w)
+    def hw(s):
+        return 0.0008 + 0.026 * min(1.0, s / 0.58) ** 0.85 * (1.0 - 0.22 * max(0.0, (s - 0.58) / 0.42))
 
-    mp = G.surface_mapper(um, 0.0016, ridge)
-    fm = G.profile_mesh(rings, G.plate_profile(0.0055, 0.0018, 2), res=0.008)
+    fm = G.ridge_ribbon(path, hw, h_edge=0.0040, h_ridge=0.0105, bevel=0.0013, nt=3)
+    mp = G.surface_mapper(um, 0.0012)
     out.append(L.from_bmesh(G.to_bmesh(fm, mp, G.planar_uv(fm)), "RX_Legs_BootToeArrow_L", coll, "Gold", 24.0))
 
 
@@ -507,59 +551,67 @@ def build_toe_plates(coll, out):
 
 
 def build_heel_back(coll, out):
-    """Crystal diamond on the back of the heel, framed in gold."""
-    phi = math.pi
-    zc = 0.136
-    p, n = shaft_point(phi, zc, 0.0)
-    # sit on whichever is further out: shaft or heel
-    p = p + n * 0.012
-    m = L.frame(p, Vector((-1.0, 0.0, 0.0)) if n.y > 0 else Vector((1.0, 0.0, 0.0)), UP)
-    if Vector(m.col[2][:3]).dot(n) < 0:
-        m = L.frame(p, -Vector(m.col[0][:3]), UP)
-    rh = [(0.0, 0.052), (-0.031, 0.0), (0.0, -0.050), (0.031, 0.0)]
-    gem = G.faceted_gem(rh, 0.014, table=0.4, crown=0.7, back=0.6, matrix=m)
+    """Tall lens crystal on the back of the heel (back-09: 0.058 x 0.136 m,
+    centre Z~0.13), its lower tip in the heel cap's notch, black bezel."""
+    # back surface: heel shell (Y~0.123, Z<0.10) below, shaft (Y~0.104) above;
+    # the crystal leans forward between them (bottom in the cap's notch)
+    p_heel = W(U_HEEL, 0.0, 0.0)
+    ps, _ns = shaft_point(math.pi, 0.199, 0.0)
+    y_lo, y_hi = p_heel.y + 0.0035, ps.y + 0.0075
+    zc = 0.131
+    x_c = 0.5 * (p_heel.x + ps.x)
+    centre = Vector((x_c, 0.5 * (y_lo + y_hi), zc))
+    along = Vector((0.0, y_hi - y_lo, 0.136)).normalized()
+    nrm = Vector((-0.06, 1.0, 0.0)).normalized()
+    nrm = (nrm - along * nrm.dot(along)).normalized()
+    m = L.frame_from_normal(centre, nrm, along)
+    lens = G.lens_outline((0.0, 0.0), 0.068, 0.029, 0.0, n=16, power=0.85)
+    gem = G.faceted_gem(lens, 0.013, table=0.38, crown=0.7, back=0.9, matrix=m)
     ob = L.from_bmesh(gem, "RX_Legs_BootHeelCrystal_L", coll, "Crystal", 15.0)
-    L.tint(ob, pink=0.3, sparkle=0.8, edge=0.7)
+    L.tint(ob, pink=0.35, sparkle=0.8, edge=0.7)
     out.append(ob)
-    fm = G.profile_mesh(lambda off: G.poly_rings(rh, 0.01)(off + 0.006), G.band_profile(0.006, 0.010, 0.002, 2, h0=-0.005, ridge=0.001),
+    rings = G.lens_rings((0.0, 0.0), 0.068, 0.029, 0.0, n=48, power=0.85)
+    fm = G.profile_mesh(lambda off: rings(off + 0.0055), G.band_profile(0.0055, 0.011, 0.0018, 2, h0=-0.008),
                         closed_profile=True)
-    out.append(L.from_bmesh(G.to_bmesh(fm, G.rigid_mapper(m), G.planar_uv(fm)), "RX_Legs_BootHeelBezel_L", coll, "Gold", 30.0))
-    L.glint("Legs_Heel_L", m @ Vector((0.0, 0.0, 0.02)), 0.04, coll, hue=0.7)
+    out.append(L.from_bmesh(G.to_bmesh(fm, G.rigid_mapper(m), G.planar_uv(fm)), "RX_Legs_BootHeelBezel_L", coll, "Black", 30.0))
+    L.glint("Legs_Heel_L", m @ Vector((0.0, 0.0, 0.02)), 0.045, coll, hue=0.7)
 
 
 # ------------------------------------------------------------------ body foot
 
 
 def splay_body_foot(ctx):
-    """The undersuit's foot is a straight bar; turn it (and slim it) so it
-    stays inside the splayed boot. Only vertices below the ankle move."""
+    """The undersuit's foot is a straight bar under the ankle; bend it along
+    the boot's curved spine (and slim it) so it stays inside the boot shell.
+    Only vertices below the ankle move; the blend fades out toward Z 0.13."""
     ob = ctx.body_ob
     me = ob.data
     n = len(me.vertices)
     co = np.empty(n * 3)
     me.vertices.foreach_get("co", co)
     co = co.reshape(-1, 3)
+    th_tab = np.array([theta_at(u) for u in _SPINE_U])
     for sx in (1.0, -1.0):
         cx = 0.29 * sx
         sel = (co[:, 2] < 0.135) & (np.abs(co[:, 0] - cx) < 0.13) & (co[:, 1] > -0.26) & (co[:, 1] < 0.20)
         if not sel.any():
             continue
-        z = co[sel, 2]
-        wgt = np.clip((0.130 - z) / (0.130 - 0.080), 0.0, 1.0)
+        P = co[sel]
+        z = P[:, 2]
+        wgt = np.clip((0.130 - z) / (0.130 - 0.070), 0.0, 1.0)
         wgt = wgt * wgt * (3 - 2 * wgt)
-        ang = THETA * sx * wgt
-        dx = co[sel, 0] - cx
-        dy = co[sel, 1] - 0.03
-        # shrink toward the foot axis a little so no part pokes through the shell
-        dx2 = dx * (1.0 - 0.12 * wgt)
-        dy2 = dy * (1.0 - 0.10 * wgt)
-        ca, sa = np.cos(ang), np.sin(ang)
-        # rotate (dx, dy) so that -Y (forward) turns toward +X for the left foot
-        rx = dx2 * ca - dy2 * sa
-        ry = dx2 * sa + dy2 * ca
-        co[sel, 0] = cx + rx
-        co[sel, 1] = 0.03 + ry
-        co[sel, 2] = np.maximum(z, 0.004 + 0.0 * z)
+        u = (0.03 - P[:, 1]) * 0.97
+        w = (P[:, 0] - cx) * sx * 0.80
+        px = np.interp(u, _SPINE_U, _SPINE_P[:, 0])
+        py = np.interp(u, _SPINE_U, _SPINE_P[:, 1])
+        th = np.interp(u, _SPINE_U, th_tab)
+        nx = px + np.cos(th) * w
+        ny = py + np.sin(th) * w
+        zz = Z_SOLE + 0.004 + (z - 0.0) * 0.92
+        P[:, 0] = (1 - wgt) * P[:, 0] + wgt * nx * sx
+        P[:, 1] = (1 - wgt) * P[:, 1] + wgt * ny
+        P[:, 2] = (1 - wgt) * z + wgt * np.maximum(zz, Z_SOLE + 0.004)
+        co[sel] = P
     me.vertices.foreach_set("co", co.ravel())
     me.update()
 

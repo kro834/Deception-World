@@ -672,9 +672,11 @@ def triangulate_with(outline, res, extra=None):
         grid = grid[inside]
     if len(grid):
         grid = grid[_dist_to_polyline(grid, B, closed=True) > res * 0.5]
+    E = np.zeros((0, 2))
     if extra is not None and len(extra):
         E = np.asarray(extra, float)
         E = E[_dist_to_polyline(E, B, closed=True) > res * 0.3]
+    if len(E):
         if len(grid):
             dd = np.min(np.linalg.norm(grid[:, None, :] - E[None, :, :], axis=2), axis=1)
             grid = grid[dd > res * 0.55]
