@@ -40,7 +40,7 @@ const io = new NodeIO()
 const document = await io.read(args.input);
 await document.transform(
   dedup(),
-  prune({ keepLeaves: true, keepExtras: true }),
+  prune({ keepLeaves: true, keepExtras: true, keepAttributes: true }),
   reorder({ encoder: MeshoptEncoder, target: "size" }),
   meshopt({
     encoder: MeshoptEncoder,
