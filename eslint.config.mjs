@@ -10,6 +10,8 @@ export default tseslint.config(
   {
     ignores: [
       "dist/**",
+      // Git-ignored local build and review artifacts (Blender renders, the standalone page).
+      "output/**",
       ".output/**",
       ".vercel/**",
       ".nitro/**",
