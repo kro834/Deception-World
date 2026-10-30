@@ -1,3 +1,5 @@
+                {COLUMNS.map((item, index) => (
+                  <p
                     key={item.no}
                     className={`world-column-number world-column-stack-item${index === columnTab ? " is-active" : ""}`}
                     aria-hidden={index !== columnTab}

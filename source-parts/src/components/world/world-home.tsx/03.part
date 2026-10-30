@@ -1,3 +1,10 @@
+  useEffect(
+    () =>
+      warmWorldSwaps(
+        shellRef.current ?? document,
+        RIDERS.map((rider) => rider.img),
+        riderTabRef.current,
+      ),
     [],
   );
 
@@ -499,8 +506,3 @@
       }
       cancelEpisodePickupScrollReset.current?.();
       cancelColumnPickupScrollReset.current?.();
-    };
-  }, []);
-  const current = POSTERS[poster];
-  const previous = prevPoster != null ? POSTERS[prevPoster] : null;
-  const nextPoster = POSTERS[(poster + 1) % POSTERS.length];

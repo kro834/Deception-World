@@ -82,7 +82,7 @@ test("browse panel preserves discovery, categories, shuffle, display settings, a
   const panel = page.slice(start, end);
   const groups = [
     '<div className="gallery-discovery-controls">',
-    '<nav className="gallery-filters" aria-label="展示の分類">',
+    '<nav className="gallery-filters" aria-label="展示の分類"',
     '<div className="gallery-shuffle-entry">',
     "<GalleryDisplaySettings",
   ];

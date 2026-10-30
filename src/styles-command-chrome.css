@@ -1249,3 +1249,104 @@ html[data-family]
     word-break: normal;
   }
 }
+
+/* Atlas choreography uses the existing open state. Never transform the
+   sheet, groups or links: swipe coordinates, scroll targets and long-press
+   rider rails must retain their exact interactive boxes. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button) {
+    --atlas-seat-delay: 0ms;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):nth-child(2n) {
+    --atlas-seat-delay: 45ms;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button):nth-child(3n) {
+    --atlas-seat-delay: 90ms;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button)
+    > span {
+    animation: command-atlas-label-seat 620ms var(--command-ease) var(--atlas-seat-delay) backwards;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    > .side-panel-head
+    > div {
+    animation: command-atlas-title-seat 680ms var(--command-ease);
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas][data-open="true"]
+    .command-atlas-scene
+    img {
+    animation: command-atlas-scene-seat 900ms var(--command-ease);
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button {
+    transition:
+      background-color 180ms ease,
+      box-shadow 220ms ease;
+  }
+  html[data-family]:not([data-world-effects="economy"])
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button:is(:hover, :focus-visible) {
+    box-shadow:
+      inset 0 -3px 0 var(--atlas-accent),
+      0 5px 20px rgb(var(--sh-l1-rgb) / 16%);
+  }
+}
+@keyframes command-atlas-label-seat {
+  from {
+    opacity: 0.55;
+    transform: translate3d(24px, 8px, 0);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(-2px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes command-atlas-title-seat {
+  from {
+    opacity: 0.65;
+    transform: perspective(900px) translate3d(-32px, 10px, 0) rotateY(12deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes command-atlas-scene-seat {
+  from {
+    opacity: 0.6;
+    transform: scale(1.14) translateX(-2%);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

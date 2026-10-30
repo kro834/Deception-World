@@ -1,3 +1,8 @@
+    };
+  }, []);
+  const current = POSTERS[poster];
+  const previous = prevPoster != null ? POSTERS[prevPoster] : null;
+  const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
   const selectedEpisodePickup = episodePickup == null ? null : EPISODES[episodePickup];
@@ -500,7 +505,3 @@
                 aria-pressed={locked}
                 aria-label={
                   locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
-                }
-                onClick={() => {
-                  cancelPosterShuffle();
-                  setLocked((v) => !v);

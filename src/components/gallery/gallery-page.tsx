@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useGallerySelectionMotion } from "./gallery-selection-motion";
 import { gallerySelectFocus } from "./gallery-select-focus";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -124,6 +125,9 @@ export function GalleryPage() {
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const restoreEditFocusRef = useRef(false);
   const gridRef = useRef<HTMLDivElement>(null);
+  const selectionFiltersRef = useRef<HTMLElement>(null);
+  const selectionStageRef = useRef<HTMLDivElement>(null);
+  const selectionDirectionRef = useRef(1);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const favoriteFeedbackRef = useRef<HTMLParagraphElement>(null);
   const featureFeedbackRef = useRef<HTMLParagraphElement>(null);
@@ -162,6 +166,15 @@ export function GalleryPage() {
     });
     return order === "newest" ? filtered.reverse() : filtered;
   }, [allArtworks, category, query, favoritesOnly, favorites, titles, order]);
+  useGallerySelectionMotion(
+    gridRef,
+    selectionFiltersRef,
+    selectionStageRef,
+    `${display.preferences.density}:${works.map((work) => work.id).join(",")}`,
+    category,
+    selectedId,
+    selectionDirectionRef,
+  );
   const discoverySummary = {
     query,
     categoryLabel:
@@ -729,6 +742,7 @@ export function GalleryPage() {
       viewerModeRef.current,
     );
     if (next) {
+      selectionDirectionRef.current = step < 0 ? -1 : 1;
       // The artwork's keyed image controls disappear on navigation. Hand their
       // focus to the persistent dialog so the next arrow key still reaches it.
       const dialog = dialogRef.current;
@@ -1171,7 +1185,8 @@ export function GalleryPage() {
                 </button>
               )}
             </div>
-            <nav className="gallery-filters" aria-label="展示の分類">
+            <nav className="gallery-filters" aria-label="展示の分類" ref={selectionFiltersRef}>
+              <span className="gallery-selection-marker" aria-hidden="true" />
               {GALLERY_CATEGORIES.map((item) => (
                 <button
                   type="button"
@@ -1786,7 +1801,7 @@ export function GalleryPage() {
                 </p>
               )}
             </header>
-            <div className="gallery-viewer-stage">
+            <div className="gallery-viewer-stage" ref={selectionStageRef}>
               <GalleryViewerImage
                 key={selected.id}
                 work={selected}

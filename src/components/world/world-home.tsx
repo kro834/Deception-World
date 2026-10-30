@@ -1,5 +1,6 @@
 import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { startTransition } from "react";
+import { animateSelectionArrival } from "@/lib/selection-arrival.js";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
 import { assetsWarmed, MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -945,6 +946,16 @@ export function WorldHome() {
     () => typeof document !== "undefined" && (document.hidden || openingHandoffHolds()),
   );
   const [managerTab, setManagerTab] = useState(0);
+  const previousManagerTab = useRef(0);
+  useLayoutEffect(() => {
+    const previous = previousManagerTab.current;
+    previousManagerTab.current = managerTab;
+    if (previous === managerTab) return;
+    return animateSelectionArrival(
+      shellRef.current?.querySelector<HTMLElement>(".manager-archive-panel") ?? null,
+      managerTab > previous ? 1 : -1,
+    );
+  }, [managerTab]);
   const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(0);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);

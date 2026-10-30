@@ -201,7 +201,7 @@ export default function QuickSearchDialog({
   return (
     <dialog
       ref={dialogRef}
-      className="quick-search"
+      className="quick-search dg-dialog"
       aria-labelledby="quick-search-title"
       onClose={onClose}
       onCancel={(event) => {

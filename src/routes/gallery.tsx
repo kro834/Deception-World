@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GalleryPage } from "@/components/gallery/gallery-page";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
+import gallerySelectionMotionCssUrl from "@/styles-gallery-selection-motion.css?url";
 import galleryCssUrl from "@/styles-gallery.css?url";
 import gallerySearchCssUrl from "@/styles-gallery-search.css?url";
 import galleryDisplayCssUrl from "@/styles-gallery-display.css?url";
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/gallery")({
         { rel: "stylesheet", href: tabletGalleryCssUrl },
         { rel: "stylesheet", href: galleryCurationCssUrl },
         { rel: "stylesheet", href: galleryControlsPolishCssUrl },
+        { rel: "stylesheet", href: gallerySelectionMotionCssUrl },
         { rel: "stylesheet", href: galleryPresentCssUrl },
       ],
     });

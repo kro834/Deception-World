@@ -1,3 +1,7 @@
+                }
+                onClick={() => {
+                  cancelPosterShuffle();
+                  setLocked((v) => !v);
                 }}
               >
                 <LiquidPointerGlow />
@@ -502,5 +506,3 @@
               aria-label={`コラム${column.no} ${column.title}`}
             >
               <div className="world-column-number-stack">
-                {COLUMNS.map((item, index) => (
-                  <p
