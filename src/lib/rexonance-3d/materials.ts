@@ -202,21 +202,23 @@ const CRYSTAL_EMISSIVE = /* glsl */ `
   float rxG = max( smoothstep( 0.45, 1.0, rxVv ), rxPinkMix );
   float rxEdge = 1.0 - smoothstep( 0.0, 0.12, min( rxU, 1.0 - rxU ) );
   rxCol = mix( rxCol, RX_HOT, rxEdge * ( 0.25 + 0.5 * rxEdgeGlow ) );
-  rxCol *= 0.7 + 0.6 * rxFacet;
+  rxCol *= 0.8 + 0.4 * rxFacet;
   vec3 rxV = normalize( vViewPosition );
   float rxNdV = clamp( dot( normal, rxV ), 0.0, 1.0 );
   float rxFres = pow( 1.0 - rxNdV, 3.0 );
   float rxLineD = rxF.y - rxF.x;
   float rxAA = fwidth( rxLineD ) + 1e-4;
-  float rxLine = 1.0 - smoothstep( 0.028 - rxAA, 0.028 + rxAA, rxLineD );
+  float rxLine = 1.0 - smoothstep( 0.02 - rxAA, 0.02 + rxAA, rxLineD );
+  // The network shows in patches, as the sheet's facets catch the light, not as a mesh.
+  rxLine *= 0.2 + 0.8 * smoothstep( 0.35, 0.75, rxNoise3( vRxRoot * 9.0 + 3.1 ) );
   vec3 rxEmit = rxCol * 0.42;
 #if RX_CRYSTAL_DETAIL > 1
   // The inner layer, a little under the surface (parallax): navy clouds and still specks.
   vec3 rxVRoot = normalize( transpose( rxRootToView ) * rxV );
   vec3 rxQ = vRxRoot - rxVRoot * 0.012;
   float rxCloud = rxNoise3( rxQ * 23.0 ) * 0.6 + rxNoise3( rxQ * 61.0 ) * 0.4;
-  float rxNavy = smoothstep( 0.42, 0.78, rxCloud );
-  rxEmit = mix( rxEmit, RX_NAVY, rxNavy * 0.8 );
+  float rxNavy = smoothstep( 0.38, 0.72, rxCloud );
+  rxEmit = mix( rxEmit, RX_NAVY, rxNavy * 0.85 );
   float rxSeedA;
   float rxSpeck = rxStar( rxQ * 260.0, 0.22, 0.2, rxSeedA );
   rxEmit += mix( RX_ICE, vec3( 1.0 ), rxSeedA ) * rxSpeck * ( 0.4 + rxNavy ) * 1.2;
@@ -240,8 +242,8 @@ const GEM_EMISSIVE = /* glsl */ `
   vec3 rxV = normalize( vViewPosition );
   float rxNdV = clamp( dot( normal, rxV ), 0.0, 1.0 );
   float rxFacet = rxHash13( floor( normalize( vRxRootNormal ) * 7.0 + 0.5 ) );
-  vec3 rxHue = mix( vec3( 0.32, 0.5, 1.0 ), vec3( 0.95, 0.42, 1.0 ), rxFacet );
-  vec3 rxEmit = rxHue * ( 0.16 + 0.85 * pow( rxNdV, 3.0 ) ) + vec3( 1.0, 0.96, 1.0 ) * pow( rxNdV, 24.0 ) * 0.6;
+  vec3 rxHue = mix( vec3( 0.18, 0.36, 1.0 ), vec3( 0.85, 0.3, 1.0 ), rxFacet );
+  vec3 rxEmit = rxHue * ( 0.24 + 0.75 * pow( rxNdV, 2.0 ) ) + vec3( 0.9, 0.9, 1.0 ) * pow( rxNdV, 30.0 ) * 0.35;
   totalEmissiveRadiance += rxEmit * ( 1.0 + 0.08 * rxPulse );
 }
 `;
@@ -298,7 +300,7 @@ const LOOKS: Record<RexonanceFamily, Look> = {
       roughness: 0.2,
       clearcoat: 0.35,
       clearcoatRoughness: 0.06,
-      envMapIntensity: 1.25,
+      envMapIntensity: 1.05,
     },
   },
   GoldDark: {
@@ -332,15 +334,16 @@ const LOOKS: Record<RexonanceFamily, Look> = {
   },
   Gem: {
     params: {
-      color: new THREE.Color().setRGB(0.18, 0.28, 0.75),
+      color: new THREE.Color().setRGB(0.06, 0.1, 0.45),
       roughness: 0.03,
+      specularIntensity: 0.8,
       ior: 2.2,
       clearcoat: 1,
       clearcoatRoughness: 0.02,
       iridescence: 0.55,
       iridescenceIOR: 1.6,
       iridescenceThicknessRange: [220, 760],
-      envMapIntensity: 0.8,
+      envMapIntensity: 0.7,
     },
     emissive: GEM_EMISSIVE,
   },
@@ -378,7 +381,7 @@ export function createRexonanceMaterial(
   const detail = options.crystalDetail ?? 2;
   const ribbonPhase = { value: options.phase ?? 0 };
   const crystalGlow = { value: 1 };
-  const facetDensity = { value: 27 };
+  const facetDensity = { value: 19 };
   material.userData.rexonance = { family, crystalGlow, facetDensity };
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms, {

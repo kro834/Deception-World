@@ -79,7 +79,7 @@ void main() {
   float core = exp( -r * r * 90.0 );
   float halo = exp( -r * r * 14.0 ) * 0.1;
   vec3 tint = mix( vec3( 0.55, 0.8, 1.0 ), vec3( 1.0, 0.48, 0.86 ), vHue );
-  vec3 color = tint * ( arms * 0.8 + diag * 0.55 + halo ) + vec3( 1.0 ) * core * 0.9;
+  vec3 color = tint * ( arms * 0.7 + diag * 0.45 + halo ) + vec3( 1.0 ) * core * 0.75;
   float fade = 1.0 - smoothstep( 0.75, 1.0, r );
   gl_FragColor = vec4( color * vLight * uStrength * fade, 1.0 );
 }`,

@@ -66,8 +66,13 @@ RIBBONS = [
     ),
 ]
 
-ROOT_Z = 1.146
+ROOT_Z = 1.178  # inside the belt band (Z 1.152 .. 1.258): the ribbon emerges from under it
+EXIT_Z = 1.138  # first point below the band, clear of the hip panel (lift 0.0145)
 YC = 0.004
+# part_waist's band: inner surface 6 mm outside the widest body section over
+# Z 1.14 .. 1.264, 13 mm thick
+BAND_Z = (1.140, 1.264)
+BAND_MID = 0.006 + 0.0065
 
 N_RINGS = 84
 N_PROF = 18
@@ -105,12 +110,28 @@ def root_point(body, theta_deg, lift, z=ROOT_Z):
     return loc + n * lift, n
 
 
+def band_root(body, theta_deg, z=ROOT_Z):
+    """A point inside the belt band's material at angle theta, and the radial
+    direction: the band wraps the widest body section over BAND_Z."""
+    th = math.radians(theta_deg)
+    d = Vector((math.sin(th), -math.cos(th), 0.0))
+    rmax = 0.0
+    for zz in np.linspace(BAND_Z[0], BAND_Z[1], 13):
+        o = Vector((0.0, YC, zz))
+        hit = body.ray(o, d, 1.0)
+        if hit is not None:
+            rmax = max(rmax, (hit[0] - o).length)
+    return Vector((0.0, YC, z)) + d * (rmax + BAND_MID), d
+
+
 def ribbon_mesh(spec, body, n_rings=N_RINGS):
     th, lift = spec["root"]
-    p0, n0 = root_point(body, th, lift)
-    # second point on the pelvis below the belt (the body flares out there)
-    p1, n1 = root_point(body, th + 2.0, lift + 0.010, z=ROOT_Z - 0.058)
-    ctrl = [p0, p1] + [Vector(p) for p in spec["ctrl"]]
+    # root hidden inside the belt band, exit just under the band's lower edge
+    # (clear of the hip panel), then down the pelvis to the authored spine
+    p0, n0 = band_root(body, th)
+    pe, _ne = root_point(body, th + 0.5, 0.023 + 0.25 * (lift - 0.022), z=EXIT_Z)
+    p1, n1 = root_point(body, th + 2.0, lift + 0.010, z=1.088)
+    ctrl = [p0, pe, p1] + [Vector(p) for p in spec["ctrl"]]
     spine = L.catmull_rom(ctrl, 12)
     spine = L.resample(spine, n_rings)
     lens = L.arc_lengths(spine)
@@ -176,14 +197,16 @@ def ribbon_mesh(spec, body, n_rings=N_RINGS):
         rings.append(ring)
     uv = bm.loops.layers.uv.verify()
     m = len(sec)
+    # u runs ACROSS the ribbon (0 inner edge .. 1 outer edge) on both faces: the
+    # viewer's crystal shader lights the edges where u is near 0 or 1.
+    us = [0.5 * (x + 1.0) for x, _y in sec]
     for i in range(len(rings) - 1):
         ra, rb = rings[i], rings[i + 1]
         ta, tb = ts[i], ts[i + 1]
         for k in range(m):
             k2 = (k + 1) % m
             f = bm.faces.new((ra[k], ra[k2], rb[k2], rb[k]))
-            u0, u1 = k / m, (k + 1) / m
-            for lp, (u, v) in zip(f.loops, ((u0, ta), (u1, ta), (u1, tb), (u0, tb))):
+            for lp, (u, v) in zip(f.loops, ((us[k], ta), (us[k2], ta), (us[k2], tb), (us[k], tb))):
                 lp[uv].uv = (u, v)
     for ring, t, rev in ((rings[0], 0.0, True), (rings[-1], 1.0, False)):
         vs = list(reversed(ring)) if rev else list(ring)
@@ -197,11 +220,15 @@ def ribbon_mesh(spec, body, n_rings=N_RINGS):
 
 
 def _tint(bias):
+    """R pink bias (rises toward the tip), G dense sparkles, B edge glow (the
+    shader's edges are hot pink: kept low at the root, strong toward the tip)."""
+
     def fn(co, uv):
-        u, v = uv
-        pink = min(1.0, bias + (1.0 - bias) * min(1.0, max(0.0, (v - 0.48) / 0.44)) ** 1.3)
-        edge = abs(math.cos(2 * math.pi * u)) ** 3
-        return (pink * 0.95, 0.85, 0.35 + 0.65 * edge)
+        _u, v = uv
+        ramp = min(1.0, max(0.0, (v - 0.48) / 0.44))
+        pink = min(1.0, bias + (1.0 - bias) * ramp ** 1.3)
+        edge = 0.2 + 0.75 * min(1.0, max(0.0, (v - 0.25) / 0.6))
+        return (pink * 0.95, 0.85, edge)
 
     return fn
 

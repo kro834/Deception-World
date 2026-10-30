@@ -56,13 +56,13 @@ void main() {
     mesh.lookAt(0, 1, 0);
     scene.add(mesh);
   };
-  panel(0xfff3e6, 7, [-7, 9, 9], [8, 5], true); // key, above front left
+  panel(0xfff3e6, 5.5, [-7, 9, 9], [8, 5], true); // key, above front left
   panel(0xe8f0ff, 2.4, [9, 4, 8], [5, 7], true); // fill, front right
   panel(0xffffff, 5, [0, 14, 1], [14, 1.6]); // overhead strip
   panel(0xf4f6ff, 6, [-8, 5, -3], [1.1, 12]); // strip behind the left shoulder
   panel(0xf4f6ff, 6, [8, 5, -3], [1.1, 12]); // strip behind the right shoulder
   panel(0x4a7dff, 4.2, [-9, 3, -9], [7, 9], true); // blue rim, behind left
-  panel(0xff4fb4, 3.6, [9, 3, -9], [7, 9], true); // pink rim, behind right
+  panel(0xff4fb4, 2.8, [9, 3, -9], [7, 9], true); // pink rim, behind right
   panel(0x3b2a26, 1, [0, -12, 0], [26, 26]); // floor bounce
   // Small hard sources for the glints on gold and jewels.
   for (const [x, y, z, k] of [
@@ -280,7 +280,7 @@ export function createLightRig() {
   fill.position.set(5, 2, 4);
   const blue = new THREE.DirectionalLight(0x5b86ff, 1.9);
   blue.position.set(-5, 2.5, -4.5);
-  const pink = new THREE.DirectionalLight(0xff63bd, 1.6);
+  const pink = new THREE.DirectionalLight(0xff63bd, 1.2);
   pink.position.set(5, 2.5, -4.5);
   const top = new THREE.DirectionalLight(0xffffff, 0.8);
   top.position.set(0, 10, 0.5);

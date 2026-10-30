@@ -1,28 +1,33 @@
-"""Rexonance pauldrons: star medallion, layered sunburst fan, crystal back
-shell, pendant and black cap.
+"""Rexonance pauldrons: star medallion, sunburst fan, side sunburst, back
+kite crystal, pendant and black cap.
 
-Authored on the suit's LEFT (+X, "_L") and mirrored to the right with
-rx_lib.mirror_x(). Pieces (per side):
+Authored on the suit's LEFT (+X, "_L") and mirrored with rx_lib.mirror_x().
+Objects (per side, one material each): RX_Shoulders_<Piece><Family>_L/_R with
+Piece in Medallion, Pendant, Fan, Shell, Cap; glints RX_Glint_Shoulders_Medallion_L/_R.
 
-  Medallion  segmented thick gold bezel, black ring, thin gold inner ring,
-             black centre disc and a four-point star jewel (Gem) + glint, on
-             a black boss that seats it on the cap. Faces outward-forward
-             (MED_N) so it reads round in front-10 and as an upright ellipse
-             in right-07 / left-08.
-  Rays       gold sunburst teeth radiating from under the bezel.
-  Fan        broad sickle blades (crystal with gold rims, black lacquer with
-             gold edges, solid gold accents) in three layers. Each petal lies
-             in a plane parallel to the medallion around FAN_C and curls back
-             (-MED_N) toward its tip like a feather; the tips are placed from
-             front-10 pixels, the curl from right-07 / left-08.
-  Back       a faceted crystal shell in a gold frame on the back of the
-             shoulder (back-09 kite / back-03 crescent) with a rosette of
-             blades fanning out from under it, and feathers hanging over the
-             outer side of the deltoid.
+  Medallion  segmented convex gold bezel, recessed black ring, thin gold inner
+             ring, black centre disc, faceted gold four-point cross over a
+             blue-white Gem star on the diagonals, Gem core (+ glint), on a
+             black boss; gold sunburst teeth from under the bezel. Faces
+             outward-forward (MED_N): round in front-10, an upright ellipse in
+             the side sheets.
+  Fan        curved sickle blades (crystal with gold rims, black lacquer with
+             gold edges, solid gold) in three layers radiating from under the
+             bezel and curling back like feathers; tips placed from front-10
+             pixels, curl from right-07 / left-08. Blades low on the arm drape
+             in front of it.
+  Side       a second sunburst on the outer face of the deltoid (left-08 /
+             right-07 show the fan radiating round the medallion there too):
+             two rings of blades draped over the cap at stacked standoffs.
+  Back       a faceted kite crystal in a straight gold frame on the back of the
+             shoulder (back-09 / back-03) with blades hanging below it.
   Pendant    gold four-point star under the medallion on a short gold stem.
-  Cap        black lacquer shell over the deltoid with a gold lower rim, so no
+  Cap        black lacquer shell over the deltoid with a gold border, so no
              undersuit shows between the blades.
 
+Blades that pass over the suit are lifted by a clearance pass (radially from
+the upper-arm axis) so they clear the cap, the arm armour's braids, the tail
+socket and the arm ribbon; draped sets snap to fixed standoffs per layer.
 Everything is built in world coordinates (identity transforms).
 """
 
@@ -118,7 +123,9 @@ ARM_TOP_Z = 1.535    # below this the arm armour (braids ~2 cm proud) wraps the 
 
 
 def clearance(p):
-    return 0.034 if p.z < ARM_TOP_Z else 0.022
+    """Standoff from the suit: over the cap (2.2 cm) easing to 3.4 cm over the
+    arm armour's braids (which start below ~1.52 m)."""
+    return 0.022 + 0.012 * _smoothstep(ARM_TOP_Z + 0.02, ARM_TOP_Z - 0.04, p.z)
 
 
 ARM_AXIS = (Vector(R.LM["shoulder"]), Vector(R.LM["elbow"]))
@@ -202,7 +209,7 @@ def leaf_shape(root_w=0.50, peak=0.40, tip_p=0.85):
 
 
 def blade_pieces(root, tip, face_hint, width, kind="crystal", skew=0.42, sickle=0.07, bow=0.08,
-                 thick=0.0075, edge=0.0012, rim_w=0.0060, rim=("L", "R"), n_len=16,
+                 thick=0.0075, edge=0.0012, rim_w=0.0060, rim=("L", "R"), n_len=20,
                  wshape=None, bot=0.6, rim_lift=0.0013, clear_from=0.12, clear_add=0.0,
                  clear_ramp=0.28, clear_max=0.045, snap=False, tip_lift=0.0):
     """A curved sickle blade from `root` to `tip` (world), face normal ~ face_hint.
@@ -645,7 +652,7 @@ def cap_pieces(body):
         # in front, run the lower edge down behind the medallion boss
         front = _smoothstep(math.radians(-35), math.radians(-75), th)
         lo = lo * (1.0 - front) + (-26.0) * front
-        return math.radians(lo), math.radians(76 - 6 * f)
+        return math.radians(lo), math.radians(70 - 6 * f)
 
     def gap(i, j):
         # flare the lower edge out over the arm armour's top (outer side only)
@@ -664,6 +671,22 @@ def cap_pieces(body):
             hit = body.ray(SHOULDER_C, d)
             row.append(Vector(hit[0]) if hit else SHOULDER_C + d * 0.09)
         P.append(row)
+    # relax the grid a little (the suit has creases near the neck and armpit
+    # that would make the shell's outline lumpy); boundary rows relax along
+    # themselves only, and a small outward bias offsets the shrinkage
+    for _it in range(4):
+        Q = [[p.copy() for p in row] for row in P]
+        for i in range(nth):
+            for j in range(nel):
+                nb = []
+                if 0 < i < nth - 1:
+                    nb += [P[i - 1][j], P[i + 1][j]]
+                if 0 < j < nel - 1:
+                    nb += [P[i][j - 1], P[i][j + 1]]
+                if nb:
+                    avg = sum(nb, Vector()) / len(nb)
+                    Q[i][j] = P[i][j].lerp(avg, 0.45)
+        P = Q
     N = []
     for i in range(nth):
         row = []
@@ -675,6 +698,13 @@ def cap_pieces(body):
                 n = -n
             row.append(n.normalized())
         N.append(row)
+    # keep at least the nominal gap after relaxing: measure against the suit
+    for i in range(nth):
+        for j in range(nel):
+            loc, _n = body.closest(P[i][j] + N[i][j] * gap(i, j))
+            d = (P[i][j] + N[i][j] * gap(i, j) - Vector(loc)).length
+            if d < gap(i, j) * 0.8:
+                P[i][j] = P[i][j] + N[i][j] * (gap(i, j) * 0.8 - d)
     inner = [[P[i][j] + N[i][j] * gap(i, j) for j in range(nel)] for i in range(nth)]
     outer = [[P[i][j] + N[i][j] * (gap(i, j) + CAP_THICK) for j in range(nel)] for i in range(nth)]
     bm = _new_bm()
@@ -696,10 +726,16 @@ def cap_pieces(body):
     if len(inward) > len(bm.faces) * 0.5:
         bmesh.ops.reverse_faces(bm, faces=bm.faces)
     pieces = [(bm, "Black")]
-    path = [outer[i][0] for i in range(nth)]
-    nn = [N[i][0] for i in range(nth)]
-    prof = _chamfer_rect(-0.0005, 0.0045, -0.006, 0.006, 0.0012)
-    pieces.append((L.sweep(path, [(b, a) for a, b in prof], normals=nn), "Gold"))
+    # gold rim round the whole border (lower edge heavier)
+    border = ([(i, 0) for i in range(nth)] + [(nth - 1, j) for j in range(1, nel)]
+              + [(i, nel - 1) for i in range(nth - 2, -1, -1)] + [(0, j) for j in range(nel - 2, 0, -1)])
+    path = [outer[i][j] - N[i][j] * (CAP_THICK * 0.5) for i, j in border]
+    nn = [N[i][j] for i, j in border]
+    prof = _chamfer_rect(-0.0050, 0.0050, -0.0045, 0.0045, 0.0013)
+    pieces.append((L.sweep(path, prof, normals=nn, closed=True), "Gold"))
+    lower = [outer[i][0] for i in range(nth)]
+    prof2 = _chamfer_rect(-0.0005, 0.0045, -0.006, 0.006, 0.0012)
+    pieces.append((L.sweep(lower, [(b, a) for a, b in prof2], normals=[N[i][0] for i in range(nth)]), "Gold"))
     return pieces
 
 
@@ -716,10 +752,9 @@ def S(x, y):
 PETALS = [
     # back layer: long, curled further back (fills the side view's back edge)
     dict(tip=(768, 166), rf=0.040, z=-0.026, kind="black", w=0.054),
-    dict(tip=(838, 252), rf=0.070, z=-0.026, kind="black", w=0.056),
-    dict(tip=(866, 352), rf=0.085, z=-0.026, kind="crystal", w=0.058, pink=0.55),
+    dict(tip=(838, 252), rf=0.048, z=-0.026, kind="black", w=0.056),   # clear of the tail stinger
+    dict(tip=(866, 352), rf=0.040, z=-0.026, kind="crystal", w=0.058, pink=0.55),   # clear of the tail stinger
     dict(tip=(856, 472), rf=0.085, z=-0.026, kind="crystal", w=0.054, pink=0.40),
-    dict(tip=(842, 506), rf=0.075, z=-0.026, kind="black", w=0.050),
     # main ring (front-10 tips)
     dict(tip=(604, 204), rf=0.030, z=0.000, kind="black", w=0.044),
     dict(tip=(725, 152), rf=0.035, z=0.000, kind="crystal", w=0.058, pink=0.30),
@@ -734,9 +769,8 @@ PETALS = [
     dict(tip=(632, 500), rf=0.020, z=0.004, kind="black", w=0.040, drape=True),
     # front accents (short)
     dict(tip=(756, 236), rf=0.012, z=0.028, kind="crystal", w=0.042, pink=0.25),
-    dict(tip=(796, 280), rf=0.020, z=0.028, kind="gold", w=0.034),
     dict(tip=(800, 398), rf=0.020, z=0.028, kind="black", w=0.042),
-    dict(tip=(750, 468), rf=0.015, z=0.028, kind="crystal", w=0.040, pink=0.35, drape=True),
+    dict(tip=(750, 468), rf=0.015, z=0.028, kind="crystal", w=0.040, pink=0.35, drape=True, stand=0.010),
 ]
 
 # Feathers hanging over the outer side of the deltoid. root: cap (azimuth,
@@ -754,14 +788,13 @@ SIDE_X = 0.310
 SIDE = [
     dict(phi=50, L=0.170, kind="black", w=0.054),
     dict(phi=18, L=0.175, kind="crystal", w=0.056, pink=0.55),
-    dict(phi=-14, L=0.170, kind="black", w=0.056),
-    dict(phi=-46, L=0.170, kind="crystal", w=0.054, pink=0.40),
-    dict(phi=-78, L=0.160, kind="black", w=0.050),
+    dict(phi=-6, L=0.125, kind="black", w=0.050),
+    dict(phi=-52, L=0.165, kind="crystal", w=0.054, pink=0.40),
+    dict(phi=-72, L=0.135, kind="black", w=0.050),
     # inner ring, shorter, on top
-    dict(phi=34, L=0.110, kind="gold", w=0.032, layer=1),
-    dict(phi=2, L=0.115, kind="crystal", w=0.040, pink=0.45, layer=1),
-    dict(phi=-30, L=0.115, kind="gold", w=0.032, layer=1),
-    dict(phi=-62, L=0.105, kind="black", w=0.038, layer=1),
+    dict(phi=2, L=0.110, kind="crystal", w=0.040, pink=0.45, layer=1),
+    dict(phi=-30, L=0.105, kind="gold", w=0.032, layer=1),
+    dict(phi=-60, L=0.080, kind="black", w=0.038, layer=1),
 ]
 
 # Back: crystal shell footprint in the back view (back-09 kite, suit's right
@@ -902,67 +935,52 @@ def shell_patch(body, nu=9, nv=9):
 
 
 def shell_pieces(body):
-    """Faceted crystal shell in a gold frame on the back of the shoulder."""
-    grid = shell_patch(body)
-    nu, nv = len(grid), len(grid[0])
-    lift0 = 0.004
-    ridge = 0.011
+    """Faceted kite crystal in a gold frame on the back of the shoulder
+    (back-09): four large flat facets rising to a central point, straight
+    frame bars along the kite's edges."""
+    grid = shell_patch(body, 3, 3)
+    corners = [grid[0][0], grid[2][0], grid[2][2], grid[0][2]]      # bottom, outer, top, inner
+    lift = 0.011                      # the kite's rim stands this far off the cap
+    ridge = 0.017
+    cen_p, cen_n = grid[1][1][0], grid[1][1][1]
+    top = [p + n * lift for p, n, _u, _v in corners]
+    bot = [p - n * 0.003 for p, n, _u, _v in corners]
+    apex = cen_p + cen_n * (lift + ridge)
     bm = _new_bm()
     lay = bm.loops.layers.uv.verify()
-    top, bot = [], []
-    for i in range(nu):
-        rt, rb = [], []
-        for j in range(nv):
-            p, n, u, v = grid[i][j]
-            pyr = 1.0 - max(abs(u - v), abs(u + v - 1.0))
-            rt.append(bm.verts.new(p + n * (lift0 + 0.003 + ridge * pyr)))
-            rb.append(bm.verts.new(p + n * lift0))
-        top.append(rt)
-        bot.append(rb)
-
-    def uvof(i, j):
-        u, v = i / (nu - 1), j / (nv - 1)
-        return ((u - v + 1) / 2, (u + v) / 2)
-
-    for i in range(nu - 1):
-        for j in range(nv - 1):
-            # split each quad along the pyramid's ridges for crisp facets
-            q = (top[i][j], top[i + 1][j], top[i + 1][j + 1], top[i][j + 1])
-            uq = (uvof(i, j), uvof(i + 1, j), uvof(i + 1, j + 1), uvof(i, j + 1))
-            if i + j == nu - 2 and i != j:
-                tris = ((0, 1, 3), (1, 2, 3))
-            else:
-                tris = ((0, 1, 2), (0, 2, 3))
-            for t in tris:
-                f = _face(bm, [q[k] for k in t])
-                if f:
-                    for loop, k in zip(f.loops, t):
-                        loop[lay].uv = uq[k]
-            _face(bm, (bot[i][j + 1], bot[i + 1][j + 1], bot[i + 1][j], bot[i][j]))
-    edges = []
-    edges.append([(i, 0) for i in range(nu)])
-    edges.append([(nu - 1, j) for j in range(nv)])
-    edges.append([(i, nv - 1) for i in reversed(range(nu))])
-    edges.append([(0, j) for j in reversed(range(nv))])
-    for e in edges:
-        for (i0, j0), (i1, j1) in zip(e, e[1:]):
-            _face(bm, (bot[i0][j0], bot[i1][j1], top[i1][j1], top[i0][j0]))
+    vt = [bm.verts.new(p) for p in top]
+    vb = [bm.verts.new(p) for p in bot]
+    va = bm.verts.new(apex)
+    uv_corner = [(0.5, 0.0), (1.0, 0.45), (0.5, 1.0), (0.0, 0.45)]
+    for i in range(4):
+        j = (i + 1) % 4
+        f = _face(bm, (vt[i], vt[j], va))
+        if f:
+            for loop, uv in zip(f.loops, (uv_corner[i], uv_corner[j], (0.5, 0.5))):
+                loop[lay].uv = uv
+        f = _face(bm, (vb[i], vb[j], vt[j], vt[i]))
+        if f:
+            for loop, uv in zip(f.loops, (uv_corner[i], uv_corner[j], uv_corner[j], uv_corner[i])):
+                loop[lay].uv = uv
+    _face(bm, list(reversed(vb)))
     _orient_outward(bm)
-    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 4])
+    out_ok = sum((f.calc_center_median() - cen_p).dot(f.normal) for f in bm.faces)
+    if out_ok < 0:
+        bmesh.ops.reverse_faces(bm, faces=bm.faces)
     pieces = [(bm, "Crystal", 0.55)]
-    # gold frame: one sweep per edge, a little proud of the crystal
-    prof = _chamfer_rect(-0.0050, 0.0060, -0.0060, 0.0060, 0.0016)
-    for e in edges:
-        path, nn = [], []
-        for i, j in e:
-            p, n, u, v = grid[i][j]
-            path.append(p + n * (lift0 + 0.005))
-            nn.append(n)
-        d0 = (path[1] - path[0]).normalized()
-        d1 = (path[-1] - path[-2]).normalized()
-        path[0] = path[0] - d0 * 0.004
-        path[-1] = path[-1] + d1 * 0.004
-        pieces.append((L.sweep(path, prof, normals=nn), "Gold", None))
+    # frame: four straight bars on the kite's rim, overlapping at the corners
+    prof = _chamfer_rect(-0.0055, 0.0055, -0.0065, 0.0065, 0.0017)
+    for i in range(4):
+        j = (i + 1) % 4
+        a, b = top[i], top[j]
+        d = (b - a).normalized()
+        n = (corners[i][1] + corners[j][1]).normalized()
+        path = [a - d * 0.005, (a + b) * 0.5, b + d * 0.005]
+        pieces.append((L.sweep(path, prof, normals=[n, n, n]), "Gold", None))
+    # gold boss at the kite's points (top and bottom), like the sheet
+    for k in (0, 2):
+        p, n = top[k], corners[k][1]
+        pieces.append((L.disc(0.0055, 0.004, seg=12, dome=0.003, matrix=L.frame_from_normal(p + n * 0.004, n, (0, 0, 1))), "Gold", None))
     return pieces
 
 
@@ -1015,13 +1033,13 @@ def blade_specs(body):
         q.setdefault("clear_max", 0.085)
         q.setdefault("z", 0.0)
         q.setdefault("snap", True)
-        q.setdefault("tip_lift", 0.006)
+        q.setdefault("tip_lift", 0.0)
         out.append(("SIDE%02d" % k, root, tip, hint, q))
     c, bo, bu, bn = back_frame(body)
     for k, p in enumerate(BACK):
         a = math.radians(p["phi"])
         dr = bo * math.cos(a) + bu * math.sin(a)
-        lay = LAYER_STEP * (p.get("layer", 0) + 0.5)          # half a layer over the side set
+        lay = LAYER_STEP * (p.get("layer", 0) + 1)            # a layer over the side set
         cc = c + bn * lay
         root = cc + dr * p.get("r0", 0.040) - bn * 0.012     # tucked under the shell
         tip = cc + dr * p["L"] - bn * p["rf"]
@@ -1034,7 +1052,7 @@ def blade_specs(body):
         q.setdefault("clear_add", 0.004 + lay)
         q.setdefault("clear_max", 0.085)
         q.setdefault("snap", True)
-        q.setdefault("tip_lift", 0.006)
+        q.setdefault("tip_lift", 0.0)
         out.append(("BACK%02d" % k, root, tip, bn, q))
     return out
 
@@ -1053,30 +1071,31 @@ def build(ctx):
     coll = ctx.coll("shoulders")
     groups = {}
 
-    def add(bm, fam, tint=None, angle=30.0):
-        ob = L.from_bmesh(bm, "RX_Shoulders_tmp_%s_%d" % (fam, sum(len(v) for v in groups.values())), coll, fam, angle)
+    def add(piece, bm, fam, tint=None, angle=30.0):
+        key = (piece, fam)
+        ob = L.from_bmesh(bm, "RX_Shoulders_tmp_%s_%s_%d" % (piece, fam, len(groups.get(key, []))), coll, fam, angle)
         if fam == "Crystal":
             L.tint(ob, pink=0.35 if tint is None else tint, sparkle=0.55, edge=0.6)
-        groups.setdefault(fam, []).append(ob)
+        groups.setdefault(key, []).append(ob)
         return ob
 
     Mm = L.frame_from_normal(MED_C - MED_N * 0.020, MED_N, (0.0, 0.0, 1.0))
     for bm, fam in medallion_pieces() + rays_pieces():
         L.transform(bm, Mm)
-        add(bm, fam, angle=40.0)
+        add("Medallion", bm, fam, angle=40.0)
     for bm, fam in pendant_pieces():
-        add(bm, fam, angle=40.0)
+        add("Pendant", bm, fam, angle=40.0)
     for bm, fam, tint in fan_pieces(ctx.body):
-        add(bm, fam, tint, angle=28.0)
+        add("Fan", bm, fam, tint, angle=28.0)
     for bm, fam, tint in shell_pieces(ctx.body):
-        add(bm, fam, tint, angle=25.0)
+        add("Shell", bm, fam, tint, angle=6.0 if fam == "Crystal" else 30.0)
     for bm, fam in cap_pieces(ctx.body):
-        add(bm, fam, angle=50.0)
+        add("Cap", bm, fam, angle=50.0)
 
-    made = [L.join(obs, "RX_Shoulders_%s_L" % fam) for fam, obs in groups.items()]
+    made = [L.join(obs, "RX_Shoulders_%s%s_L" % (piece, fam)) for (piece, fam), obs in groups.items()]
     for ob in made:
         L.mirror_x(ob)
-    # glints (mirror_x on empties reads a stale matrix_world, so place both directly)
+    # star glints at the medallion cores (placed directly on both sides)
     star = MED_C + MED_N * 0.0045
     L.glint("Shoulders_Medallion_L", star, 0.05, coll, 0.35)
     L.glint("Shoulders_Medallion_R", (-star.x, star.y, star.z), 0.05, coll, 0.35)

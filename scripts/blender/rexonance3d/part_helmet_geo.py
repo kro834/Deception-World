@@ -647,17 +647,20 @@ PROF_ROOF = [(-0.5, 0.0), (0.5, 0.0), (0.5, 0.42), (0.36, 0.66), (0.0, 1.0), (-0
 PROF_FLAT = [(-0.5, 0.0), (0.5, 0.0), (0.5, 0.55), (0.40, 0.92), (0.0, 1.0), (-0.40, 0.92), (-0.5, 0.55)]
 
 
-def edge_blade(LE, TE, thick_fn, n_span=28, n_chord=8, ridge_a=0.5, outward=(1.0, 0.0, 0.0), samples=10,
-               section="diamond"):
+def edge_blade(LE, TE, thick_fn, n_span=28, ridge_a=0.5, outward=(1.0, 0.0, 0.0), samples=10, section="diamond"):
     """Blade lofted between a leading-edge curve LE and a trailing-edge curve TE
     (3D control points, root first; both end at the tip). The section is a lens
     between the two edges, thick_fn(s) thick at the ridge (chord position ridge_a),
     offset along the blade normal (oriented toward `outward`).
-    section: "diamond" (sharp central ridge) or "hex" (flat crown with bevels).
+    section: "diamond" (sharp central ridge) or "hex" (flat crown, chamfered
+    sides). The section is piecewise linear across the chord, so vertices sit only
+    on the edges and the creases: crisp ridges at a quarter of the triangles.
     UV: u across the chord (0 LE .. 1 TE), v along the span (0 root .. 1 tip)."""
     le = L.resample(L.catmull_rom([Vector(p) for p in LE], samples), n_span)
     te = L.resample(L.catmull_rom([Vector(p) for p in TE], samples), n_span)
     out_v = Vector(outward)
+    stations = [0.0, 0.28, 0.72, 1.0] if section == "hex" else [0.0, ridge_a, 1.0]
+    n_chord = len(stations) - 1
     bm = bmesh.new()
     rows_a = []
     rows_b = []
@@ -679,8 +682,7 @@ def edge_blade(LE, TE, thick_fn, n_span=28, n_chord=8, ridge_a=0.5, outward=(1.0
             nrm = -nrm
         th = max(thick_fn(s), 0.0) * 0.5
         ra, rb = [], []
-        for j in range(n_chord + 1):
-            a = j / n_chord
+        for a in stations:
             if section == "hex":
                 f = min(1.0, a / 0.28, (1.0 - a) / 0.28)
             else:
@@ -702,7 +704,7 @@ def edge_blade(LE, TE, thick_fn, n_span=28, n_chord=8, ridge_a=0.5, outward=(1.0
     for i in range(n_span - 1):
         sa, sb = i / (n_span - 1), (i + 1) / (n_span - 1)
         for j in range(n_chord):
-            ua, ub = j / n_chord, (j + 1) / n_chord
+            ua, ub = stations[j], stations[j + 1]
             for rows, flip in ((VA, False), (VB, True)):
                 q = (rows[i][j], rows[i][j + 1], rows[i + 1][j + 1], rows[i + 1][j])
                 if flip:
@@ -867,35 +869,37 @@ def bezier(p0, p1, p2, n):
     return (1 - t) ** 2 * p0 + 2 * (1 - t) * t * p1 + t ** 2 * p2
 
 
-def swept_blade(base, root_specs, tip, width_fn, thick_fn, bend=(0.0, 0.0, 0.0), lift=0.003, n_root=6,
-                n_free=14, ridge_a=0.45, twist=0.0, outward=None):
-    """Blade that hugs the shell along a short root path, then curves free to `tip`.
-    width_fn / thick_fn take t in 0..1 over the whole length (root start .. tip).
-    bend: offset of the free part's Bezier control point (makes it a sickle).
-    twist: radians the chord turns about the path toward the tip (0 = keeps the
-    in-surface chord direction of the root)."""
+def swept_edges(base, root_specs, tip, width_fn, bend=(0.0, 0.0, 0.0), lift=0.003, n_root=6, n_free=14,
+                twist=0.0):
+    """Leading / trailing edge polylines of a blade that hugs the shell along a
+    root path (point specs), then curves free to `tip` (quadratic Bezier; `bend`
+    offsets its control point, making a sickle). width_fn(s), s = 0 root .. 1 tip.
+    lift: float or f(s) (height of the centre line above the shell).
+    twist: radians the chord turns toward the surface normal along the free part.
+    Returns LE, TE (lists of 3D tuples, LE on the in-surface +B side), the centre
+    line and per-point side vectors, and the mean surface normal."""
     P, N, T, B = hug_frames(base, root_specs, n_root)
-    start = P[-1] + N[-1] * lift
+    lf = lift if callable(lift) else (lambda s, v=lift: v)
     tipv = np.asarray(tip, float)
+    # centre line: provisional arc length for the lift profile
+    start = P[-1] + N[-1] * lf(0.4)
     ctrl = start + T[-1] * (np.linalg.norm(tipv - start) * 0.45) + np.asarray(bend, float)
     free = bezier(start, ctrl, tipv, n_free + 1)[1:]
-    cen = np.vstack([P + N * lift, free])
-    m = len(cen)
+    cen = np.vstack([P, free])
     seg = np.linalg.norm(np.diff(cen, axis=0), axis=1)
     s = np.concatenate([[0.0], np.cumsum(seg)])
     s /= s[-1]
-    side0 = B[-1]
-    nrm0 = N[-1]
-    LE, TE = [], []
+    cen[:n_root] = P + N * np.asarray([lf(v) for v in s[:n_root]])[:, None]
+    m = len(cen)
+    side0, nrm0 = B[-1], N[-1]
+    LE, TE, sides = [], [], []
     for i in range(m):
         if i < n_root:
             side = B[i]
-            nn = N[i]
         else:
             k = (s[i] - s[n_root - 1]) / max(1.0 - s[n_root - 1], 1e-6)
             a = twist * k
             side = side0 * math.cos(a) + nrm0 * math.sin(a)
-            nn = nrm0
         if 0 < i < m - 1:
             tan = cen[i + 1] - cen[i - 1]
         elif i == 0:
@@ -908,8 +912,17 @@ def swept_blade(base, root_specs, tip, width_fn, thick_fn, bend=(0.0, 0.0, 0.0),
         w = width_fn(s[i]) * 0.5
         LE.append(tuple(cen[i] + side * w))
         TE.append(tuple(cen[i] - side * w))
-    out = tuple(outward) if outward is not None else tuple(np.mean(N, axis=0))
-    return edge_blade(LE, TE, thick_fn, n_span=m, n_chord=6, ridge_a=ridge_a, outward=out, samples=2)
+        sides.append(side)
+    return LE, TE, cen, np.asarray(sides), s, np.mean(N, axis=0)
+
+
+def swept_blade(base, root_specs, tip, width_fn, thick_fn, bend=(0.0, 0.0, 0.0), lift=0.003, n_root=6,
+                n_free=14, ridge_a=0.45, twist=0.0, outward=None):
+    """Blade that hugs the shell along a short root path, then curves free to
+    `tip` (see swept_edges). thick_fn(s) is the ridge thickness."""
+    LE, TE, _c, _s, _t, nmean = swept_edges(base, root_specs, tip, width_fn, bend, lift, n_root, n_free, twist)
+    out = tuple(outward) if outward is not None else tuple(nmean)
+    return edge_blade(LE, TE, thick_fn, n_span=len(LE), ridge_a=ridge_a, outward=out, samples=2)
 
 
 def blade_inlay(LE, TE, thick_fn, a0, a1, s0, s1, outward, ridge_a=0.45, n_span=24, samples=10, raise_=0.0004,

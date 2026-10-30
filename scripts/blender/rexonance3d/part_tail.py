@@ -96,12 +96,11 @@ TAB = 0.48                 # crown tab length / segment length
 TAB_AMPS = (1.0, 0.85, 0.55, 0.85)   # dorsal, +B flank, ventral, -B flank
 NECK = 0.28                # hidden neck length / segment length
 SHELL_T = 0.0024
-FIN_THETA = 50.0           # deg: fin centre lines either side of the dorsal line
-FIN_ALPHA = 30.0           # deg: fin plane tilted off the tube surface, dorsal edge up
-FIN_PITCH = 7.0            # deg: fin spine lifting off the surface toward its tip
+FIN_THETA = 65.0           # deg: fin centre lines either side of the dorsal line
+FIN_ALPHA = 35.0           # deg: fin plane tilted off the tube surface, dorsal edge up
+FIN_PITCH = 10.0           # deg: fin spine lifting off the surface toward its tip
 FIN_CURL = 10.0            # deg: fin spine turning toward its raised edge (flame)
 BAND_W, BAND_H = 0.023, 0.0063   # gold chevron band: width square to the edge, height
-CREST_TIP = (0.567, 0.320, 1.840)  # crest blade tip (front-10 / back-09 / right-07)
 
 
 def _smooth(t):
@@ -337,7 +336,7 @@ def leaf_spine(root, d0, u0, length, curl, n=20, lift=None, power=1.6):
     return pts, dirs
 
 
-def flank_fin(path, s_r, th, radius, length, width, embed=0.010, thick=0.22):
+def flank_fin(path, s_r, th, radius, length, width, embed=0.006, thick=0.20):
     """A broad crystal leaf lying along the tube's flank at angle th from the
     dorsal line: it leaves the surface at FIN_PITCH toward the tip, its plane
     tilted FIN_ALPHA off the surface with the dorsal-side edge raised (the
@@ -359,31 +358,26 @@ def flank_fin(path, s_r, th, radius, length, width, embed=0.010, thick=0.22):
         return n_hat * (0.5 * leaf_width(t, width) * math.sin(a) * 0.85)
 
     spine, dirs = leaf_spine(root, d0, u0, total, math.radians(FIN_CURL), n=20, lift=lift)
-    return crystal_blade(spine, dirs, lambda t: leaf_width(t, width, 0.30), thick=thick, n_sec=4)
+    return crystal_blade(spine, dirs, lambda t: leaf_width(t, width, 0.42), thick=thick, n_sec=4)
 
 
-def crest_blade(path, s_r, radius, tip, width=0.056):
-    """The large pink blade on top of the crest: it grows out of the dorsal
-    line and sweeps along the arch, curving less than the tail, so its point
-    stands outside the falling leg (all three main views draw it)."""
-    P, T, N, B = path.at(s_r)
-    root = P + N * (radius(s_r, 0.0) - 0.012) - T * 0.010
-    tip = Vector(tip)
-    chord = (tip - root).length
-    mid_s = s_r + 0.45 * chord
-    ctrl = path.point(mid_s, 0.0, radius(mid_s, 0.0) + 0.068)
+def crest_blade(path, s0, r_nom, length_s=0.165, width=0.056, rise=0.066):
+    """The large pink blade on top of the crest: it stands on the dorsal line
+    in the plane of the arch, rides the top of the falling leg and lifts off
+    it toward its point, so the point stands outside the falling leg (front-10
+    ~(0.57, 1.84), back-09 ~(0.56, 1.84), right-07 Y ~0.32)."""
     n = 32
     spine, dirs = [], []
-    plane_n = B
     for i in range(n + 1):
         t = i / n
-        q = _bez(root, ctrl, tip, t)
-        dq = (ctrl - root) * (2 * (1 - t)) + (tip - ctrl) * (2 * t)
-        spine.append(q)
-        u = plane_n.cross(dq).normalized()
-        if u.dot(N) < 0:
-            u = -u
-        dirs.append(u)
+        s = s0 + length_s * t
+        spine.append(path.point(s, 0.0, r_nom + 0.003 + rise * t ** 1.5))
+    for i in range(n + 1):
+        a = spine[max(i - 1, 0)]
+        b = spine[min(i + 1, n)]
+        _P, _T, N, B = path.at(s0 + length_s * i / n)
+        u = B.cross(b - a).normalized()
+        dirs.append(u if u.dot(N) > 0 else -u)
     return crystal_blade(spine, dirs, lambda t: leaf_width(t, width, 0.32), thick=0.22, n_sec=4)
 
 
@@ -512,11 +506,12 @@ def build_stinger(coll, path, s_j, piv, ploc):
     # back toward the back-outer side (front-10, back-09, right-07, left-08)
     O = path.at(s_j + 0.004)[0]
     Lb = 0.300
+    down = (Vector(CTRL[-1]) - Vector(CTRL[STING_JOINT])).normalized()   # the stinger hangs plumb
     spine, dirs = [], []
     for i in range(57):
         t = i / 56.0
-        off = -0.020 * math.sin(math.pi * min(t / 0.85, 1.0)) + 0.036 * max(0.0, (t - 0.55) / 0.45) ** 2.2
-        spine.append(O + T * (Lb * t) + wb * off)
+        off = -0.020 * math.sin(math.pi * min(t / 0.85, 1.0)) + 0.027 * max(0.0, (t - 0.55) / 0.45) ** 2.2
+        spine.append(O + down * (Lb * t) + wb * off)
         dirs.append(wb)
 
     def bw(t):
@@ -532,10 +527,10 @@ def build_stinger(coll, path, s_j, piv, ploc):
     # barbs: broad crescent leaves in the plane STING_DIR, growing out of the
     # collar's lower sides; the inner one is a second blade rising to Z ~1.76
     barbs = [blade]
-    for sgn, s_off, out_c, up_c, out_t, up_t, wid in ((-1.0, 0.092, 0.100, 0.025, 0.105, 0.150, 0.052),
-                                                     (1.0, 0.104, 0.075, 0.012, 0.088, 0.075, 0.036)):
+    for sgn, s_off, out_c, up_c, out_t, up_t, wid in ((-1.0, 0.086, 0.132, 0.036, 0.090, 0.150, 0.058),
+                                                     (1.0, 0.098, 0.104, 0.008, 0.076, 0.078, 0.042)):
         th = th_w + (math.pi if sgn < 0 else 0.0)
-        root = path.point(s_j + s_off, th, 0.020)
+        root = path.point(s_j + s_off, th, 0.034)
         out = w * sgn
         p0 = root
         c = root + out * out_c + up * up_c
@@ -548,7 +543,7 @@ def build_stinger(coll, path, s_j, piv, ploc):
             dq = (c - p0) * (2 * (1 - t)) + (p1 - c) * (2 * t)
             spine.append(q)
             dirs.append(p.cross(dq).normalized())
-        bm = crystal_blade(spine, dirs, lambda t, wd=wid: leaf_width(t, wd), thick=0.24, n_sec=4)
+        bm = crystal_blade(spine, dirs, lambda t, wd=wid: leaf_width(t, wd, 0.30), thick=0.24, n_sec=4)
         ob = L.from_bmesh(bm, "RX_Tail_Stinger_Barb%s" % ("In" if sgn < 0 else "Out"), coll, "Crystal", angle=30.0)
         L.tint(ob, pink=0.55, sparkle=0.6, edge=0.7)
         barbs.append(ob)
@@ -716,14 +711,14 @@ def build(ctx):
                 s_r = sa + 0.30 * ln
                 scale = 0.78
             scale *= (1.0, 0.90)[(k + (sgn < 0)) % 2] * (0.94 + 0.12 * jit)
-            flen = r * (2.05 + 0.70 * bump) * scale
-            fwid = r * (0.98 + 0.30 * bump) * scale
+            flen = r * (2.00 + 0.60 * bump) * scale
+            fwid = r * (1.15 + 0.25 * bump) * scale
             bm = flank_fin(path, s_r, th, radius, flen, fwid)
             ob = L.from_bmesh(bm, "RX_Tail_Seg%02d_Fin%s" % (k, "A" if sgn > 0 else "B"), coll, "Crystal", angle=30.0)
             L.tint(ob, pink=min(0.70, 0.12 + 0.50 * _smooth(tk / 0.62) + 0.08 * tk), sparkle=0.55, edge=0.65)
             fins.append(ob)
         if k == KEYSTONE:
-            bm = crest_blade(path, sa + 0.45 * ln, radius, CREST_TIP)
+            bm = crest_blade(path, sa + 0.20 * ln, r)
             ob = L.from_bmesh(bm, "RX_Tail_Seg%02d_CrestBlade" % k, coll, "Crystal", angle=30.0)
             L.tint(ob, pink=0.75, sparkle=0.7, edge=0.75)
             fins.append(ob)

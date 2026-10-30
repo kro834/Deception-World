@@ -111,6 +111,64 @@ def vesica(a, b, n=32):
     return L.ccw(right + left)
 
 
+def _seg_dist(px, pz, poly):
+    """Distance from (px, pz) to an open polyline [(x, z), ...]."""
+    best = 1e9
+    for (x0, z0), (x1, z1) in zip(poly, poly[1:]):
+        dx, dz = x1 - x0, z1 - z0
+        L2 = dx * dx + dz * dz
+        t = 0.0 if L2 < 1e-18 else max(0.0, min(1.0, ((px - x0) * dx + (pz - z0) * dz) / L2))
+        ex, ez = x0 + dx * t - px, z0 + dz * t - pz
+        best = min(best, math.hypot(ex, ez))
+    return best
+
+
+def band_uv(outer, inner, z_top, z_bot):
+    """Crystal band UV: u runs across the band (0 on the outer edge, 1 on the
+    inner edge, so the viewer lights both edges), v from z_top (0) to z_bot (1)."""
+
+    def fn(x, z):
+        do, di = _seg_dist(x, z, outer), _seg_dist(x, z, inner)
+        u = do / max(do + di, 1e-9)
+        v = min(1.0, max(0.0, (z_top - z) / max(z_top - z_bot, 1e-9)))
+        return (u, v)
+
+    return fn
+
+
+def fill_uv(boundary, z_top, z_bot, rim=0.010):
+    """Crystal fill UV: u = 0 on the boundary rising to 0.5 inside (edge glow
+    all round), v from z_top (0) to z_bot (1)."""
+    closed = list(boundary) + [boundary[0]]
+
+    def fn(x, z):
+        d = _seg_dist(x, z, closed)
+        u = 0.5 * min(1.0, d / rim)
+        v = min(1.0, max(0.0, (z_top - z) / max(z_top - z_bot, 1e-9)))
+        return (u, v)
+
+    return fn
+
+
+def _mirror_half(half_px, view):
+    """Full polyline (left half reversed + right half) from a right half given
+    as (dx_px, y_px) top -> bottom ending on the centre line."""
+    pts = [(dx * R.S, _z(view, y)) for dx, y in half_px]
+    left = [(-x, z) for x, z in reversed(pts[:-1])]
+    return left + pts
+
+
+def centre_v_uv(bm, half_h):
+    """u across x (0..1), v = |y| / half_h: 0 at the centre, 1 at both tips."""
+    xs = [v.co.x for v in bm.verts]
+    x0, x1 = min(xs), max(xs)
+    uv = bm.loops.layers.uv.verify()
+    for f in bm.faces:
+        for lp in f.loops:
+            co = lp.vert.co
+            lp[uv].uv = ((co.x - x0) / max(x1 - x0, 1e-9), min(1.0, abs(co.y) / half_h))
+
+
 def frame_ring(outer, inner, z0, z1, zi=None, bevel=0.0012, seg=2):
     """Solid frame between two matched CCW outlines (same count), walls z0..z1.
     zi: z of the inner wall's foot (default z0)."""
@@ -364,6 +422,7 @@ def cell_meshes(C, s, gold, crystal, coll, name, glints=True):
     L.transform(fr, M)
     gold.add(fr)
     lens = faceted_lens(arc_resample(vesica(0.0087, 0.0378, 24), 24), 0.001, 0.0112, ridge=0.62)
+    centre_v_uv(lens, 0.0378)
     L.transform(lens, M)
     crystal.add(lens)
     if glints:
@@ -459,7 +518,8 @@ def buckle(C, coll, acc):
     uv = orb.loops.layers.uv.verify()
     for f in orb.faces:
         for lp in f.loops:
-            lp[uv].uv = (0.5 + lp.vert.co.x / 0.083, 0.5 - lp.vert.co.y / 0.083)
+            r = math.hypot(lp.vert.co.x, lp.vert.co.y) / 0.0415
+            lp[uv].uv = (0.5 - 0.5 * min(1.0, r) ** 2, 0.5 - lp.vert.co.y / 0.083)
     L.transform(orb, M)
     acc["CrystalOrb"].add(orb)
 
@@ -580,7 +640,9 @@ def belt(ctx, coll, C):
     frames = cells_gold.build("RX_Waist_CellFrames", coll, "Gold", 30)
     crys = cells_crystal.build("RX_Waist_CellCrystals", coll, "Crystal", 30)
     # cells: pink at both ends, blue in the middle (v runs bottom -> top)
-    L.tint(crys, fn=lambda co, uv: (min(1.0, abs(uv[1] - 0.5) * 2.0) ** 1.5 * 0.9, 0.8, 0.7))
+    # blue middle (v = 0) -> pink at both tips (v = 1) comes from the UVs; a light
+    # extra pink bias toward the tips, dense sparkle, strong edges
+    L.tint(crys, fn=lambda co, uv: (0.35 * uv[1] ** 2, 0.8, 0.75))
     return out
 
 
@@ -793,10 +855,6 @@ def tasset(ctx, coll, side):
         hw = lambda z: 0.075 if z > 0.95 else 0.05  # noqa: E731
         surf = HangSurface(body, o, hw, z_top + 0.01, z_bot - 0.01, gap=0.011, c=0.9, y_top=0.120, lean=0.004)
 
-    def vmap(z):
-        return (z_top - z) / (z_top - z_bot)
-
-    uv_down = lambda x, z: (0.5 + x / 0.2, vmap(z))  # noqa: E731
 
     pieces = {"Black": [], "Gold": [], "Crystal": [], "CrystalViolet": [], "GoldDark": []}
     base = sheet_plate(_px_outline(view, base_half), surf, 0.0, 0.007, res=0.018, edge=0.010, bevel=0.0018, back=True)
@@ -809,8 +867,9 @@ def tasset(ctx, coll, side):
         # glowing crystal V band (root at the belt, tip at the V point)
         cry_o = [(59, 651), (53, 673), (31, 763), (10, 843), (0, 886)]
         cry_i = [(51, 651), (45, 673), (23, 763), (5, 843), (0, 867)]
+        cry_uv = band_uv(_mirror_half(cry_o, view), _mirror_half(cry_i, view), _z(view, 651), _z(view, 886))
         pieces["Crystal"].append(sheet_plate(_vband(view, cry_o, cry_i), surf, 0.005, 0.0045, edge=0.008, bevel=0.001,
-                                             uv_fn=uv_down))
+                                             uv_fn=cry_uv))
         # black recess between gold frame and crystal band (GoldDark lip under the gold)
         # stacked chevron plates in the centre V (top plate highest)
         chev = [
@@ -830,8 +889,9 @@ def tasset(ctx, coll, side):
             pieces["Gold"].append(sheet_plate(L.ccw(poly), surf, 0.006, crease, edge=0.006, bevel=0.0010))
         # violet crystal V inside the lower gold frame
         vio = [(29, 893), (28, 940), (16, 980), (6, 1012), (0, 1026), (-6, 1012), (-16, 980), (-28, 940), (-29, 893)]
-        pieces["CrystalViolet"].append(sheet_plate(L.ccw([(dx * R.S, _z(view, y)) for dx, y in vio]), surf, 0.005,
-                                                   0.0042, edge=0.006, bevel=0.0008, uv_fn=uv_down))
+        vio_w = [(dx * R.S, _z(view, y)) for dx, y in vio]
+        pieces["CrystalViolet"].append(sheet_plate(L.ccw(vio_w), surf, 0.005, 0.0042, res=0.0045, edge=0.005,
+                                                   bevel=0.0008, uv_fn=fill_uv(vio_w, _z(view, 893), _z(view, 1026))))
         pend = dict(stem=(1039, 1085), top=1083, wide=1121, bot=1155, hw=19)
     else:
         gold_o = [(57, 650), (52, 720), (42, 790), (32, 840), (16, 880), (0, 898)]
@@ -842,8 +902,10 @@ def tasset(ctx, coll, side):
         pieces["Gold"].append(sheet_plate(_vband(view, low_o, low_i), surf, 0.006, 0.0072, edge=0.007, bevel=0.0014))
         # crystal: V band whose bottom is filled down to the gold point
         cr = [(40, 688), (28, 790), (15, 840), (0, 878), (-15, 840), (-28, 790), (-40, 688), (-31, 688), (0, 791), (31, 688)]
+        cr_uv = band_uv([(dx * R.S, _z(view, y)) for dx, y in cr[:7]], [(dx * R.S, _z(view, y)) for dx, y in cr[7:]],
+                        _z(view, 688), _z(view, 878))
         pieces["Crystal"].append(sheet_plate(L.ccw([(dx * R.S, _z(view, y)) for dx, y in cr]), surf, 0.005, 0.0045,
-                                             edge=0.008, bevel=0.001, uv_fn=uv_down))
+                                             edge=0.008, bevel=0.001, uv_fn=cr_uv))
         chev = [
             [(42, 650), (31, 688), (0, 737), (-31, 688), (-42, 650)],
             [(31, 685), (0, 790), (-31, 685), (0, 732)],
@@ -852,8 +914,9 @@ def tasset(ctx, coll, side):
             poly = [(dx * R.S, _z(view, y)) for dx, y in half]
             pieces["Black"].append(sheet_plate(L.ccw(poly), surf, 0.006, 0.0058 - 0.0012 * k, edge=0.008, bevel=0.0014))
         vio = [(20, 906), (15, 960), (5, 1000), (0, 1019), (-5, 1000), (-15, 960), (-20, 906)]
-        pieces["CrystalViolet"].append(sheet_plate(L.ccw([(dx * R.S, _z(view, y)) for dx, y in vio]), surf, 0.005,
-                                                   0.0042, edge=0.006, bevel=0.0008, uv_fn=uv_down))
+        vio_w = [(dx * R.S, _z(view, y)) for dx, y in vio]
+        pieces["CrystalViolet"].append(sheet_plate(L.ccw(vio_w), surf, 0.005, 0.0042, res=0.0045, edge=0.005,
+                                                   bevel=0.0008, uv_fn=fill_uv(vio_w, _z(view, 906), _z(view, 1019))))
         pend = dict(stem=(1036, 1097), top=1095, wide=1122, bot=1179, hw=18)
 
     # gold spike pendant on a short stem
@@ -897,9 +960,9 @@ def tasset(ctx, coll, side):
         ob = acc.build("RX_Waist_%sTasset_%s" % (tag, fam), coll, family, 32)
         obs[fam] = ob
     if "Crystal" in obs:
-        L.tint(obs["Crystal"], fn=lambda co, uv: (min(1.0, max(0.0, (uv[1] - 0.45) / 0.55)) * 0.9, 0.7, 0.8))
+        L.tint(obs["Crystal"], fn=lambda co, uv: (0.5 * min(1.0, max(0.0, (uv[1] - 0.55) / 0.45)), 0.7, 0.8))
     if "CrystalViolet" in obs:
-        L.tint(obs["CrystalViolet"], fn=lambda co, uv: (0.55 + 0.4 * min(1.0, max(0.0, (uv[1] - 0.6) / 0.4)), 0.5, 0.7))
+        L.tint(obs["CrystalViolet"], fn=lambda co, uv: (0.45 + 0.4 * min(1.0, max(0.0, (uv[1] - 0.5) / 0.5)), 0.55, 0.7))
     return surf
 
 
