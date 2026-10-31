@@ -421,6 +421,16 @@ export function DossierNav({
           <b>一覧へ戻る</b>
           {items.length > 1 ? <IndexMeter items={items} idx={idx} /> : null}
         </GuardedLink>
+        <GuardedLink
+          to="/world-map"
+          search={{ source: currentHref }}
+          assets={[]}
+          className="dossier-index-return dg-control"
+          aria-label="この人物を世界関係図で見る"
+        >
+          <b>世界関係図へ</b>
+          <span aria-hidden="true">↗</span>
+        </GuardedLink>
         {items.length > 1 ? (
           <DossierRoster items={items} idx={idx} originSearch={originSearch} />
         ) : null}

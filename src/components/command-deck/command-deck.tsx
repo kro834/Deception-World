@@ -153,12 +153,14 @@ function imageProps(art: Artwork) {
     ? {
         src: art.src,
         ...rexonanceImage(art.src),
-        sizes: "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
+        sizes:
+          "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
       }
     : {
         src: art.src,
         ...posterImage(art.src),
-        sizes: "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
+        sizes:
+          "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
       };
 }
 
@@ -216,13 +218,17 @@ function DeckWorldEntry({
     void Promise.all([
       Promise.resolve().then(() => router.preloadRoute({ to: "/world" })),
       Promise.resolve().then(() => preloadAssets(WORLD_ENTER_ASSETS, () => undefined)),
-    ]).catch(() => { warmed.current = false; });
+    ]).catch(() => {
+      warmed.current = false;
+    });
   };
   const enterWorld = async (keyboard: boolean) => {
     const logo = logoRef.current;
     if (pending.current) return;
     if (!logo) {
-      await go({ to: "/world", assets: WORLD_ENTER_ASSETS, focusDestination: keyboard }).catch(() => undefined);
+      await go({ to: "/world", assets: WORLD_ENTER_ASSETS, focusDestination: keyboard }).catch(
+        () => undefined,
+      );
       return;
     }
     pending.current = true;
@@ -238,16 +244,23 @@ function DeckWorldEntry({
     // inside the visual viewport rather than diving toward an offscreen ring.
     const ringX = measured.left + measured.width * 0.573;
     const ringY = measured.top + measured.height * 0.315;
-    const visible = measured.width > 0 && measured.height > 0 &&
-      ringX >= left && ringX <= left + width && ringY >= top && ringY <= top + height;
+    const visible =
+      measured.width > 0 &&
+      measured.height > 0 &&
+      ringX >= left &&
+      ringX <= left + width &&
+      ringY >= top &&
+      ringY <= top + height;
     const fallbackWidth = Math.min(208, width * 0.72);
-    const fallbackHeight = fallbackWidth * 2 / 3;
-    const logoRect = visible ? measured : {
-      left: left + width * 0.5 - fallbackWidth * 0.573,
-      top: top + height * 0.42 - fallbackHeight * 0.315,
-      width: fallbackWidth,
-      height: fallbackHeight,
-    };
+    const fallbackHeight = (fallbackWidth * 2) / 3;
+    const logoRect = visible
+      ? measured
+      : {
+          left: left + width * 0.5 - fallbackWidth * 0.573,
+          top: top + height * 0.42 - fallbackHeight * 0.315,
+          width: fallbackWidth,
+          height: fallbackHeight,
+        };
     const hudSize = Math.min(620, width * 0.84);
     const started = beginOpeningHandoff({
       logoRect,
@@ -288,7 +301,15 @@ function DeckWorldEntry({
     }
   };
   const onClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    )
+      return;
     event.preventDefault();
     event.stopPropagation();
     if (event.detail !== 0) event.currentTarget.blur();
@@ -324,21 +345,32 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
 
   useEffect(() => {
     try {
-      const saved = readDeckSelection(window.sessionStorage, SCENES.map((item) => item.artwork.length));
+      const saved = readDeckSelection(
+        window.sessionStorage,
+        SCENES.map((item) => item.artwork.length),
+      );
       if (saved) {
         currentScene.current = saved.scene;
         setSceneIndex(saved.scene);
         setArtIndex(saved.artwork);
       }
-    } catch { /* Storage is optional; keep the first available artwork. */ }
+    } catch {
+      /* Storage is optional; keep the first available artwork. */
+    }
   }, []);
 
   const rememberSelection = (selectedScene: number, selectedArtwork: number) => {
-    try { saveDeckSelection(window.sessionStorage, { scene: selectedScene, artwork: selectedArtwork }); } catch { /* Storage may be blocked by browser policy. */ }
+    try {
+      saveDeckSelection(window.sessionStorage, { scene: selectedScene, artwork: selectedArtwork });
+    } catch {
+      /* Storage may be blocked by browser policy. */
+    }
   };
 
   useEffect(() => {
-    const adjacent = [-1, 1].map((offset) => scene.artwork[(artIndex + offset + scene.artwork.length) % scene.artwork.length]);
+    const adjacent = [-1, 1].map(
+      (offset) => scene.artwork[(artIndex + offset + scene.artwork.length) % scene.artwork.length],
+    );
     const images = adjacent.map((item) => {
       const image = new Image();
       const props = imageProps(item);
@@ -348,7 +380,12 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
       image.src = props.src;
       return image;
     });
-    return () => { images.forEach((image) => { image.onload = null; image.onerror = null; }); };
+    return () => {
+      images.forEach((image) => {
+        image.onload = null;
+        image.onerror = null;
+      });
+    };
   }, [scene, artIndex]);
 
   useEffect(() => {
@@ -531,12 +568,12 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             </div>
           }
         >
-        <div className="command-deck-title" key={`title-${scene.id}`}>
-          <h1>
-            <span>{scene.title[0]}</span>
-            <span>{scene.title[1]}</span>
-          </h1>
-        </div>
+          <div className="command-deck-title" key={`title-${scene.id}`}>
+            <h1>
+              <span>{scene.title[0]}</span>
+              <span>{scene.title[1]}</span>
+            </h1>
+          </div>
           <section className="command-deck-select" aria-label="作品選択">
             <div className="command-deck-section-rule" aria-hidden="true">
               <i />
@@ -621,6 +658,16 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                   <ArrowUpRight size={20} aria-hidden="true" />
                 </DeckLink>
               ))}
+            </nav>
+            <nav className="command-deck-chapter-links" aria-label="世界を探索する">
+              <DeckLink href="/transformation-lab">
+                <span>変身・フォーム研究室</span>
+                <ArrowUpRight size={20} aria-hidden="true" />
+              </DeckLink>
+              <DeckLink href="/world-map">
+                <span>世界関係図</span>
+                <ArrowUpRight size={20} aria-hidden="true" />
+              </DeckLink>
             </nav>
             <DeckLink href="/gallery" className="command-deck-gallery-link">
               <span>ギャラリー</span>

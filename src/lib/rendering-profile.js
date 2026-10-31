@@ -62,39 +62,27 @@ export function isOneUiRenderer(device) {
 }
 
 /**
- * Select a CSS-only decorative renderer without changing gesture behavior.
- * Chosen by capability hints, never by device model: capable Android keeps full
- * motion; Android reporting 4 cores or fewer is treated as a weak budget.
- * @param {{userAgent?: string, maxTouchPoints?: number, deviceMemory?: number, hardwareConcurrency?: number,
- * connection?: {saveData?: boolean, effectiveType?: string}}} device
+ * Select the user-requested CSS-only renderer. Device and network hints never
+ * downgrade visual quality; those hints may still suppress speculative work.
+ * @param {{renderQuality?: string, userAgent?: string, maxTouchPoints?: number,
+ * hardwareConcurrency?: number, deviceMemory?: number,
+ * connection?: {saveData?: boolean, effectiveType?: string}}} [device]
  */
 export function prefersLightweightRendering(device) {
-  return (
-    prefersIOS18Rendering(device) ||
-    (isAndroidRenderer(device) &&
-      (device.hardwareConcurrency || 0) > 0 &&
-      device.hardwareConcurrency <= 4) ||
-    device.connection?.saveData === true ||
-    ["slow-2g", "2g"].includes(device.connection?.effectiveType || "") ||
-    (device.deviceMemory !== undefined && device.deviceMemory <= 2) ||
-    ((device.hardwareConcurrency || 0) > 0 && device.hardwareConcurrency <= 2)
-  );
+  if (device?.renderQuality === "lightweight") return true;
+  if (device?.renderQuality === "high") return false;
+  return typeof document !== "undefined" && document.documentElement?.dataset.worldEffects === "economy";
 }
 
 /**
- * Resource hints that point at a constrained device or connection: Save-Data,
- * a 2G connection, at most 2 GB of memory or at most 2 logical cores. Read
- * by capability only, never by device model or platform.
- * @param {{deviceMemory?: number, hardwareConcurrency?: number,
- * connection?: {saveData?: boolean, effectiveType?: string}}} device
+ * The heavy renderer is suppressed only by the explicit lightweight choice;
+ * actual WebGL capability and runtime-loss checks remain in each engine.
+ * @param {{renderQuality?: string, userAgent?: string, maxTouchPoints?: number,
+ * hardwareConcurrency?: number, deviceMemory?: number,
+ * connection?: {saveData?: boolean, effectiveType?: string}}} [device]
  */
 export function hasConstrainedResources(device) {
-  return (
-    device.connection?.saveData === true ||
-    ["slow-2g", "2g"].includes(device.connection?.effectiveType || "") ||
-    (device.deviceMemory !== undefined && device.deviceMemory <= 2) ||
-    ((device.hardwareConcurrency || 0) > 0 && device.hardwareConcurrency <= 2)
-  );
+  return prefersLightweightRendering(device);
 }
 
 /**

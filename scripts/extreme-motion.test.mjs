@@ -209,7 +209,7 @@ test("desktop Safari27 is not misclassified as a touch iPad", () => {
   cleanup();
 });
 
-test("economy, network and pointer gates stop unnecessary fallback work", () => {
+test("economy and pointer gates stop fallback work; Save-Data and 2G do not", () => {
   const h = setup();
   const cleanup = h.mount();
   h.document.documentElement.dataset.worldEffects = "economy";
@@ -220,9 +220,11 @@ test("economy, network and pointer gates stop unnecessary fallback work", () => 
   h.mutate();
   h.connection.saveData = true;
   h.connection.emit("change");
-  assert.equal(h.ready.at(-1), false);
-  h.connection.saveData = false;
+  assert.equal(h.ready.at(-1), true);
+  h.connection.effectiveType = "2g";
   h.connection.emit("change");
+  assert.equal(h.ready.at(-1), true);
+  h.connection.effectiveType = "4g";
   assert.equal(h.ready.at(-1), true);
   h.coarsePointer.matches = true;
   h.coarsePointer.emit("change");

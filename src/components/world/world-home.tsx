@@ -29,6 +29,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
 import { MysteryColumnProse } from "./mystery-column-prose";
+import { WorldExploration } from "./world-exploration";
 import { ArtworkStage } from "@/components/artwork-stage/artwork-stage";
 import { WorldChapterRail, WorldContents, WorldSpecialDoors } from "./world-special";
 
@@ -2116,6 +2117,7 @@ export function WorldHome() {
       <MirageTicker variant="open" records={EPISODES.length} />
 
       <WorldContents />
+      <WorldExploration />
 
       <section className="story-section" id="story">
         <div className="section-index" data-film-reveal>

@@ -5,7 +5,7 @@ import {
   prefersLightweightRendering,
 } from "../src/lib/rendering-profile.js";
 
-test("iOS 18.7.7 and desktop-mode iPadOS 18 use lightweight decoration", () => {
+test("iOS 18.7.7 and desktop-mode iPadOS 18 keep high quality unless selected", () => {
   for (const userAgent of [
     "iPhone; CPU iPhone OS 18_7_7 like Mac OS X",
     "iPad; CPU OS 18_7 like Mac OS X",
@@ -13,7 +13,7 @@ test("iOS 18.7.7 and desktop-mode iPadOS 18 use lightweight decoration", () => {
   ]) {
     const device = { userAgent, maxTouchPoints: 5, hardwareConcurrency: 8 };
     assert.equal(prefersIOS18Rendering(device), true);
-    assert.equal(prefersLightweightRendering(device), true);
+    assert.equal(prefersLightweightRendering(device), false);
   }
 });
 test("newer iOS, desktop Safari and unknown versions retain existing policy", () => {

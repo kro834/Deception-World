@@ -147,7 +147,6 @@ export function warmNaniteFlame(env = globalThis) {
     !document?.createElement ||
     document.hidden ||
     document.documentElement?.dataset?.worldEffects === "economy" ||
-    connection?.saveData ||
     /^(slow-)?2g$/.test(connection?.effectiveType || "") ||
     env.matchMedia?.("(prefers-reduced-motion: reduce)").matches ||
     env.matchMedia?.("(forced-colors: active)").matches

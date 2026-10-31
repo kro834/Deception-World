@@ -32,7 +32,7 @@ test("capable Android Chrome, Samsung Internet and WebView keep the full rendere
   assert.equal(prefersLightweightRendering({ userAgent: PIXEL_9 }), false);
 });
 
-test("weak Android hardware and constrained networks select the lightweight renderer", () => {
+test("weak hardware and constrained networks never override the explicit quality choice", () => {
   for (const hints of [
     { hardwareConcurrency: 4, deviceMemory: 4 },
     { hardwareConcurrency: 4, deviceMemory: 8 },
@@ -45,7 +45,7 @@ test("weak Android hardware and constrained networks select the lightweight rend
     for (const userAgent of [PIXEL_9, SAMSUNG_INTERNET, WEBVIEW]) {
       assert.equal(
         prefersLightweightRendering({ userAgent, ...hints }),
-        true,
+        false,
         `${userAgent} ${JSON.stringify(hints)}`,
       );
     }
@@ -68,15 +68,16 @@ test("iPhone, iPad and desktop keep the full renderer without resource constrain
   );
 });
 
-test("resource hints still select the lightweight renderer independently of platform", () => {
+test("resource hints are separate from the persistent visual quality preference", () => {
   for (const hints of [
     { deviceMemory: 2 },
     { hardwareConcurrency: 2 },
     { connection: { saveData: true } },
     { connection: { effectiveType: "2g" } },
   ]) {
-    assert.equal(prefersLightweightRendering(hints), true);
+    assert.equal(prefersLightweightRendering(hints), false);
   }
+  assert.equal(prefersLightweightRendering({ renderQuality: "lightweight" }), true);
   assert.equal(prefersLightweightRendering({}), false);
 });
 

@@ -1,0 +1,439 @@
+.wm-page {
+  --wm-ink: #dfeaec;
+  --wm-muted: #95aab2;
+  --wm-accent: #b6e6e6;
+  color: var(--wm-ink);
+  background: radial-gradient(ellipse at 75% 0, #15303c66, transparent 50%), #080e16;
+  min-height: 100svh;
+  padding: 28px clamp(16px, 4vw, 72px) 36px;
+  font-family: var(--font-body, sans-serif);
+}
+.wm-page a {
+  color: inherit;
+  text-decoration: none;
+}
+.wm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ffffff25;
+  padding-bottom: 22px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+.wm-back {
+  font-family: monospace;
+}
+.wm-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  padding: 52px 0 36px;
+  gap: 30px;
+}
+.wm-eyebrow {
+  font: 10px/1.6 monospace;
+  letter-spacing: 0.17em;
+  color: var(--wm-muted);
+}
+.wm-intro h1 {
+  font-size: clamp(32px, 4vw, 60px);
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  margin: 12px 0 0;
+}
+.wm-intro h1 span {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  margin-top: 12px;
+  color: var(--wm-muted);
+}
+.wm-intro p {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--wm-muted);
+  margin: 0;
+}
+.wm-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  padding: 16px 0 24px;
+}
+.wm-search {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 1px solid #769096;
+  width: min(360px, 100%);
+  font-size: 12px;
+}
+.wm-search input {
+  background: none;
+  border: 0;
+  color: var(--wm-ink);
+  padding: 13px 0;
+  min-width: 0;
+  width: 100%;
+  font-size: 14px;
+}
+.wm-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.wm-page button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+.wm-filters button {
+  background: none;
+  border: 1px solid #ffffff20;
+  border-radius: 2px;
+  padding: 9px 13px;
+  font-size: 12px;
+  color: var(--wm-muted);
+}
+.wm-filters button[aria-pressed="true"] {
+  background: #b6e6e61c;
+  border-color: #b6e6e6;
+  color: var(--wm-accent);
+}
+.wm-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  border: 1px solid #647a832f;
+}
+.wm-canvas {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background-image: radial-gradient(#90acbb28 0.7px, transparent 0.7px);
+  background-size: 20px 20px;
+  min-height: 540px;
+}
+.wm-canvas svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+  touch-action: none;
+  cursor: grab;
+}
+.wm-map-caption {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.wm-map-caption span,
+.wm-map-caption small {
+  font-size: 10px;
+  color: var(--wm-muted);
+}
+.wm-map-caption strong {
+  font-weight: 400;
+  font-size: 16px;
+}
+.wm-orbit {
+  fill: none;
+  stroke: #a7ccdb16;
+  stroke-dasharray: 2 9;
+}
+.wm-line {
+  stroke: #a3bac44d;
+  stroke-width: 1;
+}
+.wm-node {
+  color: #9fd4d4;
+  cursor: pointer;
+  outline: none;
+}
+.wm-kind-organization {
+  color: #dbbb8f;
+}
+.wm-kind-form {
+  color: #b7a8e3;
+}
+.wm-kind-event {
+  color: #93b5da;
+}
+.wm-kind-chapter {
+  color: #d6c39f;
+}
+.wm-node circle {
+  fill: #0c1820;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.wm-node text {
+  fill: currentColor;
+  font-size: 11px;
+  paint-order: stroke;
+  stroke: #080e16;
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.wm-node.is-selected circle {
+  fill: #acdcdc22;
+  stroke-width: 2;
+}
+.wm-node.is-selected text {
+  font-size: 15px;
+}
+.wm-node:hover circle,
+.wm-node:focus-visible circle {
+  fill: currentColor;
+  stroke-width: 4;
+}
+.wm-view-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #ffffff30;
+  background: #08101de8;
+}
+.wm-view-controls button {
+  border: 0;
+  background: none;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+.wm-view-controls output {
+  font: 10px monospace;
+  min-width: 40px;
+  text-align: center;
+}
+.wm-detail {
+  border-left: 1px solid #647a832f;
+  padding: 28px 22px;
+  background: #101b2580;
+  max-height: 690px;
+  overflow: auto;
+}
+.wm-detail h2 {
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  margin: 12px 0;
+}
+.wm-detail > p {
+  font-size: 12px;
+  color: var(--wm-muted);
+  line-height: 1.9;
+}
+.wm-source {
+  display: block;
+  border: 1px solid #a6c6ca50;
+  padding: 13px 16px;
+  margin-top: 24px;
+  font-size: 12px;
+}
+.wm-detail h3 {
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 32px;
+  display: flex;
+  justify-content: space-between;
+}
+.wm-detail h3 span {
+  color: var(--wm-muted);
+}
+.wm-detail ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.wm-detail li {
+  border-top: 1px solid #ffffff16;
+  padding: 12px 0;
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}
+.wm-detail li button {
+  border: 0;
+  background: none;
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+  padding: 0;
+}
+.wm-detail li small {
+  display: block;
+  font-size: 9px;
+  color: var(--wm-muted);
+  margin-bottom: 7px;
+}
+.wm-detail li span {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.wm-detail li b {
+  font-weight: 400;
+  margin-left: 10px;
+}
+.wm-detail li > a {
+  font-size: 9px;
+  white-space: nowrap;
+  color: var(--wm-muted);
+}
+.wm-index {
+  margin-top: 36px;
+}
+.wm-index-heading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+.wm-index h2 {
+  font-size: 16px;
+  font-weight: 400;
+  margin: 0;
+}
+.wm-index-heading > span {
+  font: 11px monospace;
+  color: var(--wm-muted);
+}
+.wm-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1px;
+  background: #ffffff15;
+  border: 1px solid #ffffff15;
+}
+.wm-index-grid button {
+  background: #0c151e;
+  border: 0;
+  padding: 15px;
+  text-align: left;
+  min-width: 0;
+}
+.wm-index-grid small {
+  display: block;
+  color: var(--wm-muted);
+  font-size: 9px;
+  margin-bottom: 7px;
+}
+.wm-index-grid span {
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.wm-index-grid button[aria-pressed="true"] {
+  background: #223c45;
+}
+.wm-page button:focus-visible,
+.wm-page a:focus-visible,
+.wm-page input:focus-visible {
+  outline: 2px solid #b6e6e6;
+  outline-offset: 4px;
+}
+.wm-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 30px;
+  color: var(--wm-muted);
+  font-size: 10px;
+  line-height: 1.9;
+}
+.wm-footer p {
+  margin: 0;
+}
+.wm-footer a {
+  white-space: nowrap;
+}
+@media (max-width: 900px) {
+  .wm-tools {
+    flex-direction: column;
+    align-items: start;
+  }
+  .wm-workspace {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .wm-detail {
+    padding: 22px 16px;
+  }
+  .wm-intro {
+    align-items: start;
+  }
+  .wm-intro p {
+    font-size: 11px;
+  }
+}
+@media (max-width: 650px) {
+  .wm-page {
+    padding-top: 20px;
+  }
+  .wm-intro {
+    padding: 35px 0 20px;
+    display: block;
+  }
+  .wm-intro p {
+    margin-top: 20px;
+  }
+  .wm-filters button {
+    padding: 8px 11px;
+  }
+  .wm-workspace {
+    display: block;
+  }
+  .wm-canvas,
+  .wm-canvas svg {
+    min-height: 430px;
+    height: 430px;
+  }
+  .wm-detail {
+    max-height: 360px;
+    border-left: 0;
+    border-top: 1px solid #647a834f;
+    border-radius: 20px 20px 0 0;
+    padding: 22px 20px;
+    position: relative;
+    background: #111e29;
+  }
+  .wm-detail:before {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 3px;
+    background: #879ca84f;
+    margin: -12px auto 20px;
+    border-radius: 4px;
+  }
+  .wm-detail h2 {
+    font-size: 21px;
+  }
+  .wm-index-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wm-footer {
+    display: block;
+  }
+  .wm-footer > a {
+    display: block;
+    margin-top: 16px;
+  }
+  .wm-map-caption {
+    top: 17px;
+    left: 17px;
+  }
+  .wm-view-controls {
+    left: 14px;
+    bottom: 14px;
+  }
+}

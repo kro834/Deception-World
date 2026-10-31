@@ -320,6 +320,8 @@ export interface RexonanceAssemblyConfig {
   prewarm?: boolean;
   /** A covered entry can supply its clock directly without a synthetic scroll runway. */
   progress?: () => number;
+  /** Exact external playhead: no scroll spring or wall-clock fire at rest. */
+  directProgress?: boolean;
   figure: string;
   undersuit: string;
   size: { readonly width: number; readonly height: number };

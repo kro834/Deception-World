@@ -44,7 +44,7 @@ const COMPACT_ART_WIDTH = 720;
  * portal and the calm tier show the art cover-fitted (2:3) at the device
  * pixel ratio, so a phone (412 x 915 at 2.6x needs about 1600 px across) and a
  * touch laptop get the full file, and only a small, low-density window gets
- * the cut. Save-Data and 2G ask for the cut too. The shader caps its texture at
+ * the cut. A 2G connection can request the smaller download. The shader caps its texture at
  * 1024 px either way.
  */
 export const risingBurnArt = () => {
@@ -53,6 +53,6 @@ export const risingBurnArt = () => {
   const connection = (
     navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
   ).connection;
-  const frugal = connection?.saveData === true || /(^|-)2g$/.test(connection?.effectiveType ?? "");
-  return frugal || needed <= COMPACT_ART_WIDTH ? RISING_BURN_ART_COMPACT : RISING_BURN_ART;
+  const slowNetwork = /(^|-)2g$/.test(connection?.effectiveType ?? "");
+  return slowNetwork || needed <= COMPACT_ART_WIDTH ? RISING_BURN_ART_COMPACT : RISING_BURN_ART;
 };

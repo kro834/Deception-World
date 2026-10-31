@@ -461,7 +461,7 @@ test("the redesign's type, motion and calm tiers", () => {
   assert.match(component, /prefers-reduced-motion: reduce/);
   assert.match(component, /forced-colors: active/);
   assert.match(component, /worldEffects !== "economy"/);
-  assert.match(component, /saveData === true/);
+  assert.doesNotMatch(component, /connection\?\.saveData|effectiveType/);
   assert.match(styles, /@media screen and \(prefers-reduced-motion: no-preference\)/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(styles, /@media \(forced-colors: active\)/);

@@ -30,6 +30,7 @@ const code = ts.transpileModule(`(${visibilityEffect})()`, {
 function mount({ hidden = false, observerSupport = true } = {}) {
   const document = new EventTarget();
   document.hidden = hidden;
+  document.documentElement = { dataset: {} };
   const window = new EventTarget();
   const media = new EventTarget();
   media.matches = false;

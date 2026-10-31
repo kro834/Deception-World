@@ -9,7 +9,6 @@ export function mountExtremeMotion(page, setMotionReady, environment = window) {
   const device = environment.navigator;
   const reducedMotion = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const coarsePointer = environment.matchMedia("(pointer: coarse)");
-  const connection = device.connection;
   const nativeEligible = supportsIOS27Enhancements(device);
   // Where view timelines run, the motion sheet's recede already follows the
   // scroll on the compositor, so the per-frame property write is skipped as on
@@ -48,10 +47,8 @@ export function mountExtremeMotion(page, setMotionReady, environment = window) {
   };
   const sync = () => {
     if (disposed) return;
-    const constrained =
-      connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType || "");
     const allowed =
-      !reducedMotion.matches && !constrained && html.dataset.worldEffects !== "economy";
+      !reducedMotion.matches && html.dataset.worldEffects !== "economy";
     if (ready !== allowed) {
       ready = allowed;
       setMotionReady(allowed);
@@ -79,7 +76,6 @@ export function mountExtremeMotion(page, setMotionReady, environment = window) {
   });
   reducedMotion.addEventListener?.("change", sync);
   coarsePointer.addEventListener?.("change", sync);
-  connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   environment.addEventListener("pagehide", detach);
   environment.addEventListener("pageshow", sync);
@@ -89,7 +85,6 @@ export function mountExtremeMotion(page, setMotionReady, environment = window) {
     observer.disconnect();
     reducedMotion.removeEventListener?.("change", sync);
     coarsePointer.removeEventListener?.("change", sync);
-    connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     environment.removeEventListener("pagehide", detach);
     environment.removeEventListener("pageshow", sync);

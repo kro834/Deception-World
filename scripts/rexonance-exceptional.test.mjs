@@ -592,7 +592,7 @@ test("a running card is retargeted, and quietly once it has begun to leave", () 
     }).action,
     "mount",
   );
-  // Hidden, reduced motion, economy, Save-Data and 2G never show a card.
+  // Hidden, reduced motion and economy never show a card.
   for (const cardMounted of [false, true]) {
     assert.deepEqual(
       planStageCall({

@@ -417,15 +417,16 @@ test("capability tiers: reduced motion, constrained resources, everything else W
     assert.equal(hasConstrainedResources(device), false, JSON.stringify(device));
   }
   for (const device of [
-    { connection: { saveData: true } },
     { connection: { effectiveType: "2g" } },
     { connection: { effectiveType: "slow-2g" } },
     { deviceMemory: 2 },
     { deviceMemory: 1 },
     { hardwareConcurrency: 2 },
   ]) {
-    assert.equal(hasConstrainedResources(device), true, JSON.stringify(device));
+    assert.equal(hasConstrainedResources(device), false, JSON.stringify(device));
   }
+  assert.equal(hasConstrainedResources({ connection: { saveData: true } }), false);
+  assert.equal(hasConstrainedResources({ renderQuality: "lightweight" }), true);
 });
 
 test("draw cadence: about 60 draws a second, never 45 on a 90 Hz panel", () => {
@@ -866,7 +867,7 @@ test("the burning image is chosen by the pixels a cover fit needs, not by pointe
     assert.equal(pick(1440, 900, 1), RISING_BURN_ART, "desktop");
     assert.equal(pick(640, 480, 1), RISING_BURN_ART_COMPACT, "a small, low-density window");
     assert.equal(pick(320, 740, 1), RISING_BURN_ART_COMPACT, "a 1x phone");
-    assert.equal(pick(412, 915, 2.625, { saveData: true }), RISING_BURN_ART_COMPACT, "Save-Data");
+    assert.equal(pick(412, 915, 2.625, { saveData: true }), RISING_BURN_ART, "Save-Data keeps needed pixels");
     assert.equal(pick(412, 915, 2.625, { effectiveType: "slow-2g" }), RISING_BURN_ART_COMPACT);
     assert.equal(pick(412, 915, 2.625, { effectiveType: "2g" }), RISING_BURN_ART_COMPACT);
     assert.equal(pick(412, 915, 2.625, { effectiveType: "4g" }), RISING_BURN_ART);

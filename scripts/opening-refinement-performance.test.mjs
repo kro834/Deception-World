@@ -165,7 +165,9 @@ function entryRuntime({
         return { armOpeningNotice() {}, disarmOpeningNotice() {} };
       if (name === "./opening-burn" || name === "./opening-dive") {
         chunkRequests.push(name);
-        return name === "./opening-dive" ? diveImport ?? {} : {};
+        return name === "./opening-dive"
+          ? diveImport ?? { releaseOpeningDivePrepared() {} }
+          : { releaseOpeningBurn() {}, mountOpeningBurn() { return () => {}; } };
       }
       return {};
     },
@@ -472,29 +474,29 @@ for (const [name, profileDevice] of [
   ["iPadOS 18", { userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) Version/18.6 Safari/605.1", maxTouchPoints: 5 }],
   ["four-core Android", { userAgent: "Mozilla/5.0 (Linux; Android 15) Chrome/134.0", hardwareConcurrency: 4 }],
 ]) {
-  test(`${name} keeps runtime video, particles and engine loading aligned with the pre-paint economy gate`, async () => {
-    const ui = entryRuntime({ runEffects: true, prepaintProfile: true, profileDevice, withVideo: true });
+  test(`${name} keeps full rendering unless lightweight is explicitly selected`, async () => {
+    const ui = entryRuntime({ runEffects: true, profileDevice, withVideo: true });
     const first = ui.render();
-    assert.equal(ui.document.documentElement.dataset.worldEffects, "economy");
+    assert.equal(ui.document.documentElement.dataset.worldEffects, undefined);
     assert.equal(first.particles.active, false, "the first SSR-compatible idle frame starts no particles");
-    assert.equal(ui.state[1], true, "the committed mount effect adopts the pre-paint profile");
+    assert.equal(ui.state[1], false, "the committed mount effect keeps the default profile");
     ui.render();
     ui.advance(120);
     const playing = ui.render();
     assert.equal(ui.state[0], "playing");
-    assert.match(playing.tree.props.className, /is-economy-opening/);
-    assert.equal(playing.particles.active, false);
+    assert.doesNotMatch(playing.tree.props.className, /is-economy-opening/);
+    assert.equal(playing.particles.active, true);
     ui.advance(3000);
     await flush();
-    assert.equal(ui.video.plays, 0);
-    assert.deepEqual(ui.chunkRequests, [], "the initial false→true economy commit starts no GPU imports");
+    assert.equal(ui.video.plays, 1);
+    assert.deepEqual(ui.chunkRequests, ["./opening-burn"], "the default profile prepares the full opening");
     ui.state[0] = "complete";
     const complete = ui.render();
     complete.enter.onFocus();
     complete.enter.onPointerDown({ pointerType: "touch" });
     ui.advance(1500);
     await flush();
-    assert.deepEqual(ui.chunkRequests, [], "focus, idle and touch must not prepare a dive in economy");
+    assert.deepEqual(ui.chunkRequests, ["./opening-burn", "./opening-dive"], "the default profile prepares the full dive");
     ui.unmount();
   });
 }

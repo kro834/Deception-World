@@ -150,6 +150,14 @@ test("tiers are chosen by capability, never by device model", () => {
       reducedMotion: false,
       constrained: hasConstrainedResources({ connection: { saveData: true } }),
     }),
+    "webgl",
+    "Save-Data does not change the renderer tier",
+  );
+  assert.equal(
+    pickOpeningTier({
+      reducedMotion: false,
+      constrained: hasConstrainedResources({ renderQuality: "lightweight" }),
+    }),
     "css",
   );
   assert.equal(pickOpeningTier({ reducedMotion: true, constrained: false }), "reduced");

@@ -10,5 +10,7 @@ export function openQuickSearch() {
 
 /** Warms the overlay chunk when an entry to it is pointed at or focused. */
 export function prefetchQuickSearch() {
+  if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData)
+    return;
   void loadQuickSearch().catch(() => undefined);
 }

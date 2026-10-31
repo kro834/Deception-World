@@ -513,7 +513,7 @@ test("the accents (the 光輪) are closed-form, reversible and allocation-free, 
   assert.equal(frame(1), "", "nothing at the runway's end");
 });
 
-const environmentFor = ({ reduced = false, forced = false, economy = false, saveData = false } = {}) => {
+const environmentFor = ({ reduced = false, forced = false, economy = false, saveData = false, effectiveType = "4g" } = {}) => {
   const listeners = new Map();
   const list = (matches) => ({
     matches,
@@ -525,7 +525,7 @@ const environmentFor = ({ reduced = false, forced = false, economy = false, save
   const idle = [];
   const environment = {
     matchMedia: (query) => list(query.includes("reduced-motion") ? reduced : forced),
-    navigator: { connection: { saveData, effectiveType: "4g" } },
+    navigator: { connection: { saveData, effectiveType } },
     requestIdleCallback: (callback) => idle.push(callback) && idle.length,
     cancelIdleCallback: () => {},
     setTimeout: () => 0,
@@ -538,9 +538,9 @@ const environmentFor = ({ reduced = false, forced = false, economy = false, save
   return { environment, host, html, idle, listeners };
 };
 
-test("the seam imports the engine chunk only under the motion gate, in idle time, and the still tiers download nothing", async () => {
+test("the seam imports the engine chunk only under accessibility/economy gates, in idle time", async () => {
   // Reduced motion: the still (data-rzn-load="static"), no import.
-  for (const tier of [{ reduced: true }, { forced: true }, { economy: true }, { saveData: true }]) {
+  for (const tier of [{ reduced: true }, { forced: true }, { economy: true }]) {
     const { environment, host, idle } = environmentFor(tier);
     let loads = 0;
     const dispose = mountFarFromAssembly(host, {
@@ -555,6 +555,16 @@ test("the seam imports the engine chunk only under the motion gate, in idle time
     dispose();
     assert.equal(loads, 0);
     assert.equal(host.dataset.rznLoad, undefined, "the mark is cleared");
+  }
+  for (const network of [{ saveData: true }, { effectiveType: "2g" }]) {
+    const saving = environmentFor(network);
+    const savingDispose = mountFarFromAssembly(saving.host, {
+      environment: saving.environment,
+      load: async () => ({ mountFarFromAssemblyEngine: () => () => {} }),
+    });
+    assert.equal(saving.host.dataset.rznLoad, "waiting", "network hints keep full motion selected");
+    assert.equal(saving.idle.length, 1);
+    savingDispose();
   }
   // Motion allowed: waiting, then the import in idle time, then the engine's mount.
   const { environment, host, idle } = environmentFor();

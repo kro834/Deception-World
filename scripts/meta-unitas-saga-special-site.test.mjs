@@ -258,10 +258,13 @@ test("the still tiers and the motion gate", () => {
   for (const term of [
     "prefers-reduced-motion: reduce",
     "forced-colors: active",
-    "saveData",
     "economy",
   ])
     assert.ok(gateModule.includes(term), term);
+  assert.doesNotMatch(
+    gateModule.slice(gateModule.indexOf("export function metaUnitasMotionAllowed")),
+    /saveData|effectiveType/,
+  );
   assert.match(gateModule, /import\("\.\/meta-unitas-rx-engine"\)/);
   assert.match(
     styles,

@@ -1,10 +1,7 @@
 /** Snapshot before layout/fragment restoration, never midway through a visit.
- * Network changes can stop motion immediately, but must not move the reader.
- * The next route entry picks up the new connection preference. */
+ * The explicit economy choice stays aligned with the pre-paint page profile. */
 export function syncRexonanceLayoutGate(environment = window) {
-  const connection = environment.navigator?.connection;
-  const constrained =
-    Boolean(connection?.saveData) || /^(slow-)?2g$/.test(connection?.effectiveType || "");
+  const constrained = environment.document.documentElement.dataset.worldEffects === "economy";
   environment.document.documentElement.toggleAttribute("data-rzn-constrained", constrained);
 }
 

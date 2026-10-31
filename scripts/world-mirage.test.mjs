@@ -339,6 +339,7 @@ const runGate = (device, { storage = {}, hash = "" } = {}) => {
     documentElement: { setAttribute: (key, value) => attributes.set(key, value) },
   };
   const windowStub = {
+    localStorage: { getItem: (key) => storage[key] ?? null },
     sessionStorage: { getItem: (key) => storage[key] ?? null },
     location: { hash },
   };
@@ -350,7 +351,7 @@ const runGate = (device, { storage = {}, hash = "" } = {}) => {
   return attributes.has("data-mirage-quiet");
 };
 
-test("the pre-paint boot gate follows the lightweight renderer rules and session state", async () => {
+test("the pre-paint boot gate follows the saved quality choice and session state", async () => {
   const desktop = {
     userAgent:
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
@@ -417,10 +418,14 @@ test("the pre-paint boot gate follows the lightweight renderer rules and session
       `${device.userAgent} ${JSON.stringify({ ...device, userAgent: undefined })}`,
     );
   }
-  // Capable Android plays the boot; weak Android and constrained hints stay quiet.
+  // Hardware and network hints never change the selected renderer.
   for (const device of [pixel9, galaxyS24, samsungInternet]) assert.equal(runGate(device), false);
-  assert.equal(runGate({ ...pixel9, deviceMemory: 2 }), true);
-  assert.equal(runGate({ ...galaxyS24, hardwareConcurrency: 4 }), true);
+  assert.equal(runGate({ ...pixel9, deviceMemory: 2 }), false);
+  assert.equal(runGate({ ...galaxyS24, hardwareConcurrency: 4 }), false);
+  assert.equal(
+    runGate(desktop, { storage: { "deception-world:render-quality:v1": "lightweight" } }),
+    true,
+  );
   assert.equal(runGate(desktop, { storage: { [MIRAGE_BOOT_KEY]: "1" } }), true);
   assert.equal(runGate(desktop, { storage: { "deception-world:rider-return": "saga" } }), true);
   assert.equal(runGate(desktop, { hash: "#riders" }), true);

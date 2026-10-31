@@ -12,6 +12,22 @@ export type SitePageEntry = {
 
 export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
   {
+    id: "transformation-lab",
+    title: "変身・フォーム研究室",
+    path: "/transformation-lab",
+    searchHash: "lab-main",
+    description: "四つの変身を再生・逆再生し、同じ工程で形態を比較する。",
+    aliases: ["変身ラボ", "研究室", "逆再生", "部位", "工程", "transformation lab"],
+  },
+  {
+    id: "world-map",
+    title: "世界関係図",
+    path: "/world-map",
+    searchHash: "world-map-main",
+    description: "人物・組織・形態・章を、公開資料の根拠とともに辿る。",
+    aliases: ["相関図", "関係図", "所属", "人物関係", "world map"],
+  },
+  {
     id: "world",
     searchHash: "top",
     title: "ディセプションワールド",

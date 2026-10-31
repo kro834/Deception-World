@@ -27,7 +27,6 @@ export function mountExtremeFightCard(page, environment = window) {
   if (!page) return () => {};
   const document = page.ownerDocument;
   const html = document.documentElement;
-  const connection = environment.navigator?.connection;
   const reducedMotion = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const comparison = page.querySelector(".rxs-comparison");
   if (!comparison || !environment.MutationObserver || !environment.IntersectionObserver)
@@ -113,10 +112,7 @@ export function mountExtremeFightCard(page, environment = window) {
   };
   const sync = () => {
     if (disposed) return;
-    const constrained =
-      connection?.saveData || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    const allowed =
-      !reducedMotion.matches && !constrained && html.dataset.worldEffects !== "economy";
+    const allowed = !reducedMotion.matches && html.dataset.worldEffects !== "economy";
     if (!allowed || document.hidden || html.hasAttribute("data-loading")) {
       stop();
       return;
@@ -138,7 +134,6 @@ export function mountExtremeFightCard(page, environment = window) {
     attributeFilter: ["data-world-effects", "data-loading"],
   });
   reducedMotion.addEventListener?.("change", sync);
-  connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", sync);
@@ -149,7 +144,6 @@ export function mountExtremeFightCard(page, environment = window) {
     disposed = true;
     attributes.disconnect();
     reducedMotion.removeEventListener?.("change", sync);
-    connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     environment.removeEventListener("pagehide", onPageHide);
     environment.removeEventListener("pageshow", sync);

@@ -33,6 +33,8 @@ export async function vercelCurlFetch(url, init = {}) {
 }
 
 export const PUBLIC_SMOKE_ROUTES = [
+  "/transformation-lab",
+  "/world-map",
   "/",
   "/world",
   "/characters",
@@ -312,6 +314,9 @@ export async function verifyPublicDeployment({
             asset.path,
           ) &&
             !/^\/ciel-inferno-20261019\/(?:ciel-(?:216|720|1080)\.webp|jet\.webp|(?:artwork|jet)-manifest\.json)(?![\s\S])/u.test(
+              asset.path,
+            ) &&
+            !/^\/nanite-surface-20261031\/(?:rexonance\.webp|far-from\.webp|illusionculum\.webp|provenance\.json)(?![\s\S])/u.test(
               asset.path,
             ) &&
             !/^\/ciel-button-20261018-(?:144|216|360)\.webp(?![\s\S])/u.test(asset.path) &&

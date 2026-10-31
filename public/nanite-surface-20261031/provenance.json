@@ -1,0 +1,47 @@
+{
+  "blender": "4.5.9 LTS / Cycles CPU",
+  "wrapperSha256": "3328ab6d15c55d094eaf29d3feaa844648f4bf92e3e075d20be1ea6bfbb49be6",
+  "geometry": "original scene meshes, cameras, rotations and frame count unchanged",
+  "alpha": "byte-identical to approved source atlas",
+  "assets": {
+    "rexonance": {
+      "source": "/rexonance-nanites-20261023/cells.webp",
+      "sourceSha256": "9999064d4f05134ec8e63d708fffbcfbaf483e711a38b9c9b9b72f2fbea55745",
+      "scene": "scripts/blender/nanite_cells.py",
+      "sceneSha256": "7a6a5151fde401d19801804c41f5e0f543b536296501e3fdda7514cb55d233ff",
+      "sha256": "a1d82caf5589fb97d456a9a0a150fc397488855397d075f313705c7d41e5be77",
+      "bytes": 77468,
+      "alphaSha256": "8ea9aeb9e8fd57c6c8ce58a6bcee5012d083453e2b28f29b3f6b70116e40fe64",
+      "frames": 24,
+      "cell": 32,
+      "width": 768,
+      "height": 224
+    },
+    "far-from": {
+      "source": "/far-from-nanites-20261022/cells.webp",
+      "sourceSha256": "522797eacae801691910bdd3ea40b0c7e255da41b8c1bbd4b92fa3e474391f82",
+      "scene": "scripts/blender/farfrom_nanite_cells.py",
+      "sceneSha256": "73722b5cd54933c3ae4c9aff7686d315462e5ae1d89dd4af4912d061f913e4b1",
+      "sha256": "ca636c949198026225ac3fd0026ce71e1da65e8b25507433459de8ddf67f7551",
+      "bytes": 64908,
+      "alphaSha256": "6a11219f255479c8b8e257cbfdb8565a116bbf7b2a375a6cc9c52f280b74909f",
+      "frames": 24,
+      "cell": 32,
+      "width": 768,
+      "height": 224
+    },
+    "illusionculum": {
+      "source": "/illusionculum-nanites-20261027/cells.webp",
+      "sourceSha256": "8e3b1f0d50013774e2a364b6f579351b3ca905a4ae0ac4ad04b652ea2609caed",
+      "scene": "scripts/blender/illusionculum_nanite_cells.py",
+      "sceneSha256": "a1763053dc9b6ab49b829bf42b32757e09aa19cd7a438dcd40afc52ff6a3af85",
+      "sha256": "aecc7077f5cd43fd09971e1b9123f44c1bee12bfac91340fca9934d1bf7fff78",
+      "bytes": 91808,
+      "alphaSha256": "e5941b26ac4d440d70f127e2e88fffb7dea45df5fecccb27e9d2a036dba59db3",
+      "frames": 24,
+      "cell": 32,
+      "width": 768,
+      "height": 224
+    }
+  }
+}

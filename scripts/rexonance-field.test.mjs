@@ -1099,7 +1099,11 @@ test("both scenes compose the field lazily, through their own clocks, and releas
   // goLive, its camera on the whole frame, its layer on the first live
   // frame, released when still, hidden or disposed.
   assert.match(scroll, /import\("\.\/rexonance-field\/index\.js"\)\.catch\(\(\) => null\)/);
-  assert.match(scroll, /fieldTake = fieldLib\.fieldTake\(fieldLib\.fieldVisitSeed\(environment\)\);/);
+  assert.match(
+    scroll,
+    /fieldTake = fieldLib\.fieldTake\(\s*config\.directProgress \? 20261031 : fieldLib\.fieldVisitSeed\(environment\),?\s*\);/,
+    "the normal scroll visit gets a fresh take while the direct-progress audit is deterministic",
+  );
   assert.match(scroll, /fieldLib\.fieldCameraView\(fieldCamera, W, H, view\.scale, view\.x, view\.y, fieldView\);/);
   assert.match(scroll, /context\.setTransform\(vs, 0, 0, vs, vx, vy\);/);
   assert.match(scroll, /nanites\.view\(vs, vx, vy\);/);

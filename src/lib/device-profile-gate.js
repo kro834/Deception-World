@@ -22,8 +22,6 @@
  * scripts against them. Keep it ES5: it runs before any polyfill.
  */
 export const DEVICE_RULES = `var u = n.userAgent || "";
-    var c = n.connection || {};
-    var cores = n.hardwareConcurrency || 0;
     var touch = n.maxTouchPoints || 0;
     var mobile = /iPhone|iPad|iPod/.test(u);
     var apple = 0;
@@ -35,14 +33,20 @@ export const DEVICE_RULES = `var u = n.userAgent || "";
     var samsung = /SamsungBrowser\\/\\d+/.test(u);
     var android = /Android/i.test(u) || (samsung && /X11; Linux x86_64/.test(u) && touch > 0);
     var oneUi = samsung && !/Windows NT/.test(u);
-    var economy =
-      apple === 18 ||
-      (android && cores > 0 && cores <= 4) ||
-      c.saveData === true ||
-      c.effectiveType === "slow-2g" ||
-      c.effectiveType === "2g" ||
-      (n.deviceMemory !== undefined && n.deviceMemory <= 2) ||
-      (cores > 0 && cores <= 2);`;
+    var economy = false;
+    var parseQuality = function (value) {
+      if (value === "high" || value === "lightweight") return { quality: value, revision: 0 };
+      if (typeof value === "string") { try { value = JSON.parse(value); } catch (parseError) { return null; } }
+      if (value && (value.quality === "high" || value.quality === "lightweight") && typeof value.revision === "number" && isFinite(value.revision)) return value;
+      return null;
+    };
+    var entryQuality = null;
+    var savedQuality = null;
+    try { entryQuality = parseQuality(window.history.state && window.history.state.deceptionWorldRenderQualityV1); } catch (historyError) {}
+    try { savedQuality = parseQuality(window.localStorage.getItem("deception-world:render-quality:v1")); } catch (storageError) {}
+    var selectedQuality = entryQuality && (!savedQuality || entryQuality.revision > savedQuality.revision) ? entryQuality : savedQuality;
+    var quality = selectedQuality && selectedQuality.quality;
+    economy = quality === "lightweight";`;
 
 export const DEVICE_PROFILE_SCRIPT = `(function () {
   var d = document.documentElement;

@@ -1,3 +1,4 @@
+import { refinedNaniteSource } from "./nanite-surface-assets.js";
 import { REXONANCE_NANITE_ASSETS } from "./rexonance-nanites.ts";
 import { registerRexonanceNaniteWarm } from "./rexonance-suit-warmup.ts";
 
@@ -78,12 +79,12 @@ export function warmRexonanceNanites(priority: Priority = "low"): Promise<boolea
   const signal = ownController.signal;
   const job = Promise.all(
     REXONANCE_NANITE_ASSETS.map((source) =>
-      decode(source, priority, signal).catch(() => false),
+      decode(refinedNaniteSource(source), priority, signal).catch(() => false),
     ),
   ).then((all) => {
     if (controller === ownController) controller = null;
     if (pending === job) pending = null;
-    decoded = all.every(Boolean) && REXONANCE_NANITE_ASSETS.every((src) => sources.has(src));
+    decoded = all.every(Boolean) && REXONANCE_NANITE_ASSETS.every((src) => sources.has(refinedNaniteSource(src)));
     if (decoded) prepare(pendingPriority);
     return decoded;
   });
@@ -113,7 +114,7 @@ export function releaseRexonanceNaniteSources() {
 }
 
 /** A decoded sheet of the kit (null until the warm-up has it). */
-export const rexonanceNaniteSource = (source: string) => sources.get(source) ?? null;
+export const rexonanceNaniteSource = (source: string) => sources.get(refinedNaniteSource(source)) ?? null;
 
 /** Whether every sheet of the kit is decoded. */
 export const isRexonanceNaniteDecoded = () => decoded;
