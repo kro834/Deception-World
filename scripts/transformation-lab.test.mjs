@@ -9,6 +9,7 @@ import {
   LAB_ZOOMS,
   LAB_BEATS,
   LAB_FORMS,
+  createLabUrlWriter,
 } from "../src/lib/transformation-lab-state.js";
 
 test("lab URL round trips all riders and zooms with a paused exact comparison beat", () => {
@@ -83,4 +84,53 @@ test("direct playback keeps deterministic field and particles while ordinary scr
   assert.match(engine, /config.directProgress \? 20261031 : fieldLib.fieldVisitSeed/);
   assert.match(engine, /draw\(shown, false, config.directProgress \? 0 : step\)/);
   assert.match(engine, /config.directProgress \|\| coarse.matches/);
+});
+
+test("a seek drag stays under WebKit's 100 replaceState per 10 s flood guard", () => {
+  // WebKit throws SecurityError past 100 writes in 10 s; a thrown effect put
+  // the route's load-error page over the lab mid-transformation.
+  let now = 0;
+  const timers = [];
+  const writes = [];
+  const history = {
+    state: { key: 1 },
+    replaceState(state, _unused, url) {
+      const recent = writes.filter((at) => at > now - 10000).length;
+      if (recent >= 100) throw new Error("SecurityError");
+      writes.push(now);
+      this.last = url;
+    },
+  };
+  const writer = createLabUrlWriter(history, {
+    schedule: (fn, delay) => timers.push({ at: now + delay, fn }) && timers.length,
+    cancel: (id) => {
+      if (timers[id - 1]) timers[id - 1].fn = () => {};
+    },
+  });
+  const advance = (ms) => {
+    const end = now + ms;
+    for (; now < end; now += 1)
+      for (const timer of timers) if (timer.at === now) timer.fn();
+  };
+  // 10 s of a 120 Hz drag.
+  for (let i = 0; i < 1200; i++) {
+    writer.write(`?at=${(i / 1200).toFixed(4)}`);
+    advance(8);
+  }
+  advance(1000);
+  assert.ok(writes.length > 0 && writes.length < 100, `wrote ${writes.length} times`);
+  assert.equal(history.last, "?at=0.9992", "the last scrub position lands");
+  writer.write("?at=0.5");
+  writer.cancel();
+  advance(1000);
+  assert.equal(history.last, "?at=0.9992", "a cancelled write never lands after leaving");
+});
+
+test("the lab writes its URL through the throttled writer, never per input", () => {
+  const source = readFileSync(
+    new URL("../src/components/transformation-lab/transformation-lab.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /createLabUrlWriter\(window\.history\)/);
+  assert.doesNotMatch(source, /window\.history\.replaceState/);
 });

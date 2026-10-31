@@ -27,3 +27,16 @@ export const LAB_NAMES: Record<LabRider, string>;
 
 export const LAB_FORMS: Record<LabRider, [string, string][]>;
 export function validLabForm(rider: LabRider, form: string): string;
+export interface LabUrlWriter {
+  write(url: string | URL): void;
+  flush(): void;
+  cancel(): void;
+}
+export function createLabUrlWriter(
+  history: Pick<History, "state" | "replaceState">,
+  options?: {
+    delay?: number;
+    schedule?: (callback: () => void, delay: number) => unknown;
+    cancel?: (timer: never) => void;
+  },
+): LabUrlWriter;

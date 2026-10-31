@@ -9,6 +9,7 @@ import {
   validLabForm,
   LAB_RIDERS,
   advanceLab,
+  createLabUrlWriter,
   labSearch,
   parseLabState,
   type LabRider,
@@ -43,21 +44,31 @@ export function TransformationLab() {
   useEffect(() => {
     current.current = state;
   }, [state]);
+  // One write per seek input flooded WebKit's history (see createLabUrlWriter).
+  const urlWriter = useRef<ReturnType<typeof createLabUrlWriter> | null>(null);
   useEffect(() => {
+    const writer = createLabUrlWriter(window.history);
+    urlWriter.current = writer;
     const restore = () => {
+      writer.cancel();
       setState(parseLabState(location.search));
       setPlaying(false);
     };
     restore();
     setHydrated(true);
     window.addEventListener("popstate", restore);
-    return () => window.removeEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("popstate", restore);
+      // The router has already moved on; a late write would rename its page.
+      writer.cancel();
+      urlWriter.current = null;
+    };
   }, []);
   useEffect(() => {
     if (!hydrated || playing) return;
     const url = new URL(location.href);
     url.search = labSearch(state);
-    window.history.replaceState(window.history.state, "", url);
+    urlWriter.current?.write(url.href);
   }, [state, hydrated, playing]);
   useEffect(() => {
     if (!playing || !ready || state.compare) return;
