@@ -405,8 +405,13 @@ html[data-button-style="liquid"]
   --lg-sheen: 0.24;
 }
 
+/* A hybrid screen (an iPad with a trackpad, a touch laptop) matches
+   hover: hover, and WebKit leaves :hover on the last control a finger
+   tapped until something else is tapped: the hover light stayed lit after
+   the release. src/lib/liquid-glass.ts marks html[data-lg-touch] from a
+   touch or pen press until the mouse moves again. */
 @media (hover: hover) and (pointer: fine) {
-  html[data-button-style="liquid"]
+  html[data-button-style="liquid"]:not([data-lg-touch])
     body
     :is(
       .topbar nav a,
@@ -477,7 +482,6 @@ html[data-button-style="liquid"]
     .rw-skip,
     .rw-replay,
     .rw-redive-button,
-    .ios-slide-open,
     .episode-pickup-plus,
     .side-panel-close,
     .site-announcement-close,
@@ -618,6 +622,46 @@ html[data-button-style="liquid"]
     scale: var(--dw-press-scale);
     transition: scale 90ms cubic-bezier(0.2, 0, 0, 1);
   }
+}
+
+/* ---------------------------------------------------------------
+   The slide-to-open pills (owner, 2026-10-31: 「スライダー長押し時の反射
+   光沢」). A slider is held for its whole gesture, so the shared press
+   (:active, which WebKit keeps for the whole touch, and the 60 ms
+   data-holding cue that blinked it on and off elsewhere) lit the whole
+   capsule from inside and parked that pool at 30% while the thumb
+   travelled away from it, over the fill's colour and the thumb's own
+   glint. The slider is not in the press list: its glass stays at rest
+   while held and dragged, and only the rim answers, through box-shadow,
+   which the control eases. The thumb carries the press as it always has.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open:is(
+    [data-holding="true"],
+    [data-dragging="true"],
+    [data-completing="true"]
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-rim: 0.8;
+}
+
+/* The track's top hairline doubled the glass's specular rim (and, drawn
+   above the thumb, streaked across the knob as it passed). */
+html[data-button-style="liquid"] body .ios-slide-open::after {
+  display: none;
+}
+
+/* The dossier and /world plates square their thumb and fill (2px) inside a
+   4px plate; the glass makes the plate a capsule, which cut the square
+   thumb at the left rim. On glass the thumb, its ring and the fill round
+   with it, as the final stage's already do. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  :is(.ios-slide-open-thumb, .ios-slide-open-thumb > i, .ios-slide-open-fill):not(#lg-glass):not(
+    #lg-glass
+  ):not(#lg-glass) {
+  border-radius: 999px !important;
 }
 
 /* The pointer light (mouse and trackpad only): liquid-glass-defs.tsx writes

@@ -1055,6 +1055,7 @@ br.tab-br {
     0 16px 38px rgba(0, 0, 0, 0.42);
   cursor: ew-resize;
   touch-action: pan-y;
+  -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -1158,3 +1159,7 @@ br.tab-br {
 
 .manager-slot-grid > .signal,
 .manager-slot-grid > .dante-archive,
+.manager-slot-grid > .other-archive-card,
+.manager-slot-grid > .archive-placeholder {
+  min-block-size: 0;
+  block-size: 178px;

@@ -108,6 +108,9 @@ export function liquidButtonsOn(doc: Document = document) {
 
 const POINTER_PROPS = ["--lg-px", "--lg-py", "--lg-lx", "--lg-ly"] as const;
 
+/** Set on <html> from a touch or pen press until the mouse moves again. */
+export const LIQUID_TOUCH_ATTRIBUTE = "data-lg-touch";
+
 /**
  * The pointer light: over a glass control, the inner pool follows the
  * pointer (--lg-px/--lg-py) and the rim is lit from its side (--lg-lx/
@@ -142,7 +145,19 @@ export function watchLiquidPointer(doc: Document = document) {
     current.style.setProperty("--lg-ly", Math.min(py * 2 - 1, -0.35).toFixed(2));
   };
 
+  // WebKit leaves :hover on the control a finger last tapped, and a hybrid
+  // screen (an iPad with a trackpad) still matches hover: hover, so the
+  // sheet's hover light is held off from a touch until the mouse moves.
+  const root = doc.documentElement;
+  const down = (event: PointerEvent) => {
+    if (event.pointerType === "mouse") root.removeAttribute(LIQUID_TOUCH_ATTRIBUTE);
+    else if (!root.hasAttribute(LIQUID_TOUCH_ATTRIBUTE))
+      root.setAttribute(LIQUID_TOUCH_ATTRIBUTE, "");
+  };
+
   const move = (event: PointerEvent) => {
+    if (event.pointerType === "mouse" && root.hasAttribute(LIQUID_TOUCH_ATTRIBUTE))
+      root.removeAttribute(LIQUID_TOUCH_ATTRIBUTE);
     if (event.pointerType !== "mouse" || !fine.matches) return;
     const target =
       event.target instanceof view.Element ? event.target.closest(TARGET_SELECTOR) : null;
@@ -162,11 +177,14 @@ export function watchLiquidPointer(doc: Document = document) {
   };
 
   const options = { capture: true, passive: true } as const;
+  doc.addEventListener("pointerdown", down, options);
   doc.addEventListener("pointermove", move, options);
   doc.addEventListener("pointerout", leave, options);
   return () => {
     if (frame) view.cancelAnimationFrame(frame);
     clear();
+    root.removeAttribute(LIQUID_TOUCH_ATTRIBUTE);
+    doc.removeEventListener("pointerdown", down, options);
     doc.removeEventListener("pointermove", move, options);
     doc.removeEventListener("pointerout", leave, options);
   };

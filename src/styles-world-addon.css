@@ -1055,6 +1055,7 @@ br.tab-br {
     0 16px 38px rgba(0, 0, 0, 0.42);
   cursor: ew-resize;
   touch-action: pan-y;
+  -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -1333,6 +1334,15 @@ br.tab-br {
   .manager-slot-grid .dante-copy {
     padding: 14px;
   }
+}
+
+/* A held thumb is a long press: WebKit must not raise its callout, a
+   selection or the tap flash on any part of the pill. */
+.ios-slide-open * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ios-slide-open::after {
