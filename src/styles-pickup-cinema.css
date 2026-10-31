@@ -280,6 +280,15 @@ html body #world-column-pickup {
     border: 0 !important;
     border-radius: 0 !important;
   }
+
+  /* The column panes share one grid cell so a tab switch never resizes the
+     frame (styles-world-addon.css); the whole-screen sheet cannot resize, and
+     the shared cell left every short column (01-04) about 3000px of empty
+     scroll under its text on a phone: the tallest, 05, set the length. Here
+     only the shown pane takes room. */
+  html body #world-column-pickup .world-column-dialog-copy-pane:not(.is-active) {
+    display: none;
+  }
 }
 
 /* The HUD bar: the close plate's row, locked on at the top corners in the

@@ -25,6 +25,38 @@
    material carries :not(#lg-glass):not(#lg-glass):not(#lg-glass), an id's weight, and !important on the
    painted properties. States change only the --lg-* variables. */
 
+/* The press and hover light (owner, 2026-10-31: 「スライダー長押し時の反射
+   光沢」). States change these four numbers, and an unregistered custom
+   property cannot interpolate: the light switched on and off in one frame
+   on every glass button while the squash beside it eased. Registered, they
+   ease with the press (the transition lists below). Non-inheriting (each
+   control sets its own; nothing inside reads them), so a registration
+   restyles no descendant; the initial values are the rest values. With the
+   option off nothing reads them. */
+@property --lg-glow {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.16;
+}
+
+@property --lg-rim {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.62;
+}
+
+@property --lg-sheen {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.16;
+}
+
+@property --lg-tint-a {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.12;
+}
+
 html[data-button-style="liquid"] {
   /* Light from the upper left. -1..1 on each axis. */
   --lg-lx: -0.55;
@@ -500,7 +532,6 @@ html[data-button-style="liquid"]
     .command-deck-down,
     .command-deck-art-controls,
     .command-deck-gallery-link,
-    .zeus-button,
     .rxs-local-nav nav a,
     .rxe-hero-primary,
     .rxe-hero-secondary,
@@ -586,21 +617,38 @@ html[data-button-style="liquid"]
     --dw-press-scale: 1.02 0.96;
   }
 
+  /* The light eases with the press: while the driver holds data-press its
+     list (styles-press-feedback.css, which this mirrors) carries the glass's
+     four light numbers too, so they take the press's 90 ms going in and the
+     settle coming back. Only while data-press is present, as there; the
+     controls' own lists are untouched. */
+  html[data-button-style="liquid"][data-press-ready]
+    body
+    [data-press][data-press]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition-property:
+      scale, filter, transform, translate, opacity, color, background-color, border-color,
+      box-shadow, --lg-glow, --lg-rim, --lg-sheen, --lg-tint-a;
+  }
+
   /* The release: the spring, on scale only (the other settles keep the
-     house curve). The list mirrors styles-press-feedback.css. */
+     house curve). The list mirrors styles-press-feedback.css, then the
+     light. */
   html[data-button-style="liquid"][data-press-ready]
     body
     [data-press="out"][data-press]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     transition-duration:
       var(--lg-spring-ms), var(--dw-dur-settle), var(--dw-dur-state), var(--dw-dur-state),
       var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state),
-      var(--dw-dur-state);
+      var(--dw-dur-state), var(--dw-dur-settle), var(--dw-dur-settle), var(--dw-dur-settle),
+      var(--dw-dur-settle);
     transition-timing-function:
       cubic-bezier(0.34, 1.56, 0.64, 1), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out);
     transition-timing-function:
       var(--lg-spring), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out);
   }
@@ -641,6 +689,21 @@ html[data-button-style="liquid"]
     [data-holding="true"],
     [data-dragging="true"],
     [data-completing="true"]
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-rim: 0.8;
+}
+
+/* Ciel's (Zeus) button, likewise (owner, 2026-10-31). The press driver
+   skips it (it owns its drag), so its press was :active and data-holding,
+   which iOS keeps for the whole touch: the glass lit from inside for as long
+   as a finger rested on it, and through a drag. Held or carried, only the
+   rim answers; its drag, park and avoid logic read none of this. */
+html[data-button-style="liquid"]
+  body
+  .zeus-button:is(
+    :active,
+    [data-holding="true"],
+    [data-dragging="true"]
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   --lg-rim: 0.8;
 }

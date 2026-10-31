@@ -219,4 +219,20 @@
       padding-inline: 16px;
     }
   }
+
+  /* 361-419px portrait (iPhone SE and mini, iPhone 15 Pro): the Astra
+     padding and tracking above outweigh the opening's phone fit
+     (styles-opening-elevation.css), so ENTER THE WORLD ran past its plate's
+     right edge on the SE and broke in two (ENTER THE / WORLD) on the 15 Pro.
+     The phone fit is restated at this weight: one line, inside the plate. */
+  @media (min-width: 361px) and (max-width: 419px) and (orientation: portrait) {
+    html[data-family="opening"] body .cine-stage .cine-btn {
+      padding-inline: 0.8rem;
+    }
+
+    html[data-family="opening"] body .cine-stage .cine-btn-primary {
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+  }
 }
