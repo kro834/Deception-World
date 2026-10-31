@@ -32,7 +32,13 @@ export function worldViewContract(source) {
     if (!ts.isVariableStatement(statement)) continue;
     for (const declaration of statement.declarationList.declarations) {
       if (recordNames.has(declaration.name.getText(file))) {
-        records.push(printer.printNode(ts.EmitHint.Unspecified, declaration, file));
+        const printed = printer.printNode(ts.EmitHint.Unspecified, declaration, file);
+        // Original dimensions are independently checked against actual files.
+        records.push(
+          declaration.name.getText(file) === "POSTERS"
+            ? printed.replace(/\s+(?:width|height): \d+,/g, "")
+            : printed,
+        );
       }
     }
   }
@@ -70,4 +76,29 @@ export function worldViewContract(source) {
   collect(file);
   const digest = (items) => createHash("sha256").update(JSON.stringify(items)).digest("hex");
   return { records: digest(records), markup: digest(markup) };
+}
+
+// Hero composition may change, but its words and everything after it may not.
+export function worldArtworkBoundaryContract(source) {
+  const start = source.lastIndexOf("<section", source.indexOf("ref={openingHeroRef}"));
+  const end = source.indexOf('<MirageTicker variant="open"', start);
+  if (start < 0 || end < 0) throw new Error("World hero boundaries missing");
+  const hero = source.slice(start, end);
+  const file = ts.createSourceFile(
+    "hero.tsx",
+    hero,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const words = [];
+  const visit = (node) => {
+    if (ts.isJsxText(node) && node.text.trim()) words.push(node.text.trim().replace(/\s+/g, " "));
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  return {
+    outsideHero: worldViewContract(source.slice(0, start) + "<span />" + source.slice(end)).markup,
+    heroWords: createHash("sha256").update(JSON.stringify(words.sort())).digest("hex"),
+  };
 }

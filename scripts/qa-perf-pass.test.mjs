@@ -167,12 +167,27 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
     assert.equal(warmup.src, posterImage(source).src);
     assert.equal(warmup.srcset, posterImage(source).srcSet);
   }
+  const metadata = [
+    ...home
+      .slice(home.indexOf("const POSTERS = ["), home.indexOf("const RIDERS = ["))
+      .matchAll(/src: "([^"]+)",\s+width: (\d+),\s+height: (\d+)/g),
+  ];
+  assert.equal(metadata.length, 33);
+  for (const [, source, width, height] of metadata) {
+    const bytes = readFileSync(file(source));
+    const actual = source.endsWith(".webp") ? webpSize(bytes) : jpegSize(bytes);
+    assert.deepEqual(
+      [Number(width), Number(height)],
+      actual,
+      `${source} stage uses original aspect`,
+    );
+  }
   assert.ok(webp < jpeg * 0.45, `${webp} of ${jpeg}`);
-  // The deck, the backdrop and the warm-ups all ask through the helpers.
+  // Both stage layers ask through the delivery helper.
   assert.equal(
     home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src, reuseWarmedPoster\)\}/g)
       ?.length,
-    8,
+    2,
   );
   // Autoplay, warmup and shuffle use the same delivery-aware loader as Dream.
   assert.match(
@@ -182,17 +197,11 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   assert.match(home, /posterLoader\.current\.load\(POSTERS\[index\]\.src, priority\)/);
   assert.doesNotMatch(home, /new Image\(/);
   assert.doesNotMatch(home, /\.src = POSTERS\[/);
-  for (let index = 1; index <= 4; index++) {
-    const source = index === 1 ? "nextPoster" : "current";
-    // Mutating a reused lazy back-card image can invalidate the front's
-    // warmed resource during rapid transitions in WebKit.
-    assert.match(
-      home,
-      new RegExp(
-        `className="poster-back-card poster-back-card-${index}"[^>]*>\\s*<img\\s+key=\\{${source}\\.src\\}\\s+src=\\{${source}\\.src\\}`,
-      ),
-    );
-  }
+  // The stage uses only the selected print and its outgoing decoded image.
+  // Key each image so rapid WebKit transitions keep their warmed resources.
+  assert.doesNotMatch(home, /className="poster-back-card/);
+  assert.match(home, /key=\{`poster-\$\{poster\}`\}/);
+  assert.match(home, /key=\{`poster-prev-\$\{prevPoster\}`\}/);
 });
 
 test("the Dream Chapter's poster console asks for the same WebP copies", async () => {

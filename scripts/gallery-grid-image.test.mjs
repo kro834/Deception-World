@@ -103,7 +103,7 @@ test("auto sizing is restricted to lazy grid images, not featured or full-resolu
     /galleryGridImage\(display\.preferences\.density, work\.width, work\.height\)/,
   );
   assert.match(autoImages[0], /loading="lazy"/);
-  const featured = tags.find((tag) => tag.includes("src={featured.medium}"));
+  const featured = tags.find((tag) => tag.includes("src={print.medium}"));
   assert.ok(featured);
   assert.match(featured, /fetchPriority="high"/);
   assert.doesNotMatch(featured, /galleryGridImage|auto,/);

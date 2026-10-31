@@ -8,6 +8,8 @@ import {
 } from "@/lib/world-head";
 import { assetsWarmed, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { posterImage } from "@/lib/thumbnail-images";
+import artworkStageCssUrl from "@/styles-artwork-stage.css?url";
+import worldArtworkStageCssUrl from "@/styles-world-artwork-stage.css?url";
 import worldProgrammeCssUrl from "@/styles-world-programme.css?url";
 import worldProgrammeSectionsCssUrl from "@/styles-world-programme-sections.css?url";
 import worldNeoCssUrl from "@/styles-world-neo.css?url";
@@ -88,6 +90,8 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: commandDirectoryCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
+        { rel: "stylesheet", href: artworkStageCssUrl },
+        { rel: "stylesheet", href: worldArtworkStageCssUrl },
       ],
     });
     return {

@@ -1,3 +1,67 @@
+    previousManagerTab.current = managerTab;
+    if (previous === managerTab) return;
+    return animateSelectionArrival(
+      shellRef.current?.querySelector<HTMLElement>(".manager-archive-panel") ?? null,
+      managerTab > previous ? 1 : -1,
+    );
+  }, [managerTab]);
+  const [columnTab, setColumnTab] = useState(0);
+  const [riderTab, setRiderTab] = useState(0);
+  const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
+  const [episode, setEpisode] = useState(0);
+  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
+  const [pickupOpen, setPickupOpen] = useState(false);
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
+  // Read by the poster timer at once; the state follows when scrolling settles.
+  const heroInViewRef = useRef(true);
+  const [motionReduced, setMotionReduced] = useState(false);
+  const managerRail = useRef<HTMLDivElement>(null);
+  const columnRail = useRef<HTMLDivElement>(null);
+  const riderRail = useRef<HTMLDivElement>(null);
+  const episodeGridRef = useRef<HTMLDivElement>(null);
+  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
+  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const episodePickupOpenedByKeyboard = useRef(false);
+  const episodePointerFocusTimer = useRef<number | null>(null);
+  const episodeScrollTimer = useRef<number | null>(null);
+  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
+  const pickupBtnRef = useRef<HTMLButtonElement>(null);
+  const pickupDialogRef = useRef<HTMLDialogElement>(null);
+  const pickupRail = useRef<HTMLDivElement>(null);
+  const pickupCloseTimer = useRef<number | null>(null);
+  const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
+  const shuffleTimers = useRef<number[]>([]);
+  const shuffleActive = useRef(false);
+  const shuffleRunId = useRef(0);
+  const posterLoader = useRef<ReturnType<typeof createReadyPosterLoader> | null>(null);
+  const episodeProgrammatic = useRef(false);
+  const riderTabRef = useRef(riderTab);
+  const riderTransitionTimer = useRef<number | null>(null);
+  const pausedAmbientAnimations = useRef<Animation[]>([]);
+
+  const loadPoster = useCallback(
+    (index: number, priority: "high" | "low" = "high") => {
+      posterLoader.current ??= createReadyPosterLoader((image, source) =>
+        preparePosterImage(image, source, reuseWarmedPoster),
+      );
+      return posterLoader.current.load(POSTERS[index].src, priority);
+    },
+    [reuseWarmedPoster],
+  );
+
+  const cancelPosterShuffle = useCallback(() => {
+    shuffleRunId.current += 1;
+    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
+    shuffleTimers.current = [];
+    shuffleActive.current = false;
+    setShuffling(false);
+  }, []);
+
+  useEffect(() => mountFilmMotion(shellRef.current), []);
+  useMirageBoot(shellRef);
+  // A first rider or archive-tab choice paints its picture at once
+  // (world-swap-warmups.ts). The return layout effect has set the shown rider.
   useEffect(
     () =>
       warmWorldSwaps(
@@ -443,66 +507,3 @@
       touching = true;
       window.clearTimeout(settleTimer);
       releaseProgrammaticScroll();
-    };
-    const endTouch = () => {
-      touching = false;
-      scheduleSettle();
-    };
-    const onScroll = () => {
-      scheduleSettle();
-      if (frame) return;
-      frame = requestAnimationFrame(syncFromScroll);
-    };
-    grid.addEventListener("touchstart", startTouch, { passive: true });
-    grid.addEventListener("touchend", endTouch, { passive: true });
-    grid.addEventListener("touchcancel", endTouch, { passive: true });
-    grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
-    grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
-    grid.addEventListener("scroll", onScroll, { passive: true });
-    grid.addEventListener("scrollend", settleScroll);
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.clearTimeout(settleTimer);
-      grid.removeEventListener("touchstart", startTouch);
-      grid.removeEventListener("touchend", endTouch);
-      grid.removeEventListener("touchcancel", endTouch);
-      grid.removeEventListener("pointerdown", releaseProgrammaticScroll);
-      grid.removeEventListener("wheel", releaseProgrammaticScroll);
-      grid.removeEventListener("scroll", onScroll);
-      grid.removeEventListener("scrollend", settleScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    syncRail(columnRail.current, columnTab);
-    syncRail(pickupRail.current, columnTab);
-  }, [columnTab]);
-
-  useEffect(() => {
-    syncRail(riderRail.current, riderTab);
-  }, [riderTab]);
-
-  // Only the selected classification's panel is rendered, so only its tab
-  // names a panel; the others would point screen readers at nothing.
-  useEffect(() => {
-    managerRail.current?.querySelectorAll<HTMLElement>('button[role="tab"]').forEach((tab, i) => {
-      if (i === managerTab) tab.setAttribute("aria-controls", `manager-panel-${i}`);
-      else tab.removeAttribute("aria-controls");
-    });
-  }, [managerTab]);
-
-  useEffect(() => {
-    return () => {
-      if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
-      shuffleRunId.current += 1;
-      shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
-      shuffleActive.current = false;
-      posterLoader.current?.dispose();
-      posterLoader.current = null;
-      if (riderTransitionTimer.current != null) window.clearTimeout(riderTransitionTimer.current);
-      if (episodeScrollTimer.current != null) window.clearTimeout(episodeScrollTimer.current);
-      if (episodePointerFocusTimer.current != null) {
-        window.clearTimeout(episodePointerFocusTimer.current);
-      }
-      cancelEpisodePickupScrollReset.current?.();
-      cancelColumnPickupScrollReset.current?.();

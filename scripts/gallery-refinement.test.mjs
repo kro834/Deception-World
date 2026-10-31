@@ -199,7 +199,8 @@ test("refinement stylesheet stays above the present exhibition layer", () => {
   const refinement = links.indexOf("href: galleryRefinementCssUrl");
   const present = links.indexOf("href: galleryPresentCssUrl");
   assert.ok(refinement > 0 && present > refinement, `${refinement} ${present}`);
-  assert.match(links, /\{ rel: "stylesheet", href: galleryPresentCssUrl \},\s*$/);
+  assert.ok(links.indexOf("href: artworkStageCss") > present);
+  assert.ok(links.indexOf("href: galleryArtworkStageCss") > links.indexOf("href: artworkStageCss"));
   assert.match(refinementCss, /@media \(max-width: 700px\)/);
   assert.match(refinementCss, /@media \(max-width: 390px\)/);
 });
@@ -226,7 +227,9 @@ test("hero entrances share one responsive navigation without changing their dest
     /@media \(max-width: 700px\)[\s\S]*?\.gallery-page \.gallery-intro \{\s*gap: 28px;\s*padding-block: 32px 48px;/,
   );
   // Geometry polish must not crop the user's personally selected top artwork.
-  assert.match(page, /--gallery-feature-ratio[^\n]*featured\.width \/ featured\.height/);
+  assert.match(page, /width: featured.width/);
+  assert.match(page, /height: featured.height/);
+  assert.match(page, /renderArtwork=\{\(artwork\) =>/);
   assert.doesNotMatch(refinementCss, /\.gallery-feature(?:-open)?\s+img\s*\{/);
 });
 

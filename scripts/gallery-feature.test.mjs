@@ -78,8 +78,14 @@ test("featured framing follows the selected artwork ratio and copy uses its avai
     "utf8",
   );
   const css = readFileSync(new URL("../src/styles-gallery.css", import.meta.url), "utf8");
-  assert.match(page, /"--gallery-feature-ratio" as string\]: featured.width \/ featured.height/);
-  assert.match(page, /data-feature-shape=\{featured.width < featured.height/);
+  assert.match(page, /width: featured.width/);
+  assert.match(page, /height: featured.height/);
+  const stageCss = readFileSync(
+    new URL("../src/styles-artwork-stage.css", import.meta.url),
+    "utf8",
+  );
+  assert.match(stageCss, /object-fit: contain/);
+  assert.match(stageCss, /data-format="portrait"/);
   assert.match(css, /aspect-ratio: var\(--gallery-feature-ratio\)/);
   assert.match(css, /container-type: inline-size/);
   assert.match(css, /font-size: clamp\(32px, 13cqi,/);

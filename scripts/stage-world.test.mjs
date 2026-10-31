@@ -38,10 +38,21 @@ test("the stage sheet loads on /world only, before the HUD face and the last she
     "href: MIRAGE_FONTS_URL",
     "href: worldMirageCssUrl",
   ].map((needle) => links.indexOf(needle));
-  assert.ok(order.every((index, i) => index > 0 && (i === 0 || index > order[i - 1])), String(order));
+  assert.ok(
+    order.every((index, i) => index > 0 && (i === 0 || index > order[i - 1])),
+    String(order),
+  );
+  const stageOrder = [...links.slice(0, links.indexOf("],")).matchAll(/href: (\w+)/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(stageOrder.slice(stageOrder.indexOf("worldMirageCssUrl")), [
+    "worldMirageCssUrl",
+    "artworkStageCssUrl",
+    "worldArtworkStageCssUrl",
+  ]);
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: worldArtworkStageCssUrl }') + 2,
   );
   for (const path of ["src/lib/world-head.ts", "src/routes/__root.tsx"]) {
     assert.doesNotMatch(await read(path), /styles-stage-world/, path);
@@ -78,7 +89,11 @@ test("the sheet adds no text, no motion, no blur and nothing under 12px", () => 
   }
   // !important only on the paint the older control sheets force.
   for (const [, property] of css.matchAll(/([\w-]+):[^;{}]*!important/g)) {
-    assert.match(property, /^(?:border|border-color|border-radius|background|box-shadow)$/, property);
+    assert.match(
+      property,
+      /^(?:border|border-color|border-radius|background|box-shadow)$/,
+      property,
+    );
   }
 });
 
@@ -96,7 +111,10 @@ test("the marquee bands and the hero HUD layer are hidden, the copy is not", asy
   assert.match(css, /> \.mr-ticker \{\s*display: none;/);
   assert.match(css, /> \.hero > \.mr-hero-hud \{\s*visibility: hidden;/);
   // The poster counter stays in the accessibility tree (visually hidden, not display: none).
-  assert.match(css, /\.poster-controls\s*> output \{\s*position: absolute;[^}]*clip-path: inset\(50%\);/);
+  assert.match(
+    css,
+    /\.poster-controls\s*> output \{\s*position: absolute;[^}]*clip-path: inset\(50%\);/,
+  );
   const home = await read("src/components/world/world-home.tsx");
   for (const id of ["top", "story", "manager-archive", "riders", "riders-return", "records"]) {
     assert.match(home, new RegExp(`id="${id}"`), id);

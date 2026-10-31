@@ -1,3 +1,68 @@
+        label: "仮面ライダーサイファー",
+        src: "/rider-cipher.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーサイファー",
+        width: 1024,
+        height: 1280,
+        to: "/riders/cipher",
+        assets: RIDER_NAV.find((item) => item.id === "cipher")?.assets ?? ["/rider-cipher.jpeg"],
+      },
+      {
+        label: "仮面ライダーレディック",
+        src: "/rider-leddic-ishihen.jpeg",
+        pos: "50% 12%",
+        alt: "仮面ライダーレディック",
+        width: 750,
+        height: 1400,
+        to: "/riders/leddic",
+        assets: RIDER_NAV.find((item) => item.id === "leddic")?.assets ?? [
+          "/rider-leddic-ishihen.jpeg",
+        ],
+      },
+      {
+        label: "夜明護尊",
+        src: "/character-yoake-mamori.jpeg",
+        pos: "50% 12%",
+        alt: "夜明護尊",
+        width: 736,
+        height: 976,
+        to: "/characters/yoake-mamori",
+        assets: ["/character-yoake-mamori.jpeg"],
+      },
+    ],
+  },
+  {
+    no: "04",
+    title: "癒えぬ傷を負った者共",
+    src: "/episode-04-kill.jpeg",
+    pos: "50% 16%",
+    alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",
+    pickups: [
+      {
+        label: "仮面ライダーファラリス",
+        src: "/manager-lejas-rider.jpeg",
+        pos: "50% 8%",
+        alt: "仮面ライダーファラリス",
+        width: 1086,
+        height: 1448,
+        to: "/managers/lejas",
+        hash: "form-records",
+        assets: [...MANAGER_ASSETS.lejas, "/manager-lejas-rider.jpeg"],
+      },
+      {
+        label: "仮面ライダールーラー・エニグマモード",
+        displayLines: ["仮面ライダールーラー", "エニグマモード"],
+        src: "/rider-ruler-enigma.webp",
+        pos: "50% 0%",
+        alt: "仮面ライダールーラー・エニグマモード",
+        width: 1023,
+        height: 1535,
+        to: "/characters/dante",
+        hash: "ruler-enigma",
+        assets: ["/character-dante.webp", "/rider-ruler-enigma.webp"],
+      },
+      {
+        label: "仮面ライダールーラー・ポラリスモード",
         displayLines: ["仮面ライダールーラー", "ポラリスモード"],
         src: "/rider-ruler-polaris.webp",
         pos: "50% 0%",
@@ -442,67 +507,3 @@ export function WorldHome() {
   const previousManagerTab = useRef(0);
   useLayoutEffect(() => {
     const previous = previousManagerTab.current;
-    previousManagerTab.current = managerTab;
-    if (previous === managerTab) return;
-    return animateSelectionArrival(
-      shellRef.current?.querySelector<HTMLElement>(".manager-archive-panel") ?? null,
-      managerTab > previous ? 1 : -1,
-    );
-  }, [managerTab]);
-  const [columnTab, setColumnTab] = useState(0);
-  const [riderTab, setRiderTab] = useState(0);
-  const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
-  const [episode, setEpisode] = useState(0);
-  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
-  const [pickupOpen, setPickupOpen] = useState(false);
-  const [sideMenuOpen, setSideMenuOpen] = useState(false);
-  const [heroVisible, setHeroVisible] = useState(true);
-  // Read by the poster timer at once; the state follows when scrolling settles.
-  const heroInViewRef = useRef(true);
-  const [motionReduced, setMotionReduced] = useState(false);
-  const managerRail = useRef<HTMLDivElement>(null);
-  const columnRail = useRef<HTMLDivElement>(null);
-  const riderRail = useRef<HTMLDivElement>(null);
-  const episodeGridRef = useRef<HTMLDivElement>(null);
-  const episodePickupDialogRef = useRef<HTMLDialogElement>(null);
-  const episodePickupTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const episodePickupOpenedByKeyboard = useRef(false);
-  const episodePointerFocusTimer = useRef<number | null>(null);
-  const episodeScrollTimer = useRef<number | null>(null);
-  const cancelEpisodePickupScrollReset = useRef<(() => void) | null>(null);
-  const pickupBtnRef = useRef<HTMLButtonElement>(null);
-  const pickupDialogRef = useRef<HTMLDialogElement>(null);
-  const pickupRail = useRef<HTMLDivElement>(null);
-  const pickupCloseTimer = useRef<number | null>(null);
-  const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
-  const shuffleTimers = useRef<number[]>([]);
-  const shuffleActive = useRef(false);
-  const shuffleRunId = useRef(0);
-  const posterLoader = useRef<ReturnType<typeof createReadyPosterLoader> | null>(null);
-  const episodeProgrammatic = useRef(false);
-  const riderTabRef = useRef(riderTab);
-  const riderTransitionTimer = useRef<number | null>(null);
-  const pausedAmbientAnimations = useRef<Animation[]>([]);
-
-  const loadPoster = useCallback(
-    (index: number, priority: "high" | "low" = "high") => {
-      posterLoader.current ??= createReadyPosterLoader((image, source) =>
-        preparePosterImage(image, source, reuseWarmedPoster),
-      );
-      return posterLoader.current.load(POSTERS[index].src, priority);
-    },
-    [reuseWarmedPoster],
-  );
-
-  const cancelPosterShuffle = useCallback(() => {
-    shuffleRunId.current += 1;
-    shuffleTimers.current.forEach((timer) => window.clearTimeout(timer));
-    shuffleTimers.current = [];
-    shuffleActive.current = false;
-    setShuffling(false);
-  }, []);
-
-  useEffect(() => mountFilmMotion(shellRef.current), []);
-  useMirageBoot(shellRef);
-  // A first rider or archive-tab choice paints its picture at once
-  // (world-swap-warmups.ts). The return layout effect has set the shown rider.

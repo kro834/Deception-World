@@ -37,7 +37,7 @@ const mediaRule = (query, selector) => {
   return rule(block, selector);
 };
 
-test("the Mirage overrides outrank Mirage from the earlier sheet, which stays last", () => {
+test("the Mirage overrides outrank Mirage from the earlier sheet, followed only by scoped hero stage", () => {
   const route = read("src/routes/world.tsx");
   const links = route.slice(
     route.indexOf("stylesheetLinks: ["),
@@ -45,7 +45,11 @@ test("the Mirage overrides outrank Mirage from the earlier sheet, which stays la
   );
   const order = [...links.matchAll(/href: (\w+)/g)].map((match) => match[1]);
   assert.ok(order.indexOf("worldProgrammeSectionsCssUrl") < order.indexOf("worldMirageCssUrl"));
-  assert.equal(order.at(-1), "worldMirageCssUrl");
+  assert.deepEqual(order.slice(-3), [
+    "worldMirageCssUrl",
+    "artworkStageCssUrl",
+    "worldArtworkStageCssUrl",
+  ]);
   // Every rule that restyles a Mirage surface carries the leading `main`.
   assert.doesNotMatch(css, /(^|\n)\s*\.site-shell\.film-edition\.mirage-edition/);
 });
@@ -155,9 +159,7 @@ test("no chapter is current once the last one has scrolled past the marker", () 
   const home = read("src/components/world/world-home.tsx");
   const start = home.indexOf("const syncActiveSection = () => {");
   const sync = home.slice(start, home.indexOf("const requestSectionSync = () => {", start));
-  const cleared = sync.indexOf(
-    "if (lastBottom <= marker) current = null;",
-  );
+  const cleared = sync.indexOf("if (lastBottom <= marker) current = null;");
   assert.ok(cleared > sync.indexOf("sections.forEach((section) => {"), "after the chapter loop");
   assert.match(sync, /lastBottom = rect\.bottom/);
   assert.ok(cleared < sync.indexOf("if (current === lastActiveRef.current) return;"));

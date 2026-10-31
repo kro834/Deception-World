@@ -1,0 +1,221 @@
+/* World hero only. The chapters and their existing colour grammar stay independent. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #top.world-artwork-hero {
+  display: block;
+  position: relative;
+  height: auto;
+  min-height: 0;
+  padding: calc(var(--film-topbar-height, 76px) + clamp(20px, 4vw, 64px)) var(--sw-gutter, 20px)
+    44px;
+  overflow: clip;
+  background: #050b13;
+  isolation: isolate;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #top.world-artwork-hero::before,
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #top.world-artwork-hero::after {
+  display: none;
+}
+#top.world-artwork-hero .world-artwork-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 25% 35%, #346c8f26, transparent 65%);
+}
+#top.world-artwork-hero .world-poster-stage {
+  max-width: 1600px;
+  margin-inline: auto;
+}
+#top.world-artwork-hero .world-poster-media,
+#top.world-artwork-hero .world-stage-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#top.world-artwork-hero .world-stage-image {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+#top.world-artwork-hero .world-stage-image-current {
+  z-index: 2;
+}
+#top.world-artwork-hero .world-stage-image-previous {
+  z-index: 1;
+  animation: world-stage-previous 560ms ease-out both;
+}
+@keyframes world-stage-previous {
+  to {
+    opacity: 0;
+  }
+}
+#top.world-artwork-hero .world-stage-identity {
+  margin: 0 0 28px;
+}
+#top.world-artwork-hero .world-stage-identity .anime-work-title {
+  position: static;
+  display: block;
+  margin: 0;
+  padding: 0;
+  width: auto;
+  max-width: none;
+}
+#top.world-artwork-hero .world-stage-identity .anime-work-title > span {
+  display: block;
+  font-size: clamp(11px, 1.1vw, 15px);
+  line-height: 1.8;
+}
+#top.world-artwork-hero .world-stage-identity .anime-work-title > b {
+  display: block;
+  font-size: clamp(21px, 2.4vw, 40px);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+#top.world-artwork-hero .world-stage-copy {
+  min-width: 0;
+}
+#top.world-artwork-hero .world-stage-copy h1 {
+  position: relative;
+  margin: 14px 0 24px;
+  width: auto;
+  max-width: none;
+  font-size: clamp(24px, 3vw, 46px);
+  line-height: 1.65;
+  letter-spacing: 0.035em;
+}
+#top.world-artwork-hero .world-stage-copy h1 > span,
+#top.world-artwork-hero .world-stage-copy h1 > strong {
+  display: block;
+}
+#top.world-artwork-hero .world-stage-copy h1 strong {
+  font-weight: inherit;
+}
+#top.world-artwork-hero .world-stage-copy .eyebrow {
+  margin: 0;
+}
+#top.world-artwork-hero .world-stage-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+#top.world-artwork-hero .world-stage-actions .primary-action {
+  max-width: 100%;
+}
+#top.world-artwork-hero .world-stage-context {
+  margin-top: 26px;
+}
+#top.world-artwork-hero .world-stage-lead {
+  font-size: clamp(13px, 1.15vw, 16px);
+  line-height: 2;
+  margin: 0;
+  text-wrap: pretty;
+}
+#top.world-artwork-hero .world-stage-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 14px;
+  width: 100%;
+}
+#top.world-artwork-hero .world-stage-control-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+#top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
+  position: relative;
+  inset: auto;
+  transform: none;
+  min-height: 44px;
+  padding: 8px 10px;
+  margin: 0;
+  font-size: 12px;
+}
+#top.world-artwork-hero .world-stage-controls output {
+  font-size: 12px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #top.world-artwork-hero
+  > .scroll-cue {
+  position: static;
+  display: flex;
+  width: max-content;
+  margin: 28px auto 0;
+  transform: none;
+}
+@media (max-width: 959px) {
+  #top.world-artwork-hero .world-poster-stage {
+    --stage-art-height: clamp(340px, 62svh, 660px);
+  }
+  #top.world-artwork-hero .world-poster-stage .artwork-stage__visual {
+    height: calc(var(--stage-art-height) + 104px);
+  }
+  #top.world-artwork-hero .world-stage-identity {
+    margin-bottom: 18px;
+  }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  #top.world-artwork-hero .world-poster-stage {
+    --stage-art-height: 72svh;
+  }
+  #top.world-artwork-hero .world-stage-copy h1 {
+    font-size: clamp(20px, 3vw, 32px);
+  }
+  #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
+    font-size: 12px;
+    padding-inline: 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #top.world-artwork-hero .world-stage-image-previous {
+    display: none;
+    animation: none;
+  }
+}
+html[data-world-effects="economy"] #top.world-artwork-hero .world-stage-image-previous {
+  animation-duration: 180ms;
+}
+
+#top.world-artwork-hero .artwork-stage[data-moving="true"] .world-stage-image-current {
+  animation: artwork-stage-in var(--stage-duration) cubic-bezier(0.18, 0.78, 0.24, 1) both;
+}
+html[data-world-effects="economy"]
+  .world-artwork-hero
+  .artwork-stage[data-moving="true"]
+  .world-stage-image-current {
+  animation-name: artwork-stage-fade;
+}
+@media (prefers-reduced-motion: reduce) {
+  #top.world-artwork-hero .artwork-stage[data-moving="true"] .world-stage-image-current {
+    animation: none !important;
+  }
+}
+
+#top.world-artwork-hero .world-stage-copy h1 > :is(span, strong) {
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+#top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) b {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}

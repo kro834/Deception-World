@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { worldViewContract } from "./helpers/world-view-contract.mjs";
+import { worldViewContract, worldArtworkBoundaryContract } from "./helpers/world-view-contract.mjs";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import {
@@ -58,7 +58,14 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner (2026-10-23): 不要なセカンダリラベルを削除（レイアウトで説明） — the UI label layer (hero 02 mark, KEY VISUAL caption, AUTO/LOCKED, faux metadata; chapter captions and English eyebrows; MANAGER ARCHIVE, tab codes, OPEN DOSSIER/ACCESS captions, card codes, English name duplicates, UNRESOLVED; WORLD COLUMN; RIDER / NN and the English name line; EPISODE ARCHIVE, RECORDS FOUND, IDENTIFIED RECORD, the card kicker; the pickups' PICKUP codes and captions; THE WORLD IS WAITING.) is gone; the rider note speaks only while a hold runs.
     // Owner (2026-10-23, ruling): the cards' RELATED / 01·02·05 and SECOND DOG / 02 codes and the archive slots' numbers stay (they pair with the artwork cards' RELATED / 03·04); the column pickup shows its own kicker (data) without the ARCHIVE prefix.
     // Owner (2026-10-30): film composition removes two decorative HUD layers; original copy and records stay.
-    markup: "89bfea58d379ab5d5395396e8acdd02f9f655e0b37b8563fcf9c98c07b6736ee",
+    // Owner 2026-10-31: original artwork stage replaces the hero composition only.
+    markup: "b2de93f3ac8b1c6ece58e5c121b5c24519352bae564468a1e15336b4c4329f56",
+  });
+  // Both values are independently pinned from pre-stage HEAD 95eb55fe.
+  // Hero wording and every JSX node outside it remain unchanged.
+  assert.deepEqual(worldArtworkBoundaryContract(homeView), {
+    outsideHero: "8192d0f1484e547a62a7386401b000f0097dbb802c87623c8b29a3f566394365",
+    heroWords: "2f6895ba018c5cf288f07508185eb1498d475b231a0930f85540b12d7f4d2825",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but
   // renders nothing: 02 RIDERS and 03 RECORDS sit back to back, and the
@@ -94,7 +101,10 @@ test("the annex data is complete", () => {
     WORLD_EPISODE_NOTES.map(({ lines }) => lines.length),
     [3, 3, 5, 3],
   );
-  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 2]);
+  assert.deepEqual(
+    WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length),
+    [3, 3, 9, 2],
+  );
   assert.equal(WORLD_GLOSSARY.length, 16);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
   assert.equal(WORLD_QUOTES.length, 17);

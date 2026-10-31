@@ -1334,3 +1334,45 @@ body:has(.command-deck) {
     outline-color: Highlight;
   }
 }
+
+/* Artwork composition: original images establish the stage; navigation keeps its own semantics. */
+.command-deck-artwork-stage { margin-top: 28px; --stage-art-height: clamp(500px, 75svh, 900px); }
+.command-deck-artwork-stage .command-deck-title { position: relative; inset: auto; animation: none; margin: 0 0 24px; }
+.command-deck-artwork-stage .command-deck-title h1 { font-size: clamp(42px, 5.2vw, 88px); line-height: .92; }
+.command-deck-artwork-stage .command-deck-title h1 span:last-child { align-self: flex-start; }
+.command-deck-artwork-stage .command-deck-select { padding: 0; }
+.command-deck-artwork-stage .command-deck-section-rule { display: none; }
+.command-deck-artwork-stage .command-deck-scene-buttons { gap: 4px; }
+.command-deck-artwork-stage .command-deck-scene-buttons a { min-height: 65px; padding-block: 9px; }
+.command-deck-artwork-stage .command-deck-enter { margin-top: 18px; }
+.command-deck-artwork-stage .command-deck-side { padding: 0; margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.command-deck-artwork-stage .command-deck-logo-panel { margin: 0; transform: none; align-self: center; }
+.command-deck-artwork-stage .command-deck-chapter-links { animation: none; }
+.command-deck-artwork-stage .command-deck-chapter-links a { padding: 10px; min-height: 44px; }
+.command-deck-artwork-stage .command-deck-gallery-link { grid-column: 1 / -1; min-height: 64px; }
+.command-deck-artwork-stage .command-deck-art-controls { position: static; transform: none; margin: 0; }
+.command-deck-artwork-stage[data-format="landscape"] .command-deck-title h1 { font-size: clamp(38px, 4.5vw, 72px); }
+@media (max-width: 959px) {
+  .command-deck-artwork-stage { --stage-art-height: clamp(360px, 65svh, 700px); }
+  .command-deck-artwork-stage .command-deck-title h1 { font-size: clamp(40px, 10vw, 78px); }
+  .command-deck-artwork-stage .command-deck-title { margin-bottom: 22px; }
+  .command-deck-artwork-stage .command-deck-side { margin-top: 20px; }
+  .command-deck-artwork-stage .command-deck-down { margin-top: 16px; }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .command-deck-artwork-stage { --stage-art-height: 72svh; }
+  .command-deck-artwork-stage .command-deck-title h1 { font-size: clamp(32px, 5vw, 60px); }
+  .command-deck-artwork-stage .command-deck-side { grid-template-columns: minmax(0, 1fr); }
+}
+/* Reserve the same information footprint for every scene and image ratio. */
+.command-deck-artwork-stage .artwork-stage__information { min-height: 740px; display: flex; flex-direction: column; justify-content: center; }
+.command-deck-artwork-stage[data-format="landscape"] .command-deck-title { padding-left: 6%; }
+.command-deck-artwork-stage[data-format="portrait"] .command-deck-title { padding-left: 0; }
+@media (max-width: 959px) {
+  .command-deck-artwork-stage .artwork-stage__information { min-height: 780px; }
+  .command-deck-artwork-stage[data-format="landscape"] .command-deck-title h1 { font-size: clamp(40px, 10vw, 78px); }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .command-deck-artwork-stage .artwork-stage__information { min-height: 840px; justify-content: flex-start; }
+  .command-deck-artwork-stage[data-format="landscape"] .command-deck-title h1 { font-size: clamp(32px, 5vw, 60px); }
+}

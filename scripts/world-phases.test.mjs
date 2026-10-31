@@ -25,7 +25,12 @@ function parse(text) {
   for (let i = 0; i < text.length; i += 1) {
     const ch = text[i];
     if (ch === "{") {
-      const prelude = text.slice(start, i).trim().replace(/\s+/g, " ").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
+      const prelude = text
+        .slice(start, i)
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/\(\s+/g, "(")
+        .replace(/\s+\)/g, ")");
       stack.push({ prelude, bodyStart: i + 1 });
       start = i + 1;
     } else if (ch === "}") {
@@ -64,7 +69,10 @@ const declarations = (body) =>
     .split(/;(?![^(]*\))/)
     .map((part) => part.trim())
     .filter(Boolean)
-    .map((part) => [part.slice(0, part.indexOf(":")).trim(), part.slice(part.indexOf(":") + 1).trim()]);
+    .map((part) => [
+      part.slice(0, part.indexOf(":")).trim(),
+      part.slice(part.indexOf(":") + 1).trim(),
+    ]);
 const tokens = (selectorNeedle) => {
   const rule = rules.find(
     (candidate) =>
@@ -77,7 +85,8 @@ const tokens = (selectorNeedle) => {
 };
 
 const SCOPE = "main.site-shell.film-edition.mirage-edition";
-const NOT_ANDROID_LITE = ':where(html:not([data-android-renderer]), html[data-world-effects="economy"])';
+const NOT_ANDROID_LITE =
+  ':where(html:not([data-android-renderer]), html[data-world-effects="economy"])';
 const ANDROID_LITE = 'html:not([data-world-effects="economy"])[data-android-renderer]';
 
 const hex = (value) => {
@@ -96,7 +105,7 @@ const contrast = (a, b) => {
 };
 const blend = (top, under, alpha) => top.map((v, i) => v * alpha + under[i] * (1 - alpha));
 
-test("the phases sheet loads on /world only, after the exhibition sheet and before the HUD face and Mirage, which stays last", () => {
+test("the phases sheet loads on /world only, after the exhibition sheet and before the HUD face and Mirage, followed only by hero stage", () => {
   assert.match(route, /import worldPhasesCssUrl from "@\/styles-world-phases\.css\?url";/);
   const links = route.slice(route.search(/stylesheetLinks:\s*\[/));
   const order = [
@@ -105,10 +114,21 @@ test("the phases sheet loads on /world only, after the exhibition sheet and befo
     "href: MIRAGE_FONTS_URL",
     "href: worldMirageCssUrl",
   ].map((needle) => links.indexOf(needle));
-  assert.ok(order.every((index, i) => index > 0 && (i === 0 || index > order[i - 1])), String(order));
+  assert.ok(
+    order.every((index, i) => index > 0 && (i === 0 || index > order[i - 1])),
+    String(order),
+  );
+  const stageOrder = [...links.slice(0, links.indexOf("],")).matchAll(/href: (\w+)/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(stageOrder.slice(stageOrder.indexOf("worldMirageCssUrl")), [
+    "worldMirageCssUrl",
+    "artworkStageCssUrl",
+    "worldArtworkStageCssUrl",
+  ]);
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: worldArtworkStageCssUrl }') + 2,
   );
   assert.doesNotMatch(head, /mirage|phases/i);
   assert.doesNotMatch(root, /styles-world-phases/);
@@ -128,9 +148,15 @@ test("every rule is scoped to the World page", () => {
 });
 
 test("a still colour layer: no motion, no text, no :has(), no paint effects, nothing under 12px", () => {
-  assert.doesNotMatch(css, /@keyframes|animation|transition|view-timeline|scroll-timeline|will-change/);
+  assert.doesNotMatch(
+    css,
+    /@keyframes|animation|transition|view-timeline|scroll-timeline|will-change/,
+  );
   assert.doesNotMatch(css, /:has\(/);
-  assert.doesNotMatch(css, /(?:^|[;{\s])(?:filter|backdrop-filter|mix-blend-mode|mask|-webkit-mask|clip-path)\s*:/);
+  assert.doesNotMatch(
+    css,
+    /(?:^|[;{\s])(?:filter|backdrop-filter|mix-blend-mode|mask|-webkit-mask|clip-path)\s*:/,
+  );
   assert.doesNotMatch(css, /(?:^|[;{\s])content\s*:/);
   assert.doesNotMatch(css, /font(?:-size)?\s*:/);
   assert.doesNotMatch(css, /!important/);
@@ -141,7 +167,10 @@ test("outside forced-colors: none only tokens are declared, so forced colours ke
     const gated = rule.context.some((context) => /forced-colors: none/.test(context));
     if (gated) continue;
     for (const [property] of declarations(rule.body)) {
-      assert.ok(property.startsWith("--"), `${rule.selector}: ${property} outside forced-colors: none`);
+      assert.ok(
+        property.startsWith("--"),
+        `${rule.selector}: ${property} outside forced-colors: none`,
+      );
     }
   }
 });
@@ -153,7 +182,10 @@ test("each chapter has its own accent, none of them the hero's ice, and every ac
     riders: { tokens: tokens("#riders"), ground: "#343b45" },
     records: { tokens: tokens("#records"), ground: "#20160c" },
     annex: { tokens: tokens(":is(.wa-contents, .world-annex)"), ground: "#0b1a15" },
-    finale: { tokens: tokens(":is(.finale-section, .mr-ticker.is-close, footer)"), ground: "#0c0604" },
+    finale: {
+      tokens: tokens(":is(.finale-section, .mr-ticker.is-close, footer)"),
+      ground: "#0c0604",
+    },
   };
   const accents = Object.values(phases).map(({ tokens: t }) => t["--mr-ice"].toLowerCase());
   assert.equal(new Set(accents).size, accents.length, accents.join(" "));
@@ -187,7 +219,9 @@ test("the paper sheets keep their ink at AA, the dimmed prints included", () => 
 });
 
 test("fire is amber light, never a saturated red field", () => {
-  const finale = rules.filter((rule) => /finale|mr-ticker\.is-close|footer|mr-endmark/.test(rule.selector));
+  const finale = rules.filter((rule) =>
+    /finale|mr-ticker\.is-close|footer|mr-endmark/.test(rule.selector),
+  );
   assert.ok(finale.length >= 4);
   for (const rule of finale) {
     for (const [, r, g, b] of rule.body.matchAll(/rgb\((\d+) (\d+) (\d+)/g)) {
@@ -200,7 +234,11 @@ test("fire is amber light, never a saturated red field", () => {
 
 test("calm modes flatten the grounds and drop the textures", () => {
   const calm = rules.filter((rule) =>
-    rule.context.some((context) => /prefers-reduced-transparency: reduce/.test(context) && /prefers-contrast: more/.test(context)),
+    rule.context.some(
+      (context) =>
+        /prefers-reduced-transparency: reduce/.test(context) &&
+        /prefers-contrast: more/.test(context),
+    ),
   );
   for (const needle of ["#story", "#riders", "#records", ".world-annex", ".finale-section"]) {
     const rule = calm.find((candidate) => candidate.selector.includes(needle));
@@ -210,25 +248,45 @@ test("calm modes flatten the grounds and drop the textures", () => {
 });
 
 test("the story record is paper on every tier, with its brackets painted in on Android lite", () => {
-  const android = rules.find((rule) => rule.selector.startsWith(ANDROID_LITE) && rule.selector.endsWith("#story .story-layout"));
+  const android = rules.find(
+    (rule) =>
+      rule.selector.startsWith(ANDROID_LITE) && rule.selector.endsWith("#story .story-layout"),
+  );
   assert.ok(android);
   assert.match(android.body, /var\(--we-paper\);/);
   for (const corner of ["0 0", "100% 0", "0 100%", "100% 100%"]) {
-    assert.equal(android.body.match(new RegExp(`\\) ${corner} \\/ (?:24px 2px|2px 24px) no-repeat`, "g"))?.length, 2, corner);
+    assert.equal(
+      android.body.match(new RegExp(`\\) ${corner} \\/ (?:24px 2px|2px 24px) no-repeat`, "g"))
+        ?.length,
+      2,
+      corner,
+    );
   }
   // verify-world-mirage counts the lite tier's ten linear layers on this plate.
   assert.equal(android.body.split("linear-gradient").length - 1, 10);
   // Plates whose brackets the lite tier paints in their own background are
   // left to it (the phase tokens recolour that background).
-  for (const plate of ["#manager-archive", "#story .world-column", "#riders .rider-console", "#records .episode-archive"]) {
-    const rule = rules.find((candidate) => candidate.selector.endsWith(plate) && /background:/.test(candidate.body));
+  for (const plate of [
+    "#manager-archive",
+    "#story .world-column",
+    "#riders .rider-console",
+    "#records .episode-archive",
+  ]) {
+    const rule = rules.find(
+      (candidate) => candidate.selector.endsWith(plate) && /background:/.test(candidate.body),
+    );
     assert.ok(rule && rule.selector.startsWith(NOT_ANDROID_LITE), plate);
   }
 });
 
 test("the topbar takes the chapter accent through the links' own aria-current, with no new listener", () => {
   for (const id of ["story", "riders", "records"]) {
-    assert.match(css, new RegExp(`\\.topbar nav a\\[href="#${id}"\\] \\{\\s*--mr-ice: #[0-9a-f]{6};\\s*--neo-cyan: #[0-9a-f]{6};`));
+    assert.match(
+      css,
+      new RegExp(
+        `\\.topbar nav a\\[href="#${id}"\\] \\{\\s*--mr-ice: #[0-9a-f]{6};\\s*--neo-cyan: #[0-9a-f]{6};`,
+      ),
+    );
   }
   assert.doesNotMatch(read("src/components/world/world-home.tsx"), /data-phase|phase-/);
 });

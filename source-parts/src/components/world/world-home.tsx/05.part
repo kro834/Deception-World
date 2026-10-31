@@ -1,73 +1,76 @@
-                }
-                onClick={() => {
-                  cancelPosterShuffle();
-                  setLocked((v) => !v);
-                }}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  <b>{locked ? "固定中" : "自動切替"}</b>
+                </button>
+              </div>
+              <output
+                aria-label="表示中のポスター"
+                aria-live={locked || posterControlsFocused ? "polite" : "off"}
+                aria-atomic="true"
+                aria-busy={shuffling}
               >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  {locked ? (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 8 0v2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
-                        height="10"
-                        rx="2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 7.5-2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
-                        height="10"
-                        rx="2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  )}
-                </span>
-                <b>{locked ? "固定中" : "自動切替"}</b>
-              </button>
+                {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+              </output>
             </div>
-            <output
-              aria-label="表示中のポスター"
-              aria-live={locked || posterControlsFocused ? "polite" : "off"}
-              aria-atomic="true"
-              aria-busy={shuffling}
-            >
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </output>
+          }
+        >
+          <div className="world-stage-identity" data-film-reveal>
+            <FilmTextScan />
+            <p className="anime-work-title">
+              <span>仮面ライダーサーガ 劇場版第二作</span>
+              <b>
+                <i className="mr-word" data-text="DECEPTION">
+                  DECEPTION
+                </i>{" "}
+                <i className="mr-word" data-text="WORLD">
+                  WORLD
+                </i>
+              </b>
+            </p>
           </div>
-        </div>
-        <div className="hero-context">
-          <p className="hero-lead">
-            救うべき世界は、目の前にある。
-            <br />
-            6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
-          </p>
-        </div>
+          <div className="world-stage-copy">
+            <p className="eyebrow">
+              <span>THE SECOND SAGA</span>
+              <i />
+            </p>
+            <h1
+              ref={openingFocusRef}
+              tabIndex={-1}
+              data-opening-handoff-focus-target
+              data-film-reveal
+            >
+              <FilmTextScan />
+              <span>世界は、</span>
+              <strong>
+                <i className="mr-redact">欺瞞</i>でできている。
+              </strong>
+            </h1>
+            <div className="world-stage-actions">
+              <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
+                <LiquidPointerGlow />
+                <span>ENTER THE WORLD</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h13M13 6l6 6-6 6" />
+                </svg>
+              </a>
+              <a className="text-action" href="#poster-stage">
+                POSTER
+              </a>
+            </div>
+          </div>
+          <div className="world-stage-context">
+            <p className="world-stage-lead">
+              救うべき世界は、目の前にある。
+              <br />
+              6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
+            </p>
+          </div>
+        </ArtworkStage>
         <a className="scroll-cue" href="#story">
           <span>SCROLL TO DESCEND</span>
           <i />
@@ -504,5 +507,3 @@
               role="tabpanel"
               aria-labelledby={`column-tab-${columnTab}`}
               aria-label={`コラム${column.no} ${column.title}`}
-            >
-              <div className="world-column-number-stack">
