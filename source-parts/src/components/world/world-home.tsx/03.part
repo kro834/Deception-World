@@ -1,7 +1,3 @@
-    previousManagerTab.current = managerTab;
-    if (previous === managerTab) return;
-    return animateSelectionArrival(
-      shellRef.current?.querySelector<HTMLElement>(".manager-archive-panel") ?? null,
       managerTab > previous ? 1 : -1,
     );
   }, [managerTab]);
@@ -507,3 +503,7 @@
       touching = true;
       window.clearTimeout(settleTimer);
       releaseProgrammaticScroll();
+    };
+    const endTouch = () => {
+      touching = false;
+      scheduleSettle();

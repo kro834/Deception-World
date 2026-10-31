@@ -304,7 +304,7 @@ const CalmFire = memo(function CalmFire() {
  * The gate after the footer. Scrolling past END OF RECORD raises the RISING
  * THE WORLD button (scroll-linked, styles-world-rising.css). The button opens
  * a modal sequence: a dive into the rider print (rising-art.ts), the print
- * burned away by red flames from below and, mid-burn, a hard cut to EP7
+ * burned away by red flames from below and, mid-burn, a hard cut to EP6
  * REXONANCE. The engine is loaded on approach, and the WebGL context exists
  * only while the sequence plays.
  */
@@ -437,7 +437,7 @@ export function RisingWorld() {
       const viewport = viewportRef.current;
       if (viewport && dialogRef.current?.open && generation === generationRef.current) {
         viewport.dataset.tier = "static";
-        setLive("EP7 REXONANCE");
+        setLive("EP6 REXONANCE");
         // SKIP unmounts without a successor: hand its focus to CLOSE first.
         if (controlsRef.current?.contains(document.activeElement)) {
           closeRef.current?.focus({ preventScroll: true });
@@ -456,7 +456,7 @@ export function RisingWorld() {
       world: artRef.current,
       rider: RIDER_ART,
       audit,
-      onTitle: () => setLive("EP7 REXONANCE"),
+      onTitle: () => setLive("EP6 REXONANCE"),
       onEnd: markEnded,
     });
     runRef.current = run;
@@ -796,7 +796,7 @@ export function RisingWorld() {
           <span className="rw-title-scrim" aria-hidden="true" />
           <div className="rw-title-wrap" aria-hidden="true">
             <p className="rw-title">
-              <span className="rw-title-ep">EP7</span>{" "}
+              <span className="rw-title-ep">EP6</span>{" "}
               <span className="rw-title-name">REXONANCE</span>
             </p>
           </div>

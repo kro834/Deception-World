@@ -456,7 +456,7 @@ async function checkSequence(browser, name) {
   assert.ok(zeusHidden, `${name}: the Zeus button is hidden over the sequence`);
   // Mid-burn cut.
   await page.waitForFunction(
-    () => document.querySelector(".rw-live").textContent === "EP7 REXONANCE",
+    () => document.querySelector(".rw-live").textContent === "EP6 REXONANCE",
     null,
     { timeout: 8000 },
   );
@@ -467,7 +467,7 @@ async function checkSequence(browser, name) {
     hidden: document.querySelector(".rw-title-wrap").getAttribute("aria-hidden"),
   }));
   assert.ok(cut.title > 0.99, `${name}: the title is cut in ${JSON.stringify(cut)}`);
-  assert.equal(cut.visibleText, "EP7 REXONANCE");
+  assert.equal(cut.visibleText, "EP6 REXONANCE");
   assert.equal(cut.hidden, "true");
   // End still by ~10 s of sequence time (RISING_TIMING.webgl.end: 9.6 s).
   await page.waitForSelector(".rw-replay", { timeout: 9000 });
@@ -533,7 +533,7 @@ async function checkSequence(browser, name) {
     focus: "rw-replay",
     canvases: 0,
     title: 1,
-    live: "EP7 REXONANCE",
+    live: "EP6 REXONANCE",
   });
   if (name === "desktop" || name === "landscape-844") {
     // The landscape end still: the rider's sides are feathered into the ember,
@@ -665,7 +665,7 @@ async function checkTiers(browser, name) {
     }));
     assert.deepEqual(
       skippedEarly,
-      { tier: "css", canvases: 0, title: 1, live: "EP7 REXONANCE", focus: "rw-replay" },
+      { tier: "css", canvases: 0, title: 1, live: "EP6 REXONANCE", focus: "rw-replay" },
       `${name}: SKIP while the engine loads`,
     );
     await page.keyboard.press("Escape");
@@ -704,7 +704,7 @@ async function checkTiers(browser, name) {
     assert.equal(pendingFocus, "rw-skip", `${name}: Shift+Tab from CLOSE reaches SKIP`);
     assert.deepEqual(
       failed,
-      { tier: "static", replay: 0, skip: 0, live: "EP7 REXONANCE", focus: "rw-close" },
+      { tier: "static", replay: 0, skip: 0, live: "EP6 REXONANCE", focus: "rw-close" },
       `${name}: engine failure`,
     );
     await page.unroute(/rising-sequence/);
@@ -717,7 +717,7 @@ async function checkTiers(browser, name) {
     const again = await read();
     assert.deepEqual(
       again,
-      { tier: "static", replay: 0, skip: 0, live: "EP7 REXONANCE", focus: "rw-close" },
+      { tier: "static", replay: 0, skip: 0, live: "EP6 REXONANCE", focus: "rw-close" },
       `${name}: the failure is final for the document`,
     );
     await page.keyboard.press("Escape");
@@ -750,7 +750,7 @@ async function checkTiers(browser, name) {
     assert.deepEqual(calm, {
       tier: "css",
       canvases: 0,
-      live: "EP7 REXONANCE",
+      live: "EP6 REXONANCE",
       // Software GL and no GL both surface as a null context (failIfMajorPerformanceCaveat).
       fallback: label === "no-webgl" ? "no-webgl" : null,
     });
@@ -806,7 +806,7 @@ async function checkTiers(browser, name) {
     );
     assert.ok(slow.readyMs >= 650 && slow.readyMs < 1000, `${name} ${label}: ${slow.readyMs} ms`);
     await page.waitForSelector(".rw-replay", { timeout: 9000 });
-    assert.equal(await page.textContent(".rw-live"), "EP7 REXONANCE");
+    assert.equal(await page.textContent(".rw-live"), "EP6 REXONANCE");
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ check: `slow-gl-${label}`, name, ...slow }));
     await context.close();
@@ -931,7 +931,7 @@ async function checkTiers(browser, name) {
     }));
     assert.deepEqual(paused, { title: 0, live: "" }, `${name}: the clock paused while hidden`);
     await page.waitForFunction(
-      () => document.querySelector(".rw-live").textContent === "EP7 REXONANCE",
+      () => document.querySelector(".rw-live").textContent === "EP6 REXONANCE",
       null,
       { timeout: 3000 },
     );

@@ -587,17 +587,10 @@ const EPISODES: EpisodeRecord[] = [
   },
   {
     no: "05",
-    title: "FARCE",
-    src: "/episode-05-farce.jpeg",
-    pos: "50% 44%",
-    alt: "夜の遊園地で赤黒と青金の仮面ライダーが対峙するEP5のサムネイル",
-  },
-  {
-    no: "06",
     title: "来訪",
-    src: "/episode-06-arrival-error.svg",
+    src: "/episode-05-arrival-error.svg",
     pos: "50% 50%",
-    alt: "EP6 来訪：サムネイルのERROR表示",
+    alt: "EP5 来訪：サムネイルのERROR表示",
   },
 ];
 
