@@ -4461,18 +4461,18 @@ html[data-rail-lock] body {
     box-shadow 0.22s ease;
 }
 
-.side-panel-zeus-toggle[aria-pressed="true"] {
+.side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"]) {
   border-color: rgb(74 218 188 / 0.24);
   background: linear-gradient(90deg, rgb(50 207 176 / 0.07), rgb(222 184 86 / 0.055));
 }
 
-.side-panel-zeus-toggle[aria-pressed="true"] > i {
+.side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"]) > i {
   border-color: rgb(75 221 190 / 0.44);
   background: linear-gradient(90deg, rgb(33 165 143 / 0.62), rgb(184 145 50 / 0.54));
   color: white;
 }
 
-.side-panel-zeus-toggle[aria-pressed="true"] > i u {
+.side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"]) > i u {
   background: linear-gradient(145deg, #f8e4a9, #47d7b7);
   box-shadow:
     0 0 12px rgb(70 218 187 / 0.42),

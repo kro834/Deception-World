@@ -1,0 +1,11 @@
+export type ButtonStyle = "liquid" | "default";
+export const BUTTON_STYLE_STORAGE_KEY: string;
+export const BUTTON_STYLE_ATTRIBUTE: string;
+export const BUTTON_STYLE_SCRIPT: string;
+export function normalizeButtonStyle(value: string | null | undefined): ButtonStyle;
+export function readButtonStyle(): ButtonStyle;
+export function applyButtonStyle(style: ButtonStyle): void;
+export function setButtonStyle(style: ButtonStyle): void;
+export function getButtonStyleSnapshot(): ButtonStyle;
+export function getButtonStyleServerSnapshot(): ButtonStyle;
+export function subscribeButtonStyle(notify: () => void): () => void;

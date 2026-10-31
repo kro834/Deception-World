@@ -2721,7 +2721,7 @@ html[data-family]
     body
     #site-side-panel.side-panel
     > .side-panel-group:last-child
-    .side-panel-zeus-toggle[aria-pressed="true"] {
+    .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"]) {
     border-color: rgb(var(--sh-l1-rgb) / 45%);
     background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 9%), rgb(var(--sh-l2-rgb) / 5%));
   }
@@ -2730,7 +2730,7 @@ html[data-family]
     body
     #site-side-panel.side-panel
     > .side-panel-group:last-child
-    .side-panel-zeus-toggle[aria-pressed="true"]
+    .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"])
     > i {
     border-color: rgb(var(--sh-l1-rgb) / 62%);
     background: linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 24%), rgb(var(--sh-l2-rgb) / 18%));
@@ -2740,7 +2740,7 @@ html[data-family]
     body
     #site-side-panel.side-panel
     > .side-panel-group:last-child
-    .side-panel-zeus-toggle[aria-pressed="true"]
+    .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"])
     > i
     u {
     background: var(--sh-l1);

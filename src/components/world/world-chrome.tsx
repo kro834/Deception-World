@@ -47,6 +47,7 @@ import {
 } from "@/lib/menu-page-context";
 import { focusMenuSectionAfterNavigation } from "@/lib/menu-section-focus";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
+import { ButtonStyleToggle } from "@/components/button-style-toggle";
 import { CinemaLink } from "./external-cinema-link";
 import {
   claimSideMenuEarlyInput,
@@ -1676,6 +1677,7 @@ export function SideMenuLayer({
           <div className="side-panel-links dg-focus-scope">
             <ZeusButtonToggle />
             <IpadMenuToggle />
+            <ButtonStyleToggle />
             <GuardedLink to="/" assets={[]} beforeNavigate={close}>
               <span>トップ</span>
               <i>DECEPTION WORLD</i>
