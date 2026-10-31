@@ -1376,3 +1376,71 @@ html[data-family]
     flex-basis: 84px;
   }
 }
+
+/* Wide menus (iPad Mini landscape) left the quick-link grid and the このページ
+   list with empty cells whenever the link count did not fill the columns.
+   Wrap-and-grow keeps every row full for any count, like the jump strip. */
+@media (min-width: 761px) {
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="find"]
+    .side-panel-links,
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"]
+    .side-panel-links {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="find"]
+    .side-panel-links
+    > :is(a, button.side-panel-link-button) {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="find"]
+    .side-panel-links
+    > button.side-panel-quick-search {
+    flex: 1.5 1 300px;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="find"]
+    .side-panel-links
+    > .library-current-control {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="find"]
+    .side-panel-links
+    > .library-current-control
+    > * {
+    flex: 1 1 auto;
+  }
+
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    [data-atlas-group="sections"]
+    .side-panel-links
+    > a {
+    flex: 1 1 40%;
+    min-width: 0;
+  }
+}
