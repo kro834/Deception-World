@@ -137,7 +137,7 @@ test("gallery route loads the World mode and its route-scoped stylesheet", () =>
 test("gallery artwork links keep a direct full-image destination and preserve modified clicks", () => {
   assert.match(
     component,
-    /href=\{featured\.full\}[\s\S]*?onClick=\{\(event\) => openWork\(event, featured\)\}/,
+    /href=\{print\.full\}[\s\S]*?onClick=\{\(event\) => openWork\(event, print\)\}/,
   );
   assert.match(
     component,

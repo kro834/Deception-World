@@ -66,7 +66,7 @@ const ALLOWED_WORDS = new Set([
   "RE DIVE…?",
 ]);
 
-test("the rising sheet is linked before the Mirage face, so Mirage stays last", async () => {
+test("the rising sheet is linked before the Mirage face, so only hero stage follows Mirage", async () => {
   const route = await read("src/routes/world.tsx");
   assert.match(route, /import worldRisingCssUrl from "@\/styles-world-rising\.css\?url";/);
   const links = route.slice(route.search(/stylesheetLinks:\s*\[/));
@@ -84,9 +84,17 @@ test("the rising sheet is linked before the Mirage face, so Mirage stays last", 
     [...order].sort((a, b) => a - b),
     order,
   );
+  const stageOrder = [...links.slice(0, links.indexOf("],")).matchAll(/href: (\w+)/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(stageOrder.slice(stageOrder.indexOf("worldMirageCssUrl")), [
+    "worldMirageCssUrl",
+    "artworkStageCssUrl",
+    "worldArtworkStageCssUrl",
+  ]);
   assert.equal(
     links.lastIndexOf('rel: "stylesheet"'),
-    links.lastIndexOf('{ rel: "stylesheet", href: worldMirageCssUrl }') + 2,
+    links.lastIndexOf('{ rel: "stylesheet", href: worldArtworkStageCssUrl }') + 2,
   );
 });
 
@@ -1229,6 +1237,9 @@ test("2026-10-01: the frame erodes from its margins, near embers and bloom at oc
   // vanishing point (scale about the horizon line), on the same view
   // timeline: still only the three discovery rises move, still compositor-only.
   const css = await readCss();
-  assert.match(css, /@keyframes rw-horizon \{\s*from \{[^}]*scale: 1\.\d+ 1\.\d+;[^}]*\}\s*to \{[^}]*scale: 1 1;/);
+  assert.match(
+    css,
+    /@keyframes rw-horizon \{\s*from \{[^}]*scale: 1\.\d+ 1\.\d+;[^}]*\}\s*to \{[^}]*scale: 1 1;/,
+  );
   assert.match(css, /\.rw-gate-horizon \{[^}]*transform-origin: 50% var\(--rw-horizon-at\);/);
 });

@@ -59,7 +59,7 @@ test("dashboard head does not preload the opening; replay head retains its exact
   mode.endDocumentEntryOpening();
   assert.deepEqual(
     Array.from(head({}).links, (link) => link.href),
-    ["../styles-command-deck.css?url"],
+    ["../styles-artwork-stage.css?url", "../styles-command-deck.css?url"],
   );
   const opening = head({ opening: 1 }).links;
   assert.equal(opening.find((link) => link.rel === "preload").href, "/logo.webp");

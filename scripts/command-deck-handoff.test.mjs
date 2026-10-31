@@ -34,7 +34,7 @@ function runtime({ reduced = false, economy = false, scene = 0, viewport, measur
   };
   const exports = {};
   runInNewContext(code, {
-    exports, CustomEvent,
+    exports, CustomEvent, Image: class {},
     window: { innerWidth: 1000, innerHeight: 800, visualViewport: viewport, matchMedia: () => ({ matches: reduced }) },
     document: { documentElement: { dataset: economy ? { worldEffects: "economy" } : {} }, dispatchEvent: (event) => { cancellations.push(event.type); } },
     require(name) {
@@ -54,6 +54,8 @@ function runtime({ reduced = false, economy = false, scene = 0, viewport, measur
       if (name === "@/lib/opening-logo") return { OPENING_LOGO_FIRST: { src: "/logo.webp" } };
       if (name === "@/lib/thumbnail-images") return { posterImage: () => ({}), launcherTile: (url) => url };
       if (name === "@/lib/rexonance-images") return { rexonanceImage: () => ({}) };
+      if (name === "@/lib/command-deck-selection") return { readDeckSelection: () => null, saveDeckSelection() {} };
+      if (name === "@/components/artwork-stage/artwork-stage") return { ArtworkStage() {} };
       if (name === "lucide-react") return {};
       throw new Error(`Unexpected dependency ${name}`);
     },
@@ -209,7 +211,7 @@ function deckPauseRuntime() {
   const exports = {}, jsx = (type, props) => ({ type, props });
   const renderer = (kind) => ({ setPaused: (value) => pauses[kind].push(value), setScene() {}, dispose: () => disposed.push(kind) });
   runInNewContext(code, {
-    exports, document,
+    exports, document, Image: class {},
     window: { matchMedia: () => motion, setTimeout: (callback) => callbacks.push(callback), clearTimeout() {} },
     require(name) {
       if (name === "react") return { useRef: (current) => ({ current }), useState: (value) => [value, () => {}], useEffect: (effect) => effects.push(effect) };

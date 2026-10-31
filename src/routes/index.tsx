@@ -13,6 +13,7 @@ import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import openingElevationCssUrl from "../styles-opening-elevation.css?url";
 import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
 import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
+import artworkStageCssUrl from "../styles-artwork-stage.css?url";
 import commandDeckCssUrl from "../styles-command-deck.css?url";
 
 const opensWith = (search: Parameters<typeof showsOpening>[0]) =>
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/")({
                 "ディセプションワールド、夢の章、ファイナルステージ。物語、ライダー、作品を巡る。",
             },
           ],
-          links: [{ rel: "stylesheet", href: commandDeckCssUrl }],
+          links: [{ rel: "stylesheet", href: artworkStageCssUrl }, { rel: "stylesheet", href: commandDeckCssUrl }],
         },
 });
 

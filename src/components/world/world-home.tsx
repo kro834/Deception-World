@@ -29,203 +29,270 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { WorldAtmosphere } from "./world-atmosphere";
 import { WORLD_COLUMNS } from "./world-columns-data";
 import { MysteryColumnProse } from "./mystery-column-prose";
+import { ArtworkStage } from "@/components/artwork-stage/artwork-stage";
 import { WorldChapterRail, WorldContents, WorldSpecialDoors } from "./world-special";
 
 const POSTERS = [
   {
     src: "/deception-world-poster-delivery.webp",
+    width: 1024,
+    height: 1536,
     pos: "50% 50%",
     fit: "cover",
     alt: "仮面ライダーサーガ Deception Worldの集合ポスター",
   },
   {
     src: "/poster-card-03.jpeg",
+    width: 1086,
+    height: 1448,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーサーガのキービジュアル 03",
   },
   {
     src: "/poster-card-04.jpeg",
+    width: 1023,
+    height: 1537,
     pos: "50% 30%",
     fit: "cover",
     alt: "仮面ライダーサーガのキービジュアル 04",
   },
   {
     src: "/poster-card-05.jpeg",
+    width: 1086,
+    height: 1448,
     pos: "50% 32%",
     fit: "cover",
     alt: "Deception Worldのキービジュアル 05",
   },
   {
     src: "/poster-card-06.jpeg",
+    width: 1086,
+    height: 1448,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーレルムのキービジュアル 06",
   },
   {
     src: "/poster-card-07.jpeg",
+    width: 1254,
+    height: 1254,
     pos: "50% 50%",
     fit: "contain",
     alt: "仮面ライダーローアのキービジュアル 07",
   },
   {
     src: "/poster-card-08.jpeg",
+    width: 1254,
+    height: 1254,
     pos: "50% 50%",
     fit: "contain",
     alt: "青い装甲のライダーのキービジュアル 08",
   },
   {
     src: "/poster-card-10.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーレディックのキービジュアル 10",
   },
   {
     src: "/poster-card-11.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーアルゲノムのキービジュアル 11",
   },
   {
     src: "/poster-card-12.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーオーバーゼッツのキービジュアル 12",
   },
   {
     src: "/poster-card-13.jpeg",
+    width: 1086,
+    height: 1448,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーフリートのキービジュアル 13",
   },
   {
     src: "/poster-card-14.jpeg",
+    width: 1086,
+    height: 1448,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダールーラーのキービジュアル 14",
   },
   {
     src: "/poster-card-15.jpeg",
+    width: 1536,
+    height: 1024,
     pos: "50% 50%",
     fit: "contain",
     alt: "仮面ライダーサーガ Deception Worldのタイトルポスター",
   },
   {
     src: "/poster-card-16.jpeg",
+    width: 1672,
+    height: 941,
     pos: "50% 50%",
     fit: "contain",
     alt: "二人のライダーが並ぶDeception Worldのキービジュアル",
   },
   {
     src: "/poster-card-17.jpeg",
+    width: 960,
+    height: 1280,
     pos: "50% 46%",
     fit: "cover",
     alt: "夜空の下で佇む青と金の仮面ライダーサーガ",
   },
   {
     src: "/poster-card-18.jpeg",
+    width: 876,
+    height: 1168,
     pos: "50% 44%",
     fit: "cover",
     alt: "星の装甲をまとい座る仮面ライダーのキービジュアル",
   },
   {
     src: "/poster-card-19.jpeg",
+    width: 1280,
+    height: 853,
     pos: "50% 50%",
     fit: "contain",
     alt: "雪原で赤い剣を振るうライダーの戦闘キービジュアル",
   },
   {
     src: "/poster-card-20.jpeg",
+    width: 1024,
+    height: 1280,
     pos: "50% 46%",
     fit: "cover",
     alt: "赤いライダーと白緑のライダーが並ぶキービジュアル",
   },
   {
     src: "/poster-card-21.jpeg",
+    width: 1280,
+    height: 720,
     pos: "50% 50%",
     fit: "contain",
     alt: "白緑と青金のライダーが対峙するキービジュアル",
   },
   {
     src: "/poster-card-22.jpeg",
+    width: 853,
+    height: 1280,
     pos: "50% 42%",
     fit: "cover",
     alt: "星空を宿す装甲のライダーのキービジュアル",
   },
   {
     src: "/poster-card-23.jpeg",
+    width: 1024,
+    height: 1280,
     pos: "50% 48%",
     fit: "cover",
     alt: "青と金の仮面ライダーサーガが構えるキービジュアル",
   },
   {
     src: "/poster-card-24.jpeg",
+    width: 960,
+    height: 1280,
     pos: "50% 46%",
     fit: "cover",
     alt: "星の装甲をまとったライダーが低く構えるキービジュアル",
   },
   {
     src: "/poster-card-25.jpeg",
+    width: 861,
+    height: 1280,
     pos: "50% 43%",
     fit: "cover",
     alt: "荒野で大剣を構える赤いライダーのキービジュアル",
   },
   {
     src: "/poster-card-26.jpeg",
+    width: 1024,
+    height: 1280,
     pos: "50% 48%",
     fit: "cover",
     alt: "森で向き合うライダーとレックス・ロワのキービジュアル",
   },
   {
     src: "/poster-card-27.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 42%",
     fit: "cover",
     alt: "赤い装甲と大剣を携えた仮面ライダーサーガのキービジュアル",
   },
   {
     src: "/poster-card-28.jpeg",
+    width: 1024,
+    height: 1536,
     pos: "50% 38%",
     fit: "cover",
     alt: "夕焼けの廃都に立つ多色の神装ライダー",
   },
   {
     src: "/poster-card-29.jpeg",
+    width: 1024,
+    height: 1536,
     pos: "50% 38%",
     fit: "cover",
     alt: "夕焼けの廃都に立つ星光のライダー",
   },
   {
     src: "/poster-card-30.jpeg",
+    width: 1023,
+    height: 1537,
     pos: "50% 34%",
     fit: "cover",
     alt: "紅い光を宿すヴェール姿の人物",
   },
   {
     src: "/poster-card-31.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 40%",
     fit: "cover",
     alt: "アーマードライダーモスコのキービジュアル",
   },
   {
     src: "/poster-card-32-20260825.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 50%",
     fit: "cover",
     alt: "青と桃色の光をまとった仮面ライダーサイファー",
   },
   {
     src: "/poster-card-33.jpeg",
+    width: 1122,
+    height: 1402,
     pos: "50% 50%",
     fit: "cover",
     alt: "夜の遊園地に立つ紅黒の装甲ライダー",
   },
   {
     src: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    width: 680,
+    height: 906,
     pos: "50% 28%",
     fit: "cover",
     alt: "仮面ライダーレクソナンスサーガのキービジュアル",
   },
   {
     src: "/rider-vandal-thumbnail-20260827.jpeg",
+    width: 900,
+    height: 1202,
     pos: "50% 26%",
     fit: "cover",
     alt: "仮面ライダーヴァンダールの新キービジュアル",
@@ -1525,7 +1592,6 @@ export function WorldHome() {
   }, []);
   const current = POSTERS[poster];
   const previous = prevPoster != null ? POSTERS[prevPoster] : null;
-  const nextPoster = POSTERS[(poster + 1) % POSTERS.length];
   const rider = RIDERS[riderTab];
   const column = COLUMNS[columnTab];
   const selectedEpisodePickup = episodePickup == null ? null : EPISODES[episodePickup];
@@ -1805,146 +1871,43 @@ export function WorldHome() {
           <SideMenuTrigger open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
         </div>
       </header>
-      <section ref={openingHeroRef} className="hero" id="top" data-performance-region>
-        <div ref={openingBackdropRef} className="hero-backdrop" aria-hidden="true">
-          {previous ? (
-            <span
-              className="hero-backdrop-layer hero-backdrop-previous"
-              key={`hb-prev-${prevPoster}`}
+      <section
+        ref={openingHeroRef}
+        className="hero world-artwork-hero"
+        id="top"
+        data-performance-region
+      >
+        <div ref={openingBackdropRef} className="world-artwork-light" aria-hidden="true" />
+        <ArtworkStage
+          variant="world"
+          className="world-poster-stage"
+          artwork={{
+            id: current.src,
+            src: current.src,
+            alt: current.alt,
+            width: current.width,
+            height: current.height,
+          }}
+          economy={motionReduced}
+          media={
+            <div
+              className={shuffling ? "world-poster-media is-shuffling" : "world-poster-media"}
+              id="poster-stage"
+              aria-busy={shuffling}
             >
-              <img
-                src={previous.src}
-                {...posterImage(previous.src, reuseWarmedPoster)}
-                alt=""
-                style={{ objectPosition: previous.pos }}
-                decoding="async"
-              />
-            </span>
-          ) : null}
-          <span className="hero-backdrop-layer hero-backdrop-current" key={`hb-${poster}`}>
-            <img
-              src={current.src}
-              {...posterImage(current.src, reuseWarmedPoster)}
-              alt=""
-              style={{ objectPosition: current.pos }}
-              fetchPriority="high"
-              decoding="async"
-            />
-          </span>
-        </div>
-        {/* The key visual's streamlined light behind the stage (styles-world-zenith.css). */}
-        <div className="zn-hero-light" aria-hidden="true">
-          <i className="zn-trail zn-trail-a" />
-          <i className="zn-trail zn-trail-b" />
-          <i className="zn-bloom" />
-        </div>
-        <div className="film-hero-identity" data-film-reveal>
-          <FilmTextScan />
-          <p className="anime-work-title">
-            <span>仮面ライダーサーガ 劇場版第二作</span>
-            <b>
-              <i className="mr-word" data-text="DECEPTION">
-                DECEPTION
-              </i>{" "}
-              <i className="mr-word" data-text="WORLD">
-                WORLD
-              </i>
-            </b>
-          </p>
-        </div>
-        <div className="hero-copy">
-          <p className="eyebrow">
-            <span>THE SECOND SAGA</span>
-            <i />
-          </p>
-          <h1
-            ref={openingFocusRef}
-            tabIndex={-1}
-            data-opening-handoff-focus-target
-            data-film-reveal
-          >
-            <FilmTextScan />
-            <span>世界は、</span>
-            <strong>
-              <i className="mr-redact">欺瞞</i>でできている。
-            </strong>
-          </h1>
-          <div className="hero-actions">
-            <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
-              <LiquidPointerGlow />
-              <span>ENTER THE WORLD</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12h13M13 6l6 6-6 6" />
-              </svg>
-            </a>
-            <a className="text-action" href="#poster-stage">
-              POSTER
-            </a>
-          </div>
-        </div>
-
-        <div className={shuffling ? "poster-stage is-shuffling" : "poster-stage"} id="poster-stage">
-          <div
-            className={shuffling ? "poster-deck is-shuffling" : "poster-deck"}
-            aria-busy={shuffling}
-          >
-            <div className="poster-back-card poster-back-card-1" aria-hidden="true">
-              <img
-                key={nextPoster.src}
-                src={nextPoster.src}
-                {...posterImage(nextPoster.src, reuseWarmedPoster)}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-            </div>
-            <div className="poster-back-card poster-back-card-2" aria-hidden="true">
-              <img
-                key={current.src}
-                src={current.src}
-                {...posterImage(current.src, reuseWarmedPoster)}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-            </div>
-            <div className="poster-back-card poster-back-card-3" aria-hidden="true">
-              <img
-                key={current.src}
-                src={current.src}
-                {...posterImage(current.src, reuseWarmedPoster)}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-            </div>
-            <div className="poster-back-card poster-back-card-4" aria-hidden="true">
-              <img
-                key={current.src}
-                src={current.src}
-                {...posterImage(current.src, reuseWarmedPoster)}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                fetchPriority="low"
-              />
-            </div>
-            <div className="poster-frame">
-              <span className="poster-holo-ring" aria-hidden="true" />
-              <div className="poster-media">
+              <div className="world-stage-media">
                 {previous ? (
                   <img
-                    className="poster-image poster-image-previous"
+                    className="world-stage-image world-stage-image-previous"
                     key={`poster-prev-${prevPoster}`}
                     src={previous.src}
+                    width={previous.width}
+                    height={previous.height}
                     {...posterImage(previous.src, reuseWarmedPoster)}
                     alt=""
                     style={{
-                      objectPosition: previous.pos,
-                      objectFit: previous.fit === "contain" ? "contain" : "cover",
+                      objectPosition: "50% 50%",
+                      objectFit: "contain",
                     }}
                     onAnimationEnd={() => startTransition(() => setPrevPoster(null))}
                   />
@@ -1952,152 +1915,198 @@ export function WorldHome() {
                 <img
                   className={
                     current.fit === "contain"
-                      ? "poster-image poster-image-current is-contain"
-                      : "poster-image poster-image-current"
+                      ? "world-stage-image world-stage-image-current is-contain"
+                      : "world-stage-image world-stage-image-current"
                   }
                   key={`poster-${poster}`}
                   src={current.src}
+                  width={current.width}
+                  height={current.height}
                   {...posterImage(current.src, reuseWarmedPoster)}
                   alt={current.alt}
                   style={{
-                    objectPosition: current.pos,
-                    objectFit: current.fit === "contain" ? "contain" : "cover",
+                    objectPosition: "50% 50%",
+                    objectFit: "contain",
                   }}
                   fetchPriority="high"
                   decoding="async"
                 />
-                <span className="poster-sheen" aria-hidden="true" />
               </div>
-              <span className="corner corner-tl" aria-hidden="true" />
-              <span className="corner corner-tr" aria-hidden="true" />
-              <span className="corner corner-bl" aria-hidden="true" />
-              <span className="corner corner-br" aria-hidden="true" />
             </div>
-          </div>
-          <div className="orbit" aria-hidden="true" />
-          <div className="orbit orbit-two" aria-hidden="true" />
-          <div
-            className="poster-controls"
-            onFocusCapture={() => setPosterControlsFocused(true)}
-            onBlurCapture={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget))
-                setPosterControlsFocused(false);
-            }}
-          >
-            <div className="poster-control-cluster" role="group" aria-label="キービジュアル操作">
-              <button
-                type="button"
-                className="poster-shuffle ios26-glass"
-                data-liquid-pointer="true"
-                aria-disabled={shuffling}
-                aria-busy={shuffling}
-                aria-label="ポスターをシャッフル（SHUFFLE POSTER）"
-                onClick={shufflePoster}
-              >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  <UiVectorIcon kind="shuffle" size={18} />
-                </span>
-                <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
-              </button>
-              <button
-                type="button"
-                className="poster-reset ios26-glass"
-                data-liquid-pointer="true"
-                disabled={poster === 0 && !shuffling}
-                aria-label="先頭のポスターへ戻る（RESET）"
-                onClick={() => {
-                  cancelPosterShuffle();
-                  goPoster(0);
-                }}
-              >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  <UiVectorIcon kind="reset" size={17} />
-                </span>
-                <b>RESET</b>
-              </button>
-              <button
-                type="button"
-                className={
-                  locked
-                    ? "poster-lock ios26-glass is-locked"
-                    : "poster-lock ios26-glass is-unlocked"
-                }
-                data-liquid-pointer="true"
-                aria-pressed={locked}
-                aria-label={
-                  locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
-                }
-                onClick={() => {
-                  cancelPosterShuffle();
-                  setLocked((v) => !v);
-                }}
-              >
-                <LiquidPointerGlow />
-                <span aria-hidden="true">
-                  {locked ? (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 8 0v2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
-                        height="10"
-                        rx="2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" width="14" height="14">
-                      <path
-                        d="M8 10V8a4 4 0 0 1 7.5-2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <rect
-                        x="6"
-                        y="10"
-                        width="12"
-                        height="10"
-                        rx="2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      />
-                    </svg>
-                  )}
-                </span>
-                <b>{locked ? "固定中" : "自動切替"}</b>
-              </button>
-            </div>
-            <output
-              aria-label="表示中のポスター"
-              aria-live={locked || posterControlsFocused ? "polite" : "off"}
-              aria-atomic="true"
-              aria-busy={shuffling}
+          }
+          controls={
+            <div
+              className="world-stage-controls"
+              onFocusCapture={() => setPosterControlsFocused(true)}
+              onBlurCapture={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget))
+                  setPosterControlsFocused(false);
+              }}
             >
-              {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
-            </output>
+              <div
+                className="world-stage-control-cluster"
+                role="group"
+                aria-label="キービジュアル操作"
+              >
+                <button
+                  type="button"
+                  className="poster-shuffle ios26-glass"
+                  data-liquid-pointer="true"
+                  aria-disabled={shuffling}
+                  aria-busy={shuffling}
+                  aria-label="ポスターをシャッフル（SHUFFLE POSTER）"
+                  onClick={shufflePoster}
+                >
+                  <LiquidPointerGlow />
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="shuffle" size={18} />
+                  </span>
+                  <b>{shuffling ? "SHUFFLING..." : "SHUFFLE POSTER"}</b>
+                </button>
+                <button
+                  type="button"
+                  className="poster-reset ios26-glass"
+                  data-liquid-pointer="true"
+                  disabled={poster === 0 && !shuffling}
+                  aria-label="先頭のポスターへ戻る（RESET）"
+                  onClick={() => {
+                    cancelPosterShuffle();
+                    goPoster(0);
+                  }}
+                >
+                  <LiquidPointerGlow />
+                  <span aria-hidden="true">
+                    <UiVectorIcon kind="reset" size={17} />
+                  </span>
+                  <b>RESET</b>
+                </button>
+                <button
+                  type="button"
+                  className={
+                    locked
+                      ? "poster-lock ios26-glass is-locked"
+                      : "poster-lock ios26-glass is-unlocked"
+                  }
+                  data-liquid-pointer="true"
+                  aria-pressed={locked}
+                  aria-label={
+                    locked ? "ロックを解除して自動切替にする" : "ポスターをロックして固定する"
+                  }
+                  onClick={() => {
+                    cancelPosterShuffle();
+                    setLocked((v) => !v);
+                  }}
+                >
+                  <LiquidPointerGlow />
+                  <span aria-hidden="true">
+                    {locked ? (
+                      <svg viewBox="0 0 24 24" width="14" height="14">
+                        <path
+                          d="M8 10V8a4 4 0 0 1 8 0v2"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                        />
+                        <rect
+                          x="6"
+                          y="10"
+                          width="12"
+                          height="10"
+                          rx="2"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" width="14" height="14">
+                        <path
+                          d="M8 10V8a4 4 0 0 1 7.5-2"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                        />
+                        <rect
+                          x="6"
+                          y="10"
+                          width="12"
+                          height="10"
+                          rx="2"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  <b>{locked ? "固定中" : "自動切替"}</b>
+                </button>
+              </div>
+              <output
+                aria-label="表示中のポスター"
+                aria-live={locked || posterControlsFocused ? "polite" : "off"}
+                aria-atomic="true"
+                aria-busy={shuffling}
+              >
+                {String(poster + 1).padStart(2, "0")} / {String(POSTERS.length).padStart(2, "0")}
+              </output>
+            </div>
+          }
+        >
+          <div className="world-stage-identity" data-film-reveal>
+            <FilmTextScan />
+            <p className="anime-work-title">
+              <span>仮面ライダーサーガ 劇場版第二作</span>
+              <b>
+                <i className="mr-word" data-text="DECEPTION">
+                  DECEPTION
+                </i>{" "}
+                <i className="mr-word" data-text="WORLD">
+                  WORLD
+                </i>
+              </b>
+            </p>
           </div>
-        </div>
-        <div className="hero-context">
-          <p className="hero-lead">
-            救うべき世界は、目の前にある。
-            <br />
-            6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
-          </p>
-        </div>
+          <div className="world-stage-copy">
+            <p className="eyebrow">
+              <span>THE SECOND SAGA</span>
+              <i />
+            </p>
+            <h1
+              ref={openingFocusRef}
+              tabIndex={-1}
+              data-opening-handoff-focus-target
+              data-film-reveal
+            >
+              <FilmTextScan />
+              <span>世界は、</span>
+              <strong>
+                <i className="mr-redact">欺瞞</i>でできている。
+              </strong>
+            </h1>
+            <div className="world-stage-actions">
+              <a className="primary-action ios26-glass" href="#story" data-liquid-pointer="true">
+                <LiquidPointerGlow />
+                <span>ENTER THE WORLD</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h13M13 6l6 6-6 6" />
+                </svg>
+              </a>
+              <a className="text-action" href="#poster-stage">
+                POSTER
+              </a>
+            </div>
+          </div>
+          <div className="world-stage-context">
+            <p className="world-stage-lead">
+              救うべき世界は、目の前にある。
+              <br />
+              6人の最上位管理人と8人のライダーが、現実世界を舞台に交錯する。
+            </p>
+          </div>
+        </ArtworkStage>
         <a className="scroll-cue" href="#story">
           <span>SCROLL TO DESCEND</span>
           <i />

@@ -1026,7 +1026,11 @@ test("angle keyboard controls wrap, focus the selected button and ignore unrelat
   assert.deepEqual(focused, [2, 0, 1, 2]);
   assert.equal(prevented, 4);
   press("ArrowRight", { focusedIndex: 0 });
-  assert.equal(f.calls.views.at(-1), "oblique", "arrows start from the focused button after Tab navigation");
+  assert.equal(
+    f.calls.views.at(-1),
+    "oblique",
+    "arrows start from the focused button after Tab navigation",
+  );
   assert.equal(focused.at(-1), 1);
   for (const modifier of ["altKey", "ctrlKey", "metaKey", "shiftKey"]) {
     press("ArrowRight", { focusedIndex: 0, [modifier]: true });
@@ -1070,11 +1074,11 @@ test("the regular gallery keeps its original enlargement link without a room or 
   assert.doesNotMatch(source, /ExhibitionStudio|useUltraArtworkReady|data-ultra-artwork-ready/);
   assert.match(
     source,
-    /<figure className="gallery-feature">\s*<a\s+className="gallery-feature-open"\s+href=\{featured\.full\}\s+onClick=\{\(event\) => openWork\(event, featured\)\}/,
+    /<a\s+className="gallery-feature-open"\s+href=\{print\.full\}\s+onClick=\{\(event\) => openWork\(event, print\)\}/,
   );
   assert.match(source, /aria-haspopup="dialog"\s+aria-controls="gallery-viewer"/);
-  assert.match(source, /src=\{featured\.medium\}\s+srcSet=\{featured\.srcSet\}/);
-  assert.match(source, /width=\{featured\.width\}\s+height=\{featured\.height\}/);
+  assert.match(source, /src=\{print\.medium\}\s+srcSet=\{print\.srcSet\}/);
+  assert.match(source, /width=\{print\.width\}\s+height=\{print\.height\}/);
   assert.match(source, /to="\/exhibition"\s+search=\{\{ work: featured\.id \}\}/);
 });
 

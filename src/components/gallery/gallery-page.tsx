@@ -1,5 +1,11 @@
+import {
+  readGalleryStagePreview,
+  rememberGalleryStagePreview,
+  resolveGalleryStageArtwork,
+} from "./gallery-stage-state";
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { useGallerySelectionMotion } from "./gallery-selection-motion";
+import { ArtworkStage } from "@/components/artwork-stage/artwork-stage";
 import { gallerySelectFocus } from "./gallery-select-focus";
 import type { Session, SupabaseClient } from "@supabase/supabase-js";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -70,6 +76,17 @@ export function GalleryPage() {
   useWorldMode();
   const router = useRouter();
   const display = useGalleryDisplayPreferences();
+  const stageEntry = useRef(
+    String((router.history.location.state as { __TSR_key?: string }).__TSR_key ?? "gallery"),
+  );
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  useEffect(() => {
+    setPreviewId(readGalleryStagePreview(stageEntry.current));
+  }, []);
+  const previewArtwork = (id: string) => {
+    rememberGalleryStagePreview(stageEntry.current, id);
+    setPreviewId(id);
+  };
   // The history entry the open viewer adds, so Back closes it in place.
   const viewerEntryRef = useRef(false);
   const readingAtRef = useRef({ top: 0, left: 0 });
@@ -222,7 +239,12 @@ export function GalleryPage() {
     return allArtworks.filter((work) => adjacent.has(work.id));
     // The sequence is a session snapshot; only its IDs and the selected work matter.
   }, [selectedId, allArtworks]);
-  const featured = allArtworks.find((work) => work.id === featuredId) ?? GALLERY_ARTWORKS[2];
+  const featured = resolveGalleryStageArtwork(
+    allArtworks,
+    previewId,
+    featuredId,
+    GALLERY_ARTWORKS[2],
+  );
   const selectedPost = communityPosts.find((post) => post.id === selectedId);
   const canDeleteSelected = Boolean(session && selectedPost?.canDelete);
 
@@ -804,6 +826,9 @@ export function GalleryPage() {
   };
   const changeFeature = (id: string | null) => {
     updateFeature(id);
+    setPreviewId(id);
+    if (id) rememberGalleryStagePreview(stageEntry.current, id);
+    else rememberGalleryStagePreview(stageEntry.current, null);
     revealPersonalFeedback(featureFeedbackRef);
   };
   const resetDiscovery = () => {
@@ -1037,99 +1062,144 @@ export function GalleryPage() {
             )}
           </div>
         )}
-        <section
-          className="gallery-intro"
-          data-feature-shape={featured.width < featured.height ? "portrait" : "landscape"}
-          style={{ ["--gallery-feature-ratio" as string]: featured.width / featured.height }}
-          aria-labelledby="gallery-title"
-        >
-          <div className="gallery-intro-copy">
-            <p className="gallery-eyebrow">DECEPTION WORLD / GALLERY</p>
-            <h1 id="gallery-title">
-              <span className="gallery-title-opening">光と影の、</span>
-              <span>展示室。</span>
-            </h1>
-            <p className="gallery-intro-description">
-              <span>戦いの一瞬から、静かな横顔まで。</span>
-              <span>
-                <span className="gallery-copy-phrase">ディセプションワールドの景色を、</span>
-                <span className="gallery-copy-phrase">一点ずつ巡るギャラリー。</span>
-              </span>
-            </p>
-          </div>
-          <figure className="gallery-feature">
-            <a
-              className="gallery-feature-open"
-              href={featured.full}
-              onClick={(event) => openWork(event, featured)}
-              aria-haspopup="dialog"
-              aria-controls="gallery-viewer"
-              aria-label={`${numberFor(featured)}を拡大して鑑賞`}
-            >
-              <img
-                src={featured.medium}
-                srcSet={featured.srcSet}
-                sizes={`(max-width: 700px) 90vw, ${Math.min(1320, Math.round((680 * featured.width) / featured.height))}px`}
-                alt={featured.alt}
-                width={featured.width}
-                height={featured.height}
-                fetchPriority="high"
-                decoding="async"
-              />
-            </a>
-            <figcaption>
-              <span>{numberFor(featured)}</span>
-              {titles[featured.id] && <span>{titles[featured.id]}</span>}
-            </figcaption>
-            <details className="gallery-feature-settings">
-              <summary>作品の表示と設定</summary>
-              {!isCommunityGalleryId(featured.id) && (
-                <Link
-                  className="exhibition-room-entry"
-                  to="/exhibition"
-                  search={{ work: featured.id }}
+        <section className="gallery-intro gallery-artwork-intro" aria-labelledby="gallery-title">
+          <ArtworkStage
+            variant="gallery"
+            artwork={{
+              id: featured.id,
+              src: featured.medium,
+              srcSet: featured.srcSet,
+              width: featured.width,
+              height: featured.height,
+              alt: featured.alt,
+            }}
+            controls={
+              <div className="gallery-stage-controls">
+                <div
+                  className="gallery-stage-candidates"
+                  role="group"
+                  aria-label="原画をプレビュー"
                 >
-                  展示室を大きく開く <span aria-hidden="true">↗</span>
-                </Link>
-              )}
-
-              <a href="#gallery-collection">トップ作品を選ぶ</a>
-              {featuredId && (
-                <button type="button" onClick={() => changeFeature(null)}>
-                  初期設定に戻す
+                  {[-2, -1, 0, 1, 2].map((step) => {
+                    const index = Math.max(
+                      0,
+                      allArtworks.findIndex((work) => work.id === featured.id),
+                    );
+                    const item =
+                      allArtworks[(index + step + allArtworks.length) % allArtworks.length];
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        aria-pressed={item.id === featured.id}
+                        onClick={() => previewArtwork(item.id)}
+                        aria-label={`${numberFor(item)}をプレビュー`}
+                      >
+                        <img src={item.thumb} alt="" width={64} height={64} loading="lazy" />
+                        <span>{numberFor(item)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <button type="button" onClick={() => changeFeature(featured.id)}>
+                  トップに飾る
                 </button>
+              </div>
+            }
+            renderArtwork={(artwork) => {
+              const print = allArtworks.find((work) => work.id === artwork.id) ?? featured;
+              return (
+                <a
+                  className="gallery-feature-open"
+                  href={print.full}
+                  onClick={(event) => openWork(event, print)}
+                  aria-haspopup="dialog"
+                  aria-controls="gallery-viewer"
+                  aria-label={`${numberFor(print)}を拡大して鑑賞`}
+                >
+                  <img
+                    src={print.medium}
+                    srcSet={print.srcSet}
+                    sizes={`(max-width: 700px) 90vw, ${Math.min(1320, Math.round((680 * print.width) / print.height))}px`}
+                    alt={print.alt}
+                    width={print.width}
+                    height={print.height}
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </a>
+              );
+            }}
+          >
+            <div className="gallery-intro-copy">
+              <p className="gallery-eyebrow">DECEPTION WORLD / GALLERY</p>
+              <h1 id="gallery-title">
+                <span className="gallery-title-opening">光と影の、</span>
+                <span>展示室。</span>
+              </h1>
+              <p className="gallery-intro-description">
+                <span>戦いの一瞬から、静かな横顔まで。</span>
+                <span>
+                  <span className="gallery-copy-phrase">ディセプションワールドの景色を、</span>
+                  <span className="gallery-copy-phrase">一点ずつ巡るギャラリー。</span>
+                </span>
+              </p>
+            </div>
+            <figure className="gallery-feature">
+              <figcaption>
+                <span>{numberFor(featured)}</span>
+                {titles[featured.id] && <span>{titles[featured.id]}</span>}
+              </figcaption>
+              <details className="gallery-feature-settings">
+                <summary>作品の表示と設定</summary>
+                {!isCommunityGalleryId(featured.id) && (
+                  <Link
+                    className="exhibition-room-entry"
+                    to="/exhibition"
+                    search={{ work: featured.id }}
+                  >
+                    展示室を大きく開く <span aria-hidden="true">↗</span>
+                  </Link>
+                )}
+
+                <a href="#gallery-collection">トップ作品を選ぶ</a>
+                {featuredId && (
+                  <button type="button" onClick={() => changeFeature(null)}>
+                    初期設定に戻す
+                  </button>
+                )}
+                <p>
+                  作品を拡大して「トップに飾る」を選択。自分の表示だけに反映され、このブラウザーに保存されます。
+                </p>
+              </details>
+              {featureMessage && (
+                <p className="gallery-feature-feedback" role="status">
+                  {featureMessage}
+                </p>
               )}
-              <p>
-                作品を拡大して「トップに飾る」を選択。自分の表示だけに反映され、このブラウザーに保存されます。
+              {featureError && (
+                <p className="gallery-feature-feedback is-error" role="alert">
+                  {featureError}
+                </p>
+              )}
+            </figure>
+            <div className="gallery-intro-navigation">
+              <nav className="gallery-intro-actions" aria-label="ギャラリーの入口">
+                <a className="gallery-enter" href="#gallery-collection">
+                  展示室へ<span aria-hidden="true">↓</span>
+                </a>
+                <p className="gallery-tour-invitation">
+                  <Link to="/gallery-tours">
+                    テーマから作品を巡る <span aria-hidden="true">↗</span>
+                  </Link>
+                  <span>光や構図を手がかりに選ぶ、５つの展示ツアー。</span>
+                </p>
+              </nav>
+              <p className="gallery-edition">
+                COLLECTION <b>{GALLERY_ARTWORKS.length}</b> WORKS
               </p>
-            </details>
-            {featureMessage && (
-              <p className="gallery-feature-feedback" role="status">
-                {featureMessage}
-              </p>
-            )}
-            {featureError && (
-              <p className="gallery-feature-feedback is-error" role="alert">
-                {featureError}
-              </p>
-            )}
-          </figure>
-          <div className="gallery-intro-navigation">
-            <nav className="gallery-intro-actions" aria-label="ギャラリーの入口">
-              <a className="gallery-enter" href="#gallery-collection">
-                展示室へ<span aria-hidden="true">↓</span>
-              </a>
-              <p className="gallery-tour-invitation">
-                <Link to="/gallery-tours">
-                  テーマから作品を巡る <span aria-hidden="true">↗</span>
-                </Link>
-                <span>光や構図を手がかりに選ぶ、５つの展示ツアー。</span>
-              </p>
-            </nav>
-            <p className="gallery-edition">
-              COLLECTION <b>{GALLERY_ARTWORKS.length}</b> WORKS
-            </p>
-          </div>
+            </div>
+          </ArtworkStage>
         </section>
         <section
           id="gallery-collection"

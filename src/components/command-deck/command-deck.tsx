@@ -3,7 +3,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type PointerEvent,
   type RefObject,
   type MouseEvent,
   type ReactNode,
@@ -17,6 +16,8 @@ import {
   RotateCcw,
   Search,
 } from "lucide-react";
+import { readDeckSelection, saveDeckSelection } from "@/lib/command-deck-selection";
+import { ArtworkStage } from "@/components/artwork-stage/artwork-stage";
 import { OPENING_LOGO_FIRST } from "@/lib/opening-logo";
 import { launcherTile, posterImage } from "@/lib/thumbnail-images";
 import { rexonanceImage } from "@/lib/rexonance-images";
@@ -152,12 +153,12 @@ function imageProps(art: Artwork) {
     ? {
         src: art.src,
         ...rexonanceImage(art.src),
-        sizes: "(max-width: 620px) 76vw, (max-width: 1100px) 48vw, 460px",
+        sizes: "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
       }
     : {
         src: art.src,
         ...posterImage(art.src),
-        sizes: "(max-width: 620px) 76vw, (max-width: 1100px) 48vw, 460px",
+        sizes: "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
       };
 }
 
@@ -322,6 +323,35 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
   const artwork = scene.artwork[artIndex];
 
   useEffect(() => {
+    try {
+      const saved = readDeckSelection(window.sessionStorage, SCENES.map((item) => item.artwork.length));
+      if (saved) {
+        currentScene.current = saved.scene;
+        setSceneIndex(saved.scene);
+        setArtIndex(saved.artwork);
+      }
+    } catch { /* Storage is optional; keep the first available artwork. */ }
+  }, []);
+
+  const rememberSelection = (selectedScene: number, selectedArtwork: number) => {
+    try { saveDeckSelection(window.sessionStorage, { scene: selectedScene, artwork: selectedArtwork }); } catch { /* Storage may be blocked by browser policy. */ }
+  };
+
+  useEffect(() => {
+    const adjacent = [-1, 1].map((offset) => scene.artwork[(artIndex + offset + scene.artwork.length) % scene.artwork.length]);
+    const images = adjacent.map((item) => {
+      const image = new Image();
+      const props = imageProps(item);
+      image.decoding = "async";
+      image.sizes = props.sizes;
+      if (props.srcSet) image.srcset = props.srcSet;
+      image.src = props.src;
+      return image;
+    });
+    return () => { images.forEach((image) => { image.onload = null; image.onerror = null; }); };
+  }, [scene, artIndex]);
+
+  useEffect(() => {
     const root = rootRef.current;
     const host = rendererHost.current;
     const projection = htmlHost.current;
@@ -404,6 +434,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
     currentScene.current = index;
     setSceneIndex(index);
     setArtIndex(0);
+    rememberSelection(index, 0);
     const next = SCENES[index];
     renderer.current?.setScene(index);
     renderer.current?.pulse();
@@ -414,29 +445,10 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
     });
   };
   const turnArt = (direction: number) => {
-    setArtIndex((index) => (index + direction + scene.artwork.length) % scene.artwork.length);
+    const next = (artIndex + direction + scene.artwork.length) % scene.artwork.length;
+    setArtIndex(next);
+    rememberSelection(sceneIndex, next);
     renderer.current?.pulse();
-  };
-  const tilt = (event: PointerEvent<HTMLDivElement>) => {
-    if (
-      event.pointerType !== "mouse" ||
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    )
-      return;
-    const box = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.style.setProperty(
-      "--deck-tilt-x",
-      `${((event.clientX - box.left) / box.width - 0.5) * 5}deg`,
-    );
-    event.currentTarget.style.setProperty(
-      "--deck-tilt-y",
-      `${((event.clientY - box.top) / box.height - 0.5) * -4}deg`,
-    );
-  };
-  const resetTilt = () => {
-    rootRef.current?.style.setProperty("--deck-tilt-x", "0deg");
-    rootRef.current?.style.setProperty("--deck-tilt-y", "0deg");
   };
 
   return (
@@ -445,8 +457,6 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
       className="command-deck"
       data-scene={scene.id}
       style={{ "--deck-accent": scene.accent, "--deck-accent-ink": scene.ink } as CSSProperties}
-      onPointerMove={tilt}
-      onPointerLeave={resetTilt}
     >
       <a className="command-deck-skip" href="#command-deck-main">
         本文へスキップ
@@ -499,13 +509,34 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
       </header>
 
       <main id="command-deck-main" className="command-deck-main dg-focus-scope" tabIndex={-1}>
+        <ArtworkStage
+          variant="home"
+          className="command-deck-artwork-stage"
+          artwork={{ ...artwork, ...imageProps(artwork), id: `${scene.id}-${artIndex}` }}
+          controls={
+            <div className="command-deck-art-controls" role="group" aria-label="ビジュアル切替">
+              <button type="button" onClick={() => turnArt(-1)} aria-label="前のビジュアル">
+                <ChevronLeft size={20} aria-hidden="true" />
+              </button>
+              <span aria-live="polite" aria-atomic="true">
+                <b>{String(artIndex + 1).padStart(2, "0")}</b>
+                <span aria-hidden="true"> / </span>
+                <span className="command-deck-sr">枚目、全</span>
+                {String(scene.artwork.length).padStart(2, "0")}
+                <span className="command-deck-sr">枚</span>
+              </span>
+              <button type="button" onClick={() => turnArt(1)} aria-label="次のビジュアル">
+                <ChevronRight size={20} aria-hidden="true" />
+              </button>
+            </div>
+          }
+        >
         <div className="command-deck-title" key={`title-${scene.id}`}>
           <h1>
             <span>{scene.title[0]}</span>
             <span>{scene.title[1]}</span>
           </h1>
         </div>
-        <div className="command-deck-layout">
           <section className="command-deck-select" aria-label="作品選択">
             <div className="command-deck-section-rule" aria-hidden="true">
               <i />
@@ -567,48 +598,6 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             </a>
           </section>
 
-          <section className="command-deck-art-stage" aria-label={`${scene.japanese}のビジュアル`}>
-            <div className="command-deck-art-orbit" aria-hidden="true">
-              <i />
-              <i />
-            </div>
-            <div className="command-deck-art-backing" aria-hidden="true" />
-            <div className="command-deck-art-frame">
-              <div className="command-deck-art" key={`${scene.id}-${artIndex}`}>
-                <img
-                  {...imageProps(artwork)}
-                  alt={artwork.alt}
-                  width={artwork.width}
-                  height={artwork.height}
-                  decoding="async"
-                  fetchPriority={sceneIndex === 0 && artIndex === 0 ? "high" : "auto"}
-                />
-              </div>
-              <div
-                className="command-deck-art-scan"
-                aria-hidden="true"
-                key={`scan-${scene.id}-${artIndex}`}
-              />
-              <i className="command-deck-corner command-deck-corner-a" aria-hidden="true" />
-              <i className="command-deck-corner command-deck-corner-b" aria-hidden="true" />
-            </div>
-            <div className="command-deck-art-controls" role="group" aria-label="ビジュアル切替">
-              <button type="button" onClick={() => turnArt(-1)} aria-label="前のビジュアル">
-                <ChevronLeft size={20} aria-hidden="true" />
-              </button>
-              <span aria-live="polite" aria-atomic="true">
-                <b>{String(artIndex + 1).padStart(2, "0")}</b>
-                <span aria-hidden="true"> / </span>
-                <span className="command-deck-sr">枚目、全</span>
-                {String(scene.artwork.length).padStart(2, "0")}
-                <span className="command-deck-sr">枚</span>
-              </span>
-              <button type="button" onClick={() => turnArt(1)} aria-label="次のビジュアル">
-                <ChevronRight size={20} aria-hidden="true" />
-              </button>
-            </div>
-          </section>
-
           <aside className="command-deck-side" aria-label="作品の見どころと資料">
             <div className="command-deck-logo-panel">
               <img
@@ -639,7 +628,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
               <div ref={htmlHost} className="command-deck-html-projection" aria-hidden="true" />
             </DeckLink>
           </aside>
-        </div>
+        </ArtworkStage>
 
         <section
           className="command-deck-riders"
