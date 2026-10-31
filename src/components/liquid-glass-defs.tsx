@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   BUTTON_STYLE_ATTRIBUTE,
+  LENS_MAP_BAR,
   LENS_MAP_CAPSULE,
   LENS_MAP_ROUND,
   LIQUID_LENS_ATTRIBUTE,
@@ -110,6 +111,8 @@ export function LiquidGlassDefs() {
       <defs>
         <Lens id="dw-liquid-lens-capsule" map={LENS_MAP_CAPSULE} scale={0.09} />
         <Lens id="dw-liquid-lens-round" map={LENS_MAP_ROUND} scale={0.2} />
+        {/* The bars are wide and short: a small scale bends their ends. */}
+        <Lens id="dw-liquid-lens-bar" map={LENS_MAP_BAR} scale={0.02} />
       </defs>
     </svg>
   );
