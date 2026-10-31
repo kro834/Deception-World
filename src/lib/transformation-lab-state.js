@@ -81,3 +81,43 @@ export const LAB_FORMS = {
 };
 export const validLabForm = (rider, form) =>
   LAB_FORMS[rider]?.some(([key]) => key === form) ? form : "standard";
+
+/** Writes the lab's URL to the current history entry at most once per
+ * `delay` ms (trailing, so the last scrub position always lands). WebKit
+ * throws a SecurityError after 100 replaceState calls in 10 seconds, and a
+ * seek drag fires input at the display rate: one write per input threw
+ * inside a React effect and the route's error boundary replaced the lab with
+ * the load-error page. A refused write is skipped; the next one retries. */
+export function createLabUrlWriter(
+  history,
+  { delay = 350, schedule = setTimeout, cancel = clearTimeout } = {},
+) {
+  let timer = null;
+  let pending = null;
+  const flush = () => {
+    timer = null;
+    const url = pending;
+    pending = null;
+    if (url == null) return;
+    try {
+      history.replaceState(history.state, "", url);
+    } catch {
+      /* flood guard or a detached document: the next write retries */
+    }
+  };
+  return {
+    write(url) {
+      pending = url;
+      if (timer == null) timer = schedule(flush, delay);
+    },
+    flush() {
+      if (timer != null) cancel(timer);
+      flush();
+    },
+    cancel() {
+      if (timer != null) cancel(timer);
+      timer = null;
+      pending = null;
+    },
+  };
+}
