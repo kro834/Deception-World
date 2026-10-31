@@ -1,0 +1,430 @@
+/* Liquid glass, spread to the surfaces and chrome (owner, 2026-10-31:
+   「リキッドグラスを横スライダーなど様々なところに波及させて」).
+
+   The buttons' material (src/styles-liquid-glass.css) dresses the controls;
+   this sheet dresses what they sit on: the top bars, the side menu and its
+   sections, the iPad compact and phone-landscape menu buttons, the dialog
+   shells, Ciel's (Zeus) halo, the SCP notice's under-surface, the toast,
+   the command deck's panels, the search boxes and the dossier's fact plate.
+
+   Rules of the sheet:
+   - Every rule waits for html[data-button-style="liquid"] (the side menu's
+     option). With it off nothing here matches: the site is unchanged.
+   - It shares the buttons' light (--lg-lx/--lg-ly) and blur budget; the
+     surface numbers are the --lgs-* tokens below.
+   - Legibility first. A text surface keeps the backing colour it had (the
+     dialogs, the panels, the plates): the glass is the frame around it, a
+     specular top, a refracting rim and a depth shadow, all painted by
+     box-shadow over the surface's own art. Only the bars go translucent, on
+     a mouse or trackpad screen, over a darkening blur.
+   - Touch screens never sample the backdrop of a large surface: the bars
+     and panels keep their solid backing and wear the glass as painted light
+     (the pre-blurred approximation). The phones' and iPads' compact menu
+     buttons, likewise.
+   - Nothing here animates, scales or moves a box: no transition, no
+     transform, no size change, so no drag, scroll or measured layout reads a
+     different number with the option on (the Zeus avoid and drag, the file
+     shutters, the opening, the dynamic GUI kit).
+   - The lens (an SVG displacement in backdrop-filter) refracts the bars'
+     ends, only where the defs mark html[data-liquid-lens] (Chromium; never
+     Safari or Firefox) and never in economy.
+
+   Specificity: the surfaces' skins weigh up to (0,7,1) with !important (the
+   iPad compact launcher), so the glass carries :not(#lg-glass) three times,
+   as the buttons' material does. */
+
+html[data-button-style="liquid"] {
+  /* The backing every glass surface is tinted toward. */
+  --lgs-ink: 5 10 18;
+  /* The bars' translucency on a mouse or trackpad screen. */
+  --lgs-bar-a: 0.76;
+  --lgs-blur: 22px;
+  --lgs-sat: 1.55;
+  /* Dims what the bars blur, so their words keep their contrast. */
+  --lgs-dim: 0.62;
+  --lgs-radius: 22px;
+  --lgs-radius-panel: 16px;
+  /* A dialog's frame: a glass bezel around a solid page. */
+  --lgs-frame:
+    /* the specular rim, lit from the light's side */
+    inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.3),
+    /* the specular top: a soft band of light under the upper rim */ inset 0 30px 38px -32px
+      rgb(255 255 255 / 0.17),
+    /* the refracting rim: warm on one side, cool on the other */ inset 3px 0 5px -3px
+      rgb(255 92 168 / 0.3),
+    inset -3px 0 5px -3px rgb(72 206 255 / 0.34), inset 0 -2px 6px -3px rgb(122 232 255 / 0.18),
+    /* a hairline that holds the shape on any backdrop */ inset 0 0 0 0.5px rgb(255 255 255 / 0.12),
+    /* the bezel: a thin glass band outside the page. Its rim catches the
+       light on the lit side and the accent on the far one. */
+    0 0 0 1px rgb(255 255 255 / 0.12),
+    calc(var(--lg-lx) * 1.5px) calc(var(--lg-ly) * 1.5px) 0 6px rgb(255 255 255 / 0.12),
+    calc(var(--lg-lx) * -1.5px) calc(var(--lg-ly) * -1.5px) 0 6px rgb(122 232 255 / 0.1),
+    0 0 0 6px rgb(150 205 240 / 0.07), 0 0 0 7px rgb(255 255 255 / 0.13),
+    /* the depth */ 0 2px 6px rgb(0 0 0 / 0.36), 0 36px 90px -28px rgb(0 0 0 / 0.78),
+    0 0 60px -26px rgb(122 232 255 / 0.4);
+  /* A panel inside a page: the same light without the bezel. */
+  --lgs-panel:
+    inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.26),
+    inset 0 24px 30px -26px rgb(255 255 255 / 0.15), inset 2px 0 4px -2px rgb(255 92 168 / 0.24),
+    inset -2px 0 4px -2px rgb(72 206 255 / 0.28), inset 0 0 0 0.5px rgb(255 255 255 / 0.12),
+    0 1px 2px rgb(0 0 0 / 0.3), 0 18px 40px -22px rgb(0 0 0 / 0.72);
+  /* A bar: the light along its lower edge, where the page passes under it. */
+  --lgs-bar:
+    inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 -1px 0 rgb(255 255 255 / 0.2),
+    inset 0 -10px 16px -14px rgb(122 232 255 / 0.32),
+    inset 0 22px 26px -24px rgb(255 255 255 / 0.12), inset 3px 0 5px -4px rgb(255 92 168 / 0.26),
+    inset -3px 0 5px -4px rgb(72 206 255 / 0.3), 0 1px 0 rgb(0 0 0 / 0.55),
+    0 14px 32px -16px rgb(0 0 0 / 0.72);
+  /* A search box: a well cut into the glass. */
+  --lgs-well:
+    inset 0 1px 3px rgb(0 0 0 / 0.55), inset 0 -1px 0 rgb(255 255 255 / 0.16),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14), 0 0 0 1px rgb(122 232 255 / 0.22),
+    0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* ---------------------------------------------------------------
+   The bars. On every screen: the bar's light (box-shadow only). The
+   lists here and in each fallback below are the sheet's lgs:* lists
+   (scripts/glass-spread-surfaces.test.mjs keeps them in step).
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    /* lgs:bars */
+    .topbar,
+    .manager-topbar,
+    .gallery-topbar,
+    .search-topbar,
+    .library-topbar,
+    .command-deck-header,
+    .side-panel-head
+    /* /lgs:bars */
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow: var(--lgs-bar) !important;
+}
+
+/* A mouse or trackpad screen: the bar turns to glass over a darkened blur.
+   Not on the iPad compact or phone-landscape chrome (their bars are solid
+   by contract, and a backdrop-filter would make the bar the containing
+   block of the fixed menu button inside it). */
+@media (hover: hover) and (pointer: fine) {
+  html[data-button-style="liquid"]:not([data-ipad-menu="compact"]):not(
+      [data-phone-landscape-menu="true"]
+    ):not([data-lg-touch])
+    body
+    :is(
+      .topbar,
+      .manager-topbar,
+      .gallery-topbar,
+      .search-topbar,
+      .library-topbar,
+      .command-deck-header,
+      .side-panel-head
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background-color: rgb(var(--lgs-ink) / var(--lgs-bar-a)) !important;
+    -webkit-backdrop-filter: blur(var(--lgs-blur)) saturate(var(--lgs-sat))
+      brightness(var(--lgs-dim)) !important;
+    backdrop-filter: blur(var(--lgs-blur)) saturate(var(--lgs-sat)) brightness(var(--lgs-dim)) !important;
+  }
+
+  /* Chromium: the bar's ends bend the page passing under them. */
+  html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"]):not(
+      [data-ipad-menu="compact"]
+    ):not([data-phone-landscape-menu="true"]):not([data-lg-touch])
+    body
+    :is(
+      .topbar,
+      .manager-topbar,
+      .gallery-topbar,
+      .search-topbar,
+      .library-topbar,
+      .command-deck-header
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    -webkit-backdrop-filter: url(#dw-liquid-lens-bar) blur(var(--lgs-blur)) saturate(var(--lgs-sat))
+      brightness(var(--lgs-dim)) !important;
+    backdrop-filter: url(#dw-liquid-lens-bar) blur(var(--lgs-blur)) saturate(var(--lgs-sat))
+      brightness(var(--lgs-dim)) !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   The dialog shells: a glass bezel around a solid page. Their backing,
+   their art (corner brackets, grids, rules) and their words are untouched.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    /* lgs:frames */
+    .form-pickup-dialog,
+    .rider-nightmare-dialog,
+    .episode-pickup-dialog,
+    .world-column-dialog,
+    .quick-search-panel,
+    .site-announcement-hub
+    /* /lgs:frames */
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.22) !important;
+  border-radius: var(--lgs-radius) !important;
+  box-shadow: var(--lgs-frame) !important;
+}
+
+/* On a phone the pickups fill the screen: their edges are the screen's, so
+   they keep square corners (a rounded one would open onto the backdrop). */
+@media (max-width: 600px) {
+  html[data-button-style="liquid"]
+    body
+    :is(.form-pickup-dialog, .episode-pickup-dialog, .world-column-dialog):not(#lg-glass):not(
+      #lg-glass
+    ):not(#lg-glass) {
+    border-radius: 0 !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Panels: the side menu's sections, the command deck's panels and the
+   dossier's fact plate. The same light, no bezel, a panel's radius.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    /* lgs:panels */
+    .command-atlas-index,
+    .side-panel-group[data-atlas-group="sections"],
+    .command-deck-chapter-links,
+    .command-deck-footer
+    /* /lgs:panels */
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.2) !important;
+  border-radius: var(--lgs-radius-panel) !important;
+  box-shadow: var(--lgs-panel) !important;
+}
+
+/* The dossier's fact plate (NAME, AGE ... ROLE). Its backing is solid and
+   darker than the page it sits on, so its words' contrast only rises. Its words sit flush with
+   its edge and its width sets where the name wraps, so it keeps its box:
+   the glass is a slab drawn outside it by spread shadows (a tinted backing,
+   a lit top rim, the warm and cool sides, an edge line, the depth), and
+   nothing inside moves. */
+html[data-button-style="liquid"]
+  body
+  /* lgs:plates */
+  .manager-facts:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lgs-plate-pad: 12px;
+  border-radius: 6px !important;
+  background-color: rgb(8 15 27) !important;
+  box-shadow:
+    0 0 0 var(--lgs-plate-pad) rgb(8 15 27),
+    0 -1px 0 var(--lgs-plate-pad) rgb(255 255 255 / 0.26),
+    -1px 0 0 var(--lgs-plate-pad) rgb(255 92 168 / 0.2),
+    1px 0 0 var(--lgs-plate-pad) rgb(72 206 255 / 0.24),
+    0 0 0 calc(var(--lgs-plate-pad) + 0.5px) rgb(255 255 255 / 0.14),
+    0 18px 40px calc(var(--lgs-plate-pad) - 22px) rgb(0 0 0 / 0.7) !important;
+}
+
+@media (max-width: 520px) {
+  html[data-button-style="liquid"]
+    body
+    .manager-facts:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --lgs-plate-pad: 8px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   The search boxes: a well in the glass.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    /* lgs:wells */
+    .quick-search-field,
+    .search-input-row
+    /* /lgs:wells */
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(122 232 255 / 0.5) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--lgs-well) !important;
+}
+
+/* ---------------------------------------------------------------
+   The toast: a small glass chip (small enough to blur on any screen).
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  .saga-cinema
+  .toast:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.24) !important;
+  border-radius: 999px !important;
+  background-color: rgb(var(--lgs-ink) / 0.82) !important;
+  box-shadow: var(--lgs-panel) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+}
+
+/* ---------------------------------------------------------------
+   Ciel's (Zeus) button: its portrait untouched; a glass ring around the
+   portrait (the aura, a decorative span) and a halo outside the button.
+   Paint only: the drag, park and avoid logic read the button's box, which
+   nothing here changes. The hold ring (the aura's ::before) is kept.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  .zeus-button
+  .zeus-button-aura:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(236 255 244 / 0.62) !important;
+  box-shadow:
+    inset calc(var(--lg-lx) * -1.5px) calc(var(--lg-ly) * -1.5px) 0 0 rgb(255 255 255 / 0.55),
+    inset 0 -10px 18px -6px rgb(128 228 162 / 0.22),
+    inset 2px 0 3px -2px rgb(255 92 168 / 0.3),
+    inset -2px 0 3px -2px rgb(72 206 255 / 0.34),
+    0 0 0 1px rgb(5 22 14 / 0.4) !important;
+}
+
+html[data-button-style="liquid"] body .zeus-button:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+      rgb(255 255 255 / var(--lg-rim)),
+    inset calc(var(--lg-lx) * -7px) calc(var(--lg-ly) * -9px) 16px -12px
+      rgb(255 255 255 / calc(var(--lg-rim) * 0.75)),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    /* the halo: a glass ring a little outside the button, edged with light */ 0 0 0 5px
+      rgb(196 255 220 / 0.06),
+    0 0 0 5.5px rgb(255 255 255 / 0.22),
+    0 0 26px 2px rgb(128 228 162 / 0.26),
+    0 12px 28px -10px rgb(0 0 0 / 0.66) !important;
+}
+
+/* ---------------------------------------------------------------
+   The SCP notice keeps its grey slip, its strip and its Verdana; a glass
+   pane shows only around it, under the slip (paint only, nothing sampled).
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"] body .opening-notice:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    0 2px 0 rgb(0 0 0 / 0.35),
+    0 0 0 6px rgb(214 226 236 / 0.09),
+    0 0 0 6.5px rgb(255 255 255 / 0.26),
+    -4px -4px 10px -4px rgb(255 255 255 / 0.1),
+    0 12px 30px rgb(0 0 0 / 0.5) !important;
+}
+
+/* ---------------------------------------------------------------
+   The iPad compact launcher and the phone-landscape trigger (the round
+   menu button that stands in for the bar once it has scrolled away). They
+   keep their box, place and colours of text; the solid disc turns to a
+   painted glass lens (touch screens: nothing is sampled).
+   --------------------------------------------------------------- */
+@media not (forced-colors: active) {
+  html[data-button-style="liquid"]:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-ipad-menu-scrolled="true"]
+    body
+    :is(.gallery-topbar, .topbar, .dream-site-header)
+    .side-panel-trigger:not(#lg-glass):not(#lg-glass):not(#lg-glass),
+  html[data-button-style="liquid"]:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
+    body
+    .side-panel-trigger[data-phone-landscape-trigger]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    /* lgs:compact */
+    /* The glyph was ink on a lit square; on dark glass it is light. */
+    color: rgb(240 249 252) !important;
+    border-color: rgb(255 255 255 / 0.3) !important;
+    background:
+      radial-gradient(120% 120% at 30% 0%, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 55%),
+      radial-gradient(90% 90% at 70% 110%, rgb(122 232 255 / 0.22), rgb(122 232 255 / 0) 60%),
+      rgb(var(--lgs-ink) / 0.9) !important;
+    box-shadow:
+      inset calc(var(--lg-lx) * -1.4px) calc(var(--lg-ly) * -1.4px) 0 0 rgb(255 255 255 / 0.55),
+      inset 0 -8px 14px -8px rgb(122 232 255 / 0.4),
+      inset 2px 0 3px -2px rgb(255 92 168 / 0.36),
+      inset -2px 0 3px -2px rgb(72 206 255 / 0.4),
+      0 0 0 4px rgb(176 226 255 / 0.06),
+      0 0 0 4.5px rgb(255 255 255 / 0.2),
+      0 10px 26px -8px rgb(0 0 0 / 0.7) !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Budgets and fallbacks
+   --------------------------------------------------------------- */
+
+/* Economy: no lens (its rule requires :not(economy)), no chromatic rim, no
+   bezel, no halo: blur and the specular rim only. */
+html[data-button-style="liquid"][data-world-effects="economy"] {
+  --lgs-blur: 12px;
+  --lgs-frame:
+    inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.28),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.12), 0 24px 60px -24px rgb(0 0 0 / 0.75);
+  --lgs-panel:
+    inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.24),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.12), 0 12px 30px -18px rgb(0 0 0 / 0.7);
+  --lgs-bar: inset 0 -1px 0 rgb(255 255 255 / 0.18), 0 10px 24px -14px rgb(0 0 0 / 0.7);
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"]
+  body
+  .manager-facts:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    0 0 0 var(--lgs-plate-pad) rgb(8 15 27),
+    0 -1px 0 var(--lgs-plate-pad) rgb(255 255 255 / 0.24),
+    0 0 0 calc(var(--lgs-plate-pad) + 0.5px) rgb(255 255 255 / 0.12) !important;
+}
+
+/* Reduced motion: the surfaces never move (nothing above animates); the
+   pointer light still places the rim, which is not motion. */
+
+/* Old engines without backdrop sampling: the bars stay nearly solid. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-button-style="liquid"] {
+    --lgs-bar-a: 0.95;
+  }
+}
+
+/* Reduce transparency: near-solid bars and no blur under them. */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-button-style="liquid"] {
+    --lgs-bar-a: 0.97;
+    --lgs-blur: 0px;
+    --lgs-dim: 1;
+  }
+}
+
+/* Forced colours: the system's surfaces, outlined; nothing sampled or
+   painted. */
+@media (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .topbar,
+      .manager-topbar,
+      .gallery-topbar,
+      .search-topbar,
+      .library-topbar,
+      .command-deck-header,
+      .side-panel-head,
+      .form-pickup-dialog,
+      .rider-nightmare-dialog,
+      .episode-pickup-dialog,
+      .world-column-dialog,
+      .quick-search-panel,
+      .site-announcement-hub,
+      .command-atlas-index,
+      .side-panel-group[data-atlas-group="sections"],
+      .command-deck-chapter-links,
+      .command-deck-footer,
+      .manager-facts,
+      .quick-search-field,
+      .search-input-row,
+      .saga-cinema .toast,
+      .opening-notice
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border-color: CanvasText !important;
+    background-color: Canvas !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Ciel's portrait stays; its halo and ring go. */
+  html[data-button-style="liquid"]
+    body
+    :is(.zeus-button, .zeus-button .zeus-button-aura):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border-color: ButtonText !important;
+    box-shadow: none !important;
+  }
+}

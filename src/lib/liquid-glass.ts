@@ -85,6 +85,8 @@ function displacementMap(width: number, height: number, inset: number, blur: num
 export const LENS_MAP_CAPSULE = displacementMap(192, 64, 11, 6);
 /** The round one: icon buttons and Ciel's button. */
 export const LENS_MAP_ROUND = displacementMap(64, 64, 11, 6);
+/** The bar: the top bars' ends (src/styles-liquid-glass-surfaces.css). */
+export const LENS_MAP_BAR = displacementMap(960, 64, 10, 6);
 
 /**
  * Whether the engine draws an SVG filter in backdrop-filter. Chromium does;

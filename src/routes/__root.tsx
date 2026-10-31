@@ -57,6 +57,7 @@ import siteAstraCss from "../styles-site-astra.css?url";
 import commandChromeCss from "../styles-command-chrome.css?url";
 import dynamicGuiCss from "../styles-dynamic-gui.css?url";
 import liquidGlassCss from "../styles-liquid-glass.css?url";
+import liquidGlassSurfacesCss from "../styles-liquid-glass-surfaces.css?url";
 import fxMotionCss from "../styles-fx-motion.css?url";
 import futureSpectrumCss from "../styles-future-spectrum.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
@@ -265,6 +266,9 @@ export const Route = createRootRoute({
       // Every rule waits for html[data-button-style="liquid"] (the side menu's
       // option), so with it off nothing here applies.
       { rel: "stylesheet", href: liquidGlassCss },
+      // Owner (2026-10-31): the same glass on the surfaces and chrome (bars,
+      // menus, dialog shells), after the buttons' sheet; scoped the same way.
+      { rel: "stylesheet", href: liquidGlassSurfacesCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
