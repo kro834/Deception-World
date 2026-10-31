@@ -1,7 +1,3 @@
-.manager-slot-grid > .other-archive-card,
-.manager-slot-grid > .archive-placeholder {
-  min-block-size: 0;
-  block-size: 178px;
 }
 
 .manager-slot-grid .dante-archive {
@@ -173,6 +169,15 @@
   .manager-slot-grid .dante-copy {
     padding: 14px;
   }
+}
+
+/* A held thumb is a long press: WebKit must not raise its callout, a
+   selection or the tap flash on any part of the pill. */
+.ios-slide-open * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ios-slide-open::after {
