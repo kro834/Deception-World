@@ -70,3 +70,33 @@
   margin-top: 12px;
   min-height: 136px;
 }
+
+/* Selection changes text, not the reading position of the collection below. */
+html[data-family="gallery"] .gallery-artwork-intro .gallery-feature figcaption {
+  box-sizing: border-box;
+  height: 84px;
+  min-height: 84px;
+  max-height: 84px;
+  flex: none;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  align-items: flex-start;
+}
+html[data-family="gallery"] .gallery-artwork-intro .gallery-stage-feedback {
+  box-sizing: border-box;
+  height: 54px;
+  min-height: 54px;
+  max-height: 54px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+html[data-family="gallery"] .gallery-artwork-intro .gallery-stage-feedback p {
+  margin-block: 4px;
+}
+
+html[data-family="gallery"]
+  .gallery-artwork-intro
+  :is(figcaption, .gallery-stage-feedback):focus-visible {
+  outline: 2px solid var(--gallery-brass, #c9b587);
+  outline-offset: -2px;
+}
