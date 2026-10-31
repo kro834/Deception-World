@@ -127,6 +127,15 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-re
   }
 }
 
+/* The order select inherited 12px: iPhone Safari zooms the page in on
+   focusing any control under 16px. Phones only (landscape included); an iPad
+   never zooms, so its size is unchanged. */
+@media (max-width: 700px), (max-height: 500px) and (pointer: coarse) {
+  .gallery-page .gallery-order select {
+    font-size: 16px;
+  }
+}
+
 @media (max-width: 480px) {
   .gallery-page .gallery-search-examples > div {
     grid-template-columns: minmax(0, 1fr);

@@ -171,6 +171,14 @@
   background: #07130e;
   color: #dce9df;
 }
+/* iPhone Safari zooms the page in on focusing a control under 16px: the pose
+   select keeps 13px everywhere but phones (landscape included; an iPad never
+   zooms and is never this short). */
+@media (max-width: 560px), (max-height: 500px) and (pointer: coarse) {
+  .dogs-viewer__toolbar .dogs-viewer__pose {
+    font-size: 16px;
+  }
+}
 .dogs-viewer__toolbar svg {
   width: 17px;
   height: 17px;
