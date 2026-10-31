@@ -6,6 +6,8 @@ import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
+// @ts-expect-error JS PostCSS step alongside the TS vite config
+import { glassSelectorBuckets } from "./scripts/glass-selector-buckets.mjs";
 
 /**
  * Finish PGLite bootstrap during dev-server setup (before traffic). Vite awaits
@@ -135,6 +137,9 @@ export default defineConfig(({ command }) => ({
     strictPort: true,
   },
   resolve: { tsconfigPaths: true },
+  // The liquid glass sheets' `:is(…)`-ended selectors get a key each, so the
+  // style engine stops trying them on every element (QA 2026-10-31).
+  css: { postcss: { plugins: [glassSelectorBuckets()] } },
   plugins: [
     pgliteBootstrapPlugin(),
     // Before tanstackStart so /auth/popup never falls through to the SPA.

@@ -121,6 +121,14 @@ const ZEUS_AVOID_SELECTOR = [
   '.rxs-stage-tabs [role="tab"]',
   ".dream-poster-thumbnails button",
   ".dream-poster-controls button",
+  // 2026-10-31 QA: /gallery's preview filmstrip and its トップに飾る plate.
+  // On phones the button rested on the strip's last thumbnail (005).
+  ".gallery-stage-candidates > button",
+  ".gallery-stage-controls > button",
+  // Same QA: /saga-cinema's chapter reel (the button sat on 終末 on an iPad
+  // Pro) and its 自動切替 switch (iPad mini).
+  ".chapter-reel > button",
+  ".saga-cinema .auto-play",
   ".rxs-comparison-selector select",
   ".rxs-p14-range-labels button",
   "#rxs-p14-baseline",
@@ -163,6 +171,9 @@ const ZEUS_AVOID_SELECTOR = [
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
 const ZEUS_AVOID_MAX_HEIGHT = 0.45;
+// How long after the button mounts a change in the page's height (content
+// still arriving) makes it look again.
+const ZEUS_ARRIVAL_MS = 8000;
 // Candidates past this index (the far corner rows) are taken only when clear.
 const ZEUS_NEAR_CANDIDATES = 10;
 // The fallback weighs covered words (px²) against distance from home (px).
@@ -1752,6 +1763,28 @@ function ZeusButton({
         ? new ResizeObserver(followDock)
         : null;
     if (dockSheet) dockObserver?.observe(dockSheet);
+    /* 2026-10-31 QA: a page whose controls lay out after the first placement
+       (/gallery's preview filmstrip, on a busy phone) left the button on them
+       until the reader scrolled. While the page is arriving, a change in its
+       height looks again once it settles; then the observer goes (no timer:
+       the first change after the window disconnects it). */
+    let arrivalSeen = false;
+    const arrivalStart = Date.now();
+    const arrivalObserver =
+      typeof ResizeObserver === "function"
+        ? new ResizeObserver((_entries, observer) => {
+            if (Date.now() - arrivalStart > ZEUS_ARRIVAL_MS) {
+              observer.disconnect();
+              return;
+            }
+            if (!arrivalSeen) {
+              arrivalSeen = true;
+              return;
+            }
+            onLayoutChange();
+          })
+        : null;
+    arrivalObserver?.observe(document.body);
     // The optional iPad launcher moves immediately when its root flags change.
     // Waiting for scroll-settle and then gliding would leave this higher-z
     // button over the new menu target. Reconcile only that footprint change,
@@ -1798,6 +1831,7 @@ function ZeusButton({
       railObserver.disconnect();
       compactMenuObserver.disconnect();
       dockObserver?.disconnect();
+      arrivalObserver?.disconnect();
       if (dockTimer != null) window.clearTimeout(dockTimer);
       revealAfterScroll();
       lookAgain.current = () => {};

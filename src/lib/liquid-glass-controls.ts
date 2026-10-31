@@ -83,7 +83,15 @@ const RAIL_HOST = "data-lg-rail-host";
 const RAIL_HOST_STATIC = "data-lg-rail-host-static";
 const RAIL_START = "data-lg-rail-start";
 const RAIL_END = "data-lg-rail-end";
-const SEG_PROPS = ["--lg-seg-x", "--lg-seg-y", "--lg-seg-w", "--lg-seg-h", "--lg-seg-s0", "--lg-seg-k", "--lg-seg-r"];
+const SEG_PROPS = [
+  "--lg-seg-x",
+  "--lg-seg-y",
+  "--lg-seg-w",
+  "--lg-seg-h",
+  "--lg-seg-s0",
+  "--lg-seg-k",
+  "--lg-seg-r",
+];
 const RAIL_PROPS = ["--lg-rail-x", "--lg-rail-y", "--lg-rail-w", "--lg-rail-h", "--lg-rail-thumb"];
 
 type Pseudo = "before" | "after";
@@ -130,6 +138,10 @@ export function watchLiquidControls(doc: Document = document) {
   const segments = new Map<HTMLElement, Segment>();
   const rails = new Map<HTMLElement, Rail>();
   const dirty = new Set<HTMLElement>();
+  // Groups and rails turned down once (both pseudo-elements already drawn by
+  // the page): the 400 ms rescan must not ask for their computed style again,
+  // which would force a style pass in the middle of a scroll.
+  const declined = new WeakSet<HTMLElement>();
   let frame = 0;
   let scanTimer = 0;
 
@@ -191,7 +203,8 @@ export function watchLiquidControls(doc: Document = document) {
     // scrolled rail each put that origin somewhere else.
     const probe = doc.createElement("i");
     probe.setAttribute("aria-hidden", "true");
-    probe.style.cssText = "position:absolute;top:0;left:0;width:0;height:0;margin:0;padding:0;border:0;";
+    probe.style.cssText =
+      "position:absolute;top:0;left:0;width:0;height:0;margin:0;padding:0;border:0;";
     el.appendChild(probe);
     const origin = probe.getBoundingClientRect();
     const probeLeft = probe.offsetLeft;
@@ -246,9 +259,12 @@ export function watchLiquidControls(doc: Document = document) {
   }
 
   function attachSegment(el: HTMLElement) {
-    if (segments.has(el) || el.hasAttribute(SEG)) return;
+    if (segments.has(el) || el.hasAttribute(SEG) || declined.has(el)) return;
     const pseudo = freePseudo(view!, el);
-    if (!pseudo) return;
+    if (!pseudo) {
+      declined.add(el);
+      return;
+    }
     const bezel = el.matches(GLASS_BEZELS.join(", "));
     if (view!.getComputedStyle(el).position === "static") el.setAttribute(SEG_STATIC, "");
     el.setAttribute(SEG, pseudo);
@@ -275,7 +291,8 @@ export function watchLiquidControls(doc: Document = document) {
     if (!(group instanceof view!.HTMLElement)) return;
     const current = segments.get(group)?.current;
     // Only a transition on the selected item or a box that holds it.
-    if (current && event.target instanceof view!.Node && event.target.contains(current)) queue(group);
+    if (current && event.target instanceof view!.Node && event.target.contains(current))
+      queue(group);
   }
 
   function detachSegment(segment: Segment) {
@@ -334,12 +351,21 @@ export function watchLiquidControls(doc: Document = document) {
 
   function attachRail(el: HTMLElement) {
     const host = el.parentElement;
-    if (rails.has(el) || !host || host.hasAttribute(RAIL_HOST) || host.closest("[data-lg-rail]"))
+    if (
+      rails.has(el) ||
+      declined.has(el) ||
+      !host ||
+      host.hasAttribute(RAIL_HOST) ||
+      host.closest("[data-lg-rail]")
+    )
       return;
     const before = view!.getComputedStyle(host, "::before").content;
     const after = view!.getComputedStyle(host, "::after").content;
     const free = (content: string) => content === "none" || content === "normal";
-    if (!free(before) || !free(after)) return;
+    if (!free(before) || !free(after)) {
+      declined.add(el);
+      return;
+    }
     if (view!.getComputedStyle(host).position === "static") host.setAttribute(RAIL_HOST_STATIC, "");
     const rail: Rail = { el, host, edges: null };
     rails.set(el, rail);
@@ -369,7 +395,11 @@ export function watchLiquidControls(doc: Document = document) {
   // Pages mount and unmount groups as the router moves: a quiet rescan,
   // at most every 400 ms, while the tree is changing.
   const tree = new view.MutationObserver((records) => {
-    if (records.every((record) => record.target instanceof view.HTMLElement && record.target.hasAttribute(SEG)))
+    if (
+      records.every(
+        (record) => record.target instanceof view.HTMLElement && record.target.hasAttribute(SEG),
+      )
+    )
       return;
     if (!scanTimer) scanTimer = view.setTimeout(scan, 400);
   });
