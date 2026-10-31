@@ -840,3 +840,47 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
     outline-offset: -1px;
   }
 }
+
+/* ---------------------------------------------------------------
+   The 六詠 pickups' close plates (owner, 2026-10-31: 「六詠のスライダー
+   やピックアップボタンなど」). The file pages' HOLD + SLIDE takes the
+   slide-to-open block above (round thumb, rim-only press); this block
+   is only the pickup dialogs' CLOSE plates.
+
+   Each plate is a 4px slab with a square glyph cell (2px) at its end. On
+   glass the slab is a capsule, and the square cell sat in the rounded
+   end: its outer corners ran over the specular rim, and the gel squash
+   (wide and short) pushed them through it while the plate was held. On
+   glass the cell rounds into the end cap, concentric with it, as the
+   slider's thumb does.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog) > .form-pickup-close > i,
+    .form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog) .form-pickup-end-close > i,
+    .rider-nightmare-dialog .rider-nightmare-dialog-close > i,
+    #episode-pickup-dialog .episode-pickup-close .episode-pickup-close-icon,
+    #world-column-pickup .world-column-dialog-close > i
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-radius: 999px !important;
+}
+
+/* A held plate is a long press (WebKit-reasoned: iOS raises the callout,
+   the selection loupe and the grey tap flash on a long-held button whose
+   label is text). The site already sets these globally; they are restated
+   on the plates so a later sheet cannot give them back under the glass. */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog) > .form-pickup-close,
+    .form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog) .form-pickup-end-close,
+    .rider-nightmare-dialog .rider-nightmare-dialog-close,
+    #episode-pickup-dialog .episode-pickup-close,
+    #world-column-pickup .world-column-dialog-close
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

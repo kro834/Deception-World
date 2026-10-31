@@ -660,6 +660,14 @@
   }
 }
 
+/* iPhone Safari zooms the page in on focusing a control under 16px; the
+   interval select was 13px. Phones only (landscape included). */
+@media (max-width: 700px), (max-height: 500px) and (pointer: coarse) {
+  .gallery-tour-playback-label select {
+    font-size: 16px;
+  }
+}
+
 @media (forced-colors: active) {
   .gallery-tour-playback-label select {
     -webkit-appearance: auto;
