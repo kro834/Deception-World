@@ -22,6 +22,7 @@ import { OpeningNotice } from "@/components/opening-notice";
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { IpadMenuMode } from "@/components/ipad-menu-mode";
+import { LiquidGlassDefs } from "@/components/liquid-glass-defs";
 import { PhoneLandscapeMenu } from "@/components/phone-landscape-menu";
 import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
@@ -54,6 +55,7 @@ import sagaStreamlineCss from "../styles-saga-streamline.css?url";
 import siteAstraCss from "../styles-site-astra.css?url";
 import commandChromeCss from "../styles-command-chrome.css?url";
 import dynamicGuiCss from "../styles-dynamic-gui.css?url";
+import liquidGlassCss from "../styles-liquid-glass.css?url";
 import fxMotionCss from "../styles-fx-motion.css?url";
 import futureSpectrumCss from "../styles-future-spectrum.css?url";
 import { DEVICE_PROFILE_SCRIPT } from "@/lib/device-profile-gate";
@@ -257,6 +259,10 @@ export const Route = createRootRoute({
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
         : [{ rel: "stylesheet", href: futureSpectrumCss }]),
+      // Owner (2026-10-30): the buttons' optional liquid glass, the last sheet.
+      // Every rule waits for html[data-button-style="liquid"] (the side menu's
+      // option), so with it off nothing here applies.
+      { rel: "stylesheet", href: liquidGlassCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
@@ -303,6 +309,7 @@ function RootDocument() {
               <IpadMenuMode />
               <PhoneLandscapeMenu />
               <OpeningNotice />
+              <LiquidGlassDefs />
             </ZeusButtonProvider>
           </LoadGateProvider>
         </AuthProvider>

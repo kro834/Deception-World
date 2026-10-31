@@ -1,0 +1,798 @@
+/* Liquid glass: the buttons' optional material (owner, 2026-10-30:
+   「ボタンをリキッドグラス風にするオプション」).
+
+   Everything here is scoped to html[data-button-style="liquid"], which the
+   side menu's option sets before the first paint (key "dw-button-style").
+   With the option off no rule below matches, so the site is unchanged.
+
+   The material, on the control's own box (no pseudo-elements: most of the
+   controls already draw their own ::before/::after):
+   - a backdrop blur and saturation, tinted toward the control's accent;
+   - a lens at the rim: an SVG displacement map (src/components/
+     liquid-glass-defs.tsx) bends the backdrop inward at the edges, with the
+     red channel bent a little further (a chromatic fringe). Only where the
+     defs mark html[data-liquid-lens] (Chromium; Safari and Firefox do not
+     draw url() in backdrop-filter) and never in economy;
+   - a specular rim and an inner highlight placed by a light direction
+     (--lg-lx, --lg-ly; the pointer moves it on mouse and trackpad);
+   - a subtle chromatic edge, warm on one side and cool on the other;
+   - a soft shadow;
+   - a gel press: the shared press driver (press-feedback.js) squashes the
+     control wide and short, and it springs back with an overshoot.
+
+   Specificity: the controls' own sheets weigh up to an id-free (0,5,2) and
+   several set background and backdrop-filter with !important, so the
+   material carries :not(#lg-glass):not(#lg-glass):not(#lg-glass), an id's weight, and !important on the
+   painted properties. States change only the --lg-* variables. */
+
+html[data-button-style="liquid"] {
+  /* Light from the upper left. -1..1 on each axis. */
+  --lg-lx: -0.55;
+  --lg-ly: -1;
+  --lg-blur: 9px;
+  --lg-sat: 1.75;
+  /* A damped spring with one visible overshoot: the gel settling. */
+  --lg-spring: linear(
+    0,
+    0.34 6%,
+    0.77 14%,
+    1.06 24%,
+    1.15 32%,
+    1.11 41%,
+    1.02 53%,
+    0.975 63%,
+    0.985 76%,
+    1.003 88%,
+    1
+  );
+  --lg-spring-ms: 560ms;
+  --lg-fill-alpha: 0.42;
+}
+
+/* ---------------------------------------------------------------
+   The material. The list is LIQUID_GLASS_TARGETS in
+   src/lib/liquid-glass.ts (the pointer light reads it); keep both in step.
+   --------------------------------------------------------------- */
+
+/* The defaults sit on the controls themselves (not on :root, so nothing
+   inside a control inherits a stray tint) at zero weight, so every tint,
+   shape and state below outranks them. */
+html[data-button-style="liquid"]
+  :where(
+    .topbar nav a,
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .manager-back,
+    .dream-back-link,
+    .rxs-footer-return,
+    .primary-action,
+    .poster-shuffle,
+    .poster-reset,
+    .poster-lock,
+    .episode-controls button,
+    .cine-btn,
+    .cine-skip,
+    .rw-skip,
+    .rw-replay,
+    .rw-redive-button,
+    .ios-slide-open,
+    .episode-pickup-plus,
+    .side-panel-close,
+    .site-announcement-close,
+    .form-pickup-close,
+    .form-pickup-end-close,
+    .rider-nightmare-dialog-close,
+    .world-column-dialog-close,
+    .episode-pickup-close,
+    .rw-close,
+    .dream-dossier-close,
+    .quick-search-close,
+    .rider-special-site-link,
+    .command-deck-header-nav a,
+    .command-deck-scene-buttons > a,
+    .command-deck-enter,
+    .command-deck-down,
+    .command-deck-art-controls,
+    .command-deck-gallery-link,
+    .zeus-button,
+    .rxs-local-nav nav a,
+    .rxe-hero-primary,
+    .rxe-hero-secondary,
+    .exo-door,
+    .opening-notice .opening-notice-close
+  ) {
+  --lg-tint: 122 232 255;
+  --lg-tint-a: 0.12;
+  --lg-fill: rgb(8 15 24 / var(--lg-fill-alpha));
+  --lg-sheen: 0.16;
+  --lg-glow: 0.16;
+  --lg-rim: 0.62;
+  --lg-radius: 999px;
+  --lg-px: 30%;
+  --lg-py: -10%;
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(
+    /* lg:targets */
+    .topbar nav a,
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .manager-back,
+    .dream-back-link,
+    .rxs-footer-return,
+    .primary-action,
+    .poster-shuffle,
+    .poster-reset,
+    .poster-lock,
+    .episode-controls button,
+    .cine-btn,
+    .cine-skip,
+    .rw-skip,
+    .rw-replay,
+    .rw-redive-button,
+    .ios-slide-open,
+    .episode-pickup-plus,
+    .side-panel-close,
+    .site-announcement-close,
+    .form-pickup-close,
+    .form-pickup-end-close,
+    .rider-nightmare-dialog-close,
+    .world-column-dialog-close,
+    .episode-pickup-close,
+    .rw-close,
+    .dream-dossier-close,
+    .quick-search-close,
+    .rider-special-site-link,
+    .command-deck-header-nav a,
+    .command-deck-scene-buttons > a,
+    .command-deck-enter,
+    .command-deck-down,
+    .command-deck-art-controls,
+    .command-deck-gallery-link,
+    .zeus-button,
+    .rxs-local-nav nav a,
+    .rxe-hero-primary,
+    .rxe-hero-secondary,
+    .exo-door,
+    .opening-notice .opening-notice-close
+    /* /lg:targets */
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.2) !important;
+  border-radius: var(--lg-radius) !important;
+  clip-path: none !important;
+  background:
+    radial-gradient(
+      120% 150% at var(--lg-px) var(--lg-py),
+      rgb(255 255 255 / var(--lg-glow)),
+      rgb(255 255 255 / 0) 58%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / var(--lg-sheen)),
+      rgb(255 255 255 / 0) 50%,
+      rgb(255 255 255 / 0.03)
+    ),
+    linear-gradient(rgb(var(--lg-tint) / var(--lg-tint-a)), rgb(var(--lg-tint) / var(--lg-tint-a))),
+    var(--lg-fill) !important;
+  box-shadow:
+    /* the specular rim on the lit side */
+    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+      rgb(255 255 255 / var(--lg-rim)),
+    /* the inner highlight, a soft pool under the lit rim */ inset calc(var(--lg-lx) * -7px)
+      calc(var(--lg-ly) * -9px) 16px -12px rgb(255 255 255 / calc(var(--lg-rim) * 0.75)),
+    /* the caustic: light leaving through the far rim, in the accent */ inset
+      calc(var(--lg-lx) * 1px) calc(var(--lg-ly) * 1px) 0 -0.25px
+      rgb(255 255 255 / calc(var(--lg-rim) * 0.32)),
+    inset calc(var(--lg-lx) * 6px) calc(var(--lg-ly) * 7px) 14px -9px rgb(var(--lg-tint) / 0.42),
+    /* the chromatic edge */ inset 2px 0 2px -1.5px rgb(255 92 168 / 0.34),
+    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.4),
+    /* a hairline that holds the shape on any backdrop */ inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    /* the shadow */ 0 1px 2px rgb(0 0 0 / 0.24),
+    0 10px 24px -10px rgb(0 0 0 / 0.6),
+    0 0 20px -8px rgb(var(--lg-tint) / 0.36) !important;
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+}
+
+/* The lens (Chromium). The capsule map suits the chips and plates; the
+   round map the icon buttons. Displacement first, then the blur. */
+html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
+  body
+  :is(
+    .topbar nav a,
+    .manager-back,
+    .dream-back-link,
+    .rxs-footer-return,
+    .primary-action,
+    .poster-shuffle,
+    .poster-reset,
+    .poster-lock,
+    .cine-btn,
+    .cine-skip,
+    .rw-skip,
+    .rw-replay,
+    .rw-redive-button,
+    .ios-slide-open,
+    .form-pickup-close,
+    .form-pickup-end-close,
+    .rider-nightmare-dialog-close,
+    .world-column-dialog-close,
+    .rw-close,
+    .rider-special-site-link,
+    .command-deck-header-nav a,
+    .command-deck-scene-buttons > a,
+    .command-deck-enter,
+    .command-deck-down,
+    .command-deck-art-controls,
+    .command-deck-gallery-link,
+    .rxs-local-nav nav a,
+    .rxe-hero-primary,
+    .rxe-hero-secondary,
+    .exo-door
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-backdrop-filter: url(#dw-liquid-lens-capsule) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: url(#dw-liquid-lens-capsule) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+}
+
+html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
+  body
+  :is(
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .episode-controls button,
+    .episode-pickup-plus,
+    .side-panel-close,
+    .site-announcement-close,
+    .episode-pickup-close,
+    .dream-dossier-close,
+    .quick-search-close,
+    .zeus-button:not([data-dragging="true"])
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-backdrop-filter: url(#dw-liquid-lens-round) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: url(#dw-liquid-lens-round) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+}
+
+/* ---------------------------------------------------------------
+   Shapes. Capsules by default; the large plates are rounded slabs, the
+   icon buttons circles, and Ciel's button keeps its own outline.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .command-deck-scene-buttons > a,
+    .command-deck-enter,
+    .command-deck-gallery-link,
+    .exo-door
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-radius: 22px;
+}
+
+/* The opening's ENTER THE WORLD keeps its cream warmth. */
+html[data-button-style="liquid"]
+  body
+  .cine-btn.cine-btn-primary.cine-btn-primary:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-fill: rgb(243 236 222 / 0.78);
+  --lg-tint: 201 228 232;
+}
+
+/* The launcher's glyph was ink on a lit square; on glass it is light. */
+html[data-button-style="liquid"]
+  body
+  .side-panel-trigger:not(
+    :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint-a: 0.22;
+  color: rgb(240 249 252) !important;
+}
+
+/* Words that sat bare on the bar get room inside their capsule. */
+html[data-button-style="liquid"]
+  body
+  :is(.command-deck-header-nav a, .command-deck-down):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  padding-inline: 12px;
+}
+
+html[data-button-style="liquid"] body .zeus-button:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-radius: 42% 42% 48% 48%;
+  /* Ciel's green, over the portrait; the portrait itself is untouched. */
+  --lg-tint: 128 228 162;
+  --lg-tint-a: 0.16;
+  --lg-fill: rgb(5 22 14 / 0.5);
+}
+
+/* The Zeus drag measures the button's box and moves it every frame: no
+   lens, and a lighter blur, while it is carried. */
+html[data-button-style="liquid"]
+  body
+  .zeus-button[data-dragging="true"]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-blur: 4px;
+}
+
+/* ---------------------------------------------------------------
+   Tints: each control's glass leans toward the accent it had.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"] body .ios-slide-open:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 107 181 255;
+  --lg-tint-a: 0.2;
+}
+
+html[data-button-style="liquid"]
+  body
+  .exs-page
+  :is(.rxs-local-nav nav a, .rxs-footer-return, .exo-door):not(#lg-glass):not(#lg-glass):not(
+    #lg-glass
+  ) {
+  --lg-tint: 240 207 134;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ffs-page
+  :is(.rxs-local-nav nav a, .rxs-footer-return):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 255 132 196;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ics-page
+  :is(.rxs-local-nav nav a, .rxs-footer-return):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 196 160 255;
+}
+
+html[data-button-style="liquid"]
+  body
+  .fst-page
+  :is(.rxs-local-nav nav a, .rxs-footer-return):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 232 196 120;
+}
+
+html[data-button-style="liquid"]
+  body
+  .dream-back-link:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 200 164 92;
+}
+
+/* The SCP notice's ×: a small dark capsule in its dark strip, its red mark
+   for the accent. The slip itself keeps its wiki grammar. */
+html[data-button-style="liquid"]
+  body
+  .opening-notice
+  .opening-notice-close:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 122 15 15;
+  --lg-tint-a: 0.24;
+  --lg-fill: rgb(30 30 30 / 0.5);
+  --lg-blur: 4px;
+  margin-right: 3px;
+  height: 22px !important;
+  width: 36px !important;
+}
+
+/* Filled plates stay filled: a light, milky glass under dark words. */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .cine-btn-primary,
+    .primary-action,
+    .command-deck-scene-buttons > a.is-selected,
+    .rxe-hero-primary
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-fill: rgb(236 246 249 / 0.74);
+  --lg-tint: 201 228 232;
+  --lg-tint-a: 0.2;
+  --lg-sheen: 0.5;
+  --lg-rim: 0.95;
+}
+
+/* ---------------------------------------------------------------
+   States
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .topbar nav a,
+    .rxs-local-nav nav a,
+    .command-deck-header-nav a,
+    .episode-controls button,
+    .poster-lock
+  ):is(
+    [aria-current="page"],
+    [aria-current="true"],
+    [aria-current="location"],
+    [aria-pressed="true"],
+    .is-active
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint-a: 0.3;
+  --lg-rim: 0.85;
+  --lg-sheen: 0.24;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .topbar nav a,
+      .side-panel-trigger:not(
+        :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+      ),
+      .manager-back,
+      .dream-back-link,
+      .rxs-footer-return,
+      .primary-action,
+      .poster-shuffle,
+      .poster-reset,
+      .poster-lock,
+      .episode-controls button,
+      .cine-btn,
+      .cine-skip,
+      .rw-skip,
+      .rw-replay,
+      .rw-redive-button,
+      .ios-slide-open,
+      .episode-pickup-plus,
+      .side-panel-close,
+      .site-announcement-close,
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-close,
+      .world-column-dialog-close,
+      .episode-pickup-close,
+      .rw-close,
+      .dream-dossier-close,
+      .quick-search-close,
+      .rider-special-site-link,
+      .command-deck-header-nav a,
+      .command-deck-scene-buttons > a,
+      .command-deck-enter,
+      .command-deck-down,
+      .command-deck-art-controls,
+      .command-deck-gallery-link,
+      .zeus-button,
+      .rxs-local-nav nav a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .exo-door,
+      .opening-notice .opening-notice-close
+    ):hover:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --lg-glow: 0.3;
+    --lg-tint-a: 0.2;
+    --lg-rim: 0.8;
+  }
+}
+
+/* The press lights the glass from inside. */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .topbar nav a,
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .manager-back,
+    .dream-back-link,
+    .rxs-footer-return,
+    .primary-action,
+    .poster-shuffle,
+    .poster-reset,
+    .poster-lock,
+    .episode-controls button,
+    .cine-btn,
+    .cine-skip,
+    .rw-skip,
+    .rw-replay,
+    .rw-redive-button,
+    .ios-slide-open,
+    .episode-pickup-plus,
+    .side-panel-close,
+    .site-announcement-close,
+    .form-pickup-close,
+    .form-pickup-end-close,
+    .rider-nightmare-dialog-close,
+    .world-column-dialog-close,
+    .episode-pickup-close,
+    .rw-close,
+    .dream-dossier-close,
+    .quick-search-close,
+    .rider-special-site-link,
+    .command-deck-header-nav a,
+    .command-deck-scene-buttons > a,
+    .command-deck-enter,
+    .command-deck-down,
+    .command-deck-art-controls,
+    .command-deck-gallery-link,
+    .zeus-button,
+    .rxs-local-nav nav a,
+    .rxe-hero-primary,
+    .rxe-hero-secondary,
+    .exo-door,
+    .opening-notice .opening-notice-close
+  ):is(:active, [data-press="in"], [data-press="touch"], [data-holding="true"]):not(#lg-glass):not(
+    #lg-glass
+  ):not(#lg-glass) {
+  --lg-glow: 0.42;
+  --lg-rim: 0.95;
+  --lg-sheen: 0.26;
+}
+
+/* ---------------------------------------------------------------
+   The gel press. The press driver (src/lib/press-feedback.js) scales a
+   pressed control by --dw-press-scale; here that scale is anisotropic, so
+   the glass squashes wide and short like a drop pressed flat, and its
+   release springs back past rest once. The slide-to-open pills and Ciel's
+   button are left to their own gestures (the driver skips them too).
+   Reduced motion: no squash and no spring (the driver only scales under
+   no-preference), only the light.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .topbar nav a,
+      .manager-back,
+      .dream-back-link,
+      .rxs-footer-return,
+      .primary-action,
+      .poster-shuffle,
+      .poster-reset,
+      .poster-lock,
+      .cine-btn,
+      .cine-skip,
+      .rw-skip,
+      .rw-replay,
+      .rw-redive-button,
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-close,
+      .world-column-dialog-close,
+      .rw-close,
+      .rider-special-site-link,
+      .command-deck-header-nav a,
+      .command-deck-down,
+      .rxs-local-nav nav a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .opening-notice .opening-notice-close
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --dw-press-scale: 1.05 0.9;
+  }
+
+  /* Icons squash a little more; slabs a little less. */
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .side-panel-trigger:not(
+        :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+      ),
+      .episode-controls button,
+      .episode-pickup-plus,
+      .side-panel-close,
+      .site-announcement-close,
+      .episode-pickup-close,
+      .dream-dossier-close,
+      .quick-search-close
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --dw-press-scale: 1.08 0.88;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .command-deck-scene-buttons > a,
+      .command-deck-enter,
+      .command-deck-art-controls,
+      .command-deck-gallery-link,
+      .exo-door
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --dw-press-scale: 1.02 0.96;
+  }
+
+  /* The release: the spring, on scale only (the other settles keep the
+     house curve). The list mirrors styles-press-feedback.css. */
+  html[data-button-style="liquid"][data-press-ready]
+    body
+    [data-press="out"][data-press]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition-duration:
+      var(--lg-spring-ms), var(--dw-dur-settle), var(--dw-dur-state), var(--dw-dur-state),
+      var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state),
+      var(--dw-dur-state);
+    transition-timing-function:
+      cubic-bezier(0.34, 1.56, 0.64, 1), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out);
+    transition-timing-function:
+      var(--lg-spring), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
+      var(--dw-ease-out);
+  }
+
+  /* Before the driver is ready (or without script), :active squashes. */
+  html[data-button-style="liquid"]:not([data-press-ready])
+    body
+    :is(
+      .topbar nav a,
+      .manager-back,
+      .rxs-footer-return,
+      .primary-action,
+      .cine-btn,
+      .cine-skip,
+      .rw-skip,
+      .rxs-local-nav nav a,
+      .command-deck-header-nav a
+    ):active:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: var(--dw-press-scale);
+    transition: scale 90ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+/* The pointer light (mouse and trackpad only): liquid-glass-defs.tsx writes
+   --lg-px/--lg-py (the pool) and --lg-lx/--lg-ly (the rim's light) on the
+   control under the pointer, and clears them when it leaves. */
+
+/* ---------------------------------------------------------------
+   Budgets and fallbacks
+   --------------------------------------------------------------- */
+
+/* Touch screens (iOS above all) pay for every backdrop layer: a smaller
+   blur, and the large slabs paint their glass without sampling at all. */
+@media (pointer: coarse) {
+  html[data-button-style="liquid"] {
+    --lg-blur: 6px;
+    --lg-sat: 1.5;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .command-deck-scene-buttons > a,
+      .command-deck-enter,
+      .command-deck-gallery-link,
+      .exo-door
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --lg-fill: rgb(10 20 31 / 0.72);
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .command-deck-scene-buttons
+    > a.is-selected:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --lg-fill: rgb(236 246 249 / 0.9);
+  }
+}
+
+/* Economy: blur and specular only. No lens (its rule requires
+   :not([data-world-effects="economy"])), no chromatic edge, no accent glow,
+   no spring. */
+html[data-button-style="liquid"][data-world-effects="economy"] {
+  --lg-blur: 6px;
+  --lg-sat: 1.4;
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"]
+  body
+  :is(
+    .topbar nav a,
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .manager-back,
+    .dream-back-link,
+    .rxs-footer-return,
+    .primary-action,
+    .poster-shuffle,
+    .poster-reset,
+    .poster-lock,
+    .episode-controls button,
+    .cine-btn,
+    .cine-skip,
+    .rw-skip,
+    .rw-replay,
+    .rw-redive-button,
+    .ios-slide-open,
+    .episode-pickup-plus,
+    .side-panel-close,
+    .site-announcement-close,
+    .form-pickup-close,
+    .form-pickup-end-close,
+    .rider-nightmare-dialog-close,
+    .world-column-dialog-close,
+    .episode-pickup-close,
+    .rw-close,
+    .dream-dossier-close,
+    .quick-search-close,
+    .rider-special-site-link,
+    .command-deck-header-nav a,
+    .command-deck-scene-buttons > a,
+    .command-deck-enter,
+    .command-deck-down,
+    .command-deck-art-controls,
+    .command-deck-gallery-link,
+    .zeus-button,
+    .rxs-local-nav nav a,
+    .rxe-hero-primary,
+    .rxe-hero-secondary,
+    .exo-door,
+    .opening-notice .opening-notice-close
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+      rgb(255 255 255 / var(--lg-rim)),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    0 8px 20px -10px rgb(0 0 0 / 0.6) !important;
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
+  body
+  [data-press="out"][data-press]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  transition-timing-function: var(--dw-ease-out);
+}
+
+/* No backdrop sampling at all (old engines): the fill carries the
+   legibility on its own. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-button-style="liquid"] {
+    --lg-fill-alpha: 0.84;
+  }
+}
+
+/* Reduce transparency: a nearly solid glass (and no lens: the defs do not
+   mark html[data-liquid-lens] under this preference). */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-button-style="liquid"] {
+    --lg-blur: 4px;
+    --lg-fill-alpha: 0.86;
+  }
+}
+
+/* Forced colours: the system's button, outlined, nothing sampled or drawn. */
+@media (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .topbar nav a,
+      .side-panel-trigger:not(
+        :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+      ),
+      .manager-back,
+      .dream-back-link,
+      .rxs-footer-return,
+      .primary-action,
+      .poster-shuffle,
+      .poster-reset,
+      .poster-lock,
+      .episode-controls button,
+      .cine-btn,
+      .cine-skip,
+      .rw-skip,
+      .rw-replay,
+      .rw-redive-button,
+      .ios-slide-open,
+      .episode-pickup-plus,
+      .side-panel-close,
+      .site-announcement-close,
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-close,
+      .world-column-dialog-close,
+      .episode-pickup-close,
+      .rw-close,
+      .dream-dossier-close,
+      .quick-search-close,
+      .rider-special-site-link,
+      .command-deck-header-nav a,
+      .command-deck-scene-buttons > a,
+      .command-deck-enter,
+      .command-deck-down,
+      .command-deck-art-controls,
+      .command-deck-gallery-link,
+      .zeus-button,
+      .rxs-local-nav nav a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .exo-door,
+      .opening-notice .opening-notice-close
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border-color: ButtonText !important;
+    background: ButtonFace !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    outline: 1px solid ButtonText;
+    outline-offset: -1px;
+  }
+}

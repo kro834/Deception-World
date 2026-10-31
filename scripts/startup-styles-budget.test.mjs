@@ -64,6 +64,9 @@ const original = [
   "../styles-fx-motion.css?url",
   // Owner (2026-10-30): 未来的でダイナミックな色合い — the future spectrum's colour and surfaces, after the kit.
   "../styles-future-spectrum.css?url",
+  // Owner (2026-10-30): the buttons' optional liquid glass, scoped to
+  // html[data-button-style="liquid"], the last sheet.
+  "../styles-liquid-glass.css?url",
   fonts.SITE_CORE_FONTS_URL,
   fonts.SITE_DISPLAY_FONTS_URL,
   "hud-fonts",
