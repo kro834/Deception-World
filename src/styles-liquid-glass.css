@@ -685,11 +685,9 @@ html[data-button-style="liquid"]
    --------------------------------------------------------------- */
 html[data-button-style="liquid"]
   body
-  .ios-slide-open:is(
-    [data-holding="true"],
-    [data-dragging="true"],
-    [data-completing="true"]
-  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  .ios-slide-open:is([data-holding="true"], [data-dragging="true"], [data-completing="true"]):not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass) {
   --lg-rim: 0.8;
 }
 
@@ -700,11 +698,9 @@ html[data-button-style="liquid"]
    rim answers; its drag, park and avoid logic read none of this. */
 html[data-button-style="liquid"]
   body
-  .zeus-button:is(
-    :active,
-    [data-holding="true"],
-    [data-dragging="true"]
-  ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  .zeus-button:is(:active, [data-holding="true"], [data-dragging="true"]):not(#lg-glass):not(
+    #lg-glass
+  ):not(#lg-glass) {
   --lg-rim: 0.8;
 }
 
@@ -946,4 +942,504 @@ html[data-button-style="liquid"]
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* ---------------------------------------------------------------
+   The slider's lens (owner, 2026-10-31: 「横選択スライダーを長押ししたら
+   リキッドグラスの様に拡大して、スライダーの形もリキッドグラス形にして」).
+
+   On glass the slide-to-open control is a capsule track with a glass pill
+   thumb. A held thumb (200 ms, or the moment it travels) swells into a
+   clear lens, as iOS 26's sliders do: it lifts about 1.34x over the track,
+   magnifies the label, fill and chevrons under it, carries a specular rim
+   and a chromatic edge, follows the finger, stretches along its travel like
+   gel, and on release deflates with the glass's spring before handing back
+   to the thumb (slide-open-control.tsx writes data-lens="on" | "settle" |
+   "off" and the lens's geometry, once per press).
+
+   The rules that keep the drag honest:
+   - Neither the button nor the thumb is ever scaled. The drag measures
+     both; the swell lives on .ios-slide-open-lens-body, a separate layer.
+   - The magnification is a copy of the track (.ios-slide-open-lens-view),
+     counter-translated by the thumb's offset and scaled with the lens. It
+     needs no backdrop magnifier, so WebKit draws the same lens as Chromium;
+     Chromium adds the displacement rim to the thumb at rest.
+   - Only translate, scale and opacity move. The one backdrop-filter is the
+     lens's own, and the copy is read from the press's measurements only.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"] body .ios-slide-open:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  /* The lens rises out of the track. */
+  overflow: visible !important;
+  --slide-lens-ease: cubic-bezier(0.18, 1.42, 0.32, 1);
+  box-shadow:
+    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+      rgb(255 255 255 / var(--lg-rim)),
+    /* a recessed track: the groove the thumb runs in */ inset 0 2px 7px -2px rgb(0 0 0 / 0.55),
+    inset 0 -1px 0 rgb(255 255 255 / 0.1),
+    inset 2px 0 2px -1.5px rgb(255 92 168 / 0.3),
+    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.36),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.24),
+    0 12px 26px -12px rgb(0 0 0 / 0.62),
+    0 0 20px -8px rgb(var(--lg-tint) / 0.34) !important;
+}
+
+/* The pill thumb: wider than tall, a clear glass capsule. Its width is read
+   by the drag at each press, so the travel follows it. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  width: calc(var(--slide-thumb-size, 50px) + 14px) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(120% 90% at 30% -10%, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0) 55%),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.16),
+      rgb(255 255 255 / 0.02) 52%,
+      rgb(255 255 255 / 0.08)
+    ),
+    linear-gradient(rgb(var(--lg-tint) / 0.14), rgb(var(--lg-tint) / 0.14)), rgb(12 20 32 / 0.34) !important;
+  -webkit-backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
+  backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
+  box-shadow:
+    inset 1.2px 1.4px 0 -0.25px rgb(255 255 255 / 0.92),
+    inset -1px -1px 0 -0.25px rgb(255 255 255 / 0.32),
+    inset 0 10px 14px -12px rgb(255 255 255 / 0.6),
+    inset 0 -8px 12px -10px rgb(var(--lg-tint) / 0.55),
+    inset 2.5px 0 3px -2px rgb(255 92 168 / 0.42),
+    inset -2.5px 0 3px -2px rgb(72 206 255 / 0.48),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.3),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 6px 14px -6px rgb(0 0 0 / 0.55) !important;
+}
+
+/* Chromium: the thumb bends the track at its rim (the capsule lens). */
+html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
+  body
+  .ios-slide-open
+  .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-backdrop-filter: url(#dw-liquid-lens-capsule) blur(3px) saturate(1.8) brightness(1.1) !important;
+  backdrop-filter: url(#dw-liquid-lens-capsule) blur(3px) saturate(1.8) brightness(1.1) !important;
+}
+
+/* The ring and the painted glints belonged to the round knob; the pill's
+   light is its rim. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  :is(.ios-slide-open-thumb > i, .ios-slide-open-thumb::before, .ios-slide-open-thumb::after):not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass) {
+  display: none !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  :is(.ios-slide-open-thumb svg, .ios-slide-open-lens-glyph svg):not(#lg-glass):not(#lg-glass):not(
+    #lg-glass
+  ) {
+  color: #fff !important;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.5)) drop-shadow(0 0 6px rgb(var(--lg-tint) / 0.55)) !important;
+}
+
+/* The label clears the wider thumb; the copy in the lens is laid out the
+   same way, so the two always line up. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-label:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  left: calc(var(--slide-thumb-size, 50px) + 26px) !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-label
+  b:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: rgb(255 255 255 / 0.95) !important;
+  text-shadow:
+    0 1px 1px rgb(0 0 0 / 0.5),
+    0 0 12px rgb(var(--lg-tint) / 0.4);
+}
+
+/* Chevrons: rounded strokes with a little light of their own. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-arrows
+  i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  width: 7px;
+  height: 7px;
+  border-top-width: 1.75px;
+  border-right-width: 1.75px;
+  border-color: rgb(255 255 255 / 0.9) !important;
+  border-radius: 0 1.5px 0 0;
+  filter: drop-shadow(0 0 3px rgb(var(--lg-tint) / 0.85));
+}
+
+/* The fill under the glass: a lit liquid with a meniscus on top. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-fill:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  top: 4px !important;
+  bottom: 4px !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 46%),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, rgb(var(--lg-tint)) 50%, var(--slide-accent) 50%),
+      color-mix(in srgb, var(--slide-accent) 62%, rgb(255 255 255 / 0.2))
+    ) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.42),
+    inset 0 -2px 4px -1px rgb(0 0 0 / 0.28),
+    0 0 14px -4px var(--slide-accent) !important;
+  opacity: 0.82 !important;
+}
+
+/* The lens. Hidden (and nothing sampled) until a press swells it. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  position: absolute;
+  z-index: 5;
+  top: var(--slide-lens-y, 3px);
+  left: var(--slide-lens-x, 4px);
+  display: block;
+  width: var(--slide-lens-w, calc(var(--slide-thumb-size, 50px) + 14px));
+  height: var(--slide-lens-h, calc(100% - 6px));
+  pointer-events: none;
+  visibility: hidden;
+  translate: var(--slide-offset, 0px) 0;
+  scale: var(--slide-lens-sx, 1) var(--slide-lens-sy, 1);
+  transition:
+    translate 0.44s var(--slide-lens-ease),
+    scale 0.18s cubic-bezier(0.2, 0.9, 0.3, 1),
+    visibility 0s linear 0.2s;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open:is([data-lens="on"], [data-lens="settle"])
+  .ios-slide-open-lens:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  visibility: visible;
+  transition:
+    translate 0.44s var(--slide-lens-ease),
+    scale 0.18s cubic-bezier(0.2, 0.9, 0.3, 1),
+    visibility 0s;
+}
+
+/* While the finger carries it, the lens is exactly under the finger. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open[data-dragging="true"]
+  :is(.ios-slide-open-lens, .ios-slide-open-lens-view):not(#lg-glass):not(#lg-glass):not(
+    #lg-glass
+  ) {
+  transition:
+    scale 0.18s cubic-bezier(0.2, 0.9, 0.3, 1),
+    visibility 0s;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-body:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 999px;
+  background:
+    linear-gradient(rgb(var(--lg-tint) / 0.1), rgb(var(--lg-tint) / 0.1)), rgb(9 16 27 / 0.58);
+  -webkit-backdrop-filter: blur(8px) saturate(1.7) brightness(1.08);
+  backdrop-filter: blur(8px) saturate(1.7) brightness(1.08);
+  box-shadow:
+    0 0 0 0.5px rgb(255 255 255 / 0.4),
+    0 2px 5px rgb(0 0 0 / 0.3),
+    0 14px 28px -10px rgb(0 0 0 / 0.6),
+    0 0 26px -8px rgb(var(--lg-tint) / 0.6);
+  opacity: 0;
+  scale: 1;
+  transition:
+    scale var(--lg-spring-ms) var(--lg-spring),
+    opacity 0.14s ease;
+}
+
+/* Swelling: the lens lifts past its size once and settles at 1.34. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open[data-lens="on"]
+  .ios-slide-open-lens-body:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 1;
+  scale: 1.34;
+  transition:
+    scale 0.42s var(--lg-spring),
+    opacity 0.08s ease;
+}
+
+/* Released: it deflates on the gel spring, still glass, then fades into
+   the thumb it covers. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open[data-lens="settle"]
+  .ios-slide-open-lens-body:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 1;
+  scale: 1;
+  transition:
+    scale var(--lg-spring-ms) var(--lg-spring),
+    opacity 0.14s ease;
+}
+
+/* The magnified track: the padding box's own layers, laid out as on the
+   track, slid back by the thumb's offset so the lens shows what it sits
+   over. It scales with the body, about the lens's centre. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-view:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  position: absolute;
+  top: calc(var(--slide-lens-y, 3px) * -1);
+  left: calc(var(--slide-lens-x, 4px) * -1);
+  width: var(--slide-track-w, 100%);
+  height: var(--slide-track-h, 100%);
+  pointer-events: none;
+  translate: calc(var(--slide-offset, 0px) * -1) 0;
+  transition: translate 0.44s var(--slide-lens-ease);
+}
+
+/* The copy's chevrons hold still: a magnified blink would read as flicker. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-view
+  .ios-slide-open-arrows
+  i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  animation: none;
+  opacity: 0.7;
+}
+
+/* The light on the lens: the specular rim, the pool under it, the caustic
+   at the far rim and the chromatic edge, drawn over the magnified view. */
+html[data-button-style="liquid"] body .ios-slide-open .ios-slide-open-lens-body::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 70% at 32% 0%, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0) 60%),
+    radial-gradient(70% 55% at 72% 112%, rgb(var(--lg-tint) / 0.26), rgb(var(--lg-tint) / 0) 70%);
+  box-shadow:
+    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.45),
+    inset 0 0 5px 0.5px rgb(255 255 255 / 0.16),
+    inset 0 -6px 9px -7px rgb(var(--lg-tint) / 0.8),
+    inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.5),
+    inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.55);
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-glyph:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  line-height: 0;
+  transition: rotate 0.28s ease;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open[data-completing="true"]
+  .ios-slide-open-lens-glyph:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  rotate: 90deg;
+}
+
+/* Carried, the lens is clear: the glyph fades and the fill under it thins,
+   so it reads as glass over the track rather than a blue knob. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-glyph:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  transition:
+    rotate 0.28s ease,
+    opacity 0.18s ease;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open[data-lens-travel="true"]
+  .ios-slide-open-lens-glyph:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 0;
+}
+
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-view
+  .ios-slide-open-fill:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 0.5 !important;
+}
+
+/* The lens stands in for the thumb while it is up (the thumb keeps its box
+   and its place: the drag still measures it). */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open:is([data-lens="on"], [data-lens="settle"])
+  .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 0 !important;
+}
+
+/* Reduced motion: no swell, no stretch, no spring: a still, clear lens. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open
+    :is(
+      .ios-slide-open-lens,
+      .ios-slide-open-lens-body,
+      .ios-slide-open-lens-view,
+      .ios-slide-open-lens-glyph
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: 1 !important;
+    transition: none !important;
+  }
+}
+
+/* Economy: the lens samples nothing; its tint carries it. */
+html[data-button-style="liquid"][data-world-effects="economy"]
+  body
+  .ios-slide-open
+  .ios-slide-open-lens-body:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  background:
+    linear-gradient(rgb(var(--lg-tint) / 0.12), rgb(var(--lg-tint) / 0.12)), rgb(9 16 27 / 0.86);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open
+    .ios-slide-open-lens-body:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background: rgb(9 16 27 / 0.92);
+  }
+}
+
+/* Forced colours: no lens; the system's thumb stays. */
+@media (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open
+    .ios-slide-open-lens:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    display: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open
+    .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border: 2px solid ButtonText !important;
+    background: ButtonFace !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Rexonance P14's baseline switch: a native range under a painted thumb (no
+   script measures it; the range input owns the gesture). On glass the knob
+   is clear glass, and a held press swells it the same way, after the same
+   short hold, springing back on release. Scale only; its travel keeps the
+   translate it has. */
+html[data-button-style="liquid"]
+  body
+  .rxs-page
+  .rxs-p14-ios-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border: 0 !important;
+  background:
+    radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0) 58%),
+    radial-gradient(70% 55% at 70% 108%, rgb(122 232 255 / 0.34), rgb(122 232 255 / 0) 70%),
+    rgb(14 34 48 / 0.42) !important;
+  -webkit-backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
+  backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
+  box-shadow:
+    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.4),
+    inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.45),
+    inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.5),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.3),
+    0 2px 5px rgb(0 0 0 / 0.35),
+    0 12px 24px -10px rgb(0 0 0 / 0.6),
+    0 0 20px -6px rgb(46 188 231 / 0.45) !important;
+  scale: 1;
+  transition:
+    translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale var(--lg-spring-ms) var(--lg-spring),
+    box-shadow 160ms ease;
+}
+
+html[data-button-style="liquid"]
+  body
+  .rxs-page
+  .rxs-p14-ios-slider:is([data-held="true"], :has(input:active))
+  .rxs-p14-ios-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  scale: 1.32;
+  transition:
+    translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.42s var(--lg-spring) 0.18s,
+    box-shadow 160ms ease;
+}
+
+/* The card clips at the track's ends, so the knob swells inward from the
+   end it rests at. */
+html[data-button-style="liquid"]
+  body
+  .rxs-page
+  .rxs-p14-ios-slider
+  .rxs-p14-ios-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  transform-origin: 6% 50%;
+}
+
+html[data-button-style="liquid"]
+  body
+  .rxs-page
+  .rxs-p14-ios-slider[data-value="p2"]
+  .rxs-p14-ios-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  transform-origin: 94% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-button-style="liquid"]
+    body
+    .rxs-page
+    .rxs-p14-ios-slider
+    .rxs-p14-ios-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: 1 !important;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    .rxs-page
+    .rxs-p14-ios-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border: 2px solid ButtonText !important;
+    background: ButtonFace !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
 }
