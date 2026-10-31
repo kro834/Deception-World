@@ -8,6 +8,7 @@ import {
   liquidButtonsOn,
   watchLiquidPointer,
 } from "@/lib/liquid-glass";
+import { watchLiquidControls } from "@/lib/liquid-glass-controls";
 
 /* The red channel is bent a little further than green and blue: a faint
    chromatic fringe at the rim, as a thick lens splits white light. */
@@ -80,8 +81,12 @@ export function LiquidGlassDefs() {
     const clearer = window.matchMedia?.("(prefers-reduced-transparency: reduce)").matches;
     if (lensSupported(window) && !clearer) root.setAttribute(LIQUID_LENS_ATTRIBUTE, "");
     const stopPointer = watchLiquidPointer(document);
+    // The selection controls' pills, bezels and rail chrome
+    // (styles-liquid-glass-controls.css).
+    const stopControls = watchLiquidControls(document);
     return () => {
       stopPointer();
+      stopControls();
       root.removeAttribute(LIQUID_LENS_ATTRIBUTE);
     };
   }, [on]);
