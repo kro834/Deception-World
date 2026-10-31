@@ -1944,6 +1944,18 @@
   background: linear-gradient(160deg, rgb(8 16 30 / 90%), rgb(3 7 15 / 88%));
 }
 
+/* The lineage, 主演算性能 and 各世代 title plates are machined panels (zenith)
+   but had no inner padding, so their text sat on the border and under the
+   clipped corner. Same inset as the 総合評価 card. */
+.ffs-page .ffs-p16-lineage,
+.ffs-page .ffs-p16-main {
+  padding: clamp(20px, 3.4vw, 36px);
+}
+
+.ffs-page .ffs-p16-generations > header {
+  padding: clamp(14px, 2.4vw, 22px) clamp(20px, 3.4vw, 36px);
+}
+
 /* The chapter's other paragraphs, by topic. */
 .ffs-page .ffs-p16-topics {
   display: grid;
