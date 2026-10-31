@@ -48,7 +48,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // 2026-10-19: remove 06 from the ordinary columns; preserve it in the RE DIVE book.
     // Owner 2026-10-19: only EP6's title, thumbnail and alt change to 来訪 / ERROR; markup stays pinned.
     // Owner 2026-10-26: EP4 title becomes 癒えぬ傷を負った者共.
-    records: "feec9c3168b011fa02ad08349e1380969a2e63e1974197054c4d6e482631ed00",
+    // Owner 2026-10-31: remove FARCE and move 来訪 to EP5; finale is EP6 REXONANCE.
+    records: "77a5e3c391de7987130c9f5aa3748fe2570af665c189cc96246503fdc3070369",
     // rx14 F3/F29: responsive poster and WebP related-image attributes only.
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.

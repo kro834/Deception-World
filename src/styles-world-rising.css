@@ -4,7 +4,7 @@
    scrolling, an ember horizon climbs and the RISING THE WORLD button rises
    into place on a named view timeline (it reverses and never loops). The
    button opens a modal dialog: a dive into the world, the world consumed by
-   red flames and, mid-burn, one hard cut to EP7 REXONANCE (rising-world.tsx,
+   red flames and, mid-burn, one hard cut to EP6 REXONANCE (rising-world.tsx,
    rising-sequence.ts, rising.frag.glsl).
 
    The gate is staged as the page's closing act: the World's prism runs down
@@ -852,7 +852,7 @@
 }
 
 /* No tier yet: the engine chunk is still loading. Keep the void, never the
-   end still (it would reveal EP7 before the dive). */
+   end still (it would reveal EP6 before the dive). */
 .site-shell.film-edition.mirage-edition
   .rw-viewport:not([data-tier])
   :is(.rw-end, .rw-calm, .rw-gl) {

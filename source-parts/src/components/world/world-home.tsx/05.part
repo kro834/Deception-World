@@ -1,5 +1,3 @@
-                          stroke="currentColor"
-                          strokeWidth="1.8"
                         />
                       </svg>
                     )}
@@ -507,3 +505,4 @@
               role="tabpanel"
               aria-labelledby={`column-tab-${columnTab}`}
               aria-label={`コラム${column.no} ${column.title}`}
+            >

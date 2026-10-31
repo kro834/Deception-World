@@ -1,4 +1,3 @@
-            >
               <div className="world-column-number-stack">
                 {COLUMNS.map((item, index) => (
                   <p

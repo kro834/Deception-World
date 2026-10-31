@@ -17,16 +17,16 @@ test("both dive tiers aim at the logo's ring without distorting the title", () =
   assert.doesNotMatch(handoff, /fitLogoRect|rectTransform/);
 });
 
-test("EP6 shows the owner's arrival title and intentional error thumbnail without invented pickups", () => {
+test("EP5 shows the owner's arrival title and intentional error thumbnail without invented pickups", () => {
   const source = readFileSync(new URL("../src/components/world/world-home.tsx", import.meta.url), "utf8");
-  const record = source.slice(source.indexOf('no: "06",', source.indexOf("const EPISODES"))).split("\n  },")[0];
+  const record = source.slice(source.indexOf('no: "05",', source.indexOf("const EPISODES"))).split("\n  },")[0];
   // Owner 2026-10-19: rename EP6 to 来訪 and replace its thumbnail with a deliberate ERROR screen.
   assert.match(record, /title: "来訪"/);
-  assert.match(record, /src: "\/episode-06-arrival-error.svg"/);
+  assert.match(record, /src: "\/episode-05-arrival-error.svg"/);
   assert.doesNotMatch(record, /pickups:/);
-  assert.ok(statSync(new URL("../public/episode-06-arrival-error.svg", import.meta.url)).size < 300_000);
-  const svg = readFileSync(new URL("../public/episode-06-arrival-error.svg", import.meta.url), "utf8");
+  assert.ok(statSync(new URL("../public/episode-05-arrival-error.svg", import.meta.url)).size < 300_000);
+  const svg = readFileSync(new URL("../public/episode-05-arrival-error.svg", import.meta.url), "utf8");
   assert.match(svg, />ERROR<\/text>/);
   assert.doesNotMatch(svg, /<script|<animate|<image|href=/);
-  assert.ok(readFileSync(new URL("../src/lib/record-art.ts", import.meta.url), "utf8").includes('src: "/episode-06-arrival-error.svg"'));
+  assert.ok(readFileSync(new URL("../src/lib/record-art.ts", import.meta.url), "utf8").includes('src: "/episode-05-arrival-error.svg"'));
 });

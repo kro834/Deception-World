@@ -56,9 +56,9 @@ const selectorList = (selector) => {
 
 const ALLOWED_WORDS = new Set([
   "RISING THE WORLD",
-  "EP7",
+  "EP6",
   "REXONANCE",
-  "EP7 REXONANCE",
+  "EP6 REXONANCE",
   "CLOSE",
   "SKIP",
   "もう一度",
@@ -146,9 +146,9 @@ test("the title is announced at the cut, and the dialog is named by the button",
   assert.match(dialog, /aria-live="polite"/);
   assert.match(
     dialog,
-    /<span className="rw-title-ep">EP7<\/span>\{" "\}\s*<span className="rw-title-name">REXONANCE<\/span>/,
+    /<span className="rw-title-ep">EP6<\/span>\{" "\}\s*<span className="rw-title-name">REXONANCE<\/span>/,
   );
-  assert.match(component, /onTitle: \(\) => setLive\("EP7 REXONANCE"\)/);
+  assert.match(component, /onTitle: \(\) => setLive\("EP6 REXONANCE"\)/);
   assert.match(
     component,
     /aria-label="RISING THE WORLD"[\s\S]*<button[\s\S]*className="rw-gate-button"/,
@@ -206,7 +206,7 @@ test("the rider art is the standard Rexonance artwork through the shared helpers
     home.indexOf("const EPISODES"),
     home.indexOf("];", home.indexOf("const EPISODES")),
   );
-  assert.doesNotMatch(episodes, /EP7|REXONANCE/i, "EP7 is not added to the episode archive");
+  assert.doesNotMatch(episodes, /EP6|REXONANCE/i, "EP6 is not added to the episode archive");
 });
 
 test("the shader runs at high precision where available and avoids undefined smoothstep", async () => {

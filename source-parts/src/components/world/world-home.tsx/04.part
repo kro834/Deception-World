@@ -1,8 +1,4 @@
     };
-    const endTouch = () => {
-      touching = false;
-      scheduleSettle();
-    };
     const onScroll = () => {
       scheduleSettle();
       if (frame) return;
@@ -508,3 +504,5 @@
                           height="10"
                           rx="2"
                           fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
