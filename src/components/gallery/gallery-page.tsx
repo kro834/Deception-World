@@ -1146,7 +1146,7 @@ export function GalleryPage() {
               </p>
             </div>
             <figure className="gallery-feature">
-              <figcaption>
+              <figcaption tabIndex={0} aria-label="表示中の作品番号とタイトル">
                 <span>{numberFor(featured)}</span>
                 {titles[featured.id] && <span>{titles[featured.id]}</span>}
               </figcaption>
@@ -1172,16 +1172,22 @@ export function GalleryPage() {
                   作品を拡大して「トップに飾る」を選択。自分の表示だけに反映され、このブラウザーに保存されます。
                 </p>
               </details>
-              {featureMessage && (
-                <p className="gallery-feature-feedback" role="status">
-                  {featureMessage}
-                </p>
-              )}
-              {featureError && (
-                <p className="gallery-feature-feedback is-error" role="alert">
-                  {featureError}
-                </p>
-              )}
+              <div
+                className="gallery-stage-feedback"
+                tabIndex={0}
+                aria-label="トップ作品の保存結果"
+              >
+                {featureMessage && (
+                  <p className="gallery-feature-feedback" role="status">
+                    {featureMessage}
+                  </p>
+                )}
+                {featureError && (
+                  <p className="gallery-feature-feedback is-error" role="alert">
+                    {featureError}
+                  </p>
+                )}
+              </div>
             </figure>
             <div className="gallery-intro-navigation">
               <nav className="gallery-intro-actions" aria-label="ギャラリーの入口">
