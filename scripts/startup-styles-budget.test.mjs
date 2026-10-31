@@ -67,6 +67,8 @@ const original = [
   // Owner (2026-10-30): the buttons' optional liquid glass, scoped to
   // html[data-button-style="liquid"], the last sheet.
   "../styles-liquid-glass.css?url",
+  // Owner (2026-10-31): the glass spread to the selection controls, same scope.
+  "../styles-liquid-glass-controls.css?url",
   // Owner (2026-10-31): the same glass on the surfaces and chrome, scoped the same way.
   "../styles-liquid-glass-surfaces.css?url",
   fonts.SITE_CORE_FONTS_URL,

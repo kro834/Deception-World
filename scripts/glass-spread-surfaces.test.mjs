@@ -180,9 +180,9 @@ test("the SCP notice keeps its slip: only a painted pane around it", () => {
   );
 });
 
-test("the root links the surfaces sheet right after the buttons' sheet", () => {
+test("the root links the surfaces sheet after the buttons' and the controls' sheets", () => {
   assert.match(
     root,
-    /\{ rel: "stylesheet", href: liquidGlassCss \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassSurfacesCss \},/,
+    /\{ rel: "stylesheet", href: liquidGlassCss \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassControlsCss \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassSurfacesCss \},/,
   );
 });

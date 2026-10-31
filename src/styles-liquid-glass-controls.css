@@ -1,0 +1,1052 @@
+/* Liquid glass on the selection controls (owner, 2026-10-31:
+   「リキッドグラスを横スライダーなど様々なところに波及させて」).
+
+   The buttons' material (styles-liquid-glass.css) spread to everything a
+   finger slides or picks: the range sliders, the segmented and tab groups,
+   the horizontal rails, the side menu's switches and the styled selects.
+   Same tokens (--lg-spring, --lg-blur, --lg-sat, the light from the upper
+   left, the warm/cool chromatic edge), same fallbacks.
+
+   Every rule waits for html[data-button-style="liquid"]; with the option off
+   nothing here matches and the site is unchanged. The script half,
+   src/lib/liquid-glass-controls.ts, writes the data-lg-* attributes this
+   sheet reads (only while the option is on) and removes them when it goes
+   off.
+
+   What moves: translate and scale on decorative layers (the pills and
+   bezels are pseudo-elements; the range thumbs are the native thumbs, whose
+   value the engine maps from layout, never from the transform). Nothing a
+   drag or a scroll measures is ever scaled. */
+
+/* ---------------------------------------------------------------
+   1. Segments: the selected option sits on a glass pill that glides
+      between options with a gel stretch. GLASS_SEGMENTS in
+      liquid-glass-controls.ts.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"] body [data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-seg-tint: 122 232 255;
+  --lg-seg-ease: cubic-bezier(0.3, 1.32, 0.42, 1);
+  isolation: isolate;
+}
+
+html[data-button-style="liquid"]
+  body
+  [data-lg-seg][data-lg-seg-static]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  position: relative;
+}
+
+/* The house accents: Dream's lamplight, the dogs' green, Extreme's gold,
+   META UNITAS's ember. */
+html[data-button-style="liquid"] body .dream-page [data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-seg-tint: 236 199 136;
+}
+
+html[data-button-style="liquid"] body .dogs-archive-selector[data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-seg-tint: 126 214 150;
+}
+
+html[data-button-style="liquid"] body .exs-opponent-options[data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-seg-tint: 244 204 123;
+}
+
+html[data-button-style="liquid"] body .mus-compare-pick[data-lg-seg]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-seg-tint: 255 170 104;
+}
+
+/* The pill: the group's free pseudo-element (the script picks it). */
+html[data-button-style="liquid"] body [data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+html[data-button-style="liquid"] body [data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  display: block;
+  width: var(--lg-seg-w, 0px);
+  height: var(--lg-seg-h, 0px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--lg-seg-r, 999px);
+  pointer-events: none;
+  translate: var(--lg-seg-x, 0px) var(--lg-seg-y, 0px);
+  transform-origin: 0 50%;
+  background:
+    radial-gradient(120% 150% at 30% -24%, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 58%),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.14),
+      rgb(255 255 255 / 0.02) 54%,
+      rgb(255 255 255 / 0.07)
+    ),
+    linear-gradient(rgb(var(--lg-seg-tint) / 0.17), rgb(var(--lg-seg-tint) / 0.17)),
+    rgb(12 22 34 / 0.52);
+  box-shadow:
+    /* the specular rim, lit from the upper left */ inset 1.2px 1.4px 0 -0.25px rgb(255 255 255 / 0.9),
+    inset -1px -1px 0 -0.25px rgb(255 255 255 / 0.3),
+    /* the caustic pool at the far rim */ inset 0 -7px 11px -9px rgb(var(--lg-seg-tint) / 0.7),
+    /* the chromatic edge */ inset 2.5px 0 3px -2px rgb(255 92 168 / 0.4),
+    inset -2.5px 0 3px -2px rgb(72 206 255 / 0.46),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.28),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 8px 18px -8px rgb(0 0 0 / 0.55),
+    0 0 18px -6px rgb(var(--lg-seg-tint) / 0.45);
+  opacity: 1;
+}
+
+/* It glides only once placed (the first placement is not animated). */
+html[data-button-style="liquid"] body [data-lg-seg="before"][data-lg-seg-ready]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+html[data-button-style="liquid"] body [data-lg-seg="after"][data-lg-seg-ready]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  transition:
+    translate 0.5s var(--lg-seg-ease),
+    opacity 0.2s ease;
+}
+
+/* The gel: it leaves at the old width, stretches along its travel, thins,
+   and settles with one small rebound. Two copies, so each change restarts. */
+@keyframes lg-seg-gel-a {
+  0% {
+    scale: var(--lg-seg-s0, 1) 1;
+  }
+
+  34% {
+    scale: calc((var(--lg-seg-s0, 1) + 1) / 2 + var(--lg-seg-k, 0)) calc(1 - var(--lg-seg-k, 0) * 0.42);
+  }
+
+  68% {
+    scale: calc(1 - var(--lg-seg-k, 0) * 0.12) calc(1 + var(--lg-seg-k, 0) * 0.1);
+  }
+
+  100% {
+    scale: 1 1;
+  }
+}
+
+@keyframes lg-seg-gel-b {
+  0% {
+    scale: var(--lg-seg-s0, 1) 1;
+  }
+
+  34% {
+    scale: calc((var(--lg-seg-s0, 1) + 1) / 2 + var(--lg-seg-k, 0)) calc(1 - var(--lg-seg-k, 0) * 0.42);
+  }
+
+  68% {
+    scale: calc(1 - var(--lg-seg-k, 0) * 0.12) calc(1 + var(--lg-seg-k, 0) * 0.1);
+  }
+
+  100% {
+    scale: 1 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"] body [data-lg-seg="before"][data-lg-seg-gel="a"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg="after"][data-lg-seg-gel="a"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    animation: lg-seg-gel-a 0.56s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+  }
+
+  html[data-button-style="liquid"] body [data-lg-seg="before"][data-lg-seg-gel="b"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg="after"][data-lg-seg-gel="b"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    animation: lg-seg-gel-b 0.56s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+  }
+}
+
+/* The options rest as clear glass chips; the pill carries the selection. */
+html[data-button-style="liquid"]
+  body
+  [data-lg-seg-mode="pill"]
+  > :is(button, a, [role="tab"], [role="radio"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.12) !important;
+  border-radius: 999px !important;
+  background: rgb(255 255 255 / 0.025) !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05) !important;
+  clip-path: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-button-style="liquid"]
+  body
+  [data-lg-seg-mode="pill"]
+  > [data-lg-seg-current]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #fff !important;
+  text-shadow:
+    0 1px 1px rgb(0 0 0 / 0.5),
+    0 0 10px rgb(var(--lg-seg-tint) / 0.45);
+}
+
+html[data-button-style="liquid"]
+  body
+  [data-lg-seg-mode="pill"]
+  > [data-lg-seg-current]
+  :is(span, b, small, strong, em):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: inherit !important;
+}
+
+/* The gallery's own sliding marker gives way to the pill. */
+html[data-button-style="liquid"] body .gallery-filters[data-lg-seg] > .gallery-selection-marker:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 0 !important;
+}
+
+/* Tall tiles are rounded slabs (the script gives their pill 22px too). */
+html[data-button-style="liquid"]
+  body
+  .dream-karakuri-tabs[data-lg-seg-mode="pill"]
+  > :is(button, a, [role="tab"], [role="radio"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-radius: 22px !important;
+}
+
+/* Bezel mode (pictures and cards): a clear glass frame over the selected
+   item, gliding the same way. Transparent in the middle: the picture stays. */
+html[data-button-style="liquid"] body [data-lg-seg-mode="bezel"][data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+html[data-button-style="liquid"] body [data-lg-seg-mode="bezel"][data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  z-index: 6;
+  background:
+    radial-gradient(80% 36% at 26% 0%, rgb(255 255 255 / 0.2), rgb(255 255 255 / 0) 70%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0) 22%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.62),
+    inset 1.5px 1.8px 0 0.5px rgb(255 255 255 / 0.55),
+    inset -1px -1px 0 0.5px rgb(255 255 255 / 0.2),
+    inset 3px 0 4px -2px rgb(255 92 168 / 0.5),
+    inset -3px 0 4px -2px rgb(72 206 255 / 0.55),
+    inset 0 -10px 16px -12px rgb(var(--lg-seg-tint) / 0.8),
+    inset 0 0 18px -6px rgb(var(--lg-seg-tint) / 0.5);
+}
+
+/* ---------------------------------------------------------------
+   2. Rails: glass edge caps and a glass scroll indicator, drawn by the
+      rail's parent (its two free pseudo-elements, so they hold still while
+      the rail scrolls). GLASS_RAILS in liquid-glass-controls.ts.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  [data-lg-rail-host][data-lg-rail-host-static]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  position: relative;
+}
+
+html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-cap: 18px;
+  --lg-cap-l: var(--lg-cap);
+  --lg-cap-r: var(--lg-cap);
+  timeline-scope: --lg-rail;
+}
+
+html[data-button-style="liquid"] body [data-lg-rail-host][data-lg-rail-start]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-cap-l: 0px;
+}
+
+html[data-button-style="liquid"] body [data-lg-rail-host][data-lg-rail-end]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-cap-r: 0px;
+}
+
+html[data-button-style="liquid"] body [data-lg-rail]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  scroll-timeline: --lg-rail x;
+}
+
+/* The caps: a sliver of glass at each end that still has more to show (a
+   dark tint with the specular line on its outer rim), and the indicator's
+   groove, a recessed hairline along the foot of the rail. */
+html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before {
+  content: "";
+  position: absolute;
+  z-index: 7;
+  top: var(--lg-rail-y, 0px);
+  left: var(--lg-rail-x, 0px);
+  width: var(--lg-rail-w, 0px);
+  height: var(--lg-rail-h, 0px);
+  pointer-events: none;
+  background:
+    /* left cap: the rim, then the glass */
+    linear-gradient(90deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 1.5px) 0 0 / var(--lg-cap-l) 100% no-repeat,
+    linear-gradient(90deg, rgb(255 92 168 / 0.22), rgb(255 92 168 / 0) 4px) 0 0 / var(--lg-cap-l) 100% no-repeat,
+    linear-gradient(90deg, rgb(7 13 21 / 0.78), rgb(7 13 21 / 0.36) 55%, rgb(7 13 21 / 0)) 0 0 / var(--lg-cap-l) 100% no-repeat,
+    /* right cap */
+    linear-gradient(270deg, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 1.5px) 100% 0 / var(--lg-cap-r) 100% no-repeat,
+    linear-gradient(270deg, rgb(72 206 255 / 0.26), rgb(72 206 255 / 0) 4px) 100% 0 / var(--lg-cap-r) 100% no-repeat,
+    linear-gradient(270deg, rgb(7 13 21 / 0.78), rgb(7 13 21 / 0.36) 55%, rgb(7 13 21 / 0)) 100% 0 / var(--lg-cap-r) 100% no-repeat,
+    /* the indicator's groove */
+    linear-gradient(rgb(0 0 0 / 0.5), rgb(255 255 255 / 0.16)) 50% calc(100% - 4px) / calc(100% - 56px) 3px no-repeat;
+}
+
+/* The indicator: a glass capsule as long as the share of the rail in view,
+   carried along by the rail's scroll timeline (the compositor moves it; no
+   script reads the scroll). Without scroll timelines it is not drawn. */
+html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  content: "";
+  position: absolute;
+  z-index: 8;
+  top: calc(var(--lg-rail-y, 0px) + var(--lg-rail-h, 0px) - 8px);
+  left: calc(var(--lg-rail-x, 0px) + 28px);
+  width: max(26px, calc((var(--lg-rail-w, 0px) - 56px) * var(--lg-rail-thumb, 1)));
+  height: 7px;
+  border-radius: 999px;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.32) 60%, rgb(255 255 255 / 0.55)),
+    rgb(var(--lg-rail-tint, 122 232 255) / 0.4);
+  box-shadow:
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.7),
+    inset 1.5px 0 1.5px -1px rgb(255 92 168 / 0.6),
+    inset -1.5px 0 1.5px -1px rgb(72 206 255 / 0.7),
+    0 1px 3px rgb(0 0 0 / 0.45),
+    0 0 10px rgb(var(--lg-rail-tint, 122 232 255) / 0.5);
+  opacity: 0;
+}
+
+@keyframes lg-rail-thumb {
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: calc(
+        max(0px, (var(--lg-rail-w, 0px) - 56px) - max(26px, (var(--lg-rail-w, 0px) - 56px) * var(--lg-rail-thumb, 1)))
+      )
+      0;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    opacity: 1;
+    animation: lg-rail-thumb linear both;
+    animation-timeline: --lg-rail;
+  }
+}
+
+html[data-button-style="liquid"] body .dream-page [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-rail-tint: 236 199 136;
+}
+
+/* ---------------------------------------------------------------
+   3. Range sliders: the movie's seek bar, the transformation lab's
+      scrubber and the dream chapter's stage slider. A recessed glass groove
+      under a clear glass thumb; the thumb holds a 1.5x copy of the groove
+      (a lens over the track), and a held or dragged thumb swells into a
+      magnifying lens on the gel spring and springs back on release. The
+      engine maps the value from the thumb's layout box; the swell is a
+      transform, so the drag reads none of it.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass) {
+  --lg-range-tint: 122 232 255;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  accent-color: rgb(var(--lg-range-tint));
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-button-style="liquid"]
+  body
+  .dream-chapter-stage-slider
+  input[type="range"]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-range-tint: 236 199 136;
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.42), rgb(255 255 255 / 0.05)),
+    linear-gradient(90deg, rgb(var(--lg-range-tint) / 0.5), rgb(var(--lg-range-tint) / 0.2));
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.16),
+    0 1px 0 rgb(255 255 255 / 0.08);
+  opacity: 1;
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::-moz-range-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.42), rgb(255 255 255 / 0.05)),
+    linear-gradient(90deg, rgb(var(--lg-range-tint) / 0.5), rgb(var(--lg-range-tint) / 0.2));
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.16);
+  opacity: 1;
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 20px;
+  margin-top: -7px;
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 58%),
+    /* the groove under the lens, 1.5x */
+    linear-gradient(
+      rgb(0 0 0 / 0) calc(50% - 4.5px),
+      rgb(var(--lg-range-tint) / 0.55) calc(50% - 4.5px),
+      rgb(var(--lg-range-tint) / 0.3) calc(50% + 4.5px),
+      rgb(0 0 0 / 0) calc(50% + 4.5px)
+    ),
+    rgb(16 32 46 / 0.3);
+  box-shadow:
+    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.4),
+    inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.45),
+    inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.5),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.32),
+    0 2px 5px rgb(0 0 0 / 0.35),
+    0 8px 16px -8px rgb(0 0 0 / 0.6),
+    0 0 14px -4px rgb(var(--lg-range-tint) / 0.5);
+  transform: none;
+  transition: transform var(--lg-spring-ms) var(--lg-spring);
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::-moz-range-thumb {
+  width: 30px;
+  height: 20px;
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 58%),
+    linear-gradient(
+      rgb(0 0 0 / 0) calc(50% - 4.5px),
+      rgb(var(--lg-range-tint) / 0.55) calc(50% - 4.5px),
+      rgb(var(--lg-range-tint) / 0.3) calc(50% + 4.5px),
+      rgb(0 0 0 / 0) calc(50% + 4.5px)
+    ),
+    rgb(16 32 46 / 0.3);
+  box-shadow:
+    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.4),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.32),
+    0 2px 5px rgb(0 0 0 / 0.35),
+    0 0 14px -4px rgb(var(--lg-range-tint) / 0.5);
+  transform: none;
+  transition: transform var(--lg-spring-ms) var(--lg-spring);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]
+    body
+    :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:active:not(
+      :disabled
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
+    transform: scale(1.5, 1.42);
+    box-shadow:
+      inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 1),
+      inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.5),
+      inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.55),
+      inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.6),
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.4),
+      0 3px 8px rgb(0 0 0 / 0.35),
+      0 12px 22px -10px rgb(0 0 0 / 0.6),
+      0 0 18px -4px rgb(var(--lg-range-tint) / 0.6);
+    transition: transform 0.42s var(--lg-spring) 0.12s;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:active:not(
+      :disabled
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass)::-moz-range-thumb {
+    transform: scale(1.5, 1.42);
+    transition: transform 0.42s var(--lg-spring) 0.12s;
+  }
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:disabled:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass) {
+  opacity: 0.5;
+}
+
+/* ---------------------------------------------------------------
+   4. The side menu's switches (the liquid glass switch itself, Ciel's
+      button and the iPad menu): a recessed glass track, a lit liquid when
+      on, and a clear glass capsule knob that swells while pressed and
+      springs across. The knob is decorative (<u>); the button's box, which
+      the tap uses, never moves.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  .side-panel-zeus-toggle
+  > i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  width: 72px;
+  height: 30px;
+  padding: 0 9px;
+  border-color: rgb(255 255 255 / 0.16) !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.32), rgb(255 255 255 / 0.04)),
+    rgb(6 12 20 / 0.66) !important;
+  box-shadow:
+    inset 0 2px 6px -2px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 rgb(255 255 255 / 0.08),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.12);
+}
+
+html[data-button-style="liquid"]
+  body
+  .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"])
+  > i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(173 240 255 / 0.4) !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 52%),
+    linear-gradient(90deg, rgb(122 232 255 / 0.62), rgb(122 232 255 / 0.34) 70%, rgb(240 207 134 / 0.34)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    inset 0 -2px 4px -1px rgb(0 0 0 / 0.26),
+    0 0 14px -4px rgb(122 232 255 / 0.6);
+  color: #fff !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .side-panel-zeus-toggle
+  > i
+  em:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+html[data-button-style="liquid"]
+  body
+  .side-panel-zeus-toggle
+  > i
+  u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  top: 3px;
+  left: 3px;
+  width: 30px;
+  height: 22px;
+  border: 0;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.55), rgb(255 255 255 / 0) 58%),
+    radial-gradient(70% 55% at 70% 108%, rgb(122 232 255 / 0.32), rgb(122 232 255 / 0) 70%),
+    rgb(205 222 232 / 0.3) !important;
+  box-shadow:
+    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.45),
+    inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.45),
+    inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.5),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.35),
+    0 2px 5px rgb(0 0 0 / 0.38),
+    0 6px 12px -6px rgb(0 0 0 / 0.55) !important;
+  translate: 0 0;
+  scale: 1;
+  transition:
+    translate var(--lg-spring-ms) var(--lg-spring),
+    scale var(--lg-spring-ms) var(--lg-spring);
+}
+
+/* On: the knob crosses the 72px track (70px inside its border): 70 - 3 - 30 - 3. */
+html[data-button-style="liquid"]
+  body
+  .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"])
+  > i
+  u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  translate: 34px 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle:is(:active, [data-press="in"], [data-press="touch"])
+    > i
+    u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: 1.3 1.16;
+    transition:
+      translate var(--lg-spring-ms) var(--lg-spring),
+      scale 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+}
+
+/* ---------------------------------------------------------------
+   5. Styled selects: the gallery's order, the tour's interval, the
+      comparison pickers, the lab's and the dream pages' choosers. A glass
+      capsule with its own chevron; the list itself stays the system's.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  :is(
+    .gallery-order select,
+    .gallery-tour-playback select,
+    .rxs-comparison-selector select,
+    .rxs-p14-native-select select,
+    .lab-selectors select,
+    .dream-page select,
+    .dogs-viewer select,
+    .exhibition-artwork-browser select
+  ):not([multiple]):not([size]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 122 232 255;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 40px;
+  padding-right: 40px !important;
+  border: 1px solid rgb(255 255 255 / 0.2) !important;
+  border-radius: 999px !important;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      right 16px center / 12px 8px no-repeat,
+    radial-gradient(120% 150% at 30% -10%, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0) 58%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 50%, rgb(255 255 255 / 0.03)),
+    linear-gradient(rgb(var(--lg-tint) / 0.1), rgb(var(--lg-tint) / 0.1)),
+    rgb(8 15 24 / 0.62) !important;
+  box-shadow:
+    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px rgb(255 255 255 / 0.62),
+    inset 2px 0 2px -1.5px rgb(255 92 168 / 0.3),
+    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.36),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    0 1px 2px rgb(0 0 0 / 0.24),
+    0 10px 22px -12px rgb(0 0 0 / 0.6) !important;
+  color: #f2f8fc !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-button-style="liquid"] body .dream-page select:not([multiple]):not([size]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-tint: 236 199 136;
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(
+    .gallery-order select,
+    .gallery-tour-playback select,
+    .rxs-comparison-selector select,
+    .rxs-p14-native-select select,
+    .lab-selectors select,
+    .dream-page select,
+    .dogs-viewer select,
+    .exhibition-artwork-browser select
+  )
+  option {
+  background: #0c1520;
+  color: #f2f8fc;
+}
+
+/* The wrappers' own drawn arrows give way to the capsule's chevron. */
+html[data-button-style="liquid"] body .rxs-p14-native-select:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  display: none;
+}
+
+/* ---------------------------------------------------------------
+   6. The liquid tab rails (the 六詠 tabs, the column tabs, the rider rail,
+      the saga sites' form sliders, the final stage's rails, the form
+      archive's switcher): their drag and lens stay theirs
+      (src/lib/liquid/boot.js); on glass the rail is a recessed glass groove
+      and the lens a clear glass capsule. The surface (a decorative layer
+      inside the positioned lens) takes the gel spring on the hold swell.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs:not(.rider-tabs):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.16) !important;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.3), rgb(255 255 255 / 0.03)),
+    rgb(7 13 21 / 0.6) !important;
+  box-shadow:
+    inset 0 2px 8px -2px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 rgb(255 255 255 / 0.08),
+    inset 2px 0 2px -1.5px rgb(255 92 168 / 0.22),
+    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.28),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    0 12px 26px -14px rgb(0 0 0 / 0.6) !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .rider-tabs.liquid-swipe-tabs:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: rgb(255 255 255 / 0.14) !important;
+  border-radius: 26px !important;
+  box-shadow:
+    inset 0 2px 8px -2px rgb(0 0 0 / 0.55),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14) !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs
+  > .liquid-rail-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-radius: inherit !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs:not(.rider-tabs)
+  > button[role="tab"]:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-color: transparent !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"]:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: #fff !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs:not(.rider-tabs)
+  > button[role="tab"][aria-selected="true"]
+  :is(span, b, small):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: #fff !important;
+  text-shadow:
+    0 1px 1px rgb(0 0 0 / 0.5),
+    0 0 10px rgb(122 232 255 / 0.4);
+}
+
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs
+  > .liquid-selection-lens
+  > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border: 0 !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(120% 150% at 30% -24%, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 58%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.02) 54%, rgb(255 255 255 / 0.07)),
+    linear-gradient(
+      color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 20%, transparent),
+      color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 20%, transparent)
+    ),
+    rgb(12 22 34 / 0.48) !important;
+  box-shadow:
+    inset 1.2px 1.4px 0 -0.25px rgb(255 255 255 / 0.9),
+    inset -1px -1px 0 -0.25px rgb(255 255 255 / 0.3),
+    inset 0 -7px 11px -9px color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 70%, transparent),
+    inset 2.5px 0 3px -2px rgb(255 92 168 / 0.4),
+    inset -2.5px 0 3px -2px rgb(72 206 255 / 0.46),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.28),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 8px 18px -8px rgb(0 0 0 / 0.55) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .rider-tabs
+  > .liquid-selection-lens
+  > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-radius: 18px !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]
+    body
+    .liquid-swipe-tabs
+    > .liquid-selection-lens
+    > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition: scale var(--lg-spring-ms) var(--lg-spring) !important;
+  }
+}
+
+/* The WebGL refraction drew the old square lens; on glass the DOM lens is
+   the glass. */
+html[data-button-style="liquid"] body .liquid-swipe-tabs > canvas:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------
+   7. The command deck's slide counter: a recessed glass well between its
+      two round glass steppers.
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"]
+  body
+  .command-deck-art-controls
+  > span:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.26);
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.5),
+    inset 0 -1px 0 rgb(255 255 255 / 0.1);
+}
+
+html[data-button-style="liquid"]
+  body
+  .command-deck-art-controls
+  > button:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  border-radius: 999px !important;
+  background: radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.22), rgb(255 255 255 / 0) 60%) !important;
+  box-shadow:
+    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.7),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.2) !important;
+}
+
+/* ---------------------------------------------------------------
+   Budgets and fallbacks
+   --------------------------------------------------------------- */
+
+/* A mouse or trackpad: the pills and the selects sample their backdrop (a
+   small blur). Touch screens draw them from their fill alone: no extra
+   backdrop layers under a finger, however many pills a page holds. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-button-style="liquid"]:not([data-world-effects="economy"]) body [data-lg-seg-mode="pill"][data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"]:not([data-world-effects="economy"]) body [data-lg-seg-mode="pill"][data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    -webkit-backdrop-filter: blur(4px) saturate(1.7) brightness(1.08);
+    backdrop-filter: blur(4px) saturate(1.7) brightness(1.08);
+  }
+}
+
+/* Chromium's lens bends the backdrop at the thumb's rim (the capsule map
+   the buttons use). Never in economy; never in Safari (no url() backdrop). */
+html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
+  -webkit-backdrop-filter: url(#dw-liquid-lens-capsule) blur(1.5px) saturate(1.8) brightness(1.1);
+  backdrop-filter: url(#dw-liquid-lens-capsule) blur(1.5px) saturate(1.8) brightness(1.1);
+}
+
+/* Economy: no lens, no sampling, no gel: blur-free glass with its rim. */
+html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  animation: none !important;
+  box-shadow:
+    inset 1.2px 1.4px 0 -0.25px rgb(255 255 255 / 0.85),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.24),
+    0 6px 14px -8px rgb(0 0 0 / 0.55);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg-mode="bezel"][data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg-mode="bezel"][data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.62),
+    inset 1.5px 1.8px 0 0.5px rgb(255 255 255 / 0.5);
+}
+
+/* Reduced motion: the pill and the bezel move without the stretch or the
+   overshoot, the thumbs and the knobs do not swell, the lens does not spring. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-button-style="liquid"] body [data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    animation: none !important;
+    scale: 1 !important;
+    transition: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle
+    > i
+    u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: 1 !important;
+    transition: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .liquid-swipe-tabs
+    > .liquid-selection-lens
+    > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: 1 !important;
+    transition: none !important;
+  }
+}
+
+/* Reduced transparency: near-solid glass. */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-button-style="liquid"] body [data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    background:
+      linear-gradient(rgb(var(--lg-seg-tint) / 0.2), rgb(var(--lg-seg-tint) / 0.2)),
+      rgb(14 24 36 / 0.94);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  html[data-button-style="liquid"] body [data-lg-seg-mode="bezel"][data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg-mode="bezel"][data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    background: none;
+  }
+
+  html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before {
+    --lg-cap: 22px;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
+    background: rgb(196 222 234 / 0.94);
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle
+    > i
+    u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background: rgb(214 230 238 / 0.96) !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .liquid-swipe-tabs
+    > .liquid-selection-lens
+    > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background: rgb(24 44 60 / 0.95) !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .gallery-order select,
+      .gallery-tour-playback select,
+      .rxs-comparison-selector select,
+      .rxs-p14-native-select select,
+      .lab-selectors select,
+      .dream-page select,
+      .dogs-viewer select,
+      .exhibition-artwork-browser select
+    ):not([multiple]):not([size]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background-color: rgb(8 15 24 / 0.94) !important;
+  }
+}
+
+/* Forced colours: the system's own colours, nothing sampled or drawn. The
+   pill is a Highlight outline; the bezel, the caps and the indicator go. */
+@media (forced-colors: active) {
+  html[data-button-style="liquid"] body [data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    animation: none !important;
+    background: none;
+    box-shadow: none;
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* A pill's option carries its own Highlight ring (below). */
+  html[data-button-style="liquid"] body [data-lg-seg-mode="pill"][data-lg-seg="before"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-seg-mode="pill"][data-lg-seg="after"]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    display: none;
+  }
+
+  html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"] body [data-lg-rail-host]:not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    display: none;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    [data-lg-seg-mode="pill"]
+    > :is(button, a, [role="tab"], [role="radio"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border-color: ButtonText !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    [data-lg-seg-mode="pill"]
+    > [data-lg-seg-current]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border-color: Highlight !important;
+    background: ButtonFace !important;
+    color: ButtonText !important;
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass) {
+    -webkit-appearance: auto;
+    appearance: auto;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle
+    > i:not(#lg-glass):not(#lg-glass):not(#lg-glass),
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle
+    > i
+    u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    border: 1px solid ButtonText !important;
+    background: ButtonFace !important;
+    box-shadow: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle:is([aria-pressed="true"], [aria-checked="true"])
+    > i
+    u:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background: Highlight !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .gallery-order select,
+      .gallery-tour-playback select,
+      .rxs-comparison-selector select,
+      .rxs-p14-native-select select,
+      .lab-selectors select,
+      .dream-page select,
+      .dogs-viewer select,
+      .exhibition-artwork-browser select
+    ):not([multiple]):not([size]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    -webkit-appearance: auto;
+    appearance: auto;
+    border-color: ButtonText !important;
+    background: ButtonFace !important;
+    box-shadow: none !important;
+    color: ButtonText !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    .liquid-swipe-tabs
+    > .liquid-selection-lens
+    > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    background: Highlight !important;
+    box-shadow: none !important;
+  }
+}
