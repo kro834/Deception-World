@@ -73,6 +73,7 @@ export function SlideOpenControl({
   const lensTimer = useRef<number | null>(null);
   const lensStretchTimer = useRef<number | null>(null);
   const lensState = useRef<LensState>("off");
+  const lensPressAt = useRef(0);
   const completingRef = useRef(false);
   const suppressFocusRing = useRef(false);
   // A press that starts on the label or arrows rather than the thumb. The
@@ -146,6 +147,7 @@ export function SlideOpenControl({
     holdActivated.current = false;
     grabOffset.current = 0;
     motionSample.current = { offset: 0, at: 0 };
+    lensPressAt.current = 0;
     dragMetrics.current = null;
     bodyTapStart.current = null;
     completingRef.current = false;
@@ -271,6 +273,10 @@ export function SlideOpenControl({
     button?.style.setProperty("--slide-thumb-tilt", `${direction * energy * 3.2}deg`);
     // The lens is gel: it stretches along its travel and rounds up again as
     // soon as the finger rests (no pointer move resets it otherwise).
+    // A busy main thread can run the swell timer late; a carried thumb that
+    // has been held long enough swells on its own move, timer or not.
+    const heldLong = lensPressAt.current > 0 && now - lensPressAt.current >= LENS_SWELL_MS;
+    if (lensState.current !== "on" && heldLong && !completingRef.current) setLens("on");
     if (next > LENS_SWELL_TRAVEL && !completingRef.current) {
       if (lensState.current !== "on") setLens("on");
       // Travelling, the lens shows what it magnifies; the glyph steps aside.
@@ -393,6 +399,7 @@ export function SlideOpenControl({
       pressed.style.setProperty("--slide-track-h", `${pressed.clientHeight}px`);
     }
     clearLensTimers();
+    lensPressAt.current = performance.now();
     const lensPointer = event.pointerId;
     lensTimer.current = window.setTimeout(() => {
       lensTimer.current = null;

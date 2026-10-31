@@ -1052,7 +1052,64 @@ html[data-button-style="liquid"]
   body
   .ios-slide-open
   .ios-slide-open-label:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  left: calc(var(--slide-thumb-size, 50px) + 26px) !important;
+  /* 32px: the held lens (1.34x) swells about 11px past the pill's right
+     rim and must clear the first glyph, not bite into it. */
+  --slide-label-left: calc(var(--slide-thumb-size, 50px) + 32px);
+  left: var(--slide-label-left) !important;
+  /* Mid-drag the label stays readable over the lit fill. */
+  opacity: calc(0.4 + var(--slide-label-opacity, 1) * 0.6);
+}
+
+/* While the lens is up, the label under it steps out of the way: the lens
+   shows its magnified copy, and the normal-size glyphs would otherwise show
+   through the glass as a ghost. The hole rides the lens (same offset, same
+   stretch) and feathers out just inside the lens's rim. (Forced colours
+   draw no lens, so nothing is masked there.) */
+@media not (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open[data-lens="on"]
+    .ios-slide-open-label:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --slide-lens-cx: calc(
+      var(--slide-lens-x, 4px) + var(--slide-offset, 0px) + var(--slide-lens-w, 64px) / 2 -
+        var(--slide-label-left)
+    );
+    --slide-lens-hw: calc(var(--slide-lens-w, 64px) * 0.67 * var(--slide-lens-sx, 1));
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      #000 calc(var(--slide-lens-cx) - var(--slide-lens-hw)),
+      transparent calc(var(--slide-lens-cx) - var(--slide-lens-hw) + 4px),
+      transparent calc(var(--slide-lens-cx) + var(--slide-lens-hw) - 4px),
+      #000 calc(var(--slide-lens-cx) + var(--slide-lens-hw))
+    );
+    mask-image: linear-gradient(
+      90deg,
+      #000 calc(var(--slide-lens-cx) - var(--slide-lens-hw)),
+      transparent calc(var(--slide-lens-cx) - var(--slide-lens-hw) + 4px),
+      transparent calc(var(--slide-lens-cx) + var(--slide-lens-hw) - 4px),
+      #000 calc(var(--slide-lens-cx) + var(--slide-lens-hw))
+    );
+  }
+}
+
+/* Reduced motion keeps the lens at the pill's size. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open[data-lens="on"]
+    .ios-slide-open-label:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --slide-lens-hw: calc(var(--slide-lens-w, 64px) * 0.5);
+  }
+}
+
+/* The copy inside the lens is never masked. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open[data-lens="on"]
+  .ios-slide-open-lens-view
+  .ios-slide-open-label:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 html[data-button-style="liquid"]
@@ -1062,7 +1119,8 @@ html[data-button-style="liquid"]
   b:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   color: rgb(255 255 255 / 0.95) !important;
   text-shadow:
-    0 1px 1px rgb(0 0 0 / 0.5),
+    0 1px 1px rgb(0 0 0 / 0.55),
+    0 0 3px rgb(0 0 0 / 0.42),
     0 0 12px rgb(var(--lg-tint) / 0.4);
 }
 
@@ -1293,12 +1351,15 @@ html[data-button-style="liquid"]
 }
 
 /* The lens stands in for the thumb while it is up (the thumb keeps its box
-   and its place: the drag still measures it). */
-html[data-button-style="liquid"]
-  body
-  .ios-slide-open:is([data-lens="on"], [data-lens="settle"])
-  .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  opacity: 0 !important;
+   and its place: the drag still measures it). Not in forced colours: there
+   the lens is not drawn, and the system-coloured thumb must stay. */
+@media not (forced-colors: active) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open:is([data-lens="on"], [data-lens="settle"])
+    .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    opacity: 0 !important;
+  }
 }
 
 /* Reduced motion: no swell, no stretch, no spring: a still, clear lens. */

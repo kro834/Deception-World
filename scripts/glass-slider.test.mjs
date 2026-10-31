@@ -106,3 +106,30 @@ test("keyboard activation still completes without the lens", () => {
   );
   assert.doesNotMatch(complete, /setLens\("on"\)/);
 });
+
+test("forced colours keep the thumb: the lens's thumb-hide rule is outside forced colours", () => {
+  const hide = lensSection.search(
+    /\.ios-slide-open:is\(\[data-lens="on"\], \[data-lens="settle"\]\)\s*\.ios-slide-open-thumb[^{]*\{\s*opacity: 0 !important;/,
+  );
+  assert.ok(hide > 0, "the thumb-hide rule exists");
+  const guard = lensSection.lastIndexOf("@media not (forced-colors: active)", hide);
+  assert.ok(
+    guard > 0 && hide - guard < 200,
+    "the thumb-hide rule sits in a not-forced-colors block",
+  );
+});
+
+test("the label under the raised lens is masked, the copy inside it is not", () => {
+  assert.match(
+    lensSection,
+    /\[data-lens="on"\]\s*\.ios-slide-open-label:not[^{]*\{[^}]*--slide-lens-cx:[^}]*mask-image: linear-gradient/,
+  );
+  assert.match(
+    lensSection,
+    /\.ios-slide-open-lens-view\s*\.ios-slide-open-label:not[^{]*\{[^}]*mask-image: none;/,
+  );
+});
+
+test("a late swell timer cannot leave a carried, long-held thumb without its lens", () => {
+  assert.match(control, /now - lensPressAt\.current >= LENS_SWELL_MS/);
+});
