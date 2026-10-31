@@ -1350,3 +1350,29 @@ html[data-family]
     transform: none;
   }
 }
+
+/* The menu's jump strip holds seven tabs. As a fixed 3- or 6-column grid it
+   left an orphan tab and empty cells on iPad and phones; wrap-and-grow keeps
+   every row full whatever the width. */
+html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  .command-atlas-index
+  button {
+  flex: 1 1 140px;
+}
+
+@media (max-width: 520px) {
+  html[data-family]
+    body
+    #site-side-panel#site-side-panel[data-command-atlas]
+    .command-atlas-index
+    button {
+    flex-basis: 84px;
+  }
+}
