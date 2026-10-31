@@ -140,8 +140,6 @@ export type FarFromAssemblyOptions = {
   }>;
 };
 
-type Connection = { saveData?: boolean; effectiveType?: string };
-
 /**
  * Mounts the suit-up on `host` (the runway element). Under the motion gate
  * the engine chunk is imported once the page is idle and mounted on the
@@ -160,8 +158,6 @@ export function mountFarFromAssembly(
   const html = host.ownerDocument.documentElement;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forced = environment.matchMedia("(forced-colors: active)");
-  const connection = (environment.navigator as Navigator & { connection?: Connection })
-    ?.connection;
   const load = options.load ?? (() => import("./far-from-assembly-engine"));
   let disposed = false;
   let loading = false;
@@ -171,8 +167,6 @@ export function mountFarFromAssembly(
   const motionAllowed = () =>
     !(options.reducedMotion ?? reduced.matches) &&
     !forced.matches &&
-    !connection?.saveData &&
-    !/^(slow-)?2g$/.test(connection?.effectiveType || "") &&
     html.dataset.worldEffects !== "economy";
   // The entry already owns an assembly scene. Its existing cover marker
   // defers only this page's engine, never the transition renderer itself.

@@ -547,16 +547,7 @@ export function ExtremeSaga() {
     const page = pageRef.current;
     if (!page) return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
-    const constrained =
-      connection?.saveData === true ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g";
-    const allowMotion = !media.matches && !constrained;
+    const allowMotion = !media.matches && document.documentElement.dataset.worldEffects !== "economy";
 
     const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];
     if (!allowMotion || !("IntersectionObserver" in window)) {

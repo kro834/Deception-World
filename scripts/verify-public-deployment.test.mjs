@@ -1004,3 +1004,34 @@ test("shared-gallery gate accepts all 113 static titles together with the 1000-p
     false,
   );
 });
+
+test("renewal verifies both new routes and exact Blender asset paths with delivered hashes", async () => {
+  assert.ok(PUBLIC_SMOKE_ROUTES.includes("/world-map"));
+  assert.ok(PUBLIC_SMOKE_ROUTES.includes("/transformation-lab"));
+  const paths = ["rexonance.webp", "far-from.webp", "illusionculum.webp", "provenance.json"].map(
+    (name) => `/nanite-surface-20261031/${name}`,
+  );
+  const bytes = Buffer.from("material delivery");
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+  for (const path of [
+    ...paths,
+    ...paths.map((path) => path + ".bak"),
+    "/nanite-surface-20261031/source.blend",
+  ]) {
+    const seen = [];
+    const report = await verifyPublicDeployment({
+      baseUrl: "https://example.test",
+      expectedSha: "a".repeat(40),
+      fetchImpl: async (url) => {
+        const requested = new URL(url).pathname;
+        seen.push(requested);
+        if (requested === "/release-identity.json")
+          return Response.json({ sha: "a".repeat(40), assets: [{ path, sha256 }] });
+        if (requested === path) return new Response(bytes);
+        return smokeResponse(requested);
+      },
+    });
+    assert.equal(report.ok, paths.includes(path), path);
+    assert.equal(seen.includes(path), paths.includes(path), path);
+  }
+});

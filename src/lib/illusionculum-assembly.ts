@@ -60,8 +60,6 @@ export type IllusionculumAssemblyOptions = {
   }>;
 };
 
-type Connection = { saveData?: boolean; effectiveType?: string };
-
 /** Mounts the suit-up on `host` (the runway). Returns the disposer. */
 export function mountIllusionculumAssembly(
   host: HTMLElement | null | undefined,
@@ -75,7 +73,6 @@ export function mountIllusionculumAssembly(
   const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)");
   const document = host.ownerDocument;
   let pageHidden = false;
-  const connection = (environment.navigator as Navigator & { connection?: Connection })?.connection;
   const load = options.load ?? (() => import("./illusionculum-assembly-engine"));
   let disposed = false;
   let loading = false;
@@ -86,8 +83,6 @@ export function mountIllusionculumAssembly(
   const motionAllowed = () =>
     !(options.reducedMotion ?? reduced.matches) &&
     !forced.matches &&
-    !connection?.saveData &&
-    !/^(slow-)?2g$/.test(connection?.effectiveType || "") &&
     html.dataset.worldEffects !== "economy";
   // A route cover already owns an assembly scene. Do not prepare the page's
   // second engine beside that active entry, including iPads reporting a fine

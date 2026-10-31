@@ -33,11 +33,6 @@ export default function CielSequin() {
     const backup = fallback.current;
     const html = document.documentElement;
     const media = matchMedia("(prefers-reduced-motion: reduce), (forced-colors: active)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: EventTarget & { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
     const coarse = matchMedia("(pointer: coarse), (any-pointer: coarse)").matches;
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -63,10 +58,7 @@ export default function CielSequin() {
       pause();
     };
     const prepare = async () => {
-      const economy =
-        html.dataset.worldEffects === "economy" ||
-        Boolean(connection?.saveData) ||
-        /^(slow-)?2g$/.test(connection?.effectiveType || "");
+      const economy = html.dataset.worldEffects === "economy";
       const next = `${media.matches}/${economy}`;
       if (next === preferences) return;
       preferences = next;
@@ -116,7 +108,6 @@ export default function CielSequin() {
     window.addEventListener("pagehide", leave);
     window.addEventListener("pageshow", shown);
     media.addEventListener("change", changed);
-    connection?.addEventListener("change", changed);
     void prepare();
     return () => {
       disposed = true;
@@ -131,7 +122,6 @@ export default function CielSequin() {
       window.removeEventListener("pagehide", leave);
       window.removeEventListener("pageshow", shown);
       media.removeEventListener("change", changed);
-      connection?.removeEventListener("change", changed);
       link.remove();
     };
   }, []);

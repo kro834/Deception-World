@@ -1,3 +1,4 @@
+import { refinedNaniteKit } from "./nanite-surface-assets.js";
 import {
   FORM_LANDMARKS,
   FORM_TONES,
@@ -17,7 +18,11 @@ import {
 import { naniteFlameEnvelope } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import { importWithRetry } from "./chunk-retry.js";
-import { FIELD_WAKE, REXONANCE_SCROLL_FLAME, scrollFlameAt } from "./rexonance-field/field-clock.js";
+import {
+  FIELD_WAKE,
+  REXONANCE_SCROLL_FLAME,
+  scrollFlameAt,
+} from "./rexonance-field/field-clock.js";
 import { PLAYHEAD, ScrollPlayhead } from "./scroll-playhead.js";
 import {
   createReactorLayers,
@@ -51,8 +56,8 @@ import {
  * in one requestAnimationFrame loop that stops once it has settled, written
  * only while the host is in view.
  *
- * Nothing runs under reduced motion, economy rendering, Save-Data or 2G, or
- * while the page is hidden; a count cut short ends on its value. Cleanup
+ * Nothing runs under reduced motion, explicit economy rendering, or while
+ * the page is hidden; a count cut short ends on its value. Cleanup
  * releases every listener, observer and timer and hands each figure back
  * exactly as it was rendered.
  */
@@ -105,7 +110,6 @@ export function mountRexonanceResonance(page, environment = window) {
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const finePointer = environment.matchMedia("(hover: hover) and (pointer: fine)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
-  const connection = environment.navigator?.connection;
   const timelines = Boolean(
     environment.CSS?.supports?.("animation-timeline", "view()") &&
     environment.CSS.supports("animation-range", "entry 0% entry 100%"),
@@ -122,11 +126,7 @@ export function mountRexonanceResonance(page, environment = window) {
   let fineNow = mediaNow(finePointer);
   let forcedNow = mediaNow(forcedColors);
 
-  const motionAllowed = () => {
-    const constrained =
-      Boolean(connection?.saveData) || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    return !reducedNow && !constrained && html.dataset.worldEffects !== "economy";
-  };
+  const motionAllowed = () => !reducedNow && html.dataset.worldEffects !== "economy";
 
   /* ---------------- transient attributes ---------------- */
   const flags = new Map();
@@ -494,7 +494,6 @@ export function mountRexonanceResonance(page, environment = window) {
   reduced.addEventListener?.("change", onReduced);
   finePointer.addEventListener?.("change", onFinePointer);
   forcedColors.addEventListener?.("change", onForcedColors);
-  connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", sync);
@@ -519,7 +518,6 @@ export function mountRexonanceResonance(page, environment = window) {
     reduced.removeEventListener?.("change", onReduced);
     finePointer.removeEventListener?.("change", onFinePointer);
     forcedColors.removeEventListener?.("change", onForcedColors);
-    connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     environment.removeEventListener("pagehide", onPageHide);
     environment.removeEventListener("pageshow", sync);
@@ -569,8 +567,8 @@ export function mountRexonanceResonance(page, environment = window) {
    scroll timelines (iOS 18). Each frame reads one rect and draws one
    canvas; tiles already welded live on a figure-sized canvas updated
    incrementally both ways; the HUD (lines, parts, percent, count) is
-   written only when it changes. Reduced motion, economy, Save-Data/2G
-   and forced colours keep the finished still (no data-rzn-state).
+   written only when it changes. Reduced motion, explicit economy and forced
+   colours keep the finished still (no data-rzn-state).
    ===================================================================== */
 
 /** Where each beat of the call falls on the scene's progress (0–1). */
@@ -637,7 +635,6 @@ const TONES = [
   [244, 251, 255],
 ];
 const RING_TONES = ["rgb(121 232 255)", "rgb(182 163 255)", "rgb(242 216 150)"];
-
 
 const grouped = (value) => String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 const REACTOR_RADIUS = 40;
@@ -1395,7 +1392,9 @@ export function* assemblyGoldPlanSteps({ pieces, gold, landed, tiles }) {
       if (++work % 128 === 0) yield;
     }
     const helm = piece.group === "helm";
-    const from = done + (helm ? ASSEMBLY_GOLD.helmDelay : ASSEMBLY_GOLD.delay) +
+    const from =
+      done +
+      (helm ? ASSEMBLY_GOLD.helmDelay : ASSEMBLY_GOLD.delay) +
       (gold.seatDelay?.(piece) ?? 0);
     const span = helm ? ASSEMBLY_GOLD.helm : ASSEMBLY_GOLD.form;
     const random = seededRandom(7919 + index);
@@ -1573,7 +1572,14 @@ const lightPixels = (lights, core, W, H, document) => {
       const size = [4, 5, 6, 8][squares.length % 4];
       const tone = squares.length % 7 === 0 ? 2 : data[i] > data[i + 2] ? 1 : 0;
       const d = Math.hypot(px - cx, py - cy) / reach;
-      squares.push({ x: px - size / 2, y: py - size / 2, size, tone, group: squares.length % 6, d });
+      squares.push({
+        x: px - size / 2,
+        y: py - size / 2,
+        size,
+        tone,
+        group: squares.length % 6,
+        d,
+      });
       if (squares.length >= 900) return squares;
     }
   return squares;
@@ -1653,7 +1659,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
   const coarse = environment.matchMedia("(pointer: coarse)");
-  const connection = environment.navigator?.connection;
   const lines = [...runway.querySelectorAll(".rzn-line")].map((line) => ({
     line,
     chips: [...line.querySelectorAll(".rzn-chip")],
@@ -1686,6 +1691,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   let retryTimer = 0;
   let retryCount = 0;
   const restLoad = runway.dataset.rznLoad;
+  const restDrawnAt = runway.dataset.rznDrawnAt;
+  const restFormLoad = runway.dataset.rznFormLoad;
   let plan = null;
   let goldPlan = null;
   let raw = null;
@@ -1731,9 +1738,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // `fieldLevel` 0..FIELD_LEVELS, the density 0.5 + 0.5 × level / levels.
   let fieldLevel = FIELD_LEVELS;
   let fieldDrawnLevel = -1;
-  // The swarm's module and kit, loaded with the pictures (round 3: the still
-  // tiers — reduced motion, economy, Save-Data — never mount the scene, so
-  // they never download them). `config.nanites` is the kit or its loader.
+  // The swarm's module and kit, loaded with the pictures. Reduced motion and
+  // explicit economy never mount the scene. `config.nanites` is the kit or
+  // its loader.
   let lib = null;
   let kit = null;
   let driver = null;
@@ -1773,11 +1780,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     typeof event?.matches === "boolean" ? event.matches : Boolean(list.matches);
   let reducedNow = mediaNow(reduced);
   let forcedNow = mediaNow(forcedColors);
-  const motionAllowed = () => {
-    const constrained =
-      Boolean(connection?.saveData) || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    return !reducedNow && !forcedNow && !constrained && html.dataset.worldEffects !== "economy";
-  };
+  const motionAllowed = () => !reducedNow && !forcedNow && html.dataset.worldEffects !== "economy";
   runway.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
 
   // Pictures still downloading when the scene goes (audit #31): each one's
@@ -1817,7 +1820,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const request = (src, priority) => {
     const held = inflight.get(src);
     if (held) {
-      if (priority === "high" && held.image.fetchPriority !== "high") held.image.fetchPriority = "high";
+      if (priority === "high" && held.image.fetchPriority !== "high")
+        held.image.fetchPriority = "high";
       return held;
     }
     const image = new environment.Image();
@@ -1909,9 +1913,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             return module;
           }),
       boundedImage(
-        Promise.resolve().then(() =>
-          typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
-        ),
+        Promise.resolve()
+          .then(() =>
+            typeof config.nanites === "function" ? config.nanites() : (config.nanites ?? null),
+          )
+          .then(refinedNaniteKit),
         null,
         2000,
       ),
@@ -2021,12 +2027,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
             : image,
         );
     const decode = (src) =>
-      (config.loadImage ? config.loadImage(src) : defaultDecode(src))
-        .then((image) => {
-          if (failed || disposed) image?.close?.();
-          else decoded.push(image);
-          return image;
-        });
+      (config.loadImage ? config.loadImage(src) : defaultDecode(src)).then((image) => {
+        if (failed || disposed) image?.close?.();
+        else decoded.push(image);
+        return image;
+      });
     // The nanite kit (owner, 2026-10-16): each sheet optional; touch
     // screens draw no comets.
     const optional = (src) =>
@@ -3531,7 +3536,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // The fire's texture runs on the wall clock in every frame, the calm
     // one included: a clock of its own (once progress × 60) re-posed the
     // whole flame 260 ms into each rest and again when the scroll resumed.
-    const flameClock = (environment.performance?.now?.() ?? 0) / 1000;
+    const flameClock = config.directProgress
+      ? progress * 12
+      : (environment.performance?.now?.() ?? 0) / 1000;
 
     // The cocoon's far side, behind the body; a page's own accents behind
     // the figure (FAR FROM's halo rings), allocation-free by contract.
@@ -4334,6 +4341,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     if (formsState || formsLoading || !config.forms || !images || clock() < formsRetryAt)
       return formsState;
     formsLoading = true;
+    if (config.directProgress) runway.dataset.rznFormLoad = "loading";
     if (formChain) {
       // A page's chain of forms, each on a sheet of the figure's frame; the
       // overwrite plan of each from the one before it (its extras: what the
@@ -4374,10 +4382,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           formsState = { pad: 0, width: W, fig, chain: formChain, sheets, plans, tones, warp: [] };
           // (formsState[key]: the form is ready, for the HUD.)
           for (const key of formChain) formsState[key] = sheets[key];
+          if (config.directProgress) runway.dataset.rznFormLoad = "ready";
           lastProgress = -1;
           schedule();
         })
         .catch(() => {
+          if (config.directProgress) runway.dataset.rznFormLoad = "error";
           formsRetryAt = clock() + 1000;
         })
         .finally(() => {
@@ -4449,10 +4459,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
                 : planOverwrite({ ...base, seed: 79, order: "descend" }),
           },
         };
+        if (config.directProgress) runway.dataset.rznFormLoad = "ready";
         lastProgress = -1;
         schedule();
       })
       .catch(() => {
+        if (config.directProgress) runway.dataset.rznFormLoad = "error";
         formsRetryAt = clock() + 1000;
       })
       .finally(() => {
@@ -4516,7 +4528,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const dt = Math.min(50, Math.max(8, fresh ? stamp - lastStamp : 16.7));
     if (fresh) lastStamp = stamp;
     let shown = progress;
-    if (lastProgress >= 0) {
+    if (lastProgress >= 0 && !config.directProgress) {
       if (!force && head.settled && Math.abs(progress - lastProgress) < 0.0005) {
         if (!burningAt(lastProgress)) return;
         // At rest the fire keeps flowing (the HUD, the governor and the
@@ -4538,7 +4550,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // the next one on, and it stays so until the scroll rests or 30 frames in
     // a row come in under 4 ms — never alternating frame by frame, which
     // would flicker hundreds of far chips at the display rate.
-    if (coarse.matches) backRects = false;
+    if (config.directProgress || coarse.matches) backRects = false;
     else if (lastDrawMs > 7) {
       backRects = true;
       quickFrames = 0;
@@ -4546,7 +4558,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       quickFrames += 1;
       if (quickFrames >= 30) backRects = false;
     } else quickFrames = 0;
-    draw(shown, false, step);
+    draw(shown, false, config.directProgress ? 0 : step);
+    if (config.directProgress && !behind) runway.dataset.rznDrawnAt = String(shown);
     restCalm = false;
     restStep = step;
     restStamp = typeof stamp === "number" && Number.isFinite(stamp) ? stamp : -Infinity;
@@ -4569,6 +4582,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       schedule();
       return;
     }
+    // Direct transport owns every frame, including a frozen comparison beat.
+    if (config.directProgress) return;
     // Resting with the fire alive: keep it flowing.
     if (burningAt(shown)) schedule();
     // Once the scroll rests, redraw the moment without its transient effects.
@@ -4696,8 +4711,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // a frame of the finished still and its 100 % read-out before the near
   // observer's notice arrived. Only a reader at the runway's end (near and
   // past it: the live frame there is the finished suit) keeps the finished
-  // still. Reduced motion, economy, Save-Data/2G and forced colours never
-  // get here: they keep the finished still exactly as before.
+  // still. Reduced motion, explicit economy and forced colours keep the
+  // finished still exactly as before.
   const standIn = () => {
     if (live || !motionAllowed()) return;
     if (!nearPast) showLoading();
@@ -4827,7 +4842,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     return idleTask(() => {
       if (token !== generation || disposed || field || fieldFailed || !fieldLib) return;
       if (!live && !(plan && settled && buffers)) return;
-      if (!fieldTake) fieldTake = fieldLib.fieldTake(fieldLib.fieldVisitSeed(environment));
+      if (!fieldTake)
+        fieldTake = fieldLib.fieldTake(
+          config.directProgress ? 20261031 : fieldLib.fieldVisitSeed(environment),
+        );
       makeField();
     });
   };
@@ -4839,7 +4857,10 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // A visit's take: rolled here (or with the layer the preparation made,
     // fieldIdle), kept for as long as the scene is live.
     if (fieldLib) {
-      if (!fieldTake) fieldTake = fieldLib.fieldTake(fieldLib.fieldVisitSeed(environment));
+      if (!fieldTake)
+        fieldTake = fieldLib.fieldTake(
+          config.directProgress ? 20261031 : fieldLib.fieldVisitSeed(environment),
+        );
       fieldScore = buildFieldScore();
     }
     runway.dataset.rznLoad = "ready";
@@ -5205,7 +5226,6 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   htmlObserver.observe(html, { attributes: true, attributeFilter: ["data-world-effects"] });
   reduced.addEventListener?.("change", onReduced);
   forcedColors.addEventListener?.("change", onForcedColors);
-  connection?.addEventListener?.("change", sync);
   document.addEventListener("visibilitychange", sync);
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   runway.addEventListener?.("rexonance:assembly-wake", wakeAssembly);
@@ -5242,12 +5262,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     htmlObserver.disconnect();
     reduced.removeEventListener?.("change", onReduced);
     forcedColors.removeEventListener?.("change", onForcedColors);
-    connection?.removeEventListener?.("change", sync);
     document.removeEventListener("visibilitychange", sync);
     runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);
     runway.removeEventListener?.("rexonance:assembly-wake", wakeAssembly);
     runway.removeEventListener?.("rexonance:assembly-frame", schedule);
     inflight.clear();
+    if (config.directProgress) {
+      if (restDrawnAt === undefined) delete runway.dataset.rznDrawnAt;
+      else runway.dataset.rznDrawnAt = restDrawnAt;
+      if (restFormLoad === undefined) delete runway.dataset.rznFormLoad;
+      else runway.dataset.rznFormLoad = restFormLoad;
+    }
     if (restLoad === undefined) delete runway.dataset.rznLoad;
     else runway.dataset.rznLoad = restLoad;
     environment.removeEventListener("pagehide", onPageHide);

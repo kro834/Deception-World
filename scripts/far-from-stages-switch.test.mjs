@@ -181,10 +181,12 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
     '"(prefers-reduced-motion: reduce)"',
     '"(forced-colors: active)"',
     'worldEffects === "economy"',
-    "connection?.saveData",
-    "/^(slow-)?2g$/",
   ])
     assert.ok(page.slice(page.indexOf("function stageMotionAllowed")).includes(term), term);
+  assert.doesNotMatch(
+    page.slice(page.indexOf("function stageMotionAllowed"), page.indexOf("/** A deep link")),
+    /connection|effectiveType|saveData/,
+  );
   // Not allowed: the rest guard never mounts a card.
   assert.deepEqual(
     planStageCall({ motionAllowed: false, cardMounted: false, cardElapsedMs: 0, sinceNaturalExitMs: Infinity }),

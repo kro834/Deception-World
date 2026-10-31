@@ -17,6 +17,7 @@ import * as ignition from "../src/lib/far-from-entry-ignition.js";
 import * as swarm from "../src/lib/far-from-entry-swarm.js";
 import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 import { FIRE_TONES } from "../src/lib/rexonance-fire/fire-tuning.js";
+import { refinedNaniteSource } from "../src/lib/nanite-surface-assets.js";
 import { REXONANCE_NANITE_CELLS } from "../src/lib/rexonance-nanites.ts";
 import { FAR_FROM_NANITE_CELLS } from "../src/lib/far-from-nanites.ts";
 import { REXONANCE_SUIT_SIZE } from "../src/lib/rexonance-suit.ts";
@@ -378,8 +379,8 @@ test("the fire burns on the registered undersuit in its gold end tone, and the t
   );
   assert.ok(U.y + U.h > suit.FAR_FROM_ENTRY_SIZE.height * 0.95, "soles at the figure's soles");
   // Kit A is Rexonance's hex kit, kit B the crystal: the same layout keys.
-  assert.equal(kits.FAR_FROM_ENTRY_KITS[0], REXONANCE_NANITE_CELLS);
-  assert.equal(kits.FAR_FROM_ENTRY_KITS[1], FAR_FROM_NANITE_CELLS);
+  assert.deepEqual(kits.FAR_FROM_ENTRY_KITS[0], { ...REXONANCE_NANITE_CELLS, src: refinedNaniteSource(REXONANCE_NANITE_CELLS.src) });
+  assert.deepEqual(kits.FAR_FROM_ENTRY_KITS[1], { ...FAR_FROM_NANITE_CELLS, src: refinedNaniteSource(FAR_FROM_NANITE_CELLS.src) });
   assert.equal(kits.FAR_FROM_ENTRY_KIT_B_STANDIN, false);
   assert.notEqual(FAR_FROM_NANITE_CELLS.src, REXONANCE_NANITE_CELLS.src);
   for (const key of [
@@ -395,8 +396,8 @@ test("the fire burns on the registered undersuit in its gold end tone, and the t
   ])
     assert.deepEqual(FAR_FROM_NANITE_CELLS[key], REXONANCE_NANITE_CELLS[key], key);
   assert.deepEqual(kits.FAR_FROM_ENTRY_KIT_ASSETS, [
-    REXONANCE_NANITE_CELLS.src,
-    FAR_FROM_NANITE_CELLS.src,
+    refinedNaniteSource(REXONANCE_NANITE_CELLS.src),
+    refinedNaniteSource(FAR_FROM_NANITE_CELLS.src),
   ]);
   assert.ok(warmup.includes("FAR_FROM_ENTRY_KIT_ASSETS"));
   for (const src of kits.FAR_FROM_ENTRY_KIT_ASSETS)
@@ -504,6 +505,15 @@ test("the still tiers, the skip, and the page: reduced motion and economy rest t
     /\["slow-2g", "2g"\]/,
   ])
     assert.match(gateModule, condition);
+  const stillTier = gateModule.slice(
+    gateModule.indexOf("export function isFarFromEntryStill"),
+    gateModule.indexOf("let warmModule"),
+  );
+  assert.doesNotMatch(stillTier, /saveData|effectiveType/);
+  assert.match(
+    gateModule.slice(gateModule.indexOf("export function prefetchFarFromEntry")),
+    /prefetchRestricted\(\)/,
+  );
   assert.match(gateModule, /if \(isFarFromEntryStill\(\)\) return Promise\.resolve\(false\);/);
   assert.match(sequence, /data-tier=\{tier\}/);
   assert.match(sequence, /<Suit suit=\{suit\} animate=\{tier === "full"\} \/>/);

@@ -1,3 +1,4 @@
+import { refinedNaniteSource } from "./nanite-surface-assets.js";
 import type { MetaUnitasEntrySequence } from "../components/meta-unitas-saga/meta-unitas-entry-sequence";
 import { META_UNITAS_ENTRY_DURATION_MS } from "./meta-unitas-entry-playback";
 
@@ -62,7 +63,7 @@ export function warmMetaUnitasEntry(): Promise<boolean> {
           [
             ...suit.META_UNITAS_RX_ASSETS,
             suit.META_UNITAS_RX_DRIVER_STANDIN,
-            ...kit.REXONANCE_NANITE_ASSETS,
+            ...kit.REXONANCE_NANITE_ASSETS.map(refinedNaniteSource),
           ].map((src) => {
             const image = new Image();
             image.src = src;
@@ -84,7 +85,17 @@ export function warmMetaUnitasEntry(): Promise<boolean> {
  * chunk, the engine and the suit's pictures, so the entry is ready when the
  * press lands (owner, 2026-10-24: 「メタ・ウニタスの遷移が一瞬で変わるので修正して」 —
  * a cold call missed its deadline and fell back to the plain dive). */
+function restrictedSpeculation() {
+  if (typeof navigator === "undefined") return true;
+  const connection = (
+    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+  ).connection;
+  return Boolean(
+    connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType ?? ""),
+  );
+}
 export function prefetchMetaUnitasEntry() {
+  if (restrictedSpeculation()) return;
   void fetchModule();
   void import("./meta-unitas-rx-engine.ts").catch(() => {});
   void warmMetaUnitasEntry();
@@ -93,10 +104,11 @@ export function prefetchMetaUnitasEntry() {
 /** After a page's load, in idle time: the code only (the chunk and the
  * engine, small), never the pictures. Returns the canceller. */
 export function scheduleMetaUnitasEntryWarmup(): () => void {
-  if (typeof window === "undefined") return () => {};
+  if (typeof window === "undefined" || restrictedSpeculation()) return () => {};
   let id = 0;
   let timer = 0;
   const run = () => {
+    if (restrictedSpeculation()) return;
     id = 0;
     timer = 0;
     void fetchModule();

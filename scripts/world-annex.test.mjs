@@ -36,7 +36,12 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // world-columns-data.ts (same text, Column 05 appended from
   // world-mystery-data.ts) and each column heading gained an id for
   // /world#world-column-NN search links.
-  assert.deepEqual(worldViewContract(homeView), {
+  // Owner-approved renewal adds one standalone exploration navigation after contents.
+  // Keep the original content/markup pins intact outside that explicit new component.
+  assert.match(home, /<WorldContents \/>\s*<WorldExploration \/>/);
+  assert.equal((home.match(/<WorldExploration \/>/g) || []).length, 1);
+  const preservedHomeView = homeView.replace("      <WorldExploration />\n", "");
+  assert.deepEqual(worldViewContract(preservedHomeView), {
     // 2026-10-12: three owner-requested EP4 pickups; all other records retained.
     // 2026-10-17: the owner's column 06 『？？？』 (a spoiler warning, the 『犬』
     // dossier behind its plus slider); all other records retained.
@@ -63,7 +68,7 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   });
   // Both values are independently pinned from pre-stage HEAD 95eb55fe.
   // Hero wording and every JSX node outside it remain unchanged.
-  assert.deepEqual(worldArtworkBoundaryContract(homeView), {
+  assert.deepEqual(worldArtworkBoundaryContract(preservedHomeView), {
     outsideHero: "8192d0f1484e547a62a7386401b000f0097dbb802c87623c8b29a3f566394365",
     heroWords: "2f6895ba018c5cf288f07508185eb1498d475b231a0930f85540b12d7f4d2825",
   });

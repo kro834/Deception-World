@@ -627,7 +627,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
    overwritten by cells from the reactor out. To ULTRA: from Rexonance a
    short run to MAX first, then the overwrite to ULTRA and its additional
    parts (its emerald crystals) generated last. Back to Rexonance: no morph.
-   Reduced motion, economy and Save-Data change quietly. */
+   Reduced motion and explicit economy change quietly. */
 const MORPH_ORIGIN = [0.5, 0.38] as const;
 function FormMorph({
   from,
@@ -649,15 +649,12 @@ function FormMorph({
     const held = panelElement?.dataset.morphStage;
     const origin = held && held in STAGES ? (held as RexonanceStage) : from;
     if (panelElement) panelElement.dataset.morphStage = origin;
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
-      .connection;
     if (
       to === "standard" ||
       origin === to ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       window.matchMedia("(forced-colors: active)").matches ||
-      document.documentElement.dataset.worldEffects === "economy" ||
-      connection?.saveData
+      document.documentElement.dataset.worldEffects === "economy"
     ) {
       if (panelElement) panelElement.dataset.morphStage = to;
       return;
@@ -1600,17 +1597,10 @@ export function RexonanceSaga() {
       // This synchronous ref also makes rapid swipes last-request-wins.
       if (latestStageRef.current === nextStage) return;
       latestStageRef.current = nextStage;
-      const connection = (
-        navigator as Navigator & {
-          connection?: { saveData?: boolean; effectiveType?: string };
-        }
-      ).connection;
       const motionAllowed = !(
         document.hidden ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-        document.documentElement.dataset.worldEffects === "economy" ||
-        connection?.saveData ||
-        /^(slow-)?2g$/.test(connection?.effectiveType ?? "")
+        document.documentElement.dataset.worldEffects === "economy"
       );
       // A running card is retargeted to the latest form and keeps its clock;
       // a selection just after a card has left changes the form quietly. Card
@@ -1629,7 +1619,7 @@ export function RexonanceSaga() {
         return;
       }
       if (plan.action === "skip") {
-        // A calm interlude (reduced motion, economy, Save-Data, a hidden
+        // A calm interlude (reduced motion, economy, a hidden
         // tab) ends the streak: the next selection may show its card.
         if (!motionAllowed) {
           cancelStageCall();
@@ -1783,16 +1773,10 @@ export function RexonanceSaga() {
     const page = pageRef.current;
     if (!page) return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
-    const constrained =
-      connection?.saveData === true ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g";
-    const updateMotion = () => setMotionReady(!media.matches && !constrained);
+    const updateMotion = () =>
+      setMotionReady(
+        !media.matches && document.documentElement.dataset.worldEffects !== "economy",
+      );
     updateMotion();
     media.addEventListener("change", updateMotion);
     const updateVisibility = () => {

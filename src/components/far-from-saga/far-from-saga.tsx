@@ -76,20 +76,15 @@ const releaseControlFocus = (control: HTMLElement) => {
   });
 };
 
-/** Whether a form switch may move (the Rexonance page's terms): not hidden,
- * no reduced motion, no forced colours, no economy, no Save-Data, no 2G. */
+/** Whether a form switch may move: visible, motion enabled, no forced colours,
+ * and no explicit lightweight choice. */
 function stageMotionAllowed() {
   if (typeof window === "undefined") return false;
-  const connection = (
-    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-  ).connection;
   return !(
     document.hidden ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
     window.matchMedia("(forced-colors: active)").matches ||
-    document.documentElement.dataset.worldEffects === "economy" ||
-    connection?.saveData ||
-    /^(slow-)?2g$/.test(connection?.effectiveType ?? "")
+    document.documentElement.dataset.worldEffects === "economy"
   );
 }
 
@@ -406,26 +401,16 @@ export function FarFromSaga() {
   // The chapter reveals (as on the Extreme site): armed after paint, only
   // where motion is allowed; otherwise everything rests fully drawn. The
   // page grants motion (data-motion-ready) only on the same terms, so the
-  // shared scroll choreography never runs under reduced motion, economy
-  // rendering or a saving connection.
+  // shared scroll choreography never runs under reduced motion or economy
+  // rendering.
   useEffect(() => {
     const page = pageRef.current;
     if (!page) return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const forced = window.matchMedia("(forced-colors: active)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
-    const constrained =
-      connection?.saveData === true ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g";
     const allowMotion =
       !media.matches &&
       !forced.matches &&
-      !constrained &&
       document.documentElement.dataset.worldEffects !== "economy";
 
     const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];

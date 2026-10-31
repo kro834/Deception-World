@@ -145,7 +145,8 @@ test("touch screens chase faster, and the engine draws the playhead in place of 
   assert.match(engine, /\} else head\.snap\(progress\);/);
   assert.match(engine, /head\.reset\(\);/);
   // The HUD keeps reading the scroll itself; only the drawn frame is the playhead's.
-  assert.match(engine, /draw\(shown, false, step\);\s*restCalm = false;[\s\S]*?updateHud\(progress\);/);
+  assert.match(engine, /draw\(shown, false, config\.directProgress \? 0 : step\);/);
+  assert.match(engine, /updateHud\(progress\);/);
   // The old first-order chase and its snap from the ignition on are gone.
   assert.doesNotMatch(engine, /Math\.exp\(-dt \/ tau\)/);
   assert.doesNotMatch(engine, /lastProgress < ASSEMBLY_BEATS\.light\[0\]/);

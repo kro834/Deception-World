@@ -30,7 +30,9 @@ import { Route as RexonanceSagaRouteImport } from './routes/rexonance-saga'
 import { Route as RidersRouteImport } from './routes/riders'
 import { Route as SagaCinemaRouteImport } from './routes/saga-cinema'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as TransformationLabRouteImport } from './routes/transformation-lab'
 import { Route as WorldRouteImport } from './routes/world'
+import { Route as WorldMapRouteImport } from './routes/world-map'
 import { Route as ApiExportRouteImport } from './routes/api/export'
 import { Route as CharactersIndexRouteImport } from './routes/characters/index'
 import { Route as CharactersCielRouteImport } from './routes/characters/ciel'
@@ -161,9 +163,19 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TransformationLabRoute = TransformationLabRouteImport.update({
+  id: '/transformation-lab',
+  path: '/transformation-lab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorldRoute = WorldRouteImport.update({
   id: '/world',
   path: '/world',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorldMapRoute = WorldMapRouteImport.update({
+  id: '/world-map',
+  path: '/world-map',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiExportRoute = ApiExportRouteImport.update({
@@ -310,7 +322,9 @@ export interface FileRoutesByFullPath {
   '/riders': typeof RidersRouteWithChildren
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
+  '/transformation-lab': typeof TransformationLabRoute
   '/world': typeof WorldRoute
+  '/world-map': typeof WorldMapRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
   '/characters/dante': typeof CharactersDanteRoute
@@ -355,7 +369,9 @@ export interface FileRoutesByTo {
   '/rexonance-saga': typeof RexonanceSagaRoute
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
+  '/transformation-lab': typeof TransformationLabRoute
   '/world': typeof WorldRoute
+  '/world-map': typeof WorldMapRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
   '/characters/dante': typeof CharactersDanteRoute
@@ -404,7 +420,9 @@ export interface FileRoutesById {
   '/riders': typeof RidersRouteWithChildren
   '/saga-cinema': typeof SagaCinemaRoute
   '/search': typeof SearchRoute
+  '/transformation-lab': typeof TransformationLabRoute
   '/world': typeof WorldRoute
+  '/world-map': typeof WorldMapRoute
   '/api/export': typeof ApiExportRoute
   '/characters/ciel': typeof CharactersCielRoute
   '/characters/dante': typeof CharactersDanteRoute
@@ -454,7 +472,9 @@ export interface FileRouteTypes {
     | '/riders'
     | '/saga-cinema'
     | '/search'
+    | '/transformation-lab'
     | '/world'
+    | '/world-map'
     | '/api/export'
     | '/characters/ciel'
     | '/characters/dante'
@@ -499,7 +519,9 @@ export interface FileRouteTypes {
     | '/rexonance-saga'
     | '/saga-cinema'
     | '/search'
+    | '/transformation-lab'
     | '/world'
+    | '/world-map'
     | '/api/export'
     | '/characters/ciel'
     | '/characters/dante'
@@ -547,7 +569,9 @@ export interface FileRouteTypes {
     | '/riders'
     | '/saga-cinema'
     | '/search'
+    | '/transformation-lab'
     | '/world'
+    | '/world-map'
     | '/api/export'
     | '/characters/ciel'
     | '/characters/dante'
@@ -596,7 +620,9 @@ export interface RootRouteChildren {
   RidersRoute: typeof RidersRouteWithChildren
   SagaCinemaRoute: typeof SagaCinemaRoute
   SearchRoute: typeof SearchRoute
+  TransformationLabRoute: typeof TransformationLabRoute
   WorldRoute: typeof WorldRoute
+  WorldMapRoute: typeof WorldMapRoute
   ApiExportRoute: typeof ApiExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiGalleryIdRoute: typeof ApiGalleryIdRouteWithChildren
@@ -755,11 +781,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/transformation-lab': {
+      id: '/transformation-lab'
+      path: '/transformation-lab'
+      fullPath: '/transformation-lab'
+      preLoaderRoute: typeof TransformationLabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/world': {
       id: '/world'
       path: '/world'
       fullPath: '/world'
       preLoaderRoute: typeof WorldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/world-map': {
+      id: '/world-map'
+      path: '/world-map'
+      fullPath: '/world-map'
+      preLoaderRoute: typeof WorldMapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export': {
@@ -1037,7 +1077,9 @@ const rootRouteChildren: RootRouteChildren = {
   RidersRoute: RidersRouteWithChildren,
   SagaCinemaRoute: SagaCinemaRoute,
   SearchRoute: SearchRoute,
+  TransformationLabRoute: TransformationLabRoute,
   WorldRoute: WorldRoute,
+  WorldMapRoute: WorldMapRoute,
   ApiExportRoute: ApiExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiGalleryIdRoute: ApiGalleryIdRouteWithChildren,

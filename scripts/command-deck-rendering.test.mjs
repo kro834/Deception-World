@@ -360,7 +360,7 @@ test("GPU deadline cleans a pending pipeline; late device resolution after dispo
   assert.equal(lateEnv.timers.size, 0);
 });
 
-test("pause, background and intersection suspend frames; reduced motion and saveData render once", async () => {
+test("pause, background and intersection suspend frames; reduced motion keeps a still", async () => {
   const env = environment(),
     control = env.mount(env.host);
   await flush();
@@ -379,7 +379,7 @@ test("pause, background and intersection suspend frames; reduced motion and save
   env.observers[1].fn([{ isIntersecting: false }]);
   assert.equal(env.frames.size, 0);
   control.dispose();
-  for (const flag of [{ reduced: true }, { saveData: true }]) {
+  for (const flag of [{ reduced: true }]) {
     const gpu = fakeGpu(),
       still = environment({ ...flag, gpu: gpu.api });
     const c = still.mount(still.host);
@@ -391,6 +391,10 @@ test("pause, background and intersection suspend frames; reduced motion and save
     assert.equal(still.frames.size, 0);
     c.dispose();
   }
+  const saving = environment({ saveData: true, gpu: fakeGpu().api });
+  saving.mount(saving.host);
+  await flush();
+  assert.ok(saving.frames.size > 0, "Save-Data does not downgrade a requested renderer");
 });
 
 test("HTML projection requires the new drawable API and marks capability only after real draw", () => {

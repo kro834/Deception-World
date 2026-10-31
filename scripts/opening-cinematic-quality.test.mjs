@@ -24,7 +24,8 @@ test("the opening composes a deterministic multi-plane cinematic reveal", () => 
 test("the richer opening keeps its runtime (now with the logo burn) and adaptive render budget", () => {
   assert.match(title, /const SEQUENCE_MS = 7200/);
   assert.match(title, /preload="none"/);
-  assert.match(title, /deviceMemory\?: number/);
+  assert.match(title, /hasEconomyOpeningProfile/);
+  assert.doesNotMatch(title, /deviceMemory\?: number/);
   assert.match(title, /economyOpening \? " is-economy-opening"/);
   assert.match(styles, /animation: cinematic-camera-path var\(--seq\)/);
   assert.match(styles, /\.cine-stage\.is-economy-opening \.cine-depth-grid/);

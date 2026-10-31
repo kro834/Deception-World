@@ -10,6 +10,16 @@ export type MenuPageContext = {
 };
 
 const MENU_PAGE_SECTIONS: Record<string, MenuPageContext> = {
+  "/world-map": {
+    title: "世界関係図",
+    image: "/deception-world-poster-delivery.webp",
+    sections: [["world-map-main", "世界関係図", "CONNECTIONS"]],
+  },
+  "/transformation-lab": {
+    title: "変身・フォーム研究室",
+    image: "/rider-saga-rexonance-thumbnail-20260827.jpeg",
+    sections: [["lab-main", "変身・フォーム研究室", "LAB"]],
+  },
   "/search": {
     title: "資料検索",
     image: "/episode-03-deception-world-delivery-600.webp",

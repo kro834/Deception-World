@@ -355,15 +355,8 @@ export function TitleSequence() {
   useEffect(() => {
     const connection = navigator as Navigator & {
       connection?: { saveData?: boolean; effectiveType?: string };
-      deviceMemory?: number;
     };
-    const economy =
-      hasEconomyOpeningProfile() ||
-      connection.connection?.saveData === true ||
-      connection.connection?.effectiveType === "slow-2g" ||
-      connection.connection?.effectiveType === "2g" ||
-      (connection.deviceMemory !== undefined && connection.deviceMemory <= 2) ||
-      (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 2);
+    const economy = hasEconomyOpeningProfile();
     setEconomyOpening(economy);
     if (
       connection.connection?.saveData ||

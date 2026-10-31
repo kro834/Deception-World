@@ -170,10 +170,14 @@ test("every destination is an existing public route with its actual heading anch
   const worldPage = read("src/components/world/world-home.tsx") + annex;
   const dreamPage = read("src/components/dream-chapter/dream-chapter.tsx");
   const routeComponents = {
+    "/world-map": read("src/components/world-map/world-map.tsx"),
+    "/transformation-lab": read("src/components/transformation-lab/transformation-lab.tsx"),
     "/world": worldPage,
     "/dream-chapter": dreamPage,
     "/extreme-saga": read("src/components/extreme-saga/extreme-saga.tsx"),
-    "/rexonance-saga": read("src/components/rexonance-saga/rexonance-saga.tsx") + read("src/components/rexonance-saga/rexonance-assembly-guide.tsx"),
+    "/rexonance-saga":
+      read("src/components/rexonance-saga/rexonance-saga.tsx") +
+      read("src/components/rexonance-saga/rexonance-assembly-guide.tsx"),
     "/far-from-saga":
       read("src/components/far-from-saga/far-from-saga.tsx") +
       // Owner (2026-10-23): ウルトラ is one of #suitup's forms; far-from-ultra.tsx is gone.
@@ -221,7 +225,9 @@ test("every destination is an existing public route with its actual heading anch
       (part) => part.id,
     ),
   );
-  assert.ok(read("src/components/far-from-saga/far-from-report.tsx").includes("<article id={part.id}"));
+  assert.ok(
+    read("src/components/far-from-saga/far-from-report.tsx").includes("<article id={part.id}"),
+  );
   assert.ok(routeComponents["/far-from-saga"].includes("<FarFromReport />"));
   const columns = loadData("src/components/world/world-columns-data.ts").WORLD_COLUMNS;
   for (const column of columns) actualWorldAnchors.add(`world-column-${column.no}`);
@@ -294,7 +300,15 @@ test("special system descriptions remain literal published component excerpts", 
 test("Rexonance search points to Yuma's awakened self-resonance canon", () => {
   // Owner's revised canon replaces the former external-gods/trinity summary.
   const rider = byId.get("rexonance-saga");
-  for (const keyword of ["第五の犬", "終焉", "自己共鳴", "i-2", "二角形構造", "DEUS SHIFT", "REXONANCE PERK"]) {
+  for (const keyword of [
+    "第五の犬",
+    "終焉",
+    "自己共鳴",
+    "i-2",
+    "二角形構造",
+    "DEUS SHIFT",
+    "REXONANCE PERK",
+  ]) {
     assert.ok(rider.keywords.includes(keyword), `${keyword} should be searchable`);
   }
   assert.match(rider.description, /第五の犬として完全覚醒した悠真/);

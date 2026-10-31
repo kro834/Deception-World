@@ -47,6 +47,7 @@ import {
 } from "@/lib/menu-page-context";
 import { focusMenuSectionAfterNavigation } from "@/lib/menu-section-focus";
 import { IpadMenuToggle } from "@/components/ipad-menu-mode";
+import { RenderQualityControl } from "./render-quality-control";
 import { ButtonStyleToggle } from "@/components/button-style-toggle";
 import { CinemaLink } from "./external-cinema-link";
 import {
@@ -1213,6 +1214,24 @@ export function SideMenuLayer({
               <i>LIBRARY</i>
             </GuardedLink>
             <GuardedLink
+              to="/transformation-lab"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/transformation-lab" ? "page" : undefined}
+            >
+              <span>変身・フォーム研究室</span>
+              <i>LAB</i>
+            </GuardedLink>
+            <GuardedLink
+              to="/world-map"
+              assets={[]}
+              beforeNavigate={close}
+              aria-current={pathname === "/world-map" ? "page" : undefined}
+            >
+              <span>世界関係図</span>
+              <i>CONNECTIONS</i>
+            </GuardedLink>
+            <GuardedLink
               to="/form-archive"
               assets={[]}
               beforeNavigate={close}
@@ -1678,6 +1697,7 @@ export function SideMenuLayer({
             <ZeusButtonToggle />
             <IpadMenuToggle />
             <ButtonStyleToggle />
+            <RenderQualityControl />
             <GuardedLink to="/" assets={[]} beforeNavigate={close}>
               <span>トップ</span>
               <i>DECEPTION WORLD</i>

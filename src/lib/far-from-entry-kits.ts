@@ -1,3 +1,4 @@
+import { refinedNaniteSource } from "./nanite-surface-assets.js";
 import { REXONANCE_NANITE_CELLS } from "./rexonance-nanites.ts";
 import { FAR_FROM_NANITE_CELLS } from "./far-from-nanites.ts";
 
@@ -15,8 +16,8 @@ export type FarFromNaniteKit = Omit<typeof REXONANCE_NANITE_CELLS, "src"> & {
 
 /** Kit A (the hex chip), kit B (the crystal). */
 export const FAR_FROM_ENTRY_KITS: readonly [FarFromNaniteKit, FarFromNaniteKit] = [
-  REXONANCE_NANITE_CELLS,
-  FAR_FROM_NANITE_CELLS,
+  { ...REXONANCE_NANITE_CELLS, src: refinedNaniteSource(REXONANCE_NANITE_CELLS.src) },
+  { ...FAR_FROM_NANITE_CELLS, src: refinedNaniteSource(FAR_FROM_NANITE_CELLS.src) },
 ];
 /** True while kit B is Rexonance's kit standing in (it is not). */
 export const FAR_FROM_ENTRY_KIT_B_STANDIN = FAR_FROM_ENTRY_KITS[0] === FAR_FROM_ENTRY_KITS[1];

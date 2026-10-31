@@ -64,16 +64,11 @@ const releaseControlFocus = (control: HTMLElement) => {
 /** Whether the page may move (the Rexonance page's terms). */
 function motionAllowed() {
   if (typeof window === "undefined") return false;
-  const connection = (
-    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-  ).connection;
   return !(
     document.hidden ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
     window.matchMedia("(forced-colors: active)").matches ||
-    document.documentElement.dataset.worldEffects === "economy" ||
-    connection?.saveData ||
-    /^(slow-)?2g$/.test(connection?.effectiveType ?? "")
+    document.documentElement.dataset.worldEffects === "economy"
   );
 }
 

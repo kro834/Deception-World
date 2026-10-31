@@ -100,7 +100,8 @@ test("keyframes and transitions are compositor-only, finite and short", () => {
 test("the script arms only what is unseen, follows the calm tiers and never scrolls the page", () => {
   assert.match(script, /prefers-reduced-motion: reduce/);
   assert.match(script, /worldEffects === "economy"/);
-  assert.match(script, /saveData === true/);
+  assert.doesNotMatch(script, /saveData/);
+  assert.doesNotMatch(script, /effectiveType/);
   assert.match(script, /if \(!covered\(\) && !belowFold\(node\)\) return false;/);
   assert.match(script, /attributeFilter: \["data-loading"\]/);
   assert.match(script, /visibilitychange/);

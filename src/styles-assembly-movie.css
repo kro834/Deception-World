@@ -104,10 +104,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie > * {
 
 /* The still tiers have no sequence to play: no control. The controller
    names them (data-tier="still": the engine's motion gate — reduced
-   motion, forced colours, economy, Save-Data, 2G — reads data-rzn-load
+   motion, forced colours or explicit economy — reads data-rzn-load
    "static", or the runway has no pinned travel); the rules beside it are
    the same gate before the controller arrives (the runway's own layout
-   rules: economy and the entry's Save-Data/2G snapshot, data-rzn-constrained,
+   rules: the entry's explicit economy snapshot, data-rzn-constrained,
    lay the runway out as one still screen). */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-tier="still"],
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-load="static"],

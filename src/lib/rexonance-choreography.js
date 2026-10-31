@@ -50,15 +50,6 @@ const END_LINKS = ":scope > a";
 const CHAPTERS = ["performance", "p14", "assembly", "stages", "system"];
 const OUT = "cubic-bezier(.16,1,.3,1)";
 
-function constrained(environment) {
-  const connection = environment.navigator?.connection;
-  return (
-    connection?.saveData === true ||
-    connection?.effectiveType === "slow-2g" ||
-    connection?.effectiveType === "2g"
-  );
-}
-
 const textOnly = (node) =>
   !node.dataset.rxkSplit &&
   !!node.textContent?.trim() &&
@@ -186,7 +177,7 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
   if (!page || !environment.IntersectionObserver || !media || !page.animate) return () => {};
   const document = page.ownerDocument;
   const root = document.documentElement;
-  if (media.matches || root.dataset.worldEffects === "economy" || constrained(environment)) {
+  if (media.matches || root.dataset.worldEffects === "economy") {
     return () => {};
   }
 

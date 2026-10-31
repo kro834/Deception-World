@@ -106,9 +106,6 @@ export function mountCommandDeckRenderer(
   const win = defaultView;
   const doc = host.ownerDocument;
   const media = win.matchMedia?.("(prefers-reduced-motion: reduce)");
-  const connection = (
-    win.navigator as Navigator & { connection?: EventTarget & { saveData?: boolean } }
-  ).connection;
   let disposed = false,
     paused = false,
     intersecting = true,
@@ -127,7 +124,7 @@ export function mountCommandDeckRenderer(
   let gpuExpired = false;
   let gpuTimer = 0;
   const canvases = new Set<HTMLCanvasElement>();
-  const isStill = () => !!options.economy || !!connection?.saveData || !!media?.matches;
+  const isStill = () => !!options.economy || !!media?.matches;
   const active = () => !disposed && !paused && intersecting && !doc.hidden;
   const makeCanvas = () => {
     const canvas = doc.createElement("canvas");
@@ -316,7 +313,6 @@ export function mountCommandDeckRenderer(
   win.addEventListener("resize", resize, { passive: true });
   doc.addEventListener("visibilitychange", refresh);
   media?.addEventListener?.("change", refresh);
-  connection?.addEventListener("change", refresh);
   resize();
   fallback();
 
@@ -475,7 +471,6 @@ export function mountCommandDeckRenderer(
       win.removeEventListener("resize", resize);
       doc.removeEventListener("visibilitychange", refresh);
       media?.removeEventListener?.("change", refresh);
-      connection?.removeEventListener("change", refresh);
       delete host.dataset.renderer;
     },
   };

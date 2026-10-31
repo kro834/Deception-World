@@ -1,3 +1,4 @@
+import { refinedNaniteSource } from "./nanite-surface-assets.js";
 // Warm compressed resources on navigation intent. Keep this module independent
 // of suit data: importing it must allocate no images, scenes or drawing surfaces.
 export const ILLUSIONCULUM_PRELOAD_URLS = [
@@ -5,7 +6,7 @@ export const ILLUSIONCULUM_PRELOAD_URLS = [
   "/illusionculum-suit-20261023/plates.webp",
   "/illusionculum-suit-20261023/gold.webp",
   "/illusionculum-suit-20261023/guide.webp",
-  "/illusionculum-nanites-20261027/cells.webp",
+  refinedNaniteSource("/illusionculum-nanites-20261027/cells.webp"),
   "/rexonance-nanites-20261023/fx.webp",
 ] as const;
 

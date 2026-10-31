@@ -1145,17 +1145,9 @@ export function DreamChapter() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
     const sync = () => {
-      const constrained =
-        connection?.saveData ||
-        connection?.effectiveType === "slow-2g" ||
-        connection?.effectiveType === "2g";
-      setPosterMotionEnabled(!document.hidden && !media.matches && !constrained);
+      const economy = document.documentElement.dataset.worldEffects === "economy";
+      setPosterMotionEnabled(!document.hidden && !media.matches && !economy);
     };
     sync();
     document.addEventListener("visibilitychange", sync);

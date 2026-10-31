@@ -473,18 +473,9 @@ export function FinalStage() {
     const page = pageRef.current;
     if (!page) return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const connection = (
-      navigator as Navigator & {
-        connection?: { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
-    const constrained =
-      connection?.saveData === true ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g";
     // Economy rendering keeps the page still, as reduced motion does.
     const economy = document.documentElement.dataset.worldEffects === "economy";
-    const allowMotion = !media.matches && !constrained && !economy;
+    const allowMotion = !media.matches && !economy;
     setMotionReady(allowMotion);
 
     const reveals = [...page.querySelectorAll<HTMLElement>(".rxs-reveal")];

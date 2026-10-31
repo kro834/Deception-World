@@ -1774,16 +1774,7 @@ test("the natural atlas feathers a curved, moving root without inventing new fir
   assert.ok(contours.size >= 28, "the root contour sways through the real animation frames");
 });
 
-for (const reason of [
-  "ssr",
-  "hidden",
-  "economy",
-  "saveData",
-  "2g",
-  "slow-2g",
-  "reduce",
-  "forced-colors",
-]) {
+for (const reason of ["ssr", "hidden", "economy", "2g", "slow-2g", "reduce", "forced-colors"]) {
   test(`warm-up respects ${reason} without fetching`, async () => {
     const module = await fresh();
     const f = fixture();
@@ -1802,3 +1793,15 @@ for (const reason of [
     assert.equal(module.naniteFlameReady(), false);
   });
 }
+
+test("Save-Data retains the user-requested procedural fire without fetching images", async () => {
+  const module = await fresh();
+  const f = fixture();
+  f.environment.navigator.connection.saveData = true;
+  const ready = module.warmNaniteFlame(f.environment);
+  f.advance(0);
+  assert.equal(await ready, true);
+  assert.equal(module.naniteFlameReady(), true);
+  assert.equal(f.images.length, 0, "procedural quality does not download an image atlas");
+  module.releaseBodyFlame();
+});

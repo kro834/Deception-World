@@ -42,7 +42,7 @@ test("every beat has the suit's real seams to trace", () => {
   assert.ok(groups[0].cy > groups[2].cy && groups[2].cy > groups[5].cy);
 });
 
-test("device tiers scale the budgets, Galaxy-class phones keep the touch tier", () => {
+test("explicit lightweight choice scales budgets; pointer capability selects high or touch", () => {
   const order = ["high", "touch", "lite"];
   for (const key of ["swarm", "shards", "sparks", "pixels"])
     for (let i = 1; i < order.length; i += 1)
@@ -58,8 +58,7 @@ test("device tiers scale the budgets, Galaxy-class phones keep the touch tier", 
     hardwareConcurrency: 8,
   };
   assert.equal(metaUnitasBoostTier(env(galaxy, true)), "touch");
-  assert.equal(metaUnitasBoostTier(env({ ...galaxy, hardwareConcurrency: 4 }, true)), "lite");
-  assert.equal(metaUnitasBoostTier(env({ ...galaxy, deviceMemory: 2 }, true)), "lite");
+  assert.equal(metaUnitasBoostTier(env({ ...galaxy, hardwareConcurrency: 4, deviceMemory: 2 }, true)), "touch");
   assert.equal(
     metaUnitasBoostTier(
       env({ userAgent: "Mozilla/5.0 (Macintosh)", hardwareConcurrency: 10 }, false),

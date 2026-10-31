@@ -44,9 +44,7 @@ export function detectGuardianQualityTier(nav: Navigator, mobile: boolean): Guar
   if (!mobile) return "high";
   const cores = nav.hardwareConcurrency || 0;
   const memory = (nav as Navigator & { deviceMemory?: number }).deviceMemory;
-  const connection = (nav as Navigator & { connection?: { saveData?: boolean } }).connection;
   const constrained =
-    connection?.saveData === true ||
     (memory !== undefined && memory <= 3) ||
     (cores > 0 && cores <= 4 && /Android/i.test(nav.userAgent));
   return constrained ? "low" : "mobile";

@@ -74,10 +74,10 @@ test("the UA table: Android renderer and One UI", () => {
     assert.equal(isAndroidRenderer(device), android, `${name}: android`);
     assert.equal(isOneUiRenderer(device), oneUi, `${name}: One UI`);
   }
-  // Desktop-site mode gets the Android weak-hardware rule too.
+  // Device hints do not select the user's visual quality.
   assert.equal(
     prefersLightweightRendering({ userAgent: SI_DESKTOP, maxTouchPoints: 10, hardwareConcurrency: 4 }),
-    true,
+    false,
   );
   assert.equal(
     prefersLightweightRendering({ userAgent: SI_DESKTOP, maxTouchPoints: 0, hardwareConcurrency: 4 }),
@@ -101,7 +101,7 @@ test("native progress: Android renderers and iOS 27, with timelines and motion a
   assert.equal(prefersNativeScrollProgress({ userAgent: MAC, hardwareConcurrency: 8 }, on), false);
 });
 
-const runScript = (script, device, { supports = true, views = true, reduced = false, storage = {}, hash = "" } = {}) => {
+const runScript = (script, device, { supports = true, views = true, reduced = false, storage = {}, hash = "", quality = "high" } = {}) => {
   const attributes = new Map();
   const documentStub = {
     documentElement: {
@@ -110,6 +110,7 @@ const runScript = (script, device, { supports = true, views = true, reduced = fa
     },
   };
   const windowStub = {
+    localStorage: { getItem: (key) => key === "deception-world:render-quality:v1" ? quality : null },
     CSS: {
       supports: (property, value) =>
         property === "animation-timeline"
@@ -166,7 +167,7 @@ test("the pre-paint device profile matches its rendering-profile twins", () => {
       assert.equal(attributes.get("data-ios18-renderer") === "true", prefersIOS18Rendering(device), label);
       assert.equal(
         attributes.get("data-world-effects") === "economy",
-        prefersLightweightRendering(device),
+        false,
         label,
       );
       assert.equal(
@@ -180,6 +181,21 @@ test("the pre-paint device profile matches its rendering-profile twins", () => {
       );
       for (const key of attributes.keys()) assert.match(key, /^data-/);
     }
+  }
+});
+
+test("only an explicit persisted lightweight choice selects economy before paint", () => {
+  for (const device of DEVICES) {
+    assert.equal(runScript(DEVICE_PROFILE_SCRIPT, device).has("data-world-effects"), false);
+    assert.equal(
+      runScript(DEVICE_PROFILE_SCRIPT, device, { quality: "lightweight" }).get("data-world-effects"),
+      "economy",
+    );
+    assert.equal(runScript(MIRAGE_BOOT_GATE_SCRIPT, device).has("data-mirage-quiet"), false);
+    assert.equal(
+      runScript(MIRAGE_BOOT_GATE_SCRIPT, device, { quality: "lightweight" }).has("data-mirage-quiet"),
+      true,
+    );
   }
 });
 

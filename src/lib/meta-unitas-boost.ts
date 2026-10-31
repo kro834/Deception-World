@@ -29,7 +29,7 @@
  * mount it (the engine's finished still is their light version).
  */
 
-import { hasConstrainedResources, isAndroidRenderer } from "./rendering-profile.js";
+import { hasConstrainedResources } from "./rendering-profile.js";
 import {
   META_UNITAS_RX_DRIVER,
   META_UNITAS_RX_MARKS,
@@ -119,9 +119,8 @@ type Device = Navigator & {
   connection?: { saveData?: boolean; effectiveType?: string };
 };
 
-/** By capability only: a constrained device or a ≤4-core Android is lite;
- * any other touch device (Galaxy 4–6 GB included) keeps the full scene at
- * the touch budget; a fine pointer gets the desktop's. */
+/** The user's lightweight choice selects the reduced scene; input capability
+ * still selects bounded touch versus desktop budgets. */
 export function metaUnitasBoostTier(environment: typeof globalThis = window): MetaUnitasBoostTier {
   const device = environment.navigator as Device;
   const info = {
@@ -131,13 +130,7 @@ export function metaUnitasBoostTier(environment: typeof globalThis = window): Me
     hardwareConcurrency: device.hardwareConcurrency,
     connection: device.connection,
   };
-  if (
-    hasConstrainedResources(info) ||
-    (isAndroidRenderer(info) &&
-      (device.hardwareConcurrency || 0) > 0 &&
-      device.hardwareConcurrency <= 4)
-  )
-    return "lite";
+  if (hasConstrainedResources(info)) return "lite";
   return environment.matchMedia("(pointer: coarse)").matches ? "touch" : "high";
 }
 

@@ -34,7 +34,6 @@ import {
 } from "./far-from-stage.ts";
 import type { FarFromUltraScene } from "./far-from-ultra-scene.ts";
 
-type Connection = { saveData?: boolean; effectiveType?: string };
 type Bitmap = (ImageBitmap | HTMLImageElement) & { width: number; height: number };
 
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -58,7 +57,6 @@ export function mountFarFromUltra(
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
   const coarse = environment.matchMedia("(pointer: coarse)");
-  const connection = (environment.navigator as Navigator & { connection?: Connection }).connection;
 
   let disposed = false;
   let live = false;
@@ -87,9 +85,7 @@ export function mountFarFromUltra(
   let reducedNow = mediaNow(reduced);
   let forcedNow = mediaNow(forcedColors);
   const motionAllowed = () => {
-    const constrained =
-      Boolean(connection?.saveData) || /^(slow-)?2g$/.test(connection?.effectiveType || "");
-    return !reducedNow && !forcedNow && !constrained && html.dataset.worldEffects !== "economy";
+    return !reducedNow && !forcedNow && html.dataset.worldEffects !== "economy";
   };
   const tier = (): FarFromUltraTier => (mediaNow(coarse) ? "coarse" : "fine");
   const setState = (state: "static" | "waiting" | "live") => {

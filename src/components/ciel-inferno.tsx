@@ -32,14 +32,9 @@ const SR_ONLY: CSSProperties = {
 const clamp = (n: number) => Math.max(0, Math.min(1, Number.isFinite(n) ? n : 0.5));
 const calmNow = () => {
   if (typeof window === "undefined") return true;
-  const connection = (
-    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
-  ).connection;
   return (
     matchMedia("(prefers-reduced-motion: reduce), (forced-colors: active)").matches ||
-    document.documentElement.dataset.worldEffects === "economy" ||
-    Boolean(connection?.saveData) ||
-    /^(slow-)?2g$/.test(connection?.effectiveType || "")
+    document.documentElement.dataset.worldEffects === "economy"
   );
 };
 
@@ -94,13 +89,6 @@ export default function CielInferno({
     const media = matchMedia("(prefers-reduced-motion: reduce), (forced-colors: active)");
     const mediaAtStart = media.matches;
     const tier = html.dataset.worldEffects;
-    const connection = (
-      navigator as Navigator & {
-        connection?: EventTarget & { saveData?: boolean; effectiveType?: string };
-      }
-    ).connection;
-    const saveData = connection?.saveData;
-    const networkTier = connection?.effectiveType;
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = styles;
@@ -219,7 +207,6 @@ export default function CielInferno({
       window.removeEventListener("resize", resize);
       window.visualViewport?.removeEventListener("resize", resize);
       media.removeEventListener("change", changed);
-      connection?.removeEventListener("change", changed);
     };
     const revealAfterBlack = () => {
       if (revealTimer || sequinRevealed.current) return;
@@ -290,9 +277,7 @@ export default function CielInferno({
     const changed = () => {
       if (
         media.matches !== mediaAtStart ||
-        html.dataset.worldEffects !== tier ||
-        connection?.saveData !== saveData ||
-        connection?.effectiveType !== networkTier
+        html.dataset.worldEffects !== tier
       )
         settleBurned();
     };
@@ -348,7 +333,6 @@ export default function CielInferno({
     window.addEventListener("resize", resize, { passive: true });
     window.visualViewport?.addEventListener("resize", resize, { passive: true });
     media.addEventListener("change", changed);
-    connection?.addEventListener("change", changed);
 
     const tick = (now: number) => {
       frame = 0;

@@ -21,7 +21,7 @@ test("known iOS27 and desktop iPadOS27 opt in without forcing lightweight render
   ]) {
     assert.equal(supportsIOS27Enhancements(device), true);
     assert.equal(prefersLightweightRendering(device), false);
-    assert.equal(prefersLightweightRendering({ ...device, connection: { saveData: true } }), true);
+    assert.equal(prefersLightweightRendering({ ...device, connection: { saveData: true } }), false);
   }
 });
 test("older iOS, unknown future versions, macOS and Android retain their rendering path", () => {

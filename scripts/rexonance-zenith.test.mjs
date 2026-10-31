@@ -2349,7 +2349,7 @@ test("a hidden tab releases partial crop canvases, then resumes from decoded ima
   assert.equal(t.idle.size, 0);
 });
 
-test("Save-Data and 2G shorten layout before fragment restoration, not on connection changes", () => {
+test("network hints do not change the restore layout; explicit economy sets its marker", () => {
   for (const connection of [
     { saveData: true },
     { effectiveType: "2g" },
@@ -2362,6 +2362,7 @@ test("Save-Data and 2G shorten layout before fragment restoration, not on connec
       navigator: { connection },
       document: {
         documentElement: {
+          dataset: {},
           toggleAttribute: (key, on) => {
             assert.equal(key, "data-rzn-constrained");
             flag = on;
@@ -2370,13 +2371,24 @@ test("Save-Data and 2G shorten layout before fragment restoration, not on connec
       },
     };
     runInNewContext(REXONANCE_LAYOUT_BOOT_SCRIPT, { window });
-    assert.equal(flag, Boolean(connection && connection.effectiveType !== "4g"));
+    assert.equal(flag, false, JSON.stringify(connection));
     if (connection) connection.effectiveType = "4g";
     const before = flag;
     assert.equal(flag, before, "no live layout listener");
     syncRexonanceLayoutGate(window);
-    assert.equal(flag, Boolean(connection?.saveData));
+    assert.equal(flag, false);
   }
+  let economyFlag;
+  const economyWindow = {
+    document: {
+      documentElement: {
+        dataset: { worldEffects: "economy" },
+        toggleAttribute: (_key, on) => (economyFlag = on),
+      },
+    },
+  };
+  syncRexonanceLayoutGate(economyWindow);
+  assert.equal(economyFlag, true);
   assert.match(read("src/routes/__root.tsx"), /children: REXONANCE_LAYOUT_BOOT_SCRIPT/);
   assert.match(route, /cause === "enter"\) syncRexonanceLayoutGate/);
 });

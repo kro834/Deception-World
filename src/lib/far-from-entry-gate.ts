@@ -65,18 +65,17 @@ export const prepareFarFromTransition = createFarFromTransitionLoader(() =>
 );
 
 type Connection = { saveData?: boolean; effectiveType?: string };
-/** The still tiers: the call rests on the finished figure, and nothing
- * heavy is fetched (prefers-reduced-motion, forced colours, economy,
- * Save-Data and 2G). */
+const prefetchRestricted = () => {
+  const connection = (navigator as Navigator & { connection?: Connection }).connection;
+  return connection?.saveData || ["slow-2g", "2g"].includes(connection?.effectiveType || "");
+};
+/** The still tiers: the call rests on the finished figure under accessibility
+ * or explicit economy settings. Save-Data gates prefetch below. */
 export function isFarFromEntryStill() {
   if (typeof window === "undefined") return true;
   const media = (query: string) => Boolean(window.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)") || media("(forced-colors: active)")) return true;
-  if (document.documentElement.dataset.worldEffects === "economy") return true;
-  const connection = (navigator as Navigator & { connection?: Connection }).connection;
-  return (
-    Boolean(connection?.saveData) || ["slow-2g", "2g"].includes(connection?.effectiveType || "")
-  );
+  return document.documentElement.dataset.worldEffects === "economy";
 }
 
 let warmModule: Promise<WarmModule | null> | null = null;
@@ -108,6 +107,7 @@ export function warmFarFromEntry(priority: Priority = "high"): Promise<boolean> 
 /** Intent (a hover, a focus, a touch on a link to /far-from-saga): the
  * sequence's chunk and the images start now, so the tap finds them. */
 export function prefetchFarFromEntry(priority: Priority = "high"): Promise<boolean> {
+  if (prefetchRestricted()) return Promise.resolve(false);
   if (isFarFromEntryStill()) return Promise.resolve(false);
   const chunk = prepareFarFromTransition.prefetch();
   const images = warmFarFromEntry(priority);
@@ -131,12 +131,11 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (id: number) => void;
 };
 /** Speculative prefetch (a link to /far-from-saga near the viewport, the
- * side menu opened, /final-stage settled): the chunk at once (it is small,
- * and a slow connection is exactly where a cold chunk misses the gate's
- * deadline), the images once the main thread is idle; never on a still
- * tier (Save-Data, 2G, reduced motion, economy). Returns the cancel. */
+ * side menu opened, /final-stage settled): the chunk at once and the images
+ * once the main thread is idle; skip constrained connections and still tiers.
+ * Returns the cancel. */
 export function prefetchFarFromEntryWhenIdle(delayMs = 0, priority: Priority = "low") {
-  if (typeof window === "undefined" || isFarFromEntryStill()) return () => {};
+  if (typeof window === "undefined" || prefetchRestricted() || isFarFromEntryStill()) return () => {};
   void prepareFarFromTransition.prefetch();
   const idle = window as IdleWindow;
   let handle = 0;

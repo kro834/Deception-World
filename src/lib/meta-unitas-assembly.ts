@@ -6,8 +6,8 @@
  * (src/lib/meta-unitas-rx-engine.ts); this module stays light: the calls as the
  * HUD prints them and the mount, which imports the engine chunk only under
  * the motion gate, after the page is idle — never on the startup path, never
- * for the still tiers (prefers-reduced-motion, forced colours, economy,
- * Save-Data and 2G keep the finished figure and download nothing).
+ * for the still tiers (prefers-reduced-motion, forced colours and explicit
+ * economy keep the finished figure).
  */
 
 import { META_UNITAS_SAGA } from "../components/meta-unitas-saga/meta-unitas-data.ts";
@@ -40,20 +40,15 @@ export type MetaUnitasAssemblyOptions = {
   }>;
 };
 
-type Connection = { saveData?: boolean; effectiveType?: string };
-
 /** Whether full motion is allowed here (the site's terms). */
 export function metaUnitasMotionAllowed(
   environment: typeof globalThis = window,
   reducedMotion?: boolean,
 ) {
   const html = environment.document.documentElement;
-  const connection = (environment.navigator as Navigator & { connection?: Connection })?.connection;
   return !(
     (reducedMotion ?? environment.matchMedia("(prefers-reduced-motion: reduce)").matches) ||
     environment.matchMedia("(forced-colors: active)").matches ||
-    connection?.saveData ||
-    /^(slow-)?2g$/.test(connection?.effectiveType || "") ||
     html.dataset.worldEffects === "economy"
   );
 }
