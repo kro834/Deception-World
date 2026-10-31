@@ -1,6 +1,3 @@
-}
-
-.manager-slot-grid .dante-archive {
   display: block;
   overflow: hidden;
   border-radius: 20px 34px 20px 12px;
@@ -277,6 +274,12 @@
 
 .ios-slide-open-arrows i:nth-child(2) {
   animation-delay: 0.14s;
+}
+
+/* The liquid-glass lens (slide-open-control.tsx) is drawn only by the
+   glass option (styles-liquid-glass.css); everywhere else it is absent. */
+.ios-slide-open-lens {
+  display: none;
 }
 
 .ios-slide-open .ios-slide-open-thumb {

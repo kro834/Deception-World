@@ -21,6 +21,17 @@ const HOLD_ACTIVATION_MS = 60;
 const COMPLETE_ANIMATION_MS = 260;
 const HORIZONTAL_INTENT_RATIO = 1.08;
 const COARSE_HIT_PADDING = 36;
+// The liquid-glass lens (owner, 2026-10-31: 「長押ししたらリキッドグラスの様に
+// 拡大」). A held thumb swells into a magnifying lens after this long, or at
+// once when it starts to travel. The lens is a separate layer drawn only by
+// the liquid-glass option's sheet (styles-liquid-glass.css); the thumb and
+// the button keep their measured boxes, so the drag maths never sees it.
+const LENS_SWELL_MS = 200;
+const LENS_SWELL_TRAVEL = 3;
+const LENS_SETTLE_MS = 460;
+const LENS_STRETCH_DECAY_MS = 90;
+
+type LensState = "off" | "on" | "settle";
 
 type PointerIntent = "idle" | "pending" | "horizontal";
 
@@ -59,6 +70,9 @@ export function SlideOpenControl({
   const holdTimer = useRef<number | null>(null);
   const activateTimer = useRef<number | null>(null);
   const resetFrame = useRef<number | null>(null);
+  const lensTimer = useRef<number | null>(null);
+  const lensStretchTimer = useRef<number | null>(null);
+  const lensState = useRef<LensState>("off");
   const completingRef = useRef(false);
   const suppressFocusRing = useRef(false);
   // A press that starts on the label or arrows rather than the thumb. The
@@ -86,8 +100,43 @@ export function SlideOpenControl({
     resetFrame.current = null;
   }, []);
 
+  const clearLensTimers = useCallback(() => {
+    if (lensTimer.current != null) window.clearTimeout(lensTimer.current);
+    lensTimer.current = null;
+    if (lensStretchTimer.current != null) window.clearTimeout(lensStretchTimer.current);
+    lensStretchTimer.current = null;
+  }, []);
+
+  /* The lens's state is a data attribute only; the glass sheet draws it.
+     "settle" is the release: the lens deflates with a gel spring where it
+     is, then hands back to the thumb. */
+  const setLens = useCallback(
+    (next: LensState) => {
+      const button = internalButtonRef.current;
+      if (lensState.current === next) return;
+      if (next === "settle" && lensState.current === "off") return;
+      clearLensTimers();
+      lensState.current = next;
+      if (button) {
+        button.dataset.lens = next;
+        if (next !== "on") button.dataset.lensTravel = "false";
+      }
+      if (next === "settle") {
+        button?.style.removeProperty("--slide-lens-sx");
+        button?.style.removeProperty("--slide-lens-sy");
+        lensTimer.current = window.setTimeout(() => {
+          lensTimer.current = null;
+          lensState.current = "off";
+          if (internalButtonRef.current) internalButtonRef.current.dataset.lens = "off";
+        }, LENS_SETTLE_MS);
+      }
+    },
+    [clearLensTimers],
+  );
+
   const reset = useCallback(() => {
     clearTimers();
+    setLens("settle");
     activePointer.current = null;
     pointerIntent.current = "idle";
     pointerStart.current = { x: 0, y: 0 };
@@ -113,11 +162,14 @@ export function SlideOpenControl({
     button?.style.removeProperty("--slide-thumb-scale-x");
     button?.style.removeProperty("--slide-thumb-scale-y");
     button?.style.removeProperty("--slide-thumb-tilt");
-  }, [clearTimers]);
+  }, [clearTimers, setLens]);
 
   useEffect(() => {
-    return () => clearTimers();
-  }, [clearTimers]);
+    return () => {
+      clearTimers();
+      clearLensTimers();
+    };
+  }, [clearTimers, clearLensTimers]);
 
   /* Capture can fail in Android WebViews. A pointer released outside the
      element must still clear the drag state instead of leaving the thumb and
@@ -217,6 +269,23 @@ export function SlideOpenControl({
     button?.style.setProperty("--slide-thumb-scale-x", String(1 + energy * 0.09));
     button?.style.setProperty("--slide-thumb-scale-y", String(1 - energy * 0.055));
     button?.style.setProperty("--slide-thumb-tilt", `${direction * energy * 3.2}deg`);
+    // The lens is gel: it stretches along its travel and rounds up again as
+    // soon as the finger rests (no pointer move resets it otherwise).
+    if (next > LENS_SWELL_TRAVEL && !completingRef.current) {
+      if (lensState.current !== "on") setLens("on");
+      // Travelling, the lens shows what it magnifies; the glyph steps aside.
+      if (button && button.dataset.lensTravel !== "true") button.dataset.lensTravel = "true";
+    }
+    if (lensState.current === "on" && button) {
+      button.style.setProperty("--slide-lens-sx", (1 + energy * 0.14).toFixed(3));
+      button.style.setProperty("--slide-lens-sy", (1 - energy * 0.08).toFixed(3));
+      if (lensStretchTimer.current != null) window.clearTimeout(lensStretchTimer.current);
+      lensStretchTimer.current = window.setTimeout(() => {
+        lensStretchTimer.current = null;
+        button.style.removeProperty("--slide-lens-sx");
+        button.style.removeProperty("--slide-lens-sy");
+      }, LENS_STRETCH_DECAY_MS);
+    }
     return ratio;
   };
 
@@ -241,6 +310,7 @@ export function SlideOpenControl({
     button?.style.removeProperty("--slide-thumb-scale-y");
     button?.style.removeProperty("--slide-thumb-tilt");
     clearTimers();
+    setLens("settle");
 
     // A pointer drag must not become the dialog's focus-return target. If the
     // button stays focused, closing the dialog restores focus here and the
@@ -303,6 +373,31 @@ export function SlideOpenControl({
     holdActivated.current = false;
     grabOffset.current = event.clientX - (metrics.thumbRect.left + metrics.thumbRect.width / 2);
     motionSample.current = { offset: 0, at: performance.now() };
+
+    // The lens layer copies the thumb's resting box and the track's padding
+    // box (its magnified view of the label and fill). Read once per press,
+    // from the rectangles just measured; never per frame.
+    const pressed = event.currentTarget;
+    const borderLeft = pressed.clientLeft || 0;
+    const borderTop = pressed.clientTop || 0;
+    const restLeft = metrics.thumbRect.left - metrics.buttonRect.left - borderLeft;
+    pressed.style.setProperty("--slide-lens-x", `${restLeft.toFixed(2)}px`);
+    pressed.style.setProperty(
+      "--slide-lens-y",
+      `${(metrics.thumbRect.top - metrics.buttonRect.top - borderTop).toFixed(2)}px`,
+    );
+    pressed.style.setProperty("--slide-lens-w", `${metrics.thumbRect.width.toFixed(2)}px`);
+    pressed.style.setProperty("--slide-lens-h", `${metrics.thumbRect.height.toFixed(2)}px`);
+    if (pressed.clientWidth) {
+      pressed.style.setProperty("--slide-track-w", `${pressed.clientWidth}px`);
+      pressed.style.setProperty("--slide-track-h", `${pressed.clientHeight}px`);
+    }
+    clearLensTimers();
+    const lensPointer = event.pointerId;
+    lensTimer.current = window.setTimeout(() => {
+      lensTimer.current = null;
+      if (activePointer.current === lensPointer && !completingRef.current) setLens("on");
+    }, LENS_SWELL_MS);
 
     if (requiresHold.current) {
       const button = event.currentTarget;
@@ -467,6 +562,8 @@ export function SlideOpenControl({
       data-holding="false"
       data-dragging="false"
       data-completing="false"
+      data-lens="off"
+      data-lens-travel="false"
       data-keyboard-focus="false"
       aria-haspopup={opensDialog ? "dialog" : undefined}
       aria-controls={ariaControls}
@@ -533,6 +630,26 @@ export function SlideOpenControl({
       <span className="ios-slide-open-arrows" aria-hidden="true">
         <i />
         <i />
+      </span>
+      {/* The liquid-glass lens: decorative, drawn only by the glass option.
+          A magnified copy of the track rides inside it. It sits before the
+          thumb so the thumb stays the control's last child. */}
+      <span className="ios-slide-open-lens" aria-hidden="true">
+        <span className="ios-slide-open-lens-body">
+          <span className="ios-slide-open-lens-view">
+            <span className="ios-slide-open-fill" />
+            <span className="ios-slide-open-label">
+              <b>{label}</b>
+            </span>
+            <span className="ios-slide-open-arrows">
+              <i />
+              <i />
+            </span>
+          </span>
+          <span className="ios-slide-open-lens-glyph">
+            <UiVectorIcon kind="plus" size={22} />
+          </span>
+        </span>
       </span>
       <span
         ref={thumbRef}

@@ -1136,7 +1136,18 @@ const P14Comparator = memo(function P14Comparator({
               aria-valuetext={`${p14Baseline.toUpperCase()}を100%とした比較`}
               onInput={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
               onChange={(event) => syncP14Baseline(event.currentTarget.valueAsNumber)}
+              // The glass knob swells while held (styles-liquid-glass.css).
+              onPointerDown={(event) => {
+                const slider = event.currentTarget.parentElement;
+                if (slider) slider.dataset.held = "true";
+              }}
+              onPointerCancel={(event) => {
+                const slider = event.currentTarget.parentElement;
+                if (slider) slider.dataset.held = "false";
+              }}
               onPointerUp={(event) => {
+                const slider = event.currentTarget.parentElement;
+                if (slider) slider.dataset.held = "false";
                 syncP14Baseline(event.currentTarget.valueAsNumber);
                 releaseControlFocus(event.currentTarget);
               }}
@@ -1921,15 +1932,27 @@ export function RexonanceSaga() {
             </b>
           </GuardedLink>
           <nav aria-label="レクソナンスサーガ ページ内ナビゲーション">
-            <a href="#performance" className="dg-control dg-focus">性能</a>
-            <a href="#p14" className="dg-control dg-focus">P14</a>
+            <a href="#performance" className="dg-control dg-focus">
+              性能
+            </a>
+            <a href="#p14" className="dg-control dg-focus">
+              P14
+            </a>
             {/* APEX (rx19): the bar lists all five chapters, numbered as the
                 chapter index; 03 stays lit through the runway and the replay. */}
-            <a href="#assembly" data-local-nav-through="assembly-runway assembly-replay" className="dg-control dg-focus">
+            <a
+              href="#assembly"
+              data-local-nav-through="assembly-runway assembly-replay"
+              className="dg-control dg-focus"
+            >
               変身
             </a>
-            <a href="#stages" className="dg-control dg-focus">形態</a>
-            <a href="#system" className="dg-control dg-focus">システム</a>
+            <a href="#stages" className="dg-control dg-focus">
+              形態
+            </a>
+            <a href="#system" className="dg-control dg-focus">
+              システム
+            </a>
           </nav>
           <SideMenuTrigger
             className="rxs-menu-trigger dg-control dg-focus"
@@ -2086,7 +2109,8 @@ export function RexonanceSaga() {
                 P14の基本設計を維持しながら、神性、終焉、超自己進化、自己共鳴へ特化した調整を施したレクソナンス専用仕様です。演算資源を終焉の適用判断、超自己進化の構造生成、共鳴機構の同期へ最適化し、神性出力と演算加速の同期を優先します。
               </p>
               <p>
-                入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14 Extreme Tuningを完全加速して全神飾の連続実装を支えます。
+                入力されたエーテルを攻撃・機動・防御へ変換する際の損失を局所ごとに抑え、必要な部位へ出力を再配分します。急激な負荷変動にも99.4%で追従し、連続最大出力でも96%の安定率を維持します。マックスでは、このP14
+                Extreme Tuningを完全加速して全神飾の連続実装を支えます。
               </p>
               <dl aria-label="P14 Extreme Tuningの主要指標">
                 <div>
@@ -2136,7 +2160,11 @@ export function RexonanceSaga() {
             <div className="rxs-stage-switcher rxs-reveal">
               <FormSlider
                 ref={stageTabsRef}
-                items={SHOWN_STAGES.map((key) => ({ key, label: STAGES[key].label, accent: STAGES[key].accent }))}
+                items={SHOWN_STAGES.map((key) => ({
+                  key,
+                  label: STAGES[key].label,
+                  accent: STAGES[key].accent,
+                }))}
                 value={stage}
                 onSelect={selectStage}
                 idPrefix="rxs-stage-tab"

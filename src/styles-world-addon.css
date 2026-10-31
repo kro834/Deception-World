@@ -1444,6 +1444,12 @@ br.tab-br {
   animation-delay: 0.14s;
 }
 
+/* The liquid-glass lens (slide-open-control.tsx) is drawn only by the
+   glass option (styles-liquid-glass.css); everywhere else it is absent. */
+.ios-slide-open-lens {
+  display: none;
+}
+
 .ios-slide-open .ios-slide-open-thumb {
   position: absolute;
   z-index: 4;
