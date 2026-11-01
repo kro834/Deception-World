@@ -7,7 +7,10 @@ import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_SIZE } from "@/lib/rexonance-suit"
 import {
   FAR_FROM_ENTRY_SWARM,
   FAR_FROM_SUIT_ACCENTS,
+  FAR_FROM_SUIT_ASSEMBLY,
+  FAR_FROM_SUIT_EMBERS,
   FAR_FROM_SUIT_LIGHT,
+  FAR_FROM_SUIT_OMEN,
 } from "@/lib/far-from-entry-calls";
 import { FAR_FROM_ENTRY_KITS, FAR_FROM_ENTRY_KIT_B_SHARE } from "@/lib/far-from-entry-kits";
 import {
@@ -70,6 +73,15 @@ import { WIRE_UNIT, decodeWireMesh, triangulateWireMesh } from "@/lib/far-from-w
      (lights.webp) runs out through the whole body from it, with a bloom
      that settles; at the end the finished figure is painted whole, so the
      finished frame is the artwork exactly.
+
+   Round 2 (owner, 2026-11-01: 「装着アニメーションを大きく改善して」): the
+   exploded-view assembly. The omen projects the suit's blueprint round the
+   body — every plate's outline at its staged pose, a leader line to its
+   seat; the burst's nanites pour into those poses, where each plate is
+   built in the air (the wire, then its tiles); then each plate is thrown
+   onto its seat, accelerating, its after-images trailing, squashes on
+   impact and springs back while sparks fly off it and its outline locks;
+   after the light has run, embers rise off the armour (the afterglow).
 
    Every frame is a closed-form function of the clock (a scrubbed clock
    resets the settled canvas and replays); the draw passes write typed
@@ -179,6 +191,13 @@ const KIT_FRAMES = Int16Array.from(FAR_FROM_ENTRY_KITS, (kit) => kit.frames);
 const KIT_MIP_X = Int16Array.from(FAR_FROM_ENTRY_KITS.flatMap((kit) => [...kit.mip.x]));
 const KIT_MIP_Y = Int16Array.from(FAR_FROM_ENTRY_KITS.flatMap((kit) => [...kit.mip.y]));
 
+const A = FAR_FROM_SUIT_ASSEMBLY;
+/** The after-images of a plate in flight: how many, ms apart, their light. */
+const TRAILS = { count: 3, gap: 13, light: [0.34, 0.2, 0.1] } as const;
+/** Sparks off a plate as it seats (per plate, by tier) and their reach
+ * (figure px). */
+const SPARKS = { desktop: 12, touch: 6, reach: [16, 46] as const } as const;
+
 export function createFarFromEntryEngine({
   box,
   coarse,
@@ -270,12 +289,98 @@ export function createFarFromEntryEngine({
       for (let i = 0; i < occ.length; i += 1) occ[i] = data[i * 4 + 3];
     }
     probe.width = probe.height = 0;
+    // Round 2: each plate's staged pose round the body (the exploded view):
+    // outward by where it sits (as far as the viewport leaves room), nearer
+    // the camera, a little turned; the bits from well outside the frame, the
+    // helmet raised. Made once, from the plate's place and its own hash.
+    const plates = plan.pieces.length;
+    const mix = (a: number, b: number) => {
+      let h = Math.imul((a + 1) ^ Math.imul(b + 0x2f1d, 0x9e3779b1), 0x85ebca6b);
+      h ^= h >>> 13;
+      h = Math.imul(h, 0xc2b2ae35);
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    // The room the viewport leaves on each side (the figure often stands
+    // to one side of the call): each side's plates spread as far as it lets.
+    const viewW = globalThis.innerWidth || inner.right;
+    const roomOf = (gap: number) =>
+      Math.min(1.6, Math.max(A.room, gap / Math.max(1, A.lateral * inner.width)));
+    const roomL = roomOf(inner.left);
+    const roomR = roomOf(viewW - inner.right);
+    const plateCX = new Float32Array(plates);
+    const plateCY = new Float32Array(plates);
+    const stX = new Float32Array(plates);
+    const stY = new Float32Array(plates);
+    const stK = new Float32Array(plates);
+    const stR = new Float32Array(plates);
+    const driver = new Uint8Array(plates);
+    for (let p = 0; p < plates; p += 1) {
+      const piece = plan.pieces[p];
+      plateCX[p] = piece.x + piece.w / 2;
+      plateCY[p] = piece.y + piece.h / 2;
+      driver[p] = DRIVER.has(piece.id) ? 1 : 0;
+      if (driver[p]) continue;
+      const nx = (plateCX[p] - FIG.width / 2) / (FIG.width / 2);
+      const ny = (plateCY[p] - FIG.height * 0.52) / (FIG.height * 0.5);
+      const h1 = mix(p, 11);
+      const h2 = mix(p, 12);
+      const h3 = mix(p, 13);
+      const side = nx < 0 ? -1 : 1;
+      if (piece.group === "bits") {
+        const away = Math.hypot(nx, ny) || 1;
+        stX[p] = (nx / away) * FIG.width * A.bitsOut * (0.8 + 0.4 * h1);
+        stY[p] = (ny / away) * FIG.width * A.bitsOut * (0.6 + 0.4 * h2);
+        stK[p] = 0.12 + 0.1 * h3;
+        stR[p] = side * A.turn * (0.8 + 0.6 * h1);
+        continue;
+      }
+      stX[p] =
+        side *
+        Math.sqrt(Math.abs(nx)) *
+        FIG.width *
+        A.lateral *
+        (side < 0 ? roomL : roomR) *
+        (0.75 + 0.5 * h1);
+      stY[p] = ny * FIG.height * A.vertical * (0.7 + 0.6 * h2);
+      if (piece.group === "helm") stY[p] -= FIG.height * A.helmLift * (0.8 + 0.4 * h2);
+      // The plates down the middle come at the camera the most.
+      stK[p] = A.depth * (0.7 + 0.6 * h3) * (1.6 - 0.9 * Math.min(1, Math.abs(nx)));
+      stR[p] = side * A.turn * (h1 - 0.25);
+    }
+    // A plate's pose: `f` of the way out to its stage (1 staged, 0 seated,
+    // below 0 driven into its seat), `squash` its impact, `bob` its hover.
+    const mat = new Float64Array(6);
+    const poseOf = (p: number, f: number, squash: number, bob: number, s: number) => {
+      const k = 1 + stK[p] * f + squash;
+      const r = stR[p] * f;
+      const a = k * Math.cos(r);
+      const b = k * Math.sin(r);
+      const cx = plateCX[p] * s;
+      const cy = plateCY[p] * s;
+      mat[0] = a;
+      mat[1] = b;
+      mat[2] = -b;
+      mat[3] = a;
+      mat[4] = cx + stX[p] * f * s - (a * cx - b * cy);
+      mat[5] = cy + (stY[p] * f + bob) * s - (b * cx + a * cy);
+    };
+    // The tiles' flights start round the staged plates: the swarm drains
+    // into the poses, not the seats.
+    const stagedX = new Float32Array(plan.total);
+    const stagedY = new Float32Array(plan.total);
+    for (let p = 0; p < plates; p += 1) {
+      poseOf(p, 1, 0, 0, 1);
+      for (let i = plan.plateTiles[p]; i < plan.plateTiles[p + 1]; i += 1) {
+        stagedX[i] = mat[0] * plan.flightX[i] + mat[2] * plan.flightY[i] + mat[4];
+        stagedY[i] = mat[1] * plan.flightX[i] + mat[3] * plan.flightY[i] + mat[5];
+      }
+    }
     // The swarm's plan over the tiles' flights.
     const chips = coarse ? S.chips.touch : S.chips.desktop;
     const swarm = planFarFromSwarm({
       count: chips,
       free: coarse ? S.free.touch : S.free.desktop,
-      tiles: { x: plan.flightX, y: plan.flightY, start: plan.start },
+      tiles: { x: stagedX, y: stagedY, start: plan.start },
       plateTiles: plan.plateTiles,
       under: U,
       figure: { width: FIG.width, height: FIG.height, core: FAR_FROM_ENTRY_MARKS.core },
@@ -287,14 +392,16 @@ export function createFarFromEntryEngine({
     const mipBelow = S.mipBelow;
     const sheets = sources.kits;
     const { atlas, figure, lights } = sources;
-    const plates = plan.pieces.length;
     const reach = Math.hypot(
       Math.max(CORE_X, FIG.width - CORE_X),
       Math.max(CORE_Y, FIG.height - CORE_Y),
     );
     // The clock the whole thing ends on: every plate whole and the light settled.
     let end = FAR_FROM_SUIT_LIGHT.from + FAR_FROM_SUIT_LIGHT.bloom;
-    for (let p = 0; p < plates; p += 1) if (plan.fit[p] + 40 > end) end = plan.fit[p] + 40;
+    for (let p = 0; p < plates; p += 1)
+      if (plan.fit[p] + A.settle > end) end = plan.fit[p] + A.settle;
+    // The afterglow's embers run on, short of the cover's end.
+    if (FAR_FROM_SUIT_EMBERS.until > end) end = FAR_FROM_SUIT_EMBERS.until;
     // Per-frame state in typed slots: a plate settled; the chip pose; the
     // fragment pose; the draw count; the light painted onto the settled canvas.
     const done = new Uint8Array(plates);
@@ -442,42 +549,127 @@ export function createFarFromEntryEngine({
     const moteT0 = new Float32Array(moteTotal);
     const moteT1 = new Float32Array(moteTotal);
     const moteGold = new Uint8Array(moteTotal);
-    const plateCX = new Float32Array(plates);
-    const plateCY = new Float32Array(plates);
     const accent = new Uint8Array(plates);
     const seamAt = new Float32Array(plates);
-    const driver = new Uint8Array(plates);
-    const mix = (a: number, b: number) => {
-      let h = Math.imul((a + 1) ^ Math.imul(b + 0x2f1d, 0x9e3779b1), 0x85ebca6b);
-      h ^= h >>> 13;
-      h = Math.imul(h, 0xc2b2ae35);
-      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-    };
     for (let p = 0; p < plates; p += 1) {
       const piece = plan.pieces[p];
-      plateCX[p] = piece.x + piece.w / 2;
-      plateCY[p] = piece.y + piece.h / 2;
       accent[p] = FAR_FROM_SUIT_ACCENTS.includes(piece.id) ? 1 : 0;
-      driver[p] = DRIVER.has(piece.id) ? 1 : 0;
       // When the light's wave (drawLight's radius) reaches the plate's centre.
       const d = Math.min(0.999, Math.hypot(plateCX[p] - CORE_X, plateCY[p] - CORE_Y) / reach);
       seamAt[p] = FAR_FROM_SUIT_LIGHT.from + (1 - Math.cbrt(1 - d)) * FAR_FROM_SUIT_LIGHT.spread;
       if (!driver[p] && seamAt[p] + BO.seam > end) end = seamAt[p] + BO.seam;
       const first = plan.plateTiles[p];
       const count = plan.plateTiles[p + 1] - first;
+      poseOf(p, 1, 0, 0, 1);
       for (let m = 0; m < perPlate; m += 1) {
         const i = p * perPlate + m;
         const tile = first + Math.min(count - 1, Math.floor(mix(i, 1) * count));
-        moteX[i] = plan.dx[tile] + plan.tw[tile] / 2;
-        moteY[i] = plan.dy[tile] + plan.th[tile] / 2;
-        moteA[i] =
-          Math.atan2(moteY[i] - plateCY[p], moteX[i] - plateCX[p]) + (mix(i, 2) - 0.5) * 1.6;
+        // Its tile where the plate is built: at the staged pose.
+        const tx = plan.dx[tile] + plan.tw[tile] / 2;
+        const ty = plan.dy[tile] + plan.th[tile] / 2;
+        moteX[i] = mat[0] * tx + mat[2] * ty + mat[4];
+        moteY[i] = mat[1] * tx + mat[3] * ty + mat[5];
+        moteA[i] = Math.atan2(ty - plateCY[p], tx - plateCX[p]) + (mix(i, 2) - 0.5) * 1.6;
         moteR[i] = BO.reach[0] + (BO.reach[1] - BO.reach[0]) * mix(i, 3);
         moteT1[i] = Math.max(FAR_FROM_ENTRY_MATERIAL + 60, plan.land[tile]);
         moteT0[i] = moteT1[i] - BO.span * (0.65 + 0.7 * mix(i, 4));
         moteGold[i] = mix(i, 6) < 0.24 ? 1 : 0;
       }
     }
+    // Round 2's own data, made once: each plate's outline (for the omen's
+    // blueprint and the sparks), the sparks, the embers.
+    const loopFrom = new Int32Array(plates + 1);
+    const outlineMeshes = plan.pieces.map((piece) => decodeWireMesh(FAR_FROM_WIREFRAME_ENTRY[piece.id]));
+    let outlineTotal = 0;
+    let loopTotal = 0;
+    for (const mesh of outlineMeshes) {
+      if (!mesh) continue;
+      outlineTotal += mesh.outline;
+      loopTotal += mesh.loopStart.length;
+    }
+    const olx = new Float32Array(outlineTotal);
+    const oly = new Float32Array(outlineTotal);
+    const loopStartAll = new Int32Array(loopTotal);
+    const loopCountAll = new Int32Array(loopTotal);
+    {
+      let v = 0;
+      let L = 0;
+      for (let p = 0; p < plates; p += 1) {
+        loopFrom[p] = L;
+        const mesh = outlineMeshes[p];
+        if (!mesh) continue;
+        for (let k = 0; k < mesh.loopStart.length; k += 1) {
+          loopStartAll[L] = v + mesh.loopStart[k];
+          loopCountAll[L] = mesh.loopCount[k];
+          L += 1;
+        }
+        for (let k = 0; k < mesh.outline; k += 1) {
+          olx[v + k] = mesh.xs[k] / WIRE_UNIT;
+          oly[v + k] = mesh.ys[k] / WIRE_UNIT;
+        }
+        v += mesh.outline;
+      }
+      loopFrom[plates] = L;
+    }
+    // The omen: when each plate's blueprint appears (the cascade's order).
+    const OM = FAR_FROM_SUIT_OMEN;
+    const omenAt = new Float32Array(plates);
+    {
+      let rank = 0;
+      const order = Array.from({ length: plates }, (_, p) => p).sort(
+        (a, b) => plan.fit[a] - plan.fit[b],
+      );
+      for (const p of order) omenAt[p] = OM.from + (OM.stagger * rank++) / Math.max(1, plates - 1);
+    }
+    // The sparks off each plate as it seats: from points of its outline,
+    // outward from its centre.
+    const sparkPer = coarse ? SPARKS.touch : SPARKS.desktop;
+    const sparkTotal = sparkPer * plates;
+    const sparkX = new Float32Array(sparkTotal);
+    const sparkY = new Float32Array(sparkTotal);
+    const sparkDX = new Float32Array(sparkTotal);
+    const sparkDY = new Float32Array(sparkTotal);
+    const sparkGold = new Uint8Array(sparkTotal);
+    for (let p = 0; p < plates; p += 1) {
+      const L0 = loopFrom[p];
+      const L1 = loopFrom[p + 1];
+      const from = L1 > L0 ? loopStartAll[L0] : 0;
+      let n = 0;
+      for (let L = L0; L < L1; L += 1) n += loopCountAll[L];
+      for (let m = 0; m < sparkPer; m += 1) {
+        const i = p * sparkPer + m;
+        const v = n ? from + Math.floor(mix(i, 21) * n) : -1;
+        sparkX[i] = v >= 0 ? olx[v] : plateCX[p];
+        sparkY[i] = v >= 0 ? oly[v] : plateCY[p];
+        const angle =
+          Math.atan2(sparkY[i] - plateCY[p], sparkX[i] - plateCX[p]) + (mix(i, 22) - 0.5) * 0.9;
+        const reach = SPARKS.reach[0] + (SPARKS.reach[1] - SPARKS.reach[0]) * mix(i, 23);
+        sparkDX[i] = Math.cos(angle) * reach * (accent[p] ? 1.5 : 1);
+        sparkDY[i] = Math.sin(angle) * reach * (accent[p] ? 1.5 : 1);
+        sparkGold[i] = mix(i, 24) < 0.55 ? 1 : 0;
+      }
+    }
+    // The embers: points of the armour's outlines, rising.
+    const EM = FAR_FROM_SUIT_EMBERS;
+    const emberTotal = outlineTotal ? (coarse ? EM.count.touch : EM.count.desktop) : 0;
+    const emberX = new Float32Array(emberTotal);
+    const emberY = new Float32Array(emberTotal);
+    const emberT = new Float32Array(emberTotal);
+    const emberRise = new Float32Array(emberTotal);
+    const emberSway = new Float32Array(emberTotal);
+    const emberGold = new Uint8Array(emberTotal);
+    for (let i = 0; i < emberTotal; i += 1) {
+      const v = Math.floor(mix(i, 31) * outlineTotal);
+      emberX[i] = olx[v];
+      emberY[i] = oly[v];
+      emberT[i] = EM.from + EM.span * mix(i, 32);
+      emberRise[i] = EM.rise[0] + (EM.rise[1] - EM.rise[0]) * mix(i, 33);
+      emberSway[i] = (mix(i, 34) - 0.5) * 2;
+      emberGold[i] = mix(i, 35) < 0.6 ? 1 : 0;
+    }
+    // A plate's motion at a moment: how far out it is (1 staged … 0 seated),
+    // its impact's squash, its hover.
+    const motion = new Float64Array(3);
     const heads = new Float32Array(2048);
     const settle = (p: number) => {
       const piece = plan.pieces[p];
@@ -567,6 +759,12 @@ export function createFarFromEntryEngine({
       const first = plan.plateTiles[p];
       const past = plan.plateTiles[p + 1];
       let locked = 0;
+      // Whole (in the air or flying): the plate in one draw.
+      if (t >= plan.built[p]) {
+        drawWhole(p, 1);
+        drawWire(p, t);
+        return;
+      }
       flight.save();
       flight.beginPath();
       for (let i = first; i < past; i += 1) {
@@ -649,12 +847,32 @@ export function createFarFromEntryEngine({
           counters[0] += 1;
         }
       }
-      // The wire over it: the lines drawn by now (those being drawn bright),
-      // fading as the plate fits.
+      drawWire(p, t);
+    };
+    // The plate's art whole, at the current transform.
+    const drawWhole = (p: number, alpha: number) => {
+      const piece = plan.pieces[p];
+      flight.globalAlpha = alpha;
+      flight.drawImage(
+        atlas,
+        piece.ax,
+        piece.ay,
+        piece.w,
+        piece.h,
+        piece.x * s,
+        piece.y * s,
+        piece.w * s,
+        piece.h * s,
+      );
+      counters[0] += 1;
+    };
+    // The wire over a plate: the lines drawn by now (those being drawn
+    // bright), fading as the plate is whole in the air.
+    const drawWire = (p: number, t: number) => {
       const wire = wireOf(p);
       if (!wire) return;
       const W = FAR_FROM_ENTRY_WIRE;
-      const light = 1 - Math.min(1, Math.max(0, (t - (plan.fit[p] - W.fadeAt)) / W.fade));
+      const light = 1 - Math.min(1, Math.max(0, (t - (plan.built[p] - W.fadeAt)) / W.fade));
       if (light <= 0) return;
       let headCount = 0;
       for (let pass = 0; pass < 2; pass += 1) {
@@ -759,6 +977,182 @@ export function createFarFromEntryEngine({
           flight.stroke();
           counters[0] += 1;
         }
+      }
+      flight.globalAlpha = 1;
+    };
+    // A plate's motion at `t` (into `motion`): staged and hovering until its
+    // flight; a short wind-up away, then thrown at its seat, accelerating
+    // all the way in; on its seat, driven a little past and squashed, then
+    // springing back.
+    const moveAt = (p: number, t: number) => {
+      const from = plan.fly[p];
+      const fit = plan.fit[p];
+      motion[1] = 0;
+      motion[2] = Math.sin(t * 0.0085 + p * 1.7) * 2.4;
+      if (t < from) {
+        motion[0] = 1;
+        return;
+      }
+      if (t < fit) {
+        const u = (t - from) / (fit - from);
+        motion[2] *= 1 - u;
+        if (u < 0.18) {
+          motion[0] = 1 + 0.07 * Math.sin((Math.PI * u) / 0.18);
+          return;
+        }
+        const v = (u - 0.18) / 0.82;
+        motion[0] = 1 - v * v * Math.sqrt(v);
+        return;
+      }
+      const x = Math.min(1, (t - fit) / A.settle);
+      const hit = Math.sin(Math.PI * Math.min(1, x * 1.6)) * (1 - x);
+      motion[0] = -0.05 * hit;
+      motion[1] = -(accent[p] ? 0.07 : 0.045) * hit;
+      motion[2] = 0;
+    };
+    // The flight canvas's transform for plate `p` at `t`.
+    const placeAt = (p: number, t: number) => {
+      moveAt(p, t);
+      poseOf(p, motion[0], motion[1], motion[2], s);
+      flight.setTransform(mat[0], mat[1], mat[2], mat[3], mat[4] + ox, mat[5] + oy);
+    };
+    // A plate in its fast flight, whole: its after-images, a few ms apart.
+    const drawTrails = (p: number, t: number) => {
+      const from = plan.fly[p];
+      const u = (t - from) / (plan.fit[p] - from);
+      if (u < 0.4 || t < plan.built[p]) return;
+      const count = coarse ? 1 : TRAILS.count;
+      for (let g = count; g >= 1; g -= 1) {
+        const at = t - g * TRAILS.gap;
+        if (at < from + (plan.fit[p] - from) * 0.25) continue;
+        if (counters[0] >= budget) return;
+        placeAt(p, at);
+        drawWhole(p, TRAILS.light[g - 1] * Math.min(1, (u - 0.4) * 4));
+      }
+    };
+    // A plate's outline as a path, at the current transform.
+    const blueprintPath = (p: number) => {
+      for (let L = loopFrom[p]; L < loopFrom[p + 1]; L += 1) {
+        const start = loopStartAll[L];
+        const count = loopCountAll[L];
+        flight.moveTo(olx[start] * s, oly[start] * s);
+        for (let k = 1; k < count; k += 1) flight.lineTo(olx[start + k] * s, oly[start + k] * s);
+        flight.closePath();
+      }
+    };
+    // The omen: the suit's blueprint round the body — each plate's outline
+    // at its staged pose (projected in, a touch large, settling), gone as
+    // its own construction begins — and the leader lines to the seats.
+    const drawOmen = (t: number) => {
+      let any = false;
+      for (let p = 0; p < plates; p += 1) {
+        if (driver[p] || t < omenAt[p]) continue;
+        const gone = (t - plan.spawn[p]) / OM.fade;
+        if (gone >= 1) continue;
+        const shown = Math.min(1, (t - omenAt[p]) / OM.fade);
+        const light = OM.light * shown * (gone > 0 ? 1 - gone : 1);
+        if (light <= 0.01) continue;
+        moveAt(p, t);
+        poseOf(p, 1, 0.06 * (1 - shown) * (1 - shown), motion[2], s);
+        flight.setTransform(mat[0], mat[1], mat[2], mat[3], mat[4] + ox, mat[5] + oy);
+        flight.beginPath();
+        blueprintPath(p);
+        flight.globalAlpha = light;
+        flight.strokeStyle = WIRE_ICE;
+        flight.lineWidth = 1.2 * s;
+        flight.stroke();
+        counters[0] += 1;
+        any = true;
+      }
+      flight.setTransform(1, 0, 0, 1, ox, oy);
+      if (!any) return;
+      // The leader lines: staged centre to seat, a mark on the seat.
+      flight.beginPath();
+      for (let p = 0; p < plates; p += 1) {
+        if (driver[p] || t < omenAt[p] || t >= plan.fly[p]) continue;
+        const x0 = (plateCX[p] + stX[p]) * s;
+        const y0 = (plateCY[p] + stY[p]) * s;
+        const x1 = plateCX[p] * s;
+        const y1 = plateCY[p] * s;
+        const shown = Math.min(1, (t - omenAt[p]) / OM.fade);
+        flight.moveTo(x0, y0);
+        flight.lineTo(x0 + (x1 - x0) * shown, y0 + (y1 - y0) * shown);
+        flight.rect(x1 - 2 * s, y1 - 2 * s, 4 * s, 4 * s);
+      }
+      flight.globalAlpha = 0.3;
+      flight.strokeStyle = WIRE_ICE;
+      flight.lineWidth = 0.8 * s;
+      flight.stroke();
+      flight.globalAlpha = 1;
+      counters[0] += 1;
+    };
+    // The sparks off each plate as it seats, and an accent's ring.
+    const drawSparks = (t: number) => {
+      for (let tone = 0; tone < 2; tone += 1) {
+        flight.beginPath();
+        let any = false;
+        for (let p = 0; p < plates; p += 1) {
+          if (driver[p]) continue;
+          const u = (t - plan.fit[p]) / A.sparkMs;
+          if (u < 0 || u >= 1) continue;
+          const head = 1 - (1 - u) * (1 - u) * (1 - u);
+          const w = Math.max(0, u - 0.3);
+          const tail = 1 - (1 - w) * (1 - w) * (1 - w);
+          for (let m = 0; m < sparkPer; m += 1) {
+            const i = p * sparkPer + m;
+            if (sparkGold[i] !== tone) continue;
+            flight.moveTo((sparkX[i] + sparkDX[i] * tail) * s, (sparkY[i] + sparkDY[i] * tail) * s);
+            flight.lineTo((sparkX[i] + sparkDX[i] * head) * s, (sparkY[i] + sparkDY[i] * head) * s);
+            any = true;
+          }
+        }
+        if (!any) continue;
+        flight.globalAlpha = 0.9;
+        flight.strokeStyle = tone ? WIRE_GOLD : WIRE_WHITE;
+        flight.lineWidth = (tone ? 1.6 : 1.2) * s;
+        flight.lineCap = "round";
+        flight.stroke();
+        flight.lineCap = "butt";
+        counters[0] += 1;
+      }
+      // An accent's ring: its group locked.
+      for (let p = 0; p < plates; p += 1) {
+        if (!accent[p]) continue;
+        const u = (t - plan.fit[p]) / 260;
+        if (u < 0 || u >= 1) continue;
+        const piece = plan.pieces[p];
+        const r = Math.max(piece.w, piece.h) * (0.35 + 0.75 * (1 - (1 - u) * (1 - u))) * s;
+        flight.beginPath();
+        flight.arc(plateCX[p] * s, plateCY[p] * s, r, 0, Math.PI * 2);
+        flight.globalAlpha = 0.6 * (1 - u) * (1 - u);
+        flight.strokeStyle = WIRE_GOLD;
+        flight.lineWidth = (2.4 * (1 - u) + 0.8) * s;
+        flight.stroke();
+        counters[0] += 1;
+      }
+      flight.globalAlpha = 1;
+    };
+    // The afterglow: embers rising off the armour, swaying, fading.
+    const drawEmbers = (t: number) => {
+      for (let tone = 0; tone < 2; tone += 1) {
+        flight.beginPath();
+        let any = false;
+        for (let i = 0; i < emberTotal; i += 1) {
+          if (emberGold[i] !== tone) continue;
+          const u = (t - emberT[i]) / EM.life;
+          if (u <= 0 || u >= 1) continue;
+          const rise = emberRise[i] * (1 - (1 - u) * (1 - u));
+          const x = (emberX[i] + Math.sin(u * 5 + i) * 5 * emberSway[i]) * s;
+          const y = (emberY[i] - rise) * s;
+          const size = (4.2 - 2.6 * u) * s;
+          flight.rect(x - size / 2, y - size / 2, size, size);
+          any = true;
+        }
+        if (!any) continue;
+        flight.globalAlpha = 0.9;
+        flight.fillStyle = tone ? WIRE_GOLD : WIRE_ICE;
+        flight.fill();
+        counters[0] += 1;
       }
       flight.globalAlpha = 1;
     };
@@ -890,16 +1284,27 @@ export function createFarFromEntryEngine({
         counters[0] += 3;
       }
       if (t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 0);
+      if (t < FAR_FROM_SUIT_LIGHT.from) drawOmen(t);
       for (let p = 0; p < plates; p += 1) {
         // The driver is worn from the first frame (owner, 2026-10-24:
         // 「最初からドライバーを装着」): settled at once, never formed.
         if (!done[p] && DRIVER.has(plan.pieces[p].id)) settle(p);
         if (done[p] || t < plan.spawn[p]) continue;
-        if (t >= plan.fit[p] + 40) settle(p);
+        if (t >= plan.fit[p] + A.settle) {
+          settle(p);
+          continue;
+        }
+        // Built in the air, thrown onto its seat, seated with a squash.
+        if (t >= plan.fly[p] && t < plan.fit[p]) drawTrails(p, t);
+        placeAt(p, t);
+        if (t >= plan.fit[p]) drawWhole(p, 1);
         else drawPlate(p, t);
+        flight.setTransform(1, 0, 0, 1, ox, oy);
       }
       if (t >= FAR_FROM_SUIT_LIGHT.from) drawLight(t);
       drawLocks(t);
+      drawSparks(t);
+      if (t >= EM.from) drawEmbers(t);
       if (t >= FAR_FROM_ENTRY_MATERIAL) drawMotes(t);
       if (t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 1);
       if (flame > 0) {
