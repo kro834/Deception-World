@@ -8,7 +8,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-const css = read("src/styles-liquid-glass-controls.css");
+const sheet = read("src/styles-liquid-glass-controls.css");
+// The long press (section 8: the swell on a held control and its light
+// overlay) has its own invariants, pinned by glass-hold.test.mjs.
+const css = sheet.slice(0, sheet.lastIndexOf("/* ---", sheet.indexOf("8. The hold")));
 const script = read("src/lib/liquid-glass-controls.ts");
 const defs = read("src/components/liquid-glass-defs.tsx");
 const root = read("src/routes/__root.tsx");

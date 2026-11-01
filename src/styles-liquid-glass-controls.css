@@ -1050,3 +1050,350 @@ html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg
     box-shadow: none !important;
   }
 }
+
+/* ---------------------------------------------------------------
+   8. The hold (owner, 2026-11-01: 「リキッドグラス長押し時のボタンの大型化や
+      光の拡散効果を実装して」). src/lib/liquid-glass-hold.ts marks a press
+      held for 200 ms with data-lg-hold="on" (then "out" for the release)
+      and data-lg-hold-kind: "swell" (the glass buttons, the pills, the rail
+      items, the selects), "switch" (the side menu's switches: their
+      decorative track swells, never the button's box) or "light" (Ciel's
+      button, the slide-to-open pills and the range thumbs, whose drags
+      measure their box: lit, never scaled). A quick tap never gets here:
+      the shared press (the gel squash) is all it shows.
+
+   The swell is the individual `scale` property (the press driver's; no
+   `transform`, no size), so nothing is laid out again; its size comes from
+   the script (--lg-hold-s: about 1.18 for an icon down to 1.08 for a card,
+   less where a clipping ancestor has no room). The light is one overlay,
+   .lg-hold, which the script places over the control (in the body, or the
+   open modal dialog) and cuts to the nearest clipping ancestor:
+   - .lg-hold-halo: the lift (a deeper shadow) and the light spilling past
+     the rim toward the finger, both outer shadows, so the control itself
+     is never covered;
+   - .lg-hold-shell, the control's shape: a bloom of light spreading from
+     the finger (--lg-tx, --lg-ty), two caustic rings travelling outward
+     from where it first rested (--lg-rx, --lg-ry), and the rim nearest the
+     finger brightened.
+   Only scale, translate and opacity animate; nothing samples a backdrop.
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    [data-lg-hold="on"][data-lg-hold-kind="swell"]:not(.zeus-button, .ios-slide-open, input):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: var(--lg-hold-s, 1);
+    transition:
+      scale 0.52s var(--lg-spring),
+      filter 0.32s var(--dw-ease-out),
+      box-shadow 0.32s var(--dw-ease-out),
+      --lg-glow 0.36s var(--dw-ease-out),
+      --lg-rim 0.36s var(--dw-ease-out),
+      --lg-sheen 0.36s var(--dw-ease-out),
+      --lg-tint-a 0.36s var(--dw-ease-out),
+      color 0.18s var(--dw-ease-out),
+      background-color 0.18s var(--dw-ease-out),
+      border-color 0.18s var(--dw-ease-out);
+  }
+
+  /* The release: back to rest on the gel spring, past it once. */
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    [data-lg-hold="out"][data-lg-hold-kind="swell"]:not(.zeus-button, .ios-slide-open, input):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition:
+      scale var(--lg-spring-ms) var(--lg-spring),
+      filter 0.42s var(--dw-ease-out),
+      box-shadow 0.42s var(--dw-ease-out),
+      --lg-glow 0.46s var(--dw-ease-out),
+      --lg-rim 0.46s var(--dw-ease-out),
+      --lg-sheen 0.46s var(--dw-ease-out),
+      --lg-tint-a 0.46s var(--dw-ease-out),
+      color 0.18s var(--dw-ease-out),
+      background-color 0.18s var(--dw-ease-out),
+      border-color 0.18s var(--dw-ease-out);
+  }
+
+  /* A switch: its track swells (the knob already does on the press). */
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    .side-panel-zeus-toggle[data-lg-hold="on"]
+    > i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: var(--lg-hold-s, 1);
+    transition: scale 0.52s var(--lg-spring);
+  }
+
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    .side-panel-zeus-toggle[data-lg-hold="out"]
+    > i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition: scale var(--lg-spring-ms) var(--lg-spring);
+  }
+}
+
+/* Held, the glass is lit from inside a little more than a press lights it
+   (the overlay carries the light itself). Not the draggables: their glass
+   stays rim-only, as when they are pressed. */
+html[data-button-style="liquid"]
+  body
+  [data-lg-hold="on"][data-lg-hold][data-lg-hold]:not([data-lg-hold-kind="light"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-glow: 0.5;
+  --lg-rim: 1;
+  --lg-sheen: 0.3;
+}
+
+/* A grown control rises over its neighbours (only where z-index already
+   applies, so no box changes how it is placed). */
+html[data-button-style="liquid"]
+  body
+  [data-lg-hold-raise]:is([data-lg-hold="on"], [data-lg-hold="out"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  z-index: 4;
+}
+
+/* A held glass control is the hold, not WebKit's callout or text loupe. */
+html[data-button-style="liquid"]
+  body
+  [data-lg-hold]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* The overlay. */
+html[data-button-style="liquid"] .lg-hold {
+  position: fixed;
+  z-index: 2147482000;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  contain: strict;
+  pointer-events: none;
+  background: none;
+}
+
+html[data-button-style="liquid"] .lg-hold[hidden] {
+  display: none;
+}
+
+html[data-button-style="liquid"] :is(.lg-hold-halo, .lg-hold-shell) {
+  position: absolute;
+  top: var(--lg-hold-y);
+  left: var(--lg-hold-x);
+  width: var(--lg-hold-w);
+  height: var(--lg-hold-h);
+  border-radius: var(--lg-hold-r);
+  opacity: 0;
+  scale: var(--lg-hold-from, 1);
+}
+
+html[data-button-style="liquid"] .lg-hold-shell {
+  overflow: hidden;
+}
+
+html[data-button-style="liquid"] .lg-hold[data-state="on"] :is(.lg-hold-halo, .lg-hold-shell) {
+  opacity: 1;
+  scale: var(--lg-hold-s, 1);
+  transition:
+    scale 0.52s var(--lg-spring),
+    opacity 0.24s cubic-bezier(0.2, 0, 0, 1);
+}
+
+html[data-button-style="liquid"] .lg-hold[data-state="out"] :is(.lg-hold-halo, .lg-hold-shell) {
+  opacity: 0;
+  scale: 1;
+  transition:
+    scale var(--lg-spring-ms) var(--lg-spring),
+    opacity 0.48s var(--dw-ease-out);
+}
+
+/* The lift and the spill: a deeper shadow under the grown glass, and its
+   light leaking past the rim on the finger's side. */
+html[data-button-style="liquid"] .lg-hold-halo {
+  box-shadow:
+    0 18px 34px -14px rgb(0 0 0 / 0.6),
+    0 6px 14px -8px rgb(0 0 0 / 0.42),
+    calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 22px 0 rgb(var(--lg-hold-tint) / 0.34),
+    0 0 14px -2px rgb(255 255 255 / 0.16);
+}
+
+html[data-button-style="liquid"] .lg-hold[data-kind="light"] .lg-hold-halo {
+  box-shadow:
+    calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 22px 0 rgb(var(--lg-hold-tint) / 0.3),
+    0 0 12px -2px rgb(255 255 255 / 0.14);
+}
+
+/* The bloom: light from the finger, spreading through the glass. */
+html[data-button-style="liquid"] .lg-hold-bloom,
+html[data-button-style="liquid"] .lg-hold-ripple::before,
+html[data-button-style="liquid"] .lg-hold-ripple::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--lg-hold-d);
+  height: var(--lg-hold-d);
+  margin: calc(var(--lg-hold-d) / -2) 0 0 calc(var(--lg-hold-d) / -2);
+  border-radius: 50%;
+}
+
+html[data-button-style="liquid"] .lg-hold-bloom {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 255 255 / 0.46),
+    rgb(255 255 255 / 0.3) 12%,
+    rgb(255 255 255 / 0.15) 27%,
+    rgb(var(--lg-hold-tint) / 0.08) 46%,
+    rgb(var(--lg-hold-tint) / 0) 70%
+  );
+  translate: var(--lg-tx) var(--lg-ty);
+  scale: 0.2;
+  opacity: 0;
+}
+
+html[data-button-style="liquid"] .lg-hold[data-state="on"] .lg-hold-bloom {
+  scale: 1;
+  opacity: 1;
+  transition:
+    translate 0.16s cubic-bezier(0.2, 0.8, 0.3, 1),
+    scale 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.26s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* A milky plate: the light is its tint, not white, so the label holds. */
+html[data-button-style="liquid"] .lg-hold[data-light] .lg-hold-bloom {
+  background: radial-gradient(
+    closest-side,
+    rgb(255 255 255 / 0.2),
+    rgb(var(--lg-hold-tint) / 0.2) 16%,
+    rgb(var(--lg-hold-tint) / 0.09) 38%,
+    rgb(var(--lg-hold-tint) / 0) 64%
+  );
+}
+
+/* A range thumb: the bloom along the track alone. */
+html[data-button-style="liquid"] .lg-hold[data-bare] :is(.lg-hold-halo, .lg-hold-rim) {
+  display: none;
+}
+
+/* Released, the light dissipates outward as it fades. */
+html[data-button-style="liquid"] .lg-hold[data-state="out"] .lg-hold-bloom {
+  scale: 1.35;
+  opacity: 1;
+  transition:
+    translate 0.16s cubic-bezier(0.2, 0.8, 0.3, 1),
+    scale 0.56s var(--dw-ease-out);
+}
+
+/* The caustic: two rings of refracted light travelling out from where the
+   finger came to rest, warm inside and cool outside. */
+html[data-button-style="liquid"] .lg-hold-ripple::before,
+html[data-button-style="liquid"] .lg-hold-ripple::after {
+  content: "";
+  background: radial-gradient(
+    closest-side,
+    rgb(255 255 255 / 0) 60%,
+    rgb(255 150 200 / 0.14) 70%,
+    rgb(255 255 255 / 0.5) 79%,
+    rgb(140 220 255 / 0.26) 86%,
+    rgb(140 220 255 / 0) 94%
+  );
+  translate: var(--lg-rx) var(--lg-ry);
+  scale: 0.06;
+  opacity: 0;
+}
+
+html[data-button-style="liquid"] .lg-hold[data-state="on"] .lg-hold-ripple::before {
+  animation: lg-hold-ripple 0.95s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+html[data-button-style="liquid"] .lg-hold[data-state="on"] .lg-hold-ripple::after {
+  animation: lg-hold-ripple 1.1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.2s both;
+}
+
+@keyframes lg-hold-ripple {
+  0% {
+    opacity: 0;
+    scale: 0.06;
+  }
+
+  16% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+/* The rim nearest the finger, brightened. */
+html[data-button-style="liquid"] .lg-hold-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1.25px rgb(255 255 255 / 0.9),
+    inset 0 0 12px -3px rgb(255 255 255 / 0.6),
+    inset 0 0 6px -2px rgb(var(--lg-hold-tint) / 0.8);
+  -webkit-mask: radial-gradient(
+    circle calc(var(--lg-hold-d) * 0.34) at var(--lg-tx) var(--lg-ty),
+    #000,
+    rgb(0 0 0 / 0.35) 55%,
+    transparent
+  );
+  mask: radial-gradient(
+    circle calc(var(--lg-hold-d) * 0.34) at var(--lg-tx) var(--lg-ty),
+    #000,
+    rgb(0 0 0 / 0.35) 55%,
+    transparent
+  );
+}
+
+/* Reduced motion and economy: no swell (the target rules wait for
+   no-preference and skip economy), no rings, no lift: the glass brightens
+   where the finger is, gently, and dims again. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-button-style="liquid"] .lg-hold :is(.lg-hold-halo, .lg-hold-shell, .lg-hold-bloom) {
+    scale: 1 !important;
+  }
+
+  html[data-button-style="liquid"] .lg-hold :is(.lg-hold-halo, .lg-hold-ripple) {
+    display: none;
+  }
+
+  html[data-button-style="liquid"] .lg-hold[data-state] .lg-hold-bloom {
+    opacity: 0.7;
+    transition: opacity 0.3s ease !important;
+  }
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"] .lg-hold :is(.lg-hold-halo, .lg-hold-shell, .lg-hold-bloom) {
+  scale: 1 !important;
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"] .lg-hold :is(.lg-hold-halo, .lg-hold-ripple, .lg-hold-rim) {
+  display: none;
+}
+
+/* Reduced transparency: the same light, subtler. */
+@media (prefers-reduced-transparency: reduce) {
+  html[data-button-style="liquid"] .lg-hold {
+    opacity: 0.5;
+  }
+}
+
+/* Forced colours: no overlay and no swell; the system's focus and press. */
+@media (forced-colors: active) {
+  html[data-button-style="liquid"] .lg-hold {
+    display: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    [data-lg-hold][data-lg-hold-kind="swell"]:not(#lg-glass):not(#lg-glass):not(#lg-glass),
+  html[data-button-style="liquid"]
+    body
+    .side-panel-zeus-toggle[data-lg-hold]
+    > i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: none !important;
+  }
+}
