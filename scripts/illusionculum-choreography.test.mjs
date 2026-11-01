@@ -76,9 +76,11 @@ test("completed IC shells hold away from the body, then seat continuously and re
       continue;
     }
     staged++;
-    close(p.depart - p.to, 0.012);
-    close(p.contact - p.depart, 0.026);
-    close(p.lift / old.lift, 1.65);
+    // Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — each plate is
+    // built far off the body, read there, then driven home in a short stroke.
+    close(p.depart - p.to, 0.022);
+    close(p.contact - p.depart, 0.018);
+    close(p.lift / old.lift, 7);
     close(armorSeatLift(p, (p.to + p.depart) / 2), 1 - p.seatHold);
     for (const boundary of [p.from, p.to, p.depart, p.contact])
       assert.ok(
