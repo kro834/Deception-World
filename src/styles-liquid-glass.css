@@ -57,6 +57,24 @@
   initial-value: 0.12;
 }
 
+/* The curvature (owner, 2026-11-01: 「ガラスの湾曲はfableで作って」;
+   src/lib/liquid-glass-curvature.ts). Each measured control carries
+   data-lg-curve="<shape key>", and a rule per shape, in a <style> the script
+   owns, sets two properties the sheet reads:
+   - --lg-lens: url(#dw-lens-<key>), the shape's own displacement filter (a
+     convex bezel refracting the backdrop inward, Chromium). Until a control
+     is measured, the lens rules fall back to the capsule or round map.
+     Registered non-inheriting, so a thumb never wears its track's lens;
+   - --lg-rim-map: url(data:…), the same bezel's light (specular arc, fresnel
+     band, far caustic), the controls' first background layer on every
+     engine: Safari and Firefox, which draw no url() backdrop, read the curve
+     from this alone, with no new backdrop layer. Not registered: the slider
+     lens's ::after reads it from its element. */
+@property --lg-lens {
+  syntax: "*";
+  inherits: false;
+}
+
 html[data-button-style="liquid"] {
   /* Light from the upper left. -1..1 on each axis. */
   --lg-lx: -0.55;
@@ -193,6 +211,8 @@ html[data-button-style="liquid"]
   border-radius: var(--lg-radius) !important;
   clip-path: none !important;
   background:
+    /* the bezel's light (the curvature's rim map, over the border box) */
+    var(--lg-rim-map, none) center / 100% 100% no-repeat border-box,
     radial-gradient(
       120% 150% at var(--lg-px) var(--lg-py),
       rgb(255 255 255 / var(--lg-glow)),
@@ -262,8 +282,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     .rxe-hero-secondary,
     .exo-door
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: url(#dw-liquid-lens-capsule) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
-  backdrop-filter: url(#dw-liquid-lens-capsule) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
 }
 
 html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
@@ -279,8 +299,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     .quick-search-close,
     .zeus-button:not([data-dragging="true"])
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: url(#dw-liquid-lens-round) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
-  backdrop-filter: url(#dw-liquid-lens-round) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
 }
 
 /* ---------------------------------------------------------------
@@ -994,6 +1014,7 @@ html[data-button-style="liquid"]
   border: 0 !important;
   border-radius: 999px !important;
   background:
+    var(--lg-rim-map, none) center / 100% 100% no-repeat border-box,
     radial-gradient(120% 90% at 30% -10%, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0) 55%),
     linear-gradient(
       180deg,
@@ -1021,8 +1042,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
   body
   .ios-slide-open
   .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: url(#dw-liquid-lens-capsule) blur(3px) saturate(1.8) brightness(1.1) !important;
-  backdrop-filter: url(#dw-liquid-lens-capsule) blur(3px) saturate(1.8) brightness(1.1) !important;
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(3px) saturate(1.8) brightness(1.1) !important;
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(3px) saturate(1.8) brightness(1.1) !important;
 }
 
 /* The ring and the painted glints belonged to the round knob; the pill's
@@ -1230,6 +1251,21 @@ html[data-button-style="liquid"]
     opacity 0.14s ease;
 }
 
+/* Chromium: the swollen lens bends the track under its rim with its own
+   shape's map (the curvature), the capsule until it is measured. The hold
+   module marks any other swollen thumb visual .lg-lens-target: it gets the
+   same lens. */
+html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
+  body
+  :is(.ios-slide-open .ios-slide-open-lens-body, .lg-lens-target):not(#lg-glass):not(#lg-glass):not(
+    #lg-glass
+  ) {
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(8px) saturate(1.7)
+    brightness(1.08);
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(8px) saturate(1.7)
+    brightness(1.08);
+}
+
 /* Swelling: the lens lifts past its size once and settles at 1.34. */
 html[data-button-style="liquid"]
   body
@@ -1293,6 +1329,7 @@ html[data-button-style="liquid"] body .ios-slide-open .ios-slide-open-lens-body:
   border-radius: inherit;
   pointer-events: none;
   background:
+    var(--lg-rim-map, none) center / 100% 100% no-repeat,
     radial-gradient(90% 70% at 32% 0%, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0) 60%),
     radial-gradient(70% 55% at 72% 112%, rgb(var(--lg-tint) / 0.26), rgb(var(--lg-tint) / 0) 70%);
   box-shadow:

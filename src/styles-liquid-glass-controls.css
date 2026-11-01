@@ -399,6 +399,8 @@ html[data-button-style="liquid"]
   border: 0;
   border-radius: 999px;
   background:
+    /* the bezel's light (the curvature's rim map, styles-liquid-glass.css) */
+    var(--lg-rim-map, none) center / 100% 100% no-repeat,
     radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 58%),
     /* the groove under the lens, 1.5x */
     linear-gradient(
@@ -431,6 +433,8 @@ html[data-button-style="liquid"]
   border: 0;
   border-radius: 999px;
   background:
+    /* the bezel's light (the curvature's rim map, styles-liquid-glass.css) */
+    var(--lg-rim-map, none) center / 100% 100% no-repeat,
     radial-gradient(90% 70% at 32% 4%, rgb(255 255 255 / 0.5), rgb(255 255 255 / 0) 58%),
     linear-gradient(
       rgb(0 0 0 / 0) calc(50% - 4.5px),
@@ -824,8 +828,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
   :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:not(
     #lg-glass
   ):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
-  -webkit-backdrop-filter: url(#dw-liquid-lens-capsule) blur(1.5px) saturate(1.8) brightness(1.1);
-  backdrop-filter: url(#dw-liquid-lens-capsule) blur(1.5px) saturate(1.8) brightness(1.1);
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(1.5px) saturate(1.8) brightness(1.1);
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(1.5px) saturate(1.8) brightness(1.1);
 }
 
 /* Economy: no lens, no sampling, no gel: blur-free glass with its rim. */
