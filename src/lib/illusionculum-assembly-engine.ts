@@ -56,6 +56,7 @@ import { createIllusionculumFormChange } from "./illusionculum-form-change.ts";
 import {
   createIllusionculumAccents,
   illusionculumAccentBudget,
+  type IllusionculumCameraSink,
 } from "./illusionculum-assembly-accents.ts";
 import { createIllusionculumImageLoader } from "./illusionculum-image-loader.js";
 import { ILLUSIONCULUM_FORM_CHAIN, ILLUSIONCULUM_FORM_PATHS } from "./illusionculum-assembly.ts";
@@ -165,11 +166,70 @@ export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
   };
 }
 
+/** The layers the camera moves: the given ones (the entry's stage), else
+ * the scroll's live canvas and its field, which share the frame's box. */
+const cameraLayers = (runway: HTMLElement, given: readonly HTMLElement[]) =>
+  given.length
+    ? given
+    : [...runway.querySelectorAll<HTMLElement>(".rzn-frame > :is(canvas.rzn-canvas, .rzn-field)")];
+
+/** The director's camera as a CSS transform (origin 0 0) on the scene's
+ * layers: the focus point (figure px) carried to the rest position of its
+ * anchor, scaled and rolled, plus the shake. The figure-to-layer mapping is
+ * the canvas's own (its 2D transform while the accents draw, over its
+ * backing ratio), so the move is exact wherever the engine places the
+ * figure. Nothing is written while it does not change. */
+function illusionculumCameraSink(
+  runway: HTMLElement,
+  given: readonly HTMLElement[],
+  amount: number,
+): { sink: IllusionculumCameraSink; amount: number } | undefined {
+  const canvas = runway.querySelector<HTMLCanvasElement>("canvas.rzn-canvas");
+  if (!canvas) return undefined;
+  return {
+    amount,
+    sink(frame, shakeX, shakeY) {
+      const layers = cameraLayers(runway, given);
+      const context = canvas.getContext("2d");
+      const css = canvas.clientWidth;
+      if (!context || !css || !canvas.width) return;
+      const m = context.getTransform();
+      const ratio = canvas.width / css;
+      // Figure px to the layer's CSS px.
+      const sx = m.a / ratio;
+      const ox = m.e / ratio;
+      const oy = m.f / ratio;
+      const [fx, fy, gx, gy, scale, roll] = frame;
+      const cos = Math.cos(roll) * scale;
+      const sin = Math.sin(roll) * scale;
+      const Fx = ox + fx * sx;
+      const Fy = oy + fy * sx;
+      const tx = ox + gx * sx - (cos * Fx - sin * Fy) + shakeX * sx;
+      const ty = oy + gy * sx - (sin * Fx + cos * Fy) + shakeY * sx;
+      const value =
+        scale === 1 && roll === 0 && Math.abs(tx) < 0.01 && Math.abs(ty) < 0.01
+          ? ""
+          : `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) rotate(${roll.toFixed(5)}rad) scale(${scale.toFixed(4)})`;
+      for (const layer of layers) {
+        layer.style.transformOrigin = "0 0";
+        layer.style.transform = value;
+      }
+    },
+  };
+}
+
+function releaseIllusionculumCamera(runway: HTMLElement, given: readonly HTMLElement[]) {
+  for (const layer of cameraLayers(runway, given)) {
+    layer.style.transform = "";
+    layer.style.transformOrigin = "";
+  }
+}
+
 /** Mounts the scene on the runway (the engine's disposer back). */
 export function mountIllusionculumAssemblyEngine(
   runway: HTMLElement,
   environment: typeof globalThis = window,
-  options: { entry?: boolean; progress?: () => number } = {},
+  options: { entry?: boolean; progress?: () => number; camera?: readonly HTMLElement[] } = {},
 ): () => void {
   const config = illusionculumAssemblyConfig();
   const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
@@ -179,16 +239,27 @@ export function mountIllusionculumAssemblyEngine(
   // separate idle windows for each phase of the page's suit-up.
   config.eager = compact || Boolean(options.entry);
   config.progress = options.progress;
-  // This form's own accents (2026-10-30): the deep nanite vortex draining
-  // into the plates group by group, the seam scans, the locks and the
-  // seal's afterglow (illusionculum-assembly-accents.ts), at the device's
-  // budget.
+  // This form's director (round 2, 2026-11-01: 「装着アニメーションを大きく
+  // 改善して」): the omen, the nanite torrent pouring into each plate where
+  // it hovers, each plate's hit at its exact contact, the groups' power, the
+  // seal and the afterglow (illusionculum-assembly-accents.ts), at the
+  // device's budget — and its camera, written as a CSS transform on the
+  // scene's layers (the entry's whole stage; the scroll's canvas and field).
+  const camera = options.camera ?? [];
   config.accents = createIllusionculumAccents({
     size: ILLUSIONCULUM_SUIT_SIZE,
     pieces: ILLUSIONCULUM_SUIT_PIECES,
     core: ILLUSIONCULUM_SUIT_MARKS.core,
+    belt: ILLUSIONCULUM_SUIT_MARKS.belt,
     seams: ILLUSIONCULUM_SUIT_SEAMS,
     budget: illusionculumAccentBudget(environment, { compact, entry: Boolean(options.entry) }),
+    // Phones frame closer already (the calls sit under the figure): a
+    // gentler move there.
+    camera: illusionculumCameraSink(
+      runway,
+      camera,
+      (options.entry ? 1 : 0.7) * (compact ? 0.62 : 1),
+    ),
   });
   if (compact) {
     config.prewarm = !options.entry;
@@ -207,6 +278,7 @@ export function mountIllusionculumAssemblyEngine(
     return () => {
       loader?.dispose();
       dispose();
+      releaseIllusionculumCamera(runway, camera);
     };
   } catch (error) {
     loader?.dispose();
