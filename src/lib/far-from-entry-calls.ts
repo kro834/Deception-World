@@ -81,7 +81,10 @@ export const FAR_FROM_SUIT_FLIGHT = { ms: 170, spread: [0.72, 1.28], bits: 2.2 }
 export const FAR_FROM_SUIT_CASCADE = [
   {
     group: "legs",
-    from: CHANT + 60,
+    // Round 2 (owner, 2026-11-01: 「装着アニメーションを大きく改善して」): the
+    // legs' plates are built in the air first, so their volley starts later
+    // and lands faster, onto the first DEUS！.
+    from: CHANT + 130,
     to: FAR_FROM_SUIT_SNAP.legs,
     order: ["boot-l", "boot-r", "shin-l", "shin-r", "knee-l", "knee-r", "thigh-l", "thigh-r"],
   },
@@ -131,6 +134,59 @@ export const FAR_FROM_SUIT_CASCADE = [
     order: ["helmet-visor", "helmet-crest"],
   },
 ] as const;
+/** Round 2 (owner, 2026-11-01: 「装着アニメーションを大きく改善して」): the
+ * exploded-view assembly. Each plate is built in the air at its own staged
+ * pose round the body (the wire, then the nanites' tiles) and then thrown
+ * onto its seat: `fly` ms of flight by group, accelerating into the seat;
+ * its tiles land over `build` ms ending `overlap` of the flight in (a plate
+ * may finish forming as it starts to move), never before the material is
+ * there (+ `materialLead`); on its seat it squashes and springs back over
+ * `settle` ms while sparks fly off it (`sparkMs`). The staged poses
+ * (figure px / shares): `lateral` of the figure's width outward (the room
+ * the viewport leaves, at least `room`), `vertical` of its height outward,
+ * `depth` nearer the camera, a turn of up to `turn` radians; the bits from
+ * well outside the frame (`bitsOut`); the helmet raised `helmLift`. */
+export const FAR_FROM_SUIT_ASSEMBLY = {
+  fly: {
+    legs: 120,
+    waist: 130,
+    arms: 130,
+    chest: 150,
+    shoulders: 150,
+    tail: 170,
+    ribbon: 180,
+    bits: 230,
+    helm: 160,
+  },
+  build: 190,
+  overlap: 0.4,
+  materialLead: 50,
+  settle: 120,
+  sparkMs: 190,
+  lateral: 0.2,
+  vertical: 0.1,
+  depth: 0.28,
+  turn: 0.2,
+  room: 0.35,
+  bitsOut: 0.42,
+  helmLift: 0.075,
+} as const;
+/** The omen (round 2): the suit's blueprint — every plate's outline at its
+ * staged pose with a leader line to its seat — projected round the body
+ * from `from` ms, plate by plate over `stagger` ms, each fading in over
+ * `fade` ms and out as its own construction begins. */
+export const FAR_FROM_SUIT_OMEN = { from: 120, stagger: 420, fade: 160, light: 0.55 } as const;
+/** The afterglow (round 2): embers rising off the armour after the light
+ * has run, from `from` ms over `span`, each living `life` ms; the engine
+ * runs until `until` (before the cover ends). */
+export const FAR_FROM_SUIT_EMBERS = {
+  from: FINAL + 260,
+  span: 420,
+  life: 520,
+  rise: [36, 96],
+  until: 3170,
+  count: { desktop: 110, touch: 44 },
+} as const;
 /** When each plate is whole (its clank), by id. */
 export const FAR_FROM_SUIT_FIT: Readonly<Record<string, number>> = Object.fromEntries(
   FAR_FROM_SUIT_CASCADE.flatMap(({ from, to, order }) =>

@@ -677,3 +677,36 @@ test("the delivered suit data is current: 36 plates partition the figure, the fi
   );
   assert.match(read("scripts/build-far-from-entry.mjs"), /--check/);
 });
+
+// Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — round 2, the
+// exploded-view assembly: each plate built in the air, then thrown onto its
+// seat; the omen's blueprint, the sparks, the afterglow's embers.
+test("round 2: every plate is built in the air before it is thrown, the embers end before the cover, the camera follows the beats", () => {
+  const A = calls.FAR_FROM_SUIT_ASSEMBLY;
+  for (const piece of suit.FAR_FROM_ENTRY_PIECES) {
+    const fit = calls.FAR_FROM_SUIT_FIT[piece.id];
+    const fly = A.fly[piece.group];
+    assert.ok(Number.isFinite(fly) && fly >= 100 && fly <= 260, piece.id);
+    const built = fit - fly * (1 - A.overlap);
+    assert.ok(built - A.build >= 0 && built < fit, piece.id);
+    // The flight starts after the material is there.
+    assert.ok(fit - fly > ignition.FAR_FROM_ENTRY_MATERIAL, `${piece.id} flies once the material is there`);
+  }
+  // The plan lands each plate's tiles in its build window, in the air.
+  assert.match(plan, /const land = buildFrom \+ progress \* \(buildTo - buildFrom\);/);
+  assert.match(plan, /plan\.fly\[p\] = fit - fly;/);
+  // The engine throws each plate along its pose and settles it after its squash.
+  assert.match(engine, /if \(t >= plan\.fit\[p\] \+ A\.settle\) \{\s*settle\(p\);/);
+  assert.match(engine, /placeAt\(p, t\);/);
+  assert.match(engine, /const drawOmen = \(t: number\) => \{/);
+  assert.match(engine, /const drawEmbers = \(t: number\) => \{/);
+  // Light: outlines, sparks and small squares only — no area fill but the embers.
+  const E = calls.FAR_FROM_SUIT_EMBERS;
+  assert.ok(E.until < calls.FAR_FROM_ENTRY_TIMINGS.cover);
+  assert.ok(E.from >= calls.FAR_FROM_SUIT_LIGHT.from);
+  assert.ok(calls.FAR_FROM_SUIT_OMEN.from + calls.FAR_FROM_SUIT_OMEN.stagger < ignition.FAR_FROM_ENTRY_MATERIAL);
+  // The camera: once, on the cover's clock, full tier only, smaller on phones.
+  assert.match(sheet, /ffeCameraPush var\(--rx-call-cover, 3240ms\) linear both/);
+  assert.match(sheet, /--ffe-cam: 0\.55;/);
+  assert.doesNotMatch(sheet, /ffeCamera[A-Za-z]+ [^;]*infinite/);
+});
