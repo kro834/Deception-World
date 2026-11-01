@@ -5,16 +5,18 @@ import {
   type FarFromEntryPiece,
 } from "@/lib/far-from-entry-suit";
 import {
+  FAR_FROM_SUIT_ASSEMBLY,
   FAR_FROM_SUIT_FIT,
   FAR_FROM_SUIT_FLIGHT,
-  FAR_FROM_SUIT_REVEAL_MS,
 } from "@/lib/far-from-entry-calls";
-import { FAR_FROM_ENTRY_MATERIAL, farFromMaterialLanding } from "@/lib/far-from-entry-ignition.js";
+import { FAR_FROM_ENTRY_MATERIAL } from "@/lib/far-from-entry-ignition.js";
 
 /* The entry engine's plan (far-from-entry-engine draws it): each plate's
-   micro-tiles — where each sits in the atlas and in the figure, when it
-   lands (from the seam outward across the plate, within the plate's landing
-   window before its fit) and where it streams in from — as flat typed
+   micro-tiles — where each sits in the atlas and in the plate, when it
+   lands (from the seam outward across the plate, within the plate's build
+   window: round 2, the plate is built in the air at its staged pose before
+   it is thrown onto its seat, FAR_FROM_SUIT_ASSEMBLY) and where it streams
+   in from — as flat typed
    arrays, built once per tier. Modelled on rexonance-suit-plan.ts tilesOf;
    no gold cells (ミドル's gold arrives with its art) and no working atlas
    (the atlas is never drawn into). */
@@ -46,6 +48,10 @@ export type FarFromEntryPlan = {
    * tile (plateTiles has plates + 1 entries). */
   readonly fit: Float32Array;
   readonly spawn: Float32Array;
+  /** Per plate (round 2): when its flight onto the seat starts, and when its
+   * last tile has landed (it is whole, in the air). */
+  readonly fly: Float32Array;
+  readonly built: Float32Array;
   readonly plateTiles: Int32Array;
   readonly total: number;
   /** Per tile: atlas x/y, figure x/y, size (clipped to the plate), tone row,
@@ -109,6 +115,8 @@ export function farFromEntryPlan(): FarFromEntryPlan {
     pieces,
     fit: new Float32Array(plates),
     spawn: new Float32Array(plates),
+    fly: new Float32Array(plates),
+    built: new Float32Array(plates),
     plateTiles: new Int32Array(plates + 1),
     total,
     sx: new Float32Array(total),
@@ -126,17 +134,25 @@ export function farFromEntryPlan(): FarFromEntryPlan {
     flightY: new Float32Array(total),
   };
   let at = 0;
-  const cx = FIG.width / 2;
-  const cy = FIG.height / 2;
   for (let p = 0; p < plates; p += 1) {
     const piece = pieces[p];
     const fit = FAR_FROM_SUIT_FIT[piece.id];
     if (!Number.isFinite(fit)) throw new Error(`no fit for ${piece.id}`);
-    const bits = piece.group === "bits";
-    const flight = FAR_FROM_SUIT_FLIGHT.ms * (bits ? FAR_FROM_SUIT_FLIGHT.bits : 1);
+    const flight = FAR_FROM_SUIT_FLIGHT.ms;
     const [gx, gy] = GROW[piece.dir];
     const { cols, rows, painted } = grids[p];
+    const A = FAR_FROM_SUIT_ASSEMBLY;
+    const fly = A.fly[piece.group as keyof typeof A.fly] ?? A.fly.chest;
+    // The build window: its tiles land from the seam outward, ending a share
+    // of the way into the flight, never before the material is there.
+    const buildTo = fit - fly * (1 - A.overlap);
+    const buildFrom = Math.min(
+      buildTo - 40,
+      Math.max(FAR_FROM_ENTRY_MATERIAL + A.materialLead, buildTo - A.build),
+    );
     plan.fit[p] = fit;
+    plan.fly[p] = fit - fly;
+    plan.built[p] = buildTo;
     plan.plateTiles[p] = at;
     let spawn = Infinity;
     for (let row = 0; row < rows; row += 1)
@@ -155,26 +171,15 @@ export function farFromEntryPlan(): FarFromEntryPlan {
         const k = hash(p * 131 + col, row * 17 + p);
         const k2 = hash(row + p * 7, col * 29 + 3);
         const progress = Math.min(1, Math.max(0, along + (k - 0.5) * 0.28));
-        // Behind the seam, a little to the side: streaming along the body.
-        // The bits fly in from outside the frame, away from the body.
+        // Behind the seam, a little to the side: streaming along the plate
+        // (the plate itself is staged round the body: the engine's pose).
         const x = piece.x + col * T;
         const y = piece.y + row * T;
-        let ox: number;
-        let oy: number;
-        if (bits) {
-          const away = Math.hypot(x - cx, y - cy) || 1;
-          ox = ((x - cx) / away) * FIG.width * (0.3 + 0.2 * k2);
-          oy = ((y - cy) / away) * FIG.width * (0.3 + 0.2 * k2);
-        } else {
-          const reach = FIG.height * (0.016 + 0.02 * k2);
-          const side = FIG.height * (k - 0.5) * 0.024;
-          ox = -gx * reach + gy * side;
-          oy = -gy * reach + gx * side;
-        }
-        const land = farFromMaterialLanding(
-          fit - FAR_FROM_SUIT_REVEAL_MS + progress * FAR_FROM_SUIT_REVEAL_MS,
-          fit,
-        );
+        const reach = FIG.height * (0.016 + 0.02 * k2);
+        const side = FIG.height * (k - 0.5) * 0.024;
+        const ox = -gx * reach + gy * side;
+        const oy = -gy * reach + gx * side;
+        const land = buildFrom + progress * (buildTo - buildFrom);
         const spread =
           FAR_FROM_SUIT_FLIGHT.spread[0] +
           (FAR_FROM_SUIT_FLIGHT.spread[1] - FAR_FROM_SUIT_FLIGHT.spread[0]) * k;
@@ -195,7 +200,7 @@ export function farFromEntryPlan(): FarFromEntryPlan {
         if (start < spawn) spawn = start;
         at += 1;
       }
-    plan.spawn[p] = spawn;
+    plan.spawn[p] = Math.min(spawn, buildFrom);
   }
   plan.plateTiles[plates] = at;
   PLAN = plan;
