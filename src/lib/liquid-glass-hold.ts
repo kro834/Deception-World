@@ -7,8 +7,16 @@
 // A quick tap keeps the shared press (press-feedback.js: the gel squash).
 // A press held for HOLD_MS, as iOS 26's glass does:
 // - the control swells (the individual `scale` property, never `transform`,
-//   so no layout moves): small chips and icons by about 1.18, large cards by
-//   about 1.08, never past what a clipping ancestor leaves room for;
+//   so no layout moves), as far as iOS 26's glass does (owner, 2026-11-01:
+//   「拡大も小さすぎます」): an icon or a small chip by 1.42, a pill by about
+//   1.28, a card by about 1.15, a large card by 1.12 (swellFor);
+// - where a clipping ancestor (a scrolling rail, the side menu, a hero) has
+//   no room for that, the control is lifted rather than capped: a styled
+//   copy of it (liftCopy) swells in the overlay, which no ancestor clips,
+//   while the control itself stays in place, unscaled and transparent, so it
+//   still takes the finger and the click. Only the viewport caps a swell, and
+//   a control the copy cannot stand for (a video, a canvas, a frame, a large
+//   tree, a dialog's content) is capped as before;
 // - light diffuses from the finger: a bloom spreads through the glass, the
 //   rim nearest the finger brightens, two caustic rings travel outward, and
 //   a little light spills past the edge. While held, the light follows the
@@ -21,7 +29,11 @@
 // bar, and no React tree gains a node.
 //
 // The draggables (Ciel's button, the slide-to-open pills, the range thumbs)
-// measure their box during the drag: they get the light only, never a scale.
+// measure their box during the drag: the box gets the light only, never a
+// scale. The sliders swell a decorative layer of their own instead (owner,
+// 2026-11-01: 「六詠や犬の切り替えスライダー長押し時などに光沢とともに拡大」):
+// the slide-to-open lens and the range thumbs in the sheet, the tab rails'
+// lens (src/lib/liquid/boot.js), none of which any drag measures.
 // Ciel's light rides its drag (the drag's own inline translate, copied as it
 // is written), so it never lets go while the button is carried.
 //
@@ -47,9 +59,18 @@ export const RELEASE_MS = 640;
 /** The light's room past the grown control: the lift's blur and the spill. */
 export const HALO_PX = 44;
 
-/** Swell bounds: an icon (48px and under) to a large card (240px and over). */
-export const SWELL_SMALL = 1.18;
-export const SWELL_LARGE = 1.08;
+/** Swell bounds: an icon (48px and under) to a large card (320px and over). */
+export const SWELL_SMALL = 1.42;
+export const SWELL_LARGE = 1.12;
+/** The swell by the box's longer side: [side px, scale], linear between. */
+export const SWELL_STOPS = [
+  [48, SWELL_SMALL],
+  [96, 1.28],
+  [200, 1.15],
+  [320, SWELL_LARGE],
+] as const;
+/** The largest copy the lift makes (elements): a bigger tree is capped instead. */
+export const LIFT_MAX_NODES = 40;
 
 /** Draggables: their drag measures the box, so they are lit, never scaled. */
 export const HOLD_LIGHT_ONLY = [
@@ -97,15 +118,33 @@ const SELECTS = HOLD_SELECTS.join(", ");
 const HOLD = "data-lg-hold";
 const KIND = "data-lg-hold-kind";
 const RAISE = "data-lg-hold-raise";
+const LIFT = "data-lg-hold-lift";
 const PROPS = ["--lg-hold-s"] as const;
+/* On a pill group (liquid-glass-controls.ts) whose chosen option is held. */
+const PILL_S = "--lg-hold-pill-s";
+
+/* The pill group a held option rides in, when it is the chosen one. */
+function pillOf(target: HTMLElement) {
+  const group = target.parentElement;
+  return group?.getAttribute("data-lg-seg-mode") === "pill" && target.hasAttribute("data-lg-seg-current")
+    ? group
+    : null;
+}
 
 type Kind = "swell" | "switch" | "light";
 
 /** The swell for a box: more for an icon, less for a card. */
 export function swellFor(width: number, height: number) {
   const d = Math.max(width, height);
-  const t = Math.min(1, Math.max(0, (d - 48) / (240 - 48)));
-  return SWELL_SMALL + (SWELL_LARGE - SWELL_SMALL) * t;
+  if (d <= SWELL_STOPS[0][0]) return SWELL_SMALL;
+  for (let i = 1; i < SWELL_STOPS.length; i++) {
+    const [d1, s1] = SWELL_STOPS[i];
+    if (d <= d1) {
+      const [d0, s0] = SWELL_STOPS[i - 1];
+      return s0 + ((s1 - s0) * (d - d0)) / (d1 - d0);
+    }
+  }
+  return SWELL_LARGE;
 }
 
 /**
@@ -182,6 +221,86 @@ function clipRect(view: Window, el: HTMLElement) {
   return { left, top, right: Math.max(left, right), bottom: Math.max(top, bottom) };
 }
 
+/* Whether a copy can stand for the control: no live media, no huge tree. */
+function liftable(target: HTMLElement) {
+  if (target.closest("dialog")) return false;
+  if (target.querySelector("video, canvas, iframe, object, embed")) return false;
+  return target.querySelectorAll("*").length < LIFT_MAX_NODES;
+}
+
+/* Every computed property, as declarations (for a style attribute or a rule). */
+function declarations(style: CSSStyleDeclaration) {
+  let text = "";
+  for (let i = 0; i < style.length; i++) {
+    const name = style[i];
+    text += `${name}:${style.getPropertyValue(name)};`;
+  }
+  return text;
+}
+
+/**
+ * A copy of the control that looks the same outside its ancestors: each
+ * element carries its computed style inline, and its ::before and ::after
+ * as rules in a <style> of the copy's own. It is decorative (aria-hidden,
+ * inert, no ids, no pointer events) and still: no animation, no transition
+ * but the swell's. One read of computed style per element, once per hold.
+ */
+function liftCopy(view: Window, target: HTMLElement) {
+  const doc = target.ownerDocument;
+  const copy = target.cloneNode(true) as HTMLElement;
+  const from = [target, ...target.querySelectorAll<HTMLElement>("*")];
+  const to = [copy, ...copy.querySelectorAll<HTMLElement>("*")];
+  let rules = "";
+  from.forEach((el, i) => {
+    const node = to[i];
+    if (!node) return;
+    node.setAttribute("style", declarations(view.getComputedStyle(el)));
+    node.style.setProperty("animation", "none");
+    node.style.setProperty("transition", "none");
+    node.removeAttribute("id");
+    // The inline style is the whole look: no page rule may reach the copy.
+    node.removeAttribute("class");
+    for (const pseudo of ["::before", "::after"]) {
+      const style = view.getComputedStyle(el, pseudo);
+      if (style.content === "none" || style.display === "none") continue;
+      node.setAttribute("data-lg-lift-n", String(i));
+      rules += `.lg-hold-lift [data-lg-lift-n="${i}"]${pseudo},.lg-hold-lift[data-lg-lift-n="${i}"]${pseudo}{${declarations(style)}animation:none;transition:none;}`;
+    }
+    if (i === 0) {
+      // The chosen option of a pill group is clear: its glass is the
+      // group's pill, which the copy wears itself.
+      const group = pillOf(target);
+      const side = group?.getAttribute("data-lg-seg");
+      if (group && (side === "before" || side === "after")) {
+        const pill = view.getComputedStyle(group, `::${side}`);
+        node.style.setProperty("background", pill.background);
+        node.style.setProperty("box-shadow", pill.boxShadow);
+        node.style.setProperty("border-radius", pill.borderRadius);
+        node.style.setProperty("border-color", "transparent");
+      }
+    }
+    if ("value" in el && "value" in node) {
+      try {
+        (node as HTMLInputElement).value = (el as HTMLInputElement).value;
+      } catch {
+        /* a file input: nothing to show */
+      }
+    }
+  });
+  for (const name of [HOLD, KIND, RAISE, LIFT, "href", "tabindex", "aria-describedby", "aria-controls"])
+    copy.removeAttribute(name);
+  copy.setAttribute("aria-hidden", "true");
+  copy.setAttribute("inert", "");
+  // lg-lens-target: the hook a refraction layer attaches to (the swollen
+  // visuals carry it: the rails' lens, the slide-to-open lens, this copy).
+  copy.setAttribute("class", "lg-hold-lift lg-lens-target");
+  // The pseudo-elements' rules sit beside the copy (a select or an input
+  // cannot hold a <style>).
+  const sheet = doc.createElement("style");
+  sheet.textContent = rules;
+  return { copy, sheet };
+}
+
 /**
  * Starts the long press. Returns a disposer that removes the overlay and
  * every attribute, property and listener it added.
@@ -194,6 +313,16 @@ export function watchLiquidHold(doc: Document = document) {
   let releasing: { target: HTMLElement; timer: number } | null = null;
   let frame = 0;
   let armFrame = 0;
+  /* The lifted copy and its pseudo-elements' rules (at most one). */
+  let lifted: { copy: HTMLElement; sheet: HTMLStyleElement } | null = null;
+
+  // The lift waits for full motion, as the sheet's swell does, and for full
+  // transparency (the overlay is dimmed under reduced transparency).
+  const motion = () =>
+    !view.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches &&
+    !view.matchMedia?.("(forced-colors: active)")?.matches &&
+    !view.matchMedia?.("(prefers-reduced-transparency: reduce)")?.matches &&
+    doc.documentElement.getAttribute("data-world-effects") !== "economy";
 
   const ensureOverlay = () => {
     if (overlay) return overlay;
@@ -214,9 +343,17 @@ export function watchLiquidHold(doc: Document = document) {
     return overlay;
   };
 
+  const dropLift = () => {
+    lifted?.copy.remove();
+    lifted?.sheet.remove();
+    lifted = null;
+  };
+
   const clearTarget = (target: HTMLElement) => {
-    for (const name of [HOLD, KIND, RAISE]) target.removeAttribute(name);
+    for (const name of [HOLD, KIND, RAISE, LIFT]) target.removeAttribute(name);
     for (const prop of PROPS) target.style.removeProperty(prop);
+    target.parentElement?.style.removeProperty(PILL_S);
+    dropLift();
   };
 
   const finishRelease = () => {
@@ -350,9 +487,26 @@ export function watchLiquidHold(doc: Document = document) {
     };
     const clip = clipRect(view, anchor);
     let scale = 1;
+    let lift = false;
     if (p.kind !== "light") {
-      scale = Math.min(swellFor(width, height), fitScale(box, clip, cx, cy));
-      if (scale < 1.02) scale = 1;
+      const want = swellFor(width, height);
+      const fit = fitScale(box, clip, cx, cy);
+      scale = Math.min(want, fit);
+      // A clipping ancestor has no room: lift the control into the overlay
+      // (only the viewport bounds it there) rather than cap it.
+      if (p.kind === "swell" && fit < want - 0.02 && motion() && liftable(target)) {
+        const screen = { left: 0, top: 0, right: view.innerWidth, bottom: view.innerHeight };
+        const room = Math.min(want, fitScale(box, screen, cx, cy));
+        if (room > scale + 0.02) {
+          scale = room;
+          lift = true;
+          Object.assign(clip, screen);
+        }
+      }
+      if (scale < 1.02) {
+        scale = 1;
+        lift = false;
+      }
     }
     const own = view.getComputedStyle(target);
     const tint = own.getPropertyValue("--lg-tint").trim();
@@ -430,7 +584,40 @@ export function watchLiquidHold(doc: Document = document) {
     ls.setProperty("--lg-rx", ls.getPropertyValue("--lg-tx"));
     ls.setProperty("--lg-ry", ls.getPropertyValue("--lg-ty"));
 
-    target.style.setProperty("--lg-hold-s", scale.toFixed(3));
+    // Lifted, the copy swells; the control stays at rest, transparent, and
+    // keeps the finger and the click.
+    target.style.setProperty("--lg-hold-s", lift ? "1" : scale.toFixed(3));
+    // The chosen option's pill swells with it (the sheet's segments rule).
+    if (!lift && p.kind === "swell") pillOf(target)?.style.setProperty(PILL_S, scale.toFixed(3));
+    if (lift) {
+      dropLift();
+      const made = liftCopy(view, target);
+      const c = made.copy.style;
+      c.setProperty("position", "absolute");
+      c.setProperty("left", `${p.left.toFixed(1)}px`);
+      c.setProperty("top", `${p.top.toFixed(1)}px`);
+      c.setProperty("right", "auto");
+      c.setProperty("bottom", "auto");
+      c.setProperty("margin", "0");
+      c.setProperty("box-sizing", "border-box");
+      c.setProperty("width", `${width}px`);
+      c.setProperty("height", `${height}px`);
+      c.setProperty("transform", "none");
+      c.setProperty("translate", "none");
+      c.setProperty("rotate", "none");
+      c.setProperty("transform-origin", "50% 50%");
+      c.setProperty("scale", from);
+      c.setProperty("opacity", "1");
+      c.setProperty("visibility", "visible");
+      c.setProperty("pointer-events", "none");
+      c.setProperty("z-index", "auto");
+      c.setProperty("float", "none");
+      const shell = layer.querySelector(".lg-hold-shell");
+      layer.insertBefore(made.copy, shell);
+      layer.appendChild(made.sheet);
+      lifted = made;
+      target.setAttribute(LIFT, "");
+    }
     target.setAttribute(KIND, p.kind);
     // A grown control lifts over its neighbours where z-index applies.
     const parent = target.parentElement;
@@ -447,7 +634,12 @@ export function watchLiquidHold(doc: Document = document) {
     if (frame) view.cancelAnimationFrame(frame);
     frame = view.requestAnimationFrame(() => {
       frame = 0;
-      if (press === p && overlay) overlay.setAttribute("data-state", "on");
+      if (press !== p || !overlay) return;
+      overlay.setAttribute("data-state", "on");
+      if (lifted) {
+        lifted.copy.style.setProperty("transition", "scale 0.52s var(--lg-spring)");
+        lifted.copy.style.setProperty("scale", scale.toFixed(3));
+      }
     });
   };
 
@@ -481,6 +673,10 @@ export function watchLiquidHold(doc: Document = document) {
     }
     p.target.setAttribute(HOLD, "out");
     overlay?.setAttribute("data-state", "out");
+    if (lifted) {
+      lifted.copy.style.setProperty("transition", "scale var(--lg-spring-ms) var(--lg-spring)");
+      lifted.copy.style.setProperty("scale", "1");
+    }
     releasing = { target: p.target, timer: view.setTimeout(finishRelease, RELEASE_MS) };
   };
 
@@ -588,6 +784,7 @@ export function watchLiquidHold(doc: Document = document) {
       releasing = null;
     }
     if (frame) view.cancelAnimationFrame(frame);
+    dropLift();
     overlay?.remove();
     overlay = null;
     doc.removeEventListener("pointerdown", down, passive);

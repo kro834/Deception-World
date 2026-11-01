@@ -166,7 +166,7 @@ test("fallbacks: reduced motion, economy, reduced transparency, forced colours",
   // The gel and the swells exist only under no-preference.
   const motion = blocks(clean, "@media (prefers-reduced-motion: no-preference)").join("\n");
   assert.match(motion, /animation: lg-seg-gel-a/);
-  assert.match(motion, /transform: scale\(1\.5, 1\.42\)/);
+  assert.match(motion, /transform: scale\(1\.75, 1\.65\)/);
   let outside = clean;
   for (const block of blocks(clean, "@media (prefers-reduced-motion: no-preference)"))
     outside = outside.replace(block, "");

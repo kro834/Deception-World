@@ -12,7 +12,9 @@ export function LiquidLens() {
         <span className="liquid-contact-reflection" />
       </span>
       <span className="liquid-selection-lens" aria-hidden="true">
-        <span className="liquid-selection-surface">
+        {/* lg-lens-target: the glass option's swollen lens, the hook for its
+            refraction (styles-liquid-glass-controls.css, section 6). */}
+        <span className="liquid-selection-surface lg-lens-target">
           <span className="liquid-lens-reflection" />
         </span>
       </span>

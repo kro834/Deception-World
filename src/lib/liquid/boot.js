@@ -391,6 +391,46 @@ function initRail(root) {
       return { x: (r.left - rr.left) / sx, y: (r.top - rr.top) / sy, width: r.width / sx, height: r.height / sy };
     });
   };
+  // The lens's size as plain numbers, for the glass option's hold swell
+  // (styles-liquid-glass-controls.css, section 6): CSS cannot divide by a
+  // length. Written only with the size itself; nothing reads it back.
+  const sizeLens = (g) => {
+    lens.style.setProperty('--liquid-lens-wn', g.width.toFixed(1));
+    lens.style.setProperty('--liquid-lens-hn', g.height.toFixed(1));
+  };
+  // With the glass option the held lens swells well past the rail
+  // (1 + min(0.5, 44 / w) across, 1 + min(0.6, 34 / h) up and down: the
+  // sheet's formula). Near an ancestor that clips (the 六詠 panel, the
+  // column card) it would be cut, so it is nudged inward by the overflow,
+  // as --liquid-lens-dx / -dy (the sheet translates the decorative surface;
+  // the lens's own box, which the drag places, never moves). The room is
+  // read once per press, with the press's own measurements.
+  const glassOn = () => document.documentElement?.getAttribute?.('data-button-style') === 'liquid';
+  const roomAround = (rect) => {
+    let l = 0, t = 0, r = window.innerWidth, b = window.innerHeight;
+    for (let n = root.parentElement; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+      const cs = getComputedStyle(n);
+      if (cs.overflowX !== 'visible' || cs.overflowY !== 'visible' || /paint|strict|content/.test(cs.contain)) {
+        const q = n.getBoundingClientRect();
+        l = Math.max(l, q.left + n.clientLeft); t = Math.max(t, q.top + n.clientTop);
+        r = Math.min(r, q.left + n.clientLeft + (n.clientWidth || q.width));
+        b = Math.min(b, q.top + n.clientTop + (n.clientHeight || q.height));
+      }
+      if (cs.position === 'fixed') break;
+    }
+    return { l: rect.left - l, t: rect.top - t, r: r - rect.right, b: b - rect.bottom };
+  };
+  const nudgeLens = (g) => {
+    const room = gesture?.room;
+    if (!lens || !room || !g) return;
+    const hx = g.width * Math.min(0.5, 44 / Math.max(1, g.width)) / 2;
+    const hy = g.height * Math.min(0.6, 34 / Math.max(1, g.height)) / 2;
+    const shift = (over0, over1) => (over0 > 0 && over1 > 0 ? (over0 - over1) / 2 : over0 > 0 ? over0 : over1 > 0 ? -over1 : 0);
+    const dx = shift(hx + 2 - (room.l + g.x), hx + 2 - (room.r + root.offsetWidth - g.x - g.width));
+    const dy = shift(hy + 2 - (room.t + g.y), hy + 2 - (room.b + root.offsetHeight - g.y - g.height));
+    lens.style.setProperty('--liquid-lens-dx', dx.toFixed(1) + 'px');
+    lens.style.setProperty('--liquid-lens-dy', dy.toFixed(1) + 'px');
+  };
   const settle = (i, geos = measure()) => {
     const g = geos[i]; if (!g || !lens) return;
     lensGeometry = g;
@@ -402,6 +442,8 @@ function initRail(root) {
     lens.style.width = g.width.toFixed(2) + 'px';
     lens.style.height = g.height.toFixed(2) + 'px';
     lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+    sizeLens(g);
+    nudgeLens(g);
     // Enlarge visibly without resizing the hit target or crossing the shell.
     lens.style.setProperty('--liquid-held-scale-x', String(1 + Math.min(20, spareX) / Math.max(1, g.width)));
     lens.style.setProperty('--liquid-held-scale-y', String(1 + Math.min(16, spareY) / Math.max(1, g.height)));
@@ -541,9 +583,10 @@ function initRail(root) {
       lensGeometry = geo;
       if (lens) {
         const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
-        if (lens.style.width !== width) lens.style.width = width;
-        if (lens.style.height !== height) lens.style.height = height;
+        if (lens.style.width !== width) { lens.style.width = width; sizeLens(geo); }
+        if (lens.style.height !== height) { lens.style.height = height; sizeLens(geo); }
         lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
+        nudgeLens(geo);
       }
       if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
       contact(m.x, m.y);
@@ -573,9 +616,10 @@ function initRail(root) {
     if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
     if (lens) {
       const width = g.width.toFixed(2) + 'px', height = g.height.toFixed(2) + 'px';
-      if (lens.style.width !== width) lens.style.width = width;
-      if (lens.style.height !== height) lens.style.height = height;
+      if (lens.style.width !== width) { lens.style.width = width; sizeLens(g); }
+      if (lens.style.height !== height) { lens.style.height = height; sizeLens(g); }
       lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+      nudgeLens(g);
     }
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
     contact(m.x, m.y);
@@ -620,6 +664,7 @@ function initRail(root) {
     const oneColumn = geos.every(box => Math.abs(box.x - first.x) < 2);
     Object.assign(g, {
       hold: 'engaged', held: true, axis: 'free', start, raw: start, geos, rect, sx, sy,
+      room: glassOn() ? roomAround(rect) : null,
       linearAxis: oneRow ? 'horizontal' : oneColumn ? 'vertical' : null,
       // Pick up the lens at the point the finger held, rather than snapping
       // its centre under an off-centre press on the first move.
@@ -664,7 +709,7 @@ function initRail(root) {
     gesture = {
       axis: 'pending', start, raw: start, held: false, pointerId: e.pointerId, pointerType: e.pointerType,
       startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
-      vx: 0, vy: 0, geos: measure(), rect,
+      vx: 0, vy: 0, geos: measure(), rect, room: glassOn() ? roomAround(rect) : null,
       sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
       sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
     };

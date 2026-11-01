@@ -1,3 +1,24 @@
+      const insetY = (Number(lens?.style.getPropertyValue('--liquid-held-scale-y') || 1) - 1) * lh / 2 + 1;
+      const geo = {
+        x: clamp(px - lw / 2, insetX, Math.max(insetX, root.clientWidth - lw - insetX)),
+        y: clamp(py - lh / 2, insetY, Math.max(insetY, root.clientHeight - lh - insetY)),
+        width: lw,
+        height: lh,
+      };
+      lensGeometry = geo;
+      if (lens) {
+        const width = geo.width.toFixed(2) + 'px', height = geo.height.toFixed(2) + 'px';
+        if (lens.style.width !== width) { lens.style.width = width; sizeLens(geo); }
+        if (lens.style.height !== height) { lens.style.height = height; sizeLens(geo); }
+        lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
+        nudgeLens(geo);
+      }
+      if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
+      contact(m.x, m.y);
+      return;
+    }
+
+    const px = (m.x - gesture.rect.left) / gesture.sx;
     const geos = gesture.geos, last = geos.length - 1;
     let raw = 0;
     for (let i = 0; i <= last; i++) {
@@ -20,9 +41,10 @@
     if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
     if (lens) {
       const width = g.width.toFixed(2) + 'px', height = g.height.toFixed(2) + 'px';
-      if (lens.style.width !== width) lens.style.width = width;
-      if (lens.style.height !== height) lens.style.height = height;
+      if (lens.style.width !== width) { lens.style.width = width; sizeLens(g); }
+      if (lens.style.height !== height) { lens.style.height = height; sizeLens(g); }
       lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
+      nudgeLens(g);
     }
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
     contact(m.x, m.y);
@@ -67,6 +89,7 @@
     const oneColumn = geos.every(box => Math.abs(box.x - first.x) < 2);
     Object.assign(g, {
       hold: 'engaged', held: true, axis: 'free', start, raw: start, geos, rect, sx, sy,
+      room: glassOn() ? roomAround(rect) : null,
       linearAxis: oneRow ? 'horizontal' : oneColumn ? 'vertical' : null,
       // Pick up the lens at the point the finger held, rather than snapping
       // its centre under an off-centre press on the first move.
@@ -111,7 +134,7 @@
     gesture = {
       axis: 'pending', start, raw: start, held: false, pointerId: e.pointerId, pointerType: e.pointerType,
       startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY, lastT: e.timeStamp,
-      vx: 0, vy: 0, geos: measure(), rect,
+      vx: 0, vy: 0, geos: measure(), rect, room: glassOn() ? roomAround(rect) : null,
       sx: rect.width / Math.max(root.offsetWidth, 1) || 1,
       sy: rect.height / Math.max(root.offsetHeight, 1) || 1,
     };
@@ -263,14 +286,3 @@
   const cancelOtherTouch = (event) => {
     if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
   };
-  const cancelWithEscape = (event) => {
-    if (holdToDrag && gesture && event.key === 'Escape') {
-      event.preventDefault();
-      cancel();
-    }
-  };
-  window.addEventListener('pointerdown', cancelOtherTouch, true);
-  window.addEventListener('keydown', cancelWithEscape);
-  // Rotation invalidates captured coordinates. Toolbar height changes do not:
-  // cancelling on every visualViewport resize would interrupt normal iOS drags.
-  window.addEventListener('orientationchange', cancel);

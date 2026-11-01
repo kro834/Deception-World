@@ -57,7 +57,7 @@ test("neither the button nor the thumb is ever scaled: the swell lives on the le
   }
   assert.match(
     lensSection,
-    /\[data-lens="on"\]\s*\.ios-slide-open-lens-body[^{]*\{[^}]*scale: 1\.34/,
+    /\[data-lens="on"\]\s*\.ios-slide-open-lens-body[^{]*\{[^}]*scale: 1\.6/,
   );
   // The drag still measures the thumb itself.
   assert.match(control, /const thumbRect = thumb\.getBoundingClientRect\(\);/);
