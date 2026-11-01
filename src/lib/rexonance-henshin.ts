@@ -87,6 +87,9 @@ export type HenshinSheet = {
   readonly seal: readonly [number, number, number];
   /** The pose's glint. */
   readonly glint: number;
+  /** The omen's vignette (off for an entry whose clock starts late: its
+   * sudden arrival would read as a flash). */
+  readonly vignette: boolean;
 };
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
@@ -142,6 +145,9 @@ const DEUS_STEP = (DEUS[1] - DEUS[0]) / 4;
 export const HENSHIN_GATHER = 0.3;
 export const HENSHIN_SEAT = 0.62;
 const GATHER_SHARE = 0.2;
+/** The plates seated by the clamp; the rest settle until HENSHIN_LOCKED. */
+const SEATED = 0.95;
+export const HENSHIN_LOCKED = 0.8;
 
 /** The scroll's progress as the engine receives it: each DEUS！ part creeps
  * through its gather, flies in at once and holds while it locks. Elsewhere
@@ -157,15 +163,26 @@ export function henshinProgress(q: number) {
       ? GATHER_SHARE * smooth(u / HENSHIN_GATHER)
       : u < HENSHIN_SEAT
         ? GATHER_SHARE +
-          (1 - GATHER_SHARE) * smooth((u - HENSHIN_GATHER) / (HENSHIN_SEAT - HENSHIN_GATHER))
-        : 1;
-  // Written as the engine writes its windows (from + (beat + 1) · step at
-  // the seat), so a layer's `p >= window end` holds exactly there.
+          (SEATED - GATHER_SHARE) * smooth((u - HENSHIN_GATHER) / (HENSHIN_SEAT - HENSHIN_GATHER))
+        : u < HENSHIN_LOCKED
+          ? SEATED + (1 - SEATED) * ((u - HENSHIN_SEAT) / (HENSHIN_LOCKED - HENSHIN_SEAT))
+          : 1;
+  // The last few plates settle through the clamp (the engine never rests
+  // mid-call: at rest it clears its transient squares, a dip in the light),
+  // then the part holds. Written as the engine writes its windows
+  // (from + (beat + 1) · step), so a layer's `p >= window end` holds there.
   return DEUS[0] + (beat + e) * DEUS_STEP;
 }
 
 /** The scroll scene's sheet, in its progress (0–1). */
-export function henshinScrollSheet(figure: HenshinFigure): HenshinSheet {
+export function henshinScrollSheet(
+  figure: HenshinFigure,
+  options: { omenPush?: boolean; steppedClock?: boolean } = {},
+): HenshinSheet {
+  // On the stepped clock a part seats at HENSHIN_SEAT of its window; on the
+  // engine's own (an entry) its plates are in near the window's end.
+  const seat = options.steppedClock === false ? 0.9 : HENSHIN_SEAT;
+  const gather = options.steppedClock === false ? 0.45 : HENSHIN_GATHER;
   const perMs = DEUS_STEP / 360;
   const box = BEAT_GROUPS.map((groups) => groupBox(figure, groups));
   const [cx] = figure.core;
@@ -173,11 +190,20 @@ export function henshinScrollSheet(figure: HenshinFigure): HenshinSheet {
   const [vx, vy] = figure.visor;
   const H = figure.size.height;
   const midY = H * 0.5;
+  // The omen's push lets go as the fire lights (q 0.02): a blaze moved or
+  // enlarged by the camera reads as flashing, so the fire burns in the
+  // still, whole frame; the torrent then rushes in with a roll.
+  // An entry under a cover (Meta Unitas) starts its clock when the engine
+  // joins, a moment before the fire: there the omen is the vignette and the
+  // driver's heartbeat on the whole frame (omenPush: false).
+  const push = options.omenPush === false ? 0 : 1;
   const keys: Key[] = [
-    [0, 1.5, bx, by, 0],
-    [0.062, 1.62, bx, by, 0],
-    [0.1, 0.93, cx, midY, -1.4],
-    [0.15, 1, cx, midY, 0],
+    [0, 1 + 0.32 * push, push ? bx : cx, push ? by : midY, 0],
+    [0.012, 1 + 0.36 * push, push ? bx : cx, push ? by : midY, 0],
+    [0.034, 1, cx, midY, 0],
+    [0.09, 1, cx, midY, 0],
+    [0.128, 1 + 0.07 * push, cx, midY, -1.4 * push],
+    [0.158, 1, cx, midY, 0],
   ];
   const locks: HenshinLock[] = [];
   const zooms = [1.3, 1.34, 1.42, 1.5];
@@ -186,12 +212,12 @@ export function henshinScrollSheet(figure: HenshinFigure): HenshinSheet {
     const [fx, fy] = centre(box[beat]);
     const zoom = zooms[beat];
     keys.push([from + DEUS_STEP * 0.26, zoom, fx, fy, beat % 2 ? 0.6 : -0.6]);
-    keys.push([from + DEUS_STEP * HENSHIN_SEAT, zoom + 0.05, fx, fy, 0]);
+    keys.push([from + DEUS_STEP * seat, zoom + 0.05, fx, fy, 0]);
     keys.push([from + DEUS_STEP * 0.97, zoom * 0.98, fx, fy, 0]);
     locks.push({
       box: box[beat],
-      from: from + DEUS_STEP * HENSHIN_GATHER,
-      at: from + DEUS_STEP * HENSHIN_SEAT,
+      from: from + DEUS_STEP * gather,
+      at: from + DEUS_STEP * seat,
       zoom,
       weight: 1,
     });
@@ -214,10 +240,11 @@ export function henshinScrollSheet(figure: HenshinFigure): HenshinSheet {
     perMs,
     keys,
     locks,
-    omen: [0, 0.07],
-    torrent: [0.07, 0.16],
+    omen: [0, 0.03],
+    torrent: [0.09, 0.16],
     seal: [0.85, 0.874, 0.905],
     glint: 0.915,
+    vignette: push === 1,
   };
 }
 
@@ -244,11 +271,17 @@ export function henshinEntrySheet(
   // The chant's ratchet: legs, waist, arms, chest — up the body.
   const order = [0, 3, 1, 2];
   const zooms = [1.32, 1.46, 1.3, 1.42];
+  // The omen's push lets go as RIDER！ lights the fire (a blaze moved or
+  // enlarged by the camera reads as flashing): the fire burns in the still,
+  // whole frame; the nanites' burst then rushes in with a roll.
+  const burst = beats.rider + 230;
   const keys: Key[] = [
-    [0, 1.46, bx, by, 0],
-    [beats.rider - 20, 1.6, bx, by, 0],
-    [beats.rider + 150, 0.94, cx, midY, -1.6],
-    [beats.chant - 10, 1, cx, midY, 0],
+    [0, 1.32, bx, by, 0],
+    [beats.rider - 70, 1.38, bx, by, 0],
+    [beats.rider + 10, 1, cx, midY, 0],
+    [burst, 1, cx, midY, 0],
+    [burst + 120, 1.07, cx, midY, -1.4],
+    [beats.chant + 60, 1, cx, midY, 0],
   ];
   const locks: HenshinLock[] = [];
   let previous = beats.chant;
@@ -284,9 +317,10 @@ export function henshinEntrySheet(
     keys,
     locks,
     omen: [0, beats.rider],
-    torrent: [beats.rider, beats.chant],
+    torrent: [burst, beats.chant + 60],
     seal: [beats.final - 10, beats.final + 90, beats.final + 330],
     glint: beats.final + 360,
+    vignette: true,
   };
 }
 
@@ -350,6 +384,10 @@ export type HenshinView = {
 };
 export type HenshinTarget = { element: HTMLElement; x: number; y: number };
 
+/** How far the sheets' pushes reach on screen (the flash audit's bound: a
+ * push moves the lit armour across the frame, so its cells' light swings). */
+export const HENSHIN_DEPTH = 0.68;
+
 /** The camera's map (host px → host px): a 2 × 3 matrix [a b c d e f]. */
 export function henshinMatrix(
   camera: HenshinCamera,
@@ -362,7 +400,7 @@ export function henshinMatrix(
   // Portrait stages (phones) hold the figure over the calls' band: the
   // pushes are shallower there, the cuts the same.
   const portrait = view.height > view.width * 1.1;
-  const z = portrait ? 1 + (camera.zoom - 1) * 0.72 : camera.zoom;
+  const z = 1 + (camera.zoom - 1) * (portrait ? HENSHIN_DEPTH * 0.8 : HENSHIN_DEPTH);
   const r = (camera.roll * Math.PI) / 180;
   const cos = Math.cos(r) * z;
   const sin = Math.sin(r) * z;
@@ -497,8 +535,8 @@ export class HenshinOverlay {
     const z = camera.zoom * view.s;
 
     /* The omen: the frame closes in on the driver, which beats twice. */
-    const omenFade = 1 - smooth(span(t, sheet.omen[1], sheet.torrent[0] + 220 * ms));
-    if (omenFade > 0.01) {
+    const omenFade = 1 - smooth(span(t, sheet.omen[1] - 80 * ms, sheet.omen[1] + 60 * ms));
+    if (omenFade > 0.01 && sheet.vignette) {
       const [px, py] = project(m, view, this.figure.belt[0], this.figure.belt[1], this.point);
       const reach = Math.hypot(view.width, view.height) * 0.62;
       const vignette = context.createRadialGradient(px, py, reach * 0.18, px, py, reach);
@@ -562,7 +600,7 @@ export class HenshinOverlay {
       // re-dealt every 40 ms of the clock like an anime bank's.
       const fly =
         smooth(span(t, lock.from, lock.from + (lock.at - lock.from) * 0.35)) *
-        (1 - smooth(span(d, -10, 90)));
+        (1 - smooth(span(d, -20, 200)));
       if (fly > 0.01) {
         const deal = Math.floor(t / (40 * ms));
         const outer = Math.hypot(view.width, view.height);
@@ -571,12 +609,12 @@ export class HenshinOverlay {
           const seed = n * 13.7 + deal * 0.37;
           const angle = (n / count) * Math.PI * 2 + hash(seed) * 0.22;
           const inner = half * (1.25 + hash(seed + 1.1) * 0.9) + 24;
-          const width = (2 + hash(seed + 2.3) * 7) * (0.6 + 0.4 * fly);
+          const width = (1.5 + hash(seed + 2.3) * 4.5) * (0.6 + 0.4 * fly);
           const cos = Math.cos(angle);
           const sin = Math.sin(angle);
           const ox = px + cos * outer;
           const oy = py + sin * outer;
-          context.fillStyle = rgba(n % 7 === 0 ? b : WHITE, (0.1 + hash(seed + 4.2) * 0.18) * fly);
+          context.fillStyle = rgba(n % 7 === 0 ? b : WHITE, (0.05 + hash(seed + 4.2) * 0.1) * fly);
           context.beginPath();
           context.moveTo(px + cos * inner, py + sin * inner);
           context.lineTo(ox - sin * width, oy + cos * width);
@@ -645,8 +683,8 @@ export class HenshinOverlay {
           py,
           (26 + 30 * lock.weight) * Math.sqrt(z),
         );
-        glow.addColorStop(0, rgba(WHITE, 0.55 * hot));
-        glow.addColorStop(0.4, rgba(a, 0.3 * hot));
+        glow.addColorStop(0, rgba(WHITE, 0.3 * hot));
+        glow.addColorStop(0.4, rgba(a, 0.16 * hot));
         glow.addColorStop(1, rgba(a, 0));
         context.fillStyle = glow;
         context.fillRect(px - 120, py - 120, 240, 240);
@@ -693,7 +731,7 @@ export class HenshinOverlay {
           const [, sy0] = project(m, view, 0, topY, this.point);
           const [, sy1] = project(m, view, 0, footY, this.corner);
           context.save();
-          context.globalAlpha = 0.2 * shell;
+          context.globalAlpha = 0.14 * shell;
           context.fillStyle = pattern;
           // The swept bands: the crown's down to its blade, the soles' up to theirs.
           if (t < sm) {
@@ -726,11 +764,11 @@ export class HenshinOverlay {
         context.beginPath();
         context.ellipse(px, py, reach * easeOut(g), reach * easeOut(g) * 0.42, 0, 0, Math.PI * 2);
         context.stroke();
-        const glow = context.createRadialGradient(px, py, 0, px, py, 130);
-        glow.addColorStop(0, rgba(WHITE, 0.5 * Math.exp(-d / 110)));
+        const glow = context.createRadialGradient(px, py, 0, px, py, 90);
+        glow.addColorStop(0, rgba(WHITE, 0.22 * Math.exp(-d / 110)));
         glow.addColorStop(1, rgba(a, 0));
         context.fillStyle = glow;
-        context.fillRect(px - 130, py - 130, 260, 260);
+        context.fillRect(px - 90, py - 90, 180, 180);
       }
     }
 
@@ -859,7 +897,8 @@ export function mountHenshinDirector(
   if (!runway || !frameBox || typeof environment.requestAnimationFrame !== "function") return inert;
   const document = runway.ownerDocument;
   const figure = options.figure;
-  const sheet = henshinScrollSheet(figure);
+  const entry = Boolean(runway.closest(".mus-entry"));
+  const sheet = henshinScrollSheet(figure, { omenPush: !entry, steppedClock: !entry });
   const tier = henshinTier(environment);
   const coarse = Boolean(environment.matchMedia?.("(pointer: coarse)").matches);
   const canvas = document.createElement("canvas");
@@ -898,7 +937,6 @@ export function mountHenshinDirector(
     document.documentElement.dataset.worldEffects === "economy";
   // An entry's runway (Meta Unitas' .mus-entry) is staged from its cover's
   // first frame: the omen's push on the driver while the engine joins.
-  const entry = Boolean(runway.closest(".mus-entry"));
   const live = () =>
     (entry || runway.dataset.rznState === "live") && !document.hidden && visible && !motionOff();
 
@@ -1055,9 +1093,14 @@ export function mountHenshinDirector(
   resize?.observe(runway);
   const onVisibility = () => (document.hidden ? stop() : wake());
   document.addEventListener("visibilitychange", onVisibility);
+  // An entry's clock already runs each part in a fraction of a second; its
+  // plates land as the engine spreads them (packing a part's landing into
+  // a snap there lights the frame at once, past the flash rule). The page's
+  // scroll takes the stepped clock.
+  const clock = entry ? (q: number) => q : henshinProgress;
   const director: HenshinDirector = {
-    progress: () => henshinProgress(readRaw()),
-    stepped: henshinProgress,
+    progress: () => clock(readRaw()),
+    stepped: clock,
     shake: (x, y) => {
       shakeX = x;
       shakeY = y;

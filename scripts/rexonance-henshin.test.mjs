@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
   HENSHIN_GATHER,
+  HENSHIN_LOCKED,
   HENSHIN_SEAT,
   createHenshinCamera,
   henshinCamera,
@@ -46,7 +47,11 @@ test("the stepped clock is continuous, monotonic and leaves the other beats alon
     const from = 0.16 + beat * step;
     const gather = henshinProgress(from + step * HENSHIN_GATHER) - from;
     assert.ok(gather < step * 0.25, "the gather moves the engine little");
-    assert.equal(henshinProgress(from + step * (HENSHIN_SEAT + 0.01)), 0.16 + (beat + 1) * step);
+    assert.ok(
+      henshinProgress(from + step * HENSHIN_SEAT) - from > step * 0.9,
+      "seated by the clamp",
+    );
+    assert.equal(henshinProgress(from + step * (HENSHIN_LOCKED + 0.01)), 0.16 + (beat + 1) * step);
     assert.equal(henshinProgress(from + step * 0.99), 0.16 + (beat + 1) * step);
   }
 });
