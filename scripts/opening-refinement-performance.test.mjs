@@ -3,6 +3,7 @@ import { readFileSync, statSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
+import * as openingVisitState from "../src/lib/opening-visit-state.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const title = read("src/components/cinematic/title-sequence.tsx");
@@ -145,6 +146,7 @@ function entryRuntime({
     URLSearchParams,
     require: (name) => {
       if (name === "@/lib/visual-paint") return visualPaint;
+      if (name === "@/lib/opening-visit-state") return openingVisitState;
       if (name === "react") return react;
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx, Fragment: "fragment" };
       if (name === "@tanstack/react-router") return { useRouter: () => router };
@@ -338,6 +340,30 @@ test("SKIP has its own row above the final entrance at narrow portrait and short
   assert.match(css, /bottom: calc\(max\(10vh, 72px\) \+ 52px \+ 12px\);/);
   assert.match(css, /bottom: calc\(max\(8vh, 56px\) \+ 52px \+ 12px\);/);
   assert.match(css, /bottom: calc\(30px \+ 44px \+ 12px\);/);
+});
+
+test("opening begins on its first frame and retains the full sequence duration", () => {
+  const ui = entryRuntime({ runEffects: true, profileDevice: { connection: { saveData: true } } });
+  ui.render();
+  ui.advance(15);
+  assert.equal(ui.state[0], "idle");
+  ui.advance(1);
+  const playing = ui.render();
+  assert.equal(ui.state[0], "playing", "the first frame releases the former 120ms hold");
+  assert.match(playing.tree.props.className, /is-playing/);
+  ui.advance(7199);
+  assert.equal(ui.state[0], "playing", "startup savings do not trim the sequence");
+  ui.advance(1);
+  assert.equal(ui.state[0], "complete");
+  ui.unmount();
+});
+
+test("unmount before the first frame cancels the scheduled opening", () => {
+  const ui = entryRuntime({ runEffects: true, profileDevice: { connection: { saveData: true } } });
+  ui.render();
+  ui.unmount();
+  ui.advance(120);
+  assert.equal(ui.state[0], "idle");
 });
 
 test("real opening gestures, M presses and repeated replays have no sound control or stage unlock", () => {

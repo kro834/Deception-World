@@ -49,7 +49,8 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner 2026-10-19: only EP6's title, thumbnail and alt change to 来訪 / ERROR; markup stays pinned.
     // Owner 2026-10-26: EP4 title becomes 癒えぬ傷を負った者共.
     // Owner 2026-10-31: remove FARCE and move 来訪 to EP5; finale is EP6 REXONANCE.
-    records: "77a5e3c391de7987130c9f5aa3748fe2570af665c189cc96246503fdc3070369",
+    // Owner 2026-11-01: restore the EP4 rider name to ファルス.
+    records: "fbf702c15869d634d3debc732b6345e3915d37d10c9ef1ed26a0d2d01f5fc077",
     // rx14 F3/F29: responsive poster and WebP related-image attributes only.
     // The owner's records and exact copy above remain unchanged.
     // Each pickup may now land on its matching form's hash via GuardedLink.
@@ -109,7 +110,7 @@ test("the annex data is complete", () => {
   );
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length),
-    [3, 3, 9, 2],
+    [3, 3, 9, 5],
   );
   assert.equal(WORLD_GLOSSARY.length, 16);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
@@ -117,14 +118,13 @@ test("the annex data is complete", () => {
   // In-story text only: no chat handles, no ideographic indent spaces.
   assert.doesNotMatch(data, /@|\u3000/);
   // Conflicting or undecided facts stay out until the owner settles them.
+  // November 1 EP4 now explicitly connects 慶弥 and シエル to the Dream story.
   for (const held of [
     "採録制",
     "モスコ",
     "ニヒル",
     "ワンコ",
     "プロヴァンス",
-    "慶弥",
-    "シエル",
     "冤罪",
   ]) {
     assert.ok(!data.includes(held), held);

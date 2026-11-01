@@ -81,7 +81,7 @@ test("World episode records follow the actual chapter boundaries and later conse
       ["04", "癒えぬ傷を負った者共"],
     ],
   );
-  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 2]);
+  assert.deepEqual(WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length), [3, 3, 9, 5]);
   for (const { synopsis } of WORLD_EPISODE_NOTES) {
     assert.ok(synopsis.every((paragraph) => paragraph.length > 80));
   }

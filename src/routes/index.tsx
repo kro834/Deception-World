@@ -9,7 +9,7 @@ import {
   validateCommandDeckSearch,
 } from "@/lib/command-deck-mode";
 import { OPENING_LOGO_FIRST, OPENING_LOGO_SIZES } from "@/lib/opening-logo";
-import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
+import openingFontsCssUrl from "../styles-opening-fonts.css?url";
 import openingElevationCssUrl from "../styles-opening-elevation.css?url";
 import openingCinemaCssUrl from "../styles-opening-cinema.css?url";
 import openingRefinementCssUrl from "../styles-opening-refinement.css?url";
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/")({
             // The World's HUD face (the same Michroma subset /world and the
             // dossiers load), the title's elevation sheet, then its cinema light
             // (the arrival, the rays, the streaks), last on this route.
-            { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
+            { rel: "stylesheet", href: openingFontsCssUrl },
             { rel: "stylesheet", href: openingElevationCssUrl },
             { rel: "stylesheet", href: openingCinemaCssUrl },
           ],

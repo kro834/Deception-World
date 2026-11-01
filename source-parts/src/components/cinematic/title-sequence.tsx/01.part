@@ -13,6 +13,12 @@ import { waitForVisualPaint } from "@/lib/visual-paint";
 import { RotateCcw, SkipForward } from "lucide-react";
 import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
 import { preloadOpeningDestinationStyles } from "@/lib/opening-destination-styles";
+import {
+  isColdOpeningLaunch,
+  isStandaloneOpening,
+  rememberOpeningCompletion,
+  shouldResumeOpening,
+} from "@/lib/opening-visit-state";
 import stageShellCssUrl from "@/styles-stage-shell.css?url";
 import {
   OPENING_LOGO_FINAL,
@@ -52,8 +58,23 @@ const REPLAY_GUARD_MS = 600;
 // Once the opening has finished in this tab, a return to "/" (browser Back from
 // the World) shows the settled title instead of seven seconds again. もう一度
 // and the menu's オープニング (which sets the replay flag) still play it.
-const OPENING_SEEN_KEY = "dw-opening-seen";
-const OPENING_REPLAY_KEY = "dw-opening-replay";
+const openingVisitOptions = () => ({
+  installed: isStandaloneOpening(window),
+  session: () => window.sessionStorage,
+  persistent: () => window.localStorage,
+});
+
+// A fresh installed launch may reuse its completed title. Reload and explicit
+// opening URLs still request the original sequence, as in an ordinary tab.
+function isColdInstalledOpeningLaunch() {
+  try {
+    const entry = performance.getEntriesByType("navigation")[0] as
+      PerformanceNavigationTiming | undefined;
+    return isColdOpeningLaunch(entry);
+  } catch {
+    return false;
+  }
+}
 
 // A reload or a new document opened at an explicit opening URL asks to play.
 // This component only mounts for validated opening queries. Consume the document
@@ -565,34 +586,28 @@ export function TitleSequence() {
       videoStartTimerRef.current = null;
     }
     videoRef.current?.pause();
-    try {
-      window.sessionStorage.setItem(OPENING_SEEN_KEY, "1");
-    } catch {
-      /* storage unavailable: every visit plays the opening */
-    }
+    rememberOpeningCompletion(openingVisitOptions());
   }, [stopBurn]);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (skipIntroRef.current === null) {
-      let seen = false;
-      let replayRequested = false;
-      try {
-        seen = window.sessionStorage.getItem(OPENING_SEEN_KEY) === "1";
-        replayRequested = window.sessionStorage.getItem(OPENING_REPLAY_KEY) === "1";
-        window.sessionStorage.removeItem(OPENING_REPLAY_KEY);
-      } catch {
-        /* storage unavailable: play the opening */
-      }
       const reloaded = consumeTitleReload();
-      skipIntroRef.current = seen && !replayRequested && !reloaded;
+      skipIntroRef.current = shouldResumeOpening({
+        ...openingVisitOptions(),
+        documentEntryReplay: reloaded,
+        coldLaunch: isColdInstalledOpeningLaunch(),
+      });
     }
     if (reduced || (replayKey === 0 && skipIntroRef.current)) {
       finish();
       return;
     }
-    const t = window.setTimeout(() => begin(), 120);
-    return () => window.clearTimeout(t);
+    // Begin on the next paint instead of holding a ready title for 120ms.
+    // All sequence/burn clocks still start together in begin(); a hidden
+    // document can wait for its next frame rather than playing unseen.
+    const frame = window.requestAnimationFrame(() => begin());
+    return () => window.cancelAnimationFrame(frame);
   }, [begin, finish, replayKey]);
 
   useEffect(() => {

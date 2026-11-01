@@ -549,10 +549,10 @@ const EPISODES: EpisodeRecord[] = [
     alt: "黒い衣装の人物が崩壊した街に立つEP4のサムネイル",
     pickups: [
       {
-        label: "仮面ライダーファラリス",
+        label: "仮面ライダーファルス",
         src: "/manager-lejas-rider.jpeg",
         pos: "50% 8%",
-        alt: "仮面ライダーファラリス",
+        alt: "仮面ライダーファルス",
         width: 1086,
         height: 1448,
         to: "/managers/lejas",

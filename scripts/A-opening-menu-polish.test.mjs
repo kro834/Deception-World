@@ -98,8 +98,9 @@ test("a keyboard skip hands focus on, and a held key presses once", () => {
 });
 
 test("a return to the title in the same tab skips the opening; asked-for replays do not", () => {
-  assert.match(title, /window\.sessionStorage\.setItem\(OPENING_SEEN_KEY, "1"\)/);
-  assert.match(title, /skipIntroRef\.current = seen && !replayRequested && !reloaded;/);
+  assert.match(title, /rememberOpeningCompletion\(openingVisitOptions\(\)\)/);
+  assert.match(title, /skipIntroRef\.current = shouldResumeOpening\(\{/);
+  assert.match(title, /documentEntryReplay: reloaded/);
   assert.match(title, /if \(reduced \|\| \(replayKey === 0 && skipIntroRef\.current\)\) \{/);
   assert.match(title, /initial\.pathname === "\/"[\s\S]*?entry\.type === "reload"/);
   assert.match(

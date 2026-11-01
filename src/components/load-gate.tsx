@@ -1011,9 +1011,14 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   // after that destination's own load; route changes cancel stale idle jobs.
   // rx17 (owner): soon after each page's load, with the call's own chunk.
   useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
-  // META UNITAS's call chunk and engine, after each page's load (code only).
+  // META UNITAS likewise waits until after the opening; its idle preparation
+  // must not compete with the title/video/World handoff. Link intent and the
+  // actual entry still prepare the call immediately.
   useEffect(
-    () => (pathname === "/meta-unitas-saga" ? undefined : scheduleMetaUnitasEntryWarmup?.()),
+    () =>
+      pathname === "/" || pathname === "/meta-unitas-saga"
+        ? undefined
+        : scheduleMetaUnitasEntryWarmup?.(),
     [pathname],
   );
   // Owner (2026-10-11): the Rexonance page itself (chunk, styles, hero) too.

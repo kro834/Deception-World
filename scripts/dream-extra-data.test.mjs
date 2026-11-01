@@ -13,7 +13,13 @@ const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf
 const dataSource = read("src/components/dream-chapter/dream-chapter-extra-data.ts");
 
 const LINES = /^\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*$/;
-const MAX_LINES = { legacy: 58013, "2026-10-12": 58405, "2026-10-18": 59541, "2026-10-27": 60120 };
+const MAX_LINES = {
+  legacy: 58013,
+  "2026-10-12": 58405,
+  "2026-10-18": 59541,
+  "2026-10-27": 60120,
+  "2026-11-01": 60602,
+};
 const HUD = /^[A-Z0-9][A-Z0-9 ·\-–—:'.&/]*$/;
 
 const isPassage = (value) =>
@@ -66,15 +72,15 @@ test("archive corners keep their ids, 目次 rows and English HUD kickers", () =
   for (const label of Object.values(extra.DREAM_ARCHIVE_LABELS)) assert.match(label, HUD);
 });
 
-test("chronicle: fifty-eight events retain case order through the ongoing final battle", () => {
+test("chronicle: sixty-one events retain case order through the ongoing final battle", () => {
   const events = extra.DREAM_CHRONICLE;
   assert.deepEqual(
     events.map(({ no }) => no),
-    Array.from({ length: 58 }, (_, i) => i + 1),
+    Array.from({ length: 61 }, (_, i) => i + 1),
   );
   const cases = owner.DREAM_CASES.map(({ no }) => no);
   const perCase = cases.map((no) => events.filter((event) => event.case === no).length);
-  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 22]);
+  assert.deepEqual(perCase, [7, 7, 8, 8, 6, 25]);
   for (let i = 1; i < events.length; i += 1) {
     assert.ok(cases.indexOf(events[i].case) >= cases.indexOf(events[i - 1].case), `event ${i + 1}`);
   }

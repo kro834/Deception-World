@@ -50,7 +50,7 @@ test("World episode lines follow reunion, intervention and resistance in source 
 test("World records expand the three supplied episodes without inventing a resolved ending", () => {
   for (const episode of WORLD_EPISODE_NOTES) {
     // The October 18 continuation expands EP3; the October 27 export opens EP4.
-    const expected = { "03": 9, "04": 2 }[episode.no] ?? 3;
+    const expected = { "03": 9, "04": 5 }[episode.no] ?? 3;
     assert.equal(episode.synopsis.length, expected, episode.no);
     assert.ok(
       episode.synopsis.every((text) => text.length >= 80),
