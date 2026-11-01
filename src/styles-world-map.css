@@ -90,6 +90,8 @@
   color: inherit;
 }
 .wm-filters button {
+  min-width: 44px;
+  min-height: 44px;
   background: none;
   border: 1px solid #ffffff20;
   border-radius: 2px;
@@ -286,7 +288,13 @@
   margin-left: 10px;
 }
 .wm-detail li > a {
-  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: 6px;
+  font-size: 11px;
   white-space: nowrap;
   color: var(--wm-muted);
 }
