@@ -39,7 +39,10 @@ export function TransformationLab() {
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
-  const [copied, setCopied] = useState(false);
+  const [copyResult, setCopyResult] = useState<{ state: LabState; ok: boolean } | null>(null);
+  const copyRequest = useRef(0);
+  const copied = copyResult?.state === state && copyResult.ok;
+  const copyFailed = copyResult?.state === state && !copyResult.ok;
   const current = useRef(state);
   useEffect(() => {
     current.current = state;
@@ -105,7 +108,7 @@ export function TransformationLab() {
   const comparisonReady = useCallback(() => {}, []);
   const change = (patch: Partial<LabState>) => {
     setPlaying(false);
-    setCopied(false);
+    setCopyResult(null);
     setState((value) => {
       const next = { ...value, ...patch };
       next.form = validLabForm(next.rider, next.form);
@@ -123,13 +126,15 @@ export function TransformationLab() {
     setPlaying(true);
   };
   const copy = async () => {
+    const request = ++copyRequest.current;
+    setCopyResult(null);
     const url = new URL(location.href);
     url.search = labSearch(state);
     try {
       await navigator.clipboard.writeText(url.href);
-      setCopied(true);
+      if (request === copyRequest.current) setCopyResult({ state, ok: true });
     } catch {
-      setCopied(false);
+      if (request === copyRequest.current) setCopyResult({ state, ok: false });
     }
   };
   return (
@@ -298,6 +303,13 @@ export function TransformationLab() {
             </label>
             <button onClick={copy}>{copied ? "コピーしました" : "この瞬間のURLをコピー"}</button>
           </div>
+          <p role="status" className={copyFailed ? "lab-note" : "sr-only"}>
+            {copyFailed
+              ? "コピーできませんでした。一時停止して、アドレス欄のURLをコピーしてください。"
+              : copied
+                ? "URLをコピーしました。"
+                : ""}
+          </p>
           {state.compare && (
             <p className="lab-note">
               比較中は同じ瞬間で静止します。スライダーや段階を選んで見比べられます。

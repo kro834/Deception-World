@@ -24,6 +24,11 @@
 .wm-back {
   font-family: monospace;
 }
+.wm-header > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 .wm-intro {
   display: flex;
   justify-content: space-between;
