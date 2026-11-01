@@ -28,7 +28,14 @@ export function WorldMap({
   );
   const nodes = [selected, ...neighborhood];
   const [view, setView] = useState({ x: 0, y: 0, zoom: 1 });
-  const drag = useRef<{ x: number; y: number; originX: number; originY: number } | null>(null);
+  const drag = useRef<{
+    pointerId: number;
+    x: number;
+    y: number;
+    originX: number;
+    originY: number;
+    inverse: DOMMatrix;
+  } | null>(null);
   const points = nodes.map((n, i) => ({
     ...n,
     x:
@@ -115,25 +122,40 @@ export function WorldMap({
               role="img"
               aria-label="選択した項目の直接の接続。下の一覧でも同じ項目を選択できます。"
               onPointerDown={(e) => {
+                if (!e.isPrimary || e.button !== 0 || drag.current) return;
                 if ((e.target as Element).closest("[data-node]")) return;
+                const matrix = e.currentTarget.getScreenCTM();
+                if (!matrix) return;
+                const inverse = matrix.inverse();
+                const start = new DOMPoint(e.clientX, e.clientY).matrixTransform(inverse);
                 e.currentTarget.setPointerCapture(e.pointerId);
-                drag.current = { x: e.clientX, y: e.clientY, originX: view.x, originY: view.y };
+                drag.current = {
+                  pointerId: e.pointerId,
+                  x: start.x,
+                  y: start.y,
+                  originX: view.x,
+                  originY: view.y,
+                  inverse,
+                };
               }}
               onPointerMove={(e) => {
-                if (drag.current) {
-                  const scale = 1000 / e.currentTarget.getBoundingClientRect().width;
-                  setView((v) => ({
-                    ...v,
-                    x: drag.current!.originX + (e.clientX - drag.current!.x) * scale,
-                    y: drag.current!.originY + (e.clientY - drag.current!.y) * scale,
-                  }));
-                }
+                const active = drag.current;
+                if (!active || active.pointerId !== e.pointerId) return;
+                const current = new DOMPoint(e.clientX, e.clientY).matrixTransform(active.inverse);
+                setView((v) => ({
+                  ...v,
+                  x: active.originX + current.x - active.x,
+                  y: active.originY + current.y - active.y,
+                }));
               }}
-              onPointerUp={() => {
-                drag.current = null;
+              onPointerUp={(e) => {
+                if (drag.current?.pointerId === e.pointerId) drag.current = null;
               }}
-              onPointerCancel={() => {
-                drag.current = null;
+              onPointerCancel={(e) => {
+                if (drag.current?.pointerId === e.pointerId) drag.current = null;
+              }}
+              onLostPointerCapture={(e) => {
+                if (drag.current?.pointerId === e.pointerId) drag.current = null;
               }}
             >
               <defs>

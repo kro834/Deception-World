@@ -23,14 +23,24 @@ html[data-family="special"]
   > .rxs-hero
   .rxe-hero-rail
   a {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   min-height: 48px;
-  padding: 10px 15px;
+  padding: 10px 18px;
   font: 600 13px / 1.4 var(--dx-display);
   letter-spacing: 0.07em;
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 12px 28px rgb(0 0 0 / 48%);
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 html[data-family="special"]
@@ -38,9 +48,9 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rxs-hero
   .rxe-hero-primary {
-  color: #061019;
-  background: #c4eff6;
-  border: 1px solid #e5faff;
+  color: #050e16;
+  background: linear-gradient(135deg, #dff9ff 0%, #baeef8 55%, #f4dc9e 100%);
+  border: 1px solid #f0fcff;
 }
 
 html[data-family="special"]
@@ -49,8 +59,62 @@ html[data-family="special"]
   > .rxs-hero
   .rxe-hero-secondary {
   color: #f2f7fb;
-  background: rgb(3 9 16 / 75%);
-  border: 1px solid rgb(195 236 246 / 47%);
+  background:
+    linear-gradient(180deg, rgb(121 232 255 / 10%), transparent 58%),
+    rgb(4 11 19 / 84%);
+  border: 1px solid rgb(195 236 246 / 52%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-hero
+  .rxe-hero-secondary::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid #f2d896;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(90deg, #000 8px, transparent 8px calc(100% - 8px), #000 0) top / 100% 8px
+      no-repeat,
+    linear-gradient(90deg, #000 8px, transparent 8px calc(100% - 8px), #000 0) bottom / 100% 8px
+      no-repeat;
+  mask:
+    linear-gradient(90deg, #000 8px, transparent 8px calc(100% - 8px), #000 0) top / 100% 8px
+      no-repeat,
+    linear-gradient(90deg, #000 8px, transparent 8px calc(100% - 8px), #000 0) bottom / 100% 8px
+      no-repeat;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxe-hero-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 14px 32px rgb(0 0 0 / 56%),
+      0 0 22px rgb(121 232 255 / 36%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-hero
+    .rxe-hero-secondary:hover {
+    transform: translateY(-1px);
+    border-color: #a5edff;
+    background:
+      linear-gradient(180deg, rgb(121 232 255 / 18%), transparent 64%),
+      rgb(6 16 26 / 90%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 26%),
+      0 14px 32px rgb(0 0 0 / 60%),
+      0 0 18px rgb(121 232 255 / 22%);
+  }
 }
 
 html[data-family="special"]
@@ -79,12 +143,20 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rxs-chapter-index.rxe-chapter-map {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   contain: layout style;
-  border-block: 1px solid rgb(121 232 255 / 23%);
-  background: rgb(3 9 16 / 76%);
+  border-block: 1px solid rgb(121 232 255 / 28%);
+  background:
+    linear-gradient(90deg, rgb(121 232 255 / 55%) 0%, rgb(242 216 150 / 65%) 50%, rgb(121 232 255 / 55%) 100%)
+      top / 100% 1px no-repeat,
+    radial-gradient(ellipse 75% 55% at 50% 0%, rgb(121 232 255 / 8%), transparent 72%),
+    rgb(3 9 16 / 84%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    0 18px 42px rgb(0 0 0 / 42%);
 }
 
 html[data-family="special"]
@@ -94,12 +166,14 @@ html[data-family="special"]
   .rxe-chapter-map-heading {
   grid-column: 1 / -1;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin: 0;
   padding: 13px 20px;
   color: #9adfeb;
-  border-bottom: 1px solid rgb(121 232 255 / 16%);
+  border-bottom: 1px solid rgb(121 232 255 / 20%);
+  background: linear-gradient(90deg, rgb(121 232 255 / 8%), transparent 65%);
   font: 500 11px / 1.4 var(--dx-hud);
   letter-spacing: 0.18em;
 }
@@ -110,22 +184,27 @@ html[data-family="special"]
   > .rxe-chapter-map
   .rxe-chapter-map-heading
   small {
-  color: #ccd5db;
+  color: #f2d896;
   font: inherit;
   white-space: nowrap;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a {
+  position: relative;
   display: grid;
-  grid-template-columns: 31px minmax(0, 1fr) 16px;
+  grid-template-columns: 36px minmax(0, 1fr) 22px;
   grid-template-rows: auto auto auto;
   align-content: center;
-  gap: 3px 12px;
+  gap: 4px 14px;
   min-height: 118px;
   min-width: 0;
   padding: 18px 20px;
   border: 0;
   background: transparent;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a + a {
@@ -137,7 +216,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rxe-chapter-map
   a:nth-of-type(even) {
-  border-left: 1px solid rgb(121 232 255 / 16%);
+  border-left: 1px solid rgb(121 232 255 / 18%);
 }
 
 html[data-family="special"]
@@ -145,7 +224,7 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rxe-chapter-map
   a:nth-of-type(n + 3) {
-  border-top: 1px solid rgb(121 232 255 / 16%);
+  border-top: 1px solid rgb(121 232 255 / 18%);
 }
 
 html[data-family="special"]
@@ -161,16 +240,23 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-ch
   grid-column: 1;
   grid-row: 1 / -1;
   align-self: start;
+  display: grid;
+  place-items: center;
+  inline-size: 32px;
+  block-size: 32px;
+  border: 1px solid rgb(242 216 150 / 38%);
+  background: linear-gradient(180deg, rgb(242 216 150 / 14%), rgb(3 9 16 / 60%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
   color: #f2d896;
-  font: 600 16px / 1.1 var(--rxf-forge, var(--dx-hud));
+  font: 600 14px / 1 var(--rxf-forge, var(--dx-hud));
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-chapter-map a small {
   grid-column: 2;
   grid-row: 1;
   color: #9adfeb;
-  font-size: 10px;
-  letter-spacing: 0.13em;
+  font: 500 10px / 1.4 var(--dx-hud);
+  letter-spacing: 0.14em;
   overflow-wrap: anywhere;
 }
 
@@ -186,8 +272,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-ch
   grid-column: 2;
   grid-row: 3;
   min-width: 0;
-  color: #aebdc7;
-  font: 400 12px / 1.5 var(--dx-body);
+  color: #b4c3cd;
+  font: 400 12px / 1.55 var(--dx-body);
   font-style: normal;
   overflow-wrap: anywhere;
 }
@@ -196,8 +282,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-ch
   grid-column: 3;
   grid-row: 1 / -1;
   align-self: center;
+  justify-self: end;
   color: #f2d896;
-  font: 400 15px / 1 var(--dx-hud);
+  font: 400 16px / 1 var(--dx-hud);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html[data-family="special"]
@@ -215,7 +303,28 @@ html[data-family="special"]
     .rxs-page.rxs-page.rxs-rexonance-page
     > .rxe-chapter-map
     a:hover {
-    background: rgb(121 232 255 / 8%);
+    background: linear-gradient(90deg, rgb(121 232 255 / 11%), rgb(242 216 150 / 5%) 85%, transparent);
+    box-shadow: inset 3px 0 0 #79e8ff;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a:hover
+    b {
+    border-color: #f2d896;
+    background: linear-gradient(180deg, rgb(242 216 150 / 28%), rgb(121 232 255 / 14%));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a:hover
+    i {
+    transform: translate(2px, 2px);
+    color: #79e8ff;
   }
 }
 
@@ -235,15 +344,47 @@ html[data-family="special"]
 /* The assembly chapter gives the scroll scene a readable start, completion
    state and replay controls outside the decorative canvas. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-heading {
+  --rxs-load-color: #79e8ff;
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px clamp(18px, 4vw, 56px);
+  gap: 16px clamp(18px, 4vw, 56px);
   align-items: end;
   contain: layout style;
-  padding: clamp(22px, 3vw, 42px) var(--rxt-gutter, 24px);
-  border-block: 1px solid rgb(121 232 255 / 20%);
-  background: #08111a;
+  padding: clamp(24px, 3.2vw, 44px) var(--rxt-gutter, 24px);
+  border-block: 1px solid rgb(121 232 255 / 26%);
+  background:
+    linear-gradient(90deg, rgb(121 232 255 / 55%), rgb(242 216 150 / 60%), transparent 88%)
+      top / 100% 1px no-repeat,
+    radial-gradient(ellipse 72% 65% at 18% 0%, rgb(121 232 255 / 11%), transparent 70%),
+    linear-gradient(180deg, #0b1724 0%, #060e16 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
   scroll-margin-block-start: 84px;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading[data-load="ready"] {
+  --rxs-load-color: #6df2c6;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading[data-load="loading"],
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading[data-load="preparing"] {
+  --rxs-load-color: #f2d896;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading[data-load="error"] {
+  --rxs-load-color: #ff6e88;
 }
 
 html[data-family="special"]
@@ -281,14 +422,18 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-asse
   gap: 16px;
   contain: layout style;
   padding: 24px var(--rxt-gutter, 24px);
-  border-block: 1px solid rgb(121 232 255 / 20%);
-  background: #08111a;
+  border-block: 1px solid rgb(121 232 255 / 24%);
+  background:
+    linear-gradient(90deg, transparent, rgb(121 232 255 / 42%), rgb(242 216 150 / 48%), transparent)
+      top / 100% 1px no-repeat,
+    linear-gradient(180deg, #0a1622 0%, #060d15 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-footer > p {
   flex: 1 1 260px;
   margin: 0;
-  color: #b6c6ce;
+  color: #bfd0d8;
   font: 400 13px / 1.8 var(--dx-body);
 }
 
@@ -307,16 +452,70 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-asse
   text-wrap: pretty;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-status {
-  color: #d7edf2;
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading
+  p.rxs-assembly-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  color: #9adfeb;
+  font: 500 11px / 1.4 var(--rxf-etch, var(--dx-hud));
+  letter-spacing: 0.2em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading
+  p.rxs-assembly-eyebrow::before {
+  content: "";
+  inline-size: 26px;
+  block-size: 2px;
+  background: linear-gradient(90deg, #f2d896, #79e8ff);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading
+  p.rxs-assembly-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--rxs-load-color, #79e8ff) 38%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rxs-load-color, #79e8ff) 12%, transparent),
+    rgb(4 10 17 / 72%) 75%
+  );
+  color: #e4f4f8;
   font: 500 12px / 1.5 var(--dx-body);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-assembly-heading
+  p.rxs-assembly-status::before {
+  content: "";
+  flex-shrink: 0;
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 999px;
+  background: var(--rxs-load-color, #79e8ff);
+  box-shadow: 0 0 10px var(--rxs-load-color, #79e8ff);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 html[data-family="special"]
@@ -324,14 +523,48 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   .rxs-assembly-controls
   :is(button, a) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 44px;
-  padding: 9px 15px;
-  border: 1px solid rgb(195 236 246 / 52%);
+  padding: 9px 16px;
+  border: 1px solid rgb(195 236 246 / 54%);
   border-radius: 0;
   color: #f2f7fb;
-  background: #101d27;
+  background:
+    linear-gradient(180deg, rgb(121 232 255 / 12%), transparent 60%),
+    #0d1a24;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 8px 20px rgb(0 0 0 / 38%);
   font: 600 12px / 1.4 var(--dx-display);
+  letter-spacing: 0.06em;
+  text-decoration: none;
   cursor: pointer;
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-assembly-controls
+    :is(button, a):hover {
+    transform: translateY(-1px);
+    border-color: #f2d896;
+    background:
+      linear-gradient(180deg, rgb(242 216 150 / 18%), rgb(121 232 255 / 8%) 68%),
+      #112230;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 24%),
+      0 10px 24px rgb(0 0 0 / 48%),
+      0 0 16px rgb(121 232 255 / 22%);
+  }
 }
 
 html[data-family="special"]
@@ -362,6 +595,124 @@ html[data-family="special"]
   text-wrap: pretty;
 }
 
+/* The existing LiquidLens remains the primary form control. This ledger
+   makes its place in the three-form sequence legible at a glance. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  width: min(100%, 780px);
+  margin: 0 auto clamp(24px, 3vw, 40px);
+  padding: 18px 20px;
+  contain: layout style;
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 32%, rgb(121 232 255 / 22%));
+  color: #eaf3f7;
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 12%, transparent),
+      transparent 74%
+    ),
+    linear-gradient(180deg, rgb(8 18 29 / 84%), rgb(3 9 16 / 88%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 16px 38px rgb(0 0 0 / 42%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--rxs-stage-accent, #79e8ff);
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) top / 100% 10px
+      no-repeat,
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) bottom / 100% 10px
+      no-repeat;
+  mask:
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) top / 100% 10px
+      no-repeat,
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) bottom / 100% 10px
+      no-repeat;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #a8cbd4;
+  font: 500 11px / 1.4 var(--dx-hud);
+  letter-spacing: 0.15em;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-status-heading
+  span:last-child {
+  color: #f2d896;
+  white-space: nowrap;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  height: 4px;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
+  display: block;
+  background: rgb(121 232 255 / 18%);
+  transition:
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxe-form-status-track
+  i.is-reached {
+  background: var(--rxs-stage-accent, #79e8ff);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 55%, transparent);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0;
+  font: 400 12px / 1.5 var(--dx-body);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p > span {
+  color: #acbac2;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p strong {
+  color: #f2f7fb;
+  font: 700 17px / 1.4 var(--dx-display);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p small {
+  padding: 1px 8px;
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 42%, transparent);
+  background: color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 12%, transparent);
+  color: var(--rxs-stage-accent, #79e8ff);
+  font: 500 11px / 1.4 var(--dx-hud);
+  letter-spacing: 0.08em;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p em {
+  flex-basis: 100%;
+  color: #d5e3e9;
+  font: 500 13px / 1.5 var(--dx-display);
+  font-style: normal;
+}
 /* The transformation guide and replay footer are direct children of the
    desktop page grid. Give them explicit rows so DOM, chapter navigation and
    the visual sequence remain the same. */
@@ -398,8 +749,14 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-comparison {
   max-width: var(--dxs-wrap, 1180px);
   margin: clamp(36px, 5vw, 72px) auto 0;
-  border-block: 1px solid rgb(121 232 255 / 24%);
-  background: rgb(3 9 16 / 78%);
+  border: 1px solid rgb(121 232 255 / 26%);
+  background:
+    linear-gradient(90deg, rgb(121 232 255 / 50%), rgb(242 216 150 / 55%), rgb(121 232 255 / 50%))
+      top / 100% 1px no-repeat,
+    rgb(3 9 16 / 84%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%),
+    0 20px 48px rgb(0 0 0 / 48%);
 }
 
 html[data-family="special"]
@@ -416,6 +773,27 @@ html[data-family="special"]
   color: #f2f7fb;
   cursor: pointer;
   list-style: none;
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-form-comparison
+    > summary:hover {
+    background: linear-gradient(90deg, rgb(121 232 255 / 9%), transparent 75%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-form-comparison
+    > summary:hover
+    > i {
+    border-color: #f2d896;
+    background: rgb(242 216 150 / 12%);
+  }
 }
 
 html[data-family="special"]
@@ -460,9 +838,15 @@ html[data-family="special"]
   place-items: center;
   inline-size: 44px;
   block-size: 44px;
-  border: 1px solid rgb(121 232 255 / 35%);
+  border: 1px solid rgb(121 232 255 / 42%);
+  background: linear-gradient(180deg, rgb(121 232 255 / 10%), rgb(3 9 16 / 65%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
   color: #f2d896;
   font: normal 24px / 1 var(--dx-hud);
+  transition:
+    rotate 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 
 html[data-family="special"]
@@ -472,6 +856,7 @@ html[data-family="special"]
   > summary
   > i {
   rotate: 45deg;
+  border-color: #f2d896;
 }
 
 html[data-family="special"]
@@ -491,16 +876,18 @@ html[data-family="special"]
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid rgb(121 232 255 / 18%);
+  border-top: 1px solid rgb(121 232 255 / 20%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
   padding: clamp(17px, 2vw, 28px);
   border-right: 1px solid rgb(121 232 255 / 16%);
   color: #d6e2e8;
+  transition: background-color 180ms ease;
 }
 
 html[data-family="special"]
@@ -514,7 +901,13 @@ html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
   .rxe-comparison-card[data-selected="true"] {
-  background: linear-gradient(180deg, rgb(121 232 255 / 8%), transparent 45%);
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 16%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(121 232 255 / 8%), transparent 45%);
   box-shadow: inset 0 2px 0 var(--rxs-stage-accent, #79e8ff);
 }
 
@@ -524,6 +917,7 @@ html[data-family="special"]
   .rxe-comparison-card
   > p:first-child {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   min-height: 22px;
@@ -548,6 +942,10 @@ html[data-family="special"]
   .rxe-comparison-card
   > p:first-child
   b {
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 45%, transparent);
+  background: color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 14%, transparent);
+  color: #f2f7fb;
   font: inherit;
   text-align: end;
 }
@@ -557,9 +955,17 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comp
   width: 100%;
   height: clamp(210px, 30vw, 410px);
   margin: 0 0 20px;
+  padding: 10px 8px 0;
+  border: 1px solid rgb(121 232 255 / 16%);
   object-fit: contain;
   object-position: center bottom;
-  background: rgb(5 12 20 / 80%);
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 50% 72%,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 14%, transparent),
+      transparent 72%
+    ),
+    rgb(4 10 18 / 86%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card h3 {
@@ -607,6 +1013,7 @@ html[data-family="special"]
   width: 5px;
   height: 5px;
   background: var(--rxs-stage-accent, #79e8ff);
+  box-shadow: 0 0 8px var(--rxs-stage-accent, #79e8ff);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comparison-card button {
@@ -617,9 +1024,34 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-comp
   border: 1px solid var(--rxs-stage-accent, #79e8ff);
   border-radius: 0;
   color: #f2f7fb;
-  background: #0a1720;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 14%, transparent),
+      transparent 68%
+    ),
+    #0a1720;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
   font: 600 12px / 1.4 var(--dx-display);
+  letter-spacing: 0.05em;
   cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxe-comparison-card
+    button:not([aria-pressed="true"]):hover {
+    background: color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 24%, #0d1d29);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      0 0 18px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 28%, transparent);
+  }
 }
 
 html[data-family="special"]
@@ -629,6 +1061,58 @@ html[data-family="special"]
   button[aria-pressed="true"] {
   color: #071118;
   background: var(--rxs-stage-accent, #79e8ff);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 20px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 36%, transparent);
+}
+
+/* Interactive P14 & form-stage GUI controls refinement */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-p14-range-labels
+  button {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-p14-range-labels
+    button:hover {
+    border-color: #79e8ff;
+    color: #f2f7fb;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-comparison-selector
+  select {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-comparison-selector
+    select:hover {
+    border-color: #f2d896;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 18%),
+      0 0 14px rgb(121 232 255 / 18%);
+  }
 }
 
 @media (max-width: 900px) {
