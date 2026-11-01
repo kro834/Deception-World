@@ -22,6 +22,13 @@
 //
 // The draggables (Ciel's button, the slide-to-open pills, the range thumbs)
 // measure their box during the drag: they get the light only, never a scale.
+// Ciel's light rides its drag (the drag's own inline translate, copied as it
+// is written), so it never lets go while the button is carried.
+//
+// A tap is never a hold: the timer only arms it for the next frame (input
+// the browser queued behind the timer runs first), and a pointerup stamped
+// (event.timeStamp) under HOLD_MS after its pointerdown puts any light that
+// did start away at once, however late the browser delivered it.
 //
 // Budgets: nothing is read on a tap. A hold reads its geometry once (one
 // getBoundingClientRect on the control, one on each clipping ancestor and
@@ -37,6 +44,8 @@ export const HOLD_MS = 200;
 export const HOLD_SLOP_PX = 10;
 /** How long the release's spring and fade run before the overlay is put away. */
 export const RELEASE_MS = 640;
+/** The light's room past the grown control: the lift's blur and the spill. */
+export const HALO_PX = 44;
 
 /** Swell bounds: an icon (48px and under) to a large card (240px and over). */
 export const SWELL_SMALL = 1.18;
@@ -125,8 +134,17 @@ interface Press {
   pointerType: string;
   x: number;
   y: number;
+  /* The pointerdown's event time: a pointerup stamped sooner is a tap,
+     however late the browser hands it over. */
+  stamp: number;
   timer: number;
   held: boolean;
+  /* Ciel's button carried by its own drag: the drag's translate when the
+     light came on, and the observer that moves the light with it. */
+  carried: { x: number; y: number; watch: MutationObserver | null } | null;
+  /* Watches the control's ancestors for a script moving them (the side
+     menu's swipe to close writes the panel's inline translate). */
+  moved: MutationObserver | null;
   /* Set when the hold starts: the shell's box in the overlay's coordinates. */
   left: number;
   top: number;
@@ -175,6 +193,7 @@ export function watchLiquidHold(doc: Document = document) {
   let overlay: HTMLDivElement | null = null;
   let releasing: { target: HTMLElement; timer: number } | null = null;
   let frame = 0;
+  let armFrame = 0;
 
   const ensureOverlay = () => {
     if (overlay) return overlay;
@@ -227,10 +246,81 @@ export function watchLiquidHold(doc: Document = document) {
     overlay.style.setProperty("--lg-dy", ((ty / p.height) * 2 - 1).toFixed(2));
   };
 
+  /* Ciel's button: its drag (zeus-button.tsx) begins before the hold and
+     writes its own `translate` each frame; the light reads that inline
+     value (no layout) as it is written and travels with the button, at the
+     drag's 1.075 lift. */
+  const parseTranslate = (value: string) => {
+    const [x = "0", y = "0"] = (value ?? "").trim().split(/\s+/);
+    return { x: parseFloat(x) || 0, y: parseFloat(y) || 0 };
+  };
+  const carry = (p: Press) => {
+    if (!overlay) return;
+    const base = parseTranslate(p.target.style.translate);
+    const layer = overlay;
+    const sync = () => {
+      const now = parseTranslate(p.target.style.translate);
+      layer.style.setProperty("--lg-hold-mx", `${(now.x - base.x).toFixed(1)}px`);
+      layer.style.setProperty("--lg-hold-my", `${(now.y - base.y).toFixed(1)}px`);
+    };
+    layer.setAttribute("data-carried", "");
+    layer.style.setProperty("--lg-hold-mx", "0px");
+    layer.style.setProperty("--lg-hold-my", "0px");
+    const Observer = view.MutationObserver;
+    const watch = Observer ? new Observer(sync) : null;
+    watch?.observe(p.target, { attributes: true, attributeFilter: ["style"] });
+    p.carried = { ...base, watch };
+  };
+
+  const drop = (p: Press) => {
+    p.carried?.watch?.disconnect();
+    p.carried = null;
+    p.moved?.disconnect();
+    p.moved = null;
+  };
+
+  /* A container carried off by a script (a swipe to close, a dragged sheet)
+     would leave the light behind: the hold lets go as soon as an ancestor's
+     inline translate or transform changes. Inline values only, no layout. */
+  const watchAncestors = (p: Press) => {
+    const Observer = view.MutationObserver;
+    if (!Observer) return;
+    const placed = new Map<Element, string>();
+    const where = (el: HTMLElement) => `${el.style.translate}|${el.style.transform}`;
+    for (
+      let node = p.target.parentElement;
+      node && node !== doc.documentElement;
+      node = node.parentElement
+    )
+      placed.set(node, where(node));
+    const watch = new Observer((records) => {
+      if (press !== p) return;
+      for (const record of records) {
+        const el = record.target as HTMLElement;
+        if (placed.has(el) && placed.get(el) !== where(el)) {
+          release();
+          return;
+        }
+      }
+    });
+    for (const node of placed.keys())
+      watch.observe(node, { attributes: true, attributeFilter: ["style"] });
+    p.moved = watch;
+  };
+
+  /* The timer only arms the hold: it starts on the next frame, after any
+     input the browser had queued behind it (a late pointerup ends it). */
+  const arm = () => {
+    if (!press) return;
+    press.timer = 0;
+    if (armFrame) view.cancelAnimationFrame(armFrame);
+    armFrame = view.requestAnimationFrame(startHold);
+  };
+
   const startHold = () => {
+    armFrame = 0;
     const p = press;
     if (!p) return;
-    p.timer = 0;
     const { target } = p;
     if (!target.isConnected) {
       press = null;
@@ -277,6 +367,17 @@ export function watchLiquidHold(doc: Document = document) {
       Number(fill[4] ?? 1) > 0.4;
     const from = style.scale && style.scale !== "none" ? style.scale : "1";
 
+    // The overlay covers the grown control and its halo, cut to the clip,
+    // not the whole clip: a smaller layer to paint and composite. Ciel's
+    // button travels with its drag, so its light keeps the whole clip.
+    const drags = p.kind === "light" && target.matches(".zeus-button");
+    if (!drags) {
+      const reach = (Math.max(width, height) * (scale - 1)) / 2 + HALO_PX;
+      clip.left = Math.max(clip.left, Math.floor(box.left - reach));
+      clip.top = Math.max(clip.top, Math.floor(box.top - reach));
+      clip.right = Math.max(clip.left, Math.min(clip.right, Math.ceil(box.right + reach)));
+      clip.bottom = Math.max(clip.top, Math.min(clip.bottom, Math.ceil(box.bottom + reach)));
+    }
     const layer = ensureOverlay();
     const host = target.closest("dialog[open]") ?? doc.body;
     if (layer.parentNode !== host) host.appendChild(layer);
@@ -319,6 +420,9 @@ export function watchLiquidHold(doc: Document = document) {
     ls.setProperty("--lg-hold-d", `${Math.ceil(reach)}px`);
     ls.setProperty("--lg-hold-tint", /^\d/.test(tint) ? tint : "190 232 255");
     layer.setAttribute("data-kind", p.kind);
+    if (drags) carry(p);
+    else layer.removeAttribute("data-carried");
+    watchAncestors(p);
     layer.toggleAttribute("data-light", light);
     layer.toggleAttribute("data-bare", bare);
     follow(p, p.x, p.y);
@@ -347,15 +451,33 @@ export function watchLiquidHold(doc: Document = document) {
     });
   };
 
-  const release = () => {
+  /** A tap the browser delivered late: put the light away at once. */
+  const abort = (p: Press) => {
+    clearTarget(p.target);
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.removeAttribute("data-state");
+    }
+  };
+
+  const release = (stamp?: number) => {
     const p = press;
     press = null;
     if (!p) return;
     if (p.timer) view.clearTimeout(p.timer);
+    if (armFrame) {
+      view.cancelAnimationFrame(armFrame);
+      armFrame = 0;
+    }
+    drop(p);
     if (!p.held) return;
     if (frame) {
       view.cancelAnimationFrame(frame);
       frame = 0;
+    }
+    if (stamp !== undefined && p.stamp > 0 && stamp > 0 && stamp - p.stamp < HOLD_MS) {
+      abort(p);
+      return;
     }
     p.target.setAttribute(HOLD, "out");
     overlay?.setAttribute("data-state", "out");
@@ -382,8 +504,11 @@ export function watchLiquidHold(doc: Document = document) {
       pointerType: event.pointerType,
       x: event.clientX,
       y: event.clientY,
-      timer: view.setTimeout(startHold, HOLD_MS),
+      stamp: event.timeStamp || 0,
+      timer: view.setTimeout(arm, HOLD_MS),
       held: false,
+      carried: null,
+      moved: null,
       left: 0,
       top: 0,
       width: 0,
@@ -405,16 +530,15 @@ export function watchLiquidHold(doc: Document = document) {
         release();
       return;
     }
-    // Ciel's button is carried away by its drag: its light lets go.
-    if (p.target.getAttribute("data-dragging") === "true" && p.target.matches(".zeus-button")) {
-      release();
-      return;
-    }
+    // Ciel's button carries its light with its drag (the finger stays put
+    // on the button, so the light does too).
+    if (p.carried) return;
     follow(p, event.clientX, event.clientY);
   };
 
   const up = (event: PointerEvent) => {
-    if (press && event.pointerId === press.pointerId) release();
+    if (press && event.pointerId === press.pointerId)
+      release(event.type === "pointerup" ? event.timeStamp : undefined);
   };
 
   // A touch held on a glass control is the hold, not the page's long-press
@@ -426,12 +550,24 @@ export function watchLiquidHold(doc: Document = document) {
 
   const cancel = () => release();
 
+  // Something around the control took the finger (the side menu's swipe to
+  // close, a rail's pan): the control is carried off under a light that
+  // stays put, so the hold lets go. Ciel's button capturing its own drag
+  // keeps it (its light rides the drag).
+  const captured = (event: PointerEvent) => {
+    const p = press;
+    if (!p || event.pointerId !== p.pointerId) return;
+    const el = event.target as Node | null;
+    if (el && el !== p.target && !p.target.contains(el)) release();
+  };
+
   const passive = { capture: true, passive: true } as const;
   const active = { capture: true, passive: false } as const;
   doc.addEventListener("pointerdown", down, passive);
   doc.addEventListener("pointermove", move, passive);
   doc.addEventListener("pointerup", up, passive);
   doc.addEventListener("pointercancel", up, passive);
+  doc.addEventListener("gotpointercapture", captured, passive);
   doc.addEventListener("scroll", cancel, passive);
   doc.addEventListener("dragstart", cancel, passive);
   doc.addEventListener("contextmenu", menu, active);
@@ -440,7 +576,11 @@ export function watchLiquidHold(doc: Document = document) {
 
   return () => {
     if (press?.timer) view.clearTimeout(press.timer);
-    if (press) clearTarget(press.target);
+    if (armFrame) view.cancelAnimationFrame(armFrame);
+    if (press) {
+      drop(press);
+      clearTarget(press.target);
+    }
     press = null;
     if (releasing) {
       view.clearTimeout(releasing.timer);
@@ -454,6 +594,7 @@ export function watchLiquidHold(doc: Document = document) {
     doc.removeEventListener("pointermove", move, passive);
     doc.removeEventListener("pointerup", up, passive);
     doc.removeEventListener("pointercancel", up, passive);
+    doc.removeEventListener("gotpointercapture", captured, passive);
     doc.removeEventListener("scroll", cancel, passive);
     doc.removeEventListener("dragstart", cancel, passive);
     doc.removeEventListener("contextmenu", menu, active);

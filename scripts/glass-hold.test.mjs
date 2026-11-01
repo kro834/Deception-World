@@ -107,6 +107,7 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
       return { left: 100, top: 200, right: 100 + width, bottom: 200 + height, width, height };
     },
     closest: (sel) => (sel.includes(cls) && !sel.startsWith("dialog") ? target : null),
+    contains: (node) => node === target,
     matches: (sel) => sel.split(",").some((part) => part.trim() === cls),
   });
   target.parentElement = body;
@@ -218,6 +219,63 @@ test("a quick tap keeps the shared press: no swell, no light, no measuring", asy
   stop();
 });
 
+test("a tap whose pointerup arrives late (after the timer) is still a tap", async () => {
+  const { watchLiquidHold, HOLD_MS } = await loadHold();
+  const w = world();
+  const stop = watchLiquidHold(w.doc);
+  // The browser stamped the pointerup 16 ms after the pointerdown but handed
+  // it over only after the hold timer had run (QA: about 390 ms late).
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: 1000 });
+  w.advance(HOLD_MS + 20);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  w.fire("pointerup", { type: "pointerup", timeStamp: 1016 });
+  assert.equal(w.target.getAttribute("data-lg-hold"), null, "no release spring for a tap");
+  assert.equal(w.target.style.getPropertyValue("--lg-hold-s"), "");
+  const overlay = w.appended.find((n) => n.className === "lg-hold");
+  assert.equal(overlay.hidden, true);
+  // A pointerup that queued behind the timer, before the next frame: the
+  // hold never starts at all.
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: 3000 });
+  w.advance(HOLD_MS + 4);
+  w.fire("pointerup", { type: "pointerup", timeStamp: 3016 });
+  w.advance(100);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  assert.equal(overlay.hidden, true);
+  // A real hold, stamped past HOLD_MS, still springs back.
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: 5000 });
+  w.advance(HOLD_MS + 20);
+  w.fire("pointerup", { type: "pointerup", timeStamp: 5000 + HOLD_MS + 40 });
+  assert.equal(w.target.getAttribute("data-lg-hold"), "out");
+  stop();
+});
+
+test("the hold's light keeps a label's contrast: no strong white wash", () => {
+  const bloom = section.match(/\.lg-hold-bloom \{\s*background: radial-gradient\(([^;]+)\);/);
+  assert.ok(bloom, "bloom gradient");
+  for (const [, alpha] of bloom[1].matchAll(/\/ ([\d.]+)\)/g))
+    assert.ok(Number(alpha) <= 0.2, `bloom stop alpha ${alpha}`);
+  // The control's own light is not animated a second time by the hold.
+  assert.doesNotMatch(section.replace(/\/\*[\s\S]*?\*\//g, ""), /--lg-glow:\s*[\d.]+;/);
+});
+
+test("a container that takes the finger (a swipe to close) ends the hold", async () => {
+  const { watchLiquidHold, HOLD_MS, RELEASE_MS } = await loadHold();
+  const w = world();
+  const stop = watchLiquidHold(w.doc);
+  w.fire("pointerdown");
+  w.advance(HOLD_MS + 40);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  // The control capturing its own pointer (Ciel's drag) keeps the hold.
+  w.fire("gotpointercapture", { target: w.target });
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  // The side menu's panel capturing it to swipe: the light lets go.
+  w.fire("gotpointercapture", { target: w.doc.body });
+  assert.equal(w.target.getAttribute("data-lg-hold"), "out");
+  w.advance(RELEASE_MS + 10);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  stop();
+});
+
 test("a finger that travels before the hold is a scroll, not a hold", async () => {
   const { watchLiquidHold, HOLD_MS, HOLD_SLOP_PX } = await loadHold();
   const w = world();
@@ -234,7 +292,9 @@ test("a hold swells the control, lights one overlay, follows the finger and spri
   const w = world();
   const stop = watchLiquidHold(w.doc);
   w.fire("pointerdown");
-  w.advance(HOLD_MS + 20);
+  // The timer arms the hold, which starts on the next frame; the overlay
+  // lights a frame after that.
+  w.advance(HOLD_MS + 40);
   assert.equal(w.target.getAttribute("data-lg-hold"), "on");
   assert.equal(w.target.getAttribute("data-lg-hold-kind"), "swell");
   const s = Number(w.target.style.getPropertyValue("--lg-hold-s"));
@@ -331,7 +391,7 @@ test("the fallbacks: reduced motion, economy, reduced transparency, forced colou
   const swell = section.indexOf("@media (prefers-reduced-motion: no-preference)");
   const firstScale = section.indexOf("scale: var(--lg-hold-s");
   assert.ok(swell > 0 && swell < firstScale, "the swell waits for no-preference");
-  const block = section.slice(swell, section.indexOf("/* Held, the glass is lit"));
+  const block = section.slice(swell, section.indexOf("/* Held, the glass keeps"));
   for (const { selector } of rules(block))
     if (selector) assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/, selector);
   const reduce = section.slice(section.indexOf("@media (prefers-reduced-motion: reduce)"));
@@ -369,5 +429,5 @@ test("the module reads layout only when a hold starts, never on a move", () => {
     holdSource.indexOf("const move = (event: PointerEvent)"),
   );
   assert.doesNotMatch(down, /getBoundingClientRect|getComputedStyle/);
-  assert.match(down, /setTimeout\(startHold, HOLD_MS\)/);
+  assert.match(down, /setTimeout\(arm, HOLD_MS\)/);
 });

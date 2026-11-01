@@ -1129,16 +1129,9 @@ html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg
   }
 }
 
-/* Held, the glass is lit from inside a little more than a press lights it
-   (the overlay carries the light itself). Not the draggables: their glass
-   stays rim-only, as when they are pressed. */
-html[data-button-style="liquid"]
-  body
-  [data-lg-hold="on"][data-lg-hold][data-lg-hold]:not([data-lg-hold-kind="light"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  --lg-glow: 0.5;
-  --lg-rim: 1;
-  --lg-sheen: 0.3;
-}
+/* Held, the glass keeps the press's own light (--lg-glow and the rest stay
+   where the press put them): the overlay carries the hold's light, so no
+   custom property is animated on the control a second time. */
 
 /* A grown control rises over its neighbours (only where z-index already
    applies, so no box changes how it is placed). */
@@ -1190,6 +1183,16 @@ html[data-button-style="liquid"] .lg-hold-shell {
   overflow: hidden;
 }
 
+/* Ciel's button: the light rides its drag (the script copies the drag's
+   translate) at the drag's own 1.075 lift. */
+html[data-button-style="liquid"] .lg-hold[data-carried] :is(.lg-hold-halo, .lg-hold-shell) {
+  translate: var(--lg-hold-mx, 0px) var(--lg-hold-my, 0px);
+}
+
+html[data-button-style="liquid"] .lg-hold[data-carried][data-state="on"] :is(.lg-hold-halo, .lg-hold-shell) {
+  scale: 1.075;
+}
+
 html[data-button-style="liquid"] .lg-hold[data-state="on"] :is(.lg-hold-halo, .lg-hold-shell) {
   opacity: 1;
   scale: var(--lg-hold-s, 1);
@@ -1210,16 +1213,20 @@ html[data-button-style="liquid"] .lg-hold[data-state="out"] :is(.lg-hold-halo, .
    light leaking past the rim on the finger's side. */
 html[data-button-style="liquid"] .lg-hold-halo {
   box-shadow:
-    0 18px 34px -14px rgb(0 0 0 / 0.6),
-    0 6px 14px -8px rgb(0 0 0 / 0.42),
-    calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 22px 0 rgb(var(--lg-hold-tint) / 0.34),
-    0 0 14px -2px rgb(255 255 255 / 0.16);
+    0 18px 32px -16px rgb(0 0 0 / 0.58),
+    calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 22px 0 rgb(var(--lg-hold-tint) / 0.36);
+}
+
+/* A milky plate: a lift that falls below it only, softer, so no dark line
+   hugs its pale rim; its spill is the plate's own light. */
+html[data-button-style="liquid"] .lg-hold[data-light] .lg-hold-halo {
+  box-shadow:
+    0 20px 30px -20px rgb(0 0 0 / 0.42),
+    calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 24px 1px rgb(255 255 255 / 0.2);
 }
 
 html[data-button-style="liquid"] .lg-hold[data-kind="light"] .lg-hold-halo {
-  box-shadow:
-    calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 22px 0 rgb(var(--lg-hold-tint) / 0.3),
-    0 0 12px -2px rgb(255 255 255 / 0.14);
+  box-shadow: calc(var(--lg-dx, 0) * 6px) calc(var(--lg-dy, 0) * 6px) 22px 0 rgb(var(--lg-hold-tint) / 0.32);
 }
 
 /* The bloom: light from the finger, spreading through the glass. */
@@ -1235,14 +1242,17 @@ html[data-button-style="liquid"] .lg-hold-ripple::after {
   border-radius: 50%;
 }
 
+/* Soft enough that a label under it keeps its contrast (QA: a 0.46 white
+   centre took a chip's label from about 8:1 to 4.4:1): the light reads
+   from the glass's tint and the rim, not from a white wash over the text. */
 html[data-button-style="liquid"] .lg-hold-bloom {
   background: radial-gradient(
     closest-side,
-    rgb(255 255 255 / 0.46),
-    rgb(255 255 255 / 0.3) 12%,
-    rgb(255 255 255 / 0.15) 27%,
-    rgb(var(--lg-hold-tint) / 0.08) 46%,
-    rgb(var(--lg-hold-tint) / 0) 70%
+    rgb(255 255 255 / 0.12),
+    rgb(var(--lg-hold-tint) / 0.11) 14%,
+    rgb(var(--lg-hold-tint) / 0.06) 30%,
+    rgb(var(--lg-hold-tint) / 0.02) 48%,
+    rgb(var(--lg-hold-tint) / 0) 68%
   );
   translate: var(--lg-tx) var(--lg-ty);
   scale: 0.2;
@@ -1262,9 +1272,9 @@ html[data-button-style="liquid"] .lg-hold[data-state="on"] .lg-hold-bloom {
 html[data-button-style="liquid"] .lg-hold[data-light] .lg-hold-bloom {
   background: radial-gradient(
     closest-side,
-    rgb(255 255 255 / 0.2),
-    rgb(var(--lg-hold-tint) / 0.2) 16%,
-    rgb(var(--lg-hold-tint) / 0.09) 38%,
+    rgb(255 255 255 / 0.12),
+    rgb(var(--lg-hold-tint) / 0.14) 16%,
+    rgb(var(--lg-hold-tint) / 0.07) 38%,
     rgb(var(--lg-hold-tint) / 0) 64%
   );
 }
@@ -1291,9 +1301,9 @@ html[data-button-style="liquid"] .lg-hold-ripple::after {
   background: radial-gradient(
     closest-side,
     rgb(255 255 255 / 0) 60%,
-    rgb(255 150 200 / 0.14) 70%,
-    rgb(255 255 255 / 0.5) 79%,
-    rgb(140 220 255 / 0.26) 86%,
+    rgb(255 150 200 / 0.12) 70%,
+    rgb(255 255 255 / 0.34) 79%,
+    rgb(140 220 255 / 0.22) 86%,
     rgb(140 220 255 / 0) 94%
   );
   translate: var(--lg-rx) var(--lg-ry);
