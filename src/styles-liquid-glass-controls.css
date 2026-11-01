@@ -186,6 +186,61 @@ html[data-button-style="liquid"]
   color: inherit !important;
 }
 
+/* A held chosen option (src/lib/liquid-glass-hold.ts): the pill swells with
+   it, about its own centre, by the option's --lg-hold-pill-s, and springs
+   back on release (owner, 2026-11-01: the dog selector among the switch
+   sliders that swell). The pill's origin is its left edge for the gel, so
+   the swell carries its own centring. A lifted option wears the pill on
+   its copy; the pill under it gives way. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    [data-lg-seg-mode="pill"][data-lg-seg="before"]:has(> [data-lg-seg-current][data-lg-hold="on"]):not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    [data-lg-seg-mode="pill"][data-lg-seg="after"]:has(> [data-lg-seg-current][data-lg-hold="on"]):not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass)::after {
+    transform: translateX(calc(var(--lg-seg-w, 0px) * (1 - var(--lg-hold-pill-s, 1)) / 2))
+      scale(var(--lg-hold-pill-s, 1));
+    transition:
+      transform 0.52s var(--lg-spring),
+      translate 0.5s var(--lg-seg-ease),
+      opacity 0.2s ease;
+  }
+
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    [data-lg-seg-mode="pill"][data-lg-seg="before"]:has(> [data-lg-seg-current][data-lg-hold="out"]):not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass)::before,
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    [data-lg-seg-mode="pill"][data-lg-seg="after"]:has(> [data-lg-seg-current][data-lg-hold="out"]):not(
+      #lg-glass
+    ):not(#lg-glass):not(#lg-glass)::after {
+    transition:
+      transform var(--lg-spring-ms) var(--lg-spring),
+      translate 0.5s var(--lg-seg-ease),
+      opacity 0.2s ease;
+  }
+}
+
+html[data-button-style="liquid"]
+  body
+  [data-lg-seg-mode="pill"][data-lg-seg="before"]:has(> [data-lg-seg-current][data-lg-hold-lift]):not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::before,
+html[data-button-style="liquid"]
+  body
+  [data-lg-seg-mode="pill"][data-lg-seg="after"]:has(> [data-lg-seg-current][data-lg-hold-lift]):not(
+    #lg-glass
+  ):not(#lg-glass):not(#lg-glass)::after {
+  opacity: 0;
+}
+
 /* The gallery's own sliding marker gives way to the pill. */
 html[data-button-style="liquid"] body .gallery-filters[data-lg-seg] > .gallery-selection-marker:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   opacity: 0 !important;
@@ -327,9 +382,10 @@ html[data-button-style="liquid"] body .dream-page [data-lg-rail-host]:not(#lg-gl
       scrubber and the dream chapter's stage slider. A recessed glass groove
       under a clear glass thumb; the thumb holds a 1.5x copy of the groove
       (a lens over the track), and a held or dragged thumb swells into a
-      magnifying lens on the gel spring and springs back on release. The
-      engine maps the value from the thumb's layout box; the swell is a
-      transform, so the drag reads none of it.
+      magnifying lens on the gel spring (1.75 by 1.65; owner, 2026-11-01:
+      「拡大も小さすぎます」, it was 1.5 by 1.42) and springs back on release,
+      while the groove brightens. The engine maps the value from the thumb's
+      layout box; the swell is a transform, so the drag reads none of it.
    --------------------------------------------------------------- */
 html[data-button-style="liquid"]
   body
@@ -367,6 +423,18 @@ html[data-button-style="liquid"]
     inset 0 0 0 0.5px rgb(255 255 255 / 0.16),
     0 1px 0 rgb(255 255 255 / 0.08);
   opacity: 1;
+}
+
+html[data-button-style="liquid"]
+  body
+  :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:active:not(
+    :disabled
+  ):not(#lg-glass):not(#lg-glass):not(#lg-glass)::-webkit-slider-runnable-track {
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.6),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.24),
+    0 0 0 2px rgb(255 255 255 / 0.06),
+    0 0 12px -2px rgb(var(--lg-range-tint) / 0.45);
 }
 
 html[data-button-style="liquid"]
@@ -459,7 +527,7 @@ html[data-button-style="liquid"]
     :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:active:not(
       :disabled
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass)::-webkit-slider-thumb {
-    transform: scale(1.5, 1.42);
+    transform: scale(1.75, 1.65);
     box-shadow:
       inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 1),
       inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.5),
@@ -477,7 +545,7 @@ html[data-button-style="liquid"]
     :is(.rzn-movie-seek > input, .lab-seek input, .dream-chapter-stage-slider input)[type="range"]:active:not(
       :disabled
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass)::-moz-range-thumb {
-    transform: scale(1.5, 1.42);
+    transform: scale(1.75, 1.65);
     transition: transform 0.42s var(--lg-spring) 0.12s;
   }
 }
@@ -665,11 +733,35 @@ html[data-button-style="liquid"] body .rxs-p14-native-select:not(#lg-glass):not(
       (src/lib/liquid/boot.js); on glass the rail is a recessed glass groove
       and the lens a clear glass capsule. The surface (a decorative layer
       inside the positioned lens) takes the gel spring on the hold swell.
+
+      The groove, the tabs and the lens share one family of corners (QA,
+      2026-11-01: 「リキッドグラス時の外枠や表示を修正して」): a 28px groove
+      around 26px tabs and a 26px lens, concentric at the 1px inset. The
+      old 2px groove around 999px tabs drew a square frame around an egg-
+      shaped lens, and the 999px tabs clipped the column tabs' corner
+      numerals ("01" read "J1").
+
+      Held (owner, 2026-11-01: 「六詠や犬の切り替えスライダー長押し時などに
+      光沢とともに拡大」, then 「拡大も小さすぎます」), the lens swells into a
+      clear glass lens over the tabs, as iOS 26's segmented sliders do: by
+      44px across (at most 1.5x) and 34px up and down (at most 1.6x), so the
+      六詠 rail's 82 x 66 lens grows about 1.54 x 1.52; its rim brightens and
+      a sheen sweeps across it once, and the groove around it swells a
+      little (a ring of light 3px out, about 1.05x; the rail's box, which
+      the drag measures, never scales). boot.js writes the lens's size as
+      unitless --liquid-lens-wn and --liquid-lens-hn, and,
+      where a clipping ancestor is too close (the 六詠 panel leaves 13px),
+      the nudge that keeps the swollen lens inside it (--liquid-lens-dx,
+      --liquid-lens-dy). The surface scales
+      inside the positioned lens, which the drag places; nothing the drag
+      reads changes.
    --------------------------------------------------------------- */
 html[data-button-style="liquid"]
   body
   .liquid-swipe-tabs:not(.rider-tabs):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --liquid-control-radius: 26px;
   border-color: rgb(255 255 255 / 0.16) !important;
+  border-radius: 28px !important;
   background:
     linear-gradient(180deg, rgb(0 0 0 / 0.3), rgb(255 255 255 / 0.03)),
     rgb(7 13 21 / 0.6) !important;
@@ -680,6 +772,18 @@ html[data-button-style="liquid"]
     inset -2px 0 2px -1.5px rgb(72 206 255 / 0.28),
     inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
     0 12px 26px -14px rgb(0 0 0 / 0.6) !important;
+}
+
+/* The saga sites' form sliders sit flush in a bordered card: its square
+   corners stood out around the rounded groove (a second, mismatched
+   frame). The card's top corners follow the groove (28px, plus its 1px
+   border). */
+html[data-button-style="liquid"]
+  body
+  .rxs-stage-switcher:not(.ics-ending, .ics-form-switcher):has(> .liquid-swipe-tabs):not(#lg-glass):not(
+    #lg-glass
+  ):not(#lg-glass) {
+  border-radius: 29px 29px 18px 18px;
 }
 
 html[data-button-style="liquid"]
@@ -704,7 +808,7 @@ html[data-button-style="liquid"]
   .liquid-swipe-tabs:not(.rider-tabs)
   > button[role="tab"]:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   border-color: transparent !important;
-  border-radius: 999px !important;
+  border-radius: 26px !important;
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -733,7 +837,7 @@ html[data-button-style="liquid"]
   > .liquid-selection-lens
   > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   border: 0 !important;
-  border-radius: 999px !important;
+  border-radius: 26px !important;
   background:
     radial-gradient(120% 150% at 30% -24%, rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 58%),
     linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.02) 54%, rgb(255 255 255 / 0.07)),
@@ -763,6 +867,35 @@ html[data-button-style="liquid"]
   border-radius: 18px !important;
 }
 
+/* The rider's code was dark ink for the pale plate; over the clear glass
+   lens it vanished. */
+html[data-button-style="liquid"]
+  body
+  .rider-tabs
+  > button[role="tab"][aria-selected="true"]
+  small:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: rgb(236 248 255 / 0.78) !important;
+}
+
+/* Until the rail has placed its lens (it measures after the page settles),
+   the chosen tab wears the lens's glass itself, so a selection always
+   shows: the transparent tabs left none. */
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs:not([data-liquid-initialized="true"])
+  > button[role="tab"][aria-selected="true"]:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  background:
+    radial-gradient(120% 150% at 30% -24%, rgb(255 255 255 / 0.3), rgb(255 255 255 / 0) 58%),
+    linear-gradient(
+      color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 20%, transparent),
+      color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 20%, transparent)
+    ),
+    rgb(12 22 34 / 0.48) !important;
+  box-shadow:
+    inset 1.2px 1.4px 0 -0.25px rgb(255 255 255 / 0.85),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.28) !important;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html[data-button-style="liquid"]
     body
@@ -771,6 +904,113 @@ html[data-button-style="liquid"]
     > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     transition: scale var(--lg-spring-ms) var(--lg-spring) !important;
   }
+
+  /* The hold's swell (economy keeps the rail's own small lift). */
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    .liquid-swipe-tabs[data-liquid-held="true"]
+    > .liquid-selection-lens
+    > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    scale: calc(1 + min(0.5, 44 / var(--liquid-lens-wn, 88)))
+      calc(1 + min(0.6, 34 / var(--liquid-lens-hn, 56))) !important;
+    /* Nudged inward where a clipping ancestor would cut the swell. */
+    translate: var(--liquid-lens-dx, 0px) var(--liquid-lens-dy, 0px);
+    transition:
+      scale 0.52s var(--lg-spring),
+      translate 0.2s var(--dw-ease-out) !important;
+  }
+
+  /* The sheen: one sweep of light across the lens as it swells. */
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    .liquid-swipe-tabs[data-liquid-held="true"]
+    > .liquid-selection-lens
+    > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+    opacity: 1;
+    animation: lg-rail-sheen 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) 0.05s both;
+  }
+}
+
+/* The sheen's band, parked outside the lens until a hold sweeps it. */
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs
+  > .liquid-selection-lens
+  > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass)::after {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 0;
+  width: 55%;
+  height: auto;
+  border-radius: 0;
+  background: linear-gradient(
+    105deg,
+    rgb(255 255 255 / 0) 8%,
+    rgb(255 255 255 / 0.34) 46%,
+    rgb(var(--lg-tint, 190 232 255) / 0.16) 58%,
+    rgb(255 255 255 / 0) 88%
+  );
+  opacity: 0;
+  translate: -120% 0;
+  pointer-events: none;
+}
+
+/* Outside the lens at both ends (the surface clips it), so it needs no
+   fade of its own. */
+@keyframes lg-rail-sheen {
+  0% {
+    translate: -120% 0;
+  }
+
+  100% {
+    translate: 210% 0;
+  }
+}
+
+/* Held, the lens's rim brightens and it lifts off the groove. */
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs[data-liquid-held="true"]
+  > .liquid-selection-lens
+  > .liquid-selection-surface:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    inset 1.4px 1.6px 0 -0.25px rgb(255 255 255 / 1),
+    inset -1px -1px 0 -0.25px rgb(255 255 255 / 0.5),
+    inset 0 -8px 12px -9px color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 85%, transparent),
+    inset 2.5px 0 3px -2px rgb(255 92 168 / 0.55),
+    inset -2.5px 0 3px -2px rgb(72 206 255 / 0.6),
+    inset 0 0 0 0.75px rgb(255 255 255 / 0.42),
+    0 2px 4px rgb(0 0 0 / 0.3),
+    0 14px 26px -10px rgb(0 0 0 / 0.62),
+    0 0 22px -6px color-mix(in srgb, var(--liquid-accent, rgb(122 232 255)) 60%, transparent) !important;
+}
+
+/* Held, the groove swells by a ring of light (its box stays: the drag
+   measures it). */
+html[data-button-style="liquid"]
+  body
+  .liquid-swipe-tabs[data-liquid-held="true"]:not(.rider-tabs):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    inset 0 2px 8px -2px rgb(0 0 0 / 0.6),
+    inset 0 -1px 0 rgb(255 255 255 / 0.08),
+    inset 2px 0 2px -1.5px rgb(255 92 168 / 0.22),
+    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.28),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    0 0 0 3px rgb(255 255 255 / 0.07),
+    0 0 0 3.5px rgb(255 255 255 / 0.1),
+    0 0 26px -6px rgb(122 232 255 / 0.32),
+    0 12px 26px -14px rgb(0 0 0 / 0.6) !important;
+}
+
+html[data-button-style="liquid"]
+  body
+  .rider-tabs.liquid-swipe-tabs[data-liquid-held="true"]:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  box-shadow:
+    inset 0 2px 8px -2px rgb(0 0 0 / 0.55),
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    0 0 0 3px rgb(255 255 255 / 0.06),
+    0 0 26px -6px rgb(122 232 255 / 0.28) !important;
 }
 
 /* The WebGL refraction drew the old square lens; on glass the DOM lens is
@@ -1063,13 +1303,17 @@ html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg
       items, the selects), "switch" (the side menu's switches: their
       decorative track swells, never the button's box) or "light" (Ciel's
       button, the slide-to-open pills and the range thumbs, whose drags
-      measure their box: lit, never scaled). A quick tap never gets here:
+      measure their box: the box is lit, never scaled; the sliders swell a
+      decorative layer of their own instead, the slide-to-open lens (1.6),
+      the range thumb (1.75 by 1.65) and the tab rails' lens, section 6).
+      A quick tap never gets here:
       the shared press (the gel squash) is all it shows.
 
    The swell is the individual `scale` property (the press driver's; no
    `transform`, no size), so nothing is laid out again; its size comes from
-   the script (--lg-hold-s: about 1.18 for an icon down to 1.08 for a card,
-   less where a clipping ancestor has no room). The light is one overlay,
+   the script (--lg-hold-s: 1.42 for an icon, about 1.28 for a pill, 1.15
+   for a card, 1.12 for a large card; where a clipping ancestor has no room
+   the control is lifted: a copy swells in the overlay instead). The light is one overlay,
    .lg-hold, which the script places over the control (in the body, or the
    open modal dialog) and cuts to the nearest clipping ancestor:
    - .lg-hold-halo: the lift (a deeper shadow) and the light spilling past
@@ -1143,6 +1387,16 @@ html[data-button-style="liquid"]
   body
   [data-lg-hold-raise]:is([data-lg-hold="on"], [data-lg-hold="out"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   z-index: 4;
+}
+
+/* Lifted: a clipping ancestor (a scrolling rail, the side menu) had no room
+   for the swell, so a styled copy swells in the overlay, which nothing
+   clips. The control stays where it is, unscaled and transparent, and
+   still takes the finger and the click. */
+html[data-button-style="liquid"]
+  body
+  [data-lg-hold-lift]:is([data-lg-hold="on"], [data-lg-hold="out"]):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  opacity: 0 !important;
 }
 
 /* A held glass control is the hold, not WebKit's callout or text loupe. */
@@ -1399,6 +1653,12 @@ html[data-button-style="liquid"][data-world-effects="economy"] .lg-hold :is(.lg-
 @media (forced-colors: active) {
   html[data-button-style="liquid"] .lg-hold {
     display: none !important;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    [data-lg-hold-lift]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    opacity: 1 !important;
   }
 
   html[data-button-style="liquid"]

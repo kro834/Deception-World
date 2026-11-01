@@ -73,7 +73,12 @@ export function RexonanceAssemblyGuide({
   // stays a live region for assistive tech, seen only on a failure (with its
   // retry beside it).
   return (
-    <section id="assembly" className="rxs-assembly-heading" aria-labelledby="rxs-assembly-title">
+    <section
+      id="assembly"
+      className="rxs-assembly-heading"
+      data-load={load}
+      aria-labelledby="rxs-assembly-title"
+    >
       <div>
         <h2 id="rxs-assembly-title">装甲が、身体になる。</h2>
         {/* How the runway answers the scroll, for assistive tech (the runway

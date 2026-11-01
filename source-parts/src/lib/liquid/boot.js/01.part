@@ -274,3 +274,13 @@ class GlassRenderer {
       const follow = 1 - Math.exp(-elapsed / 52);
       const d = Math.abs(target.x - g0.x) + Math.abs(target.y - g0.y)
               + Math.abs(target.width - g0.width) + Math.abs(target.height - g0.height);
+      if (d < 0.12) this.geometry = target;
+      else {
+        this.geometry = {
+          x: g0.x + (target.x - g0.x) * follow, y: g0.y + (target.y - g0.y) * follow,
+          width: g0.width + (target.width - g0.width) * follow,
+          height: g0.height + (target.height - g0.height) * follow,
+        };
+        settling = true;
+      }
+    }

@@ -1,8 +1,10 @@
 // The liquid glass's long press (owner, 2026-11-01: 「リキッドグラス長押し時の
 // ボタンの大型化や光の拡散効果を実装して」). Pins its scope (the glass option
-// only), that a quick tap keeps the shared press while only a hold swells,
-// that the draggables are lit but never scaled or resized, that one overlay
-// carries the light, and the fallbacks.
+// only), that a quick tap keeps the shared press while only a hold swells
+// (to iOS 26's size, and lifted out of a clipping ancestor rather than
+// capped), that the draggables' boxes are lit but never scaled or resized
+// while the switch sliders swell a decorative layer with a sheen, that one
+// overlay carries the light, and the fallbacks.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -41,7 +43,7 @@ function rules(css) {
 }
 
 /* A small DOM and clock: enough for the module's listeners, timers and writes. */
-function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
+function world({ cls = ".primary-action", width = 120, height = 44, clipped = false } = {}) {
   let now = 0;
   const timers = new Map();
   let nextId = 1;
@@ -85,7 +87,14 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
       remove: () => {
         el.parentNode = null;
       },
+      insertBefore: (n) => el.appendChild(n),
       querySelector: () => null,
+      querySelectorAll: () => [],
+      cloneNode: () => {
+        const copy = makeEl(name);
+        copies.push(copy);
+        return copy;
+      },
       getBoundingClientRect: () => {
         reads.rect += 1;
         return { left: 0, top: 0, right: 0, bottom: 0, width: 0, height: 0 };
@@ -97,6 +106,7 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
     return el;
   };
   const appended = [];
+  const copies = [];
   const body = makeEl("body");
   const html = makeEl("html");
   const target = makeEl("button", {
@@ -111,8 +121,24 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
     matches: (sel) => sel.split(",").some((part) => part.trim() === cls),
   });
   target.parentElement = body;
+  // A scrolling rail around the control, 5px of room on every side.
+  const rail = makeEl("div", {
+    clipping: true,
+    clientLeft: 0,
+    clientTop: 0,
+    clientWidth: width + 10,
+    clientHeight: height + 10,
+    getBoundingClientRect: () => {
+      reads.rect += 1;
+      return { left: 95, top: 195, right: 105 + width, bottom: 205 + height, width: width + 10, height: height + 10 };
+    },
+  });
+  if (clipped) {
+    target.parentElement = rail;
+    rail.parentElement = body;
+  }
   const doc = {};
-  for (const el of [body, html, target]) el.ownerDocument = doc;
+  for (const el of [body, html, target, rail]) el.ownerDocument = doc;
   class Element {}
   Object.setPrototypeOf(target, Element.prototype);
   const view = {
@@ -127,7 +153,7 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
     clearTimeout: (id) => timers.delete(id),
     requestAnimationFrame: (fn) => view.setTimeout(fn, 16),
     cancelAnimationFrame: (id) => timers.delete(id),
-    getComputedStyle: () => {
+    getComputedStyle: (el) => {
       reads.style += 1;
       return {
         scale: "none",
@@ -135,8 +161,9 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
         zIndex: "auto",
         position: "static",
         display: "flex",
-        overflowX: "visible",
-        overflowY: "visible",
+        content: "none",
+        overflowX: el?.clipping ? "auto" : "visible",
+        overflowY: el?.clipping ? "hidden" : "visible",
         contain: "none",
         backgroundColor: "rgba(0, 0, 0, 0)",
         getPropertyValue: (k) => (k === "--lg-tint" ? "122 232 255" : ""),
@@ -178,7 +205,7 @@ function world({ cls = ".primary-action", width = 120, height = 44 } = {}) {
     }
     now = end;
   };
-  return { doc, target, fire, advance, reads, appended, listeners };
+  return { doc, target, fire, advance, reads, appended, listeners, copies };
 }
 
 test("the hold starts only with the glass option, from the glass defs", () => {
@@ -337,7 +364,52 @@ test("the swell is larger for an icon than for a card, and never past a clip", a
   assert.equal(fitScale(box, { left: -100, top: 10, right: 200, bottom: 50 }, 50, 30), 1);
 });
 
-test("the draggables are lit, never scaled", async () => {
+test("the swell is iOS 26's size: icons 1.42, pills about 1.28, cards 1.15, large cards 1.12", async () => {
+  const { swellFor, SWELL_SMALL, SWELL_LARGE } = await loadHold();
+  assert.equal(SWELL_SMALL, 1.42);
+  assert.equal(SWELL_LARGE, 1.12);
+  assert.equal(swellFor(44, 44), 1.42);
+  assert.ok(Math.abs(swellFor(96, 44) - 1.28) < 1e-9);
+  assert.ok(Math.abs(swellFor(200, 120) - 1.15) < 1e-9);
+  assert.equal(swellFor(360, 330), 1.12);
+  // Never shrinks as a box grows.
+  let last = Infinity;
+  for (let d = 20; d < 500; d += 7) {
+    const s = swellFor(d, 30);
+    assert.ok(s <= last + 1e-9, `${d}px`);
+    last = s;
+  }
+});
+
+test("a clipped control is lifted, not capped: a copy swells in the overlay", async () => {
+  const { watchLiquidHold, HOLD_MS, RELEASE_MS, swellFor } = await loadHold();
+  const w = world({ clipped: true });
+  const stop = watchLiquidHold(w.doc);
+  w.fire("pointerdown");
+  w.advance(HOLD_MS + 40);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  assert.equal(w.target.getAttribute("data-lg-hold-lift"), "", "lifted");
+  // The control itself stays at rest (it keeps the finger and the click).
+  assert.equal(w.target.style.getPropertyValue("--lg-hold-s"), "1");
+  const overlay = w.appended.find((n) => n.className === "lg-hold");
+  const copy = overlay.children.find((n) => n.getAttribute("class")?.includes("lg-hold-lift"));
+  assert.ok(copy, "the copy is in the overlay");
+  assert.match(copy.getAttribute("class"), /\blg-lens-target\b/, "the refraction hook");
+  assert.equal(copy.getAttribute("aria-hidden"), "true");
+  assert.equal(copy.getAttribute("inert"), "");
+  // The full swell, not the 5px rail's cap.
+  const s = Number(copy.style.getPropertyValue("scale"));
+  assert.ok(Math.abs(s - swellFor(120, 44)) < 0.002, `copy swell ${s}`);
+  assert.equal(overlay.style.getPropertyValue("--lg-hold-s"), s.toFixed(3));
+  w.fire("pointerup");
+  assert.equal(copy.style.getPropertyValue("scale"), "1", "springs back");
+  w.advance(RELEASE_MS + 10);
+  assert.equal(w.target.getAttribute("data-lg-hold-lift"), null);
+  assert.equal(copy.parentNode, null, "the copy is removed");
+  stop();
+});
+
+test("the draggables' boxes are lit, never scaled", async () => {
   const { watchLiquidHold, HOLD_MS, HOLD_LIGHT_ONLY, HOLD_SWELL } = await loadHold();
   for (const draggable of [".zeus-button", ".ios-slide-open"]) {
     assert.ok(HOLD_LIGHT_ONLY.includes(draggable));
@@ -430,4 +502,70 @@ test("the module reads layout only when a hold starts, never on a move", () => {
   );
   assert.doesNotMatch(down, /getBoundingClientRect|getComputedStyle/);
   assert.match(down, /setTimeout\(arm, HOLD_MS\)/);
+});
+
+/* The switch sliders (owner, 2026-11-01: 「六詠や犬の切り替えスライダー長押し時
+   などに光沢とともに拡大する様にして」, then 「拡大も小さすぎます」): each swells
+   a decorative layer no drag measures, with a sheen, and only on glass. */
+test("the switch sliders swell with a sheen: the rails' lens, the slide lens, the thumbs, the pill", () => {
+  const glassSheet = read("src/styles-liquid-glass.css");
+  const boot = read("src/lib/liquid/boot.js");
+  const rail = read("src/components/world/liquid-rail.tsx");
+  const slide = read("src/components/world/slide-open-control.tsx");
+  const clean = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const c = clean(controls);
+  // The tab rails (the 六詠 / 犬 rail and the rest): the held surface scales
+  // by the lens's own size, 1.5x across and 1.6x up and down at most.
+  const held = c.match(
+    /\.liquid-swipe-tabs\[data-liquid-held="true"\]\s*>\s*\.liquid-selection-lens\s*>\s*\.liquid-selection-surface[^{]*\{([^}]*)\}/,
+  );
+  assert.ok(held, "held rail surface rule");
+  assert.match(held[1], /scale: calc\(1 \+ min\(0\.5, 44 \/ var\(--liquid-lens-wn, 88\)\)\)\s*calc\(1 \+ min\(0\.6, 34 \/ var\(--liquid-lens-hn, 56\)\)\) !important/);
+  assert.match(held[1], /translate: var\(--liquid-lens-dx, 0px\) var\(--liquid-lens-dy, 0px\)/);
+  assert.doesNotMatch(held[1], /(^|[\s;])(transform|width|height|left|top)\s*:/);
+  // The 六詠 rail's 82 x 66 lens grows by half or more both ways.
+  const sx = 1 + Math.min(0.5, 44 / 82);
+  const sy = 1 + Math.min(0.6, 34 / 66);
+  assert.ok(sx >= 1.5 && sy >= 1.5, `${sx} ${sy}`);
+  assert.match(c, /@keyframes lg-rail-sheen/);
+  assert.match(c, /liquid-selection-surface[^{]*::after \{\s*opacity: 1;\s*animation: lg-rail-sheen/);
+  // Only under full motion, never in economy.
+  const swell = controls.indexOf("scale: calc(1 + min(0.5, 44 / var(--liquid-lens-wn");
+  const media = controls.lastIndexOf("@media (prefers-reduced-motion: no-preference)", swell);
+  assert.ok(media > 0 && controls.slice(media, swell).split("@media").length === 2);
+  assert.match(controls.slice(media, swell), /:not\(\[data-world-effects="economy"\]\)/);
+  // boot.js writes the size and the nudge, and reads the room once per press.
+  assert.match(boot, /setProperty\('--liquid-lens-wn'/);
+  assert.match(boot, /setProperty\('--liquid-lens-dx'/);
+  assert.match(boot, /room: glassOn\(\) \? roomAround\(rect\) : null/);
+  const nudge = boot.slice(boot.indexOf("const nudgeLens"), boot.indexOf("const settle ="));
+  assert.doesNotMatch(nudge, /getBoundingClientRect|getComputedStyle/, "no layout read per move");
+  // The slide-to-open lens: 1.6, the track a ring of light, never the box.
+  assert.match(clean(glassSheet), /\.ios-slide-open\[data-lens="on"\]\s*\.ios-slide-open-lens-body[^{]*\{\s*opacity: 1;\s*scale: 1\.6;/);
+  assert.match(clean(glassSheet), /\.ios-slide-open\[data-lens="on"\]:not\(#lg-glass\)[^{]*\{\s*box-shadow:[^}]*0 0 0 3px/);
+  // The range thumbs: 1.75 by 1.65 while held.
+  assert.equal((c.match(/transform: scale\(1\.75, 1\.65\)/g) ?? []).length, 2);
+  // The dog selector's pill (a segment group) swells with its held option.
+  assert.match(c, /:has\(> \[data-lg-seg-current\]\[data-lg-hold="on"\]\)[^{]*::before[^{]*\{\s*transform: translateX\(calc\(var\(--lg-seg-w, 0px\) \* \(1 - var\(--lg-hold-pill-s, 1\)\) \/ 2\)\)\s*scale\(var\(--lg-hold-pill-s, 1\)\)/);
+  assert.match(holdSource, /pillOf\(target\)\?\.style\.setProperty\(PILL_S/);
+  // The hooks the refraction attaches to.
+  assert.match(rail, /className="liquid-selection-surface lg-lens-target"/);
+  assert.match(slide, /className="ios-slide-open-lens-body lg-lens-target"/);
+  // Every new rule waits for the glass option.
+  for (const sheet of [controls, glassSheet])
+    for (const { selector } of rules(sheet)) {
+      if (!/lg-rail-sheen|liquid-lens-|lg-hold-pill-s|data-lens="on"\]:not/.test(selector)) continue;
+      for (const part of selector.split(/,(?![^(]*\))/))
+        assert.match(part.trim(), /^html\[data-button-style="liquid"\]/, part);
+    }
+});
+
+test("glass off: the rails, the slide lens and the hold leave no trace", () => {
+  // Nothing outside the glass sheets reads the rails' new properties.
+  const boot = read("src/lib/liquid/boot.js");
+  assert.match(boot, /const glassOn = \(\) => document\.documentElement\?\.getAttribute\?\.\('data-button-style'\) === 'liquid'/);
+  for (const prop of ["--liquid-lens-wn", "--liquid-lens-dx", "--lg-hold-pill-s", "lg-lens-target"]) {
+    for (const file of ["src/styles.css", "src/styles-frosted-controls.css", "src/styles-world/12.css", "src/styles-world/13.css"])
+      assert.ok(!read(file).includes(prop), `${prop} in ${file}`);
+  }
 });

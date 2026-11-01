@@ -642,7 +642,7 @@ export function SlideOpenControl({
           A magnified copy of the track rides inside it. It sits before the
           thumb so the thumb stays the control's last child. */}
       <span className="ios-slide-open-lens" aria-hidden="true">
-        <span className="ios-slide-open-lens-body">
+        <span className="ios-slide-open-lens-body lg-lens-target">
           <span className="ios-slide-open-lens-view">
             <span className="ios-slide-open-fill" />
             <span className="ios-slide-open-label">

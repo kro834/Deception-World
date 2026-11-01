@@ -1,3 +1,14 @@
+  const cancelWithEscape = (event) => {
+    if (holdToDrag && gesture && event.key === 'Escape') {
+      event.preventDefault();
+      cancel();
+    }
+  };
+  window.addEventListener('pointerdown', cancelOtherTouch, true);
+  window.addEventListener('keydown', cancelWithEscape);
+  // Rotation invalidates captured coordinates. Toolbar height changes do not:
+  // cancelling on every visualViewport resize would interrupt normal iOS drags.
+  window.addEventListener('orientationchange', cancel);
   let viewportWidth = window.innerWidth;
   const handleViewportResize = () => {
     if (window.innerWidth === viewportWidth) return;

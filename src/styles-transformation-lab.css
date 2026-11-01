@@ -15,6 +15,9 @@
   margin-inline: auto;
 }
 .lab-header a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: #a9d9de;
   font-size: 12px;
   letter-spacing: 0.16em;

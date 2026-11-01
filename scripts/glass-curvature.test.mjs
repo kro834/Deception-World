@@ -180,7 +180,7 @@ test("the slider's lens, the thumbs and the hold's lens targets wear the curvatu
   assert.match(watcher, /el\.classList\.contains\("lg-lens-target"\)/);
   assert.match(
     glass,
-    /:is\(\.ios-slide-open \.ios-slide-open-lens-body, \.lg-lens-target\)[^{]*\{[^}]*var\(--lg-lens, url\(#dw-liquid-lens-capsule\)\)/,
+    /:is\(\.ios-slide-open \.ios-slide-open-lens-body, \.lg-lens-target\[data-lg-curve\]\)[^{]*\{[^}]*var\(--lg-lens, url\(#dw-liquid-lens-capsule\)\)/,
   );
   // Range thumbs: measured from the pseudo-element, keyed on the input.
   assert.match(watcher, /getComputedStyle\(el, "::-webkit-slider-thumb"\)/);
