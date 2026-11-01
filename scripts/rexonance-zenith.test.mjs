@@ -447,9 +447,12 @@ test("the scene is decorative and passes the generated shape masks to its plan",
   assert.match(page, /maskTile: REXONANCE_SUIT_TILE/);
   // No sprite, atlas or tile field of a piece is read by the page.
   assert.doesNotMatch(page, /piece\.(?:src|float|ax|ay|tiles|dir)\b/);
+  // Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — the scene's
+  // engine and config are unchanged; the bank's director (rexonance-henshin)
+  // hands it only its stepped clock through config.progress.
   assert.match(
     page,
-    /useEffect\(\(\) => mountRexonanceAssembly\(runwayRef\.current, SUIT_UP\), \[\]\);/,
+    /const director = mountHenshinDirector\(runway, \{[\s\S]*?const dispose = mountRexonanceAssembly\(runway, \{ \.\.\.SUIT_UP, progress: director\.progress \}\);/,
   );
   // The call is the published one, in its order.
   assert.match(page, /const SUIT_UP_LINES = REXONANCE_ENTRY_CALLS\.map/);
