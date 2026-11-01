@@ -12,9 +12,12 @@
 // sourceRevision. Earlier lines shifted within that export; do not offset legacy anchors.
 // Chat dates identify source posts, not elapsed story days. The new endpoint is the
 // ongoing battles through 2026-10-18, without a rescue, final victory or return.
-// Events 54–58 use the 2026-10-27 attachment (60,120 physical lines; the 2026-10-18 anchors sit
+// Events 54–56 retain the 2026-10-27 attachment (60,120 physical lines; the 2026-10-18 anchors sit
 // eight lines lower there and keep their own revision). The endpoint is still the ongoing final
-// battle: Ciel walking alone to the left passage, with no rescue, victory or return.
+// battle at that revision: Ciel walking alone to the left passage, without a return.
+// Events 57–61 use the revised 2026-11-01 attachment (60,602 physical lines).
+// The revised shrine and temple scenes supersede the older excerpts for 57–58.
+// Parallel encounters remain unresolved; conditional attacks are not completed actions.
 import type { DreamCharacter, DreamDolminence } from "./dream-chapter-data";
 
 /** Global line references into the source log, e.g. "2243,2247,2897". Not rendered. */
@@ -30,7 +33,7 @@ type DreamArchivePassageBase = {
   /** Caption for the whole passage when it is one speaker's words ("―― by"). */
   readonly by?: string;
   readonly lines: DreamSourceLines;
-  readonly sourceRevision?: "2026-10-12" | "2026-10-18" | "2026-10-27";
+  readonly sourceRevision?: "2026-10-12" | "2026-10-18" | "2026-10-27" | "2026-11-01";
 };
 
 /** A passage: one `text` ("\n" = line break) or speaker `segments`, never both. */
@@ -1078,7 +1081,12 @@ export const DREAM_CHRONICLE: readonly DreamChronicleEvent[] = [
     title: { text: "この手で守るべきもの", lines: "59394" },
     place: "命蓮寺",
     cast: ["寅丸星"],
-    segments: [{ by: "寅丸星", text: "「だが……それでは、私が守ろうとしてきたものまで失ってしまう！　もう、誰か一人に全てを背負わせたりはしない、この手で守るべきもののために、私は戦う！」" }],
+    segments: [
+      {
+        by: "寅丸星",
+        text: "「だが……それでは、私が守ろうとしてきたものまで失ってしまう！　もう、誰か一人に全てを背負わせたりはしない、この手で守るべきもののために、私は戦う！」",
+      },
+    ],
     lines: "59394",
   },
   {
@@ -1131,30 +1139,134 @@ export const DREAM_CHRONICLE: readonly DreamChronicleEvent[] = [
   {
     no: 57,
     case: "5",
-    sourceRevision: "2026-10-27",
-    title: { text: "静かな殺意", lines: "59970" },
+    sourceRevision: "2026-11-01",
+    title: {
+      text: "最悪の選択",
+      lines: "60210",
+    },
     place: "博麗神社",
-    cast: ["博麗霊夢", "如月狡"],
-    by: "博麗霊夢",
-    text: "「アンタは必ずここで祓ってやるわ」",
-    lines: "59983",
+    cast: ["博麗霊夢", "八雲紫", "如月狡"],
+    segments: [
+      {
+        by: "如月狡",
+        text: "「さあ、選択肢をあげるよ、博麗霊夢――君自身の命をここで差し出して僕に殺されるか、それとも僕がここで紫の命を奪うのを見届けるか。どっちがいい？」",
+      },
+      {
+        by: "八雲紫",
+        text: "「ダメ……よ……霊夢……！ 惑わされ……ちゃ……ダメ……っ！」",
+      },
+      {
+        text: "大幣を握り締め、答えることができずにその場に立ち尽くす霊夢。",
+      },
+    ],
+    lines: "60178,60187,60200",
   },
   {
     no: 58,
     case: "5",
-    sourceRevision: "2026-10-27",
-    title: { text: "毘羯羅", lines: "59990" },
+    sourceRevision: "2026-11-01",
+    title: {
+      text: "毘羯羅",
+      lines: "60233",
+    },
     place: "命蓮寺",
-    cast: ["毘羯羅", "聖白蓮", "寅丸星", "秦こころ"],
+    cast: ["毘羯羅", "聖白蓮", "寅丸星", "秦こころ", "豊聡耳神子"],
     segments: [
       {
-        text: "暗雲から音もなく参道の中央へ舞い降りたのは、子の能力を宿す十二神将の一角――『毘羯羅』。",
+        text: "子の能力を宿す十二神将の一角――『毘羯羅』。他を圧倒する邪気や怒号を撒き散らすわけではない。ただ淡々と、地面に重厚な長大の『錫杖』の先端を滑らせながら一歩、また一歩と踏みしめてくる。",
       },
       {
-        text: "誰一人として命は落としていない――しかし、全員が寸前のところで息を繋ぐのみの、絶体絶命の重体に陥っていた。",
+        text: "わずか数秒で前線が壊滅する中、残された聖白蓮、寅丸星、秦こころ、そして豊聡耳神子の四人は、背中を合わせて目前の絶望へと武器を構えた。",
+      },
+      {
+        text: "白蓮、星、こころ、神子。屈指の猛者たちが命を留めるのが精一杯という絶体絶命の重体に陥り、参道には血と粉砕された石畳だけが残された。",
       },
     ],
-    lines: "59990,60114",
+    lines: "60233,60287,60363",
+  },
+  {
+    no: 59,
+    case: "5",
+    sourceRevision: "2026-11-01",
+    title: {
+      text: "復讐の視線",
+      lines: "60404",
+    },
+    place: "人里外れの広場",
+    cast: ["東風谷慶弥", "暁夕夏", "サヨ", "シンソウ"],
+    segments: [
+      {
+        text: "次の瞬間、踏み込んだ大理石のタイルが落とし穴の如く扉として開き、空間そのものが激しい重力波とともに歪み始めた。視界が白銀の渦へと塗り替えられ、浮遊感と空間跳躍の強烈な圧迫感が三人の肉体を襲う。",
+      },
+      {
+        text: "次の瞬間、彼らが足を着けたのは――先ほどまで激しい戦闘の爆音が響き渡っていた人間の里の、ほんの少し外れに位置する荒涼とした広場だった。遠くからは煙が立ち上り、永守や黒影たちが死闘を繰り広げる凄惨な喧騒が風に乗ってかすかに届いてくる。突然の戦場への引き戻しに、サヨは即座に周囲の気配を警戒してルパンガンナーを強く構えた。",
+      },
+      {
+        by: "シンソウ",
+        text: "「よく来たな……東風谷慶弥」",
+      },
+      {
+        text: "深く息を吐き握り込んだ拳から少しだけ力を抜いて腰に構えた右手の指の関節一つ分開いた。",
+      },
+    ],
+    lines: "60387,60398,60410,60600",
+  },
+  {
+    no: 60,
+    case: "5",
+    sourceRevision: "2026-11-01",
+    title: {
+      text: "戦闘態勢",
+      lines: "60583",
+    },
+    place: "ドルミネンス本部・地下ドーム",
+    cast: ["シエル", "ムツキ"],
+    segments: [
+      {
+        text: "空間を埋め尽くしていたのは、おぞましい気配を放つ数え切れないほどの『ロードナイトメア』の過密な隊列。毒々しいカラーリングの鎧を纏う悪夢の軍勢が規則正しく並び立ち、一斉にシエルへと禍々しい矛先を向けている。",
+      },
+      {
+        by: "ムツキ",
+        text: "「よくここまで来たねシエル……歓迎するよ！」",
+      },
+      {
+        text: "機動性に長けたヴァーテックスサーガに変わったシエルは呟く。",
+      },
+      {
+        by: "シエル",
+        text: "「好都合だ、デモンストレーションとして利用させてもらう……」",
+      },
+      {
+        text: "フェイタルエッジを構えつつ、戦闘態勢に突入。",
+      },
+    ],
+    lines: "60434,60443,60577,60581,60583",
+  },
+  {
+    no: 61,
+    case: "5",
+    sourceRevision: "2026-11-01",
+    title: {
+      text: "死怒",
+      lines: "60531",
+    },
+    place: "命蓮寺",
+    cast: ["聖白蓮", "豊聡耳神子", "毘羯羅"],
+    segments: [
+      {
+        text: "ガラリと音を立てて倒れ伏していた豊聡耳神子が、血を拭いながら手元へ転がった『七星剣』の柄を固く握り締める。その隣には、法力の衣を荒々しく揺らし、脚の痛みに耐えながら体を起こす聖白蓮の姿があった。",
+      },
+      {
+        text: "満身創痍でありながらも、命蓮寺と神霊廟の頂点に立つ二人の瞳には、衰えることのない闘志の炎が宿っていた。",
+      },
+      {
+        text: "破壊はそれだけに留まらなかった。全方位を覆い尽くす【死怒】の波動は、二人を直接打ち据えるだけでなく、その肉体に宿る『生命力』そのものを波紋のように強引に削り取り、吸い上げていく。",
+      },
+      {
+        text: "衝撃と生命力の急速な喪失により、神子の手から七星剣がガラガラと音を立ててこぼれ落ちる。聖もまた膝の力が完全に抜け、二人同時に参道の石畳へ崩れ落ちるように膝をついた。",
+      },
+    ],
+    lines: "60469,60484,60544,60559",
   },
 ] as const;
 

@@ -7,20 +7,19 @@ import { DREAM_CHRONICLE } from "../src/components/dream-chapter/dream-chapter-e
 // October 27 attachment (60,120 physical lines): the party enters the Dolminence headquarters
 // and the final battle continues across Gensokyo. The source stays outside the repository;
 // opt in with DREAM_OCT27_SOURCE=/absolute/path/to/the/attachment.
-const additions = DREAM_CHRONICLE.slice(53);
+// Later exports replace events 57–58; retain only the still-published October 27 passages.
+const additions = DREAM_CHRONICLE.filter(({ sourceRevision }) => sourceRevision === "2026-10-27");
 
 test("October 27 story enters the headquarters and keeps the final battle unfinished", () => {
   const dream = DREAM_CASES[5].paragraphs.slice(13).join("");
   for (const scene of ["ドルミネンス本部", "ロードナイト", "摩虎羅", "伐折羅", "如月狡", "毘羯羅"])
     assert.ok(dream.includes(scene), scene);
-  assert.match(dream, /紫の胸を貫く/);
   assert.match(dream, /安否は、まだ分からない/);
-  assert.match(dream, /誰も命は落としていない/);
-  assert.match(DREAM_CASES[5].paragraphs.at(-1), /全員の帰還も、まだ描かれていない。$/);
+  assert.doesNotMatch(dream, /全員の帰還が実現|怪作の救出に成功/);
   assert.doesNotMatch(dream, /奪還に成功|全員が帰還|十二神将を全滅|ロードナイトを倒/);
   assert.deepEqual(
     additions.map(({ no, sourceRevision }) => [no, sourceRevision]),
-    [54, 55, 56, 57, 58].map((no) => [no, "2026-10-27"]),
+    [54, 55, 56].map((no) => [no, "2026-10-27"]),
   );
 });
 

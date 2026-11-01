@@ -110,7 +110,7 @@ test("the annex data is complete", () => {
   );
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length),
-    [3, 3, 9, 2],
+    [3, 3, 9, 5],
   );
   assert.equal(WORLD_GLOSSARY.length, 16);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
@@ -118,14 +118,13 @@ test("the annex data is complete", () => {
   // In-story text only: no chat handles, no ideographic indent spaces.
   assert.doesNotMatch(data, /@|\u3000/);
   // Conflicting or undecided facts stay out until the owner settles them.
+  // November 1 EP4 now explicitly connects 慶弥 and シエル to the Dream story.
   for (const held of [
     "採録制",
     "モスコ",
     "ニヒル",
     "ワンコ",
     "プロヴァンス",
-    "慶弥",
-    "シエル",
     "冤罪",
   ]) {
     assert.ok(!data.includes(held), held);
