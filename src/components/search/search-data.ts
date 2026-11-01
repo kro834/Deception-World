@@ -135,7 +135,7 @@ const DOSSIER_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     keywords: [
       "六詠",
       "IV",
-      "仮面ライダーファラリス",
+      "仮面ライダーファルス",
       "ゲーマドライバー",
       "グランドマスターガシャット",
       "ゲームマスターガシャット",

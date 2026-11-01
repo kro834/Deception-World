@@ -263,14 +263,14 @@ export function LejasPage() {
             img: "/manager-lejas-rider.jpeg",
             pos: "50% 8%",
             system: "ゲーマドライバー × グランドマスターガシャット／ゲームマスターガシャット",
-            name: "ファラリス",
+            name: "ファルス",
             calls: [
               "GAME MASTER SYSTEM!",
               "ガシャット!",
               "ガッチャーン!",
               "レベルアップ!!",
               "TRUE! FALSE! CHECKMATE!",
-              "KAMEN RIDER PHALARIS!",
+              "KAMEN RIDER FALS!",
             ],
             quote: "選んだのは君だ。私が並べた選択肢の中から",
             stats: [
@@ -319,7 +319,7 @@ export function LejasPage() {
             ],
             finishers: [
               {
-                name: "PHALARIS CRITICAL STRIKE",
+                name: "FALS CRITICAL STRIKE",
                 body: "白黒区画を跳躍して連続蹴撃を放ち、最も損害の大きい一撃だけを現実へ確定する。",
               },
               {

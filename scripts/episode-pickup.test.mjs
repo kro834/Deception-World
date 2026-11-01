@@ -48,7 +48,7 @@ test("EP1 and EP2 expose the five requested thumbnail pickup records", () => {
   );
 });
 
-test("EP4 opens Phalaris and each requested Ruler mode at its own existing form", () => {
+test("EP4 opens Fals and each requested Ruler mode at its own existing form", () => {
   const source = ts.createSourceFile(
     "world-home.tsx",
     worldHome,
@@ -69,7 +69,7 @@ test("EP4 opens Phalaris and each requested Ruler mode at its own existing form"
   assert.deepEqual(
     pickups.map((item) => ["label", "src", "to", "hash"].map((key) => property(item, key).text)),
     [
-      ["仮面ライダーファラリス", "/manager-lejas-rider.jpeg", "/managers/lejas", "form-records"],
+      ["仮面ライダーファルス", "/manager-lejas-rider.jpeg", "/managers/lejas", "form-records"],
       [
         "仮面ライダールーラー・エニグマモード",
         "/rider-ruler-enigma.webp",
