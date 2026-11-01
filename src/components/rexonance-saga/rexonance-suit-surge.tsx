@@ -3,6 +3,7 @@ import {
   REXONANCE_CALL_BEATS,
   REXONANCE_SUIT_CASCADE,
   REXONANCE_SUIT_FIT,
+  REXONANCE_SUIT_SNAP,
 } from "@/lib/rexonance-calls";
 import { entryCanonicalTime } from "@/lib/rexonance-ignition.js";
 import {
@@ -18,6 +19,13 @@ import {
   surgePieces,
   surgeTier,
 } from "@/lib/rexonance-suit-surge";
+import {
+  REXONANCE_HENSHIN_PALETTE,
+  henshinEntrySheet,
+  henshinOf,
+  mountHenshinEntry,
+} from "@/lib/rexonance-henshin";
+import { REXONANCE_HENSHIN_FIGURE } from "@/lib/rexonance-henshin-figures";
 
 /* REXONANCE SURGE (owner, 2026-10-30): the suit-up's extra layer of nanite
    swarm, debris, construction scans, lock-in impacts and camera shake, over
@@ -78,6 +86,28 @@ export function EntrySurge() {
     });
     const final = REXONANCE_CALL_BEATS[4].start;
     const engine = new SurgeEngine(back, front, surgeTier());
+    // The bank's direction (owner, 2026-11-01: 「装着アニメーションを大きく
+    // 改善して」): the camera on the figure, the overlay over the stage, on
+    // the call's own beats (rexonance-henshin.ts).
+    const tail = REXONANCE_SUIT_CASCADE.find((step) => step.group === "tail");
+    const henshin = mountHenshinEntry(figure, suit, {
+      figure: REXONANCE_HENSHIN_FIGURE,
+      palette: REXONANCE_HENSHIN_PALETTE,
+      sheet: henshinEntrySheet(REXONANCE_HENSHIN_FIGURE, {
+        rider: REXONANCE_CALL_BEATS[1].start,
+        chant: REXONANCE_CALL_BEATS[2].start,
+        snaps: [
+          REXONANCE_SUIT_SNAP.legs,
+          REXONANCE_SUIT_SNAP.waist,
+          REXONANCE_SUIT_SNAP.arms,
+          REXONANCE_SUIT_SNAP.chest,
+        ],
+        response: REXONANCE_CALL_BEATS[3].start,
+        tail: tail?.to ?? REXONANCE_CALL_BEATS[3].start + 400,
+        helm: REXONANCE_SUIT_SNAP.helm,
+        final,
+      }),
+    });
     const frame = createSurgeFrame();
     let raf = 0;
     let last = -1;
@@ -98,6 +128,7 @@ export function EntrySurge() {
       });
     };
     const rest = () => {
+      henshin.rest();
       if (!shaken) return;
       shaken = false;
       suit.style.translate = "";
@@ -121,12 +152,13 @@ export function EntrySurge() {
           }
         last = t;
         engine.draw(entrySurgeFrame(frame, t, now, fits, windows, final));
+        // The locks' shake rides the bank's camera (one transform).
         const [x, y] = engine.shake(now);
-        if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) {
-          shaken = true;
-          suit.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`;
-        } else rest();
-        if (t > final + 1400) return;
+        henshin.frame(t, x, y);
+        if (t > final + 1400) {
+          henshin.rest();
+          return;
+        }
       }
       raf = requestAnimationFrame(tick);
     };
@@ -134,6 +166,7 @@ export function EntrySurge() {
     return () => {
       cancelAnimationFrame(raf);
       rest();
+      henshin.dispose();
       engine.dispose();
       back.width = 0;
       back.height = 0;
@@ -241,7 +274,10 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       }
       if (!engine) engine = new SurgeEngine(back, front, surgeTier());
       measure();
-      const target = travel > 0 ? Math.min(1, Math.max(0, (pinTop - runway.getBoundingClientRect().top) / travel)) : 1;
+      const raw = travel > 0 ? Math.min(1, Math.max(0, (pinTop - runway.getBoundingClientRect().top) / travel)) : 1;
+      // The bank's stepped clock (rexonance-henshin.ts), as the scene plays it.
+      const director = henshinOf(runway);
+      const target = director ? director.stepped(raw) : raw;
       const dt = Math.min(50, Math.max(1, lastStamp ? now - lastStamp : 16.7));
       lastStamp = now;
       // The scene's own playhead, in short: a spring that never trails far.
@@ -271,6 +307,12 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
         // frame rate; there only the locks' brief shake moves them.
         const push = coarse ? 1 : scrollPush(q);
         const [x, y] = engine.shake(now);
+        // The bank's director owns the camera: the locks' shake joins it.
+        if (director) {
+          if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) director.shake(x, y);
+          raf = requestAnimationFrame(tick);
+          return;
+        }
         const key = `${push.toFixed(4)}|${x.toFixed(1)}|${y.toFixed(1)}`;
         if (key !== camera) {
           camera = key;

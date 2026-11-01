@@ -37,6 +37,7 @@ import {
   META_UNITAS_RX_SIZE,
 } from "./meta-unitas-rx-suit.ts";
 import { META_UNITAS_RX_SEAMS } from "./meta-unitas-rx-suit-nanites.ts";
+import { henshinOf } from "./rexonance-henshin.ts";
 
 /** The engine's beats (ASSEMBLY_BEATS in rexonance-resonance.js; pinned
  * equal by scripts/meta-unitas-boost.test.mjs). */
@@ -388,6 +389,11 @@ export function mountMetaUnitasBoost(
     return true;
   };
   const collectTargets = () => {
+    // Under the bank's director, its camera moves these layers.
+    if (henshinOf(runway)) {
+      targets = [];
+      return;
+    }
     for (const target of targets) target.element.style.transform = "";
     const frameBox = frame.getBoundingClientRect();
     const list: Target[] = [];
@@ -537,9 +543,11 @@ export function mountMetaUnitasBoost(
   let measured = false;
 
   const engineLive = () => runway.dataset.rznState === "live" && !runway.dataset.rznArming;
+  // The bank's stepped clock (rexonance-henshin.ts), as the engine plays it.
   const readProgress = () => {
-    if (travel <= 0) return 1;
-    return clamp01((pinTop - runway.getBoundingClientRect().top) / travel);
+    const raw = travel <= 0 ? 1 : clamp01((pinTop - runway.getBoundingClientRect().top) / travel);
+    const director = henshinOf(runway);
+    return director ? director.stepped(raw) : raw;
   };
   const ultra = () => runway.dataset.form === "ultra";
 
@@ -832,7 +840,11 @@ export function mountMetaUnitasBoost(
     camera.phase += dt;
     const dx = camera.shake * Math.sin(camera.phase * 61 + 1.3);
     const dy = camera.shake * Math.cos(camera.phase * 47);
-    writeCamera(drawable ? camScale + camera.kick : 1, drawable ? dx : 0, drawable ? dy : 0);
+    // The bank's director owns the camera: the shake joins it.
+    const director = henshinOf(runway);
+    if (director) {
+      if (drawable && (Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05)) director.shake(dx, dy);
+    } else writeCamera(drawable ? camScale + camera.kick : 1, drawable ? dx : 0, drawable ? dy : 0);
 
     // Clear.
     fctx.setTransform(1, 0, 0, 1, 0, 0);

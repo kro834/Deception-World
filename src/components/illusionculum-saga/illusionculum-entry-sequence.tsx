@@ -77,9 +77,15 @@ function useEngineClock(
     void import("@/lib/illusionculum-assembly-engine")
       .then((module) => {
         if (disposed || settled()) return;
+        // The director's camera moves the whole stage: the engine's layer
+        // and the reactor's overlay, one box.
+        const camera = [runway.parentElement, scene?.querySelector?.(".ice-entry-stage")].filter(
+          (layer): layer is HTMLElement => Boolean(layer),
+        );
         dispose = module.mountIllusionculumAssemblyEngine(runway, window, {
           entry: true,
           progress: () => progress,
+          camera,
         });
       })
       .catch(() => {
@@ -145,14 +151,6 @@ export function IllusionculumEntrySequence({
       aria-hidden="true"
     >
       <span className="ice-entry-ground" />
-      {/* The dream-dive vortex: rings of the light paths' colours, far and
-          near, spinning in and converging into the reactor (the form's own
-          signature event, at the scale of Rexonance's flame vortex). */}
-      <span className="ice-entry-vortex" aria-hidden="true">
-        {[0, 1, 2, 3, 4, 5].map((ring) => (
-          <i key={ring} style={{ ["--ring" as string]: ring }} />
-        ))}
-      </span>
       {/* Far cells, drifting behind the figure (the depth's back plane). */}
       <span className="ice-entry-far" aria-hidden="true" />
       <svg className="ice-entry-sigil" viewBox="0 0 400 400">
@@ -221,8 +219,6 @@ export function IllusionculumEntrySequence({
           lock's ring at the reactor once the suit is whole. */}
       {/* The orbit plane, tilted, the orbs' path round the figure. */}
       <span className="ice-entry-orbit" />
-      {/* Near cells, larger and faster in front (the depth's front plane). */}
-      <span className="ice-entry-near" />
       <span className="ice-entry-frame" />
       <span className="ice-entry-scan" />
       <span className="ice-entry-lock" />

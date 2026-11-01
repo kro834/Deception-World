@@ -19,6 +19,8 @@ export function QuickSearchHost() {
     pathnameRef.current = pathname;
     // A route change closes it (a result was opened, or Back was pressed).
     setOpen(false);
+    pendingRef.current = null;
+    setSeed("");
   }, [pathname]);
 
   useEffect(() => {
@@ -42,16 +44,28 @@ export function QuickSearchHost() {
         if (document.querySelector("dialog.quick-search[open]")) {
           pendingRef.current = null;
         } else if (
-          event.key.length === 1 &&
+          !event.defaultPrevented &&
           !event.ctrlKey &&
           !event.metaKey &&
           !event.altKey &&
-          !event.isComposing
+          !event.isComposing &&
+          event.keyCode !== 229
         ) {
-          event.preventDefault();
-          pendingRef.current += event.key;
-          setSeed(pendingRef.current);
-          return;
+          if (event.key === "Escape") {
+            event.preventDefault();
+            pendingRef.current = null;
+            setSeed("");
+            setOpen(false);
+            return;
+          }
+          if (event.key === "Backspace" || event.key.length === 1) {
+            event.preventDefault();
+            if (event.key === "Backspace")
+              pendingRef.current = Array.from(pendingRef.current).slice(0, -1).join("");
+            else pendingRef.current += event.key;
+            setSeed(pendingRef.current);
+            return;
+          }
         }
       }
       if (!isQuickSearchShortcut(event) || isTypingTarget(event.target)) return;
@@ -77,7 +91,11 @@ export function QuickSearchHost() {
           pendingRef.current = null;
           setSeed("");
         }}
-        onClose={() => setOpen(false)}
+        onClose={() => {
+          pendingRef.current = null;
+          setSeed("");
+          setOpen(false);
+        }}
       />
     </Suspense>
   );

@@ -217,7 +217,9 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
   assert.match(engine, /import \{ mountRexonanceAssembly/);
   assert.match(
     engine,
-    /mountRexonanceAssembly\(\s*runway,\s*\{ \.\.\.metaUnitasAssemblyConfig\(\), eager: options\.eager \},\s*environment,?\s*\)/,
+    // Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — the same
+    // engine and config; the bank's director hands it its stepped clock.
+    /mountRexonanceAssembly\(\s*runway,\s*\{\s*\.\.\.metaUnitasAssemblyConfig\(\),\s*eager: options\.eager,\s*progress: director\.progress\s*\},\s*environment,?\s*\)/,
   );
   assert.ok(!/fire: false|generation:/.test(engine), "the fire and the nanites stay Rexonance's");
   assert.match(read("src/lib/meta-unitas-assembly.ts"), /import\("\.\/meta-unitas-rx-engine"\)/);

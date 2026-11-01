@@ -117,6 +117,27 @@ export const FAR_FROM_WIRE_BOOST = Object.freeze({
   grow: 0.1,
 });
 
+/** Round 2 (owner, 2026-11-01: 「装着アニメーションを大きく改善して」): each
+ * plate's outline is no longer traced on the body; it is THROWN onto it from
+ * an exploded pose round the body (outward by `lateral` of the figure's
+ * width and `vertical` of its height, nearer the camera by up to `depth`,
+ * turned up to `turn` radians), over `span` of the progress, accelerating
+ * all the way in with `trails` after-images `gap` apart, and locks on its
+ * seat — a flash, a shock outline and `sparks` sparks off it (by tier) —
+ * before the nanites stream into it. */
+export const FAR_FROM_WIRE_THROW = Object.freeze({
+  span: 0.026,
+  lateral: 0.17,
+  vertical: 0.09,
+  depth: 0.3,
+  turn: 0.2,
+  trails: 2,
+  gap: 0.0028,
+  sparks: { desktop: 10, touch: 5 },
+  reach: [14, 40] as const,
+  spark: 0.016,
+});
+
 /** The wire's look: line widths (CSS px) and the light of each kind. */
 export const FAR_FROM_WIRE_STYLE = Object.freeze({
   outline: 1.15,
@@ -207,6 +228,10 @@ type WirePlate = {
   readonly rib: Float32Array;
   readonly rt: Float32Array;
   first: number;
+  /** When its outline, thrown, lands on its seat, and when the pens have
+   * traced it round. */
+  readonly arrive: number;
+  readonly traced: number;
   fillStart: number;
   fillEnd: number;
   wireEnd: number;
@@ -505,6 +530,8 @@ export function* prepareFarFromWireframe(
         const at = tf[t] - T.lead;
         if (at < vt[v]) vt[v] = at;
       }
+    let arrive = from;
+    let traced = from;
     // The outline is traced first, as two pens from its point nearest the
     // seat running round it both ways to meet on the far side, at a pace by
     // its length; every loop of it (an island, a hole) from its own nearest
@@ -523,7 +550,12 @@ export function* prepareFarFromWireframe(
       }
       const span = Math.min(0.02, Math.max(0.007, 0.004 + perimeter / 42000));
       const pace = span / Math.max(1, perimeter / 2);
-      const traceFrom = Math.max(from, fillFirst - T.lead - T.outline);
+      // Round 2: the outline is thrown on whole and lands as its trace
+      // begins (never before its call's own throw could start); the pens
+      // then run round the landed silhouette.
+      arrive = Math.max(from + FAR_FROM_WIRE_THROW.span, fillFirst - T.lead - T.outline);
+      traced = arrive + span + 0.01;
+      const traceFrom = arrive;
       for (let L = 0; L < mesh.loopStart.length; L += 1) {
         const start = mesh.loopStart[L];
         const count = mesh.loopCount[L];
@@ -673,6 +705,8 @@ export function* prepareFarFromWireframe(
       rib,
       rt,
       first,
+      arrive,
+      traced,
       fillStart,
       fillEnd,
       wireEnd: Infinity,
@@ -848,8 +882,14 @@ export function* prepareFarFromWireframe(
     maxEdges = Math.max(maxEdges, form.ea.length);
     maxTris = Math.max(maxTris, form.tk.length);
   }
+  let outlineAll = 0;
+  for (const plate of plates) outlineAll += plate.outline;
   const KINDS = 5;
-  const segs = Array.from({ length: KINDS }, () => new Float32Array(maxEdges * 4));
+  // (Room for the thrown outlines and their after-images too.)
+  const segs = Array.from(
+    { length: KINDS },
+    () => new Float32Array(maxEdges * 4 + outlineAll * 4 * (FAR_FROM_WIRE_THROW.trails + 1)),
+  );
   const segCount = new Int32Array(KINDS);
   const GLOWS = 6;
   const glows = Array.from({ length: GLOWS }, () => new Float32Array(maxTris * 6));
@@ -901,12 +941,63 @@ export function* prepareFarFromWireframe(
       moteTone[i] = h3 < 0.2 ? 1 : 0;
     }
   }
+  // Round 2: each plate's exploded pose (FAR_FROM_WIRE_THROW) and the
+  // sparks off it as its outline lands, made once.
+  const TH = FAR_FROM_WIRE_THROW;
+  const stX = new Float32Array(plates.length);
+  const stY = new Float32Array(plates.length);
+  const stK = new Float32Array(plates.length);
+  const stR = new Float32Array(plates.length);
+  const sparkPer = input.coarse ? TH.sparks.touch : TH.sparks.desktop;
+  const sparkX = new Float32Array(sparkPer * plates.length);
+  const sparkY = new Float32Array(sparkPer * plates.length);
+  const sparkDX = new Float32Array(sparkPer * plates.length);
+  const sparkDY = new Float32Array(sparkPer * plates.length);
+  {
+    const W = input.size.width;
+    const H = input.size.height;
+    for (let k = 0; k < plates.length; k += 1) {
+      const plate = plates[k];
+      const nx = (plateCX[k] - W / 2) / (W / 2);
+      const ny = (plateCY[k] - H * 0.52) / (H * 0.5);
+      const h1 = hash(k, 501);
+      const h2 = hash(k, 502);
+      const h3 = hash(k, 503);
+      const side = nx < 0 ? -1 : 1;
+      if (/^bit/.test(plate.id)) {
+        const away = Math.hypot(nx, ny) || 1;
+        stX[k] = (nx / away) * W * 0.4 * (0.8 + 0.4 * h1);
+        stY[k] = (ny / away) * W * 0.4 * (0.6 + 0.4 * h2);
+        stK[k] = 0.12 + 0.1 * h3;
+        stR[k] = side * TH.turn * (0.8 + 0.6 * h1);
+      } else {
+        stX[k] = side * Math.sqrt(Math.abs(nx)) * W * TH.lateral * (0.75 + 0.5 * h1);
+        stY[k] = ny * H * TH.vertical * (0.7 + 0.6 * h2) - (plate.beat === 5 ? H * 0.07 : 0);
+        stK[k] = TH.depth * (0.7 + 0.6 * h3) * (1.6 - 0.9 * Math.min(1, Math.abs(nx)));
+        stR[k] = side * TH.turn * (h1 - 0.25);
+      }
+      for (let m = 0; m < sparkPer; m += 1) {
+        const i = k * sparkPer + m;
+        const v = Math.min(plate.outline - 1, Math.floor(hash(i, 511) * plate.outline));
+        sparkX[i] = plate.vx[v];
+        sparkY[i] = plate.vy[v];
+        const angle =
+          Math.atan2(plate.vy[v] - plateCY[k], plate.vx[v] - plateCX[k]) + (hash(i, 512) - 0.5) * 0.9;
+        const reach = TH.reach[0] + (TH.reach[1] - TH.reach[0]) * hash(i, 513);
+        sparkDX[i] = Math.cos(angle) * reach;
+        sparkDY[i] = Math.sin(angle) * reach;
+      }
+    }
+  }
   // Each streak a curve of four points along its spiral.
   const motes = [new Float32Array(moteTotal * 8), new Float32Array(moteTotal * 8)];
   const moteCount = new Int32Array(2);
   const heads = new Float32Array(maxEdges * 2 + 16);
   // Lock lines: 0 the fresh flash and the shock outline, 1 the afterglow.
-  const locks = [new Float32Array(outlineMax * 8 + 16), new Float32Array(outlineMax * 8 + 16)];
+  const locks = [
+    new Float32Array(outlineMax * 12 + sparkX.length * 4 + 16),
+    new Float32Array(outlineMax * 12 + 16),
+  ];
   const lockCount = new Int32Array(2);
   // The reactor's rim: its outline a little outside the crystal's own frame
   // (scaled about the outline's centre), so the ring reads over the frame.
@@ -1241,6 +1332,30 @@ export function* prepareFarFromWireframe(
     lockCount[1] = 0;
     for (let k = 0; k < plates.length; k += 1) {
       const plate = plates[k];
+      // Round 2: its thrown outline lands — the flash, the shock, the sparks.
+      const landed = (q - plate.arrive) / B.lock;
+      if (landed >= 0 && landed < 1) {
+        pushLock(landed < 0.4 ? 0 : 1, k, 0);
+        if (!calm && landed < B.shock / B.lock)
+          pushLock(0, k, (B.grow * 1.4 * landed * B.lock) / B.shock);
+      }
+      const flown = (q - plate.arrive) / TH.spark;
+      if (!calm && flown >= 0 && flown < 1) {
+        const head = 1 - (1 - flown) * (1 - flown) * (1 - flown);
+        const w = flown > 0.3 ? flown - 0.3 : 0;
+        const tail = 1 - (1 - w) * (1 - w) * (1 - w);
+        const buffer = locks[0];
+        for (let m = 0; m < sparkPer; m += 1) {
+          const i = k * sparkPer + m;
+          const at = lockCount[0];
+          if (at + 4 > buffer.length) break;
+          buffer[at] = sparkX[i] + sparkDX[i] * tail;
+          buffer[at + 1] = sparkY[i] + sparkDY[i] * tail;
+          buffer[at + 2] = sparkX[i] + sparkDX[i] * head;
+          buffer[at + 3] = sparkY[i] + sparkDY[i] * head;
+          lockCount[0] = at + 4;
+        }
+      }
       const a = (q - plate.fillEnd) / B.lock;
       if (a < 0 || a >= 1) continue;
       if (a < 0.4) pushLock(0, k, 0);
@@ -1272,6 +1387,62 @@ export function* prepareFarFromWireframe(
       context.strokeStyle = bucket ? GOLD : WHITE;
       context.lineWidth = (bucket ? 1.4 : 2.2) * px;
       context.stroke();
+    }
+  };
+
+  // A plate's outline into a line bucket, at `f` of the way out to its
+  // exploded pose (1 there, 0 on its seat).
+  const pushOutline = (kind: number, k: number, f: number) => {
+    const plate = plates[k];
+    const scale = 1 + stK[k] * f;
+    const r = stR[k] * f;
+    const a = scale * Math.cos(r);
+    const b = scale * Math.sin(r);
+    const cx = plateCX[k];
+    const cy = plateCY[k];
+    const tx = cx + stX[k] * f;
+    const ty = cy + stY[k] * f;
+    for (let L = 0; L < plate.loopStart.length; L += 1) {
+      const start = plate.loopStart[L];
+      const size = plate.loopCount[L];
+      for (let i = 0; i < size; i += 1) {
+        const u = start + i;
+        const w = start + ((i + 1) % size);
+        const ux = plate.vx[u] - cx;
+        const uy = plate.vy[u] - cy;
+        const wx = plate.vx[w] - cx;
+        const wy = plate.vy[w] - cy;
+        pushSeg(kind, tx + a * ux - b * uy, ty + b * ux + a * uy, tx + a * wx - b * wy, ty + b * wx + a * wy);
+      }
+    }
+  };
+  // How far out a thrown outline is at `q`: a short wind-up away, then
+  // accelerating all the way onto its seat.
+  const thrownAt = (k: number, q: number) => {
+    const u = (q - (plates[k].arrive - TH.span)) / TH.span;
+    if (u < 0.18) return 1 + 0.07 * Math.sin((Math.PI * (u < 0 ? 0 : u)) / 0.18);
+    const v = (u - 0.18) / 0.82;
+    return 1 - v * v * Math.sqrt(v);
+  };
+  // The thrown outlines: each in flight with its after-images, then its
+  // landed silhouette under the pens until they have traced it round.
+  const gatherThrows = (q: number, calm: boolean) => {
+    for (let k = 0; k < plates.length; k += 1) {
+      const plate = plates[k];
+      const from = plate.arrive - TH.span;
+      if (q < from || q >= plate.traced) continue;
+      if (q >= plate.arrive) {
+        pushOutline(3, k, 0);
+        continue;
+      }
+      // In flight: bright (the drawing line's kind), its after-images in
+      // the interior's ice.
+      pushOutline(2, k, thrownAt(k, q));
+      if (calm) continue;
+      for (let g = 1; g <= TH.trails; g += 1) {
+        const at = q - g * TH.gap;
+        if (at >= from + TH.span * 0.2) pushOutline(1, k, thrownAt(k, at));
+      }
     }
   };
 
@@ -1419,6 +1590,7 @@ export function* prepareFarFromWireframe(
           nodes[nodeCount++] = plate.vy[v];
         }
     }
+    gatherThrows(q, calm);
     context.globalCompositeOperation = "lighter";
     flushGlows(context, 1);
     context.lineCap = "round";
