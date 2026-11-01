@@ -37,6 +37,20 @@ import {
 } from "./meta-unitas-rx-suit-nanites.ts";
 import { farFromAccents } from "./far-from-assembly-accents.ts";
 import { mountMetaUnitasBoost } from "./meta-unitas-boost.ts";
+import {
+  META_UNITAS_HENSHIN_PALETTE,
+  mountHenshinDirector,
+  type HenshinFigure,
+} from "./rexonance-henshin.ts";
+
+/** Meta Unitas' figure for the bank's direction (rexonance-henshin.ts). */
+export const META_UNITAS_HENSHIN_FIGURE: HenshinFigure = {
+  size: META_UNITAS_RX_SIZE,
+  pieces: META_UNITAS_RX_PIECES,
+  core: META_UNITAS_RX_MARKS.core as unknown as readonly [number, number],
+  visor: META_UNITAS_RX_MARKS.visor as unknown as readonly [number, number],
+  belt: META_UNITAS_RX_MARKS.belt as unknown as readonly [number, number],
+};
 
 /** The form after ミドル: ウルトラ, in its crystal's pale light. */
 export const META_UNITAS_FORM_CHAIN = Object.freeze(["ultra"] as const);
@@ -133,9 +147,17 @@ export function mountMetaUnitasAssemblyEngine(
   environment: typeof globalThis = window,
   options: { eager?: boolean } = {},
 ): () => void {
+  // The bank's direction (owner, 2026-11-01: 「装着アニメーションを大きく
+  // 改善して」): the stepped clock, the camera and the overlay, on the page's
+  // runway and the entry's alike; the engine receives only the clock.
+  const director = mountHenshinDirector(runway, {
+    figure: META_UNITAS_HENSHIN_FIGURE,
+    palette: META_UNITAS_HENSHIN_PALETTE,
+    environment,
+  });
   const dispose = mountRexonanceAssembly(
     runway,
-    { ...metaUnitasAssemblyConfig(), eager: options.eager },
+    { ...metaUnitasAssemblyConfig(), eager: options.eager, progress: director.progress },
     environment,
   );
   // The page's scroll suit-up rides the nanite boost (meta-unitas-boost.ts);
@@ -144,5 +166,6 @@ export function mountMetaUnitasAssemblyEngine(
   return () => {
     disposeBoost?.();
     dispose();
+    director.dispose();
   };
 }
