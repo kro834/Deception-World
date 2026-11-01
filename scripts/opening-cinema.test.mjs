@@ -62,7 +62,7 @@ test("the cinema sheet is the last sheet on /, after the elevation sheet", async
   const links = route.slice(route.indexOf("links: ["), route.indexOf("],"));
   const order = [...links.matchAll(/href: (\w+)/g)].map((m) => m[1]);
   assert.deepEqual(order.slice(-3), [
-    "DOSSIER_HUD_FONTS_URL",
+    "openingFontsCssUrl",
     "openingElevationCssUrl",
     "openingCinemaCssUrl",
   ]);

@@ -4,6 +4,7 @@ import { runInNewContext } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
 import * as fonts from "../src/lib/site-fonts.ts";
+import { compactStylesheetGroups } from "../src/lib/compact-stylesheet-groups.ts";
 
 const read = (file) => readFileSync(new URL("../" + file, import.meta.url), "utf8");
 const source = read("src/routes/__root.tsx").replaceAll("import.meta.env", "({})");
@@ -16,6 +17,7 @@ runInNewContext(code, {
   require(name) {
     if (name === "@tanstack/react-router") return { createRootRoute: (config) => config };
     if (name === "@/lib/site-fonts") return fonts;
+    if (name === "@/lib/compact-stylesheet-groups") return { compactStylesheetGroups };
     if (name === "@/lib/world-head") return { DOSSIER_HUD_FONTS_URL: "hud-fonts" };
     if (name === "@/lib/viewport-chrome") return { getViewportChromeColor: () => "#000" };
     if (name.endsWith("?url")) return { default: name };
@@ -107,7 +109,20 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     .map((href) =>
       href === "../styles-stage-shell.css?url" ? "../styles-opening-shell.css?url" : href,
     );
-  assert.deepEqual(styles("/"), expected);
+  const bundles = Object.fromEntries(["platform", "interface"].map((name) => [
+    `../styles-opening-${name}.css?url`,
+    Array.from(read(`src/styles-opening-${name}.css`).matchAll(/@import "\.\/(.*?)";/g),
+      (match) => `../${match[1]}?url`),
+  ]));
+  bundles["../styles-opening-fonts.css?url"] = [fonts.SITE_CORE_FONTS_URL, "hud-fonts"];
+  const actual = styles("/");
+  assert.deepEqual(
+    actual.flatMap((href) => bundles[href] ?? [href]),
+    expected,
+    "bundles expand to the complete unchanged title/dashboard cascade",
+  );
+  assert.equal(actual.length, expected.length - 18);
+  assert.equal(actual.filter((href) => href.startsWith("../")).length, 7);
   const tokenBlock = (file) => read(file).match(/html\[data-family\] \{[\s\S]*?\n\}/)[0];
   assert.equal(
     tokenBlock("src/styles-opening-shell.css"),
@@ -123,4 +138,28 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     "src/styles-inquiry-navigation.css",
   ])
     assert.doesNotMatch(read(file), /\.cine-|\.load-gate|--op-/);
+});
+
+test("opening bundles inline every rule in original order without runtime import waterfalls", async () => {
+  const { preprocessCSS, resolveConfig } = await import("vite");
+  const { fileURLToPath } = await import("node:url");
+  const { glassSelectorBuckets } = await import("./glass-selector-buckets.mjs");
+  const config = await resolveConfig({
+    configFile: false,
+    css: { postcss: { plugins: [glassSelectorBuckets()] } },
+  }, "build");
+  const transform = async (file) => (await preprocessCSS(
+    read(file), fileURLToPath(new URL(`../${file}`, import.meta.url)), config,
+  )).code;
+  const normalize = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, "");
+  for (const name of ["platform", "interface"]) {
+    const file = `src/styles-opening-${name}.css`;
+    const members = Array.from(read(file).matchAll(/@import "\.\/(.*?)";/g), (match) => `src/${match[1]}`);
+    const bundled = await transform(file);
+    const originals = await Promise.all(members.map(transform));
+    assert.doesNotMatch(bundled, /@import\b/);
+    assert.equal(normalize(bundled), normalize(originals.join("\n")), name);
+    assert.ok(!members.includes("src/styles.css"), "Tailwind keeps its own compilation");
+    assert.ok(members.every((path) => !path.includes("styles-liquid-glass")), "filename-sensitive glass transform keeps its original input");
+  }
 });

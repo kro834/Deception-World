@@ -45,6 +45,10 @@ import pickupVisibilityCss from "../styles-pickup-visibility.css?url";
 import pressFeedbackCss from "../styles-press-feedback.css?url";
 import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
+import openingPlatformCss from "../styles-opening-platform.css?url";
+import openingFontsCss from "../styles-opening-fonts.css?url";
+import openingInterfaceCss from "../styles-opening-interface.css?url";
+import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
 import farFromEntryCss from "../styles-far-from-entry.css?url";
 import illusionculumEntryCss from "../styles-illusionculum-entry.css?url";
@@ -66,7 +70,7 @@ import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport"
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
-import { siteFontLinks } from "@/lib/site-fonts";
+import { siteFontLinks, SITE_CORE_FONTS_URL } from "@/lib/site-fonts";
 import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
@@ -176,7 +180,7 @@ export const Route = createRootRoute({
       { children: REXONANCE_LAYOUT_BOOT_SCRIPT },
       { children: SIDE_MENU_EARLY_INPUT_SCRIPT },
     ],
-    links: [
+    links: compactStylesheetGroups([
       // The Zeus button's image, for every route that shows the button. The
       // opening (/) never renders it, so there the preload went unused (a
       // console warning on every visit, and a fetch beside the title's logo).
@@ -219,15 +223,9 @@ export const Route = createRootRoute({
       // The shared chrome (menu, announcements, covers, Zeus button, skip
       // link) in one grammar on every route; it outweighs the route sheets.
       { rel: "stylesheet", href: chromeElevationCss },
-      // The file shutter: every covered route change closes onto what was
-      // pressed and opens from the destination's portrait (load-gate.tsx).
       { rel: "stylesheet", href: transitionCinemaCss },
-      // Entry calls must be available on the departure route as well.
       { rel: "stylesheet", href: rexonanceCallsCss },
-      // FAR FROM's entry rides the same call sheet with its own differences,
-      // on the departure route too (load-gate.tsx, far-from-entry-gate.ts).
       { rel: "stylesheet", href: farFromEntryCss },
-      // ILLUSIONCULUM's entry (illusionculum-entry-sequence.tsx), the same way.
       { rel: "stylesheet", href: illusionculumEntryCss },
       { rel: "stylesheet", href: viewportChromeCss },
       ...(matches.some((match) => (match.routeId as string) === "/")
@@ -273,17 +271,32 @@ export const Route = createRootRoute({
       // Owner (2026-10-31): the same glass on the surfaces and chrome (bars,
       // menus, dialog shells), after the buttons' sheet; scoped the same way.
       { rel: "stylesheet", href: liquidGlassSurfacesCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "preconnect", href: "https://fonts.googleapis.com" }]),
       {
         rel: "preconnect",
         href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
+        crossOrigin: "anonymous" as const,
       },
       ...siteFontLinks(matches.some((match) => (match.routeId as string) === "/")),
       // The chrome's HUD labels: the Michroma subset of capitals and digits
       // the character files already load (a few KB, display=swap).
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
-    ],
+    ], matches.some((match) => (match.routeId as string) === "/") ? [
+      // Keep every rule for both the opening and the same-path dashboard.
+      // Tailwind and the filename-sensitive liquid-glass transform keep their
+      // original standalone sheets. Each group is contiguous in the cascade.
+      // Same font faces and binary URLs, without a render-blocking external CSS round trip.
+      { href: openingFontsCss, members: [SITE_CORE_FONTS_URL, DOSSIER_HUD_FONTS_URL] },
+      { href: openingPlatformCss, members: [androidPerformanceCss, ios18PerformanceCss, ios27EnhancementsCss] },
+      { href: openingInterfaceCss, members: [
+        routeTransitionsCss, frostedControlsCss, futureInterfaceCss, pressFeedbackCss,
+        chromeElevationCss, transitionCinemaCss, rexonanceCallsCss, farFromEntryCss,
+        illusionculumEntryCss, viewportChromeCss, stageCss, openingShellCss,
+        siteAstraCss, commandChromeCss, dynamicGuiCss, fxMotionCss,
+      ] },
+    ] : []),
   }),
   component: RootDocument,
 });
