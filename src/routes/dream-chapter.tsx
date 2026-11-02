@@ -1,3 +1,5 @@
+import dreamImageCinemaCssUrl from "@/styles-dream-image-cinema.css?url";
+import dreamCinemaEffectsCssUrl from "@/styles-dream-cinema-effects.css?url";
 import readingAstraCssUrl from "@/styles-reading-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { DreamChapter } from "@/components/dream-chapter/dream-chapter";
@@ -87,6 +89,8 @@ export const Route = createFileRoute("/dream-chapter")({
       { rel: "stylesheet", href: readingAstraCssUrl },
       { rel: "stylesheet", href: dreamGpuCssUrl },
       CINEMATIC_STYLESHEET_LINK,
+      { rel: "stylesheet", href: dreamImageCinemaCssUrl },
+      { rel: "stylesheet", href: dreamCinemaEffectsCssUrl },
       // The same files the dive warms and the hero shows.
       { rel: "preload", as: "image", href: DREAM_CHAPTER_HERO_ART },
       {
