@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { ASSEMBLY_BEATS, mountRexonanceAssembly, planAssembly } from "../src/lib/rexonance-resonance.js";
@@ -30,16 +30,7 @@ import {
   triangulateWireMesh,
   wireSuitFingerprint,
 } from "../src/lib/far-from-wireframe-mesh.ts";
-import {
-  FAR_FROM_WIRE_THROW,
-  FAR_FROM_WIRE_TIMING,
-  prepareFarFromWireframe,
-} from "../src/lib/far-from-wireframe-layer.ts";
-import {
-  FAR_FROM_CAMERA_KEYS,
-  farFromCamera,
-  farFromCameraAt,
-} from "../src/lib/far-from-suitup-camera.ts";
+import { FAR_FROM_WIRE_TIMING, prepareFarFromWireframe } from "../src/lib/far-from-wireframe-layer.ts";
 import { FAR_FROM_FORM_CHAIN, farFromAssemblyConfig } from "../src/lib/far-from-assembly-engine.ts";
 
 /* FAR FROM SAGA — the armour generated as a wireframe (owner, 2026-10-23:
@@ -448,29 +439,13 @@ test("the entry transition's plates have their own conforming meshes, made from 
   assert.match(engine, /A nanite mote, streaming in/);
 });
 
-// Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — round 2: each
-// plate's outline is thrown onto its seat and locks before it is traced and
-// filled; the camera follows the beats.
-test("round 2: each outline is thrown on within its call, lands before its fill, and the camera is closed-form", () => {
-  const B = ASSEMBLY_BEATS;
-  const start = (beat) =>
-    beat <= 3 ? B.deus[0] + (beat * (B.deus[1] - B.deus[0])) / 4 : beat === 4 ? B.rexonance[0] : B.rexonance[0] + 0.06;
-  for (const plate of layer.plates) {
-    assert.ok(plate.arrive - FAR_FROM_WIRE_THROW.span >= start(plate.beat) - 1e-6, `${plate.id} thrown within its call`);
-    assert.ok(plate.arrive <= plate.fillStart, `${plate.id} lands before it fills`);
-    assert.ok(plate.traced > plate.arrive);
-  }
-  const at = new Float64Array(3);
-  let previous = null;
-  for (let q = 0; q <= 1.0001; q += 0.001) {
-    farFromCameraAt(q, at);
-    assert.ok(Math.abs(at[0]) <= 0.13 && at[1] >= 0 && at[1] <= 1 && Math.abs(at[2]) < 0.01, String(q));
-    if (previous) assert.ok(Math.abs(at[0] - previous[0]) < 0.02, `smooth at ${q}`);
-    previous = [at[0]];
-  }
-  farFromCameraAt(1, at);
-  assert.equal(at[0], 0, "the runway ends on the whole figure");
-  assert.equal(FAR_FROM_CAMERA_KEYS.at(-1)[0], 1);
-  // A context without a page's canvas (the tests', the lab's) is left alone.
-  assert.doesNotThrow(() => farFromCamera({}, 0.3));
+// Owner (2026-11-03): 「スクロール変身アニメーションは、もとの体がガタガタしないタイプにもどして。」
+// The scroll suit-up is back to the pre-round-2 steady build: no camera moves
+// the scene's canvases and no outline is thrown in from an exploded pose.
+test("round 3: the scroll suit-up holds the body still (no camera, no thrown outlines)", () => {
+  const accents = readFileSync(new URL("../src/lib/far-from-assembly-accents.ts", import.meta.url), "utf8");
+  const wire = readFileSync(new URL("../src/lib/far-from-wireframe-layer.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(accents, /farFromCamera|\.style\.transform/);
+  assert.doesNotMatch(wire, /FAR_FROM_WIRE_THROW|gatherThrows|\.style\.transform/);
+  assert.ok(!existsSync(new URL("../src/lib/far-from-suitup-camera.ts", import.meta.url)));
 });
