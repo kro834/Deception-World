@@ -32,8 +32,6 @@ import {
   mountRexonanceResonance,
   type RexonanceAssemblyConfig,
 } from "@/lib/rexonance-resonance.js";
-import { mountHenshinDirector, REXONANCE_HENSHIN_PALETTE } from "@/lib/rexonance-henshin";
-import { REXONANCE_HENSHIN_FIGURE } from "@/lib/rexonance-henshin-figures";
 import { mountRexonanceChoreography } from "@/lib/rexonance-choreography.js";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import {
@@ -502,21 +500,10 @@ const FORM_MESH = Array.from({ length: 12 }, (_, index) => (
 
 const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: RexonanceStage }) {
   const runwayRef = useRef<HTMLDivElement | null>(null);
-  // The bank's direction (owner, 2026-11-01: 「装着アニメーションを大きく改善して」):
-  // the stepped clock, the camera and the overlay (rexonance-henshin.ts);
-  // the engine receives only the clock, through its own `progress` option.
-  useEffect(() => {
-    const runway = runwayRef.current;
-    const director = mountHenshinDirector(runway, {
-      figure: REXONANCE_HENSHIN_FIGURE,
-      palette: REXONANCE_HENSHIN_PALETTE,
-    });
-    const dispose = mountRexonanceAssembly(runway, { ...SUIT_UP, progress: director.progress });
-    return () => {
-      dispose();
-      director.dispose();
-    };
-  }, []);
+  // Owner (2026-11-03): 「スクロール変身アニメーションは、もとの体がガタガタしない
+  // タイプにもどして。」 — the scroll suit-up plays the engine on its own clock
+  // and its own steady camera again; the bank's direction stays on the entry.
+  useEffect(() => mountRexonanceAssembly(runwayRef.current, SUIT_UP), []);
   // The surge layer over the live scene (Rexonance's own; the engine is shared).
   useScrollSurge(runwayRef);
   return (

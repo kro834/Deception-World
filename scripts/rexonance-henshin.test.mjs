@@ -91,8 +91,14 @@ test("the camera starts on the driver, cuts to the parts and ends on the rest fr
 });
 
 test("only Rexonance and Meta Unitas mount the director; the lab and the other forms do not", () => {
-  assert.match(read("src/components/rexonance-saga/rexonance-saga.tsx"), /mountHenshinDirector/);
-  assert.match(read("src/lib/meta-unitas-rx-engine.ts"), /mountHenshinDirector/);
+  // Owner (2026-11-03): 「スクロール変身アニメーションは、もとの体がガタガタしない
+  // タイプにもどして。」 — the scroll suit-ups play without the director; only
+  // the entries (Rexonance's call, Meta Unitas' .mus-entry runway) keep it.
+  assert.doesNotMatch(read("src/components/rexonance-saga/rexonance-saga.tsx"), /henshin/i);
+  assert.match(
+    read("src/lib/meta-unitas-rx-engine.ts"),
+    /runway\.closest\("\.mus-entry"\)\s*\?\s*mountHenshinDirector\(/,
+  );
   assert.match(read("src/components/rexonance-saga/rexonance-suit-surge.tsx"), /mountHenshinEntry/);
   for (const path of [
     "src/components/transformation-lab/lab-stage.tsx",

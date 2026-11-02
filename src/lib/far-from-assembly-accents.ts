@@ -154,3 +154,14 @@ export const farFromAccents = Object.freeze({
 });
 
 /* -- end of the draw passes -- */
+
+/** The same hooks without the FAR FROM camera, for Meta Unitas' scroll
+ * suit-up (owner, 2026-11-03: 「スクロール変身アニメーションは、もとの体が
+ * ガタガタしないタイプにもどして。」): its canvases keep the nanite boost's own
+ * steady camera, as before round 2, instead of a second writer fighting it. */
+export const farFromStillAccents = Object.freeze({
+  back: farFromAccents.back,
+  front(context: CanvasRenderingContext2D, progress: number, _calm: boolean, width: number) {
+    drawRings(context, progress, true, width);
+  },
+});

@@ -35,7 +35,7 @@ import {
   META_UNITAS_RX_GUIDE,
   META_UNITAS_RX_SEAMS,
 } from "./meta-unitas-rx-suit-nanites.ts";
-import { farFromAccents } from "./far-from-assembly-accents.ts";
+import { farFromAccents, farFromStillAccents } from "./far-from-assembly-accents.ts";
 import { mountMetaUnitasBoost } from "./meta-unitas-boost.ts";
 import {
   META_UNITAS_HENSHIN_PALETTE,
@@ -148,16 +148,27 @@ export function mountMetaUnitasAssemblyEngine(
   options: { eager?: boolean } = {},
 ): () => void {
   // The bank's direction (owner, 2026-11-01: 「装着アニメーションを大きく
-  // 改善して」): the stepped clock, the camera and the overlay, on the page's
-  // runway and the entry's alike; the engine receives only the clock.
-  const director = mountHenshinDirector(runway, {
-    figure: META_UNITAS_HENSHIN_FIGURE,
-    palette: META_UNITAS_HENSHIN_PALETTE,
-    environment,
-  });
+  // 改善して」): the camera and the overlay on the entry's runway only. Owner
+  // (2026-11-03): 「スクロール変身アニメーションは、もとの体がガタガタしないタイプに
+  // もどして。」 — the page's scroll suit-up (#suitup) plays the engine on its
+  // own clock and the boost's own steady camera, as before the bank.
+  const director = runway.closest(".mus-entry")
+    ? mountHenshinDirector(runway, {
+        figure: META_UNITAS_HENSHIN_FIGURE,
+        palette: META_UNITAS_HENSHIN_PALETTE,
+        environment,
+      })
+    : null;
   const dispose = mountRexonanceAssembly(
     runway,
-    { ...metaUnitasAssemblyConfig(), eager: options.eager, progress: director.progress },
+    {
+      ...metaUnitasAssemblyConfig(),
+      // The scroll's canvases move by the boost's camera alone (FAR FROM's
+      // round-2 camera rode the shared accents and fought it, frame by frame).
+      ...(director ? null : { accents: farFromStillAccents }),
+      eager: options.eager,
+      progress: director?.progress,
+    },
     environment,
   );
   // The page's scroll suit-up rides the nanite boost (meta-unitas-boost.ts);
@@ -166,6 +177,6 @@ export function mountMetaUnitasAssemblyEngine(
   return () => {
     disposeBoost?.();
     dispose();
-    director.dispose();
+    director?.dispose();
   };
 }
