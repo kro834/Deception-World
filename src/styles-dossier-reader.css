@@ -780,7 +780,7 @@ main.manager-page.rider-dossier-page .rider-nightmare-card-shade {
 .manager-page .manager-topbar .manager-back {
   flex-direction: row-reverse;
   gap: 9px;
-  padding-inline: 14px 18px;
+  padding-inline: 16px; /* the arrow side carries its own inset; ink measured 1.5px off-centre with 14/18 */
   border-color: color-mix(in srgb, var(--manager-accent) 30%, rgb(255 255 255 / 12%));
   color: #e6edf5;
 }
@@ -797,7 +797,7 @@ main.manager-page.rider-dossier-page .rider-nightmare-card-shade {
     min-width: 48px;
     height: 44px;
     min-height: 44px;
-    padding-inline: 12px 15px;
+    padding-inline: 13.5px;
   }
   .manager-page .manager-topbar .manager-back > span {
     letter-spacing: 0.03em;

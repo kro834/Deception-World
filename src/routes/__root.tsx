@@ -47,6 +47,7 @@ import chromeElevationCss from "../styles-chrome-elevation.css?url";
 import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import openingPlatformCss from "../styles-opening-platform.css?url";
 import openingFontsCss from "../styles-opening-fonts.css?url";
+import siteDisplayFontsCss from "../styles-site-display-fonts.css?url";
 import openingInterfaceCss from "../styles-opening-interface.css?url";
 import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
@@ -70,7 +71,7 @@ import { IPAD_STANDALONE_VIEWPORT_SCRIPT } from "@/lib/ipad-standalone-viewport"
 import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome";
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
-import { siteFontLinks, SITE_CORE_FONTS_URL } from "@/lib/site-fonts";
+import { siteFontLinks, SITE_CORE_FONTS_URL, SITE_DISPLAY_FONTS_URL } from "@/lib/site-fonts";
 import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
 
 const APP_NAME = "Deception World";
@@ -279,10 +280,21 @@ export const Route = createRootRoute({
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous" as const,
       },
-      ...siteFontLinks(matches.some((match) => (match.routeId as string) === "/")),
+      // Zen Kaku's Google sheet is served from this origin instead, with the
+      // metric overrides (same faces and binary URLs, one cross-origin round trip fewer).
+      ...siteFontLinks(matches.some((match) => (match.routeId as string) === "/")).map((link) =>
+        link.href === SITE_DISPLAY_FONTS_URL ? { ...link, href: siteDisplayFontsCss } : link,
+      ),
       // The chrome's HUD labels: the Michroma subset of capitals and digits
       // the character files already load (a few KB, display=swap).
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
+      // Metric-corrected twins of the faces above (same families, ranges and
+      // binary URLs, plus ascent/descent overrides that centre capitals and
+      // kana in their line box). Last, so each face outranks its Google twin;
+      // the opening route already merges this sheet in place of the remote ones.
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "stylesheet", href: openingFontsCss }]),
     ], matches.some((match) => (match.routeId as string) === "/") ? [
       // Keep every rule for both the opening and the same-path dashboard.
       // Tailwind and the filename-sensitive liquid-glass transform keep their
