@@ -11,7 +11,7 @@ import {
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-function runEarly(stored, { denied = false } = {}) {
+function runEarly(stored, { denied = false, env = {} } = {}) {
   const attrs = new Map();
   const root = {
     setAttribute: (k, v) => attrs.set(k, v),
@@ -23,12 +23,41 @@ function runEarly(stored, { denied = false } = {}) {
       return k === "dw-button-style" ? stored : null;
     },
   };
+  const window = { localStorage, ...(env.window ?? {}) };
   vm.runInNewContext(BUTTON_STYLE_SCRIPT, {
     document: { documentElement: root },
-    window: { localStorage },
+    window,
+    ...(env.globals ?? {}),
   });
   return attrs;
 }
+
+/* An engine for the head script's lens decision. */
+function engine({ brands = true, url = true, clearer = false } = {}) {
+  const CSS = { supports: (p, v) => p === "backdrop-filter" && (url || !/url\(/.test(v)) };
+  const matchMedia = (q) => ({ matches: clearer && /reduced-transparency: reduce/.test(q) });
+  return {
+    window: { CSS, matchMedia },
+    globals: { CSS, navigator: brands ? { userAgentData: { brands: [] } } : {} },
+  };
+}
+
+test("the head script decides the lens before the first paint, with the defs' checks", () => {
+  const lens = (stored, opts) => runEarly(stored, { env: engine(opts) }).has("data-liquid-lens");
+  assert.equal(lens("liquid"), true);
+  // WebKit and Gecko: no userAgentData, or no url() in backdrop-filter.
+  assert.equal(lens("liquid", { brands: false }), false);
+  assert.equal(lens("liquid", { url: false }), false);
+  // Reduced transparency keeps the blur-only glass, as the defs' effect does.
+  assert.equal(lens("liquid", { clearer: true }), false);
+  // The option off: no lens, no style.
+  assert.equal(lens(null), false);
+  assert.equal(runEarly("liquid", { env: engine() }).get("data-button-style"), "liquid");
+  // The economy guard stays the sheet's: every lens rule wants :not(economy).
+  const defs = read("src/components/liquid-glass-defs.tsx");
+  assert.match(defs, /if \(lensSupported\(window\) && !clearer\) root\.setAttribute\(LIQUID_LENS_ATTRIBUTE/);
+  assert.match(defs, /matchMedia\?\.\("\(prefers-reduced-transparency: reduce\)"\)/);
+});
 
 test("the key and values are pinned", () => {
   assert.equal(BUTTON_STYLE_STORAGE_KEY, "dw-button-style");

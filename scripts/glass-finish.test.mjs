@@ -125,6 +125,13 @@ test("Clear / Tinted: applied before paint, pinned values, accessibility still w
   const toggle = read("src/components/button-style-toggle.tsx");
   assert.match(toggle, /aria-pressed=\{variant === value\}/);
   assert.match(toggle, /\{on && \(/);
+  // The variant row's look is the sheet's (no inline style); each button is a 44px target.
+  assert.doesNotMatch(toggle, /style=\{/);
+  assert.match(
+    glass,
+    /\.side-panel-glass-variant\s*> button:not\(#lg-glass\):not\(#lg-glass\):not\(#lg-glass\) \{\s*min-height: 44px;/,
+  );
+  assert.match(glass, /\.side-panel-glass-variant:not\(#lg-glass\):not\(#lg-glass\):not\(#lg-glass\) \{\s*grid-column: 1 \/ -1;/);
   const tinted = glass.slice(glass.indexOf("@media not (prefers-reduced-transparency: reduce)"));
   assert.match(tinted, /^@media not \(prefers-reduced-transparency: reduce\) \{\s*@media not \(prefers-contrast: more\) \{/);
   assert.match(tinted, /\[data-glass-variant="tinted"\] \{\s*--lg-fill-alpha: 0\.58;/);

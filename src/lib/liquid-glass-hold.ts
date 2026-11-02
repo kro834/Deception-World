@@ -83,6 +83,9 @@ export const HOLD_LIGHT_ONLY = [
   '.rzn-movie-seek > input[type="range"]',
   '.lab-seek input[type="range"]',
   '.dream-chapter-stage-slider input[type="range"]',
+  // The compact launchers (the iPad's, the phone's in landscape): their
+  // chrome holds the hit box unscaled while it can fly into the menu.
+  ':is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) .side-panel-trigger',
 ] as const;
 
 /** The styled selects (styles-liquid-glass-controls.css, section 5). */
@@ -594,6 +597,13 @@ export function watchLiquidHold(doc: Document = document) {
     else layer.removeAttribute("data-carried");
     watchAncestors(p);
     layer.toggleAttribute("data-light", light);
+    // A label over art (liquid-glass-tone.ts marks the control busy): the
+    // glow and the highlight under the finger are held lower, so the label
+    // keeps 6:1 held (owner's QA, 2026-11-02).
+    layer.toggleAttribute(
+      "data-busy-label",
+      target.hasAttribute("data-lg-busy") && !!target.textContent?.trim(),
+    );
     layer.toggleAttribute("data-bare", bare);
     follow(p, p.x, p.y);
 

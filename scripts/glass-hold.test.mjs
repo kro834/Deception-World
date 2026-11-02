@@ -612,3 +612,55 @@ test("glass off: the rails, the slide lens and the hold leave no trace", () => {
       assert.ok(!read(file).includes(prop), `${prop} in ${file}`);
   }
 });
+
+test("a held label over art keeps 6:1: a deeper veil, the glare held at half", async () => {
+  const { watchLiquidHold, HOLD_MS } = await loadHold();
+  for (const [busy, text, marked] of [
+    [true, "SHUFFLE POSTER", true],
+    [true, " ", false],
+    [false, "自動切替", false],
+  ]) {
+    const w = world();
+    w.target.textContent = text;
+    if (busy) w.target.setAttribute("data-lg-busy", "");
+    const stop = watchLiquidHold(w.doc);
+    w.fire("pointerdown");
+    w.advance(HOLD_MS + 40);
+    const overlay = w.appended.find((n) => n.className === "lg-hold");
+    assert.equal(overlay.hasAttribute("data-busy-label"), marked, `${busy} ${text}`);
+    stop();
+  }
+  assert.match(section, /\.lg-hold\[data-busy-label\] \{\s*--lg-hold-glare: 0\.5;/);
+  assert.match(section, /\.lg-hold\[data-state="on"\] \.lg-hold-bloom \{[^}]*opacity: var\(--lg-hold-glare, 1\);/);
+  assert.match(section, /\.lg-hold\[data-state="on"\] \.lg-hold-spec \{[^}]*opacity: var\(--lg-hold-glare, 1\);/);
+  assert.match(
+    section,
+    /\[data-lg-hold="on"\]\[data-lg-hold-kind="swell"\]:not\(#lg-glass\):not\(#lg-glass\):not\(#lg-glass\):not\(#lg-glass\) \{\s*--lg-veil-add: 0\.16;/,
+  );
+});
+
+test("a crowded swell floats over its neighbours, and drops back on release", async () => {
+  const { watchLiquidHold, HOLD_MS, RELEASE_MS } = await loadHold();
+  // The tab rows and the bar keep the big swell (owner, 2026-11-01): the
+  // held chip is raised (z-index) over the chips beside it, iOS's way.
+  const w = world({ width: 87, height: 44 });
+  const stop = watchLiquidHold(w.doc);
+  w.fire("pointerdown");
+  w.advance(HOLD_MS + 40);
+  assert.equal(w.target.getAttribute("data-lg-hold-raise"), "");
+  assert.ok(Number(w.target.style.getPropertyValue("--lg-hold-s")) > 1.28);
+  w.fire("pointerup", { timeStamp: 1000 });
+  w.advance(RELEASE_MS + 20);
+  assert.equal(w.target.getAttribute("data-lg-hold-raise"), null);
+  stop();
+  assert.match(section, /\[data-lg-hold-raise\]:is\(\[data-lg-hold="on"\], \[data-lg-hold="out"\]\)[^{]*\{\s*z-index: 4;/);
+});
+
+test("the compact launchers are lit when held, never scaled", async () => {
+  const { HOLD_LIGHT_ONLY } = await loadHold();
+  assert.ok(
+    HOLD_LIGHT_ONLY.includes(
+      ':is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) .side-panel-trigger',
+    ),
+  );
+});

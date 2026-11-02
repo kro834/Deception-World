@@ -113,6 +113,20 @@ export function watchLiquidTone(doc: Document = document) {
     }
   }
 
+  /* Art hit testing skips (pointer-events: none, as /world's poster under
+     its buttons is): a stack node's own media child over the point. */
+  function mediaUnder(node: Element, el: HTMLElement, x: number, y: number) {
+    for (const media of node.querySelectorAll(
+      ":scope > :is(img, video, canvas), :scope > picture > img",
+    )) {
+      if (media.contains(el)) continue;
+      const box = media.getBoundingClientRect();
+      if (x < box.left || x > box.right || y < box.top || y > box.bottom) continue;
+      if (view!.getComputedStyle(media).pointerEvents === "none") return media;
+    }
+    return null;
+  }
+
   /* The colour behind one point of the control, front to back. */
   function sampleAt(el: HTMLElement, x: number, y: number): Sample {
     let r = 0;
@@ -122,8 +136,9 @@ export function watchLiquidTone(doc: Document = document) {
     let busy = false;
     for (const node of doc.elementsFromPoint(x, y)) {
       if (node === el || el.contains(node) || node.closest(".lg-hold")) continue;
-      if (node instanceof view!.HTMLImageElement) {
-        const c = imageAt(node, x, y) ?? { r: 40, g: 44, b: 54 };
+      const hit = mediaUnder(node, el, x, y) ?? node;
+      if (hit instanceof view!.HTMLImageElement) {
+        const c = imageAt(hit, x, y) ?? { r: 40, g: 44, b: 54 };
         busy = true;
         r += c.r * left;
         g += c.g * left;
@@ -131,7 +146,7 @@ export function watchLiquidTone(doc: Document = document) {
         left = 0;
         break;
       }
-      if (node instanceof view!.HTMLVideoElement || node instanceof view!.HTMLCanvasElement) {
+      if (hit instanceof view!.HTMLVideoElement || hit instanceof view!.HTMLCanvasElement) {
         busy = true;
         r += 40 * left;
         g += 44 * left;

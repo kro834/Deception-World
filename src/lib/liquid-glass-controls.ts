@@ -65,6 +65,17 @@ export const GLASS_RAILS = [
   ".gallery-tour-filmstrip",
 ] as const;
 
+/**
+ * The pickup openers: each sits in a card its own scroll timeline reveals
+ * (opacity 0 until the card scrolls into view), and their dialogs stay
+ * closed until they are used. Off screen they are marked data-lg-offscreen
+ * and the sheet drops their backdrop-filter, so a hidden opener holds no
+ * backdrop layer; they get it back a little before they scroll in.
+ */
+export const GLASS_OFFSCREEN = [".form-pickup-plus"] as const;
+/** How far past the viewport an opener keeps its glass (the fade's head start). */
+export const OFFSCREEN_MARGIN = "25% 0px";
+
 const SELECTED =
   ':is([aria-pressed="true"], [aria-checked="true"], [aria-selected="true"], [aria-current="true"], [aria-current="page"], [aria-current="step"], .is-active)';
 const OPTION = ':is(button, a, [role="tab"], [role="radio"])';
@@ -83,6 +94,8 @@ const RAIL_HOST = "data-lg-rail-host";
 const RAIL_HOST_STATIC = "data-lg-rail-host-static";
 const RAIL_START = "data-lg-rail-start";
 const RAIL_END = "data-lg-rail-end";
+const OFFSCREEN = "data-lg-offscreen";
+const OPENERS = GLASS_OFFSCREEN.join(", ");
 const SEG_PROPS = [
   "--lg-seg-x",
   "--lg-seg-y",
@@ -384,12 +397,37 @@ export function watchLiquidControls(doc: Document = document) {
     rails.delete(rail.el);
   }
 
+  // The openers off screen (GLASS_OFFSCREEN): one observer for them all.
+  const openers = new Set<HTMLElement>();
+  const offscreen =
+    typeof view.IntersectionObserver === "function"
+      ? new view.IntersectionObserver(
+          (entries) => {
+            for (const entry of entries)
+              entry.target.toggleAttribute(OFFSCREEN, !entry.isIntersecting);
+          },
+          { rootMargin: OFFSCREEN_MARGIN },
+        )
+      : null;
+
   function scan() {
     scanTimer = 0;
     for (const [el, segment] of segments) if (!el.isConnected) detachSegment(segment);
     for (const [el, rail] of rails) if (!el.isConnected) detachRail(rail);
     for (const el of doc.querySelectorAll<HTMLElement>(GROUPS)) attachSegment(el);
     for (const el of doc.querySelectorAll<HTMLElement>(RAILS)) attachRail(el);
+    if (offscreen) {
+      for (const el of openers)
+        if (!el.isConnected) {
+          offscreen.unobserve(el);
+          openers.delete(el);
+        }
+      for (const el of doc.querySelectorAll<HTMLElement>(OPENERS))
+        if (!openers.has(el)) {
+          openers.add(el);
+          offscreen.observe(el);
+        }
+    }
   }
 
   // Pages mount and unmount groups as the router moves: a quiet rescan,
@@ -416,6 +454,9 @@ export function watchLiquidControls(doc: Document = document) {
 
   return () => {
     tree.disconnect();
+    offscreen?.disconnect();
+    for (const el of openers) el.removeAttribute(OFFSCREEN);
+    openers.clear();
     selection.disconnect();
     resize.disconnect();
     view.removeEventListener("resize", remeasure);

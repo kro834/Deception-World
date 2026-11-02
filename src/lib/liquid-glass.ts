@@ -18,7 +18,7 @@ export const LIQUID_LENS_ATTRIBUTE = "data-liquid-lens";
 /** The controls that wear the glass: the sheet's `lg:targets` list. */
 export const LIQUID_GLASS_TARGETS = [
   ".topbar nav a",
-  '.side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *)',
+  '.side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *)',
   ".manager-back",
   ".dream-back-link",
   ".rxs-footer-return",

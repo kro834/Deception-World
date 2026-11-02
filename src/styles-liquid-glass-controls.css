@@ -1480,6 +1480,15 @@ html[data-button-style="liquid"][data-world-effects="economy"] body [data-lg-seg
    where the press put them): the overlay carries the hold's light, so no
    custom property is animated on the control a second time. */
 
+/* Held, the label sits under the hold's light as well as the press's: the
+   veil deepens further, so a label reads 6:1 held over art (owner's QA,
+   2026-11-02). Not motion: under reduced motion too. */
+html[data-button-style="liquid"]
+  body
+  [data-lg-hold="on"][data-lg-hold-kind="swell"]:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-veil-add: 0.16;
+}
+
 /* A grown control rises over its neighbours (only where z-index already
    applies, so no box changes how it is placed). */
 html[data-button-style="liquid"]
@@ -1603,6 +1612,13 @@ html[data-button-style="liquid"] .lg-hold[data-kind="light"] .lg-hold-halo {
     calc(var(--lg-dx, 0) * 5px) calc(var(--lg-dy, 0) * 5px) 18px -4px rgb(var(--lg-hold-tint) / 0.2);
 }
 
+/* A label over art (the script's data-busy-label): the glow and the
+   highlight, which lie over the label, at half strength; the rim, the band
+   and the lift stay whole. Held, the label reads 6:1 over /world's poster. */
+html[data-button-style="liquid"] .lg-hold[data-busy-label] {
+  --lg-hold-glare: 0.5;
+}
+
 /* The glow and the highlight: both centred on their own box, carried to
    their place by translate. */
 html[data-button-style="liquid"] :is(.lg-hold-bloom, .lg-hold-spec) {
@@ -1634,7 +1650,7 @@ html[data-button-style="liquid"] .lg-hold-bloom {
 
 html[data-button-style="liquid"] .lg-hold[data-state="on"] .lg-hold-bloom {
   scale: 1;
-  opacity: 1;
+  opacity: var(--lg-hold-glare, 1);
   transition:
     translate 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
     scale 0.7s cubic-bezier(0.16, 1, 0.3, 1),
@@ -1731,7 +1747,7 @@ html[data-button-style="liquid"] .lg-hold-spec {
 
 html[data-button-style="liquid"] .lg-hold[data-state="on"] .lg-hold-spec {
   scale: 1 0.62;
-  opacity: 1;
+  opacity: var(--lg-hold-glare, 1);
   transition:
     translate 0.26s cubic-bezier(0.2, 0.8, 0.2, 1),
     scale 0.6s cubic-bezier(0.16, 1, 0.3, 1),

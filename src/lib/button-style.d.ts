@@ -2,6 +2,7 @@ export type ButtonStyle = "liquid" | "default";
 export const BUTTON_STYLE_STORAGE_KEY: string;
 export const BUTTON_STYLE_ATTRIBUTE: string;
 export const BUTTON_STYLE_SCRIPT: string;
+export const LIQUID_LENS_ATTRIBUTE: string;
 export function normalizeButtonStyle(value: string | null | undefined): ButtonStyle;
 export function readButtonStyle(): ButtonStyle;
 export function applyButtonStyle(style: ButtonStyle): void;

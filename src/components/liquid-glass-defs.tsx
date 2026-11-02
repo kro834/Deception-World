@@ -67,8 +67,9 @@ function Lens({ id, map, scale }: { id: string; map: string; scale: number }) {
 
 /**
  * The liquid glass's SVG lens filters (src/styles-liquid-glass.css), and its
- * pointer light. Renders nothing, and listens to nothing but the option's
- * attribute, while the buttons' liquid style is off.
+ * pointer light. While the buttons' liquid style is off the filters are an
+ * unreferenced, empty 0×0 <svg>, and nothing listens but the option's
+ * attribute.
  */
 export function LiquidGlassDefs() {
   const [on, setOn] = useState(false);
@@ -113,7 +114,11 @@ export function LiquidGlassDefs() {
     };
   }, [on]);
 
-  if (!on) return null;
+  // The filters are rendered from the server on, whatever the option: the
+  // head script (BUTTON_STYLE_SCRIPT) marks html[data-liquid-lens] before
+  // the first paint, and the lens they name is drawn from that paint, not
+  // once this has hydrated. Unreferenced (the option off), they draw
+  // nothing; the scripts above still wait for the option.
   return (
     <svg
       className="liquid-glass-defs"

@@ -163,7 +163,7 @@ html[data-button-style="liquid"]:not([data-liquid-lens]) {
 html[data-button-style="liquid"]
   :where(
     .topbar nav a,
-    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *),
     .manager-back,
     .dream-back-link,
     .rxs-footer-return,
@@ -205,7 +205,9 @@ html[data-button-style="liquid"]
   ) {
   --lg-tint: 122 232 255;
   --lg-tint-a: 0.08;
-  --lg-fill: rgb(12 18 26 / var(--lg-fill-alpha));
+  /* --lg-veil-add: a press deepens the veil from wherever it rests (clear,
+     tinted or busy), never below it. */
+  --lg-fill: rgb(12 18 26 / calc(var(--lg-fill-alpha) + var(--lg-veil-add, 0)));
   --lg-sheen: 0.05;
   --lg-glow: 0;
   --lg-rim: 0.7;
@@ -220,7 +222,7 @@ html[data-button-style="liquid"]
   :is(
     /* lg:targets */
     .topbar nav a,
-    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *),
     .manager-back,
     .dream-back-link,
     .rxs-footer-return,
@@ -350,7 +352,7 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
 html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
   body
   :is(
-    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *),
     .episode-controls button,
     .episode-pickup-plus,
     .side-panel-close,
@@ -394,7 +396,7 @@ html[data-button-style="liquid"]
 html[data-button-style="liquid"]
   body
   .side-panel-trigger:not(
-    :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+    :is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   --lg-tint-a: 0.22;
   color: rgb(240 249 252) !important;
@@ -520,8 +522,11 @@ html[data-button-style="liquid"]
      shadow ("lowers the opacity of its shadow when it is over a solid
      light background").
    --------------------------------------------------------------- */
+/* Busy: the labels over art (/world's poster under SHUFFLE POSTER and
+   自動切替 on a 375px phone) read 4.5:1 at rest at the art's brightest,
+   and 6:1 held under the hold's light (owner's QA, 2026-11-02). */
 html[data-button-style="liquid"] body [data-lg-busy]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  --lg-fill-alpha: 0.44;
+  --lg-fill-alpha: 0.56;
   --lg-shadow-a: 0.52;
 }
 
@@ -565,7 +570,20 @@ html[data-button-style="liquid"]
     html[data-button-style="liquid"][data-glass-variant="tinted"]
       body
       [data-lg-busy]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-      --lg-fill-alpha: 0.68;
+      --lg-fill-alpha: 0.76;
+    }
+
+    /* The bar chips' words sit on the glass's lift (the sheen and the tint
+       over the veil), which a deeper veil alone hardly darkened over the
+       dark bars: Tinted keeps less of that lift under its labels, so the
+       chip reads deeper. Without an id's weight, the hover, press and
+       light-backdrop states still set their own. */
+    html[data-button-style="liquid"][data-glass-variant="tinted"]
+      body
+      :is(.topbar nav a, .rxs-local-nav nav a, .command-deck-header-nav a) {
+      --lg-fill-alpha: 0.74;
+      --lg-sheen: 0.015;
+      --lg-tint-a: 0.035;
     }
 
     html[data-button-style="liquid"][data-glass-variant="tinted"]
@@ -574,6 +592,56 @@ html[data-button-style="liquid"]
       --lg-fill: rgb(250 251 253 / 0.84);
     }
   }
+}
+
+/* The variant row (src/components/button-style-toggle.tsx): rendered only
+   while the glass is on. Two pressed buttons in a fieldset, under their
+   switch; each is a 44px target. In the iPad two-column menu the grid
+   dropped the row into the other column, away from its switch: it takes the
+   whole row. */
+html[data-button-style="liquid"]
+  body
+  .side-panel-glass-variant:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+}
+
+html[data-button-style="liquid"]
+  body
+  .side-panel-glass-variant
+  > legend:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 0.8em;
+  opacity: 0.78;
+}
+
+html[data-button-style="liquid"]
+  body
+  .side-panel-glass-variant
+  > button:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+html[data-button-style="liquid"]
+  body
+  .side-panel-glass-variant
+  > button[aria-pressed="true"]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  background: #ffffff24;
 }
 
 /* ---------------------------------------------------------------
@@ -668,7 +736,7 @@ html[data-button-style="liquid"]
     :is(
       .topbar nav a,
       .side-panel-trigger:not(
-        :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+        :is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *
       ),
       .manager-back,
       .dream-back-link,
@@ -720,7 +788,7 @@ html[data-button-style="liquid"]
   body
   :is(
     .topbar nav a,
-    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *),
     .manager-back,
     .dream-back-link,
     .rxs-footer-return,
@@ -761,11 +829,13 @@ html[data-button-style="liquid"]
     #lg-glass
   ):not(#lg-glass) {
   /* The label sits under the finger: the light in the middle stays low
-     (6:1 for the label, probed), and gathers at the edge (the ring). */
+     (6:1 for the label, probed), and gathers at the edge (the ring). The
+     veil deepens by 0.06 from its rest (it was set to 0.36, which thinned
+     the busy and Tinted veils under a finger). */
   --lg-glow: 0.07;
   --lg-spread: 1;
   --lg-rim: 1;
-  --lg-fill-alpha: 0.36;
+  --lg-veil-add: 0.06;
 }
 
 /* ---------------------------------------------------------------
@@ -814,13 +884,13 @@ html[data-button-style="liquid"]
     --dw-press-scale: 1.06;
   }
 
-  /* Icons swell a little more; slabs a little less. */
+  /* Icons swell a little more; slabs a little less. The compact launchers
+     (the iPad's, the phone's in landscape) never scale: their chrome holds
+     the hit box still while it can fly into the menu. */
   html[data-button-style="liquid"]
     body
     :is(
-      .side-panel-trigger:not(
-        :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
-      ),
+      .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
       .episode-controls button,
       .episode-pickup-plus,
       .side-panel-close,
@@ -1011,7 +1081,7 @@ html[data-button-style="liquid"][data-world-effects="economy"]
   body
   :is(
     .topbar nav a,
-    .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+    .side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *),
     .manager-back,
     .dream-back-link,
     .rxs-footer-return,
@@ -1097,7 +1167,7 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
     body
     :is(
       .topbar nav a,
-      .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+      .side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *),
       .manager-back,
       .dream-back-link,
       .rxs-footer-return,
@@ -1167,7 +1237,7 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
     :is(
       .topbar nav a,
       .side-panel-trigger:not(
-        :is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *
+        :is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *
       ),
       .manager-back,
       .dream-back-link,
@@ -1584,6 +1654,17 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     brightness(1.08);
   backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(8px) saturate(1.7)
     brightness(1.08);
+}
+
+/* A pickup opener off screen (src/lib/liquid-glass-controls.ts,
+   GLASS_OFFSCREEN): its card is hidden until its scroll timeline reveals it,
+   and its dialog is closed. It keeps no backdrop layer, nor does its lens,
+   until it nears the viewport. */
+html[data-button-style="liquid"]
+  body
+  :is(.ios-slide-open[data-lg-offscreen], .ios-slide-open[data-lg-offscreen] .ios-slide-open-lens-body):not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 /* Swelling: the lens lifts past its size once and settles at 1.6. */

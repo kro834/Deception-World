@@ -166,21 +166,33 @@ test("motion, economy, forced colours and touch budgets", () => {
   // The iPad compact launcher and the phone-landscape trigger keep their own shells.
   const flat = css.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
   const all = flat.split(".side-panel-trigger").length - 1;
-  const guarded =
+  // The compact launchers wear the glass in their bar, never while they
+  // fly into the menu or stand in for the scrolled-away bar (those shells
+  // are styles-liquid-glass-surfaces.css's lgs:compact), and never scale.
+  const inBar =
+    flat.split(
+      '.side-panel-trigger:not(:is([data-ipad-menu="compact"]:is([data-ipad-menu-scrolled="true"], [data-ipad-menu-motion]), [data-phone-landscape-menu="true"]:is([data-phone-landscape-hidden="true"], [data-phone-landscape-motion])) *)',
+    ).length - 1;
+  const neverScaled =
     flat.split(
       '.side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *)',
     ).length - 1;
   assert.ok(all >= 6);
-  assert.equal(guarded, all);
+  assert.equal(neverScaled, 1);
+  assert.match(flat, /\.side-panel-trigger:not\(:is\(\[data-ipad-menu="compact"\], \[data-phone-landscape-menu="true"\]\) \*\),[^{]*\{ --dw-press-scale: 1\.1;/);
+  assert.equal(inBar + neverScaled, all);
 });
 
-test("the root links the sheet last and mounts the defs, which render nothing while off", () => {
+test("the root links the sheet last and mounts the defs, which run nothing while off", () => {
   assert.match(
     root,
     /\[\{ rel: "stylesheet", href: futureSpectrumCss \}\]\),\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassCss \},/,
   );
   assert.match(root, /<LiquidGlassDefs \/>/);
-  assert.match(defs, /if \(!on\) return null;/);
+  // The filters are static markup from the server on (the head script
+  // marks the lens before the first paint); every watcher waits for the option.
+  assert.doesNotMatch(defs, /if \(!on\) return null;/);
+  assert.match(defs, /if \(!on\) return;\s*const root = document\.documentElement;/);
   assert.match(defs, /attributeFilter: \[BUTTON_STYLE_ATTRIBUTE\]/);
 });
 

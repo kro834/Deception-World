@@ -75,7 +75,7 @@ test("the sheet adapts: busy deepens the veil and shadow, a light backdrop flips
   const busy = rules(glass).find(({ selector }) => /\[data-lg-busy\]/.test(selector));
   assert.ok(busy, "busy rule");
   assert.match(busy.selector, /^html\[data-button-style="liquid"\]/);
-  assert.match(busy.body, /--lg-fill-alpha: 0\.44;/);
+  assert.match(busy.body, /--lg-fill-alpha: 0\.56;/);
   assert.match(busy.body, /--lg-shadow-a: 0\.52;/);
   const light = rules(glass).find(({ selector }) => /^html[^{]*\[data-lg-tone="light"\]:not\(\.zeus-button\)/.test(selector));
   assert.ok(light, "light rule");
@@ -170,4 +170,22 @@ test("accessibility: frostier under reduced transparency, black and white with a
   assert.match(more, /--lg-fill: rgb\(255 255 255 \/ 0\.94\);\s*color: rgb\(0 0 0\) !important;/);
   for (const { selector } of rules(more.slice(0, more.indexOf("\n}\n") + 3)))
     if (selector && !selector.startsWith("@")) assert.match(selector, /html\[data-button-style="liquid"\]/, selector);
+});
+
+test("art that hit testing skips still counts as busy, and a press never thins a veil", () => {
+  // /world's poster is pointer-events: none under its buttons: the estimate
+  // looks for a stack node's own media child over the point.
+  assert.match(toneSource, /function mediaUnder\(node: Element, el: HTMLElement, x: number, y: number\)/);
+  assert.match(toneSource, /pointerEvents === "none"\) return media;/);
+  assert.match(toneSource, /const hit = mediaUnder\(node, el, x, y\) \?\? node;/);
+  // The press deepens the veil from its rest (busy, Tinted), by an addend.
+  assert.match(glass, /--lg-fill: rgb\(12 18 26 \/ calc\(var\(--lg-fill-alpha\) \+ var\(--lg-veil-add, 0\)\)\);/);
+  assert.match(glass, /--lg-rim: 1;\s*--lg-veil-add: 0\.06;\s*\}/);
+  assert.doesNotMatch(glass, /--lg-fill-alpha: 0\.36;/);
+  // Tinted: busy deeper still, and the bar chips keep less lift under their words.
+  assert.match(glass, /\[data-glass-variant="tinted"\]\s*body\s*\[data-lg-busy\][^{]*\{\s*--lg-fill-alpha: 0\.76;/);
+  assert.match(
+    glass,
+    /\[data-glass-variant="tinted"\]\s*body\s*:is\(\.topbar nav a, \.rxs-local-nav nav a, \.command-deck-header-nav a\) \{\s*--lg-fill-alpha: 0\.74;\s*--lg-sheen: 0\.015;\s*--lg-tint-a: 0\.035;/,
+  );
 });

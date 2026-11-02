@@ -208,3 +208,17 @@ test("the controls it covers", () => {
   assert.match(clean, /\.gallery-order select/);
   assert.match(clean, /\.liquid-swipe-tabs\s*> \.liquid-selection-lens\s*> \.liquid-selection-surface/);
 });
+
+test("a pickup opener off screen keeps no backdrop layer", () => {
+  const glass = read("src/styles-liquid-glass.css");
+  assert.match(script, /export const GLASS_OFFSCREEN = \[".form-pickup-plus"\] as const;/);
+  // One IntersectionObserver for every opener, a little past the viewport,
+  // found by the same quiet rescan as the groups; stopping undoes it.
+  assert.match(script, /new view\.IntersectionObserver\(\s*\(entries\) => \{\s*for \(const entry of entries\)\s*entry\.target\.toggleAttribute\(OFFSCREEN, !entry\.isIntersecting\);/);
+  assert.match(script, /\{ rootMargin: OFFSCREEN_MARGIN \}/);
+  assert.match(script, /offscreen\?\.disconnect\(\);\s*for \(const el of openers\) el\.removeAttribute\(OFFSCREEN\);/);
+  assert.match(
+    glass,
+    /:is\(\.ios-slide-open\[data-lg-offscreen\], \.ios-slide-open\[data-lg-offscreen\] \.ios-slide-open-lens-body\)[^{]*\{\s*-webkit-backdrop-filter: none !important;\s*backdrop-filter: none !important;/,
+  );
+});

@@ -227,3 +227,16 @@ test("the Zeus button steps off the P14 pills and readout", () => {
   assert.ok(avoid.includes('".rxs-p14-range-labels button"'));
   assert.ok(avoid.includes('".rxs-p14-comparator output"'));
 });
+
+test("Extreme's bar keeps its whole name at 681–760px (the iPad mini in portrait)", () => {
+  const css = read("src/styles-extreme-edition.css");
+  const narrow = css.slice(css.indexOf("@media (min-width: 681px) and (max-width: 760px)"));
+  assert.ok(narrow.length > 0);
+  // No ellipsis: the tag gives way, the name eases down and the links close up.
+  assert.doesNotMatch(css, /text-overflow: ellipsis/);
+  assert.match(narrow, /> header\.rxs-local-nav \.rxs-brand\.rxs-brand > span \{\s*display: none;/);
+  assert.match(narrow, /> header\.rxs-local-nav \.rxs-brand\.rxs-brand > b \{\s*font-size: min\(1em, 2\.1vw\);/);
+  assert.match(narrow, /\.exs-page\.exs-page > header\.rxs-local-nav\.rxs-local-nav nav \{\s*gap: 4px;/);
+  // Their weight outranks the editorial sheet's (0,5,4) bar rules.
+  assert.match(narrow, /\.exs-page\.exs-page > header\.rxs-local-nav\.rxs-local-nav nav a \{\s*padding-inline: 8px;/);
+});

@@ -140,21 +140,28 @@ html[data-mode="world"]:has(.exs-page) {
   .rxs-page.rxs-page.exs-page .rxs-local-nav-inner {
     grid-template-columns: minmax(0, 1fr) auto 48px;
   }
+}
 
-  /* The title ran on under the four links at 744px (it is 183px wide, the
-     brand's cell about 215px less its tag): let it shorten instead. */
-  .rxs-page.rxs-page.exs-page .rxs-brand {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    overflow: hidden;
+/* 681–760px (the iPad mini in portrait): the brand's EXTREME tag gives way
+   to the name, as it does from 761px (styles-extreme-editorial.css); the
+   name eases down with the width and the four links close up, so the whole
+   name stands beside them (it was cut to 「エ…」 at 744px). */
+@media (min-width: 681px) and (max-width: 760px) {
+  .rxs-page.rxs-page.exs-page.exs-page > header.rxs-local-nav .rxs-brand.rxs-brand > span {
+    display: none;
   }
 
-  .rxs-page.rxs-page.exs-page .rxs-brand b {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .rxs-page.rxs-page.exs-page.exs-page > header.rxs-local-nav .rxs-brand.rxs-brand > b {
+    font-size: min(1em, 2.1vw);
+  }
+
+  .rxs-page.rxs-page.exs-page.exs-page > header.rxs-local-nav.rxs-local-nav nav {
+    gap: 4px;
+  }
+
+  .rxs-page.rxs-page.exs-page.exs-page > header.rxs-local-nav.rxs-local-nav nav a {
+    padding-inline: 8px;
+    letter-spacing: 0.04em;
   }
 }
 

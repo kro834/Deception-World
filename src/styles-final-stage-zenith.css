@@ -1045,8 +1045,8 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     row-gap: 0;
     /* The two rows outgrow the bar's 64px floor, so its centring no longer
        spaces the brand row: the menu button sat flush on the glass's top
-       edge. The brand row keeps the 8px the one-row bar gave it. */
-    padding-top: 8px;
+       edge. The brand row keeps 6px of it (8px in the one-row bar). */
+    padding-top: 6px;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav {
@@ -1055,7 +1055,9 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
     display: flex;
     gap: 0;
     justify-content: stretch;
-    margin: -8px 0 0;
+    /* The strip starts under the brand row: pulled up 8px into it, its
+       links ran 7px under the 48px menu button (owner's QA, 2026-11-02). */
+    margin: 0;
     padding: 0 0 2px;
     /* No scroller: the three links fit down to 320px (nav 16–304), and an
        overflow box would clip each link's focus ring (2px, 3px outside the

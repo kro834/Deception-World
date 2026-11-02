@@ -4,10 +4,16 @@ export const BUTTON_STYLE_ATTRIBUTE = "data-button-style";
 export const GLASS_VARIANT_STORAGE_KEY = "dw-glass-variant";
 export const GLASS_VARIANT_ATTRIBUTE = "data-glass-variant";
 
+export const LIQUID_LENS_ATTRIBUTE = "data-liquid-lens";
+
 /** Applied while <head> is parsed (before first paint): only "liquid" sets the
     style attribute, and only "tinted" the glass's variant (Clear, the
-    default, sets nothing). */
-export const BUTTON_STYLE_SCRIPT = `(function(){try{var r=document.documentElement,s=window.localStorage;if(s.getItem(${JSON.stringify(BUTTON_STYLE_STORAGE_KEY)})==="liquid")r.setAttribute(${JSON.stringify(BUTTON_STYLE_ATTRIBUTE)},"liquid");else r.removeAttribute(${JSON.stringify(BUTTON_STYLE_ATTRIBUTE)});if(s.getItem(${JSON.stringify(GLASS_VARIANT_STORAGE_KEY)})==="tinted")r.setAttribute(${JSON.stringify(GLASS_VARIANT_ATTRIBUTE)},"tinted");else r.removeAttribute(${JSON.stringify(GLASS_VARIANT_ATTRIBUTE)});}catch(_){}})();`;
+    default, sets nothing). With "liquid" it also decides the lens
+    (html[data-liquid-lens]) with lensSupported()'s checks in
+    src/lib/liquid-glass.ts (a Chromium that draws url() in backdrop-filter)
+    and the defs' reduced-transparency check, so the material does not change
+    once the page has hydrated. Economy is the sheet's own guard. */
+export const BUTTON_STYLE_SCRIPT = `(function(){try{var r=document.documentElement,s=window.localStorage;if(s.getItem(${JSON.stringify(BUTTON_STYLE_STORAGE_KEY)})==="liquid"){r.setAttribute(${JSON.stringify(BUTTON_STYLE_ATTRIBUTE)},"liquid");try{var n=navigator.userAgentData,w=window;if(n&&Array.isArray(n.brands)&&w.CSS&&CSS.supports&&CSS.supports("backdrop-filter","url(#a) blur(1px)")&&!(w.matchMedia&&w.matchMedia("(prefers-reduced-transparency: reduce)").matches))r.setAttribute(${JSON.stringify(LIQUID_LENS_ATTRIBUTE)},"");}catch(_){}}else r.removeAttribute(${JSON.stringify(BUTTON_STYLE_ATTRIBUTE)});if(s.getItem(${JSON.stringify(GLASS_VARIANT_STORAGE_KEY)})==="tinted")r.setAttribute(${JSON.stringify(GLASS_VARIANT_ATTRIBUTE)},"tinted");else r.removeAttribute(${JSON.stringify(GLASS_VARIANT_ATTRIBUTE)});}catch(_){}})();`;
 
 /** @param {string | null | undefined} value */
 export function normalizeButtonStyle(value) {

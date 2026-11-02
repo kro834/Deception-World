@@ -335,3 +335,12 @@ test("delayed stepped runs end on the element's own style (WebKit stops them a s
     }
   }
 });
+
+test("the phone chapter strip starts under the brand row, clear of the 48px menu button", async () => {
+  const css = strip(await read(SHEET));
+  const phone = css.slice(css.indexOf("@media (max-width: 599.98px)"));
+  const nav = phone.match(/\.fst-page > \.rxs-local-nav nav \{([^}]*)\}/)[1];
+  assert.match(nav, /margin: 0;/);
+  assert.doesNotMatch(nav, /margin: -/);
+  assert.match(phone, /grid-template-rows: auto auto;\s*row-gap: 0;\s*padding-top: 6px;/);
+});
