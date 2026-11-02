@@ -110,6 +110,8 @@ test("the lens is Chromium-only and never in economy; blur and specular are the 
     /([^{}]+)\{[^{}]*url\(#dw-liquid-lens-(capsule|round)\)[^{}]*\}/g,
   )) {
     const selector = match[1].replace(/\/\*[\s\S]*?\*\//g, "");
+    // A keyframe (materialize's lens stages) only runs on the lens rules.
+    if (/^\s*(\d+%|from|to)\s*$/.test(selector)) continue;
     assert.match(selector, /\[data-liquid-lens\]/);
     assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/);
   }

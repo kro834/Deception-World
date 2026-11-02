@@ -109,27 +109,34 @@
   inherits: false;
 }
 
+/* The lens a materializing control wears for the moment (lg-materialize):
+   nothing, then the shape's lens bending less (--lg-lens-mat, the
+   curvature's twin filter), then its own. Unset, the lens rules fall back to
+   --lg-lens. A url() filter does not interpolate, so it steps. */
+@property --lg-lens-stage {
+  syntax: "*";
+  inherits: false;
+}
+
 html[data-button-style="liquid"] {
   /* Light from the upper left. -1..1 on each axis. */
   --lg-lx: -0.55;
   --lg-ly: -1;
   --lg-blur: 9px;
   --lg-sat: 1.75;
-  /* A damped spring with one visible overshoot: the gel settling. */
-  --lg-spring: linear(
-    0,
-    0.34 6%,
-    0.77 14%,
-    1.06 24%,
-    1.15 32%,
-    1.11 41%,
-    1.02 53%,
-    0.975 63%,
-    0.985 76%,
-    1.003 88%,
-    1
-  );
-  --lg-spring-ms: 560ms;
+  /* The springs (src/lib/liquid-glass-springs.ts, which the tests check
+     these against): SwiftUI's documented presets, mass 1, stiffness
+     (2π / 0.5 s)², damping ratio 1 − bounce, sampled to their settle.
+     --lg-spring is .bouncy (bounce 0.3: one 4.6% overshoot), the
+     interactive glass's release and swell; --lg-snappy is .snappy (bounce
+     0.15), the selection's glide; --lg-smooth is .smooth (no bounce), the
+     light and materials settling. */
+  --lg-spring: linear(0, 0.037 3.13%, 0.128 6.25%, 0.248 9.38%, 0.38 12.5%, 0.511 15.63%, 0.632 18.75%, 0.737 21.88%, 0.826 25%, 0.897 28.13%, 0.951 31.25%, 0.991 34.38%, 1.018 37.5%, 1.034 40.63%, 1.043 43.75%, 1.046 46.88%, 1.045 50%, 1.041 53.13%, 1.035 56.25%, 1.029 59.38%, 1.023 62.5%, 1.018 65.63%, 1.013 68.75%, 1.009 71.88%, 1.005 75%, 1.003 78.13%, 1.001 81.25%, 0.999 84.38%, 0.999 87.5%, 0.998 90.63%, 0.998 93.75%, 0.998 96.88%, 1);
+  --lg-spring-ms: 740ms;
+  --lg-snappy: linear(0, 0.028 3.13%, 0.098 6.25%, 0.19 9.38%, 0.292 12.5%, 0.396 15.63%, 0.495 18.75%, 0.585 21.88%, 0.666 25%, 0.736 28.13%, 0.795 31.25%, 0.844 34.38%, 0.884 37.5%, 0.916 40.63%, 0.941 43.75%, 0.96 46.88%, 0.975 50%, 0.986 53.13%, 0.994 56.25%, 0.999 59.38%, 1.003 62.5%, 1.005 65.63%, 1.006 68.75%, 1.006 71.88%, 1.006 75%, 1.006 78.13%, 1.005 81.25%, 1.005 84.38%, 1.004 87.5%, 1.003 90.63%, 1.003 93.75%, 1.002 96.88%, 1);
+  --lg-snappy-ms: 650ms;
+  --lg-smooth: linear(0, 0.03 3.13%, 0.101 6.25%, 0.192 9.38%, 0.289 12.5%, 0.386 15.63%, 0.476 18.75%, 0.557 21.88%, 0.63 25%, 0.692 28.13%, 0.746 31.25%, 0.791 34.38%, 0.829 37.5%, 0.861 40.63%, 0.887 43.75%, 0.909 46.88%, 0.926 50%, 0.941 53.13%, 0.953 56.25%, 0.962 59.38%, 0.97 62.5%, 0.976 65.63%, 0.981 68.75%, 0.985 71.88%, 0.988 75%, 0.99 78.13%, 0.992 81.25%, 0.994 84.38%, 0.995 87.5%, 0.996 90.63%, 0.997 93.75%, 0.998 96.88%, 1);
+  --lg-smooth-ms: 680ms;
   /* The regular variant is a clear glass that "blurs and adjusts the
      luminosity" of what is behind it (HIG Materials): a light blur, a lift,
      and only a thin dark veil (the luminosity range is compressed, not
@@ -137,6 +144,12 @@ html[data-button-style="liquid"] {
      a light backdrop flips the glass light (data-lg-tone,
      src/lib/liquid-glass-tone.ts). */
   --lg-fill-alpha: 0.3;
+}
+
+/* No lens (WebKit, Gecko): the rim's gathered light stands in a little more
+   for the bending the backdrop cannot show. */
+html[data-button-style="liquid"]:not([data-liquid-lens]) {
+  --lg-edge-glow: 0.11;
 }
 
 /* ---------------------------------------------------------------
@@ -281,6 +294,12 @@ html[data-button-style="liquid"]
        label in the middle keeps its contrast): nothing at rest (--lg-rim
        0.7), a bright inner ring at a press (1) */
     inset 0 0 14px -3px rgb(255 255 255 / calc(max(0, var(--lg-rim) - 0.7) * 0.9)),
+    /* the bezel's gathered light at rest: Apple's glass over dark content
+       lifts its last ~5pt inside the rim by about 8% white (HIG Materials
+       art, measured), the light the convex edge concentrates. Engines with
+       no lens get a little more (--lg-edge-glow), standing in for the bent
+       backdrop. Scaled by --lg-mat, so it materializes with the glass. */
+    inset 0 0 9px -2px rgb(255 255 255 / calc(var(--lg-edge-glow, 0.07) * var(--lg-mat))),
     /* the shadow: soft and low, deeper over busy content (--lg-shadow-a,
        src/lib/liquid-glass-tone.ts) */ 0 0.5px 1px rgb(0 0 0 / calc(var(--lg-shadow-a) * 0.6)),
     0 6px 18px -6px rgb(0 0 0 / var(--lg-shadow-a)) !important;
@@ -324,8 +343,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     .rxe-hero-secondary,
     .exo-door
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
-  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: var(--lg-lens-stage, var(--lg-lens, url(#dw-liquid-lens-capsule))) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  backdrop-filter: var(--lg-lens-stage, var(--lg-lens, url(#dw-liquid-lens-capsule))) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
 }
 
 html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
@@ -341,8 +360,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     .quick-search-close,
     .zeus-button:not([data-dragging="true"])
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
-  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: var(--lg-lens-stage, var(--lg-lens, url(#dw-liquid-lens-round))) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  backdrop-filter: var(--lg-lens-stage, var(--lg-lens, url(#dw-liquid-lens-round))) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
 }
 
 /* ---------------------------------------------------------------
@@ -508,6 +527,45 @@ html[data-button-style="liquid"]
 }
 
 /* ---------------------------------------------------------------
+   Tinted (the side menu's ガラスの見え方, html[data-glass-variant]): iOS
+   26.1's second look for the same glass, "greater opacity and contrast",
+   more frosted and still glass (Clear, the default, is the look above).
+   A deeper veil, more frost and less saturation, on every state; the
+   accessibility settings below still win (their media hold these off).
+   --------------------------------------------------------------- */
+@media not (prefers-reduced-transparency: reduce) {
+  @media not (prefers-contrast: more) {
+    html[data-button-style="liquid"][data-glass-variant="tinted"] {
+      --lg-fill-alpha: 0.58;
+      --lg-sat: 1.35;
+    }
+
+    /* Touch screens keep a smaller blur (they pay for every sample). */
+    html[data-button-style="liquid"][data-glass-variant="tinted"]:not([data-world-effects="economy"]) {
+      --lg-blur: 13px;
+    }
+
+    @media (pointer: coarse) {
+      html[data-button-style="liquid"][data-glass-variant="tinted"]:not([data-world-effects="economy"]) {
+        --lg-blur: 9px;
+      }
+    }
+
+    html[data-button-style="liquid"][data-glass-variant="tinted"]
+      body
+      [data-lg-busy]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+      --lg-fill-alpha: 0.68;
+    }
+
+    html[data-button-style="liquid"][data-glass-variant="tinted"]
+      body
+      [data-lg-tone="light"]:not(.zeus-button):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+      --lg-fill: rgb(250 251 253 / 0.84);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
    Materialize: glass that appears with a dialog or the menu "lens[es] in"
    rather than fading (WWDC25: "Liquid Glass objects materialize in and out
    by gradually modulating the light bending and lensing"; the SwiftUI
@@ -520,10 +578,22 @@ html[data-button-style="liquid"]
     opacity: 0;
     scale: 0.78;
     --lg-mat: 0;
+    --lg-rim: 0;
+    --lg-lens-stage: saturate(1);
+  }
+
+  /* The bending comes in in two steps (a url() filter cannot ease): the
+     shape's lens at MATERIALIZE_STRENGTH, then its own. */
+  30% {
+    --lg-lens-stage: var(--lg-lens-mat, url(#dw-liquid-lens-round-m));
   }
 
   45% {
     opacity: 1;
+  }
+
+  60% {
+    --lg-lens-stage: var(--lg-lens, url(#dw-liquid-lens-round));
   }
 
   100% {
@@ -549,7 +619,7 @@ html[data-button-style="liquid"]
       .dream-dossier-close,
       .quick-search-close
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    animation: lg-materialize 0.62s var(--lg-spring) 0.08s backwards;
+    animation: lg-materialize var(--lg-spring-ms) var(--lg-spring) 0.08s backwards;
   }
 }
 
@@ -804,11 +874,6 @@ html[data-button-style="liquid"]
       var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state),
       var(--dw-dur-state), var(--dw-dur-settle), var(--dw-dur-settle), var(--dw-dur-settle),
       var(--dw-dur-settle), var(--dw-dur-settle);
-    transition-timing-function:
-      cubic-bezier(0.34, 1.56, 0.64, 1), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
-      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
-      var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
-      var(--dw-ease-out);
     transition-timing-function:
       var(--lg-spring), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
@@ -1439,6 +1504,22 @@ html[data-button-style="liquid"]
     translate 0.44s var(--slide-lens-ease),
     scale 0.18s cubic-bezier(0.2, 0.9, 0.3, 1),
     visibility 0s;
+}
+
+/* Let go, the lens keeps the stretch its last travel gave it and gives it
+   back on the gel spring, a wobble past round and back ("thumbs preserve
+   momentum and stretch when they are moved", WWDC25 "Build a UIKit app
+   with the new design"). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]
+    body
+    .ios-slide-open[data-lens="settle"]
+    .ios-slide-open-lens:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition:
+      translate 0.44s var(--slide-lens-ease),
+      scale var(--lg-spring-ms) var(--lg-spring),
+      visibility 0s;
+  }
 }
 
 /* While the finger carries it, the lens is exactly under the finger. */
