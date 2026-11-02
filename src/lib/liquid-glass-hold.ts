@@ -46,6 +46,16 @@
 // (event.timeStamp) under HOLD_MS after its pointerdown puts any light that
 // did start away at once, however late the browser delivered it.
 //
+// A hold is timed from the finger, not from the script (owner, 2026-11-02:
+// on /world the hold started up to about 1.4 s late in the first seconds
+// after load, while the page's first layout held the main thread): the
+// timer counts HOLD_MS from the pointerdown's event.timeStamp, so a
+// pointerdown handed over late arms what is left, and a timer that itself
+// ran late (HOLD_LATE_MS past its time, the thread was blocked) starts the
+// hold at once rather than waiting another frame, the finger being still
+// down (its pointerup has not arrived). A tap stays a tap: the pointerup
+// stamped under HOLD_MS still puts the light away before it is painted.
+//
 // Budgets: nothing is read on a tap. A hold reads its geometry once (one
 // getBoundingClientRect on the control, one on each clipping ancestor and
 // the overlay, and their computed style); a move while held writes two
@@ -56,6 +66,8 @@ import { LIQUID_GLASS_TARGETS } from "./liquid-glass";
 
 /** How long a press rests before it counts as a hold (the slider lens's 200 ms). */
 export const HOLD_MS = 200;
+/** A hold timer this late ran behind a blocked thread: the hold starts at once. */
+export const HOLD_LATE_MS = 48;
 /** A finger that travels further before the hold is scrolling, not holding. */
 export const HOLD_SLOP_PX = 10;
 /** How long the release's spring and fade run before the overlay is put away. */
@@ -320,6 +332,7 @@ export function watchLiquidHold(doc: Document = document) {
   let releasing: { target: HTMLElement; timer: number } | null = null;
   let frame = 0;
   let armFrame = 0;
+  let armLate = 0;
   /* The lifted copy and its pseudo-elements' rules (at most one). */
   let lifted: { copy: HTMLElement; sheet: HTMLStyleElement } | null = null;
 
@@ -461,17 +474,41 @@ export function watchLiquidHold(doc: Document = document) {
     p.moved = watch;
   };
 
+  /* How long ago the finger came down, by the event's own clock (0 when
+     the clock is missing or disagrees: then the timer alone counts). */
+  const since = (stamp: number) => {
+    const now = view.performance?.now?.();
+    if (!(stamp > 0) || typeof now !== "number") return 0;
+    const waited = now - stamp;
+    return waited > 0 && waited < 60_000 ? waited : 0;
+  };
+
   /* The timer only arms the hold: it starts on the next frame, after any
-     input the browser had queued behind it (a late pointerup ends it). */
+     input the browser had queued behind it (a late pointerup ends it), or
+     HOLD_LATE_MS on if no frame comes (a long render holds the frames back;
+     the queued input still runs first). A timer that ran late (the thread
+     was blocked) starts it at once: the finger is still down, and a frame
+     more would only add to the wait. */
+  const unarm = () => {
+    if (armFrame) view.cancelAnimationFrame(armFrame);
+    if (armLate) view.clearTimeout(armLate);
+    armFrame = 0;
+    armLate = 0;
+  };
   const arm = () => {
     if (!press) return;
     press.timer = 0;
-    if (armFrame) view.cancelAnimationFrame(armFrame);
+    unarm();
+    if (since(press.stamp) >= HOLD_MS + HOLD_LATE_MS) {
+      startHold();
+      return;
+    }
     armFrame = view.requestAnimationFrame(startHold);
+    armLate = view.setTimeout(startHold, HOLD_LATE_MS);
   };
 
   const startHold = () => {
-    armFrame = 0;
+    unarm();
     const p = press;
     if (!p) return;
     const { target } = p;
@@ -680,10 +717,7 @@ export function watchLiquidHold(doc: Document = document) {
     press = null;
     if (!p) return;
     if (p.timer) view.clearTimeout(p.timer);
-    if (armFrame) {
-      view.cancelAnimationFrame(armFrame);
-      armFrame = 0;
-    }
+    unarm();
     drop(p);
     if (!p.held) return;
     if (frame) {
@@ -716,6 +750,7 @@ export function watchLiquidHold(doc: Document = document) {
       : target.matches(SWITCHES)
         ? "switch"
         : "swell";
+    const stamp = event.timeStamp || 0;
     press = {
       target,
       kind,
@@ -723,8 +758,10 @@ export function watchLiquidHold(doc: Document = document) {
       pointerType: event.pointerType,
       x: event.clientX,
       y: event.clientY,
-      stamp: event.timeStamp || 0,
-      timer: view.setTimeout(arm, HOLD_MS),
+      stamp,
+      // What is left of HOLD_MS since the finger came down (a pointerdown
+      // handed over late has already waited part of it, or all of it).
+      timer: view.setTimeout(arm, Math.max(0, HOLD_MS - since(stamp))),
       held: false,
       carried: null,
       moved: null,
@@ -795,7 +832,7 @@ export function watchLiquidHold(doc: Document = document) {
 
   return () => {
     if (press?.timer) view.clearTimeout(press.timer);
-    if (armFrame) view.cancelAnimationFrame(armFrame);
+    unarm();
     if (press) {
       drop(press);
       clearTarget(press.target);

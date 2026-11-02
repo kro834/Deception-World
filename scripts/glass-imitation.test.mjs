@@ -53,7 +53,7 @@ test("the backdrop estimate: luminance, hysteresis and parsing", async () => {
   assert.equal(lib.parseRgb("transparent"), null);
 });
 
-test("the backdrop estimate is cheap: once per control, again only when a pinned bar's page rests", () => {
+test("the backdrop estimate is cheap: once per control in view, again only when a pinned bar's page rests", () => {
   // Started with the option, undone with it.
   assert.match(defs, /const stopTone = watchLiquidTone\(document\);/);
   assert.match(defs, /stopTone\(\);/);
@@ -64,8 +64,10 @@ test("the backdrop estimate is cheap: once per control, again only when a pinned
   const scrolled = toneSource.slice(toneSource.indexOf("const scrolled = "), toneSource.indexOf("const loaded = "));
   assert.doesNotMatch(scrolled, /getBoundingClientRect|getComputedStyle|elementsFromPoint/);
   assert.match(scrolled, /setTimeout\(rest, SCROLL_REST_MS\)/);
-  // Only the pinned (fixed or sticky) controls look again after a scroll.
-  assert.match(toneSource, /if \(entry\.pinned\) enqueue\(el\);/);
+  // Only the pinned (fixed or sticky) controls on screen look again after a
+  // scroll, with those just coming into view.
+  assert.match(toneSource, /if \(entry\.pinned && entry\.near\) enqueue\(el\);/);
+  assert.match(toneSource, /for \(const el of nearing\) enqueue\(el\);/);
   // Every attribute it wrote is removed when the option goes off.
   assert.match(toneSource, /el\.removeAttribute\(TONE_ATTRIBUTE\);\s*el\.removeAttribute\(BUSY_ATTRIBUTE\);/);
   assert.match(toneSource, /for \(const el of \[\.\.\.tracked\.keys\(\)\]\) detach\(el\);/);
@@ -188,4 +190,410 @@ test("art that hit testing skips still counts as busy, and a press never thins a
     glass,
     /\[data-glass-variant="tinted"\]\s*body\s*:is\(\.topbar nav a, \.rxs-local-nav nav a, \.command-deck-header-nav a\) \{\s*--lg-fill-alpha: 0\.74;\s*--lg-sheen: 0\.015;\s*--lg-tint-a: 0\.035;/,
   );
+});
+
+/* A small page for the backdrop estimate: one shared IntersectionObserver,
+   timers and frames on a clock, controls with boxes in page coordinates
+   over an <img> whose colour the test sets. */
+function tonePage() {
+  let now = 0;
+  let scrollY = 0;
+  const timers = new Map();
+  let nextId = 1;
+  const reads = new Map();
+  const listeners = new Map();
+  // A write dirties style; the next layout read pays a whole-page pass.
+  const style = { dirty: false, passes: 0 };
+  class HTMLImageElement {}
+  class HTMLVideoElement {}
+  class HTMLCanvasElement {}
+  const ios = [];
+  const mos = [];
+  const observed = new Set();
+  class IntersectionObserver {
+    constructor(fn, options) {
+      this.fn = fn;
+      this.options = options;
+      this.disconnected = false;
+      ios.push(this);
+    }
+    observe(el) {
+      observed.add(el);
+    }
+    unobserve(el) {
+      observed.delete(el);
+    }
+    disconnect() {
+      this.disconnected = true;
+      observed.clear();
+    }
+  }
+  class MutationObserver {
+    constructor(fn) {
+      this.fn = fn;
+      mos.push(this);
+    }
+    observe(_node, options) {
+      this.options = options;
+    }
+    disconnect() {
+      this.disconnected = true;
+    }
+  }
+  const view = {
+    innerWidth: 400,
+    innerHeight: 800,
+    HTMLImageElement,
+    HTMLVideoElement,
+    HTMLCanvasElement,
+    IntersectionObserver,
+    MutationObserver,
+    setTimeout: (fn, ms) => {
+      const id = nextId++;
+      timers.set(id, { at: now + ms, fn });
+      return id;
+    },
+    clearTimeout: (id) => timers.delete(id),
+    requestAnimationFrame: (fn) => view.setTimeout(fn, 16),
+    cancelAnimationFrame: (id) => timers.delete(id),
+    getComputedStyle: () => ({
+      position: "static",
+      pointerEvents: "auto",
+      backgroundImage: "none",
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      opacity: "1",
+    }),
+    addEventListener: (type, fn) => listeners.set(type, fn),
+    removeEventListener: (type) => listeners.delete(type),
+  };
+  const attrsOf = () => {
+    const attrs = new Map();
+    return {
+      attrs,
+      setAttribute: (k, v) => {
+        style.dirty = true;
+        attrs.set(k, String(v));
+      },
+      getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
+      hasAttribute: (k) => attrs.has(k),
+      removeAttribute: (k) => {
+        style.dirty = true;
+        attrs.delete(k);
+      },
+      toggleAttribute: (k, on) => {
+        style.dirty = true;
+        if (on) attrs.set(k, "");
+        else attrs.delete(k);
+      },
+    };
+  };
+  // The art: a picture filling the page's width from `top`, `height` tall.
+  const art = Object.assign(new HTMLImageElement(), {
+    localName: "img",
+    nodeType: 1,
+    complete: true,
+    naturalWidth: 400,
+    naturalHeight: 400,
+    colour: [20, 20, 24],
+    top: 0,
+    height: 0,
+    closest: () => null,
+    querySelectorAll: () => [],
+    getBoundingClientRect: () => ({
+      left: 0,
+      right: 400,
+      top: art.top - scrollY,
+      bottom: art.top + art.height - scrollY,
+      width: 400,
+      height: art.height,
+    }),
+  });
+  const control = (name, pageTop) => {
+    const el = {
+      name,
+      pageTop,
+      isConnected: true,
+      parentElement: null,
+      ...attrsOf(),
+      contains: (node) => node === el,
+      closest: () => null,
+      querySelectorAll: () => [],
+      getBoundingClientRect: () => {
+        if (style.dirty) {
+          style.passes += 1;
+          style.dirty = false;
+        }
+        reads.set(name, (reads.get(name) ?? 0) + 1);
+        const top = el.pageTop - scrollY;
+        return { left: 20, right: 140, top, bottom: top + 44, width: 120, height: 44 };
+      },
+    };
+    return el;
+  };
+  const controls = [];
+  const body = { localName: "body", closest: () => null, querySelectorAll: () => [] };
+  const doc = {
+    defaultView: view,
+    body,
+    querySelectorAll: () => controls,
+    createElement: () => ({
+      getContext: () => ({
+        clearRect: () => {},
+        drawImage: () => {},
+        getImageData: () => ({ data: [...art.colour, 255] }),
+      }),
+    }),
+    elementsFromPoint: (_x, y) => {
+      const pageY = y + scrollY;
+      const under = pageY >= art.top && pageY <= art.top + art.height ? [art] : [];
+      const over = controls.filter((c) => pageY >= c.pageTop && pageY <= c.pageTop + 44);
+      return [...over, ...under, body];
+    },
+    addEventListener: (type, fn) => listeners.set("doc:" + type, fn),
+    removeEventListener: (type) => listeners.delete("doc:" + type),
+  };
+  body.ownerDocument = doc;
+  const advance = (ms) => {
+    const end = now + ms;
+    for (;;) {
+      const due = [...timers].filter(([, t]) => t.at <= end).sort((a, b) => a[1].at - b[1].at)[0];
+      if (!due) break;
+      timers.delete(due[0]);
+      now = due[1].at;
+      due[1].fn();
+    }
+    now = end;
+  };
+  // The browser's IntersectionObserver: which controls are within the
+  // screen grown by the margin (the test passes the margin's reach).
+  const intersect = (reach) => {
+    const entries = [...observed].map((el) => {
+      const top = el.pageTop - scrollY;
+      return { target: el, isIntersecting: top + 44 >= -reach && top <= view.innerHeight + reach };
+    });
+    ios[0].fn(entries);
+  };
+  return {
+    view,
+    doc,
+    art,
+    controls,
+    control,
+    reads,
+    style,
+    listeners,
+    timers,
+    advance,
+    intersect,
+    io: () => ios[0],
+    mo: () => mos[0],
+    observed,
+    scrollTo: (y) => {
+      scrollY = y;
+    },
+  };
+}
+
+test("a control below the fold is read as it comes into view, and is busy over art", async () => {
+  const lib = await loadTone();
+  const page = tonePage();
+  // A chip on the art 2000px down (the screen is 800px tall), and one on screen.
+  page.art.top = 1800;
+  page.art.height = 600;
+  const below = page.control("below", 2100);
+  const top = page.control("top", 100);
+  page.controls.push(below, top);
+  const stop = lib.watchLiquidTone(page.doc);
+  assert.equal(page.observed.size, 0, "the first look waits for the page");
+  page.advance(1);
+  // One shared observer, reaching ahead of the screen.
+  assert.equal(page.observed.size, 2);
+  assert.match(page.io().options.rootMargin, /^\d+% 0px$/);
+  const reach = 0.4 * 800;
+  page.intersect(reach);
+  page.advance(100);
+  assert.equal(top.hasAttribute("data-lg-busy"), false);
+  assert.equal(below.hasAttribute("data-lg-busy"), false, "off screen: not read");
+  assert.equal(page.reads.get("below") ?? 0, 0, "far below: not even measured");
+
+  // The finger scrolls: the chip nears the screen (within the margin) …
+  page.scrollTo(1100);
+  page.intersect(reach);
+  page.advance(100);
+  assert.equal(below.hasAttribute("data-lg-busy"), false, "near but not on screen yet");
+  // … then comes on. The scroll handler reads nothing; its timer does.
+  page.scrollTo(1700);
+  const before = page.reads.get("below") ?? 0;
+  page.listeners.get("scroll")();
+  assert.equal(page.reads.get("below") ?? 0, before, "no layout read in the scroll handler");
+  page.advance(lib.SCROLL_PEEK_MS + 20);
+  assert.equal(below.hasAttribute("data-lg-busy"), true, "busy over the art once on screen");
+
+  // Read once: later scrolls do not read it again while it stays in view.
+  const once = page.reads.get("below");
+  page.listeners.get("scroll")();
+  page.advance(lib.SCROLL_REST_MS + 40);
+  assert.equal(page.reads.get("below"), once);
+
+  // It leaves and comes back: read again (the page may have changed).
+  page.scrollTo(0);
+  page.intersect(reach);
+  page.art.colour = [250, 250, 250];
+  page.scrollTo(1700);
+  page.intersect(reach);
+  page.advance(40);
+  assert.equal(below.getAttribute("data-lg-tone"), "light");
+
+  stop();
+  assert.equal(page.io().disconnected, true, "the observer goes with the option");
+  assert.equal(below.hasAttribute("data-lg-busy"), false);
+  assert.equal(below.getAttribute("data-lg-tone"), null);
+  assert.equal(page.timers.size, 0, "no timer left behind");
+  assert.equal(page.listeners.size, 0, "no listener left behind");
+});
+
+test("the poster switching re-reads the controls over it, and only those", async () => {
+  const lib = await loadTone();
+  const page = tonePage();
+  page.art.top = 0;
+  page.art.height = 500;
+  page.art.colour = [10, 12, 18];
+  const onArt = page.control("onArt", 400);
+  const plain = page.control("plain", 600);
+  page.controls.push(onArt, plain);
+  const stop = lib.watchLiquidTone(page.doc);
+  page.advance(1);
+  page.intersect(320);
+  page.advance(100);
+  assert.equal(onArt.hasAttribute("data-lg-busy"), true);
+  assert.equal(onArt.getAttribute("data-lg-tone"), null, "dark poster: dark glass");
+  assert.equal(plain.hasAttribute("data-lg-busy"), false);
+  // Pictures and their sources are watched as well as the tree.
+  assert.deepEqual(page.mo().options.attributeFilter, ["src", "srcset"]);
+
+  // The poster switches to a light one: React swaps the <img>.
+  page.art.colour = [245, 240, 236];
+  const plainReads = page.reads.get("plain");
+  page.mo().fn([{ type: "childList", addedNodes: [page.art], removedNodes: [] }]);
+  page.advance(lib.ART_SETTLE_MS - 10);
+  assert.equal(onArt.getAttribute("data-lg-tone"), null, "waits for the art to settle");
+  page.advance(40);
+  assert.equal(onArt.getAttribute("data-lg-tone"), "light", "re-read after the switch");
+  assert.equal(page.reads.get("plain"), plainReads, "a control over no art is not re-read");
+
+  // A source swapped in place, and a late load, count too.
+  page.art.colour = [8, 8, 10];
+  page.mo().fn([{ type: "attributes", attributeName: "src", addedNodes: [], removedNodes: [] }]);
+  page.advance(lib.ART_SETTLE_MS + 40);
+  assert.equal(onArt.getAttribute("data-lg-tone"), null);
+  page.art.colour = [245, 240, 236];
+  page.listeners.get("doc:load")({ target: page.art });
+  page.advance(lib.ART_SETTLE_MS + 40);
+  assert.equal(onArt.getAttribute("data-lg-tone"), "light");
+  stop();
+  assert.equal(page.timers.size, 0);
+});
+
+test("the estimate stays cheap: no per-frame work, no reads in handlers", () => {
+  // One observer for every control, created once.
+  assert.equal(toneSource.match(/new view\.IntersectionObserver\(/g).length, 1);
+  assert.match(toneSource, /export const NEAR_MARGIN = "40% 0px";/);
+  // The observer's callback, the scroll handler and the art handler arm work; they read nothing.
+  const near = toneSource.slice(toneSource.indexOf("const near ="), toneSource.indexOf("function detach("));
+  const handlers = toneSource.slice(toneSource.indexOf("const artChanged = "), toneSource.indexOf("const options = "));
+  for (const part of [near, handlers])
+    assert.doesNotMatch(part, /getBoundingClientRect|getComputedStyle|elementsFromPoint/);
+  // No frame loop: an idle moment (or a task after the next frame, where
+  // there is no requestIdleCallback) drains a queue, a few at a time.
+  assert.equal(toneSource.match(/requestAnimationFrame\(/g).length, 1);
+  assert.match(toneSource, /if \(queue\.size\) schedule\(\);/);
+  assert.match(toneSource, /idleId = view!\.requestIdleCallback\(drain, \{ timeout: IDLE_TIMEOUT_MS \}\);/);
+  assert.match(toneSource, /post = view!\.setTimeout\(drain, 0\);/);
+  assert.match(toneSource, /if \(idleId\) view\.cancelIdleCallback\(idleId\);/);
+  // Everything goes with the option.
+  assert.match(toneSource, /near\?\.disconnect\(\);/);
+  assert.match(toneSource, /if \(peekTimer\) view\.clearTimeout\(peekTimer\);/);
+  assert.match(toneSource, /if \(artTimer\) view\.clearTimeout\(artTimer\);/);
+});
+
+test("a frame's estimates read together, then write together: one style pass, not one per control", async () => {
+  const lib = await loadTone();
+  const page = tonePage();
+  page.art.top = 0;
+  page.art.height = 800;
+  page.art.colour = [245, 240, 236];
+  for (let i = 0; i < 5; i++) page.controls.push(page.control(`c${i}`, 60 + i * 120));
+  const stop = lib.watchLiquidTone(page.doc);
+  page.advance(1);
+  page.intersect(320);
+  page.style.passes = 0;
+  page.style.dirty = true; // the page's own pending style
+  page.advance(20);
+  for (const el of page.controls) {
+    assert.equal(el.hasAttribute("data-lg-busy"), true);
+    assert.equal(el.getAttribute("data-lg-tone"), "light");
+  }
+  assert.equal(page.style.passes, 1, "one pass for the frame's five controls");
+  // Unchanged results write nothing (no style invalidated by a re-read).
+  page.style.dirty = false;
+  page.mo().fn([{ type: "childList", addedNodes: [page.art], removedNodes: [] }]);
+  page.advance(lib.ART_SETTLE_MS + 40);
+  assert.equal(page.style.dirty, false, "a re-read with the same answer writes nothing");
+  stop();
+});
+
+test("the controls' glass batches its measuring: reads, then writes, per frame and per scan", () => {
+  const controls = read("src/lib/liquid-glass-controls.ts");
+  const flush = controls.slice(controls.indexOf("function flush() {"), controls.indexOf("function markCurrent("));
+  const order = [
+    "pick.option = selectedOption(pick.segment.el)",
+    "markCurrent(pick.segment, pick.option)",
+    "pick.at = readSegment(",
+    "railList.map(readRail)",
+    "pick.probe?.remove()",
+    "writeSegment(pick.segment, pick.option, pick.at)",
+    "writeRail(rail, railBoxes[i])",
+  ].map((needle) => flush.indexOf(needle));
+  assert.ok(order.every((at) => at > 0), String(order));
+  assert.deepEqual([...order].sort((a, b) => a - b), order, "read, write, read, write");
+  // The read helpers write nothing; the write helpers read no layout.
+  const body = (name, next) => controls.slice(controls.indexOf(`function ${name}(`), controls.indexOf(`function ${next}(`));
+  for (const reader of [body("readSegment", "writeSegment"), body("readRail", "writeRail")])
+    assert.doesNotMatch(reader, /setAttribute|setProperty|removeAttribute|toggleAttribute|appendChild/);
+  for (const writer of [body("writeSegment", "inspectSegment"), body("writeRail", "watchEdges")])
+    assert.doesNotMatch(writer, /getBoundingClientRect|getComputedStyle|offset(Left|Top|Width|Height)|scrollWidth|clientWidth/);
+  // A scan reads every new group and rail before it writes any.
+  const scan = controls.slice(controls.indexOf("function scan() {"), controls.indexOf("const tree = new view.MutationObserver"));
+  assert.ok(scan.indexOf("map(inspectRail)") < scan.indexOf("attachSegment(found)"));
+  assert.ok(scan.indexOf("attachRail(found)") < scan.indexOf("watchEdges(rail)"));
+  // A group taken on is measured with the next frame's batch, not on the spot.
+  assert.match(body("attachSegment", "settle"), /queue\(el\);/);
+  assert.doesNotMatch(body("attachSegment", "settle"), /getBoundingClientRect|readSegment/);
+});
+
+test("with requestIdleCallback the estimate runs in idle time, and stops with the option", async () => {
+  const lib = await loadTone();
+  const page = tonePage();
+  const idle = [];
+  page.view.requestIdleCallback = (fn, options) => {
+    idle.push(options);
+    return page.view.setTimeout(() => fn({ didTimeout: false, timeRemaining: () => 8 }), 30);
+  };
+  page.view.cancelIdleCallback = (id) => page.view.clearTimeout(id);
+  page.art.top = 0;
+  page.art.height = 800;
+  const chip = page.control("chip", 300);
+  page.controls.push(chip);
+  const stop = lib.watchLiquidTone(page.doc);
+  assert.equal(idle.length, 1, "the first look is an idle callback");
+  assert.equal(idle[0].timeout, lib.IDLE_TIMEOUT_MS);
+  page.advance(31);
+  page.intersect(320);
+  assert.equal(chip.hasAttribute("data-lg-busy"), false, "not read in the observer's callback");
+  page.advance(31);
+  assert.equal(chip.hasAttribute("data-lg-busy"), true);
+  page.mo().fn([{ type: "childList", addedNodes: [page.art], removedNodes: [] }]);
+  page.advance(lib.ART_SETTLE_MS + 1);
+  stop();
+  assert.equal(page.timers.size, 0, "the pending idle read is cancelled");
 });

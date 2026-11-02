@@ -12,9 +12,22 @@
 //   painted background colours composited front to back, and the first
 //   image under the control sampled once into a 1×1 canvas (same-origin;
 //   a tainted or unloaded image counts as busy and mid-dark);
-// - read when a control is first seen or resized, and, for a control that
-//   stays put while the page scrolls under it (in a fixed or sticky box),
-//   once each time a scroll comes to rest. Never per frame.
+// - read when a control first comes into view, or is resized, and, for a
+//   control that stays put while the page scrolls under it (in a fixed or
+//   sticky box), once each time a scroll comes to rest. Never per frame.
+//   "Into view" is one shared IntersectionObserver whose root reaches
+//   NEAR_MARGIN past the screen (owner, 2026-11-02: a control below the fold
+//   was never read, so it was never busy or light over art): a control that
+//   nears the screen is read as soon as it is on it, by a timer armed from
+//   the scroll (the handler reads nothing), and again each time it comes
+//   back (the page may have changed under it meanwhile);
+// - read again when the art under it may have changed: a picture added,
+//   removed or loaded (the /world poster switching), for the controls on
+//   screen that sit over art (busy) only, once the change has settled.
+// The reading waits for an idle moment (requestIdleCallback; WebKit: a task
+// right after the next frame), a few controls at a time, all read before
+// any is written: the page's style is clean then, so a read forces no
+// extra style pass, and a finger waiting for the thread goes first.
 // The result is two attributes the sheet reads: data-lg-tone="light" (the
 // backdrop is light: the glass flips light, its label dark) and
 // data-lg-busy (an image or video behind: a deeper veil and shadow).
@@ -30,8 +43,16 @@ export const TONE_DARK_BELOW = 0.42;
 const GROUND = { r: 8, g: 10, b: 16 };
 /** How long a scroll must be still before the fixed controls look again. */
 export const SCROLL_REST_MS = 160;
+/** While a scroll runs, how often the controls nearing the screen look. */
+export const SCROLL_PEEK_MS = 120;
+/** How far past the screen a control counts as coming into view. */
+export const NEAR_MARGIN = "40% 0px";
+/** How long the art must be still before the controls over it look again. */
+export const ART_SETTLE_MS = 320;
 /** Estimates per frame. */
 const PER_FRAME = 6;
+/** The longest an estimate waits for an idle moment. */
+export const IDLE_TIMEOUT_MS = 400;
 
 const TARGETS = LIQUID_GLASS_TARGETS.join(", ");
 
@@ -64,6 +85,13 @@ export function toneFor(lum: number, was: "light" | "dark") {
   return lum > TONE_LIGHT_ABOVE ? "light" : "dark";
 }
 
+interface Entry {
+  pinned: boolean;
+  tone: "light" | "dark";
+  /* Within the observer's reach (on screen or about to be). */
+  near: boolean;
+}
+
 interface Sample {
   r: number;
   g: number;
@@ -79,11 +107,23 @@ export function watchLiquidTone(doc: Document = document) {
   const view = doc.defaultView;
   if (!view || typeof doc.elementsFromPoint !== "function" || !doc.body) return () => {};
 
-  const tracked = new Map<HTMLElement, { pinned: boolean; tone: "light" | "dark" }>();
+  const tracked = new Map<HTMLElement, Entry>();
   const queue = new Set<HTMLElement>();
+  /* Near the screen (the observer's margin) and not yet read since it came near. */
+  const nearing = new Set<HTMLElement>();
+  /* The drain's turn: an idle callback, or (no requestIdleCallback: WebKit)
+     a task just after the next frame. Either way the page's style is
+     already clean from its own render, so the reads cost no extra pass,
+     and input waiting for the thread goes first. */
   let frame = 0;
+  let idleId = 0;
+  let post = 0;
+  let startId = 0;
+  const idle = typeof view.requestIdleCallback === "function";
   let scanTimer = 0;
   let restTimer = 0;
+  let peekTimer = 0;
+  let artTimer = 0;
   let canvas: HTMLCanvasElement | null = null;
   let ctx: CanvasRenderingContext2D | null = null;
 
@@ -172,13 +212,21 @@ export function watchLiquidTone(doc: Document = document) {
     return { r, g, b, busy };
   }
 
+  /* Read: the backdrop under one control (null: nothing to read now). */
   function estimate(el: HTMLElement) {
     const entry = tracked.get(el);
-    if (!entry || !el.isConnected) return;
+    if (!entry || !el.isConnected) return null;
     const box = el.getBoundingClientRect();
-    if (!box.width || !box.height) return;
+    // No box (collapsed, hidden): nothing to read until it resizes.
+    if (!box.width || !box.height) {
+      nearing.delete(el);
+      return null;
+    }
+    // Off screen (only near it): no pixels to read yet; the scroll's timer
+    // brings it back once it is on.
     if (box.bottom < 0 || box.top > view!.innerHeight || box.right < 0 || box.left > view!.innerWidth)
-      return;
+      return null;
+    nearing.delete(el);
     const y = box.top + box.height / 2;
     const points = [0.2, 0.5, 0.8].map((f) => sampleAt(el, box.left + box.width * f, y));
     const n = points.length;
@@ -186,27 +234,52 @@ export function watchLiquidTone(doc: Document = document) {
       (s, p) => ({ r: s.r + p.r / n, g: s.g + p.g / n, b: s.b + p.b / n }),
       { r: 0, g: 0, b: 0 },
     );
-    const tone = toneFor(luminance(avg.r, avg.g, avg.b), entry.tone);
-    entry.tone = tone;
-    if (tone === "light") el.setAttribute(TONE_ATTRIBUTE, "light");
-    else el.removeAttribute(TONE_ATTRIBUTE);
-    el.toggleAttribute(BUSY_ATTRIBUTE, points.some((p) => p.busy));
+    entry.tone = toneFor(luminance(avg.r, avg.g, avg.b), entry.tone);
+    return { el, tone: entry.tone, busy: points.some((p) => p.busy) };
   }
 
+  /* A frame's few controls: every read first, then every write, so one
+     style pass serves them all (a write before the next read would force
+     a whole-page style pass per control). */
   function drain() {
     frame = 0;
-    let done = 0;
+    idleId = 0;
+    post = 0;
+    const read = [];
     for (const el of queue) {
       queue.delete(el);
-      estimate(el);
-      if (++done >= PER_FRAME) break;
+      const result = estimate(el);
+      if (result) read.push(result);
+      if (read.length >= PER_FRAME) break;
     }
-    if (queue.size) frame = view!.requestAnimationFrame(drain);
+    for (const { el, tone, busy } of read) {
+      if (tone === "light") {
+        if (el.getAttribute(TONE_ATTRIBUTE) !== "light") el.setAttribute(TONE_ATTRIBUTE, "light");
+      } else if (el.hasAttribute(TONE_ATTRIBUTE)) el.removeAttribute(TONE_ATTRIBUTE);
+      if (el.hasAttribute(BUSY_ATTRIBUTE) !== busy) el.toggleAttribute(BUSY_ATTRIBUTE, busy);
+    }
+    if (queue.size) schedule();
+  }
+
+  function schedule() {
+    if (frame || idleId || post) return;
+    if (idle) idleId = view!.requestIdleCallback(drain, { timeout: IDLE_TIMEOUT_MS });
+    else
+      frame = view!.requestAnimationFrame(() => {
+        frame = 0;
+        post = view!.setTimeout(drain, 0);
+      });
   }
 
   function enqueue(el: HTMLElement) {
     queue.add(el);
-    if (!frame) frame = view!.requestAnimationFrame(drain);
+    schedule();
+  }
+
+  /* Read it now if it is on screen, else as soon as the scroll brings it on. */
+  function look(el: HTMLElement) {
+    nearing.add(el);
+    enqueue(el);
   }
 
   /* Whether the control stays put while the page scrolls (a fixed or sticky box). */
@@ -221,16 +294,46 @@ export function watchLiquidTone(doc: Document = document) {
   const resize =
     typeof view.ResizeObserver === "function"
       ? new view.ResizeObserver((entries) => {
-          for (const entry of entries) enqueue(entry.target as HTMLElement);
+          for (const entry of entries) {
+            const el = entry.target as HTMLElement;
+            // Far off screen there is nothing to read: the observer below
+            // brings it in when it nears.
+            if (!near || tracked.get(el)?.near) look(el);
+          }
         })
+      : null;
+
+  // One observer for every control: a control nearing the screen (or back
+  // after leaving it) is read once it is on it. The entries carry their own
+  // geometry; nothing is measured here.
+  const near =
+    typeof view.IntersectionObserver === "function"
+      ? new view.IntersectionObserver(
+          (entries) => {
+            for (const io of entries) {
+              const el = io.target as HTMLElement;
+              const entry = tracked.get(el);
+              if (!entry) continue;
+              entry.near = io.isIntersecting;
+              if (!io.isIntersecting) {
+                nearing.delete(el);
+                continue;
+              }
+              look(el);
+            }
+          },
+          { rootMargin: NEAR_MARGIN },
+        )
       : null;
 
   function detach(el: HTMLElement) {
     resize?.unobserve(el);
+    near?.unobserve(el);
     el.removeAttribute(TONE_ATTRIBUTE);
     el.removeAttribute(BUSY_ATTRIBUTE);
     tracked.delete(el);
     queue.delete(el);
+    nearing.delete(el);
   }
 
   function scan() {
@@ -238,42 +341,109 @@ export function watchLiquidTone(doc: Document = document) {
     for (const el of [...tracked.keys()]) if (!el.isConnected) detach(el);
     for (const el of doc.querySelectorAll<HTMLElement>(TARGETS)) {
       if (tracked.has(el)) continue;
-      tracked.set(el, { pinned: pinnedOf(el), tone: "dark" });
+      // Without the observer (an old engine) every control is "near" and
+      // read as before: on first sight, on resize and after a scroll.
+      tracked.set(el, { pinned: pinnedOf(el), tone: "dark", near: !near });
       resize?.observe(el);
-      enqueue(el);
+      if (near) near.observe(el);
+      else look(el);
     }
   }
 
+  // The art under the controls may have changed (a picture added, removed
+  // or swapped: the /world poster switching every few seconds; one loaded):
+  // once it is still, the controls on screen over art look again. Only
+  // those: a plain backdrop does not change with a picture far from it.
+  const artChanged = () => {
+    if (artTimer) view.clearTimeout(artTimer);
+    artTimer = view.setTimeout(recheckArt, ART_SETTLE_MS);
+  };
+  const recheckArt = () => {
+    artTimer = 0;
+    for (const [el, entry] of tracked)
+      if (entry.near && el.hasAttribute(BUSY_ATTRIBUTE)) look(el);
+  };
+  const MEDIA = /^(img|picture|video|canvas|source)$/;
+  const isMedia = (node: Node) =>
+    node.nodeType === 1 &&
+    (MEDIA.test((node as Element).localName) ||
+      !!(node as Element).querySelector?.("img, picture, video, canvas"));
+
   const tree = new view.MutationObserver((records) => {
-    if (records.some((r) => r.addedNodes.length || r.removedNodes.length) && !scanTimer)
-      scanTimer = view.setTimeout(scan, 400);
+    let added = false;
+    let art = false;
+    for (const r of records) {
+      if (r.type === "attributes") {
+        art = true;
+        continue;
+      }
+      if (!r.addedNodes.length && !r.removedNodes.length) continue;
+      added = true;
+      if (!art) for (const node of [...r.addedNodes, ...r.removedNodes]) if (isMedia(node)) art = true;
+    }
+    if (added && !scanTimer) scanTimer = view.setTimeout(scan, 400);
+    if (art) artChanged();
   });
-  tree.observe(doc.body, { childList: true, subtree: true });
+  // A picture's own source swapped in place counts as new art too.
+  tree.observe(doc.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["src", "srcset"],
+  });
 
   // The page moved under the pinned controls: look again once it is still.
-  // Images load late (the art under the bar): look again then too.
+  // While it moves, the controls nearing the screen look as they come on
+  // (a timer armed here: the handler itself reads nothing).
   const rest = () => {
     restTimer = 0;
-    for (const [el, entry] of tracked) if (entry.pinned) enqueue(el);
+    for (const [el, entry] of tracked) if (entry.pinned && entry.near) enqueue(el);
+    for (const el of nearing) enqueue(el);
+  };
+  const peek = () => {
+    peekTimer = 0;
+    for (const el of nearing) enqueue(el);
   };
   const scrolled = () => {
     if (restTimer) view.clearTimeout(restTimer);
     restTimer = view.setTimeout(rest, SCROLL_REST_MS);
+    if (nearing.size && !peekTimer) peekTimer = view.setTimeout(peek, SCROLL_PEEK_MS);
   };
+  // Images load late (the art under the bar, the poster): look again then too.
   const loaded = (event: Event) => {
-    if (event.target instanceof view.HTMLImageElement) scrolled();
+    if (!(event.target instanceof view.HTMLImageElement)) return;
+    scrolled();
+    artChanged();
   };
   const options = { capture: true, passive: true } as const;
   view.addEventListener("scroll", scrolled, options);
   doc.addEventListener("load", loaded, options);
-  scan();
+  // The first look waits for the page to be idle too: the glass starts
+  // while a large page is still laying out (the controls' computed style
+  // read here would force that pass early, in front of the finger).
+  const start = () => {
+    startId = 0;
+    scan();
+  };
+  startId = idle
+    ? view.requestIdleCallback(start, { timeout: IDLE_TIMEOUT_MS })
+    : view.setTimeout(start, 0);
 
   return () => {
     tree.disconnect();
     resize?.disconnect();
+    near?.disconnect();
     if (frame) view.cancelAnimationFrame(frame);
+    if (idleId) view.cancelIdleCallback(idleId);
+    if (post) view.clearTimeout(post);
+    if (startId) {
+      if (idle) view.cancelIdleCallback(startId);
+      else view.clearTimeout(startId);
+    }
     if (scanTimer) view.clearTimeout(scanTimer);
     if (restTimer) view.clearTimeout(restTimer);
+    if (peekTimer) view.clearTimeout(peekTimer);
+    if (artTimer) view.clearTimeout(artTimer);
     view.removeEventListener("scroll", scrolled, options);
     doc.removeEventListener("load", loaded, options);
     for (const el of [...tracked.keys()]) detach(el);

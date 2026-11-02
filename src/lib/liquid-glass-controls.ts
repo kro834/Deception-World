@@ -17,7 +17,12 @@
 // a group is first seen, never per frame; the motion is translate and scale
 // on the pseudo-elements; the rail edges are tracked by IntersectionObserver
 // and the indicator by the compositor (animation-timeline), not by scroll
-// handlers.
+// handlers. Reads and writes are batched (owner, 2026-11-02: on /world the
+// long press started late in the first seconds after load): a frame's
+// groups and rails are read together, then written together, so the page
+// pays one style and layout pass for them all, not one per group (each
+// write before the next group's read forced a whole-page style pass, about
+// 2.5 s of /world's first seconds on a throttled phone-class CPU).
 
 /** Option groups whose selection becomes a sliding glass pill. */
 export const GLASS_SEGMENTS = [
@@ -127,6 +132,23 @@ interface Segment {
   gel: boolean;
 }
 
+/* A group being measured this frame. */
+interface Pick {
+  segment: Segment;
+  option: HTMLElement | null;
+  probe: HTMLElement | null;
+  at: Placed | null;
+}
+
+/* The pill's place and shape, read in the frame's read pass. */
+interface Placed {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  radius: string;
+}
+
 interface Rail {
   el: HTMLElement;
   host: HTMLElement;
@@ -151,6 +173,7 @@ export function watchLiquidControls(doc: Document = document) {
   const segments = new Map<HTMLElement, Segment>();
   const rails = new Map<HTMLElement, Rail>();
   const dirty = new Set<HTMLElement>();
+  const dirtyRails = new Set<Rail>();
   // Groups and rails turned down once (both pseudo-elements already drawn by
   // the page): the 400 ms rescan must not ask for their computed style again,
   // which would force a style pass in the middle of a scroll.
@@ -164,7 +187,7 @@ export function watchLiquidControls(doc: Document = document) {
       const group = target.closest(GROUPS);
       if (group instanceof view.HTMLElement && segments.has(group)) queue(group);
       const rail = rails.get(target);
-      if (rail) measureRail(rail);
+      if (rail) queueRail(rail);
     }
   });
 
@@ -180,49 +203,80 @@ export function watchLiquidControls(doc: Document = document) {
     if (!frame) frame = view!.requestAnimationFrame(flush);
   }
 
+  function queueRail(rail: Rail) {
+    dirtyRails.add(rail);
+    if (!frame) frame = view!.requestAnimationFrame(flush);
+  }
+
+  /* One frame's measuring, in four passes: read the selections; write the
+     markers and place the probes; read every box; write every property.
+     Two style passes for the lot, however many groups changed. */
   function flush() {
     frame = 0;
-    const groups = [...dirty];
-    dirty.clear();
-    for (const group of groups) {
+    const picks: Pick[] = [];
+    for (const group of dirty) {
       const segment = segments.get(group);
-      if (segment) measureSegment(segment);
+      if (segment && group.isConnected)
+        picks.push({ segment, option: null, probe: null, at: null });
+    }
+    const railList = [...dirtyRails].filter((rail) => rail.el.isConnected && rails.has(rail.el));
+    dirty.clear();
+    dirtyRails.clear();
+    // 1. Read: which option is selected in each group.
+    for (const pick of picks) pick.option = selectedOption(pick.segment.el);
+    // 2. Write: the current markers, and a probe in each group to find the
+    //    pill's origin; the rails' own marker.
+    for (const pick of picks) {
+      markCurrent(pick.segment, pick.option);
+      if (pick.option) pick.probe = placeProbe(pick.segment.el);
+    }
+    for (const rail of railList) rail.el.toggleAttribute(RAIL, true);
+    // 3. Read: every box (one style and layout pass).
+    for (const pick of picks)
+      if (pick.option && pick.probe) pick.at = readSegment(pick.segment, pick.option, pick.probe);
+    const railBoxes = railList.map(readRail);
+    // 4. Write: put the probes away, then the properties.
+    for (const pick of picks) pick.probe?.remove();
+    for (const pick of picks) {
+      if (!pick.option) {
+        pick.segment.el.style.removeProperty("--lg-seg-w");
+        pick.segment.current = null;
+      } else if (pick.at) writeSegment(pick.segment, pick.option, pick.at);
+    }
+    railList.forEach((rail, i) => writeRail(rail, railBoxes[i]));
+  }
+
+  function markCurrent(segment: Segment, option: HTMLElement | null) {
+    if (option === segment.current) return;
+    if (segment.current) {
+      segment.current.removeAttribute(SEG_CURRENT);
+      resize.unobserve(segment.current);
+    }
+    if (option) {
+      option.setAttribute(SEG_CURRENT, "");
+      resize.observe(option);
     }
   }
 
-  function measureSegment(segment: Segment) {
-    const { el } = segment;
-    if (!el.isConnected) return;
-    const option = selectedOption(el);
-    if (option !== segment.current) {
-      if (segment.current) {
-        segment.current.removeAttribute(SEG_CURRENT);
-        resize.unobserve(segment.current);
-      }
-      if (option) {
-        option.setAttribute(SEG_CURRENT, "");
-        resize.observe(option);
-      }
-    }
-    if (!option) {
-      el.style.removeProperty("--lg-seg-w");
-      segment.current = null;
-      return;
-    }
-    const rect = option.getBoundingClientRect();
-    if (!rect.width) return;
-    // Where the pill's top left corner lands: a probe placed as the pill is
-    // (absolute, at 0 0), read once and removed. A fieldset, a grid or a
-    // scrolled rail each put that origin somewhere else.
+  // Where the pill's top left corner lands: a probe placed as the pill is
+  // (absolute, at 0 0), read once and removed. A fieldset, a grid or a
+  // scrolled rail each put that origin somewhere else.
+  function placeProbe(el: HTMLElement) {
     const probe = doc.createElement("i");
     probe.setAttribute("aria-hidden", "true");
     probe.style.cssText =
       "position:absolute;top:0;left:0;width:0;height:0;margin:0;padding:0;border:0;";
     el.appendChild(probe);
+    return probe;
+  }
+
+  function readSegment(segment: Segment, option: HTMLElement, probe: HTMLElement): Placed | null {
+    const { el } = segment;
+    const rect = option.getBoundingClientRect();
+    if (!rect.width) return null;
     const origin = probe.getBoundingClientRect();
     const probeLeft = probe.offsetLeft;
     const probeTop = probe.offsetTop;
-    probe.remove();
     // A bezel follows the layout box, not the painted one: a card that is
     // still rising into place (a transform, often scroll-driven, which ends
     // no event) must not leave the bezel where it was mid-flight. Offsets up
@@ -237,49 +291,69 @@ export function watchLiquidControls(doc: Document = document) {
       node = node.offsetParent instanceof view!.HTMLElement ? node.offsetParent : null;
     }
     const laid = node === el;
-    const r = laid
-      ? { width: option.offsetWidth, height: option.offsetHeight }
-      : { width: rect.width, height: rect.height };
-    const x = laid ? left - probeLeft : rect.left - origin.left;
-    const y = laid ? top - probeTop : rect.top - origin.top;
+    return {
+      width: laid ? option.offsetWidth : rect.width,
+      height: laid ? option.offsetHeight : rect.height,
+      x: laid ? left - probeLeft : rect.left - origin.left,
+      y: laid ? top - probeTop : rect.top - origin.top,
+      radius: view!.getComputedStyle(option).borderTopLeftRadius,
+    };
+  }
+
+  function writeSegment(segment: Segment, option: HTMLElement, at: Placed) {
+    const { el } = segment;
+    const { x, y, width, height, radius } = at;
     const moved = segment.current !== null && option !== segment.current && segment.w > 0;
     const style = el.style;
     if (moved) {
       // The pill starts at the old width (scaled from the left edge, where
       // the translate starts too) and stretches along its travel like gel.
       const distance = Math.abs(x - segment.x);
-      const stretch = Math.min(0.32, distance / Math.max(1, r.width) / 4);
-      style.setProperty("--lg-seg-s0", (segment.w / r.width).toFixed(3));
+      const stretch = Math.min(0.32, distance / Math.max(1, width) / 4);
+      style.setProperty("--lg-seg-s0", (segment.w / width).toFixed(3));
       style.setProperty("--lg-seg-k", stretch.toFixed(3));
       segment.gel = !segment.gel;
       el.setAttribute(SEG_GEL, segment.gel ? "a" : "b");
     }
     style.setProperty("--lg-seg-x", `${x.toFixed(1)}px`);
     style.setProperty("--lg-seg-y", `${y.toFixed(1)}px`);
-    style.setProperty("--lg-seg-w", `${r.width.toFixed(1)}px`);
-    style.setProperty("--lg-seg-h", `${r.height.toFixed(1)}px`);
-    const radius = view!.getComputedStyle(option).borderTopLeftRadius;
+    style.setProperty("--lg-seg-w", `${width.toFixed(1)}px`);
+    style.setProperty("--lg-seg-h", `${height.toFixed(1)}px`);
     // Tall tiles (a grid of cards) keep a rounded slab, not a capsule.
-    const pill = r.height > 60 ? "22px" : "999px";
+    const pill = height > 60 ? "22px" : "999px";
     style.setProperty("--lg-seg-r", el.getAttribute(SEG_MODE) === "bezel" ? radius : pill);
     segment.current = option;
     segment.x = x;
-    segment.w = r.width;
+    segment.w = width;
     if (!el.hasAttribute(SEG_READY))
       view!.requestAnimationFrame(() => {
         if (segments.has(el)) el.setAttribute(SEG_READY, "");
       });
   }
 
-  function attachSegment(el: HTMLElement) {
-    if (segments.has(el) || el.hasAttribute(SEG) || declined.has(el)) return;
+  /* Read: whether the group can take a pill (a free pseudo-element). */
+  function inspectSegment(el: HTMLElement) {
+    if (segments.has(el) || el.hasAttribute(SEG) || declined.has(el)) return null;
     const pseudo = freePseudo(view!, el);
     if (!pseudo) {
       declined.add(el);
-      return;
+      return null;
     }
+    return { el, pseudo, still: view!.getComputedStyle(el).position === "static" };
+  }
+
+  /* Write: take it on; its first measure is the next frame's. */
+  function attachSegment({
+    el,
+    pseudo,
+    still,
+  }: {
+    el: HTMLElement;
+    pseudo: Pseudo;
+    still: boolean;
+  }) {
     const bezel = el.matches(GLASS_BEZELS.join(", "));
-    if (view!.getComputedStyle(el).position === "static") el.setAttribute(SEG_STATIC, "");
+    if (still) el.setAttribute(SEG_STATIC, "");
     el.setAttribute(SEG, pseudo);
     el.setAttribute(SEG_MODE, bezel ? "bezel" : "pill");
     const segment: Segment = { el, current: null, x: 0, w: 0, gel: false };
@@ -296,7 +370,7 @@ export function watchLiquidControls(doc: Document = document) {
       attributeFilter: ["aria-pressed", "aria-checked", "aria-selected", "aria-current", "class"],
     });
     resize.observe(el);
-    measureSegment(segment);
+    queue(el);
   }
 
   function settle(event: Event) {
@@ -322,23 +396,33 @@ export function watchLiquidControls(doc: Document = document) {
     segments.delete(el);
   }
 
-  function measureRail(rail: Rail) {
+  /* Read: the rail's overflow and its box in its host's (after its marker is written). */
+  function readRail(rail: Rail) {
     const { el, host } = rail;
-    if (!el.isConnected) return;
-    const overflow = el.scrollWidth > el.clientWidth + 4;
-    el.toggleAttribute(RAIL, true);
-    if (!overflow) {
+    if (el.scrollWidth <= el.clientWidth + 4) return null;
+    const h = host.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    return {
+      x: r.left - h.left - host.clientLeft,
+      y: r.top - h.top - host.clientTop,
+      width: r.width,
+      height: r.height,
+      thumb: el.clientWidth / el.scrollWidth,
+    };
+  }
+
+  function writeRail(rail: Rail, box: ReturnType<typeof readRail>) {
+    const { host } = rail;
+    if (!box) {
       host.removeAttribute(RAIL_HOST);
       return;
     }
-    const h = host.getBoundingClientRect();
-    const r = el.getBoundingClientRect();
     const style = host.style;
-    style.setProperty("--lg-rail-x", `${(r.left - h.left - host.clientLeft).toFixed(1)}px`);
-    style.setProperty("--lg-rail-y", `${(r.top - h.top - host.clientTop).toFixed(1)}px`);
-    style.setProperty("--lg-rail-w", `${r.width.toFixed(1)}px`);
-    style.setProperty("--lg-rail-h", `${r.height.toFixed(1)}px`);
-    style.setProperty("--lg-rail-thumb", (el.clientWidth / el.scrollWidth).toFixed(4));
+    style.setProperty("--lg-rail-x", `${box.x.toFixed(1)}px`);
+    style.setProperty("--lg-rail-y", `${box.y.toFixed(1)}px`);
+    style.setProperty("--lg-rail-w", `${box.width.toFixed(1)}px`);
+    style.setProperty("--lg-rail-h", `${box.height.toFixed(1)}px`);
+    style.setProperty("--lg-rail-thumb", box.thumb.toFixed(4));
     host.setAttribute(RAIL_HOST, "");
   }
 
@@ -362,7 +446,8 @@ export function watchLiquidControls(doc: Document = document) {
     if (last !== first) rail.edges.observe(last);
   }
 
-  function attachRail(el: HTMLElement) {
+  /* Read: whether the rail's host has both pseudo-elements free. */
+  function inspectRail(el: HTMLElement) {
     const host = el.parentElement;
     if (
       rails.has(el) ||
@@ -371,20 +456,25 @@ export function watchLiquidControls(doc: Document = document) {
       host.hasAttribute(RAIL_HOST) ||
       host.closest("[data-lg-rail]")
     )
-      return;
+      return null;
     const before = view!.getComputedStyle(host, "::before").content;
     const after = view!.getComputedStyle(host, "::after").content;
     const free = (content: string) => content === "none" || content === "normal";
     if (!free(before) || !free(after)) {
       declined.add(el);
-      return;
+      return null;
     }
-    if (view!.getComputedStyle(host).position === "static") host.setAttribute(RAIL_HOST_STATIC, "");
+    return { el, host, still: view!.getComputedStyle(host).position === "static" };
+  }
+
+  /* Write: take it on; it is measured with the next frame's batch. */
+  function attachRail({ el, host, still }: { el: HTMLElement; host: HTMLElement; still: boolean }) {
+    if (still) host.setAttribute(RAIL_HOST_STATIC, "");
     const rail: Rail = { el, host, edges: null };
     rails.set(el, rail);
     resize.observe(el);
-    measureRail(rail);
-    watchEdges(rail);
+    queueRail(rail);
+    return rail;
   }
 
   function detachRail(rail: Rail) {
@@ -395,6 +485,7 @@ export function watchLiquidControls(doc: Document = document) {
       rail.host.removeAttribute(name);
     for (const prop of RAIL_PROPS) rail.host.style.removeProperty(prop);
     rails.delete(rail.el);
+    dirtyRails.delete(rail);
   }
 
   // The openers off screen (GLASS_OFFSCREEN): one observer for them all.
@@ -414,8 +505,12 @@ export function watchLiquidControls(doc: Document = document) {
     scanTimer = 0;
     for (const [el, segment] of segments) if (!el.isConnected) detachSegment(segment);
     for (const [el, rail] of rails) if (!el.isConnected) detachRail(rail);
-    for (const el of doc.querySelectorAll<HTMLElement>(GROUPS)) attachSegment(el);
-    for (const el of doc.querySelectorAll<HTMLElement>(RAILS)) attachRail(el);
+    // Read every new group and rail first, then write: one style pass.
+    const newGroups = [...doc.querySelectorAll<HTMLElement>(GROUPS)].map(inspectSegment);
+    const newRails = [...doc.querySelectorAll<HTMLElement>(RAILS)].map(inspectRail);
+    for (const found of newGroups) if (found) attachSegment(found);
+    const added = newRails.flatMap((found) => (found ? [attachRail(found)] : []));
+    for (const rail of added) watchEdges(rail);
     if (offscreen) {
       for (const el of openers)
         if (!el.isConnected) {
@@ -446,7 +541,7 @@ export function watchLiquidControls(doc: Document = document) {
   // Web fonts change every label's width once.
   const remeasure = () => {
     for (const el of segments.keys()) queue(el);
-    for (const rail of rails.values()) measureRail(rail);
+    for (const rail of rails.values()) queueRail(rail);
   };
   doc.fonts?.ready.then(remeasure, () => {});
   view.addEventListener("resize", remeasure, { passive: true });

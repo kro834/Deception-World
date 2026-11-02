@@ -43,7 +43,7 @@ function rules(css) {
 }
 
 /* A small DOM and clock: enough for the module's listeners, timers and writes. */
-function world({ cls = ".primary-action", width = 120, height = 44, clipped = false } = {}) {
+function world({ cls = ".primary-action", width = 120, height = 44, clipped = false, clock = false } = {}) {
   let now = 0;
   const timers = new Map();
   let nextId = 1;
@@ -172,6 +172,8 @@ function world({ cls = ".primary-action", width = 120, height = 44, clipped = fa
     addEventListener: () => {},
     removeEventListener: () => {},
   };
+  // The page's clock (event.timeStamp and performance.now share it).
+  if (clock) view.performance = { now: () => now };
   Object.assign(doc, {
     defaultView: view,
     body,
@@ -205,7 +207,11 @@ function world({ cls = ".primary-action", width = 120, height = 44, clipped = fa
     }
     now = end;
   };
-  return { doc, target, fire, advance, reads, appended, listeners, copies };
+  // The main thread blocked: time passes, no timer or frame runs.
+  const stall = (ms) => {
+    now += ms;
+  };
+  return { doc, target, fire, advance, stall, now: () => now, reads, appended, listeners, copies };
 }
 
 test("the hold starts only with the glass option, from the glass defs", () => {
@@ -541,7 +547,7 @@ test("the module reads layout only when a hold starts, never on a move", () => {
     holdSource.indexOf("const move = (event: PointerEvent)"),
   );
   assert.doesNotMatch(down, /getBoundingClientRect|getComputedStyle/);
-  assert.match(down, /setTimeout\(arm, HOLD_MS\)/);
+  assert.match(down, /setTimeout\(arm, Math\.max\(0, HOLD_MS - since\(stamp\)\)\)/);
 });
 
 /* The switch sliders (owner, 2026-11-01: 「六詠や犬の切り替えスライダー長押し時
@@ -663,4 +669,129 @@ test("the compact launchers are lit when held, never scaled", async () => {
       ':is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) .side-panel-trigger',
     ),
   );
+});
+
+test("a hold is timed from the finger: a late pointerdown or a late timer starts it at once", async () => {
+  const { watchLiquidHold, HOLD_MS, HOLD_LATE_MS } = await loadHold();
+  assert.ok(HOLD_LATE_MS > 0 && HOLD_LATE_MS <= 64, `late ${HOLD_LATE_MS}ms`);
+  const w = world({ clock: true });
+  const stop = watchLiquidHold(w.doc);
+  w.advance(5000);
+
+  // The page's first layout held the thread: the pointerdown is handed over
+  // 1.3 s after the finger came down, the finger still on the glass. The
+  // hold starts with the next task, not HOLD_MS and a frame later.
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: w.now() - 1300 });
+  assert.equal(w.target.getAttribute("data-lg-hold"), null, "nothing in the handler itself");
+  w.advance(0);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  w.fire("pointerup", { type: "pointerup", timeStamp: w.now() });
+  assert.equal(w.target.getAttribute("data-lg-hold"), "out");
+  w.advance(1000);
+
+  // The timer itself runs late (the thread blocked after the pointerdown):
+  // the hold starts as it fires, without waiting for another frame.
+  const down = w.now();
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: down });
+  w.stall(1400);
+  w.advance(0);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  w.fire("pointerup", { type: "pointerup", timeStamp: down + 1500 });
+  w.advance(1000);
+
+  // On time, it still waits for the next frame (queued input first).
+  const ontime = w.now();
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: ontime });
+  w.advance(HOLD_MS);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null, "armed, not yet started");
+  w.advance(20);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  w.fire("pointerup", { type: "pointerup", timeStamp: w.now() });
+  w.advance(1000);
+
+  // A pointerdown handed over late arms only what is left of HOLD_MS.
+  const part = w.now();
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: part - 150 });
+  w.advance(HOLD_MS - 150 - 1);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  w.advance(1 + 20);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  w.fire("pointerup", { type: "pointerup", timeStamp: w.now() });
+  w.advance(1000);
+  stop();
+});
+
+test("late or not, a tap is never a hold: a pointerup under HOLD_MS never lights", async () => {
+  const { watchLiquidHold, HOLD_MS } = await loadHold();
+  const w = world({ clock: true });
+  const stop = watchLiquidHold(w.doc);
+  w.advance(5000);
+  // Both handed over together, 1.3 s late: the pointerup ends it first.
+  const t = w.now() - 1300;
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: t });
+  w.fire("pointerup", { type: "pointerup", timeStamp: t + 60 });
+  w.advance(1000);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  assert.equal(w.appended.length, 0, "no overlay for a tap");
+  // The hold started at once (the pointerup still queued behind it): the
+  // pointerup stamped under HOLD_MS puts the light away before a frame.
+  const t2 = w.now() - 1300;
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: t2 });
+  w.advance(0);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on");
+  w.fire("pointerup", { type: "pointerup", timeStamp: t2 + HOLD_MS - 20 });
+  assert.equal(w.target.getAttribute("data-lg-hold"), null, "no release spring for a tap");
+  const overlay = w.appended.find((n) => n.className === "lg-hold");
+  assert.equal(overlay.hidden, true);
+  // A clock that disagrees (a stamp from the future, or none) falls back to
+  // the timer alone.
+  w.advance(1000);
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: w.now() + 5000 });
+  w.advance(HOLD_MS - 1);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  w.fire("pointerup", { type: "pointerup", timeStamp: w.now() + 5000 + HOLD_MS - 1 });
+  stop();
+});
+
+test("the hold's pointer listeners stay passive and cheap", () => {
+  assert.match(holdSource, /doc\.addEventListener\("pointerdown", down, passive\);/);
+  assert.match(holdSource, /const passive = \{ capture: true, passive: true \} as const;/);
+  const down = holdSource.slice(holdSource.indexOf("const down = (event: PointerEvent) => {"), holdSource.indexOf("const move = (event: PointerEvent) => {"));
+  assert.doesNotMatch(down, /getBoundingClientRect|getComputedStyle|offsetWidth|requestAnimationFrame/);
+  assert.match(down, /view\.setTimeout\(arm, Math\.max\(0, HOLD_MS - since\(stamp\)\)\)/);
+});
+
+test("a hold whose frame is held back by a long render starts HOLD_LATE_MS after the timer", async () => {
+  const { watchLiquidHold, HOLD_MS, HOLD_LATE_MS } = await loadHold();
+  const w = world({ clock: true });
+  const view = w.doc.defaultView;
+  const frames = [];
+  const raf = view.requestAnimationFrame;
+  // No frame comes while the page renders (the frame's callbacks are held).
+  view.requestAnimationFrame = (fn) => {
+    frames.push(fn);
+    return 9999 + frames.length;
+  };
+  const stop = watchLiquidHold(w.doc);
+  w.advance(5000);
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: w.now() });
+  w.advance(HOLD_MS + HOLD_LATE_MS - 1);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  w.advance(1);
+  assert.equal(w.target.getAttribute("data-lg-hold"), "on", "started without the frame");
+  view.requestAnimationFrame = raf;
+  // A tap in the same conditions never lights.
+  w.fire("pointerup", { type: "pointerup", timeStamp: w.now() });
+  w.advance(1000);
+  view.requestAnimationFrame = (fn) => {
+    frames.push(fn);
+    return 1;
+  };
+  const t = w.now();
+  w.fire("pointerdown", { type: "pointerdown", timeStamp: t });
+  w.advance(HOLD_MS - 20);
+  w.fire("pointerup", { type: "pointerup", timeStamp: t + HOLD_MS - 20 });
+  w.advance(1000);
+  assert.equal(w.target.getAttribute("data-lg-hold"), null);
+  stop();
 });

@@ -93,8 +93,14 @@ test("the script writes only data-lg-* attributes and --lg-* properties, and rem
   assert.match(script, /for \(const prop of SEG_PROPS\) el\.style\.removeProperty\(prop\)/);
   assert.match(script, /for \(const prop of RAIL_PROPS\) rail\.host\.style\.removeProperty\(prop\)/);
   // The pills live in pseudo-elements: no node is left in a React tree (the
-  // origin probe is appended and removed in the same task).
-  assert.match(script, /el\.appendChild\(probe\);(?:\s*const [a-zA-Z]+ = probe\.[a-zA-Z]+(?:\(\))?;)+\s*probe\.remove\(\);/);
+  // origin probes are appended and removed in the same task: one frame's
+  // flush places them all, reads, and puts them all away).
+  assert.match(script, /el\.appendChild\(probe\);\s*return probe;/);
+  const flush = script.slice(script.indexOf("function flush() {"), script.indexOf("function markCurrent("));
+  const placed = flush.indexOf("pick.probe = placeProbe(pick.segment.el);");
+  const removed = flush.indexOf("for (const pick of picks) pick.probe?.remove();");
+  assert.ok(placed > 0 && removed > placed, "probes placed, then removed, in one flush");
+  assert.doesNotMatch(flush.slice(placed, removed), /await|requestAnimationFrame|setTimeout|return;/);
 });
 
 test("no layout is read per frame: no scroll listener, the indicator rides a scroll timeline", () => {
