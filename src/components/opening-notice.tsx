@@ -39,6 +39,12 @@ const NOTICE_CSS = `
   box-shadow: 0 2px 0 rgb(0 0 0 / 35%), 0 10px 26px rgb(0 0 0 / 45%);
   border-radius: 0;
 }
+/* The side menu is a modal sheet (z 61); the slip sits at 75, so it used to
+   float over the menu's links. Yield while the menu is open, as Zeus does. */
+body:has(.side-panel-trigger[aria-expanded="true"]) .opening-notice {
+  visibility: hidden;
+  pointer-events: none;
+}
 .opening-notice-strip {
   display: flex;
   align-items: center;
@@ -46,6 +52,10 @@ const NOTICE_CSS = `
   height: 28px;
   border-bottom: 1px solid #5c5c5c;
   background: linear-gradient(#3b3b3b, #2a2a2a);
+  /* A colour under the gradient: the glass tone sampler reads painted colours,
+     and without one it looked through the strip at the poster and flipped the
+     close button light on a dark header. */
+  background-color: #2a2a2a;
 }
 .opening-notice-strip::before {
   content: "";
