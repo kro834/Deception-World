@@ -1641,3 +1641,39 @@ html[data-world-effects="economy"] .cine-stage.is-complete .cine-editorial-word 
     outline: 3px solid Highlight;
   }
 }
+
+/* iPhone safe areas (viewport-fit=cover) -------------------------------------
+   The gutter and the bar above re-skinned rules from styles.css that read
+   env(safe-area-inset-*), and lost them: held sideways, a notched iPhone put
+   the meta tags, the frame's sides and the progress rail's ends under the
+   sensor housing (the 4.4vw gutter is 37 px at 852 px, the inset 59 px), and
+   a home-screen launch that reports a top inset put the meta tags under the
+   status bar. The gutter clears the side insets; the top bar grows by the
+   top inset and the meta row, the frame, its rails and the kicker step down
+   with it (the ghost word keeps its centre on the picture). Every inset is 0
+   in a desktop browser and in Safari's upright tab, so nothing moves there. */
+@media (min-width: 701px) {
+  .cine-stage {
+    --cine-inset-x: max(
+      26px,
+      4.4vw,
+      calc(env(safe-area-inset-left, 0px) + 10px),
+      calc(env(safe-area-inset-right, 0px) + 10px)
+    );
+  }
+}
+
+.cine-letterbox.top {
+  height: calc(var(--cine-bar) + env(safe-area-inset-top, 0px));
+}
+
+.cine-sequence-meta,
+.cine-editorial-frame,
+.cine-editorial-type,
+.cine-rails {
+  margin-top: env(safe-area-inset-top, 0px);
+}
+
+.cine-editorial-word {
+  margin-top: calc(env(safe-area-inset-top, 0px) / -2);
+}
