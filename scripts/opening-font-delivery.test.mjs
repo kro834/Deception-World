@@ -31,28 +31,41 @@ test("the opening route reuses the root-owned local font stylesheet", () => {
   assert.doesNotMatch(route, /DOSSIER_HUD_FONTS_URL|fonts\.googleapis\.com/);
 });
 
-test("every face carries the metric overrides that centre its capitals in the line box", () => {
-  // Measured with canvas fontBoundingBox vs the capital height (see the font
-  // audit): Google's metrics leave Noto Sans JP and Michroma ~7% of the em
-  // low and Oxanium and Cinzel ~5% high. ascent - descent is set to the cap
-  // height; the sum of the two is kept so line boxes do not change height.
-  const caps = { "Noto Sans JP": [110, 35, 75], Oxanium: [84.5, 15.5, 69], Cinzel: [102.5, 32.5, 70], Michroma: [109, 34, 75] };
-  const faces = [...css.matchAll(/@font-face\s*\{([^}]+)\}/g)].map((match) => match[1]);
+const faceBlocks = (text) => [...text.matchAll(/@font-face\s*\{([^}]+)\}/g)].map((match) => match[1]);
+
+test("Cinzel, Oxanium and Michroma carry the metric overrides that centre their capitals", () => {
+  // Measured with canvas fontBoundingBox vs the glyph ink (see the font audit):
+  // Google's metrics leave Michroma ~7% of the em low and Oxanium and Cinzel
+  // ~5% high. The overrides put the ink on the line-box centre at 11-24px once
+  // Blink's integer rounding of ascent and descent is accounted for; the
+  // ascent + descent sum is Google's own, so no line box changes height.
+  // Noto Sans JP is deliberately left alone: its kana and kanji already sit
+  // centred and only its Latin capitals sit low, which one face cannot split.
+  const caps = { Oxanium: [84.5, 15.5, 100], Cinzel: [102.5, 32.5, 135], Michroma: [109, 34, 143] };
+  const faces = faceBlocks(css);
   for (const face of faces) {
     const family = face.match(/font-family: '([^']+)'/)[1];
-    const [ascent, descent, cap] = caps[family];
+    if (family === "Noto Sans JP") {
+      assert.doesNotMatch(face, /-override:/);
+      continue;
+    }
+    const [ascent, descent, sum] = caps[family];
     assert.equal(Number(face.match(/ascent-override: ([\d.]+)%;/)?.[1]), ascent, family);
     assert.equal(Number(face.match(/descent-override: ([\d.]+)%;/)?.[1]), descent, family);
     assert.match(face, /line-gap-override: 0%;/);
-    assert.equal(ascent - descent, cap, `${family}: ascent - descent equals the cap height`);
+    assert.equal(ascent + descent, sum, `${family}: the line box keeps Google's height`);
   }
 });
 
-test("other routes load the corrected twins after the remote sheets", () => {
+test("other routes load the same corrected faces after the remote sheets", () => {
   const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
   const hud = root.indexOf('{ rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL }');
-  const twins = root.indexOf('[{ rel: "stylesheet", href: openingFontsCss }]');
+  const twins = root.indexOf('[{ rel: "stylesheet", href: siteMetricFacesCss }]');
   assert.ok(hud > 0 && twins > hud, "the corrected faces come after the remote Google sheets");
+  const metric = readFileSync(new URL("../src/styles-site-metric-faces.css", import.meta.url), "utf8");
+  const expected = faceBlocks(css).filter((face) => !face.includes("'Noto Sans JP'"));
+  assert.equal(expected.length, 5);
+  assert.deepEqual(faceBlocks(metric), expected, "the twin sheet is the snapshot's non-Noto faces, verbatim");
 });
 
 test("Zen Kaku Gothic New is served from this origin with the same overrides on every face", () => {

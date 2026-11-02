@@ -48,6 +48,7 @@ import transitionCinemaCss from "../styles-transition-cinema.css?url";
 import openingPlatformCss from "../styles-opening-platform.css?url";
 import openingFontsCss from "../styles-opening-fonts.css?url";
 import siteDisplayFontsCss from "../styles-site-display-fonts.css?url";
+import siteMetricFacesCss from "../styles-site-metric-faces.css?url";
 import openingInterfaceCss from "../styles-opening-interface.css?url";
 import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
@@ -288,13 +289,13 @@ export const Route = createRootRoute({
       // The chrome's HUD labels: the Michroma subset of capitals and digits
       // the character files already load (a few KB, display=swap).
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
-      // Metric-corrected twins of the faces above (same families, ranges and
-      // binary URLs, plus ascent/descent overrides that centre capitals and
-      // kana in their line box). Last, so each face outranks its Google twin;
-      // the opening route already merges this sheet in place of the remote ones.
+      // Metric-corrected twins of the Cinzel, Oxanium and Michroma faces above
+      // (same ranges and binary URLs, plus ascent/descent overrides that put
+      // their capitals on the line-box centre). Last, so each face outranks its
+      // Google twin; the title's snapshot sheet already carries the same faces.
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
-        : [{ rel: "stylesheet", href: openingFontsCss }]),
+        : [{ rel: "stylesheet", href: siteMetricFacesCss }]),
     ], matches.some((match) => (match.routeId as string) === "/") ? [
       // Keep every rule for both the opening and the same-path dashboard.
       // Tailwind and the filename-sensitive liquid-glass transform keep their

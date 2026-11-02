@@ -13,6 +13,11 @@ test("cinematic skin follows each feature's own stylesheet", async () => {
   for (const route of ["dream-chapter", "rexonance-saga", "extreme-saga", "final-stage"]) {
     const source = await read(`src/routes/${route}.tsx`);
     const links = source.slice(source.search(/(?:stylesheetLinks|links):\s*\[/));
+    if (route === "dream-chapter") {
+      assert.ok(links.indexOf("CINEMATIC_STYLESHEET_LINK") < links.indexOf("dreamImageCinemaCssUrl"));
+      assert.ok(links.indexOf("dreamImageCinemaCssUrl") < links.indexOf("dreamCinemaEffectsCssUrl"));
+      continue;
+    }
     assert.ok(
       links.indexOf("CINEMATIC_STYLESHEET_LINK") > links.lastIndexOf('rel: "stylesheet"'),
       route,
