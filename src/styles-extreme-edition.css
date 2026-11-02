@@ -140,6 +140,22 @@ html[data-mode="world"]:has(.exs-page) {
   .rxs-page.rxs-page.exs-page .rxs-local-nav-inner {
     grid-template-columns: minmax(0, 1fr) auto 48px;
   }
+
+  /* The title ran on under the four links at 744px (it is 183px wide, the
+     brand's cell about 215px less its tag): let it shorten instead. */
+  .rxs-page.rxs-page.exs-page .rxs-brand {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-brand b {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 /* ---------- Hero: a gold targeting dial behind the figure ---------- */

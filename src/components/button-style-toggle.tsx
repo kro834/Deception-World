@@ -56,6 +56,9 @@ export function ButtonStyleToggle() {
           aria-label="ガラスの見え方"
           className="side-panel-glass-variant"
           style={{
+            /* In the iPad two-column menu the grid dropped this row into the
+               other column, away from its switch: take the whole row. */
+            gridColumn: "1 / -1",
             display: "flex",
             alignItems: "center",
             gap: 8,

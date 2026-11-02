@@ -400,6 +400,17 @@ html[data-button-style="liquid"]
   color: rgb(240 249 252) !important;
 }
 
+/* The bar's chip labels were the site's blue-grey (196 211 223): 4.3:1 on the
+   chip at rest (3.9:1 on a phone in landscape), under 4.5. Lighter, they
+   read 5.5:1 or better; the light-backdrop flip below still turns them dark. */
+html[data-button-style="liquid"]
+  body
+  .topbar
+  nav
+  a:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: rgb(232 240 247);
+}
+
 /* Words that sat bare on the bar get room inside their capsule. */
 html[data-button-style="liquid"]
   body

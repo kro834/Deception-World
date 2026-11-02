@@ -572,7 +572,10 @@ html[data-button-style="liquid"]
   > i:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   width: 72px;
   height: 30px;
-  padding: 0 9px;
+  /* The 34px knob covers 33px of the 70px inside: the word beside it (Michroma
+     at 12px is 28px for ON, 35px for OFF) ran under the knob. Tighter padding
+     and a 10px word keep it clear in both positions. */
+  padding: 0 4px;
   border-color: rgb(255 255 255 / 0.16) !important;
   border-radius: 999px !important;
   background:
@@ -604,6 +607,8 @@ html[data-button-style="liquid"]
   .side-panel-zeus-toggle
   > i
   em:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  font-size: 10px;
+  letter-spacing: 0.02em;
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.5);
 }
 
