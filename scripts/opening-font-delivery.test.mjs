@@ -38,10 +38,22 @@ test("Cinzel, Oxanium and Michroma carry the metric overrides that centre their 
   // Google's metrics leave Michroma ~7% of the em low and Oxanium and Cinzel
   // ~5% high. The overrides put the ink on the line-box centre at 11-24px once
   // Blink's integer rounding of ascent and descent is accounted for; the
-  // ascent + descent sum is Google's own, so no line box changes height.
-  // Noto Sans JP is deliberately left alone: its kana and kanji already sit
-  // centred and only its Latin capitals sit low, which one face cannot split.
-  const caps = { Oxanium: [84.5, 15.5, 100], Cinzel: [102.5, 32.5, 135], Michroma: [109, 34, 143] };
+  // ascent + descent sum of Oxanium and Cinzel is Google's own, so their line
+  // boxes keep their height.
+  // Noto Sans JP is deliberately left alone. Round 2 tried the owner's idea of a
+  // Latin-range face with its own overrides: Blink takes the line box from the
+  // face that covers the space character, which is that Latin face, so the
+  // override moved the kana of the same element exactly as far (measured: -1px
+  // for both at 12px) and no face can split them. Blink also rounds a face's
+  // ascent and descent in whole pixels, so a family-wide shift is a full pixel
+  // and puts the many controls that are already centred a pixel high.
+  // Michroma's 103/24 (sum 127, not Google's 143) is the pair that keeps the
+  // title's ENTER THE WORLD closest to centre across the 12-15px the clamp
+  // reaches (worst 0.75px over 1133, 1194 and 1280 wide at dpr 2 and 1.5;
+  // Google's pair left it a pixel high at 13-13.75px) while leaving the other
+  // Michroma ink (the DW sigil, the dossier brand) where round 1 put it. No pair
+  // does better everywhere: the baseline also snaps to the box's fractional top.
+  const caps = { Oxanium: [84.5, 15.5, 100], Cinzel: [102.5, 32.5, 135], Michroma: [103, 24, 127] };
   const faces = faceBlocks(css);
   for (const face of faces) {
     const family = face.match(/font-family: '([^']+)'/)[1];
@@ -53,7 +65,7 @@ test("Cinzel, Oxanium and Michroma carry the metric overrides that centre their 
     assert.equal(Number(face.match(/ascent-override: ([\d.]+)%;/)?.[1]), ascent, family);
     assert.equal(Number(face.match(/descent-override: ([\d.]+)%;/)?.[1]), descent, family);
     assert.match(face, /line-gap-override: 0%;/);
-    assert.equal(ascent + descent, sum, `${family}: the line box keeps Google's height`);
+    assert.equal(ascent + descent, sum, `${family}: ascent + descent as documented above`);
   }
 });
 
@@ -82,4 +94,30 @@ test("Zen Kaku Gothic New is served from this origin with the same overrides on 
   assert.doesNotMatch(zen, /@import|fonts\.googleapis\.com/);
   const root = readFileSync(new URL("../src/routes/__root.tsx", import.meta.url), "utf8");
   assert.match(root, /link\.href === SITE_DISPLAY_FONTS_URL \? \{ \.\.\.link, href: siteDisplayFontsCss \}/);
+});
+
+test("the optics sheet nudges layout only, so the button glass is never overridden", () => {
+  // Round 2: icon+label pills, submits, chapter tabs and the gallery's chip row are
+  // centred or un-clipped with margin and padding alone. No paint, filter or
+  // transform property may appear, so glass on and off keep one geometry.
+  const optics = readFileSync(new URL("../src/styles-control-optics.css", import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+  const props = new Set([...optics.matchAll(/([a-z-]+)\s*:[^;{}]+;/g)].map((match) => match[1]));
+  assert.ok(props.size > 0);
+  for (const prop of props)
+    assert.match(prop, /^(margin|padding|scroll-padding)(-[a-z]+)*$/, `${prop} is not a layout nudge`);
+  // Every rule outranks the route sheets that load after it (:not(#a) adds an id's weight).
+  for (const rule of optics.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
+    const selector = rule[1].trim();
+    if (selector.startsWith("@media")) continue;
+    assert.match(selector, /:not\(#a\)/, selector);
+  }
+});
+
+test("the title's skip plate is balanced where the key cap is absent", () => {
+  const elevation = readFileSync(new URL("../src/styles-opening-elevation.css", import.meta.url), "utf8");
+  assert.match(
+    elevation,
+    /@media \(pointer: coarse\) \{\s*html \.cine-skip:not\(#a\) \{\s*padding-inline: 14\.8px;/,
+  );
 });

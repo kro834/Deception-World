@@ -49,6 +49,7 @@ import openingPlatformCss from "../styles-opening-platform.css?url";
 import openingFontsCss from "../styles-opening-fonts.css?url";
 import siteDisplayFontsCss from "../styles-site-display-fonts.css?url";
 import siteMetricFacesCss from "../styles-site-metric-faces.css?url";
+import controlOpticsCss from "../styles-control-optics.css?url";
 import openingInterfaceCss from "../styles-opening-interface.css?url";
 import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
 import rexonanceCallsCss from "../styles-rexonance-calls.css?url";
@@ -296,6 +297,13 @@ export const Route = createRootRoute({
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
         : [{ rel: "stylesheet", href: siteMetricFacesCss }]),
+      // Optical centring nudges for the icon+label pills, submits and chapter
+      // tabs whose ink sat off the box centre (layout properties only, so the
+      // glass sheets above are untouched). After the faces, so it is the last
+      // sheet; the title's own sheets carry the nudges its controls need.
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "stylesheet", href: controlOpticsCss }]),
     ], matches.some((match) => (match.routeId as string) === "/") ? [
       // Keep every rule for both the opening and the same-path dashboard.
       // Tailwind and the filename-sensitive liquid-glass transform keep their

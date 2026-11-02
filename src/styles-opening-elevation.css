@@ -450,6 +450,14 @@
   box-shadow: var(--op-plate-edge), var(--op-plate-drop);
 }
 
+/* Without the key cap (touch) the skip icon's 3px inset and the label's trailing
+   tracking sat the pair 1.25px right of centre; equal padding centres its ink. */
+@media (pointer: coarse) {
+  html .cine-skip:not(#a) {
+    padding-inline: 14.8px;
+  }
+}
+
 /* SKIP and the cue stand in from the frame's corners by the bracket arm plus
    6px, so neither rides a corner mark. */
 .cine-cue {
