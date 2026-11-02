@@ -57,6 +57,10 @@ export const CURVE_THUMB_ATTRIBUTE = "data-lg-curve-thumb";
 export const LENS_ID_PREFIX = "dw-lens-";
 /** How far the red channel is bent past green and blue (the fringe). */
 export const DISPERSION = 1.15;
+/** The materialize stage's lens: this share of the shape's bend. */
+export const MATERIALIZE_STRENGTH = 0.45;
+/** Its filter's id: the shape's own id and this suffix. */
+export const MATERIALIZE_SUFFIX = "-m";
 /** Map building per frame, ms. */
 export const FRAME_BUDGET_MS = 6;
 
@@ -141,9 +145,9 @@ export function watchLiquidCurvature(doc: Document = document) {
     return canvas.toDataURL("image/png");
   }
 
-  function lensFilter(key: string, maps: SurfaceMaps) {
+  function lensFilter(key: string, maps: SurfaceMaps, href: string, strength = 1) {
     if (!svg) return null;
-    const id = LENS_ID_PREFIX + key;
+    const id = LENS_ID_PREFIX + key + (strength < 1 ? MATERIALIZE_SUFFIX : "");
     const filter = doc.createElementNS(SVG_NS, "filter");
     filter.setAttribute("id", id);
     filter.setAttribute("x", "0");
@@ -153,7 +157,7 @@ export function watchLiquidCurvature(doc: Document = document) {
     filter.setAttribute("primitiveUnits", "objectBoundingBox");
     filter.setAttribute("color-interpolation-filters", "sRGB");
     const image = doc.createElementNS(SVG_NS, "feImage");
-    image.setAttribute("href", png(maps.lens.cols, maps.lens.rows, maps.lens.data));
+    image.setAttribute("href", href);
     image.setAttribute("x", "0");
     image.setAttribute("y", "0");
     image.setAttribute("width", "1");
@@ -184,8 +188,8 @@ export function watchLiquidCurvature(doc: Document = document) {
     blend.setAttribute("mode", "screen");
     filter.append(
       image,
-      bend(maps.scale, "bent"),
-      bend(maps.scale * DISPERSION, "bentRed"),
+      bend(maps.scale * strength, "bent"),
+      bend(maps.scale * strength * DISPERSION, "bentRed"),
       matrix("bentRed", RED_ONLY, "red"),
       matrix("bent", GREEN_BLUE, "greenBlue"),
       blend,
@@ -205,8 +209,14 @@ export function watchLiquidCurvature(doc: Document = document) {
   function build(key: string, shape: LensShape) {
     const maps = surfaceMaps(shape);
     const rimUrl = `url("${png(maps.rim.cols, maps.rim.rows, maps.rim.data)}")`;
-    const lensUrl = lensFilter(key, maps);
-    const body = `--lg-rim-map: ${rimUrl};${lensUrl ? ` --lg-lens: ${lensUrl};` : ""}`;
+    const lensHref = svg ? png(maps.lens.cols, maps.lens.rows, maps.lens.data) : "";
+    const lensUrl = lensFilter(key, maps, lensHref);
+    // The same bezel bending less: the stage a materializing control passes
+    // through as its lens comes in (the sheet's lg-materialize).
+    const halfUrl = lensFilter(key, maps, lensHref, MATERIALIZE_STRENGTH);
+    const body = `--lg-rim-map: ${rimUrl};${lensUrl ? ` --lg-lens: ${lensUrl};` : ""}${
+      halfUrl ? ` --lg-lens-mat: ${halfUrl};` : ""
+    }`;
     rule(`[${CURVE_ATTRIBUTE}="${key}"]`, body);
     rule(`[${CURVE_THUMB_ATTRIBUTE}="${key}"]::-webkit-slider-thumb`, body);
     rule(`[${CURVE_THUMB_ATTRIBUTE}="${key}"]::-moz-range-thumb`, body);

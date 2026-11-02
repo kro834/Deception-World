@@ -10,8 +10,9 @@ import {
   watchLiquidPointer,
 } from "@/lib/liquid-glass";
 import { watchLiquidControls } from "@/lib/liquid-glass-controls";
-import { watchLiquidCurvature } from "@/lib/liquid-glass-curvature";
+import { MATERIALIZE_STRENGTH, watchLiquidCurvature } from "@/lib/liquid-glass-curvature";
 import { watchLiquidHold } from "@/lib/liquid-glass-hold";
+import { watchLiquidLight } from "@/lib/liquid-glass-light";
 import { watchLiquidTone } from "@/lib/liquid-glass-tone";
 
 /* The red channel is bent a little further than green and blue: a faint
@@ -98,7 +99,11 @@ export function LiquidGlassDefs() {
     // The backdrop under each control: light or dark, busy or plain
     // (liquid-glass-tone.ts), so the glass adapts as Liquid Glass does.
     const stopTone = watchLiquidTone(document);
+    // The room's light: the pointer, the scroll and (only where already
+    // allowed) the tilt lean it a little (liquid-glass-light.ts).
+    const stopLight = watchLiquidLight(document);
     return () => {
+      stopLight();
       stopTone();
       stopPointer();
       stopControls();
@@ -127,6 +132,9 @@ export function LiquidGlassDefs() {
       <defs>
         <Lens id="dw-liquid-lens-capsule" map={LENS_MAP_CAPSULE} scale={0.09} />
         <Lens id="dw-liquid-lens-round" map={LENS_MAP_ROUND} scale={0.2} />
+        {/* Materialize's stage: the round lens bending less, until the
+            control's own shape is measured (MATERIALIZE_STRENGTH). */}
+        <Lens id="dw-liquid-lens-round-m" map={LENS_MAP_ROUND} scale={0.2 * MATERIALIZE_STRENGTH} />
         {/* The bars are wide and short: a small scale bends their ends. */}
         <Lens id="dw-liquid-lens-bar" map={LENS_MAP_BAR} scale={0.02} />
       </defs>

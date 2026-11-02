@@ -118,12 +118,12 @@ test("the hold flexes toward the finger on the same spring", () => {
 
 test("switch and slider thumbs: an opaque white capsule at rest, a clear lens when touched", () => {
   const c = clean(controls);
-  // The switch's knob: wider than tall, white by --lg-knob, travel 30px.
+  // The switch's knob: wider than tall, white by --lg-knob, travel 30px (--lg-knob-x).
   const knob = c.match(/\.side-panel-zeus-toggle\s*> i\s*u:not\(#lg-glass\):not\(#lg-glass\):not\(#lg-glass\) \{([^}]*)\}/)[1];
   assert.match(knob, /width: 34px;\s*height: 22px;/);
   assert.match(knob, /--lg-knob: 1;/);
   assert.match(knob, /calc\(0\.06 \+ var\(--lg-knob\) \* 0\.9\)/);
-  assert.match(c, /\.side-panel-zeus-toggle:is\(\[aria-pressed="true"\], \[aria-checked="true"\]\)\s*> i\s*u[^{]*\{\s*translate: 30px 0;/);
+  assert.match(c, /\.side-panel-zeus-toggle:is\(\[aria-pressed="true"\], \[aria-checked="true"\]\)\s*> i\s*u[^{]*\{\s*--lg-knob-x: 30px;/);
   assert.match(c, /\.side-panel-zeus-toggle:is\(:active, \[data-press="in"\], \[data-press="touch"\], \[data-lg-hold="on"\]\)\s*> i\s*u[^{]*\{\s*--lg-knob: 0;/);
   assert.match(c, /scale: 1\.42 1\.5;/);
   // Held, the track stays put: the knob is the lens.
@@ -154,7 +154,7 @@ test("materialize: the glass lenses in with its dialog, only under full motion",
   const block = media.slice(media.indexOf("@media (prefers-reduced-motion: no-preference)"));
   assert.match(block, /^@media \(prefers-reduced-motion: no-preference\) \{\s*html\[data-button-style="liquid"\]:not\(\[data-world-effects="economy"\]\)/);
   // Backwards only: once in, the press owns `scale`.
-  assert.match(block, /animation: lg-materialize 0\.62s var\(--lg-spring\) 0\.08s backwards;/);
+  assert.match(block, /animation: lg-materialize var\(--lg-spring-ms\) var\(--lg-spring\) 0\.08s backwards;/);
   // The blur and the lift rise with it.
   assert.match(glass, /blur\(calc\(var\(--lg-blur\) \* var\(--lg-mat\)\)\)/);
   assert.match(glass, /rgb\(255 255 255 \/ calc\(var\(--lg-sheen\) \* var\(--lg-mat\)\)\)/);

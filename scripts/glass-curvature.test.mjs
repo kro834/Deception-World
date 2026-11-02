@@ -43,6 +43,8 @@ test("glass-only scope: the curvature starts with the option and every rule read
     for (const { selector, body } of rules(sheet)) {
       if (!/--lg-rim-map|--lg-lens/.test(body)) continue;
       if (/^@property/.test(selector)) continue;
+      // A keyframe (materialize's lens stages) only runs on scoped rules.
+      if (/^(\d+%|from|to)$/.test(selector)) continue;
       assert.match(selector, /^html\[data-button-style="liquid"\]/, selector);
     }
   }
@@ -135,7 +137,7 @@ test("the bezel is convex glass: flat centre, inward refraction growing to the r
   assert.ok(lib.refractionShift(0.4, 10) < lib.refractionShift(0.8, 10));
   // The red channel is bent a little further (the fringe).
   assert.match(watcher, /DISPERSION = 1\.15/);
-  assert.match(watcher, /bend\(maps\.scale \* DISPERSION, "bentRed"\)/);
+  assert.match(watcher, /bend\(maps\.scale \* strength \* DISPERSION, "bentRed"\)/);
 });
 
 test("a squircle's field is the superellipse: fuller corners than a circle, tangent to the edges", async () => {
@@ -244,6 +246,7 @@ test("Chromium gets the shape's lens with the capsule as fallback; the rim is a 
   for (const sheet of [glass, controls]) {
     for (const { selector, body } of rules(sheet)) {
       if (!/url\(#dw-liquid-lens-(capsule|round)\)/.test(body)) continue;
+      if (/^(\d+%|from|to)$/.test(selector)) continue;
       lensRules++;
       assert.match(body, /var\(--lg-lens, url\(#dw-liquid-lens-(capsule|round)\)\)/, selector);
       assert.match(selector, /\[data-liquid-lens\]:not\(\[data-world-effects="economy"\]\)/, selector);

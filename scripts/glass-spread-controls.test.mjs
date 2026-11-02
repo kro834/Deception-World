@@ -113,7 +113,9 @@ test("only transform-class properties animate: translate, scale, transform and o
     for (const item of transition.split(/,(?![^(]*\))/)) {
       const prop = item.trim().split(/\s+/)[0];
       assert.ok(
-        ["translate", "scale", "transform", "opacity", "visibility"].includes(prop),
+        // --lg-knob-x: the switch knob's travel, a registered length on the
+        // one small knob, so the track copy inside its lens follows it.
+        ["translate", "scale", "transform", "opacity", "visibility", "--lg-knob-x"].includes(prop),
         `animated: ${prop}`,
       );
     }
