@@ -17,10 +17,14 @@
 //   still takes the finger and the click. Only the viewport caps a swell, and
 //   a control the copy cannot stand for (a video, a canvas, a frame, a large
 //   tree, a dialog's content) is capped as before;
-// - light diffuses from the finger: a bloom spreads through the glass, the
-//   rim nearest the finger brightens, two caustic rings travel outward, and
-//   a little light spills past the edge. While held, the light follows the
-//   finger; on release the control springs back and the light fades.
+// - the finger is a light held over curved glass (owner, 2026-11-02:
+//   「長押し時の反射光沢などを大きく改善して」): a specular highlight sits
+//   between the finger and the glass's apex and slides as the finger does,
+//   an environment reflection band drifts the other way across the top,
+//   the rim brightens by Fresnel on the finger's side (a lobe that rotates
+//   toward it, with a spectral fringe), a caustic pools under the glass on
+//   the far side, and a tinted glow rises inside. On release the control
+//   springs back and the light relaxes to the rest light.
 //
 // The light is one overlay (.lg-hold), reused for every press, so at most
 // one diffusion layer exists. It is a fixed layer in the body (or in the open
@@ -334,7 +338,7 @@ export function watchLiquidHold(doc: Document = document) {
     halo.className = "lg-hold-halo";
     const shell = doc.createElement("i");
     shell.className = "lg-hold-shell";
-    for (const name of ["lg-hold-bloom", "lg-hold-ripple", "lg-hold-rim"]) {
+    for (const name of ["lg-hold-bloom", "lg-hold-band", "lg-hold-spec", "lg-hold-rim"]) {
       const layer = doc.createElement("i");
       layer.className = name;
       shell.appendChild(layer);
@@ -378,7 +382,8 @@ export function watchLiquidHold(doc: Document = document) {
     const ty = Math.min(p.height, Math.max(0, ly));
     overlay.style.setProperty("--lg-tx", `${tx.toFixed(1)}px`);
     overlay.style.setProperty("--lg-ty", `${ty.toFixed(1)}px`);
-    // Toward the finger, -1..1: the spill leans that way.
+    // Toward the finger, -1..1: the rim's lobe, the caustic and the spill
+    // read the direction (the sheet takes its angle with atan2()).
     overlay.style.setProperty("--lg-dx", ((tx / p.width) * 2 - 1).toFixed(2));
     overlay.style.setProperty("--lg-dy", ((ty / p.height) * 2 - 1).toFixed(2));
   };
@@ -567,6 +572,9 @@ export function watchLiquidHold(doc: Document = document) {
     // track, in a capsule (no rim, no spill outlining the input's box).
     const bare = anchor.localName === "input";
     ls.setProperty("--lg-hold-r", bare ? "999px" : style.borderRadius || "999px");
+    // The corner family (the slabs' squircle), so the light clips to the
+    // same outline; an engine without corner-shape reads "" and is round.
+    ls.setProperty("--lg-hold-cs", bare ? "round" : style.getPropertyValue("corner-shape") || "round");
     ls.setProperty("--lg-hold-from", from);
     ls.setProperty("--lg-hold-s", scale.toFixed(3));
     // The bloom's reach: past the far corner of a chip, a pool on a card.
@@ -580,9 +588,6 @@ export function watchLiquidHold(doc: Document = document) {
     layer.toggleAttribute("data-light", light);
     layer.toggleAttribute("data-bare", bare);
     follow(p, p.x, p.y);
-    // The rings start where the finger first rested and keep travelling.
-    ls.setProperty("--lg-rx", ls.getPropertyValue("--lg-tx"));
-    ls.setProperty("--lg-ry", ls.getPropertyValue("--lg-ty"));
 
     // Lifted, the copy swells; the control stays at rest, transparent, and
     // keeps the finger and the click.

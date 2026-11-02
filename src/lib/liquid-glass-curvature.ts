@@ -4,9 +4,12 @@
 // option goes off (every attribute, rule and node it wrote is removed).
 //
 // Each glass control is measured once (a ResizeObserver: its border box,
-// never a layout read per frame) and its corner radius read from computed
-// style at that moment. The box is quantised to a shape (4px steps, 2px
-// radius steps: src/lib/liquid-glass-curvature-map.ts) and the shape's maps
+// never a layout read per frame) and its corner radius and corner family
+// (corner-shape: squircle on the slabs; round, or unsupported, elsewhere)
+// read from computed style at that moment. The box is quantised to a shape
+// (4px steps, 2px radius steps: src/lib/liquid-glass-curvature-map.ts),
+// keyed by the family too, so an engine without corner-shape, which paints
+// circular corners, gets a bezel that follows them, and the shape's maps
 // are built once, on a canvas, in a frame-budgeted queue:
 // - Chromium (html[data-liquid-lens]): an SVG filter per shape, the
 //   displacement map of a convex bezel refracting the backdrop inward with
@@ -23,6 +26,7 @@
 
 import { LIQUID_GLASS_TARGETS, LIQUID_LENS_ATTRIBUTE } from "./liquid-glass";
 import {
+  cornerOf,
   curvatureKey,
   quantizeShape,
   surfaceMaps,
@@ -237,16 +241,22 @@ export function watchLiquidCurvature(doc: Document = document) {
     let w = width;
     let h = height;
     let radius: string;
+    let corner: string;
     if (entry.range) {
       // The thumb's own box and corners (its pseudo-element's style).
       const thumb = view!.getComputedStyle(el, "::-webkit-slider-thumb");
       w = parseFloat(thumb.width) || 0;
       h = parseFloat(thumb.height) || 0;
       radius = thumb.borderTopLeftRadius;
+      corner = thumb.getPropertyValue("corner-shape");
       if (w < 2 || h < 2) return;
-    } else radius = view!.getComputedStyle(el).borderTopLeftRadius;
+    } else {
+      const own = view!.getComputedStyle(el);
+      radius = own.borderTopLeftRadius;
+      corner = own.getPropertyValue("corner-shape");
+    }
     const dpr = economy() ? 1 : (view!.devicePixelRatio || 1);
-    const shape = quantizeShape(w, h, parseRadius(radius, w, h), dpr);
+    const shape = quantizeShape(w, h, parseRadius(radius, w, h), dpr, cornerOf(corner));
     const key = curvatureKey(shape);
     if (entry.key === key) return;
     entry.key = key;

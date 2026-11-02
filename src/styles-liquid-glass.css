@@ -15,8 +15,15 @@
      draw url() in backdrop-filter) and never in economy;
    - a specular rim and an inner highlight placed by a light direction
      (--lg-lx, --lg-ly; the pointer moves it on mouse and trackpad);
-   - a subtle chromatic edge, warm on one side and cool on the other;
-   - a soft shadow;
+   - no border line (owner, 2026-11-02: 「安っぽいのでボタンの形を大きく変更
+     して」): the edge is the bezel's own light (the curvature's rim map:
+     the specular arc, the crest, the density band, the caustic and a
+     spectral fringe at the outermost rim), an inner shadow under the far
+     rim for the glass's thickness, and a contact shadow outside;
+   - one family of corners per control: capsules (the chips and CTAs),
+     circles (the icon buttons) and squircles (the slabs and cards:
+     corner-shape: squircle, continuous curvature, with 28px corners, and
+     circular 28px corners where the engine has no corner-shape);
    - a gel press: the shared press driver (press-feedback.js) squashes the
      control wide and short, and it springs back with an overshoot.
 
@@ -36,25 +43,25 @@
 @property --lg-glow {
   syntax: "<number>";
   inherits: false;
-  initial-value: 0.16;
+  initial-value: 0.08;
 }
 
 @property --lg-rim {
   syntax: "<number>";
   inherits: false;
-  initial-value: 0.62;
+  initial-value: 0.7;
 }
 
 @property --lg-sheen {
   syntax: "<number>";
   inherits: false;
-  initial-value: 0.16;
+  initial-value: 0.07;
 }
 
 @property --lg-tint-a {
   syntax: "<number>";
   inherits: false;
-  initial-value: 0.12;
+  initial-value: 0.08;
 }
 
 /* The curvature (owner, 2026-11-01: 「ガラスの湾曲はfableで作って」;
@@ -151,12 +158,13 @@ html[data-button-style="liquid"]
     .opening-notice .opening-notice-close
   ) {
   --lg-tint: 122 232 255;
-  --lg-tint-a: 0.12;
+  --lg-tint-a: 0.08;
   --lg-fill: rgb(8 15 24 / var(--lg-fill-alpha));
-  --lg-sheen: 0.16;
-  --lg-glow: 0.16;
-  --lg-rim: 0.62;
+  --lg-sheen: 0.07;
+  --lg-glow: 0.08;
+  --lg-rim: 0.7;
   --lg-radius: 999px;
+  --lg-corner: round;
   --lg-px: 30%;
   --lg-py: -10%;
 }
@@ -207,8 +215,9 @@ html[data-button-style="liquid"]
     .opening-notice .opening-notice-close
     /* /lg:targets */
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  border-color: rgb(255 255 255 / 0.2) !important;
+  border-color: transparent !important;
   border-radius: var(--lg-radius) !important;
+  corner-shape: var(--lg-corner, round);
   clip-path: none !important;
   background:
     /* the bezel's light (the curvature's rim map, over the border box) */
@@ -221,27 +230,24 @@ html[data-button-style="liquid"]
     linear-gradient(
       180deg,
       rgb(255 255 255 / var(--lg-sheen)),
-      rgb(255 255 255 / 0) 50%,
-      rgb(255 255 255 / 0.03)
+      rgb(255 255 255 / 0) 46%,
+      rgb(var(--lg-tint) / 0.06)
     ),
     linear-gradient(rgb(var(--lg-tint) / var(--lg-tint-a)), rgb(var(--lg-tint) / var(--lg-tint-a))),
     var(--lg-fill) !important;
   box-shadow:
     /* the specular rim on the lit side */
-    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+    inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
       rgb(255 255 255 / var(--lg-rim)),
-    /* the inner highlight, a soft pool under the lit rim */ inset calc(var(--lg-lx) * -7px)
-      calc(var(--lg-ly) * -9px) 16px -12px rgb(255 255 255 / calc(var(--lg-rim) * 0.75)),
+    /* the inner highlight, a soft pool under the lit rim */ inset calc(var(--lg-lx) * -8px)
+      calc(var(--lg-ly) * -10px) 18px -12px rgb(255 255 255 / calc(var(--lg-rim) * 0.55)),
+    /* the thickness: a shadow inside the far rim */ inset calc(var(--lg-lx) * 4px)
+      calc(var(--lg-ly) * 5px) 12px -8px rgb(0 0 0 / 0.42),
     /* the caustic: light leaving through the far rim, in the accent */ inset
-      calc(var(--lg-lx) * 1px) calc(var(--lg-ly) * 1px) 0 -0.25px
-      rgb(255 255 255 / calc(var(--lg-rim) * 0.32)),
-    inset calc(var(--lg-lx) * 6px) calc(var(--lg-ly) * 7px) 14px -9px rgb(var(--lg-tint) / 0.42),
-    /* the chromatic edge */ inset 2px 0 2px -1.5px rgb(255 92 168 / 0.34),
-    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.4),
-    /* a hairline that holds the shape on any backdrop */ inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
-    /* the shadow */ 0 1px 2px rgb(0 0 0 / 0.24),
-    0 10px 24px -10px rgb(0 0 0 / 0.6),
-    0 0 20px -8px rgb(var(--lg-tint) / 0.36) !important;
+      calc(var(--lg-lx) * 7px) calc(var(--lg-ly) * 8px) 14px -9px rgb(var(--lg-tint) / 0.5),
+    /* the contact shadow and the ambient one */ 0 0.5px 1px rgb(0 0 0 / 0.32),
+    0 2px 4px -1px rgb(0 0 0 / 0.28),
+    0 14px 28px -12px rgb(0 0 0 / 0.55) !important;
   -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
   backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
 }
@@ -304,8 +310,10 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
 }
 
 /* ---------------------------------------------------------------
-   Shapes. Capsules by default; the large plates are rounded slabs, the
-   icon buttons circles, and Ciel's button keeps its own outline.
+   Shapes. Capsules by default; the large plates are squircle slabs
+   (continuous corners, as iOS's; circular where corner-shape is not
+   drawn), the icon buttons circles, and Ciel's button keeps its own
+   outline. The curvature keys its bezel by the family it finds painted.
    --------------------------------------------------------------- */
 html[data-button-style="liquid"]
   body
@@ -315,7 +323,8 @@ html[data-button-style="liquid"]
     .command-deck-gallery-link,
     .exo-door
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  --lg-radius: 22px;
+  --lg-radius: 28px;
+  --lg-corner: squircle;
 }
 
 /* The opening's ENTER THE WORLD keeps its cream warmth. */
@@ -429,8 +438,8 @@ html[data-button-style="liquid"]
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   --lg-fill: rgb(236 246 249 / 0.74);
   --lg-tint: 201 228 232;
-  --lg-tint-a: 0.2;
-  --lg-sheen: 0.5;
+  --lg-tint-a: 0.16;
+  --lg-sheen: 0.4;
   --lg-rim: 0.95;
 }
 
@@ -452,9 +461,9 @@ html[data-button-style="liquid"]
     [aria-pressed="true"],
     .is-active
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  --lg-tint-a: 0.3;
-  --lg-rim: 0.85;
-  --lg-sheen: 0.24;
+  --lg-tint-a: 0.22;
+  --lg-rim: 0.9;
+  --lg-sheen: 0.12;
 }
 
 /* A hybrid screen (an iPad with a trackpad, a touch laptop) matches
@@ -509,9 +518,9 @@ html[data-button-style="liquid"]
       .exo-door,
       .opening-notice .opening-notice-close
     ):hover:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --lg-glow: 0.3;
-    --lg-tint-a: 0.2;
-    --lg-rim: 0.8;
+    --lg-glow: 0.16;
+    --lg-tint-a: 0.14;
+    --lg-rim: 0.85;
   }
 }
 
@@ -560,9 +569,9 @@ html[data-button-style="liquid"]
   ):is(:active, [data-press="in"], [data-press="touch"], [data-holding="true"]):not(#lg-glass):not(
     #lg-glass
   ):not(#lg-glass) {
-  --lg-glow: 0.42;
-  --lg-rim: 0.95;
-  --lg-sheen: 0.26;
+  --lg-glow: 0.18;
+  --lg-rim: 1;
+  --lg-sheen: 0.12;
 }
 
 /* ---------------------------------------------------------------
@@ -781,7 +790,7 @@ html[data-button-style="liquid"]
 }
 
 /* Economy: blur and specular only. No lens (its rule requires
-   :not([data-world-effects="economy"])), no chromatic edge, no accent glow,
+   :not([data-world-effects="economy"])), no inner pool, no accent glow,
    no spring. */
 html[data-button-style="liquid"][data-world-effects="economy"] {
   --lg-blur: 6px;
@@ -833,9 +842,10 @@ html[data-button-style="liquid"][data-world-effects="economy"]
     .opening-notice .opening-notice-close
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   box-shadow:
-    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+    inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
       rgb(255 255 255 / var(--lg-rim)),
-    inset 0 0 0 0.5px rgb(255 255 255 / 0.14),
+    inset calc(var(--lg-lx) * 4px) calc(var(--lg-ly) * 5px) 12px -8px rgb(0 0 0 / 0.36),
+    0 0.5px 1px rgb(0 0 0 / 0.32),
     0 8px 20px -10px rgb(0 0 0 / 0.6) !important;
 }
 
@@ -974,7 +984,7 @@ html[data-button-style="liquid"]
    2026-11-01: 「拡大も小さすぎます」; it was 1.34) while the track swells by
    a ring of light (its box never scales),
    magnifies the label, fill and chevrons under it, carries a specular rim
-   and a chromatic edge, follows the finger, stretches along its travel like
+   and the bezel's light, follows the finger, stretches along its travel like
    gel, and on release deflates with the glass's spring before handing back
    to the thumb (slide-open-control.tsx writes data-lens="on" | "settle" |
    "off" and the lens's geometry, once per press).
@@ -994,16 +1004,12 @@ html[data-button-style="liquid"] body .ios-slide-open:not(#lg-glass):not(#lg-gla
   overflow: visible !important;
   --slide-lens-ease: cubic-bezier(0.18, 1.42, 0.32, 1);
   box-shadow:
-    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+    inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
       rgb(255 255 255 / var(--lg-rim)),
     /* a recessed track: the groove the thumb runs in */ inset 0 2px 7px -2px rgb(0 0 0 / 0.55),
     inset 0 -1px 0 rgb(255 255 255 / 0.1),
-    inset 2px 0 2px -1.5px rgb(255 92 168 / 0.3),
-    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.36),
-    inset 0 0 0 0.5px rgb(255 255 255 / 0.16),
-    0 1px 2px rgb(0 0 0 / 0.24),
-    0 12px 26px -12px rgb(0 0 0 / 0.62),
-    0 0 20px -8px rgb(var(--lg-tint) / 0.34) !important;
+    0 0.5px 1px rgb(0 0 0 / 0.32),
+    0 12px 26px -12px rgb(0 0 0 / 0.62) !important;
 }
 
 /* While the lens is up, the track swells by a ring of light. */
@@ -1011,13 +1017,10 @@ html[data-button-style="liquid"]
   body
   .ios-slide-open[data-lens="on"]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   box-shadow:
-    inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.25px
+    inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
       rgb(255 255 255 / var(--lg-rim)),
     inset 0 2px 7px -2px rgb(0 0 0 / 0.55),
     inset 0 -1px 0 rgb(255 255 255 / 0.1),
-    inset 2px 0 2px -1.5px rgb(255 92 168 / 0.3),
-    inset -2px 0 2px -1.5px rgb(72 206 255 / 0.36),
-    inset 0 0 0 0.5px rgb(255 255 255 / 0.16),
     0 0 0 3px rgb(255 255 255 / 0.07),
     0 0 0 3.5px rgb(255 255 255 / 0.12),
     0 12px 26px -12px rgb(0 0 0 / 0.62),
@@ -1046,14 +1049,12 @@ html[data-button-style="liquid"]
   -webkit-backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
   backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
   box-shadow:
-    inset 1.2px 1.4px 0 -0.25px rgb(255 255 255 / 0.92),
-    inset -1px -1px 0 -0.25px rgb(255 255 255 / 0.32),
+    inset 1.1px 1.3px 0 -0.3px rgb(255 255 255 / 0.92),
+    inset -1px -1px 0 -0.3px rgb(255 255 255 / 0.32),
     inset 0 10px 14px -12px rgb(255 255 255 / 0.6),
+    inset 0 -4px 8px -6px rgb(0 0 0 / 0.38),
     inset 0 -8px 12px -10px rgb(var(--lg-tint) / 0.55),
-    inset 2.5px 0 3px -2px rgb(255 92 168 / 0.42),
-    inset -2.5px 0 3px -2px rgb(72 206 255 / 0.48),
-    inset 0 0 0 0.5px rgb(255 255 255 / 0.3),
-    0 1px 2px rgb(0 0 0 / 0.3),
+    0 0.5px 1px rgb(0 0 0 / 0.32),
     0 6px 14px -6px rgb(0 0 0 / 0.55) !important;
 }
 
@@ -1261,7 +1262,7 @@ html[data-button-style="liquid"]
   -webkit-backdrop-filter: blur(8px) saturate(1.7) brightness(1.08);
   backdrop-filter: blur(8px) saturate(1.7) brightness(1.08);
   box-shadow:
-    0 0 0 0.5px rgb(255 255 255 / 0.4),
+    0 0.5px 1px rgb(0 0 0 / 0.36),
     0 2px 5px rgb(0 0 0 / 0.3),
     0 14px 28px -10px rgb(0 0 0 / 0.6),
     0 0 26px -8px rgb(var(--lg-tint) / 0.6);
@@ -1342,7 +1343,7 @@ html[data-button-style="liquid"]
 }
 
 /* The light on the lens: the specular rim, the pool under it, the caustic
-   at the far rim and the chromatic edge, drawn over the magnified view. */
+   at the far rim and the bezel's light, drawn over the magnified view. */
 html[data-button-style="liquid"] body .ios-slide-open .ios-slide-open-lens-body::after {
   content: "";
   position: absolute;
@@ -1355,12 +1356,11 @@ html[data-button-style="liquid"] body .ios-slide-open .ios-slide-open-lens-body:
     radial-gradient(90% 70% at 32% 0%, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0) 60%),
     radial-gradient(70% 55% at 72% 112%, rgb(var(--lg-tint) / 0.26), rgb(var(--lg-tint) / 0) 70%);
   box-shadow:
-    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
-    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.45),
-    inset 0 0 5px 0.5px rgb(255 255 255 / 0.16),
-    inset 0 -6px 9px -7px rgb(var(--lg-tint) / 0.8),
-    inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.5),
-    inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.55);
+    inset 1px 1.2px 0 -0.3px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.3px rgb(255 255 255 / 0.45),
+    inset 0 0 5px 0.5px rgb(255 255 255 / 0.14),
+    inset 0 -5px 9px -7px rgb(0 0 0 / 0.4),
+    inset 0 -6px 9px -7px rgb(var(--lg-tint) / 0.8);
 }
 
 html[data-button-style="liquid"]
@@ -1496,11 +1496,10 @@ html[data-button-style="liquid"]
   -webkit-backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
   backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
   box-shadow:
-    inset 1px 1.2px 0 -0.2px rgb(255 255 255 / 0.95),
-    inset -0.8px -0.8px 0 -0.2px rgb(255 255 255 / 0.4),
-    inset 2.5px 0 2.5px -1.5px rgb(255 92 168 / 0.45),
-    inset -2.5px 0 2.5px -1.5px rgb(72 206 255 / 0.5),
-    inset 0 0 0 0.5px rgb(255 255 255 / 0.3),
+    inset 1px 1.2px 0 -0.3px rgb(255 255 255 / 0.95),
+    inset -0.8px -0.8px 0 -0.3px rgb(255 255 255 / 0.4),
+    inset 0 -4px 8px -6px rgb(0 0 0 / 0.38),
+    0 0.5px 1px rgb(0 0 0 / 0.32),
     0 2px 5px rgb(0 0 0 / 0.35),
     0 12px 24px -10px rgb(0 0 0 / 0.6),
     0 0 20px -6px rgb(46 188 231 / 0.45) !important;

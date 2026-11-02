@@ -279,8 +279,16 @@ test("a tap whose pointerup arrives late (after the timer) is still a tap", asyn
 test("the hold's light keeps a label's contrast: no strong white wash", () => {
   const bloom = section.match(/\.lg-hold-bloom \{\s*background: radial-gradient\(([^;]+)\);/);
   assert.ok(bloom, "bloom gradient");
+  // The glow is the glass's tint, never white.
+  assert.doesNotMatch(bloom[1], /rgb\(255 255 255/);
   for (const [, alpha] of bloom[1].matchAll(/\/ ([\d.]+)\)/g))
     assert.ok(Number(alpha) <= 0.2, `bloom stop alpha ${alpha}`);
+  // The highlight's white core is small and no stronger than a quarter.
+  const spec = section.match(/\.lg-hold-spec \{\s*background:\s*([^;]+);/);
+  assert.ok(spec, "specular gradient");
+  for (const [, alpha] of spec[1].matchAll(/rgb\(255 255 255 \/ ([\d.]+)\)/g))
+    assert.ok(Number(alpha) <= 0.25, `specular stop alpha ${alpha}`);
+  assert.match(spec[1], /rgb\(255 255 255 \/ 0\) 20%/, "the core ends within a fifth of its box");
   // The control's own light is not animated a second time by the hold.
   assert.doesNotMatch(section.replace(/\/\*[\s\S]*?\*\//g, ""), /--lg-glow:\s*[\d.]+;/);
 });
@@ -454,9 +462,41 @@ test("the light moves only scale, translate and opacity, and samples nothing", (
       for (const item of transition.split(/,(?![^(]*\))/))
         assert.match(item.trim(), /^(scale|translate|opacity)\s/, `${selector}: ${item}`);
   }
-  const keyframes = section.slice(section.indexOf("@keyframes lg-hold-ripple"));
-  const frames = keyframes.slice(0, keyframes.indexOf("\n}\n"));
-  assert.doesNotMatch(frames.replace(/scale|opacity/g, ""), /[a-z-]+\s*:/);
+  // No keyframes: every layer eases between states.
+  assert.doesNotMatch(section, /@keyframes/);
+});
+
+test("the hold is the finger as a light over curved glass: highlight, reflection, Fresnel rim, caustic", () => {
+  // The overlay's layers, in order: the glow, the reflection band, the
+  // specular highlight, the rim.
+  assert.match(holdSource, /\["lg-hold-bloom", "lg-hold-band", "lg-hold-spec", "lg-hold-rim"\]/);
+  // The finger's bearing and reach, from the direction the script writes.
+  assert.match(section, /--lg-ang: atan2\(var\(--lg-dx, 0\), calc\(-1 \* var\(--lg-dy, 0\)\)\);/);
+  assert.match(section, /--lg-reach: min\(1, hypot\(var\(--lg-dx, 0\), var\(--lg-dy, 0\)\)\);/);
+  // The highlight sits between the finger and the apex, a little above.
+  const spec = section.match(/\.lg-hold-spec \{[^}]*translate:\s*([^;]+);/);
+  assert.ok(spec, "specular placement");
+  assert.match(spec[1], /var\(--lg-cx\) \+ \(var\(--lg-tx\) - var\(--lg-cx\)\) \* 0\.56/);
+  assert.match(spec[1], /\(var\(--lg-ty\) - var\(--lg-cy\)\) \* 0\.3 - var\(--lg-hold-h\) \* 0\.36/);
+  // The reflection drifts against the finger.
+  const band = section.match(/\.lg-hold-band \{[^}]*translate:\s*([^;]+);/);
+  assert.match(band[1], /\(var\(--lg-tx\) - var\(--lg-cx\)\) \* -0\.45/);
+  // The rim's lobe turns toward the finger and grows toward the edge, with
+  // a warm and a cool fringe a pixel apart.
+  const rim = section.match(/\.lg-hold-rim \{([^}]*)\}/);
+  assert.match(rim[1], /conic-gradient\(\s*from calc\(var\(--lg-ang\) - 180deg\)/);
+  assert.match(rim[1], /opacity: calc\(0\.5 \+ 0\.5 \* var\(--lg-reach, 0\)\);/);
+  assert.match(rim[1], /rgb\(255 120 150 \/ 0\.3\)/);
+  assert.match(rim[1], /rgb\(120 200 255 \/ 0\.34\)/);
+  // The caustic pools on the far side, below.
+  const halo = section.match(/\.lg-hold-halo \{\s*box-shadow:\s*([^;]+);/);
+  assert.match(halo[1], /calc\(var\(--lg-dx, 0\) \* -10px\) calc\(var\(--lg-dy, 0\) \* -8px \+ 10px\)/);
+  // The light clips to the control's outline, corner family included.
+  assert.match(holdSource, /setProperty\("--lg-hold-cs", bare \? "round" : style\.getPropertyValue\("corner-shape"\) \|\| "round"\)/);
+  assert.match(section, /corner-shape: var\(--lg-hold-cs, round\);/);
+  // Released, every layer relaxes to the rest light.
+  for (const layer of ["lg-hold-band", "lg-hold-spec", "lg-hold-rim"])
+    assert.match(section, new RegExp(`\\[data-state="out"\\] \\.${layer} \\{[^}]*opacity: 0;`), layer);
 });
 
 test("the fallbacks: reduced motion, economy, reduced transparency, forced colours", () => {
@@ -468,10 +508,10 @@ test("the fallbacks: reduced motion, economy, reduced transparency, forced colou
     if (selector) assert.match(selector, /:not\(\[data-world-effects="economy"\]\)/, selector);
   const reduce = section.slice(section.indexOf("@media (prefers-reduced-motion: reduce)"));
   assert.match(reduce, /scale: 1 !important/);
-  assert.match(reduce, /\.lg-hold-ripple\) \{\s*display: none;/);
+  assert.match(reduce, /\.lg-hold-band, \.lg-hold-spec\) \{\s*display: none;/);
   assert.match(
     section,
-    /\[data-world-effects="economy"\] \.lg-hold :is\(\.lg-hold-halo, \.lg-hold-ripple, \.lg-hold-rim\) \{\s*display: none;/,
+    /\[data-world-effects="economy"\] \.lg-hold :is\(\.lg-hold-halo, \.lg-hold-band, \.lg-hold-spec, \.lg-hold-rim\) \{\s*display: none;/,
   );
   assert.match(
     section,

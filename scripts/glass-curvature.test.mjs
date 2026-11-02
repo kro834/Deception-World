@@ -78,7 +78,20 @@ test("maps are keyed by size and radius, quantised so near boxes share one", asy
   assert.notEqual(key(96, 40, 20), key(160, 40, 20), "width changes the key");
   assert.notEqual(key(96, 40, 20), key(96, 56, 20), "height changes the key");
   assert.notEqual(key(96, 40, 20, 1), key(96, 40, 20, 2), "density changes the rim");
-  assert.match(key(96, 40, 20, 2), /^v\d+-w96-h40-r20-x2$/);
+  assert.match(key(96, 40, 20, 2), /^v\d+-rd-w96-h40-r20-x2$/);
+  // The corner family keys the map too: a squircle slab and a rounded one
+  // of the same box are different bezels (an engine without corner-shape
+  // paints circular corners and gets the rounded map).
+  const squircle = lib.curvatureKey(lib.quantizeShape(200, 120, 28, 1, "squircle"));
+  assert.match(squircle, /^v\d+-sq-w200-h120-r28-x1$/);
+  assert.notEqual(squircle, key(200, 120, 28));
+  assert.equal(lib.cornerOf("squircle"), "squircle");
+  assert.equal(lib.cornerOf("superellipse(2)"), "squircle");
+  assert.equal(lib.cornerOf("round"), "round");
+  assert.equal(lib.cornerOf(""), "round", "no corner-shape: circular corners");
+  assert.equal(lib.quantizeShape(40, 40, 0, 1, "squircle").corner, "round", "no corner, no family");
+  assert.match(watcher, /corner = own\.getPropertyValue\("corner-shape"\)/);
+  assert.match(watcher, /quantizeShape\(w, h, parseRadius\(radius, w, h\), dpr, cornerOf\(corner\)\)/);
   // The filter ids and the attribute rules carry the key.
   assert.match(watcher, /LENS_ID_PREFIX = "dw-lens-"/);
   assert.match(watcher, /rule\(`\[\$\{CURVE_ATTRIBUTE\}="\$\{key\}"\]`, body\)/);
@@ -125,6 +138,53 @@ test("the bezel is convex glass: flat centre, inward refraction growing to the r
   assert.match(watcher, /bend\(maps\.scale \* DISPERSION, "bentRed"\)/);
 });
 
+test("a squircle's field is the superellipse: fuller corners than a circle, tangent to the edges", async () => {
+  const lib = await loadMaps();
+  const w = 200;
+  const h = 120;
+  const r = 28;
+  // On the straight edges the two fields agree exactly.
+  for (const [x, y] of [
+    [100, 3],
+    [100, 117],
+    [3, 60],
+    [197, 60],
+  ]) {
+    const a = lib.squircleField(x, y, w, h, r);
+    const b = lib.roundedRectField(x, y, w, h, r);
+    assert.ok(Math.abs(a.inside - b.inside) < 1e-9, `${x},${y}: ${a.inside} vs ${b.inside}`);
+    assert.deepEqual([a.nx, a.ny], [b.nx, b.ny]);
+  }
+  // On the corner's diagonal the superellipse lies outside the circle: a
+  // point the circle leaves out is inside the squircle.
+  const d = r - r / Math.pow(2, 1 / 4) + 1;
+  const diag = lib.squircleField(d, d, w, h, r);
+  const circ = lib.roundedRectField(d, d, w, h, r);
+  assert.ok(circ.inside < 0 && diag.inside > 0, `circle ${circ.inside}, squircle ${diag.inside}`);
+  // The corner's very centre is a full radius inside, facing out diagonally.
+  const centre = lib.squircleField(r, r, w, h, r);
+  assert.ok(Math.abs(centre.inside - r) < 1e-6);
+  assert.ok(centre.nx < 0 && centre.ny < 0);
+  // The distance grows monotonically inward along the diagonal.
+  let last = -Infinity;
+  for (let i = 0; i <= 28; i++) {
+    const v = lib.squircleField(i, i, w, h, r).inside;
+    assert.ok(v >= last - 1e-9, `${i}: ${v} after ${last}`);
+    last = v;
+  }
+  // The lens of a squircle differs from the rounded one at the corner only.
+  const sq = lib.surfaceMaps(lib.quantizeShape(w, h, r, 1, "squircle"));
+  const rd = lib.surfaceMaps(lib.quantizeShape(w, h, r, 1, "round"));
+  const px = (m, col, row) => m.lens.data[(row * m.lens.cols + col) * 4];
+  assert.equal(px(sq, 100, 0), px(rd, 100, 0), "the edge is the same");
+  assert.notEqual(px(sq, 4, 4), px(rd, 4, 4), "the corner is not");
+  // The sheet paints the slabs as squircles and keys the hold's outline by it.
+  assert.match(glass, /--lg-radius: 28px;\s*--lg-corner: squircle;/);
+  assert.match(glass, /corner-shape: var\(--lg-corner, round\);/);
+  assert.match(controls, /\.liquid-swipe-tabs:not\(\.rider-tabs\)[^{]*\{[^}]*corner-shape: squircle;/);
+  assert.match(controls, /corner-shape: var\(--lg-hold-cs, round\);/);
+});
+
 test("the rim light comes from the same normals: lit on the light's side, dark band along the bezel", async () => {
   const lib = await loadMaps();
   const maps = lib.surfaceMaps(lib.quantizeShape(120, 48, 24, 1));
@@ -141,6 +201,30 @@ test("the rim light comes from the same normals: lit on the light's side, dark b
   const far = at(Math.floor(cols / 2), rows - 2);
   assert.ok(lit.a > 60 && lit.lum > 200, `lit rim ${JSON.stringify(lit)}`);
   assert.ok(far.a > 20 && far.lum < lit.lum, `far rim ${JSON.stringify(far)}`);
+  // The bevel is thick: a 48px pill's band is over a third of its half-height.
+  assert.ok(maps.bezel >= 9 && maps.bezel <= 18, `bezel ${maps.bezel}`);
+  // The crest (where the bevel meets the flat top) is a second, fainter
+  // line: the pixel at the bezel's inner edge is lit where the mid-bezel
+  // on the far side is dark.
+  const crestRow = Math.round(maps.bezel * 0.84);
+  const midRow = Math.round(maps.bezel * 0.5);
+  const crest = at(Math.floor(cols / 2), rows - 1 - crestRow);
+  const mid = at(Math.floor(cols / 2), rows - 1 - midRow);
+  assert.ok(crest.lum > mid.lum, `crest ${JSON.stringify(crest)} over mid ${JSON.stringify(mid)}`);
+  // The fringe: the outermost lit rim is warm, the outermost far rim cool.
+  const rgb = (col, row) => {
+    const i = (row * cols + col) * 4;
+    return [data[i], data[i + 1], data[i + 2]];
+  };
+  const top = rgb(Math.floor(cols / 2), 1);
+  const bottom = rgb(Math.floor(cols / 2), rows - 2);
+  assert.ok(top[0] >= top[2], `warm lit rim ${top}`);
+  assert.ok(bottom[2] >= bottom[0], `cool far rim ${bottom}`);
+  // The edge is the light, not a line: no border colour, no hairline.
+  const material = glass.slice(glass.indexOf("/* /lg:targets */"), glass.indexOf("/* The lens (Chromium)"));
+  assert.match(material, /border-color: transparent !important;/);
+  assert.doesNotMatch(material, /inset 0 0 0 0\.5px/);
+  assert.doesNotMatch(material, /255 92 168|72 206 255/, "no painted chromatic stripes");
   // Light direction matches the sheet's rest values.
   assert.deepEqual(lib.LIGHT, { x: -0.55, y: -1, z: 0.9 });
   assert.match(glass, /--lg-lx: -0\.55;\s*--lg-ly: -1;/);
