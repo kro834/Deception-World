@@ -10,7 +10,9 @@ import {
 } from "../src/lib/illusionculum-entry.ts";
 import {
   ILLUSIONCULUM_ARMOUR_STAGING,
+  ILLUSIONCULUM_SCROLL_STAGING,
   illusionculumPlateDelay,
+  illusionculumPlateDelayFor,
 } from "../src/lib/illusionculum-choreography.ts";
 import { planAssembly, planAssemblyGold } from "../src/lib/rexonance-resonance.js";
 import { planAssemblyNanites, armorSeatLift } from "../src/lib/rexonance-assembly-nanites.js";
@@ -101,6 +103,27 @@ test("completed IC shells hold away from the body, then seat continuously and re
     assert.equal(armorSeatLift(p, p.contact), 0);
     assert.ok(p.contact < 0.86, `${p.id} seats before seal`);
     close(p.contact - old.contact, illusionculumPlateDelay(p));
+  }
+  assert.ok(staged >= 10);
+});
+
+// Owner (2026-11-03): 「スクロール変身アニメーションは、もとの体がガタガタしない
+// タイプにもどして。」 — the scroll keeps the pre-round-2 pins (short lift, slow
+// continuous seat); the far staging above is the entry's only.
+test("the scroll's shells keep the pre-round-2 short lift and slow seat", () => {
+  const scroll = planAssemblyNanites({ ...options, plan, staging: ILLUSIONCULUM_SCROLL_STAGING });
+  const delay = illusionculumPlateDelayFor(ILLUSIONCULUM_SCROLL_STAGING);
+  let staged = 0;
+  for (let i = 0; i < scroll.pieces.length; i++) {
+    const p = scroll.pieces[i],
+      old = original.pieces[i];
+    if (p.fixed || p.ornament) continue;
+    staged++;
+    close(p.depart - p.to, 0.012);
+    close(p.contact - p.depart, 0.026);
+    close(p.lift / old.lift, 1.65);
+    close(p.contact - old.contact, delay(p));
+    assert.ok(p.contact < 0.86, `${p.id} seats before seal`);
   }
   assert.ok(staged >= 10);
 });

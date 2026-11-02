@@ -29,7 +29,9 @@
 
 import {
   ILLUSIONCULUM_ARMOUR_STAGING,
-  illusionculumPlateDelay,
+  ILLUSIONCULUM_SCROLL_STAGING,
+  illusionculumPlateDelayFor,
+  type IllusionculumStaging,
 } from "./illusionculum-choreography.ts";
 import { mountRexonanceAssembly, type RexonanceAssemblyConfig } from "./rexonance-resonance.js";
 import {
@@ -58,6 +60,10 @@ import {
   illusionculumAccentBudget,
   type IllusionculumCameraSink,
 } from "./illusionculum-assembly-accents.ts";
+import {
+  createIllusionculumScrollAccents,
+  illusionculumScrollAccentBudget,
+} from "./illusionculum-scroll-accents.ts";
 import { createIllusionculumImageLoader } from "./illusionculum-image-loader.js";
 import { ILLUSIONCULUM_FORM_CHAIN, ILLUSIONCULUM_FORM_PATHS } from "./illusionculum-assembly.ts";
 
@@ -103,19 +109,25 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
 /** The nanite kit, loaded with the scene's pictures: Rexonance's hex chips,
  * comets and effects (src/lib/rexonance-nanites.ts), with this suit's own
  * guideway conduit, plate outlines and gold boxes. */
-export const loadIllusionculumNanites = (compact = false) =>
+export const loadIllusionculumNanites = (
+  compact = false,
+  staging: IllusionculumStaging = ILLUSIONCULUM_ARMOUR_STAGING,
+) =>
   import("./rexonance-nanites.ts").then((kit) => ({
     cells: { ...kit.REXONANCE_NANITE_CELLS, src: "/illusionculum-nanites-20261027/cells.webp" },
     comets: kit.REXONANCE_NANITE_COMETS,
     fx: kit.REXONANCE_NANITE_FX,
     guide: compact ? undefined : ILLUSIONCULUM_SUIT_GUIDE,
-    staging: ILLUSIONCULUM_ARMOUR_STAGING,
+    staging,
     seams: ILLUSIONCULUM_SUIT_SEAMS,
     goldBoxes: ILLUSIONCULUM_SUIT_GOLD_BOXES,
   }));
 
-/** The scene's config: this suit in the Rexonance engine's terms. */
-export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
+/** The scene's config: this suit in the Rexonance engine's terms (the gold
+ * waits for the given staging's seat: the entry's and the lab's by default). */
+export function illusionculumAssemblyConfig(
+  staging: IllusionculumStaging = ILLUSIONCULUM_ARMOUR_STAGING,
+): RexonanceAssemblyConfig {
   return {
     figure: ILLUSIONCULUM_SUIT_FIGURE,
     undersuit: ILLUSIONCULUM_SUIT_UNDERSUIT,
@@ -146,7 +158,7 @@ export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
     gold: {
       atlas: ILLUSIONCULUM_SUIT_GOLD_ATLAS.src,
       cell: ILLUSIONCULUM_SUIT_GOLD_CELL,
-      seatDelay: illusionculumPlateDelay,
+      seatDelay: illusionculumPlateDelayFor(staging),
       cells: ILLUSIONCULUM_SUIT_GOLD_CELLS,
     },
     nanites: loadIllusionculumNanites,
@@ -231,7 +243,15 @@ export function mountIllusionculumAssemblyEngine(
   environment: typeof globalThis = window,
   options: { entry?: boolean; progress?: () => number; camera?: readonly HTMLElement[] } = {},
 ): () => void {
-  const config = illusionculumAssemblyConfig();
+  // Owner (2026-11-03): 「スクロール変身アニメーションは、もとの体がガタガタしない
+  // タイプにもどして。」 — only the entry keeps round 2 (far staging, director,
+  // camera); the scroll is back on the pre-round-2 staging and accents, with
+  // no camera on its canvas or field.
+  const entry = Boolean(options.entry);
+  const config = illusionculumAssemblyConfig(
+    entry ? ILLUSIONCULUM_ARMOUR_STAGING : ILLUSIONCULUM_SCROLL_STAGING,
+  );
+  if (!entry) config.nanites = () => loadIllusionculumNanites(false, ILLUSIONCULUM_SCROLL_STAGING);
   const compact = environment.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
   const loader = compact || options.entry ? createIllusionculumImageLoader(environment) : null;
   if (loader) config.loadImage = loader.load;
@@ -239,28 +259,38 @@ export function mountIllusionculumAssemblyEngine(
   // separate idle windows for each phase of the page's suit-up.
   config.eager = compact || Boolean(options.entry);
   config.progress = options.progress;
-  // This form's director (round 2, 2026-11-01: 「装着アニメーションを大きく
-  // 改善して」): the omen, the nanite torrent pouring into each plate where
-  // it hovers, each plate's hit at its exact contact, the groups' power, the
-  // seal and the afterglow (illusionculum-assembly-accents.ts), at the
+  // The entry: this form's director (round 2, 2026-11-01: 「装着アニメーション
+  // を大きく改善して」): the omen, the nanite torrent pouring into each plate
+  // where it hovers, each plate's hit at its exact contact, the groups' power,
+  // the seal and the afterglow (illusionculum-assembly-accents.ts), at the
   // device's budget — and its camera, written as a CSS transform on the
-  // scene's layers (the entry's whole stage; the scroll's canvas and field).
+  // entry's whole stage. The scroll: the pre-round-2 accents
+  // (illusionculum-scroll-accents.ts), which never move the figure.
   const camera = options.camera ?? [];
-  config.accents = createIllusionculumAccents({
-    size: ILLUSIONCULUM_SUIT_SIZE,
-    pieces: ILLUSIONCULUM_SUIT_PIECES,
-    core: ILLUSIONCULUM_SUIT_MARKS.core,
-    belt: ILLUSIONCULUM_SUIT_MARKS.belt,
-    seams: ILLUSIONCULUM_SUIT_SEAMS,
-    budget: illusionculumAccentBudget(environment, { compact, entry: Boolean(options.entry) }),
-    // Phones frame closer already (the calls sit under the figure): a
-    // gentler move there.
-    camera: illusionculumCameraSink(
-      runway,
-      camera,
-      (options.entry ? 1 : 0.7) * (compact ? 0.62 : 1),
-    ),
-  });
+  if (!entry)
+    config.accents = createIllusionculumScrollAccents({
+      size: ILLUSIONCULUM_SUIT_SIZE,
+      pieces: ILLUSIONCULUM_SUIT_PIECES,
+      core: ILLUSIONCULUM_SUIT_MARKS.core,
+      seams: ILLUSIONCULUM_SUIT_SEAMS,
+      budget: illusionculumScrollAccentBudget(environment, { compact, entry: false }),
+    });
+  else
+    config.accents = createIllusionculumAccents({
+      size: ILLUSIONCULUM_SUIT_SIZE,
+      pieces: ILLUSIONCULUM_SUIT_PIECES,
+      core: ILLUSIONCULUM_SUIT_MARKS.core,
+      belt: ILLUSIONCULUM_SUIT_MARKS.belt,
+      seams: ILLUSIONCULUM_SUIT_SEAMS,
+      budget: illusionculumAccentBudget(environment, { compact, entry: Boolean(options.entry) }),
+      // Phones frame closer already (the calls sit under the figure): a
+      // gentler move there.
+      camera: illusionculumCameraSink(
+        runway,
+        camera,
+        (options.entry ? 1 : 0.7) * (compact ? 0.62 : 1),
+      ),
+    });
   if (compact) {
     config.prewarm = !options.entry;
     if (options.entry) {
@@ -278,7 +308,7 @@ export function mountIllusionculumAssemblyEngine(
     return () => {
       loader?.dispose();
       dispose();
-      releaseIllusionculumCamera(runway, camera);
+      if (entry) releaseIllusionculumCamera(runway, camera);
     };
   } catch (error) {
     loader?.dispose();
