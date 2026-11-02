@@ -1,0 +1,111 @@
+/* Optical centring of controls, from the font and control audit (round 2).
+ *
+ * Every offset below was measured as ink (the pixels of the text against the
+ * control's own background, text colour on and off), not as line boxes, and
+ * the compensation is the measured half-gap: dx = (left gap - right gap) / 2.
+ * Each rule is a layout nudge only (margin or padding on the control's own
+ * content), so it holds with the buttons' glass on or off: the glass sheets
+ * repaint the surface and never touch these properties. The selectors carry an
+ * id-free extra class or :not(#a) so they outrank the route sheets that load
+ * after this one.
+ *
+ * Why the offsets exist: a centred label's trailing letter-spacing sits to the
+ * right of the last glyph (so the ink is left of centre by half of it), the
+ * arrows and the icon boxes carry side bearings of their own, and a number
+ * plate's cut corner leaves its visible shape narrower than its box.
+ */
+
+/* 1. World poster pills: the icon box leaves 5px of empty inset on its left and
+ * the label's tracking trails on its right, so the group sat 0.75-1.75px right
+ * of centre. The last item takes the extra margin on its end (2 x the offset). */
+html body #top.world-artwork-hero .world-stage-controls .poster-shuffle:not(#a) > b {
+  margin-inline-end: 1.75px;
+}
+html body #top.world-artwork-hero .world-stage-controls .poster-reset:not(#a) > b {
+  margin-inline-end: 1.25px;
+}
+html body #top.world-artwork-hero .world-stage-controls .poster-lock:not(#a) > b {
+  margin-inline-end: 3px;
+}
+
+/* 2. Dream chapter poster pills: 4.8px of tracking trails the last glyph and the
+ * ↝ / ◆ marks carry their own bearings (ink 2.5-3px left of centre). */
+html body .dream-poster-controls:not(#a) :is(.dream-poster-shuffle, .dream-poster-reset, .dream-poster-lock) > :nth-child(2) {
+  margin-inline-start: 5.6px;
+}
+
+/* 3. Library and search submit: the trailing tracking plus the arrow's right
+ * bearing put the ink 0.75-1.5px left of centre. The padding sum is unchanged,
+ * so no button changes width. */
+html body .library-browse-submit:not(#a) {
+  padding-inline: 21.25px 18.75px;
+  /* Noto Sans JP's 13px label also sat 0.5-0.75px low in the 56px box. */
+  padding-block: 0 1px;
+}
+html body .search-page .search-submit:not(#a) {
+  padding-inline: 10.75px 9.25px;
+  padding-block: 0 1px;
+}
+@media (min-width: 700px) {
+  html body .search-page .search-submit:not(#a) {
+    padding-inline: 21.5px 18.5px;
+    padding-block: 0;
+  }
+}
+
+/* 3b. The command bar's STORY / RIDERS / RECORDS links: Latin capitals only,
+ * and Noto Sans JP's capitals sit 0.75-0.83px low in a box whose padding is
+ * symmetrical. Half a pixel of padding moves the label up (no font metric can:
+ * Blink rounds a face's ascent and descent in whole pixels, which moves the
+ * kana of the same face by a whole pixel too). */
+html body .topbar nav a:not(#a) {
+  padding-block: 9.5px 10.5px;
+}
+
+/* 3c. Gallery filter chips: the row scrolls sideways on phones, and overflow-x
+ * clips the other axis too, so the keyboard focus ring (2px, 3px off the chip)
+ * lost its top 5px on every chip and its left 5px on the first. Padding makes
+ * room for the ring and the matching negative margin keeps every chip where it
+ * was. */
+html[data-family="gallery"] body .gallery-page :is(.gallery-filters, .gallery-stage-candidates):not(#a) {
+  scroll-padding-inline: 8px;
+}
+@media (max-width: 700px) {
+  html[data-family="gallery"] body .gallery-page[data-gallery-page] .gallery-filters:not(#a) {
+    padding-top: 6px;
+    padding-inline: 6px;
+    margin-block-start: 12px;
+    margin-inline: -6px;
+  }
+}
+
+/* 4. Final stage chapter tabs: the "01" marker's leading space and the label's
+ * 0.72px tracking left the ink up to 1px left of centre on phones. */
+html body .fst-page .rxs-local-nav nav a.dg-control:not(#a)::before {
+  margin-inline-start: 1.5px;
+}
+
+/* 5. Extreme saga chapter tabs. The number plate (a parallelogram: its lower
+ * right corner is cut away) keeps its own padding, and the whole plate-and-label
+ * group moves left by the plate's left padding, which sat the group 1.25px (375px)
+ * to 2.7px (desktop) right of centre. The digits also sat 1px low in their plate
+ * (3px above, 2px below); the padding is swapped so they centre. Only where the
+ * tabs are fixed-width (phones, and 1000px and wider): the intrinsic-width tabs
+ * of a portrait tablet were already centred. */
+@media (max-width: 560px) {
+  html[data-family="special"] body .rxs-page.exs-page .rxs-local-nav nav a:not(#a) > span:first-child {
+    margin-inline-start: -5px;
+    padding-block: 2px 3px;
+  }
+}
+@media (max-width: 389px) {
+  html[data-family="special"] body .rxs-page.exs-page .rxs-local-nav nav a:not(#a) > span:first-child {
+    margin-inline-start: -3px;
+  }
+}
+@media (min-width: 1000px) {
+  html[data-family="special"] body .rxs-page.exs-page .rxs-local-nav nav a:not(#a) > span:first-child {
+    margin-inline-start: -4.5px;
+    padding-block: 2px 3px;
+  }
+}
