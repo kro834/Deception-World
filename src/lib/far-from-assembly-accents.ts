@@ -14,7 +14,6 @@
  */
 
 import { FAR_FROM_SUIT_SIZE } from "./far-from-stage.ts";
-import { farFromCamera } from "./far-from-suitup-camera.ts";
 
 const TAU = Math.PI * 2;
 const HALF = Math.PI / 2;
@@ -148,8 +147,6 @@ export const farFromAccents = Object.freeze({
   },
   front(context: CanvasRenderingContext2D, progress: number, _calm: boolean, width: number) {
     drawRings(context, progress, true, width);
-    // Round 2 (owner, 2026-11-01): the camera follows the assembly.
-    farFromCamera(context, progress);
   },
 });
 
