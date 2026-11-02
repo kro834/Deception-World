@@ -78,7 +78,7 @@ const original = [
   "../styles-site-display-fonts.css?url",
   "hud-fonts",
   // Metric-corrected twins of the faces above, last so they outrank them.
-  "../styles-opening-fonts.css?url",
+  "../styles-site-metric-faces.css?url",
 ];
 
 test("non-opening pages keep every original shared stylesheet and its cascade order", () => {
@@ -106,7 +106,7 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     .filter((href) => !omitted.has(href))
     .filter((href) => href !== "../styles-site-display-fonts.css?url")
     // The opening merges the corrected faces in place of the remote sheets.
-    .filter((href) => href !== "../styles-opening-fonts.css?url")
+    .filter((href) => href !== "../styles-site-metric-faces.css?url")
     .filter((href) => href !== "../styles-saga-streamline.css?url")
     .filter((href) => href !== "@/styles-interaction-choreography.css?url")
     // Owner (2026-10-30): the future spectrum paints no title surface, so the title skips it.

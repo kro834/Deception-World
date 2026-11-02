@@ -1,0 +1,63 @@
+/* Metric-corrected faces for the routes other than the title.
+ * The same Cinzel, Oxanium and Michroma faces (families, ranges, display=swap and
+ * fonts.gstatic.com URLs) as the Google sheets and as styles-opening-fonts.css, plus
+ * ascent/descent overrides that put the capitals on the line-box centre. Loaded after
+ * the remote sheets so each face outranks its Google twin. Noto Sans JP is left alone:
+ * its kana and kanji already sit centred and only its Latin capitals sit low, which the
+ * overrides cannot separate. Kept equal to the title's snapshot by opening-font-delivery.test.mjs.
+ */
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  ascent-override: 102.5%;
+  descent-override: 32.5%;
+  line-gap-override: 0%;
+  src: url(https://fonts.gstatic.com/s/cinzel/v26/8vIJ7ww63mVu7gt7-GT7PkRXM8Xx.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cinzel';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  ascent-override: 102.5%;
+  descent-override: 32.5%;
+  line-gap-override: 0%;
+  src: url(https://fonts.gstatic.com/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  ascent-override: 84.5%;
+  descent-override: 15.5%;
+  line-gap-override: 0%;
+  src: url(https://fonts.gstatic.com/s/oxanium/v21/RrQQboN_4yJ0JmiMe2zE0ZJCZ4cQGg.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxanium';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  ascent-override: 84.5%;
+  descent-override: 15.5%;
+  line-gap-override: 0%;
+  src: url(https://fonts.gstatic.com/s/oxanium/v21/RrQQboN_4yJ0JmiMe2LE0ZJCZ4c.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Michroma';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  ascent-override: 109%;
+  descent-override: 34%;
+  line-gap-override: 0%;
+  src: url(https://fonts.gstatic.com/l/font?kit=PN_zRfy9qWD8fEagAMg_rz7b_srp7lgG-awxfvIhj-Ijq7bkddaQz7AxuDq5bWQIrA1QSEuZMyOJQPTgO9wOEmOJ2REP6mo&skey=967406fa199edd66&v=v21) format('woff2');
+  unicode-range: U+20, U+23, U+25-26, U+2b, U+2d-3a, U+3c, U+3e, U+41-5a, U+7c, U+b7;
+}
