@@ -57,7 +57,10 @@ function selectors(source) {
 }
 
 test('every rule waits for the option: html[data-button-style="liquid"]', () => {
-  const rules = selectors(css);
+  // Keyframes are inert definitions (only scoped rules name them); their
+  // steps are not selectors. Only the glass's own (lg-) keyframes exist.
+  for (const [, name] of css.matchAll(/@keyframes\s+([\w-]+)/g)) assert.match(name, /^lg-/);
+  const rules = selectors(css.replace(/@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, ""));
   assert.ok(rules.length > 20);
   for (const rule of rules)
     for (const part of splitList(rule))
@@ -66,8 +69,8 @@ test('every rule waits for the option: html[data-button-style="liquid"]', () => 
         /^html\[data-button-style="liquid"\]/,
         `unscoped selector: ${part.slice(0, 80)}`,
       );
-  // No bare custom properties or keyframes leak out with the option off.
-  assert.doesNotMatch(css, /@keyframes|:root\s*\{/);
+  // No bare custom properties leak out with the option off.
+  assert.doesNotMatch(css, /:root\s*\{/);
 });
 
 test("the sheet's target list and the pointer light's list are the same", async () => {
@@ -114,8 +117,9 @@ test("the lens is Chromium-only and never in economy; blur and specular are the 
   const base = css.match(
     /:not\(#lg-glass\):not\(#lg-glass\):not\(#lg-glass\) \{\n {2}border-color[\s\S]*?\n\}/,
   )[0];
-  assert.match(base, /-webkit-backdrop-filter: blur\(var\(--lg-blur\)\) saturate/);
-  assert.match(base, /backdrop-filter: blur\(var\(--lg-blur\)\) saturate/);
+  // (the blur rises from nothing as the glass materializes: --lg-mat)
+  assert.match(base, /-webkit-backdrop-filter: blur\(calc\(var\(--lg-blur\) \* var\(--lg-mat\)\)\) saturate/);
+  assert.match(base, /backdrop-filter: blur\(calc\(var\(--lg-blur\) \* var\(--lg-mat\)\)\) saturate/);
   assert.doesNotMatch(base, /url\(/);
   // The lens attribute: only where userAgentData (Chromium) and CSS.supports agree,
   // and not under reduced transparency.
@@ -127,9 +131,15 @@ test("the lens is Chromium-only and never in economy; blur and specular are the 
 });
 
 test("motion, economy, forced colours and touch budgets", () => {
-  // The gel press: only under no-preference, through the shared press driver.
-  const motion = css.match(/@media \(prefers-reduced-motion: no-preference\) \{[\s\S]*?\n\}\n/)[0];
-  assert.match(motion, /--dw-press-scale: 1\.05 0\.9;/);
+  // The press: only under no-preference, through the shared press driver. It
+  // swells (interactive Liquid Glass scales up and bounces), never squashes.
+  const motion = css.match(/@media \(prefers-reduced-motion: no-preference\) \{\n {2}html\[data-button-style="liquid"\]\n {4}body\n {4}:is\([\s\S]*?\n\}\n/)[0];
+  assert.match(motion, /--dw-press-scale: 1\.06;/);
+  for (const [, value] of css.matchAll(/--dw-press-scale: ([^;]+);/g)) {
+    const parts = value.trim().split(/\s+/).map(Number);
+    assert.equal(parts.length, 1, `uniform swell: ${value}`);
+    assert.ok(parts[0] > 1 && parts[0] <= 1.12, `a little larger: ${value}`);
+  }
   assert.match(motion, /var\(--lg-spring\)/);
   assert.equal(css.match(/--dw-press-scale:/g).length, motion.match(/--dw-press-scale:/g).length);
   // Ciel's button and the slide-to-open pills are never squashed (their drags measure the box).

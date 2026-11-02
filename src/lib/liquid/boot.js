@@ -543,9 +543,21 @@ function initRail(root) {
     pending = null;
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
+    stretch(0, 0);
     reset();
     unlockPage();
     if (wasActive) settle(active);
+  };
+
+  // The glass option's droplet stretches along its travel and thins across
+  // it, as the selection lens of a native tab bar does when dragged fast:
+  // the finger's smoothed velocity (px/ms) as -1..1 on each axis, which the
+  // sheet turns into a scale on the decorative surface (never the lens box,
+  // which the drag places). Written once per processed move.
+  const stretch = (vx, vy) => {
+    if (!lens) return;
+    lens.style.setProperty('--liquid-lens-vx', clamp(vx / 1.6, -1, 1).toFixed(2));
+    lens.style.setProperty('--liquid-lens-vy', clamp(vy / 1.6, -1, 1).toFixed(2));
   };
 
   const process = () => {
@@ -587,6 +599,7 @@ function initRail(root) {
         if (lens.style.height !== height) { lens.style.height = height; sizeLens(geo); }
         lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
         nudgeLens(geo);
+        stretch(gesture.vx, gesture.vy);
       }
       if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
       contact(m.x, m.y);
@@ -620,6 +633,7 @@ function initRail(root) {
       if (lens.style.height !== height) { lens.style.height = height; sizeLens(g); }
       lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
       nudgeLens(g);
+      stretch(gesture.vx, 0);
     }
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
     contact(m.x, m.y);

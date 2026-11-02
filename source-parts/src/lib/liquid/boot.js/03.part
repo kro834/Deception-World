@@ -1,3 +1,8 @@
+      const g = geos[preview];
+      const tab = tabs()[preview];
+      if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
+      const lw = g.width, lh = g.height;
+      const insetX = (Number(lens?.style.getPropertyValue('--liquid-held-scale-x') || 1) - 1) * lw / 2 + 1;
       const insetY = (Number(lens?.style.getPropertyValue('--liquid-held-scale-y') || 1) - 1) * lh / 2 + 1;
       const geo = {
         x: clamp(px - lw / 2, insetX, Math.max(insetX, root.clientWidth - lw - insetX)),
@@ -12,6 +17,7 @@
         if (lens.style.height !== height) { lens.style.height = height; sizeLens(geo); }
         lens.style.transform = 'translate3d(' + geo.x.toFixed(2) + 'px,' + geo.y.toFixed(2) + 'px,0)';
         nudgeLens(geo);
+        stretch(gesture.vx, gesture.vy);
       }
       if (getRenderer().isActive(root)) getRenderer().setGeometry(geo);
       contact(m.x, m.y);
@@ -45,6 +51,7 @@
       if (lens.style.height !== height) { lens.style.height = height; sizeLens(g); }
       lens.style.transform = 'translate3d(' + g.x.toFixed(2) + 'px,' + g.y.toFixed(2) + 'px,0)';
       nudgeLens(g);
+      stretch(gesture.vx, 0);
     }
     if (getRenderer().isActive(root)) getRenderer().setGeometry(g);
     contact(m.x, m.y);
@@ -282,7 +289,3 @@
   window.addEventListener('pointerup', finish, true);
   window.addEventListener('pointercancel', cancel, true);
   window.addEventListener('blur', cancel);
-  window.addEventListener('pagehide', cancel);
-  const cancelOtherTouch = (event) => {
-    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
-  };

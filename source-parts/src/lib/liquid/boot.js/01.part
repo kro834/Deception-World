@@ -284,3 +284,8 @@ class GlassRenderer {
         settling = true;
       }
     }
+
+    if (this.releasing) {
+      // Exponential release: ~150ms to the shader's transparent cutoff.
+      const fade = Math.exp(-elapsed / 42);
+      this.phase *= fade; this.phaseVelocity = 0;

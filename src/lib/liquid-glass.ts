@@ -151,10 +151,42 @@ export function watchLiquidPointer(doc: Document = document) {
   // screen (an iPad with a trackpad) still matches hover: hover, so the
   // sheet's hover light is held off from a touch until the mouse moves.
   const root = doc.documentElement;
+  // A finger lights the glass from where it lands: the press's light
+  // "starts right under your fingertips" and spreads (the sheet eases
+  // --lg-spread). One box read per press, none while it is held; the place
+  // is cleared once the release's light has faded.
+  let touched: HTMLElement | null = null;
+  let untouch = 0;
+  const clearTouch = () => {
+    untouch = 0;
+    if (touched && touched !== current) {
+      touched.style.removeProperty("--lg-px");
+      touched.style.removeProperty("--lg-py");
+    }
+    touched = null;
+  };
   const down = (event: PointerEvent) => {
     if (event.pointerType === "mouse") root.removeAttribute(LIQUID_TOUCH_ATTRIBUTE);
-    else if (!root.hasAttribute(LIQUID_TOUCH_ATTRIBUTE))
-      root.setAttribute(LIQUID_TOUCH_ATTRIBUTE, "");
+    else {
+      if (!root.hasAttribute(LIQUID_TOUCH_ATTRIBUTE)) root.setAttribute(LIQUID_TOUCH_ATTRIBUTE, "");
+      const target =
+        event.target instanceof view.Element ? event.target.closest(TARGET_SELECTOR) : null;
+      if (untouch) view.clearTimeout(untouch);
+      clearTouch();
+      if (target instanceof view.HTMLElement) {
+        const box = target.getBoundingClientRect();
+        if (box.width && box.height) {
+          const px = Math.min(1, Math.max(0, (event.clientX - box.left) / box.width));
+          const py = Math.min(1, Math.max(0, (event.clientY - box.top) / box.height));
+          target.style.setProperty("--lg-px", `${(px * 100).toFixed(1)}%`);
+          target.style.setProperty("--lg-py", `${(py * 100).toFixed(1)}%`);
+          touched = target;
+        }
+      }
+    }
+  };
+  const up = () => {
+    if (touched && !untouch) untouch = view.setTimeout(clearTouch, 900);
   };
 
   const move = (event: PointerEvent) => {
@@ -182,9 +214,15 @@ export function watchLiquidPointer(doc: Document = document) {
   doc.addEventListener("pointerdown", down, options);
   doc.addEventListener("pointermove", move, options);
   doc.addEventListener("pointerout", leave, options);
+  doc.addEventListener("pointerup", up, options);
+  doc.addEventListener("pointercancel", up, options);
   return () => {
     if (frame) view.cancelAnimationFrame(frame);
+    if (untouch) view.clearTimeout(untouch);
+    clearTouch();
     clear();
+    doc.removeEventListener("pointerup", up, options);
+    doc.removeEventListener("pointercancel", up, options);
     root.removeAttribute(LIQUID_TOUCH_ATTRIBUTE);
     doc.removeEventListener("pointerdown", down, options);
     doc.removeEventListener("pointermove", move, options);

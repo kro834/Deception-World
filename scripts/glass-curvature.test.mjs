@@ -185,7 +185,7 @@ test("a squircle's field is the superellipse: fuller corners than a circle, tang
   assert.match(controls, /corner-shape: var\(--lg-hold-cs, round\);/);
 });
 
-test("the rim light comes from the same normals: lit on the light's side, dark band along the bezel", async () => {
+test("the rim light comes from the same normals: a thin line at both ends of the light axis", async () => {
   const lib = await loadMaps();
   const maps = lib.surfaceMaps(lib.quantizeShape(120, 48, 24, 1));
   const { cols, rows, data } = maps.rim;
@@ -195,31 +195,38 @@ test("the rim light comes from the same normals: lit on the light's side, dark b
   };
   // The flat centre is clear.
   assert.equal(at(Math.floor(cols / 2), Math.floor(rows / 2)).a, 0);
-  // The upper-left rim (toward the light) is a bright arc; the lower-right
-  // rim carries the band (dark) with the faint caustic.
+  // Liquid Glass lights both ends of the light's axis: the upper-left rim
+  // (toward the light) is the brighter line, the lower-right one is lit too.
   const lit = at(Math.floor(cols / 2), 1);
   const far = at(Math.floor(cols / 2), rows - 2);
-  assert.ok(lit.a > 60 && lit.lum > 200, `lit rim ${JSON.stringify(lit)}`);
-  assert.ok(far.a > 20 && far.lum < lit.lum, `far rim ${JSON.stringify(far)}`);
-  // The bevel is thick: a 48px pill's band is over a third of its half-height.
+  assert.ok(lit.a > 80 && lit.lum > 200, `lit rim ${JSON.stringify(lit)}`);
+  assert.ok(far.a > 40 && far.lum > 160, `far rim ${JSON.stringify(far)}`);
+  assert.ok(far.a < lit.a, `the far end is weaker: ${far.a} < ${lit.a}`);
+  // A thin line, not a bevel: a few pixels in, the rim is nearly gone, and
+  // the mid-bezel carries no band (no crest, no pillow).
+  const inward = at(Math.floor(cols / 2), 6);
+  assert.ok(inward.a < lit.a * 0.25, `inward ${JSON.stringify(inward)}`);
+  const mid = at(Math.floor(cols / 2), Math.round(maps.bezel * 0.6));
+  assert.ok(mid.a < 24, `mid-bezel ${JSON.stringify(mid)}`);
+  // The squircle profile: steep only at the rim, so the slope is far
+  // gentler than a circle's a third of the way in.
+  const circle = (t) => (1 - t) / Math.sqrt(1 - (1 - t) ** 2);
+  assert.ok(-lib.bezelProfile(0.33).slope < circle(0.33) * 0.6);
+  assert.ok(Math.abs(lib.bezelProfile(0.5).height - Math.pow(1 - 0.5 ** 4, 0.25)) < 1e-9);
+  // The bezel band is still the glass's own (refraction reads it).
   assert.ok(maps.bezel >= 9 && maps.bezel <= 18, `bezel ${maps.bezel}`);
-  // The crest (where the bevel meets the flat top) is a second, fainter
-  // line: the pixel at the bezel's inner edge is lit where the mid-bezel
-  // on the far side is dark.
-  const crestRow = Math.round(maps.bezel * 0.84);
-  const midRow = Math.round(maps.bezel * 0.5);
-  const crest = at(Math.floor(cols / 2), rows - 1 - crestRow);
-  const mid = at(Math.floor(cols / 2), rows - 1 - midRow);
-  assert.ok(crest.lum > mid.lum, `crest ${JSON.stringify(crest)} over mid ${JSON.stringify(mid)}`);
-  // The fringe: the outermost lit rim is warm, the outermost far rim cool.
+  // Dispersion: the outermost rim splits warm (red over blue), strongest on
+  // the diagonals; a little further in it turns cool.
   const rgb = (col, row) => {
     const i = (row * cols + col) * 4;
     return [data[i], data[i + 1], data[i + 2]];
   };
   const top = rgb(Math.floor(cols / 2), 1);
-  const bottom = rgb(Math.floor(cols / 2), rows - 2);
-  assert.ok(top[0] >= top[2], `warm lit rim ${top}`);
-  assert.ok(bottom[2] >= bottom[0], `cool far rim ${bottom}`);
+  assert.ok(top[0] > top[2], `warm outer rim ${top}`);
+  const warmth = (c) => c[0] - c[2];
+  const diag = rgb(Math.round(cols * 0.09), Math.round(rows * 0.18));
+  if (at(Math.round(cols * 0.09), Math.round(rows * 0.18)).a > 40)
+    assert.ok(warmth(diag) >= warmth(top) - 4, `diagonal fringe ${diag} vs ${top}`);
   // The edge is the light, not a line: no border colour, no hairline.
   const material = glass.slice(glass.indexOf("/* /lg:targets */"), glass.indexOf("/* The lens (Chromium)"));
   assert.match(material, /border-color: transparent !important;/);
@@ -242,7 +249,8 @@ test("Chromium gets the shape's lens with the capsule as fallback; the rim is a 
       assert.match(selector, /\[data-liquid-lens\]:not\(\[data-world-effects="economy"\]\)/, selector);
     }
   }
-  assert.ok(lensRules >= 5, `${lensRules} lens rules`);
+  // (the slide-to-open thumb is an opaque white capsule now: no lens)
+  assert.ok(lensRules >= 4, `${lensRules} lens rules`);
   // The filters exist only where the engine draws them.
   assert.match(watcher, /const withLens = root\.hasAttribute\(LIQUID_LENS_ATTRIBUTE\);/);
   assert.match(watcher, /if \(withLens\) \{\s*svg = doc\.createElementNS/);

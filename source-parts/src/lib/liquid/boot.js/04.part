@@ -1,3 +1,7 @@
+  window.addEventListener('pagehide', cancel);
+  const cancelOtherTouch = (event) => {
+    if (holdToDrag && gesture?.pointerType === 'touch' && event.pointerType === 'touch' && event.pointerId !== gesture.pointerId) cancel();
+  };
   const cancelWithEscape = (event) => {
     if (holdToDrag && gesture && event.key === 'Escape') {
       event.preventDefault();

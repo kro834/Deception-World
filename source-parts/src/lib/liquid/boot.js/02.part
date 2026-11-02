@@ -1,8 +1,3 @@
-
-    if (this.releasing) {
-      // Exponential release: ~150ms to the shader's transparent cutoff.
-      const fade = Math.exp(-elapsed / 42);
-      this.phase *= fade; this.phaseVelocity = 0;
       this.velocity.x *= fade; this.velocity.y *= fade;
       const glide = 1 - fade, s = this.targetGeometry || this.geometry;
       const tx = s.x + s.width / 2, ty = s.y + s.height / 2;
@@ -257,9 +252,21 @@ function initRail(root) {
     pending = null;
     if (moveFrame !== null) cancelAnimationFrame(moveFrame);
     moveFrame = null;
+    stretch(0, 0);
     reset();
     unlockPage();
     if (wasActive) settle(active);
+  };
+
+  // The glass option's droplet stretches along its travel and thins across
+  // it, as the selection lens of a native tab bar does when dragged fast:
+  // the finger's smoothed velocity (px/ms) as -1..1 on each axis, which the
+  // sheet turns into a scale on the decorative surface (never the lens box,
+  // which the drag places). Written once per processed move.
+  const stretch = (vx, vy) => {
+    if (!lens) return;
+    lens.style.setProperty('--liquid-lens-vx', clamp(vx / 1.6, -1, 1).toFixed(2));
+    lens.style.setProperty('--liquid-lens-vy', clamp(vy / 1.6, -1, 1).toFixed(2));
   };
 
   const process = () => {
@@ -282,8 +289,3 @@ function initRail(root) {
       const preview = nearestTab(px, py, geos);
       gesture.raw = preview;
       setContact(preview);
-      const g = geos[preview];
-      const tab = tabs()[preview];
-      if (tab && getRenderer().isActive(root)) getRenderer().setAccent(getComputedStyle(tab).getPropertyValue('--liquid-accent').trim());
-      const lw = g.width, lh = g.height;
-      const insetX = (Number(lens?.style.getPropertyValue('--liquid-held-scale-x') || 1) - 1) * lw / 2 + 1;

@@ -14,9 +14,9 @@
 //   nothing moves. Red bends x, green bends y, mid-grey rests, scaled to the
 //   control's box (feDisplacementMap in primitiveUnits="objectBoundingBox");
 // - its rim light: the same normals lit from the glass's light direction
-//   (a specular arc on the lit side, the crest where the bevel meets the
-//   flat top, a fresnel density band along the whole bezel, a caustic on
-//   the far side and a faint spectral fringe at the outermost rim), drawn
+//   (a thin specular line at both ends of the light axis, the lit end
+//   brighter, a faint dark hairline at the very edge and a warm/cool
+//   dispersion fringe strongest on the diagonals), drawn
 //   as a background layer on every engine, so Safari and Firefox, which
 //   draw no url() backdrop, still read the bezel's curve. It is the edge:
 //   the glass wears no border line.
@@ -26,7 +26,7 @@
 // handful of maps serve a page of controls.
 
 /** Bump when the maths changes: the keys (and so the filter ids) change with it. */
-export const CURVATURE_VERSION = 2;
+export const CURVATURE_VERSION = 3;
 
 /** Glass: n = 1.5 (crown glass; iOS's material refracts about this much). */
 export const GLASS_INDEX = 1.5;
@@ -211,17 +211,22 @@ export function shapeField(shape: LensShape, x: number, y: number) {
 
 /**
  * The bezel's profile: t is 0 at the rim and 1 where the flat centre
- * starts. A quarter circle (vertical at the rim, flat at the centre) eased
- * into the flat so the join has no crease. Returns height (0..1) and its
- * slope toward the rim (negative: the surface falls away toward the rim).
+ * starts. The convex squircle, h = (1 - (1 - t)^4)^(1/4): the profile
+ * Apple's glass is read to favour (kube.io's teardown, 2025-10): it stays
+ * almost flat across most of the bezel and turns down only near the rim,
+ * so the refraction gathers in a thin band at the edge (the bezel reads
+ * optically thinner than it is) and the flat join has no crease. Returns
+ * height (0..1) and its slope toward the rim (negative: the surface falls
+ * away toward the rim).
  */
 export function bezelProfile(t: number): { height: number; slope: number } {
   if (t >= 1) return { height: 1, slope: 0 };
   if (t <= 0) return { height: 0, slope: -8 };
-  // A circle's quarter: h = sqrt(1 - (1-t)^2).
   const u = 1 - t;
-  const height = Math.sqrt(1 - u * u);
-  const slope = -u / Math.max(0.125, Math.sqrt(1 - u * u));
+  const u4 = u * u * u * u;
+  const height = Math.pow(1 - u4, 0.25);
+  // dh/dt = u^3 (1 - u^4)^(-3/4), capped at the rim's vertical wall.
+  const slope = -Math.min(8, (u * u * u) / Math.pow(Math.max(1e-3, 1 - u4), 0.75));
   return { height, slope };
 }
 
@@ -323,41 +328,35 @@ export function surfaceMaps(shape: LensShape): SurfaceMaps {
       const nx = (field.nx * grad) / nLen;
       const ny = (field.ny * grad) / nLen;
       const nz = 1 / nLen;
-      // Which side of the light this rim sits on: 1 toward it, -1 away,
-      // wrapped so the arc fades round the sides instead of ending.
+      // Where this rim sits on the light's axis: 1 facing the light (upper
+      // left), -1 facing away (lower right). Liquid Glass lights both ends
+      // of the axis (a highlight travels round the silhouette from the
+      // light and catches the opposite edge too), the far one weaker; the
+      // sides between them stay dark.
       const facing = field.nx * sx + field.ny * sy;
-      const lit = clamp((facing + 0.2) / 1.2, 0, 1);
-      const unlit = clamp((0.2 - facing) / 1.2, 0, 1);
-      // Fresnel: the glass mirrors its surroundings where it is seen at a
-      // grazing angle, which is the outermost rim. On the light's side that
-      // is the specular arc, a bright line hugging the edge and fading
-      // inward; a narrow Blinn highlight sits just inside it.
-      const fresnel = Math.pow(1 - nz, 3.2);
-      const blinn = Math.pow(Math.max(0, nx * hx + ny * hy + nz * hz), 64);
-      const arc = fresnel * Math.pow(lit, 1.5) * 1.3 + blinn * 0.45 * lit;
-      // The crest: where the bevel meets the flat top, a faint line all the
-      // way round (brighter toward the light). It is what makes the edge
-      // read as a bevel and not a rounded wall.
-      const crest = Math.exp(-Math.pow((t - 0.84) / 0.06, 2)) * (0.06 * lit + 0.02);
-      // The far rim: light leaving the glass makes a thin bright line at
-      // the very edge (the caustic), with the glass's thickness as a dark
-      // band just inside it.
-      const caustic = 0.5 * unlit * Math.pow(1 - t, 5);
-      const white = Math.min(1, arc + crest + caustic);
-      // The glass is thickest in the bezel: a faint density band (what
-      // makes a Safari pill read as curved without a lens), the far side's
-      // thickness band, and the grazing far edge under the caustic.
-      const band = 0.12 * Math.pow(Math.sin(Math.PI * t), 1.2) * (1 - 0.6 * lit);
-      const thick = 0.28 * unlit * Math.exp(-Math.pow((t - 0.2) / 0.12, 2));
-      const black = clamp(band + thick + fresnel * 0.2 * unlit, 0, 1);
-      // The fringe: a thick edge splits white light; warm on the lit rim,
-      // cool on the far one, only at the outermost sliver.
-      const fringe = Math.pow(1 - t, 3);
-      const warm = fringe * lit;
-      const cool = fringe * unlit;
-      const cr = clamp(1 + 0.14 * warm - 0.08 * cool, 0, 1.2);
-      const cg = clamp(1 - 0.03 * warm - 0.02 * cool, 0, 1.2);
-      const cb = clamp(1 - 0.12 * warm + 0.16 * cool, 0, 1.2);
+      const lit = Math.pow(clamp(facing, 0, 1), 1.4);
+      const unlit = Math.pow(clamp(-facing, 0, 1), 1.4);
+      // Fresnel: the glass mirrors its surroundings at a grazing angle. On
+      // the squircle profile that is only the outermost pixel or two, so
+      // the specular is a thin line hugging the edge, as on the real glass
+      // (about a point wide), not a bevel.
+      const fresnel = Math.pow(1 - nz, 2.2);
+      const blinn = Math.pow(Math.max(0, nx * hx + ny * hy + nz * hz), 96);
+      const arc = fresnel * (lit * 1.7 + unlit * 1.05 + 0.16) + blinn * 0.22 * lit;
+      const white = Math.min(1, arc);
+      // The edge itself: a faint dark hairline outside the specular (the
+      // backdrop compressed by the rim), which is what outlines the glass
+      // over light content; no inner band, no crest (no pillow).
+      const black = clamp(0.3 * Math.pow(1 - t, 7) * (1 - 0.6 * lit), 0, 1);
+      // Dispersion: a thick edge splits white light into a warm outer and a
+      // cool inner fringe, strongest where the rim runs diagonally (the
+      // corners of a capsule, both ends of the light axis).
+      const diagonal = 0.35 + 0.65 * clamp(Math.abs(field.nx * field.ny) * 2, 0, 1);
+      const outer = Math.pow(1 - t, 6) * diagonal;
+      const inner = Math.exp(-Math.pow((t - 0.22) / 0.08, 2)) * diagonal;
+      const cr = clamp(1 + 0.3 * outer - 0.22 * inner, 0, 1.3);
+      const cg = clamp(1 - 0.06 * outer + 0.02 * inner, 0, 1.3);
+      const cb = clamp(1 - 0.26 * outer + 0.3 * inner, 0, 1.3);
       // White over black over transparency, premultiplied for the canvas.
       const alpha = white + black * (1 - white);
       if (alpha <= 0.002) continue;

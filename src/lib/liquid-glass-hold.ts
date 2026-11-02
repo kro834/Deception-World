@@ -123,7 +123,7 @@ const HOLD = "data-lg-hold";
 const KIND = "data-lg-hold-kind";
 const RAISE = "data-lg-hold-raise";
 const LIFT = "data-lg-hold-lift";
-const PROPS = ["--lg-hold-s"] as const;
+const PROPS = ["--lg-hold-s", "--lg-dx", "--lg-dy"] as const;
 /* On a pill group (liquid-glass-controls.ts) whose chosen option is held. */
 const PILL_S = "--lg-hold-pill-s";
 
@@ -384,8 +384,16 @@ export function watchLiquidHold(doc: Document = document) {
     overlay.style.setProperty("--lg-ty", `${ty.toFixed(1)}px`);
     // Toward the finger, -1..1: the rim's lobe, the caustic and the spill
     // read the direction (the sheet takes its angle with atan2()).
-    overlay.style.setProperty("--lg-dx", ((tx / p.width) * 2 - 1).toFixed(2));
-    overlay.style.setProperty("--lg-dy", ((ty / p.height) * 2 - 1).toFixed(2));
+    const dx = ((tx / p.width) * 2 - 1).toFixed(2);
+    const dy = ((ty / p.height) * 2 - 1).toFixed(2);
+    overlay.style.setProperty("--lg-dx", dx);
+    overlay.style.setProperty("--lg-dy", dy);
+    // The swollen control flexes toward the finger with its light (the
+    // sheet's stretch); two custom properties, no layout.
+    if (p.kind === "swell") {
+      p.target.style.setProperty("--lg-dx", dx);
+      p.target.style.setProperty("--lg-dy", dy);
+    }
   };
 
   /* Ciel's button: its drag (zeus-button.tsx) begins before the hold and

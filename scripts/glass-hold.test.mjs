@@ -501,7 +501,7 @@ test("the hold is the finger as a light over curved glass: highlight, reflection
 
 test("the fallbacks: reduced motion, economy, reduced transparency, forced colours", () => {
   const swell = section.indexOf("@media (prefers-reduced-motion: no-preference)");
-  const firstScale = section.indexOf("scale: var(--lg-hold-s");
+  const firstScale = section.indexOf("scale: calc(var(--lg-hold-s");
   assert.ok(swell > 0 && swell < firstScale, "the swell waits for no-preference");
   const block = section.slice(swell, section.indexOf("/* Held, the glass keeps"));
   for (const { selector } of rules(block))
@@ -560,7 +560,10 @@ test("the switch sliders swell with a sheen: the rails' lens, the slide lens, th
     /\.liquid-swipe-tabs\[data-liquid-held="true"\]\s*>\s*\.liquid-selection-lens\s*>\s*\.liquid-selection-surface[^{]*\{([^}]*)\}/,
   );
   assert.ok(held, "held rail surface rule");
-  assert.match(held[1], /scale: calc\(1 \+ min\(0\.5, 44 \/ var\(--liquid-lens-wn, 88\)\)\)\s*calc\(1 \+ min\(0\.6, 34 \/ var\(--liquid-lens-hn, 56\)\)\) !important/);
+  assert.match(held[1], /scale: calc\(\s*\(1 \+ min\(0\.5, 44 \/ var\(--liquid-lens-wn, 88\)\)\) \*/);
+  assert.match(held[1], /calc\(\s*\(1 \+ min\(0\.6, 34 \/ var\(--liquid-lens-hn, 56\)\)\) \*/);
+  // Stretched along a fast drag, thinner across it (boot.js's velocity).
+  assert.match(held[1], /1 \+ 0\.2 \* max\(var\(--liquid-lens-vx, 0\), -1 \* var\(--liquid-lens-vx, 0\)\)/);
   assert.match(held[1], /translate: var\(--liquid-lens-dx, 0px\) var\(--liquid-lens-dy, 0px\)/);
   assert.doesNotMatch(held[1], /(^|[\s;])(transform|width|height|left|top)\s*:/);
   // The 六詠 rail's 82 x 66 lens grows by half or more both ways.
@@ -570,7 +573,7 @@ test("the switch sliders swell with a sheen: the rails' lens, the slide lens, th
   assert.match(c, /@keyframes lg-rail-sheen/);
   assert.match(c, /liquid-selection-surface[^{]*::after \{\s*opacity: 1;\s*animation: lg-rail-sheen/);
   // Only under full motion, never in economy.
-  const swell = controls.indexOf("scale: calc(1 + min(0.5, 44 / var(--liquid-lens-wn");
+  const swell = controls.indexOf("(1 + min(0.5, 44 / var(--liquid-lens-wn");
   const media = controls.lastIndexOf("@media (prefers-reduced-motion: no-preference)", swell);
   assert.ok(media > 0 && controls.slice(media, swell).split("@media").length === 2);
   assert.match(controls.slice(media, swell), /:not\(\[data-world-effects="economy"\]\)/);

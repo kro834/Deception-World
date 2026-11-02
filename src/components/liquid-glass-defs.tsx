@@ -12,6 +12,7 @@ import {
 import { watchLiquidControls } from "@/lib/liquid-glass-controls";
 import { watchLiquidCurvature } from "@/lib/liquid-glass-curvature";
 import { watchLiquidHold } from "@/lib/liquid-glass-hold";
+import { watchLiquidTone } from "@/lib/liquid-glass-tone";
 
 /* The red channel is bent a little further than green and blue: a faint
    chromatic fringe at the rim, as a thick lens splits white light. These
@@ -94,7 +95,11 @@ export function LiquidGlassDefs() {
     // The curvature: each control's own bezel, its lens (Chromium, after
     // the attribute above is set) and its rim light (liquid-glass-curvature.ts).
     const stopCurvature = watchLiquidCurvature(document);
+    // The backdrop under each control: light or dark, busy or plain
+    // (liquid-glass-tone.ts), so the glass adapts as Liquid Glass does.
+    const stopTone = watchLiquidTone(document);
     return () => {
+      stopTone();
       stopPointer();
       stopControls();
       stopHold();

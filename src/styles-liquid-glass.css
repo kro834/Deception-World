@@ -64,6 +64,33 @@
   initial-value: 0.08;
 }
 
+/* Liquid Glass imitation (owner, 2026-11-02: 「リキッドグラスの外観を徹底検索
+   し、完全に模倣する様に」; the research notes are in the commit). Two more
+   eased numbers:
+   - --lg-spread: the press's light, which "starts right under your
+     fingertips" and "spreads throughout the element" (WWDC25 "Meet Liquid
+     Glass"): 0 is a small pool at the finger, 1 fills the glass;
+   - --lg-mat: the materialize transition, glass that "materializes in and
+     out by gradually modulating the light bending and lensing" instead of
+     fading: it scales the backdrop's blur and lift from 0 to rest. */
+@property --lg-spread {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --lg-mat {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --lg-shadow-a {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0.34;
+}
+
 /* The curvature (owner, 2026-11-01: 「ガラスの湾曲はfableで作って」;
    src/lib/liquid-glass-curvature.ts). Each measured control carries
    data-lg-curve="<shape key>", and a rule per shape, in a <style> the script
@@ -103,7 +130,13 @@ html[data-button-style="liquid"] {
     1
   );
   --lg-spring-ms: 560ms;
-  --lg-fill-alpha: 0.42;
+  /* The regular variant is a clear glass that "blurs and adjusts the
+     luminosity" of what is behind it (HIG Materials): a light blur, a lift,
+     and only a thin dark veil (the luminosity range is compressed, not
+     painted over). Busy content behind deepens the veil and the shadow;
+     a light backdrop flips the glass light (data-lg-tone,
+     src/lib/liquid-glass-tone.ts). */
+  --lg-fill-alpha: 0.3;
 }
 
 /* ---------------------------------------------------------------
@@ -159,9 +192,9 @@ html[data-button-style="liquid"]
   ) {
   --lg-tint: 122 232 255;
   --lg-tint-a: 0.08;
-  --lg-fill: rgb(8 15 24 / var(--lg-fill-alpha));
-  --lg-sheen: 0.07;
-  --lg-glow: 0.08;
+  --lg-fill: rgb(12 18 26 / var(--lg-fill-alpha));
+  --lg-sheen: 0.05;
+  --lg-glow: 0;
   --lg-rim: 0.7;
   --lg-radius: 999px;
   --lg-corner: round;
@@ -220,36 +253,39 @@ html[data-button-style="liquid"]
   corner-shape: var(--lg-corner, round);
   clip-path: none !important;
   background:
-    /* the bezel's light (the curvature's rim map, over the border box) */
+    /* the bezel's light (the curvature's rim map, over the border box): a
+       thin specular line at both ends of the light axis, the dispersion
+       fringe on the diagonals, a faint dark edge */
     var(--lg-rim-map, none) center / 100% 100% no-repeat border-box,
+    /* the touch: light from inside the glass, starting under the finger
+       and spreading through it as --lg-spread eases to 1 */
     radial-gradient(
-      120% 150% at var(--lg-px) var(--lg-py),
+      calc(36% + 150% * var(--lg-spread)) calc(52% + 190% * var(--lg-spread)) at var(--lg-px)
+        var(--lg-py),
       rgb(255 255 255 / var(--lg-glow)),
-      rgb(255 255 255 / 0) 58%
+      rgb(255 255 255 / calc(var(--lg-glow) * 0.45)) 42%,
+      rgb(255 255 255 / 0) 72%
     ),
-    linear-gradient(
-      180deg,
-      rgb(255 255 255 / var(--lg-sheen)),
-      rgb(255 255 255 / 0) 46%,
-      rgb(var(--lg-tint) / 0.06)
-    ),
+    /* the luminosity lift: the glass gathers light, it does not gloss */
+    linear-gradient(rgb(255 255 255 / calc(var(--lg-sheen) * var(--lg-mat))), rgb(255 255 255 / calc(var(--lg-sheen) * var(--lg-mat)))),
     linear-gradient(rgb(var(--lg-tint) / var(--lg-tint-a)), rgb(var(--lg-tint) / var(--lg-tint-a))),
     var(--lg-fill) !important;
   box-shadow:
-    /* the specular rim on the lit side */
+    /* the specular line where the light enters (upper left) and, weaker,
+       where it leaves (lower right): the glass's silhouette */
     inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
       rgb(255 255 255 / var(--lg-rim)),
-    /* the inner highlight, a soft pool under the lit rim */ inset calc(var(--lg-lx) * -8px)
-      calc(var(--lg-ly) * -10px) 18px -12px rgb(255 255 255 / calc(var(--lg-rim) * 0.55)),
-    /* the thickness: a shadow inside the far rim */ inset calc(var(--lg-lx) * 4px)
-      calc(var(--lg-ly) * 5px) 12px -8px rgb(0 0 0 / 0.42),
-    /* the caustic: light leaving through the far rim, in the accent */ inset
-      calc(var(--lg-lx) * 7px) calc(var(--lg-ly) * 8px) 14px -9px rgb(var(--lg-tint) / 0.5),
-    /* the contact shadow and the ambient one */ 0 0.5px 1px rgb(0 0 0 / 0.32),
-    0 2px 4px -1px rgb(0 0 0 / 0.28),
-    0 14px 28px -12px rgb(0 0 0 / 0.55) !important;
-  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
-  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+    inset calc(var(--lg-lx) * 0.9px) calc(var(--lg-ly) * 0.9px) 0 -0.3px
+      rgb(255 255 255 / calc(var(--lg-rim) * 0.42)),
+    /* touched, the light that fills the glass gathers at its edge (the
+       label in the middle keeps its contrast): nothing at rest (--lg-rim
+       0.7), a bright inner ring at a press (1) */
+    inset 0 0 14px -3px rgb(255 255 255 / calc(max(0, var(--lg-rim) - 0.7) * 0.9)),
+    /* the shadow: soft and low, deeper over busy content (--lg-shadow-a,
+       src/lib/liquid-glass-tone.ts) */ 0 0.5px 1px rgb(0 0 0 / calc(var(--lg-shadow-a) * 0.6)),
+    0 6px 18px -6px rgb(0 0 0 / var(--lg-shadow-a)) !important;
+  -webkit-backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  backdrop-filter: blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
 }
 
 /* The lens (Chromium). The capsule map suits the chips and plates; the
@@ -288,8 +324,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     .rxe-hero-secondary,
     .exo-door
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
-  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
 }
 
 html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
@@ -305,8 +341,8 @@ html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="econ
     .quick-search-close,
     .zeus-button:not([data-dragging="true"])
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
-  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(var(--lg-blur)) saturate(var(--lg-sat)) !important;
+  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
+  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-round)) blur(calc(var(--lg-blur) * var(--lg-mat))) saturate(var(--lg-sat)) !important;
 }
 
 /* ---------------------------------------------------------------
@@ -439,8 +475,82 @@ html[data-button-style="liquid"]
   --lg-fill: rgb(236 246 249 / 0.74);
   --lg-tint: 201 228 232;
   --lg-tint-a: 0.16;
-  --lg-sheen: 0.4;
+  --lg-sheen: 0.16;
   --lg-rim: 0.95;
+}
+
+/* ---------------------------------------------------------------
+   Adaptivity (src/lib/liquid-glass-tone.ts estimates each control's
+   backdrop once, and again when a pinned bar's page comes to rest).
+   - Busy (an image or video behind): "shadows become more prominent" and
+     "the amount of tint and the dynamic range shift" so the label holds:
+     a deeper veil and shadow.
+   - Light (a light backdrop): small glass "flip[s] from light to dark",
+     and its glyphs flip with it: a light glass with a dark label, a softer
+     shadow ("lowers the opacity of its shadow when it is over a solid
+     light background").
+   --------------------------------------------------------------- */
+html[data-button-style="liquid"] body [data-lg-busy]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-fill-alpha: 0.44;
+  --lg-shadow-a: 0.52;
+}
+
+html[data-button-style="liquid"]
+  body
+  [data-lg-tone="light"]:not(.zeus-button):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  --lg-fill: rgb(250 251 253 / 0.58);
+  --lg-tint-a: 0.05;
+  --lg-sheen: 0.1;
+  --lg-shadow-a: 0.18;
+  --lg-rim: 0.9;
+  color: rgb(18 22 28) !important;
+  text-shadow: none !important;
+}
+
+/* ---------------------------------------------------------------
+   Materialize: glass that appears with a dialog or the menu "lens[es] in"
+   rather than fading (WWDC25: "Liquid Glass objects materialize in and out
+   by gradually modulating the light bending and lensing"; the SwiftUI
+   transition is .materialize). The backdrop's blur and lift rise from
+   nothing (--lg-mat) while the glass grows out of a smaller drop on the
+   gel spring. Fill mode backwards only: once in, the press owns `scale`.
+   --------------------------------------------------------------- */
+@keyframes lg-materialize {
+  0% {
+    opacity: 0;
+    scale: 0.78;
+    --lg-mat: 0;
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+    scale: 1;
+    --lg-mat: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-button-style="liquid"]:not([data-world-effects="economy"])
+    body
+    :is(
+      /* the menu stays laid out while closed: it lenses in as it opens */
+      .side-panel[data-open="true"] .side-panel-close,
+      .site-announcement-close,
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-close,
+      .world-column-dialog-close,
+      .episode-pickup-close,
+      .rw-close,
+      .dream-dossier-close,
+      .quick-search-close
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    animation: lg-materialize 0.62s var(--lg-spring) 0.08s backwards;
+  }
 }
 
 /* ---------------------------------------------------------------
@@ -569,19 +679,26 @@ html[data-button-style="liquid"]
   ):is(:active, [data-press="in"], [data-press="touch"], [data-holding="true"]):not(#lg-glass):not(
     #lg-glass
   ):not(#lg-glass) {
-  --lg-glow: 0.18;
+  /* The label sits under the finger: the light in the middle stays low
+     (6:1 for the label, probed), and gathers at the edge (the ring). */
+  --lg-glow: 0.07;
+  --lg-spread: 1;
   --lg-rim: 1;
-  --lg-sheen: 0.12;
+  --lg-fill-alpha: 0.36;
 }
 
 /* ---------------------------------------------------------------
-   The gel press. The press driver (src/lib/press-feedback.js) scales a
-   pressed control by --dw-press-scale; here that scale is anisotropic, so
-   the glass squashes wide and short like a drop pressed flat, and its
-   release springs back past rest once. The slide-to-open pills and Ciel's
-   button are left to their own gestures (the driver skips them too).
-   Reduced motion: no squash and no spring (the driver only scales under
-   no-preference), only the light.
+   The press. Interactive Liquid Glass "reacts to user interaction by
+   scaling, bouncing, and shimmering" (WWDC25, "Build a SwiftUI app with the
+   new design"): it grows a little the instant it is touched ("instantly
+   flexing and energizing with light"), the light spreads from the finger,
+   and on release it springs back past rest once. The press driver
+   (src/lib/press-feedback.js) scales a pressed control by --dw-press-scale;
+   here that scale is a swell (it was a squash, wide and short, which the
+   real glass does not do). The slide-to-open pills and Ciel's button are
+   left to their own gestures (the driver skips them too). Reduced motion:
+   no swell and no spring (the driver only scales under no-preference;
+   "Reduce Motion … disables any elastic properties"), only the light.
    --------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
   html[data-button-style="liquid"]
@@ -613,10 +730,10 @@ html[data-button-style="liquid"]
       .rxe-hero-secondary,
       .opening-notice .opening-notice-close
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --dw-press-scale: 1.05 0.9;
+    --dw-press-scale: 1.06;
   }
 
-  /* Icons squash a little more; slabs a little less. */
+  /* Icons swell a little more; slabs a little less. */
   html[data-button-style="liquid"]
     body
     :is(
@@ -631,7 +748,7 @@ html[data-button-style="liquid"]
       .dream-dossier-close,
       .quick-search-close
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --dw-press-scale: 1.08 0.88;
+    --dw-press-scale: 1.1;
   }
 
   html[data-button-style="liquid"]
@@ -643,7 +760,7 @@ html[data-button-style="liquid"]
       .command-deck-gallery-link,
       .exo-door
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --dw-press-scale: 1.02 0.96;
+    --dw-press-scale: 1.025;
   }
 
   /* The light eases with the press: while the driver holds data-press its
@@ -656,7 +773,24 @@ html[data-button-style="liquid"]
     [data-press][data-press]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     transition-property:
       scale, filter, transform, translate, opacity, color, background-color, border-color,
-      box-shadow, --lg-glow, --lg-rim, --lg-sheen, --lg-tint-a;
+      box-shadow, --lg-glow, --lg-rim, --lg-sheen, --lg-tint-a, --lg-spread;
+  }
+
+  /* Pressed: everything takes the press's quick curve but the spread, which
+     radiates from the finger through the glass more slowly. */
+  html[data-button-style="liquid"][data-press-ready]
+    body
+    :is([data-press="in"], [data-press="touch"])[data-press]:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    transition-duration:
+      var(--dw-dur-press), var(--dw-dur-press), var(--dw-dur-press), var(--dw-dur-press),
+      var(--dw-dur-press), var(--dw-dur-press), var(--dw-dur-press), var(--dw-dur-press),
+      var(--dw-dur-press), var(--dw-dur-press), var(--dw-dur-press), var(--dw-dur-press),
+      var(--dw-dur-press), 0.42s;
+    transition-timing-function:
+      var(--dw-ease-press), var(--dw-ease-press), var(--dw-ease-press), var(--dw-ease-press),
+      var(--dw-ease-press), var(--dw-ease-press), var(--dw-ease-press), var(--dw-ease-press),
+      var(--dw-ease-press), var(--dw-ease-press), var(--dw-ease-press), var(--dw-ease-press),
+      var(--dw-ease-press), cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   /* The release: the spring, on scale only (the other settles keep the
@@ -669,7 +803,7 @@ html[data-button-style="liquid"]
       var(--lg-spring-ms), var(--dw-dur-settle), var(--dw-dur-state), var(--dw-dur-state),
       var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state), var(--dw-dur-state),
       var(--dw-dur-state), var(--dw-dur-settle), var(--dw-dur-settle), var(--dw-dur-settle),
-      var(--dw-dur-settle);
+      var(--dw-dur-settle), var(--dw-dur-settle);
     transition-timing-function:
       cubic-bezier(0.34, 1.56, 0.64, 1), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
@@ -679,7 +813,7 @@ html[data-button-style="liquid"]
       var(--lg-spring), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
       var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out), var(--dw-ease-out),
-      var(--dw-ease-out);
+      var(--dw-ease-out), var(--dw-ease-out);
   }
 
   /* Before the driver is ready (or without script), :active squashes. */
@@ -844,9 +978,8 @@ html[data-button-style="liquid"][data-world-effects="economy"]
   box-shadow:
     inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
       rgb(255 255 255 / var(--lg-rim)),
-    inset calc(var(--lg-lx) * 4px) calc(var(--lg-ly) * 5px) 12px -8px rgb(0 0 0 / 0.36),
-    0 0.5px 1px rgb(0 0 0 / 0.32),
-    0 8px 20px -10px rgb(0 0 0 / 0.6) !important;
+    0 0.5px 1px rgb(0 0 0 / 0.3),
+    0 6px 16px -8px rgb(0 0 0 / var(--lg-shadow-a)) !important;
 }
 
 html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
@@ -863,12 +996,91 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
   }
 }
 
-/* Reduce transparency: a nearly solid glass (and no lens: the defs do not
-   mark html[data-liquid-lens] under this preference). */
+/* Reduce transparency: "makes Liquid Glass frostier and obscures more of
+   the content behind it" (WWDC25): a heavier frost and a nearly solid veil
+   (and no lens: the defs do not mark html[data-liquid-lens] under this
+   preference). */
 @media (prefers-reduced-transparency: reduce) {
   html[data-button-style="liquid"] {
-    --lg-blur: 4px;
-    --lg-fill-alpha: 0.86;
+    --lg-blur: 14px;
+    --lg-fill-alpha: 0.84;
+  }
+}
+
+/* Increase contrast: "makes elements predominantly black or white and
+   highlights them with a contrasting border" (WWDC25). The glass keeps its
+   shape and its press; its veil goes near solid, its label pure, and a
+   contrasting line draws the edge in place of the rim light. */
+@media (prefers-contrast: more) {
+  html[data-button-style="liquid"] {
+    --lg-fill-alpha: 0.9;
+    --lg-sat: 1;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .topbar nav a,
+      .side-panel-trigger:not(:is([data-ipad-menu="compact"], [data-phone-landscape-menu="true"]) *),
+      .manager-back,
+      .dream-back-link,
+      .rxs-footer-return,
+      .primary-action,
+      .poster-shuffle,
+      .poster-reset,
+      .poster-lock,
+      .episode-controls button,
+      .cine-btn,
+      .cine-skip,
+      .rw-skip,
+      .rw-replay,
+      .rw-redive-button,
+      .ios-slide-open,
+      .episode-pickup-plus,
+      .side-panel-close,
+      .site-announcement-close,
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-close,
+      .world-column-dialog-close,
+      .episode-pickup-close,
+      .rw-close,
+      .dream-dossier-close,
+      .quick-search-close,
+      .rider-special-site-link,
+      .command-deck-header-nav a,
+      .command-deck-scene-buttons > a,
+      .command-deck-enter,
+      .command-deck-down,
+      .command-deck-art-controls,
+      .command-deck-gallery-link,
+      .zeus-button,
+      .rxs-local-nav nav a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .exo-door,
+      .opening-notice .opening-notice-close
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --lg-fill: rgb(0 0 0 / 0.9);
+    --lg-tint-a: 0;
+    --lg-sheen: 0;
+    --lg-rim-map: none;
+    outline: 1.5px solid rgb(255 255 255 / 0.92);
+    outline-offset: -1.5px;
+  }
+
+  html[data-button-style="liquid"]
+    body
+    :is(
+      .cine-btn-primary,
+      .primary-action,
+      .command-deck-scene-buttons > a.is-selected,
+      .rxe-hero-primary,
+      [data-lg-tone="light"]
+    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+    --lg-fill: rgb(255 255 255 / 0.94);
+    color: rgb(0 0 0) !important;
+    outline-color: rgb(0 0 0 / 0.9);
   }
 }
 
@@ -1027,8 +1239,10 @@ html[data-button-style="liquid"]
     0 0 26px -6px rgb(var(--lg-tint) / 0.5) !important;
 }
 
-/* The pill thumb: wider than tall, a clear glass capsule. Its width is read
-   by the drag at each press, so the travel follows it. */
+/* The pill thumb: wider than tall, an opaque white capsule at rest, as the
+   thumbs of iOS 26's sliders and switches are; held, the clear lens below
+   stands in for it. Its width is read by the drag at each press, so the
+   travel follows it. Opaque, it samples no backdrop. */
 html[data-button-style="liquid"]
   body
   .ios-slide-open
@@ -1038,33 +1252,14 @@ html[data-button-style="liquid"]
   border-radius: 999px !important;
   background:
     var(--lg-rim-map, none) center / 100% 100% no-repeat border-box,
-    radial-gradient(120% 90% at 30% -10%, rgb(255 255 255 / 0.34), rgb(255 255 255 / 0) 55%),
-    linear-gradient(
-      180deg,
-      rgb(255 255 255 / 0.16),
-      rgb(255 255 255 / 0.02) 52%,
-      rgb(255 255 255 / 0.08)
-    ),
-    linear-gradient(rgb(var(--lg-tint) / 0.14), rgb(var(--lg-tint) / 0.14)), rgb(12 20 32 / 0.34) !important;
-  -webkit-backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
-  backdrop-filter: blur(5px) saturate(1.8) brightness(1.1) !important;
+    linear-gradient(rgb(255 255 255 / 0.97), rgb(240 243 246 / 0.97)) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   box-shadow:
-    inset 1.1px 1.3px 0 -0.3px rgb(255 255 255 / 0.92),
-    inset -1px -1px 0 -0.3px rgb(255 255 255 / 0.32),
-    inset 0 10px 14px -12px rgb(255 255 255 / 0.6),
-    inset 0 -4px 8px -6px rgb(0 0 0 / 0.38),
-    inset 0 -8px 12px -10px rgb(var(--lg-tint) / 0.55),
-    0 0.5px 1px rgb(0 0 0 / 0.32),
-    0 6px 14px -6px rgb(0 0 0 / 0.55) !important;
-}
-
-/* Chromium: the thumb bends the track at its rim (the capsule lens). */
-html[data-button-style="liquid"][data-liquid-lens]:not([data-world-effects="economy"])
-  body
-  .ios-slide-open
-  .ios-slide-open-thumb:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  -webkit-backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(3px) saturate(1.8) brightness(1.1) !important;
-  backdrop-filter: var(--lg-lens, url(#dw-liquid-lens-capsule)) blur(3px) saturate(1.8) brightness(1.1) !important;
+    inset 0 0 0 0.6px rgb(255 255 255 / 0.7),
+    0 0 0 0.5px rgb(0 0 0 / 0.16),
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 4px 12px -4px rgb(0 0 0 / 0.45) !important;
 }
 
 /* The ring and the painted glints belonged to the round knob; the pill's
@@ -1086,6 +1281,16 @@ html[data-button-style="liquid"]
   ) {
   color: #fff !important;
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.5)) drop-shadow(0 0 6px rgb(var(--lg-tint) / 0.55)) !important;
+}
+
+/* On the white thumb the glyph is dark, as a glyph on a light glass is. */
+html[data-button-style="liquid"]
+  body
+  .ios-slide-open
+  .ios-slide-open-thumb
+  svg:not(#lg-glass):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
+  color: rgb(28 34 44) !important;
+  filter: none !important;
 }
 
 /* The label clears the wider thumb; the copy in the lens is laid out the
