@@ -63,9 +63,10 @@ import {
 } from "./dream-chapter-extra-data";
 import { DreamScreeningLauncher } from "./dream-screening-launcher";
 import { DreamReadingLauncher } from "./dream-reading-launcher";
-import { DreamProgrammeDesk, DREAM_PROGRAMME_ROUTES } from "./dream-programme-desk";
+import { DreamProgrammeDesk } from "./dream-programme-desk";
 import { DreamGpuStage } from "./dream-gpu-stage";
 import { DreamKarakuriCabinet } from "./dream-karakuri-cabinet";
+import { DreamCinemaEffects } from "./dream-cinema-effects";
 import { DreamStageLantern } from "./dream-stage-lantern";
 import { DreamGlossarySearch } from "./dream-glossary-search";
 import { DreamDossierGuide } from "./dream-dossier-guide";
@@ -1421,7 +1422,7 @@ export function DreamChapter() {
     <main
       ref={pageRef}
       id="top"
-      className="dream-page dg-focus-scope"
+      className="dream-page dg-focus-scope dream-image-cinema"
       onClickCapture={revisitDossier}
     >
       <header className="dream-site-header">
@@ -1437,7 +1438,7 @@ export function DreamChapter() {
           <span>DECEPTION WORLD</span>
         </GuardedLink>
         <p>
-          <b>ドリームチャプター</b>
+          <b>DREAM CHAPTER</b>
         </p>
         <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
       </header>
@@ -1491,11 +1492,14 @@ export function DreamChapter() {
             decoding="async"
           />
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
-            {DREAM_PROGRAMME_ROUTES.map((route) => (
-              <a key={route.href} href={route.href}>
-                <span>{route.title}</span>
-              </a>
-            ))}
+            <a href="#cases" className="dream-cinema-primary">
+              <span>物語を辿る</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a href="#characters">
+              <span>登場人物</span>
+              <span aria-hidden="true">↗</span>
+            </a>
           </nav>
           <DreamStageLantern />
         </div>
@@ -1506,9 +1510,12 @@ export function DreamChapter() {
         </div>
       </section>
 
+      <DreamCinemaEffects />
+
       <section className="dream-prologue" id="prologue" aria-labelledby="prologue-title">
         <div className="dream-prologue-card" data-dream-reveal>
-          <h2 id="prologue-title">口上</h2>
+          <p className="dream-cinema-kicker">序 / INTRODUCTION</p>
+          <h2 id="prologue-title">夢と現実の境界が、明ける。</h2>
           <p>{DREAM_STORY_INTRO}</p>
         </div>
       </section>
@@ -1820,6 +1827,9 @@ export function DreamChapter() {
                 <span className="dream-character-copy">
                   <b>{item.name}</b>
                   <small>{item.tagline}</small>
+                  <span className="dream-cinema-record-link">
+                    人物資料を開く <i aria-hidden="true">↗</i>
+                  </span>
                 </span>
               </button>
             </article>

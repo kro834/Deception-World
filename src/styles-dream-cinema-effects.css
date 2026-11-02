@@ -1,0 +1,310 @@
+/* Route-only practical effects. Every animation is finite; the art stays intact. */
+html[data-family="dream"] .dream-image-cinema .dream-cinema-effects {
+  position: relative;
+  z-index: 4;
+  width: min(100% - 32px, 720px);
+  margin: 0 auto;
+  color: #eae2d4;
+  font-family: "Shippori Mincho B1", "Shippori Mincho", serif;
+}
+html[data-family="dream"] .dream-cinema-console {
+  border-block: 1px solid #c5aa7052;
+  background: #0c0b12;
+}
+html[data-family="dream"] .dream-cinema-console summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  list-style: none;
+}
+html[data-family="dream"] .dream-cinema-console summary::-webkit-details-marker {
+  display: none;
+}
+html[data-family="dream"] .dream-cinema-console-mark {
+  color: #cdb487;
+  font-size: 24px;
+}
+html[data-family="dream"] .dream-cinema-console-current {
+  margin-left: auto;
+  color: #c5b9d2;
+  font-size: 12px;
+}
+html[data-family="dream"] .dream-cinema-console-chevron {
+  color: #cdb487;
+}
+html[data-family="dream"] .dream-cinema-console[open] .dream-cinema-console-chevron {
+  transform: rotate(45deg);
+}
+html[data-family="dream"] .dream-cinema-console-body {
+  padding: 10px 16px 16px;
+}
+html[data-family="dream"] .dream-cinema-console fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+}
+html[data-family="dream"] .dream-cinema-console legend {
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: #cfbf9d;
+}
+html[data-family="dream"] .dream-cinema-moods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+html[data-family="dream"] .dream-cinema-console button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #c7b48c55;
+  border-radius: 2px;
+  color: #eae2d4;
+  background: #18151f;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+html[data-family="dream"] .dream-cinema-console button[aria-pressed="true"] {
+  border-color: #dfc38e;
+  background: #342940;
+}
+html[data-family="dream"] .dream-cinema-console :is(button, summary):focus-visible {
+  outline: 2px solid #f1cf90;
+  outline-offset: 4px;
+}
+html[data-family="dream"] .dream-cinema-mood-orb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #bb94da;
+  box-shadow: 0 0 12px #bb94da66;
+}
+html[data-family="dream"] .dream-cinema-mood-orb--dawn {
+  background: #ebce8c;
+  box-shadow: 0 0 12px #ebce8c66;
+}
+html[data-family="dream"] .dream-cinema-mood-orb--night {
+  background: #90bddc;
+  box-shadow: 0 0 12px #90bddc66;
+}
+html[data-family="dream"] .dream-cinema-play-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+html[data-family="dream"] .dream-cinema-play-controls > button {
+  flex: 1 1 120px;
+}
+html[data-family="dream"] .dream-cinema-console-note,
+html[data-family="dream"] .dream-cinema-release-status {
+  margin: 10px 0 0;
+  color: #c5b9d2;
+  font-size: 12px;
+  line-height: 1.8;
+}
+html[data-family="dream"] .dream-cinema-release-status:empty {
+  display: none;
+}
+html[data-family="dream"] .dream-cinema-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  contain: paint;
+  --dc-hue: 148, 101, 206;
+}
+html[data-family="dream"] .dream-cinema-atmosphere[data-mood="dawn"] {
+  --dc-hue: 231, 190, 105;
+}
+html[data-family="dream"] .dream-cinema-atmosphere[data-mood="night"] {
+  --dc-hue: 80, 151, 220;
+}
+html[data-family="dream"] .dream-cinema-wash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 83% 22%, rgba(var(--dc-hue), 0.22), transparent 65%);
+}
+html[data-family="dream"] .dream-cinema-pointer-light {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    ellipse 220px 200px at var(--dc-x, 70%) var(--dc-y, 30%),
+    rgba(var(--dc-hue), 0.18),
+    transparent
+  );
+}
+html[data-family="dream"] .dream-cinema-mist {
+  position: absolute;
+  width: 70%;
+  height: 25%;
+  bottom: 8%;
+  right: -10%;
+  opacity: 0.18;
+  background: radial-gradient(ellipse, rgba(var(--dc-hue), 0.7), transparent 68%);
+}
+html[data-family="dream"]
+  .dream-cinema-atmosphere[data-motion="on"][data-visible="true"]
+  .dream-cinema-mist {
+  animation: dream-cinema-mist-arrive 3.8s ease-out both;
+}
+html[data-family="dream"] .dream-cinema-portal {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  bottom: 7%;
+  left: calc(50% - 60px);
+  border: 1px solid #dfc3ff80;
+  border-radius: 50%;
+  box-shadow:
+    0 0 24px #bc8ddd33,
+    inset 0 0 24px #bc8ddd33;
+  opacity: 0.5;
+}
+html[data-family="dream"] [data-motion="on"] .dream-cinema-portal {
+  animation: dream-cinema-portal-open 2s ease-out both;
+}
+html[data-family="dream"] .dream-cinema-butterflies {
+  position: absolute;
+  inset: -80px -12px 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+html[data-family="dream"] .dream-cinema-butterfly {
+  position: absolute;
+  left: calc(12% + var(--dc-i) * 14%);
+  bottom: 25%;
+  width: 22px;
+  height: 18px;
+  transform: rotate(-24deg);
+  opacity: 0.8;
+}
+html[data-family="dream"] .dream-cinema-butterfly i {
+  position: absolute;
+  left: 1px;
+  width: 10px;
+  height: 16px;
+  border-radius: 80% 20% 70% 20%;
+  background: linear-gradient(135deg, #ecdcff, #795397);
+  transform: rotate(-25deg);
+}
+html[data-family="dream"] .dream-cinema-butterfly i + i {
+  left: 11px;
+  transform: scaleX(-1) rotate(-25deg);
+}
+html[data-family="dream"] [data-motion="on"] .dream-cinema-butterfly {
+  animation: dream-cinema-butterfly-flight 2.2s ease-out both;
+  animation-delay: calc(var(--dc-i) * 35ms);
+}
+@keyframes dream-cinema-mist-arrive {
+  from {
+    transform: translateX(8%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 0.18;
+  }
+}
+@keyframes dream-cinema-portal-open {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes dream-cinema-butterfly-flight {
+  from {
+    transform: translateY(15px) rotate(-24deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(30px, -180px) rotate(20deg);
+    opacity: 0;
+  }
+}
+html[data-family="dream"][data-world-effects="economy"] .dream-cinema-atmosphere *,
+html[data-family="dream"][data-world-effects="economy"] .dream-cinema-butterfly {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="dream"] .dream-cinema-atmosphere *,
+  html[data-family="dream"] .dream-cinema-butterfly {
+    animation: none !important;
+  }
+}
+@media (max-width: 360px) {
+  html[data-family="dream"] .dream-cinema-console summary {
+    gap: 8px;
+    padding-inline: 8px;
+  }
+  html[data-family="dream"] .dream-cinema-console-current {
+    font-size: 12px;
+  }
+}
+html[data-family="dream"] .dream-cinema-scene-trail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 12px 0;
+}
+html[data-family="dream"] .dream-cinema-scene-trail a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 52px;
+  border-bottom: 1px solid #c5aa7038;
+  color: #c1b5cb;
+  font-size: 12px;
+  text-decoration: none;
+}
+html[data-family="dream"] .dream-cinema-scene-trail a > span:first-child {
+  color: #b99e75;
+}
+html[data-family="dream"] .dream-cinema-scene-trail a[data-visited="true"] {
+  border-color: #c5aa70;
+}
+html[data-family="dream"] .dream-cinema-scene-trail a[aria-current="location"] {
+  background: #b194d018;
+  color: #fff1dc;
+}
+html[data-family="dream"] .dream-cinema-scene-trail a:focus-visible {
+  outline: 2px solid #f1cf90;
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  html[data-family="dream"] .dream-cinema-atmosphere,
+  html[data-family="dream"] .dream-cinema-butterflies {
+    display: none;
+  }
+  html[data-family="dream"] .dream-cinema-console button[aria-pressed="true"] {
+    border: 3px double ButtonText;
+    padding: 8px 10px;
+    font-weight: 700;
+  }
+  html[data-family="dream"] .dream-cinema-scene-trail a[aria-current="location"] {
+    border-bottom: 3px double LinkText;
+    font-weight: 700;
+  }
+}

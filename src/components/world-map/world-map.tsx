@@ -63,7 +63,10 @@ export function WorldMap({
     setView({ x: 0, y: 0, zoom: 1 });
   };
   const zoom = (by: number) =>
-    setView((v) => ({ ...v, zoom: Math.max(0.45, Math.min(2, v.zoom + by)) }));
+    setView((v) => ({
+      ...v,
+      zoom: Math.max(0.45, Math.min(2, Math.round((v.zoom + by) * 100) / 100)),
+    }));
   return (
     <>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
@@ -208,11 +211,11 @@ export function WorldMap({
               </g>
             </svg>
             <div className="wm-view-controls">
-              <button aria-label="縮小" onClick={() => zoom(-0.15)}>
+              <button aria-label="縮小" disabled={view.zoom <= 0.45} onClick={() => zoom(-0.15)}>
                 −
               </button>
               <output>{Math.round(view.zoom * 100)}%</output>
-              <button aria-label="拡大" onClick={() => zoom(0.15)}>
+              <button aria-label="拡大" disabled={view.zoom >= 2} onClick={() => zoom(0.15)}>
                 ＋
               </button>
               <button onClick={() => setView({ x: 0, y: 0, zoom: 1 })}>中央へ</button>
