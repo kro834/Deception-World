@@ -925,7 +925,17 @@ export const SEARCH_DOCUMENTS: readonly SearchCatalogueDocument[] = [
     title: "仮面ライダーレルムロイヤル",
     category: "riders",
     description: "ロイヤル・マルチタイプ",
-    body: proseOf([REALM_ROYAL.overview, REALM_ROYAL.armor, REALM_ROYAL.abilities]).join("\n"),
+    body: proseOf([
+      REALM_ROYAL.overview,
+      REALM_ROYAL.systems,
+      REALM_ROYAL.computing,
+      REALM_ROYAL.armor,
+      REALM_ROYAL.abilities,
+      REALM_ROYAL.multiType,
+      REALM_ROYAL.forms,
+      REALM_ROYAL.arsenal,
+      REALM_ROYAL.finishers,
+    ]).join("\n"),
     keywords: [
       "FINAL STAGE",
       "ROYALLL",

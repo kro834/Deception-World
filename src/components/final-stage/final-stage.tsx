@@ -866,7 +866,7 @@ export function FinalStage() {
           imageSet={royalVisualImage(activeVisual.image, activeVisual.width)}
           name={REALM_ROYAL.name}
           sub={REALM_ROYAL.formsLine}
-          quote="戦場を王国として宣言し、味方全員に勝利譚の加護を分配する。仮面ライダーレルムの究極形態。"
+          quote="武器と盾を生み出して操り、受け止めた攻撃のエネルギーを自分と仲間の力へ変える。仮面ライダーレルムの究極形態。"
         >
           <SubHeading title="形態とスペック" />
           <div className="rxs-stage-switcher">
@@ -913,6 +913,7 @@ export function FinalStage() {
               <div key={`${form}-copy`} className="fst-form-copy">
                 <h3>{activeForm.name}</h3>
                 <CallOuts calls={activeForm.calls} label={`${activeForm.name} 変身音声`} />
+                <Prose paragraphs={activeForm.body} className="fst-plain" />
               </div>
               <div key={`${form}-specs`} className="fst-form-specs">
                 <SpecList rows={activeForm.specs} label={`${activeForm.name} スペック`} />
@@ -943,8 +944,24 @@ export function FinalStage() {
           <SubHeading title="概要" />
           <Prose paragraphs={REALM_ROYAL.overview} className="fst-plain" />
 
-          <SubHeading title="装甲・外観" />
-          <Prose paragraphs={REALM_ROYAL.armor} className="fst-plain" />
+          <SubHeading title="変身システム" />
+          <ArticleGrid
+            items={REALM_ROYAL.systems}
+            columns={3}
+            label="レルムロイヤルの変身システム"
+          />
+          <SubHeading title="統合演算機構" />
+          <ArticleGrid
+            items={REALM_ROYAL.computing}
+            columns={2}
+            label="レルムロイヤルの統合演算機構"
+          />
+          <SubHeading title="ナノマシン装甲" />
+          <ArticleGrid
+            items={REALM_ROYAL.armor}
+            columns={2}
+            label="レルムロイヤルのナノマシン装甲"
+          />
 
           <SubHeading title="能力" />
           <ArticleGrid items={REALM_ROYAL.abilities} columns={3} label="レルムロイヤルの能力" />
