@@ -1,4 +1,7 @@
+import { DreamReadingArchive } from "./dream-reading-archive";
+import { DreamResearchNotes } from "./dream-research-notes";
 import {
+  Fragment,
   memo,
   useCallback,
   useEffect,
@@ -7,6 +10,7 @@ import {
   useState,
   type MouseEvent,
 } from "react";
+import { DreamSceneMaterial } from "./dream-scene-material";
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -2126,6 +2130,8 @@ export function DreamChapter() {
           </p>
         </div>
         <DreamReadingLauncher />
+        <DreamReadingArchive />
+        <DreamResearchNotes />
         <DreamStoryIndex />
         <div className="dream-story-layout">
           <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
@@ -2172,16 +2178,19 @@ export function DreamChapter() {
                   <div className="dream-story-case-body">
                     <h3>{episode.lead}</h3>
                     {episode.paragraphs.map((paragraph, index) => (
-                      <p
-                        key={paragraph}
-                        id={`dream-case-${episode.no}-paragraph-${index + 1}`}
-                        data-dream-reading-paragraph
-                        data-case-no={episode.no}
-                        data-paragraph-no={index + 1}
-                        tabIndex={-1}
-                      >
-                        {paragraph}
-                      </p>
+                      <Fragment key={paragraph}>
+                        <p
+                          key={paragraph}
+                          id={`dream-case-${episode.no}-paragraph-${index + 1}`}
+                          data-dream-reading-paragraph
+                          data-case-no={episode.no}
+                          data-paragraph-no={index + 1}
+                          tabIndex={-1}
+                        >
+                          {paragraph}
+                        </p>
+                        {episode.no === "0" && index === 0 ? <DreamSceneMaterial /> : null}
+                      </Fragment>
                     ))}
                     <DreamChapterCompanion no={episode.no} />
                     <DreamStoryNavigation no={episode.no} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import {
@@ -6,7 +6,7 @@ import {
   DREAM_READER_STORAGE_KEY,
   validateDreamReaderState,
 } from "@/lib/dream-reader-state.js";
-import { DREAM_CASES } from "./dream-chapter-data";
+import { DREAM_CASES, DREAM_CHARACTERS } from "./dream-chapter-data";
 
 type Props = { trigger: HTMLButtonElement | null; onClose: () => void };
 
@@ -62,13 +62,30 @@ function captureReadingAnchor(scroller: HTMLDivElement | null): ReadingAnchor {
   const paragraph = [...scroller.querySelectorAll<HTMLElement>("[data-room-paragraph]")].find(
     (node) => node.getBoundingClientRect().bottom > line,
   );
-  const text =
-    paragraph &&
-    [...paragraph.childNodes].find(
-      (node): node is Text => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
-    );
-  if (!text) return null;
   const range = document.createRange();
+  // A linked name splits the paragraph into several text nodes. Keep the
+  // node on the reading line rather than pinning the opening sentence.
+  const candidates = paragraph
+    ? [...paragraph.childNodes]
+        .flatMap((node) =>
+          node.nodeType === Node.TEXT_NODE
+            ? [node]
+            : (node as Element).matches?.("button.dream-scene-word")
+              ? [...node.childNodes]
+              : [],
+        )
+        .filter(
+          (node): node is Text =>
+            node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+        )
+    : [];
+  const text =
+    candidates.find((node) => {
+      range.setStart(node, node.length - 1);
+      range.setEnd(node, node.length);
+      return range.getBoundingClientRect().bottom > line;
+    }) ?? candidates.at(-1);
+  if (!text) return null;
   let low = 0;
   let high = text.length - 1;
   while (low < high) {
@@ -188,6 +205,10 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   const [spacing, setSpacing] = useState(initial.spacing);
   const [paper, setPaper] = useState(false);
   const [status, setStatus] = useState("");
+  const [referenceOpen, setReferenceOpen] = useState(false);
+  const referenceTrigger = useRef<HTMLButtonElement>(null);
+  const referenceClose = useRef<HTMLButtonElement>(null);
+  const referenceOrigin = useRef(0);
   const dialog = useRef<HTMLDialogElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
@@ -200,6 +221,21 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   onCloseRef.current = onClose;
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
   const index = DREAM_CASES.indexOf(episode);
+  const ciel = DREAM_CHARACTERS.find((character) => character.id === "ciel")!;
+  const closeReference = () => {
+    setReferenceOpen(false);
+    requestAnimationFrame(() => {
+      const scroller = viewport.current;
+      const target = referenceTrigger.current;
+      if (!scroller || !target) return;
+      target.focus({ preventScroll: true });
+      scroller.scrollTop += target.getBoundingClientRect().top - referenceOrigin.current;
+      readingViewport.current?.remember();
+    });
+  };
+  useLayoutEffect(() => {
+    if (referenceOpen) referenceClose.current?.focus({ preventScroll: true });
+  }, [referenceOpen]);
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
@@ -284,6 +320,7 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   }, [chapter, size, spacing]);
 
   const select = (no: string) => {
+    setReferenceOpen(false);
     setStatus("");
     setChapter(no);
   };
@@ -448,12 +485,63 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                 <span>{episode.lead}</span>
               </header>
               {episode.paragraphs.map((text, i) => (
-                <p key={text} data-room-paragraph={i + 1}>
-                  <span className="dream-reading-paragraph-number" aria-hidden="true">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  {text}
-                </p>
+                <Fragment key={text}>
+                  <p key={text} data-room-paragraph={i + 1}>
+                    <span className="dream-reading-paragraph-number" aria-hidden="true">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    {chapter === "0" && i === 0 ? (
+                      <>
+                        {text.slice(0, text.indexOf("シエル"))}
+                        <button
+                          ref={referenceTrigger}
+                          className="dream-scene-word"
+                          type="button"
+                          aria-expanded={referenceOpen}
+                          aria-controls="dream-scene-ciel"
+                          aria-label={
+                            referenceOpen ? "シエルの人物原画を閉じる" : "シエルの人物原画を開く"
+                          }
+                          onClick={() => {
+                            if (referenceOpen) closeReference();
+                            else {
+                              referenceOrigin.current =
+                                referenceTrigger.current?.getBoundingClientRect().top ?? 0;
+                              setReferenceOpen(true);
+                            }
+                          }}
+                        >
+                          シエル
+                        </button>
+                        {text.slice(text.indexOf("シエル") + "シエル".length)}
+                      </>
+                    ) : (
+                      text
+                    )}
+                  </p>
+                  {chapter === "0" && i === 0 && referenceOpen ? (
+                    <aside
+                      id="dream-scene-ciel"
+                      className="dream-scene-reference"
+                      aria-label="シエルの人物原画"
+                      onKeyDown={(event) => {
+                        if (event.key === "Escape") {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          closeReference();
+                        }
+                      }}
+                    >
+                      <figure>
+                        <img src={ciel.portrait} alt={ciel.portraitAlt} width="768" height="1024" />
+                        <figcaption>{ciel.name} · 人物原画</figcaption>
+                      </figure>
+                      <button ref={referenceClose} type="button" onClick={closeReference}>
+                        原画を閉じて本文に戻る
+                      </button>
+                    </aside>
+                  ) : null}
+                </Fragment>
               ))}
               <footer>
                 <span aria-hidden="true">◇</span>
