@@ -1,4 +1,5 @@
 import worldCssUrl from "@/styles-world.css?url";
+import worldCommonCssUrl from "@/styles-world-common.css?url";
 import worldAddonCssUrl from "@/styles-world-addon.css?url";
 import filmDirectionCssUrl from "@/styles-film-direction.css?url";
 import dossierReaderCssUrl from "@/styles-dossier-reader.css?url";
@@ -19,7 +20,7 @@ export type RouteStylesheetLink = {
 
 export const WORLD_BASE_STYLESHEET_LINK: RouteStylesheetLink = {
   rel: "stylesheet",
-  href: worldCssUrl,
+  href: worldCommonCssUrl,
 };
 
 export const WORLD_ADDON_STYLESHEET_LINK: RouteStylesheetLink = {
@@ -79,7 +80,11 @@ export const TABLET_DOSSIER_STYLESHEET_LINK: RouteStylesheetLink = {
   href: tabletDossierCssUrl,
 };
 export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
-  ...WORLD_STYLESHEET_LINKS,
+  // Keep the original cascade order for the Leddic partner dossier. The
+  // shared World sheet omits its dedicated 26.css rules.
+  { rel: "stylesheet", href: worldCssUrl },
+  ...WORLD_CORE_STYLESHEET_LINKS.slice(1),
+  CINEMATIC_STYLESHEET_LINK,
   { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
   { rel: "stylesheet", href: dossierEditionCssUrl },
   { rel: "stylesheet", href: dossierCinemaCssUrl },
