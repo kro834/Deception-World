@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "@/components/world/pickup-scroll-reset";
@@ -393,29 +393,37 @@ export function FinalStage() {
   const activeForm = REALM_ROYAL.forms[form];
   const activeVisual = REALM_ROYAL.visuals[RR_FORM_ORDER.indexOf(form)];
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // The native dialog makes the underlying navigation inert. Keep its last
+    // reserve while the portrait mounts, then measure again before the first
+    // paint after closing (including rotation while the reader was inside).
+    if (royalOpen) return;
     const page = pageRef.current;
     const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
     if (!page || !nav) return;
+    let frame = 0;
     const syncNavReserve = () => {
+      frame = 0;
       const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
       if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve) {
         page.style.setProperty("--rxs-local-nav-reserve", reserve);
       }
     };
-    const observer =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncNavReserve);
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(syncNavReserve);
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
     observer?.observe(nav);
-    window.addEventListener("resize", syncNavReserve, { passive: true });
-    window.visualViewport?.addEventListener("resize", syncNavReserve, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    window.visualViewport?.addEventListener("resize", schedule, { passive: true });
     syncNavReserve();
     return () => {
       observer?.disconnect();
-      window.removeEventListener("resize", syncNavReserve);
-      window.visualViewport?.removeEventListener("resize", syncNavReserve);
-      page.style.removeProperty("--rxs-local-nav-reserve");
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [royalOpen]);
 
   // The chapter in view is marked in the bar (aria-current="location").
   useEffect(

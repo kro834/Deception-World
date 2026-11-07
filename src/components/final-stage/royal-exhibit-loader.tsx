@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentProps } from "react";
+import { Suspense, useEffect, useState, type ComponentProps } from "react";
 import { importWithRetry } from "@/lib/chunk-retry.js";
 
 type Exhibit = typeof import("./royal-exhibit").default;
@@ -26,8 +26,7 @@ export function RoyalExhibitLoader(props: ComponentProps<Exhibit>) {
       active = false;
     };
   }, [Exhibit, attempt]);
-  if (Exhibit) return <Exhibit {...props} />;
-  return (
+  const plate = (
     <div className="fst-gallery fst-royal-selected-visual">
       <figure>{props.children}</figure>
       {failed ? (
@@ -45,4 +44,11 @@ export function RoyalExhibitLoader(props: ComponentProps<Exhibit>) {
       )}
     </div>
   );
+  // The first stylesheet request can suspend a commit. Keep the page and
+  // native dialog laid out while only this optional exhibit is loading.
+  return Exhibit ? (
+    <Suspense fallback={plate}>
+      <Exhibit {...props} />
+    </Suspense>
+  ) : plate;
 }
