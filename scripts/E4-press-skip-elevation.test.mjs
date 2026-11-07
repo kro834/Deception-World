@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { watchPresses } from "../src/lib/press-feedback.js";
 
@@ -25,10 +25,17 @@ function fakePage() {
   const hadElement = "Element" in globalThis;
   const RealElement = globalThis.Element;
   class Element {
-    constructor({ pressable = true, skipped = false } = {}) {
+    constructor({ pressable = true, skipped = false, inCase = null } = {}) {
       this.attributes = new Map();
       this.pressable = pressable;
       this.skipped = skipped;
+      // The case this control presses as a whole (an episode card, ...).
+      this.parentElement = { closest: () => inCase };
+      this.inCase = inCase;
+    }
+    matches(selector) {
+      if (selector.includes(".episode-card > .episode-card-select")) return Boolean(this.inCase);
+      throw new Error(`unexpected selector ${selector}`);
     }
     closest(selector) {
       if (selector.includes("a[href]")) return this.pressable ? this : null;
@@ -150,6 +157,49 @@ test("a touch press is marked at once, held for a quick tap and settled on the h
     assert.equal(page.listeners.size, 0);
   } finally {
     page.restore();
+  }
+});
+
+test("a case pressed through its control carries the press too, never through :has()", () => {
+  const page = fakePage();
+  try {
+    const dispose = watchPresses(page.doc);
+    const card = new page.Element({ pressable: false });
+    const select = new page.Element({ inCase: card });
+    page.pointer("pointerdown", select);
+    assert.equal(select.getAttribute("data-press"), "touch");
+    assert.equal(card.getAttribute("data-press-within"), "touch");
+    page.pointer("pointerup", select);
+    page.advance(150);
+    assert.equal(card.getAttribute("data-press-within"), "out");
+    page.advance(340);
+    assert.equal(card.getAttribute("data-press-within"), null);
+    page.pointer("pointerdown", select, { kind: "mouse" });
+    assert.equal(card.getAttribute("data-press-within"), "in");
+    dispose();
+    assert.equal(card.getAttribute("data-press-within"), null);
+    // A control re-rendered out of its case mid-press still clears the case.
+    const again = watchPresses(page.doc);
+    page.pointer("pointerdown", select);
+    assert.equal(card.getAttribute("data-press-within"), "touch");
+    select.inCase = null;
+    page.pointer("pointercancel", select);
+    page.advance(400);
+    assert.equal(select.getAttribute("data-press"), null);
+    assert.equal(card.getAttribute("data-press-within"), null);
+    again();
+  } finally {
+    page.restore();
+  }
+  // An attribute named inside any :has() restyles every ancestor a :has()
+  // rule depends on (Chromium), <body> included: the press stays out of them.
+  const sheets = readdirSync(new URL("../src/", import.meta.url), { recursive: true })
+    .filter((f) => f.endsWith(".css"))
+    .map((f) => `src/${f}`);
+  assert.ok(sheets.includes("src/styles-press-feedback.css"));
+  for (const file of sheets) {
+    const css = read(file).replace(/\/\*[\s\S]*?\*\//g, "");
+    assert.doesNotMatch(css, /:has\([^{]*data-press/, file);
   }
 });
 
@@ -388,7 +438,7 @@ test("each control sinks once, by its own measure", () => {
   );
   assert.match(
     rules,
-    /\.dream-story-case:not\(\[open\]\):has\(> summary:is\(\[data-press="in"\], \[data-press="touch"\]\)\) \{\s*scale: 0\.982;/,
+    /details\.dream-story-case:not\(\[open\]\):is\(\[data-press-within="in"\], \[data-press-within="touch"\]\) \{\s*scale: 0\.982;/,
   );
   // RISING's overlay controls keep the audit's own sink and pressed fill.
   assert.match(

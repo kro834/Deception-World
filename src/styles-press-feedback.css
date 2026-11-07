@@ -149,27 +149,30 @@ html[data-press-ready] body .dream-chapter-nav a:is([data-press="in"], [data-pre
   --dw-press-light: 1.3;
 }
 
-/* The episode card is pressed through its full-size select button. */
-html[data-press-ready] .episode-card:has(> .episode-card-select[data-press]) {
+/* The episode card is pressed through its full-size select button, which
+   marks the card too (data-press-within, press-feedback.js: a :has() over
+   data-press restyled the whole page on every press in Chromium). The
+   doubled attribute keeps the specificity of the :has() it replaced. */
+html[data-press-ready] .episode-card[data-press-within][data-press-within] {
   transition:
     scale var(--dw-dur-settle) var(--dw-ease-out),
     filter var(--dw-dur-settle) var(--dw-ease-out);
 }
 
 html[data-press-ready]
-  .episode-card:has(> .episode-card-select:is([data-press="in"], [data-press="touch"])) {
+  .episode-card[data-press-within]:is([data-press-within="in"], [data-press-within="touch"]) {
   filter: brightness(1.08);
   transition-duration: var(--dw-dur-press);
   transition-timing-function: var(--dw-ease-press);
 }
 
-html[data-press-ready] .episode-card:has(> .episode-card-select[data-press="touch"]) {
+html[data-press-ready] .episode-card[data-press-within][data-press-within="touch"] {
   transition-delay: 45ms;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   html[data-press-ready]
-    .episode-card:has(> .episode-card-select:is([data-press="in"], [data-press="touch"])) {
+    .episode-card[data-press-within]:is([data-press-within="in"], [data-press-within="touch"]) {
     scale: 0.982;
   }
 }
@@ -182,23 +185,25 @@ html[data-press-ready] .dream-story-case > summary {
   --dw-press-light: 1.08;
 }
 
-html[data-press-ready] .dream-story-case:has(> summary[data-press]) {
+/* Marked through its summary as the episode card is (data-press-within);
+   details. keeps the specificity of the :has() it replaced. */
+html[data-press-ready] details.dream-story-case[data-press-within] {
   transition: scale var(--dw-dur-settle) var(--dw-ease-out);
 }
 
 html[data-press-ready]
-  .dream-story-case:not([open]):has(> summary:is([data-press="in"], [data-press="touch"])) {
+  details.dream-story-case:not([open]):is([data-press-within="in"], [data-press-within="touch"]) {
   transition-duration: var(--dw-dur-press);
   transition-timing-function: var(--dw-ease-press);
 }
 
-html[data-press-ready] .dream-story-case:has(> summary[data-press="touch"]) {
+html[data-press-ready] details.dream-story-case[data-press-within="touch"] {
   transition-delay: 45ms;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   html[data-press-ready]
-    .dream-story-case:not([open]):has(> summary:is([data-press="in"], [data-press="touch"])) {
+    details.dream-story-case:not([open]):is([data-press-within="in"], [data-press-within="touch"]) {
     scale: 0.982;
   }
 }
@@ -234,7 +239,7 @@ html[data-world-effects="economy"][data-press-ready]
   body
   :is([data-press="in"], [data-press="touch"]),
 html[data-world-effects="economy"][data-press-ready]
-  .episode-card:has(> .episode-card-select[data-press]) {
+  .episode-card[data-press-within][data-press-within] {
   filter: none;
 }
 

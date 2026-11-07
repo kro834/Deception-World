@@ -2557,9 +2557,14 @@ html[data-family="library"] .library-page .library-card > h3 > a[data-press] {
   filter: none;
 }
 
+/* The card is marked through its title link (data-press-within,
+   press-feedback.js: a :has() over data-press restyled the whole page on
+   every press in Chromium). body and article. keep the specificity of the
+   :has() it replaced. */
 html[data-press-ready][data-family="library"]
+  body
   .library-page
-  .library-card:has(> h3 > a[data-press]) {
+  article.library-card[data-press-within] {
   transition:
     scale var(--dw-dur-settle) var(--dw-ease-out),
     filter var(--dw-dur-settle) var(--dw-ease-out),
@@ -2567,8 +2572,9 @@ html[data-press-ready][data-family="library"]
 }
 
 html[data-press-ready][data-family="library"]
+  body
   .library-page
-  .library-card:has(> h3 > a:is([data-press="in"], [data-press="touch"])) {
+  article.library-card:is([data-press-within="in"], [data-press-within="touch"]) {
   filter: brightness(1.08);
   transition-duration: var(--dw-dur-press), var(--dw-dur-press), 220ms;
   transition-timing-function: var(--dw-ease-press), var(--dw-ease-press), ease;
@@ -2576,8 +2582,9 @@ html[data-press-ready][data-family="library"]
 
 @media (prefers-reduced-motion: no-preference) {
   html[data-press-ready][data-family="library"]
+    body
     .library-page
-    .library-card:has(> h3 > a:is([data-press="in"], [data-press="touch"])) {
+    article.library-card:is([data-press-within="in"], [data-press-within="touch"]) {
     scale: 0.982;
   }
 }

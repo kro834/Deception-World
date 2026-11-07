@@ -19,6 +19,15 @@
 // Zeus button own their drag; all three are skipped, as is anything marked
 // data-press-skip. Nothing here calls preventDefault, reads layout or writes
 // styles.
+//
+// A few cases are pressed as a whole through one control inside them (an
+// episode card through its select button, a Dream CASE through its summary,
+// a library card through its title link): the case carries the press too,
+// as data-press-within, and the sheets scale it by that. They used
+// :has(> ... [data-press]), but an attribute named inside any :has() makes
+// Chromium restyle every ancestor any :has() rule depends on, <body>
+// included: every press on every control restyled the whole page (about
+// 3,700 elements on /world).
 
 const ATTRIBUTE = "data-press";
 const PRESSABLE = 'a[href], button:not(:disabled), summary, [role="button"], [role="tab"]';
@@ -28,6 +37,37 @@ const SLOP_PX = 8;
 const MIN_TOUCH_MS = 150;
 const MIN_MOUSE_MS = 90;
 const RELEASE_MS = 340;
+/** The cases pressed through a control inside them, and those controls. */
+const CASE = ".episode-card, .dream-story-case, .library-card";
+const CASE_CONTROL =
+  ".episode-card > .episode-card-select, .dream-story-case > summary, .library-card > h3 > a";
+const WITHIN = "data-press-within";
+/**
+ * The case each control last marked: the release clears that one, even
+ * when the control has left its case (or the page) in the meantime.
+ * @type {WeakMap<Element, Element>}
+ */
+const marked = new WeakMap();
+
+/**
+ * Sets (or with null removes) the press on a control, and on its case.
+ * @param {Element} el @param {string | null} value
+ */
+function mark(el, value) {
+  const was = marked.get(el);
+  const box = value !== null && el.matches(CASE_CONTROL) ? el.parentElement?.closest(CASE) : null;
+  if (was && was !== box) was.removeAttribute(WITHIN);
+  if (value === null) {
+    el.removeAttribute(ATTRIBUTE);
+    marked.delete(el);
+    return;
+  }
+  el.setAttribute(ATTRIBUTE, value);
+  if (box) {
+    box.setAttribute(WITHIN, value);
+    marked.set(el, box);
+  } else marked.delete(el);
+}
 
 /**
  * Mark presses on `doc` and return a disposer.
@@ -61,11 +101,11 @@ export function watchPresses(doc = document) {
 
   /** @param {Element} el */
   const settle = (el) => {
-    el.setAttribute(ATTRIBUTE, "out");
+    mark(el, "out");
     later(
       el,
       () => {
-        if (el.getAttribute(ATTRIBUTE) === "out") el.removeAttribute(ATTRIBUTE);
+        if (el.getAttribute(ATTRIBUTE) === "out") mark(el, null);
       },
       RELEASE_MS,
     );
@@ -96,7 +136,7 @@ export function watchPresses(doc = document) {
     downAt = performance.now();
     minMs = touch ? MIN_TOUCH_MS : MIN_MOUSE_MS;
     view?.clearTimeout(timers.get(target));
-    target.setAttribute(ATTRIBUTE, touch ? "touch" : "in");
+    mark(target, touch ? "touch" : "in");
   };
 
   /** @param {PointerEvent} event */
@@ -131,12 +171,12 @@ export function watchPresses(doc = document) {
   root.setAttribute("data-press-ready", "");
 
   return () => {
-    if (pressed) pressed.removeAttribute(ATTRIBUTE);
+    if (pressed) mark(pressed, null);
     pressed = null;
     pointerId = -1;
     for (const [el, timer] of timers) {
       view?.clearTimeout(timer);
-      el.removeAttribute(ATTRIBUTE);
+      mark(el, null);
     }
     timers.clear();
     doc.removeEventListener("pointerdown", down, options);
