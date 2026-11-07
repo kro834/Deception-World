@@ -137,8 +137,9 @@ export default defineConfig(({ command }) => ({
     strictPort: true,
   },
   resolve: { tsconfigPaths: true },
-  // The liquid glass sheets' `:is(…)`-ended selectors get a key each, so the
-  // style engine stops trying them on every element (QA 2026-10-31).
+  // Every site sheet's `:is(…)`-ended selectors get a key each, so the style
+  // engine stops trying them on every element (QA 2026-10-31 for the liquid
+  // glass; owner 2026-11-06 for the whole site).
   css: { postcss: { plugins: [glassSelectorBuckets()] } },
   plugins: [
     pgliteBootstrapPlugin(),
@@ -166,6 +167,13 @@ export default defineConfig(({ command }) => ({
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
             serverDir: "./server",
+            // The font subsets carry a content hash in their names
+            // (scripts/build-font-subsets.mjs), like /assets/.
+            routeRules: {
+              "/fonts/subsets/**": {
+                headers: { "cache-control": "public, max-age=31536000, immutable" },
+              },
+            },
           }),
         ]
       : []),

@@ -1,13 +1,17 @@
-// Liquid glass sheets: let the engine skip rules on elements they cannot match.
+// Every site sheet: let the engine skip rules on elements they cannot match.
 //
 // A rule whose last compound is a multi-argument `:is()` / `:where()`
 // (`html[data-button-style="liquid"] body :is(.topbar nav a, .manager-back, …)`)
 // has no class, id, tag or attribute for Chromium and WebKit to file it
 // under, so it is tried on every element of the page at every style
 // recalculation. QA (2026-10-31) measured that as extra style time on the
-// iPads with glass on. This PostCSS step, run on the glass sheets only,
-// rewrites each such selector into one selector per argument, keyed by that
-// argument's own last class/id/attribute/tag:
+// iPads with glass on, and the step ran on the glass sheets only. Owner
+// (2026-11-06,「サイト全体が重いので軽くして」): the site's other sheets carried
+// about 1,200 more such selectors, every one tried on every element at every
+// recalculation (a /world menu tap recalculates the whole page several
+// times). The step now runs on every stylesheet under src/. It rewrites each
+// such selector into one selector per argument, keyed by that argument's own
+// last class/id/attribute/tag:
 //
 //   P :is(A1, …, An) S   ->   P :where(k1):is(A1, Amax) S, …, P :where(kn):is(An, Amax) S
 //   P :where(A1, …, An) S -> P :where(k1):where(A1) S, …
@@ -24,7 +28,8 @@
 // forgiving `:is()` list into a plain list would let one unknown selector
 // drop the whole rule.
 
-const GLASS_SHEET = /[\\/]src[\\/]styles-liquid-glass[\w-]*\.css$/;
+// Every stylesheet of the site (src/**/*.css); dependencies' CSS is left alone.
+const SITE_SHEET = /[\\/]src[\\/](?:[\w.-]+[\\/])*[\w.-]+\.css$/;
 
 function scan(text, visit) {
   let depth = 0;
@@ -228,14 +233,15 @@ export function bucketSelectors(selectors) {
   return selectors.flatMap(bucketSelector);
 }
 
-/** PostCSS plugin: applied to the liquid glass sheets only. */
+/** PostCSS plugin: applied to every sheet under src/ (the name is historical:
+ * the liquid glass sheets were its first). */
 export function glassSelectorBuckets() {
   return {
     postcssPlugin: "dw-glass-selector-buckets",
     Once(root) {
       // Vite passes the id with its query (`…/styles-liquid-glass.css?url`).
       const file = String(root.source?.input?.file ?? "").replace(/\?.*$/, "");
-      if (!GLASS_SHEET.test(file)) return;
+      if (!SITE_SHEET.test(file) || /[\\/]node_modules[\\/]/.test(file)) return;
       root.walkRules((rule) => {
         if (rule.parent?.type === "atrule" && /keyframes$/i.test(rule.parent.name)) return;
         const next = bucketSelectors(rule.selectors);

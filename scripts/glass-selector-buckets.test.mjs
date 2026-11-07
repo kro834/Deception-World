@@ -72,7 +72,7 @@ test("the list split respects brackets, parentheses and quotes", () => {
   ]);
 });
 
-test("the step runs on the liquid glass sheets only, wired into Vite", () => {
+test("the step runs on every site sheet (not dependencies' CSS), wired into Vite", () => {
   const plugin = glassSelectorBuckets();
   const rule = (file) => {
     const node = {
@@ -87,7 +87,12 @@ test("the step runs on the liquid glass sheets only, wired into Vite", () => {
   };
   assert.equal(rule("/repo/src/styles-liquid-glass-controls.css?url").length, 2);
   assert.equal(rule("/repo/src/styles-liquid-glass.css").length, 2);
-  assert.deepEqual(rule("/repo/src/styles.css?url"), ["html :is(.a, .b)"]);
+  // Owner (2026-11-06): the whole site, not only the glass.
+  assert.equal(rule("/repo/src/styles.css?url").length, 2);
+  assert.equal(rule("/repo/src/styles-world/21.css").length, 2);
+  assert.equal(rule("/repo/src/components/world/external-cinema-link.css").length, 2);
+  assert.deepEqual(rule("/repo/node_modules/pkg/src/index.css"), ["html :is(.a, .b)"]);
+  assert.deepEqual(rule("/repo/other/a.css"), ["html :is(.a, .b)"]);
   const config = read("vite.config.ts");
   assert.match(
     config,

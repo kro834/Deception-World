@@ -49,6 +49,8 @@ import openingPlatformCss from "../styles-opening-platform.css?url";
 import openingFontsCss from "../styles-opening-fonts.css?url";
 import siteDisplayFontsCss from "../styles-site-display-fonts.css?url";
 import siteMetricFacesCss from "../styles-site-metric-faces.css?url";
+import fontSubsetsCoreCss from "../styles-font-subsets-core.css?url";
+import fontSubsetsDisplayCss from "../styles-font-subsets-display.css?url";
 import controlOpticsCss from "../styles-control-optics.css?url";
 import openingInterfaceCss from "../styles-opening-interface.css?url";
 import { compactStylesheetGroups } from "@/lib/compact-stylesheet-groups";
@@ -297,6 +299,14 @@ export const Route = createRootRoute({
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
         : [{ rel: "stylesheet", href: siteMetricFacesCss }]),
+      // Owner (2026-11-06): Noto Sans JP and Zen Kaku Gothic New cut to the
+      // site's own characters, served from here (scripts/build-font-subsets.mjs).
+      // After the Google faces, so these are tried first; a character outside
+      // them still falls through to Google's slice.
+      { rel: "stylesheet", href: fontSubsetsCoreCss },
+      ...(matches.some((match) => (match.routeId as string) === "/")
+        ? []
+        : [{ rel: "stylesheet", href: fontSubsetsDisplayCss }]),
       // Optical centring nudges for the icon+label pills, submits and chapter
       // tabs whose ink sat off the box centre (layout properties only, so the
       // glass sheets above are untouched). After the faces, so it is the last

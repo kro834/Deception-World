@@ -37,7 +37,7 @@
                        (fixed to the top by default; .dg-rail-static keeps it in
                        flow, e.g. inside a header). Scroll-driven where the
                        browser has scroll() timelines; else the helper writes
-                       --dg-progress (0..1) on <html>.
+                       --dg-progress (0..1) on the rail itself.
    .dg-dialog          On a <dialog>: smooth open (lens-in, slight rise) and
                        close (fade/shrink) with a fading ::backdrop, through
                        @starting-style + transition-behavior where supported,
