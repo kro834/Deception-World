@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "@tanstack/react-router";
 import type { DreamReadingRoom } from "./dream-reading-room";
+import type { DreamPersonTarget } from "./dream-reading-room";
 import { prepareReadingStyle } from "./dream-reading-style";
 
 /** The room and its styles are fetched only after explicit entry. */
@@ -9,6 +10,7 @@ export function DreamReadingLauncher() {
   const router = useRouter();
   const [Room, setRoom] = useState<typeof DreamReadingRoom | null>(null);
   const [open, setOpen] = useState(false);
+  const [personTarget, setPersonTarget] = useState<DreamPersonTarget | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
@@ -32,7 +34,8 @@ export function DreamReadingLauncher() {
       }),
     [router],
   );
-  const enter = async () => {
+  const enter = async (target: DreamPersonTarget | null = null) => {
+    setPersonTarget(target);
     const request = ++generation.current;
     pending.current = true;
     setBusy(true);
@@ -51,6 +54,18 @@ export function DreamReadingLauncher() {
       }
     }
   };
+  useEffect(() => {
+    const jump = (event: Event) => {
+      const target = (event as CustomEvent<DreamPersonTarget>).detail;
+      if (target?.id !== "ciel" || target.paragraphId !== "dream-person-ciel-section-2-paragraph-1")
+        return;
+      void enter(target);
+    };
+    window.addEventListener("dream-research-open-source", jump);
+    return () => {
+      window.removeEventListener("dream-research-open-source", jump);
+    };
+  }, []);
   return (
     <div className="dream-reading-entry" id="dream-reading-room-entry" data-dream-reveal>
       <div>
@@ -72,7 +87,11 @@ export function DreamReadingLauncher() {
       ) : null}
       {open && Room
         ? createPortal(
-            <Room trigger={trigger.current} onClose={() => setOpen(false)} />,
+            <Room
+              trigger={trigger.current}
+              onClose={() => setOpen(false)}
+              personTarget={personTarget}
+            />,
             document.body,
           )
         : null}

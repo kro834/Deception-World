@@ -74,3 +74,19 @@
   outline: 2px solid #eacb8d;
   outline-offset: 4px;
 }
+.dream-reading-room .dream-scene-reference h4 {
+  margin: 0;
+  font-size: 16px;
+}
+.dream-reading-room .dream-scene-reference p[data-dream-source-kind] {
+  margin: 0;
+  font-size: 16px;
+  line-height: 2;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  overflow-wrap: anywhere;
+}
+.dream-reading-room .dream-scene-reference p[data-dream-source-kind]:focus-visible {
+  outline: 2px solid var(--room-gilt);
+  outline-offset: 5px;
+}

@@ -164,3 +164,18 @@ body .dream-research-notes textarea {
   user-select: text !important;
   -webkit-touch-callout: default !important;
 }
+.dream-research-source {
+  font-size: 0.9rem !important;
+  color: #d9c8a4;
+}
+.dream-research-unresolved {
+  padding: 0.6rem;
+  border-left: 2px solid #d9c8a4;
+  font-size: 0.9rem !important;
+}
+.dream-research-floating {
+  white-space: normal;
+}
+dialog .dream-research-floating {
+  z-index: 1300;
+}

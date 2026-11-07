@@ -8,7 +8,12 @@ import {
 } from "@/lib/dream-reader-state.js";
 import { DREAM_CASES, DREAM_CHARACTERS } from "./dream-chapter-data";
 
-type Props = { trigger: HTMLButtonElement | null; onClose: () => void };
+export type DreamPersonTarget = { id: string; paragraphId: string; start?: number; end?: number };
+type Props = {
+  trigger: HTMLButtonElement | null;
+  onClose: () => void;
+  personTarget?: DreamPersonTarget | null;
+};
 
 function visibleParagraph(scroller: HTMLDivElement | null) {
   if (!scroller) return 1;
@@ -187,7 +192,7 @@ function readParagraph(scroller: HTMLDivElement | null, pin: { current: Pin }) {
   return visibleParagraph(scroller);
 }
 
-export function DreamReadingRoom({ trigger, onClose }: Props) {
+export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
   const router = useRouter();
   const [initial] = useState(() => {
     try {
@@ -222,6 +227,8 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   const episode = DREAM_CASES.find((item) => item.no === chapter) ?? DREAM_CASES[0];
   const index = DREAM_CASES.indexOf(episode);
   const ciel = DREAM_CHARACTERS.find((character) => character.id === "ciel")!;
+  const cielIntroduction = ciel.sections.find((section) => section.title === "概要")!
+    .paragraphs![0];
   const closeReference = () => {
     setReferenceOpen(false);
     requestAnimationFrame(() => {
@@ -236,6 +243,54 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
   useLayoutEffect(() => {
     if (referenceOpen) referenceClose.current?.focus({ preventScroll: true });
   }, [referenceOpen]);
+
+  useEffect(() => {
+    if (
+      personTarget?.id !== "ciel" ||
+      personTarget.paragraphId !== "dream-person-ciel-section-2-paragraph-1"
+    )
+      return;
+    firstLanding.current = 1;
+    setChapter("0");
+    setReferenceOpen(true);
+  }, [personTarget]);
+
+  // Wait for the chapter and its material to commit before looking up the
+  // destination. A frame queued with setReferenceOpen can run before React
+  // has mounted that paragraph, especially during a fresh modal entry.
+  useLayoutEffect(() => {
+    if (!personTarget || chapter !== "0" || !referenceOpen) return;
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        const paragraph = dialog.current?.querySelector<HTMLElement>("#dream-room-ciel-overview-1");
+        const scroller = viewport.current;
+        if (!paragraph || !scroller) return;
+        scroller.scrollTop +=
+          paragraph.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
+        paragraph.focus({ preventScroll: true });
+        readingViewport.current?.remember();
+        referenceOrigin.current = scroller.getBoundingClientRect().top + 24;
+        const text = paragraph.firstChild;
+        const { start, end } = personTarget;
+        if (
+          text?.nodeType === Node.TEXT_NODE &&
+          start !== undefined &&
+          end !== undefined &&
+          start >= 0 &&
+          end > start &&
+          end <= (text.textContent?.length ?? 0)
+        ) {
+          const range = document.createRange();
+          range.setStart(text, start);
+          range.setEnd(text, end);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+        }
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [personTarget, chapter, referenceOpen]);
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
@@ -536,6 +591,19 @@ export function DreamReadingRoom({ trigger, onClose }: Props) {
                         <img src={ciel.portrait} alt={ciel.portraitAlt} width="768" height="1024" />
                         <figcaption>{ciel.name} · 人物原画</figcaption>
                       </figure>
+                      <h4>シエル · 概要</h4>
+                      <p
+                        id="dream-room-ciel-overview-1"
+                        tabIndex={-1}
+                        data-dream-reading-paragraph
+                        data-source-kind="person"
+                        data-dream-source-kind="person"
+                        data-source-id="ciel"
+                        data-dream-source-id="ciel"
+                        data-paragraph-id="dream-person-ciel-section-2-paragraph-1"
+                      >
+                        {cielIntroduction}
+                      </p>
                       <button ref={referenceClose} type="button" onClick={closeReference}>
                         原画を閉じて本文に戻る
                       </button>

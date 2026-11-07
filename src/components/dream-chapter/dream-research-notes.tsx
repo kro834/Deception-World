@@ -1,22 +1,27 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { DREAM_CASES } from "./dream-chapter-data";
+import { DREAM_RESEARCH_SOURCES } from "./dream-research-sources";
 import {
   emptyResearch,
   readResearch,
   writeResearch,
   removeResearchQuote,
+  createResearchAnchor,
+  resolveResearchQuote,
   type ResearchData,
   type ResearchQuote,
 } from "@/lib/dream-research-store.js";
 
 type Passage = Omit<ResearchQuote, "id">;
 const sourceLabel = (q: Passage) =>
-  `CASE ${q.caseNo}「${DREAM_CASES.find((c) => c.no === q.caseNo)?.title ?? ""}」・${q.paragraph}段落目`;
+  q.source
+    ? `${q.source.title}・${q.paragraph}段落目`
+    : `CASE ${q.caseNo}・${q.paragraph}段落目`;
 const newId = () =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-/** Captures only an actual selection wholly within a canonical story paragraph. */
+/** A quote is captured only when the selected text maps exactly to its source paragraph. */
 function selectedDreamPassage(selection: Selection | null): Passage | null {
   if (!selection || selection.isCollapsed || selection.rangeCount !== 1) return null;
   const range = selection.getRangeAt(0);
@@ -26,19 +31,32 @@ function selectedDreamPassage(selection: Selection | null): Passage | null {
       : range.startContainer.parentElement;
   const paragraph = element?.closest<HTMLElement>("p[data-dream-reading-paragraph]");
   if (!paragraph || !paragraph.contains(range.endContainer)) return null;
-  const caseNo = paragraph.dataset.caseNo;
-  const no = Number(paragraph.dataset.paragraphNo);
-  const text = selection.toString().trim();
-  const chapter = DREAM_CASES.find((c) => c.no === caseNo);
-  if (
-    !chapter ||
-    !Number.isInteger(no) ||
-    !text ||
-    text.length > 4000 ||
-    !chapter.paragraphs[no - 1]?.includes(text)
-  )
-    return null;
-  return { caseNo: chapter.no, paragraph: no, text };
+  const kind = paragraph.dataset.sourceKind ?? "case";
+  const sourceId = paragraph.dataset.sourceId ?? paragraph.dataset.caseNo;
+  const source = DREAM_RESEARCH_SOURCES.find((item) => item.kind === kind && item.id === sourceId);
+  const paragraphId =
+    paragraph.dataset.paragraphId ??
+    `dream-case-${sourceId}-paragraph-${paragraph.dataset.paragraphNo}`;
+  const original = source?.paragraphs.find((item) => item.id === paragraphId);
+  if (!source || !original) return null;
+  const raw = selection.toString();
+  const text = raw.trim();
+  if (!text || text.length > 4000) return null;
+  const before = range.cloneRange();
+  before.selectNodeContents(paragraph);
+  before.setEnd(range.startContainer, range.startOffset);
+  // Number badges are outside the source text. Subtract their text from the prefix.
+  const badge = paragraph.querySelector(".dream-reading-paragraph-number");
+  const start = before.toString().length - (badge?.textContent?.length ?? 0) + raw.indexOf(text);
+  const anchor = createResearchAnchor(original.text, start, start + text.length);
+  if (!anchor || anchor.exact !== text) return null;
+  return {
+    caseNo: source.kind === "case" ? source.id : undefined,
+    paragraph: source.paragraphs.indexOf(original) + 1,
+    text,
+    source: { kind: source.kind, id: source.id, title: source.title, paragraphId: original.id },
+    anchor,
+  };
 }
 
 export function DreamResearchNotes() {
@@ -47,6 +65,7 @@ export function DreamResearchNotes() {
   const [status, setStatus] = useState("");
   const [notice, setNotice] = useState("");
   const [passage, setPassage] = useState<Passage | null>(null);
+  const [portalTarget, setPortalTarget] = useState<Element | null>(null);
   const [pair, setPair] = useState<string[]>(["", ""]);
   const [thought, setThought] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -59,7 +78,14 @@ export function DreamResearchNotes() {
       setStatus("このブラウザーでは保存記録を利用できません。");
     }
     setReady(true);
-    const select = () => setPassage(selectedDreamPassage(window.getSelection()));
+    const select = () => {
+      const selection = window.getSelection();
+      const selected = selectedDreamPassage(selection);
+      setPassage(selected);
+      const node = selection?.anchorNode;
+      const element = node?.nodeType === 1 ? (node as Element) : node?.parentElement;
+      setPortalTarget(element?.closest("dialog[open]") ?? null);
+    };
     document.addEventListener("selectionchange", select);
     return () => document.removeEventListener("selectionchange", select);
   }, []);
@@ -97,9 +123,12 @@ export function DreamResearchNotes() {
     if (
       data.quotes.some(
         (q) =>
-          q.caseNo === passage.caseNo &&
+          (q.source?.kind ?? "case") === (passage.source?.kind ?? "case") &&
+          (q.source?.id ?? q.caseNo) === (passage.source?.id ?? passage.caseNo) &&
           q.paragraph === passage.paragraph &&
-          q.text === passage.text,
+          q.text === passage.text &&
+          q.anchor?.prefix === passage.anchor?.prefix &&
+          q.anchor?.suffix === passage.anchor?.suffix,
       )
     ) {
       setStatus("この一節は保存済みです。");
@@ -122,7 +151,26 @@ export function DreamResearchNotes() {
     }
   };
   const jump = (q: ResearchQuote) => {
-    const target = document.getElementById(`dream-case-${q.caseNo}-paragraph-${q.paragraph}`);
+    const resolved = resolveResearchQuote(q, DREAM_RESEARCH_SOURCES);
+    if (resolved.status !== "resolved") {
+      setStatus("現在の本文では引用位置を一意に確認できません。当時の引用と出典を表示しています。");
+      return;
+    }
+    if (resolved.source.kind === "person") {
+      window.dispatchEvent(
+        new CustomEvent("dream-research-open-source", {
+          detail: {
+            kind: "person",
+            id: resolved.source.id,
+            paragraphId: resolved.paragraph.id,
+            start: resolved.start,
+            end: resolved.end,
+          },
+        }),
+      );
+      return;
+    }
+    const target = document.getElementById(resolved.paragraph.id);
     if (!target) {
       setStatus("元の段落が見つかりませんでした。");
       return;
@@ -131,16 +179,38 @@ export function DreamResearchNotes() {
       if (parent instanceof HTMLDetailsElement) parent.open = true;
     target.scrollIntoView({ block: "center", behavior: "instant" });
     target.focus({ preventScroll: true });
+    const node = target.firstChild;
+    if (node instanceof Text && node.data === resolved.paragraph.text) {
+      const range = document.createRange();
+      range.setStart(node, resolved.start);
+      range.setEnd(node, resolved.end);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
     history.replaceState(history.state, "", `#${target.id}`);
   };
-  const renderQuote = (q: ResearchQuote) => (
-    <>
-      <blockquote>{q.text}</blockquote>
-      <button type="button" onClick={() => jump(q)}>
-        {sourceLabel(q)}へ戻る
-      </button>
-    </>
-  );
+  const renderQuote = (q: ResearchQuote) => {
+    const resolved = resolveResearchQuote(q, DREAM_RESEARCH_SOURCES);
+    return (
+      <>
+        <blockquote>{q.text}</blockquote>
+        <p className="dream-research-source">保存時の出典：{sourceLabel(q)}</p>
+        {resolved.status === "resolved" ? (
+          <button type="button" onClick={() => jump(q)}>
+            出典の引用箇所へ戻る
+          </button>
+        ) : (
+          <p className="dream-research-unresolved">
+            {resolved.status === "ambiguous"
+              ? "引用箇所の候補が複数あるため、現在の位置を確定できません。"
+              : "本文が変更されたため、現在の引用箇所を確認できません。"}
+            保存時の引用を残しています。
+          </p>
+        )}
+      </>
+    );
+  };
   return (
     <>
       <section
@@ -150,7 +220,7 @@ export function DreamResearchNotes() {
       >
         <h2 id="dream-research-title">引用と思索</h2>
         <p>
-          本文の一節を選択して引用を保存。二つの引用を並べて、考察を残せます。記録はこの端末のブラウザーに保存されます。
+          本文や読書室の人物資料から一節を選択して引用を保存。二つの引用を並べて、考察を残せます。記録はこの端末のブラウザーに保存されます。
         </p>
         {passage ? (
           <div className="dream-research-selection">
@@ -337,7 +407,7 @@ export function DreamResearchNotes() {
               </button>
             )}
           </aside>,
-          document.body,
+          portalTarget?.isConnected ? portalTarget : document.body,
         )}
     </>
   );
