@@ -132,7 +132,90 @@ function fetchChunk(face, chars) {
   return { font: curl([src]), unicodeRange };
 }
 
+/** Code points of a unicode-range value ("U+20-7e, U+3042"). */
+export function rangeCodepoints(range) {
+  return range.split(",").flatMap((part) => {
+    const [a, b] = part.trim().replace(/^U\+/i, "").split("-").map((hex) => parseInt(hex, 16));
+    return b === undefined ? [a] : Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  });
+}
+
+/** A unicode-range value for code points, as Google writes them. */
+export function formatRange(points) {
+  const sorted = [...new Set(points)].sort((a, b) => a - b);
+  const parts = [];
+  for (let i = 0; i < sorted.length; i++) {
+    let j = i;
+    while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++;
+    const hex = (n) => n.toString(16);
+    parts.push(j > i ? `U+${hex(sorted[i])}-${hex(sorted[j])}` : `U+${hex(sorted[i])}`);
+    i = j;
+  }
+  return parts.join(", ");
+}
+
+// The local snapshots of Google's sheets for the same faces. Chromium starts
+// loading every face that covers a character while the first is still
+// loading, so a Google slice overlapping a chunk was fetched as well (FAR
+// FROM's phone layout fetched 45 slices). Each snapshot face keeps Google's
+// range minus the characters the chunks of its weight carry; a face left
+// with nothing is dropped. Google's own ranges are re-read every run (keyed
+// by the face's file), so a smaller chunk set gives the characters back.
+export const SNAPSHOTS = [
+  {
+    file: "src/styles-opening-fonts.css",
+    family: "Noto Sans JP",
+    google: "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400..600&display=swap",
+  },
+  {
+    file: "src/styles-site-display-fonts.css",
+    family: "Zen Kaku Gothic New",
+    google: "https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&display=swap",
+  },
+];
+
+/** Trim one snapshot's faces of `family` by the covered code points of each weight. */
+export function trimSnapshot(css, family, covered, originals) {
+  return css.replace(/(\/\*[^*]*\*\/\n)?@font-face \{[^}]*\}\n?/g, (block) => {
+    if (!block.includes(`font-family: '${family}';`)) return block;
+    const src = block.match(/src: url\(([^)]+)\)/)[1];
+    const original = originals.get(src);
+    if (!original) throw new Error(`${family}: ${src} is not in Google's current sheet; refresh the snapshot`);
+    const weight = block.match(/font-weight: ([^;]+);/)[1];
+    const keep = rangeCodepoints(original).filter((c) => !covered.get(weight)?.has(c));
+    if (!keep.length) return "";
+    return block.replace(/unicode-range: [^;]+;/, `unicode-range: ${formatRange(keep)};`);
+  });
+}
+
+function trimSnapshots() {
+  const covered = new Map();
+  for (const sheet of ["core", "display"]) {
+    const css = readFileSync(join(repo, `src/styles-font-subsets-${sheet}.css`), "utf8");
+    for (const block of css.match(/@font-face \{[^}]*\}/g) ?? []) {
+      const key = `${block.match(/font-family: '([^']+)'/)[1]}|${block.match(/font-weight: ([^;]+);/)[1]}`;
+      if (!covered.has(key)) covered.set(key, new Set());
+      for (const c of rangeCodepoints(block.match(/unicode-range: ([^;]+);/)[1])) covered.get(key).add(c);
+    }
+  }
+  for (const snapshot of SNAPSHOTS) {
+    const originals = new Map();
+    for (const block of curl([snapshot.google]).toString("utf8").match(/@font-face \{[^}]*\}/g) ?? [])
+      originals.set(block.match(/src: url\(([^)]+)\)/)[1], block.match(/unicode-range: ([^;]+);/)[1]);
+    const byWeight = new Map(
+      [...covered].filter(([key]) => key.startsWith(`${snapshot.family}|`)).map(([key, set]) => [key.split("|")[1], set]),
+    );
+    const path = join(repo, snapshot.file);
+    const before = readFileSync(path, "utf8");
+    const after = trimSnapshot(before, snapshot.family, byWeight, originals);
+    writeFileSync(path, after);
+    const count = (text) => (text.match(new RegExp(`font-family: '${snapshot.family}'`, "g")) ?? []).length;
+    console.log(snapshot.file, snapshot.family, "faces", count(before), "->", count(after));
+  }
+}
+
 function main() {
+  if (process.argv.includes("--trim-only")) return trimSnapshots();
   const routeChars = JSON.parse(readFileSync(new URL("./font-subsets/route-chars.json", import.meta.url), "utf8"));
   const source = sourceCharacters();
   rmSync(OUT_DIR, { recursive: true, force: true });
@@ -168,6 +251,7 @@ function main() {
   for (const [sheet, faces] of Object.entries(sheets))
     writeFileSync(join(repo, `src/styles-font-subsets-${sheet}.css`), header(sheet) + faces.join("\n") + "\n");
   console.log("total", total, "bytes");
+  trimSnapshots();
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

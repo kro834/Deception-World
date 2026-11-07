@@ -122,3 +122,34 @@ test("report: site characters the subsets miss (they fall back to Google's slice
   if (missing.size) console.log(`font subsets: ${missing.size} kanji in src/ not in the subsets: ${[...missing].join("")}`);
   assert.ok(true);
 });
+
+test("the Google snapshots never overlap the subsets (Chromium would fetch both while one loads)", async () => {
+  const { rangeCodepoints, SNAPSHOTS } = await import("./build-font-subsets.mjs");
+  for (const snapshot of SNAPSHOTS) {
+    const covered = new Map();
+    for (const sheet of ["core", "display"])
+      for (const block of faces(read(`src/styles-font-subsets-${sheet}.css`))) {
+        if (!block.includes(`'${snapshot.family}'`)) continue;
+        const weight = block.match(/font-weight: ([^;]+);/)[1];
+        if (!covered.has(weight)) covered.set(weight, new Set());
+        for (const c of rangeCodepoints(block.match(/unicode-range: ([^;]+);/)[1])) covered.get(weight).add(c);
+      }
+    assert.ok(covered.size > 0, snapshot.family);
+    for (const block of faces(read(snapshot.file))) {
+      if (!block.includes(`'${snapshot.family}'`)) continue;
+      const set = covered.get(block.match(/font-weight: ([^;]+);/)[1]);
+      const overlap = rangeCodepoints(block.match(/unicode-range: ([^;]+);/)[1]).filter((c) => set?.has(c));
+      assert.deepEqual(overlap, [], `${snapshot.file}: ${snapshot.family}`);
+    }
+  }
+  // Every route reads the core faces from that snapshot, never the remote Noto sheet.
+  const root = read("src/routes/__root.tsx");
+  assert.match(root, /link\.href === SITE_CORE_FONTS_URL &&\s*!matches\.some\(\(match\) => \(match\.routeId as string\) === "\/"\)\s*\? \{ \.\.\.link, href: openingFontsCss \}/);
+});
+
+test("formatRange round-trips with rangeCodepoints", async () => {
+  const { rangeCodepoints, formatRange } = await import("./build-font-subsets.mjs");
+  const points = [0x20, 0x21, 0x22, 0x3042, 0x4e00, 0x4e01, 0x20b9f];
+  assert.equal(formatRange(points), "U+20-22, U+3042, U+4e00-4e01, U+20b9f");
+  assert.deepEqual(rangeCodepoints(formatRange(points)), points);
+});

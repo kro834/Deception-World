@@ -97,7 +97,13 @@ test("non-opening pages keep every original shared stylesheet and its cascade or
     "/characters/ciel",
     "/search",
   ])
-    assert.deepEqual(styles(route), original, route);
+    assert.deepEqual(
+      styles(route),
+      // Owner (2026-11-06): the core Google faces come from the title's local
+      // snapshot (Noto trimmed by the font subsets), in the same place.
+      original.map((href) => (href === fonts.SITE_CORE_FONTS_URL ? "../styles-opening-fonts.css?url" : href)),
+      route,
+    );
 });
 
 test("opening removes only unused record UI CSS and preserves the same shell tokens", () => {

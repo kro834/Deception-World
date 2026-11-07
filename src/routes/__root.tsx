@@ -288,7 +288,17 @@ export const Route = createRootRoute({
       // metric overrides (same faces and binary URLs, one cross-origin round trip fewer).
       ...siteFontLinks(matches.some((match) => (match.routeId as string) === "/")).map((link) =>
         link.href === SITE_DISPLAY_FONTS_URL ? { ...link, href: siteDisplayFontsCss } : link,
-      ),
+      )
+        // Owner (2026-11-06): the core faces from this origin too, as the title
+        // already has them (styles-opening-fonts.css: the same Google faces, with
+        // the Noto slices trimmed of the characters the subsets below carry, so
+        // Chromium never fetches both). One render-blocking cross-origin sheet fewer.
+        .map((link) =>
+          link.href === SITE_CORE_FONTS_URL &&
+          !matches.some((match) => (match.routeId as string) === "/")
+            ? { ...link, href: openingFontsCss }
+            : link,
+        ),
       // The chrome's HUD labels: the Michroma subset of capitals and digits
       // the character files already load (a few KB, display=swap).
       { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
