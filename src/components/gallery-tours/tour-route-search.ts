@@ -8,12 +8,18 @@ export const GALLERY_TOUR_WORK_IDS: Readonly<Record<string, readonly string[]>> 
   "design-lines": ["g81", "g80", "g83", "g84", "g85", "g86", "g89"],
 };
 
+export type QuoteSceneId = "bell" | "ciel" | "kaisaku";
+
 export function normalizeTourSearch(input: Record<string, unknown>): {
   tour?: string;
   work?: string;
+  quote?: QuoteSceneId;
 } {
   const tour = input.tour;
-  if (typeof tour !== "string" || !Object.hasOwn(GALLERY_TOUR_WORK_IDS, tour)) return {};
+  if (typeof tour !== "string" || !Object.hasOwn(GALLERY_TOUR_WORK_IDS, tour)) {
+    const quote = input.quote;
+    return quote === "bell" || quote === "ciel" || quote === "kaisaku" ? { quote } : {};
+  }
   return typeof input.work === "string" && GALLERY_TOUR_WORK_IDS[tour].includes(input.work)
     ? { tour, work: input.work }
     : { tour };

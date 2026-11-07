@@ -1,0 +1,281 @@
+@import "./royal-exhibit-effects.css";
+
+/* The complete plate and the calibrated detail share one illuminated mount. */
+.rr-exhibit {
+  --rr-brass: #dec79c;
+  --rr-rule: #655640;
+  container-type: inline-size;
+  min-width: 0;
+  margin: 0 auto;
+  color: #f7efdd;
+  color-scheme: dark;
+  border: 1px solid var(--rr-rule);
+  border-radius: 4px;
+  background: linear-gradient(140deg, #211f22, #12141b 60%, #18171b);
+}
+.rr-exhibit *,
+.rr-exhibit *::before,
+.rr-exhibit *::after {
+  box-sizing: border-box;
+}
+.rr-exhibit-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px clamp(10px, 2vw, 22px);
+  border-bottom: 1px solid var(--rr-rule);
+}
+.rr-exhibit-select {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 7px;
+  max-width: 100%;
+  color: var(--rr-brass);
+  font-weight: 600;
+  line-height: 1.4;
+  font-size: 12px;
+}
+.rr-exhibit-select select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--rr-rule);
+  border-radius: 0;
+  color: #fbf6e9;
+  background-color: #1b1b22;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.rr-exhibit button {
+  font-family: inherit;
+  cursor: pointer;
+}
+.rr-exhibit .rr-exhibit-compare {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--rr-rule);
+  border-radius: 3px;
+  background: #232126;
+  color: #f4e5c8;
+  font-size: 13px;
+  font-weight: 650;
+}
+.rr-exhibit-compare svg {
+  width: 17px;
+  height: 17px;
+}
+.rr-exhibit .rr-exhibit-compare[aria-expanded="true"] {
+  border-color: var(--rr-brass);
+}
+.rr-exhibit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.91fr) minmax(0, 1fr);
+  min-width: 0;
+}
+.rr-exhibit-portrait-bed {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  padding: clamp(12px, 2.5cqw, 32px);
+  border-right: 1px solid var(--rr-rule);
+  background: radial-gradient(ellipse at center, #39333a 0%, #13141c 67%, #100f14 100%);
+}
+.rr-exhibit-portrait {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 410px;
+  box-shadow:
+    0 0 0 1px #9e8a67,
+    0 10px 30px #0009;
+}
+.rr-exhibit-portrait > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.rr-exhibit .rr-exhibit-pin {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  touch-action: manipulation;
+}
+.rr-exhibit-pin i {
+  width: 23px;
+  height: 23px;
+  border: 1.5px solid #f7e3af;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px #17131adb,
+    inset 0 0 0 2px #20191dc7;
+}
+.rr-exhibit-pin[aria-pressed="true"] i {
+  width: 32px;
+  height: 32px;
+  border: 2px solid white;
+  outline: 1px solid var(--rr-brass);
+  outline-offset: 3px;
+}
+.rr-exhibit-study {
+  min-width: 0;
+  padding: clamp(12px, 2.8cqw, 32px);
+  align-self: center;
+}
+.rr-exhibit-parts {
+  display: flex;
+  gap: 2px;
+  padding: 0 0 10px;
+}
+.rr-exhibit-parts button {
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 4px;
+  border: 0;
+  border-bottom: 2px solid #5d554b;
+  background: transparent;
+  color: #e0d6c4;
+  font-size: 14px;
+  font-weight: 650;
+}
+.rr-exhibit-parts button[aria-pressed="true"] {
+  border-color: var(--rr-tint);
+  color: white;
+  background: linear-gradient(to top, #ffffff12, transparent);
+}
+.rr-exhibit-lenses {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(6px, 1.2cqw, 14px);
+}
+.rr-exhibit-lenses[data-comparing="true"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.rr-exhibit-detail {
+  min-width: 0;
+  margin: 0;
+}
+.rr-exhibit-crop {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  aspect-ratio: 1;
+  background: #090b10;
+  border: 1px solid #75664f;
+}
+.rr-exhibit-crop img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  max-width: none;
+  height: auto;
+  margin: 0;
+}
+.rr-exhibit-detail figcaption {
+  padding: 5px 0;
+  color: var(--rr-brass);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+.rr-exhibit-lenses[data-comparing="false"] figcaption {
+  display: none;
+}
+.rr-exhibit-study > .rr-exhibit-select {
+  margin-top: 3px;
+}
+.rr-exhibit-notes {
+  margin-top: clamp(12px, 2cqw, 22px);
+}
+.rr-exhibit-notes h4 {
+  margin: 0;
+  color: #fbf4de;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(18px, 2.7cqw, 28px);
+  font-weight: 650;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.rr-exhibit-notes p {
+  margin: 8px 0 0;
+  color: #e0dbd2;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.rr-exhibit :is(button, select):focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+@container (max-width: 540px) {
+  .rr-exhibit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rr-exhibit-portrait-bed {
+    border-right: 0;
+    border-bottom: 1px solid var(--rr-rule);
+    padding: 16px;
+  }
+  .rr-exhibit-portrait {
+    max-width: 230px;
+  }
+  .rr-exhibit-study {
+    width: 100%;
+  }
+  .rr-exhibit-lenses[data-comparing="false"] .rr-exhibit-detail {
+    width: min(100%, 320px);
+    margin-inline: auto;
+  }
+}
+@container (max-width: 335px) {
+  .rr-exhibit-toolbar {
+    gap: 4px;
+    padding-inline: 8px;
+  }
+  .rr-exhibit-toolbar .rr-exhibit-select {
+    display: grid;
+    gap: 0;
+  }
+  .rr-exhibit .rr-exhibit-compare {
+    padding: 0 6px;
+    font-size: 12px;
+  }
+  .rr-exhibit-portrait {
+    max-width: 195px;
+  }
+}
+@media (forced-colors: active) {
+  .rr-exhibit,
+  .rr-exhibit-toolbar,
+  .rr-exhibit-portrait,
+  .rr-exhibit-crop,
+  .rr-exhibit-parts button {
+    border: 1px solid CanvasText;
+  }
+  .rr-exhibit-pin i {
+    border-color: ButtonText;
+    background-color: Canvas;
+  }
+  .rr-exhibit-pin[aria-pressed="true"] i,
+  .rr-exhibit-parts button[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+}

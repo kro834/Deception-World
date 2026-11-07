@@ -1,0 +1,135 @@
+.quote-exhibition {
+  margin: clamp(4rem, 8vw, 8rem) auto;
+  max-width: 68rem;
+  color: var(--gallery-ivory, #f5eee3);
+  scroll-margin-top: calc(var(--gallery-header-height, 5rem) + 1rem);
+}
+.quote-exhibition h2 {
+  margin: 0 0 1.5rem;
+  font: 500 clamp(1.6rem, 3vw, 2.4rem)/1.55 var(--gallery-serif, serif);
+}
+.quote-scene {
+  border-top: 1px solid #6b6353;
+  overflow-anchor: none;
+}
+.quote-scene:last-child {
+  border-bottom: 1px solid #6b6353;
+}
+.quote-scene h3,
+.quote-scene h4,
+.quote-scene figure {
+  margin: 0;
+}
+.quote-scene h3 button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: clamp(1.1rem, 3vw, 2.2rem) 0.4rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: start;
+  font: 400 clamp(1.2rem, 2.6vw, 2.3rem)/1.65 var(--gallery-serif, serif);
+}
+.quote-scene[data-open="true"] h3 button {
+  color: var(--quote-ink);
+}
+.quote-line {
+  text-wrap: balance;
+  line-break: strict;
+}
+.quote-fold {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  aspect-ratio: 1;
+  border: 1px solid #776e5d;
+  border-radius: 50%;
+  font: 400 1rem/1 sans-serif;
+}
+.quote-leaf:not([hidden]) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(1rem, 4vw, 4rem);
+  padding: 0.4rem 0.4rem clamp(1.4rem, 4vw, 3rem);
+}
+.quote-leaf figure {
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #6a6050;
+  background: radial-gradient(ellipse at 50% 18%, #38352f, #151514 76%);
+}
+.quote-leaf img {
+  display: block;
+  width: 100%;
+  height: clamp(15rem, 36vw, 23rem);
+  object-fit: contain;
+}
+.quote-leaf-copy {
+  min-width: 0;
+}
+.quote-leaf-copy h4 {
+  color: var(--quote-ink);
+  font: 500 clamp(1.35rem, 2.3vw, 2rem)/1.5 var(--gallery-serif, serif);
+}
+.quote-leaf-copy p {
+  margin: 1rem 0;
+  line-height: 1.95;
+  text-wrap: pretty;
+}
+.quote-leaf-copy a,
+.quote-scene-ambience button {
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0.35rem 0;
+  color: var(--gallery-ivory, #f5eee3);
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+.quote-scene-ambience button {
+  border: 0;
+  background: transparent;
+  color: var(--quote-ink);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.quote-scene :is(button, a):focus-visible {
+  outline: 2px solid var(--quote-ink);
+  outline-offset: 3px;
+}
+@media (max-width: 620px) {
+  .quote-leaf:not([hidden]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .quote-leaf img {
+    height: clamp(12rem, 56vw, 19rem);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .quote-leaf:not([hidden]) figure {
+    animation: quote-scene-arrive 0.48s ease-out both;
+  }
+}
+@keyframes quote-scene-arrive {
+  from {
+    opacity: 0.65;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

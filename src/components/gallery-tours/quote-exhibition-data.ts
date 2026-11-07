@@ -1,0 +1,43 @@
+// The exhibition borrows the actual speaker's portrait. A three-line selection
+// keeps the full Dream and World scripts in their own route bundles.
+export const QUOTE_SCENES = [
+  {
+    id: "bell",
+    line: "掴め、悠真",
+    by: "ベル・アレイン",
+    caption: "水没した地下道を越え、ベルは悠真へ手を差し出す。",
+    image: "/civilian-bell-20260826-delivery-720.webp",
+    width: 720,
+    height: 1080,
+    color: "#c2e8ed",
+    to: "/world",
+    hash: "wa-episode-01",
+    source: "EP 01「HIDE-AND-SEEK」",
+  },
+  {
+    id: "ciel",
+    line: "胡蝶の夢から目醒める時間だ",
+    by: "シエル",
+    caption: "慶弥が家族と暮らす夢へ、シエルが踏み込む。",
+    image: "/dream-chapter-ciel-delivery.webp",
+    width: 1022,
+    height: 1539,
+    color: "#d4bce6",
+    to: "/dream-chapter",
+    hash: "dream-case-note-0",
+    source: "夢の章 CASE 0「交わる」",
+  },
+  {
+    id: "kaisaku",
+    line: "忘れられたものが流れ着く場所だよ",
+    by: "怪作",
+    caption: "白い扉を抜けた三人が辿り着いたのは、幻想郷だった。",
+    image: "/dream-chapter-kaisaku-delivery.webp",
+    width: 638,
+    height: 630,
+    color: "#dece9f",
+    to: "/dream-chapter",
+    hash: "dream-case-note-1",
+    source: "夢の章 CASE 1「開く」",
+  },
+] as const;
