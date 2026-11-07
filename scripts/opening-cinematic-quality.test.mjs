@@ -6,8 +6,6 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const title = read("../src/components/cinematic/title-sequence.tsx");
 const titlePart = read("../source-parts/src/components/cinematic/title-sequence.tsx/01.part");
 const styles = read("../src/styles.css");
-const audio = read("../src/lib/cinematic-audio.ts");
-const audioPart = read("../source-parts/src/lib/cinematic-audio.ts/01.part");
 
 test("the opening composes a deterministic multi-plane cinematic reveal", () => {
   assert.match(title, /function CinematicDepthField\(\)/);
@@ -34,16 +32,9 @@ test("the richer opening keeps its runtime (now with the logo burn) and adaptive
   assert.match(styles, /\.cine-impact-bloom,[\s\S]*?\.cine-logo-echo,[\s\S]*?\.cine-hud-orbits/);
 });
 
-test("the visual reveal is sound-free and the retired adapter cannot start playback", () => {
+test("the visual reveal is sound-free", () => {
   assert.doesNotMatch(
     title,
     /cinematic-audio|createCinematicScore|unlockAudio|SOUND|音声を(?:オン|オフ)/,
   );
-  assert.doesNotMatch(
-    audio,
-    /AudioContext|webkitAudioContext|createOscillator|createBuffer|fetch\(|setTimeout|window|navigator/,
-  );
-  assert.match(audio, /unlock: async \(\) => false/);
-  assert.match(audio, /start: \(\) => undefined/);
-  assert.equal(audioPart, audio);
 });

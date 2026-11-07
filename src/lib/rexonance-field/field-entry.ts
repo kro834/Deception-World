@@ -131,5 +131,3 @@ export function entryFieldScore() {
   });
   return SCORE;
 }
-
-export const REXONANCE_FIELD_FIGURE = REXONANCE_SUIT_SIZE;

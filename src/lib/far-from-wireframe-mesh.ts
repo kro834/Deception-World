@@ -432,24 +432,6 @@ export function delaunay(xs: ArrayLike<number>, ys: ArrayLike<number>): Int32Arr
   return drain(delaunaySteps(xs, ys));
 }
 
-/** Whether (px, py) is inside the mesh's outline (even-odd over its loops). */
-export function insideOutline(mesh: WireMesh, px: number, py: number) {
-  const { xs, ys, loopStart, loopCount } = mesh;
-  let hit = false;
-  for (let L = 0; L < loopStart.length; L += 1) {
-    const first = loopStart[L];
-    const n = loopCount[L];
-    for (let i = 0, j = n - 1; i < n; j = i, i += 1) {
-      const xi = xs[first + i];
-      const yi = ys[first + i];
-      const xj = xs[first + j];
-      const yj = ys[first + j];
-      if (yi > py !== yj > py && ((xj - xi) * (py - yi)) / (yj - yi) + xi - px > 0) hit = !hit;
-    }
-  }
-  return hit;
-}
-
 /** The outline's segments in horizontal bands, for a fast even-odd test. */
 function outlineBands(mesh: WireMesh) {
   const { ys, loopStart, loopCount } = mesh;

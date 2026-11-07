@@ -121,9 +121,6 @@ export const FAR_FROM_ULTRA_DEPLOY_CROWN = { cx: 575, cy: 60, rx: 128, ry: 26, a
 /** The crown's read-out: the form's name in katakana and its limit (record). */
 export const FAR_FROM_ULTRA_DEPLOY_CROWN_LABEL = `${FAR_FROM_SAGA.stages.ultra.label} 60S`;
 
-/** The whole deploy, from data-run (ms, before --ffd-delay). */
-export const FAR_FROM_ULTRA_DEPLOY_MS = 2000;
-
 /* The layer's type (polish sweep, 2026-10-23). The panels are drawn in the
    picture's 1083 px units, which a phone shows at about a third of a CSS
    pixel each, so a 10-unit read-out was 3.6 px tall. The layer measures

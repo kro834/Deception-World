@@ -68,9 +68,6 @@ export const FAR_FROM_SUIT_SNAP = {
   chest: deus(3),
   helm: FINAL - 90,
 } as const;
-/** A plate's tiles land over this long before it is whole (its clank). */
-export const FAR_FROM_SUIT_REVEAL_MS = 100;
-export const FAR_FROM_SUIT_CLANK_MS = 40;
 /** How long a tile streams before it locks (ms), and the share of it each
  * tile's own flight takes; the bits fly in from outside the frame, longer. */
 export const FAR_FROM_SUIT_FLIGHT = { ms: 170, spread: [0.72, 1.28], bits: 2.2 } as const;
@@ -200,11 +197,6 @@ export const FAR_FROM_SUIT_FIT: Readonly<Record<string, number>> = Object.fromEn
 export const FAR_FROM_SUIT_ACCENTS: readonly string[] = FAR_FROM_SUIT_CASCADE.filter(
   ({ group }) => group in FAR_FROM_SUIT_SNAP,
 ).map(({ order }) => order[order.length - 1]);
-/** Sparks: every accent, and the first bite of each run. */
-export const FAR_FROM_SUIT_SPARKS: readonly string[] = [
-  ...FAR_FROM_SUIT_ACCENTS,
-  ...FAR_FROM_SUIT_CASCADE.map(({ order }) => order[0]),
-].filter((id, index, all) => all.indexOf(id) === index);
 /** The fallback motes gather from the material and are spent by the chest. */
 export const FAR_FROM_SUIT_MOTES = { from: FAR_FROM_ENTRY_MATERIAL, ms: 970 } as const;
 /** The suit's lights (the crystals) stand dark while the suit assembles;

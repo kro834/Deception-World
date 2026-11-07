@@ -445,8 +445,6 @@ export const ZEUS_BUTTON_IMAGES = {
   },
 } satisfies Record<string, ImageSet>;
 
-export const ZEUS_BUTTON_SRCSET = srcSet(ZEUS_BUTTON_IMAGES.default);
-export const ZEUS_BUTTON_RETURN_SRCSET = srcSet(ZEUS_BUTTON_IMAGES.returning);
 
 // One supplied illustration serves both resting and return states. Keep the
 // legacy Zeus sets above for older assets/build consumers, not runtime loading.

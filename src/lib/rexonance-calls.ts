@@ -259,8 +259,6 @@ export const REXONANCE_SUIT_GOLD_AT: Readonly<Record<string, readonly [number, n
       }),
     ),
   ]);
-/** RIDER！'s nanite motes gather from here (and are spent by the waist's snap). */
-export const REXONANCE_SUIT_MOTES = REXONANCE_CALL_BEATS[1].start;
 /** The suit's lights (owner, 2026-10-11): the ice-cyan and pink light
  * stands monochrome while the suit assembles; once the whole suit is on,
  * on REXONANCE DEUS！ the reactor ignites and the light runs out through

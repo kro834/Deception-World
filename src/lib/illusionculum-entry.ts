@@ -19,10 +19,6 @@ export const ILLUSIONCULUM_ENTRY_CALLS = Object.freeze([
 
 export const ILLUSIONCULUM_ENTRY_FIGURE = ILLUSIONCULUM_ENTRY_CUTOUT.src;
 
-/** The bare undersuit the armour locks onto: this suit's (Rexonance's, set
- * into this frame by scripts/build-illusionculum-suit.mjs). */
-export const ILLUSIONCULUM_ENTRY_UNDERSUIT = "/illusionculum-suit-20261023/undersuit.webp";
-
 /** Entry and CSS share this elapsed clock, starting only once the renderer
  * is ready. The gate holds for completion even on a cold asset load. */
 export const ILLUSIONCULUM_ENTRY_HOLD_MS = 140;

@@ -3,18 +3,6 @@
  * stylesheet can scope itself even after the visitor's earlier pages have
  * left their sheets in the document (route stylesheets persist on client
  * navigation). */
-export const ROUTE_FAMILIES = [
-  "opening",
-  "world",
-  "dossier",
-  "dream",
-  "special",
-  "gallery",
-  "library",
-  "archive",
-  "utility",
-];
-
 export function getRouteFamily(pathname) {
   const path = pathname.replace(/\/$/, "") || "/";
   if (path === "/") return "opening";

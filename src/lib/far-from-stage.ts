@@ -70,20 +70,6 @@ export const FAR_FROM_STAGE_VARS = Object.freeze({
   bottom: "--rzn-fig-b",
 });
 
-/** The sticky frame's height (CSS): one screen under the bar, never under
- * `min` nor, on desktop, over `max`. */
-export const FAR_FROM_STAGE_FRAME = Object.freeze({
-  desktop: Object.freeze({ min: 620, max: 1100 }),
-  phone: Object.freeze({ min: 560, max: Number.POSITIVE_INFINITY }),
-});
-
-/** The runway's travel (CSS): how tall the scrolled track is while the
- * frame is pinned — the scene's progress runs 0 → 1 over it. */
-export const FAR_FROM_RUNWAY_TRAVEL = Object.freeze({
-  desktop: "max(2400px, 420svh)",
-  phone: "max(1950px, 360svh)",
-});
-
 /** The layout tier for a viewport, as the stylesheet picks it. */
 export function farFromStageTier(viewportWidth: number, viewportHeight: number): FarFromStageTier {
   if (viewportWidth < 350) return "narrow";
@@ -127,9 +113,4 @@ export function farFromFigureBox(
     height,
     scale,
   };
-}
-
-/** A cutout pixel (the owner's 1024 x 1536 frame) in figure px. */
-export function farFromCutoutToFigure(x: number, y: number): readonly [number, number] {
-  return [x * FAR_FROM_SUIT_SCALE, y * FAR_FROM_SUIT_SCALE];
 }

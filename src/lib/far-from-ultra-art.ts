@@ -38,17 +38,6 @@ export function farFromUltraSrc(
   return `${FAR_FROM_ULTRA_ART[key].stem}-${width}.webp`;
 }
 
-/** srcset / sizes for a cutout drawn as the figure of a stage. */
-export function farFromUltraImage(key: FarFromUltraArtKey) {
-  return {
-    src: farFromUltraSrc(key, 1024),
-    srcSet: FAR_FROM_ULTRA_WIDTHS.map((width) => `${farFromUltraSrc(key, width)} ${width}w`).join(
-      ", ",
-    ),
-    sizes: "(max-width: 767px) 92vw, min(92vw, 640px)",
-  };
-}
-
 /** Where the figure stands in the stage is the #suitup runway's own
  * placement (src/lib/far-from-stage.ts: FAR_FROM_STAGE_TIERS, read by the
  * mount through farFromFigureBox), so マックス stands exactly where that
@@ -79,14 +68,6 @@ export const FAR_FROM_ULTRA_PHASES = [
   { phase: "interface", step: "05", label: "INTERFACE" },
 ] as const;
 
-/** The crystal armour's tile (figure px) and the chest point it spreads from. */
-export const FAR_FROM_ULTRA_TILE = 24;
-export const FAR_FROM_ULTRA_CORE = [512, 430] as const;
-
-/** A tile's nanites fly for this long before it (progress), and its landing
- * flash lasts this long after. */
-export const FAR_FROM_ULTRA_FLIGHT = { armour: 0.05, parts: 0.07, flash: 0.016 } as const;
-
 /** The draw budgets by pointer: the device-ratio cap, the chips in flight
  * drawn in one frame, the orbiting motes, the landed tiles drawn into the
  * cache in one frame, and the delivery width the engine decodes. */
@@ -95,15 +76,6 @@ export const FAR_FROM_ULTRA_BUDGET = {
   coarse: { ratio: 1.5, sprites: 440, motes: 72, cache: 320, width: 768 },
 } as const;
 export type FarFromUltraTier = keyof typeof FAR_FROM_ULTRA_BUDGET;
-
-/** The light rings (figure px): centre, radii, the window each opens over
- * (within FAR_FROM_ULTRA_WINDOWS.halo, as shares) and its tick count. The
- * upper two pass behind the figure at the top and before it at the bottom. */
-export const FAR_FROM_ULTRA_RINGS = [
-  { cx: 512, cy: 300, rx: 520, ry: 96, from: 0, to: 0.55, ticks: 48, behind: false },
-  { cx: 512, cy: 640, rx: 430, ry: 80, from: 0.2, to: 0.75, ticks: 36, behind: false },
-  { cx: 512, cy: 430, rx: 660, ry: 300, from: 0.4, to: 1, ticks: 72, behind: true },
-] as const;
 
 export type FarFromUltraPanelKind = "dial" | "bars" | "text" | "graph";
 export type FarFromUltraPanelSize = "tall" | "low";

@@ -3,7 +3,6 @@ import type { Session, SupabaseClient } from "@supabase/supabase-js";
 
 export const COMMUNITY_GALLERY_MAX_FILE_BYTES = 19 * 1024 * 1024;
 export const COMMUNITY_GALLERY_MAX_PIXELS = 40_000_000;
-export const COMMUNITY_GALLERY_MAX_UPLOAD_BYTES = COMMUNITY_GALLERY_MAX_FILE_BYTES;
 export const COMMUNITY_GALLERY_TITLE_LIMIT = 120;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 let authClientPromise: Promise<SupabaseClient> | undefined;

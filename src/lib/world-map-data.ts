@@ -10,7 +10,6 @@ import { DREAM_CHAPTERS } from "./dream-chapter-index.ts";
 import {
   DREAM_CAST_ROSTER,
   DREAM_CHARACTERS,
-  DREAM_CASES,
   DREAM_FACTIONS,
 } from "../components/dream-chapter/dream-chapter-data.ts";
 
@@ -134,8 +133,6 @@ export const DREAM_MAP_APPEARANCES = [
   { no: "4", people: ["ciel", "kaisaku"] },
   { no: "5", people: ["ciel", "keiya", "kaisaku"] },
 ] as const;
-// Keep the chapter list tied to the existing published cases.
-export const dreamMapCaseIds = DREAM_CASES.map((c) => c.no);
 export const WORLD_MAP_EDGES: readonly MapEdge[] = [
   ...DREAM_MAP_APPEARANCES.flatMap((c) =>
     c.people.map((id) => ({

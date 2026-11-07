@@ -20,15 +20,3 @@ export const OPENING_LOGO_HEIGHT = 1024;
 
 export const OPENING_LOGO_FIRST = delivery("logo-title-saga-20261016");
 export const OPENING_LOGO_FINAL = delivery("logo-title-saga-20261016");
-
-/**
- * The candidate a browser would pick for a logo box of `cssWidth` px: the
- * WebGL passes load the same file the <img> layers already fetched.
- */
-export function openingLogoCandidate(stem: "first" | "final", cssWidth: number) {
-  const logo = stem === "first" ? OPENING_LOGO_FIRST : OPENING_LOGO_FINAL;
-  const ratio = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
-  const need = cssWidth * ratio;
-  const width = WIDTHS.find((candidate) => candidate >= need) ?? WIDTHS[WIDTHS.length - 1];
-  return logo.src.replace(/-1536\.webp$/, `-${width}.webp`);
-}
