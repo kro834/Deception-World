@@ -12,7 +12,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock";
-import { GALLERY_ARTWORKS, GALLERY_CATEGORIES } from "./gallery-data";
+import { GALLERY_ARTWORKS, GALLERY_CATEGORIES, GALLERY_DEFAULT_ARTWORK } from "./gallery-data";
 import {
   communityPostToArtwork,
   COMMUNITY_GALLERY_TITLE_LIMIT,
@@ -62,6 +62,7 @@ import {
   type GalleryViewerMode,
 } from "./gallery-viewer-state";
 import { GALLERY_TITLES_KEY, readGalleryTitles, type GalleryTitles } from "./gallery-titles";
+import { galleryStageSizes, rememberGalleryNativeLoad } from "./gallery-image-delivery";
 import { galleryGridImage } from "./gallery-grid-image";
 import { createGalleryCommunityRefresh } from "./gallery-community-refresh";
 
@@ -173,6 +174,9 @@ export function GalleryPage() {
     changeFavorite: updateFavorite,
     changeFeature: updateFeature,
   } = useGalleryPersonalPreferences(allArtworkIds);
+  // Resolve browser-local selection before issuing the first hero image request.
+  const [imageSelectionReady, setImageSelectionReady] = useState(false);
+  useEffect(() => setImageSelectionReady(true), []);
   const works = useMemo(() => {
     const filtered = filterGalleryArtworks(allArtworks, {
       category,
@@ -229,22 +233,19 @@ export function GalleryPage() {
     viewerModeRef.current,
   );
   const viewerOpen = selected !== null;
-  const neighbors = useMemo(() => {
-    if (viewerWorksRef.current.length < 2 || !selectedId) return [];
-    const ids = availableGalleryDeck(viewerWorksRef.current, allArtworks).map((work) => work.id);
-    const adjacent = new Set([
-      galleryAdjacentId(ids, selectedId, -1, viewerModeRef.current),
-      galleryAdjacentId(ids, selectedId, 1, viewerModeRef.current),
-    ]);
-    return allArtworks.filter((work) => adjacent.has(work.id));
-    // The sequence is a session snapshot; only its IDs and the selected work matter.
-  }, [selectedId, allArtworks]);
   const featured = resolveGalleryStageArtwork(
     allArtworks,
     previewId,
     featuredId,
-    GALLERY_ARTWORKS[2],
+    GALLERY_DEFAULT_ARTWORK,
   );
+  const waitingForFeaturedPost =
+    !allArtworks.some((work) => work.id === previewId) &&
+    isCommunityGalleryId(featuredId ?? "") &&
+    !allArtworks.some((work) => work.id === featuredId) &&
+    !communityLoaded &&
+    !communityLoadError &&
+    !(communityConfigChecked && !communityReady);
   const selectedPost = communityPosts.find((post) => post.id === selectedId);
   const canDeleteSelected = Boolean(session && selectedPost?.canDelete);
 
@@ -1068,7 +1069,7 @@ export function GalleryPage() {
             artwork={{
               id: featured.id,
               src: featured.medium,
-              srcSet: featured.srcSet,
+              srcSet: featured.fullSrcSet ?? featured.srcSet,
               width: featured.width,
               height: featured.height,
               alt: featured.alt,
@@ -1108,6 +1109,21 @@ export function GalleryPage() {
             }
             renderArtwork={(artwork) => {
               const print = allArtworks.find((work) => work.id === artwork.id) ?? featured;
+              const image = (
+                <img
+                  src={print.medium}
+                  srcSet={print.fullSrcSet ?? print.srcSet}
+                  sizes={galleryStageSizes(print.width, print.height)}
+                  alt={print.alt}
+                  width={print.width}
+                  height={print.height}
+                  fetchPriority={print.id === featured.id ? "high" : "low"}
+                  decoding="async"
+                  onLoad={(event) =>
+                    rememberGalleryNativeLoad(print.full, event.currentTarget.currentSrc)
+                  }
+                />
+              );
               return (
                 <a
                   className="gallery-feature-open"
@@ -1117,16 +1133,11 @@ export function GalleryPage() {
                   aria-controls="gallery-viewer"
                   aria-label={`${numberFor(print)}を拡大して鑑賞`}
                 >
-                  <img
-                    src={print.medium}
-                    srcSet={print.srcSet}
-                    sizes={`(max-width: 700px) 90vw, ${Math.min(1320, Math.round((680 * print.width) / print.height))}px`}
-                    alt={print.alt}
-                    width={print.width}
-                    height={print.height}
-                    fetchPriority="high"
-                    decoding="async"
-                  />
+                  {!imageSelectionReady ? (
+                    <noscript>{image}</noscript>
+                  ) : waitingForFeaturedPost ? null : (
+                    image
+                  )}
                 </a>
               );
             }}
@@ -1881,7 +1892,6 @@ export function GalleryPage() {
               <GalleryViewerImage
                 key={selected.id}
                 work={selected}
-                neighbors={neighbors}
                 navigationDisabled={
                   editing || confirmDelete || communityBusy || viewerWorks.length < 2
                 }
