@@ -79,6 +79,10 @@ const original = [
   "hud-fonts",
   // Metric-corrected twins of the faces above, last so they outrank them.
   "../styles-site-metric-faces.css?url",
+  // Owner (2026-11-06): Noto Sans JP and Zen Kaku cut to the site's characters,
+  // after the Google faces so they are tried first (font-subsets.test.mjs).
+  "../styles-font-subsets-core.css?url",
+  "../styles-font-subsets-display.css?url",
   // Optical centring nudges (layout only), the last sheet on every page but the title.
   "../styles-control-optics.css?url",
 ];
@@ -107,6 +111,8 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
   const expected = original
     .filter((href) => !omitted.has(href))
     .filter((href) => href !== "../styles-site-display-fonts.css?url")
+    // No display faces on the title, so no display subsets either.
+    .filter((href) => href !== "../styles-font-subsets-display.css?url")
     // The opening merges the corrected faces in place of the remote sheets.
     .filter((href) => href !== "../styles-site-metric-faces.css?url")
     // The title's controls take their nudges inside the opening's own sheets.
@@ -131,7 +137,7 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     "bundles expand to the complete unchanged title/dashboard cascade",
   );
   assert.equal(actual.length, expected.length - 18);
-  assert.equal(actual.filter((href) => href.startsWith("../")).length, 7);
+  assert.equal(actual.filter((href) => href.startsWith("../")).length, 8);
   const tokenBlock = (file) => read(file).match(/html\[data-family\] \{[\s\S]*?\n\}/)[0];
   assert.equal(
     tokenBlock("src/styles-opening-shell.css"),

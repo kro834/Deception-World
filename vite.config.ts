@@ -167,6 +167,13 @@ export default defineConfig(({ command }) => ({
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
             serverDir: "./server",
+            // The font subsets carry a content hash in their names
+            // (scripts/build-font-subsets.mjs), like /assets/.
+            routeRules: {
+              "/fonts/subsets/**": {
+                headers: { "cache-control": "public, max-age=31536000, immutable" },
+              },
+            },
           }),
         ]
       : []),
