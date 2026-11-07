@@ -52,7 +52,7 @@ test("every dossier route but the sovereign file loads the dossier sheets", asyn
   assert.match(rider, /stylesheetLinks: DOSSIER_STYLESHEET_LINKS/);
   assert.match(
     rider,
-    /id === "over-zeztz" \|\| id === "leddic"\s*\? \[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: formSignatureCssUrl \}\]\s*:\s*DOSSIER_STYLESHEET_LINKS/,
+    /id === "over-zeztz" \|\| id === "leddic"\s*\? \[\.\.\.dossierLinks, \{ rel: "stylesheet", href: formSignatureCssUrl \}\]\s*:\s*dossierLinks/,
   );
 
   for (const name of ["lejas", "opus", "reemu", "rex-loi", "shuza"]) {

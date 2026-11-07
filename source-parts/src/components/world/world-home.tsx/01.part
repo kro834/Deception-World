@@ -21,7 +21,7 @@ import { OtherArtworkCard, OTHER_ARTWORK } from "./other-artwork-card";
 import { MirageTicker } from "./mirage-ticker";
 import { useMirageBoot } from "./use-mirage-boot";
 import { RisingWorld } from "./rising-world";
-import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex";
+import { WorldAnnexRecords, WorldAnnexRiders } from "./world-annex-sections";
 import { createViewportResizeFilter } from "@/lib/viewport-resize";
 import { createReadyPosterLoader } from "@/lib/ready-poster-loader";
 import { warmWorldSwaps } from "./world-swap-warmups";

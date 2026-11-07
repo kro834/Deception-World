@@ -68,7 +68,7 @@ test("the World keeps its sections laid out, so its anchors land where they did"
   for (const path of ["src/styles-world-annex.css", "src/styles-world-mirage.css"]) {
     assert.doesNotMatch(strip(read(path)), /content-visibility|contain-intrinsic-size/, path);
   }
-  const annex = read("src/components/world/world-annex.tsx");
+  const annex = read("src/components/world/world-annex.tsx") + read("src/components/world/world-annex-sections.tsx");
   // The disclosures stay native, so a closed one reads as not drawn.
   assert.match(annex, /<details className="wa-profile" onToggle=\{keepProfileInPlace\}>/);
   assert.match(

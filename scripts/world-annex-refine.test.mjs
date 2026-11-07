@@ -13,7 +13,8 @@ import test from "node:test";
    pinned below. */
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-const annex = read("src/components/world/world-annex.tsx");
+const shell = read("src/components/world/world-annex-sections.tsx");
+const annex = read("src/components/world/world-annex.tsx") + shell;
 const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");
 
 const S = ".site-shell.film-edition.mirage-edition";
@@ -312,7 +313,9 @@ test("the sheet stays still paint at the 12px floor", () => {
 });
 
 test("world-annex.tsx keeps its labels and accessibility with the approved episode expansion and voice controls", () => {
-  const texts = [...annex.matchAll(/>([^<>{}]*[^\s<>{}][^<>{}]*)</g)]
+  const body = read("src/components/world/world-annex.tsx");
+  const contents = shell.slice(shell.indexOf('<nav className="wa-contents"'), shell.indexOf("</nav>") + 6);
+  const texts = [...(body + contents).matchAll(/>([^<>{}]*[^\s<>{}][^<>{}]*)</g)]
     .map((match) => match[1].replace(/\s+/g, " ").trim())
     .filter((text) => text && !/^[=&|;)(,.:?]/.test(text) && !/=>/.test(text));
   assert.deepEqual(texts, [
@@ -336,8 +339,11 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     "STAGE",
     "資料目次",
   ]);
+  // Count the published reading elements separately from the SPA loading/error UI.
+  const sections = [...shell.matchAll(/<section\s+id="[^"]+"[^>]*>/g)].map(([tag]) => tag);
+  const readingMarkup = [body, contents, ...sections].join("\n");
   const attrs = [
-    ...annex.matchAll(
+    ...readingMarkup.matchAll(
       /\b(aria-[\w-]+|alt|title|lang|role|id|href|tabIndex)=(\{`[^`]*`\}|"[^"]*"|\{[^{}]*\})/g,
     ),
   ].map((match) => `${match[1]}=${match[2]}`);

@@ -19,7 +19,7 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf
 const home = read("src/components/world/world-home.tsx");
 // The columns render from their own data module (rx6); the contract reads both.
 const homeView = `${home}\n${read("src/components/world/world-columns-data.ts")}`;
-const annex = read("src/components/world/world-annex.tsx");
+const annex = read("src/components/world/world-annex.tsx") + read("src/components/world/world-annex-sections.tsx");
 const data = read("src/components/world/world-annex-data.ts");
 const route = read("src/routes/world.tsx");
 const css = read("src/styles-world-annex.css").replace(/\/\*[\s\S]*?\*\//g, "");

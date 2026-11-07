@@ -5,7 +5,7 @@ import {
   DOSSIER_ZENITH_STYLESHEET_LINK,
   STAGE_DOSSIER_STYLESHEET_LINK,
   TABLET_DOSSIER_STYLESHEET_LINK,
-  WORLD_STYLESHEET_LINKS,
+  SOVEREIGN_STYLESHEET_LINKS,
   createWorldHead,
 } from "@/lib/world-head";
 import sovereignFileCssUrl from "@/styles-sovereign-file.css?url";
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/managers/zeus")({
       // the World sheets, the shared STAGE dossier, then its own sheet, and
       // the shared ZENITH brush-up (the roster rail) after it.
       stylesheetLinks: [
-        ...WORLD_STYLESHEET_LINKS,
+        ...SOVEREIGN_STYLESHEET_LINKS,
         STAGE_DOSSIER_STYLESHEET_LINK,
         { rel: "stylesheet", href: sovereignFileCssUrl },
         TABLET_DOSSIER_STYLESHEET_LINK,
