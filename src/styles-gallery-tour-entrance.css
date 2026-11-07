@@ -1,3 +1,5 @@
+@import "./components/gallery-tours/quote-exhibition.css";
+
 .gallery-tour-entrance {
   --gallery-tour-course-accent: var(--gallery-brass);
   min-width: 0;

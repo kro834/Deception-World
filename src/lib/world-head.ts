@@ -1,4 +1,6 @@
-import worldCssUrl from "@/styles-world.css?url";
+import worldCommonCssUrl from "@/styles-world-common.css?url";
+import sovereignDetailCssUrl from "@/styles-world/20-dossier.css?url";
+import partnerDetailCssUrl from "@/styles-world/26.css?url";
 import worldAddonCssUrl from "@/styles-world-addon.css?url";
 import filmDirectionCssUrl from "@/styles-film-direction.css?url";
 import dossierReaderCssUrl from "@/styles-dossier-reader.css?url";
@@ -19,7 +21,7 @@ export type RouteStylesheetLink = {
 
 export const WORLD_BASE_STYLESHEET_LINK: RouteStylesheetLink = {
   rel: "stylesheet",
-  href: worldCssUrl,
+  href: worldCommonCssUrl,
 };
 
 export const WORLD_ADDON_STYLESHEET_LINK: RouteStylesheetLink = {
@@ -27,6 +29,8 @@ export const WORLD_ADDON_STYLESHEET_LINK: RouteStylesheetLink = {
   href: worldAddonCssUrl,
 };
 
+// Dossiers reuse this exact URL and add only isolated private rules. Rules
+// whose order matters remain in the shared sheet at their original position.
 export const WORLD_CORE_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   WORLD_BASE_STYLESHEET_LINK,
   WORLD_ADDON_STYLESHEET_LINK,
@@ -40,6 +44,14 @@ export const CINEMATIC_STYLESHEET_LINK: RouteStylesheetLink = {
 };
 export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   ...WORLD_CORE_STYLESHEET_LINKS,
+  CINEMATIC_STYLESHEET_LINK,
+];
+// Zeus uses the World edition instead of the dossier edition. Its isolated
+// artwork is inserted before the unchanged finish sheets on that route only.
+export const SOVEREIGN_STYLESHEET_LINKS: RouteStylesheetLink[] = [
+  WORLD_BASE_STYLESHEET_LINK,
+  { rel: "stylesheet", href: sovereignDetailCssUrl },
+  ...WORLD_CORE_STYLESHEET_LINKS.slice(1),
   CINEMATIC_STYLESHEET_LINK,
 ];
 
@@ -142,13 +154,21 @@ export function createRiderHead(id: string) {
       stylesheetLinks: DOSSIER_STYLESHEET_LINKS,
     });
   }
+  const dossierLinks =
+    id === "leddic"
+      ? [
+          WORLD_BASE_STYLESHEET_LINK,
+          { rel: "stylesheet" as const, href: partnerDetailCssUrl },
+          ...DOSSIER_STYLESHEET_LINKS.slice(1),
+        ]
+      : DOSSIER_STYLESHEET_LINKS;
   return createWorldHead({
     title: `仮面ライダー${rider.name}｜Deception World`,
     description: `仮面ライダー${rider.name}の人物記録、能力、フォーム、装備を収録した公式資料。`,
     image: rider.image,
     stylesheetLinks:
       id === "over-zeztz" || id === "leddic"
-        ? [...DOSSIER_STYLESHEET_LINKS, { rel: "stylesheet", href: formSignatureCssUrl }]
-        : DOSSIER_STYLESHEET_LINKS,
+        ? [...dossierLinks, { rel: "stylesheet", href: formSignatureCssUrl }]
+        : dossierLinks,
   });
 }

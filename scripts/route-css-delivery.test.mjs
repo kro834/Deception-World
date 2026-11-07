@@ -57,7 +57,7 @@ test("route-only CSS is emitted as URLs instead of entering the root CSS graph",
 });
 
 test("shared world styles keep base-before-addon cascade order", () => {
-  assert.match(worldHead, /styles-world\.css\?url/);
+  assert.match(worldHead, /styles-world-common\.css\?url/);
   assert.match(worldHead, /styles-world-addon\.css\?url/);
   assert.ok(
     worldHead.indexOf("WORLD_BASE_STYLESHEET_LINK,") <

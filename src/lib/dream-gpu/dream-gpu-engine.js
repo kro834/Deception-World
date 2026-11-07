@@ -982,9 +982,18 @@ function fullscreenPass(device, encoder, view, pipeline, bind) {
   pass.end();
 }
 
-/** Tier A + B: the lamplight layer over the page. Returns a stop function. */
-export async function startLamplightOverlay(canvas, { getDeskRect } = {}) {
+/** Tier A + B: the viewport lamplight. Abort ends ownership of the canvas.
+ * @param {HTMLCanvasElement} canvas
+ * @param {{ getDeskRect?: () => DOMRect | null, signal?: AbortSignal }} options
+ */
+export async function startLamplightOverlay(canvas, { getDeskRect, signal } = {}) {
+  if (signal?.aborted) return;
   const device = await getDevice();
+  // The effect may have been replaced while the adapter/device was starting.
+  if (signal?.aborted) {
+    device.destroy();
+    return;
+  }
   const ctx = canvas.getContext("webgpu");
   const format = navigator.gpu.getPreferredCanvasFormat();
   ctx.configure({ device, format, alphaMode: "premultiplied" });
@@ -1043,7 +1052,11 @@ export async function startLamplightOverlay(canvas, { getDeskRect } = {}) {
     fullscreenPass(device, enc, ctx.getCurrentTexture().createView(), pipeline, bind);
     device.queue.submit([enc.finish()]);
   });
-  return () => {
+  let disposed = false;
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    signal?.removeEventListener("abort", dispose);
     stopLoop();
     pointer.dispose();
     release();
@@ -1055,6 +1068,8 @@ export async function startLamplightOverlay(canvas, { getDeskRect } = {}) {
     ubuf.destroy();
     device.destroy();
   };
+  signal?.addEventListener("abort", dispose, { once: true });
+  return dispose;
 }
 
 /** Tier A: HTML-in-Canvas. `canvas` has the layoutsubtree attribute and `element` is its child. */

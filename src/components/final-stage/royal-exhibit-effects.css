@@ -1,0 +1,198 @@
+.rr-surge {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  --rr-energy: #7ceff7;
+}
+.rr-surge[data-form="wrath"] {
+  --rr-energy: #ff5c68;
+}
+.rr-surge[data-form="abyss"] {
+  --rr-energy: #6ff2d1;
+}
+.rr-surge[data-form="birth"] {
+  --rr-energy: #87cfff;
+}
+.rr-surge[data-form="nehan"] {
+  --rr-energy: #e0bcff;
+}
+.rr-surge-origin {
+  position: absolute;
+  left: var(--rr-origin-x);
+  top: var(--rr-origin-y);
+  width: 68%;
+  max-width: 23rem;
+  transform: translate(-50%, -50%);
+}
+.rr-surge .rr-surge-route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.rr-surge-route path {
+  stroke: var(--rr-energy);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+.rr-surge-route .rr-arc-out {
+  stroke: #ffde8f;
+}
+.rr-reactor-charge {
+  fill: none;
+  stroke: #fff2c0;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.rr-surge svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.rr-surge-heavy,
+.rr-surge-return {
+  display: none;
+}
+.rr-surge[data-form="wrath"] .rr-surge-heavy,
+.rr-surge[data-form="abyss"] .rr-surge-return,
+.rr-surge[data-form="nehan"] :is(.rr-surge-heavy, .rr-surge-return) {
+  display: block;
+}
+.rr-surge[data-form="wrath"] :is(.rr-surge-lances, .rr-surge-wards),
+.rr-surge[data-form="abyss"] .rr-surge-lances,
+.rr-surge[data-form="birth"] .rr-surge-wards {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .rr-surge {
+    display: block;
+    animation: rr-regalia-release 1.15s ease-out both;
+  }
+  .rr-surge-intake {
+    animation: rr-roulette-in 0.5s cubic-bezier(0.22, 0.72, 0.22, 1) both;
+  }
+  .rr-surge-crown {
+    animation: rr-signet 0.85s ease-out 0.16s both;
+  }
+  .rr-surge-armament {
+    animation: rr-arm 0.7s cubic-bezier(0.16, 0.86, 0.28, 1) 0.33s both;
+  }
+  .rr-surge[data-form="birth"] .rr-surge-armament {
+    animation-name: rr-dash;
+  }
+}
+@keyframes rr-regalia-release {
+  0% {
+    opacity: 0;
+  }
+  14%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The energy path names the sequence even with animation disabled. The
+   full-motion version draws each leg once, and then releases the SVG. */
+.rr-surge[data-demonstration="true"] {
+  display: block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .rr-surge[data-demonstration="true"] {
+    animation-duration: 2.1s;
+  }
+  html:not([data-world-effects="economy"]) .rr-surge-route path {
+    stroke-dasharray: 1;
+    animation: rr-route-leg 0.58s ease-out both;
+  }
+  html:not([data-world-effects="economy"]) .rr-arc-out {
+    animation-delay: 0.62s;
+  }
+  html:not([data-world-effects="economy"]) .rr-reactor-charge {
+    animation: rr-reactor-light 0.76s ease-out 0.28s both;
+  }
+  .rr-surge[data-demonstration="true"] .rr-surge-intake {
+    animation-delay: 0.86s;
+  }
+  .rr-surge[data-demonstration="true"] .rr-surge-crown {
+    animation-delay: 1.02s;
+  }
+  .rr-surge[data-demonstration="true"] .rr-surge-armament {
+    animation-delay: 1.16s;
+  }
+}
+html[data-world-effects="economy"] .rr-surge * {
+  animation: none;
+}
+@keyframes rr-route-leg {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0.75;
+  }
+}
+@keyframes rr-reactor-light {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+}
+@keyframes rr-roulette-in {
+  from {
+    transform: rotate(-55deg) scale(1.28);
+    opacity: 0.25;
+  }
+  to {
+    transform: rotate(0) scale(0.38);
+    opacity: 0;
+  }
+}
+@keyframes rr-signet {
+  0% {
+    transform: scale(0.42);
+    opacity: 0;
+  }
+  34% {
+    transform: scale(0.93);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.48;
+  }
+}
+@keyframes rr-arm {
+  from {
+    transform: scale(0.36) rotate(-13deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+@keyframes rr-dash {
+  from {
+    transform: translate(-14px, 22px) scale(0.48) rotate(-30deg);
+    opacity: 0;
+  }
+  to {
+    transform: translate(9px, -8px) rotate(12deg);
+    opacity: 1;
+  }
+}

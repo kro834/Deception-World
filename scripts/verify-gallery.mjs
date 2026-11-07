@@ -33,7 +33,7 @@ try {
       "page overflow",
     );
     await page.waitForFunction(
-      () => document.querySelector(".gallery-feature img")?.naturalWidth > 0,
+      () => document.querySelector(".gallery-feature-open img")?.naturalWidth > 0,
     );
     await page.screenshot({ path: `${output}/gallery-${viewport.width}-entrance.png` });
     const collection = page.locator("#gallery-collection");
@@ -175,11 +175,12 @@ try {
   await page.locator(".gallery-viewer[open]").waitFor({ state: "hidden" });
   await reduced.close();
 
-  const recovery = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const recovery = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const recoveryPage = await recovery.newPage();
   await recoveryPage.route(`**${GALLERY_ARTWORKS[0].full}`, (route) => route.abort());
   await recoveryPage.goto(base + "/gallery", { waitUntil: "networkidle" });
   await recoveryPage.locator(".gallery-work-open").first().click();
+  await recoveryPage.getByRole("button", { name: "2倍で鑑賞" }).click();
   // The existing viewer keeps a successful medium image after full-art failure; block both below to retain total-error coverage.
   const fallback = recoveryPage.locator(".gallery-viewer[open] .gallery-image-fallback");
   await fallback.waitFor();
@@ -205,7 +206,7 @@ try {
 
   const unavailable = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const unavailablePage = await unavailable.newPage();
-  for (const source of new Set([GALLERY_ARTWORKS[0].full, GALLERY_ARTWORKS[0].medium]))
+  for (const source of new Set([GALLERY_ARTWORKS[0].full, GALLERY_ARTWORKS[0].medium, GALLERY_ARTWORKS[0].thumb]))
     await unavailablePage.route(`**${source}`, (route) => route.abort());
   await unavailablePage.goto(base + "/gallery", { waitUntil: "networkidle" });
   await unavailablePage.locator(".gallery-work-open").first().click();
@@ -245,18 +246,16 @@ try {
       await dialog.waitFor();
       const art = dialog.locator(".gallery-image-full");
       await art.evaluate((node) => node.decode());
-      assert.equal(await art.getAttribute("src"), work.full);
+      assert.ok([work.thumb, work.medium, work.full].includes(new URL(await art.evaluate((node) => node.currentSrc)).pathname));
       await assertWorkHeading(addedPage, dialog, work);
-      assert.deepEqual(await art.evaluate((node) => [node.naturalWidth, node.naturalHeight]), [
-        work.width,
-        work.height,
-      ]);
+      assert.ok(await art.evaluate((node) => node.naturalWidth > 0 && node.naturalHeight > 0));
       assert.equal(await art.evaluate((node) => getComputedStyle(node).objectFit), "contain");
       await addedPage.screenshot({ path: `${output}/gallery-${width}-${work.id}.png` });
       if (work === GALLERY_ARTWORKS.at(-1)) {
         await addedPage.keyboard.press("ArrowRight");
         await assertWorkHeading(addedPage, dialog, GALLERY_ARTWORKS[0]);
-        assert.equal(await art.getAttribute("src"), GALLERY_ARTWORKS[0].full);
+        await art.evaluate((node) => node.decode());
+        assert.ok([GALLERY_ARTWORKS[0].thumb, GALLERY_ARTWORKS[0].medium, GALLERY_ARTWORKS[0].full].includes(new URL(await art.evaluate((node) => node.currentSrc)).pathname));
       }
       await addedPage.getByRole("button", { name: "閉じる" }).click();
       await dialog.waitFor({ state: "hidden" });

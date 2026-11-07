@@ -1,3 +1,7 @@
+@import "./components/dream-chapter/dream-reading-archive.css";
+@import "./components/dream-chapter/dream-research-notes.css";
+@import "./components/dream-chapter/dream-scene-reference.css";
+
 /* Archive navigation and local discovery for 舞台 / 繋がり / 武装. */
 .dream-page.dream-page .dream-archive-index {
   min-width: 0;

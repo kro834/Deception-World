@@ -27,6 +27,7 @@ const mime = {
   ".avif": "image/avif",
   ".woff2": "font/woff2",
   ".mp4": "video/mp4",
+  ".wav": "audio/wav",
   ".ico": "image/x-icon",
 };
 const port = Number(process.env.PREVIEW_PORT || process.env.PORT || 8082);

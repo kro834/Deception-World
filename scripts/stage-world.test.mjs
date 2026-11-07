@@ -120,7 +120,7 @@ test("the marquee bands and the hero HUD layer are hidden, the copy is not", asy
     assert.match(home, new RegExp(`id="${id}"`), id);
   }
   assert.match(home, /<i className="mr-redact">欺瞞<\/i>でできている。/);
-  const annex = await read("src/components/world/world-annex.tsx");
+  const annex = await read("src/components/world/world-annex-sections.tsx");
   for (const id of ["cast-roster", "world-brief", "episode-notes", "glossary", "quotes"]) {
     assert.match(annex, new RegExp(`id="${id}"`), id);
   }

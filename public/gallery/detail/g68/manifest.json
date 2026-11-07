@@ -1,0 +1,129 @@
+{
+  "id": "g68",
+  "width": 1792,
+  "height": 1008,
+  "source": "/gallery/g68-1792.webp",
+  "sourceBytes": 253090,
+  "sourceSha256": "9bf17062c8ef362a156d0bd8fb97f60c420abdf83feecae5ee2dc1a46ede528f",
+  "encoder": {
+    "format": "webp",
+    "quality": 90,
+    "effort": 6,
+    "withoutEnlargement": true
+  },
+  "comparison": {
+    "reference": "published native-size WebP decoded to RGB",
+    "psnrDb": 43.376151245762514,
+    "rmse": 1.7287516918665673
+  },
+  "tiles": [
+    {
+      "left": 0,
+      "top": 0,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/0-0.webp",
+      "bytes": 17656,
+      "sha256": "d5236f67ec1b1750c62240aa9005cf7d2dfa0457450807019f2c70a1707dcb9b"
+    },
+    {
+      "left": 448,
+      "top": 0,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/448-0.webp",
+      "bytes": 29548,
+      "sha256": "099b51d0f9354b49162e7eb720538a80d4e59303ef4402b0ff2f39b62766ff08"
+    },
+    {
+      "left": 896,
+      "top": 0,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/896-0.webp",
+      "bytes": 15952,
+      "sha256": "7faf71373c2ab7d5c7c05c7e4bea86fae30d10b87c013d0d2910564736cde92e"
+    },
+    {
+      "left": 1344,
+      "top": 0,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/1344-0.webp",
+      "bytes": 12798,
+      "sha256": "d199e6fda53f7e5b906cf8ff0b22129664d85db40489fc462cc1e296cba5204d"
+    },
+    {
+      "left": 0,
+      "top": 336,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/0-336.webp",
+      "bytes": 33082,
+      "sha256": "427cdde4b40ce784dce4a4b2d2691734021d99b5479e5630b30a12693e520064"
+    },
+    {
+      "left": 448,
+      "top": 336,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/448-336.webp",
+      "bytes": 46602,
+      "sha256": "8d9203a9cef2ef42c6db03acca937958a488c538919ce7a5b40f322822e249b4"
+    },
+    {
+      "left": 896,
+      "top": 336,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/896-336.webp",
+      "bytes": 40336,
+      "sha256": "84c861caf33cbf85e704330ec6d67ef838310ca1acb9da1d76fe8df9bfa22a0a"
+    },
+    {
+      "left": 1344,
+      "top": 336,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/1344-336.webp",
+      "bytes": 14028,
+      "sha256": "d049a8d26ce25324df0dbd8529af0a3088df3e89575d7f6e329b86f683ee8c2c"
+    },
+    {
+      "left": 0,
+      "top": 672,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/0-672.webp",
+      "bytes": 26360,
+      "sha256": "e981193af5170c5d5dfb551637e5fd73b32f04a1a77cc0c7e210082f5e33ddb5"
+    },
+    {
+      "left": 448,
+      "top": 672,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/448-672.webp",
+      "bytes": 27388,
+      "sha256": "16eaf153a45652eadefd645ff1f2ed1f449e1b1961209b4f0fd6739f4150fdf6"
+    },
+    {
+      "left": 896,
+      "top": 672,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/896-672.webp",
+      "bytes": 16106,
+      "sha256": "c607289e9c9e9152134807c51dfcd813d7026f9b97bf6832324bd7068d631fd8"
+    },
+    {
+      "left": 1344,
+      "top": 672,
+      "width": 448,
+      "height": 336,
+      "path": "/gallery/detail/g68/1344-672.webp",
+      "bytes": 12474,
+      "sha256": "9c3fdc19484a5d03630e04321be362cff4bdb434110e215ddd6ec55b51d8d3c1"
+    }
+  ]
+}

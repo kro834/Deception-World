@@ -6,7 +6,10 @@ import { Script, createContext } from "node:vm";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
-import { DREAM_CASES } from "../src/components/dream-chapter/dream-chapter-data.ts";
+import {
+  DREAM_CASES,
+  DREAM_CHARACTERS,
+} from "../src/components/dream-chapter/dream-chapter-data.ts";
 import {
   DREAM_READER_STORAGE_KEY,
   mountDreamReader,
@@ -39,7 +42,7 @@ function loadRoom(localStorage) {
           DREAM_READER_DEFAULTS: { size: "standard", spacing: "standard", bookmark: null },
           validateDreamReaderState,
         };
-      if (specifier === "./dream-chapter-data") return { DREAM_CASES };
+      if (specifier === "./dream-chapter-data") return { DREAM_CASES, DREAM_CHARACTERS };
       if (specifier.endsWith(".css")) return {};
       return require(specifier);
     },
@@ -160,7 +163,7 @@ test("room renders every canonical paragraph in its original order and restores 
     );
     let prior = -1;
     for (const paragraph of episode.paragraphs) {
-      const next = html.indexOf(paragraph);
+      const next = html.replace(/<[^>]+>/g, "").indexOf(paragraph);
       assert.ok(next > prior, `CASE ${episode.no}: missing or reordered canonical paragraph`);
       prior = next;
     }
@@ -230,7 +233,7 @@ test("denied or malformed storage keeps the room readable and the page reader us
     },
   });
   const html = renderToStaticMarkup(React.createElement(Room, { trigger: null, onClose() {} }));
-  assert.ok(html.includes(DREAM_CASES[0].paragraphs[0]));
+  assert.ok(html.replace(/<[^>]+>/g, "").includes(DREAM_CASES[0].paragraphs[0]));
   assert.equal(
     (html.match(/data-room-paragraph="\d+"/g) ?? []).length,
     DREAM_CASES[0].paragraphs.length,
@@ -239,7 +242,7 @@ test("denied or malformed storage keeps the room readable and the page reader us
   const malformedHtml = renderToStaticMarkup(
     React.createElement(MalformedRoom, { trigger: null, onClose() {} }),
   );
-  assert.ok(malformedHtml.includes(DREAM_CASES[0].paragraphs[0]));
+  assert.ok(malformedHtml.replace(/<[^>]+>/g, "").includes(DREAM_CASES[0].paragraphs[0]));
   const room = source("dream-reading-room.tsx");
   assert.match(
     room,

@@ -1,0 +1,106 @@
+.dream-reading-archive {
+  margin: 3rem auto;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  max-width: 72rem;
+  border: 1px solid #bda47770;
+  background: #171512;
+  color: #f0e5cf;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  scroll-margin-top: 5rem;
+}
+.dream-reading-archive h2 {
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  line-height: 1.5;
+}
+.dream-reading-archive p {
+  margin: 0.7rem 0;
+}
+.dream-reading-archive-controls {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 42rem;
+}
+.dream-reading-archive label {
+  display: block;
+  font-weight: 600;
+}
+.dream-reading-archive select,
+.dream-reading-archive input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.6rem 0.8rem;
+  background: #29251e;
+  color: #fff3db;
+  border: 1px solid #c3a678;
+  border-radius: 0.25rem;
+  font: inherit;
+}
+.dream-reading-archive :focus-visible {
+  outline: 3px solid #f8d99b;
+  outline-offset: 4px;
+}
+.dream-reading-archive-note,
+.dream-reading-archive-source {
+  font-size: 0.85rem;
+  color: #d3c3a8;
+}
+.dream-reading-archive-results {
+  display: grid;
+  gap: 0.8rem;
+}
+.dream-reading-archive details {
+  min-width: 0;
+  border-top: 1px solid #bda47770;
+}
+.dream-reading-archive summary {
+  padding: 1rem 0.3rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+.dream-reading-archive summary > span {
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+  color: #d3c3a8;
+}
+.dream-reading-archive summary small {
+  display: block;
+  margin-left: 1.3rem;
+  font-size: 0.8rem;
+}
+.dream-reading-archive article {
+  padding: 0.6rem clamp(0.2rem, 2vw, 1.2rem) 1rem;
+}
+.dream-reading-archive h3 {
+  font-size: 1rem;
+}
+.dream-reading-archive blockquote {
+  margin: 1rem 0;
+  padding-left: 0.8rem;
+  border-left: 2px solid #bda477;
+  white-space: pre-line;
+}
+.dream-reading-archive input:disabled {
+  opacity: 0.6;
+}
+@media (min-width: 768px) {
+  .dream-reading-archive-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (forced-colors: active) {
+  .dream-reading-archive,
+  .dream-reading-archive details,
+  .dream-reading-archive select,
+  .dream-reading-archive input {
+    border-color: CanvasText;
+  }
+  .dream-reading-archive :focus-visible {
+    outline-color: Highlight;
+  }
+}

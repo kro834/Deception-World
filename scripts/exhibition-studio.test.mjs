@@ -1077,7 +1077,7 @@ test("the regular gallery keeps its original enlargement link without a room or 
     /<a\s+className="gallery-feature-open"\s+href=\{print\.full\}\s+onClick=\{\(event\) => openWork\(event, print\)\}/,
   );
   assert.match(source, /aria-haspopup="dialog"\s+aria-controls="gallery-viewer"/);
-  assert.match(source, /src=\{print\.medium\}\s+srcSet=\{print\.srcSet\}/);
+  assert.match(source, /src=\{print\.medium\}\s+srcSet=\{print\.fullSrcSet \?\? print\.srcSet\}/);
   assert.match(source, /width=\{print\.width\}\s+height=\{print\.height\}/);
   assert.match(source, /to="\/exhibition"\s+search=\{\{ work: featured\.id \}\}/);
 });

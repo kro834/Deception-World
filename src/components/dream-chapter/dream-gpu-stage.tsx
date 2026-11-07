@@ -25,21 +25,15 @@ function DreamGpuOverlay() {
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    let stop: (() => void) | null = null;
-    let alive = true;
+    const controller = new AbortController();
+    const { signal } = controller;
     loadEngine()
-      .then((engine) => engine.startLamplightOverlay(canvas, { getDeskRect: deskRect }))
-      .then((dispose) => {
-        if (alive) {
-          stop = dispose;
-          setReady(true);
-        } else dispose();
+      .then((engine) => engine.startLamplightOverlay(canvas, { getDeskRect: deskRect, signal }))
+      .then(() => {
+        if (!signal.aborted) setReady(true);
       })
       .catch(() => undefined);
-    return () => {
-      alive = false;
-      stop?.();
-    };
+    return () => controller.abort();
   }, []);
   return (
     <canvas

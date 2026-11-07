@@ -61,7 +61,7 @@ test("special type is small, local, licensed, and loaded on only the two rider r
   const head = read("src/lib/world-head.ts");
   assert.match(
     head,
-    /id === "over-zeztz" \|\| id === "leddic"\s*\? \[\.\.\.DOSSIER_STYLESHEET_LINKS, \{ rel: "stylesheet", href: formSignatureCssUrl \}\]/,
+    /id === "over-zeztz" \|\| id === "leddic"\s*\? \[\.\.\.dossierLinks, \{ rel: "stylesheet", href: formSignatureCssUrl \}\]/,
   );
   const common = head.slice(
     head.indexOf("export const DOSSIER_STYLESHEET_LINKS"),

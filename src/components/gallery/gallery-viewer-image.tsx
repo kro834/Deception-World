@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryCollectionArtwork } from "./gallery-community-client";
 import { galleryImagePresentation, type GalleryImageLoadStatus } from "./gallery-image-state";
 import {
@@ -8,6 +8,15 @@ import {
   gallerySwipeStep,
   type GalleryImageViewport,
 } from "./gallery-viewer-state";
+
+import { GALLERY_DETAIL } from "./gallery-detail-assets";
+import { GalleryDetailTiles } from "./gallery-detail-tiles";
+import {
+  galleryFitSizes,
+  galleryZoomSource,
+  galleryNativeIsReady,
+  rememberGalleryNativeLoad,
+} from "./gallery-image-delivery";
 
 function readViewport(viewport: HTMLDivElement): GalleryImageViewport {
   return {
@@ -23,12 +32,10 @@ function readViewport(viewport: HTMLDivElement): GalleryImageViewport {
 /** Remounted per artwork: stale loads and zoom state cannot leak into the next work. */
 export function GalleryViewerImage({
   work,
-  neighbors,
   navigationDisabled,
   onMove,
 }: {
   work: GalleryCollectionArtwork;
-  neighbors: readonly GalleryCollectionArtwork[];
   navigationDisabled: boolean;
   onMove: (step: number) => void;
 }) {
@@ -37,6 +44,18 @@ export function GalleryViewerImage({
   const [attempt, setAttempt] = useState(0);
   const [mediumAttempt, setMediumAttempt] = useState(0);
   const [zoomed, setZoomed] = useState(false);
+  const [pixelRatio, setPixelRatio] = useState(1);
+  const [fitWidth, setFitWidth] = useState<number | null>(null);
+  const [detailViewport, setDetailViewport] = useState<GalleryImageViewport | null>(null);
+  const [nativeReady, setNativeReady] = useState(() => galleryNativeIsReady(work.full));
+  const [detailFull, setDetailFull] = useState(false);
+  const fitSourceRef = useRef(work.medium);
+  const useFullDetail = useCallback(() => setDetailFull(true), []);
+  const zoomSource = nativeReady
+    ? work.full
+    : galleryZoomSource(work, fitWidth ?? work.width, pixelRatio);
+  const tiled =
+    work.id === GALLERY_DETAIL.id && zoomSource === work.full && !nativeReady && !detailFull;
   const imageRef = useRef<HTMLImageElement>(null);
   const mediumRef = useRef<HTMLImageElement>(null);
   const zoomRef = useRef<HTMLButtonElement>(null);
@@ -49,7 +68,16 @@ export function GalleryViewerImage({
   const hasSeparateMedium = work.medium !== work.full;
   const { showingMedium, waitingForMedium, imageUnavailable, busy, canZoom } =
     galleryImagePresentation(fullStatus, mediumStatus, hasSeparateMedium);
-  const source = galleryImageRetrySource(work.full, attempt);
+  const activeSource = zoomed ? (tiled ? fitSourceRef.current : zoomSource) : work.medium;
+  const source = fitWidth ? galleryImageRetrySource(activeSource, attempt) : undefined;
+  const responsiveSources = (work.fullSrcSet ?? work.srcSet)
+    .split(",")
+    .filter(Boolean)
+    .map((candidate) => {
+      const [path, descriptor] = candidate.trim().split(/\s+/);
+      return `${galleryImageRetrySource(path, attempt)} ${descriptor}`;
+    })
+    .join(", ");
   const mediumSource = galleryImageRetrySource(work.medium, mediumAttempt);
 
   const retry = () => {
@@ -66,8 +94,34 @@ export function GalleryViewerImage({
   };
 
   useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const measure = () => {
+      setPixelRatio(window.devicePixelRatio || 1);
+      const width = Math.min(
+        viewport.clientWidth,
+        (viewport.clientHeight * work.width) / work.height,
+      );
+      if (width > 0) setFitWidth(Math.ceil(width));
+    };
+    measure();
+    // The parent opens the native dialog in its effect, after this child mounts.
+    const frame = requestAnimationFrame(measure);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    observer?.observe(viewport);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [work.width, work.height]);
+
+  useEffect(() => {
+    if (!source) return;
     const img = imageRef.current;
     if (img?.complete) setFullStatus(img.naturalWidth ? "ready" : "error");
+    else setFullStatus("loading");
   }, [source]);
 
   useEffect(() => {
@@ -93,6 +147,7 @@ export function GalleryViewerImage({
     if (!zoomed) {
       viewport.scrollTo({ top: 0, left: 0, behavior: "instant" });
       viewingPositionRef.current = null;
+      setDetailViewport(null);
       if (wasZoomedRef.current) zoomRef.current?.focus({ preventScroll: true });
       wasZoomedRef.current = false;
       return;
@@ -104,6 +159,7 @@ export function GalleryViewerImage({
       behavior: "instant",
     });
     viewingPositionRef.current = readViewport(viewport);
+    setDetailViewport(readViewport(viewport));
     viewport.focus({ preventScroll: true });
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(() => {
@@ -122,6 +178,7 @@ export function GalleryViewerImage({
         behavior: "instant",
       });
       viewingPositionRef.current = readViewport(viewport);
+      setDetailViewport(readViewport(viewport));
     });
     observer.observe(viewport);
     // WebKit can expose the enlarged canvas one layout after the viewport.
@@ -131,28 +188,14 @@ export function GalleryViewerImage({
     return () => observer.disconnect();
   }, [zoomed, work.width, work.height]);
 
-  useEffect(() => {
-    if (
-      fullStatus !== "ready" ||
-      (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
-    )
-      return;
-    // Only the two adjacent images, and only once the current image is ready.
-    const pending = neighbors.map((neighbor) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.fetchPriority = "low";
-      img.src = neighbor.full;
-      return img;
-    });
-    return () =>
-      pending.forEach((img) => {
-        img.removeAttribute("src");
-      });
-  }, [neighbors, fullStatus]);
-
   return (
-    <div className="gallery-viewer-image" data-zoomed={zoomed}>
+    <div
+      className="gallery-viewer-image"
+      data-zoomed={zoomed}
+      data-detail-mode={
+        zoomed ? (tiled ? "tiles" : zoomSource === work.full ? "full" : "standard") : "fit"
+      }
+    >
       <div className="gallery-image-toolbar">
         <span id="gallery-image-help">
           {zoomed ? "スクロール・↑ ↓ ← → キーで鑑賞" : "左右スワイプ・← → キーで作品移動"}
@@ -161,7 +204,7 @@ export function GalleryViewerImage({
           type="button"
           className="gallery-viewer-close"
           ref={zoomRef}
-          disabled={!canZoom}
+          disabled={!canZoom && !zoomed}
           aria-pressed={zoomed}
           onClick={() => {
             setZoomed((current) => !current);
@@ -193,6 +236,7 @@ export function GalleryViewerImage({
           )
             return;
           viewingPositionRef.current = next;
+          setDetailViewport(next);
         }}
         onKeyDown={(event) => {
           if (!zoomed || event.target !== event.currentTarget) return;
@@ -203,6 +247,7 @@ export function GalleryViewerImage({
           event.preventDefault();
           event.currentTarget.scrollTo({ ...position, behavior: "instant" });
           viewingPositionRef.current = readViewport(event.currentTarget);
+          setDetailViewport(readViewport(event.currentTarget));
         }}
         onTouchStart={(event) => {
           const touch = event.touches[0];
@@ -238,7 +283,7 @@ export function GalleryViewerImage({
         }}
       >
         <div className="gallery-image-canvas">
-          {hasSeparateMedium && fullStatus !== "ready" && (
+          {hasSeparateMedium && fullStatus !== "ready" && (zoomed || fullStatus === "error") && (
             <img
               key={mediumSource}
               ref={mediumRef}
@@ -261,15 +306,32 @@ export function GalleryViewerImage({
             data-ready={fullStatus === "ready"}
             ref={imageRef}
             src={source}
+            srcSet={zoomed || !fitWidth ? undefined : responsiveSources}
+            sizes={
+              zoomed
+                ? undefined
+                : fitWidth
+                  ? `${fitWidth}px`
+                  : galleryFitSizes(work.width, work.height)
+            }
+            fetchPriority="high"
             alt={fullStatus === "ready" ? work.alt : ""}
             aria-hidden={fullStatus !== "ready"}
             width={work.width}
             height={work.height}
             decoding="async"
             draggable={false}
-            onLoad={() => setFullStatus("ready")}
+            onLoad={(event) => {
+              setFullStatus("ready");
+              const loaded = event.currentTarget.currentSrc;
+              if (!zoomed) fitSourceRef.current = loaded || work.medium;
+              if (rememberGalleryNativeLoad(work.full, loaded)) setNativeReady(true);
+            }}
             onError={() => setFullStatus("error")}
           />
+          {zoomed && tiled && detailViewport && (
+            <GalleryDetailTiles viewport={detailViewport} onFallback={useFullDetail} />
+          )}
         </div>
         {(fullStatus === "loading" || (fullStatus === "error" && waitingForMedium)) && (
           <p className="gallery-image-status" data-preview-ready={showingMedium} role="status">

@@ -1,0 +1,470 @@
+/* World signals and cascade-sensitive sovereign rules. */
+
+.signal.zeus-signal {
+  border-color: rgba(244, 215, 142, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.14),
+    0 0 32px rgba(244, 215, 142, 0.1);
+}
+
+.signal.zeus-signal::after {
+  background:
+    linear-gradient(180deg, rgba(75, 46, 8, 0.02) 18%, rgba(9, 7, 4, 0.9) 100%),
+    linear-gradient(90deg, rgba(49, 31, 7, 0.62), transparent 56%);
+}
+
+.signal.zeus-signal:focus-visible {
+  border-color: rgba(255, 237, 184, 0.8);
+  box-shadow:
+    0 18px 52px rgba(0, 0, 0, 0.38),
+    0 0 38px rgba(244, 215, 142, 0.22),
+    inset 0 0 26px rgba(244, 215, 142, 0.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .signal.zeus-signal:hover {
+    border-color: rgba(255, 237, 184, 0.8);
+    box-shadow:
+      0 18px 52px rgba(0, 0, 0, 0.38),
+      0 0 38px rgba(244, 215, 142, 0.22),
+      inset 0 0 26px rgba(244, 215, 142, 0.08);
+  }
+}
+
+.signal-apex {
+  position: absolute;
+  z-index: 3;
+  top: 15px;
+  left: 46px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid rgba(255, 246, 214, 0.58);
+  border-radius: 999px;
+  background: rgba(25, 17, 5, 0.74);
+  box-shadow: 0 0 16px rgba(244, 215, 142, 0.2);
+  color: #fff8df;
+  font-style: normal;
+  text-shadow: 0 0 10px rgba(244, 215, 142, 0.62);
+}
+
+.signal-apex svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
+.manager-page.is-sovereign {
+  --sovereign-gold: #f4d78e;
+  --sovereign-ivory: #fffaf0;
+  background:
+    radial-gradient(circle at 25% 35%, rgba(244, 215, 142, 0.16), transparent 29rem),
+    radial-gradient(
+      ellipse 72% 40% at -12% 42%,
+      transparent 69.3%,
+      rgba(244, 215, 142, 0.12) 69.7%,
+      transparent 70.2%
+    ),
+    radial-gradient(
+      ellipse 62% 34% at 112% 75%,
+      transparent 69.4%,
+      rgba(244, 215, 142, 0.07) 69.8%,
+      transparent 70.2%
+    ),
+    radial-gradient(circle at 82% 8%, rgba(244, 215, 142, 0.14), transparent 32rem),
+    linear-gradient(145deg, #0d0c0a, #080a0f 43%, #11100c);
+}
+
+.is-sovereign .manager-grid {
+  opacity: 0.17;
+  background-image:
+    linear-gradient(rgba(244, 215, 142, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 215, 142, 0.13) 1px, transparent 1px);
+  background-size: 84px 84px;
+}
+
+.is-sovereign .manager-glow {
+  top: -19rem;
+  right: -11rem;
+  border-color: rgba(244, 215, 142, 0.25);
+  box-shadow:
+    0 0 0 8rem rgba(244, 215, 142, 0.028),
+    0 0 0 18rem rgba(244, 215, 142, 0.018),
+    0 0 140px rgba(244, 215, 142, 0.08);
+}
+
+.is-sovereign .manager-topbar {
+  border-bottom-color: rgba(244, 215, 142, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 251, 235, 0.08), transparent 46%),
+    linear-gradient(120deg, rgba(244, 215, 142, 0.09), transparent 42%), var(--glass-regular);
+}
+
+.sovereign-aura > i:nth-child(2) {
+  inset: 13%;
+  border-color: rgba(244, 215, 142, 0.3);
+  animation: sovereignOrbitReverse 20s linear infinite;
+}
+
+.sovereign-aura > i:nth-child(3) {
+  inset: 28%;
+  border-color: rgba(255, 250, 240, 0.3);
+  box-shadow:
+    0 0 40px rgba(244, 215, 142, 0.08),
+    inset 0 0 40px rgba(244, 215, 142, 0.05);
+  animation: sovereignAuraPulse 4.8s ease-in-out infinite;
+}
+
+.is-sovereign .manager-portrait-frame {
+  border-color: rgba(244, 215, 142, 0.66);
+  background: #f7f4ec;
+  box-shadow:
+    0 36px 110px rgba(0, 0, 0, 0.56),
+    0 0 0 1px rgba(255, 250, 240, 0.08),
+    0 0 90px rgba(244, 215, 142, 0.17);
+}
+
+.is-sovereign .manager-portrait-column {
+  position: relative;
+  isolation: isolate;
+}
+
+.is-sovereign .manager-portrait-column::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 9%;
+  left: 50%;
+  width: min(130%, 720px);
+  aspect-ratio: 1;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(244, 215, 142, 0.2) 0 0.7deg,
+    transparent 0.7deg 10deg
+  );
+  opacity: 0.32;
+  -webkit-mask-image: radial-gradient(
+    circle,
+    transparent 0 27%,
+    rgba(0, 0, 0, 0.9) 44%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(circle, transparent 0 27%, rgba(0, 0, 0, 0.9) 44%, transparent 72%);
+  transform: translateX(-50%);
+  animation: sovereignCrownRays 38s linear infinite;
+}
+
+.is-sovereign .manager-portrait-frame::before,
+.is-sovereign .manager-portrait-frame::after {
+  width: 72px;
+  height: 72px;
+  border-color: var(--sovereign-gold);
+  filter: drop-shadow(0 0 8px rgba(244, 215, 142, 0.42));
+}
+
+.is-sovereign .manager-portrait-frame > img {
+  filter: saturate(0.96) contrast(1.015);
+}
+
+.is-sovereign .manager-numeral {
+  color: #7b5418;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9),
+    0 4px 20px rgba(79, 48, 8, 0.22);
+}
+
+.is-sovereign .manager-introduction {
+  position: relative;
+  isolation: isolate;
+}
+
+.is-sovereign .manager-introduction::before {
+  content: "I";
+  position: absolute;
+  z-index: -1;
+  top: -54px;
+  right: -2%;
+  color: rgba(244, 215, 142, 0.055);
+  font-family: var(--font-display);
+  font-size: clamp(104px, 14vw, 210px);
+  font-weight: 900;
+  letter-spacing: -0.09em;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.is-sovereign .manager-display-name {
+  color: transparent;
+  background: linear-gradient(
+    105deg,
+    #ad7b27 0%,
+    #fff7d9 32%,
+    #d6a94e 52%,
+    #fffdf4 68%,
+    #b8852f 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgba(244, 215, 142, 0.12));
+  animation: sovereignTitleShine 6s ease-in-out infinite;
+}
+
+.is-sovereign .manager-title {
+  color: rgba(244, 223, 171, 0.78);
+}
+
+.sovereign-status::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -80%;
+  left: -28%;
+  width: 22%;
+  height: 260%;
+  background: linear-gradient(90deg, transparent, rgba(255, 252, 236, 0.16), transparent);
+  filter: blur(3px);
+  transform: rotate(17deg);
+  animation: sovereignStatusSweep 7.2s 1.4s ease-in-out infinite;
+}
+
+.sovereign-emblem > i {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed rgba(244, 215, 142, 0.38);
+  border-radius: 50%;
+  animation: sovereignOrbit 12s linear infinite;
+}
+
+.sovereign-status-copy {
+  min-width: 0;
+}
+
+.sovereign-status-copy small,
+.sovereign-status-copy p {
+  display: block;
+  margin: 0;
+  color: rgba(244, 215, 142, 0.66);
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: 0.26em;
+}
+
+.sovereign-status-copy strong {
+  display: block;
+  margin: 5px 0 6px;
+  color: var(--sovereign-ivory);
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.7vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-shadow: 0 0 22px rgba(244, 215, 142, 0.18);
+}
+
+.is-sovereign .manager-copy-section:first-child {
+  border-color: rgba(244, 215, 142, 0.2);
+  background:
+    linear-gradient(118deg, rgba(244, 215, 142, 0.055), transparent 42%),
+    linear-gradient(130deg, rgba(255, 255, 255, 0.025), rgba(7, 12, 19, 0.28));
+  box-shadow:
+    inset 2px 0 0 rgba(244, 215, 142, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 760px) {
+  .is-sovereign .manager-portrait-column {
+    position: relative;
+  }
+}
+
+@media (max-width: 520px) {
+  .sovereign-status-copy small,
+  .sovereign-status-copy p {
+    font-size: 5px;
+    letter-spacing: 0.18em;
+  }
+
+  .sovereign-status-copy strong {
+    font-size: 21px;
+  }
+}
+
+html[data-android-renderer] .is-sovereign .manager-display-name {
+  background-position: 0 50%;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sovereign-aura > i,
+  .is-sovereign .manager-portrait-column::before,
+  .sovereign-portrait-effects::before,
+  .sovereign-portrait-effects > i,
+  .sovereign-apex-seal,
+  .is-sovereign .manager-display-name,
+  .sovereign-status::after,
+  .sovereign-emblem > i,
+  .sovereign-scale i {
+    animation: none !important;
+  }
+
+  .sovereign-portrait-effects::before,
+  .sovereign-status::after {
+    display: none;
+  }
+}
+.signal.zeus-signal {
+  --zeus-aquamarine: #63e6cd;
+  border-color: rgba(117, 235, 211, 0.58);
+  background: linear-gradient(135deg, rgba(244, 215, 142, 0.08), rgba(29, 152, 142, 0.12));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.18),
+    inset 0 -1px 0 rgba(99, 230, 205, 0.16),
+    -12px 0 34px rgba(244, 215, 142, 0.08),
+    12px 0 34px rgba(82, 224, 210, 0.1);
+}
+
+.signal.zeus-signal::after {
+  background:
+    radial-gradient(circle at 78% 17%, rgba(99, 230, 205, 0.2), transparent 31%),
+    linear-gradient(180deg, rgba(75, 46, 8, 0.01) 12%, rgba(4, 18, 17, 0.91) 100%),
+    linear-gradient(96deg, rgba(62, 39, 7, 0.54), transparent 48%, rgba(18, 112, 104, 0.18));
+}
+
+.signal.zeus-signal > img {
+  filter: saturate(1.03) contrast(1.025) drop-shadow(-10px 0 24px rgba(244, 215, 142, 0.08))
+    drop-shadow(10px 0 24px rgba(99, 230, 205, 0.1));
+}
+
+.signal.zeus-signal > i {
+  background: linear-gradient(180deg, #fff3c6, #61e4cc);
+  box-shadow:
+    0 0 16px rgba(99, 230, 205, 0.7),
+    0 0 26px rgba(244, 215, 142, 0.4);
+}
+
+.signal.zeus-signal:focus-visible {
+  border-color: rgba(151, 255, 233, 0.86);
+  box-shadow:
+    0 18px 52px rgba(0, 0, 0, 0.38),
+    -14px 0 42px rgba(244, 215, 142, 0.18),
+    14px 0 42px rgba(99, 230, 205, 0.2),
+    inset 0 0 26px rgba(153, 255, 235, 0.07);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .signal.zeus-signal:hover {
+    border-color: rgba(151, 255, 233, 0.86);
+    box-shadow:
+      0 18px 52px rgba(0, 0, 0, 0.38),
+      -14px 0 42px rgba(244, 215, 142, 0.18),
+      14px 0 42px rgba(99, 230, 205, 0.2),
+      inset 0 0 26px rgba(153, 255, 235, 0.07);
+  }
+}
+
+.signal-apex {
+  border-color: rgba(137, 245, 222, 0.72);
+  background: linear-gradient(135deg, rgba(47, 30, 6, 0.91), rgba(5, 42, 39, 0.92));
+  color: #ecfff9;
+  box-shadow:
+    -5px 0 16px rgba(244, 215, 142, 0.18),
+    5px 0 18px rgba(99, 230, 205, 0.28);
+  text-shadow: 0 0 10px rgba(99, 230, 205, 0.72);
+}
+
+.manager-page.is-sovereign {
+  --sovereign-aquamarine: #63e6cd;
+  --sovereign-cyan: #86dcf5;
+  background:
+    radial-gradient(circle at 21% 30%, rgba(244, 215, 142, 0.18), transparent 29rem),
+    radial-gradient(circle at 82% 13%, rgba(99, 230, 205, 0.17), transparent 34rem),
+    radial-gradient(
+      ellipse 62% 34% at 112% 75%,
+      transparent 69.4%,
+      rgba(99, 230, 205, 0.09) 69.8%,
+      transparent 70.2%
+    ),
+    linear-gradient(145deg, #0d0c09, #071112 46%, #0b1714);
+}
+
+.is-sovereign .manager-grid {
+  background-image:
+    linear-gradient(rgba(244, 215, 142, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 230, 205, 0.12) 1px, transparent 1px);
+}
+
+.is-sovereign .manager-glow {
+  border-color: rgba(99, 230, 205, 0.28);
+  box-shadow:
+    0 0 0 8rem rgba(244, 215, 142, 0.026),
+    0 0 0 18rem rgba(99, 230, 205, 0.018),
+    0 0 140px rgba(99, 230, 205, 0.1);
+}
+
+.is-sovereign .manager-topbar {
+  border-bottom-color: rgba(99, 230, 205, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 251, 235, 0.08), transparent 46%),
+    linear-gradient(115deg, rgba(244, 215, 142, 0.09), transparent 42%, rgba(99, 230, 205, 0.08)),
+    var(--glass-regular);
+}
+
+.sovereign-aura > i:nth-child(2) {
+  border-color: rgba(99, 230, 205, 0.38);
+  box-shadow: inset 0 0 46px rgba(99, 230, 205, 0.035);
+}
+
+.sovereign-aura > i:nth-child(3) {
+  border-color: rgba(171, 255, 237, 0.38);
+  box-shadow:
+    0 0 46px rgba(99, 230, 205, 0.1),
+    inset 0 0 40px rgba(244, 215, 142, 0.05);
+}
+
+.is-sovereign .manager-portrait-frame {
+  border-color: rgba(112, 238, 213, 0.7);
+  box-shadow:
+    0 36px 110px rgba(0, 0, 0, 0.56),
+    -15px 0 68px rgba(244, 215, 142, 0.17),
+    15px 0 76px rgba(99, 230, 205, 0.2),
+    inset 0 1px 0 rgba(255, 250, 240, 0.12);
+}
+
+.is-sovereign .manager-display-name {
+  background-image: linear-gradient(
+    105deg,
+    #b9872e 0%,
+    #fff4c8 25%,
+    #70e8ce 48%,
+    #d9fff6 66%,
+    #d2a044 100%
+  );
+  filter: drop-shadow(-6px 0 16px rgba(244, 215, 142, 0.1))
+    drop-shadow(6px 0 18px rgba(99, 230, 205, 0.12));
+}
+
+.sovereign-emblem > i {
+  border-color: rgba(244, 215, 142, 0.45);
+}
+
+.sovereign-emblem > span,
+.sovereign-status-copy strong {
+  text-shadow:
+    -4px 0 16px rgba(244, 215, 142, 0.28),
+    4px 0 18px rgba(99, 230, 205, 0.36);
+}
+
+.is-sovereign .manager-copy-section:first-child {
+  border-color: rgba(99, 230, 205, 0.24);
+  background:
+    linear-gradient(118deg, rgba(244, 215, 142, 0.05), transparent 38%, rgba(99, 230, 205, 0.045)),
+    linear-gradient(130deg, rgba(255, 255, 255, 0.025), rgba(7, 12, 19, 0.28));
+  box-shadow:
+    inset 2px 0 0 rgba(244, 215, 142, 0.4),
+    inset -2px 0 0 rgba(99, 230, 205, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}

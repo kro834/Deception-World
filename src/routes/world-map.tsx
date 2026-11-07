@@ -3,8 +3,16 @@ import { WorldMap } from "@/components/world-map/world-map";
 import { validateMapSearch } from "@/lib/world-map-data";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import css from "@/styles-world-map.css?url";
+type MapRequest = { q?: string; kind?: string; node?: string; source?: string };
+
 export const Route = createFileRoute("/world-map")({
-  validateSearch: validateMapSearch,
+  // Only the map view needs the graph to resolve aliases and decide which node exists.
+  validateSearch: (input: Record<string, unknown>): MapRequest => ({
+    q: typeof input.q === "string" ? input.q.slice(0, 120) : undefined,
+    kind: typeof input.kind === "string" ? input.kind : undefined,
+    node: typeof input.node === "string" ? input.node : undefined,
+    source: typeof input.source === "string" ? input.source : undefined,
+  }),
   component: WorldMapRoute,
   head: () =>
     createWorldHead({
@@ -14,7 +22,7 @@ export const Route = createFileRoute("/world-map")({
     }),
 });
 function WorldMapRoute() {
-  const search = Route.useSearch();
+  const search = validateMapSearch(Route.useSearch());
   const navigate = Route.useNavigate();
   return (
     <WorldMap

@@ -64,3 +64,36 @@
   overscroll-behavior: contain;
   align-content: safe center;
 }
+
+/* Source-pixel crops share the existing contain geometry and never capture input. */
+.gallery-image-canvas {
+  position: relative;
+}
+.gallery-detail-tiles {
+  position: absolute;
+  pointer-events: none;
+}
+.gallery-viewer-stage .gallery-detail-tiles img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+}
+
+.gallery-feature-open > noscript {
+  display: contents;
+}
+
+/* React's streamed route waits for an inline placement script. Without JS,
+   expose only the gallery segment and omit its scripted arrival curtain.
+   Match Tailwind's base layer: its [hidden] !important beats unlayered rules. */
+@layer base {
+  @media (scripting: none) {
+    div[hidden][id^="S:"]:has(.gallery-page[data-gallery-page]) {
+      display: block !important;
+    }
+    .gallery-page .gallery-arrival {
+      display: none !important;
+    }
+  }
+}

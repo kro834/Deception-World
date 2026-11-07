@@ -12,6 +12,7 @@ export type GalleryArtwork = {
   medium: string;
   full: string;
   srcSet: string;
+  fullSrcSet?: string;
 };
 
 // Exhibition labels describe the supplied pictures, not new story canon.
@@ -317,6 +318,10 @@ export const GALLERY_ARTWORKS: readonly GalleryArtwork[] = GALLERY_ASSETS.map((a
     thumb: thumb.path,
     medium: medium.path,
     full: full.path,
+    fullSrcSet: variants.map((variant) => `${variant.path} ${variant.width}w`).join(", "),
     srcSet: displayVariants.map((variant) => `${variant.path} ${variant.width}w`).join(", "),
   };
 });
+
+// Shared by the rendered hero and the early, browser-local preload decision.
+export const GALLERY_DEFAULT_ARTWORK = GALLERY_ARTWORKS[2];

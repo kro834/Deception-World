@@ -17,6 +17,7 @@ import galleryCurationCssUrl from "@/styles-gallery-curation.css?url";
 import galleryControlsPolishCssUrl from "@/styles-gallery-controls-polish.css?url";
 import tabletGalleryCssUrl from "@/styles-tablet-gallery.css?url";
 import commandGalleryCssUrl from "@/styles-command-gallery.css?url";
+import { GALLERY_HERO_PRELOAD_SCRIPT } from "@/components/gallery/gallery-hero-preload";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
 export const Route = createFileRoute("/gallery")({
@@ -46,6 +47,10 @@ export const Route = createFileRoute("/gallery")({
     });
     return {
       ...head,
+      // The preload decision belongs to the HTML parser. A client navigation
+      // can render its image immediately and must not put the catalogue in the
+      // shared router bundle just to construct this script.
+      scripts: import.meta.env.SSR ? [{ children: GALLERY_HERO_PRELOAD_SCRIPT }] : [],
       meta: [...(head.meta ?? []), { name: "theme-color", content: "#07080c" }],
       links: [
         ...(head.links ?? []),

@@ -159,7 +159,11 @@ test("the last saved artwork remains resumable and offers a separate restart act
     }).outputText,
     {
       exports,
-      require: (name) => (name === "./tour-data" ? data : require(name)),
+      require: (name) => {
+        if (name === "./tour-data") return data;
+        if (name === "./quote-exhibition") return { QuoteExhibition: () => null };
+        return require(name);
+      },
     },
   );
   const tour = data.GALLERY_TOURS[0];

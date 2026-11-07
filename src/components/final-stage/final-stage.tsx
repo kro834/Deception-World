@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { GuardedLink } from "@/components/load-gate";
 import { LiquidLens, LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "@/components/world/pickup-scroll-reset";
@@ -29,6 +29,7 @@ import {
   type RrFormKey,
   type SpecRow,
 } from "./final-stage-data";
+import { RoyalExhibitLoader } from "./royal-exhibit-loader";
 
 const LOGO = "/final-stage-logo.webp";
 
@@ -150,6 +151,7 @@ function RiderPickup({
   imageHeight,
   imagePos,
   imageSet,
+  onOpenChange,
   name,
   sub,
   quote,
@@ -163,6 +165,7 @@ function RiderPickup({
   imagePos: string;
   /* The picture's candidates when they are not the Rexonance cuts. */
   imageSet?: { srcSet?: string; sizes?: string };
+  onOpenChange?: (open: boolean) => void;
   name: string;
   sub: string;
   quote: string;
@@ -193,6 +196,7 @@ function RiderPickup({
     cancelScrollReset.current?.();
     try {
       dialog.showModal();
+      onOpenChange?.(true);
     } catch {
       /* already open */
     }
@@ -264,7 +268,10 @@ function RiderPickup({
         className="form-pickup-dialog fst-pickup-dialog"
         tabIndex={-1}
         aria-label={`仮面ライダー${name}`}
-        onClose={resetScroll}
+        onClose={() => {
+          if (!dlg.current?.open) onOpenChange?.(false);
+          resetScroll();
+        }}
         onCancel={(event) => {
           event.preventDefault();
           close();
@@ -367,6 +374,7 @@ export function FinalStage() {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
   const [stage, setStage] = useState<FfsStageKey>("middle");
+  const [royalOpen, setRoyalOpen] = useState(false);
   const [form, setForm] = useState<RrFormKey>("royal");
   const [castIndex, setCastIndex] = useState(0);
   const [motionReady, setMotionReady] = useState(false);
@@ -385,29 +393,37 @@ export function FinalStage() {
   const activeForm = REALM_ROYAL.forms[form];
   const activeVisual = REALM_ROYAL.visuals[RR_FORM_ORDER.indexOf(form)];
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // The native dialog makes the underlying navigation inert. Keep its last
+    // reserve while the portrait mounts, then measure again before the first
+    // paint after closing (including rotation while the reader was inside).
+    if (royalOpen) return;
     const page = pageRef.current;
     const nav = page?.querySelector<HTMLElement>(".rxs-local-nav");
     if (!page || !nav) return;
+    let frame = 0;
     const syncNavReserve = () => {
+      frame = 0;
       const reserve = `${Math.ceil(nav.getBoundingClientRect().height)}px`;
       if (page.style.getPropertyValue("--rxs-local-nav-reserve") !== reserve) {
         page.style.setProperty("--rxs-local-nav-reserve", reserve);
       }
     };
-    const observer =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncNavReserve);
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(syncNavReserve);
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
     observer?.observe(nav);
-    window.addEventListener("resize", syncNavReserve, { passive: true });
-    window.visualViewport?.addEventListener("resize", syncNavReserve, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    window.visualViewport?.addEventListener("resize", schedule, { passive: true });
     syncNavReserve();
     return () => {
       observer?.disconnect();
-      window.removeEventListener("resize", syncNavReserve);
-      window.visualViewport?.removeEventListener("resize", syncNavReserve);
-      page.style.removeProperty("--rxs-local-nav-reserve");
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [royalOpen]);
 
   // The chapter in view is marked in the bar (aria-current="location").
   useEffect(
@@ -858,6 +874,7 @@ export function FinalStage() {
 
         <RiderPickup
           id="realm-royal"
+          onOpenChange={setRoyalOpen}
           accent="#ff6f8d"
           image={activeVisual.image}
           imageWidth={activeVisual.width}
@@ -868,6 +885,17 @@ export function FinalStage() {
           sub={REALM_ROYAL.formsLine}
           quote="武器と盾を生み出して操り、受け止めた攻撃のエネルギーを自分と仲間の力へ変える。仮面ライダーレルムの究極形態。"
         >
+          <button
+            className="fst-royal-exhibit-jump"
+            type="button"
+            onClick={() => {
+              const exhibit = document.getElementById("fst-royal-armour");
+              exhibit?.focus({ preventScroll: true });
+              exhibit?.scrollIntoView({ block: "start", behavior: "instant" });
+            }}
+          >
+            装甲部位展示へ <span aria-hidden="true">↓</span>
+          </button>
           <SubHeading title="形態とスペック" />
           <div className="rxs-stage-switcher">
             <div
@@ -921,24 +949,30 @@ export function FinalStage() {
             </div>
           </div>
 
-          <SubHeading title="ビジュアル" />
-          <div
-            className="fst-gallery fst-royal-selected-visual"
-            role="list"
-            aria-label="レルムロイヤル ビジュアル"
-          >
-            <figure key={activeVisual.image} role="listitem">
-              <img
-                src={activeVisual.image}
-                {...royalVisualImage(activeVisual.image, activeVisual.width)}
-                alt={activeVisual.alt}
-                width={activeVisual.width}
-                height={activeVisual.height}
-                loading="lazy"
-                decoding="async"
-                fetchPriority="auto"
-              />
-            </figure>
+          <div id="fst-royal-armour" role="region" aria-label="装甲部位展示" tabIndex={-1}>
+            <SubHeading title="装甲部位展示" />
+            {royalOpen && (
+              <RoyalExhibitLoader
+                form={form}
+                imageSet={royalVisualImage}
+                onFormChange={(key) => {
+                  // Use the existing rail so its lens, keyboard position and specs follow.
+                  formTabsRef.current
+                    ?.querySelector<HTMLButtonElement>(`#fst-rr-form-tab-${key}`)
+                    ?.click();
+                }}
+              >
+                <img
+                  src={activeVisual.image}
+                  {...royalVisualImage(activeVisual.image, activeVisual.width)}
+                  alt={activeVisual.alt}
+                  width={activeVisual.width}
+                  height={activeVisual.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </RoyalExhibitLoader>
+            )}
           </div>
 
           <SubHeading title="概要" />

@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { GALLERY_TOURS, getTourArtwork, getTourStopIndex } from "./tour-data";
 import type { TourProgress } from "./tour-progress";
+import { QuoteExhibition } from "./quote-exhibition";
 
 type GalleryTourEntranceProps = {
   progress: TourProgress;
@@ -86,6 +87,9 @@ export function GalleryTourEntrance({
             >
               おまかせで選ぶ <span aria-hidden="true">↗</span>
             </button>
+            <a className="gallery-tour-action gallery-tour-action-text" href="#quote-exhibition">
+              台詞から見る <span aria-hidden="true">↓</span>
+            </a>
           </div>
         </div>
         {openingArtwork && (
@@ -294,6 +298,7 @@ export function GalleryTourEntrance({
           })}
         </div>
       </section>
+      <QuoteExhibition />
     </div>
   );
 }

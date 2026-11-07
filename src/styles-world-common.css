@@ -1,0 +1,58 @@
+/* Reusable World cascade; isolated sovereign art and Leddic records are linked separately. */
+
+@import "./styles-world/01.css";
+@import "./styles-world/02.css";
+@import "./styles-world/03.css";
+@import "./styles-world/04.css";
+@import "./styles-world/05.css";
+@import "./styles-world/06.css";
+@import "./styles-world/07.css";
+@import "./styles-world/08.css";
+@import "./styles-world/09.css";
+@import "./styles-world/10.css";
+@import "./styles-world/11.css";
+@import "./styles-world/12.css";
+@import "./styles-world/13.css";
+@import "./styles-world/14.css";
+@import "./styles-world/15.css";
+@import "./styles-world/16.css";
+@import "./styles-world/17.css";
+@import "./styles-world/18.css";
+@import "./styles-world/19.css";
+@import "./styles-world/20-shared.css";
+@import "./styles-world/21.css";
+@import "./styles-world/22.css";
+@import "./styles-world/23.css";
+@import "./styles-world/24.css";
+@import "./styles-world/25.css";
+@import "./styles-world/28.css";
+@import "./styles-world/29.css";
+@import "./styles-world/30.css";
+@import "./styles-world/31.css";
+@import "./styles-world/32.css";
+@import "./styles-world/33.css";
+
+@layer base {
+  @media (scripting: none) {
+    /* A streamed document normally moves this segment with React's inline
+       script. In a script-free World visit the completed server page is here. */
+    div[hidden][id^="S:"]:has(> main.site-shell > #cast-roster) {
+      display: block !important;
+    }
+  }
+}
+
+/* Only a measured single-column term can reuse its real content-box height on a
+   later scroll. No section, disclosure, sticky ancestor or quote rail is
+   contained. Unsupported engines and new cards retain ordinary layout. */
+@supports (content-visibility: auto) and (contain-intrinsic-block-size: auto 1px) {
+  @media screen and (max-width: 1099px) {
+    html:not([data-route-restoring]):not(:has(:target))
+      .site-shell
+      .wa-glossary
+      > div[data-reading-measured="true"]:not(:focus-within) {
+      content-visibility: auto;
+      contain-intrinsic-block-size: auto var(--reading-block-size);
+    }
+  }
+}

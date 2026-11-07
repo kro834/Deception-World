@@ -36,14 +36,6 @@ import {
    Portraits reuse the dossiers' own files through the site's image helpers.
    Styles: styles-world-annex.css and styles-world-transcript.css. */
 
-const ANNEX_CONTENTS: readonly { href: string; code: string; label: string }[] = [
-  { href: "#cast-roster", code: "04", label: "人物一覧" },
-  { href: "#world-brief", code: "05", label: "世界と組織" },
-  { href: "#episode-notes", code: "06.1", label: "エピソードの記録" },
-  { href: "#glossary", code: "06.2", label: "用語集" },
-  { href: "#quotes", code: "06.3", label: "名台詞" },
-];
-
 const DOSSIER_ASSETS = new Map<string, readonly string[]>(
   [...RIKUEI_NAV, ...RIDER_NAV, ...RELATED_NAV]
     .filter((item) => item.href)
@@ -307,183 +299,171 @@ function keepProfileInPlace(event: SyntheticEvent<HTMLDetailsElement>) {
 }
 
 /** 04 CAST FILES: the portrait wall. */
-function CastFiles() {
+export function CastFiles() {
   const { filter, setFilter } = useWorldCastDirectory();
   return (
-    <section
-      id="cast-roster"
-      className="world-annex is-chapter"
-      aria-labelledby="cast-roster-title"
-    >
-      <div className="wa-inner">
-        <ChapterOpener no="04" />
-        <AnnexHeading id="cast-roster-title" title="人物一覧" />
-        <WorldCastDirectory filter={filter} onChange={setFilter} />
-        <ol className="wa-roster">
-          {WORLD_CAST_ROSTER.map((entry) => (
-            <li key={entry.id} hidden={!matchesCastDirectoryFilter(entry, filter)}>
-              <article
-                className={`wa-plate wa-person is-${kindOf(entry)}`}
-                aria-labelledby={`wa-person-${entry.id}`}
-              >
-                <CastPortrait entry={entry} />
-                <div className="wa-person-body">
-                  {/* A rider name breaks after 仮面ライダー, never inside it
+    <div className="wa-inner">
+      <ChapterOpener no="04" />
+      <AnnexHeading id="cast-roster-title" title="人物一覧" />
+      <WorldCastDirectory filter={filter} onChange={setFilter} />
+      <ol className="wa-roster">
+        {WORLD_CAST_ROSTER.map((entry) => (
+          <li key={entry.id} hidden={!matchesCastDirectoryFilter(entry, filter)}>
+            <article
+              className={`wa-plate wa-person is-${kindOf(entry)}`}
+              aria-labelledby={`wa-person-${entry.id}`}
+            >
+              <CastPortrait entry={entry} />
+              <div className="wa-person-body">
+                {/* A rider name breaks after 仮面ライダー, never inside it
                       (アルゲノ / ム), and keeps its dash company. */}
-                  <p className="wa-role">
-                    <DisplayName value={entry.role} />
-                  </p>
-                  <h3 id={`wa-person-${entry.id}`}>
-                    <NameText value={entry.name} />
-                  </h3>
-                  {entry.line ? <AnnexQuote text={entry.line} signature /> : null}
-                  <details className="wa-profile" onToggle={keepProfileInPlace}>
-                    <summary onClick={noteProfileTop}>
-                      <span className="wa-sr">{entry.name}</span> <span lang="en">PROFILE</span>
-                    </summary>
-                    <div className="wa-profile-body">
-                      {entry.profile.map((item) =>
-                        item.by ? (
-                          <AnnexQuote key={item.text} text={item.text} by={item.by} />
-                        ) : (
-                          <p key={item.text} className="wa-prose">
-                            {item.text}
-                          </p>
-                        ),
-                      )}
-                    </div>
-                  </details>
-                </div>
-                {entry.to ? (
-                  <GuardedLink
-                    className="wa-open"
-                    to={entry.to}
-                    search={CAST_ROSTER_SEARCH}
-                    assets={DOSSIER_ASSETS.get(entry.to) ?? []}
-                    aria-label={`${entry.name}の個別資料を開く`}
-                  >
-                    <span aria-hidden="true" />
-                  </GuardedLink>
-                ) : null}
-              </article>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
+                <p className="wa-role">
+                  <DisplayName value={entry.role} />
+                </p>
+                <h3 id={`wa-person-${entry.id}`}>
+                  <NameText value={entry.name} />
+                </h3>
+                {entry.line ? <AnnexQuote text={entry.line} signature /> : null}
+                <details className="wa-profile" onToggle={keepProfileInPlace}>
+                  <summary onClick={noteProfileTop}>
+                    <span className="wa-sr">{entry.name}</span> <span lang="en">PROFILE</span>
+                  </summary>
+                  <div className="wa-profile-body">
+                    {entry.profile.map((item) =>
+                      item.by ? (
+                        <AnnexQuote key={item.text} text={item.text} by={item.by} />
+                      ) : (
+                        <p key={item.text} className="wa-prose">
+                          {item.text}
+                        </p>
+                      ),
+                    )}
+                  </div>
+                </details>
+              </div>
+              {entry.to ? (
+                <GuardedLink
+                  className="wa-open"
+                  to={entry.to}
+                  search={CAST_ROSTER_SEARCH}
+                  assets={DOSSIER_ASSETS.get(entry.to) ?? []}
+                  aria-label={`${entry.name}の個別資料を開く`}
+                >
+                  <span aria-hidden="true" />
+                </GuardedLink>
+              ) : null}
+            </article>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
 /** 05 WORLD FILES: the world brief and the locations. */
-function WorldFiles() {
+export function WorldFiles() {
   return (
-    <section
-      id="world-brief"
-      className="world-annex is-chapter"
-      aria-labelledby="world-brief-title"
-    >
-      <div className="wa-inner">
-        <ChapterOpener no="05" />
-        <AnnexHeading id="world-brief-title" title="世界と組織" />
-        <div className="wa-brief-stage">
-          <WorldBriefArt />
-          <div className="wa-brief-documents">
-            <div className="wa-brief-grid">
-              {WORLD_BRIEF.map((entry) => (
-                <article
-                  key={entry.id}
-                  className={`wa-plate wa-brief is-${entry.id}`}
-                  aria-labelledby={`wa-brief-${entry.id}`}
-                >
-                  <p className="wa-code">{entry.code}</p>
-                  <h3 id={`wa-brief-${entry.id}`}>{entry.name}</h3>
-                  {entry.id === "rikuei" ? (
-                    <span className="wa-signals" aria-hidden="true">
-                      {RIKUEI_KEYS.map((key) => (
-                        <img
-                          key={key}
-                          src={`/manager-${key}-thumb.jpeg`}
-                          {...managerThumbnail(key)}
-                          alt=""
-                          width={44}
-                          height={44}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ))}
-                    </span>
-                  ) : null}
-                  {entry.id === "code" ? (
-                    <span className="wa-id-photo" aria-hidden="true">
+    <div className="wa-inner">
+      <ChapterOpener no="05" />
+      <AnnexHeading id="world-brief-title" title="世界と組織" />
+      <div className="wa-brief-stage">
+        <WorldBriefArt />
+        <div className="wa-brief-documents">
+          <div className="wa-brief-grid">
+            {WORLD_BRIEF.map((entry) => (
+              <article
+                key={entry.id}
+                className={`wa-plate wa-brief is-${entry.id}`}
+                aria-labelledby={`wa-brief-${entry.id}`}
+              >
+                <p className="wa-code">{entry.code}</p>
+                <h3 id={`wa-brief-${entry.id}`}>{entry.name}</h3>
+                {entry.id === "rikuei" ? (
+                  <span className="wa-signals" aria-hidden="true">
+                    {RIKUEI_KEYS.map((key) => (
                       <img
-                        src="/character-james-20260829.webp"
-                        {...portraitThumbnail("/character-james-20260829.webp")}
+                        key={key}
+                        src={`/manager-${key}-thumb.jpeg`}
+                        {...managerThumbnail(key)}
                         alt=""
-                        width={720}
-                        height={1165}
+                        width={44}
+                        height={44}
                         loading="lazy"
                         decoding="async"
                       />
-                    </span>
-                  ) : null}
-                  {entry.body.map((paragraph) => (
-                    <p key={paragraph} className="wa-prose">
-                      {paragraph}
-                    </p>
-                  ))}
-                  {entry.mission ? (
-                    <p className="wa-mission">
-                      <b lang="en">{entry.mission.code}</b>
-                      <span>派遣時の任務</span>
-                      <span>{entry.mission.text}</span>
-                    </p>
-                  ) : null}
-                  <Lines lines={entry.said} />
-                  {entry.hud?.length ? (
-                    <ul className="wa-readout" lang="en">
-                      {entry.hud.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  {entry.docs?.map((doc) => (
-                    <details key={doc.office} className="wa-doc" aria-label={doc.office}>
-                      <summary>
-                        <span className="wa-doc-office">{doc.office}</span>
-                        <i aria-hidden="true" />
-                      </summary>
-                      <p className="wa-doc-subject">
-                        <b>件名</b>
-                        <span>{doc.subject}</span>
-                      </p>
-                      <AnnexQuote text={doc.excerpt} />
-                      <p className="wa-doc-verdict">
-                        <b>最終判定</b>
-                        <span>{doc.verdict}</span>
-                      </p>
-                    </details>
-                  ))}
-                </article>
-              ))}
-            </div>
-            <section className="wa-locations" aria-labelledby="wa-locations-title">
-              <h3 id="wa-locations-title">舞台</h3>
-              <ol>
-                {WORLD_LOCATIONS.map((place, index) => (
-                  <li key={place.name} id={`wa-location-${place.name}`}>
-                    <span className="wa-index" aria-hidden="true">
-                      {pad(index + 1)}
-                    </span>
-                    <b>{place.name}</b>
-                    <p>{place.text}</p>
-                  </li>
+                    ))}
+                  </span>
+                ) : null}
+                {entry.id === "code" ? (
+                  <span className="wa-id-photo" aria-hidden="true">
+                    <img
+                      src="/character-james-20260829.webp"
+                      {...portraitThumbnail("/character-james-20260829.webp")}
+                      alt=""
+                      width={720}
+                      height={1165}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                ) : null}
+                {entry.body.map((paragraph) => (
+                  <p key={paragraph} className="wa-prose">
+                    {paragraph}
+                  </p>
                 ))}
-              </ol>
-            </section>
+                {entry.mission ? (
+                  <p className="wa-mission">
+                    <b lang="en">{entry.mission.code}</b>
+                    <span>派遣時の任務</span>
+                    <span>{entry.mission.text}</span>
+                  </p>
+                ) : null}
+                <Lines lines={entry.said} />
+                {entry.hud?.length ? (
+                  <ul className="wa-readout" lang="en">
+                    {entry.hud.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {entry.docs?.map((doc) => (
+                  <details key={doc.office} className="wa-doc" aria-label={doc.office}>
+                    <summary>
+                      <span className="wa-doc-office">{doc.office}</span>
+                      <i aria-hidden="true" />
+                    </summary>
+                    <p className="wa-doc-subject">
+                      <b>件名</b>
+                      <span>{doc.subject}</span>
+                    </p>
+                    <AnnexQuote text={doc.excerpt} />
+                    <p className="wa-doc-verdict">
+                      <b>最終判定</b>
+                      <span>{doc.verdict}</span>
+                    </p>
+                  </details>
+                ))}
+              </article>
+            ))}
           </div>
+          <section className="wa-locations" aria-labelledby="wa-locations-title">
+            <h3 id="wa-locations-title">舞台</h3>
+            <ol>
+              {WORLD_LOCATIONS.map((place, index) => (
+                <li key={place.name} id={`wa-location-${place.name}`}>
+                  <span className="wa-index" aria-hidden="true">
+                    {pad(index + 1)}
+                  </span>
+                  <b>{place.name}</b>
+                  <p>{place.text}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -658,162 +638,205 @@ function QuoteRail({ children }: { children: ReactNode }) {
 }
 
 /** 06 ARCHIVE LOG: episode synopses and source dialogue, then the glossary. */
-function ArchiveLog() {
+export function EpisodeNotes() {
   return (
-    <>
-      <section
-        id="episode-notes"
-        className="world-annex is-chapter"
-        aria-labelledby="episode-notes-title"
-      >
-        <div className="wa-inner">
-          <ChapterOpener no="06" />
-          <AnnexHeading id="episode-notes-title" no="06.1" title="エピソードの記録" />
-          <p className="wa-prose">EP.01〜03の展開を含みます。</p>
-          <WorldEpisodeIndex />
-          <ol className="wa-episodes">
-            {WORLD_EPISODE_NOTES.map((episode) => {
-              const art = EPISODE_ART[episode.no];
-              return (
-                <li
-                  key={episode.no}
-                  id={`wa-episode-${episode.no}`}
-                  className={`wa-plate wa-episode is-ep-${episode.no}`}
+    <div className="wa-inner">
+      <ChapterOpener no="06" />
+      <AnnexHeading id="episode-notes-title" no="06.1" title="エピソードの記録" />
+      <p className="wa-prose">EP.01〜03の展開を含みます。</p>
+      <WorldEpisodeIndex />
+      <ol className="wa-episodes">
+        {WORLD_EPISODE_NOTES.map((episode) => {
+          const art = EPISODE_ART[episode.no];
+          return (
+            <li
+              key={episode.no}
+              id={`wa-episode-${episode.no}`}
+              className={`wa-plate wa-episode is-ep-${episode.no}`}
+            >
+              {art ? (
+                <span
+                  className="wa-episode-art"
+                  aria-hidden="true"
+                  style={{ "--pos": art.pos } as CSSProperties}
                 >
-                  {art ? (
-                    <span
-                      className="wa-episode-art"
-                      aria-hidden="true"
-                      style={{ "--pos": art.pos } as CSSProperties}
-                    >
-                      <img
-                        src={art.src}
-                        {...episodeThumbnail(art.src)}
-                        alt=""
-                        width={art.width}
-                        height={art.height}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </span>
-                  ) : null}
-                  <p className="wa-episode-head">
-                    <span>
-                      EPISODE <b>{episode.no}</b>
-                    </span>
-                    <strong lang="en">{episode.title}</strong>
-                    <small>
-                      <i lang="en" className="visually-hidden">
-                        STAGE
-                      </i>
-                      {episode.stage}
-                    </small>
-                  </p>
-                  {/* The notes and the lines as one column beside the art on
+                  <img
+                    src={art.src}
+                    {...episodeThumbnail(art.src)}
+                    alt=""
+                    width={art.width}
+                    height={art.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+              ) : null}
+              <p className="wa-episode-head">
+                <span>
+                  EPISODE <b>{episode.no}</b>
+                </span>
+                <strong lang="en">{episode.title}</strong>
+                <small>
+                  <i lang="en" className="visually-hidden">
+                    STAGE
+                  </i>
+                  {episode.stage}
+                </small>
+              </p>
+              {/* The notes and the lines as one column beside the art on
                       wide screens; below 900px both wrappers are
                       display: contents (the plate's own stack). */}
-                  <div className="wa-episode-body">
-                    <div className="wa-episode-synopsis">
-                      {episode.synopsis.map((paragraph) => (
-                        <p key={paragraph} className="wa-prose">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                    <div className="wa-episode-lines">
-                      <Lines lines={episode.lines} />
-                    </div>
-                    <WorldRecordContext episodeNo={episode.no} />
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </section>
-
-      <section id="glossary" className="world-annex" aria-labelledby="glossary-title">
-        <div className="wa-inner">
-          <AnnexHeading id="glossary-title" no="06.2" title="用語集" />
-          {/* The terms as a register (numbered from styles-world-zenith.css),
-              each a jump to its entry below. */}
-          <nav className="wa-term-index" aria-label="用語の索引">
-            <ol>
-              {WORLD_GLOSSARY.map((entry) => (
-                <li key={entry.term}>
-                  <a href={`#wa-term-${entry.term}`}>{entry.term}</a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-          <dl className="wa-glossary">
-            {WORLD_GLOSSARY.map((entry) => (
-              <div key={entry.term} id={`wa-term-${entry.term}`}>
-                <dt>{entry.term}</dt>
-                <dd>
-                  {entry.body.map((paragraph) => (
+              <div className="wa-episode-body">
+                <div className="wa-episode-synopsis">
+                  {episode.synopsis.map((paragraph) => (
                     <p key={paragraph} className="wa-prose">
                       {paragraph}
                     </p>
                   ))}
-                  <Lines lines={entry.said} />
-                </dd>
+                </div>
+                <div className="wa-episode-lines">
+                  <Lines lines={episode.lines} />
+                </div>
+                <WorldRecordContext episodeNo={episode.no} />
               </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-
-      <section id="quotes" className="world-annex wa-quotes" aria-labelledby="quotes-title">
-        <div className="wa-inner">
-          <AnnexHeading id="quotes-title" no="06.3" title="名台詞" />
-          {/* A snap rail on phones (the region scrolls sideways; a vertical
-              swipe still scrolls the page), a plate-less log from 700px. */}
-          <QuoteRail>
-            <ol className="wa-quote-band">
-              {WORLD_QUOTES.map((quote) => (
-                <li key={quote.text}>
-                  <AnnexQuote text={quote.text} by={quote.by} transcribed />
-                </li>
-              ))}
-            </ol>
-          </QuoteRail>
-        </div>
-      </section>
-    </>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }
 
-/* world-home.tsx keeps this hook byte for byte (its SHA-256 is pinned);
-   rendering nothing keeps 02 EIGHT RIDERS and 03 NEW RECORDS back to back. */
-export function WorldAnnexRiders() {
-  return null;
+// Only previously viewed static term cards can skip a later off-screen paint.
+// Fresh DOM (including Back arrivals) starts with its complete natural layout.
+function useMeasuredGlossaryCards() {
+  const ref = useRef<HTMLDListElement>(null);
+  useEffect(() => {
+    const root = ref.current;
+    if (
+      !root ||
+      typeof IntersectionObserver === "undefined" ||
+      typeof ResizeObserver === "undefined" ||
+      !CSS.supports("content-visibility", "auto") ||
+      !CSS.supports("contain-intrinsic-block-size", "auto 1px")
+    )
+      return;
+    const cards = Array.from(root.children) as HTMLElement[];
+    let observer: IntersectionObserver | undefined;
+    let width = -1;
+    const clear = () => {
+      observer?.disconnect();
+      observer = undefined;
+      for (const card of cards) {
+        delete card.dataset.readingMeasured;
+        card.style.removeProperty("--reading-block-size");
+      }
+    };
+    const refresh = () => {
+      clear();
+      // Multi-column fragmentation and fonts in flight retain normal layout.
+      if (window.matchMedia("(min-width: 1100px)").matches || document.fonts?.status === "loading")
+        return;
+      const current = new IntersectionObserver((entries) => {
+        if (observer !== current) return;
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const card = entry.target as HTMLElement;
+          const style = getComputedStyle(card);
+          // IntersectionObserver supplies the actual border box. The intrinsic
+          // fallback is its content box, so padding and borders are not doubled.
+          const block =
+            entry.boundingClientRect.height -
+            parseFloat(style.paddingTop) -
+            parseFloat(style.paddingBottom) -
+            parseFloat(style.borderTopWidth) -
+            parseFloat(style.borderBottomWidth);
+          if (!Number.isFinite(block) || block <= 0) continue;
+          card.style.setProperty("--reading-block-size", `${block}px`);
+          card.dataset.readingMeasured = "true";
+          current.unobserve(card);
+        }
+      });
+      observer = current;
+      cards.forEach((card) => current.observe(card));
+    };
+    const resize = new ResizeObserver(([entry]) => {
+      if (!entry || entry.contentRect.width === width) return;
+      width = entry.contentRect.width;
+      refresh();
+    });
+    resize.observe(root);
+    // A loaded font can change a previously measured paragraph without changing
+    // the register's width. Remove every cached size before measuring again.
+    document.fonts?.addEventListener("loading", clear);
+    document.fonts?.addEventListener("loadingdone", refresh);
+    document.fonts?.addEventListener("loadingerror", refresh);
+    // Crossing into the two-column layout can keep the same inner width.
+    const columns = window.matchMedia("(min-width: 1100px)");
+    columns.addEventListener("change", refresh);
+    refresh();
+    return () => {
+      clear();
+      resize.disconnect();
+      columns.removeEventListener("change", refresh);
+      document.fonts?.removeEventListener("loading", clear);
+      document.fonts?.removeEventListener("loadingdone", refresh);
+      document.fonts?.removeEventListener("loadingerror", refresh);
+    };
+  }, []);
+  return ref;
 }
 
-/** After 03 RECORDS: the contents strip, then chapters 04-06. */
-export function WorldAnnexRecords() {
+export function Glossary() {
+  const register = useMeasuredGlossaryCards();
   return (
-    <>
-      <nav className="wa-contents" aria-labelledby="wa-contents-title">
-        <div className="wa-contents-inner">
-          <h2 id="wa-contents-title" className="visually-hidden">
-            資料目次
-          </h2>
-          <ol>
-            {ANNEX_CONTENTS.map(({ href, code, label }) => (
-              <li key={href}>
-                <a href={href}>
-                  <small aria-hidden="true">{code}</small>
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </div>
+    <div className="wa-inner">
+      <AnnexHeading id="glossary-title" no="06.2" title="用語集" />
+      {/* The terms as a register (numbered from styles-world-zenith.css),
+              each a jump to its entry below. */}
+      <nav className="wa-term-index" aria-label="用語の索引">
+        <ol>
+          {WORLD_GLOSSARY.map((entry) => (
+            <li key={entry.term}>
+              <a href={`#wa-term-${entry.term}`}>{entry.term}</a>
+            </li>
+          ))}
+        </ol>
       </nav>
-      <CastFiles />
-      <WorldFiles />
-      <ArchiveLog />
-    </>
+      <dl ref={register} className="wa-glossary">
+        {WORLD_GLOSSARY.map((entry) => (
+          <div key={entry.term} id={`wa-term-${entry.term}`}>
+            <dt>{entry.term}</dt>
+            <dd>
+              {entry.body.map((paragraph) => (
+                <p key={paragraph} className="wa-prose">
+                  {paragraph}
+                </p>
+              ))}
+              <Lines lines={entry.said} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+export function Quotes() {
+  return (
+    <div className="wa-inner">
+      <AnnexHeading id="quotes-title" no="06.3" title="名台詞" />
+      {/* A snap rail on phones (the region scrolls sideways; a vertical
+              swipe still scrolls the page), a plate-less log from 700px. */}
+      <QuoteRail>
+        <ol className="wa-quote-band">
+          {WORLD_QUOTES.map((quote) => (
+            <li key={quote.text}>
+              <AnnexQuote text={quote.text} by={quote.by} transcribed />
+            </li>
+          ))}
+        </ol>
+      </QuoteRail>
+    </div>
   );
 }

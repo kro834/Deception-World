@@ -1,0 +1,181 @@
+.dream-research-notes {
+  margin: 2rem 0;
+  padding: clamp(14px, 3vw, 32px);
+  border: 1px solid #a9967055;
+  background: #171711;
+  color: #eee6d5;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.dream-research-notes h2,
+.dream-research-notes h3 {
+  color: inherit;
+  line-height: 1.5;
+  margin: 1.5rem 0 0.75rem;
+}
+.dream-research-notes h2 {
+  margin-top: 0;
+}
+.dream-research-notes p {
+  font-size: 1rem;
+  line-height: 1.9;
+}
+.dream-research-notes button,
+.dream-research-notes select,
+.dream-research-notes textarea {
+  font: inherit;
+  color: inherit;
+  background: #29271f;
+  border: 1px solid #bba77870;
+  border-radius: 4px;
+  padding: 10px;
+  max-width: 100%;
+  min-height: 44px;
+}
+.dream-research-notes button {
+  white-space: normal;
+  text-align: left;
+  cursor: pointer;
+  margin: 4px 8px 4px 0;
+}
+.dream-research-notes button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.dream-research-notes :is(button, a, select, textarea, summary):focus-visible {
+  outline: 2px solid #edcf84;
+  outline-offset: 3px;
+}
+.dream-research-notes label {
+  display: block;
+  margin-top: 1rem;
+}
+.dream-research-notes select,
+.dream-research-notes textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.dream-research-notes textarea {
+  resize: vertical;
+}
+.dream-research-notes blockquote {
+  margin: 12px 0;
+  padding: 0 0 0 14px;
+  border-left: 2px solid #bda677;
+  white-space: pre-wrap;
+  font-size: 1rem;
+  line-height: 1.9;
+}
+.dream-research-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.dream-research-pair > div {
+  min-width: 0;
+}
+.dream-research-quotes,
+.dream-research-saved {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dream-research-quotes > li,
+.dream-research-saved > li {
+  padding: 18px 0;
+  border-bottom: 1px solid #bba77840;
+}
+.dream-research-thought {
+  white-space: pre-wrap;
+}
+.dream-research-notes a {
+  color: #f1d397;
+  margin-right: 12px;
+}
+.dream-research-notes summary {
+  min-height: 44px;
+  cursor: pointer;
+  padding-block: 8px;
+}
+.dream-research-notes [role="status"] {
+  min-height: 1.9em;
+}
+@media (max-width: 600px) {
+  .dream-research-pair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .dream-research-notes {
+    margin-inline: 0;
+  }
+  .dream-research-notes button {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+.dream-research-floating {
+  position: fixed;
+  z-index: 1200;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  color: #211d14;
+  background: #e5d4a6;
+  box-shadow: 0 4px 24px #0008;
+  border: 1px solid #bba778;
+  border-radius: 6px;
+  padding: 8px;
+  font: 16px/1.6 sans-serif;
+  overflow-wrap: anywhere;
+}
+.dream-research-floating button {
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  padding: 10px;
+  min-height: 44px;
+  border: 1px solid #726544;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+.dream-research-floating p {
+  margin: 0 0 8px;
+  font: inherit;
+}
+.dream-research-floating a {
+  color: #3d3217;
+  text-decoration: underline;
+}
+.dream-research-floating :is(button, a):focus-visible {
+  outline: 2px solid #211d14;
+  outline-offset: 2px;
+}
+/* The site's default content guard must allow the canonical reading text to be quoted. */
+body p[data-dream-reading-paragraph],
+body p[data-dream-reading-paragraph] *,
+body .dream-research-notes textarea {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+.dream-research-source {
+  font-size: 0.9rem !important;
+  color: #d9c8a4;
+}
+.dream-research-unresolved {
+  padding: 0.6rem;
+  border-left: 2px solid #d9c8a4;
+  font-size: 0.9rem !important;
+}
+.dream-research-floating {
+  white-space: normal;
+}
+dialog .dream-research-floating {
+  z-index: 1300;
+}
