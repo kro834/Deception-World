@@ -1556,22 +1556,6 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-status {
   letter-spacing: 0.04em;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-footer {
-  display: grid;
-  gap: 14px;
-  justify-items: center;
-  max-width: 930px;
-  margin: clamp(26px, 4vw, 44px) auto 0;
-  text-align: center;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-footer > p {
-  margin: 0;
-  color: #b6c6ce;
-  font: 400 14px / 1.8 var(--dx-body);
-  text-wrap: pretty;
-}
-
 html[data-family="special"] body .rxs-page.ffs-page .ffs-assembly-controls {
   display: flex;
   flex-wrap: wrap;
@@ -1654,19 +1638,6 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-panel {
   width: 100%;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame {
-  display: grid;
-  gap: clamp(16px, 2vw, 20px);
-  box-sizing: border-box;
-  width: 100%;
-  padding: clamp(18px, 2.4vw, 24px) clamp(16px, 2.6vw, 26px) clamp(16px, 2.2vw, 22px);
-  border: 1px solid color-mix(in srgb, var(--ffs-accent) 32%, transparent);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--ffs-accent) 9%, transparent), transparent 62%),
-    rgb(5 9 16 / 82%);
-  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
-}
-
 /* The order of the overwrites: each form's bar lights up to the chosen one. */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route {
   display: grid;
@@ -1731,15 +1702,6 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > .ffs-not
   font-size: 12px;
 }
 
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls {
-  justify-content: flex-start;
-}
-
-html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls > button {
-  border-color: color-mix(in srgb, var(--ffs-accent) 60%, transparent);
-  background: color-mix(in srgb, var(--ffs-accent) 16%, transparent);
-}
-
 @media (prefers-reduced-motion: no-preference) {
   html[data-family="special"]:not([data-world-effects="economy"])
     body
@@ -1763,11 +1725,6 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-ass
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
     font-size: 11px;
     word-break: keep-all;
-  }
-
-  html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls {
-    display: grid;
-    justify-content: stretch;
   }
 
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-frame > .ffs-assembly-controls > :is(a, button) {

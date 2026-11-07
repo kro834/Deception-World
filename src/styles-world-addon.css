@@ -356,23 +356,6 @@ br.tab-br {
 .dante-denied-dialog {
   outline: none !important;
 }
-.dante-denied-inner.is-slam {
-  animation: danteNoSlam 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dante-no-stack {
-  position: relative;
-}
-.dante-no-ghost {
-  position: absolute;
-  inset: 0;
-  opacity: 0.28;
-  pointer-events: none;
-}
-.dante-no-ghost.is-offset {
-  transform: translate(10px, -6px);
-  color: rgba(80, 180, 255, 0.45);
-}
 
 .dossier-jump {
   display: flex;
@@ -430,14 +413,6 @@ br.tab-br {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.18em;
-}
-
-.rider-form-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  width: min(1100px, calc(100% - 40px));
-  margin: 28px auto 0;
 }
 
 .form-pickup {
@@ -773,17 +748,6 @@ br.tab-br {
   }
 }
 
-@keyframes danteNoSlam {
-  0% {
-    transform: scale(1.18);
-    filter: contrast(1.6);
-  }
-  100% {
-    transform: none;
-    filter: none;
-  }
-}
-
 @media (max-width: 840px) {
   header.topbar {
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -945,7 +909,6 @@ br.tab-br {
   .form-pickup-layout,
   .form-pickup-stats,
   .form-pickup-gallery,
-  .rider-form-gallery,
   .rider-archive-identity-records.has-nightmare {
     grid-template-columns: 1fr;
   }

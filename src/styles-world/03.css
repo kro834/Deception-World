@@ -103,11 +103,7 @@
   box-shadow: 0 0 10px var(--blue);
   animation: posterCornerPulse 3.4s ease-in-out infinite;
 }
-
-.corner-tl::before { top: -2px; left: -2px; }
-.corner-tr::before { top: -2px; right: -2px; animation-delay: 0.28s; }
 .corner-bl::before { bottom: -2px; left: -2px; animation-delay: 0.56s; }
-.corner-br::before { right: -2px; bottom: -2px; animation-delay: 0.84s; }
 
 @media (prefers-reduced-motion: reduce) {
   .poster-holo-ring::before,
@@ -127,11 +123,7 @@
   0%, 100% { opacity: 0.35; scale: 0.8; }
   50% { opacity: 1; scale: 1.15; }
 }
-
-.corner-tl { top: -11px; left: -11px; border-top: 1px solid; border-left: 1px solid; }
-.corner-tr { top: -11px; right: -11px; border-top: 1px solid; border-right: 1px solid; }
 .corner-bl { bottom: -11px; left: -11px; border-bottom: 1px solid; border-left: 1px solid; }
-.corner-br { right: -11px; bottom: -11px; border-right: 1px solid; border-bottom: 1px solid; }
 
 .orbit {
   position: absolute;
@@ -154,13 +146,6 @@
 
 .orbit::before { top: 14%; left: 14%; width: 4px; height: 4px; }
 .orbit::after { right: 6%; bottom: 32%; width: 2px; height: 2px; }
-
-.orbit-two {
-  width: min(57vw, 700px);
-  border-color: rgba(215, 171, 81, 0.08);
-  animation-duration: 34s;
-  animation-direction: reverse;
-}
 
 .poster-index {
   position: absolute;
@@ -477,8 +462,7 @@
   translate: 0 var(--motion-shift);
 }
 
-[data-scroll-motion="profile"][data-motion-active="true"] .manager-portrait-frame > img,
-[data-scroll-motion="profile"][data-motion-active="true"] .rider-archive-portrait > img {
+[data-scroll-motion="profile"][data-motion-active="true"] .manager-portrait-frame > img {
   animation: none;
   transform: scale(var(--motion-image-scale, 1.018));
 }

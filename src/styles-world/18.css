@@ -20,8 +20,7 @@
    Use one shared measurement for the header and the first content row so the
    portrait can never begin underneath the chrome. */
 @media (max-width: 760px), (orientation: landscape) and (max-height: 600px) and (max-width: 1000px) {
-  .manager-page,
-  .rider-archive-page {
+  .manager-page {
     --detail-header-height: max(68px, calc(58px + env(safe-area-inset-top, 0px)));
   }
 
@@ -37,8 +36,7 @@
 }
 
 @media (orientation: landscape) and (max-height: 520px) and (max-width: 1000px) {
-  .manager-portrait-frame,
-  .rider-archive-portrait {
+  .manager-portrait-frame {
     width: auto;
     max-width: min(100%, 420px);
     height: min(72vw, calc(100dvh - var(--detail-header-height, 68px) - 20px));
@@ -65,8 +63,7 @@ html[data-android-renderer] {
 
 html[data-android-renderer] body,
 html[data-android-renderer] .site-shell,
-html[data-android-renderer] .manager-page,
-html[data-android-renderer] .rider-archive-page {
+html[data-android-renderer] .manager-page {
   min-height: 100%;
   min-height: 100svh;
 }
@@ -95,7 +92,6 @@ html[data-android-renderer] .ambient {
 html[data-android-renderer] .ambient-orb,
 html[data-android-renderer] .poster-image,
 html[data-android-renderer] .poster-sheen,
-html[data-android-renderer] .rider-archive-glow,
 html[data-android-renderer] .world-column-orbit,
 html[data-android-renderer] .world-column-orbit-glow,
 html[data-android-renderer] .liquid-rail-surface,
@@ -121,10 +117,7 @@ html[data-android-renderer] .rider-nightmare-dialog-panel {
 }
 
 html[data-android-renderer] .poster-image img,
-html[data-android-renderer] .manager-portrait-frame img,
-html[data-android-renderer] .rider-image,
-html[data-android-renderer] .rider-archive-portrait img,
-html[data-android-renderer] .rider-nightmare-image img {
+html[data-android-renderer] .manager-portrait-frame img {
   image-rendering: auto;
   backface-visibility: hidden;
 }
@@ -162,7 +155,6 @@ html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="medi
   html[data-android-renderer] .poster-shuffle,
   html[data-android-renderer] .poster-reset,
   html[data-android-renderer] .poster-lock,
-  html[data-android-renderer] .motion-toggle,
   html[data-android-renderer] .episode-controls button {
     min-height: 48px;
   }
@@ -177,13 +169,6 @@ html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="medi
   html[data-android-renderer] .rider-nightmare-dialog-panel {
     max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     overscroll-behavior: contain;
-  }
-
-  html[data-android-renderer] .dialog-inner {
-    padding-top: max(60px, calc(48px + env(safe-area-inset-top)));
-    padding-right: max(24px, env(safe-area-inset-right));
-    padding-bottom: max(32px, env(safe-area-inset-bottom));
-    padding-left: max(24px, env(safe-area-inset-left));
   }
 
   html[data-android-renderer] .poster-dialog-close,
@@ -204,7 +189,6 @@ html[data-android-renderer] [data-motion-active="true"] [data-motion-layer="medi
   html[data-android-renderer] .poster-shuffle,
   html[data-android-renderer] .poster-reset,
   html[data-android-renderer] .poster-lock,
-  html[data-android-renderer] .motion-toggle,
   html[data-android-renderer] .episode-controls button {
     min-height: 48px;
   }
@@ -340,16 +324,6 @@ html::-webkit-scrollbar-thumb:hover {
 
   .world-column-orbit-trigger:hover i {
     rotate: 90deg;
-  }
-
-  .liquid-glass-action.rider-profile-link:hover {
-    border-color: color-mix(in srgb, var(--rider-tone) 58%, transparent);
-    background: linear-gradient(90deg, color-mix(in srgb, var(--rider-tone) 13%, transparent), transparent);
-    scale: 1.014;
-  }
-
-  .liquid-glass-action.rider-profile-link:hover svg {
-    transform: translateX(4px);
   }
 
   .poster-shuffle:hover,

@@ -198,7 +198,6 @@ html[data-page-scrolled] .dream-site-header {
 }
 
 .dream-back-link:focus-visible,
-.dream-scroll-cue:focus-visible,
 .dream-poster-thumbnails button:focus-visible,
 .dream-character-grid button:focus-visible,
 .dream-dolminence-grid button:focus-visible,
@@ -288,138 +287,6 @@ html[data-page-scrolled] .dream-site-header {
     linear-gradient(155deg, #081124 0%, #030612 44%, #070817 100%);
 }
 
-.dream-aurora,
-.dream-light-gate,
-.dream-dream-grid,
-.dream-star-field {
-  position: absolute;
-  pointer-events: none;
-}
-
-.dream-aurora {
-  width: min(84vw, 1120px);
-  aspect-ratio: 1.9;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.48;
-  mix-blend-mode: screen;
-  will-change: transform;
-}
-
-.dream-aurora-blue {
-  top: 2%;
-  left: -18%;
-  background: conic-gradient(
-    from 210deg,
-    transparent,
-    rgba(46, 111, 255, 0.5),
-    rgba(118, 223, 255, 0.2),
-    transparent 62%
-  );
-  animation: dream-aurora-blue 14s ease-in-out infinite alternate;
-}
-
-.dream-aurora-gold {
-  right: -26%;
-  bottom: 4%;
-  background: conic-gradient(
-    from 35deg,
-    transparent,
-    rgba(255, 138, 29, 0.12),
-    rgba(255, 207, 107, 0.34),
-    transparent 58%
-  );
-  animation: dream-aurora-gold 17s ease-in-out infinite alternate;
-}
-
-.dream-light-gate {
-  top: 50%;
-  left: 64%;
-  width: min(42vw, 590px);
-  aspect-ratio: 1;
-  border: 1px solid rgba(177, 211, 255, 0.28);
-  border-radius: 50%;
-  box-shadow:
-    0 0 60px rgba(93, 151, 255, 0.14),
-    inset 0 0 70px rgba(255, 184, 83, 0.08),
-    inset 0 0 0 2.8vw rgba(87, 139, 255, 0.025),
-    inset 0 0 0 5.6vw rgba(255, 187, 82, 0.018);
-  transform: translate(-50%, -50%) perspective(720px) rotateX(66deg) rotateZ(-12deg);
-  animation: dream-gate-pulse 8s ease-in-out infinite;
-}
-
-.dream-light-gate::before,
-.dream-light-gate::after {
-  content: "";
-  position: absolute;
-  border: 1px solid rgba(132, 182, 255, 0.16);
-  border-radius: inherit;
-}
-
-.dream-light-gate::before {
-  inset: 11%;
-}
-
-.dream-light-gate::after {
-  inset: 24%;
-  border-color: rgba(255, 188, 83, 0.18);
-}
-
-.dream-dream-grid {
-  inset: 0;
-  opacity: 0.16;
-  background-image:
-    linear-gradient(rgba(133, 177, 255, 0.18) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(133, 177, 255, 0.18) 1px, transparent 1px);
-  background-size: 72px 72px;
-  -webkit-mask-image: radial-gradient(ellipse at 58% 54%, black, transparent 72%);
-  mask-image: radial-gradient(ellipse at 58% 54%, black, transparent 72%);
-  transform: perspective(680px) rotateX(62deg) scale(1.5) translateY(26%);
-  transform-origin: center bottom;
-}
-
-.dream-star-field {
-  --dream-star-from-x: -2%;
-  --dream-star-from-y: -1.5%;
-  --dream-star-to-x: 4%;
-  --dream-star-to-y: 3%;
-  --dream-star-rotation: 0deg;
-  --dream-star-scale: 1;
-  inset: -10%;
-  opacity: 0.48;
-  background-image:
-    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.4px),
-    radial-gradient(circle, rgba(116, 180, 255, 0.86) 0 1px, transparent 1.3px),
-    radial-gradient(circle, rgba(255, 190, 89, 0.72) 0 1px, transparent 1.2px);
-  background-position:
-    0 0,
-    37px 71px,
-    93px 18px;
-  background-size:
-    131px 139px,
-    157px 173px,
-    191px 181px;
-  transform: translate3d(var(--dream-star-from-x), var(--dream-star-from-y), 0)
-    rotate(var(--dream-star-rotation)) scale(var(--dream-star-scale));
-  transform-origin: center;
-  will-change: transform;
-}
-
-.dream-star-field-near {
-  animation: dream-star-drift 22s ease-in-out infinite alternate;
-}
-
-.dream-star-field-far {
-  --dream-star-from-x: 3%;
-  --dream-star-from-y: -2%;
-  --dream-star-to-x: -4%;
-  --dream-star-to-y: 3%;
-  --dream-star-rotation: 4deg;
-  --dream-star-scale: 1.18;
-  opacity: 0.22;
-  animation: dream-star-drift 36s ease-in-out infinite alternate;
-}
-
 .dream-hero-vignette {
   z-index: -3;
   background:
@@ -450,30 +317,6 @@ html[data-page-scrolled] .dream-site-header {
   border-radius: 50%;
   background: #dbe8ff;
   box-shadow: 0 0 20px 4px rgba(118, 171, 255, 0.72);
-}
-
-.dream-orbit-a {
-  top: 12%;
-  right: -12vw;
-  width: min(62vw, 780px);
-  aspect-ratio: 1;
-  animation: dream-orbit 28s linear infinite;
-}
-
-.dream-orbit-b {
-  top: 27%;
-  right: -2vw;
-  width: min(42vw, 560px);
-  aspect-ratio: 1;
-  border-color: rgba(255, 177, 59, 0.2);
-  transform: rotate(32deg);
-  animation: dream-orbit-reverse 23s linear infinite;
-}
-
-.dream-orbit-b::before,
-.dream-orbit-b::after {
-  background: #ffd690;
-  box-shadow: 0 0 20px 4px rgba(255, 164, 45, 0.6);
 }
 
 .dream-hero-copy {
@@ -553,37 +396,6 @@ html[data-page-scrolled] .dream-site-header {
   color: rgba(234, 240, 255, 0.7);
   font-size: 13px;
   letter-spacing: 0.12em;
-}
-
-.dream-scroll-cue {
-  position: absolute;
-  z-index: 4;
-  right: clamp(24px, 6vw, 96px);
-  bottom: clamp(40px, 7vh, 78px);
-  display: grid;
-  gap: 12px;
-  color: rgba(235, 242, 255, 0.74);
-  text-decoration: none;
-  font-family: "Cinzel", serif;
-  font-size: 9px;
-  letter-spacing: 0.28em;
-}
-
-.dream-scroll-cue i {
-  display: block;
-  width: 100%;
-  height: 1px;
-  background: rgba(199, 218, 255, 0.3);
-  overflow: hidden;
-}
-
-.dream-scroll-cue i::after {
-  content: "";
-  display: block;
-  width: 45%;
-  height: 100%;
-  background: linear-gradient(90deg, var(--dream-blue), var(--dream-gold));
-  animation: dream-line 2.8s ease-in-out infinite;
 }
 
 .dream-section {
@@ -1609,36 +1421,6 @@ html[data-page-scrolled] .dream-site-header {
   letter-spacing: 0.1em;
 }
 
-@keyframes dream-aurora-blue {
-  from {
-    transform: translate3d(-3%, -2%, 0) rotate(-5deg) scale(0.96);
-  }
-  to {
-    transform: translate3d(10%, 8%, 0) rotate(6deg) scale(1.08);
-  }
-}
-
-@keyframes dream-aurora-gold {
-  from {
-    transform: translate3d(4%, 5%, 0) rotate(4deg) scale(0.95);
-  }
-  to {
-    transform: translate3d(-10%, -7%, 0) rotate(-7deg) scale(1.1);
-  }
-}
-
-@keyframes dream-gate-pulse {
-  0%,
-  100% {
-    opacity: 0.58;
-    filter: brightness(0.92);
-  }
-  50% {
-    opacity: 0.9;
-    filter: brightness(1.18);
-  }
-}
-
 @keyframes dream-star-drift {
   from {
     transform: translate3d(var(--dream-star-from-x), var(--dream-star-from-y), 0)
@@ -1653,25 +1435,6 @@ html[data-page-scrolled] .dream-site-header {
 @keyframes dream-orbit {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes dream-orbit-reverse {
-  from {
-    transform: rotate(32deg);
-  }
-  to {
-    transform: rotate(-328deg);
-  }
-}
-
-@keyframes dream-line {
-  0%,
-  100% {
-    transform: translateX(-115%);
-  }
-  52% {
-    transform: translateX(245%);
   }
 }
 
@@ -1980,39 +1743,10 @@ html[data-page-scrolled] .dream-site-header {
     letter-spacing: 0.04em;
   }
 
-  .dream-aurora {
-    width: 142vw;
-    filter: blur(54px);
-    opacity: 0.4;
-  }
-
-  .dream-light-gate {
-    top: 39%;
-    left: 63%;
-    width: 94vw;
-  }
-
-  .dream-dream-grid {
-    background-size: 52px 52px;
-    transform: perspective(560px) rotateX(65deg) scale(1.68) translateY(30%);
-  }
-
   .dream-hero-vignette {
     background:
       linear-gradient(180deg, rgba(2, 4, 10, 0.34), transparent 28%, rgba(2, 4, 10, 0.95) 88%),
       linear-gradient(90deg, rgba(2, 4, 10, 0.5), transparent);
-  }
-
-  .dream-orbit-a {
-    top: 18%;
-    right: -46vw;
-    width: 112vw;
-  }
-
-  .dream-orbit-b {
-    top: 28%;
-    right: -20vw;
-    width: 80vw;
   }
 
   .dream-hero-copy {
@@ -2070,10 +1804,6 @@ html[data-page-scrolled] .dream-site-header {
 
   .dream-hero-actions span {
     font-size: 11px;
-  }
-
-  .dream-scroll-cue {
-    display: none;
   }
 
   .dream-section {
@@ -2401,27 +2131,10 @@ html[data-page-scrolled] .dream-site-header {
   }
 }
 
-html[data-world-effects="economy"] .dream-aurora,
-html[data-world-effects="economy"] .dream-light-gate,
-html[data-world-effects="economy"] .dream-star-field,
 html[data-world-effects="economy"] .dream-orbit,
-html[data-world-effects="economy"] .dream-scroll-cue i::after,
-html[data-world-page-visible="false"] .dream-aurora,
-html[data-world-page-visible="false"] .dream-light-gate,
-html[data-world-page-visible="false"] .dream-star-field,
 html[data-world-page-visible="false"] .dream-orbit,
-html[data-world-page-visible="false"] .dream-scroll-cue i::after,
-.dream-hero[data-dream-hero-active="false"] .dream-aurora,
-.dream-hero[data-dream-hero-active="false"] .dream-light-gate,
-.dream-hero[data-dream-hero-active="false"] .dream-star-field,
-.dream-hero[data-dream-hero-active="false"] .dream-orbit,
-.dream-hero[data-dream-hero-active="false"] .dream-scroll-cue i::after {
+.dream-hero[data-dream-hero-active="false"] .dream-orbit {
   animation-play-state: paused;
-}
-
-.dream-hero[data-dream-hero-active="false"] .dream-aurora,
-.dream-hero[data-dream-hero-active="false"] .dream-star-field {
-  will-change: auto;
 }
 
 html[data-world-effects="economy"] .dream-site-header,
@@ -2437,11 +2150,7 @@ html[data-world-effects="economy"] .dream-case-list li {
   html[data-dream-chapter="true"] {
     scroll-behavior: auto;
   }
-  .dream-aurora,
-  .dream-light-gate,
-  .dream-star-field,
   .dream-orbit,
-  .dream-scroll-cue i::after,
   .dream-poster-stage > figure > img {
     animation: none !important;
   }
@@ -2483,11 +2192,6 @@ html[data-world-effects="economy"] [data-dream-reveal] {
   font-size: 11px;
   line-height: 1.6;
   letter-spacing: 0.06em;
-}
-
-.dream-scroll-cue {
-  min-height: 48px;
-  font-size: 11px;
 }
 
 @media (max-width: 480px) {

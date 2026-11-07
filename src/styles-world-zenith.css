@@ -149,24 +149,6 @@
     body
     main.site-shell.film-edition.mirage-edition
     > .hero
-    > .hero-context {
-    align-self: start;
-    margin-top: 6px;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context
-    > .hero-metadata {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
     > .poster-stage
     .poster-control-cluster {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
@@ -348,24 +330,6 @@
     main.site-shell.film-edition.mirage-edition
     > .hero
     > .hero-context
-    > .hero-lead {
-    font-size: clamp(15px, 1.25svh, 18px);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context
-    > .hero-metadata {
-    max-width: 760px;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context
     > .hero-metadata
     :is(small, b) {
     font-size: 14px;
@@ -399,24 +363,6 @@
 
 /* The caption's two labels hold their line (KEY VISUAL, 01 / 33): at the
    256px floor they still sit side by side with room between them. */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .poster-stage
-  > .film-visual-caption {
-  column-gap: 12px;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .poster-stage
-  > .film-visual-caption
-  > span {
-  white-space: nowrap;
-}
 
 /* ----------------------------------------------------------------
    3. The key visual's light on the title stage: two streamlined trails
@@ -448,108 +394,14 @@ html[data-family="world"]:root
 }
 
 @media (forced-colors: none) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-trail {
-    --zn-o: 0.44;
-    left: var(--zn-x, 58%);
-    top: var(--zn-y, 66%);
-    width: var(--zn-w, 128vw);
-    height: var(--zn-h, 210px);
-    border-radius: 50%;
-    background: linear-gradient(
-      100deg,
-      transparent 0,
-      rgb(122 232 255 / 70%) 18%,
-      rgb(79 123 255 / 78%) 38%,
-      rgb(255 79 195 / 92%) 60%,
-      rgb(240 207 134 / 72%) 82%,
-      transparent 100%
-    );
-    -webkit-mask: radial-gradient(
-      50% 50% at 50% 50%,
-      #000 0,
-      rgb(0 0 0 / 60%) 34%,
-      transparent 70%
-    );
-    mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
-    opacity: var(--zn-o);
-    translate: -50% -50%;
-    rotate: var(--zn-r, -14deg);
-  }
 
   /* The bright core of each trail, inside the same soft mask: the logo's
      thin streamline through its halo. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-trail::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 0;
-    left: 0;
-    height: 2px;
-    translate: 0 -50%;
-    background: linear-gradient(
-      90deg,
-      transparent 0,
-      rgb(200 240 255 / 90%) 22%,
-      rgb(255 255 255 / 96%) 50%,
-      rgb(255 214 240 / 90%) 74%,
-      transparent 100%
-    );
-    opacity: 0.85;
-  }
 
   /* The second, thinner trail crosses the upper right behind the print,
      pink and gold first. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-trail-b {
-    --zn-o: 0.34;
-    --zn-x: 74%;
-    --zn-y: 30%;
-    --zn-w: 96vw;
-    --zn-h: 110px;
-    --zn-r: -22deg;
-    background: linear-gradient(
-      100deg,
-      transparent 0,
-      rgb(255 79 195 / 70%) 26%,
-      rgb(200 77 255 / 80%) 46%,
-      rgb(240 207 134 / 80%) 66%,
-      rgb(122 232 255 / 50%) 84%,
-      transparent 100%
-    );
-  }
 
   /* The pink bloom under the print: the logo's own light on the floor. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-bloom {
-    left: 60%;
-    right: -10%;
-    top: 46%;
-    bottom: -8%;
-    background: radial-gradient(
-      55% 50% at 50% 62%,
-      rgb(255 79 195 / 26%),
-      rgb(79 123 255 / 12%) 46%,
-      transparent 74%
-    );
-  }
 
   /* The print's floor glow and shadow carry the same light. */
   html[data-family="world"]:root
@@ -587,54 +439,6 @@ html[data-family="world"]:root
 
 /* One column: the long trail climbs behind the print, the bloom sits
    under it. */
-@media (forced-colors: none) and (max-width: 699px),
-  (forced-colors: none) and (max-width: 900px) and (orientation: landscape) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-trail-a {
-    --zn-x: 50%;
-    --zn-y: 52%;
-    --zn-w: 210vw;
-    --zn-h: 150px;
-    --zn-r: -34deg;
-    --zn-o: 0.4;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-trail-b {
-    --zn-x: 42%;
-    --zn-y: 20%;
-    --zn-w: 150vw;
-    --zn-h: 80px;
-    --zn-r: -28deg;
-    --zn-o: 0.3;
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .zn-hero-light
-    > .zn-bloom {
-    left: -10%;
-    right: -10%;
-    top: 34%;
-    bottom: 14%;
-    background: radial-gradient(
-      50% 42% at 50% 56%,
-      rgb(255 79 195 / 24%),
-      rgb(79 123 255 / 10%) 50%,
-      transparent 76%
-    );
-  }
-}
 
 /* The trails sweep in once, after the boot has sealed (the reduced and
    economy tiers show them at rest). Full motion only; one iteration;

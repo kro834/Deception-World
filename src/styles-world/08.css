@@ -178,43 +178,9 @@
   background: rgba(0, 0, 0, 0.8);
 }
 
-.dialog-inner {
-  display: grid;
-  min-height: 100%;
-  place-items: center;
-  padding: 60px 24px 32px;
-}
-
-.dialog-inner:focus,
 .world-column-dialog-heading h2:focus,
 .rider-nightmare-dialog-heading h2:focus {
   outline: none;
-}
-
-.dialog-inner img {
-  width: auto;
-  max-width: min(92vw, 820px);
-  height: auto;
-  max-height: calc(100vh - 92px);
-  max-height: calc(100dvh - 92px);
-  object-fit: contain;
-  box-shadow: 0 40px 100px #000;
-}
-
-.dialog-inner button {
-  position: fixed;
-  z-index: 2;
-  top: 20px;
-  right: 24px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid rgba(103, 216, 255, 0.35);
-  background: rgba(5, 7, 11, 0.82);
-  color: #fff;
-  cursor: pointer;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
 }
 
 .dante-denied-dialog {
@@ -236,49 +202,6 @@
 
 .dante-denied-dialog::backdrop {
   background: rgba(0, 0, 0, 0.96);
-}
-
-.dante-denied-inner {
-  position: relative;
-  display: grid;
-  width: 100%;
-  min-height: 100%;
-  place-items: center;
-  overflow: hidden;
-}
-
-.dante-denied-inner:focus {
-  outline: none;
-}
-
-.dante-denied-inner::before,
-.dante-denied-inner::after {
-  content: "ACCESS DENIED // ACCESS DENIED // ACCESS DENIED // ACCESS DENIED";
-  position: absolute;
-  right: 0;
-  left: 0;
-  overflow: hidden;
-  color: rgba(241, 74, 96, 0.46);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.dante-denied-inner::before { top: 22px; }
-.dante-denied-inner::after { bottom: 22px; }
-
-.dante-denied-inner strong {
-  color: #f11d35;
-  font-family: var(--font-display);
-  font-size: clamp(150px, 46vw, 680px);
-  font-weight: 700;
-  letter-spacing: -0.11em;
-  line-height: 0.72;
-  text-indent: -0.06em;
-  text-shadow: 0 0 18px rgba(241, 29, 53, 0.58), 0 0 90px rgba(241, 29, 53, 0.24);
-  animation: danteDenied 0.68s steps(2, end) both;
 }
 
 /* Fail-open. `.motion-on` lands on boot, but `data-scroll-motion-ready` is only
@@ -396,16 +319,6 @@ html[data-scroll-motion-ready="true"] [data-motion-reveal][data-motion-visible="
   transform: none !important;
 }
 
-@keyframes bootProgress {
-  0% { transform: scaleX(0); }
-  65% { transform: scaleX(0.72); }
-  100% { transform: scaleX(1); }
-}
-
-@keyframes bootSlice {
-  to { transform: scaleY(1); }
-}
-
 @keyframes heroRise {
   from { opacity: 0; transform: translateY(22px); }
   to { opacity: 1; transform: translateY(0); }
@@ -458,14 +371,6 @@ html[data-scroll-motion-ready="true"] [data-motion-reveal][data-motion-visible="
 @keyframes signalPulse {
   0%, 100% { border-color: rgba(132, 203, 255, 0.09); }
   50% { border-color: rgba(241, 74, 96, 0.23); }
-}
-
-@keyframes danteDenied {
-  0% { opacity: 0; transform: scale(1.55) skewX(-8deg); filter: blur(8px); }
-  35% { opacity: 1; transform: scale(0.92) skewX(4deg); filter: blur(0); }
-  58% { transform: scale(1.06) translateX(-1.2%); }
-  76% { transform: scale(0.98) translateX(0.8%); }
-  100% { transform: scale(1); }
 }
 
 @keyframes riderVisualIn {

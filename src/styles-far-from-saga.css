@@ -2005,8 +2005,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 .rxs-page.rxs-page.ffs-page .ffs-p16-figures dd,
 .rxs-page.rxs-page.ffs-page .ffs-p16-values strong,
 .rxs-page.rxs-page.ffs-page .ffs-p16-lineage ol b,
-.rxs-page.rxs-page.ffs-page .ffs-p16-label,
-.rxs-page.rxs-page.ffs-page .ffu-percent {
+.rxs-page.rxs-page.ffs-page .ffs-p16-label {
   font-variant-numeric: tabular-nums lining-nums;
   text-shadow: var(--fft-glow-ice);
 }

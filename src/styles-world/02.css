@@ -144,16 +144,6 @@
   animation: backdropBreathe 16s ease-in-out infinite alternate;
 }
 
-.hero-backdrop-current {
-  z-index: 0;
-  animation: posterImageFadeIn 0.9s ease both;
-}
-
-.hero-backdrop-previous {
-  z-index: 1;
-  animation: posterImageFadeOut 0.9s ease both;
-}
-
 .hero-copy {
   position: relative;
   z-index: 2;
@@ -288,36 +278,6 @@
   font-weight: 800;
   letter-spacing: 0.2em;
   transition: color 0.25s;
-}
-
-.hero-metadata {
-  display: flex;
-  margin-top: 48px;
-  border-top: 1px solid rgba(132, 203, 255, 0.14);
-}
-
-.hero-metadata > span {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 7px;
-  padding: 16px 18px 0 0;
-}
-
-.hero-metadata small {
-  color: var(--dim);
-  font-size: 7px;
-  letter-spacing: 0.24em;
-}
-
-.hero-metadata b {
-  overflow: hidden;
-  color: rgba(244, 246, 251, 0.8);
-  font-size: 8px;
-  letter-spacing: 0.14em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .poster-stage {

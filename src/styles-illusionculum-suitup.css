@@ -104,15 +104,6 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame > .
   background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 18%), transparent);
 }
 
-html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .ics-runway-numeral {
-  position: absolute;
-  z-index: 2;
-  top: clamp(20px, 5%, 56px);
-  right: var(--rzn-gutter);
-  font-size: clamp(56px, 8cqw, 120px);
-  pointer-events: none;
-}
-
 html[data-family="special"]
   body
   .rxs-page.ics-page
@@ -432,14 +423,6 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-rail > i {
   /* Above the movie's pill (bottom right on phones and stacked tablets). */
   html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-hud {
     bottom: 76px;
-  }
-
-  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .ics-runway-numeral {
-    top: auto;
-    bottom: 12px;
-    left: var(--rzn-gutter);
-    right: auto;
-    font-size: 56px;
   }
 }
 

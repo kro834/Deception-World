@@ -1808,47 +1808,6 @@ html[data-family="library"] .search-page .search-lede {
 }
 
 /* 171 RECORDS: the index's read-out, a strip above the title. */
-html[data-family="library"] .search-page .search-index-mark {
-  order: 1;
-  display: inline-flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  width: auto;
-  height: auto;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid var(--dxl-line-2);
-  border-radius: 999px;
-  outline: 0;
-  background: rgb(3 6 12 / 65%);
-  box-shadow: var(--dx-bevel);
-}
-
-html[data-family="library"] .search-page .search-index-mark::before,
-html[data-family="library"] .search-page .search-index-mark::after {
-  display: none;
-}
-
-html[data-family="library"] .search-page .search-index-mark > span {
-  color: var(--dx-text-3);
-  font: 400 12px / 1.3 var(--dx-hud);
-  letter-spacing: 0.16em;
-}
-
-html[data-family="library"] .search-page .search-index-mark > .search-index-wide {
-  display: inline;
-  max-width: none;
-  white-space: nowrap;
-  padding-left: 12px;
-  border-left: 1px solid var(--dxl-line-2);
-}
-
-html[data-family="library"] .search-page .search-index-mark strong {
-  color: var(--dx-gold);
-  font: 600 22px / 1 var(--dx-mono);
-  letter-spacing: 0.06em;
-}
 
 /* The workbench is the lit stage under the title. */
 html[data-family="library"] .search-page .search-workbench {
@@ -2355,10 +2314,6 @@ html[data-family="library"] .search-page .search-scope-note {
 
   html[data-family="library"] .library-page .inquiry-choice {
     min-height: 260px;
-  }
-
-  html[data-family="library"] .search-page .search-index-mark > .search-index-wide {
-    display: none;
   }
 
   html[data-family="library"] .search-page .search-eyebrow {

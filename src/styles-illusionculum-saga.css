@@ -407,27 +407,6 @@
   display: none;
 }
 
-.rxs-page.rxs-page.ics-page .ics-sigil {
-  position: absolute;
-  top: -4%;
-  left: 50%;
-  width: 92%;
-  translate: -50% 0;
-  fill: none;
-  stroke: rgb(233 184 102 / 32%);
-  stroke-width: 0.8;
-  filter: drop-shadow(0 0 10px rgb(233 184 102 / 30%));
-}
-
-.rxs-page.rxs-page.ics-page .ics-hero-frame {
-  position: absolute;
-  inset: 0;
-  margin-inline: auto;
-  aspect-ratio: 2 / 3;
-  height: 100%;
-  max-width: 100%;
-}
-
 .rxs-page.rxs-page.ics-page .ics-hero-figure {
   position: absolute;
   inset: 0;
@@ -743,22 +722,6 @@
   width: 34%;
   height: auto;
   filter: drop-shadow(0 18px 30px rgb(0 0 0 / 70%));
-}
-
-.rxs-page.rxs-page.ics-page .ics-projection-orb {
-  position: absolute;
-  width: 10%;
-  height: auto;
-}
-
-.rxs-page.rxs-page.ics-page .ics-projection-orb.is-left {
-  top: 22%;
-  left: 85%;
-}
-
-.rxs-page.rxs-page.ics-page .ics-projection-orb.is-right {
-  top: 56%;
-  left: 86%;
 }
 
 /* ---------- 01 スペック ---------- */

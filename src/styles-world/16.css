@@ -227,10 +227,6 @@
   transition: transform 0.9s cubic-bezier(0.2, 0.75, 0.16, 1), filter 0.9s ease;
 }
 
-.rider-archive-civilian.fit-contain .rider-archive-civilian-visual > img {
-  object-fit: contain;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .rider-archive-civilian:hover .rider-archive-civilian-visual > img {
     filter: saturate(1.02) contrast(1.05);
@@ -346,10 +342,6 @@
   overflow-wrap: anywhere;
 }
 
-.rider-archive-sections {
-  display: grid;
-}
-
 .rider-archive-copy-section {
   display: grid;
   grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
@@ -387,15 +379,7 @@
   text-wrap: balance;
 }
 
-.rider-archive-copy-body {
-  display: grid;
-  gap: 22px;
-  align-content: start;
-}
-
-.rider-archive-copy-body p,
-.rider-archive-form-copy p,
-.rider-archive-record-grid article p {
+.rider-archive-form-copy p {
   margin: 0;
   color: rgba(218, 224, 235, 0.74);
   font-size: clamp(13px, 1.15vw, 15px);
@@ -509,30 +493,4 @@
 
 .rider-archive-form-heading h2.is-long > em {
   font-size: clamp(11px, 1.4vw, 18px);
-}
-
-.rider-archive-call {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.rider-archive-call b {
-  max-width: 100%;
-  padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--archive-accent) 24%, transparent);
-  color: color-mix(in srgb, var(--archive-accent) 76%, #fff 24%);
-  font-family: var(--font-display);
-  font-size: 8px;
-  letter-spacing: 0.13em;
-  overflow-wrap: anywhere;
-}
-
-.rider-archive-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
-  margin: 46px 0;
-  border-top: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
-  border-left: 1px solid color-mix(in srgb, var(--archive-accent-soft) 15%, transparent);
 }

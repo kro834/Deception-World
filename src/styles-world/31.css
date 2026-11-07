@@ -115,29 +115,10 @@
   min-height: 48px;
   font-size: 13px;
 }
-.site-shell .hero-metadata {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 32px;
-  border-block: 1px solid var(--anime-line);
-}
-.site-shell .hero-metadata > span {
-  padding: 16px 12px;
-  border: 0;
-  background: none;
-}
-.site-shell .hero-metadata > span + span {
-  border-left: 1px solid var(--anime-line);
-}
 .site-shell .hero-metadata :is(small, b) {
   font-size: 12px;
   letter-spacing: 0.06em;
   line-height: 1.6;
-}
-.site-shell .hero-metadata b {
-  overflow: visible;
-  white-space: normal;
-  overflow-wrap: anywhere;
 }
 
 .site-shell .poster-stage {
@@ -300,9 +281,6 @@
   font-size: 16px;
   line-height: 1.8;
 }
-.site-shell .rider-number {
-  font-size: 12px;
-}
 .site-shell .rider-monogram {
   opacity: 0.07;
 }
@@ -414,20 +392,6 @@
   }
   .site-shell .hero-lead {
     font-size: 15px;
-  }
-  .site-shell .hero-metadata {
-    grid-template-columns: 1fr;
-    margin-top: 24px;
-  }
-  .site-shell .hero-metadata > span {
-    display: grid;
-    grid-template-columns: 76px minmax(0, 1fr);
-    gap: 12px;
-    padding: 12px 0;
-  }
-  .site-shell .hero-metadata > span + span {
-    border-left: 0;
-    border-top: 1px solid var(--anime-line);
   }
   .site-shell .poster-stage {
     --poster-width: min(100%, 360px);

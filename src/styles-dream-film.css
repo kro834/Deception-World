@@ -94,9 +94,6 @@ html[data-dream-chapter="true"] {
 .dream-hero .dream-orbit {
   display: none;
 }
-.dream-hero-field .dream-star-field {
-  opacity: 0.12;
-}
 .dream-hero-vignette {
   background:
     linear-gradient(90deg, transparent 38%, rgb(16 11 22 / 35%) 68%, rgb(16 11 22 / 78%)),
@@ -190,12 +187,6 @@ html[data-dream-chapter="true"] .dream-hero-copy {
 }
 .dream-hero-actions span {
   font-size: 14px;
-}
-
-.dream-scroll-cue {
-  left: clamp(24px, 6vw, 90px);
-  right: auto;
-  bottom: 30px;
 }
 
 .dream-section {
@@ -557,9 +548,6 @@ html[data-dream-chapter="true"] .dream-hero-copy {
   }
   .dream-hero-actions span {
     font-size: 13px;
-  }
-  .dream-scroll-cue {
-    display: none;
   }
   .dream-section {
     width: calc(100% - 40px);

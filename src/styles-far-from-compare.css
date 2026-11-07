@@ -1222,51 +1222,12 @@
   box-shadow: 0 24px 60px -32px rgb(0 0 0 / 80%), 0 0 40px -12px rgb(168 120 255 / 40%);
 }
 
-.ffs-page .ffs-p16-pins rect {
-  fill: rgb(127 230 255 / 38%);
-}
-
-.ffs-page .ffs-p16-package {
-  fill: #07121f;
-  stroke: rgb(127 230 255 / 45%);
-  stroke-width: 1.5;
-}
-
-.ffs-page .ffs-p16-die {
-  fill: url(#ffs-p16-die);
-  stroke: rgb(127 230 255 / 70%);
-  stroke-width: 1;
-}
-
-.ffs-page .ffs-p16-trace {
-  fill: none;
-  stroke: rgb(127 230 255 / 40%);
-  stroke-width: 1.5;
-  stroke-linecap: round;
-}
-
-.ffs-page .ffs-p16-ring {
-  fill: none;
-  stroke: rgb(255 215 122 / 70%);
-  stroke-width: 1.5;
-  stroke-dasharray: 6 7;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: ffs-p16-ring 24s linear infinite;
-}
-
 .ffs-page .ffs-p16-label {
   fill: #f2f8ff;
   font-family: var(--fft-forge);
   font-size: 30px;
   font-weight: 780;
   letter-spacing: 0.04em;
-}
-
-@keyframes ffs-p16-ring {
-  to {
-    rotate: 360deg;
-  }
 }
 
 .ffs-page .ffs-p16-core figcaption {
@@ -2299,14 +2260,6 @@
   .ffs-page .ffs-report-tools button {
     transition: none;
   }
-
-  .ffs-page .ffs-p16-ring {
-    animation: none;
-  }
-}
-
-html[data-world-effects="economy"] .ffs-page .ffs-p16-ring {
-  animation: none;
 }
 
 @media (forced-colors: active) {

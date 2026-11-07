@@ -656,30 +656,6 @@ html[data-family="special"]
   white-space: nowrap;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  height: 4px;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i {
-  display: block;
-  background: rgb(121 232 255 / 18%);
-  transition:
-    background-color 220ms ease,
-    box-shadow 220ms ease;
-}
-
-html[data-family="special"]
-  body
-  .rxs-page.rxs-page.rxs-rexonance-page
-  .rxe-form-status-track
-  i.is-reached {
-  background: var(--rxs-stage-accent, #79e8ff);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 55%, transparent);
-}
-
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p {
   display: flex;
   flex-wrap: wrap;

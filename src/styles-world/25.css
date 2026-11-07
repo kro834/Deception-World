@@ -187,12 +187,10 @@ html[data-side-menu-open="true"] body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
-.hero-metadata > span,
 .return-strip {
   border-color: var(--future-line);
 }
 
-.hero-metadata small,
 .system-label,
 .manager-file-number,
 .episode-archive-heading > div:first-child > span {

@@ -1108,89 +1108,9 @@ html[data-family="world"]:root
    6. The title stage: the special sites' HUD (scan grid, brackets,
       scale bar), under the copy and the print, over the key art
    ---------------------------------------------------------------- */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .ws-hero-hud {
-  display: none;
-}
-
-@media (forced-colors: none) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .ws-hero-hud {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    display: block;
-    pointer-events: none;
-    background:
-      linear-gradient(rgb(122 232 255 / 6%) 1px, transparent 1px) 0 0 / 100% 56px,
-      linear-gradient(90deg, rgb(122 232 255 / 6%) 1px, transparent 1px) 0 0 / 56px 100%;
-    -webkit-mask-image: radial-gradient(120% 90% at 60% 40%, #000 30%, transparent 86%);
-    mask-image: radial-gradient(120% 90% at 60% 40%, #000 30%, transparent 86%);
-  }
-
-  /* Brackets on the stage's corners, inside the bar and the gutters. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .ws-hero-hud
-    > .ws-hero-bracket {
-    position: absolute;
-    top: calc(var(--film-topbar-height, 76px) + 18px);
-    right: clamp(12px, 1.6vw, 28px);
-    bottom: 18px;
-    left: clamp(12px, 1.6vw, 28px);
-    background:
-      linear-gradient(#7ae8ff 0 0) 0 0 / 22px 1px no-repeat,
-      linear-gradient(#7ae8ff 0 0) 0 0 / 1px 22px no-repeat,
-      linear-gradient(#7ae8ff 0 0) 100% 0 / 22px 1px no-repeat,
-      linear-gradient(#7ae8ff 0 0) 100% 0 / 1px 22px no-repeat,
-      linear-gradient(var(--ws-pink) 0 0) 0 100% / 22px 1px no-repeat,
-      linear-gradient(var(--ws-pink) 0 0) 0 100% / 1px 22px no-repeat,
-      linear-gradient(var(--ws-pink) 0 0) 100% 100% / 22px 1px no-repeat,
-      linear-gradient(var(--ws-pink) 0 0) 100% 100% / 1px 22px no-repeat;
-    opacity: 0.7;
-  }
-
-  /* The scale bar along the foot: ticks every 12px, a lit run at its start. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .ws-hero-hud
-    > .ws-hero-scale {
-    position: absolute;
-    right: clamp(44px, 5vw, 96px);
-    bottom: 18px;
-    left: clamp(44px, 5vw, 96px);
-    height: 6px;
-    background:
-      linear-gradient(90deg, #7ae8ff, var(--ws-pink) 30%, transparent 60%) 0 100% / 100% 1px
-        no-repeat,
-      repeating-linear-gradient(90deg, rgb(122 232 255 / 34%) 0 1px, transparent 1px 12px) 0 100% /
-        100% 4px no-repeat;
-    opacity: 0.8;
-  }
-}
 
 /* Phones and portrait tablets: only the brackets stay (the scale bar
    would run under the controls). */
-@media (max-width: 1023px), (orientation: portrait) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .ws-hero-hud
-    > .ws-hero-scale {
-    display: none;
-  }
-}
 
 /* ----------------------------------------------------------------
    7. HUD plates: corner ticks and a lit hairline on the consoles that

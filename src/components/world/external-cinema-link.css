@@ -20,12 +20,6 @@ html[data-family]
   isolation: isolate;
   color: #f4e5c6;
 }
-.external-cinema-exit-curtain {
-  position: absolute;
-  inset: 0;
-  background: #08090d;
-  animation: cinema-exit-cover 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
 .external-cinema-exit-title {
   position: relative;
   display: grid;
@@ -45,17 +39,6 @@ html[data-family]
   font-weight: 600;
   letter-spacing: 0.08em;
 }
-@keyframes cinema-exit-cover {
-  0% {
-    opacity: 0;
-    transform: scaleY(0.02);
-  }
-  65%,
-  100% {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-}
 @keyframes cinema-exit-title {
   0%,
   30% {
@@ -69,12 +52,10 @@ html[data-family]
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .external-cinema-exit-curtain,
   .external-cinema-exit-title {
     animation: none;
   }
 }
-html[data-world-effects="economy"] .external-cinema-exit-curtain,
 html[data-world-effects="economy"] .external-cinema-exit-title {
   animation: none;
 }

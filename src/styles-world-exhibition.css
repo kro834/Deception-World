@@ -48,10 +48,6 @@ main.site-shell.film-edition.mirage-edition
     linear-gradient(90deg, var(--mr-ice), var(--we-gold)) border-box !important;
 }
 
-main.site-shell.film-edition.mirage-edition .hero-metadata {
-  background: linear-gradient(90deg, rgb(6 11 18 / 58%), transparent);
-}
-
 /* Numerals remain the archive's voice; their face is crisp against the
    quieter field. There is still one off-register ghost, without a halo. */
 main.site-shell.film-edition.mirage-edition :is(.section-index, .wa-chapter) > span {

@@ -480,25 +480,6 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > .hero
   > .poster-stage
-  > .film-visual-caption {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-  width: var(--poster-width);
-  margin: 0;
-  padding: 0 0 8px;
-  border-bottom: 1px solid rgb(122 232 255 / 26%);
-  color: #7ae8ff;
-  font: 400 12px / 1.4 var(--sw-hud);
-  letter-spacing: 0.22em;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .poster-stage
   > .poster-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -777,15 +758,6 @@ html[data-family="world"]:root
     min-height: 0;
     padding-bottom: 48px;
   }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context {
-    align-self: start;
-    margin-top: 12px;
-  }
 }
 
 /* The identity: the work's line, the wordmark, the edition tag. */
@@ -864,26 +836,6 @@ html[data-family="world"]:root
   letter-spacing: -0.02em;
 }
 
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .film-hero-identity
-  > .film-edition-mark {
-  position: static;
-  align-self: start;
-  margin: 0;
-  padding: 6px 9px;
-  border: 1px solid rgb(240 207 134 / 50%);
-  border-radius: 2px;
-  background: transparent;
-  box-shadow: none;
-  color: #f0cf86;
-  font: 600 12px / 1 var(--sw-mono);
-  letter-spacing: 0.16em;
-  transform: none;
-}
-
 /* The copy: the typed headline and the way in. */
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .hero > .hero-copy {
   grid-area: copy;
@@ -937,104 +889,6 @@ html[data-family="world"]:root
 }
 
 /* The context: the lead and the facts set as credits. */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context {
-  grid-area: context;
-  align-self: end;
-  display: grid;
-  gap: clamp(12px, 2vh, 20px);
-  margin: 0;
-  padding: 0;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context
-  > .hero-lead {
-  max-width: 36em;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  color: var(--sw-text-2);
-  font: 400 15px / 1.9 var(--sw-body);
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context
-  > .hero-metadata {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  max-width: 640px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-top: 1px solid rgb(122 232 255 / 22%);
-  background: none;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context
-  > .hero-metadata
-  > span {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  gap: 6px;
-  min-width: 0;
-  margin: 0;
-  padding: 12px 14px 0 0;
-  border: 0;
-  background: none;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context
-  > .hero-metadata
-  > span
-  + span {
-  padding-left: 14px;
-  border-left: 1px solid rgb(122 232 255 / 12%);
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context
-  > .hero-metadata
-  small {
-  color: #7ae8ff;
-  font: 400 12px / 1.4 var(--sw-hud);
-  letter-spacing: 0.12em;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > .hero
-  > .hero-context
-  > .hero-metadata
-  b {
-  color: var(--sw-text);
-  font: 600 12px / 1.5 var(--sw-mono);
-  letter-spacing: 0.14em;
-  overflow-wrap: anywhere;
-}
 
 html[data-family="world"]:root
   body
@@ -1090,39 +944,6 @@ html[data-family="world"]:root
 }
 
 @media (max-width: 420px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context
-    > .hero-metadata {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context
-    > .hero-metadata
-    > span {
-    grid-template-columns: 88px minmax(0, 1fr);
-    align-items: baseline;
-    padding: 10px 0;
-    border-bottom: 1px solid rgb(122 232 255 / 12%);
-  }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context
-    > .hero-metadata
-    > span
-    + span {
-    padding-left: 0;
-    border-left: 0;
-  }
 
   html[data-family="world"]:root
     body
@@ -2297,21 +2118,6 @@ html[data-family="world"]:root
     background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rider-tone, #cfd8e3) 70%, transparent) 40%, transparent);
     pointer-events: none;
   }
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > #riders
-  .rider-detail
-  > .rider-number {
-  padding: 5px 9px;
-  border: 1px solid color-mix(in srgb, var(--rider-tone, #cfd8e3) 60%, transparent);
-  border-radius: 2px;
-  background: rgb(6 8 11 / 70%);
-  color: #fff;
-  font: 600 12px / 1 var(--sw-mono);
-  letter-spacing: 0.16em;
 }
 
 html[data-family="world"]:root

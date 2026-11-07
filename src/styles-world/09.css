@@ -147,7 +147,6 @@
   }
 
   .orbit { width: min(90vw, 620px); }
-  .orbit-two { width: min(108vw, 720px); }
 
   .scroll-cue {
     display: none;
@@ -362,10 +361,6 @@
     display: none;
   }
 
-  .motion-toggle {
-    font-size: 7px;
-  }
-
   .hero {
     gap: 54px;
     padding: 118px 18px 136px;
@@ -415,21 +410,6 @@
 
   .text-action {
     width: max-content;
-  }
-
-  .hero-metadata {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px 6px;
-    margin-top: 34px;
-  }
-
-  .hero-metadata > span {
-    padding-top: 13px;
-  }
-
-  .hero-metadata > span:last-child {
-    grid-column: 1 / -1;
   }
 
   .poster-stage {
@@ -662,11 +642,6 @@
 
   .rider-copy-block {
     padding: 32px 22px 38px;
-  }
-
-  .rider-number {
-    top: 20px;
-    left: 22px;
   }
 
   .rider-person {

@@ -68,21 +68,6 @@
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.site-shell .hero-metadata > span {
-  padding: 16px 12px;
-  border-left: 2px solid rgb(131 228 255 / 55%);
-  border-top: 1px solid rgb(131 228 255 / 18%);
-  background: linear-gradient(100deg, rgb(30 66 89 / 38%), rgb(8 15 25 / 70%));
-}
-
-.site-shell .hero-metadata b {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  overflow: visible;
-  text-overflow: clip;
-  line-height: 1.6;
-}
-
 .site-shell :is(.world-column-content, .episode-archive, .threat-panel),
 .site-shell .rider-console {
   border-color: var(--neo-border);
@@ -256,13 +241,6 @@ main.manager-page .manager-hero .manager-portrait-frame {
 
   .site-shell .poster-frame::before { inset: -10px; }
 
-  .site-shell .hero-metadata b {
-    white-space: normal;
-    overflow-wrap: anywhere;
-    text-overflow: clip;
-    line-height: 1.6;
-  }
-
   .side-panel {
     width: min(72vw, 480px);
   }
@@ -302,7 +280,6 @@ main.manager-page .manager-hero .manager-portrait-frame {
 
   .site-shell .hero-lead { margin-top: 24px; }
   .site-shell .hero-actions { margin-top: 28px; }
-  .site-shell .hero-metadata { margin-top: 28px; }
 
   .site-shell .poster-stage {
     width: 100%;

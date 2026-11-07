@@ -113,10 +113,6 @@
   text-shadow: none;
 }
 
-.rxs-page.rxs-page .rxs-hero-kicker-tail {
-  white-space: nowrap;
-}
-
 .rxs-page.rxs-page .rxs-hero h1 {
   color: var(--sc-text);
   background: var(--sc-headline-gradient);

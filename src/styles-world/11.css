@@ -8,13 +8,6 @@
   background: linear-gradient(90deg, var(--manager-accent), transparent);
 }
 
-.rider-record-intro {
-  display: grid;
-  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
-  align-items: center;
-  gap: clamp(34px, 6vw, 88px);
-}
-
 .rider-record-visual {
   position: relative;
   min-width: 0;
@@ -155,48 +148,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 26px 42px;
-}
-
-.rider-record-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 48px;
-}
-
-.rider-record-grid > div {
-  padding: clamp(24px, 3vw, 38px);
-  border: 1px solid color-mix(in srgb, var(--manager-accent-soft) 12%, transparent);
-  background: rgba(255, 255, 255, 0.012);
-}
-
-.rider-record-grid > div > span {
-  display: block;
-  margin-bottom: 26px;
-  color: var(--manager-accent);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.28em;
-}
-
-.rider-record-grid article + article {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid color-mix(in srgb, var(--manager-accent-soft) 10%, transparent);
-}
-
-.rider-record-grid article h3 {
-  margin: 0 0 11px;
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 18px;
-  letter-spacing: 0.04em;
-}
-
-.rider-record-grid article p {
-  font-size: 12px;
-  line-height: 1.85;
-  text-align: left;
 }
 
 .manager-pagination {
@@ -454,11 +405,6 @@
     padding: 38px 24px;
   }
 
-  .rider-record-intro {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
-
   .rider-record-visual {
     width: min(100%, 560px);
     justify-self: center;
@@ -466,10 +412,6 @@
 
   .rider-record-heading h2 {
     font-size: clamp(36px, 10vw, 58px);
-  }
-
-  .rider-record-grid {
-    grid-template-columns: 1fr;
   }
 
   .manager-pagination {

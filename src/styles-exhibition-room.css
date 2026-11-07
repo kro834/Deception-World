@@ -32,15 +32,6 @@
   padding-bottom: 34px;
   border-bottom: 1px solid var(--room-rule);
 }
-.exhibition-room-curated .exhibition-room-eyebrow {
-  margin: 0 0 18px;
-  color: var(--room-muted);
-  font:
-    500 10px/1.6 "Noto Sans JP",
-    "Hiragino Sans",
-    sans-serif;
-  letter-spacing: 0.19em;
-}
 .exhibition-room-curated .exhibition-room-heading h1 {
   margin: 0;
   color: var(--room-ink);
@@ -279,9 +270,6 @@
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 28px;
-}
-.exhibition-room-curated .exhibition-shelf-heading .exhibition-room-eyebrow {
-  margin-bottom: 12px;
 }
 .exhibition-room-curated .exhibition-shelf-heading h2 {
   margin: 0;

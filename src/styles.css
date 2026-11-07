@@ -2951,76 +2951,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   }
 }
 
-@keyframes world-dive-background {
-  0% {
-    opacity: 0.42;
-    filter: brightness(0.4) saturate(1.15);
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.16;
-    filter: brightness(0.28) saturate(1.35) blur(1px);
-    transform: scale(1.08);
-  }
-}
-
-@keyframes world-dive-light {
-  0% {
-    opacity: 0.52;
-    transform: scale(1.04);
-  }
-  100% {
-    opacity: 0.16;
-    transform: scale(1.24);
-  }
-}
-
-@keyframes world-dive-logo-release {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(2px);
-  }
-}
-
-@keyframes world-dive-hud {
-  0% {
-    opacity: 0.22;
-    transform: translate(-50%, -50%) scale(1) rotate(0);
-  }
-  100% {
-    opacity: 0.06;
-    transform: translate(-50%, -50%) scale(1.12) rotate(8deg);
-  }
-}
-
-@keyframes world-dive-particles {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.2;
-    filter: blur(1px);
-    transform: scale(1.06);
-  }
-}
-
-@keyframes world-dive-vignette {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.88;
-    transform: scale(0.98);
-  }
-}
-
 @keyframes world-dive-tunnel-enter {
   0% {
     opacity: 0;
@@ -3164,20 +3094,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
     opacity: 0;
     filter: blur(3px);
     transform: scale(1.03);
-  }
-}
-
-@keyframes world-dive-bar-top {
-  to {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-}
-
-@keyframes world-dive-bar-bottom {
-  to {
-    opacity: 0;
-    transform: translateY(100%);
   }
 }
 
@@ -3441,16 +3357,6 @@ html[data-android-renderer] .form-archive-switcher.liquid-swipe-tabs > button {
   }
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes glow-breathe {
-  0%,
-  100% {
-    opacity: 0.42;
-  }
-  50% {
-    opacity: 0.78;
   }
 }
 

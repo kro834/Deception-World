@@ -47,14 +47,6 @@
     align-self: start;
     margin-top: 0;
   }
-
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .hero
-    > .hero-context {
-    margin-top: 0;
-  }
 }
 
 /* Six portraits keep their names and faces readable at the middle touch

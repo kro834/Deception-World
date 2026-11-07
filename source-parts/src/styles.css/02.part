@@ -1,3 +1,50 @@
+  font: 600 0.5rem/1 var(--font-sans);
+  letter-spacing: 0.3em;
+}
+
+.cine-cue span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+/* The ice logo arrives, burns, and the prism logo is locked in. */
+.is-playing .cine-cue span:nth-child(1) {
+  animation: cue-phase 2.1s ease 0.34s both;
+}
+.is-playing .cine-cue span:nth-child(2) {
+  animation: cue-phase 2.7s ease 2.6s both;
+}
+.is-playing .cine-cue span:nth-child(3) {
+  animation: cue-phase 1.7s ease 5.4s both;
+}
+
+.is-complete .cine-cue {
+  opacity: 0;
+}
+
+.cine-chrome {
+  position: absolute;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px) scale(0.985);
+  filter: blur(4px);
+}
+
+.is-complete .cine-chrome {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  /* Interpolates from blur(4px) like blur(0), but leaves no filter (and no
+     render pass) behind once the controls are in. */
+  filter: none;
+  transition:
+    opacity 0.45s ease 0.05s,
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
+    filter 0.35s ease 0.05s;
+}
 
 /* ENTER THE WORLD: the handoff layer's dive covers the title from its first
    frame (the canvas fades in over it on the title's own framing), so the
@@ -695,76 +742,6 @@
   }
 }
 
-@keyframes world-dive-background {
-  0% {
-    opacity: 0.42;
-    filter: brightness(0.4) saturate(1.15);
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.16;
-    filter: brightness(0.28) saturate(1.35) blur(1px);
-    transform: scale(1.08);
-  }
-}
-
-@keyframes world-dive-light {
-  0% {
-    opacity: 0.52;
-    transform: scale(1.04);
-  }
-  100% {
-    opacity: 0.16;
-    transform: scale(1.24);
-  }
-}
-
-@keyframes world-dive-logo-release {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(2px);
-  }
-}
-
-@keyframes world-dive-hud {
-  0% {
-    opacity: 0.22;
-    transform: translate(-50%, -50%) scale(1) rotate(0);
-  }
-  100% {
-    opacity: 0.06;
-    transform: translate(-50%, -50%) scale(1.12) rotate(8deg);
-  }
-}
-
-@keyframes world-dive-particles {
-  0% {
-    opacity: 1;
-    filter: blur(0);
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.2;
-    filter: blur(1px);
-    transform: scale(1.06);
-  }
-}
-
-@keyframes world-dive-vignette {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0.88;
-    transform: scale(0.98);
-  }
-}
-
 @keyframes world-dive-tunnel-enter {
   0% {
     opacity: 0;
@@ -908,20 +885,6 @@
     opacity: 0;
     filter: blur(3px);
     transform: scale(1.03);
-  }
-}
-
-@keyframes world-dive-bar-top {
-  to {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
-}
-
-@keyframes world-dive-bar-bottom {
-  to {
-    opacity: 0;
-    transform: translateY(100%);
   }
 }
 
@@ -1185,16 +1148,6 @@
   }
   50% {
     opacity: 1;
-  }
-}
-
-@keyframes glow-breathe {
-  0%,
-  100% {
-    opacity: 0.42;
-  }
-  50% {
-    opacity: 0.78;
   }
 }
 

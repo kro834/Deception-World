@@ -96,13 +96,6 @@
   pointer-events: none;
 }
 
-.hero-metadata > span {
-  position: relative;
-  padding-inline-start: 12px;
-  border-inline-start: 1px solid rgba(103, 216, 255, 0.2);
-  background: linear-gradient(90deg, rgba(103, 216, 255, 0.035), transparent 72%);
-}
-
 /* Repeated information blocks now read as modules in the same HUD, while the
    inset outline avoids modifying their measured dimensions. */
 :is(.threat-panel, .rider-console, .world-column-content, .episode-archive) {
@@ -254,10 +247,6 @@
   .hero-copy::before {
     inset: -12px -8px;
     opacity: 0.48;
-  }
-
-  .hero-metadata > span {
-    padding-inline-start: 8px;
   }
 
   .is-sovereign .manager-portrait-frame {

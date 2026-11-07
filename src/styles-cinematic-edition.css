@@ -78,10 +78,6 @@
   letter-spacing: 0.12em;
 }
 .site-shell.film-edition .primary-action > span { color: inherit; }
-.site-shell.film-edition .hero-metadata {
-  margin-top: 28px;
-  border-color: var(--cinema-rule);
-}
 .site-shell.film-edition .hero-metadata :is(small, b) { font-size: 12px; }
 .site-shell.film-edition .poster-stage {
   --poster-width: min(100%, 39vw, 440px);
@@ -101,7 +97,6 @@
   border-color: var(--cinema-rule);
   box-shadow: none;
 }
-.site-shell.film-edition .film-visual-caption { font-size: 12px; color: var(--cinema-muted); }
 
 /* Light story sheet has its own ink; never inherit dark-surface white type. */
 .site-shell.film-edition .story-layout {
@@ -236,17 +231,6 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   animation: none;
   box-shadow: none;
 }
-.dream-page .dream-hero-field > .dream-light-gate {
-  display: block;
-  left: 80%;
-  top: 36%;
-  width: min(40vw, 530px);
-  opacity: 0.22;
-  transform: translate(-50%, -50%);
-  animation: none;
-  box-shadow: none;
-  border-color: var(--dream-gold);
-}
 .dream-page .dream-chapter-nav a { min-height: 48px; }
 .dream-page .dream-chapter-nav a > span { font-size: 0.875rem; }
 .dream-page .dream-character-copy { border-top: 2px solid var(--dream-scarlet); background: #18121d; }
@@ -315,7 +299,6 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   .site-shell.film-edition > .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); padding-top: 104px; }
   .site-shell.film-edition .poster-stage { --poster-width: min(100%, 36vw, max(280px, calc((100svh - 280px) * 0.667))); }
   .site-shell.film-edition .film-hero-identity .anime-work-title b { font-size: clamp(36px, 4.3vw, 60px); }
-  .site-shell.film-edition .hero-metadata { margin-top: 22px; }
   .rxs-page .rxs-hero {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
@@ -377,9 +360,7 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   .site-shell.film-edition .film-hero-identity { padding-bottom: 12px; align-items: center; }
   .site-shell.film-edition .film-hero-identity .anime-work-title b { font-size: clamp(24px, 6.8vw, 32px); line-height: 1.2; }
   .site-shell.film-edition .film-hero-identity .anime-work-title span { font-size: 12px; }
-  .site-shell.film-edition .film-edition-mark { display: none; }
   .site-shell.film-edition .poster-stage { --poster-width: min(100%, 224px); gap: 8px; }
-  .site-shell.film-edition .film-visual-caption { padding-bottom: 4px; letter-spacing: 0.08em; }
   .site-shell.film-edition .hero .poster-controls { width: 100%; max-width: 350px; }
   .site-shell.film-edition .poster-control-cluster { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 6px; }
   .site-shell.film-edition .poster-control-cluster > button { grid-column: auto; width: auto; min-width: 0; gap: 6px; padding: 8px 6px; }
@@ -392,7 +373,6 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   .site-shell.film-edition .hero .primary-action { flex: 1; padding-inline: 18px; min-width: 0; }
   .site-shell.film-edition .hero .text-action { display: none; }
   .site-shell.film-edition .hero-lead { order: 2; margin-top: 24px; }
-  .site-shell.film-edition .hero-metadata { order: 3; margin-top: 16px; }
   .site-shell.film-edition .story-layout { padding: 28px 22px; }
   .site-shell.film-edition .episode-card-copy { padding: 18px; }
   .manager-page .dossier-contents { grid-template-columns: minmax(0, 1fr); }

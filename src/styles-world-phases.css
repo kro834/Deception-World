@@ -426,11 +426,6 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     color: #b3bfcc;
   }
 
-  main.site-shell.film-edition.mirage-edition #riders .rider-number {
-    color: #0b0e12;
-    background: linear-gradient(90deg, #cfd8e3, #ff5fc8 45%, #ff5cc8 75%, #f0cf86);
-  }
-
   main.site-shell.film-edition.mirage-edition #riders .rider-visual::before {
     background:
       linear-gradient(90deg, var(--mr-deck) 0%, rgb(29 34 41 / 55%) 16%, transparent 34%),

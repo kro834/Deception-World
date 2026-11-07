@@ -309,8 +309,7 @@
 .rider-archive-civilian,
 .rider-nightmare-card,
 .rider-archive-form,
-.manager-pagination,
-.rider-archive-pagination {
+.manager-pagination {
   border-color: var(--glass-border-soft);
   box-shadow: var(--glass-shadow);
 }
@@ -324,12 +323,10 @@
   background-blend-mode: screen, normal;
 }
 
-.motion-toggle,
 .episode-controls button,
 .world-column-orbit-trigger,
 .world-column-dialog-close,
 .poster-dialog-close,
-.dante-dialog-close,
 .rider-nightmare-dialog-close,
 .rider-nightmare-pickup-button {
   border-color: var(--glass-border);
@@ -343,27 +340,16 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
-.topbar .motion-toggle,
-.manager-topbar .manager-back,
-.rider-archive-topbar .rider-archive-back {
+.manager-topbar .manager-back {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-.motion-toggle {
-  padding: 0 14px;
-  border: 1px solid var(--glass-border);
-  border-radius: 999px;
-}
-
 .manager-back,
-.rider-archive-back,
 .poster-shuffle,
 .poster-reset,
 .poster-lock,
 .poster-dialog-close,
-.dante-dialog-close,
-.motion-toggle,
 .episode-controls button,
 .primary-action,
 .world-column-orbit-trigger,

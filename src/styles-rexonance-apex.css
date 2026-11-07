@@ -225,38 +225,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
   position: relative;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
-  position: absolute;
-  z-index: 1;
-  /* An absolutely placed grid child is boxed by its grid area: the
-     columns run the head's width, so the index sits at its right edge
-     (the rows are implicit, so the area is the running head's row). */
-  grid-area: 1 / 1 / -1 / -1;
-  top: 1px;
-  right: 0;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  margin: 0;
-  padding: 0 0 0 46px;
-  color: rgb(168 203 212 / 78%);
-  background:
-    linear-gradient(90deg, var(--rxa-gold), var(--rxa-gold)) 0 55% / 28px 1px no-repeat,
-    radial-gradient(circle, var(--rxa-gold) 0 1.5px, transparent 2px) 30px 55% / 6px 6px no-repeat;
-  background-position: 0 55%, 29px 50%;
-  font: 500 12px / 1 var(--dx-hud);
-  letter-spacing: 0.22em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index > b {
-  color: var(--rxa-gold);
-  font: 600 15px / 1 var(--rxf-forge, var(--dx-hud));
-  font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: 0.02em;
-}
-
 /* The script column beside the stage (1100–1299: an iPad in landscape, a
    1280 laptop) is narrow: P14's running head reaches the index, so the
    index moves to the foot of the head, beside the intro's last line (the
@@ -276,12 +244,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-se
 
 /* 05: on wide screens the trinity rings stand at the head's right, so its
    index takes the free corner at the top left, above the forged numeral. */
-@media (min-width: 1100px) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system > .rxs-section-heading > .rxa-index {
-    right: auto;
-    left: 0;
-  }
-}
 
 /* Round 2 (2026-10-22): 03, the suit-up's head, carries the index too
    (the heads read 01, 02, 04, 05 while the bar and CONTENTS count 03).
@@ -334,11 +296,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-as
 
 /* Phones: the forged numeral beside the kicker already names the chapter;
    the index would crowd the kicker's one line. */
-@media (max-width: 760px) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
-    display: none;
-  }
-}
 
 /* ================================================================
    01 PERFORMANCE: the comparison as one instrument
@@ -645,14 +602,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-heading {
   font-size: 12px;
   letter-spacing: 0.18em;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track {
-  height: 4px;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status-track i.is-reached {
-  box-shadow: 0 0 10px color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 55%, transparent);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxe-form-status p small {
@@ -1014,19 +963,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxe-ch
     border: 1px solid CanvasText;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index {
-    background: none;
-    padding-left: 0;
-    color: CanvasText;
-  }
-
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::before,
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-assembly-heading .rxs-assembly-eyebrow::after {
     background: none;
     color: CanvasText;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-section > .rxs-section-heading > .rxa-index > b,
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > header.rxs-local-nav nav a::before {
     color: CanvasText;
     text-shadow: none;

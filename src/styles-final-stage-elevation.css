@@ -482,11 +482,6 @@ html[data-mode="world"] .fst-page .fst-pickup-plus .ios-slide-open-label small {
   line-height: 1.9;
 }
 
-.fst-page .fst-note {
-  color: var(--fst-text-3);
-  font-size: 13px;
-}
-
 /* ================================================================
    Section openings
    ================================================================ */
@@ -1120,10 +1115,6 @@ html[data-mode="world"] .fst-page .fst-pickup-dialog .form-pickup-close:focus-vi
 
 .fst-page .fst-pickup-record :is(.fst-arsenal p, .fst-finishers p) {
   max-width: 48em;
-}
-
-.fst-page .fst-pickup-record .fst-note {
-  margin-inline: 0;
 }
 
 .fst-page .fst-pickup-record .fst-copy p {

@@ -1,10 +1,3 @@
-.tone-red { --rider-tone: var(--red); --rider-tone-alt: var(--gold); }
-.tone-cyan { --rider-tone: var(--cyan); --rider-tone-alt: var(--blue); }
-.tone-magenta { --rider-tone: var(--magenta); --rider-tone-alt: var(--gold); }
-.tone-green { --rider-tone: var(--green); --rider-tone-alt: #d8f26b; }
-.tone-algenome { --rider-tone: #d71920; --rider-tone-alt: #f2f2f2; }
-.tone-over { --rider-tone: var(--red); --rider-tone-alt: var(--teal); }
-
 .rider-detail::before {
   content: "";
   position: absolute;
@@ -82,11 +75,6 @@
   animation: riderPortraitIn 0.92s cubic-bezier(0.2, 0.72, 0.2, 1) both;
 }
 
-.rider-visual.fit-contain img {
-  object-fit: contain;
-  padding: 20px 0;
-}
-
 .rider-monogram {
   position: absolute;
   z-index: 1;
@@ -112,23 +100,12 @@
   animation: riderCopyIn 0.52s 0.08s cubic-bezier(0.2, 0.72, 0.2, 1) both;
 }
 
-.rider-number,
 .rider-person,
 .rider-detail h3,
 .rider-description,
 .rider-line {
   position: relative;
   z-index: 1;
-}
-
-.rider-number {
-  position: absolute;
-  z-index: 3;
-  top: 32px;
-  left: 36px;
-  color: var(--dim);
-  font-size: 7px;
-  letter-spacing: 0.28em;
 }
 
 .rider-person {
@@ -169,24 +146,6 @@
 /* The rider CTA is a standalone liquid-glass pressable. It carries the
    `liquid-swipe-tabs` class so every pressed / held / WebGL state rule written
    for the rail applies verbatim; only shape and layout are restated here. */
-.liquid-glass-action.rider-profile-link {
-  z-index: 1;
-  --liquid-shell-radius: 999px;
-  --liquid-current-accent: var(--rider-tone, var(--cyan));
-  display: inline-flex;
-  width: fit-content;
-  min-width: min(100%, 286px);
-  margin-top: 28px;
-  border: 1px solid color-mix(in srgb, var(--rider-tone) 38%, transparent);
-  border-radius: 999px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--rider-tone) 9%, transparent), transparent);
-  cursor: pointer;
-  scale: 1;
-  transition:
-    border-color 0.3s ease,
-    background 0.3s ease,
-    scale 0.34s var(--glass-settle);
-}
 
 .liquid-glass-action > .liquid-selection-lens {
   border-radius: 999px;
@@ -217,64 +176,11 @@
   transition-duration: 0.34s, 0.34s, 0.34s;
 }
 
-.liquid-glass-action-link {
-  position: relative;
-  z-index: 6;
-  display: inline-flex;
-  width: 100%;
-  align-items: center;
-  gap: 34px;
-  padding: 14px 22px 14px 26px;
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  -webkit-tap-highlight-color: transparent;
-}
-
 /* Let the refracted copy carry the label while the glass is over it, exactly
    as the rail does for the tab under the lens. */
-.liquid-glass-action[data-liquid-webgl="true"][data-liquid-webgl-active="true"] > .liquid-glass-action-link > * {
-  opacity: 0.28;
-  transition: opacity 0.1s ease;
-}
-
-.rider-profile-link > .liquid-glass-action-link > span {
-  display: grid;
-  gap: 3px;
-}
-
-.rider-profile-link .liquid-glass-action-link small {
-  color: var(--rider-tone-alt);
-  font-size: 6px;
-  letter-spacing: 0.24em;
-}
-
-.rider-profile-link .liquid-glass-action-link svg {
-  width: 19px;
-  margin-left: auto;
-  transition: transform 0.3s ease;
-}
-
-.rider-profile-link .liquid-glass-action-link path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.4;
-}
-
-.liquid-glass-action-link:focus-visible {
-  border-radius: 999px;
-  outline: 2px solid var(--rider-tone);
-  outline-offset: 3px;
-}
 
 .liquid-glass-action:focus-within {
   border-color: var(--rider-tone);
-}
-
-.liquid-glass-action-link:focus-visible svg {
-  transform: translateX(4px);
 }
 
 .rider-line {

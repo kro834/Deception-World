@@ -15,12 +15,6 @@
   max-width: 48rem;
   margin-bottom: 1.6rem;
 }
-.inquiry-eyebrow {
-  margin: 0 0 0.7rem;
-  color: var(--inquiry-accent);
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-}
 .inquiry-heading h2 {
   margin: 0 0 0.8rem;
   font-size: clamp(1.8rem, 4vw, 2.8rem);

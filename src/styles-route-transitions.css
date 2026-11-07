@@ -374,21 +374,6 @@ html[data-route-scroll-settling="true"] {
 /* A single adaptive canvas adds true perspective motion to the opening dive.
    Its backing resolution and streak count are capped in JavaScript, avoiding
    the large composited surfaces that previously destabilised mobile WebKit. */
-.cine-dive-velocity {
-  position: absolute;
-  z-index: 19;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  contain: strict;
-  opacity: 0;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  transform: translateZ(0) scale(1.015);
-  backface-visibility: hidden;
-  will-change: opacity, transform;
-}
 
 .cine-dive-tunnel {
   z-index: 18;
@@ -593,11 +578,6 @@ html[data-route-scroll-settling="true"] {
   animation: dw-dive-status-in 0.24s ease-out 0.2s both;
 }
 
-.cine-stage.is-diving .cine-dive-velocity,
-.title-world-dive-overlay.is-diving .cine-dive-velocity {
-  animation: dw-dive-velocity-in 0.34s ease-out both;
-}
-
 .cine-stage.is-arriving .cine-dive-tunnel,
 .title-world-dive-overlay.is-arriving .cine-dive-tunnel,
 .archive-route-dive.is-arriving .cine-dive-tunnel {
@@ -636,11 +616,6 @@ html[data-route-scroll-settling="true"] {
     transparent 78%
   );
   animation: dw-dive-exit-core 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.cine-stage.is-arriving .cine-dive-velocity,
-.title-world-dive-overlay.is-arriving .cine-dive-velocity {
-  animation: dw-dive-velocity-out 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Dives end on their exit light; unmounting then cut from near-white to the
@@ -701,10 +676,6 @@ html[data-route-scroll-settling="true"] {
 /* iPhone and touch-first iPads retain the forward motion while staying inside
    WebKit's graphics budget: bounded surfaces, one streak plane, no blur. */
 @media (max-width: 1180px), (any-pointer: coarse) {
-  .cine-dive-velocity {
-    mix-blend-mode: normal;
-    transform: translateZ(0);
-  }
 
   .cine-stage .cine-dive-tunnel,
   .title-world-dive-overlay .cine-dive-tunnel,
@@ -811,34 +782,6 @@ html[data-route-scroll-settling="true"] {
   to {
     opacity: 0;
     transform: translateZ(0) scale(1.2);
-  }
-}
-
-@keyframes dw-dive-velocity-in {
-  from {
-    opacity: 0;
-    transform: translateZ(0) scale(1.015);
-  }
-  28% {
-    opacity: 0.78;
-  }
-  to {
-    opacity: 1;
-    transform: translateZ(0) scale(1.045);
-  }
-}
-
-@keyframes dw-dive-velocity-out {
-  from {
-    opacity: 1;
-    transform: translateZ(0) scale(1.045);
-  }
-  56% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.28;
-    transform: translateZ(0) scale(1.1);
   }
 }
 
@@ -949,13 +892,6 @@ html[data-route-scroll-settling="true"] {
 
 /* iOS exposes Reduce Motion through matchMedia. Keep a short, opacity-led
    tunnel instead of removing the world transition entirely. */
-.cine-stage.is-reduced-dive .cine-dive-velocity {
-  display: none;
-}
-
-.title-world-dive-overlay.is-reduced-dive .cine-dive-velocity {
-  display: none;
-}
 
 .cine-stage.is-reduced-dive .cine-dive-tunnel::before,
 .title-world-dive-overlay.is-reduced-dive .cine-dive-tunnel::before,
@@ -1013,13 +949,8 @@ html[data-route-scroll-settling="true"] {
   .cine-dive-tunnel > i,
   .cine-dive-flash,
   .cine-dive-flash::before,
-  .cine-dive-status,
-  .cine-dive-velocity {
+  .cine-dive-status {
     animation: none !important;
-  }
-
-  .cine-dive-velocity {
-    display: none;
   }
 
   .is-diving .cine-dive-flash {

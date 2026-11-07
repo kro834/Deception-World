@@ -49,7 +49,6 @@ html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
 /* Dynamic GUI (src/lib/dream-gpu/dream-gui-physics.js, Tier A + B only).
    The solver writes the individual translate / rotate / scale properties;
    the rows give them depth. Nothing here changes layout. */
-html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-routes,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-strip,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls,
