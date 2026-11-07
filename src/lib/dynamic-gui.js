@@ -8,14 +8,17 @@
 //   viewport (an IntersectionObserver, with a MutationObserver for elements a
 //   later React commit adds), and marks everything already in view on its first
 //   pass so nothing above the fold waits;
-// - writes `--dg-progress` (0..1, the document's scroll position) on <html> for
-//   the .dg-rail where the browser has no scroll() timeline, from a passive
-//   scroll listener coalesced on requestAnimationFrame. Only when a rail is
-//   on the page.
+// - writes `--dg-progress` (0..1, the document's scroll position) on each
+//   .dg-rail (its ::before is the only reader) where the browser has no
+//   scroll() timeline, from a passive scroll listener coalesced on
+//   requestAnimationFrame. Only when a rail is on the page. (Written on
+//   <html> until 2026-11-06: an inherited custom property there restyled
+//   every element of the page on every scroll frame, about 900 elements on a
+//   dossier; on the rail it restyles the rail alone, same fill.)
 //
-// Nothing here calls preventDefault, locks scroll or writes element styles;
-// it reads layout once per scroll frame (scrollTop/scrollHeight) and only
-// while a rail exists. A safety timer marks every reveal seen if the observer
+// Nothing here calls preventDefault or locks scroll; the only style it writes
+// is that property on the rails. It reads layout once per scroll frame
+// (scrollTop/scrollHeight) and only while a rail exists. A safety timer marks every reveal seen if the observer
 // has not fired within SAFETY_MS of ready (a stalled observer must never leave
 // content invisible).
 
@@ -63,11 +66,23 @@ export function watchDynamicGui(doc = document) {
   // Progress rail fallback.
   let rails = 0;
   let frame = 0;
+  // Live: a rail a later commit adds receives the value on the next frame.
+  const railElements = doc.getElementsByClassName(RAIL.slice(1));
+  /** @param {string | null} value */
+  const writeRails = (value) => {
+    for (const rail of Array.from(railElements)) {
+      const style = /** @type {HTMLElement} */ (rail).style;
+      if (!style) continue;
+      if (value === null) style.removeProperty("--dg-progress");
+      else if (style.getPropertyValue("--dg-progress") !== value)
+        style.setProperty("--dg-progress", value);
+    }
+  };
   const measure = () => {
     frame = 0;
     const max = root.scrollHeight - root.clientHeight;
     const ratio = max > 0 ? Math.min(1, Math.max(0, root.scrollTop / max)) : 0;
-    root.style.setProperty("--dg-progress", ratio.toFixed(4));
+    writeRails(ratio.toFixed(4));
   };
   const onScroll = () => {
     if (!frame) frame = view.requestAnimationFrame(measure);
@@ -81,7 +96,6 @@ export function watchDynamicGui(doc = document) {
     } else if (!count && rails) {
       view.removeEventListener("scroll", onScroll);
       view.removeEventListener("resize", onScroll);
-      root.style.removeProperty("--dg-progress");
     }
     rails = count;
   };
@@ -127,7 +141,7 @@ export function watchDynamicGui(doc = document) {
       view.removeEventListener("resize", onScroll);
     }
     if (frame) view.cancelAnimationFrame(frame);
-    root.style.removeProperty("--dg-progress");
+    writeRails(null);
     root.removeAttribute(READY);
   };
 }

@@ -137,8 +137,9 @@ export default defineConfig(({ command }) => ({
     strictPort: true,
   },
   resolve: { tsconfigPaths: true },
-  // The liquid glass sheets' `:is(…)`-ended selectors get a key each, so the
-  // style engine stops trying them on every element (QA 2026-10-31).
+  // Every site sheet's `:is(…)`-ended selectors get a key each, so the style
+  // engine stops trying them on every element (QA 2026-10-31 for the liquid
+  // glass; owner 2026-11-06 for the whole site).
   css: { postcss: { plugins: [glassSelectorBuckets()] } },
   plugins: [
     pgliteBootstrapPlugin(),

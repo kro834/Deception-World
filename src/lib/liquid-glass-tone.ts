@@ -120,6 +120,8 @@ export function watchLiquidTone(doc: Document = document) {
   let post = 0;
   let startId = 0;
   const idle = typeof view.requestIdleCallback === "function";
+  /* The last drain wrote, and no frame has rendered those writes yet. */
+  let unrendered = false;
   let scanTimer = 0;
   let restTimer = 0;
   let peekTimer = 0;
@@ -258,16 +260,25 @@ export function watchLiquidTone(doc: Document = document) {
       } else if (el.hasAttribute(TONE_ATTRIBUTE)) el.removeAttribute(TONE_ATTRIBUTE);
       if (el.hasAttribute(BUSY_ATTRIBUTE) !== busy) el.toggleAttribute(BUSY_ATTRIBUTE, busy);
     }
+    // After writes, the next few wait for a frame first: an idle callback can
+    // run again in the same idle period, before those writes are rendered,
+    // and its reads would then force a style pass of their own (2026-11-06).
+    // Without requestIdleCallback the next turn already follows a frame.
+    unrendered = read.length > 0;
     if (queue.size) schedule();
   }
 
   function schedule() {
     if (frame || idleId || post) return;
-    if (idle) idleId = view!.requestIdleCallback(drain, { timeout: IDLE_TIMEOUT_MS });
+    if (idle && !unrendered) idleId = view!.requestIdleCallback(drain, { timeout: IDLE_TIMEOUT_MS });
     else
       frame = view!.requestAnimationFrame(() => {
         frame = 0;
-        post = view!.setTimeout(drain, 0);
+        if (!idle) post = view!.setTimeout(drain, 0);
+        else {
+          unrendered = false;
+          schedule();
+        }
       });
   }
 
