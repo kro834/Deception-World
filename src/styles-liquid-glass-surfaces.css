@@ -44,6 +44,14 @@ html[data-button-style="liquid"] {
   --lgs-dim: 0.62;
   --lgs-radius: 22px;
   --lgs-radius-panel: 16px;
+}
+
+/* The lit tokens. They resolve the light where they are declared, so they
+   are declared again on whatever carries the room's light (data-lg-lit:
+   liquid-glass-light.ts writes --lg-lx/--lg-ly on the glass in view, not on
+   <html>, which would restyle the whole page). */
+html[data-button-style="liquid"],
+html[data-button-style="liquid"] [data-lg-lit] {
   /* A dialog's frame: a glass bezel around a solid page. */
   --lgs-frame:
     /* the specular rim, lit from the light's side */
@@ -68,6 +76,9 @@ html[data-button-style="liquid"] {
     inset 0 24px 30px -26px rgb(255 255 255 / 0.15), inset 2px 0 4px -2px rgb(255 92 168 / 0.24),
     inset -2px 0 4px -2px rgb(72 206 255 / 0.28), inset 0 0 0 0.5px rgb(255 255 255 / 0.12),
     0 1px 2px rgb(0 0 0 / 0.3), 0 18px 40px -22px rgb(0 0 0 / 0.72);
+}
+
+html[data-button-style="liquid"] {
   /* A bar: the light along its lower edge, where the page passes under it. */
   --lgs-bar:
     inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 -1px 0 rgb(255 255 255 / 0.2),
@@ -347,13 +358,17 @@ html[data-button-style="liquid"] body .opening-notice:not(#lg-glass):not(#lg-gla
    bezel, no halo: blur and the specular rim only. */
 html[data-button-style="liquid"][data-world-effects="economy"] {
   --lgs-blur: 12px;
+  --lgs-bar: inset 0 -1px 0 rgb(255 255 255 / 0.18), 0 10px 24px -14px rgb(0 0 0 / 0.7);
+}
+
+html[data-button-style="liquid"][data-world-effects="economy"],
+html[data-button-style="liquid"][data-world-effects="economy"] [data-lg-lit] {
   --lgs-frame:
     inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.28),
     inset 0 0 0 0.5px rgb(255 255 255 / 0.12), 0 24px 60px -24px rgb(0 0 0 / 0.75);
   --lgs-panel:
     inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.24),
     inset 0 0 0 0.5px rgb(255 255 255 / 0.12), 0 12px 30px -18px rgb(0 0 0 / 0.7);
-  --lgs-bar: inset 0 -1px 0 rgb(255 255 255 / 0.18), 0 10px 24px -14px rgb(0 0 0 / 0.7);
 }
 
 html[data-button-style="liquid"][data-world-effects="economy"]

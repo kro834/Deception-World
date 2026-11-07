@@ -26,7 +26,7 @@ const clean = (css) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 async function load(path) {
   const code = ts.transpileModule(read(path), {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
-  }).outputText;
+  }).outputText.replace(/^import \{ LIQUID_GLASS_TARGETS \} from "\.\/liquid-glass";$/m, "const LIQUID_GLASS_TARGETS = [];");
   return import("data:text/javascript;base64," + Buffer.from(code).toString("base64"));
 }
 
@@ -65,7 +65,8 @@ test("the room's light: pointer, scroll and an already-granted tilt, throttled, 
   assert.doesNotMatch(src, /getBoundingClientRect|getComputedStyle|scrollY|scrollTop|offset(Width|Height|Top|Left)/);
   assert.match(src, /prefers-reduced-motion: reduce/);
   assert.match(src, /data-world-effects/);
-  assert.match(src, /root\.style\.removeProperty\("--lg-lx"\);/);
+  // Written on the lit glass in view, removed at rest (glass-light-scope.test.mjs).
+  assert.match(src, /style\.removeProperty\("--lg-lx"\);/);
   const lib = await load("src/lib/liquid-glass-light.ts");
   assert.deepEqual(lib.lightFor({ x: 0, y: 0 }, 0, { x: 0, y: 0 }), { x: -0.55, y: -1 });
   // Leaning stays in range and never drops the light below the horizon.
