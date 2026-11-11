@@ -174,22 +174,14 @@ test("the locks' glows are local, rare and absent from a resting frame", () => {
 // タイプにもどして。」 — the scroll suit-up is back on these pre-round-2 accents
 // and staging, with no director camera on its canvas or field; the round-2
 // director (and its camera) stays on the entry only.
-test("the scroll mounts the pre-round-2 accents and staging, without the director's camera", () => {
+test("the scene mounts the steady accents, without the director's camera", () => {
   const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
   const source = read("../src/lib/illusionculum-assembly-engine.ts");
   assert.match(source, /config\.accents = createIllusionculumScrollAccents\(/);
-  assert.match(
-    source,
-    /illusionculumScrollAccentBudget\(environment, \{ compact, entry: false \}\)/,
-  );
-  assert.match(source, /entry \? ILLUSIONCULUM_ARMOUR_STAGING : ILLUSIONCULUM_SCROLL_STAGING/);
-  assert.match(
-    source,
-    /if \(!entry\)\s+config\.nanites = \(\) =>\s+loadIllusionculumNanites\(false, ILLUSIONCULUM_SCROLL_STAGING\)/,
-  );
-  // The director's camera (and its shake) is mounted for the entry only.
-  assert.match(source, /else\s+config\.accents = createIllusionculumAccents\(/);
-  assert.match(source, /if \(entry\) releaseIllusionculumCamera\(runway, camera\);/);
+  assert.match(source, /illusionculumScrollAccentBudget\(environment, \{ compact, entry \}\)/);
+  // Owner (2026-11-11): the nanite skin builds the armour, on the scroll and
+  // the entry alike; no plate is staged, so no director and no camera.
+  assert.doesNotMatch(source, /createIllusionculumAccents\(|releaseIllusionculumCamera|STAGING/);
   const accents = read("../src/lib/illusionculum-scroll-accents.ts");
   assert.doesNotMatch(accents, /camera:|shakeX|\.setTransform\(|\.style\./);
   // The scroll's own camera is the pre-round-2 one: a slow scroll-linked push.

@@ -77,15 +77,9 @@ function useEngineClock(
     void import("@/lib/illusionculum-assembly-engine")
       .then((module) => {
         if (disposed || settled()) return;
-        // The director's camera moves the whole stage: the engine's layer
-        // and the reactor's overlay, one box.
-        const camera = [runway.parentElement, scene?.querySelector?.(".ice-entry-stage")].filter(
-          (layer): layer is HTMLElement => Boolean(layer),
-        );
         dispose = module.mountIllusionculumAssemblyEngine(runway, window, {
           entry: true,
           progress: () => progress,
-          camera,
         });
       })
       .catch(() => {

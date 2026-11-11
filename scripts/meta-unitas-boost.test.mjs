@@ -38,8 +38,9 @@ test("every beat has the suit's real seams to trace", () => {
     assert.ok(group.loops.length > 0, `beat ${group.beat} has seams`);
     for (const loop of group.loops) assert.ok(loop.length > 0);
   }
-  // Bottom up: the legs below the chest, the helmet on top.
-  assert.ok(groups[0].cy > groups[2].cy && groups[2].cy > groups[5].cy);
+  // Out from the reactor (the nanite skin's order): the chest first, the
+  // legs below it last of the body, the helmet on top.
+  assert.ok(groups[3].cy > groups[0].cy && groups[0].cy > groups[5].cy);
 });
 
 test("explicit lightweight choice scales budgets; pointer capability selects high or touch", () => {

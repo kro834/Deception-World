@@ -3,24 +3,28 @@
  * Owner: 「メタ・ウニタスはレクソナンスと同じ装着です」. The Rexonance scroll
  * engine (src/lib/rexonance-resonance.js, mountRexonanceAssembly) plays Meta
  * Unitas' suit (src/lib/meta-unitas-rx-suit.ts, built by
- * scripts/build-meta-unitas-rx-suit.mjs from SAM's cut of the owner's ミドル),
- * the way it played FAR FROM's before its wireframe: the undersuit scanned,
- * the fire engulfing it and bursting into the nanites, the plates landing
- * group by group on each call, the seal, the ignition, the helix and the
- * eyes filling with pixel squares, then ウルトラ (the owner's cutout, the same
- * frame) overwriting it from the core out when the selector chose it. Only
- * the engine's own options are passed (the palette, the reactor's outline,
- * the form chain): Rexonance, FAR FROM and ILLUSIONCULUM play exactly as before.
+ * scripts/build-meta-unitas-rx-suit.mjs from SAM's cut of the owner's ミドル):
+ * the undersuit scanned, the fire engulfing it, the seal, the ignition, the
+ * helix and the eyes filling with pixel squares, then ウルトラ (the owner's
+ * cutout, the same frame) taking it over from the core out when the selector
+ * chose it. Since 2026-11-11 (owner: 「ナノマシン感が全くない」) the armour
+ * itself grows as a nanite skin from the reactor (`generation`,
+ * src/lib/nanite-skin.ts), in place of the swarm and its plates. Only the
+ * engine's own options are passed: Rexonance plays exactly as before.
  */
 
-import { mountRexonanceAssembly, type RexonanceAssemblyConfig } from "./rexonance-resonance.js";
+import {
+  ASSEMBLY_BEATS,
+  mountRexonanceAssembly,
+  type RexonanceAssemblyConfig,
+} from "./rexonance-resonance.js";
+import { createNaniteSkinGeneration, type NaniteSkinStyle } from "./nanite-skin.ts";
 import {
   META_UNITAS_RX_ATLAS,
   META_UNITAS_RX_DRIVER,
   META_UNITAS_RX_FACE_GLOW,
   META_UNITAS_RX_FIGURE,
   META_UNITAS_RX_FORMS,
-  META_UNITAS_RX_GOLD_ATLAS,
   META_UNITAS_RX_MARKS,
   META_UNITAS_RX_ORNAMENTS,
   META_UNITAS_RX_PIECES,
@@ -29,12 +33,6 @@ import {
   META_UNITAS_RX_TILE,
   META_UNITAS_RX_UNDERSUIT,
 } from "./meta-unitas-rx-suit.ts";
-import { META_UNITAS_RX_GOLD_CELL, META_UNITAS_RX_GOLD_CELLS } from "./meta-unitas-rx-suit-gold.ts";
-import {
-  META_UNITAS_RX_GOLD_BOXES,
-  META_UNITAS_RX_GUIDE,
-  META_UNITAS_RX_SEAMS,
-} from "./meta-unitas-rx-suit-nanites.ts";
 import { farFromAccents, farFromStillAccents } from "./far-from-assembly-accents.ts";
 import { mountMetaUnitasBoost } from "./meta-unitas-boost.ts";
 import {
@@ -43,10 +41,26 @@ import {
   type HenshinFigure,
 } from "./rexonance-henshin.ts";
 
+/** The bank's direction cuts to its parts in the plan's order (legs, arms,
+ * chest, waist); the nanite skin makes them whole out from the reactor
+ * (chest, waist, arms, legs). Each piece is handed to the director under
+ * the group whose beat it is whole on, so the camera and the lock follow
+ * the armour (rexonance-henshin.ts is shared and untouched). */
+const HENSHIN_GROUP: Readonly<Record<string, string>> = {
+  chest: "legs",
+  shoulders: "legs",
+  waist: "arms",
+  arms: "chest",
+  legs: "waist",
+};
+
 /** Meta Unitas' figure for the bank's direction (rexonance-henshin.ts). */
 export const META_UNITAS_HENSHIN_FIGURE: HenshinFigure = {
   size: META_UNITAS_RX_SIZE,
-  pieces: META_UNITAS_RX_PIECES,
+  pieces: META_UNITAS_RX_PIECES.map((piece) => ({
+    ...piece,
+    group: HENSHIN_GROUP[piece.group] ?? piece.group,
+  })),
   core: META_UNITAS_RX_MARKS.core as unknown as readonly [number, number],
   visor: META_UNITAS_RX_MARKS.visor as unknown as readonly [number, number],
   belt: META_UNITAS_RX_MARKS.belt as unknown as readonly [number, number],
@@ -86,16 +100,23 @@ export const META_UNITAS_PALETTE = Object.freeze({
   },
 } as const satisfies NonNullable<RexonanceAssemblyConfig["palette"]>);
 
-/** The kit: Rexonance's hex chips; Meta Unitas' own guide, seams and gold. */
-export const loadMetaUnitasNanites = () =>
-  import("./rexonance-nanites.ts").then((kit) => ({
-    cells: kit.REXONANCE_NANITE_CELLS,
-    comets: kit.REXONANCE_NANITE_COMETS,
-    fx: kit.REXONANCE_NANITE_FX,
-    guide: META_UNITAS_RX_GUIDE,
-    seams: META_UNITAS_RX_SEAMS,
-    goldBoxes: META_UNITAS_RX_GOLD_BOXES,
-  }));
+/** Meta Unitas' nanite skin (nanite-skin.ts; owner, 2026-11-11): dark teal
+ * steel under its scale's light, hexagonal cells. */
+export const META_UNITAS_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
+  steel: "rgb(16 30 34)",
+  steelAlpha: 0.84,
+  line: "rgb(120 226 220)",
+  glint: [226, 252, 248] as const,
+  motes: ["rgb(140 176 178)", "rgb(255 170 96)", "rgb(244 248 250)"] as const,
+  cell: 7,
+  triangles: false,
+});
+
+/** The armour's generation: the nanite skin growing from the reactor. */
+export const metaUnitasSkinGeneration = createNaniteSkinGeneration({
+  style: META_UNITAS_SKIN_STYLE,
+  beats: ASSEMBLY_BEATS,
+});
 
 export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
   return {
@@ -126,14 +147,11 @@ export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
     // The driver stays in front of the plates built around it.
     driverFront: true,
     atlas: META_UNITAS_RX_ATLAS.src,
-    gold: {
-      atlas: META_UNITAS_RX_GOLD_ATLAS.src,
-      cell: META_UNITAS_RX_GOLD_CELL,
-      cells: META_UNITAS_RX_GOLD_CELLS,
-    },
     palette: META_UNITAS_PALETTE,
     accents: farFromAccents,
-    nanites: loadMetaUnitasNanites,
+    // The armour grows as a nanite skin from the reactor (owner,
+    // 2026-11-11): no swarm kit and no gold atlas are fetched.
+    generation: metaUnitasSkinGeneration,
     forms: {
       chain: META_UNITAS_FORM_CHAIN,
       tones: META_UNITAS_FORM_TONES,

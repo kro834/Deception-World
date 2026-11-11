@@ -8,17 +8,17 @@ export async function loadLabConfig(rider: LabRider): Promise<RexonanceAssemblyC
     case "illusionculum": {
       const [engine, accents, suit] = await Promise.all([
         import("./illusionculum-assembly-engine"),
-        import("./illusionculum-assembly-accents"),
+        import("./illusionculum-scroll-accents"),
         import("./illusionculum-suit"),
       ]);
       const config = engine.illusionculumAssemblyConfig();
       const compact = window.matchMedia("(any-pointer: coarse), (max-width: 767px)").matches;
-      config.accents = accents.createIllusionculumAccents({
+      config.accents = accents.createIllusionculumScrollAccents({
         size: suit.ILLUSIONCULUM_SUIT_SIZE,
         pieces: suit.ILLUSIONCULUM_SUIT_PIECES,
         core: suit.ILLUSIONCULUM_SUIT_MARKS.core,
         seams: suit.ILLUSIONCULUM_SUIT_SEAMS,
-        budget: accents.illusionculumAccentBudget(window, { compact, entry: false }),
+        budget: accents.illusionculumScrollAccentBudget(window, { compact, entry: false }),
       });
       return config;
     }

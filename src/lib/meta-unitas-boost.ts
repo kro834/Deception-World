@@ -53,13 +53,15 @@ export const META_UNITAS_BOOST_BEATS = {
   complete: 0.93,
 } as const;
 
-/** The engine's group → beat (BEAT_OF_GROUP). */
+/** Each group's beat, in the order the nanite skin makes them whole — out
+ * from the reactor (nanite-skin.ts NANITE_SKIN_BEAT_ORDER; owner,
+ * 2026-11-11): chest, waist, arms, legs, then the engine's own. */
 const BEAT_OF_GROUP: Record<string, number> = {
-  legs: 0,
-  arms: 1,
-  chest: 2,
-  shoulders: 2,
-  waist: 3,
+  chest: 0,
+  shoulders: 0,
+  waist: 1,
+  arms: 2,
+  legs: 3,
   tail: 4,
   ribbon: 4,
   bits: 4,

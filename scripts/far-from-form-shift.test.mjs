@@ -10,15 +10,15 @@ import {
   farFromShiftUnder,
 } from "../src/lib/far-from-form-shift.ts";
 import { FAR_FROM_FORM_CHAIN, farFromAssemblyConfig } from "../src/lib/far-from-assembly-engine.ts";
-import { FAR_FROM_MIST, createFarFromMist, farFromMistCurl } from "../src/lib/far-from-nanite-mist.ts";
-import { FAR_FROM_TIDE, farFromTidePath, prepareFarFromTide } from "../src/lib/far-from-nanite-tide.ts";
+import { drawFarFromSettle } from "../src/lib/far-from-form-settle.ts";
 
-/* FAR FROM SAGA — the form change on the suit-up's runway and the nanite
-   tide (owner, 2026-11-11: 「ナノマシン装着アニメーションを強化して。また、
+/* FAR FROM SAGA — the form change on the suit-up's runway (owner, 2026-11-11: 「ナノマシン装着アニメーションを強化して。また、
    5つの形態のうち1つを開いた後、別の形態に移動する時、現在の形態のアーマーの
    ナノマシンが消散し、そのアンダースーツから遷移アニメーションが始まるように」).
    These pin the change's sequence (dissolve → build from the undersuit →
-   settle), every way it can be interrupted, and the draw layers' contracts. */
+   settle), every way it can be interrupted, and the draw layers' contracts.
+   The dissolve is the nanite skin's retract (nanite-skin.ts, pinned by
+   scripts/nanite-skin.test.mjs): the armour flows back into the reactor. */
 
 const steps = (form) => FAR_FROM_FORM_CHAIN.indexOf(form) + 1;
 const machine = () => createFarFromFormShift({ beats: ASSEMBLY_BEATS, steps });
@@ -65,7 +65,6 @@ test("the change runs dissolve, the build from the undersuit, then the settle", 
   const build = live.filter((frame) => frame.phase === "build");
   assert.ok(build[0].mist >= 1 && build[0].mist < 1 + FAR_FROM_SHIFT.mistTail);
   assert.equal(build.at(-1).mist, -1);
-  assert.ok(1 + FAR_FROM_SHIFT.mistTail <= FAR_FROM_MIST.end, "the picture outlives its mist");
   // The settle is the scroll's own frame, flashing once.
   const settle = live.filter((frame) => frame.phase === "settle");
   assert.ok(settle.every((frame) => frame.progress === 1 && frame.mist === -1));
@@ -123,7 +122,7 @@ test("a second choice during the dissolve or the base build only retargets", () 
   assert.equal(shift.target, "high");
   assert.equal(shift.phase, "dissolve", "the dissolve is not started over");
   const before = shift.frame(416, 1).mist;
-  assert.ok(before > 0.3, "the mist keeps its clock");
+  assert.ok(before > 0.2, "the dissolve keeps its clock");
   // On into the base build: still the same figure, so still a retarget.
   run(shift, 432, FAR_FROM_SHIFT.dissolveMs + 800);
   assert.equal(shift.phase, "build");
@@ -276,148 +275,32 @@ const fakeContext = (calls) =>
       },
     },
   );
-const fakeDocument = (pixel) => ({
-  createElement: () => {
-    const canvas = { width: 0, height: 0 };
-    canvas.getContext = () => {
-      const calls = [];
-      const context = fakeContext(calls);
-      context.getImageData = (x, y, width, height) => {
-        const data = new Uint8ClampedArray(width * height * 4);
-        for (let i = 0; i < width * height; i += 1) data.set(pixel(i % width, Math.floor(i / width), width, height), i * 4);
-        return { data };
-      };
-      canvas.calls = calls;
-      return context;
-    };
-    return canvas;
-  },
+test("the dissolve is the skin's retract: one copy of the canvas, nothing read back, about 1.6 s", () => {
+  assert.ok(FAR_FROM_SHIFT.dissolveMs >= 1400 && FAR_FROM_SHIFT.dissolveMs <= 1800);
+  const engine = readFileSync(new URL("../src/lib/far-from-assembly-engine.ts", import.meta.url), "utf8");
+  const kit = engine.slice(engine.indexOf("export const farFromFormShiftKit"), engine.indexOf("/** The scene's config"));
+  assert.match(kit, /return Boolean\(farFromSkin\?\.hold\(canvas, vs, vx, vy\)\);/);
+  assert.match(kit, /if \(state\.mist >= 0 && state\.mist < 1\) farFromSkin\?\.retract\(context, state\.mist, vs, ratio\);/);
+  // The hitch at the dissolve's start is gone with its cause: no pixels are
+  // read and nothing is sorted when a form is chosen.
+  assert.doesNotMatch(kit, /getImageData|\.sort\(|createFarFromMist/);
+  const skin = readFileSync(new URL("../src/lib/nanite-skin.ts", import.meta.url), "utf8");
+  const hold = skin.slice(skin.indexOf("const hold = ("), skin.indexOf("const retract = ("));
+  assert.doesNotMatch(hold, /getImageData|\.sort\(/);
+  assert.equal(hold.match(/drawImage\(/g).length, 1, "one copy of the scene's canvas");
 });
 
-test("the mist: every solid cell is cut once, in order; armour flies, the body does not", () => {
-  const size = { width: 693, height: 1040 };
-  // The picture: a body column, armour (another colour) over its top half.
-  let armoured = false;
-  const pixel = (x, y, width, height) => {
-    if (x < width * 0.3 || x > width * 0.7) return [0, 0, 0, 0];
-    return armoured && y < height / 2 ? [40, 120, 255, 255] : [60, 60, 70, 255];
-  };
-  const document = fakeDocument(pixel);
-  const mist = createFarFromMist({ document, size, core: [346, 300], coarse: true, undersuit: {} });
-  assert.ok(mist);
-  // (The undersuit's sample was read at once, with no armour on it.)
-  assert.equal(mist.live, false);
-  mist.draw(fakeContext([]), 0.5, 1);
-  armoured = true;
-  assert.equal(mist.capture({}, { a: 0.9, d: 0.9, e: 12, f: 30 }), true);
-  assert.equal(mist.live, true);
-  assert.ok(mist.count > 500, "the armour's cells fly");
-  assert.ok(mist.count <= FAR_FROM_MIST.budget.coarse, "within the touch budget");
-  const cell = FAR_FROM_MIST.cell.coarse;
-  const solid = Math.ceil(size.width / cell) * Math.ceil(size.height / cell) * 0.4;
-  assert.ok(mist.count < solid * 0.62, "the body's cells never fly");
-  // Drawn forward: rects grow in number, then the mist thins to nothing.
-  const rects = (u) => {
-    const calls = [];
-    mist.draw(fakeContext(calls), u, 1);
-    return calls.filter(([name]) => name === "rect").length;
-  };
-  assert.ok(rects(0.02) < rects(0.4));
-  assert.ok(rects(0.4) > 300);
-  assert.ok(rects(1.35) < rects(0.6));
-  assert.equal(mist.live, true);
-  rects(FAR_FROM_MIST.end);
-  assert.equal(mist.live, false, "gone for good at its end");
-  assert.equal(rects(0.5), 0, "nothing is drawn after it");
-  // A new capture starts it over (an interrupted change).
-  assert.equal(mist.capture({}, { a: 0.9, d: 0.9, e: 12, f: 30 }), true);
-  assert.equal(mist.live, true);
-  assert.ok(rects(0.3) > 0);
-  mist.release();
-  assert.equal(mist.live, false);
-  // An empty picture is no dissolve.
-  const empty = createFarFromMist({ document: fakeDocument(() => [0, 0, 0, 0]), size, core: [346, 300], coarse: false });
-  assert.equal(empty.capture({}, { a: 1, d: 1, e: 0, f: 0 }), false);
-  assert.equal(empty.live, false);
-});
-
-test("the curl field is divergence-free and bounded", () => {
-  const out = [0, 0];
-  const at = (x, y) => {
-    farFromMistCurl(x, y, 0.4, out);
-    return [out[0], out[1]];
-  };
-  for (const [x, y] of [
-    [100, 200],
-    [346, 520],
-    [600, 900],
-  ]) {
-    const h = 0.01;
-    const div = (at(x + h, y)[0] - at(x - h, y)[0]) / (2 * h) + (at(x, y + h)[1] - at(x, y - h)[1]) / (2 * h);
-    assert.ok(Math.abs(div) < 1e-6, `divergence at ${x}, ${y}`);
-    assert.ok(Math.hypot(...at(x, y)) < 3);
-  }
-});
-
-test("the tide: every tile docks ahead of its landing, flashes, charges and locks", () => {
-  const tiles = [];
-  for (let i = 0; i < 400; i += 1)
-    tiles.push({ sx: (i % 20) * 16, sy: Math.floor(i / 20) * 16, cx: (i % 20) * 16 + 8, cy: Math.floor(i / 20) * 16 + 8, tw: 16, th: 16, t1: 0.2 + (i / 400) * 0.1, pieceId: "plate" });
-  tiles.push({ sx: 0, sy: 0, t1: 0.25, pieceId: null });
-  const tide = prepareFarFromTide({ tiles, tile: 16, core: [160, 160], coarse: false, until: ASSEMBLY_BEATS.clamp });
-  assert.equal(tide.count, 400 * FAR_FROM_TIDE.split ** 2, "the plates' tiles only, each split");
-  const draw = (q, calm = false) => {
-    const calls = [];
-    tide.draw(fakeContext(calls), q, calm, 1);
-    return { calls, ...tide.drawn };
-  };
-  // Before the first nanite flies, and after the last lock: nothing.
-  assert.equal(draw(0.2 - FAR_FROM_TIDE.lead - FAR_FROM_TIDE.flight - FAR_FROM_TIDE.stagger - 0.001).calls.length, 0);
-  assert.equal(draw(0.31 + FAR_FROM_TIDE.lock).calls.filter(([name]) => name === "rect").length, 0);
-  // Ahead of the first landing: streams only.
-  const early = draw(0.2 - FAR_FROM_TIDE.lead - FAR_FROM_TIDE.stagger - 0.004);
-  assert.ok(early.stream > 0 && early.coat === 0 && early.lock === 0);
-  // Mid-wave: the coat with a lit edge ahead and locks behind.
-  const mid = draw(0.25);
-  assert.ok(mid.coat > 0 && mid.dock > 0 && mid.lock > 0 && mid.stream > 0);
-  assert.ok(mid.dock < mid.coat, "the lit edge is the front, not the coat");
-  // The coat is a band of the wave, never the whole plate at once.
-  assert.ok(mid.coat < tide.count * 0.5);
-  // A calm frame keeps the coat and drops the transients.
-  const calm = draw(0.25, true);
-  assert.equal(calm.coat, mid.coat);
-  assert.equal(calm.dock + calm.lock + calm.stream, 0);
-  // Closed form: the same frame whichever way it is reached.
-  draw(0.29);
-  assert.deepEqual(draw(0.25).calls, mid.calls);
-  // Touch screens stream fewer nanites; the coat is whole.
-  const touch = prepareFarFromTide({ tiles, tile: 16, core: [160, 160], coarse: true, until: ASSEMBLY_BEATS.clamp });
+test("the settle's flash eases out and leaves the context as it found it", () => {
   const calls = [];
-  touch.draw(fakeContext(calls), 0.25, false, 1);
-  assert.equal(touch.drawn.coat, mid.coat);
-  assert.ok(touch.drawn.stream < mid.stream);
-});
-
-test("a nanite eases into its place: quick at first, settling in, never a straight even move", () => {
-  const out = [0, 0];
-  const at = (a) => {
-    farFromTidePath(300, 400, 0.6, 120, 1.8, a, 0.25, out);
-    return [out[0], out[1]];
-  };
-  assert.deepEqual(at(1), [300, 400], "docked exactly on its tile");
-  const far = Math.hypot(at(0)[0] - 300, at(0)[1] - 400);
-  assert.ok(far > 90);
-  const d = (a) => Math.hypot(at(a)[0] - 300, at(a)[1] - 400);
-  // Ease out: the first half of the flight covers most of the way.
-  assert.ok(d(0.5) < far * 0.35);
-  const firstStep = Math.hypot(at(0.1)[0] - at(0)[0], at(0.1)[1] - at(0)[1]);
-  const lastStep = Math.hypot(at(1)[0] - at(0.9)[0], at(1)[1] - at(0.9)[1]);
-  assert.ok(lastStep < firstStep * 0.2, "it settles in");
-  // Not a straight line: the mid-flight point is off the chord.
-  const [x0, y0] = at(0);
-  const [xm, ym] = at(0.35);
-  const cross = Math.abs((300 - x0) * (ym - y0) - (400 - y0) * (xm - x0)) / far;
-  assert.ok(cross > 6, "it turns in on its spiral");
+  const context = fakeContext(calls);
+  drawFarFromSettle(context, {}, -1, { width: 693, height: 1040 }, [346, 300], "#fff", 1);
+  drawFarFromSettle(context, {}, 1, { width: 693, height: 1040 }, [346, 300], "#fff", 1);
+  assert.equal(calls.length, 0, "nothing outside its beat");
+  drawFarFromSettle(context, {}, 0.3, { width: 693, height: 1040 }, [346, 300], "#fff", 1);
+  assert.ok(calls.some(([name]) => name === "drawImage"));
+  assert.ok(calls.some(([name]) => name === "ellipse"));
+  assert.equal(context.globalAlpha, 1);
+  assert.equal(context.globalCompositeOperation, "source-over");
 });
 
 test("the engine: FAR FROM alone has the form change; the scene's own beats are as they were", () => {

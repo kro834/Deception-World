@@ -214,7 +214,7 @@ test("no secondary labels: no kicker, caption, counter or hint on the page", () 
 test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut suit", () => {
   // Owner (2026-10-23): 「メタ・ウニタスはレクソナンスと同じ装着です」.
   const engine = read("src/lib/meta-unitas-rx-engine.ts");
-  assert.match(engine, /import \{ mountRexonanceAssembly/);
+  assert.match(engine, /import \{\n {2}ASSEMBLY_BEATS,\n {2}mountRexonanceAssembly,/);
   assert.match(
     engine,
     // Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — the same
@@ -222,7 +222,10 @@ test("the suit-up assembles as Rexonance's: its engine, Meta Unitas' SAM-cut sui
     // (2026-11-03): the scroll suit-up has no director (its own clock again).
     /mountRexonanceAssembly\(\s*runway,\s*\{\s*\.\.\.metaUnitasAssemblyConfig\(\),[\s\S]*?\.\.\.\(director \? null : \{ accents: farFromStillAccents \}\),\s*eager: options\.eager,\s*progress: director\?\.progress,?\s*\},\s*environment,?\s*\)/,
   );
-  assert.ok(!/fire: false|generation:/.test(engine), "the fire and the nanites stay Rexonance's");
+  assert.ok(!/fire: false/.test(engine), "the fire stays Rexonance's");
+  // Owner (2026-11-11): the armour grows as a nanite skin from the reactor.
+  assert.match(engine, /generation: metaUnitasSkinGeneration,/);
+  assert.doesNotMatch(engine, /nanites: load|gold: \{\s+atlas:/);
   assert.match(read("src/lib/meta-unitas-assembly.ts"), /import\("\.\/meta-unitas-rx-engine"\)/);
   assert.match(suitup, /className="mus-runway rzn-suitup"/);
   assert.match(suitup, /className="rzn-canvas"/);

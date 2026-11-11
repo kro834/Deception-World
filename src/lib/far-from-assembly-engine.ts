@@ -10,16 +10,13 @@
  * - the palette: ice, gold and white instead of ice, pink and white — the
  *   chips, the mosaic, the pixel squares, the core's rings and glow, the
  *   field's particles and the swarm's batched chips;
- * - the armour is generated as a wireframe (owner, 2026-10-23: 「また、
- *   ファーフロムはワイヤーフレーム風の生成方式を採るように。」; `generation`,
- *   src/lib/far-from-wireframe-layer.ts): each plate's real outline traced,
- *   its mesh drawn out from its seat (src/lib/far-from-wireframe.ts, made by
- *   scripts/build-far-from-wireframe.mjs from the suit), its facets lit and
- *   resolved into the art, then a scan over each group resolving the gold
- *   while the wire retracts into the seams — in place of Rexonance's nanite
- *   swarm — combined with it (owner, 2026-10-24: 「ナノマシンによる生成をワイヤー
- *   フレームと組み合わせて」): the wire is traced first and the nanite cells
- *   (two kits mixed, hex chips and the Blender crystal) stream in along it;
+ * - the armour grows as a nanite skin (owner, 2026-11-11: 「ナノマシン感が
+ *   全くない」; `generation`, src/lib/nanite-skin.ts): one liquid front
+ *   leaves the reactor and runs over the body — chest, waist, arms, legs,
+ *   then the parts off the body and the helmet — and behind it the surface
+ *   crystallises into a mesh of triangles (the wireframe this page's armour
+ *   was generated as; owner, 2026-10-23) whose cells click into the art, in
+ *   place of Rexonance's swarm, plates, gold pour and field;
  * - the reactor completes like the compound eyes (owner): its rim forms
  *   first, a wire ring with the chest's crystal, then on FAR FROM DEUS！
  *   pixel squares fill the crystal and scatter (`reactorGlow`); the crystal
@@ -30,8 +27,7 @@
  *   ウルトラ, each form overwriting the last with cells from the core out.
  *   ウルトラ goes through マックス and overwrites it twice — the owner's body
  *   (white, with its added parts), then the owner's figure with its
- *   auxiliary interfaces; each change draws the next form's wireframe over
- *   the last from the reactor out, then fills its facets from the reactor
+ *   auxiliary interfaces; each change is the same front from the reactor
  *   out. ミドル ("standard") stops on the base figure;
  * - the 光輪 open behind the figure as the output ignites
  *   (src/lib/far-from-assembly-accents.ts).
@@ -42,14 +38,17 @@
  * its end tone gold (`fireTone`, rexonance-fire/fire-tuning.js FIRE_TONES).
  */
 
-import { mountRexonanceAssembly, type RexonanceAssemblyConfig } from "./rexonance-resonance.js";
+import {
+  ASSEMBLY_BEATS,
+  mountRexonanceAssembly,
+  type RexonanceAssemblyConfig,
+} from "./rexonance-resonance.js";
 import {
   FAR_FROM_SUIT_ATLAS,
   FAR_FROM_SUIT_DRIVER,
   FAR_FROM_SUIT_FACE_GLOW,
   FAR_FROM_SUIT_FIGURE,
   FAR_FROM_SUIT_FORMS,
-  FAR_FROM_SUIT_GOLD_ATLAS,
   FAR_FROM_SUIT_MARKS,
   FAR_FROM_SUIT_ORNAMENTS,
   FAR_FROM_SUIT_PIECES,
@@ -58,14 +57,7 @@ import {
   FAR_FROM_SUIT_TILE,
   FAR_FROM_SUIT_UNDERSUIT,
 } from "./far-from-suit.ts";
-import { FAR_FROM_SUIT_GOLD_CELL, FAR_FROM_SUIT_GOLD_CELLS } from "./far-from-suit-gold.ts";
-import {
-  FAR_FROM_SUIT_GOLD_BOXES,
-  FAR_FROM_SUIT_GUIDE,
-  FAR_FROM_SUIT_SEAMS,
-} from "./far-from-suit-nanites.ts";
 import { farFromAccents } from "./far-from-assembly-accents.ts";
-import { farFromWireGeneration } from "./far-from-wireframe-layer.ts";
 import { farFromUltraSrc } from "./far-from-ultra-art.ts";
 import {
   FAR_FROM_SHIFT,
@@ -73,7 +65,9 @@ import {
   type FarFromShiftBeats,
   type FarFromShiftFrame,
 } from "./far-from-form-shift.ts";
-import { createFarFromMist, drawFarFromSettle } from "./far-from-nanite-mist.ts";
+import { drawFarFromSettle } from "./far-from-form-settle.ts";
+import { createNaniteSkinGeneration, type NaniteSkinLayer } from "./nanite-skin.ts";
+import { FAR_FROM_SKIN_STYLE } from "./far-from-skin-style.ts";
 
 /** The stages' lights, as the record's accents (final-stage-data.ts). */
 export const FAR_FROM_FORM_TONES = Object.freeze({
@@ -146,29 +140,23 @@ export const FAR_FROM_REACTOR_RADIUS = 0;
  * fire's end tone, rexonance-fire/fire-tuning.js FIRE_TONES.gold. */
 export const FAR_FROM_FIRE_TONE = 1;
 
-/** The nanite kits, loaded with the scene's pictures: kit A's chips, comets
- * and effects, kit B's crystal chips, and FAR FROM's own guide, seams and
- * gold boxes. */
-export const loadFarFromNanites = () =>
-  Promise.all([import("./rexonance-nanites.ts"), import("./far-from-nanites.ts")]).then(
-    ([kitA, kitB]) => ({
-      // Kit A: Rexonance's hex chip. Kit B: Far From's own Blender crystal
-      // (the same sheet layout, so one sprite path draws both, mixed per
-      // chip). Comets, FX and the guide come from kit A and the suit build.
-      cells: kitA.REXONANCE_NANITE_CELLS,
-      cellsB: kitB.FAR_FROM_NANITE_CELLS,
-      comets: kitA.REXONANCE_NANITE_COMETS,
-      fx: kitA.REXONANCE_NANITE_FX,
-      guide: FAR_FROM_SUIT_GUIDE,
-      seams: FAR_FROM_SUIT_SEAMS,
-      goldBoxes: FAR_FROM_SUIT_GOLD_BOXES,
-    }),
-  );
+// The scene's skin, lent to the form change while the scene is mounted.
+let farFromSkin: NaniteSkinLayer | null = null;
+
+/** The armour's generation: the nanite skin growing from the reactor. */
+export const farFromSkinGeneration = createNaniteSkinGeneration({
+  style: FAR_FROM_SKIN_STYLE,
+  beats: ASSEMBLY_BEATS,
+  onLayer(layer) {
+    farFromSkin = layer;
+  },
+});
 
 /** The form change (owner, 2026-11-11; far-from-form-shift.ts): its clock,
- * the armour's dissolve into mist and the finished form's flash, as the
- * engine's `formShift` kit. A form's path through the chain is its place
- * in it (ミドル, "standard", has none). */
+ * the armour flowing back into the reactor (the skin's `retract`: the
+ * picture on the canvas held with one copy, nothing read back) and the
+ * finished form's flash, as the engine's `formShift` kit. A form's path
+ * through the chain is its place in it (ミドル, "standard", has none). */
 export const farFromFormShiftKit = Object.freeze({
   visible: FAR_FROM_SHIFT.visible,
   create(input: {
@@ -179,8 +167,6 @@ export const farFromFormShiftKit = Object.freeze({
     undersuit: CanvasImageSource;
     beats: FarFromShiftBeats;
   }) {
-    const mist = createFarFromMist(input);
-    if (!mist) return null;
     const chain: readonly string[] = FAR_FROM_FORM_CHAIN;
     const tones: Readonly<Record<string, string>> = FAR_FROM_FORM_TONES;
     const machine = createFarFromFormShift({
@@ -199,7 +185,7 @@ export const farFromFormShiftKit = Object.freeze({
       frame: machine.frame,
       cancel: machine.cancel,
       capture(canvas: CanvasImageSource, vs: number, vx: number, vy: number) {
-        return mist.capture(canvas, { a: vs, d: vs, e: vx, f: vy });
+        return Boolean(farFromSkin?.hold(canvas, vs, vx, vy));
       },
       paint(
         context: CanvasRenderingContext2D,
@@ -213,7 +199,7 @@ export const farFromFormShiftKit = Object.freeze({
         const state = frame as FarFromShiftFrame;
         const px = ratio / Math.max(1e-6, vs);
         context.setTransform(vs, 0, 0, vs, vx, vy);
-        if (state.mist >= 0) mist.draw(context, state.mist, px);
+        if (state.mist >= 0 && state.mist < 1) farFromSkin?.retract(context, state.mist, vs, ratio);
         if (state.settle >= 0) {
           tone = tones[machine.target] ?? tone;
           drawFarFromSettle(context, canvas, state.settle, input.size, input.core, tone, px);
@@ -221,7 +207,6 @@ export const farFromFormShiftKit = Object.freeze({
       },
       release() {
         machine.cancel();
-        mist.release();
       },
     };
   },
@@ -256,17 +241,12 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
     reactorRadius: FAR_FROM_REACTOR_RADIUS,
     fireTone: FAR_FROM_FIRE_TONE,
     atlas: FAR_FROM_SUIT_ATLAS.src,
-    gold: {
-      atlas: FAR_FROM_SUIT_GOLD_ATLAS.src,
-      cell: FAR_FROM_SUIT_GOLD_CELL,
-      cells: FAR_FROM_SUIT_GOLD_CELLS,
-    },
     palette: FAR_FROM_PALETTE,
     accents: farFromAccents,
-    // Both nanite kits build the armour (owner), over the wireframe that
-    // traces each plate first (owner, 2026-10-24).
-    nanites: loadFarFromNanites,
-    generation: farFromWireGeneration,
+    // The armour grows as a nanite skin from the reactor (owner,
+    // 2026-11-11), its cells the triangles of the wireframe. No swarm kit and
+    // no gold atlas: the skin draws the art itself, so neither is fetched.
+    generation: farFromSkinGeneration,
     formShift: farFromFormShiftKit,
     forms: {
       chain: FAR_FROM_FORM_CHAIN,

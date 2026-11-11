@@ -59,13 +59,12 @@ import {
   farFromHaloSweep,
 } from "../src/lib/far-from-assembly-accents.ts";
 import {
+  farFromSkinGeneration,
   FAR_FROM_FORM_CHAIN,
   FAR_FROM_PALETTE,
   farFromAssemblyConfig,
-  loadFarFromNanites,
 } from "../src/lib/far-from-assembly-engine.ts";
 import { REXONANCE_SUIT_MARKS, REXONANCE_SUIT_UNDERSUIT } from "../src/lib/rexonance-suit.ts";
-import { farFromWireGeneration } from "../src/lib/far-from-wireframe-layer.ts";
 import { FIRE_TONES } from "../src/lib/rexonance-fire/fire-tuning.js";
 import { FAR_FROM_SAGA } from "../src/components/final-stage/final-stage-data.ts";
 
@@ -289,7 +288,8 @@ test("the beats are the engine's, the HUD has one part per beat, the call is the
   const beat = (part) => FAR_FROM_ASSEMBLY_BEATS.find((entry) => entry.part === part);
   assert.deepEqual([beat("scan").at, beat("scan").until], B.scan);
   const step = (B.deus[1] - B.deus[0]) / 4;
-  ["legs", "arms", "chest", "waist"].forEach((part, index) => {
+  // Out from the reactor (the nanite skin's order; owner, 2026-11-11).
+  ["chest", "waist", "arms", "legs"].forEach((part, index) => {
     assert.ok(Math.abs(beat(part).at - (B.deus[0] + index * step)) < 1e-9, part);
     assert.ok(Math.abs(beat(part).until - (B.deus[0] + (index + 1) * step)) < 1e-9, part);
   });
@@ -301,7 +301,7 @@ test("the beats are the engine's, the HUD has one part per beat, the call is the
   assert.deepEqual([beat("pixels").at, beat("pixels").until], B.pixels);
   assert.deepEqual([beat("forms").at, beat("forms").until], B.form);
   assert.equal(FAR_FROM_ASSEMBLY_PARTS.length, 6);
-  assert.deepEqual([...FAR_FROM_ASSEMBLY_PARTS], ["LEGS", "ARMS", "CHEST", "WAIST", "BITS", "HEAD"]);
+  assert.deepEqual([...FAR_FROM_ASSEMBLY_PARTS], ["CHEST", "WAIST", "ARMS", "LEGS", "BITS", "HEAD"]);
   assert.equal(FAR_FROM_ASSEMBLY_PHASES.length, 6);
   assert.deepEqual(
     FAR_FROM_ASSEMBLY_PHASES.map((entry) => entry.phase),
@@ -456,12 +456,15 @@ test("the config is the engine's: FAR FROM's palette, reactor, chain, kits and a
   assert.ok(swarm.indexOf("const KITOF") < swarm.indexOf("/* -- draw passes: allocation-free from here -- */"));
   assert.match(swarm, /const sheet = second \? cellsB : cells;/);
   assert.match(resonance, /optional\(kit\?\.cellsB\?\.src\)/);
-  // Owner (2026-10-24): both kits build the armour over the wireframe.
-  assert.equal(config.generation, farFromWireGeneration);
-  assert.equal(config.nanites, loadFarFromNanites);
-  assert.match(engine, /cellsB: kitB\.FAR_FROM_NANITE_CELLS/);
-  assert.match(engine, /import\("\.\/far-from-nanites\.ts"\)/);
-  assert.match(engine, /generation: farFromWireGeneration/);
+  // Owner (2026-11-11): the armour grows as a nanite skin from the reactor.
+  assert.equal(config.generation, farFromSkinGeneration);
+  assert.equal(config.generation.overlay, false);
+  // The skin draws the art itself: no swarm kit and no gold atlas are
+  // fetched for the scroll (the entry keeps its own kits).
+  assert.equal(config.nanites, undefined);
+  assert.equal(config.gold, undefined);
+  assert.doesNotMatch(engine, /far-from-nanites\.ts|rexonance-nanites\.ts/);
+  assert.match(engine, /generation: farFromSkinGeneration/);
   // The field's tones only where a palette names them.
   assert.match(resonance, /\.\.\.\(palette\.field \? \{ tones: palette\.field \} : \{\}\)/);
 });

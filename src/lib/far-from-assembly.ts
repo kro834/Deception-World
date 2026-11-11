@@ -51,10 +51,10 @@ export type FarFromAssemblyBeat = {
 export const FAR_FROM_ASSEMBLY_BEATS: readonly FarFromAssemblyBeat[] = Object.freeze([
   { at: 0, until: 0.07, part: "scan", label: "アンダースーツを走査" },
   { at: 0.02, until: 0.16, part: "fire", label: "炎が全身を覆い、爆散" },
-  { at: 0.16, until: 0.275, part: "legs", label: "脚部装甲" },
-  { at: 0.275, until: 0.39, part: "arms", label: "腕部装甲" },
-  { at: 0.39, until: 0.505, part: "chest", label: "胸部・肩部装甲" },
-  { at: 0.505, until: 0.62, part: "waist", label: "腰部装甲" },
+  { at: 0.16, until: 0.275, part: "chest", label: "胸部・肩部装甲" },
+  { at: 0.275, until: 0.39, part: "waist", label: "腰部装甲" },
+  { at: 0.39, until: 0.505, part: "arms", label: "腕部装甲" },
+  { at: 0.505, until: 0.62, part: "legs", label: "脚部装甲" },
   { at: 0.62, until: 0.82, part: "bits", label: "結晶・翼・ファーフロムビット" },
   { at: 0.68, until: 0.848, part: "head", label: "頭部" },
   { at: 0.86, until: 0.9, part: "seal", label: "構造を固定" },
@@ -65,10 +65,10 @@ export const FAR_FROM_ASSEMBLY_BEATS: readonly FarFromAssemblyBeat[] = Object.fr
 
 /** The HUD's parts, one per beat, in the order they land. */
 export const FAR_FROM_ASSEMBLY_PARTS = Object.freeze([
-  "LEGS",
-  "ARMS",
   "CHEST",
   "WAIST",
+  "ARMS",
+  "LEGS",
   "BITS",
   "HEAD",
 ] as const);

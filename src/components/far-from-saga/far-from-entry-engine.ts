@@ -11,6 +11,7 @@ import {
   FAR_FROM_SUIT_EMBERS,
   FAR_FROM_SUIT_LIGHT,
   FAR_FROM_SUIT_OMEN,
+  FAR_FROM_SUIT_SNAP,
 } from "@/lib/far-from-entry-calls";
 import { FAR_FROM_ENTRY_KITS, FAR_FROM_ENTRY_KIT_B_SHARE } from "@/lib/far-from-entry-kits";
 import {
@@ -25,7 +26,11 @@ import {
   fireFragmentPose,
   naniteFlameEnvelope,
 } from "@/lib/rexonance-ignition.js";
-import { FAR_FROM_ENTRY_MATERIAL, farFromFlamePhase } from "@/lib/far-from-entry-ignition.js";
+import {
+  FAR_FROM_ENTRY_FIRE,
+  FAR_FROM_ENTRY_MATERIAL,
+  farFromFlamePhase,
+} from "@/lib/far-from-entry-ignition.js";
 import {
   CHIP_ALPHA,
   CHIP_DEPTH,
@@ -39,6 +44,15 @@ import {
   planFarFromSwarm,
 } from "@/lib/far-from-entry-swarm.js";
 import { farFromEntryPlan, T } from "./far-from-entry-plan";
+import {
+  NANITE_SKIN_GROUP_BEAT,
+  NANITE_SKIN_SCENE_BEATS,
+  naniteSkinTimeline,
+  prepareNaniteSkin,
+  type NaniteSkinLayer,
+  type NaniteSkinTile,
+} from "@/lib/nanite-skin";
+import { FAR_FROM_SKIN_STYLE } from "@/lib/far-from-skin-style";
 import { FAR_FROM_WIREFRAME_ENTRY } from "@/lib/far-from-wireframe-entry";
 import { WIRE_UNIT, decodeWireMesh, triangulateWireMesh } from "@/lib/far-from-wireframe-mesh";
 
@@ -155,6 +169,46 @@ export const FAR_FROM_ENTRY_BOOST = Object.freeze({
 /** The driver's plates: worn from the start, never constructed. */
 const DRIVER: ReadonlySet<string> = new Set(["belt"]);
 const WIRE_WHITE = "#f4fbff";
+
+/** The nanite skin on the entry's clock (owner, 2026-11-11; nanite-skin.ts):
+ * the armour grows from the reactor as one liquid front — chest, waist,
+ * arms, legs, a group whole on each DEUS！, the parts off the body and the
+ * helmet after — in place of the exploded assembly, which stays as the
+ * fallback where the skin cannot be prepared. [entry ms, the skin's
+ * progress] pairs; the suit is whole as the light starts. */
+export const FAR_FROM_ENTRY_SKIN = Object.freeze(
+  (() => {
+    const B = NANITE_SKIN_SCENE_BEATS;
+    const step = (B.deus[1] - B.deus[0]) / 4;
+    const snaps = [
+      FAR_FROM_SUIT_SNAP.legs,
+      FAR_FROM_SUIT_SNAP.waist,
+      FAR_FROM_SUIT_SNAP.arms,
+      FAR_FROM_SUIT_SNAP.chest,
+    ];
+    return [
+      [FAR_FROM_ENTRY_MATERIAL, B.deus[0]] as const,
+      ...snaps.map((at, k) => [at, B.deus[0] + (k + 1) * step] as const),
+      [FAR_FROM_SUIT_LIGHT.from, B.clamp + 0.002] as const,
+    ];
+  })(),
+);
+/** The skin's progress at entry `t` ms. */
+export function farFromEntrySkinProgress(t: number): number {
+  const K = FAR_FROM_ENTRY_SKIN;
+  if (!(t > K[0][0])) return K[0][1];
+  for (let k = 1; k < K.length; k += 1)
+    if (t <= K[k][0]) {
+      const [t0, q0] = K[k - 1];
+      const [t1, q1] = K[k];
+      return q0 + ((q1 - q0) * (t - t0)) / Math.max(1, t1 - t0);
+    }
+  return K[K.length - 1][1];
+}
+/** The skin is prepared in slices of this many ms a frame: before the fire
+ * (nothing else is drawn), and under it. */
+const SKIN_SLICE = { scan: 12, fire: 6 } as const;
+const FAR_FROM_ENTRY_FIRE_IGNITE = FAR_FROM_ENTRY_FIRE.ignite;
 
 /** The engine takes over only if it is ready before the first tile is due. */
 export const FAR_FROM_ENTRY_START_BY = 420;
@@ -396,6 +450,66 @@ export function createFarFromEntryEngine({
       Math.max(CORE_X, FIG.width - CORE_X),
       Math.max(CORE_Y, FIG.height - CORE_Y),
     );
+    // The nanite skin: the armour's art (the plates, their light held back)
+    // on one sheet, the plan's tiles by group, prepared in slices under the
+    // scan and the fire.
+    let skin: NaniteSkinLayer | null = null;
+    let skinState: "pending" | "ready" | "failed" = "pending";
+    const skinArt = globalThis.document.createElement("canvas");
+    skinArt.width = FIG.width;
+    skinArt.height = FIG.height;
+    const skinSteps = (() => {
+      const artContext = skinArt.getContext("2d");
+      if (!artContext) return null;
+      const tiles: NaniteSkinTile[] = [];
+      for (let p = 0; p < plates; p += 1) {
+        const piece = plan.pieces[p];
+        if (DRIVER.has(piece.id)) continue;
+        artContext.drawImage(atlas, piece.ax, piece.ay, piece.w, piece.h, piece.x, piece.y, piece.w, piece.h);
+        const beat = NANITE_SKIN_GROUP_BEAT[piece.group] ?? 2;
+        for (let i = plan.plateTiles[p]; i < plan.plateTiles[p + 1]; i += 1)
+          tiles.push({
+            sx: plan.dx[i],
+            sy: plan.dy[i],
+            tw: plan.tw[i],
+            th: plan.th[i],
+            beat,
+            pieceId: piece.id,
+          });
+      }
+      return prepareNaniteSkin({
+        document: globalThis.document,
+        size: FIG,
+        tiles,
+        tile: T,
+        core: FAR_FROM_ENTRY_MARKS.core,
+        visor: FAR_FROM_ENTRY_MARKS.visor,
+        coarse,
+        art: skinArt,
+        style: FAR_FROM_SKIN_STYLE,
+        timeline: naniteSkinTimeline(NANITE_SKIN_SCENE_BEATS),
+        now: () => globalThis.performance.now(),
+      });
+    })();
+    if (!skinSteps) skinState = "failed";
+    const prepareSkin = (budget: number) => {
+      if (skinState !== "pending" || !skinSteps) return;
+      const from = globalThis.performance.now();
+      try {
+        do {
+          const step = skinSteps.next();
+          if (step.done) {
+            skin = step.value;
+            skinState = skin ? "ready" : "failed";
+            box.dataset.skin = skinState;
+            return;
+          }
+        } while (globalThis.performance.now() - from < budget);
+      } catch {
+        skinState = "failed";
+        box.dataset.skin = skinState;
+      }
+    };
     // The clock the whole thing ends on: every plate whole and the light settled.
     let end = FAR_FROM_SUIT_LIGHT.from + FAR_FROM_SUIT_LIGHT.bloom;
     for (let p = 0; p < plates; p += 1)
@@ -1283,12 +1397,26 @@ export function createFarFromEntryEngine({
         flight.setTransform(1, 0, 0, 1, ox, oy);
         counters[0] += 3;
       }
-      if (t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 0);
-      if (t < FAR_FROM_SUIT_LIGHT.from) drawOmen(t);
+      // The exploded assembly plays only where the skin could not be made.
+      const exploded = skinState === "failed";
+      if (exploded && t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 0);
+      if (exploded && t < FAR_FROM_SUIT_LIGHT.from) drawOmen(t);
+      if (skin && t < FAR_FROM_SUIT_LIGHT.from) {
+        // The nanite skin: one front from the reactor over the body.
+        flight.setTransform(s, 0, 0, s, ox, oy);
+        skin.draw(flight, farFromEntrySkinProgress(t), false, s, scale);
+        flight.setTransform(1, 0, 0, 1, ox, oy);
+        flight.globalAlpha = 1;
+      }
       for (let p = 0; p < plates; p += 1) {
         // The driver is worn from the first frame (owner, 2026-10-24:
         // 「最初からドライバーを装着」): settled at once, never formed.
         if (!done[p] && DRIVER.has(plan.pieces[p].id)) settle(p);
+        if (!exploded) {
+          // The skin's armour is whole as the light starts: settled then.
+          if (!done[p] && skin && t >= FAR_FROM_SUIT_LIGHT.from) settle(p);
+          continue;
+        }
         if (done[p] || t < plan.spawn[p]) continue;
         if (t >= plan.fit[p] + A.settle) {
           settle(p);
@@ -1302,11 +1430,13 @@ export function createFarFromEntryEngine({
         flight.setTransform(1, 0, 0, 1, ox, oy);
       }
       if (t >= FAR_FROM_SUIT_LIGHT.from) drawLight(t);
-      drawLocks(t);
-      drawSparks(t);
+      if (exploded) {
+        drawLocks(t);
+        drawSparks(t);
+      }
       if (t >= EM.from) drawEmbers(t);
-      if (t >= FAR_FROM_ENTRY_MATERIAL) drawMotes(t);
-      if (t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 1);
+      if (exploded && t >= FAR_FROM_ENTRY_MATERIAL) drawMotes(t);
+      if (exploded && t >= FAR_FROM_ENTRY_MATERIAL - 80) drawChips(t, 1);
       if (flame > 0) {
         fireTransform();
         drawBodyFlame(flight, UNDER_SIZE, flame, clock, 1, "front", phase, TONE);
@@ -1332,6 +1462,9 @@ export function createFarFromEntryEngine({
     };
     stopDraw = () => {
       finished = true;
+      skin?.release();
+      skin = null;
+      skinArt.width = skinArt.height = 0;
       box.replaceChildren();
     };
     const tick = () => {
@@ -1342,10 +1475,12 @@ export function createFarFromEntryEngine({
         finish(t === null ? "finished:no-clock" : `finished:${Math.round(t)}`);
         return;
       }
+      prepareSkin(t < FAR_FROM_ENTRY_FIRE_IGNITE ? SKIN_SLICE.scan : SKIN_SLICE.fire);
       draw(t);
       frame = globalThis.requestAnimationFrame(tick);
     };
     box.dataset.engineStart = `${Math.round(now)}`;
+    prepareSkin(SKIN_SLICE.scan);
     draw(now);
     frame = globalThis.requestAnimationFrame(tick);
     return true;

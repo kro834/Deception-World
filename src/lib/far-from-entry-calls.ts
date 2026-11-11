@@ -235,10 +235,11 @@ export const FAR_FROM_SUIT_JOINTS = {
 /** The reticle on the visor: acquired with the scan, handed to the lock. */
 export const FAR_FROM_SUIT_RETICLE = { delay: 60, duration: FINAL + 120 - 60 } as const;
 
-/** The part callouts, in the order their groups snap on: one per DEUS！ of
- * the chant (the helmet's on the last call). */
-export const FAR_FROM_SUIT_PARTS = ["LEGS", "ARMS", "CHEST", "HEAD"] as const;
-export const FAR_FROM_SUIT_PART_LINE = { LEGS: 0, ARMS: 2, CHEST: 3, HEAD: 3 } as const;
+/** The part callouts, in the order the nanite skin makes their groups whole
+ * — out from the reactor (owner, 2026-11-11): one per DEUS！ of the chant
+ * (the helmet's on the last call). */
+export const FAR_FROM_SUIT_PARTS = ["CHEST", "ARMS", "LEGS", "HEAD"] as const;
+export const FAR_FROM_SUIT_PART_LINE = { CHEST: 0, ARMS: 2, LEGS: 3, HEAD: 3 } as const;
 /** The suit-up HUD's system check reads only what the page already states
  * (final-stage-data.ts FAR_FROM_SAGA.specs, as printed there). ONLINE and
  * LINK are generic HUD words. Decorative: the overlay is aria-hidden. */

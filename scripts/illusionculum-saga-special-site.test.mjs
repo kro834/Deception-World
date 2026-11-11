@@ -183,12 +183,12 @@ test("the engine's new options are opt-in: Rexonance and FAR FROM pass none of t
   assert.doesNotMatch(read("src/components/rexonance-saga/rexonance-saga.tsx"), /\bfire: false|\bpaths:/);
   const own = read("src/lib/illusionculum-assembly-engine.ts");
   assert.match(own, /fire: false,/);
-  // Owner (2026-10-23): 「ナノマシンで生成された装甲をしてから装着する方式」 —
-  // the Rexonance nanite engine builds the armour (no generation layer).
-  assert.doesNotMatch(own, /generation:/);
-  assert.match(own, /nanites: loadIllusionculumNanites,/);
-  assert.match(own, /gold: \{/);
-  assert.match(own, /formChange: createIllusionculumFormChange\(/);
+  // Owner (2026-11-11): the armour grows as a nanite skin from the reactor
+  // (nanite-skin.ts), the changes of form staying this form's own.
+  assert.match(own, /generation: createNaniteSkinGeneration\(\{/);
+  assert.match(own, /changes: formChange,/);
+  assert.doesNotMatch(own, /nanites: load|gold: \{\s+atlas:/);
+  assert.match(own, /const formChange = createIllusionculumFormChange\(/);
   assert.match(engine, /!\(replaceArmour \? wire : formChange\)\?\.form\(/);
   assert.doesNotMatch(farFrom, /formChange/);
   assert.match(own, /paths: ILLUSIONCULUM_FORM_PATHS,/);

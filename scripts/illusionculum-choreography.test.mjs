@@ -167,10 +167,8 @@ test("entry decorations share the renderer clock and the IC atlas remains opt-in
   );
   assert.match(sequence, /progress = illusionculumEntryProgress\(elapsed\)/);
   assert.match(sequence, /cancelAnimationFrame\(raf\)/);
-  assert.match(
-    read("../src/lib/illusionculum-assembly-engine.ts"),
-    /cells: \{ \.\.\.kit\.REXONANCE_NANITE_CELLS, src: "\/illusionculum-nanites-20261027\/cells.webp" \}/,
-  );
+  // The skin builds the armour: the scene fetches no swarm kit.
+  assert.doesNotMatch(read("../src/lib/illusionculum-assembly-engine.ts"), /REXONANCE_NANITE_CELLS/);
   assert.doesNotMatch(read("../src/lib/rexonance-nanites.ts"), /illusionculum-nanites/);
 });
 

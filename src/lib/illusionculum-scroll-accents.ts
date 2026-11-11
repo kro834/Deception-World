@@ -60,7 +60,9 @@ export const ILLUSIONCULUM_ACCENT_BEATS = Object.freeze({
   end: 0.972,
 });
 
-/** The plate groups in the order they lock, each with its beat window
+/** The plate groups in the order they are whole — the nanite skin's, out
+ * from the reactor (nanite-skin.ts NANITE_SKIN_BEAT_ORDER: chest, waist,
+ * arms, legs; owner, 2026-11-11) — each with its beat window
  * (the engine's beatWindow) and whether its lock may bloom (the four
  * DEUS！ groups; the tail and helmet are too close to the seal's bloom). */
 export const ILLUSIONCULUM_ACCENT_GROUPS = Object.freeze(
@@ -69,10 +71,10 @@ export const ILLUSIONCULUM_ACCENT_GROUPS = Object.freeze(
     const step = (to - from) / 4;
     const rex = ILLUSIONCULUM_ACCENT_BEATS.rexonance;
     return [
-      { groups: ["legs"], window: [from, from + step], bloom: true },
-      { groups: ["arms"], window: [from + step, from + 2 * step], bloom: true },
-      { groups: ["chest", "shoulders"], window: [from + 2 * step, from + 3 * step], bloom: true },
-      { groups: ["waist"], window: [from + 3 * step, to], bloom: true },
+      { groups: ["chest", "shoulders"], window: [from, from + step], bloom: true },
+      { groups: ["waist"], window: [from + step, from + 2 * step], bloom: true },
+      { groups: ["arms"], window: [from + 2 * step, from + 3 * step], bloom: true },
+      { groups: ["legs"], window: [from + 3 * step, to], bloom: true },
       { groups: ["tail", "ribbon", "bits"], window: [rex[0], rex[1]], bloom: false },
       {
         groups: ["helm"],

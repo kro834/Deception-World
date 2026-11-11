@@ -11,8 +11,9 @@
  *
  *   idle ─ request ─▶ dissolve ─▶ build ─▶ settle ─▶ idle
  *
- * - dissolve: the form on screen breaks into nanites that disperse as mist
- *   (far-from-nanite-mist.ts draws it over the scene), baring the undersuit
+ * - dissolve: the form on screen turns back to liquid and flows into the
+ *   reactor, the helmet first (nanite-skin.ts `retract`, over the scene),
+ *   baring the undersuit
  *   the scene shows just after its fire is spent (FAR_FROM_SHIFT.under);
  * - build: the scene's own suit-up from that undersuit — never from the
  *   start of the runway: no scan, no fire — through the armour, the seal, the
@@ -39,8 +40,9 @@ export type FarFromShiftBeats = {
 
 /** The form change's times (ms) and its place on the runway's progress. */
 export const FAR_FROM_SHIFT = Object.freeze({
-  /** The armour's dissolve; the mist lingers `mistTail` of it into the build. */
-  dissolveMs: 1250,
+  /** The armour's dissolve: it flows back into the reactor (the nanite
+   * skin's retract); `mistTail` of it is the clock's run-on into the build. */
+  dissolveMs: 1600,
   mistTail: 0.42,
   /** The undersuit under the dissolve: the scene from the spent fire to the
    * first of its swarm (ASSEMBLY_BEATS.motes ends at .16). */

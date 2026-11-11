@@ -188,16 +188,17 @@ test("the locks' glows are local, rare and absent from a resting frame", () => {
   assert.equal(glowAt(starts[3] + 0.001, true).length, 0);
 });
 
-test("the engine mounts the accents at the device's budget", () => {
+// Owner (2026-11-11): the armour grows as a nanite skin (nanite-skin.ts), so
+// no plate is thrown onto the body any more: the engine mounts the steady
+// accents (illusionculum-scroll-accents.ts) on the entry and the lab too.
+// This director stays in the tree, unmounted, with its own tests.
+test("the director is not mounted while the skin builds the armour", () => {
   const source = readFileSync(
     new URL("../src/lib/illusionculum-assembly-engine.ts", import.meta.url),
     "utf8",
   );
-  assert.match(source, /config\.accents = createIllusionculumAccents\(/);
-  assert.match(
-    source,
-    /illusionculumAccentBudget\(environment, \{ compact, entry: Boolean\(options\.entry\) \}\)/,
-  );
+  assert.doesNotMatch(source, /createIllusionculumAccents\(|illusionculumCameraSink/);
+  assert.match(source, /config\.accents = createIllusionculumScrollAccents\(/);
 });
 
 // Owner (2026-11-01): 「装着アニメーションを大きく改善して」 — the director
