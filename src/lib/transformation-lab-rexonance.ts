@@ -55,5 +55,8 @@ export function rexonanceLabConfig(): RexonanceAssemblyConfig {
     // guideway conduit, and each plate's real outline and gold box — loaded
     // with the scene's pictures (round 3), never by the still tiers.
     nanites: () => import("@/lib/rexonance-nanites").then((module) => module.REXONANCE_NANITES),
+    // The skin (2026-11-11), as on /rexonance-saga: the scene draws nothing
+    // while the surge layer holds its canvases hidden (the layer's own flag).
+    covered: (_progress, runway) => "rznCovered" in runway.dataset,
   };
 }

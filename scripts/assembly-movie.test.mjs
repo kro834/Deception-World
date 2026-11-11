@@ -6,6 +6,7 @@ import {
   MOVIE_DURATION_MS,
   MOVIE_FIGURE_ASPECT,
   MOVIE_IDLE_COLLAPSE_MS,
+  MOVIE_LEAVE_CANCEL_EVENT,
   MOVIE_LEAVE_EVENT,
   MOVIE_LEAVE_WAIT_MS,
   MOVIE_LOAD_RETRY_DELAYS,
@@ -1449,6 +1450,87 @@ test("a play from the start asks the runway first: a page whose suit leaves on i
     t.restart.fire("click");
     done(true);
     assert.equal(t.control.dataset.state, "playing");
+    dispose();
+  }
+  // The scrubber moved while the suit left (owner, 2026-11-11) — even one
+  // step, which the runway's own scroll check would let pass: the play is
+  // dropped, the runway told to end its sequence, and a late answer starts
+  // nothing behind the reader's hand.
+  {
+    const { t, dispose } = ended();
+    let done = null;
+    let cancelled = 0;
+    t.runway.addEventListener(MOVIE_LEAVE_EVENT, (event) => {
+      event.preventDefault();
+      done = event.detail.done;
+    });
+    t.runway.addEventListener(MOVIE_LEAVE_CANCEL_EVENT, () => (cancelled += 1));
+    t.restart.fire("click");
+    assert.equal(cancelled, 0);
+    t.seek.fire("pointerdown");
+    t.seek.value = String(MOVIE_SEEK_STEPS - 1);
+    t.seek.fire("input");
+    assert.equal(cancelled, 1, "the runway is told at the first input");
+    assert.equal(t.control.dataset.state, "paused");
+    const at = t.scrollY();
+    done(true);
+    assert.equal(t.control.dataset.state, "paused", "no play from the start under the scrubber");
+    assert.equal(t.scrollY(), at, "the page stays where the scrubber put it");
+    assert.equal(t.frames.size, 0);
+    // Scrubbing on, fast: nothing more to call off, the page follows each input.
+    for (const value of [40, 180, 3, 199, 77, MOVIE_SEEK_STEPS, 120]) {
+      t.seek.value = String(value);
+      t.seek.fire("input");
+    }
+    t.seek.fire("pointerup");
+    assert.equal(cancelled, 1);
+    assert.equal(t.seek.getAttribute("aria-valuetext"), "60%");
+    assert.equal(t.control.dataset.state, "paused");
+    assert.equal(t.frames.size, 0);
+    // The wait's own timer is gone with it: nothing plays later either.
+    for (let k = 0; k < 60 * 4; k += 1) t.tick();
+    assert.equal(t.control.dataset.state, "paused");
+    // The next press from the end asks again.
+    t.seek.value = String(MOVIE_SEEK_STEPS);
+    t.seek.fire("input");
+    assert.equal(t.control.dataset.state, "ended");
+    t.play.fire("click");
+    assert.equal(cancelled, 1);
+    done(true);
+    assert.equal(t.control.dataset.state, "playing");
+    dispose();
+  }
+  // The reader's own scroll while it left: the same.
+  {
+    const { t, dispose } = ended();
+    let done = null;
+    let cancelled = 0;
+    t.runway.addEventListener(MOVIE_LEAVE_EVENT, (event) => {
+      event.preventDefault();
+      done = event.detail.done;
+    });
+    t.runway.addEventListener(MOVIE_LEAVE_CANCEL_EVENT, () => (cancelled += 1));
+    t.restart.fire("click");
+    t.user.wheel();
+    assert.equal(cancelled, 1);
+    done(true);
+    assert.notEqual(t.control.dataset.state, "playing");
+    assert.equal(t.frames.size, 0);
+    // With no leave waiting, the reader's scroll tells the runway nothing.
+    t.user.wheel();
+    assert.equal(cancelled, 1);
+    dispose();
+  }
+  // Every other page: nothing waits, so nothing is ever called off.
+  {
+    const { t, dispose } = ended();
+    let cancelled = 0;
+    t.runway.addEventListener(MOVIE_LEAVE_CANCEL_EVENT, () => (cancelled += 1));
+    t.restart.fire("click");
+    t.seek.value = "50";
+    t.seek.fire("input");
+    t.user.wheel();
+    assert.equal(cancelled, 0);
     dispose();
   }
 });

@@ -19,6 +19,7 @@ import {
 } from "../src/lib/rexonance-calls.ts";
 import { ASSEMBLY_BEATS, ASSEMBLY_PARTS } from "../src/lib/rexonance-resonance.js";
 import { MOVIE_DURATION_MS, MOVIE_LEAVE_EVENT } from "../src/lib/assembly-movie.ts";
+import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK } from "../src/lib/rexonance-suit-leave.ts";
 import {
   SKIN_ENTRY_PARTS,
   SKIN_PART_REACH,
@@ -462,7 +463,7 @@ test("each HUD label lights when the front reaches the part it names", () => {
   assert.match(engine, /setFlag\(part, "data-on", progress >= \(\(partAt \?\? plan\.partDone\)\[index\] \|\| 2\)\),/);
   const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
   assert.match(surge, /flagSkin\(skinLive\);/);
-  assert.match(surge, /if \(retract\) endRetract\(true\);\s*flagSkin\(false\);/);
+  assert.match(surge, /endLeave\(true\);\s*flagSkin\(false\);/);
   // Under the skin a label lighting strikes no plate lock (and no shake).
   assert.match(surge, /q >= lastQ - 0\.001 && !skinLive\)/);
 });
@@ -511,10 +512,16 @@ test("the shared scene stops drawing while the skin covers it whole — Rexonanc
   const users = walk("src")
     .filter((path) => /\.(tsx?|jsx?)$/.test(path))
     .filter((path) => /\b(hudParts|covered)\??:\s*\(/.test(read(path)));
+  // (Rexonance's own two stages: the page's runway and the lab's.)
   assert.deepEqual(users.sort(), [
     "src/components/rexonance-saga/rexonance-saga.tsx",
     "src/lib/rexonance-resonance.d.ts",
+    "src/lib/transformation-lab-rexonance.ts",
   ]);
+  assert.match(
+    read("src/lib/transformation-lab-rexonance.ts"),
+    /covered: \(_progress, runway\) => "rznCovered" in runway\.dataset,/,
+  );
 });
 
 test("the retract: lights out, the face opens, the helmet sinks, the limbs are drawn in, the reactor dims last", () => {
@@ -602,25 +609,37 @@ test("the retract plays where the suit leaves; a plain scroll back stays the bui
   // retract on its own clock; another form or no skin, and the still tiers
   // (reduced motion, economy), a short fade.
   assert.match(surge, /if \(lastQ < RETRACT_FROM\) return;/);
-  assert.match(surge, /const RETRACT_FROM = 0\.93;/);
-  assert.match(surge, /const RETRACT_FADE_MS = 250;/);
+  assert.match(surge, /const RETRACT_FROM = LEAVE_FROM;/);
+  assert.match(surge, /const RETRACT_FADE_MS = LEAVE_FADE_MS;/);
+  assert.equal(LEAVE_FROM, 0.93);
+  assert.equal(LEAVE_FADE_MS, 250);
   assert.equal(SKIN_RETRACT_FADE_MS, 250);
   assert.match(
     surge,
-    /if \(grown && !grown\.renderer\.lost && runway\.dataset\.form === "standard"\) \{[\s\S]*?retract = \{ from: performance\.now\(\), q: -1, done: detail\.done, over: false \};/,
+    /if \(grown && !grown\.renderer\.lost && runway\.dataset\.form === "standard"\) \{[\s\S]*?if \(!leave\.begin\("retract", performance\.now\(\), detail\.done\)\) return;\s*event\.preventDefault\(\);/,
   );
-  assert.match(surge, /if \(!visible \|\| !still \|\| !reducedMotion\(\)\) return;[\s\S]*?fadeOut\(\[still\]\);/);
-  assert.match(surge, /grown\.lib\.skinRetractFrame\(grown\.frame, now - leaving\.from\)/);
-  // The page moves only once it is over; the reader's own scroll ends it.
-  assert.match(surge, /now - leaving\.from >= grown\.lib\.SKIN_RETRACT_MS\) \{[\s\S]*?leaving\.over = true;\s*leaving\.done\(true\);/);
-  assert.match(surge, /Math\.abs\(target - leaving\.q\) > 0\.012/);
-  // Without a retract in play the skin is the playhead's alone: scrubbing
-  // back runs the same frames in reverse (the closed-form test above).
   assert.match(
     surge,
-    /\? leaving\s*\? grown\.lib\.skinRetractFrame\(grown\.frame, now - leaving\.from\)\s*: grown\.lib\.skinFrame\(grown\.frame, grown\.lib\.SKIN_SCROLL, q\)/,
+    /if \(!visible \|\| !still \|\| !reducedMotion\(\)\) return;[\s\S]*?if \(fadeOut\(\[still\]\)\) event\.preventDefault\(\);/,
   );
-  assert.equal(surge.match(/retract = \{/g).length, 1, "only a leave starts it");
+  assert.match(surge, /if \(fadeOut\(classicLayers\(\)\)\) event\.preventDefault\(\);/);
+  // The page moves only once it is over; the reader's own scroll ends it
+  // (the leave's own state: rexonance-suit-leave.ts, tested apart).
+  assert.match(
+    surge,
+    /const step = leave\.step\(\s*now,\s*target,\s*!retracting \|\| skinLive,\s*retracting && grown \? grown\.lib\.SKIN_RETRACT_MS : Number\.POSITIVE_INFINITY,\s*slack,\s*\);/,
+  );
+  assert.match(surge, /const slack = direct \? 0 : LEAVE_SLACK;/);
+  assert.equal(LEAVE_SLACK, 0.012);
+  // Without a retract in play the skin is the playhead's alone: scrubbing
+  // back runs the same frames in reverse (the closed-form test above).
+  assert.match(surge, /const leaving = step !== "" && step !== "moved" && retracting;/);
+  assert.match(
+    surge,
+    /\? leaving\s*\? grown\.lib\.skinRetractFrame\(grown\.frame, leave\.ms\)\s*: grown\.lib\.skinFrame\(grown\.frame, grown\.lib\.SKIN_SCROLL, q\)/,
+  );
+  assert.equal(surge.match(/leave\.begin\("retract"/g).length, 1, "only a leave starts it");
+  assert.equal(surge.match(/skinRetractFrame\(/g).length, 1);
   // The entry has no retract: the call hands the suit to the page.
   const entry = surge.slice(surge.indexOf("export function EntrySurge()"), surge.indexOf("export function ScrollSurgeCanvas"));
   assert.doesNotMatch(entry, /skinRetractFrame|RETRACT_EVENT/);

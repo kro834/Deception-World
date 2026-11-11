@@ -38,6 +38,7 @@ export function LabStage({
     if (!runway) return;
     let cancelled = false;
     let dispose: (() => void) | undefined;
+    let dropSurge: (() => void) | undefined;
     readyCallback.current(false);
     setStatus("loading");
     setFallback({});
@@ -79,6 +80,24 @@ export function LabStage({
         });
         runway.dispatchEvent(new Event("rexonance:assembly-wake"));
         sync();
+        // Rexonance's own layer over its scene (owner, 2026-11-11: the lab
+        // plays the suit-up as /rexonance-saga does — the liquid skin's
+        // front, the torrent that feeds it, the retract): the page's surge
+        // layer itself, on this stage, on the lab's playhead. Its chunk is
+        // fetched here, for this rider only; it fetches the skin's chunk and
+        // field in turn once the scene is live. If it never arrives the
+        // scene plays as it did.
+        if (rider !== "rexonance") return;
+        void import("@/components/rexonance-saga/rexonance-suit-surge").then(
+          (layer) => {
+            if (cancelled) return;
+            dropSurge = layer.mountScrollSurge(runway, {
+              box: runway.querySelector<HTMLElement>(".lab-viewport"),
+              progress: () => playhead.current,
+            });
+          },
+          () => undefined,
+        );
       })
       .catch(() => {
         if (!cancelled) {
@@ -89,11 +108,15 @@ export function LabStage({
     return () => {
       cancelled = true;
       observer.disconnect();
+      // (Its layer first: it hands the scene's canvases back as they were.)
+      dropSurge?.();
       dispose?.();
       readyCallback.current(false);
     };
   }, [rider, attempt]);
   const retry = () => setAttempt((value) => value + 1);
+  // Rexonance's surge layer draws on canvases of its own round the scene's.
+  const surge = rider === "rexonance";
   return (
     <section className="lab-stage" aria-label={`${LAB_NAMES[rider]}の変身`}>
       <h2>
@@ -110,11 +133,22 @@ export function LabStage({
                 alt={`${LAB_NAMES[rider]}の完成形`}
               />
             )}
+            {surge && (
+              <canvas className="rzn-surge is-back" aria-hidden="true" width={0} height={0} />
+            )}
             <canvas
               className="rzn-canvas"
               aria-label={`${LAB_NAMES[rider]}の変身、${Math.round(progress * 100)}%`}
               role="img"
             />
+            {surge && (
+              <>
+                <i className="rzn-surge is-skin" aria-hidden="true">
+                  <canvas width={0} height={0} />
+                </i>
+                <canvas className="rzn-surge is-front" aria-hidden="true" width={0} height={0} />
+              </>
+            )}
           </div>
         </div>
       </div>

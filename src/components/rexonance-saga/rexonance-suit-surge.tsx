@@ -36,6 +36,7 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import type { SkinField, SkinFrame, SkinRenderer, SkinTorrent } from "@/lib/rexonance-suit-skin";
+import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK, SuitLeave, isSeek } from "@/lib/rexonance-suit-leave";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 import type { CrescendoEngine, CrescendoFrame } from "@/lib/rexonance-suit-crescendo";
 
@@ -186,11 +187,14 @@ function mountCrescendo(
    Both ask with RETRACT_EVENT on the runway; the scroll hook below answers.
    A plain scroll back is never touched: it scrubs the build in reverse. */
 const RETRACT_EVENT = "rexonance:assembly-leave";
+/** The one who asked calls the leave off (the auto movie's scrubber moved,
+ * the lab's slider): it ends at once and the scene is the playhead's. */
+const RETRACT_CANCEL_EVENT = "rexonance:assembly-leave-cancel";
 type RetractDetail = { done: (ok?: boolean) => void };
 /** The retract plays over the finished suit: from this progress on. */
-const RETRACT_FROM = 0.93;
+const RETRACT_FROM = LEAVE_FROM;
 /** Reduced motion, economy, another form's art, no WebGL: a short fade. */
-const RETRACT_FADE_MS = 250;
+const RETRACT_FADE_MS = LEAVE_FADE_MS;
 /** The reactor's disc (the scene's REACTOR_RADIUS), figure px. */
 const REACTOR_DISC = 40;
 type SkinLib = typeof import("@/lib/rexonance-suit-skin");
@@ -554,15 +558,37 @@ const PART_GROUPS = [
   [SURGE_GROUPS.indexOf("helm")],
 ];
 
+/** Where the scene is not the page's scroll runway (the transformation lab,
+ * 2026-11-11): the same layer on the lab's own stage. */
+export type ScrollSurgeOptions = {
+  /** The element whose children the scene's layers are (default: the
+   * runway's frame). */
+  box?: HTMLElement | null;
+  /** The scene's playhead, given directly (the engine's `directProgress`):
+   * no scroll is read and nothing eases — the skin stands exactly where the
+   * scene does, at any speed and either way. */
+  progress?: () => number;
+};
+
 /** Runs the surge over the scroll suit-up while its scene is live. */
 export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const runway = runwayRef.current;
-    const frameBox = runway?.querySelector<HTMLElement>(":scope > .rzn-frame");
-    const back = frameBox?.querySelector<HTMLCanvasElement>(":scope > canvas.rzn-surge.is-back");
-    const front = frameBox?.querySelector<HTMLCanvasElement>(":scope > canvas.rzn-surge.is-front");
-    const scene = frameBox?.querySelector<HTMLCanvasElement>(":scope > .rzn-canvas");
-    if (!runway || !frameBox || !back || !front || !scene) return;
+    return runway ? mountScrollSurge(runway) : undefined;
+  }, [runwayRef]);
+}
+
+/** The surge layer on a runway whose scene the shared engine plays; returns
+ * its disposer. The page's own scroll scene by default (useScrollSurge). */
+export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOptions = {}) {
+  {
+    const frameBox = runway.querySelector<HTMLElement>(":scope > .rzn-frame");
+    const layerBox = options.box ?? frameBox;
+    const direct = typeof options.progress === "function" ? options.progress : null;
+    const back = layerBox?.querySelector<HTMLCanvasElement>(":scope > canvas.rzn-surge.is-back");
+    const front = layerBox?.querySelector<HTMLCanvasElement>(":scope > canvas.rzn-surge.is-front");
+    const scene = layerBox?.querySelector<HTMLCanvasElement>(":scope > .rzn-canvas");
+    if (!frameBox || !layerBox || !back || !front || !scene) return () => {};
     const coarse = Boolean(globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches);
     const windows = scrollWindows();
     const pieceWindows = scrollPieceWindows(windows);
@@ -572,8 +598,8 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
     let crescendo: Crescendo | null = null;
     let crescendoClock: InstanceType<CrescendoLib["CrescendoScrollClock"]> | null = null;
     let dropCrescendo = () => {};
-    const still = frameBox.querySelector<HTMLImageElement>(":scope > img.rzn-still");
-    const skinBox = frameBox.querySelector<HTMLElement>(":scope > .rzn-surge.is-skin");
+    const still = layerBox.querySelector<HTMLImageElement>(":scope > img.rzn-still");
+    const skinBox = layerBox.querySelector<HTMLElement>(":scope > .rzn-surge.is-skin");
     const skinCanvas = skinBox?.querySelector<HTMLCanvasElement>("canvas") ?? null;
     let skin: Skin | null = null;
     let dropSkin = () => {};
@@ -598,31 +624,62 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
         runway.dispatchEvent(new Event("rexonance:assembly-redraw"));
       }
     };
-    // The retract in play: its start, where the reader stood, its answer.
-    let retract: { from: number; q: number; done: (ok?: boolean) => void; over: boolean } | null =
-      null;
+    // The leave in play (rexonance-suit-leave.ts): the retract, or the fade.
+    const leave = new SuitLeave();
+    // A playhead given directly has no scroll's noise: any move is the reader's.
+    const slack = direct ? 0 : LEAVE_SLACK;
+    // The fade's animations (they hold the figure hidden until the page has
+    // moved) and its timers. Animations, not a transition: the reduced-motion
+    // sheet zeroes every transition's duration, and the fade was a cut.
+    let fading: Animation[] = [];
     let fadeTimer = 0;
-    const endRetract = (ok: boolean) => {
-      const ended = retract;
-      retract = null;
-      ended?.done(ok);
+    let fadeFrame = 0;
+    // A leave that ended with the playhead where it was (called off, or the
+    // page never moved) leaves its last frame on the canvases: the next
+    // frame is drawn whether or not anything moves.
+    let redraw = false;
+    const releaseFade = () => {
+      if (fadeTimer) window.clearTimeout(fadeTimer);
+      if (fadeFrame) cancelAnimationFrame(fadeFrame);
+      fadeTimer = fadeFrame = 0;
+      for (const animation of fading) animation.cancel();
+      fading = [];
+    };
+    /** The leave ends, whatever its state: answered (once), nothing of it
+     * left — no stream in flight, no figure held hidden. */
+    const endLeave = (ok: boolean) => {
+      if (leave.end(ok)) {
+        skin?.torrent.clear();
+        redraw = true;
+      }
+      releaseFade();
     };
     // The classic scene's canvases under the skin: their opacity is this
     // layer's while the skin grows (and their own sheet's again after).
+    const classicLayers = () =>
+      layerBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field)");
+    let snapFrame = 0;
     const showClassic = (value: number) => {
       const next = value >= 0.999 ? "" : value.toFixed(3);
-      // (A leave's short fade owns their opacity until the page has moved.)
-      if (next === classicShown || fadeTimer) return;
+      if (next === classicShown) return;
+      // Raised whole from well under (a seek out from under the skin, a
+      // leave called off): at once. The sheet's own fade-in for these
+      // canvases would show the figure empty while it ran, the skin being
+      // gone already; its transition is theirs again a frame later.
+      const snap = next === "" && Number(classicShown) < 0.5;
       classicShown = next;
       const hidden = value <= 0.001;
       if (!hidden) flagCovered(false);
-      for (const element of frameBox.querySelectorAll<HTMLElement>(
-        ":scope > :is(.rzn-canvas, .rzn-field)",
-      )) {
+      for (const element of classicLayers()) {
         element.style.opacity = next;
-        element.style.transition = next ? "none" : "";
+        element.style.transition = next || snap ? "none" : "";
       }
       if (hidden) flagCovered(true);
+      if (snap && !snapFrame)
+        snapFrame = requestAnimationFrame(() => {
+          snapFrame = 0;
+          if (classicShown === "") for (const element of classicLayers()) element.style.transition = "";
+        });
     };
     const frame = createSurgeFrame();
     let raf = 0;
@@ -638,7 +695,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
     let travel = 0;
     const layers = () =>
       Array.from(
-        frameBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field, .rzn-surge)"),
+        layerBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field, .rzn-surge)"),
       );
     const restCamera = () => {
       for (const element of moved) {
@@ -680,8 +737,8 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       engine?.clear();
       skin?.renderer.clear();
       skin?.torrent.clear();
-      // (A retract cut short: the page moves on as it was asked to.)
-      if (retract) endRetract(true);
+      // (A leave cut short: the page moves on as it was asked to.)
+      endLeave(true);
       flagSkin(false);
       showClassic(1);
       crescendoClock?.reset();
@@ -712,14 +769,18 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
         );
       }
       measure();
-      const raw = travel > 0 ? Math.min(1, Math.max(0, (pinTop - runway.getBoundingClientRect().top) / travel)) : 1;
+      const raw = direct
+        ? Math.min(1, Math.max(0, Number(direct()) || 0))
+        : travel > 0
+          ? Math.min(1, Math.max(0, (pinTop - runway.getBoundingClientRect().top) / travel))
+          : 1;
       // The bank's stepped clock (rexonance-henshin.ts), as the scene plays it.
       const director = henshinOf(runway);
       const target = director ? director.stepped(raw) : raw;
       const dt = Math.min(50, Math.max(1, lastStamp ? now - lastStamp : 16.7));
       lastStamp = now;
       // The scene's own playhead, in short: a spring that never trails far.
-      if (shown < 0 || Math.abs(target - shown) > 0.2) shown = target;
+      if (direct || shown < 0 || Math.abs(target - shown) > 0.2) shown = target;
       else shown += (target - shown) * (1 - Math.exp(-dt * (coarse ? 0.044 : 0.032)));
       if (Math.abs(target - shown) < 0.0005) shown = target;
       const q = shown;
@@ -735,31 +796,37 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
         partOn[index] = on;
       });
       const moving = lastQ < 0 || Math.abs(q - lastQ) > 0.00005;
+      // A seek (the scrubber, a jump): the streams in flight were aimed at a
+      // front that is no longer there.
+      if (isSeek(lastQ, q)) grown?.torrent.clear();
       lastQ = q;
       scrollSurgeFrame(frame, q, now, windows, pieceWindows);
-      // The retract, on its own clock, until it is over or the reader moves.
-      let leaving = retract as typeof retract;
-      if (leaving && leaving.q < 0) leaving.q = target;
-      if (leaving && (!grown || !skinLive || Math.abs(target - leaving.q) > 0.012)) {
-        // The reader took the scroll (or the context went): the scrub again.
-        endRetract(leaving.over || !skinLive);
-        leaving = null;
-      }
-      if (leaving && grown && !leaving.over && now - leaving.from >= grown.lib.SKIN_RETRACT_MS) {
+      // The leave, on its own clock, until it is over or the reader moves
+      // (the retract needs the skin; the fade ends with its own animations).
+      const retracting = leave.mode === "retract";
+      const step = leave.step(
+        now,
+        target,
+        !retracting || skinLive,
+        retracting && grown ? grown.lib.SKIN_RETRACT_MS : Number.POSITIVE_INFINITY,
+        slack,
+      );
+      if (step === "moved") {
+        // The scrub again (or the page has moved): nothing in flight; the
+        // figure is raised only once the scene has drawn where it now is.
+        grown?.torrent.clear();
+        redraw = true;
+        if (fading.length && !fadeFrame) fadeFrame = requestAnimationFrame(releaseFade);
+      } else if (step === "hold" && retracting) {
         // Over: the page moves on; the bare body stands until it has.
-        grown.torrent.clear();
-        leaving.over = true;
-        leaving.done(true);
-      } else if (leaving && grown && now - leaving.from > grown.lib.SKIN_RETRACT_MS + 1200) {
-        // (The page never moved: the scene is the scroll's again.)
-        endRetract(true);
-        leaving = null;
+        grown?.torrent.clear();
       }
+      const leaving = step !== "" && step !== "moved" && retracting;
       // The skin at this playhead (closed-form: it scrubs both ways).
       const growing =
         grown && skinLive
           ? leaving
-            ? grown.lib.skinRetractFrame(grown.frame, now - leaving.from)
+            ? grown.lib.skinRetractFrame(grown.frame, leave.ms)
             : grown.lib.skinFrame(grown.frame, grown.lib.SKIN_SCROLL, q)
           : null;
       const skinOn = Boolean(growing?.on);
@@ -768,7 +835,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       const flowing =
         (frame.swarm > 0.01 && frame.implode < 1) ||
         shellOn ||
-        Boolean(leaving) ||
+        leaving ||
         Boolean(grown && grown.torrent.live > 0);
       // The crescendo's events strike on the same playhead, every frame.
       const pass =
@@ -780,8 +847,9 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       const busy = engine.busy(now) || playing;
       // At rest the swarm keeps flowing (touch screens at about 30 fps).
       const due =
-        moving || busy || Boolean(leaving) || (flowing && (!coarse || now - lastDraw > 31));
+        redraw || moving || busy || leaving || (flowing && (!coarse || now - lastDraw > 31));
       if (due) {
+        redraw = false;
         const paced = !moving && !busy;
         lastDraw = now;
         engine.draw(frame);
@@ -831,7 +899,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
               grown.lib.drawSkinDroplets(surfaces.front, grown.field, growing, cell, now, px);
             surfaces.back.globalCompositeOperation = "source-over";
             surfaces.front.globalCompositeOperation = "source-over";
-          }
+          } else if (grown.torrent.live) grown.torrent.clear();
         } else showClassic(1);
         if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
         // The lean in is for fine pointers: on touch screens a transform on
@@ -867,63 +935,73 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       if (!raf && live()) raf = requestAnimationFrame(tick);
     };
     // The suit is asked to leave (the replay link, the movie's play from the
-    // start). Over the finished standard suit, with the skin in hand: the
-    // retract. Another form's art, no skin, or the still tiers (reduced
-    // motion, economy: the finished figure in view): a short fade.
+    // start, the lab's replay). Over the finished standard suit, with the
+    // skin in hand: the retract. Another form's art, no skin, or the still
+    // tiers (reduced motion, economy: the finished figure in view): a short
+    // fade, then the page moves.
     const onLeave = (event: Event) => {
       const detail = (event as CustomEvent<RetractDetail>).detail;
-      if (typeof detail?.done !== "function" || retract || fadeTimer) return;
+      if (typeof detail?.done !== "function" || leave.active) return;
       const fadeOut = (elements: Iterable<HTMLElement>) => {
-        const faded = [...elements];
-        for (const element of faded) {
-          element.style.transition = `opacity ${RETRACT_FADE_MS}ms ease-out`;
-          element.style.opacity = "0";
-        }
-        fadeTimer = window.setTimeout(() => {
-          detail.done(true);
-          // Back once the page has moved.
-          requestAnimationFrame(() => {
-            fadeTimer = 0;
-            for (const element of faded) {
-              element.style.transition = "none";
-              element.style.opacity = "";
-            }
-            requestAnimationFrame(() => {
-              for (const element of faded) element.style.transition = "";
-            });
-          });
-        }, RETRACT_FADE_MS);
+        const faded = [...elements].filter((element) => typeof element.animate === "function");
+        if (!faded.length || !leave.begin("fade", performance.now(), detail.done)) return false;
+        fading = faded.map((element) =>
+          element.animate([{ opacity: getComputedStyle(element).opacity }, { opacity: 0 }], {
+            duration: RETRACT_FADE_MS,
+            easing: "ease-out",
+            fill: "forwards",
+          }),
+        );
+        // Faded (the animations' own end: under load they start a frame or
+        // more after they are made; a timer of the same length cut them
+        // short): the page moves, and the figure is back once it has (the
+        // live scene's own frames see to it; the still tiers' two frames on).
+        const mine = fading;
+        const fadedOut = () => {
+          if (fading !== mine || leave.over) return;
+          window.clearTimeout(fadeTimer);
+          leave.finish();
+          fadeTimer = window.setTimeout(() => endLeave(true), live() ? 600 : 34);
+        };
+        void mine[0].finished.then(fadedOut, () => undefined);
+        // (An animation that never runs is not waited for.)
+        fadeTimer = window.setTimeout(fadedOut, RETRACT_FADE_MS + 400);
+        return true;
       };
       if (!live()) {
         // The still tiers: the finished figure, if it is in view, fades.
         if (!visible || !still || !reducedMotion()) return;
         const box = still.getBoundingClientRect();
         if (box.bottom < 0 || box.top > window.innerHeight) return;
-        event.preventDefault();
-        fadeOut([still]);
+        if (fadeOut([still])) event.preventDefault();
         return;
       }
       if (lastQ < RETRACT_FROM) return;
       const grown = skin as Skin | null;
-      event.preventDefault();
       if (grown && !grown.renderer.lost && runway.dataset.form === "standard") {
         // The frame back on its pin if the reader has scrolled it part away.
         const box = frameBox.getBoundingClientRect();
-        if (box.top < -0.4 * box.height && travel > 0)
+        if (!direct && box.top < -0.4 * box.height && travel > 0)
           window.scrollTo({
             top: window.scrollY + runway.getBoundingClientRect().top - pinTop + travel,
             behavior: "instant" as ScrollBehavior,
           });
-        retract = { from: performance.now(), q: -1, done: detail.done, over: false };
+        if (!leave.begin("retract", performance.now(), detail.done)) return;
+        event.preventDefault();
         wake();
         return;
       }
       // Another form's art, or no skin: the figure fades, then the page moves.
-      flagCovered(false);
-      classicShown = "";
-      fadeOut(frameBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field)"));
+      if (fadeOut(classicLayers())) event.preventDefault();
+    };
+    // Called off by the one who asked: it ends at once, unanswered there.
+    const onLeaveCancel = () => {
+      if (!leave.active) return;
+      endLeave(false);
+      wake();
     };
     runway.addEventListener(RETRACT_EVENT, onLeave);
+    runway.addEventListener(RETRACT_CANCEL_EVENT, onLeaveCancel);
     const intersection = new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
       if (visible) wake();
@@ -935,6 +1013,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       size = "";
     });
     resize.observe(frameBox);
+    if (layerBox !== frameBox) resize.observe(layerBox);
     resize.observe(runway);
     const onVisibility = () => wake();
     document.addEventListener("visibilitychange", onVisibility);
@@ -944,8 +1023,13 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       resize.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       runway.removeEventListener(RETRACT_EVENT, onLeave);
-      if (fadeTimer) window.clearTimeout(fadeTimer);
+      runway.removeEventListener(RETRACT_CANCEL_EVENT, onLeaveCancel);
+      // Nothing of this layer stays on a stage that outlives it (the lab's
+      // canvas plays the next rider): no leave, no flag, no held opacity.
       stop();
+      flagCovered(false);
+      if (snapFrame) cancelAnimationFrame(snapFrame);
+      for (const element of classicLayers()) element.style.transition = "";
       dropCrescendo();
       dropSkin();
       skin = null;
@@ -958,5 +1042,5 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       front.width = 0;
       front.height = 0;
     };
-  }, [runwayRef]);
+  }
 }

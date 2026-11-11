@@ -16,6 +16,7 @@ import {
   type LabState,
   type LabZoom,
 } from "@/lib/transformation-lab-state.js";
+import { LAB_LEAVE_FROM, createLabLeave } from "@/lib/transformation-lab-leave";
 import { LabPartRecord } from "./lab-part-record";
 import { LabStage } from "./lab-stage";
 
@@ -47,6 +48,17 @@ export function TransformationLab() {
   useEffect(() => {
     current.current = state;
   }, [state]);
+  // A replay over a finished suit asks the stage first (Rexonance's armour
+  // retracts, then the lab moves: transformation-lab-leave.ts). A comparison
+  // stands still on both sides and asks nothing.
+  const stages = useRef<HTMLDivElement>(null);
+  const [leave] = useState(() => createLabLeave());
+  const leaveThen = useCallback((then: () => void) => {
+    if (current.current.compare) return false;
+    const stage = stages.current?.querySelector<HTMLElement>(".lab-side-a .lab-engine") ?? null;
+    return leave.ask(stage, then);
+  }, [leave]);
+  useEffect(() => () => leave.cancel(), [leave]);
   // One write per seek input flooded WebKit's history (see createLabUrlWriter).
   const urlWriter = useRef<ReturnType<typeof createLabUrlWriter> | null>(null);
   useEffect(() => {
@@ -54,6 +66,7 @@ export function TransformationLab() {
     urlWriter.current = writer;
     const restore = () => {
       writer.cancel();
+      leave.cancel();
       setState(parseLabState(location.search));
       setPlaying(false);
     };
@@ -66,7 +79,7 @@ export function TransformationLab() {
       writer.cancel();
       urlWriter.current = null;
     };
-  }, []);
+  }, [leave]);
   useEffect(() => {
     if (!hydrated || playing) return;
     const url = new URL(location.href);
@@ -77,6 +90,7 @@ export function TransformationLab() {
     if (!playing || !ready || state.compare) return;
     let frame = 0;
     let previous = 0;
+    let stopped = false;
     const tick = (now: number) => {
       const elapsed = previous ? now - previous : 0;
       previous = now;
@@ -85,8 +99,24 @@ export function TransformationLab() {
       setState(current.current);
       if (next === (direction > 0 ? 1 : 0)) {
         if (current.current.loop) {
-          current.current = { ...current.current, progress: direction > 0 ? 0 : 1 };
-          setState(current.current);
+          const wrap = () => {
+            current.current = { ...current.current, progress: direction > 0 ? 0 : 1 };
+            setState(current.current);
+          };
+          // The loop's wrap over the finished suit: the suit leaves first,
+          // the playhead held at the end; then the loop goes round (if it
+          // was paused meanwhile, the stage still ends at the start).
+          if (
+            direction > 0 &&
+            leaveThen(() => {
+              wrap();
+              if (stopped) return;
+              previous = 0;
+              frame = requestAnimationFrame(tick);
+            })
+          )
+            return;
+          wrap();
         } else {
           setPlaying(false);
           return;
@@ -100,13 +130,16 @@ export function TransformationLab() {
     };
     document.addEventListener("visibilitychange", hide);
     return () => {
+      stopped = true;
       cancelAnimationFrame(frame);
       document.removeEventListener("visibilitychange", hide);
     };
-  }, [playing, ready, direction, state.compare]);
+  }, [playing, ready, direction, state.compare, leaveThen]);
   const primaryReady = useCallback((value: boolean) => setReady(value), []);
   const comparisonReady = useCallback(() => {}, []);
   const change = (patch: Partial<LabState>) => {
+    // The reader's hand on the playhead or the stage ends a leave in play.
+    if ("progress" in patch || "rider" in patch || "compare" in patch) leave.cancel();
     setPlaying(false);
     setCopyResult(null);
     setState((value) => {
@@ -121,9 +154,25 @@ export function TransformationLab() {
       setPlaying(false);
       return;
     }
-    if (state.progress === (direction > 0 ? 1 : 0))
-      setState((value) => ({ ...value, progress: direction > 0 ? 0 : 1 }));
+    if (state.progress === (direction > 0 ? 1 : 0)) {
+      const restart = () => {
+        setState((value) => ({ ...value, progress: direction > 0 ? 0 : 1 }));
+        setPlaying(true);
+      };
+      // From the end, forward: the suit leaves first, then it plays again.
+      if (direction > 0 && leaveThen(restart)) return;
+      restart();
+      return;
+    }
     setPlaying(true);
+  };
+  /** 最初へ: over a finished suit the suit leaves first, then the start. */
+  const rewind = () => {
+    if (state.progress >= LAB_LEAVE_FROM && leaveThen(() => change({ progress: 0 }))) {
+      setPlaying(false);
+      return;
+    }
+    change({ progress: 0 });
   };
   const copy = async () => {
     const request = ++copyRequest.current;
@@ -220,7 +269,12 @@ export function TransformationLab() {
             </button>
           </div>
         )}
-        <div className="lab-stages" data-compare={Boolean(state.compare)} data-side={side}>
+        <div
+          ref={stages}
+          className="lab-stages"
+          data-compare={Boolean(state.compare)}
+          data-side={side}
+        >
           <div className="lab-side-a">
             {(!compact || !state.compare || side === "a") && (
               <LabStage
@@ -278,7 +332,7 @@ export function TransformationLab() {
             >
               逆再生
             </button>
-            <button onClick={() => change({ progress: 0 })}>最初へ</button>
+            <button onClick={rewind}>最初へ</button>
             <button
               aria-pressed={state.loop}
               disabled={Boolean(state.compare)}

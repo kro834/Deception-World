@@ -124,6 +124,9 @@ export const MOVIE_RETRY_EVENT = "rexonance:assembly-retry";
  * a page that never answers is not waited for past the wait below. */
 export const MOVIE_LEAVE_EVENT = "rexonance:assembly-leave";
 export const MOVIE_LEAVE_WAIT_MS = 3000;
+/** The reader took the playhead while the suit was leaving (the scrubber, a
+ * scroll): the runway is told, so its sequence ends there and then. */
+export const MOVIE_LEAVE_CANCEL_EVENT = "rexonance:assembly-leave-cancel";
 
 export type MovieState = "idle" | "loading" | "playing" | "paused" | "ended" | "error";
 
@@ -477,6 +480,15 @@ export function mountAssemblyMovie(
     leaveTimer = later(() => done(true), MOVIE_LEAVE_WAIT_MS);
     return true;
   };
+  /** A play waiting for the page's own leave is dropped (the reader took
+   * the playhead), and the page told to end its sequence. */
+  const dropLeave = () => {
+    if (!leaving) return;
+    leaving = 0;
+    cancelLater(leaveTimer);
+    leaveTimer = 0;
+    send(MOVIE_LEAVE_CANCEL_EVENT);
+  };
   /** 再生 (or 最初から) asked for: played now if the scene is ready, else
    * queued until it is, the engine asked to prepare now. */
   const request = (from: number | "here") => {
@@ -652,6 +664,8 @@ export function mountAssemblyMovie(
   const onSeekInput = () => {
     if (!seek) return;
     const q = clamp01(Number(seek.value) / MOVIE_SEEK_STEPS);
+    // (The scrubber during the suit's leave: the leave is the reader's to end.)
+    dropLeave();
     measure();
     progress = q;
     scrollTo(q);
@@ -672,7 +686,7 @@ export function mountAssemblyMovie(
   /** The reader's own scroll: the movie's turn is over. */
   const yieldToReader = () => {
     // (A play waiting for the page's own leave is dropped with it.)
-    leaving = 0;
+    dropLeave();
     resumeOnShow = false;
     cancelQueue();
     pause();
@@ -938,6 +952,10 @@ export function mountAssemblyMovie(
     if (mounted.get(control) === dispose) mounted.delete(control);
     stop();
     clearQueue();
+    // (A play waiting for the suit to leave goes with the controller.)
+    leaving = 0;
+    cancelLater(leaveTimer);
+    leaveTimer = 0;
     loadObserver?.disconnect();
     showObserver?.disconnect();
     clearIdle();
