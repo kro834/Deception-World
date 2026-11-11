@@ -4550,6 +4550,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       formShift.cancel();
     syncShiftPhase();
     if (!formShift.active) return false;
+    // The chain's sheets are wanted seconds from now: fetched and cut while
+    // the armour dissolves, never as a hitch when the chain begins.
+    if (to !== "standard") formFigures();
     environment.clearTimeout(calmTimer);
     calmTimer = 0;
     schedule();

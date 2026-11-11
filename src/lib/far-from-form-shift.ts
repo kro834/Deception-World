@@ -44,11 +44,11 @@ export const FAR_FROM_SHIFT = Object.freeze({
   mistTail: 0.42,
   /** The undersuit under the dissolve: the scene from the spent fire to the
    * first of its swarm (ASSEMBLY_BEATS.motes ends at .16). */
-  under: Object.freeze([0.121, 0.137] as const),
+  under: Object.freeze([0.124, 0.152] as const),
   /** The base figure's build, to the chain's window. */
-  buildMs: 3300,
+  buildMs: 3000,
   /** The build eases in over this share of itself. */
-  buildEase: 0.16,
+  buildEase: 0.1,
   /** The chain: per form of the path, within these bounds; ミドル has none. */
   stepMs: 560,
   chainMinMs: 380,

@@ -1597,6 +1597,15 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .
   animation: ffs-still-left 240ms ease-out both;
 }
 
+/* The special sites' reduced-motion reset (styles-rexonance-saga.css) cuts
+   every animation to 0.001ms; this fade keeps its calm length, as the
+   covers' do (it moves nothing). */
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-still.ffs-still-left {
+    animation-duration: 240ms !important;
+  }
+}
+
 @keyframes ffs-still-left {
   from {
     opacity: 1;

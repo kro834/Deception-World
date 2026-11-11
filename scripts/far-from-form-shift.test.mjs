@@ -437,3 +437,18 @@ test("the engine: FAR FROM alone has the form change; the scene's own beats are 
   assert.deepEqual(ASSEMBLY_BEATS.form, [0.915, 0.975]);
   assert.deepEqual(ASSEMBLY_BEATS.motes, [0.07, 0.16]);
 });
+
+test("the still tiers crossfade between forms, at a calm length under reduced motion too", () => {
+  const page = readFileSync(new URL("../src/components/far-from-saga/far-from-suitup.tsx", import.meta.url), "utf8");
+  const sheet = readFileSync(new URL("../src/styles-far-from-suitup.css", import.meta.url), "utf8");
+  const ms = Number(/export const STILL_FADE_MS = (\d+);/.exec(page)?.[1]);
+  assert.ok(ms >= 150 && ms <= 300, "a quick crossfade");
+  assert.match(page, /className="rzn-still ffs-still-left"/);
+  assert.match(sheet, new RegExp(`animation: ffs-still-left ${ms}ms ease-out both;`));
+  // Opacity only, and it survives the special sites' reduced-motion reset.
+  const frames = /@keyframes ffs-still-left \{([\s\S]*?)\n\}/.exec(sheet)[1];
+  assert.deepEqual([...new Set(frames.match(/[a-z-]+(?=:)/g))], ["opacity"]);
+  const reduced = /@media \(prefers-reduced-motion: reduce\) \{\s+html\[data-family="special"\][^{]*\.ffs-still-left \{([^}]*)\}/.exec(sheet);
+  assert.ok(reduced, "the reduced-motion rule");
+  assert.match(reduced[1], new RegExp(`animation-duration: ${ms}ms !important;`));
+});
