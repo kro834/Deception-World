@@ -1,0 +1,1 @@
+export function startPerfHud(){try{var m=/[?&]perf=([01])/.exec(location.search),s=sessionStorage;if(m)s.setItem("dw-perf",m[1]);if(s.getItem("dw-perf")==="1")import("./perf-hud").then(function(h){h.mountPerfHud()})}catch{/**/}}
