@@ -31,8 +31,12 @@ const render = resolve(
 );
 const maskFile = resolve(root, "design/rexonance-suit/rexonance-undersuit-mask-20261016.png");
 // The suit's folder (2026-10-23: the suit re-cut by SAM's masks moved to a new
-// folder; the undersuit carries over into it unchanged).
-const file = resolve(root, "public/rexonance-suit-20261023/undersuit-20261021.webp");
+// folder; the undersuit carried over into it unchanged). 2026-11-11 (owner:
+// the bare undersuit's feet read as boxes): the mask's feet are smooth feet
+// inside the boots (scripts/build-rexonance-suit.mjs UNDERSUIT_BODY), the
+// relief re-rendered from it, and the file renamed so no cached copy keeps
+// the boxed feet.
+const file = resolve(root, "public/rexonance-suit-20261023/undersuit-20261111.webp");
 const WIDTH = 571;
 const HEIGHT = 1040;
 // The rx12/rx13 set (figure, undersuit, body, face, plates) stays under

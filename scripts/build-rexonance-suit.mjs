@@ -71,7 +71,7 @@ const OUT_DIR = fileURLToPath(
 const PUBLIC_PATH = `/rexonance-suit-${ASSET_VERSION}`;
 // The bodysuit, rendered and packed by its own scripts (see the header);
 // versioned on its own so a cached mannequin never meets the new module.
-const UNDERSUIT_FILE = "undersuit-20261021.webp";
+const UNDERSUIT_FILE = "undersuit-20261111.webp";
 const MASK_FILE = fileURLToPath(
   new URL("../design/rexonance-suit/rexonance-undersuit-mask-20261016.png", import.meta.url),
 );
@@ -173,6 +173,84 @@ const BODY_LEFT = [
   [527, 898],
 ];
 const BODY = [...BODY_LEFT, ...mirror(BODY_LEFT.slice(1, -1)).reverse()];
+// The bare undersuit's own outline (owner, 2026-11-11: its feet read as
+// boxes): BODY with each foot drawn as a smooth foot inside its boot's
+// silhouette (the toe out and down, the sole along the boot's, a rounded
+// heel) instead of BODY's flat-soled box. The art's two boots are not
+// mirror images, so each foot is traced over its own. Only the registration
+// mask (and so the undersuit's footprint) takes it; BODY still guards the
+// figure's cut. Each foot runs between two of BODY's ankle points, smoothed
+// by three Chaikin passes (its ends kept).
+const chaikin = (points, passes) => {
+  let line = points;
+  for (let pass = 0; pass < passes; pass += 1) {
+    const next = [line[0]];
+    for (let i = 0; i < line.length - 1; i += 1) {
+      const [[ax, ay], [bx, by]] = [line[i], line[i + 1]];
+      next.push([0.75 * ax + 0.25 * bx, 0.75 * ay + 0.25 * by]);
+      next.push([0.25 * ax + 0.75 * bx, 0.25 * ay + 0.75 * by]);
+    }
+    next.push(line[line.length - 1]);
+    line = next;
+  }
+  return line.map(([x, y]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10]);
+};
+// The figure's right foot (on the viewer's left), outer ankle to inner.
+const FOOT_LEFT = chaikin(
+  [
+    [238, 1640],
+    [226, 1680],
+    [212, 1730],
+    [196, 1782],
+    [180, 1824],
+    [170, 1852],
+    [171, 1866],
+    [184, 1879],
+    [214, 1888],
+    [252, 1880],
+    [288, 1862],
+    [314, 1844],
+    [334, 1822],
+    [345, 1794],
+    [348, 1756],
+    [346, 1712],
+    [346, 1662],
+  ],
+  3,
+);
+// Its left foot (the viewer's right), inner ankle to outer.
+const FOOT_RIGHT = chaikin(
+  [
+    [708, 1662],
+    [704, 1712],
+    [700, 1756],
+    [698, 1796],
+    [708, 1826],
+    [726, 1852],
+    [752, 1868],
+    [790, 1878],
+    [830, 1888],
+    [858, 1872],
+    [872, 1854],
+    [874, 1840],
+    [864, 1810],
+    [852, 1780],
+    [840, 1740],
+    [830, 1700],
+    [822, 1668],
+    [816, 1640],
+  ],
+  3,
+);
+/** `line` with the run between `foot`'s two ends replaced by `foot`. */
+function withFoot(line, foot) {
+  const key = ([x, y]) => `${x},${y}`;
+  const from = line.findIndex((p) => key(p) === key(foot[0]));
+  const to = line.findIndex((p) => key(p) === key(foot[foot.length - 1]));
+  if (from < 0 || to <= from) throw new Error("the foot's ends are not on BODY");
+  return [...line.slice(0, from), ...foot, ...line.slice(to + 1)];
+}
+const UNDERSUIT_BODY = withFoot(withFoot(BODY, FOOT_LEFT), FOOT_RIGHT);
 
 // The face's lights: the V of cyan and pink under the crest.
 const FACE_GLOW = [
@@ -1590,9 +1668,10 @@ const FIGURE = await writeWebp("figure.webp", figureRaw, FIG_W, FIG_H, { quality
 // relief rendered by scripts/blender/rexonance_undersuit.py and packed by
 // scripts/build-rexonance-undersuit.mjs into UNDERSUIT_FILE, which this
 // build keeps in place and registers. Both clip to this build's body
-// polygon, written at delivery size as the registration contract: the
-// plates, the driver, the flame mask and the nanite targets seat on it.
-const bodyMask = await rasterise([BODY], 0, 0.35);
+// polygon (the undersuit's, UNDERSUIT_BODY: BODY with smooth feet), written
+// at delivery size as the registration contract: the plates, the driver, the
+// flame mask and the nanite targets seat on it.
+const bodyMask = await rasterise([UNDERSUIT_BODY], 0, 0.35);
 await sharp(await toDelivery(rgba(bodyMask)), { raw: { width: FIG_W, height: FIG_H, channels: 4 } })
   .extractChannel(3)
   .png({ compressionLevel: 9 })

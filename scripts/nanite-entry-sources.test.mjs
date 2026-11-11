@@ -75,7 +75,7 @@ test("Illusionculum intent requests current cells; arbitrary base, face and eye 
   for (const source of [
     "/rexonance-suit-20261023/face.webp",
     "/rexonance-suit-20261023/figure.webp",
-    "/rexonance-suit-20261023/undersuit-20261021.webp",
+    "/rexonance-suit-20261023/undersuit-20261111.webp",
     "/illusionculum-suit-20261023/standard.webp",
   ])
     assert.equal(refinedNaniteSource(source), source);
