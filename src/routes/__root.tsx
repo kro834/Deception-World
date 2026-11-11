@@ -31,6 +31,7 @@ import { watchOpenDialogs } from "@/lib/dialog-open-flag.js";
 import { watchPresses } from "@/lib/press-feedback.js";
 import { watchDynamicGui } from "@/lib/dynamic-gui.js";
 import { watchFxMotion } from "@/lib/fx-motion.js";
+import { startPerfHud } from "@/lib/perf-hud-gate.js";
 import { SIDE_MENU_EARLY_INPUT_SCRIPT } from "@/lib/side-menu-early-input.js";
 import androidPerformanceCss from "../styles-android-performance.css?url";
 import ios18PerformanceCss from "../styles-ios18-performance.css?url";
@@ -112,6 +113,13 @@ function DynamicGui() {
    spring (src/lib/fx-motion.js, src/styles-fx-motion.css). */
 function FxMotion() {
   useEffect(() => watchFxMotion(), []);
+  return null;
+}
+
+/* ?perf=1: the on-device performance overlay, fetched only when on
+   (src/lib/perf-hud-gate.js; src/lib/perf-hud.ts is a dynamic import). */
+function PerfHudGate() {
+  useEffect(() => startPerfHud(), []);
   return null;
 }
 
@@ -368,6 +376,7 @@ function RootDocument() {
               <InquiryNavigation />
               <DynamicGui />
               <FxMotion />
+              <PerfHudGate />
               <QuickSearchHost />
               <GalleryStickerWarmup />
               <IpadMenuMode />
