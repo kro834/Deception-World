@@ -1384,6 +1384,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   width: 11%;
 }
 
+/* While the skin grows the armour as one front (2026-11-11,
+   rexonance-suit-skin.ts) no plate bites, so no clank glints. */
+.rx-call-sequence .rx-suit[data-skin] .rx-suit-build > .rx-suit-spark {
+  visibility: hidden;
+}
+
 /* The reactor's light forms from pixel squares like the eyes (full tier;
    owner 2026-10-23: it popped in whole). */
 .rx-call-sequence .rx-suit-figure > .rx-suit-reactor-pixels {
