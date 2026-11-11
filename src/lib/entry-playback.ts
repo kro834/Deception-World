@@ -42,6 +42,17 @@ export function createEntryPlayback(
     complete: () => {
       if (state === "playing") settle("complete");
     },
+    /** The page went hidden mid-play: the watchdog stops counting (the
+     * renderer's own clock stops with its frames). */
+    pause: () => {
+      if (state === "playing") clock.clearTimeout(timer);
+    },
+    /** Visible again: the watchdog restarts in full. */
+    resume: () => {
+      if (state !== "playing") return;
+      clock.clearTimeout(timer);
+      timer = clock.setTimeout(() => settle("unavailable"), ENTRY_PREPARE_MS);
+    },
     skip: () => settle("skipped"),
     fail: () => settle("unavailable"),
     cancel: () => settle("cancelled"),
