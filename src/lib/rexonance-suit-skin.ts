@@ -478,6 +478,12 @@ export class SkinTorrent {
     return this.state / 4294967296;
   }
 
+  /** Every stream in flight is dropped (the scene stopped, or moved on). */
+  clear() {
+    this.born.fill(-1);
+    this.live = 0;
+  }
+
   /** A sample of the armour near field value `at` of a front's list. */
   private aim(field: SkinField, head: boolean, at: number, out: Float32Array, o: number, cell: number) {
     const first = head ? field.bodySamples : 0;

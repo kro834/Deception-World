@@ -677,6 +677,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       restCamera();
       engine?.clear();
       skin?.renderer.clear();
+      skin?.torrent.clear();
       // (A retract cut short: the page moves on as it was asked to.)
       if (retract) endRetract(true);
       flagSkin(false);
@@ -744,6 +745,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       }
       if (leaving && grown && !leaving.over && now - leaving.from >= grown.lib.SKIN_RETRACT_MS) {
         // Over: the page moves on; the bare body stands until it has.
+        grown.torrent.clear();
         leaving.over = true;
         leaving.done(true);
       } else if (leaving && grown && now - leaving.from > grown.lib.SKIN_RETRACT_MS + 1200) {
