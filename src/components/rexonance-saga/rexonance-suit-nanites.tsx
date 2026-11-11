@@ -511,6 +511,20 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           flight.setTransform(1, 0, 0, 1, 0, 0);
           flight.clearRect(0, 0, width, height);
           flight.setTransform(1, 0, 0, 1, ox, oy);
+          // Standing by under the skin (2026-11-11, rexonance-suit-skin.ts:
+          // the armour grows as one front on its own canvas, and this box is
+          // at opacity 0): nothing is drawn. Only the field's camera keeps
+          // its beat on the figure. Every clock here is closed-form and the
+          // plates' state catches up in the loops below, so the first frame
+          // back is the frame it would have been.
+          if ("standby" in box.dataset) {
+            if (field && fieldLib && fieldState && fieldCamera && fieldTake) {
+              fieldLib.fieldState(fieldScore, t, fieldState);
+              fieldLib.fieldCamera(fieldState, fieldTake, FIG.height, fieldCamera);
+              moveCamera(fieldCamera);
+            }
+            return;
+          }
           if (keepOut) {
             // The label stays clear (round 3): the frame is drawn around it.
             flight.save();

@@ -58,6 +58,13 @@ export const MOVIE_SEEK_STEPS = 200;
 /** How far (px) the page may stand from where the movie put it before the
  * difference reads as the viewer's own scroll. */
 export const MOVIE_SCROLL_TOLERANCE = 2;
+/** The clear space kept between the pill and a selector rail docked beside it. */
+export const MOVIE_RAIL_GAP = 10;
+/** What it clears: the form selector rails (tablists), and the links that
+ * follow the runway (/far-from-saga's form buttons, /rexonance-saga's
+ * #assembly-replay). */
+export const MOVIE_RAIL_SELECTOR =
+  '[role="tablist"], .ffs-assembly-controls > :is(a, button), .rxs-assembly-footer .rxs-assembly-controls > a';
 /** The share of the frame in view before the control shows (of what of the
  * frame fits the window). */
 export const MOVIE_SHOW_AT = 0.6;
@@ -153,6 +160,7 @@ export function mountAssemblyMovie(
   // The pill (phones, tablets, short windows): 再生／一時停止 with the
   // progress ring, and the speed, whose tap opens the sheet.
   const mini = control.querySelector<HTMLButtonElement>(".rzn-movie-mini");
+  const pill = mini?.parentElement ?? null;
   const toggle = control.querySelector<HTMLButtonElement>(".rzn-movie-toggle");
   const speedNow = control.querySelector<HTMLElement>(".rzn-movie-speed-now");
   const restart = control.querySelector<HTMLButtonElement>(".rzn-movie-restart");
@@ -264,6 +272,60 @@ export function mountAssemblyMovie(
     // Where the HUD's call ends (the stacked tiers' rail starts below it).
     const call = runway.querySelector<HTMLElement>(".rzn-call");
     if (call) set("--mc-call-bottom", call.getBoundingClientRect().bottom);
+  };
+  /** Controls docked at the foot of the window where the pill stands (the
+   * form selector rail, the links under it): the pill rises to the lowest
+   * place clear of them (--mc-lift), so every tab and link stays whole and
+   * tappable. Its resting place is read back from where it stands less the
+   * lift it already has. */
+  let lift = 0;
+  const clearRails = () => {
+    const rails = document.querySelectorAll?.(MOVIE_RAIL_SELECTOR);
+    // The pill stands in the small tiers; the wide, tall windows dock the
+    // sheet itself at the same foot.
+    let pillBox = pill?.getBoundingClientRect?.();
+    let pilled = true;
+    if (pillBox && pillBox.width <= 0) {
+      pilled = false;
+      pillBox = pill?.nextElementSibling?.getBoundingClientRect?.();
+    }
+    if (!rails || !pillBox || pillBox.width <= 0 || !control.style) return;
+    const gap = MOVIE_RAIL_GAP;
+    const baseBottom = pillBox.bottom + lift;
+    const baseTop = pillBox.top + lift;
+    // Either side's corner (the pill steps left when lifted: both are tested,
+    // so the side it stands on never decides whether it lifts).
+    const width = document.documentElement?.clientWidth || 0;
+    const spans = [[pillBox.left, pillBox.right]];
+    if (pilled && width > 0) spans.push([width - pillBox.right, width - pillBox.left]);
+    const boxes: { top: number; bottom: number }[] = [];
+    for (const rail of rails) {
+      if (control.contains?.(rail)) continue;
+      const box = rail.getBoundingClientRect();
+      if (box.width <= 0 || box.height <= 0) continue;
+      if (!spans.some(([left, right]) => box.left < right + gap && box.right > left - gap)) continue;
+      boxes.push(box);
+    }
+    // The lowest lift (at least none) that clears them all: the pill's top
+    // and bottom each against the controls' edges.
+    const clear = (up: number) =>
+      boxes.every((box) => baseBottom - up + gap <= box.top || baseTop - up - gap >= box.bottom);
+    let next = 0;
+    if (!clear(0)) {
+      const candidates = boxes
+        .flatMap((box) => [baseBottom - box.top + gap, baseTop - box.bottom - gap])
+        .filter((up) => up > 0)
+        .sort((a, b) => a - b);
+      next = candidates.find(clear) ?? candidates.at(-1) ?? 0;
+    }
+    next = Math.round(next);
+    if (next === lift) return;
+    lift = next;
+    control.style.setProperty("--mc-lift", `${next}px`);
+    // Lifted, the pill leaves the right corner (the floating menu button
+    // stands above it there) for the left, as in the landscape tiers.
+    if (next > 0) control.dataset.lifted = "true";
+    else delete control.dataset.lifted;
   };
   const readProgress = () => {
     if (travel <= 0) return 1;
@@ -620,6 +682,7 @@ export function mountAssemblyMovie(
       yieldToReader();
   };
   const onScroll = () => {
+    clearRails();
     const y = environment.scrollY;
     // A scroll the browser makes to keep the content in place (scroll
     // anchoring, as the page above settles) leaves the runway where it
@@ -656,7 +719,10 @@ export function mountAssemblyMovie(
     if (state === "playing") measure();
     else travel = 0;
     syncLoad();
-    if (shown) place();
+    if (shown) {
+      place();
+      clearRails();
+    }
   };
   /** A hidden page (another tab, the page leaving) holds the movie; it
    * resumes where it was when the page is back. */

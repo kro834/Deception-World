@@ -227,7 +227,8 @@ export type SurgeView = {
 export class SurgeEngine {
   private back: CanvasRenderingContext2D | null;
   private front: CanvasRenderingContext2D | null;
-  private view: SurgeView = { width: 0, height: 0, x: 0, y: 0, scale: 1 };
+  /** The canvases' box and the figure in it, as last measured. */
+  view: SurgeView = { width: 0, height: 0, x: 0, y: 0, scale: 1 };
   private ratio = 1;
   private pieces = surgePieces();
   private groups = groupFrames(surgePieces());
@@ -252,6 +253,10 @@ export class SurgeEngine {
   private slow = 0;
   private lastNow = 0;
   private drawn = false;
+  /** While the skin grows the armour (rexonance-suit-skin.ts) the swarm,
+   * the debris, the scans and the locks stand down: the canvases are still
+   * cleared and set to figure space for the passes drawn over them. */
+  quiet = false;
 
   constructor(
     private backCanvas: HTMLCanvasElement,
@@ -338,6 +343,31 @@ export class SurgeEngine {
     return [x, y];
   }
 
+  /** The canvases as the last draw left them (figure space), for the
+   * crescendo's pass over the same two layers (rexonance-suit-crescendo.ts):
+   * the figure's scale, and how far the canvases reach from the reactor in
+   * figure px. Null before the first draw. */
+  layers() {
+    const { back, front, view } = this;
+    if (!back || !front || !view.width || !this.drawn) return null;
+    const [cx, cy] = REXONANCE_SUIT_MARKS.core;
+    const left = view.x / view.scale + cx;
+    const right = (view.width - view.x) / view.scale - cx;
+    return {
+      back,
+      front,
+      scale: view.scale,
+      reachX: Math.max(1, Math.min(left, right)),
+      reachUp: Math.max(1, view.y / view.scale + cy),
+      reachDown: Math.max(1, (view.height - view.y) / view.scale - cy),
+    };
+  }
+
+  /** The groups' anchors (figure px), in SURGE_GROUPS order. */
+  anchors() {
+    return this.groups.map((group) => [group.anchor[0], group.anchor[1]] as const);
+  }
+
   /** Anything left to play once the inputs are still (locks, embers). */
   busy(now: number) {
     return this.locks.some((lock) => now - lock.at < (lock.big ? FINAL_MS : LOCK_MS));
@@ -378,10 +408,12 @@ export class SurgeEngine {
       context.globalCompositeOperation = "lighter";
     }
     this.drawn = true;
-    this.drawSwarm(back, front, frame, scale);
-    this.drawShards(front, frame, scale);
-    this.drawScans(front, frame, scale);
-    this.drawLocks(back, front, frame.now, scale);
+    if (!this.quiet) {
+      this.drawSwarm(back, front, frame, scale);
+      this.drawShards(front, frame, scale);
+      this.drawScans(front, frame, scale);
+      this.drawLocks(back, front, frame.now, scale);
+    }
     for (const context of [back, front]) context.globalCompositeOperation = "source-over";
     // Finished locks leave the list.
     if (this.locks.length)

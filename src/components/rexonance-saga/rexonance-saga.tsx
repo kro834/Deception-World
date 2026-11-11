@@ -2,7 +2,7 @@ import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useRef, useSta
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
 import { AssemblyMovie } from "./rexonance-assembly-movie";
-import { ScrollSurgeCanvas, useScrollSurge } from "./rexonance-suit-surge";
+import { ScrollSkinCanvas, ScrollSurgeCanvas, useScrollSurge } from "./rexonance-suit-surge";
 import {
   REXONANCE_ASSEMBLY_PHASES,
   RexonanceAssemblyGuide,
@@ -561,6 +561,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
             decoding="async"
           />
           <canvas className="rzn-canvas" width={0} height={0} />
+          <ScrollSkinCanvas />
           <ScrollSurgeCanvas layer="front" />
           <div className="rzn-call">
             <p className="rzn-kicker">

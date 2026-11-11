@@ -28,7 +28,7 @@ import {
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
 import { SuitNanites } from "./rexonance-suit-nanites";
-import { EntrySurge, EntrySurgeBack } from "./rexonance-suit-surge";
+import { EntrySkinCanvas, EntrySurge, EntrySurgeBack } from "./rexonance-suit-surge";
 import {
   NANITE_FIRE_PHASES,
   REXONANCE_ENTRY_SCAN,
@@ -638,6 +638,9 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
               engine runs only while the suit builds (a late switch inside
               the opening beat mounts it then). */}
           {animate && suit === "build" ? <SuitNanites onReady={onNanites} /> : null}
+          {/* The skin (2026-11-11): the armour grown as one front, over the
+              engine's canvases while they stand down. */}
+          {animate && suit === "build" ? <EntrySkinCanvas /> : null}
           {/* The face's lights, lit: they come on under the pixel squares. */}
           <i
             className="rx-suit-face"
