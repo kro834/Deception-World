@@ -6,15 +6,25 @@
 // stepped, scrubbable, the classic engines whole under it before it fades),
 // the droplets at the front only, and the device budget.
 import assert from "node:assert/strict";
-import { readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import {
   REXONANCE_CALL_BEATS,
   REXONANCE_SUIT_LIGHT,
+  REXONANCE_SUIT_PARTS,
+  REXONANCE_SUIT_PIXELS,
   REXONANCE_SUIT_SNAP,
 } from "../src/lib/rexonance-calls.ts";
+import { ASSEMBLY_BEATS, ASSEMBLY_PARTS } from "../src/lib/rexonance-resonance.js";
+import { MOVIE_DURATION_MS, MOVIE_LEAVE_EVENT } from "../src/lib/assembly-movie.ts";
+import {
+  SKIN_ENTRY_PARTS,
+  SKIN_PART_REACH,
+  SKIN_SCROLL_COVER,
+  SKIN_SCROLL_PARTS,
+} from "../src/lib/rexonance-suit-skin-marks.ts";
 import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 import {
   REXONANCE_SUIT_MARKS,
@@ -37,6 +47,10 @@ import {
   SKIN_BANDS,
   SKIN_ENTRY,
   SKIN_QUALITY,
+  SKIN_RETRACT,
+  SKIN_RETRACT_FADE_MS,
+  SKIN_RETRACT_MS,
+  SKIN_RETRACT_PULL,
   SKIN_SAMPLE,
   SKIN_SCROLL,
   SKIN_WHOLE,
@@ -44,9 +58,20 @@ import {
   drawSkinDroplets,
   skinBudget,
   skinFrame,
+  skinReach,
+  skinRetractFrame,
   skinSamples,
 } from "../src/lib/rexonance-suit-skin.ts";
-import { SKIN_FIELD_FILE, bakeSkinField, skinFieldInput } from "./build-rexonance-skin.mjs";
+import {
+  SKIN_COVER_MARGIN,
+  SKIN_FIELD_FILE,
+  SKIN_MARKS_FILE,
+  SKIN_PART_GROUPS,
+  bakeSkinField,
+  skinFieldInput,
+  skinMarks,
+  skinMarksSource,
+} from "./build-rexonance-skin.mjs";
 
 const file = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 const read = (path) => readFileSync(file(path), "utf8");
@@ -272,10 +297,14 @@ for (const [name, timeline, from, to, step] of [
     for (const frame of frames) {
       assert.ok(frame.alpha >= 1 - frame.classic - 1e-9, `something is drawn at ${frame.x}`);
       if (frame.x <= timeline.leave[0] || frame.x >= timeline.fade[1]) {
-        assert.equal(frame.on, false);
+        // The armour is gone; only its lit emitters may still stand over the
+        // classic engines' held lights (the next test).
+        assert.equal(frame.shell, false);
         assert.equal(frame.alpha, 0);
         assert.equal(frame.classic, 1);
       }
+      assert.equal(frame.on, frame.x > timeline.leave[0] && frame.x < timeline.glow[1]);
+      if (!frame.on) assert.equal(frame.glow, 0);
       if (frame.alpha < 1 && frame.x > timeline.back[0])
         assert.equal(frame.classic, 1, "the skin fades only over a whole suit");
     }
@@ -316,6 +345,284 @@ test("the skin sits inside each scene's own beats", () => {
   assert.ok(SKIN_SCROLL.leave[0] >= 0.02 + NANITE_FIRE_PHASES.flameEnd * 0.48);
   assert.ok(SKIN_SCROLL.head[1] < 0.86 && SKIN_SCROLL.fade[1] < 0.9);
 });
+
+test("each emitter lights a moment after the shell over it is whole; the reactor first, the eyes last", () => {
+  // The lagged fronts: the front as it stood `lag` ago, on both clocks.
+  for (const timeline of [SKIN_ENTRY, SKIN_SCROLL]) {
+    const span = timeline.fade[1] - timeline.leave[0];
+    for (let k = 0; k <= 200; k += 1) {
+      const x = timeline.leave[0] + (span * k) / 200;
+      const now = skinFrame(createSkinFrame(), timeline, x);
+      const then = skinFrame(createSkinFrame(), timeline, x - timeline.lag);
+      assert.equal(now.litBody, then.body);
+      assert.equal(now.litHead, then.head);
+      assert.ok(now.litBody <= now.body && now.litHead <= now.head);
+      // Growing, the emitters are at full gain and the eyes are not the skin's.
+      assert.deepEqual([now.lights, now.eyes, now.reactor, now.flow], [1, 0, 1, 1]);
+    }
+  }
+  // About 60 ms: the entry's exactly, the scroll's at the auto movie's pace.
+  assert.equal(SKIN_ENTRY.lag, 60);
+  assert.ok(SKIN_SCROLL.lag * MOVIE_DURATION_MS >= 60 && SKIN_SCROLL.lag * MOVIE_DURATION_MS < 120);
+  const shader = read("src/lib/rexonance-suit-skin.ts");
+  // Lit from the lagged front, the bands behind it; a bloom that settles.
+  assert.match(shader, /float since = \(mix\(uLit\.x, uLit\.y, crown\) - fld\.r\) \/ BAND - \$\{SKIN_BANDS\.toFixed\(1\)\};/);
+  assert.match(shader, /float lamp = smoothstep\(0\.0, 0\.6, since\);/);
+  assert.match(shader, /float bloom = lamp \* gain \* \(1\.0 - smoothstep\(0\.6, 3\.2, since\)\) \* 0\.35/);
+  // The reactor's disc lights as soon as its cells set: the trigger.
+  assert.match(shader, /disc \* smoothstep\(1\.0, 2\.5, a\) \* min\(uGlow\.w, 1\.0\)/);
+  // The eyes' box takes the eyes' gain (0 while growing): the scene lights them.
+  assert.match(shader, /float gain = mix\(uGlow\.y, uGlow\.z, eyes\);/);
+  const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
+  assert.match(surge, /eyes: \[\s*REXONANCE_SUIT_FACE\.x,\s*REXONANCE_SUIT_FACE\.y,/);
+  assert.match(surge, /reactor: \[REXONANCE_SUIT_MARKS\.core\[0\], REXONANCE_SUIT_MARKS\.core\[1\], REACTOR_DISC\]/);
+  // Gold is never an emitter (no gold forms anywhere it did not).
+  assert.match(shader, /float gold = step\(c\.b, c\.g\) \* step\(c\.g, c\.r\);\s*return smoothstep\(0\.16, 0\.42, sat\) \* \(1\.0 - gold\)/);
+  // Once the armour has faded, the lit emitters alone stay over the classic
+  // engines' held lights until those have lit: no dark gap, no second pop.
+  for (const timeline of [SKIN_ENTRY, SKIN_SCROLL]) {
+    assert.ok(timeline.glow[0] >= timeline.fade[1] && timeline.glow[1] > timeline.glow[0]);
+    const fading = skinFrame(createSkinFrame(), timeline, (timeline.fade[0] + timeline.fade[1]) / 2);
+    assert.equal(fading.glow, 1);
+    const after = skinFrame(createSkinFrame(), timeline, (timeline.fade[1] + timeline.glow[0]) / 2);
+    assert.deepEqual([after.alpha, after.glow, after.on, after.shell, after.classic], [0, 1, true, false, 1]);
+    assert.equal(skinFrame(createSkinFrame(), timeline, timeline.glow[1]).glow, 0);
+  }
+  // The call's light has run out through the body before they go, and they
+  // are gone before the face's squares scatter and the eyes light (last).
+  assert.ok(SKIN_ENTRY.glow[0] >= REXONANCE_SUIT_LIGHT.from + REXONANCE_SUIT_LIGHT.spread);
+  assert.ok(SKIN_ENTRY.glow[1] < REXONANCE_SUIT_PIXELS.scatter);
+  // The scroll's: inside the scene's light, gone before a chosen form evolves.
+  assert.ok(SKIN_SCROLL.glow[0] > ASSEMBLY_BEATS.light[0]);
+  assert.ok(SKIN_SCROLL.glow[1] <= ASSEMBLY_BEATS.light[1] && SKIN_SCROLL.glow[1] <= ASSEMBLY_BEATS.form[0]);
+  assert.match(shader, /float lone = art\.a \* glowing \* lit \* step\(\$\{SKIN_BANDS\.toFixed\(1\)\}, a\) \* uGlow\.x \* \(1\.0 - uAlpha\);/);
+  // The eyes, last, bloom a little past their light (the call's halo).
+  const css = read("src/styles-rexonance-calls.css");
+  assert.match(css, /\.rx-suit\[data-skin\]\s*\.rx-suit-halo\.is-eyes \{\s*animation: rxSuitEyeBloom 270ms/);
+  assert.match(css, /@keyframes rxSuitEyeBloom \{[^}]*\}\s*44% \{\s*opacity: 1;\s*transform: scale\(1\.15\);/);
+});
+
+test("each HUD label lights when the front reaches the part it names", () => {
+  // The committed marks are the bake's.
+  const marks = skinMarks(bake);
+  assert.equal(read(SKIN_MARKS_FILE), skinMarksSource(marks), "run scripts/build-rexonance-skin.mjs");
+  assert.deepEqual({ ...SKIN_PART_REACH }, marks.reach);
+  assert.deepEqual(Object.keys(SKIN_PART_GROUPS), ASSEMBLY_PARTS);
+  assert.deepEqual(Object.keys(SKIN_ENTRY_PARTS).sort(), [...REXONANCE_SUIT_PARTS].sort());
+  assert.equal(SKIN_SCROLL_PARTS.length, ASSEMBLY_PARTS.length);
+  // At its mark the front's lip is at the middle of the part, on each clock.
+  const front = (timeline, x, head) => {
+    const frame = skinFrame(createSkinFrame(), timeline, x);
+    return head ? frame.head : frame.body;
+  };
+  for (const part of REXONANCE_SUIT_PARTS) {
+    const head = part === "HEAD";
+    assert.ok(Math.abs(front(SKIN_ENTRY, SKIN_ENTRY_PARTS[part], head) - SKIN_PART_REACH[part]) < 0.01, part);
+    assert.ok(Math.abs(skinReach(SKIN_ENTRY, SKIN_PART_REACH[part], head) - SKIN_ENTRY_PARTS[part]) <= 0.5);
+  }
+  ASSEMBLY_PARTS.forEach((part, index) => {
+    const head = part === "HEAD";
+    assert.ok(Math.abs(front(SKIN_SCROLL, SKIN_SCROLL_PARTS[index], head) - SKIN_PART_REACH[part]) < 0.01, part);
+  });
+  // Never before the front is there: a tenth of the part's cells is under
+  // the lip when its label lights, and none of it before the part's first.
+  const order = (marksOf) => Object.entries(marksOf).sort((a, b) => a[1] - b[1]).map(([part]) => part);
+  // From the reactor out: the chest, the arms, the legs, the helmet last.
+  assert.deepEqual(order(SKIN_ENTRY_PARTS), ["CHEST", "ARMS", "LEGS", "HEAD"]);
+  assert.deepEqual(
+    order(Object.fromEntries(ASSEMBLY_PARTS.map((part, index) => [part, SKIN_SCROLL_PARTS[index]]))),
+    ["CHEST", "WAIST", "ARMS", "TAIL", "LEGS", "HEAD"],
+  );
+  assert.ok(SKIN_ENTRY_PARTS.CHEST > SKIN_ENTRY.body[0] && SKIN_ENTRY_PARTS.LEGS < SKIN_ENTRY.body[1]);
+  assert.ok(SKIN_ENTRY_PARTS.HEAD > SKIN_ENTRY.head[0] && SKIN_ENTRY_PARTS.HEAD < SKIN_ENTRY.head[1]);
+  assert.ok(SKIN_SCROLL_PARTS.at(-1) > SKIN_SCROLL.head[0] && SKIN_SCROLL_PARTS.at(-1) < SKIN_SCROLL.head[1]);
+  // The legs' label no longer leads the front: the old beat (the first
+  // DEUS！, the scroll's first quarter of the chant) would light it with the
+  // lip still above the knees.
+  assert.ok(SKIN_PART_REACH.LEGS > SKIN_PART_REACH.ARMS && SKIN_PART_REACH.ARMS > SKIN_PART_REACH.CHEST);
+  // The call: each label carries its mark, used only under the skin; the
+  // classic call keeps its beats (the plates' own snaps), and LOCK its own.
+  const call = read("src/components/rexonance-saga/rexonance-call-sequence.tsx");
+  assert.match(call, /"--rx-suit-skin-lock": `\$\{entryElapsedTime\(SKIN_ENTRY_PARTS\[part\]\)\}ms`,/);
+  const css = read("src/styles-rexonance-calls.css");
+  assert.match(
+    css,
+    /\.rx-suit\[data-skin\]\s*\.rx-suit-callout:not\(\.is-lock\) \{\s*--rx-suit-lock: var\(--rx-suit-skin-lock\);/,
+  );
+  assert.match(css, /--rx-suit-lock: calc\(var\(--rx-call-chant-start\) \+ 230ms \+ var\(--rx-suit-i\) \* 120ms\);/);
+  // The scroll scene and the auto movie (which drives the scroll): the
+  // shared engine reads the page's marks while the skin is live over it,
+  // and its own (each part's last tile) otherwise and on every other page.
+  const page = read("src/components/rexonance-saga/rexonance-saga.tsx");
+  assert.match(page, /hudParts: \(runway\) => \("rznSkin" in runway\.dataset \? SKIN_SCROLL_PARTS : null\),/);
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.match(engine, /const hudPartsOf = typeof config\.hudParts === "function" \? config\.hudParts : null;/);
+  assert.match(engine, /const partAt = hudPartsOf\?\.\(runway\) \?\? null;/);
+  assert.match(engine, /setFlag\(part, "data-on", progress >= \(\(partAt \?\? plan\.partDone\)\[index\] \|\| 2\)\),/);
+  const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
+  assert.match(surge, /flagSkin\(skinLive\);/);
+  assert.match(surge, /if \(retract\) endRetract\(true\);\s*flagSkin\(false\);/);
+  // Under the skin a label lighting strikes no plate lock (and no shake).
+  assert.match(surge, /q >= lastQ - 0\.001 && !skinLive\)/);
+});
+
+test("the shared scene stops drawing while the skin covers it whole — Rexonance's config only", () => {
+  // Inside the span its canvas is hidden (opacity 0), by a margin for the
+  // two playheads.
+  assert.ok(SKIN_COVER_MARGIN >= 0.02);
+  assert.ok(Math.abs(SKIN_SCROLL_COVER[0] - (SKIN_SCROLL.leave[1] + SKIN_COVER_MARGIN)) < 1e-9);
+  assert.ok(Math.abs(SKIN_SCROLL_COVER[1] - (SKIN_SCROLL.back[0] - SKIN_COVER_MARGIN)) < 1e-9);
+  for (const q of SKIN_SCROLL_COVER) {
+    for (const d of [-SKIN_COVER_MARGIN * 0.9, 0, SKIN_COVER_MARGIN * 0.9])
+      assert.equal(skinFrame(createSkinFrame(), SKIN_SCROLL, q + d).classic, 0, `hidden at ${q + d}`);
+    assert.equal(skinFrame(createSkinFrame(), SKIN_SCROLL, q).alpha, 1);
+  }
+  const page = read("src/components/rexonance-saga/rexonance-saga.tsx");
+  assert.match(
+    page,
+    /covered: \(progress, runway\) =>\s*"rznSkin" in runway\.dataset &&\s*progress > SKIN_SCROLL_COVER\[0\] &&\s*progress < SKIN_SCROLL_COVER\[1\],/,
+  );
+  const engine = read("src/lib/rexonance-resonance.js");
+  assert.match(engine, /const coveredAt = typeof config\.covered === "function" \? config\.covered : null;/);
+  // The frame draws nothing, but the welded plates and the gold keep pace,
+  // so the first frame back is whole; the field's layer is cleared.
+  assert.match(
+    engine,
+    /coveredDrawn = Boolean\(coveredAt && !wire && nano && coveredAt\(progress, runway\)\);\s*if \(coveredDrawn\) \{\s*syncSettled\(paintedBy\(progress\), seal >= 1\);\s*if \(goldLayer\) syncGold\(progress\);\s*lastDrawMs = 0;\s*if \(field && fieldProgress >= 0\) \{\s*fieldProgress = -1;\s*field\.clear\(\);\s*\}\s*return;/,
+  );
+  // The skin coming or going over a resting frame draws it again.
+  assert.match(engine, /runway\.addEventListener\?\.\("rexonance:assembly-redraw", redrawAssembly\);/);
+  assert.match(engine, /runway\.removeEventListener\?\.\("rexonance:assembly-redraw", redrawAssembly\);/);
+  assert.match(
+    read("src/components/rexonance-saga/rexonance-suit-surge.tsx"),
+    /runway\.dispatchEvent\(new Event\("rexonance:assembly-redraw"\)\);/,
+  );
+  // No other page's suit-up passes either hook.
+  const walk = (dir) =>
+    readdirSync(new URL(`../${dir}`, import.meta.url), { withFileTypes: true }).flatMap((entry) =>
+      entry.isDirectory() ? walk(`${dir}/${entry.name}`) : [`${dir}/${entry.name}`],
+    );
+  const users = walk("src")
+    .filter((path) => /\.(tsx?|jsx?)$/.test(path))
+    .filter((path) => /\b(hudParts|covered)\??:\s*\(/.test(read(path)));
+  assert.deepEqual(users.sort(), [
+    "src/components/rexonance-saga/rexonance-saga.tsx",
+    "src/lib/rexonance-resonance.d.ts",
+  ]);
+});
+
+test("the retract: lights out, the face opens, the helmet sinks, the limbs are drawn in, the reactor dims last", () => {
+  assert.equal(SKIN_RETRACT_MS, 1600);
+  assert.ok(SKIN_RETRACT_FADE_MS >= 150 && SKIN_RETRACT_FADE_MS <= 300);
+  const at = (ms) => skinRetractFrame(createSkinFrame(), ms);
+  // It starts on the finished, lit suit and ends on the bare body.
+  const first = at(0);
+  assert.deepEqual(
+    [first.body, first.head, first.lights, first.eyes, first.reactor, first.alpha, first.classic],
+    [SKIN_WHOLE, SKIN_WHOLE, 1, 1, 1, 1, 0],
+  );
+  const end = at(SKIN_RETRACT_MS);
+  assert.ok(end.body <= -SKIN_BAND * 0.6 && end.head <= -SKIN_BAND * 0.6, "nothing of the shell is left");
+  assert.equal(end.reactor, 0);
+  assert.deepEqual(at(SKIN_RETRACT_MS + 500), end);
+  let previous = first;
+  let faceOpen = -1;
+  let helmetGone = -1;
+  let bodyMoves = -1;
+  let bodyGone = -1;
+  const steps = [];
+  for (let ms = 4; ms <= SKIN_RETRACT_MS; ms += 4) {
+    const frame = at(ms);
+    // The fronts only recede, without a jump; the droplets run inward.
+    for (const key of ["body", "head"]) {
+      assert.ok(frame[key] <= previous[key] + 1e-12, `${key} never grows back at ${ms}`);
+      assert.ok(previous[key] - frame[key] < 0.03, `${key} never jumps at ${ms}`);
+    }
+    assert.equal(frame.flow, -1);
+    assert.ok(frame.on && frame.shell && frame.alpha === 1 && frame.classic === 0 && frame.glow === 0);
+    if (faceOpen < 0 && frame.head <= SKIN_FACE_FROM) faceOpen = ms;
+    if (helmetGone < 0 && frame.head <= 0) helmetGone = ms;
+    if (bodyMoves < 0 && frame.body < SKIN_WHOLE) bodyMoves = ms;
+    if (bodyGone < 0 && frame.body <= 0) bodyGone = ms;
+    if (ms > SKIN_RETRACT.body[0] && ms <= SKIN_RETRACT.body[1]) steps.push(previous.body - frame.body);
+    previous = frame;
+  }
+  // 1. The lights go out first: the eyes, then the emitters, before any of
+  // the shell has left (its first texel goes once the front is under 1).
+  assert.equal(at(SKIN_RETRACT.eyes[1]).eyes, 0);
+  assert.ok(at(SKIN_RETRACT.eyes[1]).head > 1, "the eyes are dark before the visor opens");
+  assert.ok(at(SKIN_RETRACT.eyes[1]).lights > 0.8, "the eyes before the emitters");
+  assert.equal(at(SKIN_RETRACT.lights[1]).lights, 0);
+  assert.ok(SKIN_RETRACT.lights[1] < SKIN_RETRACT.body[0] && SKIN_RETRACT.lights[1] < faceOpen);
+  // 2–3. The face opens (by 0.3 s), then the helmet sinks (by 0.6 s) …
+  assert.ok(faceOpen > 150 && faceOpen <= 300, `the face is open at ${faceOpen}`);
+  assert.ok(helmetGone > faceOpen && helmetGone <= 600, `the helmet is down at ${helmetGone}`);
+  // 4. … before the limbs start for the chest, ever faster.
+  assert.ok(bodyMoves > SKIN_RETRACT.body[0] && bodyMoves <= SKIN_RETRACT.body[0] + 8);
+  assert.ok(helmetGone <= bodyMoves + 220);
+  for (let n = 1; n < steps.length; n += 1)
+    assert.ok(steps[n] >= steps[n - 1] - 1e-9, "the pull accelerates");
+  assert.ok(SKIN_RETRACT_PULL > 2 && SKIN_RETRACT_PULL <= 3);
+  // The feet (the field's far end) leave first, the chest (its origin) last.
+  const feetGone = (() => {
+    for (let ms = 0; ms <= SKIN_RETRACT_MS; ms += 4) if (at(ms).body < 0.9) return ms;
+  })();
+  assert.ok(feetGone < bodyGone - 300);
+  // 5. The reactor is lit through all of it, pulses once, and dims last.
+  for (let ms = 0; ms <= SKIN_RETRACT.pulse[0]; ms += 20) assert.equal(at(ms).reactor, 1);
+  assert.ok(at((SKIN_RETRACT.pulse[0] + SKIN_RETRACT.pulse[1]) / 2).reactor > 1.2, "one last pulse");
+  assert.ok(at(bodyGone).reactor > 0.1, "still lit as the chest closes into it");
+  assert.ok(bodyGone > 1400 && bodyGone < SKIN_RETRACT_MS);
+  assert.ok(at(SKIN_RETRACT_MS - 20).reactor > 0 && at(SKIN_RETRACT_MS - 20).reactor < 0.1);
+  // Closed-form.
+  const reused = createSkinFrame();
+  skinRetractFrame(reused, 1500);
+  skinRetractFrame(reused, 420);
+  assert.deepEqual(reused, at(420));
+});
+
+test("the retract plays where the suit leaves; a plain scroll back stays the build's own reverse", () => {
+  const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
+  // One event, the movie's and the replay link's.
+  assert.match(surge, new RegExp(`const RETRACT_EVENT = "${MOVIE_LEAVE_EVENT}";`));
+  const guide = read("src/components/rexonance-saga/rexonance-assembly-guide.tsx");
+  assert.match(guide, /<a href="#assembly" onClick=\{replayAfterRetract\}>/);
+  assert.match(guide, new RegExp(`const RETRACT_EVENT = "${MOVIE_LEAVE_EVENT}";`));
+  assert.match(guide, /new CustomEvent<RetractDetail>\(RETRACT_EVENT, \{\s*cancelable: true,/);
+  // Nothing to play (or a modified click): the plain link, as it was.
+  assert.match(guide, /if \(!leave\.defaultPrevented\) \{\s*delete anchor\.dataset\.leave;\s*return;\s*\}\s*event\.preventDefault\(\);/);
+  assert.match(guide, /anchor\.dataset\.leave = "go";\s*anchor\.click\(\);/);
+  // The hook: over the finished standard suit with the skin in hand, the
+  // retract on its own clock; another form or no skin, and the still tiers
+  // (reduced motion, economy), a short fade.
+  assert.match(surge, /if \(lastQ < RETRACT_FROM\) return;/);
+  assert.match(surge, /const RETRACT_FROM = 0\.93;/);
+  assert.match(surge, /const RETRACT_FADE_MS = 250;/);
+  assert.equal(SKIN_RETRACT_FADE_MS, 250);
+  assert.match(
+    surge,
+    /if \(grown && !grown\.renderer\.lost && runway\.dataset\.form === "standard"\) \{[\s\S]*?retract = \{ from: performance\.now\(\), q: -1, done: detail\.done, over: false \};/,
+  );
+  assert.match(surge, /if \(!visible \|\| !still \|\| !reducedMotion\(\)\) return;[\s\S]*?fadeOut\(\[still\]\);/);
+  assert.match(surge, /grown\.lib\.skinRetractFrame\(grown\.frame, now - leaving\.from\)/);
+  // The page moves only once it is over; the reader's own scroll ends it.
+  assert.match(surge, /now - leaving\.from >= grown\.lib\.SKIN_RETRACT_MS\) \{[\s\S]*?leaving\.over = true;\s*leaving\.done\(true\);/);
+  assert.match(surge, /Math\.abs\(target - leaving\.q\) > 0\.012/);
+  // Without a retract in play the skin is the playhead's alone: scrubbing
+  // back runs the same frames in reverse (the closed-form test above).
+  assert.match(
+    surge,
+    /\? leaving\s*\? grown\.lib\.skinRetractFrame\(grown\.frame, now - leaving\.from\)\s*: grown\.lib\.skinFrame\(grown\.frame, grown\.lib\.SKIN_SCROLL, q\)/,
+  );
+  assert.equal(surge.match(/retract = \{/g).length, 1, "only a leave starts it");
+  // The entry has no retract: the call hands the suit to the page.
+  const entry = surge.slice(surge.indexOf("export function EntrySurge()"), surge.indexOf("export function ScrollSurgeCanvas"));
+  assert.doesNotMatch(entry, /skinRetractFrame|RETRACT_EVENT/);
+  // The driver stays on the body, finished: the retract ends on the skin's
+  // base (the undersuit with the driver), and the body never moves.
+  assert.match(surge, /grown\.renderer\.render\(growing, now \/ 1000, 1\);/);
+});
+
 
 test("the bands are narrow (a front, never a cross-fade)", () => {
   assert.ok(SKIN_BAND <= 0.08);
@@ -406,9 +713,17 @@ test("the droplets are budgeted per device, sorted along the field, and live onl
     };
     const live = (body, head) => {
       drawn.length = 0;
-      drawSkinDroplets(context, field, { body, head, alpha: 1, classic: 0, on: true }, 3, 1000, 1);
+      drawSkinDroplets(
+        context,
+        field,
+        { body, head, alpha: 1, classic: 0, on: true, flow },
+        3,
+        1000,
+        1,
+      );
       return drawn.length;
     };
+    let flow = 1;
     assert.equal(live(0, 0), 0, "none before the front leaves the reactor");
     assert.equal(live(SKIN_WHOLE, SKIN_WHOLE), 0, "none on the finished suit");
     let most = 0;
@@ -437,6 +752,13 @@ test("the droplets are budgeted per device, sorted along the field, and live onl
         }
       assert.ok(near, "a droplet is at the front");
     }
+    // Receding (the retract), the same droplets run the other way.
+    const out = drawn.map(([x, y]) => [x, y]);
+    flow = -1;
+    live(0.5, 0);
+    assert.equal(drawn.length, out.length);
+    assert.ok(drawn.some(([x, y], n) => Math.hypot(x - out[n][0], y - out[n][1]) > 4));
+    flow = 1;
   }
 });
 
@@ -456,8 +778,8 @@ test("the skin takes over only when it and the nanite engine are ready, and hand
   assert.ok(surge.match(/showClassic\(1\);/g).length >= 4);
   assert.match(surge, /dropSkin\(\);\s*showClassic\(1\);\s*delete suit\.dataset\.skin;/);
   // The surge's own swarm and locks stand down while the skin grows.
-  assert.match(surge, /engine\.quiet = Boolean\(growing\?\.on\);/);
-  assert.match(surge, /engine\.quiet = skinOn;/);
+  assert.match(surge, /engine\.quiet = Boolean\(growing\?\.shell\);/);
+  assert.match(surge, /engine\.quiet = shellOn;/);
   assert.match(read("src/lib/rexonance-suit-surge.ts"), /if \(!this\.quiet\) \{\s*this\.drawSwarm/);
   // The canvases are in both scenes, after the classic engines'.
   const call = read("src/components/rexonance-saga/rexonance-call-sequence.tsx");

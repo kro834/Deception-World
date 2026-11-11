@@ -28,13 +28,14 @@ import {
 import { REXONANCE_HENSHIN_FIGURE } from "@/lib/rexonance-henshin-figures";
 import {
   REXONANCE_SUIT_ATLAS,
+  REXONANCE_SUIT_FACE,
   REXONANCE_SUIT_FIGURE,
   REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
-import type { SkinField, SkinFrame, SkinRenderer } from "@/lib/rexonance-suit-skin";
+import type { SkinField, SkinFrame, SkinRenderer, SkinTorrent } from "@/lib/rexonance-suit-skin";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 import type { CrescendoEngine, CrescendoFrame } from "@/lib/rexonance-suit-crescendo";
 
@@ -176,7 +177,22 @@ function mountCrescendo(
    down (their opacity, never their clocks) while it grows and are whole
    again under it before it fades. Its chunk, the figure's picture and the
    baked field are fetched here, on demand, in full motion only; without
-   WebGL, or if anything is late or fails, the classic suit-up plays. */
+   WebGL, or if anything is late or fails, the classic suit-up plays.
+
+   The retract (owner, 2026-11-11): where the suit leaves on the page — the
+   「もう一度、装着を体験」 link and the auto movie's play from the start, both
+   over the finished suit — the same canvas plays the build's reverse on a
+   clock of its own (skinRetractFrame, about 1.6 s) before the page moves.
+   Both ask with RETRACT_EVENT on the runway; the scroll hook below answers.
+   A plain scroll back is never touched: it scrubs the build in reverse. */
+const RETRACT_EVENT = "rexonance:assembly-leave";
+type RetractDetail = { done: (ok?: boolean) => void };
+/** The retract plays over the finished suit: from this progress on. */
+const RETRACT_FROM = 0.93;
+/** Reduced motion, economy, another form's art, no WebGL: a short fade. */
+const RETRACT_FADE_MS = 250;
+/** The reactor's disc (the scene's REACTOR_RADIUS), figure px. */
+const REACTOR_DISC = 40;
 type SkinLib = typeof import("@/lib/rexonance-suit-skin");
 type Skin = {
   lib: SkinLib;
@@ -184,6 +200,8 @@ type Skin = {
   field: SkinField;
   frame: SkinFrame;
   ratio: number;
+  /** The torrent of nanites that feeds the front (SkinTorrent). */
+  torrent: SkinTorrent;
 };
 const DRIVER_STANDIN = "/rexonance-zenith-20261023/driver-standin.webp";
 
@@ -238,7 +256,19 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
     if (cancelled) return;
     renderer = lib.SkinRenderer.create(
       canvas,
-      { art, base, field: fieldPicture, fieldSize: [field.w, field.h] },
+      {
+        art,
+        base,
+        field: fieldPicture,
+        fieldSize: [field.w, field.h],
+        eyes: [
+          REXONANCE_SUIT_FACE.x,
+          REXONANCE_SUIT_FACE.y,
+          REXONANCE_SUIT_FACE.x + REXONANCE_SUIT_FACE.w,
+          REXONANCE_SUIT_FACE.y + REXONANCE_SUIT_FACE.h,
+        ],
+        reactor: [REXONANCE_SUIT_MARKS.core[0], REXONANCE_SUIT_MARKS.core[1], REACTOR_DISC],
+      },
       [REXONANCE_SUIT_SIZE.width, REXONANCE_SUIT_SIZE.height],
     );
     if (base) {
@@ -251,7 +281,18 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
       renderer = null;
       return;
     }
-    ready({ lib, renderer, field, frame: lib.createSkinFrame(), ratio: budget.ratio });
+    ready({
+      lib,
+      renderer,
+      field,
+      frame: lib.createSkinFrame(),
+      ratio: budget.ratio,
+      torrent: new lib.SkinTorrent(
+        budget.torrent,
+        REXONANCE_SUIT_MARKS.core,
+        REXONANCE_SUIT_MARKS.belt,
+      ),
+    });
   })().catch(() => undefined);
   return () => {
     cancelled = true;
@@ -407,7 +448,7 @@ export function EntrySurge() {
           if (engaged) suit.dataset.skin = "";
         }
         const growing = engaged && grown ? grown.lib.skinFrame(grown.frame, grown.lib.SKIN_ENTRY, t) : null;
-        engine.quiet = Boolean(growing?.on);
+        engine.quiet = Boolean(growing?.shell);
         engine.draw(entrySurgeFrame(frame, t, now, fits, windows, final));
         const layers = engine.layers();
         const made = crescendo as Crescendo | null;
@@ -428,15 +469,25 @@ export function EntrySurge() {
             grown.renderer.render(growing, now / 1000, 0);
             showClassic(growing.classic);
             if (growing.on && layers) {
+              // The torrent that feeds the front, then the droplets at its lip.
+              const cell = REXONANCE_SUIT_SIZE.width / grown.field.w;
+              const px = 1 / Math.max(0.05, layers.scale);
+              layers.back.globalCompositeOperation = "lighter";
               layers.front.globalCompositeOperation = "lighter";
-              grown.lib.drawSkinDroplets(
+              grown.torrent.draw(
+                layers.back,
                 layers.front,
                 grown.field,
                 growing,
-                REXONANCE_SUIT_SIZE.width / grown.field.w,
+                cell,
                 now,
-                1 / Math.max(0.05, layers.scale),
+                px,
+                grown.lib.SKIN_TORRENT_SHARE[level],
+                made ? made.lib.entryCharge(t, final) : 0,
               );
+              if (growing.shell)
+                grown.lib.drawSkinDroplets(layers.front, grown.field, growing, cell, now, px);
+              layers.back.globalCompositeOperation = "source-over";
               layers.front.globalCompositeOperation = "source-over";
             }
           }
@@ -453,7 +504,7 @@ export function EntrySurge() {
             frame.implode,
             frame.pull,
           );
-          made.engine.draw(layers, growing ? made.lib.quietCrescendo(pass) : pass);
+          made.engine.draw(layers, growing?.shell ? made.lib.quietCrescendo(pass) : pass);
         }
         // The locks' shake rides the bank's camera (one transform).
         const [x, y] = engine.shake(now);
@@ -526,11 +577,29 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
     let dropSkin = () => {};
     let classicShown = "";
     let skinPlaced = "";
+    // The skin is live over the scene: the engine lights the HUD's parts by
+    // its front and stops drawing under it (SUIT_UP hudParts, covered).
+    const flagSkin = (on: boolean) => {
+      if (on === "rznSkin" in runway.dataset) return;
+      if (on) runway.dataset.rznSkin = "";
+      else delete runway.dataset.rznSkin;
+      runway.dispatchEvent(new Event("rexonance:assembly-redraw"));
+    };
+    // The retract in play: its start, where the reader stood, its answer.
+    let retract: { from: number; q: number; done: (ok?: boolean) => void; over: boolean } | null =
+      null;
+    let fadeTimer = 0;
+    const endRetract = (ok: boolean) => {
+      const ended = retract;
+      retract = null;
+      ended?.done(ok);
+    };
     // The classic scene's canvases under the skin: their opacity is this
     // layer's while the skin grows (and their own sheet's again after).
     const showClassic = (value: number) => {
       const next = value >= 0.999 ? "" : value.toFixed(3);
-      if (next === classicShown) return;
+      // (A leave's short fade owns their opacity until the page has moved.)
+      if (next === classicShown || fadeTimer) return;
       classicShown = next;
       for (const element of frameBox.querySelectorAll<HTMLElement>(
         ":scope > :is(.rzn-canvas, .rzn-field)",
@@ -594,6 +663,9 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       restCamera();
       engine?.clear();
       skin?.renderer.clear();
+      // (A retract cut short: the page moves on as it was asked to.)
+      if (retract) endRetract(true);
+      flagSkin(false);
       showClassic(1);
       crescendoClock?.reset();
       shown = -1;
@@ -634,35 +706,63 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       else shown += (target - shown) * (1 - Math.exp(-dt * (coarse ? 0.044 : 0.032)));
       if (Math.abs(target - shown) < 0.0005) shown = target;
       const q = shown;
-      // A part that seats as the reader moves forward strikes its lock.
+      const grown = skin as Skin | null;
+      const skinLive = Boolean(grown && !grown.renderer.lost);
+      flagSkin(skinLive);
+      // A part that seats as the reader moves forward strikes its lock
+      // (under the skin its label lights with the front: no plate clanks).
       parts.forEach((part, index) => {
         const on = part.hasAttribute("data-on");
-        if (on && !partOn[index] && lastQ >= 0 && q >= lastQ - 0.001)
+        if (on && !partOn[index] && lastQ >= 0 && q >= lastQ - 0.001 && !skinLive)
           for (const g of PART_GROUPS[index]) if (g >= 0) engine?.lock(g, now);
         partOn[index] = on;
       });
       const moving = lastQ < 0 || Math.abs(q - lastQ) > 0.00005;
       lastQ = q;
       scrollSurgeFrame(frame, q, now, windows, pieceWindows);
+      // The retract, on its own clock, until it is over or the reader moves.
+      let leaving = retract as typeof retract;
+      if (leaving && leaving.q < 0) leaving.q = target;
+      if (leaving && (!grown || !skinLive || Math.abs(target - leaving.q) > 0.012)) {
+        // The reader took the scroll (or the context went): the scrub again.
+        endRetract(leaving.over || !skinLive);
+        leaving = null;
+      }
+      if (leaving && grown && !leaving.over && now - leaving.from >= grown.lib.SKIN_RETRACT_MS) {
+        // Over: the page moves on; the bare body stands until it has.
+        leaving.over = true;
+        leaving.done(true);
+      } else if (leaving && grown && now - leaving.from > grown.lib.SKIN_RETRACT_MS + 1200) {
+        // (The page never moved: the scene is the scroll's again.)
+        endRetract(true);
+        leaving = null;
+      }
       // The skin at this playhead (closed-form: it scrubs both ways).
-      const grown = skin as Skin | null;
       const growing =
-        grown && !grown.renderer.lost
-          ? grown.lib.skinFrame(grown.frame, grown.lib.SKIN_SCROLL, q)
+        grown && skinLive
+          ? leaving
+            ? grown.lib.skinRetractFrame(grown.frame, now - leaving.from)
+            : grown.lib.skinFrame(grown.frame, grown.lib.SKIN_SCROLL, q)
           : null;
       const skinOn = Boolean(growing?.on);
-      engine.quiet = skinOn;
-      const flowing = (frame.swarm > 0.01 && frame.implode < 1) || skinOn;
+      const shellOn = Boolean(growing?.shell);
+      engine.quiet = shellOn;
+      const flowing =
+        (frame.swarm > 0.01 && frame.implode < 1) ||
+        shellOn ||
+        Boolean(leaving) ||
+        Boolean(grown && grown.torrent.live > 0);
       // The crescendo's events strike on the same playhead, every frame.
       const pass =
         crescendo && crescendoClock
           ? crescendoClock.frame(crescendo.frame, q, now, frame.swarm, frame.implode, frame.pull)
           : null;
-      if (pass && skinOn) crescendo?.lib.quietCrescendo(pass);
+      if (pass && shellOn) crescendo?.lib.quietCrescendo(pass);
       const playing = Boolean(pass && crescendo?.lib.crescendoBusy(pass));
       const busy = engine.busy(now) || playing;
       // At rest the swarm keeps flowing (touch screens at about 30 fps).
-      const due = moving || busy || (flowing && (!coarse || now - lastDraw > 31));
+      const due =
+        moving || busy || Boolean(leaving) || (flowing && (!coarse || now - lastDraw > 31));
       if (due) {
         const paced = !moving && !busy;
         lastDraw = now;
@@ -691,15 +791,25 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
           grown.renderer.render(growing, now / 1000, 1);
           showClassic(growing.classic);
           if (skinOn && surfaces) {
+            // The torrent that feeds the front, then the droplets at its lip.
+            const cell = REXONANCE_SUIT_SIZE.width / grown.field.w;
+            const px = 1 / Math.max(0.05, surfaces.scale);
+            surfaces.back.globalCompositeOperation = "lighter";
             surfaces.front.globalCompositeOperation = "lighter";
-            grown.lib.drawSkinDroplets(
+            grown.torrent.draw(
+              surfaces.back,
               surfaces.front,
               grown.field,
               growing,
-              REXONANCE_SUIT_SIZE.width / grown.field.w,
+              cell,
               now,
-              1 / Math.max(0.05, surfaces.scale),
+              px,
+              grown.lib.SKIN_TORRENT_SHARE[crescendo ? crescendo.engine.governor.level : 0],
+              leaving ? 0 : (pass?.charge ?? 0),
             );
+            if (shellOn)
+              grown.lib.drawSkinDroplets(surfaces.front, grown.field, growing, cell, now, px);
+            surfaces.back.globalCompositeOperation = "source-over";
             surfaces.front.globalCompositeOperation = "source-over";
           }
         } else showClassic(1);
@@ -736,6 +846,63 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
     const wake = () => {
       if (!raf && live()) raf = requestAnimationFrame(tick);
     };
+    // The suit is asked to leave (the replay link, the movie's play from the
+    // start). Over the finished standard suit, with the skin in hand: the
+    // retract. Another form's art, no skin, or the still tiers (reduced
+    // motion, economy: the finished figure in view): a short fade.
+    const onLeave = (event: Event) => {
+      const detail = (event as CustomEvent<RetractDetail>).detail;
+      if (typeof detail?.done !== "function" || retract || fadeTimer) return;
+      const fadeOut = (elements: Iterable<HTMLElement>) => {
+        const faded = [...elements];
+        for (const element of faded) {
+          element.style.transition = `opacity ${RETRACT_FADE_MS}ms ease-out`;
+          element.style.opacity = "0";
+        }
+        fadeTimer = window.setTimeout(() => {
+          detail.done(true);
+          // Back once the page has moved.
+          requestAnimationFrame(() => {
+            fadeTimer = 0;
+            for (const element of faded) {
+              element.style.transition = "none";
+              element.style.opacity = "";
+            }
+            requestAnimationFrame(() => {
+              for (const element of faded) element.style.transition = "";
+            });
+          });
+        }, RETRACT_FADE_MS);
+      };
+      if (!live()) {
+        // The still tiers: the finished figure, if it is in view, fades.
+        if (!visible || !still || !reducedMotion()) return;
+        const box = still.getBoundingClientRect();
+        if (box.bottom < 0 || box.top > window.innerHeight) return;
+        event.preventDefault();
+        fadeOut([still]);
+        return;
+      }
+      if (lastQ < RETRACT_FROM) return;
+      const grown = skin as Skin | null;
+      event.preventDefault();
+      if (grown && !grown.renderer.lost && runway.dataset.form === "standard") {
+        // The frame back on its pin if the reader has scrolled it part away.
+        const box = frameBox.getBoundingClientRect();
+        if (box.top < -0.4 * box.height && travel > 0)
+          window.scrollTo({
+            top: window.scrollY + runway.getBoundingClientRect().top - pinTop + travel,
+            behavior: "instant" as ScrollBehavior,
+          });
+        retract = { from: performance.now(), q: -1, done: detail.done, over: false };
+        wake();
+        return;
+      }
+      // Another form's art, or no skin: the figure fades, then the page moves.
+      classicShown = "";
+      fadeOut(frameBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field)"));
+    };
+    runway.addEventListener(RETRACT_EVENT, onLeave);
     const intersection = new IntersectionObserver((entries) => {
       visible = entries.some((entry) => entry.isIntersecting);
       if (visible) wake();
@@ -755,6 +922,8 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       state.disconnect();
       resize.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
+      runway.removeEventListener(RETRACT_EVENT, onLeave);
+      if (fadeTimer) window.clearTimeout(fadeTimer);
       stop();
       dropCrescendo();
       dropSkin();

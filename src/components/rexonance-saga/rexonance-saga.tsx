@@ -47,6 +47,7 @@ import {
 } from "@/lib/rexonance-suit";
 import { rexonanceImage } from "@/lib/rexonance-images";
 import { REXONANCE_FORM_FIGURES, REXONANCE_FORM_PAD } from "@/lib/rexonance-forms";
+import { SKIN_SCROLL_COVER, SKIN_SCROLL_PARTS } from "@/lib/rexonance-suit-skin-marks";
 import { REXONANCE_SUIT_BASE, REXONANCE_SUIT_ORNAMENTS } from "@/lib/rexonance-suit-base";
 import {
   FORM_CHANGE_MS,
@@ -484,6 +485,14 @@ const SUIT_UP: RexonanceAssemblyConfig = {
   // guideway conduit, and each plate's real outline and gold box — loaded
   // with the scene's pictures (round 3), never by the still tiers.
   nanites: () => import("@/lib/rexonance-nanites").then((module) => module.REXONANCE_NANITES),
+  // The skin (2026-11-11), while it is live over the scene (the surge layer
+  // flags the runway): each HUD part lights as the skin's front reaches it,
+  // and the scene draws nothing while its canvas is hidden whole under it.
+  hudParts: (runway) => ("rznSkin" in runway.dataset ? SKIN_SCROLL_PARTS : null),
+  covered: (progress, runway) =>
+    "rznSkin" in runway.dataset &&
+    progress > SKIN_SCROLL_COVER[0] &&
+    progress < SKIN_SCROLL_COVER[1],
 };
 // The entry overlay follows its established five-beat grouping; repeated
 // chant text still splits into individual visual units within its existing beat.

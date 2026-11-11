@@ -367,6 +367,14 @@ export interface RexonanceAssemblyConfig {
   progress?: () => number;
   /** Exact external playhead: no scroll spring or wall-clock fire at rest. */
   directProgress?: boolean;
+  /** A page's own layer over the figure (Rexonance's skin): the progress at
+   * which each HUD part lights, in the HUD's order, or null for the scene's
+   * own (each part's last tile). */
+  hudParts?: (runway: HTMLElement) => readonly number[] | null;
+  /** True while that layer hides the scene's canvas whole: the frame then
+   * draws nothing. The page sends rexonance:assembly-redraw when its layer
+   * comes or goes. */
+  covered?: (progress: number, runway: HTMLElement) => boolean;
   figure: string;
   undersuit: string;
   size: { readonly width: number; readonly height: number };

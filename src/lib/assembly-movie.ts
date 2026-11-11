@@ -116,6 +116,14 @@ export const MOVIE_WAKE_INTERVAL_MS = 4000;
  * asked to play, or is about to), and retry a failed preparation. */
 export const MOVIE_WAKE_EVENT = "rexonance:assembly-wake";
 export const MOVIE_RETRY_EVENT = "rexonance:assembly-retry";
+/** Before a play from the start, the runway is asked whether its suit
+ * leaves on a sequence of its own (Rexonance's retract, 2026-11-11): a
+ * cancelable event whose `detail.done(ok)` the page calls when that
+ * sequence is over (ok: play now; false: the reader took the scroll). A
+ * page that does not cancel it (every other page) plays at once, as ever;
+ * a page that never answers is not waited for past the wait below. */
+export const MOVIE_LEAVE_EVENT = "rexonance:assembly-leave";
+export const MOVIE_LEAVE_WAIT_MS = 3000;
 
 export type MovieState = "idle" | "loading" | "playing" | "paused" | "ended" | "error";
 
@@ -445,12 +453,38 @@ export function mountAssemblyMovie(
       else send(MOVIE_WAKE_EVENT);
     }, delay);
   };
+  /** The page's own leave before a play from the start (MOVIE_LEAVE_EVENT):
+   * true if the page took it, and `then` runs when it is over. */
+  let leaving = 0;
+  let leaveCount = 0;
+  let leaveTimer: unknown = 0;
+  const leave = (then: () => void) => {
+    if (leaving) return true;
+    if (typeof CustomEvent !== "function" || typeof runway.dispatchEvent !== "function")
+      return false;
+    const token = (leaveCount += 1);
+    const done = (ok = true) => {
+      if (leaving !== token) return;
+      leaving = 0;
+      cancelLater(leaveTimer);
+      leaveTimer = 0;
+      if (ok && !disposed) then();
+    };
+    const event = new CustomEvent(MOVIE_LEAVE_EVENT, { cancelable: true, detail: { done } });
+    runway.dispatchEvent(event);
+    if (!event.defaultPrevented) return false;
+    leaving = token;
+    leaveTimer = later(() => done(true), MOVIE_LEAVE_WAIT_MS);
+    return true;
+  };
   /** 再生 (or 最初から) asked for: played now if the scene is ready, else
    * queued until it is, the engine asked to prepare now. */
   const request = (from: number | "here") => {
     if (disposed || still()) return;
     if (ready()) {
-      start(from === "here" ? here() : from);
+      const at = from === "here" ? here() : from;
+      if (at <= 0 && state !== "playing" && leave(() => start(0))) return;
+      start(at);
       return;
     }
     // A fresh press: the whole backoff again.
@@ -637,6 +671,8 @@ export function mountAssemblyMovie(
   const outside = (event: Event) => !control.contains(event.target as Node | null);
   /** The reader's own scroll: the movie's turn is over. */
   const yieldToReader = () => {
+    // (A play waiting for the page's own leave is dropped with it.)
+    leaving = 0;
     resumeOnShow = false;
     cancelQueue();
     pause();

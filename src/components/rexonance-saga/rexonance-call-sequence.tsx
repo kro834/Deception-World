@@ -27,6 +27,7 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
   type RexonanceSuitPiece,
 } from "@/lib/rexonance-suit";
+import { SKIN_ENTRY_PARTS } from "@/lib/rexonance-suit-skin-marks";
 import { SuitNanites } from "./rexonance-suit-nanites";
 import { EntrySkinCanvas, EntrySurge, EntrySurgeBack } from "./rexonance-suit-surge";
 import {
@@ -500,7 +501,9 @@ function SquarePaths({ squares }: { squares: Squares }) {
 }
 
 // Each label lands on the line its group snaps on (the helmet's on the
-// last call).
+// last call). Under the skin (2026-11-11: the armour grows from the reactor
+// as one front, .rx-suit[data-skin]) each lights as the front reaches the
+// part it names instead: the chest, the arms, the legs, the helmet.
 const SUIT_PART_LINE = { LEGS: 0, ARMS: 2, CHEST: 3, HEAD: 3 } as const;
 // The halos' places and widths (figure pixels): the core and the eyes.
 const SUIT_HALOS = [
@@ -745,7 +748,12 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
           <p
             key={part}
             className={`rx-suit-callout is-${part.toLowerCase()}`}
-            style={{ "--rx-suit-i": SUIT_PART_LINE[part] } as CSSProperties}
+            style={
+              {
+                "--rx-suit-i": SUIT_PART_LINE[part],
+                "--rx-suit-skin-lock": `${entryElapsedTime(SKIN_ENTRY_PARTS[part])}ms`,
+              } as CSSProperties
+            }
           >
             <span className="rx-suit-label">{part}</span>
             <i />

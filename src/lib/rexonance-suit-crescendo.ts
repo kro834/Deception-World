@@ -204,6 +204,11 @@ const gatherFrom = (frame: CrescendoFrame, pull: Float32Array) => {
 /** The entry's finale runs faster: the cover closes 750 ms after the light. */
 export const CRESCENDO_ENTRY_PACE = 1.45;
 
+/** The entry's charge before the light (0–1; over with the light), at
+ * canonical time t: the torrent's call back into the reactor. */
+export const entryCharge = (t: number, final: number) =>
+  smooth(span(t, final - 300, final - 20)) * (t < final ? 1 : 0);
+
 /** The entry at canonical time t (ms). `fits` are the plates' fit times,
  * `windows` each group's [from, to], `final` the light's start; `swarm`,
  * `implode` and `pull` are the surge frame's. */

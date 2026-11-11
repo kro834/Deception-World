@@ -10,8 +10,10 @@
      the cells    a hexagonal micro-tessellation whose cells click solid one
                   by one and take the art's colour, while the panel lines
                   light and cool;
-     the armour   the art itself (its lights still held, as the call keeps
-                  them, until the suit is whole).
+     the armour   the art itself, each of its emitters (the glow lines,
+                  the gems, the reactor's details) lighting a moment after
+                  the shell over it is whole; the reactor's first, the
+                  trigger, and the eyes last, with the scene's own light.
 
    The front is a comparison against a field baked once from the art: the
    geodesic distance inside the armour's silhouette from the reactor (and the
@@ -43,6 +45,8 @@ export type SkinBudget = {
   samples: number;
   /** The highest backing-store ratio of the skin's canvas. */
   ratio: number;
+  /** The torrent's streams (SkinTorrent). */
+  torrent: number;
 };
 
 type BudgetEnvironment = {
@@ -56,13 +60,15 @@ type BudgetEnvironment = {
 export function skinBudget(environment: BudgetEnvironment = globalThis): SkinBudget | null {
   const media = (query: string) => Boolean(environment.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)")) return null;
-  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2 };
+  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2, torrent: 520 };
   const memory = environment.navigator?.deviceMemory;
   const cores = environment.navigator?.hardwareConcurrency ?? 0;
   if ((memory !== undefined && memory <= 4) || (cores > 0 && cores <= 4))
-    return { samples: 1200, ratio: 1.5 };
+    return { samples: 1200, ratio: 1.5, torrent: 130 };
   const short = Math.min(environment.innerWidth || 0, environment.innerHeight || 0);
-  return short >= 700 ? { samples: 3600, ratio: 2 } : { samples: 2500, ratio: 2 };
+  return short >= 700
+    ? { samples: 3600, ratio: 2, torrent: 320 }
+    : { samples: 2500, ratio: 2, torrent: 220 };
 }
 
 /** The canvas's quality at each of the crescendo governor's levels. */
@@ -158,8 +164,25 @@ export type SkinFrame = {
   /** The skin's own opacity, and the classic engines' under it. */
   alpha: number;
   classic: number;
-  /** Whether anything of the skin is on screen. */
+  /** Whether anything of the skin is on screen, and whether its armour is
+   * (the emitters' light outlasts it: see `glow`). */
   on: boolean;
+  shell: boolean;
+  /** The fronts as they stood `lag` ago: an emitter lights once the shell
+   * over it has been whole that long. */
+  litBody: number;
+  litHead: number;
+  /** The lit emitters alone, over the classic engines once the armour has
+   * faded, until their own light has run out through the suit. */
+  glow: number;
+  /** The emitters' light, the eyes', and the reactor's (0–1; the reactor's
+   * last pulse a little over). Growing, the eyes are the scene's own to
+   * light, last of all: 0. */
+  lights: number;
+  eyes: number;
+  reactor: number;
+  /** The droplets' way: 1 out along the flow, -1 back toward the reactor. */
+  flow: 1 | -1;
 };
 export const createSkinFrame = (): SkinFrame => ({
   body: 0,
@@ -167,6 +190,14 @@ export const createSkinFrame = (): SkinFrame => ({
   alpha: 0,
   classic: 1,
   on: false,
+  shell: false,
+  litBody: 0,
+  litHead: 0,
+  glow: 0,
+  lights: 1,
+  eyes: 0,
+  reactor: 1,
+  flow: 1,
 });
 
 /** The body's front: fast off the chest, easing as it reaches the hands and
@@ -190,6 +221,11 @@ export type SkinTimeline = {
   leave: readonly [number, number];
   back: readonly [number, number];
   fade: readonly [number, number];
+  /** An emitter lights this long after the shell over it is whole, and the
+   * lit emitters stay over the classic engines' held lights until those
+   * have lit, fading over `glow`. */
+  lag: number;
+  glow: readonly [number, number];
 };
 
 /** The entry, in the call's canonical ms: the fire's burst (420) is the
@@ -201,6 +237,9 @@ export const SKIN_ENTRY: SkinTimeline = {
   leave: [470, 600],
   back: [1880, 1900],
   fade: [1900, 1975],
+  lag: 60,
+  // The call's light has run out through the body by 1980 + 380.
+  glow: [2360, 2440],
 };
 /** The scroll scene, in its progress: after the fire's end (0.14), closed
  * before the seal (0.86) and the light (0.9). */
@@ -211,6 +250,10 @@ export const SKIN_SCROLL: SkinTimeline = {
   leave: [0.15, 0.165],
   back: [0.853, 0.858],
   fade: [0.858, 0.872],
+  // 60 ms of the auto movie's 24 s, and a little for a slow hand.
+  lag: 0.004,
+  // The scene's light (0.9 – 0.915) is all but out through the body.
+  glow: [0.906, 0.915],
 };
 
 const spanOf = (x: number, [from, to]: readonly [number, number]) =>
@@ -231,7 +274,85 @@ export function skinFrame(out: SkinFrame, timeline: SkinTimeline, x: number) {
     ) *
     (1 - smooth(spanOf(x, timeline.fade)));
   out.classic = 1 - smooth(spanOf(x, timeline.leave)) * (1 - smooth(spanOf(x, timeline.back)));
-  out.on = x > timeline.leave[0] && x < timeline.fade[1];
+  out.shell = x > timeline.leave[0] && x < timeline.fade[1];
+  out.litBody = bodyFront(spanOf(x - timeline.lag, timeline.body), timeline.ease);
+  out.litHead = headFront(spanOf(x - timeline.lag, timeline.head));
+  out.glow =
+    x > timeline.leave[0] && x < timeline.glow[1] ? 1 - smooth(spanOf(x, timeline.glow)) : 0;
+  out.on = x > timeline.leave[0] && x < timeline.glow[1];
+  out.lights = 1;
+  out.eyes = 0;
+  out.reactor = 1;
+  out.flow = 1;
+  return out;
+}
+
+/** When the lip of a front reaches field value `field` (the body's, or the
+ * head's): the clock value, by bisection of the same closed forms. */
+export function skinReach(timeline: SkinTimeline, field: number, head = false) {
+  const [from, to] = head ? timeline.head : timeline.body;
+  const front = (u: number) => (head ? headFront(u) : bodyFront(u, timeline.ease));
+  let low = 0;
+  let high = 1;
+  for (let step = 0; step < 40; step += 1) {
+    const middle = (low + high) / 2;
+    if (front(middle) < field) low = middle;
+    else high = middle;
+  }
+  return from + (to - from) * high;
+}
+
+/* ---------------- the retract ---------------- */
+
+/** The suit leaves (owner, 2026-11-11): about 1.6 s, the build's reverse on
+ * a clock of its own. The lights go out first (the eyes, then the emitters);
+ * the face opens from the visor outward; the helmet sinks to the neck; the
+ * limbs' armour is drawn back toward the chest, faster the nearer it gets;
+ * the chest closes into the reactor, which dims last, on one last pulse. */
+export const SKIN_RETRACT_MS = 1600;
+/** Reduced motion and economy: a short fade instead. */
+export const SKIN_RETRACT_FADE_MS = 250;
+export const SKIN_RETRACT = {
+  eyes: [0, 90],
+  lights: [50, 220],
+  face: [0, 300],
+  helmet: [200, 600],
+  body: [400, 1560],
+  pulse: [1380, 1460],
+  reactor: [1440, 1600],
+} as const;
+/** The pull toward the chest: the front recedes as this power of its time
+ * (a cube held the limbs still for most of a second on a phone). */
+export const SKIN_RETRACT_PULL = 2.4;
+/** The head's field where the face begins (rexonance-suit-skin-field.ts
+ * SKIN_FACE_FROM): the face is open once the front is back to it. */
+const FACE_FROM = 0.72;
+
+/** The retract at `ms` since it began. Closed-form and monotone: the fronts
+ * only recede. The skin draws everything (the classic engines stand down). */
+export function skinRetractFrame(out: SkinFrame, ms: number) {
+  const t = ms < 0 ? 0 : ms > SKIN_RETRACT_MS ? SKIN_RETRACT_MS : ms;
+  const gone = -SKIN_BAND;
+  out.head =
+    SKIN_WHOLE -
+    (SKIN_WHOLE - FACE_FROM) * smooth(spanOf(t, SKIN_RETRACT.face)) -
+    (FACE_FROM - gone) * smooth(spanOf(t, SKIN_RETRACT.helmet));
+  // Accelerating: drawn in.
+  const u = spanOf(t, SKIN_RETRACT.body);
+  out.body = gone + (SKIN_WHOLE - gone) * (1 - Math.pow(u, SKIN_RETRACT_PULL));
+  out.litBody = SKIN_WHOLE;
+  out.litHead = SKIN_WHOLE;
+  out.alpha = 1;
+  out.classic = 0;
+  out.glow = 0;
+  out.on = true;
+  out.shell = true;
+  out.eyes = 1 - spanOf(t, SKIN_RETRACT.eyes);
+  out.lights = 1 - smooth(spanOf(t, SKIN_RETRACT.lights));
+  out.reactor =
+    (1 + 0.3 * Math.sin(Math.PI * spanOf(t, SKIN_RETRACT.pulse))) *
+    (1 - smooth(spanOf(t, SKIN_RETRACT.reactor)));
+  out.flow = -1;
   return out;
 }
 
@@ -255,6 +376,7 @@ export function drawSkinDroplets(
   share = 1,
 ) {
   const s = field.samples;
+  const way = frame.flow;
   const pass = (first: number, count: number, front: number) => {
     if (front <= 0 || front >= SKIN_WHOLE || !count) return;
     const low = front - DROPLET_BEHIND * SKIN_BAND;
@@ -279,7 +401,8 @@ export function drawSkinDroplets(
       const k = (front - t) / SKIN_BAND;
       const life = (k + DROPLET_AHEAD) / (DROPLET_AHEAD + DROPLET_BEHIND);
       // It leaves the lip, leads it, and is drawn back in.
-      const lead = Math.sin(Math.PI * Math.min(1, life * 1.15)) * (7 + 13 * seed);
+      // (Receding, it runs the other way: back toward the reactor.)
+      const lead = way * Math.sin(Math.PI * Math.min(1, life * 1.15)) * (7 + 13 * seed);
       const sway = Math.sin(now * 0.006 + seed * 40) * 2.2;
       const x = s[o] * cell + s[o + 3] * lead - s[o + 4] * sway;
       const y = s[o + 1] * cell + s[o + 4] * lead + s[o + 3] * sway;
@@ -292,6 +415,251 @@ export function drawSkinDroplets(
   context.fillStyle = `rgb(226 240 250 / ${(0.9 * frame.alpha).toFixed(3)})`;
   pass(0, field.bodySamples, frame.body);
   pass(field.bodySamples, field.headSamples, frame.head);
+}
+
+/* ---------------- the torrent ---------------- */
+
+/* REXONANCE TORRENT (owner, 2026-11-11: 「滑らかな変身」 and also a suit-up
+   「ナノマシンの派手な奔流」 — both). The nanites that become the armour, seen:
+   streams pour out of the reactor and the driver, swing wide round the body
+   and wind in along the limbs, each a bright head on a trail, and land just
+   ahead of the skin's front, where the lip takes them in: the torrent is
+   what the liquid metal is made of. A few ride great arcs right round the
+   figure (half of them behind it). As the suit closes, the charge calls
+   every stream back into the reactor in one converging burst before the
+   completion's flash; on a retract they run from the receding lip home.
+
+   Drawn additively on the surge layer's two canvases, in figure px, as a few
+   batched paths a frame (no sprite, no gradient, no shadow). The streams fly
+   on wall time and each keeps its own flight (where from, where to, when),
+   aimed when it is born at the front as it then stands, so the scroll can
+   be scrubbed either way under it. Budgeted per device (skinBudget) and
+   shed with the governor (SKIN_TORRENT_SHARE); nothing is allocated a
+   frame. */
+
+/** The share of the streams each governor level keeps. */
+export const SKIN_TORRENT_SHARE = [1, 0.75, 0.55, 0.4] as const;
+/** One stream in nine rides a great arc round the figure. */
+export const SKIN_TORRENT_ARC = 9;
+const STREAM = 10;
+/** A stream's trail: this many points behind its head, over this share of
+ * its path (the great arcs' longer). */
+const TRAIL = 5;
+const POSE = TRAIL * 2 + 1;
+const TORRENT_TONES = ["rgb(150 236 255)", "rgb(255 143 216)", "rgb(244 251 255)"] as const;
+
+export class SkinTorrent {
+  /** Per stream: from x, y, to x, y, its life (ms), its bend and its
+   * helix's radius (px), the helix's turns, a seed, its tone. */
+  private streams: Float32Array;
+  private born: Float64Array;
+  /** Per stream, this frame: its trail from tail to head (x, y each), and
+   * its presence (0: not drawn). */
+  private pose: Float32Array;
+  private state = 0x9e3779b9;
+  readonly count: number;
+  /** The streams drawn last frame. */
+  live = 0;
+
+  private core: readonly [number, number];
+  private belt: readonly [number, number];
+
+  constructor(count: number, core: readonly [number, number], belt: readonly [number, number]) {
+    this.core = core;
+    this.belt = belt;
+    this.count = Math.max(0, Math.floor(count));
+    this.streams = new Float32Array(this.count * STREAM);
+    this.born = new Float64Array(this.count).fill(-1);
+    this.pose = new Float32Array(this.count * POSE);
+  }
+
+  private random() {
+    this.state = (Math.imul(this.state, 1664525) + 1013904223) >>> 0;
+    return this.state / 4294967296;
+  }
+
+  /** A sample of the armour near field value `at` of a front's list. */
+  private aim(field: SkinField, head: boolean, at: number, out: Float32Array, o: number, cell: number) {
+    const first = head ? field.bodySamples : 0;
+    const count = head ? field.headSamples : field.bodySamples;
+    if (!count) return false;
+    const s = field.samples;
+    let a = 0;
+    let b = count;
+    while (a < b) {
+      const m = (a + b) >> 1;
+      if (s[(first + m) * SKIN_SAMPLE + 2] < at) a = m + 1;
+      else b = m;
+    }
+    const spread = Math.max(1, Math.floor(count * 0.035));
+    let index = a + Math.floor(this.random() * spread);
+    if (index >= count) index = count - 1 - Math.floor(this.random() * Math.min(spread, count));
+    if (index < 0) index = 0;
+    const at0 = (first + index) * SKIN_SAMPLE;
+    out[o] = s[at0] * cell;
+    out[o + 1] = s[at0 + 1] * cell;
+    return true;
+  }
+
+  /** A stream's next flight, or false if there is nowhere to fly. */
+  private launch(i: number, field: SkinField, frame: SkinFrame, cell: number, converge: number) {
+    const v = this.streams;
+    const o = i * STREAM;
+    const arc = i % SKIN_TORRENT_ARC === 0;
+    const side = this.random() < 0.5 ? -1 : 1;
+    const origin = this.random() < 0.3 ? this.belt : this.core;
+    let life = 380 + 260 * this.random();
+    if (converge > 0.02) {
+      // The charge: in from all round the figure, into the reactor.
+      const angle = this.random() * Math.PI * 2;
+      const reach = 250 + 190 * this.random();
+      v[o] = this.core[0] + Math.cos(angle) * reach * 0.8;
+      v[o + 1] = this.core[1] + Math.sin(angle) * reach;
+      v[o + 2] = origin[0];
+      v[o + 3] = origin[1];
+      life = 230 + 170 * this.random();
+    } else {
+      const body = frame.body > 0 && frame.body < 1.02;
+      const crown = frame.head > 0 && frame.head < 1.02;
+      if (!frame.shell || (!body && !crown)) return false;
+      const head = crown && (!body || this.random() < 0.45);
+      const front = head ? frame.head : frame.body;
+      if (frame.flow > 0) {
+        // Out of the reactor (or the driver), to land just ahead of the lip.
+        v[o] = origin[0];
+        v[o + 1] = origin[1];
+        if (!this.aim(field, head, front + (0.6 + 2.6 * this.random()) * SKIN_BAND, v, o + 2, cell))
+          return false;
+      } else {
+        // The retract: from the receding lip, home.
+        if (!this.aim(field, head, front - (0.4 + 1.2 * this.random()) * SKIN_BAND, v, o, cell))
+          return false;
+        v[o + 2] = this.core[0];
+        v[o + 3] = this.core[1];
+        life *= 0.8;
+      }
+    }
+    v[o + 4] = arc ? life * 1.55 : life;
+    v[o + 5] = side * (arc ? 170 + 90 * this.random() : 26 + 74 * this.random());
+    v[o + 6] = arc ? 0 : 7 + 14 * this.random();
+    v[o + 7] = 1 + 1.6 * this.random();
+    v[o + 8] = this.random();
+    v[o + 9] = i % 7 === 0 ? 2 : this.random() < 0.72 ? 0 : 1;
+    return true;
+  }
+
+  /** Draws the torrent at `now` (ms): `share` of the streams (the
+   * governor's), `converge` the charge before completion (0–1), `cell` the
+   * figure px per field cell, `px` one device px in figure px. Both contexts
+   * are in figure space and composite additively. */
+  draw(
+    back: CanvasRenderingContext2D,
+    front: CanvasRenderingContext2D,
+    field: SkinField,
+    frame: SkinFrame,
+    cell: number,
+    now: number,
+    px: number,
+    share = 1,
+    converge = 0,
+  ) {
+    const v = this.streams;
+    const pose = this.pose;
+    const keep = Math.floor(this.count * (share < 0 ? 0 : share > 1 ? 1 : share));
+    let live = 0;
+    for (let i = 0; i < this.count; i += 1) {
+      const o = i * STREAM;
+      const q = i * POSE;
+      pose[q + POSE - 1] = 0;
+      let age = this.born[i] < 0 ? -1 : now - this.born[i];
+      if (age < 0 || age >= v[o + 4]) {
+        // Landed (or never flown): the next flight, staggered at first.
+        if (i >= keep || !this.launch(i, field, frame, cell, converge)) {
+          this.born[i] = -1;
+          continue;
+        }
+        this.born[i] = this.born[i] < 0 ? now - this.random() * v[o + 4] * 0.9 : now;
+        age = now - this.born[i];
+      }
+      const p = age / v[o + 4];
+      const dx = v[o + 2] - v[o];
+      const dy = v[o + 3] - v[o + 1];
+      const length = Math.hypot(dx, dy) || 1;
+      const nx = -dy / length;
+      const ny = dx / length;
+      const trail = v[o + 6] === 0 ? 0.42 : 0.34;
+      for (let k = 0; k < TRAIL; k += 1) {
+        const u = Math.max(0, p - (trail * (TRAIL - 1 - k)) / (TRAIL - 1));
+        // Fast off the mark, slowing into the surface.
+        const e = 1 - (1 - u) * (1 - u);
+        const swell = Math.sin(Math.PI * u);
+        const off =
+          swell * v[o + 5] + Math.sin(u * v[o + 7] * 6.2832 + v[o + 8] * 6.2832) * v[o + 6] * swell;
+        pose[q + k * 2] = v[o] + dx * e + nx * off;
+        pose[q + k * 2 + 1] = v[o + 1] + dy * e + ny * off;
+      }
+      // Present from its first step until the surface takes it in.
+      pose[q + POSE - 1] = Math.min(1, p * 8) * (p > 0.9 ? (1 - p) * 10 : 1) + 0.001;
+      live += 1;
+    }
+    this.live = live;
+    if (!live) return;
+    const strong = frame.alpha > 0 ? frame.alpha : 1;
+    for (const context of [back, front]) {
+      context.lineCap = "round";
+      context.lineJoin = "round";
+    }
+    // The trails, a tone at a time: each path stroked wide and faint (its
+    // glow), then narrow and bright; the great arcs thicker, half behind.
+    const unit = Math.max(1, px);
+    for (let tone = 0; tone < 3; tone += 1)
+      for (let pass = 0; pass < 3; pass += 1) {
+        // 0: the streams; 1: the arcs in front; 2: the arcs behind.
+        const context = pass === 2 ? back : front;
+        let any = false;
+        context.beginPath();
+        for (let i = 0; i < this.count; i += 1) {
+          const q = i * POSE;
+          if (pose[q + POSE - 1] <= 0 || v[i * STREAM + 9] !== tone) continue;
+          const arc = i % SKIN_TORRENT_ARC === 0;
+          if (arc !== pass > 0 || (arc && v[i * STREAM + 5] < 0 !== (pass === 2))) continue;
+          context.moveTo(pose[q], pose[q + 1]);
+          for (let k = 1; k < TRAIL; k += 1) context.lineTo(pose[q + k * 2], pose[q + k * 2 + 1]);
+          any = true;
+        }
+        if (!any) continue;
+        context.strokeStyle = TORRENT_TONES[tone];
+        context.globalAlpha = (pass ? 0.3 : 0.24) * strong;
+        context.lineWidth = (pass ? 8 : 5.5) * unit;
+        context.stroke();
+        context.globalAlpha = (pass ? 0.95 : 0.85) * strong;
+        context.lineWidth = (pass ? 2.8 : 1.7) * unit;
+        context.stroke();
+      }
+    // The heads: white-hot, swelling as the surface takes them.
+    for (let pass = 0; pass < 2; pass += 1) {
+      const context = pass ? back : front;
+      let any = false;
+      context.beginPath();
+      for (let i = 0; i < this.count; i += 1) {
+        const q = i * POSE;
+        const here = pose[q + POSE - 1];
+        if (here <= 0) continue;
+        const arc = i % SKIN_TORRENT_ARC === 0;
+        if ((arc && v[i * STREAM + 5] < 0) !== (pass === 1)) continue;
+        const size = (arc ? 5 : 3 + 1.8 * v[i * STREAM + 8]) * unit * (0.5 + 0.5 * here);
+        const h = q + (TRAIL - 1) * 2;
+        context.rect(pose[h] - size / 2, pose[h + 1] - size / 2, size, size);
+        any = true;
+      }
+      if (!any) continue;
+      context.fillStyle = "rgb(246 252 255)";
+      context.globalAlpha = 0.95 * strong;
+      context.fill();
+    }
+    back.globalAlpha = 1;
+    front.globalAlpha = 1;
+  }
 }
 
 /* ---------------- the shader ---------------- */
@@ -313,6 +681,10 @@ uniform sampler2D uArt;
 uniform sampler2D uField;
 uniform sampler2D uBase;
 uniform vec2 uFront;
+uniform vec2 uLit;
+uniform vec4 uGlow;
+uniform vec4 uEyes;
+uniform vec3 uCore;
 uniform vec2 uFigure;
 uniform vec2 uCell;
 uniform float uTime;
@@ -328,13 +700,16 @@ float hash(vec2 p) {
   return fract(p.x * p.y);
 }
 float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
-// The armour with its lights held: ice and pink light stands cold and dim.
-vec3 held(vec3 c) {
+// The armour's emitters: its ice and pink light (never its gold).
+float emitter(vec3 c) {
   float hi = max(c.r, max(c.g, c.b));
   float lo = min(c.r, min(c.g, c.b));
   float sat = hi - lo;
   float gold = step(c.b, c.g) * step(c.g, c.r);
-  float lit = smoothstep(0.16, 0.42, sat) * (1.0 - gold) * smoothstep(0.3, 0.6, hi);
+  return smoothstep(0.16, 0.42, sat) * (1.0 - gold) * smoothstep(0.3, 0.6, hi);
+}
+// The armour with its lights held: they stand cold and dim.
+vec3 held(vec3 c, float lit) {
   vec3 cold = vec3(luma(c)) * vec3(0.5, 0.56, 0.66);
   return mix(c, cold, lit * 0.86);
 }
@@ -343,16 +718,30 @@ void main() {
   vec4 art = texture2D(uArt, vUv);
   vec4 fld = texture2D(uField, vUv);
   // Blue: the head from 224 up (its dilated edge and itself), the body below.
-  float front = mix(uFront.x, uFront.y, step(0.69, fld.b));
+  float crown = step(0.69, fld.b);
+  float front = mix(uFront.x, uFront.y, crown);
   float a = (front - fld.r) / BAND;
   if (art.a < 0.004 || a < -0.6) {
     gl_FragColor = base * uAlpha;
     return;
   }
   vec3 colour = art.rgb / max(art.a, 0.001);
-  vec3 armour = held(colour);
   float light = luma(colour);
   vec2 p = vUv * uFigure;
+  // The emitters: each lights once the shell over it has been whole a
+  // moment (the lagged front, the bands behind it), with a bloom that
+  // settles; the reactor's as soon as its cells set (the trigger); the
+  // eyes' on their own gain (growing: the scene lights them, last).
+  float glowing = emitter(colour);
+  float since = (mix(uLit.x, uLit.y, crown) - fld.r) / BAND - ${SKIN_BANDS.toFixed(1)};
+  float eyes = step(uEyes.x, vUv.x) * step(vUv.x, uEyes.z) * step(uEyes.y, vUv.y) * step(vUv.y, uEyes.w);
+  float lamp = smoothstep(0.0, 0.6, since);
+  float gain = mix(uGlow.y, uGlow.z, eyes);
+  float disc = (1.0 - smoothstep(uCore.z * 0.8, uCore.z, distance(p, uCore.xy))) * (1.0 - crown);
+  float lit = max(lamp * gain * (1.0 - disc), disc * smoothstep(1.0, 2.5, a) * min(uGlow.w, 1.0));
+  float bloom = lamp * gain * (1.0 - smoothstep(0.6, 3.2, since)) * 0.35 + disc * max(uGlow.w - 1.0, 0.0);
+  vec3 lamps = colour * glowing * (1.0 + bloom);
+  vec3 armour = held(colour, glowing * (1.0 - lit)) + colour * glowing * bloom * lit;
   // The flow's direction: the field's gradient.
   vec2 g = vec2(
     texture2D(uField, vUv + vec2(uCell.x, 0.0)).r - texture2D(uField, vUv - vec2(uCell.x, 0.0)).r,
@@ -419,7 +808,10 @@ void main() {
   // The veins, bright while liquid.
   outc += vec3(0.8, 0.9, 1.0) * fld.g * (1.0 - smoothstep(0.3, 1.6, a)) * 0.5;
   float alpha = art.a * smoothstep(0.0, 0.06, a);
-  gl_FragColor = vec4(outc * alpha + base.rgb * (1.0 - alpha), alpha + base.a * (1.0 - alpha)) * uAlpha;
+  // Once the armour has faded: the lit emitters alone, over the scene's own.
+  float lone = art.a * glowing * lit * step(${SKIN_BANDS.toFixed(1)}, a) * uGlow.x * (1.0 - uAlpha);
+  gl_FragColor = vec4(outc * alpha + base.rgb * (1.0 - alpha), alpha + base.a * (1.0 - alpha)) * uAlpha
+    + vec4(lamps * lone, lone);
 }`;
 
 export type SkinSources = {
@@ -429,6 +821,10 @@ export type SkinSources = {
   base: TexImageSource | null;
   field: TexImageSource;
   fieldSize: readonly [number, number];
+  /** The eyes' box (x0, y0, x1, y1), and the reactor's centre and radius,
+   * in figure px. */
+  eyes: readonly [number, number, number, number];
+  reactor: readonly [number, number, number];
 };
 
 /** The skin's canvas. Null where WebGL is not to be had. */
@@ -504,6 +900,10 @@ export class SkinRenderer {
       "uField",
       "uBase",
       "uFront",
+      "uLit",
+      "uGlow",
+      "uEyes",
+      "uCore",
       "uFigure",
       "uCell",
       "uTime",
@@ -542,6 +942,14 @@ export class SkinRenderer {
     gl.uniform1i(this.uniforms.uBase, base ? 2 : 0);
     gl.uniform2f(this.uniforms.uFigure, figure[0], figure[1]);
     gl.uniform2f(this.uniforms.uCell, 1 / sources.fieldSize[0], 1 / sources.fieldSize[1]);
+    gl.uniform4f(
+      this.uniforms.uEyes,
+      sources.eyes[0] / figure[0],
+      sources.eyes[1] / figure[1],
+      sources.eyes[2] / figure[0],
+      sources.eyes[3] / figure[1],
+    );
+    gl.uniform3f(this.uniforms.uCore, sources.reactor[0], sources.reactor[1], sources.reactor[2]);
     gl.disable(gl.DEPTH_TEST);
     gl.disable(gl.BLEND);
     gl.clearColor(0, 0, 0, 0);
@@ -568,11 +976,13 @@ export class SkinRenderer {
     const gl = this.gl;
     if (this.lost) return;
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    if (!frame.on || frame.alpha <= 0.002) {
+    if (!frame.on || (frame.alpha <= 0.002 && frame.glow <= 0.002)) {
       gl.clear(gl.COLOR_BUFFER_BIT);
       return;
     }
     gl.uniform2f(this.uniforms.uFront, frame.body, frame.head);
+    gl.uniform2f(this.uniforms.uLit, frame.litBody, frame.litHead);
+    gl.uniform4f(this.uniforms.uGlow, frame.glow, frame.lights, frame.eyes, frame.reactor);
     gl.uniform1f(this.uniforms.uTime, seconds % 1000);
     gl.uniform1f(this.uniforms.uAlpha, frame.alpha);
     gl.uniform1f(this.uniforms.uBase01, this.hasBase ? base01 : 0);

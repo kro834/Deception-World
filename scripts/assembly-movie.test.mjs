@@ -6,6 +6,8 @@ import {
   MOVIE_DURATION_MS,
   MOVIE_FIGURE_ASPECT,
   MOVIE_IDLE_COLLAPSE_MS,
+  MOVIE_LEAVE_EVENT,
+  MOVIE_LEAVE_WAIT_MS,
   MOVIE_LOAD_RETRY_DELAYS,
   MOVIE_MAX_STEP_MS,
   MOVIE_PLAY_LABELS,
@@ -1372,4 +1374,81 @@ test("the pill never stands over a selector rail docked beside it: it lifts abov
   // Lifted, the pill steps out of the right corner (the floating menu button's).
   assert.match(source, /control\.dataset\.lifted = "true"/);
   assert.match(css, /\.rzn-movie\[data-lifted\] \.rzn-movie-pill \{\s*right: auto;/);
+});
+
+test("a play from the start asks the runway first: a page whose suit leaves on its own sequence is waited for, every other page plays at once", () => {
+  assert.equal(MOVIE_LEAVE_EVENT, "rexonance:assembly-leave");
+  assert.ok(MOVIE_LEAVE_WAIT_MS >= 2000 && MOVIE_LEAVE_WAIT_MS <= 4000);
+  const ended = () => {
+    const t = environment();
+    const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+    t.play.fire("click");
+    for (let k = 0; k < 60 * 24 + 70 && t.control.dataset.state === "playing"; k += 1) t.tick();
+    assert.equal(t.control.dataset.state, "ended");
+    return { t, dispose };
+  };
+  // No listener (FAR FROM, ILLUSIONCULUM, META UNITAS): asked, not waited for.
+  {
+    const { t, dispose } = ended();
+    const asked = [];
+    t.runway.addEventListener(MOVIE_LEAVE_EVENT, (event) => asked.push(event));
+    t.play.fire("click");
+    assert.equal(asked.length, 1);
+    assert.equal(asked[0].cancelable, true);
+    assert.equal(typeof asked[0].detail.done, "function");
+    assert.equal(t.control.dataset.state, "playing", "plays at once");
+    t.tick();
+    assert.ok(t.progress() < 0.01);
+    // Mid-movie (not from the start) nobody is asked.
+    for (let k = 0; k < 30; k += 1) t.tick();
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "paused");
+    t.play.fire("click");
+    assert.equal(asked.length, 1);
+    dispose();
+  }
+  // Rexonance's retract: the page cancels the event and answers when it is over.
+  {
+    const { t, dispose } = ended();
+    let done = null;
+    t.runway.addEventListener(MOVIE_LEAVE_EVENT, (event) => {
+      event.preventDefault();
+      done = event.detail.done;
+    });
+    const at = t.scrollY();
+    t.play.fire("click");
+    assert.equal(t.control.dataset.state, "ended", "waits on the finished suit");
+    assert.equal(t.scrollY(), at, "the page has not moved");
+    // A second press while it leaves asks nothing more.
+    const first = done;
+    t.restart.fire("click");
+    assert.equal(done, first);
+    assert.equal(t.control.dataset.state, "ended");
+    done(true);
+    assert.equal(t.control.dataset.state, "playing");
+    t.tick();
+    assert.ok(t.progress() < 0.01, "then from the start");
+    // An answer twice is one answer.
+    done(true);
+    assert.equal(t.control.dataset.state, "playing");
+    dispose();
+  }
+  // The reader took the scroll while it left: no play behind their back.
+  {
+    const { t, dispose } = ended();
+    let done = null;
+    t.runway.addEventListener(MOVIE_LEAVE_EVENT, (event) => {
+      event.preventDefault();
+      done = event.detail.done;
+    });
+    t.restart.fire("click");
+    done(false);
+    assert.equal(t.control.dataset.state, "ended");
+    assert.equal(t.frames.size, 0);
+    // The next press asks again.
+    t.restart.fire("click");
+    done(true);
+    assert.equal(t.control.dataset.state, "playing");
+    dispose();
+  }
 });

@@ -1662,6 +1662,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // clock of its own that lends the scene a progress while it plays.
   // Rexonance has none: a chosen form changes exactly as before.
   const formShiftKit = config.formShift ?? null;
+  // A page's own layer over the figure (Rexonance's skin, 2026-11-11:
+  // its surge layer grows the armour on a canvas of its own while
+  // this scene's canvases stand hidden under it). `hudParts(runway)`: when
+  // each of the HUD's parts lights, in its order (the progress the page's
+  // front reaches it), or null for the scene's own (each part's last tile).
+  // `covered(progress, runway)`: true while that layer hides this canvas
+  // whole, and the frame then draws nothing (the welded plates and the gold
+  // keep pace unseen, so the first frame back is whole). Without them
+  // (every other page) everything below is as it was.
+  const hudPartsOf = typeof config.hudParts === "function" ? config.hudParts : null;
+  const coveredAt = typeof config.covered === "function" ? config.covered : null;
+  let coveredDrawn = false;
   let formShift = null;
   let shiftForm = runway.dataset.form || "standard";
   let shiftPhase = "";
@@ -3513,6 +3525,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     context.globalCompositeOperation = "source-over";
     context.clearRect(0, 0, canvas.width, canvas.height);
     const seal = smooth(span(progress, B.seal));
+    // Hidden whole under a page's own layer (`covered`): nothing is drawn.
+    coveredDrawn = Boolean(coveredAt && !wire && nano && coveredAt(progress, runway));
+    if (coveredDrawn) {
+      syncSettled(paintedBy(progress), seal >= 1);
+      if (goldLayer) syncGold(progress);
+      lastDrawMs = 0;
+      if (field && fieldProgress >= 0) {
+        fieldProgress = -1;
+        field.clear();
+      }
+      return;
+    }
     // The swarm (owner, 2026-10-16: 超大幅な改善) runs until the seal is
     // whole; from .9 on nothing new is drawn.
     const nanites = swarm && progress < B.seal[1] ? swarm : null;
@@ -4318,10 +4342,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
         );
       });
     }
+    // A page's own front (`hudParts`) lights each part as it reaches it.
+    // (Its key is the lit set, below zero: never one of the scene's counts,
+    // so a change of source rewrites the flags.)
+    const partAt = hudPartsOf?.(runway) ?? null;
+    if (partAt) {
+      landed = -1;
+      for (let i = 0; i < parts.length; i += 1)
+        if (progress >= (partAt[i] || 2)) landed -= 1 << i;
+      landed -= 1;
+    }
     if (landed !== hud.parts) {
       hud.parts = landed;
       parts.forEach((part, index) =>
-        setFlag(part, "data-on", progress >= (plan.partDone[index] || 2)),
+        setFlag(part, "data-on", progress >= ((partAt ?? plan.partDone)[index] || 2)),
       );
     }
     const share = String(Math.round(100 * clamp01(progress / B.complete))).padStart(3, "0");
@@ -4644,7 +4678,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     let shown = progress;
     if (lastProgress >= 0 && !config.directProgress) {
-      if (!force && head.settled && Math.abs(progress - lastProgress) < 0.0005) {
+      if (
+        !force &&
+        head.settled &&
+        Math.abs(progress - lastProgress) < 0.0005 &&
+        // (A page's layer came or went over the resting frame: drawn again.)
+        (!coveredAt || coveredDrawn === Boolean(!wire && nano && coveredAt(lastProgress, runway)))
+      ) {
         if (!burningAt(lastProgress)) return;
         // At rest the fire keeps flowing (the HUD, the governor and the
         // calm timer stay as the last moving frame left them).
@@ -5344,6 +5384,14 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   document.addEventListener("visibilitychange", sync);
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   runway.addEventListener?.("rexonance:assembly-wake", wakeAssembly);
+  // A page's own layer over the figure came or went (`covered`): the
+  // resting frame is drawn again. Only such a page sends it.
+  const redrawAssembly = () => {
+    if (!coveredAt || disposed || !live) return;
+    hud.progress = -1;
+    schedule();
+  };
+  runway.addEventListener?.("rexonance:assembly-redraw", redrawAssembly);
   runway.addEventListener?.("rexonance:assembly-frame", schedule);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
@@ -5380,6 +5428,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     document.removeEventListener("visibilitychange", sync);
     runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);
     runway.removeEventListener?.("rexonance:assembly-wake", wakeAssembly);
+    runway.removeEventListener?.("rexonance:assembly-redraw", redrawAssembly);
     runway.removeEventListener?.("rexonance:assembly-frame", schedule);
     inflight.clear();
     if (config.directProgress) {

@@ -330,6 +330,11 @@ test("the new suit-up code is fetched on demand, only by Rexonance's surge layer
       [
         "src/components/rexonance-saga/rexonance-suit-surge.tsx",
         "src/components/rexonance-saga/rexonance-suit-nanites.tsx",
+        // The skin's marks (numbers only: when its front reaches each HUD
+        // part) and the two that read them, the call and the page.
+        "src/components/rexonance-saga/rexonance-call-sequence.tsx",
+        "src/components/rexonance-saga/rexonance-saga.tsx",
+        "src/lib/rexonance-suit-skin-marks.ts",
         "src/lib/rexonance-suit-crescendo.ts",
         "src/lib/rexonance-suit-skin.ts",
         "src/lib/rexonance-suit-skin-field.ts",
@@ -344,6 +349,13 @@ test("the new suit-up code is fetched on demand, only by Rexonance's surge layer
       `${path}: the bake never ships`,
     );
   }
+  // The call and the page reach the marks only, never the skin's chunk.
+  for (const path of [
+    "src/components/rexonance-saga/rexonance-call-sequence.tsx",
+    "src/components/rexonance-saga/rexonance-saga.tsx",
+  ])
+    assert.doesNotMatch(read(path), /rexonance-suit-(crescendo|skin)(?!-marks)/, path);
+  assert.doesNotMatch(read("src/lib/rexonance-suit-skin-marks.ts"), /^\s*import\s|\bimport\(/m);
   // No route preloads the field picture or the chunks.
   for (const path of walk("src/routes"))
     assert.doesNotMatch(read(path), /rexonance-skin-|suit-crescendo|suit-skin/);

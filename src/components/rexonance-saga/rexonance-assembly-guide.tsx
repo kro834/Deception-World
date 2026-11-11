@@ -1,4 +1,4 @@
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useState, type MouseEvent, type RefObject } from "react";
 
 const LOAD_COPY: Record<string, string> = {
   waiting: "表示設定に合わせて変身演出を準備します。",
@@ -129,6 +129,56 @@ export function RexonanceAssemblyGuide({
   );
 }
 
+/** The runway is asked whether its suit leaves on a sequence of its own
+ * (rexonance-suit-surge.tsx RETRACT_EVENT, the auto movie's
+ * MOVIE_LEAVE_EVENT): `detail.done(ok)` when it is over. */
+const RETRACT_EVENT = "rexonance:assembly-leave";
+type RetractDetail = { done: (ok?: boolean) => void };
+/** How long the replay waits for the suit's leave before it goes anyway. */
+const REPLAY_WAIT_MS = 3000;
+
+/** 「もう一度、装着を体験」 (owner, 2026-11-11): over the finished suit the
+ * armour first retracts (rexonance-suit-surge.tsx answers RETRACT_EVENT on
+ * the runway; a short fade in the still tiers), then the link goes where it
+ * always went. With nothing to play, or a modified click, it is a plain link. */
+function replayAfterRetract(event: MouseEvent<HTMLAnchorElement>) {
+  const anchor = event.currentTarget;
+  if (anchor.dataset.leave === "go") {
+    // The link's own navigation, after the leave.
+    delete anchor.dataset.leave;
+    return;
+  }
+  if (anchor.dataset.leave) {
+    event.preventDefault();
+    return;
+  }
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    return;
+  const runway = document.getElementById("assembly-runway");
+  if (!runway) return;
+  let timer = 0;
+  const done = (ok = true) => {
+    if (anchor.dataset.leave !== "wait") return;
+    window.clearTimeout(timer);
+    delete anchor.dataset.leave;
+    if (!ok || !anchor.isConnected) return;
+    anchor.dataset.leave = "go";
+    anchor.click();
+  };
+  const leave = new CustomEvent<RetractDetail>(RETRACT_EVENT, {
+    cancelable: true,
+    detail: { done },
+  });
+  anchor.dataset.leave = "wait";
+  runway.dispatchEvent(leave);
+  if (!leave.defaultPrevented) {
+    delete anchor.dataset.leave;
+    return;
+  }
+  event.preventDefault();
+  timer = window.setTimeout(done, REPLAY_WAIT_MS);
+}
+
 export function RexonanceAssemblyReplay() {
   const [staticMode, setStaticMode] = useState(false);
   useEffect(() => {
@@ -147,7 +197,9 @@ export function RexonanceAssemblyReplay() {
   return (
     <div id="assembly-replay" className="rxs-assembly-footer">
       <div className="rxs-assembly-controls">
-        <a href="#assembly">{staticMode ? "変身の資料を見る" : "もう一度、装着を体験"}</a>
+        <a href="#assembly" onClick={replayAfterRetract}>
+          {staticMode ? "変身の資料を見る" : "もう一度、装着を体験"}
+        </a>
         <a href="#stages">三つの形態へ</a>
       </div>
     </div>

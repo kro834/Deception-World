@@ -2047,6 +2047,24 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     --rx-suit-lock: calc(var(--rx-call-final-start) + 80ms);
   }
 
+  /* Under the skin (rexonance-suit-skin.ts) each label lights as the front
+     reaches the part it names (rexonance-suit-skin-marks.ts). */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit[data-skin]
+    .rx-suit-callout:not(.is-lock) {
+    --rx-suit-lock: var(--rx-suit-skin-lock);
+  }
+
+  /* ... and the eyes, lit last, bloom a little past their light and settle. */
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit[data-skin]
+    .rx-suit-halo.is-eyes {
+    animation: rxSuitEyeBloom 270ms var(--rx-call-ease) calc(var(--rx-call-final-start) + 560ms)
+      both;
+  }
+
   /* REXONANCE！: resonance rings run from the core, one phase per line
      with the aperture's arcs — ice, violet, gold (the shoulders, the tail,
      the ribbons and the helmet fit in the cascade above). */
@@ -2781,6 +2799,21 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
   45% {
     opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
+    transform: none;
+  }
+}
+
+@keyframes rxSuitEyeBloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  44% {
+    opacity: 1;
+    transform: scale(1.15);
   }
   100% {
     opacity: 0.9;

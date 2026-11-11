@@ -8,6 +8,7 @@ import postcss from "postcss";
 import * as calls from "../src/lib/rexonance-calls.ts";
 import * as suit from "../src/lib/rexonance-suit.ts";
 import * as ignition from "../src/lib/rexonance-ignition.js";
+import * as skinMarks from "../src/lib/rexonance-suit-skin-marks.ts";
 import {
   reactorFormation,
   reactorCoilAngle,
@@ -76,6 +77,8 @@ test("the cold DOM coil uses the same reactor window and pivot behind the existi
         if (name === "@/lib/rexonance-calls") return calls;
         if (name === "@/lib/rexonance-suit") return suit;
         if (name === "@/lib/rexonance-ignition.js") return ignition;
+        // The skin's marks (2026-11-11): when its front reaches each label's part.
+        if (name === "@/lib/rexonance-suit-skin-marks") return skinMarks;
         if (name === "./rexonance-suit-nanites") return { SuitNanites() {} };
         // Owner (2026-10-30): the call mounts the surge layer (装着遷移の強化).
         if (name === "./rexonance-suit-surge") return { EntrySurge() {}, EntrySurgeBack() {} };
