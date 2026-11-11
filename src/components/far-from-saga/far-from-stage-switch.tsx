@@ -17,8 +17,11 @@ import { REXONANCE_STAGE_DURATION_MS } from "@/lib/rexonance-calls";
      tapping cadence keeps to one flash a second;
    - the panel's entrance under it (FarFromSwitchFx and the sheet): the new
      form rises from its floor as the aperture opens, three rings leave its
-     core, one refraction band and a hex-cell sweep cross it, the copy
-     resolves; a selection without a card changes quietly;
+     core, one refraction band crosses it, and under a card the picture
+     resolves as the suit-up's armour does (owner, 2026-11-11): held under
+     liquid metal, a bright lip runs out from the reactor and the form
+     comes up behind it, its hex cells lit for a moment; the copy resolves;
+     a selection without a card changes quietly;
    - in step with a swipe (the tuning band, driven by the page from the
      rail's own contact state): while a finger or pointer drags the lens,
      the figure shows the form under it — a band in that form's light at
@@ -89,12 +92,6 @@ export function FarFromFormCall({ stage }: { stage: FarFromStageKey }) {
   );
 }
 
-// The hex-cell sweep: twelve strips across the art, alternately from the
-// left and the right (the Rexonance panel's nanite mesh, in hex cells).
-const MESH = Array.from({ length: 12 }, (_, index) => (
-  <i key={index} style={{ ["--ffs-d" as string]: index }} />
-));
-
 /** The new form's arrival over the stage picture (decorative). */
 export function FarFromSwitchFx() {
   return (
@@ -105,8 +102,13 @@ export function FarFromSwitchFx() {
         <i />
         <i />
       </i>
-      <i className="ffs-switch-mesh" aria-hidden="true">
-        {MESH}
+      {/* The nanite skin's front: the liquid, the cells, the lip. */}
+      <i className="ffs-switch-skin" aria-hidden="true">
+        <i>
+          <i />
+          <i />
+          <i />
+        </i>
       </i>
       {/* In step with a swipe: the page writes the previewed form here. */}
       <i className="ffs-stage-tune" aria-hidden="true">

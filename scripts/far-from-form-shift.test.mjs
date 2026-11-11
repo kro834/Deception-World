@@ -316,6 +316,13 @@ test("the engine: FAR FROM alone has the form change; the scene's own beats are 
     assert.doesNotMatch(readFileSync(new URL(`../src/components/${page}`, import.meta.url), "utf8"), /formShift/);
   for (const other of ["illusionculum-assembly-engine.ts", "meta-unitas-rx-engine.ts"])
     assert.doesNotMatch(readFileSync(new URL(`../src/lib/${other}`, import.meta.url), "utf8"), /formShift/);
+  // The chain's sheets are made ready in idle time once the suit stands
+  // whole, behind the kit: choosing a form starts no long task.
+  assert.match(
+    engine,
+    /if \(formShiftKit && !formsWarmed && progress >= ASSEMBLY_BEATS\.complete\) \{\n\s+formsWarmed = true;/,
+  );
+  assert.match(engine, /environment\.requestIdleCallback\(warmForms, \{ timeout: 2000 \}\);/);
   // The beats the change is built on.
   assert.deepEqual(ASSEMBLY_BEATS.form, [0.915, 0.975]);
   assert.deepEqual(ASSEMBLY_BEATS.motes, [0.07, 0.16]);

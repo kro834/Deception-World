@@ -4249,7 +4249,20 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (!element.hasAttribute(name)) element.setAttribute(name, "");
     } else if (element.hasAttribute(name)) element.removeAttribute(name);
   };
+  // A page's form change (FAR FROM): the chain's sheets are fetched and cut
+  // once the suit stands whole, in idle time, ahead of a choice — never as a
+  // long task on the frame a form is chosen. Rexonance has no such kit.
+  let formsWarmed = false;
   const updateHud = (progress) => {
+    if (formShiftKit && !formsWarmed && progress >= ASSEMBLY_BEATS.complete) {
+      formsWarmed = true;
+      const warmForms = () => {
+        if (!disposed && live) formFigures();
+      };
+      if (typeof environment.requestIdleCallback === "function")
+        environment.requestIdleCallback(warmForms, { timeout: 2000 });
+      else environment.setTimeout(warmForms, 300);
+    }
     const form = runway.dataset.form || "standard";
     const formReady = form === "standard" || Boolean(formsState?.[form]);
     if (progress === hud.progress && form === hud.form && formReady === hud.formReady) return;

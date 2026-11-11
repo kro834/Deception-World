@@ -2383,8 +2383,8 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 }
 
 /* The switch's ornaments over the figure: rings from the core, one
-   refraction band, the hex-cell sweep, and the tuning band of a swipe. */
-.rxs-page.rxs-page.ffs-page .ffs-stage-panel figure > :is(.ffs-switch-rings, .ffs-switch-mesh) {
+   refraction band, the nanite skin's front, and the tuning band of a swipe. */
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel figure > :is(.ffs-switch-rings, .ffs-switch-skin) {
   position: absolute;
   z-index: 3;
   inset: 0;
@@ -2431,23 +2431,70 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   translate: -110% 0;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-switch-mesh > i {
+/* The nanite skin's front (owner, 2026-11-11), as the suit-up's: the new
+   form is held under liquid metal; a bright lip runs out from the reactor
+   and the picture comes up behind it, its hex cells lit for a moment. The
+   three layers share one box whose centre is the reactor's height (40% of
+   the figure). Masks' sizes and one scale are all that animate: no
+   registered property (see styles-future-spectrum.css), no filter. */
+.rxs-page.rxs-page.ffs-page .ffs-switch-skin > i {
   position: absolute;
-  top: calc(var(--ffs-d) * 100% / 12);
+  top: -20%;
   right: 0;
   left: 0;
   display: block;
-  height: calc(100% / 12 + 1px);
-  opacity: 0;
-  background:
-    linear-gradient(90deg, transparent, color-mix(in srgb, var(--ffs-accent) 30%, transparent) 30% 70%, transparent),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='31.18' viewBox='0 0 18 31.18'%3E%3Cpath d='M9 0 18 5.2v10.4L9 20.8 0 15.6V5.2Zm0 20.8V31.18' fill='none' stroke='%239cf1ff' stroke-opacity='.7'/%3E%3C/svg%3E")
-      0 0 / 18px 31.18px;
-  transform-origin: 0 50%;
+  height: 120%;
 }
 
-.rxs-page.rxs-page.ffs-page .ffs-switch-mesh > i:nth-child(even) {
-  transform-origin: 100% 50%;
+.rxs-page.rxs-page.ffs-page .ffs-switch-skin > i > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 0;
+}
+
+/* The liquid: everything the front has not reached. */
+.rxs-page.rxs-page.ffs-page .ffs-switch-skin > i > i:nth-child(1) {
+  background:
+    linear-gradient(
+      118deg,
+      rgb(226 248 255 / 0%) 0 22%,
+      rgb(226 248 255 / 16%) 30%,
+      rgb(226 248 255 / 0%) 38% 58%,
+      rgb(226 248 255 / 9%) 66%,
+      rgb(226 248 255 / 0%) 74%
+    ),
+    rgb(13 18 27 / 94%);
+  -webkit-mask:
+    linear-gradient(#000 0 0),
+    radial-gradient(closest-side, #000 96%, transparent 100%) 50% 50% / 0% 0% no-repeat;
+  mask:
+    linear-gradient(#000 0 0),
+    radial-gradient(closest-side, #000 96%, transparent 100%) 50% 50% / 0% 0% no-repeat;
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* The cells behind the front. */
+.rxs-page.rxs-page.ffs-page .ffs-switch-skin > i > i:nth-child(2) {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='31.18' viewBox='0 0 18 31.18'%3E%3Cpath d='M9 0 18 5.2v10.4L9 20.8 0 15.6V5.2Zm0 20.8V31.18' fill='none' stroke='%239cf1ff' stroke-opacity='.7'/%3E%3C/svg%3E")
+      0 0 / 18px 31.18px,
+    color-mix(in srgb, var(--ffs-accent) 12%, transparent);
+  -webkit-mask: radial-gradient(closest-side, transparent 52%, #000 92%, transparent 100%) 50% 50% / 0% 0%
+    no-repeat;
+  mask: radial-gradient(closest-side, transparent 52%, #000 92%, transparent 100%) 50% 50% / 0% 0% no-repeat;
+}
+
+/* The lip. */
+.rxs-page.rxs-page.ffs-page .ffs-switch-skin > i > i:nth-child(3) {
+  inset: -100%;
+  border: 3px solid rgb(232 249 255 / 95%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 12px 1px rgb(226 248 255 / 45%),
+    inset 0 0 26px 2px color-mix(in srgb, var(--ffs-accent) 55%, transparent);
+  scale: 0;
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-stage-tune {
@@ -2877,14 +2924,32 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
     animation: ffs-switch-band 720ms cubic-bezier(0.65, 0, 0.35, 1) calc(var(--ffs-entrance-delay, 0ms) + 60ms) both;
   }
 
-  /* The hex-cell sweep under a card: strips woven left and right. */
+  /* The nanite skin's front under a card: out from the reactor. */
   html:not([data-world-effects="economy"])
     .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
     #ffs-stage-panel[data-entrance="card"]
-    .ffs-switch-mesh
-    > i {
-    animation: ffs-switch-mesh 520ms cubic-bezier(0.16, 1, 0.3, 1)
-      calc(var(--ffs-entrance-delay, 0ms) - 40ms + var(--ffs-d) * 26ms) both;
+    .ffs-switch-skin
+    > i
+    > i:nth-child(1) {
+    animation: ffs-skin-liquid 900ms cubic-bezier(0.3, 0.55, 0.3, 1) var(--ffs-entrance-delay, 0ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    .ffs-switch-skin
+    > i
+    > i:nth-child(2) {
+    animation: ffs-skin-cells 900ms cubic-bezier(0.3, 0.55, 0.3, 1) var(--ffs-entrance-delay, 0ms) both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-entrance="card"]
+    .ffs-switch-skin
+    > i
+    > i:nth-child(3) {
+    animation: ffs-skin-lip 900ms cubic-bezier(0.3, 0.55, 0.3, 1) var(--ffs-entrance-delay, 0ms) both;
   }
 
   /* A selection without a card settles quietly (the rest guard's budget). */
@@ -3029,7 +3094,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   .ffs-page > .ffs-form-call,
   .ffs-page .ffs-stage-tune,
   .ffs-page .ffs-switch-rings,
-  .ffs-page .ffs-switch-mesh {
+  .ffs-page .ffs-switch-skin {
     display: none;
   }
 }
@@ -3038,7 +3103,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   .ffs-page > .ffs-form-call,
   .ffs-page .ffs-stage-tune,
   .ffs-page .ffs-switch-rings,
-  .ffs-page .ffs-switch-mesh,
+  .ffs-page .ffs-switch-skin,
   .ffs-page .ffs-ultra-deploy {
     display: none;
   }
@@ -3046,7 +3111,7 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
 
 html[data-world-effects="economy"] .ffs-page > .ffs-form-call,
 html[data-world-effects="economy"] .ffs-page .ffs-stage-tune,
-html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-mesh) {
+html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-skin) {
   display: none;
 }
 
@@ -3230,20 +3295,69 @@ html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-
   }
 }
 
-@keyframes ffs-switch-mesh {
+/* The front's box is 300% of the layers' (the lip's inset −100%), so a
+   mask of 300% and a scale of 1 are the same ellipse. */
+@keyframes ffs-skin-liquid {
   0% {
-    opacity: 0;
-    transform: scaleX(0.06);
+    opacity: 1;
+    -webkit-mask-size:
+      100% 100%,
+      0% 0%;
+    mask-size:
+      100% 100%,
+      0% 0%;
   }
 
-  36% {
-    opacity: 0.9;
-    transform: scaleX(1);
+  80% {
+    opacity: 1;
   }
 
   100% {
     opacity: 0;
-    transform: scaleX(1);
+    -webkit-mask-size:
+      100% 100%,
+      300% 300%;
+    mask-size:
+      100% 100%,
+      300% 300%;
+  }
+}
+
+@keyframes ffs-skin-cells {
+  0% {
+    opacity: 0;
+    -webkit-mask-size: 0% 0%;
+    mask-size: 0% 0%;
+  }
+
+  10% {
+    opacity: 0.9;
+  }
+
+  70% {
+    opacity: 0.8;
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-mask-size: 300% 300%;
+    mask-size: 300% 300%;
+  }
+}
+
+@keyframes ffs-skin-lip {
+  0% {
+    opacity: 1;
+    scale: 0;
+  }
+
+  78% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1;
   }
 }
 

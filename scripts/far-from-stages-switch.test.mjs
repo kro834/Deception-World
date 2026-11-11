@@ -255,12 +255,23 @@ test("the switch effect: the Rexonance card and entrance in FAR FROM's palette, 
   // The entrance's ornaments over the figure.
   const fx = render(React.createElement(stageSwitch.FarFromSwitchFx));
   assert.match(fx, /^<i class="ffs-switch-rings" aria-hidden="true"><i><\/i><i><\/i><i><\/i><i><\/i><\/i>/);
-  assert.equal(fx.match(/--ffs-d:/g)?.length, 12);
+  // Owner (2026-11-11): the picture resolves as the suit-up's armour does —
+  // the nanite skin's front (liquid, cells, lip), not strips fading in.
+  assert.match(fx, /<i class="ffs-switch-skin" aria-hidden="true"><i><i><\/i><i><\/i><i><\/i><\/i><\/i>/);
+  assert.doesNotMatch(fx, /ffs-switch-mesh|--ffs-d:/);
   assert.match(fx, /<i class="ffs-stage-tune" aria-hidden="true"><b><\/b><\/i>$/);
   assert.match(page, /data-entrance=\{stageEntrance\?\.kind\}/);
-  for (const name of ["ffs-blade-left", "ffs-blade-right", "ffs-blade-shutter", "ffs-floor-rise", "ffs-switch-ring", "ffs-switch-band", "ffs-switch-mesh", "ffs-measure"])
+  for (const name of ["ffs-blade-left", "ffs-blade-right", "ffs-blade-shutter", "ffs-floor-rise", "ffs-switch-ring", "ffs-switch-band", "ffs-skin-liquid", "ffs-skin-cells", "ffs-skin-lip", "ffs-measure"])
     assert.match(styles, new RegExp(`@keyframes ${name} \\{`), name);
   assert.match(styles, /#ffs-stage-panel\[data-entrance="card"\]\s*> figure \{\s*animation: ffs-floor-rise/);
+  // The front animates masks' sizes and one scale: no registered property
+  // (a registration is global and slowed WebKit's scroll restyles), no filter.
+  const skinRules = styles.slice(styles.indexOf("/* The nanite skin's front (owner, 2026-11-11)"), styles.indexOf(".rxs-page.rxs-page.ffs-page .ffs-stage-tune {"));
+  assert.ok(skinRules.length > 800);
+  assert.doesNotMatch(skinRules, /filter:|backdrop-filter/);
+  assert.doesNotMatch(styles, /@property --ffs-/);
+  assert.match(styles, /\.ffs-page \.ffs-switch-skin \{\s*display: none;/);
+  assert.match(styles, /html\[data-world-effects="economy"\] \.ffs-page :is\(\.ffs-switch-rings, \.ffs-switch-skin\) \{\s*display: none;/);
   assert.match(styles, /#ffs-stage-panel\[data-entrance="quiet"\]\s*> figure,/);
   // In step with a swipe: the rail's own drag state drives the tuning band.
   assert.match(page, /attributeFilter: \["data-liquid-dragging", "data-liquid-contact", "style"\]/);
