@@ -260,6 +260,51 @@ export interface RexonanceAssemblyGenerationLayer {
   release(): void;
 }
 
+/** A page's form change while it plays (far-from-form-shift.ts). */
+export interface RexonanceAssemblyFormShift {
+  readonly active: boolean;
+  readonly phase: string;
+  request(request: {
+    now: number;
+    to: string;
+    shown: number;
+    scroll: number;
+    visible: boolean;
+    motion: boolean;
+  }): string;
+  /** The frame at `now` (the scroll at `scroll`): the progress the scene
+   * draws, or null once the scene is the scroll's again. */
+  frame(now: number, scroll: number): { readonly progress: number } | null;
+  /** Takes the scene's canvas as the armour to dissolve (drawn through
+   * `vs`, `vx`, `vy`: device px per figure px and the origin). */
+  capture(canvas: CanvasImageSource, vs: number, vx: number, vy: number): boolean;
+  /** Draws the change's own layers over the scene's frame. */
+  paint(
+    context: CanvasRenderingContext2D,
+    frame: { readonly progress: number },
+    canvas: CanvasImageSource,
+    vs: number,
+    vx: number,
+    vy: number,
+    ratio: number,
+  ): void;
+  cancel(): void;
+  release(): void;
+}
+
+export interface RexonanceAssemblyFormShiftKit {
+  /** The least share of the pinned frame on screen for a change to play. */
+  visible?: number;
+  create(input: {
+    document: Document;
+    size: { readonly width: number; readonly height: number };
+    core: readonly [number, number];
+    coarse: boolean;
+    undersuit: CanvasImageSource;
+    beats: { readonly light: readonly [number, number]; readonly form: readonly [number, number] };
+  }): RexonanceAssemblyFormShift | null;
+}
+
 /** A page's own armour generation (FAR FROM: 「ワイヤーフレーム風の生成方式」):
  * prepared once the plan is made (a generator the scene steps in idle
  * slices), its layer draws the armour in place of the nanite swarm, the
@@ -352,6 +397,11 @@ export interface RexonanceAssemblyConfig {
   /** A page's own armour generation (FAR FROM: the wireframe). Without it
    * the nanite swarm builds the armour (Rexonance). */
   generation?: RexonanceAssemblyGeneration;
+  /** A page's own form change (FAR FROM, 2026-11-11): a finished form
+   * chosen away from dissolves and the suit-up plays again from the
+   * undersuit, on the kit's own clock. Without it a chosen form changes
+   * with the scroll alone (Rexonance). */
+  formShift?: RexonanceAssemblyFormShiftKit;
   gold?: RexonanceAssemblyGold;
   /** The plates' atlas (art | mosaic), for the driver's cut-outs. */
   atlas?: string;

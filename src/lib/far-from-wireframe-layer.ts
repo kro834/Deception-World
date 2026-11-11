@@ -37,6 +37,7 @@
  */
 
 import { ASSEMBLY_BEATS } from "./rexonance-resonance.js";
+import { prepareFarFromTide } from "./far-from-nanite-tide.ts";
 import { FAR_FROM_WIREFRAME_FORMS, FAR_FROM_WIREFRAME_PLATES } from "./far-from-wireframe.ts";
 import {
   WIRE_UNIT,
@@ -379,6 +380,17 @@ export function* prepareFarFromWireframe(
   // in along it.
   const T = input.overlay ? FAR_FROM_WIRE_OVERLAY_TIMING : FAR_FROM_WIRE_TIMING;
   const { plan, pieces, document } = input;
+  // The nanite tide (owner, 2026-11-11), with the swarm's build only: the
+  // coat creeping over the undersuit in the plan's own landing order.
+  const tide = input.overlay
+    ? prepareFarFromTide({
+        tiles: plan.tiles,
+        tile: plan.tile,
+        core: input.core,
+        coarse: input.coarse,
+        until: ASSEMBLY_BEATS.clamp,
+      })
+    : null;
   const { cols, rows, tile } = plan;
   // The plan's tiles by cell: when each lands, and whose it is.
   const ids = new Map<string, number>();
@@ -1286,6 +1298,8 @@ export function* prepareFarFromWireframe(
     reset();
     let nodeCount = 0;
     let headCount = 0;
+    // Over the swarm's build: the nanites' tide under the wire.
+    tide?.draw(context, q, calm, px);
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = 1;
     // The art: finished plates whole; plates whose group is being scanned,

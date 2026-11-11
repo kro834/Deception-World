@@ -67,6 +67,13 @@ import {
 import { farFromAccents } from "./far-from-assembly-accents.ts";
 import { farFromWireGeneration } from "./far-from-wireframe-layer.ts";
 import { farFromUltraSrc } from "./far-from-ultra-art.ts";
+import {
+  FAR_FROM_SHIFT,
+  createFarFromFormShift,
+  type FarFromShiftBeats,
+  type FarFromShiftFrame,
+} from "./far-from-form-shift.ts";
+import { createFarFromMist, drawFarFromSettle } from "./far-from-nanite-mist.ts";
 
 /** The stages' lights, as the record's accents (final-stage-data.ts). */
 export const FAR_FROM_FORM_TONES = Object.freeze({
@@ -158,6 +165,68 @@ export const loadFarFromNanites = () =>
     }),
   );
 
+/** The form change (owner, 2026-11-11; far-from-form-shift.ts): its clock,
+ * the armour's dissolve into mist and the finished form's flash, as the
+ * engine's `formShift` kit. A form's path through the chain is its place
+ * in it (ミドル, "standard", has none). */
+export const farFromFormShiftKit = Object.freeze({
+  visible: FAR_FROM_SHIFT.visible,
+  create(input: {
+    document: Document;
+    size: { readonly width: number; readonly height: number };
+    core: readonly [number, number];
+    coarse: boolean;
+    undersuit: CanvasImageSource;
+    beats: FarFromShiftBeats;
+  }) {
+    const mist = createFarFromMist(input);
+    if (!mist) return null;
+    const chain: readonly string[] = FAR_FROM_FORM_CHAIN;
+    const tones: Readonly<Record<string, string>> = FAR_FROM_FORM_TONES;
+    const machine = createFarFromFormShift({
+      beats: input.beats,
+      steps: (form) => chain.indexOf(form) + 1,
+    });
+    let tone: string = FAR_FROM_PALETTE.nanites.tone[0];
+    return {
+      get active() {
+        return machine.active;
+      },
+      get phase() {
+        return machine.phase;
+      },
+      request: machine.request,
+      frame: machine.frame,
+      cancel: machine.cancel,
+      capture(canvas: CanvasImageSource, vs: number, vx: number, vy: number) {
+        return mist.capture(canvas, { a: vs, d: vs, e: vx, f: vy });
+      },
+      paint(
+        context: CanvasRenderingContext2D,
+        frame: { readonly progress: number },
+        canvas: CanvasImageSource,
+        vs: number,
+        vx: number,
+        vy: number,
+        ratio: number,
+      ) {
+        const state = frame as FarFromShiftFrame;
+        const px = ratio / Math.max(1e-6, vs);
+        context.setTransform(vs, 0, 0, vs, vx, vy);
+        if (state.mist >= 0) mist.draw(context, state.mist, px);
+        if (state.settle >= 0) {
+          tone = tones[machine.target] ?? tone;
+          drawFarFromSettle(context, canvas, state.settle, input.size, input.core, tone, px);
+        }
+      },
+      release() {
+        machine.cancel();
+        mist.release();
+      },
+    };
+  },
+});
+
 /** The scene's config: FAR FROM's suit in the Rexonance engine's terms. */
 export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
   return {
@@ -198,6 +267,7 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
     // traces each plate first (owner, 2026-10-24).
     nanites: loadFarFromNanites,
     generation: farFromWireGeneration,
+    formShift: farFromFormShiftKit,
     forms: {
       chain: FAR_FROM_FORM_CHAIN,
       tones: FAR_FROM_FORM_TONES,

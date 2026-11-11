@@ -1587,6 +1587,26 @@ html[data-family="special"]
   outline-offset: 3px;
 }
 
+/* The still tiers' form change (far-from-suitup.tsx): the form left behind
+   fades off the new one — a quick crossfade, opacity only, so it is the
+   whole change under reduced motion too. */
+html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-still.ffs-still-left {
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  animation: ffs-still-left 240ms ease-out both;
+}
+
+@keyframes ffs-still-left {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 /* The still tiers keep every line lit and the finished figure. */
 @media (prefers-reduced-motion: reduce) {
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hint {

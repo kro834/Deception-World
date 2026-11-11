@@ -73,6 +73,10 @@ const STILLS: Record<FarFromAssemblyForm, string> = {
  * (the engine's ASSEMBLY_BEATS.seal starts at .86). */
 const REPLAY_AT = 0.835;
 
+/** The still tiers' crossfade between forms (ms; the sheet's
+ * --ffs-still-fade is the same). */
+export const STILL_FADE_MS = 240;
+
 const FORM_LABELS = FAR_FROM_ASSEMBLY_FORMS.map((key) => FAR_FROM_SAGA.stages[key].label);
 
 /** The ending's sentence: which forms the end of the scroll runs through. */
@@ -207,6 +211,21 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
   useEffect(() => {
     tabsRef.current?.dispatchEvent(new Event("liquidrelayout"));
   }, [stage]);
+  // The still tiers' form change (reduced motion, economy, forced colours:
+  // no engine, so no dissolve): the form left behind stays over the new one
+  // for a quick crossfade (styles-far-from-suitup.css), then goes. Where
+  // the engine is live the stills are hidden and it plays the change itself
+  // (far-from-form-shift.ts).
+  const [left, setLeft] = useState<FarFromAssemblyForm | null>(null);
+  const shownStage = useRef(stage);
+  useEffect(() => {
+    const previous = shownStage.current;
+    shownStage.current = stage;
+    if (previous === stage) return;
+    setLeft(previous);
+    const timer = window.setTimeout(() => setLeft(null), STILL_FADE_MS + 80);
+    return () => window.clearTimeout(timer);
+  }, [stage]);
   const form = FAR_FROM_SAGA.stages[stage];
   const reached = FAR_FROM_ASSEMBLY_FORMS.indexOf(stage);
 
@@ -251,6 +270,17 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
             loading="lazy"
             decoding="async"
           />
+          {left && left !== stage ? (
+            <img
+              key={left}
+              className="rzn-still ffs-still-left"
+              src={STILLS[left]}
+              alt=""
+              width={FAR_FROM_SUIT_SIZE.width}
+              height={FAR_FROM_SUIT_SIZE.height}
+              decoding="async"
+            />
+          ) : null}
           {/* While the scene prepares, the undersuit stands in (never the
               finished suit before the scroll). */}
           <img

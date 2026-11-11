@@ -1656,6 +1656,19 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // its wire over it; otherwise the generation replaces the armour's build.
   const replaceArmour = Boolean(armourGeneration && !armourGeneration.overlay);
   let wire = null;
+  // A page's own form change (FAR FROM, 2026-11-11: the finished form's
+  // armour dissolves into nanites and the suit-up plays again from the
+  // undersuit to the form chosen; far-from-form-shift.ts): `formShift`, a
+  // clock of its own that lends the scene a progress while it plays.
+  // Rexonance has none: a chosen form changes exactly as before.
+  const formShiftKit = config.formShift ?? null;
+  let formShift = null;
+  let shiftForm = runway.dataset.form || "standard";
+  let shiftPhase = "";
+  // The view the last frame was drawn through (device px per figure px).
+  let drawnVs = 1;
+  let drawnVx = 0;
+  let drawnVy = 0;
   const reduced = environment.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = environment.matchMedia("(forced-colors: active)");
   const coarse = environment.matchMedia("(pointer: coarse)");
@@ -3530,6 +3543,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     }
     context.setTransform(vs, 0, 0, vs, vx, vy);
     context.imageSmoothingEnabled = true;
+    drawnVs = vs;
+    drawnVx = vx;
+    drawnVy = vy;
 
     const flamePhase = (progress - NANITE_FLAME_START) / NANITE_FLAME_SPAN;
     const flame = FIRE ? naniteFlameEnvelope(flamePhase) : 0;
@@ -4478,11 +4494,67 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           // A selected form changes CSS figure limits without changing the
           // canvas's border box, so ResizeObserver alone cannot update fit.
           if (live) measure();
+          // A page's form change takes the frame from here (FAR FROM).
+          if (formShiftKit && requestFormShift()) return;
           lastProgress = -1;
           schedule();
         })
       : null;
   formObserver?.observe(runway, { attributes: true, attributeFilter: ["data-form"] });
+  const syncShiftPhase = () => {
+    const phase = formShift?.active ? formShift.phase : "";
+    if (phase === shiftPhase) return;
+    shiftPhase = phase;
+    if (phase) runway.dataset.rznShift = phase;
+    else delete runway.dataset.rznShift;
+  };
+  // The share of the pinned frame on screen.
+  const frameShown = () => {
+    const box = frameBox.getBoundingClientRect();
+    const seen = Math.min(box.bottom, environment.innerHeight || 0) - Math.max(box.top, 0);
+    return box.height > 0 ? seen / box.height : 0;
+  };
+  // True when the change plays (the scene's frames are its own until done).
+  function requestFormShift() {
+    const to = runway.dataset.form || "standard";
+    if (to === shiftForm) return Boolean(formShift?.active);
+    shiftForm = to;
+    const ready = Boolean(
+      live && near && pageActive && !document.hidden && view && images && plan && lastProgress >= 0,
+    );
+    if (!formShift) {
+      if (!ready) return false;
+      formShift = formShiftKit.create({
+        document,
+        size: config.size,
+        core: config.core,
+        coarse: coarse.matches,
+        undersuit: images.undersuit,
+        beats: ASSEMBLY_BEATS,
+      });
+      if (!formShift) return false;
+    }
+    const answer = formShift.request({
+      now: environment.performance?.now?.() ?? 0,
+      to,
+      shown: lastProgress,
+      scroll: readProgress(),
+      visible: ready && frameShown() >= (formShiftKit.visible ?? 0.35),
+      motion: motionAllowed(),
+    });
+    // The armour to dissolve: what is on the canvas now.
+    if (
+      (answer === "start" || answer === "restart") &&
+      !formShift.capture(canvas, drawnVs, drawnVx, drawnVy)
+    )
+      formShift.cancel();
+    syncShiftPhase();
+    if (!formShift.active) return false;
+    environment.clearTimeout(calmTimer);
+    calmTimer = 0;
+    schedule();
+    return true;
+  }
 
   // Follow-through (owner, 2026-10-16: fine and dynamic at every notch;
   // 2026-10-23: 「スクロールに伴ってより滑らかに変身されるようにし」): the
@@ -4527,6 +4599,33 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     const fresh = typeof stamp === "number" && stamp > lastStamp;
     const dt = Math.min(50, Math.max(8, fresh ? stamp - lastStamp : 16.7));
     if (fresh) lastStamp = stamp;
+    if (formShift?.active) {
+      // A page's form change (FAR FROM): its clock's progress, its mist and
+      // its flash over the scene's own frame, until it hands the scene back.
+      const state = formShift.frame(
+        typeof stamp === "number" ? stamp : (environment.performance?.now?.() ?? 0),
+        progress,
+      );
+      syncShiftPhase();
+      if (state) {
+        const step = lastProgress >= 0 ? Math.min(0.01, Math.abs(state.progress - lastProgress)) : 0;
+        lastProgress = state.progress;
+        backRects = false;
+        draw(state.progress, false, step);
+        formShift.paint(canvas.getContext("2d"), state, canvas, drawnVs, drawnVx, drawnVy, view.ratio);
+        restCalm = false;
+        restStep = step;
+        restStamp = -Infinity;
+        updateHud(state.progress);
+        if (runway.dataset.rznArming) delete runway.dataset.rznArming;
+        environment.clearTimeout(calmTimer);
+        calmTimer = 0;
+        schedule();
+        return;
+      }
+      // Done or interrupted: the scroll's own frame, at once.
+      lastProgress = -1;
+    }
     let shown = progress;
     if (lastProgress >= 0 && !config.directProgress) {
       if (!force && head.settled && Math.abs(progress - lastProgress) < 0.0005) {
@@ -5290,6 +5389,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     images?.guide?.close?.();
     images?.cellsB?.close?.();
     formObserver?.disconnect();
+    formShift?.release();
+    formShift = null;
+    delete runway.dataset.rznShift;
     environment.clearTimeout(calmTimer);
     for (const image of loaders) releasePendingImage(image);
     loaders.clear();
