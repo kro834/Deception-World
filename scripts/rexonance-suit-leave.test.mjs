@@ -508,6 +508,9 @@ test("the lab plays Rexonance's suit-up as the page does: the page's own layer, 
   // A playhead given directly is read as it is: no scroll, no easing.
   assert.match(surge, /const raw = direct\s*\? Math\.min\(1, Math\.max\(0, Number\(direct\(\)\) \|\| 0\)\)/);
   assert.match(surge, /if \(direct \|\| shown < 0 \|\| Math\.abs\(target - shown\) > 0\.2\) shown = target;/);
+  // The lab holds the figure at one size (its zooms, its side-by-side): the
+  // page's lean in is the page's.
+  assert.match(surge, /const push = coarse \|\| direct \? 1 : scrollPush\(q\);/);
   // The page's own pin is never scrolled back for a stage that has none.
   assert.match(surge, /if \(!direct && box\.top < -0\.4 \* box\.height && travel > 0\)/);
   // The safeguards are the layer's own, so the lab has them too: live only

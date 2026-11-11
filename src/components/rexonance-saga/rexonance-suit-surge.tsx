@@ -905,7 +905,9 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         // The lean in is for fine pointers: on touch screens a transform on
         // the scene's large canvases every scrolled frame cost WebKit its
         // frame rate; there only the locks' brief shake moves them.
-        const push = coarse ? 1 : scrollPush(q);
+        // (Nor on a stage with a playhead of its own: the lab holds the
+        // figure at one size, for its zooms and its side-by-side.)
+        const push = coarse || direct ? 1 : scrollPush(q);
         const [x, y] = engine.shake(now);
         // The bank's director owns the camera: the locks' shake joins it.
         if (director) {
