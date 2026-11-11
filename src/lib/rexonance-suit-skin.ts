@@ -226,6 +226,9 @@ export type SkinTimeline = {
    * have lit, fading over `glow`. */
   lag: number;
   glow: readonly [number, number];
+  /** The scene's light: nothing of the torrent is in the air from here on
+   * (its call back into the reactor is over before the flash). */
+  light: number;
 };
 
 /** The entry, in the call's canonical ms: the fire's burst (420) is the
@@ -240,6 +243,7 @@ export const SKIN_ENTRY: SkinTimeline = {
   lag: 60,
   // The call's light has run out through the body by 1980 + 380.
   glow: [2360, 2440],
+  light: 1980,
 };
 /** The scroll scene, in its progress: after the fire's end (0.14), closed
  * before the seal (0.86) and the light (0.9). */
@@ -254,6 +258,7 @@ export const SKIN_SCROLL: SkinTimeline = {
   lag: 0.004,
   // The scene's light (0.9 – 0.915) is all but out through the body.
   glow: [0.906, 0.915],
+  light: 0.9,
 };
 
 const spanOf = (x: number, [from, to]: readonly [number, number]) =>

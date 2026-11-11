@@ -964,6 +964,23 @@ test("the torrent: streams from the reactor and the driver land just ahead of th
       assert.ok(at < frame.body + 2 * SKIN_BAND, "from the armour still on");
     }
   }
+  // Nothing of it outlives the light (no burn after the flash): the streams
+  // in flight are dropped at the scene's light on both clocks.
+  assert.equal(SKIN_ENTRY.light, REXONANCE_SUIT_LIGHT.from);
+  assert.equal(SKIN_SCROLL.light, ASSEMBLY_BEATS.light[0]);
+  {
+    const torrent = new SkinTorrent(phone.torrent, core, belt);
+    torrent.draw(context(), context(), field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1950), cell, 9000, 1, 1, 1);
+    assert.ok(torrent.live > 0);
+    torrent.clear();
+    const [back, front] = [context(), context()];
+    torrent.draw(back, front, field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1990), cell, 9016, 1, 1, 0);
+    assert.equal(torrent.live, 0);
+    assert.equal(back.calls.strokes + front.calls.strokes + back.calls.fills + front.calls.fills, 0);
+  }
+  const wired = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
+  assert.match(wired, /if \(t >= grown\.lib\.SKIN_ENTRY\.light\) grown\.torrent\.clear\(\);/);
+  assert.match(wired, /if \(!leaving && q >= grown\.lib\.SKIN_SCROLL\.light\) grown\.torrent\.clear\(\);/);
   // Wired on both clocks, on the surge layer's own two canvases, with the
   // governor's share and the crescendo's charge; no transform anywhere.
   const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");

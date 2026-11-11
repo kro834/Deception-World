@@ -474,6 +474,8 @@ export function EntrySurge() {
               const px = 1 / Math.max(0.05, layers.scale);
               layers.back.globalCompositeOperation = "lighter";
               layers.front.globalCompositeOperation = "lighter";
+              // (Nothing of it outlives the light: no streams after the flash.)
+              if (t >= grown.lib.SKIN_ENTRY.light) grown.torrent.clear();
               grown.torrent.draw(
                 layers.back,
                 layers.front,
@@ -812,6 +814,8 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
             const px = 1 / Math.max(0.05, surfaces.scale);
             surfaces.back.globalCompositeOperation = "lighter";
             surfaces.front.globalCompositeOperation = "lighter";
+            // (Nothing of it outlives the light: no streams after the flash.)
+            if (!leaving && q >= grown.lib.SKIN_SCROLL.light) grown.torrent.clear();
             grown.torrent.draw(
               surfaces.back,
               surfaces.front,
