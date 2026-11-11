@@ -395,11 +395,11 @@ export function crescendoLines(rgba: Uint8ClampedArray, w: number, h: number) {
           2 * luma[i - w] -
           luma[i - w + 1];
         const g = Math.sqrt(gx * gx + gy * gy);
-        if (g > 70) {
+        if (g > 110) {
           edge[o] = 196;
           edge[o + 1] = 244;
           edge[o + 2] = 255;
-          edge[o + 3] = Math.min(255, (g - 70) * 0.9);
+          edge[o + 3] = Math.min(255, (g - 110) * 0.7);
         }
       }
       const a = rgba[o + 3];
@@ -803,14 +803,14 @@ export class CrescendoEngine {
     if (level.rim && this.art.rim) {
       const rim = finale.rim(a);
       if (rim > 0.01) {
-        front.globalAlpha = 0.9 * rim;
+        front.globalAlpha = 0.5 * rim;
         front.drawImage(this.art.rim, 0, 0, W, H);
       }
     }
     if (level.edges && this.art.edge) {
       const glowing = finale.linesGlow(a);
       if (glowing > 0.01) {
-        front.globalAlpha = 0.42 * glowing;
+        front.globalAlpha = 0.2 * glowing;
         front.drawImage(this.art.edge, 0, 0, W, H);
       }
       this.band(
@@ -820,14 +820,14 @@ export class CrescendoEngine {
         cy,
         finale.waveReach(a) * H * 0.8,
         130,
-        finale.waveLight(a),
+        0.75 * finale.waveLight(a),
       );
       // The punch: the lines' echo swells off the armour (the body is still).
       if (level.echo) {
         const light = finale.echoLight(a);
         if (light > 0.01) {
           const k = finale.echoScale(a);
-          front.globalAlpha = 0.6 * light;
+          front.globalAlpha = 0.45 * light;
           front.drawImage(this.art.edge, cx - cx * k, cy - cy * k, W * k, H * k);
         }
       }

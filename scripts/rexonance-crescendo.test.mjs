@@ -286,7 +286,7 @@ test("the armour's lines come from the art: edges where it changes, a two-tone r
   const { edge, rim } = crescendoLines(rgba, w, h);
   const alpha = (data, x, y) => data[(y * w + x) * 4 + 3];
   assert.ok(alpha(edge, 20, 22) > 100, "the bar's edge is a line");
-  assert.ok(alpha(edge, 10, 16) > 100, "so is the silhouette");
+  assert.ok(alpha(edge, 10, 16) > 60, "so is the silhouette");
   assert.equal(alpha(edge, 20, 15), 0, "flat armour has none");
   assert.equal(alpha(edge, 4, 4), 0, "nor has the air");
   // Key light (ice) on the upper left, fill (pink) on the right.
