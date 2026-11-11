@@ -1358,3 +1358,18 @@ test("the control's chunk: retried, imported early on approach or intent, never 
     /const retryAssembly = \(event\) => \{\s*if \(runway\.dataset\.rznLoad !== "error" \|\| !pageActive \|\| document\.hidden \|\| disposed\) return;/,
   );
 });
+
+test("the pill never stands over a selector rail docked beside it: it lifts above the tablist (--mc-lift), on every tier", () => {
+  const source = read("src/lib/assembly-movie.ts");
+  assert.match(source, /MOVIE_RAIL_GAP = 10;/);
+  assert.match(source, /MOVIE_RAIL_SELECTOR =\s*'\[role="tablist"\], \.ffs-assembly-controls > :is\(a, button\), \.rxs-assembly-footer \.rxs-assembly-controls > a'/);
+  assert.match(source, /querySelectorAll\?\.\(MOVIE_RAIL_SELECTOR\)/);
+  assert.match(source, /setProperty\("--mc-lift", `\$\{next\}px`\)/);
+  const css = read("src/styles-assembly-movie.css");
+  // The pill and the sheet that opens above it (landscape tiers) follow the lift.
+  const lifted = css.match(/var\(--mc-safe-bottom\) \+ var\(--mc-lift, 0px\)/g) ?? [];
+  assert.equal(lifted.length, 4);
+  // Lifted, the pill steps out of the right corner (the floating menu button's).
+  assert.match(source, /control\.dataset\.lifted = "true"/);
+  assert.match(css, /\.rzn-movie\[data-lifted\] \.rzn-movie-pill \{\s*right: auto;/);
+});

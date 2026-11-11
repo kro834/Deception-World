@@ -139,7 +139,7 @@ html[data-dialog-open] body .rxs-page.rxs-page.rxs-page .rzn-movie {
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
   position: absolute;
   left: calc(var(--mc-gutter) + var(--mc-safe-left));
-  bottom: calc(14px + var(--mc-safe-bottom));
+  bottom: calc(14px + var(--mc-safe-bottom) + var(--mc-lift, 0px));
   /* The column left of the figure, less its gutters (before the controller
      has measured it: a third of the window). */
   width: clamp(300px, calc(var(--mc-left-room, 33vw) - 2 * var(--mc-gutter) - 8px), 560px);
@@ -154,7 +154,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
   position: absolute;
   left: calc(var(--mc-gutter) + var(--mc-safe-left));
-  bottom: calc(14px + var(--mc-safe-bottom));
+  bottom: calc(14px + var(--mc-safe-bottom) + var(--mc-lift, 0px));
   align-items: center;
   box-sizing: border-box;
   height: var(--mc-pill);
@@ -423,7 +423,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie :is(butt
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
     display: none;
-    bottom: calc(14px + var(--mc-pill) + 8px + var(--mc-safe-bottom));
+    bottom: calc(14px + var(--mc-pill) + 8px + var(--mc-safe-bottom) + var(--mc-lift, 0px));
     width: clamp(
       280px,
       calc(var(--mc-left-room, 33vw) - 2 * var(--mc-gutter) - 8px),
@@ -462,6 +462,14 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie :is(butt
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
     right: calc(var(--mc-gutter) + var(--mc-safe-right));
     left: auto;
+  }
+
+  /* Docked above a selector rail (--mc-lift, assembly-movie.ts), the pill
+     steps to the left: the floating menu button stands over the right
+     corner, and the lift would carry the pill into it. */
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie[data-lifted] .rzn-movie-pill {
+    right: auto;
+    left: calc(var(--mc-gutter) + var(--mc-safe-left));
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
@@ -564,7 +572,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie :is(butt
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-sheet {
     top: auto;
     right: auto;
-    bottom: calc(14px + var(--mc-pill) + 8px + var(--mc-safe-bottom));
+    bottom: calc(14px + var(--mc-pill) + 8px + var(--mc-safe-bottom) + var(--mc-lift, 0px));
     left: calc(var(--mc-gutter) + var(--mc-safe-left));
     width: clamp(
       260px,
