@@ -232,11 +232,11 @@ test("a seek is told from a played frame", () => {
 
 test("the surge layer: one way out of a leave, and nothing of it left behind", () => {
   const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
-  // Every end goes through one place: answered, the streams dropped, the
+  // Every end goes through one place: answered, the cells dropped, the
   // fade's hold on the figure released.
   assert.match(
     surge,
-    /const endLeave = \(ok: boolean\) => \{\s*if \(leave\.end\(ok\)\) \{\s*skin\?\.torrent\.clear\(\);\s*redraw = true;\s*\}\s*releaseFade\(\);\s*\};/,
+    /const endLeave = \(ok: boolean\) => \{\s*if \(leave\.end\(ok\)\) \{\s*skin\?\.cells\.clear\(\);\s*redraw = true;\s*\}\s*releaseFade\(\);\s*\};/,
   );
   // A leave that ends with the playhead where it was (called off on the
   // spot, or the page never moved) is drawn over at once: its last frame
@@ -247,14 +247,14 @@ test("the surge layer: one way out of a leave, and nothing of it left behind", (
     surge,
     /const releaseFade = \(\) => \{\s*if \(fadeTimer\) window\.clearTimeout\(fadeTimer\);\s*if \(fadeFrame\) cancelAnimationFrame\(fadeFrame\);\s*fadeTimer = fadeFrame = 0;\s*for \(const animation of fading\) animation\.cancel\(\);\s*fading = \[\];\s*\};/,
   );
-  // The reader's playhead ends it inside the frame: no stream in flight, and
+  // The reader's playhead ends it inside the frame: no cell in the air, and
   // a faded figure is raised only a frame after the scene has drawn.
   assert.match(
     surge,
-    /if \(step === "moved"\) \{[\s\S]*?grown\?\.torrent\.clear\(\);\s*redraw = true;\s*if \(fading\.length && !fadeFrame\) fadeFrame = requestAnimationFrame\(releaseFade\);/,
+    /if \(step === "moved"\) \{[\s\S]*?grown\?\.cells\.clear\(\);\s*redraw = true;\s*if \(fading\.length && !fadeFrame\) fadeFrame = requestAnimationFrame\(releaseFade\);/,
   );
   // Over, the bare body stands with nothing in the air.
-  assert.match(surge, /\} else if \(step === "hold" && retracting\) \{[\s\S]*?grown\?\.torrent\.clear\(\);/);
+  assert.match(surge, /\} else if \(step === "hold" && retracting\) \{[\s\S]*?grown\?\.cells\.clear\(\);/);
   // Called off by the one who asked.
   assert.match(surge, new RegExp(`const RETRACT_CANCEL_EVENT = "${MOVIE_LEAVE_CANCEL_EVENT}";`));
   assert.match(
@@ -265,15 +265,15 @@ test("the surge layer: one way out of a leave, and nothing of it left behind", (
   assert.match(surge, /runway\.removeEventListener\(RETRACT_CANCEL_EVENT, onLeaveCancel\);/);
   // One at a time.
   assert.match(surge, /if \(typeof detail\?\.done !== "function" \|\| leave\.active\) return;/);
-  // A seek drops the streams aimed at the front that was; with the skin off
-  // screen none is kept alive (a stream counted live kept the scene drawing).
-  assert.match(surge, /if \(isSeek\(lastQ, q\)\) grown\?\.torrent\.clear\(\);\s*lastQ = q;/);
-  assert.match(surge, /\} else if \(grown\.torrent\.live\) grown\.torrent\.clear\(\);/);
+  // A seek drops the cells of the playhead that was; with the layers off
+  // screen none is kept alive (a cell counted live kept the scene drawing).
+  assert.match(surge, /if \(isSeek\(lastQ, q\)\) grown\?\.cells\.clear\(\);\s*lastQ = q;/);
+  assert.match(surge, /\} else if \(grown\.cells\.live\) grown\.cells\.clear\(\);/);
   // The scene stopping, and the layer going (the lab's stage outlives it):
   // the leave ended, the flags and the canvases' opacity handed back.
   const stopAt = surge.indexOf("const stop = () => {");
   const stop = surge.slice(stopAt, surge.indexOf("const tick = (now: number) => {", stopAt));
-  assert.match(stop, /skin\?\.torrent\.clear\(\);[\s\S]*?endLeave\(true\);\s*flagSkin\(false\);\s*showClassic\(1\);/);
+  assert.match(stop, /skin\?\.cells\.clear\(\);[\s\S]*?endLeave\(true\);\s*flagSkin\(false\);\s*showClassic\(1\);/);
   assert.match(
     surge,
     /runway\.removeEventListener\(RETRACT_CANCEL_EVENT, onLeaveCancel\);[\s\S]*?stop\(\);\s*flagCovered\(false\);/,

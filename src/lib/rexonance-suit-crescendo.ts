@@ -3,16 +3,13 @@
    layer's own two canvases (no new compositor layer) after the surge has
    drawn, in the figure's coordinates (571 x 1040):
 
-   - reactor streams: nanite cells born at the reactor that wind out along
-     the neck, the arms and the legs in helices, carried by a curl-noise
-     flow, and gather on whichever limb is being armoured (cohesion);
    - panel lock-in: every plate, as it seats, a micro-flash on its seat (a
      four-point glint, its corner ticks, a sweep along its seam);
    - energy lines: the armour's own panel lines (an edge map taken from the
      art once, in idle time) lit in a band that runs out from each group's
      lock, and from the reactor through the whole suit on completion;
    - anticipation: a charge-up on the reactor and the driver before the last
-     lock (converging cells, contracting rings, a growing bloom);
+     lock (contracting rings, a growing bloom);
    - impact: on completion a flash, a double shock shell with a chromatic
      fringe, a ground ring, rays, a scale-punch echo of the armour's lines
      (the body itself never moves), a lens glint on the visor;
@@ -21,7 +18,7 @@
 
    Every value is closed-form in the ages the caller passes (ms since each
    event), so the entry plays it on the call's clock and the scroll scene can
-   be scrubbed; only the streams and the charge flow on wall time. Nothing is
+   be scrubbed; only the charge's rings turn on wall time. Nothing is
    allocated per frame. This module imports nothing: the suit's landmarks
    come in through `CrescendoSuit`, and it is fetched on its own, lazily,
    only where Rexonance's suit-up plays. */
@@ -32,7 +29,7 @@ export type CrescendoSuit = {
   core: readonly [number, number];
   visor: readonly [number, number];
   belt: readonly [number, number];
-  /** Each group's anchor (figure px) and each group's limb (CRESCENDO_LIMBS). */
+  /** Each group's anchor (figure px). */
   anchors: ReadonlyArray<readonly [number, number]>;
   /** The plates: seat x, seat y, box x, y, w, h — six numbers each. */
   plates: Float32Array;
@@ -57,11 +54,8 @@ const hash = (a: number, b: number) => {
 
 export type CrescendoTier = {
   name: "desktop" | "tablet" | "phone" | "low";
-  /** Reactor-stream cells. */
-  streams: number;
-  /** Completion rays, and the charge's converging cells. */
+  /** Completion rays. */
   rays: number;
-  converge: number;
   /** The edge map's width in px (0: no energy lines, no rim light). */
   edge: number;
   /** The highest backing-store ratio its canvases may use. */
@@ -91,9 +85,7 @@ export function crescendoTier(environment: TierEnvironment = globalThis): Cresce
   if (!coarse)
     return {
       name: "desktop",
-      streams: 360,
       rays: 28,
-      converge: 44,
       edge: 420,
       dpr: Math.min(ratio, 1.5),
       level: 0,
@@ -103,18 +95,18 @@ export function crescendoTier(environment: TierEnvironment = globalThis): Cresce
     (cores > 0 && cores <= 4) ||
     connection?.saveData === true
   )
-    return { name: "low", streams: 80, rays: 12, converge: 16, edge: 0, dpr: 1, level: 2 };
+    return { name: "low", rays: 12, edge: 0, dpr: 1, level: 2 };
   if (short >= 700)
-    return { name: "tablet", streams: 220, rays: 22, converge: 32, edge: 360, dpr: 1, level: 0 };
-  return { name: "phone", streams: 150, rays: 18, converge: 26, edge: 300, dpr: 1, level: 0 };
+    return { name: "tablet", rays: 22, edge: 360, dpr: 1, level: 0 };
+  return { name: "phone", rays: 18, edge: 300, dpr: 1, level: 0 };
 }
 
 /** The share of a tier's budget each governor level keeps. */
 export const CRESCENDO_LEVELS = [
-  { streams: 1, rays: 1, edges: true, echo: true, rim: true },
-  { streams: 0.55, rays: 0.6, edges: true, echo: true, rim: true },
-  { streams: 0.3, rays: 0.5, edges: true, echo: false, rim: false },
-  { streams: 0, rays: 0.4, edges: false, echo: false, rim: false },
+  { rays: 1, edges: true, echo: true, rim: true },
+  { rays: 0.6, edges: true, echo: true, rim: true },
+  { rays: 0.5, edges: true, echo: false, rim: false },
+  { rays: 0.4, edges: false, echo: false, rim: false },
 ] as const;
 export const CRESCENDO_SLOW_MS = 26;
 const SLOW_SCORE = 8;
@@ -161,17 +153,10 @@ export const CRESCENDO_FINALE_MS = 1600;
 /** A plate's micro-flash and a group's line pulse, ms. */
 export const CRESCENDO_PLATE_MS = 260;
 export const CRESCENDO_GROUP_MS = 620;
-/** The limbs the streams wind along (CRESCENDO_LIMBS index) per surge group:
- * legs, waist, arms, chest, shoulders, tail, ribbon, helm. */
-export const CRESCENDO_GROUP_LIMB = [3, 1, 2, 1, 2, 1, 1, 0] as const;
 
 export type CrescendoFrame = {
   /** Wall clock, ms. */
   now: number;
-  /** The streams' presence, 0–1, and each limb class's gather, 0–1
-   * (head, torso, arms, legs). */
-  flow: number;
-  gather: Float32Array;
   /** The charge before completion, 0–1. */
   charge: number;
   /** ms since completion (< 0: not yet). */
@@ -184,8 +169,6 @@ export type CrescendoFrame = {
 export function createCrescendoFrame(groups: number, plates: number): CrescendoFrame {
   return {
     now: 0,
-    flow: 0,
-    gather: new Float32Array(4),
     charge: 0,
     finale: -1,
     groups: new Float32Array(groups).fill(-1),
@@ -193,25 +176,11 @@ export function createCrescendoFrame(groups: number, plates: number): CrescendoF
   };
 }
 
-const gatherFrom = (frame: CrescendoFrame, pull: Float32Array) => {
-  frame.gather.fill(0);
-  for (let g = 0; g < pull.length && g < CRESCENDO_GROUP_LIMB.length; g += 1) {
-    const limb = CRESCENDO_GROUP_LIMB[g];
-    if (pull[g] > frame.gather[limb]) frame.gather[limb] = pull[g];
-  }
-};
-
 /** The entry's finale runs faster: the cover closes 750 ms after the light. */
 export const CRESCENDO_ENTRY_PACE = 1.45;
 
-/** The entry's charge before the light (0–1; over with the light), at
- * canonical time t: the torrent's call back into the reactor. */
-export const entryCharge = (t: number, final: number) =>
-  smooth(span(t, final - 300, final - 20)) * (t < final ? 1 : 0);
-
 /** The entry at canonical time t (ms). `fits` are the plates' fit times,
- * `windows` each group's [from, to], `final` the light's start; `swarm`,
- * `implode` and `pull` are the surge frame's. */
+ * `windows` each group's [from, to], `final` the light's start. */
 export function entryCrescendoFrame(
   frame: CrescendoFrame,
   t: number,
@@ -219,13 +188,8 @@ export function entryCrescendoFrame(
   fits: Float32Array,
   windows: Float32Array,
   final: number,
-  swarm: number,
-  implode: number,
-  pull: Float32Array,
 ) {
   frame.now = now;
-  frame.flow = swarm * (1 - smooth(implode));
-  gatherFrom(frame, pull);
   frame.charge = smooth(span(t, final - 300, final - 20));
   frame.finale = t >= final ? (t - final) * CRESCENDO_ENTRY_PACE : -1;
   for (let g = 0; g < frame.groups.length; g += 1) {
@@ -268,16 +232,8 @@ export class CrescendoScrollClock {
     this.groupAt.fill(-Infinity);
     this.plateAt.fill(-Infinity);
   }
-  /** Fills the frame at progress q; `swarm`, `implode`, `pull` are the surge
-   * frame's. */
-  frame(
-    frame: CrescendoFrame,
-    q: number,
-    now: number,
-    swarm: number,
-    implode: number,
-    pull: Float32Array,
-  ) {
+  /** Fills the frame at progress q. */
+  frame(frame: CrescendoFrame, q: number, now: number) {
     const last = this.last;
     const forward = last >= 0 && q > last && q - last <= SEEK;
     const crossed = (at: number) => forward && at > last && at <= q;
@@ -295,8 +251,6 @@ export class CrescendoScrollClock {
     }
     this.last = q;
     frame.now = now;
-    frame.flow = swarm * (1 - smooth(implode));
-    gatherFrom(frame, pull);
     frame.charge =
       smooth(span(q, CRESCENDO_SCROLL_CHARGE[0], CRESCENDO_SCROLL_CHARGE[1])) *
       (q < CRESCENDO_SCROLL_LIGHT ? 1 : 0);
@@ -315,10 +269,8 @@ export class CrescendoScrollClock {
 }
 
 /** While the skin grows the armour (rexonance-suit-skin.ts) there are no
- * plates to flash and no streams in the air: only the charge and the
- * completion remain. */
+ * plates to flash: only the charge and the completion remain. */
 export function quietCrescendo(frame: CrescendoFrame) {
-  frame.flow = 0;
   frame.groups.fill(-1);
   frame.plates.fill(-1);
   return frame;
@@ -427,21 +379,7 @@ export function crescendoLines(rgba: Uint8ClampedArray, w: number, h: number) {
 
 /* ---------------- the engine ---------------- */
 
-/** head/neck, torso, arms (left, right), legs (left, right): root x, y,
- * tip x, tip y, half width at the root and the tip, and the limb's class
- * (0 head, 1 torso, 2 arms, 3 legs). Figure fractions (x of 571, y of 1040,
- * widths of 571). */
-export const CRESCENDO_LIMBS = [
-  [0.498, 0.235, 0.498, 0.075, 0.075, 0.06, 0],
-  [0.498, 0.27, 0.498, 0.47, 0.2, 0.16, 1],
-  [0.36, 0.25, 0.14, 0.56, 0.085, 0.06, 2],
-  [0.636, 0.25, 0.856, 0.56, 0.085, 0.06, 2],
-  [0.42, 0.45, 0.3, 0.965, 0.105, 0.08, 3],
-  [0.576, 0.45, 0.696, 0.965, 0.105, 0.08, 3],
-] as const;
-
 const TONES = ["150 236 255", "255 143 216", "242 216 150"] as const;
-const STREAM = 8;
 
 export type CrescendoLayers = {
   back: CanvasRenderingContext2D;
@@ -460,15 +398,10 @@ export type CrescendoArt = {
   rim: CanvasImageSource | null;
 };
 
-const P = new Float32Array(3);
-const Q = new Float32Array(3);
-
 export class CrescendoEngine {
   readonly governor: CrescendoGovernor;
   private suit: CrescendoSuit;
   private tier: CrescendoTier;
-  /** limb, phase, speed, angle, turns, radius share, tone, seed. */
-  private streams: Float32Array;
   private sprites: HTMLCanvasElement[] = [];
   private flare: HTMLCanvasElement | null = null;
   private art: CrescendoArt = { edge: null, rim: null };
@@ -478,22 +411,6 @@ export class CrescendoEngine {
     this.suit = suit;
     this.tier = tier;
     this.governor = new CrescendoGovernor(tier.level);
-    this.streams = new Float32Array(tier.streams * STREAM);
-    for (let i = 0; i < tier.streams; i += 1) {
-      const o = i * STREAM;
-      // The limbs by length: the legs and arms carry most of the cells.
-      const pick = hash(i, 3);
-      const limb =
-        pick < 0.08 ? 0 : pick < 0.2 ? 1 : pick < 0.4 ? 2 : pick < 0.6 ? 3 : pick < 0.8 ? 4 : 5;
-      this.streams[o] = limb;
-      this.streams[o + 1] = hash(i, 5);
-      this.streams[o + 2] = 0.00042 + 0.00046 * hash(i, 7);
-      this.streams[o + 3] = hash(i, 11) * Math.PI * 2;
-      this.streams[o + 4] = (limb === 1 ? 1.2 : 2.4) + 1.6 * hash(i, 13);
-      this.streams[o + 5] = 0.92 + 0.5 * hash(i, 17);
-      this.streams[o + 6] = i % 7 === 0 ? 2 : i % 3 === 0 ? 1 : 0;
-      this.streams[o + 7] = hash(i, 19);
-    }
     if (typeof document !== "undefined") {
       this.sprites = [
         glow("236 252 255", TONES[0]),
@@ -513,43 +430,6 @@ export class CrescendoEngine {
     return this.tier.edge > 0 && !this.art.edge;
   }
 
-  /** A stream cell at wall time t: x, y, depth into out. Returns its light
-   * (0: not drawn). */
-  private place(i: number, t: number, out: Float32Array) {
-    const p = this.streams;
-    const o = i * STREAM;
-    const limb = CRESCENDO_LIMBS[p[o]];
-    const W = this.suit.width;
-    const H = this.suit.height;
-    const seed = p[o + 7];
-    const u = (p[o + 1] + t * p[o + 2]) % 1;
-    const x0 = limb[0] * W;
-    const y0 = limb[1] * H;
-    const dx = limb[2] * W - x0;
-    const dy = limb[3] * H - y0;
-    const length = Math.hypot(dx, dy) || 1;
-    const nx = -dy / length;
-    const ny = dx / length;
-    const angle = p[o + 3] + u * p[o + 4] * Math.PI * 2 + t * 0.0011;
-    const half = (limb[4] + (limb[5] - limb[4]) * u) * W * p[o + 5];
-    const c = Math.cos(angle);
-    const z = Math.sin(angle);
-    let x = x0 + dx * u + nx * c * half + (dx / length) * z * half * 0.2;
-    let y = y0 + dy * u + ny * c * half + (dy / length) * z * half * 0.2;
-    // Curl of the potential sin(ax + pt) cos(by - qt): divergence-free, so
-    // the cells swirl without bunching.
-    const a = x * 0.013 + t * 0.0007 + seed * 6.28;
-    const b = y * 0.0105 - t * 0.0005 + seed * 3.1;
-    const amp = 11 + 9 * seed;
-    x += -Math.sin(a) * Math.sin(b) * amp;
-    y += -Math.cos(a) * Math.cos(b) * amp;
-    out[0] = x;
-    out[1] = y;
-    out[2] = z;
-    // Born at the root, spent at the tip.
-    return Math.min(1, u * 7, (1 - u) * 5);
-  }
-
   draw(layers: CrescendoLayers, frame: CrescendoFrame, paced = false) {
     const dt = frame.now - this.lastNow;
     this.lastNow = frame.now;
@@ -558,8 +438,6 @@ export class CrescendoEngine {
     const px = 1 / Math.max(0.05, layers.scale);
     back.globalCompositeOperation = "lighter";
     front.globalCompositeOperation = "lighter";
-    if (frame.flow > 0.01 && level.streams > 0)
-      this.drawStreams(back, front, frame, level.streams, px);
     this.drawPlates(front, frame, px);
     if (level.edges && this.art.edge) this.drawGroupLines(front, frame);
     if (frame.charge > 0.01 && frame.finale < 0) this.drawCharge(back, front, frame, layers, px);
@@ -568,60 +446,6 @@ export class CrescendoEngine {
     front.globalAlpha = 1;
     back.globalCompositeOperation = "source-over";
     front.globalCompositeOperation = "source-over";
-  }
-
-  private drawStreams(
-    back: CanvasRenderingContext2D,
-    front: CanvasRenderingContext2D,
-    frame: CrescendoFrame,
-    share: number,
-    px: number,
-  ) {
-    const t = frame.now;
-    const count = Math.floor(this.tier.streams * share);
-    const p = this.streams;
-    // Tone by tone: the far half behind the figure (dim, thin), the near
-    // half in front (bright, with a head).
-    for (let tone = 0; tone < 3; tone += 1) {
-      for (let side = 0; side < 2; side += 1) {
-        const context = side ? front : back;
-        context.beginPath();
-        let any = false;
-        for (let i = 0; i < count; i += 1) {
-          const o = i * STREAM;
-          if (p[o + 6] !== tone) continue;
-          // Cohesion: a limb being armoured keeps all its cells; the rest
-          // thin out to a third.
-          const gather = frame.gather[CRESCENDO_LIMBS[p[o]][6]];
-          if (p[o + 7] > 0.34 + 0.66 * gather) continue;
-          const light = this.place(i, t, P);
-          if (light <= 0.02 || P[2] >= 0 !== (side === 1)) continue;
-          this.place(i, t - 46, Q);
-          if (Math.abs(P[0] - Q[0]) > 60 || Math.abs(P[1] - Q[1]) > 60) continue;
-          context.moveTo(Q[0], Q[1]);
-          context.lineTo(P[0], P[1]);
-          any = true;
-        }
-        if (!any) continue;
-        context.lineCap = "round";
-        context.lineWidth = (side ? 2.1 : 1.3) * px;
-        context.strokeStyle = `rgb(${TONES[tone]} / ${((side ? 0.78 : 0.34) * frame.flow).toFixed(3)})`;
-        context.stroke();
-        context.lineCap = "butt";
-      }
-    }
-    // The near cells' heads, on the limbs being armoured.
-    front.fillStyle = `rgb(244 252 255 / ${(0.85 * frame.flow).toFixed(3)})`;
-    front.beginPath();
-    const head = 2.4 * px;
-    for (let i = 0; i < count; i += 2) {
-      const o = i * STREAM;
-      const gather = frame.gather[CRESCENDO_LIMBS[p[o]][6]];
-      if (gather < 0.2 || p[o + 7] > gather) continue;
-      if (this.place(i, t, P) <= 0.3 || P[2] < 0.2) continue;
-      front.rect(P[0] - head / 2, P[1] - head / 2, head, head);
-    }
-    front.fill();
   }
 
   /** Each seating plate's micro-flash. */
@@ -731,8 +555,8 @@ export class CrescendoEngine {
     }
   }
 
-  /** The charge: cells and rings converge on the reactor; it and the driver
-   * bloom. */
+  /** The charge: rings draw in on the reactor; it and the driver bloom.
+   * (No spokes, no streaks: the matter that converges is the skin's cells.) */
   private drawCharge(
     back: CanvasRenderingContext2D,
     front: CanvasRenderingContext2D,
@@ -744,22 +568,6 @@ export class CrescendoEngine {
     const t = frame.now;
     const [cx, cy] = this.suit.core;
     const reach = Math.min(layers.reachX * 0.92, this.suit.height * 0.34);
-    // Converging cells: streaks along their spokes, quickening as they near.
-    for (let tone = 0; tone < 3; tone += 1) {
-      front.beginPath();
-      for (let i = tone; i < this.tier.converge; i += 3) {
-        const u = (hash(i, 71) + t * (0.0011 + 0.0007 * hash(i, 73))) % 1;
-        const angle = hash(i, 79) * Math.PI * 2 + u * 1.3;
-        const r0 = reach * Math.pow(1 - u, 1.5);
-        const r1 = reach * Math.pow(1 - Math.min(1, u + 0.07), 1.5);
-        if (r0 < 10) continue;
-        front.moveTo(cx + Math.cos(angle) * r0, cy + Math.sin(angle) * r0);
-        front.lineTo(cx + Math.cos(angle + 0.09) * r1, cy + Math.sin(angle + 0.09) * r1);
-      }
-      front.lineWidth = 1.7 * px;
-      front.strokeStyle = `rgb(${TONES[tone]} / ${(0.72 * c).toFixed(3)})`;
-      front.stroke();
-    }
     // Two rings drawing in.
     for (let ring = 0; ring < 2; ring += 1) {
       const u = (t / 460 + ring * 0.5) % 1;

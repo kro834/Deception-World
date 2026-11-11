@@ -82,7 +82,7 @@ export function LabStage({
         sync();
         // Rexonance's own layer over its scene (owner, 2026-11-11: the lab
         // plays the suit-up as /rexonance-saga does — the liquid skin's
-        // front, the torrent that feeds it, the retract): the page's surge
+        // front, the cells it takes in, the retract): the page's surge
         // layer itself, on this stage, on the lab's playhead. Its chunk is
         // fetched here, for this rider only; it fetches the skin's chunk and
         // field in turn once the scene is live. If it never arrives the

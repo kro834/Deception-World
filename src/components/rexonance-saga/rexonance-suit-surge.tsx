@@ -35,7 +35,7 @@ import {
   REXONANCE_SUIT_SIZE,
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
-import type { SkinField, SkinFrame, SkinRenderer, SkinTorrent } from "@/lib/rexonance-suit-skin";
+import type { SkinCells, SkinField, SkinFrame, SkinRenderer } from "@/lib/rexonance-suit-skin";
 import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK, SuitLeave, isSeek } from "@/lib/rexonance-suit-leave";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 import type { CrescendoEngine, CrescendoFrame } from "@/lib/rexonance-suit-crescendo";
@@ -74,7 +74,7 @@ const reducedMotion = () =>
   document.documentElement.dataset.worldEffects === "economy";
 
 /* REXONANCE CRESCENDO (owner, 2026-11-11): the cinema pass over the surge's
-   own two canvases — reactor streams that wind along the limbs, a micro-flash
+   own two canvases — a micro-flash
    on every plate, energy along the armour's panel lines, the charge, the
    completion's shock, visor glint and settle (rexonance-suit-crescendo.ts).
    Its chunk is fetched here, on demand, only once a suit-up is about to
@@ -204,8 +204,20 @@ type Skin = {
   field: SkinField;
   frame: SkinFrame;
   ratio: number;
-  /** The torrent of nanites that feeds the front (SkinTorrent). */
-  torrent: SkinTorrent;
+  /** The cells the front takes in from the air (SkinCells). */
+  cells: SkinCells;
+};
+/** The call's cells fade in over this long once the skin engages. */
+const CELLS_IN_MS = 200;
+/** The surge canvases' reach about the reactor as the cells' bounds. */
+const CELL_BOUNDS = new Float32Array(4);
+const cellBounds = (layers: { reachX: number; reachUp: number; reachDown: number }) => {
+  const [x, y] = REXONANCE_SUIT_MARKS.core;
+  CELL_BOUNDS[0] = x - layers.reachX;
+  CELL_BOUNDS[1] = y - layers.reachUp;
+  CELL_BOUNDS[2] = x + layers.reachX;
+  CELL_BOUNDS[3] = y + layers.reachDown;
+  return CELL_BOUNDS;
 };
 const DRIVER_STANDIN = "/rexonance-zenith-20261023/driver-standin.webp";
 
@@ -291,10 +303,17 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
       field,
       frame: lib.createSkinFrame(),
       ratio: budget.ratio,
-      torrent: new lib.SkinTorrent(
-        budget.torrent,
-        REXONANCE_SUIT_MARKS.core,
-        REXONANCE_SUIT_MARKS.belt,
+      cells: new lib.SkinCells(
+        budget.large,
+        budget.fine,
+        lib.buildSkinCellSheet((width, height) => {
+          const sheet = document.createElement("canvas");
+          sheet.width = width;
+          sheet.height = height;
+          return sheet;
+        }),
+        REXONANCE_SUIT_SIZE.width / field.w,
+        [REXONANCE_SUIT_SIZE.width, REXONANCE_SUIT_SIZE.height],
       ),
     });
   })().catch(() => undefined);
@@ -407,6 +426,7 @@ export function EntrySurge() {
     let last = -1;
     let size = "";
     let shaken = false;
+    let engagedAt = 0;
     const measure = () => {
       const width = figure.clientWidth;
       const height = figure.clientHeight;
@@ -449,7 +469,10 @@ export function EntrySurge() {
         if (grown && !engaged && !grown.renderer.lost) {
           const [from, to] = grown.lib.SKIN_ENTRY.leave;
           engaged = t < from + (to - from) * 0.4 && suit.dataset.nanites === "canvas";
-          if (engaged) suit.dataset.skin = "";
+          if (engaged) {
+            suit.dataset.skin = "";
+            engagedAt = now;
+          }
         }
         const growing = engaged && grown ? grown.lib.skinFrame(grown.frame, grown.lib.SKIN_ENTRY, t) : null;
         engine.quiet = Boolean(growing?.shell);
@@ -472,24 +495,26 @@ export function EntrySurge() {
             );
             grown.renderer.render(growing, now / 1000, 0);
             showClassic(growing.classic);
-            if (growing.on && layers) {
-              // The torrent that feeds the front, then the droplets at its lip.
+            if (layers) {
+              // The cells the front takes in (they gather in the air before
+              // it starts), then the droplets at its lip.
               const cell = REXONANCE_SUIT_SIZE.width / grown.field.w;
               const px = 1 / Math.max(0.05, layers.scale);
-              layers.back.globalCompositeOperation = "lighter";
-              layers.front.globalCompositeOperation = "lighter";
-              // (Nothing of it outlives the light: no streams after the flash.)
-              if (t >= grown.lib.SKIN_ENTRY.light) grown.torrent.clear();
-              grown.torrent.draw(
+              // (Nothing of them outlives the light: none after the flash.)
+              if (t >= grown.lib.SKIN_ENTRY.light) grown.cells.clear();
+              grown.cells.draw(
                 layers.back,
                 layers.front,
                 grown.field,
-                growing,
-                cell,
+                grown.lib.SKIN_ENTRY,
+                t,
                 now,
-                px,
-                grown.lib.SKIN_TORRENT_SHARE[level],
-                made ? made.lib.entryCharge(t, final) : 0,
+                layers.scale,
+                grown.renderer.hex,
+                cellBounds(layers),
+                grown.lib.SKIN_CELL_SHARE[level],
+                // (A skin that engages late: its cells fade in, never pop.)
+                Math.min(1, (now - engagedAt) / CELLS_IN_MS),
               );
               if (growing.shell)
                 grown.lib.drawSkinDroplets(layers.front, grown.field, growing, cell, now, px);
@@ -506,9 +531,6 @@ export function EntrySurge() {
             fits,
             windows,
             final,
-            frame.swarm,
-            frame.implode,
-            frame.pull,
           );
           made.engine.draw(layers, growing?.shell ? made.lib.quietCrescendo(pass) : pass);
         }
@@ -646,10 +668,10 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       fading = [];
     };
     /** The leave ends, whatever its state: answered (once), nothing of it
-     * left — no stream in flight, no figure held hidden. */
+     * left — no cell in the air, no figure held hidden. */
     const endLeave = (ok: boolean) => {
       if (leave.end(ok)) {
-        skin?.torrent.clear();
+        skin?.cells.clear();
         redraw = true;
       }
       releaseFade();
@@ -736,7 +758,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       restCamera();
       engine?.clear();
       skin?.renderer.clear();
-      skin?.torrent.clear();
+      skin?.cells.clear();
       // (A leave cut short: the page moves on as it was asked to.)
       endLeave(true);
       flagSkin(false);
@@ -796,9 +818,9 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         partOn[index] = on;
       });
       const moving = lastQ < 0 || Math.abs(q - lastQ) > 0.00005;
-      // A seek (the scrubber, a jump): the streams in flight were aimed at a
-      // front that is no longer there.
-      if (isSeek(lastQ, q)) grown?.torrent.clear();
+      // A seek (the scrubber, a jump): the cells in the air were the old
+      // playhead's.
+      if (isSeek(lastQ, q)) grown?.cells.clear();
       lastQ = q;
       scrollSurgeFrame(frame, q, now, windows, pieceWindows);
       // The leave, on its own clock, until it is over or the reader moves
@@ -814,12 +836,12 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       if (step === "moved") {
         // The scrub again (or the page has moved): nothing in flight; the
         // figure is raised only once the scene has drawn where it now is.
-        grown?.torrent.clear();
+        grown?.cells.clear();
         redraw = true;
         if (fading.length && !fadeFrame) fadeFrame = requestAnimationFrame(releaseFade);
       } else if (step === "hold" && retracting) {
         // Over: the page moves on; the bare body stands until it has.
-        grown?.torrent.clear();
+        grown?.cells.clear();
       }
       const leaving = step !== "" && step !== "moved" && retracting;
       // The skin at this playhead (closed-form: it scrubs both ways).
@@ -829,18 +851,17 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
             ? grown.lib.skinRetractFrame(grown.frame, leave.ms)
             : grown.lib.skinFrame(grown.frame, grown.lib.SKIN_SCROLL, q)
           : null;
-      const skinOn = Boolean(growing?.on);
       const shellOn = Boolean(growing?.shell);
       engine.quiet = shellOn;
       const flowing =
         (frame.swarm > 0.01 && frame.implode < 1) ||
         shellOn ||
         leaving ||
-        Boolean(grown && grown.torrent.live > 0);
+        Boolean(grown && grown.cells.live > 0);
       // The crescendo's events strike on the same playhead, every frame.
       const pass =
         crescendo && crescendoClock
-          ? crescendoClock.frame(crescendo.frame, q, now, frame.swarm, frame.implode, frame.pull)
+          ? crescendoClock.frame(crescendo.frame, q, now)
           : null;
       if (pass && shellOn) crescendo?.lib.quietCrescendo(pass);
       const playing = Boolean(pass && crescendo?.lib.crescendoBusy(pass));
@@ -876,30 +897,30 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
           );
           grown.renderer.render(growing, now / 1000, 1);
           showClassic(growing.classic);
-          if (skinOn && surfaces) {
-            // The torrent that feeds the front, then the droplets at its lip.
+          if (surfaces) {
+            // The cells the front takes in (they gather in the air before
+            // it starts; a retract sheds them), then the droplets at its lip.
             const cell = REXONANCE_SUIT_SIZE.width / grown.field.w;
             const px = 1 / Math.max(0.05, surfaces.scale);
-            surfaces.back.globalCompositeOperation = "lighter";
-            surfaces.front.globalCompositeOperation = "lighter";
-            // (Nothing of it outlives the light: no streams after the flash.)
-            if (!leaving && q >= grown.lib.SKIN_SCROLL.light) grown.torrent.clear();
-            grown.torrent.draw(
+            // (Nothing of them outlives the light: none after the flash.)
+            if (!leaving && q >= grown.lib.SKIN_SCROLL.light) grown.cells.clear();
+            grown.cells.draw(
               surfaces.back,
               surfaces.front,
               grown.field,
-              growing,
-              cell,
+              leaving ? null : grown.lib.SKIN_SCROLL,
+              leaving ? leave.ms : q,
               now,
-              px,
-              grown.lib.SKIN_TORRENT_SHARE[crescendo ? crescendo.engine.governor.level : 0],
-              leaving ? 0 : (pass?.charge ?? 0),
+              surfaces.scale,
+              grown.renderer.hex,
+              cellBounds(surfaces),
+              grown.lib.SKIN_CELL_SHARE[crescendo ? crescendo.engine.governor.level : 0],
             );
             if (shellOn)
               grown.lib.drawSkinDroplets(surfaces.front, grown.field, growing, cell, now, px);
             surfaces.back.globalCompositeOperation = "source-over";
             surfaces.front.globalCompositeOperation = "source-over";
-          } else if (grown.torrent.live) grown.torrent.clear();
+          } else if (grown.cells.live) grown.cells.clear();
         } else showClassic(1);
         if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
         // The lean in is for fine pointers: on touch screens a transform on

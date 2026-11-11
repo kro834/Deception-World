@@ -22,7 +22,8 @@
    fingered edge (noise) and veins that race ahead down each limb. One
    fragment shader draws it on a figure-sized WebGL canvas: one quad a frame,
    whatever the device. Droplets skim just ahead of the front and are drawn
-   back into it; nothing flies anywhere else.
+   back into it, and the matter itself comes in from the air as hexagonal
+   cells the front takes in (SkinCells).
 
    Everything is closed-form in the two fronts the caller passes (the body's
    and the head's), so the entry plays it on the call's clock and the scroll
@@ -45,8 +46,10 @@ export type SkinBudget = {
   samples: number;
   /** The highest backing-store ratio of the skin's canvas. */
   ratio: number;
-  /** The torrent's streams (SkinTorrent). */
-  torrent: number;
+  /** The cells taken in from the air (SkinCells): the large plates and
+   * the fine specks. */
+  large: number;
+  fine: number;
 };
 
 type BudgetEnvironment = {
@@ -60,15 +63,15 @@ type BudgetEnvironment = {
 export function skinBudget(environment: BudgetEnvironment = globalThis): SkinBudget | null {
   const media = (query: string) => Boolean(environment.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)")) return null;
-  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2, torrent: 420 };
+  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2, large: 44, fine: 400 };
   const memory = environment.navigator?.deviceMemory;
   const cores = environment.navigator?.hardwareConcurrency ?? 0;
   if ((memory !== undefined && memory <= 4) || (cores > 0 && cores <= 4))
-    return { samples: 1200, ratio: 1.5, torrent: 110 };
+    return { samples: 1200, ratio: 1.5, large: 14, fine: 120 };
   const short = Math.min(environment.innerWidth || 0, environment.innerHeight || 0);
   return short >= 700
-    ? { samples: 3600, ratio: 2, torrent: 260 }
-    : { samples: 2500, ratio: 2, torrent: 180 };
+    ? { samples: 3600, ratio: 2, large: 34, fine: 300 }
+    : { samples: 2500, ratio: 2, large: 25, fine: 220 };
 }
 
 /** The canvas's quality at each of the crescendo governor's levels. */
@@ -226,9 +229,19 @@ export type SkinTimeline = {
    * have lit, fading over `glow`. */
   lag: number;
   glow: readonly [number, number];
-  /** The scene's light: nothing of the torrent is in the air from here on
-   * (its call back into the reactor is over before the flash). */
+  /** The scene's light: no cell is in the air from here on. */
   light: number;
+  /** The cells (SkinCells), in this clock's units: a fine and a large
+   * cell's flight, their absorption (fine, large), when the last wave
+   * lands, and the cells' own entrance and exit. */
+  cells: {
+    fine: readonly [number, number];
+    large: readonly [number, number];
+    absorb: readonly [number, number];
+    wave: readonly [number, number];
+    from: readonly [number, number];
+    out: readonly [number, number];
+  };
 };
 
 /** The entry, in the call's canonical ms: the fire's burst (420) is the
@@ -244,6 +257,14 @@ export const SKIN_ENTRY: SkinTimeline = {
   // The call's light has run out through the body by 1980 + 380.
   glow: [2360, 2440],
   light: 1980,
+  cells: {
+    fine: [380, 700],
+    large: [560, 900],
+    absorb: [110, 190],
+    wave: [1800, 1945],
+    from: [120, 300],
+    out: [1958, 1978],
+  },
 };
 /** The scroll scene, in its progress: after the fire's end (0.14), closed
  * before the seal (0.86) and the light (0.9). */
@@ -259,6 +280,14 @@ export const SKIN_SCROLL: SkinTimeline = {
   // The scene's light (0.9 – 0.915) is all but out through the body.
   glow: [0.906, 0.915],
   light: 0.9,
+  cells: {
+    fine: [0.03, 0.055],
+    large: [0.045, 0.075],
+    absorb: [0.006, 0.01],
+    wave: [0.868, 0.8955],
+    from: [0.1, 0.12],
+    out: [0.8968, 0.8998],
+  },
 };
 
 const spanOf = (x: number, [from, to]: readonly [number, number]) =>
@@ -422,78 +451,272 @@ export function drawSkinDroplets(
   pass(field.bodySamples, field.headSamples, frame.head);
 }
 
-/* ---------------- the torrent ---------------- */
+/* ---------------- the cells ---------------- */
 
-/* REXONANCE TORRENT (owner, 2026-11-11: 「滑らかな変身」 and also a suit-up
-   「ナノマシンの派手な奔流」 — both). The nanites that become the armour, seen:
-   streams pour out of the reactor and the driver, swing wide round the body
-   and wind in along the limbs, each a bright head on a trail, and land just
-   ahead of the skin's front, where the lip takes them in: the torrent is
-   what the liquid metal is made of. A few ride great arcs right round the
-   figure (half of them behind it). As the suit closes, the charge calls
-   every stream back into the reactor in one converging burst before the
-   completion's flash; on a retract they run from the receding lip home.
+/* REXONANCE CELLS (owner, 2026-11-11: the streams 「気持ち悪い」 — 「大きな
+   セル状のものや細かいものが周囲から吸収されていくように」). The armour's
+   matter arrives as hexagonal cells, the skin's own tessellation seen loose:
+   a few large plates (a metal face, a thin bright rim, the hex pattern
+   inside) and many fine glinting specks. They come out of the air all round
+   the figure, some from past the canvas's edge: each flickers in, drifts,
+   and is drawn to a point of the armour just ahead of the front on a short
+   spiral, quickening on its last approach, its size and its turn settling
+   until it lies flat on the surface as the lip reaches it. There it is taken
+   in: a rim flash, and it shrinks into the hex grid (a plate breaks into
+   seven micro-cells on the shader's own lattice). Before the light a last
+   wave from all round lands over the whole body, and nothing is left in the
+   air at the light. On a retract the receding lip sheds them: each forms on
+   the surface, lifts off and dissolves outward.
 
-   Drawn additively on the surge layer's two canvases, in figure px, as a few
-   batched paths a frame (no sprite, no gradient, no shadow). The streams fly
-   on wall time and each keeps its own flight (where from, where to, when),
-   aimed when it is born at the front as it then stands, so the scroll can
-   be scrubbed either way under it. Budgeted per device (skinBudget) and
-   shed with the governor (SKIN_TORRENT_SHARE); nothing is allocated a
-   frame. */
+   No trail, no line, no streak: every cell is one sprite from a sheet drawn
+   once (buildSkinCellSheet); a frame is drawImage calls only. Stateless and
+   closed-form in the scene's clock (the entry's ms, the scroll's progress,
+   the retract's ms): each slot flies again and again, each flight's landing
+   chosen from where the front will be when it lands (skinReach), so the
+   scroll scrubs it both ways and a seek leaves nothing behind. Wall time
+   only makes them glint. Budgeted per device (skinBudget) and shed with the
+   governor (SKIN_CELL_SHARE); nothing is allocated a frame. */
 
-/** The share of the streams each governor level keeps. */
-export const SKIN_TORRENT_SHARE = [1, 0.75, 0.55, 0.4] as const;
-/** One stream in nine rides a great arc round the figure. */
-export const SKIN_TORRENT_ARC = 9;
-const STREAM = 10;
-/** A stream's trail: this many points behind its head, over this share of
- * its path (the great arcs' longer). */
-const TRAIL = 5;
-const POSE = TRAIL * 2 + 1;
-const TORRENT_TONES = ["rgb(150 236 255)", "rgb(255 143 216)", "rgb(244 251 255)"] as const;
+/** The share of the cells each governor level keeps. */
+export const SKIN_CELL_SHARE = [1, 0.75, 0.55, 0.4] as const;
+/** The cells' widths in figure px (flat to flat), and their least width in
+ * CSS px whatever the figure's scale. */
+export const SKIN_CELL_SIZE = {
+  large: [46, 92],
+  fine: [4.5, 11],
+  largeMin: 16,
+  fineMin: 2,
+} as const;
+/** The retract's cells, in its ms: flight lives, and the forming on the
+ * surface before each lifts off. */
+export const SKIN_RETRACT_CELLS = {
+  fine: [340, 620],
+  large: [460, 760],
+  absorb: [90, 150],
+} as const;
+/** The helmet's plates and the last wave's are this share of the body's
+ * (the helmet is small; the wave lands on finished armour). */
+const CELL_SMALL = 0.62;
+/** The lip reaches a landed cell this far into its absorption. */
+const CELL_LEAD = 0.35;
+/** A cell's way in at flight share p: slow out of the air, quickening onto
+ * the surface. The distance left is 1 - cellEase(p): it only falls. */
+export const cellEase = (p: number) => {
+  const u = clamp01(p);
+  return 0.3 * u + 0.7 * u * u * u;
+};
 
-export class SkinTorrent {
-  /** Per stream: from x, y, to x, y, its life (ms), its bend and its
-   * helix's radius (px), the helix's turns, a seed, its tone. */
-  private streams: Float32Array;
-  private born: Float64Array;
-  /** Per stream, this frame: its trail from tail to head (x, y each), and
-   * its presence (0: not drawn). */
-  private pose: Float32Array;
-  private state = 0x9e3779b9;
+/* The sheet: the plates (128 px, three rims), the absorb flash (64 px), a
+   micro-cell (32 px) and the specks (24 px: three tones, eight turns of the
+   hexagon's 60 degrees). */
+const SHEET = { width: 512, height: 264, plate: 128, flash: 64, micro: 32, speck: 24, turns: 8 };
+const PLATE_R = 58;
+const FLASH_R = 24;
+const MICRO_R = 14;
+const SPECK_R = 9;
+const ROOT3 = 1.7320508;
+const CELL_RIMS = ["214 246 255", "255 190 232", "246 250 255"] as const;
+const CELL_FILLS = ["178 238 255", "255 170 224", "246 251 255"] as const;
+
+/** Draws the cells' sheet into a canvas the caller makes (once a mount). */
+export function buildSkinCellSheet(
+  make: (width: number, height: number) => HTMLCanvasElement | null,
+): HTMLCanvasElement | null {
+  const canvas = make(SHEET.width, SHEET.height);
+  const context = canvas?.getContext("2d");
+  if (!canvas || !context) return null;
+  // A pointy-top hexagon (the shader's cells), turned by `turn`.
+  const hex = (x: number, y: number, r: number, turn = 0) => {
+    context.beginPath();
+    for (let n = 0; n < 6; n += 1) {
+      const angle = turn + Math.PI / 6 + (n * Math.PI) / 3;
+      const px = x + Math.cos(angle) * r;
+      const py = y + Math.sin(angle) * r;
+      if (n) context.lineTo(px, py);
+      else context.moveTo(px, py);
+    }
+    context.closePath();
+  };
+  context.lineJoin = "round";
+  for (let tone = 0; tone < 3; tone += 1) {
+    const x = tone * SHEET.plate + SHEET.plate / 2;
+    const y = SHEET.plate / 2;
+    // The face: brushed dark metal, lit from the upper left.
+    const face = context.createLinearGradient(x - PLATE_R, y - PLATE_R, x + PLATE_R, y + PLATE_R);
+    face.addColorStop(0, "rgb(78 96 116 / 0.9)");
+    face.addColorStop(0.4, "rgb(24 31 43 / 0.88)");
+    face.addColorStop(0.5, "rgb(176 204 224 / 0.92)");
+    face.addColorStop(0.57, "rgb(30 38 52 / 0.88)");
+    face.addColorStop(1, "rgb(12 16 24 / 0.9)");
+    hex(x, y, PLATE_R);
+    context.fillStyle = face;
+    context.fill();
+    // The hex pattern inside: seven cells, faint.
+    const inner = PLATE_R * 0.36;
+    context.lineWidth = 1.5;
+    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.26)`;
+    for (let n = 0; n < 7; n += 1) {
+      const angle = ((n - 1) * Math.PI) / 3;
+      const reach = n ? inner * ROOT3 : 0;
+      hex(x + Math.cos(angle) * reach, y + Math.sin(angle) * reach, inner);
+      context.stroke();
+    }
+    // The rim: thin and bright, with a soft inner light.
+    hex(x, y, PLATE_R - 4);
+    context.lineWidth = 7;
+    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.2)`;
+    context.stroke();
+    hex(x, y, PLATE_R - 1.5);
+    context.lineWidth = 3.2;
+    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.98)`;
+    context.stroke();
+  }
+  // The flash: a hexagonal ring of light.
+  {
+    const x = SHEET.flash / 2;
+    const y = SHEET.plate + SHEET.flash / 2;
+    for (const [width, alpha] of [
+      [12, 0.1],
+      [7, 0.22],
+      [2.2, 0.95],
+    ]) {
+      hex(x, y, FLASH_R);
+      context.lineWidth = width;
+      context.strokeStyle = `rgb(226 246 255 / ${alpha})`;
+      context.stroke();
+    }
+  }
+  // The micro-cell: one cell of the skin's grid, clicking in.
+  {
+    const x = SHEET.flash + SHEET.micro / 2;
+    const y = SHEET.plate + SHEET.micro / 2;
+    hex(x, y, MICRO_R);
+    context.fillStyle = "rgb(150 214 246 / 0.42)";
+    context.fill();
+    context.lineWidth = 1.6;
+    context.strokeStyle = "rgb(236 250 255 / 0.95)";
+    context.stroke();
+  }
+  // The specks: a bright hexagon with a white heart.
+  for (let tone = 0; tone < 3; tone += 1)
+    for (let turn = 0; turn < SHEET.turns; turn += 1) {
+      const x = turn * SHEET.speck + SHEET.speck / 2;
+      const y = SHEET.plate + SHEET.flash + tone * SHEET.speck + SHEET.speck / 2;
+      const angle = (turn / SHEET.turns) * (Math.PI / 3);
+      hex(x, y, SPECK_R, angle);
+      context.fillStyle = `rgb(${CELL_FILLS[tone]} / 0.9)`;
+      context.fill();
+      hex(x, y, SPECK_R * 0.5, angle);
+      context.fillStyle = "rgb(255 255 255 / 0.95)";
+      context.fill();
+    }
+  return canvas;
+}
+
+/** The retract's fronts at ms t (skinRetractFrame's). */
+const retractHead = (t: number) =>
+  SKIN_WHOLE -
+  (SKIN_WHOLE - FACE_FROM) * smooth(spanOf(t, SKIN_RETRACT.face)) -
+  (FACE_FROM + SKIN_BAND) * smooth(spanOf(t, SKIN_RETRACT.helmet));
+const retractBody = (t: number) =>
+  -SKIN_BAND +
+  (SKIN_WHOLE + SKIN_BAND) * (1 - Math.pow(spanOf(t, SKIN_RETRACT.body), SKIN_RETRACT_PULL));
+/** When the retract's lip falls back to field value `field`, ms. */
+export function skinRetractReach(field: number, head = false) {
+  let low = 0;
+  let high = SKIN_RETRACT_MS;
+  for (let step = 0; step < 32; step += 1) {
+    const middle = (low + high) / 2;
+    if ((head ? retractHead(middle) : retractBody(middle)) > field) low = middle;
+    else high = middle;
+  }
+  return high;
+}
+
+const hash3 = (a: number, b: number, c: number) => hash2(a * 7 + c * 131, b * 13 + c * 31 + 7);
+const SLOT = 10;
+const MEMO = 8;
+const POSE = 8;
+/** A cell's pose: x, y, width, alpha, turn, tilt, its absorption (-1 in
+ * flight, else 0 → 1), its flight's share. */
+export const SKIN_CELL_POSE = POSE;
+type CellContext = Pick<
+  CanvasRenderingContext2D,
+  "drawImage" | "save" | "restore" | "translate" | "rotate" | "scale"
+> & { globalAlpha: number; globalCompositeOperation: string };
+
+export class SkinCells {
+  /** The large plates' slots come first, then the fine specks'. */
+  readonly large: number;
+  readonly fine: number;
   readonly count: number;
-  /** The streams drawn last frame. */
+  /** The cells drawn last frame. */
   live = 0;
+  private sheet: CanvasImageSource | null;
+  private cell: number;
+  private width: number;
+  private height: number;
+  /** Per slot: life, gap, offset, size (shares), spin, first turn, tone,
+   * behind the figure, a phase, from past the edge. */
+  private slots: Float32Array;
+  /** Per slot and lane (its flights; the last wave): whether it flies (its
+   * plate's share of its size; 0: no), its
+   * landing (figure px), where it came from, and its three times. A pure
+   * cache of closed forms, keyed by the flight. */
+  private memo: Float64Array;
+  private memoKey: Float64Array;
+  private memoFor: SkinTimeline | null | undefined = undefined;
+  private memoField: SkinField | null = null;
+  private pose = new Float32Array(POSE);
+  private burst: Float32Array;
 
-  private core: readonly [number, number];
-  private belt: readonly [number, number];
-
-  constructor(count: number, core: readonly [number, number], belt: readonly [number, number]) {
-    this.core = core;
-    this.belt = belt;
-    this.count = Math.max(0, Math.floor(count));
-    this.streams = new Float32Array(this.count * STREAM);
-    this.born = new Float64Array(this.count).fill(-1);
-    this.pose = new Float32Array(this.count * POSE);
+  /** `cell`: figure px per field cell; `figure`: the figure's size. */
+  constructor(
+    large: number,
+    fine: number,
+    sheet: CanvasImageSource | null,
+    cell: number,
+    figure: readonly [number, number],
+  ) {
+    this.large = Math.max(0, Math.floor(large));
+    this.fine = Math.max(0, Math.floor(fine));
+    this.count = this.large + this.fine;
+    this.sheet = sheet;
+    this.cell = cell;
+    [this.width, this.height] = figure;
+    this.slots = new Float32Array(this.count * SLOT);
+    for (let i = 0; i < this.count; i += 1) {
+      const o = i * SLOT;
+      const s = this.slots;
+      s[o] = hash3(i, 1, 1);
+      s[o + 1] = hash3(i, 2, 1);
+      s[o + 2] = hash3(i, 3, 1);
+      s[o + 3] = hash3(i, 4, 1);
+      // Under half a turn of spiral, either way.
+      s[o + 4] = (hash3(i, 5, 1) < 0.5 ? -1 : 1) * (0.25 + 0.55 * hash3(i, 6, 1));
+      s[o + 5] = (hash3(i, 7, 1) < 0.5 ? -1 : 1) * (0.7 + 1.5 * hash3(i, 8, 1));
+      s[o + 6] = i % 7 === 3 ? 1 : i % 5 === 2 ? 2 : 0;
+      s[o + 7] = i >= this.large && hash3(i, 9, 1) < 0.22 ? 1 : 0;
+      s[o + 8] = hash3(i, 10, 1) * 6.2832;
+      s[o + 9] = hash3(i, 11, 1) < 0.14 ? 1 : 0;
+    }
+    this.memo = new Float64Array(this.count * 2 * MEMO);
+    this.memoKey = new Float64Array(this.count * 2).fill(Number.NaN);
+    this.burst = new Float32Array(Math.max(1, this.large) * 2 * 4);
   }
 
-  private random() {
-    this.state = (Math.imul(this.state, 1664525) + 1013904223) >>> 0;
-    return this.state / 4294967296;
-  }
-
-  /** Every stream in flight is dropped (the scene stopped, or moved on). */
+  /** Nothing is in the air (the scene stopped, sought, or moved on). The
+   * cells keep no flight of their own: the next frame is its clock's. */
   clear() {
-    this.born.fill(-1);
     this.live = 0;
   }
 
-  /** A sample of the armour near field value `at` of a front's list. */
-  private aim(field: SkinField, head: boolean, at: number, out: Float32Array, o: number, cell: number) {
+  /** A sample at field value `at` of a front's list (at or just past it),
+   * as an offset into the samples, or -1. */
+  private sampleAt(field: SkinField, head: boolean, at: number, pick: number) {
     const first = head ? field.bodySamples : 0;
     const count = head ? field.headSamples : field.bodySamples;
-    if (!count) return false;
+    if (!count) return -1;
     const s = field.samples;
     let a = 0;
     let b = count;
@@ -502,178 +725,422 @@ export class SkinTorrent {
       if (s[(first + m) * SKIN_SAMPLE + 2] < at) a = m + 1;
       else b = m;
     }
-    const spread = Math.max(1, Math.floor(count * 0.035));
-    let index = a + Math.floor(this.random() * spread);
-    if (index >= count) index = count - 1 - Math.floor(this.random() * Math.min(spread, count));
-    if (index < 0) index = 0;
-    // (Where the armour is thin on samples, never far past the lip.)
-    while (index > a && s[(first + index) * SKIN_SAMPLE + 2] > at + 1.5 * SKIN_BAND) index -= 1;
-    const at0 = (first + index) * SKIN_SAMPLE;
-    out[o] = s[at0] * cell;
-    out[o + 1] = s[at0 + 1] * cell;
-    return true;
-  }
-
-  /** A stream's next flight, or false if there is nowhere to fly. */
-  private launch(i: number, field: SkinField, frame: SkinFrame, cell: number, converge: number) {
-    const v = this.streams;
-    const o = i * STREAM;
-    const arc = i % SKIN_TORRENT_ARC === 0;
-    const side = this.random() < 0.5 ? -1 : 1;
-    const origin = this.random() < 0.3 ? this.belt : this.core;
-    let life = 380 + 260 * this.random();
-    if (converge > 0.02) {
-      // The charge: in from all round the figure, into the reactor.
-      const angle = this.random() * Math.PI * 2;
-      const reach = 250 + 190 * this.random();
-      v[o] = this.core[0] + Math.cos(angle) * reach * 0.8;
-      v[o + 1] = this.core[1] + Math.sin(angle) * reach;
-      v[o + 2] = origin[0];
-      v[o + 3] = origin[1];
-      life = 230 + 170 * this.random();
-    } else {
-      const body = frame.body > 0 && frame.body < 1.02;
-      const crown = frame.head > 0 && frame.head < 1.02;
-      if (!frame.shell || (!body && !crown)) return false;
-      const head = crown && (!body || this.random() < 0.45);
-      const front = head ? frame.head : frame.body;
-      if (frame.flow > 0) {
-        // Out of the reactor (or the driver), to land just ahead of the lip.
-        // (From anywhere on the reactor's disc, or along the driver.)
-        const wide = origin === this.belt ? 46 : 18;
-        v[o] = origin[0] + (this.random() * 2 - 1) * wide;
-        v[o + 1] = origin[1] + (this.random() * 2 - 1) * (origin === this.belt ? 8 : 18);
-        if (!this.aim(field, head, front + (0.6 + 2.6 * this.random()) * SKIN_BAND, v, o + 2, cell))
-          return false;
-      } else {
-        // The retract: from the receding lip, home.
-        if (!this.aim(field, head, front - (0.4 + 1.2 * this.random()) * SKIN_BAND, v, o, cell))
-          return false;
-        v[o + 2] = this.core[0];
-        v[o + 3] = this.core[1];
-        life *= 0.8;
-      }
+    // Any of the cells the lip takes in the same moment.
+    const from = a;
+    b = count;
+    while (a < b) {
+      const m = (a + b) >> 1;
+      if (s[(first + m) * SKIN_SAMPLE + 2] < at + 0.012) a = m + 1;
+      else b = m;
     }
-    v[o + 4] = arc ? life * 1.55 : life;
-    // (The call back runs straighter: an implosion, not a tangle.)
-    const calm = converge > 0.02 ? 0.4 : 1;
-    v[o + 5] = side * calm * (arc ? 170 + 90 * this.random() : 26 + 74 * this.random());
-    v[o + 6] = arc || calm < 1 ? 0 : 7 + 14 * this.random();
-    v[o + 7] = 1 + 1.6 * this.random();
-    v[o + 8] = this.random();
-    v[o + 9] = i % 7 === 0 ? 2 : this.random() < 0.72 ? 0 : 1;
-    return true;
+    const index = Math.min(count - 1, from + Math.floor(pick * Math.max(1, a - from)));
+    return (first + index) * SKIN_SAMPLE;
   }
 
-  /** Draws the torrent at `now` (ms): `share` of the streams (the
-   * governor's), `converge` the charge before completion (0–1), `cell` the
-   * figure px per field cell, `px` one device px in figure px. Both contexts
-   * are in figure space and composite additively. */
-  draw(
-    back: CanvasRenderingContext2D,
-    front: CanvasRenderingContext2D,
+  /** Where a cell comes from (or goes to), out in the air. */
+  private origin(i: number, key: number, tx: number, ty: number, wave: boolean, m: number) {
+    const big = i < this.large;
+    const cx = this.width / 2;
+    const cy = Math.min(this.height * 0.8, Math.max(this.height * 0.22, ty));
+    const dx = tx - cx;
+    const dy = ty - cy;
+    // Outward from the body's axis, widely spread; anywhere for the wave
+    // and for the middle of the chest.
+    const angle =
+      wave || Math.hypot(dx, dy) < 24
+        ? hash3(i, key, 21) * 6.2832
+        : Math.atan2(dy, dx) + (hash3(i, key, 21) - 0.5) * 2.4;
+    // (The wave from a ring close round the figure: seen whole, closing.)
+    const reach = wave
+      ? 190 + 150 * hash3(i, key, 22)
+      : this.slots[i * SLOT + 9]
+        ? 420 + 150 * hash3(i, key, 22)
+        : (big ? 170 : 110) + 220 * hash3(i, key, 22);
+    this.memo[m + 3] = tx + Math.cos(angle) * reach;
+    this.memo[m + 4] = ty + Math.sin(angle) * reach;
+  }
+
+  /** The slot's flight at clock x into the memo; false: none. */
+  private flight(
+    i: number,
+    wave: boolean,
     field: SkinField,
-    frame: SkinFrame,
-    cell: number,
-    now: number,
-    px: number,
-    share = 1,
-    converge = 0,
+    timeline: SkinTimeline | null,
+    x: number,
   ) {
-    const v = this.streams;
-    const pose = this.pose;
-    const keep = Math.floor(this.count * (share < 0 ? 0 : share > 1 ? 1 : share));
-    let live = 0;
-    for (let i = 0; i < this.count; i += 1) {
-      const o = i * STREAM;
-      const q = i * POSE;
-      pose[q + POSE - 1] = 0;
-      let age = this.born[i] < 0 ? -1 : now - this.born[i];
-      if (age < 0 || age >= v[o + 4]) {
-        // Landed (or never flown): the next flight, staggered at first.
-        if (i >= keep || !this.launch(i, field, frame, cell, converge)) {
-          this.born[i] = -1;
-          continue;
-        }
-        this.born[i] = this.born[i] < 0 ? now - this.random() * v[o + 4] * 0.9 : now;
-        age = now - this.born[i];
-      }
-      const p = age / v[o + 4];
-      const dx = v[o + 2] - v[o];
-      const dy = v[o + 3] - v[o + 1];
-      const length = Math.hypot(dx, dy) || 1;
-      const nx = -dy / length;
-      const ny = dx / length;
-      const trail = v[o + 6] === 0 ? 0.26 : 0.17;
-      for (let k = 0; k < TRAIL; k += 1) {
-        const u = Math.max(0, p - (trail * (TRAIL - 1 - k)) / (TRAIL - 1));
-        // Fast off the mark, slowing into the surface.
-        const e = 1 - (1 - u) * (1 - u);
-        const swell = Math.sin(Math.PI * u);
-        const off =
-          swell * v[o + 5] + Math.sin(u * v[o + 7] * 6.2832 + v[o + 8] * 6.2832) * v[o + 6] * swell;
-        pose[q + k * 2] = v[o] + dx * e + nx * off;
-        pose[q + k * 2 + 1] = v[o + 1] + dy * e + ny * off;
-      }
-      // Present from its first step until the surface takes it in.
-      pose[q + POSE - 1] = Math.min(1, p * 5) * (p > 0.9 ? (1 - p) * 10 : 1) + 0.001;
-      live += 1;
+    const s = this.slots;
+    const o = i * SLOT;
+    const big = i < this.large;
+    const clock = timeline ? timeline.cells : SKIN_RETRACT_CELLS;
+    const [low, high] = big ? clock.large : clock.fine;
+    const life = low + (high - low) * s[o];
+    const absorb = clock.absorb[big ? 1 : 0];
+    const gap = life * (big ? 0.3 + 0.5 * s[o + 1] : 0.08 + 0.14 * s[o + 1]);
+    const period = life + absorb + gap;
+    const key = wave ? 0 : Math.floor((x - s[o + 2] * period) / period);
+    const lane = i * 2 + (wave ? 1 : 0);
+    const m = lane * MEMO;
+    const memo = this.memo;
+    if (this.memoKey[lane] === key) return memo[m] > 0;
+    this.memoKey[lane] = key;
+    memo[m] = 0;
+    const cell = this.cell;
+    const samples = field.samples;
+    const most = (head: boolean) => {
+      const count = head ? field.headSamples : field.bodySamples;
+      const first = head ? field.bodySamples : 0;
+      return count ? samples[(first + count - 1) * SKIN_SAMPLE + 2] : -1;
+    };
+    if (wave) {
+      // (Four specks in five join it, and two plates in five; a retract
+      // has none.)
+      if (!timeline || i % 5 > (big ? 1 : 3)) return false;
+      // The last wave: one landing each, anywhere on the armour.
+      const [from, to] = timeline.cells.wave;
+      const land = from + (to - from) * hash3(i, 31, 3);
+      const total = field.bodySamples + field.headSamples;
+      if (!total) return false;
+      const at = Math.min(total - 1, Math.floor(hash3(i, 32, 3) * total)) * SKIN_SAMPLE;
+      memo[m + 1] = samples[at] * cell;
+      memo[m + 2] = samples[at + 1] * cell;
+      this.origin(i, 0, memo[m + 1], memo[m + 2], true, m);
+      // (They form together and hang in the air before they close.)
+      memo[m + 5] = land - (clock.fine[0] + clock.fine[1]) * 0.62;
+      memo[m + 6] = land;
+      // (All of it over before the light.)
+      memo[m + 7] = Math.min(absorb, (timeline.light - land) * 0.8);
+      memo[m] = CELL_SMALL;
+      return true;
     }
-    this.live = live;
-    if (!live) return;
-    const strong = frame.alpha > 0 ? frame.alpha : 1;
-    back.lineCap = front.lineCap = "round";
-    back.lineJoin = front.lineJoin = "round";
-    // The trails, a tone at a time: each path stroked wide and faint (its
-    // glow), then narrow and bright; the great arcs thicker, half behind.
-    const unit = Math.max(1, px);
-    for (let tone = 0; tone < 3; tone += 1)
-      for (let pass = 0; pass < 3; pass += 1) {
-        // 0: the streams; 1: the arcs in front; 2: the arcs behind.
-        const context = pass === 2 ? back : front;
-        let any = false;
-        context.beginPath();
-        for (let i = 0; i < this.count; i += 1) {
-          const q = i * POSE;
-          if (pose[q + POSE - 1] <= 0 || v[i * STREAM + 9] !== tone) continue;
-          const arc = i % SKIN_TORRENT_ARC === 0;
-          if (arc !== pass > 0 || (arc && v[i * STREAM + 5] < 0 !== (pass === 2))) continue;
-          context.moveTo(pose[q], pose[q + 1]);
-          for (let k = 1; k < TRAIL; k += 1) context.lineTo(pose[q + k * 2], pose[q + k * 2 + 1]);
-          any = true;
+    const start = s[o + 2] * period + key * period;
+    if (timeline) {
+      // Landing where the lip will be as the cell is taken in.
+      const lip = start + life + CELL_LEAD * absorb;
+      const body =
+        lip > timeline.body[0] ? bodyFront(spanOf(lip, timeline.body), timeline.ease) : -1;
+      const crown = lip > timeline.head[0] ? headFront(spanOf(lip, timeline.head)) : -1;
+      const bodyOn = body >= 0 && body <= most(false);
+      const crownOn = crown >= 0 && crown <= most(true);
+      if (!bodyOn && !crownOn) return false;
+      const head = crownOn && (!bodyOn || hash3(i, key, 12) < 0.5);
+      const at = this.sampleAt(field, head, head ? crown : body, hash3(i, key, 13));
+      if (at < 0) return false;
+      memo[m + 1] = samples[at] * cell;
+      memo[m + 2] = samples[at + 1] * cell;
+      this.origin(i, key, memo[m + 1], memo[m + 2], false, m);
+      // …and landing when the lip is in fact due at that very cell.
+      const due = skinReach(timeline, samples[at + 2], head) - CELL_LEAD * absorb;
+      memo[m + 5] = start;
+      memo[m + 6] = Math.min(start + life + gap, Math.max(start + life * 0.6, due));
+      memo[m + 7] = absorb;
+      memo[m] = head ? CELL_SMALL : 1;
+    } else {
+      // The retract: shed where the receding lip then is.
+      const lip = start + 0.4 * absorb;
+      const body = lip > SKIN_RETRACT.body[0] ? retractBody(lip) : -1;
+      const crown = retractHead(lip);
+      const bodyOn = body >= 0 && body <= most(false);
+      const crownOn = crown >= 0 && crown <= most(true);
+      if (!bodyOn && !crownOn) return false;
+      const head = crownOn && (!bodyOn || hash3(i, key, 12) < 0.5);
+      const at = this.sampleAt(field, head, head ? crown : body, hash3(i, key, 13));
+      if (at < 0) return false;
+      memo[m + 1] = samples[at] * cell;
+      memo[m + 2] = samples[at + 1] * cell;
+      this.origin(i, key, memo[m + 1], memo[m + 2], false, m);
+      const due = skinRetractReach(samples[at + 2], head) - 0.4 * absorb;
+      // It forms from memo[5], lifts off at memo[6], and has dissolved by
+      // the retract's end however late it was shed.
+      memo[m + 5] = Math.min(start + gap, Math.max(start, due));
+      memo[m + 6] = memo[m + 5] + absorb;
+      memo[m + 7] = Math.min(life, SKIN_RETRACT_MS - 20 - memo[m + 6]);
+      if (memo[m + 7] < 40) return false;
+      memo[m] = head ? CELL_SMALL : 1;
+    }
+    return true;
+  }
+
+  /** A slot's cell at clock x (the timeline's; null: the retract's ms) into
+   * `out` (SKIN_CELL_POSE numbers); false: nothing of it is in the air.
+   * `scale`: CSS px per figure px; `bounds`: the canvas's reach (left, top,
+   * right, bottom), figure px. */
+  poseAt(
+    out: Float32Array,
+    i: number,
+    wave: boolean,
+    field: SkinField,
+    timeline: SkinTimeline | null,
+    x: number,
+    now: number,
+    scale: number,
+    bounds?: ArrayLike<number>,
+  ) {
+    if (timeline ? x >= timeline.light : x >= SKIN_RETRACT_MS || x < 0) return false;
+    if (this.memoFor !== timeline || this.memoField !== field) {
+      this.memoFor = timeline;
+      this.memoField = field;
+      this.memoKey.fill(Number.NaN);
+    }
+    if (!this.flight(i, wave, field, timeline, x)) return false;
+    const s = this.slots;
+    const o = i * SLOT;
+    const big = i < this.large;
+    const m = (i * 2 + (wave ? 1 : 0)) * MEMO;
+    const memo = this.memo;
+    if (x < memo[m + 5]) return false;
+    const clock = timeline ? timeline.cells : SKIN_RETRACT_CELLS;
+    const [low, high] = big ? clock.large : clock.fine;
+    const life = low + (high - low) * s[o];
+    const phase = s[o + 8];
+    // The air's flicker (wall time): now and then a cell dims as it forms.
+    const flicker = hash3(i, Math.floor(now / 70), 41) < 0.4 ? 0.3 : 1;
+    let p = 1;
+    let k = -1;
+    let alpha = 1;
+    if (timeline) {
+      if (x < memo[m + 6]) {
+        p = (x - memo[m + 5]) / (memo[m + 6] - memo[m + 5]);
+        alpha = smooth(p / 0.22) * (p < 0.16 ? flicker : 1);
+      } else {
+        k = (x - memo[m + 6]) / memo[m + 7];
+        if (!(k < 1)) return false;
+      }
+      // The cells' own entrance and exit: none before the scene's matter
+      // is in the air, none at the light.
+      alpha *=
+        smooth(spanOf(x, timeline.cells.from)) * (1 - smooth(spanOf(x, timeline.cells.out)));
+    } else if (x < memo[m + 6]) {
+      k = 1 - (x - memo[m + 5]) / (memo[m + 6] - memo[m + 5]);
+    } else {
+      const u = (x - memo[m + 6]) / memo[m + 7];
+      if (!(u < 1)) return false;
+      p = 1 - u * (memo[m + 7] / life);
+      alpha = (1 - smooth(u)) * (u > 0.7 ? flicker : 1);
+    }
+    if (alpha <= 0.004) return false;
+    const left = 1 - cellEase(p);
+    let sx = memo[m + 3];
+    let sy = memo[m + 4];
+    if (bounds) {
+      // From the canvas's edge at the farthest (it fades in from there).
+      sx = Math.min(bounds[2] + 30, Math.max(bounds[0] - 30, sx));
+      sy = Math.min(bounds[3] + 30, Math.max(bounds[1] - 30, sy));
+    }
+    // The spiral: the way in turns as it shortens (and breathes a little on
+    // wall time); the turn never changes the distance left.
+    const turn = (s[o + 4] + 0.05 * Math.sin(now * 0.0021 + phase)) * left;
+    const cos = Math.cos(turn);
+    const sin = Math.sin(turn);
+    const dx = (sx - memo[m + 1]) * left;
+    const dy = (sy - memo[m + 2]) * left;
+    out[0] = memo[m + 1] + dx * cos - dy * sin;
+    out[1] = memo[m + 2] + dx * sin + dy * cos;
+    const range = big ? SKIN_CELL_SIZE.large : SKIN_CELL_SIZE.fine;
+    const least = (big ? SKIN_CELL_SIZE.largeMin : SKIN_CELL_SIZE.fineMin) / Math.max(0.05, scale);
+    // (Most are small; the wave's specks are the larger ones.)
+    const share = wave && !big ? 0.55 + 0.45 * s[o + 3] : s[o + 3] * s[o + 3];
+    const size = Math.max(least, (range[0] + (range[1] - range[0]) * share) * (big ? memo[m] : 1));
+    // Its size settles: small as it forms, a little large in the air, true
+    // on the surface.
+    out[2] = size * (0.5 + 0.5 * smooth(p / 0.3)) * (1 + 0.16 * left);
+    // No cell meets the canvas's edge while it shows.
+    if (bounds) {
+      alpha *= smooth(
+        (Math.min(out[0] - bounds[0], bounds[2] - out[0], out[1] - bounds[1], bounds[3] - out[1]) -
+          out[2] * 0.6) /
+          (out[2] * 0.5 + 24),
+      );
+      if (alpha <= 0.004) return false;
+    }
+    out[3] = alpha * (big ? 1 : 0.72 + 0.28 * Math.sin(now * 0.009 + phase * 7));
+    out[4] = left > 0 ? s[o + 5] * left * left : 0;
+    out[5] = 1 - 0.42 * left * (0.4 + 0.6 * s[o + 1]);
+    out[6] = k;
+    out[7] = p;
+    return true;
+  }
+
+  /** Draws the cells at clock x (`timeline` null: the retract at x ms).
+   * `now`: wall ms (the glints only); `scale`: CSS px per figure px; `hex`:
+   * the skin's hex cell, figure px; `share`: the governor's; `gain`: the
+   * whole layer's opacity (the call raises it as the skin engages). Both contexts
+   * are in figure space; they are left compositing additively. */
+  draw(
+    back: CellContext,
+    front: CellContext,
+    field: SkinField,
+    timeline: SkinTimeline | null,
+    x: number,
+    now: number,
+    scale: number,
+    hex: number,
+    bounds?: ArrayLike<number>,
+    share = 1,
+    gain = 1,
+  ) {
+    const sheet = this.sheet;
+    this.live = 0;
+    front.globalCompositeOperation = "lighter";
+    back.globalCompositeOperation = "lighter";
+    if (!sheet || gain <= 0.004) return;
+    const keep = share < 0 ? 0 : share > 1 ? 1 : share;
+    const large = Math.floor(this.large * keep);
+    const fine = Math.floor(this.fine * keep);
+    const pose = this.pose;
+    const burst = this.burst;
+    const lanes = timeline ? 2 : 1;
+    let bursts = 0;
+    let live = 0;
+    // The plates: metal, over the scene.
+    front.globalCompositeOperation = "source-over";
+    const plate = SHEET.plate;
+    const plateDraw = plate / (ROOT3 * PLATE_R);
+    for (let i = 0; i < large; i += 1)
+      for (let lane = 0; lane < lanes; lane += 1) {
+        if (!this.poseAt(pose, i, lane === 1, field, timeline, x, now, scale, bounds)) continue;
+        live += 1;
+        const k = pose[6];
+        let width = pose[2] * plateDraw;
+        let alpha = pose[3] * gain;
+        if (k >= 0) {
+          // Taken in: it shrinks into the surface under its own flash.
+          width *= 1 - 0.22 * smooth(k);
+          alpha *= 1 - smooth(k / 0.55);
+          const b = bursts * 4;
+          burst[b] = pose[0];
+          burst[b + 1] = pose[1];
+          burst[b + 2] = pose[2];
+          burst[b + 3] = k;
+          bursts += 1;
         }
-        if (!any) continue;
-        context.strokeStyle = TORRENT_TONES[tone];
-        context.globalAlpha = (pass ? 0.26 : 0.18) * strong;
-        context.lineWidth = (pass ? 7 : 4.5) * unit;
-        context.stroke();
-        context.globalAlpha = (pass ? 0.95 : 0.85) * strong;
-        context.lineWidth = (pass ? 2.8 : 1.7) * unit;
-        context.stroke();
+        if (alpha <= 0.004) continue;
+        front.save();
+        front.translate(pose[0], pose[1]);
+        front.rotate(pose[4]);
+        front.scale(1, pose[5]);
+        front.globalAlpha = alpha;
+        front.drawImage(
+          sheet,
+          this.slots[i * SLOT + 6] * plate,
+          0,
+          plate,
+          plate,
+          -width / 2,
+          -width / 2,
+          width,
+          width,
+        );
+        front.restore();
       }
-    // The heads: white-hot, swelling as the surface takes them.
-    for (let pass = 0; pass < 2; pass += 1) {
-      const context = pass ? back : front;
-      let any = false;
-      context.beginPath();
-      for (let i = 0; i < this.count; i += 1) {
-        const q = i * POSE;
-        const here = pose[q + POSE - 1];
-        if (here <= 0) continue;
-        const arc = i % SKIN_TORRENT_ARC === 0;
-        if ((arc && v[i * STREAM + 5] < 0) !== (pass === 1)) continue;
-        const size = (arc ? 5 : 3 + 1.8 * v[i * STREAM + 8]) * unit * (0.5 + 0.5 * here);
-        const h = q + (TRAIL - 1) * 2;
-        context.rect(pose[h] - size / 2, pose[h + 1] - size / 2, size, size);
-        any = true;
+    front.globalCompositeOperation = "lighter";
+    back.globalCompositeOperation = "lighter";
+    // The plates' absorption: the rim's flash, and seven micro-cells that
+    // spread onto the skin's own lattice and click out.
+    const flashDraw = SHEET.flash / (ROOT3 * FLASH_R);
+    const microDraw = SHEET.micro / (ROOT3 * MICRO_R);
+    const row = hex * ROOT3;
+    for (let n = 0; n < bursts; n += 1) {
+      const b = n * 4;
+      const bx = burst[b];
+      const by = burst[b + 1];
+      const size = burst[b + 2];
+      const k = burst[b + 3];
+      const ring = size * (1 + 0.24 * k) * flashDraw;
+      front.globalAlpha = 0.9 * Math.pow(1 - k, 1.5) * gain;
+      front.drawImage(
+        sheet,
+        0,
+        plate,
+        SHEET.flash,
+        SHEET.flash,
+        bx - ring / 2,
+        by - ring / 2,
+        ring,
+        ring,
+      );
+      // The nearest centre of the shader's lattice (its two offset grids).
+      const ax = (Math.floor(bx / hex) + 0.5) * hex;
+      const ay = (Math.floor(by / row) + 0.5) * row;
+      const ox = Math.round(bx / hex) * hex;
+      const oy = Math.round(by / row) * row;
+      const first = Math.hypot(bx - ax, by - ay) < Math.hypot(bx - ox, by - oy);
+      const gx = first ? ax : ox;
+      const gy = first ? ay : oy;
+      const set = smooth(k);
+      const from = size * 0.36;
+      const width = (from + (hex - from) * set) * microDraw;
+      for (let j = 0; j < 7; j += 1) {
+        const light = smooth(k / 0.22) * (1 - smooth((k - (0.36 + 0.05 * j)) / 0.3));
+        if (light <= 0.01) continue;
+        const angle = ((j - 1) * Math.PI) / 3;
+        const ux = j ? Math.cos(angle) : 0;
+        const uy = j ? Math.sin(angle) : 0;
+        const mx = bx + ux * from + (gx + ux * hex - (bx + ux * from)) * set;
+        const my = by + uy * from + (gy + uy * hex - (by + uy * from)) * set;
+        front.globalAlpha = light * gain;
+        front.drawImage(
+          sheet,
+          SHEET.flash,
+          plate,
+          SHEET.micro,
+          SHEET.micro,
+          mx - width / 2,
+          my - width / 2,
+          width,
+          width,
+        );
       }
-      if (!any) continue;
-      context.fillStyle = "rgb(246 252 255)";
-      context.globalAlpha = 0.95 * strong;
-      context.fill();
+    }
+    // The specks: one sprite each, a glint; a small flash as each is taken.
+    const speck = SHEET.speck;
+    const speckDraw = speck / (ROOT3 * SPECK_R);
+    const sixth = Math.PI / 3;
+    for (let n = 0; n < fine; n += 1) {
+      const i = this.large + n;
+      const o = i * SLOT;
+      const context = this.slots[o + 7] ? back : front;
+      for (let lane = 0; lane < lanes; lane += 1) {
+        if (!this.poseAt(pose, i, lane === 1, field, timeline, x, now, scale, bounds)) continue;
+        live += 1;
+        const k = pose[6];
+        let size = pose[2];
+        let alpha = pose[3] * gain;
+        if (k >= 0) {
+          const ring = hex * (1.1 + 0.9 * k) * flashDraw;
+          context.globalAlpha = 0.7 * (1 - k) * (1 - k) * gain;
+          context.drawImage(
+            sheet,
+            0,
+            plate,
+            SHEET.flash,
+            SHEET.flash,
+            pose[0] - ring / 2,
+            pose[1] - ring / 2,
+            ring,
+            ring,
+          );
+          size += (hex - size) * smooth(k);
+          alpha *= 1 - k;
+        }
+        const turn = pose[4] - Math.floor(pose[4] / sixth) * sixth;
+        const width = size * speckDraw;
+        context.globalAlpha = alpha;
+        context.drawImage(
+          sheet,
+          Math.min(SHEET.turns - 1, Math.floor((turn / sixth) * SHEET.turns)) * speck,
+          plate + SHEET.flash + this.slots[o + 6] * speck,
+          speck,
+          speck,
+          pose[0] - width / 2,
+          pose[1] - width / 2,
+          width,
+          width,
+        );
+      }
     }
     back.globalAlpha = 1;
     front.globalAlpha = 1;
+    this.live = live;
   }
 }
 
@@ -987,6 +1454,11 @@ export class SkinRenderer {
     if (this.canvas.height !== height) this.canvas.height = height;
   }
 
+  /** The hex cells' width, figure px (the loose cells merge into it). */
+  get hex() {
+    return Math.max(8.5, 4 / Math.max(0.1, this.scale));
+  }
+
   render(frame: SkinFrame, seconds: number, base01: number) {
     const gl = this.gl;
     if (this.lost) return;
@@ -1002,7 +1474,7 @@ export class SkinRenderer {
     gl.uniform1f(this.uniforms.uAlpha, frame.alpha);
     gl.uniform1f(this.uniforms.uBase01, this.hasBase ? base01 : 0);
     // Cells of four backing px across at the least, 8.5 figure px.
-    gl.uniform1f(this.uniforms.uHex, Math.max(8.5, 4 / Math.max(0.1, this.scale)));
+    gl.uniform1f(this.uniforms.uHex, this.hex);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 

@@ -4,7 +4,8 @@
 // scripts/build-rexonance-skin.mjs) — the bake and its order (torso, limbs,
 // hands and feet, the helmet last, the face closing), the two clocks (never
 // stepped, scrubbable, the classic engines whole under it before it fades),
-// the droplets at the front only, and the device budget.
+// the droplets at the front only, the cells taken in from the air, and the
+// device budget.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
@@ -53,16 +54,21 @@ import {
   SKIN_RETRACT_PULL,
   SKIN_SAMPLE,
   SKIN_SCROLL,
-  SKIN_TORRENT_ARC,
-  SKIN_TORRENT_SHARE,
+  SKIN_CELL_POSE,
+  SKIN_CELL_SHARE,
+  SKIN_CELL_SIZE,
+  SKIN_RETRACT_CELLS,
   SKIN_WHOLE,
-  SkinTorrent,
+  SkinCells,
+  buildSkinCellSheet,
+  cellEase,
   createSkinFrame,
   drawSkinDroplets,
   skinBudget,
   skinFrame,
   skinReach,
   skinRetractFrame,
+  skinRetractReach,
   skinSamples,
 } from "../src/lib/rexonance-suit-skin.ts";
 import {
@@ -841,176 +847,541 @@ test("the marks the bake seeds from are the suit's own", () => {
   for (const [, , delay] of input.satellites) assert.ok(delay > 0 && delay < 0.5);
 });
 
-test("the torrent: streams from the reactor and the driver land just ahead of the front, converge on the charge, and run home on a retract", () => {
-  const device = (coarse, width, height, cores = 8) => ({
-    matchMedia: (query) => ({ matches: query.includes("coarse") ? coarse : false }),
-    navigator: { hardwareConcurrency: cores },
-    innerWidth: width,
-    innerHeight: height,
-  });
-  const desktop = skinBudget(device(false, 1440, 900));
-  const tablet = skinBudget(device(true, 820, 1180));
-  const phone = skinBudget(device(true, 390, 844));
-  const low = skinBudget(device(true, 390, 844, 4));
-  // Budgeted per device; the weakest still reads as a torrent, and the
-  // governor sheds it by shares, never to nothing.
-  assert.ok(desktop.torrent > tablet.torrent && tablet.torrent > phone.torrent);
-  assert.ok(phone.torrent > low.torrent && low.torrent >= 100 && desktop.torrent <= 480);
-  assert.equal(SKIN_TORRENT_SHARE[0], 1);
-  assert.deepEqual([...SKIN_TORRENT_SHARE].sort((a, b) => b - a), [...SKIN_TORRENT_SHARE]);
-  assert.ok(SKIN_TORRENT_SHARE.at(-1) >= 0.4);
-  assert.equal(SKIN_TORRENT_SHARE.length, SKIN_QUALITY.length);
-  // Reduced motion has no skin, so no torrent.
+/* The cells (owner, 2026-11-11: the streams were 「気持ち悪い」; the matter
+   is taken in from the air as hexagonal cells, large and fine). */
+const cellDevice = (coarse, width, height, cores = 8) => ({
+  matchMedia: (query) => ({ matches: query.includes("coarse") ? coarse : false }),
+  navigator: { hardwareConcurrency: cores },
+  innerWidth: width,
+  innerHeight: height,
+});
+const cellRgba = new Uint8ClampedArray(W * H * 4);
+for (let i = 0; i < W * H; i += 1)
+  cellRgba.set([bake.texture[i * 3], bake.texture[i * 3 + 1], bake.texture[i * 3 + 2], 255], i * 4);
+const CELL = REXONANCE_SUIT_SIZE.width / W;
+const FIGURE = [REXONANCE_SUIT_SIZE.width, REXONANCE_SUIT_SIZE.height];
+/** A phone's entry: CSS px per figure px. */
+const PHONE_SCALE = 0.44;
+const HEX = 9.1;
+const cellAt = (x, y) =>
+  Math.min(H - 1, Math.max(0, Math.floor(y / CELL))) * W +
+  Math.min(W - 1, Math.max(0, Math.floor(x / CELL)));
+/** A context that can only draw sprites: any path or stroke throws. */
+const spriteContext = () => {
+  const calls = [];
+  let depth = 0;
+  const never = (name) => () => {
+    throw new Error(`${name}: the cells draw sprites only`);
+  };
+  const context = {
+    calls,
+    globalAlpha: 1,
+    globalCompositeOperation: "source-over",
+    drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh) {
+      assert.ok(Number.isFinite(dx + dy + dw + dh) && dw > 0 && dh > 0);
+      calls.push({ sx, sy, sw, sh, dx, dy, dw, dh, alpha: context.globalAlpha, mode: context.globalCompositeOperation });
+    },
+    save() {
+      depth += 1;
+    },
+    restore() {
+      depth -= 1;
+      assert.ok(depth >= 0);
+    },
+    translate() {},
+    rotate() {},
+    scale() {},
+    get depth() {
+      return depth;
+    },
+  };
+  for (const name of ["beginPath", "moveTo", "lineTo", "arc", "rect", "stroke", "fill", "fillRect", "strokeRect", "quadraticCurveTo", "bezierCurveTo"])
+    context[name] = never(name);
+  return context;
+};
+const SHEET = { sheet: true };
+
+test("the cells: budgeted per device in two sizes, shed by the governor, none under reduced motion", () => {
+  const desktop = skinBudget(cellDevice(false, 1440, 900));
+  const tablet = skinBudget(cellDevice(true, 820, 1180));
+  const phone = skinBudget(cellDevice(true, 390, 844));
+  const low = skinBudget(cellDevice(true, 390, 844, 4));
+  for (const key of ["large", "fine"]) {
+    assert.ok(desktop[key] > tablet[key] && tablet[key] > phone[key] && phone[key] > low[key], key);
+    for (const budget of [desktop, tablet, phone, low])
+      assert.ok(budget.fine >= budget.large * 8, "many fine cells to each large one");
+  }
+  assert.deepEqual([phone.large, phone.fine], [25, 220]);
+  assert.ok(low.large >= 10 && low.fine >= 100 && desktop.large <= 48 && desktop.fine <= 420);
+  assert.equal(SKIN_CELL_SHARE[0], 1);
+  assert.deepEqual([...SKIN_CELL_SHARE].sort((a, b) => b - a), [...SKIN_CELL_SHARE]);
+  assert.ok(SKIN_CELL_SHARE.at(-1) >= 0.4);
+  assert.equal(SKIN_CELL_SHARE.length, SKIN_QUALITY.length);
   assert.equal(
     skinBudget({ matchMedia: (query) => ({ matches: query.includes("reduced-motion") }) }),
     null,
   );
+  // Large: 18 – 40 CSS px on a phone's call; fine: 2 – 6.
+  assert.ok(SKIN_CELL_SIZE.large[0] * PHONE_SCALE >= 18 && SKIN_CELL_SIZE.large[1] * PHONE_SCALE <= 41);
+  assert.ok(SKIN_CELL_SIZE.fine[0] * PHONE_SCALE >= 1.9 && SKIN_CELL_SIZE.fine[1] * PHONE_SCALE <= 6);
+  assert.ok(SKIN_CELL_SIZE.fineMin >= 2 && SKIN_CELL_SIZE.largeMin >= 16);
+  const field = skinSamples(cellRgba, W, H, phone.samples);
+  const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+  const [back, front] = [spriteContext(), spriteContext()];
+  cells.draw(back, front, field, SKIN_ENTRY, 900, 5000, PHONE_SCALE, HEX);
+  assert.ok(cells.live > (phone.large + phone.fine) * 0.35, `in the air: ${cells.live}`);
+  const shed = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+  shed.draw(spriteContext(), spriteContext(), field, SKIN_ENTRY, 900, 5000, PHONE_SCALE, HEX, undefined, SKIN_CELL_SHARE.at(-1));
+  assert.ok(shed.live > 0 && shed.live < cells.live * 0.55);
+  // The layer's own gain (the call raises it as the skin engages: a skin
+  // that is ready late never pops its cells in mid-flight).
+  const [dimBack, dimFront] = [spriteContext(), spriteContext()];
+  cells.draw(dimBack, dimFront, field, SKIN_ENTRY, 900, 5000, PHONE_SCALE, HEX, undefined, 1, 0.5);
+  assert.equal(dimFront.calls.length, front.calls.length);
+  dimFront.calls.forEach((call, n) => assert.ok(Math.abs(call.alpha - front.calls[n].alpha * 0.5) < 1e-6));
+  const [offBack, offFront] = [spriteContext(), spriteContext()];
+  cells.draw(offBack, offFront, field, SKIN_ENTRY, 900, 5000, PHONE_SCALE, HEX, undefined, 1, 0);
+  assert.equal(offBack.calls.length + offFront.calls.length, 0);
+  // The droplets after it always draw as light.
+  assert.equal(offFront.globalCompositeOperation, "lighter");
+  assert.match(
+    read("src/components/rexonance-saga/rexonance-suit-surge.tsx"),
+    /Math\.min\(1, \(now - engagedAt\) \/ CELLS_IN_MS\),/,
+  );
+  // Without a sheet (no canvas to be had) nothing is drawn and nothing throws.
+  const bare = new SkinCells(phone.large, phone.fine, null, CELL, FIGURE);
+  bare.draw(spriteContext(), spriteContext(), field, SKIN_ENTRY, 900, 5000, PHONE_SCALE, HEX);
+  assert.equal(bare.live, 0);
+});
 
-  const rgba = new Uint8ClampedArray(W * H * 4);
-  for (let i = 0; i < W * H; i += 1)
-    rgba.set([bake.texture[i * 3], bake.texture[i * 3 + 1], bake.texture[i * 3 + 2], 255], i * 4);
-  const field = skinSamples(rgba, W, H, phone.samples);
+test("the cells are sprites from a sheet drawn once: no stroke, no line, no trail in a frame", () => {
+  // The sheet: hexagons only, built through the canvas the caller makes.
+  const built = { paths: 0, points: 0, fills: 0, strokes: 0 };
+  const sheetContext = {
+    beginPath: () => (built.paths += 1),
+    moveTo: () => (built.points += 1),
+    lineTo: () => (built.points += 1),
+    closePath() {},
+    fill: () => (built.fills += 1),
+    stroke: () => (built.strokes += 1),
+    createLinearGradient: () => ({ addColorStop() {} }),
+  };
+  let size = null;
+  const canvas = { getContext: () => sheetContext };
+  assert.equal(
+    buildSkinCellSheet((width, height) => {
+      size = [width, height];
+      return canvas;
+    }),
+    canvas,
+  );
+  assert.ok(size[0] <= 512 && size[1] <= 512, "a small sheet");
+  assert.equal(built.points, built.paths * 6, "every shape on it is a hexagon");
+  assert.ok(built.fills >= 3 + 1 + 24 && built.strokes >= 3 * 9);
+  assert.equal(buildSkinCellSheet(() => null), null);
+
+  const phone = skinBudget(cellDevice(true, 390, 844));
+  const field = skinSamples(cellRgba, W, H, phone.samples);
+  const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+  const seen = { plates: 0, specks: 0, flashes: 0, micros: 0 };
+  for (let t = 150; t < 1980; t += 10) {
+    const [back, front] = [spriteContext(), spriteContext()];
+    // (Any path or stroke call throws.)
+    cells.draw(back, front, field, SKIN_ENTRY, t, 5000 + t, PHONE_SCALE, HEX);
+    assert.equal(front.depth, 0);
+    assert.equal(front.globalAlpha, 1);
+    assert.equal(back.globalAlpha, 1);
+    assert.ok(front.calls.length + back.calls.length <= cells.count * 2 * 2 + phone.large * 2 * 8);
+    for (const call of [...front.calls, ...back.calls]) {
+      assert.ok(call.alpha >= 0 && call.alpha <= 1);
+      if (call.sy === 0) {
+        // A plate: metal over the scene, never added light; on the front.
+        assert.equal(call.sw, 128);
+        assert.equal(call.mode, "source-over");
+        assert.ok(front.calls.includes(call));
+        assert.ok(call.dw * PHONE_SCALE <= 62, "a plate, not a panel");
+        seen.plates += 1;
+      } else {
+        assert.equal(call.mode, "lighter");
+        if (call.sw === 24) {
+          // A speck, never stretched: square, and a few px at most.
+          assert.equal(call.dw, call.dh);
+          assert.ok(call.dw * PHONE_SCALE < 9.5, `a speck (${call.dw * PHONE_SCALE})`);
+          seen.specks += 1;
+        } else if (call.sw === 64) seen.flashes += 1;
+        else {
+          assert.equal(call.sw, 32);
+          seen.micros += 1;
+        }
+      }
+      assert.equal(call.dw, call.dh, "no stretch along the way");
+    }
+  }
+  assert.ok(seen.plates > 0 && seen.specks > seen.plates * 4 && seen.flashes > 0);
+  assert.ok(seen.micros > 0, "a plate breaks into micro-cells as it is taken in");
+
+  const lib = read("src/lib/rexonance-suit-skin.ts");
+  const drawn = lib.slice(lib.indexOf("export class SkinCells"), lib.indexOf("/* ---------------- the shader"));
+  assert.doesNotMatch(drawn, /(context|front|back)\.(stroke|lineTo|moveTo|beginPath|arc|rect|fill|fillRect|strokeRect)\(/);
+  assert.doesNotMatch(drawn, /createLinearGradient|createRadialGradient|shadowBlur|lineWidth/);
+  assert.doesNotMatch(lib, /SkinTorrent|TORRENT|TRAIL\b/);
+  // Nothing is allocated a frame: the typed arrays are the constructor's.
+  const perFrame = drawn.slice(drawn.indexOf("  clear()"));
+  assert.doesNotMatch(perFrame, /new (Float32Array|Float64Array|Array)|\[\.\.\.|\.map\(|\.filter\(/);
+});
+
+/** Every flight of a slot over a clock's run, as lists of poses. */
+const flightsOf = (cells, field, timeline, i, wave, from, to, step, nowOf = (x) => 7000 + x) => {
+  const pose = new Float32Array(SKIN_CELL_POSE);
+  const flights = [];
+  let current = null;
+  for (let x = from; x <= to; x += step) {
+    if (!cells.poseAt(pose, i, wave, field, timeline, x, nowOf(x), PHONE_SCALE)) continue;
+    const entry = { x, at: [pose[0], pose[1]], size: pose[2], alpha: pose[3], turn: pose[4], tilt: pose[5], k: pose[6], p: pose[7] };
+    if (!current || (timeline ? entry.p < current.at(-1).p : entry.k > current.at(-1).k && current.at(-1).k < 0)) {
+      current = [];
+      flights.push(current);
+    }
+    current.push(entry);
+  }
+  return flights;
+};
+
+test("the cells come out of the air all round, only ever inward, and settle flat onto the surface", () => {
+  const phone = skinBudget(cellDevice(true, 390, 844));
+  const field = skinSamples(cellRgba, W, H, phone.samples);
+  const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
   const core = REXONANCE_SUIT_MARKS.core;
-  const belt = REXONANCE_SUIT_MARKS.belt;
-  const context = () => {
-    const calls = { paths: 0, strokes: 0, fills: 0, rects: 0 };
-    return {
-      calls,
-      beginPath() {
-        calls.paths += 1;
-      },
-      moveTo() {},
-      lineTo() {},
-      rect() {
-        calls.rects += 1;
-      },
-      stroke() {
-        calls.strokes += 1;
-      },
-      fill() {
-        calls.fills += 1;
-      },
-    };
-  };
-  const cell = REXONANCE_SUIT_SIZE.width / W;
-  const fieldAt = (x, y) =>
-    bake.field[
-      Math.min(H - 1, Math.max(0, Math.floor(y / cell))) * W +
-        Math.min(W - 1, Math.max(0, Math.floor(x / cell)))
-    ];
-  const near = (x, y, [px, py], reach) => Math.hypot(x - px, y - py) <= reach;
-  const flights = (torrent) => {
-    const list = [];
-    for (let i = 0; i < torrent.count; i += 1)
-      if (torrent.born[i] >= 0) list.push([...torrent.streams.subarray(i * 10, i * 10 + 10)]);
-    return list;
-  };
+  let landed = 0;
+  let wide = 0;
+  let nearCore = 0;
+  const quadrants = [0, 0, 0, 0];
+  for (let i = 0; i < cells.count; i += 3) {
+    for (const flight of flightsOf(cells, field, SKIN_ENTRY, i, false, 0, 1975, 4)) {
+      const last = flight.at(-1);
+      if (last.k < 0) continue;
+      landed += 1;
+      const target = last.at;
+      const air = flight.filter((pose) => pose.k < 0);
+      if (air.length < 4) continue;
+      // Inward only: the way left to its landing never grows.
+      let left = Infinity;
+      for (const pose of air) {
+        const d = Math.hypot(pose.at[0] - target[0], pose.at[1] - target[1]);
+        assert.ok(d <= left + 1e-3, `slot ${i}: ${d} after ${left}`);
+        left = d;
+      }
+      // Out of the air, not out of the reactor: it first shows far from its
+      // landing, faint, and well away from the reactor unless it lands there.
+      const first = air[0];
+      const reach = Math.hypot(first.at[0] - target[0], first.at[1] - target[1]);
+      if (first.p < 0.1) {
+        assert.ok(reach > 70, `slot ${i}: first seen ${reach} from its landing`);
+        assert.ok(first.alpha < 0.5, "it fades in");
+        if (reach > 200) wide += 1;
+        if (Math.hypot(first.at[0] - core[0], first.at[1] - core[1]) < 60) nearCore += 1;
+        quadrants[(first.at[0] > FIGURE[0] / 2 ? 1 : 0) + (first.at[1] > FIGURE[1] / 2 ? 2 : 0)] += 1;
+      }
+      // Slow out of the air, quickening onto the surface (no constant crawl).
+      const speed = (a, b) => Math.hypot(b.at[0] - a.at[0], b.at[1] - a.at[1]) / (b.x - a.x);
+      const third = Math.floor(air.length / 3);
+      if (third >= 2) assert.ok(speed(air.at(-3), air.at(-1)) > speed(air[third - 1], air[third + 1]));
+      // Its turn and its tilt settle: flat and pointy-top (the shader's
+      // cells) by the time it lands; its size its own.
+      assert.ok(Math.abs(air.at(-1).turn) < 0.12 && air.at(-1).tilt > 0.94);
+      assert.equal(last.turn, 0);
+      assert.equal(last.tilt, 1);
+      // Never a streak: frame to frame it moves a few px, and it is one sprite.
+      for (let n = 1; n < air.length; n += 1) {
+        const stride = Math.hypot(air[n].at[0] - air[n - 1].at[0], air[n].at[1] - air[n - 1].at[1]);
+        assert.ok(stride * PHONE_SCALE < 12, `slot ${i}: ${stride} figure px in 4 ms`);
+      }
+      // Size: plates 18 – 46 CSS px in the air on a phone (the helmet's
+      // smaller, never under 16), specks 2 – 6.
+      for (const pose of air.filter((entry) => entry.p > 0.3)) {
+        const css = pose.size * PHONE_SCALE;
+        if (i < cells.large) assert.ok(css >= 15.9 && css <= 47, `plate ${css}`);
+        else assert.ok(css >= 1.95 && css <= 6, `speck ${css}`);
+      }
+    }
+  }
+  assert.ok(landed > 60, `landings: ${landed}`);
+  assert.ok(wide > landed * 0.25, "many from far out");
+  assert.ok(nearCore < landed * 0.03, "not emitted from the reactor");
+  for (const count of quadrants) assert.ok(count > landed * 0.08, `all round: ${quadrants}`);
+  // The way in itself: monotone, slow first, under half a turn of spiral.
+  let before = -1;
+  for (let p = 0; p <= 1.0001; p += 0.01) {
+    assert.ok(cellEase(p) > before);
+    before = cellEase(p);
+  }
+  assert.equal(cellEase(0), 0);
+  assert.ok(Math.abs(cellEase(1) - 1) < 1e-9);
+  assert.ok(cellEase(0.5) < 0.3, "it lingers in the air");
+  // Wall time only makes them glint: the place is the clock's alone.
+  const pose = new Float32Array(SKIN_CELL_POSE);
+  const other = new Float32Array(SKIN_CELL_POSE);
+  let compared = 0;
+  for (let i = 0; i < cells.count; i += 1) {
+    if (!cells.poseAt(pose, i, false, field, SKIN_ENTRY, 900, 1000, PHONE_SCALE)) continue;
+    if (!cells.poseAt(other, i, false, field, SKIN_ENTRY, 900, 91000, PHONE_SCALE)) continue;
+    assert.ok(Math.hypot(pose[0] - other[0], pose[1] - other[1]) * PHONE_SCALE < 12);
+    assert.equal(pose[2], other[2]);
+    compared += 1;
+  }
+  assert.ok(compared > 20);
+  // From the canvas's edge at the farthest (some from just off screen),
+  // and none shows where it would be cut by that edge.
+  const bounds = [-200, -100, 771, 1140];
+  let edged = 0;
+  for (let i = 0; i < cells.count; i += 1)
+    for (let x = 200; x < 1900; x += 50)
+      if (cells.poseAt(pose, i, false, field, SKIN_ENTRY, x, 0, PHONE_SCALE, bounds)) {
+        const inside = Math.min(pose[0] - bounds[0], bounds[2] - pose[0], pose[1] - bounds[1], bounds[3] - pose[1]);
+        assert.ok(inside > 0, "nothing shows past the edge");
+        if (inside < pose[2] / 2) assert.ok(pose[3] < 0.2, `faint at the edge (${pose[3]})`);
+        if (inside < 60) edged += 1;
+      }
+  assert.ok(edged > 0, "some come in from the edge");
+});
 
-  // Nothing flies before the front leaves the reactor, or over a whole suit.
-  {
-    const torrent = new SkinTorrent(phone.torrent, core, belt);
-    const [back, front] = [context(), context()];
-    torrent.draw(back, front, field, skinFrame(createSkinFrame(), SKIN_ENTRY, 100), cell, 1000, 1);
-    assert.equal(torrent.live, 0);
-    torrent.draw(back, front, field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1960), cell, 1016, 1);
-    assert.equal(torrent.live, 0);
-    assert.equal(front.calls.strokes + back.calls.strokes + front.calls.fills, 0);
-  }
-  // Growing: every stream is in flight, from the reactor's disc or along the
-  // driver, to a cell of the armour at or just ahead of the lip.
-  {
-    const torrent = new SkinTorrent(phone.torrent, core, belt);
-    const [back, front] = [context(), context()];
-    const frame = skinFrame(createSkinFrame(), SKIN_ENTRY, 800);
-    assert.ok(frame.body > 0.3 && frame.body < 0.9 && frame.head === 0);
-    torrent.draw(back, front, field, frame, cell, 5000, 1);
-    assert.equal(torrent.live, phone.torrent);
-    let fromBelt = 0;
-    for (const [sx, sy, tx, ty, life] of flights(torrent)) {
-      const driver = near(sx, sy, belt, 50);
-      assert.ok(driver || near(sx, sy, core, 28), "born at the reactor or the driver");
-      if (driver && !near(sx, sy, core, 28)) fromBelt += 1;
-      const at = fieldAt(tx, ty);
-      assert.ok(at >= 0, "it lands on the armour");
-      assert.ok(
-        at > frame.body - 2 * SKIN_BAND && at < frame.body + 5 * SKIN_BAND,
-        `at the front (${at} for ${frame.body})`,
-      );
-      assert.ok(life > 300 && life < 1100, "fast");
+for (const [name, timeline, step] of [
+  ["entry", SKIN_ENTRY, 4],
+  ["scroll", SKIN_SCROLL, 0.0004],
+]) {
+  test(`${name}: each cell lands just ahead of the front and is taken in as the lip reaches it — torso first, the helmet last`, () => {
+    const phone = skinBudget(cellDevice(true, 390, 844));
+    const field = skinSamples(cellRgba, W, H, phone.samples);
+    const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+    const absorbMost = timeline.cells.absorb[1];
+    // (The lip has crossed the whole body here; the bands' flush follows.)
+    const bodyDone = skinReach(timeline, 1);
+    let landings = 0;
+    let onTime = 0;
+    let headFirst = Infinity;
+    const early = [];
+    const late = [];
+    for (let i = 0; i < cells.count; i += 2) {
+      for (const flight of flightsOf(cells, field, timeline, i, false, 0, timeline.light, step)) {
+        const landing = flight.find((pose) => pose.k >= 0);
+        if (!landing) continue;
+        landings += 1;
+        const at = cellAt(landing.at[0], landing.at[1]);
+        const value = bake.field[at];
+        assert.ok(value >= 0, "it lands on the armour");
+        const head = bake.texture[at * 3 + 2] === 255;
+        const lip = skinReach(timeline, value, head);
+        // The lip is not there yet as it lands, and arrives while it is
+        // being taken in.
+        if (lip >= landing.x - step * 1.5 && lip <= landing.x + absorbMost) onTime += 1;
+        assert.ok(lip > landing.x - (timeline.body[1] - timeline.body[0]) * 0.12, "never long after the lip");
+        if (head) headFirst = Math.min(headFirst, landing.x);
+        else if (landing.x < timeline.body[0] + (bodyDone - timeline.body[0]) * 0.3) early.push(value);
+        else if (landing.x > timeline.body[0] + (bodyDone - timeline.body[0]) * 0.6) late.push(value);
+        // Absorbed: it stays where it landed, shrinks into the grid, and is gone.
+        const taken = flight.filter((pose) => pose.k >= 0);
+        for (const pose of taken) assert.deepEqual(pose.at, landing.at);
+        assert.ok(taken.at(-1).k <= 1);
+      }
     }
-    assert.ok(fromBelt > phone.torrent * 0.12 && fromBelt < phone.torrent * 0.5);
-    // A few batched paths a frame: glow and core per tone and layer, the heads.
-    assert.ok(front.calls.strokes + back.calls.strokes <= 18);
-    assert.ok(front.calls.fills + back.calls.fills <= 2);
-    assert.equal(front.calls.rects + back.calls.rects, phone.torrent, "a bright head each");
-    assert.ok(back.calls.strokes > 0, "some of the great arcs pass behind the figure");
-    assert.ok(Math.round(phone.torrent / SKIN_TORRENT_ARC) >= 12, "a few large arcs");
-    // The governor's share.
-    const shed = new SkinTorrent(phone.torrent, core, belt);
-    shed.draw(context(), context(), field, frame, cell, 5000, 1, SKIN_TORRENT_SHARE.at(-1));
-    assert.equal(shed.live, Math.floor(phone.torrent * SKIN_TORRENT_SHARE.at(-1)));
-    // A stream that has landed flies again, to the front as it then stands.
-    const later = skinFrame(createSkinFrame(), SKIN_ENTRY, 1100);
-    torrent.draw(back, front, field, later, cell, 5000 + 2000, 1);
-    for (const [, , tx, ty] of flights(torrent)) {
-      const at = fieldAt(tx, ty);
-      assert.ok(at > later.body - 2 * SKIN_BAND, "the new flight follows the front");
+    assert.ok(landings > 120, `landings: ${landings}`);
+    assert.ok(onTime > landings * 0.9, `${onTime} of ${landings} on the lip`);
+    // The order is the front's: the torso's cells first, the limbs' ends
+    // later, the helmet's only once the head's front runs.
+    const meanOf = (list) => list.reduce((sum, value) => sum + value, 0) / list.length;
+    assert.ok(early.length > 10 && late.length > 10);
+    assert.ok(meanOf(early) < 0.5 && meanOf(late) > meanOf(early) + 0.25);
+    assert.ok(headFirst >= timeline.head[0] - absorbMost, `the helmet's first cell at ${headFirst}`);
+    assert.ok(headFirst < timeline.head[1]);
+    // They gather in the air before the front starts, but not before the
+    // scene's own matter is there.
+    const [back, front] = [spriteContext(), spriteContext()];
+    cells.draw(back, front, field, timeline, timeline.cells.from[0], 0, PHONE_SCALE, HEX);
+    assert.equal(cells.live, 0);
+    cells.draw(back, front, field, timeline, timeline.body[0], 0, PHONE_SCALE, HEX);
+    assert.ok(cells.live > 40, "in the air as the front leaves the reactor");
+    assert.ok(timeline.cells.from[1] <= timeline.body[0]);
+  });
+
+  test(`${name}: a last wave from all round lands over the body before the light, and nothing outlives it`, () => {
+    const phone = skinBudget(cellDevice(true, 390, 844));
+    const field = skinSamples(cellRgba, W, H, phone.samples);
+    const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+    const [from, to] = timeline.cells.wave;
+    assert.ok(from > timeline.body[1] && to < timeline.light, "after the body is whole, before the light");
+    let waves = 0;
+    const sides = [0, 0, 0, 0];
+    let headLandings = 0;
+    for (let i = 0; i < cells.count; i += 1) {
+      const flights = flightsOf(cells, field, timeline, i, true, timeline.body[0], timeline.light, step);
+      if (!flights.length) continue;
+      assert.equal(flights.length, 1, "one landing each");
+      const flight = flights[0];
+      const landing = flight.find((pose) => pose.k >= 0);
+      assert.ok(landing, "it lands");
+      assert.ok(landing.x >= from - step && landing.x <= to + step * 1.5);
+      const at = cellAt(landing.at[0], landing.at[1]);
+      assert.ok(bake.field[at] >= 0, "on the body");
+      if (bake.texture[at * 3 + 2] === 255) headLandings += 1;
+      const first = flight[0];
+      let left = Infinity;
+      for (const pose of flight.filter((entry) => entry.k < 0)) {
+        const d = Math.hypot(pose.at[0] - landing.at[0], pose.at[1] - landing.at[1]);
+        assert.ok(d <= left + 1e-3);
+        left = d;
+      }
+      sides[(first.at[0] > landing.at[0] ? 1 : 0) + (first.at[1] > landing.at[1] ? 2 : 0)] += 1;
+      assert.ok(flight.at(-1).x < timeline.light, "over before the light");
+      waves += 1;
+    }
+    assert.ok(waves > cells.count * 0.65 && waves < cells.count * 0.85, `the wave: ${waves}`);
+    for (const count of sides) assert.ok(count > waves * 0.12, `from all round: ${sides}`);
+    assert.ok(headLandings > 0 && headLandings < waves * 0.5, "over the whole body");
+    // Faded out into the light; from the light on, none (no afterburn).
+    const [back, front] = [spriteContext(), spriteContext()];
+    cells.draw(back, front, field, timeline, timeline.cells.out[1], 0, PHONE_SCALE, HEX);
+    for (const call of [...back.calls, ...front.calls]) assert.ok(call.alpha < 0.01);
+    assert.ok(timeline.cells.out[1] <= timeline.light);
+    for (const x of [timeline.light, timeline.light * 1.02, timeline.glow[1], timeline.light * 2]) {
+      const [behind, over] = [spriteContext(), spriteContext()];
+      cells.draw(behind, over, field, timeline, x, 0, PHONE_SCALE, HEX);
+      assert.equal(cells.live, 0);
+      assert.equal(behind.calls.length + over.calls.length, 0);
+    }
+  });
+}
+
+test("the cells keep nothing of their own: a seek, a stop, a scrub either way leave the clock's frame and no more", () => {
+  const phone = skinBudget(cellDevice(true, 390, 844));
+  const field = skinSamples(cellRgba, W, H, phone.samples);
+  const frameAt = (cells, timeline, x) => {
+    const [back, front] = [spriteContext(), spriteContext()];
+    cells.draw(back, front, field, timeline, x, 4242, PHONE_SCALE, HEX);
+    return JSON.stringify([back.calls, front.calls]);
+  };
+  const fresh = () => new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+  // 200 rounds of fast scrubbing — forward, back, seeks, the retract cut in,
+  // clears — then any playhead draws exactly what a new mount would.
+  const cells = fresh();
+  let seed = 12345;
+  const random = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  for (let round = 0; round < 200; round += 1) {
+    const q = random();
+    const kind = round % 5;
+    if (kind === 3) frameAt(cells, null, random() * SKIN_RETRACT_MS * 1.1);
+    else frameAt(cells, SKIN_SCROLL, q);
+    if (kind === 1) cells.clear();
+    if (kind === 1) assert.equal(cells.live, 0);
+    if (round % 20 === 0) {
+      const at = 0.15 + 0.7 * random();
+      assert.equal(frameAt(cells, SKIN_SCROLL, at), frameAt(fresh(), SKIN_SCROLL, at), `round ${round}`);
     }
   }
-  // The charge: called back into the reactor (and the driver) from all round.
-  {
-    const torrent = new SkinTorrent(phone.torrent, core, belt);
-    torrent.draw(context(), context(), field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1900), cell, 9000, 1, 1, 0.8);
-    assert.equal(torrent.live, phone.torrent);
-    let far = 0;
-    for (const [sx, sy, tx, ty, life] of flights(torrent)) {
-      assert.ok(near(tx, ty, core, 1) || near(tx, ty, belt, 1), "into the reactor or the driver");
-      if (!near(sx, sy, core, 180)) far += 1;
-      assert.ok(life < 700);
-    }
-    assert.ok(far > phone.torrent * 0.9);
+  // The scrub back is the same frames: forward to .4 and back from .6.
+  const forward = fresh();
+  const backward = fresh();
+  for (let q = 0.2; q <= 0.4001; q += 0.002) frameAt(forward, SKIN_SCROLL, q);
+  for (let q = 0.6; q >= 0.4; q -= 0.002) frameAt(backward, SKIN_SCROLL, q);
+  assert.equal(frameAt(forward, SKIN_SCROLL, 0.4), frameAt(backward, SKIN_SCROLL, 0.4));
+  // Over a finished suit, before the scene, and past the retract: nothing.
+  for (const [timeline, x] of [
+    [SKIN_SCROLL, 0],
+    [SKIN_SCROLL, 0.95],
+    [SKIN_SCROLL, 1],
+    [SKIN_ENTRY, 0],
+    [SKIN_ENTRY, 2600],
+    [null, SKIN_RETRACT_MS],
+    [null, SKIN_RETRACT_MS + 400],
+    [null, -5],
+  ]) {
+    frameAt(cells, timeline, x);
+    assert.equal(cells.live, 0, `${timeline ? "grow" : "retract"} at ${x}`);
   }
-  // The retract: from the receding lip, home.
-  {
-    const torrent = new SkinTorrent(phone.torrent, core, belt);
-    const frame = skinRetractFrame(createSkinFrame(), 1250);
-    assert.ok(frame.body > 0.3 && frame.body < 1);
-    torrent.draw(context(), context(), field, frame, cell, 9000, 1);
-    assert.ok(torrent.live > 0);
-    for (const [sx, sy, tx, ty] of flights(torrent)) {
-      assert.deepEqual([tx, ty], [...new Float32Array(core)]);
-      const at = fieldAt(sx, sy);
-      assert.ok(at < frame.body + 2 * SKIN_BAND, "from the armour still on");
-    }
-  }
-  // Nothing of it outlives the light (no burn after the flash): the streams
-  // in flight are dropped at the scene's light on both clocks.
+  // Wired on both clocks: the entry's and the scroll's own timelines, the
+  // retract's ms where the suit leaves, the governor's share, the skin's hex.
+  const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
+  assert.equal(surge.match(/grown\.cells\.draw\(/g).length, 2);
+  assert.match(surge, /grown\.lib\.SKIN_ENTRY,\s*t,\s*now,\s*layers\.scale,\s*grown\.renderer\.hex,\s*cellBounds\(layers\),\s*grown\.lib\.SKIN_CELL_SHARE\[level\],/);
+  assert.match(surge, /leaving \? null : grown\.lib\.SKIN_SCROLL,\s*leaving \? leave\.ms : q,\s*now,\s*surfaces\.scale,\s*grown\.renderer\.hex,\s*cellBounds\(surfaces\),/);
+  assert.match(surge, /if \(t >= grown\.lib\.SKIN_ENTRY\.light\) grown\.cells\.clear\(\);/);
+  assert.match(surge, /if \(!leaving && q >= grown\.lib\.SKIN_SCROLL\.light\) grown\.cells\.clear\(\);/);
+  assert.match(surge, /new lib\.SkinCells\(\s*budget\.large,\s*budget\.fine,\s*lib\.buildSkinCellSheet\(/);
+  assert.doesNotMatch(surge, /torrent|Torrent/);
   assert.equal(SKIN_ENTRY.light, REXONANCE_SUIT_LIGHT.from);
   assert.equal(SKIN_SCROLL.light, ASSEMBLY_BEATS.light[0]);
-  {
-    const torrent = new SkinTorrent(phone.torrent, core, belt);
-    torrent.draw(context(), context(), field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1950), cell, 9000, 1, 1, 1);
-    assert.ok(torrent.live > 0);
-    torrent.clear();
-    const [back, front] = [context(), context()];
-    torrent.draw(back, front, field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1990), cell, 9016, 1, 1, 0);
-    assert.equal(torrent.live, 0);
-    assert.equal(back.calls.strokes + front.calls.strokes + back.calls.fills + front.calls.fills, 0);
+});
+
+test("the retract sheds the cells: each forms on the receding lip, lifts off and dissolves outward, gone by its end", () => {
+  const phone = skinBudget(cellDevice(true, 390, 844));
+  const field = skinSamples(cellRgba, W, H, phone.samples);
+  const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
+  // The closed forms are the retract's own fronts.
+  const frame = createSkinFrame();
+  for (const value of [0.05, 0.3, 0.6, 0.9]) {
+    for (const head of [false, true]) {
+      const at = skinRetractReach(value, head);
+      skinRetractFrame(frame, at);
+      assert.ok(Math.abs((head ? frame.head : frame.body) - value) < 0.004, `${head ? "head" : "body"} ${value}`);
+    }
   }
-  const wired = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
-  assert.match(wired, /if \(t >= grown\.lib\.SKIN_ENTRY\.light\) grown\.torrent\.clear\(\);/);
-  assert.match(wired, /if \(!leaving && q >= grown\.lib\.SKIN_SCROLL\.light\) grown\.torrent\.clear\(\);/);
-  // Wired on both clocks, on the surge layer's own two canvases, with the
-  // governor's share and the crescendo's charge; no transform anywhere.
-  const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
-  assert.equal(surge.match(/grown\.torrent\.draw\(/g).length, 2);
-  assert.match(surge, /grown\.lib\.SKIN_TORRENT_SHARE\[level\],\s*made \? made\.lib\.entryCharge\(t, final\) : 0,/);
-  assert.match(surge, /leaving \? 0 : \(pass\?\.charge \?\? 0\),/);
-  assert.match(surge, /new lib\.SkinTorrent\(\s*budget\.torrent,\s*REXONANCE_SUIT_MARKS\.core,\s*REXONANCE_SUIT_MARKS\.belt,\s*\)/);
-  const lib = read("src/lib/rexonance-suit-skin.ts");
-  const drawn = lib.slice(lib.indexOf("export class SkinTorrent"), lib.indexOf("/* ---------------- the shader"));
-  assert.doesNotMatch(drawn, /createLinearGradient|createRadialGradient|shadowBlur|drawImage/);
-  // Nothing is allocated a frame: the typed arrays are the constructor's.
-  const perFrame = drawn.slice(drawn.indexOf("  draw("));
-  assert.doesNotMatch(perFrame, /new (Float32Array|Float64Array|Array)|\[\.\.\.|\.map\(|\.filter\(/);
+  let shed = 0;
+  let fromHead = 0;
+  let bodyFirst = Infinity;
+  for (let i = 0; i < cells.count; i += 2) {
+    for (const flight of flightsOf(cells, field, null, i, false, 0, SKIN_RETRACT_MS + 100, 4)) {
+      const forming = flight.filter((pose) => pose.k >= 0);
+      const air = flight.filter((pose) => pose.k < 0);
+      if (!forming.length || air.length < 3) continue;
+      shed += 1;
+      const source = forming[0].at;
+      const at = cellAt(source[0], source[1]);
+      const value = bake.field[at];
+      assert.ok(value >= 0, "shed from the armour");
+      const head = bake.texture[at * 3 + 2] === 255;
+      if (head) fromHead += 1;
+      else bodyFirst = Math.min(bodyFirst, forming[0].x);
+      // Where the lip is: it forms as the lip passes back over it.
+      const lip = skinRetractReach(value, head);
+      assert.ok(Math.abs(lip - forming[0].x) < 260, `formed at ${forming[0].x}, the lip there at ${lip}`);
+      // It forms out of the grid (the absorption reversed)…
+      assert.ok(forming[0].k > forming.at(-1).k);
+      // …then only ever outward, fast off the surface and slowing, dissolving.
+      let far = -1;
+      for (const pose of air) {
+        const d = Math.hypot(pose.at[0] - source[0], pose.at[1] - source[1]);
+        assert.ok(d >= far - 1e-3);
+        far = d;
+      }
+      assert.ok(far > 12, "it leaves the surface");
+      assert.ok(air.at(-1).alpha < 0.12, "dissolved");
+      assert.ok(flight.at(-1).x < SKIN_RETRACT_MS, "gone by the retract's end");
+    }
+  }
+  assert.ok(shed > 80, `shed: ${shed}`);
+  assert.ok(fromHead > 5, "the helmet sheds too");
+  // The face and the helmet first, the body after (the retract's own order).
+  assert.ok(bodyFirst > SKIN_RETRACT.body[0]);
+  // No wave on the way out, and sprites only.
+  const pose = new Float32Array(SKIN_CELL_POSE);
+  for (let i = 0; i < cells.count; i += 1)
+    assert.equal(cells.poseAt(pose, i, true, field, null, 1200, 0, PHONE_SCALE), false);
+  for (let ms = 0; ms <= SKIN_RETRACT_MS; ms += 40) {
+    const [back, front] = [spriteContext(), spriteContext()];
+    cells.draw(back, front, field, null, ms, 9000 + ms, PHONE_SCALE, HEX);
+    if (ms > 1150 && ms < 1500) assert.ok(cells.live > 20, `shedding at ${ms}: ${cells.live}`);
+  }
+  assert.equal(SKIN_RETRACT_MS, 1600);
+  assert.ok(SKIN_RETRACT_CELLS.large[1] < 900);
+});
+
+test("the crescendo draws no streams and no spokes: its charge is rings and bloom, the matter is the cells", () => {
+  const crescendo = read("src/lib/rexonance-suit-crescendo.ts");
+  assert.doesNotMatch(crescendo, /drawStreams|CRESCENDO_LIMBS|streams:|converge:/);
+  const charge = crescendo.slice(crescendo.indexOf("  private drawCharge("), crescendo.indexOf("  /** The reactor's and the driver's bloom. */"));
+  assert.ok(charge.length > 200);
+  assert.doesNotMatch(charge, /moveTo|lineTo/);
+  assert.match(charge, /back\.arc\(cx, cy, r, 0, Math\.PI \* 2\);/);
 });

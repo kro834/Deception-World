@@ -18,8 +18,8 @@ export const LEAVE_SLACK = 0.012;
 /** Over, the bare body stands this long for the page to move; then the
  * scene is the playhead's again. */
 export const LEAVE_HOLD_MS = 1200;
-/** A playhead that jumps this far in one frame is a seek: streams in flight
- * were aimed at a front that is no longer there. */
+/** A playhead that jumps this far in one frame is a seek: the cells in the
+ * air were the old playhead's. */
 export const SEEK_JUMP = 0.03;
 
 /** `ok`: the page may move on (false: the reader took the playhead). */

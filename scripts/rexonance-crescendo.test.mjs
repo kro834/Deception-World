@@ -10,10 +10,8 @@ import test from "node:test";
 import {
   CRESCENDO_ENTRY_PACE,
   CRESCENDO_FINALE_MS,
-  CRESCENDO_GROUP_LIMB,
   CRESCENDO_GROUP_MS,
   CRESCENDO_LEVELS,
-  CRESCENDO_LIMBS,
   CRESCENDO_PLATE_MS,
   CRESCENDO_SCROLL_CHARGE,
   CRESCENDO_SCROLL_LIGHT,
@@ -65,7 +63,7 @@ test("the budget scales by device, caps the pixel ratio, and reduced motion has 
     [desktop.name, tablet.name, phone.name, low.name, saver.name],
     ["desktop", "tablet", "phone", "low", "low"],
   );
-  for (const key of ["streams", "rays", "converge"]) {
+  for (const key of ["rays"]) {
     assert.ok(desktop[key] > tablet[key], `${key}: desktop over tablet`);
     assert.ok(tablet[key] > phone[key], `${key}: tablet over phone`);
     assert.ok(phone[key] > low[key], `${key}: phone over low`);
@@ -109,11 +107,11 @@ test("each level keeps no more than the one before it", () => {
   for (let level = 1; level < CRESCENDO_LEVELS.length; level += 1) {
     const now = CRESCENDO_LEVELS[level];
     const before = CRESCENDO_LEVELS[level - 1];
-    assert.ok(now.streams <= before.streams && now.rays <= before.rays);
+    assert.ok(now.rays <= before.rays);
     for (const key of ["edges", "echo", "rim"]) assert.ok(!now[key] || before[key], key);
   }
   const last = CRESCENDO_LEVELS.at(-1);
-  assert.deepEqual([last.streams, last.edges, last.echo, last.rim], [0, false, false, false]);
+  assert.deepEqual([last.edges, last.echo, last.rim], [false, false, false]);
 });
 
 test("the completion's envelopes start from nothing, stay continuous and end at nothing", () => {
@@ -162,9 +160,8 @@ test("the completion's envelopes start from nothing, stay continuous and end at 
 test("the entry plays the charge, each plate's flash and the completion on the call's clock", () => {
   const fits = Float32Array.of(900, 1200, 0);
   const windows = Float32Array.of(800, 900, 1000, 1200);
-  const pull = Float32Array.of(0.8, 0.2);
   const frame = createCrescendoFrame(2, 3);
-  const at = (t) => entryCrescendoFrame(frame, t, 5000 + t, fits, windows, 1980, 1, 0, pull);
+  const at = (t) => entryCrescendoFrame(frame, t, 5000 + t, fits, windows, 1980);
   assert.equal(at(850).plates[0], -1);
   assert.equal(at(900).plates[0], 0);
   assert.equal(at(1000).plates[0], 100);
@@ -172,8 +169,6 @@ test("the entry plays the charge, each plate's flash and the completion on the c
   assert.equal(at(1500).plates[2], -1, "a plate with no fit (the driver's) never flashes");
   assert.equal(at(1000).groups[0], 100);
   assert.equal(at(900 + CRESCENDO_GROUP_MS).groups[0], -1);
-  // The streams gather on the limb whose group pulls (legs: limb class 3).
-  assert.equal(at(850).gather[CRESCENDO_GROUP_LIMB[0]], Math.fround(0.8));
   // The charge rises into the light and never falls before it.
   let last = 0;
   for (let t = 1500; t < 1980; t += 5) {
@@ -188,18 +183,17 @@ test("the entry plays the charge, each plate's flash and the completion on the c
   assert.equal(at(2080).finale, 100 * CRESCENDO_ENTRY_PACE);
   // The cover closes 750 ms after the light: by then the impact is spent.
   assert.ok(750 * CRESCENDO_ENTRY_PACE > 960, "the shock shells are done under the cover");
-  // The implosion takes the streams away.
-  assert.equal(entryCrescendoFrame(frame, 2100, 0, fits, windows, 1980, 1, 1, pull).flow, 0);
+  // No streams, no spokes: the frame carries none (the matter is the skin's cells).
+  assert.ok(!("flow" in frame) && !("gather" in frame));
 });
 
 test("the scroll strikes forward only, re-arms backward, ignores seeks, and stays scrubbable", () => {
   const windows = Float32Array.of(0.2, 0.3, 0.4, 0.5);
   const pieces = Float32Array.of(0.2, 0.25, 0.42, 0.5);
-  const pull = new Float32Array(2);
   const clock = new CrescendoScrollClock(windows, pieces);
   const frame = createCrescendoFrame(2, 2);
   let now = 1000;
-  const to = (q, ms = 16) => clock.frame(frame, q, (now += ms), 1, 0, pull);
+  const to = (q, ms = 16) => clock.frame(frame, q, (now += ms));
   to(0.1);
   to(0.24);
   assert.equal(frame.plates[0], -1);
@@ -248,29 +242,13 @@ test("the scroll strikes forward only, re-arms backward, ignores seeks, and stay
 
 test("while the skin grows the armour only the charge and the completion remain", () => {
   const frame = createCrescendoFrame(2, 2);
-  frame.flow = 1;
   frame.groups[0] = 10;
   frame.plates[1] = 10;
   frame.charge = 0.4;
   frame.finale = 12;
   quietCrescendo(frame);
-  assert.deepEqual([frame.flow, [...frame.groups], [...frame.plates]], [0, [-1, -1], [-1, -1]]);
+  assert.deepEqual([[...frame.groups], [...frame.plates]], [[-1, -1], [-1, -1]]);
   assert.deepEqual([frame.charge, frame.finale], [0.4, 12]);
-});
-
-test("the streams wind from the reactor out along every limb", () => {
-  assert.equal(CRESCENDO_LIMBS.length, 6);
-  assert.deepEqual(
-    CRESCENDO_LIMBS.map((limb) => limb[6]),
-    [0, 1, 2, 2, 3, 3],
-  );
-  for (const [x0, y0, x1, y1, w0, w1] of CRESCENDO_LIMBS) {
-    for (const v of [x0, y0, x1, y1]) assert.ok(v > 0 && v < 1);
-    assert.ok(w0 >= w1, "a limb tapers");
-    // Root nearer the reactor (0.498, 0.265) than the tip.
-    assert.ok(Math.hypot(x0 - 0.498, y0 - 0.265) < Math.hypot(x1 - 0.498, y1 - 0.265));
-  }
-  assert.equal(CRESCENDO_GROUP_LIMB.length, 8);
 });
 
 test("the armour's lines come from the art: edges where it changes, a two-tone rim on the silhouette", () => {
