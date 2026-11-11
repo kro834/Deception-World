@@ -72,6 +72,9 @@ function tracePoly(ctx: Ctx | Path2D, poly: readonly Point[], k = 1, dx = 0, dy 
   ctx.closePath();
 }
 
+/** The horns' box in art units: x, y, width, height. */
+const HORN_BOX = [424, 0, 176, 130] as const;
+
 /** Sprites are cut a touch larger than their cells (no hairline seams). */
 const GROW = 1.07;
 function grown(plate: { poly: readonly Point[]; at: Point }): Point[] {
@@ -91,8 +94,6 @@ type Prepared = {
   under: Canvas;
   cape: Canvas;
   horns: Canvas;
-  locked: Canvas;
-  lockedCtx: Ctx;
   atlas: Canvas;
   glowAtlas: Canvas;
   slotW: number;
@@ -103,7 +104,6 @@ type Prepared = {
     solid: boolean;
     baked: 0 | 1 | 2;
   })[];
-  body: Path2D;
   sparkles: { x: number; y: number; phase: number; size: number }[];
   shimmer: Canvas;
   shimmerCtx: Ctx;
@@ -173,11 +173,13 @@ function prepare(art: HTMLImageElement): Prepared {
   const glowBody = layer(glow, body);
   const under = layer(shade, body);
   const cape = layer(pixels, bodyWithHorns, "out");
-  const [horns, hctx] = makeCanvas(w, h);
+  // The horns, cropped to their own box (HORN_BOX, art units).
+  const [hx, hy, hw, hh] = HORN_BOX;
+  const [horns, hctx] = makeCanvas(hw * k, hh * k);
   hctx.beginPath();
-  for (const horn of SUITUP_HORNS) tracePoly(hctx, horn, k);
+  for (const horn of SUITUP_HORNS) tracePoly(hctx, horn, k, -hx * k, -hy * k);
   hctx.clip();
-  hctx.drawImage(source, 0, 0);
+  hctx.drawImage(source, -hx * k, -hy * k);
 
   const alphaAt = ([x, y]: Point) => {
     const px = Math.min(w - 1, Math.max(0, Math.round(x * k)));
@@ -250,8 +252,7 @@ function prepare(art: HTMLImageElement): Prepared {
     if (capeData[i + 2] < 90 || capeData[i] > 140) continue;
     sparkles.push({ x, y, phase: rand() * Math.PI * 2, size: 2 + rand() * 4.5 });
   }
-  const [shimmer, shimmerCtx] = makeCanvas(Math.round(w / 2), Math.round(h / 2));
-  const [locked, lockedCtx] = makeCanvas(w, h);
+  const [shimmer, shimmerCtx] = makeCanvas(Math.round(w / 4), Math.round(h / 4));
   source.width = source.height = 0;
   armourBody.width = armourBody.height = 0;
   glowBody.width = glowBody.height = 0;
@@ -260,8 +261,6 @@ function prepare(art: HTMLImageElement): Prepared {
     under,
     cape,
     horns,
-    locked,
-    lockedCtx,
     atlas,
     glowAtlas,
     slotW,
@@ -271,7 +270,6 @@ function prepare(art: HTMLImageElement): Prepared {
     shimmer,
     shimmerCtx,
     art,
-    body: bodyPath(1, true),
   };
 }
 
@@ -349,17 +347,34 @@ export function mountExtremeSuitup(
   let scale = 1;
   let ox = 0;
   let oy = 0;
+  // A device that cannot keep up draws at 1× for the rest of the play.
+  let dprLimit = Number.POSITIVE_INFINITY;
   const layout = () => {
-    const box = canvas.getBoundingClientRect();
-    cssW = Math.max(1, box.width || window.innerWidth);
-    cssH = Math.max(1, box.height || window.innerHeight);
-    dpr = extremeSuitupDpr(window.devicePixelRatio, coarse);
+    // The canvas covers only the figure's box (and a margin for its light),
+    // not the whole screen: fewer pixels to fill each frame.
+    const box = (canvas.parentElement ?? canvas).getBoundingClientRect();
+    const areaW = Math.max(1, box.width || window.innerWidth);
+    const areaH = Math.max(1, box.height || window.innerHeight);
+    dpr = Math.min(dprLimit, extremeSuitupDpr(window.devicePixelRatio, coarse));
+    const portrait = areaH > areaW;
+    scale = Math.min((areaH * (portrait ? 0.8 : 0.9)) / ART_H, (areaW * 1.02) / ART_W);
+    const fx = (areaW - ART_W * scale) / 2;
+    const fy = (areaH - ART_H * scale) * (portrait ? 0.42 : 0.5);
+    const margin = 24;
+    const x0 = Math.max(0, Math.floor(fx - margin));
+    const y0 = Math.max(0, Math.floor(fy - margin));
+    cssW = Math.min(areaW, Math.ceil(fx + ART_W * scale + margin)) - x0;
+    cssH = Math.min(areaH, Math.ceil(fy + ART_H * scale + margin)) - y0;
+    Object.assign(canvas.style, {
+      left: `${x0}px`,
+      top: `${y0}px`,
+      width: `${cssW}px`,
+      height: `${cssH}px`,
+    });
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
-    const portrait = cssH > cssW;
-    scale = Math.min((cssH * (portrait ? 0.8 : 0.9)) / ART_H, (cssW * 1.02) / ART_W);
-    ox = (cssW - ART_W * scale) / 2;
-    oy = (cssH - ART_H * scale) * (portrait ? 0.42 : 0.5);
+    ox = fx - x0;
+    oy = fy - y0;
   };
   layout();
   let resized = false;
@@ -378,6 +393,7 @@ export function mountExtremeSuitup(
     .then((art) => {
       if (disposed) return;
       prepared = prepare(art);
+      buildDevice(prepared);
       raf = window.requestAnimationFrame(frame);
     })
     .catch(() => {
@@ -387,17 +403,29 @@ export function mountExtremeSuitup(
   let t = 0;
   let last = -1;
   let started = false;
+  let slow = 16;
+  let frames = 0;
   const frame = (now: number) => {
     raf = 0;
     if (disposed || !prepared) return;
     if (playback.state !== "preparing" && playback.state !== "playing") return;
     if (playback.frame(now) === null) return;
-    if (started) t += Math.min(64, Math.max(0, now - last));
+    if (started) {
+      const delta = Math.max(0, now - last);
+      t += Math.min(64, delta);
+      slow = slow * 0.85 + Math.min(100, delta) * 0.15;
+      frames += 1;
+      if (frames > 8 && slow > 26 && dpr > 1 && dprLimit > 1) {
+        dprLimit = 1;
+        resized = true;
+      }
+    }
     started = true;
     last = now;
     if (resized) {
       resized = false;
       layout();
+      buildDevice(prepared);
     }
     draw(prepared, t);
     options.onFrame?.(t);
@@ -406,9 +434,55 @@ export function mountExtremeSuitup(
   };
 
   const base = () => ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy);
+  const blit = () => ctx.setTransform(1, 0, 0, 1, Math.round(dpr * ox), Math.round(dpr * oy));
+
+  /* The layers drawn whole every frame are kept at the screen's own
+     resolution, so a frame blits them 1:1 instead of resampling the art:
+     the build (the undersuit with every locked plate baked in), the cape
+     and the finished art. Rebuilt on a resize. */
+  type Device = { s: number; build: Canvas; bctx: Ctx; cape: Canvas; art: Canvas };
+  let device: Device | null = null;
+  const slotOf = (p: Prepared, slot: number) => {
+    const perRow = Math.floor(p.atlas.width / p.slotW);
+    return [(slot % perRow) * p.slotW, Math.floor(slot / perRow) * p.slotH] as const;
+  };
+  const bake = (p: Prepared, d: Device, plate: Prepared["plates"][number], glow: boolean) => {
+    const [sx, sy] = slotOf(p, plate.slot);
+    const f = d.s / p.k;
+    d.bctx.drawImage(
+      glow ? p.glowAtlas : p.atlas,
+      sx,
+      sy,
+      p.slotW,
+      p.slotH,
+      plate.at[0] * d.s - (p.slotW / 2) * f,
+      plate.at[1] * d.s - (p.slotH / 2) * f,
+      p.slotW * f,
+      p.slotH * f,
+    );
+  };
+  const buildDevice = (p: Prepared) => {
+    if (device) for (const layer of [device.build, device.cape, device.art]) layer.width = 0;
+    const s = dpr * scale;
+    const w = Math.ceil(ART_W * s);
+    const h = Math.ceil(ART_H * s);
+    const [build, bctx] = makeCanvas(w, h);
+    bctx.drawImage(p.under, 0, 0, w, h);
+    const [cape, cctx] = makeCanvas(w, h);
+    cctx.drawImage(p.cape, 0, 0, w, h);
+    const [art, actx] = makeCanvas(w, h);
+    actx.drawImage(p.art, 0, 0, w, h);
+    device = { s, build, bctx, cape, art };
+    for (const plate of p.plates) {
+      if (plate.baked >= 1) bake(p, device, plate, false);
+      if (plate.baked === 2 && plate.hasGlow) bake(p, device, plate, true);
+    }
+    return device;
+  };
 
   function draw(p: Prepared, now: number) {
     const c = ctx!;
+    const d = device ?? buildDevice(p);
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.globalCompositeOperation = "source-over";
     c.globalAlpha = 1;
@@ -420,8 +494,11 @@ export function mountExtremeSuitup(
     const capeU = beat("cape", now);
     if (capeU > 0) {
       const f = easeOutCubic(capeU) * 1.3;
-      if (capeU >= 1) c.drawImage(p.cape, 0, 0, ART_W, ART_H);
-      else {
+      if (capeU >= 1) {
+        blit();
+        c.drawImage(d.cape, 0, 0);
+        base();
+      } else {
         const top = 220;
         const strips = 30;
         const step = (ART_H - top) / strips;
@@ -434,11 +511,11 @@ export function mountExtremeSuitup(
           const ripple = Math.sin(n * 10 - now * 0.014) * 16 * (1 - capeU);
           c.globalAlpha = a;
           c.drawImage(
-            p.cape,
+            d.cape,
             0,
-            y * p.k,
-            p.cape.width,
-            (step + 1.5) * p.k,
+            y * d.s,
+            d.cape.width,
+            (step + 1.5) * d.s,
             512 - 512 * sx + ripple,
             y,
             ART_W * sx,
@@ -449,51 +526,27 @@ export function mountExtremeSuitup(
       }
     }
 
-    // The dark undersuit.
-    c.globalAlpha = easeOutCubic(clamp01(now / 360));
-    c.drawImage(p.under, 0, 0, ART_W, ART_H);
-    c.globalAlpha = 1;
-
-    // Bake what has locked; the glow lines trace on after.
-    const lctx = p.lockedCtx;
+    // Bake what has locked (its glow line once traced) into the build.
     const hw = p.slotW / 2;
     const hh = p.slotH / 2;
     const perRow = Math.floor(p.atlas.width / p.slotW);
     for (const plate of p.plates) {
       if (plate.baked === 0 && now >= plate.lock) {
-        const sx = (plate.slot % perRow) * p.slotW;
-        const sy = Math.floor(plate.slot / perRow) * p.slotH;
-        lctx.drawImage(
-          p.atlas,
-          sx,
-          sy,
-          p.slotW,
-          p.slotH,
-          plate.at[0] * p.k - hw,
-          plate.at[1] * p.k - hh,
-          p.slotW,
-          p.slotH,
-        );
+        bake(p, d, plate, false);
         plate.baked = plate.hasGlow ? 1 : 2;
       }
       if (plate.baked === 1 && now >= plate.glow + 260) {
-        const sx = (plate.slot % perRow) * p.slotW;
-        const sy = Math.floor(plate.slot / perRow) * p.slotH;
-        lctx.drawImage(
-          p.glowAtlas,
-          sx,
-          sy,
-          p.slotW,
-          p.slotH,
-          plate.at[0] * p.k - hw,
-          plate.at[1] * p.k - hh,
-          p.slotW,
-          p.slotH,
-        );
+        bake(p, d, plate, true);
         plate.baked = 2;
       }
     }
-    c.drawImage(p.locked, 0, 0, ART_W, ART_H);
+    // The dark undersuit fades up under the core's light (nothing locks
+    // before the belt's first plates, well after this).
+    blit();
+    c.globalAlpha = easeOutCubic(clamp01(now / 360));
+    c.drawImage(d.build, 0, 0);
+    c.globalAlpha = 1;
+    base();
 
     // Glow lines tracing on (the bright pass fades as they settle).
     const unit = 1 / p.k;
@@ -566,8 +619,6 @@ export function mountExtremeSuitup(
     // The lock: a glint runs along the plate's upper gold edges.
     c.globalCompositeOperation = "lighter";
     c.lineCap = "round";
-    c.save();
-    c.clip(p.body);
     for (const plate of p.plates) {
       const v = (now - plate.lock) / 240;
       if (v < 0 || v >= 1 || !plate.solid) continue;
@@ -589,7 +640,6 @@ export function mountExtremeSuitup(
       c.arc(sx, sy, 2.2 * (1 - v) + 0.6, 0, Math.PI * 2);
       c.fill();
     }
-    c.restore();
 
     // The belt core: it ignites, then breathes with every wave.
     const ignite = beat("core", now);
@@ -639,7 +689,7 @@ export function mountExtremeSuitup(
       c.beginPath();
       c.rect(0, 0, ART_W, SUITUP_HORN_BASE_Y);
       c.clip();
-      c.drawImage(p.horns, 0, (1 - rise) * 118, ART_W, ART_H);
+      c.drawImage(p.horns, HORN_BOX[0], HORN_BOX[1] + (1 - rise) * 118, HORN_BOX[2], HORN_BOX[3]);
       c.restore();
       if (hornU < 1) {
         c.globalCompositeOperation = "lighter";
@@ -648,7 +698,7 @@ export function mountExtremeSuitup(
         c.beginPath();
         c.rect(0, 0, ART_W, SUITUP_HORN_BASE_Y);
         c.clip();
-        c.drawImage(p.horns, 0, (1 - rise) * 118, ART_W, ART_H);
+        c.drawImage(p.horns, HORN_BOX[0], HORN_BOX[1] + (1 - rise) * 118, HORN_BOX[2], HORN_BOX[3]);
         c.restore();
       }
       c.globalAlpha = 1;
@@ -678,7 +728,9 @@ export function mountExtremeSuitup(
     if (sweepU > 0) {
       c.globalCompositeOperation = "source-over";
       c.globalAlpha = easeInOutCubic(clamp01(sweepU / 0.7));
-      c.drawImage(p.art, 0, 0, ART_W, ART_H);
+      blit();
+      c.drawImage(d.art, 0, 0);
+      base();
       c.globalAlpha = 1;
       if (sweepU < 1) sheen(p, p.art, sweepU, 0.55);
     }
@@ -726,7 +778,6 @@ export function mountExtremeSuitup(
         prepared.under,
         prepared.cape,
         prepared.horns,
-        prepared.locked,
         prepared.atlas,
         prepared.glowAtlas,
         prepared.shimmer,
@@ -734,6 +785,10 @@ export function mountExtremeSuitup(
         layer.width = layer.height = 0;
       }
       prepared = null;
+    }
+    if (device) {
+      for (const layer of [device.build, device.cape, device.art]) layer.width = layer.height = 0;
+      device = null;
     }
   };
 }

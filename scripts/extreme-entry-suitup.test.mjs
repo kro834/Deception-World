@@ -92,7 +92,9 @@ test("the playback pauses its watchdog while hidden, and the renderer its clock"
   assert.equal(playback.state, "skipped");
   assert.match(engine, /visibilitychange/);
   assert.match(engine, /playback\.pause\(\)/);
-  assert.match(engine, /Math\.min\(64, Math\.max\(0, now - last\)\)/);
+  assert.match(engine, /t \+= Math\.min\(64, delta\)/);
+  // A device that cannot keep up drops to 1x (smooth on slow phones).
+  assert.match(engine, /dprLimit = 1;/);
 });
 
 test("the art and the engine load only when the sequence mounts (no eager download elsewhere)", () => {
@@ -135,9 +137,9 @@ test("the suit art ships at its widths, with alpha", () => {
     assert.ok(chunk === "VP8L" || (chunk === "VP8X" && (bytes[20] & 0x10) !== 0), "keeps alpha");
     assert.ok(bytes.length < 320_000, `${width}: ${bytes.length} bytes`);
   }
-  assert.equal(pickExtremeSuitupWidth(500, 1.75), 768);
+  assert.equal(pickExtremeSuitupWidth(500, 1.5), 768);
   assert.equal(pickExtremeSuitupWidth(900, 2), 1024);
-  assert.equal(extremeSuitupDpr(3, true), 1.75);
+  assert.equal(extremeSuitupDpr(3, true), 1.5);
   assert.equal(extremeSuitupDpr(3, false), 2);
   assert.equal(extremeSuitupDpr(Number.NaN, false), 1);
 });
