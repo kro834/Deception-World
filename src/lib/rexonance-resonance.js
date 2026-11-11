@@ -5385,12 +5385,16 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   runway.addEventListener?.("rexonance:assembly-retry", retryAssembly);
   runway.addEventListener?.("rexonance:assembly-wake", wakeAssembly);
   // A page's own layer over the figure came or went (`covered`): the
-  // resting frame is drawn again. Only such a page sends it.
+  // frame is drawn again, at once (the page raises this canvas in the same
+  // frame: a seek must never show it empty). Only such a page sends it.
   const redrawAssembly = () => {
     if (!coveredAt || disposed || !live) return;
     hud.progress = -1;
     force = true;
-    schedule();
+    if (!near || !pageActive || document.hidden) return;
+    if (frame) environment.cancelAnimationFrame(frame);
+    frame = 0;
+    render(environment.performance?.now?.());
   };
   runway.addEventListener?.("rexonance:assembly-redraw", redrawAssembly);
   runway.addEventListener?.("rexonance:assembly-frame", schedule);
