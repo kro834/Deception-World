@@ -5389,6 +5389,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   const redrawAssembly = () => {
     if (!coveredAt || disposed || !live) return;
     hud.progress = -1;
+    force = true;
     schedule();
   };
   runway.addEventListener?.("rexonance:assembly-redraw", redrawAssembly);

@@ -16,9 +16,8 @@
 // It also writes src/lib/rexonance-suit-skin-marks.ts: when the front
 // reaches each of the HUD's parts (the middle of the part's own plates on
 // the field), on the entry's clock and on the scroll's, so each label lights
-// with the armour it names; and the span of the scroll over which the skin
-// covers the scene's own canvas whole. Numbers only: the pages import it
-// without the skin's chunk.
+// with the armour it names. Numbers only: the pages import it without the
+// skin's chunk.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,10 +93,6 @@ export const SKIN_PART_GROUPS = {
   TAIL: ["tail", "ribbon"],
   HEAD: ["helm"],
 };
-/** The scene's own playhead and the skin's are two springs on one scroll:
- * the scene stops drawing this far inside the span its canvas is hidden. */
-export const SKIN_COVER_MARGIN = 0.025;
-
 /** The marks from a bake: each part's reach (the median field value of its
  * plates' cells; the helmet's on the head's field) and when the front's lip
  * is there on each clock. */
@@ -141,10 +136,6 @@ export function skinMarks(bake) {
       REXONANCE_SUIT_PARTS.map((part) => [part, Math.round(at(SKIN_ENTRY, part))]),
     ),
     scroll: ASSEMBLY_PARTS.map((part) => Math.round(at(SKIN_SCROLL, part) * 1000) / 1000),
-    cover: [
-      Math.round((SKIN_SCROLL.leave[1] + SKIN_COVER_MARGIN) * 1000) / 1000,
-      Math.round((SKIN_SCROLL.back[0] - SKIN_COVER_MARGIN) * 1000) / 1000,
-    ],
   };
 }
 
@@ -167,9 +158,6 @@ export const SKIN_ENTRY_PARTS = ${object(marks.entry)} as const;
 /** And in the scroll scene (its progress), in the HUD's order
  * (rexonance-resonance.js ASSEMBLY_PARTS). */
 export const SKIN_SCROLL_PARTS = [${marks.scroll.join(", ")}] as const;
-/** The span of the scroll's progress over which the skin covers the
- * scene's own canvas whole (inside the span that canvas is hidden). */
-export const SKIN_SCROLL_COVER = [${marks.cover.join(", ")}] as const;
 `;
 }
 

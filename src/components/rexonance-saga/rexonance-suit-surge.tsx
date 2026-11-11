@@ -585,6 +585,17 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       else delete runway.dataset.rznSkin;
       runway.dispatchEvent(new Event("rexonance:assembly-redraw"));
     };
+    // The scene's canvases are held at opacity 0 by this layer: the engine
+    // draws nothing meanwhile. Set only after they are hidden, and cleared
+    // (the engine told to draw again) before they are raised.
+    const flagCovered = (on: boolean) => {
+      if (on === "rznCovered" in runway.dataset) return;
+      if (on) runway.dataset.rznCovered = "";
+      else {
+        delete runway.dataset.rznCovered;
+        runway.dispatchEvent(new Event("rexonance:assembly-redraw"));
+      }
+    };
     // The retract in play: its start, where the reader stood, its answer.
     let retract: { from: number; q: number; done: (ok?: boolean) => void; over: boolean } | null =
       null;
@@ -601,12 +612,15 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
       // (A leave's short fade owns their opacity until the page has moved.)
       if (next === classicShown || fadeTimer) return;
       classicShown = next;
+      const hidden = value <= 0.001;
+      if (!hidden) flagCovered(false);
       for (const element of frameBox.querySelectorAll<HTMLElement>(
         ":scope > :is(.rzn-canvas, .rzn-field)",
       )) {
         element.style.opacity = next;
         element.style.transition = next ? "none" : "";
       }
+      if (hidden) flagCovered(true);
     };
     const frame = createSurgeFrame();
     let raf = 0;
@@ -899,6 +913,7 @@ export function useScrollSurge(runwayRef: RefObject<HTMLDivElement | null>) {
         return;
       }
       // Another form's art, or no skin: the figure fades, then the page moves.
+      flagCovered(false);
       classicShown = "";
       fadeOut(frameBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field)"));
     };

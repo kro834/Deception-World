@@ -60,15 +60,15 @@ type BudgetEnvironment = {
 export function skinBudget(environment: BudgetEnvironment = globalThis): SkinBudget | null {
   const media = (query: string) => Boolean(environment.matchMedia?.(query).matches);
   if (media("(prefers-reduced-motion: reduce)")) return null;
-  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2, torrent: 520 };
+  if (!media("(pointer: coarse), (any-pointer: coarse)")) return { samples: 6000, ratio: 2, torrent: 420 };
   const memory = environment.navigator?.deviceMemory;
   const cores = environment.navigator?.hardwareConcurrency ?? 0;
   if ((memory !== undefined && memory <= 4) || (cores > 0 && cores <= 4))
-    return { samples: 1200, ratio: 1.5, torrent: 130 };
+    return { samples: 1200, ratio: 1.5, torrent: 110 };
   const short = Math.min(environment.innerWidth || 0, environment.innerHeight || 0);
   return short >= 700
-    ? { samples: 3600, ratio: 2, torrent: 320 }
-    : { samples: 2500, ratio: 2, torrent: 220 };
+    ? { samples: 3600, ratio: 2, torrent: 260 }
+    : { samples: 2500, ratio: 2, torrent: 180 };
 }
 
 /** The canvas's quality at each of the crescendo governor's levels. */
@@ -495,6 +495,8 @@ export class SkinTorrent {
     let index = a + Math.floor(this.random() * spread);
     if (index >= count) index = count - 1 - Math.floor(this.random() * Math.min(spread, count));
     if (index < 0) index = 0;
+    // (Where the armour is thin on samples, never far past the lip.)
+    while (index > a && s[(first + index) * SKIN_SAMPLE + 2] > at + 1.5 * SKIN_BAND) index -= 1;
     const at0 = (first + index) * SKIN_SAMPLE;
     out[o] = s[at0] * cell;
     out[o + 1] = s[at0 + 1] * cell;
@@ -526,8 +528,10 @@ export class SkinTorrent {
       const front = head ? frame.head : frame.body;
       if (frame.flow > 0) {
         // Out of the reactor (or the driver), to land just ahead of the lip.
-        v[o] = origin[0];
-        v[o + 1] = origin[1];
+        // (From anywhere on the reactor's disc, or along the driver.)
+        const wide = origin === this.belt ? 46 : 18;
+        v[o] = origin[0] + (this.random() * 2 - 1) * wide;
+        v[o + 1] = origin[1] + (this.random() * 2 - 1) * (origin === this.belt ? 8 : 18);
         if (!this.aim(field, head, front + (0.6 + 2.6 * this.random()) * SKIN_BAND, v, o + 2, cell))
           return false;
       } else {
@@ -540,8 +544,10 @@ export class SkinTorrent {
       }
     }
     v[o + 4] = arc ? life * 1.55 : life;
-    v[o + 5] = side * (arc ? 170 + 90 * this.random() : 26 + 74 * this.random());
-    v[o + 6] = arc ? 0 : 7 + 14 * this.random();
+    // (The call back runs straighter: an implosion, not a tangle.)
+    const calm = converge > 0.02 ? 0.4 : 1;
+    v[o + 5] = side * calm * (arc ? 170 + 90 * this.random() : 26 + 74 * this.random());
+    v[o + 6] = arc || calm < 1 ? 0 : 7 + 14 * this.random();
     v[o + 7] = 1 + 1.6 * this.random();
     v[o + 8] = this.random();
     v[o + 9] = i % 7 === 0 ? 2 : this.random() < 0.72 ? 0 : 1;
@@ -587,7 +593,7 @@ export class SkinTorrent {
       const length = Math.hypot(dx, dy) || 1;
       const nx = -dy / length;
       const ny = dx / length;
-      const trail = v[o + 6] === 0 ? 0.42 : 0.34;
+      const trail = v[o + 6] === 0 ? 0.26 : 0.17;
       for (let k = 0; k < TRAIL; k += 1) {
         const u = Math.max(0, p - (trail * (TRAIL - 1 - k)) / (TRAIL - 1));
         // Fast off the mark, slowing into the surface.
@@ -599,16 +605,14 @@ export class SkinTorrent {
         pose[q + k * 2 + 1] = v[o + 1] + dy * e + ny * off;
       }
       // Present from its first step until the surface takes it in.
-      pose[q + POSE - 1] = Math.min(1, p * 8) * (p > 0.9 ? (1 - p) * 10 : 1) + 0.001;
+      pose[q + POSE - 1] = Math.min(1, p * 5) * (p > 0.9 ? (1 - p) * 10 : 1) + 0.001;
       live += 1;
     }
     this.live = live;
     if (!live) return;
     const strong = frame.alpha > 0 ? frame.alpha : 1;
-    for (const context of [back, front]) {
-      context.lineCap = "round";
-      context.lineJoin = "round";
-    }
+    back.lineCap = front.lineCap = "round";
+    back.lineJoin = front.lineJoin = "round";
     // The trails, a tone at a time: each path stroked wide and faint (its
     // glow), then narrow and bright; the great arcs thicker, half behind.
     const unit = Math.max(1, px);
@@ -629,8 +633,8 @@ export class SkinTorrent {
         }
         if (!any) continue;
         context.strokeStyle = TORRENT_TONES[tone];
-        context.globalAlpha = (pass ? 0.3 : 0.24) * strong;
-        context.lineWidth = (pass ? 8 : 5.5) * unit;
+        context.globalAlpha = (pass ? 0.26 : 0.18) * strong;
+        context.lineWidth = (pass ? 7 : 4.5) * unit;
         context.stroke();
         context.globalAlpha = (pass ? 0.95 : 0.85) * strong;
         context.lineWidth = (pass ? 2.8 : 1.7) * unit;

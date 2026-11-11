@@ -22,7 +22,6 @@ import { MOVIE_DURATION_MS, MOVIE_LEAVE_EVENT } from "../src/lib/assembly-movie.
 import {
   SKIN_ENTRY_PARTS,
   SKIN_PART_REACH,
-  SKIN_SCROLL_COVER,
   SKIN_SCROLL_PARTS,
 } from "../src/lib/rexonance-suit-skin-marks.ts";
 import { NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
@@ -53,7 +52,10 @@ import {
   SKIN_RETRACT_PULL,
   SKIN_SAMPLE,
   SKIN_SCROLL,
+  SKIN_TORRENT_ARC,
+  SKIN_TORRENT_SHARE,
   SKIN_WHOLE,
+  SkinTorrent,
   createSkinFrame,
   drawSkinDroplets,
   skinBudget,
@@ -63,7 +65,6 @@ import {
   skinSamples,
 } from "../src/lib/rexonance-suit-skin.ts";
 import {
-  SKIN_COVER_MARGIN,
   SKIN_FIELD_FILE,
   SKIN_MARKS_FILE,
   SKIN_PART_GROUPS,
@@ -467,21 +468,26 @@ test("each HUD label lights when the front reaches the part it names", () => {
 });
 
 test("the shared scene stops drawing while the skin covers it whole — Rexonance's config only", () => {
-  // Inside the span its canvas is hidden (opacity 0), by a margin for the
-  // two playheads.
-  assert.ok(SKIN_COVER_MARGIN >= 0.02);
-  assert.ok(Math.abs(SKIN_SCROLL_COVER[0] - (SKIN_SCROLL.leave[1] + SKIN_COVER_MARGIN)) < 1e-9);
-  assert.ok(Math.abs(SKIN_SCROLL_COVER[1] - (SKIN_SCROLL.back[0] - SKIN_COVER_MARGIN)) < 1e-9);
-  for (const q of SKIN_SCROLL_COVER) {
-    for (const d of [-SKIN_COVER_MARGIN * 0.9, 0, SKIN_COVER_MARGIN * 0.9])
-      assert.equal(skinFrame(createSkinFrame(), SKIN_SCROLL, q + d).classic, 0, `hidden at ${q + d}`);
-    assert.equal(skinFrame(createSkinFrame(), SKIN_SCROLL, q).alpha, 1);
-  }
+  // One playhead decides: the surge layer flags the runway only once it has
+  // put the scene's canvases at opacity 0, and clears the flag (telling the
+  // engine to draw again) before it raises them.
   const page = read("src/components/rexonance-saga/rexonance-saga.tsx");
+  assert.match(page, /covered: \(_progress, runway\) => "rznCovered" in runway\.dataset,/);
+  const layer = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
   assert.match(
-    page,
-    /covered: \(progress, runway\) =>\s*"rznSkin" in runway\.dataset &&\s*progress > SKIN_SCROLL_COVER\[0\] &&\s*progress < SKIN_SCROLL_COVER\[1\],/,
+    layer,
+    /const hidden = value <= 0\.001;\s*if \(!hidden\) flagCovered\(false\);\s*for \(const element of[\s\S]*?\}\s*if \(hidden\) flagCovered\(true\);/,
   );
+  assert.match(
+    layer,
+    /delete runway\.dataset\.rznCovered;\s*runway\.dispatchEvent\(new Event\("rexonance:assembly-redraw"\)\);/,
+  );
+  // Whenever the skin's armour is opaque over the figure the flag can be up;
+  // the canvases are hidden only inside that span.
+  for (let q = 0; q <= 1; q += 0.001) {
+    const frame = skinFrame(createSkinFrame(), SKIN_SCROLL, q);
+    if (frame.classic <= 0.001) assert.equal(frame.alpha, 1, `the skin is whole at ${q}`);
+  }
   const engine = read("src/lib/rexonance-resonance.js");
   assert.match(engine, /const coveredAt = typeof config\.covered === "function" \? config\.covered : null;/);
   // The frame draws nothing, but the welded plates and the gold keep pace,
@@ -814,4 +820,161 @@ test("the marks the bake seeds from are the suit's own", () => {
   ]);
   assert.equal(input.satellites.length, 5);
   for (const [, , delay] of input.satellites) assert.ok(delay > 0 && delay < 0.5);
+});
+
+test("the torrent: streams from the reactor and the driver land just ahead of the front, converge on the charge, and run home on a retract", () => {
+  const device = (coarse, width, height, cores = 8) => ({
+    matchMedia: (query) => ({ matches: query.includes("coarse") ? coarse : false }),
+    navigator: { hardwareConcurrency: cores },
+    innerWidth: width,
+    innerHeight: height,
+  });
+  const desktop = skinBudget(device(false, 1440, 900));
+  const tablet = skinBudget(device(true, 820, 1180));
+  const phone = skinBudget(device(true, 390, 844));
+  const low = skinBudget(device(true, 390, 844, 4));
+  // Budgeted per device; the weakest still reads as a torrent, and the
+  // governor sheds it by shares, never to nothing.
+  assert.ok(desktop.torrent > tablet.torrent && tablet.torrent > phone.torrent);
+  assert.ok(phone.torrent > low.torrent && low.torrent >= 100 && desktop.torrent <= 480);
+  assert.equal(SKIN_TORRENT_SHARE[0], 1);
+  assert.deepEqual([...SKIN_TORRENT_SHARE].sort((a, b) => b - a), [...SKIN_TORRENT_SHARE]);
+  assert.ok(SKIN_TORRENT_SHARE.at(-1) >= 0.4);
+  assert.equal(SKIN_TORRENT_SHARE.length, SKIN_QUALITY.length);
+  // Reduced motion has no skin, so no torrent.
+  assert.equal(
+    skinBudget({ matchMedia: (query) => ({ matches: query.includes("reduced-motion") }) }),
+    null,
+  );
+
+  const rgba = new Uint8ClampedArray(W * H * 4);
+  for (let i = 0; i < W * H; i += 1)
+    rgba.set([bake.texture[i * 3], bake.texture[i * 3 + 1], bake.texture[i * 3 + 2], 255], i * 4);
+  const field = skinSamples(rgba, W, H, phone.samples);
+  const core = REXONANCE_SUIT_MARKS.core;
+  const belt = REXONANCE_SUIT_MARKS.belt;
+  const context = () => {
+    const calls = { paths: 0, strokes: 0, fills: 0, rects: 0 };
+    return {
+      calls,
+      beginPath() {
+        calls.paths += 1;
+      },
+      moveTo() {},
+      lineTo() {},
+      rect() {
+        calls.rects += 1;
+      },
+      stroke() {
+        calls.strokes += 1;
+      },
+      fill() {
+        calls.fills += 1;
+      },
+    };
+  };
+  const cell = REXONANCE_SUIT_SIZE.width / W;
+  const fieldAt = (x, y) =>
+    bake.field[
+      Math.min(H - 1, Math.max(0, Math.floor(y / cell))) * W +
+        Math.min(W - 1, Math.max(0, Math.floor(x / cell)))
+    ];
+  const near = (x, y, [px, py], reach) => Math.hypot(x - px, y - py) <= reach;
+  const flights = (torrent) => {
+    const list = [];
+    for (let i = 0; i < torrent.count; i += 1)
+      if (torrent.born[i] >= 0) list.push([...torrent.streams.subarray(i * 10, i * 10 + 10)]);
+    return list;
+  };
+
+  // Nothing flies before the front leaves the reactor, or over a whole suit.
+  {
+    const torrent = new SkinTorrent(phone.torrent, core, belt);
+    const [back, front] = [context(), context()];
+    torrent.draw(back, front, field, skinFrame(createSkinFrame(), SKIN_ENTRY, 100), cell, 1000, 1);
+    assert.equal(torrent.live, 0);
+    torrent.draw(back, front, field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1960), cell, 1016, 1);
+    assert.equal(torrent.live, 0);
+    assert.equal(front.calls.strokes + back.calls.strokes + front.calls.fills, 0);
+  }
+  // Growing: every stream is in flight, from the reactor's disc or along the
+  // driver, to a cell of the armour at or just ahead of the lip.
+  {
+    const torrent = new SkinTorrent(phone.torrent, core, belt);
+    const [back, front] = [context(), context()];
+    const frame = skinFrame(createSkinFrame(), SKIN_ENTRY, 800);
+    assert.ok(frame.body > 0.3 && frame.body < 0.9 && frame.head === 0);
+    torrent.draw(back, front, field, frame, cell, 5000, 1);
+    assert.equal(torrent.live, phone.torrent);
+    let fromBelt = 0;
+    for (const [sx, sy, tx, ty, life] of flights(torrent)) {
+      const driver = near(sx, sy, belt, 50);
+      assert.ok(driver || near(sx, sy, core, 28), "born at the reactor or the driver");
+      if (driver && !near(sx, sy, core, 28)) fromBelt += 1;
+      const at = fieldAt(tx, ty);
+      assert.ok(at >= 0, "it lands on the armour");
+      assert.ok(
+        at > frame.body - 2 * SKIN_BAND && at < frame.body + 5 * SKIN_BAND,
+        `at the front (${at} for ${frame.body})`,
+      );
+      assert.ok(life > 300 && life < 1100, "fast");
+    }
+    assert.ok(fromBelt > phone.torrent * 0.12 && fromBelt < phone.torrent * 0.5);
+    // A few batched paths a frame: glow and core per tone and layer, the heads.
+    assert.ok(front.calls.strokes + back.calls.strokes <= 18);
+    assert.ok(front.calls.fills + back.calls.fills <= 2);
+    assert.equal(front.calls.rects + back.calls.rects, phone.torrent, "a bright head each");
+    assert.ok(back.calls.strokes > 0, "some of the great arcs pass behind the figure");
+    assert.ok(Math.round(phone.torrent / SKIN_TORRENT_ARC) >= 12, "a few large arcs");
+    // The governor's share.
+    const shed = new SkinTorrent(phone.torrent, core, belt);
+    shed.draw(context(), context(), field, frame, cell, 5000, 1, SKIN_TORRENT_SHARE.at(-1));
+    assert.equal(shed.live, Math.floor(phone.torrent * SKIN_TORRENT_SHARE.at(-1)));
+    // A stream that has landed flies again, to the front as it then stands.
+    const later = skinFrame(createSkinFrame(), SKIN_ENTRY, 1100);
+    torrent.draw(back, front, field, later, cell, 5000 + 2000, 1);
+    for (const [, , tx, ty] of flights(torrent)) {
+      const at = fieldAt(tx, ty);
+      assert.ok(at > later.body - 2 * SKIN_BAND, "the new flight follows the front");
+    }
+  }
+  // The charge: called back into the reactor (and the driver) from all round.
+  {
+    const torrent = new SkinTorrent(phone.torrent, core, belt);
+    torrent.draw(context(), context(), field, skinFrame(createSkinFrame(), SKIN_ENTRY, 1900), cell, 9000, 1, 1, 0.8);
+    assert.equal(torrent.live, phone.torrent);
+    let far = 0;
+    for (const [sx, sy, tx, ty, life] of flights(torrent)) {
+      assert.ok(near(tx, ty, core, 1) || near(tx, ty, belt, 1), "into the reactor or the driver");
+      if (!near(sx, sy, core, 180)) far += 1;
+      assert.ok(life < 700);
+    }
+    assert.ok(far > phone.torrent * 0.9);
+  }
+  // The retract: from the receding lip, home.
+  {
+    const torrent = new SkinTorrent(phone.torrent, core, belt);
+    const frame = skinRetractFrame(createSkinFrame(), 1250);
+    assert.ok(frame.body > 0.3 && frame.body < 1);
+    torrent.draw(context(), context(), field, frame, cell, 9000, 1);
+    assert.ok(torrent.live > 0);
+    for (const [sx, sy, tx, ty] of flights(torrent)) {
+      assert.deepEqual([tx, ty], [...new Float32Array(core)]);
+      const at = fieldAt(sx, sy);
+      assert.ok(at < frame.body + 2 * SKIN_BAND, "from the armour still on");
+    }
+  }
+  // Wired on both clocks, on the surge layer's own two canvases, with the
+  // governor's share and the crescendo's charge; no transform anywhere.
+  const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
+  assert.equal(surge.match(/grown\.torrent\.draw\(/g).length, 2);
+  assert.match(surge, /grown\.lib\.SKIN_TORRENT_SHARE\[level\],\s*made \? made\.lib\.entryCharge\(t, final\) : 0,/);
+  assert.match(surge, /leaving \? 0 : \(pass\?\.charge \?\? 0\),/);
+  assert.match(surge, /new lib\.SkinTorrent\(\s*budget\.torrent,\s*REXONANCE_SUIT_MARKS\.core,\s*REXONANCE_SUIT_MARKS\.belt,\s*\)/);
+  const lib = read("src/lib/rexonance-suit-skin.ts");
+  const drawn = lib.slice(lib.indexOf("export class SkinTorrent"), lib.indexOf("/* ---------------- the shader"));
+  assert.doesNotMatch(drawn, /createLinearGradient|createRadialGradient|shadowBlur|drawImage/);
+  // Nothing is allocated a frame: the typed arrays are the constructor's.
+  const perFrame = drawn.slice(drawn.indexOf("  draw("));
+  assert.doesNotMatch(perFrame, /new (Float32Array|Float64Array|Array)|\[\.\.\.|\.map\(|\.filter\(/);
 });

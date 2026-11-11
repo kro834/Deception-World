@@ -11,6 +11,3 @@ export const SKIN_ENTRY_PARTS = { LEGS: 711, ARMS: 639, CHEST: 549, HEAD: 1567 }
 /** And in the scroll scene (its progress), in the HUD's order
  * (rexonance-resonance.js ASSEMBLY_PARTS). */
 export const SKIN_SCROLL_PARTS = [0.308, 0.262, 0.204, 0.208, 0.296, 0.694] as const;
-/** The span of the scroll's progress over which the skin covers the
- * scene's own canvas whole (inside the span that canvas is hidden). */
-export const SKIN_SCROLL_COVER = [0.19, 0.828] as const;
