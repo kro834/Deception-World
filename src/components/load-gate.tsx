@@ -49,6 +49,11 @@ import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-e
 import { createEntryPlayback, type EntryPlayback } from "@/lib/entry-playback";
 import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
 import { IllusionculumEntrySequence } from "@/components/illusionculum-saga/illusionculum-entry-sequence";
+// EXTREME SAGA's entry suit-up (owner, 2026-11-11): its plates deploy under
+// the same cover, on a playback like ILLUSIONCULUM's. Only the light layer
+// is in the gate's chunk; its engine and art load when it mounts.
+import { EXTREME_ENTRY_TIMINGS } from "@/lib/extreme-entry";
+import { ExtremeEntrySequence } from "@/components/extreme-saga/extreme-entry-sequence";
 import {
   afterFarFromEntry,
   prefetchFarFromEntry,
@@ -114,6 +119,7 @@ type GateState = {
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   metaUnitasPlayback?: MetaUnitasEntryPlayback;
   illusionculumPlayback?: EntryPlayback;
+  extremePlayback?: EntryPlayback;
 };
 
 type CineRect = { x: number; y: number; w: number; h: number };
@@ -207,7 +213,7 @@ const RIDER_DIVE_TIMINGS: Record<RiderDiveVariant, { cover: number; reveal: numb
   vandal: { cover: 360, reveal: 460 },
   dream: { cover: 450, reveal: 540 },
   rexonance: REXONANCE_ENTRY_TIMINGS,
-  extreme: { cover: 380, reveal: 480 },
+  extreme: EXTREME_ENTRY_TIMINGS,
   "far-from": FAR_FROM_ENTRY_TIMINGS,
   illusionculum: ILLUSIONCULUM_ENTRY_TIMINGS,
   // Without its call (the call's chunk or pictures late): the plain dive.
@@ -1746,6 +1752,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           let metaUnitasCall: MetaUnitasTransitionRenderer | null = null;
           let metaUnitasPlayback: MetaUnitasEntryPlayback | undefined;
           let illusionculumPlayback: EntryPlayback | undefined;
+          let extremePlayback: EntryPlayback | undefined;
           if (diveVariant === "meta-unitas" && tier === "full") {
             metaUnitasTransition.current = requestId;
             if (document.documentElement.dataset.sideMenuOpen === "true") {
@@ -1761,6 +1768,10 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             illusionculumTransition.current = requestId;
             illusionculumPlayback = createEntryPlayback();
             rexonanceCoverCancel.current = illusionculumPlayback.cancel;
+          }
+          if (diveVariant === "extreme" && tier === "full") {
+            extremePlayback = createEntryPlayback();
+            rexonanceCoverCancel.current = extremePlayback.cancel;
           }
           // PREV / NEXT between dossiers flips the file; entry from anywhere
           // else keeps the rider's own dive or cut-in.
@@ -1818,6 +1829,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             metaUnitasCall,
             metaUnitasPlayback,
             illusionculumPlayback,
+            extremePlayback,
           });
           // The skip, from the first painted frame: before the hold it marks
           // the cover spent; during the hold it ends it (below).
@@ -1828,6 +1840,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           }
           if (metaUnitasPlayback) farFromSkip.current = metaUnitasPlayback.skip;
           if (illusionculumPlayback) farFromSkip.current = illusionculumPlayback.skip;
+          if (extremePlayback) farFromSkip.current = extremePlayback.skip;
           try {
             if (assets.length) {
               void preloadAssets(assets, () => undefined).catch(() => undefined);
@@ -1876,6 +1889,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               diveVariant === "rexonance" ||
               diveVariant === "far-from" ||
               diveVariant === "illusionculum" ||
+              Boolean(extremePlayback) ||
               (diveVariant === "meta-unitas" && metaUnitasCall)
             ) {
               await nextFrame();
@@ -1886,6 +1900,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               if (diveVariant === "rexonance") startedAt = performance.now();
               if (diveVariant === "far-from") startedAt = performance.now();
               if (diveVariant === "illusionculum") startedAt = performance.now();
+              if (extremePlayback) startedAt = performance.now();
               if (diveVariant === "meta-unitas") startedAt = performance.now();
             }
             // Images warm independently of the route chunk. A stalled chunk
@@ -1897,6 +1912,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               if (result === "unavailable") {
                 // A genuine failure is visible and retryable, never a silent
                 // automatic skip. The existing link permits a direct visit.
+                setDelayedRoute({
+                  href: guardedHref(to, hash, search),
+                  focus: Boolean(focusDestination || skipFocusRequested.current),
+                });
+                return;
+              }
+            }
+            if (extremePlayback) {
+              const result = await clock.wait(extremePlayback.promise);
+              if (!isCurrent() || result === "cancelled") return;
+              if (result === "unavailable") {
                 setDelayedRoute({
                   href: guardedHref(to, hash, search),
                   focus: Boolean(focusDestination || skipFocusRequested.current),
@@ -1917,6 +1943,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             }
             const coverTimeLeft = Math.max(0, timings.cover - (performance.now() - startedAt));
             if (
+              !extremePlayback &&
               !clock.skipped &&
               !metaUnitasPlayback &&
               !illusionculumPlayback &&
@@ -1991,6 +2018,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               metaUnitasCall,
               metaUnitasPlayback,
               illusionculumPlayback,
+              extremePlayback,
             });
             await clock.wait(
               revealRan(
@@ -2006,6 +2034,9 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               ),
             );
           } finally {
+            extremePlayback?.cancel();
+            if (extremePlayback && rexonanceCoverCancel.current === extremePlayback.cancel)
+              rexonanceCoverCancel.current = null;
             illusionculumPlayback?.cancel();
             if (
               illusionculumPlayback &&
@@ -2197,7 +2228,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
     gate.scene?.tier === "full" &&
     ((gate.variant === "far-from" && Boolean(gate.farFromCall)) ||
       (gate.variant === "meta-unitas" && Boolean(gate.metaUnitasCall && gate.metaUnitasPlayback)) ||
-      (gate.variant === "illusionculum" && Boolean(gate.illusionculumPlayback)));
+      (gate.variant === "illusionculum" && Boolean(gate.illusionculumPlayback)) ||
+      (gate.variant === "extreme" && Boolean(gate.extremePlayback)));
 
   return (
     <LoadGateContext.Provider value={api}>
@@ -2214,6 +2246,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         metaUnitasCall={gate.metaUnitasCall}
         metaUnitasPlayback={gate.metaUnitasPlayback}
         illusionculumPlayback={gate.illusionculumPlayback}
+        extremePlayback={gate.extremePlayback}
         onSkip={skipDecoration}
       />
       {gate.active && !decorationSkipped && !entryHasSkip && (
@@ -2271,6 +2304,7 @@ function LoadOverlay({
   metaUnitasCall,
   metaUnitasPlayback,
   illusionculumPlayback,
+  extremePlayback,
   onSkip,
 }: {
   active: boolean;
@@ -2284,6 +2318,7 @@ function LoadOverlay({
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   metaUnitasPlayback?: MetaUnitasEntryPlayback;
   illusionculumPlayback?: EntryPlayback;
+  extremePlayback?: EntryPlayback;
   onSkip?: () => void;
 }) {
   if (!active) return null;
@@ -2332,6 +2367,7 @@ function LoadOverlay({
         metaUnitasCall={metaUnitasCall}
         metaUnitasPlayback={metaUnitasPlayback}
         illusionculumPlayback={illusionculumPlayback}
+        extremePlayback={extremePlayback}
         onSkip={onSkip}
       />
     );
@@ -2457,6 +2493,7 @@ function RiderRouteDive({
   metaUnitasCall: MetaUnitasCallSequence,
   metaUnitasPlayback,
   illusionculumPlayback,
+  extremePlayback,
   onSkip,
 }: {
   variant: RiderDiveVariant;
@@ -2469,6 +2506,7 @@ function RiderRouteDive({
   metaUnitasCall?: MetaUnitasTransitionRenderer | null;
   metaUnitasPlayback?: MetaUnitasEntryPlayback;
   illusionculumPlayback?: EntryPlayback;
+  extremePlayback?: EntryPlayback;
   onSkip?: () => void;
 }) {
   const meta = RIDER_DIVE_META[variant];
@@ -2484,7 +2522,11 @@ function RiderRouteDive({
   const farFromSkippable = farFrom && !revealing && scene?.tier === "full" && Boolean(onSkip);
   const metaUnitasSkippable = metaUnitas && !revealing && scene?.tier === "full" && Boolean(onSkip);
   const illusionculumSkippable = Boolean(illusionculum && illusionculumPlayback && !revealing);
-  const skippable = farFromSkippable || metaUnitasSkippable || illusionculumSkippable;
+  // EXTREME's suit-up (extreme-entry-sequence.tsx), the same way.
+  const extreme = variant === "extreme" && scene?.tier === "full" && Boolean(extremePlayback);
+  const extremeSkippable = extreme && !revealing;
+  const skippable =
+    farFromSkippable || metaUnitasSkippable || illusionculumSkippable || extremeSkippable;
   useEffect(() => {
     if (!skippable) return;
     const onKey = (event: KeyboardEvent) => {
@@ -2495,7 +2537,7 @@ function RiderRouteDive({
   }, [skippable, onSkip]);
   return (
     <div
-      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}${farFrom ? " is-far-from-calls" : ""}${illusionculum ? " is-illusionculum-calls" : ""}`}
+      className={`load-gate archive-route-dive rider-route-dive is-${variant}-dive is-diving${revealing ? " is-arriving" : ""} is-${phase}${cineClass(scene)}${rexonance ? " is-rexonance-calls" : ""}${farFrom ? " is-far-from-calls" : ""}${illusionculum ? " is-illusionculum-calls" : ""}${extreme ? " is-extreme-calls" : ""}`}
       style={sceneStyle(scene)}
       role="status"
       aria-live="polite"
@@ -2547,6 +2589,20 @@ function RiderRouteDive({
             </button>
           ) : null}
         </>
+      ) : extreme && extremePlayback ? (
+        <>
+          <ExtremeEntrySequence phase={phase} playback={extremePlayback} />
+          {extremeSkippable ? (
+            <button
+              type="button"
+              className="ffe-skip"
+              onClick={onSkip}
+              aria-label="変身演出をスキップ"
+            >
+              スキップ
+            </button>
+          ) : null}
+        </>
       ) : illusionculum && illusionculumPlayback ? (
         <>
           <IllusionculumEntrySequence phase={phase} playback={illusionculumPlayback} />
@@ -2580,7 +2636,7 @@ function RiderRouteDive({
         className="cine-dive-status rider-dive-status"
         // META UNITAS's call carries the screen: its status is for assistive
         // technology only (no caption over the scene).
-        style={metaUnitas ? DIVE_STATUS_HIDDEN : undefined}
+        style={metaUnitas || extreme ? DIVE_STATUS_HIDDEN : undefined}
       >
         <small>
           {variant === "rexonance"
