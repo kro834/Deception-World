@@ -1414,6 +1414,13 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
 }
 
+/* Under the skin the reactor's cells are taken into the front that starts
+   there: they drift a little way out as they fade instead of bursting to
+   three or five times their size over the liquid metal. */
+.rx-call-sequence .rx-suit[data-skin] .rx-suit-reactor-pixels {
+  --rx-suit-out: calc(1.35 / var(--rx-suit-burst));
+}
+
 /* REXONANCE DEUS！'s pixel squares (full tier). */
 .rx-call-sequence .rx-suit-figure > .rx-suit-pixels {
   display: none;
@@ -2389,7 +2396,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   }
   100% {
     opacity: 0;
-    transform: rotate(var(--rx-suit-r));
+    transform: rotate(var(--rx-suit-r)) scale(var(--rx-suit-out, 1));
   }
 }
 @keyframes rxSuitGlint {

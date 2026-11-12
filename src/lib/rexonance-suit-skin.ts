@@ -247,8 +247,10 @@ export type SkinTimeline = {
 /** The entry, in the call's canonical ms: the fire's burst (420) is the
  * trigger, the helmet's clamp (1890) the close, the light (1980) after it. */
 export const SKIN_ENTRY: SkinTimeline = {
-  body: [470, 1600],
-  head: [1380, 1880],
+  // (The helmet starts to rise as the limbs' armour sets: nine tenths of
+  // the body is finished by 1110, and no beat stands still between them.)
+  body: [470, 1750],
+  head: [1230, 1880],
   ease: 2,
   leave: [470, 600],
   back: [1880, 1900],
@@ -269,8 +271,10 @@ export const SKIN_ENTRY: SkinTimeline = {
 /** The scroll scene, in its progress: after the fire's end (0.14), closed
  * before the seal (0.86) and the light (0.9). */
 export const SKIN_SCROLL: SkinTimeline = {
-  body: [0.15, 0.66],
-  head: [0.6, 0.852],
+  // (Nine tenths of the body is finished by 0.54, the helmet by 0.83, and
+  // the last wave gathers from 0.8: no stretch of the scroll is still.)
+  body: [0.15, 0.74],
+  head: [0.535, 0.852],
   ease: 1.3,
   leave: [0.15, 0.165],
   back: [0.853, 0.858],
@@ -284,7 +288,7 @@ export const SKIN_SCROLL: SkinTimeline = {
     fine: [0.03, 0.055],
     large: [0.045, 0.075],
     absorb: [0.006, 0.01],
-    wave: [0.868, 0.8955],
+    wave: [0.85, 0.8955],
     from: [0.1, 0.12],
     out: [0.8968, 0.8998],
   },
@@ -358,6 +362,12 @@ export const SKIN_RETRACT = {
 /** The pull toward the chest: the front recedes as this power of its time
  * (a cube held the limbs still for most of a second on a phone). */
 export const SKIN_RETRACT_PULL = 2.4;
+/** Before the pull the body's front falls from past the bands' flush to the
+ * far end of the field, while the helmet sinks: the finished bands behind a
+ * whole suit hold no armour, and receding through them on the pull's curve
+ * left the body untouched for half a second (450 – 1000 ms). */
+export const SKIN_RETRACT_FLUSH = [200, 560] as const;
+const RETRACT_FROM = 1.02;
 /** The head's field where the face begins (rexonance-suit-skin-field.ts
  * SKIN_FACE_FROM): the face is open once the front is back to it. */
 const FACE_FROM = 0.72;
@@ -371,9 +381,8 @@ export function skinRetractFrame(out: SkinFrame, ms: number) {
     SKIN_WHOLE -
     (SKIN_WHOLE - FACE_FROM) * smooth(spanOf(t, SKIN_RETRACT.face)) -
     (FACE_FROM - gone) * smooth(spanOf(t, SKIN_RETRACT.helmet));
-  // Accelerating: drawn in.
-  const u = spanOf(t, SKIN_RETRACT.body);
-  out.body = gone + (SKIN_WHOLE - gone) * (1 - Math.pow(u, SKIN_RETRACT_PULL));
+  // The bands' flush, then accelerating: drawn in.
+  out.body = retractBody(t);
   out.litBody = SKIN_WHOLE;
   out.litHead = SKIN_WHOLE;
   out.alpha = 1;
@@ -440,8 +449,10 @@ export function drawSkinDroplets(
       const sway = Math.sin(now * 0.006 + seed * 40) * 2.2;
       const x = s[o] * cell + s[o + 3] * lead - s[o + 4] * sway;
       const y = s[o + 1] * cell + s[o + 4] * lead + s[o + 3] * sway;
-      const size = (1 + 1.6 * seed) * px * (0.6 + 0.4 * Math.sin(Math.PI * life));
-      context.rect(x - size / 2, y - size / 2, size, size);
+      // (Round: squares read as confetti in a close look.)
+      const r = (0.56 + 0.9 * seed) * px * (0.6 + 0.4 * Math.sin(Math.PI * life));
+      context.moveTo(x + r, y);
+      context.arc(x, y, r, 0, 6.2832);
       bright = true;
     }
     if (bright) context.fill();
@@ -456,8 +467,8 @@ export function drawSkinDroplets(
 /* REXONANCE CELLS (owner, 2026-11-11: the streams 「気持ち悪い」 — 「大きな
    セル状のものや細かいものが周囲から吸収されていくように」). The armour's
    matter arrives as hexagonal cells, the skin's own tessellation seen loose:
-   a few large plates (a metal face, a thin bright rim, the hex pattern
-   inside) and many fine glinting specks. They come out of the air all round
+   a few large plates (a bevelled metal face, a thin bright rim, a fine
+   honeycomb inside) and many fine glinting specks. They come out of the air all round
    the figure, some from past the canvas's edge: each flickers in, drifts,
    and is drawn to a point of the armour just ahead of the front on a short
    spiral, quickening on its last approach, its size and its turn settling
@@ -494,8 +505,8 @@ export const SKIN_RETRACT_CELLS = {
   large: [460, 760],
   absorb: [90, 150],
 } as const;
-/** The helmet's plates and the last wave's are this share of the body's
- * (the helmet is small; the wave lands on finished armour). */
+/** The helmet's plates are this share of the body's (the helmet is small),
+ * and so are the plates that pass behind the figure. */
 const CELL_SMALL = 0.62;
 /** The lip reaches a landed cell this far into its absorption. */
 const CELL_LEAD = 0.35;
@@ -503,10 +514,11 @@ const CELL_LEAD = 0.35;
  * the surface. The distance left is 1 - cellEase(p): it only falls. */
 export const cellEase = (p: number) => {
   const u = clamp01(p);
-  return 0.3 * u + 0.7 * u * u * u;
+  const v = u * u;
+  return 0.25 * u + 0.75 * v * v;
 };
 
-/* The sheet: the plates (128 px, three rims), the absorb flash (64 px), a
+/* The sheet: the plates (128 px, four rims), the absorb flash (64 px), a
    micro-cell (32 px) and the specks (24 px: three tones, eight turns of the
    hexagon's 60 degrees). */
 const SHEET = { width: 512, height: 264, plate: 128, flash: 64, micro: 32, speck: 24, turns: 8 };
@@ -515,7 +527,16 @@ const FLASH_R = 24;
 const MICRO_R = 14;
 const SPECK_R = 9;
 const ROOT3 = 1.7320508;
-const CELL_RIMS = ["214 246 255", "255 190 232", "246 250 255"] as const;
+/** The plates' rims: ice, pink, white and the armour's gold. */
+const CELL_RIMS = ["214 246 255", "255 190 232", "246 250 255", "250 224 168"] as const;
+/** Each plate's honeycomb: the cells' rings about its middle (0: the one
+ * cell; 1: seven; 2: nineteen), and whether the middle cells are left out. */
+const PLATE_COMBS = [
+  [2, false],
+  [1, false],
+  [2, true],
+  [2, false],
+] as const;
 const CELL_FILLS = ["178 238 255", "255 170 224", "246 251 255"] as const;
 
 /** Draws the cells' sheet into a canvas the caller makes (once a mount). */
@@ -538,37 +559,54 @@ export function buildSkinCellSheet(
     context.closePath();
   };
   context.lineJoin = "round";
-  for (let tone = 0; tone < 3; tone += 1) {
+  for (let tone = 0; tone < CELL_RIMS.length; tone += 1) {
     const x = tone * SHEET.plate + SHEET.plate / 2;
     const y = SHEET.plate / 2;
-    // The face: brushed dark metal, lit from the upper left.
-    const face = context.createLinearGradient(x - PLATE_R, y - PLATE_R, x + PLATE_R, y + PLATE_R);
-    face.addColorStop(0, "rgb(78 96 116 / 0.9)");
-    face.addColorStop(0.4, "rgb(24 31 43 / 0.88)");
-    face.addColorStop(0.5, "rgb(176 204 224 / 0.92)");
-    face.addColorStop(0.57, "rgb(30 38 52 / 0.88)");
-    face.addColorStop(1, "rgb(12 16 24 / 0.9)");
+    const across = () =>
+      context.createLinearGradient(x - PLATE_R, y - PLATE_R, x + PLATE_R, y + PLATE_R);
+    // The plate: dark metal, its bevel lit from the upper left.
+    const bevel = across();
+    bevel.addColorStop(0, "rgb(150 170 194 / 0.97)");
+    bevel.addColorStop(0.4, "rgb(50 61 80 / 0.96)");
+    bevel.addColorStop(1, "rgb(6 9 15 / 0.97)");
     hex(x, y, PLATE_R);
+    context.fillStyle = bevel;
+    context.fill();
+    // Its face, set in: lit the other way (the bevel reads as depth).
+    const face = across();
+    face.addColorStop(0, "rgb(9 13 21 / 0.96)");
+    face.addColorStop(0.62, "rgb(24 31 44 / 0.96)");
+    face.addColorStop(1, "rgb(58 72 94 / 0.96)");
+    hex(x, y, PLATE_R - 10);
     context.fillStyle = face;
     context.fill();
-    // The hex pattern inside: seven cells, faint.
-    const inner = PLATE_R * 0.36;
-    context.lineWidth = 1.5;
-    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.26)`;
-    for (let n = 0; n < 7; n += 1) {
-      const angle = ((n - 1) * Math.PI) / 3;
-      const reach = n ? inner * ROOT3 : 0;
-      hex(x + Math.cos(angle) * reach, y + Math.sin(angle) * reach, inner);
-      context.stroke();
-    }
+    // A broad, soft sheen (never a hard band: that read as glass).
+    const sheen = across();
+    sheen.addColorStop(0.16, "rgb(210 232 250 / 0)");
+    sheen.addColorStop(0.4, "rgb(210 232 250 / 0.15)");
+    sheen.addColorStop(0.66, "rgb(210 232 250 / 0)");
+    hex(x, y, PLATE_R - 10);
+    context.fillStyle = sheen;
+    context.fill();
+    // The honeycomb inside: the skin's own cells, fine and faint.
+    const [rings, open] = PLATE_COMBS[tone];
+    const inner = PLATE_R * 0.168;
+    context.lineWidth = 1.1;
+    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.24)`;
+    for (let q = -rings; q <= rings; q += 1)
+      for (let r = Math.max(-rings, -q - rings); r <= Math.min(rings, -q + rings); r += 1) {
+        if (open && Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)) < 2) continue;
+        hex(x + inner * ROOT3 * (q + r / 2), y + inner * 1.5 * r, inner);
+        context.stroke();
+      }
     // The rim: thin and bright, with a soft inner light.
-    hex(x, y, PLATE_R - 4);
-    context.lineWidth = 7;
-    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.2)`;
+    hex(x, y, PLATE_R - 3.5);
+    context.lineWidth = 6;
+    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.16)`;
     context.stroke();
-    hex(x, y, PLATE_R - 1.5);
-    context.lineWidth = 3.2;
-    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.98)`;
+    hex(x, y, PLATE_R - 1.4);
+    context.lineWidth = 2.4;
+    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.96)`;
     context.stroke();
   }
   // The flash: a hexagonal ring of light.
@@ -576,9 +614,9 @@ export function buildSkinCellSheet(
     const x = SHEET.flash / 2;
     const y = SHEET.plate + SHEET.flash / 2;
     for (const [width, alpha] of [
-      [12, 0.1],
-      [7, 0.22],
-      [2.2, 0.95],
+      [11, 0.07],
+      [6, 0.16],
+      [1.8, 0.85],
     ]) {
       hex(x, y, FLASH_R);
       context.lineWidth = width;
@@ -591,10 +629,10 @@ export function buildSkinCellSheet(
     const x = SHEET.flash + SHEET.micro / 2;
     const y = SHEET.plate + SHEET.micro / 2;
     hex(x, y, MICRO_R);
-    context.fillStyle = "rgb(150 214 246 / 0.42)";
+    context.fillStyle = "rgb(150 214 246 / 0.3)";
     context.fill();
-    context.lineWidth = 1.6;
-    context.strokeStyle = "rgb(236 250 255 / 0.95)";
+    context.lineWidth = 1.4;
+    context.strokeStyle = "rgb(236 250 255 / 0.9)";
     context.stroke();
   }
   // The specks: a bright hexagon with a white heart.
@@ -618,9 +656,13 @@ const retractHead = (t: number) =>
   SKIN_WHOLE -
   (SKIN_WHOLE - FACE_FROM) * smooth(spanOf(t, SKIN_RETRACT.face)) -
   (FACE_FROM + SKIN_BAND) * smooth(spanOf(t, SKIN_RETRACT.helmet));
-const retractBody = (t: number) =>
-  -SKIN_BAND +
-  (SKIN_WHOLE + SKIN_BAND) * (1 - Math.pow(spanOf(t, SKIN_RETRACT.body), SKIN_RETRACT_PULL));
+function retractBody(t: number) {
+  return (
+    SKIN_WHOLE -
+    (SKIN_WHOLE - RETRACT_FROM) * smooth(spanOf(t, SKIN_RETRACT_FLUSH)) -
+    (RETRACT_FROM + SKIN_BAND) * Math.pow(spanOf(t, SKIN_RETRACT.body), SKIN_RETRACT_PULL)
+  );
+}
 /** When the retract's lip falls back to field value `field`, ms. */
 export function skinRetractReach(field: number, head = false) {
   let low = 0;
@@ -656,8 +698,8 @@ export class SkinCells {
   private cell: number;
   private width: number;
   private height: number;
-  /** Per slot: life, gap, offset, size (shares), spin, first turn, tone,
-   * behind the figure, a phase, from past the edge. */
+  /** Per slot: life, gap, offset, size (shares), spin, first turn, tone
+   * (a plate's rim), behind the figure, a phase, from past the edge. */
   private slots: Float32Array;
   /** Per slot and lane (its flights; the last wave): whether it flies (its
    * plate's share of its size; 0: no), its
@@ -695,14 +737,23 @@ export class SkinCells {
       // Under half a turn of spiral, either way.
       s[o + 4] = (hash3(i, 5, 1) < 0.5 ? -1 : 1) * (0.25 + 0.55 * hash3(i, 6, 1));
       s[o + 5] = (hash3(i, 7, 1) < 0.5 ? -1 : 1) * (0.7 + 1.5 * hash3(i, 8, 1));
-      s[o + 6] = i % 7 === 3 ? 1 : i % 5 === 2 ? 2 : 0;
-      s[o + 7] = i >= this.large && hash3(i, 9, 1) < 0.22 ? 1 : 0;
+      // (A plate's rim: ice for two in five, then pink, white, gold.)
+      s[o + 6] =
+        i < this.large
+          ? [0, 1, 0, 3, 2][i % 5]
+          : i % 7 === 3
+            ? 1
+            : i % 5 === 2
+              ? 2
+              : 0;
+      // Behind the figure: a speck in five, a plate in three or so.
+      s[o + 7] = hash3(i, 9, 1) < (i < this.large ? 0.32 : 0.22) ? 1 : 0;
       s[o + 8] = hash3(i, 10, 1) * 6.2832;
       s[o + 9] = hash3(i, 11, 1) < 0.14 ? 1 : 0;
     }
     this.memo = new Float64Array(this.count * 2 * MEMO);
     this.memoKey = new Float64Array(this.count * 2).fill(Number.NaN);
-    this.burst = new Float32Array(Math.max(1, this.large) * 2 * 4);
+    this.burst = new Float32Array(Math.max(1, this.large) * 4);
   }
 
   /** Nothing is in the air (the scene stopped, sought, or moved on). The
@@ -792,9 +843,9 @@ export class SkinCells {
       return count ? samples[(first + count - 1) * SKIN_SAMPLE + 2] : -1;
     };
     if (wave) {
-      // (Four specks in five join it, and two plates in five; a retract
-      // has none.)
-      if (!timeline || i % 5 > (big ? 1 : 3)) return false;
+      // (Four specks in five join it and no plate: on finished armour a
+      // plate sat like a sticker. A retract has none.)
+      if (!timeline || big || i % 5 > 3) return false;
       // The last wave: one landing each, anywhere on the armour.
       const [from, to] = timeline.cells.wave;
       const land = from + (to - from) * hash3(i, 31, 3);
@@ -809,7 +860,7 @@ export class SkinCells {
       memo[m + 6] = land;
       // (All of it over before the light.)
       memo[m + 7] = Math.min(absorb, (timeline.light - land) * 0.8);
-      memo[m] = CELL_SMALL;
+      memo[m] = 1;
       return true;
     }
     const start = s[o + 2] * period + key * period;
@@ -837,7 +888,7 @@ export class SkinCells {
     } else {
       // The retract: shed where the receding lip then is.
       const lip = start + 0.4 * absorb;
-      const body = lip > SKIN_RETRACT.body[0] ? retractBody(lip) : -1;
+      const body = lip > SKIN_RETRACT_FLUSH[0] ? retractBody(lip) : -1;
       const crown = retractHead(lip);
       const bodyOn = body >= 0 && body <= most(false);
       const crownOn = crown >= 0 && crown <= most(true);
@@ -991,21 +1042,26 @@ export class SkinCells {
     const lanes = timeline ? 2 : 1;
     let bursts = 0;
     let live = 0;
-    // The plates: metal, over the scene.
+    // The plates: metal, over the scene, or passing behind the figure
+    // (smaller and dimmer there: depth).
     front.globalCompositeOperation = "source-over";
+    back.globalCompositeOperation = "source-over";
     const plate = SHEET.plate;
     const plateDraw = plate / (ROOT3 * PLATE_R);
-    for (let i = 0; i < large; i += 1)
-      for (let lane = 0; lane < lanes; lane += 1) {
-        if (!this.poseAt(pose, i, lane === 1, field, timeline, x, now, scale, bounds)) continue;
-        live += 1;
-        const k = pose[6];
-        let width = pose[2] * plateDraw;
-        let alpha = pose[3] * gain;
-        if (k >= 0) {
-          // Taken in: it shrinks into the surface under its own flash.
-          width *= 1 - 0.22 * smooth(k);
-          alpha *= 1 - smooth(k / 0.55);
+    for (let i = 0; i < large; i += 1) {
+      if (!this.poseAt(pose, i, false, field, timeline, x, now, scale, bounds)) continue;
+      live += 1;
+      const behind = this.slots[i * SLOT + 7] > 0;
+      const context = behind ? back : front;
+      const k = pose[6];
+      let width = pose[2] * plateDraw * (behind ? CELL_SMALL : 1);
+      let alpha = pose[3] * gain * (behind ? 0.62 : 1);
+      if (k >= 0) {
+        // Taken in: it shrinks into the surface under its own flash (a
+        // plate behind the figure has gone under its edge: no flash).
+        width *= 1 - 0.22 * smooth(k);
+        alpha *= 1 - smooth(k / 0.55);
+        if (!behind) {
           const b = bursts * 4;
           burst[b] = pose[0];
           burst[b + 1] = pose[1];
@@ -1013,25 +1069,26 @@ export class SkinCells {
           burst[b + 3] = k;
           bursts += 1;
         }
-        if (alpha <= 0.004) continue;
-        front.save();
-        front.translate(pose[0], pose[1]);
-        front.rotate(pose[4]);
-        front.scale(1, pose[5]);
-        front.globalAlpha = alpha;
-        front.drawImage(
-          sheet,
-          this.slots[i * SLOT + 6] * plate,
-          0,
-          plate,
-          plate,
-          -width / 2,
-          -width / 2,
-          width,
-          width,
-        );
-        front.restore();
       }
+      if (alpha <= 0.004) continue;
+      context.save();
+      context.translate(pose[0], pose[1]);
+      context.rotate(pose[4]);
+      context.scale(1, pose[5]);
+      context.globalAlpha = alpha;
+      context.drawImage(
+        sheet,
+        this.slots[i * SLOT + 6] * plate,
+        0,
+        plate,
+        plate,
+        -width / 2,
+        -width / 2,
+        width,
+        width,
+      );
+      context.restore();
+    }
     front.globalCompositeOperation = "lighter";
     back.globalCompositeOperation = "lighter";
     // The plates' absorption: the rim's flash, and seven micro-cells that
@@ -1046,7 +1103,9 @@ export class SkinCells {
       const size = burst[b + 2];
       const k = burst[b + 3];
       const ring = size * (1 + 0.24 * k) * flashDraw;
-      front.globalAlpha = 0.9 * Math.pow(1 - k, 1.5) * gain;
+      // (A glint, not a flare: the ring, the micro-cells and the specks'
+      // own flashes add up on one spot.)
+      front.globalAlpha = 0.6 * Math.pow(1 - k, 1.5) * gain;
       front.drawImage(
         sheet,
         0,
@@ -1077,7 +1136,7 @@ export class SkinCells {
         const uy = j ? Math.sin(angle) : 0;
         const mx = bx + ux * from + (gx + ux * hex - (bx + ux * from)) * set;
         const my = by + uy * from + (gy + uy * hex - (by + uy * from)) * set;
-        front.globalAlpha = light * gain;
+        front.globalAlpha = 0.62 * light * gain;
         front.drawImage(
           sheet,
           SHEET.flash,
@@ -1107,7 +1166,7 @@ export class SkinCells {
         let alpha = pose[3] * gain;
         if (k >= 0) {
           const ring = hex * (1.1 + 0.9 * k) * flashDraw;
-          context.globalAlpha = 0.7 * (1 - k) * (1 - k) * gain;
+          context.globalAlpha = 0.45 * (1 - k) * (1 - k) * gain;
           context.drawImage(
             sheet,
             0,

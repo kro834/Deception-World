@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
+  HenshinOverlay,
   HENSHIN_GATHER,
   HENSHIN_LOCKED,
   HENSHIN_SEAT,
@@ -117,4 +118,72 @@ test("the overlay keeps the flash rules: no red, small lights, and nothing alloc
   assert.doesNotMatch(source, /fillRect\(0, 0, view\.width, view\.height\)[\s\S]{0,80}WHITE/);
   assert.match(source, /prefers-reduced-motion: reduce/);
   assert.match(source, /worldEffects === "economy"/);
+});
+
+test("Rexonance's call draws none of the overlay's linework; every other mount keeps all of it", () => {
+  // Owner (2026-11-11): no line effects on Rexonance's suit-up. Its armour
+  // grows as one front (rexonance-suit-skin.ts): the torrent's streaks, the
+  // focus lines, the brackets, the hex ring, the sparks, the seal's bars and
+  // ring and the pose's streak have no plate to belong to. The soft light
+  // stays (each lock's glow and the seal's). The option is the
+  // call's alone: Meta Unitas' director never passes it.
+  const sheet = henshinEntrySheet(figure, {
+    rider: 240,
+    chant: 760,
+    snaps: [880, 1000, 1120, 1240],
+    response: 1500,
+    tail: 1900,
+    helm: 1890,
+    final: 1980,
+  });
+  const play = (linework) => {
+    const calls = { stroke: 0, lineTo: 0, fill: 0, fillRect: 0 };
+    const store = {};
+    const context = new Proxy(store, {
+      get: (target, key) =>
+        key in calls
+          ? () => (calls[key] += 1)
+          : key === "createRadialGradient" || key === "createLinearGradient"
+            ? () => ({ addColorStop() {} })
+            : key in target
+              ? target[key]
+              : () => {},
+      set: (target, key, value) => {
+        target[key] = value;
+        return true;
+      },
+    });
+    const canvas = { width: 1, height: 1, getContext: () => context };
+    const tier = { lines: 22, sparks: 5, dpr: 1, lattice: false };
+    const overlay =
+      linework === undefined
+        ? new HenshinOverlay(canvas, figure, { a: [121, 232, 255], b: [255, 143, 216], c: [242, 216, 150] }, tier)
+        : new HenshinOverlay(canvas, figure, { a: [121, 232, 255], b: [255, 143, 216], c: [242, 216, 150] }, tier, linework);
+    overlay.resize(390, 700);
+    const camera = createHenshinCamera();
+    const view = { x: 40, y: 20, s: 0.55, width: 390, height: 700 };
+    // (After the omen: its heartbeat on the driver is soft light, kept.)
+    for (let t = sheet.omen[1] + 80; t < 1980 + 1100; t += 10) {
+      henshinCamera(sheet, t, camera);
+      overlay.draw(sheet, t, camera, view);
+    }
+    return calls;
+  };
+  const all = play(undefined);
+  assert.ok(all.stroke > 100 && all.lineTo > 100, "the bank's linework, as ever");
+  const none = play(false);
+  assert.equal(none.stroke, 0);
+  assert.equal(none.lineTo, 0);
+  assert.equal(none.fill, 0);
+  assert.ok(none.fillRect > 20 && none.fillRect < all.fillRect, "the locks' and the seal's glow stays");
+  assert.deepEqual(play(true), all);
+  assert.match(
+    read("src/components/rexonance-saga/rexonance-suit-surge.tsx"),
+    /mountHenshinEntry\(figure, suit, \{\s*figure: REXONANCE_HENSHIN_FIGURE,\s*palette: REXONANCE_HENSHIN_PALETTE,\s*\/\/ [^\n]*\n\s*linework: false,/,
+  );
+  const source = read("src/lib/rexonance-henshin.ts");
+  assert.match(source, /options\.linework !== false,/);
+  // The director (Meta Unitas' entry) builds its overlay without the option.
+  assert.match(source, /const overlay = new HenshinOverlay\(canvas, figure, options\.palette, tier\);/);
+  assert.doesNotMatch(read("src/lib/meta-unitas-rx-engine.ts"), /linework/);
 });

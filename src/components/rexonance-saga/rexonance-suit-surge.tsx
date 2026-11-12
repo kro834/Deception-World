@@ -381,6 +381,8 @@ export function EntrySurge() {
     const henshin = mountHenshinEntry(figure, suit, {
       figure: REXONANCE_HENSHIN_FIGURE,
       palette: REXONANCE_HENSHIN_PALETTE,
+      // (Owner, 2026-11-11: no line effects on this suit-up.)
+      linework: false,
       sheet: henshinEntrySheet(REXONANCE_HENSHIN_FIGURE, {
         rider: REXONANCE_CALL_BEATS[1].start,
         chant: REXONANCE_CALL_BEATS[2].start,

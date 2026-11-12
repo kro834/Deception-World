@@ -399,6 +399,14 @@ const inside = (polygon: readonly (readonly [number, number])[], px: number, py:
 };
 const square = (x: number, y: number, size: number) =>
   `M${x.toFixed(1)} ${y.toFixed(1)}h${size}v${size}h-${size}z`;
+// A pointy-top hexagon of that width about (x, y): the skin's own cell
+// (the armour's tessellation), for the reactor's light.
+const hexagon = (x: number, y: number, size: number) => {
+  const r = size * 0.58;
+  const w = r * 0.866;
+  const f = (value: number) => value.toFixed(1);
+  return `M${f(x)} ${f(y - r)}L${f(x + w)} ${f(y - r / 2)}L${f(x + w)} ${f(y + r / 2)}L${f(x)} ${f(y + r)}L${f(x - w)} ${f(y + r / 2)}L${f(x - w)} ${f(y - r / 2)}z`;
+};
 type Squares = { cyan: string; pink: string; white: string };
 // RIDER！'s nanite motes: squares hanging in the air round the body,
 // thickest near it (figure pixels).
@@ -443,7 +451,10 @@ const suitPixels = (): Squares[] => {
   return groups;
 };
 // The reactor's light forms the same way as the eyes (owner, 2026-10-23:
-// it popped in whole): squares fill the disc, hold, then scatter.
+// it popped in whole): cells fill the disc, hold, then scatter. They are
+// hexagons, the skin's own cells (2026-11-11: flat squares on the liquid
+// front read as a mosaic), and under the skin they scatter only a little
+// way before they are gone (styles-rexonance-calls.css --rx-suit-out).
 const REACTOR_REACH = 34;
 const suitReactorPixels = (): Squares[] => {
   const random = seeded(2023);
@@ -461,7 +472,7 @@ const suitReactorPixels = (): Squares[] => {
     const size = [4, 5, 6, 8][found % 4];
     const inner = Math.min(r, REACTOR_REACH * 0.45) === r;
     const tone = found % 7 === 0 ? "white" : inner ? "pink" : "cyan";
-    groups[found % groups.length][tone] += square(x - size / 2, y - size / 2, size);
+    groups[found % groups.length][tone] += hexagon(x, y, size);
     found += 1;
   }
   return groups;

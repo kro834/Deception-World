@@ -10,9 +10,10 @@
      lock, and from the reactor through the whole suit on completion;
    - anticipation: a charge-up on the reactor and the driver before the last
      lock (contracting rings, a growing bloom);
-   - impact: on completion a flash, a double shock shell with a chromatic
-     fringe, a ground ring, rays, a scale-punch echo of the armour's lines
-     (the body itself never moves), a lens glint on the visor;
+   - impact: on completion a flash, a thin shock shell and a broad soft one
+     behind it, a ground ring, motes of light thrown out from the reactor
+     (no rays: owner, 2026-11-11, no line effects), a scale-punch echo of the
+     armour's lines (the body itself never moves), a lens glint on the visor;
    - the settle: a rim light on the silhouette (ice from the key side, pink
      from the fill) and the reactor's and driver's bloom easing to rest.
 
@@ -54,7 +55,8 @@ const hash = (a: number, b: number) => {
 
 export type CrescendoTier = {
   name: "desktop" | "tablet" | "phone" | "low";
-  /** Completion rays. */
+  /** The completion's motes of light (once its rays: the budget's name
+   * stays). */
   rays: number;
   /** The edge map's width in px (0: no energy lines, no rim light). */
   edge: number;
@@ -578,7 +580,8 @@ export class CrescendoEngine {
       back.arc(cx, cy, r, 0, Math.PI * 2);
       back.stroke();
     }
-    if (this.art.edge) this.band(front, this.art.edge, cx, cy, 0, 150 + 190 * c, 0.5 * c);
+    // (Faint: at half light the whole chest went frost-white before the light.)
+    if (this.art.edge) this.band(front, this.art.edge, cx, cy, 0, 150 + 190 * c, 0.32 * c);
     this.bloom(front, c * (0.5 + 0.12 * Math.sin(t / 37)), 0.6 + 0.5 * c);
   }
 
@@ -667,10 +670,9 @@ export class CrescendoEngine {
       context.ellipse(cx, cy, 6 + rx * k, 6 + down * k, 0, 0, Math.PI);
       context.stroke();
     };
+    // (Two shells: four at once, with the ground's two, crowded the beat.)
     shell(front, 620, 1, 2.4, "244 252 255", 0.95);
-    shell(front, 960, 0.9, 9, "255 143 216", 0.34);
-    shell(front, 960, 0.88, 6, "150 236 255", 0.6);
-    shell(back, 1180, 0.8, 16, "121 232 255", 0.22);
+    shell(back, 1080, 0.86, 10, "150 220 255", 0.26);
     // The ground ring, under the feet.
     const ground = finale.shockLight(a, 860);
     if (ground > 0.01) {
@@ -681,30 +683,25 @@ export class CrescendoEngine {
       back.beginPath();
       back.ellipse(cx, gy, 20 + rx * 0.95 * g, (20 + rx * 0.95 * g) * 0.13, 0, 0, Math.PI * 2);
       back.stroke();
-      back.lineWidth = 9 * px;
-      back.strokeStyle = `rgb(255 143 216 / ${(0.22 * ground).toFixed(3)})`;
-      back.beginPath();
-      back.ellipse(cx, gy, 12 + rx * 0.8 * g, (12 + rx * 0.8 * g) * 0.13, 0, 0, Math.PI * 2);
-      back.stroke();
     }
-    // The rays.
-    if (a < 560) {
-      const k = a / 560;
-      const count = Math.max(6, Math.floor(this.tier.rays * level.rays));
-      const grow = outCubic(k);
-      back.beginPath();
+    // The motes: a few small lights carried out just behind the thin shell
+    // and gone with it (sprites: no ray, no stroke; half the old rays).
+    if (a < 620 && this.sprites.length) {
+      const k = a / 620;
+      const count = Math.max(4, Math.floor(this.tier.rays * level.rays * 0.5));
+      const reach = finale.shockReach(a, 620);
+      const light = 0.7 * finale.shockLight(a, 620);
       for (let i = 0; i < count; i += 1) {
-        const angle = (i / count) * Math.PI * 2 + hash(i, 83) * 0.4;
-        const inner = 30 + rx * 0.5 * grow * (0.5 + 0.5 * hash(i, 89));
-        const outer = inner + rx * (0.16 + 0.34 * hash(i, 97)) * (1 - k * 0.5);
-        const c = Math.cos(angle);
-        const s = Math.sin(angle) * (up / Math.max(1, rx)) * 0.8;
-        back.moveTo(cx + c * inner, cy + s * inner);
-        back.lineTo(cx + c * Math.min(outer, rx * 0.96), cy + s * Math.min(outer, rx * 0.96));
+        const angle = (i / count) * Math.PI * 2 + hash(i, 83) * 0.5;
+        const share = reach * (0.8 + 0.17 * hash(i, 89));
+        const r = (3.5 + 5 * hash(i, 97)) * (1 - 0.4 * k);
+        const sin = Math.sin(angle);
+        const x = cx + Math.cos(angle) * (6 + rx * share);
+        const y = cy + sin * (6 + (sin < 0 ? up : down) * share);
+        back.globalAlpha = light * (0.5 + 0.5 * hash(i, 101));
+        back.drawImage(this.sprites[0], x - r, y - r, r * 2, r * 2);
       }
-      back.lineWidth = 2 * px;
-      back.strokeStyle = `rgb(236 252 255 / ${(0.62 * smooth(k * 8) * (1 - k) * (1 - k)).toFixed(3)})`;
-      back.stroke();
+      back.globalAlpha = 1;
     }
     // The reactor and the driver: the flash, then the bloom easing to rest.
     const flash = finale.flash(a);
@@ -723,7 +720,7 @@ export class CrescendoEngine {
       const k = span(a, 170, 900);
       const long = Math.min(
         rx * 0.98,
-        W * (0.34 + 0.6 * Math.sin(Math.PI * Math.min(1, k * 1.5) * 0.5)),
+        W * (0.3 + 0.45 * Math.sin(Math.PI * Math.min(1, k * 1.5) * 0.5)),
       );
       const thick = 9 + 12 * glint;
       front.globalAlpha = glint;

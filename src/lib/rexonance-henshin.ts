@@ -465,13 +465,22 @@ export class HenshinOverlay {
   private readonly figure: HenshinFigure;
   private readonly palette: HenshinPalette;
   private readonly tier: HenshinTier;
+  /** Whether the overlay draws its linework: the torrent's streaks, the
+   * focus lines, the clamp's brackets, the lock's hex ring and sparks, the
+   * seal's blades, lattice and ring, the pose's streak and star. Off (owner,
+   * 2026-11-11: no line effects on Rexonance's suit-up, whose armour grows
+   * as one front and has no plate to clamp), only the soft light stays: the
+   * omen, each lock's glow and the seal's. */
+  private readonly linework: boolean;
 
   constructor(
     canvas: HTMLCanvasElement,
     figure: HenshinFigure,
     palette: HenshinPalette,
     tier: HenshinTier,
+    linework = true,
   ) {
+    this.linework = linework;
     this.canvas = canvas;
     this.figure = figure;
     this.palette = palette;
@@ -569,7 +578,7 @@ export class HenshinOverlay {
     const torrent =
       smooth(span(t, sheet.torrent[0] - 40 * ms, sheet.torrent[0] + 80 * ms)) *
       (1 - smooth(span(t, sheet.torrent[1] - 60 * ms, sheet.torrent[1] + 160 * ms)));
-    if (torrent > 0.01) {
+    if (torrent > 0.01 && this.linework) {
       const [px, py] = project(m, view, this.figure.core[0], this.figure.core[1], this.point);
       const reach = Math.hypot(view.width, view.height) * 0.55;
       const clock = (t - sheet.torrent[0]) / (ms * 420);
@@ -601,7 +610,7 @@ export class HenshinOverlay {
       const fly =
         smooth(span(t, lock.from, lock.from + (lock.at - lock.from) * 0.35)) *
         (1 - smooth(span(d, -20, 200)));
-      if (fly > 0.01) {
+      if (fly > 0.01 && this.linework) {
         const deal = Math.floor(t / (40 * ms));
         const outer = Math.hypot(view.width, view.height);
         const count = Math.round(this.lines * lock.weight);
@@ -628,7 +637,7 @@ export class HenshinOverlay {
       const close =
         d < 0 ? 1.5 - 0.5 * easeIn((d + 80) / 80) : 1 + 0.05 * Math.exp(-d / 60) * Math.cos(d / 30);
       const fade = d < 0 ? clamp01((d + 80) / 50) : 1 - smooth(span(d, 260, 520));
-      if (fade > 0.01) {
+      if (fade > 0.01 && this.linework) {
         const [x0, y0] = project(m, view, bx, by, this.point);
         const [x1, y1] = project(m, view, bx + bw, by + bh, this.corner);
         const cx = (x0 + x1) / 2;
@@ -663,17 +672,19 @@ export class HenshinOverlay {
       if (ring > 0) {
         const r = half * (0.55 + 0.75 * easeOut(d / 300)) + 10;
         const turn = (Math.PI / 6) * easeOut(d / 260);
-        context.strokeStyle = rgba(a, 0.7 * ring * lock.weight);
-        context.lineWidth = 1.5 + 2 * ring;
-        context.beginPath();
-        for (let v = 0; v <= 6; v += 1) {
-          const angle = turn + (v * Math.PI) / 3;
-          const vx = px + Math.cos(angle) * r;
-          const vy = py + Math.sin(angle) * r * 0.86;
-          if (v) context.lineTo(vx, vy);
-          else context.moveTo(vx, vy);
+        if (this.linework) {
+          context.strokeStyle = rgba(a, 0.7 * ring * lock.weight);
+          context.lineWidth = 1.5 + 2 * ring;
+          context.beginPath();
+          for (let v = 0; v <= 6; v += 1) {
+            const angle = turn + (v * Math.PI) / 3;
+            const vx = px + Math.cos(angle) * r;
+            const vy = py + Math.sin(angle) * r * 0.86;
+            if (v) context.lineTo(vx, vy);
+            else context.moveTo(vx, vy);
+          }
+          context.stroke();
         }
-        context.stroke();
         const hot = Math.exp(-d / 90);
         const glow = context.createRadialGradient(
           px,
@@ -691,7 +702,7 @@ export class HenshinOverlay {
       }
       const sparks = Math.round(this.tier.sparks * lock.weight);
       const life = 1 - d / 340;
-      if (life > 0) {
+      if (life > 0 && this.linework) {
         context.lineCap = "round";
         for (let n = 0; n < sparks; n += 1) {
           const seed = n * 5.3 + lock.at * 0.01;
@@ -725,7 +736,7 @@ export class HenshinOverlay {
       const [lx, ty] = project(m, view, W * 0.06, 0, this.point);
       const [rx, fy] = project(m, view, W * 0.94, H, this.corner);
       const shell = (t < sm ? 1 : after) * 0.9;
-      if (shell > 0.01 && this.tier.lattice) {
+      if (shell > 0.01 && this.tier.lattice && this.linework) {
         const pattern = this.hexes(context);
         if (pattern) {
           const [, sy0] = project(m, view, 0, topY, this.point);
@@ -741,7 +752,7 @@ export class HenshinOverlay {
           context.restore();
         }
       }
-      if (t < sm + 40 * ms) {
+      if (t < sm + 40 * ms && this.linework) {
         for (const y of [topY, footY]) {
           const [, sy] = project(m, view, 0, y, this.point);
           const band = context.createLinearGradient(0, sy - 18, 0, sy + 18);
@@ -759,11 +770,13 @@ export class HenshinOverlay {
         const [px, py] = project(m, view, this.figure.belt[0], beltY, this.point);
         const g = d / 520;
         const reach = H * view.s * camera.zoom * 0.62;
-        context.strokeStyle = rgba(b, 0.7 * (1 - g));
-        context.lineWidth = 3 * (1 - g) + 1;
-        context.beginPath();
-        context.ellipse(px, py, reach * easeOut(g), reach * easeOut(g) * 0.42, 0, 0, Math.PI * 2);
-        context.stroke();
+        if (this.linework) {
+          context.strokeStyle = rgba(b, 0.7 * (1 - g));
+          context.lineWidth = 3 * (1 - g) + 1;
+          context.beginPath();
+          context.ellipse(px, py, reach * easeOut(g), reach * easeOut(g) * 0.42, 0, 0, Math.PI * 2);
+          context.stroke();
+        }
         const glow = context.createRadialGradient(px, py, 0, px, py, 90);
         glow.addColorStop(0, rgba(WHITE, 0.22 * Math.exp(-d / 110)));
         glow.addColorStop(1, rgba(a, 0));
@@ -774,7 +787,7 @@ export class HenshinOverlay {
 
     /* The pose: the eyes' glint, a horizontal streak and a four-point star. */
     const g = (t - sheet.glint) / ms;
-    if (g >= 0 && g < 700) {
+    if (g >= 0 && g < 700 && this.linework) {
       const [px, py] = project(m, view, this.figure.visor[0], this.figure.visor[1], this.point);
       const env = Math.sin(Math.PI * clamp01(g / 700)) ** 1.5;
       const length = this.figure.size.width * view.s * camera.zoom * (0.5 + 0.5 * easeOut(g / 400));
@@ -1151,6 +1164,8 @@ export function mountHenshinEntry(
     figure: HenshinFigure;
     palette: HenshinPalette;
     sheet: HenshinSheet;
+    /** false: the overlay draws no linework (HenshinOverlay's `linework`). */
+    linework?: boolean;
     environment?: typeof globalThis;
   },
 ): HenshinEntry {
@@ -1174,6 +1189,7 @@ export function mountHenshinEntry(
     options.figure,
     options.palette,
     henshinTier(environment),
+    options.linework !== false,
   );
   const camera = createHenshinCamera();
   const matrix = new Float64Array(6);

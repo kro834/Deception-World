@@ -51,6 +51,7 @@ import {
   SKIN_RETRACT,
   SKIN_RETRACT_FADE_MS,
   SKIN_RETRACT_MS,
+  SKIN_RETRACT_FLUSH,
   SKIN_RETRACT_PULL,
   SKIN_SAMPLE,
   SKIN_SCROLL,
@@ -548,6 +549,7 @@ test("the retract: lights out, the face opens, the helmet sinks, the limbs are d
   let faceOpen = -1;
   let helmetGone = -1;
   let bodyMoves = -1;
+  let armourGoes = -1;
   let bodyGone = -1;
   const steps = [];
   for (let ms = 4; ms <= SKIN_RETRACT_MS; ms += 4) {
@@ -562,8 +564,9 @@ test("the retract: lights out, the face opens, the helmet sinks, the limbs are d
     if (faceOpen < 0 && frame.head <= SKIN_FACE_FROM) faceOpen = ms;
     if (helmetGone < 0 && frame.head <= 0) helmetGone = ms;
     if (bodyMoves < 0 && frame.body < SKIN_WHOLE) bodyMoves = ms;
+    if (armourGoes < 0 && frame.body < 1) armourGoes = ms;
     if (bodyGone < 0 && frame.body <= 0) bodyGone = ms;
-    if (ms > SKIN_RETRACT.body[0] && ms <= SKIN_RETRACT.body[1]) steps.push(previous.body - frame.body);
+    if (ms > SKIN_RETRACT_FLUSH[1] && ms <= SKIN_RETRACT.body[1]) steps.push(previous.body - frame.body);
     previous = frame;
   }
   // 1. The lights go out first: the eyes, then the emitters, before any of
@@ -573,12 +576,19 @@ test("the retract: lights out, the face opens, the helmet sinks, the limbs are d
   assert.ok(at(SKIN_RETRACT.eyes[1]).lights > 0.8, "the eyes before the emitters");
   assert.equal(at(SKIN_RETRACT.lights[1]).lights, 0);
   assert.ok(SKIN_RETRACT.lights[1] < SKIN_RETRACT.body[0] && SKIN_RETRACT.lights[1] < faceOpen);
+  assert.ok(at(SKIN_RETRACT.lights[1]).body > 1.25, "the lights are out before any armour leaves");
   // 2–3. The face opens (by 0.3 s), then the helmet sinks (by 0.6 s) …
   assert.ok(faceOpen > 150 && faceOpen <= 300, `the face is open at ${faceOpen}`);
   assert.ok(helmetGone > faceOpen && helmetGone <= 600, `the helmet is down at ${helmetGone}`);
-  // 4. … before the limbs start for the chest, ever faster.
-  assert.ok(bodyMoves > SKIN_RETRACT.body[0] && bodyMoves <= SKIN_RETRACT.body[0] + 8);
-  assert.ok(helmetGone <= bodyMoves + 220);
+  // 4. … while the body's front falls through the finished bands behind a
+  // whole suit (they hold no armour: receding through them on the pull's
+  // own curve left the body untouched until 1000 ms), so the limbs' far
+  // ends start for the chest as the helmet is down, and ever faster.
+  assert.ok(bodyMoves > SKIN_RETRACT_FLUSH[0] && bodyMoves <= SKIN_RETRACT_FLUSH[0] + 8);
+  assert.ok(SKIN_RETRACT_FLUSH[0] >= SKIN_RETRACT.helmet[0] && SKIN_RETRACT_FLUSH[1] <= SKIN_RETRACT.helmet[1]);
+  assert.ok(at(SKIN_RETRACT_FLUSH[1]).body > 0.98, "the flush takes none of the armour off");
+  assert.ok(armourGoes > faceOpen && armourGoes >= helmetGone - 60 && armourGoes <= 680, `the limbs' ends go at ${armourGoes}`);
+  assert.ok(at(1000).body < 0.85 && at(1000).body > 0.6, "no still half second in the middle");
   for (let n = 1; n < steps.length; n += 1)
     assert.ok(steps[n] >= steps[n - 1] - 1e-9, "the pull accelerates");
   assert.ok(SKIN_RETRACT_PULL > 2 && SKIN_RETRACT_PULL <= 3);
@@ -739,7 +749,12 @@ test("the droplets are budgeted per device, sorted along the field, and live onl
     const context = {
       beginPath() {},
       fill() {},
-      rect: (x, y) => drawn.push([x, y]),
+      // (Round droplets: a square read as confetti.)
+      moveTo() {},
+      arc: (x, y, r) => {
+        assert.ok(r > 0 && r < 3);
+        drawn.push([x, y]);
+      },
       fillStyle: "",
     };
     const live = (body, head) => {
@@ -977,13 +992,15 @@ test("the cells are sprites from a sheet drawn once: no stroke, no line, no trai
   );
   assert.ok(size[0] <= 512 && size[1] <= 512, "a small sheet");
   assert.equal(built.points, built.paths * 6, "every shape on it is a hexagon");
-  assert.ok(built.fills >= 3 + 1 + 24 && built.strokes >= 3 * 9);
+  // Four plates (a bevel, a face, a sheen each; a honeycomb and a rim),
+  // the flash, the micro-cell, the specks.
+  assert.ok(built.fills >= 4 * 3 + 1 + 24 && built.strokes >= 4 * 9);
   assert.equal(buildSkinCellSheet(() => null), null);
 
   const phone = skinBudget(cellDevice(true, 390, 844));
   const field = skinSamples(cellRgba, W, H, phone.samples);
   const cells = new SkinCells(phone.large, phone.fine, SHEET, CELL, FIGURE);
-  const seen = { plates: 0, specks: 0, flashes: 0, micros: 0 };
+  const seen = { plates: 0, behind: 0, specks: 0, flashes: 0, micros: 0 };
   for (let t = 150; t < 1980; t += 10) {
     const [back, front] = [spriteContext(), spriteContext()];
     // (Any path or stroke call throws.)
@@ -995,10 +1012,15 @@ test("the cells are sprites from a sheet drawn once: no stroke, no line, no trai
     for (const call of [...front.calls, ...back.calls]) {
       assert.ok(call.alpha >= 0 && call.alpha <= 1);
       if (call.sy === 0) {
-        // A plate: metal over the scene, never added light; on the front.
+        // A plate: metal over the scene, never added light; over the
+        // figure, or passing behind it (smaller and dimmer: depth).
         assert.equal(call.sw, 128);
+        assert.ok(call.sx % 128 === 0 && call.sx < 512, "one of the four rims");
         assert.equal(call.mode, "source-over");
-        assert.ok(front.calls.includes(call));
+        if (back.calls.includes(call)) {
+          assert.ok(call.alpha <= 0.63 && call.dw * PHONE_SCALE <= 40);
+          seen.behind += 1;
+        }
         assert.ok(call.dw * PHONE_SCALE <= 62, "a plate, not a panel");
         seen.plates += 1;
       } else {
@@ -1019,6 +1041,7 @@ test("the cells are sprites from a sheet drawn once: no stroke, no line, no trai
   }
   assert.ok(seen.plates > 0 && seen.specks > seen.plates * 4 && seen.flashes > 0);
   assert.ok(seen.micros > 0, "a plate breaks into micro-cells as it is taken in");
+  assert.ok(seen.behind > 0 && seen.behind < seen.plates * 0.6, "some plates pass behind the figure");
 
   const lib = read("src/lib/rexonance-suit-skin.ts");
   const drawn = lib.slice(lib.indexOf("export class SkinCells"), lib.indexOf("/* ---------------- the shader"));
@@ -1235,6 +1258,9 @@ for (const [name, timeline, step] of [
       waves += 1;
     }
     assert.ok(waves > cells.count * 0.65 && waves < cells.count * 0.85, `the wave: ${waves}`);
+    // Specks only: on finished armour a plate sat like a sticker.
+    for (let i = 0; i < cells.large; i += 1)
+      assert.equal(flightsOf(cells, field, timeline, i, true, timeline.body[0], timeline.light, step).length, 0);
     for (const count of sides) assert.ok(count > waves * 0.12, `from all round: ${sides}`);
     assert.ok(headLandings > 0 && headLandings < waves * 0.5, "over the whole body");
     // Faded out into the light; from the light on, none (no afterburn).
@@ -1384,4 +1410,42 @@ test("the crescendo draws no streams and no spokes: its charge is rings and bloo
   assert.ok(charge.length > 200);
   assert.doesNotMatch(charge, /moveTo|lineTo/);
   assert.match(charge, /back\.arc\(cx, cy, r, 0, Math\.PI \* 2\);/);
+  // Nor rays at the completion (owner, 2026-11-11: no line effects): motes
+  // of light, sprites thrown out from the reactor.
+  const completion = crescendo.slice(crescendo.indexOf("  private drawFinale("), crescendo.indexOf("  dispose() {"));
+  assert.ok(completion.length > 2000);
+  assert.doesNotMatch(completion, /moveTo|lineTo/);
+  assert.match(completion, /back\.drawImage\(this\.sprites\[0\], x - r, y - r, r \* 2, r \* 2\);/);
+});
+
+test("no beat stands still: the helmet rises as the limbs' armour sets, and the last wave gathers as it closes", () => {
+  const body = [];
+  const head = [];
+  for (let i = 0; i < W * H; i += 1)
+    if (bake.field[i] >= 0) (bake.texture[i * 3 + 2] === 255 ? head : body).push(bake.field[i]);
+  body.sort((a, b) => a - b);
+  head.sort((a, b) => a - b);
+  const flush = (SKIN_BANDS + 0.4) * SKIN_BAND;
+  for (const [name, timeline] of [
+    ["entry", SKIN_ENTRY],
+    ["scroll", SKIN_SCROLL],
+  ]) {
+    const run = timeline.head[1] - timeline.body[0];
+    // Nine tenths of the body's armour is finished (the bands have passed)…
+    const set = skinReach(timeline, body[Math.floor(body.length * 0.9)] + flush);
+    // … and the helmet is already on its way, or all but (before: 345 ms of
+    // the call and 14% of the scroll with a finished, headless figure).
+    assert.ok(timeline.head[0] - set < run * 0.1, `${name}: the helmet starts ${timeline.head[0] - set} after`);
+    // The helmet's own armour is set, and the wave's specks are in the air.
+    const closed = skinReach(timeline, Math.min(1, head[Math.floor(head.length * 0.75)]) + flush * 0.5, true);
+    const gathers = timeline.cells.wave[0] - (timeline.cells.fine[0] + timeline.cells.fine[1]) * 0.62;
+    assert.ok(gathers - closed < run * 0.06, `${name}: the wave gathers ${gathers - closed} after`);
+  }
+  // The call's reactor: its light forms from the skin's own cells, hexagons,
+  // which under the skin drift a little way out instead of bursting.
+  const call = read("src/components/rexonance-saga/rexonance-call-sequence.tsx");
+  assert.match(call, /groups\[found % groups\.length\]\[tone\] \+= hexagon\(x, y, size\);/);
+  const css = read("src/styles-rexonance-calls.css");
+  assert.match(css, /\.rx-suit\[data-skin\] \.rx-suit-reactor-pixels \{\s*--rx-suit-out: calc\(1\.35 \/ var\(--rx-suit-burst\)\);/);
+  assert.match(css, /transform: rotate\(var\(--rx-suit-r\)\) scale\(var\(--rx-suit-out, 1\)\);/);
 });
