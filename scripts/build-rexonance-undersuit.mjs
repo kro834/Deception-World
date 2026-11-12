@@ -35,8 +35,9 @@ const maskFile = resolve(root, "design/rexonance-suit/rexonance-undersuit-mask-2
 // the bare undersuit's feet read as boxes): the mask's feet are smooth feet
 // inside the boots (scripts/build-rexonance-suit.mjs UNDERSUIT_BODY), the
 // relief re-rendered from it, and the file renamed so no cached copy keeps
-// the boxed feet.
-const file = resolve(root, "public/rexonance-suit-20261023/undersuit-20261111.webp");
+// the boxed feet. Then its hands the same way (rounded hands inside the mitts),
+// and the file renamed once more.
+const file = resolve(root, "public/rexonance-suit-20261023/undersuit-20261112.webp");
 const WIDTH = 571;
 const HEIGHT = 1040;
 // The rx12/rx13 set (figure, undersuit, body, face, plates) stays under

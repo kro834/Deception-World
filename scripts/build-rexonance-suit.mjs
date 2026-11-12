@@ -71,7 +71,7 @@ const OUT_DIR = fileURLToPath(
 const PUBLIC_PATH = `/rexonance-suit-${ASSET_VERSION}`;
 // The bodysuit, rendered and packed by its own scripts (see the header);
 // versioned on its own so a cached mannequin never meets the new module.
-const UNDERSUIT_FILE = "undersuit-20261111.webp";
+const UNDERSUIT_FILE = "undersuit-20261112.webp";
 const MASK_FILE = fileURLToPath(
   new URL("../design/rexonance-suit/rexonance-undersuit-mask-20261016.png", import.meta.url),
 );
@@ -250,7 +250,54 @@ function withFoot(line, foot) {
   if (from < 0 || to <= from) throw new Error("the foot's ends are not on BODY");
   return [...line.slice(0, from), ...foot, ...line.slice(to + 1)];
 }
-const UNDERSUIT_BODY = withFoot(withFoot(BODY, FOOT_LEFT), FOOT_RIGHT);
+// The hands the same way (2026-11-11: BODY's hand is a nine-point mitt with
+// straight sides and a flat end, which read as a box at the undersuit
+// stage): a rounded hand inside that mitt, wrist to wrist, the forearm's
+// taper carried into it. BODY is symmetric, so the other hand is its mirror.
+const HAND_LEFT = chaikin(
+  [
+    [176, 870],
+    [170, 922],
+    [162, 958],
+    [158, 1000],
+    [160, 1042],
+    [171, 1076],
+    [190, 1094],
+    [213, 1097],
+    [233, 1084],
+    [245, 1052],
+    [248, 1010],
+    [248, 970],
+    [252, 932],
+    [268, 860],
+  ],
+  3,
+);
+const HAND_RIGHT = mirror(HAND_LEFT).reverse();
+const UNDERSUIT_BODY = [HAND_LEFT, HAND_RIGHT].reduce(
+  withFoot,
+  withFoot(withFoot(BODY, FOOT_LEFT), FOOT_RIGHT),
+);
+// And the outline's remaining corners (the head's eight sides, the hips,
+// the knees, the elbows: BODY is some seventy points with straight runs
+// between them, which showed as facets and kinks on the bare body): the
+// whole loop rounded by two Chaikin passes. The mask takes it only where it
+// lies inside UNDERSUIT_BODY itself (a rounded hollow corner, the neck's or
+// the armpit's, would grow past it).
+const chaikinLoop = (points, passes) => {
+  let line = points;
+  for (let pass = 0; pass < passes; pass += 1) {
+    const next = [];
+    for (let i = 0; i < line.length; i += 1) {
+      const [[ax, ay], [bx, by]] = [line[i], line[(i + 1) % line.length]];
+      next.push([0.75 * ax + 0.25 * bx, 0.75 * ay + 0.25 * by]);
+      next.push([0.25 * ax + 0.75 * bx, 0.25 * ay + 0.75 * by]);
+    }
+    line = next;
+  }
+  return line.map(([x, y]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10]);
+};
+const UNDERSUIT_ROUND = chaikinLoop(UNDERSUIT_BODY, 2);
 
 // The face's lights: the V of cyan and pink under the crest.
 const FACE_GLOW = [
@@ -1668,10 +1715,15 @@ const FIGURE = await writeWebp("figure.webp", figureRaw, FIG_W, FIG_H, { quality
 // relief rendered by scripts/blender/rexonance_undersuit.py and packed by
 // scripts/build-rexonance-undersuit.mjs into UNDERSUIT_FILE, which this
 // build keeps in place and registers. Both clip to this build's body
-// polygon (the undersuit's, UNDERSUIT_BODY: BODY with smooth feet), written
+// polygon (the undersuit's, UNDERSUIT_BODY: BODY with smooth feet and
+// hands, its corners rounded), written
 // at delivery size as the registration contract: the plates, the driver, the
 // flame mask and the nanite targets seat on it.
 const bodyMask = await rasterise([UNDERSUIT_BODY], 0, 0.35);
+{
+  const round = await rasterise([UNDERSUIT_ROUND], 0, 0.35);
+  for (let i = 0; i < N; i += 1) bodyMask[i] = Math.min(bodyMask[i], round[i]);
+}
 await sharp(await toDelivery(rgba(bodyMask)), { raw: { width: FIG_W, height: FIG_H, channels: 4 } })
   .extractChannel(3)
   .png({ compressionLevel: 9 })
