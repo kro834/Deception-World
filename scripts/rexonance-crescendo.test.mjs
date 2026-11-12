@@ -308,6 +308,8 @@ test("the new suit-up code is fetched on demand, only by Rexonance's surge layer
       [
         "src/components/rexonance-saga/rexonance-suit-surge.tsx",
         "src/components/rexonance-saga/rexonance-suit-nanites.tsx",
+        // The form burst's own lazy chunk draws with the skin's cells' sheet.
+        "src/lib/rexonance-form-burst-stage.ts",
         // The skin's marks (numbers only: when its front reaches each HUD
         // part) and the two that read them, the call and the page.
         "src/components/rexonance-saga/rexonance-call-sequence.tsx",

@@ -522,6 +522,8 @@ export const cellEase = (p: number) => {
    micro-cell (32 px) and the specks (24 px: three tones, eight turns of the
    hexagon's 60 degrees). */
 const SHEET = { width: 512, height: 264, plate: 128, flash: 64, micro: 32, speck: 24, turns: 8 };
+/** The sheet's layout, for the form change's own cells (rexonance-form-burst.ts). */
+export const SKIN_CELL_SHEET = SHEET;
 const PLATE_R = 58;
 const FLASH_R = 24;
 const MICRO_R = 14;

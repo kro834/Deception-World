@@ -11,6 +11,7 @@ import {
 import { RexonanceHeroRail, RexonanceChapterMap } from "./rexonance-editorial";
 import { scheduleRexonancePageStep } from "@/lib/rexonance-page-step";
 import { RexonanceFormComparison } from "./rexonance-form-comparison";
+import { RexonanceFormBurst, formBurstPlays, useFormBurstNear } from "./rexonance-form-burst";
 import {
   REXONANCE_ENTRY_CALLS,
   REXONANCE_STAGE_DURATION_MS,
@@ -1589,6 +1590,8 @@ export function RexonanceSaga() {
   }, []);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const activeStage = STAGES[stage];
+  // The form burst's chunk, once the forms' panel nears the view.
+  useFormBurstNear(stageTabsRef, lower);
 
   useEffect(() => {
     const page = pageRef.current;
@@ -2226,13 +2229,25 @@ export function RexonanceSaga() {
                   {/* The form change (owner, 2026-10-11): MAX overwrites the
                   finished Rexonance with cells; ULTRA runs to MAX briefly,
                   overwrites it again and generates its additional parts. */}
-                  {morphFrom.current !== stage ? (
+                  {/* The form burst (owner, 2026-11-12): to MAX it is burned
+                  by green fire and explodes apart; to ULTRA it explodes apart
+                  and takes the cells in; back to Rexonance the front draws
+                  back. Until its chunk is here, the overwrite above. */}
+                  {morphFrom.current === stage ? null : formBurstPlays(morphFrom.current, stage) ? (
+                    <RexonanceFormBurst
+                      from={morphFrom.current}
+                      to={stage}
+                      delay={stageEntrance?.delayMs ?? 0}
+                      pictures={STAGES}
+                      responsive={rexonanceImage}
+                    />
+                  ) : (
                     <FormMorph
                       from={morphFrom.current}
                       to={stage}
                       delay={stageEntrance?.delayMs ?? 0}
                     />
-                  ) : null}
+                  )}
                   {/* ZENITH (rx15): nanites re-forming over the new art. */}
                   <i className="rzn-mesh" aria-hidden="true">
                     {FORM_MESH}

@@ -39,6 +39,8 @@ import type { SkinCells, SkinField, SkinFrame, SkinRenderer } from "@/lib/rexona
 import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK, SuitLeave, isSeek } from "@/lib/rexonance-suit-leave";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
 import type { CrescendoEngine, CrescendoFrame } from "@/lib/rexonance-suit-crescendo";
+import { REXONANCE_FORM_FIGURES } from "@/lib/rexonance-forms";
+import { formBurst, formBurstKind } from "@/lib/rexonance-form-burst-loader";
 
 /* REXONANCE SURGE (owner, 2026-10-30): the suit-up's extra layer of nanite
    swarm, debris, construction scans, lock-in impacts and camera shake, over
@@ -220,6 +222,28 @@ const cellBounds = (layers: { reachX: number; reachUp: number; reachDown: number
   return CELL_BOUNDS;
 };
 const DRIVER_STANDIN = "/rexonance-zenith-20261023/driver-standin.webp";
+
+/* REXONANCE FORM BURST on the scene (owner, 2026-11-12; the play is
+   rexonance-form-burst.ts): where the scene's end changes form — the scroll
+   or the auto movie reaching it with MAX or ULTRA chosen in 03, the lab's
+   form picked with the scene at its end — the change plays on a layer of
+   its own over the figure, on its own clock (a fire needs its time: the
+   scroll only starts it and, scrolled back, ends it). The shared engine's
+   own overwrite of that stretch (FORM_STRETCH: its ASSEMBLY_BEATS.form) is
+   untouched and stands hidden under the layer, as under the skin; it plays
+   as it did wherever the play cannot (its chunk or pictures late, no WebGL,
+   EXCELSIOR). Once the play is over and the scene's own picture is the new
+   form's, the layer is gone. */
+const FORM_STRETCH = [0.915, 0.975] as const;
+type FormBurstPlay = NonNullable<
+  ReturnType<typeof import("@/lib/rexonance-form-burst-stage").playFormBurst>
+>;
+const formFigure = (form: string) =>
+  form === "standard"
+    ? REXONANCE_SUIT_FIGURE
+    : form === "max" || form === "ultra"
+      ? REXONANCE_FORM_FIGURES[form]
+      : null;
 
 const picture = (source: string) =>
   new Promise<HTMLImageElement | null>((resolve) => {
@@ -705,6 +729,34 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
           if (classicShown === "") for (const element of classicLayers()) element.style.transition = "";
         });
     };
+    // The form burst: its play, the pictures it needs, and the form whose
+    // art the scene's end now shows ("": not yet known).
+    let burst: { play: FormBurstPlay; from: string; to: string; leaving: number } | null = null;
+    let burstAsked = false;
+    let formOn = "";
+    let gone = false;
+    const formArt = new Map<string, HTMLImageElement | null>();
+    const askBurst = (...forms: string[]) => {
+      if (!burstAsked) {
+        burstAsked = true;
+        void formBurst.load().then((stage) => stage?.warmFormBurst());
+      }
+      for (const form of forms) {
+        const source = formFigure(form);
+        if (!source || formArt.has(form)) continue;
+        formArt.set(form, null);
+        void picture(source).then((image) => {
+          if (!gone && image) formArt.set(form, image);
+          else if (!image) formArt.delete(form);
+        });
+      }
+    };
+    const endBurst = () => {
+      if (!burst) return;
+      burst.play.cancel();
+      burst = null;
+      redraw = true;
+    };
     const frame = createSurgeFrame();
     let raf = 0;
     let visible = false;
@@ -761,6 +813,9 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       engine?.clear();
       skin?.renderer.clear();
       skin?.cells.clear();
+      // (A form burst cut short: the scene's own picture stands.)
+      endBurst();
+      formOn = "";
       // (A leave cut short: the page moves on as it was asked to.)
       endLeave(true);
       flagSkin(false);
@@ -824,6 +879,71 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       // playhead's.
       if (isSeek(lastQ, q)) grown?.cells.clear();
       lastQ = q;
+      // The form burst at the scene's end.
+      const form = runway.dataset.form || "standard";
+      if (q > 0.4 && (form !== "standard" || (formOn && formOn !== form)))
+        askBurst("standard", form, formOn || "standard");
+      if (q < FORM_STRETCH[0]) {
+        // Not there yet, or scrolled back: the standard suit stands.
+        endBurst();
+        formOn = "standard";
+      } else if (!formOn) {
+        // Come upon at its end: the form is simply there.
+        formOn = form;
+      } else {
+        if (burst && burst.to !== form) {
+          // Another form picked mid-play: this one ends where it is, and
+          // the next starts from whichever form was on screen.
+          formOn = burst.play.swapped ? burst.to : burst.from;
+          endBurst();
+        }
+        if (burst && burst.play.done && !burst.leaving && (q >= FORM_STRETCH[1] || burst.to === "standard")) {
+          // Over, and the scene's own picture is this form's: the scene is
+          // raised under the layer, and the layer goes two frames on.
+          burst.leaving = 1;
+          formOn = burst.to;
+          redraw = true;
+        } else if (burst?.leaving && (burst.leaving += 1) > 3) endBurst();
+        if (!burst && formOn !== form) {
+          const kind = formBurstKind(formOn, form);
+          const from = formArt.get(formOn);
+          const to = formArt.get(form);
+          const stage = formBurst.stage;
+          const scene = engine;
+          const play =
+            kind && stage && from && to && scene && size
+              ? stage.playFormBurst({
+                  kind,
+                  host: layerBox,
+                  after: front,
+                  // The figure's box in the frame (the surge's own measure).
+                  art: () => ({
+                    left: scene.view.x,
+                    top: scene.view.y,
+                    width: REXONANCE_SUIT_SIZE.width * scene.view.scale,
+                    height: REXONANCE_SUIT_SIZE.height * scene.view.scale,
+                  }),
+                  bleed: { x: 0.55, top: 0.26, bottom: 0.05 },
+                  air: () => ({ left: 0, top: 0, width: layerBox.clientWidth, height: layerBox.clientHeight }),
+                  clip: () => ({ left: 0, top: 0, width: layerBox.clientWidth, height: layerBox.clientHeight }),
+                  from,
+                  to,
+                  body: "alpha",
+                  origin: [
+                    REXONANCE_SUIT_MARKS.core[0] / REXONANCE_SUIT_SIZE.width,
+                    REXONANCE_SUIT_MARKS.core[1] / REXONANCE_SUIT_SIZE.height,
+                  ],
+                  unit: REXONANCE_SUIT_SIZE.width / REXONANCE_SUIT_SIZE.height,
+                })
+              : null;
+          if (play) burst = { play, from: formOn, to: form, leaving: 0 };
+          // (No play: the scene's own change stands.)
+          else formOn = form;
+          redraw = true;
+        }
+      }
+      // The scene's canvases stand hidden under the play.
+      const bursting = Boolean(burst && !burst.leaving);
       scrollSurgeFrame(frame, q, now, windows, pieceWindows);
       // The leave, on its own clock, until it is over or the reader moves
       // (the retract needs the skin; the fade ends with its own animations).
@@ -898,7 +1018,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
             grown.lib.SKIN_QUALITY[crescendo ? crescendo.engine.governor.level : 0],
           );
           grown.renderer.render(growing, now / 1000, 1);
-          showClassic(growing.classic);
+          showClassic(bursting ? 0 : growing.classic);
           if (surfaces) {
             // The cells the front takes in (they gather in the air before
             // it starts; a retract sheds them), then the droplets at its lip.
@@ -923,7 +1043,8 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
             surfaces.back.globalCompositeOperation = "source-over";
             surfaces.front.globalCompositeOperation = "source-over";
           } else if (grown.cells.live) grown.cells.clear();
-        } else showClassic(1);
+        } else if (bursting) showClassic(0);
+        else showClassic(1);
         if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
         // The lean in is for fine pointers: on touch screens a transform on
         // the scene's large canvases every scrolled frame cost WebKit its
@@ -1051,6 +1172,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       runway.removeEventListener(RETRACT_CANCEL_EVENT, onLeaveCancel);
       // Nothing of this layer stays on a stage that outlives it (the lab's
       // canvas plays the next rider): no leave, no flag, no held opacity.
+      gone = true;
       stop();
       flagCovered(false);
       if (snapFrame) cancelAnimationFrame(snapFrame);

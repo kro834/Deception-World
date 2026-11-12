@@ -2686,6 +2686,24 @@ html[data-family="special"]
   }
 }
 
+/* The form burst (owner, 2026-11-12): while it plays over the panel's art,
+   the figure's own entrance marks (the rings, the mesh, the scan) stand
+   down: the play is the entrance. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-stage-panel
+  figure[data-rxf-burst]
+  > :is(.rsn-form, .rzn-mesh, .rxs-stage-scan) {
+  visibility: hidden;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page :is(.rxf-burst, .rxf-fade) {
+    display: none;
+  }
+}
+
 /* Until the lower sections render after a covered arrival, the page keeps
    room below the fold (the reader is at the top, under the reveal). */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-lower-pending {
