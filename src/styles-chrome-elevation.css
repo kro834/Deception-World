@@ -126,15 +126,17 @@ html
 html body #site-side-panel.side-panel[data-liquid-pointer] {
   border-left-color: var(--dwc-line-strong);
   background:
-    radial-gradient(ellipse 70% 30% at 100% 0%, rgb(122 232 255 / 10%), transparent 70%),
-    radial-gradient(ellipse 60% 28% at 0% 100%, rgb(240 207 134 / 5%), transparent 70%),
+    radial-gradient(ellipse 70% 30% at 100% 0%, rgb(122 232 255 / 12%), transparent 70%),
+    radial-gradient(ellipse 60% 28% at 0% 100%, rgb(240 207 134 / 7%), transparent 70%),
     var(--dwc-grid),
     var(--dwc-ink) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   box-shadow:
-    -24px 0 60px rgb(0 0 0 / 55%),
-    inset 1px 0 0 rgb(122 232 255 / 14%) !important;
+    -32px 0 80px rgb(0 0 0 / 72%),
+    -8px 0 24px rgb(0 0 0 / 45%),
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 1px 0 0 rgb(122 232 255 / 20%) !important;
   color: var(--dwc-text);
 }
 
@@ -159,6 +161,7 @@ html body .side-panel-scrim {
    the head keeps its height. */
 html body #site-side-panel > .side-panel-head {
   border-bottom-color: transparent;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
   background:
     var(--dwc-prism) var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px
       no-repeat,
@@ -229,15 +232,22 @@ html body #site-announcement-dialog .site-announcement-close.ios26-glass {
   border: 1px solid rgb(var(--dwc-ice-rgb) / 36%);
   border-radius: 3px;
   background: rgb(var(--dwc-ink-rgb) / 92%) !important;
-  box-shadow: inset 0 0 0 1px rgb(var(--dwc-ice-rgb) / 8%) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 0 1px rgb(var(--dwc-ice-rgb) / 12%),
+    0 2px 6px rgb(0 0 0 / 38%) !important;
   color: var(--dwc-text);
 }
 
 @media (hover: hover) and (pointer: fine) {
   html body #site-side-panel .side-panel-close.ios26-glass:hover,
   html body #site-announcement-dialog .site-announcement-close.ios26-glass:hover {
-    border-color: rgb(var(--dwc-ice-rgb) / 58%);
-    background: rgb(var(--dwc-ice-rgb) / 8%) !important;
+    border-color: rgb(var(--dwc-ice-rgb) / 64%);
+    background: rgb(var(--dwc-ice-rgb) / 14%) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 45%),
+      inset 0 0 0 1px rgb(var(--dwc-ice-rgb) / 28%),
+      0 0 14px rgb(var(--dwc-ice-rgb) / 28%) !important;
     rotate: none;
   }
 }
@@ -381,8 +391,10 @@ html
   .side-panel-links
   :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
   color: #fff;
-  background: linear-gradient(90deg, rgb(122 232 255 / 10%), transparent 72%);
-  box-shadow: none;
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 16%) 0%, transparent 1px),
+    linear-gradient(90deg, rgb(122 232 255 / 14%), transparent 72%);
+  box-shadow: inset 0 1px 0 rgb(122 232 255 / 28%);
   border-left-color: var(--dwc-ice);
 }
 
@@ -391,7 +403,9 @@ html
   #site-side-panel
   .side-panel-links
   :is(a, button.side-panel-link-button)[aria-current="location"] {
-  box-shadow: inset 2px 0 0 var(--dwc-ice);
+  box-shadow:
+    inset 2px 0 0 var(--dwc-ice),
+    inset 0 1px 0 rgb(122 232 255 / 28%);
 }
 
 html
@@ -403,6 +417,9 @@ html
   border-color: var(--dwc-ice);
   background: var(--dwc-ice);
   color: var(--dwc-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 35%),
+    0 0 12px rgb(122 232 255 / 32%);
 }
 
 /* While the riders sit in two columns, the rule between them is an ice
@@ -546,6 +563,8 @@ html body #site-side-panel .side-panel-zeus-toggle:is([aria-pressed="true"], [ar
     align-items: center;
     margin-bottom: 6px;
     padding-bottom: 10px;
+    padding-top: max(var(--sp-pad-top, 12px), env(safe-area-inset-top, 0px));
+    padding-inline: max(var(--sp-pad-inline, 18px), env(safe-area-inset-right, 0px)) max(var(--sp-pad-inline, 18px), env(safe-area-inset-left, 0px));
   }
 
   html body #site-side-panel .side-panel-head > div {
@@ -2086,14 +2105,21 @@ html[data-world-effects="economy"]
 .side-panel-quick-search kbd {
   display: inline-block;
   min-width: 1.6em;
-  margin-left: 4px;
-  padding: 0 4px;
-  border: 1px solid currentColor;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid rgb(122 232 255 / 38%);
+  border-bottom: 2px solid rgb(122 232 255 / 55%);
   border-radius: 3px;
-  font: inherit;
+  background: linear-gradient(180deg, rgb(10 18 32 / 90%) 0%, rgb(4 8 15 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 1px 3px rgb(0 0 0 / 45%);
+  color: var(--dwc-ice);
+  font-family: var(--dwc-hud);
+  font-size: 12px;
   line-height: 1.3;
   text-align: center;
-  opacity: 0.8;
+  opacity: 0.95;
 }
 @media (pointer: coarse) {
   .side-panel-quick-search kbd {

@@ -799,8 +799,20 @@ main.manager-page.is-sovereign #dossier-profile .sovereign-status {
     inset 0 1px 0 rgb(255 255 255 / 5%);
 }
 
-/* The scale takes a narrower column, so the protocol line breaks once. */
-@media (min-width: 1121px) {
+/* The scale wraps cleanly below the emblem and rank across mid-widths,
+   and takes a narrower third column once the split stage has full room. */
+@media (min-width: 761px) and (max-width: 1280px) {
+  main.manager-page.is-sovereign #dossier-profile .sovereign-status {
+    grid-template-columns: 68px minmax(0, 1fr);
+    row-gap: 16px;
+  }
+
+  main.manager-page.is-sovereign #dossier-profile .sovereign-scale {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1281px) {
   main.manager-page.is-sovereign #dossier-profile .sovereign-status {
     grid-template-columns: 76px minmax(0, 1fr) minmax(150px, 0.62fr);
   }
@@ -1069,6 +1081,13 @@ main.manager-page.is-sovereign #dossier-profile .manager-facts dd {
 
   main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal strong {
     font-size: 44px;
+  }
+}
+
+/* Narrow phones: stack the fact cells into a single column. */
+@media (max-width: 440px) {
+  main.manager-page.is-sovereign #dossier-profile .manager-facts {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

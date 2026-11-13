@@ -1192,11 +1192,43 @@
 
 .ffs-page .ffs-report-table [data-current] {
   color: #fff;
-  background: rgb(127 230 255 / 7%);
+  background: linear-gradient(
+    180deg,
+    rgb(127 230 255 / 14%) 0%,
+    rgb(127 230 255 / 7%) 40%,
+    rgb(127 230 255 / 5%) 100%
+  );
+  box-shadow:
+    inset 1px 0 0 rgb(127 230 255 / 16%),
+    inset -1px 0 0 rgb(127 230 255 / 16%);
 }
 
 .ffs-page .ffs-report-table thead [data-current] {
-  color: var(--ffs-accent);
+  color: var(--ffs-accent, #9cf1ff);
+  background: linear-gradient(
+    180deg,
+    rgb(127 230 255 / 22%) 0%,
+    rgb(127 230 255 / 10%) 100%
+  );
+  box-shadow:
+    inset 0 2.5px 0 0 var(--ffs-accent, #9cf1ff),
+    inset 1px 0 0 rgb(127 230 255 / 20%),
+    inset -1px 0 0 rgb(127 230 255 / 20%),
+    0 0 14px rgb(127 230 255 / 25%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ffs-page .ffs-report-table tbody tr:hover > * {
+    background-color: rgb(255 255 255 / 4.5%);
+  }
+  .ffs-page .ffs-report-table tbody tr:hover > [data-current] {
+    background: linear-gradient(
+      180deg,
+      rgb(127 230 255 / 20%) 0%,
+      rgb(127 230 255 / 12%) 40%,
+      rgb(127 230 255 / 8%) 100%
+    );
+  }
 }
 
 .ffs-page .ffs-report-table figcaption {

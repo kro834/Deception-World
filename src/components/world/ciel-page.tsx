@@ -189,8 +189,24 @@ export function CielPage() {
       </section>
       {pickupForms.length ? (
         <div className="rider-form-pickup-stack" id="form-records">
+          {pickupForms.length > 1 ? (
+            <nav className="dossier-form-pills" aria-label="フォーム切替">
+              {pickupForms.map((form, index) => (
+                <a
+                  key={`${form.name}-${form.sub ?? "base"}`}
+                  href={`#form-record-${index + 1}`}
+                >
+                  <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                  <b>
+                    <NameText value={form.displayName ?? form.name} seams />
+                  </b>
+                </a>
+              ))}
+            </nav>
+          ) : null}
           {pickupForms.map((form, index) => (
             <FormPickup
+              id={`form-record-${index + 1}`}
               key={`${form.name}-${form.sub ?? "base"}`}
               rider={{
                 img: form.img,

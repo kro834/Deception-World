@@ -1645,7 +1645,7 @@ export function GalleryPage() {
             <header className="gallery-viewer-header">
               <div>
                 <h2 id="gallery-viewer-title">
-                  {numberFor(selected)}
+                  <span className="gallery-viewer-number">{numberFor(selected)}</span>
                   {titles[selected.id] && (
                     <span className="gallery-personal-title">{titles[selected.id]}</span>
                   )}

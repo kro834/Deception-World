@@ -1,9 +1,10 @@
-              {stats.length ? (
                 <dl className="form-pickup-stats">
                   {stats.map((s) => (
                     <div key={s.dt}>
                       <dt>{s.dt}</dt>
-                      <dd>{s.dd}</dd>
+                      <dd>
+                        <NameText value={s.dd} seams />
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -314,6 +315,15 @@ function ManagerDossier({ profile }: { profile: Profile }) {
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
               </div>
+              {!profile.sovereign && profile.sections.length >= 4 ? (
+                <CharacterChapterTools
+                  sections={profile.sections}
+                  currentNo={s.no}
+                  continuation={
+                    profile.rider ? { href: "#form-records", title: "変身記録" } : undefined
+                  }
+                />
+              ) : null}
             </article>
           ))}
         </div>
@@ -434,8 +444,3 @@ export const REX_LOI: Profile = {
       "光と闇を循環させる変換炉が終焉の炎『ヒネモス』を生み、正義の志、倒した管理人から回収した力、大気や水などを再錬成して無尽蔵のエネルギーを得る。必要な攻撃へ身体を瞬時に再錬成する性能とレックスの思想から、外敵だけでなく、他の六詠の4人からも最大級の脅威とされる。",
     ],
     stats: [
-      { dt: "HEIGHT", dd: "203.6cm" },
-      { dt: "WEIGHT", dd: "113.2kg" },
-      { dt: "PUNCH", dd: "262.9t" },
-      { dt: "KICK", dd: "372.2t" },
-      { dt: "JUMP", dd: "5000m" },

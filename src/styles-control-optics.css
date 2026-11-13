@@ -18,6 +18,18 @@
 /* 1. World poster pills: the icon box leaves 5px of empty inset on its left and
  * the label's tracking trails on its right, so the group sat 0.75-1.75px right
  * of centre. The last item takes the extra margin on its end (2 x the offset). */
+html body #top.world-artwork-hero .world-stage-controls .poster-shuffle:not(#a) {
+  padding-inline: 11px 13px;
+}
+html body #top.world-artwork-hero .world-stage-controls .poster-reset:not(#a) {
+  padding-inline: 10px 12px;
+}
+html body #top.world-artwork-hero .world-stage-controls .poster-lock:not(#a) {
+  padding-inline: 10px 12px;
+}
+html body #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock):not(#a) > span {
+  margin-inline-end: 6px;
+}
 html body #top.world-artwork-hero .world-stage-controls .poster-shuffle:not(#a) > b {
   margin-inline-end: 1.75px;
 }

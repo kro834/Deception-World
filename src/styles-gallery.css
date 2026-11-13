@@ -671,7 +671,7 @@ select[data-gallery-select="true"][data-pointer-focus="true"]:focus {
   width: min(100%, 520px);
   gap: 8px;
   color: var(--gallery-muted);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.08em;
 }
 
@@ -1038,7 +1038,7 @@ select[data-gallery-select="true"][data-pointer-focus="true"]:focus {
 
 .gallery-viewer-tools summary span {
   margin-left: 14px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .gallery-viewer-tools .gallery-viewer-actions {
@@ -1207,7 +1207,7 @@ html[data-route-cover] .gallery-arrival {
   justify-content: space-between;
   gap: 12px;
   color: var(--gallery-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .gallery-image-toolbar span {
@@ -1311,8 +1311,13 @@ html[data-route-cover] .gallery-arrival {
 }
 
 .gallery-viewer-footer p {
-  display: block;
+  display: inline-flex;
+  align-items: center;
   margin: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--gallery-rule);
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.03);
   color: #c6b99f;
   font-family: var(--gallery-serif);
   font-size: 12px;

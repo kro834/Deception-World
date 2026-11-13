@@ -1,25 +1,3 @@
-        "熱血でやかましい一方、物事の本質を捉え、自分の中へきちんと落とし込んでから発言する警部。非常にまっすぐな性格で、その実直さゆえに損をすることも少なくない。",
-        "幹部候補生だったが、まっすぐ過ぎる姿勢から上司と衝突し、出世街道から早々に外された。本人はほとんど気にしておらず、元幹部候補として培った高水準の頭脳と、ボクシングで鍛えた体術を現場で発揮する。在原華火以外には一度も負けたことがない。",
-      ],
-      facts: [
-        { dt: "READING", dd: "ないかみ ちぎり" },
-        { dt: "AGE", dd: "28歳" },
-        { dt: "GENDER", dd: "男性" },
-        { dt: "HEIGHT", dd: "198cm" },
-        { dt: "WEIGHT", dd: "98kg" },
-        { dt: "OCCUPATION", dd: "警察官（警部）" },
-        { dt: "CV", dd: "谷山紀章" },
-        { dt: "PRONOUN", dd: "俺／自分　君／アンタ／お前" },
-      ],
-      forms: [
-        {
-          img: "/rider-leddic-hoko.jpeg",
-          pos: "50% 8%",
-          system: "レディックウォッチ × 戈フォーム",
-          name: "レディック",
-          sub: "戈フォーム",
-          calls: ["戈フォーム！！！", "BREAK & Destroy！！！"],
-          quote: "火力を突き詰め、華火の支援を突破力へ変える。",
           overview: [
             "無神千桐が変身する第一形態。在原華火とコンビを組むため、支援系を名目とする彼女と対になるよう、火力を突き詰めたフォームとなっている。",
           ],
@@ -387,3 +365,36 @@
         ],
       },
       {
+        // Owner's official spec (2026-10-24), verbatim. Set in a mechanical
+        // face (styles-form-signature.css, data-form-theme="custom").
+        img: "/overzetts-custom-20261024/rider-over-zeztz-custom.jpeg",
+        pos: "50% 8%",
+        recordImg: "/overzetts-custom-20261024/rider-over-zeztz-custom-action.jpeg",
+        system: "ゼッツドライバー × カスタメアカプセム",
+        name: "オーバーゼッツ",
+        sub: "カスタム",
+        theme: "custom",
+        calls: ["アタッチメント！ライダー！", "ゼッツ！ゼッツ！ゼッツ！オーバー！", "カスタム！"],
+        stats: [
+          { dt: "HEIGHT", dd: "200.5cm（est.）" },
+          { dt: "WEIGHT", dd: "107.7kg（est.）" },
+          { dt: "PUNCH", dd: "40.71t（est.）" },
+          { dt: "KICK", dd: "63.71t（est.）" },
+          { dt: "JUMP", dd: "40.71m（ひと跳び est.）" },
+          { dt: "100m", dd: "1.5秒（100m est.）" },
+        ],
+        finishers: [
+          {
+            name: "カスタム・オーバーカミング",
+            body: "仮面ライダーオーバーゼッツ カスタムの必殺技。",
+          },
+        ],
+        arsenal: [
+          {
+            name: "カスタメアカプセム",
+            body: "CODEイギリス支部のエンジニア達が開発した四つの属性の夢を叶え、制御する特殊なカプセム。",
+          },
+          {
+            name: "ゼッツドライバー",
+            body: "仮面ライダーオーバーゼッツのドライバー。カスタメアカプセムを使用することで、仮面ライダーオーバーゼッツ カスタムへの変身を可能とする他、従来型カプセムの壁を超えた四つの属性の固有能力を引き出すことが可能。",
+          },

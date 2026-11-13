@@ -874,6 +874,14 @@ main.manager-page:not(.is-sovereign):not(:has(.manager-pagination)) .manager-dos
   main.manager-page:not(.is-sovereign) .manager-dossier:has(.manager-copy-section:nth-child(5)) {
     contain-intrinsic-size: auto 5400px;
   }
+
+  main.manager-page:not(.is-sovereign) .manager-dossier:has(.manager-copy-section:nth-child(8)) {
+    contain-intrinsic-size: auto 8400px;
+  }
+
+  main.manager-page:not(.is-sovereign) .manager-dossier:has(.manager-copy-section:nth-child(14)) {
+    contain-intrinsic-size: auto 13200px;
+  }
 }
 
 /* ================================================================

@@ -146,9 +146,12 @@ const SUIT_SHELL = curve(
 const SUIT_CREST = curve("103,12* 100,25 100,37 103,49 109,59 115,67* 112,55 108,42 105,27");
 const SUIT_HORN = curve("92,36* 95,49 101,59 106,66* 102,57 97,47");
 const SUIT_SPIKE = curve("120,31* 123,44 122,58 120,67* 118,58 117,44");
-// MAX adds faceted temple fins; ULTRA carries cheek blades and a forehead jewel.
+// MAX adds faceted temple fins; ULTRA fans out tall outer horns, temple fins, cheek blades, and a forehead jewel.
 const SUIT_FIN = curve("90,52* 95,62 103,70* 98,63");
 const SUIT_BLADE = curve("92,64* 98,72 106,79* 100,70");
+const SUIT_ULTRA_SPIKE = curve("120,24* 124,44 123,58 120,66* 117,58 116,44");
+const SUIT_ULTRA_HORN = curve("91,32* 94,46 100,57 106,65* 102,56 96,44");
+const SUIT_ULTRA_FIN = curve("88,49* 93,60 103,69* 97,60");
 const SUIT_CRESTS = {
   standard: [SUIT_CREST, mirror(SUIT_CREST), SUIT_HORN, mirror(SUIT_HORN), SUIT_SPIKE],
   max: [
@@ -163,6 +166,11 @@ const SUIT_CRESTS = {
   ultra: [
     SUIT_CREST,
     mirror(SUIT_CREST),
+    SUIT_ULTRA_SPIKE,
+    SUIT_ULTRA_HORN,
+    mirror(SUIT_ULTRA_HORN),
+    SUIT_ULTRA_FIN,
+    mirror(SUIT_ULTRA_FIN),
     SUIT_BLADE,
     mirror(SUIT_BLADE),
     "120,40 124,49 120,58 116,49",
@@ -171,6 +179,11 @@ const SUIT_CRESTS = {
   excelsior: [
     SUIT_CREST,
     mirror(SUIT_CREST),
+    SUIT_ULTRA_SPIKE,
+    SUIT_ULTRA_HORN,
+    mirror(SUIT_ULTRA_HORN),
+    SUIT_ULTRA_FIN,
+    mirror(SUIT_ULTRA_FIN),
     SUIT_BLADE,
     mirror(SUIT_BLADE),
     SUIT_FIN,

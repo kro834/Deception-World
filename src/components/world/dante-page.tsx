@@ -171,6 +171,18 @@ export function DantePage() {
         />
       </section>
       <div id="form-records">
+        {DANTE_FORMS.length > 1 ? (
+          <nav className="dossier-form-pills" aria-label="フォーム切替">
+            {DANTE_FORMS.map((form, index) => (
+              <a key={form.id} href={`#${form.id}`}>
+                <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                <b>
+                  <NameText value={form.name} seams />
+                </b>
+              </a>
+            ))}
+          </nav>
+        ) : null}
         {DANTE_FORMS.map((rider) => (
           <div id={rider.id} key={rider.id} className="character-reading-target">
             <FormPickup rider={rider} />

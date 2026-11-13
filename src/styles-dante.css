@@ -14,11 +14,53 @@
   object-fit: contain;
 }
 .dante-page .varg-portrait figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
   padding: 14px 16px;
+  border-top: 1px solid rgba(237, 102, 126, 0.24);
   color: var(--manager-accent);
   font-size: 13px;
   line-height: 1.7;
   overflow-wrap: anywhere;
+}
+.dante-page .varg-portrait figcaption br {
+  display: none;
+}
+.dante-page .varg-portrait figcaption a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid rgba(237, 102, 126, 0.48);
+  border-radius: 999px;
+  background: rgba(237, 102, 126, 0.12);
+  color: #f8dfe4;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+.dante-page .varg-portrait figcaption a:focus-visible {
+  outline: 2px solid var(--manager-accent, #ed667e);
+  outline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .dante-page .varg-portrait figcaption a:hover {
+    border-color: rgba(237, 102, 126, 0.85);
+    background-color: rgba(237, 102, 126, 0.24);
+    color: #fff;
+  }
 }
 html[data-family="dossier"]
   main.dante-page.manager-page.manager-page:not(.is-sovereign)
@@ -27,10 +69,27 @@ html[data-family="dossier"]
 .dante-page.manager-page:not(.is-sovereign) .manager-portrait-frame {
   background: #ede8ea;
 }
+html[data-family="dossier"]
+  main.dante-page.manager-page.manager-page.manager-page
+  .form-pickup-visual {
+  background: #ede8ea;
+}
+html[data-family="dossier"]
+  main.dante-page.manager-page.manager-page.manager-page
+  .form-pickup-visual::after {
+  background: linear-gradient(180deg, transparent 78%, rgb(3 5 10 / 26%) 100%);
+}
+html[data-family="dossier"]
+  main.dante-page.manager-page.manager-page.manager-page
+  .form-pickup-visual
+  > img {
+  object-fit: contain;
+  background: #ede8ea;
+}
 .dante-page .form-pickup-visual img,
 .dante-page .form-pickup-layout img {
   object-fit: contain;
-  background: #eee;
+  background: #ede8ea;
 }
 .dante-page #form-records {
   display: grid;
@@ -147,5 +206,15 @@ html[data-family="dossier"]
   .dante-entry-glitch {
     animation: none;
     display: none;
+  }
+  .dante-page .varg-portrait figcaption a {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .dante-page .varg-portrait figcaption a {
+    border: 1px solid LinkText;
+    background: Canvas;
+    color: LinkText;
   }
 }

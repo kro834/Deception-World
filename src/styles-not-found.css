@@ -647,13 +647,33 @@
   }
 }
 
-/* Under 360px (320px phones, tiles under 90px) Michroma's CONTINUE is wider
-   than the tile at any tracking: the codes take the page's narrower HUD
-   face, Oxanium (already on the page for the outlined 404), still 12px. */
-@media (max-width: 359px) {
+/* Under 360px (320px phones, tiles under 90px), tiles stack cleanly in a
+   single column so Japanese labels and CONTINUE codes never wrap awkwardly into
+   cramped multi-line fragments. */
+@media (max-width: 360px) {
+  .app-not-found.app-not-found > nav.recovery-tiles {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a {
+    min-height: 52px;
+    padding: 10px 14px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .app-not-found.app-not-found > nav.recovery-tiles > a > small {
     font-family: "Oxanium", "Michroma", sans-serif;
     letter-spacing: 0.12em;
+    font-size: 12px;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a > b {
+    font-size: 12px;
+    text-align: right;
   }
 }
 

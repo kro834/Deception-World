@@ -109,11 +109,17 @@ html:root[data-ipad-viewport="contained"] .ipad-menu-toggle {
   line-height: 1.4;
   color: #c9b587;
   background: transparent;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 1px 3px rgb(0 0 0 / 35%);
 }
 
 .ipad-menu-toggle[aria-pressed="true"] i {
   background: #c9b587;
   color: #070d16;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 12px rgb(201 181 135 / 45%);
 }
 
 /* The old paint guard is not part of compact chrome. Remove its positive

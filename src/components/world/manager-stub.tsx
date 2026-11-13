@@ -9,6 +9,7 @@ import { LiquidPointerGlow } from "./liquid-rail";
 import { resetPickupScroll, settlePickupScroll } from "./pickup-scroll-reset";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
+import { CharacterChapterTools } from "./character-reading-tools";
 import { DisplayName } from "@/components/name-text";
 import { dossierImage, formPickupImage } from "@/lib/dossier-images";
 import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
@@ -64,7 +65,7 @@ type Profile = {
   sovereign?: boolean;
 };
 
-export function FormPickup({ rider: record }: { rider: RiderForm }) {
+export function FormPickup({ rider: record, id }: { rider: RiderForm; id?: string }) {
   const router = useRouter();
   // Name markup marks word boundaries; labels and alt retain exact spelling.
   const rider = record;
@@ -262,6 +263,7 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
   return (
     <section
       ref={signatureRef}
+      id={id}
       className={`form-pickup${isRexonance ? " is-rexonance-pickup" : ""}`}
       data-form-theme={rider.theme}
       aria-label={`${riderPrefix}${record.name}の記録`}
@@ -340,7 +342,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   {stats.map((s) => (
                     <div key={s.dt}>
                       <dt>{s.dt}</dt>
-                      <dd>{s.dd}</dd>
+                      <dd>
+                        <NameText value={s.dd} seams />
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -444,7 +448,9 @@ export function FormPickup({ rider: record }: { rider: RiderForm }) {
                   {stats.map((s) => (
                     <div key={s.dt}>
                       <dt>{s.dt}</dt>
-                      <dd>{s.dd}</dd>
+                      <dd>
+                        <NameText value={s.dd} seams />
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -755,6 +761,15 @@ function ManagerDossier({ profile }: { profile: Profile }) {
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
               </div>
+              {!profile.sovereign && profile.sections.length >= 4 ? (
+                <CharacterChapterTools
+                  sections={profile.sections}
+                  currentNo={s.no}
+                  continuation={
+                    profile.rider ? { href: "#form-records", title: "変身記録" } : undefined
+                  }
+                />
+              ) : null}
             </article>
           ))}
         </div>

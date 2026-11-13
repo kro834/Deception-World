@@ -70,6 +70,19 @@
     font-size: 12px;
   }
 }
+@media (max-width: 360px) {
+  .app-not-found.app-not-found > .recovery-tiles {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .recovery-tiles.recovery-tiles > a {
+    min-height: 52px;
+    padding: 10px 14px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   .recovery-tiles.recovery-tiles > a {
     transition:

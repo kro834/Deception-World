@@ -1540,6 +1540,28 @@ html[data-family="special"]
   justify-content: center;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs
+    > button[role="tab"]:hover {
+    color: #f2faff;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-tabs
+    > button[role="tab"]:active {
+    transform: scale(0.97);
+  }
+}
+
 /* The scroll cue is its line, falling to a gold point (its words are read
    to assistive tech only); a 44px target around it. */
 html[data-family="special"]

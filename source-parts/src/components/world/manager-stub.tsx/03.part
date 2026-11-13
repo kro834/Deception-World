@@ -1,3 +1,8 @@
+      { dt: "HEIGHT", dd: "203.6cm" },
+      { dt: "WEIGHT", dd: "113.2kg" },
+      { dt: "PUNCH", dd: "262.9t" },
+      { dt: "KICK", dd: "372.2t" },
+      { dt: "JUMP", dd: "5000m" },
       { dt: "100m", dd: "0.01sec" },
     ],
     abilities: [

@@ -2487,3 +2487,479 @@ html[data-family="dossier"]
   line-height: 1.55;
   text-wrap: pretty;
 }
+
+/* ----------------------------------------------------------------
+   7. Wave-2 dossier refinements: multi-form switcher, telemetry,
+      chapter footers, partner crimson, SCARS optics & redaction seal
+   ---------------------------------------------------------------- */
+
+/* Multi-form files number each form silently before the prefix line. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(#form-records, .rider-partner-forms .rider-form-pickup-stack):has(
+    .form-pickup ~ .form-pickup,
+    > div ~ div > .form-pickup
+  )
+  .form-pickup-copy
+  > h2
+  > span {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(#form-records, .rider-partner-forms .rider-form-pickup-stack):has(
+    .form-pickup ~ .form-pickup,
+    > div ~ div > .form-pickup
+  )
+  .form-pickup-copy
+  > h2
+  > span::before {
+  content: counter(zenith-form, decimal-leading-zero) / "";
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 44%, transparent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--sd-accent) 10%, var(--sd-plate));
+  color: var(--sd-accent);
+  font: 500 12px/1.35 var(--sd-hud);
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Form switcher pills at the head of multi-form stacks. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .dossier-form-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--sd-read) + 2 * var(--sd-pad));
+  margin: 0 auto;
+  padding: 24px var(--sd-pad) 16px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-partner-forms
+  > header
+  > .dossier-form-pills {
+  max-width: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .dossier-form-pills
+  > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid var(--sd-line-2);
+  border-left: 2px solid var(--sd-accent);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--sd-accent) 12%, transparent), transparent 62%),
+    var(--sd-plate);
+  color: var(--sd-text);
+  text-decoration: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .dossier-form-pills
+  > a
+  > i {
+  flex: 0 0 auto;
+  color: var(--sd-accent);
+  font: 500 12px/1 var(--sd-hud);
+  font-style: normal;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .dossier-form-pills
+  > a
+  > b {
+  color: currentColor;
+  font: 600 13px/1.35 var(--sd-display);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .dossier-form-pills
+  > a:focus-visible {
+  outline: 2px solid var(--dx-focus, #fff0b5);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .dossier-form-pills
+    > a:hover {
+    background-color: var(--sd-plate-2);
+    color: var(--sd-accent);
+  }
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(.form-pickup[id], .character-reading-target) {
+  scroll-margin-top: calc(var(--sd-head, 76px) + 56px);
+}
+
+@media (max-width: 699px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .dossier-form-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .dossier-form-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .dossier-form-pills
+    > a {
+    flex: 0 0 auto;
+  }
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      > #form-records
+      > .dossier-form-pills {
+      width: auto;
+      max-width: calc(var(--sd-read) + var(--sd-pad) + var(--sd-pad-end));
+      margin: 0 0 0 var(--sd-stage-w);
+      padding: 36px var(--sd-pad-end) 12px var(--sd-pad);
+      border-top: 1px solid var(--sd-line);
+    }
+  }
+}
+
+/* Tabular telemetry readouts and tall-desktop compaction for 8+ stat forms. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  :is(
+    .manager-facts dd,
+    #identity-records figcaption dl dd,
+    .form-pickup-record .form-pickup-spec dd,
+    .form-pickup-dialog:not(.fst-pickup-dialog) .form-pickup-stats dd,
+    .rider-nightmare-dialog .rider-nightmare-dialog-record dd
+  ) {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1100px) and (min-height: 921px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-card
+    > .form-pickup-copy:has(.form-pickup-spec > div:nth-child(8)) {
+    gap: 6px;
+    padding-top: 64px;
+    padding-bottom: 32px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-copy
+    > .form-pickup-record:has(.form-pickup-spec > div:nth-child(8)) {
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8))
+    > div {
+    gap: 4px;
+    padding: 8px 9px 9px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec:has(> div:nth-child(8))
+    dd {
+    font-size: clamp(14px, 1.05vw, 16px);
+  }
+}
+
+/* Chapter footers on long rider and manager dossiers. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-tools {
+  display: grid;
+  gap: 4px;
+  margin: 24px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--sd-line);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-tools
+  a {
+  min-width: 0;
+  min-height: 48px;
+  color: var(--sd-text);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-shortcuts
+  a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 4px;
+  color: var(--sd-text-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 4px;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-next-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-next-copy
+  b {
+  color: currentColor;
+  font-family: var(--sd-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.7;
+  text-wrap: pretty;
+  line-break: strict;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-next-arrow {
+  flex: 0 0 20px;
+  color: var(--sd-accent);
+  font-size: 18px;
+  text-align: center;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section
+  .character-chapter-tools
+  a:focus-visible {
+  outline: 2px solid var(--sd-accent);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    a:hover {
+    color: var(--sd-accent);
+    background-color: rgb(255 255 255 / 4%);
+  }
+}
+
+/* Cipher SCARS terminal optics: cyan/magenta hairline & #8be9ff telemetry keys. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page[data-rider="cipher"]
+  #dossier-index
+  .manager-copy-section {
+  background:
+    linear-gradient(90deg, #8be9ff 0%, #c95cff 52%, transparent 100%) 0 0 / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(139 233 255 / 4%), transparent 120px),
+    var(--sd-plate);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page[data-rider="cipher"]
+  :is(#dossier-profile .manager-facts, .form-pickup-record .form-pickup-spec) {
+  border-top-color: rgb(139 233 255 / 38%);
+  box-shadow: inset 0 1px 0 rgb(201 92 255 / 26%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page[data-rider="cipher"]
+  :is(
+    #dossier-profile .manager-facts dt,
+    .form-pickup-record .form-pickup-spec dt,
+    .form-pickup-dialog:not(.fst-pickup-dialog) .form-pickup-stats dt
+  ) {
+  color: #8be9ff;
+}
+
+/* Chigiri's partner forms stage takes his #f44f58 crimson light. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .rider-partner-forms {
+  --sd-accent: #f44f58;
+  --sd-accent-2: #8dffb7;
+  --sd-glow: color-mix(in srgb, #f44f58 34%, transparent);
+  --sd-glow-soft: color-mix(in srgb, #f44f58 14%, transparent);
+  --sd-rule: color-mix(in srgb, #f44f58 62%, transparent);
+}
+
+/* Yoake Mamori divine redaction seal chip. */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-facts
+  dd.is-redacted {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 2px 10px;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 38%, var(--sd-line-2));
+  border-left: 2px solid var(--sd-accent);
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--sd-accent) 14%, transparent) 0 4px,
+      rgb(4 7 13 / 72%) 4px 9px
+    ),
+    var(--sd-plate);
+  color: color-mix(in srgb, var(--sd-accent) 68%, var(--sd-text-2));
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+
+/* Narrow 4-tab sticky ruler protection and tablet reading measure / 2-column TOC. */
+@media (max-width: 389px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .dossier-reader
+    .dossier-reader-links {
+    gap: 2px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > .dossier-reader
+    .dossier-reader-links
+    a {
+    padding-inline: 1px;
+    font-size: 12px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1099px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-index
+    .manager-copy-body {
+    max-width: 40em;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-index
+    .dossier-contents:has(> a:nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    :is(.dossier-form-pills > a, .manager-copy-section .character-chapter-tools a) {
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .dossier-form-pills
+    > a {
+    border: 1px solid LinkText;
+    background: Canvas;
+    color: LinkText;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-facts
+    dd.is-redacted {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    .manager-copy-section
+    .character-chapter-tools
+    a {
+    color: LinkText;
+  }
+}

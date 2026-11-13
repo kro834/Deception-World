@@ -95,6 +95,9 @@
   color: inherit;
 }
 .wm-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-width: 44px;
   min-height: 44px;
   background: none;
@@ -103,11 +106,40 @@
   padding: 9px 13px;
   font-size: 12px;
   color: var(--wm-muted);
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+.wm-filters button[data-kind]::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+  background: #95aab2;
+}
+.wm-filters button[data-kind="person"]::before {
+  background: #9fd4d4;
+}
+.wm-filters button[data-kind="organization"]::before {
+  background: #dbbb8f;
+}
+.wm-filters button[data-kind="form"]::before {
+  background: #b7a8e3;
+}
+.wm-filters button[data-kind="event"]::before {
+  background: #93b5da;
+}
+.wm-filters button[data-kind="chapter"]::before {
+  background: #d6c39f;
 }
 .wm-filters button[aria-pressed="true"] {
   background: #b6e6e61c;
   border-color: #b6e6e6;
   color: var(--wm-accent);
+  box-shadow: 0 0 12px rgb(182 230 230 / 25%), inset 0 0 8px rgb(182 230 230 / 15%);
+}
+.wm-filters button[aria-pressed="true"]::before {
+  box-shadow: 0 0 6px currentColor;
 }
 .wm-workspace {
   display: grid;
@@ -121,6 +153,13 @@
   background-image: radial-gradient(#90acbb28 0.7px, transparent 0.7px);
   background-size: 20px 20px;
   min-height: 540px;
+}
+.wm-canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 65% at 50% 50%, transparent 45%, rgb(8 14 22 / 85%) 100%);
 }
 .wm-canvas svg {
   display: block;
@@ -157,6 +196,21 @@
 .wm-line {
   stroke: #a3bac44d;
   stroke-width: 1;
+}
+.wm-line.is-active-edge {
+  stroke: #b6e6e6a8;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .wm-line.is-active-edge {
+    animation: wm-line-flow 18s linear infinite;
+  }
+}
+@keyframes wm-line-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
 }
 .wm-node {
   color: #9fd4d4;
@@ -255,11 +309,39 @@
   line-height: 1.9;
 }
 .wm-source {
-  display: block;
-  border: 1px solid #a6c6ca50;
-  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  border: 1px solid rgb(122 232 255 / 35%);
+  border-radius: 2px;
+  padding: 11px 16px;
   margin-top: 24px;
   font-size: 12px;
+  color: #c6f5ff;
+  background: linear-gradient(90deg, rgb(122 232 255 / 8%), transparent);
+  letter-spacing: 0.04em;
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wm-source:hover {
+    border-color: rgb(122 232 255 / 75%);
+    background: linear-gradient(90deg, rgb(122 232 255 / 16%), rgb(122 232 255 / 4%));
+    box-shadow: 0 0 12px rgb(122 232 255 / 20%);
+  }
+}
+.wm-source[href*="/transformation-lab"] {
+  border-color: rgb(183 168 227 / 45%);
+  color: #dfd7f7;
+  background: linear-gradient(90deg, rgb(183 168 227 / 10%), transparent);
+  margin-top: 10px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wm-source[href*="/transformation-lab"]:hover {
+    border-color: rgb(183 168 227 / 85%);
+    background: linear-gradient(90deg, rgb(183 168 227 / 22%), rgb(183 168 227 / 6%));
+    box-shadow: 0 0 12px rgb(183 168 227 / 25%);
+  }
 }
 .wm-detail h3 {
   font-size: 12px;
@@ -414,8 +496,21 @@
   .wm-intro p {
     margin-top: 20px;
   }
+  .wm-filters {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .wm-filters::-webkit-scrollbar {
+    display: none;
+  }
   .wm-filters button {
-    padding: 8px 11px;
+    flex: none;
+    white-space: nowrap;
+    min-height: 44px;
+    padding: 8px 13px;
   }
   .wm-workspace {
     display: block;
@@ -429,18 +524,25 @@
     max-height: 380px;
     border-left: 0;
     border-top: 1px solid #647a8360;
-    border-radius: 0;
-    padding: 20px 18px;
+    border-radius: 8px 8px 0 0;
+    padding: 26px 18px 20px;
     position: relative;
     background: #0f1924f0;
-    box-shadow: inset 0 1px 0 #b6e6e633;
+    box-shadow:
+      0 -8px 24px rgb(0 0 0 / 45%),
+      inset 0 1px 0 #b6e6e633;
   }
-  .wm-detail:before {
+  .wm-detail::before {
     content: "";
-    display: block;
-    height: 1px;
-    background: linear-gradient(90deg, #b6e6e6, #647a834f 60%, transparent);
-    margin: -8px 0 16px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: #76909680;
+    box-shadow: 0 0 6px rgb(182 230 230 / 15%);
   }
   .wm-detail h2 {
     font-size: 21px;
@@ -484,6 +586,14 @@
 }
 
 @media (forced-colors: active) {
+  .wm-canvas::after {
+    display: none;
+  }
+  .wm-line.is-active-edge {
+    stroke: Highlight;
+    stroke-width: 2;
+    stroke-dasharray: none;
+  }
   .wm-header,
   .wm-search,
   .wm-workspace,
@@ -500,15 +610,32 @@
     border-color: ButtonBorder;
     color: ButtonText;
   }
+  .wm-filters button[data-kind]::before {
+    background: ButtonText;
+  }
   .wm-filters button[aria-pressed="true"],
   .wm-index-grid button[aria-pressed="true"] {
     background: Highlight;
     color: HighlightText;
     border-color: Highlight;
   }
+  .wm-filters button[aria-pressed="true"]::before {
+    background: HighlightText;
+    box-shadow: none;
+  }
   .wm-view-controls,
   .wm-detail {
     border-color: ButtonBorder;
+    background: Canvas;
+  }
+  .wm-detail::before {
+    background: ButtonBorder;
+    box-shadow: none;
+  }
+  .wm-source,
+  .wm-source[href*="/transformation-lab"] {
+    border: 1px solid LinkText;
+    color: LinkText;
     background: Canvas;
   }
   .wm-index-grid {
@@ -535,5 +662,86 @@
   .wm-page a:focus-visible,
   .wm-page input:focus-visible {
     outline: 2px solid Highlight;
+  }
+}
+
+@media print {
+  .wm-page {
+    background: #ffffff;
+    color: #000000;
+    min-height: auto;
+    padding: 16px;
+  }
+  .wm-header,
+  .wm-tools,
+  .wm-view-controls,
+  .wm-footer {
+    display: none !important;
+  }
+  .wm-intro {
+    padding: 12px 0;
+    color: #000000;
+  }
+  .wm-intro h1 {
+    font-size: 24px;
+    color: #000000;
+  }
+  .wm-intro p {
+    font-size: 12px;
+    color: #333333;
+  }
+  .wm-workspace {
+    border: 1px solid #999999;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    page-break-inside: avoid;
+  }
+  .wm-canvas {
+    background: #ffffff;
+    min-height: 400px;
+  }
+  .wm-canvas::after {
+    display: none !important;
+  }
+  .wm-canvas svg text {
+    fill: #000000;
+    stroke: #ffffff;
+  }
+  .wm-canvas svg circle:not(.wm-node-hit) {
+    fill: #f0f0f0;
+    stroke: #333333;
+  }
+  .wm-detail {
+    background: #fafafa;
+    border-left: 1px solid #999999;
+    color: #000000;
+  }
+  .wm-detail::before {
+    display: none;
+  }
+  .wm-detail h2 {
+    font-size: 18px;
+    color: #000000;
+  }
+  .wm-detail p,
+  .wm-detail span,
+  .wm-detail small,
+  .wm-detail h3 {
+    font-size: 12px;
+    color: #333333;
+  }
+  .wm-source {
+    border: 1px solid #666666;
+    color: #000000;
+    font-size: 12px;
+  }
+  .wm-index-grid button {
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    color: #000000;
+  }
+  .wm-index-grid span,
+  .wm-index-grid small {
+    font-size: 12px;
+    color: #000000;
   }
 }

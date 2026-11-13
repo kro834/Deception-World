@@ -54,6 +54,11 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
             >
               <p>
                 <span>{String(index + 1).padStart(2, "0")}</span>
+                {selected === form.key ? (
+                  <span className="rxe-comparison-live-badge" aria-hidden="true">
+                    選択中
+                  </span>
+                ) : null}
               </p>
               <img
                 src={form.image}

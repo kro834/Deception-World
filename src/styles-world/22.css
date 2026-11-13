@@ -36,7 +36,7 @@
 
 .rider-cutin-caption small {
   font-family: var(--font-display);
-  font-size: clamp(7px, 0.72vw, 10px);
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.35em;
 }

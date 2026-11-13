@@ -662,11 +662,19 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 }
 
 .mus-table-wrap {
-  border: 1px solid var(--mus-hair);
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--mus-teal) 22%, var(--mus-hair));
   border-radius: 6px;
   overflow-x: auto;
   touch-action: pan-x pan-y pinch-zoom;
-  background: rgb(4 12 16 / 72%);
+  background:
+    radial-gradient(ellipse 65% 50% at 50% -10%, rgb(55 198 192 / 12%), transparent 70%),
+    linear-gradient(180deg, rgb(55 198 192 / 4%), transparent 30%),
+    rgb(4 12 16 / 82%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 16%),
+    inset 0 0 32px -12px rgb(55 198 192 / 15%),
+    0 12px 32px -8px rgb(0 0 0 / 60%);
 }
 
 .mus-table {
@@ -1067,6 +1075,23 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   font-weight: 700;
   letter-spacing: 0.04em;
   box-shadow: inset 2px 0 0 rgb(255 154 74 / 55%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mus-weapons li {
+    transition:
+      background-color 200ms ease,
+      box-shadow 200ms ease,
+      color 200ms ease;
+  }
+  .mus-weapons li:hover {
+    background: #07151c;
+    color: #ffffff;
+    box-shadow:
+      inset 4px 0 0 0 var(--mus-orange),
+      inset 0 1px 0 0 rgb(255 255 255 / 12%),
+      0 0 16px -4px rgb(255 154 74 / 35%);
+  }
 }
 
 .mus-arsenal-note {
@@ -1818,7 +1843,9 @@ html:not([data-world-effects="economy"])
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mus-finisher-calls button {
+  .mus-finisher-calls button,
+  .mus-weapons li,
+  .mus-compare-pick button {
     transition: none !important;
     scale: none !important;
   }
@@ -1847,13 +1874,30 @@ html:not([data-world-effects="economy"])
   transition:
     border-color 0.2s ease,
     color 0.2s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .mus-compare-pick button[aria-pressed="true"] {
   border-color: var(--mus-accent);
-  background: color-mix(in srgb, var(--mus-accent) 16%, transparent);
-  color: var(--mus-silver);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--mus-accent) 26%, transparent), color-mix(in srgb, var(--mus-accent) 12%, transparent));
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 28%),
+    0 0 18px color-mix(in srgb, var(--mus-accent) 36%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--mus-accent) 65%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mus-compare-pick button:not([aria-pressed="true"]):hover {
+    color: var(--mus-silver);
+    border-color: color-mix(in srgb, var(--mus-accent) 45%, var(--mus-hair));
+    background: rgb(255 255 255 / 5%);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 14%),
+      0 0 12px color-mix(in srgb, var(--mus-accent) 20%, transparent);
+  }
 }
 
 .mus-performance[data-stage="middle"] .mus-table tr[data-self]:not([data-ultra]),

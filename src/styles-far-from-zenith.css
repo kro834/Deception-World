@@ -201,11 +201,66 @@
   .rxs-page.rxs-page.ffs-page .ffs-specs > div,
   .rxs-page.rxs-page.ffs-page .ffs-articles > article,
   .rxs-page.rxs-page.ffs-page .ffs-weapons > li,
-  .rxs-page.rxs-page.ffs-page .ffs-finisher {
+  .rxs-page.rxs-page.ffs-page .ffs-finisher,
+  .rxs-page.rxs-page.ffs-page .ffs-stage-panel {
     clip-path: none;
     background: Canvas;
     border-color: CanvasText;
+    box-shadow: none;
   }
+
+  .rxs-page.rxs-page.ffs-page .ffs-stage-panel::before {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.ffs-page .ffs-form-code {
+    -webkit-text-stroke: 1px CanvasText;
+    filter: none;
+  }
+}
+
+/* -- stage switcher panel: machined bevel & optical plate ------------- */
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel {
+  position: relative;
+  isolation: isolate;
+  background: var(--ffz-plate);
+  border: 1px solid rgb(var(--ffz-ice) / 0.2);
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--ffz-cut)) 0,
+    100% var(--ffz-cut),
+    100% 100%,
+    var(--ffz-cut) 100%,
+    0 calc(100% - var(--ffz-cut))
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 18%),
+    inset 0 -40px 70px -30px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 14%, transparent),
+    0 18px 48px -12px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 22%, transparent);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 var(--ffz-cut) auto 0;
+  height: 3px;
+  background: var(--ffz-rail);
+  box-shadow:
+    0 0 14px rgb(var(--ffz-ice) / 0.55),
+    0 0 24px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 60%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-stage-copy h3 {
+  text-shadow:
+    0 0 28px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 45%, transparent),
+    0 2px 4px rgb(0 0 0 / 0.6);
+}
+
+.rxs-page.rxs-page.ffs-page .ffs-form-code {
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 75%, transparent);
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 35%, transparent));
 }
 
 /* -- the hero: the key visual dissolves into the stage ------------------ */

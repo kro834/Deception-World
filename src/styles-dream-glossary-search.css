@@ -197,7 +197,7 @@
   outline-offset: 3px;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .dream-page.dream-page
     .dream-glossary-search
     .dream-glossary-jump

@@ -51,10 +51,12 @@
   overflow-wrap: anywhere;
 }
 
-.dream-page.dream-page .dream-archive-index a:hover,
-.dream-page.dream-page .dream-archive-related a:hover {
-  border-color: var(--ts-kin-light);
-  background: rgb(70 46 51 / 74%);
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-archive-index a:hover,
+  .dream-page.dream-page .dream-archive-related a:hover {
+    border-color: var(--ts-kin-light);
+    background: rgb(70 46 51 / 74%);
+  }
 }
 
 .dream-page.dream-page .dream-archive-index a:focus-visible,

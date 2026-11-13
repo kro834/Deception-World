@@ -426,6 +426,174 @@ html[data-family="library"]
 html[data-family="library"] .search-page.search-observatory .search-display-summary {
   margin-bottom: 8px;
 }
+
+/* Wave-2 observatory telemetry: high-contrast gold-ink mark beacon, tabular
+   category count pills, left-aligned active filter strip, keyboard focus-visible
+   accent parity on result cards, and structured empty-state badges. */
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  mark {
+  padding: 0 3px;
+  border-bottom: 2px solid #f2cf8d;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #f2cf8d2e, #f2cf8d47), #3d2e14;
+  color: #fffdf6;
+  box-shadow: none;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-categories
+  button
+  span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  min-height: 22px;
+  padding: 1px 7px;
+  border: 1px solid #8ebad24d;
+  border-radius: 999px;
+  background: #06111b;
+  color: #c7dbe8;
+  font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-categories
+  button[aria-pressed="true"]
+  span {
+  border-color: #0b243466;
+  background: #0a202e;
+  color: #ecfaff;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-active-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid #91bdd759;
+  border-left: 3px solid var(--records-ice, #9deafa);
+  background: linear-gradient(90deg, #132839cc, #08131ee6 72%);
+  text-align: left;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-active-filter
+  > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 1px solid #9deafa73;
+  border-radius: 0;
+  background: #0d2231;
+  color: var(--records-ice, #9deafa);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  :is(.search-result-card, .search-more-option):focus-visible {
+  border-color: #d4f7ff;
+  background: linear-gradient(125deg, #26485e, #102b3e 60%, #1b3b4e);
+  box-shadow:
+    inset 4px 0 var(--records-ice, #9deafa),
+    5px 6px 0 #010810b3;
+  outline: 3px solid #c8faff;
+  outline-offset: 4px;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-empty
+  > .search-empty-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  padding: 4px 12px;
+  border: 1px solid #f2cf8d66;
+  background: #261e12cc;
+  color: var(--records-gold, #f2cf8d);
+  font-family: "Michroma", "Oxanium", sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-empty
+  > .search-empty-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 18px;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-empty-kinds
+  > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #9deafa66;
+  border-radius: 0;
+  background: #0c1f2e;
+  color: var(--records-silver, #e9f6fb);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-empty-kinds
+  > button
+  > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 20px;
+  padding: 1px 7px;
+  border: 1px solid #9deafa59;
+  border-radius: 999px;
+  background: #06111b;
+  color: var(--records-ice, #9deafa);
+  font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    :is(.search-active-filter > button, .search-empty-kinds > button):hover {
+    border-color: #c8faff;
+    background: #143247;
+  }
+}
 @media (max-width: 999px) {
   html[data-family="library"] .search-observatory .search-observatory-desk {
     grid-template-columns: minmax(0, 1fr);
@@ -601,5 +769,39 @@ html[data-family="library"] .search-page.search-observatory .search-display-summ
     .search-more-option
     > .search-more-peek {
     display: none;
+  }
+  html[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    mark {
+    background: Highlight;
+    color: HighlightText;
+    border-bottom-color: HighlightText;
+    box-shadow: none;
+  }
+  html[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    :is(
+      .search-active-filter,
+      .search-active-filter > button,
+      .search-empty > .search-empty-code,
+      .search-empty-kinds > button
+    ) {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+  html[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    :is(.search-categories button span, .search-empty-kinds > button > span) {
+    border-color: currentColor;
+    background: transparent;
+    color: inherit;
+  }
+  html[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    :is(.search-result-card, .search-more-option):focus-visible {
+    outline: 3px solid Highlight;
+    box-shadow: none !important;
   }
 }

@@ -30,7 +30,7 @@
 }
 .dogs-archive-header h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Cinzel", Georgia, "Times New Roman", serif;
   font-size: clamp(22px, 3vw, 35px);
   font-weight: 400;
   letter-spacing: 0.1em;
@@ -74,6 +74,7 @@
   border-bottom: 1px solid var(--dogs-line);
 }
 .dogs-archive-selector button {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,13 +92,26 @@
 }
 .dogs-archive-selector button b {
   font:
-    400 21px/1 Georgia,
+    400 21px/1 "Cinzel",
+    Georgia,
     "Times New Roman",
     serif;
 }
 .dogs-archive-selector button span {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.06em;
+}
+.dogs-archive-selector button[data-released] {
+  color: #b5cbbd;
+}
+.dogs-archive-selector button[data-released]::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #4ad88a;
+  box-shadow: 0 0 8px #4ad88a99;
 }
 .dogs-archive-selector button[aria-selected="true"] {
   background: #142f22;
@@ -109,6 +123,11 @@
   .dogs-archive-selector button:hover {
     color: #f2fff4;
     background: #143123a6;
+  }
+  .dogs-archive-varg > a:hover {
+    border-color: #d9a792b3;
+    background-color: #26181ce6;
+    color: #fff6f1;
   }
 }
 .dogs-archive button:focus-visible,
@@ -162,11 +181,12 @@
   cursor: pointer;
 }
 .dogs-archive-varg {
+  box-sizing: border-box;
   height: 100%;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   place-items: center;
-  padding: 24px var(--dogs-edge);
+  padding: 76px var(--dogs-edge) 20px;
   gap: 14px;
 }
 .dogs-archive-varg > img {
@@ -177,11 +197,24 @@
   object-fit: contain;
 }
 .dogs-archive-varg > a {
-  color: #e0d3c9;
-  padding: 12px 24px;
-  border-bottom: 1px solid #bd907d66;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 44px;
+  color: #efe2da;
+  padding: 10px 22px;
+  border: 1px solid #bd907d66;
+  border-radius: 999px;
+  background: #171012cc;
   text-decoration: none;
   font-size: 13px;
+  letter-spacing: 0.06em;
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
 }
 .dogs-archive-unreleased {
   height: 100%;
@@ -193,7 +226,8 @@
 }
 .dogs-archive-unreleased > span {
   font:
-    400 clamp(80px, 16vw, 180px)/1 Georgia,
+    400 clamp(80px, 16vw, 180px)/1 "Cinzel",
+    Georgia,
     "Times New Roman",
     serif;
   color: #7a9f8626;
@@ -207,11 +241,15 @@
   width: min(1240px, calc(100vw - 80px));
   max-width: none;
   max-height: calc(100svh - 80px);
+  max-height: calc(100dvh - 80px);
   padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid #87b19545;
   background: #06100b;
   color: #dce9df;
-  overscroll-behavior: none;
+  overscroll-behavior: contain;
 }
 .dogs-archive-reference-dialog::backdrop {
   background: #000e;
@@ -301,6 +339,7 @@ html[data-dogs-archive] .zeus-button {
     padding-block: 9px;
   }
   .dogs-archive-selector button {
+    gap: 6px;
     min-height: 44px;
     padding: 4px;
   }
@@ -313,14 +352,18 @@ html[data-dogs-archive] .zeus-button {
   .dogs-archive-record h2 {
     font-size: 13px;
   }
+  .dogs-archive-varg {
+    padding-top: 68px;
+  }
   .dogs-archive-reference {
-    font-size: 11px;
+    font-size: 12px;
     min-width: 46px;
     padding-inline: 10px;
   }
   .dogs-archive-reference-dialog {
-    width: calc(100vw - 64px);
-    max-height: calc(100svh - 48px);
+    width: calc(100vw - 24px);
+    max-height: calc(100svh - 24px);
+    max-height: calc(100dvh - 24px);
   }
   .dogs-reference-pair {
     grid-template-columns: 1fr;
@@ -369,24 +412,33 @@ html[data-dogs-archive] .zeus-button {
     padding-block: 4px;
   }
   .dogs-archive-selector button {
-    min-height: 40px;
+    min-height: 44px;
   }
   .dogs-archive-record {
     top: 15px;
+  }
+  .dogs-archive-varg {
+    padding-block: 16px 12px;
   }
   .dogs-archive .dogs-viewer__toolbar {
     bottom: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dogs-archive-selector button {
+  .dogs-archive-selector button,
+  .dogs-archive-varg > a {
     transition: none;
   }
 }
 @media (forced-colors: active) {
   .dogs-archive-selector button,
-  .dogs-archive-reference {
+  .dogs-archive-reference,
+  .dogs-archive-varg > a {
     border: 1px solid ButtonText;
+  }
+  .dogs-archive-selector button[data-released]::after {
+    background: Highlight;
+    box-shadow: none;
   }
   .dogs-archive-selector button[aria-selected="true"] {
     outline: 2px solid Highlight;

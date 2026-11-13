@@ -63,12 +63,12 @@
 .saga-cinema.saga-cinema .hero-floor>a,.saga-cinema.saga-cinema .hero-floor>.text-button{min-height:44px}
 
 /* Four direct chapter selections below the hero. */
-.saga-cinema.saga-cinema .chapter-reel{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;max-width:1500px;margin:clamp(48px,6vh,84px) auto 14px;border:1px solid #ffffff38;background:#ffffff2e;box-shadow:0 26px 75px #0006}
-.saga-cinema.saga-cinema .chapter-reel button{min-width:0;min-height:102px;padding:16px 18px 18px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;text-align:left;background:#06090de0;transition:background .25s,box-shadow .25s}
-.saga-cinema.saga-cinema .chapter-reel button:hover,.saga-cinema.saga-cinema .chapter-reel button:focus-visible,.saga-cinema.saga-cinema .chapter-reel button[aria-pressed="true"]{background:rgba(var(--saga-accent-rgb),.16);box-shadow:inset 0 3px var(--saga-accent)}
-.saga-cinema.saga-cinema .chapter-reel button>small{font:10px/1.5 var(--saga-tech);letter-spacing:.1em;color:var(--saga-accent)}
+.saga-cinema.saga-cinema .chapter-reel{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;max-width:1500px;margin:clamp(48px,6vh,84px) auto 14px;border:1px solid rgba(var(--saga-accent-rgb),.35);background:rgba(var(--saga-accent-rgb),.15);box-shadow:0 26px 75px #0006,inset 0 1px 0 0 rgb(255 255 255 / 18%)}
+.saga-cinema.saga-cinema .chapter-reel button{position:relative;min-width:0;min-height:102px;padding:16px 18px 18px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;text-align:left;background:#06090de0;transition:background .25s,box-shadow .25s}
+.saga-cinema.saga-cinema .chapter-reel button:hover,.saga-cinema.saga-cinema .chapter-reel button:focus-visible,.saga-cinema.saga-cinema .chapter-reel button[aria-pressed="true"]{background:linear-gradient(180deg,rgba(var(--saga-accent-rgb),.22) 0%,rgba(var(--saga-accent-rgb),.12) 100%);box-shadow:inset 0 3px var(--saga-accent),inset 0 4px 14px rgba(var(--saga-accent-rgb),.24),inset 0 1px 0 0 rgb(255 255 255 / 24%),0 0 20px rgba(var(--saga-accent-rgb),.16)}
+.saga-cinema.saga-cinema .chapter-reel button>small{font:12px/1.5 var(--saga-tech);letter-spacing:.1em;color:var(--saga-accent)}
 .saga-cinema.saga-cinema .chapter-reel button strong{font:26px/1.4 var(--saga-serif);letter-spacing:.22em;color:#fff}
-.saga-cinema.saga-cinema .chapter-reel button>span:last-child{font:10px/1.5 var(--saga-tech);letter-spacing:.11em;color:#b9b5b3}
+.saga-cinema.saga-cinema .chapter-reel button>span:last-child{font:12px/1.5 var(--saga-tech);letter-spacing:.11em;color:#b9b5b3}
 
 /* Film-program scale with complete art. */
 .saga-cinema.saga-cinema .section{max-width:1500px;padding-block:110px}.saga-cinema.saga-cinema .section-label{border-color:rgba(var(--saga-accent-rgb),.32)}
@@ -115,7 +115,7 @@
 .saga-cinema.saga-cinema .hero-copy>.logo-crop{width:106%;margin-left:-3%}.saga-cinema.saga-cinema .hero-catch{font-size:clamp(26px,6vw,34px)}.saga-cinema.saga-cinema .hero-description{font-size:12px}
 .saga-cinema.saga-cinema .hero-actions{justify-content:flex-start;flex-wrap:wrap}.saga-cinema.saga-cinema .hero-actions>.frame-button,.saga-cinema.saga-cinema .hero-actions>.text-button{font-size:12px}
 .saga-cinema.saga-cinema .hero-poster-area{width:min(320px,83vw);margin-inline:auto}.saga-cinema.saga-cinema .chapter-reel{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:48px}
-.saga-cinema.saga-cinema .chapter-reel button{min-height:82px;padding:10px 12px}.saga-cinema.saga-cinema .chapter-reel button strong{font-size:20px}.saga-cinema.saga-cinema .chapter-reel button>small,.saga-cinema.saga-cinema .chapter-reel button>span:last-child{font-size:9px}
+.saga-cinema.saga-cinema .chapter-reel button{min-height:84px;padding:10px 12px}.saga-cinema.saga-cinema .chapter-reel button strong{font-size:20px}.saga-cinema.saga-cinema .chapter-reel button>small,.saga-cinema.saga-cinema .chapter-reel button>span:last-child{font-size:12px}
 .saga-cinema.saga-cinema .hero-floor{left:6%;right:6%;bottom:17px}.saga-cinema.saga-cinema .hero-floor>a,.saga-cinema.saga-cinema .hero-floor>.text-button{font-size:10px}
 .saga-cinema.saga-cinema .section{padding:74px 7%}.saga-cinema.saga-cinema .intro-art-image{height:min(510px,112vw)}.saga-cinema.saga-cinema .intro-copy{padding-left:6%}
 .saga-cinema.saga-cinema .film-grid{grid-template-columns:1fr;row-gap:64px}.saga-cinema.saga-cinema .film-card:nth-child(even){margin-top:0}.saga-cinema.saga-cinema .film-card-top{font-size:12px}.saga-cinema.saga-cinema .film-card-top>span:first-child{font-size:10px}
@@ -291,6 +291,10 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 /* The reel under the hero: each film by its title alone. */
 .saga-cinema.saga-cinema .chapter-reel button {
   min-height: 84px;
+}
+.saga-cinema.saga-cinema .chapter-reel button > small,
+.saga-cinema.saga-cinema .chapter-reel button > span:last-child {
+  font-size: 12px;
 }
 
 /* A film's card: its part, its poster, its title and the ＋ that opens it. */

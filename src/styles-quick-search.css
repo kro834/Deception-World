@@ -82,9 +82,11 @@ dialog.quick-search *::after {
     repeating-linear-gradient(0deg, rgb(var(--qs-ice-rgb) / 0.03) 0 1px, transparent 1px 32px),
     var(--qs-ink);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.1),
-    0 30px 90px rgb(0 0 0 / 0.68),
-    0 0 0 1px rgb(var(--qs-pink-rgb) / 0.12);
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.18),
+    0 32px 96px rgb(0 0 0 / 0.78),
+    0 8px 32px rgb(0 0 0 / 0.52),
+    0 0 0 1px rgb(var(--qs-pink-rgb) / 0.16);
 }
 /* The prism along the top edge; gold brackets at the foot. */
 .quick-search-panel::before {
@@ -205,23 +207,27 @@ dialog.quick-search kbd {
   border-radius: 3px;
   color: var(--qs-ice);
   background:
+    linear-gradient(180deg, rgb(0 0 0 / 35%) 0%, transparent 12px),
     linear-gradient(
       90deg,
-      rgb(var(--qs-ice-rgb) / 0.12) 0%,
-      rgb(var(--qs-pink-rgb) / 0.07) 46%,
+      rgb(var(--qs-ice-rgb) / 0.14) 0%,
+      rgb(var(--qs-pink-rgb) / 0.08) 46%,
       transparent 78%
     ),
     var(--qs-ink-2);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 2px 4px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
     0 10px 26px -14px rgb(0 0 0 / 0.7);
 }
 .quick-search-field:focus-within {
-  border-color: rgb(var(--qs-pink-rgb) / 0.66);
+  border-color: rgb(var(--qs-pink-rgb) / 0.78);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.14),
-    0 0 0 3px rgb(var(--qs-pink-rgb) / 0.14),
-    0 12px 28px -12px rgb(var(--qs-pink-rgb) / 0.32);
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    inset 0 2px 4px rgb(0 0 0 / 0.4),
+    0 0 0 3px rgb(var(--qs-pink-rgb) / 0.22),
+    0 0 20px rgb(var(--qs-pink-rgb) / 0.35),
+    0 12px 28px -12px rgb(var(--qs-pink-rgb) / 0.42);
 }
 .quick-search-field svg {
   flex-shrink: 0;
@@ -320,13 +326,15 @@ dialog.quick-search .quick-search-clear {
 .quick-search-option[data-active="true"] {
   background: linear-gradient(
     90deg,
-    rgb(var(--qs-ice-rgb) / 0.17) 0%,
-    rgb(var(--qs-pink-rgb) / 0.08) 48%,
-    rgb(var(--qs-ice-rgb) / 0.03) 100%
+    rgb(var(--qs-ice-rgb) / 0.22) 0%,
+    rgb(var(--qs-pink-rgb) / 0.12) 48%,
+    rgb(var(--qs-ice-rgb) / 0.04) 100%
   );
   box-shadow:
     inset 3px 0 0 var(--qs-ice),
-    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.34);
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.42),
+    0 0 16px -4px rgb(var(--qs-ice-rgb) / 0.25);
   outline: 0;
 }
 .quick-search-option-title {
@@ -710,12 +718,21 @@ dialog.quick-search .quick-search-art {
   width: 48px;
   height: 64px;
   overflow: hidden;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.22);
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.32);
   border-radius: 3px;
   color: var(--qs-ice);
   background: var(--qs-ink-2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    0 2px 8px rgb(0 0 0 / 0.5);
   font-size: 12px;
   text-align: center;
+}
+dialog.quick-search .quick-search-option[data-active="true"] .quick-search-art {
+  border-color: var(--qs-ice);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 0 12px rgb(var(--qs-ice-rgb) / 0.38);
 }
 dialog.quick-search .quick-search-art img {
   display: block;

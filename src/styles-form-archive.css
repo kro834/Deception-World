@@ -615,3 +615,153 @@ html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger:focus
     outline-color: Highlight;
   }
 }
+
+/* ================================================================
+   Command-archive REALM violet telemetry, compact 480-699.98px lamp
+   and forced-colours contrast over late command-archive rules.
+   ================================================================ */
+html[data-family] body main.form-archive-page.command-archive[data-archive-kind="realm"] {
+  --fa-accent: #b8a2ff;
+  --fa-lock: #e3d6ff;
+  --archive-violet: #b8a2ff;
+  --fa-lamp: #b8a2ff;
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"][data-archive-ready="false"] {
+  --fa-lamp: var(--fa-gold);
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border-color: rgb(196 176 255 / 62%);
+  background:
+    linear-gradient(135deg, rgb(184 162 255 / 26%), transparent 56%),
+    #272247 !important;
+  box-shadow:
+    inset 0 1px rgb(241 232 255 / 36%),
+    inset 0 -2px rgb(184 162 255 / 58%),
+    0 2px 8px rgb(0 0 0 / 50%) !important;
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  #archive-switcher.form-archive-switcher
+  > button[aria-selected="true"]
+  b {
+  color: #f4eeff;
+}
+
+@media (min-width: 700px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind="realm"]:not(
+      [data-archive-ready="false"]
+    )
+    .form-archive-toolbar::before {
+    color: rgb(214 198 255 / 86%);
+  }
+}
+
+@media (min-width: 480px) and (max-width: 699.98px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind]
+    > header.form-archive-toolbar::before {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + var(--fa-bar) / 2);
+    left: max(var(--sh-gutter, 16px), env(safe-area-inset-left, 0px));
+    bottom: auto;
+    box-sizing: border-box;
+    max-width: calc(50vw - 155px - 28px);
+    padding-left: 14px;
+    background:
+      radial-gradient(
+        circle at 3px 50%,
+        color-mix(in srgb, var(--fa-lamp) 46%, transparent) 0 3px,
+        transparent 8px
+      ),
+      linear-gradient(var(--fa-lamp) 0 0) 0 50% / 6px 6px no-repeat;
+    color: color-mix(in srgb, var(--fa-accent) 78%, #eaf6ff);
+    font-family: var(--fa-hud);
+    font-size: 12px;
+    font-synthesis: none;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind="saga"]
+    > header.form-archive-toolbar::before {
+    content: "SAGA";
+  }
+
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind="realm"]
+    > header.form-archive-toolbar::before {
+    content: "REALM";
+  }
+
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-ready="false"]
+    > header.form-archive-toolbar::before {
+    color: rgb(240 207 134 / 86%);
+  }
+}
+
+@media (min-width: 480px) and (max-width: 560px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind]
+    > header.form-archive-toolbar::before {
+    left: calc(max(10px, env(safe-area-inset-left, 0px) + 8px) + 272px);
+    max-width: calc(
+      100vw - 352px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)
+    );
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind]
+    > header.form-archive-toolbar::before {
+    background: none;
+    color: CanvasText;
+  }
+
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind]
+    #archive-switcher.form-archive-switcher
+    > .liquid-selection-lens
+    > .liquid-selection-surface {
+    border-color: Highlight;
+    background: Highlight !important;
+    box-shadow: none !important;
+  }
+
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind]
+    #archive-switcher.form-archive-switcher
+    > button[aria-selected="true"]
+    :is(b, small) {
+    color: HighlightText;
+  }
+}

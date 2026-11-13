@@ -10,6 +10,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
+import { CharacterChapterTools } from "./character-reading-tools";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
@@ -386,3 +387,14 @@ export const RIDER_DOSSIERS: RiderDossier[] = [
         kicker: "人物と判断基準",
         title: "軽口を絶やさず、共存できるかを見極める。",
         body: [
+          "明るく親しみやすく、冗談や軽口で場を動かす一方、意思と理性を不可逆的に失った災害は、過去の善性にかかわらず排除する。外見や出自に惑わされず、共存できるかどうかで判断する。",
+        ],
+      },
+      {
+        no: "03",
+        kicker: "外見と戦闘",
+        title: "生身でも、この世界で最強とされる。",
+        body: [
+          "黒く染めた髪、淡い蒼の瞳、長い耳を持ち、白いコートを好む。反射神経、空間認識、情報処理に秀で、初手の必殺技と欺瞞を織り交ぜる。",
+        ],
+      },

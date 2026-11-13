@@ -1,39 +1,3 @@
-        returnHash="riders-return"
-        returnLabel="ライダー一覧へ戻る"
-      />
-      <i className="dg-rail" aria-hidden="true" />
-      <section className="manager-hero" id="dossier-profile">
-        <div className="manager-portrait-column">
-          <div className="manager-portrait-frame">
-            <img
-              src={rider.civilianImg}
-              srcSet={
-                rider.id === "over-zeztz"
-                  ? "/character-james-20260829.webp"
-                  : dossierImage(rider.civilianImg).srcSet
-              }
-              sizes="(max-width: 760px) 92vw, (max-width: 1120px) 46vw, 520px"
-              alt={`${rider.civilian.name}の変身前ビジュアル`}
-              style={{
-                objectPosition: `var(--dossier-portrait-position, ${rider.civilianPos ?? "center"})`,
-                objectFit: "var(--dossier-portrait-fit, cover)" as CSSProperties["objectFit"],
-              }}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-            <i className="dossier-arrive-scan" aria-hidden="true" />
-          </div>
-        </div>
-        <div className="manager-introduction">
-          <header className="dossier-identity">
-            {/* The file's numeral, drawn in outline over the name as on the
-                end card (decorative: the name is the heading). */}
-            <span className="dossier-file-numeral" aria-hidden="true">
-              {rider.no}
-            </span>
-            <h1>
-              <span
                 className="manager-display-name"
                 style={{ ["--name-len" as string]: [...rider.civilian.name].length }}
               >
@@ -121,7 +85,9 @@
                 {rider.partner.facts.map((fact) => (
                   <div key={fact.dt}>
                     <dt>{fact.dt}</dt>
-                    <dd>{fact.dd}</dd>
+                    <dd>
+                      <NameText value={fact.dd} seams />
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -182,14 +148,42 @@
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
               </div>
+              {rider.sections.length >= 4 ? (
+                <CharacterChapterTools
+                  sections={rider.sections}
+                  currentNo={s.no}
+                  continuation={
+                    pickupForms.length ? { href: "#form-records", title: "変身記録" } : undefined
+                  }
+                />
+              ) : null}
             </article>
           ))}
         </div>
       </section>
       {pickupForms.length ? (
         <div className="rider-form-pickup-stack" id="form-records">
+          {pickupForms.length > 1 ? (
+            <nav className="dossier-form-pills" aria-label="フォーム切替">
+              {pickupForms.map((form, index) => (
+                <a
+                  key={`${form.name}-${form.sub ?? "base"}`}
+                  href={`#form-record-${index + 1}`}
+                >
+                  <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                  <b>
+                    <NameText
+                      value={(samePickupName ? form.sub : undefined) ?? form.displayName ?? form.name}
+                      seams
+                    />
+                  </b>
+                </a>
+              ))}
+            </nav>
+          ) : null}
           {pickupForms.map((form, index) => (
             <FormPickup
+              id={`form-record-${index + 1}`}
               key={`${form.name}-${form.sub ?? "base"}`}
               rider={{
                 img: form.img,
@@ -273,10 +267,26 @@
               <NameText value={rider.partner.name} />
               の変身記録
             </h2>
+            {partnerForms.length > 1 ? (
+              <nav className="dossier-form-pills" aria-label="フォーム切替">
+                {partnerForms.map((form, index) => (
+                  <a
+                    key={`${form.name}-${form.sub ?? "base"}`}
+                    href={`#partner-form-${index + 1}`}
+                  >
+                    <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                    <b>
+                      <NameText value={form.sub ?? form.name} seams />
+                    </b>
+                  </a>
+                ))}
+              </nav>
+            ) : null}
           </header>
           <div className="rider-form-pickup-stack">
-            {partnerForms.map((form) => (
+            {partnerForms.map((form, index) => (
               <FormPickup
+                id={`partner-form-${index + 1}`}
                 key={`${form.name}-${form.sub ?? "base"}`}
                 rider={{
                   img: form.img,
@@ -351,7 +361,9 @@
                   {rider.nightmare.facts.map((f) => (
                     <div key={f.dt}>
                       <dt>{f.dt}</dt>
-                      <dd>{f.dd}</dd>
+                      <dd>
+                        <NameText value={f.dd} seams />
+                      </dd>
                     </div>
                   ))}
                 </dl>

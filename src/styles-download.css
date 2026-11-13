@@ -304,6 +304,7 @@ html[data-world-effects="economy"] .export-page h1 {
   /* The page's one glow. */
   box-shadow:
     0 0 0 1px rgb(4 8 15 / 60%),
+    inset 0 1px 0 rgb(255 255 255 / 80%),
     0 12px 32px rgb(122 232 255 / 18%);
 }
 
@@ -345,7 +346,7 @@ html[data-world-effects="economy"] .export-page h1 {
   padding-inline: 12px;
   margin-top: 8px;
   border-radius: 2px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.75;
   letter-spacing: 0.04em;
   color: var(--dl-text-2);
@@ -361,13 +362,12 @@ html[data-world-effects="economy"] .export-page h1 {
 }
 
 .export-page-alt::after {
-  content: "";
+  content: "↺" / "";
   display: inline-block;
-  width: 6px;
-  height: 6px;
   margin-left: 8px;
   vertical-align: middle;
-  background: var(--dl-ice);
+  font-size: 12px;
+  color: var(--dl-ice);
   opacity: 0.85;
 }
 
@@ -454,10 +454,11 @@ html[data-world-effects="economy"] .export-page h1 {
 }
 
 .export-page-btn:active {
-  translate: 0 0;
+  translate: 0 2px;
   box-shadow:
-    0 0 0 1px rgb(4 8 15 / 60%),
-    0 6px 18px rgb(122 232 255 / 18%);
+    0 0 0 1px rgb(4 8 15 / 80%),
+    inset 0 1px 2px rgb(4 8 15 / 35%),
+    0 4px 12px rgb(122 232 255 / 14%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -465,6 +466,7 @@ html[data-world-effects="economy"] .export-page h1 {
     background: linear-gradient(180deg, #fff, #a6f0ff);
     box-shadow:
       0 0 0 1px rgb(4 8 15 / 60%),
+      inset 0 1px 0 #fff,
       0 16px 40px rgb(122 232 255 / 28%);
     translate: 0 -1px;
   }
@@ -1057,6 +1059,20 @@ html[data-world-effects="economy"] .export-page h1 {
   letter-spacing: 0.02em;
   overflow-wrap: anywhere;
   text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.export-page-navigation > .export-page-back {
+  background: linear-gradient(180deg, rgb(122 232 255 / 10%), rgb(122 232 255 / 4%));
+  color: #eafbff;
+  font-weight: 600;
+}
+
+.export-page-navigation > .export-page-context {
+  background: rgb(122 232 255 / 4%);
+  color: var(--dl-text-2);
+  font-weight: 500;
+  font-size: 12px;
 }
 
 .export-page-navigation > :is(.export-page-back, .export-page-context):focus-visible {
@@ -1066,8 +1082,13 @@ html[data-world-effects="economy"] .export-page h1 {
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .export-page-navigation > .export-page-back:hover {
+    background: linear-gradient(180deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 8%));
+    color: #fff;
+  }
   .export-page-navigation > .export-page-context:hover {
-    background: rgb(122 232 255 / 14%);
+    background: rgb(122 232 255 / 12%);
+    color: #fff;
   }
 }
 
@@ -1136,9 +1157,83 @@ html[data-world-effects="economy"] .export-page h1 {
   border: 1px solid rgb(139 155 167 / 36%);
   border-radius: 4px;
 }
+.export-page .export-page-navigation > .export-page-back {
+  border-color: rgb(122 232 255 / 42%);
+}
+.export-page .export-page-navigation > .export-page-context {
+  border-color: rgb(139 155 167 / 28%);
+}
 @media (forced-colors: active) {
   .export-page small#export-scope {
     color: CanvasText;
     border-color: CanvasText;
+  }
+}
+
+@media print {
+  .export-page {
+    background: #ffffff;
+    color: #000000;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    padding: 24px;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+  }
+  .export-page::before,
+  .export-page::after {
+    display: none !important;
+  }
+  .export-page-sigil {
+    border: 1px solid #000000;
+    background: #ffffff;
+    color: #000000;
+    box-shadow: none;
+  }
+  .export-page-sigil > i {
+    font-size: 16px;
+  }
+  .export-page p {
+    color: #333333;
+    font-size: 12px;
+  }
+  .export-page h1 {
+    color: #000000;
+    -webkit-text-fill-color: initial;
+    filter: none;
+    font-size: 28px;
+  }
+  .export-page b {
+    color: #000000;
+    border-left: 2px solid #000000;
+    background: none;
+    font-size: 12px;
+  }
+  .export-page-btn {
+    border: 1px solid #000000;
+    background: #f0f0f0;
+    color: #000000;
+    box-shadow: none;
+    font-size: 14px;
+  }
+  .export-page-btn::before {
+    display: none !important;
+  }
+  .export-page-alt {
+    color: #333333;
+    font-size: 12px;
+  }
+  .export-page-alt::after {
+    display: none !important;
+  }
+  .export-page small,
+  .export-page small#export-scope {
+    color: #333333;
+    font-size: 12px;
+    border-color: #cccccc;
+  }
+  .export-page .export-page-navigation {
+    display: none !important;
   }
 }

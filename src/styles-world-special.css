@@ -886,7 +886,9 @@ html[data-family="world"]:root
   );
   transition:
     border-color 220ms ease,
-    background-color 220ms ease;
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    translate 220ms ease;
 }
 
 html[data-family="world"]:root
@@ -945,6 +947,11 @@ html[data-family="world"]:root
         no-repeat,
       radial-gradient(80% 120% at 0 50%, rgb(var(--ws-door-rgb) / 14%), transparent 70%),
       rgb(10 8 8 / 86%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      inset 0 0 20px -8px rgb(var(--ws-door-rgb) / 28%),
+      inset 0 0 0 1px rgb(var(--ws-door-rgb) / 16%),
+      0 4px 20px rgb(0 0 0 / 56%);
   }
 }
 
@@ -1020,7 +1027,7 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > footer
   > .ws-doors
-  > a:is(:hover, :focus-visible) {
+  > a:focus-visible {
   border-color: var(--ws-door);
   background-color: rgb(var(--ws-door-rgb) / 12%);
 }
@@ -1030,7 +1037,7 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > footer
   > .ws-doors
-  > a:is(:hover, :focus-visible)
+  > a:focus-visible
   > i {
   translate: 3px -3px;
 }
@@ -1040,9 +1047,82 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > footer
   > .ws-doors
-  > a:is(:hover, :focus-visible)
+  > a:focus-visible
   > img {
   filter: brightness(1.12) saturate(1.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:hover {
+    border-color: var(--ws-door);
+    background-color: rgb(var(--ws-door-rgb) / 16%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 28%),
+      inset 0 0 28px -6px rgb(var(--ws-door-rgb) / 42%),
+      0 8px 28px rgb(0 0 0 / 64%),
+      0 0 24px -4px rgb(var(--ws-door-rgb) / 38%);
+    translate: 0 -2px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:hover
+    > i {
+    translate: 4px -4px;
+    border-color: #fff;
+    filter: drop-shadow(0 0 6px var(--ws-door));
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:hover
+    > i::after {
+    background: #fff;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:hover
+    > img {
+    filter: brightness(1.15) saturate(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a {
+    translate: none !important;
+    transition: none !important;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a
+    > i {
+    translate: none !important;
+    transition: none !important;
+  }
 }
 
 /* The cut corners would clip an outline: the ring goes inside. */

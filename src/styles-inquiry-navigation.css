@@ -38,10 +38,6 @@
   color: var(--inquiry-accent);
   cursor: pointer;
   list-style: none;
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .inquiry-navigation > summary::before {
   content: "";
@@ -227,17 +223,6 @@
   font-size: 13px;
   font-weight: 500;
 }
-.inquiry-navigation-panel a:hover {
-  border-color: color-mix(in srgb, var(--inquiry-accent) 62%, transparent);
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--inquiry-accent) 12%, transparent),
-    rgb(255 255 255 / 4%) 82%
-  );
-  box-shadow:
-    inset 2px 0 0 var(--inquiry-accent),
-    inset 0 1px 0 rgb(255 255 255 / 12%);
-}
 .inquiry-navigation-panel .inquiry-navigation-return {
   display: flex;
   align-items: center;
@@ -259,6 +244,17 @@
   cursor: pointer;
 }
 @media (hover: hover) and (pointer: fine) {
+  .inquiry-navigation-panel a:hover {
+    border-color: color-mix(in srgb, var(--inquiry-accent) 62%, transparent);
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--inquiry-accent) 12%, transparent),
+      rgb(255 255 255 / 4%) 82%
+    );
+    box-shadow:
+      inset 2px 0 0 var(--inquiry-accent),
+      inset 0 1px 0 rgb(255 255 255 / 12%);
+  }
   .inquiry-navigation-panel button:hover {
     border-color: var(--inquiry-accent);
     background: color-mix(in srgb, var(--inquiry-accent) 10%, transparent);
@@ -280,6 +276,12 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .inquiry-navigation > summary {
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
   html:not([data-world-effects="economy"]) .inquiry-navigation[open] .inquiry-navigation-panel {
     animation: inquiry-navigation-open 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }

@@ -105,6 +105,7 @@ export function WorldMap({
             {[["all", "すべて"], ...Object.entries(MAP_KINDS)].map(([key, label]) => (
               <button
                 key={key}
+                data-kind={key}
                 aria-pressed={kind === key}
                 onClick={() => onChange({ kind: key as State["kind"] })}
               >
@@ -178,7 +179,7 @@ export function WorldMap({
                     y1="0"
                     x2={p.x}
                     y2={p.y}
-                    className={`wm-line wm-kind-${p.kind}`}
+                    className={`wm-line is-active-edge wm-kind-${p.kind}`}
                   />
                 ))}
                 {points.map((p, i) => (

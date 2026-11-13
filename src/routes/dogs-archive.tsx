@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
+import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { DogViewer } from "@/components/dogs-archive/dog-viewer";
 import {
@@ -38,6 +39,7 @@ function DogsArchive() {
   const referenceButton = useRef<HTMLButtonElement>(null);
   const tabs = useRef<HTMLDivElement>(null);
   const entry = DOG_ARCHIVE_ENTRIES[dog - 1];
+  useDialogHistoryDismiss(dialogRef, () => setReferenceOpen(false));
 
   useEffect(() => {
     const root = document.documentElement;
@@ -119,6 +121,7 @@ function DogsArchive() {
             type="button"
             role="tab"
             data-dog={item.id}
+            data-released={item.id === 2 || item.id === 5 ? "true" : undefined}
             id={`dog-tab-${item.id}`}
             aria-label={item.title}
             aria-selected={dog === item.id}
@@ -160,9 +163,12 @@ function DogsArchive() {
           <div className="dogs-archive-varg">
             <img
               src="/character-varg-20261021.webp"
+              srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
+              sizes="(max-width: 700px) calc(100vw - 32px), 720px"
               alt="第二の犬・ヴァルグの本来形態"
               width={1088}
               height={1445}
+              decoding="async"
             />
             <Link to="/characters/dante" hash="character-section-04">
               人物資料へ <span aria-hidden="true">↗</span>
@@ -182,6 +188,9 @@ function DogsArchive() {
         onCancel={(event) => {
           event.preventDefault();
           setReferenceOpen(false);
+        }}
+        onClick={(event) => {
+          if (event.target === dialogRef.current) setReferenceOpen(false);
         }}
         onClose={() => setReferenceOpen(false)}
       >

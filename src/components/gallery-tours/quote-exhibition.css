@@ -133,3 +133,102 @@
     transform: none;
   }
 }
+
+.command-support-tours .quote-exhibition {
+  color: var(--gallery-ivory, #eef4f5);
+}
+
+.command-support-tours .quote-exhibition .quote-scene {
+  border-top-color: var(--gallery-rule, #637581);
+}
+
+.command-support-tours .quote-exhibition .quote-scene:last-child {
+  border-bottom-color: var(--gallery-rule, #637581);
+}
+
+.command-support-tours .quote-exhibition .quote-fold {
+  border-color: #6b808d;
+  background: #111c25;
+  box-shadow: inset 0 1px rgb(224 244 252 / 14%);
+  color: #cfe0e8;
+}
+
+.command-support-tours .quote-exhibition .quote-scene[data-open="true"] .quote-fold {
+  border-color: var(--quote-ink, #b7dce7);
+  background: linear-gradient(180deg, #1d3140, #101c26);
+  box-shadow:
+    inset 0 1px rgb(235 249 255 / 24%),
+    0 0 0 1px rgb(183 220 231 / 20%);
+  color: var(--quote-ink, #eef8fc);
+}
+
+.command-support-tours .quote-exhibition .quote-leaf figure {
+  border-color: #7c909c;
+  background: radial-gradient(ellipse at 50% 22%, #273b48, #080d12 76%);
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 22%),
+    0 16px 34px rgb(0 0 0 / 46%);
+}
+
+.command-support-tours .quote-exhibition .quote-leaf-copy p {
+  color: #d6e2e8;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .command-support-tours .quote-exhibition .quote-scene h3 button:hover {
+    color: var(--quote-ink, #d8eef6);
+  }
+
+  .command-support-tours .quote-exhibition .quote-scene h3 button:hover .quote-fold {
+    border-color: var(--quote-ink, #b7dce7);
+    background: #182936;
+    color: #f0f9fc;
+  }
+
+  .command-support-tours .quote-exhibition .quote-leaf-copy a:hover,
+  .command-support-tours .quote-exhibition .quote-scene-ambience button:hover {
+    color: #f3fbfe;
+    text-decoration-color: var(--quote-ink, #b7dce7);
+  }
+}
+
+@media (forced-colors: active) {
+  .quote-scene,
+  .quote-scene:last-child,
+  .command-support-tours .quote-exhibition .quote-scene,
+  .command-support-tours .quote-exhibition .quote-scene:last-child {
+    border-color: CanvasText;
+  }
+
+  .quote-fold,
+  .command-support-tours .quote-exhibition .quote-fold {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  .quote-scene[data-open="true"] .quote-fold,
+  .command-support-tours .quote-exhibition .quote-scene[data-open="true"] .quote-fold {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+    box-shadow: none;
+    forced-color-adjust: none;
+  }
+
+  .quote-leaf figure,
+  .command-support-tours .quote-exhibition .quote-leaf figure {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  .quote-leaf-copy a {
+    color: LinkText;
+  }
+
+  .quote-scene :is(button, a):focus-visible {
+    outline-color: Highlight;
+  }
+}

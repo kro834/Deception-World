@@ -27,7 +27,17 @@ import { releasePendingImage } from "@/lib/release-pending-images";
  * shoulders, the trunk, the arms to the hands, the legs to the picture's
  * foot, the tail over the right shoulder. */
 export const FORM_BURST_PANEL_BODY = [
-  [0.5, 0.06, 0.5, 0.2, 0.07],
+  // Forehead/visor
+  [0.51, 0.16, 0.51, 0.26, 0.065],
+  // Left & right tall horns
+  [0.455, 0.076, 0.49, 0.17, 0.034],
+  [0.565, 0.076, 0.53, 0.17, 0.034],
+  // Left & right outer horns (外角 at (0.365, 0.20) and (0.65, 0.18))
+  [0.365, 0.2, 0.455, 0.18, 0.038],
+  [0.65, 0.18, 0.56, 0.18, 0.038],
+  // Upper left/right shoulder spine/crystal tips
+  [0.095, 0.22, 0.18, 0.28, 0.045],
+  [0.82, 0.22, 0.76, 0.32, 0.055],
   [0.5, 0.2, 0.58, 0.33, 0.1],
   [0.36, 0.27, 0.71, 0.31, 0.12],
   [0.56, 0.33, 0.6, 0.52, 0.15],

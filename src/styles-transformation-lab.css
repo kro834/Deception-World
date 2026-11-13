@@ -93,12 +93,37 @@
   padding: 22px 0 14px;
 }
 .lab-stages {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 18px;
 }
 .lab-stages[data-compare="true"] {
+  position: relative;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+@media (min-width: 681px) {
+  .lab-stages[data-compare="true"]::after {
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 50%;
+    z-index: 3;
+    width: 2px;
+    content: "";
+    background: linear-gradient(
+      180deg,
+      transparent,
+      rgb(121 232 255 / 45%) 15%,
+      rgb(242 216 150 / 65%) 50%,
+      rgb(121 232 255 / 45%) 85%,
+      transparent
+    );
+    box-shadow: 0 0 10px rgb(121 232 255 / 40%);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
 }
 .lab-stage {
   position: relative;
@@ -112,8 +137,19 @@
   top: 18px;
   left: 20px;
   z-index: 2;
-  font-size: clamp(12px, 1.7vw, 18px);
-  font-weight: 500;
+  display: inline-flex;
+  flex-direction: column;
+  padding: 8px 14px;
+  background: rgb(8 16 25 / 82%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgb(121 232 255 / 28%);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 4px 16px rgb(0 0 0 / 40%);
+  font-size: clamp(12px, 1.7vw, 17px);
+  font-weight: 600;
   letter-spacing: 0.06em;
   margin: 0;
   pointer-events: none;
@@ -183,6 +219,7 @@
   flex-wrap: wrap;
 }
 .lab-seek {
+  position: relative;
   display: block;
   margin: 22px 0 12px;
   font-size: 14px;
@@ -192,11 +229,34 @@
   font-variant-numeric: tabular-nums;
   color: #a9d9de;
 }
+.lab-seek-milestone {
+  font-size: 12px;
+  color: #79e8ff;
+  margin-left: 6px;
+  font-weight: 500;
+}
 .lab-seek input {
   display: block;
   width: 100%;
   min-height: 44px;
   accent-color: #a9d9de;
+}
+.lab-seek-ticks {
+  position: relative;
+  display: block;
+  height: 8px;
+  margin-top: -6px;
+  margin-bottom: 8px;
+  pointer-events: none;
+}
+.lab-seek-tick {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 7px;
+  background: rgb(169 217 222 / 42%);
+  transform: translateX(-50%);
+  border-radius: 1px;
 }
 .lab-beats {
   display: flex;
@@ -236,6 +296,7 @@
     flex: 1;
     overflow-wrap: anywhere;
     font-size: 12px;
+    min-height: 44px;
   }
   .lab-stages[data-compare="true"] {
     grid-template-columns: minmax(0, 1fr);
@@ -248,22 +309,42 @@
     height: 440px;
     height: clamp(340px, 58svh, 540px);
   }
+  .lab-controls {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: rgb(8 13 18 / 94%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgb(121 232 255 / 22%);
+    box-shadow: 0 -8px 24px rgb(0 0 0 / 60%);
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    margin-inline: -12px;
+  }
   .lab-transport {
     gap: 8px;
     font-size: 13px;
   }
+  .lab-transport button,
+  .lab-transport select {
+    min-height: 44px;
+  }
   .lab-beats button {
     flex: 1 0 22%;
     font-size: 13px;
+    min-height: 44px;
   }
   .lab-stage h2 {
-    left: 14px;
-    top: 14px;
+    left: 12px;
+    top: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
   }
   .lab-zoom button {
     flex: 1;
     font-size: 12px;
     padding-inline: 8px;
+    min-height: 44px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -416,5 +497,24 @@
   .transformation-lab :focus-visible,
   .tl-part-record a:focus-visible {
     outline: 2px solid Highlight;
+  }
+  .lab-stages[data-compare="true"]::after {
+    background: CanvasText;
+    box-shadow: none;
+  }
+  .lab-stage h2 {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  .lab-form-name {
+    color: CanvasText;
+  }
+  .lab-seek-tick {
+    background: CanvasText;
+  }
+  .lab-controls {
+    background: Canvas;
+    border-top: 1px solid CanvasText;
   }
 }

@@ -186,6 +186,9 @@ export function TransformationLab() {
       if (request === copyRequest.current) setCopyResult({ state, ok: false });
     }
   };
+  const currentBeat =
+    [...LAB_BEATS].reverse().find((beat) => state.progress >= beat.at - 0.005) ?? LAB_BEATS[0];
+
   return (
     <>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
@@ -370,7 +373,7 @@ export function TransformationLab() {
             </p>
           )}
           <label className="lab-seek">
-            変身の進行 <output>{Math.round(state.progress * 100)}%</output>
+            変身の進行 <output>{Math.round(state.progress * 100)}% <span className="lab-seek-milestone">({currentBeat.label})</span></output>
             <input
               aria-label="変身の進行"
               aria-valuetext={`${Math.round(state.progress * 100)}%`}
@@ -381,6 +384,15 @@ export function TransformationLab() {
               value={state.progress}
               onChange={(event) => change({ progress: Number(event.target.value) })}
             />
+            <span className="lab-seek-ticks" aria-hidden="true">
+              {LAB_BEATS.map((beat) => (
+                <i
+                  key={beat.at}
+                  className="lab-seek-tick"
+                  style={{ left: `${beat.at * 100}%` }}
+                />
+              ))}
+            </span>
           </label>
           <div className="lab-beats" role="group" aria-label="変身の段階">
             {LAB_BEATS.map((beat) => (

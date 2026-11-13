@@ -10,6 +10,7 @@ import { useDialogHistoryDismiss } from "./use-dialog-history-dismiss";
 import { DossierNav, RIDER_NAV, NameText } from "./dossier-nav";
 import { FormPickup, REX_LOI } from "./manager-stub";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
+import { CharacterChapterTools } from "./character-reading-tools";
 import { SlideOpenControl } from "./slide-open-control";
 import { UiVectorIcon } from "./ui-vector-icon";
 import { LiquidPointerGlow } from "./liquid-rail";
@@ -1533,9 +1534,17 @@ export function RiderPage({ id }: { id: string }) {
             : primaryForm
               ? [primaryForm]
               : [];
+  const samePickupName =
+    pickupForms.length > 1 &&
+    pickupForms.every(
+      (form) =>
+        (form.displayName ?? form.name) ===
+        (pickupForms[0]?.displayName ?? pickupForms[0]?.name),
+    );
   return (
     <main
       className="manager-page rider-dossier-page dg-focus-scope"
+      data-rider={rider.id}
       style={{
         ["--manager-accent" as string]: rider.tone,
         ["--manager-accent-soft" as string]: rider.tone,
@@ -1676,7 +1685,9 @@ export function RiderPage({ id }: { id: string }) {
                 {rider.partner.facts.map((fact) => (
                   <div key={fact.dt}>
                     <dt>{fact.dt}</dt>
-                    <dd>{fact.dd}</dd>
+                    <dd>
+                      <NameText value={fact.dd} seams />
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -1737,14 +1748,42 @@ export function RiderPage({ id }: { id: string }) {
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
               </div>
+              {rider.sections.length >= 4 ? (
+                <CharacterChapterTools
+                  sections={rider.sections}
+                  currentNo={s.no}
+                  continuation={
+                    pickupForms.length ? { href: "#form-records", title: "変身記録" } : undefined
+                  }
+                />
+              ) : null}
             </article>
           ))}
         </div>
       </section>
       {pickupForms.length ? (
         <div className="rider-form-pickup-stack" id="form-records">
+          {pickupForms.length > 1 ? (
+            <nav className="dossier-form-pills" aria-label="フォーム切替">
+              {pickupForms.map((form, index) => (
+                <a
+                  key={`${form.name}-${form.sub ?? "base"}`}
+                  href={`#form-record-${index + 1}`}
+                >
+                  <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                  <b>
+                    <NameText
+                      value={(samePickupName ? form.sub : undefined) ?? form.displayName ?? form.name}
+                      seams
+                    />
+                  </b>
+                </a>
+              ))}
+            </nav>
+          ) : null}
           {pickupForms.map((form, index) => (
             <FormPickup
+              id={`form-record-${index + 1}`}
               key={`${form.name}-${form.sub ?? "base"}`}
               rider={{
                 img: form.img,
@@ -1828,10 +1867,26 @@ export function RiderPage({ id }: { id: string }) {
               <NameText value={rider.partner.name} />
               の変身記録
             </h2>
+            {partnerForms.length > 1 ? (
+              <nav className="dossier-form-pills" aria-label="フォーム切替">
+                {partnerForms.map((form, index) => (
+                  <a
+                    key={`${form.name}-${form.sub ?? "base"}`}
+                    href={`#partner-form-${index + 1}`}
+                  >
+                    <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+                    <b>
+                      <NameText value={form.sub ?? form.name} seams />
+                    </b>
+                  </a>
+                ))}
+              </nav>
+            ) : null}
           </header>
           <div className="rider-form-pickup-stack">
-            {partnerForms.map((form) => (
+            {partnerForms.map((form, index) => (
               <FormPickup
+                id={`partner-form-${index + 1}`}
                 key={`${form.name}-${form.sub ?? "base"}`}
                 rider={{
                   img: form.img,
@@ -1906,7 +1961,9 @@ export function RiderPage({ id }: { id: string }) {
                   {rider.nightmare.facts.map((f) => (
                     <div key={f.dt}>
                       <dt>{f.dt}</dt>
-                      <dd>{f.dd}</dd>
+                      <dd>
+                        <NameText value={f.dd} seams />
+                      </dd>
                     </div>
                   ))}
                 </dl>
