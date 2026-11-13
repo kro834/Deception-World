@@ -527,11 +527,16 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
 /* The specs: ミドル and ウルトラ side by side; one value spans both. */
 .mus-specs-wrap {
   position: relative;
-  border: 1px solid var(--mus-hair);
+  border: 1px solid color-mix(in srgb, var(--mus-orange, #ff9a4a) 25%, var(--mus-hair));
   border-radius: 6px;
   background:
+    radial-gradient(circle at 0% 0%, rgb(55 198 192 / 12%), transparent 42%),
+    radial-gradient(circle at 100% 100%, rgb(255 154 74 / 10%), transparent 45%),
     linear-gradient(90deg, rgb(55 198 192 / 6%), transparent 40%, rgb(240 222 255 / 5%)),
     rgb(4 12 16 / 72%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 16%),
+    0 12px 36px -8px rgb(0 0 0 / 60%);
   overflow: hidden;
 }
 
@@ -1422,11 +1427,11 @@ html[data-family="special"]
    ミドル's share of ウルトラ drawn under them; the table carries the names) ---------- */
 .mus-specs tbody tr[data-bar] td {
   position: relative;
-  padding-bottom: 20px;
+  padding-bottom: 22px;
   font-size: clamp(20px, 2.4vw, 34px);
 }
 
-.mus-specs tbody tr[data-bar] td::after {
+.mus-specs tbody tr[data-dual][data-bar] td::before {
   content: "";
   position: absolute;
   left: clamp(12px, 2vw, 24px);
@@ -1434,16 +1439,30 @@ html[data-family="special"]
   bottom: 8px;
   height: 4px;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--mus-teal), var(--mus-orange));
-  transform: scaleX(var(--share));
-  transform-origin: 0 50%;
-  box-shadow: 0 0 10px rgb(255 154 74 / 45%);
+  background: rgb(255 255 255 / 8%);
 }
 
-.mus-specs tbody tr[data-bar] td:nth-child(3)::after {
-  background: var(--mus-iris);
-  transform: none;
-  box-shadow: none;
+.mus-specs tbody tr[data-bar] td::after {
+  content: "";
+  position: absolute;
+  left: clamp(12px, 2vw, 24px);
+  bottom: 8px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--mus-teal), var(--mus-orange));
+  transform-origin: 0 50%;
+}
+
+.mus-specs tbody tr[data-dual][data-bar] td:nth-child(2)::after {
+  width: calc(var(--share, 1) * (100% - clamp(24px, 4vw, 48px)));
+  background: linear-gradient(90deg, var(--mus-teal), color-mix(in srgb, var(--mus-teal) 70%, #fff));
+  box-shadow: 0 0 10px rgb(55 198 192 / 50%);
+}
+
+.mus-specs tbody tr[data-dual][data-bar] td:nth-child(3)::after {
+  width: calc(100% - clamp(24px, 4vw, 48px));
+  background: linear-gradient(90deg, var(--mus-iris), #f6eeff);
+  box-shadow: 0 0 10px rgb(240 222 255 / 45%);
 }
 
 /* ---------- Chapter openings (the Extreme site's lit band) ---------- */
@@ -1485,13 +1504,18 @@ html[data-family="special"]
   background: #03080b;
 }
 
-.mus-article {
+.mus-article,
+.mus-article-grid article,
+.mus-articles article {
   box-shadow:
-    0 0 0 1px rgb(255 154 74 / 22%),
-    inset 0 1px 0 rgb(255 255 255 / 5%);
+    0 0 0 1px rgb(255 154 74 / 26%),
+    inset 0 1px 0 0 rgb(255 255 255 / 14%),
+    0 8px 24px -4px rgb(0 0 0 / 50%);
   background:
+    radial-gradient(circle at 100% 0%, rgb(255 154 74 / 8%), transparent 45%),
+    radial-gradient(120% 60% at 0% 0%, rgb(55 198 192 / 12%), transparent 60%),
     linear-gradient(115deg, transparent 60%, rgb(255 154 74 / 6%) 60.3%, transparent 70%),
-    radial-gradient(120% 60% at 0% 0%, rgb(55 198 192 / 9%), transparent 60%), #040b0f;
+    #040b0f;
 }
 
 .mus-article h3 {
@@ -1773,6 +1797,31 @@ html:not([data-world-effects="economy"])
   letter-spacing: inherit;
   text-align: left;
   cursor: pointer;
+  transition:
+    scale 120ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mus-finisher-calls button:hover {
+    color: #fff;
+    background: rgb(255 154 74 / 14%);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 154 74 / 38%),
+      0 0 16px rgb(255 154 74 / 20%);
+  }
+}
+
+.mus-finisher-calls button:active {
+  scale: 0.985;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mus-finisher-calls button {
+    transition: none !important;
+    scale: none !important;
+  }
 }
 
 /* The comparison follows the page's form: its row and bars light. */

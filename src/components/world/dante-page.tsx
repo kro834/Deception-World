@@ -84,7 +84,9 @@ export function DantePage() {
             {DANTE_FACTS.map((fact) => (
               <div key={fact.dt}>
                 <dt>{fact.dt}</dt>
-                <dd>{fact.dd}</dd>
+                <dd>
+                  <NameText value={fact.dd} seams />
+                </dd>
               </div>
             ))}
           </dl>
@@ -136,7 +138,9 @@ export function DantePage() {
                     {VARG_FACTS.map((fact) => (
                       <div key={fact.dt}>
                         <dt>{fact.dt}</dt>
-                        <dd>{fact.dd}</dd>
+                        <dd>
+                          <NameText value={fact.dd} seams />
+                        </dd>
                       </div>
                     ))}
                   </dl>

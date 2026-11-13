@@ -303,7 +303,7 @@ main.manager-page .manager-facts dd .jp-atom {
     padding: 0 20px;
     border-radius: 999px;
   }
-  .manager-page .manager-pagination .dossier-index-return > span {
+  .manager-page .manager-pagination .dossier-index-return:not(.is-world-map) > span {
     display: none;
   }
 }

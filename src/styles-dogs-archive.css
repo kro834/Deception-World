@@ -2,7 +2,7 @@
   --dogs-ink: #020806;
   --dogs-text: #dce9df;
   --dogs-line: #9ed6b126;
-  --dogs-edge: max(40px, env(safe-area-inset-left), env(safe-area-inset-right));
+  --dogs-edge: max(clamp(16px, 4vw, 40px), env(safe-area-inset-left), env(safe-area-inset-right));
   box-sizing: border-box;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
@@ -105,9 +105,11 @@
   color: #e5f6e8;
   box-shadow: inset 0 -1px #a5d5ad;
 }
-.dogs-archive-selector button:hover {
-  color: #f2fff4;
-  background: #143123a6;
+@media (hover: hover) and (pointer: fine) {
+  .dogs-archive-selector button:hover {
+    color: #f2fff4;
+    background: #143123a6;
+  }
 }
 .dogs-archive button:focus-visible,
 .dogs-archive a:focus-visible {

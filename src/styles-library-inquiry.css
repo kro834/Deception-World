@@ -45,15 +45,25 @@
   border-radius: 0;
   background: linear-gradient(145deg, #ffffff09, #ffffff02);
   color: var(--library-ink, #eeeae1);
-  transition:
-    border-color 180ms ease,
-    background-color 180ms ease;
 }
-.library-page .inquiry-choice:hover,
 .library-page .inquiry-choice[aria-pressed="true"] {
   border-color: var(--inquiry-accent);
   background: #ffffff0d;
   color: var(--library-ink, #eeeae1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .library-page .inquiry-choice:hover {
+    border-color: var(--inquiry-accent);
+    background: #ffffff0d;
+    color: var(--library-ink, #eeeae1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .library-page .inquiry-choice {
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease;
+  }
 }
 .inquiry-choice-label,
 .inquiry-stop-label {

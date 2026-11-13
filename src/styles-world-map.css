@@ -175,10 +175,16 @@
 .wm-kind-chapter {
   color: #d6c39f;
 }
-.wm-node circle {
+.wm-node circle:not(.wm-node-hit) {
   fill: #0c1820;
   stroke: currentColor;
   stroke-width: 1.5;
+}
+.wm-node circle.wm-node-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0;
+  pointer-events: all;
 }
 .wm-node text {
   fill: currentColor;
@@ -188,15 +194,20 @@
   stroke-width: 5px;
   stroke-linejoin: round;
 }
-.wm-node.is-selected circle {
+.wm-node.is-selected circle:not(.wm-node-hit) {
   fill: #acdcdc22;
   stroke-width: 2;
 }
 .wm-node.is-selected text {
   font-size: 15px;
 }
-.wm-node:hover circle,
-.wm-node:focus-visible circle {
+@media (hover: hover) and (pointer: fine) {
+  .wm-node:hover circle:not(.wm-node-hit) {
+    fill: currentColor;
+    stroke-width: 4;
+  }
+}
+.wm-node:focus-visible circle:not(.wm-node-hit) {
   fill: currentColor;
   stroke-width: 4;
 }
@@ -411,26 +422,25 @@
   }
   .wm-canvas,
   .wm-canvas svg {
-    min-height: 430px;
-    height: 430px;
+    min-height: 300px;
+    height: clamp(300px, 46svh, 410px);
   }
   .wm-detail {
-    max-height: 360px;
+    max-height: 380px;
     border-left: 0;
-    border-top: 1px solid #647a834f;
-    border-radius: 20px 20px 0 0;
-    padding: 22px 20px;
+    border-top: 1px solid #647a8360;
+    border-radius: 0;
+    padding: 20px 18px;
     position: relative;
-    background: #111e29;
+    background: #0f1924f0;
+    box-shadow: inset 0 1px 0 #b6e6e633;
   }
   .wm-detail:before {
     content: "";
     display: block;
-    width: 34px;
-    height: 3px;
-    background: #879ca84f;
-    margin: -12px auto 20px;
-    border-radius: 4px;
+    height: 1px;
+    background: linear-gradient(90deg, #b6e6e6, #647a834f 60%, transparent);
+    margin: -8px 0 16px;
   }
   .wm-detail h2 {
     font-size: 21px;
@@ -452,5 +462,78 @@
   .wm-view-controls {
     left: 14px;
     bottom: 14px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .wm-filters button {
+    border-color: #8fb1be;
+    color: var(--wm-ink);
+  }
+  .wm-filters button[aria-pressed="true"] {
+    border-color: var(--wm-accent);
+    background: #b6e6e633;
+  }
+  .wm-detail,
+  .wm-workspace {
+    border-color: #8fb1be;
+  }
+  .wm-node text {
+    stroke-width: 6px;
+  }
+}
+
+@media (forced-colors: active) {
+  .wm-header,
+  .wm-search,
+  .wm-workspace,
+  .wm-source,
+  .wm-detail li {
+    border-color: ButtonBorder;
+  }
+  .wm-search input {
+    color: CanvasText;
+  }
+  .wm-filters button,
+  .wm-view-controls button,
+  .wm-detail li button {
+    border-color: ButtonBorder;
+    color: ButtonText;
+  }
+  .wm-filters button[aria-pressed="true"],
+  .wm-index-grid button[aria-pressed="true"] {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .wm-view-controls,
+  .wm-detail {
+    border-color: ButtonBorder;
+    background: Canvas;
+  }
+  .wm-index-grid {
+    background: ButtonBorder;
+    border: 1px solid ButtonBorder;
+  }
+  .wm-index-grid button {
+    background: Canvas;
+    color: ButtonText;
+  }
+  .wm-node circle:not(.wm-node-hit) {
+    stroke: ButtonBorder;
+    fill: Canvas;
+  }
+  .wm-node.is-selected circle:not(.wm-node-hit) {
+    stroke: Highlight;
+    fill: Highlight;
+  }
+  .wm-node text {
+    fill: CanvasText;
+    stroke: Canvas;
+  }
+  .wm-page button:focus-visible,
+  .wm-page a:focus-visible,
+  .wm-page input:focus-visible {
+    outline: 2px solid Highlight;
   }
 }

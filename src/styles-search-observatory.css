@@ -344,6 +344,48 @@ html[data-family="library"] .search-page.search-observatory .search-more-option:
 html[data-family="library"] .search-page.search-observatory .search-more-option::after {
   display: none;
 }
+@media (min-width: 481px) {
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-more-option
+    > .search-more-peek {
+    position: static;
+    inset: auto;
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 34px;
+    gap: 5px;
+    flex: 0 0 auto;
+    order: 1;
+    margin-left: auto;
+    opacity: 0.92;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-more-option > b {
+    order: 2;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-more-peek::after,
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-more-peek
+    > :nth-child(n + 5),
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-more-peek
+    > .dxl-art
+    > :is(b, i) {
+    display: none;
+  }
+  html[data-family="library"] .search-page.search-observatory .search-more-peek > .dxl-art {
+    display: block;
+    width: 34px;
+    height: 44px;
+    aspect-ratio: auto;
+    border: 1px solid #5c7a8d;
+    background: #0b1620;
+  }
+}
 html[data-family="library"] .search-page.search-observatory .search-empty {
   padding: clamp(24px, 5vw, 56px);
   border: 1px solid #455762;
@@ -356,10 +398,19 @@ html[data-family="library"] .search-page.search-observatory .search-empty::befor
 }
 html[data-family="library"]
   .search-page.search-observatory
-  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"]) {
+  :is(.search-result-card, .search-more-option)[data-active="true"] {
   background: #192c37;
   box-shadow: inset 3px 0 var(--search-accent);
   transform: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"]
+    .search-page.search-observatory
+    :is(.search-result-card, .search-more-option):hover {
+    background: #192c37;
+    box-shadow: inset 3px 0 var(--search-accent);
+    transform: none;
+  }
 }
 /* Once a query is entered, the instrument yields space to its answers. */
 html[data-family="library"]
@@ -544,5 +595,11 @@ html[data-family="library"] .search-page.search-observatory .search-display-summ
     button[aria-pressed="true"] {
     outline: 2px solid Highlight;
     outline-offset: -3px;
+  }
+  html[data-family="library"]
+    .search-page.search-observatory
+    .search-more-option
+    > .search-more-peek {
+    display: none;
   }
 }

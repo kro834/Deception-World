@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useWorldMode } from "./use-world-mode";
-import { DossierNav, RIKUEI_NAV } from "./dossier-nav";
+import { DossierNav, NameText, RIKUEI_NAV } from "./dossier-nav";
 import { FormPickup } from "./manager-stub";
 import { DossierTopbar } from "./world-chrome";
 import { DossierContents, DossierReader, PhrasedText } from "./dossier-reader";
@@ -161,27 +161,39 @@ export function LejasPage() {
           <dl className="manager-facts">
             <div>
               <dt>NAME</dt>
-              <dd>レジャス</dd>
+              <dd>
+                <NameText value="レジャス" seams />
+              </dd>
             </div>
             <div>
               <dt>AGE</dt>
-              <dd>不明</dd>
+              <dd>
+                <NameText value="不明" seams />
+              </dd>
             </div>
             <div>
               <dt>GENDER</dt>
-              <dd>男性</dd>
+              <dd>
+                <NameText value="男性" seams />
+              </dd>
             </div>
             <div>
               <dt>HEIGHT</dt>
-              <dd>186.4cm</dd>
+              <dd>
+                <NameText value="186.4cm" seams />
+              </dd>
             </div>
             <div>
               <dt>WEIGHT</dt>
-              <dd>76.4kg</dd>
+              <dd>
+                <NameText value="76.4kg" seams />
+              </dd>
             </div>
             <div>
               <dt>RANK</dt>
-              <dd>六詠・第四位</dd>
+              <dd>
+                <NameText value="六詠・第四位" seams />
+              </dd>
             </div>
           </dl>
         </div>

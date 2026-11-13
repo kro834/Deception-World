@@ -1917,7 +1917,9 @@ export function RiderPage({ id }: { id: string }) {
                         <span>{s.no}</span>
                         <p>{s.kicker}</p>
                       </header>
-                      <h3>{s.title}</h3>
+                      <h3>
+                        <PhrasedText text={s.title} />
+                      </h3>
                       <div>
                         {s.body.map((p) => (
                           <p key={p.slice(0, 20)}>{p}</p>
@@ -1928,6 +1930,12 @@ export function RiderPage({ id }: { id: string }) {
                 </div>
               </div>
             </div>
+            <button type="button" className="form-pickup-end-close" onClick={closeNightmare}>
+              <span>CLOSE</span>
+              <i aria-hidden="true">
+                <UiVectorIcon kind="close" size={16} />
+              </i>
+            </button>
           </div>
         </dialog>
       ) : null}

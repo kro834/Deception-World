@@ -1588,6 +1588,16 @@ main.manager-page:not(.is-sovereign) .rider-nightmare-dialog.rider-nightmare-dia
     background: none;
     box-shadow: none;
   }
+
+  html[data-family="dossier"]
+    main.manager-page:not(.is-sovereign).manager-page.manager-page
+    .rider-special-site-copy
+    > em {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
 }
 
 /* ================================================================
@@ -1695,4 +1705,30 @@ main.manager-page:not(.is-sovereign) .rexonance-panel-ambient i,
 main.manager-page:not(.is-sovereign) .rexonance-weapon-grid figure > div::after {
   animation-iteration-count: 1;
   animation-fill-mode: both;
+}
+
+/* Special-site codenames (ROYAL / WRATH / ABYSS / BIRTH / ULTRA): framed as
+   a subtle gilded metallic tag beneath the Rider display name. */
+html[data-family="dossier"]
+  main.manager-page:not(.is-sovereign).manager-page.manager-page
+  .rider-special-site-copy
+  > em {
+  width: fit-content;
+  margin: 4px 0 0;
+  padding: 5px 12px;
+  border: 1px solid color-mix(in srgb, var(--dm-gold) 44%, var(--sd-line-2, rgb(122 232 255 / 24%)));
+  border-left: 2px solid var(--dm-gold);
+  border-radius: 2px;
+  color: #f5ebd2;
+  background: linear-gradient(
+    90deg,
+    rgb(240 207 134 / 14%),
+    rgb(122 232 255 / 5%) 68%,
+    rgb(8 13 22 / 76%)
+  );
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
 }

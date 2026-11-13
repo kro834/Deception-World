@@ -28,7 +28,7 @@
 .gallery-tour-stop-label {
   margin: 0 0 12px;
   color: var(--gallery-tour-accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.19em;
   line-height: 1.7;
@@ -184,9 +184,11 @@
   touch-action: manipulation;
 }
 
-.gallery-tour-theatre .gallery-tour-theatre-button:hover:not(:disabled) {
-  border-color: var(--gallery-tour-accent);
-  background: rgb(218 197 157 / 0.06);
+@media (hover: hover) and (pointer: fine) {
+  .gallery-tour-theatre .gallery-tour-theatre-button:hover:not(:disabled) {
+    border-color: var(--gallery-tour-accent);
+    background: rgb(218 197 157 / 0.06);
+  }
 }
 
 .gallery-tour-theatre .gallery-tour-theatre-button:disabled {
@@ -293,7 +295,7 @@
   bottom: 3px;
   left: 0;
   right: 0;
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   line-height: 1.4;
   letter-spacing: 0.14em;
@@ -468,9 +470,11 @@
   touch-action: manipulation;
 }
 
-.gallery-tour-next-tour:hover {
-  border-color: var(--gallery-tour-accent);
-  background: rgb(218 197 157 / 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .gallery-tour-next-tour:hover {
+    border-color: var(--gallery-tour-accent);
+    background: rgb(218 197 157 / 0.08);
+  }
 }
 
 .gallery-tour-next-tour img {
@@ -660,6 +664,11 @@
   }
 }
 
+html[data-world-effects="economy"] .gallery-tour-time-fill {
+  animation: none;
+  transform: scaleX(1);
+}
+
 /* iPhone Safari zooms the page in on focusing a control under 16px; the
    interval select was 13px. Phones only (landscape included). */
 @media (max-width: 700px), (max-height: 500px) and (pointer: coarse) {
@@ -673,5 +682,19 @@
     -webkit-appearance: auto;
     appearance: auto;
     background-image: none;
+  }
+
+  .gallery-tour-theatre [aria-pressed="true"] {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+
+  .gallery-tour-theatre .gallery-tour-thumbnail[aria-current="step"] {
+    border-color: Highlight;
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+    color: Highlight;
   }
 }

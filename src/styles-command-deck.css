@@ -109,16 +109,39 @@ body:has(.command-deck) {
 }
 .command-deck-skip {
   position: fixed;
-  z-index: 100;
-  top: 12px;
-  left: 12px;
-  padding: 14px 22px;
-  background: #12242a;
+  z-index: 2147483000;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  padding: 12px 20px;
+  border: 1px solid var(--deck-accent, #74d9ec);
+  border-radius: 4px;
+  background: #091724;
   color: #fff !important;
+  font-family: var(--sh-mono, "Oxanium", "Noto Sans JP", monospace);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--deck-accent, #74d9ec) 35%, transparent), 0 10px 24px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  pointer-events: none;
   transform: translateY(-180%);
 }
-.command-deck-skip:focus {
+.command-deck-skip:focus,
+.command-deck-skip:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
   transform: none;
+  outline: 2px solid var(--deck-accent-ink, #c8faff);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .command-deck-skip {
+    transition:
+      transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.22s ease,
+      box-shadow 0.22s ease;
+  }
 }
 .command-deck-header {
   max-width: 1700px;
@@ -188,6 +211,8 @@ body:has(.command-deck) {
 .command-deck-header-nav button,
 .command-deck-header-nav .command-deck-replay {
   min-height: 44px;
+  padding-inline: 13px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,6 +220,7 @@ body:has(.command-deck) {
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
+  transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 .command-deck-header-nav button {
   padding: 0 0 0 20px;
@@ -335,8 +361,12 @@ body:has(.command-deck) {
 .command-deck-scene-number {
   align-self: flex-start;
   margin-top: 4px;
-  font: 11px/1.3 monospace;
+  font-family: var(--sh-mono, "Oxanium", monospace);
+  font-size: 11px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
   opacity: 0.65;
+  transition: opacity 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
 }
 .command-deck-scene-buttons strong {
   display: block;
@@ -446,12 +476,22 @@ body:has(.command-deck) {
     color 0.2s;
 }
 .command-deck-art-controls > span {
-  font: 11px/1 monospace;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  font-family: var(--sh-mono, "Oxanium", "Noto Sans JP", monospace);
+  font-size: 12px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.09em;
   white-space: nowrap;
 }
 .command-deck-art-controls b {
-  font-size: 19px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 .command-deck-side {
   position: relative;
@@ -716,6 +756,16 @@ body:has(.command-deck) {
     background: linear-gradient(125deg, #fff, #cadfe9 48%, #e8f9ff);
     color: #0b1d28;
   }
+  .command-deck-scene-buttons a:hover .command-deck-scene-number {
+    opacity: 1;
+    color: var(--deck-accent-ink);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--deck-accent) 60%, transparent);
+  }
+  .command-deck-scene-buttons a.is-selected:hover .command-deck-scene-number {
+    opacity: 0.9;
+    color: #0b1d28;
+    text-shadow: none;
+  }
   .command-deck-enter:hover svg {
     transform: translateX(8px);
   }
@@ -745,9 +795,11 @@ body:has(.command-deck) {
   }
   .command-deck-header-nav a:hover,
   .command-deck-header-nav button:hover,
+  .command-deck-header-nav .command-deck-replay:hover,
   .command-deck-footer a:hover {
     color: var(--deck-accent-ink);
-    background: #75dcff0c;
+    background: color-mix(in srgb, var(--deck-accent, #74d9ec) 12%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--deck-accent, #74d9ec) 20%, transparent);
   }
 }
 .command-deck button:disabled,

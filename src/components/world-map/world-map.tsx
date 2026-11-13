@@ -198,7 +198,8 @@ export function WorldMap({
                       }
                     }}
                   >
-                    <circle r={i === 0 ? 30 : 8} />
+                    <circle className="wm-node-hit" r={i === 0 ? 36 : 22} />
+                    <circle className="wm-node-disc" r={i === 0 ? 30 : 8} />
                     <text y={i === 0 ? 57 : 25} textAnchor="middle">
                       {p.title.match(/.{1,8}/gu)?.map((line, index) => (
                         <tspan key={index} x="0" dy={index === 0 ? 0 : 15}>

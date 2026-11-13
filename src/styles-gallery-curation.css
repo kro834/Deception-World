@@ -66,11 +66,18 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-enter span
   color: #111216;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-enter:hover,
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-enter:focus-visible {
   border-color: #fff;
   background: #fff;
   color: #111216;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-enter:hover {
+    border-color: #fff;
+    background: #fff;
+    color: #111216;
+  }
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-tour-invitation > span {

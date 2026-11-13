@@ -84,7 +84,7 @@
 .exhibition-room-curated .exhibition-room-work-number {
   margin: 0 0 7px;
   color: var(--room-muted);
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.1em;
 }
@@ -120,7 +120,7 @@
   display: block;
   margin-bottom: 8px;
   color: var(--room-muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .exhibition-room-curated
@@ -242,7 +242,7 @@
 }
 .exhibition-room-curated .exhibition-room-adjacent button > span:first-child {
   color: var(--room-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .exhibition-room-curated .exhibition-room-adjacent button > span:last-child {
   font-size: 14px;
@@ -357,7 +357,7 @@
   padding: 5px 9px;
   color: #fffef8;
   background: #34382d;
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .exhibition-room-curated .exhibition-shelf-work-caption {
@@ -423,7 +423,7 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .exhibition-room-curated .exhibition-shelf-work:hover .exhibition-shelf-image {
     background: #dad7c8;
     border-color: #969881;
@@ -506,7 +506,7 @@
     width: auto;
   }
   .exhibition-room-curated .exhibition-room-choose > a {
-    font-size: 11px;
+    font-size: 12px;
   }
   .exhibition-room-curated .exhibition-room-view .exhibition-studio-stage,
   .exhibition-room-curated .exhibition-room-source {
@@ -521,7 +521,7 @@
   .exhibition-room-curated .exhibition-studio-tools [role="group"] button {
     flex: 1;
     padding-inline: 6px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .exhibition-room-curated .exhibition-room-adjacent {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -566,7 +566,7 @@
     display: none;
   }
   .exhibition-room-curated .exhibition-shelf-work-caption > span:nth-child(2) {
-    font-size: 11px;
+    font-size: 12px;
   }
   .exhibition-room-curated .exhibition-shelf-pagination {
     justify-content: space-between;
@@ -575,7 +575,7 @@
   }
   .exhibition-room-curated .exhibition-shelf-pagination button {
     padding-inline: 0;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -609,7 +609,7 @@
 }
 .exhibition-room-curated .exhibition-shelf-return > span:last-child {
   color: var(--room-muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
   overflow-wrap: anywhere;
 }

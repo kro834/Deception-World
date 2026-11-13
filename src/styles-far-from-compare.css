@@ -103,13 +103,21 @@
 .ffs-page .ffs-provisional-tag {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 3px 10px;
-  border: 1px solid rgb(255 215 122 / 45%);
+  border: 1px solid rgb(255 215 122 / 50%);
   border-radius: 999px;
   color: #ffe2a1;
-  background: rgb(255 215 122 / 8%);
-  font-size: 11px;
+  background:
+    linear-gradient(180deg, rgb(255 215 122 / 16%), rgb(255 215 122 / 6%)),
+    rgb(20 16 8 / 60%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 20%),
+    0 0 12px rgb(255 215 122 / 18%);
+  font-family: var(--fft-mono, "Oxanium", var(--fft-jp-display));
+  font-size: 12px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.12em;
   line-height: 1.5;
   white-space: nowrap;
@@ -156,9 +164,15 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid rgb(127 230 255 / 22%);
   border-radius: 999px;
-  background: rgb(0 0 0 / 34%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 6%) 0%, transparent 40%),
+    rgb(0 0 0 / 48%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 16%),
+    inset 0 0 20px rgb(0 0 0 / 50%),
+    0 8px 24px -4px rgb(0 0 0 / 60%);
 }
 
 .ffs-page .ffs-p16-switch > div {
@@ -184,14 +198,25 @@
     box-shadow 180ms ease;
 }
 
-.ffs-page .ffs-views label:hover {
-  color: var(--ffs-text);
+@media (hover: hover) and (pointer: fine) {
+  .ffs-page .ffs-views label:hover:not(.is-active) {
+    color: var(--ffs-text);
+    background: rgb(127 230 255 / 8%);
+    box-shadow: inset 0 0 0 1px rgb(127 230 255 / 22%);
+  }
 }
 
 .ffs-page .ffs-views label.is-active {
-  background: linear-gradient(180deg, rgb(127 230 255 / 22%), rgb(127 230 255 / 10%));
+  background:
+    linear-gradient(180deg, rgb(127 230 255 / 30%), rgb(127 230 255 / 12%)),
+    rgb(10 32 52 / 65%);
   color: #fff;
-  box-shadow: inset 0 0 0 1px rgb(127 230 255 / 45%);
+  border: 1px solid rgb(127 230 255 / 55%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 35%),
+    0 0 18px rgb(127 230 255 / 32%),
+    0 0 2px rgb(127 230 255 / 60%);
+  text-shadow: 0 0 10px rgb(127 230 255 / 40%);
 }
 
 /* The native radio stays in the tab order and keeps arrow-key selection. */

@@ -194,6 +194,7 @@ export function CielPage() {
               key={`${form.name}-${form.sub ?? "base"}`}
               rider={{
                 img: form.img,
+                recordImg: form.recordImg,
                 pos: form.pos,
                 system: form.system,
                 name: form.displayName ?? (index === 0 ? SAGA.ja : form.name),
@@ -229,6 +230,7 @@ export function CielPage() {
             <div className="rider-special-site-visual">
               <img
                 src={SAGA.special.img}
+                {...dossierImage(SAGA.special.img)}
                 alt={`仮面ライダー${SAGA.special.name}のビジュアル`}
                 style={{ objectPosition: SAGA.special.pos }}
                 width="1080"

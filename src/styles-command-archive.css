@@ -149,7 +149,17 @@ main.command-exhibition .exhibition-studio-tools button[aria-pressed="true"] {
   box-shadow: inset 0 -2px var(--command-key), inset 0 1px #e7fbff40;
 }
 main.command-exhibition .exhibition-studio-tools button:disabled { opacity: .48; }
-main.command-exhibition .exhibition-studio-notice { color: #b7cbd9; font-size: 12px; }
+main.command-exhibition .exhibition-studio-notice {
+  margin: 14px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--room-rule);
+  border-left: 3px solid var(--command-key);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #d7efff1f;
+  color: #c8dcea;
+  font-size: 12px;
+  line-height: 1.8;
+}
 main.command-exhibition .exhibition-room-caption { padding: 4px 0 0; }
 main.command-exhibition .exhibition-room-caption a { display: flex; align-items: center; min-height: 48px; color: var(--command-key); }
 main.command-exhibition .exhibition-room-adjacent {
@@ -189,7 +199,40 @@ main.command-exhibition .exhibition-shelf-work-caption > span:first-child { font
 main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border-color: #9be9fa; box-shadow: inset 0 -2px #9be9fa; }
 main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] .exhibition-shelf-image { border-color: transparent; box-shadow: none; }
 main.command-exhibition .exhibition-shelf-selected { font-size: 12px; color: #dffaff; background: #15364b; border: 1px solid #9be9fa80; }
-main.command-exhibition .exhibition-shelf-pagination { gap: 16px; }
+main.command-exhibition .exhibition-shelf-empty {
+  margin-top: 8px;
+  padding: clamp(28px, 4vw, 44px) 24px;
+  border: 1px solid var(--room-rule);
+  border-top: 2px solid var(--command-key);
+  background: var(--command-metal);
+  box-shadow: inset 0 1px #d8f3ff24, 0 12px 28px #0004;
+  color: var(--room-ink);
+}
+main.command-exhibition .exhibition-shelf-empty p {
+  color: #bfd3e2;
+  font-size: 14px;
+}
+main.command-exhibition .exhibition-shelf-empty button {
+  padding: 10px 18px;
+  border-color: #9be9fa80;
+  font-size: 13px;
+  font-weight: 550;
+}
+main.command-exhibition .exhibition-shelf-pagination {
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--room-rule);
+}
+main.command-exhibition .exhibition-shelf-pagination button {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 550;
+}
+main.command-exhibition .exhibition-shelf-pagination > span {
+  color: #bdd5e3;
+  font-family: "Michroma", sans-serif;
+  font-size: 13px;
+}
 main.command-exhibition :is(a, button, input, select, h2, [tabindex]):focus-visible,
 main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
   outline: 2px solid #b2efff;
@@ -217,7 +260,7 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
   main.command-exhibition .exhibition-shelf-work-caption { gap: 6px; padding: 12px 10px; grid-template-columns: minmax(0, 1fr) auto; }
   main.command-exhibition .exhibition-shelf-work-caption > span:first-child { grid-column: 1 / -1; }
   main.command-exhibition .exhibition-shelf-pagination { gap: 8px; }
-  main.command-exhibition .exhibition-shelf-pagination button { padding: 10px 8px; }
+  main.command-exhibition .exhibition-shelf-pagination button { padding: 10px 12px; font-size: 12px; }
   main.command-exhibition .exhibition-studio-tools { align-items: stretch; }
   main.command-exhibition .exhibition-studio-tools > [role="group"] { width: 100%; }
   main.command-exhibition .exhibition-studio-tools > [role="group"] button { flex: 1 1 auto; padding-inline: 10px; }
@@ -229,7 +272,9 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
 html[data-world-effects="economy"] main.command-exhibition .exhibition-shelf-image { transition: none; }
 @media (forced-colors: active) {
   main.command-exhibition.exhibition-room-curated, main.command-archive[data-archive-kind] { background: Canvas; color: CanvasText; }
-  main.command-exhibition :is(.exhibition-room-heading, .exhibition-room-view, .exhibition-shelf-filters, .exhibition-shelf-work, button, a, input, select) { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
-  main.command-exhibition .exhibition-studio-tools button[aria-pressed="true"], main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border: 2px solid Highlight; }
+  main.command-exhibition :is(.exhibition-room-heading, .exhibition-room-view, .exhibition-studio-notice, .exhibition-shelf-filters, .exhibition-shelf-work, .exhibition-shelf-empty, a, input, select) { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
+  main.command-exhibition button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; }
+  main.command-exhibition .exhibition-studio-tools button[aria-pressed="true"] { background: Highlight; color: HighlightText; border: 2px solid Highlight; forced-color-adjust: none; }
+  main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border: 2px solid Highlight; }
   main.command-exhibition :is(a, button, input, select, h2, [tabindex]):focus-visible { outline-color: Highlight; }
 }

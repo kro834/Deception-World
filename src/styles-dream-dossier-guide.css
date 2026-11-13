@@ -38,16 +38,27 @@
   border: 1px solid #a98b58;
   border-radius: 4px;
   color: #fff3dc;
-  background: #302234;
+  background-color: #302234;
   font: inherit;
   font-size: 16px;
   line-height: 1.5;
 }
 
 .dream-page.dream-page .dream-dossier-guide select {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  padding: 8px;
+  padding: 8px 34px 8px 10px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
   text-overflow: ellipsis;
+  cursor: pointer;
 }
 
 .dream-page.dream-page .dream-dossier-guide button {
@@ -56,9 +67,15 @@
   touch-action: manipulation;
 }
 
-.dream-page.dream-page .dream-dossier-guide button:hover {
-  border-color: #fff3dc;
-  background: #49304a;
+@media (hover: hover) and (pointer: fine) {
+  .dream-page.dream-page .dream-dossier-guide select:hover {
+    border-color: #fff3dc;
+  }
+
+  .dream-page.dream-page .dream-dossier-guide button:hover {
+    border-color: #fff3dc;
+    background-color: #49304a;
+  }
 }
 
 .dream-page.dream-page .dream-dossier-guide :is(select, button):focus-visible {
@@ -101,6 +118,13 @@
   .dream-page.dream-page .dream-dossier-guide :is(select, button) {
     color: ButtonText;
     border-color: ButtonText;
-    background: ButtonFace;
+    background-color: ButtonFace;
+  }
+
+  .dream-page.dream-page .dream-dossier-guide select {
+    -webkit-appearance: auto;
+    appearance: auto;
+    padding-inline: 8px;
+    background-image: none;
   }
 }

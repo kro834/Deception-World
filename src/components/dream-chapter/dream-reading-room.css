@@ -104,11 +104,13 @@
   outline: 3px solid #b878d6;
   outline-offset: -3px;
 }
-.dream-reading-room button:not(:disabled):hover {
-  background: var(--room-paper);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    0 4px 12px rgb(0 0 0 / 18%);
+@media (hover: hover) and (pointer: fine) {
+  .dream-reading-room button:not(:disabled):hover {
+    background: var(--room-paper);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      0 4px 12px rgb(0 0 0 / 18%);
+  }
 }
 .dream-reading-topbar {
   display: flex;
@@ -604,6 +606,9 @@
     grid-template-columns: minmax(0, 220px) auto;
     justify-content: space-between;
   }
+}
+html[data-world-effects="economy"] .dream-reading-room :is(button, select) {
+  transition: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .dream-reading-room :is(button, select) {

@@ -20,6 +20,10 @@
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
+html[data-family="dossier"]
+  main.dante-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-portrait-frame,
 .dante-page.manager-page:not(.is-sovereign) .manager-portrait-frame {
   background: #ede8ea;
 }

@@ -373,6 +373,7 @@ export function TransformationLab() {
             変身の進行 <output>{Math.round(state.progress * 100)}%</output>
             <input
               aria-label="変身の進行"
+              aria-valuetext={`${Math.round(state.progress * 100)}%`}
               type="range"
               min="0"
               max="1"

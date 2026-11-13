@@ -61,7 +61,7 @@
   bottom: 7px;
   color: #35283d;
   font:
-    11px/1 Georgia,
+    12px/1 Georgia,
     serif;
   transform: rotate(-90deg);
 }
@@ -279,7 +279,7 @@
   outline-offset: 4px;
   z-index: 1;
 }
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .dream-page .dream-chapter-stage-chapters button:hover {
     border-color: #ffe3b7;
   }
@@ -361,8 +361,8 @@
     border-width: 12px;
   }
   .dream-page .dream-chapter-stage-wings b {
-    left: -9px;
-    font-size: 9px;
+    left: -10px;
+    font-size: 12px;
   }
   .dream-page .dream-chapter-stage-moon {
     width: 42px;

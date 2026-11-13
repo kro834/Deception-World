@@ -506,7 +506,7 @@ html[data-mode="world"]
   .form-pickup-end-close:focus-visible,
 html[data-mode="world"]
   .rider-nightmare-dialog.rider-nightmare-dialog
-  .rider-nightmare-dialog-close:focus-visible,
+  :is(.rider-nightmare-dialog-close, .form-pickup-end-close):focus-visible,
 html body #episode-pickup-dialog .episode-pickup-close:focus-visible,
 html body #world-column-pickup .world-column-dialog-close:focus-visible {
   outline: 2px solid var(--pc-focus) !important;
@@ -999,6 +999,7 @@ html[data-mode="world"]
   p {
   margin: 0;
   color: var(--pc-text-2);
+  white-space: pre-line;
 }
 
 html[data-mode="world"]
@@ -1198,6 +1199,9 @@ html[data-mode="world"]
    ================================================================ */
 html[data-mode="world"]
   .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+  .form-pickup-end-close,
+html[data-mode="world"]
+  .rider-nightmare-dialog.rider-nightmare-dialog
   .form-pickup-end-close {
   display: flex;
   box-sizing: border-box;
@@ -1222,6 +1226,10 @@ html[data-mode="world"]
 html[data-mode="world"]
   .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
   .form-pickup-end-close
+  > i,
+html[data-mode="world"]
+  .rider-nightmare-dialog.rider-nightmare-dialog
+  .form-pickup-end-close
   > i {
   display: grid;
   width: 28px;
@@ -1235,6 +1243,9 @@ html[data-mode="world"]
 @media (hover: hover) and (pointer: fine) {
   html[data-mode="world"]
     .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-end-close:hover,
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
     .form-pickup-end-close:hover {
     border-color: var(--pc-lock);
   }
@@ -1417,6 +1428,10 @@ html[data-mode="world"]
 /* 仮面ライダー is a third of the name: never under 12px. */
 html[data-mode="world"] .form-pickup-dialog.is-rexonance-dialog .form-pickup-heading h2 > span {
   font-size: max(12px, 0.34em);
+}
+
+html[data-mode="world"] .form-pickup-dialog.is-rexonance-dialog .form-pickup-sections p {
+  white-space: pre-line;
 }
 
 
@@ -1860,7 +1875,7 @@ html[data-mode="world"]
     .rider-nightmare-dialog-panel {
     display: grid;
     grid-template-columns: minmax(250px, 0.82fr) minmax(0, 1.18fr);
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     align-items: start;
     column-gap: clamp(28px, 3.6vw, 56px);
   }
@@ -1887,12 +1902,21 @@ html[data-mode="world"]
 
   html[data-mode="world"]
     .rider-nightmare-dialog.rider-nightmare-dialog
+    .form-pickup-end-close {
+    grid-column: 2;
+    grid-row: 3;
+    justify-self: start;
+    width: min(100%, 360px);
+  }
+
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
     .rider-nightmare-dialog-layout
     > figure {
     position: sticky;
     top: 0;
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 1 / span 3;
     align-self: start;
   }
 
@@ -1936,6 +1960,7 @@ html[data-mode="world"]
     .rider-nightmare-dialog.rider-nightmare-dialog
     .rider-nightmare-dialog-panel {
     padding-bottom: max(104px, calc(env(safe-area-inset-bottom) + 88px));
+    scroll-padding-bottom: 80px;
   }
 
   html[data-mode="world"]
@@ -1943,6 +1968,13 @@ html[data-mode="world"]
     .rider-nightmare-dialog-heading
     h2 {
     font-size: clamp(30px, 9vw, 40px);
+  }
+
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .form-pickup-end-close {
+    width: calc(100% - 72px);
+    margin-inline-end: 72px;
   }
 }
 
@@ -2736,7 +2768,7 @@ html[data-world-effects="economy"] body #world-column-pickup #world-column-picku
     :is(.form-pickup-close, .form-pickup-end-close),
   html[data-mode="world"]
     .rider-nightmare-dialog.rider-nightmare-dialog
-    .rider-nightmare-dialog-close,
+    :is(.rider-nightmare-dialog-close, .form-pickup-end-close),
   html body #episode-pickup-dialog .episode-pickup-close,
   html body #world-column-pickup .world-column-dialog-close {
     border: 1px solid ButtonText;
@@ -2750,7 +2782,7 @@ html[data-world-effects="economy"] body #world-column-pickup #world-column-picku
     > :is(span, i),
   html[data-mode="world"]
     .rider-nightmare-dialog.rider-nightmare-dialog
-    .rider-nightmare-dialog-close
+    :is(.rider-nightmare-dialog-close, .form-pickup-end-close)
     > :is(span, i),
   html body #episode-pickup-dialog .episode-pickup-close::before,
   html body #episode-pickup-dialog .episode-pickup-close .episode-pickup-close-icon,
@@ -2824,7 +2856,7 @@ html[data-world-effects="economy"] body #world-column-pickup #world-column-picku
     .form-pickup-end-close:focus-visible,
   html[data-mode="world"]
     .rider-nightmare-dialog.rider-nightmare-dialog
-    .rider-nightmare-dialog-close:focus-visible,
+    :is(.rider-nightmare-dialog-close, .form-pickup-end-close):focus-visible,
   html body #episode-pickup-dialog :is(.episode-pickup-close, .episode-pickup-item):focus-visible,
   html body #world-column-pickup .world-column-dialog-close:focus-visible {
     outline-color: Highlight !important;

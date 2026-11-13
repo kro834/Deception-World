@@ -1,4 +1,4 @@
-/* Scoped command surfaces for the export page and the tour entrance. */
+/* Scoped command surfaces for the export page and the guided tours. */
 .command-support-download {
   --dl-ice: #b9d9e5;
   --dl-lock: #d7e6ea;
@@ -23,6 +23,7 @@
   min-height: 44px;
 }
 .command-support-download .export-page-btn {
+  min-height: 56px;
   border-color: #c9d6dc;
   background: linear-gradient(180deg, #e5edf0, #a5b7c0 48%, #788d99);
   color: #101820;
@@ -37,14 +38,35 @@
   outline-offset: 4px;
 }
 
+.command-support-tours {
+  --gallery-ivory: #eef4f5;
+  --gallery-muted: #c0cbd1;
+  --gallery-brass: #b7dce7;
+  --gallery-rule: #637581;
+  --gallery-tour-accent: #b7dce7;
+  background: radial-gradient(ellipse at 50% 0%, #24313b, #0c1219 43%, #080c11 100%);
+  color: var(--gallery-ivory);
+}
+.command-support-tours .gallery-topbar {
+  border-bottom-color: #637581;
+  background: linear-gradient(180deg, #16222ceb, #0b1219e6);
+}
+.command-support-tours .gallery-brand {
+  color: #eef4f5;
+}
+.command-support-tours .gallery-brand span {
+  color: #b7dce7;
+}
+.command-support-tours .gallery-topbar-actions > a {
+  border-color: #5b707d;
+  background: #131e27;
+  color: #e4eef2;
+}
 .command-support-tours .gallery-tour-entrance {
   --gallery-ivory: #eef4f5;
   --gallery-muted: #c0cbd1;
   --gallery-brass: #b7dce7;
   --gallery-rule: #637581;
-}
-.command-support-tours:has(.gallery-tour-entrance) {
-  background: radial-gradient(ellipse at 50% 0%, #24313b, #0c1219 43%, #080c11 100%);
 }
 .command-support-tours .gallery-tour-introduction {
   position: relative;
@@ -120,12 +142,138 @@
   background: #18242d;
   color: #e4edef;
 }
-.command-support-tours .gallery-tour-entrance :is(a, button, summary):focus-visible {
+.command-support-tours .gallery-tour-theatre {
+  --gallery-tour-accent: #b7dce7;
+  --gallery-tour-text: #eef4f5;
+  --gallery-tour-muted: #c0cbd1;
+}
+.command-support-tours .gallery-tour-stage {
+  border: 1px solid #7b8d97;
+  background: radial-gradient(ellipse at 50% 25%, #233643, #080d13 76%);
+  box-shadow:
+    inset 0 1px #ffffff38,
+    0 24px 64px #0009;
+}
+.command-support-tours .gallery-tour-theatre .gallery-tour-theatre-button,
+.command-support-tours .gallery-tour-sharing button {
+  border-color: #637885;
+  background: linear-gradient(180deg, #1d2a35, #111922);
+  color: #eef4f5;
+  box-shadow: inset 0 1px #ffffff1f;
+}
+.command-support-tours .gallery-tour-theatre .gallery-tour-view-controls button {
+  border-color: #4f6370;
+  background: #121c25;
+  color: #c7d4da;
+}
+.command-support-tours .gallery-tour-theatre .gallery-tour-focus-toggle {
+  border-color: #6c818e;
+}
+.command-support-tours
+  .gallery-tour-theatre
+  :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"] {
+  border-color: #d9edf4;
+  background: linear-gradient(180deg, #dff0f6, #a5c6d4 52%, #7f9fad);
+  color: #0d171f;
+  box-shadow:
+    inset 0 1px #fff,
+    0 2px 0 #344955;
+}
+.command-support-tours
+  .gallery-tour-theatre
+  .gallery-tour-view-controls
+  button[aria-pressed="true"]
+  > span:last-child {
+  color: #0d171f;
+}
+.command-support-tours .gallery-tour-playback-label select,
+.command-support-tours .gallery-tour-sharing input {
+  border-color: #637885;
+  background-color: #101821;
+  color: #eef4f5;
+}
+.command-support-tours .gallery-tour-filmstrip {
+  scrollbar-color: #b7dce7 #101821;
+}
+.command-support-tours .gallery-tour-theatre .gallery-tour-thumbnail {
+  border-color: #556975;
+  background: #0c131b;
+  color: #c0cbd1;
+}
+.command-support-tours .gallery-tour-theatre .gallery-tour-thumbnail[aria-current="step"] {
+  border-color: #d0eaf3;
+  background: #182733;
+  color: #eef6f9;
+  box-shadow: inset 0 0 0 1px #b7dce7;
+}
+.command-support-tours .gallery-tour-stop-caption,
+.command-support-tours .gallery-tour-ending {
+  border-color: #5c707c;
+}
+.command-support-tours .gallery-tour-time-track,
+.command-support-tours .gallery-tour-progress-marks span:not([data-visited="true"]) {
+  background: rgb(183 220 231 / 0.2);
+}
+.command-support-tours .gallery-tour-theatre .gallery-tour-next-tour {
+  border-color: #6d818e;
+  background: linear-gradient(155deg, #21303b, #0f1720);
+  box-shadow: inset 0 1px #ffffff26;
+}
+.command-support-tours .gallery-tour-next-tour img {
+  border: 1px solid #4d606c;
+  background: #080d13;
+}
+.command-support-tours :where(a, button, summary, select, input, [tabindex]):focus-visible {
   outline: 2px solid #fff0b5;
   outline-offset: 4px;
 }
 .command-support-tours .gallery-tour-course-observation summary {
   min-height: 44px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .command-support-download .export-page-btn:hover {
+    border-color: #eef6f9;
+    background: linear-gradient(180deg, #f2f7f9, #b7cad3 48%, #889fab);
+  }
+  .command-support-download :is(.export-page-alt, .export-page-navigation a):hover {
+    border-color: #b9d9e5;
+    color: #eef6f9;
+  }
+  .command-support-tours .gallery-topbar-actions > a:hover,
+  .command-support-tours .gallery-tour-course-index a:hover,
+  .command-support-tours .gallery-tour-entrance .gallery-tour-action-text:hover {
+    border-color: #b7dce7;
+    background: #1e2d39;
+    color: #f4f9fb;
+  }
+  .command-support-tours .gallery-tour-entrance .gallery-tour-action-primary:hover {
+    border-color: #eff7fa;
+    background: linear-gradient(180deg, #f0f6f8, #b8ccd5 48%, #8ea4b0);
+  }
+  .command-support-tours
+    .gallery-tour-theatre
+    .gallery-tour-theatre-button:not([aria-pressed="true"]):hover:not(:disabled),
+  .command-support-tours .gallery-tour-sharing button:hover:not(:disabled) {
+    border-color: #b7dce7;
+    background: linear-gradient(180deg, #263846, #16222d);
+    color: #f4f9fb;
+  }
+  .command-support-tours
+    .gallery-tour-theatre
+    :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"]:hover:not(:disabled) {
+    border-color: #f2fafe;
+    background: linear-gradient(180deg, #eaf6fa, #b4d3e0 52%, #8dadbb);
+  }
+  .command-support-tours
+    .gallery-tour-theatre
+    .gallery-tour-thumbnail:not([aria-current="step"]):hover {
+    border-color: #9dc2cf;
+    color: #eef4f5;
+  }
+  .command-support-tours .gallery-tour-theatre .gallery-tour-next-tour:hover {
+    border-color: #b7dce7;
+    background: linear-gradient(155deg, #293c49, #131e29);
+  }
 }
 @media (max-width: 600px) {
   .command-support-tours .gallery-tour-introduction {
@@ -140,12 +288,27 @@
 }
 @media (forced-colors: active) {
   .command-support-download :is(.export-page-btn, .export-page-alt, .export-page-navigation a),
-  .command-support-tours .gallery-tour-entrance :is(a, button, summary) {
+  .command-support-tours :is(.gallery-tour-entrance, .gallery-tour-theatre, .gallery-tour-sharing)
+    :is(a, button, summary, select, input) {
     border: 1px solid ButtonText;
     color: ButtonText;
   }
   .command-support-tours
-    :is(.gallery-tour-introduction, .gallery-tour-course, .gallery-tour-opening-frame) {
+    .gallery-tour-theatre
+    :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"] {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+  .command-support-tours
+    :is(
+      .gallery-tour-introduction,
+      .gallery-tour-course,
+      .gallery-tour-opening-frame,
+      .gallery-tour-stage,
+      .gallery-tour-next-tour
+    ) {
     border: 1px solid CanvasText;
   }
 }

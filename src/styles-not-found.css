@@ -385,7 +385,6 @@
   letter-spacing: 0.12em;
   text-decoration: none;
   transform: none;
-  transition: background-color 160ms ease;
 }
 
 .app-not-found.app-not-found > a::after {
@@ -416,14 +415,6 @@
   rotate: 45deg;
 }
 
-.app-not-found.app-not-found > a:hover {
-  border-color: transparent;
-  background:
-    linear-gradient(rgb(255 255 255 / 60%) 0 0) 0 0 / 100% 1px no-repeat,
-    linear-gradient(180deg, #c6f5ff, #8eedff);
-  transform: none;
-}
-
 /* The second way: the record index, a quiet outlined plate. */
 .app-not-found.app-not-found > a.app-not-found-search {
   grid-row: 9;
@@ -445,8 +436,18 @@
   display: none;
 }
 
-.app-not-found.app-not-found > a.app-not-found-search:hover {
-  background: rgb(122 232 255 / 14%);
+@media (hover: hover) and (pointer: fine) {
+  .app-not-found.app-not-found > a:hover {
+    border-color: transparent;
+    background:
+      linear-gradient(rgb(255 255 255 / 60%) 0 0) 0 0 / 100% 1px no-repeat,
+      linear-gradient(180deg, #c6f5ff, #8eedff);
+    transform: none;
+  }
+
+  .app-not-found.app-not-found > a.app-not-found-search:hover {
+    background: rgb(122 232 255 / 14%);
+  }
 }
 
 /* The focus ring sits outside the brackets, in the site's warm family. */
@@ -492,9 +493,6 @@
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
     #060c15;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a > img {
@@ -525,16 +523,17 @@
   color: #f2f7fb;
 }
 
-.app-not-found.app-not-found > nav.recovery-tiles > a:hover {
-  border-color: rgb(122 232 255 / 62%);
-  background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 12px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
-    #091423;
-  box-shadow: 0 0 24px rgb(122 232 255 / 14%);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .app-not-found.app-not-found > nav.recovery-tiles > a:hover {
+    border-color: rgb(122 232 255 / 62%);
+    background:
+      linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1px no-repeat,
+      linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 12px no-repeat,
+      linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
+      linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
+      #091423;
+    box-shadow: 0 0 24px rgb(122 232 255 / 14%);
+  }
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a:focus-visible {
@@ -1014,6 +1013,26 @@
   html:not([data-world-effects="economy"]) .app-not-found.app-not-found::after {
     animation: lr-mark 1.2s ease-out 0.2s both;
   }
+
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found > a {
+    transition: background-color 160ms ease;
+  }
+
+  html:not([data-world-effects="economy"]) .app-not-found.app-not-found > nav.recovery-tiles > a {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])
+    .app-not-found.app-not-found
+    > nav.recovery-tiles
+    > a:hover {
+    transform: translateY(-2px);
+  }
 }
 
 @keyframes lr-lock {
@@ -1128,6 +1147,14 @@
   .app-not-found.app-not-found > nav.recovery-tiles > a > b {
     color: LinkText;
   }
+
+  .app-not-found.app-not-found > a:hover,
+  .app-not-found.app-not-found > a.app-not-found-search:hover,
+  .app-not-found.app-not-found > nav.recovery-tiles > a:hover {
+    border-color: Highlight;
+    background: Canvas;
+    box-shadow: none;
+  }
 }
 
 /* Reading edition: a clear recovery page, with room for its complete explanation. */
@@ -1140,10 +1167,6 @@
   font-size: 16px;
   line-height: 1.95;
   max-width: 34em;
-}
-.app-not-found.app-not-found > nav.recovery-tiles > a {
-  min-height: 76px;
-  padding-block: 20px;
 }
 @media (max-width: 380px) {
   .app-not-found.app-not-found > #not-found-description {

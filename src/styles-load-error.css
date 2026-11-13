@@ -185,13 +185,19 @@
   box-shadow: none;
 }
 
-.app-load-error-actions button:hover {
-  background: linear-gradient(180deg, #fff, #a6f0ff);
+@media (hover: hover) and (pointer: fine) {
+  .app-load-error-actions button:hover {
+    background: linear-gradient(180deg, #fff, #a6f0ff);
+  }
+
+  .app-load-error-actions a:hover {
+    border-color: rgb(122 232 255 / 70%);
+    background: rgb(122 232 255 / 14%);
+  }
 }
 
-.app-load-error-actions a:hover {
-  border-color: rgb(122 232 255 / 70%);
-  background: rgb(122 232 255 / 14%);
+.app-load-error-actions :is(button, a):active {
+  translate: 0 1px;
 }
 
 .app-load-error-actions :focus-visible {
@@ -265,13 +271,22 @@
     line-height: 1.6;
   }
 
-  /* The plates start under the words (the sign's 60px and the 22px gap). */
+  /* Four recovery actions sit in a compact 2x2 grid so short landscape phones never clip. */
   .app-load-error-actions {
     grid-column: 1 / -1;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    width: 100%;
     margin-top: 6px;
-    padding-top: 14px;
-    padding-inline-start: 82px;
+    padding-top: 12px;
+    padding-inline-start: 0;
+  }
+
+  .app-load-error-actions button,
+  .app-load-error-actions a {
+    width: 100%;
+    padding-inline: 14px;
   }
 }
 
@@ -326,9 +341,16 @@
     text-shadow: none;
   }
 
-  .app-load-error-actions button,
-  .app-load-error-actions a {
+  .app-load-error-actions button {
     border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  .app-load-error-actions a {
+    border-color: LinkText;
+    background: Canvas;
+    color: LinkText;
   }
 
   .app-load-error-actions button::before {

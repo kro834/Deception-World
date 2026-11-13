@@ -146,9 +146,11 @@
   text-underline-offset: 4px;
 }
 
-.gallery-page .gallery-submission-details summary:hover,
-.gallery-page .gallery-search-tips summary:hover {
-  color: #f0d9a7;
+@media (hover: hover) and (pointer: fine) {
+  .gallery-page .gallery-submission-details summary:hover,
+  .gallery-page .gallery-search-tips summary:hover {
+    color: #f0d9a7;
+  }
 }
 
 .gallery-page .gallery-submission-details > div {
@@ -183,11 +185,13 @@
     transform 160ms ease;
 }
 
-.gallery-page .gallery-personal-controls > .gallery-personal-add:hover:not(:disabled) {
-  border-color: #ead29d;
-  background: linear-gradient(145deg, #ddc28e, #b8945b);
-  box-shadow: 0 8px 22px rgb(0 0 0 / 0.25);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .gallery-page .gallery-personal-controls > .gallery-personal-add:hover:not(:disabled) {
+    border-color: #ead29d;
+    background: linear-gradient(145deg, #ddc28e, #b8945b);
+    box-shadow: 0 8px 22px rgb(0 0 0 / 0.25);
+    transform: translateY(-1px);
+  }
 }
 
 .gallery-page .gallery-personal-controls > .gallery-personal-add:disabled {
@@ -406,9 +410,11 @@
   text-underline-offset: 4px;
 }
 
-.gallery-page .gallery-viewer-close:hover,
-.gallery-page .gallery-viewer-footer button:hover {
-  box-shadow: 0 5px 14px rgb(0 0 0 / 0.22);
+@media (hover: hover) and (pointer: fine) {
+  .gallery-page .gallery-viewer-close:hover,
+  .gallery-page .gallery-viewer-footer button:hover {
+    box-shadow: 0 5px 14px rgb(0 0 0 / 0.22);
+  }
 }
 
 @media (max-width: 700px) {

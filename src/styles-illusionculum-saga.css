@@ -888,6 +888,9 @@
   left: 0;
   z-index: 1;
   background-color: #070914;
+  box-shadow:
+    4px 0 14px -2px rgb(0 0 0 / 75%),
+    inset -1px 0 0 var(--ics-line);
 }
 
 .rxs-page.rxs-page.ics-page .ics-table tbody th {
@@ -908,13 +911,19 @@
 
 .rxs-page.rxs-page.ics-page .ics-table td > i {
   display: block;
-  height: 2px;
+  height: 3px;
   margin-top: 8px;
-  background: linear-gradient(
-    90deg,
-    var(--ics-bar-a, rgb(166 230 255 / 50%)),
-    var(--ics-bar-b, rgb(169 131 255 / 30%))
-  );
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 35%), transparent 60%),
+    linear-gradient(
+      90deg,
+      var(--ics-bar-a, rgb(166 230 255 / 75%)),
+      var(--ics-bar-b, rgb(169 131 255 / 45%))
+    );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 40%),
+    0 0 10px color-mix(in srgb, var(--ics-bar-a, rgb(166 230 255 / 70%)) 45%, transparent);
   transform: scaleX(var(--ics-bar));
   transform-origin: 0 50%;
 }
@@ -2634,6 +2643,16 @@ html:not([data-world-effects="economy"])
 
 .rxs-page.rxs-page.ics-page .ics-table tr[data-current] td > i {
   height: 4px;
+  background:
+    linear-gradient(180deg, #fff 0%, rgb(255 255 255 / 40%) 60%),
+    linear-gradient(
+      90deg,
+      var(--ics-bar-a, var(--ics-gold-hi)),
+      var(--ics-bar-b, var(--ics-gold))
+    );
+  box-shadow:
+    inset 0 1px 0 0 #fff,
+    0 0 14px color-mix(in srgb, var(--ics-bar-a, var(--ics-gold-hi)) 65%, transparent);
 }
 
 /* The finishers' calls step on one at a time (each call is its button; the
@@ -2658,18 +2677,39 @@ html:not([data-world-effects="economy"])
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition:
+    scale 120ms ease,
+    opacity 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.ics-page .ics-step-calls button:hover b {
+    border-color: color-mix(in srgb, var(--ics-gold) 65%, #fff);
+    background: rgb(233 184 102 / 24%);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 30%),
+      0 0 20px rgb(233 184 102 / 28%);
+  }
+}
+
+.rxs-page.rxs-page.ics-page .ics-step-calls button:active {
+  scale: 0.985;
 }
 
 .rxs-page.rxs-page.ics-page .ics-step-calls > li[data-lit] b {
   border-color: var(--ics-gold);
-  background: rgb(233 184 102 / 18%);
-  box-shadow: 0 0 22px rgb(233 184 102 / 22%);
+  background: rgb(233 184 102 / 22%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 35%),
+    0 0 24px rgb(233 184 102 / 32%),
+    0 0 6px rgb(255 235 180 / 45%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rxs-page.rxs-page.ics-page :is(.ics-more-body, .ics-dg-step, .ics-more > summary i::after) {
+  .rxs-page.rxs-page.ics-page :is(.ics-more-body, .ics-dg-step, .ics-more > summary i::after, .ics-step-calls button) {
     animation: none !important;
     transition: none !important;
+    scale: none !important;
   }
 }
 

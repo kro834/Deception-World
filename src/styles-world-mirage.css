@@ -1064,9 +1064,27 @@ html[data-mode="world"]:not([data-world-effects="economy"])
    img.is-on keeps its timing and opacity. */
 .site-shell.film-edition.mirage-edition .rider-visual::before {
   background:
-    linear-gradient(90deg, var(--mr-deck) 0%, rgb(10 18 32 / 55%) 16%, transparent 34%),
-    linear-gradient(0deg, rgb(10 18 32 / 80%), transparent 30%),
-    radial-gradient(ellipse 90% 80% at 60% 42%, transparent 58%, rgb(10 18 32 / 55%) 100%);
+    linear-gradient(
+      90deg,
+      var(--mr-deck) 0%,
+      color-mix(in srgb, var(--mr-deck) 84%, rgb(10 18 32 / 55%)) 8%,
+      rgb(10 18 32 / 55%) 16%,
+      color-mix(in srgb, rgb(10 18 32 / 55%) 48%, transparent) 25%,
+      transparent 36%
+    ),
+    linear-gradient(
+      0deg,
+      rgb(10 18 32 / 82%) 0%,
+      rgb(10 18 32 / 56%) 12%,
+      rgb(10 18 32 / 20%) 22%,
+      transparent 32%
+    ),
+    radial-gradient(
+      ellipse 90% 80% at 60% 42%,
+      transparent 55%,
+      rgb(10 18 32 / 24%) 76%,
+      rgb(10 18 32 / 55%) 100%
+    );
 }
 
 .site-shell.film-edition.mirage-edition .rider-visual::after {
@@ -1460,6 +1478,71 @@ html[data-mode="world"]:not([data-world-effects="economy"])
     .signal:is(:hover, :focus-visible)
     > img {
     scale: 1.05;
+  }
+
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    :is(.other-archive-card, .dante-archive) {
+    transition:
+      translate 240ms var(--mr-ease-out),
+      box-shadow 240ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    :is(.other-archive-card, .dante-archive):hover {
+    translate: 0 -3px;
+    box-shadow:
+      -2px 0 0 rgb(255 92 200 / 65%),
+      2px 0 0 rgb(122 232 255 / 75%),
+      0 8px 28px -4px rgb(0 0 0 / 70%),
+      0 0 44px rgb(122 232 255 / 22%);
+  }
+
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    #cast-roster
+    .wa-directory-controls
+    button {
+    transition:
+      translate 200ms var(--mr-ease-out),
+      box-shadow 200ms ease,
+      border-color 200ms ease,
+      background-color 200ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    #cast-roster
+    .wa-directory-controls
+    button:hover {
+    translate: 0 -2px;
+    border-color: rgb(122 232 255 / 65%);
+    background: #152636;
+    box-shadow:
+      0 6px 20px -4px rgb(0 0 0 / 65%),
+      0 0 18px rgb(122 232 255 / 20%);
+  }
+
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    #cast-roster
+    .wa-roster
+    > li:not(:has(.wa-profile[open])) {
+    transition:
+      translate 240ms var(--mr-ease-out),
+      box-shadow 240ms ease;
+  }
+
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    #cast-roster
+    .wa-roster
+    > li:not(:has(.wa-profile[open])):hover {
+    translate: 0 -3px;
+    box-shadow:
+      0 10px 30px -6px rgb(0 0 0 / 70%),
+      0 0 24px rgb(122 232 255 / 15%);
   }
 
   html:not([data-world-effects="economy"])

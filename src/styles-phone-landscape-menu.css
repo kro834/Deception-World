@@ -133,6 +133,11 @@ html:root[data-phone-landscape-menu="true"][data-world-effects="economy"]
     border-color: ButtonText !important;
     box-shadow: none !important;
   }
+  html:root[data-phone-landscape-menu="true"]
+    body
+    .side-panel-trigger[data-phone-landscape-trigger]:focus-visible {
+    outline-color: Highlight !important;
+  }
 }
 
 /* Both compact controllers share the same native target and travelling shell.
@@ -144,6 +149,14 @@ html:root[data-phone-landscape-menu="true"] body .side-panel-trigger[data-phone-
   scale: none !important;
   rotate: none !important;
   perspective: none !important;
+}
+html:root[data-phone-landscape-menu="true"]
+  body
+  .side-panel-trigger[data-phone-landscape-trigger]:active:not([data-phone-landscape-motion]),
+html:root[data-phone-landscape-menu="true"]:not([data-phone-landscape-motion])
+  body
+  .side-panel-trigger[data-phone-landscape-trigger]:active {
+  scale: 0.94 !important;
 }
 html:root[data-phone-landscape-menu="true"][data-phone-landscape-motion]
   body

@@ -374,7 +374,7 @@ html body .form-archive-page #archive-switcher.form-archive-switcher > button[ar
 @media (hover: hover) and (pointer: fine) {
   html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"]:not([aria-selected="true"]):hover {
     color: var(--fa-text);
-    background: rgb(122 232 255 / 6%);
+    background: color-mix(in srgb, var(--liquid-accent, var(--fa-accent)) 10%, transparent);
   }
 }
 
@@ -602,5 +602,16 @@ html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger:focus
 
   html body .form-archive-page #archive-switcher.form-archive-switcher > button[aria-selected="true"] small {
     color: HighlightText;
+  }
+
+  html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger {
+    border-color: ButtonText;
+    background: ButtonFace !important;
+    color: ButtonText;
+  }
+
+  html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger:focus-visible,
+  html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"]:focus-visible {
+    outline-color: Highlight;
   }
 }

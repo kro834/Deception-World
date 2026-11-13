@@ -491,6 +491,14 @@
   animation-name: op-marker;
 }
 
+.is-complete .cine-progress > i {
+  border-color: color-mix(in srgb, var(--op-gold) 85%, transparent);
+  background: var(--op-focus);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--op-gold) 50%, transparent);
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(45deg) scale(1);
+}
+
 @keyframes op-marker {
   to {
     border-color: color-mix(in srgb, var(--op-gold) 85%, transparent);
@@ -1616,7 +1624,8 @@ html[data-world-effects="economy"] .cine-stage.is-complete .cine-editorial-word 
     box-shadow: none;
   }
 
-  .cine-progress > i {
+  .cine-progress > i,
+  .is-complete .cine-progress > i {
     background: Canvas;
     border-color: CanvasText;
     box-shadow: none;

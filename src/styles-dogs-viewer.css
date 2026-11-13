@@ -109,10 +109,12 @@
     color 0.2s;
   box-shadow: 0 5px 18px #0003;
 }
-.dogs-viewer__toolbar button:hover {
-  background: #122a1ce8;
-  border-color: #b5e4ba77;
-  color: #effff0;
+@media (hover: hover) and (pointer: fine) {
+  .dogs-viewer__toolbar button:hover {
+    background: #122a1ce8;
+    border-color: #b5e4ba77;
+    color: #effff0;
+  }
 }
 .dogs-viewer__toolbar button:focus-visible {
   outline: 2px solid #bbe2bd;
@@ -154,10 +156,12 @@
     border-color 0.2s,
     color 0.2s;
 }
-.dogs-viewer__toolbar .dogs-viewer__pose:hover {
-  background-color: #122a1ce8;
-  border-color: #b5e4ba77;
-  color: #effff0;
+@media (hover: hover) and (pointer: fine) {
+  .dogs-viewer__toolbar .dogs-viewer__pose:hover {
+    background-color: #122a1ce8;
+    border-color: #b5e4ba77;
+    color: #effff0;
+  }
 }
 .dogs-viewer__toolbar .dogs-viewer__pose:focus-visible {
   outline: 2px solid #bbe2bd;
@@ -201,7 +205,7 @@
   }
   .dogs-viewer__toolbar {
     gap: 6px;
-    bottom: 19px;
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
     flex-wrap: wrap;
     justify-content: center;
     row-gap: 8px;
@@ -232,5 +236,17 @@
   .dogs-viewer.is-ready .dogs-viewer__fallback,
   .dogs-viewer__toolbar button {
     transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .dogs-viewer__toolbar button,
+  .dogs-viewer__toolbar .dogs-viewer__pose,
+  .dogs-viewer__loading button {
+    border: 1px solid ButtonBorder;
+    color: ButtonText;
+  }
+  .dogs-viewer__toolbar .dogs-viewer__breathe {
+    border: 2px solid Highlight;
   }
 }

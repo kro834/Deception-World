@@ -10,7 +10,8 @@
 .lab-zoom,
 .lab-stages,
 .lab-controls,
-.lab-mobile-switch {
+.lab-mobile-switch,
+.tl-part-record {
   max-width: 1280px;
   margin-inline: auto;
 }
@@ -55,6 +56,7 @@
   font: inherit;
   min-height: 44px;
   max-width: 100%;
+  box-shadow: inset 0 1px 0 #ffffff14;
 }
 .transformation-lab select {
   min-width: 0;
@@ -62,8 +64,14 @@
 .transformation-lab button {
   cursor: pointer;
 }
-.transformation-lab button:hover {
-  border-color: #b0dee3;
+@media (hover: hover) and (pointer: fine) {
+  .transformation-lab button:hover:not(:disabled) {
+    border-color: #b0dee3;
+    background: #162633;
+  }
+  .transformation-lab select:hover {
+    border-color: #b0dee3;
+  }
 }
 .transformation-lab button[aria-pressed="true"] {
   color: #081316;
@@ -307,12 +315,23 @@
 
 /* Published mechanism record paired with the selected camera view. */
 .tl-part-record {
-  margin: 18px 0 0;
+  max-width: 1280px;
+  margin: 18px auto 0;
   padding: 18px 20px;
   border: 1px solid #9bc6d52b;
   border-left: 2px solid #b9dbdf;
   background: linear-gradient(115deg, #23394245, #101a2450);
+  box-shadow: inset 0 1px 0 #ffffff0d;
   min-width: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tl-part-record:hover {
+    border-color: #9bc6d548;
+  }
+  .tl-part-record-heading a:hover {
+    color: #ffffff;
+    border-bottom-color: #ffffff;
+  }
 }
 .tl-part-record-heading {
   display: flex;
@@ -365,5 +384,37 @@
   }
   .tl-part-record h3 {
     font-size: 14px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .transformation-lab select,
+  .transformation-lab button {
+    border-color: #8da6b8;
+  }
+  .tl-part-record {
+    border-color: #a0c0cb;
+    border-left-width: 3px;
+  }
+}
+
+@media (forced-colors: active) {
+  .transformation-lab select,
+  .transformation-lab button {
+    border: 1px solid ButtonBorder;
+    color: CanvasText;
+  }
+  .transformation-lab button[aria-pressed="true"] {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .tl-part-record {
+    border: 1px solid CanvasText;
+    border-left: 3px solid Highlight;
+  }
+  .transformation-lab :focus-visible,
+  .tl-part-record a:focus-visible {
+    outline: 2px solid Highlight;
   }
 }

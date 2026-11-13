@@ -14,7 +14,8 @@ main.manager-page.ciel-dossier-page {
   --ciel-aqua-pale: #d3f3ff;
 }
 
-main.manager-page.ciel-dossier-page:not(.is-sovereign) {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign) {
   background:
     radial-gradient(circle at 84% 2%, rgb(134 217 255 / 0.2), transparent 34rem),
     radial-gradient(circle at 4% 30%, rgb(28 207 157 / 0.15), transparent 36rem),
@@ -30,12 +31,18 @@ body:has(> main.manager-page.ciel-dossier-page) {
   background-color: #030b0e;
 }
 
-main.manager-page.ciel-dossier-page:not(.is-sovereign) .manager-grid {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-grid {
   opacity: 0.08;
 }
 
 /* The name reads from emerald into light blue. */
-main.manager-page.ciel-dossier-page .dossier-identity .manager-display-name {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name {
   background: linear-gradient(
     100deg,
     var(--ciel-emerald) 0%,
@@ -46,20 +53,42 @@ main.manager-page.ciel-dossier-page .dossier-identity .manager-display-name {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
-main.manager-page.ciel-dossier-page .manager-introduction .dossier-identity h1 small,
-main.manager-page.ciel-dossier-page .dossier-identity .manager-title,
-main.manager-page.ciel-dossier-page .dossier-identity .manager-file-number {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-introduction
+  .dossier-identity
+  h1
+  small,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity
+  .manager-title,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity
+  .manager-file-number {
   color: var(--ciel-aqua);
 }
 
-main.manager-page.ciel-dossier-page .dossier-identity .manager-file-number {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity
+  .manager-file-number {
   border-left-color: var(--ciel-emerald);
   background: linear-gradient(90deg, rgb(28 207 157 / 0.12), rgb(134 217 255 / 0.04));
 }
 
-main.manager-page.ciel-dossier-page:not(.is-sovereign) .manager-portrait-frame {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-portrait-frame {
   border-color: rgb(134 217 255 / 0.45);
   box-shadow:
     0 30px 80px rgb(0 0 0 / 0.42),
@@ -68,37 +97,73 @@ main.manager-page.ciel-dossier-page:not(.is-sovereign) .manager-portrait-frame {
     inset 0 1px 0 rgb(211 243 255 / 0.24);
 }
 
-main.manager-page.ciel-dossier-page .manager-quotes {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes {
   border-color: rgb(134 217 255 / 0.32);
+  border-left-color: var(--ciel-emerald);
   background: linear-gradient(
     135deg,
-    rgb(28 207 157 / 0.08),
-    rgb(134 217 255 / 0.06) 60%,
-    transparent
+    rgb(28 207 157 / 0.1),
+    rgb(134 217 255 / 0.07) 60%,
+    var(--sd-plate, #0b111c)
   );
 }
 
-main.manager-page.ciel-dossier-page .manager-quotes q {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes
+  q {
   color: var(--ciel-aqua-pale);
 }
 
-main.manager-page.ciel-dossier-page .manager-facts dt,
-main.manager-page.ciel-dossier-page .manager-copy-heading p,
-main.manager-page.ciel-dossier-page .dossier-contents-copy small {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-facts
+  dt,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading
+  > p,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents
+  a
+  .dossier-contents-copy
+  small {
   color: var(--ciel-aqua);
 }
 
-main.manager-page.ciel-dossier-page .manager-facts > div {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-facts
+  > div {
   border-color: rgb(134 217 255 / 0.22);
 }
 
 @media (forced-colors: active) {
-  main.manager-page.ciel-dossier-page .dossier-identity .manager-display-name {
+  html[data-family="dossier"]
+    main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name {
     background: none;
     color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
   }
 }
 
-main.manager-page.ciel-dossier-page .manager-topbar .brand small {
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page
+  .manager-topbar
+  .brand
+  small {
   color: var(--ciel-aqua-pale);
 }

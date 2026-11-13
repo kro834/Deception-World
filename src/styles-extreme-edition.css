@@ -498,6 +498,31 @@ html[data-mode="world"]:has(.exs-page) {
   line-height: 1.5;
 }
 
+/* Duel stage rim contrast: Middle gold and Ultra cyan luminous aura */
+.rxs-page.rxs-page.exs-page .rxs-stage-panel figure {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 16%),
+    0 14px 40px -8px rgb(0 0 0 / 75%),
+    0 0 32px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold)) 15%, transparent);
+  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold)) 32%, rgb(255 255 255 / 10%));
+}
+
+.rxs-page.rxs-page.exs-page .rxs-stage-panel[data-stage="middle"] figure {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 20%),
+    0 16px 44px -8px rgb(0 0 0 / 80%),
+    0 0 44px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold, #ffd57a)) 22%, transparent);
+  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-gold, #ffd57a)) 46%, transparent);
+}
+
+.rxs-page.rxs-page.exs-page .rxs-stage-panel[data-stage="ultra"] figure {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 24%),
+    0 16px 44px -8px rgb(0 0 0 / 80%),
+    0 0 48px color-mix(in srgb, var(--rxs-stage-accent, var(--ex-ice, #7ae8ff)) 24%, transparent);
+  border-color: color-mix(in srgb, var(--rxs-stage-accent, var(--ex-ice, #7ae8ff)) 52%, transparent);
+}
+
 /* Below 901px the panel is one column with the figure first, which left the
    new code and title a screen below the rail after every tap. The copy block
    dissolves into the panel grid: code and title above the art, the lede and
@@ -621,6 +646,29 @@ html[data-mode="world"]:has(.exs-page) {
   }
 }
 
+/* Portrait tablet breathing room (681–768px) */
+@media (min-width: 681px) and (max-width: 768px) and (orientation: portrait) {
+  .rxs-page.rxs-page.exs-page .rxs-processing-comparison {
+    padding: clamp(20px, 3.2vw, 28px);
+    gap: 20px;
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-processing-comparison > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(14px, 2.2vw, 22px);
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-processing-comparison > div > section {
+    padding: 16px clamp(14px, 2vw, 20px);
+  }
+
+  .rxs-page.rxs-page.exs-page .rxs-processing-comparison li {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+}
+
 @media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
   .rxs-page.rxs-page.exs-page .exs-p14-comparison article::after {
     display: none;
@@ -637,7 +685,8 @@ html[data-mode="world"]:has(.exs-page) {
   .rxs-page.rxs-page.exs-page :is(.rxs-local-nav, .rxs-chapter-index, .rxs-comparison, .rxs-footer),
   .rxs-page.rxs-page.exs-page .rxs-comparison-selector,
   .rxs-page.rxs-page.exs-page .exs-p14-comparison article,
-  .rxs-page.rxs-page.exs-page .rxs-system-grid article {
+  .rxs-page.rxs-page.exs-page .rxs-system-grid article,
+  .rxs-page.rxs-page.exs-page .rxs-stage-panel figure {
     background: Canvas;
     border-color: CanvasText;
     box-shadow: none;

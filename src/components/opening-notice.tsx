@@ -56,6 +56,7 @@ body:has(.side-panel-trigger[aria-expanded="true"]) .opening-notice {
      and without one it looked through the strip at the poster and flipped the
      close button light on a dark header. */
   background-color: #2a2a2a;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 15%);
 }
 .opening-notice-strip::before {
   content: "";
@@ -76,7 +77,16 @@ body:has(.side-panel-trigger[aria-expanded="true"]) .opening-notice {
   font: 400 16px/1 Verdana, Arial, sans-serif;
   cursor: pointer;
 }
-.opening-notice .opening-notice-close:hover { background: #7a0f0f; color: #fff; }
+.opening-notice .opening-notice-close > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+@media (hover: hover) and (pointer: fine) {
+  .opening-notice .opening-notice-close:hover { background: #7a0f0f; color: #fff; }
+}
 .opening-notice .opening-notice-open {
   all: unset;
   box-sizing: border-box;
@@ -94,7 +104,9 @@ body:has(.side-panel-trigger[aria-expanded="true"]) .opening-notice {
   text-decoration: underline dotted #7a0f0f;
   text-underline-offset: 4px;
 }
-.opening-notice .opening-notice-open:hover { background: #e8e8e8; color: #7a0f0f; }
+@media (hover: hover) and (pointer: fine) {
+  .opening-notice .opening-notice-open:hover { background: #e8e8e8; color: #7a0f0f; }
+}
 .opening-notice :is(.opening-notice-open, .opening-notice-close):focus-visible {
   outline: 2px solid #7a0f0f;
   outline-offset: -2px;

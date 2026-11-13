@@ -311,9 +311,11 @@ dialog.quick-search .quick-search-clear {
   box-shadow: inset 3px 0 0 transparent;
   text-decoration: none;
 }
-.quick-search-option:hover {
-  background: rgb(var(--qs-ice-rgb) / 0.08);
-  box-shadow: inset 3px 0 0 rgb(var(--qs-ice-rgb) / 0.58);
+@media (hover: hover) and (pointer: fine) {
+  .quick-search-option:hover {
+    background: rgb(var(--qs-ice-rgb) / 0.08);
+    box-shadow: inset 3px 0 0 rgb(var(--qs-ice-rgb) / 0.58);
+  }
 }
 .quick-search-option[data-active="true"] {
   background: linear-gradient(
@@ -824,6 +826,12 @@ dialog.quick-search .quick-search-foot {
     color: CanvasText;
     background: Canvas;
     border-color: CanvasText;
+    box-shadow: none;
+  }
+  dialog.quick-search :is(.quick-search-close, .quick-search-empty button) {
+    border: 1px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
     box-shadow: none;
   }
   dialog.quick-search .quick-search-art {

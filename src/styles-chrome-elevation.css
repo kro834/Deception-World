@@ -606,7 +606,7 @@ html body #site-announcement-dialog .site-announcement-hub {
     var(--dwc-ink);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  box-shadow: 0 36px 100px rgb(0 0 0 / 62%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%), 0 36px 100px rgb(0 0 0 / 62%);
   animation: none;
 }
 
@@ -836,7 +836,7 @@ html body #site-announcement-dialog .site-announcement-list-item {
     var(--dwc-prism-soft) top / 100% 1px no-repeat,
     linear-gradient(135deg, rgb(var(--dwc-ice-rgb) / 6%), transparent 42%),
     rgb(var(--dwc-deck-rgb) / 82%);
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%), 0 4px 12px rgb(0 0 0 / 24%);
 }
 
 html body #site-announcement-dialog .site-announcement-list-visual {
@@ -902,6 +902,7 @@ html body #site-announcement-dialog .site-announcement-list-copy b {
       var(--dwc-prism) top / 100% 1px no-repeat,
       linear-gradient(135deg, rgb(var(--dwc-ice-rgb) / 10%), transparent 46%),
       rgb(var(--dwc-deck-rgb) / 92%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%), 0 8px 20px rgb(0 0 0 / 36%), 0 0 16px rgb(var(--dwc-ice-rgb) / 16%);
     transform: none;
     translate: 0 -1px;
   }
@@ -1323,7 +1324,7 @@ html body #site-announcement-dialog .site-announcement-metric {
     var(--dwc-prism-soft) top / 100% 1px no-repeat,
     linear-gradient(135deg, rgb(var(--dwc-ice-rgb) / 7%), transparent 42%),
     rgb(var(--dwc-deck-rgb) / 82%);
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%), 0 2px 8px rgb(0 0 0 / 20%);
 }
 
 html body #site-announcement-dialog .site-announcement-metric b {
@@ -1837,6 +1838,16 @@ html body .dw-skip-link:is(:focus, :focus-visible) {
   outline-offset: -4px;
 }
 
+html body .dw-skip-link:focus-visible::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--dwc-prism);
+  pointer-events: none;
+  z-index: 2147483000;
+}
+
 /* ================================================================
    Focus: one ring for the chrome's controls. Rows draw it inside their
    edges (they sit edge to edge); the Zeus button and the skip link have
@@ -2023,6 +2034,10 @@ html[data-world-effects="economy"]
   html body .dw-skip-link {
     clip-path: none;
     border: 1px solid LinkText;
+  }
+
+  html body .dw-skip-link:focus-visible::before {
+    background: Highlight;
   }
 
   html body .zeus-button:not(:focus-visible) {

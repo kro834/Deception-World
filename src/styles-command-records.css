@@ -269,11 +269,25 @@ html[data-family="library"]
 }
 html[data-family="library"]
   .command-records.library-page.library-atelier
-  :is(.library-continue, .library-shelf, .library-history, .library-searches) {
-  padding: 18px;
-  border: 1px solid #91bdd733;
+  .library-hub-grid
+  > :is(.library-continue, .library-shelf, .library-history, .library-searches) {
+  padding: 0;
+  border: 0;
   border-radius: 0;
-  background: #07141d88;
+  background: none;
+}
+html[data-family="library"]
+  .command-records.library-page.library-atelier
+  :is(.library-hub-subhead, .library-continue > h3) {
+  border-bottom-color: var(--records-line);
+}
+html[data-family="library"] .command-records.library-page.library-atelier .library-empty {
+  border: 1px solid #91bdd766;
+  border-radius: 0;
+  background: var(--records-panel);
+  box-shadow:
+    inset 0 1px #e5f7ff22,
+    5px 6px 0 #010810b3;
 }
 html[data-family="library"]
   .command-records.library-page.library-atelier
@@ -951,11 +965,6 @@ html[data-family="library"]
   }
   html[data-family="library"]
     .command-records.library-page.library-atelier
-    :is(.library-continue, .library-shelf, .library-history, .library-searches) {
-    padding: 14px;
-  }
-  html[data-family="library"]
-    .command-records.library-page.library-atelier
     .library-browse-controls {
     padding: 18px 14px;
   }
@@ -1111,8 +1120,15 @@ html[data-family="library"]
   html[data-family="library"] .command-records *::after {
     animation: none !important;
     transition: none !important;
+    transform: none !important;
+    translate: none !important;
     scroll-behavior: auto !important;
   }
+}
+html[data-world-effects="economy"][data-family="library"] .command-records *,
+html[data-world-effects="economy"][data-family="library"] .command-records *::before,
+html[data-world-effects="economy"][data-family="library"] .command-records *::after {
+  transition: none !important;
 }
 @media (forced-colors: active) {
   html[data-family="library"]
@@ -1133,6 +1149,7 @@ html[data-family="library"]
       .library-hub,
       .library-browse-controls,
       .library-card,
+      .library-empty,
       .library-index-meter > button,
       .inquiry-choice,
       .inquiry-stop-body,
@@ -1152,13 +1169,21 @@ html[data-family="library"]
   }
   html[data-family="library"]
     .command-records
-    :is(button[aria-pressed="true"], .search-result-card[data-active="true"]) {
+    :is(
+      button[aria-pressed="true"],
+      .search-result-card[data-active="true"],
+      .search-more-option[data-active="true"]
+    ) {
     background: Highlight !important;
     color: HighlightText !important;
   }
   html[data-family="library"]
     .command-records
-    :is(button[aria-pressed="true"], .search-result-card[data-active="true"])
+    :is(
+      button[aria-pressed="true"],
+      .search-result-card[data-active="true"],
+      .search-more-option[data-active="true"]
+    )
     * {
     color: inherit !important;
   }

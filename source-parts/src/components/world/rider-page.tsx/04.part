@@ -1,8 +1,3 @@
-            body: "オーバーゼッツ エクスプロムの腕部。ナイトメアの力から生まれた破壊力を衝動のままに発揮して拳1つで対象を崩壊させる。また、圧倒的な破壊力をさらに最大化する必殺技「エクスプロムスマッシュ」の発動により、蓄積されていた全ての衝撃を炸裂させる。",
-          },
-        ],
-      },
-      {
         // Owner's official spec (2026-10-24), verbatim. Set in a mechanical
         // face (styles-form-signature.css, data-form-theme="custom").
         img: "/overzetts-custom-20261024/rider-over-zeztz-custom.jpeg",
@@ -385,3 +380,10 @@ export function RiderPage({ id }: { id: string }) {
       }}
     >
       <div className="manager-ambient" aria-hidden="true">
+        <div className="manager-grid" />
+        <div className="manager-glow" />
+      </div>
+      {/* A file shows no file line in its top bar (2026-10-23, the dossier
+          sheets); the label names the brand link's way back. */}
+      <DossierTopbar
+        fileLabel={`${rider.civilian.name}の資料`}

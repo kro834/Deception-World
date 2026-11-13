@@ -1007,6 +1007,9 @@ html[data-world-effects="economy"] .export-page h1 {
   .export-page .export-page-back {
     color: LinkText;
   }
+  .export-page-alt:focus-visible {
+    outline-color: Highlight;
+  }
   /* The foot is opaque here and covers the card's own edges along its row,
      so it draws the card's sides and bottom itself. */
   .export-page .export-page-back {
@@ -1031,6 +1034,8 @@ html[data-world-effects="economy"] .export-page h1 {
   justify-self: stretch;
   margin: 0;
   min-width: 0;
+  overflow: hidden;
+  border-radius: 0 0 6px 6px;
 }
 
 .export-page-navigation > :is(.export-page-back, .export-page-context) {
@@ -1060,8 +1065,10 @@ html[data-world-effects="economy"] .export-page h1 {
   outline-offset: -4px;
 }
 
-.export-page-navigation > .export-page-context:hover {
-  background: rgb(122 232 255 / 14%);
+@media (hover: hover) and (pointer: fine) {
+  .export-page-navigation > .export-page-context:hover {
+    background: rgb(122 232 255 / 14%);
+  }
 }
 
 @media (max-width: 559px) {
@@ -1122,6 +1129,12 @@ html[data-world-effects="economy"] .export-page h1 {
 }
 .export-page .export-page-navigation {
   gap: 12px;
+  overflow: visible;
+  border-radius: 0;
+}
+.export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
+  border: 1px solid rgb(139 155 167 / 36%);
+  border-radius: 4px;
 }
 @media (forced-colors: active) {
   .export-page small#export-scope {

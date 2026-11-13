@@ -90,8 +90,30 @@ html:root[data-ipad-viewport="contained"] .ipad-menu-toggle {
 }
 
 .ipad-menu-toggle[aria-pressed="true"] {
-  outline: 1px solid #c9b587;
-  outline-offset: -1px;
+  border-color: #c9b587;
+  box-shadow: inset 0 0 0 1px #c9b587;
+}
+
+.ipad-menu-toggle i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border: 1px solid #c9b587;
+  border-radius: 999px;
+  font-family: var(--sh-mono, monospace);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  color: #c9b587;
+  background: transparent;
+}
+
+.ipad-menu-toggle[aria-pressed="true"] i {
+  background: #c9b587;
+  color: #070d16;
 }
 
 /* The old paint guard is not part of compact chrome. Remove its positive
@@ -360,5 +382,13 @@ html:root[data-ipad-viewport="contained"][data-ipad-menu="compact"][data-viewpor
   }
   html:root[data-viewport-chrome] :is(.gallery-topbar, .topbar, .dream-site-header) {
     background-color: Canvas !important;
+  }
+  .ipad-menu-toggle i {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+  .ipad-menu-toggle[aria-pressed="true"] i {
+    background: Highlight;
+    color: HighlightText;
   }
 }
