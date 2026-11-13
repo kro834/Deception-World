@@ -12,7 +12,7 @@ const root = (path) => fileURLToPath(new URL(`../${path}`, import.meta.url));
 const SOURCE = { width: 1055, height: 2000 };
 const CROP = { left: 20, top: 41, width: 1019, height: 1855 };
 const FIG = { width: 571, height: 1040 };
-const SUIT = "public/rexonance-suit-20261016";
+const SUIT = "public/rexonance-suit-20261023";
 const OUT = "public/rexonance-forms-20261011";
 
 const base = await sharp(root(`${SUIT}/figure.webp`))
@@ -24,9 +24,9 @@ const N = FIG.width * FIG.height;
 // The black ground: near-black pixels connected to the image edges. It never
 // enters the body (the black plates are walled in by their lit bevels), so
 // the armour stays opaque.
-const GROUND = 14;
+const GROUND = 24;
 // The ground's dark anti-aliased rim, one pixel deep, goes with it.
-const RIM = 44;
+const RIM = 42;
 const flood = (lum) => {
   const ground = new Uint8Array(N);
   const stack = [];
@@ -72,7 +72,7 @@ const feather = async (field) => {
   const bytes = Buffer.alloc(N);
   for (let i = 0; i < N; i += 1) bytes[i] = field[i] * 255;
   const soft = await sharp(bytes, { raw: { width: FIG.width, height: FIG.height, channels: 1 } })
-    .blur(0.6)
+    .blur(0.55)
     .toColourspace("b-w")
     .raw()
     .toBuffer();
@@ -99,17 +99,11 @@ for (const form of ["max", "ultra"]) {
     const r = data[i * 3];
     const g = data[i * 3 + 1];
     const b = data[i * 3 + 2];
-    // The silhouette is the owner's cut-out of the figure (HIGH's alpha):
-    // the forms share its pose to the pixel. Only real light beyond it (a
-    // coloured glow, not the ground's grey haze) adds to it (owner,
-    // 2026-10-11). Where this form's own shape falls short of HIGH's, or the
-    // ground shows through the feathered edge, the ground is cut away rather
-    // than carried along as a dark rim (owner, 2026-10-15: the cut-outs were
-    // rough), and the edge is unpremultiplied against the black ground so no
-    // dark fringe remains.
-    const chroma = Math.min(1, (lum[i] - Math.min(r, g, b)) / 40);
-    const lit = Math.min(1, Math.max(0, (lum[i] - 90) / 70)) * chroma;
-    const alpha = Math.max(lit, base[i * 4 + 3] / 255) * (1 - ground[i] / 255);
+    // The silhouette starts from the SAM-cut HIGH figure, and any painted
+    // crown horn, cheek fin or ornament extending past HIGH's silhouette stays
+    // whole without clipping pale gold highlights or deep violet bevels.
+    const paint = Math.min(1, Math.max(0, (lum[i] - 50) / 38));
+    const alpha = Math.max(paint, base[i * 4 + 3] / 255) * (1 - ground[i] / 255);
     const lift = alpha > 0 && alpha < 0.98 ? Math.min(1.8, 1 / Math.max(alpha, 0.4)) : 1;
     out[i * 4] = Math.min(255, Math.round(r * lift));
     out[i * 4 + 1] = Math.min(255, Math.round(g * lift));
