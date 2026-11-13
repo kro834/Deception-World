@@ -384,6 +384,47 @@ export function capsuleCover(w: number, h: number, capsules: readonly (readonly 
   return cover;
 }
 
+/** A painting's figure matte: 1 bit a cell (row-major, most significant bit
+ * first, base64), in the painting's frame. */
+export type FormBurstMatte = { width: number; height: number; bits: string };
+
+const decodeBase64 = (text: string) => Uint8Array.from(atob(text), (c) => c.charCodeAt(0));
+
+/** The body's coverage from a matte (bilinear between its cells), at the
+ * field's size. */
+export function matteCover(w: number, h: number, matte: FormBurstMatte) {
+  const bytes = decodeBase64(matte.bits);
+  const mw = matte.width;
+  const mh = matte.height;
+  const bit = (x: number, y: number) => {
+    const cx = x < 0 ? 0 : x >= mw ? mw - 1 : x;
+    const cy = y < 0 ? 0 : y >= mh ? mh - 1 : y;
+    const n = cy * mw + cx;
+    return (bytes[n >> 3] >> (7 - (n & 7))) & 1;
+  };
+  const cover = new Float32Array(w * h);
+  for (let y = 0; y < h; y += 1)
+    for (let x = 0; x < w; x += 1) {
+      const u = ((x + 0.5) / w) * mw - 0.5;
+      const v = ((y + 0.5) / h) * mh - 0.5;
+      const x0 = Math.floor(u);
+      const y0 = Math.floor(v);
+      const fx = u - x0;
+      const fy = v - y0;
+      const top = bit(x0, y0) * (1 - fx) + bit(x0 + 1, y0) * fx;
+      const bottom = bit(x0, y0 + 1) * (1 - fx) + bit(x0 + 1, y0 + 1) * fx;
+      cover[y * w + x] = top * (1 - fy) + bottom * fy;
+    }
+  return cover;
+}
+
+/** The union of two coverages (a point of either form's body is body). */
+export function unionCover(a: Float32Array, b: Float32Array) {
+  const out = new Float32Array(a.length);
+  for (let n = 0; n < a.length; n += 1) out[n] = a[n] > b[n] ? a[n] : b[n];
+  return out;
+}
+
 /** Bakes the field from the body's coverage (0 – 1 a texel). `unit`: texels
  * a figure width. */
 export function bakeFormBurstField(

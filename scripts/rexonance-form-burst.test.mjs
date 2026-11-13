@@ -5,12 +5,15 @@
 // any moment, the calm tiers, the chunk fetched on demand by Rexonance's
 // pages only, and particles that are sprites and nothing else: no trail.
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import { ASSEMBLY_BEATS } from "../src/lib/rexonance-resonance.js";
 import { skinBudget } from "../src/lib/rexonance-suit-skin.ts";
 import {
+  FORM_BURST_BAND,
   FORM_BURST_BEATS,
   FORM_BURST_CELL_FLIGHT,
   FORM_BURST_FLASH,
@@ -29,7 +32,10 @@ import {
   formBurstBuilt,
   formBurstFrame,
   formBurstLit,
+  matteCover,
+  unionCover,
 } from "../src/lib/rexonance-form-burst.ts";
+import { FORM_BURST_PANEL_MATTE } from "../src/lib/rexonance-form-burst-matte.ts";
 import {
   FORM_BURST_FADE_MS,
   createFormBurstLoader,
@@ -383,6 +389,7 @@ test("the play's chunk is fetched on demand, by Rexonance's own pages only", asy
     "src/components/rexonance-saga/rexonance-saga.tsx",
     "src/components/rexonance-saga/rexonance-suit-surge.tsx",
     "src/lib/rexonance-form-burst-loader.ts",
+    "src/lib/rexonance-form-burst-matte.ts",
     "src/lib/rexonance-form-burst-stage.ts",
     "src/lib/rexonance-form-burst.ts",
     "src/lib/rexonance-suit-skin.ts",
@@ -405,8 +412,11 @@ test("the play's chunk is fetched on demand, by Rexonance's own pages only", asy
   );
   assert.match(
     read("src/components/rexonance-saga/rexonance-suit-surge.tsx"),
-    /if \(q > 0\.4 && \(form !== "standard" \|\| \(formOn && formOn !== form\)\)\)\s*askBurst\(/,
+    /if \(q > 0\.4 && \(direct \|\| form !== "standard" \|\| \(formOn && formOn !== form\)\)\)\s*askBurst\("standard", "max", "ultra"\);/,
   );
+  // (Every form's art, once one is asked for: from MAX the lab's or the
+  // scene's next pick, ULTRA, found its art not yet fetched and was cut.)
+  assert.doesNotMatch(read("src/components/rexonance-saga/rexonance-suit-surge.tsx"), /askBurst\("standard", form,/);
   // The loader: one import shared, a failure may be retried.
   let imports = 0;
   const stage = { playFormBurst: () => null };
@@ -544,6 +554,120 @@ test("the body's field: the body, the air about it, and the lift above it", () =
   // The particles' points are on the body.
   assert.ok(points.length > 200);
   for (let n = 0; n < points.length; n += 2) assert.equal(texel(points[n], points[n + 1])[3] >= 128, true);
+});
+
+/* Every part of either form is transformed (owner, 2026-11-13: 「ウルトラに
+   切り替えた時に肩などのパーツが変わらない」): the field is the union of the
+   two forms' bodies, so the old form's parts burn or break and the new
+   form's — ULTRA's pauldrons, horns and ribbons — are built by the front. */
+const FIELD = { w: 57, h: 104 };
+const alphaOf = async (path) => {
+  const { data } = await sharp(`${root}public${path}`)
+    .ensureAlpha()
+    .resize(FIELD.w, FIELD.h, { fit: "fill" })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const out = new Float32Array(FIELD.w * FIELD.h);
+  for (let n = 0; n < out.length; n += 1) out[n] = data[n * 4 + 3] / 255;
+  return out;
+};
+test("the runway's field covers each form's alpha: the union of the old form's and the new's", async () => {
+  const forms = {
+    standard: await alphaOf("/rexonance-suit-20261023/figure.webp"),
+    max: await alphaOf("/rexonance-forms-20261011/max.webp"),
+    ultra: await alphaOf("/rexonance-forms-20261011/ultra.webp"),
+  };
+  for (const [a, b] of [["standard", "ultra"], ["max", "ultra"], ["standard", "max"], ["ultra", "standard"], ["ultra", "max"]]) {
+    const { bytes } = bakeFormBurstField(unionCover(forms[a], forms[b]), FIELD.w, FIELD.h, FIELD.w);
+    for (const form of [a, b])
+      for (let n = 0; n < forms[form].length; n += 1)
+        if (forms[form][n] >= 0.5) assert.ok(bytes[n * 4 + 3] >= 128, `${a}→${b}: ${form} at ${n}`);
+  }
+  // (A half-alpha blend of the new over the old left the new form's own
+  // parts at 127/255, under the body's threshold.)
+  const stage = read("src/lib/rexonance-form-burst-stage.ts");
+  assert.match(stage, /cover = unionCover\(alpha\(from\), alpha\(to\)\)/);
+  assert.doesNotMatch(stage, /globalAlpha = 0\.5/);
+});
+
+test("the panel's field is the paintings' own figure: every form's parts, ULTRA's shoulders with them", async () => {
+  // The matte is the bake's, bit for bit.
+  const check = spawnSync(process.execPath, [`${root}scripts/build-rexonance-form-burst-matte.mjs`, "--check"], { encoding: "utf8" });
+  assert.equal(check.status, 0, check.stderr);
+  const panel = read("src/components/rexonance-saga/rexonance-form-burst.tsx");
+  assert.match(panel, /body: \{ matte: stage\.FORM_BURST_PANEL_MATTE, capsules: FORM_BURST_PANEL_BODY \}/);
+  const block = panel.slice(panel.indexOf("FORM_BURST_PANEL_BODY = ["), panel.indexOf("] as const;", panel.indexOf("FORM_BURST_PANEL_BODY = [")));
+  const capsules = [...block.matchAll(/\[([\d.,\s]+)\]/g)].map((m) => m[1].split(",").map(Number));
+  assert.ok(capsules.length > 10);
+  const W = 136;
+  const H = 181;
+  const matte = unionCover(matteCover(W, H, FORM_BURST_PANEL_MATTE), capsuleCover(W, H, capsules));
+  const only = capsuleCover(W, H, capsules);
+  // Each painting's lit figure (armour, gold, ribbons) where it is not the
+  // others' (what must change), away from the frame's edge.
+  const paint = async (name) =>
+    (
+      await sharp(`${root}public/rider-rexonance-${name}-20260923.webp`)
+        .removeAlpha()
+        .resize(W, H, { fit: "fill" })
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+    ).data;
+  const [standard, max, ultra] = await Promise.all(["saga-pickup", "max", "ultra"].map(paint));
+  for (const [name, own, other] of [["ULTRA", ultra, standard], ["ULTRA from MAX", ultra, max], ["MAX", max, standard]]) {
+    let parts = 0;
+    let inMatte = 0;
+    let inCapsules = 0;
+    for (let y = 4; y < H - 4; y += 1)
+      for (let x = 4; x < W - 4; x += 1) {
+        const n = y * W + x;
+        const [r, g, b] = [own[n * 3], own[n * 3 + 1], own[n * 3 + 2]].map((v) => v / 255);
+        const v = Math.max(r, g, b);
+        const s = (v - Math.min(r, g, b)) / Math.max(v, 1e-3);
+        const lit = (v > 0.4 && s > 0.3) || v > 0.65;
+        const differs = Math.max(...[0, 1, 2].map((k) => Math.abs(own[n * 3 + k] - other[n * 3 + k]))) > 60;
+        if (!lit || !differs) continue;
+        parts += 1;
+        if (matte[n] >= 0.5) inMatte += 1;
+        if (only[n] >= 0.5) inCapsules += 1;
+      }
+    assert.ok(parts > 2000, name);
+    assert.ok(inMatte / parts > 0.95, `${name}: the matte covers ${((100 * inMatte) / parts).toFixed(1)}%`);
+    // (The capsules alone left a good part of it out: the bug.)
+    assert.ok(inCapsules / parts < inMatte / parts - 0.1, `${name}: capsules ${((100 * inCapsules) / parts).toFixed(1)}%`);
+  }
+  // The matte is the play's: in its chunk, not the page's.
+  assert.match(read("src/lib/rexonance-form-burst-stage.ts"), /export \{ FORM_BURST_PANEL_MATTE \} from "\.\/rexonance-form-burst-matte"/);
+  assert.doesNotMatch(panel, /import[^;]*rexonance-form-burst-matte/);
+});
+
+test("nothing of the old form is left for the settle: the shatter and the fronts reach every point", () => {
+  const stage = read("src/lib/rexonance-form-burst-stage.ts");
+  // The old armour breaks up everywhere by the shatter's end (it runs to 1).
+  const goes = [...stage.matchAll(/float goes = hash\(id\) \* ([\d.]+) \+ min\(fn, ([\d.]+)\) \* ([\d.]+);/g)];
+  assert.equal(goes.length, 2);
+  for (const [, spread, cap, rate] of goes) assert.ok(Number(spread) + Number(cap) * Number(rate) <= 1, goes[0][0]);
+  assert.equal(at("max", FORM_BURST_BEATS.max.burst + 240).shatter, 1);
+  assert.equal(at("ultra", FORM_BURST_BEATS.ultra.shatter[1]).shatter, 1);
+  // ULTRA's front passes every point (its lobes included) before it is whole,
+  // and the release's draws back past every point.
+  const build = stage.match(/float fnL = min\(fn, ([\d.]+)\) \+ \(ns\.r - 0\.5\) \* ([\d.]+) \+ \(ns\.b - 0\.5\) \* ([\d.]+);/);
+  const lobes = Number(build[2]) / 2 + Number(build[3]) / 2;
+  assert.ok(Number(build[1]) + lobes < FORM_BURST_WHOLE);
+  // On the figure (within its reach, 1) every cell has clicked solid and
+  // taken the art's colour by the time the front is whole.
+  const age = stage.match(/float age = \(\(af - ([\d.]+)\) \/ ([\d.]+) - threshold \* ([\d.]+)\) \/ 0\.18;/);
+  const solid = (Number(age[1]) + Number(age[2]) * Number(age[3])) * FORM_BURST_BAND;
+  assert.ok(1 + lobes + solid <= FORM_BURST_WHOLE);
+  const release = stage.match(/float fnL = min\(fn, ([\d.]+)\) \+ \(ns\.r - 0\.5\) \* ([\d.]+);/);
+  assert.ok(Number(release[1]) + Number(release[2]) / 2 < FORM_BURST_WHOLE - 0.05);
+  // The end state is the new form's art exactly: the settle is whole before
+  // the play is done, and the shader's last word is the art.
+  for (const kind of ["max", "ultra", "release"]) {
+    assert.equal(at(kind, FORM_BURST_MS[kind] - 20).settle, 1, kind);
+    assert.equal(at(kind, FORM_BURST_MS[kind] - 20).done, false, kind);
+  }
+  assert.match(stage, /rgb = mix\(rgb, settled\.rgb, uLate\.w\);\s+alpha = mix\(alpha, settled\.a, uLate\.w\);\s+gl_FragColor = vec4\(rgb, alpha\);/);
 });
 
 test("the budget steps down by device, and the governor sheds when frames run long", () => {

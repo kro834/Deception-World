@@ -21,7 +21,8 @@ import { releasePendingImage } from "@/lib/release-pending-images";
    The page mounts this only once the play's chunk is here (or for the
    cross-fade); until then its own overwrite (FormMorph) changes the form. */
 
-/** The body in the panel's paintings ([x0, y0, x1, y1, r]: x and r in the
+/** The body in the panel's paintings, under the figure's matte baked from
+ * them (scripts/build-rexonance-form-burst-matte.mjs) ([x0, y0, x1, y1, r]: x and r in the
  * picture's widths, y in its heights). The three forms stand alike in them
  * (rexonance-overwrite.js FORM_LANDMARKS.panel): the head and horns, the
  * shoulders, the trunk, the arms to the hands, the legs to the picture's
@@ -268,7 +269,9 @@ export function RexonanceFormBurst({
         clip: () => ({ left: 0, top: 0, width: img.offsetWidth, height: img.offsetHeight }),
         from: a,
         to: b,
-        body: FORM_BURST_PANEL_BODY,
+        // The paintings' own figure (every form's part, ULTRA's shoulders
+        // with them), the capsules over it.
+        body: { matte: stage.FORM_BURST_PANEL_MATTE, capsules: FORM_BURST_PANEL_BODY },
         origin: FORM_BURST_PANEL_ORIGIN,
         unit: FORM_BURST_PANEL_UNIT,
         delay,

@@ -31,16 +31,21 @@ import {
   buildFormBurstSheet,
   capsuleCover,
   createFormBurstFrame,
+  matteCover,
+  unionCover,
   formBurstBudget,
   formBurstFrame,
   type FormBurstCells,
   type FormBurstField,
   type FormBurstFrame,
   type FormBurstKind,
+  type FormBurstMatte,
 } from "./rexonance-form-burst";
 
 export { FORM_BURST_MS } from "./rexonance-form-burst";
 export type { FormBurstKind } from "./rexonance-form-burst";
+// The 03 panel paintings' figure: with the play, not the page.
+export { FORM_BURST_PANEL_MATTE } from "./rexonance-form-burst-matte";
 
 /* ---------------- the shader ---------------- */
 
@@ -229,7 +234,8 @@ void main() {
     charred = mix(charred, vec3(0.72, 1.0, 0.76), uFire.w * 0.5 * body * (0.4 + 0.6 * trim));
     // It breaks up in cells, from the reactor out.
     vec2 id = hexCell(pw, uHex.y);
-    float goes = hash(id) * 0.3 + fn * 0.62;
+    // (Capped: every point of the canvas is gone by the shatter's end.)
+    float goes = hash(id) * 0.3 + min(fn, 1.12) * 0.62;
     float gone = step(goes, uBlast.x);
     float oldA = from.a * (1.0 - gone);
     // MAX, from the blast's middle out, still white with the fire's heat.
@@ -261,7 +267,7 @@ void main() {
     vec4 to = settled;
     vec3 fc = from.rgb / max(from.a, 0.001);
     vec2 id = hexCell(pw, uHex.y);
-    float goes = hash(id) * 0.34 + fn * 0.6;
+    float goes = hash(id) * 0.34 + min(fn, 1.1) * 0.6;
     float gone = step(goes, uBlast.x);
     float flare = smoothstep(goes - 0.16, goes, uBlast.x) * (1.0 - gone);
     vec3 oc = fc + vec3(0.82, 0.92, 1.0) * flare * (0.12 + 0.4 * body) + ICE * uFire.w * exp(-fn * fn * 9.0) * 0.6;
@@ -273,7 +279,8 @@ void main() {
     vec3 armour = held(tc, glowing * (1.0 - litE)) + tc * glowing * uForm.w * 0.5 + vec3(0.9, 0.86, 1.0) * uForm.w * 0.1 * light;
     // The unbuilt body: a dark glass of itself.
     vec3 ghost = vec3(light) * vec3(0.2, 0.19, 0.32) + vec3(0.016, 0.016, 0.04) + ICE * 0.1 * exp(-din / 0.012);
-    float fnL = fn + (ns.r - 0.5) * 0.24 + (ns.b - 0.5) * 0.08;
+    // (Capped: the front passes every point before it is whole.)
+    float fnL = min(fn, 1.2) + (ns.r - 0.5) * 0.24 + (ns.b - 0.5) * 0.08;
     float af = (uForm.x - fnL) / BAND;
     vec3 nc = ghost;
     float newA = to.a * mix(uLate.y * 0.9, 1.0, opaque);
@@ -339,7 +346,7 @@ void main() {
     vec4 from = inArt(texture2D(uFrom, clamp(a, 0.0, 1.0)), a);
     vec4 to = settled;
     vec3 fc = from.rgb / max(from.a, 0.001);
-    float fnL = fn + (ns.r - 0.5) * 0.2;
+    float fnL = min(fn, 1.2) + (ns.r - 0.5) * 0.2;
     float keep = smoothstep(0.0, 0.05, uForm.x - fnL);
     float lip = exp(-pow((uForm.x - fnL) / 0.04, 2.0)) * step(0.001, uForm.x) * step(uForm.x, WHOLE - 0.01);
     vec3 oc = held(fc, emitter(fc) * uForm.y);
@@ -628,9 +635,13 @@ export type FormBurstOptions = {
   /** The two forms' art, decoded. */
   from: HTMLImageElement;
   to: HTMLImageElement;
-  /** The body: the art's own alpha (a cut-out figure), or capsules over a
-   * whole painting ([x0, y0, x1, y1, r]). */
-  body: "alpha" | readonly (readonly number[])[];
+  /** The body: the art's own alpha (a cut-out figure: the union of the two
+   * forms'), or over a whole painting its figure's matte (the union of the
+   * forms', with capsules over it) or capsules alone ([x0, y0, x1, y1, r]). */
+  body:
+    | "alpha"
+    | readonly (readonly number[])[]
+    | { matte: FormBurstMatte; capsules?: readonly (readonly number[])[] };
   /** The reactor in the art, and the figure's width in the art's heights. */
   origin: readonly [number, number];
   unit: number;
@@ -672,23 +683,31 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
   const renderer = takeRenderer();
   if (!renderer) return null;
   const aspect = to.naturalWidth / to.naturalHeight;
-  // The body's field, from the art's alpha or the painting's capsules.
+  // The body's field: every point of either form is body, so each part of
+  // the old burns or breaks and each part of the new is built (owner,
+  // 2026-11-13: ULTRA's shoulders were left out).
   const fw = Math.max(8, Math.round(FIELD_H * aspect));
   let cover: Float32Array | null = null;
-  if (options.body === "alpha") {
+  const body = options.body;
+  if (body === "alpha") {
     const scratch = makeCanvas(fw, FIELD_H);
     const context = scratch.getContext("2d", { willReadFrequently: true });
     if (context) {
-      // (Either form's: a point on one is on the other, near enough.)
-      context.drawImage(from, 0, 0, fw, FIELD_H);
-      context.globalAlpha = 0.5;
-      context.drawImage(to, 0, 0, fw, FIELD_H);
-      const pixels = context.getImageData(0, 0, fw, FIELD_H).data;
-      cover = new Float32Array(fw * FIELD_H);
-      for (let n = 0; n < cover.length; n += 1) cover[n] = pixels[n * 4 + 3] / 255;
+      const alpha = (image: HTMLImageElement) => {
+        context.clearRect(0, 0, fw, FIELD_H);
+        context.drawImage(image, 0, 0, fw, FIELD_H);
+        const pixels = context.getImageData(0, 0, fw, FIELD_H).data;
+        const out = new Float32Array(fw * FIELD_H);
+        for (let n = 0; n < out.length; n += 1) out[n] = pixels[n * 4 + 3] / 255;
+        return out;
+      };
+      cover = unionCover(alpha(from), alpha(to));
     }
     scratch.width = scratch.height = 0;
-  } else cover = capsuleCover(fw, FIELD_H, options.body);
+  } else if ("matte" in body) {
+    cover = matteCover(fw, FIELD_H, body.matte);
+    if (body.capsules) cover = unionCover(cover, capsuleCover(fw, FIELD_H, body.capsules));
+  } else cover = capsuleCover(fw, FIELD_H, body);
   if (!cover) {
     giveRenderer(renderer);
     return null;
