@@ -881,8 +881,11 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       lastQ = q;
       // The form burst at the scene's end.
       const form = runway.dataset.form || "standard";
+      // (Asked for only where a change may play: a form chosen, or a stage
+      // whose form is picked in place — the lab.)
       if (q > 0.4 && (form !== "standard" || (formOn && formOn !== form)))
         askBurst("standard", form, formOn || "standard");
+      else if (q > 0.4 && direct) askBurst("standard", "max", "ultra");
       if (q < FORM_STRETCH[0]) {
         // Not there yet, or scrolled back: the standard suit stands.
         endBurst();

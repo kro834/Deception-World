@@ -158,7 +158,7 @@ void main() {
   if (mode < 0.5) {
     // ---- MAX: burned by green fire, and it explodes apart. ----
     vec4 nr = texture2D(uNoise, vec2(pw.x * 0.6, pw.y * 0.3 + uFlow.w));
-    float reach = 0.14 + 0.38 * nr.r;
+    float reach = (0.14 + 0.38 * nr.r) * (1.0 - 0.3 * opaque);
     float surface = min(lift, dOut * 3.5);
     float rag = (nw.b * 0.55 + nw.g * 0.3 + nw.a * 0.15 - 0.5) * 0.65 * smoothstep(0.0, 0.06, surface)
       * (1.0 - smoothstep(0.45, 1.0, surface / reach));
@@ -252,7 +252,7 @@ void main() {
     E *= window;
     rgb = rgb * (1.0 - min(1.0, absorb)) + E;
     alpha = alpha + (1.0 - alpha) * min(1.0, max(max(E.r, max(E.g, E.b)), absorb * window));
-    float flash = uBlast.w * exp(-fn * fn * 11.0) * window;
+    float flash = uBlast.w * exp(-dot(fromCore, fromCore) / (uShape.y * uShape.y) * 6.0) * window;
     rgb += vec3(0.8, 1.0, 0.86) * flash;
     alpha = max(alpha, flash);
   } else if (mode < 1.5) {
@@ -331,7 +331,7 @@ void main() {
     float aura = uLate.z * exp(-dOut / 0.1) * mix(air, 0.35, opaque) * window;
     rgb += mix(ICE, PINK, ns.g) * aura * 0.5;
     alpha = max(alpha, aura * 0.6);
-    float flash = uBlast.w * exp(-fn * fn * 9.0) * window;
+    float flash = uBlast.w * exp(-dot(fromCore, fromCore) / (uShape.y * uShape.y) * 5.0) * window;
     rgb += vec3(0.9, 0.9, 1.0) * flash * 0.8;
     alpha = max(alpha, flash);
   } else {
@@ -818,6 +818,7 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
   let ended = false;
   let visible = true;
   let away = 0;
+  let awayTimer = 0;
   const rect: [number, number, number, number] = [0, 0, 1, 1];
   const shape: [number, number, number, number] = [
     aspect,
@@ -869,6 +870,13 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
       // Paused: the clock stands until the layer is seen again.
       last = 0;
       away ||= now;
+      // Left away, it ends there: its context and layer are not kept for
+      // a reader who may never come back (the new form stands).
+      if (!awayTimer && elapsed > 0)
+        awayTimer = globalThis.setTimeout(() => {
+          awayTimer = 0;
+          if (document.hidden || !visible) finish();
+        }, AWAY_MS) as unknown as number;
       return;
     }
     // Seen again after a while away: the reader finds the new form.
@@ -877,6 +885,8 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
       return;
     }
     away = 0;
+    globalThis.clearTimeout(awayTimer);
+    awayTimer = 0;
     if (renderer.lost) {
       // The context is gone: the play is over, the new form stands.
       finish();
@@ -966,6 +976,7 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
       if (ended) return;
       ended = true;
       cancelAnimationFrame(raf);
+      globalThis.clearTimeout(awayTimer);
       raf = 0;
       intersection?.disconnect();
       resize?.disconnect();

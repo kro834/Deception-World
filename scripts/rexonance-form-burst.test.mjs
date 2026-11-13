@@ -298,7 +298,7 @@ test("a play is a closed form of its clock: any moment, in any order, and a cut 
   assert.match(stage, /if \(draw\(performance\.now\(\)\)\) \{\s*shown = true;\s*options\.onShown\?\.\(\);/);
   assert.match(stage, /getExtension\("WEBGL_lose_context"\)\?\.loseContext\(\)/);
   // Paused while the tab is hidden or the layer is out of view: the clock stands.
-  assert.match(stage, /if \(document\.hidden \|\| !visible\) \{[\s\S]*?last = 0;\s*away \|\|= now;\s*return;/);
+  assert.match(stage, /if \(document\.hidden \|\| !visible\) \{[\s\S]*?last = 0;\s*away \|\|= now;[\s\S]*?if \(document\.hidden \|\| !visible\) finish\(\);\s*\}, AWAY_MS\)[^;]*;\s*return;/);
   // Left out of view for long, it is not resumed: the new form simply stands.
   assert.match(stage, /if \(away && now - away > AWAY_MS && elapsed > 0\) \{\s*finish\(\);/);
   assert.match(stage, /new IntersectionObserver\(/);
@@ -520,7 +520,7 @@ test("the flashes are local and capped, and a second apart", () => {
   // The light falls off from the reactor (never a lit rectangle), and the
   // canvas's own edge never shows.
   const stage = read("src/lib/rexonance-form-burst-stage.ts");
-  assert.equal([...stage.matchAll(/float flash = uBlast\.w \* exp\(-fn \* fn \* (?:9|11)\.0\) \* window;/g)].length, 2);
+  assert.equal([...stage.matchAll(/float flash = uBlast\.w \* exp\(-dot\(fromCore, fromCore\) \/ \(uShape\.y \* uShape\.y\) \* [56]\.0\) \* window;/g)].length, 2);
   assert.match(stage, /float window = mix\(smoothstep\(0\.0, 0\.07, margin\.x\) \* smoothstep\(0\.0, 0\.07, margin\.y\), 1\.0, opaque\);/);
 });
 
