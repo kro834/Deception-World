@@ -1,6 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { detachedDOMReport } from "./heap-retainers.mjs";
+import { detachedDOMReport, detachedResourceGrowth } from "./heap-retainers.mjs";
+
+test("warm-up may release canvas storage without hiding growing resources", () => {
+  const sized = '<canvas width="1024" height="1175">';
+  const empty = '<canvas width="0" height="0">';
+  const row = (histogram) => ({
+    histogram,
+    detachedNodes: Object.values(histogram).reduce((a, b) => a + b, 0),
+  });
+  const before = row({ [sized]: 4, "<img>": 2 });
+  assert.deepEqual(detachedResourceGrowth(before, row({ [sized]: 1, [empty]: 1, "<img>": 2 })), []);
+  assert.deepEqual(detachedResourceGrowth(before, before), []);
+  for (const after of [
+    row({ [sized]: 1, [empty]: 4 }),
+    row({ [sized]: 1, "<img>": 3 }),
+    row({ [sized]: 1, "<video>": 1 }),
+    row({ [sized]: 5, "<img>": 2 }),
+  ])
+    assert.ok(detachedResourceGrowth(before, after).length > 0);
+});
 
 // Minimal V8-format snapshots, with edges grouped by their owning node. The
 // numeric offsets deliberately use the metadata rather than test-only IDs.
@@ -60,6 +79,41 @@ function snapshotFor(records, { detachedness = true, reorderFields = false } = {
 }
 
 const mainName = '<main id="top" class="rxs-page rxs-rexonance-page">';
+
+test("allRetainers includes resources beyond the diagnostic sample limit", () => {
+  const resources = Array.from({ length: 31 }, (_, i) => ({
+    name: `<img data-resource="${i}">`,
+    detachedness: 2,
+  }));
+  const report = detachedDOMReport(
+    snapshotFor([
+      {
+        name: "(root)",
+        type: "synthetic",
+        edges: [
+          ...resources.slice(0, 30).map((_, i) => ["element", i, i + 1]),
+          ["weak", "not-an-owner", 31],
+          ["property", "document", 32],
+        ],
+      },
+      ...resources,
+      { name: "HTMLDocument", edges: [["internal", "listener", 33]] },
+      { name: "HTMLImageElement::ViewportChangeListener", edges: [["internal", "image", 31]] },
+    ]),
+    { allRetainers: true },
+  );
+  assert.equal(report.detachedMains, 0);
+  assert.equal(report.detachedNodes, 31);
+  assert.equal(report.retainers.length, 31);
+  assert.deepEqual(
+    report.retainers.map(({ target }) => target),
+    resources.map(({ name }) => name),
+  );
+  assert.deepEqual(
+    report.retainers.at(-1).path.map(({ owner }) => owner),
+    ["(root)", "HTMLDocument", "HTMLImageElement::ViewportChangeListener", resources.at(-1).name],
+  );
+});
 
 test("allRetainers also diagnoses a standalone responsive warm-up with no detached page", () => {
   const report = detachedDOMReport(

@@ -17,6 +17,7 @@
     "preview": "node scripts/preview-production.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/run-tests.mjs",
+    "harness": "node scripts/harness.mjs",
     "verify:public": "node scripts/verify-public-deployment.mjs",
     "verify:ui": "node scripts/verify-anime-ui.mjs",
     "lint": "eslint .",

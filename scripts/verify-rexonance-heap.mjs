@@ -1,4 +1,5 @@
-// Production-build regression: genuine SPA navigation, five returns, forced GC,
+// Production-build regression: two preparation returns, five measured returns,
+// genuine SPA navigation, forced GC,
 // then detached native DOM and strong retaining paths from Chrome heap snapshots.
 // WeakRefs distinguish nodes removed from this page from intentional off-document
 // decoded-image caches, which Chromium also labels native detachedness=2.
@@ -8,7 +9,7 @@
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
-import { detachedDOMReport } from "./heap-retainers.mjs";
+import { detachedDOMReport, detachedResourceGrowth } from "./heap-retainers.mjs";
 
 const base = process.env.BASE_URL ?? "http://127.0.0.1:18642";
 const baseline = process.argv.includes("--record-baseline");
@@ -18,6 +19,8 @@ const context = await browser.newContext({ viewport: { width: 1440, height: 900 
 const page = await context.newPage();
 const cdp = await context.newCDPSession(page);
 const rows = [];
+const warmupRounds = 2;
+const measuredRounds = 5;
 let initialTimeOrigin;
 
 async function settle() {
@@ -72,6 +75,7 @@ async function measure(cycle) {
   chunks = null;
   const row = {
     cycle,
+    phase: cycle === 0 ? "initial" : cycle <= warmupRounds ? "warmup" : "measured",
     ...(await cdp.send("Memory.getDOMCounters")),
     ...detachedDOMReport(snapshot, { allRetainers: true }),
     ...(await page.evaluate(() => {
@@ -91,7 +95,7 @@ try {
   await settle();
   initialTimeOrigin = await page.evaluate(() => performance.timeOrigin);
   await measure(0);
-  for (let cycle = 1; cycle <= 5; cycle++) {
+  for (let cycle = 1; cycle <= warmupRounds + measuredRounds; cycle++) {
     await go("/rexonance-saga");
     const image = page.locator(".rxs-p14-overview img");
     assert.match(
@@ -127,7 +131,19 @@ try {
   if (process.env.HEAP_REPORT)
     await writeFile(
       process.env.HEAP_REPORT,
-      JSON.stringify({ base, browser: browser.version(), baseline, unvisitedP14, rows }, null, 2),
+      JSON.stringify(
+        {
+          base,
+          browser: browser.version(),
+          baseline,
+          unvisitedP14,
+          warmupRounds,
+          measuredRounds,
+          rows,
+        },
+        null,
+        2,
+      ),
     );
   if (!baseline) {
     for (const row of rows) {
@@ -144,15 +160,24 @@ try {
         ),
         `cycle ${row.cycle}: an abandoned responsive-image listener retained a native node`,
       );
-      if (row.cycle > 1)
+      // The first call can leave temporary snapshot canvases whose backing stores
+      // are released during the next call. Count every object in both rounds and
+      // reject growth, then demand an identical cohort for five further returns.
+      if (row.cycle === warmupRounds)
+        assert.deepEqual(
+          detachedResourceGrowth(rows[1], row),
+          [],
+          `cycle ${row.cycle}: off-document resources grew during warm-up`,
+        );
+      if (row.cycle > warmupRounds)
         assert.deepEqual(
           row.histogram,
-          rows[1].histogram,
+          rows[warmupRounds].histogram,
           `cycle ${row.cycle}: off-document resource cohort changed after warm-up`,
         );
     }
     console.log(
-      "PASS five SPA round trips + forced GC: no retained former page DOM or main.rxs-page; off-document resources do not grow",
+      "PASS two warm-up + five measured SPA round trips + forced GC: no retained former page DOM or main.rxs-page; off-document resources do not grow",
     );
   }
 } finally {

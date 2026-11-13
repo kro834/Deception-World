@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createEntryPlayback, ENTRY_PREPARE_MS } from "../src/lib/entry-playback.ts";
 import {
   EXTREME_ENTRY_TIMINGS,
@@ -115,7 +116,7 @@ test("the art and the engine load only when the sequence mounts (no eager downlo
       }
     }
   };
-  walk(new URL("../src", import.meta.url).pathname);
+  walk(fileURLToPath(new URL("../src", import.meta.url)));
   // The address lives in one light module (the sequence names it in prose).
   assert.deepEqual(offenders.map((path) => path.replace(/^.*\/src\//, "src/")).sort(), [
     "src/components/extreme-saga/extreme-entry-sequence.tsx",
