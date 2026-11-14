@@ -161,6 +161,7 @@ function entryRuntime({
         return {
           WORLD_ENTER_ASSETS: ["/world.webp"],
           preloadAssets: async () => undefined,
+          assetsWarmed: () => true,
           warmedSource: (source) => source,
         };
       // Startup delivery adds an idle stylesheet hint, not a different title clock/handler.

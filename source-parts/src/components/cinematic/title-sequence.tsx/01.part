@@ -11,7 +11,7 @@ import {
 import { useRouter } from "@tanstack/react-router";
 import { waitForVisualPaint } from "@/lib/visual-paint";
 import { RotateCcw, SkipForward } from "lucide-react";
-import { WORLD_ENTER_ASSETS, preloadAssets, warmedSource } from "@/lib/asset-loader";
+import { WORLD_ENTER_ASSETS, assetsWarmed, preloadAssets, warmedSource } from "@/lib/asset-loader";
 import { preloadOpeningDestinationStyles } from "@/lib/opening-destination-styles";
 import {
   isColdOpeningLaunch,
@@ -673,8 +673,13 @@ export function TitleSequence() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     )
       return;
-    void loadDiveEngine()
-      .then((engine) => {
+    // An immediate skip can reach the handoff before the idle warm-up has
+    // selected a responsive candidate. Share that request with the renderer.
+    const worldArtReady = assetsWarmed(WORLD_ENTER_ASSETS)
+      ? undefined
+      : preloadAssets(WORLD_ENTER_ASSETS, () => undefined, "low");
+    void Promise.all([loadDiveEngine(), worldArtReady])
+      .then(([engine]) => {
         // The import may arrive after focus has already navigated away or a
         // replay has begun. A still-mounted handoff may adopt preparation, but
         // an abandoned title must not create module-global decoded assets.
