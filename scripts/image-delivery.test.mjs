@@ -79,7 +79,7 @@ test("critical images expose explicit priority and responsive delivery hints", (
   assert.match(openingHandoff, /DEFAULT_LOGO_SRC = "\/logo-title-saga-20261016-delivery-1536\.webp"/);
   assert.match(assetLoader, /WORLD_ENTER_ASSETS = \[[\s\S]*?"\/deception-world-poster-delivery\.webp"/);
   assert.match(worldHome, /srcSet=\{r\.img\.replace\(\/\\\.jpe\?g\$\/i, "\.webp"\)\}/);
-  assert.match(worldHome, /src="\/deception-world-poster-delivery\.webp"[\s\S]*?loading="lazy"/);
+  assert.match(worldHome, /posterImage\(WORLD_ENTER_ASSETS\[0\]\)[\s\S]*?loading="lazy"/);
   assert.match(riderPage, /rider\.id === "over-zeztz"\s*\?\s*"\/character-james-20260829\.webp"/);
 });
 
@@ -118,15 +118,15 @@ test("the supplied logos are preserved and their alpha-keyed files serve every o
   }
 });
 
-test("world preload and first poster share responsive and warmed image selection", () => {
+test("World preload, first poster and transition warmup use the same image selection", () => {
   const route = readSource("../src/routes/world.tsx");
   const home = readSource("../src/components/world/world-home.tsx");
-  assert.match(route, /posterImage\(\s*WORLD_ENTER_ASSETS\[0\],/);
-  assert.match(route, /assetsWarmed\(WORLD_ENTER_ASSETS\)/);
+  assert.match(route, /posterImage\(WORLD_ENTER_ASSETS\[0\]\)/);
+  assert.match(readSource("../src/lib/asset-loader.ts"), /url === WORLD_ENTER_ASSETS\[0\]\) return posterImage\(url\)/);
   assert.match(route, /href: poster\.src/);
   assert.match(route, /imageSrcSet: poster\.srcSet/);
   assert.match(route, /imageSizes: poster\.sizes/);
-  assert.match(home, /posterImage\(current\.src, reuseWarmedPoster\)/);
+  assert.match(home, /posterImage\(current\.src\)/);
   assert.match(home, /src: "\/deception-world-poster-delivery\.webp"/);
   assert.doesNotMatch(home, /["']\/deception-world-poster\.webp["']/);
   const original = statSync(new URL("../public/deception-world-poster.webp", import.meta.url)).size;

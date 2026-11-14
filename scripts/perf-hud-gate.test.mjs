@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import vm from "node:vm";
 
@@ -18,7 +19,7 @@ function walk(dir, out = []) {
 }
 
 test("the overlay module is reached only by the gate's dynamic import", () => {
-  const dir = new URL(".", src).pathname;
+  const dir = fileURLToPath(src);
   const offenders = [];
   for (const file of walk(dir)) {
     if (file.endsWith("perf-hud.ts")) continue;

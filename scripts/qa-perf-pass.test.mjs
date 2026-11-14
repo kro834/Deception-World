@@ -140,10 +140,7 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
       .matchAll(/src: "([^"]+)"/g),
   ].map((m) => m[1]);
   assert.equal(posters.length, 33);
-  // rx14: direct entries use responsive pixels; an opening handoff reuses
-  // its already decoded full candidate without starting another request.
-  assert.equal(posterImage(posters[0], true).src, posters[0]);
-  assert.equal(posterImage(posters[0], true).srcSet, posters[0]);
+  // Direct entry and opening handoff share the responsive candidates.
   assert.ok(posterImage(posters[0]).srcSet.includes("640w"));
   let jpeg = 0;
   let webp = 0;
@@ -185,14 +182,14 @@ test("the poster deck: one WebP per poster, the same pixels as the JPEG, a fract
   assert.ok(webp < jpeg * 0.45, `${webp} of ${jpeg}`);
   // Both stage layers ask through the delivery helper.
   assert.equal(
-    home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src, reuseWarmedPoster\)\}/g)
+    home.match(/\{\.\.\.posterImage\((?:current|previous|nextPoster)\.src\)\}/g)
       ?.length,
     2,
   );
   // Autoplay, warmup and shuffle use the same delivery-aware loader as Dream.
   assert.match(
     home,
-    /createReadyPosterLoader\(\(image, source\) =>\s*preparePosterImage\(image, source, reuseWarmedPoster\)/,
+    /createReadyPosterLoader\(\(image, source\) =>\s*preparePosterImage\(image, source\)/,
   );
   assert.match(home, /posterLoader\.current\.load\(POSTERS\[index\]\.src, priority\)/);
   assert.doesNotMatch(home, /new Image\(/);

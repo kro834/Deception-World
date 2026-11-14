@@ -3,25 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
-const effect = gate.match(/useEffect\(\s*\(\) =>\s*([^;{}]*?scheduleMetaUnitasEntryWarmup\?\.\(\)),\s*\[pathname\],\s*\)/);
-assert.ok(effect, "find the route-dependent META UNITAS idle effect");
-const scheduleForPath = new Function("pathname", "scheduleMetaUnitasEntryWarmup", `return (${effect[1]});`);
-
-test("opening and the META UNITAS page do not schedule speculative entry work", () => {
-  for (const pathname of ["/", "/meta-unitas-saga"]) {
-    let calls = 0;
-    assert.equal(scheduleForPath(pathname, () => { calls++; }), undefined);
-    assert.equal(calls, 0, pathname);
-  }
-});
-
-test("leaving the opening retains destination idle preparation and its cleanup", () => {
-  for (const pathname of ["/world", "/final-stage", "/far-from-saga"]) {
-    let calls = 0;
-    const cancel = () => {};
-    assert.equal(scheduleForPath(pathname, () => { calls++; return cancel; }), cancel);
-    assert.equal(calls, 1, pathname);
-  }
+test("Meta Unitas loads its entry after the menu opens or the user chooses its link", () => {
+  const menu = readFileSync(new URL("../src/components/world/world-chrome.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(gate, /scheduleMetaUnitasEntryWarmup/);
+  assert.match(menu, /if \(isOpen && pathname !== "\/meta-unitas-saga"\) prefetchMetaUnitasEntry/);
 });
 
 test("explicit link intent and the actual META UNITAS entry keep their preparation", () => {

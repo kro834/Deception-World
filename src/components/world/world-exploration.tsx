@@ -1,4 +1,5 @@
 import { GuardedLink } from "@/components/load-gate";
+import { posterImage } from "@/lib/thumbnail-images";
 const entrances = [
   {
     to: "/world-map",
@@ -30,7 +31,15 @@ export function WorldExploration() {
     <nav className="world-exploration" aria-label="世界の探索" id="world-exploration">
       {entrances.map((entry) => (
         <GuardedLink key={entry.to} to={entry.to} assets={[]} className="world-exploration-card">
-          <img src={entry.image} alt="" loading="lazy" decoding="async" width="320" height="400" />
+          <img
+            src={entry.image}
+            {...posterImage(entry.image)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width="320"
+            height="400"
+          />
           <span>
             <strong>{entry.name}</strong>
             <small>{entry.detail}</small>

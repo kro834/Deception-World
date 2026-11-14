@@ -11,7 +11,8 @@ const publicRoot = resolve(repoRoot, "public");
 const outputRoot = resolve(publicRoot, "gallery");
 const manifestOutput = resolve(outputRoot, "asset-manifest.json");
 const assetModuleOutput = resolve(repoRoot, "src/components/gallery/gallery-assets.ts");
-const requestedWidths = [480, 900, 1800];
+const previewWidth = 288;
+const requestedWidths = [previewWidth, 480, 900, 1800];
 
 function hash(buffer) {
   return createHash("sha256").update(buffer).digest("hex");
@@ -35,11 +36,17 @@ async function readInputs(manifestPath) {
 
 const manifestFlagIndex = process.argv.indexOf("--manifest");
 const manifestPath = manifestFlagIndex >= 0 ? process.argv[manifestFlagIndex + 1] : undefined;
-const inputs = await readInputs(manifestPath);
+const backfillPreviews = process.argv.includes("--backfill-previews");
+const append = process.argv.includes("--append");
+if (backfillPreviews && (manifestFlagIndex >= 0 || append)) {
+  throw new Error("Use --backfill-previews on its own to update the published catalogue.");
+}
+const inputs = backfillPreviews ? [] : await readInputs(manifestPath);
 if (
-  !Array.isArray(inputs) ||
-  inputs.length === 0 ||
-  inputs.some((input) => typeof input !== "string")
+  !backfillPreviews &&
+  (!Array.isArray(inputs) ||
+    inputs.length === 0 ||
+    inputs.some((input) => typeof input !== "string"))
 ) {
   throw new Error("The input manifest must provide a non-empty array of exact image file paths.");
 }
@@ -47,8 +54,8 @@ await mkdir(outputRoot, { recursive: true });
 
 // An addition uses the published catalogue rather than requiring the original
 // private attachments again. Existing IDs, metadata and delivery bytes stay put.
-const append = process.argv.includes("--append");
-const previous = append ? JSON.parse(await readFile(manifestOutput, "utf8")) : null;
+const previous =
+  append || backfillPreviews ? JSON.parse(await readFile(manifestOutput, "utf8")) : null;
 if (
   previous &&
   (previous.version !== 1 ||
@@ -56,11 +63,45 @@ if (
     !Array.isArray(previous.items) ||
     previous.items.some((entry, index) => entry.id !== `g${String(index + 1).padStart(2, "0")}`))
 ) {
-  throw new Error("Cannot append to an invalid or out-of-order gallery catalogue.");
+  throw new Error("Cannot update an invalid or out-of-order gallery catalogue.");
 }
 const entries = [...(previous?.items ?? [])];
 const existingCount = entries.length;
 let totalBytes = 0;
+let previewCount = 0;
+
+async function buildVariant(id, width, original) {
+  const name = `${id}-${width}.webp`;
+  const outputPath = resolve(outputRoot, name);
+  const result = await sharp(original)
+    .rotate()
+    .resize({ width, withoutEnlargement: true })
+    .webp({ quality: 84, effort: 6 })
+    .toFile(outputPath);
+  const outputBytes = await readFile(outputPath);
+  totalBytes += result.size;
+  return {
+    path: `/gallery/${name}`,
+    width: result.width,
+    height: result.height,
+    bytes: result.size,
+    sha256: hash(outputBytes),
+  };
+}
+
+if (backfillPreviews) {
+  for (const entry of entries) {
+    const width = Math.min(previewWidth, entry.sourceWidth);
+    if (entry.variants.some((variant) => variant.width === width)) continue;
+    // Use the published largest derivative when the private originals are unavailable.
+    const source = entry.variants.reduce((largest, variant) =>
+      variant.width > largest.width ? variant : largest,
+    );
+    const original = await readFile(resolve(publicRoot, `.${source.path}`));
+    entry.variants.unshift(await buildVariant(entry.id, width, original));
+    previewCount += 1;
+  }
+}
 
 for (const [index, inputPath] of inputs.entries()) {
   const id = `g${String(existingCount + index + 1).padStart(2, "0")}`;
@@ -79,23 +120,7 @@ for (const [index, inputPath] of inputs.entries()) {
   const actualWidths = [...new Set(requestedWidths.map((width) => Math.min(width, sourceWidth)))];
   const variants = [];
   for (const width of actualWidths) {
-    const name = `${id}-${width}.webp`;
-    const outputPath = resolve(outputRoot, name);
-    const result = await sharp(original)
-      .rotate()
-      .resize({ width, withoutEnlargement: true })
-      .webp({ quality: 84, effort: 6 })
-      .toFile(outputPath);
-    const outputBytes = await readFile(outputPath);
-    const variant = {
-      path: `/gallery/${name}`,
-      width: result.width,
-      height: result.height,
-      bytes: result.size,
-      sha256: hash(outputBytes),
-    };
-    variants.push(variant);
-    totalBytes += result.size;
+    variants.push(await buildVariant(id, width, original));
   }
 
   entries.push({
@@ -128,6 +153,5 @@ const assetModule = [
 await writeFile(assetModuleOutput, assetModule);
 
 const variantCount = entries.reduce((sum, entry) => sum + entry.variants.length, 0);
-console.log(
-  `Built ${inputs.length} ${append ? "additional" : "gallery"} originals; catalogue now has ${entries.length} works and ${variantCount} variants (${totalBytes.toLocaleString()} new bytes).`,
-);
+const built = backfillPreviews ? `${previewCount} compact previews` : `${inputs.length} originals`;
+console.log(`Built ${built}. Catalogue has ${entries.length} works and ${variantCount} variants (${totalBytes.toLocaleString()} new bytes).`);

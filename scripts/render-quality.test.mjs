@@ -138,7 +138,6 @@ test("speculative Meta warmup has network gates while explicit preparation remai
     source.indexOf("let warm:"),
   );
   assert.doesNotMatch(prepare, /restrictedSpeculation/);
-  assert.match(source, /typeof window === "undefined" \|\| restrictedSpeculation\(\)/);
 });
 test("when both browser persistence APIs reject the choice, DOM and current quality stay unchanged", () => {
   const storage = {

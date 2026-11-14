@@ -126,25 +126,17 @@ async function main() {
       quality,
     );
 
-    const nativeWidth = canonical.width;
-    for (const target of [...DELIVERY_WIDTHS, nativeWidth]) {
+    for (const target of DELIVERY_WIDTHS) {
+      if (target >= canonical.width) continue;
       const file = `${source.name}-delivery-${target}.webp`;
+      const cap = target === 640 ? CAPS.delivery640 : CAPS.delivery960;
       let out;
-      if (target >= nativeWidth) {
-        // withoutEnlargement: the native delivery file is a byte copy of the canonical.
-        out = { ...canonical, quality };
-      } else {
-        let q;
-        for (q of WEBP_QUALITIES) {
-          const result = await encode(dataUrl, target, "image/webp", q);
-          const bytes = Buffer.from(result.base64, "base64");
-          out = { ...result, bytes, quality: q };
-          const cap =
-            target === 640 ? CAPS.delivery640 : target === 960 ? CAPS.delivery960 : Infinity;
-          if (bytes.length < cap && bytes.length <= canonical.bytes.length) break;
-        }
+      for (const deliveryQuality of WEBP_QUALITIES) {
+        const result = await encode(dataUrl, target, "image/webp", deliveryQuality);
+        const bytes = Buffer.from(result.base64, "base64");
+        out = { ...result, bytes, quality: deliveryQuality };
+        if (bytes.length < cap && bytes.length <= canonical.bytes.length) break;
       }
-      const cap = target === 640 ? CAPS.delivery640 : target === 960 ? CAPS.delivery960 : Infinity;
       if (out.bytes.length >= cap)
         throw new Error(`${file} is ${out.bytes.length} bytes (cap ${cap})`);
       if (out.bytes.length > canonical.bytes.length) {

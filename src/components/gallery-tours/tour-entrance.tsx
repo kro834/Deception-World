@@ -208,7 +208,7 @@ export function GalleryTourEntrance({
                         >
                           <span className="gallery-tour-course-preview-image">
                             <img
-                              src={preview.thumb}
+                              src={preview.preview}
                               width={preview.width}
                               height={preview.height}
                               alt=""

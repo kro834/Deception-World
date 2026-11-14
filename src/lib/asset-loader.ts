@@ -6,6 +6,7 @@ import { ILLUSIONCULUM_ENTRY_CUTOUT, ILLUSIONCULUM_HERO, illusionculumCutoutImag
 import { META_UNITAS_KEY_VISUAL, metaUnitasImage } from "./meta-unitas-saga-artwork.ts";
 import { META_UNITAS_RX_DRIVER_STANDIN, META_UNITAS_RX_UNDERSUIT } from "./meta-unitas-rx-suit.ts";
 import { dossierImage } from "./dossier-images.ts";
+import { posterImage } from "./thumbnail-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
   "/deception-world-poster-delivery.webp": 270310,
@@ -18,7 +19,6 @@ const KNOWN_BYTES: Record<string, number> = {
   "/poster-card-10.jpeg": 382400,
   "/episode-05-farce.jpeg": 320800,
   "/manager-lejas.jpeg": 283500,
-  "/manager-lejas-face.jpeg": 280014,
   "/manager-lejas-portrait.jpeg": 280014,
   "/manager-lejas-rider.jpeg": 570400,
   "/manager-rex-loi.jpeg": 516600,
@@ -92,6 +92,7 @@ export const MANAGER_ASSETS = {
 
 // Every width set the site publishes, keyed by its canonical file.
 function responsiveImage(url: string) {
+  if (url === WORLD_ENTER_ASSETS[0]) return posterImage(url);
   if (url === FAR_FROM_SAGA_KEY_VISUAL.src) return farFromImage("middle");
   if (url === ILLUSIONCULUM_HERO.src) return illusionculumHeroImage();
   if (url === ILLUSIONCULUM_ENTRY_CUTOUT.src) return illusionculumCutoutImage("standard");

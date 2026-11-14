@@ -1096,7 +1096,7 @@ export function GalleryPage() {
                         onClick={() => previewArtwork(item.id)}
                         aria-label={`${numberFor(item)}をプレビュー`}
                       >
-                        <img src={item.thumb} alt="" width={64} height={64} loading="lazy" />
+                        <img src={item.preview} alt="" width={64} height={64} loading="lazy" />
                         <span>{numberFor(item)}</span>
                       </button>
                     );

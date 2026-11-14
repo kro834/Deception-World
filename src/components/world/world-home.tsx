@@ -3,7 +3,7 @@ import { startTransition } from "react";
 import { animateSelectionArrival } from "@/lib/selection-arrival.js";
 import { useRouterState } from "@tanstack/react-router";
 import { bootLiquidGlass } from "@/lib/liquid/boot.js";
-import { assetsWarmed, MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
 import { LiquidLens, LiquidPointerGlow } from "./liquid-rail";
@@ -984,11 +984,6 @@ function openingHandoffHolds() {
 
 export function WorldHome() {
   useWorldMode();
-  // Opening already decoded the full poster for its WebGL handoff. Reuse
-  // that one resource; a direct /world entry selects a responsive print.
-  const [reuseWarmedPoster] = useState(
-    () => typeof window !== "undefined" && assetsWarmed(WORLD_ENTER_ASSETS),
-  );
   const { go, notifyOpeningDestination } = useLoadGate();
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
@@ -1055,11 +1050,11 @@ export function WorldHome() {
   const loadPoster = useCallback(
     (index: number, priority: "high" | "low" = "high") => {
       posterLoader.current ??= createReadyPosterLoader((image, source) =>
-        preparePosterImage(image, source, reuseWarmedPoster),
+        preparePosterImage(image, source),
       );
       return posterLoader.current.load(POSTERS[index].src, priority);
     },
-    [reuseWarmedPoster],
+    [],
   );
 
   const cancelPosterShuffle = useCallback(() => {
@@ -1897,7 +1892,7 @@ export function WorldHome() {
                     src={previous.src}
                     width={previous.width}
                     height={previous.height}
-                    {...posterImage(previous.src, reuseWarmedPoster)}
+                    {...posterImage(previous.src)}
                     alt=""
                     style={{
                       objectPosition: "50% 50%",
@@ -1916,7 +1911,7 @@ export function WorldHome() {
                   src={current.src}
                   width={current.width}
                   height={current.height}
-                  {...posterImage(current.src, reuseWarmedPoster)}
+                  {...posterImage(current.src)}
                   alt={current.alt}
                   style={{
                     objectPosition: "50% 50%",
@@ -2806,7 +2801,7 @@ export function WorldHome() {
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img
-              src="/deception-world-poster-delivery.webp"
+              {...posterImage(WORLD_ENTER_ASSETS[0])}
               alt=""
               width={1024}
               height={1536}

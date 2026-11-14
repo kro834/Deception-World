@@ -95,7 +95,7 @@ test("the title recovers cancellation, BFCache, and background video state", () 
     /document\.removeEventListener\("visibilitychange", handleVisibilityChange\)/,
   );
   assert.match(title, /if \(!economyOpening\) \{[\s\S]*?videoStartTimerRef\.current/);
-  assert.match(title, /document\.visibilityState === "visible"[\s\S]*?video\.play\(\)\.catch/);
+  assert.match(title, /document\.visibilityState === "visible"[\s\S]*?playAtmosphere\(video\)/);
 });
 
 test("covered navigation waits for destination readiness and is cancellation-safe", () => {

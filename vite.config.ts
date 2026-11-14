@@ -4,10 +4,24 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
+import { FINAL_STAGE_NATIVE_WIDTHS } from "./src/lib/rexonance-images.ts";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 // @ts-expect-error JS PostCSS step alongside the TS vite config
 import { glassSelectorBuckets } from "./scripts/glass-selector-buckets.mjs";
+
+const legacyImageRedirects = Object.fromEntries(
+  [
+    ...Object.entries(FINAL_STAGE_NATIVE_WIDTHS).map(([source, width]) => [
+      source.replace(/\.webp$/, `-delivery-${width}.webp`),
+      source,
+    ]),
+    ["/app-icon.png", "/__grok/icon-512.png"],
+    ["/manager-lejas-face.jpeg", "/manager-lejas-portrait.jpeg"],
+    ["/poster-card-32.jpeg", "/poster-card-32-20260825.jpeg"],
+    ["/rider-cipher-thumbnail.jpeg", "/rider-cipher-thumbnail-20260825.jpeg"],
+  ].map(([from, to]) => [from, { redirect: { to, status: 308 } }]),
+);
 
 /**
  * Finish PGLite bootstrap during dev-server setup (before traffic). Vite awaits
@@ -170,6 +184,7 @@ export default defineConfig(({ command }) => ({
             // The font subsets carry a content hash in their names
             // (scripts/build-font-subsets.mjs), like /assets/.
             routeRules: {
+              ...legacyImageRedirects,
               "/fonts/subsets/**": {
                 headers: { "cache-control": "public, max-age=31536000, immutable" },
               },

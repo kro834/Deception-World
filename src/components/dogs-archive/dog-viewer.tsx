@@ -109,7 +109,16 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
     >
       <div className="dogs-viewer__surface" ref={host} />
       <div className="dogs-viewer__fallback" aria-hidden={status === "ready"}>
-        <img src="/dogs-archive-20261028/reference/guardian-rest.jpg" alt="" draggable={false} />
+        <img
+          src="/dogs-archive-20261028/guardian-480.webp"
+          srcSet="/dogs-archive-20261028/guardian-480.webp 480w, /dogs-archive-20261028/guardian-920.webp 920w"
+          sizes="min(100vw, 72dvh), 100vw"
+          width={920}
+          height={1280}
+          decoding="async"
+          alt=""
+          draggable={false}
+        />
         <div className="dogs-viewer__loading" role="status">
           {status === "error" ? (
             <>

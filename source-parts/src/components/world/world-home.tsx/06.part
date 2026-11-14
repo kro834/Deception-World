@@ -1,4 +1,3 @@
-              <div className="world-column-number-stack">
                 {COLUMNS.map((item, index) => (
                   <p
                     key={item.no}
@@ -265,7 +264,7 @@
         <div className="finale-sticky">
           <div className="finale-backdrop" aria-hidden="true">
             <img
-              src="/deception-world-poster-delivery.webp"
+              {...posterImage(WORLD_ENTER_ASSETS[0])}
               alt=""
               width={1024}
               height={1536}

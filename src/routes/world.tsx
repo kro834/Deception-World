@@ -6,7 +6,7 @@ import {
   PICKUP_CINEMA_STYLESHEET_LINK,
   WORLD_STYLESHEET_LINKS,
 } from "@/lib/world-head";
-import { assetsWarmed, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
+import { WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { posterImage } from "@/lib/thumbnail-images";
 import artworkStageCssUrl from "@/styles-artwork-stage.css?url";
 import worldArtworkStageCssUrl from "@/styles-world-artwork-stage.css?url";
@@ -44,10 +44,7 @@ export const Route = createFileRoute("/world")({
   validateSearch: validateInquirySearch,
   component: WorldHome,
   head: () => {
-    const poster = posterImage(
-      WORLD_ENTER_ASSETS[0],
-      typeof window !== "undefined" && assetsWarmed(WORLD_ENTER_ASSETS),
-    );
+    const poster = posterImage(WORLD_ENTER_ASSETS[0]);
     const head = createWorldHead({
       title: "Deception World｜仮面ライダーサーガ",
       description:

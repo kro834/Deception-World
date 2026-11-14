@@ -98,10 +98,11 @@ test("opening never downloads the unrelated suit atlas", async (t) => {
     "the opening keeps more than 300KB of unrelated artwork off its path",
   );
   const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
-  assert.match(gate, /scheduleRexonanceSuitWarm\(\), \[pathname\]/);
+  assert.doesNotMatch(gate, /scheduleRexonanceSuitWarm\(\), \[pathname\]/);
+  assert.match(gate, /closest\("\.ws-doors"\)[\s\S]*?scheduleRexonanceSuitWarm\(0\)/);
 });
 
-test("public pages retain suit warmup after load and idle", async (t) => {
+test("approaching the World doorway can warm the suit at low priority", async (t) => {
   const f = await suitSchedule(t, "/world");
   assert.equal(f.images.length, 0);
   f.flush(f.timers);

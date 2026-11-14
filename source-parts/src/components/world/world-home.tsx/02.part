@@ -1,3 +1,4 @@
+        assets: MANAGER_ASSETS.shuza,
       },
       {
         label: "仮面ライダーサイファー",
@@ -476,11 +477,6 @@ function openingHandoffHolds() {
 
 export function WorldHome() {
   useWorldMode();
-  // Opening already decoded the full poster for its WebGL handoff. Reuse
-  // that one resource; a direct /world entry selects a responsive print.
-  const [reuseWarmedPoster] = useState(
-    () => typeof window !== "undefined" && assetsWarmed(WORLD_ENTER_ASSETS),
-  );
   const { go, notifyOpeningDestination } = useLoadGate();
   const locationHash = useRouterState({ select: (state) => state.location.hash });
   const shellRef = useRef<HTMLDivElement>(null);
@@ -506,3 +502,7 @@ export function WorldHome() {
     if (previous === managerTab) return;
     return animateSelectionArrival(
       shellRef.current?.querySelector<HTMLElement>(".manager-archive-panel") ?? null,
+      managerTab > previous ? 1 : -1,
+    );
+  }, [managerTab]);
+  const [columnTab, setColumnTab] = useState(0);

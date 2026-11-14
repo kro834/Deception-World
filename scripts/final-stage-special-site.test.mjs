@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { test } from "node:test";
+import { FINAL_STAGE_NATIVE_WIDTHS, rexonanceImage } from "../src/lib/rexonance-images.ts";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const readOptional = (path) => {
@@ -128,4 +129,18 @@ test("Final Stage public artwork is present, WebP encoded, and budgeted", () => 
   assert.equal(existsSync(ogImage), true, "final-stage-logo.jpeg should exist");
   const jpegHeader = readFileSync(ogImage).subarray(0, 3);
   assert.deepEqual([...jpegHeader], [0xff, 0xd8, 0xff], "final-stage-logo.jpeg should be JPEG");
+});
+
+test("Final Stage responsive artwork uses the canonical file at native width", () => {
+  assert.equal(Object.keys(FINAL_STAGE_NATIVE_WIDTHS).length, 12);
+  for (const [source, width] of Object.entries(FINAL_STAGE_NATIVE_WIDTHS)) {
+    const candidates = rexonanceImage(source).srcSet.split(", ");
+    assert.equal(candidates.at(-1), `${source} ${width}w`);
+    for (const candidate of candidates) {
+      const [path] = candidate.split(" ");
+      assert.ok(existsSync(publicAsset(path.slice(1))), path);
+    }
+    const superseded = source.slice(1).replace(".webp", `-delivery-${width}.webp`);
+    assert.equal(existsSync(publicAsset(superseded)), false);
+  }
 });

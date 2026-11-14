@@ -558,9 +558,7 @@ test("rx17: the engine draws the warm-up's own decoded layers (bitmaps where sup
   }
 });
 
-test("rx17: it warms on every route the visitor reaches; /rexonance-saga waits for intent", async () => {
-  // The owner (1be03ff): the opening and /rexonance-saga itself never warm;
-  // leaving them schedules the warm on the next route (LoadGate's [pathname]).
+test("rx17: the doorway can prepare the suit; the opening and suit page wait for intent", async () => {
   for (const pathname of ["/", "/rexonance-saga"]) {
     const f = await suitFixture({ pathname });
     try {

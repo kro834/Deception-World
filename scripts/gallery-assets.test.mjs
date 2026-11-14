@@ -19,7 +19,7 @@ test("the gallery preserves every supplied work and its unique ordered catalogue
     assert.ok(work.title.trim().length > 0 && work.alt.trim().length > 0);
     assert.ok(work.width > 0 && work.height > 0);
     assert.ok(GALLERY_CATEGORIES.some((category) => category.id === work.category));
-    for (const path of [work.thumb, work.medium, work.full])
+    for (const path of [work.preview, work.thumb, work.medium, work.full])
       assert.match(path, /^\/gallery\/g\d+-\d+\.webp$/);
   }
 });
@@ -93,8 +93,13 @@ test("delivery derivatives have recorded bytes, hashes and uncropped non-upscale
       assert.ok(
         Math.abs(variant.height - (entry.sourceHeight * variant.width) / entry.sourceWidth) <= 1,
       );
-      assert.ok([work.thumb, work.medium, work.full].includes(variant.path));
+      assert.ok([work.preview, work.thumb, work.medium, work.full].includes(variant.path));
     }
+    const preview = entry.variants.find((variant) => variant.path === work.preview);
+    const thumb = entry.variants.find((variant) => variant.path === work.thumb);
+    assert.equal(preview.width, Math.min(288, entry.sourceWidth));
+    assert.ok(preview.bytes <= thumb.bytes, "compact controls should transfer less artwork data");
+    assert.ok(thumb.width >= Math.min(480, entry.sourceWidth));
     const descriptors = work.srcSet.split(",").map((part) => part.trim().split(/\s+/));
     assert.equal(new Set(descriptors.map(([, width]) => width)).size, descriptors.length);
     for (const [path, descriptor] of descriptors) {

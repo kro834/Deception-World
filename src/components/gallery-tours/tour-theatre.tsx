@@ -183,20 +183,18 @@ export function GalleryTourTheatre({
 
   useEffect(() => {
     if (
-      !imageReady ||
-      !pageVisible ||
-      suspended ||
+      !advancing ||
       !nextSource ||
       (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
     )
       return;
-    // One adjacent full image is enough; never fetch the entire tour ahead of time.
+    // Autoplay has committed to the next stop. Manual viewing waits for a selection.
     const next = new Image();
     next.decoding = "async";
     next.fetchPriority = "low";
     next.src = nextSource;
     return () => next.removeAttribute("src");
-  }, [imageReady, nextSource, pageVisible, suspended]);
+  }, [advancing, nextSource]);
 
   useEffect(() => {
     const strip = filmstripRef.current;
@@ -442,7 +440,7 @@ export function GalleryTourTheatre({
                   }}
                 >
                   <img
-                    src={thumbnail.thumb}
+                    src={thumbnail.preview}
                     alt=""
                     width={thumbnail.width}
                     height={thumbnail.height}
@@ -552,7 +550,7 @@ export function GalleryTourTheatre({
             >
               {nextTourCover && (
                 <img
-                  src={nextTourCover.thumb}
+                  src={nextTourCover.preview}
                   alt=""
                   width={nextTourCover.width}
                   height={nextTourCover.height}

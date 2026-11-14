@@ -68,7 +68,6 @@ import {
 import {
   META_UNITAS_ENTRY_TIMINGS,
   prefetchMetaUnitasEntry,
-  scheduleMetaUnitasEntryWarmup,
   warmMetaUnitasEntry,
   type MetaUnitasTransitionRenderer,
 } from "@/lib/meta-unitas-entry-gate";
@@ -1012,26 +1011,6 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const illusionculumTransition = useRef<number | null>(null);
   const farFromSkip = useRef<(() => void) | null>(null);
 
-  // Keep the suit ready on the public pages, but never compete with the
-  // opening's title/video/World handoff. Leaving the opening schedules it
-  // after that destination's own load; route changes cancel stale idle jobs.
-  // rx17 (owner): soon after each page's load, with the call's own chunk.
-  useEffect(() => scheduleRexonanceSuitWarm(), [pathname]);
-  // META UNITAS likewise waits until after the opening; its idle preparation
-  // must not compete with the title/video/World handoff. Link intent and the
-  // actual entry still prepare the call immediately.
-  useEffect(
-    () =>
-      pathname === "/" || pathname === "/meta-unitas-saga"
-        ? undefined
-        : scheduleMetaUnitasEntryWarmup?.(),
-    [pathname],
-  );
-  // Owner (2026-10-11): the Rexonance page itself (chunk, styles, hero) too.
-  useEffect(
-    () => scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" })),
-    [pathname, router],
-  );
   const rexonanceCoverCancel = useRef<(() => void) | null>(null);
   const openingHandoff = useRef<OpeningHandoffRuntime | null>(null);
   const openingFocusFrames = useRef<number[]>([]);
@@ -2856,6 +2835,36 @@ export function GuardedLink({
   const anchor = useRef<HTMLAnchorElement>(null);
   const href = guardedHref(to, hash, search);
 
+  useEffect(() => {
+    const link = anchor.current;
+    // The dedicated doorway is far below the reader's initial viewport.
+    // Its approach gives the call time to prepare without loading a second
+    // page for someone reading a chapter or browsing the gallery.
+    if (
+      to !== "/rexonance-saga" ||
+      !link?.closest(".ws-doors") ||
+      typeof IntersectionObserver !== "function"
+    )
+      return;
+    let stopSuit: (() => void) | undefined;
+    let stopPage: (() => void) | undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting) || stopSuit) return;
+        observer.disconnect();
+        stopSuit = scheduleRexonanceSuitWarm(0);
+        stopPage = scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" }));
+      },
+      { rootMargin: "280px" },
+    );
+    observer.observe(link);
+    return () => {
+      observer.disconnect();
+      stopPage?.();
+      stopSuit?.();
+    };
+  }, [router, to]);
+
   // FAR FROM's entry, speculatively (2026-10-24): a link to /far-from-saga
   // that comes near the viewport (the side menu opening, a door scrolled
   // into view) warms the call's chunk and images at low priority when the
@@ -2901,7 +2910,10 @@ export function GuardedLink({
     // rx12: the Rexonance call's suit-up pieces decode on intent.
     // Actual hover/focus/touch owns this warm-up. go() may suspend
     // speculative work, but must not abort the visitor's intended call.
-    if (to === "/rexonance-saga") void warmRexonanceSuit("high");
+    if (to === "/rexonance-saga") {
+      void prepareRexonanceTransition.prefetch();
+      void warmRexonanceSuit("high");
+    }
     // FAR FROM's call chunk and images, the same way (never on a still tier).
     if (to === "/far-from-saga") prefetchFarFromEntry();
     if (to === "/meta-unitas-saga") prefetchMetaUnitasEntry?.();

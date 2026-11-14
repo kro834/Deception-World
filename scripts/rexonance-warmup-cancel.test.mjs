@@ -609,7 +609,7 @@ test("rx17: LoadGate owns warmup pause before every go and releases on settle, h
     /if \(released\) return;\s*released = true;\s*releases\.delete\(release\);\s*resume\(\);/,
   );
   assert.equal((gate.match(/pendingSuitWarmReleases\.forEach/g) ?? []).length, 2);
-  assert.match(gate, /useEffect\(\(\) => scheduleRexonanceSuitWarm\(\), \[pathname\]\);/);
+  assert.match(gate, /scheduleRexonanceSuitWarm\(0\)[\s\S]*?stopPage\?\.\(\);\s*stopSuit\?\.\(\);/);
 });
 
 for (const reason of ["go", "hidden"]) {

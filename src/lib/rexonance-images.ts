@@ -1,15 +1,7 @@
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 
-// Shared by HTML preload, image elements and navigation warmup.
-const widths: Record<string, number> = {
-  [REXONANCE_SITE_ARTWORK.standard]: 1086,
-  [REXONANCE_SITE_ARTWORK.max]: 1086,
-  [REXONANCE_SITE_ARTWORK.ultra]: 1086,
-  [REXONANCE_SITE_ARTWORK.excelsior]: 1022,
-  "/rider-rexonance-saga-pickup-20260922.webp": 1086,
-  "/rider-rexonance-max-20260922.webp": 1086,
-  "/rider-rexonance-ultra-20260922.webp": 1086,
-  "/rexonance-p14-core.jpg": 1000,
+// These artworks are already encoded at native width by the Final Stage build.
+export const FINAL_STAGE_NATIVE_WIDTHS: Record<string, number> = {
   "/final-stage-logo.webp": 1536,
   "/rider-far-from-saga-middle.webp": 1070,
   "/rider-far-from-saga-high.webp": 1083,
@@ -24,12 +16,32 @@ const widths: Record<string, number> = {
   "/character-nagi-20260922.webp": 1086,
 };
 
+// Shared by HTML preload, image elements and navigation warmup.
+const widths: Record<string, number> = {
+  [REXONANCE_SITE_ARTWORK.standard]: 1086,
+  [REXONANCE_SITE_ARTWORK.max]: 1086,
+  [REXONANCE_SITE_ARTWORK.ultra]: 1086,
+  [REXONANCE_SITE_ARTWORK.excelsior]: 1022,
+  "/rider-rexonance-saga-pickup-20260922.webp": 1086,
+  "/rider-rexonance-max-20260922.webp": 1086,
+  "/rider-rexonance-ultra-20260922.webp": 1086,
+  "/rexonance-p14-core.jpg": 1000,
+  ...FINAL_STAGE_NATIVE_WIDTHS,
+};
+
 export function rexonanceImage(source: string, lazyLayout = false) {
   const width = widths[source];
   if (!width) return {};
   const stem = source.replace(/\.[^.]+$/, "");
+  const largest = Object.hasOwn(FINAL_STAGE_NATIVE_WIDTHS, source)
+    ? source
+    : `${stem}-delivery-${width}.webp`;
+  const candidates = [640, 960]
+    .filter((size) => size < width)
+    .map((size) => `${stem}-delivery-${size}.webp ${size}w`);
+  candidates.push(`${largest} ${width}w`);
   return {
-    srcSet: [640, 960, width].map((size) => `${stem}-delivery-${size}.webp ${size}w`).join(", "),
+    srcSet: candidates.join(", "),
     // Only an in-document lazy image has a layout width for `auto`. Keep
     // preload and stage warmup candidates identical to their eager images.
     sizes:

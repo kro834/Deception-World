@@ -54,12 +54,11 @@ test("JPEG delivery preserves source resolution and canonical fallback files", a
   assert.deepEqual(dossierImage("/character-james-20260829.webp"), {});
 });
 
-test("fresh World visits choose responsive art; warmed opening reuses one full file", async () => {
+test("World delivers proportional image candidates for direct visits and the opening", async () => {
   const master = "/deception-world-poster-delivery.webp";
   const fresh = posterImage(master);
   assert.equal(fresh.src, "/deception-world-poster-delivery-640.webp");
   assert.match(fresh.srcSet, /640w, .*720w, .*1024w$/);
-  assert.deepEqual(posterImage(master, true), { src: master, srcSet: master });
   const original = await sharp(asset(master)).metadata();
   for (const width of [640, 720]) {
     const path = `/deception-world-poster-delivery-${width}.webp`;

@@ -5,6 +5,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g01-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g01-480.webp",
         "width": 480
       },
@@ -23,6 +27,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1536,
     "variants": [
+      {
+        "path": "/gallery/g02-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g02-480.webp",
         "width": 480
@@ -43,6 +51,10 @@ export const GALLERY_ASSETS = [
     "height": 1024,
     "variants": [
       {
+        "path": "/gallery/g03-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g03-480.webp",
         "width": 480
       },
@@ -61,6 +73,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g04-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g04-480.webp",
         "width": 480
@@ -81,6 +97,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g05-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g05-480.webp",
         "width": 480
       },
@@ -99,6 +119,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g06-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g06-480.webp",
         "width": 480
@@ -119,6 +143,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g07-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g07-480.webp",
         "width": 480
       },
@@ -137,6 +165,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g08-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g08-480.webp",
         "width": 480
@@ -157,6 +189,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g09-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g09-480.webp",
         "width": 480
       },
@@ -175,6 +211,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g10-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g10-480.webp",
         "width": 480
@@ -195,6 +235,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g11-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g11-480.webp",
         "width": 480
       },
@@ -213,6 +257,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g12-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g12-480.webp",
         "width": 480
@@ -233,6 +281,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g13-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g13-480.webp",
         "width": 480
       },
@@ -251,6 +303,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g14-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g14-480.webp",
         "width": 480
@@ -271,6 +327,10 @@ export const GALLERY_ASSETS = [
     "height": 1024,
     "variants": [
       {
+        "path": "/gallery/g15-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g15-480.webp",
         "width": 480
       },
@@ -289,6 +349,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1536,
     "variants": [
+      {
+        "path": "/gallery/g16-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g16-480.webp",
         "width": 480
@@ -309,6 +373,10 @@ export const GALLERY_ASSETS = [
     "height": 1402,
     "variants": [
       {
+        "path": "/gallery/g17-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g17-480.webp",
         "width": 480
       },
@@ -327,6 +395,10 @@ export const GALLERY_ASSETS = [
     "width": 1672,
     "height": 941,
     "variants": [
+      {
+        "path": "/gallery/g18-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g18-480.webp",
         "width": 480
@@ -347,6 +419,10 @@ export const GALLERY_ASSETS = [
     "height": 941,
     "variants": [
       {
+        "path": "/gallery/g19-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g19-480.webp",
         "width": 480
       },
@@ -365,6 +441,10 @@ export const GALLERY_ASSETS = [
     "width": 1672,
     "height": 941,
     "variants": [
+      {
+        "path": "/gallery/g20-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g20-480.webp",
         "width": 480
@@ -385,6 +465,10 @@ export const GALLERY_ASSETS = [
     "height": 941,
     "variants": [
       {
+        "path": "/gallery/g21-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g21-480.webp",
         "width": 480
       },
@@ -403,6 +487,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1536,
     "variants": [
+      {
+        "path": "/gallery/g22-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g22-480.webp",
         "width": 480
@@ -423,6 +511,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g23-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g23-480.webp",
         "width": 480
       },
@@ -441,6 +533,10 @@ export const GALLERY_ASSETS = [
     "width": 1023,
     "height": 1537,
     "variants": [
+      {
+        "path": "/gallery/g24-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g24-480.webp",
         "width": 480
@@ -461,6 +557,10 @@ export const GALLERY_ASSETS = [
     "height": 1444,
     "variants": [
       {
+        "path": "/gallery/g25-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g25-480.webp",
         "width": 480
       },
@@ -479,6 +579,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1536,
     "variants": [
+      {
+        "path": "/gallery/g26-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g26-480.webp",
         "width": 480
@@ -499,6 +603,10 @@ export const GALLERY_ASSETS = [
     "height": 1086,
     "variants": [
       {
+        "path": "/gallery/g27-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g27-480.webp",
         "width": 480
       },
@@ -517,6 +625,10 @@ export const GALLERY_ASSETS = [
     "width": 1448,
     "height": 1086,
     "variants": [
+      {
+        "path": "/gallery/g28-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g28-480.webp",
         "width": 480
@@ -537,6 +649,10 @@ export const GALLERY_ASSETS = [
     "height": 1024,
     "variants": [
       {
+        "path": "/gallery/g29-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g29-480.webp",
         "width": 480
       },
@@ -555,6 +671,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g30-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g30-480.webp",
         "width": 480
@@ -575,6 +695,10 @@ export const GALLERY_ASSETS = [
     "height": 1402,
     "variants": [
       {
+        "path": "/gallery/g31-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g31-480.webp",
         "width": 480
       },
@@ -593,6 +717,10 @@ export const GALLERY_ASSETS = [
     "width": 1536,
     "height": 1024,
     "variants": [
+      {
+        "path": "/gallery/g32-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g32-480.webp",
         "width": 480
@@ -613,6 +741,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g33-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g33-480.webp",
         "width": 480
       },
@@ -631,6 +763,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1536,
     "variants": [
+      {
+        "path": "/gallery/g34-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g34-480.webp",
         "width": 480
@@ -651,6 +787,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g35-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g35-480.webp",
         "width": 480
       },
@@ -669,6 +809,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 960,
     "variants": [
+      {
+        "path": "/gallery/g36-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g36-480.webp",
         "width": 480
@@ -689,6 +833,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g37-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g37-480.webp",
         "width": 480
       },
@@ -707,6 +855,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1280,
     "variants": [
+      {
+        "path": "/gallery/g38-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g38-480.webp",
         "width": 480
@@ -727,6 +879,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g39-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g39-480.webp",
         "width": 480
       },
@@ -745,6 +901,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 960,
     "variants": [
+      {
+        "path": "/gallery/g40-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g40-480.webp",
         "width": 480
@@ -765,6 +925,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g41-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g41-480.webp",
         "width": 480
       },
@@ -783,6 +947,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1280,
     "variants": [
+      {
+        "path": "/gallery/g42-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g42-480.webp",
         "width": 480
@@ -803,6 +971,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g43-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g43-480.webp",
         "width": 480
       },
@@ -821,6 +993,10 @@ export const GALLERY_ASSETS = [
     "width": 1032,
     "height": 1280,
     "variants": [
+      {
+        "path": "/gallery/g44-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g44-480.webp",
         "width": 480
@@ -841,6 +1017,10 @@ export const GALLERY_ASSETS = [
     "height": 853,
     "variants": [
       {
+        "path": "/gallery/g45-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g45-480.webp",
         "width": 480
       },
@@ -860,6 +1040,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g46-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g46-480.webp",
         "width": 480
       },
@@ -874,6 +1058,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 851,
     "variants": [
+      {
+        "path": "/gallery/g47-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g47-480.webp",
         "width": 480
@@ -894,6 +1082,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g48-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g48-480.webp",
         "width": 480
       },
@@ -908,6 +1100,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 723,
     "variants": [
+      {
+        "path": "/gallery/g49-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g49-480.webp",
         "width": 480
@@ -928,6 +1124,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g50-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g50-480.webp",
         "width": 480
       },
@@ -942,6 +1142,10 @@ export const GALLERY_ASSETS = [
     "width": 960,
     "height": 1280,
     "variants": [
+      {
+        "path": "/gallery/g51-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g51-480.webp",
         "width": 480
@@ -962,6 +1166,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g52-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g52-480.webp",
         "width": 480
       },
@@ -980,6 +1188,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 960,
     "variants": [
+      {
+        "path": "/gallery/g53-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g53-480.webp",
         "width": 480
@@ -1000,6 +1212,10 @@ export const GALLERY_ASSETS = [
     "height": 960,
     "variants": [
       {
+        "path": "/gallery/g54-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g54-480.webp",
         "width": 480
       },
@@ -1018,6 +1234,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 960,
     "variants": [
+      {
+        "path": "/gallery/g55-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g55-480.webp",
         "width": 480
@@ -1038,6 +1258,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g56-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g56-480.webp",
         "width": 480
       },
@@ -1057,6 +1281,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g57-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g57-480.webp",
         "width": 480
       },
@@ -1072,6 +1300,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g58-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g58-480.webp",
         "width": 480
       },
@@ -1086,6 +1318,10 @@ export const GALLERY_ASSETS = [
     "width": 1280,
     "height": 853,
     "variants": [
+      {
+        "path": "/gallery/g59-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g59-480.webp",
         "width": 480
@@ -1106,6 +1342,10 @@ export const GALLERY_ASSETS = [
     "height": 1254,
     "variants": [
       {
+        "path": "/gallery/g60-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g60-480.webp",
         "width": 480
       },
@@ -1125,6 +1365,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g61-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g61-480.webp",
         "width": 480
       },
@@ -1139,6 +1383,10 @@ export const GALLERY_ASSETS = [
     "width": 960,
     "height": 1280,
     "variants": [
+      {
+        "path": "/gallery/g62-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g62-480.webp",
         "width": 480
@@ -1159,6 +1407,10 @@ export const GALLERY_ASSETS = [
     "height": 1280,
     "variants": [
       {
+        "path": "/gallery/g63-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g63-480.webp",
         "width": 480
       },
@@ -1177,6 +1429,10 @@ export const GALLERY_ASSETS = [
     "width": 960,
     "height": 1280,
     "variants": [
+      {
+        "path": "/gallery/g64-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g64-480.webp",
         "width": 480
@@ -1197,6 +1453,10 @@ export const GALLERY_ASSETS = [
     "height": 720,
     "variants": [
       {
+        "path": "/gallery/g65-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g65-480.webp",
         "width": 480
       },
@@ -1215,6 +1475,10 @@ export const GALLERY_ASSETS = [
     "width": 1145,
     "height": 1374,
     "variants": [
+      {
+        "path": "/gallery/g66-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g66-480.webp",
         "width": 480
@@ -1235,6 +1499,10 @@ export const GALLERY_ASSETS = [
     "height": 941,
     "variants": [
       {
+        "path": "/gallery/g67-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g67-480.webp",
         "width": 480
       },
@@ -1253,6 +1521,10 @@ export const GALLERY_ASSETS = [
     "width": 1792,
     "height": 1008,
     "variants": [
+      {
+        "path": "/gallery/g68-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g68-480.webp",
         "width": 480
@@ -1273,6 +1545,10 @@ export const GALLERY_ASSETS = [
     "height": 1024,
     "variants": [
       {
+        "path": "/gallery/g69-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g69-480.webp",
         "width": 480
       },
@@ -1291,6 +1567,10 @@ export const GALLERY_ASSETS = [
     "width": 1672,
     "height": 941,
     "variants": [
+      {
+        "path": "/gallery/g70-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g70-480.webp",
         "width": 480
@@ -1311,6 +1591,10 @@ export const GALLERY_ASSETS = [
     "height": 941,
     "variants": [
       {
+        "path": "/gallery/g71-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g71-480.webp",
         "width": 480
       },
@@ -1329,6 +1613,10 @@ export const GALLERY_ASSETS = [
     "width": 1536,
     "height": 1024,
     "variants": [
+      {
+        "path": "/gallery/g72-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g72-480.webp",
         "width": 480
@@ -1349,6 +1637,10 @@ export const GALLERY_ASSETS = [
     "height": 1086,
     "variants": [
       {
+        "path": "/gallery/g73-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g73-480.webp",
         "width": 480
       },
@@ -1367,6 +1659,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g74-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g74-480.webp",
         "width": 480
@@ -1387,6 +1683,10 @@ export const GALLERY_ASSETS = [
     "height": 887,
     "variants": [
       {
+        "path": "/gallery/g75-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g75-480.webp",
         "width": 480
       },
@@ -1405,6 +1705,10 @@ export const GALLERY_ASSETS = [
     "width": 1774,
     "height": 887,
     "variants": [
+      {
+        "path": "/gallery/g76-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g76-480.webp",
         "width": 480
@@ -1425,6 +1729,10 @@ export const GALLERY_ASSETS = [
     "height": 887,
     "variants": [
       {
+        "path": "/gallery/g77-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g77-480.webp",
         "width": 480
       },
@@ -1443,6 +1751,10 @@ export const GALLERY_ASSETS = [
     "width": 1536,
     "height": 1024,
     "variants": [
+      {
+        "path": "/gallery/g78-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g78-480.webp",
         "width": 480
@@ -1463,6 +1775,10 @@ export const GALLERY_ASSETS = [
     "height": 941,
     "variants": [
       {
+        "path": "/gallery/g79-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g79-480.webp",
         "width": 480
       },
@@ -1481,6 +1797,10 @@ export const GALLERY_ASSETS = [
     "width": 1024,
     "height": 1536,
     "variants": [
+      {
+        "path": "/gallery/g80-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g80-480.webp",
         "width": 480
@@ -1501,6 +1821,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g81-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g81-480.webp",
         "width": 480
       },
@@ -1519,6 +1843,10 @@ export const GALLERY_ASSETS = [
     "width": 1122,
     "height": 1402,
     "variants": [
+      {
+        "path": "/gallery/g82-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g82-480.webp",
         "width": 480
@@ -1539,6 +1867,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g83-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g83-480.webp",
         "width": 480
       },
@@ -1557,6 +1889,10 @@ export const GALLERY_ASSETS = [
     "width": 1536,
     "height": 1024,
     "variants": [
+      {
+        "path": "/gallery/g84-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g84-480.webp",
         "width": 480
@@ -1577,6 +1913,10 @@ export const GALLERY_ASSETS = [
     "height": 1086,
     "variants": [
       {
+        "path": "/gallery/g85-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g85-480.webp",
         "width": 480
       },
@@ -1595,6 +1935,10 @@ export const GALLERY_ASSETS = [
     "width": 1536,
     "height": 1024,
     "variants": [
+      {
+        "path": "/gallery/g86-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g86-480.webp",
         "width": 480
@@ -1615,6 +1959,10 @@ export const GALLERY_ASSETS = [
     "height": 1086,
     "variants": [
       {
+        "path": "/gallery/g87-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g87-480.webp",
         "width": 480
       },
@@ -1633,6 +1981,10 @@ export const GALLERY_ASSETS = [
     "width": 1054,
     "height": 1492,
     "variants": [
+      {
+        "path": "/gallery/g88-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g88-480.webp",
         "width": 480
@@ -1653,6 +2005,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g89-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g89-480.webp",
         "width": 480
       },
@@ -1671,6 +2027,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g90-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g90-480.webp",
         "width": 480
@@ -1691,6 +2051,10 @@ export const GALLERY_ASSETS = [
     "height": 1402,
     "variants": [
       {
+        "path": "/gallery/g91-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g91-480.webp",
         "width": 480
       },
@@ -1709,6 +2073,10 @@ export const GALLERY_ASSETS = [
     "width": 1122,
     "height": 1402,
     "variants": [
+      {
+        "path": "/gallery/g92-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g92-480.webp",
         "width": 480
@@ -1729,6 +2097,10 @@ export const GALLERY_ASSETS = [
     "height": 1537,
     "variants": [
       {
+        "path": "/gallery/g93-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g93-480.webp",
         "width": 480
       },
@@ -1747,6 +2119,10 @@ export const GALLERY_ASSETS = [
     "width": 1448,
     "height": 1086,
     "variants": [
+      {
+        "path": "/gallery/g94-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g94-480.webp",
         "width": 480
@@ -1767,6 +2143,10 @@ export const GALLERY_ASSETS = [
     "height": 1629,
     "variants": [
       {
+        "path": "/gallery/g95-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g95-480.webp",
         "width": 480
       },
@@ -1785,6 +2165,10 @@ export const GALLERY_ASSETS = [
     "width": 1025,
     "height": 1534,
     "variants": [
+      {
+        "path": "/gallery/g96-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g96-480.webp",
         "width": 480
@@ -1805,6 +2189,10 @@ export const GALLERY_ASSETS = [
     "height": 1448,
     "variants": [
       {
+        "path": "/gallery/g97-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g97-480.webp",
         "width": 480
       },
@@ -1823,6 +2211,10 @@ export const GALLERY_ASSETS = [
     "width": 1008,
     "height": 1792,
     "variants": [
+      {
+        "path": "/gallery/g98-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g98-480.webp",
         "width": 480
@@ -1843,6 +2235,10 @@ export const GALLERY_ASSETS = [
     "height": 1024,
     "variants": [
       {
+        "path": "/gallery/g99-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g99-480.webp",
         "width": 480
       },
@@ -1861,6 +2257,10 @@ export const GALLERY_ASSETS = [
     "width": 1122,
     "height": 1402,
     "variants": [
+      {
+        "path": "/gallery/g100-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g100-480.webp",
         "width": 480
@@ -1881,6 +2281,10 @@ export const GALLERY_ASSETS = [
     "height": 941,
     "variants": [
       {
+        "path": "/gallery/g101-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g101-480.webp",
         "width": 480
       },
@@ -1899,6 +2303,10 @@ export const GALLERY_ASSETS = [
     "width": 1122,
     "height": 1402,
     "variants": [
+      {
+        "path": "/gallery/g102-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g102-480.webp",
         "width": 480
@@ -1919,6 +2327,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g103-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g103-480.webp",
         "width": 480
       },
@@ -1937,6 +2349,10 @@ export const GALLERY_ASSETS = [
     "width": 1122,
     "height": 1402,
     "variants": [
+      {
+        "path": "/gallery/g104-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g104-480.webp",
         "width": 480
@@ -1957,6 +2373,10 @@ export const GALLERY_ASSETS = [
     "height": 1079,
     "variants": [
       {
+        "path": "/gallery/g105-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g105-480.webp",
         "width": 480
       },
@@ -1975,6 +2395,10 @@ export const GALLERY_ASSETS = [
     "width": 1086,
     "height": 1448,
     "variants": [
+      {
+        "path": "/gallery/g106-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g106-480.webp",
         "width": 480
@@ -1995,6 +2419,10 @@ export const GALLERY_ASSETS = [
     "height": 1536,
     "variants": [
       {
+        "path": "/gallery/g107-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g107-480.webp",
         "width": 480
       },
@@ -2013,6 +2441,10 @@ export const GALLERY_ASSETS = [
     "width": 1122,
     "height": 1402,
     "variants": [
+      {
+        "path": "/gallery/g108-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g108-480.webp",
         "width": 480
@@ -2033,6 +2465,10 @@ export const GALLERY_ASSETS = [
     "height": 1484,
     "variants": [
       {
+        "path": "/gallery/g109-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g109-480.webp",
         "width": 480
       },
@@ -2051,6 +2487,10 @@ export const GALLERY_ASSETS = [
     "width": 1448,
     "height": 1086,
     "variants": [
+      {
+        "path": "/gallery/g110-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g110-480.webp",
         "width": 480
@@ -2071,6 +2511,10 @@ export const GALLERY_ASSETS = [
     "height": 1086,
     "variants": [
       {
+        "path": "/gallery/g111-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g111-480.webp",
         "width": 480
       },
@@ -2090,6 +2534,10 @@ export const GALLERY_ASSETS = [
     "height": 1024,
     "variants": [
       {
+        "path": "/gallery/g112-288.webp",
+        "width": 288
+      },
+      {
         "path": "/gallery/g112-480.webp",
         "width": 480
       },
@@ -2108,6 +2556,10 @@ export const GALLERY_ASSETS = [
     "width": 1448,
     "height": 1086,
     "variants": [
+      {
+        "path": "/gallery/g113-288.webp",
+        "width": 288
+      },
       {
         "path": "/gallery/g113-480.webp",
         "width": 480

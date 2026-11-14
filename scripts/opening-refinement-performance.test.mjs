@@ -158,7 +158,11 @@ function entryRuntime({
           OPENING_LOGO_FINAL: { src: "/prism.webp" },
         };
       if (name === "@/lib/asset-loader")
-        return { WORLD_ENTER_ASSETS: ["/world.webp"], preloadAssets: async () => undefined };
+        return {
+          WORLD_ENTER_ASSETS: ["/world.webp"],
+          preloadAssets: async () => undefined,
+          warmedSource: (source) => source,
+        };
       // Startup delivery adds an idle stylesheet hint, not a different title clock/handler.
       if (name === "@/lib/opening-destination-styles") return { preloadOpeningDestinationStyles() {} };
       if (name === "./opening-timing") return { OPENING_BURN: { start: 2.6 } };

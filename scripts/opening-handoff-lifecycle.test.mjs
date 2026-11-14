@@ -96,6 +96,7 @@ function runtime() {
         },
       };
       if (name === "react-dom") return { createPortal: (tree) => tree };
+      if (name === "@/lib/thumbnail-images") return { posterImage: (src) => ({ src }) };
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
       if (name === "./opening-timing") return { OPENING_DIVE: { cut: 0.95, glEnd: 1.45 } };
       if (name === "./opening-dive") return {

@@ -80,14 +80,15 @@ let preparedKey = "";
 let preparedValue: DiveAssets | null = null;
 
 /** Idempotent: the prism logo, the atmosphere still and the world as ImageBitmaps. */
-export function prepareOpeningDive(logo: string) {
-  if (prepared && preparedKey === logo) return prepared;
+export function prepareOpeningDive(logo: string, worldArt = DIVE_WORLD_ART) {
+  const key = `${logo}\n${worldArt}`;
+  if (prepared && preparedKey === key) return prepared;
   releasePreparedBitmaps();
-  preparedKey = logo;
+  preparedKey = key;
   const pending: Promise<DiveAssets> = Promise.allSettled([
     loadGlImage(logo, { width: 1536, height: 1024 }, 1024),
     loadGlImage(DIVE_ATMOSPHERE_ART, { width: 1280, height: 720 }, 960),
-    loadGlImage(DIVE_WORLD_ART, { width: 1024, height: 1536 }, 1024),
+    loadGlImage(worldArt, { width: 1024, height: 1536 }, 1024),
   ] as const).then(
     ([logoImage, atmosphere, world]) => {
       if (

@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { OPENING_DIVE } from "./opening-timing";
 import type { DiveRun, DiveStats } from "./opening-dive";
+import { posterImage } from "@/lib/thumbnail-images";
 
 export type OpeningHandoffRect = {
   left: number;
@@ -69,7 +70,6 @@ const CSS_LATE_START_GRACE_MS = 500;
 const REDUCED_DURATION_MS = 250;
 const CSS_DIVE_SCALE = { full: 1, economy: 0.8 } as const;
 const DEFAULT_LOGO_SRC = "/logo-title-saga-20261016-delivery-1536.webp";
-const DEFAULT_VIDEO_SRC = "/atmosphere.mp4";
 const DEFAULT_VIDEO_POSTER = "/atmosphere-poster.jpg";
 const WORLD_ART = "/deception-world-poster-delivery.webp";
 // The dark dial inside the logo's ring (above サーガ), in its own box: the camera dives into it.
@@ -861,9 +861,9 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       <video
         ref={videoRef}
         data-opening-handoff-video
-        src={source.videoSrc ?? DEFAULT_VIDEO_SRC}
+        src={source.videoSrc}
         poster={source.videoPoster ?? DEFAULT_VIDEO_POSTER}
-        preload={source.economy ? "none" : "metadata"}
+        preload={source.videoPlaying && !source.economy && !source.reducedMotion ? "metadata" : "none"}
         muted
         playsInline
       />
@@ -890,7 +890,7 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       </div>
       <div ref={tunnelRef} data-opening-handoff-tunnel />
       <div ref={worldRef} data-opening-handoff-world>
-        <img src={WORLD_ART} alt="" width={1024} height={1536} decoding="async" />
+        <img {...posterImage(WORLD_ART)} alt="" width={1024} height={1536} decoding="async" />
       </div>
       <div ref={warpRef} data-opening-handoff-warp />
       <div ref={bloomRef} data-opening-handoff-bloom />

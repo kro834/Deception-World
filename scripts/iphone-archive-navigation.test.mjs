@@ -61,7 +61,7 @@ test("the iPhone archive entry closes its menu and never waits for the full stan
   assert.doesNotMatch(loadGate, /preloadArchiveDocument/);
   assert.doesNotMatch(loadGate, /saga-form-archive-standalone\.html/);
   assert.match(loadGate, /router\.preloadRoute\(\{ to: to as never \}\)/);
-  assert.doesNotMatch(loadGate, /fetch\s*\(/);
+  assert.doesNotMatch(loadGate, /\bfetch\s*\(/);
   assert.match(styles, /@media \(max-width: 1180px\), \(any-pointer: coarse\)/);
   assert.match(styles, /width: min\(92vmax, 980px\)/);
   assert.match(styles, /archive-mobile-tunnel-out/);

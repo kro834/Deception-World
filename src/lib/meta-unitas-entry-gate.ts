@@ -100,37 +100,3 @@ export function prefetchMetaUnitasEntry() {
   void import("./meta-unitas-rx-engine.ts").catch(() => {});
   void warmMetaUnitasEntry();
 }
-
-/** After a page's load, in idle time: the code only (the chunk and the
- * engine, small), never the pictures. Returns the canceller. */
-export function scheduleMetaUnitasEntryWarmup(): () => void {
-  if (typeof window === "undefined" || restrictedSpeculation()) return () => {};
-  let id = 0;
-  let timer = 0;
-  const run = () => {
-    if (restrictedSpeculation()) return;
-    id = 0;
-    timer = 0;
-    void fetchModule();
-    void import("./meta-unitas-rx-engine.ts").catch(() => {});
-    // The wearer and the driver warm site-wide at idle, as Rexonance's suit.
-    void import("./meta-unitas-rx-suit.ts").then((suit) => {
-      for (const src of [suit.META_UNITAS_RX_UNDERSUIT, suit.META_UNITAS_RX_DRIVER_STANDIN]) {
-        const image = new Image();
-        image.src = src;
-      }
-    });
-  };
-  const start = () => {
-    if (typeof window.requestIdleCallback === "function")
-      id = window.requestIdleCallback(run, { timeout: 1500 });
-    else timer = window.setTimeout(run, 1500);
-  };
-  if (document.readyState === "complete") start();
-  else window.addEventListener("load", start, { once: true });
-  return () => {
-    window.removeEventListener("load", start);
-    if (id) window.cancelIdleCallback?.(id);
-    if (timer) window.clearTimeout(timer);
-  };
-}

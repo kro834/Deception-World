@@ -490,6 +490,7 @@ export function communityPostToArtwork(post: CommunityGalleryPost): GalleryColle
     category: "community",
     width: post.width,
     height: post.height,
+    preview: post.url,
     thumb: post.url,
     medium: post.url,
     full: post.url,

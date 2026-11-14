@@ -12,7 +12,7 @@ const source = readFileSync(
   "utf8",
 );
 
-function mount(index, suspended = false, ready = false, playing = false) {
+function mount(index, suspended = false, ready = false, playing = false, saveData = false) {
   const effects = [];
   const changes = [];
   const refs = [];
@@ -53,7 +53,7 @@ function mount(index, suspended = false, ready = false, playing = false) {
           };
         return require(name);
       },
-      navigator: {},
+      navigator: { connection: { saveData } },
       document: { visibilityState: "visible" },
       window: {
         setTimeout(callback) {
@@ -171,14 +171,33 @@ test("manual thumbnail movement stops playback even before the URL selection com
   assert.ok(view.updates.some(([state, next]) => state === 1 && next === false));
 });
 
-test("adjacent full images are requested only while the theatre is visible and unsuspended", () => {
-  for (const suspended of [false, true]) {
-    const view = mount(2, suspended, true);
+test("manual viewing leaves adjacent full images unrequested until a work is selected", () => {
+  const view = mount(2, false, true);
+  const prefetch = view.effects.find((effect) => String(effect).includes("new Image"));
+  assert.ok(prefetch);
+  prefetch();
+  assert.deepEqual(view.requests, []);
+
+  const thumbnails = view.nodes.filter((node) => node.props?.className === "gallery-tour-thumbnail");
+  assert.deepEqual(
+    thumbnails.map((node) => node.props.children[0].props.src),
+    view.tour.stops.map((stop) => data.getTourArtwork(stop.artworkId).preview),
+  );
+});
+
+test("autoplay warms only the adjacent artwork when the theatre can advance", () => {
+  for (const [suspended, ready, saveData, expected] of [
+    [false, true, false, 1],
+    [true, true, false, 0],
+    [false, false, false, 0],
+    [false, true, true, 0],
+  ]) {
+    const view = mount(2, suspended, ready, true, saveData);
     const prefetch = view.effects.find((effect) => String(effect).includes("new Image"));
     assert.ok(prefetch);
     prefetch();
-    assert.equal(view.requests.length, suspended ? 0 : 1);
-    if (!suspended)
+    assert.equal(view.requests.length, expected);
+    if (expected)
       assert.equal(view.requests[0], data.getTourArtwork(view.tour.stops[3].artworkId).full);
   }
 });

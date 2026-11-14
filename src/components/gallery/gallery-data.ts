@@ -8,6 +8,7 @@ export type GalleryArtwork = {
   category: GalleryCategory;
   width: number;
   height: number;
+  preview: string;
   thumb: string;
   medium: string;
   full: string;
@@ -302,11 +303,12 @@ if (galleryDetails.length !== GALLERY_ASSETS.length)
 export const GALLERY_ARTWORKS: readonly GalleryArtwork[] = GALLERY_ASSETS.map((asset, index) => {
   const [title, alt, category] = galleryDetails[index];
   const variants = [...asset.variants].sort((first, second) => first.width - second.width);
-  const thumb = variants[0];
+  const preview = variants[0];
+  const thumb = variants.find((variant) => variant.width >= 480) ?? variants.at(-1)!;
   const medium = variants.find((variant) => variant.width >= 900) ?? variants.at(-1)!;
   const full = variants.at(-1)!;
   const displayVariants = [
-    ...new Map([thumb, medium].map((variant) => [variant.width, variant])).values(),
+    ...new Map([preview, thumb, medium].map((variant) => [variant.width, variant])).values(),
   ];
   return {
     id: asset.id,
@@ -315,10 +317,14 @@ export const GALLERY_ARTWORKS: readonly GalleryArtwork[] = GALLERY_ASSETS.map((a
     category,
     width: asset.width,
     height: asset.height,
+    preview: preview.path,
     thumb: thumb.path,
     medium: medium.path,
     full: full.path,
-    fullSrcSet: variants.map((variant) => `${variant.path} ${variant.width}w`).join(", "),
+    fullSrcSet: variants
+      .filter((variant) => variant.width >= thumb.width)
+      .map((variant) => `${variant.path} ${variant.width}w`)
+      .join(", "),
     srcSet: displayVariants.map((variant) => `${variant.path} ${variant.width}w`).join(", "),
   };
 });

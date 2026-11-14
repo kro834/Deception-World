@@ -11,7 +11,7 @@ import {
 import { useRouter } from "@tanstack/react-router";
 import { waitForVisualPaint } from "@/lib/visual-paint";
 import { RotateCcw, SkipForward } from "lucide-react";
-import { WORLD_ENTER_ASSETS, preloadAssets } from "@/lib/asset-loader";
+import { WORLD_ENTER_ASSETS, preloadAssets, warmedSource } from "@/lib/asset-loader";
 import { preloadOpeningDestinationStyles } from "@/lib/opening-destination-styles";
 import {
   isColdOpeningLaunch,
@@ -49,6 +49,17 @@ const loadDiveEngine = () => (diveEngine ??= import("./opening-dive"));
 // Most taps last longer than this, and a flick usually cancels the pointer
 // sooner; a quicker tap primes at pointerup (as RISING THE WORLD does).
 const DIVE_TOUCH_PRIME_DELAY_MS = 60;
+
+function playAtmosphere(video: HTMLVideoElement) {
+  if (!video.src) {
+    // Keep the same composition and frame rate. A small screen needs fewer
+    // pixels for the blurred background layer than the desktop edition.
+    video.src = window.matchMedia("(max-width: 767px)").matches
+      ? "/atmosphere-960.mp4"
+      : "/atmosphere.mp4";
+  }
+  void video.play().catch(() => undefined);
+}
 
 // スキップ and もう一度 share one spot and the end still replaces the void, so
 // a press this soon after the title settles is the second half of a double
@@ -554,7 +565,7 @@ export function TitleSequence() {
     if (video) {
       video.currentTime = 0;
       if (videoStartTimerRef.current != null) window.clearTimeout(videoStartTimerRef.current);
-      // `preload="none"` keeps the 1 MB atmosphere clip off the critical
+      // The atmosphere clip stays off the critical
       // startup path. The poster carries the first frames; playback joins once
       // the opening chrome has had a chance to paint.
       // The audit clock keeps the atmosphere on its poster frame.
@@ -567,7 +578,7 @@ export function TitleSequence() {
             !hasEconomyOpeningProfile() &&
             !audit
           ) {
-            void video.play().catch(() => undefined);
+            playAtmosphere(video);
           }
         }, 900);
       }
@@ -680,7 +691,10 @@ export function TitleSequence() {
         // inside opening-dive rather than leaking or clearing a newer run.
         diveModuleRef.current = engine;
         const logo = logoRef.current;
-        return engine.prepareOpeningDive(logo?.currentSrc || logo?.src || OPENING_LOGO_FINAL.src);
+        return engine.prepareOpeningDive(
+          logo?.currentSrc || logo?.src || OPENING_LOGO_FINAL.src,
+          warmedSource(WORLD_ENTER_ASSETS[0]),
+        );
       })
       .catch(() => undefined);
   }, [economyOpening]);
@@ -811,7 +825,7 @@ export function TitleSequence() {
         !hasEconomyOpeningProfile() &&
         !audit
       ) {
-        void video?.play().catch(() => undefined);
+        if (video) playAtmosphere(video);
       }
     };
     const handlePageShow = (event: PageTransitionEvent) => {
@@ -931,7 +945,6 @@ export function TitleSequence() {
           key={`atm-${replayKey}`}
           ref={videoRef}
           className="cine-atmosphere"
-          src="/atmosphere.mp4"
           poster="/atmosphere-poster.jpg"
           muted
           playsInline

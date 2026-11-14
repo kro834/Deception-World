@@ -1,5 +1,3 @@
-    };
-    const onScroll = () => {
       scheduleSettle();
       if (frame) return;
       frame = requestAnimationFrame(syncFromScroll);
@@ -372,7 +370,7 @@
                     src={previous.src}
                     width={previous.width}
                     height={previous.height}
-                    {...posterImage(previous.src, reuseWarmedPoster)}
+                    {...posterImage(previous.src)}
                     alt=""
                     style={{
                       objectPosition: "50% 50%",
@@ -391,7 +389,7 @@
                   src={current.src}
                   width={current.width}
                   height={current.height}
-                  {...posterImage(current.src, reuseWarmedPoster)}
+                  {...posterImage(current.src)}
                   alt={current.alt}
                   style={{
                     objectPosition: "50% 50%",
@@ -506,3 +504,5 @@
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="1.8"
+                        />
+                      </svg>

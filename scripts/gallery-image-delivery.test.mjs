@@ -23,6 +23,8 @@ const centred = {
 test("fit viewing includes native resolution while grid candidates stay bounded", () => {
   for (const work of GALLERY_ARTWORKS) {
     assert.ok(work.fullSrcSet.includes(work.full));
+    assert.ok(work.srcSet.includes(work.preview));
+    if (work.preview !== work.thumb) assert.ok(!work.fullSrcSet.includes(work.preview));
     for (const candidate of work.srcSet.split(","))
       assert.ok(Number.parseInt(candidate.trim().split(/\s+/)[1]) <= 900);
   }

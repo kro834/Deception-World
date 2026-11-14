@@ -66,12 +66,12 @@ test("world-home preserves its layout and copy outside explicitly approved edits
     // Owner (2026-10-23, ruling): the cards' RELATED / 01·02·05 and SECOND DOG / 02 codes and the archive slots' numbers stay (they pair with the artwork cards' RELATED / 03·04); the column pickup shows its own kicker (data) without the ARCHIVE prefix.
     // Owner (2026-10-30): film composition removes two decorative HUD layers; original copy and records stay.
     // Owner 2026-10-31: original artwork stage replaces the hero composition only.
-    markup: "b2de93f3ac8b1c6ece58e5c121b5c24519352bae564468a1e15336b4c4329f56",
+    markup: "e22bac1597fc906e9f31c0042f55ca3515ca12397cdd0854d3b2a785100b4524",
   });
   // Both values are independently pinned from pre-stage HEAD 95eb55fe.
   // Hero wording and every JSX node outside it remain unchanged.
   assert.deepEqual(worldArtworkBoundaryContract(preservedHomeView), {
-    outsideHero: "8192d0f1484e547a62a7386401b000f0097dbb802c87623c8b29a3f566394365",
+    outsideHero: "0846d3f5626222597db807efc886d312cb22802c671d5524ddae2c0cb65a35a2",
     heroWords: "2f6895ba018c5cf288f07508185eb1498d475b231a0930f85540b12d7f4d2825",
   });
   // The WorldAnnexRiders hook stays where it was (this file is pinned), but

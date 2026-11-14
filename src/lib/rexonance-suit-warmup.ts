@@ -388,18 +388,6 @@ export function pauseRexonanceSuitWarmup(preserveIntent = false) {
   };
 }
 
-/** rx13 (owner): the suit-up's layers are warmed in advance, not only on
- * intent. rx17 (owner, 2026-10-11): "preload it" — soon after each public
- * page's own load (it re-runs on every route), in idle time: the call's own
- * chunk, then every layer at low priority, then the engine's plan and
- * canvases, sliced into idle time. The same skips apply (Save-Data, 2G,
- * reduced motion, economy); the opening preserves its network budget, a
- * hidden (suspended) page does no work, and /rexonance-saga itself, where
- * the call does not play, waits for intent — leaving it schedules the warm
- * on the next route. It waits about 1 s after load; go() suspends speculative
- * requests so they do not compete with another route. The call's warm on
- * intent and bounded entry preparation cover earlier taps. Returns
- * its cancel. */
 /** Phones on /illusionculum-saga skip the speculative Rexonance warm-up:
  * that page's own suit engine already holds the memory (2026-10-24, a
  * phone crash's margin). A tap on a Rexonance link still warms on intent. */
@@ -411,6 +399,9 @@ function heldBySuitPage() {
   );
 }
 
+/** Prepare the call's chunk, images and canvases at low priority near its
+ * doorway. Direct link intent and the bounded entry preparation cover taps
+ * before the idle work completes. Unrelated navigation suspends the work. */
 export function scheduleRexonanceSuitWarm(delayMs = 1000) {
   if (typeof window === "undefined") return () => {};
   if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))
@@ -501,14 +492,8 @@ export function scheduleRexonanceSuitWarm(delayMs = 1000) {
   };
 }
 
-/** Owner (2026-10-11): the Rexonance call must not stutter, so the page it
- * lands on is preloaded too — not when the link is tapped (its chunk would
- * then be parsed and its art decoded in the middle of the call), but in
- * idle time after each public page has settled: the route's chunk (through
- * `preload`, the router's own preloadRoute), its stylesheets (rel=preload,
- * so its hand-over never waits on them) and its hero artwork. The same skips
- * as the suit's warm-up; straight after it, so the two never compete.
- * Returns its cancel. */
+/** Preload the landing page near the doorway, after the suit. The chunk,
+ * stylesheets and first artwork are ready for the transition handoff. */
 export function scheduleRexonancePagePreload(preload: () => Promise<unknown>, delayMs = 2500) {
   if (typeof window === "undefined" || pagePreloaded) return () => {};
   if (window.location.pathname === "/" || window.location.pathname.startsWith("/rexonance-saga"))

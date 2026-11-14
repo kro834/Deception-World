@@ -336,9 +336,9 @@ export const TITLE_LOGO_IMAGES: Record<string, ImageSet> = {
   },
 };
 
-export function posterImage(source: string, reuseWarmedFull = false) {
+export function posterImage(source: string) {
   const set = POSTER_IMAGES[source];
-  if (source === "/deception-world-poster-delivery.webp" && !reuseWarmedFull) {
+  if (source === "/deception-world-poster-delivery.webp") {
     // The print's CSS width at each title-stage layout (styles-stage-world
     // and styles-world-zenith): one column to 699 px and on small
     // landscapes, two columns on portrait tablets, the viewport-resolved
@@ -351,9 +351,6 @@ export function posterImage(source: string, reuseWarmedFull = false) {
         "(max-width: 699px) min(78vw, 440px), (max-width: 900px) and (orientation: portrait) min(40vw, 390px), (max-width: 900px) min(78vw, 440px), (max-width: 1100px) and (orientation: portrait) min(40vw, 430px), (max-width: 1440px) and (orientation: landscape) min(36vw, 440px), (min-width: 1800px) min(24vw, 512px), min(31vw, 430px)",
     };
   }
-  if (source === "/deception-world-poster-delivery.webp" && reuseWarmedFull) {
-    return { src: source, srcSet: source };
-  }
   // Keep src and srcset identical: WebKit can otherwise start the original
   // JPEG while React changes a keyed poster, invalidating the decoded warmup.
   return set ? { src: set.variants[0].path, srcSet: set.variants[0].path } : {};
@@ -364,9 +361,8 @@ export function posterImage(source: string, reuseWarmedFull = false) {
 export function preparePosterImage(
   image: HTMLImageElement,
   source: string,
-  reuseWarmedFull = false,
 ) {
-  const choice = posterImage(source, reuseWarmedFull);
+  const choice = posterImage(source);
   if (choice.sizes) image.sizes = choice.sizes;
   if (choice.srcSet) image.srcset = choice.srcSet;
   image.src = choice.src ?? source;
