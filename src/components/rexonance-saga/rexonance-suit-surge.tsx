@@ -756,6 +756,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       burst.play.cancel();
       burst = null;
       redraw = true;
+      delete runway.dataset.rznBurst;
     };
     const frame = createSurgeFrame();
     let raf = 0;
@@ -940,7 +941,10 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
                   unit: REXONANCE_SUIT_SIZE.width / REXONANCE_SUIT_SIZE.height,
                 })
               : null;
-          if (play) burst = { play, from: formOn, to: form, leaving: 0 };
+          if (play && kind) {
+            burst = { play, from: formOn, to: form, leaving: 0 };
+            runway.dataset.rznBurst = kind;
+          }
           // (No play: the scene's own change stands.)
           else formOn = form;
           redraw = true;

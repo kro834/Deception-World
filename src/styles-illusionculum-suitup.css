@@ -976,3 +976,423 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-mo
     font-size: clamp(15px, 4vw, 20px);
   }
 }
+
+/* ================================================================
+   POLISH LAYER (2026-11-14) — prism refraction, layered rims, precise
+   scales on the runway HUD. Appended; nothing above is rewritten. No new
+   text (decoration only, content is always empty). Motion is limited to
+   transitions, under no-preference and not economy / constrained; hover only
+   where a fine pointer hovers; :active only sinks. Gold x ice (#a6e6ff) x
+   magenta (#ff8fd2) / violet (#a983ff).
+   ================================================================ */
+
+/* The runway's edges: inset rims and two prism hairlines (top, bottom). */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup {
+  box-shadow:
+    inset 0 1px 0 rgb(var(--rzn-gold) / 22%),
+    inset 0 -1px 0 rgb(var(--rzn-ice) / 10%),
+    inset 0 0 120px rgb(2 3 10 / 60%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup::before,
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--rzn-ice) / 70%) 18%,
+    rgb(var(--rzn-pink) / 60%) 42%,
+    rgb(var(--rzn-gold) / 70%) 62%,
+    rgb(var(--rzn-violet) / 60%) 82%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup::before {
+  top: 0;
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup::after {
+  bottom: 0;
+  opacity: 0.6;
+  transform: scaleX(-1);
+}
+
+/* The frame: four corner brackets in the gold, over the canvas. */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame::before {
+  content: "";
+  position: absolute;
+  inset: clamp(10px, 1.6cqw, 22px);
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(rgb(var(--rzn-gold) / 60%) 0 0) 0 0 / 18px 1px,
+    linear-gradient(rgb(var(--rzn-gold) / 60%) 0 0) 0 0 / 1px 18px,
+    linear-gradient(rgb(var(--rzn-gold) / 60%) 0 0) 100% 0 / 18px 1px,
+    linear-gradient(rgb(var(--rzn-gold) / 60%) 0 0) 100% 0 / 1px 18px,
+    linear-gradient(rgb(var(--rzn-ice) / 50%) 0 0) 0 100% / 18px 1px,
+    linear-gradient(rgb(var(--rzn-ice) / 50%) 0 0) 0 100% / 1px 18px,
+    linear-gradient(rgb(var(--rzn-ice) / 50%) 0 0) 100% 100% / 18px 1px,
+    linear-gradient(rgb(var(--rzn-ice) / 50%) 0 0) 100% 100% / 1px 18px;
+  background-repeat: no-repeat;
+}
+
+/* The stage light: a refraction fan out of the gold circle's centre. */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-light::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from 196deg at 56% 32%,
+    transparent 0 6%,
+    rgb(var(--rzn-ice) / 7%) 8%,
+    transparent 12%,
+    rgb(var(--rzn-pink) / 6%) 17%,
+    transparent 22%,
+    rgb(var(--rzn-violet) / 7%) 28%,
+    transparent 34%,
+    rgb(var(--rzn-gold) / 5%) 40%,
+    transparent 46%
+  );
+}
+
+/* The floor ring: lit from inside, with a second ring in the gold. */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-floor {
+  box-shadow:
+    inset 0 0 22px rgb(var(--rzn-ice) / 14%),
+    0 0 40px rgb(var(--rzn-violet) / 10%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-floor::before {
+  content: "";
+  position: absolute;
+  inset: 16% 12%;
+  border: 1px solid rgb(var(--rzn-ice) / 24%);
+  border-radius: 50%;
+}
+
+/* The call: the number is a lit gold index (dim until its line lights). */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-line::before {
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 10px rgb(var(--rzn-gold) / 40%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup[data-rzn-state] .rzn-line:not([data-on])::before {
+  opacity: 0.55;
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup[data-rzn-state] .rzn-line[data-on]::before {
+  color: #f6d79a;
+  text-shadow:
+    0 0 12px rgb(var(--rzn-gold) / 60%),
+    0 0 1px rgb(var(--rzn-gold));
+}
+
+/* A lit chip refracts: a faint magenta and ice fringe on the white. (The last
+   line's iris text keeps its own colour.) */
+html[data-family="special"]
+  body
+  .rxs-page.ics-page
+  .rzn-suitup[data-rzn-state]
+  .rzn-line[data-on]:not(:last-child)
+  .rzn-chip[data-on] {
+  text-shadow:
+    0 0 1px rgb(var(--rzn-ice)),
+    0 0 16px rgb(var(--rzn-ice) / 45%),
+    -0.5px 0 0 rgb(var(--rzn-pink) / 40%),
+    0.5px 0 0 rgb(var(--rzn-ice) / 40%);
+}
+
+/* The progress rail: a ruler (minor and major ticks) on its left, a glowing
+   fill, and a gold node at its end. */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-rail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 9px;
+  background:
+    repeating-linear-gradient(180deg, rgb(var(--rzn-gold) / 55%) 0 1px, transparent 1px 60px) 100% 0 / 9px 100% no-repeat,
+    repeating-linear-gradient(180deg, rgb(var(--rzn-ice) / 40%) 0 1px, transparent 1px 12px) 100% 0 / 5px 100% no-repeat;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-rail::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: -2px;
+  width: 5px;
+  height: 5px;
+  border: 1px solid rgb(var(--rzn-gold) / 80%);
+  background: #02030a;
+  rotate: 45deg;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-rail > i {
+  inset: 0 -0.5px;
+  box-shadow: 0 0 8px rgb(var(--rzn-ice) / 50%);
+}
+
+/* The stamp: a prism-rimmed plate with layered inset light and two
+   brackets; the ultra form keeps its crimson edge. */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b {
+  position: relative;
+  border-color: transparent;
+  background:
+    linear-gradient(rgb(2 3 10 / 82%), rgb(2 3 10 / 82%)) padding-box,
+    linear-gradient(
+        120deg,
+        rgb(var(--rzn-gold) / 80%),
+        rgb(var(--rzn-ice) / 70%) 38%,
+        rgb(var(--rzn-pink) / 60%) 70%,
+        rgb(var(--rzn-violet) / 70%)
+      )
+      border-box;
+  box-shadow:
+    inset 3px 0 0 rgb(var(--rzn-ice)),
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 0 18px rgb(var(--rzn-violet) / 12%);
+  text-shadow: 0 0 14px rgb(var(--rzn-ice) / 30%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup[data-ultra] .rzn-stamp > b {
+  box-shadow:
+    inset 3px 0 0 var(--ics-crimson-hi),
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 0 18px rgb(var(--rzn-violet) / 12%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b::before,
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b::before {
+  top: -4px;
+  left: -4px;
+  border-top: 1px solid rgb(var(--rzn-gold));
+  border-left: 1px solid rgb(var(--rzn-gold));
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b::after {
+  right: -4px;
+  bottom: -4px;
+  border-right: 1px solid rgb(var(--rzn-ice));
+  border-bottom: 1px solid rgb(var(--rzn-ice));
+}
+
+/* The stamp sweeps open (a clip, once) as the form completes. */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup[data-rzn-state="live"]
+    .rzn-stamp
+    > b {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 520ms cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup[data-rzn-state="live"]:not([data-rzn-form-complete])
+    .rzn-stamp
+    > b {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.ics-page
+    .rzn-suitup[data-rzn-state="live"]
+    .rzn-line::before {
+    transition: opacity 220ms ease;
+  }
+}
+
+/* The ending's route: bevelled segments, a lit trail and a stronger node. */
+html[data-family="special"] body .rxs-page.ics-page .ics-ending-route > li {
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .ics-ending-route > li[data-reached] {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 0 6px color-mix(in srgb, var(--ics-node) 40%, transparent);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .ics-ending-route > li[data-current] {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    0 0 12px color-mix(in srgb, var(--ics-node) 60%, transparent),
+    0 0 26px color-mix(in srgb, var(--ics-node) 26%, transparent);
+}
+
+/* The ending's controls: a lit rim and a bevel; the movie's buttons the same. */
+html[data-family="special"] body .rxs-page.ics-page .ics-assembly-controls > :is(button, a) {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 6%), transparent 55%), rgb(3 4 12 / 70%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    inset 0 0 0 1px rgb(var(--rzn-ice, 166 230 255) / 6%),
+    0 6px 18px rgb(0 0 0 / 28%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-sheet {
+  border-color: rgb(166 230 255 / 34%);
+  box-shadow:
+    0 0 0 1px rgb(233 184 102 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    inset 0 0 28px rgb(169 131 255 / 8%),
+    0 12px 40px rgb(0 0 0 / 45%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-row > button,
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-speeds > button {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-play {
+  background: linear-gradient(180deg, #d4f4ff, #a6e6ff 55%, #86cdf0);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 55%),
+    0 0 18px rgb(166 230 255 / 24%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ics-page
+  .rzn-movie[data-state="playing"]
+  .rzn-movie-play {
+  background: rgb(166 230 255 / 12%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    inset 0 0 14px rgb(166 230 255 / 12%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ics-page
+  .rzn-movie-speeds
+  > button[aria-checked="true"] {
+  background: linear-gradient(180deg, #f6d79a, #e9b866 60%, #cf9c4d);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 40%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-webkit-slider-runnable-track {
+  background: linear-gradient(90deg, #a6e6ff, #ff8fd2 40%, #e9b866 75%, #f4fbff);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-moz-range-track {
+  background: linear-gradient(90deg, #a6e6ff, #ff8fd2 40%, #e9b866 75%, #f4fbff);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 3px rgb(166 230 255 / 20%),
+    0 0 10px rgb(166 230 255 / 60%);
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-seek > input::-moz-range-thumb {
+  box-shadow:
+    0 0 0 3px rgb(166 230 255 / 20%),
+    0 0 10px rgb(166 230 255 / 60%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ics-page
+  :is(.ics-assembly-controls > :is(button, a), .rzn-movie-row > button, .rzn-movie-speeds > button):focus-visible {
+  outline: 2px solid #a6e6ff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    body
+    .rxs-page.ics-page
+    :is(.ics-assembly-controls > :is(button, a), .rzn-movie-row > button, .rzn-movie-speeds > button) {
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      filter 160ms ease,
+      translate 140ms ease,
+      scale 140ms ease;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"] body .rxs-page.ics-page .rzn-movie-row > button:not(:disabled):hover,
+  html[data-family="special"] body .rxs-page.ics-page .rzn-movie-speeds > button:not(:disabled):hover {
+    border-color: rgb(166 230 255 / 62%);
+    filter: brightness(1.1);
+  }
+
+  html[data-family="special"] body .rxs-page.ics-page .ics-assembly-controls > :is(button, a):hover {
+    border-color: rgb(233 184 102 / 70%);
+    filter: brightness(1.1);
+  }
+}
+
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-row > button:not(:disabled):active,
+html[data-family="special"] body .rxs-page.ics-page .rzn-movie-speeds > button:not(:disabled):active,
+html[data-family="special"] body .rxs-page.ics-page .ics-assembly-controls > :is(button, a):active {
+  translate: 0 1px;
+  scale: 0.98;
+}
+
+/* Fallbacks. Reduced motion has no transition above to stop (the block is
+   no-preference only); the cheap extras are dropped on economy and
+   constrained devices; forced colours take the system's own. */
+html[data-world-effects="economy"] .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-light::before,
+html[data-world-effects="economy"] .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-floor::before,
+html[data-rzn-constrained] .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-light::before,
+html[data-rzn-constrained] .rxs-page.ics-page .rzn-suitup > .rzn-frame > .rzn-floor::before {
+  display: none;
+}
+
+html[data-world-effects="economy"] .rxs-page.ics-page .rzn-suitup,
+html[data-rzn-constrained] .rxs-page.ics-page .rzn-suitup {
+  box-shadow: none;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup {
+    box-shadow: none;
+  }
+
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup::before,
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup::after,
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame::before,
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b::before,
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b::after {
+    display: none;
+  }
+
+  html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-stamp > b {
+    border-color: CanvasText;
+    background-image: none;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family="special"] body .rxs-page.ics-page :is(.rzn-movie-play, .rzn-movie-speeds > button[aria-checked="true"]) {
+    background-image: none;
+    box-shadow: none;
+  }
+}

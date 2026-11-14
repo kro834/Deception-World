@@ -5,20 +5,37 @@
   overflow: hidden;
   border-color: rgb(127 202 233 / 18%);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(46 128 164 / 12%), transparent 68%),
+    linear-gradient(90deg, rgb(214 247 255 / 0%), rgb(214 247 255 / 34%) 50%, rgb(214 247 255 / 0%)) 50% 0 /
+      70% 1px no-repeat,
+    radial-gradient(ellipse at 50% 0%, rgb(46 128 164 / 14%), transparent 68%),
     linear-gradient(145deg, rgb(7 17 27 / 94%), rgb(4 9 17 / 88%));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 5%),
+    inset 0 -1px 0 rgb(0 0 0 / 45%),
+    inset 0 0 0 1px rgb(121 232 255 / 6%);
 }
 
 /* Shared frosted sheets use html body + !important; keep the override scoped
-   to this page's P14 slider shell and thumb. */
+   to this page's P14 slider shell and thumb. OPTICS (2026-11-14): the shell
+   carries a graduated scale under its track — a stop at each baseline, one
+   at the middle, the fine marks between — so the two points read as a
+   calibrated instrument, not a slider. */
 html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider {
   background:
+    linear-gradient(rgb(150 236 255 / 52%), rgb(150 236 255 / 52%)) 23px calc(50% + 14px) / 1px 9px
+      no-repeat,
+    linear-gradient(rgb(150 236 255 / 52%), rgb(150 236 255 / 52%)) calc(100% - 23px) calc(50% + 14px) /
+      1px 9px no-repeat,
+    linear-gradient(rgb(242 216 150 / 46%), rgb(242 216 150 / 46%)) 50% calc(50% + 14px) / 1px 7px no-repeat,
+    repeating-linear-gradient(90deg, rgb(150 236 255 / 20%) 0 1px, transparent 1px 10px) 23px
+      calc(50% + 14px) / calc(100% - 46px) 4px no-repeat,
     radial-gradient(ellipse at 30% 18%, rgb(86 218 255 / 19%), transparent 34%),
     linear-gradient(145deg, #152a38, #07131e 72%) !important;
   box-shadow:
     inset 0 0 0 1px rgb(124 216 243 / 29%),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 40%),
+    inset 0 10px 18px -14px rgb(150 236 255 / 30%),
     0 8px 22px rgb(0 0 0 / 34%) !important;
 }
 
@@ -32,9 +49,12 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
     #071722 100%
   ) !important;
   box-shadow:
+    inset 0 1px 1px rgb(255 255 255 / 55%),
+    inset 0 -4px 7px rgb(1 14 22 / 55%),
     0 2px 13px rgb(0 0 0 / 62%),
     0 0 0 5px rgb(5 13 20 / 82%),
-    0 0 20px rgb(46 188 231 / 32%) !important;
+    0 0 0 6px rgb(150 236 255 / 16%),
+    0 0 22px rgb(46 188 231 / 36%) !important;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels {
@@ -53,16 +73,40 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
     border-color 180ms ease,
     color 180ms ease,
     background-color 180ms ease,
-    box-shadow 180ms ease;
+    box-shadow 180ms ease,
+    scale 140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* The chosen baseline: a lit lip, the ice line under it and a cool glow;
+   it reads as the stop the instrument is calibrated to. */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button.is-active {
-  border-color: rgb(100 221 255 / 52%);
+  border-color: rgb(100 221 255 / 56%);
   color: #f4fcff;
-  background: linear-gradient(135deg, rgb(46 157 202 / 26%), rgb(23 91 133 / 13%));
+  background: linear-gradient(135deg, rgb(46 157 202 / 28%), rgb(23 91 133 / 13%));
   box-shadow:
+    inset 0 1px 0 rgb(214 247 255 / 26%),
+    inset 0 -2px 0 rgb(140 234 255 / 78%),
     inset 0 0 0 1px rgb(145 229 255 / 8%),
-    0 0 18px rgb(34 157 205 / 12%);
+    0 0 20px rgb(34 157 205 / 18%);
+}
+
+/* A fine pointer finds the other stop before it presses it. */
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button:not(.is-active):hover {
+    border-color: rgb(100 221 255 / 26%);
+    color: #e2f6ff;
+    box-shadow: inset 0 -1px 0 rgb(140 234 255 / 36%);
+  }
+}
+
+/* The press sinks (never grows), on every pointer. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.rxs-rexonance-page
+    .rxs-p14-range-labels
+    button:active {
+    scale: 0.97;
+  }
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider {
@@ -137,7 +181,8 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   background: #14374a;
   box-shadow:
     0 0 0 5px rgb(3 9 14 / 76%),
-    0 0 18px rgb(54 197 238 / 26%),
+    0 0 0 6px rgb(140 234 255 / 22%),
+    0 0 18px rgb(54 197 238 / 30%),
     inset 0 0 0 3px #153547;
 }
 

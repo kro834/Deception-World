@@ -17,7 +17,11 @@
  *   holds the screen, its ticks set where each chapter really falls in the
  *   scroll (the rail's fill is the sheet's scroll timeline; this script only
  *   places the ticks and names the chapter; every width already has the
- *   shell's reading line under the local navigation).
+ *   shell's reading line under the local navigation);
+ * - OPTICS (2026-11-14): the plates still below the fold catch one specular
+ *   pass as they come up, a chapter's guideway carries one run of light as
+ *   its title lands (both in elements made for the run and removed after
+ *   it), and the rail keeps the chapters behind the reader lit.
  *
  * Rules (the page's, kept): content is complete and visible without this
  * script, without observers and without animation support — nothing is
@@ -49,6 +53,19 @@ const END_TITLE = ".rxs-footer > div > h2";
 const END_LINKS = ":scope > a";
 const CHAPTERS = ["performance", "p14", "assembly", "stages", "system"];
 const OUT = "cubic-bezier(.16,1,.3,1)";
+// OPTICS (2026-11-14): the instrument plates catch one specular pass as
+// they come up, and a chapter's guideway carries one run of light as its
+// title lands. Decoration only: the light is the script's own element,
+// made for its run and removed when it ends (nothing rests in the page).
+const PLATES = [
+  "#performance .rxs-comparison",
+  "#p14 .rxs-p14-overview > figure",
+  "#p14 .rxs-p14-comparator",
+  "#system > .rxs-system-grid",
+  "#system > .rxs-specs",
+  "#stages .rxe-form-comparison",
+].join(", ");
+const HEADING = ".rxs-section-heading";
 
 const textOnly = (node) =>
   !node.dataset.rxkSplit &&
@@ -245,28 +262,99 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
   );
   const callRun = (boxes, by) => {
     // Long calls step faster, so every call lands within about a second; a
-    // call set by word steps at a word's pace.
+    // call set by word steps at a word's pace. Each box rises from a touch
+    // small, crests a hair above its seat and settles (OPTICS, 2026-11-14:
+    // the letters read struck, not slid).
     const step = Math.min(by === "words" ? 90 : 22, 600 / boxes.length);
     return boxes.map((box, index) =>
       box.animate(
         [
-          { opacity: 0, transform: "translate3d(0, 0.7em, 0)" },
+          { opacity: 0, transform: "translate3d(0, 0.7em, 0) scale(0.9)" },
+          { opacity: 1, transform: "translate3d(0, -0.06em, 0) scale(1.03)", offset: 0.62 },
           { opacity: 1, transform: "none" },
         ],
-        { duration: 520, delay: Math.round(index * step), easing: OUT, fill: "both" },
+        { duration: 560, delay: Math.round(index * step), easing: OUT, fill: "both" },
       ),
     );
   };
+  // A title's line comes up through its mask, overshoots by a hair (inside
+  // the mask's room above it) and seats as its skew straightens.
   const lineRun = (lines) =>
     lines.map((line, index) =>
       line.animate(
         [
           { transform: "translate3d(0, 118%, 0) skewY(3deg)" },
+          { transform: "translate3d(0, -2%, 0) skewY(-0.3deg)", offset: 0.72 },
           { transform: "translate3d(0, 0, 0) skewY(0deg)" },
         ],
-        { duration: 820, delay: 90 + index * 130, easing: OUT, fill: "both" },
+        { duration: 860, delay: 90 + index * 120, easing: OUT, fill: "both" },
       ),
     );
+
+  // OPTICS: one run of light, in its own element (rxk-flare > rxk-flare-band),
+  // over a host that already positions its children. Calm tiers, forced
+  // colours, the constrained and Android tiers and a hidden tab get none.
+  const forced = environment.matchMedia?.("(forced-colors: active)");
+  const flares = new Set();
+  const dim = () =>
+    disposed ||
+    media.matches ||
+    document.hidden ||
+    !!forced?.matches ||
+    root.dataset.worldEffects === "economy" ||
+    root.hasAttribute("data-rzn-constrained") ||
+    root.hasAttribute("data-android-renderer");
+  const flare = (host, kind, delay) => {
+    if (!host || dim()) return;
+    const style = document.defaultView?.getComputedStyle(host);
+    if (!style || style.position === "static") return;
+    const shell = document.createElement("rxk-flare");
+    shell.className = `rxk-flare is-${kind}`;
+    shell.setAttribute("aria-hidden", "true");
+    const band = document.createElement("rxk-flare-band");
+    band.className = "rxk-flare-band";
+    shell.appendChild(band);
+    host.appendChild(shell);
+    const animation =
+      kind === "rule"
+        ? band.animate(
+            [
+              { opacity: 0, transform: "translate3d(-100%, 0, 0)" },
+              { opacity: 1, offset: 0.18 },
+              { opacity: 1, offset: 0.7 },
+              { opacity: 0, transform: "translate3d(100%, 0, 0)" },
+            ],
+            { duration: 820, delay, easing: "cubic-bezier(.45,0,.2,1)", fill: "both" },
+          )
+        : band.animate(
+            [
+              { opacity: 0, transform: "translate3d(-130%, 0, 0) skewX(-18deg)" },
+              { opacity: 1, offset: 0.22 },
+              { opacity: 1, offset: 0.74 },
+              { opacity: 0, transform: "translate3d(420%, 0, 0) skewX(-18deg)" },
+            ],
+            { duration: 900, delay, easing: "cubic-bezier(.4,0,.2,1)", fill: "both" },
+          );
+    flares.add(animation);
+    const drop = () => {
+      flares.delete(animation);
+      shell.remove();
+    };
+    animation.finished.then(drop, drop);
+  };
+  const dropFlares = () => [...flares].forEach((animation) => animation.cancel());
+  // The plates still below the fold (or under the cover) catch their pass
+  // once, as a third of them comes up.
+  const plateObserver = new environment.IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        plateObserver.unobserve(entry.target);
+        flare(entry.target, "sheen", 140);
+      }
+    },
+    { rootMargin: "0px 0px -12%", threshold: 0.3 },
+  );
 
   /** Sets the calls and titles in their boxes and holds each to its
    * measure: a call whose box moves by any amount (a letter box drops the
@@ -310,7 +398,12 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     for (const { node: title, lines } of titles) {
       if (!lines.length) continue;
       if (!title.matches(END_TITLE)) {
-        arm(title, () => run(title, lineRun(lines)));
+        // A chapter's guideway carries its run of light as the lines land.
+        const heading = title.closest(HEADING);
+        arm(title, () => {
+          run(title, lineRun(lines));
+          flare(heading, "rule", 160);
+        });
         continue;
       }
       // The end card: its links rise in order (the return last) as the last
@@ -336,6 +429,11 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
         arm(footer, () => run(footer, linkRun(0)));
       }
     }
+    // Plates already on screen stay as drawn; the rest catch their pass
+    // (watched with the rest, so under the cover only once it lifts).
+    for (const plate of page.querySelectorAll(PLATES)) {
+      if (covered() || belowFold(plate)) plates.push(plate);
+    }
     if (covered()) {
       // Observe once the cover lifts: what stands on the first screen then
       // plays at once, a beat into the hero's arrival.
@@ -349,7 +447,13 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     } else watchAll();
   };
 
-  const watchAll = () => plays.forEach((_, node) => observer.observe(node));
+  /** @type {Element[]} */
+  const plates = [];
+  const watchAll = () => {
+    if (disposed) return;
+    plays.forEach((_, node) => observer.observe(node));
+    plates.splice(0).forEach((plate) => plateObserver.observe(plate));
+  };
   /** @type {MutationObserver | null} */
   let coverObserver = null;
   // The measures hold only in the page's own faces: set the boxes once they
@@ -364,7 +468,7 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
   rail.className = "rxk-rail";
   rail.setAttribute("aria-hidden", "true");
   rail.innerHTML =
-    '<i class="rxk-rail-track"><b class="rxk-rail-fill"></b></i>' +
+    '<i class="rxk-rail-track"><b class="rxk-rail-fill"></b><b class="rxk-rail-head"></b></i>' +
     CHAPTERS.map(
       (id, index) => `<span class="rxk-rail-tick" data-chapter="${id}"><b>0${index + 1}</b></span>`,
     ).join("");
@@ -398,12 +502,29 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
   environment.addEventListener?.("resize", placeSoon);
 
   const seen = new Map();
+  // The chapters behind the reader stay lit on the rail (passed), the one
+  // that holds the screen is current; ahead, the ticks wait unlit. Past the
+  // last chapter (the end card) every tick is behind the reader.
+  const mark = (current) => {
+    let at = CHAPTERS.indexOf(current ?? "");
+    if (at < 0) {
+      const last = document.getElementById(CHAPTERS[CHAPTERS.length - 1]);
+      const middle = (environment.innerHeight || 800) * 0.5;
+      if (last && last.getBoundingClientRect().bottom < middle) at = CHAPTERS.length;
+    }
+    ticks.forEach((tick, index) => {
+      if (index < at) tick.dataset.state = "passed";
+      else if (index === at) tick.dataset.state = "current";
+      else delete tick.dataset.state;
+    });
+  };
   const chapterObserver = new environment.IntersectionObserver(
     (entries) => {
       for (const entry of entries) seen.set(entry.target.id, entry.isIntersecting);
       const current = CHAPTERS.filter((id) => seen.get(id)).pop();
       if (current) page.dataset.rxkChapter = current;
       else if (!CHAPTERS.some((id) => seen.get(id))) delete page.dataset.rxkChapter;
+      mark(page.dataset.rxkChapter);
     },
     { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
   );
@@ -429,13 +550,19 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     plays.forEach((_, node) => settle(node));
     plays.clear();
     observer.disconnect();
+    plateObserver.disconnect();
+    plates.length = 0;
+    dropFlares();
   };
   const syncPreference = () => {
     if (media.matches || root.dataset.worldEffects === "economy") settleAll();
   };
   const syncVisibility = () => {
     // A hidden tab stops its clocks; what was mid-flight is shown at rest.
-    if (document.hidden) settleRunning();
+    if (document.hidden) {
+      settleRunning();
+      dropFlares();
+    }
   };
   const effects = new environment.MutationObserver(syncPreference);
   effects.observe(root, { attributes: true, attributeFilter: ["data-world-effects"] });

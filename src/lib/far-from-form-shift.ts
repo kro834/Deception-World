@@ -94,11 +94,24 @@ export function farFromShiftPlan(steps: number): FarFromShiftPlan {
 }
 
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
-const smooth = (u: number) => u * u * (3 - 2 * u);
-/** Eases in over the first `k`, then runs at one rate (C1). */
-const easeIn = (x: number, k: number) =>
-  x < k ? (x * x) / (k * (2 - k)) : (2 * x - k) / (2 - k);
-const easeOut = (x: number) => 1 - (1 - x) * (1 - x);
+const smooth = (u: number) => {
+  const h3 = u * u * (3 - 2 * u);
+  const h5 = u * u * u * (10 + u * (-15 + 6 * u));
+  return h3 * 0.6 + h5 * 0.4;
+};
+/** Eases in over the first `k` with C2-like inflection, then runs at one rate (C1). */
+const easeIn = (x: number, k: number) => {
+  if (x < k) {
+    const r = x / k;
+    return (k / (2 - k)) * r * r * (0.75 + 0.25 * r * (2 - r));
+  }
+  return (2 * x - k) / (2 - k);
+};
+const easeChain = (u: number) => u * 0.92 + u * u * (3 - 2 * u) * 0.08;
+const easeOut = (x: number) => {
+  const inv = 1 - x;
+  return 1 - inv * inv * (1 - 0.24 * x);
+};
 
 /** The progress of the dissolve's undersuit at `u` (0–1). */
 export function farFromShiftUnder(u: number): number {
@@ -118,7 +131,8 @@ export function farFromShiftProgress(
   const [a, b] = beats.form;
   if (t <= 0) return from;
   if (t < plan.base) return from + (a - from) * easeIn(t / plan.base, FAR_FROM_SHIFT.buildEase);
-  if (t < plan.base + plan.chain) return a + (b - a) * ((t - plan.base) / plan.chain);
+  if (t < plan.base + plan.chain)
+    return a + (b - a) * easeChain((t - plan.base) / plan.chain);
   const last = Math.max(b, end);
   if (t >= plan.total) return last;
   return b + (last - b) * easeOut((t - plan.base - plan.chain) / plan.tail);

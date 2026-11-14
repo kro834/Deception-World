@@ -543,17 +543,21 @@ export function buildFormBurstSheet<Canvas extends { getContext(kind: "2d"): unk
     const y = S / 2 + dy;
     // The burning edge: green, hottest toward the upper left.
     const edge = context.createLinearGradient(x - 26, y - 26, x + 26, y + 26);
-    edge.addColorStop(0, "rgb(214 255 190 / 0.98)");
-    edge.addColorStop(0.45, "rgb(74 236 120 / 0.96)");
-    edge.addColorStop(1, "rgb(12 110 48 / 0.94)");
+    edge.addColorStop(0, "rgb(242 255 218 / 0.99)");
+    edge.addColorStop(0.24, "rgb(162 255 152 / 0.98)");
+    edge.addColorStop(0.52, "rgb(58 242 118 / 0.97)");
+    edge.addColorStop(0.78, "rgb(20 168 74 / 0.95)");
+    edge.addColorStop(1, "rgb(8 86 38 / 0.92)");
     piece(x, y, 26, corners, middle);
     context.fillStyle = edge;
     context.fill();
     // The charred plate, set in: near black, a faint bevel.
     const face = context.createLinearGradient(x - 22, y - 22, x + 22, y + 22);
-    face.addColorStop(0, "rgb(34 44 38 / 0.98)");
-    face.addColorStop(0.5, "rgb(10 15 13 / 0.98)");
-    face.addColorStop(1, "rgb(3 6 5 / 0.98)");
+    face.addColorStop(0, "rgb(46 66 54 / 0.99)");
+    face.addColorStop(0.28, "rgb(24 34 29 / 0.99)");
+    face.addColorStop(0.58, "rgb(10 15 13 / 0.99)");
+    face.addColorStop(0.84, "rgb(5 8 7 / 0.99)");
+    face.addColorStop(1, "rgb(14 28 20 / 0.98)");
     piece(x + (middle ? 1.6 : 0), y + (middle ? 1.6 : 0), middle ? 20.5 : 22.5, corners, middle);
     context.fillStyle = face;
     context.fill();
@@ -564,10 +568,11 @@ export function buildFormBurstSheet<Canvas extends { getContext(kind: "2d"): unk
     const x = E / 2;
     const y = S + E / 2;
     const ember = context.createRadialGradient(x, y, 0, x, y, E / 2);
-    ember.addColorStop(0, "rgb(244 255 232 / 1)");
-    ember.addColorStop(0.22, "rgb(150 255 150 / 0.9)");
-    ember.addColorStop(0.55, "rgb(40 214 96 / 0.34)");
-    ember.addColorStop(1, "rgb(10 120 50 / 0)");
+    ember.addColorStop(0, "rgb(250 255 242 / 1)");
+    ember.addColorStop(0.18, "rgb(198 255 176 / 0.95)");
+    ember.addColorStop(0.42, "rgb(84 246 128 / 0.68)");
+    ember.addColorStop(0.72, "rgb(28 196 86 / 0.28)");
+    ember.addColorStop(1, "rgb(8 108 44 / 0)");
     context.fillStyle = ember;
     context.fillRect(0, S, E, E);
   }
@@ -577,8 +582,9 @@ export function buildFormBurstSheet<Canvas extends { getContext(kind: "2d"): unk
     const x = FORM_BURST_SHEET.ember + G / 2;
     const y = S + G / 2;
     const glow = context.createRadialGradient(x, y, 0, x, y, G / 2);
-    glow.addColorStop(0, "rgb(170 255 170 / 0.5)");
-    glow.addColorStop(0.4, "rgb(50 220 100 / 0.2)");
+    glow.addColorStop(0, "rgb(196 255 188 / 0.58)");
+    glow.addColorStop(0.36, "rgb(78 238 122 / 0.32)");
+    glow.addColorStop(0.7, "rgb(26 172 78 / 0.12)");
     glow.addColorStop(1, "rgb(10 120 50 / 0)");
     context.fillStyle = glow;
     context.fillRect(FORM_BURST_SHEET.ember, S, G, G);
@@ -831,18 +837,27 @@ export class FormBurstParticles {
           const life = data[s + 8];
           if (t <= 0 || t >= life) continue;
           const seconds = t / 1000;
-          // Thrown, and held by the air; the fire's draught lifts it a little.
-          const far = (data[s + 4] * (1 - Math.exp(-DRAG * seconds))) / DRAG;
-          const cx = left + data[s] * w + data[s + 2] * far * h;
-          const cy = top + data[s + 1] * h + data[s + 3] * far * h + (kind === "max" ? -0.05 : 0.04) * seconds * seconds * h;
           const p = t / life;
-          const size = Math.max(5 * px, data[s + 7] * h * (kind === "max" ? 1 : 1.25)) * (1 - 0.4 * p);
-          const turn = data[s + 5] * seconds + n;
-          // It tumbles: seen edge-on now and then, never thinner than a fifth.
-          const tumble = 0.2 + 0.8 * Math.abs(Math.cos(data[s + 6] * seconds + n * 1.7));
+          // Thrown with a shock-wave impulse, then held by air drag; thermal updraft on MAX, ballistic drop on ULTRA.
+          const snap = 1 + 0.14 * Math.exp(-seconds * 13);
+          const far = ((data[s + 4] * (1 - Math.exp(-DRAG * seconds))) / DRAG) * snap;
+          const sway = Math.sin(seconds * 5.8 + n * 1.3) * 0.006 * seconds * h;
+          const cx = left + data[s] * w + data[s + 2] * far * h - data[s + 3] * sway;
+          const cy =
+            top +
+            data[s + 1] * h +
+            data[s + 3] * far * h +
+            data[s + 2] * sway +
+            (kind === "max" ? -0.056 : 0.042) * seconds * seconds * h;
+          const punch = 1 + 0.12 * Math.sin(Math.PI * clamp01(t / 110));
+          const size = Math.max(5 * px, data[s + 7] * h * (kind === "max" ? 1 : 1.25)) * punch * (1 - 0.4 * p);
+          const turn = data[s + 5] * seconds * (1 - 0.16 * p) + n;
+          // It tumbles: seen edge-on now and then, never thinner than a fifth, with bi-axial nutation.
+          const nutation = 0.88 + 0.12 * Math.sin(data[s + 5] * seconds * 0.6 + n);
+          const tumble = 0.2 + 0.8 * Math.abs(Math.cos(data[s + 6] * seconds + n * 1.7)) * nutation;
           const cos = Math.cos(turn) * size;
           const sin = Math.sin(turn) * size;
-          context.globalAlpha = Math.min(1, t / 40) * (p < 0.55 ? 1 : 1 - smooth((p - 0.55) / 0.45));
+          context.globalAlpha = Math.min(1, t / 36) * (p < 0.54 ? 1 : 1 - smooth((p - 0.54) / 0.46));
           context.setTransform(cos, sin, -sin * tumble, cos * tumble, cx, cy);
           context.drawImage(source, (n % kinds) * side, 0, side, side, -0.5, -0.5, 1, 1);
           live += 1;
@@ -865,16 +880,22 @@ export class FormBurstParticles {
         let cy = top + data[e + 1] * h;
         if (data[e + 2]) {
           const far = (data[e + 5] * (1 - Math.exp(-DRAG * seconds))) / DRAG;
-          cx += Math.cos(data[e + 6]) * far * h;
-          cy += Math.sin(data[e + 6]) * far * h - 0.09 * seconds * seconds * h;
+          const ang = data[e + 6];
+          const swirl = Math.sin(seconds * 7.8 + n * 1.4) * 0.015 * seconds * h;
+          cx += Math.cos(ang) * far * h - Math.sin(ang) * swirl;
+          cy += Math.sin(ang) * far * h + Math.cos(ang) * swirl - 0.098 * seconds * seconds * h;
         } else {
-          // It rises, quickening, and sways as it goes.
-          cy -= data[e + 5] * seconds * (1 + 1.6 * seconds) * h;
-          cx += Math.sin(data[e + 6] + seconds * 5.2) * 0.012 * (0.4 + seconds) * h;
+          // It rises, quickening, and spirals in a dual-harmonic convective updraft.
+          cy -= data[e + 5] * seconds * (1 + 1.68 * seconds) * h;
+          const wave =
+            Math.sin(data[e + 6] + seconds * 5.4) + 0.34 * Math.cos(data[e + 6] * 1.7 - seconds * 8.6);
+          cx += wave * 0.0115 * (0.38 + seconds) * h;
         }
-        const size = Math.max(2.2 * px, data[e + 7] * h * (1 - 0.5 * p)) * 2.4;
-        const glint = 0.7 + 0.3 * Math.sin(wall * 0.021 + n * 2.4);
-        context.globalAlpha = Math.min(1, t / 70) * (1 - p * p) * glint;
+        const breath = 0.92 + 0.16 * Math.sin(wall * 0.019 + n * 3.1);
+        const size = Math.max(2.2 * px, data[e + 7] * h * (1 - 0.48 * p)) * 2.45 * breath;
+        const glint =
+          0.72 + 0.2 * Math.sin(wall * 0.021 + n * 2.4) + 0.08 * Math.cos(wall * 0.011 - n * 1.3);
+        context.globalAlpha = Math.min(1, t / 64) * (1 - p * p) * glint;
         context.setTransform(size, 0, 0, size, cx, cy);
         context.drawImage(own, 0, FORM_BURST_SHEET.shard, E, E, -0.5, -0.5, 1, 1);
         live += 1;
@@ -902,22 +923,27 @@ export class FormBurstParticles {
           const landed = ms > lands ? (ms - lands) / absorb : 0;
           const tx = left + data[c] * w;
           const ty = top + data[c + 1] * h;
-          // Its way in bows a little and straightens onto the surface.
-          const bow = data[c + 7] * Math.sin(Math.PI * eased) * (1 - eased) * h;
+          // Its way in bows in a magnetic vortex arc and straightens onto the surface.
+          const spiral = 1 + 0.26 * Math.cos(Math.PI * 1.8 * eased + (n & 3));
+          const bow = data[c + 7] * Math.sin(Math.PI * eased) * (1 - eased) * spiral * h;
           const away = 1 - eased;
-          const cx = tx + (data[c + 2] * away - data[c + 3] * bow / h) * h;
-          const cy = ty + (data[c + 3] * away + data[c + 2] * bow / h) * h;
+          const cx = tx + (data[c + 2] * away - (data[c + 3] * bow) / h) * h;
+          const cy = ty + (data[c + 3] * away + (data[c + 2] * bow) / h) * h;
           const least = pass ? S.largeMin : S.fineMin;
-          // Small as it forms in the air, true on its way, taken in.
+          // Small as it forms in the air, true on its way, with a lock-on pulse as it joins the front.
+          const lockPulse = pass ? 1 + 0.1 * smooth(1 - Math.abs(p - 0.94) * 7) : 1;
           const size =
             Math.max(least * px, data[c + 6] * h) *
             (0.55 + 0.45 * smooth(p * 4)) *
+            lockPulse *
             (1 - 0.55 * landed);
-          const glint = pass ? 1 : 0.72 + 0.28 * Math.sin(wall * 0.013 + n * 1.9);
-          context.globalAlpha = smooth(p * (pass ? 5 : 6)) * (1 - landed) * (pass ? 0.94 : glint);
+          const glint = pass
+            ? 1
+            : 0.74 + 0.18 * Math.sin(wall * 0.013 + n * 1.9) + 0.08 * Math.cos(wall * 0.009 - n * 1.1);
+          context.globalAlpha = smooth(p * (pass ? 5 : 6)) * (1 - landed) * (pass ? 0.95 : glint);
           if (pass) {
-            const turn = data[c + 8] + (1 - eased) * 1.4;
-            const tilt = 0.45 + 0.55 * eased;
+            const turn = data[c + 8] + (1 - eased) * (1.45 + 0.35 * Math.sin(n * 1.3));
+            const tilt = 0.42 + 0.58 * eased;
             const cos = Math.cos(turn) * size;
             const sin = Math.sin(turn) * size;
             context.setTransform(cos, sin, -sin * tilt, cos * tilt, cx, cy);
@@ -950,15 +976,17 @@ export class FormBurstParticles {
         if (t <= 0 || t >= life) continue;
         const p = t / life;
         const far = data[e + 6] * (1 - (1 - p) * (1 - p));
+        const curl = (n % 2 ? 1 : -1) * 0.2 * far * p;
         const size = Math.max(FORM_BURST_CELL_SIZE.fineMin * px, data[e + 7] * h) * (1 - 0.4 * p);
-        context.globalAlpha = smooth(p * 5) * (1 - p) * 0.9;
+        const glint = 0.84 + 0.16 * Math.sin(wall * 0.017 + n * 2.1);
+        context.globalAlpha = smooth(p * 5) * (1 - p) * 0.92 * glint;
         context.setTransform(
           size,
           0,
           0,
           size,
-          left + data[e] * w + data[e + 2] * far * h,
-          top + data[e + 1] * h + data[e + 3] * far * h,
+          left + data[e] * w + (data[e + 2] * far - data[e + 3] * curl) * h,
+          top + data[e + 1] * h + (data[e + 3] * far + data[e + 2] * curl) * h,
         );
         context.drawImage(
           sheet,

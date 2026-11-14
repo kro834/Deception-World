@@ -3198,3 +3198,284 @@ html:not([data-world-effects="economy"])
 .rxs-page.rxs-page.ics-page .ics-table tr[data-self]:not([data-current]) :is(th, td) {
   opacity: 0.74;
 }
+
+/* ================================================================
+   Prism pass (2026-11): the page's idea, what is seen and what is real,
+   given a crystal's edge. Every rim is the same three-hairline dispersion
+   (ice, violet-pink, gold) laid over the page's metal: the chapter plate,
+   the hero stage, the article and finisher plates, the forms picture, the
+   spec cells and the comparison table. Static by default; the entrances
+   below play once, only on the full-motion tier (never economy, never a
+   constrained device), and the calm tiers rest fully drawn. No loop.
+   ================================================================ */
+@property --ics-rim-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 210deg;
+}
+
+.rxs-page.rxs-page.ics-page {
+  --ics-rim-angle: 210deg;
+  --ics-prism-rim: conic-gradient(
+    from var(--ics-rim-angle) at 50% 50%,
+    rgb(166 230 255 / 90%),
+    rgb(169 131 255 / 70%) 22%,
+    rgb(255 143 210 / 82%) 44%,
+    rgb(255 225 163 / 92%) 62%,
+    rgb(166 230 255 / 26%) 82%,
+    rgb(166 230 255 / 90%)
+  );
+  --ics-prism-edge: linear-gradient(
+    90deg,
+    transparent,
+    rgb(166 230 255 / 75%) 16%,
+    rgb(169 131 255 / 62%) 38%,
+    rgb(255 143 210 / 66%) 60%,
+    rgb(255 225 163 / 84%) 82%,
+    transparent
+  );
+}
+
+/* The chapter plate: a one-pixel prism rim (a masked conic ring) over the
+   plate's gold corner, and a cool floor of light in its lower edge. */
+.rxs-page.rxs-page.ics-page .ics-heading-plate {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 20%),
+    inset 0 -22px 30px -20px rgb(47 79 216 / 55%),
+    inset 0 0 0 1px rgb(2 3 10 / 70%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-heading-plate::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1px;
+  content: "";
+  background: var(--ics-prism-rim);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+/* The hero stage: a layered edge (a dark seat, a faint ice line, the lit top
+   edge, a cool floor shadow and a rose bloom) and the prism band that
+   crosses the picture once, as the projections close. At rest the band sits
+   off the picture. */
+.rxs-page.rxs-page.ics-page .ics-hero-visual {
+  box-shadow:
+    0 0 0 1px rgb(2 3 10),
+    0 0 0 2px rgb(166 230 255 / 14%),
+    0 30px 80px -38px rgb(47 79 216 / 62%),
+    0 0 64px -26px rgb(255 143 210 / 30%),
+    inset 0 0 0 1px rgb(255 255 255 / 6%),
+    inset 0 1px 0 0 rgb(255 255 255 / 24%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-hero-visual::after {
+  background:
+    linear-gradient(
+        105deg,
+        transparent 38%,
+        rgb(166 230 255 / 0%) 42%,
+        rgb(255 225 163 / 22%) 47%,
+        rgb(255 143 210 / 18%) 51%,
+        rgb(166 230 255 / 14%) 55%,
+        transparent 62%
+      )
+      94% 0 / 260% 100% no-repeat,
+    linear-gradient(180deg, transparent 62%, rgb(2 3 10 / 40%) 82%, #02030a 100%),
+    radial-gradient(circle at 50% 34%, transparent 40%, rgb(0 0 0 / 16%) 84%);
+}
+
+/* The plates (装甲・能力・兵装・必殺): the lit top edge as a prism hairline,
+   the gold bracket closing the lower right. */
+.rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher) {
+  position: relative;
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher)::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  height: 1px;
+  content: "";
+  background: var(--ics-prism-edge);
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 320ms ease;
+}
+
+.rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher)::after {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  content: "";
+  border-right: 1px solid rgb(233 184 102 / 62%);
+  border-bottom: 1px solid rgb(233 184 102 / 62%);
+  pointer-events: none;
+}
+
+/* The forms picture: the same rim over its frame. */
+.rxs-page.rxs-page.ics-page .ics-form-panel > figure::before {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  padding: 1px;
+  content: "";
+  background: var(--ics-prism-rim);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* The spec cells: a short ice tick on the floor of each, drawn full on
+   hover (below); the figures keep their lining numerals. */
+.rxs-page.rxs-page.ics-page .ics-specs > div::before {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  content: "";
+  background: var(--ics-prism-edge);
+  opacity: 0.7;
+  pointer-events: none;
+  transform: scaleX(0.18);
+  transform-origin: 0 50%;
+  transition:
+    transform 520ms cubic-bezier(0.2, 0.7, 0.1, 1),
+    opacity 320ms ease;
+}
+
+/* The comparison: a lit head, the figure's own row printed in the rim. */
+.rxs-page.rxs-page.ics-page .ics-table thead th:not(:first-child) {
+  box-shadow: inset 0 -1px 0 0 rgb(166 230 255 / 30%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-self] td {
+  box-shadow: inset 0 1px 0 0 rgb(166 230 255 / 16%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tr[data-ultra] td {
+  box-shadow: inset 0 1px 0 0 rgb(255 107 128 / 16%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-table tbody :is(th, td) {
+  transition: background-color 240ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher):hover::before {
+    opacity: 0.95;
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-specs > div:hover::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-specs > div:hover dd > b {
+    text-shadow:
+      0 0 16px rgb(166 230 255 / 32%),
+      0 0 2px rgb(255 255 255 / 30%);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-table tbody tr:not([data-self], [data-ultra]):hover td {
+    background-color: rgb(166 230 255 / 5%);
+  }
+
+  .rxs-page.rxs-page.ics-page .ics-table tbody tr:not([data-self], [data-ultra]):hover th {
+    background-color: #0a1020;
+  }
+}
+
+/* Entrances, once: the plate's rim turns a full circle as its chapter
+   opens (the plate itself slides in from the title's side), and the prism
+   band crosses the hero stage. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal:not(.is-visible)
+    .ics-heading-plate {
+    opacity: 0;
+    translate: 14px 0;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal
+    .ics-heading-plate {
+    transition:
+      opacity 700ms ease 200ms,
+      translate 900ms cubic-bezier(0.2, 0.7, 0.1, 1) 200ms;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-heading.rxs-reveal.is-visible
+    .ics-heading-plate::before {
+    animation: ics-rim-turn 2200ms cubic-bezier(0.3, 0.6, 0.1, 1) 260ms backwards;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-hero-visual::after {
+    animation: ics-hero-prism 2200ms cubic-bezier(0.45, 0.05, 0.2, 1) 700ms both;
+  }
+}
+
+@keyframes ics-rim-turn {
+  from {
+    --ics-rim-angle: -150deg;
+    opacity: 0.2;
+  }
+}
+
+@keyframes ics-hero-prism {
+  from {
+    background-position: 94% 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 6% 0, 0 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rxs-page.rxs-page.ics-page :is(.ics-heading-plate, .ics-hero-visual, .ics-article, .ics-finisher, .ics-specs > div, .ics-table tbody :is(th, td))::before,
+  .rxs-page.rxs-page.ics-page .ics-hero-visual::after,
+  .rxs-page.rxs-page.ics-page .ics-table tbody :is(th, td) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .rxs-page.rxs-page.ics-page :is(.ics-heading-plate, .ics-form-panel > figure)::before,
+  .rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher)::after,
+  .rxs-page.rxs-page.ics-page .ics-specs > div::before {
+    display: none;
+  }
+
+  .rxs-page.rxs-page.ics-page :is(.ics-heading-plate, .ics-hero-visual) {
+    box-shadow: none;
+    border-color: CanvasText;
+  }
+
+  .rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher)::before {
+    background: CanvasText;
+    opacity: 0.4;
+  }
+}

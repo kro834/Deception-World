@@ -1761,3 +1761,256 @@ html[data-family="special"]
     font-size: 20px;
   }
 }
+
+/* ======================================================================
+   OPTICS (2026-11-14) — the plates' material, one step deeper.
+   Owner brief (2026-11-14): 光学エッジ（微細なスペキュラハイライト、多層
+   インセット照明、精密なルーラー・テレメトリ装飾）の深化. Paint only: every
+   plate keeps its box, padding and layout; nothing here moves (the motion
+   sheet owns timing; the type sheets own the words). The forced-colour
+   frames are restated at the end of this layer, after it.
+   ====================================================================== */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+  /* The plate's light, in layers: a lit top lip and a dark base, faint ice
+     side rims, the frame line, a cool falloff under the lip and a shade
+     over the foot, then the drop. */
+  --rxl-plate-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%), inset 0 -1px 0 rgb(0 0 0 / 55%),
+    inset 1px 0 0 rgb(121 232 255 / 7%), inset -1px 0 0 rgb(121 232 255 / 7%),
+    inset 0 0 0 1px var(--rxl-plate-edge), inset 0 30px 44px -40px rgb(121 232 255 / 26%),
+    inset 0 -34px 42px -40px rgb(0 0 0 / 70%), 0 1px 0 rgb(121 232 255 / 6%),
+    0 30px 70px -36px rgb(0 0 0 / 85%);
+  /* A specular glint along the top edge, brightest at its middle. */
+  --rxl-specular: linear-gradient(
+      90deg,
+      rgb(214 247 255 / 0%),
+      rgb(214 247 255 / 48%) 50%,
+      rgb(214 247 255 / 0%)
+    )
+    50% 0 / 64% 1px no-repeat;
+  /* A precision ruler along the foot, clear of the corner ticks: a minor
+     graduation every 8px, a major every 64px. */
+  --rxl-ruler:
+    repeating-linear-gradient(90deg, rgb(121 232 255 / 32%) 0 1px, transparent 1px 64px) 24px 100% /
+      calc(100% - 48px) 7px no-repeat,
+    repeating-linear-gradient(90deg, rgb(121 232 255 / 15%) 0 1px, transparent 1px 8px) 24px 100% /
+      calc(100% - 48px) 3px no-repeat;
+}
+
+/* The chapter guideways: the gold seat at the rule's head, a graduated
+   scale riding above the rule's lit stretch, and the stop at its end. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-section
+  > .rxs-section-heading {
+  background:
+    linear-gradient(var(--rxt-gold, #f2d896), var(--rxt-gold, #f2d896)) 0 100% / 28px 3px no-repeat,
+    linear-gradient(90deg, var(--rxt-ice, #79e8ff), rgb(255 143 216 / 60%) 36%, var(--rxl-line) 70%, transparent)
+      no-repeat 0 100% / 100% 1px,
+    repeating-linear-gradient(90deg, rgb(121 232 255 / 36%) 0 1px, transparent 1px 12px) 40px
+      calc(100% - 5px) / min(44%, 360px) 4px no-repeat,
+    linear-gradient(rgb(121 232 255 / 42%), rgb(121 232 255 / 42%)) 100% 100% / 1px 9px no-repeat;
+}
+
+/* The chapter map: each numeral plate is struck metal, a lit lip over a
+   dark seat and a warm cast under it. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > .rxe-chapter-map
+  a
+  > b {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 50%),
+    0 0 0 1px rgb(0 0 0 / 35%),
+    0 5px 12px -7px rgb(242 216 150 / 50%);
+}
+
+/* 01 / 02 / 05: the instrument plates take the glint and the ruler. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > :is(#performance, #p14)
+  :is(.rxs-comparison, .rxs-p14-comparator),
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid {
+  background: var(--rxl-corners), var(--rxl-specular), var(--rxl-ruler), var(--rxl-plate);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-specs {
+  background:
+    var(--rxl-corners),
+    var(--rxl-specular),
+    var(--rxl-ruler),
+    linear-gradient(90deg, transparent 10%, rgb(121 232 255 / 6%) 50%, transparent 90%),
+    var(--rxl-plate);
+}
+
+/* 04: the drawer takes the glint (its open grid draws its own floor). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  :is(.rxe-form-comparison, .rxe-form-status) {
+  background: var(--rxl-corners), var(--rxl-specular), var(--rxl-plate);
+}
+
+/* 02: a row under the pointer is lit across, so its label reads to its two
+   figures (fine pointers only; the rows are not controls). */
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #p14
+    .rxs-p14-metrics
+    article:hover {
+    background: linear-gradient(90deg, rgb(121 232 255 / 8%), rgb(121 232 255 / 2%) 62%, transparent);
+    box-shadow: inset 2px 0 0 rgb(121 232 255 / 72%);
+  }
+}
+
+/* 04: the comparison cards. Each figure's frame takes a lit lip; the card
+   shown in the panel gathers its form's light under its edge; a card under
+   the pointer draws its accent beneath it (the motion sheet times it). */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card
+  > img {
+  border-color: rgb(121 232 255 / 12%);
+  border-block-start-color: rgb(214 247 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxe-comparison-card[data-selected="true"] {
+  background:
+    radial-gradient(
+      80% 36% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 15%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(121 232 255 / 6%), transparent 60%);
+  box-shadow:
+    inset 0 2px 0 var(--rxs-stage-accent, #63e2ff),
+    inset 0 3px 16px -8px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 75%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 22%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxe-comparison-card:hover {
+    box-shadow:
+      inset 0 2px 0 var(--rxs-stage-accent, #63e2ff),
+      inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 30%, transparent),
+      0 26px 50px -30px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 55%, transparent);
+  }
+}
+
+/* 05: each plate takes a lit lip; his (the third) its gold lip and the
+   gold's glow under it; a plate under the pointer casts its light. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 9%),
+    inset 0 0 0 1px rgb(121 232 255 / 5%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system
+  > .rxs-system-grid
+  > article:nth-child(3) {
+  box-shadow:
+    inset 0 2px 0 var(--rxt-gold, #f2d896),
+    inset 0 3px 20px -10px rgb(242 216 150 / 60%),
+    inset 0 0 0 1px rgb(242 216 150 / 10%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid
+    > article:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 14%),
+      inset 0 0 0 1px rgb(121 232 255 / 16%),
+      0 24px 46px -30px rgb(121 232 255 / 50%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #system
+    > .rxs-system-grid
+    > article:nth-child(3):hover {
+    box-shadow:
+      inset 0 2px 0 var(--rxt-gold, #f2d896),
+      inset 0 3px 20px -10px rgb(242 216 150 / 70%),
+      inset 0 0 0 1px rgb(242 216 150 / 18%),
+      0 24px 46px -30px rgb(242 216 150 / 45%);
+  }
+}
+
+/* Forced colours: the layer's paint goes; the frames stay real borders. */
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14, #stages, #system)
+    :is(
+      .rxs-comparison,
+      .rxs-p14-comparator,
+      .rxe-form-status,
+      .rxe-form-comparison,
+      .rxs-system-grid,
+      .rxs-specs
+    ) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-section
+    > .rxs-section-heading {
+    background: none;
+    border-block-end: 1px solid CanvasText;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    :is(
+      .rxs-system-grid > article,
+      .rxe-comparison-card,
+      .rxs-p14-metrics article,
+      .rxe-chapter-map a > b
+    ) {
+    box-shadow: none !important;
+  }
+}

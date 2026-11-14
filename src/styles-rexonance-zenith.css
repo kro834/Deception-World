@@ -27,6 +27,7 @@
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
   --rzn-ice: 121 232 255;
+  --rzn-emerald: 74 242 132;
   --rzn-violet: 182 163 255;
   --rzn-pink: 255 143 216;
   --rzn-gold: 242 216 150;
@@ -40,11 +41,12 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
     radial-gradient(60% 46% at 50% 44%, rgb(var(--rzn-violet) / 12%), transparent 70%),
     radial-gradient(38% 30% at 50% 92%, rgb(var(--rzn-ice) / 16%), transparent 72%),
     linear-gradient(180deg, #03060c, #050914 46%, #03060c);
-  border-block: 1px solid rgb(var(--rzn-ice) / 16%);
+  border-block: 1px solid rgb(var(--rzn-ice) / 18%);
 }
 
-/* The prism cut across the scene's top edge, drawn. */
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before {
+/* The prism cut across the scene's top and bottom edges, drawn. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::after {
   content: "";
   position: absolute;
   top: -1px;
@@ -55,14 +57,23 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(var(--rzn-ice)) 18%,
-    rgb(var(--rzn-violet)) 42%,
-    rgb(var(--rzn-pink)) 66%,
+    rgb(var(--rzn-ice)) 16%,
+    rgb(var(--rzn-violet)) 38%,
+    rgb(var(--rzn-white)) 50%,
+    rgb(var(--rzn-pink)) 64%,
     rgb(var(--rzn-gold)) 86%,
     transparent
   );
-  opacity: 0.8;
+  box-shadow: 0 1px 14px rgb(var(--rzn-ice) / 24%);
+  opacity: 0.85;
   pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::after {
+  top: auto;
+  bottom: -1px;
+  height: 1px;
+  opacity: 0.65;
 }
 
 /* ---------------- The frame: one screen, the figure in the middle ---------------- */
@@ -90,7 +101,7 @@ html[data-family="special"]
   pointer-events: none;
 }
 
-/* The prism stage: three shafts falling on the figure, a lattice. */
+/* The prism stage: shafts falling on the figure, a precision optical lattice. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
@@ -100,13 +111,14 @@ html[data-family="special"]
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(101deg, transparent 0 41%, rgb(var(--rzn-ice) / 7%) 41% 44%, transparent 44%),
-    linear-gradient(79deg, transparent 0 55%, rgb(var(--rzn-pink) / 6%) 55% 58%, transparent 58%),
-    linear-gradient(94deg, transparent 0 49%, rgb(var(--rzn-white) / 5%) 49% 50%, transparent 50%),
-    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 4%) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 3%) 0 1px, transparent 1px 64px);
-  -webkit-mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
-  mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+    linear-gradient(101deg, transparent 0 41%, rgb(var(--rzn-ice) / 8%) 41% 44%, transparent 44%),
+    linear-gradient(79deg, transparent 0 55%, rgb(var(--rzn-pink) / 7%) 55% 58%, transparent 58%),
+    linear-gradient(112deg, transparent 0 34%, rgb(var(--rzn-violet) / 5.5%) 34% 37%, transparent 37%),
+    linear-gradient(94deg, transparent 0 49%, rgb(var(--rzn-white) / 6%) 49% 50.2%, transparent 50.2%),
+    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 4.5%) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 3.5%) 0 1px, transparent 1px 64px);
+  -webkit-mask-image: radial-gradient(72% 82% at 50% 46%, #000 32%, transparent 88%);
+  mask-image: radial-gradient(72% 82% at 50% 46%, #000 32%, transparent 88%);
 }
 
 /* The floor: a lit ring under the boots. */
@@ -354,7 +366,8 @@ html[data-family="special"]
   height: 1px;
   margin: 0 12px 0 0;
   vertical-align: middle;
-  background: rgb(var(--rzn-ice));
+  background: linear-gradient(90deg, rgb(var(--rzn-ice)), rgb(var(--rzn-pink)));
+  box-shadow: 0 0 8px rgb(var(--rzn-ice) / 45%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-lines {
@@ -444,8 +457,9 @@ html[data-family="special"]
   .rzn-chip {
   color: rgb(var(--rzn-white));
   text-shadow:
-    0 0 1px rgb(var(--rzn-ice)),
-    0 0 18px rgb(var(--rzn-ice) / 45%);
+    0 0 1px rgb(var(--rzn-white)),
+    0 0 14px rgb(var(--rzn-ice) / 54%),
+    0 0 28px rgb(var(--rzn-pink) / 24%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hint {
@@ -502,6 +516,7 @@ html[data-family="special"]
   > span {
   color: rgb(var(--rzn-ice));
   font-size: max(12px, 0.28em);
+  text-shadow: 0 0 8px rgb(var(--rzn-ice) / 16%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-nanites {
@@ -554,8 +569,10 @@ html[data-family="special"]
   flex: none;
   width: 9px;
   height: 9px;
-  background: rgb(var(--rzn-ice));
-  box-shadow: 0 0 0 3px rgb(var(--rzn-ice) / 18%);
+  background: radial-gradient(circle at 35% 35%, rgb(var(--rzn-white)), rgb(var(--rzn-ice)) 72%);
+  box-shadow:
+    0 0 0 3px rgb(var(--rzn-ice) / 20%),
+    0 0 10px rgb(var(--rzn-ice) / 36%);
 }
 
 html[data-family="special"]
@@ -563,8 +580,10 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-rexonance-page
   > .rzn-suitup
   .rzn-part:nth-child(even)::after {
-  background: rgb(var(--rzn-pink));
-  box-shadow: 0 0 0 3px rgb(var(--rzn-pink) / 18%);
+  background: radial-gradient(circle at 35% 35%, rgb(var(--rzn-white)), rgb(var(--rzn-pink)) 72%);
+  box-shadow:
+    0 0 0 3px rgb(var(--rzn-pink) / 20%),
+    0 0 10px rgb(var(--rzn-pink) / 36%);
 }
 
 /* The stamp lands under the parts, high in the column: the Zeus button
@@ -611,7 +630,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   z-index: 2;
   display: none;
   width: 1px;
-  background: rgb(var(--rzn-ice) / 16%);
+  background: rgb(var(--rzn-ice) / 18%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-rail > i {
@@ -621,9 +640,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   background: linear-gradient(
     180deg,
     rgb(var(--rzn-ice)),
-    rgb(var(--rzn-pink)) 70%,
+    rgb(var(--rzn-violet)) 38%,
+    rgb(var(--rzn-pink)) 72%,
     rgb(var(--rzn-gold))
   );
+  box-shadow: 0 0 10px rgb(var(--rzn-ice) / 48%);
   transform-origin: 50% 0;
 }
 
@@ -652,8 +673,9 @@ html[data-family="special"]
   .rzn-chip[data-on] {
   color: rgb(var(--rzn-white));
   text-shadow:
-    0 0 1px rgb(var(--rzn-ice)),
-    0 0 18px rgb(var(--rzn-ice) / 50%);
+    0 0 1px rgb(var(--rzn-white)),
+    0 0 16px rgb(var(--rzn-ice) / 56%),
+    0 0 30px rgb(var(--rzn-pink) / 26%);
 }
 
 html[data-family="special"]
@@ -1221,7 +1243,8 @@ html[data-family="special"]
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, rgb(var(--rzn-ice, 121 232 255)), rgb(255 143 216 / 80%));
+  background: linear-gradient(90deg, rgb(var(--rzn-ice, 121 232 255)), rgb(255 143 216 / 84%));
+  box-shadow: 0 0 10px rgb(121 232 255 / 32%);
   transform-origin: 0 50%;
 }
 
@@ -1245,11 +1268,15 @@ html[data-family="special"]
   border-radius: 50%;
   background:
     radial-gradient(circle, rgb(244 251 255) 0 2.5px, transparent 3px),
+    radial-gradient(circle, transparent 58%, rgb(121 232 255 / 26%) 60% 63%, transparent 65%),
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 50% 0 / 1.5px 22% no-repeat,
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 50% 100% / 1.5px 22% no-repeat,
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 0 50% / 22% 1.5px no-repeat,
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 100% 50% / 22% 1.5px no-repeat;
-  box-shadow: 0 0 0 6px rgb(121 232 255 / 10%);
+  box-shadow:
+    0 0 0 6px rgb(121 232 255 / 12%),
+    0 0 18px rgb(121 232 255 / 28%),
+    inset 0 0 10px rgb(121 232 255 / 18%);
 }
 
 html[data-family="special"]
@@ -1744,6 +1771,26 @@ html[data-family="special"]
   > .rxs-footer-top
   > a:is(:hover, :focus-visible) {
   color: var(--rxt-text-1, #f7f9fc);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > .rxs-footer
+    > .rxs-footer-top
+    > a:hover {
+    text-shadow: 0 0 14px rgb(var(--rzn-ice, 121 232 255) / 42%);
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rxs-footer
+  > .rxs-footer-top
+  > a:active {
+  translate: 0 1px;
 }
 
 html[data-family="special"]
@@ -2576,7 +2623,8 @@ html[data-family="special"]
     display: none;
   }
 
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::after {
     display: none;
   }
 
@@ -2698,6 +2746,30 @@ html[data-family="special"]
   visibility: hidden;
 }
 
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-stage-panel
+  figure[data-rxf-burst="max"] {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice, #7ae8ff)) 38%, transparent),
+    0 0 48px -8px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice, #7ae8ff)) 40%, transparent),
+    var(--ra-drop, 0 22px 56px rgb(0 0 0 / 68%)),
+    inset 0 0 28px rgb(74 242 132 / 12%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  .rxs-stage-panel
+  figure[data-rxf-burst="ultra"] {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice, #7ae8ff)) 38%, transparent),
+    0 0 48px -8px color-mix(in srgb, var(--rxs-stage-accent, var(--ra-ice, #7ae8ff)) 40%, transparent),
+    var(--ra-drop, 0 22px 56px rgb(0 0 0 / 68%)),
+    inset 0 0 28px rgb(182 163 255 / 12%);
+}
+
 @media (forced-colors: active) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page :is(.rxf-burst, .rxf-fade) {
     display: none;
@@ -2741,7 +2813,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stag
    figure's fit, and phase changes use only opacity and transforms. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
   background:
-    radial-gradient(ellipse at 50% 44%, rgb(33 46 73 / 32%), transparent 68%),
+    radial-gradient(ellipse at 50% 44%, rgb(33 46 73 / 36%), transparent 68%),
+    radial-gradient(ellipse at 50% 88%, rgb(var(--rzn-ice) / 8%), transparent 56%),
     linear-gradient(180deg, #020409, #070b16 48%, #020409);
 }
 
@@ -2766,7 +2839,7 @@ html[data-family="special"]
   inset: 0;
   background:
     linear-gradient(90deg, #020409 0%, transparent 28% 72%, #020409 100%),
-    radial-gradient(ellipse at 50% 105%, rgb(121 232 255 / 8%), transparent 44%),
+    radial-gradient(ellipse at 50% 105%, rgb(121 232 255 / 10%), transparent 46%),
     linear-gradient(180deg, rgb(2 4 9 / 68%), transparent 24% 76%, rgb(2 4 9 / 72%));
 }
 
@@ -2776,7 +2849,7 @@ html[data-family="special"]
   > .rzn-suitup
   > .rzn-frame
   > .rzn-light {
-  opacity: 0.44;
+  opacity: 0.46;
 }
 
 html[data-family="special"]
@@ -2787,10 +2860,11 @@ html[data-family="special"]
   > .rzn-aura {
   inset: 4% 14% 0;
   background:
-    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 22%), transparent 48%),
-    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 20%), transparent 48%),
-    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 10%), transparent 38%);
-  opacity: 0.78;
+    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 24%), transparent 49%),
+    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 22%), transparent 49%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 13%), transparent 40%),
+    radial-gradient(ellipse at 50% 54%, rgb(var(--rzn-violet) / 10%), transparent 54%);
+  opacity: 0.82;
   scale: 1;
 }
 
@@ -2804,10 +2878,13 @@ html[data-family="special"]
   left: 50%;
   width: min(42%, 580px);
   height: 64%;
-  border: 1px solid rgb(var(--rzn-gold) / 24%);
+  border: 1px solid rgb(var(--rzn-gold) / 28%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 9%), transparent 38%);
-  opacity: 0.7;
+  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 11%), transparent 40%);
+  box-shadow:
+    0 0 28px rgb(var(--rzn-gold) / 10%),
+    inset 0 0 22px rgb(var(--rzn-ice) / 8%);
+  opacity: 0.74;
   translate: -50% 0;
   scale: 1;
 }
@@ -2825,7 +2902,7 @@ html[data-family="special"]
   content: "";
   position: absolute;
   inset: 8% -16%;
-  border: 1px solid rgb(var(--rzn-gold) / 16%);
+  border: 1px solid rgb(var(--rzn-gold) / 18%);
   border-radius: 50%;
   transform: rotate(25deg);
 }
@@ -2836,7 +2913,7 @@ html[data-family="special"]
   > .rzn-suitup
   .rzn-crown::after {
   inset: 20% -28%;
-  border-color: rgb(var(--rzn-ice) / 15%);
+  border-color: rgb(var(--rzn-ice) / 18%);
   transform: rotate(-25deg);
 }
 
@@ -2846,11 +2923,17 @@ html[data-family="special"]
   > .rzn-suitup
   > .rzn-frame
   > .rzn-floor {
-  border-color: rgb(var(--rzn-ice) / 24%);
-  background: radial-gradient(closest-side, rgb(var(--rzn-ice) / 13%), transparent);
+  border-color: rgb(var(--rzn-ice) / 28%);
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--rzn-ice) / 16%),
+    rgb(var(--rzn-violet) / 6%) 64%,
+    transparent
+  );
   box-shadow:
-    0 0 0 10px rgb(var(--rzn-ice) / 3%),
-    0 0 0 30px rgb(var(--rzn-gold) / 2%);
+    0 0 0 10px rgb(var(--rzn-ice) / 4%),
+    0 0 0 30px rgb(var(--rzn-gold) / 2.5%),
+    inset 0 0 18px rgb(var(--rzn-ice) / 10%);
 }
 
 /* A single, honest phase caption. The static fallback shows completion;
@@ -2862,7 +2945,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-phase {
   min-height: 22px;
   margin: 0 0 clamp(18px, 2.6vh, 30px);
-  color: rgb(var(--rzn-white) / 76%);
+  color: rgb(var(--rzn-white) / 78%);
   font: 500 12px / 1.7 var(--dx-body);
   letter-spacing: 0.12em;
 }
@@ -2883,6 +2966,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   font: 500 12px / 1.7 var(--dx-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.1em;
+  text-shadow: 0 0 8px rgb(var(--rzn-ice) / 14%);
 }
 
 html[data-family="special"]
@@ -2968,7 +3052,16 @@ html[data-family="special"]
   > .rzn-suitup[data-rzn-state]:is([data-rzn-phase="ignite"], [data-rzn-phase="evolve"])
   > .rzn-frame
   > .rzn-light {
-  opacity: 0.64;
+  opacity: 0.66;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-rzn-state][data-rzn-burst]
+  > .rzn-frame
+  > .rzn-light {
+  opacity: 0.78;
 }
 
 html[data-family="special"]
@@ -3017,9 +3110,100 @@ html[data-family="special"]
   .rzn-stamp
   > b {
   color: rgb(var(--rzn-white));
-  background: rgb(var(--rzn-ice) / 9%);
-  border: 1px solid rgb(var(--rzn-ice) / 40%);
+  background: linear-gradient(
+    135deg,
+    rgb(var(--rzn-ice) / 14%),
+    rgb(var(--rzn-violet) / 8%) 55%,
+    rgb(var(--rzn-pink) / 12%)
+  );
+  border: 1px solid rgb(var(--rzn-ice) / 44%);
+  box-shadow:
+    0 0 18px rgb(var(--rzn-ice) / 20%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 22%);
+  text-shadow: 0 0 12px rgb(var(--rzn-ice) / 42%);
   clip-path: none;
+}
+
+/* Form-specific throne resonance when MAX, ULTRA, or EXCELSIOR completes. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="max"][data-rzn-form-complete]
+  > .rzn-frame
+  > .rzn-aura {
+  background:
+    radial-gradient(ellipse at 34% 44%, rgb(var(--rzn-emerald) / 26%), transparent 50%),
+    radial-gradient(ellipse at 66% 42%, rgb(var(--rzn-ice) / 18%), transparent 48%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 14%), transparent 40%);
+  opacity: 0.88;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="max"][data-rzn-form-complete]
+  > .rzn-frame
+  > .rzn-crown {
+  border-color: rgb(var(--rzn-emerald) / 30%);
+  box-shadow:
+    0 0 32px rgb(var(--rzn-emerald) / 14%),
+    inset 0 0 22px rgb(var(--rzn-gold) / 10%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="max"][data-rzn-form-complete]
+  .rzn-stamp
+  > b {
+  border-color: rgb(var(--rzn-emerald) / 50%);
+  box-shadow:
+    0 0 20px rgb(var(--rzn-emerald) / 24%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 24%);
+  text-shadow: 0 0 12px rgb(var(--rzn-emerald) / 45%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="ultra"][data-rzn-form-complete]
+  > .rzn-frame
+  > .rzn-aura {
+  background:
+    radial-gradient(ellipse at 30% 42%, rgb(var(--rzn-ice) / 28%), transparent 50%),
+    radial-gradient(ellipse at 70% 42%, rgb(var(--rzn-pink) / 26%), transparent 50%),
+    radial-gradient(ellipse at 50% 22%, rgb(var(--rzn-gold) / 16%), transparent 42%),
+    radial-gradient(ellipse at 50% 54%, rgb(var(--rzn-violet) / 16%), transparent 56%);
+  opacity: 0.92;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="ultra"][data-rzn-form-complete]
+  .rzn-stamp
+  > b {
+  border-color: rgb(var(--rzn-pink) / 48%);
+  box-shadow:
+    0 0 22px rgb(var(--rzn-pink) / 24%),
+    0 0 36px rgb(var(--rzn-ice) / 16%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 26%);
+  text-shadow:
+    0 0 12px rgb(var(--rzn-ice) / 48%),
+    0 0 22px rgb(var(--rzn-pink) / 32%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > .rzn-suitup[data-form="excelsior"][data-rzn-form-complete]
+  .rzn-stamp
+  > b {
+  border-color: rgb(var(--rzn-gold) / 52%);
+  box-shadow:
+    0 0 22px rgb(var(--rzn-gold) / 24%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 28%);
+  text-shadow: 0 0 14px rgb(var(--rzn-gold) / 48%);
 }
 
 @media (max-width: 760px), (max-width: 1099.98px) and (orientation: portrait) {

@@ -11,18 +11,22 @@
 
 .rxs-page.rxs-page.ffs-page {
   --ffz-ice: 127 230 255;
+  --ffz-violet: 201 155 255;
   --ffz-gold: 255 215 122;
-  --ffz-plate: linear-gradient(
-    160deg,
-    rgb(18 30 46 / 0.94) 0%,
-    rgb(9 15 26 / 0.96) 58%,
-    rgb(6 10 18 / 0.98) 100%
-  );
+  --ffz-plate:
+    radial-gradient(120% 90% at 12% 0%, rgb(var(--ffz-ice) / 0.11), transparent 56%),
+    radial-gradient(110% 85% at 88% 100%, rgb(var(--ffz-violet) / 0.09), transparent 58%),
+    linear-gradient(
+      160deg,
+      rgb(20 33 52 / 0.95) 0%,
+      rgb(9 16 28 / 0.97) 56%,
+      rgb(5 9 17 / 0.99) 100%
+    );
   --ffz-rail: linear-gradient(
     90deg,
-    rgb(var(--ffz-ice) / 0.95),
-    rgb(var(--ffz-ice) / 0.55) 46%,
-    rgb(var(--ffz-gold) / 0.85)
+    rgb(var(--ffz-ice) / 0.98),
+    rgb(var(--ffz-violet) / 0.78) 48%,
+    rgb(var(--ffz-gold) / 0.92)
   );
   --ffz-cut: 18px;
 }
@@ -40,18 +44,21 @@
   height: 1px;
   background: linear-gradient(
     90deg,
-    rgb(var(--ffz-ice) / 0.9),
-    rgb(var(--ffz-ice) / 0.25) 55%,
-    rgb(var(--ffz-gold) / 0.6) 82%,
+    rgb(var(--ffz-ice) / 0.95),
+    rgb(var(--ffz-violet) / 0.55) 48%,
+    rgb(var(--ffz-gold) / 0.72) 82%,
     transparent
   );
-  box-shadow: 0 0 12px rgb(var(--ffz-ice) / 0.35);
+  box-shadow:
+    0 0 14px rgb(var(--ffz-ice) / 0.42),
+    0 0 28px rgb(var(--ffz-violet) / 0.22);
   pointer-events: none;
 }
 .rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-suitup) > .rxs-section-heading h2 {
   text-shadow:
-    0 0 28px rgb(var(--ffz-ice) / 0.22),
-    0 2px 0 rgb(0 0 0 / 0.5);
+    0 0 28px rgb(var(--ffz-ice) / 0.26),
+    0 0 54px rgb(var(--ffz-violet) / 0.14),
+    0 2px 0 rgb(0 0 0 / 0.55);
 }
 
 /* -- plates: the spec table, the articles, the weapons, the finishers ---- */
@@ -62,7 +69,7 @@
   position: relative;
   isolation: isolate;
   background: var(--ffz-plate);
-  border: 1px solid rgb(var(--ffz-ice) / 0.16);
+  border: 1px solid rgb(var(--ffz-ice) / 0.22);
   clip-path: polygon(
     0 0,
     calc(100% - var(--ffz-cut)) 0,
@@ -72,8 +79,10 @@
     0 calc(100% - var(--ffz-cut))
   );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.05),
-    inset 0 -40px 60px -40px rgb(var(--ffz-ice) / 0.08);
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 0 0 1px rgb(var(--ffz-violet) / 0.07),
+    inset 0 -42px 64px -38px rgb(var(--ffz-ice) / 0.11),
+    0 16px 38px -16px rgb(0 0 0 / 0.62);
 }
 .rxs-page.rxs-page.ffs-page .ffs-specs > div::before,
 .rxs-page.rxs-page.ffs-page .ffs-articles > article::after,
@@ -84,7 +93,9 @@
   inset: 0 var(--ffz-cut) auto 0;
   height: 3px;
   background: var(--ffz-rail);
-  box-shadow: 0 0 14px rgb(var(--ffz-ice) / 0.45);
+  box-shadow:
+    0 0 14px rgb(var(--ffz-ice) / 0.52),
+    0 0 26px rgb(var(--ffz-violet) / 0.28);
   pointer-events: none;
   z-index: 1;
 }
@@ -187,13 +198,20 @@
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div {
     transition:
       transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      border-color 260ms ease;
+      border-color 260ms ease,
+      box-shadow 260ms ease;
   }
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-articles > article:hover,
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-weapons > li:hover,
   html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page .ffs-specs > div:hover {
     transform: translateY(-3px);
-    border-color: rgb(var(--ffz-ice) / 0.4);
+    border-color: rgb(var(--ffz-ice) / 0.48);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.24),
+      inset 0 0 0 1px rgb(var(--ffz-violet) / 0.14),
+      inset 0 -44px 68px -36px rgb(var(--ffz-ice) / 0.16),
+      0 22px 46px -16px rgb(0 0 0 / 0.76),
+      0 0 24px -6px rgb(var(--ffz-ice) / 0.2);
   }
 }
 
@@ -202,14 +220,28 @@
   .rxs-page.rxs-page.ffs-page .ffs-articles > article,
   .rxs-page.rxs-page.ffs-page .ffs-weapons > li,
   .rxs-page.rxs-page.ffs-page .ffs-finisher,
-  .rxs-page.rxs-page.ffs-page .ffs-stage-panel {
+  .rxs-page.rxs-page.ffs-page .ffs-stage-panel,
+  .rxs-page.rxs-page.ffs-page .ffs-console,
+  .rxs-page.rxs-page.ffs-page .ffs-panel,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-main,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-summary,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-comparator,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-generations > *,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-lineage {
     clip-path: none;
     background: Canvas;
     border-color: CanvasText;
     box-shadow: none;
   }
 
-  .rxs-page.rxs-page.ffs-page .ffs-stage-panel::before {
+  .rxs-page.rxs-page.ffs-page .ffs-stage-panel::before,
+  .rxs-page.rxs-page.ffs-page .ffs-console::before,
+  .rxs-page.rxs-page.ffs-page .ffs-panel::before,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-main::before,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-summary::before,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-comparator::before,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-generations > *::before,
+  .rxs-page.rxs-page.ffs-page .ffs-p16-lineage::before {
     display: none;
   }
 
@@ -224,7 +256,7 @@
   position: relative;
   isolation: isolate;
   background: var(--ffz-plate);
-  border: 1px solid rgb(var(--ffz-ice) / 0.2);
+  border: 1px solid rgb(var(--ffz-ice) / 0.26);
   clip-path: polygon(
     0 0,
     calc(100% - var(--ffz-cut)) 0,
@@ -234,9 +266,10 @@
     0 calc(100% - var(--ffz-cut))
   );
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 18%),
-    inset 0 -40px 70px -30px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 14%, transparent),
-    0 18px 48px -12px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 22%, transparent);
+    inset 0 1px 0 0 rgb(255 255 255 / 22%),
+    inset 0 0 0 1px rgb(var(--ffz-violet) / 10%),
+    inset 0 -44px 76px -28px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 18%, transparent),
+    0 22px 54px -14px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 26%, transparent);
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-stage-panel::before {
@@ -246,21 +279,21 @@
   height: 3px;
   background: var(--ffz-rail);
   box-shadow:
-    0 0 14px rgb(var(--ffz-ice) / 0.55),
-    0 0 24px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 60%, transparent);
+    0 0 16px rgb(var(--ffz-ice) / 0.62),
+    0 0 28px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 66%, transparent);
   pointer-events: none;
   z-index: 2;
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-stage-copy h3 {
   text-shadow:
-    0 0 28px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 45%, transparent),
-    0 2px 4px rgb(0 0 0 / 0.6);
+    0 0 32px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 52%, transparent),
+    0 2px 4px rgb(0 0 0 / 0.65);
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-form-code {
-  -webkit-text-stroke: 1px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 75%, transparent);
-  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 35%, transparent));
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 82%, transparent);
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--ffs-accent, rgb(var(--ffz-ice))) 42%, transparent));
 }
 
 /* -- the hero: the key visual dissolves into the stage ------------------ */
@@ -268,23 +301,24 @@
 .rxs-page.rxs-page.ffs-page .ffs-hero .rxs-hero-visual > svg {
   -webkit-mask-image: radial-gradient(64% 58% at 50% 46%, #000 62%, rgb(0 0 0 / 0.6) 82%, transparent 100%);
   mask-image: radial-gradient(64% 58% at 50% 46%, #000 62%, rgb(0 0 0 / 0.6) 82%, transparent 100%);
-  filter: drop-shadow(0 0 42px rgb(var(--ffz-ice) / 0.18));
+  filter: drop-shadow(0 0 42px rgb(var(--ffz-ice) / 0.22));
 }
 .rxs-page.rxs-page.ffs-page .ffs-hero .rxs-hero-visual::after {
   content: "";
   position: absolute;
   inset: 8% 6% 4%;
   z-index: -1;
-  background: radial-gradient(closest-side, rgb(var(--ffz-ice) / 0.2), rgb(88 60 200 / 0.12) 55%, transparent);
+  background: radial-gradient(closest-side, rgb(var(--ffz-ice) / 0.24), rgb(var(--ffz-violet) / 0.14) 55%, transparent);
   pointer-events: none;
 }
 .rxs-page.rxs-page.ffs-page .ffs-hero h1 {
   text-shadow:
-    0 0 36px rgb(var(--ffz-ice) / 0.28),
-    0 3px 0 rgb(0 0 0 / 0.55);
+    0 0 38px rgb(var(--ffz-ice) / 0.32),
+    0 0 64px rgb(var(--ffz-violet) / 0.18),
+    0 3px 0 rgb(0 0 0 / 0.58);
 }
 .rxs-page.rxs-page.ffs-page .ffs-hero .ffs-mark {
-  -webkit-text-stroke-color: rgb(var(--ffz-ice) / 0.34);
+  -webkit-text-stroke-color: rgb(var(--ffz-ice) / 0.38);
 }
 
 /* -- the comparison console and P16: machined panels -------------------- */
@@ -297,12 +331,14 @@
 .rxs-page.rxs-page.ffs-page .ffs-p16-lineage {
   position: relative;
   background: var(--ffz-plate);
-  border: 1px solid rgb(var(--ffz-ice) / 0.18);
+  border: 1px solid rgb(var(--ffz-ice) / 0.24);
   border-radius: 0;
   clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.05),
-    inset 0 -60px 80px -60px rgb(var(--ffz-ice) / 0.1);
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    inset 0 0 0 1px rgb(var(--ffz-violet) / 0.08),
+    inset 0 -60px 84px -56px rgb(var(--ffz-ice) / 0.14),
+    0 20px 48px -18px rgb(0 0 0 / 0.66);
 }
 .rxs-page.rxs-page.ffs-page .ffs-console::before,
 .rxs-page.rxs-page.ffs-page .ffs-panel::before,
@@ -316,12 +352,16 @@
   inset: 0 22px auto 0;
   height: 3px;
   background: var(--ffz-rail);
-  box-shadow: 0 0 14px rgb(var(--ffz-ice) / 0.45);
+  box-shadow:
+    0 0 16px rgb(var(--ffz-ice) / 0.52),
+    0 0 28px rgb(var(--ffz-violet) / 0.28);
   pointer-events: none;
 }
 .rxs-page.rxs-page.ffs-page .ffs-metric-result,
 .rxs-page.rxs-page.ffs-page .ffs-p16-result {
-  text-shadow: 0 0 22px rgb(var(--ffz-ice) / 0.35);
+  text-shadow:
+    0 0 22px rgb(var(--ffz-ice) / 0.4),
+    0 0 42px rgb(var(--ffz-violet) / 0.2);
 }
 
 /* -- the end card: the figure in the light, the last line lit ----------- */
@@ -434,10 +474,11 @@
     background:
       linear-gradient(rgb(127 230 255 / 4%) 1px, transparent 1px) 0 0 / 100% 48px,
       linear-gradient(90deg, rgb(127 230 255 / 4%) 1px, transparent 1px) 0 0 / 48px 100%,
-      radial-gradient(70% 22% at 50% 100%, rgb(127 230 255 / 18%), transparent 70%),
-      radial-gradient(circle at 46% 42%, rgb(66 110 220 / 20%), transparent 30rem),
+      radial-gradient(74% 26% at 50% 100%, rgb(127 230 255 / 22%), transparent 72%),
+      radial-gradient(circle at 46% 42%, rgb(66 110 220 / 22%), rgb(201 155 255 / 10%) 52%, transparent 32rem),
       linear-gradient(180deg, #01040a, #02040a 72%, var(--fft-ink));
-    border-right: 1px solid rgb(var(--ffz-ice) / 0.18);
+    border-right: 1px solid rgb(var(--ffz-ice) / 0.24);
+    box-shadow: inset -1px 0 24px -10px rgb(var(--ffz-ice) / 0.22);
   }
 
   /* Owner (2026-10-24, iPad): 「画像表示に余白があるので直して。」 The

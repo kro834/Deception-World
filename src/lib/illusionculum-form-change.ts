@@ -13,14 +13,28 @@
  *   circle that grows over the change, its front a thin dim crimson ring
  *   (the art carries the colour; never a flash of red light).
  *
- * Closed-form in `u`, allocation-free in a frame (the orb sprites are made
- * once, on the first change), no shadows or filters (Android).
+ * 2026-11 prism pass: every change now reads as light through a crystal —
+ * the ウルトラ circle's front is a refracting lens (a thin band of the
+ * incoming figure magnified just outside the edge, three dispersed hairlines
+ * ice / pink / gold around the dim crimson ring, a few prism glints on it);
+ * the projections are flat ice and pink silhouettes of the incoming figure
+ * (made once per figure, at half size) that part and close; each orb leaves a
+ * short comet of itself and lands in a ring of dispersed light.
+ *
+ * Closed-form in `u`, allocation-free in a frame (the orb sprites and the two
+ * projection silhouettes are made once per change, never in a frame), no
+ * shadows or filters (Android).
  */
 
 import type { RexonanceAssemblyFormChange } from "./rexonance-resonance.js";
 
 const ORB_TONES = ["rgb(166 230 255)", "rgb(169 131 255)"] as const;
+/** The prism's three dispersed hairlines: ice, pink, gold. */
+const PRISM_TONES = ["rgb(166 230 255)", "rgb(255 143 210)", "rgb(255 225 163)"] as const;
 const CRIMSON_FRONT = "rgb(184 31 58)";
+const GOLDEN_ANGLE = 2.399963229728653;
+const GLINTS = 12;
+const TRAIL = 3;
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u: number) => u * u * (3 - 2 * u);
 
@@ -42,6 +56,40 @@ export function createIllusionculumFormChange(
   const { width: W, height: H } = options.size;
   const core = options.core;
   let orbGhosts: HTMLCanvasElement[] | null = null;
+  // The projections: ice and pink silhouettes of the incoming figure, half
+  // size, made once per figure (the first frame that wants them).
+  const TW = Math.max(1, Math.round(W / 2));
+  const TH = Math.max(1, Math.round(H / 2));
+  const silhouettes: (HTMLCanvasElement | null)[] = [null, null];
+  let silhouetteOf: CanvasImageSource | null = null;
+  const prepareSilhouettes = (document: Document, figure: CanvasImageSource) => {
+    if (silhouetteOf === figure) return;
+    silhouetteOf = figure;
+    for (let k = 0; k < 2; k += 1) {
+      const canvas = (silhouettes[k] ??= document.createElement("canvas"));
+      if (canvas.width !== TW) canvas.width = TW;
+      if (canvas.height !== TH) canvas.height = TH;
+      const gc = canvas.getContext("2d");
+      if (!gc) continue;
+      gc.globalCompositeOperation = "copy";
+      gc.drawImage(figure, 0, 0, TW, TH);
+      gc.globalCompositeOperation = "source-in";
+      gc.fillStyle = PRISM_TONES[k];
+      gc.fillRect(0, 0, TW, TH);
+      gc.globalCompositeOperation = "source-over";
+    }
+  };
+  // Where an orb is at eased progress `e`: out of the shoulder line, in
+  // toward the neck and low, up and out along an arc to the seat.
+  let orbX = 0;
+  let orbY = 0;
+  const placeOrb = (ox: number, oy: number, r: number, e: number) => {
+    const fromX = ox + (ox < W / 2 ? 1 : -1) * r * 1.1;
+    const fromY = oy + r * 1.9;
+    const arc = Math.sin(Math.PI * Math.min(1, e * 1.1)) * r * 0.5;
+    orbX = fromX + (ox - fromX) * e;
+    orbY = fromY + (oy - fromY) * e - arc;
+  };
   return {
     form(context, from, to, fromKey, toKey, u, _tone, calm) {
       context.globalAlpha = 1;
@@ -51,17 +99,26 @@ export function createIllusionculumFormChange(
       const ultraIn = options.ultraForms.includes(toKey) && !options.ultraForms.includes(fromKey);
       if (ultraIn) {
         // ウルトラ from the reactor out: the ウルトラ figure inside a circle
-        // that grows over the change, its front a thin dim crimson ring
+        // that grows over the change, its front a lens (a refracting band,
+        // dispersed hairlines, a few glints) around a thin dim crimson ring
         // (the art itself carries the colour: no flash of red light).
         context.drawImage(from, 0, 0, W, H);
         const [cx, cy] = core;
         const reach = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy));
         const radius = Math.max(0.5, reach * e);
-        // Its projection first, displaced and closing (the same idea).
+        const pulse = Math.sin(Math.PI * u);
+        // Its projections first: ice and pink silhouettes, parted and closing.
         if (!calm && u < 0.7) {
-          context.globalCompositeOperation = "lighter";
-          context.globalAlpha = 0.16 * (1 - u / 0.7);
+          prepareSilhouettes(context.canvas.ownerDocument, to);
+          const left = silhouettes[0];
+          const right = silhouettes[1];
           const shift = (1 - e) * W * 0.06;
+          const fade = 1 - u / 0.7;
+          context.globalCompositeOperation = "lighter";
+          context.globalAlpha = 0.1 * fade;
+          if (left) context.drawImage(left, -shift * 1.25, 0, W, H);
+          if (right) context.drawImage(right, shift * 1.25, 0, W, H);
+          context.globalAlpha = 0.16 * fade;
           context.drawImage(to, -shift, 0, W, H);
           context.drawImage(to, shift, 0, W, H);
           context.globalCompositeOperation = "source-over";
@@ -75,7 +132,50 @@ export function createIllusionculumFormChange(
         context.drawImage(to, 0, 0, W, H);
         context.restore();
         if (u > 0 && u < 1) {
-          context.globalAlpha = 0.5 * Math.sin(Math.PI * u);
+          if (!calm) {
+            // The lens: the figure magnified a little, in a band just
+            // outside the edge only.
+            const band = 8 + W * 0.03 * pulse;
+            const zoom = 1 + 0.022 * pulse;
+            context.save();
+            context.beginPath();
+            context.arc(cx, cy, radius + band, 0, Math.PI * 2);
+            context.moveTo(cx + radius, cy);
+            context.arc(cx, cy, radius, 0, Math.PI * 2, true);
+            context.clip();
+            context.globalAlpha = 0.34 * pulse;
+            context.drawImage(to, cx - cx * zoom, cy - cy * zoom, W * zoom, H * zoom);
+            context.restore();
+            // Dispersed hairlines: ice inside, pink outside, gold between.
+            context.globalCompositeOperation = "lighter";
+            context.lineWidth = 1.25;
+            context.globalAlpha = 0.34 * pulse;
+            for (let t = 0; t < 3; t += 1) {
+              context.strokeStyle = PRISM_TONES[t];
+              context.beginPath();
+              context.arc(cx, cy, Math.max(0.5, radius + (t - 1) * (2.5 + 3 * pulse)), 0, Math.PI * 2);
+              context.stroke();
+            }
+            // Glints on the front, ice / pink / gold in turn.
+            context.lineWidth = 1.5;
+            context.globalAlpha = 0.5 * pulse;
+            for (let t = 0; t < 3; t += 1) {
+              context.strokeStyle = PRISM_TONES[t];
+              context.beginPath();
+              for (let k = t; k < GLINTS; k += 3) {
+                const angle = k * GOLDEN_ANGLE + e * 1.6;
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                const inner = radius - 3;
+                const outer = radius + 7 + ((k * 7) % 5) * 3 * pulse;
+                context.moveTo(cx + cos * inner, cy + sin * inner);
+                context.lineTo(cx + cos * outer, cy + sin * outer);
+              }
+              context.stroke();
+            }
+            context.globalCompositeOperation = "source-over";
+          }
+          context.globalAlpha = 0.5 * pulse;
           context.strokeStyle = CRIMSON_FRONT;
           context.lineWidth = 2;
           context.beginPath();
@@ -93,16 +193,12 @@ export function createIllusionculumFormChange(
           canvas.width = canvas.height = Math.ceil(r * 2);
           return canvas;
         });
+        const arrive = smooth(clamp01(u * 1.8));
         for (let k = 0; k < options.orbs.length; k += 1) {
           const [ox, oy, r] = options.orbs[k];
-          const left = ox < W / 2;
-          // Out of the shoulder line: from just above the shoulder, in
-          // toward the neck and low, up and out along an arc to the seat.
-          const fromX = ox + (left ? 1 : -1) * r * 1.1;
-          const fromY = oy + r * 1.9;
-          const arc = Math.sin(Math.PI * Math.min(1, e * 1.1)) * r * 0.5;
-          const x = fromX + (ox - fromX) * e;
-          const y = fromY + (oy - fromY) * e - arc;
+          placeOrb(ox, oy, r, e);
+          const x = orbX;
+          const y = orbY;
           const scale = 0.42 + 0.58 * e;
           const size = r * 2 * scale;
           // Its projection, ahead of it at the seat, fading as it lands.
@@ -117,9 +213,27 @@ export function createIllusionculumFormChange(
             context.globalCompositeOperation = "lighter";
             context.globalAlpha = 0.32 * Math.sin(Math.PI * Math.min(1, u * 1.15));
             context.drawImage(ghost, ox - r, oy - r, r * 2, r * 2);
+            // A short comet of the orb itself, each step a little behind.
+            for (let t = 1; t <= TRAIL; t += 1) {
+              const behind = smooth(clamp01(u - t * 0.05));
+              placeOrb(ox, oy, r, behind);
+              const trail = r * 2 * (0.42 + 0.58 * behind) * (1 - t * 0.09);
+              context.globalAlpha = (0.3 / t) * arrive * (1 - u * u * u);
+              context.drawImage(
+                ghost,
+                0,
+                0,
+                r * 2,
+                r * 2,
+                orbX - trail / 2,
+                orbY - trail / 2,
+                trail,
+                trail,
+              );
+            }
             context.globalCompositeOperation = "source-over";
           }
-          context.globalAlpha = smooth(clamp01(u * 1.8));
+          context.globalAlpha = arrive;
           context.drawImage(
             to,
             ox - r,
@@ -131,12 +245,37 @@ export function createIllusionculumFormChange(
             size,
             size,
           );
+          // Landing: a ring of dispersed light opening off the seat.
+          if (!calm && u > 0.68 && u < 1) {
+            const open = (u - 0.68) / 0.32;
+            context.globalCompositeOperation = "lighter";
+            context.lineWidth = 1.5;
+            context.globalAlpha = 0.46 * (1 - open) * (1 - open);
+            for (let t = 0; t < 3; t += 1) {
+              context.strokeStyle = PRISM_TONES[t];
+              context.beginPath();
+              context.arc(ox, oy, r * (1.05 + 0.85 * open + t * 0.09), 0, Math.PI * 2);
+              context.stroke();
+            }
+            context.globalCompositeOperation = "source-over";
+          }
         }
         context.globalAlpha = 1;
         return true;
       }
-      // Any other change: the next figure resolves over the last.
+      // Any other change: the next figure resolves over the last, through a
+      // faint ice projection that parts from it and closes.
       context.drawImage(from, 0, 0, W, H);
+      if (!calm && u > 0 && u < 1) {
+        prepareSilhouettes(context.canvas.ownerDocument, to);
+        const left = silhouettes[0];
+        if (left) {
+          context.globalCompositeOperation = "lighter";
+          context.globalAlpha = 0.12 * Math.sin(Math.PI * u);
+          context.drawImage(left, -(1 - e) * W * 0.025, 0, W, H);
+          context.globalCompositeOperation = "source-over";
+        }
+      }
       context.globalAlpha = e;
       context.drawImage(to, 0, 0, W, H);
       context.globalAlpha = 1;

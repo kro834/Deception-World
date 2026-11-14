@@ -815,3 +815,302 @@
 .ice-entry-stage {
   will-change: transform;
 }
+
+/* ================================================================
+   POLISH LAYER (2026-11-14) — prism refraction, layered rims, precise
+   scales. Appended; nothing above is rewritten. Decoration only: gradients
+   and shadows on the existing boxes, no new text. The shared clock seeks
+   elements, not pseudo-elements, so every pseudo here is static and rides
+   its parent's own opacity; the one new animation is on a real box and runs
+   once. Gold x ice (#a6e6ff) x magenta (#ff8fd2) / violet (#a983ff).
+   ================================================================ */
+
+/* The cover's own rim: a hairline and a deep vignette, in the dive's light. */
+.load-gate.rider-route-dive.is-illusionculum-dive {
+  box-shadow:
+    inset 0 0 0 1px rgb(166 230 255 / 8%),
+    inset 0 0 180px rgb(2 3 10 / 72%);
+}
+
+/* The ground: a faint refraction fan from the reactor and a fine scan grain. */
+.ice-entry-ground::before,
+.ice-entry-ground::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ice-entry-ground::before {
+  background: conic-gradient(
+    from 196deg at 50% 36%,
+    transparent 0 6%,
+    rgb(166 230 255 / 7%) 8%,
+    transparent 12%,
+    rgb(255 143 210 / 6%) 17%,
+    transparent 22%,
+    rgb(169 131 255 / 7%) 28%,
+    transparent 34%,
+    rgb(233 184 102 / 5%) 40%,
+    transparent 46%
+  );
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 40%, #000 20%, transparent 80%);
+  mask-image: radial-gradient(70% 70% at 50% 40%, #000 20%, transparent 80%);
+}
+
+.ice-entry-ground::after {
+  background:
+    radial-gradient(120% 90% at 50% 46%, transparent 55%, rgb(2 3 10 / 70%)),
+    repeating-linear-gradient(0deg, rgb(166 230 255 / 3%) 0 1px, transparent 1px 4px);
+}
+
+/* The sigil's lines carry a soft ice bloom. */
+.ice-entry-sigil {
+  filter: drop-shadow(0 0 5px rgb(166 230 255 / 30%));
+}
+
+/* The figure stands on a lit floor: a ring and its glow under the feet. */
+.ice-entry-figure::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1.5%;
+  width: 74%;
+  aspect-ratio: 6 / 1;
+  translate: -50% 0;
+  border: 1px solid rgb(233 184 102 / 34%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(166 230 255 / 20%), transparent);
+  box-shadow:
+    0 0 36px rgb(169 131 255 / 14%),
+    inset 0 0 18px rgb(255 143 210 / 10%);
+  pointer-events: none;
+}
+
+/* Nanite chips: a bevelled face with a lit rim, not a flat swatch. */
+.ice-entry-chips > i {
+  background: linear-gradient(135deg, #2c3550, #171d2e);
+  border-radius: 1px;
+}
+
+/* The scan: a prism blade (magenta and violet at its ends, white at the
+   core) with a soft wake behind it. */
+.ice-entry-scan {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 143 210 / 70%) 14%,
+    rgb(230 248 255) 38% 62%,
+    rgb(169 131 255 / 70%) 86%,
+    transparent
+  );
+  box-shadow:
+    0 0 18px rgb(166 230 255 / 50%),
+    0 -6px 22px rgb(255 143 210 / 22%),
+    0 6px 22px rgb(169 131 255 / 20%);
+}
+
+.ice-entry-scan::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 100%;
+  height: 46px;
+  background: linear-gradient(0deg, rgb(166 230 255 / 16%), transparent);
+  pointer-events: none;
+}
+
+/* The surge: its ice core gets a magenta fringe. */
+.ice-entry-surge {
+  box-shadow: 0 0 40px rgb(255 143 210 / 10%);
+}
+
+/* The frame: it arrives (once), then holds. Its pseudos are a ruler along
+   the top and bottom and a prism rim hairline. */
+.ice-entry-frame {
+  animation: ice-frame-in 520ms cubic-bezier(0.2, 0.7, 0.1, 1) both;
+}
+
+.ice-entry-frame::before,
+.ice-entry-frame::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.ice-entry-frame::before {
+  inset: 0 30px;
+  background:
+    repeating-linear-gradient(90deg, rgb(166 230 255 / 45%) 0 1px, transparent 1px 12px) 0 0 / 100% 5px
+      no-repeat,
+    repeating-linear-gradient(90deg, rgb(233 184 102 / 55%) 0 1px, transparent 1px 60px) 0 0 / 100% 9px
+      no-repeat,
+    repeating-linear-gradient(90deg, rgb(166 230 255 / 45%) 0 1px, transparent 1px 12px) 0 100% / 100% 5px
+      no-repeat,
+    repeating-linear-gradient(90deg, rgb(233 184 102 / 55%) 0 1px, transparent 1px 60px) 0 100% / 100% 9px
+      no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 14% 86%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 14% 86%, transparent);
+}
+
+.ice-entry-frame::after {
+  inset: 0;
+  border: 1px solid transparent;
+  background: linear-gradient(
+      135deg,
+      rgb(233 184 102 / 40%),
+      rgb(166 230 255 / 14%) 30%,
+      rgb(255 143 210 / 12%) 60%,
+      rgb(169 131 255 / 34%)
+    )
+    border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) padding-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+@keyframes ice-frame-in {
+  from {
+    opacity: 0;
+    scale: 1.015;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* The calls: a prism fringe on the letters and a rule that rides each call's
+   own fade (the last holds). */
+.ice-entry-calls > li {
+  text-shadow:
+    0 0 18px rgb(166 230 255 / 45%),
+    -1px 0 0 rgb(255 143 210 / 35%),
+    1px 0 0 rgb(166 230 255 / 35%),
+    0 2px 12px #000;
+}
+
+.ice-entry-calls > li[data-last] {
+  text-shadow:
+    0 0 22px rgb(166 230 255 / 50%),
+    0 0 46px rgb(169 131 255 / 32%),
+    -1px 0 0 rgb(255 143 210 / 40%),
+    1px 0 0 rgb(166 230 255 / 40%),
+    0 2px 12px #000;
+}
+
+.ice-entry-calls > li::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.16em;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(233 184 102 / 80%) 18%,
+    rgb(166 230 255 / 90%) 50%,
+    rgb(255 143 210 / 80%) 82%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+@media (min-width: 761px) {
+  .ice-entry-calls > li::after {
+    background: linear-gradient(
+      90deg,
+      rgb(233 184 102 / 85%),
+      rgb(166 230 255 / 80%) 40%,
+      rgb(255 143 210 / 60%) 70%,
+      transparent
+    );
+  }
+}
+
+/* The core and the rings (orbit, lock): layered light with a magenta halo. */
+.ice-entry-core {
+  background:
+    radial-gradient(circle, rgb(255 255 255 / 85%) 0 6%, transparent 22%),
+    radial-gradient(circle, rgb(230 248 255 / 70%), rgb(166 230 255 / 0) 68%);
+  box-shadow: 0 0 60px 8px rgb(255 143 210 / 16%);
+}
+
+.ice-entry-lock {
+  box-shadow:
+    0 0 0 6px rgb(255 143 210 / 10%),
+    0 0 40px rgb(169 131 255 / 24%),
+    inset 0 0 36px rgb(166 230 255 / 18%);
+}
+
+.ice-entry-lock::before {
+  content: "";
+  position: absolute;
+  inset: 7%;
+  border: 1px solid rgb(233 184 102 / 40%);
+  border-radius: 50%;
+}
+
+.ice-entry-orbit {
+  box-shadow:
+    0 0 30px rgb(166 230 255 / 12%),
+    inset 0 0 30px rgb(169 131 255 / 14%);
+}
+
+/* Far cells: a violet speck joins the ice, gold and pink. */
+.ice-entry-far {
+  background-image:
+    radial-gradient(1.5px 1.5px at 10% 20%, rgb(166 230 255 / 70%) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgb(233 184 102 / 60%) 50%, transparent 51%),
+    radial-gradient(1px 1px at 80% 30%, rgb(255 143 210 / 70%) 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 86%, rgb(169 131 255 / 70%) 50%, transparent 51%);
+}
+
+/* Fallbacks for the new layers. Reduced motion already stops every
+   animation under .ice-entry above. Economy and constrained devices (the
+   gate does not render the entry there, but the sheet is linked everywhere)
+   and forced colours drop the decorative extras. */
+@media (prefers-reduced-motion: reduce) {
+  .ice-entry-frame {
+    animation: none;
+  }
+}
+
+html[data-world-effects="economy"] .ice-entry-ground::before,
+html[data-world-effects="economy"] .ice-entry-scan::after,
+html[data-rzn-constrained] .ice-entry-ground::before,
+html[data-rzn-constrained] .ice-entry-scan::after {
+  display: none;
+}
+
+html[data-world-effects="economy"] .ice-entry-sigil,
+html[data-rzn-constrained] .ice-entry-sigil {
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  .ice-entry-ground::before,
+  .ice-entry-ground::after,
+  .ice-entry-figure::before,
+  .ice-entry-frame::before,
+  .ice-entry-frame::after,
+  .ice-entry-scan::after,
+  .ice-entry-lock::before,
+  .ice-entry-calls > li::after {
+    display: none;
+  }
+
+  .ice-entry-sigil {
+    filter: none;
+  }
+
+  .ice-entry-calls > li {
+    text-shadow: none;
+  }
+}

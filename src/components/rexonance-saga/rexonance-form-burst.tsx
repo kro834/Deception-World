@@ -280,6 +280,7 @@ export function RexonanceFormBurst({
           const live = getComputedStyle(img);
           layer.style.transform = live.transform;
           layer.style.scale = live.scale;
+          layer.style.rotate = live.rotate;
           layer.style.translate = live.translate;
           layer.style.transformOrigin = live.transformOrigin;
         },

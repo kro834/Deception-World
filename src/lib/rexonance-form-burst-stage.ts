@@ -112,11 +112,11 @@ vec3 held(vec3 c, float lit) {
 // The green fire, from its dark emerald edge to its white heart (the
 // suit-up fire's forest green: rexonance-fire/fire-tuning.js RAMP_SOOTY).
 vec3 ramp(float t) {
-  vec3 c = vec3(0.03, 0.26, 0.09);
-  c = mix(c, vec3(0.05, 0.4, 0.13), smoothstep(0.0, 0.3, t));
-  c = mix(c, vec3(0.2, 0.7, 0.24), smoothstep(0.3, 0.6, t));
-  c = mix(c, vec3(0.56, 0.94, 0.44), smoothstep(0.6, 0.85, t));
-  c = mix(c, vec3(0.9, 1.0, 0.8), smoothstep(0.85, 1.0, t));
+  vec3 c = vec3(0.025, 0.24, 0.085);
+  c = mix(c, vec3(0.045, 0.42, 0.14), smoothstep(0.0, 0.28, t));
+  c = mix(c, vec3(0.18, 0.74, 0.28), smoothstep(0.28, 0.58, t));
+  c = mix(c, vec3(0.58, 0.96, 0.46), smoothstep(0.58, 0.84, t));
+  c = mix(c, vec3(0.93, 1.0, 0.84), smoothstep(0.84, 1.0, t));
   return c;
 }
 vec4 inArt(vec4 texel, vec2 a) {
@@ -189,15 +189,17 @@ void main() {
     float thr = mix(0.2, 1.0, pow(fall, 1.25)) + kindling;
     float core = smoothstep(thr, thr + 0.1, n);
     float halo = smoothstep(thr - 0.16, thr + 0.1, n);
-    float plume = (core * 0.7 + halo * 0.3) * air * (1.0 - smoothstep(0.7, 1.0, fall));
-    float plumeHeat = (0.4 + 0.6 * clamp((n - thr) / 0.35, 0.0, 1.0)) * (1.0 - 0.75 * fall);
-    float rim = exp(-din / 0.028) * skin * (0.3 + 0.7 * smoothstep(0.3, 0.75, n));
+    float wisp = smoothstep(0.54, 0.82, sb.r * 0.56 + ss.a * 0.44) * (1.0 - fall * 0.85);
+    float plume = (core * 0.68 + halo * 0.24 + wisp * 0.14) * air * (1.0 - smoothstep(0.7, 1.0, fall));
+    float plumeHeat = (0.42 + 0.58 * clamp((n - thr) / 0.34, 0.0, 1.0) + wisp * 0.15) * (1.0 - 0.74 * fall);
+    float rim = (exp(-din / 0.028) + 0.32 * exp(-din / 0.012)) * skin * (0.3 + 0.7 * smoothstep(0.28, 0.74, n));
     // Over the armour the fire is thin: the char shows through it.
     float sheet = (0.06 + 0.94 * smoothstep(0.5 + kindling, 0.84 + kindling, nS)) * skin;
-    float dens = min(1.0, plume + rim * 0.5 + sheet * 0.5) * lit * uFire.y;
+    float coreIgnite = exp(-fn * fn * 18.0) * (uFire.y * 0.28 + uFire.w * 0.65) * skin;
+    float dens = min(1.0, plume + rim * 0.52 + sheet * 0.5 + coreIgnite * 0.35) * lit * uFire.y;
     float np = texture2D(uNoise, pw * 0.9 + vec2(0.0, uDrift.z)).r;
-    float temp = clamp((plume * plumeHeat + rim * 0.8 + sheet * 0.62) * lit * flare * flick * (0.68 + 0.32 * np), 0.0, 1.0);
-    temp = min(1.0, temp + uFire.w * 0.4 * dens);
+    float temp = clamp((plume * plumeHeat + rim * 0.82 + sheet * 0.64 + coreIgnite * 0.5) * lit * flare * flick * (0.68 + 0.32 * np), 0.0, 1.0);
+    temp = min(1.0, temp + uFire.w * 0.44 * dens);
     vec3 E = ramp(temp) * clamp(dens * flick, 0.0, 1.0);
     float absorb = dens * (1.0 - 0.5 * temp) * 0.3;
     // The blast: the fire thrown out from the reactor, hollowing as it goes.
@@ -209,10 +211,11 @@ void main() {
       float nbv = nb.r * 0.5 + nb.g * 0.32 + nb.b * 0.18;
       float shell = 1.0 - smoothstep(rb * 0.45, rb, far + (nbv - 0.5) * 0.6 * uShape.z);
       float hollow = smoothstep(rb * 0.2, rb * 0.85, far + (nb.a - 0.5) * 0.2 * uShape.z);
-      float bd = shell * mix(1.0, hollow, smoothstep(0.15, 0.7, uBlast.y)) * uBlast.z
-        * smoothstep(0.3, 0.62, nbv + 0.34 * (1.0 - uBlast.y));
+      float shock = exp(-pow((far - rb * 0.76) / max(0.001, 0.085 * uShape.z), 2.0)) * (1.0 - 0.55 * uBlast.y);
+      float bd = (shell * mix(1.0, hollow, smoothstep(0.15, 0.7, uBlast.y))
+        * smoothstep(0.3, 0.62, nbv + 0.34 * (1.0 - uBlast.y)) + shock * 0.34) * uBlast.z;
       bd *= mix(smoothstep(0.0, 0.2, margin.x) * smoothstep(0.0, 0.32, margin.y), 1.0, opaque);
-      E += ramp(clamp(bd * (0.84 - 0.44 * uBlast.y), 0.0, 1.0)) * bd;
+      E += ramp(clamp(bd * (0.86 - 0.42 * uBlast.y) + shock * 0.22, 0.0, 1.0)) * bd;
       absorb += bd * 0.2;
     }
     // Heat shimmer: the picture swims a little where the fire stands.
@@ -224,14 +227,17 @@ void main() {
     vec3 fc = from.rgb / max(from.a, 0.001);
     float heat = uFire.z * lit;
     float ridge = 1.0 - abs(ns.g * 2.0 - 1.0);
+    float subRidge = 1.0 - abs(ns.r * 2.0 - 1.0);
     // What was bright on it glows on as the rest goes dark: its trims and
     // its lights, like embers in the char; and a few cracks.
-    float trim = smoothstep(0.4, 0.8, luma(fc));
-    float seam = smoothstep(0.9, 0.99, ridge) * smoothstep(0.5, 0.68, ns.b) * 0.8;
-    vec3 charred = mix(fc, vec3(luma(fc)) * vec3(0.17, 0.2, 0.17) + vec3(0.0, 0.012, 0.004), heat * 0.92 * body);
-    charred += vec3(0.3, 1.0, 0.46) * (trim * 0.75 + seam) * heat * body * (0.6 + 0.7 * nf.g) * (1.0 + uFire.w * 1.2);
-    charred += ramp(0.62) * 0.26 * lit * uFire.y * (1.0 - heat * 0.55) * mix(1.0, 0.5 + 0.5 * body, opaque);
-    charred = mix(charred, vec3(0.72, 1.0, 0.76), uFire.w * 0.5 * body * (0.4 + 0.6 * trim));
+    float trim = smoothstep(0.38, 0.78, luma(fc));
+    float seam = (smoothstep(0.89, 0.99, ridge) * smoothstep(0.48, 0.68, ns.b) * 0.85
+      + smoothstep(0.86, 0.97, subRidge) * smoothstep(0.45, 0.66, ns.a) * 0.42);
+    vec3 charred = mix(fc, vec3(luma(fc)) * vec3(0.15, 0.19, 0.16) + vec3(0.0, 0.014, 0.005), heat * 0.93 * body);
+    vec3 seamTint = mix(vec3(0.24, 0.98, 0.44), vec3(0.82, 1.0, 0.84), clamp(uFire.w * 0.7 + seam * 0.35, 0.0, 1.0));
+    charred += seamTint * (trim * 0.76 + seam) * heat * body * (0.62 + 0.72 * nf.g) * (1.0 + uFire.w * 1.3);
+    charred += ramp(0.64) * 0.27 * lit * uFire.y * (1.0 - heat * 0.55) * mix(1.0, 0.5 + 0.5 * body, opaque);
+    charred = mix(charred, vec3(0.76, 1.0, 0.8), uFire.w * 0.54 * body * (0.4 + 0.6 * trim));
     // It breaks up in cells, from the reactor out.
     vec2 id = hexCell(pw, uHex.y);
     // (Capped: every point of the canvas is gone by the shatter's end.)
@@ -246,12 +252,12 @@ void main() {
     float glowing = emitter(tc);
     float litE = uForm.z < 0.0 ? 0.0 : smoothstep(0.0, 0.12, uForm.z - fn);
     float wave = uForm.z < 0.0 ? 0.0 : exp(-pow((uForm.z - fn) / 0.16, 2.0));
-    vec3 nc = held(tc, glowing * (1.0 - litE) * 0.6) + tc * glowing * wave * 0.9;
-    vec3 hot = nc * 1.18 + vec3(0.24, 0.8, 0.4) * (0.16 + 0.34 * luma(tc));
-    nc = mix(nc, hot, uForm.y * (0.5 + 0.25 * ns.g) * body);
-    nc += vec3(0.7, 1.0, 0.75) * lip * 0.8;
+    vec3 nc = held(tc, glowing * (1.0 - litE) * 0.6) + (tc + vec3(0.32, 0.95, 0.52) * 0.24) * glowing * wave * 0.95;
+    vec3 hot = nc * 1.18 + vec3(0.24, 0.84, 0.42) * (0.16 + 0.36 * luma(tc));
+    nc = mix(nc, hot, uForm.y * (0.52 + 0.26 * ns.g) * body);
+    nc += mix(vec3(0.52, 1.0, 0.66), vec3(0.86, 1.0, 0.88), lip) * lip * 0.86;
     float glint = uLate.x < -0.5 ? 0.0 : exp(-pow((a.x * 0.4 + a.y - uLate.x) / 0.05, 2.0));
-    nc += vec3(0.9, 1.0, 0.94) * glint * 0.55 * (0.25 + luma(tc));
+    nc += vec3(0.9, 1.0, 0.94) * glint * 0.58 * (0.25 + luma(tc));
     float newA = to.a * shown;
     rgb = charred * oldA + nc * newA * (1.0 - oldA);
     alpha = oldA + newA * (1.0 - oldA);
@@ -270,15 +276,20 @@ void main() {
     float goes = hash(id) * 0.34 + min(fn, 1.1) * 0.6;
     float gone = step(goes, uBlast.x);
     float flare = smoothstep(goes - 0.16, goes, uBlast.x) * (1.0 - gone);
-    vec3 oc = fc + vec3(0.82, 0.92, 1.0) * flare * (0.12 + 0.4 * body) + ICE * uFire.w * exp(-fn * fn * 9.0) * 0.6;
+    vec3 shardPrism = mix(ICE, PINK, hash(id + 3.7));
+    vec3 oc = fc + mix(vec3(0.84, 0.93, 1.0), shardPrism, 0.35) * flare * (0.14 + 0.42 * body)
+      + mix(ICE, PINK, 0.28) * uFire.w * exp(-fn * fn * 9.0) * 0.66;
     float oldA = from.a * (1.0 - gone);
     vec3 tc = to.rgb / max(to.a, 0.001);
     float light = luma(tc);
     float glowing = emitter(tc);
     float litE = step(0.0, uForm.z);
-    vec3 armour = held(tc, glowing * (1.0 - litE)) + tc * glowing * uForm.w * 0.5 + vec3(0.9, 0.86, 1.0) * uForm.w * 0.1 * light;
-    // The unbuilt body: a dark glass of itself.
-    vec3 ghost = vec3(light) * vec3(0.2, 0.19, 0.32) + vec3(0.016, 0.016, 0.04) + ICE * 0.1 * exp(-din / 0.012);
+    vec3 armour = held(tc, glowing * (1.0 - litE)) + tc * glowing * uForm.w * 0.54
+      + mix(ICE, PINK, clamp(a.y, 0.0, 1.0)) * uForm.w * 0.12 * light;
+    // The unbuilt body: a dark glass of itself, with prism rim and core refraction.
+    vec3 ghostRim = mix(ICE, PINK, clamp(a.y * 0.85 + 0.1, 0.0, 1.0)) * 0.13 * exp(-din / 0.013);
+    vec3 ghostCore = mix(ICE, PINK, 0.4) * 0.1 * exp(-fn * fn * 11.0);
+    vec3 ghost = vec3(light) * vec3(0.2, 0.19, 0.33) + vec3(0.016, 0.016, 0.042) + ghostRim + ghostCore;
     // (Capped: the front passes every point before it is whole.)
     float fnL = min(fn, 1.2) + (ns.r - 0.5) * 0.24 + (ns.b - 0.5) * 0.08;
     float af = (uForm.x - fnL) / BAND;
@@ -293,10 +304,11 @@ void main() {
       float bead = cos(clamp(af, 0.0, 1.0) * 3.14159);
       float facing = 0.5 + 0.5 * bead * dot(flow, normalize(vec2(-0.5, -0.8)));
       float room = 0.5 + 0.5 * sin(p.y * 0.11 + p.x * 0.05 + uClock.y * 2.6 + fnL * 40.0);
-      vec3 chrome = mix(vec3(0.085, 0.095, 0.115), vec3(0.6, 0.64, 0.68), facing * (0.55 + 0.45 * room));
+      vec3 prismWave = mix(ICE, PINK, 0.5 + 0.5 * sin(af * 3.8 - fnL * 16.0 + uClock.y * 3.0));
+      vec3 chrome = mix(vec3(0.08, 0.092, 0.12), vec3(0.62, 0.67, 0.74) + prismWave * 0.12, facing * (0.55 + 0.45 * room));
       chrome = mix(chrome, chrome * (0.6 + 0.9 * light), 0.5);
       float stripe = smoothstep(0.4, 0.5, abs(fract(dot(p, vec2(-flow.y, flow.x)) * 0.33) - 0.5) * 2.0);
-      vec3 fibre = mix(vec3(0.1, 0.11, 0.13), vec3(light) * vec3(0.8, 0.87, 0.95), 0.42) * (0.66 + 0.5 * stripe);
+      vec3 fibre = mix(vec3(0.1, 0.11, 0.135), vec3(light) * vec3(0.82, 0.88, 0.96), 0.44) * (0.66 + 0.5 * stripe);
       vec3 metal = mix(chrome, fibre, smoothstep(0.8, 1.5, af));
       vec2 hs = vec2(1.0, 1.7320508);
       vec2 hp = p / uHex.x;
@@ -310,33 +322,36 @@ void main() {
       float solid = step(0.0, age);
       float paint = smoothstep(0.0, 1.0, age);
       float tilt = hash(cell.zw + 7.31) - 0.5;
-      vec3 facet = metal * (0.9 + 0.7 * tilt) + vec3(0.07, 0.09, 0.11);
+      vec3 cellPrism = mix(ICE, PINK, hash(cell.zw + 2.17));
+      vec3 facet = metal * (0.9 + 0.72 * tilt) + vec3(0.065, 0.088, 0.115) + cellPrism * 0.045 * max(0.0, tilt);
       float tess = smoothstep(1.7, 2.4, af);
-      float cut = smoothstep(0.4, 0.5, seamAt);
-      vec3 liquid = mix(metal, facet, 0.5 * tess);
-      liquid = mix(liquid, liquid * 0.5, cut * tess * 0.7);
-      vec3 celled = mix(facet, armour * (1.0 + 0.1 * tilt * (1.0 - smoothstep(1.0, 3.0, age))), paint);
-      celled += (0.35 * exp(-max(age, 0.0) * 2.6)) * mix(vec3(0.8, 0.9, 1.0), armour, 0.4);
-      celled = mix(celled, celled * 0.42 + ICE * 0.12, cut * (1.0 - smoothstep(0.6, 2.4, age)));
+      float cut = smoothstep(0.39, 0.5, seamAt);
+      vec3 liquid = mix(metal, facet, 0.52 * tess);
+      liquid = mix(liquid, liquid * 0.46 + cellPrism * 0.14, cut * tess * 0.76);
+      vec3 celled = mix(facet, armour * (1.0 + 0.11 * tilt * (1.0 - smoothstep(1.0, 3.0, age))), paint);
+      celled += (0.38 * exp(-max(age, 0.0) * 2.5)) * mix(cellPrism, armour, 0.38);
+      celled = mix(celled, celled * 0.4 + mix(ICE, PINK, 0.35) * 0.16, cut * (1.0 - smoothstep(0.6, 2.4, age)));
       nc = mix(liquid, celled, solid);
-      float lip = 1.0 - smoothstep(0.0, 0.2, af);
-      nc += vec3(0.91, 0.95, 1.0) * lip * 0.95;
-      nc += mix(ICE, PINK, hash(floor(p / 9.0))) * lip * 0.22;
+      float lip = 1.0 - smoothstep(0.0, 0.22, af);
+      nc += vec3(0.92, 0.96, 1.0) * lip * 0.96;
+      nc += mix(ICE, PINK, hash(floor(p / 9.0))) * lip * 0.28;
       newA = to.a * mix(mix(uLate.y * 0.9, 1.0, smoothstep(0.0, 0.06, af)), 1.0, opaque);
     } else {
-      // The lip's shadow, just ahead of it.
-      nc *= 1.0 - 0.45 * smoothstep(-0.6, 0.0, af);
+      // The lip's shadow and faint leading prism fringe, just ahead of it.
+      float ahead = smoothstep(-0.6, 0.0, af);
+      nc = nc * (1.0 - 0.45 * ahead) + mix(ICE, PINK, ns.b) * 0.06 * smoothstep(-0.22, 0.0, af);
     }
     // A whole painting: only its figure is built; the rest simply stands.
     float figure = mix(1.0, smoothstep(0.3, 0.62, fld.a), opaque);
     nc = mix(armour, nc, figure);
     float glint = uLate.x < -0.5 ? 0.0 : exp(-pow((a.x * 0.4 + a.y - uLate.x) / 0.05, 2.0));
-    nc += vec3(0.94, 0.94, 1.0) * glint * 0.55 * (0.25 + light) * figure;
+    nc += mix(vec3(0.94, 0.95, 1.0), mix(ICE, PINK, 0.45), 0.28) * glint * 0.6 * (0.25 + light) * figure;
     rgb = oc * oldA + nc * newA * (1.0 - oldA);
     alpha = oldA + newA * (1.0 - oldA);
     // The completion's light about the figure, and the local flash.
     float aura = uLate.z * exp(-dOut / 0.1) * mix(air, 0.35, opaque) * window;
-    rgb += mix(ICE, PINK, ns.g) * aura * 0.5;
+    float auraTone = clamp(ns.g + 0.22 * sin(fn * 9.0 - uClock.y * 2.2), 0.0, 1.0);
+    rgb += mix(ICE, PINK, auraTone) * aura * 0.54;
     alpha = max(alpha, aura * 0.6);
     float flash = uBlast.w * exp(-dot(fromCore, fromCore) / (uShape.y * uShape.y) * 5.0) * window;
     rgb += vec3(0.9, 0.9, 1.0) * flash * 0.8;
@@ -348,12 +363,14 @@ void main() {
     vec3 fc = from.rgb / max(from.a, 0.001);
     float fnL = min(fn, 1.2) + (ns.r - 0.5) * 0.2;
     float keep = smoothstep(0.0, 0.05, uForm.x - fnL);
-    float lip = exp(-pow((uForm.x - fnL) / 0.04, 2.0)) * step(0.001, uForm.x) * step(uForm.x, WHOLE - 0.01);
+    float lip = exp(-pow((uForm.x - fnL) / 0.042, 2.0)) * step(0.001, uForm.x) * step(uForm.x, WHOLE - 0.01);
     vec3 oc = held(fc, emitter(fc) * uForm.y);
     rgb = mix(to.rgb, oc * from.a, keep);
     alpha = mix(to.a, from.a, keep);
-    rgb += mix(vec3(0.91, 0.95, 1.0), ICE, 0.4) * lip * 0.85 * max(from.a, to.a);
-    rgb += ICE * uFire.w * exp(-fn * fn * 42.0) * 0.55 * to.a;
+    vec3 releaseLip = mix(vec3(0.91, 0.95, 1.0), mix(ICE, PINK, 0.28), 0.5);
+    rgb += releaseLip * lip * 0.9 * max(from.a, to.a);
+    float corePulse = exp(-fn * fn * 40.0) + 0.28 * exp(-pow((fn - 0.12 * (1.0 - uFire.w)) / 0.045, 2.0));
+    rgb += mix(ICE, vec3(0.88, 0.95, 1.0), 0.35) * uFire.w * corePulse * 0.58 * to.a;
   }
   // The last moments: the new form's art, exactly.
   rgb = mix(rgb, settled.rgb, uLate.w);

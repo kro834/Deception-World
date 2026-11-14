@@ -148,8 +148,8 @@ html[data-family="special"]
 /* The focus lines replace the drawn conic burst behind the colossus. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
   background:
-    radial-gradient(38% 56% at 50% 46%, rgb(var(--ext-gold-rgb) / 16%), transparent 70%),
-    radial-gradient(30% 22% at 50% 100%, rgb(var(--ext-amber-rgb) / 22%), transparent 72%),
+    radial-gradient(40% 58% at 50% 45%, rgb(var(--ext-gold-rgb) / 20%), transparent 72%),
+    radial-gradient(32% 24% at 50% 100%, rgb(var(--ext-amber-rgb) / 26%), transparent 74%),
     var(--ext-ink);
 }
 
@@ -160,10 +160,10 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-
   left: 0;
   width: 100%;
   height: 88%;
-  color: rgb(var(--ext-gold-rgb) / 26%);
+  color: rgb(var(--ext-gold-rgb) / 30%);
   /* Full strength round the colossus, a third of it under the copy. */
-  -webkit-mask: radial-gradient(ellipse 50% 70% at 50% 50%, #000 24%, rgb(0 0 0 / 34%) 100%);
-  mask: radial-gradient(ellipse 50% 70% at 50% 50%, #000 24%, rgb(0 0 0 / 34%) 100%);
+  -webkit-mask: radial-gradient(ellipse 50% 70% at 50% 50%, #000 24%, rgb(0 0 0 / 36%) 100%);
+  mask: radial-gradient(ellipse 50% 70% at 50% 50%, #000 24%, rgb(0 0 0 / 36%) 100%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards {
@@ -173,7 +173,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-
   width: min(60svh, 44vw);
   height: min(60svh, 44vw);
   color: var(--ext-gold);
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 @media (max-width: 1099.98px) {
@@ -242,24 +242,25 @@ html[data-family="special"]
   background:
     radial-gradient(
       circle at 100% 0,
-      #fffaf0 0 2px,
-      rgb(var(--ext-gold-rgb) / 85%) 4px,
-      rgb(var(--ext-gold-rgb) / 0%) 22px
+      #ffffff 0 3px,
+      #fffaf0 5px,
+      rgb(var(--ext-gold-rgb) / 90%) 9px,
+      rgb(var(--ext-gold-rgb) / 0%) 26px
     ),
     linear-gradient(
       to bottom right,
-      transparent calc(50% - 2px),
-      #fffaf0 calc(50% - 1px) calc(50% + 1.5px),
-      transparent calc(50% + 2.5px)
+      transparent calc(50% - 2.5px),
+      #ffffff calc(50% - 1px) calc(50% + 1.5px),
+      transparent calc(50% + 3px)
     ),
     linear-gradient(
       to bottom right,
-      transparent calc(50% - 10px),
-      rgb(var(--ext-gold-rgb) / 80%) 50%,
-      transparent calc(50% + 14px)
+      transparent calc(50% - 12px),
+      rgb(var(--ext-gold-rgb) / 86%) 50%,
+      transparent calc(50% + 16px)
     );
-  -webkit-mask: linear-gradient(90deg, transparent, #000 58%);
-  mask: linear-gradient(90deg, transparent, #000 58%);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 56%);
+  mask: linear-gradient(90deg, transparent, #000 56%);
   border: 0;
   opacity: 0;
   transform: none;
@@ -452,7 +453,9 @@ html[data-family="special"]
   width: 100%;
   height: clamp(10px, 1.1vw, 16px);
   margin: 0;
-  background: linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 70%, #fff3cf);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 38%) 0 22%, transparent 55%),
+    linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 52%, #ffe8a8 82%, #fffaf0);
   -webkit-mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
   mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
   border: 0;
@@ -505,9 +508,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-s
   left: -40%;
   width: 180%;
   height: 440%;
-  color: rgb(var(--ext-gold-rgb) / 22%);
-  -webkit-mask: radial-gradient(closest-side, #000 52%, transparent 100%);
-  mask: radial-gradient(closest-side, #000 52%, transparent 100%);
+  color: rgb(var(--ext-gold-rgb) / 26%);
+  -webkit-mask: radial-gradient(closest-side, #000 54%, transparent 100%);
+  mask: radial-gradient(closest-side, #000 54%, transparent 100%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-ring {
@@ -519,7 +522,13 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-s
   width: 64%;
   aspect-ratio: 1;
   margin: -32% 0 0 -32%;
-  border: 3px solid rgb(var(--ext-gold-rgb) / 80%);
+  background: radial-gradient(
+    closest-side,
+    transparent 72%,
+    rgb(var(--ext-gold-rgb) / 24%) 92%,
+    rgb(255 250 240 / 55%) 100%
+  );
+  border: 3px solid rgb(255 246 220 / 88%);
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
@@ -541,7 +550,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-s
   left: -110%;
   width: 216%;
   height: 64%;
-  color: rgb(var(--ext-gold-rgb) / 30%);
+  color: rgb(var(--ext-gold-rgb) / 34%);
   transform-origin: 100% 50%;
 }
 
@@ -575,9 +584,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-b
   background: linear-gradient(
     90deg,
     rgb(var(--ext-gold-rgb) / 0%),
-    var(--ext-gold) 18%,
-    #fff6dc 50%,
-    var(--ext-gold) 82%,
+    var(--ext-gold) 16%,
+    #fffaf0 42%,
+    #ffffff 50%,
+    #fffaf0 58%,
+    var(--ext-gold) 84%,
     rgb(var(--ext-gold-rgb) / 0%)
   );
   transform-origin: 0 50%;
@@ -659,7 +670,7 @@ html[data-family="special"]
   left: -70%;
   width: 240%;
   height: 240%;
-  color: rgb(var(--ext-gold-rgb) / 30%);
+  color: rgb(var(--ext-gold-rgb) / 34%);
   -webkit-mask: radial-gradient(closest-side, transparent 36%, #000 45%, transparent 68%);
   mask: radial-gradient(closest-side, transparent 36%, #000 45%, transparent 68%);
 }
@@ -673,7 +684,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #exs-stage-panel > 
   left: -20%;
   width: 140%;
   height: 140%;
-  color: rgb(255 248 228 / 52%);
+  color: rgb(255 248 228 / 58%);
   opacity: 0;
   /* Strongest at the frame's edges, clear over the form's face. */
   -webkit-mask: radial-gradient(closest-side, transparent 30%, #000 78%);
@@ -686,7 +697,7 @@ html[data-family="special"]
   #exs-stage-panel
   > figure[data-form="middle"]
   > .exi-rays {
-  color: rgb(150 236 255 / 46%);
+  color: rgb(150 236 255 / 52%);
 }
 
 html[data-family="special"]
@@ -700,7 +711,7 @@ html[data-family="special"]
   left: -10%;
   width: 120%;
   height: 70%;
-  color: rgb(255 246 220 / 34%);
+  color: rgb(255 246 220 / 40%);
   opacity: 0;
 }
 
@@ -1734,13 +1745,13 @@ html[data-press-ready][data-family="special"]
 @keyframes exi-throw {
   0% {
     opacity: 0;
-    scale: 1.68;
+    scale: 1.72;
     translate: 5% -8%;
   }
-  55% {
+  52% {
     opacity: 1;
-    scale: 0.96;
-    translate: -0.02em 0;
+    scale: 0.955;
+    translate: -0.025em 0;
   }
   100% {
     opacity: 1;
@@ -1751,12 +1762,12 @@ html[data-press-ready][data-family="special"]
 
 @keyframes exi-ray-punch {
   0% {
-    opacity: 0.4;
-    scale: 1.32;
+    opacity: 0.36;
+    scale: 1.36;
   }
-  35% {
+  34% {
     opacity: 1;
-    scale: 0.98;
+    scale: 0.975;
   }
   100% {
     opacity: 1;
@@ -1780,14 +1791,14 @@ html[data-press-ready][data-family="special"]
 @keyframes exi-shock {
   0% {
     opacity: 0;
-    scale: 0.15;
+    scale: 0.14;
   }
-  12% {
+  14% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    scale: 2.4;
+    scale: 2.52;
   }
 }
 

@@ -857,10 +857,45 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
 }
 
 /* ================================================================
+   OPTICS (2026-11-14): the titles catch the light
+   ================================================================ */
+/* A hair of ice rim at each stroke (the specular edge), the short deep
+   drop that seats the line, and a faint ambient of the page's light: ice
+   for the hero and the chapters, gold for the last word (the decision is
+   his). Shadows only; the faces, sizes and words are untouched. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
+  text-shadow:
+    0 0 1px rgb(150 236 255 / 42%),
+    0 2px 0 rgb(0 2 7 / 55%),
+    0 18px 48px rgb(0 0 0 / 45%),
+    0 0 24px rgb(150 236 255 / 10%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title {
+  text-shadow:
+    0 0 1px rgb(150 236 255 / 38%),
+    0 2px 0 rgb(0 2 7 / 60%),
+    0 12px 30px rgb(0 0 0 / 40%),
+    0 0 26px rgb(150 236 255 / 8%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2 {
+  text-shadow:
+    0 0 1px rgb(242 216 150 / 45%),
+    0 2px 0 rgb(0 2 7 / 60%),
+    0 16px 40px rgb(0 0 0 / 45%),
+    0 0 30px rgb(242 216 150 / 11%);
+}
+
+/* ================================================================
    Forced colours and more contrast: plain text, no shadows
    ================================================================ */
 @media (forced-colors: active) {
-  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2 {
     text-shadow: none;
   }
 }

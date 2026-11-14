@@ -2022,3 +2022,164 @@ html[data-family="special"] body .rxs-page.mus-page .rzn-movie-seek > input::-mo
     display: none;
   }
 }
+
+/* ================================================================
+   POLISH LAYER (2026-11-14) — the runway as a flight instrument.
+   Appended only. Teal (--rzn-ice) and amber (--rzn-gold) brackets on
+   the frame's corners, a graticule ruler on its floor, tick marks on
+   the rail and the read-out column, a held glow on the figures.
+   Motion: one scroll-linked lock-in on the frame's brackets (opacity
+   and transform only), on the runway's own named view timeline, behind
+   reduced motion, economy and the constrained tier.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgb(var(--rzn-gold) / 78%), rgb(var(--rzn-gold) / 78%)) left top / 22px 1px no-repeat,
+    linear-gradient(rgb(var(--rzn-gold) / 78%), rgb(var(--rzn-gold) / 78%)) left top / 1px 22px no-repeat,
+    linear-gradient(rgb(var(--rzn-gold) / 78%), rgb(var(--rzn-gold) / 78%)) right top / 22px 1px no-repeat,
+    linear-gradient(rgb(var(--rzn-gold) / 78%), rgb(var(--rzn-gold) / 78%)) right top / 1px 22px no-repeat,
+    linear-gradient(rgb(var(--rzn-ice) / 78%), rgb(var(--rzn-ice) / 78%)) left bottom / 22px 1px no-repeat,
+    linear-gradient(rgb(var(--rzn-ice) / 78%), rgb(var(--rzn-ice) / 78%)) left bottom / 1px 22px no-repeat,
+    linear-gradient(rgb(var(--rzn-ice) / 78%), rgb(var(--rzn-ice) / 78%)) right bottom / 22px 1px no-repeat,
+    linear-gradient(rgb(var(--rzn-ice) / 78%), rgb(var(--rzn-ice) / 78%)) right bottom / 1px 22px no-repeat,
+    linear-gradient(rgb(var(--rzn-ice) / 30%), rgb(var(--rzn-ice) / 30%)) center top / 1px 8px no-repeat,
+    linear-gradient(rgb(var(--rzn-ice) / 30%), rgb(var(--rzn-ice) / 30%)) center bottom / 1px 8px no-repeat;
+}
+
+/* The graticule along the frame's foot: a tick every 12 px, a long one every 60. */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::after {
+  content: "";
+  position: absolute;
+  right: 9%;
+  bottom: 9px;
+  left: 9%;
+  z-index: 0;
+  height: 8px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgb(var(--rzn-gold) / 54%) 0 1px, transparent 1px 60px) left bottom / 100% 8px no-repeat,
+    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 34%) 0 1px, transparent 1px 12px) left bottom / 100% 4px no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+/* The floor ring: a second, fainter ring and a specular lip. */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame > .rzn-floor {
+  box-shadow:
+    0 0 0 10px rgb(var(--rzn-ice) / 4%),
+    0 0 0 22px rgb(var(--rzn-gold) / 2.5%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 24%),
+    inset 0 0 26px rgb(var(--rzn-ice) / 16%);
+}
+
+/* The rail: a ruler beside it and a held glow on its filled length. */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-rail::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -6px;
+  width: 5px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgb(var(--rzn-gold) / 50%) 0 1px, transparent 1px 60px) right top / 5px 100% no-repeat,
+    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 32%) 0 1px, transparent 1px 12px) right top / 3px 100% no-repeat;
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-rail > i {
+  box-shadow: 0 0 9px rgb(var(--rzn-ice) / 55%);
+}
+
+/* The read-out column: a ruler on its outer edge, a soft teal bloom on the figure. */
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -14px;
+  bottom: 0;
+  width: 5px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgb(var(--rzn-gold) / 46%) 0 1px, transparent 1px 60px) left top / 5px 100% no-repeat,
+    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 30%) 0 1px, transparent 1px 12px) left top / 3px 100% no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-readout {
+  text-shadow:
+    0 1px 0 rgb(var(--rzn-white) / 12%),
+    0 0 28px rgb(var(--rzn-ice) / 26%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-nanites > small {
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgb(var(--rzn-ice) / 28%);
+}
+
+html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-kicker > span:first-child::before {
+  height: 2px;
+  background: linear-gradient(90deg, rgb(var(--rzn-gold)), rgb(var(--rzn-ice)));
+  box-shadow: 0 0 8px rgb(var(--rzn-ice) / 45%);
+}
+
+@supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-rzn-constrained]):not(
+        [data-side-menu-open]
+      ):not([data-dialog-open])
+      body
+      .rxs-page.mus-page:not([data-route-covered])
+      .rzn-suitup[data-rzn-state]
+      > .rzn-frame::before {
+      animation: mus-hud-lock linear both;
+      animation-timeline: --rzn-run;
+      animation-range: entry 8% entry 100%;
+    }
+  }
+}
+
+@keyframes mus-hud-lock {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Stills: reduced motion and economy stop the lock-in; forced colours
+   and print drop the drawn instruments. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::before {
+    animation: none !important;
+  }
+}
+
+html[data-family="special"][data-world-effects="economy"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::before,
+html[data-family="special"][data-rzn-constrained] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::before {
+  animation: none !important;
+}
+
+@media (forced-colors: active), print {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::before,
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup > .rzn-frame::after,
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-rail::before,
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup .rzn-hud::after {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.mus-page .rzn-suitup :is(.rzn-readout, .rzn-kicker) {
+    text-shadow: none;
+  }
+}

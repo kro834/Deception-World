@@ -23,8 +23,8 @@
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   --exz-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --exz-steel-rail: linear-gradient(180deg, #dfe7ef, #8fa0b3 50%, #3c4756);
-  --exz-gold-rail-v: linear-gradient(180deg, #fff3cf, var(--ext-gold) 50%, #d99a3a);
+  --exz-steel-rail: linear-gradient(180deg, #f4f8fc, #c5d3e2 28%, #8fa0b3 58%, #3c4756);
+  --exz-gold-rail-v: linear-gradient(180deg, #fffaf0, #ffe6a3 24%, var(--ext-gold) 54%, #c98624);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page ::selection {
@@ -77,6 +77,9 @@ html[data-family="special"]
   > span {
   color: #080807;
   background: var(--exe-gold-pill);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 48%),
+    0 0 12px rgb(244 204 123 / 36%);
 }
 
 html[data-family="special"]
@@ -424,13 +427,14 @@ html[data-family="special"]
   button[aria-pressed="true"] {
   border-color: var(--ext-gold);
   background:
-    linear-gradient(90deg, rgb(244 204 123 / 16%) 0%, rgb(244 204 123 / 4%) 100%),
-    rgb(26 22 16 / 92%);
+    linear-gradient(90deg, rgb(244 204 123 / 20%) 0%, rgb(244 204 123 / 5%) 100%),
+    rgb(26 22 16 / 94%);
   color: #ffffff;
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 22%),
-    0 4px 20px -4px rgb(244 204 123 / 26%);
-  text-shadow: 0 0 12px rgb(244 204 123 / 45%);
+    inset 0 1px 0 0 rgb(255 248 230 / 28%),
+    inset 0 -1px 0 0 rgb(244 204 123 / 16%),
+    0 6px 24px -4px rgb(244 204 123 / 32%);
+  text-shadow: 0 0 14px rgb(244 204 123 / 52%);
 }
 
 html[data-family="special"]
@@ -933,13 +937,13 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status {
   font-variant-numeric: tabular-nums;
   padding: 4px 14px 4px 10px;
   border-radius: 999px;
-  border: 1px solid rgb(244 204 123 / 32%);
+  border: 1px solid rgb(244 204 123 / 38%);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(244 204 123 / 16%), transparent 70%),
-    rgb(18 20 28 / 85%);
+    radial-gradient(ellipse at 50% 0%, rgb(244 204 123 / 22%), transparent 72%),
+    rgb(18 20 28 / 88%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 22%),
-    0 0 16px -2px rgb(244 204 123 / 28%);
+    inset 0 1px 0 0 rgb(255 248 230 / 28%),
+    0 0 18px -2px rgb(244 204 123 / 34%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status::before {
@@ -948,7 +952,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-stage-status::
   width: 8px;
   height: 8px;
   background: var(--ext-gold);
-  box-shadow: 0 0 10px rgb(244 204 123 / 55%);
+  box-shadow:
+    0 0 12px rgb(244 204 123 / 68%),
+    inset 0 1px 0 rgb(255 255 255 / 55%);
   rotate: 45deg;
 }
 
@@ -1132,11 +1138,12 @@ html[data-family="special"]
 @media (hover: hover) and (pointer: fine) {
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-local-nav nav a:hover {
     color: #fff6df;
-    background: rgb(244 204 123 / 9%);
+    background: rgb(244 204 123 / 11%);
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover {
-    background: linear-gradient(180deg, rgb(244 204 123 / 14%), rgb(244 204 123 / 3%));
+    background: linear-gradient(180deg, rgb(244 204 123 / 16%), rgb(244 204 123 / 4%));
+    box-shadow: inset 0 1px 0 rgb(255 248 230 / 22%);
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-chapter-index a:hover::after {
@@ -1147,18 +1154,19 @@ html[data-family="special"]
     color: #080807;
     border-color: var(--ext-gold);
     background: var(--exe-gold-pill);
+    box-shadow: 0 0 14px rgb(244 204 123 / 38%);
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-opponent-options button:hover {
     color: #fff8e6;
     border-color: #ffe1a1;
     background:
-      linear-gradient(90deg, rgb(255 255 255 / 8%) 0%, transparent 100%),
-      rgb(28 32 42 / 85%);
+      linear-gradient(90deg, rgb(255 248 230 / 10%) 0%, transparent 100%),
+      rgb(28 32 42 / 88%);
     box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 18%),
-      0 6px 20px -4px rgb(0 0 0 / 70%),
-      0 0 14px -2px rgb(244 204 123 / 22%);
+      inset 0 1px 0 0 rgb(255 255 255 / 22%),
+      0 8px 24px -4px rgb(0 0 0 / 74%),
+      0 0 16px -2px rgb(244 204 123 / 28%);
   }
 
   html[data-family="special"]
@@ -1168,8 +1176,9 @@ html[data-family="special"]
     .rxs-comparison-metrics
     > article:hover {
     box-shadow:
-      0 22px 44px -20px rgb(0 0 0 / 90%),
-      inset 0 0 0 1px rgb(244 204 123 / 50%);
+      0 24px 48px -20px rgb(0 0 0 / 92%),
+      inset 0 1px 0 rgb(255 248 230 / 24%),
+      inset 0 0 0 1px rgb(244 204 123 / 54%);
   }
 
   html[data-family="special"]
@@ -1179,8 +1188,9 @@ html[data-family="special"]
     .rxs-comparison-metrics
     > article[data-exf-win="rival"]:hover {
     box-shadow:
-      0 22px 44px -20px rgb(0 0 0 / 90%),
-      inset 0 0 0 1px rgb(114 228 255 / 52%);
+      0 24px 48px -20px rgb(0 0 0 / 92%),
+      inset 0 1px 0 rgb(226 248 255 / 24%),
+      inset 0 0 0 1px rgb(114 228 255 / 56%);
   }
 
   html[data-family="special"]
@@ -1196,7 +1206,7 @@ html[data-family="special"]
     .rxs-page.rxs-page.exs-page
     .exs-catalog-details
     > summary:hover::after {
-    box-shadow: 0 0 0 4px rgb(244 204 123 / 20%);
+    box-shadow: 0 0 0 4px rgb(244 204 123 / 24%);
   }
 
   html[data-family="special"]
@@ -1206,15 +1216,16 @@ html[data-family="special"]
     .rxs-system-grid
     > article:hover {
     box-shadow:
-      0 34px 70px -24px rgb(0 0 0 / 95%),
-      inset 0 1px 0 rgb(255 248 230 / 30%),
-      inset 0 0 0 1px var(--exe-rule-strong);
+      0 36px 72px -24px rgb(0 0 0 / 96%),
+      inset 0 1px 0 rgb(255 248 230 / 34%),
+      inset 0 0 0 1px var(--exe-rule-strong),
+      0 0 28px -8px rgb(244 204 123 / 20%);
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer > a:hover {
     box-shadow:
-      0 18px 38px rgb(0 0 0 / 64%),
-      inset 0 1px 0 rgb(255 248 230 / 26%);
+      0 20px 42px rgb(0 0 0 / 68%),
+      inset 0 1px 0 rgb(255 248 230 / 30%);
   }
 }
 
@@ -1560,6 +1571,7 @@ html[data-family="special"]
     color: HighlightText;
     -webkit-text-fill-color: HighlightText;
     background: Highlight;
+    box-shadow: none;
   }
 
   html[data-family="special"]

@@ -32,12 +32,14 @@
    ================================================================ */
 html .fst-page.fst-page {
   --fsl-lamp: #ffd9a3;
-  --fsl-lamp-hot: #ffe9c9;
-  --fsl-chalk: #f5e7c6;
-  --fsl-chalk-70: rgb(245 231 198 / 70%);
-  --fsl-chalk-40: rgb(245 231 198 / 40%);
-  --fsl-chalk-24: rgb(245 231 198 / 24%);
-  --fsl-chalk-14: rgb(245 231 198 / 14%);
+  --fsl-lamp-hot: #ffedd2;
+  --fsl-lavender: #c99bff;
+  --fsl-violet: #a48bff;
+  --fsl-chalk: #f7ebd0;
+  --fsl-chalk-70: rgb(247 235 208 / 72%);
+  --fsl-chalk-40: rgb(247 235 208 / 42%);
+  --fsl-chalk-24: rgb(247 235 208 / 26%);
+  --fsl-chalk-14: rgb(247 235 208 / 16%);
   --fsl-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --fsl-door: cubic-bezier(0.32, 0.72, 0, 1);
   --fsl-draw: cubic-bezier(0.7, 0, 0.2, 1);
@@ -51,11 +53,21 @@ html .fst-page.fst-page {
      about .5 to 1), so the map's lines read as drawn on the board, not
      ruled. */
   --fsl-chalk-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='c' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.5 0 0 0 .08'/%3E%3C/filter%3E%3Crect width='96' height='96' filter='url(%23c)'/%3E%3C/svg%3E");
-  /* An enamel plate: two rivets and a soft top gloss. */
+  /* An enamel plate: two brass-rimmed rivets and a soft top gloss. */
   --fsl-rivets:
-    radial-gradient(circle at 7px 50%, rgb(245 231 198 / 58%) 0 1.25px, transparent 1.9px),
-    radial-gradient(circle at calc(100% - 7px) 50%, rgb(245 231 198 / 58%) 0 1.25px, transparent 1.9px),
-    linear-gradient(180deg, rgb(255 255 255 / 7%), transparent 48%);
+    radial-gradient(
+      circle at 7px 50%,
+      #fff5de 0 1.2px,
+      rgb(255 217 163 / 36%) 1.3px 2.1px,
+      transparent 2.5px
+    ),
+    radial-gradient(
+      circle at calc(100% - 7px) 50%,
+      #fff5de 0 1.2px,
+      rgb(255 217 163 / 36%) 1.3px 2.1px,
+      transparent 2.5px
+    ),
+    linear-gradient(180deg, rgb(255 250 240 / 9%), transparent 50%);
 }
 
 /* ================================================================
@@ -66,10 +78,15 @@ html .fst-page.fst-page .fst-cast-console {
   background:
     var(--fsl-grain) 0 0 / 160px 160px,
     var(--fsk-paper) 0 0 / 26px 26px,
-    radial-gradient(ellipse 40% 34% at 0% 0%, rgb(255 196 130 / 9%), transparent 70%),
+    radial-gradient(ellipse 46% 38% at 0% 0%, rgb(255 206 142 / 11%), transparent 72%),
+    radial-gradient(ellipse 48% 42% at 100% 100%, rgb(201 155 255 / 9%), transparent 74%),
     var(--fst-prism-soft) top / 100% 1px no-repeat,
-    linear-gradient(150deg, rgb(122 232 255 / 5%), transparent 55%),
+    linear-gradient(150deg, rgb(164 139 255 / 6%), transparent 58%),
     var(--fst-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 242 216 / 11%),
+    inset 0 0 0 1px rgb(201 155 255 / 9%),
+    0 22px 52px rgb(0 0 0 / 38%);
 }
 
 html .fst-page.fst-page .fst-pickup-card {
@@ -78,10 +95,14 @@ html .fst-page.fst-page .fst-pickup-card {
     var(--fst-prism-soft) top / 100% 1px no-repeat,
     radial-gradient(
       circle at 92% 8%,
-      color-mix(in srgb, var(--fst-accent) 14%, transparent),
-      transparent 34%
+      color-mix(in srgb, var(--fst-accent) 16%, transparent),
+      transparent 38%
     ),
+    radial-gradient(ellipse 52% 38% at 8% 100%, rgb(255 206 142 / 8%), transparent 70%),
     var(--fst-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 242 216 / 10%),
+    0 20px 48px rgb(0 0 0 / 40%);
 }
 
 html .fst-page.fst-page .fst-pickup-dialog .fst-pickup-panel {
@@ -91,9 +112,10 @@ html .fst-page.fst-page .fst-pickup-dialog .fst-pickup-panel {
     var(--fst-prism-soft) top / 100% 1px no-repeat,
     radial-gradient(
       circle at 90% 0%,
-      color-mix(in srgb, var(--fst-accent) 10%, transparent),
-      transparent 30rem
+      color-mix(in srgb, var(--fst-accent) 12%, transparent),
+      transparent 32rem
     ),
+    radial-gradient(circle at 8% 18%, rgb(255 206 142 / 7%), transparent 28rem),
     var(--fst-ink);
 }
 
@@ -102,7 +124,8 @@ html .fst-page.fst-page .rxs-footer {
     var(--fsl-grain) 0 0 / 160px 160px,
     var(--fsk-paper) 0 0 / 26px 26px,
     var(--fst-prism-soft) top / 100% 1px no-repeat,
-    radial-gradient(ellipse 34% 60% at 12% 100%, rgb(255 196 130 / 11%), transparent 72%),
+    radial-gradient(ellipse 38% 62% at 14% 100%, rgb(255 206 142 / 12%), transparent 72%),
+    radial-gradient(ellipse 40% 54% at 86% 100%, rgb(201 155 255 / 9%), transparent 74%),
     var(--fst-ink);
 }
 
@@ -111,11 +134,12 @@ html .fst-page.fst-page .rxs-section-heading > p,
 html .fst-page.fst-page .fst-pickup-heading p {
   background:
     var(--fsl-rivets),
-    linear-gradient(90deg, rgb(255 196 130 / 10%), transparent 65%),
-    rgb(4 8 15 / 88%);
+    linear-gradient(125deg, rgb(255 206 142 / 13%), transparent 54%, rgb(201 155 255 / 9%)),
+    rgb(4 8 16 / 90%);
   box-shadow:
-    inset 0 1px 0 rgb(255 240 214 / 10%),
-    0 10px 24px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(255 244 220 / 14%),
+    inset 0 0 0 1px rgb(201 155 255 / 8%),
+    0 10px 26px rgb(0 0 0 / 38%);
 }
 
 /* Chalk on the board: the map's strokes (all but the lit here-mark, whose
@@ -144,10 +168,11 @@ html .fst-page.fst-page .fsk-map::after {
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    transparent 0 292deg,
-    rgb(255 217 163 / 0%) 292deg,
-    rgb(255 217 163 / 78%) 354deg,
-    var(--fsl-lamp-hot) 357deg 360deg
+    transparent 0 268deg,
+    rgb(201 155 255 / 0%) 268deg,
+    rgb(201 155 255 / 34%) 318deg,
+    rgb(255 217 163 / 84%) 353deg,
+    var(--fsl-lamp-hot) 356.5deg 360deg
   );
   opacity: 0;
   -webkit-mask: radial-gradient(
@@ -167,13 +192,14 @@ html .fst-page.fst-page .fsk-map::after {
   pointer-events: none;
 }
 
-/* The platform's here-mark throws a wider pool of lamp light. */
+/* The platform's here-mark throws a wider pool of lamp and lavender dusk light. */
 html .fst-page.fst-page .fsk-map i:nth-child(6) {
   box-shadow:
     0 0 0 4px #04080f,
     0 0 0 5.5px var(--fsl-chalk-70),
-    0 0 18px 4px rgb(255 217 163 / 35%),
-    0 0 64px 18px rgb(255 196 130 / 12%);
+    0 0 20px 5px rgb(255 217 163 / 42%),
+    0 0 44px 12px rgb(201 155 255 / 20%),
+    0 0 72px 20px rgb(255 196 130 / 12%);
 }
 
 /* ================================================================
@@ -418,15 +444,17 @@ html .fst-page.fst-page .fst-cast-detail {
   --fsl-pass-ground: #101a2b;
   position: relative;
   padding: var(--fsl-pass-pad);
-  border: 1px solid var(--fsl-chalk-14);
+  border: 1px solid var(--fsl-chalk-24);
   border-radius: 8px;
   background:
     var(--fsl-grain) 0 0 / 160px 160px,
-    linear-gradient(180deg, rgb(255 226 186 / 5%), transparent 42%),
+    radial-gradient(ellipse 52% 44% at 100% 0%, rgb(201 155 255 / 9%), transparent 70%),
+    linear-gradient(180deg, rgb(255 226 186 / 6.5%), transparent 44%),
     var(--fsl-pass-ground);
   box-shadow:
-    inset 0 1px 0 rgb(255 240 214 / 7%),
-    0 18px 44px rgb(0 0 0 / 30%);
+    inset 0 1px 0 rgb(255 242 218 / 11%),
+    inset 0 0 0 1px rgb(164 139 255 / 8%),
+    0 20px 48px rgb(0 0 0 / 36%);
 }
 
 /* Both lines of the area are named: an absolutely placed grid item whose
@@ -860,17 +888,17 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
   html:not([data-world-effects="economy"]) .fst-page.fst-page .rxs-local-nav nav a::before,
   html:not([data-world-effects="economy"]) .fst-page.fst-page .rxs-footer > a::after,
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-cast-copy > a::after {
-    transition: scale 260ms var(--fsl-ease);
+    transition: scale 180ms var(--fsl-ease);
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .rxs-footer > a i,
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-gallery figcaption,
   html:not([data-world-effects="economy"]) .fst-page.fst-page .rxs-scroll-cue i {
-    transition: translate 260ms var(--fsl-ease);
+    transition: translate 180ms var(--fsl-ease);
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-card {
-    transition: border-color 220ms ease;
+    transition: border-color 180ms var(--fsl-ease);
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-visual img {
@@ -910,7 +938,7 @@ html .fst-page.fst-page .fst-cast-copy > a:focus-visible::after {
   }
 
   html:not([data-world-effects="economy"]) .fst-page.fst-page .fst-pickup-dialog[open]::backdrop {
-    animation: fsl-fade 320ms ease-out both;
+    animation: fsl-fade 320ms var(--fsl-ease) both;
   }
 
   /* The board, as the doors clear it: the name is struck from the left,
