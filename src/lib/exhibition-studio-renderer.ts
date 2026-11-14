@@ -26,6 +26,7 @@ import {
   SRGBColorSpace,
   Texture,
   Vector2,
+  Vector3,
   WebGLRenderer,
   type BufferGeometry,
   type WebGLRenderTarget,
@@ -105,6 +106,15 @@ function surfaceGrain(size: number, variation: number, seed: number) {
   return texture;
 }
 
+function isReducedMotionRequested() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return true;
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return true;
+  }
+}
+
 function abortError() {
   return new DOMException("Exhibition loading was cancelled.", "AbortError");
 }
@@ -142,6 +152,13 @@ export async function createExhibitionStudio(
   const scene = new Scene();
   scene.background = new Color(0xe3ded3);
   const camera = new PerspectiveCamera(39, 1, 0.025, 40);
+  const currentTarget = new Vector3();
+  const dollyTargetPos = new Vector3();
+  const dollyTargetLook = new Vector3();
+  const dollyStartPos = new Vector3();
+  const dollyStartLook = new Vector3();
+  let dollyProgress = 1;
+  let lastFrameTime = 0;
   const notify = (status: ExhibitionStudioStatus) => {
     if (!disposed) options.onStatus?.(status);
   };
@@ -167,6 +184,7 @@ export async function createExhibitionStudio(
     if (disposed) return;
     disposed = true;
     ready = false;
+    dollyProgress = 1;
     controller.abort();
     if (frameId) cancelAnimationFrame(frameId);
     frameId = 0;
@@ -245,10 +263,22 @@ export async function createExhibitionStudio(
     frameId = 0;
     if (disposed || paused || contextLost || !renderer) return;
     try {
+      if (dollyProgress < 1) {
+        const now = performance.now();
+        const dt = lastFrameTime ? Math.min(0.1, (now - lastFrameTime) / 1000) : 0.016;
+        lastFrameTime = now;
+        dollyProgress = Math.min(1, dollyProgress + dt / 0.35);
+        const t = dollyProgress * dollyProgress * (3 - 2 * dollyProgress);
+        camera.position.lerpVectors(dollyStartPos, dollyTargetPos, t);
+        currentTarget.lerpVectors(dollyStartLook, dollyTargetLook, t);
+        camera.lookAt(currentTarget);
+        camera.updateProjectionMatrix();
+      }
       renderer.render(scene, camera);
       renderCount++;
       ready = true;
       notify("ready");
+      if (dollyProgress < 1) scheduleRender();
     } catch (error) {
       ready = false;
       notify("error");
@@ -259,13 +289,24 @@ export async function createExhibitionStudio(
   function scheduleRender() {
     if (!disposed && !paused && !contextLost && !frameId) frameId = requestAnimationFrame(draw);
   }
-  function updateCamera() {
+  function updateCamera(immediate = false) {
     const fit = getExhibitionCamera(dimensions, width, height, view);
     camera.aspect = fit.aspect;
     camera.fov = fit.fov;
-    camera.position.set(...fit.position);
-    camera.lookAt(...fit.target);
-    camera.updateProjectionMatrix();
+    dollyTargetPos.set(...fit.position);
+    dollyTargetLook.set(...fit.target);
+    if (immediate || isReducedMotionRequested() || !ready) {
+      dollyProgress = 1;
+      camera.position.copy(dollyTargetPos);
+      currentTarget.copy(dollyTargetLook);
+      camera.lookAt(currentTarget);
+      camera.updateProjectionMatrix();
+      return;
+    }
+    dollyStartPos.copy(camera.position);
+    dollyStartLook.copy(currentTarget);
+    dollyProgress = 0;
+    lastFrameTime = performance.now();
   }
   function resize() {
     if (disposed || !renderer) return;
@@ -277,12 +318,12 @@ export async function createExhibitionStudio(
     const requestedDpr = options.quality === "cinema" ? 3 : 2;
     // This is a GPU allocation safety bound, not a lower-quality fallback for mobile devices.
     pixelRatio = Math.min(
-      requestedDpr,
-      Math.sqrt((options.quality === "cinema" ? 16_000_000 : 8_000_000) / (width * height)),
-    );
+        requestedDpr,
+        Math.sqrt((options.quality === "cinema" ? 16_000_000 : 8_000_000) / (width * height)),
+      );
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(width, height, false);
-    updateCamera();
+    updateCamera(true);
     scheduleRender();
   }
   async function imageTexture(url: string, colour: boolean) {
@@ -431,12 +472,13 @@ export async function createExhibitionStudio(
     scene.add(mount);
     const aluminium = ownMaterial(
       new MeshStandardMaterial({
-        color: 0x626967,
-        metalness: 0.92,
-        roughness: 0.42,
+        color: 0x69706e,
+        metalness: 0.94,
+        roughness: 0.38,
         normalMap,
-        normalScale: new Vector2(0.035, 0.035),
+        normalScale: new Vector2(0.038, 0.038),
         roughnessMap,
+        envMapIntensity: 1.15,
       }),
     );
     for (const geometry of createMiteredFrameGeometry(dimensions)) {
@@ -502,13 +544,14 @@ export async function createExhibitionStudio(
         new MeshPhysicalMaterial({
           color: 0xffffff,
           metalness: 0,
-          roughness: 0,
+          roughness: 0.006,
           transmission: 1,
-          // Low specular intensity approximates the anti-reflective coating, not a false glass IOR.
+          // Low specular intensity approximates the anti-reflective coating with subtle oblique interference.
           thickness: dimensions.glassThickness,
           ior: 1.52,
-          specularIntensity: 0.035,
-          envMapIntensity: 0.16,
+          specularIntensity: 0.042,
+          specularColor: new Color(0xd8eeff),
+          envMapIntensity: 0.22,
           attenuationColor: new Color(0xffffff),
           attenuationDistance: Infinity,
         }),
@@ -519,7 +562,7 @@ export async function createExhibitionStudio(
     glass.castShadow = glass.receiveShadow = false;
     mount.add(glass);
 
-    scene.add(new HemisphereLight(0xf4f6ff, 0x8b806e, 0.65));
+    scene.add(new HemisphereLight(0xf4f6ff, 0x938875, 0.68));
     const windowLight = new RectAreaLight(0xf5f5ff, 4.0, 1.7, 2.4);
     windowLight.position.set(-2.3, 2.4, 2.0);
     windowLight.lookAt(0, 1.3, 0);
@@ -557,7 +600,7 @@ export async function createExhibitionStudio(
       fixture.position.set(x, 2.82, 0.3);
       fixture.rotation.x = -0.4;
       scene.add(fixture);
-      const spotlight = new SpotLight(0xffedd5, 14, 5, 0.6, 0.75, 2);
+      const spotlight = new SpotLight(0xffeedb, 14.5, 5.2, 0.65, 0.88, 2);
       spotlight.position.set(x, 2.75, 0.25);
       spotlight.target.position.set(x * 0.35, dimensions.centreHeight, 0);
       scene.add(spotlight, spotlight.target);

@@ -2288,8 +2288,11 @@ html[data-world-effects="economy"]
   0% {
     scale: 1;
   }
-  22% {
-    scale: 1.14;
+  18% {
+    scale: 1.15;
+  }
+  38% {
+    scale: 0.985;
   }
   100% {
     scale: 1;

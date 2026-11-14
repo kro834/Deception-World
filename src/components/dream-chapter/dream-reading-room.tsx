@@ -206,6 +206,7 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
   });
   const [chapter, setChapter] = useState(initial.bookmark?.caseNo ?? "0");
   const [paragraph, setParagraph] = useState(initial.bookmark?.paragraph ?? 1);
+  const [bookmark, setBookmark] = useState(initial.bookmark);
   const [size, setSize] = useState(initial.size);
   const [spacing, setSpacing] = useState(initial.spacing);
   const [paper, setPaper] = useState(false);
@@ -398,6 +399,7 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
         DREAM_READER_STORAGE_KEY,
         JSON.stringify({ version: 1, size, spacing, bookmark: { caseNo: chapter, paragraph } }),
       );
+      setBookmark({ caseNo: chapter, paragraph });
       window.dispatchEvent(new Event("dream-reader-state-change"));
       setStatus(`CASE ${chapter}・${paragraph}段落目にしおりを保存しました。`);
     } catch {
@@ -541,7 +543,15 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
               </header>
               {episode.paragraphs.map((text, i) => (
                 <Fragment key={text}>
-                  <p key={text} data-room-paragraph={i + 1}>
+                  <p
+                    key={text}
+                    data-room-paragraph={i + 1}
+                    data-bookmarked={
+                      bookmark?.caseNo === chapter && bookmark?.paragraph === i + 1
+                        ? "true"
+                        : undefined
+                    }
+                  >
                     <span className="dream-reading-paragraph-number" aria-hidden="true">
                       {String(i + 1).padStart(2, "0")}
                     </span>

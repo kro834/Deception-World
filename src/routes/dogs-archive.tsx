@@ -161,21 +161,29 @@ function DogsArchive() {
           </>
         ) : dog === 2 ? (
           <div className="dogs-archive-varg">
-            <img
-              src="/character-varg-20261021.webp"
-              srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
-              sizes="(max-width: 700px) calc(100vw - 32px), 720px"
-              alt="第二の犬・ヴァルグの本来形態"
-              width={1088}
-              height={1445}
-              decoding="async"
-            />
+            <div className="dogs-archive-varg__frame">
+              <img
+                src="/character-varg-20261021.webp"
+                srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
+                sizes="(max-width: 700px) calc(100vw - 32px), 720px"
+                alt="第二の犬・ヴァルグの本来形態"
+                width={1088}
+                height={1445}
+                decoding="async"
+              />
+              <div className="dogs-archive-varg__aura" aria-hidden="true" />
+            </div>
             <Link to="/characters/dante" hash="character-section-04">
               人物資料へ <span aria-hidden="true">↗</span>
             </Link>
           </div>
         ) : (
           <div className="dogs-archive-unreleased">
+            <div className="dogs-archive-seal" aria-hidden="true">
+              <span className="dogs-archive-seal__ring" />
+              <span className="dogs-archive-seal__label">CLASSIFIED ARCHIVE</span>
+              <span className="dogs-archive-seal__code">第{entry.numeral}観測領域・封印指定</span>
+            </div>
             <span aria-hidden="true">{entry.numeral}</span>
             <p>個体資料は未公開です。</p>
           </div>

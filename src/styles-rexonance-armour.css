@@ -263,7 +263,12 @@
 
 /* ---------- 02 P14: the core's halo, crystal readouts ---------- */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview figure {
+  background:
+    linear-gradient(90deg, transparent 0 10%, rgb(122 232 255 / 24%) 20% 80%, transparent 90%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 0 15%, rgb(242 216 150 / 22%) 25% 75%, transparent 85%) 0 100% / 100% 1px no-repeat,
+    var(--ra-plate);
   box-shadow:
+    var(--ra-bevel),
     var(--ra-rim-ice),
     0 0 40px -6px rgb(122 232 255 / 30%),
     var(--ra-drop);
@@ -300,12 +305,25 @@
     22px 100%,
     0 calc(100% - 22px)
   );
-  box-shadow: var(--ra-bevel), var(--ra-rim-ice);
+  background:
+    linear-gradient(90deg, var(--ra-ice) 0 28px, transparent 28px calc(100% - 28px), var(--ra-pink) calc(100% - 28px)) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent 0 24px, rgb(242 216 150 / 22%) 24px calc(100% - 24px), transparent calc(100% - 24px)) 0 100% / 100% 1px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  box-shadow:
+    var(--ra-bevel),
+    var(--ra-rim-ice),
+    inset 0 0 20px rgb(122 232 255 / 6%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14 .rxs-p14-metrics article {
   border-radius: 4px;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  background:
+    linear-gradient(90deg, rgb(122 232 255 / 28%) 0 18px, transparent 18px) 0 0 / 100% 1px no-repeat,
+    var(--ra-sheen),
+    var(--ra-plate);
+  box-shadow: var(--ra-bevel), var(--ra-rim-ice);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-values strong {
@@ -354,6 +372,7 @@
   border-radius: 6px;
   background:
     linear-gradient(var(--ri-voice, var(--ra-ice)) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(90deg, transparent, rgb(122 232 255 / 18%), transparent) 0 4px / 100% 1px no-repeat,
     linear-gradient(var(--ra-gold) 0 0) 50% 100% / 36px 2px no-repeat,
     var(--ra-sheen),
     var(--ra-plate);
@@ -367,7 +386,8 @@
   );
   box-shadow:
     var(--ra-bevel),
-    0 0 0 1px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 30%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 30%, transparent),
+    inset 0 0 18px color-mix(in srgb, var(--ri-voice, var(--ra-ice)) 5%, transparent);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-system .rxs-system-grid article:nth-child(2) {

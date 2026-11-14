@@ -394,14 +394,108 @@ html[data-family="world"]:root
 }
 
 @media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail {
+    --zn-o: 0.44;
+    left: var(--zn-x, 58%);
+    top: var(--zn-y, 66%);
+    width: var(--zn-w, 128vw);
+    height: var(--zn-h, 210px);
+    border-radius: 50%;
+    background: linear-gradient(
+      100deg,
+      transparent 0,
+      rgb(122 232 255 / 70%) 18%,
+      rgb(79 123 255 / 78%) 38%,
+      rgb(255 79 195 / 92%) 60%,
+      rgb(240 207 134 / 72%) 82%,
+      transparent 100%
+    );
+    -webkit-mask: radial-gradient(
+      50% 50% at 50% 50%,
+      #000 0,
+      rgb(0 0 0 / 60%) 34%,
+      transparent 70%
+    );
+    mask: radial-gradient(50% 50% at 50% 50%, #000 0, rgb(0 0 0 / 60%) 34%, transparent 70%);
+    opacity: var(--zn-o);
+    translate: -50% -50%;
+    rotate: var(--zn-r, -14deg);
+  }
 
   /* The bright core of each trail, inside the same soft mask: the logo's
      thin streamline through its halo. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 2px;
+    translate: 0 -50%;
+    background: linear-gradient(
+      90deg,
+      transparent 0,
+      rgb(200 240 255 / 90%) 22%,
+      rgb(255 255 255 / 96%) 50%,
+      rgb(255 214 240 / 90%) 74%,
+      transparent 100%
+    );
+    opacity: 0.85;
+  }
 
   /* The second, thinner trail crosses the upper right behind the print,
      pink and gold first. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail-b {
+    --zn-o: 0.34;
+    --zn-x: 74%;
+    --zn-y: 30%;
+    --zn-w: 96vw;
+    --zn-h: 110px;
+    --zn-r: -22deg;
+    background: linear-gradient(
+      100deg,
+      transparent 0,
+      rgb(255 79 195 / 70%) 26%,
+      rgb(200 77 255 / 80%) 46%,
+      rgb(240 207 134 / 80%) 66%,
+      rgb(122 232 255 / 50%) 84%,
+      transparent 100%
+    );
+  }
 
   /* The pink bloom under the print: the logo's own light on the floor. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-bloom {
+    left: 60%;
+    right: -10%;
+    top: 46%;
+    bottom: -8%;
+    background: radial-gradient(
+      55% 50% at 50% 62%,
+      rgb(255 79 195 / 26%),
+      rgb(79 123 255 / 12%) 46%,
+      transparent 74%
+    );
+  }
 
   /* The print's floor glow and shadow carry the same light. */
   html[data-family="world"]:root
@@ -439,6 +533,54 @@ html[data-family="world"]:root
 
 /* One column: the long trail climbs behind the print, the bloom sits
    under it. */
+@media (forced-colors: none) and (max-width: 699px),
+  (forced-colors: none) and (max-width: 900px) and (orientation: landscape) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > :is(.zn-trail, .zn-trail-a) {
+    --zn-x: 50%;
+    --zn-y: 52%;
+    --zn-w: 210vw;
+    --zn-h: 150px;
+    --zn-r: -34deg;
+    --zn-o: 0.4;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-trail-b {
+    --zn-x: 42%;
+    --zn-y: 20%;
+    --zn-w: 150vw;
+    --zn-h: 80px;
+    --zn-r: -28deg;
+    --zn-o: 0.3;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .zn-hero-light
+    > .zn-bloom {
+    left: -10%;
+    right: -10%;
+    top: 34%;
+    bottom: 14%;
+    background: radial-gradient(
+      50% 42% at 50% 56%,
+      rgb(255 79 195 / 24%),
+      rgb(79 123 255 / 10%) 50%,
+      transparent 76%
+    );
+  }
+}
 
 /* The trails sweep in once, after the boot has sealed (the reduced and
    economy tiers show them at rest). Full motion only; one iteration;
@@ -991,7 +1133,9 @@ html[data-family="world"]:root
 }
 
 @media (forced-colors: none) and (min-width: 900px) {
-  /* The print as a lit frame: its foot glows in the logo's pink and ice. */
+  /* The print as a lit frame: its foot glows in the logo's pink and ice.
+     Optical corner accents bracket the sticky frame without exceeding the
+     scroll-paint or Android GPU blur budgets (blur <= 48px). */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -1000,8 +1144,27 @@ html[data-family="world"]:root
     box-shadow:
       0 0 0 5px rgb(3 8 7 / 70%),
       0 0 0 6px rgb(var(--sw-light-rgb) / 12%),
-      0 34px 60px -34px rgb(0 0 0 / 90%),
-      0 18px 70px -30px rgb(255 79 195 / 30%);
+      0 24px 44px -24px rgb(0 0 0 / 90%),
+      0 14px 48px -20px rgb(255 79 195 / 28%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #episode-notes
+    .wa-episode-art::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      linear-gradient(90deg, var(--sw-light), transparent 32px) top left / 32px 1px no-repeat,
+      linear-gradient(180deg, var(--sw-light), transparent 32px) top left / 1px 32px no-repeat,
+      linear-gradient(270deg, #ff4fc3, transparent 32px) bottom right / 32px 1px no-repeat,
+      linear-gradient(0deg, #ff4fc3, transparent 32px) bottom right / 1px 32px no-repeat;
+    opacity: 0.85;
   }
 
   html[data-family="world"]:root

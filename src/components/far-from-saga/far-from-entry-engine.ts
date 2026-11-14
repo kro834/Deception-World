@@ -1036,7 +1036,30 @@ export function createFarFromEntryEngine({
         flight.globalAlpha = light;
         flight.fillStyle = WIRE_WHITE;
         flight.fill();
-        counters[0] += 2;
+        // Multi-wavelength laser scanning slit beams
+        flight.beginPath();
+        for (let i = 0; i < headCount; i += 2) {
+          const hx = heads[i];
+          const hy = heads[i + 1];
+          flight.moveTo(hx - size * 1.6, hy);
+          flight.lineTo(hx + size * 1.6, hy);
+        }
+        flight.globalAlpha = 0.65 * light;
+        flight.strokeStyle = WIRE_ICE;
+        flight.lineWidth = 1 * s;
+        flight.stroke();
+        flight.beginPath();
+        for (let i = 0; i < headCount; i += 2) {
+          const hx = heads[i];
+          const hy = heads[i + 1];
+          flight.moveTo(hx, hy - size * 1.1);
+          flight.lineTo(hx, hy + size * 1.1);
+        }
+        flight.globalAlpha = 0.48 * light;
+        flight.strokeStyle = WIRE_GOLD;
+        flight.lineWidth = 0.8 * s;
+        flight.stroke();
+        counters[0] += 4;
       }
       flight.globalAlpha = 1;
     };
@@ -1229,19 +1252,29 @@ export function createFarFromEntryEngine({
         flight.lineCap = "butt";
         counters[0] += 1;
       }
-      // An accent's ring: its group locked.
+      // Shock rings upon seating lock: precision dual expansion rings
       for (let p = 0; p < plates; p += 1) {
-        if (!accent[p]) continue;
-        const u = (t - plan.fit[p]) / 260;
+        if (driver[p]) continue;
+        const u = (t - plan.fit[p]) / (accent[p] ? 280 : 180);
         if (u < 0 || u >= 1) continue;
         const piece = plan.pieces[p];
-        const r = Math.max(piece.w, piece.h) * (0.35 + 0.75 * (1 - (1 - u) * (1 - u))) * s;
+        const baseR = Math.max(piece.w, piece.h);
+        const r = baseR * (0.3 + (accent[p] ? 0.9 : 0.6) * (1 - (1 - u) * (1 - u))) * s;
         flight.beginPath();
         flight.arc(plateCX[p] * s, plateCY[p] * s, r, 0, Math.PI * 2);
-        flight.globalAlpha = 0.6 * (1 - u) * (1 - u);
-        flight.strokeStyle = WIRE_GOLD;
-        flight.lineWidth = (2.4 * (1 - u) + 0.8) * s;
+        flight.globalAlpha = (accent[p] ? 0.75 : 0.45) * (1 - u) * (1 - u);
+        flight.strokeStyle = accent[p] ? WIRE_GOLD : WIRE_ICE;
+        flight.lineWidth = (2.2 * (1 - u) + 0.7) * s;
         flight.stroke();
+        if (accent[p]) {
+          const innerR = baseR * (0.2 + 0.5 * (1 - (1 - u) * (1 - u))) * s;
+          flight.beginPath();
+          flight.arc(plateCX[p] * s, plateCY[p] * s, innerR, 0, Math.PI * 2);
+          flight.globalAlpha = 0.9 * (1 - u);
+          flight.strokeStyle = WIRE_WHITE;
+          flight.lineWidth = (1.5 * (1 - u) + 0.6) * s;
+          flight.stroke();
+        }
         counters[0] += 1;
       }
       flight.globalAlpha = 1;
@@ -1403,8 +1436,25 @@ export function createFarFromEntryEngine({
       if (exploded && t < FAR_FROM_SUIT_LIGHT.from) drawOmen(t);
       if (skin && t < FAR_FROM_SUIT_LIGHT.from) {
         // The nanite skin: one front from the reactor over the body.
+        const prog = farFromEntrySkinProgress(t);
         flight.setTransform(s, 0, 0, s, ox, oy);
         skin.draw(flight, farFromEntrySkinProgress(t), false, s, scale);
+        // Multi-wavelength laser crystallization front sweep
+        const frontR = reach * Math.min(1, prog * 1.04);
+        if (frontR > 6 && frontR < reach) {
+          flight.beginPath();
+          flight.arc(CORE_X, CORE_Y, frontR, 0, Math.PI * 2);
+          flight.globalAlpha = 0.45 * (1 - prog * 0.35);
+          flight.strokeStyle = WIRE_ICE;
+          flight.lineWidth = 1.6;
+          flight.stroke();
+          flight.beginPath();
+          flight.arc(CORE_X, CORE_Y, Math.max(1, frontR - 3.2), 0, Math.PI * 2);
+          flight.globalAlpha = 0.3 * (1 - prog * 0.35);
+          flight.strokeStyle = WIRE_GOLD;
+          flight.lineWidth = 1.0;
+          flight.stroke();
+        }
         flight.setTransform(1, 0, 0, 1, ox, oy);
         flight.globalAlpha = 1;
       }

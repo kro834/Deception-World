@@ -691,8 +691,12 @@ export class SurgeEngine {
       // A tight bloom (small: the larger one is the final lock's alone).
       const bloomK = Math.min(1, k * 2.4);
       const bloom = (lock.big ? 0.2 : 0.075) * H * (0.6 + 0.4 * bloomK);
-      front.globalAlpha = (lock.big ? 0.42 : 0.5) * (1 - bloomK) * (1 - bloomK);
+      front.globalAlpha = (lock.big ? 0.46 : 0.54) * (1 - bloomK) * (1 - bloomK);
       front.drawImage(this.sprites[lock.big ? 0 : 2], ax - bloom, ay - bloom, bloom * 2, bloom * 2);
+      // Secondary inner core spark for elevated optical density
+      const innerBloom = bloom * 0.45;
+      front.globalAlpha = (lock.big ? 0.35 : 0.4) * Math.pow(1 - bloomK, 3);
+      front.drawImage(this.sprites[0], ax - innerBloom, ay - innerBloom, innerBloom * 2, innerBloom * 2);
       front.globalAlpha = 1;
       // The rings: ice, then gold a beat behind.
       const ease = 1 - Math.pow(1 - k, 3);
@@ -840,9 +844,10 @@ function sprite(tone: string) {
   const context = canvas.getContext("2d");
   if (context) {
     const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
-    gradient.addColorStop(0, "rgb(255 255 255 / 0.95)");
-    gradient.addColorStop(0.18, `rgb(${tone} / 0.75)`);
-    gradient.addColorStop(0.5, `rgb(${tone} / 0.18)`);
+    gradient.addColorStop(0, "rgb(255 255 255 / 0.98)");
+    gradient.addColorStop(0.12, "rgb(240 252 255 / 0.90)");
+    gradient.addColorStop(0.28, `rgb(${tone} / 0.65)`);
+    gradient.addColorStop(0.55, `rgb(${tone} / 0.16)`);
     gradient.addColorStop(1, `rgb(${tone} / 0)`);
     context.fillStyle = gradient;
     context.fillRect(0, 0, 32, 32);

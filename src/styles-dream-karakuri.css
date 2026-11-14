@@ -44,48 +44,155 @@ html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern {
   max-width: 100%;
   margin-top: 20px;
   padding: 8px 22px 12px 14px;
-  border: 1px solid rgb(214 180 123 / 40%);
+  border: 1px solid rgb(214 180 123 / 52%);
   border-radius: 2px;
-  background: #1b1120;
+  background:
+    linear-gradient(#e5c488 0 0) 0 0 / 12px 1.5px no-repeat,
+    linear-gradient(#e5c488 0 0) 0 0 / 1.5px 12px no-repeat,
+    radial-gradient(ellipse 60% 80% at 22% 50%, rgb(255 194 102 / 14%), transparent 72%),
+    linear-gradient(145deg, #211425, #160d1b);
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 198 / 16%),
+    0 10px 24px rgb(0 0 0 / 38%);
   color: #f4ecdc;
   cursor: pointer;
   text-align: start;
   touch-action: manipulation;
 }
 
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-stage-lantern[aria-pressed="false"] {
+  background:
+    linear-gradient(#9f8252 0 0) 0 0 / 12px 1.5px no-repeat,
+    linear-gradient(#9f8252 0 0) 0 0 / 1.5px 12px no-repeat,
+    linear-gradient(145deg, #18101c, #110b15);
+}
+
+/* ガス燈のガラスホヤ縦リブ＋白熱マントル芯光＋消灯余燼 */
 html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-shade {
   position: relative;
   display: grid;
   place-items: center;
-  flex: 0 0 30px;
-  width: 30px;
-  height: 40px;
-  border-block: 3px solid #5e3b29;
-  border-radius: 38% / 18%;
-  color: #6a3226;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 42px;
+  border-top: 4px solid #8c6536;
+  border-bottom: 4px solid #694823;
+  border-inline: 1px solid rgb(238 206 146 / 62%);
+  border-radius: 42% 42% 36% 36% / 22% 22% 18% 18%;
+  color: #5b261b;
   background:
-    repeating-linear-gradient(0deg, transparent 0 5px, rgb(100 57 31 / 35%) 5px 6px),
-    radial-gradient(ellipse, #fff3c8, #d4a76c);
-  box-shadow: 0 0 18px rgb(244 193 103 / 24%);
-  font: 700 17px / 1 var(--dr-serif, serif);
+    radial-gradient(ellipse 72% 76% at 50% 54%, #fff9dc 0%, #f4cc84 58%, #c9924d 100%);
+  box-shadow:
+    0 0 22px rgb(255 198 104 / 38%),
+    0 0 6px rgb(255 232 176 / 44%),
+    inset 0 2px 3px rgb(92 54 24 / 38%),
+    inset 0 -2px 3px rgb(92 54 24 / 42%);
+  font: 700 16px / 1 var(--dr-serif, serif);
+  transition:
+    box-shadow 420ms ease,
+    border-color 420ms ease,
+    color 420ms ease;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-mantle {
+  position: absolute;
+  inset: 5px 5px 4px;
+  border-radius: 46% 46% 34% 34%;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 52% 62% at 50% 58%,
+      #fffff6 0%,
+      #ffe8a3 42%,
+      rgb(255 174 68 / 45%) 74%,
+      transparent 100%
+    );
+  box-shadow: 0 0 10px rgb(255 244 204 / 72%);
+  transition:
+    opacity 420ms ease,
+    box-shadow 420ms ease;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-chimney {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(104deg, transparent 14%, rgb(255 255 255 / 44%) 25%, transparent 37%),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 250 236 / 32%) 0 1.5px,
+      rgb(92 54 26 / 22%) 1.5px 3px,
+      transparent 3px 5px
+    );
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-glyph {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 0 6px rgb(255 248 222 / 75%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-shade::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  width: 12px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, #6b4b25, #e2be80, #6b4b25);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-shade::after {
   content: "";
   position: absolute;
   bottom: -9px;
-  width: 1px;
+  width: 1.5px;
   height: 7px;
-  background: #d4a76c;
+  background: linear-gradient(180deg, #e2be80, #9a7340);
 }
 
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-stage-lantern[aria-pressed="false"]
   .dream-stage-lantern-shade {
+  border-inline-color: rgb(186 164 132 / 36%);
+  color: #dfd2be;
   background:
-    repeating-linear-gradient(0deg, transparent 0 5px, rgb(100 57 31 / 35%) 5px 6px), #ad9e88;
-  box-shadow: none;
+    radial-gradient(
+      ellipse 68% 36% at 50% 84%,
+      rgb(226 82 34 / 52%) 0%,
+      rgb(142 38 18 / 28%) 56%,
+      transparent 86%
+    ),
+    linear-gradient(180deg, #3b333d 0%, #2a232d 68%, #352324 100%);
+  box-shadow:
+    inset 0 -3px 8px rgb(214 72 28 / 28%),
+    inset 0 2px 4px rgb(0 0 0 / 52%);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-stage-lantern[aria-pressed="false"]
+  .dream-stage-lantern-mantle {
+  background:
+    radial-gradient(
+      ellipse 56% 32% at 50% 84%,
+      rgb(255 126 56 / 78%) 0%,
+      rgb(196 52 22 / 42%) 52%,
+      transparent 85%
+    );
+  box-shadow: 0 2px 6px rgb(224 74 28 / 36%);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-stage-lantern[aria-pressed="false"]
+  .dream-stage-lantern-glyph {
+  text-shadow: 0 1px 2px rgb(0 0 0 / 68%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-label {
@@ -174,10 +281,38 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
   border-inline-start: 1px solid rgb(214 180 123 / 40%);
 }
 
+/* 絵看板アパーチャ内縁ウォームハレーション（Warm projector aperture halation） */
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure {
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 202 / 24%),
+    inset 0 0 34px rgb(255 188 96 / 18%),
+    0 34px 82px rgb(0 0 0 / 54%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 76% 38% at 50% 0%, rgb(255 210 128 / 16%), transparent 70%),
+    radial-gradient(circle at 0% 0%, rgb(255 194 104 / 14%), transparent 32%),
+    radial-gradient(circle at 100% 0%, rgb(255 194 104 / 14%), transparent 32%);
+  box-shadow:
+    inset 0 0 36px rgb(255 188 96 / 22%),
+    inset 0 0 9px rgb(255 228 176 / 26%),
+    inset 0 0 1.5px rgb(255 242 208 / 46%);
+}
+
 @media (hover: hover) and (pointer: fine) {
   html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern:hover {
     border-color: #edcb96;
-    background: #2a1b29;
+    background:
+      linear-gradient(#f2d49b 0 0) 0 0 / 14px 1.5px no-repeat,
+      linear-gradient(#f2d49b 0 0) 0 0 / 1.5px 14px no-repeat,
+      radial-gradient(ellipse 64% 84% at 22% 50%, rgb(255 202 114 / 20%), transparent 74%),
+      linear-gradient(145deg, #2c1b30, #1d1223);
   }
 }
 
@@ -191,6 +326,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
 
 @media (prefers-reduced-motion: reduce) {
   html[data-family="dream"] main.dream-page.dream-page .dream-hero-lamplight,
+  html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-shade,
+  html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-mantle,
   html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
     transition: none;
   }
@@ -198,9 +335,17 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
 
 html[data-family="dream"][data-world-effects="economy"]
   main.dream-page.dream-page
-  .dream-hero-lamplight,
+  :is(.dream-hero-lamplight, .dream-stage-lantern-shade, .dream-stage-lantern-mantle),
 html[data-family="dream"][data-motion-enabled="false"]
   main.dream-page.dream-page
-  .dream-hero-lamplight {
+  :is(.dream-hero-lamplight, .dream-stage-lantern-shade, .dream-stage-lantern-mantle) {
   transition: none;
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-poster-stage > figure::before,
+  html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-mantle,
+  html[data-family="dream"] main.dream-page.dream-page .dream-stage-lantern-chimney {
+    display: none;
+  }
 }

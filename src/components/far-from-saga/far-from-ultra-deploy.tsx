@@ -112,34 +112,80 @@ function PanelContent({ panel, body }: { panel: FarFromDeployPanel; body: number
       const cy = body + 34;
       return (
         <g className="ffd-glyph">
+          {/* Precision optical reticle: coordinate grid & concentric targeting rings */}
+          <line className="ffd-glyph-dim" x1={cx - 32} y1={cy} x2={cx + 32} y2={cy} strokeDasharray="2,3" />
+          <line className="ffd-glyph-dim" x1={cx} y1={cy - 32} x2={cx} y2={cy + 32} strokeDasharray="2,3" />
+          <circle cx={cx} cy={cy} r={30} className="ffd-glyph-dim" strokeDasharray="1,4" />
           <circle cx={cx} cy={cy} r={26} />
           <circle cx={cx} cy={cy} r={18} className="ffd-glyph-dim" />
+          <circle cx={cx} cy={cy} r={6} className="ffd-glyph-dim" />
+          <circle cx={cx} cy={cy} r={2} />
+          {/* Quadrant vernier notches */}
+          <line className="ffd-glyph-dim" x1={cx - 26} y1={cy - 4} x2={cx - 26} y2={cy + 4} />
+          <line className="ffd-glyph-dim" x1={cx + 26} y1={cy - 4} x2={cx + 26} y2={cy + 4} />
+          <line className="ffd-glyph-dim" x1={cx - 4} y1={cy - 26} x2={cx + 4} y2={cy - 26} />
+          <line className="ffd-glyph-dim" x1={cx - 4} y1={cy + 26} x2={cx + 4} y2={cy + 26} />
           <path
             className="ffd-glyph-arc"
             pathLength={1}
             d={`M ${cx - 26} ${cy} A 26 26 0 1 1 ${cx + 18} ${cy + 18.7}`}
           />
           <path d={`M ${cx} ${cy} L ${cx + 14} ${cy - 14}`} />
+          {/* Vector alignment ticks */}
+          <line x1={cx + 14} y1={cy - 14} x2={cx + 18} y2={cy - 14} />
         </g>
       );
     }
     case "bars":
       return (
         <g className="ffd-glyph">
+          {/* Multi-wavelength frequency matrix: reference grids & dB thresholds */}
+          {[0.25, 0.5, 0.75, 1.0].map((ratio, gIdx) => (
+            <line
+              key={`grid-${gIdx}`}
+              className="ffd-glyph-dim"
+              x1={x + PAD}
+              y1={body + 58 - 58 * ratio}
+              x2={x + w - PAD}
+              y2={body + 58 - 58 * ratio}
+              strokeDasharray="1,3"
+            />
+          ))}
           {[0.62, 0.86, 0.48, 0.94, 0.7].map((level, index) => {
             const bw = (w - PAD * 2 - 4 * 6) / 5;
             const bx = x + PAD + index * (bw + 6);
             const full = 58;
+            const barHeight = full * level;
+            const barY = body + full - barHeight;
             return (
-              <rect
-                key={index}
-                className="ffd-bar"
-                x={bx}
-                y={body + full - full * level}
-                width={bw}
-                height={full * level}
-                style={v({ "--ffd-c": 640 + index * 50 })}
-              />
+              <g key={index}>
+                {/* Background channel rail */}
+                <rect
+                  className="ffd-glyph-dim"
+                  x={bx}
+                  y={body}
+                  width={bw}
+                  height={full}
+                  opacity={0.18}
+                />
+                {/* Active frequency spectral column */}
+                <rect
+                  className="ffd-bar"
+                  x={bx}
+                  y={barY}
+                  width={bw}
+                  height={barHeight}
+                  style={v({ "--ffd-c": 640 + index * 50 })}
+                />
+                {/* Peak hold indicator */}
+                <line
+                  x1={bx - 0.5}
+                  y1={barY - 2}
+                  x2={bx + bw + 0.5}
+                  y2={barY - 2}
+                  strokeWidth={1.5}
+                />
+              </g>
             );
           })}
         </g>
@@ -147,18 +193,37 @@ function PanelContent({ panel, body }: { panel: FarFromDeployPanel; body: number
     case "graph":
       return (
         <g className="ffd-glyph">
+          {/* Quantum waveform oscilloscope: horizontal timeline, grid coordinates & modulation harmonics */}
+          <line className="ffd-glyph-dim" x1={x + PAD} y1={body + 18} x2={x + w - PAD} y2={body + 18} strokeDasharray="2,3" />
+          <line className="ffd-glyph-dim" x1={x + PAD} y1={body + 6} x2={x + w - PAD} y2={body + 6} strokeDasharray="1,4" />
+          <line className="ffd-glyph-dim" x1={x + PAD} y1={body + 30} x2={x + w - PAD} y2={body + 30} strokeDasharray="1,4" />
+          {/* Sub-harmonic interference carrier */}
+          <path
+            className="ffd-glyph-dim"
+            d={`M ${x + PAD} ${body + 20} Q ${x + 25} ${body + 8}, ${x + 50} ${body + 20} T ${x + 95} ${body + 20} T ${x + w - PAD} ${body + 14}`}
+            fill="none"
+          />
+          {/* Primary quantum wave trace */}
           <path
             className="ffd-glyph-arc"
             pathLength={1}
             d={`M ${x + PAD} ${body + 26} L ${x + 30} ${body + 14} L ${x + 50} ${body + 22} L ${x + 70} ${body + 4} L ${x + 92} ${body + 12} L ${x + w - PAD} ${body + 2}`}
           />
+          {/* Peak nodal measurement coordinates */}
+          <circle cx={x + 30} cy={body + 14} r={1.5} />
+          <circle cx={x + 70} cy={body + 4} r={1.5} />
+          <circle cx={x + w - PAD} cy={body + 2} r={2} />
         </g>
       );
     default:
       return (
         <g className="ffd-glyph">
-          <rect className="ffd-glyph-dim" x={x + PAD} y={body + 2} width={w - PAD * 2} height={4} />
-          <rect className="ffd-glyph-dim" x={x + PAD} y={body + 10} width={(w - PAD * 2) * 0.6} height={4} />
+          {/* High-density status bus matrix & binary quantum state blocks */}
+          <rect className="ffd-glyph-dim" x={x + PAD} y={body + 2} width={w - PAD * 2} height={3} />
+          <rect className="ffd-glyph-dim" x={x + PAD} y={body + 8} width={(w - PAD * 2) * 0.72} height={2.5} />
+          <rect className="ffd-glyph-dim" x={x + PAD} y={body + 13} width={(w - PAD * 2) * 0.44} height={2} />
+          <circle cx={x + w - PAD - 6} cy={body + 9} r={2} className="ffd-glyph-dim" />
+          <circle cx={x + w - PAD - 13} cy={body + 9} r={2} />
         </g>
       );
   }

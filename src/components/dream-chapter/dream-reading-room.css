@@ -5,6 +5,8 @@
   --room-muted: #bfb09f;
   --room-rule: #967e5b;
   --room-gilt: #c89b54;
+  --room-stack-sheet: #1b1522;
+  --room-stack-edge: rgb(200 158 92 / 34%);
   --room-latin:
     "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --room-display:
@@ -33,6 +35,8 @@
   --room-ink: #2c2425;
   --room-muted: #615046;
   --room-rule: #9e8256;
+  --room-stack-sheet: #ebe0cc;
+  --room-stack-edge: rgb(142 112 68 / 44%);
   color-scheme: light;
 }
 .dream-reading-room > .zeus-button {
@@ -304,7 +308,9 @@
     radial-gradient(64% 48% at 50% 0%, rgb(200 155 84 / 18%), transparent 74%),
     radial-gradient(48% 42% at 50% 100%, rgb(164 73 59 / 8%), transparent 70%);
 }
+/* 双柱飾り罫＋重ね紙の小口立体影（Twin-pillar book rules + stacked-paper fore-edge depth） */
 .dream-reading-paper {
+  --room-pillar: color-mix(in srgb, var(--room-rule) 42%, transparent);
   max-width: 800px;
   margin: 0 auto;
   background:
@@ -316,14 +322,64 @@
     linear-gradient(var(--room-rule) 0 0) 0 100% / 2px 32px no-repeat,
     linear-gradient(var(--room-rule) 0 0) 100% 100% / 32px 2px no-repeat,
     linear-gradient(var(--room-rule) 0 0) 100% 100% / 2px 32px no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 20px,
+        var(--room-pillar) 20px calc(100% - 20px),
+        transparent calc(100% - 20px)
+      )
+      8px 0 / 1px 100% no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 24px,
+        var(--room-pillar) 24px calc(100% - 24px),
+        transparent calc(100% - 24px)
+      )
+      11px 0 / 1px 100% no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 20px,
+        var(--room-pillar) 20px calc(100% - 20px),
+        transparent calc(100% - 20px)
+      )
+      calc(100% - 8px) 0 / 1px 100% no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 24px,
+        var(--room-pillar) 24px calc(100% - 24px),
+        transparent calc(100% - 24px)
+      )
+      calc(100% - 11px) 0 / 1px 100% no-repeat,
     radial-gradient(70% 45% at 50% 0%, rgb(200 164 92 / 9%), transparent 72%),
     var(--room-paper);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 12%),
     inset 0 0 0 6px rgb(200 155 84 / 6%),
-    0 28px 68px rgb(0 0 0 / 38%);
+    3px 3px 0 -1px var(--room-stack-sheet),
+    3px 3px 0 0 var(--room-stack-edge),
+    6px 6px 0 -1px var(--room-stack-sheet),
+    6px 6px 0 0 var(--room-stack-edge),
+    9px 9px 0 -1px var(--room-stack-sheet),
+    9px 9px 0 0 color-mix(in srgb, var(--room-stack-edge) 70%, transparent),
+    0 28px 68px rgb(0 0 0 / 40%);
   border: 1px solid var(--room-rule);
   padding: clamp(24px, 5vw, 72px);
+}
+@keyframes dream-reading-ink-settle {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-world-effects="static"]):not(
+      [data-world-effects="saver"]
+    ):not([data-motion-enabled="false"])
+    .dream-reading-paper {
+    animation: dream-reading-ink-settle 240ms ease-out both;
+  }
 }
 .dream-reading-paper > header {
   border-bottom: 3px double var(--room-rule);
@@ -371,6 +427,28 @@
   font-variant-numeric: tabular-nums;
   margin-bottom: 10px;
 }
+/* 茜×金の組紐しおりマーカー（Akane × gold kumihimo braided bookmark ribbon） */
+.dream-reading-paper > [data-room-paragraph][data-bookmarked="true"]::before {
+  content: "";
+  position: absolute;
+  left: -13px;
+  top: 0.24em;
+  width: 6px;
+  height: 2.35em;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #f3d796 0 2px, transparent 2px),
+    repeating-linear-gradient(
+      135deg,
+      #9e2f32 0 3px,
+      #e6c17a 3px 4.5px,
+      #762024 4.5px 7.5px
+    );
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 34%),
+    inset 0 0 0 0.5px rgb(244 212 148 / 52%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 5px), 0 100%);
+}
 /* On a wide paper the numeral hangs in the margin, as a folio. */
 @media (min-width: 761px) and (orientation: landscape), (min-width: 981px) {
   .dream-reading-paragraph-number {
@@ -386,6 +464,19 @@
     text-align: right;
     color: var(--room-muted);
   }
+  .dream-reading-paper
+    > [data-room-paragraph][data-bookmarked="true"]
+    > .dream-reading-paragraph-number {
+    margin-right: 1.5em;
+    border-right-color: var(--room-gilt);
+    color: var(--room-gilt);
+  }
+  .dream-reading-paper > [data-room-paragraph][data-bookmarked="true"]::before {
+    left: -12px;
+    top: 0.16em;
+    width: 6px;
+    height: 2.45em;
+  }
 }
 /* Paper mode: a laid sheet, the chain lines every 54px. */
 .dream-reading-room[data-paper="true"] .dream-reading-paper {
@@ -398,6 +489,34 @@
     linear-gradient(var(--room-rule) 0 0) 0 100% / 2px 32px no-repeat,
     linear-gradient(var(--room-rule) 0 0) 100% 100% / 32px 2px no-repeat,
     linear-gradient(var(--room-rule) 0 0) 100% 100% / 2px 32px no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 20px,
+        var(--room-pillar) 20px calc(100% - 20px),
+        transparent calc(100% - 20px)
+      )
+      8px 0 / 1px 100% no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 24px,
+        var(--room-pillar) 24px calc(100% - 24px),
+        transparent calc(100% - 24px)
+      )
+      11px 0 / 1px 100% no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 20px,
+        var(--room-pillar) 20px calc(100% - 20px),
+        transparent calc(100% - 20px)
+      )
+      calc(100% - 8px) 0 / 1px 100% no-repeat,
+    linear-gradient(
+        180deg,
+        transparent 24px,
+        var(--room-pillar) 24px calc(100% - 24px),
+        transparent calc(100% - 24px)
+      )
+      calc(100% - 11px) 0 / 1px 100% no-repeat,
     repeating-linear-gradient(0deg, rgb(110 72 40 / 3%) 0 1px, transparent 1px 5px),
     repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 4%) 53px 54px),
     var(--room-paper);
@@ -628,9 +747,15 @@
 html[data-world-effects="economy"] .dream-reading-room :is(button, select) {
   transition: none;
 }
+html[data-world-effects="economy"] .dream-reading-paper {
+  animation: none;
+}
 @media (prefers-reduced-motion: reduce) {
   .dream-reading-room :is(button, select) {
     transition: none;
+  }
+  .dream-reading-paper {
+    animation: none;
   }
 }
 @media (forced-colors: active) {
@@ -641,6 +766,13 @@ html[data-world-effects="economy"] .dream-reading-room :is(button, select) {
     --room-muted: CanvasText;
     --room-rule: CanvasText;
     --room-gilt: Highlight;
+    --room-stack-sheet: Canvas;
+    --room-stack-edge: CanvasText;
+  }
+  .dream-reading-paper > [data-room-paragraph][data-bookmarked="true"]::before {
+    background: Highlight;
+    box-shadow: none;
+    forced-color-adjust: none;
   }
   .dream-reading-chapters [aria-current],
   .dream-reading-paragraph-pills button[aria-current="location"],

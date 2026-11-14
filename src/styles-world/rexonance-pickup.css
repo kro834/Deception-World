@@ -52,16 +52,18 @@
   grid-template-columns: minmax(300px, 0.84fr) minmax(0, 1.16fr);
   min-height: 430px;
   overflow: hidden;
-  border: 1px solid transparent;
+  border: 1px solid rgba(114, 231, 255, 0.42);
   border-radius: 18px 62px 30px 18px;
   background:
     linear-gradient(145deg, rgba(5, 9, 18, 0.985), rgba(11, 8, 20, 0.97)) padding-box,
     linear-gradient(118deg, rgba(114, 231, 255, 0.88), rgba(233, 196, 123, 0.7) 35%, rgba(255, 115, 216, 0.88) 70%, rgba(114, 231, 255, 0.74)) border-box;
   box-shadow:
-    0 38px 100px rgba(0, 0, 0, 0.58),
-    0 0 42px rgba(83, 206, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 0 70px rgba(91, 126, 255, 0.06);
+    0 24px 48px rgba(0, 0, 0, 0.65),
+    0 0 32px rgba(83, 206, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.85),
+    inset 0 0 48px rgba(91, 126, 255, 0.08);
 }
 
 .is-rexonance-pickup .form-pickup-card::before {
@@ -649,14 +651,27 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  border: 1px solid transparent;
+  border: 1px solid rgba(114, 231, 255, 0.28);
   border-radius: 12px 34px 16px 12px;
   background:
     linear-gradient(#050711, #050711) padding-box,
-    linear-gradient(128deg, rgba(114, 231, 255, 0.46), rgba(233, 196, 123, 0.18), rgba(255, 115, 216, 0.42)) border-box;
-  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.34);
+    linear-gradient(128deg, rgba(114, 231, 255, 0.52), rgba(233, 196, 123, 0.24), rgba(255, 115, 216, 0.48)) border-box;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
   content-visibility: auto;
   contain-intrinsic-size: 480px 320px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rexonance-weapon-grid figure {
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  .rexonance-weapon-grid figure:hover {
+    border-color: rgba(114, 231, 255, 0.78);
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.48),
+      0 0 24px rgba(114, 231, 255, 0.28),
+      inset 0 0 0 1px rgba(114, 231, 255, 0.45);
+  }
 }
 
 .rexonance-weapon-grid figure.is-wide {
@@ -683,6 +698,14 @@
 .rexonance-weapon-grid figure > div::before {
   inset: 0;
   background:
+    linear-gradient(var(--rex-cyan) 0 0) 8px 8px / 12px 1.5px no-repeat,
+    linear-gradient(var(--rex-cyan) 0 0) 8px 8px / 1.5px 12px no-repeat,
+    linear-gradient(var(--rex-pink) 0 0) calc(100% - 8px) 8px / 12px 1.5px no-repeat,
+    linear-gradient(var(--rex-pink) 0 0) calc(100% - 8px) 8px / 1.5px 12px no-repeat,
+    linear-gradient(var(--rex-cyan) 0 0) 8px calc(100% - 8px) / 12px 1.5px no-repeat,
+    linear-gradient(var(--rex-cyan) 0 0) 8px calc(100% - 8px) / 1.5px 12px no-repeat,
+    linear-gradient(var(--rex-pink) 0 0) calc(100% - 8px) calc(100% - 8px) / 12px 1.5px no-repeat,
+    linear-gradient(var(--rex-pink) 0 0) calc(100% - 8px) calc(100% - 8px) / 1.5px 12px no-repeat,
     linear-gradient(90deg, transparent 0 49.8%, rgba(255, 255, 255, 0.055) 50%, transparent 50.2%),
     linear-gradient(0deg, rgba(5, 7, 17, 0.48), transparent 24%, transparent 76%, rgba(5, 7, 17, 0.36));
 }
@@ -721,10 +744,10 @@
 
 .rexonance-weapon-grid figcaption small {
   grid-column: 1;
-  color: rgba(114, 231, 255, 0.7);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
+  color: rgba(114, 231, 255, 0.78);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
 .rexonance-weapon-grid figcaption b {
@@ -1445,5 +1468,33 @@ html[data-world-effects="economy"] .rexonance-weapon-grid figure > div::after {
   .form-pickup-dialog.is-rexonance-dialog::backdrop {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .is-rexonance-pickup .form-pickup-card {
+    border: 2px solid CanvasText;
+    box-shadow: none;
+  }
+
+  .rexonance-weapon-grid figure {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+
+  .rexonance-weapon-grid figure > div::before,
+  .rexonance-weapon-grid figure > div::after {
+    display: none;
+  }
+
+  .rexonance-weapon-grid figcaption {
+    background: Canvas;
+    border-top: 1px solid CanvasText;
+  }
+
+  .rexonance-weapon-grid figcaption small,
+  .rexonance-weapon-grid figcaption b,
+  .rexonance-weapon-grid figcaption > span {
+    color: CanvasText;
   }
 }

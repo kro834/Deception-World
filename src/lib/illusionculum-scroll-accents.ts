@@ -145,22 +145,37 @@ const seededRandom = (seed: number) => {
 // The light paths' colours: ice, pink, gold; and the glows' white.
 const TONE_CSS = ["rgb(166 230 255)", "rgb(255 143 210)", "rgb(240 204 130)"] as const;
 const WHITE = "rgb(236 248 255)";
-// Each plane's mote size (figure px), alpha and orbit (shares of W).
+// Each plane's mote size (figure px), alpha, tilt and orbit (shares of W).
 const PLANES = [
-  { size: 2.2, alpha: 0.42, r: [0.95, 1.55], spin: [3.2, 5.4] },
-  { size: 3.4, alpha: 0.7, r: [0.42, 0.95], spin: [6, 9.5] },
-  { size: 5.6, alpha: 0.85, r: [0.62, 1.15], spin: [8, 12] },
+  { size: 2.1, alpha: 0.4, tilt: 0.11, r: [0.98, 1.62], spin: [3.2, 5.4] },
+  { size: 3.4, alpha: 0.72, tilt: 0.17, r: [0.42, 0.95], spin: [6, 9.5] },
+  { size: 5.8, alpha: 0.88, tilt: 0.24, r: [0.6, 1.16], spin: [8.2, 12.4] },
 ] as const;
 const PLANE_SHARE = [0.36, 0.44, 0.2];
 // The motes' share by group (the order above), the rest kept for the seal.
 const GROUP_SHARE = [0.18, 0.16, 0.18, 0.12, 0.13, 0.09];
-// The vortex's tilt (its ellipse's height over its width).
+// The vortex's reference tilt (its ellipse's height over its width).
 const TILT = 0.17;
 // The streak's look-back (progress) for a flying mote.
-const STREAK = 0.003;
+const STREAK = 0.0032;
 const FREE = -1;
 
 type Piece = Pick<RexonanceAssemblyPiece, "id" | "group" | "x" | "y" | "w" | "h">;
+
+/** Draws a 4-point optical diamond centred at (x, y) using moveTo/lineTo only. */
+const addDiamond = (
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  rx: number,
+  ry: number,
+) => {
+  context.moveTo(x, y - ry);
+  context.lineTo(x + rx, y);
+  context.lineTo(x, y + ry);
+  context.lineTo(x - rx, y);
+  context.closePath();
+};
 
 /** The scene's accent hooks for this suit. */
 export function createIllusionculumScrollAccents(options: {
@@ -190,8 +205,14 @@ export function createIllusionculumScrollAccents(options: {
     let y0 = Infinity;
     let x1 = -Infinity;
     let y1 = -Infinity;
+    let nonBeltCount = 0;
+    for (const piece of options.pieces) {
+      if (spec.groups.includes(piece.group) && piece.id !== "belt") nonBeltCount += 1;
+    }
     for (const piece of options.pieces) {
       if (!spec.groups.includes(piece.group)) continue;
+      // Keep the driver belt cutout clear when surrounding waist plates are present.
+      if (piece.id === "belt" && nonBeltCount > 0) continue;
       x0 = Math.min(x0, piece.x);
       y0 = Math.min(y0, piece.y);
       x1 = Math.max(x1, piece.x + piece.w);
@@ -232,6 +253,7 @@ export function createIllusionculumScrollAccents(options: {
   const RISE = new Float32Array(N);
   const DELAY = new Float32Array(N);
   const SIZE = new Float32Array(N);
+  const MPLANE = new Uint8Array(N);
   const GROUP = new Int8Array(N);
   const TX = new Float32Array(N);
   const TY = new Float32Array(N);
@@ -280,6 +302,7 @@ export function createIllusionculumScrollAccents(options: {
       RISE[i] = H * (0.25 + 0.55 * r4);
       DELAY[i] = 0.075 * r5;
       SIZE[i] = plane.size * (0.7 + 0.6 * r6);
+      MPLANE[i] = mote.plane;
       GROUP[i] = mote.group;
       if (mote.group !== FREE) {
         const g = mote.group;
@@ -320,17 +343,20 @@ export function createIllusionculumScrollAccents(options: {
   const TOP = -0.1 * H;
   const SPAN = 1.2 * H;
   const orbit = (i: number, p: number) => {
+    const planeIdx = MPLANE[i];
     const intro = smooth(clamp01((p - DELAY[i]) / 0.11));
-    const tighten = 1 - 0.24 * smooth(clamp01(p / ILLUSIONCULUM_ACCENT_BEATS.clamp));
-    const r = R0[i] * tighten * (1 + 1.7 * (1 - intro));
+    const tighten =
+      1 - (0.18 + planeIdx * 0.05) * smooth(clamp01(p / ILLUSIONCULUM_ACCENT_BEATS.clamp));
+    const r = R0[i] * tighten * (1 + (1.45 + planeIdx * 0.22) * (1 - intro));
     const th = A0[i] + SPIN[i] * p;
     const c = Math.cos(th);
     const s = Math.sin(th);
     let y = Y0[i] - RISE[i] * p - TOP;
     y = TOP + (((y % SPAN) + SPAN) % SPAN);
     const edge = Math.min(1, (y - TOP) / (0.1 * H), (TOP + SPAN - y) / (0.1 * H));
+    const tilt = PLANES[planeIdx].tilt;
     px = CX + r * c;
-    py = y + r * TILT * s;
+    py = y + r * tilt * s + Math.sin(th * 2 + planeIdx) * 4.5 * planeIdx;
     pz = s;
     pk = intro * clamp01(edge);
   };
@@ -377,9 +403,33 @@ export function createIllusionculumScrollAccents(options: {
   };
 
   // ---- Drawing helpers. ----
-  /** The motes of one depth side: rects for the swarm, streaks for the
-   * flights, one fill/stroke per plane and tone. */
-  const drawMotes = (context: CanvasRenderingContext2D, p: number, front: boolean) => {
+  /** The motes of one depth side: far/mid micro-squares, near optical diamonds,
+   * curved attraction streaks for flights, and subtle vortex depth filaments behind. */
+  const drawMotes = (
+    context: CanvasRenderingContext2D,
+    p: number,
+    front: boolean,
+    calm: boolean,
+  ) => {
+    if (!front && p < ILLUSIONCULUM_ACCENT_BEATS.clamp + 0.05) {
+      const fadeIn = smooth(clamp01(p / 0.1));
+      const fadeOut = 1 - smooth(clamp01((p - 0.76) / 0.15));
+      const bandAlpha = 0.16 * fadeIn * fadeOut;
+      if (bandAlpha > 0.005) {
+        const tighten = 1 - 0.22 * smooth(clamp01(p / ILLUSIONCULUM_ACCENT_BEATS.clamp));
+        for (let ring = 0; ring < 3; ring += 1) {
+          const rx = W * (0.46 + ring * 0.14) * tighten;
+          const ry = rx * (0.11 + ring * 0.025);
+          const ryCenter = coreY + (ring - 1) * H * 0.21;
+          context.strokeStyle = TONE_CSS[ring % 3];
+          context.globalAlpha = bandAlpha * (1 - ring * 0.2);
+          context.lineWidth = 0.9;
+          context.beginPath();
+          context.ellipse(CX, ryCenter, rx, ry, (ring - 1) * 0.05, 0, TAU);
+          context.stroke();
+        }
+      }
+    }
     for (let plane = 0; plane < 3; plane += 1) {
       // The far plane is all behind; the near one never behind the body.
       if (plane === 0 && front) continue;
@@ -398,28 +448,52 @@ export function createIllusionculumScrollAccents(options: {
           if (pk <= 0.02 || flying) continue;
           const isFront = plane === 2 ? true : plane === 0 ? false : pz >= 0;
           if (isFront !== front) continue;
-          const s = SIZE[i] * pk * (1 + 0.3 * pz);
-          context.rect(px - s / 2, py - s / 2, s, s);
+          const s = SIZE[i] * pk * (1 + (plane === 2 ? 0.42 : 0.28) * pz);
+          if (plane === 2) {
+            addDiamond(context, px, py, s * 0.46, s * 0.72);
+          } else {
+            context.rect(px - s / 2, py - s / 2, s, s);
+          }
           any = true;
         }
         if (any) context.fill();
-        // The flights: a streak from a moment ago to now.
+        // The flights: a curved two-step streak from moments ago to now.
         context.beginPath();
         any = false;
         for (let i = from; i < to; i += 1) {
           place(i, p);
           if (!flying || pk <= 0.02) continue;
           if (pz >= 0 !== front) continue;
+          const x2 = px;
+          const y2 = py;
+          place(i, Math.max(TD[i], p - STREAK * 0.95));
           const x1 = px;
           const y1 = py;
-          place(i, Math.max(TD[i], p - STREAK));
+          place(i, Math.max(TD[i], p - STREAK * 1.9));
           context.moveTo(px, py);
           context.lineTo(x1, y1);
+          context.lineTo(x2, y2);
           any = true;
         }
         if (any) {
-          context.lineWidth = PLANES[plane].size * 0.7;
+          context.lineWidth = PLANES[plane].size * 0.68;
           context.stroke();
+          if (!calm && plane >= 1) {
+            context.strokeStyle = WHITE;
+            context.globalAlpha = PLANES[plane].alpha * 0.82;
+            context.lineWidth = PLANES[plane].size * 0.32;
+            context.beginPath();
+            for (let i = from; i < to; i += 1) {
+              place(i, p);
+              if (!flying || pk <= 0.02 || pz >= 0 !== front) continue;
+              const x2 = px;
+              const y2 = py;
+              place(i, Math.max(TD[i], p - STREAK * 0.42));
+              context.moveTo(px, py);
+              context.lineTo(x2, y2);
+            }
+            context.stroke();
+          }
         }
       }
     }
@@ -536,10 +610,23 @@ export function createIllusionculumScrollAccents(options: {
     const hw = box[g * 4 + 2];
     const hh = box[g * 4 + 3];
     if (p < at) {
-      // The construction scan: two heads from each outline's start, meeting.
+      // The construction scan: two heads from each outline's start, meeting,
+      // with a trailing pink chromatic dispersion echo.
       const u = smooth(clamp01((p - (at - SCAN)) / SCAN));
+      if (u > 0.08) {
+        const lag = Math.max(0, u - 0.08);
+        context.strokeStyle = TONE_CSS[1];
+        context.globalAlpha = 0.24;
+        context.lineWidth = 2.4;
+        context.beginPath();
+        for (let k = 0; k < loops.length; k += 1) {
+          const half = (lengths[k] / 2) * lag;
+          traceLoop(context, loops[k], lengths[k], -half, half);
+        }
+        context.stroke();
+      }
       context.strokeStyle = TONE_CSS[0];
-      context.globalAlpha = 0.4;
+      context.globalAlpha = 0.44;
       context.lineWidth = 1.6;
       context.beginPath();
       for (let k = 0; k < loops.length; k += 1) {
@@ -560,15 +647,15 @@ export function createIllusionculumScrollAccents(options: {
         }
         context.stroke();
       }
-      // The brackets close on the group's box.
-      const close = smooth(clamp01((p - (at - SCAN * 0.7)) / (SCAN * 0.7)));
+      // The brackets and optical diamond diffraction calipers close on the group's box.
+      const close = smooth(clamp01((p - (at - SCAN * 0.72)) / (SCAN * 0.72)));
       if (close > 0) {
         const grow = 1 + 0.35 * (1 - close);
         const bx = hw * grow + 10;
         const by = hh * grow + 10;
         const arm = Math.min(bx, by) * 0.22;
         context.strokeStyle = TONE_CSS[2];
-        context.globalAlpha = 0.75 * close;
+        context.globalAlpha = 0.78 * close;
         context.lineWidth = 2;
         context.beginPath();
         for (let corner = 0; corner < 4; corner += 1) {
@@ -580,6 +667,18 @@ export function createIllusionculumScrollAccents(options: {
           context.lineTo(x, y);
           context.lineTo(x, y - sy * arm);
         }
+        context.stroke();
+        // Converging optical diamond diffraction brackets on cardinal axes.
+        const dSize = 5.5 + 3.5 * (1 - close);
+        const offset = 14 * (1 - close);
+        context.strokeStyle = TONE_CSS[0];
+        context.globalAlpha = 0.68 * close;
+        context.lineWidth = 1.3;
+        context.beginPath();
+        addDiamond(context, cx - bx - offset, cy, dSize * 0.75, dSize);
+        addDiamond(context, cx + bx + offset, cy, dSize * 0.75, dSize);
+        addDiamond(context, cx, cy - by - offset, dSize, dSize * 0.75);
+        addDiamond(context, cx, cy + by + offset, dSize, dSize * 0.75);
         context.stroke();
       }
       return;
@@ -597,7 +696,7 @@ export function createIllusionculumScrollAccents(options: {
     context.globalAlpha = 0.9 * fade;
     context.lineWidth = 1.2;
     context.stroke();
-    // The brackets, locked, fading.
+    // Corner L-brackets + optical diamond diffraction brackets with chromatic spikes.
     {
       const bx = hw + 10;
       const by = hh + 10;
@@ -616,11 +715,47 @@ export function createIllusionculumScrollAccents(options: {
         context.lineTo(x, y - sy * arm);
       }
       context.stroke();
+      // Optical diamond diffraction brackets & prism cross-spikes at corners & cardinals.
+      const dSpread = 4 * easeOut(v);
+      const dR = 5.2 * (1 - 0.35 * v);
+      const spike = (11 + 10 * easeOut(v)) * (1 - v);
+      context.strokeStyle = TONE_CSS[0];
+      context.globalAlpha = 0.84 * fade;
+      context.lineWidth = 1.35;
+      context.beginPath();
+      addDiamond(context, cx - bx - dSpread, cy, dR * 0.75, dR * 1.15);
+      addDiamond(context, cx + bx + dSpread, cy, dR * 0.75, dR * 1.15);
+      addDiamond(context, cx, cy - by - dSpread, dR * 1.15, dR * 0.75);
+      addDiamond(context, cx, cy + by + dSpread, dR * 1.15, dR * 0.75);
+      for (let corner = 0; corner < 4; corner += 1) {
+        const sx = corner & 1 ? 1 : -1;
+        const sy = corner & 2 ? 1 : -1;
+        const x = cx + sx * bx;
+        const y = cy + sy * by;
+        addDiamond(context, x, y, dR * 0.65, dR * 0.65);
+        context.moveTo(x - spike, y);
+        context.lineTo(x + spike, y);
+        context.moveTo(x, y - spike);
+        context.lineTo(x, y + spike);
+      }
+      context.stroke();
+      if (!calm) {
+        // Chromatic magenta dispersion twin on the optical diamond brackets.
+        context.strokeStyle = TONE_CSS[1];
+        context.globalAlpha = 0.62 * fade;
+        context.lineWidth = 1;
+        context.beginPath();
+        addDiamond(context, cx - bx - dSpread - 2.5, cy, dR * 0.6, dR);
+        addDiamond(context, cx + bx + dSpread + 2.5, cy, dR * 0.6, dR);
+        addDiamond(context, cx, cy - by - dSpread - 2.5, dR, dR * 0.6);
+        addDiamond(context, cx, cy + by + dSpread + 2.5, dR, dR * 0.6);
+        context.stroke();
+      }
     }
     if (calm) return;
     const w = clamp01((p - at) / (AFTER * 0.7));
     if (w < 1) {
-      // The impact: a ring and a burst of sparks out of the group's centre.
+      // The impact: dual chromatic diffraction rings and a burst of sparks out of the group's centre.
       const ring = easeOut(w);
       const rx = Math.max(hw, 40) * (0.5 + 0.85 * ring);
       const ry = Math.max(hh, 40) * (0.5 + 0.85 * ring) * 0.9;
@@ -629,6 +764,12 @@ export function createIllusionculumScrollAccents(options: {
       context.lineWidth = 1 + 3 * (1 - w);
       context.beginPath();
       context.ellipse(cx, cy, rx, ry, 0, 0, TAU);
+      context.stroke();
+      context.strokeStyle = TONE_CSS[1];
+      context.globalAlpha = 0.48 * (1 - w) * (1 - w);
+      context.lineWidth = 1.1;
+      context.beginPath();
+      context.ellipse(cx, cy, rx * 1.07, ry * 0.93, 0.14, 0, TAU);
       context.stroke();
       context.strokeStyle = TONE_CSS[2];
       context.globalAlpha = 0.9 * (1 - w);
@@ -698,19 +839,18 @@ export function createIllusionculumScrollAccents(options: {
     back(context, progress, calm) {
       if (progress <= 0 || progress >= ILLUSIONCULUM_ACCENT_BEATS.end || !N) return;
       context.globalCompositeOperation = "lighter";
-      drawMotes(context, progress, false);
+      drawMotes(context, progress, false, calm);
       context.globalAlpha = 1;
       context.globalCompositeOperation = "source-over";
-      void calm;
     },
     front(context, progress, calm) {
       if (progress <= 0 || progress >= ILLUSIONCULUM_ACCENT_BEATS.end) return;
       makeGlows(context);
       context.globalCompositeOperation = "lighter";
-      if (N) drawMotes(context, progress, true);
+      if (N) drawMotes(context, progress, true, calm);
       for (let g = 0; g < groupCount; g += 1) drawGroup(context, g, progress, calm);
       drawSeal(context, progress, calm);
-      // Where the flying motes land: a spark on the seam (live frames).
+      // Where the flying motes land: a diamond spark on the seam (live frames).
       if (!calm && N) {
         context.fillStyle = WHITE;
         context.globalAlpha = 0.95;
@@ -719,8 +859,8 @@ export function createIllusionculumScrollAccents(options: {
           if (GROUP[i] === FREE) continue;
           const since = progress - TA[i];
           if (since < 0 || since > 0.006) continue;
-          const s = SIZE[i] * 2.4 * (1 - since / 0.006);
-          context.rect(TX[i] - s / 2, TY[i] - s / 2, s, s);
+          const s = SIZE[i] * 2.5 * (1 - since / 0.006);
+          addDiamond(context, TX[i], TY[i], s * 0.48, s * 0.78);
         }
         context.fill();
       }

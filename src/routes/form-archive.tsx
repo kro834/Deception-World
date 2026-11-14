@@ -77,6 +77,69 @@ type ArchiveReadyFallback = ArchiveTransition & {
   timer: number;
 };
 
+function ArchiveCrest({ kind }: { kind: ArchiveKind }) {
+  if (kind === "saga") {
+    return (
+      <svg
+        className="fa-crest fa-crest-saga"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M12 2.2L20.4 12L12 21.8L3.6 12L12 2.2Z"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinejoin="miter"
+        />
+        <path
+          d="M12 6.4L16.2 12L12 17.6L7.8 12L12 6.4Z"
+          fill="currentColor"
+          fillOpacity="0.22"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <path
+          d="M1.4 12H6.2M17.8 12H22.6M5.2 7.8L8.6 9.8M15.4 9.8L18.8 7.8"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinecap="square"
+        />
+        <circle cx="12" cy="12" r="1.4" fill="currentColor" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      className="fa-crest fa-crest-realm"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M12 1.8L13 4.3L15.5 5.3L13 6.3L12 8.8L11 6.3L8.5 5.3L11 4.3L12 1.8Z"
+        fill="currentColor"
+      />
+      <path
+        d="M3.6 17.4L5.2 9.8L9.3 13.2L12 8.2L14.7 13.2L18.8 9.8L20.4 17.4H3.6Z"
+        fill="currentColor"
+        fillOpacity="0.2"
+        stroke="currentColor"
+        strokeWidth="1.45"
+        strokeLinejoin="miter"
+      />
+      <path
+        d="M4.2 20.2H19.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
 function FormArchive() {
   useWorldMode();
   const {
@@ -365,6 +428,7 @@ function FormArchive() {
             onClick={() => selectArchive("saga")}
           >
             <LiquidPointerGlow />
+            <ArchiveCrest kind="saga" />
             <small>SAGA</small>
             <b>サーガ</b>
           </button>
@@ -382,6 +446,7 @@ function FormArchive() {
             onClick={() => selectArchive("realm")}
           >
             <LiquidPointerGlow />
+            <ArchiveCrest kind="realm" />
             <small>REALM</small>
             <b>レルム</b>
           </button>
@@ -398,7 +463,9 @@ function FormArchive() {
         role="status"
         aria-live="polite"
       >
-        <i aria-hidden="true" />
+        <i aria-hidden="true">
+          <ArchiveCrest kind={archive} />
+        </i>
         <span>{isSaga ? "SAGA" : "REALM"} ARCHIVE</span>
         <small aria-hidden="true">FORM INDEX // LINKING</small>
       </div>

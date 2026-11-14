@@ -1,7 +1,7 @@
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import {
   LAB_BEATS,
   LAB_NAMES,
@@ -188,11 +188,18 @@ export function TransformationLab() {
   };
   const currentBeat =
     [...LAB_BEATS].reverse().find((beat) => state.progress >= beat.at - 0.005) ?? LAB_BEATS[0];
+  const activeRider = side === "b" && state.compare ? state.compare : state.rider;
 
   return (
     <>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
-      <main id="lab-main" className="world transformation-lab">
+      <main
+        id="lab-main"
+        className="world transformation-lab"
+        data-rider={activeRider}
+        data-direction={direction < 0 ? "reverse" : "forward"}
+        style={{ "--lab-progress": state.progress } as CSSProperties}
+      >
         <header className="lab-header">
           <div className="lab-topbar">
             <GuardedLink to="/world" assets={[]}>
@@ -374,24 +381,38 @@ export function TransformationLab() {
           )}
           <label className="lab-seek">
             変身の進行 <output>{Math.round(state.progress * 100)}% <span className="lab-seek-milestone">({currentBeat.label})</span></output>
-            <input
-              aria-label="変身の進行"
-              aria-valuetext={`${Math.round(state.progress * 100)}%`}
-              type="range"
-              min="0"
-              max="1"
-              step="0.001"
-              value={state.progress}
-              onChange={(event) => change({ progress: Number(event.target.value) })}
-            />
+            <span className="lab-seek-slider">
+              <span className="lab-seek-rail" aria-hidden="true">
+                <i className="lab-seek-fill" />
+              </span>
+              <input
+                aria-label="変身の進行"
+                aria-valuetext={`${Math.round(state.progress * 100)}%`}
+                type="range"
+                min="0"
+                max="1"
+                step="0.001"
+                value={state.progress}
+                onChange={(event) => change({ progress: Number(event.target.value) })}
+              />
+            </span>
             <span className="lab-seek-ticks" aria-hidden="true">
-              {LAB_BEATS.map((beat) => (
-                <i
-                  key={beat.at}
-                  className="lab-seek-tick"
-                  style={{ left: `${beat.at * 100}%` }}
-                />
-              ))}
+              {LAB_BEATS.map((beat) => {
+                const tickState =
+                  beat === currentBeat
+                    ? "active"
+                    : beat.at < currentBeat.at
+                      ? "passed"
+                      : "upcoming";
+                return (
+                  <i
+                    key={beat.at}
+                    className={`lab-seek-tick is-${tickState}`}
+                    data-state={tickState}
+                    style={{ left: `${beat.at * 100}%` }}
+                  />
+                );
+              })}
             </span>
           </label>
           <div className="lab-beats" role="group" aria-label="変身の段階">

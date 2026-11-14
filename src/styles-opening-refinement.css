@@ -9,27 +9,9 @@
     radial-gradient(ellipse at 82% 28%, rgb(119 77 108 / 12%), transparent 48%), #04080f;
 }
 
-/* Broad reflected light base (overridden by styles-opening-cinema.css volumetric fan). */
-.cine-rays {
-  background:
-    linear-gradient(113deg, transparent 22%, rgb(122 232 255 / 13%) 22.1%, transparent 38%),
-    linear-gradient(113deg, transparent 37%, rgb(182 163 255 / 8%) 37.1%, transparent 54%),
-    linear-gradient(293deg, transparent 22%, rgb(240 207 134 / 10%) 22.1%, transparent 43%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 36%, #000, transparent 72%);
-  mask-image: radial-gradient(ellipse at 50% 36%, #000, transparent 72%);
-}
-
-.cine-halo {
-  background: radial-gradient(
-    ellipse,
-    rgb(122 232 255 / 12%),
-    rgb(182 163 255 / 6%) 42%,
-    transparent 70%
-  );
-}
-
 /* Radial/conic astrolabe grid complemented by diagonal registration cuts
-   echoing the silhouette of the wordmark. */
+   echoing the silhouette of the wordmark. (Volumetric .cine-rays and dual-pool
+   .cine-halo live solely in styles-opening-cinema.css with zero duplication.) */
 .cine-depth-grid {
   background:
     linear-gradient(157deg, transparent 39.85%, rgb(122 232 255 / 24%) 40%, transparent 40.15%),
@@ -53,7 +35,16 @@
 }
 
 /* Economy opening keeps only the primary dial and logo planes. */
-.cine-stage.is-economy-opening :is(.cine-prism-field, .cine-aperture, .cine-orbit-b, .cine-depth-grid) {
+.cine-stage.is-economy-opening
+  :is(
+    .cine-prism-field,
+    .cine-aperture,
+    .cine-orbit-b,
+    .cine-depth-grid,
+    .cine-grain,
+    .cine-logo-glow,
+    .cine-rays
+  ) {
   display: none;
 }
 
@@ -86,10 +77,6 @@
   mask-position: 0 0;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-}
-
-.cine-editorial-frame > i {
-  background-color: rgb(122 232 255 / 4%);
 }
 
 /* Keep the entrance outside the opening score and keyboard focus until the
@@ -134,10 +121,6 @@
   will-change: auto;
 }
 
-.cine-stage.is-economy-opening :is(.cine-grain, .cine-logo-glow, .cine-rays) {
-  display: none;
-}
-
 html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
   opacity: 1;
   transform: none;
@@ -145,8 +128,8 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* A diagonal light slit opens along the wordmark's own sweep. It arrives
-     before the unchanged burn starts at 2.6s. No independent clock/layer. */
+  /* Compositor-only fallback arrival harmonized with styles-opening-cinema.css's
+     op-logo-arrive, avoiding polygon clip-path paint work. */
   html:not([data-world-effects="economy"]) .cine-stage.is-playing .cine-logo-wrap {
     animation-name: op-title-unseal;
   }
@@ -155,22 +138,14 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
 @keyframes op-title-unseal {
   0% {
     opacity: 0;
-    transform: translate3d(-8px, 5px, 0) scale(1.04);
-    clip-path: polygon(0 66%, 100% 28%, 100% 28.5%, 0 66.5%);
+    transform: translate3d(0, 12px, 0) scale(1.045);
   }
-  18% {
-    opacity: 0.85;
-    clip-path: polygon(0 59%, 100% 21%, 100% 36%, 0 74%);
-  }
-  62% {
+  26% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1.008);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 }
 
@@ -329,7 +304,7 @@ html[data-world-effects="economy"] .cine-stage .cine-logo-wrap {
     color: CanvasText;
   }
 
-  .cine-stage .cine-btn-primary::before {
+  .cine-stage :is(.cine-btn-primary::before, .cine-btn-primary::after) {
     display: none;
   }
 }

@@ -292,29 +292,59 @@ function loadArt(src: string): Promise<HTMLImageElement> {
     .then(() => art);
 }
 
-/** A four-point star glare, centred at (x, y), art units. */
+/** A precision star glare with horizontal anamorphic streak and cross-spikes, centred at (x, y), art units. */
 function star(ctx: Ctx, x: number, y: number, r: number, alpha: number) {
   if (alpha <= 0.01 || r <= 0) return;
   ctx.globalAlpha = Math.min(1, alpha);
-  const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 1.2);
-  glow.addColorStop(0, "rgba(255,255,255,0.95)");
-  glow.addColorStop(0.25, "rgba(150,200,255,0.55)");
-  glow.addColorStop(1, "rgba(40,90,255,0)");
+  // Concentric radial field
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 1.35);
+  glow.addColorStop(0, "rgba(255,255,255,0.98)");
+  glow.addColorStop(0.2, "rgba(170,215,255,0.72)");
+  glow.addColorStop(0.5, "rgba(60,130,255,0.35)");
+  glow.addColorStop(1, "rgba(20,50,220,0)");
   ctx.fillStyle = glow;
   ctx.beginPath();
-  ctx.arc(x, y, r * 1.2, 0, Math.PI * 2);
+  ctx.arc(x, y, r * 1.35, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "rgba(235,245,255,0.95)";
+
+  // Horizontal anamorphic flare streak
+  const streak = ctx.createLinearGradient(x - r * 5.4, y, x + r * 5.4, y);
+  streak.addColorStop(0, "rgba(100,180,255,0)");
+  streak.addColorStop(0.35, "rgba(150,210,255,0.45)");
+  streak.addColorStop(0.5, "rgba(255,255,255,0.95)");
+  streak.addColorStop(0.65, "rgba(150,210,255,0.45)");
+  streak.addColorStop(1, "rgba(100,180,255,0)");
+  ctx.fillStyle = streak;
+  ctx.fillRect(x - r * 5.4, y - r * 0.1, r * 10.8, r * 0.2);
+
+  // Primary 4-point cross spike
+  ctx.fillStyle = "rgba(240,248,255,0.95)";
   ctx.beginPath();
-  const t = r * 0.09;
-  ctx.moveTo(x, y - r * 2.1);
+  const t = r * 0.085;
+  ctx.moveTo(x, y - r * 2.4);
   ctx.lineTo(x + t, y - t);
-  ctx.lineTo(x + r * 2.1, y);
+  ctx.lineTo(x + r * 2.4, y);
   ctx.lineTo(x + t, y + t);
-  ctx.lineTo(x, y + r * 2.1);
+  ctx.lineTo(x, y + r * 2.4);
   ctx.lineTo(x - t, y + t);
-  ctx.lineTo(x - r * 2.1, y);
+  ctx.lineTo(x - r * 2.4, y);
   ctx.lineTo(x - t, y - t);
+  ctx.closePath();
+  ctx.fill();
+
+  // Secondary diagonal 4-point diffraction spike
+  ctx.fillStyle = "rgba(180,220,255,0.65)";
+  ctx.beginPath();
+  const dt = r * 0.055;
+  const dr = r * 1.3;
+  ctx.moveTo(x - dr, y - dr);
+  ctx.lineTo(x, y - dt);
+  ctx.lineTo(x + dr, y - dr);
+  ctx.lineTo(x + dt, y);
+  ctx.lineTo(x + dr, y + dr);
+  ctx.lineTo(x, y + dt);
+  ctx.lineTo(x - dr, y + dr);
+  ctx.lineTo(x - dt, y);
   ctx.closePath();
   ctx.fill();
 }
@@ -568,6 +598,26 @@ export function mountExtremeSuitup(
 
     // Plates in the air: unfold, turn, slide, overshoot and lock.
     c.lineJoin = "round";
+    // Linkage hinge guide lines (mechanical precision deployment tracking)
+    base();
+    c.globalCompositeOperation = "lighter";
+    for (const plate of p.plates) {
+      if (now < plate.start || now >= plate.lock || !plate.solid) continue;
+      const u = (now - plate.start) / (plate.lock - plate.start);
+      if (u < 0.1 || u > 0.88) continue;
+      const travel = easeOutBack(clamp01(u / 0.86), 1.35);
+      const x = plate.from[0] + (plate.at[0] - plate.from[0]) * travel;
+      const y = plate.from[1] + (plate.at[1] - plate.from[1]) * travel;
+      c.globalAlpha = 0.32 * Math.sin(Math.PI * clamp01((u - 0.1) / 0.78));
+      c.strokeStyle = "rgba(105,219,255,0.55)";
+      c.lineWidth = 0.75;
+      c.beginPath();
+      c.moveTo(plate.from[0], plate.from[1]);
+      c.lineTo(x, y);
+      c.stroke();
+    }
+    c.globalCompositeOperation = "source-over";
+
     for (const plate of p.plates) {
       if (now < plate.start || now >= plate.lock) continue;
       const u = (now - plate.start) / (plate.lock - plate.start);
@@ -616,7 +666,7 @@ export function mountExtremeSuitup(
     base();
     c.globalAlpha = 1;
 
-    // The lock: a glint runs along the plate's upper gold edges.
+    // The lock: a glint runs along the plate's upper gold edges & magnetic latch micro-arcs flash.
     c.globalCompositeOperation = "lighter";
     c.lineCap = "round";
     for (const plate of p.plates) {
@@ -639,6 +689,24 @@ export function mountExtremeSuitup(
       c.beginPath();
       c.arc(sx, sy, 2.2 * (1 - v) + 0.6, 0, Math.PI * 2);
       c.fill();
+
+      // Magnetic latch micro-arc flash at mechanical seating points
+      if (v < 0.35) {
+        const arcAlpha = (1 - v / 0.35) * 0.95;
+        c.globalAlpha = arcAlpha;
+        c.strokeStyle = "rgb(190,230,255)";
+        c.lineWidth = 1.0;
+        const p2 = plate.poly[2];
+        const p4 = plate.poly[4];
+        c.beginPath();
+        c.moveTo(p2[0] - 1.5, p2[1]);
+        c.lineTo(p2[0] + 0.5, p2[1] - 2);
+        c.lineTo(p2[0] + 1.5, p2[1] + 1);
+        c.moveTo(p4[0] + 1.5, p4[1]);
+        c.lineTo(p4[0] - 0.5, p4[1] + 2);
+        c.lineTo(p4[0] - 1.5, p4[1] - 1);
+        c.stroke();
+      }
     }
 
     // The belt core: it ignites, then breathes with every wave.

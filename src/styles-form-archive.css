@@ -106,17 +106,27 @@ main.form-archive-page[data-archive-kind]::before {
 
 .form-archive-page .form-archive-toolbar::after {
   right: 0;
+  bottom: -1px;
   left: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    #7ae8ff 14%,
-    #a48bff 38%,
-    #ff5cc8 62%,
-    #f0cf86 86%,
-    transparent
-  );
-  opacity: 0.62;
+  height: 8px;
+  background:
+    /* Left & right HUD seam brackets */
+    linear-gradient(var(--fa-lock) 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 22px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 2px 8px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 22px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 2px 8px no-repeat,
+    /* Lower prismatic seam */
+    linear-gradient(
+        90deg,
+        transparent,
+        #7ae8ff 14%,
+        #a48bff 38%,
+        #ff5cc8 62%,
+        #f0cf86 86%,
+        transparent
+      )
+      0 100% / 100% 1px no-repeat;
+  opacity: 0.78;
 }
 
 /* FORM INTERFACE // LINKED: a 12px HUD label. It never runs wider than
@@ -336,6 +346,14 @@ html body
 }
 
 html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"] {
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    "crest sub"
+    "crest label";
+  align-items: center;
+  justify-content: center;
+  column-gap: 7px;
+  row-gap: 2px;
   border-color: transparent;
   border-radius: 4px !important;
   color: var(--fa-text-3);
@@ -346,8 +364,33 @@ html body .form-archive-page #archive-switcher.form-archive-switcher > button[ar
   text-shadow: none;
 }
 
+.form-archive-page .form-archive-switcher button .fa-crest {
+  grid-area: crest;
+  width: 17px;
+  height: 17px;
+  display: block;
+  flex-shrink: 0;
+  color: var(--fa-text-2);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.form-archive-page .form-archive-switcher button[data-archive="saga"][aria-selected="true"] .fa-crest {
+  color: var(--archive-cyan);
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgb(122 232 255 / 52%));
+}
+
+.form-archive-page .form-archive-switcher button[data-archive="realm"][aria-selected="true"] .fa-crest {
+  color: #f5d58b;
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgb(184 162 255 / 62%));
+}
+
 /* SAGA / REALM: 12px HUD label over the Japanese name. */
 .form-archive-page .form-archive-switcher button small {
+  grid-area: sub;
+  justify-self: start;
   color: var(--fa-text-2);
   font-family: var(--fa-hud);
   font-size: 12px;
@@ -362,10 +405,21 @@ html body .form-archive-page #archive-switcher.form-archive-switcher > button[ar
 }
 
 .form-archive-page .form-archive-switcher button b {
+  grid-area: label;
+  justify-self: start;
   font-weight: 600;
 }
 
 @media (max-width: 560px) {
+  html body .form-archive-page #archive-switcher.form-archive-switcher > button[role="tab"] {
+    column-gap: 5px;
+  }
+
+  .form-archive-page .form-archive-switcher button .fa-crest {
+    width: 15px;
+    height: 15px;
+  }
+
   .form-archive-page .form-archive-switcher button small {
     letter-spacing: 0.1em;
   }
@@ -445,6 +499,9 @@ html body .form-archive-page .form-archive-menu-trigger::before {
 
 .form-archive-page .form-archive-frame-status i {
   width: 64px;
+  display: grid;
+  place-items: center;
+  font-style: normal;
   border: 0;
   border-radius: 0;
   background:
@@ -455,9 +512,21 @@ html body .form-archive-page .form-archive-menu-trigger::before {
     linear-gradient(var(--fa-gold) 0 0) 0 100% / 14px 2px no-repeat,
     linear-gradient(var(--fa-gold) 0 0) 0 100% / 2px 14px no-repeat,
     linear-gradient(var(--fa-gold) 0 0) 100% 100% / 14px 2px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 14px no-repeat,
-    radial-gradient(circle, color-mix(in srgb, var(--fa-accent) 70%, #fff) 0 2px, transparent 2.5px);
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 14px no-repeat;
   animation: none;
+}
+
+.form-archive-page .form-archive-frame-status i .fa-crest {
+  width: 30px;
+  height: 30px;
+  display: block;
+  color: var(--fa-lock);
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--fa-accent) 48%, transparent));
+}
+
+.form-archive-page[data-archive-kind="realm"] .form-archive-frame-status i .fa-crest {
+  color: #f5d58b;
+  filter: drop-shadow(0 0 12px rgb(184 162 255 / 55%));
 }
 
 .form-archive-page .form-archive-frame-status span {
@@ -574,8 +643,14 @@ html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger:focus
 
   main.form-archive-page[data-archive-kind]::before,
   main.form-archive-page[data-archive-kind]::after,
+  .form-archive-page .form-archive-toolbar::after,
   .form-archive-page .form-archive-frame-status::after {
     display: none;
+  }
+
+  .form-archive-page .fa-crest {
+    color: currentColor !important;
+    filter: none !important;
   }
 
   .form-archive-page .form-archive-frame-status i {
@@ -623,7 +698,11 @@ html body .form-archive-page .side-panel-trigger.form-archive-menu-trigger:focus
 html[data-family] body main.form-archive-page.command-archive[data-archive-kind="realm"] {
   --fa-accent: #b8a2ff;
   --fa-lock: #e3d6ff;
+  --fa-gold: #f5d58b;
   --archive-violet: #b8a2ff;
+  --archive-gold: #f5d58b;
+  --command-edge: rgb(184 162 255 / 38%);
+  --command-key: #b8a2ff;
   --fa-lamp: #b8a2ff;
 }
 
@@ -636,17 +715,124 @@ html[data-family]
 html[data-family]
   body
   main.form-archive-page.command-archive[data-archive-kind="realm"]
+  > header.form-archive-toolbar.form-archive-toolbar {
+  border-bottom-color: rgb(196 176 255 / 36%);
+  background:
+    linear-gradient(118deg, rgb(227 214 255 / 9%), transparent 38% 74%, rgb(245 213 139 / 9%)),
+    linear-gradient(180deg, #1b1633, #100d21 56%, #0b0918);
+  box-shadow:
+    inset 0 1px rgb(244 236 255 / 16%),
+    0 8px 24px rgb(0 0 0 / 45%);
+}
+
+/* REALM lower seam & brackets synchronize to Violet × Royal Gold. */
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  > header.form-archive-toolbar.form-archive-toolbar::after,
+.form-archive-page[data-archive-kind="realm"] .form-archive-toolbar::after {
+  background:
+    linear-gradient(#e3d6ff 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 22px 2px no-repeat,
+    linear-gradient(#e3d6ff 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 2px 8px no-repeat,
+    linear-gradient(#f5d58b 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 22px 2px no-repeat,
+    linear-gradient(#f5d58b 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 2px 8px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 18px, rgb(245 213 139 / 46%) 18px 19px) 36px 100% /
+      calc(100% - 72px) 3px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent,
+        #8f73f6 12%,
+        #b8a2ff 34%,
+        #f5d58b 50%,
+        #b8a2ff 66%,
+        #e3be6c 88%,
+        transparent
+      )
+      0 100% / 100% 1px no-repeat;
+  opacity: 0.92;
+}
+
+@media (min-width: 720px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind="realm"]::after {
+    background:
+      linear-gradient(90deg, transparent, #b8a2ff 18%, #f5d58b 50%, #b8a2ff 82%, transparent)
+        0 0 / 100% 1px no-repeat,
+      repeating-linear-gradient(90deg, transparent 0 14px, rgb(245 213 139 / 44%) 14px 15px) 0 3px /
+        100% 4px no-repeat;
+    opacity: 0.42;
+  }
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  #archive-switcher.form-archive-switcher
+  > .liquid-rail-surface {
+  border-color: rgb(196 176 255 / 34%);
+  background: #0a0816 !important;
+  box-shadow: inset 0 1px 8px rgb(0 0 0 / 68%) !important;
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
   #archive-switcher.form-archive-switcher
   > .liquid-selection-lens
   > .liquid-selection-surface {
-  border-color: rgb(196 176 255 / 62%);
+  border-color: rgb(245 213 139 / 58%);
   background:
-    linear-gradient(135deg, rgb(184 162 255 / 26%), transparent 56%),
+    linear-gradient(135deg, rgb(184 162 255 / 28%), rgb(245 213 139 / 10%) 56%, transparent 78%),
     #272247 !important;
   box-shadow:
-    inset 0 1px rgb(241 232 255 / 36%),
-    inset 0 -2px rgb(184 162 255 / 58%),
+    inset 0 1px rgb(246 236 255 / 38%),
+    inset 0 -2px rgb(245 213 139 / 64%),
     0 2px 8px rgb(0 0 0 / 50%) !important;
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface::after {
+  background: linear-gradient(90deg, transparent, #b8a2ff 20%, #f5d58b 50%, #b8a2ff 80%, transparent);
+  opacity: 0.92;
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  border-color: rgb(196 176 255 / 42%);
+  background: rgb(10 8 22 / 94%) !important;
+  box-shadow: inset 0 0 0 1px rgb(245 213 139 / 12%) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive[data-archive-kind="realm"]
+    .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
+    border-color: rgb(245 213 139 / 72%);
+    background: rgb(184 162 255 / 14%) !important;
+    box-shadow: inset 0 0 0 1px rgb(245 213 139 / 22%) !important;
+  }
+}
+
+html[data-family]
+  body
+  main.form-archive-page.command-archive[data-archive-kind="realm"]
+  .form-archive-frame-status::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #b8a2ff 20%,
+    #f5d58b 50%,
+    #b8a2ff 80%,
+    transparent
+  );
 }
 
 html[data-family]

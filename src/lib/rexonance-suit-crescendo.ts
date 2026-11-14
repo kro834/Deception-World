@@ -626,7 +626,10 @@ export class CrescendoEngine {
     if (level.edges && this.art.edge) {
       const glowing = finale.linesGlow(a);
       if (glowing > 0.01) {
-        front.globalAlpha = 0.2 * glowing;
+        front.globalAlpha = 0.22 * glowing;
+        front.drawImage(this.art.edge, 0, 0, W, H);
+        // Inner hot-core reinforcement along armor lines
+        front.globalAlpha = 0.12 * Math.pow(glowing, 1.8);
         front.drawImage(this.art.edge, 0, 0, W, H);
       }
       this.band(
@@ -673,7 +676,7 @@ export class CrescendoEngine {
     // (Two shells: four at once, with the ground's two, crowded the beat.)
     shell(front, 620, 1, 2.4, "244 252 255", 0.95);
     shell(back, 1080, 0.86, 10, "150 220 255", 0.26);
-    // The ground ring, under the feet.
+    // The ground ring, under the feet: sharp inner core + broader soft thermal surge
     const ground = finale.shockLight(a, 860);
     if (ground > 0.01) {
       const g = finale.shockReach(a, 860);
@@ -683,6 +686,14 @@ export class CrescendoEngine {
       back.beginPath();
       back.ellipse(cx, gy, 20 + rx * 0.95 * g, (20 + rx * 0.95 * g) * 0.13, 0, 0, Math.PI * 2);
       back.stroke();
+      // Secondary outer dissipation ring
+      if (g > 0.15) {
+        back.lineWidth = 1.4 * px;
+        back.strokeStyle = `rgb(240 207 134 / ${(0.42 * ground * (1 - g * 0.5)).toFixed(3)})`;
+        back.beginPath();
+        back.ellipse(cx, gy, (20 + rx * 0.95 * g) * 0.82, (20 + rx * 0.95 * g) * 0.11, 0, 0, Math.PI * 2);
+        back.stroke();
+      }
     }
     // The motes: a few small lights carried out just behind the thin shell
     // and gone with it (sprites: no ray, no stroke; half the old rays).
@@ -727,6 +738,9 @@ export class CrescendoEngine {
       front.drawImage(this.flare, vx - long, vy - thick / 2, long * 2, thick);
       front.globalAlpha = 0.7 * glint;
       front.drawImage(this.flare, vx - long * 0.45, vy - thick * 0.22, long * 0.9, thick * 0.44);
+      // Secondary needle sharp horizontal core
+      front.globalAlpha = 0.85 * Math.pow(glint, 1.4);
+      front.drawImage(this.flare, vx - long * 0.75, vy - thick * 0.12, long * 1.5, thick * 0.24);
       front.save();
       front.translate(vx, vy);
       front.rotate(Math.PI / 2);
@@ -781,9 +795,10 @@ function glow(core: string, tone: string) {
   const context = canvas.getContext("2d");
   if (context) {
     const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gradient.addColorStop(0, `rgb(${core} / 0.95)`);
-    gradient.addColorStop(0.14, `rgb(${tone} / 0.7)`);
-    gradient.addColorStop(0.45, `rgb(${tone} / 0.16)`);
+    gradient.addColorStop(0, `rgb(${core} / 0.98)`);
+    gradient.addColorStop(0.12, `rgb(${core} / 0.88)`);
+    gradient.addColorStop(0.24, `rgb(${tone} / 0.68)`);
+    gradient.addColorStop(0.52, `rgb(${tone} / 0.15)`);
     gradient.addColorStop(1, `rgb(${tone} / 0)`);
     context.fillStyle = gradient;
     context.fillRect(0, 0, 64, 64);

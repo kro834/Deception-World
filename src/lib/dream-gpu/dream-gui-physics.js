@@ -24,10 +24,13 @@ const DESK = ".dream-programme-desk";
 const BODY_SELECTOR = [
   ".dream-programme-ticket",
   ".dream-programme-dossier-chip",
+  ".dream-programme-reel-controls button",
   ".dream-programme-spotlight-modes button",
   ".dream-programme-spotlight-controls button",
   ".dream-programme-reel-frame",
 ].join(",");
+const REEL_CONTROLS_BUTTON =
+  ".dream-programme-reel-controls button, .dream-programme-spotlight-controls button";
 const REEL_WINDOW = ".dream-programme-reel-window";
 const REEL_SHEET = ".dream-programme-reel-sheet";
 const INK_MAX = 12;
@@ -60,7 +63,10 @@ function makeBody(el) {
   return {
     el,
     kind,
-    row: el.parentElement?.closest("nav, ul, [role=group], .dream-programme-spotlight-controls") ?? null,
+    row:
+      el.parentElement?.closest(
+        "nav, ul, [role=group], .dream-programme-reel-controls, .dream-programme-spotlight-controls",
+      ) ?? null,
     tx: ch(),
     ty: ch(),
     rx: ch(),
@@ -242,6 +248,16 @@ export function startDreamGui({ tier } = {}) {
 
   const frame = (now) => {
     raf = 0;
+    if (
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.worldEffects === "economy" ||
+      document.documentElement.dataset.motionEnabled === "false"
+    ) {
+      for (const b of list) if (b.written) clearStyle(b);
+      reelSheet?.style.removeProperty("translate");
+      reelSheet?.style.removeProperty("rotate");
+      return;
+    }
     const dt = Math.min(1 / 30, (now - last) / 1000 || 1 / 60);
     last = now;
     if (!desk?.isConnected) collect();
@@ -397,7 +413,7 @@ export function startDreamGui({ tier } = {}) {
     reel.to = 0;
     if (!cancel && (Math.abs(dx) > 70 || Math.abs(v) > 650)) {
       const dir = (Math.abs(v) > 650 ? -Math.sign(v) : -Math.sign(dx)) || 1;
-      const buttons = desk?.querySelectorAll(".dream-programme-spotlight-controls button");
+      const buttons = desk?.querySelectorAll(REEL_CONTROLS_BUTTON);
       const btn = buttons?.[dir < 0 ? 0 : 1];
       if (btn) {
         ghostOut(dir);
@@ -453,7 +469,7 @@ export function startDreamGui({ tier } = {}) {
   const onControlClick = (e) => {
     // a click on 前へ / 次へ (keyboard included) also leaves a ghost
     if (!e.isTrusted) return;
-    const ctl = e.target.closest?.(".dream-programme-spotlight-controls button");
+    const ctl = e.target.closest?.(REEL_CONTROLS_BUTTON);
     if (!ctl || !desk?.contains(ctl)) return;
     const dir = /前/.test(ctl.getAttribute("aria-label") ?? "") ? -1 : 1;
     ghostOut(dir);

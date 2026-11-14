@@ -118,7 +118,7 @@ export function LabStage({
   // Rexonance's surge layer draws on canvases of its own round the scene's.
   const surge = rider === "rexonance";
   return (
-    <section className="lab-stage" aria-label={`${LAB_NAMES[rider]}の変身`}>
+    <section className="lab-stage" data-rider={rider} aria-label={`${LAB_NAMES[rider]}の変身`}>
       <h2>
         {LAB_NAMES[rider]}
         <span className="lab-form-name">{LAB_FORMS[rider].find(([key]) => key === form)?.[1]}</span>
@@ -151,6 +151,14 @@ export function LabStage({
             )}
           </div>
         </div>
+        {zoom !== "full" && (
+          <div className="lab-optical-calipers" data-target={zoom} aria-hidden="true">
+            <i className="lab-caliper is-tl" />
+            <i className="lab-caliper is-tr" />
+            <i className="lab-caliper is-bl" />
+            <i className="lab-caliper is-br" />
+          </div>
+        )}
       </div>
       {status !== "ready" && (
         <div className="lab-stage-status" role="status">

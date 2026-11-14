@@ -38,10 +38,12 @@ void main(){
  vec2 p=(vUv-.5)*vec2(aspect,1.);
  vec2 e=(vUv-uBody.xy)/max(uBody.zw,vec2(.05));
  float d=length(e);
- // ink wash ground: broad slow washes, lighter toward the top, with dark blots
+ // ink wash ground: broad slow washes, layered cosmic ink nebula, with dark blots
  float wash=nz(vec3(p*.5,uTime*.012+2.)).r;
- vec3 ink=vec3(.004,.011,.008),washDark=vec3(.016,.036,.024),washLight=vec3(.09,.12,.1);
- vec3 base=mix(ink,washDark,smoothstep(.3,.65,wash));
+ float washNebula=nz(vec3(p*.22,uTime*.005+5.)).g;
+ vec3 ink=vec3(.002,.007,.005),washDeep=vec3(.008,.022,.015),washDark=vec3(.016,.036,.024),washLight=vec3(.09,.12,.1);
+ vec3 base=mix(ink,washDeep,smoothstep(.2,.7,washNebula));
+ base=mix(base,washDark,smoothstep(.3,.65,wash));
  base=mix(base,washLight,smoothstep(.5,.88,wash)*smoothstep(-.4,.5,p.y)*.9);
  float blot=nz(vec3(p*2.1,7.)).a;
  base*=1.-.55*smoothstep(.8,.96,blot);
@@ -88,12 +90,15 @@ void main(){
  col=mix(col,flamePale,wisps);
  col*=1.-veins;
  col=mix(col,ink,edge*.9);
- // fine particulate drifting upward; the lookup is warped so the specks leave the noise lattice
+ // fine particulate drifting upward in multi-depth layers
  vec2 s=p*17.;s.y-=uTime*.5;
  s+=(nz(vec3(p*1.4,uTime*.03+21.)).rg-.5)*2.5;
  float spark=nz(vec3(s,uTime*.22+13.)).a*nz(vec3(s.yx*1.7+3.,uTime*.17)).b;
  float dots=smoothstep(.6,.78,spark)*(.15+mass)*smoothstep(.6,-.2,p.y);
- col+=vec3(.6,1.,.7)*dots*.6;
+ vec2 s2=p*8.5;s2.y-=uTime*.25;
+ float spark2=nz(vec3(s2+vec2(1.2,3.4),uTime*.14+31.)).g*nz(vec3(s2.yx*1.2,uTime*.11)).r;
+ float dots2=smoothstep(.7,.88,spark2)*(.1+.2*mass)*smoothstep(.5,-.3,p.y);
+ col+=vec3(.6,1.,.7)*dots*.6+vec3(.35,.85,.48)*dots2*.4;
  outColor=vec4(col*uIntensity,1.);
 }`,
   });

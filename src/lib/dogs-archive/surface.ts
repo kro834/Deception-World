@@ -157,8 +157,9 @@ const GUARDIAN_TONES_GLSL = `{
 #endif
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
- // a soft inner light on jade-like bone, not a realistic subsurface
- gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
+ // a soft inner light on jade-like bone with subtle warm rim translucency (SSS warmth)
+ float gBoneWarm=pow(1.-gNdV,2.5)*gWrapLight;
+ gTone+=mix(vec3(.2,.34,.2),vec3(.32,.36,.22),gBoneWarm)*gWrapLight*.36*uTranslucency*gBone;
 #endif
  // the skin rim is a little stronger since the skin went black: the silhouette must hold
  // against the dark green backdrop
@@ -176,7 +177,8 @@ const GUARDIAN_TONES_GLSL = `{
  // the scales and off the gaps; the scale normals make the band break along the rims.
  float gGloss=mix(.15,1.,1.-smoothstep(.3,.85,roughnessFactor));
  float gSheen=smoothstep(.26,.6,pow(gNdH,mix(4.,10.,gGloss)))*gGloss;
- vec3 gSkinSpec=vec3(.05,.08,.06)*gSheen+vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.12*gGloss;
+ float gWetFres=pow(1.-gNdV,4.2)*gGloss;
+ vec3 gSkinSpec=vec3(.05,.08,.06)*gSheen+vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.12*gGloss+vec3(.09,.15,.11)*gWetFres*.22;
  reflectedLight.directSpecular=mix(gSkinSpec,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
  reflectedLight.indirectSpecular=vec3(0.);
 }`;
@@ -762,14 +764,17 @@ ${GUARDIAN_TONES_GLSL}`,
     patched,
     families,
     update(time, strength, anticipation) {
-      const pulse = 0.5 + 0.5 * Math.sin(time * 1.35);
-      const latticeScale = 1.0 + pulse * 0.25 + anticipation * 0.8 + strength * 0.4;
+      // Natural bioluminescent micro-flutter and rhythmic respiration
+      const respiration = Math.sin(time * 1.35);
+      const flutter = 0.08 * Math.sin(time * 2.85 + 0.4) + 0.04 * Math.sin(time * 0.65);
+      const pulse = 0.5 + 0.5 * (respiration + flutter);
+      const latticeScale = 1.0 + pulse * 0.28 + anticipation * 0.85 + strength * 0.45;
       for (const { material, base } of lattice) material.emissiveIntensity = base * latticeScale;
       // The references' cores glow white-green; the authored strength is modest, so scale it
       // up to the edge of the bloom threshold and let the breath push it over.
-      const coreScale = 1.9 + pulse * 0.25 + anticipation * 0.5 + strength * 0.3;
+      const coreScale = 1.9 + pulse * 0.28 + anticipation * 0.55 + strength * 0.35;
       for (const { material, base } of cores) material.emissiveIntensity = base * coreScale;
-      for (const material of mouths) material.emissiveIntensity = strength * 4.5 + anticipation * 0.6;
+      for (const material of mouths) material.emissiveIntensity = strength * 4.8 + anticipation * 0.7;
     },
     restore() {
       previous.forEach((state, material) => {

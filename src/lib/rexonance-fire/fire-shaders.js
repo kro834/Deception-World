@@ -209,6 +209,13 @@ void main() {
     * lit * flare * flick * patch, 0.0, 1.0);
   // Complete combustion in the fire's end tone: clean, gold, or between.
   vec3 colour = mix(rampSooty(temp), mix(rampClean(temp), rampGold(temp), uTone.x), mLocal);
+  // Multi-layer ionized corona & plasma core boost:
+  // Emerald-to-deep-cyan ionization halo residing in outer atmospheric fringe (air * (1.0 - core)),
+  // complemented by a vivid thermal inner-core intensity uplift.
+  float coronaFringe = air * (1.0 - core) * smoothstep(0.06, 0.52, dens);
+  vec3 coronaIon = vec3(0.04, 0.38, 0.34) * coronaFringe * (0.6 + 0.4 * n) * (1.0 - 0.72 * uTone.x);
+  float corePlasma = pow(temp, 2.6) * 0.36;
+  colour += coronaIon + colour * corePlasma;
   float emit = clamp(dens * flick, 0.0, 1.0);
   float share = mix(1.0 - ${f(T.frontShare)} * skin, ${f(T.frontShare)} * skin, layer);
   vec3 E = colour * emit * share;
@@ -242,6 +249,9 @@ ${tearGaps()}    float width = (${f(T.tearHair)} + ${f(T.tearWidth - T.tearHair)
     float cyan = exp(-h * h) * glow * ${f(T.tearHaloGain)};
     E += ${tint("tearWhite")} * white + ${tint("tearHalo")} * cyan;
   }
+  // Filmic shoulder and knee compression curve to suppress harsh saturation clipping
+  // while preserving deep plasma radiance (strictly zero when uClock.y == 0).
+  E = (E * (vec3(1.0) + E * 0.35)) / (vec3(1.0) + E * 0.65 + vec3(0.00001));
   E = min(E * uClock.y, vec3(1.0));
   float alpha = max(max(E.r, max(E.g, E.b)), min(1.0, absorb * uClock.y));
   gl_FragColor = vec4(E, alpha);
@@ -283,9 +293,17 @@ ${ramp("rampHeat", RAMP_HEAT)}
 ${ramp("rampHeatGold", RAMP_HEAT_GOLD)}
 void main() {
   float r2 = dot(vCorner, vCorner);
-  float g = exp(-r2 * 2.6) * (1.0 - smoothstep(0.55, 1.0, sqrt(r2)));
-  vec3 E = mix(rampHeat(vHeat), rampHeatGold(vHeat), uSparkTone.x) * g * pow(vHeat, 0.6) * uSpark.x;
-  E += vec3(1.0) * g * g * vHeat * vHeat * 0.6 * uSpark.x;
+  float r = sqrt(r2);
+  float g = exp(-r2 * 2.6) * (1.0 - smoothstep(0.55, 1.0, r));
+  // Dual-ring supersonic shock halo along the travel axis
+  float ringInner = exp(-pow((r - 0.38) / 0.12, 2.0)) * 0.32;
+  float ringOuter = exp(-pow((r - 0.70) / 0.15, 2.0)) * 0.18 * smoothstep(0.35, 0.85, vHeat);
+  float shockHalo = (ringInner + ringOuter) * (1.0 - smoothstep(0.72, 1.0, r));
+  // Incandescent needle sharpness at the core
+  float tipCore = exp(-r2 * 12.0) * pow(vHeat, 2.2) * 0.8;
+  vec3 heatTone = mix(rampHeat(vHeat), rampHeatGold(vHeat), uSparkTone.x);
+  vec3 E = heatTone * (g * pow(vHeat, 0.6) + shockHalo * 0.45) * uSpark.x;
+  E += vec3(1.0) * (g * g * vHeat * vHeat * 0.6 + tipCore) * uSpark.x;
   E = min(E, vec3(1.0));
   gl_FragColor = vec4(E, max(E.r, max(E.g, E.b)));
 }

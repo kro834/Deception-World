@@ -31,9 +31,13 @@ import type { RexonanceAssemblyFormChange } from "./rexonance-resonance.js";
 const ORB_TONES = ["rgb(166 230 255)", "rgb(169 131 255)"] as const;
 /** The prism's three dispersed hairlines: ice, pink, gold. */
 const PRISM_TONES = ["rgb(166 230 255)", "rgb(255 143 210)", "rgb(255 225 163)"] as const;
+const FROST_HI = "rgb(220 246 255)";
 const CRIMSON_FRONT = "rgb(184 31 58)";
+const CRIMSON_EMBER = "rgb(233 158 102)";
 const GOLDEN_ANGLE = 2.399963229728653;
-const GLINTS = 12;
+const GLINTS = 15;
+const FROST_FACETS = 16;
+const ARC_STEPS = 10;
 const TRAIL = 3;
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const smooth = (u: number) => u * u * (3 - 2 * u);
@@ -146,19 +150,50 @@ export function createIllusionculumFormChange(
             context.globalAlpha = 0.34 * pulse;
             context.drawImage(to, cx - cx * zoom, cy - cy * zoom, W * zoom, H * zoom);
             context.restore();
-            // Dispersed hairlines: ice inside, pink outside, gold between.
+            // Crimson-frost erosion contrast: outer crystalline frost facets vs inner crimson-gold rim.
             context.globalCompositeOperation = "lighter";
-            context.lineWidth = 1.25;
-            context.globalAlpha = 0.34 * pulse;
+            // 1. Retreating ice-crystal frost crown just ahead of the crimson wave front.
+            context.strokeStyle = FROST_HI;
+            context.lineWidth = 1.15;
+            context.globalAlpha = 0.42 * pulse;
+            context.beginPath();
+            for (let f = 0; f < FROST_FACETS; f += 1) {
+              const a = (f / FROST_FACETS) * Math.PI * 2 - e * 0.85;
+              const spread = 0.055 + ((f * 3) % 4) * 0.012;
+              const rIn = radius + 2.5;
+              const rTip = radius + 10 + ((f * 5) % 4) * 3.2 * pulse;
+              context.moveTo(cx + Math.cos(a - spread) * rIn, cy + Math.sin(a - spread) * rIn);
+              context.lineTo(cx + Math.cos(a) * rTip, cy + Math.sin(a) * rTip);
+              context.lineTo(cx + Math.cos(a + spread) * rIn, cy + Math.sin(a + spread) * rIn);
+            }
+            context.stroke();
+            // 2. Dispersed prism hairlines: ice outside, pink mid, warm gold hugging the erosion front.
+            context.lineWidth = 1.3;
+            context.globalAlpha = 0.38 * pulse;
             for (let t = 0; t < 3; t += 1) {
               context.strokeStyle = PRISM_TONES[t];
               context.beginPath();
-              context.arc(cx, cy, Math.max(0.5, radius + (t - 1) * (2.5 + 3 * pulse)), 0, Math.PI * 2);
+              context.arc(
+                cx,
+                cy,
+                Math.max(0.5, radius + (1 - t) * (3.2 + 3.6 * pulse)),
+                0,
+                Math.PI * 2,
+              );
               context.stroke();
             }
-            // Glints on the front, ice / pink / gold in turn.
+            // 3. Inner crimson-ember harmonic ring just inside the advancing wave.
+            if (radius > 8) {
+              context.strokeStyle = CRIMSON_EMBER;
+              context.lineWidth = 1.2;
+              context.globalAlpha = 0.34 * pulse;
+              context.beginPath();
+              context.arc(cx, cy, Math.max(0.5, radius - 3.5 - 2 * pulse), 0, Math.PI * 2);
+              context.stroke();
+            }
+            // 4. Glints on the front, ice / pink / gold in turn.
             context.lineWidth = 1.5;
-            context.globalAlpha = 0.5 * pulse;
+            context.globalAlpha = 0.52 * pulse;
             for (let t = 0; t < 3; t += 1) {
               context.strokeStyle = PRISM_TONES[t];
               context.beginPath();
@@ -166,8 +201,8 @@ export function createIllusionculumFormChange(
                 const angle = k * GOLDEN_ANGLE + e * 1.6;
                 const cos = Math.cos(angle);
                 const sin = Math.sin(angle);
-                const inner = radius - 3;
-                const outer = radius + 7 + ((k * 7) % 5) * 3 * pulse;
+                const inner = Math.max(0, radius - 4);
+                const outer = radius + 8 + ((k * 7) % 5) * 3.2 * pulse;
                 context.moveTo(cx + cos * inner, cy + sin * inner);
                 context.lineTo(cx + cos * outer, cy + sin * outer);
               }
@@ -175,9 +210,9 @@ export function createIllusionculumFormChange(
             }
             context.globalCompositeOperation = "source-over";
           }
-          context.globalAlpha = 0.5 * pulse;
+          context.globalAlpha = 0.54 * pulse;
           context.strokeStyle = CRIMSON_FRONT;
-          context.lineWidth = 2;
+          context.lineWidth = 2.2;
           context.beginPath();
           context.arc(cx, cy, radius, 0, Math.PI * 2);
           context.stroke();
@@ -201,6 +236,48 @@ export function createIllusionculumFormChange(
           const y = orbY;
           const scale = 0.42 + 0.58 * e;
           const size = r * 2 * scale;
+          // Multi-wavelength Reactor More orbital trajectory arcs & seat reticle.
+          if (!calm && u > 0.02 && u < 0.96) {
+            const arcFade = Math.sin(Math.PI * clamp01(u / 0.96));
+            context.globalCompositeOperation = "lighter";
+            for (let t = 0; t < 3; t += 1) {
+              const offset = (t - 1) * 3.2 * (1 - e * 0.6);
+              context.strokeStyle = PRISM_TONES[t];
+              context.lineWidth = t === 0 ? 1.6 : 1.1;
+              context.globalAlpha = (t === 0 ? 0.44 : 0.28) * arcFade;
+              context.beginPath();
+              const sStart = Math.max(0, e - 0.58);
+              for (let step = 0; step <= ARC_STEPS; step += 1) {
+                const sAt = sStart + ((e - sStart) * step) / ARC_STEPS;
+                placeOrb(ox, oy, r, sAt);
+                const pxArc = orbX + offset;
+                const pyArc = orbY - Math.abs(offset) * 0.45;
+                if (step === 0) context.moveTo(pxArc, pyArc);
+                else context.lineTo(pxArc, pyArc);
+              }
+              context.stroke();
+            }
+            // Pre-lock diamond phase reticle tightening on the target seat.
+            if (u < 0.78) {
+              const lockFade = Math.sin(Math.PI * clamp01(u / 0.78));
+              const dR = r * (0.62 - 0.24 * clamp01(u / 0.78));
+              const spin = (k === 0 ? 1 : -1) * e * 1.4;
+              context.strokeStyle = PRISM_TONES[k === 0 ? 0 : 2];
+              context.lineWidth = 1.15;
+              context.globalAlpha = 0.38 * lockFade;
+              context.beginPath();
+              for (let c = 0; c < 4; c += 1) {
+                const a = spin + (c * Math.PI) / 2;
+                const vx = ox + Math.cos(a) * dR;
+                const vy = oy + Math.sin(a) * dR;
+                if (c === 0) context.moveTo(vx, vy);
+                else context.lineTo(vx, vy);
+              }
+              context.closePath();
+              context.stroke();
+            }
+            context.globalCompositeOperation = "source-over";
+          }
           // Its projection, ahead of it at the seat, fading as it lands.
           const ghost = orbGhosts[k];
           const gc = ghost.getContext("2d");
@@ -245,18 +322,31 @@ export function createIllusionculumFormChange(
             size,
             size,
           );
-          // Landing: a ring of dispersed light opening off the seat.
-          if (!calm && u > 0.68 && u < 1) {
-            const open = (u - 0.68) / 0.32;
+          // Landing: dispersed diffraction rings & radial optical glints opening off the seat.
+          if (!calm && u > 0.66 && u < 1) {
+            const open = (u - 0.66) / 0.34;
+            const decay = (1 - open) * (1 - open);
             context.globalCompositeOperation = "lighter";
             context.lineWidth = 1.5;
-            context.globalAlpha = 0.46 * (1 - open) * (1 - open);
+            context.globalAlpha = 0.48 * decay;
             for (let t = 0; t < 3; t += 1) {
               context.strokeStyle = PRISM_TONES[t];
               context.beginPath();
-              context.arc(ox, oy, r * (1.05 + 0.85 * open + t * 0.09), 0, Math.PI * 2);
+              context.arc(ox, oy, r * (1.02 + 0.88 * open + t * 0.09), 0, Math.PI * 2);
               context.stroke();
             }
+            context.strokeStyle = FROST_HI;
+            context.lineWidth = 1.25;
+            context.globalAlpha = 0.52 * decay;
+            context.beginPath();
+            for (let g = 0; g < 8; g += 1) {
+              const a = (g * Math.PI) / 4 + (k === 0 ? 0.2 : -0.2);
+              const r0 = r * (0.94 + 0.55 * open);
+              const r1 = r0 + r * 0.26 * (1 - open);
+              context.moveTo(ox + Math.cos(a) * r0, oy + Math.sin(a) * r0);
+              context.lineTo(ox + Math.cos(a) * r1, oy + Math.sin(a) * r1);
+            }
+            context.stroke();
             context.globalCompositeOperation = "source-over";
           }
         }

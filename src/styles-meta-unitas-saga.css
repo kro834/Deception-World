@@ -2266,3 +2266,318 @@ html[data-rzn-constrained] .mus-weapons li::after {
     box-shadow: none;
   }
 }
+
+/* ================================================================
+   2026-11 Magnetic Coupling & Spatial Cleavage Upgrade:
+   - Hero split seams (.mus-hero-seam): "separation without destruction"
+     high-energy dual-hue light leakage & magnetic calibration nodes.
+   - Comparison bars (--mus-bar): Orange / Teal magnetic coupling track
+     frame with pole caps, Vernier ruler, and coupled energy core.
+   - Mechanism, armor, finisher & weapon plates (.mus-article,
+     .mus-finisher, .mus-weapons li): 4-corner L-shaped forged brackets.
+   ================================================================ */
+.mus-page {
+  --mus-forged-a: rgb(255 190 122 / 88%);
+  --mus-forged-t: rgb(92 232 224 / 84%);
+  --mus-forged-l:
+    linear-gradient(90deg, var(--mus-forged-a), var(--mus-orange)) left 7px top 7px / 18px 2px no-repeat,
+    linear-gradient(180deg, var(--mus-forged-a), var(--mus-orange)) left 7px top 7px / 2px 18px no-repeat,
+    linear-gradient(270deg, var(--mus-forged-a), var(--mus-orange)) right 7px top 7px / 18px 2px no-repeat,
+    linear-gradient(180deg, var(--mus-forged-a), var(--mus-orange)) right 7px top 7px / 2px 18px no-repeat,
+    linear-gradient(90deg, var(--mus-forged-t), var(--mus-teal)) left 7px bottom 7px / 18px 2px no-repeat,
+    linear-gradient(0deg, var(--mus-forged-t), var(--mus-teal)) left 7px bottom 7px / 2px 18px no-repeat,
+    linear-gradient(270deg, var(--mus-forged-t), var(--mus-teal)) right 7px bottom 7px / 18px 2px no-repeat,
+    linear-gradient(0deg, var(--mus-forged-t), var(--mus-teal)) right 7px bottom 7px / 2px 18px no-repeat;
+}
+
+/* 1. Key Visual Split Seams — "Separation Without Destruction" High-Energy Light Leakage */
+.mus-page .mus-hero-seam {
+  z-index: 2;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--mus-teal) 9%,
+    var(--mus-orange) 22%,
+    #ffffff 50%,
+    var(--mus-orange-hot) 78%,
+    var(--mus-teal) 91%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 6px rgb(255 201 143 / 92%),
+    0 0 16px rgb(255 154 74 / 72%),
+    0 0 28px rgb(55 198 192 / 46%);
+  opacity: 0.56;
+}
+
+.mus-page .mus-hero-seam::before {
+  content: "";
+  position: absolute;
+  top: 4%;
+  bottom: 4%;
+  left: -11px;
+  width: 23px;
+  background:
+    radial-gradient(50% 38% at 50% 50%, rgb(255 235 205 / 34%), transparent 72%),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(255 154 74 / 24%) 36%,
+      rgb(255 245 230 / 48%) 50%,
+      rgb(55 198 192 / 24%) 64%,
+      transparent 100%
+    );
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.mus-page .mus-hero-seam::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  left: -3px;
+  width: 7px;
+  background:
+    radial-gradient(circle at 50% 24%, #ffffff 0 1.5px, rgb(55 198 192 / 75%) 2.5px, transparent 4px),
+    radial-gradient(circle at 50% 50%, #ffffff 0 2px, rgb(255 154 74 / 85%) 3px, transparent 5px),
+    radial-gradient(circle at 50% 76%, #ffffff 0 1.5px, rgb(55 198 192 / 75%) 2.5px, transparent 4px),
+    repeating-linear-gradient(
+      180deg,
+      rgb(233 239 242 / 42%) 0 1px,
+      transparent 1px 18px
+    ) center / 5px 100% no-repeat;
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+/* 2. Performance Comparison Bars (--mus-bar) — Orange / Teal Magnetic Coupling Frame */
+.mus-page .mus-table td[data-bar] {
+  padding-bottom: 16px;
+}
+
+.mus-page .mus-table td[data-bar]::before {
+  content: "";
+  position: absolute;
+  left: clamp(10px, 1.6vw, 20px);
+  right: clamp(10px, 1.6vw, 20px);
+  bottom: 5px;
+  height: 5px;
+  border-radius: 2px;
+  border: 1px solid rgb(55 198 192 / 24%);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(255 154 74 / 85%) 0 2px,
+      transparent 2px calc(100% - 2px),
+      rgb(55 198 192 / 85%) calc(100% - 2px) 100%
+    ),
+    repeating-linear-gradient(90deg, rgb(233 239 242 / 14%) 0 1px, transparent 1px 10px),
+    rgb(3 9 13 / 78%);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 70%);
+  pointer-events: none;
+}
+
+.mus-page .mus-table td[data-bar]::after {
+  bottom: 6px;
+  height: 3px;
+  border-radius: 1.5px;
+  background: linear-gradient(
+    90deg,
+    rgb(233 239 242 / 52%),
+    rgb(55 198 192 / 46%) calc(100% - 2px),
+    #e9eff2 calc(100% - 2px)
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    0 0 8px -2px rgb(55 198 192 / 35%);
+}
+
+.mus-page .mus-table tbody tr[data-self] td[data-bar]::before {
+  border-color: rgb(255 154 74 / 42%);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 68%),
+    0 0 10px -3px rgb(255 154 74 / 30%);
+}
+
+.mus-page .mus-table tbody tr[data-self] td[data-bar]::after {
+  background: linear-gradient(
+    90deg,
+    var(--mus-orange) 0%,
+    var(--mus-orange-hot) 46%,
+    var(--mus-teal) calc(100% - 3px),
+    #ffffff calc(100% - 3px) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 55%),
+    0 0 12px -1px rgb(255 154 74 / 52%),
+    0 0 16px -3px rgb(55 198 192 / 46%);
+}
+
+.mus-page .mus-table tbody tr[data-ultra] td[data-bar]::before {
+  border-color: rgb(233 216 255 / 44%);
+}
+
+.mus-page .mus-table tbody tr[data-ultra] td[data-bar]::after {
+  background: linear-gradient(
+    90deg,
+    #f3d6ff 0%,
+    #b8f3ef 52%,
+    #ffd7b0 calc(100% - 3px),
+    #ffffff calc(100% - 3px) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 62%),
+    0 0 14px -1px rgb(233 216 255 / 55%);
+}
+
+@media (max-width: 560px) {
+  .mus-page .mus-table td[data-bar]::before {
+    left: 6px;
+    right: 6px;
+    bottom: 3px;
+  }
+  .mus-page .mus-table td[data-bar]::after {
+    left: 6px;
+    right: 6px;
+    bottom: 4px;
+  }
+}
+
+/* 3. Mechanism, Armor, Finisher & Weapon Cards — 4-Corner L-Shaped Forged Brackets */
+.mus-page .mus-article {
+  background:
+    var(--mus-forged-l),
+    radial-gradient(circle at 100% 0%, rgb(255 154 74 / 10%), transparent 46%),
+    radial-gradient(120% 60% at 0% 0%, rgb(55 198 192 / 13%), transparent 60%),
+    linear-gradient(115deg, transparent 60%, rgb(255 154 74 / 6%) 60.3%, transparent 70%),
+    #040b0f;
+  box-shadow:
+    0 0 0 1px rgb(255 154 74 / 28%),
+    inset 0 1px 0 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 18%),
+    0 12px 28px -6px rgb(0 0 0 / 58%);
+}
+
+.mus-page .mus-article::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid rgb(55 198 192 / 70%);
+  background: rgb(255 154 74 / 24%);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.mus-page .mus-finisher {
+  border-color: rgb(255 154 74 / 28%);
+  background:
+    var(--mus-forged-l),
+    radial-gradient(60% 90% at 0% 50%, rgb(255 154 74 / 10%), transparent 70%),
+    radial-gradient(50% 70% at 100% 100%, rgb(55 198 192 / 9%), transparent 65%),
+    #040b0f;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 16%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 16%),
+    0 14px 34px -10px rgb(0 0 0 / 64%);
+}
+
+.mus-page .mus-weapons li {
+  background:
+    linear-gradient(90deg, var(--mus-forged-a), var(--mus-orange)) left 6px top 6px / 11px 1.5px no-repeat,
+    linear-gradient(180deg, var(--mus-forged-a), var(--mus-orange)) left 6px top 6px / 1.5px 11px no-repeat,
+    linear-gradient(270deg, var(--mus-forged-a), var(--mus-orange)) right 6px top 6px / 11px 1.5px no-repeat,
+    linear-gradient(180deg, var(--mus-forged-a), var(--mus-orange)) right 6px top 6px / 1.5px 11px no-repeat,
+    linear-gradient(90deg, var(--mus-forged-t), var(--mus-teal)) left 6px bottom 6px / 11px 1.5px no-repeat,
+    linear-gradient(0deg, var(--mus-forged-t), var(--mus-teal)) left 6px bottom 6px / 1.5px 11px no-repeat,
+    linear-gradient(270deg, var(--mus-forged-t), var(--mus-teal)) right 6px bottom 6px / 11px 1.5px no-repeat,
+    linear-gradient(0deg, var(--mus-forged-t), var(--mus-teal)) right 6px bottom 6px / 1.5px 11px no-repeat,
+    repeating-linear-gradient(0deg, rgb(233 239 242 / 18%) 0 1px, transparent 1px 6px) right 9px bottom 20px / 4px calc(100% - 40px) no-repeat,
+    linear-gradient(90deg, rgb(255 154 74 / 11%), transparent 44%),
+    #040b0f;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mus-page :is(.mus-article, .mus-finisher) {
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+  .mus-page :is(.mus-article, .mus-finisher):hover {
+    box-shadow:
+      0 0 0 1px rgb(255 154 74 / 48%),
+      inset 0 1px 0 0 rgb(255 255 255 / 26%),
+      inset 0 -1px 0 0 rgb(55 198 192 / 34%),
+      0 16px 38px -8px rgb(0 0 0 / 70%),
+      0 0 24px -8px rgb(55 198 192 / 28%);
+  }
+  .mus-page .mus-weapons li:hover {
+    background:
+      linear-gradient(90deg, #ffffff, var(--mus-orange-hot)) left 6px top 6px / 13px 1.5px no-repeat,
+      linear-gradient(180deg, #ffffff, var(--mus-orange-hot)) left 6px top 6px / 1.5px 13px no-repeat,
+      linear-gradient(270deg, #ffffff, var(--mus-orange-hot)) right 6px top 6px / 13px 1.5px no-repeat,
+      linear-gradient(180deg, #ffffff, var(--mus-orange-hot)) right 6px top 6px / 1.5px 13px no-repeat,
+      linear-gradient(90deg, #dffcf9, var(--mus-teal)) left 6px bottom 6px / 13px 1.5px no-repeat,
+      linear-gradient(0deg, #dffcf9, var(--mus-teal)) left 6px bottom 6px / 1.5px 13px no-repeat,
+      linear-gradient(270deg, #dffcf9, var(--mus-teal)) right 6px bottom 6px / 13px 1.5px no-repeat,
+      linear-gradient(0deg, #dffcf9, var(--mus-teal)) right 6px bottom 6px / 1.5px 13px no-repeat,
+      repeating-linear-gradient(0deg, rgb(255 201 143 / 36%) 0 1px, transparent 1px 6px) right 9px bottom 20px / 4px calc(100% - 40px) no-repeat,
+      linear-gradient(90deg, rgb(255 154 74 / 18%), transparent 55%),
+      #07151c;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .mus-page[data-motion-ready="true"]
+    .mus-hero-seam::before {
+    animation: mus-seam-leak 1.6s cubic-bezier(0.22, 1, 0.36, 1) calc(0.2s + var(--seam) * 0.08s)
+      both;
+  }
+}
+
+@keyframes mus-seam-leak {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.2) scaleY(0);
+  }
+  48% {
+    opacity: 1;
+    transform: scaleX(1.35) scaleY(1);
+  }
+  100% {
+    opacity: 0.72;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mus-page .mus-hero-seam::before,
+  .mus-page :is(.mus-article, .mus-finisher) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+html[data-world-effects="economy"] .mus-page .mus-hero-seam::before,
+html[data-rzn-constrained] .mus-page .mus-hero-seam::before {
+  animation: none !important;
+}
+
+@media (forced-colors: active) {
+  .mus-page .mus-hero-seam::before,
+  .mus-page .mus-hero-seam::after,
+  .mus-page .mus-article::after,
+  .mus-page .mus-table td[data-bar]::before {
+    display: none;
+  }
+  .mus-page :is(.mus-article, .mus-finisher) {
+    background: Canvas;
+    box-shadow: none;
+    border: 1px solid CanvasText;
+  }
+}

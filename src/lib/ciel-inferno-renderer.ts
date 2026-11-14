@@ -109,7 +109,18 @@ void main(){
  float breadth=.016+max(along,0.)*.17;
  float lift=smoothstep(4.6,6.8,t)*max(along,0.)*.18;
  float cone=(1.-smoothstep(breadth*.35,breadth*1.6,abs(across+(flow-.5)*breadth*.8-lift)))*step(0.,along)*(1.-smoothstep(reach*.8,reach,along));
- float jet=cone*(.24+.76*rib)*jetOn;
+ // Supersonic Mach cone: periodic shock diamond nodes along the jet stream
+ float diamondDist=max(0.,along);
+ float diamondFreq=42.;
+ float diamondEnvelope=exp(-diamondDist*6.5)*step(0.,along);
+ float diamondPhase=cos(diamondDist*diamondFreq-t*15.)*.5+.5;
+ float diamondAcross=1.-smoothstep(0.,breadth*.72,abs(across)*1.55+abs(diamondPhase-.5)*breadth*.55);
+ float shockDiamonds=pow(diamondPhase,3.2)*diamondAcross*diamondEnvelope*jetOn;
+ float throatNode=exp(-diamondDist*22.)*(1.-smoothstep(0.,breadth*.38,abs(across)))*jetOn*step(0.,along);
+ // Intense shear layer vortices along jet flanks
+ float shear=fbm(vec2(along*9.-t*4.6,abs(across)*24.+flow*2.2));
+ float vortex=pow(abs(sin(shear*6.28+across*18.)),2.6);
+ float jetCore=cone*(.26+.74*rib+vortex*.24)*jetOn;
  // The impact seam catches progressively, sending unequal fingers upward.
  // Static arrival geometry keeps the char continuous beneath moving tongues.
  vec2 adv=uv*aspect*vec2(8.,6.5)+vec2(0.,t*1.22);
@@ -129,21 +140,34 @@ void main(){
  float crown=exp(-abs(front+.055)*13.)*smoothstep(.25,.7,billow);
  float fuel=(1.-smoothstep(.15,1.7,age))*.8+.2;
  float flame=(tongues*inside*fuel+crown*.85)*life;
- float heat=clamp(jet*.82+flame,0.,1.);
+ float heat=clamp(jetCore*.82+flame,0.,1.);
  vec3 forest=vec3(.008,.075,.024), emerald=vec3(.04,.48,.105), core=vec3(.5,.98,.38);
  vec3 fire=mix(forest,emerald,smoothstep(.025,.6,heat));
  fire=mix(fire,core,pow(heat,4.)*.8);
+ // Incandescent combustion front: white-hot line, emerald flame body, amber burning edge
+ float edgeFlash=exp(-abs(front)*32.)*smoothstep(2.05,2.4,t)*life;
+ float superFlash=exp(-abs(front)*68.)*smoothstep(2.05,2.4,t)*life;
+ float amberMargin=smoothstep(.04,-.06,front)*smoothstep(-.22,-.02,front)*smoothstep(2.05,2.4,t)*life;
+ vec3 amberGlow=vec3(.96,.56,.12)*amberMargin*(.75+.45*billow);
+ vec3 whiteEdge=vec3(.94,1.,.93)*superFlash*1.85+vec3(.35,.98,.55)*edgeFlash*1.3;
+ vec3 shockLight=vec3(.95,1.,.97)*shockDiamonds*2.4+vec3(.25,.96,.65)*shockDiamonds*1.6;
+ vec3 throatLight=vec3(1.,1.,.98)*throatNode*2.6;
+ // Enhanced charring, multi-scale fissures and living ember veins
  float charred=smoothstep(.12,.7,age)*inside;
- float cracks=pow(1.-abs(noise(uv*vec2(91.,117.))*2.-1.),16.);
+ float microCracks=pow(1.-abs(noise(uv*vec2(91.,117.)+t*.03)*2.-1.),14.);
+ float macroCracks=pow(1.-abs(noise(uv*vec2(38.,44.))*2.-1.),8.);
+ float emberPulse=sin(t*5.5+uv.x*32.+uv.y*22.)*.2+.8;
+ float emberLife=exp(-age*1.5)*(1.-smoothstep(5.8,8.2,t));
+ vec3 emberVeins=mix(vec3(.92,.42,.09),vec3(.18,.88,.36),microCracks)*(microCracks*1.7+macroCracks*.85)*charred*emberLife*emberPulse;
  vec3 ash=vec3(.004,.009,.006)+vec3(.012,.018,.012)*detail;
- vec3 colour=ash*inside+fire*(jet+flame)*1.25;
- colour+=vec3(.08,.24,.025)*cracks*charred*exp(-age*2.)*life;
+ vec3 colour=ash*inside+fire*(jetCore+flame)*1.25;
+ colour+=whiteEdge+amberGlow+shockLight+throatLight+emberVeins;
  // Transparent rolling smoke precedes the edge, never an opaque green disc.
  float smoke=exp(-abs(front-.16)*5.)*billow*.2*smoothstep(2.,3.,t)*life;
  smoke+=inside*billow*.10*smoothstep(4.9,6.2,t)*(1.-smoothstep(7.,8.5,t));
  colour+=vec3(.018,.035,.022)*smoke;
  float dim=.24*smoothstep(0.,.65,t);
- float alpha=max(dim,max(inside*.96,max(jet*.84,max(flame*.8,smoke))));
+ float alpha=max(dim,max(inside*.96,max(jetCore*.84,max(flame*.8,smoke))));
  // Burn remains opaque; never reveal the untouched page behind the shell.
  float black=smoothstep(6.6,9.,t);
  OUTPUT=vec4(colour*(1.-black),clamp(max(alpha,black),0.,1.));
@@ -623,7 +647,8 @@ export function createCielInfernoRenderer(options: Options) {
       if (opacity < 0.004 || px < -12 || px > w + 12 || py < -12 || py > h + 12) continue;
       context.globalAlpha = opacity;
       const size = 0.7 + SEEDS[k + 4] * (ash > 0.6 ? 1.3 : 2);
-      context.fillStyle = ash > 0.6 ? "#819186" : "#a7e879";
+      context.fillStyle =
+        ash > 0.6 ? "#819186" : SEEDS[k + 5] > 0.4 ? "#a7e879" : "#ffbe4a";
       context.save();
       context.translate(px, py);
       context.rotate(ash > 0.6 ? seconds * (SEEDS[k + 5] - 0.5) * 3 + i : angle - life * 0.5);

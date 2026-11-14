@@ -171,16 +171,34 @@
 }
 .exhibition-room-curated .exhibition-studio-tools button {
   min-height: 44px;
-  padding: 9px 17px;
-  border: 1px solid var(--room-rule);
-  border-radius: 0;
-  color: var(--room-ink);
-  background: transparent;
+  padding: 9px 18px;
+  border: 1px solid #b8b19d;
+  border-radius: 999px;
+  color: #3b392e;
+  background: #faf8f2;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  box-shadow: 0 1px 3px #00000008;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .exhibition-room-curated .exhibition-studio-tools button:hover:not(:disabled) {
+    background: #f0ecdf;
+    border-color: #8f856f;
+    color: #1c1a14;
+    box-shadow: 0 2px 6px #00000014;
+  }
 }
 .exhibition-room-curated .exhibition-studio-tools button[aria-pressed="true"] {
   background: #34382d;
   border-color: #34382d;
   color: #fffef8;
+  box-shadow: 0 2px 8px #00000022;
 }
 .exhibition-room-curated .exhibition-studio-notice {
   color: var(--room-muted);
@@ -189,6 +207,8 @@
   border-color: var(--room-rule);
   background: #fbfaf6;
   color: var(--room-ink);
+  border-radius: 999px;
+  cursor: pointer;
 }
 .exhibition-room-curated .exhibition-room-caption {
   display: flex;
@@ -235,6 +255,12 @@
   color: var(--room-ink);
   text-align: left;
   cursor: pointer;
+  transition: color 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .exhibition-room-curated .exhibition-room-adjacent button:hover:not(:disabled) {
+    color: #63573e;
+  }
 }
 .exhibition-room-curated .exhibition-room-adjacent button:last-child {
   align-items: end;

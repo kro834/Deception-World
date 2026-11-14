@@ -281,6 +281,14 @@ html[data-button-style="liquid"]
       rgb(255 255 255 / calc(var(--lg-glow) * 0.45)) 42%,
       rgb(255 255 255 / 0) 72%
     ),
+    /* ultra-thin diagonal optical coating reflection shimmer */
+    linear-gradient(
+      118deg,
+      rgb(255 255 255 / 0) 24%,
+      rgb(255 255 255 / calc(var(--lg-sheen) * 0.65 * var(--lg-mat))) 38%,
+      rgb(var(--lg-tint) / calc(var(--lg-tint-a) * 0.45 * var(--lg-mat))) 47%,
+      rgb(255 255 255 / 0) 62%
+    ),
     /* the luminosity lift: the glass gathers light, it does not gloss */
     linear-gradient(rgb(255 255 255 / calc(var(--lg-sheen) * var(--lg-mat))), rgb(255 255 255 / calc(var(--lg-sheen) * var(--lg-mat)))),
     linear-gradient(rgb(var(--lg-tint) / var(--lg-tint-a)), rgb(var(--lg-tint) / var(--lg-tint-a))),
@@ -292,6 +300,11 @@ html[data-button-style="liquid"]
       rgb(255 255 255 / var(--lg-rim)),
     inset calc(var(--lg-lx) * 0.9px) calc(var(--lg-ly) * 0.9px) 0 -0.3px
       rgb(255 255 255 / calc(var(--lg-rim) * 0.42)),
+    /* counter-phase transmitted caustic glow pooled along the exit inner rim */
+    inset calc(var(--lg-lx) * 4.5px) calc(var(--lg-ly) * 5.5px) 12px -5px
+      rgb(var(--lg-tint) / calc(var(--lg-tint-a) * 1.75 * var(--lg-mat))),
+    inset calc(var(--lg-lx) * 2.6px) calc(var(--lg-ly) * 3.2px) 6px -3px
+      rgb(255 248 236 / calc(var(--lg-sheen) * 1.6 * var(--lg-mat))),
     /* touched, the light that fills the glass gathers at its edge (the
        label in the middle keeps its contrast): nothing at rest (--lg-rim
        0.7), a bright inner ring at a press (1) */

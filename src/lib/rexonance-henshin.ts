@@ -352,19 +352,19 @@ export function henshinCamera(sheet: HenshinSheet, t: number, out: HenshinCamera
   out.fy = a[3] + (b[3] - a[3]) * mix;
   out.roll = a[4] + (b[4] - a[4]) * mix;
   out.dropY = 0;
-  // Each lock: an inhale before it (the camera eases back), then the punch
-  // (in, overshooting and settling), a small roll jolt and the weight's drop.
+  // Each lock: an inhale anticipation before it (camera eases back), then the sharp
+  // suction impact punch with rapid settle into rigid lock-in, roll jolt and weight drop.
   let punch = 0;
   for (const lock of sheet.locks) {
     const d = (t - lock.at) / sheet.perMs;
     if (d < -90 || d >= 360) continue;
-    if (d < 0) punch -= 0.03 * lock.weight * Math.sin((Math.PI * (d + 90)) / 90);
+    if (d < 0) punch -= 0.032 * lock.weight * Math.sin((Math.PI * (d + 90)) / 90);
     else {
-      // Damped, and gone by 360 ms (the next part's gather starts clean).
-      const decay = Math.exp(-d / 120) * (1 - smooth((d - 200) / 160));
-      punch += 0.085 * lock.weight * decay * Math.cos(d / 52);
-      out.roll += 0.9 * lock.weight * Math.exp(-d / 90) * decay * Math.sin(d / 26);
-      out.dropY += 7 * lock.weight * Math.exp(-d / 80) * decay * Math.sin(d / 34);
+      // Crisp rapid attack and rigid lock-in damping, gone by 360 ms
+      const decay = Math.exp(-d / 95) * (1 - smooth((d - 190) / 150));
+      punch += 0.095 * lock.weight * decay * Math.cos(d / 44);
+      out.roll += 0.85 * lock.weight * Math.exp(-d / 80) * decay * Math.sin(d / 24);
+      out.dropY += 6.5 * lock.weight * Math.exp(-d / 75) * decay * Math.sin(d / 30);
     }
   }
   out.zoom *= 1 + punch;
@@ -692,10 +692,11 @@ export class HenshinOverlay {
           0,
           px,
           py,
-          (26 + 30 * lock.weight) * Math.sqrt(z),
+          (28 + 32 * lock.weight) * Math.sqrt(z),
         );
-        glow.addColorStop(0, rgba(WHITE, 0.3 * hot));
-        glow.addColorStop(0.4, rgba(a, 0.16 * hot));
+        glow.addColorStop(0, rgba(WHITE, 0.35 * hot));
+        glow.addColorStop(0.22, rgba(a, 0.22 * hot));
+        glow.addColorStop(0.55, rgba(c, 0.08 * hot));
         glow.addColorStop(1, rgba(a, 0));
         context.fillStyle = glow;
         context.fillRect(px - 120, py - 120, 240, 240);
@@ -778,7 +779,9 @@ export class HenshinOverlay {
           context.stroke();
         }
         const glow = context.createRadialGradient(px, py, 0, px, py, 90);
-        glow.addColorStop(0, rgba(WHITE, 0.22 * Math.exp(-d / 110)));
+        glow.addColorStop(0, rgba(WHITE, 0.25 * Math.exp(-d / 110)));
+        glow.addColorStop(0.35, rgba(a, 0.18 * Math.exp(-d / 140)));
+        glow.addColorStop(0.7, rgba(c, 0.06 * Math.exp(-d / 180)));
         glow.addColorStop(1, rgba(a, 0));
         context.fillStyle = glow;
         context.fillRect(px - 90, py - 90, 180, 180);

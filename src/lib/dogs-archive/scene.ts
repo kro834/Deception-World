@@ -174,6 +174,15 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const viewUp = new THREE.Vector3().crossVectors(viewDirection, viewRight).normalize();
   const viewBounds = new THREE.Box3(new THREE.Vector3(-3, -3.4, -2), new THREE.Vector3(3, 3.4, 2));
   const fitCorner = new THREE.Vector3();
+  const resetTargetPosition = new THREE.Vector3();
+  const resetStartPosition = new THREE.Vector3();
+  const resetTargetLook = new THREE.Vector3(0, -0.1, 0);
+  const resetStartLook = new THREE.Vector3();
+  const sphericalStart = new THREE.Spherical();
+  const sphericalEnd = new THREE.Spherical();
+  let resetProgress = 1;
+  const resetDuration = 0.65;
+  const cameraImpulse = new THREE.Vector3();
   let environmentTarget = createInkEnvironment(renderer);
   scene.environment = referenceLook ? null : environmentTarget.texture;
   scene.environmentIntensity = 0.34;
@@ -382,7 +391,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   const request = () => {
     if (!frame && canDraw()) frame = requestAnimationFrame(draw);
   };
-  const resetView = () => {
+  const resetView = (immediate = false) => {
     userOrbit = false;
     const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)),
       tanH = tanV * camera.aspect;
@@ -399,11 +408,22 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
           );
         }
     distance = Math.max(8, distance);
-    camera.position.copy(viewDirection).multiplyScalar(distance);
     controls.maxDistance = Math.max(23, distance * 1.8);
-    controls.target.set(0, -0.1, 0);
-    controls.update();
-    settleFrames = 24;
+    resetTargetPosition.copy(viewDirection).multiplyScalar(distance);
+    resetTargetLook.set(0, -0.1, 0);
+    if (immediate || reducedMotion || look.look === "reference") {
+      resetProgress = 1;
+      camera.position.copy(resetTargetPosition);
+      controls.target.copy(resetTargetLook);
+      controls.update();
+      settleFrames = 24;
+      request();
+      return;
+    }
+    resetStartPosition.copy(camera.position);
+    resetStartLook.copy(controls.target);
+    resetProgress = 0;
+    settleFrames = 48;
     request();
   };
   function draw(now: number) {
@@ -413,6 +433,24 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       return;
     }
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+    if (resetProgress < 1) {
+      resetProgress = Math.min(1, resetProgress + dt / resetDuration);
+      const t = 1 - Math.pow(1 - resetProgress, 3);
+      controls.target.lerpVectors(resetStartLook, resetTargetLook, t);
+      sphericalStart.setFromVector3(offset.subVectors(resetStartPosition, resetStartLook));
+      sphericalEnd.setFromVector3(offset.subVectors(resetTargetPosition, resetTargetLook));
+      let dTheta = sphericalEnd.theta - sphericalStart.theta;
+      while (dTheta > Math.PI) dTheta -= 2 * Math.PI;
+      while (dTheta < -Math.PI) dTheta += 2 * Math.PI;
+      spherical.set(
+        THREE.MathUtils.lerp(sphericalStart.radius, sphericalEnd.radius, t),
+        THREE.MathUtils.lerp(sphericalStart.phi, sphericalEnd.phi, t),
+        sphericalStart.theta + dTheta * t,
+      );
+      camera.position.copy(controls.target).add(offset.setFromSpherical(spherical));
+      controls.update();
+      settleFrames = Math.max(settleFrames, 12);
+    }
     if (last && model) {
       measuredFrames++;
       measuredSeconds += (now - last) / 1000;
@@ -535,7 +573,8 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       // Candela: pale bone sits just under the bloom threshold, so the mouth light stays small
       // (the fire itself carries the brightness, as in the breath painting).
       breathLight.position.copy(origin).addScaledVector(direction, 0.6);
-      breathLight.intensity = effectStrength * 1.6;
+      const breathFlicker = effectStrength > 0.05 ? 1 + 0.09 * Math.sin(time * 28.0) : 1;
+      breathLight.intensity = (effectStrength * 2.8 + anticipation * 0.6) * breathFlicker;
       facePosition
         .copy(origin)
         .addScaledVector(direction, -0.3)
@@ -551,6 +590,19 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     }
     controls.update();
     sculptureLighting?.update(time, pose);
+    if (!reducedMotion && !referenceLook && actionTime >= 0 && (effectsEnabled ? strength : 0) > 0.02) {
+      const eff = effectsEnabled ? strength : 0;
+      const impulsePhase = actionTime * 15.0;
+      const impulseAmp = eff * 0.024;
+      cameraImpulse.set(
+        Math.sin(impulsePhase * 1.1) * impulseAmp * 0.6,
+        Math.cos(impulsePhase * 0.85) * impulseAmp * 0.45,
+        Math.sin(impulsePhase * 1.3) * impulseAmp * 0.85,
+      );
+      camera.position.add(cameraImpulse);
+    } else {
+      cameraImpulse.set(0, 0, 0);
+    }
     camera.updateMatrixWorld();
     if (model) {
       const effectStrength = effectsEnabled ? strength : 0;
@@ -581,6 +633,10 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     if (options.diagnostics) renderer.info.reset();
     const submitStarted = captureFirstFrame ? performance.now() : 0;
     composer.render();
+    if (cameraImpulse.lengthSq() > 0) {
+      camera.position.sub(cameraImpulse);
+      cameraImpulse.set(0, 0, 0);
+    }
     if (captureFirstFrame && model) {
       loading.firstFrameSubmitMs = performance.now() - submitStarted;
       loading.firstFrameTotalMs = performance.now() - bootStartedAt;
@@ -628,7 +684,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     );
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    if (!userOrbit) resetView();
+    if (!userOrbit) resetView(true);
     request();
   };
   const setLightingProfile = (next: GuardianLightingProfile) => {
@@ -669,6 +725,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   };
   const controlStart = () => {
     userOrbit = true;
+    resetProgress = 1;
   };
   controls.addEventListener("change", change);
   controls.addEventListener("start", controlStart);
@@ -681,6 +738,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
       return;
     }
     userOrbit = true;
+    resetProgress = 1;
     offset.subVectors(camera.position, controls.target);
     spherical.setFromVector3(offset);
     if (event.key === "ArrowLeft") spherical.theta -= 0.11;
@@ -758,7 +816,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
   );
   intersection.observe(host);
   setLightingProfile(options.lightingProfile ?? "legacy");
-  resetView();
+  resetView(true);
   resize();
   notify("loading");
   void (async () => {
@@ -1124,6 +1182,7 @@ export function createGuardianScene(host: HTMLElement, options: Options = {}): G
     dispose() {
       if (disposed) return;
       disposed = true;
+      resetProgress = 1;
       loading.phase = "disposed";
       abort.abort();
       gltfManager.abort();

@@ -53,9 +53,15 @@ function RegaliaBurst({ form, origin, reactor }: BurstProps) {
           className="rr-surge-route"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
+          aria-hidden="true"
           focusable="false"
         >
           <g fill="none" vectorEffect="non-scaling-stroke">
+            <path
+              className="rr-coronation-canopy"
+              pathLength="1"
+              d={`M${Math.max(8, rx - 26)} ${Math.max(8, ry - 12)} Q${rx} ${Math.max(3, ry - 28)} ${Math.min(92, ox + 16)} ${Math.max(8, oy - 10)}`}
+            />
             <path className="rr-arc-aura rr-arc-in" pathLength="1" d={arcInPath} />
             <path className="rr-arc-core rr-arc-in" pathLength="1" d={arcInPath} />
             <path className="rr-arc-aura rr-arc-out" pathLength="1" d={arcOutPath} />
@@ -64,11 +70,15 @@ function RegaliaBurst({ form, origin, reactor }: BurstProps) {
           <g className="rr-reactor-node">
             <ellipse className="rr-reactor-charge" cx={rx} cy={ry} rx="7.2" ry="4.6" />
             <ellipse className="rr-reactor-ring" cx={rx} cy={ry} rx="3.9" ry="2.5" />
+            <path
+              className="rr-reactor-crest"
+              d={`M${rx - 3.6} ${ry - 3.2} L${rx - 4.4} ${ry - 6.2} L${rx - 1.8} ${ry - 4.6} L${rx} ${ry - 7.4} L${rx + 1.8} ${ry - 4.6} L${rx + 4.4} ${ry - 6.2} L${rx + 3.6} ${ry - 3.2}Z`}
+            />
           </g>
         </svg>
       )}
       <div className="rr-surge-origin">
-        <svg viewBox="-120 -120 240 240" focusable="false">
+        <svg viewBox="-120 -120 240 240" aria-hidden="true" focusable="false">
           <defs>
             <radialGradient id={`${id}-halo`} cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="#fff9df" stopOpacity=".46" />

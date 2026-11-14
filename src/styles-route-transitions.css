@@ -1916,36 +1916,126 @@ html[data-route-scroll-settling="true"] {
   position: absolute;
   width: clamp(18px, 4vmin, 34px);
   height: clamp(18px, 4vmin, 34px);
-  border: 0 solid rgb(var(--opening-handoff-blue) / 0.62);
+  border: 0 solid rgb(var(--opening-handoff-blue) / 0.66);
   filter: drop-shadow(0 0 6px rgb(var(--opening-handoff-blue) / 0.45));
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 [data-opening-handoff-lock] > i:nth-of-type(1) {
   top: 0;
   left: 0;
-  border-top-width: 1px;
-  border-left-width: 1px;
+  border-top-width: 1.5px;
+  border-left-width: 1.5px;
+  transform-origin: 0 0;
 }
 
 [data-opening-handoff-lock] > i:nth-of-type(2) {
   top: 0;
   right: 0;
-  border-top-width: 1px;
-  border-right-width: 1px;
+  border-top-width: 1.5px;
+  border-right-width: 1.5px;
+  transform-origin: 100% 0;
 }
 
 [data-opening-handoff-lock] > i:nth-of-type(3) {
   bottom: 0;
   left: 0;
-  border-bottom-width: 1px;
-  border-left-width: 1px;
+  border-bottom-width: 1.5px;
+  border-left-width: 1.5px;
+  border-color: rgb(var(--opening-handoff-gold) / 0.64);
+  filter: drop-shadow(0 0 6px rgb(var(--opening-handoff-gold) / 0.36));
+  transform-origin: 0 100%;
 }
 
 [data-opening-handoff-lock] > i:nth-of-type(4) {
   right: 0;
   bottom: 0;
-  border-right-width: 1px;
-  border-bottom-width: 1px;
+  border-right-width: 1.5px;
+  border-bottom-width: 1.5px;
+  border-color: rgb(var(--opening-handoff-gold) / 0.64);
+  filter: drop-shadow(0 0 6px rgb(var(--opening-handoff-gold) / 0.36));
+  transform-origin: 100% 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root]:not([data-opening-handoff-mode="economy"])
+    :is(
+      [data-opening-handoff-lock] > i,
+      [data-opening-handoff-hud] > i,
+      [data-opening-handoff-letterbox]
+    ) {
+    transition:
+      transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-lock]
+    > i:nth-of-type(1) {
+    opacity: 0;
+    transform: translate3d(-12px, -12px, 0) scale(1.08);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-lock]
+    > i:nth-of-type(2) {
+    opacity: 0;
+    transform: translate3d(12px, -12px, 0) scale(1.08);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-lock]
+    > i:nth-of-type(3) {
+    opacity: 0;
+    transform: translate3d(-12px, 12px, 0) scale(1.08);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-lock]
+    > i:nth-of-type(4) {
+    opacity: 0;
+    transform: translate3d(12px, 12px, 0) scale(1.08);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-hud]
+    > i {
+    opacity: 0;
+    transform: scale(1.14);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-letterbox="top"] {
+    transform: translate3d(0, -100%, 0);
+  }
+
+  html:not([data-world-effects="economy"])
+    [data-opening-handoff-root][data-opening-handoff-phase="arriving"]:not(
+      [data-opening-handoff-mode="economy"]
+    )
+    [data-opening-handoff-letterbox="bottom"] {
+    transform: translate3d(0, 100%, 0);
+  }
 }
 
 [data-opening-handoff-scan] {

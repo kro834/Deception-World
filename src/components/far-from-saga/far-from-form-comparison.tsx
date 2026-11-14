@@ -44,6 +44,7 @@ export const FarFromFormComparison = memo(function FarFromFormComparison({
               <article
                 key={key}
                 className="ffs-comparison-card"
+                data-form={key}
                 data-selected={selected === key}
                 style={{ ["--ffs-accent" as string]: form.accent }}
               >

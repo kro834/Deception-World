@@ -132,6 +132,7 @@ export function drawOverwrite(
   }
   // Hot squares on the cells flipping now; hairlines on the next ones.
   context.beginPath();
+  let prismSparkle = 0;
   for (let index = 0; index < key.length; index += 1) {
     if (extra[index]) continue;
     const age = u - key[index];
@@ -140,10 +141,27 @@ export function drawOverwrite(
     const row = (index - col) / cols;
     const inset = cell * (0.06 + 0.3 * (age / hot));
     context.rect(col * cell + inset, row * cell + inset, cell - inset * 2, cell - inset * 2);
+    if (age < 0.026) prismSparkle += 1;
   }
   context.globalAlpha = 0.72;
   context.fillStyle = tone;
   context.fill();
+  // Prism sparkle core along the active wavefront
+  if (prismSparkle > 0) {
+    context.beginPath();
+    for (let index = 0; index < key.length; index += 1) {
+      if (extra[index]) continue;
+      const age = u - key[index];
+      if (age < 0 || age >= 0.026) continue;
+      const col = index % cols;
+      const row = (index - col) / cols;
+      const coreInset = cell * 0.28;
+      context.rect(col * cell + coreInset, row * cell + coreInset, cell - coreInset * 2, cell - coreInset * 2);
+    }
+    context.globalAlpha = 0.92;
+    context.fillStyle = "#ffffff";
+    context.fill();
+  }
   if (u < 1) {
     context.beginPath();
     for (let index = 0; index < key.length; index += 1) {

@@ -378,21 +378,21 @@
   pointer-events: none;
 }
 
-/* 0.002 SEC: it has already arrived; its streaks trail off to the right. */
+/* 0.002 SEC: it has already arrived; its streaks trail off to the right with multi-depth contrast. */
 .rxs-page.rxs-page.exs-page .exo-speed {
   position: absolute;
   z-index: -1;
-  top: 22%;
-  right: -0.6em;
-  bottom: 24%;
-  left: 38%;
+  top: 20%;
+  right: -0.8em;
+  bottom: 22%;
+  left: 35%;
   background:
-    linear-gradient(270deg, transparent, var(--exo-gold)) 0 8% / 72% 2px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-ice)) 0 30% / 94% 1px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-gold)) 0 52% / 58% 2px no-repeat,
-    linear-gradient(270deg, transparent, #fff) 0 74% / 84% 1px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-gold)) 0 94% / 44% 1px no-repeat;
-  opacity: 0.32;
+    linear-gradient(270deg, transparent, var(--exo-gold) 60%, #fff) 0 8% / 78% 2.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-ice) 70%, #fff) 0 28% / 96% 1.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold) 55%, var(--exo-hot)) 0 52% / 68% 2px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-ice) 60%, #fff) 0 72% / 88% 1.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold) 45%, #fff) 0 94% / 54% 2px no-repeat;
+  opacity: 0.52;
   pointer-events: none;
 }
 
@@ -511,7 +511,7 @@
 }
 
 /* The slash rides the cut's edge: a "/" from (24%, 0) to (0, 100%) of the
-   figure, moved by the cut's own curve. At rest it is out of sight. */
+   figure, moved by the cut's own curve. Molten gold core with layered thermal edge glow. */
 .rxs-page.rxs-page.exs-page .rxs-stage-panel figure > .exo-slash {
   position: absolute;
   z-index: 3;
@@ -519,16 +519,30 @@
   background:
     linear-gradient(
         to bottom right,
-        transparent calc(50% - 1.5px),
-        var(--exo-hot) calc(50% - 1.5px) calc(50% + 1.5px),
-        transparent calc(50% + 1.5px)
+        transparent calc(50% - 1px),
+        #ffffff calc(50% - 0.75px) calc(50% + 0.75px),
+        transparent calc(50% + 1px)
       )
       0 0 / 24% 100% no-repeat,
     linear-gradient(
         to bottom right,
-        transparent calc(50% - 6px),
-        rgb(255 213 122 / 24%) 50%,
-        transparent calc(50% + 6px)
+        transparent calc(50% - 3px),
+        var(--exo-hot) calc(50% - 1.5px) calc(50% + 1.5px),
+        transparent calc(50% + 3px)
+      )
+      0 0 / 24% 100% no-repeat,
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 7px),
+        rgb(255 213 122 / 45%) 50%,
+        transparent calc(50% + 7px)
+      )
+      0 0 / 24% 100% no-repeat,
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 14px),
+        rgb(255 157 74 / 20%) 50%,
+        transparent calc(50% + 14px)
       )
       0 0 / 24% 100% no-repeat;
   opacity: 0;

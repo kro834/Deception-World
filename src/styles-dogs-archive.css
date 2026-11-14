@@ -187,14 +187,40 @@
   grid-template-rows: minmax(0, 1fr) auto;
   place-items: center;
   padding: 76px var(--dogs-edge) 20px;
-  gap: 14px;
+  gap: 16px;
 }
-.dogs-archive-varg > img {
+.dogs-archive-varg__frame {
+  position: relative;
+  height: 100%;
+  max-width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: radial-gradient(ellipse at 50% 50%, #30131955 0%, #0d0608aa 75%, transparent 100%);
+  border: 1px solid #bd907d44;
+  border-radius: 4px;
+  box-shadow:
+    0 16px 48px #000c,
+    0 0 32px #e6452218,
+    inset 0 0 24px #2b0b1066;
+}
+.dogs-archive-varg__frame > img {
   display: block;
   height: 100%;
   max-width: 100%;
   min-height: 0;
   object-fit: contain;
+  filter: drop-shadow(0 12px 28px #000e);
+}
+.dogs-archive-varg__aura {
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid #e2a89033;
+  box-shadow: inset 0 1px 0 #ffcfbe33;
 }
 .dogs-archive-varg > a {
   display: inline-flex;
@@ -203,18 +229,22 @@
   gap: 8px;
   box-sizing: border-box;
   min-height: 44px;
-  color: #efe2da;
-  padding: 10px 22px;
-  border: 1px solid #bd907d66;
+  color: #f7ebe3;
+  padding: 10px 24px;
+  border: 1px solid #cf958066;
   border-radius: 999px;
-  background: #171012cc;
+  background: linear-gradient(180deg, #241418f4 0%, #150a0df8 100%);
   text-decoration: none;
   font-size: 13px;
   letter-spacing: 0.06em;
+  box-shadow:
+    0 4px 14px #0006,
+    inset 0 1px 0 #ffded233;
   transition:
-    color 0.2s,
-    background-color 0.2s,
-    border-color 0.2s;
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 .dogs-archive-unreleased {
   height: 100%;
@@ -222,7 +252,38 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
+  text-align: center;
+  isolation: isolate;
+}
+.dogs-archive-seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.dogs-archive-seal__ring {
+  width: 54px;
+  height: 54px;
+  border: 1px dashed #72b28966;
+  border-radius: 50%;
+  box-shadow:
+    0 0 24px #4ad88a22,
+    inset 0 0 14px #4ad88a14;
+}
+.dogs-archive-seal__label {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: #92c5a7;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px #4ad88a33;
+}
+.dogs-archive-seal__code {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #70937e;
 }
 .dogs-archive-unreleased > span {
   font:
@@ -231,11 +292,14 @@
     "Times New Roman",
     serif;
   color: #7a9f8626;
+  text-shadow: 0 0 40px #4ad88a14;
+  user-select: none;
 }
 .dogs-archive-unreleased p {
   font-size: 13px;
-  color: #91a899;
+  color: #a4beae;
   letter-spacing: 0.08em;
+  margin: 0;
 }
 .dogs-archive-reference-dialog {
   width: min(1240px, calc(100vw - 80px));
@@ -433,6 +497,7 @@ html[data-dogs-archive] .zeus-button {
 @media (forced-colors: active) {
   .dogs-archive-selector button,
   .dogs-archive-reference,
+  .dogs-archive-varg__frame,
   .dogs-archive-varg > a {
     border: 1px solid ButtonText;
   }

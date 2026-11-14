@@ -40,40 +40,60 @@
 .ciel-sequin-controls p {
   flex-basis: 100%;
   margin: 0;
-  color: #edf5ef;
+  color: #edf7f1;
   font:
-    14px/1.5 system-ui,
+    500 14px/1.5 system-ui,
     sans-serif;
+  letter-spacing: 0.06em;
   text-align: center;
   text-shadow:
-    0 1px 5px #000,
-    0 1px 12px #000;
+    0 1px 4px rgb(0 0 0 / 0.9),
+    0 0 12px rgb(28 207 157 / 0.25);
 }
 .ciel-sequin-controls button {
   min-height: 48px;
-  min-width: 0;
-  padding: 10px 16px;
-  border: 1px solid #92b4a3;
+  min-width: 44px;
+  padding: 10px 18px;
+  border: 1px solid rgb(28 207 157 / 0.38);
   border-radius: 999px;
-  background: #071d17eb;
-  color: #edf5ef;
+  background: rgb(6 22 17 / 0.82);
+  backdrop-filter: blur(14px) saturate(1.45);
+  -webkit-backdrop-filter: blur(14px) saturate(1.45);
+  color: #eaf8f1;
   font:
     500 14px/1.4 system-ui,
     sans-serif;
   letter-spacing: 0.05em;
   box-shadow:
-    0 3px 22px #0008,
-    inset 0 1px #d6e4d426;
+    0 4px 22px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(134 217 255 / 0.28),
+    0 0 14px rgb(28 207 157 / 0.12);
   pointer-events: auto;
   touch-action: manipulation;
   cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 120ms ease;
 }
-.ciel-sequin-controls button:hover {
-  background: #173c2e;
+@media (hover: hover) and (pointer: fine) {
+  .ciel-sequin-controls button:hover {
+    background: rgb(14 44 34 / 0.9);
+    border-color: rgb(28 207 157 / 0.78);
+    box-shadow:
+      0 6px 26px rgb(0 0 0 / 0.6),
+      inset 0 1px 0 rgb(134 217 255 / 0.45),
+      0 0 20px rgb(28 207 157 / 0.36);
+    color: #ffffff;
+  }
+}
+.ciel-sequin-controls button:active {
+  transform: scale(0.97);
 }
 .ciel-sequin-controls button:focus-visible {
-  outline: 3px solid #e6f3cf;
-  outline-offset: 4px;
+  outline: 3px solid #86d9ff;
+  outline-offset: 3px;
 }
 @keyframes ciel-sequin-arrive {
   from {
@@ -84,8 +104,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ciel-sequin {
-    animation: none;
+  .ciel-sequin,
+  .ciel-sequin-controls button {
+    animation: none !important;
+    transition: none !important;
   }
 }
 @media (max-width: 390px) {
@@ -96,7 +118,8 @@
   }
   .ciel-sequin-controls button {
     flex: 1;
-    padding-inline: 9px;
+    min-height: 46px;
+    padding-inline: 10px;
     font-size: 13px;
     letter-spacing: 0;
   }
@@ -112,5 +135,9 @@
     border-color: ButtonText;
     background: ButtonFace;
     color: ButtonText;
+    box-shadow: none;
+  }
+  .ciel-sequin-controls button:focus-visible {
+    outline: 3px solid Highlight;
   }
 }

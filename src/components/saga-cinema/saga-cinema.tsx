@@ -104,6 +104,7 @@ export function SagaCinema() {
   const [toast, setToast] = useState("");
   const { calm, ready, visible } = useCinemaPreferences();
   const modalOpen = detailOpen || galleryOpen;
+  const autoRunning = automatic && heroVisible && visible && !modalOpen && !menuOpen && !calm;
   const hero = SAGA_CINEMA_FILMS[heroIndex];
   const detail = SAGA_CINEMA_FILMS[detailIndex];
   const gallery = SAGA_CINEMA_FILMS[galleryIndex];
@@ -225,12 +226,12 @@ export function SagaCinema() {
   );
 
   useEffect(() => {
-    if (!automatic || !heroVisible || !visible || modalOpen || menuOpen || calm) return;
+    if (!autoRunning) return;
     const timer = setTimeout(() => {
       void selectHero(heroIndex + 1);
     }, 6500);
     return () => clearTimeout(timer);
-  }, [automatic, heroVisible, visible, modalOpen, menuOpen, calm, heroIndex, selectHero]);
+  }, [autoRunning, heroIndex, selectHero]);
 
   const chapterKeyboard = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -341,6 +342,7 @@ export function SagaCinema() {
                   height="1280"
                 />
               </div>
+              <div className="hero-proscenium" aria-hidden="true" />
               <div className="hero-rings" aria-hidden="true" />
               <div className="hero-layout">
                 <div className="hero-copy">
@@ -482,6 +484,18 @@ export function SagaCinema() {
                     <strong>{film.title}</strong>
                   </button>
                 ))}
+              </div>
+              <div
+                className="chapter-reel-timeline"
+                data-running={autoRunning ? "true" : "false"}
+                data-active-chapter={heroIndex + 1}
+                aria-hidden="true"
+              >
+                <span className="chapter-reel-ticks" />
+                <i
+                  key={`${heroIndex}-${autoRunning ? "run" : "hold"}`}
+                  className="chapter-reel-progress"
+                />
               </div>
               <div className="hero-floor">
                 <a href="#introduction" aria-label="作品について">

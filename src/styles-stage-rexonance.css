@@ -37,12 +37,13 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   --rxt-cut: linear-gradient(90deg, var(--rxt-ice), rgb(255 143 216 / 70%) 60%, var(--rxt-gold));
   /* The prism stage: shafts from above, a floor pool, the lattice. */
   --rxt-stage-light:
-    linear-gradient(104deg, transparent 0 30%, rgb(121 232 255 / 7%) 30% 33%, transparent 33% 100%),
-    linear-gradient(76deg, transparent 0 58%, rgb(255 143 216 / 6%) 58% 61%, transparent 61% 100%),
-    linear-gradient(96deg, transparent 0 46%, rgb(244 251 255 / 5%) 46% 47%, transparent 47% 100%),
-    radial-gradient(70% 22% at 50% 100%, rgb(121 232 255 / 22%), transparent 70%),
-    radial-gradient(60% 44% at 50% 40%, rgb(150 156 255 / 14%), transparent 72%),
-    radial-gradient(120% 60% at 50% -10%, rgb(121 232 255 / 10%), transparent 60%);
+    linear-gradient(104deg, transparent 0 28%, rgb(121 232 255 / 9%) 28% 33%, transparent 33% 100%),
+    linear-gradient(76deg, transparent 0 57%, rgb(255 143 216 / 8%) 57% 62%, transparent 62% 100%),
+    linear-gradient(96deg, transparent 0 45%, rgb(244 251 255 / 7%) 45% 47%, transparent 47% 100%),
+    linear-gradient(116deg, transparent 0 18%, rgb(242 216 150 / 6%) 18% 21%, transparent 21% 100%),
+    radial-gradient(70% 24% at 50% 100%, rgb(121 232 255 / 26%), transparent 70%),
+    radial-gradient(60% 48% at 50% 38%, rgb(150 156 255 / 16%), transparent 72%),
+    radial-gradient(120% 64% at 50% -10%, rgb(121 232 255 / 12%), transparent 60%);
 }
 
 /* ================================================================
@@ -1092,11 +1093,16 @@ html[data-family="special"]
   border: 0;
   border-radius: 0;
   background:
-    radial-gradient(60% 34% at 50% 100%, rgb(121 232 255 / 18%), transparent 72%),
+    radial-gradient(60% 34% at 50% 100%, rgb(121 232 255 / 22%), transparent 72%),
     radial-gradient(
       70% 60% at 50% 42%,
-      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 16%, transparent),
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 20%, transparent),
       transparent 72%
+    ),
+    radial-gradient(
+      90% 70% at 50% 20%,
+      color-mix(in srgb, var(--rxs-stage-accent, #79e8ff) 8%, transparent),
+      transparent 80%
     );
   box-shadow: none;
   clip-path: none;

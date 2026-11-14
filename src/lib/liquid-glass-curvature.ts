@@ -68,7 +68,8 @@ const TARGETS = CURVATURE_TARGETS.join(", ");
 const RANGES = CURVATURE_RANGES.join(", ");
 const SVG_NS = "http://www.w3.org/2000/svg";
 const RED_ONLY = "1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0";
-const GREEN_BLUE = "0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0";
+const GREEN_ONLY = "0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0";
+const BLUE_ONLY = "0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0";
 
 /** The corner radius, CSS px, from a computed border-radius of one corner. */
 export function parseRadius(value: string, width: number, height: number) {
@@ -182,17 +183,24 @@ export function watchLiquidCurvature(doc: Document = document) {
       node.setAttribute("result", result);
       return node;
     };
-    const blend = doc.createElementNS(SVG_NS, "feBlend");
-    blend.setAttribute("in", "red");
-    blend.setAttribute("in2", "greenBlue");
-    blend.setAttribute("mode", "screen");
+    const blend = (in1: string, in2: string, result?: string) => {
+      const node = doc.createElementNS(SVG_NS, "feBlend");
+      node.setAttribute("in", in1);
+      node.setAttribute("in2", in2);
+      node.setAttribute("mode", "screen");
+      if (result) node.setAttribute("result", result);
+      return node;
+    };
     filter.append(
       image,
       bend(maps.scale * strength, "bent"),
       bend(maps.scale * strength * DISPERSION, "bentRed"),
+      bend(maps.scale * strength / DISPERSION, "bentBlue"),
       matrix("bentRed", RED_ONLY, "red"),
-      matrix("bent", GREEN_BLUE, "greenBlue"),
-      blend,
+      matrix("bent", GREEN_ONLY, "green"),
+      matrix("bentBlue", BLUE_ONLY, "blue"),
+      blend("red", "green", "redGreen"),
+      blend("redGreen", "blue"),
     );
     svg.firstElementChild!.append(filter);
     return `url("#${id}")`;

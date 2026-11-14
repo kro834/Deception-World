@@ -132,7 +132,11 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
           )}
         </div>
       </div>
-      <div className="dogs-viewer__toolbar" aria-label="立体模型の操作">
+      <div
+        className={`dogs-viewer__toolbar ${action ? "is-breathing" : ""}`}
+        aria-label="立体模型の操作"
+        data-breathing={action ? "true" : undefined}
+      >
         <button
           className="dogs-viewer__breathe"
           type="button"

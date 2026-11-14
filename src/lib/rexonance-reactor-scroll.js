@@ -180,9 +180,19 @@ export function drawReactorFormation(context, layers, core, u, fade = 1) {
     context.globalAlpha = Math.min(1, u * 3);
     context.drawImage(layers.art, x - cx, y - cy, w, h);
     context.globalCompositeOperation = "lighter";
-    context.globalAlpha = 0.7 * Math.min(1, u * 3);
+    context.globalAlpha = 0.72 * Math.min(1, u * 3);
+    // Base champagne-gold nanite lock
     context.fillStyle = "rgb(240 207 134)";
     for (let i = 0; i < fresh; i += 1) context.fillRect(FRESH[i].x, FRESH[i].y, CELL, CELL);
+    // Closed-form electromagnetic ripple spike (cyan-white) for just-seated cells along angle wave
+    context.fillStyle = "rgb(180 245 255)";
+    for (let i = 0; i < fresh; i += 1) {
+      const c = FRESH[i];
+      const phase = Math.sin(c.angle * 6.0 - u * 18.84955592153876);
+      if (c.seed > 0.42 && phase > 0.25) {
+        context.fillRect(c.x + 0.5, c.y + 0.5, CELL - 1, CELL - 1);
+      }
+    }
     context.restore();
   }
   // The forming edge: a thin gold-to-pink line where the nanites are laying

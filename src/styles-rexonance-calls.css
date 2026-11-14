@@ -95,14 +95,36 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   right: 0;
   left: 0;
   height: 1px;
-  background: linear-gradient(90deg, var(--rx-call-cyan), transparent 30% 70%, var(--rx-call-pink));
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(121 232 255 / 22%) 14%,
+    var(--rx-call-cyan) 38%,
+    #ffffff 50%,
+    var(--rx-call-pink) 62%,
+    rgb(255 114 218 / 22%) 86%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 8px 1px rgb(121 232 255 / 45%),
+    0 0 22px 2px rgb(255 114 218 / 28%);
 }
 .rx-call-axis-vertical {
   top: 0;
   bottom: 0;
   left: 50%;
   width: 1px;
-  background: linear-gradient(var(--rx-call-cyan), transparent 28% 72%, var(--rx-call-pink));
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgb(121 232 255 / 20%) 16%,
+    var(--rx-call-cyan) 40%,
+    #ffffff 50%,
+    var(--rx-call-pink) 60%,
+    rgb(255 114 218 / 20%) 84%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px 1px rgb(121 232 255 / 35%);
 }
 .rx-call-brackets {
   position: absolute;
@@ -281,6 +303,22 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 }
 .rx-call-sequence[data-mode="stage"][data-tier="full"] .rx-call-ground {
   opacity: 0.96;
+}
+.rx-call-sequence[data-mode="stage"][data-stage="max"] .rx-call-ground {
+  background:
+    radial-gradient(circle at 50% 50%, rgb(182 163 255 / 36%), transparent 42%),
+    radial-gradient(circle at 50% 50%, rgb(46 229 157 / 24%), transparent 68%),
+    radial-gradient(ellipse at 10% 50%, rgb(50 142 184 / 24%), transparent 50%),
+    radial-gradient(ellipse at 90% 50%, rgb(171 49 123 / 22%), transparent 50%),
+    #02050b;
+}
+.rx-call-sequence[data-mode="stage"][data-stage="ultra"] .rx-call-ground {
+  background:
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 40%), transparent 24%),
+    radial-gradient(circle at 50% 50%, rgb(255 114 218 / 42%), transparent 52%),
+    radial-gradient(ellipse at 10% 50%, rgb(255 80 180 / 28%), transparent 56%),
+    radial-gradient(ellipse at 90% 50%, rgb(255 220 120 / 20%), transparent 52%),
+    #02050b;
 }
 .rx-call-sequence[data-mode="stage"][data-tier="full"] .rx-call-final {
   animation: rxCallLock 240ms var(--rx-call-ease) forwards;

@@ -585,6 +585,7 @@ export function mountMetaUnitasBoost(
     toneB: Tone,
   ) => {
     if (alpha <= 0.004 || fraction <= 0) return;
+    // Stride 4: [hx, hy, txDir, tyDir] per active scanning head.
     const heads: number[] = [];
     context.beginPath();
     for (const loop of group.loops) {
@@ -601,23 +602,68 @@ export function mountMetaUnitasBoost(
         const j = (k - 1) * 2;
         const seg = loop.cum[k] - loop.cum[k - 1] || 1;
         const f = (target - loop.cum[k - 1]) / seg;
-        const hx = toX(loop.xy[j] + (loop.xy[i] - loop.xy[j]) * f);
-        const hy = toY(loop.xy[j + 1] + (loop.xy[i + 1] - loop.xy[j + 1]) * f);
+        const x0 = toX(loop.xy[j]);
+        const y0 = toY(loop.xy[j + 1]);
+        const x1 = toX(loop.xy[i]);
+        const y1 = toY(loop.xy[i + 1]);
+        const hx = x0 + (x1 - x0) * f;
+        const hy = y0 + (y1 - y0) * f;
         context.lineTo(hx, hy);
-        if (head) heads.push(hx, hy);
+        if (head) {
+          const dLen = Math.hypot(x1 - x0, y1 - y0) || 1;
+          heads.push(hx, hy, (x1 - x0) / dLen, (y1 - y0) / dLen);
+        }
       }
     }
     context.lineJoin = "round";
     context.lineCap = "round";
     context.strokeStyle = rgba(toneA, 0.3 * alpha);
-    context.lineWidth = 6 * unit;
+    context.lineWidth = 6.2 * unit;
     context.stroke();
     context.strokeStyle = rgba(toneB, alpha);
-    context.lineWidth = 1.7 * unit;
+    context.lineWidth = 1.85 * unit;
     context.stroke();
+    context.strokeStyle = rgba(SILVER, 0.65 * alpha);
+    context.lineWidth = 0.75 * unit;
+    context.stroke();
+    if (!heads.length) return;
     const size = 22 * unit;
-    for (let h = 0; h < heads.length; h += 2)
-      context.drawImage(sprites.gold, heads[h] - size / 2, heads[h + 1] - size / 2, size, size);
+    const dR = 4.6 * unit;
+    for (let h = 0; h < heads.length; h += 4) {
+      const hx = heads[h];
+      const hy = heads[h + 1];
+      const dx = heads[h + 2];
+      const dy = heads[h + 3];
+      context.drawImage(sprites.gold, hx - size / 2, hy - size / 2, size, size);
+      // Precision diamond scan reticle at the seam head.
+      context.strokeStyle = rgba(SILVER, 0.88 * alpha);
+      context.lineWidth = 1.05 * unit;
+      context.beginPath();
+      context.moveTo(hx, hy - dR);
+      context.lineTo(hx + dR, hy);
+      context.lineTo(hx, hy + dR);
+      context.lineTo(hx - dR, hy);
+      context.closePath();
+      context.stroke();
+      // Deterministic spark cluster fanning backward from the scan head tangent.
+      const baseAngle = Math.atan2(-dy, -dx);
+      for (let sp = 0; sp < 5; sp += 1) {
+        const phase = fraction * 34 + h * 0.7 + sp * 1.9;
+        const spread = ((sp - 2) * 0.38) + Math.sin(phase) * 0.16;
+        const ang = baseAngle + spread;
+        const r0 = (2.2 + (sp % 2) * 2.4) * unit;
+        const r1 = r0 + (5.5 + ((sp * 3) % 4) * 2.6) * unit * (0.55 + 0.45 * Math.cos(phase));
+        context.strokeStyle = rgba(
+          sp === 2 ? SILVER : sp % 2 === 0 ? toneB : toneA,
+          (sp === 2 ? 0.92 : 0.78) * alpha,
+        );
+        context.lineWidth = (sp === 2 ? 1.35 : 1) * unit;
+        context.beginPath();
+        context.moveTo(hx + Math.cos(ang) * r0, hy + Math.sin(ang) * r0);
+        context.lineTo(hx + Math.cos(ang) * r1, hy + Math.sin(ang) * r1);
+        context.stroke();
+      }
+    }
   };
 
   const drawShards = (
@@ -660,19 +706,45 @@ export function mountMetaUnitasBoost(
       const u = 1 - e;
       const x = u * u * bx + 2 * u * e * mx + e * e * ex;
       const y = u * u * by + 2 * u * e * my + e * e * ey;
-      const e0 = easeInOut(Math.max(0, s - 0.05));
-      const u0 = 1 - e0;
-      const x0 = u0 * u0 * bx + 2 * u0 * e0 * mx + e0 * e0 * ex;
-      const y0 = u0 * u0 * by + 2 * u0 * e0 * my + e0 * e0 * ey;
       const fade = Math.min(1, s * 6) * Math.min(1, (1 - s) * 8);
-      // The trail.
-      context.strokeStyle = rgba(lilac ? LILAC : ORANGE, 0.5 * fade);
-      context.lineWidth = 1.2 * unit;
+      // Forward magnetic capture guide vector toward the seam lock point.
+      if (s > 0.18 && s < 0.96) {
+        const ef = easeInOut(Math.min(1, s + 0.24));
+        const uf = 1 - ef;
+        const xf = uf * uf * bx + 2 * uf * ef * mx + ef * ef * ex;
+        const yf = uf * uf * by + 2 * uf * ef * my + ef * ef * ey;
+        context.strokeStyle = rgba(TEAL, 0.24 * fade);
+        context.lineWidth = 0.85 * unit;
+        context.beginPath();
+        context.moveTo(x, y);
+        context.lineTo(xf, yf);
+        context.stroke();
+        if (s > 0.42) {
+          const lockTick = 2.6 * unit * (1 - 0.3 * e);
+          context.strokeStyle = rgba(lilac ? LILAC : ORANGE, 0.42 * fade);
+          context.beginPath();
+          context.moveTo(ex - lockTick, ey);
+          context.lineTo(ex + lockTick, ey);
+          context.moveTo(ex, ey - lockTick);
+          context.lineTo(ex, ey + lockTick);
+          context.stroke();
+        }
+      }
+      // Curved multi-segment attraction wake trail behind the shard.
+      context.strokeStyle = rgba(lilac ? LILAC : ORANGE, 0.62 * fade);
+      context.lineWidth = 1.35 * unit;
       context.beginPath();
-      context.moveTo(x0, y0);
-      context.lineTo(x, y);
+      const sTail = Math.max(0, s - 0.14);
+      for (let seg = 0; seg <= 4; seg += 1) {
+        const es = easeInOut(sTail + ((s - sTail) * seg) / 4);
+        const us = 1 - es;
+        const xs = us * us * bx + 2 * us * es * mx + es * es * ex;
+        const ys = us * us * by + 2 * us * es * my + es * es * ey;
+        if (seg === 0) context.moveTo(xs, ys);
+        else context.lineTo(xs, ys);
+      }
       context.stroke();
-      // The shard: a sliver of plate turning as it comes.
+      // The shard: a machined sliver of plate turning as it comes.
       const size = (6 + hash(seed + 6) * 7) * unit * (1 - 0.55 * e);
       const rot = hash(seed + 7) * 6.28 + s * (hash(seed + 8) - 0.5) * 14;
       const c = Math.cos(rot);
@@ -686,8 +758,15 @@ export function mountMetaUnitasBoost(
       context.lineTo(-size * 0.6, size * 0.45);
       context.closePath();
       context.fill();
-      context.strokeStyle = rgba(lilac ? SILVER : ORANGE, 0.9 * fade);
-      context.lineWidth = 0.8 * unit;
+      context.strokeStyle = rgba(lilac ? SILVER : ORANGE, 0.92 * fade);
+      context.lineWidth = 0.85 * unit;
+      context.stroke();
+      // Inner specular facet bevel on the armor sliver.
+      context.strokeStyle = rgba(SILVER, 0.7 * fade);
+      context.lineWidth = 0.65 * unit;
+      context.beginPath();
+      context.moveTo(-size * 0.72, -size * 0.04);
+      context.lineTo(size * 0.68, -size * 0.08);
       context.stroke();
       context.setTransform(fRatio, 0, 0, fRatio, 0, 0);
     }
@@ -1066,6 +1145,42 @@ export function mountMetaUnitasBoost(
         Math.PI * 2,
       );
       fctx.stroke();
+      // Spatial slice flash ("separation without destruction") & magnetic clamp bracket on lock.
+      if (t < 0.78) {
+        const st = t / 0.78;
+        const sFade = (1 - st) * (1 - st);
+        const sliceHalf =
+          figH * (effect.kind === "lock" ? 0.27 : 0.64) * easeOut(Math.min(1, st * 2.4));
+        const tilt = (((Math.round(effect.x * 0.37 + effect.y * 0.19) % 5) - 2) * 0.13);
+        const cs = Math.cos(tilt);
+        const sn = Math.sin(tilt);
+        // Outer teal magnetic cleavage aura
+        fctx.strokeStyle = rgba(TEAL, 0.46 * sFade);
+        fctx.lineWidth = (effect.kind === "lock" ? 4.2 : 6.4) * unit * (1 - st * 0.5);
+        fctx.beginPath();
+        fctx.moveTo(effect.x - cs * sliceHalf, effect.y - sn * sliceHalf);
+        fctx.lineTo(effect.x + cs * sliceHalf, effect.y + sn * sliceHalf);
+        fctx.stroke();
+        // Crisp coupled orange/lilac edge + white-silver razor cleavage wire
+        fctx.strokeStyle = rgba(toneE, 0.9 * sFade);
+        fctx.lineWidth = 1.65 * unit * (1 - st * 0.35);
+        fctx.stroke();
+        fctx.strokeStyle = rgba(SILVER, 0.95 * sFade);
+        fctx.lineWidth = 0.75 * unit;
+        fctx.stroke();
+        // Orthogonal magnetic coupling clamp diamond snapping onto the lock anchor
+        const clampR =
+          (effect.kind === "lock" ? 16 : 30) * unit * (1 - 0.42 * easeOut(st));
+        fctx.strokeStyle = rgba(TEAL, 0.78 * sFade);
+        fctx.lineWidth = 1.2 * unit;
+        fctx.beginPath();
+        fctx.moveTo(effect.x, effect.y - clampR);
+        fctx.lineTo(effect.x + clampR * 1.25, effect.y);
+        fctx.lineTo(effect.x, effect.y + clampR);
+        fctx.lineTo(effect.x - clampR * 1.25, effect.y);
+        fctx.closePath();
+        fctx.stroke();
+      }
       if (effect.kind !== "lock") {
         fctx.strokeStyle = rgba(TEAL, 0.6 * (1 - t) ** 2);
         fctx.lineWidth = 1.2 * unit;

@@ -1243,8 +1243,16 @@ html[data-family="special"]
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, rgb(var(--rzn-ice, 121 232 255)), rgb(255 143 216 / 84%));
-  box-shadow: 0 0 10px rgb(121 232 255 / 32%);
+  background: linear-gradient(
+    90deg,
+    #ffffff 0,
+    rgb(var(--rzn-ice, 121 232 255)) 14%,
+    rgb(255 143 216 / 84%) 72%,
+    rgb(var(--rzn-ice, 121 232 255) / 95%) 100%
+  );
+  box-shadow:
+    0 0 10px rgb(121 232 255 / 38%),
+    0 0 20px rgb(255 143 216 / 20%);
   transform-origin: 0 50%;
 }
 
@@ -1267,16 +1275,17 @@ html[data-family="special"]
   border: 1.5px solid rgb(121 232 255);
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgb(244 251 255) 0 2.5px, transparent 3px),
-    radial-gradient(circle, transparent 58%, rgb(121 232 255 / 26%) 60% 63%, transparent 65%),
+    radial-gradient(circle, #ffffff 0 2.5px, transparent 3px),
+    radial-gradient(circle, transparent 40%, rgb(121 232 255 / 18%) 42% 44%, transparent 46%),
+    radial-gradient(circle, transparent 58%, rgb(121 232 255 / 32%) 60% 63%, transparent 65%),
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 50% 0 / 1.5px 22% no-repeat,
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 50% 100% / 1.5px 22% no-repeat,
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 0 50% / 22% 1.5px no-repeat,
     linear-gradient(rgb(121 232 255), rgb(121 232 255)) 100% 50% / 22% 1.5px no-repeat;
   box-shadow:
-    0 0 0 6px rgb(121 232 255 / 12%),
-    0 0 18px rgb(121 232 255 / 28%),
-    inset 0 0 10px rgb(121 232 255 / 18%);
+    0 0 0 6px rgb(121 232 255 / 14%),
+    0 0 22px rgb(121 232 255 / 34%),
+    inset 0 0 12px rgb(121 232 255 / 22%);
 }
 
 html[data-family="special"]
@@ -1992,6 +2001,27 @@ html[data-family="special"]
       animation: rzn-lock-in linear both;
       animation-timeline: --rsn-ch3;
       animation-range: entry 38% entry 82%;
+    }
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  @media (forced-colors: none) and (min-width: 1100px) {
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+      > .rxs-hero
+      .rxs-hero-visual
+      > .rzn-callouts {
+      display: block;
+    }
+
+    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+      body
+      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+      .rxs-hero-visual
+      .rzn-callout {
+      opacity: 0.95;
     }
   }
 }

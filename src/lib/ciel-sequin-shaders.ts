@@ -142,6 +142,18 @@ void main(){
  color+=reflected*fresnel(f0,nv)*(.72-.12*vWall);
  color+=spec*vec3(.30,.33,.31);
  color*=.96+grain*.025;
+ // Ciel signature thin-film iridescence: emerald (#1ccf9d) to aqua (#86d9ff)
+ // flashes across the anisotropic specular highlights and rotating disc bevel.
+ float cosTheta=clamp(nv,0.,1.);
+ float iriPhase=fract(cosTheta*2.8+dot(t,light)*.35+vSeed*.15);
+ vec3 iriEmerald=vec3(.1098,.8118,.6157);
+ vec3 iriAqua=vec3(.5255,.8510,1.);
+ vec3 iriColor=mix(iriEmerald,iriAqua,sin(iriPhase*6.283185)*.5+.5);
+ float iriSheen=pow(1.-cosTheta,2.8)*.45;
+ float iriSpecularGlint=length(spec)*.85;
+ float flipGlint=(1.-abs(n.z))*.35;
+ float iriIntensity=(iriSheen+iriSpecularGlint+flipGlint)*(1.-vWall*.4);
+ color+=iriColor*iriIntensity*(1.-rimPhotoWeight);
  // The stamped lip has a narrow contact recess, followed by the actual
  // reflective bevel. This avoids painting dark borders onto the photo.
  float recess=smoothstep(.78,.86,radius)*(1.-smoothstep(.88,.94,radius));

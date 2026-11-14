@@ -16,10 +16,10 @@
 //     misregistration, halation, paper sheen and the click's gate slip + paper
 //     tear. The DOM keeps hit testing and the accessibility tree.
 //
-// Photosensitivity: no full-area flash; the projector breathe is ≤ 6% and slower
+// Photosensitivity: no full-area flash; the projector breathe is ≤ 5% and slower
 // than 1 Hz; sweeps are thin bands that follow a user action (≥ 1 s apart);
 // the click is a film-gate slip and a paper tear (geometry moves, luminance
-// stays put); vermilion is only a slow ambient ramp.
+// stays put); vermilion and stage mood / lantern shifts ramp smoothly.
 
 import { gui } from "./dream-gui-physics.js";
 
@@ -40,7 +40,7 @@ struct U {
   scroll: f32, small: f32, seed: f32, enter: f32,
   trans: vec4f,
   trect: vec4f,
-  coarse: f32, hotN: f32, pad0: f32, pad1: f32,
+  coarse: f32, hotN: f32, lantern: f32, mood: f32,
   hot: array<vec4f, ${HOT_MAX * 2}>,
   ink: array<vec4f, ${INK_MAX * 2}>,
   lens: vec4f,
@@ -165,11 +165,11 @@ const GOLD = vec3f(1.0, .80, .47);
 const LAMP = vec3f(1.0, .63, .34);
 const VERMILION = vec3f(.86, .30, .20);
 const CREAM = vec3f(1.0, .93, .80);
-// The projector's breathe: a slow, small luminance drift (never a flash).
+// The projector's breathe: a slow, ≤ 5% luminance drift (< 1 Hz, never a flash).
 fn flicker(t: f32) -> f32 {
-  return 1. + .05 * (vnoise(vec2f(t * .9, 11.)) - .5) * 2. + .015 * sin(t * .43);
+  return 1. + .016 * (vnoise(vec2f(t * .48, 11.)) - .5) * 2. + .007 * sin(t * 2.1);
 }
-// One depth layer of lamp dust. Cells of size s; motes rise, sway and twinkle.
+// One depth layer of lamp dust. Cells of size s; motes rise, sway and twinkle (< 1 Hz).
 fn dust(px: vec2f, s: f32, speed: f32, t: f32, seed: f32, rad: f32, soft: f32) -> f32 {
   let q = px / s + vec2f(0., t * speed + u.scroll / s * (.12 + seed * .18));
   let id = floor(q);
@@ -178,7 +178,7 @@ fn dust(px: vec2f, s: f32, speed: f32, t: f32, seed: f32, rad: f32, soft: f32) -
   if (r.x > .34 - seed * .05) { return 0.; }
   let off = (r - .5) * .62 + vec2f(sin(t * .5 + r.y * 6.28) * .14, cos(t * .37 + r.x * 6.28) * .05);
   let d = length(f - off);
-  let tw = .5 + .5 * sin(t * (.9 + r.y * 2.2) + r.x * 40.);
+  let tw = .5 + .5 * sin(t * (1.4 + r.y * 2.2) + r.x * 40.);
   let rr = rad * (.6 + r.y * .8);
   return smoothstep(rr + soft, rr - soft * .4, d) * (.35 + .65 * tw);
 }
@@ -242,36 +242,55 @@ fn hotLight(px: vec2f, t: f32, dpr: f32) -> vec4f {
 const OVERLAY_WGSL =
   COMMON_WGSL +
   /* wgsl */ `
-// A stage lamp as a volume: a wedge from a point off-screen, broken into rays
-// by angular noise, seen through a slow-drifting dust density (fbm) so the
-// shafts thicken and thin as the air moves.
-fn shafts(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32, dens: f32) -> f32 {
+// A 35mm carbon-arc stage lamp as a volume: a wedge from an off-screen gate
+// with a warm amber paraxial core and subtle off-axis condenser chromatic
+// dispersion rims, broken into rays through slow-drifting dust density (fbm).
+fn shafts(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32, dens: f32) -> vec3f {
   let asp = u.res.x / u.res.y;
   let rel = (uv - src) * vec2f(asp, 1.);
   let r = length(rel);
   let ang = atan2(rel.y, rel.x);
-  let wedge = exp(-pow((ang - theta) / width, 2.));
+  let off = (ang - theta) / width;
+  let offR = off * .93 - .038;
+  let offG = off;
+  let offB = off * 1.08 + .046;
+  let wR = exp(-offR * offR);
+  let wG = exp(-offG * offG * 1.12);
+  let wB = exp(-offB * offB * 1.24);
+  let core = exp(-off * off * 2.4);
+  let rimD = (abs(off) - .92) / .26;
+  let rim = exp(-rimD * rimD);
   let rays = vnoise(vec2f(ang * 34., r * 1.1 - t * .05)) * vnoise(vec2f(ang * 12. + t * .025, .7));
   let rays2 = vnoise(vec2f(ang * 66. - t * .012, r * .5 + t * .02));
-  let fall = exp(-r * .7);
-  return wedge * fall * (rays * .85 + rays2 * .45) * (.3 + .7 * dens);
+  let fall = exp(-r * .68);
+  let medium = fall * (rays * .85 + rays2 * .45) * (.3 + .7 * dens);
+  let spec = vec3f(
+    wR * 1.04 + core * .18 + rim * step(0., -off) * .16,
+    wG * .82 + core * .22 + rim * .05,
+    wB * .48 + core * .14 + rim * step(0., off) * .24
+  );
+  return spec * medium;
 }
 @fragment fn fs(in: VO) -> @location(0) vec4f {
   let px = in.uv * u.res;
   let t = u.time;
   let fl = flicker(t);
   let asp = u.res.x / u.res.y;
+  let lan = clamp(u.lantern, .22, 1.);
+  let dawnTint = vec3f(1.06, .93, .74);
+  let dreamTint = vec3f(1.0, .88, .96);
+  let nightTint = vec3f(.76, .89, 1.08);
+  let moodTint = select(
+    mix(dawnTint, dreamTint, clamp(u.mood * 2., 0., 1.)),
+    mix(dreamTint, nightTint, clamp((u.mood - .5) * 2., 0., 1.)),
+    u.mood > .5
+  );
   var c = vec3f(0.);
   var a = 0.;
-  // --- lamp dust, three depths with parallax from the pointer and the scroll -
   let par = (u.mouse - .5) * u.dpr;
   // the pointer's wake stirs the air: the dust is advected by the ink field
   let ink = inkField(px);
   let pxw = px - ink.xy * 1.6;
-  let d1 = dust(pxw + par * vec2f(6., 3.), 36. * u.dpr, .045, t, 1., .055, .025);
-  let d2 = dust(pxw + par * vec2f(20., 9.), 66. * u.dpr, .03, t, 2., .06, .04);
-  var d3 = 0.;
-  if (u.small < .5) { d3 = dust(pxw + par * vec2f(48., 22.), 128. * u.dpr, .02, t, 3., .11, .09); }
   // the desk's own lamp keeps the paper mostly clear of motes
   var deskIn = 0.;
   if (u.rect.z > 0.) {
@@ -279,22 +298,38 @@ fn shafts(uv: vec2f, src: vec2f, theta: f32, width: f32, t: f32, dens: f32) -> f
     deskIn = smoothstep(20. * u.dpr, -20. * u.dpr, dIn) * .6;
   }
   let dk = 1. - deskIn;
-  c += (CREAM * d1 * .6 + GOLD * d2 * .55 + LAMP * d3 * .38) * dk;
-  a += (d1 * .5 + d2 * .42 + d3 * .3) * dk;
+  let overDesk = 1. - deskIn * .9;
 
-  // --- volumetric lamps: a swinging key light from above-left, a vermilion
-  //     fill from above-right, both through the dust. Low amplitude, slow. ---
+  // --- volumetric 35mm carbon-arc lamps: swinging key light from above-left,
+  //     warm fill from above-right, modulated by stage lantern & mood -------
   let dens = fbm((in.uv + par * .02) * vec2f(asp, 1.) * 2.2 + vec2f(t * .02, -t * .035));
   // the key light comes through a lattice window: slow soft bars drift across it
-  let gobo = .7 + .3 * pow(.5 + .5 * sin((in.uv.x * asp * 1.3 + in.uv.y * .7) * 20. + sin(t * .07) * 2.5), 2.);
-  let key = shafts(in.uv, vec2f(-.08, -.22), 1.05 + .2 * sin(t * .09), .2, t, dens) * .44 * gobo;
-  let fill = shafts(in.uv, vec2f(1.1, -.3), 2.25 + .16 * sin(t * .07 + 2.), .24, t, dens) * .2;
-  let overDesk = 1. - deskIn * .9;
-  c += (GOLD * key + mix(VERMILION, LAMP, .5 + .5 * sin(t * .05)) * fill) * fl * overDesk;
-  a += (key * .55 + fill * .45) * fl * overDesk;
-  // a warm vermilion breath pooling at the floor
-  let floorAmb = pow(in.uv.y, 3.) * (.012 + .008 * sin(t * .11));
-  c += VERMILION * floorAmb;
+  let goboS = .5 + .5 * sin((in.uv.x * asp * 1.3 + in.uv.y * .7) * 20. + sin(t * .07) * 2.5);
+  let gobo = .7 + .3 * goboS * goboS;
+  let keySpec = shafts(in.uv, vec2f(-.08, -.22), 1.05 + .2 * sin(t * .09), .2, t, dens) * (.46 * gobo * lan);
+  let fillTint = mix(VERMILION, LAMP, .5 + .5 * sin(t * .05));
+  let fillSpec = shafts(in.uv, vec2f(1.1, -.3), 2.25 + .16 * sin(t * .07 + 2.), .24, t, dens) * fillTint * (.22 * lan);
+  let shaftLum = dot(keySpec + fillSpec, vec3f(.38, .44, .18));
+  c += (keySpec + fillSpec) * moodTint * fl * overDesk;
+  a += shaftLum * .52 * fl * overDesk;
+
+  // --- lamp dust: three parallax depths + forward Mie scattering glint
+  //     when motes enter the projector cone ---------------------------------
+  let d1 = dust(pxw + par * vec2f(6., 3.), 36. * u.dpr, .045, t, 1., .055, .025);
+  let d2 = dust(pxw + par * vec2f(20., 9.), 66. * u.dpr, .03, t, 2., .06, .04);
+  var d3 = 0.;
+  if (u.small < .5) { d3 = dust(pxw + par * vec2f(48., 22.), 128. * u.dpr, .02, t, 3., .11, .09); }
+  let mie = clamp(shaftLum * 4.4, 0., 1.85);
+  let mieGain = (.34 * lan + mie * 1.85) * dk;
+  let mieGlint = (d1 * d1 * 1.35 + d2 * d2 * .9) * mie * dk;
+  let moteTint = mix(vec3f(1.), moodTint, .45);
+  c += ((CREAM * d1 * .6 + GOLD * d2 * .55 + LAMP * d3 * .38) * mieGain
+      + vec3f(1., .97, .90) * mieGlint * .85) * moteTint;
+  a += ((d1 * .5 + d2 * .42 + d3 * .3) * (.38 * lan + mie * 1.15) + mieGlint * .55) * dk;
+
+  // a warm breath pooling at the floor, smoothly coupled to mood and lantern
+  let floorAmb = in.uv.y * in.uv.y * in.uv.y * (.011 + .005 * sin(t * .11)) * (.45 + .55 * lan);
+  c += mix(VERMILION, moodTint * LAMP, .35) * floorAmb;
   a += floorAmb;
 
   // --- the pointer's lantern (drifts by itself on touch screens) -------------
@@ -698,6 +733,12 @@ function makePointer() {
   };
 }
 
+const motionBlocked = () =>
+  (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches) ||
+  (typeof document !== "undefined" &&
+    (document.documentElement?.dataset?.worldEffects === "economy" ||
+      document.documentElement?.dataset?.motionEnabled === "false"));
+
 function loop(frame) {
   let raf = 0;
   let last = performance.now();
@@ -706,7 +747,7 @@ function loop(frame) {
     if (!running) return;
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    frame(now / 1000, dt);
+    if (!motionBlocked()) frame(now / 1000, dt);
     raf = requestAnimationFrame(tick);
   };
   const onVis = () => {
@@ -734,6 +775,7 @@ const DESK = ".dream-programme-desk";
 const HOT_SELECTOR = [
   ".dream-programme-ticket",
   ".dream-programme-dossier-chip",
+  ".dream-programme-reel-controls button",
   ".dream-programme-spotlight-modes button",
   ".dream-programme-spotlight-controls button",
 ].join(",");
@@ -748,6 +790,16 @@ function makeTheatre() {
   const items = []; // { el, kind, stagger, hover, hoverTo, press }
   const byEl = new Map();
   let hovered = null;
+  const stageState = { lantern: 1, lanternTo: 1, mood: 0.5, moodTo: 0.5 };
+  const syncStageMood = () => {
+    const hero = document.querySelector(".dream-hero");
+    stageState.lanternTo = hero?.dataset?.dreamLantern === "dim" ? 0.24 : 1;
+    const fx =
+      document.querySelector(".dream-cinema-effects[data-mood]") ??
+      document.querySelector(".dream-cinema-atmosphere[data-mood]");
+    const mood = fx?.getAttribute("data-mood");
+    stageState.moodTo = mood === "dawn" ? 0 : mood === "night" ? 1 : 0.5;
+  };
   const refresh = () => {
     const desk = document.querySelector(DESK);
     items.length = 0;
@@ -824,14 +876,16 @@ function makeTheatre() {
   };
   const onClick = (e) => {
     const t = e.target;
-    const ticket = t.closest?.(".dream-programme-ticket");
+    const ticket = t.closest?.(".dream-programme-ticket, .dream-programme-dossier-chip");
     if (ticket) {
-      const all = [...document.querySelectorAll(".dream-programme-ticket")];
+      const all = [
+        ...document.querySelectorAll(".dream-programme-ticket, .dream-programme-dossier-chip"),
+      ];
       fire(1, all.indexOf(ticket) === 0 ? -1 : 1, null);
       return;
     }
     const ctl = t.closest?.(
-      ".dream-programme-spotlight-controls button, .dream-programme-spotlight-modes button",
+      ".dream-programme-reel-controls button, .dream-programme-spotlight-controls button, .dream-programme-spotlight-modes button",
     );
     if (ctl) {
       const frame = document.querySelector(".dream-programme-reel-frame");
@@ -844,9 +898,21 @@ function makeTheatre() {
     clearTimeout(moTimer);
     moTimer = setTimeout(refresh, 80);
   });
+  const stageMo = new MutationObserver(syncStageMood);
+  if (document.body) {
+    stageMo.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-dream-lantern", "data-mood"],
+    });
+  }
+  syncStageMood();
+  stageState.lantern = stageState.lanternTo;
+  stageState.mood = stageState.moodTo;
   let moTimer = 0;
   let observed = null;
   const observeDesk = () => {
+    syncStageMood();
     const desk = document.querySelector(DESK);
     if (desk === observed) return;
     if (observed) {
@@ -877,6 +943,12 @@ function makeTheatre() {
         it.hover += (it.hoverTo - it.hover) * k;
         if (it.press < 1) it.press = Math.min(1, it.press + dt / 0.9);
       }
+      const sk = 1 - Math.exp(-dt * 2.2);
+      stageState.lantern += (stageState.lanternTo - stageState.lantern) * sk;
+      stageState.mood += (stageState.moodTo - stageState.mood) * sk;
+    },
+    stage() {
+      return stageState;
     },
     /** Seconds since the desk entered the view (−1 = not yet). */
     enter() {
@@ -905,6 +977,7 @@ function makeTheatre() {
       clearInterval(watch);
       io.disconnect();
       mo.disconnect();
+      stageMo.disconnect();
       clearTimeout(moTimer);
       document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerdown", onDown);
@@ -1045,7 +1118,8 @@ export async function startLamplightOverlay(canvas, { getDeskRect, signal } = {}
           b.bottom < 0 || b.top > innerHeight ? null : [b.left * s, b.top * s, b.width * s, b.height * s],
         )
       : 0;
-    u.set([coarse ? 1 : 0, n, 0, 0], 24);
+    const st = th.stage();
+    u.set([coarse ? 1 : 0, n, st.lantern, st.mood], 24);
     feed(u, dt, (x, y) => [x * s, y * s], s);
     device.queue.writeBuffer(ubuf, 0, u);
     const enc = device.createCommandEncoder();
@@ -1276,7 +1350,8 @@ export async function startDeskStage(canvas, element, { onFail } = {}) {
       b.width * sx,
       b.height * sx,
     ]);
-    u.set([0, n, 0, 0], 24);
+    const st = th.stage();
+    u.set([0, n, st.lantern, st.mood], 24);
     const tr = th.trans();
     u.set([tr.t, tr.kind, tr.dir, 0], 16);
     const tre = tr.el && tr.t < 1 ? tr.el.getBoundingClientRect() : null;

@@ -175,39 +175,52 @@
 }
 
 /* The anamorphic streaks: one lens flare line across the title's centre with
-   a magenta fringe above and a gold fringe below (the chromatic split of a
-   cinema lens). A: ice and white, at the score's impact. B: the prism, as
-   the prism logo locks. Both are gone on every still state. */
+   cyan/champagne spectral dispersion and off-axis chromatic fringes (the split
+   of a cinema anamorphic front element). A: ice-cyan and champagne-white at
+   impact. B: full cyan-to-champagne prism dispersion as the final logo locks.
+   Both are gone on every still state. */
 .cine-streak {
   top: 50%;
   left: 50%;
   width: min(128vw, 1620px);
   height: 2px;
   transform: translate(-50%, -50%) scaleX(0.15);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(74 137 214 / 0.32) 10%,
-    rgb(122 232 255 / 0.68) 24%,
-    rgb(255 255 255 / 0.98) 50%,
-    rgb(122 232 255 / 0.68) 76%,
-    rgb(74 137 214 / 0.32) 90%,
-    transparent
-  );
+  background:
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      rgb(122 232 255 / 0.42) 18%,
+      rgb(226 249 255 / 0.94) 43%,
+      rgb(255 252 242 / 0.99) 50%,
+      rgb(246 225 174 / 0.92) 57%,
+      rgb(122 232 255 / 0.46) 82%,
+      transparent 96%
+    ),
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(56 124 206 / 0.3) 8%,
+      rgb(122 232 255 / 0.74) 24%,
+      rgb(255 255 255 / 0.98) 50%,
+      rgb(240 207 134 / 0.7) 74%,
+      rgb(74 137 214 / 0.32) 92%,
+      transparent
+    );
   box-shadow:
-    0 0 14px 2px rgb(198 245 255 / 0.55),
-    0 0 28px 5px rgb(122 232 255 / 0.44),
-    0 0 96px 16px rgb(122 232 255 / 0.18);
+    0 0 12px 2px rgb(206 247 255 / 0.62),
+    0 0 28px 5px rgb(122 232 255 / 0.46),
+    0 0 54px 9px rgb(240 207 134 / 0.22),
+    0 0 104px 16px rgb(122 232 255 / 0.18);
 }
 
 .cine-streak::before,
 .cine-streak::after {
   content: "";
   position: absolute;
-  right: 10%;
-  left: 10%;
+  right: 6%;
+  left: 6%;
   height: 1px;
-  opacity: 0.78;
+  opacity: 0.84;
 }
 
 .cine-streak::before {
@@ -215,9 +228,11 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(164 139 255 / 0.52) 28%,
-    rgb(255 92 200 / 0.82) 50%,
-    rgb(164 139 255 / 0.52) 72%,
+    rgb(122 232 255 / 0.38) 16%,
+    rgb(164 139 255 / 0.62) 34%,
+    rgb(255 92 200 / 0.86) 50%,
+    rgb(246 225 174 / 0.58) 68%,
+    rgb(122 232 255 / 0.36) 84%,
     transparent
   );
 }
@@ -227,28 +242,77 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(122 232 255 / 0.48) 28%,
-    rgb(240 207 134 / 0.82) 50%,
-    rgb(122 232 255 / 0.48) 72%,
+    rgb(74 137 214 / 0.34) 14%,
+    rgb(122 232 255 / 0.68) 32%,
+    rgb(248 226 172 / 0.9) 50%,
+    rgb(240 207 134 / 0.78) 68%,
+    rgb(122 232 255 / 0.42) 86%,
     transparent
   );
 }
 
 .cine-streak-b {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 3%,
+      rgb(122 232 255 / 0.54) 16%,
+      rgb(224 249 255 / 0.94) 41%,
+      rgb(255 252 240 / 0.99) 50%,
+      rgb(248 224 166 / 0.95) 59%,
+      rgb(240 207 134 / 0.62) 84%,
+      transparent 97%
+    ),
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(86 196 242 / 0.46) 9%,
+      rgb(122 232 255 / 0.84) 22%,
+      rgb(186 168 255 / 0.92) 36%,
+      rgb(255 255 255 / 0.98) 50%,
+      rgb(246 218 152 / 0.94) 64%,
+      rgb(240 207 134 / 0.82) 78%,
+      rgb(255 92 200 / 0.48) 91%,
+      transparent
+    );
+  box-shadow:
+    0 0 16px 2px rgb(198 245 255 / 0.46),
+    0 0 38px 6px rgb(240 207 134 / 0.28),
+    0 0 72px 11px rgb(164 139 255 / 0.2),
+    0 0 108px 16px rgb(122 232 255 / 0.16);
+}
+
+.cine-streak-b::before,
+.cine-streak-b::after {
+  right: 4%;
+  left: 4%;
+  opacity: 0.88;
+}
+
+.cine-streak-b::before {
+  top: -3px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(122 232 255 / 0.74) 16%,
-    rgb(164 139 255 / 0.92) 34%,
-    rgb(255 255 255 / 0.98) 50%,
-    rgb(255 92 200 / 0.92) 66%,
-    rgb(240 207 134 / 0.76) 84%,
+    rgb(122 232 255 / 0.56) 20%,
+    rgb(214 248 255 / 0.88) 44%,
+    rgb(248 226 172 / 0.84) 58%,
+    rgb(164 139 255 / 0.52) 80%,
     transparent
   );
-  box-shadow:
-    0 0 18px 3px rgb(164 139 255 / 0.38),
-    0 0 64px 10px rgb(255 92 200 / 0.16),
-    0 0 92px 14px rgb(240 207 134 / 0.1);
+}
+
+.cine-streak-b::after {
+  bottom: -3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(122 232 255 / 0.46) 20%,
+    rgb(240 207 134 / 0.9) 48%,
+    rgb(255 244 212 / 0.86) 56%,
+    rgb(122 232 255 / 0.5) 80%,
+    transparent
+  );
 }
 
 /* The rails: ruler ticks on the frame's vertical lines at the quarters, the

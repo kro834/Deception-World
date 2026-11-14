@@ -30,16 +30,71 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-heading h2 
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork {
+  position: relative;
   padding: 18px;
-  border: 1px solid #775d3d;
+  border: 1px solid #9c7b4c;
   border-radius: 3px;
+  /* 黒漆・溜塗（Tame-nuri lacquer: deep vermilion glowing through jet-black urushi + 金蒔絵 micro-flecks） */
   background:
-    repeating-linear-gradient(1deg, transparent 0 4px, #dbad5d09 5px, transparent 7px 11px),
-    linear-gradient(110deg, #35291f, #4b3828 43%, #2b211c);
+    radial-gradient(circle at 12% 18%, rgb(236 198 118 / 28%) 0 0.9px, transparent 1.6px),
+    radial-gradient(circle at 86% 14%, rgb(225 183 102 / 24%) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 78% 84%, rgb(236 198 118 / 22%) 0 0.8px, transparent 1.5px),
+    radial-gradient(circle at 24% 88%, rgb(219 175 96 / 20%) 0 0.9px, transparent 1.6px),
+    linear-gradient(164deg, rgb(255 238 210 / 7%) 0%, transparent 28%),
+    radial-gradient(ellipse 68% 52% at 22% 18%, rgb(124 33 38 / 34%), transparent 68%),
+    radial-gradient(ellipse 64% 56% at 82% 82%, rgb(104 26 32 / 30%), transparent 70%),
+    repeating-linear-gradient(1deg, transparent 0 4px, #dbad5d08 5px, transparent 7px 11px),
+    linear-gradient(125deg, #0e090c 0%, #1b1014 38%, #2a1419 54%, #110b0e 100%);
   box-shadow:
-    0 18px 48px #0005,
-    inset 0 0 0 5px #19140f80,
-    inset 0 0 0 7px #d3ac641f;
+    0 22px 54px rgb(0 0 0 / 56%),
+    inset 0 1px 0 rgb(255 232 190 / 16%),
+    inset 0 0 0 4px #0b0709cc,
+    inset 0 0 0 6px #d6af6833;
+}
+
+/* 四隅真鍮金具（Four-corner sculpted brass L-brackets & corner rivets） */
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::before,
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::before {
+  background:
+    linear-gradient(135deg, #f2d598, #a57d41) 0 0 / 24px 3px no-repeat,
+    linear-gradient(135deg, #f2d598, #a57d41) 0 0 / 3px 24px no-repeat,
+    linear-gradient(225deg, #f2d598, #a57d41) 100% 0 / 24px 3px no-repeat,
+    linear-gradient(225deg, #f2d598, #a57d41) 100% 0 / 3px 24px no-repeat,
+    linear-gradient(45deg, #e5c382, #8f6932) 0 100% / 24px 3px no-repeat,
+    linear-gradient(45deg, #e5c382, #8f6932) 0 100% / 3px 24px no-repeat,
+    linear-gradient(315deg, #e5c382, #8f6932) 100% 100% / 24px 3px no-repeat,
+    linear-gradient(315deg, #e5c382, #8f6932) 100% 100% / 3px 24px no-repeat;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::after {
+  background:
+    radial-gradient(circle at 8px 8px, #f6dfb0 0 1.6px, #6e4f23 1.7px 2.6px, transparent 2.8px),
+    radial-gradient(
+      circle at calc(100% - 8px) 8px,
+      #f6dfb0 0 1.6px,
+      #6e4f23 1.7px 2.6px,
+      transparent 2.8px
+    ),
+    radial-gradient(
+      circle at 8px calc(100% - 8px),
+      #ebd09a 0 1.6px,
+      #6e4f23 1.7px 2.6px,
+      transparent 2.8px
+    ),
+    radial-gradient(
+      circle at calc(100% - 8px) calc(100% - 8px),
+      #ebd09a 0 1.6px,
+      #6e4f23 1.7px 2.6px,
+      transparent 2.8px
+    );
 }
 
 /* A bookmark slip belongs to the reader; selecting a drawer never moves it. */
@@ -50,12 +105,14 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume {
   gap: 18px;
   margin: 1px 1px 23px;
   padding: 17px 20px;
-  border: 1px solid #ba9b6f70;
-  border-left: 4px solid #b58c54;
-  background: linear-gradient(105deg, #241c18, #37261f);
+  border: 1px solid #c6a47066;
+  border-left: 4px solid #c3995c;
+  background:
+    radial-gradient(ellipse 55% 90% at 15% 50%, rgb(118 32 36 / 24%), transparent 70%),
+    linear-gradient(108deg, #170f13, #27161a 56%, #150e12);
   box-shadow:
-    0 4px 12px #130d0a33,
-    inset 0 0 0 4px #cbb17b08;
+    0 6px 16px #09050859,
+    inset 0 0 0 4px #cbb17b0a;
 }
 
 html[data-family="dream"]
@@ -116,19 +173,44 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link
   overflow-wrap: anywhere;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-drawer-label {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 5px 14px;
-  color: #cfb68a;
+  color: #dec292;
   font-family: var(--ts-display);
   font-size: 12px;
   letter-spacing: 0.24em;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-gearbox {
+  display: inline-flex;
+  align-items: center;
+  color: #d6b272;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 55%));
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-gear {
+  display: block;
+  flex: none;
+  transform-origin: 50% 50%;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-gear--drive {
+  width: 26px;
+  height: 26px;
+  transform: rotate(calc(var(--karakuri-index, 0) * 60deg));
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-gear--pinion {
+  width: 20px;
+  height: 20px;
+  margin-left: -3px;
+  color: #e6c88c;
+  transform: rotate(calc(var(--karakuri-index, 0) * -90deg + 22.5deg));
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tabs {
@@ -148,13 +230,16 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab {
   gap: 8px;
   position: relative;
   padding: 14px 5px 13px;
-  border: 1px solid #9a784b7d;
+  border: 1px solid #b4905b80;
   border-radius: 2px;
-  background: linear-gradient(100deg, #503c2d, #33261e);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 18%, rgb(130 36 40 / 26%), transparent 70%),
+    linear-gradient(155deg, #241418 0%, #341a1f 48%, #180f13 100%);
   box-shadow:
-    inset 0 0 0 3px #21180f80,
-    0 3px 0 #1b1512;
-  color: #e7d8bb;
+    inset 0 1px 0 rgb(255 232 190 / 12%),
+    inset 0 0 0 3px #120b0e99,
+    0 3px 0 #0d080b;
+  color: #eee0c5;
   cursor: pointer;
   transition:
     background-color 180ms,
@@ -166,7 +251,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab::before
   content: "";
   position: absolute;
   inset: 5px;
-  border: 1px solid #c6a15b23;
+  border: 1px solid #d4af6a2e;
   pointer-events: none;
 }
 
@@ -185,17 +270,31 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab strong 
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle {
-  width: 24px;
-  height: 9px;
-  border: 2px solid #ad8e5b;
-  border-top-width: 3px;
-  border-radius: 2px 2px 7px 7px;
-  box-shadow: 0 2px 2px #0005;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 16px;
+  color: #cca768;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 48%));
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle-cog {
+  transform-origin: 0 0;
+  transform: rotate(calc(var(--karakuri-index, 0) * 45deg));
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab[aria-selected="true"] {
-  border-color: #dec48d;
-  background: linear-gradient(105deg, #f0e3c3, #d4c096);
+  border-color: #e5cb94;
+  background: linear-gradient(105deg, #f2e5c7, #d6c298);
   color: #3c2d21;
   transform: translateY(3px);
   box-shadow:
@@ -213,10 +312,16 @@ html[data-family="dream"]
   main.dream-page.dream-page
   .dream-karakuri-tab[aria-selected="true"]
   .dream-karakuri-handle {
-  border-color: #765533;
+  color: #765533;
+  filter: drop-shadow(0 1px 1px rgb(58 38 18 / 28%));
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab:hover {
     border-color: #e6ca90;
   }
@@ -368,9 +473,11 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-scope {
   line-height: 1.8;
 }
 
-html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a:hover {
-  text-decoration: underline;
-  text-underline-offset: 5px;
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-shoji {
@@ -385,18 +492,29 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-shoji-leaf 
   top: 0;
   bottom: 0;
   width: 50%;
-  border: 6px solid #57412b;
+  border: 6px solid #4a3420;
+  /* 組子桟ベベル＋和紙透過暖色（Beveled cedar kumiko muntins + warm lantern-backlit washi） */
   background:
-    repeating-linear-gradient(0deg, transparent 0 calc(25% - 2px), #675031 calc(25% - 2px) 25%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 calc(25% - 3px),
+      #8e6e44 calc(25% - 3px) calc(25% - 2px),
+      #5c4328 calc(25% - 2px) calc(25% - 0.8px),
+      #362514 calc(25% - 0.8px) 25%
+    ),
     repeating-linear-gradient(
       90deg,
-      transparent 0 calc(33.333% - 2px),
-      #675031 calc(33.333% - 2px) 33.333%
+      transparent 0 calc(33.333% - 3px),
+      #8e6e44 calc(33.333% - 3px) calc(33.333% - 2px),
+      #5c4328 calc(33.333% - 2px) calc(33.333% - 0.8px),
+      #362514 calc(33.333% - 0.8px) 33.333%
     ),
-    linear-gradient(105deg, #e3d5b8, #f4ead4 65%, #d3c19d);
+    radial-gradient(ellipse 74% 64% at 50% 44%, #fff6df 0%, #f5e6c4 56%, #dcc8a0 100%);
   box-shadow:
-    0 0 12px #0003,
-    inset 0 0 0 1px #c7a264;
+    0 0 18px rgb(0 0 0 / 34%),
+    inset 0 1px 0 rgb(255 248 228 / 65%),
+    inset 0 0 0 1px #c7a264,
+    inset 0 0 26px rgb(224 166 82 / 22%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-shoji-left {
@@ -532,7 +650,9 @@ html[data-family="dream"]
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab {
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab,
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-gear,
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle-cog {
     transition: none;
   }
   html[data-family="dream"]
@@ -565,17 +685,17 @@ html[data-family="dream"]
 
 html[data-family="dream"][data-world-effects="economy"]
   main.dream-page.dream-page
-  .dream-karakuri-tab,
+  :is(.dream-karakuri-tab, .dream-karakuri-gear, .dream-karakuri-handle-cog),
 html[data-family="dream"][data-motion-enabled="false"]
   main.dream-page.dream-page
-  .dream-karakuri-tab,
+  :is(.dream-karakuri-tab, .dream-karakuri-gear, .dream-karakuri-handle-cog),
 html[data-family="dream"]
   main.dream-page.dream-page[data-motion-enabled="false"]
-  .dream-karakuri-tab,
+  :is(.dream-karakuri-tab, .dream-karakuri-gear, .dream-karakuri-handle-cog),
 html[data-family="dream"]
   [data-motion-enabled="false"]
   main.dream-page.dream-page
-  .dream-karakuri-tab {
+  :is(.dream-karakuri-tab, .dream-karakuri-gear, .dream-karakuri-handle-cog) {
   transition: none;
 }
 
@@ -585,6 +705,10 @@ html[data-family="dream"]
     .dream-karakuri-cabinet
     :is(a, button, [role="tabpanel"]):focus-visible {
     outline-color: Highlight;
+  }
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::before,
+  html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::after {
+    display: none;
   }
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume {
     border-color: CanvasText;

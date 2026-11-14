@@ -28,16 +28,44 @@ html[data-family="dream"] main.dream-page.dream-page canvas.dream-gpu-desk {
   html[data-family="dream"] main.dream-page .dream-gpu-overlay {
     display: none;
   }
+
+  html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-ticket,
+  html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-chip,
+  html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-frame,
+  html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-controls button,
+  html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes button,
+  html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls button {
+    transition: none;
+  }
 }
 
 html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
   display: none;
 }
 
-/* Tier A: a hovered ticket carries a gold rim light that the desk shader blooms. */
+html[data-world-effects="economy"][data-dream-gui="on"]
+  main.dream-page.dream-page
+  :is(
+    .dream-programme-ticket,
+    .dream-programme-dossier-chip,
+    .dream-programme-reel-frame,
+    .dream-programme-reel-controls button,
+    .dream-programme-spotlight-modes button,
+    .dream-programme-spotlight-controls button
+  ) {
+  transition: none;
+}
+
+/* Tier A: a hovered ticket, chip, or reel control carries a gold rim light that the desk shader blooms. */
 @media (hover: hover) and (pointer: fine) {
   html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-ticket:hover,
-  html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-dossier-chip:hover {
+  html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-dossier-chip:hover,
+  html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-reel-controls button:hover,
+  html[data-dream-gpu="A"] main.dream-page.dream-page .dream-programme-spotlight-modes button:hover,
+  html[data-dream-gpu="A"]
+    main.dream-page.dream-page
+    .dream-programme-spotlight-controls
+    button:hover {
     box-shadow:
       inset 0 1px 0 rgb(243 224 176 / 30%),
       0 0 0 1px rgb(255 204 120 / 55%),
@@ -50,6 +78,7 @@ html[data-world-effects="economy"] main.dream-page .dream-gpu-overlay {
    The solver writes the individual translate / rotate / scale properties;
    the rows give them depth. Nothing here changes layout. */
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-strip,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-controls,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel {
@@ -74,6 +103,7 @@ html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-frame
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-ticket,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-dossier-chip,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-frame,
+html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-reel-controls button,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-modes button,
 html[data-dream-gui="on"] main.dream-page.dream-page .dream-programme-spotlight-controls button {
   transition: box-shadow 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);

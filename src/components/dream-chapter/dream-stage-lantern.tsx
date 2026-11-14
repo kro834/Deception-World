@@ -24,7 +24,9 @@ export function DreamStageLantern() {
       onClick={() => setLit((current) => !current)}
     >
       <span className="dream-stage-lantern-shade" aria-hidden="true">
-        <span>夢</span>
+        <span className="dream-stage-lantern-mantle" />
+        <span className="dream-stage-lantern-chimney" />
+        <span className="dream-stage-lantern-glyph">夢</span>
       </span>
       <span className="dream-stage-lantern-label">
         <strong>夢灯り</strong>

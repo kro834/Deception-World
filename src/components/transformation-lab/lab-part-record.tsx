@@ -8,6 +8,7 @@ export function LabPartRecord({ rider, zoom }: { rider: LabRider; zoom: LabZoom 
       className="tl-part-record"
       aria-label={`${LAB_PART_LABELS[zoom]}の関連記録`}
       data-part={zoom}
+      data-rider={rider}
     >
       <div className="tl-part-record-heading">
         <span>{LAB_PART_LABELS[zoom]} / 関連記録</span>

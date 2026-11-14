@@ -25,17 +25,19 @@ html body .load-gate.has-cine {
   --dwc-close: 320ms;
   --dwc-prism: linear-gradient(
     90deg,
-    var(--dwc-accent),
-    color-mix(in srgb, var(--dwc-accent) 56%, var(--dwc-gold)) 36%,
-    color-mix(in srgb, var(--dwc-gold) 72%, var(--dwc-accent)) 68%,
-    var(--dwc-gold)
+    color-mix(in srgb, var(--dwc-accent) 76%, #7ae8ff) 0%,
+    #bcefff 22%,
+    color-mix(in srgb, var(--dwc-accent) 52%, var(--dwc-gold)) 50%,
+    #f7e2b0 78%,
+    color-mix(in srgb, var(--dwc-gold) 80%, #f0cf86) 100%
   );
   --dwc-prism-v: linear-gradient(
     180deg,
-    var(--dwc-accent),
-    color-mix(in srgb, var(--dwc-accent) 56%, var(--dwc-gold)) 36%,
-    color-mix(in srgb, var(--dwc-gold) 72%, var(--dwc-accent)) 68%,
-    var(--dwc-gold)
+    color-mix(in srgb, var(--dwc-accent) 76%, #7ae8ff) 0%,
+    #bcefff 22%,
+    color-mix(in srgb, var(--dwc-accent) 52%, var(--dwc-gold)) 50%,
+    #f7e2b0 78%,
+    color-mix(in srgb, var(--dwc-gold) 80%, #f0cf86) 100%
   );
   background: transparent;
 }
@@ -165,7 +167,9 @@ html body .load-gate.has-cine > .dwc-shutter > i::after {
   position: absolute;
   content: "";
   opacity: 0;
-  box-shadow: 0 0 14px color-mix(in srgb, var(--dwc-accent) 44%, transparent);
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--dwc-accent) 46%, transparent),
+    0 0 4px color-mix(in srgb, var(--dwc-gold) 36%, transparent);
 }
 
 html body .load-gate.has-cine > .dwc-shutter > i.is-left::after,
@@ -173,7 +177,10 @@ html body .load-gate.has-cine > .dwc-shutter > i.is-right::after {
   top: 0;
   bottom: 0;
   width: 1.5px;
-  background: var(--dwc-prism-v, linear-gradient(180deg, #7ae8ff, #ff5fc8 34%, #ff5cc8 66%, #f0cf86));
+  background: var(
+    --dwc-prism-v,
+    linear-gradient(180deg, #7ae8ff 0%, #bcefff 26%, #9ee6f5 50%, #f7e2b0 76%, #f0cf86 100%)
+  );
 }
 
 html body .load-gate.has-cine > .dwc-shutter > i.is-left::after {
@@ -189,7 +196,10 @@ html body .load-gate.has-cine > .dwc-shutter > i.is-bottom::after {
   right: 0;
   left: 0;
   height: 1.5px;
-  background: var(--dwc-prism, linear-gradient(90deg, #7ae8ff, #ff5fc8, #ff5cc8, #f0cf86));
+  background: var(
+    --dwc-prism,
+    linear-gradient(90deg, #7ae8ff 0%, #bcefff 26%, #9ee6f5 50%, #f7e2b0 76%, #f0cf86 100%)
+  );
 }
 
 html body .load-gate.has-cine > .dwc-shutter > i.is-top::after {
@@ -253,10 +263,11 @@ html body .load-gate.has-cine > .dwc-carry::before {
     inset 1px 1px 0 color-mix(in srgb, var(--dwc-lock) 44%, transparent),
     inset -2px -2px 0 rgb(1 5 12 / 0.76),
     inset 0 -28px 34px rgb(1 5 12 / 0.24);
+  opacity: 1;
 }
 
 html body .load-gate.has-cine.is-revealing > .dwc-carry::before {
-  display: none;
+  opacity: 0;
 }
 
 /* The page is the reader's again as soon as the shutter starts to lift. */
@@ -635,6 +646,10 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
 /* ---- Full motion ------------------------------------------------------- */
 
 @media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) body .load-gate.has-cine > .dwc-carry::before {
+    transition: opacity 210ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   html:not([data-world-effects="economy"]) body .load-gate.has-cine.is-cine-full {
     animation: none;
   }

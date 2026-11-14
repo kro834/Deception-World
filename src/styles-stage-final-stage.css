@@ -262,8 +262,116 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   content: none;
 }
 
+/* Harmonize the cinema arrival's shutter iris edges with the 2.39:1 screen:
+   silent and invisible at rest, parting once from the centre in the stage's
+   violet and lamplight palette. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo .rxs-orbit {
-  display: none;
+  display: block;
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  bottom: 10px;
+  width: 50%;
+  border: 0;
+  border-radius: 0;
+  transform: none;
+  opacity: 0;
+  animation-name: none;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .fst-hero
+  .fst-hero-logo
+  > .rxs-orbit-a {
+  inset-inline: 0 auto;
+  background: linear-gradient(
+      180deg,
+      transparent,
+      var(--fsx-violet) 26%,
+      var(--fsx-lilac) 74%,
+      transparent
+    )
+    0 0 / 1.5px 100% no-repeat;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .fst-hero
+  .fst-hero-logo
+  > .rxs-orbit-b {
+  inset-inline: auto 0;
+  background: linear-gradient(
+      180deg,
+      transparent,
+      var(--fsx-lamp) 26%,
+      var(--fsx-violet) 74%,
+      transparent
+    )
+    100% 0 / 1.5px 100% no-repeat;
+}
+
+@keyframes dxs-fst-iris-a {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scaleY(0.38);
+  }
+  18% {
+    opacity: 0.92;
+  }
+  76% {
+    opacity: 0.46;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0) scaleY(1);
+  }
+}
+
+@keyframes dxs-fst-iris-b {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%) scaleY(0.38);
+  }
+  18% {
+    opacity: 0.92;
+  }
+  76% {
+    opacity: 0.46;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .fst-hero-logo
+    > .rxs-orbit-a {
+    animation: dxs-fst-iris-a 720ms var(--fsc-project, cubic-bezier(0.16, 1, 0.3, 1))
+      var(--fsc-delay, 120ms) both;
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not(
+      [data-loading]
+    ):not([data-dialog-open])
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .fst-hero-logo
+    > .rxs-orbit-b {
+    animation: dxs-fst-iris-b 720ms var(--fsc-project, cubic-bezier(0.16, 1, 0.3, 1))
+      var(--fsc-delay, 120ms) both;
+  }
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo img {
@@ -1196,6 +1304,15 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::before,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section::before {
     content: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .fst-hero
+    .fst-hero-logo
+    .rxs-orbit {
+    display: none;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-index span {

@@ -237,7 +237,9 @@ void main() {
     vec3 seamTint = mix(vec3(0.24, 0.98, 0.44), vec3(0.82, 1.0, 0.84), clamp(uFire.w * 0.7 + seam * 0.35, 0.0, 1.0));
     charred += seamTint * (trim * 0.76 + seam) * heat * body * (0.62 + 0.72 * nf.g) * (1.0 + uFire.w * 1.3);
     charred += ramp(0.64) * 0.27 * lit * uFire.y * (1.0 - heat * 0.55) * mix(1.0, 0.5 + 0.5 * body, opaque);
-    charred = mix(charred, vec3(0.76, 1.0, 0.8), uFire.w * 0.54 * body * (0.4 + 0.6 * trim));
+    float reactorSpike = exp(-fn * fn * 16.0) * uFire.w * uFire.w * 0.85 * body;
+    charred += vec3(0.88, 1.0, 0.92) * reactorSpike;
+    charred = mix(charred, vec3(0.88, 1.0, 0.92), uFire.w * 0.68 * body * (0.35 + 0.65 * trim));
     // It breaks up in cells, from the reactor out.
     vec2 id = hexCell(pw, uHex.y);
     // (Capped: every point of the canvas is gone by the shatter's end.)
@@ -333,13 +335,14 @@ void main() {
       celled = mix(celled, celled * 0.4 + mix(ICE, PINK, 0.35) * 0.16, cut * (1.0 - smoothstep(0.6, 2.4, age)));
       nc = mix(liquid, celled, solid);
       float lip = 1.0 - smoothstep(0.0, 0.22, af);
-      nc += vec3(0.92, 0.96, 1.0) * lip * 0.96;
-      nc += mix(ICE, PINK, hash(floor(p / 9.0))) * lip * 0.28;
+      float lipSpike = exp(-af * af * 42.0);
+      nc += vec3(0.96, 0.98, 1.0) * (lip * 0.98 + lipSpike * 0.45);
+      nc += mix(ICE, PINK, hash(floor(p / 9.0))) * lip * 0.35;
       newA = to.a * mix(mix(uLate.y * 0.9, 1.0, smoothstep(0.0, 0.06, af)), 1.0, opaque);
     } else {
       // The lip's shadow and faint leading prism fringe, just ahead of it.
       float ahead = smoothstep(-0.6, 0.0, af);
-      nc = nc * (1.0 - 0.45 * ahead) + mix(ICE, PINK, ns.b) * 0.06 * smoothstep(-0.22, 0.0, af);
+      nc = nc * (1.0 - 0.52 * ahead) + mix(ICE, PINK, ns.b) * 0.08 * smoothstep(-0.25, 0.0, af);
     }
     // A whole painting: only its figure is built; the rest simply stands.
     float figure = mix(1.0, smoothstep(0.3, 0.62, fld.a), opaque);

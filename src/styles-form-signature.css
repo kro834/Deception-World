@@ -2177,17 +2177,108 @@ html[data-world-effects="economy"]
   }
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
-    :where([data-form-theme="explom"], [data-form-theme="kemonohen"])
+    :where([data-form-theme="explom"], [data-form-theme="kemonohen"], [data-form-theme="custom"])
     :is(.form-pickup-copy, .form-pickup-heading)
     > em {
     color: CanvasText;
+    background: none;
     text-shadow: none;
     border-color: CanvasText;
   }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup[data-form-theme="custom"]
+    .form-pickup-card,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog[data-form-theme="custom"],
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog[data-form-theme="custom"]
+    > .form-pickup-panel,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-dialog[data-form-theme="custom"]
+    .form-pickup-sections
+    > section
+    > div,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    .form-pickup-gallery
+    > figure[data-form-theme="custom"] {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
 }
 
-/* ── オーバーゼッツ カスタム: the names in the mechanical face, cut by a
-   cyan instrument line; reading text keeps the site's gothic. ── */
+/* ── オーバーゼッツ カスタム: cyan mechanical blueprint grid, vernier caliper
+   scale bevels & mechanical display face; reading prose keeps site gothic. ── */
+[data-form-theme="custom"] {
+  --custom-cad-grid:
+    linear-gradient(rgb(79 243 255 / 9%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(79 243 255 / 9%) 1px, transparent 1px),
+    linear-gradient(rgb(79 243 255 / 3.6%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(79 243 255 / 3.6%) 1px, transparent 1px);
+  --custom-calipers:
+    linear-gradient(var(--signature-light) 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(var(--signature-light) 0 0) 0 0 / 2px 16px no-repeat,
+    linear-gradient(var(--signature-light) 0 0) 100% 0 / 16px 2px no-repeat,
+    linear-gradient(var(--signature-light) 0 0) 100% 0 / 2px 16px no-repeat,
+    linear-gradient(var(--signature-hot) 0 0) 0 100% / 16px 2px no-repeat,
+    linear-gradient(var(--signature-hot) 0 0) 0 100% / 2px 16px no-repeat,
+    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 16px no-repeat;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"] {
+  --sd-accent: var(--signature-light);
+  --sd-rule: var(--signature-light);
+  --sd-glow: var(--signature-wash);
+  --sd-glow-soft: var(--signature-wash);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-card {
+  position: relative;
+  border: 1px solid rgb(79 243 255 / 36%);
+  border-top: 2px solid var(--signature-light);
+  background:
+    var(--custom-calipers),
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 62%) 0 1px, transparent 1px 40px) 18px 0 /
+      calc(100% - 36px) 7px no-repeat,
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 34%) 0 1px, transparent 1px 8px) 18px 0 /
+      calc(100% - 36px) 4px no-repeat,
+    repeating-linear-gradient(90deg, rgb(31 184 214 / 48%) 0 1px, transparent 1px 40px) 18px 100% /
+      calc(100% - 36px) 6px no-repeat,
+    repeating-linear-gradient(90deg, rgb(31 184 214 / 28%) 0 1px, transparent 1px 8px) 18px 100% /
+      calc(100% - 36px) 3px no-repeat,
+    linear-gradient(rgb(79 243 255 / 8.5%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, rgb(79 243 255 / 8.5%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(rgb(79 243 255 / 3.4%) 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(90deg, rgb(79 243 255 / 3.4%) 1px, transparent 1px) 0 0 / 16px 16px,
+    radial-gradient(ellipse 58% 48% at 88% 24%, rgb(79 243 255 / 12%), transparent 70%),
+    linear-gradient(165deg, #09131c 0%, var(--signature-ink) 64%);
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 38%),
+    inset 0 -1px 0 rgb(31 184 214 / 36%),
+    inset 0 0 0 1px rgb(79 243 255 / 16%),
+    0 20px 46px rgb(0 0 0 / 48%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-copy {
+  border-bottom: 1px solid rgb(79 243 255 / 38%);
+}
+
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   [data-form-theme="custom"]
@@ -2210,11 +2301,79 @@ html[data-family="dossier"]
   :is(.form-pickup-copy, .form-pickup-heading)
   > em {
   display: inline-block;
-  padding: 2px 0 8px;
+  padding: 2px 0 11px;
   border-bottom: 2px solid var(--signature-light);
+  background:
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 68%) 0 1px, transparent 1px 32px) 0 100% /
+      100% 6px no-repeat,
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 38%) 0 1px, transparent 1px 8px) 0 100% /
+      100% 3px no-repeat;
   color: var(--signature-light);
   font-size: clamp(28px, 5vw, 52px);
   text-shadow: 0 0 18px rgb(79 243 255 / 35%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="custom"] {
+  --pc-lock: var(--signature-light);
+  --pc-accent: var(--signature-hot);
+  --pc-gold: var(--signature-light);
+  --pc-edge: rgb(79 243 255 / 36%);
+  --pc-plate: var(--signature-ink);
+  --manager-accent: var(--signature-light);
+  border-color: rgb(79 243 255 / 48%);
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 32%),
+    0 28px 80px rgb(0 0 0 / 78%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="custom"]
+  > .form-pickup-panel {
+  position: relative;
+  isolation: isolate;
+  background:
+    var(--custom-calipers),
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 54%) 0 1px, transparent 1px 40px) 18px 0 /
+      calc(100% - 36px) 7px no-repeat,
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 30%) 0 1px, transparent 1px 8px) 18px 0 /
+      calc(100% - 36px) 4px no-repeat,
+    linear-gradient(rgb(79 243 255 / 7.5%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, rgb(79 243 255 / 7.5%) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(rgb(79 243 255 / 3%) 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(90deg, rgb(79 243 255 / 3%) 1px, transparent 1px) 0 0 / 16px 16px,
+    radial-gradient(ellipse 56% 42% at 92% 0%, rgb(79 243 255 / 12%), transparent 70%),
+    linear-gradient(180deg, #08121b 0%, var(--signature-ink) 48%);
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 28%),
+    inset 0 -1px 0 rgb(31 184 214 / 30%),
+    inset 0 0 0 1px rgb(79 243 255 / 14%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="custom"]
+  .form-pickup-sections
+  > section
+  > div {
+  border: 1px solid rgb(79 243 255 / 26%);
+  border-left: 3px solid var(--signature-light);
+  background:
+    linear-gradient(var(--signature-light) 0 0) 100% 0 / 12px 2px no-repeat,
+    linear-gradient(var(--signature-light) 0 0) 100% 0 / 2px 12px no-repeat,
+    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 12px 2px no-repeat,
+    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 12px no-repeat,
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 36%) 0 1px, transparent 1px 12px) 0 0 /
+      calc(100% - 14px) 3px no-repeat,
+    linear-gradient(rgb(79 243 255 / 4%) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgb(79 243 255 / 4%) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(135deg, rgb(79 243 255 / 7%), transparent 52%),
+    #060d14;
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 22%),
+    inset 0 -1px 0 rgb(31 184 214 / 20%);
 }
 
 html[data-family="dossier"]
@@ -2244,6 +2403,16 @@ html[data-family="dossier"]
   .form-pickup-gallery
   > figure[data-form-theme="custom"] {
   border-color: var(--signature-light);
+  background:
+    var(--custom-calipers),
+    repeating-linear-gradient(90deg, rgb(79 243 255 / 34%) 0 1px, transparent 1px 10px) 16px 0 /
+      calc(100% - 32px) 3px no-repeat,
+    linear-gradient(rgb(79 243 255 / 5%) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgb(79 243 255 / 5%) 1px, transparent 1px) 0 0 / 24px 24px,
+    var(--signature-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 26%),
+    inset 0 0 0 1px rgb(79 243 255 / 16%);
 }
 
 /* Attribute groups (e.g. Over Zeztz Custom's four dream attributes). */

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { watchDreamCabinetBookmark, type DreamCabinetBookmark } from "@/lib/dream-cabinet-guide.js";
 import { DREAM_CASES } from "./dream-chapter-data";
 
@@ -49,6 +49,7 @@ export function DreamKarakuriCabinet() {
       id="dream-karakuri-cabinet"
       data-dream-karakuri
       aria-labelledby={`${identity}-title`}
+      style={{ "--karakuri-index": selected } as CSSProperties}
     >
       <header className="dream-karakuri-heading">
         <h2 id={`${identity}-title`}>からくり章案内</h2>
@@ -85,6 +86,64 @@ export function DreamKarakuriCabinet() {
         </div>
         <div className="dream-karakuri-drawer-label" aria-hidden="true">
           <span>物語之匣</span>
+          <span className="dream-karakuri-gearbox">
+            <svg
+              className="dream-karakuri-gear dream-karakuri-gear--drive"
+              viewBox="0 0 36 36"
+              focusable="false"
+            >
+              <circle
+                cx="18"
+                cy="18"
+                r="13.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3.6"
+                strokeDasharray="3.534 3.534"
+              />
+              <circle
+                cx="18"
+                cy="18"
+                r="10.8"
+                fill="#1d1215"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M18 7.5v21M7.5 18h21M10.6 10.6l14.8 14.8M25.4 10.6L10.6 25.4"
+                stroke="currentColor"
+                strokeWidth="1.35"
+              />
+              <circle cx="18" cy="18" r="3.6" fill="currentColor" />
+              <circle cx="18" cy="18" r="1.4" fill="#1b1013" />
+            </svg>
+            <svg
+              className="dream-karakuri-gear dream-karakuri-gear--pinion"
+              viewBox="0 0 28 28"
+              focusable="false"
+            >
+              <circle
+                cx="14"
+                cy="14"
+                r="9.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3.2"
+                strokeDasharray="3.848 3.848"
+              />
+              <circle
+                cx="14"
+                cy="14"
+                r="7.4"
+                fill="#1d1215"
+                stroke="currentColor"
+                strokeWidth="1.6"
+              />
+              <path d="M14 6.8v14.4M6.8 14h14.4" stroke="currentColor" strokeWidth="1.3" />
+              <circle cx="14" cy="14" r="2.8" fill="currentColor" />
+              <circle cx="14" cy="14" r="1.1" fill="#1b1013" />
+            </svg>
+          </span>
         </div>
         <div className="dream-karakuri-tabs" role="tablist" aria-label="あらすじを選ぶ">
           {DREAM_CASES.map((chapter, index) => (
@@ -106,7 +165,33 @@ export function DreamKarakuriCabinet() {
             >
               <span className="dream-karakuri-tab-number">巻之{VOLUMES[index]}</span>
               <strong>{chapter.title}</strong>
-              <span className="dream-karakuri-handle" aria-hidden="true" />
+              <span className="dream-karakuri-handle" aria-hidden="true">
+                <svg className="dream-karakuri-handle-svg" viewBox="0 0 44 18" focusable="false">
+                  <g transform="translate(22 8)">
+                    <g className="dream-karakuri-handle-cog">
+                      <circle
+                        r="5.2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.1"
+                        strokeDasharray="2.042 2.042"
+                      />
+                      <circle r="3.6" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                      <path d="M0-3.6v7.2M-3.6 0h7.2" stroke="currentColor" strokeWidth="1" />
+                    </g>
+                  </g>
+                  <circle cx="8" cy="5.5" r="2.1" fill="currentColor" />
+                  <circle cx="36" cy="5.5" r="2.1" fill="currentColor" />
+                  <path
+                    className="dream-karakuri-handle-bail"
+                    d="M8 5.5v4.5c0 3 2.6 5.2 6.2 5.2h15.6c3.6 0 6.2-2.2 6.2-5.2V5.5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
             </button>
           ))}
         </div>

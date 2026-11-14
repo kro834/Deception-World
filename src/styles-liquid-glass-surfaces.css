@@ -56,6 +56,11 @@ html[data-button-style="liquid"] [data-lg-lit] {
   --lgs-frame:
     /* the specular rim, lit from the light's side */
     inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.3),
+    /* counter-phase transmitted caustic glow pooled along the opposite inner rim */
+    inset calc(var(--lg-lx) * 9px) calc(var(--lg-ly) * 11px) 24px -12px rgb(122 232 255 / 0.26),
+    inset calc(var(--lg-lx) * 5px) calc(var(--lg-ly) * 6px) 12px -7px rgb(255 244 218 / 0.18),
+    /* diagonal optical coating shimmer across the opposing bevel */
+    inset calc(var(--lg-lx) * -4px) calc(var(--lg-ly) * 4px) 16px -10px rgb(233 246 255 / 0.14),
     /* the specular top: a soft band of light under the upper rim */ inset 0 30px 38px -32px
       rgb(255 255 255 / 0.17),
     /* the refracting rim: warm on one side, cool on the other */ inset 3px 0 5px -3px
@@ -73,6 +78,9 @@ html[data-button-style="liquid"] [data-lg-lit] {
   /* A panel inside a page: the same light without the bezel. */
   --lgs-panel:
     inset calc(var(--lg-lx) * -1px) calc(var(--lg-ly) * -1px) 0 0 rgb(255 255 255 / 0.26),
+    inset calc(var(--lg-lx) * 7px) calc(var(--lg-ly) * 9px) 20px -10px rgb(122 232 255 / 0.24),
+    inset calc(var(--lg-lx) * 4px) calc(var(--lg-ly) * 5px) 10px -6px rgb(255 244 218 / 0.15),
+    inset calc(var(--lg-lx) * -3px) calc(var(--lg-ly) * 3px) 14px -9px rgb(233 246 255 / 0.12),
     inset 0 24px 30px -26px rgb(255 255 255 / 0.15), inset 2px 0 4px -2px rgb(255 92 168 / 0.24),
     inset -2px 0 4px -2px rgb(72 206 255 / 0.28), inset 0 0 0 0.5px rgb(255 255 255 / 0.12),
     0 1px 2px rgb(0 0 0 / 0.3), 0 18px 40px -22px rgb(0 0 0 / 0.72);
@@ -133,6 +141,13 @@ html[data-button-style="liquid"]
       .side-panel-head
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     background-color: rgb(var(--lgs-ink) / var(--lgs-bar-a)) !important;
+    background-image: linear-gradient(
+      116deg,
+      rgb(255 255 255 / 0) 18%,
+      rgb(255 255 255 / 0.05) 34%,
+      rgb(122 232 255 / 0.04) 46%,
+      rgb(255 255 255 / 0) 62%
+    ) !important;
     -webkit-backdrop-filter: blur(var(--lgs-blur)) saturate(var(--lgs-sat))
       brightness(var(--lgs-dim)) !important;
     backdrop-filter: blur(var(--lgs-blur)) saturate(var(--lgs-sat)) brightness(var(--lgs-dim)) !important;
@@ -430,6 +445,7 @@ html[data-button-style="liquid"][data-world-effects="economy"]
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     border-color: CanvasText !important;
     background-color: Canvas !important;
+    background-image: none !important;
     box-shadow: none !important;
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;

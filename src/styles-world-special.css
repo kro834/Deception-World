@@ -287,6 +287,20 @@ html[data-family="world"]:root
 }
 
 @media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-contents
+    > .ws-map
+    a {
+    background: repeating-linear-gradient(
+        90deg,
+        rgb(var(--ws-accent-rgb) / 36%) 0 1px,
+        transparent 1px 8px
+      )
+      calc(100% - 34px) 100% / 65px 4px no-repeat;
+  }
+
   /* A light runs in from the numeral on hover and focus. */
   html[data-family="world"]:root
     body
@@ -426,7 +440,7 @@ html[data-family="world"]:root
 
   @media (forced-colors: none) {
     /* The plate: the chapter's light at the top edge, its tint in the
-       corner, the corner ticks; the pink at the foot. */
+       corner, precision calibration ticks, and the corner ticks; the pink at the foot. */
     html[data-family="world"]:root
       body
       main.site-shell.film-edition.mirage-edition
@@ -449,6 +463,18 @@ html[data-family="world"]:root
         linear-gradient(var(--ws-pink) 0 0) 0 100% / 1px 16px no-repeat,
         linear-gradient(var(--ws-pink) 0 0) 100% 100% / 16px 1px no-repeat,
         linear-gradient(var(--ws-pink) 0 0) 100% 100% / 1px 16px no-repeat,
+        repeating-linear-gradient(
+            90deg,
+            rgb(var(--ws-accent-rgb) / 48%) 0 1px,
+            transparent 1px 10px
+          )
+          calc(100% - 22px) 0 / 71px 5px no-repeat,
+        repeating-linear-gradient(
+            180deg,
+            rgb(var(--ws-accent-rgb) / 34%) 0 1px,
+            transparent 1px 8px
+          )
+          100% 50% / 4px 49px no-repeat,
         linear-gradient(90deg, var(--ws-accent), var(--ws-pink) 58%, transparent) 0 0 / 62% 1px
           no-repeat,
         radial-gradient(
@@ -694,6 +720,25 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     opacity: 0;
   }
 
+  /* Precision Vernier scale ticks alongside the chapter rail. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: -8px;
+    width: 4px;
+    height: calc(100% - 6px);
+    background: repeating-linear-gradient(
+      180deg,
+      rgb(122 232 255 / 32%) 0 1px,
+      transparent 1px 6px
+    );
+    pointer-events: none;
+  }
+
   html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-rail > ol {
     position: relative;
     display: grid;
@@ -781,6 +826,21 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     body
     main.site-shell.film-edition.mirage-edition
     > .ws-rail
+    li::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    width: 6px;
+    height: 1px;
+    translate: 0 -50%;
+    background: rgb(122 232 255 / 48%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
     li[data-on] {
     border-color: #fff;
     background: var(--ws-dot);
@@ -788,6 +848,16 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
       0 0 0 3px rgb(var(--ws-pink-rgb) / 26%),
       0 0 14px rgb(var(--ws-pink-rgb) / 56%);
     scale: 1.45;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .ws-rail
+    li[data-on]::before {
+    width: 7px;
+    background: var(--ws-dot);
+    box-shadow: 0 0 6px var(--ws-dot);
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -802,8 +872,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
 }
 
 /* ----------------------------------------------------------------
-   5. The end of the record: the doors to the three special sites, each
-      shown by its form (the side menu's own tiles) in its site's light
+   5. The end of the record: the five doors to the special sites, each
+      shown by its form (the side menu's own tiles) with edition prism
+      bevels, silent numeral watermarks, and a one-shot light sweep
    ---------------------------------------------------------------- */
 html[data-family="world"]:root
   body
@@ -818,39 +889,6 @@ html[data-family="world"]:root
   margin: 14px 0 8px;
 }
 
-@media (min-width: 1000px) {
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > footer
-    > .ws-doors {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.25fr);
-    gap: 16px;
-    width: min(100%, 1120px);
-  }
-
-  /* ファーフロム ends, a little larger: a wider door after the four. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > footer
-    > .ws-doors
-    > a.is-far-from {
-    grid-row: 1 / span 2;
-    grid-column: 3;
-  }
-}
-
-/* ファーフロム, a little larger, at every width. */
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > footer
-  > .ws-doors
-  > a.is-far-from {
-  min-height: 136px;
-}
-
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
@@ -860,7 +898,10 @@ html[data-family="world"]:root
   --ws-door: #ffd57a;
   --ws-door-rgb: 255 213 122;
   --ws-door-2: #ff9d4a;
+  --ws-door-2-rgb: 255 157 74;
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr) 22px;
   align-items: center;
@@ -869,7 +910,7 @@ html[data-family="world"]:root
   min-height: 112px;
   box-sizing: border-box;
   padding: 8px 18px 8px 8px;
-  border: 1px solid rgb(var(--ws-door-rgb) / 30%);
+  border: 1px solid rgb(var(--ws-door-rgb) / 34%);
   border-radius: 0;
   background: rgb(10 8 8 / 82%);
   color: var(--sw-text);
@@ -891,6 +932,29 @@ html[data-family="world"]:root
     translate 220ms ease;
 }
 
+/* ファーフロム, a little larger, at every width. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  grid-template-columns: 88px minmax(0, 1fr) 22px;
+  min-height: 136px;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-extreme {
+  --ws-door: #ffd57a;
+  --ws-door-rgb: 255 213 122;
+  --ws-door-2: #ff9d4a;
+  --ws-door-2-rgb: 255 157 74;
+}
+
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
@@ -900,17 +964,7 @@ html[data-family="world"]:root
   --ws-door: #79e8ff;
   --ws-door-rgb: 121 232 255;
   --ws-door-2: #ff8fd8;
-}
-
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > footer
-  > .ws-doors
-  > a.is-far-from {
-  --ws-door: #c99bff;
-  --ws-door-rgb: 201 155 255;
-  --ws-door-2: #7fe6ff;
+  --ws-door-2-rgb: 255 143 216;
 }
 
 html[data-family="world"]:root
@@ -922,6 +976,7 @@ html[data-family="world"]:root
   --ws-door: #a6e6ff;
   --ws-door-rgb: 166 230 255;
   --ws-door-2: #e9b866;
+  --ws-door-2-rgb: 233 184 102;
 }
 
 html[data-family="world"]:root
@@ -933,6 +988,19 @@ html[data-family="world"]:root
   --ws-door: #ffb44a;
   --ws-door-rgb: 255 180 74;
   --ws-door-2: #7fe6ff;
+  --ws-door-2-rgb: 127 230 255;
+}
+
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from {
+  --ws-door: #c99bff;
+  --ws-door-rgb: 201 155 255;
+  --ws-door-2: #7fe6ff;
+  --ws-door-2-rgb: 127 230 255;
 }
 
 @media (forced-colors: none) {
@@ -943,15 +1011,113 @@ html[data-family="world"]:root
     > .ws-doors
     > a {
     background:
-      linear-gradient(90deg, var(--ws-door), var(--ws-door-2) 58%, transparent) 0 0 / 70% 1px
+      linear-gradient(var(--ws-door) 0 0) 0 0 / 16px 1.5px no-repeat,
+      linear-gradient(var(--ws-door) 0 0) 0 0 / 1.5px 16px no-repeat,
+      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 16px 1.5px no-repeat,
+      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 1.5px 16px no-repeat,
+      linear-gradient(90deg, var(--ws-door), var(--ws-door-2) 58%, transparent) 0 0 / 74% 1px
         no-repeat,
-      radial-gradient(80% 120% at 0 50%, rgb(var(--ws-door-rgb) / 14%), transparent 70%),
-      rgb(10 8 8 / 86%);
+      linear-gradient(270deg, var(--ws-door-2), var(--ws-door) 54%, transparent) 100% 100% / 64%
+        1px no-repeat,
+      radial-gradient(82% 125% at 0 50%, rgb(var(--ws-door-rgb) / 16%), transparent 70%),
+      radial-gradient(64% 100% at 100% 100%, rgb(var(--ws-door-2-rgb) / 10%), transparent 72%),
+      rgb(8 10 16 / 88%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 16%),
-      inset 0 0 20px -8px rgb(var(--ws-door-rgb) / 28%),
-      inset 0 0 0 1px rgb(var(--ws-door-rgb) / 16%),
-      0 4px 20px rgb(0 0 0 / 56%);
+      inset 0 1px 0 rgb(255 255 255 / 20%),
+      inset 1px 0 0 rgb(var(--ws-door-rgb) / 36%),
+      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 30%),
+      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 40%),
+      inset 0 0 0 1px rgb(var(--ws-door-rgb) / 18%),
+      inset 0 0 22px -8px rgb(var(--ws-door-rgb) / 32%),
+      0 6px 22px rgb(0 0 0 / 58%);
+  }
+
+  /* Silent numeral watermarks (01-05) in each door's prism light. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a::before {
+    position: absolute;
+    right: 14px;
+    bottom: -5px;
+    z-index: 0;
+    color: transparent;
+    font: 700 clamp(44px, 4.4vw, 60px) / 0.82 var(--sw-mono);
+    letter-spacing: -0.04em;
+    -webkit-text-stroke: 1px rgb(var(--ws-door-rgb) / 22%);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-extreme::before {
+    content: "01" / "";
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-rexonance::before {
+    content: "02" / "";
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-illusionculum::before {
+    content: "03" / "";
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-meta-unitas::before {
+    content: "04" / "";
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-far-from::before {
+    content: "05" / "";
+  }
+
+  /* Specular prism sweep layer (fires once on mouse hover). */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(var(--ws-door-rgb) / 0%) 30%,
+      rgb(255 255 255 / 22%) 48%,
+      rgb(var(--ws-door-2-rgb) / 26%) 56%,
+      transparent 72%
+    );
+    opacity: 0;
+    transform: translateX(-115%) skewX(-22deg);
+    pointer-events: none;
   }
 }
 
@@ -963,14 +1129,81 @@ html[data-family="world"]:root
   > .ws-doors
   > a
   > img {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 76px;
   height: 96px;
   object-fit: cover;
   object-position: 50% 18%;
-  border: 1px solid rgb(var(--ws-door-rgb) / 34%);
+  border: 1px solid rgb(var(--ws-door-rgb) / 38%);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
   transition: filter 240ms ease;
+}
+
+/* Phones and portrait tablets: anchor Far From at y = 0% so >= 90% of the
+   helmet stays in frame. */
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a.is-far-from
+  > img {
+  width: 88px;
+  height: 118px;
+  object-position: 50% 0%;
+}
+
+@media (min-width: 1000px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 1.32fr);
+    gap: 16px;
+    width: min(100%, 1140px);
+  }
+
+  /* ファーフロム ends, spanning both rows with an expanded portrait ratio. */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-far-from {
+    grid-row: 1 / span 2;
+    grid-column: 3;
+    grid-template-columns: clamp(132px, 12.6vw, 158px) minmax(0, 1fr) 24px;
+    gap: 0 20px;
+    padding: 12px 22px 12px 12px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-far-from
+    > img {
+    width: clamp(132px, 12.6vw, 158px);
+    height: clamp(196px, 18.2vw, 216px);
+    object-position: 50% 14%;
+  }
+
+  @media (forced-colors: none) {
+    html[data-family="world"]:root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > footer
+      > .ws-doors
+      > a.is-far-from::before {
+      right: 16px;
+      bottom: -7px;
+      font-size: clamp(72px, 7vw, 102px);
+    }
+  }
 }
 
 html[data-family="world"]:root
@@ -980,6 +1213,8 @@ html[data-family="world"]:root
   > .ws-doors
   > a
   > span {
+  position: relative;
+  z-index: 2;
   min-width: 0;
   font: 700 clamp(16px, 1.5vw, 19px) / 1.4 var(--sw-display);
   letter-spacing: 0.04em;
@@ -996,6 +1231,7 @@ html[data-family="world"]:root
   > a
   > i {
   position: relative;
+  z-index: 2;
   justify-self: end;
   width: 12px;
   height: 12px;
@@ -1062,11 +1298,25 @@ html[data-family="world"]:root
     border-color: var(--ws-door);
     background-color: rgb(var(--ws-door-rgb) / 16%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 28%),
-      inset 0 0 28px -6px rgb(var(--ws-door-rgb) / 42%),
+      inset 0 1px 0 rgb(255 255 255 / 32%),
+      inset 1px 0 0 rgb(var(--ws-door-rgb) / 56%),
+      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 48%),
+      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 62%),
+      inset 0 0 28px -6px rgb(var(--ws-door-rgb) / 44%),
       0 8px 28px rgb(0 0 0 / 64%),
       0 0 24px -4px rgb(var(--ws-door-rgb) / 38%);
     translate: 0 -2px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    html[data-family="world"]:not([data-world-effects="economy"]):root
+      body
+      main.site-shell.film-edition.mirage-edition
+      > footer
+      > .ws-doors
+      > a:hover::after {
+      animation: ws-door-sweep 680ms cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+    }
   }
 
   html[data-family="world"]:root
@@ -1102,6 +1352,29 @@ html[data-family="world"]:root
   }
 }
 
+@keyframes ws-door-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-115%) skewX(-22deg);
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(125%) skewX(-22deg);
+  }
+}
+
+html[data-family="world"][data-world-effects="economy"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a::after {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html[data-family="world"]:root
     body
@@ -1111,6 +1384,15 @@ html[data-family="world"]:root
     > a {
     translate: none !important;
     transition: none !important;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a::after {
+    animation: none !important;
   }
 
   html[data-family="world"]:root

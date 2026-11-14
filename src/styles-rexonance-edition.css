@@ -130,6 +130,24 @@
   stroke-opacity: 0.3;
 }
 
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-blade-bevel {
+  stroke: #ffffff;
+  stroke-width: 1.1;
+  stroke-opacity: 0.72;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-vernier {
+  stroke: #7ae8ff;
+  stroke-width: 0.8;
+  opacity: 0.32;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-core {
+  stroke: #e3c185;
+  stroke-width: 0.9;
+  opacity: 0.28;
+}
+
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-graduations {
   stroke: #dae4f0;
   stroke-width: 1;

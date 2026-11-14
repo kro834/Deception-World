@@ -39,23 +39,27 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   --ext-ink-2: #0d0a06;
   --ext-plate: linear-gradient(
     170deg,
-    rgb(255 236 190 / 9%) 0,
-    rgb(255 213 122 / 4%) 5%,
-    #120e08 16%,
+    rgb(255 236 190 / 12%) 0,
+    rgb(255 213 122 / 6%) 5%,
+    #140f09 16%,
     #0a0805 60%,
     #050403 100%
   );
-  --ext-bevel: inset 0 1px 0 rgb(255 240 200 / 20%), inset 0 -1px 0 rgb(0 0 0 / 80%);
+  --ext-bevel: inset 0 1px 0 rgb(255 240 200 / 24%), inset 0 -1px 0 rgb(0 0 0 / 85%);
   --ext-gutter: clamp(18px, 4vw, 64px);
   --ext-slant: clamp(28px, 4vw, 64px);
   --ext-speed: repeating-linear-gradient(
     112deg,
-    transparent 0 46px,
-    rgb(255 213 122 / 3.5%) 46px 47px
+    transparent 0 44px,
+    rgb(255 213 122 / 5.5%) 44px 45.5px,
+    transparent 45.5px 90px,
+    rgb(105 219 255 / 3.5%) 90px 91px
   );
   --ext-segments: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px);
   background:
-    radial-gradient(70% 50% at 50% 0, rgb(255 157 74 / 8%), transparent 70%), var(--ext-speed),
+    radial-gradient(70% 50% at 50% 0, rgb(255 157 74 / 11%), transparent 70%),
+    radial-gradient(50% 40% at 85% 20%, rgb(105 219 255 / 4%), transparent 60%),
+    var(--ext-speed),
     var(--ext-ink);
 }
 

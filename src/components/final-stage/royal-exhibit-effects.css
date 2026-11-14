@@ -5,22 +5,32 @@
   z-index: 2;
   overflow: hidden;
   pointer-events: none;
+  --rr-regalia-rgb: 233 207 154;
+  --rr-energy: #7ceff7;
+  --rr-gold: #fce0a0;
+}
+.rr-surge[data-form="royal"] {
+  --rr-regalia-rgb: 233 207 154;
   --rr-energy: #7ceff7;
   --rr-gold: #fce0a0;
 }
 .rr-surge[data-form="wrath"] {
+  --rr-regalia-rgb: 255 95 109;
   --rr-energy: #ff5c68;
   --rr-gold: #ffd494;
 }
 .rr-surge[data-form="abyss"] {
+  --rr-regalia-rgb: 111 242 209;
   --rr-energy: #6ff2d1;
   --rr-gold: #d9e8ff;
 }
 .rr-surge[data-form="birth"] {
+  --rr-regalia-rgb: 135 220 255;
   --rr-energy: #87dcff;
   --rr-gold: #d6fff0;
 }
-.rr-surge[data-form="nehan"] {
+.rr-surge:is([data-form="nehan"], [data-form="ultra"]) {
+  --rr-regalia-rgb: 255 215 122;
   --rr-energy: #e6c6ff;
   --rr-gold: #ffe49c;
 }
@@ -53,6 +63,12 @@
 .rr-surge-route .rr-arc-out {
   stroke: var(--rr-gold);
 }
+.rr-surge-route .rr-coronation-canopy {
+  stroke: rgb(var(--rr-regalia-rgb));
+  stroke-width: 1.5;
+  stroke-dasharray: 0.08 0.03;
+  opacity: 0.68;
+}
 .rr-reactor-charge {
   fill: rgba(255, 244, 206, 0.12);
   stroke: #fff2c0;
@@ -63,6 +79,13 @@
   fill: none;
   stroke: var(--rr-energy);
   stroke-width: 1.35;
+  vector-effect: non-scaling-stroke;
+}
+.rr-reactor-crest {
+  fill: rgba(255, 244, 208, 0.18);
+  stroke: var(--rr-gold);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
 .rr-surge svg {
@@ -158,6 +181,12 @@
   html:not([data-world-effects="economy"]):not([data-rzn-constrained]) .rr-surge-route .rr-arc-out {
     animation-delay: 0.62s;
   }
+  html:not([data-world-effects="economy"]):not([data-rzn-constrained])
+    .rr-surge-route
+    .rr-coronation-canopy {
+    animation-delay: 0.44s;
+    animation-duration: 0.92s;
+  }
   html:not([data-world-effects="economy"]):not([data-rzn-constrained]) .rr-reactor-node {
     animation: rr-reactor-light 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
   }
@@ -211,12 +240,14 @@ html[data-rzn-constrained] .rr-surge-sparks {
 @media (forced-colors: active) {
   .rr-surge-halo,
   .rr-surge-sparks,
-  .rr-surge-route .rr-arc-aura {
+  .rr-surge-route .rr-arc-aura,
+  .rr-surge-route .rr-coronation-canopy {
     display: none;
   }
   .rr-surge-route .rr-arc-core,
   .rr-reactor-charge,
   .rr-reactor-ring,
+  .rr-reactor-crest,
   .rr-surge-crown {
     stroke: Highlight;
     fill: none;

@@ -19,6 +19,12 @@
 :where(.mus-page) {
   --form-slider-light: 255 162 84;
 }
+:where(.fst-page) {
+  --form-slider-light: 170 178 255;
+}
+:where(#realm-royal, #realm-royal-pickup, .fst-rr, .fst-rr-form-tabs) {
+  --form-slider-light: 233 211 160;
+}
 
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs,
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {

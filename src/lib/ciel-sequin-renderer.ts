@@ -478,7 +478,7 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
           target = sequinStrokeTarget(dx, dy),
           direction = target > 1 ? 1 : -1;
         brushSequinGrid(grid, lastX, lastY, p.x, p.y, coarse ? 34 : 27, (i, weight) => {
-          if (weight > 0.08)
+          if (weight > 0.08) {
             retarget(
               i,
               target,
@@ -488,6 +488,19 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
               direction * (2 + weight * 3),
               calm ? 0 : sequinBrushDelay(weight),
             );
+          } else if (weight > 0.01 && !calm) {
+            // Delicate ripple energy propagation to fringe discs without flipping face
+            const currentTarget = motion[i * 4 + 2];
+            retarget(
+              i,
+              currentTarget,
+              dy / length,
+              dx / length,
+              time,
+              direction * (weight * 1.5),
+              0.045 + (0.08 - weight) * 0.2,
+            );
+          }
         });
         activeUntil = time + SEQUIN_SPRING.settle + 0.065;
         report();
@@ -605,8 +618,17 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
       if (disposed) return;
       const time = clock(),
         target = face === "back" ? Math.PI : 0;
-      for (let i = 0; i < grid.count; i++) retarget(i, target, 0, 1, time, 0);
-      activeUntil = time + SEQUIN_SPRING.settle;
+      const cx = grid.width * 0.5,
+        cy = grid.height * 0.5,
+        maxDist = Math.hypot(cx, cy);
+      const maxCascade = calm ? 0 : 0.038;
+      for (let i = 0; i < grid.count; i++) {
+        sequinGridCenter(grid, i, centerScratch);
+        const dist = Math.hypot(centerScratch[0] - cx, centerScratch[1] - cy) / Math.max(1, maxDist);
+        const delay = calm ? 0 : dist * maxCascade;
+        retarget(i, target, 0, 1, time, 0, delay);
+      }
+      activeUntil = time + SEQUIN_SPRING.settle + maxCascade;
       report();
       wake();
     },

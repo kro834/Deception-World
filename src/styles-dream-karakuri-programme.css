@@ -139,30 +139,54 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame
   position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) 36px;
-  padding-block: 13px;
+  padding-block: 15px;
 }
 
+/* 上下紫檀軸木＋真鍮擬宝珠軸頭（Turned shitan rosewood scroll rollers + brass giboshi finials） */
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame::before,
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame::after {
   content: "";
   position: absolute;
-  z-index: 1;
-  left: 20px;
-  right: 20px;
-  height: 15px;
-  border: 1px solid #271b18;
-  border-radius: 3px;
+  z-index: 2;
+  left: 12px;
+  right: 12px;
+  height: 17px;
+  border: 1px solid #1e0f10;
+  border-radius: 999px;
   background:
     linear-gradient(
       90deg,
-      #a47740 0 2%,
-      #32211b 2% 3%,
-      transparent 3% 97%,
-      #32211b 97% 98%,
-      #a47740 98%
+      #7c5828 0%,
+      #f2d596 1.4%,
+      #b88c48 3%,
+      #1f0f10 3.4% 4.1%,
+      #dfc082 4.1% 5.2%,
+      #251213 5.2% 5.8%,
+      transparent 5.8% 94.2%,
+      #251213 94.2% 94.8%,
+      #dfc082 94.8% 95.9%,
+      #1f0f10 95.9% 96.6%,
+      #b88c48 97%,
+      #f2d596 98.6%,
+      #7c5828 100%
     ),
-    linear-gradient(#30201c, #a77a48 26%, #d3b37e 46%, #835934 61%, #37231e);
-  box-shadow: 0 3px 5px #0004;
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 22px,
+      rgb(255 214 176 / 4%) 22px 24px,
+      transparent 24px 39px
+    ),
+    linear-gradient(
+      180deg,
+      #1e0e10 0%,
+      #592624 22%,
+      #843e38 40%,
+      #4a1e1d 68%,
+      #190b0d 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 232 196 / 26%),
+    0 5px 10px rgb(0 0 0 / 48%);
   pointer-events: none;
 }
 
@@ -171,6 +195,10 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame::after {
   bottom: 0;
+  box-shadow:
+    inset 0 1px 0 rgb(255 232 196 / 22%),
+    0 -3px 8px rgb(0 0 0 / 34%),
+    0 5px 10px rgb(0 0 0 / 48%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-spine,
@@ -195,13 +223,18 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-seal 
   transform: rotate(3deg);
 }
 
+/* 円筒巻き込みシャドウ（Cylindrical paper roll-in curvature shadows & silk-washi sheen） */
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-window {
+  position: relative;
   overflow: hidden;
   min-width: 0;
   background: #ddcaa5;
   box-shadow:
     0 0 0 1px #ba9b6c,
-    inset 0 12px 18px #72553838;
+    inset 0 20px 22px -8px rgb(46 26 16 / 48%),
+    inset 0 -20px 22px -8px rgb(46 26 16 / 44%),
+    inset 0 2px 4px rgb(30 16 10 / 38%),
+    inset 0 -2px 4px rgb(30 16 10 / 36%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-sheet {
@@ -209,9 +242,20 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-sheet
   padding: clamp(22px, 3vw, 36px);
   color: var(--programme-ink);
   background:
-    linear-gradient(0deg, #89663726, transparent 12% 88%, #89663726),
-    repeating-linear-gradient(0deg, #8b603305 0 1px, transparent 1px 4px),
+    linear-gradient(
+      180deg,
+      rgb(92 58 28 / 28%) 0%,
+      rgb(255 250 236 / 52%) 7%,
+      transparent 16% 84%,
+      rgb(255 250 236 / 46%) 93%,
+      rgb(92 58 28 / 28%) 100%
+    ),
+    repeating-linear-gradient(0deg, #8b603306 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, transparent 0 47px, #8b603308 47px 48px),
     radial-gradient(ellipse at 0 50%, #fff8e5, transparent 75%), var(--programme-paper);
+  box-shadow:
+    inset 10px 0 0 -9px rgb(164 126 74 / 36%),
+    inset -10px 0 0 -9px rgb(164 126 74 / 36%);
 }
 
 html[data-family="dream"]

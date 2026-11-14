@@ -109,34 +109,34 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   /* Bevelled gold: a bright face, a dark horizon, a warm underside. */
   --rxf-gold: linear-gradient(
     180deg,
-    #fffaf0 0%,
-    #f7e2a8 24%,
-    #d9ad5c 47%,
-    #7d5520 50%,
-    #c99a4c 55%,
-    #f6dda0 76%,
-    #fff3d0 90%,
-    #a87a35 100%
+    #ffffff 0%,
+    #fdf0c8 18%,
+    #ecc77b 46%,
+    #694514 50%,
+    #bf8f3f 54%,
+    #fae5b0 74%,
+    #fff6dc 88%,
+    #9e6f2c 100%
   );
   --rxf-ice: linear-gradient(
     180deg,
-    #fff 0%,
-    #effcff 34%,
-    #a9f0ff 49%,
-    #3bb6d6 51%,
-    #8fe6fb 62%,
-    #e9fbff 88%,
-    #fff 100%
+    #ffffff 0%,
+    #f2fdff 28%,
+    #b2f3ff 47%,
+    #2c9ec4 50%,
+    #7ddff9 55%,
+    #eafbff 84%,
+    #ffffff 100%
   );
   --rxf-pink: linear-gradient(
     180deg,
-    #fff 0%,
-    #fff0fa 34%,
-    #ffb1e6 49%,
-    #d0469f 51%,
-    #ff9bdc 62%,
-    #fff0fa 88%,
-    #fff 100%
+    #ffffff 0%,
+    #fff2fb 28%,
+    #ffb8e9 47%,
+    #b83387 50%,
+    #ff8cd3 55%,
+    #fff2fb 84%,
+    #ffffff 100%
   );
   /* White-hot to bright gold: the lock before it cools. */
   --rxf-molten: linear-gradient(180deg, #fffaf0 0%, #ffe6a3 30%, #f2b84b 55%, #ffd98a 75%, #c98a2e 100%);
