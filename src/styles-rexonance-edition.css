@@ -3,27 +3,30 @@
 .rxs-page.rxs-page.rxs-rexonance-page {
   --rx-edition-ink: #050912;
   --rx-edition-ivory: #f0f6ff;
+  --rx-edition-ice: #7ae8ff;
   --rx-edition-violet: #b6a3ff;
   --rx-edition-gold: #e3c185;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-local-nav {
   background: rgb(5 9 18 / 96%);
-  border-bottom-color: rgb(122 232 255 / 24%);
+  border-bottom-color: rgb(122 232 255 / 26%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-menu-trigger {
-  border: 1px solid rgb(122 232 255 / 28%);
+  border: 1px solid rgb(122 232 255 / 30%);
   border-radius: 6px;
   background: #111d2b !important;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero {
   background:
-    radial-gradient(ellipse at 74% 45%, rgb(62 72 122 / 24%), transparent 53%),
-    radial-gradient(ellipse at 0 100%, rgb(37 104 126 / 12%), transparent 47%),
+    radial-gradient(ellipse 56% 52% at 68% 38.2%, rgb(122 232 255 / 14%), transparent 62%),
+    radial-gradient(ellipse 62% 58% at 74% 46%, rgb(82 78 148 / 26%), transparent 58%),
+    radial-gradient(ellipse 48% 34% at 64% 88%, rgb(227 193 133 / 11%), transparent 64%),
+    radial-gradient(ellipse at 0 100%, rgb(37 104 126 / 16%), transparent 50%),
     var(--rx-edition-ink);
 }
 
@@ -31,10 +34,12 @@
   display: block;
   z-index: -1;
   inset: 20px max(20px, calc((100% - 1280px) / 2));
-  border-inline: 1px solid rgb(159 185 213 / 9%);
+  border-inline: 1px solid rgb(159 185 213 / 11%);
   background:
-    linear-gradient(90deg, #7ae8ff 0 32px, transparent 32px) 0 0 / 100% 1px,
-    linear-gradient(270deg, #e3c185 0 32px, transparent 32px) 0 100% / 100% 1px;
+    linear-gradient(90deg, #fff 0 4px, #7ae8ff 4px 36px, transparent 36px) 0 0 / 100% 1px,
+    linear-gradient(270deg, #e3c185 0 24px, transparent 24px) 100% 0 / 100% 1px,
+    linear-gradient(90deg, #7ae8ff 0 24px, transparent 24px) 0 100% / 100% 1px,
+    linear-gradient(270deg, #fff 0 4px, #e3c185 4px 36px, transparent 36px) 0 100% / 100% 1px;
   background-repeat: no-repeat;
   mask-image: none;
   pointer-events: none;
@@ -126,32 +131,32 @@
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-blade {
   fill: currentColor;
-  fill-opacity: 0.05;
-  stroke-opacity: 0.3;
+  fill-opacity: 0.065;
+  stroke-opacity: 0.36;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-blade-bevel {
   stroke: #ffffff;
-  stroke-width: 1.1;
-  stroke-opacity: 0.72;
+  stroke-width: 1.15;
+  stroke-opacity: 0.82;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-vernier {
   stroke: #7ae8ff;
-  stroke-width: 0.8;
-  opacity: 0.32;
+  stroke-width: 0.85;
+  opacity: 0.4;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-core {
   stroke: #e3c185;
-  stroke-width: 0.9;
-  opacity: 0.28;
+  stroke-width: 1;
+  opacity: 0.38;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture-graduations {
-  stroke: #dae4f0;
+  stroke: #e4eef9;
   stroke-width: 1;
-  opacity: 0.45;
+  opacity: 0.54;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index {
@@ -293,6 +298,89 @@
   }
 }
 
+/* ================================================================
+   Three-Form Edition Exhibition: studio product lighting & form auras
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages .rxs-stage-panel {
+  --rxe-stage-keylight: rgb(122 232 255 / 26%);
+  --rxe-stage-halo: rgb(99 226 255 / 22%);
+  --rxe-stage-counter: rgb(227 193 133 / 15%);
+  --rxe-stage-floor: rgb(99 226 255 / 36%);
+  --rxe-stage-rim: rgb(184 246 255 / 54%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel[aria-labelledby="rxs-stage-tab-max"] {
+  --rxe-stage-keylight: rgb(150 156 255 / 30%);
+  --rxe-stage-halo: rgb(182 163 255 / 28%);
+  --rxe-stage-counter: rgb(109 242 198 / 16%);
+  --rxe-stage-floor: rgb(150 156 255 / 40%);
+  --rxe-stage-rim: rgb(214 210 255 / 58%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel[aria-labelledby="rxs-stage-tab-ultra"] {
+  --rxe-stage-keylight: rgb(255 114 218 / 30%);
+  --rxe-stage-halo: rgb(242 216 150 / 30%);
+  --rxe-stage-counter: rgb(122 232 255 / 17%);
+  --rxe-stage-floor: rgb(255 114 218 / 42%);
+  --rxe-stage-rim: rgb(255 224 244 / 64%);
+}
+
+/* Studio overhead softbox slit, calibration marks & subpixel rim light over
+   the three-form exhibition pedestal. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--rxe-stage-rim) 38.2%,
+      rgb(255 255 255 / 72%) 50%,
+      var(--rxe-stage-rim) 61.8%,
+      transparent
+    )
+      50% 0 / 72% 1px no-repeat,
+    linear-gradient(90deg, var(--rx-edition-gold), var(--rx-edition-gold)) 16px 10px / 22px 1px
+      no-repeat,
+    linear-gradient(180deg, var(--rx-edition-gold), transparent) 16px 10px / 1px 14px no-repeat,
+    linear-gradient(270deg, var(--rxs-stage-accent, #7ae8ff), var(--rxs-stage-accent, #7ae8ff))
+      calc(100% - 16px) 10px / 22px 1px no-repeat,
+    linear-gradient(180deg, var(--rxs-stage-accent, #7ae8ff), transparent) calc(100% - 16px) 10px /
+      1px 14px no-repeat,
+    radial-gradient(56% 28% at 50% 0%, var(--rxe-stage-keylight), transparent 74%);
+  box-shadow:
+    inset 0 0.5px 0 rgb(255 255 255 / 30%),
+    inset 0 -1px 0 var(--rxe-stage-floor);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > div
+  > small {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 18px color-mix(in srgb, var(--rxs-stage-accent, #7ae8ff) 36%, transparent);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-chapter-index a:hover {
     background: #10202d;
@@ -325,8 +413,24 @@
 @media (forced-colors: active) {
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-aperture,
   .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero::before,
-  .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-lede::before {
+  .rxs-page.rxs-page.rxs-rexonance-page .rxs-hero-lede::before,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > figure::before {
     display: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > div
+    > small {
+    box-shadow: none;
   }
 
   .rxs-page.rxs-page.rxs-rexonance-page :is(.rxs-hero, .rxs-local-nav, .rxs-chapter-index) {

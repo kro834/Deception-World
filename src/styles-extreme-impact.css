@@ -242,10 +242,10 @@ html[data-family="special"]
   background:
     radial-gradient(
       circle at 100% 0,
-      #ffffff 0 3px,
-      #fffaf0 5px,
-      rgb(var(--ext-gold-rgb) / 90%) 9px,
-      rgb(var(--ext-gold-rgb) / 0%) 26px
+      #ffffff 0 4px,
+      #fffdf8 6px,
+      rgb(var(--ext-gold-rgb) / 95%) 10px,
+      rgb(var(--ext-gold-rgb) / 0%) 30px
     ),
     linear-gradient(
       to bottom right,
@@ -255,9 +255,9 @@ html[data-family="special"]
     ),
     linear-gradient(
       to bottom right,
-      transparent calc(50% - 12px),
-      rgb(var(--ext-gold-rgb) / 86%) 50%,
-      transparent calc(50% + 16px)
+      transparent calc(50% - 14px),
+      rgb(var(--ext-gold-rgb) / 92%) 50%,
+      transparent calc(50% + 18px)
     );
   -webkit-mask: linear-gradient(90deg, transparent, #000 56%);
   mask: linear-gradient(90deg, transparent, #000 56%);
@@ -454,8 +454,8 @@ html[data-family="special"]
   height: clamp(10px, 1.1vw, 16px);
   margin: 0;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 38%) 0 22%, transparent 55%),
-    linear-gradient(90deg, var(--ext-amber), var(--ext-gold) 52%, #ffe8a8 82%, #fffaf0);
+    linear-gradient(180deg, rgb(255 255 255 / 48%) 0 24%, transparent 58%),
+    linear-gradient(90deg, #b86214 0%, var(--ext-amber) 22%, var(--ext-gold) 54%, #fff2cb 84%, #ffffff 100%);
   -webkit-mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
   mask: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
   border: 0;

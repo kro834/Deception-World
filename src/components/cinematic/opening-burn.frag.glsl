@@ -99,9 +99,13 @@ void main() {
   float live = uFlame * (1.0 - uCool);
 
   // ---- Heat haze, strongest just ahead of the front; gone once it has cooled.
+  // Multilayer refractive haze: broad turbulent wave plus high-frequency thermal shimmer.
   float ahead = fall(0.24, 0.0, d);
-  vec2 haze = (vec2(vnoise(lp * 10.0 + vec2(0.0, -t * 2.3)),
-                    vnoise(lp * 10.0 + vec2(5.3, -t * 2.3))) - 0.5)
+  vec2 hazeCoarse = (vec2(vnoise(lp * 8.0 + vec2(0.0, -t * 1.9)),
+                          vnoise(lp * 8.0 + vec2(5.3, -t * 1.9))) - 0.5);
+  vec2 hazeFine = (vec2(vnoise(lp * 22.0 + vec2(1.7, -t * 3.4)),
+                        vnoise(lp * 22.0 + vec2(8.1, -t * 3.4))) - 0.5);
+  vec2 haze = (hazeCoarse * 0.72 + hazeFine * 0.28)
               * (0.012 * ahead + 0.003) * uHeat * (1.0 - uCool);
 
   // ---- Ahead: the waiting logo. The heated air splits its red and blue a
@@ -164,8 +168,10 @@ void main() {
   // The glyph faces the front meets flare. One-sided and local: a face
   // lights only on the glyph itself, against the pixel 2px behind it (lower
   // left), so the flare never draws a displaced copy of a letter.
+  // Sharpened local radiance curve preserves crisp typography contours.
   float face = max(fn - lum(sampleTop(uFinal, luv - px * 2.0)), 0.0);
-  float flare = clamp(face * 2.4, 0.0, 1.0) * fall(0.07, 0.0, abs(d)) * env * live;
+  float flareCore = pow(clamp(face * 2.8, 0.0, 1.0), 1.45);
+  float flare = flareCore * fall(0.07, 0.0, abs(d)) * env * live;
 
   // Faint smoke above the flames, and the fire's light on the air around it.
   float smokeA = smoothstep(0.46, 0.8, fbm(lp * 2.6 + vec2(0.0, -t * 0.45)))

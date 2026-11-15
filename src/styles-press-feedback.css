@@ -19,12 +19,12 @@
    keeps its hold-back. */
 :root {
   --dw-ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* the house curve: glass, Mirage, Dream */
-  --dw-ease-press: cubic-bezier(0.2, 0, 0, 1);
-  --dw-dur-press: 90ms;
+  --dw-ease-press: cubic-bezier(0.18, 0, 0, 1);
+  --dw-dur-press: 82ms;
   --dw-dur-settle: 320ms;
   --dw-dur-state: 180ms;
   --dw-press-scale: 0.96;
-  --dw-press-light: 1.14;
+  --dw-press-light: 1.16;
 }
 
 html[data-press-ready] body [data-press][data-press] {
@@ -119,7 +119,10 @@ html[data-press-ready]
     [data-press="touch"]
   ) {
   background-color: rgb(126 231 255 / 0.1);
-  --dw-press-light: 1.3;
+  box-shadow:
+    inset 0 1px 0 rgb(198 245 255 / 0.28),
+    inset 0 -1px 0 rgb(126 231 255 / 0.22);
+  --dw-press-light: 1.32;
 }
 
 /* Menu rows are full-width, each with its own divider: they take the light
@@ -134,7 +137,10 @@ html[data-press-ready]
   .side-panel-links
   :is(a, button.side-panel-link-button):is([data-press="in"], [data-press="touch"]) {
   background-color: rgb(126 231 255 / 0.1);
-  --dw-press-light: 1.3;
+  box-shadow:
+    inset 3px 0 0 rgb(126 231 255 / 0.82),
+    inset 0 1px 0 rgb(198 245 255 / 0.22);
+  --dw-press-light: 1.32;
 }
 
 /* Dream's act tabs are the same kind of full-bleed cell between gold
@@ -146,7 +152,16 @@ html[data-press-ready] .dream-chapter-nav a {
 
 html[data-press-ready] body .dream-chapter-nav a:is([data-press="in"], [data-press="touch"]) {
   background-color: rgb(200 164 92 / 0.12);
-  --dw-press-light: 1.3;
+  box-shadow:
+    inset 0 1px 0 rgb(240 207 134 / 0.3),
+    inset 0 -2px 0 rgb(200 164 92 / 0.72);
+  --dw-press-light: 1.32;
+}
+
+html[data-press-ready]
+  body
+  [data-press]:focus-visible:is([data-press="in"], [data-press="touch"]) {
+  outline-offset: 2px;
 }
 
 /* The episode card is pressed through its full-size select button, which
@@ -161,7 +176,7 @@ html[data-press-ready] .episode-card[data-press-within][data-press-within] {
 
 html[data-press-ready]
   .episode-card[data-press-within]:is([data-press-within="in"], [data-press-within="touch"]) {
-  filter: brightness(1.08);
+  filter: brightness(1.1);
   transition-duration: var(--dw-dur-press);
   transition-timing-function: var(--dw-ease-press);
 }

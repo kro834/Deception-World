@@ -80,6 +80,7 @@ function P16Core() {
   // The owner's P16 artwork (2026-10-23), as Rexonance shows its P14 core.
   return (
     <figure className="ffs-p16-core">
+      <span className="ffs-p16-core-frame" aria-hidden="true" />
       <img
         src="/far-from-p16-core-20261023-720.webp"
         srcSet="/far-from-p16-core-20261023-720.webp 720w, /far-from-p16-core-20261023.webp 1254w"
@@ -90,6 +91,7 @@ function P16Core() {
         loading="lazy"
         decoding="async"
       />
+      <span className="ffs-p16-core-specular" aria-hidden="true" />
     </figure>
   );
 }
@@ -139,6 +141,7 @@ function OfficialMetricRow({ metric, base }: { metric: OfficialMetric; base: Uni
             <b>{metric.values[item.key]}</b>
             <span className="ffs-p16-trio-track" aria-hidden="true">
               <i style={barStyle(metric.values[item.key] / longest)} />
+              <b className="ffs-p16-track-calib" />
             </span>
           </li>
         ))}

@@ -1,15 +1,17 @@
+/* Curated inquiry trails: specimen triptych cards and an illuminated
+   three-stop route diagram with step nodes, optical guide-lines, and glass plates. */
 .library-inquiry {
-  --inquiry-accent: #dfbd84;
+  --inquiry-accent: #e6c68a;
   margin: 0 0 clamp(3rem, 6vw, 5rem);
   padding-top: 2rem;
-  border-top: 1px solid #d8b77a45;
+  border-top: 1px solid rgb(216 183 122 / 28%);
   color: var(--library-ink, #eeeae1);
 }
 .inquiry-color-gold {
-  --inquiry-accent: #dfbd84;
+  --inquiry-accent: #e8c98e;
 }
 .inquiry-color-blue {
-  --inquiry-accent: #95d3e6;
+  --inquiry-accent: #8de4f8;
 }
 .inquiry-heading {
   max-width: 48rem;
@@ -30,58 +32,98 @@
 .inquiry-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 .library-page .inquiry-choice {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.8rem;
-  padding: clamp(1.3rem, 3vw, 2.1rem);
+  gap: 0.85rem;
+  padding: clamp(1.35rem, 3vw, 2.1rem);
   text-align: left;
-  border: 1px solid #ffffff24;
+  border: 1px solid rgb(186 214 232 / 22%);
   border-top: 2px solid var(--inquiry-accent);
   border-radius: 0;
-  background: linear-gradient(145deg, #ffffff09, #ffffff02);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--inquiry-accent) 9%, transparent), transparent 55%),
+    linear-gradient(155deg, rgb(18 34 48 / 76%), rgb(8 16 25 / 88%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 14px 32px -18px rgb(0 0 0 / 70%);
   color: var(--library-ink, #eeeae1);
 }
 .library-page .inquiry-choice[aria-pressed="true"] {
   border-color: var(--inquiry-accent);
-  background: #ffffff0d;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--inquiry-accent) 16%, transparent), transparent 62%),
+    linear-gradient(155deg, rgb(22 42 58 / 90%), rgb(9 19 30 / 94%));
+  box-shadow:
+    inset 3px 0 0 var(--inquiry-accent),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 18px 38px -18px rgb(0 0 0 / 78%);
   color: var(--library-ink, #eeeae1);
 }
 @media (hover: hover) and (pointer: fine) {
   .library-page .inquiry-choice:hover {
     border-color: var(--inquiry-accent);
-    background: #ffffff0d;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--inquiry-accent) 14%, transparent), transparent 60%),
+      linear-gradient(155deg, rgb(21 40 56 / 86%), rgb(9 18 28 / 92%));
     color: var(--library-ink, #eeeae1);
+  }
+  .library-page .inquiry-source-link:hover {
+    border-color: var(--inquiry-accent);
+    background: color-mix(in srgb, var(--inquiry-accent) 14%, transparent);
+    color: #fff;
+  }
+  .library-page .inquiry-guide-jump:hover {
+    border-color: var(--inquiry-accent);
+    background: color-mix(in srgb, var(--inquiry-accent) 12%, transparent);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .library-page .inquiry-choice {
     transition:
       border-color 180ms ease,
-      background-color 180ms ease;
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+  html:not([data-world-effects="economy"])
+    .library-page
+    :is(.inquiry-source-link, .inquiry-guide-jump) {
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease;
   }
 }
 .inquiry-choice-label,
-.inquiry-stop-label {
+.inquiry-stop-label,
+.inquiry-route-kicker {
   color: var(--inquiry-accent);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  line-height: 1.7;
+  font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+.inquiry-route-kicker {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.16em;
 }
 .inquiry-choice-title {
   font-size: clamp(1.35rem, 2.4vw, 1.85rem);
   line-height: 1.55;
-  font-weight: 500;
+  font-weight: 600;
   text-wrap: pretty;
 }
 .inquiry-choice-intro {
   color: var(--library-muted, #b9c2c8);
-  font-size: 1rem;
-  line-height: 1.85;
+  font-size: 15px;
+  line-height: 1.9;
 }
 .inquiry-choice-action {
   display: flex;
@@ -89,26 +131,40 @@
   align-items: center;
   align-self: stretch;
   gap: 1rem;
+  min-height: 48px;
   margin-top: auto;
-  padding-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid color-mix(in srgb, var(--inquiry-accent) 24%, rgb(186 214 232 / 14%));
   color: var(--inquiry-accent);
-  font-size: 0.9rem;
+  font-size: 14px;
+  font-weight: 600;
 }
 .inquiry-start-note {
   color: var(--library-muted, #b9c2c8);
-  font-size: 0.9rem;
-  line-height: 1.8;
-  margin: 1rem 0 0;
+  font-size: 14px;
+  line-height: 1.85;
+  margin: 1.1rem 0 0;
+  padding: 14px 18px;
+  border: 1px dashed rgb(186 214 232 / 24%);
+  background: rgb(7 15 24 / 48%);
 }
 .library-page .inquiry-guide-jump {
   display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  min-height: 44px;
-  margin-top: 0.75rem;
+  gap: 0.85rem;
+  min-height: 48px;
+  margin-top: 1rem;
+  padding: 8px 16px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 46%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--inquiry-accent) 14%, transparent),
+    rgb(9 19 30 / 70%)
+  );
   color: var(--inquiry-accent);
-  text-decoration: underline;
-  text-underline-offset: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
 }
 #inquiry-guide-title {
   scroll-margin-top: calc(100px + env(safe-area-inset-top));
@@ -118,24 +174,41 @@
   outline-offset: 5px;
 }
 .inquiry-route {
-  margin-top: 2rem;
-  padding: clamp(1.2rem, 3vw, 2.5rem);
-  border: 1px solid #ffffff1c;
-  background: #080e1252;
+  position: relative;
+  margin-top: 1.75rem;
+  padding: clamp(1.35rem, 3vw, 2.6rem);
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 36%, rgb(145 189 215 / 32%));
+  border-top: 2px solid var(--inquiry-accent);
+  background:
+    linear-gradient(90deg, rgb(186 218 238 / 3.5%) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(0deg, rgb(186 218 238 / 3.5%) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(
+      ellipse 70% 35% at 15% 0%,
+      color-mix(in srgb, var(--inquiry-accent) 12%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(160deg, rgb(12 24 36 / 92%), rgb(6 13 21 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    6px 7px 0 rgb(1 8 16 / 70%);
 }
 .inquiry-route-heading {
-  margin-bottom: 2rem;
+  margin-bottom: 2.1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgb(186 214 232 / 18%);
 }
 .inquiry-route-heading h3 {
-  margin: 0 0 0.8rem;
-  font-size: clamp(1.4rem, 3vw, 2rem);
-  font-weight: 500;
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.4rem, 3vw, 2.05rem);
+  font-weight: 650;
   line-height: 1.5;
+  color: #f3f9fc;
 }
 .inquiry-route-heading > p:last-child {
-  font-size: 0.85rem;
+  font-size: 14px;
 }
-.inquiry-stops {
+.inquiry-stops,
+.library-inquiry-stops {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -143,78 +216,130 @@
 .inquiry-stop {
   position: relative;
   display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr);
-  gap: clamp(1rem, 3vw, 2rem);
-  padding-bottom: 2.5rem;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: clamp(1rem, 2.6vw, 1.85rem);
+  padding-bottom: 2.25rem;
 }
+/* Optical connecting guideline between specimen route stops. */
 .inquiry-stop:not(:last-child)::before {
   position: absolute;
   content: "";
-  left: 1.45rem;
-  top: 3.3rem;
-  bottom: 0.5rem;
-  border-left: 1px solid #ffffff2a;
+  left: calc(1.625rem - 1px);
+  top: 3.45rem;
+  bottom: 0.35rem;
+  width: 2px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      var(--inquiry-accent) 0 6px,
+      transparent 6px 11px
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--inquiry-accent) 45%, transparent),
+      rgb(186 214 232 / 14%)
+    );
 }
 .inquiry-stop:last-child {
   padding-bottom: 0;
 }
 .inquiry-stop-number {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
+  width: 3.25rem;
+  height: 3.25rem;
   border: 1px solid var(--inquiry-accent);
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      color-mix(in srgb, var(--inquiry-accent) 24%, transparent),
+      rgb(8 18 28 / 94%) 74%
+    );
+  box-shadow:
+    inset 0 0 0 3px rgb(6 14 22 / 90%),
+    inset 0 0 0 4px color-mix(in srgb, var(--inquiry-accent) 32%, transparent),
+    0 6px 18px rgb(0 0 0 / 55%);
   color: var(--inquiry-accent);
-  font-size: 1rem;
+  font-family: "Oxanium", "Michroma", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
 }
 .inquiry-stop-body {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   min-width: 0;
-  max-width: 48rem;
+  max-width: 54rem;
   padding: clamp(18px, 2.5vw, 26px);
+  border: 1px solid rgb(156 198 222 / 28%);
+  border-left: 3px solid var(--inquiry-accent);
+  background:
+    linear-gradient(125deg, rgb(28 50 68 / 48%), rgb(10 21 33 / 86%) 56%, rgb(14 29 43 / 82%));
+  box-shadow:
+    inset 0 1px 0 rgb(235 250 255 / 12%),
+    4px 5px 0 rgb(1 8 16 / 64%);
+}
+.inquiry-stop-header {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+.inquiry-stop-header > .dxl-art.is-stop {
+  width: 88px;
+  height: 108px;
+  min-height: 0;
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 42%, rgb(156 198 222 / 32%));
+}
+.inquiry-stop-meta {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
 .inquiry-stop-label {
   margin: 0;
 }
 .inquiry-stop h4 {
   margin: 0;
-  font-size: clamp(1.2rem, 2.1vw, 1.6rem);
-  font-weight: 500;
-  line-height: 1.6;
+  font-size: clamp(1.2rem, 2.1vw, 1.55rem);
+  font-weight: 650;
+  line-height: 1.55;
+  color: #f0f8fc;
 }
 .inquiry-look-for {
   margin: 0;
-  padding: 12px 16px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 26%, transparent);
+  padding: 13px 16px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 30%, transparent);
   border-left: 3px solid var(--inquiry-accent);
   background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--inquiry-accent) 12%, transparent),
-    rgb(7 15 23 / 52%) 78%
+    92deg,
+    color-mix(in srgb, var(--inquiry-accent) 14%, transparent),
+    rgb(7 15 24 / 62%) 80%
   );
-  font-size: 1rem;
+  font-size: 15px;
   line-height: 1.9;
 }
 .inquiry-stop blockquote {
   margin: 0;
   padding: 14px 18px;
-  border: 1px solid rgb(186 214 232 / 18%);
-  border-left: 3px solid var(--inquiry-accent);
-  background: linear-gradient(135deg, rgb(12 24 36 / 72%), rgb(5 12 20 / 78%));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
-  color: #e0ebf1;
+  border: 1px solid rgb(186 214 232 / 20%);
+  border-left: 3px solid color-mix(in srgb, var(--inquiry-accent) 72%, #9deafa);
+  background: linear-gradient(135deg, rgb(10 21 32 / 84%), rgb(5 11 19 / 90%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
+  color: #e3eef4;
 }
 .inquiry-stop blockquote p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 15px;
   line-height: 1.95;
 }
 .inquiry-stop cite {
   display: block;
   margin-top: 0.7rem;
-  font-size: 0.8rem;
+  font-size: 13px;
   line-height: 1.65;
   font-style: normal;
   color: var(--library-muted, #b9c2c8);
@@ -224,18 +349,25 @@
   align-items: center;
   justify-content: space-between;
   justify-self: start;
-  gap: 2rem;
-  min-height: 44px;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--inquiry-accent);
+  gap: 1.75rem;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 55%, transparent);
+  border-left: 3px solid var(--inquiry-accent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--inquiry-accent) 14%, transparent),
+    rgb(8 18 28 / 78%)
+  );
   color: var(--inquiry-accent);
-  font-size: 1rem;
+  font-size: 14px;
+  font-weight: 650;
 }
 .inquiry-return-note {
   margin: 2rem 0 0;
   padding-top: 1.2rem;
-  border-top: 1px solid #ffffff1c;
-  font-size: 0.9rem;
+  border-top: 1px solid rgb(186 214 232 / 18%);
+  font-size: 14px;
   line-height: 1.85;
   color: var(--library-muted, #b9c2c8);
 }
@@ -248,20 +380,28 @@
     grid-template-columns: 1fr;
   }
   .inquiry-stop {
-    grid-template-columns: 2.2rem minmax(0, 1fr);
-    gap: 0.9rem;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.85rem;
   }
   .inquiry-stop-number {
-    width: 2.2rem;
-    height: 2.5rem;
-    font-size: 0.9rem;
+    width: 2.4rem;
+    height: 2.6rem;
+    font-size: 13px;
   }
   .inquiry-stop:not(:last-child)::before {
-    left: 1.05rem;
-    top: 2.9rem;
+    left: calc(1.2rem - 1px);
+    top: 2.95rem;
   }
   .inquiry-stop-body {
     padding: 16px;
+  }
+  .inquiry-stop-header {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .inquiry-stop-header > .dxl-art.is-stop {
+    width: 68px;
+    height: 88px;
   }
   .inquiry-look-for,
   .inquiry-stop blockquote {
@@ -269,7 +409,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .library-page .inquiry-choice {
+  .library-page :is(.inquiry-choice, .inquiry-source-link, .inquiry-guide-jump) {
     transition: none;
   }
 }
@@ -277,10 +417,13 @@
   .library-page .inquiry-choice[aria-pressed="true"] {
     outline: 2px solid Highlight;
   }
+  .inquiry-route,
   .inquiry-stop-number,
   .inquiry-stop-body,
   .inquiry-look-for,
-  .inquiry-stop blockquote {
+  .inquiry-stop blockquote,
+  .library-page .inquiry-source-link,
+  .library-page .inquiry-guide-jump {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;

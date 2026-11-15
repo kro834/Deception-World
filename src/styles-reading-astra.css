@@ -1,13 +1,18 @@
 /* The film's plum and warm paper remain; hierarchy is carried by type and rules. */
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
   border: 1px solid #876b58;
-  background: #211925;
-  box-shadow: 0 12px 28px #0003;
+  background:
+    linear-gradient(135deg, rgba(243, 217, 172, 0.04) 0%, transparent 40%),
+    #211925;
+  box-shadow:
+    inset 0 1px 0 rgba(243, 217, 172, 0.28),
+    0 12px 28px rgba(0, 0, 0, 0.35);
   margin-bottom: 24px;
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
   padding: clamp(20px, 3.2vw, 36px);
   background: linear-gradient(110deg, #3a2735, #241c2d);
+  box-shadow: inset 0 1px 0 rgba(243, 217, 172, 0.2);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-heading > span {
   font-size: clamp(21px, 2.5vw, 31px);
@@ -160,6 +165,26 @@ html[data-family="dream"]
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-glossary-search-word strong {
   font-size: 20px;
+}
+html[data-family="dream"] main.dream-page.dream-page :is(a, summary):focus-visible {
+  outline: 2px solid #f1d39e;
+  outline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol > li > a:hover {
+    border-bottom-color: #f1d39e;
+    background: rgba(56, 39, 53, 0.5);
+  }
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-glossary-search
+    .dream-glossary-jump
+    .dream-glossary-search-results
+    a:hover {
+    border-color: #c3a171;
+    background: #362a3d;
+    box-shadow: inset 0 1px 0 rgba(243, 217, 172, 0.25);
+  }
 }
 @media (max-width: 600px) {
   html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol {

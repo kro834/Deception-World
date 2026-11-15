@@ -119,7 +119,14 @@ export function ArtworkStage({
       data-economy={economy}
     >
       <div className="artwork-stage__visual">
+        <div className="artwork-stage__halo" aria-hidden="true" />
         <div key={`plane-${artwork.id}`} className="artwork-stage__plane" aria-hidden="true" />
+        <div className="artwork-stage__frame-bevel" aria-hidden="true">
+          <span className="artwork-stage__reticle is-tl" />
+          <span className="artwork-stage__reticle is-tr" />
+          <span className="artwork-stage__reticle is-bl" />
+          <span className="artwork-stage__reticle is-br" />
+        </div>
         <div className="artwork-stage__aperture">
           {!media && frames.previous && (
             <div

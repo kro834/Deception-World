@@ -267,11 +267,13 @@ html[data-route-scroll-settling="true"] {
   box-sizing: border-box;
   height: var(--archive-toolbar-height);
   overflow: visible;
-  border-bottom: 1px solid rgb(148 211 242 / 0.13);
+  border-bottom: 1px solid rgb(148 211 242 / 0.16);
   background:
-    radial-gradient(ellipse at 50% 112%, rgb(76 182 219 / 0.1), transparent 48%),
+    radial-gradient(ellipse at 50% 112%, rgb(76 182 219 / 0.14), transparent 50%),
     linear-gradient(180deg, rgb(2 5 10 / 0.99), rgb(5 11 19 / 0.96));
-  box-shadow: 0 10px 28px rgb(0 0 0 / 0.32);
+  box-shadow:
+    inset 0 1px 0 rgb(214 246 255 / 0.1),
+    0 12px 30px rgb(0 0 0 / 0.36);
 }
 
 .form-archive-toolbar::after {
@@ -284,8 +286,9 @@ html[data-route-scroll-settling="true"] {
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(117 221 255 / 0.32),
-    rgb(224 186 102 / 0.24),
+    rgb(122 232 255 / 0.42) 26%,
+    rgb(188 158 255 / 0.28) 52%,
+    rgb(240 207 134 / 0.32) 78%,
     transparent
   );
   pointer-events: none;
@@ -623,6 +626,12 @@ html[data-route-scroll-settling="true"] {
    the destination comes up through it (still one flash per dive). */
 .load-gate.archive-route-dive.is-arriving {
   animation: dw-gate-dissolve 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .load-gate.archive-route-dive.is-arriving {
+    animation-timing-function: cubic-bezier(0.28, 0, 0.14, 1);
+  }
 }
 
 @keyframes dw-gate-dissolve {
@@ -1225,6 +1234,10 @@ html[data-route-scroll-settling="true"] {
     animation: dw-dive-gate-open 0.48s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
 
+  html:not([data-world-effects="economy"]) .load-gate.rider-route-dive.is-arriving {
+    animation-timing-function: cubic-bezier(0.28, 0, 0.14, 1);
+  }
+
   .rider-route-dive.is-arriving .cine-dive-flash {
     animation-name: dw-dive-exit-light-soft;
   }
@@ -1244,8 +1257,11 @@ html[data-route-scroll-settling="true"] {
   from {
     opacity: 0;
   }
-  45% {
-    opacity: 0.5;
+  28% {
+    opacity: 0.36;
+  }
+  58% {
+    opacity: 0.52;
   }
   to {
     opacity: 0.56;
@@ -2071,12 +2087,16 @@ html[data-route-scroll-settling="true"] {
 
 [data-opening-handoff-letterbox="top"] {
   top: 0;
-  box-shadow: inset 0 -1px 0 rgb(var(--opening-handoff-blue) / 0.26);
+  box-shadow:
+    inset 0 -1px 0 rgb(var(--opening-handoff-blue) / 0.34),
+    inset 0 -2px 0 rgb(214 248 255 / 0.08);
 }
 
 [data-opening-handoff-letterbox="bottom"] {
   bottom: 0;
-  box-shadow: inset 0 1px 0 rgb(var(--opening-handoff-gold) / 0.24);
+  box-shadow:
+    inset 0 1px 0 rgb(var(--opening-handoff-gold) / 0.32),
+    inset 0 2px 0 rgb(246 226 178 / 0.08);
 }
 
 /* Economy: no ambient loops anywhere in the handoff (the dive itself is WAAPI). */

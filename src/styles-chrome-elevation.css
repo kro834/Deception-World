@@ -37,10 +37,12 @@
   --dwc-ice-hi: #c6f5ff;
   --dwc-gold: #f0cf86;
   --dwc-gold-rgb: 240 207 134;
+  --dwc-gold-hi: #fff3c7;
   --dwc-pink: #ff5fc8;
   --dwc-pink-rgb: 255 95 200;
   --dwc-deck-rgb: 10 18 32;
   --dwc-lock: color-mix(in srgb, #7ae8ff 62%, #dff9ff);
+  --dwc-lock-hi: #f2fcff;
   --dwc-text: #f1f7fb;
   --dwc-text-2: #b9cad8;
   --dwc-text-3: #8fa6ba;
@@ -56,8 +58,18 @@
     rgb(255 92 200 / 62%) 66%,
     rgb(240 207 134 / 62%) 100%
   );
-  --dwc-chrome-ink: linear-gradient(180deg, #fff 0%, #eafbff 30%, #9eeeff 60%, #5aa8ff 100%);
-  --dwc-ghost: drop-shadow(3px 0 rgb(122 232 255 / 30%)) drop-shadow(-2px 0 rgb(255 92 200 / 24%));
+  --dwc-chrome-ink: linear-gradient(
+    180deg,
+    #fff 0%,
+    #effcff 26%,
+    #b6f3ff 54%,
+    #7edbff 78%,
+    #5aa8ff 100%
+  );
+  --dwc-ghost:
+    drop-shadow(0 1px 0 rgb(2 5 12 / 86%))
+    drop-shadow(3px 0 rgb(122 232 255 / 34%))
+    drop-shadow(-2px 0 rgb(255 92 200 / 26%));
   --dwc-grid:
     repeating-linear-gradient(90deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
     repeating-linear-gradient(0deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px);
@@ -68,9 +80,9 @@
 
 /* ================================================================
    Brackets: eight 2px arms on an aria-hidden pseudo, ice (lock) at the
-   top corners and gold at the bottom. Arm length per frame in --dwc-arm.
-   Everything framed here sits in a dialog, a scroll container or a cover,
-   so the brackets are static.
+   top corners and gold at the bottom, anchored by 3px specular corner
+   pins. Arm length per frame in --dwc-arm. Everything framed here sits
+   in a dialog, a scroll container or a cover, so the brackets are static.
    ================================================================ */
 html body #site-side-panel > .side-panel-head::after,
 html body #site-announcement-dialog .site-announcement-hub::after,
@@ -80,14 +92,19 @@ html body .load-gate .cine-dive-status::after {
   position: absolute;
   pointer-events: none;
   background:
-    linear-gradient(var(--dwc-lock) 0 0) 0 0 / var(--dwc-arm, 22px) 2px no-repeat,
-    linear-gradient(var(--dwc-lock) 0 0) 0 0 / 2px var(--dwc-arm, 22px) no-repeat,
-    linear-gradient(var(--dwc-lock) 0 0) 100% 0 / var(--dwc-arm, 22px) 2px no-repeat,
-    linear-gradient(var(--dwc-lock) 0 0) 100% 0 / 2px var(--dwc-arm, 22px) no-repeat,
-    linear-gradient(var(--dwc-gold) 0 0) 0 100% / var(--dwc-arm, 22px) 2px no-repeat,
-    linear-gradient(var(--dwc-gold) 0 0) 0 100% / 2px var(--dwc-arm, 22px) no-repeat,
-    linear-gradient(var(--dwc-gold) 0 0) 100% 100% / var(--dwc-arm, 22px) 2px no-repeat,
-    linear-gradient(var(--dwc-gold) 0 0) 100% 100% / 2px var(--dwc-arm, 22px) no-repeat;
+    linear-gradient(var(--dwc-lock-hi, #f2fcff) 0 0) 0 0 / 3px 3px no-repeat,
+    linear-gradient(var(--dwc-lock-hi, #f2fcff) 0 0) 100% 0 / 3px 3px no-repeat,
+    linear-gradient(var(--dwc-gold-hi, #fff3c7) 0 0) 0 100% / 3px 3px no-repeat,
+    linear-gradient(var(--dwc-gold-hi, #fff3c7) 0 0) 100% 100% / 3px 3px no-repeat,
+    linear-gradient(90deg, var(--dwc-lock-hi, #f2fcff), var(--dwc-lock) 46%, color-mix(in srgb, var(--dwc-lock) 42%, transparent)) 0 0 / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(180deg, var(--dwc-lock-hi, #f2fcff), var(--dwc-lock) 46%, color-mix(in srgb, var(--dwc-lock) 42%, transparent)) 0 0 / 2px var(--dwc-arm, 22px) no-repeat,
+    linear-gradient(270deg, var(--dwc-lock-hi, #f2fcff), var(--dwc-lock) 46%, color-mix(in srgb, var(--dwc-lock) 42%, transparent)) 100% 0 / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(180deg, var(--dwc-lock-hi, #f2fcff), var(--dwc-lock) 46%, color-mix(in srgb, var(--dwc-lock) 42%, transparent)) 100% 0 / 2px var(--dwc-arm, 22px) no-repeat,
+    linear-gradient(90deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 0 100% / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(0deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 0 100% / 2px var(--dwc-arm, 22px) no-repeat,
+    linear-gradient(270deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 100% 100% / var(--dwc-arm, 22px) 2px no-repeat,
+    linear-gradient(0deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 100% 100% / 2px var(--dwc-arm, 22px) no-repeat;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 78%));
 }
 
 /* ================================================================
@@ -116,6 +133,9 @@ html
   font-weight: 400;
   font-synthesis: none;
   font-style: normal;
+  text-shadow:
+    0 1px 0 rgb(0 0 0 / 78%),
+    0 0 12px rgb(var(--dwc-ice-rgb) / 16%);
 }
 
 /* ================================================================
@@ -126,17 +146,19 @@ html
 html body #site-side-panel.side-panel[data-liquid-pointer] {
   border-left-color: var(--dwc-line-strong);
   background:
-    radial-gradient(ellipse 70% 30% at 100% 0%, rgb(122 232 255 / 12%), transparent 70%),
-    radial-gradient(ellipse 60% 28% at 0% 100%, rgb(240 207 134 / 7%), transparent 70%),
+    radial-gradient(ellipse 72% 32% at 100% 0%, rgb(122 232 255 / 15%), transparent 70%),
+    radial-gradient(ellipse 52% 24% at 0% 42%, rgb(255 95 200 / 6%), transparent 72%),
+    radial-gradient(ellipse 62% 30% at 0% 100%, rgb(240 207 134 / 9%), transparent 70%),
     var(--dwc-grid),
     var(--dwc-ink) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   box-shadow:
-    -32px 0 80px rgb(0 0 0 / 72%),
-    -8px 0 24px rgb(0 0 0 / 45%),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    inset 1px 0 0 rgb(122 232 255 / 20%) !important;
+    -32px 0 80px rgb(0 0 0 / 74%),
+    -8px 0 24px rgb(0 0 0 / 48%),
+    inset 0 1px 0 rgb(255 255 255 / 15%),
+    inset 1px 0 0 rgb(198 245 255 / 28%),
+    inset 2px 0 0 rgb(4 8 15 / 88%) !important;
   color: var(--dwc-text);
 }
 
@@ -643,6 +665,8 @@ html[data-family="dream"] body #site-announcement-dialog {
   --dwc-ice-rgb: var(--sh-l1-rgb, 224 97 79);
   --dwc-ice-hi: #f8cfc4;
   --dwc-lock: var(--sh-l1, #e0614f);
+  --dwc-lock-hi: #ffe8e0;
+  --dwc-gold-hi: #fff2c4;
   --dwc-pink: var(--sh-l2, #c9a15a);
   --dwc-pink-rgb: var(--sh-l2-rgb, 201 161 90);
   --dwc-text: var(--sh-text, #f6ecdf);
@@ -738,13 +762,17 @@ html body #site-announcement-dialog .site-announcement-header > div::before {
   border: 1px solid rgb(var(--dwc-ice-rgb) / 62%);
   background:
     linear-gradient(225deg, var(--dwc-ice) 0 7px, transparent 7px),
-    linear-gradient(145deg, rgb(var(--dwc-ice-rgb) / 20%), transparent 62%),
+    linear-gradient(145deg, rgb(var(--dwc-ice-rgb) / 24%), transparent 62%),
     var(--dwc-deck);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 4px 12px rgb(0 0 0 / 42%);
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
   color: var(--dwc-ice);
   font-family: var(--dwc-hud);
   font-size: 13px;
   letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 82%);
 }
 
 html body #site-announcement-dialog .site-announcement-header > div > p {
@@ -1569,52 +1597,61 @@ html body .load-gate.is-sovereign-gate .load-gate-kicker {
    contains its paint, which clips anything drawn outside its box.
    ================================================================ */
 html body .zeus-button {
-  border-color: rgb(240 207 134 / 78%);
+  border-color: rgb(240 207 134 / 82%);
   background:
     linear-gradient(
       145deg,
-      rgb(255 255 255 / 65%),
-      rgb(122 232 255 / 18%) 54%,
-      rgb(240 207 134 / 30%)
+      rgb(255 255 255 / 72%),
+      rgb(122 232 255 / 22%) 52%,
+      rgb(240 207 134 / 34%)
     ),
-    rgb(4 8 15 / 90%);
+    rgb(4 8 15 / 92%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 80%),
-    0 0 0 3px rgb(4 8 15 / 80%),
-    0 12px 34px rgb(0 0 0 / 50%),
-    0 0 24px rgb(122 232 255 / 16%),
-    0 0 34px rgb(240 207 134 / 16%);
-  outline: 1px solid rgb(122 232 255 / 42%);
+    inset 0 1.5px 0 rgb(255 255 255 / 88%),
+    inset 0 -1.5px 2px rgb(4 8 15 / 62%),
+    0 0 0 3px rgb(4 8 15 / 84%),
+    0 14px 36px rgb(0 0 0 / 54%),
+    0 0 26px rgb(122 232 255 / 20%),
+    0 0 36px rgb(240 207 134 / 18%);
+  outline: 1px solid rgb(122 232 255 / 46%);
   outline-offset: 6px;
 }
 
 /* Ciel keeps the proven floating-control geometry and gesture selectors. */
 html body .zeus-button.ciel-button[data-navigation-character="ciel"] {
-  border-color: rgb(128 228 162 / 82%);
+  border-color: rgb(134 236 168 / 86%);
   background:
     linear-gradient(
       145deg,
-      rgb(231 255 239 / 78%),
-      rgb(55 130 84 / 24%) 54%,
-      rgb(80 203 134 / 36%)
+      rgb(236 255 243 / 82%),
+      rgb(55 130 84 / 26%) 52%,
+      rgb(84 212 140 / 40%)
     ),
     #071a11;
-  outline-color: rgb(110 239 159 / 48%);
+  outline-color: rgb(118 244 166 / 52%);
   box-shadow:
-    inset 0 1px 0 rgb(240 255 245 / 86%),
-    0 0 0 3px rgb(5 22 14 / 82%),
-    0 12px 34px rgb(0 0 0 / 50%),
-    0 0 28px rgb(94 228 142 / 22%);
+    inset 0 1.5px 0 rgb(244 255 248 / 90%),
+    inset 0 -1.5px 2px rgb(4 16 10 / 64%),
+    0 0 0 3px rgb(5 22 14 / 84%),
+    0 14px 36px rgb(0 0 0 / 54%),
+    0 0 30px rgb(94 228 142 / 26%);
 }
 
 html body .zeus-button.ciel-button[data-navigation-character="ciel"] .zeus-button-aura {
-  border-color: rgb(173 242 190 / 75%);
-  box-shadow: inset 0 -12px 22px rgb(82 207 129 / 12%);
+  border-color: rgb(180 246 196 / 80%);
+  box-shadow:
+    inset 0 1px 0 rgb(242 255 246 / 40%),
+    inset 0 -12px 22px rgb(82 207 129 / 15%);
 }
 
 html body .zeus-button.ciel-button[data-navigation-character="ciel"] .zeus-button-aura::before {
-  border-color: #9aefb4;
-  background: linear-gradient(0deg, rgb(94 228 142 / 26%), transparent 72%);
+  border-color: #a4f5bd;
+  background: linear-gradient(
+    0deg,
+    rgb(94 228 142 / 34%),
+    rgb(142 246 178 / 12%) 46%,
+    transparent 76%
+  );
 }
 
 html body .zeus-button.ciel-button[data-navigation-character="ciel"] .zeus-button-move {
@@ -1658,8 +1695,10 @@ html body .zeus-button::before {
 }
 
 html body .zeus-button-aura {
-  border-color: color-mix(in srgb, #f0cf86 55%, #fff);
-  box-shadow: inset 0 -12px 22px rgb(122 232 255 / 10%);
+  border-color: color-mix(in srgb, #f0cf86 58%, #fff);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 -12px 22px rgb(122 232 255 / 14%);
 }
 
 /* MOVE: an ink tag inside the button at 12px. */
@@ -1668,9 +1707,10 @@ html body .zeus-button-move {
   bottom: 6px;
   left: 5px;
   padding: 3px 0;
-  border-color: rgb(240 207 134 / 70%);
+  border-color: rgb(240 207 134 / 74%);
   border-radius: 2px;
   background: var(--dwc-ink);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
   color: var(--dwc-text);
   font-family: var(--dwc-mono);
   font-size: 12px;
@@ -1685,11 +1725,31 @@ html body .zeus-button[data-dragging="true"] {
   outline: 2px solid var(--dwc-gold);
   outline-offset: 8px;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 90%),
-    0 0 0 4px rgb(4 8 15 / 82%),
-    0 18px 42px rgb(0 0 0 / 54%),
-    0 0 34px rgb(122 232 255 / 34%),
-    0 0 46px rgb(240 207 134 / 24%);
+    inset 0 1.5px 0 rgb(255 255 255 / 92%),
+    0 0 0 4px rgb(4 8 15 / 84%),
+    0 18px 42px rgb(0 0 0 / 56%),
+    0 0 34px rgb(122 232 255 / 36%),
+    0 0 46px rgb(240 207 134 / 26%);
+}
+
+html body .zeus-button[data-dragging="true"][data-edge-snap="true"] {
+  outline-color: var(--dwc-ice-hi);
+  outline-offset: 5px;
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 95%),
+    0 0 0 4px rgb(4 8 15 / 88%),
+    0 18px 42px rgb(0 0 0 / 58%),
+    0 0 38px rgb(122 232 255 / 54%),
+    0 0 52px rgb(240 207 134 / 30%);
+}
+
+html body .zeus-button.ciel-button[data-navigation-character="ciel"][data-dragging="true"][data-edge-snap="true"] {
+  outline-color: #dcffe9;
+  box-shadow:
+    inset 0 1.5px 0 rgb(244 255 248 / 96%),
+    0 0 0 4px rgb(5 22 14 / 88%),
+    0 18px 42px rgb(0 0 0 / 58%),
+    0 0 38px rgb(110 239 159 / 54%);
 }
 
 html body .zeus-button[data-return-loading="true"] {
@@ -1707,21 +1767,35 @@ html body .zeus-button:focus-visible {
   outline-offset: 6px;
 }
 
-/* The hold fills in. From 160ms a gold ring is drawn up from the base and
-   closes as the drag takes over at 420ms, so a long press reads as one
-   while it waits. Let go before it closes and it drains back. The ring
-   stays full while dragging. The button's scale is left alone: the drag
-   measures its box when the hold activates. */
+/* The hold fills in. At pointerdown an initial rim spark cues contact; from
+   160ms a gold ring is drawn up from the base and closes as the drag takes
+   over at 420ms, so a long press reads as one while it waits. Let go before
+   it closes and it drains back. The ring stays full while dragging. The
+   button's scale is left alone: the drag measures its box when the hold
+   activates. */
 html body .zeus-button-aura::before {
   content: "";
   position: absolute;
   inset: -2px;
   border: 2px solid var(--dwc-gold);
   border-radius: inherit;
-  background: linear-gradient(0deg, rgb(240 207 134 / 26%), transparent 72%);
+  background: linear-gradient(
+    0deg,
+    rgb(240 207 134 / 32%),
+    rgb(122 232 255 / 12%) 46%,
+    transparent 76%
+  );
   clip-path: inset(100% 0 0 0);
   opacity: 0;
   pointer-events: none;
+}
+
+html
+  body
+  .zeus-button[data-pressing="true"]:not([data-holding="true"]):not([data-dragging="true"])
+  .zeus-button-aura::before {
+  clip-path: inset(78% 0 0 0);
+  opacity: 0.72;
 }
 
 html body .zeus-button:is([data-holding="true"], [data-dragging="true"]) .zeus-button-aura::before {
@@ -1749,21 +1823,30 @@ html body .zeus-button[data-dragging="true"][data-move-tag="below"] .zeus-button
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) body .zeus-button-aura::before {
     transition:
-      clip-path 0.12s ease-out,
+      clip-path 0.14s cubic-bezier(0.22, 1, 0.36, 1),
       opacity 0.12s ease-out;
+  }
+
+  html:not([data-world-effects="economy"])
+    body
+    .zeus-button[data-pressing="true"]:not([data-holding="true"]):not([data-dragging="true"])
+    .zeus-button-aura::before {
+    transition:
+      clip-path 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.08s ease-out;
   }
 
   html:not([data-world-effects="economy"]) body .zeus-button[data-holding="true"] .zeus-button-aura::before {
     transition:
-      clip-path 0.26s linear,
-      opacity 0.08s linear;
+      clip-path 0.26s cubic-bezier(0.22, 0.68, 0.36, 1),
+      opacity 0.08s ease-out;
   }
 
   /* A dock onto the edge after a drop glides (FLIP on the individual
      translate, set by zeus-button.tsx). The drag, drop and cancel never do,
      and a relocation the reader did not ask for hands off in place (below). */
   html:not([data-world-effects="economy"]) body .zeus-button[data-relocating="true"] {
-    transition: translate 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: translate 0.22s cubic-bezier(0.16, 1, 0.32, 1);
   }
 
   /* 2026-10-21 sweep F32: a step off words or controls fades out where the
@@ -1964,7 +2047,11 @@ html[data-world-effects="economy"] body #site-announcement-dialog::backdrop {
 
 html[data-world-effects="economy"]
   body
-  :is(#site-side-panel .side-panel-head b, #site-announcement-dialog .site-announcement-copy h3) {
+  :is(#site-side-panel .side-panel-head b, #site-announcement-dialog .site-announcement-copy h3),
+html[data-world-effects="economy"] body #site-side-panel > .side-panel-head::after,
+html[data-world-effects="economy"] body #site-announcement-dialog .site-announcement-hub::after,
+html[data-world-effects="economy"] body #site-announcement-dialog .site-announcement-visual::before,
+html[data-world-effects="economy"] body .load-gate .cine-dive-status::after {
   filter: none;
 }
 
@@ -1972,6 +2059,26 @@ html[data-world-effects="economy"]
    Forced colours: system colours, opaque sheets and bars, real edges.
    ================================================================ */
 @media (forced-colors: active) {
+  html
+    body
+    :is(
+      #site-side-panel .side-panel-head p,
+      #site-side-panel .side-panel-group > p,
+      #site-side-panel .side-panel-links :is(a, button.side-panel-link-button) > i,
+      #site-side-panel .side-panel-zeus-toggle > i em,
+      #site-announcement-dialog .site-announcement-header p,
+      #site-announcement-dialog .site-announcement-count,
+      #site-announcement-dialog .site-announcement-index-copy span,
+      #site-announcement-dialog .site-announcement-list-copy small,
+      #site-announcement-dialog .site-announcement-list-copy time,
+      #site-announcement-dialog .site-announcement-list-copy i,
+      #site-announcement-dialog .site-announcement-meta,
+      #site-announcement-dialog .site-announcement-copy time,
+      #site-announcement-dialog .site-announcement-eyebrow
+    ) {
+    text-shadow: none;
+  }
+
   html
     body
     :is(

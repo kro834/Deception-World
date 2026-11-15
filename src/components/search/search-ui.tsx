@@ -11,7 +11,11 @@ export function Highlighted({ text, ranges }: { text: string; ranges: readonly M
   let at = 0;
   for (const [start, end] of ranges) {
     if (start > at) parts.push(text.slice(at, start));
-    parts.push(<mark key={start}>{text.slice(start, end)}</mark>);
+    parts.push(
+      <mark key={start} className="search-spectrum-mark">
+        {text.slice(start, end)}
+      </mark>,
+    );
     at = end;
   }
   if (at < text.length) parts.push(text.slice(at));
@@ -50,6 +54,7 @@ export function ResultOption({
   result,
   id,
   active,
+  recordCode,
   className,
   tabbable = false,
   onOpen,
@@ -58,6 +63,7 @@ export function ResultOption({
   result: SearchResult;
   id: string;
   active: boolean;
+  recordCode?: string;
   className?: string;
   tabbable?: boolean;
   onOpen: (result: SearchResult, fromKeyboard: boolean) => void;
@@ -93,6 +99,11 @@ export function ResultOption({
         onOpen(result, event.detail === 0);
       }}
     >
+      {recordCode ? (
+        <span className="search-record-code" aria-hidden="true">
+          {recordCode}
+        </span>
+      ) : null}
       {children}
     </a>
   );

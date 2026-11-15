@@ -7,6 +7,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] {
   --gallery-ivory: #edf5fa;
   --gallery-muted: #acbdcc;
   --gallery-brass: #9be9fa;
+  --gallery-gold: #e2c989;
   --gallery-rule: rgb(162 198 224 / 24%);
   /* Feed the existing opaque header and launcher material locally. */
   --sh-ink: #0c1621;
@@ -17,6 +18,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] {
   --sh-l2-rgb: 167 200 220;
   --sh-on-l1: #071a26;
   --gallery-command-edge: rgb(190 222 241 / 38%);
+  --gallery-command-specular: rgb(237 245 250 / 42%);
   --gallery-command-metal:
     linear-gradient(118deg, rgb(218 239 251 / 7%), transparent 35% 75%, rgb(106 183 214 / 5%)),
     linear-gradient(180deg, #192a39, #0d1722 52%, #0b131e);
@@ -169,6 +171,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-browse-pan
   border-top: 2px solid #b6d9eb;
   background: var(--gallery-command-metal);
   box-shadow:
+    inset 0 1px 0 var(--gallery-command-specular),
     6px 6px 0 #03070c,
     7px 7px 0 rgb(137 195 222 / 19%);
 }
@@ -380,6 +383,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-work-frame
   padding: 0;
   background: #050b12;
   box-shadow:
+    inset 0 1px 0 var(--gallery-command-specular),
     0 0 0 1px rgb(169 207 230 / 28%),
     5px 6px 0 #101c28;
 }
@@ -458,7 +462,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-viewer {
   background: #0b1420;
   box-shadow:
     inset 0 1px 0 #bed7e6,
-    0 28px 90px rgb(0 0 0 / 65%);
+    0 20px 46px rgb(0 0 0 / 65%);
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-viewer::backdrop {
@@ -516,12 +520,14 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-footer {
     .gallery-page[data-gallery-page]
     :is(button, .gallery-feature-settings a):hover:not(:disabled):not([aria-disabled="true"]) {
     border-color: #a9efff;
+    box-shadow: inset 0 1px 0 var(--gallery-command-specular);
   }
   html[data-family="gallery"]
     .gallery-page[data-gallery-page]
     .gallery-work-open:hover
     .gallery-work-frame {
     box-shadow:
+      inset 0 1px 0 var(--gallery-command-specular),
       0 0 0 1px #a9efff,
       5px 6px 0 #193243;
   }

@@ -49,7 +49,12 @@ html[data-family] {
   --fx-c: var(--sh-l2, #ff5fc8);
   --fx-ink: #040a14;
   --fx-ink-2: #071222;
-  --fx-scan: repeating-linear-gradient(180deg, rgb(233 246 251 / 2.6%) 0 1px, transparent 1px 3px);
+  --fx-scan: repeating-linear-gradient(
+    180deg,
+    rgb(236 249 255 / 3%) 0 0.75px,
+    rgb(157 134 255 / 1.1%) 0.75px 1.5px,
+    transparent 1.5px 3.5px
+  );
 }
 
 html[data-family="dream"],
@@ -85,25 +90,27 @@ html:is(
     [data-family="archive"],
     [data-family="utility"]
   ) {
-  --command-edge: color-mix(in srgb, var(--fx-a) 62%, transparent);
+  --command-edge: color-mix(in srgb, var(--fx-a) 66%, color-mix(in srgb, var(--fx-b) 24%, transparent));
   --command-metal:
     linear-gradient(
       var(--fx-angle),
-      transparent 20%,
-      color-mix(in srgb, var(--fx-a) 15%, transparent) 20.2%,
-      color-mix(in srgb, var(--fx-b) 9%, transparent) 33%,
-      transparent 46%
+      transparent 17%,
+      color-mix(in srgb, var(--fx-a) 18%, transparent) 17.3%,
+      color-mix(in srgb, var(--fx-b) 12%, transparent) 29%,
+      color-mix(in srgb, var(--fx-c) 9%, transparent) 38%,
+      transparent 49%
     ),
     radial-gradient(
-      120% 90% at 100% 0%,
-      color-mix(in srgb, var(--fx-c) 11%, transparent),
-      transparent 62%
+      115% 88% at 100% 0%,
+      color-mix(in srgb, var(--fx-c) 14%, transparent),
+      color-mix(in srgb, var(--fx-b) 6%, transparent) 40%,
+      transparent 66%
     ),
     linear-gradient(
       180deg,
-      rgb(233 240 241 / 12%),
-      rgb(233 240 241 / 2%) 45%,
-      rgb(0 0 0 / 30%) 46%,
+      rgb(238 248 255 / 14%),
+      rgb(220 238 248 / 3%) 44%,
+      rgb(2 6 14 / 34%) 45.5%,
       transparent 100%
     );
   --command-ribs: var(--fx-scan);
@@ -1028,13 +1035,21 @@ html:is(
     .primary-action.ios26-glass:not(#fx):not(#fx) {
     border-color: transparent;
     background:
-      linear-gradient(var(--fx-angle), #ecfcff 0%, #bdefff 34%, #d8cdff 66%, #ffd3f0 100%) padding-box,
+      linear-gradient(
+        var(--fx-angle),
+        #f2fdff 0%,
+        #c4f2ff 30%,
+        #ddd3ff 64%,
+        #ffd8f2 100%
+      )
+        padding-box,
       linear-gradient(90deg, var(--fx-a), var(--fx-b) 50%, var(--fx-c)) border-box !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 70%),
-      0 0 0 1px color-mix(in srgb, var(--fx-b) 40%, transparent),
-      -8px 10px 30px -12px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-glow)), transparent),
-      12px 14px 34px -14px color-mix(in srgb, var(--fx-c) calc(85% * var(--fx-glow)), transparent);
+      inset 0 1px 0 rgb(255 255 255 / 82%),
+      inset 0 -1px 0 color-mix(in srgb, var(--fx-b) 28%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--fx-b) 44%, transparent),
+      -8px 10px 30px -12px color-mix(in srgb, var(--fx-a) calc(92% * var(--fx-glow)), transparent),
+      12px 14px 34px -14px color-mix(in srgb, var(--fx-c) calc(86% * var(--fx-glow)), transparent);
   }
 }
 
@@ -1046,12 +1061,19 @@ html[data-family="world"]
     #riders#riders#riders .rider-tabs
   )
   .liquid-selection-surface {
-  background: linear-gradient(var(--fx-angle), #ecfcff 0%, #bdefff 34%, #d8cdff 66%, #ffd3f0 100%);
+  background: linear-gradient(
+    var(--fx-angle),
+    #f2fdff 0%,
+    #c4f2ff 30%,
+    #ddd3ff 64%,
+    #ffd8f2 100%
+  );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 80%),
-    0 0 0 1px color-mix(in srgb, var(--fx-a) 70%, transparent),
-    0 0 26px -6px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent),
-    8px 10px 26px -12px color-mix(in srgb, var(--fx-c) calc(70% * var(--fx-glow)), transparent);
+    inset 0 1px 0 rgb(255 255 255 / 86%),
+    inset 0 -1px 0 color-mix(in srgb, var(--fx-b) 26%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--fx-a) 74%, transparent),
+    0 0 26px -6px color-mix(in srgb, var(--fx-a) calc(82% * var(--fx-glow)), transparent),
+    8px 10px 26px -12px color-mix(in srgb, var(--fx-c) calc(72% * var(--fx-glow)), transparent);
 }
 
 /* Light-text tabs (columns, the archive switcher): a dark spectrum glass. */

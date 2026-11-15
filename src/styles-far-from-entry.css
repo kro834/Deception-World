@@ -135,6 +135,35 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .ffe-skip {
   font-variant-numeric: tabular-nums lining-nums;
 }
 
+/* Precision HUD reticle texture and optical slit on lock and captions */
+.ffe-sequence .rx-suit-lock {
+  border-color: rgb(255 215 122 / 65%);
+  box-shadow:
+    0 0 16px rgb(255 215 122 / 30%),
+    inset 0 0 12px rgb(127 230 255 / 25%);
+}
+
+.ffe-sequence .rx-suit-lock::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 1px dashed rgb(127 230 255 / 45%);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.ffe-sequence :is(.rx-suit-callout, .rx-suit-boot) {
+  text-shadow:
+    0 0 10px rgb(127 230 255 / 40%),
+    0 0 20px rgb(255 215 122 / 20%);
+}
+
+.ffe-sequence .rx-suit-scan {
+  box-shadow:
+    0 0 32px rgb(127 230 255 / 24%),
+    0 0 64px rgb(201 155 255 / 16%);
+}
+
 /* The opening calls are longer lines than Rexonance's: a size that keeps
    them in the calls' zone (measured on the longest opening call). */
 .ffe-sequence[data-mode="entry"] .rx-call-opening:first-child {
@@ -175,7 +204,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .ffe-skip {
   background-repeat: no-repeat;
 }
 
-/* The reactor's ignition on FAR FROM DEUS！: a gold bloom from the chest. */
+/* The reactor's ignition on FAR FROM DEUS！: a gold bloom from the chest with deep chromatic glow. */
 .ffe-sequence .ffe-reactor-halo {
   position: absolute;
   display: block;
@@ -184,12 +213,17 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .ffe-skip {
   opacity: 0;
   background: radial-gradient(
     circle,
-    rgb(255 253 242 / 92%) 0 6%,
-    rgb(255 215 122 / 54%) 16%,
-    rgb(201 155 255 / 26%) 29%,
-    rgb(121 232 255 / 20%) 44%,
-    transparent 68%
+    rgb(255 255 255 / 96%) 0 7%,
+    rgb(255 228 150 / 75%) 14%,
+    rgb(255 215 122 / 58%) 22%,
+    rgb(201 155 255 / 32%) 34%,
+    rgb(121 232 255 / 24%) 48%,
+    rgb(46 128 255 / 12%) 60%,
+    transparent 72%
   );
+  box-shadow:
+    0 0 40px rgb(255 215 122 / 40%),
+    0 0 80px rgb(127 230 255 / 25%);
   translate: -50% -50%;
 }
 
@@ -452,6 +486,16 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .ffe-skip {
   }
 
   .ffe-sequence .rx-call-chant .rx-call-answer {
+    text-shadow: none;
+  }
+
+  .ffe-sequence .rx-suit-lock,
+  .ffe-sequence .ffe-reactor-halo,
+  .ffe-sequence .rx-suit-scan {
+    box-shadow: none;
+  }
+
+  .ffe-sequence :is(.rx-suit-callout, .rx-suit-boot) {
     text-shadow: none;
   }
 }

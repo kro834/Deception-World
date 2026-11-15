@@ -180,9 +180,11 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side
   line-height: 1;
 }
 
-.gallery-refresh:hover {
-  border-color: #c5a66c;
-  color: #f3d899;
+@media (hover: hover) and (pointer: fine) {
+  .gallery-refresh:hover {
+    border-color: #c5a66c;
+    color: #f3d899;
+  }
 }
 
 .gallery-refresh[data-busy="true"] {
@@ -200,7 +202,7 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side
 
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .gallery-refresh[data-busy="true"] > span {
-    animation: gallery-refresh-turn 700ms linear infinite;
+    animation: gallery-refresh-turn 700ms cubic-bezier(0.22, 1, 0.36, 1) 2;
   }
 }
 
@@ -232,9 +234,11 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side
   }
 }
 
-.gallery-topbar-actions > a:hover,
-.gallery-footer > a:hover {
-  color: #f3d899;
+@media (hover: hover) and (pointer: fine) {
+  .gallery-topbar-actions > a:hover,
+  .gallery-footer > a:hover {
+    color: #f3d899;
+  }
 }
 
 .gallery-intro,
@@ -339,9 +343,11 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side
   font-size: 18px;
 }
 
-.gallery-enter:hover {
-  gap: 25px;
-  color: #fff2d2;
+@media (hover: hover) and (pointer: fine) {
+  .gallery-enter:hover {
+    gap: 25px;
+    color: #fff2d2;
+  }
 }
 
 .gallery-edition {
@@ -820,35 +826,50 @@ select[data-gallery-select="true"][data-pointer-focus="true"]:focus {
   place-items: center;
   padding: var(--gallery-mat);
   overflow: hidden;
-  border: 1px solid rgb(212 191 153 / 0.33);
+  border: 1px solid rgb(212 191 153 / 0.36);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(236 220 185 / 0.085), transparent 45%), #070707;
+    radial-gradient(ellipse at 50% -6%, rgb(240 222 184 / 0.11), transparent 52%),
+    linear-gradient(180deg, #0d0d0c, #060606);
   box-shadow:
-    inset 0 0 0 5px rgb(230 215 185 / 0.025),
-    0 12px 36px rgb(0 0 0 / 0.18);
+    inset 0 1px 0 rgb(255 247 230 / 0.08),
+    inset 0 0 0 5px rgb(230 215 185 / 0.03),
+    inset 0 10px 24px rgb(0 0 0 / 0.45),
+    0 14px 38px rgb(0 0 0 / 0.28);
   transition:
     border-color 240ms ease,
     box-shadow 240ms ease;
 }
 
+.gallery-work-frame::before {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% -12%, rgb(246 226 184 / 0.16), transparent 60%);
+  content: "";
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 240ms ease;
+}
+
 .gallery-work-frame::after {
   position: absolute;
   inset: 6px;
-  border: 1px solid rgb(222 201 164 / 0.11);
+  border: 1px solid rgb(222 201 164 / 0.14);
+  box-shadow: inset 0 1px 0 rgb(255 250 240 / 0.05);
   content: "";
   pointer-events: none;
 }
 
 .gallery-work-frame img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: var(--gallery-ar, auto);
   object-fit: contain;
   object-position: center;
-  transition:
-    transform 280ms cubic-bezier(0.2, 0.7, 0.2, 1),
-    filter 280ms ease;
+  filter: none;
+  transform: none;
 }
 
 .gallery-work-hint {
@@ -965,6 +986,7 @@ select[data-gallery-select="true"][data-pointer-focus="true"]:focus {
 }
 
 .gallery-viewer {
+  --gallery-viewer-mat: clamp(10px, 1.8vw, 22px);
   position: fixed;
   inset: 0;
   width: min(1200px, calc(100vw - 32px));
@@ -978,14 +1000,22 @@ select[data-gallery-select="true"][data-pointer-focus="true"]:focus {
   margin: auto;
   padding: 0;
   overflow: auto;
-  border: 1px solid rgb(216 192 151 / 0.46);
-  background: radial-gradient(ellipse at 50% 0%, rgb(194 162 109 / 0.11), transparent 46%), #171614;
+  border: 1px solid rgb(216 192 151 / 0.5);
+  background:
+    radial-gradient(ellipse at 50% -6%, rgb(214 182 126 / 0.13), transparent 48%),
+    radial-gradient(ellipse at 50% 52%, transparent 48%, rgb(4 4 6 / 0.56) 100%),
+    #141311;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 0.12),
+    inset 0 0 0 1px rgb(216 192 151 / 0.1),
+    0 32px 96px rgb(0 0 0 / 0.72);
   color: var(--gallery-ivory);
   overscroll-behavior: contain;
 }
 
 .gallery-viewer::backdrop {
-  background: rgb(5 5 4 / 0.84);
+  background:
+    radial-gradient(ellipse at 50% 38%, rgb(26 23 19 / 0.76), rgb(3 3 4 / 0.94) 72%);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
@@ -1171,11 +1201,13 @@ html[data-route-cover] .gallery-arrival {
     color 160ms ease;
 }
 
-.gallery-viewer-close:hover,
-.gallery-viewer-footer button:hover {
-  border-color: #c7a76d;
-  background: rgb(199 167 109 / 0.11);
-  color: #f5dfb0;
+@media (hover: hover) and (pointer: fine) {
+  .gallery-viewer-close:hover,
+  .gallery-viewer-footer button:hover {
+    border-color: #c7a76d;
+    background: rgb(199 167 109 / 0.11);
+    color: #f5dfb0;
+  }
 }
 
 .gallery-viewer-close span {
@@ -1185,6 +1217,8 @@ html[data-route-cover] .gallery-arrival {
 }
 
 .gallery-viewer-stage {
+  position: relative;
+  isolation: isolate;
   display: grid;
   min-height: 0;
   place-items: center;
@@ -1192,7 +1226,20 @@ html[data-route-cover] .gallery-arrival {
   overflow: hidden;
 }
 
+.gallery-viewer-stage::before {
+  position: absolute;
+  inset: 6px 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 6%, rgb(232 206 158 / 0.08), transparent 56%),
+    radial-gradient(ellipse at 50% 50%, transparent 54%, rgb(0 0 0 / 0.42) 100%);
+  content: "";
+  pointer-events: none;
+}
+
 .gallery-viewer-image {
+  position: relative;
+  z-index: 1;
   display: grid;
   width: 100%;
   height: 100%;
@@ -1220,8 +1267,63 @@ html[data-route-cover] .gallery-arrival {
   width: 100%;
   height: 100%;
   min-height: 0;
+  padding: var(--gallery-viewer-mat, 14px);
   overflow: hidden;
+  border: 1px solid rgb(220 198 158 / 0.24);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 0.09),
+    inset 0 0 0 5px rgb(224 205 170 / 0.035),
+    inset 0 14px 36px rgb(0 0 0 / 0.48);
   touch-action: pan-y pinch-zoom;
+}
+
+/* Stepped passe-partout mat bevel tiers (museum / calm / tight) — frame only, never artwork pixels. */
+:is(.gallery-viewer, .gallery-page, .gallery-image-viewport)[data-mat="museum"] {
+  --gallery-viewer-mat: clamp(16px, 2.6vw, 32px);
+  --gallery-mat: clamp(14px, 2vw, 26px);
+}
+
+:is(.gallery-viewer, .gallery-page, .gallery-image-viewport)[data-mat="museum"]
+  .gallery-image-viewport,
+.gallery-image-viewport[data-mat="museum"],
+.gallery-work-frame[data-mat="museum"] {
+  border-color: rgb(224 198 150 / 0.42);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 0.14),
+    inset 0 0 0 7px rgb(228 208 172 / 0.055),
+    inset 0 0 0 8px rgb(218 190 138 / 0.18),
+    inset 0 18px 42px rgb(0 0 0 / 0.52);
+}
+
+:is(.gallery-viewer, .gallery-page, .gallery-image-viewport)[data-mat="calm"] {
+  --gallery-viewer-mat: clamp(10px, 1.5vw, 18px);
+  --gallery-mat: clamp(10px, 1.35vw, 18px);
+}
+
+:is(.gallery-viewer, .gallery-page, .gallery-image-viewport)[data-mat="calm"]
+  .gallery-image-viewport,
+.gallery-image-viewport[data-mat="calm"],
+.gallery-work-frame[data-mat="calm"] {
+  border-color: rgb(212 194 162 / 0.28);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 240 / 0.08),
+    inset 0 0 0 4px rgb(224 208 180 / 0.035),
+    inset 0 12px 28px rgb(0 0 0 / 0.38);
+}
+
+:is(.gallery-viewer, .gallery-page, .gallery-image-viewport)[data-mat="tight"] {
+  --gallery-viewer-mat: clamp(2px, 0.5vw, 6px);
+  --gallery-mat: clamp(3px, 0.5vw, 6px);
+}
+
+:is(.gallery-viewer, .gallery-page, .gallery-image-viewport)[data-mat="tight"]
+  .gallery-image-viewport,
+.gallery-image-viewport[data-mat="tight"],
+.gallery-work-frame[data-mat="tight"] {
+  border-color: rgb(212 194 162 / 0.22);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 250 240 / 0.08),
+    inset 0 6px 18px rgb(0 0 0 / 0.32);
 }
 
 .gallery-image-canvas {
@@ -1266,6 +1368,7 @@ html[data-route-cover] .gallery-arrival {
 }
 
 .gallery-viewer-image[data-zoomed="true"] .gallery-image-viewport {
+  padding: 0;
   overflow: auto;
   touch-action: pan-x pan-y pinch-zoom;
   overscroll-behavior: contain;
@@ -1360,16 +1463,22 @@ html[data-route-cover] .gallery-arrival {
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   .gallery-work-open:hover .gallery-work-frame {
-    border-color: rgb(226 192 127 / 0.8);
+    border-color: rgb(226 192 127 / 0.82);
     box-shadow:
-      inset 0 0 0 5px rgb(230 215 185 / 0.055),
-      0 16px 42px rgb(0 0 0 / 0.32),
-      0 0 28px rgb(197 166 108 / 0.08);
+      inset 0 1px 0 rgb(255 250 238 / 0.16),
+      inset 0 0 0 5px rgb(230 215 185 / 0.065),
+      0 18px 46px rgb(0 0 0 / 0.38),
+      0 0 32px rgb(197 166 108 / 0.12);
   }
 
-  .gallery-work-open:hover .gallery-work-frame img {
-    filter: brightness(1.045);
-    transform: scale(1.018);
+  .gallery-work-open:hover .gallery-work-frame::before {
+    opacity: 1;
+  }
+
+  .gallery-work-open:hover .gallery-work-frame img,
+  .gallery-work-open:focus-visible .gallery-work-frame img {
+    filter: none;
+    transform: none;
   }
 
   .gallery-work-open:hover .gallery-work-hint,
@@ -1698,5 +1807,134 @@ html[data-world-effects="economy"] .gallery-viewer::backdrop {
     background: #171614;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+  }
+}
+
+/* Velvet curtain architrave valance, ring glints, pile chiaroscuro & bullion hem.
+   Motion timings stay synchronized with the route gate (720ms close / 1120ms open / 240ms calm). */
+.gallery-curtain-rail {
+  overflow: visible;
+}
+
+.gallery-curtain-valance {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: clamp(16px, 3vw, 42px);
+  border-bottom: 1px solid rgb(245 212 152 / 0.48);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(28 16 12 / 0.92),
+      rgb(122 86 44 / 0.42) 18%,
+      rgb(224 184 118 / 0.34) 50%,
+      rgb(122 86 44 / 0.42) 82%,
+      rgb(28 16 12 / 0.92)
+    ),
+    linear-gradient(180deg, #4b321d 0%, #c9a165 34%, #6f4d2d 68%, #1d100c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 198 / 0.55),
+    0 10px 28px rgb(0 0 0 / 0.72);
+  pointer-events: none;
+}
+
+.gallery-curtain-valance-medallion {
+  width: clamp(44px, 6vw, 72px);
+  height: 6px;
+  border: 1px solid rgb(255 233 189 / 0.62);
+  background: linear-gradient(90deg, #8a6236, #f0cf95 50%, #8a6236);
+  box-shadow: 0 0 14px rgb(238 197 126 / 0.35);
+}
+
+.gallery-curtain-valance-finial {
+  width: 14px;
+  height: 8px;
+  border: 1px solid rgb(246 216 160 / 0.54);
+  background: linear-gradient(180deg, #e7c488, #6b4929);
+}
+
+.gallery-curtain-rings {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  left: 0;
+  height: 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 38px,
+    rgb(236 198 134 / 0.72) 38px 43px,
+    rgb(42 24 14 / 0.85) 43px 45px,
+    transparent 45px 80px
+  );
+  pointer-events: none;
+}
+
+.gallery-curtain-drape-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 50% 8%, rgb(250 198 142 / 0.16), transparent 54%),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 224 196 / 0.045) 0 2%,
+      transparent 2% 5.5%,
+      rgb(8 2 4 / 0.34) 5.5% 8.333%
+    ),
+    linear-gradient(180deg, rgb(6 2 4 / 0.52) 0%, transparent 18%, transparent 74%, rgb(6 2 4 / 0.64) 100%);
+  pointer-events: none;
+}
+
+.gallery-curtain-seam-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 4px;
+  background: linear-gradient(180deg, #6d4c2c, #e5c080 28%, #9f7545 64%, #432b18);
+  box-shadow: 0 0 18px rgb(0 0 0 / 0.75);
+  pointer-events: none;
+}
+
+.gallery-curtain-panel.is-left .gallery-curtain-seam-edge {
+  right: 0;
+}
+
+.gallery-curtain-panel.is-right .gallery-curtain-seam-edge {
+  left: 0;
+}
+
+.gallery-curtain-bullion {
+  position: absolute;
+  right: 0;
+  bottom: -7px;
+  left: 0;
+  height: 7px;
+  background: repeating-linear-gradient(
+    90deg,
+    #cfa668 0 3px,
+    #6a4929 3px 5px,
+    #ebd09c 5px 7px,
+    #2b180e 7px 9px
+  );
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .gallery-curtain-stickers,
+  .gallery-curtain-valance,
+  .gallery-curtain-rings,
+  .gallery-curtain-drape-sheen,
+  .gallery-curtain-seam-edge,
+  .gallery-curtain-bullion {
+    display: none;
+  }
+
+  .gallery-image-viewport {
+    border-color: CanvasText;
+    box-shadow: none;
   }
 }

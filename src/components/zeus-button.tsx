@@ -67,8 +67,11 @@ const GLIDE_MS = 260;
 // straight to the hidden move.
 const FADE_OUT_MS = 120;
 const SCROLL_REVEAL_MS = 180;
-// A drop this close to a side edge docks on it.
+// A drop this close to a side edge docks on it; a brisk horizontal flick
+// toward that rail widens the magnetic capture reach without touching slow drops.
 const EDGE_SNAP_PX = 48;
+const EDGE_SNAP_FLICK_PX = 76;
+const EDGE_FLICK_PX_PER_MS = 0.22;
 const ZEUS_AVOID_SELECTOR = [
   ".ios-slide-open",
   ".episode-pickup-plus",
@@ -984,6 +987,9 @@ function ZeusButton({
   // A safe temporary spot stays put until the reader moves on or that spot
   // becomes obstructed. Passive layout/frame reports must not send it home.
   const stepAway = useRef<{ scrollTop: number } | null>(null);
+  const dragVelocity = useRef<{ x: number; at: number; prevX: number; prevAt: number } | null>(
+    null,
+  );
   const secretPress = useRef<{ id: number; x: number; y: number; at: number } | null>(null);
 
   useEffect(() => {
@@ -1033,7 +1039,10 @@ function ZeusButton({
     if (cueTimer.current != null) window.clearTimeout(cueTimer.current);
     cueTimer.current = null;
     holdActivate.current = null;
-    if (buttonRef.current) delete buttonRef.current.dataset.holding;
+    if (buttonRef.current) {
+      delete buttonRef.current.dataset.pressing;
+      delete buttonRef.current.dataset.holding;
+    }
   }, []);
 
   /* A glide is an individual translate from the old spot back to zero, so it
@@ -1925,9 +1934,11 @@ function ZeusButton({
       cancelDragFrame();
       activePointer.current = null;
       held.current = false;
+      dragVelocity.current = null;
       disarmTouchGuard();
       moved.current = true;
       if (button) {
+        delete button.dataset.edgeSnap;
         button.dataset.dragging = "false";
         button.setAttribute("aria-grabbed", "false");
         if (wasHeld) restoreGestureOrigin();
@@ -1986,17 +1997,41 @@ function ZeusButton({
     // The MOVE tag rides above the finger, or below it at the top edge.
     const side = next.center.y - geometry.bounds.minY < 40 ? "below" : "above";
     if (button.dataset.moveTag !== side) button.dataset.moveTag = side;
+    const nearEdge =
+      next.center.x - geometry.bounds.minX < EDGE_SNAP_PX ||
+      geometry.bounds.maxX - next.center.x < EDGE_SNAP_PX;
+    if (nearEdge) {
+      if (button.dataset.edgeSnap !== "true") button.dataset.edgeSnap = "true";
+    } else if (button.dataset.edgeSnap) {
+      delete button.dataset.edgeSnap;
+    }
   };
 
   /* A drop close to a side edge docks on it, so a spot meant for the edge
-     does not end up a few pixels short of it. A drop elsewhere stays. */
-  const dockToEdge = (button: HTMLElement, spot: ZeusButtonPosition) => {
+     does not end up a few pixels short of it. A directional flick toward a
+     side rail extends the magnetic capture reach; a drop elsewhere stays. */
+  const dockToEdge = (
+    button: HTMLElement,
+    spot: ZeusButtonPosition,
+    releaseX?: number,
+    releaseAt?: number,
+  ) => {
     const viewport = getViewport();
     const bounds = readBounds(viewport, restingSize(button));
     const x = viewport.offsetLeft + spot.x * viewport.width;
+    const sample = dragVelocity.current;
+    let vx = 0;
+    if (sample && releaseX != null && releaseAt != null && Number.isFinite(releaseAt)) {
+      const anchorAt = releaseAt - sample.at >= 8 ? sample.at : sample.prevAt;
+      const anchorX = releaseAt - sample.at >= 8 ? sample.x : sample.prevX;
+      const dt = releaseAt - anchorAt;
+      if (dt > 0 && dt <= 140) vx = (releaseX - anchorX) / dt;
+    }
+    const leftSnapPx = vx < -EDGE_FLICK_PX_PER_MS ? EDGE_SNAP_FLICK_PX : EDGE_SNAP_PX;
+    const rightSnapPx = vx > EDGE_FLICK_PX_PER_MS ? EDGE_SNAP_FLICK_PX : EDGE_SNAP_PX;
     let dockX: number | null = null;
-    if (x - bounds.minX < EDGE_SNAP_PX) dockX = bounds.minX;
-    else if (bounds.maxX - x < EDGE_SNAP_PX) dockX = bounds.maxX;
+    if (x - bounds.minX < leftSnapPx) dockX = bounds.minX;
+    else if (bounds.maxX - x < rightSnapPx) dockX = bounds.maxX;
     if (dockX == null || Math.abs(dockX - x) < 1) return null;
     return { x: (dockX - viewport.offsetLeft) / viewport.width, y: spot.y };
   };
@@ -2022,7 +2057,12 @@ function ZeusButton({
         viewport.offsetLeft + pendingPosition.current.x * viewport.width,
         viewport.offsetTop + pendingPosition.current.y * viewport.height,
       );
-      const docked = dockToEdge(event.currentTarget, pendingPosition.current);
+      const docked = dockToEdge(
+        event.currentTarget,
+        pendingPosition.current,
+        event.clientX,
+        event.timeStamp,
+      );
       if (docked) {
         // The saved spot is the edge; the placement that follows glides there.
         glideNext.current = true;
@@ -2036,8 +2076,10 @@ function ZeusButton({
     } else if (wasHeld && cancelled) {
       restoreGestureOrigin();
     }
+    dragVelocity.current = null;
     held.current = false;
     disarmTouchGuard();
+    delete event.currentTarget.dataset.edgeSnap;
     event.currentTarget.dataset.dragging = "false";
     event.currentTarget.setAttribute("aria-grabbed", "false");
     try {
@@ -2183,13 +2225,23 @@ function ZeusButton({
         moved.current = false;
         held.current = false;
         clearHoldTimer();
+        dragVelocity.current = Number.isFinite(event.timeStamp)
+          ? {
+              x: event.clientX,
+              at: event.timeStamp,
+              prevX: event.clientX,
+              prevAt: event.timeStamp,
+            }
+          : null;
         holdTimer.current = window.setTimeout(activateHold, LONG_PRESS_MS);
         holdActivate.current = activateHold;
+        target.dataset.pressing = "true";
         // Past a tap's length the hold starts filling in (styles), so the
         // wait before the drag reads as progress, not as nothing happening.
         cueTimer.current = window.setTimeout(() => {
           cueTimer.current = null;
           if (activePointer.current === event.pointerId && !held.current) {
+            delete target.dataset.pressing;
             target.dataset.holding = "true";
           }
         }, HOLD_CUE_MS);
@@ -2220,6 +2272,7 @@ function ZeusButton({
           };
           held.current = true;
           armTouchGuard();
+          delete target.dataset.pressing;
           delete target.dataset.holding;
           target.dataset.dragging = "true";
           target.setAttribute("aria-grabbed", "true");
@@ -2268,6 +2321,26 @@ function ZeusButton({
           return;
         }
         event.preventDefault();
+        if (Number.isFinite(event.timeStamp)) {
+          const sample = dragVelocity.current;
+          if (!sample) {
+            dragVelocity.current = {
+              x: event.clientX,
+              at: event.timeStamp,
+              prevX: event.clientX,
+              prevAt: event.timeStamp,
+            };
+          } else if (event.timeStamp - sample.at >= 16) {
+            dragVelocity.current = {
+              x: event.clientX,
+              at: event.timeStamp,
+              prevX: sample.x,
+              prevAt: sample.at,
+            };
+          } else {
+            dragVelocity.current = { ...sample, x: event.clientX, at: event.timeStamp };
+          }
+        }
         if (dragFrame.current == null) {
           dragFrame.current = window.requestAnimationFrame(() => {
             dragFrame.current = null;

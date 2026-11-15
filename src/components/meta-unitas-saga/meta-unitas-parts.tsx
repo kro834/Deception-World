@@ -174,10 +174,28 @@ export function ArticleDiagram({ name }: { name: string }) {
   );
 }
 
+/** Precision cyber optical frame for technical diagrams. */
+const cyberFrame = () => (
+  <g className="mus-dg-grid">
+    <path
+      d="M6 14V4h10 M224 4h10v10 M6 82v10h10 M224 92h10V82"
+      stroke="rgb(55 198 192 / 0.35)"
+      strokeWidth={1}
+      fill="none"
+    />
+    <path
+      d="M24 4v3 M74 4v2 M120 4v4 M166 4v2 M216 4v3 M24 92v-3 M74 92v-2 M120 92v-4 M166 92v-2 M216 92v-3"
+      stroke="rgb(255 154 74 / 0.3)"
+      strokeWidth={1}
+    />
+  </g>
+);
+
 const DIAGRAMS: Record<string, ReactNode> = {
   // 識別 → 維持 → 形成 → 安定化: four steps as a flow.
   "METAPARTITION ENGINE": (
     <g>
+      {cyberFrame()}
       {[0, 1, 2, 3].map((step) => (
         <g key={step} style={{ ["--d" as string]: step }} className="mus-dg-step">
           <rect x={14 + step * 58} y={34} width={36} height={28} rx={4} />
@@ -191,6 +209,7 @@ const DIAGRAMS: Record<string, ReactNode> = {
   // One whole, made divisible into independent parts.
   "DIVISIBILITY GRANT": (
     <g>
+      {cyberFrame()}
       <circle cx={60} cy={48} r={30} />
       <path d="M100 48h22m-5-4 5 4-5 4" className="mus-dg-link" />
       {[0, 1, 2, 3].map((part) => (
@@ -207,6 +226,7 @@ const DIAGRAMS: Record<string, ReactNode> = {
   // The halo's orbits and the bits riding them.
   "UNITAS HALO": (
     <g>
+      {cyberFrame()}
       <ellipse cx={120} cy={48} rx={92} ry={20} />
       <ellipse cx={120} cy={48} rx={60} ry={34} className="mus-dg-alt" />
       <circle cx={120} cy={48} r={6} className="mus-dg-core" />
@@ -214,6 +234,7 @@ const DIAGRAMS: Record<string, ReactNode> = {
   ),
   "META UNITAS BIT": (
     <g>
+      {cyberFrame()}
       <ellipse cx={120} cy={48} rx={96} ry={30} className="mus-dg-alt" />
       {[0, 1, 2, 3, 4, 5].map((bit) => {
         const a = (bit / 6) * Math.PI * 2;
@@ -232,6 +253,7 @@ const DIAGRAMS: Record<string, ReactNode> = {
   // The arms deployed around one body.
   "TETRA MANUS": (
     <g>
+      {cyberFrame()}
       <circle cx={120} cy={48} r={12} className="mus-dg-core" />
       {[-150, -110, -70, -30].map((deg, arm) => {
         const r = (deg * Math.PI) / 180;
@@ -251,6 +273,7 @@ const DIAGRAMS: Record<string, ReactNode> = {
   // Independent zones held inside one field.
   "ULTRA PARTITION FIELD": (
     <g>
+      {cyberFrame()}
       <ellipse cx={120} cy={48} rx={104} ry={40} />
       {[
         [70, 44, 20],
@@ -277,17 +300,48 @@ export function FinisherCalls({ name, calls }: { name: string; calls: readonly s
   const [step, setStep] = useState(-1);
   return (
     <ol className="mus-finisher-calls" aria-label={`${name} 発動音声`} data-step={step}>
-      {calls.map((call, index) => (
-        <li key={call} data-lit={index <= step || undefined}>
-          <button
-            type="button"
-            aria-pressed={index <= step}
-            onClick={() => setStep(index === step ? index - 1 : index)}
+      {calls.map((call, index) => {
+        const isLit = index <= step;
+        const isCurrent = index === step;
+        return (
+          <li
+            key={call}
+            data-lit={isLit || undefined}
+            data-current={isCurrent || undefined}
           >
-            <Bracketed text={call} />
-          </button>
-        </li>
-      ))}
+            <button
+              type="button"
+              aria-pressed={isLit}
+              onClick={() => setStep(index === step ? index - 1 : index)}
+            >
+              <span
+                className="mus-call-pip"
+                aria-hidden="true"
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  marginRight: 8,
+                  borderRadius: 1,
+                  verticalAlign: "middle",
+                  backgroundColor: isCurrent
+                    ? "#ffffff"
+                    : isLit
+                      ? "rgb(255 154 74)"
+                      : "rgb(55 198 192 / 0.3)",
+                  boxShadow: isCurrent
+                    ? "0 0 10px #ffffff, 0 0 14px rgb(255 154 74)"
+                    : isLit
+                      ? "0 0 6px rgb(255 154 74 / 0.8)"
+                      : "none",
+                  transition: "background-color 180ms ease, box-shadow 180ms ease",
+                }}
+              />
+              <Bracketed text={call} />
+            </button>
+          </li>
+        );
+      })}
     </ol>
   );
 }

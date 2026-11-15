@@ -1,29 +1,36 @@
 /* Rexonance's operating stages share one colour from control to artwork.
+   Standard (Cyan/Sapphire), Max (Gold/Solar Amber), Ultra (Crimson/Royal Violet).
    Scoped to the Rexonance route; shared showcase geometry,
    type sizes, comparison values and artwork framing remain untouched. */
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="standard"] {
   --rxs-control-accent: #63e2ff;
+  --rxs-control-secondary: #0077ff;
 }
 
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="max"] {
-  --rxs-control-accent: #969cff;
+  --rxs-control-accent: #f2d896;
+  --rxs-control-secondary: #ffaa00;
 }
 
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="ultra"] {
-  --rxs-control-accent: #ff72da;
+  --rxs-control-accent: #ff3b69;
+  --rxs-control-secondary: #9b51e0;
 }
 
 /* The shared frosted rail uses an !important surface paint. Match its
-   specificity here so the selected stage can supply the lens edge. */
+   specificity here so the selected stage can supply the lens edge. Optical rim and specular gradients. */
 html body .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs .liquid-selection-surface {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--rxs-control-accent) 16%, transparent),
-    rgb(255 255 255 / 7%)
+    color-mix(in srgb, var(--rxs-control-accent) 24%, transparent),
+    color-mix(in srgb, var(--rxs-control-secondary, var(--rxs-control-accent)) 12%, transparent) 80%,
+    rgb(255 255 255 / 8%)
   ) !important;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 20%),
-    inset 0 0 0 1px color-mix(in srgb, var(--rxs-control-accent) 55%, transparent) !important;
+    inset 0 1px 0 rgb(255 255 255 / 35%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-control-accent) 65%, transparent),
+    0 0 14px color-mix(in srgb, var(--rxs-control-accent) 30%, transparent),
+    inset 0 0 16px color-mix(in srgb, var(--rxs-control-secondary, var(--rxs-control-accent)) 22%, transparent) !important;
 }
 
 .rxs-page.rxs-rexonance-page
@@ -35,12 +42,18 @@ html body .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs .liquid
 
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]::after {
   position: absolute;
-  right: 24%;
+  right: 20%;
   bottom: 4px;
-  left: 24%;
+  left: 20%;
   height: 2px;
   border-radius: 2px;
-  background: var(--rxs-control-accent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--rxs-control-secondary, var(--rxs-control-accent)) 70%, transparent),
+    var(--rxs-control-accent),
+    color-mix(in srgb, var(--rxs-control-secondary, var(--rxs-control-accent)) 70%, transparent)
+  );
+  box-shadow: 0 0 8px var(--rxs-control-accent);
   opacity: 0;
   content: "";
   pointer-events: none;
@@ -52,21 +65,38 @@ html body .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs .liquid
   opacity: 1;
 }
 
+/* Three stage forms: Standard, Max, Ultra panel palette mapping */
+.rxs-page.rxs-rexonance-page .rxs-stage-panel[data-stage="standard"] {
+  --rxs-stage-accent: #63e2ff;
+  --rxs-stage-accent-secondary: #0077ff;
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-panel[data-stage="max"] {
+  --rxs-stage-accent: #f2d896;
+  --rxs-stage-accent-secondary: #ffaa00;
+}
+
+.rxs-page.rxs-rexonance-page .rxs-stage-panel[data-stage="ultra"] {
+  --rxs-stage-accent: #ff3b69;
+  --rxs-stage-accent-secondary: #9b51e0;
+}
+
 /* A compact status chip keeps the existing code face and size. */
 .rxs-page.rxs-rexonance-page .rxs-stage-panel > div > small {
   display: inline-flex;
   align-items: center;
   width: fit-content;
   padding: 7px 10px;
-  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent) 42%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent) 48%, transparent);
   border-radius: 4px 12px 4px 4px;
   color: var(--rxs-stage-accent);
-  background: color-mix(in srgb, var(--rxs-stage-accent) 8%, #080e17);
+  background: color-mix(in srgb, var(--rxs-stage-accent) 10%, #080e17);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rxs-stage-accent) 18%, transparent);
   line-height: 1.5;
 }
 
 .rxs-page.rxs-rexonance-page .rxs-stage-panel figure {
-  --rxs-stage-bracket: color-mix(in srgb, var(--rxs-stage-accent) 76%, #fff);
+  --rxs-stage-bracket: color-mix(in srgb, var(--rxs-stage-accent) 80%, #fff);
   --sc-brackets:
     linear-gradient(var(--rxs-stage-bracket) 0 0) 0 0 / var(--sc-arm) 2px,
     linear-gradient(var(--rxs-stage-bracket) 0 0) 0 0 / 2px var(--sc-arm),
@@ -79,14 +109,21 @@ html body .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs .liquid
   background:
     radial-gradient(
       ellipse at 50% 35%,
-      color-mix(in srgb, var(--rxs-stage-accent) 9%, transparent),
+      color-mix(in srgb, var(--rxs-stage-accent) 15%, transparent),
       transparent 72%
+    ),
+    radial-gradient(
+      circle at 50% 90%,
+      color-mix(in srgb, var(--rxs-stage-accent-secondary, var(--rxs-stage-accent)) 18%, transparent),
+      transparent 60%
     ),
     var(--sc-tile, #080e17);
 }
 
 .rxs-page.rxs-rexonance-page .rxs-stage-panel figure > span {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent) 24%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent) 30%, transparent),
+    inset 0 0 20px color-mix(in srgb, var(--rxs-stage-accent) 12%, transparent);
 }
 
 /* All three titles start at the same height on a two-column stage. This is

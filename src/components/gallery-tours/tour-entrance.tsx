@@ -41,6 +41,11 @@ export function GalleryTourEntrance({
     <div className="gallery-tour-entrance dg-focus-scope">
       <section
         className="gallery-tour-introduction dg-reveal"
+        style={
+          openingTour
+            ? ({ "--gallery-tour-course-accent": openingTour.accent } as CSSProperties)
+            : undefined
+        }
         aria-labelledby="gallery-tour-heading"
       >
         <div className="gallery-tour-introduction-copy">
@@ -95,16 +100,18 @@ export function GalleryTourEntrance({
         {openingArtwork && (
           <figure className="gallery-tour-opening-artwork">
             <div className="gallery-tour-opening-frame">
-              <img
-                src={openingArtwork.medium}
-                srcSet={openingArtwork.srcSet}
-                sizes="(max-width: 800px) calc(100vw - 40px), 48vw"
-                width={openingArtwork.width}
-                height={openingArtwork.height}
-                alt={openingArtwork.alt}
-                decoding="async"
-                fetchPriority="high"
-              />
+              <div className="gallery-tour-opening-mat">
+                <img
+                  src={openingArtwork.medium}
+                  srcSet={openingArtwork.srcSet}
+                  sizes="(max-width: 800px) calc(100vw - 40px), 48vw"
+                  width={openingArtwork.width}
+                  height={openingArtwork.height}
+                  alt={openingArtwork.alt}
+                  decoding="async"
+                  fetchPriority="high"
+                />
+              </div>
             </div>
             <figcaption>
               <span>{openingArtwork.title}</span>
@@ -128,7 +135,11 @@ export function GalleryTourEntrance({
         </div>
         <nav className="gallery-tour-course-index" aria-label="鑑賞コース">
           {GALLERY_TOURS.map((tour, index) => (
-            <a href={`#gallery-tour-course-${tour.id}`} key={tour.id}>
+            <a
+              href={`#gallery-tour-course-${tour.id}`}
+              key={tour.id}
+              style={{ "--gallery-tour-course-accent": tour.accent } as CSSProperties}
+            >
               <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
               {tour.title}
             </a>
@@ -163,6 +174,7 @@ export function GalleryTourEntrance({
                 className="gallery-tour-course"
                 id={`gallery-tour-course-${tour.id}`}
                 data-tour-id={tour.id}
+                data-has-progress={hasSavedPosition || undefined}
                 key={tour.id}
                 style={{ "--gallery-tour-course-accent": tour.accent } as CSSProperties}
                 aria-labelledby={`gallery-tour-title-${tour.id}`}
@@ -171,18 +183,23 @@ export function GalleryTourEntrance({
                   <span className="gallery-tour-course-number" aria-hidden="true">
                     {String(tourIndex + 1).padStart(2, "0")}
                   </span>
+                  <span className="gallery-tour-course-count-plate" aria-hidden="true">
+                    {tour.stops.length} WORKS
+                  </span>
                   {artwork && (
-                    <img
-                      className="gallery-tour-course-cover"
-                      src={artwork.medium}
-                      srcSet={artwork.srcSet}
-                      sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 980px) 45vw, 35vw"
-                      width={artwork.width}
-                      height={artwork.height}
-                      alt={artwork.alt}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <div className="gallery-tour-course-mat">
+                      <img
+                        className="gallery-tour-course-cover"
+                        src={artwork.medium}
+                        srcSet={artwork.srcSet}
+                        sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 980px) 45vw, 35vw"
+                        width={artwork.width}
+                        height={artwork.height}
+                        alt={artwork.alt}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
                   )}
                 </div>
                 <div className="gallery-tour-course-body">

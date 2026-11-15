@@ -49,11 +49,17 @@ export function RecordReturnNavigation() {
   )
     return null;
 
-  const label = context.source.pathname === "/search" ? "検索結果へ戻る" : "資料一覧へ戻る";
+  const isSearch = context.source.pathname === "/search";
+  const label = isSearch ? "検索結果へ戻る" : "資料一覧へ戻る";
   return (
     <>
       <link rel="stylesheet" href={cssUrl} precedence="default" />
-      <nav className="record-return-navigation" aria-label="開いた資料の一覧に戻る">
+      <nav
+        className="record-return-navigation"
+        aria-label="開いた資料の一覧に戻る"
+        data-return-source={isSearch ? "search" : "library"}
+        data-return-phase={phase}
+      >
         <GuardedLink
           to={context.source.pathname}
           search={context.source.search}
@@ -62,11 +68,38 @@ export function RecordReturnNavigation() {
           beforeNavigate={beginRecordReturn}
           aria-label={context.source.search.q ? `${label}：${context.source.search.q}` : label}
         >
-          <span aria-hidden="true">←</span>
+          <span
+            aria-hidden="true"
+            style={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
+          >
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+              <circle
+                cx="8"
+                cy="8"
+                r="6.2"
+                stroke="currentColor"
+                strokeOpacity="0.45"
+                strokeWidth="1"
+                strokeDasharray="2.6 1.8"
+              />
+              <path
+                d="M10.8 8H5.2M7.5 5.5 5 8l2.5 2.5"
+                stroke="currentColor"
+                strokeWidth="1.45"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
           {label}
         </GuardedLink>
         <button type="button" aria-label="一覧への戻る案内を閉じる" onClick={clearRecordReturn}>
-          ×
+          <span
+            aria-hidden="true"
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+          >
+            ×
+          </span>
         </button>
       </nav>
     </>

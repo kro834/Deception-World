@@ -17,6 +17,9 @@ export function LibraryInquiry({
   return (
     <section className="library-inquiry" aria-labelledby="inquiry-title" id="inquiry">
       <header className="inquiry-heading">
+        <p className="library-section-kicker" aria-hidden="true">
+          CURATED INQUIRY // SPECIMEN ROUTE
+        </p>
         <h2 id="inquiry-title">問いから辿る</h2>
         <p>名前をまだ知らなくても、気になる問いから。人物や世界の記録を、三つの入口で辿ります。</p>
       </header>
@@ -71,27 +74,34 @@ export function LibraryInquiry({
         {selected ? (
           <div className={`inquiry-route inquiry-color-${selected.color}`}>
             <header className="inquiry-route-heading">
+              <p className="inquiry-route-kicker" aria-hidden="true">
+                CURATED TRAIL // {selected.stops.length} SPECIMEN STOPS
+              </p>
               <h3 id="inquiry-guide-title" tabIndex={-1} style={titleRunStyle(selected.question)}>
                 {selected.question}
               </h3>
               <p>番号は案内の順番です。物語の時系列や読了を示すものではありません。</p>
             </header>
-            <ol className="inquiry-stops">
+            <ol className="inquiry-stops library-inquiry-stops">
               {selected.stops.map((stop, index) => (
                 <li key={stop.id} className="inquiry-stop">
                   <span className="inquiry-stop-number" aria-hidden="true">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <article className="inquiry-stop-body">
-                    <RecordArtFrame
-                      art={pathArt(stop.to, stop.hash)}
-                      title={stop.title}
-                      className="is-stop"
-                    />
-                    <p className="inquiry-stop-label">
-                      入口 {index + 1} / {stop.sourceLabel}
-                    </p>
-                    <h4>{stop.title}</h4>
+                    <div className="inquiry-stop-header">
+                      <RecordArtFrame
+                        art={pathArt(stop.to, stop.hash)}
+                        title={stop.title}
+                        className="is-stop"
+                      />
+                      <div className="inquiry-stop-meta">
+                        <p className="inquiry-stop-label">
+                          入口 {index + 1} / {stop.sourceLabel}
+                        </p>
+                        <h4>{stop.title}</h4>
+                      </div>
+                    </div>
                     <p className="inquiry-look-for">{stop.lookFor}</p>
                     <blockquote>
                       <p>{stop.excerpt}</p>

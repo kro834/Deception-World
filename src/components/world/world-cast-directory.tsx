@@ -13,6 +13,15 @@ const LABELS: Record<CastDirectoryFilter, string> = {
   characters: "関連人物の資料",
   profile: "プロフィールのみ",
 };
+
+const CODES: Record<CastDirectoryFilter, string> = {
+  all: "ALL // 00",
+  riders: "RDR // 01",
+  managers: "MGR // 02",
+  characters: "CHR // 03",
+  profile: "PRF // 04",
+};
+
 const COUNTS = castDirectoryCounts(WORLD_CAST_ROSTER);
 
 /** A local way into the existing portrait wall; the cards remain its source. */
@@ -40,11 +49,18 @@ export function WorldCastDirectory({
           <button
             key={value}
             type="button"
+            data-facet={value}
             aria-pressed={filter === value}
             aria-controls="cast-roster"
             onClick={(event) => activateCastDirectoryFilter(value, event.currentTarget, onChange)}
           >
-            <span>{LABELS[value]}</span>
+            <i className="wa-directory-pip" aria-hidden="true" />
+            <span className="wa-directory-copy">
+              <em className="wa-directory-code" aria-hidden="true">
+                {CODES[value]}
+              </em>
+              <span className="wa-directory-name">{LABELS[value]}</span>
+            </span>
             <span className="wa-directory-badge" aria-hidden="true">
               {COUNTS[value]}
             </span>

@@ -264,32 +264,39 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     // Long calls step faster, so every call lands within about a second; a
     // call set by word steps at a word's pace. Each box rises from a touch
     // small, crests a hair above its seat and settles (OPTICS, 2026-11-14:
-    // the letters read struck, not slid).
-    const step = Math.min(by === "words" ? 90 : 22, 600 / boxes.length);
-    return boxes.map((box, index) =>
-      box.animate(
+    // the letters read struck, not slid). Harmonic phase curve delivers
+    // a cinematic cadence.
+    const step = Math.min(by === "words" ? 85 : 20, 580 / Math.max(1, boxes.length));
+    return boxes.map((box, index) => {
+      const p = boxes.length > 1 ? index / (boxes.length - 1) : 0;
+      const delay = Math.round(
+        index * step + (by === "words" ? Math.sin(p * Math.PI) * 16 : Math.sin(p * Math.PI * 2) * 6),
+      );
+      return box.animate(
         [
           { opacity: 0, transform: "translate3d(0, 0.7em, 0) scale(0.9)" },
           { opacity: 1, transform: "translate3d(0, -0.06em, 0) scale(1.03)", offset: 0.62 },
           { opacity: 1, transform: "none" },
         ],
-        { duration: 560, delay: Math.round(index * step), easing: OUT, fill: "both" },
-      ),
-    );
+        { duration: 560, delay: Math.max(0, delay), easing: OUT, fill: "both" },
+      );
+    });
   };
   // A title's line comes up through its mask, overshoots by a hair (inside
   // the mask's room above it) and seats as its skew straightens.
   const lineRun = (lines) =>
-    lines.map((line, index) =>
-      line.animate(
+    lines.map((line, index) => {
+      const p = lines.length > 1 ? index / (lines.length - 1) : 0;
+      const delay = Math.round(90 + index * 120 + Math.sin(p * Math.PI) * 20);
+      return line.animate(
         [
           { transform: "translate3d(0, 118%, 0) skewY(3deg)" },
           { transform: "translate3d(0, -2%, 0) skewY(-0.3deg)", offset: 0.72 },
           { transform: "translate3d(0, 0, 0) skewY(0deg)" },
         ],
-        { duration: 860, delay: 90 + index * 120, easing: OUT, fill: "both" },
-      ),
-    );
+        { duration: 860, delay, easing: OUT, fill: "both" },
+      );
+    });
 
   // OPTICS: one run of light, in its own element (rxk-flare > rxk-flare-band),
   // over a host that already positions its children. Calm tiers, forced

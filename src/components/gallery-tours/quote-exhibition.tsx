@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { QuoteAmbience } from "./quote-ambience";
 import type { QuoteSceneId } from "./tour-route-search";
@@ -16,6 +16,8 @@ export function QuoteExhibition() {
   const { quote } = route.useSearch();
   const navigate = route.useNavigate();
   const activeLine = useRef<HTMLButtonElement>(null);
+  const ambienceRef = useRef<HTMLDivElement>(null);
+  const [ambiencePlaying, setAmbiencePlaying] = useState(false);
   const anchor = useRef<{ button: HTMLButtonElement; top: number; next?: QuoteSceneId } | null>(
     null,
   );
@@ -63,6 +65,23 @@ export function QuoteExhibition() {
     };
   }, [quote]);
 
+  useEffect(() => {
+    const host = ambienceRef.current;
+    if (!host) {
+      setAmbiencePlaying(false);
+      return;
+    }
+    const sync = () => {
+      const label = host.querySelector(".quote-scene-ambience button")?.textContent ?? "";
+      setAmbiencePlaying(label.includes("止める"));
+    };
+    sync();
+    if (typeof MutationObserver === "undefined") return;
+    const observer = new MutationObserver(sync);
+    observer.observe(host, { childList: true, characterData: true, subtree: true });
+    return () => observer.disconnect();
+  }, [quote]);
+
   function choose(id: QuoteSceneId, button: HTMLButtonElement) {
     const next = quote === id ? undefined : id;
     anchor.current = { button, top: button.getBoundingClientRect().top, next };
@@ -81,80 +100,120 @@ export function QuoteExhibition() {
       className="quote-exhibition"
       aria-labelledby="quote-exhibition-title"
     >
-      <h2 id="quote-exhibition-title">台詞から見る</h2>
-      {QUOTE_SCENES.map((scene) => {
-        const open = quote === scene.id;
-        const panel = `quote-scene-${scene.id}`;
-        return (
-          <article
-            key={scene.id}
-            className="quote-scene"
-            data-open={open}
-            style={{ "--quote-ink": scene.color } as CSSProperties}
-          >
-            <h3>
-              <button
-                type="button"
-                ref={open ? activeLine : undefined}
-                onClick={(event) => choose(scene.id, event.currentTarget)}
-                aria-expanded={open}
-                aria-controls={panel}
-              >
-                <span className="quote-line">「{scene.line}」</span>
-                <span className="quote-fold" aria-hidden="true">
-                  {open ? "−" : "＋"}
-                </span>
-              </button>
-            </h3>
-            <div id={panel} className="quote-leaf" hidden={!open}>
-              {open && (
-                <>
-                  <figure>
-                    <img
-                      src={scene.image}
-                      alt={`${scene.by}の人物原画`}
-                      width={scene.width}
-                      height={scene.height}
-                      decoding="async"
-                    />
-                  </figure>
-                  <div className="quote-leaf-copy">
-                    <h4>{scene.by}</h4>
-                    <p>{scene.caption}</p>
-                    <Link
-                      to={scene.to}
-                      hash={scene.hash}
-                      className="quote-source"
-                      onClick={(event) => {
-                        if (
-                          event.button ||
-                          event.metaKey ||
-                          event.ctrlKey ||
-                          event.altKey ||
-                          event.shiftKey
-                        )
-                          return;
-                        const entry = history.state?.__TSR_key;
-                        if (typeof entry === "string" && activeLine.current) {
-                          returnToLine = {
-                            entry,
-                            id: scene.id,
-                            top: activeLine.current.getBoundingClientRect().top,
-                            keyboard: event.detail === 0,
-                          };
-                        }
-                      }}
-                    >
-                      {scene.source}を読む <span aria-hidden="true">↗</span>
-                    </Link>
-                    <QuoteAmbience />
-                  </div>
-                </>
-              )}
-            </div>
-          </article>
-        );
-      })}
+      <header className="quote-exhibition-header">
+        <div className="quote-exhibition-heading">
+          <p className="quote-exhibition-eyebrow">
+            <span>VOICE &amp; PORTRAIT ARCHIVE</span>
+            <span className="quote-exhibition-acoustic-lamp" aria-hidden="true" />
+          </p>
+          <h2 id="quote-exhibition-title">台詞から見る</h2>
+        </div>
+        <p className="quote-exhibition-lead">
+          ひとつの言葉、一枚の人物原画から、物語の場面を静かにひらく展示です。
+        </p>
+      </header>
+      <div className="quote-plaque-list">
+        {QUOTE_SCENES.map((scene, index) => {
+          const open = quote === scene.id;
+          const panel = `quote-scene-${scene.id}`;
+          return (
+            <article
+              key={scene.id}
+              className="quote-scene quote-plaque"
+              data-open={open}
+              style={{ "--quote-ink": scene.color } as CSSProperties}
+            >
+              <h3>
+                <button
+                  type="button"
+                  ref={open ? activeLine : undefined}
+                  onClick={(event) => choose(scene.id, event.currentTarget)}
+                  aria-expanded={open}
+                  aria-controls={panel}
+                >
+                  <span className="quote-plaque-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="quote-words">
+                    <span className="quote-line">「{scene.line}」</span>
+                    <span className="quote-plaque-meta" aria-hidden="true">
+                      <span>{scene.by}</span>
+                      <span>{scene.source}</span>
+                    </span>
+                  </span>
+                  <span className="quote-fold" aria-hidden="true">
+                    {open ? "−" : "＋"}
+                  </span>
+                </button>
+              </h3>
+              <div id={panel} className="quote-leaf" hidden={!open}>
+                {open && (
+                  <>
+                    <figure className="quote-leaf-frame">
+                      <div className="quote-leaf-mat">
+                        <img
+                          src={scene.image}
+                          alt={`${scene.by}の人物原画`}
+                          width={scene.width}
+                          height={scene.height}
+                          decoding="async"
+                        />
+                      </div>
+                    </figure>
+                    <div className="quote-leaf-copy">
+                      <p className="quote-leaf-kicker" aria-hidden="true">
+                        PORTRAIT SPECIMEN · {String(index + 1).padStart(2, "0")}
+                      </p>
+                      <h4>{scene.by}</h4>
+                      <p className="quote-leaf-caption">{scene.caption}</p>
+                      <div className="quote-leaf-actions">
+                        <Link
+                          to={scene.to}
+                          hash={scene.hash}
+                          className="quote-source"
+                          onClick={(event) => {
+                            if (
+                              event.button ||
+                              event.metaKey ||
+                              event.ctrlKey ||
+                              event.altKey ||
+                              event.shiftKey
+                            )
+                              return;
+                            const entry = history.state?.__TSR_key;
+                            if (typeof entry === "string" && activeLine.current) {
+                              returnToLine = {
+                                entry,
+                                id: scene.id,
+                                top: activeLine.current.getBoundingClientRect().top,
+                                keyboard: event.detail === 0,
+                              };
+                            }
+                          }}
+                        >
+                          {scene.source}を読む <span aria-hidden="true">↗</span>
+                        </Link>
+                        <div
+                          ref={ambienceRef}
+                          className="quote-ambience"
+                          data-playing={ambiencePlaying ? "true" : undefined}
+                        >
+                          <span className="quote-ambience-indicator" aria-hidden="true">
+                            <span />
+                            <span />
+                            <span />
+                          </span>
+                          <QuoteAmbience />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </section>
   );
 }

@@ -380,11 +380,70 @@
 .exhibition-room-curated .exhibition-shelf-selected {
   position: absolute;
   inset: auto 10px 10px auto;
-  padding: 5px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid #c8ba98;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #3c4034 0%, #292d22 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.25);
   color: #fffef8;
-  background: #34382d;
   font-size: 12px;
-  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+.exhibition-shelf-plate-crest {
+  display: inline-block;
+  color: #e5cf96;
+  font-size: 10px;
+  line-height: 1;
+}
+.exhibition-shelf-search-field {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.exhibition-shelf-search-clear {
+  position: absolute;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--room-rule);
+  border-radius: 999px;
+  background: #f0ece1;
+  color: var(--room-ink);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 160ms, color 160ms, border-color 160ms;
+}
+@media (hover: hover) and (pointer: fine) {
+  .exhibition-shelf-search-clear:hover {
+    background: #ded9cb;
+    border-color: #8c8672;
+    color: #171612;
+  }
+}
+.exhibition-shelf-caption-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.exhibition-shelf-format-frame {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  color: var(--room-muted);
+  opacity: 0.8;
 }
 .exhibition-room-curated .exhibition-shelf-work-caption {
   display: grid;
@@ -886,7 +945,88 @@ html[data-family="gallery"]
   }
 }
 
+/* Command Studio HUD deck - cut metal, cyan keylight & gallery spotlight */
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf {
+  background:
+    radial-gradient(ellipse 70% 35% at 50% 0%, rgb(155 233 250 / 4%), transparent 60%);
+}
+
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf-search-clear {
+  border-color: rgb(155 233 250 / 38%);
+  background: #0d1a27;
+  color: #cbeeff;
+  box-shadow: inset 0 1px 0 rgb(219 243 255 / 14%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="gallery"]
+    main.exhibition-room.exhibition-room-curated
+    .exhibition-shelf-search-clear:hover {
+    border-color: var(--command-key, #9be9fa);
+    background: #173248;
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 24%), 0 0 10px rgb(155 233 250 / 30%);
+  }
+}
+
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf-selected {
+  border-color: rgb(155 233 250 / 55%);
+  border-left: 2px solid var(--command-key, #9be9fa);
+  background: linear-gradient(180deg, #162b3d 0%, #081420 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(220 244 255 / 22%),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(0, 0, 0, 0.45);
+  color: #e8f7ff;
+}
+
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf-plate-crest {
+  color: var(--command-key, #9be9fa);
+}
+
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf-format-frame {
+  color: #79a8c4;
+}
+
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf-image {
+  border-color: rgb(179 227 248 / 22%);
+  background: radial-gradient(circle at 50% 30%, #152433 0%, #0c1723 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(219 243 255 / 10%),
+    0 8px 22px rgba(0, 0, 0, 0.28);
+}
+
+html[data-family="gallery"]
+  main.exhibition-room.exhibition-room-curated
+  .exhibition-shelf-work[aria-pressed="true"] .exhibition-shelf-image {
+  border-color: var(--command-key, #9be9fa);
+  box-shadow:
+    inset 0 0 0 1px var(--command-key, #9be9fa),
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    0 0 20px rgb(155 233 250 / 25%);
+}
+
 @media (forced-colors: active) {
+  html[data-family="gallery"]
+    main.exhibition-room.exhibition-room-curated
+    :is(.exhibition-shelf-search-clear, .exhibition-shelf-selected) {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
   html[data-family="gallery"]
     main.exhibition-room.exhibition-room-curated
     :is(.exhibition-studio-tools, .exhibition-room-caption, .exhibition-room-adjacent-number) {

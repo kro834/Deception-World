@@ -42,20 +42,23 @@ export function RexonanceAssemblyGuide({
   calls?: readonly string[];
 }) {
   const [load, setLoad] = useState("waiting");
-  // Whether the motion picture is up, and whether the suit stands complete.
-  const [scene, setScene] = useState({ motion: false, complete: false });
+  // Whether the motion picture is up, whether the suit stands complete, and its active phase.
+  const [scene, setScene] = useState({ motion: false, complete: false, phase: "prepare" });
   useEffect(() => {
     const runway = runwayRef.current;
     if (!runway) return;
     const update = () => {
       const next = runway.dataset.rznLoad || "waiting";
       const motion = runway.hasAttribute("data-rzn-state");
+      const phase = runway.dataset.rznPhase || "prepare";
       // One announcement per completion: the phase flips on the scroll, the
       // status only when it reaches (or leaves) the finished suit.
-      const complete = next === "ready" && runway.dataset.rznPhase === "complete";
+      const complete = next === "ready" && phase === "complete";
       setLoad(next);
       setScene((current) =>
-        current.motion === motion && current.complete === complete ? current : { motion, complete },
+        current.motion === motion && current.complete === complete && current.phase === phase
+          ? current
+          : { motion, complete, phase },
       );
     };
     update();
@@ -67,6 +70,12 @@ export function RexonanceAssemblyGuide({
     return () => observer.disconnect();
   }, [runwayRef]);
   const status = assemblyStatus(load, Boolean(scene.motion));
+  const activePhase =
+    typeof scene === "object" && scene && "phase" in scene ? scene.phase : "prepare";
+  const activePhaseIndex = Math.max(
+    0,
+    REXONANCE_ASSEMBLY_PHASES.findIndex((item) => item.phase === activePhase),
+  );
   // Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The head is the
   // chapter's numeral and its catchphrase; the runway below shows its own state
   // (the undersuit while it prepares, the scroll's armour after). The status
@@ -77,6 +86,8 @@ export function RexonanceAssemblyGuide({
       id="assembly"
       className="rxs-assembly-heading"
       data-load={load}
+      data-phase={activePhase}
+      data-complete={scene.complete ? "true" : undefined}
       aria-labelledby="rxs-assembly-title"
     >
       <div>
@@ -113,11 +124,27 @@ export function RexonanceAssemblyGuide({
             {scene.complete ? COMPLETE_COPY : ""}
           </p>
         </div>
+        <span className="rxs-assembly-phase-rail" data-phase={activePhase}>
+          {REXONANCE_ASSEMBLY_PHASES.map(({ phase }, index) => (
+            <i
+              key={phase}
+              data-phase={phase}
+              data-state={
+                index < activePhaseIndex
+                  ? "done"
+                  : index === activePhaseIndex
+                    ? "active"
+                    : "upcoming"
+              }
+            />
+          ))}
+        </span>
       </div>
       <div className="rxs-assembly-controls">
         {load === "error" ? (
           <button
             type="button"
+            className="rxs-assembly-retry"
             onClick={() => runwayRef.current?.dispatchEvent(new Event("rexonance:assembly-retry"))}
           >
             素材を再読み込み

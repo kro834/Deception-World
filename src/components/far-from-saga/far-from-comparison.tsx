@@ -113,9 +113,11 @@ function PairMetric({ metric, baseline }: { metric: BasicMetric; baseline: Basel
       <div className="ffs-bars" role="img" aria-label={summary}>
         <span style={accentStyle("farFrom")}>
           <i style={barStyle(result.multiplier / longer)} />
+          <b className="ffs-bar-calib" aria-hidden="true" />
         </span>
         <span style={accentStyle(baseline)}>
           <i style={barStyle(1 / longer)} />
+          <b className="ffs-bar-calib" aria-hidden="true" />
         </span>
       </div>
       <p className="ffs-metric-base">
@@ -160,6 +162,7 @@ function AllMetric({ metric }: { metric: BasicMetric }) {
               </b>
               <span className="ffs-all-bar" aria-hidden="true">
                 <i style={barStyle(score(cell) / top)} />
+                <b className="ffs-bar-calib" />
               </span>
             </li>
           );
@@ -305,6 +308,7 @@ function BenchmarkChart({ baseline }: { baseline: BaselineKey | null }) {
                     <span>{item.label}</span>
                     <span className="ffs-bench-track" aria-hidden="true">
                       <i style={barStyle(row.values[item.key] / BENCHMARK_SCALE)} />
+                      <b className="ffs-bar-calib" />
                     </span>
                     <b>{row.values[item.key]}</b>
                   </li>

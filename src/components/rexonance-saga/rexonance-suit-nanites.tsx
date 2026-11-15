@@ -478,6 +478,22 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           }
           flight.fill();
         };
+        // Precision micro-highlight along golden nanite cell crystalline boundaries
+        const cellRim = (list: Int32Array, count: number, colour: string, alpha: number) => {
+          if (!count) return;
+          flight.globalAlpha = alpha;
+          flight.strokeStyle = colour;
+          flight.lineWidth = Math.max(0.6, 0.8 * s);
+          for (let k = 0; k < count; k += 1) {
+            const i = list[k];
+            flight.strokeRect(
+              gold.fx[i] * s + 0.5,
+              gold.fy[i] * s + 0.5,
+              gold.cw[i] * s - 1,
+              gold.ch[i] * s - 1,
+            );
+          }
+        };
         // The pinned grains: the cooling cells, the glint and the gold motes
         // in flight. With the extras they lie under the molten band (round 3,
         // owner 「更にブラッシュアップして」: the band is the pour's hero), and
@@ -485,8 +501,12 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         // gather at the band's head instead of dotting the whole trim.
         const grains = () => {
           glow(heat[0], heats[0], BLOOM);
+          cellRim(heat[0], heats[0], "#ffffff", 0.3);
           for (let k = HEAT.length - 1; k >= 0; k -= 1) glow(heat[k], heats[k], HEAT[k]);
-          for (let k = GLINT.length - 1; k >= 0; k -= 1) glow(glint[k], glints[k], GLINT[k]);
+          for (let k = GLINT.length - 1; k >= 0; k -= 1) {
+            glow(glint[k], glints[k], GLINT[k]);
+            if (k === 0) cellRim(glint[0], glints[0], "#fff8d6", 0.26);
+          }
           if (!moteCount) return;
           flight.fillStyle = "#fff8de";
           for (let pass = extras ? 0 : 2; pass < 3; pass += 1) {
@@ -658,9 +678,11 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                   const y0 = Math.round(y);
                   const w = Math.round(x + tile.tw * s) - x0;
                   const h = Math.round(y + tile.th * s) - y0;
-                  flight.globalAlpha = 0.55 + 0.45 * v;
+                  // Tile landing bloom luminance curve: peaking as micro-tile locks into place
+                  const landingBloom = Math.sin(Math.min(1, v * 1.1) * Math.PI) * 0.32;
+                  flight.globalAlpha = Math.min(1, 0.55 + 0.45 * v + landingBloom);
                   flight.drawImage(source, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
-                  flight.globalAlpha = 0.6 * (1 - v);
+                  flight.globalAlpha = Math.min(1, 0.6 * (1 - v) + landingBloom * 0.6);
                   flight.drawImage(sheet, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
                 }
               }

@@ -77,6 +77,7 @@ function ComparisonTable({ chapter }: { chapter: Chapter }) {
                         : undefined
                     }
                     data-bar={shares[column] ? "true" : undefined}
+                    data-top={shares[column] && shares[column]![rowIndex] >= 0.99 ? "true" : undefined}
                   >
                     <span>{jp(cell)}</span>
                   </td>

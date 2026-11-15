@@ -5,7 +5,7 @@
 .site-shell.film-edition {
   --neo-ink: #04070c;
   --neo-ink-2: #070d16;
-  --neo-panel: rgb(8 18 30 / 92%);
+  --neo-panel: rgb(8 18 30 / 93%);
   --neo-panel-raised: rgb(12 26 42 / 96%);
   --neo-cyan: #6fe3ff;
   --neo-cyan-deep: #2fb8dc;
@@ -13,9 +13,11 @@
   --neo-signal: #ff5f6d;
   --neo-text: #eef5fa;
   --neo-muted: #9fb2c3;
-  --neo-line: rgb(111 227 255 / 22%);
-  --neo-line-strong: rgb(111 227 255 / 56%);
-  --neo-glow: rgb(111 227 255 / 14%);
+  --neo-line: rgb(111 227 255 / 24%);
+  --neo-line-strong: rgb(111 227 255 / 58%);
+  --neo-glow: rgb(111 227 255 / 15%);
+  --neo-specular: rgb(228 248 255 / 20%);
+  --neo-rim-inner: rgb(111 227 255 / 10%);
   --neo-mono: "Oxanium", "Noto Sans JP", sans-serif;
   --neo-chamfer: polygon(
     10px 0,
@@ -35,14 +37,14 @@
   );
   /* Corner brackets drawn with gradients: reusable on any panel. */
   --neo-bracket:
-    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 22px 1px no-repeat,
-    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 1px 22px no-repeat,
-    linear-gradient(var(--neo-cyan), var(--neo-cyan)) right top / 22px 1px no-repeat,
-    linear-gradient(var(--neo-cyan), var(--neo-cyan)) right top / 1px 22px no-repeat,
-    linear-gradient(var(--neo-gold), var(--neo-gold)) left bottom / 22px 1px no-repeat,
-    linear-gradient(var(--neo-gold), var(--neo-gold)) left bottom / 1px 22px no-repeat,
-    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 22px 1px no-repeat,
-    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 22px no-repeat;
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 24px 1px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 1px 24px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) right top / 24px 1px no-repeat,
+    linear-gradient(var(--neo-cyan), var(--neo-cyan)) right top / 1px 24px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) left bottom / 24px 1px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) left bottom / 1px 24px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 24px 1px no-repeat,
+    linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 24px no-repeat;
   --programme-ink: var(--neo-ink);
   --programme-paper: var(--neo-text);
   --programme-red: var(--neo-cyan);
@@ -51,8 +53,8 @@
   --programme-rule: var(--neo-line);
   color: var(--neo-text);
   background:
-    radial-gradient(ellipse 60% 40% at 84% 6%, rgb(47 184 220 / 13%), transparent),
-    radial-gradient(ellipse 50% 36% at 6% 62%, rgb(233 201 130 / 5%), transparent),
+    radial-gradient(ellipse 62% 40% at 84% 6%, rgb(47 184 220 / 14%), transparent),
+    radial-gradient(ellipse 52% 36% at 6% 62%, rgb(233 201 130 / 6%), transparent),
     repeating-linear-gradient(90deg, rgb(111 227 255 / 3.5%) 0 1px, transparent 1px 72px),
     repeating-linear-gradient(0deg, rgb(111 227 255 / 3.5%) 0 1px, transparent 1px 72px),
     var(--neo-ink);
@@ -63,16 +65,16 @@
   background:
     linear-gradient(
       90deg,
-      rgb(111 227 255 / 7%),
+      rgb(111 227 255 / 8%),
       transparent 26%,
       transparent 74%,
-      rgb(233 201 130 / 5%)
+      rgb(233 201 130 / 6%)
     ),
     rgb(4 7 12 / 96%);
   border-bottom: 1px solid var(--neo-line);
   box-shadow:
-    0 1px 0 rgb(111 227 255 / 6%),
-    0 14px 40px rgb(0 0 0 / 35%);
+    0 1px 0 rgb(111 227 255 / 8%),
+    0 14px 36px rgb(0 0 0 / 38%);
 }
 .site-shell.film-edition .topbar::after {
   background: linear-gradient(
@@ -82,15 +84,17 @@
     var(--neo-gold) 70%,
     transparent
   );
-  opacity: 0.55;
+  opacity: 0.6;
 }
 .site-shell.film-edition .brand-sigil {
   border: 1px solid var(--neo-line-strong);
   border-radius: 0;
   clip-path: var(--neo-chamfer-small);
   color: var(--neo-cyan);
-  background: linear-gradient(145deg, rgb(111 227 255 / 16%), rgb(111 227 255 / 3%));
-  box-shadow: inset 0 0 12px rgb(111 227 255 / 12%);
+  background: linear-gradient(145deg, rgb(111 227 255 / 18%), rgb(111 227 255 / 4%));
+  box-shadow:
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 12px rgb(111 227 255 / 12%);
 }
 .site-shell.film-edition .brand > span > b {
   color: var(--neo-text);
@@ -116,16 +120,18 @@
   border: 1px solid var(--neo-line-strong);
   border-radius: 0;
   clip-path: var(--neo-chamfer-small);
-  background: linear-gradient(155deg, rgb(20 38 56 / 96%), rgb(8 18 30 / 98%)) !important;
-  box-shadow: inset 0 0 0 1px rgb(111 227 255 / 8%) !important;
+  background: linear-gradient(155deg, rgb(22 42 62 / 96%), rgb(8 18 30 / 98%)) !important;
+  box-shadow:
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 0 1px rgb(111 227 255 / 10%) !important;
 }
 
 /* ---------- Hero ---------- */
 .site-shell.film-edition > .hero {
   background:
-    radial-gradient(ellipse 48% 60% at 78% 50%, rgb(47 184 220 / 10%), transparent),
+    radial-gradient(ellipse 50% 62% at 78% 50%, rgb(47 184 220 / 12%), transparent),
     repeating-linear-gradient(0deg, transparent 0 3px, rgb(111 227 255 / 2.2%) 3px 4px),
-    linear-gradient(120deg, #0a1522, var(--neo-ink) 62%);
+    linear-gradient(120deg, #0a1624, var(--neo-ink) 64%);
   border-bottom: 1px solid var(--neo-line);
 }
 .site-shell.film-edition .hero::before {
@@ -135,7 +141,7 @@
   z-index: 0;
   pointer-events: none;
   background: var(--neo-bracket);
-  opacity: 0.7;
+  opacity: 0.74;
 }
 .site-shell.film-edition .hero-backdrop {
   opacity: 0.1;
@@ -171,7 +177,7 @@
   color: var(--neo-text);
   text-shadow:
     0 0 32px rgb(111 227 255 / 28%),
-    0 18px 48px rgb(0 0 0 / 55%);
+    0 18px 44px rgb(0 0 0 / 55%);
 }
 .site-shell.film-edition .hero-copy {
   border-left: 2px solid transparent;
@@ -189,7 +195,7 @@
     0 12px 34px rgb(0 0 0 / 55%);
 }
 .site-shell.film-edition .hero-lead {
-  color: #c9d6e2;
+  color: #ccd9e5;
 }
 
 /* Primary entry: chamfered plate with an inner light edge. Focus lives
@@ -200,10 +206,10 @@
   border-radius: 0;
   clip-path: var(--neo-chamfer);
   color: #04202b;
-  background: linear-gradient(120deg, #aef0ff, var(--neo-cyan) 45%, #58cbe8) !important;
+  background: linear-gradient(120deg, #b8f3ff, var(--neo-cyan) 46%, #58cbe8) !important;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 55%),
-    inset 0 0 0 1px rgb(255 255 255 / 20%) !important;
+    inset 0 1px 0 rgb(255 255 255 / 62%),
+    inset 0 0 0 1px rgb(255 255 255 / 24%) !important;
   letter-spacing: 0.16em;
   font-family: var(--neo-mono);
   font-weight: 700;
@@ -240,10 +246,11 @@
   border-radius: 0;
   background: var(--neo-bracket), #060b12;
   box-shadow:
+    inset 0 1px 0 var(--neo-specular),
     0 0 0 1px var(--neo-ink),
-    0 0 0 2px rgb(111 227 255 / 12%),
-    0 24px 64px rgb(0 0 0 / 55%),
-    0 0 72px var(--neo-glow);
+    0 0 0 2px rgb(111 227 255 / 14%),
+    0 22px 46px rgb(0 0 0 / 56%),
+    0 0 44px var(--neo-glow);
 }
 .site-shell.film-edition .poster-control-cluster > button {
   color: var(--neo-text);
@@ -251,8 +258,8 @@
   border: 1px solid var(--neo-line);
   border-radius: 0;
   clip-path: var(--neo-chamfer-small);
-  background: linear-gradient(155deg, rgb(18 34 50 / 98%), rgb(8 18 30 / 98%)) !important;
-  box-shadow: inset 0 1px 0 rgb(111 227 255 / 10%) !important;
+  background: linear-gradient(155deg, rgb(20 38 56 / 98%), rgb(8 18 30 / 98%)) !important;
+  box-shadow: inset 0 1px 0 rgb(228 248 255 / 14%) !important;
 }
 .site-shell.film-edition .poster-control-cluster > button > span[aria-hidden] {
   color: var(--neo-cyan);
@@ -264,6 +271,150 @@
 .site-shell.film-edition .poster-controls output {
   color: var(--neo-muted);
   font-family: var(--neo-mono);
+}
+
+/* ---------- Signal bands (MirageTicker structured telemetry) ---------- */
+.site-shell.film-edition .mr-ticker {
+  pointer-events: none;
+}
+.site-shell.film-edition .mr-ticker-unit {
+  display: inline-flex;
+  align-items: baseline;
+  pointer-events: none;
+}
+.site-shell.film-edition .mr-ticker-idx {
+  font-weight: 400;
+  color: var(--neo-gold);
+  margin-right: 0.45em;
+  opacity: 0.88;
+}
+.site-shell.film-edition .mr-ticker-item {
+  font-style: normal;
+}
+.site-shell.film-edition .mr-ticker-sep {
+  font-style: normal;
+  color: var(--neo-muted);
+  margin-inline: 0.65em;
+  opacity: 0.62;
+}
+.site-shell.film-edition .mr-ticker-count {
+  font-weight: 400;
+  color: #ffffff;
+}
+.site-shell.film-edition .mr-ticker-glyph {
+  font-style: normal;
+  -webkit-text-stroke-color: var(--neo-gold);
+}
+
+/* ---------- Exploration portal cards (/world-map, /transformation-lab, /saga-cinema, /library) ---------- */
+.site-shell.film-edition .world-exploration {
+  gap: 14px;
+}
+
+.site-shell.film-edition .world-exploration-card {
+  --portal-accent: #7ae8ff;
+  min-height: 216px;
+  padding: 20px 22px;
+  border: 1px solid color-mix(in srgb, var(--portal-accent) 40%, rgb(215 234 252 / 22%));
+  border-radius: 12px;
+  background: #060f1b;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 0 0 1px rgb(111 227 255 / 8%),
+    0 18px 40px rgb(0 0 0 / 50%);
+}
+
+.site-shell.film-edition .world-exploration-card[data-portal="lab"] {
+  --portal-accent: #c6b2ff;
+}
+
+.site-shell.film-edition .world-exploration-card[data-portal="cinema"] {
+  --portal-accent: #f0c47d;
+}
+
+.site-shell.film-edition .world-exploration-card[data-portal="library"] {
+  --portal-accent: #7ce6c4;
+}
+
+.site-shell.film-edition .world-exploration-card::after {
+  background: linear-gradient(
+    180deg,
+    rgb(4 10 18 / 58%) 0%,
+    rgb(4 10 18 / 18%) 38%,
+    rgb(4 10 18 / 82%) 72%,
+    rgb(3 8 16 / 96%) 100%
+  );
+}
+
+.site-shell.film-edition .world-exploration-rim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(var(--portal-accent) 0 0) 12px 12px / 18px 1px no-repeat,
+    linear-gradient(var(--portal-accent) 0 0) 12px 12px / 1px 18px no-repeat,
+    linear-gradient(var(--neo-gold) 0 0) calc(100% - 12px) calc(100% - 12px) / 18px 1px no-repeat,
+    linear-gradient(var(--neo-gold) 0 0) calc(100% - 12px) calc(100% - 12px) / 1px 18px no-repeat,
+    linear-gradient(
+      132deg,
+      rgb(255 255 255 / 15%) 0%,
+      rgb(255 255 255 / 3%) 26%,
+      transparent 48%,
+      color-mix(in srgb, var(--portal-accent) 12%, transparent) 100%
+    );
+}
+
+.site-shell.film-edition .world-exploration-code {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  z-index: 1;
+  pointer-events: none;
+  font-style: normal;
+  font-family: var(--neo-mono);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  color: var(--portal-accent);
+  text-shadow: 0 2px 8px rgb(0 0 0 / 80%);
+}
+
+.site-shell.film-edition .world-exploration-card span {
+  position: relative;
+  z-index: 1;
+  gap: 6px;
+}
+
+.site-shell.film-edition .world-exploration-card strong {
+  color: #f5fbff;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 75%);
+}
+
+.site-shell.film-edition .world-exploration-card small {
+  color: #c9dce8;
+}
+
+.site-shell.film-edition .world-exploration-card b {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  padding-left: 0;
+  border: 1px solid color-mix(in srgb, var(--portal-accent) 56%, transparent);
+  border-radius: 6px;
+  background: rgb(5 13 22 / 78%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 20%);
+  color: var(--portal-accent);
+  font-size: 14px;
+  line-height: 1;
 }
 
 /* ---------- Eyebrows and chapter indices ---------- */
@@ -319,13 +470,14 @@
   border-radius: 0;
   color: var(--neo-text);
   background:
-    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 7%), transparent 38%),
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 8%), transparent 40%),
     repeating-linear-gradient(0deg, transparent 0 3px, rgb(111 227 255 / 1.8%) 3px 4px),
     var(--neo-panel);
   box-shadow:
-    inset 0 1px 0 rgb(111 227 255 / 10%),
-    0 28px 80px rgb(0 0 0 / 45%),
-    0 0 64px var(--neo-glow);
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 0 1px var(--neo-rim-inner),
+    0 24px 48px rgb(0 0 0 / 48%),
+    0 0 42px var(--neo-glow);
 }
 .site-shell.film-edition .story-layout::before {
   content: "STORY // RECORD 01";
@@ -368,11 +520,12 @@
   border: 1px solid var(--neo-line);
   border-radius: 0;
   background:
-    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 40%),
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 7%), transparent 42%),
     var(--neo-panel);
   box-shadow:
-    inset 0 1px 0 rgb(111 227 255 / 8%),
-    0 20px 60px rgb(0 0 0 / 40%);
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 0 1px var(--neo-rim-inner),
+    0 20px 46px rgb(0 0 0 / 44%);
 }
 .site-shell.film-edition .threat-panel::before {
   width: 120px;
@@ -406,9 +559,11 @@
     linear-gradient(var(--neo-cyan), var(--neo-cyan)) left top / 1px 18px no-repeat,
     linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 18px 1px no-repeat,
     linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 18px no-repeat,
-    linear-gradient(160deg, rgb(111 227 255 / 7%), transparent 45%),
+    linear-gradient(160deg, rgb(111 227 255 / 8%), transparent 46%),
     var(--neo-panel-raised);
-  box-shadow: inset 0 1px 0 rgb(111 227 255 / 8%);
+  box-shadow:
+    inset 0 1px 0 rgb(228 248 255 / 14%),
+    0 10px 26px rgb(0 0 0 / 32%);
 }
 .site-shell.film-edition
   .manager-slot-grid
@@ -433,11 +588,12 @@
   border: 1px solid var(--neo-line);
   border-radius: 0;
   background:
-    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 42%),
     var(--neo-panel);
   box-shadow:
-    inset 0 1px 0 rgb(111 227 255 / 8%),
-    0 20px 60px rgb(0 0 0 / 40%);
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 0 1px var(--neo-rim-inner),
+    0 20px 46px rgb(0 0 0 / 44%);
 }
 .site-shell.film-edition .world-column::before {
   width: 120px;
@@ -459,7 +615,7 @@
 .site-shell.film-edition .world-column-tabs button:is(.is-active, :focus-visible) {
   border-color: var(--neo-cyan);
   color: var(--neo-text);
-  background: rgb(111 227 255 / 10%);
+  background: rgb(111 227 255 / 12%);
   box-shadow: inset 3px 0 0 var(--neo-cyan);
 }
 .site-shell.film-edition .world-column-tabs small,
@@ -470,13 +626,14 @@
   color: var(--neo-text);
 }
 .site-shell.film-edition .world-column-summary-pane p {
-  color: #c2d0dc;
+  color: #c6d4e0;
 }
 .site-shell.film-edition .world-column-orbit-trigger {
   border-color: var(--neo-line-strong);
   border-radius: 0;
   clip-path: var(--neo-chamfer-small);
-  background: linear-gradient(155deg, rgb(18 34 50 / 98%), rgb(8 18 30 / 98%));
+  background: linear-gradient(155deg, rgb(20 38 56 / 98%), rgb(8 18 30 / 98%));
+  box-shadow: inset 0 1px 0 rgb(228 248 255 / 14%);
 }
 .site-shell.film-edition .world-column-orbit-trigger > i {
   color: var(--neo-ink);
@@ -488,12 +645,13 @@
   border: 1px solid var(--neo-line);
   border-radius: 0;
   background:
-    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 42%),
     var(--neo-panel);
   box-shadow:
-    inset 0 1px 0 rgb(111 227 255 / 8%),
-    0 24px 70px rgb(0 0 0 / 45%),
-    0 0 60px var(--neo-glow);
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 0 1px var(--neo-rim-inner),
+    0 22px 48px rgb(0 0 0 / 48%),
+    0 0 42px var(--neo-glow);
 }
 .site-shell.film-edition .rider-tabs {
   border-color: var(--neo-line);
@@ -527,7 +685,7 @@
   text-shadow: 0 0 30px rgb(111 227 255 / 18%);
 }
 .site-shell.film-edition .rider-description {
-  color: #c2d0dc;
+  color: #c6d4e0;
 }
 .site-shell.film-edition .rider-line {
   background: linear-gradient(90deg, var(--neo-cyan), var(--neo-gold) 60%, transparent);
@@ -535,7 +693,7 @@
 .site-shell.film-edition .rider-dossier-open {
   border-color: var(--neo-line-strong);
   box-shadow:
-    inset 0 1px 0 rgb(111 227 255 / 12%),
+    inset 0 1px 0 rgb(228 248 255 / 18%),
     0 0 32px var(--neo-glow) !important;
 }
 .site-shell.film-edition .rider-dossier-open .ios-slide-open-label small {
@@ -583,11 +741,12 @@
   border: 1px solid var(--neo-line);
   border-radius: 0;
   background:
-    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 5%), transparent 40%),
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 42%),
     var(--neo-panel);
   box-shadow:
-    inset 0 1px 0 rgb(111 227 255 / 8%),
-    0 20px 60px rgb(0 0 0 / 40%);
+    inset 0 1px 0 var(--neo-specular),
+    inset 0 0 0 1px var(--neo-rim-inner),
+    0 20px 46px rgb(0 0 0 / 44%);
 }
 .site-shell.film-edition .episode-archive::before,
 .site-shell.film-edition .episode-archive::after {
@@ -607,7 +766,8 @@
   border: 1px solid var(--neo-line);
   border-radius: 0;
   clip-path: var(--neo-chamfer-small);
-  background: linear-gradient(155deg, rgb(18 34 50 / 98%), rgb(8 18 30 / 98%));
+  background: linear-gradient(155deg, rgb(20 38 56 / 98%), rgb(8 18 30 / 98%));
+  box-shadow: inset 0 1px 0 rgb(228 248 255 / 12%);
 }
 .site-shell.film-edition .episode-controls button:focus-visible {
   outline: none;
@@ -623,15 +783,17 @@
     linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 18px 1px no-repeat,
     linear-gradient(var(--neo-gold), var(--neo-gold)) right bottom / 1px 18px no-repeat,
     var(--neo-panel-raised);
-  box-shadow: inset 0 1px 0 rgb(111 227 255 / 6%);
+  box-shadow:
+    inset 0 1px 0 rgb(228 248 255 / 12%),
+    0 10px 24px rgb(0 0 0 / 32%);
 }
 .site-shell.film-edition .episode-card.is-active .episode-card-surface {
   border-color: var(--neo-cyan);
   box-shadow:
-    inset 0 0 0 1px rgb(111 227 255 / 25%),
+    inset 0 0 0 1px rgb(111 227 255 / 26%),
     0 0 0 1px var(--neo-ink),
-    0 18px 50px rgb(0 0 0 / 45%),
-    0 0 48px var(--neo-glow);
+    0 18px 46px rgb(0 0 0 / 48%),
+    0 0 42px var(--neo-glow);
 }
 .site-shell.film-edition .episode-card-copy > p {
   color: var(--neo-cyan);
@@ -694,12 +856,13 @@
   border: 1px solid var(--neo-line-strong);
   border-radius: 0;
   background:
-    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 6%), transparent 40%),
+    var(--neo-bracket), linear-gradient(135deg, rgb(111 227 255 / 7%), transparent 42%),
     rgb(6 13 22 / 98%);
   box-shadow:
+    inset 0 1px 0 var(--neo-specular),
     0 0 0 1px var(--neo-ink),
-    0 40px 100px rgb(0 0 0 / 60%),
-    0 0 80px var(--neo-glow);
+    0 28px 48px rgb(0 0 0 / 62%),
+    0 0 44px var(--neo-glow);
 }
 .site-shell.film-edition .world-column-dialog-number {
   color: var(--neo-cyan);
@@ -723,7 +886,7 @@
 .site-shell.film-edition .side-panel {
   border-left-color: var(--neo-line-strong);
   background:
-    linear-gradient(180deg, rgb(111 227 255 / 6%), transparent 22%, rgb(233 201 130 / 3%)),
+    linear-gradient(180deg, rgb(111 227 255 / 7%), transparent 22%, rgb(233 201 130 / 4%)),
     rgb(4 9 16 / 99%);
 }
 .site-shell.film-edition .side-panel .side-panel-group > p {
@@ -755,8 +918,21 @@
   .site-shell.film-edition .episode-card:not(.is-active) .episode-card-surface:hover {
     border-color: var(--neo-line-strong);
     box-shadow:
-      inset 0 1px 0 rgb(111 227 255 / 10%),
-      0 0 40px var(--neo-glow);
+      inset 0 1px 0 rgb(228 248 255 / 16%),
+      0 0 38px var(--neo-glow);
+  }
+  .site-shell.film-edition .world-exploration-card:hover {
+    border-color: var(--portal-accent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      inset 0 0 0 1px color-mix(in srgb, var(--portal-accent) 26%, transparent),
+      0 20px 44px rgb(0 0 0 / 56%),
+      0 0 28px color-mix(in srgb, var(--portal-accent) 20%, transparent);
+  }
+  .site-shell.film-edition .world-exploration-card:hover b {
+    border-color: var(--portal-accent);
+    background: color-mix(in srgb, var(--portal-accent) 22%, rgb(5 13 22 / 86%));
+    color: #ffffff;
   }
   .site-shell.film-edition .topbar nav a:hover {
     color: var(--neo-text);
@@ -794,17 +970,27 @@
   }
   .site-shell.film-edition .story-layout {
     box-shadow:
-      inset 0 1px 0 rgb(111 227 255 / 10%),
-      0 16px 48px rgb(0 0 0 / 45%);
+      inset 0 1px 0 rgb(228 248 255 / 14%),
+      0 16px 40px rgb(0 0 0 / 45%);
   }
   .site-shell.film-edition .rider-console,
   .site-shell.film-edition .episode-card.is-active .episode-card-surface {
     box-shadow:
       inset 0 0 0 1px rgb(111 227 255 / 20%),
-      0 14px 40px rgb(0 0 0 / 45%);
+      0 14px 38px rgb(0 0 0 / 45%);
   }
   .site-shell.film-edition .rider-detail {
     background: rgb(9 19 31 / 96%);
+  }
+  .site-shell.film-edition .world-exploration-card {
+    min-height: 186px;
+    padding: 16px;
+  }
+  .site-shell.film-edition .world-exploration-code {
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    letter-spacing: 0.08em;
   }
 }
 
@@ -825,7 +1011,8 @@
       .poster-control-cluster > button,
       .episode-controls button,
       .signal,
-      .episode-card-surface
+      .episode-card-surface,
+      .world-exploration-card
     ) {
     transition: none;
   }
@@ -843,7 +1030,8 @@
       .episode-archive,
       .episode-card-surface,
       .world-column-dialog-card,
-      .episode-pickup-panel
+      .episode-pickup-panel,
+      .world-exploration-card
     ) {
     border-color: rgb(111 227 255 / 70%);
     background: #070d16;
@@ -852,7 +1040,22 @@
   .site-shell.film-edition .rider-detail {
     background: #0a1522;
   }
-  .site-shell.film-edition .hero::before {
+  .site-shell.film-edition .hero::before,
+  .site-shell.film-edition .world-exploration-rim {
     display: none;
+  }
+}
+@media (forced-colors: active) {
+  .site-shell.film-edition .world-exploration-rim {
+    display: none;
+  }
+  .site-shell.film-edition .world-exploration-card {
+    border-color: ButtonBorder;
+    box-shadow: none;
+  }
+  .site-shell.film-edition .world-exploration-card b {
+    border-color: LinkText;
+    color: LinkText;
+    background: Canvas;
   }
 }

@@ -64,6 +64,8 @@ const STAGING = `.mus-entry::-webkit-scrollbar{display:none}
 .mus-entry .mus-entry-fig{position:absolute;left:calc((var(--rzn-fig-x) - .46) * 100%);bottom:5%;width:92%;height:86%;object-fit:contain;object-position:50% 100%}
 .mus-entry .mus-entry-orbit{position:absolute;left:calc(var(--rzn-fig-x) * 100%);top:50%;width:min(110vh,90vw);aspect-ratio:1;border:1px solid rgb(255 154 74 / 18%);border-radius:50%;transform:translate(-50%,-50%) rotate(-12deg) scaleY(.38)}
 .mus-entry .mus-entry-orbit.is-b{width:min(78vh,70vw);border-color:rgb(55 198 192 / 20%);transform:translate(-50%,-56%) rotate(18deg) scaleY(.52)}
+.mus-entry .mus-entry-orbit.is-c{width:min(94vh,82vw);border:1px dashed rgb(233 239 242 / 16%);border-radius:50%;transform:translate(-50%,-52%) rotate(34deg) scaleY(.46)}
+.mus-entry .mus-entry-telemetry{position:absolute;inset:16px;pointer-events:none;border:1px solid rgb(55 198 192 / 14%);box-shadow:inset 0 0 40px rgb(55 198 192 / 6%)}
 .mus-entry .mus-entry-calls{position:absolute;left:clamp(24px,6vw,96px);top:50%;width:min(40vw,600px);height:0;margin:0;padding:0;list-style:none}
 .mus-entry .rzn-line{position:absolute;left:0;top:0;transform:translateY(-40%);display:flex;flex-wrap:wrap;gap:0 .32em;font:640 clamp(32px,4.4vw,84px)/1.06 "Rexonance Forge","Helvetica Neue",Arial,sans-serif;letter-spacing:.01em;color:#f4f8fa;opacity:0;transition:opacity .28s ease,transform .5s cubic-bezier(.2,.7,.1,1)}
 .mus-entry .rzn-line[data-chant]{flex-direction:column;font-size:clamp(30px,4.4vw,76px)}
@@ -270,6 +272,8 @@ export function MetaUnitasEntrySequence({
           <canvas className="rzn-canvas" width={0} height={0} style={FILL} />
           <i className="mus-entry-orbit" />
           <i className="mus-entry-orbit is-b" />
+          <i className="mus-entry-orbit is-c" />
+          <i className="mus-entry-telemetry" />
           <p className="mus-entry-loading">変身演出を準備しています</p>
           <ol className="rzn-lines mus-entry-calls">
             {META_UNITAS_CALL_LINES.map((units, index) => (

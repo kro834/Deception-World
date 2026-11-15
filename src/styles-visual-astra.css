@@ -17,6 +17,7 @@ html[data-family="special"]
   border-top: 2px solid #b4d9ee;
   padding: clamp(24px, 3vw, 44px);
   background: linear-gradient(155deg, #11202b, #080e17 70%);
+  box-shadow: inset 0 1px 0 rgba(180, 217, 238, 0.35);
 }
 html[data-family="special"]
   body
@@ -37,6 +38,7 @@ html[data-family="special"]
   border-top: 3px solid #f4cc7b;
   padding: clamp(24px, 3vw, 40px);
   background: linear-gradient(135deg, #292114, #101013 72%);
+  box-shadow: inset 0 1px 0 rgba(244, 204, 123, 0.35);
 }
 html[data-family="special"]
   body
@@ -71,6 +73,7 @@ html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-finisher {
   border-left: 3px solid #b2cfff;
   padding: clamp(24px, 3vw, 44px);
   background: linear-gradient(110deg, #11223a, #080d19 78%);
+  box-shadow: inset 0 1px 0 rgba(178, 207, 255, 0.35);
 }
 html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article {
   padding: clamp(24px, 3vw, 44px);
@@ -89,6 +92,7 @@ html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-articles > art
   border-top: 2px solid #b5b4ee;
   padding: clamp(24px, 3vw, 40px);
   background: linear-gradient(150deg, #19192c, #080c17 70%);
+  box-shadow: inset 0 1px 0 rgba(181, 180, 238, 0.35);
 }
 html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-articles > article p {
   color: #dadbed;
@@ -182,5 +186,20 @@ html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-finisher h3 {
     font-size: 28px;
     line-height: 1.5;
     line-break: strict;
+  }
+}
+html[data-family="special"] body .rxs-page :is(a, button):focus-visible {
+  outline: 2px solid #f4cc7b;
+  outline-offset: 3px;
+}
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page
+    :is(article, .ics-finisher, .mus-article, .ffs-finisher, .fst-story-layout) {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
   }
 }

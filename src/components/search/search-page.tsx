@@ -60,8 +60,22 @@ type Option =
 function SearchGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" width="24" height="24" aria-hidden="true">
-      <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="m15.5 15.5 5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="10.5" cy="10.5" r="7.25" stroke="currentColor" strokeWidth="1.4" />
+      <circle
+        cx="10.5"
+        cy="10.5"
+        r="4.25"
+        stroke="currentColor"
+        strokeOpacity="0.45"
+        strokeWidth="0.9"
+        strokeDasharray="2.2 1.8"
+      />
+      <path
+        d="M10.5 2v2M10.5 17v2M2 10.5h2M17 10.5h2M15.8 15.8 21 21"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -273,7 +287,12 @@ export function SearchPage({
         <div className="search-observatory-desk">
           <section className="search-intro" aria-labelledby="search-title">
             <div>
-              <p className="search-eyebrow">全文検索</p>
+              <p className="search-eyebrow">
+                全文検索
+                <i className="search-eyebrow-coords" aria-hidden="true">
+                  ASTROLABE // RA 24H
+                </i>
+              </p>
               <h1 id="search-title">記録の先へ。</h1>
               <p className="search-lede">
                 名前から、物語から、気になる言葉から。散らばる記録をつなぎ、読みたい場所へ。
@@ -418,9 +437,11 @@ export function SearchPage({
                 <button
                   type="button"
                   key={item.id}
+                  data-category-id={item.id}
                   aria-pressed={category === item.id}
                   onClick={() => onCategoryChange(item.id)}
                 >
+                  <i aria-hidden="true">{item.code}</i>
                   {item.label}
                   <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
                 </button>
@@ -601,19 +622,19 @@ const ResultCard = memo(function ResultCard({
   const { result } = option;
   const { document } = result;
   const place = placeLabel(document);
+  const recordNo = RECORD_NUMBER.get(document.id) ?? 0;
+  const recordCode = recordNo > 0 ? `OBS-${String(recordNo).padStart(3, "0")}` : undefined;
   return (
     <ResultOption
       result={result}
       id={option.id}
       active={active}
+      recordCode={recordCode}
       className="search-result-card"
       tabbable
       onOpen={onOpen}
     >
-      <RecordArtFrame
-        art={documentArt(document, RECORD_NUMBER.get(document.id) ?? 0)}
-        title={document.title}
-      />
+      <RecordArtFrame art={documentArt(document, recordNo)} title={document.title} />
       <span className="search-result-body">
         <span className="search-result-meta">
           <span>{categoryLabel(document.category)}</span>

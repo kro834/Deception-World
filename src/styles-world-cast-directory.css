@@ -1,8 +1,16 @@
-/* Local record facets for 04 CAST FILES. No rail geometry or shared chrome. */
+/* Local record facets for 04 CAST FILES. Ice-blue (#7ae8ff) x Titanium HUD pills.
+   No rail geometry or shared chrome; >= 48px touch targets throughout. */
 .site-shell.film-edition.mirage-edition #cast-roster .wa-directory {
-  margin: 0 0 28px;
-  padding: 20px 0;
-  border-block: 1px solid rgb(122 232 255 / 24%);
+  margin: 0 0 30px;
+  padding: 10px;
+  border: 1px solid rgb(122 232 255 / 26%);
+  border-top: 2px solid #b8d2e2;
+  background:
+    linear-gradient(135deg, rgb(122 232 255 / 8%), transparent 42%),
+    #061019;
+  box-shadow:
+    inset 0 1px 0 rgb(228 248 255 / 22%),
+    0 12px 28px rgb(0 0 0 / 42%);
   color: #eaf4ff;
 }
 
@@ -46,47 +54,199 @@
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px;
   min-width: 48px;
   min-height: 48px;
   max-width: 100%;
   padding: 10px 14px;
-  border: 1px solid #536776;
-  border-radius: 4px;
-  background: #101a24;
-  color: #eaf4ff;
+  border: 1px solid rgb(156 190 212 / 34%);
+  border-radius: 999px;
+  background:
+    linear-gradient(165deg, rgb(224 244 255 / 10%), rgb(14 30 44 / 92%) 56%, #091521);
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 20%),
+    0 4px 12px rgb(0 0 0 / 34%);
+  color: #dbeaf5;
   font: inherit;
   font-size: 14px;
-  line-height: 1.5;
-  letter-spacing: normal;
-  text-align: center;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  text-align: left;
   overflow-wrap: anywhere;
   cursor: pointer;
+}
+
+/* Outrank the later command-directory rule with Ice-Blue (#7ae8ff) x Titanium HUD pills */
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory {
+  margin: 0 0 32px;
+  padding: 10px 12px;
+  border: 1px solid rgb(122 232 255 / 28%);
+  border-top: 2px solid #c6dce9;
+  border-radius: 14px;
+  background:
+    linear-gradient(#7ae8ff 0 0) 0 0 / 22px 1px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 100% 100% / 22px 1px no-repeat,
+    linear-gradient(135deg, rgb(122 232 255 / 9%) 0%, transparent 44%, rgb(198 220 233 / 6%) 100%),
+    #050d16;
+  box-shadow:
+    inset 0 1px 0 rgb(232 248 255 / 28%),
+    inset 0 -1px 0 rgb(122 232 255 / 14%),
+    0 14px 32px rgb(0 0 0 / 48%);
+}
+
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory-controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory-controls
+  button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 48px;
+  min-height: 54px;
+  padding: 8px 12px 8px 14px;
+  border: 1px solid rgb(156 192 214 / 32%);
+  border-radius: 999px;
+  background:
+    linear-gradient(165deg, rgb(228 246 255 / 12%) 0%, rgb(15 31 46 / 94%) 52%, #08131f 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 22%),
+    0 4px 12px rgb(0 0 0 / 34%);
+  color: #cfe1ee;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgb(122 232 255 / 55%);
+  background: rgb(122 232 255 / 18%);
+  flex: none;
+}
+
+.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-code {
+  font-style: normal;
+  font-family: "Oxanium", monospace;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  color: rgb(122 232 255 / 72%);
+}
+
+.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-name {
+  display: block;
+  overflow-wrap: anywhere;
 }
 
 .site-shell.film-edition.mirage-edition
   #cast-roster
   .wa-directory-controls
+  button[aria-pressed="true"],
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory-controls
   button[aria-pressed="true"] {
   border-color: #7ae8ff;
-  background: #173743;
-  color: #fff;
-  box-shadow: inset 0 -2px #7ae8ff;
+  background:
+    linear-gradient(155deg, rgb(122 232 255 / 28%) 0%, rgb(20 56 76 / 95%) 48%, #0c2636 100%);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 44%),
+    inset 0 0 0 1px rgb(122 232 255 / 26%),
+    0 0 20px rgb(122 232 255 / 24%);
 }
 
-.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-controls button:focus-visible {
+.site-shell.film-edition.mirage-edition
+  #cast-roster
+  .wa-directory-controls
+  button[aria-pressed="true"]
+  .wa-directory-pip {
+  border-color: #ffffff;
+  background: #7ae8ff;
+  box-shadow: 0 0 8px #7ae8ff;
+}
+
+.site-shell.film-edition.mirage-edition
+  #cast-roster
+  .wa-directory-controls
+  button[aria-pressed="true"]
+  .wa-directory-code {
+  color: #bdf3ff;
+}
+
+.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-controls button:focus-visible,
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory-controls
+  button:focus-visible {
   outline: 2px solid #fff0b5;
   outline-offset: 3px;
 }
 
-.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-badge {
-  min-width: 22px;
-  padding-inline: 5px;
-  border-radius: 2px;
-  background: rgb(234 244 255 / 10%);
+.site-shell.film-edition.mirage-edition #cast-roster .wa-directory-badge,
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  min-height: 26px;
+  padding-inline: 7px;
+  border: 1px solid rgb(122 232 255 / 34%);
+  border-radius: 999px;
+  background: rgb(4 12 20 / 78%);
+  color: #bfefff;
+  font-family: "Oxanium", monospace;
   font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
+}
+
+.site-shell.film-edition.mirage-edition
+  #cast-roster
+  .wa-directory-controls
+  button[aria-pressed="true"]
+  .wa-directory-badge,
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  #cast-roster#cast-roster#cast-roster
+  .wa-directory-controls
+  button[aria-pressed="true"]
+  .wa-directory-badge {
+  border-color: #d8f8ff;
+  background: linear-gradient(155deg, #b8f3ff, #7ae8ff);
+  color: #041520;
+  box-shadow: 0 0 10px rgb(122 232 255 / 35%);
 }
 
 /* Author display:grid on subgrid rows otherwise overrides native hidden. */
@@ -94,16 +254,139 @@
   display: none;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button:hover:not([aria-pressed="true"]) {
+    border-color: rgb(122 232 255 / 64%);
+    background:
+      linear-gradient(165deg, rgb(122 232 255 / 18%) 0%, rgb(18 40 58 / 95%) 54%, #0b1b2a 100%);
+    color: #ffffff;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .site-shell.film-edition.mirage-edition
+    #cast-roster
+    .wa-directory-controls
+    button {
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
+  }
+}
+
+@media (max-width: 980px) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory {
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button {
+    min-height: 48px;
+    padding: 8px 10px;
+    gap: 7px;
+    font-size: 12px;
+  }
+
+  .site-shell.film-edition.mirage-edition #cast-roster .wa-directory-code {
+    display: none;
+  }
+}
+
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory,
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button {
+    background: #08121c;
+    box-shadow: none;
+  }
+
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button[aria-pressed="true"] {
+    background: #143646;
+    border-color: #7ae8ff;
+    box-shadow: none;
+  }
+}
+
 @media (forced-colors: active) {
   .site-shell.film-edition.mirage-edition
     #cast-roster
     .wa-directory-controls
+    button[aria-pressed="true"],
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
     button[aria-pressed="true"] {
     border: 2px solid Highlight;
+    background: Canvas;
     color: Highlight;
+    box-shadow: none;
   }
 
-  .site-shell.film-edition.mirage-edition #cast-roster .wa-directory-controls button:focus-visible {
+  .site-shell.film-edition.mirage-edition
+    #cast-roster
+    .wa-directory-controls
+    button[aria-pressed="true"]
+    .wa-directory-badge,
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button[aria-pressed="true"]
+    .wa-directory-badge {
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+    box-shadow: none;
+  }
+
+  .site-shell.film-edition.mirage-edition #cast-roster .wa-directory-controls button:focus-visible,
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster#cast-roster
+    .wa-directory-controls
+    button:focus-visible {
     outline-color: Highlight;
   }
 }

@@ -607,16 +607,22 @@
   inset: -10% -6%;
   /* The fire's light on the print above the front: warm, strongest at the lip
      (at 50%), gone a quarter of the frame higher. The char itself is the
-     edge strip below. */
-  background: linear-gradient(
-    0deg,
-    transparent 44%,
-    rgb(59 184 68 / 0.36) 50%,
-    rgb(35 154 36 / 0.22) 55%,
-    rgb(18 108 19 / 0.1) 63%,
-    rgb(12 79 14 / 0.04) 70%,
-    transparent 78%
-  );
+     edge strip below. Deepened with emerald-ember thermal scattering. */
+  background:
+    radial-gradient(
+      84% 30% at 50% 50%,
+      rgb(110 235 130 / 0.28),
+      transparent 72%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 44%,
+      rgb(59 184 68 / 0.36) 50%,
+      rgb(35 154 36 / 0.22) 55%,
+      rgb(18 108 19 / 0.1) 63%,
+      rgb(12 79 14 / 0.04) 70%,
+      transparent 78%
+    );
   /* The fire's leading edge starts just below the frame, so it is already
      climbing when the title cuts in (rising-sequence.ts). */
   translate: 0 58%;

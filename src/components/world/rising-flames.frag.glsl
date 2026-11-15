@@ -166,6 +166,7 @@ void main() {
   // The swirl fetch's fine channel: filaments that split the tongues' upper
   // halves into licks that fray and detach, so the tips are never smooth.
   turb += (swirl.a - 0.5) * 0.16 * smoothstep(0.25, 1.1, h);
+  turb += (eddy.b - 0.5) * 0.08 * smoothstep(0.35, 1.2, h);
 #else
   float n1 = nz(q + vec2(0.0, -fract(T * 0.5))).r;
   float n2 = n1;

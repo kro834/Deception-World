@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 
 type Chapter = { no: string; title: string; kicker: string };
 type ReaderDestination = { id: string; label: string };
@@ -26,7 +27,12 @@ export function PhrasedText({ text }: { text: string }) {
 /** Native anchors keep the archive navigable before hydration, too. */
 export function DossierContents({ sections }: { sections: readonly Chapter[] }) {
   return (
-    <nav className="dossier-contents" aria-label="人物資料の章">
+    <nav
+      className="dossier-contents"
+      aria-label="人物資料の章"
+      data-chapter-count={sections.length}
+      style={{ "--contents-count": sections.length } as CSSProperties}
+    >
       {sections.map((section) => (
         <a key={section.no} href={`#character-section-${section.no}`}>
           <span className="dossier-contents-number">{section.no}</span>
@@ -156,8 +162,22 @@ export function DossierReader({
     };
   }, [ids]);
 
+  const activeIndex = Math.max(
+    0,
+    destinations.findIndex((item) => item.id === active),
+  );
+  const readerStyle = {
+    "--reader-active-index": activeIndex,
+    "--reader-count": destinations.length,
+  } as CSSProperties;
+
   return (
-    <nav className="dossier-reader" aria-label={`${name}の資料内を移動`}>
+    <nav
+      className="dossier-reader"
+      aria-label={`${name}の資料内を移動`}
+      data-active-section={active}
+      style={readerStyle}
+    >
       <span className="dossier-reader-name">{name}</span>
       <div className="dossier-reader-links">
         {destinations.map((item) => (
@@ -170,6 +190,11 @@ export function DossierReader({
           </a>
         ))}
       </div>
+      <span
+        className="dossier-reader-ruler"
+        aria-hidden="true"
+        style={{ position: "absolute", pointerEvents: "none" }}
+      />
     </nav>
   );
 }

@@ -109,12 +109,16 @@ float nearEmbers(vec2 q, vec2 cells, float speed, float seed, float radius) {
   // In cell widths (FP16-normal squares); the motion smear lengthens it 2.4x along the rise.
   vec2 r = (fract(g) - 0.5 - o) * vec2(1.0, cells.x / cells.y);
   r.y /= 2.4 + 0.8 * h;
-  float rad = radius * cells.x * (0.7 + 0.6 * hash12(id + seed + 1.3));
-  float disc = exp(-dot(r, r) / (rad * rad));
-  float core = exp(-dot(r, r) / (0.2 * rad * rad));
+  // Depth of field: defocus varies per ember, expanding radius and softening the disc
+  float dof = 0.68 + 0.64 * hash12(id + seed + 1.3);
+  float rad = radius * cells.x * dof;
+  float d2 = dot(r, r);
+  float disc = exp(-d2 / (rad * rad));
+  float core = exp(-d2 / (0.19 * rad * rad));
+  float rim = exp(-pow(sqrt(max(d2, 0.0)) - rad * 0.82, 2.0) / (0.05 * rad * rad));
   // One in five cells; each glows on its own slow beat (local, never a strobe).
   float alive = step(0.74, h) * (0.65 + 0.35 * sin(uTime * (1.6 + 2.0 * h) + h * 30.0));
-  return (disc * 0.55 + core * 0.45) * alive;
+  return (disc * 0.47 + core * 0.43 + rim * 0.1) * alive;
 }
 
 // Stylised forest-green emission for a normalised temperature; geometry and
@@ -332,6 +336,8 @@ void main() {
     float scatter = (texture2D(uFire, uv + vec2(0.0, 0.045)).r + texture2D(uFire, uv - vec2(0.0, 0.045)).r
                    + texture2D(uFire, uv + vec2(0.035, 0.0)).r + texture2D(uFire, uv - vec2(0.035, 0.0)).r) * 0.25;
     emit += blackbody(0.62) * scatter * uFlame * (0.2 + 0.16 * roar);
+    // Deep emerald core volumetric scatter
+    emit += vec3(0.065, 0.36, 0.1) * (scatter * scatter) * uFlame * (0.18 + 0.14 * roar);
 #endif
 
     // Smoke: grey billows, cool blue-grey away from the fire, warm only on
@@ -537,6 +543,9 @@ void main() {
     float lz = (d + 0.008) / w;
     float lipGlow = exp(-lz * lz) * run;
     float halo = exp(-(d + 0.01) * (d + 0.01) / 0.0004) * run;
+    // Micro-scintillation along the edge: fine fibres flashing as they char
+    float scint = 0.85 + 0.15 * sin(cf.b * 44.0 + T * 8.8 + edgeFine * 22.0);
+    lipGlow *= scint;
     // The ember bed reaches further back into the fresh char (0.05 field
     // units), so the char just behind the flames glows instead of going flat.
     float bed = exp(min(d, 0.0) / 0.05) * burnt * (0.6 + 0.4 * smoothstep(0.04, 0.3, cells));

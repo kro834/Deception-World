@@ -43,17 +43,40 @@ export const IllusionculumRail = memo(function IllusionculumRail() {
   return (
     <nav className="ics-rail" aria-label="章" data-current={current >= 0 ? current : undefined}>
       <ol>
-        {CHAPTERS.map(([id, label], index) => (
-          <li key={id} data-on={index === current || undefined}>
-            <a
-              href={`#${id}`}
-              aria-label={label}
-              aria-current={index === current ? "location" : undefined}
-            >
-              <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
-            </a>
-          </li>
-        ))}
+        {CHAPTERS.map(([id, label], index) => {
+          const isOn = index === current;
+          return (
+            <li key={id} data-on={isOn || undefined}>
+              <a
+                href={`#${id}`}
+                aria-label={label}
+                aria-current={isOn ? "location" : undefined}
+                style={{ position: "relative" }}
+              >
+                {isOn ? (
+                  <span
+                    className="ics-rail-optical-beacon"
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: "50%",
+                      translate: "50% -50%",
+                      width: 4,
+                      height: 16,
+                      background:
+                        "linear-gradient(180deg, rgb(166 230 255), rgb(233 184 102), rgb(255 143 210))",
+                      borderRadius: 1,
+                      boxShadow: "0 0 10px rgb(233 184 102 / 80%), 0 0 4px #ffffff",
+                      pointerEvents: "none",
+                    }}
+                  />
+                ) : null}
+                <i aria-hidden="true">{String(index + 1).padStart(2, "0")}</i>
+              </a>
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

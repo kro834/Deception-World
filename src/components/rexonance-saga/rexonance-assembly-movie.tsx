@@ -208,7 +208,13 @@ export function AssemblyMovie({
       aria-label="自動変身ムービー"
     >
       <div className="rzn-movie-pill">
-        <button type="button" className="rzn-movie-mini" aria-label="再生" disabled />
+        <button type="button" className="rzn-movie-mini" aria-label="再生" disabled>
+          <svg className="rzn-movie-ring" viewBox="0 0 42 42" aria-hidden="true">
+            <circle className="rzn-movie-ring-track" cx="21" cy="21" r="19" />
+            <circle className="rzn-movie-ring-ticks" cx="21" cy="21" r="16.4" pathLength={120} />
+            <circle className="rzn-movie-ring-arc" cx="21" cy="21" r="19" pathLength={100} />
+          </svg>
+        </button>
         <button
           type="button"
           className="rzn-movie-toggle"
@@ -217,6 +223,7 @@ export function AssemblyMovie({
           aria-label={`速度 ${ASSEMBLY_MOVIE_DEFAULT_SPEED}× と操作`}
           disabled
         >
+          <span className="rzn-movie-dial" aria-hidden="true" />
           <span className="rzn-movie-speed-now" aria-hidden="true">
             {ASSEMBLY_MOVIE_DEFAULT_SPEED}×
           </span>

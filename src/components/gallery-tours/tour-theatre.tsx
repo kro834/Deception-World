@@ -246,6 +246,8 @@ export function GalleryTourTheatre({
     <section
       className="gallery-tour-theatre"
       data-focused={focused || undefined}
+      data-advancing={advancing || undefined}
+      data-completed={completed || undefined}
       style={
         {
           "--gallery-tour-accent": tour.accent,
@@ -329,6 +331,8 @@ export function GalleryTourTheatre({
           <div
             id="gallery-tour-stage"
             className="gallery-tour-stage"
+            data-ready={imageReady || undefined}
+            data-advancing={advancing || undefined}
             tabIndex={0}
             role="group"
             aria-label={`作品 ${index + 1}。左右の矢印キーで作品を移動、Homeで最初、Endで最後の作品`}
@@ -355,6 +359,7 @@ export function GalleryTourTheatre({
               artwork={artwork}
               onStatus={handleImageStatus}
             />
+            <span className="gallery-tour-stage-aperture" aria-hidden="true" />
           </div>
           <div className="gallery-tour-transport" aria-label="作品の移動">
             <button
@@ -414,6 +419,7 @@ export function GalleryTourTheatre({
                   key={`${item.artworkId}:${itemIndex}`}
                   ref={itemIndex === index ? activeThumbnailRef : undefined}
                   className="gallery-tour-thumbnail"
+                  data-visited={itemIndex <= index || undefined}
                   type="button"
                   tabIndex={itemIndex === index ? 0 : -1}
                   aria-label={`${itemIndex + 1}点目、${thumbnail.alt}`}
@@ -462,7 +468,7 @@ export function GalleryTourTheatre({
             <h2>{artwork.alt}</h2>
             <p className="gallery-tour-stop-note">{stop.note}</p>
           </div>
-          <div className="gallery-tour-playback">
+          <div className="gallery-tour-playback" data-playing={playing || undefined}>
             <div className="gallery-tour-playback-label">
               <label htmlFor="gallery-tour-interval">一枚を眺める時間</label>
               <select
@@ -493,7 +499,11 @@ export function GalleryTourTheatre({
             >
               {playing ? "Ⅱ 自動送りを停止" : "▷ 自動で作品を巡る"}
             </button>
-            <div className="gallery-tour-time-track" aria-hidden="true">
+            <div
+              className="gallery-tour-time-track"
+              data-advancing={advancing || undefined}
+              aria-hidden="true"
+            >
               {advancing && (
                 <span
                   key={`${tour.id}:${index}:${intervalSeconds}`}
@@ -543,6 +553,7 @@ export function GalleryTourTheatre({
             <button
               className="gallery-tour-next-tour"
               type="button"
+              style={{ "--gallery-tour-next-accent": nextTour.accent } as CSSProperties}
               onClick={() => {
                 setPlaying(false);
                 onNextTour();

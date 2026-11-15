@@ -713,11 +713,14 @@ export function mountMetaUnitasBoost(
         const uf = 1 - ef;
         const xf = uf * uf * bx + 2 * uf * ef * mx + ef * ef * ex;
         const yf = uf * uf * by + 2 * uf * ef * my + ef * ef * ey;
-        context.strokeStyle = rgba(TEAL, 0.24 * fade);
-        context.lineWidth = 0.85 * unit;
+        context.strokeStyle = rgba(TEAL, 0.28 * fade);
+        context.lineWidth = 0.95 * unit;
         context.beginPath();
         context.moveTo(x, y);
         context.lineTo(xf, yf);
+        context.stroke();
+        context.strokeStyle = rgba(lilac ? LILAC : ORANGE, 0.18 * fade);
+        context.lineWidth = 0.55 * unit;
         context.stroke();
         if (s > 0.42) {
           const lockTick = 2.6 * unit * (1 - 0.3 * e);
@@ -743,6 +746,9 @@ export function mountMetaUnitasBoost(
         if (seg === 0) context.moveTo(xs, ys);
         else context.lineTo(xs, ys);
       }
+      context.stroke();
+      context.strokeStyle = rgba(SILVER, 0.45 * fade);
+      context.lineWidth = 0.65 * unit;
       context.stroke();
       // The shard: a machined sliver of plate turning as it comes.
       const size = (6 + hash(seed + 6) * 7) * unit * (1 - 0.55 * e);

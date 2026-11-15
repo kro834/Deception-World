@@ -31,5 +31,6 @@
     #dossier-profile
     .dossier-identity {
     padding-block: 28px 48px;
+    letter-spacing: 0.01em;
   }
 }

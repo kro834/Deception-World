@@ -234,8 +234,9 @@ export function mountExtremeImpact(page, environment = window) {
         continue;
       }
       if (time - run.drawn < TALLY_STEP_MS) continue;
-      // Smooth telemetry drum braking into the measured value.
-      const eased = 1 - (1 - progress) ** 2.6;
+      // Smooth telemetry drum braking into the measured value with precision landing snap.
+      const rem = 1 - progress;
+      const eased = rem <= 0.03 ? 1 : 1 - rem ** 2.75;
       const measured = run.parts.sweepFrom
         ? run.parts.sweepFrom + (run.parts.value - run.parts.sweepFrom) * eased
         : run.parts.value * eased;

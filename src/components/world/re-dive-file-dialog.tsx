@@ -106,7 +106,12 @@ export function ReDiveFileDialog({
       }}
     >
       <header className="rd-file-header">
-        <div>
+        <div className="rd-file-header-inner">
+          <div className="rd-file-ruler-band" aria-hidden="true">
+            <span className="rd-file-stamp">TOP SECRET // STRICT CLEARANCE</span>
+            <span className="rd-file-rule-ticks" />
+            <span className="rd-file-serial">REF: DW-ARCHIVE-FBL</span>
+          </div>
           <h2 id="rd-file-title">機密ファイル</h2>
           <p id="rd-file-caption">{RE_DIVE_CLASSIFIED_REPORT.title}</p>
         </div>
@@ -153,7 +158,10 @@ export function ReDiveFileDialog({
         </section>
       </article>
       <footer className="rd-file-footer">
-        <span>{RE_DIVE_CLASSIFIED_REPORT.edition}</span>
+        <div className="rd-file-footer-meta">
+          <span className="rd-file-seal" aria-hidden="true">SEALED CLASSIFIED RECORD</span>
+          <span>{RE_DIVE_CLASSIFIED_REPORT.edition}</span>
+        </div>
         <button
           ref={returnRef}
           type="button"

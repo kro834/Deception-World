@@ -1,11 +1,38 @@
 /* The illustration is shown whole (contain) on its own paper; the frame
    takes that paper so the room below the figure reads as part of it. The
-   shared dark frame rule is more specific than a page class alone. */
+   shared dark frame rule is more specific than a page class alone.
+   Chapter 05 Varg: Museum specimen glass display case framing. */
 .dante-page .varg-portrait {
+  position: relative;
   width: min(100%, 640px);
   margin: 0 0 32px;
-  border: 1px solid rgba(237, 102, 126, 0.35);
-  background: #090b10;
+  border: 1px solid rgba(237, 102, 126, 0.42);
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 20%, rgb(255 255 255 / 4%), transparent 75%),
+    linear-gradient(135deg, rgb(237 102 126 / 8%), transparent 42%),
+    linear-gradient(315deg, rgb(54 155 137 / 8%), transparent 40%),
+    #090b10;
+  box-shadow:
+    0 24px 60px rgb(0 0 0 / 68%),
+    0 0 0 1px rgb(237 102 126 / 20%),
+    0 0 36px rgb(237 102 126 / 14%),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 0 28px rgb(0 0 0 / 70%);
+}
+.dante-page .varg-portrait::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    rgb(255 255 255 / 8%) 0%,
+    rgb(255 255 255 / 2%) 22%,
+    transparent 45%,
+    transparent 100%
+  );
+  z-index: 2;
 }
 .dante-page .varg-portrait img {
   display: block;
@@ -70,9 +97,25 @@ html[data-family="dossier"]
   background: #ede8ea;
 }
 html[data-family="dossier"]
+  main.dante-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-portrait-frame {
+  border: 1px solid #ba415b;
+  box-shadow:
+    0 30px 80px rgb(0 0 0 / 55%),
+    0 0 0 1px rgb(237 102 126 / 35%),
+    0 0 36px rgb(186 65 91 / 20%),
+    inset 0 0 36px rgb(14 10 14 / 16%),
+    inset 0 0 0 1px rgb(186 65 91 / 45%);
+}
+html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page
   .form-pickup-visual {
   background: #ede8ea;
+  border-bottom: 1px solid rgb(186 65 91 / 32%);
+  box-shadow:
+    inset 0 0 32px rgb(14 10 14 / 14%),
+    inset 0 0 0 1px rgb(186 65 91 / 26%);
 }
 html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page
@@ -90,6 +133,14 @@ html[data-family="dossier"]
 .dante-page .form-pickup-layout img {
   object-fit: contain;
   background: #ede8ea;
+}
+.dante-page .form-pickup-card {
+  border-color: rgb(237 102 126 / 40%);
+  box-shadow:
+    0 24px 64px rgb(0 0 0 / 52%),
+    0 0 0 1px rgb(237 102 126 / 22%),
+    0 0 28px rgb(186 65 91 / 14%),
+    inset 0 1px 0 rgb(255 255 255 / 16%);
 }
 .dante-page #form-records {
   display: grid;

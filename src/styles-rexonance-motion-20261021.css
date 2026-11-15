@@ -85,6 +85,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
    contrast tiers' own paint carries down the same way. */
 .rxs-page.rxs-page.rxs-rexonance-page [data-rxk-paint="text"] :is(.rxk-word, .rxk-run, .rxk-ch) {
   background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rxs-page.rxs-page.rxs-rexonance-page [data-rxk-paint="text"] .rxk-ch {
+  text-shadow:
+    0 0 1px rgb(255 245 200 / 30%),
+    0 1px 2px rgb(0 0 0 / 60%),
+    0 0 14px rgb(242 216 150 / 22%);
 }
 
 /* A split title's lines are blocks (its <br> made them lines already; the
@@ -193,12 +203,24 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
 }
 
 @keyframes rxk-drift {
-  from {
+  0% {
     translate: 0 28px;
+    opacity: 0.7;
   }
 
-  to {
+  35% {
+    translate: 0 14px;
+    opacity: 0.88;
+  }
+
+  70% {
+    translate: 0 3px;
+    opacity: 0.98;
+  }
+
+  100% {
     translate: 0 0;
+    opacity: 1;
   }
 }
 

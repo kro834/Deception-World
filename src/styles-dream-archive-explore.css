@@ -2,13 +2,29 @@
 @import "./components/dream-chapter/dream-research-notes.css";
 @import "./components/dream-chapter/dream-scene-reference.css";
 
-/* Archive navigation and local discovery for 舞台 / 繋がり / 武装. */
+/* Archive navigation and local discovery for 舞台 / 繋がり / 武装, plus cut-glass specular launcher bars. */
 .dream-page.dream-page .dream-archive-index {
   min-width: 0;
   margin: 0 0 clamp(18px, 2.5vw, 28px);
   padding: clamp(14px, 2vw, 22px);
-  border: 1px solid var(--dr-rule-2, var(--ts-hair));
-  background: var(--dr-plate-fill, var(--ts-night));
+  border: 1px solid rgb(225 190 124 / 46%);
+  background:
+    linear-gradient(#efd29a 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 2px 22px no-repeat,
+    linear-gradient(
+      122deg,
+      transparent 18%,
+      rgb(255 248 230 / 7%) 35%,
+      rgb(255 255 255 / 14%) 39%,
+      rgb(230 194 142 / 6%) 44%,
+      transparent 58%
+    ),
+    var(--dr-plate-fill, var(--ts-night));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 24%),
+    0 12px 28px rgb(0 0 0 / 32%);
 }
 
 .dream-page.dream-page .dream-archive-explore > label {
@@ -41,9 +57,12 @@
   align-items: center;
   min-height: 44px;
   padding: 9px 13px;
-  border: 1px solid var(--ts-hair);
+  border: 1px solid rgb(225 190 124 / 38%);
   color: var(--ts-kinari);
-  background: rgb(15 13 25 / 75%);
+  background:
+    linear-gradient(#e6c28e 0 0) 0 0 / 10px 2px no-repeat,
+    linear-gradient(180deg, rgb(28 22 40 / 82%) 0%, rgb(15 13 25 / 88%) 100%);
+  box-shadow: inset 0 1px 0 rgb(255 248 228 / 16%);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.4;
@@ -51,11 +70,134 @@
   overflow-wrap: anywhere;
 }
 
+/* Cut-glass specular elevation for in-story archive & reading-room launcher bars */
+html[data-family="dream"] main.dream-page.dream-page .dream-scene-material {
+  padding: 12px 14px;
+  border: 1px solid rgb(230 194 142 / 50%);
+  border-left: 3px solid #deb468;
+  background:
+    linear-gradient(#f3dc9f 0 0) 100% 0 / 20px 2px no-repeat,
+    linear-gradient(#f3dc9f 0 0) 100% 0 / 2px 20px no-repeat,
+    linear-gradient(#f3dc9f 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(#f3dc9f 0 0) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(
+      120deg,
+      transparent 16%,
+      rgb(255 248 232 / 10%) 33%,
+      rgb(255 255 255 / 22%) 37%,
+      rgb(230 194 142 / 8%) 42%,
+      transparent 56%
+    ),
+    radial-gradient(68% 90% at 8% 0%, rgb(230 194 142 / 15%), transparent 70%),
+    linear-gradient(180deg, rgb(34 24 44 / 90%) 0%, rgb(18 13 26 / 94%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 34%),
+    inset 0 -1px 0 rgb(214 176 106 / 20%),
+    0 12px 28px rgb(0 0 0 / 38%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-scene-material > button {
+  border: 1px solid rgb(242 212 152 / 68%);
+  color: #fbf2df;
+  background:
+    linear-gradient(
+      118deg,
+      transparent 18%,
+      rgb(255 250 236 / 13%) 35%,
+      rgb(255 255 255 / 26%) 39%,
+      transparent 53%
+    ),
+    linear-gradient(#f8e7ba 0 0) 0 0 / 18px 2px no-repeat,
+    linear-gradient(180deg, rgb(54 37 64 / 94%) 0%, rgb(28 19 37 / 96%) 100%);
+  box-shadow:
+    inset 3px 0 0 #e6bd70,
+    inset 0 1px 0 rgb(255 248 228 / 38%),
+    0 6px 18px rgb(0 0 0 / 38%);
+}
+
+html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry#dream-reading-room-entry {
+  border-color: rgb(235 201 142 / 54%);
+  background:
+    linear-gradient(var(--zn-kin-light, #e6c28e) 0 0) 0 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light, #e6c28e) 0 0) 0 0 / 2px 44px no-repeat,
+    linear-gradient(var(--zn-kin-light, #e6c28e) 0 0) 100% 0 / 44px 2px no-repeat,
+    linear-gradient(var(--zn-kin-light, #e6c28e) 0 0) 100% 0 / 2px 44px no-repeat,
+    linear-gradient(
+      120deg,
+      transparent 20%,
+      rgb(255 248 232 / 9%) 35%,
+      rgb(255 255 255 / 19%) 39%,
+      rgb(230 194 142 / 8%) 44%,
+      transparent 58%
+    ),
+    radial-gradient(70% 90% at 12% 0%, rgb(230 194 142 / 16%), transparent 70%),
+    radial-gradient(40% 70% at 92% 100%, rgb(204 73 59 / 11%), transparent 70%),
+    linear-gradient(125deg, #2d1d36 0%, #1d1426 58%, #150f1c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 34%),
+    inset 0 -1px 0 rgb(230 194 142 / 18%),
+    0 14px 32px rgb(0 0 0 / 36%);
+}
+
+html[data-family="dream"]
+  main.dream-page.dream-page
+  .dream-reading-entry#dream-reading-room-entry
+  > button {
+  color: #241728;
+  border-color: #f6e2b3;
+  background:
+    linear-gradient(
+      118deg,
+      transparent 18%,
+      rgb(255 255 255 / 48%) 36%,
+      rgb(255 255 255 / 78%) 40%,
+      transparent 54%
+    ),
+    linear-gradient(#8f262c 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(180deg, #fbf1da 0%, #e6cea0 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 88%),
+    0 12px 28px rgb(0 0 0 / 44%);
+}
+
 @media (hover: hover) and (pointer: fine) {
   .dream-page.dream-page .dream-archive-index a:hover,
   .dream-page.dream-page .dream-archive-related a:hover {
     border-color: var(--ts-kin-light);
-    background: rgb(70 46 51 / 74%);
+    background:
+      linear-gradient(#f5dfab 0 0) 0 0 / 14px 2px no-repeat,
+      linear-gradient(180deg, rgb(78 50 56 / 84%) 0%, rgb(48 30 38 / 90%) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 28%),
+      0 6px 16px rgb(0 0 0 / 34%);
+  }
+
+  html[data-family="dream"] main.dream-page.dream-page .dream-scene-material > button:hover {
+    border-color: #fae6b4;
+    background:
+      linear-gradient(
+        118deg,
+        transparent 16%,
+        rgb(255 250 236 / 18%) 34%,
+        rgb(255 255 255 / 34%) 39%,
+        transparent 54%
+      ),
+      linear-gradient(#fae6b4 0 0) 0 0 / 22px 2px no-repeat,
+      linear-gradient(180deg, #432f52 0%, #261b33 100%);
+    box-shadow:
+      inset 3px 0 0 #fae6b4,
+      inset 0 1px 0 rgb(255 250 232 / 48%),
+      0 10px 24px rgb(0 0 0 / 44%);
+  }
+
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-reading-entry#dream-reading-room-entry
+    > button:not(:disabled):hover {
+    border-color: #fff5d9;
+    box-shadow:
+      inset 0 1px 0 #fff,
+      0 16px 34px rgb(0 0 0 / 52%);
   }
 }
 
@@ -74,8 +216,24 @@
   min-width: 0;
   margin: 0 0 12px;
   padding: clamp(14px, 2vw, 20px);
-  border: 1px solid var(--dr-rule-2, var(--ts-hair));
-  background: var(--dr-plate-fill, var(--ts-night));
+  border: 1px solid rgb(225 190 124 / 46%);
+  background:
+    linear-gradient(#efd29a 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 2px 22px no-repeat,
+    linear-gradient(
+      122deg,
+      transparent 18%,
+      rgb(255 248 230 / 7%) 35%,
+      rgb(255 255 255 / 14%) 39%,
+      rgb(230 194 142 / 6%) 44%,
+      transparent 58%
+    ),
+    var(--dr-plate-fill, var(--ts-night));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 24%),
+    0 12px 28px rgb(0 0 0 / 32%);
 }
 
 .dream-page.dream-page .dream-archive-explore > label {
@@ -235,6 +393,23 @@
 }
 
 @media (forced-colors: active) {
+  .dream-page.dream-page .dream-archive-index,
+  .dream-page.dream-page .dream-archive-explore,
+  .dream-page.dream-page .dream-archive-index a,
+  .dream-page.dream-page .dream-archive-related a,
+  html[data-family="dream"] main.dream-page.dream-page .dream-scene-material,
+  html[data-family="dream"] main.dream-page.dream-page .dream-scene-material > button,
+  html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry#dream-reading-room-entry,
+  html[data-family="dream"]
+    main.dream-page.dream-page
+    .dream-reading-entry#dream-reading-room-entry
+    > button {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
   .dream-page.dream-page .dream-archive-index a,
   .dream-page.dream-page .dream-archive-related a,
   .dream-page.dream-page .dream-archive-explore :is(input, select) {

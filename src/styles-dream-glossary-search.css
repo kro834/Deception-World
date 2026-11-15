@@ -1,43 +1,119 @@
 /* A readable index above the unchanged canonical glossary and archive fold. */
 .dream-page.dream-page .dream-glossary-search {
+  --gls-gold: #d4b272;
+  --gls-gold-bright: #f0d79c;
+  --gls-gold-rule: rgb(212 178 114 / 44%);
+  --gls-fuji: #dcc2fc;
+  position: relative;
+  min-width: 0;
   margin: -12px 0 28px;
-  padding: clamp(16px, 3vw, 28px);
-  border: 1px solid #8a714a;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #201c28, #17131d);
-  color: #f5ecd9;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1px solid #9e8152;
+  border-radius: 3px;
+  /* 辞典見返し風の金箔コーナー飾り＋紫黒マーブル見返し紙 */
+  background:
+    linear-gradient(var(--gls-gold-bright) 0 0) 6px 6px / 22px 1.5px no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) 6px 6px / 1.5px 22px no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) calc(100% - 6px) 6px / 22px 1.5px no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) calc(100% - 6px) 6px / 1.5px 22px no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) 6px calc(100% - 6px) / 22px 1.5px no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) 6px calc(100% - 6px) / 1.5px 22px no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) calc(100% - 6px) calc(100% - 6px) / 22px 1.5px
+      no-repeat,
+    linear-gradient(var(--gls-gold-bright) 0 0) calc(100% - 6px) calc(100% - 6px) / 1.5px 22px
+      no-repeat,
+    radial-gradient(64% 58% at 18% 0%, rgb(220 194 252 / 10%), transparent 72%),
+    radial-gradient(60% 52% at 88% 0%, rgb(218 178 106 / 14%), transparent 70%),
+    linear-gradient(142deg, #241d2f 0%, #1a1523 54%, #14101c 100%);
+  color: #f6eedc;
   font-family: var(--ts-text, serif);
   text-align: left;
   box-shadow:
-    inset 0 0 0 4px #211b27,
-    inset 0 0 0 5px #594a38;
+    inset 0 0 0 4px #1d1726,
+    inset 0 0 0 5px rgb(198 164 102 / 46%),
+    inset 0 1px 0 rgb(255 240 206 / 14%),
+    0 18px 42px rgb(6 4 10 / 48%);
   scroll-margin-top: 164px;
 }
 
+.dream-page.dream-page .dream-glossary-search::before,
+.dream-page.dream-page .dream-glossary-search::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+}
+
+.dream-page.dream-page .dream-glossary-search::before {
+  background:
+    radial-gradient(circle at 0 0, var(--gls-gold-bright) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 100% 0, var(--gls-gold-bright) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 0 100%, var(--gls-gold-bright) 0 2px, transparent 2.6px),
+    radial-gradient(circle at 100% 100%, var(--gls-gold-bright) 0 2px, transparent 2.6px);
+}
+
+.dream-page.dream-page .dream-glossary-search::after {
+  inset: 12px;
+  border: 1px solid rgb(212 178 114 / 16%);
+}
+
 .dream-page.dream-page .dream-glossary-search label {
-  display: block;
-  margin-bottom: 8px;
-  color: #f5ecd9;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #f8efdc;
   font-size: 16px;
   font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.dream-page.dream-page .dream-glossary-search-crest {
+  flex: none;
+  color: #ebd097;
 }
 
 .dream-page.dream-page .dream-glossary-search-field {
   display: flex;
   flex-wrap: wrap;
+  align-items: stretch;
   gap: 8px;
 }
 
-.dream-page.dream-page .dream-glossary-search-field input {
+.dream-page.dream-page .dream-glossary-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
   flex: 1 1 240px;
   min-width: 0;
+}
+
+.dream-page.dream-page .dream-glossary-search-loupe {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6d5539;
+}
+
+.dream-page.dream-page .dream-glossary-search-input-wrap:focus-within .dream-glossary-search-loupe {
+  color: #8f621e;
+}
+
+.dream-page.dream-page .dream-glossary-search-field input {
+  box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   min-height: 48px;
-  padding: 10px 12px;
-  border: 1px solid #b3a080;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid #bfa476;
   border-radius: 3px;
-  background: #fbf4e5;
-  color: #281e2b;
+  background: linear-gradient(180deg, #fdf7ea 0%, #f6ebd6 100%);
+  color: #261b2a;
+  box-shadow:
+    inset 0 1px 3px rgb(34 22 38 / 12%),
+    0 1px 0 rgb(255 243 214 / 10%);
   font: inherit;
   font-size: 16px;
   line-height: 1.5;
@@ -45,18 +121,51 @@
   color-scheme: light;
 }
 
+.dream-page.dream-page .dream-glossary-search-input-wrap[data-has-query="true"] input {
+  padding-right: 54px;
+}
+
+.dream-page.dream-page .dream-glossary-search-field input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .dream-page.dream-page .dream-glossary-search-field input::placeholder {
-  color: #6a5b64;
+  color: #675763;
   opacity: 1;
 }
 
+.dream-page.dream-page .dream-glossary-search-esc {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  padding: 2px 6px;
+  border: 1px solid #b4996a;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f3e7ce 0%, #e6d5b4 100%);
+  color: #4a3827;
+  font-family: var(--ts-latin, serif);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+}
+
 .dream-page.dream-page .dream-glossary-search button {
+  min-width: 48px;
   min-height: 48px;
-  padding: 10px 14px;
-  border: 1px solid #ad9465;
+  padding: 10px 16px;
+  border: 1px solid #be9f68;
   border-radius: 3px;
-  background: #322837;
-  color: #f5ecd9;
+  background:
+    linear-gradient(#edd29a 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(180deg, #3c2e43 0%, #281e2f 100%);
+  color: #f8efdc;
+  box-shadow:
+    inset 0 1px 0 rgb(255 242 212 / 18%),
+    0 4px 12px rgb(8 5 12 / 34%);
   font: inherit;
   font-size: 15px;
   line-height: 1.5;
@@ -64,9 +173,10 @@
 }
 
 .dream-page.dream-page .dream-glossary-search button:disabled {
-  border-color: #736575;
-  background: #211b27;
-  color: #b9aebb;
+  border-color: #6d5f72;
+  background: #211a28;
+  color: #bcb0c0;
+  box-shadow: none;
   cursor: default;
 }
 
@@ -81,10 +191,11 @@
 /* The count speaks only while searching; idle, the field sits on the list. */
 .dream-page.dream-page .dream-glossary-search-count {
   margin: 14px 0 10px;
-  color: #ead2a2;
+  color: #efd7a5;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.7;
+  letter-spacing: 0.04em;
 }
 
 .dream-page.dream-page .dream-glossary-search-count:empty {
@@ -99,7 +210,7 @@
 .dream-page.dream-page .dream-glossary-search-results {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 9px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -116,16 +227,23 @@
   .dream-glossary-jump
   .dream-glossary-search-results
   a {
+  box-sizing: border-box;
   display: flex;
   align-items: baseline;
   gap: 10px;
   height: 100%;
-  min-height: 52px;
-  padding: 12px;
-  border: 1px solid #746047;
+  min-height: 54px;
+  padding: 12px 13px 12px 15px;
+  border: 1px solid #846c4c;
   border-radius: 3px;
-  background: #2b2230;
-  color: #f5ecd9;
+  background:
+    linear-gradient(#e7ca91 0 0) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(#e7ca91 0 0) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(155deg, #302538 0%, #241b2b 100%);
+  color: #f7eedc;
+  box-shadow:
+    inset 3px 0 0 #b8965d,
+    inset 0 1px 0 rgb(255 241 210 / 10%);
   font-size: 16px;
   line-height: 1.7;
   text-decoration: none;
@@ -150,51 +268,92 @@
   small {
   display: block;
   margin-top: 2px;
-  color: #d9cddc;
+  color: #dfd2e3;
   font-size: 14px;
 }
 
 .dream-page.dream-page .dream-glossary-search-excerpt {
   display: block;
   margin-top: 7px;
-  color: #e7dce6;
+  padding-top: 6px;
+  border-top: 1px solid rgb(212 178 114 / 22%);
+  color: #ece1ed;
   font-size: 15px;
   line-height: 1.9;
 }
 
 /* The link's arrow: a term plate jumps to its entry below. */
 .dream-page.dream-page .dream-glossary-search-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
   align-self: center;
-  color: #e6cd9e;
+  color: #ebd29f;
   font-size: 15px;
   line-height: 1;
 }
 
+.dream-page.dream-page .dream-glossary-search-ribbon {
+  flex: none;
+  opacity: 0.88;
+}
+
 .dream-page.dream-page .dream-glossary-search mark {
-  padding: 0 1px;
-  background: #e5c98c;
-  color: #241729;
+  padding: 0 2px;
+  border-bottom: 1px solid #9e762c;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #f3dda5 0%, #e2c179 100%);
+  color: #221527;
 }
 
 .dream-page.dream-page .dream-glossary-search-empty {
-  padding: 18px;
-  border: 1px dashed #a78d66;
+  padding: 20px 18px;
+  border: 1px dashed #b49666;
   border-radius: 3px;
-  background: #2b2230;
+  background:
+    radial-gradient(56% 70% at 50% 0%, rgb(220 194 252 / 9%), transparent 75%),
+    #281f30;
+}
+
+.dream-page.dream-page .dream-glossary-search-empty-ornament {
+  display: block;
+  margin: 0 0 10px;
+  color: #e2c58a;
 }
 
 .dream-page.dream-page .dream-glossary-search-empty p {
   margin: 0 0 14px;
-  color: #f5ecd9;
+  color: #f6eedc;
   font-size: 16px;
   line-height: 1.9;
 }
 
+/* 藤色×金彩フォーカスグロウ（Wisteria × gilt focus halo） */
 .dream-page.dream-page .dream-glossary-search :is(input, button, a):focus-visible,
 .dream-page.dream-page .dream-glossary > [data-dream-glossary-focused] {
-  outline: 3px solid #dcc2fc;
-  outline-offset: 3px;
+  outline: 3px solid var(--gls-fuji, #dcc2fc);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px #efd59a,
+    0 0 16px rgb(220 194 252 / 42%),
+    0 0 28px rgb(226 190 124 / 24%);
+}
+
+.dream-page.dream-page .dream-glossary-search-field input:focus-visible {
+  border-color: #9e77c9;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-glossary-search
+    :is(input, button, a) {
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -202,10 +361,26 @@
     .dream-glossary-search
     .dream-glossary-jump
     .dream-glossary-search-results
-    a:hover,
+    a:hover {
+    border-color: #ebd097;
+    background:
+      linear-gradient(#f5e0b0 0 0) 100% 0 / 16px 1.5px no-repeat,
+      linear-gradient(#f5e0b0 0 0) 100% 0 / 1.5px 16px no-repeat,
+      linear-gradient(155deg, #3f2f49 0%, #2e2237 100%);
+    box-shadow:
+      inset 3px 0 0 #ebd097,
+      inset 0 1px 0 rgb(255 244 218 / 18%),
+      0 6px 18px rgb(8 5 12 / 36%);
+  }
+
   .dream-page.dream-page .dream-glossary-search button:not(:disabled):hover {
-    border-color: #e4c389;
-    background: #3d2e40;
+    border-color: #f0d79c;
+    background:
+      linear-gradient(#f5e0b0 0 0) 0 0 / 16px 2px no-repeat,
+      linear-gradient(180deg, #4b3854 0%, #34263d 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 24%),
+      0 6px 16px rgb(8 5 12 / 42%);
   }
 }
 
@@ -222,20 +397,29 @@
     .dream-glossary-jump
     .dream-glossary-search-results
     a,
-  .dream-page.dream-page .dream-glossary-search button {
+  .dream-page.dream-page .dream-glossary-search button,
+  .dream-page.dream-page .dream-glossary-search-field input,
+  .dream-page.dream-page .dream-glossary-search-esc {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;
     box-shadow: none;
   }
 
+  .dream-page.dream-page .dream-glossary-search::before,
+  .dream-page.dream-page .dream-glossary-search::after {
+    display: none;
+  }
+
   .dream-page.dream-page .dream-glossary-search mark {
     background: Highlight;
     color: HighlightText;
+    border-color: HighlightText;
   }
 
   .dream-page.dream-page .dream-glossary-search :is(input, button, a):focus-visible,
   .dream-page.dream-page .dream-glossary > [data-dream-glossary-focused] {
     outline-color: Highlight;
+    box-shadow: none;
   }
 }

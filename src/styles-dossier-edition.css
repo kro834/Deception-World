@@ -197,15 +197,48 @@ main.manager-page:not(.is-sovereign) .form-pickup:not(.is-rexonance-pickup) .for
 }
 
 /* The special-site card already carries two corner marks; they take the
-   bracket colours. */
+   bracket colours and an enriched multi-layered gold and silver foil bezel. */
+main.manager-page:not(.is-sovereign) :is(.rider-special-site, #special-site) .rider-special-site-card {
+  border: 1px solid color-mix(in srgb, var(--dm-gold) 48%, var(--dm-edge));
+  background:
+    radial-gradient(ellipse 65% 55% at 88% 10%, rgb(240 207 134 / 18%), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 12% 90%, color-mix(in srgb, var(--dm-lock) 16%, transparent), transparent 60%),
+    linear-gradient(148deg, rgb(6 9 18 / 98%), rgb(12 8 22 / 96%));
+  box-shadow:
+    0 34px 90px rgb(0 0 0 / 60%),
+    0 0 0 1px rgb(240 207 134 / 24%),
+    0 0 34px color-mix(in srgb, var(--dm-gold) 20%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -1px 0 rgb(240 207 134 / 18%);
+}
+
 main.manager-page:not(.is-sovereign) .rider-special-site-card::before {
   border-color: var(--dm-lock);
   border-radius: 0;
+  box-shadow: 1px -1px 0 rgb(255 255 255 / 38%);
 }
 
 main.manager-page:not(.is-sovereign) .rider-special-site-card::after {
   border-color: var(--dm-gold);
   border-radius: 0;
+  box-shadow: -1px 1px 0 rgb(240 207 134 / 45%);
+}
+
+/* Card and dialog specular edges: high-grade luminance rim and depth. */
+main.manager-page:not(.is-sovereign) :is(.form-pickup-card, .rider-nightmare-card, .rider-archive-civilian) {
+  box-shadow:
+    0 24px 64px rgb(0 0 0 / 52%),
+    0 0 0 1px color-mix(in srgb, var(--dm-edge) 55%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    inset 0 0 28px color-mix(in srgb, var(--manager-accent, #7ae8ff) 5%, transparent);
+}
+
+main.manager-page:not(.is-sovereign) :is(.form-pickup-dialog, .rider-nightmare-dialog) {
+  box-shadow:
+    0 32px 96px rgb(0 0 0 / 72%),
+    0 0 0 1px color-mix(in srgb, var(--dm-lock) 36%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 36px color-mix(in srgb, var(--manager-accent, #7ae8ff) 6%, transparent);
 }
 
 /* The portrait sits in a projection frame: the character's edge light and

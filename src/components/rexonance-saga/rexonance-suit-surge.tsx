@@ -1053,6 +1053,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
           } else if (grown.cells.live) grown.cells.clear();
         } else if (bursting) showClassic(0);
         else showClassic(1);
+        // Surge aura and shell blend tracking across form burst transitions
         if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
         // The lean in is for fine pointers: on touch screens a transform on
         // the scene's large canvases every scrolled frame cost WebKit its

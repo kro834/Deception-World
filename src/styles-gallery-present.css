@@ -1,128 +1,299 @@
 /* Gallery present — a current night exhibition.
 
-   Last sheet on /gallery. The brass double-frames, warm brown room and
-   catalog underlines give way to a cool ink stage: the picture is the
-   plate, type is quiet, and controls stay at least 12px with their
-   existing hit areas. No new words, images, or looping motion. */
+   Last sheet on /gallery. Wall-washer illumination, stepped conservation mats,
+   double-hairline exhibition plaques, and optical rim consoles frame each
+   work while keeping every pixel of the original art untouched. Controls stay
+   at least 12px with their existing hit areas. No new words, images, or
+   looping motion. */
 
-html[data-family="gallery"] .gallery-page {
-  --gallery-ink: #07080c;
-  --gallery-ink-soft: #12141a;
-  --gallery-ivory: #f4f1ea;
-  --gallery-muted: #a7a095;
-  --gallery-brass: #d7c4a2;
-  --gallery-rule: rgb(255 255 255 / 10%);
-  background: radial-gradient(ellipse at 70% -10%, rgb(255 255 255 / 4%), transparent 42%), #07080c;
-  color: #f4f1ea;
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] {
+  --gallery-ink: #06090f;
+  --gallery-ink-soft: #0f1520;
+  --gallery-ivory: #f3f0e8;
+  --gallery-muted: #b2b8c2;
+  --gallery-brass: #dec8a1;
+  --gallery-gold: #e7d2a8;
+  --gallery-cyan-rim: #9ee8fa;
+  --gallery-rule: rgb(222 200 161 / 18%);
+  --gallery-rule-cool: rgb(158 232 250 / 20%);
+  --gallery-console-plate:
+    linear-gradient(180deg, rgb(255 250 240 / 5%), transparent 38%),
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgb(158 232 250 / 5%), transparent 70%),
+    linear-gradient(180deg, #111925 0%, #0b1019 56%, #080c14 100%);
+  background:
+    radial-gradient(ellipse 68% 32% at 50% -3%, rgb(232 210 168 / 9%), transparent 70%),
+    radial-gradient(ellipse 48% 34% at 86% 2%, rgb(134 206 235 / 8%), transparent 68%),
+    radial-gradient(ellipse 46% 30% at 14% 4%, rgb(214 188 142 / 5%), transparent 66%),
+    linear-gradient(180deg, #0a0e16 0%, #06090f 36%, #05070c 100%);
+  color: #f3f0e8;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-topbar {
-  border-bottom-color: rgb(255 255 255 / 8%);
-  background: #07080c;
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-topbar {
+  --world-atmosphere-base: #080c14;
+  border-bottom-color: rgb(222 200 161 / 22%);
+  background-color: #080c14;
+  background-image:
+    linear-gradient(
+      90deg,
+      #dec8a1 0 3px,
+      transparent 3px,
+      rgb(222 200 161 / 24%) 18%,
+      rgb(158 232 250 / 26%) 52%,
+      transparent 92%
+    ),
+    linear-gradient(180deg, rgb(245 238 224 / 7%), transparent 65%);
+  box-shadow:
+    inset 0 -1px 0 rgb(158 232 250 / 12%),
+    0 8px 26px rgb(0 0 0 / 38%);
 }
 
-html[data-family="gallery"] .gallery-page .gallery-brand {
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-brand {
+  color: #f6f2ea;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.06em;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-eyebrow {
-  color: #d7c4a2;
-  letter-spacing: 0.18em;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-brand
+  span {
+  color: #dec8a1;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-intro h1,
-html[data-family="gallery"] .gallery-page .gallery-intro h1 span,
-html[data-family="gallery"] .gallery-page .gallery-intro h1 .gallery-title-opening {
-  color: #f7f4ee;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-refresh-status,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-topbar-actions
+  > a {
+  color: #cbd3de;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-eyebrow {
+  color: #dec8a1;
+  letter-spacing: 0.2em;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-intro h1,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-intro
+  h1
+  span,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-intro
+  h1
+  .gallery-title-opening {
+  color: #f8f5ee;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.025em;
   line-height: 1.25;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-intro h1 {
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-intro h1 {
   margin: 14px 0 16px;
   font-size: clamp(34px, 4.6vw, 58px);
 }
 
-html[data-family="gallery"] .gallery-page .gallery-intro-description {
-  color: #c9c2b6;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-intro-description {
+  color: #d2cec4;
   font-size: 16px;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
   line-height: 1.85;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-enter {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-enter {
   min-height: 48px;
   margin-top: 22px;
-  padding: 0 18px;
-  border: 1px solid rgb(255 255 255 / 16%);
-  border-bottom-color: rgb(255 255 255 / 16%);
-  background: #12141a;
-  color: #f7f4ee;
+  padding: 0 20px;
+  border: 1px solid rgb(226 205 168 / 48%);
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgb(255 248 232 / 12%), transparent 55%),
+    linear-gradient(180deg, #182231, #0e1520);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 234 / 24%),
+    inset 0 -1px 0 rgb(158 232 250 / 18%),
+    0 8px 20px rgb(0 0 0 / 32%);
+  color: #f8f5ee;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-size: 14px;
+  font-weight: 550;
   letter-spacing: 0.06em;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-enter span {
-  color: #f7f4ee;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-enter
+  span {
+  color: #dec8a1;
   font-size: 16px;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-edition b {
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-edition b {
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-size: 20px;
   font-weight: 500;
-  color: #f7f4ee;
+  color: #f8f5ee;
 }
 
 html[data-family="gallery"] .gallery-page .gallery-feature::before,
-html[data-family="gallery"] .gallery-page .gallery-feature-open::after,
-html[data-family="gallery"] .gallery-page .gallery-work-frame::after {
+html[data-family="gallery"] .gallery-page .gallery-feature-open::after {
   content: none;
   display: none;
   border: 0;
   background: none;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-feature-open {
+html[data-family="gallery"] .gallery-page .gallery-work-frame::after {
   border: 0;
-  background: #0c0d12;
   box-shadow: none;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-feature figcaption {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-feature-open {
+  border: 1px solid rgb(222 200 161 / 28%);
+  outline: 1px solid rgb(158 232 250 / 18%);
+  outline-offset: 5px;
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 6%, rgb(232 212 174 / 8%), transparent 68%),
+    #080c13;
+  box-shadow:
+    inset 0 1px 0 rgb(255 249 236 / 14%),
+    0 22px 48px rgb(0 0 0 / 45%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-feature
+  figcaption {
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
-  color: #c9c2b6;
+  color: #ddd7cb;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-collection-heading {
-  border-top-color: rgb(255 255 255 / 10%);
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-collection-heading {
+  border-top: 1px solid rgb(222 200 161 / 30%);
+  box-shadow: inset 0 3px 0 -2px rgb(158 232 250 / 16%);
 }
 
-html[data-family="gallery"] .gallery-page .gallery-collection-heading h2 {
-  color: #f7f4ee;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-collection-heading
+  h2 {
+  color: #f8f5ee;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-size: clamp(22px, 2vw, 28px);
   font-weight: 500;
   letter-spacing: 0.08em;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-filters button,
-html[data-family="gallery"] .gallery-page .gallery-favorites-filter,
-html[data-family="gallery"] .gallery-page .gallery-order select,
-html[data-family="gallery"] .gallery-page .gallery-reset-filter,
-html[data-family="gallery"] .gallery-page .gallery-search input {
-  border-color: rgb(255 255 255 / 12%);
-  border-radius: 0;
-  background: #101218;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-browse-panel {
+  border: 1px solid rgb(222 200 161 / 24%);
+  border-top: 1px solid rgb(236 216 180 / 46%);
+  background: var(--gallery-console-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 14%),
+    inset 0 0 0 1px rgb(158 232 250 / 8%),
+    0 18px 42px rgb(0 0 0 / 38%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-display-settings,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-browse-panel
+  .gallery-display-settings {
+  border: 1px solid rgb(222 200 161 / 22%);
+  background:
+    linear-gradient(180deg, rgb(255 248 235 / 4%), transparent 44%),
+    #0a0f18;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 240 / 10%),
+    inset 0 0 0 1px rgb(158 232 250 / 6%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-filters
+  button,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-favorites-filter,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-reset-filter,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-search-clear,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-shuffle-start,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-shuffle-end
+  button,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-display-choice,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-display-reset,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-refresh {
+  border: 1px solid rgb(216 198 164 / 24%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #151e2c, #0c121c);
+  box-shadow:
+    inset 0 1px 0 rgb(255 249 238 / 10%),
+    inset 0 -1px 0 rgb(0 0 0 / 35%);
+  color: #f3f0e8;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-search
+  input,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-order
+  select,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-share-url
+  input,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-title-editor
+  input {
+  border: 1px solid rgb(216 198 164 / 26%);
+  border-radius: 2px;
+  background-color: #080d15;
+  box-shadow:
+    inset 0 2px 5px rgb(0 0 0 / 42%),
+    inset 0 0 0 1px rgb(158 232 250 / 6%);
   color: #f4f1ea;
 }
 
 /* Paint the native select surface so WebKit retains the 46px target. */
-html[data-family="gallery"] .gallery-page .gallery-order select {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-order
+  select {
   -webkit-appearance: none;
   appearance: none;
   padding-inline-end: 38px;
@@ -136,207 +307,377 @@ html[data-family="gallery"] .gallery-page .gallery-order select {
   background-repeat: no-repeat;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-filters button[aria-pressed="true"],
-html[data-family="gallery"] .gallery-page .gallery-favorites-filter[aria-pressed="true"],
-html[data-family="gallery"] .gallery-page .gallery-favorite-toggle[aria-pressed="true"] {
-  border-color: #f4f1ea;
-  background: #f4f1ea;
-  color: #111216;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-filters
+  button[aria-pressed="true"],
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-favorites-filter[aria-pressed="true"],
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-favorite-toggle[aria-pressed="true"],
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-display-choice:has(input:checked) {
+  border-color: #ead8b5;
+  background: linear-gradient(180deg, #f6f1e6, #e2d4b7);
+  box-shadow:
+    inset 0 1px 0 #fffdf8,
+    inset 0 -2px 0 rgb(94 74 42 / 24%);
+  color: #10141c;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-filters button[aria-pressed="true"] span,
-html[data-family="gallery"] .gallery-page .gallery-favorites-filter[aria-pressed="true"] span {
-  color: #111216;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-filters
+  button[aria-pressed="true"]
+  span,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-favorites-filter[aria-pressed="true"]
+  span {
+  color: #242b35;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-grid {
-  --gallery-mat: 0px;
-  row-gap: clamp(28px, 3.2vw, 44px);
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-display-choice
+  input {
+  accent-color: #172230;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-work-frame {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-grid {
+  --gallery-mat: 8px;
+  row-gap: clamp(32px, 3.5vw, 48px);
 }
 
-html[data-family="gallery"] .gallery-page .gallery-work-frame img {
-  background: #0c0d12;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-grid[data-gallery-density="compact"] {
+  --gallery-mat: 6px;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-work figcaption,
-html[data-family="gallery"] .gallery-page .gallery-work figcaption h3,
-html[data-family="gallery"] .gallery-page .gallery-work-number {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-grid[data-gallery-density="spacious"] {
+  --gallery-mat: 11px;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-grid[data-mat="museum"],
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-mat="museum"]
+  .gallery-grid {
+  --gallery-mat: 14px;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-grid[data-mat="calm"],
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-mat="calm"]
+  .gallery-grid {
+  --gallery-mat: 8px;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-grid[data-mat="tight"],
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-mat="tight"]
+  .gallery-grid {
+  --gallery-mat: 4px;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work-frame {
+  padding: var(--gallery-mat);
+  border: 1px solid rgb(222 200 161 / 24%);
+  background:
+    radial-gradient(ellipse 80% 52% at 50% -8%, rgb(242 224 188 / 12%), transparent 62%),
+    linear-gradient(180deg, #0d121b 0%, #070a10 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 249 236 / 14%),
+    inset 0 0 0 1px rgb(158 232 250 / 8%),
+    inset 0 8px 20px rgb(0 0 0 / 52%),
+    0 14px 34px rgb(0 0 0 / 36%);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work-frame::before {
+  background: radial-gradient(
+    ellipse 76% 48% at 50% -10%,
+    rgb(246 228 190 / 18%),
+    rgb(158 232 250 / 6%) 42%,
+    transparent 68%
+  );
+  opacity: 0.55;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work-frame
+  img {
+  background: #06090f;
+  filter: none;
+  transform: none;
+}
+
+/* Exhibition Plaque — double-hairline curatorial label beneath the mat. */
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work
+  figcaption {
+  margin-top: 10px;
+  padding: 13px 2px 6px;
+  border-top: 1px solid rgb(222 200 161 / 26%);
+  border-bottom: 1px solid rgb(222 200 161 / 18%);
+  background-image:
+    linear-gradient(90deg, rgb(222 200 161 / 46%) 0 28px, rgb(158 232 250 / 16%) 28px 100%),
+    linear-gradient(90deg, rgb(222 200 161 / 14%), transparent 85%);
+  background-size:
+    100% 1px,
+    100% 1px;
+  background-position:
+    0 3px,
+    0 calc(100% - 3px);
+  background-repeat: no-repeat;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-work figcaption h3 {
-  color: #f7f4ee;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work
+  figcaption
+  h3 {
+  color: #f6f3ec;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.02em;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-work-number {
-  color: #a7a095;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work-number {
+  color: #dec8a1;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-work-hint,
-html[data-family="gallery"] .gallery-page .gallery-work-hint > span {
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-work-hint,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work-hint
+  > span {
   border: 0;
   background: none;
-  color: #a7a095;
+  color: #b4bcc8;
   font-size: 12px;
   letter-spacing: 0.04em;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-favorite-toggle {
-  border-color: rgb(255 255 255 / 14%);
-  background: transparent;
-  color: #d9d3c8;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-favorite-toggle {
+  border-color: rgb(222 200 161 / 22%);
+  background: rgb(14 20 30 / 72%);
+  color: #e4dfd4;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-account {
-  border-color: rgb(255 255 255 / 10%);
-  background: #0c0d12;
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-account {
+  border-color: rgb(222 200 161 / 22%);
+  background: var(--gallery-console-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 249 236 / 10%),
+    0 14px 34px rgb(0 0 0 / 30%);
 }
 
-html[data-family="gallery"] .gallery-page .gallery-account h3 {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-account
+  h3 {
   color: #f7f4ee;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
   font-weight: 500;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-submission-specs span {
-  border-color: rgb(255 255 255 / 12%);
-  background: #101218;
-  color: #c9c2b6;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-submission-specs
+  span {
+  border-color: rgb(222 200 161 / 22%);
+  background: #0c121c;
+  color: #d7d1c5;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-personal-controls > .gallery-personal-add {
-  border: 1px solid #f4f1ea;
-  border-radius: 0;
-  background: #f4f1ea;
-  box-shadow: none;
-  color: #111216;
-  font-weight: 500;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-personal-controls
+  > .gallery-personal-add {
+  border: 1px solid #ead8b5;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f6f1e6, #e2d4b7);
+  box-shadow:
+    inset 0 1px 0 #fffdf8,
+    0 6px 18px rgb(0 0 0 / 28%);
+  color: #10141c;
+  font-weight: 600;
   transform: none;
 }
 
 html[data-family="gallery"]
-  .gallery-page
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-personal-controls
   > .gallery-personal-add:disabled {
   border-color: rgb(255 255 255 / 14%);
-  background: #1a1c22;
-  color: #a7a095;
+  background: #171d27;
+  box-shadow: none;
+  color: #a7aeb8;
   opacity: 1;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-feature-settings :is(a, button) {
-  border-color: rgb(255 255 255 / 16%);
-  border-radius: 0;
-  background: #12141a;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-feature-settings
+  :is(a, button) {
+  border-color: rgb(222 200 161 / 28%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #16202e, #0c121b);
   color: #f7f4ee;
   font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
 }
 
-html[data-family="gallery"] .gallery-page .gallery-browse-panel {
-  border-color: rgb(255 255 255 / 10%);
-  background: #0c0d12;
+html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-viewer {
+  border-color: rgb(222 200 161 / 34%);
+  border-radius: 2px;
+  background: #070b12;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 234 / 18%),
+    inset 0 0 0 1px rgb(158 232 250 / 10%),
+    0 24px 56px rgb(0 0 0 / 72%);
 }
 
-html[data-family="gallery"] .gallery-page .gallery-browse-panel .gallery-filters button,
-html[data-family="gallery"] .gallery-page .gallery-browse-panel .gallery-favorites-filter,
-html[data-family="gallery"] .gallery-page .gallery-browse-panel .gallery-reset-filter,
-html[data-family="gallery"] .gallery-page .gallery-search-input-row input,
-html[data-family="gallery"] .gallery-page .gallery-search-clear {
-  border-radius: 0;
-  border-color: rgb(255 255 255 / 12%);
-}
-
-html[data-family="gallery"] .gallery-page .gallery-search-clear {
-  background: transparent;
-  color: #f4f1ea;
-}
-
-html[data-family="gallery"] .gallery-page .gallery-shuffle-start,
-html[data-family="gallery"] .gallery-page .gallery-shuffle-end button {
-  border-color: rgb(255 255 255 / 16%);
-  border-radius: 0;
-  background: #12141a;
-  color: #f4f1ea;
-}
-
-html[data-family="gallery"] .gallery-page .gallery-display-choice,
-html[data-family="gallery"] .gallery-page .gallery-display-reset {
-  border-color: rgb(255 255 255 / 14%);
-  background: #101218;
-  color: #f4f1ea;
-}
-
-html[data-family="gallery"] .gallery-page .gallery-display-choice:has(input:checked) {
-  border-color: #f4f1ea;
-  background: #f4f1ea;
-  color: #111216;
-}
-
-html[data-family="gallery"] .gallery-page .gallery-display-choice input {
-  accent-color: #f4f1ea;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  :is(.gallery-viewer-header, .gallery-viewer-footer) {
+  border-color: rgb(222 200 161 / 22%);
+  background: linear-gradient(180deg, #0d141f, #080d15);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html[data-family="gallery"] .gallery-page .gallery-work-open:hover .gallery-work-frame,
-  html[data-family="gallery"] .gallery-page .gallery-work-open:focus-visible .gallery-work-frame {
-    border-color: transparent;
-    box-shadow: none;
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page]
+    .gallery-work-open:hover
+    .gallery-work-frame,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page]
+    .gallery-work-open:focus-visible
+    .gallery-work-frame {
+    border-color: rgb(232 210 168 / 62%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 238 / 26%),
+      inset 0 0 0 1px rgb(158 232 250 / 22%),
+      inset 0 8px 22px rgb(0 0 0 / 46%),
+      0 18px 42px rgb(0 0 0 / 48%);
   }
 
-  html[data-family="gallery"] .gallery-page .gallery-enter:hover,
-  html[data-family="gallery"] .gallery-page .gallery-filters button:hover,
-  html[data-family="gallery"] .gallery-page .gallery-feature-settings :is(a, button):hover,
-  html[data-family="gallery"] .gallery-page .gallery-shuffle-start:hover {
-    border-color: rgb(255 255 255 / 36%);
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page]
+    .gallery-work-open:hover
+    .gallery-work-frame::before,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page]
+    .gallery-work-open:focus-visible
+    .gallery-work-frame::before {
+    opacity: 0.92;
+  }
+
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-enter:hover,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-filters
+    button:hover,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-feature-settings
+    :is(a, button):hover,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-shuffle-start:hover {
+    border-color: rgb(232 210 168 / 68%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 240 / 24%),
+      0 0 0 1px rgb(158 232 250 / 20%);
     color: #fff;
   }
 
   html[data-family="gallery"]
-    .gallery-page
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-personal-controls
     > .gallery-personal-add:hover:not(:disabled) {
     border-color: #fff;
     background: #fff;
-    box-shadow: none;
-    color: #111216;
+    box-shadow: 0 8px 22px rgb(0 0 0 / 34%);
+    color: #10141c;
     transform: none;
   }
 }
 
 @media (max-width: 700px) {
-  html[data-family="gallery"] .gallery-page .gallery-intro h1 {
+  html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-intro h1 {
     font-size: clamp(32px, 9vw, 44px);
   }
 }
 
 @media (forced-colors: active) {
-  html[data-family="gallery"] .gallery-page .gallery-order select {
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-order
+    select {
     -webkit-appearance: auto;
     appearance: auto;
     background-image: none;
   }
 
-  html[data-family="gallery"] .gallery-page,
-  html[data-family="gallery"] .gallery-page .gallery-topbar,
-  html[data-family="gallery"] .gallery-page .gallery-work-frame,
-  html[data-family="gallery"] .gallery-page .gallery-feature-open,
-  html[data-family="gallery"] .gallery-page .gallery-filters button,
-  html[data-family="gallery"] .gallery-page .gallery-enter,
-  html[data-family="gallery"] .gallery-page .gallery-personal-add,
-  html[data-family="gallery"] .gallery-page .gallery-account,
-  html[data-family="gallery"] .gallery-page .gallery-browse-panel,
-  html[data-family="gallery"] .gallery-page .gallery-shuffle-start {
+  html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page],
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-topbar,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-work-frame,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-feature-open,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-filters
+    button,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-enter,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-personal-add,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-account,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-browse-panel,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-shuffle-start {
     background: Canvas;
+    background-image: none;
+    box-shadow: none;
     color: CanvasText;
     border-color: CanvasText;
   }

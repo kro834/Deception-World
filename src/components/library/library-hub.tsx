@@ -145,6 +145,9 @@ export function LibraryHub({
       }}
     >
       <header className="library-hub-heading">
+        <p className="library-section-kicker" aria-hidden="true">
+          PERSONAL ARCHIVE // READING PLATEN
+        </p>
         <h2 id="library-hub-title" ref={hubTitleRef} tabIndex={-1}>
           マイライブラリー
         </h2>
@@ -170,8 +173,15 @@ export function LibraryHub({
         </p>
       ) : (
         <div className="library-hub-grid">
-          <article className="library-continue" aria-labelledby="library-continue-title">
-            <h3 id="library-continue-title">続きから</h3>
+          <article
+            className="library-continue"
+            data-has-resume={resume ? "true" : "false"}
+            aria-labelledby="library-continue-title"
+          >
+            <h3 id="library-continue-title">
+              続きから
+              <span aria-hidden="true">ILLUMINATED READING PLATEN</span>
+            </h3>
             {resume ? (
               <>
                 <RecordArtFrame
@@ -214,6 +224,12 @@ export function LibraryHub({
                 </a>
               </div>
             )}
+            <span className="library-platen-clasps" aria-hidden="true">
+              <i data-corner="tl" />
+              <i data-corner="tr" />
+              <i data-corner="bl" />
+              <i data-corner="br" />
+            </span>
           </article>
 
           <section className="library-shelf" aria-labelledby="library-shelf-title">
@@ -221,11 +237,12 @@ export function LibraryHub({
               <h3 id="library-shelf-title" ref={shelfTitleRef} tabIndex={-1}>
                 しおり
               </h3>
+              <b aria-hidden="true">{bookmarks.length}</b>
             </div>
             {bookmarks.length ? (
               <ul className="library-rows" id="library-saved-list">
                 {shownBookmarks.map((entry, index) => (
-                  <li key={entry.id} id={`library-saved-${entry.id}`}>
+                  <li key={entry.id} id={`library-saved-${entry.id}`} data-kind={entry.kind}>
                     <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
                       <RecordArtFrame
                         art={pathArt(entry.path, entry.hash)}
@@ -316,6 +333,7 @@ export function LibraryHub({
           <section className="library-history" aria-labelledby="library-history-title">
             <div className="library-hub-subhead">
               <h3 id="library-history-title">閲覧履歴</h3>
+              <b aria-hidden="true">{saved.recent.length}</b>
             </div>
             {groups.length ? (
               groups.map((group) => (
@@ -323,7 +341,7 @@ export function LibraryHub({
                   <p>{group.label}</p>
                   <ul className="library-rows">
                     {group.visits.map(({ entry, at }) => (
-                      <li key={entry.id}>
+                      <li key={entry.id} data-kind={entry.kind}>
                         <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
                           <RecordArtFrame
                             art={pathArt(entry.path, entry.hash)}
@@ -368,6 +386,7 @@ export function LibraryHub({
           <section className="library-searches" aria-labelledby="library-searches-title">
             <div className="library-hub-subhead">
               <h3 id="library-searches-title">最近の検索</h3>
+              <b aria-hidden="true">{searches.length}</b>
             </div>
             {searches.length ? (
               <ul className="library-search-chips">

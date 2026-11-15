@@ -70,7 +70,8 @@ export function mountMetaUnitasAssembly(
   let idleId = 0;
   let idleTimer: ReturnType<typeof setTimeout> | 0 = 0;
   const allowed = () => metaUnitasMotionAllowed(environment, options.reducedMotion);
-  // Page preparation waits behind the existing entry cover on every viewport.
+  // Page preparation waits behind the existing entry cover on every viewport;
+  // cyber optical telemetry and nanite convergence initiate once cleared.
   const canStart = () => allowed() && !html.dataset.routeCover;
   const stop = () => {
     if (dispose) dispose();

@@ -6,6 +6,10 @@
     --astra-gold: #cfb77d;
     --astra-rule: rgb(207 183 125 / 28%);
     --astra-surface: #0b1119;
+    --astra-specular: rgb(242 234 221 / 42%);
+    --astra-rim: rgb(207 183 125 / 38%);
+    --astra-sheen: linear-gradient(135deg, rgb(207 183 125 / 12%) 0%, transparent 45%, rgb(242 234 221 / 6%) 100%);
+    --astra-shadow-deep: 0 16px 40px rgb(0 0 0 / 55%);
   }
 
   html[data-family]
@@ -23,7 +27,7 @@
     background-color: #070b11;
     box-shadow:
       0 1px 0 #000,
-      inset 0 1px 0 rgb(255 255 255 / 5%);
+      inset 0 1px 0 var(--astra-specular, rgb(255 255 255 / 8%));
   }
 
   html[data-family] body :is(.topbar, .manager-topbar) .brand b {
@@ -220,6 +224,20 @@
     }
   }
 
+  @media (hover: hover) and (pointer: fine) {
+    html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button):hover:not([aria-current]) {
+      border-color: var(--astra-rim, #cfb77d);
+      box-shadow: inset 0 1px 0 var(--astra-specular, rgb(242 234 221 / 30%));
+      color: #fff9ed;
+    }
+    html[data-family="dossier"] body .manager-page :is(.form-pickup-card, .rider-special-site-card):hover {
+      border-color: var(--astra-rim, #cfb77d);
+      box-shadow:
+        inset 0 1px 0 var(--astra-specular, rgb(242 234 221 / 30%)),
+        0 8px 24px rgb(0 0 0 / 50%);
+    }
+  }
+
   /* 361-419px portrait (iPhone SE and mini, iPhone 15 Pro): the Astra
      padding and tracking above outweigh the opening's phone fit
      (styles-opening-elevation.css), so ENTER THE WORLD ran past its plate's
@@ -234,5 +252,46 @@
       letter-spacing: 0.08em;
       white-space: nowrap;
     }
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family] {
+    --astra-paper: CanvasText;
+    --astra-gold: Highlight;
+    --astra-rule: CanvasText;
+    --astra-surface: Canvas;
+  }
+  html[data-family]
+    body
+    :is(
+      .topbar,
+      .manager-topbar,
+      .dream-site-header,
+      .library-topbar,
+      .search-topbar,
+      .form-archive-toolbar,
+      .rxs-local-nav
+    ) {
+    border-bottom-color: CanvasText;
+    background-color: Canvas;
+    box-shadow: none;
+  }
+  html[data-family] body #site-side-panel.side-panel {
+    background-color: Canvas;
+    color: CanvasText;
+  }
+  html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button) {
+    border-color: ButtonText;
+    color: ButtonText;
+  }
+  html[data-family]
+    body
+    #site-side-panel.side-panel
+    .side-panel-links
+    > :is(a, button):is([aria-current="page"], [aria-current="location"]) {
+    border-color: Highlight;
+    background-color: Highlight;
+    color: HighlightText;
   }
 }

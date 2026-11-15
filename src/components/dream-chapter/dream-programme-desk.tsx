@@ -85,7 +85,23 @@ export function DreamProgrammeDesk() {
     <section className="dream-programme-desk" aria-labelledby="dream-programme-title">
       <header className="dream-programme-heading">
         <h2 id="dream-programme-title">劇場案内</h2>
+        <span className="dream-programme-heading-ornament" aria-hidden="true" />
       </header>
+      <nav className="dream-programme-routes" aria-label="ドリームチャプターの入口">
+        {DREAM_PROGRAMME_ROUTES.map((route) => (
+          <a key={route.href} href={route.href} className="dream-programme-ticket">
+            <span className="dream-programme-ticket-main">
+              <span className="dream-programme-ticket-seal" aria-hidden="true">
+                {route.mark}
+              </span>
+              <strong>{route.title}</strong>
+            </span>
+            <span className="dream-programme-ticket-foot" aria-hidden="true">
+              <span className="dream-programme-ticket-arrow">↗</span>
+            </span>
+          </a>
+        ))}
+      </nav>
       <div className="dream-programme-dossiers" role="group" aria-label="人物資料・機密記録">
         <ul className="dream-programme-dossier-strip">
           {dossierQuickLinks.map((entry) => (
@@ -109,9 +125,12 @@ export function DreamProgrammeDesk() {
         aria-labelledby="dream-programme-reel-title"
       >
         <header className="dream-programme-reel-heading">
-          <div>
+          <div className="dream-programme-reel-title-block">
             <span className="dream-programme-reel-label">幕間の小道具</span>
-            <h3 id="dream-programme-reel-title">ことばの巻取箱</h3>
+            <div className="dream-programme-reel-title-row">
+              <h3 id="dream-programme-reel-title">ことばの巻取箱</h3>
+              <span className="dream-programme-reel-ornament" aria-hidden="true" />
+            </div>
           </div>
           <div className="dream-programme-spotlight-modes" role="group" aria-label="表示切替">
             <button
@@ -189,6 +208,16 @@ export function DreamProgrammeDesk() {
                 : `CASE ${activeNote?.no}「${activeNoteCase?.title}」`}
             </span>
           </p>
+          <div className="dream-programme-reel-meter" aria-hidden="true">
+            <span className="dream-programme-reel-counter">
+              {String(reelIndex + 1).padStart(2, "0")} / {String(reelTotal).padStart(2, "0")}
+            </span>
+            <span className="dream-programme-reel-dots">
+              {Array.from({ length: reelTotal }, (_, index) => (
+                <i key={index} data-active={index === reelIndex ? "true" : "false"} />
+              ))}
+            </span>
+          </div>
           <div className="dream-programme-spotlight-controls">
             <button
               type="button"

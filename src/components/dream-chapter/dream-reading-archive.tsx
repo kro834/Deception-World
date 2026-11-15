@@ -35,6 +35,21 @@ const terms = [
   ]),
 ];
 const reference = (no: number) => paragraphs[no - 1];
+const chapterSteps = (() => {
+  let cursor = 0;
+  return DREAM_CASES.map((chapter) => {
+    const start = cursor + 1;
+    const end = cursor + chapter.paragraphs.length;
+    cursor = end;
+    return {
+      no: chapter.no,
+      title: chapter.title,
+      start,
+      end,
+    };
+  });
+})();
+
 export function DreamReadingArchive() {
   const id = useId();
   const [progress, setProgress] = useState(0);
@@ -63,16 +78,64 @@ export function DreamReadingArchive() {
   };
   const available = buildReadingArchive(records, terms, progress);
   const results = searchReadingArchive(available, query);
+  const currentBoundary = progress > 0 ? reference(progress) : null;
+  const progressRatio = maximum > 0 ? Math.round((progress / maximum) * 100) : 0;
+  const shieldLabel =
+    progress === 0
+      ? "ネタバレ保護：未読領域を封印中"
+      : progress >= maximum
+        ? "ネタバレ保護：全六章を開放中"
+        : `ネタバレ保護：CASE ${currentBoundary?.chapter}・第${currentBoundary?.paragraph}段落より先を封印`;
   return (
     <section
       id="dream-reading-archive"
       className="dream-reading-archive"
       aria-labelledby={`${id}-heading`}
     >
-      <header>
-        <h2 id={`${id}-heading`}>読んだところまでの資料室</h2>
+      <header className="dream-reading-archive-header">
+        <div className="dream-reading-archive-plate">
+          <h2 id={`${id}-heading`}>読んだところまでの資料室</h2>
+          <span
+            className="dream-reading-archive-shield"
+            data-shield-state={
+              progress === 0 ? "sealed" : progress >= maximum ? "complete" : "scoped"
+            }
+          >
+            {shieldLabel}
+          </span>
+        </div>
         <p>読んだ段落までの人物と用語を探せます。サイト全体の検索は全編を対象にします。</p>
       </header>
+      <div className="dream-reading-archive-gauge" role="group" aria-label="章ごとの読了範囲">
+        <div className="dream-reading-archive-rail" aria-hidden="true">
+          <i style={{ width: `${progressRatio}%` }} />
+        </div>
+        <div className="dream-reading-archive-steps">
+          {chapterSteps.map((step) => {
+            const state =
+              progress >= step.end ? "complete" : progress >= step.start ? "partial" : "sealed";
+            const selected = progress === step.end;
+            return (
+              <button
+                key={step.no}
+                type="button"
+                className="dream-reading-archive-step"
+                data-step-state={state}
+                aria-pressed={selected}
+                onClick={() => choose(selected ? 0 : step.end)}
+              >
+                <span className="dream-reading-archive-step-no" lang="en">
+                  CASE {step.no}
+                </span>
+                <strong className="dream-reading-archive-step-title">{step.title}</strong>
+                <small className="dream-reading-archive-step-status">
+                  {state === "complete" ? "読了" : state === "partial" ? "読書中" : "封印"}
+                </small>
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <div className="dream-reading-archive-controls">
         <label htmlFor={`${id}-progress`}>ここまで読んだ</label>
         <select

@@ -43,13 +43,22 @@ export function GalleryCurtain({
       }
       aria-busy={phase === "covering"}
     >
-      <div className="gallery-curtain-rail" aria-hidden="true" />
+      <div className="gallery-curtain-rail" aria-hidden="true">
+        <span className="gallery-curtain-valance">
+          <span className="gallery-curtain-valance-finial is-left" />
+          <span className="gallery-curtain-valance-medallion" />
+          <span className="gallery-curtain-valance-finial is-right" />
+        </span>
+        <span className="gallery-curtain-rings" />
+      </div>
       {["left", "right"].map((side) => (
         <div key={side} className={`gallery-curtain-panel is-${side}`} aria-hidden="true">
           <div className="gallery-curtain-cloth">
             {Array.from({ length: 12 }, (_, index) => (
               <i key={index} style={{ "--fold": index } as CSSProperties} />
             ))}
+            <span className="gallery-curtain-drape-sheen" />
+            <span className="gallery-curtain-seam-edge" />
             <div className="gallery-curtain-stickers">
               {STICKERS.filter((sticker) => sticker.side === side).map((sticker) => (
                 <img
@@ -75,7 +84,9 @@ export function GalleryCurtain({
               ))}
             </div>
           </div>
-          <div className="gallery-curtain-hem" />
+          <div className="gallery-curtain-hem">
+            <span className="gallery-curtain-bullion" />
+          </div>
         </div>
       ))}
     </div>

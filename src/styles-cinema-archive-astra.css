@@ -9,17 +9,22 @@
   border-top: 2px solid #d9bc80;
   background-color: #e7e2d6;
   background-image:
-    /* Gold-foil corner registration ticks */
-    linear-gradient(90deg, rgb(186 146 72 / 78%) 0 18px, transparent 18px calc(100% - 18px), rgb(186 146 72 / 78%) calc(100% - 18px) 100%),
-    linear-gradient(90deg, rgb(186 146 72 / 78%) 0 18px, transparent 18px calc(100% - 18px), rgb(186 146 72 / 78%) calc(100% - 18px) 100%),
+    /* Gold-foil corner registration horizontal ticks */
+    linear-gradient(90deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    linear-gradient(90deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    /* Gold-foil corner registration vertical ticks */
+    linear-gradient(180deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    linear-gradient(180deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
     /* Archival paper four-corner vignette shading */
-    radial-gradient(circle at 0% 0%, rgb(110 86 44 / 13%) 0%, transparent 38%),
-    radial-gradient(circle at 100% 0%, rgb(110 86 44 / 12%) 0%, transparent 38%),
-    radial-gradient(circle at 0% 100%, rgb(92 72 36 / 14%) 0%, transparent 42%),
-    radial-gradient(circle at 100% 100%, rgb(92 72 36 / 15%) 0%, transparent 42%);
+    radial-gradient(circle at 0% 0%, rgb(110 86 44 / 15%) 0%, transparent 40%),
+    radial-gradient(circle at 100% 0%, rgb(110 86 44 / 14%) 0%, transparent 40%),
+    radial-gradient(circle at 0% 100%, rgb(92 72 36 / 16%) 0%, transparent 44%),
+    radial-gradient(circle at 100% 100%, rgb(92 72 36 / 17%) 0%, transparent 44%);
   background-position:
     12px 12px,
     12px calc(100% - 12px),
+    12px 12px,
+    calc(100% - 12px) 12px,
     0 0,
     0 0,
     0 0,
@@ -27,6 +32,8 @@
   background-size:
     calc(100% - 24px) 1px,
     calc(100% - 24px) 1px,
+    1px calc(100% - 24px),
+    1px calc(100% - 24px),
     100% 100%,
     100% 100%,
     100% 100%,
@@ -34,12 +41,12 @@
   background-repeat: no-repeat;
   box-shadow:
     inset 0 0 0 7px #e7e2d6,
-    inset 0 0 0 8px rgb(196 158 84 / 72%),
+    inset 0 0 0 8px rgb(196 158 84 / 78%),
     inset 0 0 0 12px #e7e2d6,
-    inset 0 0 0 13px rgb(174 136 66 / 44%),
-    inset 24px 24px 42px rgb(92 72 38 / 10%),
-    inset -24px -24px 44px rgb(78 60 30 / 12%),
-    0 24px 56px rgb(0 0 0 / 34%);
+    inset 0 0 0 13px rgb(174 136 66 / 52%),
+    inset 24px 24px 44px rgb(92 72 38 / 12%),
+    inset -24px -24px 46px rgb(78 60 30 / 14%),
+    0 24px 56px rgb(0 0 0 / 38%);
   color: #26302e;
 }
 .saga-cinema.saga-cinema #introduction .intro-copy h3 {
@@ -64,16 +71,34 @@
   font-size: 13px;
 }
 .saga-cinema.saga-cinema #films .film-card {
-  padding: 16px 0 0;
-  border-top: 1px solid rgb(217 188 128 / 52%);
+  position: relative;
+  padding: 18px 0 0;
+  border-top: 1px solid rgb(217 188 128 / 58%);
+  box-shadow: 0 -1px 0 0 rgb(255 244 204 / 32%), 0 -8px 24px -6px rgb(217 188 128 / 18%);
 }
 .saga-cinema.saga-cinema #films .film-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 18px;
   color: #d9bc80;
 }
 .saga-cinema.saga-cinema #films .film-card-top span {
   font-size: 13px;
   letter-spacing: 0.16em;
+  font-weight: 650;
+  text-shadow: 0 0 12px rgb(217 188 128 / 38%);
+}
+.saga-cinema.saga-cinema #films .film-card-top span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px 3px 8px;
+  border: 1px solid rgb(217 188 128 / 50%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(217 188 128 / 18%) 0%, rgb(18 20 26 / 82%) 100%);
+  box-shadow: inset 0 1px 0 rgb(255 248 226 / 35%), 0 2px 8px rgb(0 0 0 / 42%);
+  color: #fff4d1;
 }
 .saga-cinema.saga-cinema #films .film-name {
   padding-block: 4px 20px;
@@ -88,15 +113,22 @@
   padding: clamp(28px, 4vw, 64px);
   background-color: #e7e2d6;
   background-image:
-    linear-gradient(90deg, rgb(186 146 72 / 78%) 0 18px, transparent 18px calc(100% - 18px), rgb(186 146 72 / 78%) calc(100% - 18px) 100%),
-    linear-gradient(90deg, rgb(186 146 72 / 78%) 0 18px, transparent 18px calc(100% - 18px), rgb(186 146 72 / 78%) calc(100% - 18px) 100%),
-    radial-gradient(circle at 0% 0%, rgb(110 86 44 / 13%) 0%, transparent 38%),
-    radial-gradient(circle at 100% 0%, rgb(110 86 44 / 12%) 0%, transparent 38%),
-    radial-gradient(circle at 0% 100%, rgb(92 72 36 / 14%) 0%, transparent 42%),
-    radial-gradient(circle at 100% 100%, rgb(92 72 36 / 15%) 0%, transparent 42%);
+    /* Gold-foil corner registration horizontal ticks */
+    linear-gradient(90deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    linear-gradient(90deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    /* Gold-foil corner registration vertical ticks */
+    linear-gradient(180deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    linear-gradient(180deg, rgb(196 158 84 / 88%) 0 22px, transparent 22px calc(100% - 22px), rgb(196 158 84 / 88%) calc(100% - 22px) 100%),
+    /* Archival paper four-corner vignette shading */
+    radial-gradient(circle at 0% 0%, rgb(110 86 44 / 15%) 0%, transparent 40%),
+    radial-gradient(circle at 100% 0%, rgb(110 86 44 / 14%) 0%, transparent 40%),
+    radial-gradient(circle at 0% 100%, rgb(92 72 36 / 16%) 0%, transparent 44%),
+    radial-gradient(circle at 100% 100%, rgb(92 72 36 / 17%) 0%, transparent 44%);
   background-position:
     12px 12px,
     12px calc(100% - 12px),
+    12px 12px,
+    calc(100% - 12px) 12px,
     0 0,
     0 0,
     0 0,
@@ -104,6 +136,8 @@
   background-size:
     calc(100% - 24px) 1px,
     calc(100% - 24px) 1px,
+    1px calc(100% - 24px),
+    1px calc(100% - 24px),
     100% 100%,
     100% 100%,
     100% 100%,
@@ -111,11 +145,12 @@
   background-repeat: no-repeat;
   box-shadow:
     inset 0 0 0 7px #e7e2d6,
-    inset 0 0 0 8px rgb(196 158 84 / 72%),
+    inset 0 0 0 8px rgb(196 158 84 / 78%),
     inset 0 0 0 12px #e7e2d6,
-    inset 0 0 0 13px rgb(174 136 66 / 44%),
-    inset 24px 24px 42px rgb(92 72 38 / 10%),
-    inset -24px -24px 44px rgb(78 60 30 / 12%);
+    inset 0 0 0 13px rgb(174 136 66 / 52%),
+    inset 24px 24px 44px rgb(92 72 38 / 12%),
+    inset -24px -24px 46px rgb(78 60 30 / 14%),
+    0 24px 56px rgb(0 0 0 / 38%);
   color: #26302e;
 }
 .saga-cinema.saga-cinema .film-dialog .dialog-copy h2 {
@@ -179,9 +214,9 @@ html
   main.form-archive-page[data-archive-kind]
   #archive-switcher.form-archive-switcher
   > .liquid-rail-surface {
-  border-color: #54616c;
-  background: #050a10 !important;
-  box-shadow: none !important;
+  border: 1px solid #6b7a88;
+  background: linear-gradient(180deg, #09121c 0%, #04080e 100%) !important;
+  box-shadow: inset 0 1px 0 rgb(217 188 128 / 22%), inset 0 -1px 0 rgba(0, 0, 0, 0.8) !important;
 }
 html
   body
@@ -189,9 +224,13 @@ html
   #archive-switcher.form-archive-switcher
   > .liquid-selection-lens
   > .liquid-selection-surface {
-  border-color: #d9bc80;
-  background: #23323e !important;
-  box-shadow: inset 0 -2px #d9bc80 !important;
+  border: 1px solid #d9bc80;
+  background: linear-gradient(180deg, #2a3c4b 0%, #172430 100%) !important;
+  box-shadow:
+    inset 0 -2px 0 #d9bc80,
+    inset 0 1px 0 rgb(255 244 204 / 45%),
+    inset 0 0 14px rgb(217 188 128 / 28%),
+    0 4px 14px rgba(0, 0, 0, 0.45) !important;
 }
 html
   body

@@ -35,6 +35,28 @@ export function IllusionculumOrbs({ ultra = false }: { ultra?: boolean }) {
     <span className="ics-orbs" aria-hidden="true">
       {(["left", "right"] as const).map((side) => (
         <span key={side} className={`ics-orb is-${side}`} style={seat(side)}>
+          <i
+            className="ics-orb-halo"
+            style={{
+              position: "absolute",
+              inset: "-12%",
+              borderRadius: "50%",
+              background:
+                "radial-gradient(circle, rgb(166 230 255 / 20%) 0%, rgb(255 143 210 / 12%) 42%, rgb(169 131 255 / 0) 72%)",
+              pointerEvents: "none",
+            }}
+          />
+          <i
+            className="ics-orb-orbit"
+            style={{
+              position: "absolute",
+              inset: "-4%",
+              borderRadius: "50%",
+              border: "1px solid rgb(166 230 255 / 28%)",
+              boxShadow: "0 0 16px rgb(166 230 255 / 22%), inset 0 0 12px rgb(233 184 102 / 16%)",
+              pointerEvents: "none",
+            }}
+          />
           <i className="ics-orb-trail" />
           <img
             src={illusionculumOrb(side, ultra)}
@@ -44,7 +66,24 @@ export function IllusionculumOrbs({ ultra = false }: { ultra?: boolean }) {
             decoding="async"
             fetchPriority="low"
           />
-          <i className="ics-orb-core" />
+          <i
+            className="ics-orb-core"
+            style={{
+              background:
+                "radial-gradient(circle at 48% 46%, #ffffff 0%, rgb(230 248 255 / 85%) 22%, rgb(166 230 255 / 45%) 48%, rgb(169 131 255 / 0) 72%)",
+              boxShadow: "0 0 18px rgb(166 230 255 / 65%)",
+            }}
+          />
+          <i
+            className="ics-orb-corona"
+            style={{
+              position: "absolute",
+              inset: "24%",
+              borderRadius: "50%",
+              border: "1px dashed rgb(255 225 163 / 48%)",
+              pointerEvents: "none",
+            }}
+          />
         </span>
       ))}
     </span>
@@ -54,6 +93,7 @@ export function IllusionculumOrbs({ ultra = false }: { ultra?: boolean }) {
 const CUTOUT = illusionculumCutout("standard", 480);
 
 const PROJECTION_TICKS = Array.from({ length: 23 }, (_, idx) => 60 + idx * 40);
+const PROJECTION_SUBTICKS = Array.from({ length: 45 }, (_, idx) => 60 + idx * 20);
 
 export function IllusionculumProjection() {
   return (
@@ -64,22 +104,66 @@ export function IllusionculumProjection() {
         <g className="ics-proj-grid">
           <path
             className="ics-proj-axis"
-            d="M44 280H956 M524 24L492 536 M588 24L556 536"
+            d="M44 280H956 M524 24L492 536 M588 24L556 536 M150 40V520 M842 40V520"
           />
           <path
             className="ics-proj-wave"
-            d="M84 146A210 210 0 0 1 84 434 M168 112A260 260 0 0 1 168 468 M258 88A310 310 0 0 1 258 492 M716 98A240 240 0 0 0 716 462 M658 134A190 190 0 0 0 658 426"
+            d="M84 146A210 210 0 0 1 84 434 M168 112A260 260 0 0 1 168 468 M258 88A310 310 0 0 1 258 492 M348 72A360 360 0 0 1 348 508 M716 98A240 240 0 0 0 716 462 M658 134A190 190 0 0 0 658 426 M600 170A140 140 0 0 0 600 390"
           />
+          {/* Shear plane prism boundary & 4-corner optical caliper brackets */}
           <path
             className="ics-proj-shear"
-            d="M524 24L588 24L556 536L492 536Z M508 112H574 M503 200H569 M498 288H564 M493 376H559 M488 464H554"
+            d="M524 24L588 24L556 536L492 536Z M508 112H574 M503 200H569 M498 288H564 M493 376H559 M488 464H554 M36 34H18V16 M964 34H982V16 M36 526H18V544 M964 526H982V544"
           />
           <path
             className="ics-proj-ticks"
-            d={PROJECTION_TICKS.map((x, idx) => {
-              const len = idx % 3 === 0 ? 11 : 5;
-              return `M${x} 16v${len}M${x} ${544 - len}v${len}`;
-            }).join("")}
+            d={
+              PROJECTION_TICKS.map((x, idx) => {
+                const len = idx % 3 === 0 ? 11 : 5;
+                return `M${x} 16v${len}M${x} ${544 - len}v${len}`;
+              }).join("") +
+              PROJECTION_SUBTICKS.map((x) => `M${x} 16v2.5M${x} 541.5v2.5`).join("")
+            }
+          />
+        </g>
+
+        {/* Optical caustics sub-layer */}
+        <g className="ics-proj-caustics">
+          <path
+            className="ics-proj-ray is-cyan"
+            opacity="0.32"
+            strokeWidth="0.8"
+            d="M148 244 C 274 162, 410 150, 512 194 L 576 172 C 640 154, 694 176, 746 212 L 894 196"
+          />
+          <path
+            className="ics-proj-ray is-magenta"
+            opacity="0.3"
+            strokeWidth="0.8"
+            d="M152 254 C 284 180, 418 170, 515 208 L 579 188 C 646 172, 700 190, 750 216 L 898 206"
+          />
+          <path
+            className="ics-proj-ray is-gold"
+            opacity="0.32"
+            strokeWidth="0.8"
+            d="M298 288 C 380 230, 450 216, 512 228 L 576 204 C 640 186, 698 198, 750 216 L 844 270"
+          />
+          <path
+            className="ics-proj-ray is-cyan"
+            opacity="0.32"
+            strokeWidth="0.8"
+            d="M294 292 C 382 356, 444 374, 498 354 L 562 372 C 630 390, 694 370, 754 336 L 900 358"
+          />
+          <path
+            className="ics-proj-ray is-magenta"
+            opacity="0.3"
+            strokeWidth="0.8"
+            d="M438 334 C 470 386, 490 400, 500 384 L 564 400 C 636 418, 702 390, 758 340 L 904 370"
+          />
+          <path
+            className="ics-proj-ray is-gold"
+            opacity="0.32"
+            strokeWidth="0.8"
+            d="M438 326 C 470 352, 490 362, 503 346 L 567 360 C 638 376, 700 360, 758 340 L 844 270"
           />
         </g>
 

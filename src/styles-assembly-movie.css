@@ -155,25 +155,35 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   background-image:
     linear-gradient(
       90deg,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 52%),
-      rgb(var(--mc-lit-rgb, 242 216 150) / 44%) 46%,
-      transparent 92%
+      rgb(var(--mc-accent-rgb, 121 232 255) / 68%),
+      rgb(var(--mc-lit-rgb, 242 216 150) / 56%) 46%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 24%) 78%,
+      transparent 96%
     ),
     radial-gradient(
       ellipse 78% 58% at 14% 0%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 11%),
+      rgb(var(--mc-accent-rgb, 121 232 255) / 14%),
       transparent 68%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 42%);
+    radial-gradient(
+      ellipse 56% 44% at 88% 100%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 8%),
+      transparent 70%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 7%), transparent 38%, rgb(0 0 0 / 28%));
   background-repeat: no-repeat;
   background-size:
     100% 1px,
     100% 100%,
+    100% 100%,
     100% 100%;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    inset 0 -1px 0 rgb(0 0 0 / 68%),
-    0 14px 34px -10px rgb(0 0 0 / 68%);
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 74%),
+    inset 1px 0 0 rgb(var(--mc-accent-rgb, 121 232 255) / 12%),
+    inset -1px 0 0 rgb(var(--mc-lit-rgb, 242 216 150) / 10%),
+    0 0 0 0.5px rgb(0 0 0 / 75%),
+    0 16px 38px -10px rgb(0 0 0 / 74%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
@@ -182,6 +192,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
 
 /* ---------------- The pill ---------------- */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
+  --mc-dial-angle: -16deg;
+  --mc-dial-ink: var(--mc-accent);
   position: absolute;
   left: calc(var(--mc-gutter) + var(--mc-safe-left));
   bottom: calc(14px + var(--mc-safe-bottom) + var(--mc-lift, 0px));
@@ -190,21 +202,35 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   height: var(--mc-pill);
   color: var(--mc-ink);
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 8%), transparent 48%, rgb(0 0 0 / 24%)),
+    linear-gradient(
+      90deg,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 42%) 18%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 48%) 62%,
+      transparent 92%
+    )
+      50% 0 / calc(100% - 22px) 1px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 11%), transparent 46%, rgb(0 0 0 / 32%)),
     radial-gradient(
-      ellipse 90% 90% at 18% 50%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 10%),
-      transparent 68%
+      ellipse 92% 96% at 18% 50%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 14%),
+      transparent 66%
+    ),
+    radial-gradient(
+      ellipse 72% 84% at 86% 50%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 9%),
+      transparent 70%
     ),
     var(--mc-bg);
   border: 1px solid var(--mc-line);
   border-radius: 999px;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    inset 0 -1px 0 rgb(0 0 0 / 58%),
-    0 10px 28px -6px rgb(0 0 0 / 58%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 9%),
+    0 0 0 0.5px rgb(0 0 0 / 72%),
+    0 12px 30px -6px rgb(0 0 0 / 64%);
+  -webkit-backdrop-filter: blur(16px) saturate(148%);
+  backdrop-filter: blur(16px) saturate(148%);
   transition:
     border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -215,11 +241,21 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-page
   .rzn-movie[data-state="playing"]
   .rzn-movie-pill {
-  border-color: rgb(var(--mc-accent-rgb, 121 232 255) / 56%);
+  border-color: rgb(var(--mc-accent-rgb, 121 232 255) / 64%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 20%),
-    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 14%),
-    0 10px 28px -6px rgb(0 0 0 / 62%);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 20%),
+    0 0 18px -4px rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
+    0 12px 30px -6px rgb(0 0 0 / 68%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="ended"]
+  .rzn-movie-pill {
+  border-color: rgb(var(--mc-lit-rgb, 242 216 150) / 52%);
 }
 
 /* 再生／一時停止, in its progress ring (--rzn-movie-p: the share played). */
@@ -239,8 +275,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
     var(--mc-track) 0
   );
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 12%),
-    0 1px 4px rgb(0 0 0 / 48%);
+    inset 0 0 0 1px rgb(255 255 255 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 1px 5px rgb(0 0 0 / 56%);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
@@ -251,24 +288,80 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini::before {
   content: "";
   position: absolute;
-  inset: 3px;
+  z-index: 0;
+  inset: 4px;
   border-radius: 50%;
   background:
     radial-gradient(
       circle at 34% 24%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 18%),
-      var(--mc-disc) 68%
+      rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
+      var(--mc-disc) 66%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    inset 0 -1px 2px rgb(0 0 0 / 72%),
-    0 0 0 1px rgb(0 0 0 / 45%);
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 -1px 2px rgb(0 0 0 / 78%),
+    0 0 0 1px rgb(0 0 0 / 52%);
+}
+
+/* Precision vector progress ring & 12-tick optical calibration bezel. */
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-ring {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-ring circle {
+  fill: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-ring-track {
+  stroke: rgb(255 255 255 / 14%);
+  stroke-width: 1.5;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-ring-ticks {
+  stroke: rgb(var(--mc-lit-rgb, 242 216 150) / 34%);
+  stroke-width: 1;
+  stroke-dasharray: 1.1 8.9;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-ring-arc {
+  stroke: var(--mc-accent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--rzn-movie-p, 0));
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 0 3px rgb(var(--mc-accent-rgb, 121 232 255) / 52%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie[data-state="ended"]
+  .rzn-movie-ring-arc {
+  stroke: var(--mc-lit);
+  filter: drop-shadow(0 0 4px rgb(var(--mc-lit-rgb, 242 216 150) / 55%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:is([data-state="loading"], [data-state="error"])
+  .rzn-movie-ring-arc {
+  opacity: 0;
 }
 
 /* The glyph: a play triangle, two bars while playing. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-mini::after {
   content: "";
   position: absolute;
+  z-index: 2;
   top: 50%;
   left: 50%;
   width: 0;
@@ -276,7 +369,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   border-style: solid;
   border-width: 6px 0 6px 10px;
   border-color: transparent transparent transparent currentcolor;
-  filter: drop-shadow(0 0 4px rgb(var(--mc-accent-rgb, 121 232 255) / 36%));
+  filter: drop-shadow(0 0 4px rgb(var(--mc-accent-rgb, 121 232 255) / 42%));
   transform: translate(-36%, -50%);
 }
 
@@ -440,11 +533,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   box-sizing: border-box;
   height: calc(var(--mc-pill) - 2px);
   margin: 0;
-  padding: 0 14px 0 9px;
+  padding: 0 13px 0 8px;
   border: 0;
   border-radius: 0 999px 999px 0;
   color: var(--mc-ink);
@@ -462,17 +555,93 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-toggle::before {
   content: "";
   position: absolute;
-  top: 26%;
-  bottom: 26%;
+  top: 22%;
+  bottom: 22%;
   left: 1px;
   width: 1px;
   background: linear-gradient(
     180deg,
     transparent,
-    rgb(255 255 255 / 20%) 50%,
+    rgb(255 255 255 / 26%) 50%,
     transparent
   );
   pointer-events: none;
+}
+
+/* Miniature optical speed-dial gauge inside the pill toggle: its needle
+   rotates to the active radio notch (0.5× … 2×) and shifts to lit gold on
+   overdrive speeds. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:has([role="radio"][data-speed="0.5"][aria-checked="true"])
+  .rzn-movie-pill {
+  --mc-dial-angle: -54deg;
+  --mc-dial-ink: var(--mc-accent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:has([role="radio"][data-speed="1"][aria-checked="true"])
+  .rzn-movie-pill {
+  --mc-dial-angle: -16deg;
+  --mc-dial-ink: var(--mc-accent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:has([role="radio"][data-speed="1.5"][aria-checked="true"])
+  .rzn-movie-pill {
+  --mc-dial-angle: 24deg;
+  --mc-dial-ink: var(--mc-lit);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie:has([role="radio"][data-speed="2"][aria-checked="true"])
+  .rzn-movie-pill {
+  --mc-dial-angle: 64deg;
+  --mc-dial-ink: var(--mc-lit);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-dial {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--mc-accent-rgb, 121 232 255) / 36%);
+  border-bottom-color: rgb(255 255 255 / 10%);
+  background: radial-gradient(
+    circle at 50% 62%,
+    rgb(var(--mc-accent-rgb, 121 232 255) / 16%),
+    var(--mc-disc) 72%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 1px 2px rgb(0 0 0 / 55%);
+  pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-dial::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 1.5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--mc-dial-ink, var(--mc-accent));
+  box-shadow: 0 0 4px var(--mc-dial-ink, var(--mc-accent));
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotate(var(--mc-dial-angle, -16deg));
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease;
 }
 
 html[data-family="special"]
@@ -482,8 +651,8 @@ html[data-family="special"]
   .rzn-movie-toggle {
   background: linear-gradient(
     90deg,
-    rgb(var(--mc-accent-rgb, 121 232 255) / 13%),
-    rgb(var(--mc-lit-rgb, 242 216 150) / 8%)
+    rgb(var(--mc-accent-rgb, 121 232 255) / 16%),
+    rgb(var(--mc-lit-rgb, 242 216 150) / 10%)
   );
 }
 
@@ -516,6 +685,7 @@ html[data-family="special"]
    bevels on the sheet's buttons and slider thumb across every HUD skin. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row > button,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-speeds > button {
+  position: relative;
   transition:
     background-color 160ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 160ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -524,25 +694,44 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
     transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page
+  .rzn-movie
+  .rzn-movie-speeds
+  > button[aria-checked="true"]::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 8px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: var(--mc-lit);
+  box-shadow: 0 0 6px rgb(var(--mc-lit-rgb, 242 216 150) / 70%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-seek {
   position: relative;
   padding-bottom: 4px;
   background-image:
     linear-gradient(
       90deg,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 55%) 0 1px,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 62%) 0 1px,
       transparent 1px 25%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 42%) 25% calc(25% + 1px),
+      rgb(var(--mc-accent-rgb, 121 232 255) / 48%) 25% calc(25% + 1px),
       transparent calc(25% + 1px) 50%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 55%) 50% calc(50% + 1px),
+      rgb(var(--mc-lit-rgb, 242 216 150) / 62%) 50% calc(50% + 1px),
       transparent calc(50% + 1px) 75%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 42%) 75% calc(75% + 1px),
+      rgb(var(--mc-accent-rgb, 121 232 255) / 48%) 75% calc(75% + 1px),
       transparent calc(75% + 1px) calc(100% - 1px),
-      rgb(var(--mc-lit-rgb, 242 216 150) / 55%) calc(100% - 1px) 100%
+      rgb(var(--mc-lit-rgb, 242 216 150) / 62%) calc(100% - 1px) 100%
     ),
     repeating-linear-gradient(
       90deg,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 20%) 0 1px,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 24%) 0 1px,
       transparent 1px 5%
     );
   background-repeat: no-repeat, no-repeat;
@@ -560,7 +749,7 @@ html[data-family="special"]
   .rzn-movie
   .rzn-movie-seek
   > input::-webkit-slider-runnable-track {
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
 html[data-family="special"]
@@ -569,7 +758,7 @@ html[data-family="special"]
   .rzn-movie
   .rzn-movie-seek
   > input::-moz-range-track {
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
 html[data-family="special"]
@@ -579,9 +768,9 @@ html[data-family="special"]
   .rzn-movie-seek
   > input::-webkit-slider-thumb {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 48%),
-    0 0 0 2px rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
-    0 2px 6px rgb(0 0 0 / 55%);
+    inset 0 1px 0 rgb(255 255 255 / 56%),
+    0 0 0 2px rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
+    0 2px 7px rgb(0 0 0 / 60%);
 }
 
 html[data-family="special"]
@@ -591,14 +780,18 @@ html[data-family="special"]
   .rzn-movie-seek
   > input::-moz-range-thumb {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 48%),
-    0 0 0 2px rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
-    0 2px 6px rgb(0 0 0 / 55%);
+    inset 0 1px 0 rgb(255 255 255 / 56%),
+    0 0 0 2px rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
+    0 2px 7px rgb(0 0 0 / 60%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie :is(button, input):focus-visible {
   outline: 2px solid var(--mc-lit);
   outline-offset: 3px;
+  box-shadow:
+    0 0 0 1px rgb(2 6 12 / 90%),
+    0 0 0 5px rgb(var(--mc-lit-rgb, 242 216 150) / 26%),
+    0 0 14px rgb(var(--mc-accent-rgb, 121 232 255) / 32%);
 }
 
 @media (hover: hover) and (pointer: fine) {

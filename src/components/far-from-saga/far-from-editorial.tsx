@@ -40,10 +40,12 @@ export function FarFromHeroRail() {
   return (
     <div className="ffs-hero-rail">
       <a className="ffs-hero-primary" href="#suitup">
+        <span className="ffs-rail-optic" aria-hidden="true" />
         <span>変身を体験</span>
         <i aria-hidden="true">↘</i>
       </a>
       <a className="ffs-hero-secondary" href="#stages">
+        <span className="ffs-rail-optic" aria-hidden="true" />
         <span>五つの形態を見る</span>
         <i aria-hidden="true">↗</i>
       </a>
@@ -81,6 +83,8 @@ export function FarFromAperture() {
       <g className="ffs-aperture-graduations">
         <path d="M360 34v18m0 696v18M34 400h18m616 0h18" />
         <path d="M186 762h348m-300 8h252m-196 8h140" />
+        <circle cx="360" cy="400" r="306" strokeDasharray="2 12" />
+        <circle cx="360" cy="400" r="250" strokeDasharray="1 8" />
       </g>
     </svg>
   );

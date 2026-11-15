@@ -6,6 +6,9 @@
   --programme-red: #d83a43;
   --programme-muted: #adb2bc;
   --programme-rule: rgb(242 238 229 / 23%);
+  --programme-surface: #12161d;
+  --programme-rim: rgb(242 238 229 / 32%);
+  --programme-specular: rgb(255 255 255 / 16%);
   background: var(--programme-ink);
 }
 
@@ -16,26 +19,30 @@
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
 .site-shell.film-edition .brand-sigil {
   border-color: var(--programme-red);
   color: #ff8088;
   box-shadow: none;
   background: transparent;
 }
+
 .site-shell.film-edition .topbar nav a {
   color: #d6d6d8;
   letter-spacing: 0.1em;
 }
+
 .site-shell.film-edition .topbar nav a[aria-current="location"] {
   color: #fff;
   box-shadow: inset 0 -2px var(--programme-red);
 }
+
 .site-shell.film-edition .topbar .side-panel-trigger {
   color: var(--programme-paper);
   border-color: var(--programme-rule);
   border-radius: 2px;
   background: #171a20;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 var(--programme-specular);
 }
 
 .site-shell.film-edition > .hero {
@@ -54,14 +61,17 @@
   background: #090b0f;
   border-bottom: 1px solid var(--programme-rule);
 }
+
 .site-shell.film-edition .hero::before,
 .site-shell.film-edition .hero::after {
   content: none;
 }
+
 .site-shell.film-edition .hero-backdrop {
   opacity: 0.045;
   pointer-events: none;
 }
+
 .site-shell.film-edition .film-hero-identity {
   align-self: start;
   align-items: flex-end;
@@ -69,24 +79,28 @@
   padding: 0 0 24px;
   border-bottom: 1px solid var(--programme-rule);
 }
+
 .site-shell.film-edition .film-hero-identity::after {
   left: 0;
   bottom: -1px;
-  width: 96px;
+  width: 108px;
   height: 3px;
   background: var(--programme-red);
 }
+
 .site-shell.film-edition .film-hero-identity .anime-work-title {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+
 .site-shell.film-edition .film-hero-identity .anime-work-title span {
   color: #c8c6c1;
   font-size: 13px;
   letter-spacing: 0.12em;
   line-height: 1.7;
 }
+
 .site-shell.film-edition .film-hero-identity .anime-work-title b {
   font-family: Impact, "Arial Narrow", "Oxanium", sans-serif;
   font-weight: 400;
@@ -99,6 +113,7 @@
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
+
 /* On short laptop screens a width-only size pushes ENTER THE WORLD below the
    fold and half-hides the key visual. The height cap still keeps the two-line
    lockup at 1280x800 and 1440x900. */
@@ -107,90 +122,116 @@
     font-size: clamp(64px, min(11vw, 15svh), 168px);
   }
 }
+
 .site-shell.film-edition .hero-copy {
   align-self: end;
-  padding-left: clamp(16px, 2vw, 28px);
+  padding-left: clamp(18px, 2.2vw, 30px);
   border-left: 2px solid var(--programme-red);
 }
+
 .site-shell.film-edition .hero h1 {
-  margin: 0 0 24px;
+  margin: 0 0 22px;
 }
+
 .site-shell.film-edition .hero h1 :is(span, strong) {
   color: var(--programme-paper);
   -webkit-text-fill-color: currentColor;
   font-size: clamp(30px, 3.3vw, 52px);
   font-weight: 700;
-  line-height: 1.5;
+  line-height: 1.48;
   letter-spacing: 0.015em;
   background: none;
   text-shadow: none;
 }
+
 .site-shell.film-edition .hero-lead {
-  color: #c6c5c3;
+  max-width: 40rem;
+  color: #cccbc8;
   font-size: 15px;
-  line-height: 2;
+  line-height: 2.02;
 }
+
 .site-shell.film-edition .hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
   margin-top: 28px;
 }
+
 .site-shell.film-edition .hero .primary-action {
   min-height: 56px;
-  padding: 16px 24px;
+  padding: 16px 26px;
   /* The shared frosted-control baseline is important. Override only this
      entry action, including its pressed state, rather than every glass UI. */
   background: #ac2632 !important;
   color: #fff;
   border: 1px solid #f36b72;
   border-radius: 2px;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 26%);
   letter-spacing: 0.13em;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+
 .site-shell.film-edition .hero .primary-action > span {
   color: #fff;
 }
+
 .site-shell.film-edition .hero .text-action {
-  color: #d7d3cb;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: #dad6ce;
 }
 
 .site-shell.film-edition .poster-stage {
   --poster-width: min(100%, 360px);
   max-width: 460px;
-  gap: 12px;
+  gap: 14px;
   justify-self: end;
 }
+
 .site-shell.film-edition .poster-frame {
-  padding: 5px;
-  border: 1px solid #797c83;
+  padding: 6px;
+  border: 1px solid #828791;
   border-radius: 0;
   background: #0d0f14;
   box-shadow:
+    inset 0 1px 0 var(--programme-specular),
     8px 8px 0 #090b0f,
     9px 9px 0 #d83a4366;
 }
+
 .site-shell.film-edition .hero .poster-controls {
   width: var(--poster-width);
   max-width: 100%;
 }
+
 .site-shell.film-edition .poster-control-cluster {
   gap: 8px;
   background: transparent;
 }
+
 .site-shell.film-edition .poster-control-cluster > button {
   min-height: 48px;
-  background: #171a20;
+  background: var(--programme-surface);
   color: var(--programme-paper);
-  border: 1px solid #5c616c;
+  border: 1px solid #626875;
   border-radius: 2px;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
 }
+
 .site-shell.film-edition .poster-control-cluster > button > span[aria-hidden] {
   color: #ff8790;
 }
+
 .site-shell.film-edition .poster-controls output {
-  color: #b2b6bf;
+  color: #b7bcc6;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
+
 .site-shell.film-edition :is(.hero a, .hero button, .topbar a, .topbar button):focus-visible {
   outline: 2px solid #fff0b5;
   outline-offset: 4px;
@@ -299,5 +340,11 @@
   .site-shell.film-edition .poster-control-cluster > button:not(:disabled):hover {
     border-color: #ff8790;
     background: #242029;
+  }
+}
+
+@media (forced-colors: active) {
+  .site-shell.film-edition :is(.hero a, .hero button, .topbar a, .topbar button):focus-visible {
+    outline: 2px solid Highlight;
   }
 }

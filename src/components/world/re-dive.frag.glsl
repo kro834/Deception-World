@@ -65,8 +65,20 @@ vec3 ground(vec2 s, vec2 px, float aspect) {
   float gy = px.y - uGroundTop;
   float charTop = uEdge.y * uEdge.z;
   vec3 col = gy < 0.0 ? GATE : GROUND;
-  if (gy >= charTop) col = texture2D(uChar, fract(vec2(px.x, gy - charTop) / uCharTile)).rgb;
-  vec2 e = vec2(px.x / uEdge.x, gy / uEdge.y);
+
+  // Horizon atmospheric amber afterglow fog decaying into the gate floor above
+  if (gy < 0.0) {
+    float fog = exp(gy / 52.0);
+    col += vec3(0.065, 0.22, 0.075) * fog * 0.38;
+  }
+
+  // Horizon heat shimmer: hot air wavering along the burning horizon
+  float shimmer = sin(px.y * 0.055 + uTime * 4.2) * cos(px.x * 0.038 + uTime * 2.9);
+  float shimmerMask = exp(-abs(gy) / 70.0);
+  vec2 shimmerPx = px + vec2(shimmer * 2.0 * shimmerMask, 0.0);
+
+  if (gy >= charTop) col = texture2D(uChar, fract(vec2(shimmerPx.x, gy - charTop) / uCharTile)).rgb;
+  vec2 e = vec2(shimmerPx.x / uEdge.x, gy / uEdge.y);
   if (e.y >= 0.0 && e.y <= 1.0) {
     vec4 edge = texture2D(uEdgeTex, e);
     col = col * (1.0 - edge.a) + edge.rgb;
@@ -74,6 +86,8 @@ vec3 ground(vec2 s, vec2 px, float aspect) {
   if (gy >= 0.0) {
     vec2 d = vec2((s.x - 0.5) * aspect / 1.57, gy / uRes.y / 0.55);
     col = mix(col, vec3(0.045, 0.3024, 0.0425), 0.144 * max(0.0, 1.0 - length(d)));
+    float groundHaze = exp(-gy / (uRes.y * 0.32));
+    col += vec3(0.022, 0.082, 0.032) * groundHaze * 0.22;
   }
   return col;
 }

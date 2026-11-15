@@ -123,15 +123,18 @@ void main() {
 
   // ---- The lens: as the camera starts to move, the logo's highlights
   // stretch into anamorphic ice streaks (gone before the tunnel).
+  // Enhanced with dual-diffraction rays: ice core and subtle forest rim.
   if (uWorld < 0.5 && uDive > 0.001) {
     float ana = smoothstep(0.02, 0.22, uDive) * (1.0 - smoothstep(0.5, 0.85, uDive));
     if (ana > 0.001 && iris < 0.999) {
       vec2 dx = vec2(0.016, 0.0);
-      vec3 acc = max(titleScene(sl + dx, sa, aspect) - 0.62, 0.0) * 0.5
-               + max(titleScene(sl - dx, sa, aspect) - 0.62, 0.0) * 0.5
-               + max(titleScene(sl + dx * 2.0, sa, aspect) - 0.62, 0.0) * 0.3
-               + max(titleScene(sl - dx * 2.0, sa, aspect) - 0.62, 0.0) * 0.3;
-      col += acc * vec3(0.5, 0.88, 1.0) * ana * 0.6;
+      vec3 accNear = max(titleScene(sl + dx, sa, aspect) - 0.62, 0.0) * 0.5
+                   + max(titleScene(sl - dx, sa, aspect) - 0.62, 0.0) * 0.5;
+      vec3 accFar = max(titleScene(sl + dx * 2.2, sa, aspect) - 0.62, 0.0) * 0.32
+                  + max(titleScene(sl - dx * 2.2, sa, aspect) - 0.62, 0.0) * 0.32;
+      vec3 streakIce = (accNear + accFar * 0.6) * vec3(0.5, 0.88, 1.0);
+      vec3 streakForest = accFar * FOREST * 0.52;
+      col += (streakIce + streakForest) * ana * 0.65;
     }
   }
 
@@ -139,7 +142,7 @@ void main() {
   col *= mix(vec3(1.0), vec3(0.82, 0.97, 1.08), uIce);
 
   // ---- The tunnel and the light trails: near trails are long, fast and
-  // bright, far ones short and dim, so the speed has depth.
+  // bright, far ones short and dim, with micro stardust streaming in depth.
   if (uDive > 0.001) {
     float ang = atan(p.y, p.x) / 6.2831853 + 0.5;
     float len = mix(0.22, 0.78, uDive);
@@ -147,6 +150,8 @@ void main() {
     float near = trail(ang, r, 110.0, 1.7, 1.5 + uDive * 2.8, 0.5, len) * smoothstep(0.08, 0.55, r);
     float far = trail(ang, r, 54.0, 4.3, 0.6 + uDive * 1.1, 0.62, len * 0.6)
               * smoothstep(0.02, 0.24, r) * fall(0.95, 0.3, r);
+    float micro = trail(ang, r, 220.0, 8.9, 2.4 + uDive * 3.6, 0.36, len * 0.38)
+                * smoothstep(0.12, 0.68, r);
     // Deep in the ring the title falls dark (the tunnel), so the magnified
     // glyphs never flare; only the trails carry the speed.
     // The world arriving through it is held a little darker too, so the
@@ -155,12 +160,13 @@ void main() {
     col *= dim * mix(1.0, fall(1.2, 0.18, r), uDive * 0.7 * (1.0 - iris));
     vec3 nearCol = mix(vec3(0.82, 0.97, 1.0), ICE, smoothstep(0.3, 0.9, r));
     vec3 farCol = mix(ICE, FOREST, 0.45);
-    col += (nearCol * near * 0.95 + farCol * far * 0.5) * gate;
+    col += (nearCol * near * 0.95 + farCol * far * 0.5 + vec3(0.92, 0.98, 1.0) * micro * 0.45) * gate;
   }
 
   // ---- The ring's rim as the iris opens: ice, split red out and blue in.
   if (rim > 0.001) {
-    col += vec3(0.7, 0.95, 1.0) * rim * 0.55 + vec3(0.18, -0.04, -0.1) * rim * uChroma;
+    vec3 rimDispersion = mix(vec3(0.7, 0.95, 1.0), vec3(0.98, 0.78, 0.52), uChroma * 0.45);
+    col += rimDispersion * rim * 0.55 + vec3(0.18, -0.04, -0.1) * rim * uChroma;
   }
 
   // ---- Breakthrough: one slow forest-green swell at the mouth of the tunnel,
@@ -171,15 +177,16 @@ void main() {
   // ---- Landing: the World page's hero (key visual at half strength on dark
   // blue, a scrim heavy on the left and at the bottom). The grade is read
   // where the landing canvas will show it, so the compositor's settle after
-  // glEnd continues this picture exactly.
+  // glEnd continues this picture exactly. Silky scrim interpolation.
   if (uLand > 0.001) {
     vec2 g = vec2(0.5) + (uv - 0.5) * uWorldZoom;
     vec3 hud = mix(vec3(0.063, 0.106, 0.161), vec3(0.027, 0.047, 0.078), clamp((g.x + (1.0 - g.y)) * 0.6, 0.0, 1.0));
     vec3 hero = mix(hud, col, 0.5);
-    float scrimX = g.x < 0.34 ? mix(0.96, 0.84, g.x / 0.34)
-                 : g.x < 0.66 ? mix(0.84, 0.26, (g.x - 0.34) / 0.32)
-                 : mix(0.26, 0.58, (g.x - 0.66) / 0.34);
-    hero = mix(hero, INK, clamp(scrimX, 0.0, 1.0));
+    float rawScrimX = g.x < 0.34 ? mix(0.96, 0.84, g.x / 0.34)
+                    : g.x < 0.66 ? mix(0.84, 0.26, (g.x - 0.34) / 0.32)
+                    : mix(0.26, 0.58, (g.x - 0.66) / 0.34);
+    float scrimX = smoothstep(0.0, 1.0, clamp(rawScrimX, 0.0, 1.0));
+    hero = mix(hero, INK, scrimX);
     hero = mix(hero, INK, fall(0.34, 0.0, g.y));
     hero = mix(hero, INK, smoothstep(0.66, 1.0, g.y) * 0.48);
     col = mix(col, hero, uLand);

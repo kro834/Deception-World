@@ -25,19 +25,19 @@ html body .load-gate.has-cine {
   --dwc-close: 320ms;
   --dwc-prism: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--dwc-accent) 76%, #7ae8ff) 0%,
-    #bcefff 22%,
+    color-mix(in srgb, var(--dwc-accent) 78%, #7ae8ff) 0%,
+    #d4f6ff 22%,
     color-mix(in srgb, var(--dwc-accent) 52%, var(--dwc-gold)) 50%,
-    #f7e2b0 78%,
-    color-mix(in srgb, var(--dwc-gold) 80%, #f0cf86) 100%
+    #fae6b6 78%,
+    color-mix(in srgb, var(--dwc-gold) 82%, #f0cf86) 100%
   );
   --dwc-prism-v: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--dwc-accent) 76%, #7ae8ff) 0%,
-    #bcefff 22%,
+    color-mix(in srgb, var(--dwc-accent) 78%, #7ae8ff) 0%,
+    #d4f6ff 22%,
     color-mix(in srgb, var(--dwc-accent) 52%, var(--dwc-gold)) 50%,
-    #f7e2b0 78%,
-    color-mix(in srgb, var(--dwc-gold) 80%, #f0cf86) 100%
+    #fae6b6 78%,
+    color-mix(in srgb, var(--dwc-gold) 82%, #f0cf86) 100%
   );
   background: transparent;
 }
@@ -168,8 +168,9 @@ html body .load-gate.has-cine > .dwc-shutter > i::after {
   content: "";
   opacity: 0;
   box-shadow:
-    0 0 12px color-mix(in srgb, var(--dwc-accent) 46%, transparent),
-    0 0 4px color-mix(in srgb, var(--dwc-gold) 36%, transparent);
+    0 0 2px color-mix(in srgb, var(--dwc-lock) 68%, transparent),
+    0 0 14px color-mix(in srgb, var(--dwc-accent) 52%, transparent),
+    0 0 5px color-mix(in srgb, var(--dwc-gold) 42%, transparent);
 }
 
 html body .load-gate.has-cine > .dwc-shutter > i.is-left::after,
@@ -247,22 +248,22 @@ html body .load-gate.has-cine > .dwc-carry::before {
   background:
     linear-gradient(
       118deg,
-      transparent 11%,
-      color-mix(in srgb, var(--dwc-accent) 4%, transparent) 29%,
-      color-mix(in srgb, var(--dwc-accent) 22%, rgb(169 220 234 / 0.16)) 31.5%,
-      color-mix(in srgb, var(--dwc-gold) 12%, transparent) 33.5%,
+      transparent 10%,
+      color-mix(in srgb, var(--dwc-accent) 5%, transparent) 28.5%,
+      color-mix(in srgb, var(--dwc-accent) 26%, rgb(176 228 242 / 0.2)) 31.2%,
+      color-mix(in srgb, var(--dwc-gold) 15%, transparent) 33.8%,
       transparent 54%
     ),
     radial-gradient(
-      80% 42% at 50% 0%,
-      color-mix(in srgb, var(--dwc-accent) 14%, transparent),
+      82% 44% at 50% 0%,
+      color-mix(in srgb, var(--dwc-accent) 18%, transparent),
       transparent 72%
     );
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--dwc-accent) 42%, transparent),
-    inset 1px 1px 0 color-mix(in srgb, var(--dwc-lock) 44%, transparent),
-    inset -2px -2px 0 rgb(1 5 12 / 0.76),
-    inset 0 -28px 34px rgb(1 5 12 / 0.24);
+    inset 0 0 0 1px color-mix(in srgb, var(--dwc-accent) 48%, transparent),
+    inset 1px 1px 0 color-mix(in srgb, var(--dwc-lock) 54%, transparent),
+    inset -2px -2px 0 rgb(1 5 12 / 0.8),
+    inset 0 -28px 34px rgb(1 5 12 / 0.26);
   opacity: 1;
 }
 
@@ -660,7 +661,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     .load-gate.has-cine.is-cine-iris.is-covering
     > .dwc-shutter
     > i {
-    animation: var(--dwc-close) cubic-bezier(0.26, 0.74, 0.18, 1) both;
+    animation: var(--dwc-close) cubic-bezier(0.22, 0.82, 0.16, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -700,7 +701,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     .load-gate.has-cine.is-cine-iris.is-covering
     > .dwc-shutter
     > i::after {
-    animation: dwc-rim-close var(--dwc-close) linear both;
+    animation: dwc-rim-close var(--dwc-close) cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   /* PREV / NEXT: the next file slides in from the side that was pressed. */
@@ -708,7 +709,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     body
     .load-gate.has-cine.is-cine-flip.is-covering
     > .dwc-shutter {
-    animation: dwc-flip-in 300ms cubic-bezier(0.25, 0.6, 0.2, 1) both;
+    animation: dwc-flip-in 300ms cubic-bezier(0.22, 0.72, 0.16, 1) both;
   }
 
   /* Open: the portrait frame first (42 %), then the rest of the page. */
@@ -717,7 +718,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     .load-gate.has-cine.is-cine-full.is-revealing
     > .dwc-shutter
     > i {
-    animation: var(--dwc-reveal) cubic-bezier(0.42, 0, 0.18, 1) both;
+    animation: var(--dwc-reveal) cubic-bezier(0.38, 0, 0.14, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -757,7 +758,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     .load-gate.has-cine.is-cine-full.is-revealing
     > .dwc-shutter
     > i::after {
-    animation: dwc-rim-open var(--dwc-reveal) linear both;
+    animation: dwc-rim-open var(--dwc-reveal) cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   /* A cut-in's own exit opens the page; the ink under it just lets go. */
@@ -782,7 +783,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     body
     .load-gate.has-cine.is-cine-iris.is-covering
     > .dwc-carry {
-    animation: dwc-carry-lift var(--dwc-close) cubic-bezier(0.38, 0, 0.12, 1) both;
+    animation: dwc-carry-lift var(--dwc-close) cubic-bezier(0.34, 0, 0.1, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -796,14 +797,14 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     body
     .load-gate.has-cine.is-cine-flip.is-covering
     > .dwc-carry {
-    animation: dwc-carry-slide 300ms cubic-bezier(0.3, 0.6, 0.1, 1) both;
+    animation: dwc-carry-slide 300ms cubic-bezier(0.24, 0.72, 0.14, 1) both;
   }
 
   html:not([data-world-effects="economy"])
     body
     .load-gate.has-cine.is-cine-full.is-revealing
     > .dwc-carry {
-    animation: dwc-carry-land var(--dwc-reveal) cubic-bezier(0.3, 0.6, 0.2, 1) both;
+    animation: dwc-carry-land var(--dwc-reveal) cubic-bezier(0.26, 0.68, 0.18, 1) both;
   }
 
   /* With the portrait measured, the file docks on it instead: one uniform
@@ -814,7 +815,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     body
     .load-gate.has-cine.is-cine-full.has-dock.is-revealing
     > .dwc-carry {
-    animation: dwc-carry-dock 230ms cubic-bezier(0.18, 0.86, 0.2, 1) both;
+    animation: dwc-carry-dock 230ms cubic-bezier(0.16, 0.88, 0.2, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -831,7 +832,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     .load-gate.has-cine.is-cine-iris.is-covering
     > .dwc-lock
     > i {
-    animation: var(--dwc-close) cubic-bezier(0.42, 0, 0.12, 1) both;
+    animation: var(--dwc-close) cubic-bezier(0.36, 0, 0.1, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -870,7 +871,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     body
     .load-gate.has-cine.is-cine-flip.is-covering
     > .dwc-lock {
-    animation: dwc-carry-slide 300ms cubic-bezier(0.3, 0.6, 0.1, 1) both;
+    animation: dwc-carry-slide 300ms cubic-bezier(0.24, 0.72, 0.14, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -878,7 +879,7 @@ html body .load-gate.has-cine.is-cine-flip .rider-cutin-caption {
     .load-gate.has-cine.is-cine-full.is-revealing
     > .dwc-lock
     > i {
-    animation: var(--dwc-reveal) cubic-bezier(0.3, 0.6, 0.2, 1) both;
+    animation: var(--dwc-reveal) cubic-bezier(0.26, 0.68, 0.18, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -1812,9 +1813,12 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
 }
 
 @keyframes dwc-rim-close {
-  from,
-  50% {
-    opacity: 0.9;
+  from {
+    opacity: 0.72;
+  }
+  28%,
+  54% {
+    opacity: 0.96;
   }
   to {
     opacity: 0;
@@ -1825,9 +1829,9 @@ html body .load-gate.has-cine:is(.is-cine-calm, .is-cine-reduced) .rider-cutin-c
   from {
     opacity: 0;
   }
-  14%,
-  60% {
-    opacity: 0.9;
+  12%,
+  62% {
+    opacity: 0.95;
   }
   to {
     opacity: 0;

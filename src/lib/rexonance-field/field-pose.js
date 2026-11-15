@@ -209,7 +209,7 @@ fieldFragment.birth = new Float64Array(5);
 /** An impulse's fling by its age: a quick throw that settles. */
 export function fieldFling(age) {
   if (!(age > 0) || age >= 1) return 0;
-  return age * Math.exp(-4 * age) * 4 * (1 - age);
+  return age * Math.exp(-4.2 * age) * 4.5 * (1 - age * age);
 }
 
 /**

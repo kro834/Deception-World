@@ -32,6 +32,7 @@ function DownloadPage() {
     <main
       className="export-page command-support-download dg-focus-scope"
       aria-labelledby="export-heading"
+      data-chassis="titanium-calibration"
     >
       <span className="export-page-sigil" aria-hidden="true">
         <i>DW</i>

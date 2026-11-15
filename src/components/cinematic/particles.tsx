@@ -402,16 +402,24 @@ export function Particles({
         } else {
           alpha = p.a * (0.78 + 0.22 * Math.sin(p.phase * 1.4));
         }
-        // Motion blur: the streak of this step, brighter and longer with speed.
+        // Comet-like velocity stretch: elongated tail fading along the motion vector.
         const dx = p.x - p.px;
         const dy = p.y - p.py;
         const speed = Math.hypot(dx, dy);
         if (glow && speed > 0.8) {
-          const tail = Math.min(2.4, 1 + speed * 0.25);
-          ctx.strokeStyle = `rgba(${rgb}, ${(alpha * 0.55).toFixed(3)})`;
-          ctx.lineWidth = Math.max(0.6, p.r * 0.95);
+          const tail = Math.min(3.2, 1 + speed * 0.35);
+          // Soft outer comet tail
+          ctx.strokeStyle = `rgba(${rgb}, ${(alpha * 0.42).toFixed(3)})`;
+          ctx.lineWidth = Math.max(0.5, p.r * 1.3);
           ctx.beginPath();
           ctx.moveTo(p.x - dx * tail, p.y - dy * tail);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+          // Bright concentrated comet core
+          ctx.strokeStyle = `rgba(255, 255, 255, ${(alpha * 0.72).toFixed(3)})`;
+          ctx.lineWidth = Math.max(0.4, p.r * 0.65);
+          ctx.beginPath();
+          ctx.moveTo(p.x - dx * (tail * 0.45), p.y - dy * (tail * 0.45));
           ctx.lineTo(p.x, p.y);
           ctx.stroke();
         }
@@ -426,8 +434,8 @@ export function Particles({
         ctx.arc(p.x, p.y, p.r * (gather ? 1.3 : 1), 0, Math.PI * 2);
         ctx.fill();
       }
-      // The lock: the logo's own light flashes once and a shockwave ring
-      // leaves the lockup.
+      // The lock: the logo's own light flashes once and a forest x ice shockwave
+      // ring bursts out from the lockup.
       if (flash && t >= LOCK.at - 0.03 && t < LOCK.waveEnd) {
         const { box, art } = flash;
         const u = clamp01((t - LOCK.at + 0.03) / (LOCK.waveEnd - LOCK.at + 0.03));
@@ -442,12 +450,21 @@ export function Particles({
         const reach = easeOutCubic(u);
         const rx = box.width * (0.42 + 0.75 * reach);
         const ry = box.height * (0.5 + 1.1 * reach);
+        // Primary Ice shockwave ring
         ctx.globalAlpha = (1 - u) ** 1.6 * 0.75;
         ctx.lineWidth = 1 + 5 * (1 - u);
         ctx.strokeStyle = "rgb(198 245 255)";
         ctx.beginPath();
         ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
         ctx.stroke();
+        // Concentric Forest green energy diffraction ring
+        ctx.lineWidth = Math.max(0.8, 2.5 * (1 - u));
+        ctx.strokeStyle = "rgb(34 139 34)";
+        ctx.globalAlpha = (1 - u) ** 1.8 * 0.68;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx * 0.96, ry * 0.96, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        // Inner Gold compression ring
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgb(240 207 134)";
         ctx.globalAlpha = (1 - u) ** 2 * 0.6;

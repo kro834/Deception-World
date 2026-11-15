@@ -11,8 +11,15 @@ export function RecoveryTiles() {
     .map((visit) => LIBRARY_ENTRIES.find((entry) => entry.id === visit.id))
     .find((entry) => entry && entry.path !== "/world");
   const tiles = [
-    { to: "/world", title: "ワールド", code: "WORLD", art: "/poster-card-03-delivery.webp" },
     {
+      slot: "01",
+      to: "/world",
+      title: "ワールド",
+      code: "WORLD",
+      art: "/poster-card-03-delivery.webp",
+    },
+    {
+      slot: "02",
       to: recent?.path ?? "/library",
       hash: recent?.hash,
       title: recent?.title ?? "資料室・しおり",
@@ -23,6 +30,7 @@ export function RecoveryTiles() {
         : "/rider-saga-rexonance-thumbnail-20260827-400.webp",
     },
     {
+      slot: "03",
       to: "/search",
       title: "全文検索",
       code: "SEARCH",
@@ -37,6 +45,7 @@ export function RecoveryTiles() {
           key={tile.code}
           to={tile.to}
           hash={tile.hash}
+          data-tile-code={tile.code}
           aria-label={tile.context ? `${tile.context}：${tile.title}` : undefined}
         >
           {tile.art ? (
@@ -48,6 +57,10 @@ export function RecoveryTiles() {
               alt=""
             />
           ) : null}
+          <span className="recovery-tile-plate" aria-hidden="true">
+            <i>SPEC-{tile.slot}</i>
+            <em>{tile.code}</em>
+          </span>
           <small>{tile.context ?? tile.code}</small>
           <b>{tile.title}</b>
         </Link>

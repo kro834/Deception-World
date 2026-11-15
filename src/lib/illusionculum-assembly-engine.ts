@@ -74,7 +74,7 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
   rings: ["rgb(166 230 255)", "rgb(169 131 255)", "rgb(233 184 102)"],
   reactorMotes: ["rgb(230 248 255)", "rgb(166 230 255)", "rgb(255 143 210)"],
   lightArms: ["rgb(166 230 255)", "rgb(255 143 210)"],
-  coreGlow: ["rgb(240 250 255 / 0.9)", "rgb(166 230 255 / 0.45)", "rgb(169 131 255 / 0)"],
+  coreGlow: ["rgb(244 252 255 / 0.95)", "rgb(166 230 255 / 0.5)", "rgb(169 131 255 / 0)"],
   field: {
     ice: [0.65, 0.9, 1],
     pink: [1, 0.56, 0.82],
@@ -99,10 +99,10 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
  * steel under ice light, hexagonal cells, pink droplets. */
 export const ILLUSIONCULUM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   steel: "rgb(24 22 40)",
-  steelAlpha: 0.84,
+  steelAlpha: 0.86,
   line: "rgb(166 230 255)",
-  glint: [232, 246, 255] as const,
-  motes: ["rgb(150 160 196)", "rgb(255 143 210)", "rgb(240 250 255)"] as const,
+  glint: [242, 250, 255] as const,
+  motes: ["rgb(160 172 210)", "rgb(255 143 210)", "rgb(240 250 255)"] as const,
   cell: 7,
   triangles: false,
 });

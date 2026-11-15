@@ -73,14 +73,19 @@ vec3 fireRamp(float h) {
 }
 
 // One layer of rising sparks on a hashed grid (sparse: one cell in five).
+// Micro aerodynamic draft and plasma scintillation for cinematic realism.
 float emberLayer(vec2 q, float t, float scale, float speed, float seed) {
   vec2 g = q * scale;
   g.y -= t * speed;
-  g.x += sin(g.y * 0.7 + seed + t * 0.8) * 0.3;
+  // Aerodynamic draft: micro lateral shear and rising turbulence
+  float draft = sin(g.y * 0.7 + seed + t * 0.8) * 0.3 + sin(g.y * 1.8 - t * 1.4 + seed * 2.1) * 0.08;
+  g.x += draft;
   vec2 id = floor(g);
   vec2 f = fract(g) - 0.5;
   float h = hash12(id + seed);
   vec2 o = (vec2(hash12(id + seed + 3.1), hash12(id + seed + 7.7)) - 0.5) * 0.6;
   float spark = fall(0.075, 0.0, length(f - o));
-  return spark * step(0.8, h) * (h - 0.8) * 5.0;
+  // Plasma micro-scintillation (high-frequency energy flicker)
+  float flicker = 0.82 + 0.36 * sin(t * 18.0 + seed * 13.7 + h * 6.28);
+  return spark * step(0.8, h) * (h - 0.8) * 5.0 * flicker;
 }

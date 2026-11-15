@@ -147,7 +147,7 @@
   grid-column: plate-start / plate-end;
   grid-row: plate-start / recovery-end;
   overflow: hidden;
-  border: 1px solid rgb(122 232 255 / 22%);
+  border: 1px solid rgb(122 232 255 / 26%);
   border-radius: 6px;
   background:
     linear-gradient(var(--lr-ice) 0 0) 0 0 / 22px 2px no-repeat,
@@ -168,8 +168,10 @@
     ),
     var(--lr-deck);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 40px 90px rgb(0 0 0 / 50%);
+    0 0 0 1px rgb(3 6 12 / 85%),
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 0 32px rgb(122 232 255 / 4%),
+    0 40px 100px rgb(0 0 0 / 60%);
   pointer-events: none;
 }
 
@@ -378,9 +380,11 @@
   border-radius: 0;
   color: #03141c;
   background:
-    linear-gradient(rgb(255 255 255 / 45%) 0 0) 0 0 / 100% 1px no-repeat,
-    linear-gradient(180deg, #9ff0ff, var(--lr-ice));
-  box-shadow: 0 0 28px rgb(122 232 255 / 22%);
+    linear-gradient(rgb(255 255 255 / 55%) 0 0) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #b2f3ff, var(--lr-ice));
+  box-shadow:
+    0 0 0 1px rgb(3 20 28 / 60%),
+    0 0 32px rgb(122 232 255 / 26%);
   font: 400 13px / 1.2 var(--lr-hud);
   letter-spacing: 0.12em;
   text-decoration: none;

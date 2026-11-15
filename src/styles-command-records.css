@@ -7,6 +7,8 @@ html[data-family="library"]
   --records-muted: #bacbd7;
   --records-ice: #9deafa;
   --records-gold: #f2cf8d;
+  --records-specular: rgb(233 246 251 / 44%);
+  --records-rim: rgb(157 234 250 / 36%);
   --records-panel: linear-gradient(135deg, #263b4c9c, #0d1c2be8 46%, #152b3a);
   --library-ink: var(--records-silver);
   --library-muted: var(--records-muted);
@@ -150,10 +152,10 @@ html[data-family="library"] .command-records.library-page.library-atelier .libra
   border: 1px solid #b7deed70;
   background: linear-gradient(135deg, #38536966, #07131eeb 45%, #172e3f);
   box-shadow:
-    inset 0 1px #edfbff40,
+    inset 0 1px var(--records-specular),
     9px 10px 0 #020912b3,
     10px 11px 0 #98cde333,
-    0 24px 50px #0005;
+    0 20px 46px #0005;
 }
 html[data-family="library"]
   .command-records.library-page.library-atelier
@@ -823,6 +825,7 @@ html[data-family="library"]
     :is(.search-result-card, .search-more-option):hover {
     border-color: #b9edff;
     box-shadow:
+      inset 0 1px 0 var(--records-specular),
       inset 3px 0 #9deafa,
       5px 6px 0 #010810b3;
   }

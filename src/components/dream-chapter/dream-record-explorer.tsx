@@ -203,6 +203,7 @@ export function DreamRecordExplorer() {
     >
       <header className="dream-record-explorer-heading">
         <h3 id="dream-record-explorer-title">記録を探す</h3>
+        <span className="dream-record-explorer-ornament" aria-hidden="true" />
       </header>
 
       <div className="dream-record-collection" aria-labelledby="dream-record-collection-title">
@@ -251,18 +252,20 @@ export function DreamRecordExplorer() {
 
       <div className="dream-record-search">
         <label htmlFor="dream-record-query">記録の中の言葉を探す</label>
-        <div className="dream-record-search-field">
-          <span aria-hidden="true">⌕</span>
-          <input
-            id="dream-record-query"
-            type="search"
-            value={filters.query}
-            onChange={(event) => updateFilter("query", event.target.value)}
-            placeholder="人物の名前、場所、台詞の一節…"
-            aria-describedby="dream-record-search-help"
-            autoComplete="off"
-            spellCheck={false}
-          />
+        <div className="dream-record-search-bezel">
+          <div className="dream-record-search-field">
+            <span aria-hidden="true">⌕</span>
+            <input
+              id="dream-record-query"
+              type="search"
+              value={filters.query}
+              onChange={(event) => updateFilter("query", event.target.value)}
+              placeholder="人物の名前、場所、台詞の一節…"
+              aria-describedby="dream-record-search-help"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </div>
         </div>
         {/* How the field searches stays with the field for assistive tech; the
             placeholder and the tags show it to the eye (Owner, 2026-10-23). */}
@@ -427,7 +430,10 @@ export function DreamRecordExplorer() {
             });
             return (
               <li key={record.no}>
-                <article className="dream-record-card">
+                <article
+                  className="dream-record-card"
+                  data-saved={savedIds.has(record.no) ? "true" : undefined}
+                >
                   <p className="dream-record-meta">
                     <span>CASE {record.case}</span>
                     <span>{highlighted(record.place)}</span>

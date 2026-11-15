@@ -121,9 +121,10 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   --exe-rail-gold: linear-gradient(180deg, #fff3cf 0 1px, #f4cc7b 1px 2px, rgb(110 74 23) 2px 3px);
   --exe-rail-cyan: linear-gradient(180deg, #effcff 0 1px, #72e4ff 1px 2px, rgb(18 82 108) 2px 3px);
   --exe-card-shadow:
-    0 26px 64px -22px rgb(0 0 0 / 92%),
-    inset 0 1px 0 rgb(255 248 230 / 24%),
-    inset 0 0 0 1px var(--exe-rule);
+    0 28px 72px -20px rgb(0 0 0 / 95%),
+    0 0 32px -8px rgb(244 204 123 / 18%),
+    inset 0 1px 0 rgb(255 250 236 / 36%),
+    inset 0 0 0 1px var(--exe-rule-strong);
   --exe-art-density: 1;
   --dxs-wrap: 1240px;
   background:
@@ -973,7 +974,7 @@ html[data-family="special"]
   font-family: var(--exe-forge);
   font-variation-settings: "wdth" 125;
   font-weight: 800;
-  box-shadow: 0 10px 24px rgb(0 0 0 / 72%);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 72%), 0 0 16px rgb(244 204 123 / 35%);
 }
 html[data-family="special"]
   body
@@ -1985,10 +1986,10 @@ html[data-family="special"]
   > .exo-joint {
   z-index: 3;
   border: 2px solid var(--ext-gold);
-  background: radial-gradient(circle, #fff8e2 0%, #f4cc7b 38%, #0b141a 72%);
+  background: radial-gradient(circle, #fffdf4 0%, #f4cc7b 36%, #0b141a 72%);
   box-shadow:
-    0 0 24px rgb(244 204 123 / 44%),
-    0 0 36px rgb(114 228 255 / 34%);
+    0 0 28px rgb(244 204 123 / 58%),
+    0 0 44px rgb(114 228 255 / 42%);
 }
 html[data-family="special"]
   body
@@ -2013,9 +2014,10 @@ html[data-family="special"]
   border-top: 4px solid var(--exe-cyan);
   background: var(--exe-surface-cyan);
   box-shadow:
-    0 26px 64px -22px rgb(0 0 0 / 92%),
-    inset 0 1px 0 rgb(220 250 255 / 24%),
-    inset 0 0 0 1px rgb(114 228 255 / 38%);
+    0 28px 72px -20px rgb(0 0 0 / 95%),
+    0 0 32px -8px rgb(114 228 255 / 24%),
+    inset 0 1px 0 rgb(220 250 255 / 36%),
+    inset 0 0 0 1px rgb(114 228 255 / 50%);
 }
 html[data-family="special"]
   body

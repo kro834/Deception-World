@@ -100,12 +100,14 @@ export function DantePage() {
       >
         <DossierContents sections={DANTE_SECTIONS} />
         <div className="manager-sections">
-          {DANTE_SECTIONS.map((section) => (
+          {DANTE_SECTIONS.map((section, index) => (
             <article
               className="manager-copy-section dg-reveal"
+              data-record-role={index === 0 ? "lead" : "detail"}
               id={`character-section-${section.no}`}
               key={section.no}
             >
+              <i className="dossier-spine-mark" aria-hidden="true" />
               <div className="manager-copy-heading">
                 <span>{section.no}</span>
                 <p>{section.kicker}</p>

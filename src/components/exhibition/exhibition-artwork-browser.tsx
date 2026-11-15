@@ -8,6 +8,59 @@ import {
 
 const PAGE_SIZE = 12;
 
+function ArtworkFormatFrame({ width, height }: { width: number; height: number }) {
+  const ratio = width / height;
+  if (ratio > 1.15) {
+    return (
+      <svg
+        aria-hidden="true"
+        className="exhibition-shelf-format-frame exhibition-shelf-format-landscape"
+        width="14"
+        height="11"
+        viewBox="0 0 16 12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      >
+        <rect x="1" y="2" width="14" height="8" rx="1" />
+        <line x1="1" y1="2" x2="4" y2="2" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+  if (ratio < 0.85) {
+    return (
+      <svg
+        aria-hidden="true"
+        className="exhibition-shelf-format-frame exhibition-shelf-format-portrait"
+        width="11"
+        height="14"
+        viewBox="0 0 12 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      >
+        <rect x="2" y="1" width="8" height="14" rx="1" />
+        <line x1="2" y1="1" x2="2" y2="4" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+  return (
+    <svg
+      aria-hidden="true"
+      className="exhibition-shelf-format-frame exhibition-shelf-format-square"
+      width="12"
+      height="12"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    >
+      <rect x="1.5" y="1.5" width="11" height="11" rx="1" />
+      <circle cx="7" cy="7" r="1.5" fill="currentColor" fillOpacity="0.6" stroke="none" />
+    </svg>
+  );
+}
+
 export function ExhibitionArtworkBrowser({
   currentIndex,
   onSelect,
@@ -56,16 +109,32 @@ export function ExhibitionArtworkBrowser({
       <div className="exhibition-shelf-filters">
         <label className="exhibition-shelf-search">
           <span>作品を探す</span>
-          <input
-            ref={searchRef}
-            type="search"
-            value={query}
-            placeholder="題名・描写・作品番号"
-            onChange={(event) => {
-              setQuery(event.currentTarget.value);
-              setPage(0);
-            }}
-          />
+          <div className="exhibition-shelf-search-field">
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              placeholder="題名・描写・作品番号"
+              onChange={(event) => {
+                setQuery(event.currentTarget.value);
+                setPage(0);
+              }}
+            />
+            {query ? (
+              <button
+                type="button"
+                className="exhibition-shelf-search-clear"
+                aria-label="検索をクリア"
+                onClick={() => {
+                  setQuery("");
+                  setPage(0);
+                  searchRef.current?.focus({ preventScroll: true });
+                }}
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            ) : null}
+          </div>
         </label>
         <label>
           <span>構図</span>
@@ -120,11 +189,17 @@ export function ExhibitionArtworkBrowser({
                     decoding="async"
                   />
                   {index === currentIndex ? (
-                    <span className="exhibition-shelf-selected">展示中</span>
+                    <span className="exhibition-shelf-selected" role="status">
+                      <span className="exhibition-shelf-plate-crest" aria-hidden="true">◆</span>
+                      展示中
+                    </span>
                   ) : null}
                 </span>
                 <span className="exhibition-shelf-work-caption">
-                  <span>{String(index + 1).padStart(3, "0")}</span>
+                  <span className="exhibition-shelf-caption-num">
+                    <ArtworkFormatFrame width={artwork.width} height={artwork.height} />
+                    <span>{String(index + 1).padStart(3, "0")}</span>
+                  </span>
                   <span>{artwork.title}</span>
                   <span aria-hidden="true">↗</span>
                 </span>

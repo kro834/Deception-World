@@ -33,20 +33,22 @@
   --saga-prism-rule: linear-gradient(
     90deg,
     var(--saga-ice) 0%,
-    var(--saga-blue) 32%,
-    var(--saga-pink) 66%,
+    var(--saga-blue) 30%,
+    var(--saga-magenta) 52%,
+    var(--saga-pink) 74%,
     var(--saga-gold) 100%
   );
   --saga-prism-fade: linear-gradient(
     90deg,
-    rgb(var(--saga-ice-rgb) / 72%) 0%,
-    rgb(var(--saga-blue-rgb) / 68%) 30%,
-    rgb(var(--saga-pink-rgb) / 72%) 62%,
-    rgb(var(--saga-gold-rgb) / 52%) 84%,
+    rgb(var(--saga-ice-rgb) / 76%) 0%,
+    rgb(var(--saga-blue-rgb) / 70%) 28%,
+    rgb(var(--saga-magenta-rgb) / 72%) 50%,
+    rgb(var(--saga-pink-rgb) / 74%) 72%,
+    rgb(var(--saga-gold-rgb) / 56%) 90%,
     transparent 100%
   );
-  --saga-spec-top: inset 0 1px 0 rgb(255 255 255 / 10%);
-  --saga-spec-bright: inset 0 1px 0 rgb(255 255 255 / 18%);
+  --saga-spec-top: inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 0 0 1px rgb(255 255 255 / 3%);
+  --saga-spec-bright: inset 0 1px 0 rgb(255 255 255 / 22%), inset 0 0 8px -2px rgb(var(--saga-pink-rgb) / 28%);
 
   /* The two light trails as images: the page's edges (body::before), and
      the same light inside the launcher, the notice sheet and the quick
@@ -131,9 +133,10 @@ html:not([data-family="dream"]) body::before {
     background: linear-gradient(
       90deg,
       var(--sh-l1) 0%,
-      var(--saga-blue) 32%,
-      var(--saga-pink) 64%,
-      rgb(var(--saga-gold-rgb) / 72%) 86%,
+      var(--saga-blue) 28%,
+      var(--saga-magenta) 50%,
+      var(--saga-pink) 72%,
+      rgb(var(--saga-gold-rgb) / 78%) 88%,
       transparent 100%
     );
   }
@@ -148,10 +151,10 @@ html:not([data-family="dream"]) body::before {
     border-color: rgb(var(--sh-l1-rgb) / 68%);
     background:
       linear-gradient(225deg, var(--sh-l1) 0 6px, transparent 6px),
-      linear-gradient(140deg, rgb(var(--sh-l1-rgb) / 22%) 0%, rgb(var(--saga-pink-rgb) / 12%) 58%, transparent 82%),
+      linear-gradient(140deg, rgb(var(--sh-l1-rgb) / 24%) 0%, rgb(var(--saga-magenta-rgb) / 10%) 34%, rgb(var(--saga-pink-rgb) / 14%) 64%, transparent 84%),
       var(--sh-ink-2);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 16%),
+      inset 0 1px 0 rgb(255 255 255 / 20%),
       0 0 18px -6px rgb(var(--sh-l1-rgb) / 36%);
   }
 

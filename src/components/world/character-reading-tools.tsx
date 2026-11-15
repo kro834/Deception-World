@@ -34,13 +34,21 @@ export function CharacterChapterTools({
     : continuation;
 
   return (
-    <nav className="character-chapter-tools" aria-label={`第${currentNo}章から読み進める`}>
+    <nav
+      className="character-chapter-tools"
+      aria-label={`第${currentNo}章から読み進める`}
+      data-chapter-no={currentNo}
+    >
       <div className="character-chapter-shortcuts">
         {previous ? <a href={`#character-section-${previous.no}`}>← 前の章</a> : null}
         <a href="#dossier-index">章目次</a>
       </div>
       {destination ? (
-        <a className="character-chapter-next" href={destination.href}>
+        <a
+          className="character-chapter-next"
+          href={destination.href}
+          data-continuation={next ? "chapter" : "section"}
+        >
           <span className="character-chapter-next-copy">
             <b>
               <PhrasedText text={destination.title} />
@@ -72,6 +80,7 @@ export function CharacterRelatedRecords({
       id="character-related-records"
       aria-labelledby="character-related-heading"
     >
+      <span className="character-related-spine" aria-hidden="true" />
       <h2 id="character-related-heading">関連する記録を読む</h2>
       <ul>
         {records.map((record) => {
@@ -89,7 +98,10 @@ export function CharacterRelatedRecords({
             </>
           );
           return (
-            <li key={"to" in record ? record.to : record.href}>
+            <li
+              key={"to" in record ? record.to : record.href}
+              data-record-kind={"to" in record ? "route" : "anchor"}
+            >
               {"to" in record ? (
                 <GuardedLink
                   to={record.to}

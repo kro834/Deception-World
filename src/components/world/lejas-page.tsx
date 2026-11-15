@@ -116,6 +116,12 @@ export function LejasPage() {
             <i className="dossier-arrive-scan" aria-hidden="true" />
             <div className="manager-portrait-shade" aria-hidden="true" />
             <i className="manager-scanline" aria-hidden="true" />
+            <span className="lejas-cut-reticle" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
             {/* The other shot, small in the plate's corner: the picture says
                 a press changes the shot (2026-10-23: no タップで… hint). The
                 button keeps its name and its pressed state. */}
@@ -221,7 +227,12 @@ export function LejasPage() {
           ]}
         />
         <div className="manager-sections">
-          <article className="manager-copy-section dg-reveal" id="character-section-01">
+          <article
+            className="manager-copy-section dg-reveal"
+            data-record-role="lead"
+            id="character-section-01"
+          >
+            <i className="dossier-spine-mark" aria-hidden="true" />
             <div className="manager-copy-heading">
               <span>01</span>
               <p>盤面と勝敗の管轄</p>
@@ -238,7 +249,12 @@ export function LejasPage() {
               </p>
             </div>
           </article>
-          <article className="manager-copy-section dg-reveal" id="character-section-02">
+          <article
+            className="manager-copy-section dg-reveal"
+            data-record-role="detail"
+            id="character-section-02"
+          >
+            <i className="dossier-spine-mark" aria-hidden="true" />
             <div className="manager-copy-heading">
               <span>02</span>
               <p>人物と情報の提示</p>
@@ -252,7 +268,12 @@ export function LejasPage() {
               </p>
             </div>
           </article>
-          <article className="manager-copy-section dg-reveal" id="character-section-03">
+          <article
+            className="manager-copy-section dg-reveal"
+            data-record-role="detail"
+            id="character-section-03"
+          >
+            <i className="dossier-spine-mark" aria-hidden="true" />
             <div className="manager-copy-heading">
               <span>03</span>
               <p>戦い方</p>

@@ -118,42 +118,55 @@ export function GalleryDisplaySettings({
   return (
     <details className="gallery-display-settings">
       <summary>
+        <span className="gallery-display-plate-tag" aria-hidden="true">
+          VIEWING
+        </span>
         <span className="gallery-display-heading">鑑賞の設定</span>
         <span className="gallery-display-current">
           {DENSITIES.find((choice) => choice.value === value.density)?.label}・
           {BACKGROUNDS.find((choice) => choice.value === value.background)?.label}
         </span>
+        <span className="gallery-display-chevron" aria-hidden="true" />
       </summary>
       <div className="gallery-display-body">
         <p className="gallery-display-description">
           一覧の間隔と拡大画面の背景を、自分の見やすい表示に。このブラウザーに保存されます。
         </p>
-        <fieldset className="gallery-display-field" onKeyDown={keepRadioNavigationLocal}>
-          <legend>一覧の密度</legend>
-          <div className="gallery-display-choices">
-            {DENSITIES.map((choice) => (
-              <label className="gallery-display-choice" key={choice.value}>
-                <input
-                  type="radio"
-                  name={name}
-                  value={choice.value}
-                  checked={value.density === choice.value}
-                  tabIndex={value.density === choice.value ? 0 : -1}
-                  onChange={() => onChange({ density: choice.value })}
-                />
-                <span>{choice.label}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <GalleryBackgroundControl
-          value={value.background}
-          onChange={(background) => onChange({ background })}
-        />
-        <button type="button" className="gallery-display-reset" onClick={onReset}>
-          表示設定を標準に戻す
-        </button>
-        <DisplayFeedback status={status} error={error} />
+        <div className="gallery-display-console-grid">
+          <fieldset className="gallery-display-field" onKeyDown={keepRadioNavigationLocal}>
+            <legend>一覧の密度</legend>
+            <div className="gallery-display-choices">
+              {DENSITIES.map((choice) => (
+                <label className="gallery-display-choice" key={choice.value}>
+                  <input
+                    type="radio"
+                    name={name}
+                    value={choice.value}
+                    checked={value.density === choice.value}
+                    tabIndex={value.density === choice.value ? 0 : -1}
+                    onChange={() => onChange({ density: choice.value })}
+                  />
+                  <span
+                    className="gallery-display-density-glyph"
+                    data-density={choice.value}
+                    aria-hidden="true"
+                  />
+                  <span>{choice.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <GalleryBackgroundControl
+            value={value.background}
+            onChange={(background) => onChange({ background })}
+          />
+        </div>
+        <div className="gallery-display-console-footer">
+          <button type="button" className="gallery-display-reset" onClick={onReset}>
+            表示設定を標準に戻す
+          </button>
+          <DisplayFeedback status={status} error={error} />
+        </div>
       </div>
     </details>
   );

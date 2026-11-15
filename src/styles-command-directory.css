@@ -11,6 +11,9 @@ html[data-family="world"]
   --directory-cyan: #74d9ec;
   --directory-seam: rgb(145 189 215 / 28%);
   --directory-metal: linear-gradient(155deg, #eaf5fa, #acc2ce 46%, #8ca6b5 47%, #dcecf4);
+  --directory-specular: rgb(233 246 251 / 45%);
+  --directory-rim: rgb(145 189 215 / 38%);
+  --directory-sheen: linear-gradient(135deg, rgb(233 246 251 / 10%) 0%, transparent 42%, rgb(116 217 236 / 7%) 100%);
 }
 
 /* A complete heading row, then classification, then the artwork. The previous
@@ -25,10 +28,11 @@ html[data-family="world"]
   border: 1px solid var(--directory-seam);
   border-top: 3px solid #b2c6d2;
   background:
+    var(--directory-sheen),
     linear-gradient(115deg, rgb(233 246 251 / 8%), transparent 36%),
     linear-gradient(155deg, #0d1d2b, #050b12 60%);
   box-shadow:
-    inset 0 1px 0 rgb(233 246 251 / 30%),
+    inset 0 1px 0 var(--directory-specular),
     8px 8px 0 rgb(2 7 13 / 52%);
 }
 html[data-family="world"]
@@ -146,8 +150,10 @@ html[data-family="world"]
   border-color: rgb(145 189 215 / 40%);
   border-top: 3px solid #a6bdca;
   background-color: var(--directory-ink);
+  background-image: linear-gradient(135deg, rgb(233 246 251 / 4%), transparent 40%);
   box-shadow:
-    inset 0 0 0 3px rgb(2 7 13 / 18%),
+    inset 0 1px 0 var(--directory-specular),
+    inset 0 0 0 1px var(--directory-rim),
     0 5px 0 #02070d,
     0 6px 0 rgb(145 189 215 / 26%);
 }
@@ -215,9 +221,11 @@ html[data-family="world"]
   > .rider-console {
   border: 1px solid var(--directory-seam);
   border-top: 3px solid #aec6d3;
-  background: var(--directory-ink);
+  background:
+    var(--directory-sheen),
+    var(--directory-ink);
   box-shadow:
-    inset 0 1px 0 rgb(233 246 251 / 28%),
+    inset 0 1px 0 var(--directory-specular),
     8px 8px 0 rgb(2 7 13 / 70%);
 }
 html[data-family="world"]
@@ -278,8 +286,13 @@ html[data-family="world"]
   padding: clamp(18px, 2vw, 28px);
   border: 1px solid var(--directory-seam);
   border-left: 3px solid var(--directory-cyan);
-  background: linear-gradient(135deg, rgb(233 246 251 / 6%), transparent 48%), rgb(5 11 18 / 94%);
-  box-shadow: 6px 6px 0 rgb(2 7 13 / 50%);
+  background:
+    var(--directory-sheen),
+    linear-gradient(135deg, rgb(233 246 251 / 6%), transparent 48%),
+    rgb(5 11 18 / 94%);
+  box-shadow:
+    inset 0 1px 0 var(--directory-specular),
+    6px 6px 0 rgb(2 7 13 / 50%);
 }
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
@@ -394,8 +407,11 @@ html[data-family="world"]
   border: 1px solid var(--directory-seam);
   border-top: 3px solid #9ab2c0;
   border-radius: 2px;
-  background: linear-gradient(150deg, #132532, #050b12 60%);
+  background:
+    linear-gradient(135deg, rgb(233 246 251 / 4%), transparent 44%),
+    linear-gradient(150deg, #132532, #050b12 60%);
   box-shadow:
+    inset 0 1px 0 var(--directory-specular),
     5px 5px 0 #02070d,
     6px 6px 0 rgb(145 189 215 / 16%);
 }
@@ -573,6 +589,13 @@ html[data-family="world"]
     column-gap: 12px;
   }
 }
+html[data-family="world"]
+  main.site-shell.film-edition.mirage-edition
+  :is(#manager-archive, #riders, #cast-roster)
+  :is(button, a, summary):focus-visible {
+  outline: 2px solid var(--directory-cyan);
+  outline-offset: 3px;
+}
 @media (hover: hover) and (pointer: fine) {
   html[data-family="world"]
     main.site-shell.film-edition.mirage-edition
@@ -585,9 +608,19 @@ html[data-family="world"]
     .wa-person:has(.wa-open:hover) {
     border-color: var(--directory-cyan);
     box-shadow:
-      inset 0 0 0 1px rgb(233 246 251 / 24%),
+      inset 0 1px 0 var(--directory-specular),
+      inset 0 0 0 1px rgb(233 246 251 / 28%),
       5px 5px 0 #02070d,
       6px 6px 0 rgb(116 217 236 / 60%);
+  }
+  html[data-family="world"]
+    main.site-shell.film-edition.mirage-edition
+    #cast-roster#cast-roster
+    .wa-directory-controls
+    button:hover:not([aria-pressed="true"]) {
+    border-color: var(--directory-rim);
+    background: linear-gradient(180deg, rgb(233 246 251 / 14%), transparent);
+    color: var(--directory-text);
   }
 }
 @media (forced-colors: active) {

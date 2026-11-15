@@ -1010,7 +1010,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   background:
     radial-gradient(
       50% 60% at 28% 58%,
-      rgb(var(--rxt-form-rgb, 150 156 255) / 14%),
+      rgb(var(--rxt-form-rgb, 99 226 255) / 16%),
       transparent 70%
     ),
     radial-gradient(36% 26% at 28% 100%, rgb(121 232 255 / 16%), transparent 70%),
@@ -1018,6 +1018,22 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
     linear-gradient(80deg, transparent 0 36%, rgb(255 143 216 / 4%) 36% 38%, transparent 38%),
     var(--ra-lattice, var(--dx-lattice)), var(--dx-ink);
   border-top: 1px solid rgb(121 232 255 / 22%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages[data-form="standard"],
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages:not([data-form]) {
+  --rxt-form-rgb: 99 226 255;
+  --rxs-stage-accent: #63e2ff;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages[data-form="max"] {
+  --rxt-form-rgb: 242 216 150;
+  --rxs-stage-accent: #f2d896;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages[data-form="ultra"] {
+  --rxt-form-rgb: 255 59 105;
+  --rxs-stage-accent: #ff3b69;
 }
 
 html[data-family="special"]
@@ -1925,11 +1941,18 @@ html[data-family="special"]
 
 @keyframes dxs-rx-cut {
   0%,
-  44% {
+  40% {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.05);
   }
-  45%,
+  44% {
+    opacity: 0.85;
+    transform: scale(0.985);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.008);
+  }
   100% {
     opacity: 1;
     transform: scale(1);

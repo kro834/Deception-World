@@ -239,6 +239,8 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
     glow: FAR_FROM_SUIT_FACE_GLOW,
     reactorGlow: FAR_FROM_SUIT_REACTOR_GLOW,
     reactorRadius: FAR_FROM_REACTOR_RADIUS,
+    // The driver stays in front of the plates built around it.
+    driverFront: true,
     fireTone: FAR_FROM_FIRE_TONE,
     atlas: FAR_FROM_SUIT_ATLAS.src,
     palette: FAR_FROM_PALETTE,

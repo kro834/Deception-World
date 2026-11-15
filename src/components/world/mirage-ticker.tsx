@@ -19,24 +19,40 @@ type MirageTickerProps = {
 
 export function MirageTicker({ variant, records }: MirageTickerProps) {
   const items = variant === "open" ? MIRAGE_TICKER_ITEMS : [...MIRAGE_TICKER_ITEMS].reverse();
-  const line = `${[...items, `RECORDS FOUND ${String(records).padStart(2, "0")}`].join(" // ")} // `;
+  const count = String(records).padStart(2, "0");
+  const renderStream = () => (
+    <>
+      {items.map((phrase, idx) => (
+        <span key={`${variant}-${idx}`} className="mr-ticker-unit">
+          <b className="mr-ticker-idx">{String(idx + 1).padStart(2, "0")}</b>
+          <em className="mr-ticker-item">{phrase}</em>
+          <i className="mr-ticker-sep">//</i>
+        </span>
+      ))}
+      <strong className="mr-ticker-count">RECORDS FOUND {count}</strong>
+      <i className="mr-ticker-sep">//</i>
+    </>
+  );
+  const renderOutline = () =>
+    variant === "open" ? (
+      <>
+        DECEPTION WORLD <i className="mr-ticker-glyph">+</i> KAMEN RIDER SAGA —{" "}
+      </>
+    ) : (
+      <>
+        THE STORY CONTINUES <i className="mr-ticker-glyph">+</i> DECEPTION WORLD —{" "}
+      </>
+    );
+
   return (
     <div className={`mr-ticker is-${variant}`} aria-hidden="true">
       <div className="mr-ticker-row">
-        <span>{line}</span>
-        <span>{line}</span>
+        <span>{renderStream()}</span>
+        <span>{renderStream()}</span>
       </div>
       <div className="mr-ticker-row is-outline">
-        <span>
-          {variant === "open"
-            ? "DECEPTION WORLD — KAMEN RIDER SAGA — "
-            : "THE STORY CONTINUES — DECEPTION WORLD — "}
-        </span>
-        <span>
-          {variant === "open"
-            ? "DECEPTION WORLD — KAMEN RIDER SAGA — "
-            : "THE STORY CONTINUES — DECEPTION WORLD — "}
-        </span>
+        <span>{renderOutline()}</span>
+        <span>{renderOutline()}</span>
       </div>
     </div>
   );

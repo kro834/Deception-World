@@ -10,11 +10,14 @@
 .other-artwork-card .other-card-copy b {
   font-size: clamp(16px, 1.5vw, 20px);
   color: #fff;
+  letter-spacing: 0.02em;
 }
 
 .other-artwork-card .other-card-copy i {
-  font-size: 11px;
-  color: #d2f5ff;
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.06em;
+  color: #d6f5ff;
 }
 
 .other-artwork-dialog {
@@ -44,11 +47,13 @@
 }
 
 .other-artwork-dialog::backdrop {
-  background: rgb(3 8 15 / 96%);
+  background:
+    radial-gradient(ellipse 68% 54% at 50% 42%, rgb(18 44 64 / 42%), transparent 72%),
+    radial-gradient(ellipse 90% 80% at 50% 50%, rgb(4 10 18 / 94%), rgb(2 5 10 / 98%));
 }
 
 .other-artwork-viewer {
-  width: min(100%, 760px);
+  width: min(100%, 780px);
   margin-inline: auto;
 }
 
@@ -61,14 +66,29 @@
   justify-content: space-between;
   gap: 12px;
   min-height: 60px;
-  padding: 8px 12px;
-  border: 1px solid #49718b;
-  background: #101e2b;
+  padding: 8px 16px;
+  border: 1px solid rgb(138 196 224 / 42%);
+  border-top: 1px solid rgb(214 238 250 / 56%);
+  background:
+    linear-gradient(
+      90deg,
+      #9be9fa 0 3px,
+      transparent 3px,
+      rgb(222 200 161 / 20%) 36%,
+      transparent 88%
+    ),
+    linear-gradient(180deg, #142636 0%, #0b1622 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(236 248 255 / 16%),
+    0 12px 30px rgb(0 0 0 / 48%);
 }
 
 .other-artwork-viewer h2 {
   margin: 0;
+  color: #f4f9fd;
   font-size: clamp(18px, 3vw, 26px);
+  font-weight: 600;
+  letter-spacing: 0.03em;
   line-height: 1.5;
 }
 
@@ -80,12 +100,20 @@
   gap: 8px;
   min-width: 88px;
   min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid #8dc5dc;
+  padding: 8px 16px;
+  border: 1px solid rgb(156 218 242 / 64%);
   border-radius: 999px;
-  background: #21394e;
+  background:
+    linear-gradient(180deg, rgb(230 248 255 / 16%), transparent 56%),
+    linear-gradient(180deg, #244057, #152838);
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 26%),
+    0 6px 16px rgb(0 0 0 / 34%);
   color: #fff;
   font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  letter-spacing: 0.04em;
   cursor: pointer;
 }
 
@@ -103,6 +131,7 @@
 /* The whole artwork fits below the header (60px plus its border): on a laptop
    a full-width portrait ran about 270px past the bottom of the screen. */
 .other-artwork-viewer > img {
+  box-sizing: border-box;
   display: block;
   width: auto;
   max-width: 100%;
@@ -116,7 +145,44 @@
       max(16px, env(safe-area-inset-bottom))
   );
   margin: 12px auto 0;
+  padding: 10px;
+  border: 1px solid rgb(146 202 228 / 32%);
+  background:
+    radial-gradient(ellipse 75% 55% at 50% 8%, rgb(168 224 248 / 9%), transparent 68%),
+    linear-gradient(180deg, #0b141f 0%, #050a11 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(236 248 255 / 14%),
+    inset 0 0 0 1px rgb(222 200 161 / 12%),
+    0 24px 56px rgb(0 0 0 / 64%);
   object-fit: contain;
+  filter: none;
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .other-artwork-viewer button:hover {
+    border-color: #c2f2ff;
+    background:
+      linear-gradient(180deg, rgb(236 250 255 / 24%), transparent 56%),
+      linear-gradient(180deg, #2c4e69, #1a3246);
+  }
+}
+
+@media (forced-colors: active) {
+  .other-artwork-viewer header,
+  .other-artwork-viewer > img {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  .other-artwork-viewer button {
+    border-color: ButtonText;
+    background: ButtonFace;
+    box-shadow: none;
+    color: ButtonText;
+  }
 }
 
 /* Native modal state controls the lock, so closing or unmounting cannot leave it behind. */

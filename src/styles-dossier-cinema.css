@@ -79,7 +79,8 @@ main.manager-page:not(.is-sovereign) .manager-scroll-cue i::after {
 /* The wipe's leading edge: an aria-hidden rule in every portrait frame. It
    is the full frame tall and draws the prism line on its bottom edge, so
    translating it by its own height carries the line from the frame's top
-   to its foot with the wipe. At rest it is out of sight. */
+   to its foot with the wipe. At rest it is out of sight.
+   Enriched multi-chromatic spectral prism edge and optical beam convergence. */
 main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
   position: absolute;
   z-index: 3;
@@ -88,14 +89,35 @@ main.manager-page:not(.is-sovereign) .dossier-arrive-scan {
   background:
     linear-gradient(
         90deg,
-        var(--dm-rim) 0%,
-        var(--dm-violet, #ff5fc8) 34%,
+        transparent 0%,
+        var(--dm-rim) 12%,
+        #7ae8ff 26%,
+        var(--dm-violet, #ff5fc8) 48%,
         var(--dm-magenta, #ff5cc8) 66%,
-        var(--dm-gold, #f0cf86) 100%
+        var(--dm-gold, #f0cf86) 84%,
+        transparent 100%
       )
       bottom / 100% 2px no-repeat,
-    linear-gradient(0deg, color-mix(in srgb, var(--dm-key) 22%, transparent), transparent 72px)
-      bottom / 100% 72px no-repeat;
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 75%) 50%,
+        transparent 100%
+      )
+      bottom / 100% 1px no-repeat,
+    radial-gradient(
+        ellipse 70% 32px at 50% 100%,
+        color-mix(in srgb, var(--dm-key) 32%, rgb(255 255 255 / 24%)),
+        transparent 72%
+      )
+      bottom / 100% 48px no-repeat,
+    linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--dm-key) 24%, transparent),
+        color-mix(in srgb, var(--dm-rim) 8%, transparent) 42px,
+        transparent 84px
+      )
+      bottom / 100% 84px no-repeat;
   opacity: 0;
   translate: 0 -100%;
   pointer-events: none;
@@ -105,19 +127,100 @@ main.manager-page.rider-dossier-page:not(.is-sovereign) .dossier-arrive-scan {
   background:
     linear-gradient(
         90deg,
-        var(--dm-key) 0%,
-        color-mix(in srgb, var(--dm-key) 52%, var(--dm-rim)) 36%,
-        var(--dm-rim) 72%,
-        var(--dm-gold, #f0cf86) 100%
+        transparent 0%,
+        var(--dm-key) 10%,
+        color-mix(in srgb, var(--dm-key) 52%, var(--dm-rim)) 34%,
+        var(--dm-rim) 68%,
+        var(--dm-gold, #f0cf86) 88%,
+        transparent 100%
       )
       bottom / 100% 2px no-repeat,
     linear-gradient(
-        0deg,
-        color-mix(in srgb, var(--dm-key) 28%, transparent),
-        color-mix(in srgb, var(--dm-rim) 10%, transparent) 38px,
-        transparent 84px
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 80%) 50%,
+        transparent 100%
       )
-      bottom / 100% 84px no-repeat;
+      bottom / 100% 1px no-repeat,
+    radial-gradient(
+        ellipse 75% 36px at 50% 100%,
+        color-mix(in srgb, var(--dm-key) 36%, rgb(240 207 134 / 28%)),
+        transparent 75%
+      )
+      bottom / 100% 54px no-repeat,
+    linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--dm-key) 30%, transparent),
+        color-mix(in srgb, var(--dm-rim) 12%, transparent) 44px,
+        transparent 96px
+      )
+      bottom / 100% 96px no-repeat;
+}
+
+main.manager-page.ciel-dossier-page:not(.is-sovereign) .dossier-arrive-scan {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        #1ccf9d 14%,
+        #86d9ff 50%,
+        #d3f3ff 84%,
+        transparent 100%
+      )
+      bottom / 100% 2px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 85%) 50%,
+        transparent 100%
+      )
+      bottom / 100% 1px no-repeat,
+    radial-gradient(
+        ellipse 70% 32px at 50% 100%,
+        rgb(134 217 255 / 35%),
+        transparent 72%
+      )
+      bottom / 100% 50px no-repeat,
+    linear-gradient(
+        0deg,
+        rgb(28 207 157 / 28%),
+        rgb(134 217 255 / 12%) 42px,
+        transparent 88px
+      )
+      bottom / 100% 88px no-repeat;
+}
+
+main.manager-page.dante-page:not(.is-sovereign) .dossier-arrive-scan {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        #369b89 16%,
+        #ede8ea 48%,
+        #ed667e 82%,
+        transparent 100%
+      )
+      bottom / 100% 2px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 80%) 50%,
+        transparent 100%
+      )
+      bottom / 100% 1px no-repeat,
+    radial-gradient(
+        ellipse 70% 32px at 50% 100%,
+        rgb(237 102 126 / 32%),
+        transparent 72%
+      )
+      bottom / 100% 52px no-repeat,
+    linear-gradient(
+        0deg,
+        rgb(54 155 137 / 26%),
+        rgb(237 102 126 / 14%) 40px,
+        transparent 86px
+      )
+      bottom / 100% 86px no-repeat;
 }
 
 /* ================================================================

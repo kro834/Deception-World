@@ -49,6 +49,7 @@ export function RexonanceChapterMap() {
     <nav className="rxs-chapter-index rxe-chapter-map" aria-label="レクソナンスの見どころ">
       {CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>
+          <u className="rxe-chapter-rail" aria-hidden="true" />
           <b aria-hidden="true">{chapter.number}</b>
           <span>{chapter.label}</span>
           <em className="visually-hidden">{chapter.detail}</em>
@@ -63,10 +64,12 @@ export function RexonanceHeroRail() {
   return (
     <div className="rxe-hero-rail">
       <a className="rxe-hero-primary" href="#assembly">
+        <u className="rxe-hero-glint" aria-hidden="true" />
         <span>変身を体験</span>
         <i aria-hidden="true">↘</i>
       </a>
       <a className="rxe-hero-secondary" href="#stages">
+        <u className="rxe-hero-glint" aria-hidden="true" />
         <span>三つの形態を見る</span>
         <i aria-hidden="true">↗</i>
       </a>

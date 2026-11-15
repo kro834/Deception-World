@@ -38,17 +38,49 @@ export function IcFinisherCalls({ name, calls }: { name: string; calls: readonly
   const [step, setStep] = useState(-1);
   return (
     <ol className="ics-calls ics-step-calls" aria-label={`${name} 発動音声`} data-step={step}>
-      {calls.map((call, index) => (
-        <li key={`${index}-${call}`} lang="en" data-lit={index <= step || undefined}>
-          <button
-            type="button"
-            aria-pressed={index <= step}
-            onClick={() => setStep(index === step ? index - 1 : index)}
+      {calls.map((call, index) => {
+        const isLit = index <= step;
+        const isCurrent = index === step;
+        return (
+          <li
+            key={`${index}-${call}`}
+            lang="en"
+            data-lit={isLit || undefined}
+            data-current={isCurrent || undefined}
           >
-            <b>{withCallBreaks(call)}</b>
-          </button>
-        </li>
-      ))}
+            <button
+              type="button"
+              aria-pressed={isLit}
+              onClick={() => setStep(index === step ? index - 1 : index)}
+            >
+              <span
+                className="ics-call-indicator"
+                aria-hidden="true"
+                style={{
+                  display: "inline-block",
+                  width: 7,
+                  height: 7,
+                  marginRight: 8,
+                  borderRadius: 1,
+                  verticalAlign: "middle",
+                  backgroundColor: isCurrent
+                    ? "#ffffff"
+                    : isLit
+                      ? "rgb(233 184 102)"
+                      : "rgb(166 230 255 / 0.35)",
+                  boxShadow: isCurrent
+                    ? "0 0 10px #ffffff, 0 0 16px rgb(233 184 102)"
+                    : isLit
+                      ? "0 0 8px rgb(233 184 102 / 0.8)"
+                      : "none",
+                  transition: "background-color 180ms ease, box-shadow 180ms ease",
+                }}
+              />
+              <b>{withCallBreaks(call)}</b>
+            </button>
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -73,32 +105,37 @@ const d = (step: number) => ({ ["--d" as string]: step });
 
 /** Precision Vernier scale & corner framing shared across flagship technical diagrams. */
 const VERNIER_X = Array.from({ length: 21 }, (_, idx) => 20 + idx * 10);
+const VERNIER_FINE_X = Array.from({ length: 41 }, (_, idx) => 20 + idx * 5);
 const frameScale = (axisY?: number) => (
   <g className="ics-dg-grid">
-    {/* 4-corner L-calipers */}
+    {/* 4-corner L-calipers with outer optical targets */}
     <path
       className="ics-dg-tick"
-      d="M6 14V4h10 M224 4h10v10 M6 82v10h10 M224 92h10V82"
+      d="M6 14V4h10 M224 4h10v10 M6 82v10h10 M224 92h10V82 M4 4h2v2H4Z M234 4h2v2h-2Z M4 90h2v2H4Z M234 90h2v2h-2Z"
     />
-    {/* Top & bottom Vernier dimension ticks */}
+    {/* Top & bottom Vernier dimension ticks with precision fine subdivisions */}
     <path
       className="ics-dg-tick"
-      d={VERNIER_X.map((x, idx) => {
-        const len = idx % 5 === 0 ? 4.5 : 2;
-        return `M${x} 4v${len}M${x} ${92 - len}v${len}`;
-      }).join("")}
+      d={
+        VERNIER_X.map((x, idx) => {
+          const len = idx % 5 === 0 ? 5 : 2.5;
+          return `M${x} 4v${len}M${x} ${92 - len}v${len}`;
+        }).join("") +
+        VERNIER_FINE_X.map((x) => `M${x} 4v1.2M${x} 90.8v1.2`).join("")
+      }
     />
     {axisY !== undefined ? <path d={`M12 ${axisY}H228`} className="ics-dg-axis" /> : null}
   </g>
 );
 
-/** Tactical aiming reticle ring with cardinal crosshairs and inner lock ring. */
+/** Tactical aiming reticle ring with cardinal crosshairs, core dot and inner lock ring. */
 const reticle = (cx: number, cy: number, r: number, step = 0, className = "") => (
   <g className={`ics-dg-reticle ics-dg-step ${className}`.trim()} style={d(step)}>
     <circle cx={cx} cy={cy} r={r} />
     <circle cx={cx} cy={cy} r={r * 0.56} className="ics-dg-echo" />
+    <circle cx={cx} cy={cy} r={1.6} className="ics-dg-core" />
     <path
-      d={`M${cx - r - 3.5} ${cy}h4.5M${cx + r - 1} ${cy}h4.5M${cx} ${cy - r - 3.5}v4.5M${cx} ${cy + r - 1}v4.5`}
+      d={`M${cx - r - 4} ${cy}h5M${cx + r - 1} ${cy}h5M${cx} ${cy - r - 4}v5M${cx} ${cy + r - 1}v5`}
     />
   </g>
 );

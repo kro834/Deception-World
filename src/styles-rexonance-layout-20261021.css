@@ -1479,12 +1479,23 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
   > .rxe-chapter-map
   a {
+  --rxe-rail-x: 36px;
   grid-template-columns: 44px minmax(0, 1fr) 20px;
   grid-template-rows: auto;
   align-items: center;
   gap: 0 16px;
   min-height: 64px;
   padding-block: 14px;
+}
+
+@media (max-width: 700px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > .rxe-chapter-map
+    a {
+    --rxe-rail-x: 30px;
+  }
 }
 
 html[data-family="special"]
@@ -1771,46 +1782,237 @@ html[data-family="special"]
    frames are restated at the end of this layer, after it.
    ====================================================================== */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
-  /* The plate's light, in layers: a lit top lip and a dark base, faint ice
-     side rims, the frame line, a cool falloff under the lip and a shade
-     over the foot, then the drop. */
+  /* Golden-ratio spatial depth coordinates (1 : 1.618 -> 38.2% / 61.8%). */
+  --rxl-depth-x: 58%;
+  --rxl-depth-y: 38.2%;
+  --rxl-depth-spread-x: 74%;
+  --rxl-depth-spread-y: 58%;
+  /* The plate's light, in layers: a 0.5px-equivalent subpixel bright meniscus,
+     a crisp 1px ice lip and dark base, faint ice side rims, the frame line,
+     a cool falloff under the lip and a shade over the foot, then the drop. */
   --rxl-plate-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%), inset 0 -1px 0 rgb(0 0 0 / 55%),
-    inset 1px 0 0 rgb(121 232 255 / 7%), inset -1px 0 0 rgb(121 232 255 / 7%),
-    inset 0 0 0 1px var(--rxl-plate-edge), inset 0 30px 44px -40px rgb(121 232 255 / 26%),
-    inset 0 -34px 42px -40px rgb(0 0 0 / 70%), 0 1px 0 rgb(121 232 255 / 6%),
-    0 30px 70px -36px rgb(0 0 0 / 85%);
-  /* A specular glint along the top edge, brightest at its middle. */
+    inset 0 0.5px 0 rgb(255 255 255 / 28%),
+    inset 0 1px 0 rgb(184 246 255 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 62%),
+    inset 0.5px 0 0 rgb(121 232 255 / 12%),
+    inset -0.5px 0 0 rgb(121 232 255 / 12%),
+    inset 0 0 0 1px var(--rxl-plate-edge),
+    inset 0 32px 46px -40px rgb(121 232 255 / 28%),
+    inset 0 -34px 42px -40px rgb(0 0 0 / 72%),
+    0 0 0 0.5px rgb(121 232 255 / 16%),
+    0 1px 0 rgb(121 232 255 / 8%),
+    0 30px 72px -36px rgb(0 0 0 / 86%);
+  /* A specular glint along the top edge, anchored on the golden section (38.2% / 61.8%). */
   --rxl-specular: linear-gradient(
       90deg,
       rgb(214 247 255 / 0%),
-      rgb(214 247 255 / 48%) 50%,
+      rgb(214 247 255 / 58%) 38.2%,
+      rgb(242 216 150 / 44%) 61.8%,
       rgb(214 247 255 / 0%)
     )
-    50% 0 / 64% 1px no-repeat;
-  /* A precision ruler along the foot, clear of the corner ticks: a minor
-     graduation every 8px, a major every 64px. */
+    50% 0 / 76% 1px no-repeat;
+  /* A three-tier precision Vernier ruler along the foot, clear of the corner ticks:
+     minor every 8px, medium every 32px, major every 64px. */
   --rxl-ruler:
-    repeating-linear-gradient(90deg, rgb(121 232 255 / 32%) 0 1px, transparent 1px 64px) 24px 100% /
-      calc(100% - 48px) 7px no-repeat,
+    repeating-linear-gradient(90deg, rgb(242 216 150 / 42%) 0 1px, transparent 1px 64px) 24px 100% /
+      calc(100% - 48px) 8px no-repeat,
+    repeating-linear-gradient(90deg, rgb(121 232 255 / 28%) 0 1px, transparent 1px 32px) 24px 100% /
+      calc(100% - 48px) 5px no-repeat,
     repeating-linear-gradient(90deg, rgb(121 232 255 / 15%) 0 1px, transparent 1px 8px) 24px 100% /
       calc(100% - 48px) 3px no-repeat;
 }
 
-/* The chapter guideways: the gold seat at the rule's head, a graduated
-   scale riding above the rule's lit stretch, and the stop at its end. */
+/* Golden-ratio spatial depth choreography across 1440px -> 1100px -> 768px -> 390px. */
+@media (min-width: 1440px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    --rxl-depth-x: 61.8%;
+    --rxl-depth-y: 38.2%;
+    --rxl-depth-spread-x: 80%;
+    --rxl-depth-spread-y: 64%;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1099.98px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    --rxl-depth-x: 50%;
+    --rxl-depth-y: 38.2%;
+    --rxl-depth-spread-x: 88%;
+    --rxl-depth-spread-y: 54%;
+  }
+}
+
+@media (max-width: 700px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    --rxl-depth-x: 50%;
+    --rxl-depth-y: 26%;
+    --rxl-depth-spread-x: 96%;
+    --rxl-depth-spread-y: 44%;
+  }
+}
+
+@media (max-width: 430px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    --rxl-depth-x: 50%;
+    --rxl-depth-y: 23.6%;
+    --rxl-depth-spread-x: 100%;
+    --rxl-depth-spread-y: 38.2%;
+  }
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > :is(#performance, #p14) {
+  background:
+    radial-gradient(
+      ellipse var(--rxl-depth-spread-x) var(--rxl-depth-spread-y) at var(--rxl-depth-x)
+        var(--rxl-depth-y),
+      rgb(121 232 255 / 6.5%),
+      rgb(242 216 150 / 2.2%) 52%,
+      transparent 76%
+    );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages {
+  background:
+    radial-gradient(
+      ellipse var(--rxl-depth-spread-x) var(--rxl-depth-spread-y) at var(--rxl-depth-x)
+        var(--rxl-depth-y),
+      rgb(182 163 255 / 7.5%),
+      rgb(121 232 255 / 3.5%) 54%,
+      transparent 78%
+    ),
+    linear-gradient(180deg, rgb(6 13 22 / 58%), transparent 28%, transparent 78%, rgb(4 9 16 / 54%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #system {
+  background:
+    radial-gradient(
+      ellipse var(--rxl-depth-spread-x) var(--rxl-depth-spread-y) at var(--rxl-depth-x)
+        var(--rxl-depth-y),
+      rgb(242 216 150 / 6.5%),
+      rgb(121 232 255 / 3.5%) 54%,
+      transparent 78%
+    );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  :is(.rxs-assembly-heading, .rxs-assembly-footer) {
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(214 247 255 / 44%) 38.2%,
+      rgb(242 216 150 / 48%) 61.8%,
+      transparent
+    )
+      50% 0 / 82% 1px no-repeat,
+    linear-gradient(
+      90deg,
+      var(--rxt-ice, #79e8ff),
+      rgb(255 143 216 / 62%) 38.2%,
+      rgb(242 216 150 / 42%) 61.8%,
+      transparent 88%
+    )
+      no-repeat 0 100% / 100% 1px,
+    radial-gradient(
+      ellipse var(--rxl-depth-spread-x) 78% at 38.2% 0%,
+      rgb(121 232 255 / 10%),
+      transparent 70%
+    ),
+    linear-gradient(180deg, rgb(12 22 34), rgb(5 10 18));
+  box-shadow:
+    inset 0 0.5px 0 rgb(255 255 255 / 20%),
+    inset 0 -0.5px 0 rgb(0 0 0 / 65%);
+}
+
+/* The chapter guideways: dual-slit forged gold datum at the rule's head,
+   golden-ratio chromatic hairline, graduated Vernier scale, and caliper stop. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
   > .rxs-section
   > .rxs-section-heading {
   background:
-    linear-gradient(var(--rxt-gold, #f2d896), var(--rxt-gold, #f2d896)) 0 100% / 28px 3px no-repeat,
-    linear-gradient(90deg, var(--rxt-ice, #79e8ff), rgb(255 143 216 / 60%) 36%, var(--rxl-line) 70%, transparent)
+    linear-gradient(90deg, #fff 0 3px, var(--rxt-gold, #f2d896) 3px 32px) 0 100% / 32px 3px
+      no-repeat,
+    linear-gradient(var(--rxt-ice, #79e8ff), var(--rxt-ice, #79e8ff)) 36px 100% / 10px 3px
+      no-repeat,
+    linear-gradient(
+      90deg,
+      var(--rxt-ice, #79e8ff),
+      rgb(255 143 216 / 64%) 38.2%,
+      rgb(242 216 150 / 44%) 61.8%,
+      var(--rxl-line) 78%,
+      transparent
+    )
       no-repeat 0 100% / 100% 1px,
-    repeating-linear-gradient(90deg, rgb(121 232 255 / 36%) 0 1px, transparent 1px 12px) 40px
-      calc(100% - 5px) / min(44%, 360px) 4px no-repeat,
-    linear-gradient(rgb(121 232 255 / 42%), rgb(121 232 255 / 42%)) 100% 100% / 1px 9px no-repeat;
+    repeating-linear-gradient(90deg, rgb(121 232 255 / 38%) 0 1px, transparent 1px 12px) 52px
+      calc(100% - 5px) / min(46%, 380px) 4px no-repeat,
+    linear-gradient(rgb(242 216 150 / 56%), rgb(242 216 150 / 56%)) calc(100% - 6px) 100% / 6px 1px
+      no-repeat,
+    linear-gradient(rgb(121 232 255 / 50%), rgb(121 232 255 / 50%)) 100% 100% / 1px 11px no-repeat;
+}
+
+/* 04: Three-Form Edition Exhibition pedestal lighting & aura integration. */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure {
+  border-color: color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 36%, var(--rxl-plate-edge));
+  background:
+    radial-gradient(
+      64% 30% at 50% 100%,
+      var(--rxe-stage-floor, color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 34%, transparent)),
+      transparent 74%
+    ),
+    radial-gradient(
+      72% 58% at 50% 38.2%,
+      var(--rxe-stage-halo, color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 22%, transparent)),
+      transparent 72%
+    ),
+    radial-gradient(
+      84% 52% at 61.8% 23.6%,
+      var(--rxe-stage-counter, rgb(242 216 150 / 14%)),
+      transparent 74%
+    ),
+    linear-gradient(180deg, rgb(9 17 29 / 68%), rgb(2 6 12 / 94%));
+  box-shadow:
+    inset 0 0.5px 0 rgb(255 255 255 / 28%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 24%, transparent),
+    0 0 0 0.5px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 22%, transparent),
+    0 32px 76px -34px rgb(0 0 0 / 88%),
+    0 18px 48px -28px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 38%, transparent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+  > #stages
+  .rxs-stage-panel
+  > figure
+  > span[aria-hidden] {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 6%,
+    var(--rxs-stage-accent, #63e2ff) 38.2%,
+    #ffffff 50%,
+    var(--rxs-stage-accent, #63e2ff) 61.8%,
+    transparent 94%
+  );
+  box-shadow: 0 0 16px var(--rxs-stage-accent, #63e2ff);
+  opacity: 0.96;
 }
 
 /* The chapter map: each numeral plate is struck metal, a lit lip over a
@@ -1822,10 +2024,11 @@ html[data-family="special"]
   a
   > b {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(0 0 0 / 50%),
-    0 0 0 1px rgb(0 0 0 / 35%),
-    0 5px 12px -7px rgb(242 216 150 / 50%);
+    inset 0 0.5px 0 rgb(255 255 255 / 32%),
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 54%),
+    0 0 0 0.5px rgb(242 216 150 / 28%),
+    0 5px 12px -7px rgb(242 216 150 / 52%);
 }
 
 /* 01 / 02 / 05: the instrument plates take the glint and the ruler. */
@@ -1887,8 +2090,8 @@ html[data-family="special"]
   > #stages
   .rxe-comparison-card
   > img {
-  border-color: rgb(121 232 255 / 12%);
-  border-block-start-color: rgb(214 247 255 / 22%);
+  border-color: rgb(121 232 255 / 14%);
+  border-block-start-color: rgb(214 247 255 / 28%);
 }
 
 html[data-family="special"]
@@ -1898,15 +2101,16 @@ html[data-family="special"]
   .rxe-comparison-card[data-selected="true"] {
   background:
     radial-gradient(
-      80% 36% at 50% 0%,
-      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 15%, transparent),
+      80% 38.2% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 18%, transparent),
       transparent 72%
     ),
-    linear-gradient(180deg, rgb(121 232 255 / 6%), transparent 60%);
+    linear-gradient(180deg, rgb(121 232 255 / 7%), transparent 61.8%);
   box-shadow:
     inset 0 2px 0 var(--rxs-stage-accent, #63e2ff),
-    inset 0 3px 16px -8px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 75%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 22%, transparent);
+    inset 0 0.5px 0 rgb(255 255 255 / 26%),
+    inset 0 3px 16px -8px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 78%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 24%, transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1917,8 +2121,9 @@ html[data-family="special"]
     .rxe-comparison-card:hover {
     box-shadow:
       inset 0 2px 0 var(--rxs-stage-accent, #63e2ff),
-      inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 30%, transparent),
-      0 26px 50px -30px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 55%, transparent);
+      inset 0 0.5px 0 rgb(255 255 255 / 26%),
+      inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 32%, transparent),
+      0 26px 50px -30px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 58%, transparent);
   }
 }
 
@@ -1931,8 +2136,9 @@ html[data-family="special"]
   > .rxs-system-grid
   > article {
   box-shadow:
+    inset 0 0.5px 0 rgb(255 255 255 / 16%),
     inset 0 1px 0 rgb(255 255 255 / 9%),
-    inset 0 0 0 1px rgb(121 232 255 / 5%);
+    inset 0 0 0 1px rgb(121 232 255 / 6%);
 }
 
 html[data-family="special"]
@@ -1943,8 +2149,8 @@ html[data-family="special"]
   > article:nth-child(3) {
   box-shadow:
     inset 0 2px 0 var(--rxt-gold, #f2d896),
-    inset 0 3px 20px -10px rgb(242 216 150 / 60%),
-    inset 0 0 0 1px rgb(242 216 150 / 10%);
+    inset 0 3px 20px -10px rgb(242 216 150 / 64%),
+    inset 0 0 0 1px rgb(242 216 150 / 12%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1955,8 +2161,9 @@ html[data-family="special"]
     > .rxs-system-grid
     > article:hover {
     box-shadow:
+      inset 0 0.5px 0 rgb(255 255 255 / 24%),
       inset 0 1px 0 rgb(255 255 255 / 14%),
-      inset 0 0 0 1px rgb(121 232 255 / 16%),
+      inset 0 0 0 1px rgb(121 232 255 / 18%),
       0 24px 46px -30px rgb(121 232 255 / 50%);
   }
 
@@ -1968,14 +2175,30 @@ html[data-family="special"]
     > article:nth-child(3):hover {
     box-shadow:
       inset 0 2px 0 var(--rxt-gold, #f2d896),
-      inset 0 3px 20px -10px rgb(242 216 150 / 70%),
-      inset 0 0 0 1px rgb(242 216 150 / 18%),
-      0 24px 46px -30px rgb(242 216 150 / 45%);
+      inset 0 3px 20px -10px rgb(242 216 150 / 72%),
+      inset 0 0 0 1px rgb(242 216 150 / 20%),
+      0 24px 46px -30px rgb(242 216 150 / 48%);
   }
 }
 
 /* Forced colours: the layer's paint goes; the frames stay real borders. */
 @media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > :is(#performance, #p14, #stages, #system) {
+    background: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    :is(.rxs-assembly-heading, .rxs-assembly-footer) {
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
@@ -1986,10 +2209,22 @@ html[data-family="special"]
       .rxe-form-status,
       .rxe-form-comparison,
       .rxs-system-grid,
-      .rxs-specs
+      .rxs-specs,
+      .rxs-stage-panel > figure
     ) {
     border: 1px solid CanvasText;
     background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-page.rxs-rexonance-page
+    > #stages
+    .rxs-stage-panel
+    > figure
+    > span[aria-hidden] {
+    background: CanvasText;
     box-shadow: none;
   }
 

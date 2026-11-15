@@ -164,7 +164,7 @@ vec3 pose(float s, float wk, float a0, float r0, float yp, float spd, float pick
       float d = sqrt(dx * dx + dy * dy);
       float near = exp(-d * d / (2.0 * REACH * REACH));
       float age = im.z;
-      float fl = age * exp(-4.0 * age) * 4.0 * (1.0 - age);
+      float fl = age * exp(-4.2 * age) * 4.5 * (1.0 - age * age);
       float push = PUSH * im.w * fl * near;
       float inv = 1.0 / max(d, 0.03);
       x += dx * inv * push;
@@ -237,7 +237,18 @@ void main() {
   vec3 tone = pick < uTone.x ? vec3(${vec3(tones.ice)}) : (pick < uTone.y ? vec3(${vec3(tones.pink)}) : vec3(${vec3(tones.white)}));
   // Hot, it is the combustion's pale cyan (a pink-violet fringe on a few).
   vec3 hot = pick > FRINGE ? vec3(${vec3(B.fringe)}) : vec3(${vec3(B.hot)});
-  tone = mix(tone, hot, heat);
+  // Optical color temperature transition: ember orange -> incandescent white core -> nanite prismatic crystal light
+  vec3 ember = vec3(1.0, 0.44, 0.14);
+  vec3 incandescent = vec3(1.0, 0.98, 0.94);
+  vec3 hotEmber = mix(hot, ember, clamp(heat * 1.6 - 0.4, 0.0, 1.0));
+  vec3 hotCore = mix(hotEmber, incandescent, smoothstep(0.28, 0.75, heat));
+  vec3 prism = vec3(
+    0.5 + 0.5 * cos(pick * TAU),
+    0.5 + 0.5 * cos(pick * TAU + 2.094395),
+    0.5 + 0.5 * cos(pick * TAU + 4.18879)
+  );
+  vec3 crystalTone = mix(tone, prism, 0.14 * (1.0 - heat));
+  tone = mix(crystalTone, hotCore, heat);
   vColor = vec4(tone * a, a);
   // The keep-out (a caption's glyphs; sweep 2, F25): the position in its
   // box's own units, (0, 1) on both axes inside it — affine in pos, so it
@@ -259,10 +270,16 @@ varying float vW;
 varying vec4 vColor;
 varying vec2 vKeep;
 void main() {
-  // Nothing over the keep-out box, a hard cut as the 2D scene's clip: its
-  // fragments add nothing (additive blending), and every fragment still
-  // writes, so a tiled GPU keeps its fast path.
-  float open = 1.0 - step(0.0, vKeep.x) * step(vKeep.x, 1.0) * step(0.0, vKeep.y) * step(vKeep.y, 1.0);
+  // Nothing over the keep-out box: fragments inside [0, 1] write zero.
+  // Near the boundary outside the box, smooth cosine rolloff eliminates
+  // hard clipping steps across raster thresholds.
+  float inside = step(0.0, vKeep.x) * step(vKeep.x, 1.0) * step(0.0, vKeep.y) * step(vKeep.y, 1.0);
+  float borderDist = max(max(-vKeep.x, vKeep.x - 1.0), max(-vKeep.y, vKeep.y - 1.0));
+  float borderFade = vKeep.x >= -0.06 && vKeep.x <= 1.06 && vKeep.y >= -0.06 && vKeep.y <= 1.06
+    ? clamp(borderDist / 0.06, 0.0, 1.0)
+    : 1.0;
+  float cosineFade = 0.5 - 0.5 * cos(borderFade * 3.14159265);
+  float open = (1.0 - inside) * cosineFade;
   float x = clamp(vLocal.x, 0.0, vLen);
   float d = length(vec2(vLocal.x - x, vLocal.y)) / max(vW, 0.001);
   float core = 1.0 - clamp(d, 0.0, 1.0);

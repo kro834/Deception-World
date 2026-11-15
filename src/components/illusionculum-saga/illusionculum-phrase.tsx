@@ -18,7 +18,7 @@ export function phrase(text: string): ReactNode {
     <Fragment key={index}>
       {index > 0 ? <wbr /> : null}
       {/* An opening bracket stays with what follows it (WebKit broke after 『). */}
-      {/^[『「（《]./u.test(part) ? (
+      {/^[『「（《【]./u.test(part) ? (
         <>
           <span className="ics-nb">{part.slice(0, 2)}</span>
           {part.slice(2)}
@@ -35,7 +35,7 @@ export function phrase(text: string): ReactNode {
  * closes a phrase (a particle, an ending) before a new word, after 、。and a
  * closing bracket, and before an opening one. The words are unchanged. */
 const PROSE_SEAM =
-  /(?<=[\p{Script=Hiragana}])(?=[\p{Script=Han}\p{Script=Katakana}A-Za-z0-9『「（《])|(?<=[、。])(?=[^、。』」）》])|(?<=[』」）》])(?=[^\p{Script=Hiragana}、。』」）》])/gu;
+  /(?<=[\p{Script=Hiragana}])(?=[\p{Script=Han}\p{Script=Katakana}A-Za-z0-9『「（《【])|(?<=[、。])(?=[^、。』」）》】])|(?<=[』」）》】])(?=[^\p{Script=Hiragana}、。』」）》】])/gu;
 
 export function prose(text: string): ReactNode {
   const parts = text.split(PROSE_SEAM);
@@ -44,7 +44,7 @@ export function prose(text: string): ReactNode {
     <Fragment key={index}>
       {index > 0 ? <wbr /> : null}
       {/* An opening bracket stays with what follows it (WebKit broke after 『). */}
-      {/^[『「（《]./u.test(part) ? (
+      {/^[『「（《【]./u.test(part) ? (
         <>
           <span className="ics-nb">{part.slice(0, 2)}</span>
           {part.slice(2)}

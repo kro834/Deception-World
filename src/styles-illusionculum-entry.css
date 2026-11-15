@@ -1114,3 +1114,58 @@ html[data-rzn-constrained] .ice-entry-sigil {
     text-shadow: none;
   }
 }
+
+/* ================================================================
+   WAVE-4 DEEP OPTICAL UPGRADE: Nanocell assembly prism sheen &
+   spatial chromatic depth contrast enhancements.
+   ================================================================ */
+
+.load-gate.rider-route-dive.is-illusionculum-dive {
+  background:
+    radial-gradient(circle at 50% 48%, rgb(255 255 255 / 0.12), transparent 14%),
+    radial-gradient(circle at 40% 44%, rgb(47 79 216 / 0.42), transparent 34%),
+    radial-gradient(circle at 64% 54%, rgb(169 131 255 / 0.28), transparent 36%),
+    radial-gradient(circle at 50% 60%, rgb(233 184 102 / 0.12), transparent 42%),
+    linear-gradient(145deg, rgb(2 3 10 / 0.99), #02030a 70%);
+}
+
+.ice-entry-sigil {
+  filter: drop-shadow(0 0 8px rgb(166 230 255 / 42%)) drop-shadow(0 0 16px rgb(233 184 102 / 28%));
+}
+
+.ice-entry-cells {
+  box-shadow:
+    inset 0 0 24px rgb(166 230 255 / 35%),
+    0 0 32px rgb(169 131 255 / 22%);
+}
+
+.ice-entry-plate-cells {
+  box-shadow:
+    inset 0 0 12px rgb(166 230 255 / 45%),
+    0 0 18px rgb(233 184 102 / 24%);
+}
+
+.ice-entry-chips > i {
+  box-shadow:
+    inset 0 0 0 1px rgb(166 230 255 / 95%),
+    0 0 6px rgb(166 230 255 / 60%);
+}
+
+.ice-entry-chips > i[data-tone="1"] {
+  box-shadow:
+    inset 0 0 0 1px rgb(233 184 102 / 95%),
+    0 0 6px rgb(233 184 102 / 60%);
+}
+
+.ice-entry-chips > i[data-tone="2"] {
+  box-shadow:
+    inset 0 0 0 1px rgb(255 143 210 / 95%),
+    0 0 6px rgb(255 143 210 / 60%);
+}
+
+html[data-world-effects="economy"] .ice-entry-cells,
+html[data-world-effects="economy"] .ice-entry-plate-cells,
+html[data-rzn-constrained] .ice-entry-cells,
+html[data-rzn-constrained] .ice-entry-plate-cells {
+  box-shadow: none;
+}

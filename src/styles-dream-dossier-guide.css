@@ -1,5 +1,7 @@
 /* The guide stays inside its dossier; jumps never replace the route fragment. */
 .dream-page.dream-page .dream-dossier-guide {
+  --dg-gold: #cfa963;
+  --dg-gold-bright: #f2da9f;
   position: sticky;
   z-index: 8;
   top: max(76px, calc(env(safe-area-inset-top) + 60px));
@@ -10,12 +12,27 @@
   min-width: 0;
   margin: 0 0 28px;
   padding: 12px;
-  border: 1px solid #a98b58;
-  border-radius: 8px;
-  background: #1c1321;
+  border: 1px solid var(--dg-gold);
+  border-radius: 6px;
+  /* 蒔絵風の漆黒×金砂子プレート＋四隅金箔留め */
+  background:
+    linear-gradient(var(--dg-gold-bright) 0 0) 5px 5px / 14px 1.5px no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) 5px 5px / 1.5px 14px no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) 5px / 14px 1.5px no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) 5px / 1.5px 14px no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) 5px calc(100% - 5px) / 14px 1.5px no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) 5px calc(100% - 5px) / 1.5px 14px no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) calc(100% - 5px) / 14px 1.5px
+      no-repeat,
+    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) calc(100% - 5px) / 1.5px 14px
+      no-repeat,
+    radial-gradient(62% 95% at 16% 0%, rgb(236 198 124 / 14%), transparent 72%),
+    linear-gradient(148deg, #181020 0%, #0e0914 56%, #160e1d 100%);
   box-shadow:
-    0 8px 24px #08050bcc,
-    inset 0 1px #ead5a622;
+    0 10px 28px rgb(6 4 10 / 84%),
+    inset 0 0 0 3px #120b18,
+    inset 0 0 0 4px rgb(212 174 102 / 36%),
+    inset 0 1px 0 rgb(255 240 204 / 20%);
 }
 
 .dream-page.dream-page .dream-dossier-guide label {
@@ -25,56 +42,136 @@
 }
 
 .dream-page.dream-page .dream-dossier-guide label > span {
-  color: #ead5a6;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f0dbb0;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.5;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
+}
+
+.dream-page.dream-page .dream-dossier-guide label > span::before {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #e4c17a;
+  background: rgb(228 193 122 / 34%);
+  transform: rotate(45deg);
 }
 
 .dream-page.dream-page .dream-dossier-guide :is(select, button) {
+  box-sizing: border-box;
   min-width: 0;
   min-height: 44px;
-  border: 1px solid #a98b58;
-  border-radius: 4px;
-  color: #fff3dc;
-  background-color: #302234;
+  border: 1px solid #c9a45f;
+  border-radius: 3px;
+  color: #fff5e1;
+  background-color: #160f1e;
   font: inherit;
   font-size: 16px;
   line-height: 1.5;
 }
 
+/* 人物・項目選択 <select> — 蒔絵風の漆黒×金縁プレート＋真鍮シェブロン */
 .dream-page.dream-page .dream-dossier-guide select {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  padding: 8px 34px 8px 10px;
+  padding: 8px 40px 8px 12px;
+  border-color: #cca660;
+  background-color: #120b18;
   background-image:
-    linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #f3dfb0 50%),
+    linear-gradient(135deg, #f3dfb0 50%, transparent 50%),
+    linear-gradient(180deg, transparent 22%, rgb(216 178 106 / 44%) 22% 78%, transparent 78%),
+    radial-gradient(80% 120% at 0% 0%, rgb(232 194 120 / 12%), transparent 68%),
+    linear-gradient(180deg, #1b1224 0%, #100a16 100%);
   background-position:
-    right 18px center,
-    right 12px center;
-  background-size: 6px 6px;
+    right 19px center,
+    right 13px center,
+    right 34px center,
+    0 0,
+    0 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    1px 100%,
+    100% 100%,
+    100% 100%;
   background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgb(255 241 206 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    inset 0 0 0 2px rgb(208 170 98 / 15%);
   text-overflow: ellipsis;
   cursor: pointer;
 }
 
+/* 調書案内ボタン — 貴賓席パス風の二重金枠プレート */
 .dream-page.dream-page .dream-dossier-guide button {
-  padding: 8px 12px;
+  padding: 8px 16px;
+  border-color: #e5c27c;
+  background:
+    linear-gradient(#f7e5b9 0 0) 3px 3px / 8px 1px no-repeat,
+    linear-gradient(#f7e5b9 0 0) 3px 3px / 1px 8px no-repeat,
+    linear-gradient(#f7e5b9 0 0) calc(100% - 3px) calc(100% - 3px) / 8px 1px no-repeat,
+    linear-gradient(#f7e5b9 0 0) calc(100% - 3px) calc(100% - 3px) / 1px 8px no-repeat,
+    linear-gradient(180deg, #422338 0%, #261222 100%);
+  box-shadow:
+    inset 0 0 0 2px #1c0d19,
+    inset 0 0 0 3px rgb(228 190 116 / 68%),
+    inset 0 1px 0 rgb(255 244 216 / 30%),
+    0 4px 12px rgb(5 3 9 / 46%);
+  font-weight: 700;
+  letter-spacing: 0.08em;
   cursor: pointer;
   touch-action: manipulation;
 }
 
+.dream-page.dream-page .dream-dossier-guide :is(select, button):disabled {
+  border-color: #6a5b6e;
+  color: #b7abbe;
+  box-shadow: none;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])
+    .dream-page.dream-page
+    .dream-dossier-guide
+    :is(select, button) {
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .dream-page.dream-page .dream-dossier-guide select:hover {
-    border-color: #fff3dc;
+  .dream-page.dream-page .dream-dossier-guide select:not(:disabled):hover {
+    border-color: #f6e4b8;
+    box-shadow:
+      inset 0 1px 0 rgb(255 245 218 / 28%),
+      inset 0 0 0 2px rgb(236 198 124 / 28%),
+      0 4px 14px rgb(6 3 10 / 42%);
   }
 
-  .dream-page.dream-page .dream-dossier-guide button:hover {
-    border-color: #fff3dc;
-    background-color: #49304a;
+  .dream-page.dream-page .dream-dossier-guide button:not(:disabled):hover {
+    border-color: #fff3d6;
+    background:
+      linear-gradient(#fff3d6 0 0) 3px 3px / 10px 1px no-repeat,
+      linear-gradient(#fff3d6 0 0) 3px 3px / 1px 10px no-repeat,
+      linear-gradient(#fff3d6 0 0) calc(100% - 3px) calc(100% - 3px) / 10px 1px no-repeat,
+      linear-gradient(#fff3d6 0 0) calc(100% - 3px) calc(100% - 3px) / 1px 10px no-repeat,
+      linear-gradient(180deg, #562d49 0%, #34192f 100%);
+    box-shadow:
+      inset 0 0 0 2px #21101e,
+      inset 0 0 0 3px #f2d598,
+      inset 0 1px 0 rgb(255 248 228 / 38%),
+      0 6px 16px rgb(6 3 10 / 54%);
   }
 }
 
@@ -98,8 +195,18 @@
     padding: 8px;
   }
 
+  .dream-page.dream-page .dream-dossier-guide select {
+    padding: 8px 34px 8px 9px;
+    background-position:
+      right 17px center,
+      right 11px center,
+      right 29px center,
+      0 0,
+      0 0;
+  }
+
   .dream-page.dream-page .dream-dossier-guide button {
-    padding-inline: 10px;
+    padding-inline: 11px;
   }
 }
 
@@ -115,10 +222,16 @@
     color: CanvasText;
   }
 
+  .dream-page.dream-page .dream-dossier-guide label > span::before {
+    border-color: CanvasText;
+    background: CanvasText;
+  }
+
   .dream-page.dream-page .dream-dossier-guide :is(select, button) {
     color: ButtonText;
     border-color: ButtonText;
-    background-color: ButtonFace;
+    background: ButtonFace;
+    box-shadow: none;
   }
 
   .dream-page.dream-page .dream-dossier-guide select {
@@ -126,5 +239,10 @@
     appearance: auto;
     padding-inline: 8px;
     background-image: none;
+  }
+
+  .dream-page.dream-page .dream-dossier-guide :is(select, button):focus-visible,
+  .dream-page.dream-page .dream-dossier-copy :is(h2, h3)[tabindex="-1"]:focus-visible {
+    outline-color: Highlight;
   }
 }

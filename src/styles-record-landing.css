@@ -6,33 +6,35 @@
    src/lib/record-arrival.ts once the route and its cover have settled,
    and keeps the mark for six seconds or until focus moves on.
 
-   The mark is a reticle on its own fixed layer (.record-landing-layer,
-   aria-hidden, pointer-events: none): four ice brackets that close in on
-   the words once, pink to ice, a single light sweep, and a tag that says
-   what found it (HIT 「ゼウス」). A tall destination is marked at its first
-   heading on screen. Under reduced motion or economy rendering the same
-   frame stands still. The layer is clipped under the top chrome and
-   follows the anchor while it is held.
+   The mark is a specimen reticle on its own fixed layer (.record-landing-layer,
+   aria-hidden, pointer-events: none): four optical clasps and a dual-stage
+   caliper ring that close in on the words once, pink to ice with a brass
+   secondary resonance halo, a single light sweep, and a slip tag that says
+   what found it (HIT / FILE / GUIDE). Under reduced motion or economy
+   rendering the same frame stands still.
 
    Without the layer (forced colours, or before it is drawn) the element
-   itself carries a ring: the site's ice with the key visual's pink light
-   under it. Outline and shadow only: no layout. The sheet is linked by
-   the opener (library-page.tsx, use-open-result.ts).
+   itself carries a dual optical ring: the site's ice with warm brass and
+   magenta light under it. Outline and shadow only: no layout.
    ================================================================ */
-html [data-record-landing][data-record-landing][data-record-landing] {
+html [data-record-landing][data-record-landing][data-record-landing],
+html [data-record-arrival][data-record-arrival][data-record-arrival] {
   --rl-ice: 122 232 255;
   --rl-pink: 240 92 207;
-  outline: 2px solid rgb(var(--rl-ice) / 92%);
+  --rl-brass: 240 207 134;
+  outline: 2px solid rgb(var(--rl-ice) / 94%);
   outline-offset: 10px;
   box-shadow:
-    0 0 0 7px rgb(var(--rl-ice) / 9%),
-    0 0 0 8px rgb(var(--rl-pink) / 28%),
-    0 22px 56px -20px rgb(var(--rl-pink) / 55%);
+    0 0 0 5px rgb(var(--rl-ice) / 14%),
+    0 0 0 9px rgb(var(--rl-brass) / 26%),
+    0 0 0 11px rgb(var(--rl-pink) / 20%),
+    0 22px 56px -18px rgb(var(--rl-pink) / 52%);
 }
 
 /* A whole <main> or embedded document (a page without a heading) is framed
    from the inside, with no glow spilling past the viewport. */
-html :is(main, iframe)[data-record-landing][data-record-landing][data-record-landing] {
+html :is(main, iframe)[data-record-landing][data-record-landing][data-record-landing],
+html :is(main, iframe)[data-record-arrival][data-record-arrival][data-record-arrival] {
   outline-offset: -4px;
   box-shadow: none;
 }
@@ -41,6 +43,8 @@ html :is(main, iframe)[data-record-landing][data-record-landing][data-record-lan
    brief skip cue (styles-route-transitions.css) is not drawn over it. */
 html
   [data-record-landing][data-record-reticle][data-record-reticle][data-record-reticle][data-record-reticle],
+html
+  [data-record-arrival][data-record-reticle][data-record-reticle][data-record-reticle][data-record-reticle],
 html [data-skip-mark][data-record-reticle][data-record-reticle] {
   outline: none;
   box-shadow: none;
@@ -49,30 +53,51 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"])
-    [data-record-landing="live"][data-record-landing][data-record-landing] {
-    animation: record-landing-lock 960ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    [data-record-landing="live"][data-record-landing][data-record-landing],
+  html:not([data-world-effects="economy"])
+    [data-record-arrival="live"][data-record-arrival][data-record-arrival] {
+    animation: record-landing-lock 1080ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
   }
 
   html:not([data-world-effects="economy"])
-    :is(main, iframe)[data-record-landing="live"][data-record-landing][data-record-landing] {
+    :is(main, iframe)[data-record-landing="live"][data-record-landing][data-record-landing],
+  html:not([data-world-effects="economy"])
+    :is(main, iframe)[data-record-arrival="live"][data-record-arrival][data-record-arrival] {
     animation: record-landing-settle 960ms ease-out both;
   }
 }
 
-/* The ring closes in from outside, pink to ice; the glow blooms once. */
+/* Dual-stage optical ring pulse: primary magenta-to-ice lock-on followed by
+   a secondary brass-ice harmonic expansion that settles cleanly. */
 @keyframes record-landing-lock {
-  from {
-    outline-color: rgb(var(--rl-pink) / 95%);
-    outline-offset: 30px;
+  0% {
+    outline-color: rgb(var(--rl-pink) / 96%);
+    outline-offset: 32px;
     box-shadow:
       0 0 0 0 rgb(var(--rl-ice) / 0%),
+      0 0 0 0 rgb(var(--rl-brass) / 0%),
       0 0 0 0 rgb(var(--rl-pink) / 0%),
-      0 22px 56px -20px rgb(var(--rl-pink) / 0%);
+      0 22px 56px -18px rgb(var(--rl-pink) / 0%);
   }
 
-  55% {
+  46% {
     outline-color: rgb(var(--rl-ice) / 100%);
-    outline-offset: 8px;
+    outline-offset: 7px;
+    box-shadow:
+      0 0 0 3px rgb(var(--rl-ice) / 28%),
+      0 0 0 6px rgb(var(--rl-brass) / 42%),
+      0 0 0 12px rgb(var(--rl-pink) / 24%),
+      0 22px 56px -18px rgb(var(--rl-pink) / 62%);
+  }
+
+  74% {
+    outline-color: rgb(var(--rl-ice) / 96%);
+    outline-offset: 11px;
+    box-shadow:
+      0 0 0 6px rgb(var(--rl-ice) / 18%),
+      0 0 0 13px rgb(var(--rl-brass) / 30%),
+      0 0 0 18px rgb(var(--rl-pink) / 10%),
+      0 22px 56px -18px rgb(var(--rl-pink) / 56%);
   }
 }
 
@@ -107,19 +132,40 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   will-change: transform;
 }
 
-/* The frame: a hairline and a faint floor of ice, the pink light under it. */
+/* Primary specimen glass frame: an ice hairline with warm brass/pink rim light. */
 .record-landing-reticle::before {
   position: absolute;
   inset: 0;
   content: "";
-  border: 1px solid rgb(var(--rl-ice) / 30%);
+  border: 1px solid rgb(var(--rl-ice) / 38%);
   border-radius: 3px;
   background:
-    linear-gradient(90deg, rgb(var(--rl-ice) / 7%), rgb(var(--rl-ice) / 0%) 55%),
-    linear-gradient(180deg, rgb(var(--rl-pink) / 0%) 60%, rgb(var(--rl-pink) / 8%));
+    linear-gradient(90deg, rgb(var(--rl-ice) / 9%), rgb(var(--rl-ice) / 0%) 56%),
+    linear-gradient(180deg, rgb(var(--rl-gold) / 5%), rgb(var(--rl-pink) / 0%) 52%, rgb(var(--rl-pink) / 9%));
   box-shadow:
-    0 0 0 1px rgb(3 6 12 / 40%),
-    0 18px 44px -24px rgb(var(--rl-pink) / 70%);
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 0 0 1px rgb(3 6 12 / 46%),
+    0 18px 46px -22px rgb(var(--rl-pink) / 68%);
+}
+
+/* Secondary outer caliper ring: calibrated brass ticks around the reticle. */
+.record-landing-reticle::after {
+  position: absolute;
+  inset: -5px;
+  content: "";
+  border: 1px solid rgb(var(--rl-gold) / 42%);
+  border-radius: 5px;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) top / 100% 12px
+      no-repeat,
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) bottom / 100%
+      12px no-repeat;
+  mask:
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) top / 100% 12px
+      no-repeat,
+    linear-gradient(90deg, #000 12px, transparent 12px calc(100% - 12px), #000 0) bottom / 100%
+      12px no-repeat;
 }
 
 /* A frame round the on-screen part of a destination with no heading in
@@ -130,19 +176,25 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   box-shadow: 0 0 0 1px rgb(3 6 12 / 40%);
 }
 
+.record-landing-reticle[data-whole]::after {
+  display: none;
+}
+
 .record-landing-reticle[data-whole] > .record-landing-scan {
   display: none;
 }
 
-/* The brackets: ice, 2px, a pink glow. */
+/* The brackets: ice clasps, 2px, optical glow. */
 .record-landing-reticle > i {
   --rl-dx: 0px;
   --rl-dy: 0px;
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   border: 0 solid rgb(var(--rl-ice));
-  filter: drop-shadow(0 0 5px rgb(var(--rl-pink) / 80%));
+  filter:
+    drop-shadow(0 0 4px rgb(var(--rl-ice) / 55%))
+    drop-shadow(0 0 7px rgb(var(--rl-pink) / 68%));
 }
 
 .record-landing-reticle > i[data-corner="tl"] {
@@ -177,7 +229,7 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   border-width: 0 2px 2px 0;
 }
 
-/* The sweep: one pass of light, its leading edge ice (still: none). */
+/* The sweep: one pass of light, its leading edge ice with brass refraction. */
 .record-landing-scan {
   position: absolute;
   inset: 1px;
@@ -193,18 +245,15 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   background: linear-gradient(
     90deg,
     rgb(var(--rl-ice) / 0%) 0%,
-    rgb(var(--rl-ice) / 0%) 78%,
-    rgb(var(--rl-pink) / 14%) 94%,
-    rgb(var(--rl-ice) / 55%) 100%
+    rgb(var(--rl-ice) / 0%) 74%,
+    rgb(var(--rl-gold) / 14%) 88%,
+    rgb(var(--rl-pink) / 16%) 95%,
+    rgb(var(--rl-ice) / 62%) 100%
   );
   transform: translateX(-100%);
 }
 
-/* The tag: the HUD code on an ice key, then what found it. It sits on the
-   frame's top line beside the bracket; where the page has words there (an
-   eyebrow over the heading) or the bar is in the way, record-arrival.ts sets
-   it beside the frame's top right, or on its bottom line, whichever is free.
-   After three seconds it fades (the brackets keep the place). */
+/* The tag: the HUD code on an ice-brass key, then what found it. */
 .record-landing-tag {
   --rl-tag-y: -50%;
   position: absolute;
@@ -214,15 +263,18 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   align-items: center;
   gap: 8px;
   max-width: min(30em, calc(100vw - 48px));
-  padding: 2px 9px 2px 2px;
-  border: 1px solid rgb(var(--rl-ice) / 55%);
+  padding: 2px 10px 2px 2px;
+  border: 1px solid rgb(var(--rl-ice) / 62%);
   border-radius: 3px;
-  color: #eafcff;
-  background: linear-gradient(90deg, rgb(4 12 22 / 94%), rgb(10 8 22 / 92%));
+  color: #effcff;
+  background:
+    linear-gradient(90deg, transparent, rgb(var(--rl-gold) / 38%), transparent) top / 100% 1px
+      no-repeat,
+    linear-gradient(95deg, rgb(6 16 28 / 96%), rgb(12 10 24 / 94%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 10%),
-    0 0 0 1px rgb(var(--rl-pink) / 22%),
-    0 10px 24px -12px rgb(0 0 0 / 80%);
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 0 0 1px rgb(var(--rl-gold) / 22%),
+    0 12px 28px -10px rgb(0 0 0 / 84%);
   font:
     600 12px / 1.4 "Noto Sans JP",
     "Hiragino Sans",
@@ -241,11 +293,6 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   left: calc(100% + 12px);
 }
 
-/* With words on every side of the frame (a phone's heading between its
-   eyebrow and its first line), the tag is the code alone (HIT, GUIDE, FILE),
-   beside the frame or just inside its top right bracket where a shorter
-   first line leaves it empty; with no free place it stays out and the
-   brackets keep the place (record-arrival.ts chooseTag). */
 .record-landing-tag[data-compact] {
   gap: 0;
   padding-right: 2px;
@@ -277,13 +324,13 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   flex: none;
   padding: 3px 7px 2px;
   border-radius: 2px;
-  color: #03141c;
-  background: linear-gradient(90deg, rgb(var(--rl-ice)), #c9f6ff);
+  color: #04151e;
+  background: linear-gradient(115deg, rgb(var(--rl-ice)), #d9f9ff 62%, rgb(var(--rl-gold)));
   font:
-    400 12px / 1 "Michroma",
+    600 12px / 1 "Michroma",
     "Oxanium",
     sans-serif;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
 }
 
 .record-landing-tag > span {
@@ -293,7 +340,7 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 }
 
 /* ================================================================
-   Motion: the lock-on, once; gated by reduced motion and economy
+   Motion: dual-stage lock-on, once; gated by reduced motion and economy
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .record-landing-layer[data-mode="live"] {
@@ -304,13 +351,19 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
     .record-landing-layer[data-mode="live"]
     .record-landing-reticle
     > i {
-    animation: record-reticle-close 640ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation: record-reticle-close 660ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
   }
 
   html:not([data-world-effects="economy"])
     .record-landing-layer[data-mode="live"]
     .record-landing-reticle::before {
-    animation: record-reticle-in 520ms 240ms ease-out both;
+    animation: record-reticle-in 520ms 220ms ease-out both;
+  }
+
+  html:not([data-world-effects="economy"])
+    .record-landing-layer[data-mode="live"]
+    .record-landing-reticle::after {
+    animation: record-reticle-halo 920ms 280ms cubic-bezier(0.2, 0.72, 0.2, 1) both;
   }
 
   html:not([data-world-effects="economy"])
@@ -328,8 +381,6 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   html:not([data-world-effects="economy"])
     .record-landing-layer[data-mode="live"]
     .record-landing-tag {
-    /* In beside the bracket, then out after three seconds: the brackets
-       keep the place, the words around them come back. */
     animation:
       record-reticle-tag 420ms 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both,
       record-reticle-tag-out 420ms 3200ms ease-in forwards;
@@ -339,6 +390,29 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 @keyframes record-reticle-in {
   from {
     opacity: 0;
+  }
+}
+
+/* Secondary outer caliper pulse: expands slightly after primary clasp lock, then settles. */
+@keyframes record-reticle-halo {
+  0% {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+
+  48% {
+    opacity: 0.95;
+    transform: scale(0.995);
+  }
+
+  76% {
+    opacity: 0.78;
+    transform: scale(1.015);
+  }
+
+  100% {
+    opacity: 0.62;
+    transform: scale(1);
   }
 }
 
@@ -397,7 +471,8 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 }
 
 @media (forced-colors: active) {
-  html [data-record-landing][data-record-landing][data-record-landing] {
+  html [data-record-landing][data-record-landing][data-record-landing],
+  html [data-record-arrival][data-record-arrival][data-record-arrival] {
     outline: 3px solid Highlight;
     box-shadow: none;
     animation: none;

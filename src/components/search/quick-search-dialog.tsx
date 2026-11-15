@@ -27,6 +27,7 @@ const PER_GROUP = 3;
 const MAX_RESULTS = 9;
 const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
 const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
+const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.code ?? "";
 
 const SHORTCUTS = [
   { to: "/search", label: "全文検索", code: "SEARCH" },
@@ -103,7 +104,11 @@ export default function QuickSearchDialog({
           .slice(0, Math.min(PER_GROUP, left))
           .map((result) => ({ kind: "result", id: `qs-${result.document.id}`, result }));
         left -= items.length;
-        parts.push({ label: categoryLabel(group.category), items });
+        parts.push({
+          label: categoryLabel(group.category),
+          code: categoryCode(group.category),
+          items,
+        });
         list.push(...items);
       }
       if (results.length) {
@@ -118,7 +123,7 @@ export default function QuickSearchDialog({
           id: `qs-recent-${index}`,
           query,
         }));
-        parts.push({ label: "最近の検索", items });
+        parts.push({ label: "最近の検索", code: "RECENT", items });
         list.push(...items);
       }
       const links: Option[] = SHORTCUTS.map((link) => ({
@@ -126,7 +131,7 @@ export default function QuickSearchDialog({
         id: `qs-link-${link.code}`,
         ...link,
       }));
-      parts.push({ label: "ページ", items: links });
+      parts.push({ label: "ページ", code: "DESTINATIONS", items: links });
       list.push(...links);
     }
     return { sections: parts, options: list };
@@ -233,9 +238,18 @@ export default function QuickSearchDialog({
         </div>
         <div className="quick-search-field">
           <svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="10.5" cy="10.5" r="7.25" stroke="currentColor" strokeWidth="1.45" />
+            <circle
+              cx="10.5"
+              cy="10.5"
+              r="4.2"
+              stroke="currentColor"
+              strokeOpacity="0.45"
+              strokeWidth="0.9"
+              strokeDasharray="2.2 1.8"
+            />
             <path
-              d="m15.5 15.5 5 5"
+              d="M10.5 2v2M10.5 17v2M2 10.5h2M17 10.5h2M15.8 15.8 21 21"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
@@ -298,7 +312,8 @@ export default function QuickSearchDialog({
             >
               {section.label ? (
                 <div className="quick-search-group-label" role="presentation" aria-hidden="true">
-                  {section.label}
+                  {section.code ? <i>{section.code}</i> : null}
+                  <span>{section.label}</span>
                 </div>
               ) : null}
               {section.items.map((option) => {
@@ -414,7 +429,7 @@ export default function QuickSearchDialog({
         <div className="quick-search-foot">
           <p id="quick-search-hint">
             <span className="quick-search-keys">
-              ↑↓で選択・Enterで開く・Escで消去、もう一度で閉じる
+              <kbd>↑↓</kbd>で選択・<kbd>Enter</kbd>で開く・<kbd>Esc</kbd>で消去、もう一度で閉じる
             </span>
             <span className="quick-search-count" role="status">
               {trimmed

@@ -2,13 +2,13 @@ import { memo, useEffect, useRef } from "react";
 import { worldChapterLine, worldChapterMarker } from "./world-chapter-marker";
 
 const PALETTES = {
-  projection: { accent: "#7ae8ff", warm: "#ff5cc8", base: "#03060c" },
-  story: { accent: "#a9c4ff", warm: "#c9abff", base: "#080d1b" },
-  managers: { accent: "#c8a3ff", warm: "#ff7fa4", base: "#12091a" },
-  riders: { accent: "#cfd8e3", warm: "#a48bff", base: "#10151c" },
-  records: { accent: "#efb96f", warm: "#e98c5e", base: "#160e07" },
-  annex: { accent: "#6ddfba", warm: "#e3a674", base: "#07140f" },
-  finale: { accent: "#ffab66", warm: "#ffc27a", base: "#120804" },
+  projection: { accent: "#7ae8ff", warm: "#ff5cc8", aurora: "#4fd5ff", horizon: "#90b8ff", base: "#03060c" },
+  story: { accent: "#a9c4ff", warm: "#c9abff", aurora: "#7395ff", horizon: "#e2b8ff", base: "#080d1b" },
+  managers: { accent: "#c8a3ff", warm: "#ff7fa4", aurora: "#9c6eff", horizon: "#ffa2c4", base: "#12091a" },
+  riders: { accent: "#cfd8e3", warm: "#a48bff", aurora: "#84dcf5", horizon: "#dce8f5", base: "#10151c" },
+  records: { accent: "#efb96f", warm: "#e98c5e", aurora: "#ffd796", horizon: "#f4a976", base: "#160e07" },
+  annex: { accent: "#6ddfba", warm: "#e3a674", aurora: "#3ec6a4", horizon: "#a8ebd4", base: "#07140f" },
+  finale: { accent: "#ffab66", warm: "#ffc27a", aurora: "#ff884d", horizon: "#ffdca8", base: "#120804" },
 };
 type Phase = keyof typeof PALETTES;
 
@@ -71,6 +71,8 @@ export const WorldAtmosphere = memo(function WorldAtmosphere() {
     const paint = (layer: HTMLElement, phase: Phase) => {
       layer.style.setProperty("--atmosphere-light", PALETTES[phase].accent);
       layer.style.setProperty("--atmosphere-warm", PALETTES[phase].warm);
+      layer.style.setProperty("--atmosphere-aurora", PALETTES[phase].aurora);
+      layer.style.setProperty("--atmosphere-horizon", PALETTES[phase].horizon);
     };
     const calm = () =>
       reducedMotion.matches ||

@@ -31,26 +31,97 @@ export function DreamGlossarySearch() {
   return (
     <div className="dream-glossary-search" id="dream-glossary-search">
       <form role="search" aria-label="用語集を検索" onSubmit={(event) => event.preventDefault()}>
-        <label htmlFor={`${id}-query`}>語句・読み・説明から探す</label>
+        <label htmlFor={`${id}-query`}>
+          <svg
+            className="dream-glossary-search-crest"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M5.5 3.5h8.2a1.8 1.8 0 0 1 1.8 1.8v14.2l-5.9-3.4-5.9 3.4V5.3a1.8 1.8 0 0 1 1.8-1.8Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinejoin="round"
+            />
+            <circle
+              cx="15.8"
+              cy="10.2"
+              r="3.8"
+              fill="#201927"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M18.6 13l3.1 3.1"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+            />
+          </svg>
+          語句・読み・説明から探す
+        </label>
         <div className="dream-glossary-search-field">
-          <input
-            ref={inputRef}
-            id={`${id}-query`}
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key !== "Escape" || event.nativeEvent.isComposing || !query) return;
-              event.preventDefault();
-              event.stopPropagation();
-              clear();
-            }}
-            autoComplete="off"
-            enterKeyHint="search"
-            aria-describedby={`${id}-help ${id}-count`}
-            aria-controls={`${id}-results`}
-            placeholder="例：げんそうきょう、悪夢 恐怖"
-          />
+          <div className="dream-glossary-search-input-wrap" data-has-query={query ? "true" : undefined}>
+            <svg
+              className="dream-glossary-search-loupe"
+              viewBox="0 0 20 20"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle
+                cx="8.6"
+                cy="8.6"
+                r="5.4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.65"
+              />
+              <path
+                d="M6.4 6.7a3.1 3.1 0 0 1 3.6-.6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M12.6 12.6l4.1 4.1"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.85"
+                strokeLinecap="round"
+              />
+            </svg>
+            <input
+              ref={inputRef}
+              id={`${id}-query`}
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key !== "Escape" || event.nativeEvent.isComposing || !query) return;
+                event.preventDefault();
+                event.stopPropagation();
+                clear();
+              }}
+              autoComplete="off"
+              enterKeyHint="search"
+              aria-describedby={`${id}-help ${id}-count`}
+              aria-controls={`${id}-results`}
+              placeholder="例：げんそうきょう、悪夢 恐怖"
+            />
+            {query ? (
+              <span className="dream-glossary-search-esc" aria-hidden="true">
+                Esc
+              </span>
+            ) : null}
+          </div>
           <button type="button" onClick={clear} disabled={!query}>
             検索をクリア
           </button>
@@ -110,7 +181,23 @@ export function DreamGlossarySearch() {
                     ) : null}
                   </span>
                   <span className="dream-glossary-search-open" aria-hidden="true">
-                    ↗
+                    <svg
+                      className="dream-glossary-search-ribbon"
+                      viewBox="0 0 12 16"
+                      width="11"
+                      height="14"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path
+                        d="M2 1.2h8v13.2L6 11.7l-4 2.7V1.2Z"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.25"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <span>↗</span>
                   </span>
                 </a>
               </li>
@@ -118,6 +205,44 @@ export function DreamGlossarySearch() {
           </ol>
         ) : (
           <div className="dream-glossary-search-empty">
+            <svg
+              className="dream-glossary-search-empty-ornament"
+              viewBox="0 0 120 26"
+              width="120"
+              height="26"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M4 13h38M78 13h38"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeOpacity="0.65"
+              />
+              <path
+                d="M52 4.5h10v16l-5-3.2-5 3.2v-16Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.25"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="64.5"
+                cy="11.5"
+                r="4.2"
+                fill="#241c2b"
+                stroke="currentColor"
+                strokeWidth="1.3"
+              />
+              <path
+                d="M67.6 14.6l3.2 3.2"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
             <p>一致する用語がありません。言葉を短くするか、別の語句でお試しください。</p>
             <button type="button" onClick={clear}>
               検索をクリアして全語を表示
