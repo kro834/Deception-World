@@ -8,6 +8,7 @@ import {
   ROUTE_WARMUP_DEADLINE_MS,
 } from "../src/lib/route-warmup-deadline.ts";
 import { createTransitionDecorationClock } from "../src/lib/transition-decoration-clock.ts";
+import { guardedHref } from "../src/lib/guarded-href.ts";
 import { REXONANCE_ENTRY_TIMINGS } from "../src/lib/rexonance-calls.ts";
 
 const source = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
@@ -256,6 +257,7 @@ function mount(
           },
         };
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
+      if (name === "@/lib/guarded-href") return { guardedHref };
       if (name === "@/lib/transition-decoration-clock") return { createTransitionDecorationClock };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };
       if (name === "@/lib/rexonance-calls")
