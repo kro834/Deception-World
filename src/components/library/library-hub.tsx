@@ -183,27 +183,29 @@ export function LibraryHub({
                   title={resume.entry.title}
                   className="is-continue"
                 />
-                <p className="library-continue-kind">
-                  {LIBRARY_KINDS[resume.entry.kind]}
-                  <span>{formatVisitTime(resume.at, now)}に開いた資料</span>
-                </p>
-                <p className="library-continue-title" style={titleRunStyle(resume.entry.title)}>
-                  <DisplayName value={resume.entry.title} />
-                </p>
-                <div className="library-continue-actions">
-                  <GuardedLink
-                    to={resume.entry.path}
-                    hash={resume.entry.hash}
-                    assets={[]}
-                    className="library-primary-link"
-                  >
-                    続きを読む <span aria-hidden="true">↗</span>
-                  </GuardedLink>
-                  {resume.next ? (
-                    <GuardedLink to={resume.next.path} hash={resume.next.hash} assets={[]}>
-                      次の章：{resume.next.title} <span aria-hidden="true">→</span>
+                <div className="library-continue-caption">
+                  <p className="library-continue-kind">
+                    {LIBRARY_KINDS[resume.entry.kind]}
+                    <span>{formatVisitTime(resume.at, now)}に開いた資料</span>
+                  </p>
+                  <p className="library-continue-title" style={titleRunStyle(resume.entry.title)}>
+                    <DisplayName value={resume.entry.title} />
+                  </p>
+                  <div className="library-continue-actions">
+                    <GuardedLink
+                      to={resume.entry.path}
+                      hash={resume.entry.hash}
+                      assets={[]}
+                      className="library-primary-link"
+                    >
+                      続きを読む <span aria-hidden="true">↗</span>
                     </GuardedLink>
-                  ) : null}
+                    {resume.next ? (
+                      <GuardedLink to={resume.next.path} hash={resume.next.hash} assets={[]}>
+                        次の章：{resume.next.title} <span aria-hidden="true">→</span>
+                      </GuardedLink>
+                    ) : null}
+                  </div>
                 </div>
               </>
             ) : (
@@ -324,28 +326,35 @@ export function LibraryHub({
               <b aria-hidden="true">{saved.recent.length}</b>
             </div>
             {groups.length ? (
-              groups.map((group) => (
-                <div key={group.label} className="library-history-day">
-                  <p>{group.label}</p>
-                  <ul className="library-rows">
-                    {group.visits.map(({ entry, at }) => (
-                      <li key={entry.id} data-kind={entry.kind}>
-                        <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
-                          <RecordArtFrame
-                            art={pathArt(entry.path, entry.hash)}
-                            title={entry.title}
-                            className="is-row"
-                          />
-                          <small>{formatVisitClock(at, now)}</small>
-                          <span>
-                            <DisplayName value={entry.title} />
-                          </span>
-                        </GuardedLink>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))
+              <div
+                className="library-history-scroll"
+                role="region"
+                aria-labelledby="library-history-title"
+                tabIndex={0}
+              >
+                {groups.map((group) => (
+                  <div key={group.label} className="library-history-day">
+                    <p>{group.label}</p>
+                    <ul className="library-rows">
+                      {group.visits.map(({ entry, at }) => (
+                        <li key={entry.id} data-kind={entry.kind}>
+                          <GuardedLink to={entry.path} hash={entry.hash} assets={[]}>
+                            <RecordArtFrame
+                              art={pathArt(entry.path, entry.hash)}
+                              title={entry.title}
+                              className="is-row"
+                            />
+                            <small>{formatVisitClock(at, now)}</small>
+                            <span>
+                              <DisplayName value={entry.title} />
+                            </span>
+                          </GuardedLink>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             ) : (
               <p className="library-hub-empty">
                 {error ? "閲覧履歴を確認できません。" : "閲覧履歴はまだありません。"}

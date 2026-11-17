@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import {
@@ -77,6 +77,15 @@ export function WorldMap({
 }: State & { onChange: (patch: Partial<State>) => void }) {
   useWorldMode();
   const [menuOpen, setMenuOpen] = useState(false);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const restoredInitialQuery = useRef(false);
+  useEffect(() => {
+    if (restoredInitialQuery.current) return;
+    restoredInitialQuery.current = true;
+    // Safari can retain text typed into the server-rendered field before React attaches.
+    const value = searchInput.current?.value;
+    if (value != null && value !== q) onChange({ q: value });
+  }, [onChange, q]);
   const svgRef = useRef<SVGSVGElement>(null);
   const selected = WORLD_MAP_NODES.find((n) => n.id === node) ?? WORLD_MAP_NODES[0];
   const neighbors = useMemo(() => mapNeighbors(selected.id), [selected.id]);
@@ -162,6 +171,31 @@ export function WorldMap({
     list[wrapped]?.focus();
   };
   const selectedOptic = KIND_OPTICS[selected.kind];
+  const isFiltering = Boolean(q.trim()) || kind !== "all";
+  const directory = (
+    <section className="wm-index" data-filtered={isFiltering} aria-labelledby="wm-index-title">
+      <div className="wm-index-heading">
+        <h2 id="wm-index-title">資料から選ぶ</h2>
+        <span role="status">{results.length} 件</span>
+        {isFiltering && <a href="#wm-selected-record">選択中の資料へ ↓</a>}
+      </div>
+      <div className="wm-index-grid">
+        {results.map((n) => (
+          <button
+            key={n.id}
+            type="button"
+            data-kind={n.kind}
+            aria-pressed={n.id === selected.id}
+            onClick={() => choose(n.id)}
+          >
+            <small>{MAP_KINDS[n.kind]}</small>
+            <span>{n.title}</span>
+          </button>
+        ))}
+      </div>
+      {!results.length && <p>該当する資料がありません。検索語や種類を変えてください。</p>}
+    </section>
+  );
 
   return (
     <>
@@ -180,7 +214,6 @@ export function WorldMap({
         </header>
         <div className="wm-intro">
           <div>
-            <span className="wm-eyebrow">DECEPTION WORLD / CONNECTIONS</span>
             <h1 id="world-map-title">
               世界関係図<span>記録の、その先へ。</span>
             </h1>
@@ -196,8 +229,10 @@ export function WorldMap({
             <label className="wm-search">
               <span className="wm-search-label">検索</span>
               <input
+                ref={searchInput}
                 type="search"
                 value={q}
+                maxLength={120}
                 onChange={(e) => onChange({ q: e.target.value })}
                 placeholder="人物・形態・章を探す"
               />
@@ -207,7 +242,10 @@ export function WorldMap({
                 type="button"
                 className="wm-search-clear"
                 aria-label="検索語をクリア"
-                onClick={() => onChange({ q: "" })}
+                onClick={() => {
+                  onChange({ q: "" });
+                  searchInput.current?.focus();
+                }}
               >
                 ×
               </button>
@@ -232,29 +270,17 @@ export function WorldMap({
             )}
           </div>
         </div>
+        {isFiltering && directory}
         <div className="wm-workspace">
           <section
             className="wm-canvas"
             data-selected-kind={selected.kind}
             aria-label={`${selected.title}を中心とした相関図`}
           >
-            <div className="wm-map-caption">
-              <span data-kind={selected.kind}>{MAP_KINDS[selected.kind]}</span>
-              <strong>{selected.title}</strong>
-              <small>{neighborhood.length} 件の接続</small>
-            </div>
-            <div className="wm-legend" aria-hidden="true">
-              {(Object.entries(MAP_KINDS) as [MapKind, string][]).map(([k, label]) => (
-                <span key={k} data-kind={k}>
-                  <i />
-                  {label}
-                </span>
-              ))}
-            </div>
             <svg
               ref={svgRef}
               viewBox="-500 -360 1000 720"
-              role="img"
+              role="group"
               aria-label="選択した項目の直接の接続。下の一覧でも同じ項目を選択できます。"
               onPointerDown={(e) => {
                 if (!e.isPrimary || e.button !== 0 || drag.current) return;
@@ -327,10 +353,7 @@ export function WorldMap({
                 <g className="wm-astrolabe" aria-hidden="true">
                   <ellipse rx="430" ry="300" fill="url(#wm-core)" />
                   <circle r="120" fill="url(#wm-inner-corona)" />
-                  <path
-                    className="wm-sighting-axis"
-                    d="M-440 0H-48M48 0H440M0 -308V-48M0 48V308"
-                  />
+                  <path className="wm-sighting-axis" d="M-440 0H-48M48 0H440M0 -308V-48M0 48V308" />
                   <ellipse rx="105" ry="78" className="wm-rangefinder-ring" />
                   {orbitTracks.map(([rx, ry], idx) => (
                     <ellipse
@@ -424,30 +447,46 @@ export function WorldMap({
                 ))}
               </g>
             </svg>
-            <div className="wm-view-controls">
-              <button
-                type="button"
-                aria-label="縮小"
-                disabled={view.zoom <= 0.45}
-                onClick={() => zoom(-0.15)}
-              >
-                −
-              </button>
-              <output>{Math.round(view.zoom * 100)}%</output>
-              <button
-                type="button"
-                aria-label="拡大"
-                disabled={view.zoom >= 2}
-                onClick={() => zoom(0.15)}
-              >
-                ＋
-              </button>
-              <button type="button" onClick={() => setView({ x: 0, y: 0, zoom: 1 })}>
-                中央へ
-              </button>
+            <div className="wm-map-toolbar">
+              <div className="wm-legend" aria-hidden="true">
+                {(Object.entries(MAP_KINDS) as [MapKind, string][]).map(([k, label]) => (
+                  <span key={k} data-kind={k}>
+                    <i />
+                    {label}
+                  </span>
+                ))}
+              </div>
+              <div className="wm-view-controls">
+                <button
+                  type="button"
+                  aria-label="縮小"
+                  disabled={view.zoom <= 0.45}
+                  onClick={() => zoom(-0.15)}
+                >
+                  −
+                </button>
+                <output>{Math.round(view.zoom * 100)}%</output>
+                <button
+                  type="button"
+                  aria-label="拡大"
+                  disabled={view.zoom >= 2}
+                  onClick={() => zoom(0.15)}
+                >
+                  ＋
+                </button>
+                <button type="button" onClick={() => setView({ x: 0, y: 0, zoom: 1 })}>
+                  中央へ
+                </button>
+              </div>
             </div>
           </section>
-          <aside className="wm-detail" data-kind={selected.kind} aria-label="選択中の資料">
+          <aside
+            className="wm-detail"
+            id="wm-selected-record"
+            tabIndex={-1}
+            data-kind={selected.kind}
+            aria-label="選択中の資料"
+          >
             <div className="wm-detail-head">
               <span className="wm-eyebrow" data-kind={selected.kind}>
                 {MAP_KINDS[selected.kind]}
@@ -495,27 +534,7 @@ export function WorldMap({
             {!connections.length && <p>公開記録から確定できる接続はありません。</p>}
           </aside>
         </div>
-        <section className="wm-index" aria-labelledby="wm-index-title">
-          <div className="wm-index-heading">
-            <h2 id="wm-index-title">資料から選ぶ</h2>
-            <span role="status">{results.length} 件</span>
-          </div>
-          <div className="wm-index-grid">
-            {results.map((n) => (
-              <button
-                key={n.id}
-                type="button"
-                data-kind={n.kind}
-                aria-pressed={n.id === selected.id}
-                onClick={() => choose(n.id)}
-              >
-                <small>{MAP_KINDS[n.kind]}</small>
-                <span>{n.title}</span>
-              </button>
-            ))}
-          </div>
-          {!results.length && <p>該当する資料がありません。検索語や種類を変えてください。</p>}
-        </section>
+        {!isFiltering && directory}
         <footer className="wm-footer">
           <p>
             接続は公開資料で確認できるもののみを掲載。登場記録は所属・敵対・因果関係を意味しません。

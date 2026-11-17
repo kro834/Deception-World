@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { defaultParseSearch, Link } from "@tanstack/react-router";
 import { LibraryInquiry } from "./library-inquiry";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
@@ -43,7 +36,7 @@ import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
 
 const byPath = new Map(LIBRARY_ENTRIES.map((entry) => [entry.path, entry]));
-// The hero's index read-out: how the entrances divide by kind.
+// Counts on the three archive entrances.
 const KIND_COUNTS = (Object.keys(LIBRARY_KINDS) as LibraryKind[]).map(
   (id) => [id, LIBRARY_ENTRIES.filter((entry) => entry.kind === id).length] as const,
 );
@@ -52,7 +45,7 @@ const KIND_ART: Record<LibraryKind, string> = {
   person: "/characters/ciel",
   chapter: "/dream-chapter",
 };
-// The hero's visual index: the eight riders' files, in the World's order.
+// The eight riders' files, in the World's order.
 const CAST = RIDER_ART.flatMap((rider) => {
   const entry = byPath.get(`/riders/${rider.id}`);
   return entry ? [{ ...rider, entry }] : [];
@@ -472,7 +465,7 @@ export function LibraryPage({
   return (
     <>
       <SideMenuLayer open={menuOpen} onOpenChange={setMenuOpen} />
-      <div className="world command-records library-page library-atelier">
+      <div className="world command-records library-page library-atelier library-screening-room">
         <header className="library-topbar">
           <GuardedLink to="/world" assets={[]}>
             DECEPTION WORLD
@@ -485,7 +478,6 @@ export function LibraryPage({
         <main id="library-main" className="dg-focus-scope">
           <section className="library-intro library-hero">
             <div className="library-intro-copy">
-              <p className="library-eyebrow">資料室</p>
               <h1>
                 世界を辿る、
                 <br />
@@ -495,37 +487,66 @@ export function LibraryPage({
                 人物の記録、夢の章、展示と世界観アーカイブを横断し、しおりや問いの道標から何度でも再訪できます。
               </p>
               <nav className="library-jump-links" aria-label="資料室内の移動">
+                <a href="#library-browser" onClick={quietFlush}>
+                  資料を探す
+                </a>
                 <a href="#my-library" onClick={quietFlush}>
                   しおり・履歴
                 </a>
                 <a href="#inquiry" onClick={quietFlush}>
                   問いから辿る
                 </a>
+                <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
+                  全文検索 <span aria-hidden="true">↗</span>
+                </GuardedLink>
               </nav>
-              <GuardedLink to="/search" assets={[]} className="library-fulltext-link">
-                全文検索 <span aria-hidden="true">↗</span>
-              </GuardedLink>
             </div>
-            <div className="library-hero-cabinet" aria-hidden="true">
-              <div className="library-hero-total">
-                <span className="library-hero-total-label">公開資料</span>
-                <strong className="library-hero-total-value">{LIBRARY_ENTRIES.length}</strong>
-                <span className="library-hero-total-unit">件</span>
-              </div>
-              <div className="library-hero-meters">
-                {KIND_COUNTS.map(([id, count]) => (
-                  <div key={id} className="library-hero-meter-item" data-kind={id}>
-                    <span className="library-hero-meter-name">{LIBRARY_KINDS[id]}</span>
-                    <b className="library-hero-meter-count">{count}</b>
-                  </div>
-                ))}
-                <div className="library-hero-meter-item" data-kind="saved">
-                  <span className="library-hero-meter-name">保存しおり</span>
-                  <b className="library-hero-meter-count">
-                    {!savedKnown ? "—" : saved.bookmarks.length}
-                  </b>
-                </div>
-              </div>
+            <div className="library-screen" aria-hidden="true">
+              <RecordArtFrame
+                art={pathArt("/world")}
+                title="DECEPTION WORLD"
+                slot="continue"
+                eager
+              />
+            </div>
+          </section>
+          <LibraryHub
+            saved={saved}
+            ready={ready}
+            error={error}
+            onBrowseSaved={() => {
+              changeScope("saved");
+              window.requestAnimationFrame(() => {
+                resultsRef.current?.scrollIntoView({ block: "start" });
+                resultsRef.current?.focus({ preventScroll: true });
+              });
+            }}
+          />
+          <section className="library-discovery" aria-labelledby="library-discovery-title">
+            <h2 id="library-discovery-title">種類から探す</h2>
+            <div className="library-index-meter" role="group" aria-label="種類から探す">
+              {KIND_COUNTS.map(([id, count]) => (
+                <button
+                  key={id}
+                  type="button"
+                  data-kind={id}
+                  aria-pressed={kind === id}
+                  onClick={() => openKind(id)}
+                >
+                  <RecordArtFrame
+                    art={pathArt(KIND_ART[id])}
+                    title={LIBRARY_KINDS[id]}
+                    slot="continue"
+                  />
+                  <span className="library-kind-name">{LIBRARY_KINDS[id]}</span>
+                  <span className="library-kind-count">
+                    <b>{count}</b> 件の資料
+                  </span>
+                  <span className="library-kind-arrow" aria-hidden="true">
+                    ↘
+                  </span>
+                </button>
+              ))}
             </div>
           </section>
           <section
@@ -809,45 +830,6 @@ export function LibraryPage({
               </div>
             )}
           </section>
-          <section className="library-discovery" aria-labelledby="library-discovery-title">
-            <h2 id="library-discovery-title">種類から探す</h2>
-            <div className="library-index-meter" role="group" aria-label="種類から探す">
-              {KIND_COUNTS.map(([id, count]) => (
-                <button
-                  key={id}
-                  type="button"
-                  data-kind={id}
-                  aria-pressed={kind === id}
-                  onClick={() => openKind(id)}
-                >
-                  <RecordArtFrame
-                    art={pathArt(KIND_ART[id])}
-                    title={LIBRARY_KINDS[id]}
-                    slot="continue"
-                  />
-                  <span className="library-kind-name">{LIBRARY_KINDS[id]}</span>
-                  <span className="library-kind-count">
-                    <b>{count}</b> 件の資料
-                  </span>
-                  <span className="library-kind-arrow" aria-hidden="true">
-                    ↘
-                  </span>
-                </button>
-              ))}
-            </div>
-          </section>
-          <LibraryHub
-            saved={saved}
-            ready={ready}
-            error={error}
-            onBrowseSaved={() => {
-              changeScope("saved");
-              window.requestAnimationFrame(() => {
-                resultsRef.current?.scrollIntoView({ block: "start" });
-                resultsRef.current?.focus({ preventScroll: true });
-              });
-            }}
-          />
           <LibraryInquiry
             guide={guide}
             onGuideChange={(id) => {
@@ -860,7 +842,6 @@ export function LibraryPage({
             <div className="library-cast-board">
               <div className="library-cast-heading">
                 <h2>八人のライダー</h2>
-                <span>人物資料</span>
               </div>
               <nav
                 className="library-cast"
@@ -872,7 +853,7 @@ export function LibraryPage({
                     tile.scrollIntoView({ block: "nearest", inline: "nearest" });
                 }}
               >
-                {CAST.map(({ entry, no, tone, src, pos }) => (
+                {CAST.map(({ entry, tone, src, pos }) => (
                   <GuardedLink
                     key={entry.id}
                     to={entry.path}
@@ -892,9 +873,6 @@ export function LibraryPage({
                         draggable={false}
                         style={{ objectPosition: pos }}
                       />
-                    </span>
-                    <span className="library-cast-no" aria-hidden="true">
-                      RIDER {no}
                     </span>
                     <span className="library-cast-name">
                       <DisplayName value={entry.title} />

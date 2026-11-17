@@ -258,7 +258,7 @@ export function SearchPage({
 
   return (
     <div
-      className="world search-page search-observatory command-records"
+      className="world search-page search-observatory"
       data-search-page="true"
       data-search-mode={trimmed ? "find" : "browse"}
     >
@@ -272,7 +272,6 @@ export function SearchPage({
         <div className="search-observatory-desk">
           <section className="search-intro" aria-labelledby="search-title">
             <div>
-              <p className="search-eyebrow">全文検索</p>
               <h1 id="search-title">記録の先へ。</h1>
               <p className="search-lede">
                 名前から、物語から、気になる言葉から。散らばる記録をつなぎ、読みたい場所へ。
@@ -428,7 +427,6 @@ export function SearchPage({
             </div>
             {category !== "all" ? (
               <div className="search-active-filter">
-                <span>分類で絞り込み中</span>
                 <button
                   type="button"
                   aria-label={`${selectedLabel}の絞り込みを解除`}
@@ -446,20 +444,14 @@ export function SearchPage({
           <div className="search-results-heading">
             <h2 id="record-results-heading" ref={resultsRef} tabIndex={-1}>
               {trimmed ? "検索結果" : "公開資料の索引"}
-              <span>{selectedLabel}</span>
             </h2>
             <p role="status" aria-live="polite" aria-atomic="true">
               <strong>{total}</strong> 件{trimmed && <span>「{trimmed}」</span>}
             </p>
           </div>
-          {total > 0 ? (
+          {visibleCount < total ? (
             <p className="search-display-summary">
               {visibleCount} / {total} 件を表示。
-              {category === "all" && visibleCount < total
-                ? "分類ごとの抜粋です。「すべて見る」から、その分類の全件を確認できます。"
-                : visibleCount < total
-                  ? "続きは「さらに表示」から確認できます。"
-                  : "すべての検索結果を表示しています。"}
             </p>
           ) : null}
           {groups.length > 1 ? (
