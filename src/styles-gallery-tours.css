@@ -4,13 +4,10 @@
 .gallery-tours-page.command-support-tours {
   --gallery-ivory: #eef4f6;
   --gallery-muted: #bcc8d0;
-  --gallery-brass: #c9dce6;
+  --gallery-brass: #e8cf9e;
   --gallery-rule: rgb(156 182 198 / 0.28);
-  --gallery-tour-accent: #c9dce6;
-  background:
-    radial-gradient(ellipse 88% 40% at 50% -6%, rgb(183 220 231 / 0.13), transparent 68%),
-    radial-gradient(ellipse 56% 34% at 14% 20%, rgb(216 193 146 / 0.055), transparent 66%),
-    linear-gradient(180deg, #0b1118 0%, #070b10 52%, #06090e 100%);
+  --gallery-tour-accent: #e8cf9e;
+  background: radial-gradient(ellipse 75% 600px at 68% 0%, #202f48, transparent 100%), #090e18;
   color: var(--gallery-ivory);
 }
 .gallery-tours-page.command-support-tours .gallery-topbar {

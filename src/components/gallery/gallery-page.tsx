@@ -149,6 +149,7 @@ export function GalleryPage() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const favoriteFeedbackRef = useRef<HTMLParagraphElement>(null);
   const featureFeedbackRef = useRef<HTMLParagraphElement>(null);
+  const saveFeatureRef = useRef<HTMLButtonElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const restoreFocusRef = useRef(false);
   const viewerWorksRef = useRef<GalleryCollectionArtwork[]>([]);
@@ -1064,6 +1065,23 @@ export function GalleryPage() {
           </div>
         )}
         <section className="gallery-intro gallery-artwork-intro" aria-labelledby="gallery-title">
+          <header className="gallery-screening-heading">
+            <div className="gallery-intro-copy">
+              <h1 id="gallery-title">
+                <span className="gallery-title-opening">光と影の、</span>
+                <span>展示室。</span>
+              </h1>
+              <p className="gallery-intro-description">戦いの一瞬から、静かな横顔まで。</p>
+            </div>
+            <nav className="gallery-screening-nav" aria-label="ギャラリーの入口">
+              <a className="gallery-enter" href="#gallery-collection">
+                作品一覧 <span aria-hidden="true">↓</span>
+              </a>
+              <Link to="/gallery-tours">
+                鑑賞ツアー <span aria-hidden="true">↗</span>
+              </Link>
+            </nav>
+          </header>
           <ArtworkStage
             variant="gallery"
             artwork={{
@@ -1102,9 +1120,6 @@ export function GalleryPage() {
                     );
                   })}
                 </div>
-                <button type="button" onClick={() => changeFeature(featured.id)}>
-                  トップに飾る
-                </button>
               </div>
             }
             renderArtwork={(artwork) => {
@@ -1146,24 +1161,12 @@ export function GalleryPage() {
               );
             }}
           >
-            <div className="gallery-intro-copy">
-              <p className="gallery-eyebrow">DECEPTION WORLD / GALLERY</p>
-              <h1 id="gallery-title">
-                <span className="gallery-title-opening">光と影の、</span>
-                <span>展示室。</span>
-              </h1>
-              <p className="gallery-intro-description">
-                <span>戦いの一瞬から、静かな横顔まで。</span>
-                <span>
-                  <span className="gallery-copy-phrase">ディセプションワールドの景色を、</span>
-                  <span className="gallery-copy-phrase">一点ずつ巡るギャラリー。</span>
-                </span>
-              </p>
-            </div>
             <figure
               className="gallery-feature"
               style={{
-                ["--gallery-feature-ratio" as string]: (featured.width / featured.height).toFixed(3),
+                ["--gallery-feature-ratio" as string]: (featured.width / featured.height).toFixed(
+                  3,
+                ),
                 ["--gallery-ar" as string]: (featured.width / featured.height).toFixed(3),
               }}
             >
@@ -1171,28 +1174,44 @@ export function GalleryPage() {
                 <span>{numberFor(featured)}</span>
                 {titles[featured.id] && <span>{titles[featured.id]}</span>}
               </figcaption>
-              <details className="gallery-feature-settings">
-                <summary>作品の表示と設定</summary>
+              <div className="gallery-feature-settings">
+                <div className="gallery-feature-personal">
+                  <p>自分のブラウザーにトップ作品を保存</p>
+                  <button
+                    type="button"
+                    className="gallery-feature-save"
+                    ref={saveFeatureRef}
+                    aria-pressed={featuredId === featured.id}
+                    aria-disabled={featuredId === featured.id}
+                    onClick={() => {
+                      if (featuredId !== featured.id) changeFeature(featured.id);
+                    }}
+                  >
+                    {featuredId === featured.id ? "トップに設定済み" : "トップに飾る"}
+                  </button>
+                  {featuredId && (
+                    <button
+                      type="button"
+                      className="gallery-feature-reset"
+                      onClick={() => {
+                        changeFeature(null);
+                        saveFeatureRef.current?.focus({ preventScroll: true });
+                      }}
+                    >
+                      初期設定に戻す
+                    </button>
+                  )}
+                </div>
                 {!isCommunityGalleryId(featured.id) && (
                   <Link
                     className="exhibition-room-entry"
                     to="/exhibition"
                     search={{ work: featured.id }}
                   >
-                    展示室を大きく開く <span aria-hidden="true">↗</span>
+                    立体展示室で見る <span aria-hidden="true">↗</span>
                   </Link>
                 )}
-
-                <a href="#gallery-collection">トップ作品を選ぶ</a>
-                {featuredId && (
-                  <button type="button" onClick={() => changeFeature(null)}>
-                    初期設定に戻す
-                  </button>
-                )}
-                <p>
-                  作品を拡大して「トップに飾る」を選択。自分の表示だけに反映され、このブラウザーに保存されます。
-                </p>
-              </details>
+              </div>
               <div
                 className="gallery-stage-feedback"
                 tabIndex={0}
@@ -1210,22 +1229,6 @@ export function GalleryPage() {
                 )}
               </div>
             </figure>
-            <div className="gallery-intro-navigation">
-              <nav className="gallery-intro-actions" aria-label="ギャラリーの入口">
-                <a className="gallery-enter" href="#gallery-collection">
-                  展示室へ<span aria-hidden="true">↓</span>
-                </a>
-                <p className="gallery-tour-invitation">
-                  <Link to="/gallery-tours">
-                    テーマから作品を巡る <span aria-hidden="true">↗</span>
-                  </Link>
-                  <span>光や構図を手がかりに選ぶ、５つの展示ツアー。</span>
-                </p>
-              </nav>
-              <p className="gallery-edition">
-                COLLECTION <b>{GALLERY_ARTWORKS.length}</b> WORKS
-              </p>
-            </div>
           </ArtworkStage>
         </section>
         <section
@@ -1235,7 +1238,6 @@ export function GalleryPage() {
         >
           <div className="gallery-collection-heading">
             <div>
-              <p className="gallery-eyebrow">THE COLLECTION</p>
               <h2 id="gallery-collection-title">作品を巡る</h2>
             </div>
             <div className="gallery-collection-meta">

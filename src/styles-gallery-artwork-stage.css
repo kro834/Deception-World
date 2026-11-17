@@ -1,42 +1,146 @@
-.gallery-page .gallery-intro.gallery-artwork-intro {
+/* The screening room owns /gallery; ArtworkStage still owns the image swap. */
+html[data-family="gallery"] .gallery-page[data-gallery-page] {
+  --screen-paper: #f4ecdd;
+  --screen-brass: #dac39b;
+  --screen-edge: #746751;
+  --screen-rule: #343744;
+  --screen-well: #06080d;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-intro.gallery-artwork-intro {
   display: block;
   min-height: 0;
-  padding-block: clamp(24px, 4vw, 56px);
+  padding-block: clamp(20px, 4vw, 55px) clamp(32px, 5vw, 72px);
+}
+
+.gallery-screening-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px 36px;
+  margin-bottom: clamp(16px, 2vw, 30px);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-artwork-intro
-  .artwork-stage {
-  border-block: 1px solid rgb(222 200 161 / 28%);
-  background:
-    radial-gradient(ellipse 64% 46% at 32% -4%, rgb(234 212 170 / 12%), transparent 68%),
-    radial-gradient(ellipse 50% 42% at 84% 8%, rgb(154 226 248 / 8%), transparent 66%),
-    linear-gradient(160deg, rgb(15 22 34 / 86%) 0%, rgb(8 12 20 / 92%) 56%, rgb(5 8 14 / 95%) 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 249 236 / 14%),
-    inset 0 -1px 0 rgb(158 232 250 / 12%),
-    0 24px 56px rgb(0 0 0 / 42%);
+  .gallery-page[data-gallery-page]
+  .gallery-screening-heading
+  .gallery-intro-copy {
+  min-width: 0;
+  padding: 0;
+  animation: none;
 }
 
-.gallery-artwork-intro .gallery-intro-copy,
-.gallery-artwork-intro .gallery-feature,
-.gallery-artwork-intro .gallery-intro-navigation {
-  width: 100%;
-  max-width: none;
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-heading h1 {
+  margin: 0 0 8px;
+  font-family: var(--gallery-serif);
+  font-size: clamp(28px, 4.7vw, 68px);
+  text-wrap: initial;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-heading h1 span {
+  display: inline-block;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-screening-heading
+  .gallery-intro-description {
   margin: 0;
-  position: static;
+  padding: 0;
+  color: #c3beaf;
+  font-size: clamp(13px, 1.35vw, 16px);
+  line-height: 1.6;
 }
 
-.gallery-artwork-intro .gallery-feature-open {
+.gallery-screening-nav {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-nav a {
+  display: inline-flex;
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--screen-edge);
+  border-radius: 2px;
+  background: #111721;
+  box-shadow: none;
+  color: var(--screen-paper);
+  font-size: 13px;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-nav .gallery-enter {
+  background: var(--screen-paper);
+  color: #151923;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-artwork-intro .artwork-stage {
+  --stage-art-height: clamp(340px, 59svh, 660px);
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(214px, 1fr);
+  align-items: stretch;
+  min-height: 0;
+  gap: 0;
+  padding: 0;
+  border: 1px solid var(--screen-edge);
+  background: #10141d;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 30%);
+  perspective: none;
+}
+
+.gallery-artwork-intro .artwork-stage__visual {
+  display: grid;
+  gap: 0;
+  grid-template-rows: minmax(0, auto) 1fr;
+  height: auto;
+  background: var(--screen-well);
+  min-width: 0;
+}
+
+.gallery-artwork-intro .artwork-stage__halo,
+.gallery-artwork-intro .artwork-stage__plane,
+.gallery-artwork-intro .artwork-stage__frame-bevel {
+  display: none;
+}
+
+.gallery-artwork-intro .artwork-stage .artwork-stage__aperture {
+  padding: 0;
+  background: radial-gradient(ellipse at 48% 22%, #1a2334, var(--screen-well) 74%);
+}
+
+.gallery-artwork-intro .artwork-stage__image {
+  inset: clamp(8px, 1.35vw, 22px);
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  a.gallery-feature-open {
   display: flex;
   width: 100%;
   height: 100%;
+  min-height: 0;
+  align-items: center;
   padding: 0;
+  border: 0;
+  outline: none;
   background: transparent;
+  box-shadow: none;
 }
 
 .gallery-page .gallery-artwork-intro .gallery-feature-open img {
+  display: block;
   width: 100%;
   height: 100%;
   max-height: none;
@@ -45,67 +149,52 @@ html[data-family="gallery"]
   transform: none;
 }
 
-.gallery-artwork-intro .gallery-intro-copy h1 {
-  font-size: clamp(28px, 3.2vw, 52px);
+.gallery-artwork-intro .artwork-stage__controls {
+  position: static;
+  margin: 0;
+  min-height: 0;
 }
 
-.gallery-artwork-intro .gallery-intro-description {
-  font-size: clamp(14px, 1.3vw, 18px);
-}
-
-/* Miniature Framed Deck — recessed exhibition rail beneath the main aperture. */
-html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-stage-controls {
-  display: grid;
+.gallery-artwork-intro .gallery-stage-controls {
   width: 100%;
-  gap: 12px;
-  padding: 10px 12px 12px;
-  border: 1px solid rgb(222 200 161 / 22%);
-  background:
-    linear-gradient(180deg, rgb(255 249 236 / 5%), transparent 46%),
-    linear-gradient(180deg, #0e1420, #080c14);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 238 / 12%),
-    0 12px 28px rgb(0 0 0 / 34%);
+  min-width: 0;
+  padding: clamp(8px, 1.3vw, 16px);
+  border-top: 1px solid var(--screen-rule);
+  background: #0e121b;
+}
+
+.gallery-artwork-intro .gallery-stage-candidates {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(4px, 1vw, 12px);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page]
-  .gallery-stage-candidates {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 6px 4px 8px;
-  scrollbar-width: thin;
-}
-
-html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
   .gallery-stage-candidates
   button {
-  flex: 0 0 68px;
-  min-height: 82px;
   display: grid;
-  justify-items: center;
-  align-content: space-between;
-  gap: 4px;
-  padding: 5px 5px 4px;
-  border: 1px solid rgb(216 198 164 / 24%);
+  min-height: 50px;
+  min-width: 0;
+  grid-template-rows: clamp(30px, 5.4vw, 68px) auto;
+  place-items: center;
+  gap: 3px;
+  padding: 4px 2px;
+  border: 1px solid #48515f;
+  border-bottom-width: 2px;
   border-radius: 2px;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgb(236 216 178 / 10%), transparent 70%),
-    linear-gradient(180deg, #131b28, #090d15);
-  box-shadow:
-    inset 0 1px 0 rgb(255 250 240 / 12%),
-    inset 0 4px 10px rgb(0 0 0 / 45%);
-  color: #cbc6bc;
-  cursor: pointer;
+  background: #0b0e15;
+  box-shadow: none;
+  color: #dad5c9;
 }
 
 .gallery-stage-candidates img {
-  width: 54px;
-  height: 54px;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 1px;
   object-fit: contain;
   filter: none;
   transform: none;
@@ -113,90 +202,155 @@ html[data-family="gallery"]
 
 .gallery-stage-candidates span {
   display: block;
-  font-size: 12px;
+  max-width: 100%;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
   .gallery-stage-candidates
   button[aria-pressed="true"] {
-  border-color: #ead6b0;
-  outline: 2px solid var(--gallery-brass, #dec8a1);
-  outline-offset: 1px;
-  background:
-    radial-gradient(ellipse 85% 65% at 50% 0%, rgb(242 222 184 / 22%), transparent 72%),
-    linear-gradient(180deg, #1c283a, #0e1622);
-  box-shadow:
-    inset 0 1px 0 rgb(255 251 242 / 28%),
-    inset 0 -2px 0 #9ee8fa,
-    0 6px 16px rgb(0 0 0 / 42%);
-  color: #f8f5ee;
+  border-color: var(--screen-brass);
+  background: #25222a;
+  color: #fff7ea;
+}
+
+.gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information {
+  display: grid;
+  align-items: center;
+  min-width: 0;
+  padding: clamp(16px, 2.6vw, 40px);
+  border-inline-start: 1px solid var(--screen-rule);
+  background: linear-gradient(147deg, #222431, #131721 55%);
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-  .gallery-stage-controls
-  > button {
-  min-height: 44px;
-  padding-inline: 16px;
-  border: 1px solid rgb(222 200 161 / 30%);
-  border-radius: 2px;
-  background: linear-gradient(180deg, #172131, #0d131d);
-  box-shadow: inset 0 1px 0 rgb(255 249 236 / 14%);
-  color: #f4f1ea;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
-
-.gallery-artwork-intro .artwork-stage__visual {
-  height: auto;
-}
-
-.gallery-artwork-intro .artwork-stage__halo {
-  inset: -8px 1% auto;
-  height: calc(var(--stage-art-height) + 16px);
-}
-
-.gallery-artwork-intro .artwork-stage__plane {
-  inset: 0 2% auto;
-  height: var(--stage-art-height);
-}
-
-.gallery-artwork-intro .artwork-stage__frame-bevel {
-  inset: 0 2% auto;
-  height: var(--stage-art-height);
-}
-
-.gallery-artwork-intro .artwork-stage__controls {
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature {
   position: static;
-  margin-top: 12px;
-  min-height: 136px;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  animation: none;
 }
 
-/* Selection changes text, not the reading position of the collection below. */
 html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
-  .gallery-feature figcaption {
+  .gallery-feature
+  figcaption {
   box-sizing: border-box;
+  display: block;
   height: 84px;
   min-height: 84px;
   max-height: 84px;
-  flex: none;
+  margin: 0;
+  padding: 0 2px 8px;
   overflow: auto;
   scrollbar-gutter: stable;
-  align-items: baseline;
-  gap: 12px;
-  margin-top: 10px;
-  padding: 10px 2px 4px;
   border: 0;
-  border-top: 1px solid rgb(222 200 161 / 18%);
-  background: transparent;
-  box-shadow: none;
+  color: var(--screen-paper);
+  font-family: var(--gallery-serif);
+  font-size: clamp(18px, 2.35vw, 31px);
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+.gallery-artwork-intro .gallery-feature figcaption span:first-child {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--screen-brass);
+  font-size: 12px;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-settings {
+  display: grid;
+  grid-template-rows: auto 44px;
+  gap: 10px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--screen-rule);
+}
+
+.gallery-feature-personal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 46px 44px;
+  gap: 5px;
+}
+
+html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature-personal p {
+  color: #cec8bb;
   font-size: 13px;
-  line-height: 1.65;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-save,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-reset,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .exhibition-room-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  max-width: none;
+  margin: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--screen-edge);
+  border-radius: 2px;
+  background: #151a25;
+  box-shadow: none;
+  color: var(--screen-paper);
+  font-size: 13px;
+  text-align: center;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-save {
+  background: var(--screen-brass);
+  color: #191a22;
+  font-weight: 650;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-save[aria-pressed="true"] {
+  background: #2b2930;
+  color: var(--screen-paper);
+  cursor: default;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-artwork-intro
+  .gallery-feature-reset {
+  border-color: transparent;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.gallery-feature-settings > .exhibition-room-entry {
+  gap: 10px;
 }
 
 html[data-family="gallery"]
@@ -207,122 +361,116 @@ html[data-family="gallery"]
   height: 54px;
   min-height: 54px;
   max-height: 54px;
+  margin: 0;
   overflow: auto;
   scrollbar-gutter: stable;
-  margin-top: 4px;
-  padding: 0 2px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
   color: #d6d1c6;
   font-size: 12px;
   line-height: 1.55;
 }
 
-html[data-family="gallery"] .gallery-artwork-intro .gallery-stage-feedback p {
-  margin-block: 4px;
-  padding: 6px 10px;
-  border-left: 2px solid var(--gallery-brass, #dec8a1);
-  background: rgb(12 18 28 / 56%);
-}
-
-@media (max-width: 700px) {
-  .gallery-page .gallery-intro.gallery-artwork-intro {
-    padding-block: 16px 32px;
-  }
-
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-artwork-intro
-    .artwork-stage {
-    --stage-art-height: clamp(220px, 66vw, 340px);
-    gap: 18px;
-    padding: 14px 12px;
-  }
-
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-artwork-intro
-    .artwork-stage[data-format="landscape"] {
-    --stage-art-height: clamp(192px, 56vw, 290px);
-  }
-
-  .gallery-artwork-intro .artwork-stage__halo {
-    inset: -6px 0 auto;
-  }
-
-  .gallery-artwork-intro .artwork-stage__plane,
-  .gallery-artwork-intro .artwork-stage__frame-bevel {
-    inset: 0 0 auto;
-  }
-
-  .gallery-artwork-intro .artwork-stage__controls {
-    margin-top: 8px;
-    min-height: 0;
-  }
-
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page]
-    .gallery-stage-controls {
-    gap: 8px;
-    padding: 8px 10px 10px;
-  }
-
-  html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-stage-candidates
-    button {
-    flex-basis: 60px;
-    min-height: 74px;
-  }
-
-  .gallery-stage-candidates img {
-    width: 48px;
-    height: 48px;
-  }
+.gallery-artwork-intro .gallery-stage-feedback p {
+  margin: 4px 0 0;
+  padding: 4px 8px;
+  border-left: 2px solid var(--screen-brass);
 }
 
 html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
   .gallery-artwork-intro
-  :is(figcaption, .gallery-stage-feedback):focus-visible {
-  outline: 2px solid var(--gallery-brass, #c9b587);
-  outline-offset: -2px;
+  :is(a, button, figcaption, .gallery-stage-feedback):focus-visible,
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-screening-nav
+  a:focus-visible {
+  outline: 2px solid #f4dba4;
+  outline-offset: 2px;
 }
 
-@media (hover: hover) and (pointer: fine) {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-collection-heading
+  h2 {
+  margin: 0;
+  font-family: var(--gallery-serif);
+  font-size: clamp(26px, 4vw, 46px);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-work
+  figcaption {
+  margin-top: 0;
+  padding: 10px 2px 4px;
+  border-block: 1px solid var(--screen-rule);
+  background: none;
+}
+
+@media (max-width: 740px) {
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-stage-candidates
-    button:hover:not([aria-pressed="true"]) {
-    border-color: rgb(232 210 168 / 58%);
-    color: #f6f3ec;
+    .gallery-page[data-gallery-page]
+    .gallery-artwork-intro
+    .artwork-stage {
+    --stage-art-height: clamp(222px, 64vw, 408px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information {
+    border-inline-start: 0;
+    border-top: 1px solid var(--screen-rule);
   }
 
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-stage-controls
-    > button:hover:not(:disabled) {
-    border-color: rgb(232 210 168 / 66%);
-    color: #fff;
+    .gallery-page[data-gallery-page]
+    .gallery-artwork-intro
+    .gallery-feature-settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gallery-feature-personal {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 46px;
+  }
+
+  .gallery-feature-personal p {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 540px) {
+  .gallery-screening-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .gallery-screening-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-height: 540px) and (orientation: landscape) and (min-width: 741px) {
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page]
+    .gallery-artwork-intro
+    .artwork-stage {
+    --stage-art-height: clamp(214px, 67svh, 340px);
   }
 }
 
 @media (forced-colors: active) {
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    .gallery-stage-controls {
-    border-color: CanvasText;
-    background: Canvas;
-    box-shadow: none;
-    color: CanvasText;
-  }
-
+    .gallery-page[data-gallery-page]
+    .gallery-artwork-intro
+    .gallery-stage-candidates
+    button[aria-pressed="true"],
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
-    :is(.gallery-feature figcaption, .gallery-stage-feedback, .gallery-stage-feedback p) {
-    border-color: CanvasText;
-    background: transparent;
-    box-shadow: none;
-    color: CanvasText;
+    .gallery-page[data-gallery-page]
+    .gallery-artwork-intro
+    .gallery-feature-save[aria-pressed="true"] {
+    border: 2px solid Highlight;
   }
 }

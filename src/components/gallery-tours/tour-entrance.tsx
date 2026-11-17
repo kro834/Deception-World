@@ -49,9 +49,6 @@ export function GalleryTourEntrance({
         aria-labelledby="gallery-tour-heading"
       >
         <div className="gallery-tour-introduction-copy">
-          <p className="gallery-tour-eyebrow">
-            GUIDED EXHIBITIONS · {GALLERY_TOURS.length} COURSES
-          </p>
           <h1 id="gallery-tour-heading" tabIndex={-1}>
             光景を、旅する。
           </h1>
@@ -128,7 +125,6 @@ export function GalleryTourEntrance({
       >
         <div className="gallery-tour-catalogue-heading">
           <div>
-            <p className="gallery-tour-eyebrow">CHOOSE YOUR PATH</p>
             <h2 id="gallery-tour-catalogue-heading">いま惹かれる景色から。</h2>
           </div>
           <p>気になる光や仕草を入口に、全体を眺めながら一枚ずつ。途中の作品からも巡れます。</p>
@@ -183,23 +179,21 @@ export function GalleryTourEntrance({
                   <span className="gallery-tour-course-number" aria-hidden="true">
                     {String(tourIndex + 1).padStart(2, "0")}
                   </span>
-                  <span className="gallery-tour-course-count-plate" aria-hidden="true">
-                    {tour.stops.length} WORKS
-                  </span>
                   {artwork && (
-                    <div className="gallery-tour-course-mat">
+                    <figure className="gallery-tour-course-mat">
                       <img
                         className="gallery-tour-course-cover"
                         src={artwork.medium}
                         srcSet={artwork.srcSet}
-                        sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 980px) 45vw, 35vw"
+                        sizes="(max-width: 760px) calc(100vw - 48px), 43vw"
                         width={artwork.width}
                         height={artwork.height}
                         alt={artwork.alt}
                         loading="lazy"
                         decoding="async"
                       />
-                    </div>
+                      <figcaption>{artwork.title}</figcaption>
+                    </figure>
                   )}
                 </div>
                 <div className="gallery-tour-course-body">
@@ -248,13 +242,13 @@ export function GalleryTourEntrance({
                   <div className="gallery-tour-course-bottom">
                     <div className="gallery-tour-course-position">
                       <span>全{tour.stops.length}点</span>
-                      <span>
-                        {hasSavedPosition
-                          ? reachedEnd
+                      {hasSavedPosition && (
+                        <span>
+                          {reachedEnd
                             ? "最後の作品まで到達"
-                            : `再開位置 ${stopIndex + 1} / ${tour.stops.length}`
-                          : "最初の一枚から"}
-                      </span>
+                            : `再開位置 ${stopIndex + 1} / ${tour.stops.length}`}
+                        </span>
+                      )}
                     </div>
                     {resumeArtwork && (
                       <p className="gallery-tour-course-resume-work">

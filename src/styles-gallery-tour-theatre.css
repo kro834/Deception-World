@@ -28,11 +28,11 @@
   gap: 24px;
   margin-bottom: clamp(22px, 3vw, 36px);
   padding-bottom: clamp(14px, 2vw, 22px);
-  border-bottom: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 24%, rgb(156 182 198 / 0.18));
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--gallery-tour-accent) 24%, rgb(156 182 198 / 0.18));
 }
 
-.gallery-tour-theatre-kicker,
-.gallery-tour-stop-label {
+.gallery-tour-theatre-kicker {
   margin: 0 0 12px;
   color: var(--gallery-tour-accent);
   font-size: 12px;
@@ -61,8 +61,8 @@
 
 .gallery-tour-theatre-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(256px, 324px);
-  gap: clamp(24px, 3vw, 44px);
+  grid-template-columns: minmax(0, 1fr) minmax(274px, 320px);
+  gap: clamp(16px, 2.5vw, 34px);
   align-items: start;
 }
 
@@ -171,24 +171,15 @@
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-stage {
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 40%, #637986);
-  background:
-    radial-gradient(
-      ellipse 50% 20% at 50% 0%,
-      color-mix(in srgb, var(--gallery-tour-accent) 24%, transparent),
-      transparent 78%
-    ),
-    radial-gradient(
-      ellipse 72% 62% at 50% 34%,
-      color-mix(in srgb, var(--gallery-tour-accent) 16%, #1b2a36),
-      #070c12 70%,
-      #04070b 100%
-    );
+  border-color: rgb(184 166 132 / 0.46);
+  background: radial-gradient(
+    ellipse 70% 85% at 50% 20%,
+    color-mix(in srgb, var(--gallery-tour-accent) 12%, #131c2a),
+    #04060b 92%
+  );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.16),
-    inset 0 0 0 5px rgb(4 7 11 / 0.62),
-    0 0 44px -12px color-mix(in srgb, var(--gallery-tour-accent) 26%, transparent),
-    0 28px 70px rgb(0 0 0 / 0.64);
+    inset 0 0 0 4px #080b12,
+    0 24px 64px rgb(0 0 0 / 0.46);
 }
 
 .gallery-tour-stage::before {
@@ -341,7 +332,10 @@
 
   .gallery-tours-page.command-support-tours
     .gallery-tour-theatre
-    :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"]:hover:not(:disabled) {
+    :is(
+      .gallery-tour-play-button,
+      .gallery-tour-view-controls button
+    )[aria-pressed="true"]:hover:not(:disabled) {
     border-color: #f4fbfe;
     background: linear-gradient(
       180deg,
@@ -497,9 +491,7 @@
   letter-spacing: 0.14em;
 }
 
-.gallery-tour-theatre
-  .gallery-tour-thumbnail[data-visited="true"]:not([aria-current="step"])
-  span {
+.gallery-tour-theatre .gallery-tour-thumbnail[data-visited="true"]:not([aria-current="step"]) span {
   color: color-mix(in srgb, var(--gallery-tour-accent) 72%, var(--gallery-tour-muted));
 }
 
@@ -508,12 +500,11 @@
   .gallery-tour-theatre
   .gallery-tour-thumbnail[aria-current="step"] {
   border-color: var(--gallery-tour-accent);
-  background:
-    radial-gradient(
-      ellipse at 50% 34%,
-      color-mix(in srgb, var(--gallery-tour-accent) 20%, #162430),
-      #091018 82%
-    );
+  background: radial-gradient(
+    ellipse at 50% 34%,
+    color-mix(in srgb, var(--gallery-tour-accent) 20%, #162430),
+    #091018 82%
+  );
   color: var(--gallery-tour-accent);
   box-shadow:
     inset 0 0 0 1px var(--gallery-tour-accent),
@@ -546,14 +537,14 @@
 
 .gallery-tour-stop-caption {
   position: relative;
-  padding: 18px 0 26px;
+  padding: clamp(16px, 2vw, 25px);
   border-top: 1px solid rgb(218 197 157 / 0.2);
   border-bottom: 1px solid rgb(218 197 157 / 0.2);
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-stop-caption {
-  border-top-color: rgb(156 182 198 / 0.22);
-  border-bottom-color: rgb(156 182 198 / 0.22);
+  border: 1px solid rgb(143 175 205 / 0.28);
+  background: linear-gradient(155deg, #1b283a, #101824 80%);
 }
 
 .gallery-tour-stop-caption::before {
@@ -569,14 +560,12 @@
 }
 
 .gallery-tour-stop-caption h2 {
-  font-size: clamp(19px, 2vw, 24px);
-  line-height: 1.75;
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1.55;
 }
 
 .gallery-tour-stop-note {
   margin: 18px 0 0;
-  padding-left: 14px;
-  border-left: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 42%, transparent);
   color: var(--gallery-tour-muted);
   font-size: 15px;
   line-height: 2.12;
@@ -733,8 +722,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-top: 38px;
-  padding-top: 28px;
+  margin-block: 18px;
+  padding-top: 16px;
   border-top: 1px solid rgb(218 197 157 / 0.2);
 }
 
@@ -846,7 +835,8 @@
   flex: 0 0 32px;
   width: 32px;
   height: 32px;
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-plate-accent) 44%, rgb(255 255 255 / 0.18));
+  border: 1px solid
+    color-mix(in srgb, var(--gallery-tour-plate-accent) 44%, rgb(255 255 255 / 0.18));
   background: rgb(8 13 19 / 0.65);
   color: var(--gallery-tour-plate-accent);
   font-size: 14px;
@@ -920,6 +910,10 @@
     display: block;
   }
 
+  .gallery-tour-theatre[data-focused="true"] .gallery-tour-artwork {
+    height: clamp(230px, 59dvh, 580px);
+  }
+
   .gallery-tour-artwork {
     height: clamp(230px, 51dvh, 560px);
   }
@@ -943,7 +937,10 @@
   }
 
   .gallery-tour-theatre .gallery-tour-view-controls button,
-  .gallery-tours-page.command-support-tours .gallery-tour-theatre .gallery-tour-view-controls button {
+  .gallery-tours-page.command-support-tours
+    .gallery-tour-theatre
+    .gallery-tour-view-controls
+    button {
     padding-inline: 8px;
     font-size: 12px;
   }
@@ -972,11 +969,21 @@
     align-items: stretch;
     flex-direction: column;
     gap: 20px;
-    margin-top: 28px;
+    margin-top: 18px;
+  }
+
+  .gallery-tour-theatre .gallery-tour-next-tour {
+    gap: 12px;
+  }
+
+  .gallery-tour-next-tour img {
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
   }
 
   .gallery-tour-next-tour strong {
-    font-size: 19px;
+    font-size: 18px;
   }
 }
 
@@ -1045,6 +1052,7 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
 
   .gallery-tour-playback,
   .gallery-tour-filmstrip,
+  .gallery-tours-page.command-support-tours .gallery-tour-stop-caption,
   .gallery-tour-next-tour > span:last-child {
     border-color: CanvasText;
     background: Canvas;
@@ -1080,5 +1088,37 @@ html[data-world-effects="economy"] .gallery-tour-time-fill {
     outline-offset: -2px;
     color: Highlight;
     box-shadow: none;
+  }
+}
+
+.gallery-tours-page.command-support-tours
+  .gallery-tour-theatre
+  .gallery-tour-transport
+  > button:last-child:enabled {
+  border-color: #e8cf9e;
+  background: #e8cf9e;
+  box-shadow: none;
+  color: #181817;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gallery-tours-page.command-support-tours
+    .gallery-tour-theatre
+    .gallery-tour-transport
+    > button:last-child:enabled:hover {
+    border-color: #fae4b5;
+    background: #fae4b5;
+    color: #181817;
+  }
+}
+
+@media (forced-colors: active) {
+  .gallery-tours-page.command-support-tours
+    .gallery-tour-theatre
+    .gallery-tour-transport
+    > button:last-child:enabled {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
   }
 }

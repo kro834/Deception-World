@@ -41,8 +41,12 @@ export function galleryFitSizes(width: number, height: number) {
 }
 
 export function galleryStageSizes(width: number, height: number) {
-  const ratio = width / height;
-  return `min(calc(100vw - 64px), clamp(${360 * ratio}px, ${65 * ratio}vh, ${780 * ratio}px))`;
+  const ratio = Number((width / height).toFixed(4));
+  return [
+    `(max-width: 740px) min(calc(100vw - 44px), clamp(${206 * ratio}px, ${62 * ratio}vw, ${386 * ratio}px))`,
+    `(max-height: 540px) and (orientation: landscape) min(calc(69vw - 75px), clamp(${190 * ratio}px, ${63 * ratio}svh, ${316 * ratio}px))`,
+    `min(calc(69vw - 75px), 864px, clamp(${305 * ratio}px, ${56 * ratio}svh, ${616 * ratio}px))`,
+  ].join(", ");
 }
 
 /** Intersect source pixels with the visible part of an object-fit:contain canvas. */

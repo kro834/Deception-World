@@ -284,7 +284,7 @@ export function GalleryTourTheatre({
 
       <div className="gallery-tour-theatre-layout">
         <div className="gallery-tour-screen-column">
-          <div className="gallery-tour-view-controls" aria-label="鑑賞画面の表示">
+          <div className="gallery-tour-view-controls" role="group" aria-label="鑑賞画面の表示">
             <button
               className="gallery-tour-theatre-button gallery-tour-selection-toggle"
               type="button"
@@ -361,7 +361,7 @@ export function GalleryTourTheatre({
             />
             <span className="gallery-tour-stage-aperture" aria-hidden="true" />
           </div>
-          <div className="gallery-tour-transport" aria-label="作品の移動">
+          <div className="gallery-tour-transport" role="group" aria-label="作品の移動">
             <button
               className="gallery-tour-theatre-button"
               type="button"
@@ -403,6 +403,61 @@ export function GalleryTourTheatre({
               {playbackNotice}
             </p>
           </div>
+          {lastStop && imageReady && (
+            <div className="gallery-tour-ending">
+              <div className="gallery-tour-ending-return">
+                <p>{completed ? "巡回を終えて" : "最後の一枚です"}</p>
+                <button
+                  className="gallery-tour-theatre-button"
+                  type="button"
+                  onClick={() => {
+                    selectStop(0);
+                    document.getElementById("gallery-tour-stage")?.focus({ preventScroll: true });
+                  }}
+                >
+                  最初の作品をもう一度
+                </button>
+              </div>
+              {nextTour && onNextTour ? (
+                <button
+                  className="gallery-tour-next-tour"
+                  type="button"
+                  style={{ "--gallery-tour-next-accent": nextTour.accent } as CSSProperties}
+                  onClick={() => {
+                    setPlaying(false);
+                    onNextTour();
+                  }}
+                >
+                  {nextTourCover && (
+                    <img
+                      src={nextTourCover.preview}
+                      alt=""
+                      width={nextTourCover.width}
+                      height={nextTourCover.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+                  <span>
+                    <small>次の巡回</small>
+                    <strong>{nextTour.title}</strong>
+                  </span>
+                  <span aria-hidden="true">→</span>
+                </button>
+              ) : (
+                <button
+                  className="gallery-tour-theatre-button gallery-tour-ending-exit"
+                  type="button"
+                  onClick={() => {
+                    setPlaying(false);
+                    onExit();
+                  }}
+                >
+                  次の巡回を選ぶ →
+                </button>
+              )}
+            </div>
+          )}
           <div
             id="gallery-tour-filmstrip"
             className="gallery-tour-filmstrip"
@@ -462,9 +517,6 @@ export function GalleryTourTheatre({
 
         <div id="gallery-tour-reading" className="gallery-tour-reading-column" hidden={focused}>
           <div className="gallery-tour-stop-caption">
-            <p className="gallery-tour-stop-label">
-              {String(index + 1).padStart(2, "0")} / {String(tour.stops.length).padStart(2, "0")}
-            </p>
             <h2>{artwork.alt}</h2>
             <p className="gallery-tour-stop-note">{stop.note}</p>
           </div>
@@ -534,61 +586,6 @@ export function GalleryTourTheatre({
           )}
         </div>
       </div>
-      {lastStop && imageReady && (
-        <div className="gallery-tour-ending">
-          <div className="gallery-tour-ending-return">
-            <p>{completed ? "巡回を終えて" : "最後の一枚です"}</p>
-            <button
-              className="gallery-tour-theatre-button"
-              type="button"
-              onClick={() => {
-                selectStop(0);
-                document.getElementById("gallery-tour-stage")?.focus({ preventScroll: true });
-              }}
-            >
-              最初の作品をもう一度
-            </button>
-          </div>
-          {nextTour && onNextTour ? (
-            <button
-              className="gallery-tour-next-tour"
-              type="button"
-              style={{ "--gallery-tour-next-accent": nextTour.accent } as CSSProperties}
-              onClick={() => {
-                setPlaying(false);
-                onNextTour();
-              }}
-            >
-              {nextTourCover && (
-                <img
-                  src={nextTourCover.preview}
-                  alt=""
-                  width={nextTourCover.width}
-                  height={nextTourCover.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              )}
-              <span>
-                <small>次の巡回</small>
-                <strong>{nextTour.title}</strong>
-              </span>
-              <span aria-hidden="true">→</span>
-            </button>
-          ) : (
-            <button
-              className="gallery-tour-theatre-button gallery-tour-ending-exit"
-              type="button"
-              onClick={() => {
-                setPlaying(false);
-                onExit();
-              }}
-            >
-              次の巡回を選ぶ →
-            </button>
-          )}
-        </div>
-      )}
     </section>
   );
 }

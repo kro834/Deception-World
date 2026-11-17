@@ -16,6 +16,7 @@ const searchCss = read("src/styles-gallery-search.css");
 const displayCss = read("src/styles-gallery-display.css");
 const shuffleCss = read("src/styles-gallery-shuffle.css");
 const refinementCss = read("src/styles-gallery-refinement.css");
+const stageCss = read("src/styles-gallery-artwork-stage.css");
 
 const searchExports = {};
 runInNewContext(
@@ -207,24 +208,21 @@ test("refinement stylesheet stays above the present exhibition layer", () => {
 
 test("hero entrances share one responsive navigation without changing their destinations", () => {
   const actions = page.match(
-    /<nav className="gallery-intro-actions" aria-label="ギャラリーの入口">([\s\S]*?)<\/nav>/,
+    /<nav className="gallery-screening-nav" aria-label="ギャラリーの入口">([\s\S]*?)<\/nav>/,
   )?.[1];
   assert.ok(actions);
   assert.match(actions, /className="gallery-enter" href="#gallery-collection"/);
   assert.match(actions, /<Link to="\/gallery-tours">/);
-  const layout = rule(refinementCss, ".gallery-page .gallery-intro-actions");
-  assert.match(layout, /display:\s*grid;/);
-  assert.match(layout, /grid-template-columns:\s*max-content minmax\(0, 1fr\);/);
+  assert.match(rule(stageCss, ".gallery-screening-nav"), /display:\s*flex;/);
   for (const selector of [
-    ".gallery-page .gallery-intro-actions .gallery-enter",
-    ".gallery-page .gallery-intro-actions .gallery-tour-invitation a",
-    ".gallery-page .gallery-feature-settings :is(a, button)",
+    ".gallery-screening-nav a",
+    ".gallery-artwork-intro .exhibition-room-entry",
   ]) {
-    assert.match(rule(refinementCss, selector), /min-height:\s*(?:44|48)px;/, selector);
+    assert.match(rule(stageCss.replace(/\s+/g, " "), selector), /min-height:\s*44px;/, selector);
   }
   assert.match(
-    refinementCss,
-    /@media \(max-width: 700px\)[\s\S]*?\.gallery-page \.gallery-intro \{\s*gap: 28px;\s*padding-block: 32px 48px;/,
+    stageCss,
+    /@media \(max-width: 540px\)[\s\S]*?\.gallery-screening-nav \{\s*display: grid;\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
   );
   // Geometry polish must not crop the user's personally selected top artwork.
   assert.match(page, /width: featured.width/);

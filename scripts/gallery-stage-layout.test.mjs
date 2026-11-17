@@ -53,9 +53,11 @@ test("title and save feedback reserve separate scrollable slots even when their 
     [".gallery-feature figcaption", 84],
     [".gallery-stage-feedback", 54],
   ]) {
-    const rule = css.match(
-      new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]+)\\}"),
-    )?.[1];
+    const rule = css
+      .replace(/\s+/g, " ")
+      .match(
+        new RegExp(selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]+)\\}"),
+      )?.[1];
     assert.ok(rule, selector);
     for (const prop of ["height", "min-height", "max-height"])
       assert.match(rule, new RegExp(`(?:^|[;\\s])${prop}: ${height}px;`));

@@ -7,7 +7,6 @@ import { normalizeExhibitionSearch } from "@/lib/gallery-route-search";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import studioCssUrl from "@/styles-exhibition-studio.css?url";
 import roomCssUrl from "@/styles-exhibition-room.css?url";
-import commandArchiveCssUrl from "@/styles-command-archive.css?url";
 
 export const Route = createFileRoute("/exhibition")({
   validateSearch: normalizeExhibitionSearch,
@@ -20,7 +19,6 @@ export const Route = createFileRoute("/exhibition")({
         ...WORLD_CORE_STYLESHEET_LINKS,
         { rel: "stylesheet", href: studioCssUrl },
         { rel: "stylesheet", href: roomCssUrl },
-        { rel: "stylesheet", href: commandArchiveCssUrl },
       ],
     }),
 });
@@ -39,10 +37,7 @@ function ExhibitionRoom() {
     void navigate({ search: { work: id }, replace: true, resetScroll: false });
 
   return (
-    <main
-      className="exhibition-room exhibition-room-curated command-exhibition dg-focus-scope"
-      id="main"
-    >
+    <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
       <header className="exhibition-room-heading dg-reveal">
         <div className="exhibition-room-heading-copy">
           <h1>原画のある、展示室。</h1>
@@ -63,29 +58,6 @@ function ExhibitionRoom() {
         tabIndex={-1}
         aria-labelledby="exhibition-current-title"
       >
-        <div className="exhibition-room-work-heading">
-          <div className="exhibition-room-work-title" aria-live="polite" aria-atomic="true">
-            <p className="exhibition-room-work-number">
-              <span>{number}</span> / {GALLERY_ARTWORKS.length}
-            </p>
-            <h2 id="exhibition-current-title">{artwork.title}</h2>
-          </div>
-          <div className="exhibition-room-choose">
-            <a className="dg-control" href="#exhibition-shelf-heading">
-              画像から選ぶ ↓
-            </a>
-            <label>
-              <span>展示する原画</span>
-              <select value={artwork.id} onChange={(event) => select(event.currentTarget.value)}>
-                {GALLERY_ARTWORKS.map((art, position) => (
-                  <option key={art.id} value={art.id}>
-                    {String(position + 1).padStart(3, "0")} — {art.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </div>
         <div className="exhibition-room-view" aria-label={`${number}の立体展示`}>
           <ExhibitionStudio
             immersive
@@ -106,11 +78,34 @@ function ExhibitionRoom() {
             />
           </ExhibitionStudio>
         </div>
-        <div className="exhibition-room-caption">
-          <p>{artwork.alt}</p>
-          <a href={artwork.full} target="_blank" rel="noreferrer">
-            原画を別のタブで開く ↗
-          </a>
+        <div className="exhibition-room-work-heading">
+          <div className="exhibition-room-work-title" aria-live="polite" aria-atomic="true">
+            <p className="exhibition-room-work-number">
+              <span>{number}</span> / {GALLERY_ARTWORKS.length}
+            </p>
+            <h2 id="exhibition-current-title">{artwork.title}</h2>
+          </div>
+          <div className="exhibition-room-caption">
+            <p>{artwork.alt}</p>
+            <a href={artwork.full} target="_blank" rel="noreferrer">
+              原画を別のタブで開く ↗
+            </a>
+          </div>
+          <div className="exhibition-room-choose">
+            <label>
+              <span>展示する原画</span>
+              <select value={artwork.id} onChange={(event) => select(event.currentTarget.value)}>
+                {GALLERY_ARTWORKS.map((art, position) => (
+                  <option key={art.id} value={art.id}>
+                    {String(position + 1).padStart(3, "0")} — {art.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <a className="dg-control" href="#exhibition-shelf-heading">
+              画像から選ぶ ↓
+            </a>
+          </div>
         </div>
         <nav className="exhibition-room-adjacent" aria-label="展示する作品">
           <button
