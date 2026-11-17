@@ -1477,12 +1477,7 @@ export function DreamChapter() {
             <span>チャプター</span>
           </span>
         </div>
-        <p className="dream-hero-catch">
-          <span>夢と現実の境界が、</span>
-          <span>明ける。</span>
-        </p>
         <div className="dream-hero-copy">
-          <p>仮面ライダーサーガ × 東方Project</p>
           <h1 id="dream-title" className="dream-visually-hidden">
             仮面ライダーサーガ Dream Chapter
           </h1>
@@ -1495,6 +1490,11 @@ export function DreamChapter() {
             fetchPriority="high"
             decoding="async"
           />
+          <p className="dream-hero-billing">仮面ライダーサーガ × 東方Project</p>
+          <p className="dream-hero-catch">
+            <span>夢と現実の境界が、</span>
+            <span>明ける。</span>
+          </p>
           <nav className="dream-hero-actions" aria-label="DREAM CHAPTERを探索">
             <a href="#cases" className="dream-cinema-primary">
               <span>物語を辿る</span>
@@ -1505,42 +1505,42 @@ export function DreamChapter() {
               <span aria-hidden="true">↗</span>
             </a>
           </nav>
-          <DreamStageLantern />
-        </div>
-        <div className="dream-hero-obi">
-          <i aria-hidden="true" />
-          <span>劇場版第二作『ディセプションワールド』へ続く</span>
-          <i aria-hidden="true" />
+          <div className="dream-hero-footer">
+            <span className="dream-hero-obi">劇場版第二作『ディセプションワールド』へ続く</span>
+            <DreamStageLantern />
+          </div>
         </div>
       </section>
 
-      <DreamCinemaEffects />
+      <div className="dream-opening-desk">
+        <section className="dream-prologue" id="prologue" aria-labelledby="prologue-title">
+          <div className="dream-prologue-card" data-dream-reveal>
+            <h2 id="prologue-title">序</h2>
+            <p>{DREAM_STORY_INTRO}</p>
+          </div>
+        </section>
 
-      <section className="dream-prologue" id="prologue" aria-labelledby="prologue-title">
-        <div className="dream-prologue-card" data-dream-reveal>
-          <p className="dream-cinema-kicker">序 / INTRODUCTION</p>
-          <h2 id="prologue-title">夢と現実の境界が、明ける。</h2>
-          <p>{DREAM_STORY_INTRO}</p>
-        </div>
-      </section>
-
-      <details className="dream-contents">
-        <summary id="dream-contents-title">目次</summary>
-        <nav aria-labelledby="dream-contents-title">
-          <ol>
-            {DREAM_CONTENTS.map(({ act, links }) => (
-              <li key={act}>
-                <small>{act}</small>
-                {links.map(({ href, label }) => (
-                  <a key={href} href={href}>
-                    {label}
-                  </a>
+        <div className="dream-opening-tools">
+          <details className="dream-contents">
+            <summary id="dream-contents-title">目次</summary>
+            <nav aria-labelledby="dream-contents-title">
+              <ol>
+                {DREAM_CONTENTS.map(({ act, links }) => (
+                  <li key={act}>
+                    <small>{act}</small>
+                    {links.map(({ href, label }) => (
+                      <a key={href} href={href}>
+                        {label}
+                      </a>
+                    ))}
+                  </li>
                 ))}
-              </li>
-            ))}
-          </ol>
-        </nav>
-      </details>
+              </ol>
+            </nav>
+          </details>
+          <DreamCinemaEffects />
+        </div>
+      </div>
 
       <section
         id="posters"
@@ -2129,28 +2129,16 @@ export function DreamChapter() {
             各章のあらすじには、物語の展開・ネタバレを含みます。
           </p>
         </div>
-        <DreamReadingLauncher />
-        <DreamReadingArchive />
-        <DreamResearchNotes />
+        <div className="dream-reading-doors">
+          <DreamReadingLauncher />
+          <nav className="dream-reading-crosslinks" aria-label="物語の案内">
+            <a href="#dream-chapter-index">六章の目次</a>
+            <a href="#dream-reading-archive">読んだところまでの資料室</a>
+            <a href="#dream-research-notes">引用と思索</a>
+          </nav>
+        </div>
         <DreamStoryIndex />
         <div className="dream-story-layout">
-          <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
-            <h3 id="dream-crossings-title">幻想郷との交差</h3>
-            <p className="dream-story-crossings-lead">
-              怪作を狙う追撃は人里を襲い、神社と竹林を戦場に変える。迎え撃つ霊夢たちとの共闘は、シエルと慶弥にも、守られる側になる戸惑いをもたらす。
-            </p>
-            <dl>
-              {DREAM_STORY_CROSSINGS.map((place) => (
-                <div key={place.name}>
-                  <dt>{place.name}</dt>
-                  <dd>
-                    <strong>{place.role}</strong>
-                    <p>{place.body}</p>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </aside>
           <ol
             className="dream-story-cases"
             aria-label="章ごとのあらすじ"
@@ -2199,6 +2187,27 @@ export function DreamChapter() {
               </li>
             ))}
           </ol>
+          <aside className="dream-story-crossings" aria-labelledby="dream-crossings-title">
+            <h3 id="dream-crossings-title">幻想郷との交差</h3>
+            <p className="dream-story-crossings-lead">
+              怪作を狙う追撃は人里を襲い、神社と竹林を戦場に変える。迎え撃つ霊夢たちとの共闘は、シエルと慶弥にも、守られる側になる戸惑いをもたらす。
+            </p>
+            <dl>
+              {DREAM_STORY_CROSSINGS.map((place) => (
+                <div key={place.name}>
+                  <dt>{place.name}</dt>
+                  <dd>
+                    <strong>{place.role}</strong>
+                    <p>{place.body}</p>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        </div>
+        <div className="dream-reading-tools">
+          <DreamReadingArchive />
+          <DreamResearchNotes />
         </div>
       </section>
 

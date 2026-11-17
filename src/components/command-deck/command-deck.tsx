@@ -8,9 +8,9 @@ import {
   type ReactNode,
 } from "react";
 import {
-  ArrowDown,
   ArrowRight,
   ArrowUpRight,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   RotateCcw,
@@ -141,6 +141,20 @@ const RIDERS = [
   ["cipher", "サイファー"],
 ] as const;
 
+const DECK_DESTINATIONS = [
+  {
+    to: "/transformation-lab",
+    label: "変身・フォーム研究室",
+    art: "/archive-media/thumbs/saga-rexonance.webp",
+  },
+  {
+    to: "/world-map",
+    label: "世界関係図",
+    art: "/episode-01-hide-and-seek-delivery-600.webp",
+  },
+  { to: "/gallery", label: "ギャラリー", art: "/gallery/g03-288.webp" },
+] as const;
+
 type Renderer = ReturnType<
   (typeof import("@/lib/command-deck-renderer"))["mountCommandDeckRenderer"]
 >;
@@ -149,18 +163,17 @@ type HtmlCanvas = ReturnType<
 >;
 
 function imageProps(art: Artwork) {
+  const sizes = "(min-width: 1260px) 670px, (min-width: 740px) 52vw, 94vw";
   return art.kind === "final"
     ? {
         src: art.src,
         ...rexonanceImage(art.src),
-        sizes:
-          "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
+        sizes,
       }
     : {
         src: art.src,
         ...posterImage(art.src),
-        sizes:
-          "(min-width: 960px) 65vw, (max-height: 540px) and (orientation: landscape) 55vw, 92vw",
+        sizes,
       };
 }
 
@@ -375,6 +388,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
       const image = new Image();
       const props = imageProps(item);
       image.decoding = "async";
+      image.fetchPriority = "low";
       image.sizes = props.sizes;
       if (props.srcSet) image.srcset = props.srcSet;
       image.src = props.src;
@@ -412,7 +426,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             { rootMargin: "100px" },
           )
         : null;
-    observer?.observe(root);
+    observer?.observe(host);
     const mount = async () => {
       const economy = document.documentElement.dataset.worldEffects === "economy";
       const [renderModule, htmlModule] = await Promise.allSettled([
@@ -512,9 +526,9 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
           </span>
         </DeckLink>
         <nav aria-label="共通ナビゲーション" className="command-deck-header-nav">
-          <DeckLink href="/library">
-            ライブラリ
-            <ArrowUpRight size={14} aria-hidden="true" />
+          <DeckLink href="/library" aria-label="ライブラリ">
+            <BookOpen size={18} aria-hidden="true" />
+            <span>ライブラリ</span>
           </DeckLink>
           <DeckLink href="/search" aria-label="全文検索">
             <Search size={19} aria-hidden="true" />
@@ -551,35 +565,39 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
           className="command-deck-artwork-stage"
           artwork={{ ...artwork, ...imageProps(artwork), id: `${scene.id}-${artIndex}` }}
           controls={
-            <div className="command-deck-art-controls" role="group" aria-label="ビジュアル切替">
-              <button type="button" onClick={() => turnArt(-1)} aria-label="前のビジュアル">
-                <ChevronLeft size={20} aria-hidden="true" />
-              </button>
-              <span aria-live="polite" aria-atomic="true">
-                <b>{String(artIndex + 1).padStart(2, "0")}</b>
-                <span aria-hidden="true"> / </span>
-                <span className="command-deck-sr">枚目、全</span>
-                {String(scene.artwork.length).padStart(2, "0")}
-                <span className="command-deck-sr">枚</span>
-              </span>
-              <button type="button" onClick={() => turnArt(1)} aria-label="次のビジュアル">
-                <ChevronRight size={20} aria-hidden="true" />
-              </button>
+            <div className="command-deck-frame-tools">
+              {scene.id === "world" && (
+                <div className="command-deck-logo-panel">
+                  <img
+                    {...OPENING_LOGO_FIRST}
+                    ref={logoRef}
+                    sizes="(max-width: 520px) 96px, 126px"
+                    alt="仮面ライダーサーガ Deception World"
+                    width="1536"
+                    height="1024"
+                    decoding="async"
+                  />
+                </div>
+              )}
+              <div className="command-deck-art-controls" role="group" aria-label="ビジュアル切替">
+                <button type="button" onClick={() => turnArt(-1)} aria-label="前のビジュアル">
+                  <ChevronLeft size={20} aria-hidden="true" />
+                </button>
+                <span aria-live="polite" aria-atomic="true">
+                  <b>{String(artIndex + 1).padStart(2, "0")}</b>
+                  <span aria-hidden="true"> / </span>
+                  <span className="command-deck-sr">枚目、全</span>
+                  {String(scene.artwork.length).padStart(2, "0")}
+                  <span className="command-deck-sr">枚</span>
+                </span>
+                <button type="button" onClick={() => turnArt(1)} aria-label="次のビジュアル">
+                  <ChevronRight size={20} aria-hidden="true" />
+                </button>
+              </div>
             </div>
           }
         >
-          <div className="command-deck-title" key={`title-${scene.id}`}>
-            <h1>
-              <span>{scene.title[0]}</span>
-              <span>{scene.title[1]}</span>
-            </h1>
-          </div>
           <section className="command-deck-select" aria-label="作品選択">
-            <div className="command-deck-section-rule" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </div>
             <div className="command-deck-scene-buttons" role="group" aria-label="作品を切り替える">
               {SCENES.map((item, index) => (
                 <a
@@ -601,52 +619,30 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                   }}
                   className={sceneIndex === index ? "is-selected" : ""}
                 >
-                  <span className="command-deck-scene-number" aria-hidden="true">
-                    0{index + 1}
-                  </span>
                   <span>
                     <strong>{item.name}</strong>
                     <span className="command-deck-scene-ja">{item.japanese}</span>
                   </span>
-                  <ArrowUpRight className="command-deck-scene-arrow" size={21} aria-hidden="true" />
                 </a>
               ))}
             </div>
+            <div className="command-deck-title" key={`title-${scene.id}`}>
+              <h1>
+                <span>{scene.title[0]}</span>
+                <span>{scene.title[1]}</span>
+              </h1>
+            </div>
             {scene.id === "world" ? (
               <DeckWorldEntry logoRef={logoRef}>
-                <span>
-                  {scene.japanese}
-                  <strong>世界に入る</strong>
-                </span>
-                <ArrowRight size={31} aria-hidden="true" />
+                <strong>世界に入る</strong>
+                <ArrowRight size={22} aria-hidden="true" />
               </DeckWorldEntry>
             ) : (
               <DeckLink className="command-deck-enter" href={scene.href}>
-                <span>
-                  {scene.japanese}
-                  <strong>世界に入る</strong>
-                </span>
-                <ArrowRight size={31} aria-hidden="true" />
+                <strong>世界に入る</strong>
+                <ArrowRight size={22} aria-hidden="true" />
               </DeckLink>
             )}
-            <a className="command-deck-down" href="#command-deck-riders">
-              ライダーを見る
-              <ArrowDown size={15} aria-hidden="true" />
-            </a>
-          </section>
-
-          <aside className="command-deck-side" aria-label="作品の見どころと資料">
-            <div className="command-deck-logo-panel">
-              <img
-                {...OPENING_LOGO_FIRST}
-                ref={logoRef}
-                sizes="(max-width: 620px) 220px, 250px"
-                alt="仮面ライダーサーガ Deception World"
-                width="1536"
-                height="1024"
-                decoding="async"
-              />
-            </div>
             <nav
               className="command-deck-chapter-links"
               aria-label={`${scene.japanese}の内容`}
@@ -655,27 +651,34 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
               {scene.links.map((link) => (
                 <DeckLink key={link.href} href={link.href}>
                   <span>{link.label}</span>
-                  <ArrowUpRight size={20} aria-hidden="true" />
+                  <ArrowUpRight size={16} aria-hidden="true" />
                 </DeckLink>
               ))}
             </nav>
-            <nav className="command-deck-chapter-links" aria-label="世界を探索する">
-              <DeckLink href="/transformation-lab">
-                <span>変身・フォーム研究室</span>
-                <ArrowUpRight size={20} aria-hidden="true" />
-              </DeckLink>
-              <DeckLink href="/world-map">
-                <span>世界関係図</span>
-                <ArrowUpRight size={20} aria-hidden="true" />
-              </DeckLink>
-            </nav>
-            <DeckLink href="/gallery" className="command-deck-gallery-link">
-              <span>ギャラリー</span>
-              <ArrowUpRight size={25} aria-hidden="true" />
-              <div ref={htmlHost} className="command-deck-html-projection" aria-hidden="true" />
-            </DeckLink>
-          </aside>
+          </section>
         </ArtworkStage>
+
+        <section className="command-deck-discover" aria-labelledby="command-deck-discover-title">
+          <h2 id="command-deck-discover-title">展示・資料</h2>
+          <div className="command-deck-destinations">
+            {DECK_DESTINATIONS.map(({ to, label, art }) => (
+              <DeckLink
+                key={to}
+                href={to}
+                className={to === "/gallery" ? "command-deck-gallery-link" : undefined}
+              >
+                <img src={art} alt="" loading="lazy" decoding="async" />
+                <span>
+                  {label}
+                  <ArrowUpRight size={19} aria-hidden="true" />
+                </span>
+                {to === "/gallery" && (
+                  <div ref={htmlHost} className="command-deck-html-projection" aria-hidden="true" />
+                )}
+              </DeckLink>
+            ))}
+          </div>
+        </section>
 
         <section
           className="command-deck-riders"
@@ -690,7 +693,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             </DeckLink>
           </header>
           <nav aria-label="ライダーショートカット" className="command-deck-rider-rail">
-            {RIDERS.map(([id, name], index) => (
+            {RIDERS.map(([id, name]) => (
               <DeckLink href={`/riders/${id}`} key={id} aria-label={name}>
                 <span className="command-deck-rider-portrait">
                   <img
@@ -701,7 +704,6 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                     loading="lazy"
                     decoding="async"
                   />
-                  <span aria-hidden="true">0{index + 1}</span>
                 </span>
                 <strong>
                   {id === "over-zeztz" ? (
@@ -730,8 +732,8 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             人物一覧
             <ArrowUpRight size={19} aria-hidden="true" />
           </DeckLink>
-          <DeckLink href="/gallery">
-            ギャラリー
+          <DeckLink href="/gallery-tours">
+            展示ツアー
             <ArrowUpRight size={19} aria-hidden="true" />
           </DeckLink>
           <DeckLink href="/library">

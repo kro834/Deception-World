@@ -1124,10 +1124,7 @@ export function SideMenuLayer({
           <i />
         </span>
         <div className="side-panel-head">
-          <div>
-            <p>NAVIGATION</p>
-            <b>{atlasScene.title}</b>
-          </div>
+          <h2 className="command-atlas-heading">サイトメニュー</h2>
           <button
             className="side-panel-close ios26-glass"
             type="button"
@@ -1214,38 +1211,74 @@ export function SideMenuLayer({
               <i>LIBRARY</i>
             </GuardedLink>
             <GuardedLink
+              className="command-atlas-record"
               to="/transformation-lab"
               assets={[]}
               beforeNavigate={close}
               aria-current={pathname === "/transformation-lab" ? "page" : undefined}
             >
+              {isOpen ? (
+                <img
+                  src="/rider-saga-rexonance-thumbnail-20260827-240.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : null}
               <span>変身・フォーム研究室</span>
               <i>LAB</i>
             </GuardedLink>
             <GuardedLink
+              className="command-atlas-record"
               to="/world-map"
               assets={[]}
               beforeNavigate={close}
               aria-current={pathname === "/world-map" ? "page" : undefined}
             >
+              {isOpen ? (
+                <img
+                  src="/episode-03-deception-world-delivery-600.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : null}
               <span>世界関係図</span>
               <i>CONNECTIONS</i>
             </GuardedLink>
             <GuardedLink
+              className="command-atlas-record"
               to="/form-archive"
               assets={[]}
               beforeNavigate={close}
               aria-current={pathname === "/form-archive" ? "page" : undefined}
             >
+              {isOpen ? (
+                <img
+                  src="/archive-media/thumbs/realm-royal.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : null}
               <span>フォームアーカイブ</span>
               <i>SAGA / REALM</i>
             </GuardedLink>
             <GuardedLink
+              className="command-atlas-record"
               to="/dogs-archive"
               assets={[]}
               beforeNavigate={close}
               aria-current={pathname === "/dogs-archive" ? "page" : undefined}
             >
+              {isOpen ? (
+                <img
+                  src="/dogs-archive-20261028/guardian-480.webp"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : null}
               <span>DOGS ARCHIVE</span>
             </GuardedLink>
             <LibraryCurrentButton pathname={pathname} hash={locationHash} />
@@ -1259,7 +1292,6 @@ export function SideMenuLayer({
         >
           <figure className="command-atlas-scene">
             {isOpen ? <img src={atlasScene.image} alt="" decoding="async" /> : null}
-            <span className="command-atlas-orbit" aria-hidden="true" />
             <figcaption>{atlasScene.title}</figcaption>
           </figure>
           <p>このページ</p>

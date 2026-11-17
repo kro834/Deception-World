@@ -9,7 +9,10 @@ import {
   REXONANCE_SAGA_ENTER_ASSETS,
 } from "@/lib/asset-loader";
 import { FAR_FROM_SAGA_MENU_TILE } from "@/lib/far-from-saga-artwork";
-import { ILLUSIONCULUM_MENU_TILE, ILLUSIONCULUM_MENU_TILE_SIZE } from "@/lib/illusionculum-saga-artwork";
+import {
+  ILLUSIONCULUM_MENU_TILE,
+  ILLUSIONCULUM_MENU_TILE_SIZE,
+} from "@/lib/illusionculum-saga-artwork";
 import { META_UNITAS_MENU_TILE } from "@/lib/meta-unitas-saga-artwork";
 
 /* SPECIAL (owner, 2026-10-23): the special sites' grammar on /world, told by
@@ -25,14 +28,33 @@ type Chapter = {
   no: string;
   phase: "story" | "riders" | "records" | "annex";
   title: string;
+  image?: string;
 };
 
 /* The page's chapter headings, in order (01-03 world-home.tsx, 04-06
    world-annex.tsx). */
 const CHAPTERS: readonly Chapter[] = [
-  { href: "#story", no: "01", phase: "story", title: "救うべき世界は、現実にある。" },
-  { href: "#riders", no: "02", phase: "riders", title: "八人の戦いが交わる。" },
-  { href: "#records", no: "03", phase: "records", title: "戦いの記録を辿る。" },
+  {
+    href: "#story",
+    no: "01",
+    phase: "story",
+    title: "救うべき世界は、現実にある。",
+    image: "/episode-03-deception-world-delivery-600.webp",
+  },
+  {
+    href: "#riders",
+    no: "02",
+    phase: "riders",
+    title: "八人の戦いが交わる。",
+    image: "/archive-media/thumbs/saga-rexonance.webp",
+  },
+  {
+    href: "#records",
+    no: "03",
+    phase: "records",
+    title: "戦いの記録を辿る。",
+    image: "/episode-01-hide-and-seek-delivery-600.webp",
+  },
   { href: "#cast-roster", no: "04", phase: "annex", title: "人物一覧" },
   { href: "#world-brief", no: "05", phase: "annex", title: "世界と組織" },
   { href: "#episode-notes", no: "06", phase: "annex", title: "エピソードの記録" },
@@ -42,16 +64,17 @@ const CHAPTERS: readonly Chapter[] = [
 export const WorldContents = memo(function WorldContents() {
   return (
     <nav className="ws-contents" aria-labelledby="ws-contents-title">
-      <h2 id="ws-contents-title" className="visually-hidden">
-        目次
-      </h2>
+      <h2 id="ws-contents-title">目次</h2>
       <ol className="ws-map">
-        {CHAPTERS.map(({ href, no, phase, title }) => (
+        {CHAPTERS.map(({ href, no, phase, title, image }) => (
           <li key={href} data-phase={phase}>
             <a href={href}>
-              <b aria-hidden="true">{no}</b>
-              <span>{title}</span>
-              <i aria-hidden="true" />
+              {image && <img src={image} alt="" loading="lazy" decoding="async" />}
+              <span className="ws-map-label">
+                <b aria-hidden="true">{no}</b>
+                <span>{title}</span>
+                <i aria-hidden="true" />
+              </span>
             </a>
           </li>
         ))}

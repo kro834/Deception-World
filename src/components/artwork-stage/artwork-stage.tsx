@@ -106,6 +106,11 @@ export function ArtworkStage({
       />
     );
   const landscape = (artwork.width ?? 1) > (artwork.height ?? 1);
+  const details = children && (
+    <div ref={information} className="artwork-stage__information">
+      {children}
+    </div>
+  );
   return (
     <section
       className={`artwork-stage artwork-stage--${variant} ${className}`}
@@ -118,6 +123,7 @@ export function ArtworkStage({
       data-failed={failedId === artwork.id}
       data-economy={economy}
     >
+      {variant !== "gallery" && details}
       <div className="artwork-stage__visual">
         <div className="artwork-stage__halo" aria-hidden="true" />
         <div key={`plane-${artwork.id}`} className="artwork-stage__plane" aria-hidden="true" />
@@ -167,11 +173,7 @@ export function ArtworkStage({
         </div>
         {controls && <div className="artwork-stage__controls">{controls}</div>}
       </div>
-      {children && (
-        <div ref={information} className="artwork-stage__information">
-          {children}
-        </div>
-      )}
+      {variant === "gallery" && details}
     </section>
   );
 }

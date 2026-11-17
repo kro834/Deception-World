@@ -208,24 +208,24 @@ export function DreamCinemaEffects() {
           <p className="dream-cinema-release-status" role="status">
             {released ? "夢の蝶が、ひとひら。" : ""}
           </p>
+          <nav
+            className="dream-cinema-scene-trail"
+            aria-label={`夢境の道しるべ・${visited.length} / 4 場面を訪問`}
+          >
+            {SCENES.map((scene) => (
+              <a
+                key={scene.id}
+                href={`#${scene.id}`}
+                aria-current={activeScene === scene.id ? "location" : undefined}
+                data-visited={visited.includes(scene.id)}
+              >
+                <span aria-hidden="true">{visited.includes(scene.id) ? "✧" : scene.number}</span>
+                <span>{scene.label}</span>
+              </a>
+            ))}
+          </nav>
         </div>
       </details>
-      <nav
-        className="dream-cinema-scene-trail"
-        aria-label={`夢境の道しるべ・${visited.length} / 4 場面を訪問`}
-      >
-        {SCENES.map((scene) => (
-          <a
-            key={scene.id}
-            href={`#${scene.id}`}
-            aria-current={activeScene === scene.id ? "location" : undefined}
-            data-visited={visited.includes(scene.id)}
-          >
-            <span aria-hidden="true">{visited.includes(scene.id) ? "✧" : scene.number}</span>
-            <span>{scene.label}</span>
-          </a>
-        ))}
-      </nav>
       <div className="dream-cinema-butterflies" aria-hidden="true">
         {released &&
           Array.from({ length: animated ? 6 : 3 }, (_, index) => (
