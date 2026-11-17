@@ -363,6 +363,11 @@ export class SurgeEngine {
     };
   }
 
+  /** Desktop and touch scroll accents follow the same frame governor. */
+  get swarmShare() {
+    return this.swarmLive / this.swarmCount;
+  }
+
   /** The groups' anchors (figure px), in SURGE_GROUPS order. */
   anchors() {
     return this.groups.map((group) => [group.anchor[0], group.anchor[1]] as const);

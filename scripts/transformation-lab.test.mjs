@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { defaultStringifySearch } from "@tanstack/react-router";
 import {
+  assemblyComparisonSearch,
   parseLabState,
   labSearch,
   advanceLab,
@@ -11,6 +13,19 @@ import {
   LAB_FORMS,
   createLabUrlWriter,
 } from "../src/lib/transformation-lab-state.js";
+
+test("both assembly comparison links keep the selected form and beat on native and client navigation", () => {
+  for (const [rider, compare] of [["rexonance", "far-from"], ["far-from", "rexonance"]]) {
+    const query = assemblyComparisonSearch(rider, "ultra");
+    for (const search of [new URLSearchParams(query).toString(), defaultStringifySearch(query)]) {
+      const state = parseLabState(search);
+      assert.equal(state.rider, rider);
+      assert.equal(state.form, "ultra");
+      assert.equal(state.compare, compare);
+      assert.equal(state.progress, 0.41);
+    }
+  }
+});
 
 test("lab URL round trips all riders and zooms with a paused exact comparison beat", () => {
   for (const rider of LAB_RIDERS)

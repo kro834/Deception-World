@@ -208,10 +208,12 @@ type CineScene = {
   reveal: number;
 };
 
+type GuardedSearch = Record<string, string | number>;
+
 type GoOptions = {
   to: string;
   hash?: string;
-  search?: Record<string, string>;
+  search?: GuardedSearch;
   assets?: readonly string[];
   transition?: "dream";
   transitionCovered?: boolean;
@@ -304,9 +306,13 @@ const wait = (duration: number) => new Promise((resolve) => window.setTimeout(re
 const nextFrame = () =>
   new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
 
-function guardedHref(to: string, hash?: string, search?: Record<string, string>) {
-  const query = search ? new URLSearchParams(search).toString() : "";
-  return `${to}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`;
+function guardedHref(to: string, hash?: string, search?: GuardedSearch) {
+  const fragment = hash ? `#${hash}` : "";
+  if (!search) return `${to}${fragment}`;
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(search)) params.set(key, String(value));
+  const query = params.toString();
+  return `${to}${query ? `?${query}` : ""}${fragment}`;
 }
 
 // The call hold can be shortened while it is playing. A live reduced
@@ -2902,7 +2908,7 @@ export function GuardedLink({
 }: {
   to: string;
   hash?: string;
-  search?: Record<string, string>;
+  search?: GuardedSearch;
   assets: readonly string[];
   transition?: "dream";
   className?: string;

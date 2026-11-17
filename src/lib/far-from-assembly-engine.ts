@@ -16,7 +16,9 @@
  *   then the parts off the body and the helmet — and behind it the surface
  *   crystallises into a mesh of triangles (the wireframe this page's armour
  *   was generated as; owner, 2026-10-23) whose cells click into the art, in
- *   place of Rexonance's swarm, plates, gold pour and field;
+ *   place of Rexonance's swarm, plates, gold pour and field. Trains of
+ *   machines run along the raised mesh edges before they settle into the
+ *   surface (far-from-wireframe-flow.ts);
  * - the reactor completes like the compound eyes (owner): its rim forms
  *   first, a wire ring with the chest's crystal, then on FAR FROM DEUS！
  *   pixel squares fill the crystal and scatter (`reactorGlow`); the crystal
@@ -68,6 +70,7 @@ import {
 import { drawFarFromSettle } from "./far-from-form-settle.ts";
 import { createNaniteSkinGeneration, type NaniteSkinLayer } from "./nanite-skin.ts";
 import { FAR_FROM_SKIN_STYLE } from "./far-from-skin-style.ts";
+import { prepareFarFromWireframeFlow } from "./far-from-wireframe-flow.ts";
 
 /** The stages' lights, as the record's accents (final-stage-data.ts). */
 export const FAR_FROM_FORM_TONES = Object.freeze({
@@ -147,6 +150,7 @@ let farFromSkin: NaniteSkinLayer | null = null;
 export const farFromSkinGeneration = createNaniteSkinGeneration({
   style: FAR_FROM_SKIN_STYLE,
   beats: ASSEMBLY_BEATS,
+  prepareFlow: prepareFarFromWireframeFlow,
   onLayer(layer) {
     farFromSkin = layer;
   },

@@ -35,6 +35,7 @@ import {
   REXONANCE_SUIT_SIZE,
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
+import type { RexonanceScrollSwarm } from "@/lib/rexonance-scroll-swarm";
 import type { SkinCells, SkinField, SkinFrame, SkinRenderer } from "@/lib/rexonance-suit-skin";
 import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK, SuitLeave, isSeek } from "@/lib/rexonance-suit-leave";
 import { rexonanceSuitSource } from "@/lib/rexonance-suit-warmup";
@@ -650,6 +651,12 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
     const skinBox = layerBox.querySelector<HTMLElement>(":scope > .rzn-surge.is-skin");
     const skinCanvas = skinBox?.querySelector<HTMLCanvasElement>("canvas") ?? null;
     let skin: Skin | null = null;
+    let scrollSwarm: RexonanceScrollSwarm | null = null;
+    const syncSwarmClock = () => {
+      if (!skin || !scrollSwarm) return;
+      const { field, lib } = skin;
+      scrollSwarm.bindSkin(field, (value, head) => lib.skinReach(lib.SKIN_SCROLL, value, head));
+    };
     let dropSkin = () => {};
     let classicShown = "";
     let skinPlaced = "";
@@ -832,12 +839,20 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         return;
       }
       if (!engine) {
-        engine = new SurgeEngine(back, front, surgeTier());
+        const tier = surgeTier();
+        engine = new SurgeEngine(back, front, tier);
+        void import("@/lib/rexonance-scroll-swarm").then(({ RexonanceScrollSwarm }) => {
+          if (gone) return;
+          scrollSwarm = new RexonanceScrollSwarm(tier.name, surgePieces(), pieceWindows);
+          syncSwarmClock();
+          redraw = true;
+        }).catch(() => undefined);
         // The lines are the standard suit's: another form ends the scene on
         // its own art, so it plays the crescendo without them.
         if (skinCanvas)
           dropSkin = mountSkin(skinCanvas, true, (made) => {
             skin = made;
+            syncSwarmClock();
           });
         dropCrescendo = mountCrescendo(
           engine,
@@ -1053,6 +1068,11 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
           } else if (grown.cells.live) grown.cells.clear();
         } else if (bursting) showClassic(0);
         else showClassic(1);
+        if (surfaces && scrollSwarm && !leaving && !bursting) {
+          const share = Math.min(engine.swarmShare, grown && crescendo
+            ? grown.lib.SKIN_CELL_SHARE[crescendo.engine.governor.level] : 1);
+          scrollSwarm.draw(surfaces.back, surfaces.front, q, skinLive, surfaces.scale, share);
+        }
         // Surge aura and shell blend tracking across form burst transitions
         if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
         // The lean in is for fine pointers: on touch screens a transform on
@@ -1188,6 +1208,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       for (const element of classicLayers()) element.style.transition = "";
       dropCrescendo();
       dropSkin();
+      scrollSwarm = null;
       skin = null;
       crescendo = null;
       crescendoClock = null;

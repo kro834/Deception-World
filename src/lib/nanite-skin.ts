@@ -92,9 +92,33 @@ export type NaniteSkinInput = {
   readonly art: CanvasImageSource;
   readonly style: NaniteSkinStyle;
   readonly timeline: NaniteSkinTimeline;
+  readonly prepareFlow?: PrepareNaniteFlow;
   /** The clock for the governor (ms); none in tests. */
   readonly now?: () => number;
 };
+
+type NaniteFlow = {
+  /** Null lets the skin draw its usual droplets for a missing route. */
+  draw(
+    context: CanvasRenderingContext2D,
+    time: number,
+    level: number,
+    vs: number,
+    ratio: number,
+    form?: string,
+    tone?: string,
+  ): number | null;
+  release(): void;
+};
+
+type PrepareNaniteFlow = (field: {
+  readonly width: number;
+  readonly height: number;
+  readonly grid: number;
+  readonly coarse: boolean;
+  readonly base: Float32Array;
+  readonly change: Float32Array;
+}) => Generator<undefined, NaniteFlow | null, unknown>;
 
 /** The skin's shape. Times are shares of the scene's progress. */
 export const NANITE_SKIN = Object.freeze({
@@ -830,6 +854,21 @@ export function* prepareNaniteSkin(
   const suit = yield* steps(time, NANITE_SKIN.front, live, false);
   if (!suit.count) return null;
   const changeFront = yield* steps(change, NANITE_SKIN.change, live, true);
+  let flow: NaniteFlow | null = null;
+  if (input.prepareFlow) {
+    try {
+      flow = yield* input.prepareFlow({
+        width: gw,
+        height: gh,
+        grid: S,
+        coarse: input.coarse,
+        base: time,
+        change,
+      });
+    } catch {
+      // Keep the skin and its original droplets if the optional geometry fails.
+    }
+  }
 
   // The baked layers. The fibres and facets (field-sized): dark lines along
   // the body's edges — the way the liquid runs — and each cell's own shade.
@@ -1222,12 +1261,18 @@ export function* prepareNaniteSkin(
     ratio: number,
   ) => {
     stats.drawn = 0;
-    if (q <= suit.first - suit.ahead - suit.timing.lead) return;
+    const hasSkin = q > suit.first - suit.ahead - suit.timing.lead;
+    if (!hasSkin) {
+      stats.drawn = flow?.draw(context, q, governor.level, vs, ratio) ?? 0;
+      return;
+    }
     const start = now();
     const level = NANITE_SKIN.levels[governor.level];
     if (update(suit, q, level.ripple)) bands(context, suit, input.art, artSX, artSY, metal);
     const device = 1 / Math.max(1e-6, vs);
-    if (q < suit.last + suit.timing.lead) droplets(context, suit, q, false, ratio * device, device);
+    const drawn = flow?.draw(context, q, governor.level, vs, ratio);
+    if (drawn != null) stats.drawn = drawn;
+    else if (q < suit.last + suit.timing.lead) droplets(context, suit, q, false, ratio * device, device);
     const cost = now() - start;
     stats.ms = cost;
     if (stats.band) governor.feed(cost);
@@ -1253,13 +1298,14 @@ export function* prepareNaniteSkin(
     from: CanvasImageSource,
     to: CanvasImageSource,
     _fromKey: string,
-    _toKey: string,
+    toKey: string,
     u: number,
-    _tone: string,
+    tone: string,
     _calm: boolean,
     vs: number,
     ratio: number,
   ) => {
+    stats.drawn = 0;
     const liquid = liquidOf(to, true);
     if (!liquid) return false;
     const start = now();
@@ -1270,13 +1316,16 @@ export function* prepareNaniteSkin(
     context.globalAlpha = 1;
     if (!update(changeFront, q, NANITE_SKIN.levels[governor.level].ripple)) {
       context.drawImage(from, 0, 0, W, H);
+      if (u > 0 && u < 1) stats.drawn = flow?.draw(context, q, governor.level, vs, ratio, toKey, tone) ?? 0;
       return true;
     }
     // The last form, where the liquid has not come.
     through(context, from, fromW ? fromW / W : 1, fromH ? fromH / H : 1, 0, 0, 0, gw, gh, true);
     bands(context, changeFront, to, toW ? toW / W : 1, toH ? toH / H : 1, liquid);
     const device = 1 / Math.max(1e-6, vs);
-    droplets(context, changeFront, q, false, ratio * device, device);
+    const drawn = flow && (u <= 0 || u >= 1) ? 0 : flow?.draw(context, q, governor.level, vs, ratio, toKey, tone);
+    if (drawn != null) stats.drawn = drawn;
+    else droplets(context, changeFront, q, false, ratio * device, device);
     const cost = now() - start;
     stats.ms = cost;
     if (stats.band) governor.feed(cost);
@@ -1339,6 +1388,8 @@ export function* prepareNaniteSkin(
     release() {
       heldLive = false;
       owner = null;
+      flow?.release();
+      flow = null;
       for (const canvas of [probe, fibres, lines, metal, scratch, otherMetal, held, ...maskCanvas])
         if (canvas) canvas.width = canvas.height = 0;
       otherMetal = held = null;
@@ -1442,12 +1493,14 @@ type GenerationInput = {
 };
 
 /** The skin as a scene's own armour generation (the engine's `generation`
- * hook, replacing the armour's build). `changes`: a page's own drawing of
+ * hook, replacing the armour's build). `prepareFlow` can replace the
+ * droplets that feed the front. `changes`: a page's own drawing of
  * its changes of form (otherwise the skin's); `onLayer`: told the layer
  * (and null on its release), for a page's form change. */
 export function createNaniteSkinGeneration(options: {
   readonly style: NaniteSkinStyle;
   readonly beats: NaniteSkinBeats;
+  readonly prepareFlow?: PrepareNaniteFlow;
   readonly changes?: { form: NaniteSkinLayer["form"] } | null;
   readonly onLayer?: (layer: NaniteSkinLayer | null) => void;
 }) {
@@ -1472,6 +1525,7 @@ export function createNaniteSkinGeneration(options: {
           art: input.unlit,
           style: options.style,
           timeline,
+          prepareFlow: options.prepareFlow,
           now,
         });
       } catch {

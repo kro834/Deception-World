@@ -354,3 +354,177 @@ html[data-world-effects="economy"]
 html[data-world-effects="economy"] .world-exploration-card img {
   transition: none;
 }
+
+/* The two assembly scenes share a stage. The three reading destinations sit
+   beside it on a wide screen and follow it in the same order on a phone. */
+#world-exploration {
+  grid-template-columns: minmax(0, 2.15fr) minmax(230px, 1fr);
+  align-items: stretch;
+  gap: clamp(10px, 1.4vw, 22px);
+}
+.world-assembly-feature {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #b2ccdc50;
+  background: #0a1020;
+  color: #eff6ff;
+}
+.world-assembly-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+  flex-wrap: wrap;
+  padding: 8px clamp(12px, 2vw, 30px);
+  border-bottom: 1px solid #dcd6ff42;
+}
+.world-assembly-heading h2 { margin: 0; font-size: clamp(17px, 1.8vw, 28px); line-height: 1.35; }
+.world-assembly-heading a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: .5em;
+  color: inherit;
+  text-decoration: none;
+}
+.world-assembly-heading h2 span { font-size: .65em; color: #bed6e9; }
+.world-assembly-heading .assembly-comparison-link {
+  color: #cdeaff;
+  font-size: .86rem;
+  text-decoration: underline;
+  text-decoration-color: #6c8395;
+  text-underline-offset: .35em;
+}
+.world-assembly-scenes {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: clamp(260px, 28vw, 400px);
+  overflow: hidden;
+}
+.world-assembly-scene {
+  --scene-light: #db9bdb;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: end;
+  overflow: hidden;
+  min-width: 0;
+  text-decoration: none;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 48% 62%, #6c4864 0%, #34283c 40%, transparent 75%),
+    #10101b;
+}
+.world-assembly-scene + .world-assembly-scene {
+  --scene-light: #9adfff;
+  border-inline-start: 1px solid #e2d0ff87;
+  background:
+    radial-gradient(ellipse at 53% 58%, #315e8b 0%, #142f49 44%, transparent 76%),
+    #080f1b;
+}
+.world-assembly-scene::before,
+.world-assembly-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.world-assembly-scene::before {
+  background: repeating-radial-gradient(ellipse at 50% 78%, transparent 0 35px, #e9c7df25 36px, transparent 37px 56px);
+}
+.world-assembly-scene + .world-assembly-scene::before {
+  background:
+    repeating-linear-gradient(60deg, transparent 0 35px, #c2eeff27 36px, transparent 37px),
+    repeating-linear-gradient(-60deg, transparent 0 35px, #c2eeff27 36px, transparent 37px);
+}
+.world-assembly-scene::after {
+  background: linear-gradient(0deg, #070b15 0%, #070b15be 10%, transparent 37%);
+}
+.world-assembly-scene img {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  width: min(96%, 388px);
+  max-width: none;
+  height: auto;
+  transform: translateX(-50%);
+}
+.world-assembly-scene span {
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: clamp(10px, 1.6vw, 24px);
+  font-weight: 750;
+  font-size: clamp(14px, 2vw, 30px);
+  line-height: 1.4;
+  color: #fff;
+}
+.world-assembly-scene i { font-style: normal; color: var(--scene-light); font-size: .8em; }
+.world-assembly-heading a:focus-visible,
+.world-assembly-scene:focus-visible {
+  outline: 3px solid #e5f6ff;
+  outline-offset: -4px;
+}
+.world-exploration-index {
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+#world-exploration .world-exploration-index .world-exploration-card {
+  min-height: 84px;
+  padding: 12px 18px;
+  align-items: center;
+  border-radius: 3px;
+}
+#world-exploration .world-exploration-index .world-exploration-card::after {
+  background: linear-gradient(98deg, #040a13ed 4%, #040a13bd 56%, #040a133d 100%);
+}
+@media (min-width: 680px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .world-assembly-scenes {
+    transition: grid-template-columns 340ms cubic-bezier(.2,.7,.15,1);
+  }
+  html:not([data-world-effects="economy"]) .world-assembly-scenes:has(> :first-child:is(:hover,:focus-visible)) {
+    grid-template-columns: minmax(0, 1.14fr) minmax(0, .86fr);
+  }
+  html:not([data-world-effects="economy"]) .world-assembly-scenes:has(> :last-child:is(:hover,:focus-visible)) {
+    grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]) .world-assembly-scenes {
+      view-timeline-name: --world-assembly-view;
+    }
+    html:not([data-world-effects="economy"]) .world-assembly-scene img {
+      animation: world-stage-arrival 1s linear both;
+      animation-timeline: --world-assembly-view;
+      animation-range: entry 0% cover 80%;
+    }
+  }
+}
+@keyframes world-stage-arrival {
+  from { translate: 0 4%; }
+  to { translate: 0 -2%; }
+}
+@media (max-width: 800px) {
+  #world-exploration { grid-template-columns: minmax(0, 1fr); }
+  .world-exploration-index { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto; }
+  .world-assembly-scenes { min-height: clamp(200px, 45vw, 330px); }
+}
+@media (max-width: 580px) {
+  .world-exploration-index { grid-template-columns: minmax(0, 1fr); }
+  #world-exploration .world-exploration-index .world-exploration-card { min-height: 64px; }
+  .world-assembly-heading { padding-block: 4px; }
+  /* Leave the artwork at the trailing edge under the floating site control. */
+  #world-exploration .world-exploration-card b { order: -1; margin-inline: 0; }
+}
+@media (forced-colors: active) {
+  .world-assembly-scene { border: 1px solid LinkText; }
+  .world-assembly-scene span { background: Canvas; color: LinkText; }
+}

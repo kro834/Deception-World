@@ -3,7 +3,8 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { mountRexonanceAssembly } from "../src/lib/rexonance-resonance.js";
+import sharp from "sharp";
+import { ASSEMBLY_BEATS, mountRexonanceAssembly, planAssembly } from "../src/lib/rexonance-resonance.js";
 import { releaseBodyFlame } from "../src/lib/rexonance-flame.js";
 import {
   FAR_FROM_SUIT_ATLAS,
@@ -27,6 +28,9 @@ import {
   wireSuitFingerprint,
 } from "../src/lib/far-from-wireframe-mesh.ts";
 import { FAR_FROM_FORM_CHAIN, farFromAssemblyConfig } from "../src/lib/far-from-assembly-engine.ts";
+import { FAR_FROM_WIRE_FLOW, prepareFarFromWireframeFlow } from "../src/lib/far-from-wireframe-flow.ts";
+import { FAR_FROM_SKIN_STYLE } from "../src/lib/far-from-skin-style.ts";
+import { NANITE_SKIN, naniteSkinTimeline, prepareNaniteSkin } from "../src/lib/nanite-skin.ts";
 
 /* FAR FROM SAGA — the armour generated as a wireframe (owner, 2026-10-23:
    「また、ファーフロムはワイヤーフレーム風の生成方式を採るように。」). The
@@ -146,6 +150,112 @@ test("the engine takes a page's generation; Rexonance has none and keeps its swa
   assert.equal(farFromAssemblyConfig().nanites, undefined);
   assert.equal(farFromAssemblyConfig().generation.overlay, false);
   assert.match(read("src/lib/far-from-skin-style.ts"), /triangles: true/);
+});
+
+test("the real cutout's wiring carries more live machines on both tiers and on every form", async (t) => {
+  const config = farFromAssemblyConfig();
+  const { size } = config;
+  const image = publicFile(FAR_FROM_SUIT_FIGURE);
+  const sample = (grid) =>
+    sharp(image)
+      .ensureAlpha()
+      .resize(Math.ceil(size.width / grid), Math.ceil(size.height / grid), { fit: "fill" })
+      .raw()
+      .toBuffer();
+  const alpha = await sample(NANITE_SKIN.grid);
+  const canvases = [];
+  const noop = () => {};
+  let capture = null;
+  const context = (output) =>
+    new Proxy(
+      {},
+      {
+        get: (_, method) => {
+          if (method === "getImageData") return () => ({ data: alpha });
+          if (method === "createImageData")
+            return (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) });
+          if (method === "createLinearGradient") return () => ({ addColorStop: noop });
+          if (output && ["rect", "moveTo", "lineTo"].includes(method))
+            return (...args) => capture?.push([method, ...args]);
+          return noop;
+        },
+        set: () => true,
+      },
+    );
+  const document = {
+    createElement: () => {
+      const canvas = { width: 0, height: 0, getContext: () => context(false) };
+      canvases.push(canvas);
+      return canvas;
+    },
+  };
+  const target = context(true);
+  const art = { ...size };
+  const drain = (steps) => {
+    let step = steps.next();
+    while (!step.done) step = steps.next();
+    return step.value;
+  };
+  for (const coarse of [false, true]) {
+    const tile = coarse ? 15 : 12;
+    const plan = planAssembly({ ...config, tile, sample: { data: await sample(tile) } });
+    const input = {
+      document,
+      size,
+      tiles: plan.tiles,
+      tile: plan.tile,
+      core: config.core,
+      visor: config.visor,
+      coarse,
+      art,
+      style: FAR_FROM_SKIN_STYLE,
+      timeline: naniteSkinTimeline(ASSEMBLY_BEATS),
+    };
+    const oldLayer = drain(prepareNaniteSkin(input));
+    const newLayer = drain(prepareNaniteSkin({ ...input, prepareFlow: prepareFarFromWireframeFlow }));
+    assert.ok(oldLayer && newLayer);
+    const draw = (layer, q) => {
+      layer.draw(target, q, false, 0.7, 1);
+      return layer.stats.drawn;
+    };
+    const progress = Array.from({ length: 76 }, (_, index) => 0.13 + index / 100);
+    const oldPeak = Math.max(...progress.map((q) => draw(oldLayer, q)));
+    const newPeak = Math.max(...progress.map((q) => draw(newLayer, q)));
+    const cap = coarse ? FAR_FROM_WIRE_FLOW.coarse : FAR_FROM_WIRE_FLOW.fine;
+    assert.ok(newPeak >= oldPeak * 2 && newPeak <= cap, `${oldPeak} → ${newPeak} (cap ${cap})`);
+    assert.equal(draw(newLayer, 0.08), 0, "no wires during the scan");
+    assert.equal(draw(newLayer, 0.87), 0, "no wires over the sealed armour");
+    capture = [];
+    const middle = draw(newLayer, 0.42);
+    const forward = capture;
+    assert.ok(forward.some(([method]) => method === "lineTo"), "the wires branch beyond the chips");
+    assert.equal(forward.filter(([method]) => method === "rect").length, middle);
+    capture = null;
+    draw(newLayer, 0.7);
+    capture = [];
+    assert.equal(draw(newLayer, 0.42), middle);
+    assert.deepEqual(capture, forward, "reverse scrolling returns to the same routes");
+    capture = null;
+
+    const counts = [];
+    for (const form of FAR_FROM_FORM_CHAIN) {
+      const nextArt = { ...size };
+      const drawForm = (layer, u) => {
+        assert.equal(layer.form(target, art, nextArt, "standard", form, u, "#b9d8ff", false, 0.7, 1), true);
+        return layer.stats.drawn;
+      };
+      const samples = Array.from({ length: 9 }, (_, index) => (index + 1) / 10);
+      const oldForm = Math.max(...samples.map((u) => drawForm(oldLayer, u)));
+      const newForm = Math.max(...samples.map((u) => drawForm(newLayer, u)));
+      assert.ok(newForm >= oldForm * 2 && newForm <= cap, `${form}: ${oldForm} → ${newForm}`);
+      assert.equal(drawForm(newLayer, 1), 0, `${form} is left with its finished artwork`);
+      counts.push(`${form} ${oldForm} → ${newForm}`);
+    }
+    t.diagnostic(`${coarse ? "coarse" : "fine"} sampled peak: base ${oldPeak} → ${newPeak}, ${counts.join(", ")}`);
+    oldLayer.release();
+    newLayer.release();
+    assert.ok(canvases.every(({ width, height }) => width === 0 && height === 0));
+  }
 });
 
 test("a live mount prepares the nanite skin and draws the armour with the scroll", async () => {

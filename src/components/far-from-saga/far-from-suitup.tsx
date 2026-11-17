@@ -1,3 +1,4 @@
+import { AssemblyComparisonLink } from "@/components/special/assembly-comparison-link";
 import { memo, useEffect, useRef, useState, type RefObject } from "react";
 import { FormSlider } from "@/components/special/form-slider";
 import { initRail } from "@/lib/liquid/boot.js";
@@ -424,6 +425,7 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
               {form.label}への変身を見る
             </button>
             <a href="#suitup">最初から装着を確認</a>
+            <AssemblyComparisonLink rider="far-from" form={farFromRunwayForm(stage)} />
           </div>
         </div>
       </div>

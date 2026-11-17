@@ -1,3 +1,4 @@
+import { AssemblyComparisonLink } from "@/components/special/assembly-comparison-link";
 import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { RexonanceCallSequence } from "./rexonance-call-sequence";
 import { RexonanceAperture } from "./rexonance-aperture";
@@ -628,7 +629,7 @@ const RexonanceSuitUp = memo(function RexonanceSuitUp({ stage }: { stage: Rexona
           </i>
         </div>
       </div>
-      <RexonanceAssemblyReplay />
+      <RexonanceAssemblyReplay comparison={<AssemblyComparisonLink rider="rexonance" form={stage} />} />
     </>
   );
 });

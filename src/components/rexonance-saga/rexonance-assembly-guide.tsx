@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent, type RefObject } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode, type RefObject } from "react";
 
 const LOAD_COPY: Record<string, string> = {
   waiting: "表示設定に合わせて変身演出を準備します。",
@@ -187,7 +187,7 @@ function replayAfterRetract(event: MouseEvent<HTMLAnchorElement>) {
   timer = window.setTimeout(done, REPLAY_WAIT_MS);
 }
 
-export function RexonanceAssemblyReplay() {
+export function RexonanceAssemblyReplay({ comparison }: { comparison: ReactNode }) {
   const [staticMode, setStaticMode] = useState(false);
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -209,6 +209,7 @@ export function RexonanceAssemblyReplay() {
           {staticMode ? "変身の資料を見る" : "もう一度、装着を体験"}
         </a>
         <a href="#stages">三つの形態へ</a>
+        {comparison}
       </div>
     </div>
   );

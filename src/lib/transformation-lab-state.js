@@ -13,6 +13,12 @@ export const LAB_BEATS = [
 ];
 export const clampProgress = (value) =>
   Number.isFinite(Number(value)) ? Math.max(0, Math.min(1, Number(value))) : 0;
+
+/** Both engines are building armour at this point on their shared playhead. */
+export function assemblyComparisonSearch(rider, form = "standard") {
+  return { rider, form, compare: rider === "rexonance" ? "far-from" : "rexonance", at: 0.41 };
+}
+
 export function parseLabState(search) {
   const p = new URLSearchParams(search);
   const rider = LAB_RIDERS.includes(p.get("rider")) ? p.get("rider") : "rexonance";
