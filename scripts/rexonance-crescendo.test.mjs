@@ -280,7 +280,7 @@ test("the armour's lines come from the art: edges where it changes, a two-tone r
 test("the new suit-up code is fetched on demand, only by Rexonance's surge layer", () => {
   const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
   const modules = ["rexonance-suit-crescendo", "rexonance-suit-skin"];
-  for (const name of modules) {
+  for (const name of [...modules, "rexonance-scroll-swarm"]) {
     assert.match(surge, new RegExp(`import\\("@/lib/${name}"\\)`), `${name} is imported lazily`);
     for (const line of surge.split("\n"))
       if (new RegExp(`from "@/lib/${name}"`).test(line))
@@ -291,9 +291,9 @@ test("the new suit-up code is fetched on demand, only by Rexonance's surge layer
       `${name}: no static value import`,
     );
   }
-  // Multi-line static imports of the two modules are type imports.
+  // Multi-line static imports of the lazy modules are type imports.
   for (const block of surge.matchAll(
-    /^import ([^;]*?) from "@\/lib\/rexonance-suit-(?:crescendo|skin)";/gms,
+    /^import ([^;]*?) from "@\/lib\/rexonance-(?:suit-(?:crescendo|skin)|scroll-swarm)";/gms,
   ))
     assert.match(block[1], /^type /, "static imports of the new modules are types");
   // The bake never ships: only the build script and the tests import it.
@@ -304,6 +304,15 @@ test("the new suit-up code is fetched on demand, only by Rexonance's surge layer
   for (const path of walk("src").filter((file) => /\.(tsx?|jsx?|css)$/.test(file))) {
     const text = read(path);
     if (!/rexonance-suit-(crescendo|skin)|rexonance-skin-20261111/.test(text)) continue;
+    if (path === "src/lib/rexonance-scroll-swarm.ts") {
+      // The scroll flocks read the baked samples supplied by the skin. No
+      // runtime skin, shader, field bake or picture may enter their chunk.
+      const fieldType = /^import type \{ SkinField \} from "\.\/rexonance-suit-skin";$/m;
+      assert.match(text, fieldType);
+      const rest = text.replace(fieldType, "");
+      assert.doesNotMatch(rest, /rexonance-suit-(crescendo|skin)|rexonance-skin-20261111/);
+      continue;
+    }
     assert.ok(
       [
         "src/components/rexonance-saga/rexonance-suit-surge.tsx",

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { guardedHref } from "../src/lib/guarded-href.ts";
 import {
   CAST_ROSTER_SEARCH,
   isCastRosterOrigin,
@@ -67,7 +68,9 @@ test("header and footer returns use reactive URL state, with the original defaul
 
 test("guarded navigation keeps the origin in native links, retry links and every route branch", () => {
   const gate = read("src/components/load-gate.tsx");
-  assert.match(gate, /new URLSearchParams\(search\)\.toString\(\)/);
+  assert.equal(guardedHref("/riders/saga", "forms", CAST_ROSTER_SEARCH), "/riders/saga?from=cast-roster#forms");
+  assert.equal(guardedHref("/world", "cast-roster"), "/world#cast-roster");
+  assert.equal(guardedHref("/world", undefined, {}), "/world");
   assert.match(gate, /const href = guardedHref\(to, hash, search\)/);
   assert.match(gate, /setDelayedRoute\(\{\s*href: guardedHref\(to, hash, search\)/);
   assert.match(gate, /const navigationSearch = search \? \(\) => search : undefined/);

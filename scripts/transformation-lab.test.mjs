@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { defaultStringifySearch } from "@tanstack/react-router";
+import { guardedHref } from "../src/lib/guarded-href.ts";
 import {
   assemblyComparisonSearch,
   parseLabState,
@@ -17,7 +18,8 @@ import {
 test("both assembly comparison links keep the selected form and beat on native and client navigation", () => {
   for (const [rider, compare] of [["rexonance", "far-from"], ["far-from", "rexonance"]]) {
     const query = assemblyComparisonSearch(rider, "ultra");
-    for (const search of [new URLSearchParams(query).toString(), defaultStringifySearch(query)]) {
+    const native = new URL(guardedHref("/transformation-lab", undefined, query), "https://example.test");
+    for (const search of [native.search, defaultStringifySearch(query)]) {
       const state = parseLabState(search);
       assert.equal(state.rider, rider);
       assert.equal(state.form, "ultra");

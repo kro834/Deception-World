@@ -42,6 +42,7 @@ function loadOpeningHandoffLayer(): Promise<OpeningHandoffLayerComponent> {
   return openingHandoffLayerPromise;
 }
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
+import { guardedHref, type GuardedSearch } from "@/lib/guarded-href";
 import { createTransitionDecorationClock } from "@/lib/transition-decoration-clock";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
 import {
@@ -208,8 +209,6 @@ type CineScene = {
   reveal: number;
 };
 
-type GuardedSearch = Record<string, string | number>;
-
 type GoOptions = {
   to: string;
   hash?: string;
@@ -305,15 +304,6 @@ const RIDER_DIVE_META: Record<RiderDiveVariant, { no: string; name: string; labe
 const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 const nextFrame = () =>
   new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
-
-function guardedHref(to: string, hash?: string, search?: GuardedSearch) {
-  const fragment = hash ? `#${hash}` : "";
-  if (!search) return `${to}${fragment}`;
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(search)) params.set(key, String(value));
-  const query = params.toString();
-  return `${to}${query ? `?${query}` : ""}${fragment}`;
-}
 
 // The call hold can be shortened while it is playing. A live reduced
 // motion/economy preference must not leave the static final word waiting for
