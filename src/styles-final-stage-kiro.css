@@ -265,10 +265,6 @@ html .fst-page.fst-page .rxs-hero-copy > p:first-child::after {
   background: var(--fsk-dash) 0 0 / 41px 2px;
 }
 
-html .fst-page.fst-page .rxs-hero-lede {
-  padding-bottom: 16px;
-  background: var(--fsk-dash) 50% 100% / 164px 2px no-repeat;
-}
 
 html .fst-page.fst-page .rxs-scroll-cue {
   color: var(--fsk-chalk-70);

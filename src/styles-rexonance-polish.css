@@ -1,5 +1,5 @@
 /* Rexonance's operating stages share one colour from control to artwork.
-   Standard (Cyan/Sapphire), Max (Gold/Solar Amber), Ultra (Crimson/Royal Violet).
+   Standard (Cyan/Sapphire), Max (Violet), Ultra (Magenta).
    Scoped to the Rexonance route; shared showcase geometry,
    type sizes, comparison values and artwork framing remain untouched. */
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="standard"] {
@@ -8,13 +8,13 @@
 }
 
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="max"] {
-  --rxs-control-accent: #f2d896;
-  --rxs-control-secondary: #ffaa00;
+  --rxs-control-accent: #969cff;
+  --rxs-control-secondary: #6370ff;
 }
 
 .rxs-page.rxs-rexonance-page .rxs-stage-tabs[data-stage="ultra"] {
-  --rxs-control-accent: #ff3b69;
-  --rxs-control-secondary: #9b51e0;
+  --rxs-control-accent: #ff72da;
+  --rxs-control-secondary: #b84dff;
 }
 
 /* The shared frosted rail uses an !important surface paint. Match its
@@ -66,19 +66,19 @@ html body .rxs-page.rxs-rexonance-page .rxs-stage-tabs.liquid-swipe-tabs .liquid
 }
 
 /* Three stage forms: Standard, Max, Ultra panel palette mapping */
-.rxs-page.rxs-rexonance-page .rxs-stage-panel[data-stage="standard"] {
+.rxs-page.rxs-rexonance-page .rxs-stage-panel[aria-labelledby="rxs-stage-tab-standard"] {
   --rxs-stage-accent: #63e2ff;
   --rxs-stage-accent-secondary: #0077ff;
 }
 
-.rxs-page.rxs-rexonance-page .rxs-stage-panel[data-stage="max"] {
-  --rxs-stage-accent: #f2d896;
-  --rxs-stage-accent-secondary: #ffaa00;
+.rxs-page.rxs-rexonance-page .rxs-stage-panel[aria-labelledby="rxs-stage-tab-max"] {
+  --rxs-stage-accent: #969cff;
+  --rxs-stage-accent-secondary: #6370ff;
 }
 
-.rxs-page.rxs-rexonance-page .rxs-stage-panel[data-stage="ultra"] {
-  --rxs-stage-accent: #ff3b69;
-  --rxs-stage-accent-secondary: #9b51e0;
+.rxs-page.rxs-rexonance-page .rxs-stage-panel[aria-labelledby="rxs-stage-tab-ultra"] {
+  --rxs-stage-accent: #ff72da;
+  --rxs-stage-accent-secondary: #b84dff;
 }
 
 /* A compact status chip keeps the existing code face and size. */

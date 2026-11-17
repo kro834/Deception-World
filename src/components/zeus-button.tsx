@@ -23,9 +23,12 @@ import {
   type ZeusBounds,
   type ZeusDragGeometry,
 } from "@/lib/zeus-drag";
-import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
+const CIEL_BUTTON_SIZES = "(max-width: 560px) 48px, 80px";
+const CIEL_BUTTON_SRCSET =
+  "/ciel-button-20261018-144.webp 144w, /ciel-button-20261018-216.webp 216w, /ciel-button-20261018-360.webp 360w";
 import { waitForFloatingButtonDelay, waitForFloatingButtonPaint } from "@/lib/floating-button-wait";
 import { CIEL_INFERNO_GAP_MS, createCielInfernoTrigger } from "@/lib/ciel-inferno-trigger";
+import { sharedZeusButtonContext } from "@/lib/zeus-button-context";
 
 type ZeusButtonPosition = { x: number; y: number };
 type InfernoView = ComponentType<{
@@ -170,6 +173,13 @@ const ZEUS_AVOID_SELECTOR = [
   ".app-load-error-actions :is(button, a)",
   // 2026-10-28: the notice /world shows after the opening (opening-notice.tsx).
   ".opening-notice :is(.opening-notice-open, .opening-notice-close)",
+  ".wm-detail",
+  ".exhibition-shelf-work",
+  ".search-results-heading p",
+  ".rxs-assembly-controls a",
+  ".gallery-work-open",
+  ".gallery-feature-open",
+  ".gallery-tour-course-preview",
 ].join(",");
 // A control taller than this share of the screen would block every spot and
 // pin the button home over it; its words still count through the glyphs.
@@ -256,13 +266,23 @@ const ZEUS_AVOID_PAGE_TEXT_SELECTOR = [
   // 2026-10-25 polish: its spec values and evaluation lines (390, mid-scroll).
   ".ics-specs dd",
   ".ics-evaluation p",
+  // 2026-11-16 polish: search intro, library stats, MUS saga hero, FFS copy
+  ".search-intro p",
+  ".library-stats dd",
+  ".library-stats dt",
+  ".mus-hero-ultra",
+  ".mus-calls li",
+  ".mus-overview-copy",
+  ".ffs-copy p",
+  ".ffs-stage-copy p",
+  ".ffs-articles p",
 ].join(",");
-/* Where no spot is clear of words on the Rexonance page (a full-width
-   instrument table, the chapter map's rows), the button steps aside in place
-   (fades out) instead of resting on them, and comes back at the next settle
-   that finds a clear spot (2026-10-21 sweep F05). Elsewhere it keeps the
-   least-covering spot, as before. */
-const ZEUS_PARK_PAGE_SELECTOR = ".rxs-rexonance-page";
+/* Where no spot is clear of words on the Rexonance page or Form Archive (a
+   full-width instrument table, the chapter map's rows, hero lead on 375),
+   the button steps aside in place (fades out) instead of resting on them, and
+   comes back at the next settle that finds a clear spot (2026-10-21 sweep F05).
+   Elsewhere it keeps the least-covering spot, as before. */
+const ZEUS_PARK_PAGE_SELECTOR = ".rxs-rexonance-page, .form-archive-page";
 /* Art the button keeps off as it keeps off words (2026-10-21 sweep F05): the
    key visual pinned beside Rexonance's chapters. Its drawn box, cut to the
    screen, counts as covered words, so a step (the far side's above all) does
@@ -293,7 +313,9 @@ const ZEUS_DOCK_SELECTOR = "dialog.quick-search .quick-search-foot";
 const ZEUS_DOCK_MIN_SHARE = 0.85;
 // From the band's far end: the button's ring (7px) and its air.
 const ZEUS_DOCK_INSET = 16;
-const ZeusButtonContext = createContext<ZeusButtonSettings | null>(null);
+const ZeusButtonContext =
+  (typeof sharedZeusButtonContext !== "undefined" ? sharedZeusButtonContext : null) ??
+  createContext<ZeusButtonSettings | null>(null);
 
 type ZeusRect = { left: number; right: number; top: number; bottom: number };
 
@@ -578,7 +600,13 @@ function readPosition(): ZeusButtonPosition {
   return DEFAULT_POSITION;
 }
 
-export function ZeusButtonProvider({ children }: { children: ReactNode }) {
+export function ZeusButtonProvider({
+  children,
+  externalSettings,
+}: {
+  children: ReactNode;
+  externalSettings?: ZeusButtonSettings;
+}) {
   const { go } = useLoadGate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [enabled, setEnabledState] = useState(true);
@@ -861,10 +889,12 @@ export function ZeusButtonProvider({ children }: { children: ReactNode }) {
     }
   }, [go]);
 
+  const activeSettings = externalSettings ?? settings;
+
   return (
-    <ZeusButtonContext.Provider value={settings}>
+    <ZeusButtonContext.Provider value={activeSettings}>
       {children}
-      {enabled && pathname !== "/" && portalTarget && !(secretOrigin && Inferno)
+      {activeSettings.enabled && pathname !== "/" && portalTarget && !(secretOrigin && Inferno)
         ? createPortal(
             <ZeusButton
               position={position}
@@ -1481,13 +1511,14 @@ function ZeusButton({
         return;
       }
       entranceSince.current = null;
-      // Crowded on the Rexonance page: step aside in place rather than rest
+      // Crowded on the Rexonance page or Form Archive: step aside in place rather than rest
       // on its words (ZEUS_PARK_PAGE_SELECTOR). Keyboard focus, its own
       // return, a dock and a dialog keep it in view.
       if (
         report.crowded &&
         !dock &&
-        document.querySelector?.(ZEUS_PARK_PAGE_SELECTOR) &&
+        (document.querySelector?.(ZEUS_PARK_PAGE_SELECTOR) ||
+          document.querySelector?.(".rxs-rexonance-page")) &&
         document.activeElement !== button &&
         button.dataset.navigating !== "true" &&
         !button.closest("dialog")

@@ -85,10 +85,10 @@
   align-items: center;
   gap: 7px;
   max-width: calc(100% - 28px);
-  padding: 6px 8px;
+  padding: 6px 10px;
   background: linear-gradient(180deg, #091a13f0 0%, #040e0bf2 100%);
   border: 1px solid #7cb98f44;
-  border-radius: 999px;
+  border-radius: 16px;
   box-shadow:
     0 12px 36px #000a,
     0 0 0 1px #46765722,
@@ -262,6 +262,8 @@
     flex-wrap: wrap;
     justify-content: center;
     row-gap: 8px;
+    border-radius: 14px;
+    padding: 8px 10px;
   }
   .dogs-viewer__toolbar .dogs-viewer__pose {
     padding: 10px 30px 10px 12px;

@@ -8,8 +8,6 @@
   --room-brass: #e6c687;
   --room-amber-glow: rgb(228 172 86 / 22%);
   --room-vignette: rgb(7 5 12 / 60%);
-  --room-stack-sheet: #1b1522;
-  --room-stack-edge: rgb(206 162 94 / 38%);
   --room-latin:
     "Cinzel", "Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --room-display:
@@ -42,8 +40,6 @@
   --room-brass: #b58943;
   --room-amber-glow: rgb(255 236 196 / 46%);
   --room-vignette: rgb(92 66 36 / 18%);
-  --room-stack-sheet: #ebe0cc;
-  --room-stack-edge: rgb(142 112 68 / 44%);
   color-scheme: light;
 }
 .dream-reading-room > .zeus-button {
@@ -351,60 +347,32 @@
     radial-gradient(50% 42% at 50% 100%, rgb(164 73 59 / 9%), transparent 70%),
     radial-gradient(96% 92% at 50% 48%, transparent 56%, var(--room-vignette) 100%);
 }
-/* 双柱飾り罫＋重ね紙の小口立体影（Twin-pillar book rules + stacked-paper fore-edge depth） */
+/* 控えめな単線枠と静かな紙面陰影（Quiet single-rule book sheet without margin collision） */
 .dream-reading-paper {
-  --room-pillar: color-mix(in srgb, var(--room-rule) 42%, transparent);
   max-width: 800px;
   margin: 0 auto;
   background:
-    linear-gradient(var(--room-brass) 0 0) 0 0 / 32px 2px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 0 0 / 2px 32px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 100% 0 / 32px 2px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 100% 0 / 2px 32px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 0 100% / 32px 2px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 0 100% / 2px 32px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 100% 100% / 32px 2px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) 100% 100% / 2px 32px no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 20px,
-        var(--room-pillar) 20px calc(100% - 20px),
-        transparent calc(100% - 20px)
-      )
-      8px 0 / 1px 100% no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 24px,
-        var(--room-pillar) 24px calc(100% - 24px),
-        transparent calc(100% - 24px)
-      )
-      11px 0 / 1px 100% no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 20px,
-        var(--room-pillar) 20px calc(100% - 20px),
-        transparent calc(100% - 20px)
-      )
-      calc(100% - 8px) 0 / 1px 100% no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 24px,
-        var(--room-pillar) 24px calc(100% - 24px),
-        transparent calc(100% - 24px)
-      )
-      calc(100% - 11px) 0 / 1px 100% no-repeat,
-    radial-gradient(72% 48% at 50% 0%, rgb(224 180 102 / 12%), transparent 74%),
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 0 0 / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 0 0 / 1px 16px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 100% 0 / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 100% 0 / 1px 16px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 0 100% / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 0 100% / 1px 16px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 100% 100% / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-brass) 62%, transparent) 0 0) 100% 100% / 1px 16px
+      no-repeat,
+    radial-gradient(72% 48% at 50% 0%, rgb(224 180 102 / 10%), transparent 74%),
     var(--room-paper);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 14%),
-    inset 0 0 0 6px rgb(206 162 90 / 7%),
-    3px 3px 0 -1px var(--room-stack-sheet),
-    3px 3px 0 0 var(--room-stack-edge),
-    6px 6px 0 -1px var(--room-stack-sheet),
-    6px 6px 0 0 var(--room-stack-edge),
-    9px 9px 0 -1px var(--room-stack-sheet),
-    9px 9px 0 0 color-mix(in srgb, var(--room-stack-edge) 70%, transparent),
-    0 28px 68px rgb(0 0 0 / 44%);
+    inset 0 1px 0 rgb(255 248 228 / 12%),
+    0 22px 52px rgb(0 0 0 / 38%);
   border: 1px solid var(--room-rule);
   padding: clamp(24px, 5vw, 72px);
 }
@@ -509,10 +477,11 @@
 .dream-reading-paragraph-number {
   display: inline-flex;
   align-items: center;
-  padding: 1px 8px;
-  border-left: 2px solid var(--room-gilt);
+  padding: 1px 4px 2px;
+  border-left: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--room-gilt) 56%, transparent);
   color: var(--room-gilt);
-  font: 600 12px/1.7 var(--room-latin);
+  font: 600 12px/1.6 var(--room-latin);
   letter-spacing: 0.16em;
   font-variant-numeric: tabular-nums;
   margin-bottom: 10px;
@@ -521,7 +490,7 @@
 .dream-reading-paper > [data-room-paragraph][data-bookmarked="true"]::before {
   content: "";
   position: absolute;
-  left: -13px;
+  left: -14px;
   top: 0.24em;
   width: 6px;
   height: 2.35em;
@@ -549,6 +518,7 @@
     width: 2.8em;
     padding: 0 0.45em 0 0;
     border-left: 0;
+    border-bottom: 0;
     border-right: 1px solid color-mix(in srgb, var(--room-rule) 65%, transparent);
     margin: 0 0.85em 0 0;
     text-align: right;
@@ -568,45 +538,38 @@
     height: 2.45em;
   }
 }
+@media (min-width: 981px) and (max-width: 1100px) and (orientation: portrait) {
+  .dream-reading-paragraph-number,
+  .dream-reading-paper
+    > [data-room-paragraph][data-bookmarked="true"]
+    > .dream-reading-paragraph-number {
+    width: auto;
+    margin: 0 0 10px;
+    padding: 1px 4px 2px;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--room-gilt) 56%, transparent);
+    text-align: left;
+  }
+}
 /* Paper mode: a laid sheet, the chain lines every 54px. */
 .dream-reading-room[data-paper="true"] .dream-reading-paper {
   background:
-    linear-gradient(var(--room-rule) 0 0) 0 0 / 32px 2px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 0 0 / 2px 32px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 100% 0 / 32px 2px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 100% 0 / 2px 32px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 0 100% / 32px 2px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 0 100% / 2px 32px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 100% 100% / 32px 2px no-repeat,
-    linear-gradient(var(--room-rule) 0 0) 100% 100% / 2px 32px no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 20px,
-        var(--room-pillar) 20px calc(100% - 20px),
-        transparent calc(100% - 20px)
-      )
-      8px 0 / 1px 100% no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 24px,
-        var(--room-pillar) 24px calc(100% - 24px),
-        transparent calc(100% - 24px)
-      )
-      11px 0 / 1px 100% no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 20px,
-        var(--room-pillar) 20px calc(100% - 20px),
-        transparent calc(100% - 20px)
-      )
-      calc(100% - 8px) 0 / 1px 100% no-repeat,
-    linear-gradient(
-        180deg,
-        transparent 24px,
-        var(--room-pillar) 24px calc(100% - 24px),
-        transparent calc(100% - 24px)
-      )
-      calc(100% - 11px) 0 / 1px 100% no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 0 0 / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 0 0 / 1px 16px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 100% 0 / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 100% 0 / 1px 16px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 0 100% / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 0 100% / 1px 16px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 100% 100% / 16px 1px
+      no-repeat,
+    linear-gradient(color-mix(in srgb, var(--room-rule) 62%, transparent) 0 0) 100% 100% / 1px 16px
+      no-repeat,
     repeating-linear-gradient(0deg, rgb(110 72 40 / 3%) 0 1px, transparent 1px 5px),
     repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 4%) 53px 54px),
     var(--room-paper);
@@ -643,20 +606,14 @@
   gap: 12px;
   margin-top: 24px;
 }
-.dream-reading-bottom {
+.dream-reading-room .dream-reading-bottom {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 4px 20px;
   padding: 10px clamp(16px, 4vw, 64px);
   border-top: 1px solid var(--room-rule);
-}
-.dream-reading-room .dream-reading-bottom {
-  display: grid;
-  padding: 10px clamp(16px, 4vw, 64px);
   background:
-    linear-gradient(var(--room-brass) 0 0) 12px calc(100% - 5px) / 18px 1px no-repeat,
-    linear-gradient(var(--room-brass) 0 0) calc(100% - 12px) calc(100% - 5px) / 18px 1px no-repeat,
     linear-gradient(180deg, rgb(214 174 102 / 9%), transparent),
     var(--room-bg);
   box-shadow: inset 0 1px 0 rgb(244 220 166 / 14%);
@@ -699,6 +656,9 @@
   font-size: 12px;
   line-height: 1.5;
   color: var(--room-muted);
+}
+.dream-reading-bottom > [role="status"]:empty {
+  display: none;
 }
 /* A portrait tablet needs the width for its text, not a permanent chapter rail. */
 @media (max-width: 760px), (max-width: 980px) and (orientation: portrait) {
@@ -758,10 +718,22 @@
     white-space: nowrap;
   }
   .dream-reading-scroll {
-    padding: 16px 10px;
+    padding: 16px 12px;
   }
   .dream-reading-paper {
-    padding: 24px 22px;
+    padding: 24px 20px 24px 24px;
+    background:
+      radial-gradient(72% 48% at 50% 0%, rgb(224 180 102 / 9%), transparent 74%),
+      var(--room-paper);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 10%),
+      0 12px 28px rgb(0 0 0 / 30%);
+  }
+  .dream-reading-room[data-paper="true"] .dream-reading-paper {
+    background:
+      repeating-linear-gradient(0deg, rgb(110 72 40 / 3%) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(90deg, transparent 0 53px, rgb(110 72 40 / 4%) 53px 54px),
+      var(--room-paper);
   }
   .dream-reading-paper > [data-room-paragraph] {
     font-size: 16px;
@@ -868,7 +840,8 @@ html[data-world-effects="economy"] .dream-reading-paper {
   }
 }
 @media (forced-colors: active) {
-  .dream-reading-room {
+  .dream-reading-room,
+  .dream-reading-room[data-paper="true"] {
     --room-bg: Canvas;
     --room-paper: Canvas;
     --room-ink: CanvasText;
@@ -876,14 +849,13 @@ html[data-world-effects="economy"] .dream-reading-paper {
     --room-rule: CanvasText;
     --room-gilt: Highlight;
     --room-brass: CanvasText;
-    --room-stack-sheet: Canvas;
-    --room-stack-edge: CanvasText;
   }
   .dream-reading-scroll,
   .dream-reading-topbar,
   .dream-reading-sidebar,
   .dream-reading-room .dream-reading-bottom,
-  .dream-reading-paper {
+  .dream-reading-paper,
+  .dream-reading-room[data-paper="true"] .dream-reading-paper {
     background: Canvas;
     box-shadow: none;
   }

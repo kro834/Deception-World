@@ -139,7 +139,7 @@ html[data-family="library"] .command-records.library-page.library-atelier .libra
   text-decoration: none;
   box-shadow:
     inset 0 1px #d9f5ff12,
-    3px 4px 0 #02081088;
+    0 10px 24px -14px #020810a6;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-fulltext-link {
   min-height: 48px;
@@ -153,21 +153,7 @@ html[data-family="library"] .command-records.library-page.library-atelier .libra
   background: linear-gradient(135deg, #38536966, #07131eeb 45%, #172e3f);
   box-shadow:
     inset 0 1px var(--records-specular),
-    9px 10px 0 #020912b3,
-    10px 11px 0 #98cde333,
-    0 20px 46px #0005;
-}
-html[data-family="library"]
-  .command-records.library-page.library-atelier
-  .library-cast-board::before {
-  content: "";
-  position: absolute;
-  inset: -9px 12px 12px -9px;
-  border: 1px solid #91dbfb33;
-  border-top-color: #c1edff88;
-  pointer-events: none;
-  z-index: -1;
-  transform: skewY(-2deg);
+    0 20px 46px -22px #000a;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-cast-heading {
   margin-bottom: 16px;
@@ -184,7 +170,7 @@ html[data-family="library"] .command-records.library-page.library-atelier .libra
 html[data-family="library"] .command-records.library-page.library-atelier .library-cast-art {
   border: 1px solid #9abed270;
   border-radius: 0;
-  box-shadow: 3px 4px 0 #020911b3;
+  box-shadow: 0 12px 26px -16px #020911bf;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-cast-name {
   font-size: 13px;
@@ -212,7 +198,7 @@ html[data-family="library"]
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #e5f7ff26,
-    5px 6px 0 #010810b3;
+    0 16px 36px -22px #010810cc;
   transition:
     border-color 0.25s,
     background 0.25s,
@@ -250,7 +236,7 @@ html[data-family="library"]
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #e5f7ff22,
-    6px 7px 0 #010810b3;
+    0 20px 44px -24px #010810cc;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-hub {
   padding: clamp(22px, 3vw, 40px);
@@ -289,7 +275,7 @@ html[data-family="library"] .command-records.library-page.library-atelier .libra
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #e5f7ff22,
-    5px 6px 0 #010810b3;
+    0 18px 40px -22px #010810cc;
 }
 html[data-family="library"]
   .command-records.library-page.library-atelier
@@ -353,7 +339,7 @@ html[data-family="library"]
   background: linear-gradient(120deg, #e9f8ff, #b4cddc);
   box-shadow:
     inset 3px 0 var(--records-ice),
-    3px 3px 0 #02081099;
+    0 10px 22px -14px #020810b3;
 }
 html[data-family="library"]
   .command-records.library-page.library-atelier
@@ -370,7 +356,7 @@ html[data-family="library"]
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #e5f7ff22,
-    5px 6px 0 #010810b3;
+    0 18px 40px -22px #010810cc;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .inquiry-choice-art {
   border-radius: 0;
@@ -381,7 +367,7 @@ html[data-family="library"]
   border-color: var(--records-ice);
   box-shadow:
     inset 3px 0 var(--records-ice),
-    5px 6px 0 #010810b3;
+    0 18px 40px -22px #010810cc;
 }
 html[data-family="library"] .command-records.library-page.library-atelier .library-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -400,7 +386,7 @@ html[data-family="library"]
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #d9f4ff22,
-    5px 6px 0 #010810b3;
+    0 18px 40px -22px #010810cc;
   transition:
     border-color 0.25s,
     box-shadow 0.25s;
@@ -500,7 +486,7 @@ html[data-family="library"] .command-records.search-page.search-observatory .sea
   border: 1px solid var(--records-line);
   border-left: 3px solid var(--records-ice);
   background: var(--records-panel);
-  box-shadow: 4px 5px 0 #010810b3;
+  box-shadow: 0 16px 36px -22px #010810cc;
 }
 html[data-family="library"] .command-records.search-page.search-observatory .search-workbench {
   position: relative;
@@ -509,8 +495,7 @@ html[data-family="library"] .command-records.search-page.search-observatory .sea
   background: linear-gradient(128deg, #34526966, #091724 48%, #1b3547);
   box-shadow:
     inset 0 1px #e7f8ff44,
-    8px 9px 0 #020911bb,
-    9px 10px 0 #91c5de33;
+    0 24px 52px -26px #020911cc;
 }
 html[data-family="library"]
   .command-records.search-page.search-observatory
@@ -586,7 +571,7 @@ html[data-family="library"]
   background: linear-gradient(130deg, #233d4e99, #0c1b29);
   box-shadow:
     inset 0 1px #e5f7ff16,
-    2px 3px 0 #010810b3;
+    0 10px 22px -14px #010810cc;
   font-size: 14px;
 }
 html[data-family="library"]
@@ -598,7 +583,7 @@ html[data-family="library"]
   background: linear-gradient(125deg, #eefaff, #b6cedc 49%, #e0f2fb);
   box-shadow:
     inset 3px 0 var(--records-ice),
-    2px 3px 0 #010810b3;
+    0 10px 22px -14px #010810cc;
 }
 html[data-family="library"]
   .command-records.search-page.search-observatory
@@ -654,7 +639,7 @@ html[data-family="library"]
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #e5f7ff20,
-    4px 5px 0 #010810b3;
+    0 18px 40px -22px #010810cc;
   transition:
     border-color 0.25s,
     box-shadow 0.25s;
@@ -702,7 +687,7 @@ html[data-family="library"]
   background: var(--records-panel);
   box-shadow:
     inset 0 1px #e5f7ff20,
-    4px 5px 0 #010810b3;
+    0 16px 36px -22px #010810cc;
 }
 html[data-family="library"]
   .command-records.search-page.search-observatory
@@ -712,12 +697,12 @@ html[data-family="library"]
   box-shadow:
     inset 4px 0 var(--records-ice),
     0 0 0 2px #8bdeef30,
-    4px 5px 0 #010810b3;
+    0 18px 42px -22px #010810d9;
 }
 html[data-family="library"] .command-records.search-page.search-observatory .search-empty {
   border: 1px solid #91bdd766;
   background: var(--records-panel);
-  box-shadow: 5px 6px 0 #010810b3;
+  box-shadow: 0 20px 44px -24px #010810cc;
 }
 
 html[data-family="library"]
@@ -827,7 +812,7 @@ html[data-family="library"]
     box-shadow:
       inset 0 1px 0 var(--records-specular),
       inset 3px 0 #9deafa,
-      5px 6px 0 #010810b3;
+      0 20px 44px -22px #010810d9;
   }
   html[data-family="library"] .command-records :is(button, a):active {
     translate: 0 1px;
@@ -1045,7 +1030,7 @@ html[data-family="library"]
   }
   html[data-family="library"] .command-records.search-page.search-observatory .search-submit {
     min-height: 48px;
-    padding-inline: 10px;
+    padding-inline: 14px;
     font-size: 13px;
   }
   html[data-family="library"] .command-records.search-page.search-observatory .search-categories {

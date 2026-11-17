@@ -320,8 +320,7 @@ html body #world-column-pickup::before {
       calc(var(--pc-top) + var(--pc-inset)) / var(--pc-arm) 2px no-repeat,
     linear-gradient(var(--pc-lock) 0 0) right var(--pc-inset) top
       calc(var(--pc-top) + var(--pc-inset)) / 2px var(--pc-arm) no-repeat,
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 22%) 0 1px, transparent 1px 32px) left
-      calc(var(--pc-pad) + 12px) bottom 0 / min(40%, 256px) 5px no-repeat,
+    linear-gradient(transparent 0 0) left calc(var(--pc-pad) + 12px) bottom 0 / 0 0 no-repeat,
     linear-gradient(
       90deg,
       color-mix(in srgb, var(--pc-accent) 10%, transparent),
@@ -1992,6 +1991,18 @@ html[data-mode="world"]
   }
 }
 
+@media (max-width: 380px) {
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    .form-pickup-stats,
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    .rider-nightmare-dialog-record
+    > dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ================================================================
    The episode pickup (/world)
    ================================================================ */
@@ -2410,6 +2421,12 @@ html body #world-column-pickup .world-column-dialog-copy > div p {
   letter-spacing: 0.035em;
   line-break: strict;
   text-wrap: pretty;
+}
+
+@media (max-width: 760px) {
+  html body #world-column-pickup #world-column-pickup-title {
+    font-size: clamp(28px, 8vw, 42px);
+  }
 }
 
 @media (max-height: 500px) {

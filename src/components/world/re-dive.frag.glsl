@@ -120,7 +120,7 @@ void main() {
 
   // ---- Ember speed lines and the tunnel.
   if (uDive > 0.001) {
-    float ang = atan(p.y, p.x) / 6.2831853 + 0.5;
+    float ang = atan(p.y, abs(p.x) > 1e-6 ? p.x : 1e-6) / 6.2831853 + 0.5;
     float lanes = 110.0;
     float lane = floor(ang * lanes);
     float rnd = hash11(lane + 3.3);

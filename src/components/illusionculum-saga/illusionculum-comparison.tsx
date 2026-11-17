@@ -97,7 +97,6 @@ function ComparisonTable({
                       {numeric[cellIndex + 1] ? (
                         <i
                           aria-hidden="true"
-                          data-max={scale[cellIndex + 1][index] >= 0.99 ? "true" : undefined}
                           style={{
                             ["--ics-bar" as string]: scale[cellIndex + 1][index].toFixed(3),
                           }}

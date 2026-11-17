@@ -151,6 +151,50 @@ html[data-family="world"]:root
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+@media (max-width: 760px) {
+  #top.world-artwork-hero .artwork-stage__controls {
+    position: static;
+    margin-top: 14px;
+    min-height: auto;
+  }
+  #top.world-artwork-hero .world-stage-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    width: 100%;
+  }
+  #top.world-artwork-hero .world-stage-control-cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    max-width: 100%;
+    justify-content: center;
+  }
+  #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) {
+    width: auto;
+    max-width: none;
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+    flex: 1 1 auto;
+  }
+}
+@media (max-width: 520px) {
+  #top.world-artwork-hero .world-stage-control-cluster {
+    width: 100%;
+  }
+  #top.world-artwork-hero .world-stage-controls .poster-shuffle {
+    flex: 1 1 100%;
+  }
+  #top.world-artwork-hero .world-stage-controls :is(.poster-reset, .poster-lock) {
+    flex: 1 1 calc(50% - 4px);
+  }
+}
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
@@ -171,6 +215,11 @@ html[data-family="world"]:root
   }
   #top.world-artwork-hero .world-stage-identity {
     margin-bottom: 18px;
+  }
+}
+@media (max-width: 760px) {
+  #top.world-artwork-hero .world-poster-stage .artwork-stage__visual {
+    height: auto;
   }
 }
 @media (max-height: 540px) and (orientation: landscape) {
@@ -218,6 +267,7 @@ html[data-world-effects="economy"]
 #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock) b {
   font-size: 12px !important;
   line-height: 1.4 !important;
+  letter-spacing: 0.08em;
 }
 
 /* The four destinations share the artwork stage's visual hierarchy. */

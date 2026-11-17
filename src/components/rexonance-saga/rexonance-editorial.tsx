@@ -49,7 +49,6 @@ export function RexonanceChapterMap() {
     <nav className="rxs-chapter-index rxe-chapter-map" aria-label="レクソナンスの見どころ">
       {CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>
-          <u className="rxe-chapter-rail" aria-hidden="true" />
           <b aria-hidden="true">{chapter.number}</b>
           <span>{chapter.label}</span>
           <em className="visually-hidden">{chapter.detail}</em>

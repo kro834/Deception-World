@@ -93,8 +93,6 @@ html[data-family="dossier"]
 }
 
 .form-signature-seal,
-.form-signature-ring,
-.form-signature-scale,
 .form-signature-trace,
 .form-signature-flare {
   position: absolute;
@@ -103,9 +101,8 @@ html[data-family="dossier"]
 }
 
 /* Explom's signature: its name as an outlined wordmark on the far edge,
-   a fractured prism bezel ring and polar shockwave graduation scale around
-   the impact point, and the fracture running out of the art into the words
-   (cyan rims, a crimson hot core), from an impact ring on the seam. */
+   and the fracture running out of the art into the words (cyan rims, a
+   crimson hot core), from an impact ring on the seam. */
 [data-form-theme="explom"] .form-signature-seal {
   top: 50%;
   right: -0.08em;
@@ -118,84 +115,6 @@ html[data-family="dossier"]
     2px 0 0 rgb(255 74 96 / 22%),
     -1px 0 0 rgb(114 242 236 / 18%);
   translate: 0 -50%;
-}
-
-/* 破砕プリズムリング: dual shattered concentric prism rings (cyan & crimson). */
-[data-form-theme="explom"] .form-signature-ring {
-  --rest: 0.72;
-  top: calc(46% - 108px);
-  left: -108px;
-  width: 216px;
-  height: 216px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from -24deg,
-    rgb(214 255 252 / 90%) 0deg 26deg,
-    transparent 26deg 34deg,
-    rgb(255 74 96 / 84%) 34deg 68deg,
-    transparent 68deg 79deg,
-    rgb(114 242 236 / 78%) 79deg 126deg,
-    transparent 126deg 138deg,
-    rgb(255 74 96 / 70%) 138deg 172deg,
-    transparent 172deg 186deg,
-    rgb(114 242 236 / 82%) 186deg 236deg,
-    transparent 236deg 248deg,
-    rgb(255 74 96 / 76%) 248deg 294deg,
-    transparent 294deg 308deg,
-    rgb(214 255 252 / 86%) 308deg 350deg,
-    transparent 350deg 360deg
-  );
-  -webkit-mask-image: radial-gradient(
-    closest-side,
-    transparent 0 73%,
-    #000 74% 80%,
-    transparent 81% 90%,
-    #000 91% 96%,
-    transparent 97%
-  );
-  mask-image: radial-gradient(
-    closest-side,
-    transparent 0 73%,
-    #000 74% 80%,
-    transparent 81% 90%,
-    #000 91% 96%,
-    transparent 97%
-  );
-  opacity: var(--rest);
-}
-
-/* 衝撃波目盛り: polar shockwave graduation dial radiating from the seam. */
-[data-form-theme="explom"] .form-signature-scale {
-  --rest: 0.58;
-  top: calc(46% - 148px);
-  left: -148px;
-  width: 296px;
-  height: 296px;
-  border-radius: 50%;
-  background:
-    repeating-conic-gradient(
-      from -8deg,
-      rgb(255 74 96 / 86%) 0deg 1.1deg,
-      transparent 1.1deg 30deg
-    ),
-    repeating-conic-gradient(
-      from -8deg,
-      rgb(114 242 236 / 64%) 0deg 0.65deg,
-      transparent 0.65deg 6deg
-    );
-  -webkit-mask-image: radial-gradient(
-    closest-side,
-    transparent 0 85%,
-    #000 86% 97%,
-    transparent 98%
-  );
-  mask-image: radial-gradient(
-    closest-side,
-    transparent 0 85%,
-    #000 86% 97%,
-    transparent 98%
-  );
-  opacity: var(--rest);
 }
 
 [data-form-theme="explom"] .form-signature-trace {
@@ -274,9 +193,8 @@ html[data-family="dossier"]
   opacity: 0;
 }
 
-/* 犭's signature: the radical itself, huge and dim, cinnabar-ink (朱墨)
-   ember afterglow and dry-brush halo ring, three dimensional bevel-edged
-   claw marks raked across the far corner, and an ember ring. */
+/* 犭's signature: the radical itself, huge and dim, three dimensional
+   bevel-edged claw marks raked across the far corner, and an ember ring. */
 [data-form-theme="kemonohen"] .form-signature-seal {
   top: -8%;
   right: -4%;
@@ -287,66 +205,6 @@ html[data-family="dossier"]
     0 0 38px rgb(219 38 62 / 34%);
   opacity: 0.2;
   rotate: -12deg;
-}
-
-/* 朱墨残光輪: dry-brush cinnabar-vermilion & sumi-ember halo ring. */
-[data-form-theme="kemonohen"] .form-signature-ring {
-  --rest: 0.54;
-  top: 1%;
-  right: 2%;
-  width: min(50%, 430px);
-  aspect-ratio: 1;
-  border-radius: 52% 48% 45% 55% / 47% 54% 46% 53%;
-  background: conic-gradient(
-    from 18deg,
-    rgb(219 38 62 / 68%) 0deg 74deg,
-    rgb(255 155 148 / 46%) 74deg 118deg,
-    transparent 118deg 154deg,
-    rgb(170 17 40 / 62%) 154deg 244deg,
-    rgb(255 186 176 / 38%) 244deg 282deg,
-    transparent 282deg 318deg,
-    rgb(219 38 62 / 58%) 318deg 360deg
-  );
-  -webkit-mask-image: radial-gradient(
-    closest-side,
-    transparent 0 74%,
-    #000 80% 88%,
-    transparent 96%
-  );
-  mask-image: radial-gradient(
-    closest-side,
-    transparent 0 74%,
-    #000 80% 88%,
-    transparent 96%
-  );
-  rotate: -16deg;
-  opacity: var(--rest);
-}
-
-/* 朱墨残光靄: layered cinnabar-ink ember wash behind the three claw gouges. */
-[data-form-theme="kemonohen"] .form-signature-scale {
-  --rest: 0.76;
-  top: -4%;
-  right: 2%;
-  width: min(58%, 470px);
-  height: 78%;
-  background:
-    radial-gradient(
-      ellipse 44% 52% at 62% 38%,
-      rgb(255 155 148 / 15%) 0%,
-      rgb(219 38 62 / 22%) 36%,
-      rgb(92 8 22 / 18%) 64%,
-      transparent 82%
-    ),
-    linear-gradient(
-      206deg,
-      transparent 16%,
-      rgb(219 38 62 / 18%) 38%,
-      rgb(255 155 148 / 10%) 50%,
-      rgb(122 10 26 / 16%) 64%,
-      transparent 82%
-    );
-  opacity: var(--rest);
 }
 
 /* 立体爪痕エッジ: gouged crimson trench with a torn white-salmon bevel lip. */
@@ -767,14 +625,6 @@ html[data-family="dossier"]
     translate: none;
   }
 
-  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-ring {
-    top: calc(22% - 108px);
-  }
-
-  [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-scale {
-    top: calc(22% - 148px);
-  }
-
   [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-trace {
     top: 22%;
   }
@@ -789,10 +639,6 @@ html[data-family="dossier"]
 
   [data-form-theme="explom"] .form-pickup-copy > .form-signature .form-signature-flare {
     top: calc(22% - 70px);
-  }
-
-  [data-form-theme="kemonohen"] .form-pickup-copy > .form-signature .form-signature-scale {
-    height: 52%;
   }
 
   [data-form-theme="kemonohen"] .form-pickup-copy > .form-signature .form-signature-trace {
@@ -1615,66 +1461,6 @@ html[data-family="dossier"]
   }
 
   html:not([data-world-effects="economy"])
-    .form-pickup[data-form-theme="explom"][data-signature-arrived="true"]
-    > .form-pickup-card
-    .form-signature-ring,
-  html:not([data-world-effects="economy"])
-    .form-pickup-dialog[data-form-theme="explom"][open]
-    > .form-pickup-panel
-    > .form-signature
-    .form-signature-ring {
-    animation: signature-prism-ring 600ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .form-pickup[data-form-theme="explom"][data-signature-arrived="true"]
-    > .form-pickup-card
-    .form-signature-scale,
-  html:not([data-world-effects="economy"])
-    .form-pickup-dialog[data-form-theme="explom"][open]
-    > .form-pickup-panel
-    > .form-signature
-    .form-signature-scale {
-    animation: signature-shock-scale 640ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .form-pickup[data-form-theme="kemonohen"][data-signature-arrived="true"]
-    > .form-pickup-card
-    :is(.form-signature-ring, .form-signature-scale),
-  html:not([data-world-effects="economy"])
-    .form-pickup-dialog[data-form-theme="kemonohen"][open]
-    > .form-pickup-panel
-    > .form-signature
-    :is(.form-signature-ring, .form-signature-scale) {
-    animation: signature-ember-wash 640ms 100ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .form-pickup-dialog[data-form-theme="custom"][open]
-    > .form-pickup-panel
-    > .form-signature
-    .form-signature-ring {
-    animation: signature-vernier-lock 620ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .form-pickup-dialog[data-form-theme="custom"][open]
-    > .form-pickup-panel
-    > .form-signature
-    .form-signature-seal {
-    animation: signature-vernier-counter 560ms 100ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
-    .form-pickup-dialog[data-form-theme="custom"][open]
-    > .form-pickup-panel
-    > .form-signature
-    :is(.form-signature-scale, .form-signature-trace) {
-    animation: signature-datum-lock 460ms 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  html:not([data-world-effects="economy"])
     :is(.form-pickup[data-signature-arrived="true"], .form-pickup-dialog[open])
     .form-signature-trace.is-second {
     animation-delay: 220ms;
@@ -1690,8 +1476,7 @@ html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     .form-pickup-dialog:where(
       [data-form-theme="explom"],
-      [data-form-theme="kemonohen"],
-      [data-form-theme="custom"]
+      [data-form-theme="kemonohen"]
     )[open]
     .form-pickup-heading
     > em {
@@ -1706,80 +1491,6 @@ html[data-family="dossier"]
     )
     > em::after {
     animation: signature-crack 360ms 240ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-  }
-}
-
-@keyframes signature-prism-ring {
-  from {
-    scale: 0.72;
-    rotate: -18deg;
-    opacity: 0;
-  }
-  to {
-    scale: 1;
-    rotate: 0deg;
-    opacity: var(--rest, 0.72);
-  }
-}
-
-@keyframes signature-shock-scale {
-  from {
-    scale: 0.84;
-    rotate: 12deg;
-    opacity: 0;
-  }
-  to {
-    scale: 1;
-    rotate: 0deg;
-    opacity: var(--rest, 0.58);
-  }
-}
-
-@keyframes signature-ember-wash {
-  from {
-    scale: 0.88;
-    opacity: 0;
-  }
-  to {
-    scale: 1;
-    opacity: var(--rest, 0.64);
-  }
-}
-
-@keyframes signature-vernier-lock {
-  from {
-    scale: 0.88;
-    rotate: -28deg;
-    opacity: 0;
-  }
-  to {
-    scale: 1;
-    rotate: 0deg;
-    opacity: var(--rest, 0.76);
-  }
-}
-
-@keyframes signature-vernier-counter {
-  from {
-    scale: 1.12;
-    rotate: 22deg;
-    opacity: 0;
-  }
-  to {
-    scale: 1;
-    rotate: 0deg;
-    opacity: var(--rest, 0.82);
-  }
-}
-
-@keyframes signature-datum-lock {
-  from {
-    scale: 0.92 1;
-    opacity: 0;
-  }
-  to {
-    scale: 1 1;
-    opacity: var(--rest, 0.68);
   }
 }
 
@@ -2469,6 +2180,161 @@ html[data-world-effects="economy"]
   }
 }
 
+/* ── オーバーゼッツ カスタム: the names in the mechanical face, cut by a
+   cyan instrument line; reading text keeps the site's gothic on a clear dark
+   ink plate. ── */
+[data-form-theme="custom"] {
+  --custom-calipers: none;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"] {
+  --sd-accent: var(--signature-light);
+  --sd-rule: var(--signature-light);
+  --sd-glow: var(--signature-wash);
+  --sd-glow-soft: var(--signature-wash);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-card {
+  position: relative;
+  border: 1px solid rgb(79 243 255 / 32%);
+  border-top: 2px solid var(--signature-light);
+  background:
+    radial-gradient(ellipse 56% 46% at 88% 22%, rgb(79 243 255 / 10%), transparent 68%),
+    linear-gradient(165deg, #09131c 0%, var(--signature-ink) 64%);
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 28%),
+    0 20px 46px rgb(0 0 0 / 46%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-copy {
+  border-bottom: 1px solid rgb(79 243 255 / 32%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  h2
+  > b,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  font-family: var(--signature-face);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-copy, .form-pickup-heading)
+  > em {
+  display: inline-block;
+  padding: 2px 0 8px;
+  border-bottom: 2px solid var(--signature-light);
+  color: var(--signature-light);
+  font-size: clamp(28px, 5vw, 52px);
+  text-shadow: 0 0 18px rgb(79 243 255 / 35%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="custom"] {
+  --pc-lock: var(--signature-light);
+  --pc-accent: var(--signature-hot);
+  --pc-gold: var(--signature-light);
+  --pc-edge: rgb(79 243 255 / 34%);
+  --pc-plate: var(--signature-ink);
+  --manager-accent: var(--signature-light);
+  border-color: rgb(79 243 255 / 44%);
+  box-shadow:
+    inset 0 1px 0 rgb(206 252 255 / 26%),
+    0 28px 80px rgb(0 0 0 / 76%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="custom"]
+  > .form-pickup-panel {
+  position: relative;
+  background:
+    radial-gradient(ellipse 52% 38% at 92% 0%, rgb(79 243 255 / 10%), transparent 68%),
+    linear-gradient(180deg, #08121b 0%, var(--signature-ink) 48%);
+  box-shadow: inset 0 1px 0 rgb(206 252 255 / 22%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-dialog[data-form-theme="custom"]
+  .form-pickup-sections
+  > section
+  > div {
+  border: 1px solid rgb(79 243 255 / 22%);
+  border-left: 3px solid var(--signature-light);
+  background:
+    linear-gradient(135deg, rgb(79 243 255 / 5%), transparent 48%),
+    #060d14;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  :is(.form-pickup-calls b, .rider-call b, .form-pickup-sections h3),
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-gallery
+  > figure[data-form-theme="custom"]
+  figcaption
+  > span {
+  font-family: var(--signature-face);
+  letter-spacing: 0.03em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  [data-form-theme="custom"]
+  .form-pickup-sections
+  h3 {
+  color: #dffbff;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup-gallery
+  > figure[data-form-theme="custom"] {
+  border-color: var(--signature-light);
+}
+
+/* Attribute groups (e.g. Over Zeztz Custom's four dream attributes). */
+.form-pickup-sections .form-pickup-group {
+  grid-column: 1 / -1;
+  margin: 1.4em 0 0.2em;
+  padding: 0.35em 0 0.35em 0.75em;
+  border-left: 4px solid var(--group-tone);
+  color: var(--group-tone) !important;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--group-tone) 45%, transparent);
+}
+.form-pickup-sections .is-grouped {
+  border-left: 3px solid var(--group-tone) !important;
+  padding-left: 0.85em;
+}
+.form-pickup-sections .is-grouped h4 {
+  margin: 0 0 0.3em;
+  color: color-mix(in srgb, var(--group-tone) 75%, white) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .form-signature,
   .form-signature * {
@@ -2549,444 +2415,26 @@ html[data-world-effects="economy"]
     border-color: CanvasText;
     box-shadow: none;
   }
-}
 
-/* ── オーバーゼッツ カスタム: cyan mechanical blueprint grid, vernier caliper
-   scale bevels & mechanical display face; reading prose keeps site gothic. ── */
-[data-form-theme="custom"] {
-  --custom-reticle-right: clamp(18px, 3.2vw, 42px);
-  --custom-reticle-size: clamp(132px, 17vw, 208px);
-  --custom-reticle-y: 50%;
-  --custom-cad-grid:
-    linear-gradient(rgb(79 243 255 / 9%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(79 243 255 / 9%) 1px, transparent 1px),
-    linear-gradient(rgb(79 243 255 / 3.6%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(79 243 255 / 3.6%) 1px, transparent 1px);
-  --custom-calipers:
-    linear-gradient(var(--signature-light) 0 0) 0 0 / 16px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 0 0 / 2px 16px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 0 / 16px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 0 / 2px 16px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 0 100% / 16px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 0 100% / 2px 16px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 16px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 16px no-repeat;
-}
-
-/* Code-native CAD Caliper & Optical Vernier (副尺) Reticle Engraving */
-[data-form-theme="custom"] .form-signature {
-  opacity: 0.88;
-}
-
-.form-pickup-dialog[data-form-theme="custom"] > .form-pickup-panel > .form-signature {
-  --custom-reticle-y: 38%;
-  opacity: 0.72;
-}
-
-/* Inner optical vernier hub bezel + center sight pip. */
-[data-form-theme="custom"] .form-signature-seal {
-  --rest: 0.82;
-  top: var(--custom-reticle-y);
-  right: var(--custom-reticle-right);
-  width: var(--custom-reticle-size);
-  height: var(--custom-reticle-size);
-  border: 1px solid rgb(79 243 255 / 36%);
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      #e6fcff 0 2.5px,
-      rgb(79 243 255 / 42%) 3px 4.5px,
-      transparent 5px 38%,
-      rgb(79 243 255 / 26%) 38.5% 39.5%,
-      transparent 40%
-    ),
-    conic-gradient(
-      from -28deg,
-      rgb(223 251 255 / 88%) 0deg 56deg,
-      transparent 56deg 152deg,
-      rgb(79 243 255 / 82%) 152deg 208deg,
-      transparent 208deg 360deg
-    );
-  background-repeat: no-repeat;
-  box-shadow:
-    inset 0 0 0 10px var(--signature-ink),
-    inset 0 0 0 11px rgb(31 184 214 / 32%),
-    0 0 22px rgb(79 243 255 / 12%);
-  translate: 0 -50%;
-  opacity: var(--rest);
-}
-
-/* Outer 360° optical vernier (副尺) degree dial & cardinal index marks. */
-[data-form-theme="custom"] .form-signature-ring {
-  --rest: 0.76;
-  top: var(--custom-reticle-y);
-  right: calc(var(--custom-reticle-right) - 22px);
-  width: calc(var(--custom-reticle-size) + 44px);
-  height: calc(var(--custom-reticle-size) + 44px);
-  border-radius: 50%;
-  background:
-    repeating-conic-gradient(
-      from -0.8deg,
-      #e6fcff 0deg 1.6deg,
-      transparent 1.6deg 90deg
-    ),
-    repeating-conic-gradient(
-      from -0.5deg,
-      rgb(79 243 255 / 84%) 0deg 1deg,
-      transparent 1deg 30deg
-    ),
-    repeating-conic-gradient(
-      from 0deg,
-      rgb(31 184 214 / 64%) 0deg 0.65deg,
-      transparent 0.65deg 6deg
-    );
-  -webkit-mask-image: radial-gradient(
-    closest-side,
-    transparent 0 80%,
-    #000 81% 89%,
-    transparent 90% 94%,
-    #000 95% 98%,
-    transparent 99%
-  );
-  mask-image: radial-gradient(
-    closest-side,
-    transparent 0 80%,
-    #000 81% 89%,
-    transparent 90% 94%,
-    #000 95% 98%,
-    transparent 99%
-  );
-  translate: 0 -50%;
-  opacity: var(--rest);
-}
-
-/* CAD caliper jaw brackets + differential main/sub vernier linear scale (主尺 10px / 副尺 9px). */
-[data-form-theme="custom"] .form-signature-scale {
-  --rest: 0.72;
-  inset: 14px 12px 14px auto;
-  width: calc(var(--custom-reticle-size) + 64px);
-  max-width: calc(100% - 24px);
-  background:
-    linear-gradient(var(--signature-light) 0 0) 0 0 / 18px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 0 0 / 2px 14px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 0 / 18px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 0 / 2px 14px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 0 100% / 18px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 0 100% / 2px 14px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 18px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 14px no-repeat,
-    repeating-linear-gradient(
-      180deg,
-      rgb(223 251 255 / 72%) 0 1px,
-      transparent 1px 10px
-    ) 100% 20px / 8px calc(100% - 40px) no-repeat,
-    repeating-linear-gradient(
-      180deg,
-      rgb(79 243 255 / 52%) 0 1px,
-      transparent 1px 9px
-    ) calc(100% - 10px) 20px / 5px calc(100% - 40px) no-repeat,
-    linear-gradient(180deg, rgb(31 184 214 / 36%), rgb(79 243 255 / 54%), rgb(31 184 214 / 36%))
-      calc(100% - 9px) 18px / 1px calc(100% - 36px) no-repeat;
-  opacity: var(--rest);
-}
-
-/* CAD datum crosshairs (.is-first horizontal, .is-second vertical, .is-third angled sight vector). */
-[data-form-theme="custom"] .form-signature-trace {
-  --rest: 0.66;
-  top: var(--custom-reticle-y);
-  right: 8px;
-  width: min(68%, calc(var(--custom-reticle-size) + 148px));
-  height: 5px;
-  margin-top: -2.5px;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgb(223 251 255 / 68%) 0 1px,
-      transparent 1px 16px
-    ) 0 0 / 100% 5px no-repeat,
-    linear-gradient(
-      90deg,
-      transparent,
-      rgb(79 243 255 / 58%) 22%,
-      #dffbff 72%,
-      rgb(79 243 255 / 76%) 100%
-    ) 0 2px / 100% 1px no-repeat;
-  opacity: var(--rest);
-}
-
-[data-form-theme="custom"] .form-signature-trace.is-second {
-  --rest: 0.58;
-  top: 10%;
-  bottom: 10%;
-  right: calc(var(--custom-reticle-right) + (var(--custom-reticle-size) * 0.5) - 2.5px);
-  width: 5px;
-  height: auto;
-  margin-top: 0;
-  background:
-    repeating-linear-gradient(
-      180deg,
-      rgb(79 243 255 / 56%) 0 1px,
-      transparent 1px 16px
-    ) 0 0 / 5px 100% no-repeat,
-    linear-gradient(
-      180deg,
-      transparent,
-      rgb(79 243 255 / 62%) 20%,
-      #dffbff 50%,
-      rgb(79 243 255 / 62%) 80%,
-      transparent
-    ) 2px 0 / 1px 100% no-repeat;
-}
-
-[data-form-theme="custom"] .form-signature-trace.is-third {
-  --rest: 0.54;
-  top: var(--custom-reticle-y);
-  right: calc(var(--custom-reticle-right) - 14px);
-  width: calc(var(--custom-reticle-size) + 28px);
-  height: 1px;
-  margin-top: 0;
-  background: linear-gradient(
-    90deg,
-    #e6fcff 0 8px,
-    rgb(79 243 255 / 38%) 8px calc(100% - 8px),
-    #e6fcff calc(100% - 8px) 100%
-  );
-  transform-origin: 50% 50%;
-  rotate: -36deg;
-}
-
-[data-form-theme="custom"] .form-signature-flare {
-  top: var(--custom-reticle-y);
-  right: var(--custom-reticle-right);
-  width: var(--custom-reticle-size);
-  height: var(--custom-reticle-size);
-  border: 1px solid var(--signature-light);
-  border-radius: 50%;
-  box-shadow:
-    inset 0 0 0 5px rgb(79 243 255 / 16%),
-    0 0 24px rgb(79 243 255 / 28%);
-  translate: 0 -50%;
-  opacity: 0;
-}
-
-@media (max-width: 899px), (orientation: portrait) and (max-width: 1199px) {
-  [data-form-theme="custom"] .form-pickup-copy > .form-signature {
-    --custom-reticle-right: 16px;
-    --custom-reticle-size: clamp(92px, 23vw, 132px);
-    --custom-reticle-y: 78px;
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    [data-form-theme="custom"]
+    .form-pickup-sections
+    h3 {
+    color: CanvasText;
   }
 
-  [data-form-theme="custom"] .form-pickup-copy > .form-signature .form-signature-scale {
-    bottom: auto;
-    height: 140px;
+  .form-pickup-sections .form-pickup-group {
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+    text-shadow: none;
   }
 
-  [data-form-theme="custom"] .form-pickup-copy > .form-signature .form-signature-trace.is-second {
-    top: 10px;
-    bottom: auto;
-    height: 140px;
+  .form-pickup-sections .is-grouped {
+    border-color: CanvasText !important;
   }
-}
 
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup[data-form-theme="custom"] {
-  --sd-accent: var(--signature-light);
-  --sd-rule: var(--signature-light);
-  --sd-glow: var(--signature-wash);
-  --sd-glow-soft: var(--signature-wash);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup[data-form-theme="custom"]
-  .form-pickup-card {
-  position: relative;
-  border: 1px solid rgb(79 243 255 / 36%);
-  border-top: 2px solid var(--signature-light);
-  background:
-    var(--custom-calipers),
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 62%) 0 1px, transparent 1px 40px) 18px 0 /
-      calc(100% - 36px) 7px no-repeat,
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 34%) 0 1px, transparent 1px 8px) 18px 0 /
-      calc(100% - 36px) 4px no-repeat,
-    repeating-linear-gradient(90deg, rgb(31 184 214 / 48%) 0 1px, transparent 1px 40px) 18px 100% /
-      calc(100% - 36px) 6px no-repeat,
-    repeating-linear-gradient(90deg, rgb(31 184 214 / 28%) 0 1px, transparent 1px 8px) 18px 100% /
-      calc(100% - 36px) 3px no-repeat,
-    linear-gradient(rgb(79 243 255 / 8.5%) 1px, transparent 1px) 0 0 / 64px 64px,
-    linear-gradient(90deg, rgb(79 243 255 / 8.5%) 1px, transparent 1px) 0 0 / 64px 64px,
-    linear-gradient(rgb(79 243 255 / 3.4%) 1px, transparent 1px) 0 0 / 16px 16px,
-    linear-gradient(90deg, rgb(79 243 255 / 3.4%) 1px, transparent 1px) 0 0 / 16px 16px,
-    radial-gradient(ellipse 58% 48% at 88% 24%, rgb(79 243 255 / 12%), transparent 70%),
-    linear-gradient(165deg, #09131c 0%, var(--signature-ink) 64%);
-  box-shadow:
-    inset 0 1px 0 rgb(206 252 255 / 38%),
-    inset 0 -1px 0 rgb(31 184 214 / 36%),
-    inset 0 0 0 1px rgb(79 243 255 / 16%),
-    0 20px 46px rgb(0 0 0 / 48%);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup[data-form-theme="custom"]
-  .form-pickup-copy {
-  border-bottom: 1px solid rgb(79 243 255 / 38%);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  [data-form-theme="custom"]
-  :is(.form-pickup-copy, .form-pickup-heading)
-  h2
-  > b,
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  [data-form-theme="custom"]
-  :is(.form-pickup-copy, .form-pickup-heading)
-  > em {
-  font-family: var(--signature-face);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  [data-form-theme="custom"]
-  :is(.form-pickup-copy, .form-pickup-heading)
-  > em {
-  display: inline-block;
-  padding: 2px 0 11px;
-  border-bottom: 2px solid var(--signature-light);
-  background:
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 68%) 0 1px, transparent 1px 32px) 0 100% /
-      100% 6px no-repeat,
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 38%) 0 1px, transparent 1px 8px) 0 100% /
-      100% 3px no-repeat;
-  color: var(--signature-light);
-  font-size: clamp(28px, 5vw, 52px);
-  text-shadow: 0 0 18px rgb(79 243 255 / 35%);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup-dialog[data-form-theme="custom"] {
-  --pc-lock: var(--signature-light);
-  --pc-accent: var(--signature-hot);
-  --pc-gold: var(--signature-light);
-  --pc-edge: rgb(79 243 255 / 36%);
-  --pc-plate: var(--signature-ink);
-  --manager-accent: var(--signature-light);
-  border-color: rgb(79 243 255 / 48%);
-  box-shadow:
-    inset 0 1px 0 rgb(206 252 255 / 32%),
-    0 28px 80px rgb(0 0 0 / 78%);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup-dialog[data-form-theme="custom"]
-  > .form-pickup-panel {
-  position: relative;
-  isolation: isolate;
-  background:
-    var(--custom-calipers),
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 54%) 0 1px, transparent 1px 40px) 18px 0 /
-      calc(100% - 36px) 7px no-repeat,
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 30%) 0 1px, transparent 1px 8px) 18px 0 /
-      calc(100% - 36px) 4px no-repeat,
-    linear-gradient(rgb(79 243 255 / 7.5%) 1px, transparent 1px) 0 0 / 64px 64px,
-    linear-gradient(90deg, rgb(79 243 255 / 7.5%) 1px, transparent 1px) 0 0 / 64px 64px,
-    linear-gradient(rgb(79 243 255 / 3%) 1px, transparent 1px) 0 0 / 16px 16px,
-    linear-gradient(90deg, rgb(79 243 255 / 3%) 1px, transparent 1px) 0 0 / 16px 16px,
-    radial-gradient(ellipse 56% 42% at 92% 0%, rgb(79 243 255 / 12%), transparent 70%),
-    linear-gradient(180deg, #08121b 0%, var(--signature-ink) 48%);
-  box-shadow:
-    inset 0 1px 0 rgb(206 252 255 / 28%),
-    inset 0 -1px 0 rgb(31 184 214 / 30%),
-    inset 0 0 0 1px rgb(79 243 255 / 14%);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup-dialog[data-form-theme="custom"]
-  .form-pickup-sections
-  > section
-  > div {
-  border: 1px solid rgb(79 243 255 / 26%);
-  border-left: 3px solid var(--signature-light);
-  background:
-    linear-gradient(var(--signature-light) 0 0) 100% 0 / 12px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 0 / 2px 12px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 12px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 12px no-repeat,
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 36%) 0 1px, transparent 1px 12px) 0 0 /
-      calc(100% - 14px) 3px no-repeat,
-    linear-gradient(rgb(79 243 255 / 4%) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(90deg, rgb(79 243 255 / 4%) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(135deg, rgb(79 243 255 / 7%), transparent 52%),
-    #060d14;
-  box-shadow:
-    inset 0 1px 0 rgb(206 252 255 / 22%),
-    inset 0 -1px 0 rgb(31 184 214 / 20%);
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  [data-form-theme="custom"]
-  :is(.form-pickup-calls b, .rider-call b, .form-pickup-sections h3),
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup-gallery
-  > figure[data-form-theme="custom"]
-  figcaption
-  > span {
-  font-family: var(--signature-face);
-  letter-spacing: 0.03em;
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  [data-form-theme="custom"]
-  .form-pickup-sections
-  h3 {
-  color: #dffbff;
-}
-
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  .form-pickup-gallery
-  > figure[data-form-theme="custom"] {
-  border-color: var(--signature-light);
-  background:
-    var(--custom-calipers),
-    repeating-linear-gradient(90deg, rgb(79 243 255 / 34%) 0 1px, transparent 1px 10px) 16px 0 /
-      calc(100% - 32px) 3px no-repeat,
-    linear-gradient(rgb(79 243 255 / 5%) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(90deg, rgb(79 243 255 / 5%) 1px, transparent 1px) 0 0 / 24px 24px,
-    var(--signature-ink);
-  box-shadow:
-    inset 0 1px 0 rgb(206 252 255 / 26%),
-    inset 0 0 0 1px rgb(79 243 255 / 16%);
-}
-
-/* Attribute groups (e.g. Over Zeztz Custom's four dream attributes). */
-.form-pickup-sections .form-pickup-group {
-  grid-column: 1 / -1;
-  margin: 1.4em 0 0.2em;
-  padding: 0.35em 0 0.35em 0.75em;
-  border-left: 4px solid var(--group-tone);
-  color: var(--group-tone) !important;
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
-  text-shadow: 0 0 12px color-mix(in srgb, var(--group-tone) 45%, transparent);
-}
-.form-pickup-sections .is-grouped {
-  border-left: 3px solid var(--group-tone) !important;
-  padding-left: 0.85em;
-}
-.form-pickup-sections .is-grouped h4 {
-  margin: 0 0 0.3em;
-  color: color-mix(in srgb, var(--group-tone) 75%, white) !important;
+  .form-pickup-sections .is-grouped h4 {
+    color: CanvasText !important;
+  }
 }

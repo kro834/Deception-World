@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentType,
   type CSSProperties,
   type MouseEvent,
   type ReactNode,
@@ -17,12 +18,29 @@ import {
   useRouter,
   useRouterState,
 } from "@tanstack/react-router";
-import {
-  OpeningHandoffLayer,
-  type OpeningHandoffDestination,
-  type OpeningHandoffSnapshot,
-  type OpeningHandoffSource,
+import type {
+  OpeningHandoffDestination,
+  OpeningHandoffSnapshot,
+  OpeningHandoffSource,
 } from "@/components/cinematic/opening-handoff";
+
+type OpeningHandoffLayerComponent = ComponentType<{
+  snapshot: OpeningHandoffSnapshot | null;
+  onCovered: (token: number) => void;
+  onComplete: (token: number) => void;
+}>;
+
+let cachedOpeningHandoffLayer: OpeningHandoffLayerComponent | null = null;
+let openingHandoffLayerPromise: Promise<OpeningHandoffLayerComponent> | null = null;
+
+function loadOpeningHandoffLayer(): Promise<OpeningHandoffLayerComponent> {
+  if (cachedOpeningHandoffLayer) return Promise.resolve(cachedOpeningHandoffLayer);
+  openingHandoffLayerPromise ??= import("@/components/cinematic/opening-handoff").then((m) => {
+    cachedOpeningHandoffLayer = m.OpeningHandoffLayer;
+    return m.OpeningHandoffLayer;
+  });
+  return openingHandoffLayerPromise;
+}
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
 import { createTransitionDecorationClock } from "@/lib/transition-decoration-clock";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
@@ -48,7 +66,46 @@ import { GalleryCurtain } from "@/components/gallery/gallery-curtain";
 import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-entry-timings";
 import { createEntryPlayback, type EntryPlayback } from "@/lib/entry-playback";
 import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
-import { IllusionculumEntrySequence } from "@/components/illusionculum-saga/illusionculum-entry-sequence";
+
+type IllusionculumEntrySequenceComponent = ComponentType<{
+  phase: "covering" | "revealing";
+  playback: EntryPlayback;
+}>;
+let cachedIllusionculumEntrySequence: IllusionculumEntrySequenceComponent | null = null;
+let illusionculumEntrySequencePromise: Promise<IllusionculumEntrySequenceComponent> | null = null;
+
+function loadIllusionculumEntrySequence(): Promise<IllusionculumEntrySequenceComponent> {
+  if (cachedIllusionculumEntrySequence) return Promise.resolve(cachedIllusionculumEntrySequence);
+  illusionculumEntrySequencePromise ??=
+    import("@/components/illusionculum-saga/illusionculum-entry-sequence").then((m) => {
+      cachedIllusionculumEntrySequence = m.IllusionculumEntrySequence;
+      return m.IllusionculumEntrySequence;
+    });
+  return illusionculumEntrySequencePromise;
+}
+
+function IllusionculumEntrySequence({
+  phase,
+  playback,
+}: {
+  phase: "covering" | "revealing";
+  playback: EntryPlayback;
+}) {
+  const [Comp, setComp] = useState<IllusionculumEntrySequenceComponent | null>(
+    () => cachedIllusionculumEntrySequence,
+  );
+  useEffect(() => {
+    if (Comp) return;
+    let active = true;
+    void loadIllusionculumEntrySequence().then((Loaded) => {
+      if (active) setComp(() => Loaded);
+    });
+    return () => {
+      active = false;
+    };
+  }, [Comp]);
+  return Comp ? <Comp phase={phase} playback={playback} /> : null;
+}
 // EXTREME SAGA's entry suit-up (owner, 2026-11-11): its plates deploy under
 // the same cover, on a playback like ILLUSIONCULUM's. Only the light layer
 // is in the gate's chunk; its engine and art load when it mounts.
@@ -68,6 +125,7 @@ import {
 import {
   META_UNITAS_ENTRY_TIMINGS,
   prefetchMetaUnitasEntry,
+  prepareMetaUnitasTransition,
   warmMetaUnitasEntry,
   type MetaUnitasTransitionRenderer,
 } from "@/lib/meta-unitas-entry-gate";
@@ -75,10 +133,6 @@ import {
   createMetaUnitasEntryPlayback,
   type MetaUnitasEntryPlayback,
 } from "@/lib/meta-unitas-entry-playback";
-// Owner (2026-10-24): 「遷移アニメーションの始まりが遅すぎる」 — the sequence is
-// in the gate's own chunk (as ILLUSIONCULUM's), so its first frame paints
-// with the cover; only the engine (and the pictures) load behind it.
-import { MetaUnitasEntrySequence } from "@/components/meta-unitas-saga/meta-unitas-entry-sequence";
 
 type RiderDiveVariant =
   | "saga"
@@ -1016,6 +1070,27 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const openingFocusFrames = useRef<number[]>([]);
   const pathnameRef = useRef(pathname);
   const [openingSnapshot, setOpeningSnapshot] = useState<OpeningHandoffSnapshot | null>(null);
+  const [OpeningHandoffLayerView, setOpeningHandoffLayerView] =
+    useState<OpeningHandoffLayerComponent | null>(() => cachedOpeningHandoffLayer);
+  useEffect(() => {
+    if (OpeningHandoffLayerView) return;
+    if (openingSnapshot) {
+      let active = true;
+      void loadOpeningHandoffLayer().then((Comp) => {
+        if (active) setOpeningHandoffLayerView(() => Comp);
+      });
+      return () => {
+        active = false;
+      };
+    }
+    if (pathname !== "/") return;
+    const timer = window.setTimeout(() => {
+      void loadOpeningHandoffLayer().then((Comp) => {
+        setOpeningHandoffLayerView(() => Comp);
+      });
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [OpeningHandoffLayerView, openingSnapshot, pathname]);
   const [signal, setSignal] = useState<"idle" | "running" | "done">("idle");
   const signalTimer = useRef(0);
   const arrivalTimer = useRef(0);
@@ -1206,6 +1281,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       openingHandoff.current = runtime;
       setDocumentLoading(true);
       dispatchOpeningHandoffState(true);
+      void loadOpeningHandoffLayer();
       setOpeningSnapshot({ token, phase: "covering", source });
       return true;
     },
@@ -1738,12 +1814,18 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
               markRouteCover("covering");
             }
             void warmMetaUnitasEntry();
-            metaUnitasCall = MetaUnitasEntrySequence;
+            const preparation = prepareMetaUnitasTransition();
+            rexonanceCoverCancel.current = preparation.cancel;
+            metaUnitasCall = await preparation.promise;
+            if (rexonanceCoverCancel.current === preparation.cancel)
+              rexonanceCoverCancel.current = null;
             if (!isCurrent()) return;
             metaUnitasPlayback = createMetaUnitasEntryPlayback();
             rexonanceCoverCancel.current = metaUnitasPlayback.cancel;
           }
           if (diveVariant === "illusionculum" && tier === "full") {
+            await loadIllusionculumEntrySequence();
+            if (!isCurrent()) return;
             illusionculumTransition.current = requestId;
             illusionculumPlayback = createEntryPlayback();
             rexonanceCoverCancel.current = illusionculumPlayback.cancel;
@@ -2262,11 +2344,13 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           </div>
         </aside>
       )}
-      <OpeningHandoffLayer
-        snapshot={openingSnapshot}
-        onCovered={notifyOpeningHandoffCovered}
-        onComplete={completeOpeningHandoff}
-      />
+      {OpeningHandoffLayerView && (
+        <OpeningHandoffLayerView
+          snapshot={openingSnapshot}
+          onCovered={notifyOpeningHandoffCovered}
+          onComplete={completeOpeningHandoff}
+        />
+      )}
     </LoadGateContext.Provider>
   );
 }

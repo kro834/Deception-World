@@ -86,6 +86,25 @@ html body .load-gate.is-far-from-dive.is-far-from-calls > .rider-dive-status {
 
 html:is([data-world-effects="economy"], [data-rzn-constrained]) .ffe-skip {
   transition: none;
+  box-shadow: none;
+}
+
+html:is([data-world-effects="economy"], [data-rzn-constrained])
+  .ffe-sequence
+  :is(.rx-suit-lock, .ffe-reactor-halo, .rx-suit-scan) {
+  box-shadow: none;
+}
+
+html:is([data-world-effects="economy"], [data-rzn-constrained])
+  .ffe-sequence
+  :is(.rx-call-chant .rx-call-answer, .rx-suit-callout, .rx-suit-boot) {
+  text-shadow: none;
+}
+
+html:is([data-world-effects="economy"], [data-rzn-constrained])
+  .ffe-sequence
+  .rx-suit-lock::after {
+  content: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -497,6 +516,10 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .ffe-skip {
 
   .ffe-sequence :is(.rx-suit-callout, .rx-suit-boot) {
     text-shadow: none;
+  }
+
+  .ffe-sequence .rx-suit-lock::after {
+    content: none;
   }
 }
 

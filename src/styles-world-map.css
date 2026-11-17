@@ -1,6 +1,6 @@
-/* Interactive Astrolabe Network Atlas (/world-map).
-   Holographic optical plates, azimuth compass bezel, glowing edge gradients,
-   titanium HUD search/filter controls and responsive bottom detail dock. */
+/* Interactive Network Map (/world-map).
+   Optical node discs, glowing edge gradients, search/filter controls
+   and responsive bottom detail dock. */
 .wm-page {
   --wm-ink: #e8f3f7;
   --wm-muted: #9eb4c2;
@@ -42,6 +42,7 @@
 
 .wm-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
@@ -56,6 +57,7 @@
 
 .wm-header-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
@@ -71,6 +73,7 @@
   font-family: "Oxanium", monospace;
   font-size: 12px;
   letter-spacing: 0.16em;
+  white-space: nowrap;
   color: #daf8ff;
 }
 
@@ -85,6 +88,7 @@
   color: #ebe3ff;
   font-size: 12px;
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 .wm-intro {
@@ -102,11 +106,6 @@
   font: 500 12px/1.5 "Oxanium", monospace;
   letter-spacing: 0.16em;
   color: var(--wm-accent);
-}
-
-.wm-eyebrow i {
-  font-style: normal;
-  color: var(--wm-gold);
 }
 
 .wm-eyebrow[data-kind="organization"] {
@@ -179,7 +178,7 @@
   align-items: center;
   gap: 6px;
   width: min(370px, 100%);
-  padding: 0 12px;
+  padding: 0 4px 0 12px;
   border: 1px solid rgb(146 184 204 / 32%);
   background: rgb(4 10 18 / 86%);
   box-shadow: inset 0 1px 3px rgb(0 0 0 / 48%);
@@ -226,13 +225,15 @@
   display: inline-grid;
   place-items: center;
   flex: none;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border: 1px solid rgb(122 232 255 / 28%);
   border-radius: 2px;
   background: rgb(18 34 48 / 80%);
   color: var(--wm-ink);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
 }
 
@@ -341,16 +342,7 @@
   min-width: 0;
   overflow: hidden;
   background:
-    linear-gradient(var(--wm-accent) 0 0) 14px 14px / 22px 1px no-repeat,
-    linear-gradient(var(--wm-accent) 0 0) 14px 14px / 1px 22px no-repeat,
-    linear-gradient(var(--wm-accent) 0 0) calc(100% - 14px) 14px / 22px 1px no-repeat,
-    linear-gradient(var(--wm-accent) 0 0) calc(100% - 14px) 14px / 1px 22px no-repeat,
-    linear-gradient(var(--wm-gold) 0 0) 14px calc(100% - 14px) / 22px 1px no-repeat,
-    linear-gradient(var(--wm-gold) 0 0) 14px calc(100% - 14px) / 1px 22px no-repeat,
-    linear-gradient(var(--wm-gold) 0 0) calc(100% - 14px) calc(100% - 14px) / 22px 1px no-repeat,
-    linear-gradient(var(--wm-gold) 0 0) calc(100% - 14px) calc(100% - 14px) / 1px 22px no-repeat,
-    radial-gradient(rgb(138 184 208 / 18%) 0.8px, transparent 0.9px) 0 0 / 22px 22px,
-    radial-gradient(ellipse 66% 58% at 50% 50%, rgb(16 42 62 / 44%), #050b14 82%);
+    radial-gradient(ellipse 66% 58% at 50% 50%, rgb(16 42 62 / 38%), #050b14 82%);
   min-height: 580px;
 }
 
@@ -397,14 +389,27 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font: 500 12px/1.4 "Oxanium", monospace;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
   color: var(--wm-accent);
 }
 
-.wm-map-caption span i {
-  font-style: normal;
-  color: var(--wm-gold);
+.wm-map-caption span[data-kind="organization"] {
+  color: var(--wm-kind-organization);
+}
+
+.wm-map-caption span[data-kind="form"] {
+  color: var(--wm-kind-form);
+}
+
+.wm-map-caption span[data-kind="event"] {
+  color: var(--wm-kind-event);
+}
+
+.wm-map-caption span[data-kind="chapter"] {
+  color: var(--wm-kind-chapter);
 }
 
 .wm-map-caption small {
@@ -417,6 +422,7 @@
   font-weight: 500;
   font-size: 17px;
   line-height: 1.35;
+  overflow-wrap: anywhere;
   color: #f4fbff;
 }
 
@@ -471,38 +477,27 @@
   border-radius: 1px;
 }
 
-/* Astrolabe orbital geometry */
+/* Orbital guide geometry & non-interactive connection edges */
+.wm-astrolabe,
+.wm-constellation,
+.wm-edge-group,
+.wm-line,
+.wm-line-glow {
+  pointer-events: none;
+}
+
 .wm-sighting-axis {
   fill: none;
-  stroke: rgb(122 232 255 / 13%);
+  stroke: rgb(122 232 255 / 12%);
   stroke-width: 1;
   stroke-dasharray: 4 6;
 }
 
-.wm-sighting-diag {
-  fill: none;
-  stroke: rgb(238 200 139 / 10%);
-  stroke-width: 0.85;
-  stroke-dasharray: 2 8;
-}
-
 .wm-rangefinder-ring {
   fill: none;
-  stroke: rgb(122 232 255 / 22%);
+  stroke: rgb(122 232 255 / 20%);
   stroke-width: 1;
   stroke-dasharray: 6 4 1.5 4;
-}
-
-.wm-bezel-inner {
-  fill: none;
-  stroke: rgb(122 232 255 / 16%);
-  stroke-width: 1;
-}
-
-.wm-bezel-outer {
-  fill: none;
-  stroke: rgb(238 200 139 / 22%);
-  stroke-width: 1;
 }
 
 .wm-orbit {
@@ -515,22 +510,6 @@
 .wm-orbit.is-outer-track {
   stroke: rgb(198 178 255 / 18%);
   stroke-dasharray: 7 7;
-}
-
-.wm-azimuth-tick {
-  stroke: rgb(122 232 255 / 22%);
-  stroke-width: 1;
-}
-
-.wm-azimuth-tick.is-major {
-  stroke: rgb(238 200 139 / 52%);
-  stroke-width: 1.4;
-}
-
-.wm-bearing-label {
-  fill: rgb(158 180 194 / 62%);
-  font: 500 12px/1 "Oxanium", monospace;
-  letter-spacing: 0.1em;
 }
 
 /* Connection edges: glowing dual-layer strokes + constellation cross-links */
@@ -558,13 +537,7 @@
   stroke-linecap: round;
 }
 
-.wm-edge-node {
-  fill: currentColor;
-  opacity: 0.78;
-  color: var(--wm-kind-person);
-}
-
-/* Holographic node plates per MapKind */
+/* Node discs per MapKind */
 .wm-node {
   color: var(--wm-kind-person);
   cursor: pointer;
@@ -587,10 +560,10 @@
   color: var(--wm-kind-chapter);
 }
 
-.wm-node circle:not(.wm-node-hit) {
+.wm-node circle.wm-node-disc {
   fill: #08131f;
   stroke: currentColor;
-  stroke-width: 1.5;
+  stroke-width: 1.6;
 }
 
 .wm-node circle.wm-node-hit {
@@ -604,24 +577,10 @@
   pointer-events: none;
 }
 
-.wm-node-glyph .wm-node-ring {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1;
-  opacity: 0.56;
-}
-
 .wm-node-glyph .wm-node-plate {
   fill: rgb(8 19 31 / 88%);
   stroke: currentColor;
-  stroke-width: 1.35;
-}
-
-.wm-node-glyph .wm-node-inner {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.15;
-  opacity: 0.85;
+  stroke-width: 1.3;
 }
 
 .wm-node-glyph .wm-node-pip {
@@ -647,13 +606,8 @@
 }
 
 .wm-node.is-selected circle.wm-node-disc {
-  fill: rgb(16 40 56 / 86%);
-  stroke-width: 2.2;
-}
-
-.wm-node.is-selected .wm-node-glyph .wm-node-ring {
-  opacity: 0.9;
-  stroke-width: 1.35;
+  fill: rgb(16 40 56 / 88%);
+  stroke-width: 2.4;
 }
 
 .wm-node.is-selected text {
@@ -691,10 +645,15 @@
 
   .wm-node:hover .wm-node-glyph .wm-node-plate {
     fill: currentColor;
+    stroke: #050b14;
   }
 
   .wm-node:hover .wm-node-glyph .wm-node-pip {
     fill: #050b14;
+  }
+
+  .wm-node:hover .wm-node-glyph .wm-node-tick {
+    stroke: #050b14;
   }
 
   .wm-view-controls button:not(:disabled):hover {
@@ -742,6 +701,19 @@
   fill: currentColor;
   stroke: #fff0b5;
   stroke-width: 3.5;
+}
+
+.wm-node:focus-visible .wm-node-glyph .wm-node-plate {
+  fill: currentColor;
+  stroke: #050b14;
+}
+
+.wm-node:focus-visible .wm-node-glyph .wm-node-pip {
+  fill: #050b14;
+}
+
+.wm-node:focus-visible .wm-node-glyph .wm-node-tick {
+  stroke: #050b14;
 }
 
 .wm-view-controls {
@@ -799,24 +771,6 @@
     linear-gradient(160deg, #0d1b2a 0%, #07101b 100%);
   max-height: 700px;
   overflow: auto;
-}
-
-.wm-detail[data-kind="organization"] {
-  background:
-    linear-gradient(180deg, rgb(240 196 136 / 9%) 0%, transparent 24%),
-    linear-gradient(160deg, #161822 0%, #08101a 100%);
-}
-
-.wm-detail[data-kind="form"] {
-  background:
-    linear-gradient(180deg, rgb(198 178 255 / 10%) 0%, transparent 24%),
-    linear-gradient(160deg, #13172b 0%, #08101b 100%);
-}
-
-.wm-detail[data-kind="chapter"] {
-  background:
-    linear-gradient(180deg, rgb(230 207 164 / 9%) 0%, transparent 24%),
-    linear-gradient(160deg, #161821 0%, #08101a 100%);
 }
 
 .wm-detail-head {
@@ -1136,7 +1090,15 @@
   }
 }
 
-@media (max-width: 960px) {
+@media (prefers-reduced-motion: reduce) {
+  .wm-page *,
+  .wm-page *::before,
+  .wm-page *::after {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 900px) {
   .wm-tools {
     flex-direction: column;
     align-items: stretch;
@@ -1218,26 +1180,27 @@
 
   .wm-canvas,
   .wm-canvas svg {
-    min-height: 320px;
-    height: clamp(320px, 48svh, 430px);
+    min-height: 280px;
+    height: clamp(280px, 46svh, 420px);
   }
 
   /* Precision bottom detail dock for single-handed thumb inspection */
   .wm-detail {
-    max-height: 410px;
+    max-height: clamp(200px, 32svh, 280px);
+    overflow-y: auto;
     border-left: 0;
-    border-top: 1px solid rgb(122 232 255 / 44%);
+    border-top: 1px solid rgb(122 232 255 / 36%);
     border-radius: 14px 14px 0 0;
-    margin-top: -10px;
-    padding: 28px 18px 22px;
+    margin-top: -8px;
+    padding: 16px 14px 14px;
     position: relative;
     z-index: 3;
     background:
-      linear-gradient(180deg, rgb(122 232 255 / 10%) 0%, transparent 64px),
+      linear-gradient(180deg, rgb(122 232 255 / 8%) 0%, transparent 48px),
       #0a1522;
     box-shadow:
       0 -12px 28px rgb(0 0 0 / 56%),
-      inset 0 1px 0 rgb(228 248 255 / 30%);
+      inset 0 1px 0 rgb(228 248 255 / 24%);
   }
 
   .wm-detail::before {
@@ -1272,6 +1235,8 @@
   .wm-map-caption {
     top: 14px;
     left: 14px;
+    right: 14px;
+    max-width: calc(100% - 28px);
     padding: 8px 10px;
   }
 
@@ -1396,13 +1361,13 @@
     box-shadow: none;
   }
 
-  .wm-node circle:not(.wm-node-hit),
+  .wm-node circle.wm-node-disc,
   .wm-node-glyph .wm-node-plate {
     stroke: ButtonBorder;
     fill: Canvas;
   }
 
-  .wm-node.is-selected circle:not(.wm-node-hit) {
+  .wm-node.is-selected circle.wm-node-disc {
     stroke: Highlight;
     fill: Highlight;
   }
@@ -1473,7 +1438,7 @@
     stroke: #ffffff;
   }
 
-  .wm-canvas svg circle:not(.wm-node-hit),
+  .wm-canvas svg circle.wm-node-disc,
   .wm-node-glyph .wm-node-plate {
     fill: #f0f0f0;
     stroke: #333333;

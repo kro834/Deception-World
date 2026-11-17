@@ -89,11 +89,9 @@
 
 .site-announcement-hub::before {
   inset: 0;
-  background:
-    linear-gradient(115deg, transparent 18%, rgba(255, 255, 255, 0.09) 39%, transparent 58%) -130%
-      0 / 56% 100% no-repeat,
-    repeating-linear-gradient(90deg, transparent 0 74px, rgba(116, 184, 255, 0.028) 75px 76px);
-  animation: site-announcement-sheen 6.4s ease-in-out infinite;
+  content: none;
+  background: none;
+  animation: none;
 }
 
 .site-announcement-hub::after {
@@ -633,21 +631,6 @@
   }
 }
 
-@keyframes site-announcement-sheen {
-  0%,
-  24% {
-    background-position:
-      -130% 0,
-      0 0;
-  }
-  64%,
-  100% {
-    background-position:
-      330% 0,
-      0 0;
-  }
-}
-
 @keyframes site-announcement-aura {
   0%,
   100% {
@@ -762,7 +745,7 @@
     position: sticky;
     z-index: 5;
     top: 0;
-    background: rgba(8, 16, 29, 0.88);
+    background: rgba(8, 16, 29, 0.97);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
   }
@@ -923,11 +906,17 @@
     background: rgba(1, 3, 7, 0.96);
   }
 
-  .site-announcement-hub,
+  .site-announcement-hub {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: #050a14;
+  }
+
   .site-announcement-close,
   .site-announcement-back {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+    background-color: #08101d;
   }
 }
 

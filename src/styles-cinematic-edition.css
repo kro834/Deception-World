@@ -29,7 +29,7 @@
   min-height: 100svh;
   padding: calc(110px + env(safe-area-inset-top)) 6vw 48px;
   background:
-    linear-gradient(90deg, transparent 49.9%, rgb(119 211 228 / 4%) 50%, transparent 50.1%),
+    linear-gradient(90deg, transparent 42%, rgb(119 211 228 / 3%) 50%, transparent 58%),
     radial-gradient(ellipse at 80% 35%, #14304470, transparent 48%),
     linear-gradient(115deg, #101b25, var(--cinema-ink) 64%);
 }
@@ -43,7 +43,7 @@
   height: 2px;
   left: 0;
   right: auto;
-  background: linear-gradient(90deg, var(--cinema-cyan) 65%, transparent 65% 69%, var(--cinema-scarlet) 69%);
+  background: linear-gradient(90deg, var(--cinema-cyan) 0%, var(--cinema-cyan) 56%, transparent 64%, transparent 68%, var(--cinema-scarlet) 76%, var(--cinema-scarlet) 100%);
 }
 .site-shell.film-edition .film-hero-identity .anime-work-title b {
   font-family: var(--cinema-display);
@@ -123,13 +123,11 @@
 .site-shell.film-edition .section-index {
   background: linear-gradient(90deg, var(--cinema-cyan) 0 52px, transparent 52px 58px, var(--cinema-scarlet) 58px 82px, transparent 82px) left bottom / 100% 2px no-repeat;
 }
-/* The existing one-shot scan animates only opacity and transform. These static
-   bands give it an optical readout texture without clipping the actual text. */
+/* The existing one-shot scan animates only opacity and transform. A smooth
+   specular gradient gives it an optical readout sweep without CRT scanline noise. */
 .film-edition .film-text-scan > i,
 .dream-page .film-text-scan > i {
-  background:
-    repeating-linear-gradient(0deg, transparent 0 5px, rgb(168 230 247 / 28%) 5px 6px),
-    linear-gradient(90deg, transparent, rgb(135 223 243 / 22%), rgb(219 250 255 / 50%));
+  background: linear-gradient(90deg, transparent, rgb(135 223 243 / 22%), rgb(219 250 255 / 50%));
   border-right: 2px solid #bcefff;
 }
 .site-shell.film-edition .world-column-copy h3 { line-height: 1.5; }

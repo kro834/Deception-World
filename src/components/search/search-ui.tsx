@@ -54,7 +54,6 @@ export function ResultOption({
   result,
   id,
   active,
-  recordCode,
   className,
   tabbable = false,
   onOpen,
@@ -63,7 +62,6 @@ export function ResultOption({
   result: SearchResult;
   id: string;
   active: boolean;
-  recordCode?: string;
   className?: string;
   tabbable?: boolean;
   onOpen: (result: SearchResult, fromKeyboard: boolean) => void;
@@ -99,11 +97,6 @@ export function ResultOption({
         onOpen(result, event.detail === 0);
       }}
     >
-      {recordCode ? (
-        <span className="search-record-code" aria-hidden="true">
-          {recordCode}
-        </span>
-      ) : null}
       {children}
     </a>
   );

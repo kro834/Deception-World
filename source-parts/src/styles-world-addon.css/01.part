@@ -242,7 +242,7 @@ html .side-panel > .side-panel-head {
   padding: 8px 0 14px;
   margin-top: -8px;
   margin-bottom: 12px;
-  background: linear-gradient(180deg, rgba(7, 11, 18, 0.99) 0 76%, transparent);
+  background: #0d1320;
 }
 
 .world-column-tabs b,
@@ -1148,3 +1148,7 @@ br.tab-br {
 
 .manager-slot-grid .dante-copy {
   position: absolute;
+  z-index: 2;
+  inset: 0;
+  justify-content: flex-end;
+  padding: 16px;

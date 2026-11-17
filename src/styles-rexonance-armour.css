@@ -34,15 +34,8 @@
     #070d16 46%,
     #03060c 100%
   );
-  /* One diagonal band of light over every plate. */
-  --ra-sheen: linear-gradient(
-    118deg,
-    transparent 38%,
-    rgb(255 255 255 / 5.5%) 47%,
-    rgb(255 255 255 / 7%) 50%,
-    rgb(255 255 255 / 5.5%) 53%,
-    transparent 62%
-  );
+  /* Diagonal sheen softened to a calm, unified surface without hard banding. */
+  --ra-sheen: linear-gradient(180deg, transparent, transparent);
   /* The bevel: a lit top edge, a dark lower edge, a faint lit left edge. */
   --ra-bevel:
     inset 0 1px 0 rgb(255 255 255 / 34%), inset 1px 0 0 rgb(255 255 255 / 9%),

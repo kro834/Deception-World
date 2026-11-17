@@ -2166,25 +2166,6 @@ html[data-family="dossier"]
   user-select: none;
 }
 
-/* Under it, a soft radial halo in the file's accent light. */
-html[data-family="dossier"]
-  main.manager-page.manager-page.manager-page
-  #dossier-profile
-  .dossier-identity
-  > .dossier-file-numeral::before {
-  content: "";
-  position: absolute;
-  inset: -14% -24%;
-  z-index: -1;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle at 38% 50%,
-    color-mix(in srgb, var(--sd-accent) 22%, transparent) 0%,
-    color-mix(in srgb, var(--sd-accent) 8%, transparent) 44%,
-    transparent 72%
-  );
-  pointer-events: none;
-}
 
 /* Under it, the end card's short rule in the file's light. */
 html[data-family="dossier"]
@@ -2232,6 +2213,25 @@ html[data-family="dossier"]
   }
 }
 
+/* Mobile phones (375px): tighten the headroom above the portrait so
+   the numeral, portrait and name block sit comfortably without pushing
+   the reading column off the bottom edge. */
+@media (max-width: 560px) and (min-height: 501px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    > #dossier-profile.manager-hero {
+    --sd-headroom: clamp(52px, 11svh, 72px);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page
+    #dossier-profile
+    .dossier-identity
+    > .dossier-file-numeral {
+    font-size: min(clamp(44px, 18vw, 64px), calc(var(--sd-headroom) * 0.72));
+  }
+}
+
 @supports (grid-template-rows: subgrid) {
   @media (min-width: 1100px) and (min-height: 540px),
     (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
@@ -2264,6 +2264,8 @@ html[data-family="dossier"]
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .dossier-reader {
+  background-color: #060a12;
+  background: #060a12;
   box-shadow:
     0 12px 32px rgb(0 0 0 / 48%),
     inset 0 1px 0 rgb(255 255 255 / 8%),
@@ -2703,7 +2705,7 @@ html[data-family="dossier"]
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
-  :is(.form-pickup[id], .character-reading-target) {
+  :is(#identity-records, #dossier-index, #form-records, #dossier-profile, .form-pickup[id], .character-reading-target, .manager-copy-section) {
   scroll-margin-top: calc(var(--sd-head, 76px) + 56px);
 }
 

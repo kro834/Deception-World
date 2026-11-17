@@ -72,10 +72,6 @@ export function RexonanceAssemblyGuide({
   const status = assemblyStatus(load, Boolean(scene.motion));
   const activePhase =
     typeof scene === "object" && scene && "phase" in scene ? scene.phase : "prepare";
-  const activePhaseIndex = Math.max(
-    0,
-    REXONANCE_ASSEMBLY_PHASES.findIndex((item) => item.phase === activePhase),
-  );
   // Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。」 The head is the
   // chapter's numeral and its catchphrase; the runway below shows its own state
   // (the undersuit while it prepares, the scroll's armour after). The status
@@ -124,21 +120,6 @@ export function RexonanceAssemblyGuide({
             {scene.complete ? COMPLETE_COPY : ""}
           </p>
         </div>
-        <span className="rxs-assembly-phase-rail" data-phase={activePhase}>
-          {REXONANCE_ASSEMBLY_PHASES.map(({ phase }, index) => (
-            <i
-              key={phase}
-              data-phase={phase}
-              data-state={
-                index < activePhaseIndex
-                  ? "done"
-                  : index === activePhaseIndex
-                    ? "active"
-                    : "upcoming"
-              }
-            />
-          ))}
-        </span>
       </div>
       <div className="rxs-assembly-controls">
         {load === "error" ? (

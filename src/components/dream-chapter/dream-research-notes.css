@@ -15,62 +15,29 @@
   min-width: 0;
   margin: 2rem 0;
   padding: clamp(18px, 3vw, 34px) clamp(16px, 3vw, 34px) clamp(22px, 3.2vw, 36px)
-    clamp(24px, 3.6vw, 42px);
+    clamp(32px, 3.8vw, 44px);
   border: 1px solid #8f6f3b;
   border-radius: 4px;
   background:
-    linear-gradient(#99763c 0 0) 6px 6px / 20px 1.5px no-repeat,
-    linear-gradient(#99763c 0 0) 6px 6px / 1.5px 20px no-repeat,
-    linear-gradient(#99763c 0 0) calc(100% - 6px) 6px / 20px 1.5px no-repeat,
-    linear-gradient(#99763c 0 0) calc(100% - 6px) 6px / 1.5px 20px no-repeat,
-    linear-gradient(#99763c 0 0) 6px calc(100% - 6px) / 20px 1.5px no-repeat,
-    linear-gradient(#99763c 0 0) 6px calc(100% - 6px) / 1.5px 20px no-repeat,
-    linear-gradient(#99763c 0 0) calc(100% - 6px) calc(100% - 6px) / 20px 1.5px no-repeat,
-    linear-gradient(#99763c 0 0) calc(100% - 6px) calc(100% - 6px) / 1.5px 20px no-repeat,
     linear-gradient(180deg, var(--rn-ebicha-soft) 0 100%) 15px 0 / 1px 100% no-repeat,
     linear-gradient(180deg, rgb(110 41 40 / 16%) 0 100%) 18px 0 / 1px 100% no-repeat,
-    repeating-linear-gradient(180deg, transparent 0 31px, var(--rn-rule-blue) 31px 32px),
-    repeating-linear-gradient(90deg, transparent 0 55px, rgb(120 92 52 / 4%) 55px 56px),
+    repeating-linear-gradient(90deg, transparent 0 55px, rgb(120 92 52 / 3.5%) 55px 56px),
     linear-gradient(165deg, #f8f2e4 0%, var(--rn-paper) 56%, #efe4cd 100%);
   color: var(--rn-ink);
   box-shadow:
-    inset 0 0 0 4px #241918,
-    inset 0 0 0 5px #b79458,
-    3px 4px 0 -1px #dfd2b7,
-    3px 4px 0 0 #8d6e3c,
-    0 20px 48px rgb(6 4 10 / 46%);
+    inset 0 1px 0 rgb(255 255 255 / 72%),
+    inset 0 0 0 1px rgb(183 148 88 / 38%),
+    0 20px 48px rgb(6 4 10 / 42%);
   font-family: var(--ts-text, "Shippori Mincho", serif);
   line-height: 1.85;
   overflow-wrap: anywhere;
   color-scheme: light;
 }
 
-.dream-research-clip {
-  display: flex;
-  justify-content: center;
-  margin: -6px auto 10px;
-  pointer-events: none;
-}
-
-.dream-research-clip-svg {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  filter: drop-shadow(0 3px 5px rgb(30 18 10 / 28%));
-}
-
 .dream-research-header {
   padding-bottom: 14px;
   margin-bottom: 14px;
   border-bottom: 3px double rgb(110 41 40 / 36%);
-}
-
-.dream-research-heading-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 14px;
 }
 
 .dream-research-notes h2,
@@ -96,27 +63,6 @@
   padding-top: 14px;
   border-top: 1px solid rgb(110 41 40 / 26%);
   font-size: clamp(17px, 2vw, 20px);
-}
-
-.dream-research-tally {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.dream-research-tally > span {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 9px;
-  border: 1px solid rgb(153 118 60 / 55%);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #fbf5e6 0%, #eadbc0 100%);
-  color: #4f3719;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
 }
 
 .dream-research-notes p,
@@ -148,66 +94,6 @@
   border-radius: 3px;
   background: linear-gradient(180deg, #fcf8ef 0%, #f1e6d0 100%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 70%);
-}
-
-.dream-research-quote-meta,
-.dream-research-note-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.dream-research-serial {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border: 1px solid rgb(110 41 40 / 44%);
-  border-radius: 2px;
-  background: rgb(110 41 40 / 8%);
-  color: var(--rn-ebicha);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.08em;
-  font-variant-numeric: tabular-nums;
-}
-
-.dream-research-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 9px;
-  border: 1px solid #2b3f5c;
-  border-radius: 999px;
-  background: #203149;
-  color: #f9f3e6;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.08em;
-  font-variant-numeric: tabular-nums;
-}
-
-.dream-research-pill[data-kind="person"] {
-  border-color: #78302f;
-  background: #682625;
-  color: #fbf2e4;
-}
-
-.dream-research-para-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border: 1px solid #b3935c;
-  border-radius: 999px;
-  background: #efe3ca;
-  color: #49361a;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  letter-spacing: 0.05em;
-  font-variant-numeric: tabular-nums;
 }
 
 .dream-research-notes button,
@@ -289,17 +175,9 @@
   font-weight: 700;
 }
 
-.dream-research-slot-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.dream-research-slot-head label,
-.dream-page.dream-page .dream-research-notes .dream-research-slot-head label {
-  margin: 0;
+.dream-research-slot > label,
+.dream-page.dream-page .dream-research-notes .dream-research-slot > label {
+  margin: 0 0 6px;
 }
 
 .dream-research-notes select,
@@ -330,13 +208,15 @@
 
 .dream-research-notes textarea,
 .dream-page.dream-page .dream-research-notes textarea {
-  padding: 8px 14px 8px 22px;
+  padding: 10px 14px;
   resize: vertical;
   line-height: 2;
   background-color: var(--rn-paper-field);
-  background-image:
-    linear-gradient(90deg, transparent 12px, rgb(110 41 40 / 24%) 12px 13px, transparent 13px),
-    repeating-linear-gradient(180deg, transparent 0 31px, rgb(38 62 98 / 15%) 31px 32px);
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0 31px,
+    rgb(38 62 98 / 14%) 31px 32px
+  );
   background-attachment: local;
   box-shadow: inset 0 1px 3px rgb(28 38 56 / 10%);
 }
@@ -412,6 +292,7 @@
 
 .dream-research-notes a,
 .dream-page.dream-page .dream-research-notes a {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -464,25 +345,13 @@
   background: linear-gradient(currentColor 0 0) center / 10px 1.5px no-repeat;
 }
 
-.dream-research-empty {
+.dream-research-empty,
+.dream-page.dream-page .dream-research-notes .dream-research-empty {
   margin: 12px 0 4px;
-  padding: 18px 14px;
+  padding: 14px;
   border: 1px dashed rgb(138 96 52 / 55%);
   border-radius: 3px;
   background: rgb(252 248 238 / 68%);
-  text-align: center;
-}
-
-.dream-research-empty-ornament {
-  display: block;
-  max-width: 100%;
-  margin: 0 auto 8px;
-  color: #8c6430;
-}
-
-.dream-research-empty p,
-.dream-page.dream-page .dream-research-notes .dream-research-empty p {
-  margin: 0;
   color: var(--rn-ink-muted);
   font-size: 15px;
 }
@@ -494,6 +363,12 @@
   color: var(--rn-ebicha);
   font-size: 14px;
   font-weight: 700;
+}
+
+.dream-research-notes [role="status"]:empty,
+.dream-page.dream-page .dream-research-notes [role="status"]:empty {
+  min-height: 0;
+  margin: 0;
 }
 
 .dream-research-pair-hint,
@@ -547,12 +422,17 @@
   .dream-research-notes,
   .dream-page.dream-page .dream-research-notes {
     margin-inline: 0;
-    padding-inline: 22px 14px;
+    padding: 18px 16px 22px;
+    background: linear-gradient(165deg, #f8f2e4 0%, var(--rn-paper) 56%, #efe4cd 100%);
   }
   .dream-research-notes button,
   .dream-page.dream-page .dream-research-notes button {
     width: 100%;
     margin-right: 0;
+  }
+  .dream-research-note-actions > :is(a, button),
+  .dream-page.dream-page .dream-research-notes .dream-research-note-actions > :is(a, button) {
+    width: 100%;
   }
 }
 
@@ -655,14 +535,25 @@ dialog .dream-research-floating {
   }
 
   .dream-research-notes :is(h2, h3, p, label, blockquote, summary, a),
-  .dream-page.dream-page .dream-research-notes :is(h2, h3, p, label, blockquote, summary, a),
-  .dream-research-serial,
-  .dream-research-pill,
-  .dream-research-para-pill,
-  .dream-research-tally > span {
+  .dream-page.dream-page .dream-research-notes :is(h2, h3, p, label, blockquote, summary, a) {
     background: Canvas;
     color: CanvasText;
     border-color: CanvasText;
+  }
+
+  .dream-research-notes summary::after {
+    width: 9px;
+    height: 9px;
+    border: solid CanvasText;
+    border-width: 0 2px 2px 0;
+    border-radius: 0;
+    background: none;
+    transform: translateY(-2px) rotate(45deg);
+  }
+
+  .dream-research-notes details[open] > summary::after {
+    background: none;
+    transform: translateY(2px) rotate(-135deg);
   }
 
   .dream-research-notes :is(button, select, textarea),

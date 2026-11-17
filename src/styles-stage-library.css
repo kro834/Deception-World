@@ -219,9 +219,9 @@ html[data-family="library"] .dxl-art {
   overflow: hidden;
   aspect-ratio: 4 / 5;
   background:
-    radial-gradient(80% 60% at 50% 18%, rgb(var(--tint-rgb) / 16%), transparent 70%),
-    repeating-linear-gradient(90deg, rgb(var(--tint-rgb) / 5%) 0 1px, transparent 1px 18px),
-    repeating-linear-gradient(0deg, rgb(var(--tint-rgb) / 5%) 0 1px, transparent 1px 18px), #060c15;
+    radial-gradient(80% 60% at 50% 18%, rgb(var(--tint-rgb) / 14%), transparent 70%),
+    linear-gradient(180deg, rgb(var(--tint-rgb) / 5%), transparent 45%),
+    #060c15;
   pointer-events: none;
   user-select: none;
 }

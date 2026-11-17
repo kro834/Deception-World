@@ -15,7 +15,6 @@
   background:
     radial-gradient(ellipse at 90% 12%, rgb(31 111 151 / 16%), transparent 34rem),
     radial-gradient(ellipse at 0 65%, rgb(25 94 139 / 12%), transparent 36rem),
-    linear-gradient(90deg, rgb(131 228 255 / 2.5%) 1px, transparent 1px) 0 0 / 96px 96px,
     #050910;
 }
 
@@ -41,7 +40,6 @@
   background:
     linear-gradient(90deg, var(--neo-cyan), transparent) left top / 112px 1px no-repeat,
     linear-gradient(180deg, var(--neo-cyan), transparent) left top / 1px 64px no-repeat,
-    repeating-linear-gradient(90deg, var(--neo-cyan) 0 1px, transparent 1px 7px) right top / 48px 5px no-repeat,
     linear-gradient(270deg, var(--neo-gold), transparent) right bottom / 100px 1px no-repeat,
     linear-gradient(0deg, var(--neo-gold), transparent) right bottom / 1px 42px no-repeat;
   opacity: 0.7;

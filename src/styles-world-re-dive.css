@@ -113,7 +113,7 @@
 .site-shell.film-edition.mirage-edition
   .re-dive-section
   .threat-panel.re-dive-archive.re-dive-archive {
-  --rd-ember: #228b22;
+  --rd-ember: #d97a46;
   --rd-gold: #f0cf86;
   --rd-saga: #6fb6ff;
   --rd-line: rgb(255 160 110 / 0.2);
@@ -212,7 +212,7 @@
   border: 1px solid rgb(255 170 120 / 0.3);
   border-radius: 0;
   background:
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 0 0 / 100% 2px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 0 100% / 12px 2px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 100% 100% / 12px 2px no-repeat,
     rgb(18 7 6 / 0.92);
@@ -274,7 +274,7 @@
   height: 2px;
   margin-top: 8px;
   border-radius: 0;
-  background: linear-gradient(90deg, var(--rd-ember, #228b22), transparent);
+  background: linear-gradient(90deg, var(--rd-ember, #d97a46), transparent);
   box-shadow: none;
 }
 
@@ -976,15 +976,16 @@
   align-items: center;
   gap: clamp(20px, 3vw, 40px);
   width: 100%;
+  min-width: 0;
   min-height: 220px;
   padding: clamp(22px, 3.4vw, 40px);
   border: 1px solid rgb(255 170 120 / 0.36);
   border-radius: 0;
   background:
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 0 0 / 22px 2px no-repeat,
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 0 0 / 2px 22px no-repeat,
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 100% 0 / 22px 2px no-repeat,
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 100% 0 / 2px 22px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 100% 0 / 22px 2px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 100% 0 / 2px 22px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 0 100% / 22px 2px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 0 100% / 2px 22px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 100% 100% / 22px 2px no-repeat,
@@ -998,63 +999,6 @@
   box-shadow:
     0 20px 50px rgb(0 0 0 / 0.5),
     inset 0 0 0 1px rgb(255 170 120 / 0.08);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-file-cover-decor {
-  position: absolute;
-  inset: 6px;
-  pointer-events: none;
-  border: 1px solid rgb(255 180 130 / 0.1);
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-decor-corner {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-color: #ffd9a0;
-  border-style: solid;
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-decor-tl {
-  top: -1px;
-  left: -1px;
-  border-width: 1px 0 0 1px;
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-decor-tr {
-  top: -1px;
-  right: -1px;
-  border-width: 1px 1px 0 0;
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-decor-bl {
-  bottom: -1px;
-  left: -1px;
-  border-width: 0 0 1px 1px;
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-decor-br {
-  bottom: -1px;
-  right: -1px;
-  border-width: 0 1px 1px 0;
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-file-terminal-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 2px;
-  font: 400 12px / 1.4 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
-  letter-spacing: 0.12em;
-  color: rgb(255 192 138 / 0.88);
-}
-
-.site-shell.film-edition.mirage-edition .re-dive-file-cover .rd-file-terminal-badge > span:first-child {
-  padding: 2px 8px;
-  border: 1px solid rgb(255 140 80 / 0.45);
-  background: rgb(38 16 10 / 0.8);
-  color: #ffc299;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1073,10 +1017,6 @@
   }
 }
 
-.site-shell.film-edition.mirage-edition .re-dive-file-cover:active {
-  scale: 0.99;
-}
-
 .site-shell.film-edition.mirage-edition .re-dive-file-cover:focus-visible,
 .rd-file-close:focus-visible,
 .rd-file-reader:focus-visible {
@@ -1093,8 +1033,7 @@
   width: 108px;
   height: 140px;
   border: 1px solid #b57954;
-  background:
-    linear-gradient(135deg, #28120d, #140806);
+  background: linear-gradient(135deg, #28120d, #140806);
   color: #ffd1ac;
   box-shadow:
     0 0 20px rgb(0 0 0 / 0.5),
@@ -1102,10 +1041,13 @@
 }
 
 .rd-file-mark > span {
-  padding: 7px 5px;
+  padding: 7px 10px;
   border-block: 1px solid currentColor;
-  font: 400 12px / 1.5 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
-  letter-spacing: 0.08em;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.2em;
+  text-indent: 0.2em;
   text-shadow: 0 0 12px rgb(255 170 110 / 0.35);
 }
 
@@ -1121,10 +1063,10 @@
 
 .rd-file-cover-copy {
   display: flex;
-  flex: 1 1 220px;
+  flex: 1 1 200px;
   min-width: 0;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .rd-file-cover-copy > small,
@@ -1132,6 +1074,7 @@
   font-size: 14px;
   line-height: 1.7;
   color: #dcc3b2;
+  overflow-wrap: anywhere;
 }
 
 .rd-file-cover-copy > strong {
@@ -1152,6 +1095,8 @@
 }
 
 .rd-file-dialog {
+  --rd-ember: #d97a46;
+  --rd-gold: #f0cf86;
   box-sizing: border-box;
   width: min(880px, calc(100vw - 32px));
   height: min(960px, calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px));
@@ -1163,10 +1108,10 @@
   border: 1px solid #b57954;
   border-radius: 0;
   background:
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 0 0 / 28px 2px no-repeat,
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 0 0 / 2px 28px no-repeat,
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 100% 0 / 28px 2px no-repeat,
-    linear-gradient(var(--rd-ember, #228b22) 0 0) 100% 0 / 2px 28px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 0 0 / 2px 28px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 100% 0 / 28px 2px no-repeat,
+    linear-gradient(var(--rd-ember, #d97a46) 0 0) 100% 0 / 2px 28px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 0 100% / 28px 2px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 0 100% / 2px 28px no-repeat,
     linear-gradient(var(--rd-gold, #f0cf86) 0 0) 100% 100% / 28px 2px no-repeat,
@@ -1196,9 +1141,11 @@
 
 .rd-file-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px 16px;
+  min-width: 0;
   padding: 20px clamp(16px, 4vw, 36px);
   border-bottom: 1px solid rgb(255 190 140 / 0.3);
   background: #180b08;
@@ -1206,48 +1153,18 @@
 
 .rd-file-header-inner {
   display: flex;
+  flex: 1 1 200px;
   min-width: 0;
   flex-direction: column;
   gap: 6px;
 }
 
-.rd-file-ruler-band {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 4px;
-  font: 400 12px / 1.4 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
-  letter-spacing: 0.12em;
-  color: #ffb885;
-}
-
-.rd-file-stamp {
-  padding: 2px 7px;
-  border: 1px solid rgb(255 140 70 / 0.5);
-  background: rgb(44 18 12 / 0.85);
-  color: #ffd2b2;
-  font-weight: 700;
-}
-
-.rd-file-rule-ticks {
-  flex: 1 1 auto;
-  height: 6px;
-  background: repeating-linear-gradient(
-    90deg,
-    rgb(255 190 140 / 0.4) 0 1px,
-    transparent 1px 8px
-  );
-}
-
-.rd-file-serial {
-  color: #d2b9a7;
-  font-size: 12px;
-}
-
 .rd-file-label {
   margin: 0 0 10px;
   color: #ffc08a;
-  font: 400 12px / 1.5 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
   letter-spacing: 0.12em;
 }
 
@@ -1258,7 +1175,7 @@
 }
 
 #rd-file-caption {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   color: #d2b9a7;
   font-size: 14px;
   line-height: 1.7;
@@ -1267,6 +1184,7 @@
 
 .rd-file-close {
   flex: 0 0 auto;
+  min-width: 44px;
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid #ac7e59;
@@ -1277,7 +1195,6 @@
   font-size: 14px;
   line-height: 1.5;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1288,20 +1205,27 @@
   }
 }
 
-.rd-file-close:active {
-  scale: 0.97;
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .site-shell.film-edition.mirage-edition .re-dive-file-cover,
+  html:not([data-world-effects="economy"]) .rd-file-close {
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
 }
 
 .rd-file-reader {
   min-height: 0;
+  min-width: 0;
   padding: 30px clamp(18px, 5vw, 52px) 44px;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   font-size: 16px;
   line-height: 1.95;
-  background:
-    linear-gradient(180deg, rgb(18 9 8 / 0.85) 0%, rgb(12 6 5 / 0.95) 100%);
+  background: linear-gradient(180deg, rgb(18 9 8 / 0.85) 0%, rgb(12 6 5 / 0.95) 100%);
 }
 
 .rd-file-reader::-webkit-scrollbar {
@@ -1389,9 +1313,11 @@
 
 .rd-file-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
   padding: 12px clamp(16px, 4vw, 36px);
   border-top: 1px solid rgb(255 190 140 / 0.3);
   background: #180b08;
@@ -1399,44 +1325,40 @@
 
 .rd-file-footer-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 8px 14px;
+  min-width: 0;
   color: #d2b9a7;
   font-size: 12px;
   line-height: 1.7;
-}
-
-.rd-file-seal {
-  padding: 2px 8px;
-  border: 1px solid rgb(255 190 140 / 0.35);
-  background: rgb(32 14 10 / 0.8);
-  font: 400 12px / 1.4 var(--mr-hud, "Michroma", "Oxanium", sans-serif);
-  letter-spacing: 0.1em;
-  color: #ffc9a3;
+  overflow-wrap: anywhere;
 }
 
 .rd-file-footer > span,
-.rd-file-footer-meta > span:last-child {
+.rd-file-footer-meta > span {
+  min-width: 0;
   color: #d2b9a7;
   font-size: 12px;
   line-height: 1.7;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 599px) {
   .site-shell.film-edition.mirage-edition .re-dive-file-cover {
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 16px;
+    padding: 18px 16px;
   }
 
   .rd-file-mark {
     flex-basis: 100%;
     width: 100%;
-    height: 64px;
+    height: 60px;
   }
 
   .rd-file-mark > span {
     font-size: 12px;
-    letter-spacing: 0;
   }
 
   .rd-file-cover-copy {
@@ -1454,11 +1376,6 @@
 
   .rd-file-header {
     padding-block: 16px;
-  }
-
-  .rd-file-ruler-band {
-    flex-wrap: wrap;
-    gap: 8px;
   }
 
   .rd-file-footer {
@@ -1498,10 +1415,6 @@
   .rd-file-reader > h3,
   .rd-file-reader > p:first-child,
   .rd-file-footer > span,
-  .rd-file-terminal-badge > span,
-  .rd-file-stamp,
-  .rd-file-serial,
-  .rd-file-seal,
   .rd-file-footer-meta > span {
     color: CanvasText;
   }

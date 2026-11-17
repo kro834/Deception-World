@@ -498,9 +498,9 @@ html[data-family="special"]
   counter-increment: rxt-cut;
   position: relative;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  align-content: stretch;
-  min-height: clamp(300px, 52svh, 480px);
+  grid-template-rows: auto auto;
+  align-content: start;
+  min-height: 0;
   margin: 0;
   padding: clamp(22px, 2.4vw, 32px) 0 clamp(20px, 2.2vw, 28px);
   overflow: hidden;
@@ -620,7 +620,7 @@ html[data-family="special"]
   > #performance
   .rxs-headline-metrics
   p {
-  align-self: end;
+  align-self: auto;
   max-width: 26em;
   margin: 0;
   color: var(--dx-text-2);
@@ -1020,20 +1020,20 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages
   border-top: 1px solid rgb(121 232 255 / 22%);
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages[data-form="standard"],
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages:not([data-form]) {
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages:has(.rxs-stage-tabs[data-stage="standard"]) {
   --rxt-form-rgb: 99 226 255;
   --rxs-stage-accent: #63e2ff;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages[data-form="max"] {
-  --rxt-form-rgb: 242 216 150;
-  --rxs-stage-accent: #f2d896;
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages:has(.rxs-stage-tabs[data-stage="max"]) {
+  --rxt-form-rgb: 150 156 255;
+  --rxs-stage-accent: #969cff;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages[data-form="ultra"] {
-  --rxt-form-rgb: 255 59 105;
-  --rxs-stage-accent: #ff3b69;
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #stages:has(.rxs-stage-tabs[data-stage="ultra"]) {
+  --rxt-form-rgb: 255 114 218;
+  --rxs-stage-accent: #ff72da;
 }
 
 html[data-family="special"]
@@ -1639,7 +1639,7 @@ html[data-family="special"]
     margin: 0;
     translate: none;
     scale: none;
-    border-bottom: 1px solid rgb(121 232 255 / 20%);
+    border-bottom: 0;
   }
 
   html[data-family="special"]

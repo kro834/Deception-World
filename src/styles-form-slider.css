@@ -36,12 +36,6 @@
       rgb(255 255 255 / 0.018) 32%,
       rgb(0 0 0 / 0.36) 100%
     ),
-    linear-gradient(
-      118deg,
-      transparent 16%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.065) 38%,
-      transparent 58%
-    ),
     radial-gradient(
       ellipse 84% 120% at 50% 108%,
       rgb(var(--form-slider-light, 121 232 255) / 0.095),
@@ -72,7 +66,6 @@
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
   background:
     radial-gradient(ellipse 92% 54% at 28% 0%, rgb(255 255 255 / 0.28), transparent 58%),
-    linear-gradient(118deg, transparent 20%, rgb(255 255 255 / 0.15) 36%, transparent 52%),
     radial-gradient(
       ellipse 88% 64% at 50% 108%,
       rgb(var(--form-slider-light, 121 232 255) / 0.42),
@@ -152,25 +145,8 @@
   min-height: 54px !important;
   padding: 11px 8px !important;
 }
-:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:not(:first-of-type)::before {
-  content: "";
-  position: absolute;
-  top: 28%;
-  bottom: 28%;
-  left: -3px;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgb(var(--form-slider-light, 121 232 255) / 0.22) 50%,
-    transparent
-  );
-  pointer-events: none;
-  transition: opacity 160ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"][aria-selected="true"]::before,
-:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"][aria-selected="true"] + button[role="tab"]::before {
-  opacity: 0;
+:root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]::before {
+  content: none !important;
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
   display: inline-block;
@@ -254,14 +230,37 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .form-slider.for
   }
 }
 
-/* Five forms on a phone: the labels keep their gaps (Rexonance has three). */
+/* Mobile widths: keep 3 to 5 forms legible and neatly aligned without clipping */
 @media (max-width: 480px) {
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs {
+    min-height: 52px !important;
+    padding: 4px !important;
+  }
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+    min-height: 44px !important;
+    padding: 6px clamp(4px, 1.5vw, 8px) !important;
+  }
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+    font-size: 12px !important;
+    letter-spacing: 0.03em !important;
+    white-space: nowrap;
+  }
   :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs:has(> button[role="tab"]:nth-of-type(5)) > button[role="tab"] {
     padding-inline: 2px !important;
   }
   :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs:has(> button[role="tab"]:nth-of-type(5)) > button[role="tab"] span {
     font-size: 12px !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0.01em !important;
+  }
+}
+
+@media (max-width: 360px) {
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
+    padding-inline: 2px !important;
+  }
+  :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
+    font-size: 11px !important;
+    letter-spacing: 0 !important;
   }
 }
 

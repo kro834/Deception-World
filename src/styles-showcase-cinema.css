@@ -124,14 +124,6 @@ html
    centred on the figure and a gold mark at its centre. */
 .rxs-page.rxs-page .rxs-hero-visual::before {
   background:
-    linear-gradient(var(--sc-gold) 0 0) 50% calc(64% + 3px) / 2px 9px no-repeat,
-    repeating-linear-gradient(
-        90deg,
-        transparent 0 calc(100% / 24 - 0.5px),
-        color-mix(in srgb, var(--sc-light) 50%, transparent) 0 calc(100% / 24 + 0.5px),
-        transparent 0 calc(100% / 12)
-      )
-      50% calc(64% + 5px) / 60% 4px no-repeat,
     linear-gradient(90deg, transparent, var(--sc-light) 30% 70%, transparent) 50% 64% / 76% 1px
       no-repeat,
     radial-gradient(
@@ -223,7 +215,7 @@ html[data-world-effects="economy"] .rxs-page.rxs-page .rxs-section-heading::befo
 /* Every bar runs over a measured track: a faint tick each tenth, so the
    baseline's shorter bar reads against a scale, not against nothing. */
 .rxs-page.rxs-page .rxs-comparison .rxs-bars {
-  background: repeating-linear-gradient(90deg, rgb(255 255 255 / 10%) 0 1px, transparent 1px 10%);
+  background: none;
 }
 
 /* The two architectures are told apart the way the bars are: the site's

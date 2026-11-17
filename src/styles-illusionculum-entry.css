@@ -859,9 +859,7 @@
 }
 
 .ice-entry-ground::after {
-  background:
-    radial-gradient(120% 90% at 50% 46%, transparent 55%, rgb(2 3 10 / 70%)),
-    repeating-linear-gradient(0deg, rgb(166 230 255 / 3%) 0 1px, transparent 1px 4px);
+  background: radial-gradient(120% 90% at 50% 46%, transparent 55%, rgb(2 3 10 / 70%));
 }
 
 /* The sigil's lines carry a soft ice bloom. */
@@ -942,14 +940,8 @@
 .ice-entry-frame::before {
   inset: 0 30px;
   background:
-    repeating-linear-gradient(90deg, rgb(166 230 255 / 45%) 0 1px, transparent 1px 12px) 0 0 / 100% 5px
-      no-repeat,
-    repeating-linear-gradient(90deg, rgb(233 184 102 / 55%) 0 1px, transparent 1px 60px) 0 0 / 100% 9px
-      no-repeat,
-    repeating-linear-gradient(90deg, rgb(166 230 255 / 45%) 0 1px, transparent 1px 12px) 0 100% / 100% 5px
-      no-repeat,
-    repeating-linear-gradient(90deg, rgb(233 184 102 / 55%) 0 1px, transparent 1px 60px) 0 100% / 100% 9px
-      no-repeat;
+    linear-gradient(90deg, transparent, rgb(166 230 255 / 45%) 20% 80%, transparent) 0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgb(233 184 102 / 50%) 20% 80%, transparent) 0 100% / 100% 1px no-repeat;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 14% 86%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 14% 86%, transparent);
 }
@@ -1072,49 +1064,6 @@
     radial-gradient(1px 1px at 34% 86%, rgb(169 131 255 / 70%) 50%, transparent 51%);
 }
 
-/* Fallbacks for the new layers. Reduced motion already stops every
-   animation under .ice-entry above. Economy and constrained devices (the
-   gate does not render the entry there, but the sheet is linked everywhere)
-   and forced colours drop the decorative extras. */
-@media (prefers-reduced-motion: reduce) {
-  .ice-entry-frame {
-    animation: none;
-  }
-}
-
-html[data-world-effects="economy"] .ice-entry-ground::before,
-html[data-world-effects="economy"] .ice-entry-scan::after,
-html[data-rzn-constrained] .ice-entry-ground::before,
-html[data-rzn-constrained] .ice-entry-scan::after {
-  display: none;
-}
-
-html[data-world-effects="economy"] .ice-entry-sigil,
-html[data-rzn-constrained] .ice-entry-sigil {
-  filter: none;
-}
-
-@media (forced-colors: active) {
-  .ice-entry-ground::before,
-  .ice-entry-ground::after,
-  .ice-entry-figure::before,
-  .ice-entry-frame::before,
-  .ice-entry-frame::after,
-  .ice-entry-scan::after,
-  .ice-entry-lock::before,
-  .ice-entry-calls > li::after {
-    display: none;
-  }
-
-  .ice-entry-sigil {
-    filter: none;
-  }
-
-  .ice-entry-calls > li {
-    text-shadow: none;
-  }
-}
-
 /* ================================================================
    WAVE-4 DEEP OPTICAL UPGRADE: Nanocell assembly prism sheen &
    spatial chromatic depth contrast enhancements.
@@ -1163,9 +1112,61 @@ html[data-rzn-constrained] .ice-entry-sigil {
     0 0 6px rgb(255 143 210 / 60%);
 }
 
+/* Fallbacks for the new layers. Reduced motion already stops every
+   animation under .ice-entry above. Economy and constrained devices (the
+   gate does not render the entry there, but the sheet is linked everywhere)
+   and forced colours drop the decorative extras. */
+@media (prefers-reduced-motion: reduce) {
+  .ice-entry-frame {
+    animation: none;
+  }
+}
+
+html[data-world-effects="economy"] .ice-entry-ground::before,
+html[data-world-effects="economy"] .ice-entry-scan::after,
 html[data-world-effects="economy"] .ice-entry-cells,
 html[data-world-effects="economy"] .ice-entry-plate-cells,
+html[data-rzn-constrained] .ice-entry-ground::before,
+html[data-rzn-constrained] .ice-entry-scan::after,
 html[data-rzn-constrained] .ice-entry-cells,
 html[data-rzn-constrained] .ice-entry-plate-cells {
+  display: none;
+}
+
+html[data-world-effects="economy"] .ice-entry-sigil,
+html[data-rzn-constrained] .ice-entry-sigil {
+  filter: none;
+}
+
+html[data-world-effects="economy"] .ice-entry-chips > i,
+html[data-rzn-constrained] .ice-entry-chips > i {
   box-shadow: none;
+}
+
+@media (forced-colors: active) {
+  .ice-entry-ground::before,
+  .ice-entry-ground::after,
+  .ice-entry-figure::before,
+  .ice-entry-frame::before,
+  .ice-entry-frame::after,
+  .ice-entry-scan::after,
+  .ice-entry-lock::before,
+  .ice-entry-calls > li::after,
+  .ice-entry-cells,
+  .ice-entry-plate-cells {
+    display: none;
+  }
+
+  .ice-entry-sigil {
+    filter: none;
+  }
+
+  .ice-entry-chips > i,
+  .ice-entry-chips > i[data-tone] {
+    box-shadow: none;
+  }
+
+  .ice-entry-calls > li {
+    text-shadow: none;
+  }
 }

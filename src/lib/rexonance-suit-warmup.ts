@@ -1,10 +1,15 @@
-import {
-  REXONANCE_SUIT_ASSETS,
-  REXONANCE_SUIT_ATLAS,
-  REXONANCE_SUIT_GOLD_ATLAS,
-} from "./rexonance-suit.ts";
 import { prepareRexonanceTransition } from "./rexonance-transition-loader.ts";
 import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
+
+const REXONANCE_SUIT_ATLAS = { src: "/rexonance-suit-20261023/plates.webp" } as const;
+const REXONANCE_SUIT_GOLD_ATLAS = { src: "/rexonance-suit-20261023/gold.webp" } as const;
+const REXONANCE_SUIT_ASSETS = [
+  REXONANCE_SUIT_ATLAS.src,
+  REXONANCE_SUIT_GOLD_ATLAS.src,
+  "/rexonance-suit-20261023/undersuit-20261112.webp",
+  "/rexonance-suit-20261023/body.webp",
+  "/rexonance-suit-20261023/face.webp",
+] as const;
 
 type Connection = { saveData?: boolean; effectiveType?: string };
 type Priority = "low" | "high";

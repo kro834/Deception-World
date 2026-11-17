@@ -10,7 +10,7 @@ html[data-family="world"]
   --directory-muted: #b6cbd7;
   --directory-cyan: #74d9ec;
   --directory-seam: rgb(145 189 215 / 28%);
-  --directory-metal: linear-gradient(155deg, #eaf5fa, #acc2ce 46%, #8ca6b5 47%, #dcecf4);
+  --directory-metal: linear-gradient(180deg, #f4fbff 0%, #dcecf4 52%, #c3dae7 100%);
   --directory-specular: rgb(233 246 251 / 45%);
   --directory-rim: rgb(145 189 215 / 38%);
   --directory-sheen: linear-gradient(135deg, rgb(233 246 251 / 10%) 0%, transparent 42%, rgb(116 217 236 / 7%) 100%);
@@ -33,7 +33,7 @@ html[data-family="world"]
     linear-gradient(155deg, #0d1d2b, #050b12 60%);
   box-shadow:
     inset 0 1px 0 var(--directory-specular),
-    8px 8px 0 rgb(2 7 13 / 52%);
+    0 12px 28px rgb(2 7 13 / 52%);
 }
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition

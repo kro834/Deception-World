@@ -38,49 +38,17 @@ export function IcFinisherCalls({ name, calls }: { name: string; calls: readonly
   const [step, setStep] = useState(-1);
   return (
     <ol className="ics-calls ics-step-calls" aria-label={`${name} 発動音声`} data-step={step}>
-      {calls.map((call, index) => {
-        const isLit = index <= step;
-        const isCurrent = index === step;
-        return (
-          <li
-            key={`${index}-${call}`}
-            lang="en"
-            data-lit={isLit || undefined}
-            data-current={isCurrent || undefined}
+      {calls.map((call, index) => (
+        <li key={`${index}-${call}`} lang="en" data-lit={index <= step || undefined}>
+          <button
+            type="button"
+            aria-pressed={index <= step}
+            onClick={() => setStep(index === step ? index - 1 : index)}
           >
-            <button
-              type="button"
-              aria-pressed={isLit}
-              onClick={() => setStep(index === step ? index - 1 : index)}
-            >
-              <span
-                className="ics-call-indicator"
-                aria-hidden="true"
-                style={{
-                  display: "inline-block",
-                  width: 7,
-                  height: 7,
-                  marginRight: 8,
-                  borderRadius: 1,
-                  verticalAlign: "middle",
-                  backgroundColor: isCurrent
-                    ? "#ffffff"
-                    : isLit
-                      ? "rgb(233 184 102)"
-                      : "rgb(166 230 255 / 0.35)",
-                  boxShadow: isCurrent
-                    ? "0 0 10px #ffffff, 0 0 16px rgb(233 184 102)"
-                    : isLit
-                      ? "0 0 8px rgb(233 184 102 / 0.8)"
-                      : "none",
-                  transition: "background-color 180ms ease, box-shadow 180ms ease",
-                }}
-              />
-              <b>{withCallBreaks(call)}</b>
-            </button>
-          </li>
-        );
-      })}
+            <b>{withCallBreaks(call)}</b>
+          </button>
+        </li>
+      ))}
     </ol>
   );
 }

@@ -15,9 +15,7 @@
 /* P14: the supplied image is the chip, the surrounding dark enclosure is
    its package. The overview and the comparator remain separate surfaces. */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-section.rxs-p14 {
-  background:
-    linear-gradient(90deg, transparent 49.9%, rgb(122 232 255 / 5%) 50%, transparent 50.1%),
-    linear-gradient(180deg, #101a28, #0c121d 62%, var(--ri-ink));
+  background: linear-gradient(180deg, #101a28, #0c121d 62%, var(--ri-ink));
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-overview {
@@ -38,22 +36,12 @@
   inset: 0;
   border-radius: 2px;
   background:
-    repeating-linear-gradient(90deg, var(--ri-cyan) 0 2px, transparent 2px 18px) 50% 6px /
-      calc(100% - 48px) 2px,
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 6px) 50% 9px /
-      calc(100% - 48px) 1px,
-    repeating-linear-gradient(90deg, var(--ri-gold) 0 2px, transparent 2px 18px) 50%
-      calc(100% - 6px) / calc(100% - 48px) 2px,
-    repeating-linear-gradient(90deg, rgb(227 193 133 / 45%) 0 1px, transparent 1px 6px) 50%
-      calc(100% - 9px) / calc(100% - 48px) 1px,
     linear-gradient(var(--ri-cyan) 0 0) 0 0 / 22px 2px,
     linear-gradient(var(--ri-cyan) 0 0) 0 0 / 2px 22px,
     linear-gradient(var(--ri-amethyst) 0 0) 100% 0 / 22px 2px,
     linear-gradient(var(--ri-amethyst) 0 0) 100% 0 / 2px 22px,
     linear-gradient(var(--ri-gold) 0 0) 0 100% / 22px 2px,
-    linear-gradient(var(--ri-gold) 0 0) 100% 100% / 22px 2px,
-    linear-gradient(var(--ri-ink) 0 0) 0 0 / 100% 14px,
-    linear-gradient(var(--ri-ink) 0 0) 0 100% / 100% 14px;
+    linear-gradient(var(--ri-gold) 0 0) 100% 100% / 22px 2px;
   background-repeat: no-repeat;
   box-shadow: inset 0 0 0 1px rgb(240 246 255 / 25%);
 }
@@ -146,10 +134,7 @@
     linear-gradient(var(--rxs-stage-accent) 0 0) 0 0 / 2px 42px,
     linear-gradient(var(--ri-gold) 0 0) 100% 100% / 42px 2px,
     linear-gradient(var(--ri-gold) 0 0) 100% 100% / 2px 42px,
-    repeating-linear-gradient(180deg, rgb(240 246 255 / 35%) 0 1px, transparent 1px 20px) 12px 50% /
-      6px 42%,
-    repeating-linear-gradient(180deg, color-mix(in srgb, var(--rxs-stage-accent) 55%, transparent) 0 1px, transparent 1px 5px) 15px 50% /
-      3px 38%,
+    linear-gradient(rgb(240 246 255 / 16%) 0 0) 14px 50% / 1px 38%,
     linear-gradient(var(--rxs-stage-accent) 0 0) 100% 50% / 3px 44px;
   background-repeat: no-repeat;
   box-shadow: inset 0 0 0 1px rgb(240 246 255 / 14%);

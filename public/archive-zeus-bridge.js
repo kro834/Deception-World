@@ -135,6 +135,7 @@
   // (2026-10-26 phone sweep: the button sat on the hero lead at 360).
   const onLoad = () => {
     schedule("load", 300);
+    window.setTimeout(() => schedule("change", 0), 1050);
     window.setTimeout(() => schedule("change", 0), 1600);
   };
   if (document.readyState === "complete") onLoad();

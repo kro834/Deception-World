@@ -170,7 +170,7 @@ void main() {
   // left), so the flare never draws a displaced copy of a letter.
   // Sharpened local radiance curve preserves crisp typography contours.
   float face = max(fn - lum(sampleTop(uFinal, luv - px * 2.0)), 0.0);
-  float flareCore = pow(clamp(face * 2.8, 0.0, 1.0), 1.45);
+  float flareCore = face > 0.0 ? pow(min(face * 2.8, 1.0), 1.45) : 0.0;
   float flare = flareCore * fall(0.07, 0.0, abs(d)) * env * live;
 
   // Faint smoke above the flames, and the fire's light on the air around it.

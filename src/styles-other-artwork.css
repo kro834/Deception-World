@@ -1,3 +1,21 @@
+#other-records,
+.site-shell #other-records {
+  scroll-margin-top: max(
+    104px,
+    calc(var(--film-topbar-height, calc(80px + env(safe-area-inset-top))) + 24px)
+  );
+}
+
+@media (max-width: 840px) {
+  #other-records,
+  .site-shell #other-records {
+    scroll-margin-top: max(
+      132px,
+      calc(var(--film-topbar-height, calc(116px + env(safe-area-inset-top))) + 20px)
+    );
+  }
+}
+
 .other-artwork-card {
   padding: 0;
   text-align: left;
@@ -67,19 +85,13 @@
   gap: 12px;
   min-height: 60px;
   padding: 8px 16px;
-  border: 1px solid rgb(138 196 224 / 42%);
-  border-top: 1px solid rgb(214 238 250 / 56%);
+  border: 1px solid rgb(146 182 205 / 28%);
+  border-top: 1px solid rgb(214 238 250 / 36%);
   background:
-    linear-gradient(
-      90deg,
-      #9be9fa 0 3px,
-      transparent 3px,
-      rgb(222 200 161 / 20%) 36%,
-      transparent 88%
-    ),
-    linear-gradient(180deg, #142636 0%, #0b1622 100%);
+    radial-gradient(ellipse 60% 100% at 50% 0%, rgb(155 233 250 / 6%), transparent 70%),
+    linear-gradient(180deg, #101c27 0%, #081119 100%);
   box-shadow:
-    inset 0 1px 0 rgb(236 248 255 / 16%),
+    inset 0 1px 0 rgb(236 248 255 / 12%),
     0 12px 30px rgb(0 0 0 / 48%);
 }
 
@@ -146,13 +158,12 @@
   );
   margin: 12px auto 0;
   padding: 10px;
-  border: 1px solid rgb(146 202 228 / 32%);
+  border: 1px solid rgb(146 182 205 / 24%);
   background:
-    radial-gradient(ellipse 75% 55% at 50% 8%, rgb(168 224 248 / 9%), transparent 68%),
-    linear-gradient(180deg, #0b141f 0%, #050a11 100%);
+    radial-gradient(ellipse 75% 55% at 50% 8%, rgb(168 224 248 / 6%), transparent 68%),
+    linear-gradient(180deg, #09111a 0%, #050a11 100%);
   box-shadow:
-    inset 0 1px 0 rgb(236 248 255 / 14%),
-    inset 0 0 0 1px rgb(222 200 161 / 12%),
+    inset 0 1px 0 rgb(236 248 255 / 10%),
     0 24px 56px rgb(0 0 0 / 64%);
   object-fit: contain;
   filter: none;

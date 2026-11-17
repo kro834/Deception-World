@@ -134,12 +134,6 @@ function EntryCard({
       }}
     >
       <RecordArtFrame art={pathArt(entry.path, entry.hash)} title={entry.title} />
-      <div className="library-card-slip" aria-hidden="true">
-        <span className="library-card-slip-code">
-          {cast ? `RIDER ${cast.no}` : `SPECIMEN // ${entry.kind.toUpperCase()}`}
-        </span>
-        <span className="library-card-slip-seal">{bookmarked ? "SEALED" : "CATALOGUED"}</span>
-      </div>
       <p className="library-card-kind">{LIBRARY_KINDS[entry.kind]}</p>
       <h3 style={titleRunStyle(entry.title)}>
         <GuardedLink to={entry.path} hash={entry.hash} assets={[]} data-library-open="true">
@@ -484,18 +478,12 @@ export function LibraryPage({
             DECEPTION WORLD
           </GuardedLink>
           <div className="library-topbar-actions">
-            <span>資料室 / LIBRARY</span>
+            <span>資料室</span>
             <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
           </div>
         </header>
         <main id="library-main" className="dg-focus-scope">
           <section className="library-intro library-hero">
-            <span className="library-hero-clasps" aria-hidden="true">
-              <i data-corner="tl" />
-              <i data-corner="tr" />
-              <i data-corner="bl" />
-              <i data-corner="br" />
-            </span>
             <div className="library-intro-copy">
               <p className="library-eyebrow">資料室</p>
               <h1>
@@ -504,7 +492,7 @@ export function LibraryPage({
                 資料を見つける。
               </h1>
               <p className="library-hero-lede">
-                人物の記録、夢の章、展示と世界観アーカイブを標本棚のように横断し、しおりや問いの道標から何度でも再訪できます。
+                人物の記録、夢の章、展示と世界観アーカイブを横断し、しおりや問いの道標から何度でも再訪できます。
               </p>
               <nav className="library-jump-links" aria-label="資料室内の移動">
                 <a href="#my-library" onClick={quietFlush}>
@@ -519,26 +507,22 @@ export function LibraryPage({
               </GuardedLink>
             </div>
             <div className="library-hero-cabinet" aria-hidden="true">
-              <div className="library-hero-cabinet-head">
-                <span>SPECIMEN ATELIER // INDEX TELEMETRY</span>
-                <span>CALIBRATED</span>
-              </div>
               <div className="library-hero-total">
-                <span className="library-hero-total-label">TOTAL SPECIMENS</span>
+                <span className="library-hero-total-label">公開資料</span>
                 <strong className="library-hero-total-value">{LIBRARY_ENTRIES.length}</strong>
-                <span className="library-hero-total-unit">FILES</span>
+                <span className="library-hero-total-unit">件</span>
               </div>
               <div className="library-hero-meters">
                 {KIND_COUNTS.map(([id, count]) => (
                   <div key={id} className="library-hero-meter-item" data-kind={id}>
                     <span className="library-hero-meter-name">{LIBRARY_KINDS[id]}</span>
-                    <b className="library-hero-meter-count">{String(count).padStart(2, "0")}</b>
+                    <b className="library-hero-meter-count">{count}</b>
                   </div>
                 ))}
                 <div className="library-hero-meter-item" data-kind="saved">
                   <span className="library-hero-meter-name">保存しおり</span>
                   <b className="library-hero-meter-count">
-                    {!savedKnown ? "—" : String(saved.bookmarks.length).padStart(2, "0")}
+                    {!savedKnown ? "—" : saved.bookmarks.length}
                   </b>
                 </div>
               </div>
@@ -550,9 +534,6 @@ export function LibraryPage({
             aria-labelledby="library-browser-title"
           >
             <div className="library-browser-heading">
-              <p className="library-section-kicker" aria-hidden="true">
-                CATALOGUE // SPECIMEN INDEX
-              </p>
               <h2 id="library-browser-title">資料を探す</h2>
             </div>
             <form
@@ -786,9 +767,6 @@ export function LibraryPage({
               )
             ) : (
               <div className="library-empty">
-                <p className="library-empty-code" aria-hidden="true">
-                  NO MATCH
-                </p>
                 <h3>条件に合う資料が見つかりません</h3>
                 <p>
                   {scope === "saved" && !saved.bookmarks.length
@@ -832,9 +810,6 @@ export function LibraryPage({
             )}
           </section>
           <section className="library-discovery" aria-labelledby="library-discovery-title">
-            <p className="library-section-kicker" aria-hidden="true">
-              TAXONOMY // FACET CABINET
-            </p>
             <h2 id="library-discovery-title">種類から探す</h2>
             <div className="library-index-meter" role="group" aria-label="種類から探す">
               {KIND_COUNTS.map(([id, count]) => (
@@ -885,7 +860,7 @@ export function LibraryPage({
             <div className="library-cast-board">
               <div className="library-cast-heading">
                 <h2>八人のライダー</h2>
-                <span>人物資料 // CAST SPECIMENS</span>
+                <span>人物資料</span>
               </div>
               <nav
                 className="library-cast"

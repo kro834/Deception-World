@@ -10,22 +10,18 @@ html[data-family="special"] body #top.rxs-page[data-command-special] {
   --cs-text: #e8eff4;
   --cs-muted: #b5c3cf;
   --cs-edge: rgb(197 220 232 / 32%);
-  --cs-ribs: repeating-linear-gradient(
-    0deg,
-    rgb(233 240 241 / 2%) 0 1px,
-    transparent 1px 3px
-  );
+  --cs-ribs: linear-gradient(transparent, transparent);
   --cs-face:
     radial-gradient(ellipse 74% 56% at 14% 0%, rgb(var(--cs-key-rgb) / 9%), transparent 64%),
     linear-gradient(125deg, rgb(var(--cs-key-rgb) / 7%), transparent 44%),
     linear-gradient(180deg, #192532, #101823 50%, #0a1019);
   --cs-metal:
-    linear-gradient(118deg, transparent 20%, rgb(233 240 241 / 14%) 20.4%, transparent 46%),
+    linear-gradient(118deg, transparent 0%, rgb(233 240 241 / 4%) 40%, transparent 80%),
     linear-gradient(
       180deg,
-      rgb(240 248 252 / 15%),
+      rgb(240 248 252 / 10%),
       transparent 46%,
-      rgb(0 0 0 / 30%) 48%,
+      rgb(0 0 0 / 22%) 48%,
       transparent
     );
   --cs-shadow:
@@ -198,13 +194,6 @@ html[data-family="special"] body #top.fst-page[data-command-special] {
     background:
       linear-gradient(90deg, var(--cs-key), var(--cs-secondary) 42%, transparent 92%) 0 0 / 100% 2px
         no-repeat,
-      repeating-linear-gradient(
-          180deg,
-          rgb(var(--cs-key-rgb) / 14%) 0 1px,
-          transparent 1px 8px
-        )
-        calc(100% - 6px) 10px / 4px calc(100% - 20px) no-repeat,
-      var(--cs-ribs),
       var(--cs-face);
     box-shadow: var(--cs-shadow);
   }

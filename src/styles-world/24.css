@@ -53,31 +53,9 @@
    mobile viewport stays clean and preserves its full reading area. */
 @media (min-width: 720px) {
   :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::after {
-    content: "";
-    position: fixed;
-    z-index: 39;
-    bottom: max(11px, calc(env(safe-area-inset-bottom, 0px) + 7px));
-    left: 50%;
-    width: min(40vw, 360px);
-    height: 7px;
-    background:
-      linear-gradient(
-          90deg,
-          transparent,
-          var(--future-hud-primary) 24%,
-          var(--future-hud-secondary) 76%,
-          transparent
-        )
-        0 0 / 100% 1px no-repeat,
-      repeating-linear-gradient(
-          90deg,
-          transparent 0 14px,
-          color-mix(in srgb, var(--future-hud-primary) 48%, transparent) 14px 15px
-        )
-        0 3px / 100% 4px no-repeat;
-    opacity: 0.34;
-    pointer-events: none;
-    transform: translate3d(-50%, 0, 0);
+    content: none;
+    background: none;
+    animation: none;
   }
 }
 
@@ -106,18 +84,8 @@
 /* Navigation telemetry. The marker is deliberately static on touch devices;
    fine pointers get the existing hover movement plus this status response. */
 .side-panel::before {
-  content: "";
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 82px);
-  right: max(26px, calc(env(safe-area-inset-right, 0px) + 18px));
-  width: 68px;
-  height: 7px;
-  background:
-    linear-gradient(90deg, transparent, rgba(103, 216, 255, 0.74)) 0 0 / 100% 1px no-repeat,
-    repeating-linear-gradient(90deg, rgba(103, 216, 255, 0.34) 0 1px, transparent 1px 9px) 0 4px /
-      100% 3px no-repeat;
-  opacity: 0.54;
-  pointer-events: none;
+  content: none;
+  background: none;
 }
 
 .side-panel-group > p {
@@ -254,12 +222,6 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) and (min-width: 720px) {
-  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::after {
-    animation: futureHudSignal 4.8s ease-in-out infinite;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   :is(.side-panel-links a, .side-panel-announcement-trigger)::before {
     transition: none;
@@ -268,23 +230,11 @@
 
 @media (prefers-reduced-transparency: reduce) {
   :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::before,
-  :is(.site-shell, .form-archive-page, .manager-page.is-sovereign)::after,
   .hero-copy::before {
     opacity: 0.28;
   }
 
   .form-archive-frame-status {
     background: #020207;
-  }
-}
-
-@keyframes futureHudSignal {
-  0%,
-  100% {
-    opacity: 0.24;
-  }
-
-  50% {
-    opacity: 0.48;
   }
 }

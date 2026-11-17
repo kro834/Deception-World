@@ -11,7 +11,7 @@ import {
   ILLUSIONCULUM_SUIT_DRIVER_STANDIN,
   ILLUSIONCULUM_SUIT_SIZE,
   ILLUSIONCULUM_SUIT_UNDERSUIT,
-} from "@/lib/illusionculum-suit";
+} from "@/lib/illusionculum-suit-tiny";
 
 /* ILLUSIONCULUM SAGA's entry transformation: the route transition screen of
    an in-site navigation to /illusionculum-saga (load-gate.tsx, the

@@ -14,11 +14,8 @@
     linear-gradient(315deg, rgb(54 155 137 / 8%), transparent 40%),
     #090b10;
   box-shadow:
-    0 24px 60px rgb(0 0 0 / 68%),
-    0 0 0 1px rgb(237 102 126 / 20%),
-    0 0 36px rgb(237 102 126 / 14%),
-    inset 0 1px 0 rgb(255 255 255 / 20%),
-    inset 0 0 28px rgb(0 0 0 / 70%);
+    0 20px 48px rgb(0 0 0 / 56%),
+    inset 0 0 0 1px rgb(237 102 126 / 24%);
 }
 .dante-page .varg-portrait::before {
   content: "";
@@ -102,11 +99,8 @@ html[data-family="dossier"]
   .manager-portrait-frame {
   border: 1px solid #ba415b;
   box-shadow:
-    0 30px 80px rgb(0 0 0 / 55%),
-    0 0 0 1px rgb(237 102 126 / 35%),
-    0 0 36px rgb(186 65 91 / 20%),
-    inset 0 0 36px rgb(14 10 14 / 16%),
-    inset 0 0 0 1px rgb(186 65 91 / 45%);
+    0 20px 52px rgb(0 0 0 / 50%),
+    inset 0 0 0 1px rgb(186 65 91 / 32%);
 }
 html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page
@@ -137,10 +131,15 @@ html[data-family="dossier"]
 .dante-page .form-pickup-card {
   border-color: rgb(237 102 126 / 40%);
   box-shadow:
-    0 24px 64px rgb(0 0 0 / 52%),
-    0 0 0 1px rgb(237 102 126 / 22%),
-    0 0 28px rgb(186 65 91 / 14%),
-    inset 0 1px 0 rgb(255 255 255 / 16%);
+    0 18px 44px rgb(0 0 0 / 44%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+}
+.dante-page #dossier-profile .dossier-identity h1 {
+  overflow: visible;
+}
+.dante-page #dossier-profile .dossier-identity .manager-display-name {
+  overflow: visible;
+  text-wrap: balance;
 }
 .dante-page #form-records {
   display: grid;

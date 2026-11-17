@@ -27,8 +27,6 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider {
     linear-gradient(rgb(150 236 255 / 52%), rgb(150 236 255 / 52%)) calc(100% - 23px) calc(50% + 14px) /
       1px 9px no-repeat,
     linear-gradient(rgb(242 216 150 / 46%), rgb(242 216 150 / 46%)) 50% calc(50% + 14px) / 1px 7px no-repeat,
-    repeating-linear-gradient(90deg, rgb(150 236 255 / 20%) 0 1px, transparent 1px 10px) 23px
-      calc(50% + 14px) / calc(100% - 46px) 4px no-repeat,
     radial-gradient(ellipse at 30% 18%, rgb(86 218 255 / 19%), transparent 34%),
     linear-gradient(145deg, #152a38, #07131e 72%) !important;
   box-shadow:

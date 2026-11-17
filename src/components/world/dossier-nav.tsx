@@ -1,4 +1,4 @@
-import { Fragment, type CSSProperties } from "react";
+import { Fragment } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DisplayName } from "@/components/name-text";
@@ -210,7 +210,6 @@ function NavPortrait({ item }: { item: DossierLink }) {
   return (
     <span className="dossier-nav-portrait" aria-hidden="true">
       <img src={src} {...image} alt="" loading="lazy" decoding="async" />
-      <span className="dossier-nav-portrait-frame" aria-hidden="true" />
     </span>
   );
 }
@@ -255,7 +254,6 @@ function RosterPortrait({ item }: { item: DossierLink }) {
         loading="lazy"
         decoding="async"
       />
-      <span className="dossier-roster-portrait-frame" aria-hidden="true" />
     </span>
   );
 }
@@ -383,17 +381,11 @@ export function DossierNav({
   const returnHash = fromCastRoster ? "cast-roster" : (listHash ?? pathHash);
   const originSearch = fromCastRoster ? CAST_ROSTER_SEARCH : undefined;
 
-  const paginationStyle = {
-    "--roster-count": items.length,
-    "--roster-index": idx,
-  } as CSSProperties;
-
   return (
     <nav
       className="manager-pagination dg-focus-scope"
       aria-label="前後の資料"
       data-numerals={romanList(items) ? "roman" : undefined}
-      style={paginationStyle}
     >
       {prev?.href ? (
         <GuardedLink

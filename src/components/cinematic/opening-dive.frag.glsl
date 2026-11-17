@@ -144,7 +144,7 @@ void main() {
   // ---- The tunnel and the light trails: near trails are long, fast and
   // bright, far ones short and dim, with micro stardust streaming in depth.
   if (uDive > 0.001) {
-    float ang = atan(p.y, p.x) / 6.2831853 + 0.5;
+    float ang = atan(p.y, abs(p.x) > 1e-6 ? p.x : 1e-6) / 6.2831853 + 0.5;
     float len = mix(0.22, 0.78, uDive);
     float gate = smoothstep(0.0, 0.3, uDive);
     float near = trail(ang, r, 110.0, 1.7, 1.5 + uDive * 2.8, 0.5, len) * smoothstep(0.08, 0.55, r);

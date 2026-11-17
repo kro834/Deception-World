@@ -13,40 +13,13 @@ import {
 
 type State = { q: string; kind: MapKind | "all"; node: string };
 
-const KIND_OPTICS: Record<MapKind, { stroke: string; hi: string; code: string }> = {
-  person: { stroke: "#7ae8ff", hi: "#d8f8ff", code: "PRS" },
-  organization: { stroke: "#f0c488", hi: "#ffecd0", code: "ORG" },
-  form: { stroke: "#c6b2ff", hi: "#ece4ff", code: "FRM" },
-  event: { stroke: "#8ec5ff", hi: "#dceeff", code: "EVT" },
-  chapter: { stroke: "#e6cfa4", hi: "#fff3dc", code: "CHP" },
+const KIND_OPTICS: Record<MapKind, { stroke: string; hi: string }> = {
+  person: { stroke: "#7ae8ff", hi: "#d8f8ff" },
+  organization: { stroke: "#f0c488", hi: "#ffecd0" },
+  form: { stroke: "#c6b2ff", hi: "#ece4ff" },
+  event: { stroke: "#8ec5ff", hi: "#dceeff" },
+  chapter: { stroke: "#e6cfa4", hi: "#fff3dc" },
 };
-
-const ASTROLABE_TICKS = Array.from({ length: 72 }, (_, index) => {
-  const deg = index * 5;
-  const rad = ((deg - 90) * Math.PI) / 180;
-  const major = deg % 30 === 0;
-  const medium = !major && deg % 15 === 0;
-  const outerRx = 504;
-  const outerRy = 384;
-  const inset = major ? 18 : medium ? 11 : 6;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  return {
-    deg,
-    major,
-    x1: Number((cos * (outerRx - inset)).toFixed(2)),
-    y1: Number((sin * (outerRy - inset)).toFixed(2)),
-    x2: Number((cos * outerRx).toFixed(2)),
-    y2: Number((sin * outerRy).toFixed(2)),
-  };
-});
-
-const CARDINAL_BEARINGS = [
-  { label: "000°", x: 0, y: -396 },
-  { label: "090°", x: 534, y: 4 },
-  { label: "180°", x: 0, y: 406 },
-  { label: "270°", x: -534, y: 4 },
-] as const;
 
 function hexPoints(radius: number): string {
   return Array.from({ length: 6 }, (_, idx) => {
@@ -57,60 +30,41 @@ function hexPoints(radius: number): string {
 
 function renderNodeGlyph(kind: MapKind, isCenter: boolean) {
   if (kind === "person") {
-    const outer = isCenter ? 33 : 15;
-    const inner = isCenter ? 14 : 5.2;
-    const core = isCenter ? 4.2 : 2.4;
     return (
       <g className="wm-node-glyph" aria-hidden="true">
-        <circle className="wm-node-ring" r={outer} strokeDasharray={isCenter ? "10 6" : "6 4"} />
-        <circle className="wm-node-inner" r={inner} />
-        <circle className="wm-node-pip" r={core} />
+        <circle className="wm-node-pip" r={isCenter ? 4.5 : 2.6} />
       </g>
     );
   }
   if (kind === "organization") {
-    const outer = isCenter ? 23 : 9.6;
-    const inner = isCenter ? 10 : 3.6;
+    const outer = isCenter ? 15 : 6;
     return (
       <g className="wm-node-glyph" aria-hidden="true">
-        <circle className="wm-node-ring" r={isCenter ? 33 : 15} strokeDasharray="3 5" />
         <polygon className="wm-node-plate" points={hexPoints(outer)} />
-        <circle className="wm-node-inner" r={inner} />
       </g>
     );
   }
   if (kind === "form") {
-    const s = isCenter ? 22 : 9.4;
-    const c = isCenter ? 10 : 4.2;
+    const s = isCenter ? 15 : 6;
     return (
       <g className="wm-node-glyph" aria-hidden="true">
-        <circle className="wm-node-ring" r={isCenter ? 33 : 15} strokeDasharray="12 4 2 4" />
         <polygon className="wm-node-plate" points={`0,${-s} ${s},0 0,${s} ${-s},0`} />
-        <polygon className="wm-node-inner" points={`0,${-c} ${c},0 0,${c} ${-c},0`} />
       </g>
     );
   }
   if (kind === "chapter") {
-    const w = isCenter ? 16 : 7;
-    const h = isCenter ? 19 : 8.2;
+    const w = isCenter ? 10.5 : 4.4;
+    const h = isCenter ? 12.5 : 5.2;
     return (
       <g className="wm-node-glyph" aria-hidden="true">
-        <circle className="wm-node-ring" r={isCenter ? 33 : 15} strokeDasharray="8 4" />
-        <rect className="wm-node-plate" x={-w} y={-h} width={w * 2} height={h * 2} rx="2" />
-        <line className="wm-node-tick" x1={-w + 3} y1="0" x2={w - 3} y2="0" />
+        <rect className="wm-node-plate" x={-w} y={-h} width={w * 2} height={h * 2} rx="1.5" />
       </g>
     );
   }
-  const tick = isCenter ? 22 : 10;
-  const gap = isCenter ? 11 : 5;
+  const tick = isCenter ? 11 : 4.8;
   return (
     <g className="wm-node-glyph" aria-hidden="true">
-      <circle className="wm-node-ring" r={isCenter ? 33 : 15} strokeDasharray="4 4" />
-      <path
-        className="wm-node-tick"
-        d={`M0 ${-tick}V${-gap}M0 ${gap}V${tick}M${-tick} 0H${-gap}M${gap} 0H${tick}`}
-      />
-      <circle className="wm-node-pip" r={isCenter ? 3.8 : 2.2} />
+      <path className="wm-node-tick" d={`M0 ${-tick}V${tick}M${-tick} 0H${tick}`} />
     </g>
   );
 }
@@ -152,16 +106,16 @@ export function WorldMap({
   const orbitTracks =
     totalNeighbors > 14
       ? [
-          [205, 165],
-          [340, 265],
-          [475, 355],
+          [175, 130],
+          [305, 215],
+          [425, 292],
         ]
       : totalNeighbors > 7
         ? [
-            [235, 185],
-            [385, 295],
+            [215, 155],
+            [355, 255],
           ]
-        : [[295, 225]];
+        : [[265, 195]];
   const ringCount = orbitTracks.length;
   const angularSlots = Math.max(1, Math.ceil(totalNeighbors / ringCount) * ringCount);
 
@@ -226,8 +180,8 @@ export function WorldMap({
         </header>
         <div className="wm-intro">
           <div>
-            <span className="wm-eyebrow">DECEPTION WORLD // ASTROLABE ATLAS</span>
-            <h1>
+            <span className="wm-eyebrow">DECEPTION WORLD / CONNECTIONS</span>
+            <h1 id="world-map-title">
               世界関係図<span>記録の、その先へ。</span>
             </h1>
           </div>
@@ -285,9 +239,7 @@ export function WorldMap({
             aria-label={`${selected.title}を中心とした相関図`}
           >
             <div className="wm-map-caption">
-              <span data-kind={selected.kind}>
-                <i aria-hidden="true">{selectedOptic.code} //</i> {MAP_KINDS[selected.kind]}
-              </span>
+              <span data-kind={selected.kind}>{MAP_KINDS[selected.kind]}</span>
               <strong>{selected.title}</strong>
               <small>{neighborhood.length} 件の接続</small>
             </div>
@@ -301,7 +253,7 @@ export function WorldMap({
             </div>
             <svg
               ref={svgRef}
-              viewBox="-580 -440 1160 880"
+              viewBox="-500 -360 1000 720"
               role="img"
               aria-label="選択した項目の直接の接続。下の一覧でも同じ項目を選択できます。"
               onPointerDown={(e) => {
@@ -343,12 +295,12 @@ export function WorldMap({
             >
               <defs>
                 <radialGradient id="wm-core">
-                  <stop offset="0%" stopColor={selectedOptic.stroke} stopOpacity=".24" />
-                  <stop offset="42%" stopColor="#7ae8ff" stopOpacity=".08" />
+                  <stop offset="0%" stopColor={selectedOptic.stroke} stopOpacity=".22" />
+                  <stop offset="45%" stopColor="#7ae8ff" stopOpacity=".07" />
                   <stop offset="100%" stopColor="#7ae8ff" stopOpacity="0" />
                 </radialGradient>
                 <radialGradient id="wm-inner-corona">
-                  <stop offset="0%" stopColor={selectedOptic.hi} stopOpacity=".2" />
+                  <stop offset="0%" stopColor={selectedOptic.hi} stopOpacity=".18" />
                   <stop offset="68%" stopColor={selectedOptic.stroke} stopOpacity=".04" />
                   <stop offset="100%" stopColor={selectedOptic.stroke} stopOpacity="0" />
                 </radialGradient>
@@ -373,19 +325,13 @@ export function WorldMap({
               </defs>
               <g transform={`translate(${view.x} ${view.y}) scale(${view.zoom})`}>
                 <g className="wm-astrolabe" aria-hidden="true">
-                  <ellipse rx="500" ry="380" fill="url(#wm-core)" />
-                  <circle r="150" fill="url(#wm-inner-corona)" />
+                  <ellipse rx="430" ry="300" fill="url(#wm-core)" />
+                  <circle r="120" fill="url(#wm-inner-corona)" />
                   <path
                     className="wm-sighting-axis"
-                    d="M-504 0H-56M56 0H504M0 -384V-56M0 56V384"
+                    d="M-440 0H-48M48 0H440M0 -308V-48M0 48V308"
                   />
-                  <path
-                    className="wm-sighting-diag"
-                    d="M-342 -260L-46 -35M46 35L342 260M342 -260L46 -35M-46 35L-342 260"
-                  />
-                  <ellipse rx="112" ry="86" className="wm-rangefinder-ring" />
-                  <ellipse rx="486" ry="366" className="wm-bezel-inner" />
-                  <ellipse rx="504" ry="384" className="wm-bezel-outer" />
+                  <ellipse rx="105" ry="78" className="wm-rangefinder-ring" />
                   {orbitTracks.map(([rx, ry], idx) => (
                     <ellipse
                       key={`${rx}-${ry}`}
@@ -393,27 +339,6 @@ export function WorldMap({
                       ry={ry}
                       className={idx % 2 === 0 ? "wm-orbit" : "wm-orbit is-outer-track"}
                     />
-                  ))}
-                  {ASTROLABE_TICKS.map((t) => (
-                    <line
-                      key={t.deg}
-                      x1={t.x1}
-                      y1={t.y1}
-                      x2={t.x2}
-                      y2={t.y2}
-                      className={t.major ? "wm-azimuth-tick is-major" : "wm-azimuth-tick"}
-                    />
-                  ))}
-                  {CARDINAL_BEARINGS.map((b) => (
-                    <text
-                      key={b.label}
-                      x={b.x}
-                      y={b.y}
-                      textAnchor="middle"
-                      className="wm-bearing-label"
-                    >
-                      {b.label}
-                    </text>
                   ))}
                 </g>
 
@@ -436,7 +361,7 @@ export function WorldMap({
                 </g>
 
                 {points.slice(1).map((p, idx) => (
-                  <g key={`edge-${p.id}`} aria-hidden="true">
+                  <g key={`edge-${p.id}`} className="wm-edge-group" aria-hidden="true">
                     <line
                       x1="0"
                       y1="0"
@@ -451,12 +376,6 @@ export function WorldMap({
                       y2={p.y}
                       stroke={`url(#wm-edge-grad-${idx})`}
                       className={`wm-line is-active-edge wm-kind-${p.kind}`}
-                    />
-                    <circle
-                      cx={Number((p.x * 0.54).toFixed(2))}
-                      cy={Number((p.y * 0.54).toFixed(2))}
-                      r="1.9"
-                      className={`wm-edge-node wm-kind-${p.kind}`}
                     />
                   </g>
                 ))}
@@ -492,11 +411,11 @@ export function WorldMap({
                     }}
                   >
                     <circle className="wm-node-hit" r={i === 0 ? 36 : 22} />
-                    <circle className="wm-node-disc" r={i === 0 ? 28 : 11} />
+                    <circle className="wm-node-disc" r={i === 0 ? 28 : 10} />
                     {renderNodeGlyph(p.kind, i === 0)}
-                    <text y={i === 0 ? 54 : 29} textAnchor="middle">
+                    <text y={i === 0 ? 50 : 26} textAnchor="middle">
                       {p.title.match(/.{1,8}/gu)?.map((line, index) => (
-                        <tspan key={index} x="0" dy={index === 0 ? 0 : 16}>
+                        <tspan key={index} x="0" dy={index === 0 ? 0 : 15}>
                           {line}
                         </tspan>
                       ))}
@@ -531,7 +450,7 @@ export function WorldMap({
           <aside className="wm-detail" data-kind={selected.kind} aria-label="選択中の資料">
             <div className="wm-detail-head">
               <span className="wm-eyebrow" data-kind={selected.kind}>
-                <i aria-hidden="true">{selectedOptic.code} //</i> {MAP_KINDS[selected.kind]}
+                {MAP_KINDS[selected.kind]}
               </span>
               <h2>{selected.title}</h2>
               <p className="wm-detail-subtitle">{selected.subtitle}</p>

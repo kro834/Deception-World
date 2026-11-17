@@ -658,7 +658,6 @@ html[data-family="special"]
   background:
     radial-gradient(52% 68% at 24% 38%, rgb(244 204 123 / 20%), transparent 72%),
     radial-gradient(50% 66% at 78% 66%, rgb(114 228 255 / 16%), transparent 72%),
-    repeating-linear-gradient(-11deg, transparent 0 46px, rgb(244 204 123 / 4%) 46px 48px),
     linear-gradient(180deg, #0d0c09 0%, #080807 100%);
   border-block: 2px solid var(--exe-rule-strong);
   box-shadow:
@@ -842,7 +841,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-s
   line-height: 1.7;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-stage .exi-band {
-  z-index: 3;
+  z-index: -1;
   grid-column: 1 / -1;
   grid-row: 1;
   align-self: center;
@@ -850,6 +849,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page #performance .exi-s
   margin-inline: -10px;
   rotate: -14deg;
   translate: 0 0;
+  opacity: 0;
   pointer-events: none;
 }
 html[data-family="special"]
@@ -2145,7 +2145,6 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
   background:
     radial-gradient(ellipse 75% 65% at 80% 100%, rgb(244 204 123 / 24%), transparent 66%),
     radial-gradient(ellipse 55% 55% at 18% 0%, rgb(212 136 42 / 16%), transparent 68%),
-    repeating-linear-gradient(-14deg, transparent 0 48px, rgb(244 204 123 / 4%) 48px 50px),
     #080806;
   border-top: 3px solid var(--ext-gold);
 }

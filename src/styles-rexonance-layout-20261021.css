@@ -1306,6 +1306,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page .rxe-hero-rail > a {
     width: 100%;
   }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page .rxe-hero-rail a > u.rxe-hero-glint {
+    display: none;
+  }
 }
 
 /* F99: shared rows align the three reading starts without imposing a
@@ -1593,9 +1597,7 @@ html[data-family="special"]
   > .rxs-hero
   .rxs-scroll-cue
   i {
-  width: 1px;
-  height: 44px;
-  background: linear-gradient(rgb(150 236 255 / 0%), var(--rxt-ice, #96ecff));
+  display: none;
 }
 
 html[data-family="special"]
@@ -1813,13 +1815,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page 
     50% 0 / 76% 1px no-repeat;
   /* A three-tier precision Vernier ruler along the foot, clear of the corner ticks:
      minor every 8px, medium every 32px, major every 64px. */
-  --rxl-ruler:
-    repeating-linear-gradient(90deg, rgb(242 216 150 / 42%) 0 1px, transparent 1px 64px) 24px 100% /
-      calc(100% - 48px) 8px no-repeat,
-    repeating-linear-gradient(90deg, rgb(121 232 255 / 28%) 0 1px, transparent 1px 32px) 24px 100% /
-      calc(100% - 48px) 5px no-repeat,
-    repeating-linear-gradient(90deg, rgb(121 232 255 / 15%) 0 1px, transparent 1px 8px) 24px 100% /
-      calc(100% - 48px) 3px no-repeat;
+  --rxl-ruler: linear-gradient(180deg, transparent, transparent);
 }
 
 /* Golden-ratio spatial depth choreography across 1440px -> 1100px -> 768px -> 390px. */
@@ -1955,8 +1951,6 @@ html[data-family="special"]
       transparent
     )
       no-repeat 0 100% / 100% 1px,
-    repeating-linear-gradient(90deg, rgb(121 232 255 / 38%) 0 1px, transparent 1px 12px) 52px
-      calc(100% - 5px) / min(46%, 380px) 4px no-repeat,
     linear-gradient(rgb(242 216 150 / 56%), rgb(242 216 150 / 56%)) calc(100% - 6px) 100% / 6px 1px
       no-repeat,
     linear-gradient(rgb(121 232 255 / 50%), rgb(121 232 255 / 50%)) 100% 100% / 1px 11px no-repeat;

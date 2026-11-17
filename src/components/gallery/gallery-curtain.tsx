@@ -43,14 +43,7 @@ export function GalleryCurtain({
       }
       aria-busy={phase === "covering"}
     >
-      <div className="gallery-curtain-rail" aria-hidden="true">
-        <span className="gallery-curtain-valance">
-          <span className="gallery-curtain-valance-finial is-left" />
-          <span className="gallery-curtain-valance-medallion" />
-          <span className="gallery-curtain-valance-finial is-right" />
-        </span>
-        <span className="gallery-curtain-rings" />
-      </div>
+      <div className="gallery-curtain-rail" aria-hidden="true" />
       {["left", "right"].map((side) => (
         <div key={side} className={`gallery-curtain-panel is-${side}`} aria-hidden="true">
           <div className="gallery-curtain-cloth">
@@ -84,9 +77,7 @@ export function GalleryCurtain({
               ))}
             </div>
           </div>
-          <div className="gallery-curtain-hem">
-            <span className="gallery-curtain-bullion" />
-          </div>
+          <div className="gallery-curtain-hem" />
         </div>
       ))}
     </div>

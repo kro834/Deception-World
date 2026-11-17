@@ -1827,7 +1827,9 @@ html[data-family="dream"] main.dream-page.dream-page #glossary .dream-annex-quot
    ---------------------------------------------------------------- */
 @media (min-width: 761px) {
   html[data-family="dream"] main.dream-page.dream-page .dream-quote-band {
-    gap: 8px;
+    row-gap: 24px;
+    column-gap: 12px;
+    align-items: flex-start;
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {

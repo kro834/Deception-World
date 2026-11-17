@@ -771,7 +771,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
     > article {
     position: sticky;
     top: var(--dxs-nav);
-    min-height: calc(100svh - var(--dxs-nav));
+    min-height: 0;
     overflow: clip;
     background-color: var(--dx-ink, #02050a);
   }
@@ -782,7 +782,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
     > #performance
     .rxs-headline-metrics
     > article:first-child {
-    margin-bottom: 36svh;
+    margin-bottom: 24px;
   }
 
   /* The last cut's hold is a spacer after it, not its margin: a sticky
@@ -795,7 +795,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-fo
     .rxs-headline-metrics::after {
     content: "";
     display: block;
-    height: 40svh;
+    height: 0;
     pointer-events: none;
   }
 }

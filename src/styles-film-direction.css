@@ -240,7 +240,7 @@
   inset: auto 0 -1px auto;
   width: 72px;
   height: 3px;
-  background: repeating-linear-gradient(90deg, var(--film-cyan) 0 3px, transparent 3px 9px);
+  background: linear-gradient(90deg, var(--film-cyan), transparent);
   pointer-events: none;
 }
 .film-edition .poster-frame::after {

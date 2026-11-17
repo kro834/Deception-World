@@ -48,32 +48,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::before,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::after {
   content: "";
-  position: absolute;
-  top: -1px;
-  left: 0;
-  right: 0;
-  z-index: 3;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(var(--rzn-ice)) 16%,
-    rgb(var(--rzn-violet)) 38%,
-    rgb(var(--rzn-white)) 50%,
-    rgb(var(--rzn-pink)) 64%,
-    rgb(var(--rzn-gold)) 86%,
-    transparent
-  );
-  box-shadow: 0 1px 14px rgb(var(--rzn-ice) / 24%);
-  opacity: 0.85;
-  pointer-events: none;
-}
-
-html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup::after {
-  top: auto;
-  bottom: -1px;
-  height: 1px;
-  opacity: 0.65;
+  display: none;
 }
 
 /* ---------------- The frame: one screen, the figure in the middle ---------------- */
@@ -1188,8 +1163,8 @@ html[data-family="special"]
   > .rxs-hero
   .rxs-hero-visual
   .rzn-callout.is-mobility {
-  top: 79%;
-  left: 37.5%;
+  top: 78%;
+  left: 66%;
 }
 
 html[data-family="special"]
@@ -2073,7 +2048,7 @@ html[data-family="special"]
     > #performance
     .rxs-headline-metrics
     > article {
-    min-height: min(calc(100svh - var(--dxs-nav)), max(440px, 64svh));
+    min-height: 0;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -2082,7 +2057,7 @@ html[data-family="special"]
     > #performance
     .rxs-headline-metrics
     > article:first-child {
-    margin-bottom: 22svh;
+    margin-bottom: 24px;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -2090,7 +2065,7 @@ html[data-family="special"]
     .rxs-page.rxs-page.rxs-rexonance-page
     > #performance
     .rxs-headline-metrics::after {
-    height: 16svh;
+    height: 0;
   }
 }
 

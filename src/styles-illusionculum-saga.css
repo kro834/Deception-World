@@ -1651,8 +1651,8 @@
     .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
     .ics-heading.rxs-reveal
     h2 {
-    --ics-split: 1;
-    opacity: 0;
+    --ics-split: 0.5;
+    opacity: 0.88;
     transition:
       --ics-split 1100ms cubic-bezier(0.2, 0.7, 0.1, 1) 120ms,
       opacity 600ms ease 60ms;
@@ -1670,8 +1670,8 @@
     .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
     .ics-heading.rxs-reveal
     .ics-numeral {
-    opacity: 0;
-    translate: -0.12em 0;
+    opacity: 0.82;
+    translate: -0.06em 0;
     transition:
       opacity 700ms ease,
       translate 900ms cubic-bezier(0.2, 0.7, 0.1, 1);
@@ -2172,10 +2172,10 @@
 
 .rxs-page.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dd::after {
   display: block;
-  height: 3px;
+  height: 1px;
   margin-top: 10px;
   content: "";
-  background: repeating-linear-gradient(90deg, var(--ics-ice) 0 6px, transparent 6px 9px);
+  background: linear-gradient(90deg, var(--ics-ice), transparent 85%);
   opacity: 0.7;
 }
 
@@ -3140,10 +3140,10 @@ html:not([data-world-effects="economy"])
 
 .rxs-page.rxs-page.ics-page .ics-specs > div:not([data-wide]):nth-child(n + 5) dd::after {
   display: block;
-  height: 3px;
+  height: 1px;
   margin-top: 10px;
   content: "";
-  background: repeating-linear-gradient(90deg, var(--ics-ice) 0 6px, transparent 6px 9px);
+  background: linear-gradient(90deg, var(--ics-ice), transparent 85%);
   opacity: 0.28;
 }
 
@@ -3410,8 +3410,8 @@ html:not([data-world-effects="economy"])
     .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
     .ics-heading.rxs-reveal:not(.is-visible)
     .ics-heading-plate {
-    opacity: 0;
-    translate: 14px 0;
+    opacity: 0.75;
+    translate: 6px 0;
   }
 
   html:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -3552,14 +3552,11 @@ html:not([data-world-effects="economy"])
 }
 
 .rxs-page.rxs-page.ics-page .ics-projection-paths .ics-proj-shear {
-  fill: rgb(166 230 255 / 5%);
-  stroke: rgb(255 225 163 / 34%);
-  stroke-width: 1;
+  display: none;
 }
 
 .rxs-page.rxs-page.ics-page .ics-projection-paths .ics-proj-ticks {
-  stroke: rgb(166 230 255 / 44%);
-  stroke-width: 1;
+  display: none;
 }
 
 .rxs-page.rxs-page.ics-page .ics-projection-paths .ics-proj-ray {
@@ -3662,8 +3659,7 @@ html:not([data-world-effects="economy"])
 }
 
 .ics-page .ics-diagram .ics-dg-tick {
-  stroke: rgb(233 184 102 / 48%);
-  stroke-width: 0.9;
+  display: none;
 }
 
 .ics-page .ics-diagram .ics-dg-axis {
@@ -3707,7 +3703,6 @@ html:not([data-world-effects="economy"])
   height: 4px;
   border-radius: 999px;
   background:
-    repeating-linear-gradient(90deg, rgb(2 3 10 / 32%) 0 1px, transparent 1px 12px),
     linear-gradient(180deg, rgb(255 255 255 / 48%), transparent 62%),
     linear-gradient(
       90deg,
@@ -3740,7 +3735,6 @@ html:not([data-world-effects="economy"])
 .rxs-page.rxs-page.ics-page .ics-table tr[data-current] td > i {
   height: 5px;
   background:
-    repeating-linear-gradient(90deg, rgb(2 3 10 / 26%) 0 1px, transparent 1px 12px),
     linear-gradient(180deg, #ffffff 0%, rgb(255 255 255 / 42%) 58%, transparent 100%),
     linear-gradient(
       90deg,

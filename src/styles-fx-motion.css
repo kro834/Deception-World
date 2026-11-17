@@ -183,19 +183,11 @@
 @keyframes fx-scan-arrive {
   0% {
     opacity: 0;
-    translate: 0 var(--dg-rise, 14px);
-    clip-path: inset(0 0 100% 0);
-    filter: brightness(1.55) saturate(1.2);
-  }
-  45% {
-    opacity: 1;
-    clip-path: inset(0 0 0 0);
+    translate: 0 var(--dg-rise, 10px);
   }
   100% {
     opacity: 1;
     translate: 0 0;
-    clip-path: inset(0 0 0 0);
-    filter: brightness(1) saturate(1);
   }
 }
 
@@ -292,7 +284,7 @@
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) body dialog.quick-search[open] .quick-search-panel {
-    animation: fx-sheet-in 520ms var(--fx-spring);
+    animation: fx-sheet-in 180ms var(--fx-ease-out);
   }
 
   html:not([data-world-effects="economy"])
@@ -300,8 +292,8 @@
     dialog.quick-search[open]
     .quick-search-group
     :is(.quick-search-option) {
-    animation: fx-option-in 480ms var(--fx-ease-out) backwards;
-    animation-delay: calc(90ms + var(--fx-row, 0) * var(--fx-stagger));
+    animation: fx-option-in 150ms var(--fx-ease-out) backwards;
+    animation-delay: calc(var(--fx-row, 0) * 16ms);
   }
 
   html:not([data-world-effects="economy"]):not([data-android-renderer])
@@ -331,8 +323,8 @@ dialog.quick-search .quick-search-group :nth-child(n + 6 of .quick-search-option
 
 @keyframes fx-sheet-in {
   from {
-    opacity: 0;
-    transform: translateY(-14px) scale(0.975);
+    opacity: 0.94;
+    transform: translateY(-6px) scale(0.99);
   }
   to {
     opacity: 1;
@@ -342,8 +334,8 @@ dialog.quick-search .quick-search-group :nth-child(n + 6 of .quick-search-option
 
 @keyframes fx-option-in {
   from {
-    opacity: 0;
-    translate: 0 8px;
+    opacity: 0.82;
+    translate: 0 4px;
   }
   to {
     opacity: 1;
@@ -353,20 +345,12 @@ dialog.quick-search .quick-search-group :nth-child(n + 6 of .quick-search-option
 
 @keyframes fx-option-scan {
   0% {
-    opacity: 0;
-    translate: 0 8px;
-    clip-path: inset(0 100% 0 0);
-    filter: brightness(1.6);
-  }
-  50% {
-    opacity: 1;
-    clip-path: inset(0 0 0 0);
+    opacity: 0.82;
+    translate: 0 4px;
   }
   100% {
     opacity: 1;
     translate: 0 0;
-    clip-path: inset(0 0 0 0);
-    filter: brightness(1);
   }
 }
 

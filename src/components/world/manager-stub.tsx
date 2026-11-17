@@ -749,7 +749,6 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               id={`character-section-${s.no}`}
               key={s.no}
             >
-              <i className="dossier-spine-mark" aria-hidden="true" />
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>

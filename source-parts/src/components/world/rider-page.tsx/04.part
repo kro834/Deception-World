@@ -1,3 +1,4 @@
+        ],
         abilities: [
           {
             name: "インパクト",
@@ -397,5 +398,3 @@ export function RiderPage({ id }: { id: string }) {
             </span>
             <h1>
               <span
-                className="manager-display-name"
-                style={{ ["--name-len" as string]: [...rider.civilian.name].length }}

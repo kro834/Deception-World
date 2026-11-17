@@ -1484,12 +1484,7 @@ html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #riders
-    > .rider-console::after,
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .finale-section
-    .finale-content::after {
+    > .rider-console::after {
     content: "";
     position: absolute;
     inset: -1px;
@@ -1518,15 +1513,6 @@ html[data-family="world"]:root
     background: var(--ws-prism);
     pointer-events: none;
     animation: none;
-  }
-
-  /* The end card's frame stands a little off its words. */
-  html[data-family="world"]:root
-    body
-    main.site-shell.film-edition.mirage-edition
-    > .finale-section
-    .finale-content::after {
-    inset: clamp(-36px, -3vw, -18px) clamp(-56px, -4vw, -20px);
   }
 }
 

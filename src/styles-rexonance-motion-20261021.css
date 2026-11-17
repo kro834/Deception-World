@@ -90,13 +90,6 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   -webkit-text-fill-color: transparent;
 }
 
-.rxs-page.rxs-page.rxs-rexonance-page [data-rxk-paint="text"] .rxk-ch {
-  text-shadow:
-    0 0 1px rgb(255 245 200 / 30%),
-    0 1px 2px rgb(0 0 0 / 60%),
-    0 0 14px rgb(242 216 150 / 22%);
-}
-
 /* A split title's lines are blocks (its <br> made them lines already; the
    break is kept in the markup and hidden while the blocks stand). While
    the title is armed and running, each line is a mask (below): the text

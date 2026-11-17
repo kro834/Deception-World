@@ -145,9 +145,6 @@ export function LibraryHub({
       }}
     >
       <header className="library-hub-heading">
-        <p className="library-section-kicker" aria-hidden="true">
-          PERSONAL ARCHIVE // READING PLATEN
-        </p>
         <h2 id="library-hub-title" ref={hubTitleRef} tabIndex={-1}>
           マイライブラリー
         </h2>
@@ -178,10 +175,7 @@ export function LibraryHub({
             data-has-resume={resume ? "true" : "false"}
             aria-labelledby="library-continue-title"
           >
-            <h3 id="library-continue-title">
-              続きから
-              <span aria-hidden="true">ILLUMINATED READING PLATEN</span>
-            </h3>
+            <h3 id="library-continue-title">続きから</h3>
             {resume ? (
               <>
                 <RecordArtFrame
@@ -224,12 +218,6 @@ export function LibraryHub({
                 </a>
               </div>
             )}
-            <span className="library-platen-clasps" aria-hidden="true">
-              <i data-corner="tl" />
-              <i data-corner="tr" />
-              <i data-corner="bl" />
-              <i data-corner="br" />
-            </span>
           </article>
 
           <section className="library-shelf" aria-labelledby="library-shelf-title">

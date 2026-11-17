@@ -489,8 +489,8 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             flight.strokeRect(
               gold.fx[i] * s + 0.5,
               gold.fy[i] * s + 0.5,
-              gold.cw[i] * s - 1,
-              gold.ch[i] * s - 1,
+              Math.max(0.5, gold.cw[i] * s - 1),
+              Math.max(0.5, gold.ch[i] * s - 1),
             );
           }
         };

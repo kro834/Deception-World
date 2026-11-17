@@ -234,7 +234,7 @@
 .sovereign-emblem > i {
   position: absolute;
   inset: 0;
-  border: 1px dashed rgba(244, 215, 142, 0.38);
+  border: 1px solid rgba(244, 215, 142, 0.38);
   border-radius: 50%;
   animation: sovereignOrbit 12s linear infinite;
 }

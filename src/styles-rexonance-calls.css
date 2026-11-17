@@ -1570,11 +1570,7 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   bottom: 0;
   left: -60px;
   content: "";
-  background:
-    repeating-linear-gradient(90deg, rgb(176 201 214 / 46%) 0 1px, transparent 1px 12px) 0 100% /
-      100% 4px no-repeat,
-    repeating-linear-gradient(90deg, rgb(176 201 214 / 70%) 0 1px, transparent 1px 60px) 0 100% /
-      100% 8px no-repeat;
+  background: linear-gradient(90deg, transparent, rgb(176 201 214 / 60%) 20% 80%, transparent) 0 100% / 100% 1px no-repeat;
 }
 
 .rx-call-sequence .rx-suit-heading::after {

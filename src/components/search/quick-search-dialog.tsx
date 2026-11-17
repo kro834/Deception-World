@@ -27,20 +27,19 @@ const PER_GROUP = 3;
 const MAX_RESULTS = 9;
 const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
 const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
-const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.code ?? "";
 
 const SHORTCUTS = [
-  { to: "/search", label: "全文検索", code: "SEARCH" },
-  { to: "/library", label: "資料室・しおり", code: "LIBRARY" },
-  { to: "/world", label: "ディセプションワールド", code: "WORLD" },
-  { to: "/dream-chapter", label: "夢の章", code: "DREAM CHAPTER" },
+  { id: "search", to: "/search", label: "全文検索" },
+  { id: "library", to: "/library", label: "資料室・しおり" },
+  { id: "world", to: "/world", label: "ディセプションワールド" },
+  { id: "dream-chapter", to: "/dream-chapter", label: "夢の章" },
 ] as const;
 
 type Option =
   | { kind: "result"; id: string; result: SearchResult }
   | { kind: "all"; id: string; count: number }
   | { kind: "recent"; id: string; query: string }
-  | { kind: "link"; id: string; to: string; label: string; code: string };
+  | { kind: "link"; id: string; to: string; label: string };
 
 export default function QuickSearchDialog({
   open,
@@ -95,7 +94,7 @@ export default function QuickSearchDialog({
 
   const { sections, options } = useMemo(() => {
     const list: Option[] = [];
-    const parts: { label: string; code?: string; items: Option[] }[] = [];
+    const parts: { label: string; items: Option[] }[] = [];
     if (trimmed) {
       let left = MAX_RESULTS;
       for (const group of groupSearchResults(results, CATEGORY_ORDER, true)) {
@@ -106,7 +105,6 @@ export default function QuickSearchDialog({
         left -= items.length;
         parts.push({
           label: categoryLabel(group.category),
-          code: categoryCode(group.category),
           items,
         });
         list.push(...items);
@@ -123,15 +121,16 @@ export default function QuickSearchDialog({
           id: `qs-recent-${index}`,
           query,
         }));
-        parts.push({ label: "最近の検索", code: "RECENT", items });
+        parts.push({ label: "最近の検索", items });
         list.push(...items);
       }
       const links: Option[] = SHORTCUTS.map((link) => ({
         kind: "link",
-        id: `qs-link-${link.code}`,
-        ...link,
+        id: `qs-link-${link.id}`,
+        to: link.to,
+        label: link.label,
       }));
-      parts.push({ label: "ページ", code: "DESTINATIONS", items: links });
+      parts.push({ label: "ページ", items: links });
       list.push(...links);
     }
     return { sections: parts, options: list };
@@ -229,29 +228,18 @@ export default function QuickSearchDialog({
       <link rel="stylesheet" href={quickSearchCssUrl} precedence="default" />
       <div className="quick-search-panel">
         <div className="quick-search-head">
-          <p id="quick-search-title">
-            <span>QUICK SEARCH</span>クイック検索
-          </p>
+          <p id="quick-search-title">クイック検索</p>
           <button type="button" className="quick-search-close" onClick={onClose}>
             閉じる<kbd aria-hidden="true">Esc</kbd>
           </button>
         </div>
         <div className="quick-search-field">
-          <svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden="true">
-            <circle cx="10.5" cy="10.5" r="7.25" stroke="currentColor" strokeWidth="1.45" />
-            <circle
-              cx="10.5"
-              cy="10.5"
-              r="4.2"
-              stroke="currentColor"
-              strokeOpacity="0.45"
-              strokeWidth="0.9"
-              strokeDasharray="2.2 1.8"
-            />
+          <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.6" />
             <path
-              d="M10.5 2v2M10.5 17v2M2 10.5h2M17 10.5h2M15.8 15.8 21 21"
+              d="m15.5 15.5 5 5"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="1.6"
               strokeLinecap="round"
             />
           </svg>
@@ -312,7 +300,6 @@ export default function QuickSearchDialog({
             >
               {section.label ? (
                 <div className="quick-search-group-label" role="presentation" aria-hidden="true">
-                  {section.code ? <i>{section.code}</i> : null}
                   <span>{section.label}</span>
                 </div>
               ) : null}
@@ -395,7 +382,9 @@ export default function QuickSearchDialog({
                     ) : (
                       <>
                         <span className="quick-search-option-title">{option.label}</span>
-                        <span className="quick-search-option-place">{option.code}</span>
+                        <span className="quick-search-option-place" aria-hidden="true">
+                          ↗
+                        </span>
                       </>
                     )}
                   </a>

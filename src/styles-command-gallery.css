@@ -20,11 +20,12 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] {
   --gallery-command-edge: rgb(190 222 241 / 38%);
   --gallery-command-specular: rgb(237 245 250 / 42%);
   --gallery-command-metal:
-    linear-gradient(118deg, rgb(218 239 251 / 7%), transparent 35% 75%, rgb(106 183 214 / 5%)),
-    linear-gradient(180deg, #192a39, #0d1722 52%, #0b131e);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgb(162 214 240 / 7%), transparent 70%),
+    linear-gradient(180deg, #162533, #0d1722 52%, #0a121c);
   background:
-    linear-gradient(118deg, transparent 52%, rgb(86 163 196 / 4%) 52.05% 67%, transparent 67.05%),
-    radial-gradient(ellipse at 85% 0, rgb(40 121 166 / 14%), transparent 45rem), #060b12;
+    radial-gradient(ellipse at 85% 0, rgb(40 121 166 / 14%), transparent 45rem),
+    radial-gradient(ellipse at 18% 6%, rgb(162 204 232 / 6%), transparent 40rem),
+    #060b12;
   color: var(--gallery-ivory);
   color-scheme: dark;
 }
@@ -66,9 +67,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-topbar {
   --world-atmosphere-base: #0c1621;
   border-bottom-color: var(--gallery-command-edge);
   background-color: #0c1621;
-  background-image:
-    linear-gradient(90deg, #9be9fa 0 4px, transparent 4px),
-    linear-gradient(180deg, rgb(220 242 255 / 10%), transparent 68%);
+  background-image: linear-gradient(180deg, rgb(220 242 255 / 9%), transparent 68%);
   box-shadow: 0 5px 22px rgb(0 0 0 / 30%);
 }
 
@@ -109,18 +108,15 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature {
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature-open {
-  outline: 1px solid rgb(200 228 244 / 54%);
-  outline-offset: 6px;
+  outline: 1px solid rgb(200 228 244 / 42%);
+  outline-offset: 5px;
   background: #050b12;
-  box-shadow:
-    12px 14px 0 #101e2a,
-    13px 15px 0 rgb(150 204 231 / 36%),
-    0 25px 50px rgb(0 0 0 / 35%);
+  box-shadow: 0 22px 48px rgb(0 0 0 / 40%);
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature figcaption {
   gap: 12px;
-  padding-top: 28px;
+  padding-top: 12px;
   font-size: 13px;
   line-height: 1.7;
 }
@@ -134,9 +130,9 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page]
   :is(.gallery-enter, .gallery-personal-controls > .gallery-personal-add) {
   border: 1px solid #d7eef8;
-  border-radius: 1px;
+  border-radius: 2px;
   background: linear-gradient(135deg, #eefaff, #adcad9);
-  box-shadow: 4px 4px 0 rgb(111 214 244 / 20%);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 28%);
   color: #0b1a26;
   font-weight: 650;
 }
@@ -168,12 +164,11 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-browse-pan
   gap: 0 24px;
   padding: clamp(16px, 2.2vw, 28px);
   border: 1px solid var(--gallery-command-edge);
-  border-top: 2px solid #b6d9eb;
+  border-top: 1px solid #b6d9eb;
   background: var(--gallery-command-metal);
   box-shadow:
     inset 0 1px 0 var(--gallery-command-specular),
-    6px 6px 0 #03070c,
-    7px 7px 0 rgb(137 195 222 / 19%);
+    0 16px 38px rgb(0 0 0 / 34%);
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-discovery-controls {
@@ -333,7 +328,7 @@ html[data-family="gallery"]
   border: 1px solid var(--gallery-command-edge);
   border-left: 3px solid #9be9fa;
   background: var(--gallery-command-metal);
-  box-shadow: 5px 6px 0 #03070c;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 32%);
   color: #e3f1fa;
 }
 
@@ -347,7 +342,7 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page]
   :is(.gallery-filters button[aria-pressed="true"], .gallery-favorites-filter[aria-pressed="true"])
   span {
-  color: #244b5a;
+  color: #121821;
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-filter-summary {
@@ -385,7 +380,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-work-frame
   box-shadow:
     inset 0 1px 0 var(--gallery-command-specular),
     0 0 0 1px rgb(169 207 230 / 28%),
-    5px 6px 0 #101c28;
+    0 14px 32px rgb(0 0 0 / 34%);
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-work-frame img {
@@ -529,7 +524,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-footer {
     box-shadow:
       inset 0 1px 0 var(--gallery-command-specular),
       0 0 0 1px #a9efff,
-      5px 6px 0 #193243;
+      0 16px 38px rgb(0 0 0 / 44%);
   }
 }
 
@@ -563,12 +558,17 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-footer {
   }
   html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature-open {
     outline-offset: 4px;
-    box-shadow:
-      6px 8px 0 #101e2a,
-      7px 9px 0 rgb(150 204 231 / 36%);
+    box-shadow: 0 14px 32px rgb(0 0 0 / 38%);
   }
   html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-account {
     padding-inline: 16px;
+  }
+  html[data-family="gallery"] .exhibition-room-heading {
+    min-height: auto;
+  }
+  html[data-family="gallery"] .exhibition-room-heading-copy {
+    flex: 0 1 auto;
+    min-width: 0;
   }
 }
 

@@ -1,4 +1,13 @@
-import { useEffect } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from "react";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 import { scheduleGalleryStickerWarmup } from "@/lib/gallery-sticker-warmup";
 import {
@@ -8,8 +17,22 @@ import {
   Scripts,
   useRouterState,
 } from "@tanstack/react-router";
-import { LibraryVisitTracker } from "@/components/library/library-controls";
-import { InquiryNavigation } from "@/components/library/inquiry-navigation";
+const LibraryVisitTracker =
+  typeof lazy === "function"
+    ? lazy(() =>
+        import("@/components/library/library-controls").then((m) => ({
+          default: m.LibraryVisitTracker,
+        })),
+      )
+    : ((() => null) as unknown as ComponentType<{ pathname: string; hash: string }>);
+const LazyInquiryNavigation =
+  typeof lazy === "function"
+    ? lazy(() =>
+        import("@/components/library/inquiry-navigation").then((m) => ({
+          default: m.InquiryNavigation,
+        })),
+      )
+    : ((() => null) as unknown as ComponentType);
 import { QuickSearchHost } from "@/components/search/quick-search-host";
 import inquiryNavigationCss from "@/styles-inquiry-navigation.css?url";
 import interactionChoreographyCss from "@/styles-interaction-choreography.css?url";
@@ -17,11 +40,41 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { LegacyDataRetirement } from "@/components/legacy-data-retirement";
 import { AppGuards, LoadGateProvider } from "@/components/load-gate";
-import { ZeusButtonProvider } from "@/components/zeus-button";
-import { OpeningNotice } from "@/components/opening-notice";
+import {
+  sharedZeusButtonContext,
+  ZEUS_BUTTON_ENABLED_KEY,
+  type ZeusButtonSettings,
+} from "@/lib/zeus-button-context";
+
+const LazyZeusButtonHost =
+  typeof lazy === "function"
+    ? lazy(() =>
+        import("@/components/zeus-button").then((m) => ({
+          default: m.ZeusButtonProvider,
+        })),
+      )
+    : ((() => null) as unknown as ComponentType<{
+        children: ReactNode;
+        externalSettings?: ZeusButtonSettings;
+      }>);
+const LazyOpeningNotice =
+  typeof lazy === "function"
+    ? lazy(() =>
+        import("@/components/opening-notice").then((m) => ({
+          default: m.OpeningNotice,
+        })),
+      )
+    : ((() => null) as unknown as ComponentType);
+const LazyIpadMenuMode =
+  typeof lazy === "function"
+    ? lazy(() =>
+        import("@/components/ipad-menu-mode").then((m) => ({
+          default: m.IpadMenuMode,
+        })),
+      )
+    : ((() => null) as unknown as ComponentType);
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
-import { IpadMenuMode } from "@/components/ipad-menu-mode";
 import { LiquidGlassDefs } from "@/components/liquid-glass-defs";
 import { BUTTON_STYLE_SCRIPT } from "@/lib/button-style.js";
 import { PhoneLandscapeMenu } from "@/components/phone-landscape-menu";
@@ -77,7 +130,9 @@ import { getViewportChrome, getViewportChromeColor } from "@/lib/viewport-chrome
 import { getRouteFamily } from "@/lib/route-family";
 import { DOSSIER_HUD_FONTS_URL } from "@/lib/world-head";
 import { siteFontLinks, SITE_CORE_FONTS_URL, SITE_DISPLAY_FONTS_URL } from "@/lib/site-fonts";
-import { CIEL_BUTTON_SIZES, CIEL_BUTTON_SRCSET } from "@/lib/thumbnail-images";
+const CIEL_BUTTON_SIZES = "(max-width: 560px) 48px, 80px";
+const CIEL_BUTTON_SRCSET =
+  "/ciel-button-20261018-144.webp 144w, /ciel-button-20261018-216.webp 216w, /ciel-button-20261018-360.webp 360w";
 
 const APP_NAME = "Deception World";
 const host = import.meta.env.VITE_PUBLIC_HOSTNAME;
@@ -130,7 +185,75 @@ function GalleryStickerWarmup() {
 
 function LibrarySession() {
   const location = useRouterState({ select: (state) => state.location });
-  return <LibraryVisitTracker pathname={location.pathname} hash={location.hash} />;
+  if (location.pathname === "/") return null;
+  return (
+    <Suspense fallback={null}>
+      <LibraryVisitTracker pathname={location.pathname} hash={location.hash} />
+    </Suspense>
+  );
+}
+
+function InquiryNavigation() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (pathname === "/") return null;
+  return (
+    <Suspense fallback={null}>
+      <LazyInquiryNavigation />
+    </Suspense>
+  );
+}
+
+function OpeningNotice() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (pathname === "/") return null;
+  return (
+    <Suspense fallback={null}>
+      <LazyOpeningNotice />
+    </Suspense>
+  );
+}
+
+function IpadMenuMode() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (pathname === "/") return null;
+  return (
+    <Suspense fallback={null}>
+      <LazyIpadMenuMode />
+    </Suspense>
+  );
+}
+
+function ZeusButtonProvider({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const [enabled, setEnabledState] = useState(true);
+  useEffect(() => {
+    try {
+      setEnabledState(window.localStorage.getItem(ZEUS_BUTTON_ENABLED_KEY) !== "false");
+    } catch {
+      setEnabledState(true);
+    }
+  }, []);
+  const setEnabled = useCallback((next: boolean) => {
+    setEnabledState(next);
+    try {
+      window.localStorage.setItem(ZEUS_BUTTON_ENABLED_KEY, String(next));
+    } catch {
+      /* Session state still applies when localStorage is unavailable. */
+    }
+  }, []);
+  const settings = useMemo(() => ({ enabled, setEnabled }), [enabled, setEnabled]);
+  const Context = sharedZeusButtonContext;
+  const content = (
+    <>
+      {children}
+      {pathname !== "/" && (
+        <Suspense fallback={null}>
+          <LazyZeusButtonHost externalSettings={settings}>{null}</LazyZeusButtonHost>
+        </Suspense>
+      )}
+    </>
+  );
+  return Context ? <Context.Provider value={settings}>{content}</Context.Provider> : content;
 }
 
 // A missing record says so in the tab and to screen readers, as its heading

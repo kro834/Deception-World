@@ -52,20 +52,8 @@ export const RexonanceFormComparison = memo(function RexonanceFormComparison({
               data-selected={selected === form.key}
               style={{ ["--rxs-stage-accent" as string]: form.accent }}
             >
-              <span className="rxe-comparison-seam" aria-hidden="true" />
-              {selected === form.key ? (
-                <>
-                  <span className="rxe-comparison-bracket" aria-hidden="true" />
-                  <span className="rxe-comparison-scan" aria-hidden="true" />
-                </>
-              ) : null}
               <p>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                {selected === form.key ? (
-                  <span className="rxe-comparison-live-badge" aria-hidden="true">
-                    選択中
-                  </span>
-                ) : null}
               </p>
               <img
                 src={form.image}

@@ -841,20 +841,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-syst
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid > article::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 34px;
-  width: 54px;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    #fff 0 3px,
-    var(--rxa-gold) 3px 36px,
-    transparent 36px 40px,
-    var(--rxa-ice) 40px 54px
-  );
-  pointer-events: none;
+  display: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-system-grid > article > header > small {

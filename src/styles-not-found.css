@@ -39,7 +39,7 @@
   --lr-text-2: #bccbd8;
   --lr-text-3: #8fa3b5;
   --lr-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
-  --lr-pad-x: clamp(20px, 5vw, 44px);
+  --lr-pad-x: clamp(14px, 4vw, 44px);
   --lr-pad-y: clamp(22px, 5vw, 40px);
   --lr-prism: linear-gradient(
     90deg,
@@ -53,8 +53,8 @@
      recovery sheet declares the same rows). */
   display: grid;
   grid-template-columns:
-    minmax(16px, 1fr) [plate-start] var(--lr-pad-x) [slot-start copy-start] minmax(0, 560px)
-    [slot-end copy-end] var(--lr-pad-x) [plate-end] minmax(16px, 1fr);
+    minmax(10px, 1fr) [plate-start] var(--lr-pad-x) [slot-start copy-start] minmax(0, 560px)
+    [slot-end copy-end] var(--lr-pad-x) [plate-end] minmax(10px, 1fr);
   grid-template-rows:
     minmax(24px, 1fr) [plate-start] var(--lr-pad-y) [slot-start] auto [slot-end head-start] auto
     auto [head-end] auto auto auto auto var(--lr-pad-y) [plate-end] auto [recovery-end]
@@ -73,8 +73,6 @@
   background:
     radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
     radial-gradient(ellipse 60% 34% at 50% 104%, rgb(255 95 200 / 8%), transparent 70%),
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     var(--lr-ink);
 }
 
@@ -158,13 +156,13 @@
     linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 22px no-repeat,
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 22px 2px no-repeat,
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 22px no-repeat,
-    linear-gradient(172deg, rgb(244 251 255 / 8%) 0, rgb(122 232 255 / 4%) 5%, transparent 22%),
+    linear-gradient(172deg, rgb(244 251 255 / 6%) 0, rgb(122 232 255 / 3%) 6%, transparent 28%),
     linear-gradient(
       112deg,
-      transparent 56%,
-      rgb(255 79 195 / 5%) 66%,
-      rgb(122 232 255 / 4%) 74%,
-      transparent 84%
+      transparent 30%,
+      rgb(255 79 195 / 2.5%) 60%,
+      rgb(122 232 255 / 2.5%) 75%,
+      transparent 90%
     ),
     var(--lr-deck);
   box-shadow:
@@ -232,15 +230,13 @@
     linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 14px no-repeat,
     linear-gradient(
       106deg,
-      transparent 30%,
-      rgb(122 232 255 / 10%) 44%,
-      rgb(255 79 195 / 16%) 52%,
-      rgb(240 207 134 / 8%) 60%,
-      transparent 72%
+      transparent 20%,
+      rgb(122 232 255 / 5%) 45%,
+      rgb(255 79 195 / 6%) 55%,
+      rgb(240 207 134 / 4%) 65%,
+      transparent 85%
     ),
     radial-gradient(70% 90% at 30% 40%, rgb(122 232 255 / 12%), transparent 70%),
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 6%) 0 1px, transparent 1px 16px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 6%) 0 1px, transparent 1px 16px),
     #050a12;
 }
 
@@ -323,8 +319,7 @@
   margin-top: 8px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgb(122 232 255 / 16%);
-  background: repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 24px) 0
-    100% / 100% 5px no-repeat;
+  background: linear-gradient(180deg, transparent, rgb(122 232 255 / 3%));
   color: var(--lr-text-3);
   font: 400 12px / 1.4 var(--lr-hud);
   letter-spacing: 0.18em;
@@ -342,9 +337,7 @@
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: anywhere;
-  text-shadow:
-    -2px 0 rgb(255 92 200 / 30%),
-    2px 0 rgb(122 232 255 / 36%);
+  text-shadow: 0 0 20px rgb(122 232 255 / 22%);
 }
 
 .app-not-found.app-not-found > p:last-of-type {
@@ -478,10 +471,7 @@
   margin: 0;
   padding: 16px var(--lr-pad-x) var(--lr-pad-y);
   border-top: 1px solid rgb(122 232 255 / 16%);
-  background:
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 38%) 0 1px, transparent 1px 24px) 0 0 / 100%
-      5px no-repeat,
-    linear-gradient(180deg, rgb(122 232 255 / 5%), transparent 60%);
+  background: linear-gradient(180deg, rgb(122 232 255 / 4%), transparent 60%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a {
@@ -566,6 +556,13 @@
 
   .app-not-found.app-not-found > .app-not-found-sigil {
     padding-inline: 16px;
+  }
+
+  .app-not-found.app-not-found {
+    --lr-pad-x: 12px;
+    grid-template-columns:
+      minmax(8px, 1fr) [plate-start] var(--lr-pad-x) [slot-start copy-start] minmax(0, 560px)
+      [slot-end copy-end] var(--lr-pad-x) [plate-end] minmax(8px, 1fr);
   }
 }
 
@@ -755,13 +752,12 @@
     padding-bottom: 16px;
   }
 
-  /* The ruler under the header runs the whole width of the words. */
+  /* The divider under the header runs the whole width of the words. */
   .app-not-found.app-not-found > h1 {
     padding-top: clamp(20px, 4vw, 30px);
     margin-top: 0;
     border-top: 1px solid rgb(122 232 255 / 16%);
-    background: repeating-linear-gradient(90deg, rgb(122 232 255 / 45%) 0 1px, transparent 1px 24px)
-      0 0 / 100% 5px no-repeat;
+    background: linear-gradient(180deg, rgb(122 232 255 / 3%), transparent 12px);
   }
 }
 

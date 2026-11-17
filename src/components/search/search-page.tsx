@@ -41,11 +41,10 @@ const URL_DELAY_MS = 280;
 const STARTING_QUERIES = ["ゼウス", "月城悠真", "六詠", "エクスプリーム", "Dream"];
 const CATEGORY_ORDER = SEARCH_CATEGORIES.slice(1).map((item) => item.id as string);
 
-// Each record's place in the index, printed on its card as a file number.
+// Each record's place in the index, used to resolve deterministic plate editions.
 const RECORD_NUMBER = new Map(SEARCH_DOCUMENTS.map((document, index) => [document.id, index + 1]));
 
 const categoryLabel = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.label ?? "";
-const categoryCode = (id: string) => SEARCH_CATEGORIES.find((item) => item.id === id)?.code ?? "";
 
 type Option =
   | { kind: "result"; id: string; result: SearchResult }
@@ -59,23 +58,9 @@ type Option =
 
 function SearchGlyph() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" width="24" height="24" aria-hidden="true">
-      <circle cx="10.5" cy="10.5" r="7.25" stroke="currentColor" strokeWidth="1.4" />
-      <circle
-        cx="10.5"
-        cy="10.5"
-        r="4.25"
-        stroke="currentColor"
-        strokeOpacity="0.45"
-        strokeWidth="0.9"
-        strokeDasharray="2.2 1.8"
-      />
-      <path
-        d="M10.5 2v2M10.5 17v2M2 10.5h2M17 10.5h2M15.8 15.8 21 21"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
+    <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="m15.5 15.5 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }
@@ -279,7 +264,7 @@ export function SearchPage({
     >
       <header className="search-topbar">
         <GuardedLink to="/world" assets={[]} className="search-brand">
-          DECEPTION WORLD<span>RECORD INDEX</span>
+          DECEPTION WORLD<span>全文検索</span>
         </GuardedLink>
         <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
       </header>
@@ -287,12 +272,7 @@ export function SearchPage({
         <div className="search-observatory-desk">
           <section className="search-intro" aria-labelledby="search-title">
             <div>
-              <p className="search-eyebrow">
-                全文検索
-                <i className="search-eyebrow-coords" aria-hidden="true">
-                  ASTROLABE // RA 24H
-                </i>
-              </p>
+              <p className="search-eyebrow">全文検索</p>
               <h1 id="search-title">記録の先へ。</h1>
               <p className="search-lede">
                 名前から、物語から、気になる言葉から。散らばる記録をつなぎ、読みたい場所へ。
@@ -441,7 +421,6 @@ export function SearchPage({
                   aria-pressed={category === item.id}
                   onClick={() => onCategoryChange(item.id)}
                 >
-                  <i aria-hidden="true">{item.code}</i>
                   {item.label}
                   <span>{item.id === "all" ? all.length : (counts.get(item.id) ?? 0)}</span>
                 </button>
@@ -522,7 +501,6 @@ export function SearchPage({
                   <span id={`${listboxId}-${group.category}-label`} tabIndex={-1}>
                     {categoryLabel(group.category)}
                   </span>
-                  <i aria-hidden="true">{categoryCode(group.category)}</i>
                   <b>{group.total}</b>
                 </div>
                 <div className="search-result-grid" role="presentation">
@@ -623,13 +601,11 @@ const ResultCard = memo(function ResultCard({
   const { document } = result;
   const place = placeLabel(document);
   const recordNo = RECORD_NUMBER.get(document.id) ?? 0;
-  const recordCode = recordNo > 0 ? `OBS-${String(recordNo).padStart(3, "0")}` : undefined;
   return (
     <ResultOption
       result={result}
       id={option.id}
       active={active}
-      recordCode={recordCode}
       className="search-result-card"
       tabbable
       onOpen={onOpen}
@@ -681,9 +657,6 @@ function EmptyState({
   return (
     <div className="search-empty">
       <SearchGlyph />
-      <p className="search-empty-code" aria-hidden="true">
-        NO MATCH
-      </p>
       <h3>一致する資料が見つかりませんでした。</h3>
       {suggestions.length ? (
         <div className="search-close-matches">

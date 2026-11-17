@@ -569,7 +569,7 @@
     justify-items: start;
     width: 100%;
     margin-inline-start: 0;
-    padding-right: 72px;
+    padding-right: clamp(16px, 12vw, 72px);
     text-align: start;
   }
 
@@ -737,7 +737,7 @@
 .rxs-page.rxs-page .rxs-p14-comparator output {
   border-color: var(--sc-hairline);
   color: var(--sc-light);
-  background: transparent;
+  background: #000;
   font-family: var(--sc-hud);
   font-size: 12px;
   font-weight: 400;

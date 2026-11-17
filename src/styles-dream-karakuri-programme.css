@@ -139,7 +139,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-frame
   position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) 36px;
-  padding-block: 15px;
+  padding-block: 19px;
 }
 
 /* 上下紫檀軸木＋真鍮擬宝珠軸頭（Turned shitan rosewood scroll rollers + brass giboshi finials） */
@@ -231,10 +231,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-windo
   background: #ddcaa5;
   box-shadow:
     0 0 0 1px #ba9b6c,
-    inset 0 20px 22px -8px rgb(46 26 16 / 48%),
-    inset 0 -20px 22px -8px rgb(46 26 16 / 44%),
-    inset 0 2px 4px rgb(30 16 10 / 38%),
-    inset 0 -2px 4px rgb(30 16 10 / 36%);
+    inset 0 10px 14px -8px rgb(46 26 16 / 20%),
+    inset 0 -10px 14px -8px rgb(46 26 16 / 18%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-sheet {
@@ -244,18 +242,16 @@ html[data-family="dream"] main.dream-page.dream-page .dream-programme-reel-sheet
   background:
     linear-gradient(
       180deg,
-      rgb(92 58 28 / 28%) 0%,
-      rgb(255 250 236 / 52%) 7%,
-      transparent 16% 84%,
-      rgb(255 250 236 / 46%) 93%,
-      rgb(92 58 28 / 28%) 100%
+      rgb(255 250 236 / 54%) 0%,
+      transparent 14% 86%,
+      rgb(255 250 236 / 48%) 100%
     ),
     repeating-linear-gradient(0deg, #8b603306 0 1px, transparent 1px 4px),
     repeating-linear-gradient(90deg, transparent 0 47px, #8b603308 47px 48px),
     radial-gradient(ellipse at 0 50%, #fff8e5, transparent 75%), var(--programme-paper);
   box-shadow:
-    inset 10px 0 0 -9px rgb(164 126 74 / 36%),
-    inset -10px 0 0 -9px rgb(164 126 74 / 36%);
+    inset 10px 0 0 -9px rgb(164 126 74 / 28%),
+    inset -10px 0 0 -9px rgb(164 126 74 / 28%);
 }
 
 html[data-family="dream"]

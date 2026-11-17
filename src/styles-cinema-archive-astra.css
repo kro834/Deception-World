@@ -206,7 +206,7 @@ html[data-family]
   main.form-archive-page[data-archive-kind]
   > header.form-archive-toolbar.form-archive-toolbar {
   background: #080f17;
-  border-bottom: 1px solid #bda573;
+  border-bottom: 1px solid rgb(122 232 255 / 16%);
   box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
 }
 html
@@ -214,9 +214,11 @@ html
   main.form-archive-page[data-archive-kind]
   #archive-switcher.form-archive-switcher
   > .liquid-rail-surface {
-  border: 1px solid #6b7a88;
-  background: linear-gradient(180deg, #09121c 0%, #04080e 100%) !important;
-  box-shadow: inset 0 1px 0 rgb(217 188 128 / 22%), inset 0 -1px 0 rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgb(122 232 255 / 24%);
+  background:
+    linear-gradient(180deg, rgb(122 232 255 / 6%), transparent 46%),
+    rgb(6 12 20 / 0.94) !important;
+  box-shadow: inset 0 1px 0 rgb(122 232 255 / 10%), 0 4px 16px rgb(0 0 0 / 0.45) !important;
 }
 html
   body
@@ -225,12 +227,11 @@ html
   > .liquid-selection-lens
   > .liquid-selection-surface {
   border: 1px solid #d9bc80;
-  background: linear-gradient(180deg, #2a3c4b 0%, #172430 100%) !important;
+  background: linear-gradient(180deg, #243542 0%, #15222c 100%) !important;
   box-shadow:
-    inset 0 -2px 0 #d9bc80,
-    inset 0 1px 0 rgb(255 244 204 / 45%),
-    inset 0 0 14px rgb(217 188 128 / 28%),
-    0 4px 14px rgba(0, 0, 0, 0.45) !important;
+    inset 0 1px 0 rgb(255 244 204 / 35%),
+    inset 0 0 10px rgb(217 188 128 / 18%),
+    0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 html
   body

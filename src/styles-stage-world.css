@@ -944,6 +944,24 @@ html[data-family="world"]:root
 }
 
 @media (max-width: 420px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .hero
+    > .film-hero-identity
+    .anime-work-title
+    b {
+    font-size: clamp(32px, 11.2vw, 48px);
+  }
 
   html[data-family="world"]:root
     body
@@ -952,7 +970,9 @@ html[data-family="world"]:root
     > .poster-stage
     .poster-control-cluster
     > button {
-    padding: 0 10px;
+    gap: 5px;
+    padding: 0 6px;
+    letter-spacing: 0.04em;
   }
 }
 
@@ -1799,7 +1819,7 @@ html[data-family="world"]:root
   }
 }
 
-@media (max-width: 359px) {
+@media (max-width: 420px) {
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -2282,16 +2302,13 @@ html[data-family="world"]:root
       linear-gradient(180deg, #170f07, #0c0804);
   }
 
-  /* The gate: two sprocket rails the frames run between. */
+  /* The gate: a quiet dark stage the frames run across. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #records
     .episode-grid {
-    background:
-      repeating-linear-gradient(90deg, rgb(var(--sw-light-rgb) / 30%) 0 12px, transparent 12px 26px) 0 9px / 100% 7px no-repeat,
-      repeating-linear-gradient(90deg, rgb(var(--sw-light-rgb) / 30%) 0 12px, transparent 12px 26px) 0 calc(100% - 9px) / 100% 7px no-repeat,
-      linear-gradient(180deg, #050302, #0a0705 50%, #050302);
+    background: linear-gradient(180deg, #050302, #0a0705 50%, #050302);
   }
 }
 

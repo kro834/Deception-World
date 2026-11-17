@@ -91,11 +91,9 @@
   content: "";
   position: absolute;
   inset: 0 var(--ffz-cut) auto 0;
-  height: 3px;
+  height: 1px;
   background: var(--ffz-rail);
-  box-shadow:
-    0 0 14px rgb(var(--ffz-ice) / 0.52),
-    0 0 26px rgb(var(--ffz-violet) / 0.28);
+  box-shadow: 0 0 4px rgb(var(--ffz-ice) / 0.25);
   pointer-events: none;
   z-index: 1;
 }

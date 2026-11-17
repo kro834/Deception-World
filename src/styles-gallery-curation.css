@@ -106,7 +106,7 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature {
   grid-column: 1 / -1;
   grid-row: 2;
   align-self: center;
-  max-width: min(100%, calc(clamp(260px, 66svh, 680px) * var(--gallery-feature-ratio)));
+  max-width: min(100%, calc(clamp(260px, 66svh, 680px) * var(--gallery-feature-ratio, var(--gallery-ar, 4 / 3))));
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature-open {
@@ -410,7 +410,7 @@ html[data-family="gallery"]
   html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature {
     grid-column: 1;
     grid-row: 2;
-    max-width: min(100%, calc(440px * var(--gallery-feature-ratio)));
+    max-width: min(100%, calc(440px * var(--gallery-feature-ratio, var(--gallery-ar, 4 / 3))));
   }
 
   html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-intro-navigation {

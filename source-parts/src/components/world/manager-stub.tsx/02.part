@@ -303,7 +303,6 @@ function ManagerDossier({ profile }: { profile: Profile }) {
               id={`character-section-${s.no}`}
               key={s.no}
             >
-              <i className="dossier-spine-mark" aria-hidden="true" />
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>
@@ -444,3 +443,4 @@ export const REX_LOI: Profile = {
       "ヴァンダールドライバーとスペシャルコアで変身する、物理格闘戦に特化したライダー。アギトやギーツのシステムと関連性を持ち、エクスプリームサーガ・ウルトラにすら迫り得る実力を備える。",
       "光と闇を循環させる変換炉が終焉の炎『ヒネモス』を生み、正義の志、倒した管理人から回収した力、大気や水などを再錬成して無尽蔵のエネルギーを得る。必要な攻撃へ身体を瞬時に再錬成する性能とレックスの思想から、外敵だけでなく、他の六詠の4人からも最大級の脅威とされる。",
     ],
+    stats: [

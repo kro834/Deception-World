@@ -65,8 +65,8 @@ export function FarFromFormCall({ stage }: { stage: FarFromStageKey }) {
         <i className="is-brackets" />
       </div>
       <div className="ffs-call-signature">
-        <i className="is-blade-flare" />
-        <i className="is-blade-edge" />
+        <i />
+        <i />
       </div>
       <p className="ffs-call-caption">
         <span lang="en">FAR FROM SAGA</span>

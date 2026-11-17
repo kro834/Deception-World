@@ -12,27 +12,15 @@
   min-width: 0;
   margin: 0 0 28px;
   padding: 12px;
-  border: 1px solid var(--dg-gold);
+  border: 1px solid rgb(207 169 99 / 64%);
   border-radius: 6px;
-  /* 蒔絵風の漆黒×金砂子プレート＋四隅金箔留め */
+  /* 蒔絵風の漆黒×金砂子プレート */
   background:
-    linear-gradient(var(--dg-gold-bright) 0 0) 5px 5px / 14px 1.5px no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) 5px 5px / 1.5px 14px no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) 5px / 14px 1.5px no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) 5px / 1.5px 14px no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) 5px calc(100% - 5px) / 14px 1.5px no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) 5px calc(100% - 5px) / 1.5px 14px no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) calc(100% - 5px) / 14px 1.5px
-      no-repeat,
-    linear-gradient(var(--dg-gold-bright) 0 0) calc(100% - 5px) calc(100% - 5px) / 1.5px 14px
-      no-repeat,
-    radial-gradient(62% 95% at 16% 0%, rgb(236 198 124 / 14%), transparent 72%),
+    radial-gradient(62% 95% at 16% 0%, rgb(236 198 124 / 12%), transparent 72%),
     linear-gradient(148deg, #181020 0%, #0e0914 56%, #160e1d 100%);
   box-shadow:
-    0 10px 28px rgb(6 4 10 / 84%),
-    inset 0 0 0 3px #120b18,
-    inset 0 0 0 4px rgb(212 174 102 / 36%),
-    inset 0 1px 0 rgb(255 240 204 / 20%);
+    0 10px 26px rgb(6 4 10 / 76%),
+    inset 0 1px 0 rgb(255 240 204 / 16%);
 }
 
 .dream-page.dream-page .dream-dossier-guide label {
@@ -103,28 +91,20 @@
     100% 100%;
   background-repeat: no-repeat;
   box-shadow:
-    inset 0 1px 0 rgb(255 241 206 / 18%),
-    inset 0 -1px 0 rgb(0 0 0 / 68%),
-    inset 0 0 0 2px rgb(208 170 98 / 15%);
+    inset 0 1px 0 rgb(255 241 206 / 16%),
+    inset 0 -1px 0 rgb(0 0 0 / 56%);
   text-overflow: ellipsis;
   cursor: pointer;
 }
 
-/* 調書案内ボタン — 貴賓席パス風の二重金枠プレート */
+/* 調書案内ボタン — 端正な一重金枠プレート */
 .dream-page.dream-page .dream-dossier-guide button {
   padding: 8px 16px;
-  border-color: #e5c27c;
-  background:
-    linear-gradient(#f7e5b9 0 0) 3px 3px / 8px 1px no-repeat,
-    linear-gradient(#f7e5b9 0 0) 3px 3px / 1px 8px no-repeat,
-    linear-gradient(#f7e5b9 0 0) calc(100% - 3px) calc(100% - 3px) / 8px 1px no-repeat,
-    linear-gradient(#f7e5b9 0 0) calc(100% - 3px) calc(100% - 3px) / 1px 8px no-repeat,
-    linear-gradient(180deg, #422338 0%, #261222 100%);
+  border-color: #dfc07c;
+  background: linear-gradient(180deg, #422338 0%, #261222 100%);
   box-shadow:
-    inset 0 0 0 2px #1c0d19,
-    inset 0 0 0 3px rgb(228 190 116 / 68%),
-    inset 0 1px 0 rgb(255 244 216 / 30%),
-    0 4px 12px rgb(5 3 9 / 46%);
+    inset 0 1px 0 rgb(255 244 216 / 24%),
+    0 4px 12px rgb(5 3 9 / 42%);
   font-weight: 700;
   letter-spacing: 0.08em;
   cursor: pointer;
@@ -154,24 +134,16 @@
   .dream-page.dream-page .dream-dossier-guide select:not(:disabled):hover {
     border-color: #f6e4b8;
     box-shadow:
-      inset 0 1px 0 rgb(255 245 218 / 28%),
-      inset 0 0 0 2px rgb(236 198 124 / 28%),
+      inset 0 1px 0 rgb(255 245 218 / 26%),
       0 4px 14px rgb(6 3 10 / 42%);
   }
 
   .dream-page.dream-page .dream-dossier-guide button:not(:disabled):hover {
     border-color: #fff3d6;
-    background:
-      linear-gradient(#fff3d6 0 0) 3px 3px / 10px 1px no-repeat,
-      linear-gradient(#fff3d6 0 0) 3px 3px / 1px 10px no-repeat,
-      linear-gradient(#fff3d6 0 0) calc(100% - 3px) calc(100% - 3px) / 10px 1px no-repeat,
-      linear-gradient(#fff3d6 0 0) calc(100% - 3px) calc(100% - 3px) / 1px 10px no-repeat,
-      linear-gradient(180deg, #562d49 0%, #34192f 100%);
+    background: linear-gradient(180deg, #562d49 0%, #34192f 100%);
     box-shadow:
-      inset 0 0 0 2px #21101e,
-      inset 0 0 0 3px #f2d598,
-      inset 0 1px 0 rgb(255 248 228 / 38%),
-      0 6px 16px rgb(6 3 10 / 54%);
+      inset 0 1px 0 rgb(255 248 228 / 32%),
+      0 6px 16px rgb(6 3 10 / 50%);
   }
 }
 

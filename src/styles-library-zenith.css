@@ -149,26 +149,6 @@ html[data-family="library"] .library-page .library-index-summary::before {
   background: var(--dxz-prism-fade);
 }
 
-html[data-family="library"] .library-page .library-index-summary::after {
-  position: absolute;
-  inset: -1px;
-  content: "";
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 18px) top left / 18px 1px no-repeat,
-    linear-gradient(180deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 18px) top left / 1px 18px no-repeat,
-    linear-gradient(270deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 18px) top right / 18px 1px no-repeat,
-    linear-gradient(180deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 18px) top right / 1px 18px no-repeat;
-  opacity: 0.32;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  html[data-family="library"] .library-page .library-index-summary:hover::after {
-    opacity: 0.95;
-  }
-}
-
 html[data-family="library"] .library-page .library-index-summary > span {
   min-height: 0;
   padding: 0;
@@ -498,34 +478,6 @@ html[data-family="library"] .library-page .library-browse-controls::before {
   content: "";
   background: var(--dx-seam, var(--dxz-prism));
   pointer-events: none;
-}
-
-html[data-family="library"] .library-page .library-browse-controls::after {
-  position: absolute;
-  inset: -1px;
-  content: "";
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) top left / 24px 1px no-repeat,
-    linear-gradient(180deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) top left / 1px 24px no-repeat,
-    linear-gradient(270deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) top right / 24px 1px no-repeat,
-    linear-gradient(180deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) top right / 1px 24px no-repeat,
-    linear-gradient(90deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) bottom left / 24px 1px no-repeat,
-    linear-gradient(0deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) bottom left / 1px 24px no-repeat,
-    linear-gradient(270deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) bottom right / 24px 1px no-repeat,
-    linear-gradient(0deg, rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 85%), transparent 24px) bottom right / 1px 24px no-repeat;
-  opacity: 0.32;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  html[data-family="library"] .library-page .library-browse-controls:hover::after {
-    opacity: 0.95;
-  }
-}
-
-html[data-family="library"] .library-page .library-browse-controls:focus-within::after {
-  opacity: 0.95;
 }
 
 html[data-family="library"] .library-page .library-search-label {
@@ -1351,10 +1303,7 @@ html[data-family="library"] .search-page .search-scope-note {
   }
 
   html:not([data-world-effects="economy"])[data-family="library"] .library-cast-art::after,
-  html:not([data-world-effects="economy"])[data-family="library"] .inquiry-choice-art::after,
-  html:not([data-world-effects="economy"])[data-family="library"]
-    .library-page
-    :is(.library-index-summary, .library-browse-controls)::after {
+  html:not([data-world-effects="economy"])[data-family="library"] .inquiry-choice-art::after {
     transition: opacity 220ms ease;
   }
 }
@@ -1404,7 +1353,6 @@ html[data-family="library"] .search-page .search-scope-note {
   }
 
   html[data-family="library"] .library-page .library-browse-controls::before,
-  html[data-family="library"] .library-page :is(.library-index-summary, .library-browse-controls)::after,
   html[data-family="library"] .library-page .library-empty::before,
   html[data-family="library"] .search-page .search-empty::before,
   html[data-family="library"] .search-page .search-more::before,

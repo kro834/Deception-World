@@ -68,24 +68,12 @@ export function RecordReturnNavigation() {
           beforeNavigate={beginRecordReturn}
           aria-label={context.source.search.q ? `${label}：${context.source.search.q}` : label}
         >
-          <span
-            aria-hidden="true"
-            style={{ display: "inline-flex", alignItems: "center", flexShrink: 0 }}
-          >
+          <span className="record-return-glyph" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
-              <circle
-                cx="8"
-                cy="8"
-                r="6.2"
-                stroke="currentColor"
-                strokeOpacity="0.45"
-                strokeWidth="1"
-                strokeDasharray="2.6 1.8"
-              />
               <path
-                d="M10.8 8H5.2M7.5 5.5 5 8l2.5 2.5"
+                d="M12.5 8H3.5M7 4.5 3.5 8 7 11.5"
                 stroke="currentColor"
-                strokeWidth="1.45"
+                strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -94,12 +82,7 @@ export function RecordReturnNavigation() {
           {label}
         </GuardedLink>
         <button type="button" aria-label="一覧への戻る案内を閉じる" onClick={clearRecordReturn}>
-          <span
-            aria-hidden="true"
-            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
-          >
-            ×
-          </span>
+          <span aria-hidden="true">×</span>
         </button>
       </nav>
     </>

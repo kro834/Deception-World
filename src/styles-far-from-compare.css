@@ -387,9 +387,14 @@
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 16%),
     0 16px 36px -12px rgb(0 0 0 / 75%);
-  transition:
-    border-color 220ms ease,
-    box-shadow 220ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ffs-page .ffs-metric {
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -479,10 +484,7 @@
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 12%) 0 1px, transparent 1px 10%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 6%) 0 1px, transparent 1px 5%),
-    rgb(255 255 255 / 6%);
+  background: rgb(255 255 255 / 6%);
   box-shadow: inset 0 1px 2px rgb(0 0 0 / 60%);
 }
 
@@ -492,7 +494,7 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: repeating-linear-gradient(90deg, rgb(255 255 255 / 20%) 0 1px, transparent 1px 20%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 15%) 50%, transparent);
   opacity: 0.7;
 }
 
@@ -1122,9 +1124,6 @@
   border-radius: 10px;
   cursor: pointer;
   list-style: none;
-  transition:
-    background-color 180ms ease,
-    box-shadow 180ms ease;
 }
 
 .ffs-page .ffs-report summary::-webkit-details-marker {
@@ -1161,10 +1160,21 @@
   border-radius: 50%;
   background: rgb(127 230 255 / 5%);
   box-shadow: 0 0 8px rgb(127 230 255 / 12%);
-  transition:
-    border-color 200ms ease,
-    background-color 200ms ease,
-    box-shadow 200ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ffs-page .ffs-report summary {
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .ffs-page .ffs-report summary > i {
+    transition:
+      border-color 200ms ease,
+      background-color 200ms ease,
+      box-shadow 200ms ease;
+  }
 }
 
 .ffs-page .ffs-report summary > i::before,
@@ -1338,32 +1348,14 @@
   position: relative;
   display: grid;
   justify-items: center;
+  justify-self: center;
+  width: min(100%, 520px);
   gap: 12px;
   margin: 0;
-  padding: clamp(14px, 2.2vw, 22px);
-  border: 1px solid rgb(127 230 255 / 24%);
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 50% 50%, rgb(127 230 255 / 16%), transparent 70%),
-    radial-gradient(circle at 50% 50%, rgb(168 120 255 / 18%), transparent 65%),
-    linear-gradient(170deg, rgb(8 16 34 / 75%), rgb(4 8 20 / 90%));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    inset 0 0 32px rgb(127 230 255 / 8%),
-    0 24px 60px -20px rgb(0 0 0 / 85%);
 }
 
 .ffs-page .ffs-p16-core-frame {
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgb(168 120 255 / 30%);
-  border-radius: 8px;
-  pointer-events: none;
-  background:
-    linear-gradient(135deg, rgb(127 230 255 / 16%) 0%, transparent 28%, transparent 72%, rgb(168 120 255 / 16%) 100%),
-    repeating-linear-gradient(0deg, rgb(127 230 255 / 15%) 0 1px, transparent 1px 12px);
-  -webkit-mask: linear-gradient(180deg, #000 0%, transparent 14%, transparent 86%, #000 100%);
-  mask: linear-gradient(180deg, #000 0%, transparent 14%, transparent 86%, #000 100%);
+  display: none;
 }
 
 .ffs-page .ffs-p16-core svg {
@@ -1376,24 +1368,25 @@
   display: block;
   position: relative;
   z-index: 1;
-  width: min(100%, 520px);
+  width: 100%;
   height: auto;
   aspect-ratio: 1;
-  border: 1px solid rgb(127 230 255 / 35%);
+  border: 1px solid rgb(127 230 255 / 28%);
   border-radius: 6px;
   box-shadow:
     0 24px 60px -32px rgb(0 0 0 / 90%),
-    0 0 44px -8px rgb(127 230 255 / 38%),
-    0 0 64px -8px rgb(168 120 255 / 32%);
+    0 0 44px -8px rgb(127 230 255 / 28%),
+    0 0 64px -8px rgb(168 120 255 / 22%);
 }
 
 .ffs-page .ffs-p16-core-specular {
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  z-index: 2;
+  border-radius: 6px;
   pointer-events: none;
-  background: linear-gradient(135deg, rgb(255 255 255 / 16%) 0%, transparent 35%, transparent 68%, rgb(127 230 255 / 10%) 100%);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%);
+  background: linear-gradient(135deg, rgb(255 255 255 / 12%) 0%, transparent 34%, transparent 70%, rgb(127 230 255 / 8%) 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 16%);
 }
 
 .ffs-page .ffs-p16-label {
@@ -1570,9 +1563,14 @@
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 14%),
     0 16px 36px -12px rgb(0 0 0 / 70%);
-  transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ffs-page .ffs-p16-metric {
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -2467,5 +2465,9 @@
 
   .ffs-page .ffs-views label.is-active {
     outline: 2px solid Highlight;
+  }
+
+  .ffs-page .ffs-p16-core-specular {
+    display: none;
   }
 }

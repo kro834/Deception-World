@@ -157,80 +157,6 @@
   padding: 22px 0 16px;
 }
 
-.dream-page.dream-page .dream-record-telemetry {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0 0 16px;
-}
-
-.dream-page.dream-page .dream-record-telemetry-bar {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-  padding: 10px 11px;
-  border: 1px solid rgb(219 186 117 / 34%);
-  border-radius: 3px;
-  color: #f2ecdf;
-  background:
-    linear-gradient(#c8a45c 0 0) 0 0 / 14px 1.5px no-repeat,
-    linear-gradient(180deg, rgb(28 21 37 / 88%) 0%, rgb(17 13 24 / 92%) 100%);
-  box-shadow: inset 0 1px 0 rgb(243 224 176 / 10%);
-  text-align: left;
-  cursor: pointer;
-}
-
-.dream-page.dream-page .dream-record-telemetry-bar[aria-pressed="true"] {
-  border-color: #f3e0b0;
-  background:
-    linear-gradient(90deg, #cc493b, #f3e0b0) 0 0 / 100% 2px no-repeat,
-    linear-gradient(180deg, #3a2131 0%, #24141f 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(243 224 176 / 22%),
-    0 8px 18px rgb(0 0 0 / 36%);
-}
-
-.dream-page.dream-page .dream-record-telemetry-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.dream-page.dream-page .dream-record-telemetry-head small {
-  color: #e6c28e;
-  font: 700 12px/1.3 var(--font-mono, monospace);
-  letter-spacing: 0.08em;
-}
-
-.dream-page.dream-page .dream-record-telemetry-head strong {
-  color: #f7efe2;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-.dream-page.dream-page .dream-record-telemetry-title {
-  color: #d4cbbd;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.dream-page.dream-page .dream-record-telemetry-track {
-  display: block;
-  width: 100%;
-  height: 4px;
-  background: rgb(11 8 15 / 85%);
-  border: 1px solid rgb(219 186 117 / 28%);
-  overflow: hidden;
-}
-
-.dream-page.dream-page .dream-record-telemetry-track > i {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #cc493b, #e6c28e 65%, #f7ecd6);
-}
-
 .dream-page.dream-page .dream-record-filters label {
   display: grid;
   gap: 7px;
@@ -287,12 +213,35 @@
 
 .dream-page.dream-page .dream-record-collection {
   min-width: 0;
-  margin-top: 22px;
-  padding: 16px;
+  margin-top: 20px;
+  padding: 14px 16px;
   color: #eee3cf;
-  border: 1px solid rgb(230 194 142 / 48%);
+  border: 1px solid rgb(230 194 142 / 36%);
   border-left: 3px solid #e6c28e;
-  background: linear-gradient(110deg, rgb(230 194 142 / 10%), transparent 80%), #17101e;
+  background: linear-gradient(110deg, rgb(230 194 142 / 8%), transparent 76%), #17101e;
+}
+
+.dream-page.dream-page .dream-record-collection[data-count="0"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 18px;
+  margin-top: 14px;
+  padding: 10px 0 12px;
+  border: 0;
+  border-bottom: 1px solid rgb(219 186 117 / 24%);
+  background: transparent;
+}
+
+.dream-page.dream-page .dream-record-collection[data-count="0"] .dream-record-collection-views {
+  margin-top: 0;
+}
+
+.dream-page.dream-page
+  .dream-record-collection[data-count="0"]
+  > :is(.dream-record-collection-warning, .dream-record-collection-status:not(:empty)) {
+  flex-basis: 100%;
 }
 
 .dream-page.dream-page .dream-record-collection-heading {
@@ -369,6 +318,12 @@
 .dream-page.dream-page .dream-record-collection > .dream-record-collection-status {
   min-height: 1.8em;
   color: #f0dba9;
+}
+
+.dream-page.dream-page .dream-record-collection > .dream-record-collection-status:empty {
+  margin: 0;
+  min-height: 0;
+  line-height: 0;
 }
 
 .dream-page.dream-page .dream-record-save {
@@ -641,10 +596,6 @@
   .dream-page.dream-page .dream-record-filters > button {
     grid-column: 1 / -1;
   }
-
-  .dream-page.dream-page .dream-record-telemetry {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 520px) {
@@ -653,16 +604,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .dream-page.dream-page .dream-record-collection {
+  .dream-page.dream-page .dream-record-collection:not([data-count="0"]) {
     padding: 14px 12px;
   }
 
   .dream-page.dream-page .dream-record-results {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .dream-page.dream-page .dream-record-telemetry {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dream-page.dream-page .dream-record-filters {
@@ -709,7 +656,6 @@
   .dream-page.dream-page .dream-record-search-field,
   .dream-page.dream-page .dream-record-search input,
   .dream-page.dream-page .dream-record-quick-tags button,
-  .dream-page.dream-page .dream-record-telemetry-bar,
   .dream-page.dream-page .dream-record-active-filters button,
   .dream-page.dream-page .dream-record-card,
   .dream-page.dream-page .dream-record-filters select,
@@ -730,6 +676,17 @@
 
   .dream-page.dream-page
     :is(.dream-record-collection-views button, .dream-record-save)[aria-pressed="true"] {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    border-bottom-width: 4px;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+    box-shadow: none;
+  }
+
+  .dream-page.dream-page .dream-record-quick-tags button[aria-pressed="true"] {
     color: CanvasText;
     background: Canvas;
     border-color: CanvasText;
@@ -764,64 +721,26 @@
 }
 
 /* Keep the search desk readable above the later programme skin's compact controls. */
-.dream-page.dream-page #dream-record-explorer .dream-record-explorer-ornament {
-  justify-self: end;
-  align-self: center;
-  width: min(220px, 34vw);
-  height: 12px;
-  background:
-    radial-gradient(circle at 6px 50%, #f7e4b4 0 2.4px, #9c7336 2.8px 4.5px, transparent 5.2px),
-    radial-gradient(
-      circle at calc(100% - 6px) 50%,
-      #f7e4b4 0 2.4px,
-      #9c7336 2.8px 4.5px,
-      transparent 5.2px
-    ),
-    linear-gradient(45deg, transparent 41%, #f3dc9f 43% 57%, transparent 59%) 50% 50% / 10px 10px
-      no-repeat,
-    linear-gradient(90deg, #a62c2b 0%, #e6c28e 44%, rgb(230 194 142 / 24%) 100%) 14px 50% /
-      calc(100% - 28px) 1px no-repeat;
-}
-
-/* Machined brass bezel search console (真鍮ベゼル検索盤) */
-.dream-page.dream-page #dream-record-explorer .dream-record-search-bezel {
-  min-width: 0;
-  padding: 5px;
-  border: 1px solid #d4af6a;
-  border-radius: 5px;
-  background:
-    linear-gradient(#f7e5b7 0 0) 0 0 / 20px 2px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 0 0 / 2px 20px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 100% 0 / 20px 2px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 100% 0 / 2px 20px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 0 100% / 20px 2px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 0 100% / 2px 20px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 100% 100% / 20px 2px no-repeat,
-    linear-gradient(#f7e5b7 0 0) 100% 100% / 2px 20px no-repeat,
-    linear-gradient(180deg, #4b3822 0%, #2a1e15 48%, #3c2b1b 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 244 212 / 44%),
-    inset 0 -1px 0 rgb(18 11 8 / 80%),
-    0 14px 32px rgb(0 0 0 / 42%);
-}
-
-.dream-page.dream-page #dream-record-explorer .dream-record-search-bezel:focus-within {
-  border-color: #fae6b4;
-  box-shadow:
-    inset 0 1px 0 rgb(255 248 225 / 62%),
-    0 0 0 1px rgb(240 213 148 / 38%),
-    0 16px 36px rgb(0 0 0 / 48%);
-}
-
 .dream-page.dream-page #dream-record-explorer .dream-record-search-field {
   border: 1px solid rgb(238 205 142 / 58%);
   border-radius: 3px;
   background:
+    linear-gradient(#f3dc9f 0 0) 0 0 / 18px 1.5px no-repeat,
+    linear-gradient(#f3dc9f 0 0) 100% 100% / 18px 1.5px no-repeat,
     radial-gradient(50% 90% at 0% 50%, rgb(230 194 142 / 14%), transparent 70%),
     linear-gradient(180deg, #0e0a14 0%, #171120 100%);
   box-shadow:
-    inset 0 2px 8px rgb(0 0 0 / 72%),
-    inset 0 -1px 0 rgb(243 224 176 / 14%);
+    inset 0 2px 8px rgb(0 0 0 / 68%),
+    inset 0 -1px 0 rgb(243 224 176 / 14%),
+    0 10px 24px rgb(0 0 0 / 32%);
+}
+
+.dream-page.dream-page #dream-record-explorer .dream-record-search-field:focus-within {
+  border-color: #f3e0b0;
+  box-shadow:
+    inset 0 2px 8px rgb(0 0 0 / 68%),
+    inset 0 0 0 1px rgb(243 224 176 / 26%),
+    0 12px 28px rgb(0 0 0 / 38%);
 }
 
 .dream-page.dream-page #dream-record-explorer .dream-record-search-field > span {
@@ -873,30 +792,22 @@
   line-height: 1;
 }
 
-/* Archival manuscript index card with 4-corner gilt rules (古文書インデックスカード四隅金罫) */
+/* Archival manuscript index card with subtle corner hairlines (古文書インデックスカード四隅金罫) */
 .dream-page.dream-page #dream-record-explorer .dream-record-card {
-  border: 1px solid rgb(225 190 124 / 44%);
+  border: 1px solid rgb(225 190 124 / 42%);
   background:
-    linear-gradient(#efd29a 0 0) 0 0 / 26px 2px no-repeat,
-    linear-gradient(#efd29a 0 0) 0 0 / 2px 26px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 0 / 26px 2px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 0 / 2px 26px no-repeat,
-    linear-gradient(#efd29a 0 0) 0 100% / 26px 2px no-repeat,
-    linear-gradient(#efd29a 0 0) 0 100% / 2px 26px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 100% / 26px 2px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 100% / 2px 26px no-repeat,
-    linear-gradient(
-        90deg,
-        transparent 30px,
-        rgb(230 194 142 / 22%) 30px calc(100% - 30px),
-        transparent calc(100% - 30px)
-      )
-      0 6px / 100% 1px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 0 / 18px 1px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 0 / 1px 18px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 0 / 18px 1px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 0 / 1px 18px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 100% / 18px 1px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 100% / 1px 18px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 18px 1px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 1px 18px no-repeat,
     radial-gradient(80% 55% at 15% 0%, rgb(243 224 176 / 9%), transparent 72%),
     linear-gradient(180deg, rgb(34 24 41 / 94%) 0%, rgb(20 14 26 / 96%) 100%);
   box-shadow:
-    inset 0 0 0 5px rgb(15 10 20 / 48%),
-    inset 0 0 0 6px rgb(225 190 124 / 16%),
+    inset 0 1px 0 rgb(243 224 176 / 14%),
     0 14px 32px rgb(0 0 0 / 34%);
 }
 
@@ -904,8 +815,7 @@
   border-color: rgb(243 216 156 / 68%);
   box-shadow:
     inset 0 2px 0 #c9473d,
-    inset 0 0 0 5px rgb(15 10 20 / 48%),
-    inset 0 0 0 6px rgb(238 205 142 / 26%),
+    inset 0 1px 0 rgb(243 224 176 / 20%),
     0 16px 36px rgb(0 0 0 / 40%);
 }
 
@@ -933,7 +843,6 @@
   font-size: 16px;
 }
 
-.dream-page.dream-page #dream-record-explorer .dream-record-telemetry-bar,
 .dream-page.dream-page #dream-record-explorer .dream-record-quick-tags button,
 .dream-page.dream-page #dream-record-explorer .dream-record-active-filters button,
 .dream-page.dream-page #dream-record-explorer .dream-record-card nav a {
@@ -1101,7 +1010,7 @@
   html:not([data-world-effects="economy"])
     .dream-page.dream-page
     #dream-record-explorer
-    :is(.dream-record-card, .dream-record-active-filters button, .dream-record-search-bezel) {
+    :is(.dream-record-card, .dream-record-active-filters button, .dream-record-search-field) {
     transition:
       border-color 200ms ease,
       box-shadow 220ms ease;
@@ -1112,8 +1021,7 @@
   .dream-page.dream-page #dream-record-explorer .dream-record-card:hover {
     border-color: rgb(243 216 156 / 74%);
     box-shadow:
-      inset 0 0 0 5px rgb(15 10 20 / 48%),
-      inset 0 0 0 6px rgb(243 216 156 / 28%),
+      inset 0 1px 0 rgb(243 224 176 / 24%),
       0 18px 40px rgb(0 0 0 / 46%);
   }
 
@@ -1126,16 +1034,10 @@
   }
 }
 
-@media (max-width: 760px) {
-  .dream-page.dream-page #dream-record-explorer .dream-record-explorer-ornament {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .dream-page.dream-page
     #dream-record-explorer
-    :is(.dream-record-card, .dream-record-active-filters button, .dream-record-search-bezel) {
+    :is(.dream-record-card, .dream-record-active-filters button, .dream-record-search-field) {
     transition: none;
   }
 }
@@ -1144,7 +1046,6 @@
   .dream-page.dream-page
     #dream-record-explorer
     :is(
-      .dream-record-search-bezel,
       .dream-record-search-field,
       .dream-record-active-filters button,
       .dream-record-active-filters i,

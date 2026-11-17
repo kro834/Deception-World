@@ -80,10 +80,8 @@ body:has(.command-deck) {
   top: 160px;
   transform: skew(-22deg) rotate(-8deg);
   border: 1px solid #b6e3ff24;
-  background: linear-gradient(145deg, #9bc5dc09, #02081299 50%, #a0d6ee0d 51%, #06111d44);
-  box-shadow:
-    -28px 30px 0 #02080d40,
-    -29px 31px 0 #81d5f215;
+  background: linear-gradient(145deg, #9bc5dc09, #02081266 45%, #06111d44 100%);
+  box-shadow: -14px 18px 32px #02080d60;
   pointer-events: none;
 }
 .command-deck *,
@@ -136,7 +134,7 @@ body:has(.command-deck) {
   opacity: 0.55;
   background-image:
     repeating-linear-gradient(0deg, transparent 0 3px, #9bd7ff08 3px 4px),
-    repeating-linear-gradient(115deg, transparent 0 134px, #7bc5f515 135px 136px);
+    linear-gradient(115deg, transparent 0%, #7bc5f508 50%, transparent 100%);
 }
 .command-deck-sr {
   position: absolute;
@@ -362,24 +360,12 @@ body:has(.command-deck) {
 .command-deck-section-rule::after {
   content: "";
   flex: 1 1 auto;
-  height: 7px;
+  height: 2px;
   margin-left: 6px;
   background:
-    repeating-linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--deck-wave-primary) 52%, transparent) 0 1px,
-        transparent 1px 6px
-      )
-      0 100% / 100% 3px no-repeat,
-    repeating-linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--deck-wave-secondary) 76%, transparent) 0 1px,
-        transparent 1px 30px
-      )
-      0 100% / 100% 7px no-repeat,
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--deck-wave-primary) 42%, transparent),
+        color-mix(in srgb, var(--deck-wave-primary) 52%, transparent),
         transparent 94%
       )
       0 100% / 100% 1px no-repeat;
@@ -429,7 +415,7 @@ body:has(.command-deck) {
 }
 .command-deck-scene-buttons a.is-selected {
   color: #0b1d28;
-  background: linear-gradient(122deg, #f2fcff, #c1d1db 48%, #8fa8b8 49%, #dcebf4 74%, #ecf7fb);
+  background: linear-gradient(122deg, #f2fcff 0%, #d8e5ed 38%, #b8ccd8 60%, #e2eff7 82%, #ecf7fb 100%);
   border-color: #f0fcff;
   transform: translateX(8px);
   box-shadow:
@@ -444,7 +430,7 @@ body:has(.command-deck) {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 25%, #fff8 48%, transparent 66%);
+  background: linear-gradient(110deg, transparent 20%, rgb(255 255 255 / 35%) 48%, transparent 76%);
   pointer-events: none;
   animation: command-deck-metal-sweep 900ms ease-out both;
 }

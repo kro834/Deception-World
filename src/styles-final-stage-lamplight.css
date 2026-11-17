@@ -468,7 +468,7 @@ html .fst-page.fst-page .fsl-tear {
   bottom: 0;
   left: calc(-1 * var(--fsl-pass-gap) / 2 - 1px);
   width: 2px;
-  background: repeating-linear-gradient(180deg, var(--fsl-chalk-40) 0 5px, transparent 5px 11px);
+  background: linear-gradient(180deg, transparent, var(--fsl-chalk-40) 12%, var(--fsl-chalk-40) 88%, transparent);
   pointer-events: none;
 }
 
@@ -515,7 +515,7 @@ html .fst-page.fst-page .fsl-tear::after {
     left: calc(-1 * var(--fsl-pass-pad));
     width: auto;
     height: 2px;
-    background: repeating-linear-gradient(90deg, var(--fsl-chalk-40) 0 5px, transparent 5px 11px);
+    background: linear-gradient(90deg, transparent, var(--fsl-chalk-40) 12%, var(--fsl-chalk-40) 88%, transparent);
   }
 
   html .fst-page.fst-page .fsl-tear::before,
@@ -660,7 +660,7 @@ html .fst-page.fst-page .fsl-gate::before {
     linear-gradient(var(--fsl-pane) 0 0) 22% 58% / 56% 1px no-repeat,
     linear-gradient(var(--fsl-pane) 0 0) 22% 14% / 1px 44% no-repeat,
     linear-gradient(var(--fsl-pane) 0 0) 78% 14% / 1px 44% no-repeat,
-    linear-gradient(160deg, transparent 30%, rgb(198 245 255 / 5%) 45%, transparent 60%) 22% 14% / 56% 44% no-repeat,
+    linear-gradient(160deg, transparent 20%, rgb(198 245 255 / 4%) 48%, transparent 75%) 22% 14% / 56% 44% no-repeat,
     var(--fsk-paper) 0 0 / 26px 26px,
     linear-gradient(90deg, #060b15, #0b1424);
   translate: -101% 0;
@@ -675,7 +675,7 @@ html .fst-page.fst-page .fsl-gate::after {
     linear-gradient(var(--fsl-pane) 0 0) 78% 58% / 56% 1px no-repeat,
     linear-gradient(var(--fsl-pane) 0 0) 22% 14% / 1px 44% no-repeat,
     linear-gradient(var(--fsl-pane) 0 0) 78% 14% / 1px 44% no-repeat,
-    linear-gradient(160deg, transparent 30%, rgb(198 245 255 / 5%) 45%, transparent 60%) 78% 14% / 56% 44% no-repeat,
+    linear-gradient(160deg, transparent 20%, rgb(198 245 255 / 4%) 48%, transparent 75%) 78% 14% / 56% 44% no-repeat,
     var(--fsk-paper) 0 0 / 26px 26px,
     linear-gradient(270deg, #060b15, #0b1424);
   translate: 101% 0;

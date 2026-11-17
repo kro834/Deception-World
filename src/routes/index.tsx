@@ -1,7 +1,15 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, type ComponentType } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { TitleSequence } from "@/components/cinematic/title-sequence";
-import { CommandDeck } from "@/components/command-deck/command-deck";
+
+const CommandDeck =
+  typeof lazy === "function"
+    ? lazy(() =>
+        import("@/components/command-deck/command-deck").then((m) => ({
+          default: m.CommandDeck,
+        })),
+      )
+    : ((() => null) as unknown as ComponentType<{ onReplay?: () => void }>);
 import {
   endDocumentEntryOpening,
   isDocumentEntryOpening,
@@ -74,15 +82,17 @@ function Home() {
   return opensWith(search) ? (
     <TitleSequence />
   ) : (
-    <CommandDeck
-      onReplay={() => {
-        try {
-          window.sessionStorage.setItem("dw-opening-replay", "1");
-        } catch {
-          // Without session storage the title already plays on every visit.
-        }
-        void navigate({ search: { opening: true } });
-      }}
-    />
+    <Suspense fallback={null}>
+      <CommandDeck
+        onReplay={() => {
+          try {
+            window.sessionStorage.setItem("dw-opening-replay", "1");
+          } catch {
+            // Without session storage the title already plays on every visit.
+          }
+          void navigate({ search: { opening: true } });
+        }}
+      />
+    </Suspense>
   );
 }

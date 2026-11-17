@@ -337,7 +337,9 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-favorites-filter[aria-pressed="true"]
   span {
-  color: #242b35;
+  border-color: rgb(16 24 36 / 30%);
+  background: rgb(16 24 36 / 12%);
+  color: #121821;
 }
 
 html[data-family="gallery"]
@@ -603,7 +605,7 @@ html[data-family="gallery"]
   html[data-family="gallery"]
     .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-filters
-    button:hover,
+    button:not([aria-pressed="true"]):hover,
   html[data-family="gallery"]
     .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-feature-settings

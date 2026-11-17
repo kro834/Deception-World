@@ -160,8 +160,6 @@
   margin-bottom: clamp(28px, 4vw, 48px);
   padding: 0 0 18px 18px;
   border-bottom: 1px solid rgb(122 232 255 / 20%);
-  background: repeating-linear-gradient(90deg, rgb(122 232 255 / 52%) 0 1px, transparent 1px 24px) 0
-    100% / 100% 6px no-repeat;
   color: var(--mr-text-2);
 }
 
@@ -728,10 +726,10 @@ html[data-world-effects="economy"]
     linear-gradient(0deg, rgb(10 18 32 / 70%), transparent 40%), rgb(6 12 22 / var(--veil, 12%));
 }
 
-/* No file: the records' empty socket, hatch and crosshair. */
+/* No file: the records' empty socket, soft glow and crosshair. */
 .site-shell.film-edition.mirage-edition .wa-portrait.is-vacant {
   background:
-    repeating-linear-gradient(135deg, rgb(122 232 255 / 7%) 0 1px, transparent 1px 12px), #070d16;
+    radial-gradient(circle at 50% 45%, rgb(122 232 255 / 10%), transparent 70%), #070d16;
 }
 
 .site-shell.film-edition.mirage-edition .wa-portrait.is-vacant::before,
@@ -2468,6 +2466,13 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-l
 
   .site-shell.film-edition.mirage-edition .wa-locations > .wa-code::after {
     background: CanvasText;
+  }
+}
+
+@media (max-width: 420px) {
+  .site-shell.film-edition.mirage-edition .wa-id-photo {
+    float: none;
+    margin: 0 0 12px;
   }
 }
 

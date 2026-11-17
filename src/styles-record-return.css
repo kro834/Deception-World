@@ -33,24 +33,6 @@
   line-height: 1.5;
   letter-spacing: 0.04em;
 }
-.record-return-navigation::before {
-  position: absolute;
-  inset: -1px;
-  content: "";
-  border: 1px solid rgb(var(--rr-brass-rgb) / 72%);
-  border-radius: 3px;
-  pointer-events: none;
-  -webkit-mask:
-    linear-gradient(90deg, #000 7px, transparent 7px calc(100% - 7px), #000 0) top / 100% 7px
-      no-repeat,
-    linear-gradient(90deg, #000 7px, transparent 7px calc(100% - 7px), #000 0) bottom / 100% 7px
-      no-repeat;
-  mask:
-    linear-gradient(90deg, #000 7px, transparent 7px calc(100% - 7px), #000 0) top / 100% 7px
-      no-repeat,
-    linear-gradient(90deg, #000 7px, transparent 7px calc(100% - 7px), #000 0) bottom / 100% 7px
-      no-repeat;
-}
 /* The words hold one line: WebKit shrank the link in the fixed plate and
    wrapped it as 検索結果 / へ戻る (2026-10-22). The plate's cap is wider
    than either label with its close button. */
@@ -67,25 +49,18 @@
   text-decoration: none;
   box-sizing: border-box;
 }
-.record-return-navigation a > span {
+.record-return-navigation a > .record-return-glyph {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
   color: #8eeeff;
-  font-family: "Oxanium", "Noto Sans JP", sans-serif;
-  font-weight: 700;
-}
-.record-return-navigation a::before {
-  flex: none;
-  width: 6px;
-  height: 6px;
-  content: "";
-  border-radius: 50%;
-  background: rgb(var(--rr-brass-rgb));
-  box-shadow:
-    0 0 0 2px rgb(var(--rr-ice-rgb) / 28%),
-    0 0 9px rgb(var(--rr-pink-rgb) / 68%);
 }
 /* A set width as well as the basis: WebKit sized the plate from the
    button's glyph, not its 44px, and the link was squeezed. */
 .record-return-navigation button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: 0 0 44px;
   width: 44px;
   min-height: 44px;
@@ -145,9 +120,8 @@ body:has(.side-panel[data-open="true"]) .record-return-navigation {
     border-color: ButtonText;
     box-shadow: none;
   }
-  .record-return-navigation::before,
-  .record-return-navigation a::before {
-    display: none;
+  .record-return-navigation a > .record-return-glyph {
+    color: currentColor;
   }
   .record-return-navigation button {
     border-color: ButtonText;

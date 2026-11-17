@@ -55,12 +55,12 @@ html body .library-browse-submit:not(#a) {
   padding-block: 0 1px;
 }
 html body .search-page .search-submit:not(#a) {
-  padding-inline: 10.75px 9.25px;
+  padding-inline: 14px;
   padding-block: 0 1px;
 }
 @media (min-width: 700px) {
   html body .search-page .search-submit:not(#a) {
-    padding-inline: 21.5px 18.5px;
+    padding-inline: 18px;
     padding-block: 0;
   }
 }

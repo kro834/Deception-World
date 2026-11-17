@@ -344,7 +344,7 @@
   border-left-color: var(--anime-line);
 }
 .side-panel .side-panel-head {
-  background: none;
+  background: #0d1320;
 }
 .side-panel .side-panel-group > p {
   font-size: 12px;

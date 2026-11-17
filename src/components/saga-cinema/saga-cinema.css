@@ -167,6 +167,39 @@
 }
 .saga-cinema.saga-cinema .hero { display: block; }
 .saga-cinema.saga-cinema :is(.hero,.section)[id] { scroll-margin-top: 105px; }
+
+/* Reset styles-world generic classes bleeding into the Saga Cinema route */
+.saga-cinema.saga-cinema .hero-copy {
+  animation: none;
+  translate: none;
+  opacity: 1;
+  max-width: 760px;
+}
+.saga-cinema.saga-cinema .hero-copy::before {
+  content: none;
+  display: none;
+}
+.saga-cinema.saga-cinema .poster-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  position: relative;
+}
+.saga-cinema.saga-cinema .hero-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  translate: none;
+  scale: none;
+  opacity: 1;
+}
+.saga-cinema.saga-cinema .eyebrow {
+  display: block;
+  font-weight: 400;
+}
 .saga-cinema.saga-cinema .site-header { top: 0; }
 .saga-cinema.saga-cinema .opening,
 .saga-cinema.saga-cinema .gallery-dialog {
@@ -848,30 +881,18 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
     transform 220ms var(--saga-ease);
 }
 
-/* Upper & lower 35mm film sprocket perforations along each chapter frame. */
+/* Upper & lower fine film highlights along each chapter frame. */
 .saga-cinema.saga-cinema .chapter-reel button::after {
   content: "";
   position: absolute;
   inset: 5px 10px;
   pointer-events: none;
-  opacity: 0.62;
+  opacity: 0.52;
   background:
-    repeating-linear-gradient(
-        90deg,
-        rgba(var(--chapter-rgb), 0.56) 0 7px,
-        transparent 7px 14px
-      )
-      0 0 / 100% 4px no-repeat,
-    repeating-linear-gradient(
-        90deg,
-        rgba(var(--chapter-rgb), 0.52) 0 7px,
-        transparent 7px 14px
-      )
-      0 100% / 100% 4px no-repeat,
-    linear-gradient(90deg, rgba(var(--chapter-rgb), 0.24), rgba(var(--chapter-rgb), 0.24))
-      0 7px / 100% 1px no-repeat,
-    linear-gradient(90deg, rgba(var(--chapter-rgb), 0.22), rgba(var(--chapter-rgb), 0.22))
-      0 calc(100% - 7px) / 100% 1px no-repeat;
+    linear-gradient(90deg, transparent, rgba(var(--chapter-rgb), 0.38) 20%, rgba(var(--chapter-rgb), 0.38) 80%, transparent)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(var(--chapter-rgb), 0.32) 20%, rgba(var(--chapter-rgb), 0.32) 80%, transparent)
+      0 100% / 100% 1px no-repeat;
   transition: opacity 180ms var(--saga-ease);
 }
 
@@ -924,17 +945,10 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.55) 0 1px, transparent 1px) 25% 0 / 1px 100% no-repeat,
-    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.55) 0 1px, transparent 1px) 50% 0 / 1px 100% no-repeat,
-    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.55) 0 1px, transparent 1px) 75% 0 / 1px 100% no-repeat,
-    repeating-linear-gradient(
-        90deg,
-        rgba(var(--saga-accent-rgb), 0.26) 0 1px,
-        transparent 1px 16px
-      )
-      0 100% / 100% 4px no-repeat,
-    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.22), rgba(var(--saga-accent-rgb), 0.22))
-      0 50% / 100% 1px no-repeat;
+    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.45) 0 1px, transparent 1px) 25% 0 / 1px 100% no-repeat,
+    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.45) 0 1px, transparent 1px) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.45) 0 1px, transparent 1px) 75% 0 / 1px 100% no-repeat,
+    linear-gradient(90deg, transparent, rgba(var(--saga-accent-rgb), 0.22) 50%, transparent) 0 50% / 100% 1px no-repeat;
 }
 
 .saga-cinema.saga-cinema .chapter-reel-timeline[data-active-chapter="1"]::before,

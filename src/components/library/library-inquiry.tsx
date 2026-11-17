@@ -17,9 +17,6 @@ export function LibraryInquiry({
   return (
     <section className="library-inquiry" aria-labelledby="inquiry-title" id="inquiry">
       <header className="inquiry-heading">
-        <p className="library-section-kicker" aria-hidden="true">
-          CURATED INQUIRY // SPECIMEN ROUTE
-        </p>
         <h2 id="inquiry-title">問いから辿る</h2>
         <p>名前をまだ知らなくても、気になる問いから。人物や世界の記録を、三つの入口で辿ります。</p>
       </header>
@@ -74,9 +71,6 @@ export function LibraryInquiry({
         {selected ? (
           <div className={`inquiry-route inquiry-color-${selected.color}`}>
             <header className="inquiry-route-heading">
-              <p className="inquiry-route-kicker" aria-hidden="true">
-                CURATED TRAIL // {selected.stops.length} SPECIMEN STOPS
-              </p>
               <h3 id="inquiry-guide-title" tabIndex={-1} style={titleRunStyle(selected.question)}>
                 {selected.question}
               </h3>

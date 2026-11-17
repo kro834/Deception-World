@@ -14,13 +14,13 @@
   --dx-ink-2: #070d16;
   --dx-deck: #0b1522;
   --dx-plate: linear-gradient(172deg, rgb(244 251 255 / 10%) 0, rgb(122 232 255 / 5%) 4%, #0b1522 14%, #060c15 58%, #03060c 100%);
-  --dx-sheen: linear-gradient(118deg, transparent 38%, rgb(255 255 255 / 5%) 48%, rgb(255 255 255 / 7%) 50%, rgb(255 255 255 / 5%) 52%, transparent 62%);
+  --dx-sheen: linear-gradient(118deg, transparent 24%, rgb(255 255 255 / 2.5%) 46%, rgb(255 255 255 / 3.5%) 50%, rgb(255 255 255 / 2.5%) 54%, transparent 76%);
   --dx-bevel: inset 0 1px 0 rgb(255 255 255 / 22%), inset 0 -1px 0 rgb(0 0 0 / 80%);
   --dx-rim: 0 0 0 1px rgb(var(--dx-edition-rgb) / 26%);
   --dx-drop: 0 22px 46px -26px rgb(0 0 0 / 90%);
   --dx-lattice:
-    repeating-linear-gradient(90deg, rgb(var(--dx-edition-rgb) / 3%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(0deg, rgb(var(--dx-edition-rgb) / 3%) 0 1px, transparent 1px 28px);
+    repeating-linear-gradient(90deg, rgb(var(--dx-edition-rgb) / 1.5%) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(0deg, rgb(var(--dx-edition-rgb) / 1.5%) 0 1px, transparent 1px 28px);
 
   /* Light: the edition's two lights (World and the archive: ice and violet) */
   --dx-edition: #7ae8ff;

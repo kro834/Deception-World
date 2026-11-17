@@ -27,9 +27,8 @@
     radial-gradient(ellipse 52% 46% at 14% 0%, rgb(183 220 231 / 0.09), transparent 70%),
     linear-gradient(142deg, #1b2732 0%, #0e1620 42%, #080d14 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.22),
-    0 26px 64px rgb(0 0 0 / 0.56),
-    0 0 0 5px #0b1219;
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 22px 52px rgb(0 0 0 / 0.48);
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-introduction::before {
@@ -399,12 +398,15 @@
 .gallery-tour-course-visual {
   position: relative;
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
   min-width: 0;
-  height: clamp(230px, 24vw, 340px);
-  padding: 18px;
+  height: clamp(248px, 25vw, 356px);
+  padding: 12px 14px 14px;
   border-bottom: 1px solid var(--gallery-rule);
   background: #100f0e;
-  place-items: center;
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-course-visual {
@@ -419,21 +421,21 @@
 
 .gallery-tour-course-mat {
   display: grid;
+  grid-column: 1 / -1;
+  grid-row: 2;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-  padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 20%, rgb(255 255 255 / 0.08));
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 18%, rgb(255 255 255 / 0.08));
   background:
     radial-gradient(
       ellipse 70% 56% at 50% 24%,
       color-mix(in srgb, var(--gallery-tour-course-accent) 10%, #101923),
       #06090e 82%
     );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.06),
-    inset 0 0 0 3px rgb(4 7 11 / 0.58);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
   place-items: center;
 }
 
@@ -447,13 +449,12 @@
 }
 
 .gallery-tour-course-number {
-  position: absolute;
-  z-index: 1;
-  top: 12px;
-  left: 12px;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
   display: grid;
   min-width: 36px;
-  height: 32px;
+  height: 28px;
   padding-inline: 8px;
   border: 1px solid rgb(238 233 220 / 0.25);
   background: rgb(23 22 20 / 0.92);
@@ -466,26 +467,23 @@
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-course-number {
-  border-color: color-mix(in srgb, var(--gallery-tour-course-accent) 56%, #6e8390);
-  border-left: 3px solid var(--gallery-tour-course-accent);
-  background: linear-gradient(180deg, rgb(19 29 38 / 0.95), rgb(9 14 20 / 0.96));
+  border-color: color-mix(in srgb, var(--gallery-tour-course-accent) 52%, #6e8390);
+  border-left: 2px solid var(--gallery-tour-course-accent);
+  background: linear-gradient(180deg, rgb(19 29 38 / 0.94), rgb(9 14 20 / 0.95));
   color: var(--gallery-tour-course-accent);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.14),
-    0 6px 16px rgb(0 0 0 / 0.42);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
 }
 
 .gallery-tour-course-count-plate {
-  position: absolute;
-  z-index: 1;
-  top: 12px;
-  right: 12px;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   min-height: 28px;
-  padding: 4px 9px;
-  border: 1px solid rgb(164 192 208 / 0.24);
-  background: rgb(9 14 20 / 0.88);
+  padding: 4px 10px;
+  border: 1px solid rgb(164 192 208 / 0.22);
+  background: rgb(9 14 20 / 0.82);
   color: var(--gallery-muted);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -537,22 +535,9 @@
   gap: 8px;
   margin-top: 24px;
   padding: 12px 10px 10px;
-  border-top: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 30%, rgb(156 182 198 / 0.2));
-  border-bottom: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 22%, rgb(156 182 198 / 0.16));
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgb(255 255 255 / 0.06) 0 4px,
-      transparent 4px 12px
-    )
-    top / 100% 2px no-repeat,
-    repeating-linear-gradient(
-      90deg,
-      rgb(255 255 255 / 0.045) 0 4px,
-      transparent 4px 12px
-    )
-    bottom / 100% 2px no-repeat,
-    linear-gradient(180deg, rgb(7 11 16 / 0.84), rgb(11 17 24 / 0.9));
+  border-top: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 26%, rgb(156 182 198 / 0.18));
+  border-bottom: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 20%, rgb(156 182 198 / 0.14));
+  background: linear-gradient(180deg, rgb(7 11 16 / 0.72), rgb(11 17 24 / 0.82));
 }
 
 .gallery-tour-entrance .gallery-tour-course-preview {
@@ -813,32 +798,62 @@
 
 @media (max-width: 600px) {
   .gallery-tours-page.command-support-tours .gallery-tour-introduction {
-    padding: 20px;
+    padding: 16px 14px;
+    gap: 24px;
+  }
+
+  .gallery-tour-opening-frame {
+    padding: 8px;
+  }
+
+  .gallery-tour-opening-frame::before {
+    display: none;
+  }
+
+  .gallery-tour-opening-mat {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   .gallery-tour-course-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
+    gap: 20px;
   }
 
   .gallery-tour-course-visual {
-    height: clamp(240px, 75vw, 340px);
+    height: clamp(232px, 72vw, 330px);
+    padding: 10px 12px 12px;
+    gap: 8px;
+  }
+
+  .gallery-tour-course-mat {
+    padding: 4px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .gallery-tour-course-body {
+    padding: 16px 14px;
   }
 
   .gallery-tour-course-previews {
-    padding-inline: 8px;
+    padding-inline: 6px;
   }
 
   .gallery-tour-course-preview-image {
-    height: 90px;
+    height: 84px;
   }
 
   .gallery-tour-eyebrow {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
 
   .gallery-tour-introduction h1 {
-    margin-bottom: 22px;
+    margin-bottom: 18px;
+    font-size: clamp(28px, 7.2vw, 40px);
   }
 }
 

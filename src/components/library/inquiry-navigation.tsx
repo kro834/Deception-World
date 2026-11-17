@@ -42,7 +42,6 @@ export function InquiryGuideNavigation() {
       }}
     >
       <summary>
-        <i className="inquiry-navigation-reticle" aria-hidden="true" />
         <span aria-hidden="true">◇</span>
         <span>探索案内</span>
         <small>
@@ -59,14 +58,6 @@ export function InquiryGuideNavigation() {
         </span>
       </summary>
       <div className="inquiry-navigation-panel">
-        <div className="inquiry-navigation-compass" aria-hidden="true">
-          {guide.stops.map((item, position) => (
-            <i
-              key={item.id}
-              data-step={position < index ? "past" : position === index ? "here" : "ahead"}
-            />
-          ))}
-        </div>
         <p className="inquiry-navigation-label">問いから辿る · {index + 1}番目の資料</p>
         <h2>{guide.question}</h2>
         <p>{stop.lookFor}</p>

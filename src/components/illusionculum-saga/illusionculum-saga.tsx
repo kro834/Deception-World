@@ -319,7 +319,7 @@ export function IllusionculumSaga() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "0px 0px -8%", threshold: 0 },
+      { rootMargin: "0px 0px 48px", threshold: 0 },
     );
     reveals.forEach((element) => observer.observe(element));
     return () => observer.disconnect();

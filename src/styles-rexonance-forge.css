@@ -263,9 +263,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-he
 
 @media (max-width: 1099.98px) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxs-hero-copy > .rxf-mark {
-    top: -0.62em;
-    bottom: auto;
+    top: auto;
+    bottom: calc(100% + 14px);
     left: var(--rxt-gutter);
+    margin: 0;
     font-size: clamp(40px, calc((100vw - 2 * var(--rxt-gutter)) / 6.95), 200px);
   }
 }

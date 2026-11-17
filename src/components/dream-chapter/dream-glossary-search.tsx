@@ -41,17 +41,18 @@ export function DreamGlossarySearch() {
             focusable="false"
           >
             <path
-              d="M5.5 3.5h8.2a1.8 1.8 0 0 1 1.8 1.8v14.2l-5.9-3.4-5.9 3.4V5.3a1.8 1.8 0 0 1 1.8-1.8Z"
+              d="M13.5 6.2V5.3a1.8 1.8 0 0 0-1.8-1.8H5.5a1.8 1.8 0 0 0-1.8 1.8v14.2l4.9-2.9 4.9 2.9v-5.3"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.4"
+              strokeLinecap="round"
               strokeLinejoin="round"
             />
             <circle
               cx="15.8"
               cy="10.2"
               r="3.8"
-              fill="#201927"
+              fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
             />
@@ -221,22 +222,22 @@ export function DreamGlossarySearch() {
                 strokeOpacity="0.65"
               />
               <path
-                d="M52 4.5h10v16l-5-3.2-5 3.2v-16Z"
+                d="M49.5 4.5h9.6v16l-4.8-3.2-4.8 3.2v-16Z"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.25"
                 strokeLinejoin="round"
               />
               <circle
-                cx="64.5"
+                cx="65"
                 cy="11.5"
                 r="4.2"
-                fill="#241c2b"
+                fill="none"
                 stroke="currentColor"
                 strokeWidth="1.3"
               />
               <path
-                d="M67.6 14.6l3.2 3.2"
+                d="M68.1 14.6l3.2 3.2"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"

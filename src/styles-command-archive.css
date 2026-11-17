@@ -7,7 +7,7 @@ main.command-exhibition {
   --command-key: #9be9fa;
   --command-specular: rgba(225, 246, 255, 0.42);
   --command-rim: rgba(155, 233, 250, 0.35);
-  --command-metal: linear-gradient(118deg, #d8effb0d, transparent 36% 75%, #6ab7d60a), linear-gradient(180deg, #192a39, #0d1722 55%, #0b131e);
+  --command-metal: linear-gradient(180deg, #192a39, #0d1722 55%, #0b131e);
   color-scheme: dark;
 }
 main.command-archive[data-archive-kind] {
@@ -23,18 +23,18 @@ main.command-archive[data-archive-kind] {
 }
 html[data-family] body main.command-archive[data-archive-kind] > header.form-archive-toolbar.form-archive-toolbar {
   border-bottom: 1px solid var(--command-edge);
-  background: var(--command-metal);
+  background: linear-gradient(180deg, #101c27, #081018 70%);
   box-shadow: inset 0 1px #e1f6ff1f, 0 8px 24px #0006;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
   border-color: var(--command-edge);
-  background: #070e18 !important;
-  box-shadow: inset 0 1px 8px #000a !important;
+  background: rgb(6 12 20 / 0.94) !important;
+  box-shadow: inset 0 1px 0 rgb(155 233 250 / 0.12), 0 4px 16px rgb(0 0 0 / 0.45) !important;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
   border-color: #a4e4f478;
-  background: linear-gradient(135deg, #bceafb26, transparent 50%), #203d50 !important;
-  box-shadow: inset 0 1px #ecfbff59, inset 0 -2px #7cc9e757, 0 2px 8px #0008 !important;
+  background: linear-gradient(180deg, rgb(155 233 250 / 0.18), transparent 70%), #142838 !important;
+  box-shadow: inset 0 1px 0 rgb(236 251 255 / 0.35), inset 0 0 10px rgb(155 233 250 / 0.15), 0 2px 8px rgb(0 0 0 / 0.4) !important;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > button[role="tab"] {
   min-width: 80px;
@@ -49,7 +49,7 @@ main.command-exhibition.exhibition-room-curated {
   --room-rule: var(--command-edge);
   --room-paper: #060b12;
   padding-top: calc(clamp(28px, 4vw, 60px) + env(safe-area-inset-top, 0px));
-  background: radial-gradient(ellipse at 90% 0, #23658a25, transparent 45rem), linear-gradient(118deg, transparent 50%, #5aa1c00a 50.05% 66%, transparent 66.05%), #060b12;
+  background: radial-gradient(ellipse at 90% 0, #23658a25, transparent 45rem), #060b12;
   color: var(--room-ink);
 }
 main.command-exhibition .exhibition-room-heading {
@@ -72,11 +72,20 @@ main.command-exhibition .exhibition-room-heading .exhibition-room-lead {
   color: #b7ccdb;
   font-size: 14px;
 }
-main.command-exhibition .exhibition-room-entrances { gap: 10px; }
+main.command-exhibition .exhibition-room-entrances {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
 main.command-exhibition :is(.exhibition-room-entrances a, .exhibition-room-choose > a, .exhibition-shelf-return) {
-  min-height: 48px;
-  padding: 12px 16px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 16px;
   border: 1px solid var(--room-rule);
+  border-radius: 4px;
   background: #09131f;
   box-shadow: inset 0 1px #d9efff14;
   color: #d4eff9;
@@ -113,7 +122,7 @@ main.command-exhibition input::placeholder { color: #90a9bb; opacity: 1; }
 main.command-exhibition .exhibition-room-view {
   padding: clamp(8px, 1.2vw, 16px);
   border: 1px solid var(--room-rule);
-  background: linear-gradient(135deg, #bbdbf51a, transparent 20% 80%, #bbdbf50d), #08101a;
+  background: radial-gradient(ellipse at 50% 0%, #bbdbf512, transparent 70%), #08101a;
   box-shadow: inset 0 1px var(--command-specular), 0 16px 42px #0005;
 }
 main.command-exhibition .exhibition-room-view .exhibition-studio-stage {
@@ -253,15 +262,17 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
   main.command-exhibition .exhibition-shelf-work:hover .exhibition-shelf-image { background: radial-gradient(ellipse at 50% 40%, #2d485d, #0d1a28 80%); }
 }
 @media (max-width: 900px) {
-  main.command-exhibition .exhibition-room-heading { align-items: start; }
-  main.command-exhibition .exhibition-room-entrances { align-items: stretch; }
+  main.command-exhibition .exhibition-room-heading { align-items: start; min-height: auto; }
+  main.command-exhibition .exhibition-room-heading-copy { flex: 0 1 auto; }
+  main.command-exhibition .exhibition-room-entrances { align-items: center; }
   main.command-exhibition .exhibition-room-work-heading { align-items: start; }
 }
 @media (max-width: 620px) {
   main.command-exhibition.exhibition-room-curated { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
-  main.command-exhibition .exhibition-room-heading { padding: 22px 18px; gap: 22px; }
-  main.command-exhibition .exhibition-room-entrances { width: 100%; }
-  main.command-exhibition .exhibition-room-entrances a { justify-content: space-between; width: 100%; }
+  main.command-exhibition .exhibition-room-heading { padding: 22px 18px; gap: 22px; min-height: auto; }
+  main.command-exhibition .exhibition-room-heading-copy { flex: 0 1 auto; min-width: 0; }
+  main.command-exhibition .exhibition-room-entrances { width: 100%; flex-direction: row; }
+  main.command-exhibition .exhibition-room-entrances a { flex: 1 1 auto; justify-content: center; }
   main.command-exhibition .exhibition-room-choose { gap: 12px; }
   main.command-exhibition .exhibition-room-adjacent { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
   main.command-exhibition .exhibition-room-adjacent-number { display: none; }

@@ -167,7 +167,7 @@
 }
 @media (max-width: 640px) {
   .gallery-tours-main {
-    padding-inline: 20px;
+    padding-inline: 14px;
   }
   .gallery-tours-colophon {
     align-items: flex-start;
@@ -192,6 +192,9 @@
   }
 }
 @media (max-width: 360px) {
+  .gallery-tours-main {
+    padding-inline: 10px;
+  }
   .gallery-tours-page .gallery-topbar {
     flex-wrap: wrap;
   }

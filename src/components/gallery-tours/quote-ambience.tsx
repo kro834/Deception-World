@@ -2,9 +2,15 @@ import { useEffect, useRef, useState } from "react";
 
 const AMBIENCE_URL = "/gallery-tours/quote-ambience-quiet.wav";
 
-export function QuoteAmbience() {
+export function QuoteAmbience({
+  onPlayingChange,
+}: {
+  onPlayingChange?: (playing: boolean) => void;
+} = {}) {
   const [status, setStatus] = useState<"idle" | "loading" | "playing" | "unavailable">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const onPlayingChangeRef = useRef(onPlayingChange);
+  onPlayingChangeRef.current = onPlayingChange;
 
   function clearPlayback(updateUi = true) {
     const audio = audioRef.current;
@@ -17,6 +23,7 @@ export function QuoteAmbience() {
       audio.load();
     }
     if (updateUi) setStatus("idle");
+    onPlayingChangeRef.current?.(false);
   }
 
   useEffect(() => {
@@ -40,6 +47,7 @@ export function QuoteAmbience() {
     }
 
     setStatus("loading");
+    onPlayingChangeRef.current?.(true);
     const audio = new Audio(AMBIENCE_URL);
     audio.preload = "none";
     audio.volume = 0.12;
@@ -55,7 +63,10 @@ export function QuoteAmbience() {
     audioRef.current = audio;
     void audio.play().then(
       () => {
-        if (audioRef.current === audio) setStatus("playing");
+        if (audioRef.current === audio) {
+          setStatus("playing");
+          onPlayingChangeRef.current?.(true);
+        }
       },
       () => {
         if (audioRef.current === audio) {

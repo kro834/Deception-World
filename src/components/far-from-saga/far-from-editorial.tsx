@@ -40,12 +40,10 @@ export function FarFromHeroRail() {
   return (
     <div className="ffs-hero-rail">
       <a className="ffs-hero-primary" href="#suitup">
-        <span className="ffs-rail-optic" aria-hidden="true" />
         <span>変身を体験</span>
         <i aria-hidden="true">↘</i>
       </a>
       <a className="ffs-hero-secondary" href="#stages">
-        <span className="ffs-rail-optic" aria-hidden="true" />
         <span>五つの形態を見る</span>
         <i aria-hidden="true">↗</i>
       </a>

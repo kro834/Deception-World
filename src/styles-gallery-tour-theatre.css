@@ -202,25 +202,25 @@
 
 .gallery-tour-stage-aperture {
   position: absolute;
-  inset: clamp(8px, 1.2vw, 14px);
+  inset: clamp(10px, 1.3vw, 14px);
   pointer-events: none;
-  opacity: 0.78;
+  opacity: 0.44;
   background:
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 14px 1px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 10px 1px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 1px 14px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top left / 1px 10px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 14px 1px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 10px 1px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 1px 14px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) top right / 1px 10px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 14px 1px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 10px 1px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 1px 14px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom left / 1px 10px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 14px 1px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 10px 1px
       no-repeat,
-    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 1px 14px
+    linear-gradient(var(--gallery-tour-accent), var(--gallery-tour-accent)) bottom right / 1px 10px
       no-repeat;
 }
 
@@ -669,30 +669,17 @@
 
 .gallery-tour-time-track {
   position: relative;
-  height: 6px;
+  height: 5px;
   margin-top: 10px;
-  border: 1px solid rgb(218 197 157 / 0.22);
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgb(255 255 255 / 0.16) 0 1px,
-      transparent 1px 12.5%
-    )
-    center / 100% 100% no-repeat,
-    rgb(10 11 14 / 0.88);
+  border: 1px solid rgb(218 197 157 / 0.2);
+  border-radius: 999px;
+  background: rgb(10 11 14 / 0.88);
   overflow: hidden;
 }
 
 .gallery-tours-page.command-support-tours .gallery-tour-time-track {
-  border-color: color-mix(in srgb, var(--gallery-tour-accent) 32%, #4a5e6b);
-  background:
-    repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--gallery-tour-accent) 34%, rgb(255 255 255 / 0.14)) 0 1px,
-      transparent 1px 12.5%
-    )
-    center / 100% 100% no-repeat,
-    #070c12;
+  border-color: color-mix(in srgb, var(--gallery-tour-accent) 28%, #4a5e6b);
+  background: #070c12;
 }
 
 .gallery-tour-time-fill {
@@ -937,8 +924,17 @@
     height: clamp(230px, 51dvh, 560px);
   }
 
-  .gallery-tour-stage {
+  .gallery-tour-stage,
+  .gallery-tours-page.command-support-tours .gallery-tour-stage {
     padding: 6px;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.12),
+      0 18px 42px rgb(0 0 0 / 0.56);
+  }
+
+  .gallery-tour-stage::before,
+  .gallery-tour-stage-aperture {
+    display: none;
   }
 
   .gallery-tour-view-controls {

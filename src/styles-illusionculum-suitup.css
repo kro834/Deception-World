@@ -720,7 +720,7 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-movie-sheet {
   margin: 0;
   padding: 10px 16px 12px;
   color: #eaf7fb;
-  background: rgb(2 5 11 / 84%);
+  background: rgb(2 5 11 / 95%);
   border: 1px solid rgb(166 230 255 / 32%);
   border-radius: 18px;
   box-shadow:
@@ -1116,11 +1116,9 @@ html[data-family="special"] body .rxs-page.ics-page .rzn-suitup .rzn-rail::befor
   position: absolute;
   top: 0;
   bottom: 0;
-  left: -8px;
-  width: 9px;
-  background:
-    repeating-linear-gradient(180deg, rgb(var(--rzn-gold) / 55%) 0 1px, transparent 1px 60px) 100% 0 / 9px 100% no-repeat,
-    repeating-linear-gradient(180deg, rgb(var(--rzn-ice) / 40%) 0 1px, transparent 1px 12px) 100% 0 / 5px 100% no-repeat;
+  left: -4px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgb(var(--rzn-ice) / 40%) 15% 85%, transparent);
   pointer-events: none;
 }
 

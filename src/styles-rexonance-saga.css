@@ -321,21 +321,11 @@ html[data-family="special"]
 }
 
 .rxs-orbit {
-  position: absolute;
-  z-index: 2;
-  inset: 16% 8%;
-  border: 1px solid rgb(111 228 255 / 25%);
-  border-radius: 50%;
-  transform: rotate(26deg);
-  animation: rxsOrbit 22s linear infinite;
+  display: none;
 }
 
 .rxs-orbit-b {
-  inset: 24% 15%;
-  border-color: rgb(255 119 220 / 22%);
-  transform: rotate(-28deg);
-  animation-direction: reverse;
-  animation-duration: 17s;
+  display: none;
 }
 
 .rxs-scroll-cue {
@@ -352,11 +342,7 @@ html[data-family="special"]
 }
 
 .rxs-scroll-cue i {
-  display: block;
-  width: 1px;
-  height: 32px;
-  background: linear-gradient(var(--rxs-cyan), transparent);
-  animation: rxsScrollCue 1.8s ease-in-out infinite;
+  display: none;
 }
 
 /* The cue can be a single 20px line of text: give it a 44px hit area without

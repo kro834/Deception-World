@@ -4,7 +4,8 @@ import { REXONANCE_SITE_ARTWORK } from "./rexonance-site-artwork.ts";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "./far-from-saga-artwork.ts";
 import { ILLUSIONCULUM_ENTRY_CUTOUT, ILLUSIONCULUM_HERO, illusionculumCutoutImage, illusionculumHeroImage } from "./illusionculum-saga-artwork.ts";
 import { META_UNITAS_KEY_VISUAL, metaUnitasImage } from "./meta-unitas-saga-artwork.ts";
-import { META_UNITAS_RX_DRIVER_STANDIN, META_UNITAS_RX_UNDERSUIT } from "./meta-unitas-rx-suit.ts";
+const META_UNITAS_RX_UNDERSUIT = "/meta-unitas-rx-suit-20261023/undersuit.webp";
+const META_UNITAS_RX_DRIVER_STANDIN = "/meta-unitas-rx-suit-20261023/driver-standin.webp";
 import { dossierImage } from "./dossier-images.ts";
 import { posterImage } from "./thumbnail-images.ts";
 

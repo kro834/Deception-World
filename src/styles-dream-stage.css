@@ -540,8 +540,8 @@ html[data-dream-chapter="true"] body .zeus-button-aura {
 @keyframes ts-stage-hang {
   from {
     opacity: 0;
-    translate: 0 -26px;
-    rotate: -1.4deg;
+    translate: 0 12px;
+    rotate: -0.45deg;
   }
   to {
     opacity: 1;
@@ -553,8 +553,8 @@ html[data-dream-chapter="true"] body .zeus-button-aura {
 @keyframes ts-stage-hang-right {
   from {
     opacity: 0;
-    translate: 0 -26px;
-    rotate: 1.4deg;
+    translate: 0 12px;
+    rotate: 0.45deg;
   }
   to {
     opacity: 1;

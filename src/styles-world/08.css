@@ -194,7 +194,6 @@
   overflow: hidden;
   border: 0;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 28, 50, 0.025) 0 1px, transparent 1px 5px),
     radial-gradient(circle at 50% 50%, rgba(140, 0, 16, 0.2), transparent 48%),
     #030000;
   color: #fff;

@@ -44,7 +44,7 @@ function ExhibitionRoom() {
       id="main"
     >
       <header className="exhibition-room-heading dg-reveal">
-        <div>
+        <div className="exhibition-room-heading-copy">
           <h1>原画のある、展示室。</h1>
           <p className="exhibition-room-lead">光と素材に囲まれて、一枚と向き合う。</p>
         </div>
@@ -71,7 +71,9 @@ function ExhibitionRoom() {
             <h2 id="exhibition-current-title">{artwork.title}</h2>
           </div>
           <div className="exhibition-room-choose">
-            <a href="#exhibition-shelf-heading">画像から選ぶ ↓</a>
+            <a className="dg-control" href="#exhibition-shelf-heading">
+              画像から選ぶ ↓
+            </a>
             <label>
               <span>展示する原画</span>
               <select value={artwork.id} onChange={(event) => select(event.currentTarget.value)}>

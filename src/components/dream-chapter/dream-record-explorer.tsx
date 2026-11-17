@@ -114,18 +114,6 @@ export function DreamRecordExplorer() {
       ),
     [filters, savedOnly, savedIds],
   );
-  const caseDistribution = useMemo(() => {
-    const maxCount = Math.max(1, ...Object.values(facets.cases));
-    return DREAM_CASES.map((episode) => {
-      const count = facets.cases[episode.no] ?? 0;
-      return {
-        no: episode.no,
-        title: episode.title,
-        count,
-        ratio: Math.round((count / maxCount) * 100),
-      };
-    });
-  }, [facets]);
   const visibleResults = results.slice(0, visibleCount);
   useLayoutEffect(() => {
     const target = pendingFocus.current;
@@ -203,10 +191,13 @@ export function DreamRecordExplorer() {
     >
       <header className="dream-record-explorer-heading">
         <h3 id="dream-record-explorer-title">記録を探す</h3>
-        <span className="dream-record-explorer-ornament" aria-hidden="true" />
       </header>
 
-      <div className="dream-record-collection" aria-labelledby="dream-record-collection-title">
+      <div
+        className="dream-record-collection"
+        aria-labelledby="dream-record-collection-title"
+        data-count={collectionReady ? collection.ids.length : 0}
+      >
         <div className="dream-record-collection-heading">
           <h4 id="dream-record-collection-title">記録の手控え</h4>
           <span>{collectionReady ? `${collection.ids.length}件` : "準備中"}</span>
@@ -252,20 +243,18 @@ export function DreamRecordExplorer() {
 
       <div className="dream-record-search">
         <label htmlFor="dream-record-query">記録の中の言葉を探す</label>
-        <div className="dream-record-search-bezel">
-          <div className="dream-record-search-field">
-            <span aria-hidden="true">⌕</span>
-            <input
-              id="dream-record-query"
-              type="search"
-              value={filters.query}
-              onChange={(event) => updateFilter("query", event.target.value)}
-              placeholder="人物の名前、場所、台詞の一節…"
-              aria-describedby="dream-record-search-help"
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </div>
+        <div className="dream-record-search-field">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="dream-record-query"
+            type="search"
+            value={filters.query}
+            onChange={(event) => updateFilter("query", event.target.value)}
+            placeholder="人物の名前、場所、台詞の一節…"
+            aria-describedby="dream-record-search-help"
+            autoComplete="off"
+            spellCheck={false}
+          />
         </div>
         {/* How the field searches stays with the field for assistive tech; the
             placeholder and the tags show it to the eye (Owner, 2026-10-23). */}
@@ -360,30 +349,6 @@ export function DreamRecordExplorer() {
         <button type="button" onClick={clearFilters} disabled={!hasFilters}>
           条件をクリア
         </button>
-      </div>
-
-      <div className="dream-record-telemetry" role="group" aria-label="章別の記録件数">
-        {caseDistribution.map((item) => {
-          const selected = filters.case === item.no;
-          return (
-            <button
-              key={item.no}
-              type="button"
-              className="dream-record-telemetry-bar"
-              aria-pressed={selected}
-              onClick={() => updateFilter("case", selected ? "" : item.no)}
-            >
-              <span className="dream-record-telemetry-head">
-                <small lang="en">CASE {item.no}</small>
-                <strong>{item.count}件</strong>
-              </span>
-              <span className="dream-record-telemetry-title">{item.title}</span>
-              <span className="dream-record-telemetry-track" aria-hidden="true">
-                <i style={{ width: `${item.ratio}%` }} />
-              </span>
-            </button>
-          );
-        })}
       </div>
 
       {hasFilters ? (

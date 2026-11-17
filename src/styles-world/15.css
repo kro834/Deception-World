@@ -294,3 +294,11 @@
   line-height: 0;
   background: #e71a9c;
 }
+
+@media (prefers-reduced-transparency: reduce) {
+  .rider-nightmare-dialog-close {
+    background: #07090e;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

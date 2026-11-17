@@ -104,7 +104,6 @@ html body .load-gate .cine-dive-status::after {
     linear-gradient(0deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 0 100% / 2px var(--dwc-arm, 22px) no-repeat,
     linear-gradient(270deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 100% 100% / var(--dwc-arm, 22px) 2px no-repeat,
     linear-gradient(0deg, var(--dwc-gold-hi, #fff3c7), var(--dwc-gold) 46%, color-mix(in srgb, var(--dwc-gold) 42%, transparent)) 100% 100% / 2px var(--dwc-arm, 22px) no-repeat;
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 78%));
 }
 
 /* ================================================================
@@ -2231,5 +2230,20 @@ html[data-world-effects="economy"] body .load-gate .cine-dive-status::after {
 @media (pointer: coarse) {
   .side-panel-quick-search kbd {
     display: none;
+  }
+}
+
+/* Opening title: resolve inner bracket collision and tidy 375px HUD crowding */
+.cine-logo-frame {
+  display: none !important;
+}
+
+@media (max-width: 420px) {
+  .cine-hud {
+    opacity: 0.65;
+    transform: scale(0.85);
+  }
+  .cine-editorial-coordinate {
+    display: none !important;
   }
 }

@@ -115,7 +115,8 @@ float nearEmbers(vec2 q, vec2 cells, float speed, float seed, float radius) {
   float d2 = dot(r, r);
   float disc = exp(-d2 / (rad * rad));
   float core = exp(-d2 / (0.19 * rad * rad));
-  float rim = exp(-pow(sqrt(max(d2, 0.0)) - rad * 0.82, 2.0) / (0.05 * rad * rad));
+  float dDelta = sqrt(max(d2, 0.0)) - rad * 0.82;
+  float rim = exp(-(dDelta * dDelta) / (0.05 * rad * rad));
   // One in five cells; each glows on its own slow beat (local, never a strobe).
   float alive = step(0.74, h) * (0.65 + 0.35 * sin(uTime * (1.6 + 2.0 * h) + h * 30.0));
   return (disc * 0.47 + core * 0.43 + rim * 0.1) * alive;
@@ -637,7 +638,7 @@ void main() {
 
   // ---- Dive: speed lines and tunnel.
   if (uDive > 0.001) {
-    float ang = atan(p.y, p.x) / 6.2831853 + 0.5;
+    float ang = atan(p.y, abs(p.x) > 1e-6 ? p.x : 1e-6) / 6.2831853 + 0.5;
     float lanes = 110.0;
     float lane = floor(ang * lanes);
     float rnd = hash11(lane + 1.7);

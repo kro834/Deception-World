@@ -237,31 +237,19 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
       radial-gradient(ellipse 64% 24% at 84% 3%, rgb(176 202 255 / 23%), transparent 74%),
       radial-gradient(ellipse 42% 20% at 14% 18%, rgb(156 184 255 / 11%), transparent 72%),
       radial-gradient(ellipse 90% 28% at 26% 100%, rgb(214 150 236 / 24%), transparent 74%),
-      repeating-linear-gradient(0deg, rgb(200 216 255 / 3.5%) 0 1px, transparent 1px 5px),
       linear-gradient(180deg, #0a1126 0%, #101a3c 30%, #182046 62%, #241a46 100%);
   }
 
   /* The riders' hangar is the one lit metal phase (the owner asked for the
      phases to differ greatly): graphite brightening to brushed gunmetal at
-     its middle, two raking sheens, a plate seam every 120px and the prism
-     thrown as violet and magenta stage light. Still a dark field (the
-     brightest stop is #343b45), so the brisk-scroll reading holds. */
+     its middle and the prism thrown as violet and magenta stage light.
+     Still a dark field (the brightest stop is #343b45), so the brisk-scroll
+     reading holds. */
   main.site-shell.film-edition.mirage-edition #riders {
     background:
       radial-gradient(ellipse 52% 32% at 92% 12%, rgb(255 95 200 / 24%), transparent 72%),
       radial-gradient(ellipse 46% 30% at 4% 88%, rgb(255 92 200 / 16%), transparent 70%),
       radial-gradient(ellipse 58% 24% at 48% 4%, rgb(207 216 227 / 14%), transparent 72%),
-      linear-gradient(
-        168deg,
-        transparent 4%,
-        rgb(236 242 250 / 14%) 9%,
-        transparent 13%,
-        transparent 54%,
-        rgb(236 242 250 / 8%) 58%,
-        transparent 61%
-      ),
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 4.5%) 0 1px, transparent 1px 3px),
-      repeating-linear-gradient(0deg, rgb(0 0 0 / 14%) 0 1px, transparent 1px 120px),
       linear-gradient(180deg, #1b1f25 0%, #2c323b 38%, #343b45 58%, #20252c 100%);
   }
 
@@ -269,7 +257,6 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background:
       radial-gradient(ellipse 66% 32% at 14% 5%, rgb(255 186 98 / 24%), transparent 72%),
       radial-gradient(ellipse 52% 36% at 92% 78%, rgb(233 140 94 / 12%), transparent 72%),
-      repeating-linear-gradient(0deg, rgb(239 185 111 / 6.5%) 0 1px, transparent 1px 34px),
       linear-gradient(180deg, #140d07 0%, #20160c 46%, #170f08 100%);
   }
 
@@ -278,20 +265,18 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background:
       radial-gradient(ellipse 56% 32% at 88% 8%, rgb(109 223 186 / 15%), transparent 74%),
       radial-gradient(ellipse 52% 32% at 8% 92%, rgb(227 166 116 / 9%), transparent 74%),
-      radial-gradient(rgb(109 223 186 / 11%) 0.8px, transparent 1.4px) 0 0 / 18px 18px,
       linear-gradient(180deg, #08150f, #0b1a15 50%, #08130f);
   }
 
   main.site-shell.film-edition.mirage-edition #glossary {
     background:
-      radial-gradient(rgb(28 107 86 / 8%) 0.8px, transparent 1.4px) 0 0 / 18px 18px,
+      radial-gradient(ellipse 60% 34% at 50% 0%, rgb(28 107 86 / 6%), transparent 72%),
       var(--we-paper);
   }
 
   main.site-shell.film-edition.mirage-edition #quotes {
     background:
       radial-gradient(ellipse 60% 34% at 50% 0%, rgb(109 223 186 / 10%), transparent 72%),
-      radial-gradient(rgb(109 223 186 / 9%) 0.8px, transparent 1.4px) 0 0 / 18px 18px,
       linear-gradient(180deg, #0c1a15, #050b09);
   }
 
@@ -355,11 +340,7 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
   }
 
   main.site-shell.film-edition.mirage-edition .wa-chapter {
-    background-image: repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--mr-ice) 54%, transparent) 0 1px,
-      transparent 1px 24px
-    );
+    background-image: none;
   }
 
   /* ================================================================
@@ -507,20 +488,18 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
   }
 
   main.site-shell.film-edition.mirage-edition .finale-sticky::before {
-    background:
-      conic-gradient(
-        from 30deg,
-        transparent 0 6%,
-        rgb(255 171 102 / 82%) 6% 7%,
-        transparent 7% 24%,
-        rgb(255 210 140 / 78%) 24% 24.6%,
-        transparent 24.6% 48%,
-        rgb(255 170 92 / 58%) 48% 56%,
-        transparent 56% 72%,
-        rgb(255 194 122 / 60%) 72% 76%,
-        transparent 76%
-      ),
-      repeating-conic-gradient(rgb(255 171 102 / 45%) 0 0.4deg, transparent 0.4deg 5deg);
+    background: conic-gradient(
+      from 30deg,
+      transparent 0 6%,
+      rgb(255 171 102 / 82%) 6% 7%,
+      transparent 7% 24%,
+      rgb(255 210 140 / 78%) 24% 24.6%,
+      transparent 24.6% 48%,
+      rgb(255 170 92 / 58%) 48% 56%,
+      transparent 56% 72%,
+      rgb(255 194 122 / 60%) 72% 76%,
+      transparent 76%
+    );
   }
 
   main.site-shell.film-edition.mirage-edition .finale-content h2 {
@@ -545,7 +524,6 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     background:
       radial-gradient(ellipse 70% 60% at 0% 0%, rgb(148 102 242 / 24%), transparent 64%),
       radial-gradient(ellipse 60% 60% at 100% 100%, rgb(255 106 140 / 15%), transparent 64%),
-      repeating-linear-gradient(135deg, rgb(255 127 164 / 4.5%) 0 1px, transparent 1px 12px),
       var(--mr-deck);
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
@@ -573,7 +551,6 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     border-color: var(--phase-rim);
     background:
       linear-gradient(172deg, rgb(228 236 248 / 8%), transparent 32%),
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 2.5%) 0 1px, transparent 1px 4px),
       #12161c;
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
@@ -587,7 +564,6 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     border-color: var(--phase-rim);
     background:
       radial-gradient(ellipse 52% 42% at 0% 0%, rgb(255 186 98 / 12%), transparent 72%),
-      repeating-linear-gradient(0deg, rgb(239 185 111 / 4.2%) 0 1px, transparent 1px 34px),
       var(--mr-deck);
     box-shadow:
       inset 0 1px 0 var(--phase-specular),

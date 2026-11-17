@@ -51,10 +51,14 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-re
 }
 
 .gallery-page .gallery-display-settings > summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   min-height: 48px;
-  padding-block: 14px;
+  align-items: center;
+  gap: 6px 12px;
+  padding-block: 12px;
   font-size: 14px;
-  line-height: 1.8;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
@@ -62,13 +66,19 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-display-re
   margin: 0;
   color: #f4f1ea;
   font: inherit;
+  white-space: nowrap;
 }
 
 .gallery-page .gallery-display-settings > summary > .gallery-display-current {
-  display: inline-block;
-  margin-inline-start: 16px;
+  display: inline-flex;
+  justify-self: start;
+  margin-inline-start: 0;
   color: #c9c2b6;
   font-size: 13px;
+}
+
+.gallery-page .gallery-display-settings > summary > .gallery-display-chevron {
+  margin-inline-start: 4px;
 }
 
 .gallery-page .gallery-display-description,
@@ -145,11 +155,15 @@ html[data-family="gallery"]
 
 html[data-family="gallery"]
   .world.gallery-page[data-gallery-page]
-  :is(.gallery-filters button[aria-pressed="true"], .gallery-favorites-filter[aria-pressed="true"])
+  :is(.gallery-filters button, .gallery-favorites-filter):is(
+    [aria-pressed="true"],
+    .is-active,
+    [data-active="true"]
+  )
   > span {
-  border-color: rgb(9 37 52 / 38%);
-  background: #0a2433;
-  color: #eefaff;
+  border-color: rgb(16 24 36 / 30%);
+  background: rgb(16 24 36 / 12%);
+  color: #121821;
 }
 
 html[data-family="gallery"]
@@ -158,7 +172,7 @@ html[data-family="gallery"]
   .gallery-work-frame {
   box-shadow:
     0 0 0 1px #a9efff,
-    5px 6px 0 #193243;
+    0 12px 28px rgb(0 0 0 / 42%);
 }
 
 html[data-family="gallery"]
@@ -265,9 +279,23 @@ html[data-family="gallery"]
     gap: 2px;
   }
 
+  .gallery-page .gallery-display-settings > summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+  }
+
+  .gallery-page .gallery-display-settings > summary > .gallery-display-heading {
+    grid-column: 1;
+  }
+
   .gallery-page .gallery-display-settings > summary > .gallery-display-current {
-    display: block;
-    margin-inline-start: 1.2em;
+    grid-column: 1;
+    margin-inline-start: 0;
+  }
+
+  .gallery-page .gallery-display-settings > summary > .gallery-display-chevron {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { QuoteAmbience } from "./quote-ambience";
 import type { QuoteSceneId } from "./tour-route-search";
@@ -16,7 +16,6 @@ export function QuoteExhibition() {
   const { quote } = route.useSearch();
   const navigate = route.useNavigate();
   const activeLine = useRef<HTMLButtonElement>(null);
-  const ambienceRef = useRef<HTMLDivElement>(null);
   const [ambiencePlaying, setAmbiencePlaying] = useState(false);
   const anchor = useRef<{ button: HTMLButtonElement; top: number; next?: QuoteSceneId } | null>(
     null,
@@ -65,23 +64,6 @@ export function QuoteExhibition() {
     };
   }, [quote]);
 
-  useEffect(() => {
-    const host = ambienceRef.current;
-    if (!host) {
-      setAmbiencePlaying(false);
-      return;
-    }
-    const sync = () => {
-      const label = host.querySelector(".quote-scene-ambience button")?.textContent ?? "";
-      setAmbiencePlaying(label.includes("止める"));
-    };
-    sync();
-    if (typeof MutationObserver === "undefined") return;
-    const observer = new MutationObserver(sync);
-    observer.observe(host, { childList: true, characterData: true, subtree: true });
-    return () => observer.disconnect();
-  }, [quote]);
-
   function choose(id: QuoteSceneId, button: HTMLButtonElement) {
     const next = quote === id ? undefined : id;
     anchor.current = { button, top: button.getBoundingClientRect().top, next };
@@ -102,10 +84,7 @@ export function QuoteExhibition() {
     >
       <header className="quote-exhibition-header">
         <div className="quote-exhibition-heading">
-          <p className="quote-exhibition-eyebrow">
-            <span>VOICE &amp; PORTRAIT ARCHIVE</span>
-            <span className="quote-exhibition-acoustic-lamp" aria-hidden="true" />
-          </p>
+          <p className="quote-exhibition-eyebrow">VOICE &amp; PORTRAIT ARCHIVE</p>
           <h2 id="quote-exhibition-title">台詞から見る</h2>
         </div>
         <p className="quote-exhibition-lead">
@@ -161,9 +140,6 @@ export function QuoteExhibition() {
                       </div>
                     </figure>
                     <div className="quote-leaf-copy">
-                      <p className="quote-leaf-kicker" aria-hidden="true">
-                        PORTRAIT SPECIMEN · {String(index + 1).padStart(2, "0")}
-                      </p>
                       <h4>{scene.by}</h4>
                       <p className="quote-leaf-caption">{scene.caption}</p>
                       <div className="quote-leaf-actions">
@@ -194,16 +170,10 @@ export function QuoteExhibition() {
                           {scene.source}を読む <span aria-hidden="true">↗</span>
                         </Link>
                         <div
-                          ref={ambienceRef}
                           className="quote-ambience"
                           data-playing={ambiencePlaying ? "true" : undefined}
                         >
-                          <span className="quote-ambience-indicator" aria-hidden="true">
-                            <span />
-                            <span />
-                            <span />
-                          </span>
-                          <QuoteAmbience />
+                          <QuoteAmbience onPlayingChange={setAmbiencePlaying} />
                         </div>
                       </div>
                     </div>

@@ -1,6 +1,14 @@
-import { createRouter } from "@tanstack/react-router";
-import { AppErrorComponent, NotFoundComponent } from "@/lib/error-component";
+import { createRouter, lazyRouteComponent } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+
+const AppErrorComponent = lazyRouteComponent(
+  () => import("@/lib/error-component"),
+  "AppErrorComponent",
+);
+const NotFoundComponent = lazyRouteComponent(
+  () => import("@/lib/error-component"),
+  "NotFoundComponent",
+);
 
 /* The document's first render on a fresh entry (owner, 2026-10-23: 「自動変身
    再生が必ず読み込まれ、正常に動作する様にして。」): the router puts a new

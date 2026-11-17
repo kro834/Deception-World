@@ -121,7 +121,7 @@
 
 .sovereign-aura > i:nth-child(1) {
   inset: 0;
-  border-style: dashed;
+  border-style: solid;
   animation: sovereignOrbit 28s linear infinite;
 }
 
@@ -522,7 +522,7 @@
 .sovereign-emblem > i {
   position: absolute;
   inset: 0;
-  border: 1px dashed rgba(244, 215, 142, 0.38);
+  border: 1px solid rgba(244, 215, 142, 0.38);
   border-radius: 50%;
   animation: sovereignOrbit 12s linear infinite;
 }
@@ -573,9 +573,7 @@
   gap: 6px;
   padding: 8px 10px 5px;
   border-bottom: 1px solid rgba(244, 215, 142, 0.2);
-  background:
-    repeating-linear-gradient(180deg, rgba(244, 215, 142, 0.075) 0 1px, transparent 1px 20px),
-    linear-gradient(90deg, rgba(244, 215, 142, 0.03), transparent);
+  background: linear-gradient(90deg, rgba(244, 215, 142, 0.03), transparent);
 }
 
 .sovereign-scale > span {
@@ -1086,7 +1084,7 @@ html[data-android-renderer] .is-sovereign .manager-display-name {
 
 .sovereign-scale {
   border-bottom-color: rgba(99, 230, 205, 0.24);
-  background: repeating-linear-gradient(180deg, rgba(99, 230, 205, 0.07) 0 1px, transparent 1px 20px), linear-gradient(90deg, rgba(244, 215, 142, 0.04), rgba(99, 230, 205, 0.035));
+  background: linear-gradient(90deg, rgba(244, 215, 142, 0.04), rgba(99, 230, 205, 0.035));
 }
 
 .sovereign-scale > span:nth-child(6) i {

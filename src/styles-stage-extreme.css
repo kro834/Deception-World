@@ -527,8 +527,8 @@ html[data-family="special"]
   height: auto;
   margin: 0;
   background: linear-gradient(0deg, var(--ext-amber), var(--ext-gold) 70%, #fff3cf);
-  -webkit-mask: repeating-linear-gradient(0deg, #000 0 9px, transparent 9px 12px);
-  mask: repeating-linear-gradient(0deg, #000 0 9px, transparent 9px 12px);
+  -webkit-mask: none;
+  mask: none;
   border: 0;
   opacity: 1;
   transform: none;
@@ -620,8 +620,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs
 
 /* Segmented meters: each bar is lit in cells, like a rev counter. */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-bars {
-  -webkit-mask: var(--ext-segments);
-  mask: var(--ext-segments);
+  -webkit-mask: none;
+  mask: none;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs-comparison-note {
@@ -655,6 +655,8 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > #performance .rxs
     align-self: start;
     position: sticky;
     top: calc(var(--dxs-nav) + 24px);
+    background: #050403;
+    z-index: 2;
     margin: 0;
   }
 

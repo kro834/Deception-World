@@ -425,4 +425,11 @@ html[data-world-effects="economy"] .grain {
     background-color: #09101a;
     background-image: none;
   }
+
+  .form-pickup-dialog .form-pickup-close[data-liquid-pointer],
+  .rider-nightmare-dialog-close {
+    background: #07090e;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }

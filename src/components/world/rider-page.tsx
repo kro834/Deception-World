@@ -1730,14 +1730,12 @@ export function RiderPage({ id }: { id: string }) {
       >
         <DossierContents sections={rider.sections} />
         <div className="manager-sections">
-          {rider.sections.map((s, index) => (
+          {rider.sections.map((s) => (
             <article
               className="manager-copy-section dg-reveal"
-              data-record-role={index === 0 ? "lead" : "detail"}
               id={`character-section-${s.no}`}
               key={s.no}
             >
-              <i className="dossier-spine-mark" aria-hidden="true" />
               <div className="manager-copy-heading">
                 <span>{s.no}</span>
                 <p>{s.kicker}</p>

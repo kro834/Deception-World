@@ -11,32 +11,13 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px 40px;
-  margin-bottom: 28px;
-  padding: 26px 22px 22px;
+  margin-bottom: 24px;
+  padding: 24px 0 20px;
   border-top: 1px solid var(--gallery-rule, #6b6353);
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.02), transparent);
 }
 
 .gallery-tours-page.command-support-tours .quote-exhibition-header {
-  border: 1px solid rgb(156 182 198 / 0.22);
-  border-top: 2px solid rgb(183 220 231 / 0.42);
-  background:
-    radial-gradient(ellipse 60% 80% at 15% 0%, rgb(183 220 231 / 0.06), transparent 72%),
-    linear-gradient(180deg, rgb(17 26 35 / 0.72), rgb(9 14 21 / 0.48));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
-}
-
-.quote-exhibition:has(.quote-ambience[data-playing="true"]) .quote-exhibition-header,
-.gallery-tours-page.command-support-tours
-  .quote-exhibition:has(.quote-ambience[data-playing="true"])
-  .quote-exhibition-header {
-  border-top-color: #d6eef6;
-  background:
-    radial-gradient(ellipse 72% 95% at 18% 0%, rgb(183 220 231 / 0.16), transparent 74%),
-    linear-gradient(180deg, rgb(22 35 46 / 0.86), rgb(10 17 25 / 0.62));
-  box-shadow:
-    inset 0 1px 0 rgb(235 249 255 / 0.22),
-    0 12px 32px -12px rgb(183 220 231 / 0.22);
+  border-top-color: rgb(156 182 198 / 0.28);
 }
 
 .quote-exhibition-heading {
@@ -44,31 +25,12 @@
 }
 
 .quote-exhibition-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
   margin: 0 0 10px;
   color: var(--gallery-brass, #c9dce6);
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   line-height: 1.6;
-}
-
-.quote-exhibition-acoustic-lamp {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border: 1px solid rgb(183 220 231 / 0.48);
-  border-radius: 50%;
-  background: rgb(183 220 231 / 0.16);
-}
-
-.quote-exhibition:has(.quote-ambience[data-playing="true"]) .quote-exhibition-acoustic-lamp {
-  border-color: #effafe;
-  background: #c9dce6;
-  box-shadow: 0 0 10px rgb(183 220 231 / 0.78);
-  transform: scale(1.18);
 }
 
 .quote-exhibition h2 {
@@ -106,11 +68,11 @@
   background:
     radial-gradient(
       ellipse 64% 46% at 26% 0%,
-      color-mix(in srgb, var(--quote-ink) 15%, transparent),
+      color-mix(in srgb, var(--quote-ink) 12%, transparent),
       transparent 74%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 0.025), transparent);
-  box-shadow: inset 3px 0 0 var(--quote-ink);
+    linear-gradient(180deg, rgb(255 255 255 / 0.02), transparent);
+  box-shadow: inset 2px 0 0 var(--quote-ink);
 }
 
 .quote-scene h3,
@@ -125,7 +87,7 @@
   align-items: center;
   gap: clamp(12px, 2vw, 22px);
   width: 100%;
-  padding: clamp(18px, 2.8vw, 32px) clamp(12px, 2vw, 22px);
+  padding: clamp(18px, 2.6vw, 30px) clamp(12px, 2vw, 20px);
   border: 0;
   background: transparent;
   color: inherit;
@@ -136,16 +98,16 @@
 
 .quote-plaque-index {
   display: grid;
-  min-width: 36px;
-  height: 32px;
+  min-width: 34px;
+  height: 28px;
   padding-inline: 6px;
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 38%, rgb(156 182 198 / 0.28));
-  background: rgb(11 18 25 / 0.72);
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 32%, rgb(156 182 198 / 0.24));
+  background: rgb(11 18 25 / 0.56);
   color: var(--quote-ink);
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   place-items: center;
 }
 
@@ -155,7 +117,7 @@
   gap: 7px;
   min-width: 0;
   padding-inline-start: clamp(12px, 1.8vw, 20px);
-  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 40%, rgb(156 182 198 / 0.24));
+  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 36%, rgb(156 182 198 / 0.22));
 }
 
 .quote-scene[data-open="true"] .quote-words {
@@ -208,10 +170,10 @@
 
 .quote-leaf:not([hidden]) {
   display: grid;
-  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.14fr);
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.16fr);
   align-items: center;
-  gap: clamp(20px, 4vw, 56px);
-  padding: 6px clamp(12px, 2.2vw, 26px) clamp(24px, 4vw, 44px);
+  gap: clamp(20px, 4vw, 52px);
+  padding: 6px clamp(12px, 2.2vw, 24px) clamp(24px, 4vw, 40px);
 }
 
 .quote-leaf figure {
@@ -219,13 +181,13 @@
   place-items: center;
   position: relative;
   overflow: hidden;
-  padding: clamp(10px, 1.5vw, 16px);
+  padding: clamp(10px, 1.4vw, 16px);
   border: 1px solid #6a6050;
   background:
     radial-gradient(
-      ellipse 76% 52% at 50% 10%,
-      color-mix(in srgb, var(--quote-ink) 20%, #34312c),
-      #141413 78%
+      ellipse 76% 54% at 50% 14%,
+      color-mix(in srgb, var(--quote-ink) 18%, #262523),
+      #101010 80%
     );
 }
 
@@ -234,17 +196,9 @@
   place-items: center;
   width: 100%;
   min-width: 0;
-  padding: clamp(8px, 1.2vw, 14px);
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 24%, rgb(255 255 255 / 0.08));
-  background:
-    radial-gradient(
-      ellipse 70% 58% at 50% 20%,
-      color-mix(in srgb, var(--quote-ink) 12%, #151e28),
-      #060a0f 82%
-    );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.08),
-    inset 0 0 0 3px rgb(4 7 11 / 0.62);
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .quote-leaf img {
@@ -258,16 +212,6 @@
   min-width: 0;
 }
 
-.quote-leaf-kicker {
-  margin: 0 0 10px;
-  color: color-mix(in srgb, var(--quote-ink) 84%, #eef4f6);
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.18em;
-  line-height: 1.6;
-}
-
 .quote-leaf-copy h4 {
   color: var(--quote-ink);
   font-family: var(--gallery-serif, serif);
@@ -277,9 +221,9 @@
 }
 
 .quote-leaf-caption {
-  margin: 16px 0 22px;
+  margin: 14px 0 22px;
   padding-inline-start: 14px;
-  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 46%, transparent);
+  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 42%, transparent);
   font-size: 15px;
   line-height: 2;
   text-wrap: pretty;
@@ -289,7 +233,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 18px;
+  gap: 12px 16px;
 }
 
 .quote-leaf-copy a,
@@ -306,77 +250,27 @@
 
 .quote-leaf-copy a.quote-source {
   padding: 10px 16px;
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 42%, rgb(156 182 198 / 0.3));
-  background: linear-gradient(180deg, rgb(22 34 45 / 0.9), rgb(12 19 27 / 0.94));
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 40%, rgb(156 182 198 / 0.28));
+  background: linear-gradient(180deg, rgb(20 31 41 / 0.88), rgb(11 18 25 / 0.92));
   font-size: 13px;
   letter-spacing: 0.04em;
   text-decoration: none;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
 .quote-ambience {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
   max-width: 100%;
-  padding: 0 14px 0 12px;
-  border: 1px solid rgb(156 182 198 / 0.28);
-  background: linear-gradient(180deg, rgb(16 25 34 / 0.84), rgb(9 15 22 / 0.92));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  padding: 0 14px;
+  border: 1px solid rgb(156 182 198 / 0.26);
+  background: linear-gradient(180deg, rgb(15 23 32 / 0.78), rgb(9 14 21 / 0.88));
 }
 
 .quote-ambience[data-playing="true"] {
-  border-color: var(--quote-ink);
-  background:
-    radial-gradient(
-      ellipse 70% 90% at 18% 50%,
-      color-mix(in srgb, var(--quote-ink) 22%, transparent),
-      transparent 78%
-    ),
-    linear-gradient(180deg, rgb(21 35 46 / 0.94), rgb(11 19 27 / 0.96));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.16),
-    0 0 18px -5px color-mix(in srgb, var(--quote-ink) 52%, transparent);
-}
-
-.quote-ambience-indicator {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 14px;
-  padding-block: 1px;
-}
-
-.quote-ambience-indicator > span {
-  display: block;
-  width: 2px;
-  height: 12px;
-  background: var(--quote-ink);
-  opacity: 0.4;
-  transform-origin: bottom;
-  transform: scaleY(0.34);
-}
-
-.quote-ambience-indicator > span:nth-child(2) {
-  transform: scaleY(0.5);
-}
-
-.quote-ambience[data-playing="true"] .quote-ambience-indicator > span {
-  opacity: 1;
-  box-shadow: 0 0 6px color-mix(in srgb, var(--quote-ink) 70%, transparent);
-}
-
-.quote-ambience[data-playing="true"] .quote-ambience-indicator > span:nth-child(1) {
-  transform: scaleY(0.68);
-}
-
-.quote-ambience[data-playing="true"] .quote-ambience-indicator > span:nth-child(2) {
-  transform: scaleY(1);
-}
-
-.quote-ambience[data-playing="true"] .quote-ambience-indicator > span:nth-child(3) {
-  transform: scaleY(0.82);
+  border-color: color-mix(in srgb, var(--quote-ink) 74%, #c9dce6);
+  background: linear-gradient(180deg, rgb(20 32 43 / 0.9), rgb(11 18 26 / 0.94));
 }
 
 .quote-scene-ambience {
@@ -411,12 +305,12 @@
 
 @media (max-width: 620px) {
   .quote-exhibition-header {
-    padding: 20px 16px 18px;
+    padding: 18px 0 14px;
   }
 
   .quote-scene h3 button {
     grid-template-columns: minmax(0, 1fr) auto;
-    padding-inline: 10px;
+    padding-inline: 8px;
   }
 
   .quote-plaque-index {
@@ -425,11 +319,16 @@
 
   .quote-leaf:not([hidden]) {
     grid-template-columns: minmax(0, 1fr);
-    padding-inline: 10px;
+    padding-inline: 8px;
+    gap: 18px;
+  }
+
+  .quote-leaf figure {
+    padding: 8px;
   }
 
   .quote-leaf img {
-    height: clamp(12rem, 56vw, 19rem);
+    height: clamp(12.5rem, 58vw, 19rem);
   }
 }
 
@@ -438,8 +337,6 @@
     animation: quote-scene-arrive 0.48s ease-out both;
   }
 
-  html:not([data-world-effects="economy"]) .quote-exhibition-header,
-  html:not([data-world-effects="economy"]) .quote-exhibition-acoustic-lamp,
   html:not([data-world-effects="economy"]) .quote-words,
   html:not([data-world-effects="economy"]) .quote-fold,
   html:not([data-world-effects="economy"]) .quote-leaf-copy a.quote-source,
@@ -448,23 +345,7 @@
       background-color 220ms ease,
       border-color 220ms ease,
       color 200ms ease,
-      box-shadow 220ms ease,
-      transform 220ms ease;
-  }
-
-  html:not([data-world-effects="economy"]) .quote-ambience-indicator > span {
-    transition:
-      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 220ms ease,
       box-shadow 220ms ease;
-  }
-
-  html:not([data-world-effects="economy"]) .quote-ambience-indicator > span:nth-child(2) {
-    transition-delay: 45ms;
-  }
-
-  html:not([data-world-effects="economy"]) .quote-ambience-indicator > span:nth-child(3) {
-    transition-delay: 90ms;
   }
 }
 
@@ -495,17 +376,17 @@
 }
 
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-plaque[data-open="true"] {
-  border-top-color: color-mix(in srgb, var(--quote-ink) 56%, #6b808d);
+  border-top-color: color-mix(in srgb, var(--quote-ink) 50%, #6b808d);
   background:
     radial-gradient(
       ellipse 64% 50% at 24% 0%,
-      color-mix(in srgb, var(--quote-ink) 18%, transparent),
+      color-mix(in srgb, var(--quote-ink) 14%, transparent),
       transparent 74%
     ),
-    linear-gradient(180deg, rgb(18 29 39 / 0.78), rgb(9 15 22 / 0.56));
+    linear-gradient(180deg, rgb(16 26 35 / 0.72), rgb(9 15 22 / 0.5));
   box-shadow:
-    inset 3px 0 0 var(--quote-ink),
-    inset 0 1px 0 rgb(255 255 255 / 0.1);
+    inset 2px 0 0 var(--quote-ink),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
 }
 
 .command-support-tours .quote-exhibition .quote-fold,
@@ -523,24 +404,22 @@
   .quote-fold {
   border-color: var(--quote-ink, #b7dce7);
   background: linear-gradient(180deg, #1d3140, #101c26);
-  box-shadow:
-    inset 0 1px rgb(235 249 255 / 24%),
-    0 0 0 1px rgb(183 220 231 / 20%);
+  box-shadow: inset 0 1px rgb(235 249 255 / 22%);
   color: var(--quote-ink, #eef8fc);
 }
 
 .command-support-tours .quote-exhibition .quote-leaf figure,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-leaf figure {
-  border-color: color-mix(in srgb, var(--quote-ink) 44%, #738895);
+  border-color: color-mix(in srgb, var(--quote-ink) 38%, #6d818e);
   background:
     radial-gradient(
-      ellipse 78% 54% at 50% 10%,
-      color-mix(in srgb, var(--quote-ink) 24%, #263a47),
-      #080d13 78%
+      ellipse 78% 54% at 50% 14%,
+      color-mix(in srgb, var(--quote-ink) 20%, #1d2e3a),
+      #070c12 80%
     );
   box-shadow:
-    inset 0 1px rgb(255 255 255 / 22%),
-    0 18px 40px rgb(0 0 0 / 50%);
+    inset 0 1px rgb(255 255 255 / 14%),
+    0 16px 36px rgb(0 0 0 / 44%);
 }
 
 .command-support-tours .quote-exhibition .quote-leaf-copy p.quote-leaf-caption,
@@ -636,16 +515,9 @@
     box-shadow: none;
   }
 
-  .quote-ambience[data-playing="true"],
-  .quote-exhibition:has(.quote-ambience[data-playing="true"]) .quote-exhibition-acoustic-lamp {
+  .quote-ambience[data-playing="true"] {
     border-color: Highlight;
     box-shadow: none;
-  }
-
-  .quote-ambience-indicator > span {
-    background: Highlight;
-    box-shadow: none;
-    forced-color-adjust: none;
   }
 
   .quote-leaf-copy a.quote-source {

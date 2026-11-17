@@ -48,8 +48,6 @@ export const FarFromFormComparison = memo(function FarFromFormComparison({
                 data-selected={selected === key}
                 style={{ ["--ffs-accent" as string]: form.accent }}
               >
-                <span className="ffs-card-edge" aria-hidden="true" />
-                <span className="ffs-card-reticle" aria-hidden="true" />
                 <p>
                   <span>{String(index + 1).padStart(2, "0")}</span>
                 </p>

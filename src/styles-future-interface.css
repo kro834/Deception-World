@@ -165,7 +165,7 @@
 }
 
 .site-shell.film-edition .film-hero-identity::after {
-  background: repeating-linear-gradient(90deg, var(--future-cyan) 0 3px, transparent 3px 9px);
+  background: linear-gradient(90deg, var(--future-cyan), transparent);
 }
 
 .site-shell.film-edition :is(.story-heading h2, .section-title h2, .records-heading h2) {
@@ -573,13 +573,6 @@ html body .side-panel {
   --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 26px);
   --sp-pad-inline: clamp(20px, 4vw, 34px);
   scroll-padding-block: 140px 24px;
-}
-
-#site-side-panel.side-panel {
-  border-inline-start: 1px solid rgb(126 231 255 / 0.46);
-  box-shadow:
-    inset 1px 0 0 rgb(198 245 255 / 0.24),
-    inset 2px 0 18px -10px rgb(126 231 255 / 0.22);
 }
 
 @media (max-width: 760px) {

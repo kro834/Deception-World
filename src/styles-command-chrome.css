@@ -8,15 +8,15 @@ html[data-family] {
   --command-gold: #f2cf8d;
   --command-edge: rgb(var(--sh-l1-rgb) / 46%);
   --command-metal:
-    linear-gradient(118deg, transparent 22%, rgb(233 240 241 / 12%) 22.15%, transparent 47%),
+    linear-gradient(118deg, transparent 0%, rgb(233 240 241 / 4%) 40%, transparent 80%),
     linear-gradient(
       180deg,
-      rgb(233 240 241 / 16%),
-      rgb(233 240 241 / 2%) 45%,
-      rgb(0 0 0 / 34%) 46%,
+      rgb(233 240 241 / 10%),
+      rgb(233 240 241 / 3%) 42%,
+      rgb(0 0 0 / 18%) 56%,
       transparent 100%
     );
-  --command-ribs: repeating-linear-gradient(0deg, rgb(233 240 241 / 3%) 0 1px, transparent 1px 3px);
+  --command-ribs: linear-gradient(0deg, transparent, transparent);
   --command-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -37,7 +37,7 @@ html[data-family] {
     ),
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
     border-bottom-color: var(--command-edge);
-    background-color: var(--sh-ink);
+    background-color: #050b14;
     background-image:
       linear-gradient(90deg, var(--sh-l1) 0 4px, transparent 4px),
       linear-gradient(
@@ -49,23 +49,14 @@ html[data-family] {
         rgb(242 207 141 / 68%) 88%,
         transparent 100%
       ),
-      repeating-linear-gradient(
-        90deg,
-        rgb(233 240 241 / 24%) 0 1px,
-        transparent 1px 24px
-      ),
-      var(--command-metal), var(--command-ribs);
+      var(--command-metal);
     background-size:
       100% 100%,
       100% 2px,
-      100% 4px,
-      100% 100%,
       100% 100%;
     background-position:
       0 0,
       0 100%,
-      0 calc(100% - 2px),
-      0 0,
       0 0;
     background-repeat: no-repeat;
     box-shadow:
@@ -140,31 +131,19 @@ html[data-family] {
     background:
       linear-gradient(135deg, var(--command-silver) 0 6px, transparent 6px),
       linear-gradient(315deg, var(--sh-ink) 0 7px, transparent 7px),
-      linear-gradient(120deg, transparent 40%, rgb(255 255 255 / 44%) 40.5%, transparent 75%),
+      linear-gradient(120deg, transparent 26%, rgb(255 255 255 / 35%) 44%, transparent 72%),
       linear-gradient(180deg, rgb(233 240 241 / 68%), transparent 68%), var(--sh-l1) !important;
     box-shadow:
       inset 0 0 0 1px rgb(233 240 241 / 66%),
       3px 3px 0 rgb(var(--sh-l1-rgb) / 22%) !important;
   }
 
-  /* The sheet is still opaque. Large diagonal strata and fine brushed lines
-     replace the old all-over grid, keeping the published art on its tiles. */
+  /* The sheet is still opaque. Smooth subtle gradients replace the old hard-stop cuts. */
   html[data-family] body #site-side-panel.side-panel[data-liquid-pointer] {
     background:
-      linear-gradient(
-        120deg,
-        transparent 0 62%,
-        rgb(var(--sh-l1-rgb) / 7%) 62.1% 78%,
-        transparent 78.1%
-      ),
-      linear-gradient(
-        300deg,
-        transparent 0 73%,
-        rgb(var(--sh-l2-rgb) / 9%) 73.1% 88%,
-        transparent 88.1%
-      ),
+      linear-gradient(120deg, transparent 0%, rgb(var(--sh-l1-rgb) / 5%) 50%, transparent 80%),
       radial-gradient(ellipse 80% 55% at 0 0, rgb(233 240 241 / 10%), transparent 70%),
-      var(--command-ribs), var(--sh-ink) !important;
+      #050b14 !important;
   }
 
   /* Sticky head stays solid through its entire safe-area band. Keep its
@@ -189,7 +168,7 @@ html[data-family] {
     border-color: rgb(233 240 241 / 70%);
     background:
       linear-gradient(225deg, var(--sh-l1) 0 8px, transparent 8px),
-      linear-gradient(135deg, #f8fcfc, #a7bdc5 47%, #334651 48%, #1a2933 75%, #dce9eb);
+      linear-gradient(135deg, #f8fcfc, #a7bdc5 38%, #5a6e7a 48%, #1a2933 70%, #dce9eb);
     color: var(--sh-ink);
     text-shadow: 0 1px 0 rgb(255 255 255 / 44%);
     box-shadow: inset 0 0 0 3px rgb(0 0 0 / 24%);
@@ -215,7 +194,7 @@ html[data-family] {
 
   html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::before {
     height: 5px;
-    background: linear-gradient(115deg, var(--sh-l1) 0 42%, transparent 43% 58%, var(--sh-l2) 59%);
+    background: linear-gradient(115deg, var(--sh-l1) 0%, transparent 45%, transparent 55%, var(--sh-l2) 100%);
   }
 
   html[data-family] body #site-side-panel.side-panel > .side-panel-group > p::after {
@@ -502,7 +481,7 @@ html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
   gap: 28px;
   background:
     linear-gradient(135deg, rgb(var(--sh-l1-rgb) / 7%), transparent 40%),
-    linear-gradient(90deg, transparent 49.95%, rgb(145 189 215 / 5%) 50%, transparent 50.05%),
+    linear-gradient(90deg, transparent 42%, rgb(145 189 215 / 4%) 50%, transparent 58%),
     var(--atlas-ink) !important;
 }
 
@@ -612,7 +591,7 @@ html[data-family]
   width: 18px;
   height: 6px;
   flex-basis: 18px;
-  background: linear-gradient(110deg, var(--atlas-accent) 0 40%, transparent 42% 56%, #e9f6fb 58%);
+  background: linear-gradient(110deg, var(--atlas-accent) 0%, transparent 46%, transparent 54%, #e9f6fb 100%);
 }
 
 html[data-family]
@@ -1078,14 +1057,14 @@ html[data-family]
     [data-special-tiles]
     > a {
     min-height: clamp(240px, 28vw, 330px);
-    margin-bottom: 20px;
+    margin-bottom: 0;
   }
   html[data-family]
     body
     #site-side-panel#site-side-panel[data-command-atlas]
     [data-special-tiles]
     > a:nth-child(even) {
-    margin-top: 20px;
+    margin-top: 0;
     margin-bottom: 0;
   }
   html[data-family]

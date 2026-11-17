@@ -118,9 +118,6 @@ export function GalleryDisplaySettings({
   return (
     <details className="gallery-display-settings">
       <summary>
-        <span className="gallery-display-plate-tag" aria-hidden="true">
-          VIEWING
-        </span>
         <span className="gallery-display-heading">鑑賞の設定</span>
         <span className="gallery-display-current">
           {DENSITIES.find((choice) => choice.value === value.density)?.label}・

@@ -28,8 +28,6 @@
     linear-gradient(#f0cf86 0 0) calc(100% - 14px) calc(100% - 14px) / 2px 24px no-repeat,
     radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
     radial-gradient(ellipse 60% 34% at 50% 104%, rgb(255 79 195 / 8%), transparent 70%),
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
     #03060c;
 }
 
@@ -53,13 +51,13 @@
     linear-gradient(#f0cf86 0 0) 0 100% / 2px 22px no-repeat,
     linear-gradient(#f0cf86 0 0) 100% 100% / 22px 2px no-repeat,
     linear-gradient(#f0cf86 0 0) 100% 100% / 2px 22px no-repeat,
-    linear-gradient(172deg, rgb(244 251 255 / 8%) 0, rgb(122 232 255 / 4%) 6%, transparent 24%),
+    linear-gradient(172deg, rgb(244 251 255 / 6%) 0, rgb(122 232 255 / 3%) 6%, transparent 28%),
     linear-gradient(
       112deg,
-      transparent 56%,
-      rgb(255 79 195 / 5%) 66%,
-      rgb(122 232 255 / 4%) 74%,
-      transparent 84%
+      transparent 30%,
+      rgb(255 79 195 / 2.5%) 60%,
+      rgb(122 232 255 / 2.5%) 75%,
+      transparent 90%
     ),
     #08111c;
   box-shadow:
@@ -112,9 +110,7 @@
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: anywhere;
-  text-shadow:
-    -2px 0 rgb(255 92 200 / 26%),
-    2px 0 rgb(122 232 255 / 32%);
+  text-shadow: 0 0 20px rgb(122 232 255 / 22%);
 }
 
 .app-load-error p {

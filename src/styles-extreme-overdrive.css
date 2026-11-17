@@ -191,11 +191,11 @@
   background: conic-gradient(from 96deg, var(--exo-hot) 0 36deg, transparent 36deg);
   -webkit-mask: radial-gradient(
     circle closest-side,
-    transparent 0 98.4%,
-    #000 98.6% 100%,
+    transparent 0 97.5%,
+    #000 98.5% 100%,
     transparent 100%
   );
-  mask: radial-gradient(circle closest-side, transparent 0 98.4%, #000 98.6% 100%, transparent 100%);
+  mask: radial-gradient(circle closest-side, transparent 0 97.5%, #000 98.5% 100%, transparent 100%);
 }
 
 .rxs-page.rxs-page.exs-page .exo-zone::after {
@@ -206,11 +206,11 @@
     transparent 1.2deg 6deg
   );
   -webkit-mask:
-    radial-gradient(circle, transparent 0 46.6%, #000 46.8% 49.6%, transparent 49.8%),
+    radial-gradient(circle, transparent 0 46%, #000 47% 49.2%, transparent 50%),
     conic-gradient(from 96deg, #000 0 36deg, transparent 36deg);
   -webkit-mask-composite: source-in;
   mask:
-    radial-gradient(circle, transparent 0 46.6%, #000 46.8% 49.6%, transparent 49.8%),
+    radial-gradient(circle, transparent 0 46%, #000 47% 49.2%, transparent 50%),
     conic-gradient(from 96deg, #000 0 36deg, transparent 36deg);
   mask-composite: intersect;
 }
@@ -427,7 +427,7 @@
 }
 
 .rxs-page.rxs-page.exs-page .rxs-comparison-key .is-rexonance {
-  background: linear-gradient(90deg, var(--exo-gold) 60%, var(--exo-hot) 60%);
+  background: linear-gradient(90deg, var(--exo-gold) 48%, var(--exo-hot) 52%);
 }
 
 /* The result reads as a measured figure. */
@@ -514,9 +514,10 @@
    figure, moved by the cut's own curve. Molten gold core with layered thermal edge glow. */
 .rxs-page.rxs-page.exs-page .rxs-stage-panel figure > .exo-slash {
   position: absolute;
-  z-index: 3;
+  z-index: 0;
   inset: 0;
   background:
+    radial-gradient(ellipse at 50% 50%, rgb(255 213 122 / 12%), transparent 68%),
     linear-gradient(
         to bottom right,
         transparent calc(50% - 1px),
@@ -534,15 +535,8 @@
     linear-gradient(
         to bottom right,
         transparent calc(50% - 7px),
-        rgb(255 213 122 / 45%) 50%,
+        rgb(255 213 122 / 35%) 50%,
         transparent calc(50% + 7px)
-      )
-      0 0 / 24% 100% no-repeat,
-    linear-gradient(
-        to bottom right,
-        transparent calc(50% - 14px),
-        rgb(255 157 74 / 20%) 50%,
-        transparent calc(50% + 14px)
       )
       0 0 / 24% 100% no-repeat;
   opacity: 0;

@@ -139,14 +139,12 @@ export function CielPage() {
       <section className="manager-dossier" id="dossier-index" aria-label="シエルの人物資料">
         <DossierContents sections={SAGA.sections} />
         <div className="manager-sections">
-          {SAGA.sections.map((section, index) => (
+          {SAGA.sections.map((section) => (
             <article
               className="manager-copy-section dg-reveal"
-              data-record-role={index === 0 ? "lead" : "detail"}
               id={`character-section-${section.no}`}
               key={section.no}
             >
-              <i className="dossier-spine-mark" aria-hidden="true" />
               <div className="manager-copy-heading">
                 <span>{section.no}</span>
                 <p>{section.kicker}</p>

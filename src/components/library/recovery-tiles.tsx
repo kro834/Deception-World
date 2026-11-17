@@ -12,28 +12,28 @@ export function RecoveryTiles() {
     .find((entry) => entry && entry.path !== "/world");
   const tiles = [
     {
-      slot: "01",
+      key: "world",
       to: "/world",
       title: "ワールド",
-      code: "WORLD",
+      kicker: "物語の拠点",
       art: "/poster-card-03-delivery.webp",
     },
     {
-      slot: "02",
+      key: "library",
       to: recent?.path ?? "/library",
       hash: recent?.hash,
       title: recent?.title ?? "資料室・しおり",
-      code: recent ? "CONTINUE" : "LIBRARY",
+      kicker: "一覧・しおり",
       context: recent ? "最近読んだ資料" : undefined,
       art: recent
         ? pathArt(recent.path, recent.hash).src
         : "/rider-saga-rexonance-thumbnail-20260827-400.webp",
     },
     {
-      slot: "03",
+      key: "search",
       to: "/search",
       title: "全文検索",
-      code: "SEARCH",
+      kicker: "語句から探す",
       art: "/episode-03-deception-world-delivery-600.webp",
     },
   ];
@@ -42,10 +42,10 @@ export function RecoveryTiles() {
       <link rel="stylesheet" href={recoveryCss} precedence="default" />
       {tiles.map((tile) => (
         <Link
-          key={tile.code}
+          key={tile.key}
           to={tile.to}
           hash={tile.hash}
-          data-tile-code={tile.code}
+          data-recent={tile.context ? "true" : undefined}
           aria-label={tile.context ? `${tile.context}：${tile.title}` : undefined}
         >
           {tile.art ? (
@@ -57,11 +57,7 @@ export function RecoveryTiles() {
               alt=""
             />
           ) : null}
-          <span className="recovery-tile-plate" aria-hidden="true">
-            <i>SPEC-{tile.slot}</i>
-            <em>{tile.code}</em>
-          </span>
-          <small>{tile.context ?? tile.code}</small>
+          <small>{tile.context ?? tile.kicker}</small>
           <b>{tile.title}</b>
         </Link>
       ))}

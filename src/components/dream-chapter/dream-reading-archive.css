@@ -5,25 +5,15 @@
   padding: clamp(1.15rem, 3.6vw, 2.4rem);
   max-width: 72rem;
   min-width: 0;
-  border: 1px solid rgb(214 176 106 / 54%);
+  border: 1px solid rgb(214 176 106 / 46%);
   color: #f3e9d4;
   background:
-    linear-gradient(#f0d399 0 0) 0 0 / 28px 2px no-repeat,
-    linear-gradient(#f0d399 0 0) 0 0 / 2px 28px no-repeat,
-    linear-gradient(#f0d399 0 0) 100% 0 / 28px 2px no-repeat,
-    linear-gradient(#f0d399 0 0) 100% 0 / 2px 28px no-repeat,
-    linear-gradient(#f0d399 0 0) 0 100% / 28px 2px no-repeat,
-    linear-gradient(#f0d399 0 0) 0 100% / 2px 28px no-repeat,
-    linear-gradient(#f0d399 0 0) 100% 100% / 28px 2px no-repeat,
-    linear-gradient(#f0d399 0 0) 100% 100% / 2px 28px no-repeat,
-    repeating-linear-gradient(90deg, transparent 0 42px, rgb(255 224 182 / 2.2%) 42px 44px),
+    repeating-linear-gradient(90deg, transparent 0 42px, rgb(255 224 182 / 2%) 42px 44px),
     radial-gradient(65% 50% at 50% 0%, rgb(214 166 92 / 14%), transparent 72%),
     linear-gradient(168deg, #2b171c 0%, #1c1015 54%, #120a0e 100%);
   box-shadow:
-    inset 0 0 0 4px #10080c,
-    inset 0 0 0 5px rgb(214 176 106 / 30%),
-    inset 0 1px 0 rgb(255 240 206 / 24%),
-    0 24px 54px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 240 206 / 22%),
+    0 22px 48px rgb(0 0 0 / 48%);
   line-height: 1.8;
   overflow-wrap: anywhere;
   scroll-margin-top: 5rem;
@@ -66,7 +56,7 @@
 .dream-reading-archive-shield {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   min-height: 30px;
   padding: 4px 11px;
   border: 1px solid rgb(242 206 144 / 58%);
@@ -83,10 +73,12 @@
 }
 
 .dream-reading-archive-shield::before {
-  content: "◆";
-  color: #f6dc9f;
-  font-size: 12px;
-  line-height: 1;
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: #f6dc9f;
+  transform: rotate(45deg);
 }
 
 .dream-reading-archive-shield[data-shield-state="scoped"] {
@@ -103,101 +95,14 @@
   margin: 0.75rem 0;
 }
 
-.dream-reading-archive-gauge {
-  margin: 0 0 1.25rem;
-  padding: 12px;
-  border: 1px solid rgb(214 176 106 / 32%);
-  background: rgb(14 9 13 / 58%);
-  box-shadow: inset 0 1px 0 rgb(255 240 206 / 10%);
-}
-
-.dream-reading-archive-rail {
-  height: 6px;
-  margin: 0 0 10px;
-  border: 1px solid rgb(214 176 106 / 38%);
-  background: #0f090d;
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 72%);
-  overflow: hidden;
-}
-
-.dream-reading-archive-rail > i {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #9d241f 0%, #d8ae60 56%, #fae5b2 100%);
-  box-shadow: 0 0 10px rgb(243 224 176 / 42%);
-}
-
-.dream-reading-archive-steps {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.dream-reading-archive-step {
-  display: grid;
-  align-content: space-between;
-  gap: 4px;
-  min-width: 0;
-  min-height: 68px;
-  padding: 9px 10px;
-  border: 1px solid rgb(208 172 108 / 34%);
-  border-radius: 3px;
-  color: #dfd3be;
-  background:
-    linear-gradient(#c8a45c 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(180deg, #25171d 0%, #170e13 100%);
-  box-shadow: inset 0 1px 0 rgb(255 240 206 / 10%);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.dream-reading-archive-step[data-step-state="partial"] {
-  border-color: rgb(224 184 114 / 58%);
-  background:
-    linear-gradient(90deg, #d8ae60 50%, transparent 50%) 0 0 / 100% 2px no-repeat,
-    linear-gradient(180deg, #312022 0%, #1d1216 100%);
-}
-
-.dream-reading-archive-step[data-step-state="complete"] {
-  border-color: rgb(235 201 138 / 64%);
-  color: #fbf1dc;
-  background:
-    linear-gradient(90deg, #a62c2b, #e8c37d) 0 0 / 100% 2px no-repeat,
-    linear-gradient(180deg, #3a2026 0%, #241318 100%);
-}
-
-.dream-reading-archive-step[aria-pressed="true"] {
-  border-color: #fae4b2;
-  box-shadow:
-    inset 0 -3px 0 #e6c28e,
-    inset 0 1px 0 rgb(255 246 218 / 28%),
-    0 8px 18px rgb(0 0 0 / 36%);
-}
-
-.dream-reading-archive-step-no {
-  color: #e8c584;
-  font: 700 12px/1.3 var(--font-mono, monospace);
-  letter-spacing: 0.08em;
-}
-
-.dream-reading-archive-step-title {
-  color: #f8eedb;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.dream-reading-archive-step-status {
-  color: #cbbba1;
-  font-size: 12px;
-  line-height: 1.3;
-}
-
 .dream-reading-archive-controls {
   display: grid;
   gap: 0.55rem;
   max-width: 44rem;
+}
+
+.dream-reading-archive-controls > [role="status"]:empty {
+  display: none;
 }
 
 .dream-reading-archive label {
@@ -334,50 +239,15 @@
   opacity: 0.6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]) .dream-reading-archive-rail > i {
-    transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  html:not([data-world-effects="economy"]) .dream-reading-archive-step {
-    transition:
-      border-color 180ms ease,
-      box-shadow 200ms ease;
-  }
-}
-
 @media (hover: hover) and (pointer: fine) {
-  .dream-reading-archive-step:hover {
-    border-color: #f5dfab;
-    box-shadow:
-      inset 0 1px 0 rgb(255 246 218 / 24%),
-      0 6px 16px rgb(0 0 0 / 34%);
-  }
-
   .dream-reading-archive details:hover {
     border-color: rgb(235 201 138 / 62%);
   }
 }
 
-@media (max-width: 900px) {
-  .dream-reading-archive-steps {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 560px) {
-  .dream-reading-archive-steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .dream-reading-archive-plate {
     padding: 10px 12px;
-  }
-}
-
-@media (max-width: 359px) {
-  .dream-reading-archive-steps {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -388,20 +258,10 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .dream-reading-archive-rail > i,
-  .dream-reading-archive-step {
-    transition: none;
-  }
-}
-
 @media (forced-colors: active) {
   .dream-reading-archive,
   .dream-reading-archive-plate,
   .dream-reading-archive-shield,
-  .dream-reading-archive-gauge,
-  .dream-reading-archive-rail,
-  .dream-reading-archive-step,
   .dream-reading-archive details,
   .dream-reading-archive select,
   .dream-reading-archive input {
@@ -411,19 +271,14 @@
     box-shadow: none;
   }
 
+  .dream-reading-archive-shield::before {
+    background: CanvasText;
+  }
+
   .dream-reading-archive select {
     -webkit-appearance: auto;
     appearance: auto;
     background-image: none;
-  }
-
-  .dream-reading-archive-rail > i {
-    background: Highlight;
-  }
-
-  .dream-reading-archive-step[aria-pressed="true"] {
-    outline: 2px solid Highlight;
-    outline-offset: -2px;
   }
 
   .dream-reading-archive :focus-visible {

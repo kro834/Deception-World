@@ -1129,6 +1129,10 @@ export function GalleryPage() {
                   className="gallery-feature-open"
                   href={print.full}
                   onClick={(event) => openWork(event, print)}
+                  style={{
+                    ["--gallery-feature-ratio" as string]: (print.width / print.height).toFixed(3),
+                    ["--gallery-ar" as string]: (print.width / print.height).toFixed(3),
+                  }}
                   aria-haspopup="dialog"
                   aria-controls="gallery-viewer"
                   aria-label={`${numberFor(print)}を拡大して鑑賞`}
@@ -1156,7 +1160,13 @@ export function GalleryPage() {
                 </span>
               </p>
             </div>
-            <figure className="gallery-feature">
+            <figure
+              className="gallery-feature"
+              style={{
+                ["--gallery-feature-ratio" as string]: (featured.width / featured.height).toFixed(3),
+                ["--gallery-ar" as string]: (featured.width / featured.height).toFixed(3),
+              }}
+            >
               <figcaption tabIndex={0} aria-label="表示中の作品番号とタイトル">
                 <span>{numberFor(featured)}</span>
                 {titles[featured.id] && <span>{titles[featured.id]}</span>}

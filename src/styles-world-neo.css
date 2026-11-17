@@ -273,48 +273,21 @@
   font-family: var(--neo-mono);
 }
 
-/* ---------- Signal bands (MirageTicker structured telemetry) ---------- */
+/* ---------- Signal bands (MirageTicker) ---------- */
 .site-shell.film-edition .mr-ticker {
   pointer-events: none;
 }
-.site-shell.film-edition .mr-ticker-unit {
-  display: inline-flex;
-  align-items: baseline;
-  pointer-events: none;
-}
-.site-shell.film-edition .mr-ticker-idx {
-  font-weight: 400;
-  color: var(--neo-gold);
-  margin-right: 0.45em;
-  opacity: 0.88;
-}
-.site-shell.film-edition .mr-ticker-item {
-  font-style: normal;
-}
-.site-shell.film-edition .mr-ticker-sep {
-  font-style: normal;
-  color: var(--neo-muted);
-  margin-inline: 0.65em;
-  opacity: 0.62;
-}
-.site-shell.film-edition .mr-ticker-count {
-  font-weight: 400;
-  color: #ffffff;
-}
-.site-shell.film-edition .mr-ticker-glyph {
-  font-style: normal;
-  -webkit-text-stroke-color: var(--neo-gold);
-}
 
 /* ---------- Exploration portal cards (/world-map, /transformation-lab, /saga-cinema, /library) ---------- */
-.site-shell.film-edition .world-exploration {
+:is(.site-shell.film-edition, .world-page) .world-exploration {
   gap: 14px;
 }
 
-.site-shell.film-edition .world-exploration-card {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card {
   --portal-accent: #7ae8ff;
   min-height: 216px;
   padding: 20px 22px;
+  gap: 12px;
   border: 1px solid color-mix(in srgb, var(--portal-accent) 40%, rgb(215 234 252 / 22%));
   border-radius: 12px;
   background: #060f1b;
@@ -324,81 +297,45 @@
     0 18px 40px rgb(0 0 0 / 50%);
 }
 
-.site-shell.film-edition .world-exploration-card[data-portal="lab"] {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card[data-portal="lab"] {
   --portal-accent: #c6b2ff;
 }
 
-.site-shell.film-edition .world-exploration-card[data-portal="cinema"] {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card[data-portal="cinema"] {
   --portal-accent: #f0c47d;
 }
 
-.site-shell.film-edition .world-exploration-card[data-portal="library"] {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card[data-portal="library"] {
   --portal-accent: #7ce6c4;
 }
 
-.site-shell.film-edition .world-exploration-card::after {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card::after {
   background: linear-gradient(
     180deg,
-    rgb(4 10 18 / 58%) 0%,
-    rgb(4 10 18 / 18%) 38%,
+    rgb(4 10 18 / 36%) 0%,
+    rgb(4 10 18 / 16%) 38%,
     rgb(4 10 18 / 82%) 72%,
     rgb(3 8 16 / 96%) 100%
   );
 }
 
-.site-shell.film-edition .world-exploration-rim {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background:
-    linear-gradient(var(--portal-accent) 0 0) 12px 12px / 18px 1px no-repeat,
-    linear-gradient(var(--portal-accent) 0 0) 12px 12px / 1px 18px no-repeat,
-    linear-gradient(var(--neo-gold) 0 0) calc(100% - 12px) calc(100% - 12px) / 18px 1px no-repeat,
-    linear-gradient(var(--neo-gold) 0 0) calc(100% - 12px) calc(100% - 12px) / 1px 18px no-repeat,
-    linear-gradient(
-      132deg,
-      rgb(255 255 255 / 15%) 0%,
-      rgb(255 255 255 / 3%) 26%,
-      transparent 48%,
-      color-mix(in srgb, var(--portal-accent) 12%, transparent) 100%
-    );
-}
-
-.site-shell.film-edition .world-exploration-code {
-  position: absolute;
-  top: 14px;
-  left: 20px;
-  right: 20px;
-  z-index: 1;
-  pointer-events: none;
-  font-style: normal;
-  font-family: var(--neo-mono);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: 0.14em;
-  color: var(--portal-accent);
-  text-shadow: 0 2px 8px rgb(0 0 0 / 80%);
-}
-
-.site-shell.film-edition .world-exploration-card span {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card span {
   position: relative;
   z-index: 1;
+  min-width: 0;
   gap: 6px;
 }
 
-.site-shell.film-edition .world-exploration-card strong {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card strong {
   color: #f5fbff;
   text-shadow: 0 2px 12px rgb(0 0 0 / 75%);
 }
 
-.site-shell.film-edition .world-exploration-card small {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card small {
   color: #c9dce8;
 }
 
-.site-shell.film-edition .world-exploration-card b {
+:is(.site-shell.film-edition, .world-page) .world-exploration-card b {
   position: relative;
   z-index: 1;
   display: inline-grid;
@@ -982,15 +919,33 @@
   .site-shell.film-edition .rider-detail {
     background: rgb(9 19 31 / 96%);
   }
-  .site-shell.film-edition .world-exploration-card {
-    min-height: 186px;
+  :is(.site-shell.film-edition, .world-page) .world-exploration-card {
+    min-height: 182px;
     padding: 16px;
   }
-  .site-shell.film-edition .world-exploration-code {
-    top: 12px;
-    left: 14px;
-    right: 14px;
-    letter-spacing: 0.08em;
+}
+
+@media (max-width: 420px) {
+  :is(.site-shell.film-edition, .world-page) .world-exploration {
+    gap: 10px;
+  }
+  :is(.site-shell.film-edition, .world-page) .world-exploration-card {
+    min-height: 166px;
+    padding: 14px;
+    gap: 10px;
+  }
+  :is(.site-shell.film-edition, .world-page) .world-exploration-card b {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 380px) {
+  :is(.site-shell.film-edition, .world-page) .world-exploration {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :is(.site-shell.film-edition, .world-page) .world-exploration-card {
+    min-height: 148px;
   }
 }
 
@@ -1040,20 +995,16 @@
   .site-shell.film-edition .rider-detail {
     background: #0a1522;
   }
-  .site-shell.film-edition .hero::before,
-  .site-shell.film-edition .world-exploration-rim {
+  .site-shell.film-edition .hero::before {
     display: none;
   }
 }
 @media (forced-colors: active) {
-  .site-shell.film-edition .world-exploration-rim {
-    display: none;
-  }
-  .site-shell.film-edition .world-exploration-card {
+  :is(.site-shell.film-edition, .world-page) .world-exploration-card {
     border-color: ButtonBorder;
     box-shadow: none;
   }
-  .site-shell.film-edition .world-exploration-card b {
+  :is(.site-shell.film-edition, .world-page) .world-exploration-card b {
     border-color: LinkText;
     color: LinkText;
     background: Canvas;

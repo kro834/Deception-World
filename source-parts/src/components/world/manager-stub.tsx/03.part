@@ -1,4 +1,3 @@
-    stats: [
       { dt: "HEIGHT", dd: "203.6cm" },
       { dt: "WEIGHT", dd: "113.2kg" },
       { dt: "PUNCH", dd: "262.9t" },

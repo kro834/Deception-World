@@ -9,11 +9,38 @@ import {
   liquidButtonsOn,
   watchLiquidPointer,
 } from "@/lib/liquid-glass";
-import { watchLiquidControls } from "@/lib/liquid-glass-controls";
-import { MATERIALIZE_STRENGTH, watchLiquidCurvature } from "@/lib/liquid-glass-curvature";
-import { watchLiquidHold } from "@/lib/liquid-glass-hold";
-import { watchLiquidLight } from "@/lib/liquid-glass-light";
-import { watchLiquidTone } from "@/lib/liquid-glass-tone";
+
+const MATERIALIZE_STRENGTH = 0.45;
+
+function lazyWatch(load: () => Promise<(doc: Document) => () => void>) {
+  return (doc: Document) => {
+    let stopped = false;
+    let cleanup: (() => void) | undefined;
+    void load().then((watch) => {
+      if (!stopped) cleanup = watch(doc);
+    });
+    return () => {
+      stopped = true;
+      cleanup?.();
+    };
+  };
+}
+
+const watchLiquidControls = lazyWatch(() =>
+  import("@/lib/liquid-glass-controls").then((m) => m.watchLiquidControls),
+);
+const watchLiquidCurvature = lazyWatch(() =>
+  import("@/lib/liquid-glass-curvature").then((m) => m.watchLiquidCurvature),
+);
+const watchLiquidHold = lazyWatch(() =>
+  import("@/lib/liquid-glass-hold").then((m) => m.watchLiquidHold),
+);
+const watchLiquidLight = lazyWatch(() =>
+  import("@/lib/liquid-glass-light").then((m) => m.watchLiquidLight),
+);
+const watchLiquidTone = lazyWatch(() =>
+  import("@/lib/liquid-glass-tone").then((m) => m.watchLiquidTone),
+);
 
 /* The red channel is bent a little further than green and blue: a faint
    chromatic fringe at the rim, as a thick lens splits white light. These

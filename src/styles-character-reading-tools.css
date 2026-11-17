@@ -196,17 +196,9 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   top: 18px;
   bottom: 18px;
   left: 8px;
-  width: 5px;
-  background:
-    linear-gradient(var(--sd-accent, var(--manager-accent, #86d9ff)) 0 0) 0 0 / 5px 2px no-repeat,
-    linear-gradient(var(--sd-accent, var(--manager-accent, #86d9ff)) 0 0) 0 100% / 5px 2px
-      no-repeat,
-    repeating-linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 48%, transparent) 0 1px,
-      transparent 1px 12px
-    );
-  opacity: 0.72;
+  width: 1px;
+  background: color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 28%, transparent);
+  opacity: 0.6;
   pointer-events: none;
 }
 

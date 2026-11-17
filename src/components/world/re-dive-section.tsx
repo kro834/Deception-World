@@ -54,21 +54,11 @@ export const ReDiveSection = memo(
                 setFileOpen(true);
               }}
             >
-              <span className="rd-file-cover-decor" aria-hidden="true">
-                <span className="rd-decor-corner rd-decor-tl" />
-                <span className="rd-decor-corner rd-decor-tr" />
-                <span className="rd-decor-corner rd-decor-bl" />
-                <span className="rd-decor-corner rd-decor-br" />
-              </span>
               <span className="rd-file-mark" aria-hidden="true">
-                <span>CLASSIFIED</span>
+                <span>機密</span>
                 <i />
               </span>
               <span className="rd-file-cover-copy">
-                <span className="rd-file-terminal-badge" aria-hidden="true">
-                  <span>CLEARANCE: LV-5</span>
-                  <span>RECORD: AUTH-RESTRICTED</span>
-                </span>
                 <small>{RE_DIVE_CLASSIFIED_REPORT.edition}</small>
                 <strong>{RE_DIVE_CLASSIFIED_REPORT.title}</strong>
                 <span>記録者：{RE_DIVE_CLASSIFIED_REPORT.author}</span>

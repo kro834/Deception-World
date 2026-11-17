@@ -155,10 +155,9 @@ html[data-family="library"] body .library-page > header.library-topbar,
 html[data-family="library"] body .search-page > header.search-topbar,
 html[data-family="archive"] body .form-archive-page > header.form-archive-toolbar {
   border-bottom: 1px solid rgb(var(--sh-l1-rgb) / 18%);
-  background-color: var(--sh-ink);
+  background-color: #050b14;
   background-image:
     linear-gradient(90deg, var(--sh-l1) 0 3px, transparent 3px),
-    repeating-linear-gradient(90deg, rgb(var(--sh-l1-rgb) / 30%) 0 1px, transparent 1px 12px),
     linear-gradient(
       90deg,
       rgb(var(--sh-l1-rgb) / 8%),
@@ -168,11 +167,9 @@ html[data-family="archive"] body .form-archive-page > header.form-archive-toolba
     );
   background-size:
     100% 100%,
-    100% 4px,
     100% 100%;
   background-position:
     0 0,
-    0 100%,
     0 0;
   background-repeat: no-repeat;
   -webkit-backdrop-filter: none;
@@ -193,11 +190,6 @@ html[data-family="archive"] body .form-archive-page > header.form-archive-toolba
     --sh-bar-light: var(--world-atmosphere-accent, var(--sh-l1));
     background-image:
       linear-gradient(90deg, var(--sh-bar-light) 0 3px, transparent 3px),
-      repeating-linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--sh-bar-light) 30%, transparent) 0 1px,
-        transparent 1px 12px
-      ),
       linear-gradient(
         90deg,
         color-mix(in srgb, var(--sh-bar-light) 8%, transparent),

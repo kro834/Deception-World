@@ -27,7 +27,7 @@
     background-color: #070b11;
     box-shadow:
       0 1px 0 #000,
-      inset 0 1px 0 var(--astra-specular, rgb(255 255 255 / 8%));
+      inset 0 1px 0 rgb(242 234 221 / 10%);
   }
 
   html[data-family] body :is(.topbar, .manager-topbar) .brand b {
@@ -225,11 +225,6 @@
   }
 
   @media (hover: hover) and (pointer: fine) {
-    html[data-family] body #site-side-panel.side-panel .side-panel-links > :is(a, button):hover:not([aria-current]) {
-      border-color: var(--astra-rim, #cfb77d);
-      box-shadow: inset 0 1px 0 var(--astra-specular, rgb(242 234 221 / 30%));
-      color: #fff9ed;
-    }
     html[data-family="dossier"] body .manager-page :is(.form-pickup-card, .rider-special-site-card):hover {
       border-color: var(--astra-rim, #cfb77d);
       box-shadow:

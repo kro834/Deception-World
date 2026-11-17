@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
 import {
   exhibitionBrowsePage,
@@ -71,6 +71,7 @@ export function ExhibitionArtworkBrowser({
   const [query, setQuery] = useState("");
   const [format, setFormat] = useState<ExhibitionFormat>("all");
   const [requestedPage, setPage] = useState(() => Math.floor(currentIndex / PAGE_SIZE));
+  const searchInputId = useId();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const matches = findExhibitionArtworks(GALLERY_ARTWORKS, query, format);
@@ -107,10 +108,11 @@ export function ExhibitionArtworkBrowser({
         </a>
       </div>
       <div className="exhibition-shelf-filters">
-        <label className="exhibition-shelf-search">
-          <span>作品を探す</span>
+        <div className="exhibition-shelf-search">
+          <label htmlFor={searchInputId}>作品を探す</label>
           <div className="exhibition-shelf-search-field">
             <input
+              id={searchInputId}
               ref={searchRef}
               type="search"
               value={query}
@@ -135,7 +137,7 @@ export function ExhibitionArtworkBrowser({
               </button>
             ) : null}
           </div>
-        </label>
+        </div>
         <label>
           <span>構図</span>
           <select
@@ -190,7 +192,6 @@ export function ExhibitionArtworkBrowser({
                   />
                   {index === currentIndex ? (
                     <span className="exhibition-shelf-selected" role="status">
-                      <span className="exhibition-shelf-plate-crest" aria-hidden="true">◆</span>
                       展示中
                     </span>
                   ) : null}

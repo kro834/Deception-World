@@ -242,7 +242,7 @@ html .side-panel > .side-panel-head {
   padding: 8px 0 14px;
   margin-top: -8px;
   margin-bottom: 12px;
-  background: linear-gradient(180deg, rgba(7, 11, 18, 0.99) 0 76%, transparent);
+  background: #0d1320;
 }
 
 .world-column-tabs b,
@@ -1206,7 +1206,7 @@ br.tab-br {
   align-content: space-between;
   overflow: hidden;
   padding: 16px;
-  border: 1px dashed rgba(132, 203, 255, 0.16);
+  border: 1px solid rgba(132, 203, 255, 0.16);
   border-radius: 20px 34px 20px 12px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.022), transparent 60%), rgba(5, 9, 15, 0.5);
@@ -1218,10 +1218,10 @@ br.tab-br {
   content: "";
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    135deg,
-    transparent 0 17px,
-    rgba(255, 255, 255, 0.018) 17px 18px
+  background: radial-gradient(
+    circle at 50% 24%,
+    rgba(132, 203, 255, 0.06),
+    transparent 68%
   );
   pointer-events: none;
 }
@@ -2165,6 +2165,15 @@ button.manager-portrait-frame:focus-visible {
     height: 48px;
     min-width: 48px;
     min-height: 48px;
+  }
+
+  .form-pickup-copy {
+    padding: 20px 18px 22px;
+  }
+
+  .manager-page .manager-introduction h1,
+  .manager-page:not(.is-sovereign) .manager-introduction h1 {
+    font-size: clamp(34px, 12.5vw, 56px);
   }
 
   .manager-page:not(.is-sovereign) .manager-facts {
