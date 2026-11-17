@@ -58,6 +58,45 @@ test("one history entry per open viewer: Back closes it, a page close removes it
   );
 });
 
+test("viewer preserves browser history shortcuts and handles only ordinary arrows", () => {
+  const handler = page.match(
+    /onKeyDown=\{\(event\) => \{([\s\S]*?moveWork\(event\.key[\s\S]*?)\n {8}\}\}/,
+  )?.[1];
+  assert.ok(handler);
+  const run = new Function(
+    "event",
+    "moveWork",
+    "restoreFocusRef",
+    "HTMLInputElement",
+    "editing",
+    "confirmDelete",
+    "communityBusy",
+    handler,
+  );
+  const moves = [];
+  const focus = { current: false };
+  let prevented = 0;
+  const dispatch = (key, flags = {}) =>
+    run(
+      { key, target: {}, preventDefault: () => prevented++, ...flags },
+      (step) => moves.push(step),
+      focus,
+      class {},
+    );
+  for (const key of ["ArrowLeft", "ArrowRight"]) {
+    for (const flag of ["altKey", "metaKey", "ctrlKey", "shiftKey", "defaultPrevented"])
+      dispatch(key, { [flag]: true });
+  }
+  assert.deepEqual(moves, []);
+  assert.equal(prevented, 0);
+  assert.equal(focus.current, false);
+  dispatch("ArrowLeft");
+  dispatch("ArrowRight");
+  assert.deepEqual(moves, [-1, 1]);
+  assert.equal(prevented, 2);
+  assert.equal(focus.current, true);
+});
+
 test("the refresh control: in the pinned bar, busy rather than disabled, announced", () => {
   assert.match(
     page,

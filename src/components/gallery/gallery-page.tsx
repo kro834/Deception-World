@@ -1615,6 +1615,14 @@ export function GalleryPage() {
             return;
           if (event.key === "Escape") restoreFocusRef.current = true;
           if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+            if (
+              event.defaultPrevented ||
+              event.altKey ||
+              event.ctrlKey ||
+              event.metaKey ||
+              event.shiftKey
+            )
+              return;
             event.preventDefault();
             if (event.repeat) return;
             restoreFocusRef.current = true;

@@ -1,4 +1,36 @@
 // V8/Chromium heap data only: never retain a live browser Element while measuring.
+// Warm-up may release canvas backing stores. Permit that bounded change in the
+// labels without permitting a new image, listener, or growing native cohort.
+export function detachedResourceGrowth(before, after) {
+  const growth = [];
+  if (after.detachedNodes > before.detachedNodes)
+    growth.push({ target: "total", before: before.detachedNodes, after: after.detachedNodes });
+  const canvasSize = (label) => {
+    if (!label.startsWith("<canvas ")) return null;
+    const width = label.match(/\bwidth="(\d+)"/);
+    const height = label.match(/\bheight="(\d+)"/);
+    return width && height ? [Number(width[1]), Number(height[1])] : null;
+  };
+  let released = Object.entries(before.histogram).reduce((sum, [label, count]) => {
+    const size = canvasSize(label);
+    return (
+      sum +
+      (size?.every((value) => value > 0) ? Math.max(0, count - (after.histogram[label] ?? 0)) : 0)
+    );
+  }, 0);
+  for (const [label, count] of Object.entries(after.histogram)) {
+    const previous = before.histogram[label] ?? 0;
+    if (count <= previous) continue;
+    const size = canvasSize(label);
+    if (size?.every((value) => value === 0) && count - previous <= released) {
+      released -= count - previous;
+      continue;
+    }
+    growth.push({ target: label, before: previous, after: count });
+  }
+  return growth;
+}
+
 export function detachedDOMReport(snapshot, { allRetainers = false } = {}) {
   const { nodes, edges, strings } = snapshot;
   const meta = snapshot.snapshot.meta;
@@ -35,7 +67,9 @@ export function detachedDOMReport(snapshot, { allRetainers = false } = {}) {
     histogram,
     retainers: [],
   };
-  const targets = allRetainers ? detachedNodes.slice(0, 24) : mains.slice(0, 2);
+  // Full audits must inspect every off-document resource, including a leak that
+  // happens to appear after the diagnostic sample limit.
+  const targets = allRetainers ? detachedNodes : mains.slice(0, 2);
   if (!targets.length) return report;
 
   // Reverse only strong edges; a WeakRef must not be presented as a leak owner.

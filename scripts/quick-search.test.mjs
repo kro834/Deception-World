@@ -51,6 +51,7 @@ function quickSearchFixture() {
   let stateIndex = 0;
   let refIndex = 0;
   let tree;
+  let deferredQuery;
   const exports = {};
   const result = { document: { id: "zeus", category: "people", to: "/managers/zeus" } };
   runInNewContext(compiledDialog, {
@@ -72,7 +73,7 @@ function quickSearchFixture() {
           },
           useRef: (current) => (refs[refIndex++] ??= { current }),
           useMemo: (calculate) => calculate(),
-          useDeferredValue: (value) => value,
+          useDeferredValue: (value) => deferredQuery ?? value,
           useEffect() {},
         };
       if (name === "react/jsx-runtime")
@@ -88,7 +89,7 @@ function quickSearchFixture() {
         return { SEARCH_DOCUMENTS: [], SEARCH_CATEGORIES: [{ id: "all" }, { id: "people" }] };
       if (name === "./search-engine")
         return {
-          searchDocuments: (_, query) => (query === "ゼウス" ? [result] : []),
+          searchDocuments: (_, query) => (["ゼウス", "ライダー"].includes(query) ? [result] : []),
           suggestSearchQueries: () => [],
           groupSearchResults: (results) => [{ category: "people", results }],
         };
@@ -134,7 +135,8 @@ function quickSearchFixture() {
     frames,
     find,
     press,
-    type(query) {
+    type(query, deferred) {
+      deferredQuery = deferred;
       find((node) => node.type === "input").props.onChange({ target: { value: query } });
       render();
     },
@@ -224,6 +226,31 @@ test("IME confirmation and Enter without results do not launch all-results navig
   dialog.press("Enter");
   assert.deepEqual(dialog.events, []);
   assert.equal(dialog.frames.length, 0);
+});
+
+test("Enter uses the current query when the highlighted result belongs to the previous query", () => {
+  const dialog = quickSearchFixture();
+  dialog.type("ゼウス");
+  dialog.press("ArrowDown");
+  assert.equal(
+    dialog.find((node) => node.type === "input").props["aria-activedescendant"],
+    "qs-zeus",
+  );
+
+  dialog.type("未登録の検索語", "ゼウス");
+  dialog.press("Enter");
+  assert.deepEqual(dialog.events, []);
+  assert.equal(dialog.frames.length, 0);
+
+  dialog.type("ライダー", "ゼウス");
+  dialog.press("Enter");
+  assert.deepEqual(dialog.events, [["remember", "ライダー"], ["close"]]);
+  dialog.flushFrame();
+  const [kind, options] = dialog.events.at(-1);
+  assert.equal(kind, "go");
+  assert.equal(options.to, "/search");
+  assert.equal(options.search.q, "ライダー");
+  assert.equal(options.focusDestination, true);
 });
 
 test('"/" and Ctrl/⌘+K open it; other keys, IME and repeats do not', () => {

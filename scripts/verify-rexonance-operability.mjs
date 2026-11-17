@@ -213,14 +213,23 @@ try {
         await page.keyboard.press(key);
         await verifyStage(page, stage);
         assert.deepEqual(await verifyStageCopy(page), [], `${stage}: text must fit the viewport`);
+        const panel = page.locator(".rxs-stage-panel");
+        assert.equal(
+          await panel.locator(":scope > div > h3").count(),
+          1,
+          `${stage}: form copy must have one leading heading`,
+        );
+        assert.equal(
+          await panel.locator(":scope > figure").count(),
+          1,
+          `${stage}: form artwork must exist`,
+        );
         copyStarts.push(
-          await page
-            .locator(".rxs-stage-panel")
-            .evaluate(
-              (panel) =>
-                panel.querySelector(":scope > div > small").getBoundingClientRect().top -
-                panel.querySelector("figure").getBoundingClientRect().top,
-            ),
+          await panel.evaluate(
+            (panel) =>
+              panel.querySelector(":scope > div > h3").getBoundingClientRect().top -
+              panel.querySelector("figure").getBoundingClientRect().top,
+          ),
         );
       }
       if (profile.viewport.width >= 901) {

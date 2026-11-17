@@ -150,14 +150,21 @@ export default function QuickSearchDialog({
     window.requestAnimationFrame(action);
   };
 
+  const openAllResults = (query: string, fromKeyboard: boolean) => {
+    if (query) rememberSearch(query);
+    closeThen(
+      () => void go({ to: "/search", search: { q: query }, focusDestination: fromKeyboard }),
+    );
+  };
+
   const choose = (option: Option, fromKeyboard: boolean) => {
     if (option.kind === "recent") {
       setDraft(option.query);
       inputRef.current?.focus();
       return;
     }
-    if (trimmed) rememberSearch(trimmed);
-    if (option.kind === "result")
+    if (option.kind === "result") {
+      if (trimmed) rememberSearch(trimmed);
       closeThen(
         () =>
           void openResult(
@@ -167,10 +174,7 @@ export default function QuickSearchDialog({
             trimmed ? `「${trimmed}」` : undefined,
           ),
       );
-    else if (option.kind === "all")
-      closeThen(
-        () => void go({ to: "/search", search: { q: trimmed }, focusDestination: fromKeyboard }),
-      );
+    } else if (option.kind === "all") openAllResults(trimmed, fromKeyboard);
     else closeThen(() => void go({ to: option.to, focusDestination: fromKeyboard }));
   };
 
@@ -187,6 +191,12 @@ export default function QuickSearchDialog({
       );
     } else if (event.key === "Enter") {
       event.preventDefault();
+      const query = draft.trim();
+      if (query !== trimmed) {
+        // The selected option can still belong to the prior query during a deferred render.
+        if (query && searchDocuments(SEARCH_DOCUMENTS, query).length) openAllResults(query, true);
+        return;
+      }
       const target = activeOption ?? (trimmed && results.length ? options.at(-1) : undefined);
       if (target) choose(target, true);
     } else if (event.key === "Escape" && draft) {

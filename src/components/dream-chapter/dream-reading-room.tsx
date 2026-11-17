@@ -217,6 +217,8 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
   const referenceOrigin = useRef(0);
   const dialog = useRef<HTMLDialogElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
+  const chapterHeading = useRef<HTMLHeadingElement>(null);
+  const focusNextHeading = useRef(false);
   const closeButton = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
   const firstLanding = useRef(initial.bookmark?.paragraph ?? 1);
@@ -353,6 +355,10 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
     } else scroller.scrollTop = 0;
     pinned.current = landing > 1 && target ? { no: landing, top: scroller.scrollTop } : null;
     setParagraph(landing);
+    if (focusNextHeading.current) {
+      focusNextHeading.current = false;
+      chapterHeading.current?.focus({ preventScroll: true });
+    }
   }, [chapter]);
 
   useLayoutEffect(() => {
@@ -380,12 +386,17 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
     setStatus("");
     setChapter(no);
   };
+  const turnPage = (no: string) => {
+    focusNextHeading.current = true;
+    select(no);
+  };
   const jumpToParagraph = (targetNo: number) => {
     const scroller = viewport.current;
     const target = scroller?.querySelector<HTMLElement>(`[data-room-paragraph="${targetNo}"]`);
     if (scroller && target) {
       scroller.scrollTop +=
         target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 24;
+      target.focus({ preventScroll: true });
       pinned.current = { no: targetNo, top: scroller.scrollTop };
       readingViewport.current?.remember();
     }
@@ -533,18 +544,20 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
             ref={viewport}
             className="dream-reading-scroll"
             tabIndex={0}
+            role="region"
             aria-label={`CASE ${chapter}「${episode.title}」の本文`}
           >
             <article className="dream-reading-paper" key={chapter}>
               <header>
                 <p lang="en">CASE 0{chapter}</p>
-                <h3>{episode.title}</h3>
+                <h3 ref={chapterHeading} tabIndex={-1}>{episode.title}</h3>
                 <span>{episode.lead}</span>
               </header>
               {episode.paragraphs.map((text, i) => (
                 <Fragment key={text}>
                   <p
                     key={text}
+                    tabIndex={-1}
                     data-room-paragraph={i + 1}
                     data-bookmarked={
                       bookmark?.caseNo === chapter && bookmark?.paragraph === i + 1
@@ -630,14 +643,14 @@ export function DreamReadingRoom({ trigger, onClose, personTarget }: Props) {
                   <button
                     type="button"
                     disabled={index === 0}
-                    onClick={() => select(DREAM_CASES[index - 1].no)}
+                    onClick={() => turnPage(DREAM_CASES[index - 1].no)}
                   >
                     ← 前の章
                   </button>
                   <button
                     type="button"
                     disabled={index === DREAM_CASES.length - 1}
-                    onClick={() => select(DREAM_CASES[index + 1].no)}
+                    onClick={() => turnPage(DREAM_CASES[index + 1].no)}
                   >
                     次の章 →
                   </button>
