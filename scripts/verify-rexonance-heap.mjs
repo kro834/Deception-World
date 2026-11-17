@@ -37,6 +37,38 @@ async function settle() {
   await page.waitForTimeout(1500);
 }
 
+// A return to Library can resume the shared suit kit's idle preparation. Its
+// partially built canvases are intentionally retained until preparation ends,
+// so sampling mid-job compares different phases rather than leaks. Observe
+// the existing hook: reading ready() neither starts nor releases the kit.
+async function settleNanitePreparation() {
+  const handle = await page.waitForFunction(
+    () =>
+      performance.getEntriesByType("resource").find((entry) =>
+        /\/rexonance-suit-extras-hook-[A-Za-z0-9_-]{8}\.js(?:\?.*)?$/.test(entry.name),
+      )?.name,
+    undefined,
+    { timeout: 60000 },
+  );
+  const url = await handle.jsonValue();
+  await handle.dispose();
+  const ready = async (hookUrl) => {
+    const hook = await import(hookUrl);
+    // The production chunk minifies export names; its read-only getter has
+    // zero parameters, whereas its registration function takes one.
+    const getters = Object.values(hook).filter(
+      (value) => typeof value === "function" && value.length === 0,
+    );
+    if (getters.length !== 1) throw new Error("Unexpected suit-extras hook exports");
+    return getters[0]()?.ready() === true;
+  };
+  await page.waitForFunction(ready, url, { timeout: 120000, polling: 500 });
+  // The published sheets are followed by idle priming on a temporary canvas.
+  // Keep the existing exact cohort assertions to catch unfinished cleanup.
+  await page.waitForTimeout(3000);
+  assert.equal(await page.evaluate(ready, url), true, "nanite preparation must remain ready");
+}
+
 async function go(path) {
   await page.locator(".side-panel-trigger").first().click();
   await page
@@ -91,6 +123,7 @@ async function measure(cycle) {
 }
 
 try {
+  await page.addInitScript(() => performance.setResourceTimingBufferSize(5000));
   await page.goto(`${base}/library`, { waitUntil: "load" });
   await settle();
   initialTimeOrigin = await page.evaluate(() => performance.timeOrigin);
@@ -126,6 +159,7 @@ try {
       while ((node = walker.nextNode())) refs.push(new WeakRef(node));
     });
     await go("/library");
+    await settleNanitePreparation();
     await measure(cycle);
   }
   if (process.env.HEAP_REPORT)

@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 
 // The World topbar's section marker (aria-current="location" on STORY /
 // RIDERS / RECORDS, world-home.tsx WorldSectionNav). An anchor jump lands a
-// section at its scroll-margin-top (96px + safe area, styles-world/21.css),
+// section at its scroll-margin-top, which follows the measured header height,
 // and the marker must name that section on every viewport, landscape phones
 // included (their toolbar-less height is 340-430px). A small height-only
 // resize with no scroll (a window edge, split screen, DeX) re-syncs it.
@@ -50,12 +50,27 @@ const current = (page) =>
       null,
   );
 
-async function rest(page) {
+function scrollPosition(section) {
+  const y = Math.round(window.scrollY);
+  if (!section) return { y };
+  const element = document.getElementById(section);
+  return {
+    y,
+    top: Math.round(element.getBoundingClientRect().top),
+    margin: Math.round(parseFloat(getComputedStyle(element).scrollMarginTop)),
+  };
+}
+
+const landingTolerance = 2;
+
+async function rest(page, section = null) {
   let last = -1;
   for (let tick = 0; tick < 40; tick += 1) {
     await page.waitForTimeout(100);
-    const y = await page.evaluate(() => Math.round(window.scrollY));
-    if (y === last) break;
+    const { y, top, margin } = await page.evaluate(scrollPosition, section);
+    // A long smooth jump can stall for more than one sample before moving
+    // again. Only count stationary samples at the expected landing.
+    if (y === last && (!section || Math.abs(top - margin) <= landingTolerance)) break;
     last = y;
   }
   await page.waitForTimeout(250);
@@ -82,21 +97,15 @@ for (const viewport of [
     const link = page.locator(`.topbar nav a[href="#${id}"]`);
     if (await link.isVisible()) await link.click();
     else await link.evaluate((anchor) => anchor.click());
-    await rest(page);
-    const landing = await page.evaluate((section) => {
-      const element = document.getElementById(section);
-      return {
-        top: Math.round(element.getBoundingClientRect().top),
-        margin: Math.round(parseFloat(getComputedStyle(element).scrollMarginTop)),
-      };
-    }, id);
+    await rest(page, id);
+    const { top, margin } = await page.evaluate(scrollPosition, id);
     const marked = await current(page);
     assert.ok(
-      Math.abs(landing.top - landing.margin) <= 2,
-      `${viewport.name} #${id}: landed at ${landing.top}, scroll-margin ${landing.margin}`,
+      Math.abs(top - margin) <= landingTolerance,
+      `${viewport.name} #${id}: landed at ${top}, scroll-margin ${margin}`,
     );
     assert.equal(marked, `#${id}`, `${viewport.name} #${id}: aria-current ${marked}`);
-    landings.push({ id, ...landing, marked });
+    landings.push({ id, top, margin, marked });
   }
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ check: "anchor-landing", name: viewport.name, landings }));

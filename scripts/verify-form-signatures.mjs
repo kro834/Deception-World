@@ -43,6 +43,7 @@ try {
     { width: 320, height: 740 },
     { width: 390, height: 844 },
     { width: 1024, height: 768 },
+    { width: 1280, height: 800 },
     { width: 1440, height: 900 },
     { width: 320, height: 740, motion: "reduce" },
     { width: 390, height: 844, economy: true },
@@ -120,8 +121,12 @@ try {
       });
       assert.ok(await image.evaluate((el) => el.complete && el.naturalWidth > 0));
       await page.screenshot({ path: `${output}/${label}-${theme.id}-card.png` });
-      const opener = card.locator(".form-pickup-plus");
-      if (scenario.width <= 1024) await opener.locator(".ios-slide-open-label").tap();
+      const opener = card.getByRole("button", { name: /をピックアップ$/ });
+      // The magnifying lens mirrors this label. Tap the visible track label
+      // to exercise pointer activation on the body of the slider.
+      const trackLabel = opener.locator(":scope > .ios-slide-open-label");
+      assert.equal(await trackLabel.innerText(), "フォーム詳細");
+      if (scenario.width <= 1024) await trackLabel.tap();
       else {
         await opener.focus();
         await opener.press("Enter");

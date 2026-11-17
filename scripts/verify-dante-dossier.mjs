@@ -27,8 +27,13 @@ try {
     assert.match(await page.title(), /ダンテ/);
     assert.equal(await page.locator("h1 .manager-display-name").textContent(), "ダンテ／ヴァルグ");
     assert.equal(await page.locator('[aria-label="ヴァルグの人物録"] > div').count(), 10);
-    for (const name of ["原圧", "界外実体", "重勢", "不退", "深紅冠", "重相復元", "存在捕食", "認知追跡"])
-      assert.equal(await page.getByRole("heading", { name, exact: true }).count(), 1);
+    for (const name of ["原圧", "界外実体", "重勢", "不退", "深紅冠", "重相復元", "存在捕食", "認知追跡"]) {
+      // Offscreen chapters use content-visibility. Read each as the visitor reaches it.
+      await show(page.locator(".manager-copy-heading h2").filter({ hasText: new RegExp(`^${name}$`) }));
+      const heading = page.getByRole("heading", { name, exact: true });
+      await heading.waitFor({ state: "visible" });
+      assert.equal(await heading.count(), 1);
+    }
     assert.equal(await page.locator(".manager-copy-section").count(), 17);
     const varg = page.locator(".varg-portrait img");
     await show(varg);
@@ -81,7 +86,7 @@ try {
       await dialog.getByRole("button", { name: "閉じる", exact: true }).click();
       await dialog.waitFor({ state: "hidden" });
     }
-    for (const selector of [".manager-back", ".dossier-index-return"]) {
+    for (const selector of [".manager-back", '.dossier-index-return[href="/world#manager-archive-dogs"]']) {
       const back = page.locator(selector);
       await show(back);
       await back.click();

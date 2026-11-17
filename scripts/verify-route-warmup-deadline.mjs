@@ -32,9 +32,13 @@ try {
         await route.continue().catch(() => undefined);
       };
       const chunk = destination === "saga" ? "_id" : destination;
-      await page.route(`**/assets/${chunk}-*.js`, holdChunk);
+      // Vite emits an eight-character content hash. Match only the route
+      // module, not similarly prefixed chunks such as zeus-button or
+      // form-archive-index, which cannot prove the route preload stalled.
+      const chunkPattern = new RegExp(`/assets/${chunk}-[A-Za-z0-9_-]{8}\\.js(?:\\?.*)?$`);
+      await page.route(chunkPattern, holdChunk);
       if (destination === "zeus") {
-        await page.locator('a[href="/managers/zeus"]').first().click();
+        await page.locator('#manager-panel-0 a.signal[href="/managers/zeus"]').click();
       } else if (destination === "saga") {
         await page.locator(".side-panel-trigger").click();
         await page.locator('.side-panel-links a[href="/riders/saga"]').click();
@@ -73,7 +77,7 @@ try {
       );
       await warning.getByRole("button", { name: "閉じる" }).click();
       release();
-      await page.unroute(`**/assets/${chunk}-*.js`, holdChunk);
+      await page.unroute(chunkPattern, holdChunk);
       await page.waitForTimeout(1500);
       assert.equal(
         new URL(page.url()).pathname,
