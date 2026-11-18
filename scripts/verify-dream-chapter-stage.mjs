@@ -30,16 +30,23 @@ for (const [name, engine, width, height, touch] of matrix) {
     const stage = page.locator(".dream-chapter-stage");
     await stage.locator(".dream-chapter-stage-chapters").waitFor();
     await page.waitForTimeout(800);
+    await page
+      .getByRole("navigation", { name: "DREAM CHAPTER セクション", exact: true })
+      .getByRole("link", { name: "物語", exact: true })
+      .click();
+    await page.waitForURL(`${base}/dream-chapter#cases`);
     const entrance = page
       .getByRole("navigation", { name: "物語の案内", exact: true })
       .getByRole("link", { name: "舞台で章をめくる", exact: true });
     assert.equal(await entrance.getAttribute("href"), "#dream-chapter-stage");
+    await entrance.scrollIntoViewIfNeeded();
     const entranceBox = await entrance.boundingBox();
     assert(
       entranceBox && entranceBox.width >= 44 && entranceBox.height >= 44,
       "stage entrance fits touch",
     );
-    await entrance.click();
+    if (touch) await entrance.tap();
+    else await entrance.click();
     await page.waitForFunction(() => location.hash === "#dream-chapter-stage");
     await page.waitForFunction(
       () => {
