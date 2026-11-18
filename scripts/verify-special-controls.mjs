@@ -128,7 +128,7 @@ async function checkLandscapeHero(route, actionSelector) {
     await page.goto(base + route);
     await page.locator(".rxs-hero h1").waitFor();
     await page.evaluate(() => document.fonts.ready);
-    for (const viewport of [{ width: 667, height: 375 }, { width: 844, height: 390 }]) {
+    for (const viewport of [{ width: 568, height: 320 }, { width: 667, height: 375 }, { width: 844, height: 390 }]) {
       await page.setViewportSize(viewport);
       const geometry = await page.evaluate((action) => {
         const rect = (selector) => document.querySelector(selector).getBoundingClientRect();

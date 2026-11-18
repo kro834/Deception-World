@@ -654,13 +654,17 @@
   }
 
   .rxs-page.rxs-page.ffs-page > .ffs-hero .ffs-hero-rail {
+    display: grid;
+    grid-template-columns: max-content minmax(0, max-content);
+    justify-content: start;
     gap: 8px;
     margin-block-start: 14px;
   }
 
   .rxs-page.rxs-page.ffs-page > .ffs-hero .ffs-hero-rail a {
+    gap: 10px;
     min-width: 0;
-    padding-inline: 12px;
+    padding: 8px 12px;
   }
 
   .rxs-page.rxs-page.ffs-page > .ffs-hero > .rxs-scroll-cue {
@@ -675,6 +679,6 @@
    on screen on arrival. The measured navigation clearance still applies. */
 @media (pointer: coarse) and (orientation: landscape) and (min-width: 568px) and (max-height: 360px) {
   .rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-subchapter, .ffs-suitup) {
-    padding-block-start: clamp(64px, 22svh, 88px);
+    padding-block-start: clamp(48px, 16svh, 64px);
   }
 }
