@@ -862,6 +862,20 @@ const ruleFor = (rules, part, at = "") => {
   return Object.assign({}, ...found.map((rule) => rule.decls));
 };
 
+test("portrait phone playback panels keep both actions and four speed targets on separate rows", () => {
+  const rules = rulesOf(read("src/styles-assembly-movie.css"));
+  const phone = "@media (max-width: 479.98px) and (orientation: portrait)";
+  const row = ruleFor(rules, ".rzn-movie-row", phone);
+  const speeds = ruleFor(rules, ".rzn-movie-speeds", phone);
+  assert.equal(row["grid-template-columns"], "repeat(2, minmax(0, 1fr))");
+  assert.equal(speeds["grid-column"], "1 / -1");
+  assert.equal(speeds["grid-template-columns"], "repeat(4, minmax(0, 1fr))");
+  for (const selector of [".rzn-movie-row > button", ".rzn-movie-speeds > button"]) {
+    assert.equal(ruleFor(rules, selector, phone)["min-height"], "44px");
+  }
+  assert.equal(ruleFor(rules, ".rzn-movie-seek > input", phone).height, "44px");
+});
+
 test("placement rules: a click-through fixed layer; the sheet docked beside the figure; the pill only where the sheet would stand over it", () => {
   const css = read("src/styles-assembly-movie.css");
   const rules = rulesOf(css);

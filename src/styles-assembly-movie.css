@@ -912,6 +912,32 @@ html[data-family="special"]
   }
 }
 
+/* Keep Japanese action labels whole and give each speed its own touch target. */
+@media (max-width: 479.98px) and (orientation: portrait) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-row > button,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-speeds > button {
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-speeds {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: 100%;
+    margin: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie:is([data-site="rexonance"], [data-site="far-from"]) .rzn-movie-seek > input {
+    height: 44px;
+  }
+}
+
 /* Short landscapes (phones on their side): the pill bottom-left, the sheet
    above it, the figure standing between the columns. */
 @media (orientation: landscape) and (max-height: 540px) and (max-width: 1099.98px) {

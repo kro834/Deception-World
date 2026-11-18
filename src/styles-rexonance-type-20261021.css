@@ -239,6 +239,16 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
     0 18px 48px rgb(0 0 0 / 45%);
 }
 
+@media (pointer: coarse) and (orientation: landscape) and (min-width: 568px) and (max-width: 1099px) and (max-height: 540px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
+    font-size: clamp(34px, 11svh, 60px);
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 > span {
+    font-size: clamp(20px, 4vw, 34px);
+  }
+}
+
 /* The Latin name stays forged (gold); only its seat under the Mincho moves. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 > span {
   margin-bottom: 0.22em;

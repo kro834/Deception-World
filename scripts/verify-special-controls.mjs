@@ -118,7 +118,44 @@ async function checkTextEnlargement(route, width) {
   }
 }
 
+async function checkLandscapeHero(route, actionSelector) {
+  const page = await browser.newPage({
+    viewport: { width: 375, height: 667 },
+    isMobile: true,
+    hasTouch: true,
+  });
+  try {
+    await page.goto(base + route);
+    await page.locator(".rxs-hero h1").waitFor();
+    await page.evaluate(() => document.fonts.ready);
+    for (const viewport of [{ width: 667, height: 375 }, { width: 844, height: 390 }]) {
+      await page.setViewportSize(viewport);
+      const geometry = await page.evaluate((action) => {
+        const rect = (selector) => document.querySelector(selector).getBoundingClientRect();
+        const title = rect(".rxs-hero h1");
+        const button = rect(action);
+        return {
+          top: title.top,
+          bottom: title.bottom,
+          buttonBottom: button.bottom,
+          navBottom: rect(".rxs-local-nav").bottom,
+          viewportHeight: innerHeight,
+        };
+      }, actionSelector);
+      assert.ok(
+        geometry.top >= geometry.navBottom - 1 && geometry.bottom <= viewport.height &&
+          geometry.buttonBottom <= viewport.height,
+        `${route} landscape ${viewport.width}px: ${JSON.stringify(geometry)}`,
+      );
+    }
+  } finally {
+    await page.close();
+  }
+}
+
 try {
+  await checkLandscapeHero("/rexonance-saga", ".rxe-hero-primary");
+  await checkLandscapeHero("/far-from-saga", ".ffs-hero-primary");
   for (const width of [320, 390, 834, 1024, 1440, 1920]) {
     const page = await browser.newPage({
       viewport: { width, height: 844 },
