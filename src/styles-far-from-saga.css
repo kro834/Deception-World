@@ -160,6 +160,42 @@ html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion
   --mx-progress-to: #ffd77a;
 }
 
+/* The chapter targets reserve the measured bar height on both direct
+   links and in-page jumps. Keep the document from adding a second offset. */
+html:has(.rxs-page.ffs-page) {
+  scroll-padding-top: 0;
+  scroll-behavior: auto;
+}
+
+.rxs-page.rxs-page.ffs-page {
+  --rxs-local-nav-reserve: 77px;
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.ffs-page {
+    --rxs-local-nav-reserve: calc(65px + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  .rxs-page.rxs-page.ffs-page {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
+.rxs-page.rxs-page.ffs-page
+  :is(.rxs-section[id], #far-from-assembly-runway, .ffs-report[id], .ffs-report details[id]) {
+  scroll-margin-block-start: calc(var(--rxs-local-nav-reserve) + 24px);
+}
+
+.rxs-page.rxs-page.ffs-page
+  :is(.rxs-hero, .rxs-section)
+  :is(a[href], button, input, select, summary, [tabindex="0"]) {
+  scroll-margin-block-start: calc(var(--rxs-local-nav-reserve) + 12px);
+  scroll-margin-block-end: 16px;
+}
+
 /* ---------- Local bar ---------- */
 .rxs-page.rxs-page.ffs-page .rxs-local-nav {
   border-bottom-color: rgb(127 230 255 / 14%);

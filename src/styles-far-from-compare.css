@@ -1001,7 +1001,6 @@
     inset 0 1px 0 rgb(127 230 255 / 16%),
     inset 0 0 40px rgb(0 0 0 / 50%),
     0 16px 44px -16px rgb(0 0 0 / 80%);
-  scroll-margin-top: 84px;
 }
 
 .ffs-page .ffs-report::before {

@@ -6,6 +6,8 @@ import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome"
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { FINAL_STAGE_ENTER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { initRail } from "@/lib/liquid/boot.js";
+import { mountExtremeNavReserve as mountNavReserve } from "@/lib/extreme-motion.js";
+import { mountRexonanceAnchorNavigation as mountChapterNavigation } from "@/lib/rexonance-anchor-navigation.js";
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { mountFarFromFonts } from "@/lib/far-from-fonts";
 import { FAR_FROM_SAGA, type Article } from "@/components/final-stage/final-stage-data";
@@ -305,6 +307,8 @@ export function FarFromSaga() {
   const activeArt = ultraDeploys ? FAR_FROM_SAGA_ULTRA_BASE : FAR_FROM_SAGA_ARTWORK[stage];
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;
 
+  useLayoutEffect(() => mountNavReserve(pageRef.current), []);
+  useEffect(() => mountChapterNavigation(pageRef.current), []);
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
 
   // The Japanese display face, applied after paint (src/lib/far-from-fonts.ts),

@@ -1346,7 +1346,10 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame {
     --rzn-fig-b: 0.18;
   }
+}
 
+/* Keep the completed form opposite the playback control as the selector enters. */
+@media (max-width: 640px) and (orientation: portrait) {
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-hud {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto auto;
@@ -1355,8 +1358,12 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp {
     grid-column: 1 / -1;
     grid-row: 3;
-    justify-self: end;
+    justify-self: start;
     margin: 0;
+  }
+
+  html[data-family="special"] body .rxs-page.ffs-page:has(.rzn-movie[data-lifted]) .rzn-suitup .rzn-stamp {
+    justify-self: end;
   }
 
   html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup .rzn-stamp > b {
