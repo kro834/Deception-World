@@ -8,7 +8,7 @@ const { synopsis } = WORLD_EPISODE_NOTES.find(({ no }) => no === "04");
 test("EP4 carries its November 1 events and their uncertainties into the continuation", () => {
   const earlier = synopsis.slice(0, 5).join("\n");
   assert.match(earlier, /六詠が世界を融合させているのではないかと考える/);
-  assert.match(earlier, /慶弥とは去年の夢で共闘/);
+  assert.match(earlier, /慶弥とは去年、夢の中で共闘/);
   assert.match(earlier, /朱い海の底.*水面に上がった/);
   assert.match(earlier, /リミッターが外されており、使う者の命にも関わる/);
   assert.match(earlier, /ローアとジェームズを連れ、三人で向かう/);

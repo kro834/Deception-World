@@ -643,7 +643,7 @@ export function EpisodeNotes() {
     <div className="wa-inner">
       <ChapterOpener no="06" />
       <AnnexHeading id="episode-notes-title" no="06.1" title="エピソードの記録" />
-      <p className="wa-prose">EP.01〜03の展開を含みます。</p>
+      <p className="wa-prose">EP.01〜04の展開を含みます。</p>
       <WorldEpisodeIndex />
       <ol className="wa-episodes">
         {WORLD_EPISODE_NOTES.map((episode) => {

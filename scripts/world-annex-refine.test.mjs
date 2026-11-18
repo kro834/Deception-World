@@ -334,7 +334,7 @@ test("world-annex.tsx keeps its labels and accessibility with the approved episo
     "声の記録を綴る。ときどき、その輪郭が乱れる。",
     "軽量設定・動きを減らす設定では、全文を表示します。",
     "スワイプ・左右キーで切替",
-    "EP.01〜03の展開を含みます。",
+    "EP.01〜04の展開を含みます。",
     "EPISODE",
     "STAGE",
     "資料目次",
