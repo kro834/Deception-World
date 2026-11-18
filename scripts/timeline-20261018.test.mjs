@@ -18,7 +18,7 @@ test("October 18 story distinguishes designs, hypotheses and unfinished battles"
   for (const place of ["永遠亭", "人里", "博麗神社", "魔法の森", "妖怪の山", "紅魔館", "命蓮寺", "太陽の畑"])
     assert.ok(dream.includes(place), place);
   assert.match(dream, /シエル、慶弥、夕夏を伴って/);
-  assert.match(dream, /全員の帰還も、まだ描かれていない/);
+  assert.match(dream, /怪作を捜し、本部の最奥へ向かう/);
   assert.doesNotMatch(dream, /奪還に成功|全員が帰還|十二神将を全滅/);
   assert.deepEqual(DREAM_CHRONICLE.slice(49, 53).map(({ no, sourceRevision }) => [no, sourceRevision]),
     [50, 51, 52, 53].map((no) => [no, "2026-10-18"]));

@@ -28,8 +28,7 @@ test("new events identify their source revision and preserve the battle-opening 
   }
   assert.ok(DREAM_CHRONICLE.slice(0, 44).every((event) => event.sourceRevision === undefined));
   const synopsis = DREAM_CASES[5].paragraphs;
-  // November 1 adds three scenes after the revised October ending.
-  assert.equal(synopsis.length, 22);
+  // Check the original battle opening at its position within the growing synopsis.
   assert.match(synopsis[6], /永遠亭へ向かう/);
   assert.match(synopsis[6], /後を追って/);
   assert.match(synopsis[6], /決戦へ向かうよう促す/);
@@ -38,7 +37,7 @@ test("new events identify their source revision and preserve the battle-opening 
   assert.match(synopsis[7], /奪還も、仲間たちとの帰還もまだ果たされない/);
   assert.match(synopsis[7], /最後の決戦が幕を開ける/);
   assert.doesNotMatch(
-    synopsis.slice(6).join(""),
+    synopsis.slice(6, 8).join(""),
     /全快|合流を果た|勝利を収め|奪還に成功|帰還を果た/,
   );
 });

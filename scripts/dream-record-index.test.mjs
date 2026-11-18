@@ -187,13 +187,13 @@ test("person link matching ignores whitespace only and preserves the Chronicle d
   );
 });
 
-test("the eleven Chronicle entries including the new encounter resolve Keiya's canonical character link", () => {
+test("all Chronicle entries featuring Keiya resolve Keiya's canonical character link", () => {
   const canonical = DREAM_CHARACTERS.find((person) => person.name === "東風谷 慶弥");
   assert.ok(canonical);
 
   const matchingRecords = DREAM_CHRONICLE.filter((record) => record.cast.includes("東風谷慶弥"));
-  assert.equal(matchingRecords.length, 11);
-  assert.equal(matchingRecords.at(-1).no, 59, "the Shinsou encounter also links to Keiya");
+  assert.equal(matchingRecords.length, 15);
+  assert.equal(matchingRecords.at(-1).no, 74, "Keiya’s decision to return also links to his record");
   for (const record of matchingRecords) {
     assert.deepEqual(
       resolveDreamRecordLinks(record, {

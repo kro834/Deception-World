@@ -36,7 +36,7 @@ test("November 1 replaces revised scenes and advances three unresolved encounter
   assert.match(textOf(resistance), /二人同時に.*膝をついた/);
 });
 
-test("latest CASE 5 synopsis preserves the hostage crisis and unfinished battles", () => {
+test("CASE 5 preserves the November 1 hostage crisis and the subsequent encounters", () => {
   const synopsis = DREAM_CASES[5].paragraphs.slice(13).join("\n");
   assert.match(synopsis, /紫を人質/);
   assert.match(synopsis, /十秒のカウントダウン/);
@@ -45,7 +45,7 @@ test("latest CASE 5 synopsis preserves the hostage crisis and unfinished battles
   assert.match(synopsis, /ムツキに迎えられる/);
   assert.match(synopsis, /死怒.*生命力/);
   assert.doesNotMatch(synopsis, /紫は藍のもと|息を引き取った|紫の瞼を閉じ|全員が帰還|ムツキを倒/);
-  assert.match(DREAM_CASES[5].paragraphs.at(-1), /全員の帰還も、まだ描かれていない。$/);
+  assert.match(DREAM_CASES[5].paragraphs.at(-1), /ゲイザーゼロを倒した.*怪作を捜し、本部の最奥へ向かう。$/);
 });
 
 test(

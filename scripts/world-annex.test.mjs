@@ -110,7 +110,7 @@ test("the annex data is complete", () => {
   );
   assert.deepEqual(
     WORLD_EPISODE_NOTES.map(({ synopsis }) => synopsis.length),
-    [3, 3, 9, 5],
+    [3, 3, 9, 11],
   );
   assert.equal(WORLD_GLOSSARY.length, 16);
   for (const entry of WORLD_GLOSSARY) assert.ok(entry.body.length || entry.said.length, entry.term);
