@@ -68,7 +68,9 @@ test("the kit's folder holds exactly its four sheets, at their sizes and within 
   assert.equal(REXONANCE_NANITE_BYTES.total, total);
   assert.ok(total <= 280_000, `the kit is ${total} B`);
   assert.deepEqual(REXONANCE_NANITE_ASSETS, Object.values(SHEETS).map((sheet) => sheet.src));
-  assert.deepEqual(Object.keys(REXONANCE_NANITES), ["cells", "comets", "fx", "guide", "seams", "goldBoxes"]);
+  const { grainScale, ...sheetsAndMasks } = REXONANCE_NANITES;
+  assert.equal(grainScale, 0.62);
+  assert.deepEqual(Object.keys(sheetsAndMasks), ["cells", "comets", "fx", "guide", "seams", "goldBoxes"]);
   assert.equal(REXONANCE_NANITES.seams, REXONANCE_NANITE_SEAMS);
   assert.equal(REXONANCE_NANITES.goldBoxes, REXONANCE_NANITE_GOLD_BOXES);
 });
