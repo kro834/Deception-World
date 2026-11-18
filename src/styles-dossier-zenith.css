@@ -2990,7 +2990,6 @@ html[data-family="dossier"]
     .dossier-reader-links
     a {
     padding-inline: 1px;
-    font-size: 12px;
     letter-spacing: 0;
     white-space: nowrap;
   }
