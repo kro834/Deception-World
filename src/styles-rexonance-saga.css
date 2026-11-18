@@ -1034,6 +1034,10 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
   outline-offset: 3px;
 }
 
+.rxs-rexonance-page :is(.rxs-comparison-selector, .rxs-p14-native-select) > select {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* A native iOS picker may return focus without dispatching change when it is
    dismissed. Keep that pointer focus from looking like a persistent choice;
    the document keydown handler removes the marker before keyboard focus moves. */

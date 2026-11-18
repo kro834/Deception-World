@@ -325,7 +325,7 @@ html[data-family="special"] body #top.fst-page[data-command-special] {
 html[data-family="special"]
   body
   #top.rxs-page[data-command-special]
-  :is(a, button, select, input, summary):focus-visible {
+  :is(a, button, select, input, summary):focus-visible:not([data-pointer-focus="true"]) {
   outline: 2px solid var(--dg-focus, #fff0b5);
   outline-offset: 4px;
 }
@@ -517,7 +517,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="spe
   html[data-family="special"]
     body
     #top.rxs-page[data-command-special]
-    :is(a, button, select, input, summary):focus-visible {
+    :is(a, button, select, input, summary):focus-visible:not([data-pointer-focus="true"]) {
     outline-color: Highlight;
   }
 }

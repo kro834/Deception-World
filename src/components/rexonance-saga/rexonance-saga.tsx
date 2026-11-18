@@ -1750,7 +1750,9 @@ export function RexonanceSaga() {
   }, []);
 
   useEffect(() => {
-    const restoreKeyboardFocus = () => {
+    const restoreKeyboardFocus = (event: KeyboardEvent) => {
+      // Escape may dismiss a pointer-opened native picker without moving focus.
+      if (event.key === "Escape") return;
       pageRef.current
         ?.querySelectorAll<HTMLSelectElement>('select[data-pointer-focus="true"]')
         .forEach((control) => delete control.dataset.pointerFocus);

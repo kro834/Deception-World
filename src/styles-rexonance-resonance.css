@@ -1307,21 +1307,23 @@ html[data-family="special"]
       animation-range: entry 50% entry 100%;
     }
 
-    /* The held cut gives way: as the next one slides over it, it sinks
-       back into the dark (the whole card: its figure stays inside it). */
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
-      body
-      .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
-      > #performance
-      .rxs-headline-metrics
-      > article:first-child {
-      transform-origin: 50% 30%;
-      animation-name: rsn-recede;
-      animation-duration: auto;
-      animation-timing-function: linear;
-      animation-fill-mode: both;
-      animation-timeline: --rsn-cut-next;
-      animation-range: entry 0% entry 100%;
+    /* On narrow touch screens the next card enters while the reaction
+       figure is still being read. Let it scroll away at full opacity. */
+    @media (pointer: fine), (min-width: 761px) and (min-height: 501px), (min-width: 981px) {
+      html[data-family="special"]:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-dialog-open])
+        body
+        .rxs-page.rxs-page.rxs-rexonance-page:not([data-route-covered])[data-motion-ready="true"]
+        > #performance
+        .rxs-headline-metrics
+        > article:first-child {
+        transform-origin: 50% 30%;
+        animation-name: rsn-recede;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --rsn-cut-next;
+        animation-range: entry 0% entry 100%;
+      }
     }
 
     /* The instruments rise into place on their own timelines. */

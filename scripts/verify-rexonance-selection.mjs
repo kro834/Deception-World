@@ -75,11 +75,18 @@ async function verifySelect(page, ariaLabel) {
   assert.equal(await select.getAttribute("data-pointer-focus"), "true");
   assert.equal(hasVisibleOutline(await outline(select)), false);
 
-  // Escape is a real keyboard event and must restore keyboard modality. Moving
-  // away and back makes Chromium apply :focus-visible deterministically.
+  // Escaping a pointer-opened picker leaves focus in place, without a ring.
   await page.keyboard.press("Escape");
-  assert.equal(await select.getAttribute("data-pointer-focus"), null);
+  assert.equal(await select.getAttribute("data-pointer-focus"), "true");
+  assert.equal(
+    hasVisibleOutline(await outline(select)),
+    false,
+    `${ariaLabel}: closing stays quiet`,
+  );
+
+  // Tabbing resumes keyboard navigation and restores its focus indicator.
   await page.keyboard.press("Tab");
+  assert.equal(await select.getAttribute("data-pointer-focus"), null);
   await page.keyboard.press("Shift+Tab");
   assert.equal(await select.evaluate((control) => document.activeElement === control), true);
   assert.equal(
@@ -89,6 +96,34 @@ async function verifySelect(page, ariaLabel) {
   );
 
   return values;
+}
+
+async function verifyReactionWhileScrolling(page) {
+  await page.locator(".rxs-rexonance-page[data-motion-ready='true']").waitFor();
+  const reaction = page.locator(".rxs-headline-metrics > article").first();
+  await reaction.evaluate((card) => {
+    window.scrollBy({
+      top: card.getBoundingClientRect().top - innerHeight * 0.46,
+      behavior: "instant",
+    });
+  });
+  for (const distance of [0, 40, 60]) {
+    const reading = await reaction.evaluate(async (card, delta) => {
+      window.scrollBy({ top: delta, behavior: "instant" });
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const { top, bottom } = card.getBoundingClientRect();
+      return {
+        visible: top >= 0 && bottom <= innerHeight,
+        opacity: Number(getComputedStyle(card).opacity),
+      };
+    }, distance);
+    assert.equal(reading.visible, true, "the reaction card is still on screen");
+    assert.equal(
+      reading.opacity,
+      1,
+      "the reaction card stays readable as the next card approaches",
+    );
+  }
 }
 
 async function numericClipReport(page) {
@@ -174,6 +209,7 @@ try {
     await page.goto(`${base}/rexonance-saga`, { waitUntil: "networkidle" });
     await page.locator(".rxs-p14-native-select select").waitFor();
     assert.equal(await page.locator("main select").count(), 2, "expected both native selectors");
+    if (profile.name.startsWith("iphone-")) await verifyReactionWhileScrolling(page);
 
     const comparisonValues = await verifySelect(page, "比較する相手：レクソナンスの比較対象");
     assert.deepEqual(comparisonValues, ["vertex", "vinculum", "extreme"]);
