@@ -364,6 +364,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     display: block;
     flex: 1 1 190px;
     width: auto;
+    min-width: 0;
     min-height: 0;
     margin: 0;
     padding: 0;
@@ -375,6 +376,8 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
       sans-serif;
     letter-spacing: normal;
     text-align: start;
+    white-space: normal;
+    overflow-wrap: anywhere;
     writing-mode: horizontal-tb;
     opacity: 1;
     animation: none;

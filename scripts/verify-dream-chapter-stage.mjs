@@ -30,6 +30,26 @@ for (const [name, engine, width, height, touch] of matrix) {
     const stage = page.locator(".dream-chapter-stage");
     await stage.locator(".dream-chapter-stage-chapters").waitFor();
     await page.waitForTimeout(800);
+    if (width <= 560) {
+      const foot = await page.locator(".dream-hero-footer").evaluate((footer) => {
+        const panel = footer.getBoundingClientRect();
+        const lantern = footer.querySelector(".dream-stage-lantern").getBoundingClientRect();
+        const label = footer
+          .querySelector(".dream-stage-lantern-label strong")
+          .getBoundingClientRect();
+        return {
+          pageWidth: document.documentElement.clientWidth,
+          panelRight: panel.right,
+          lanternRight: lantern.right,
+          labelRight: label.right,
+        };
+      });
+      assert(
+        foot.lanternRight <= Math.min(foot.panelRight, foot.pageWidth) + 1 &&
+          foot.labelRight <= foot.lanternRight + 1,
+        `the narrow cover keeps the full lantern label in its footer ${JSON.stringify(foot)}`,
+      );
+    }
     await page
       .getByRole("navigation", { name: "DREAM CHAPTER セクション", exact: true })
       .getByRole("link", { name: "物語", exact: true })
