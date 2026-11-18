@@ -6,6 +6,7 @@ import type { NaniteSkinStyle } from "./nanite-skin.ts";
  * crystallises into. Gold droplets. Shared by the scroll suit-up and the
  * entry. */
 export const FAR_FROM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
+  alloy: "far-from",
   steel: "rgb(24 30 40)",
   steelAlpha: 0.84,
   line: "rgb(150 236 255)",

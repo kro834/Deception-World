@@ -1,4 +1,5 @@
 import test from "node:test";
+import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -36,7 +37,9 @@ test("Blender material deliveries retain every approved alpha pixel and original
   );
   const wrapper = await readFile(new URL("scripts/blender/nanite_surface_polish.py", root));
   assert.equal(hash(wrapper), receipt.wrapperSha256);
-  for (const [source, target] of Object.entries(NANITE_SURFACE_SOURCES)) {
+  assert.deepEqual(Object.keys(receipt.assets).sort(), ["far-from", "illusionculum", "rexonance"]);
+  for (const [name, { source }] of Object.entries(receipt.assets)) {
+    const target = `/nanite-surface-20261031/${name}.webp`;
     const beforeBytes = await readFile(new URL(`public${source}`, root));
     const afterBytes = await readFile(new URL(`public${target}`, root));
     const before = await sharp(beforeBytes).ensureAlpha().raw().toBuffer();
@@ -57,8 +60,13 @@ test("Blender material deliveries retain every approved alpha pixel and original
         changed++;
     }
     assert.ok(changed > 500, "real material change must be present");
-    const name = target.split("/").at(-1).replace(".webp", "");
     assert.equal(hash(afterBytes), receipt.assets[name].sha256);
     assert.equal(hash(beforeBytes), receipt.assets[name].sourceSha256);
+  }
+});
+
+test("the current Cycles sheets and Three.js relief match their authoring sources", () => {
+  for (const script of ["build-nanite-forge.mjs", "build-nanite-relief.mjs"]) {
+    execFileSync(process.execPath, [`scripts/${script}`, "--check"], { cwd: root });
   }
 });

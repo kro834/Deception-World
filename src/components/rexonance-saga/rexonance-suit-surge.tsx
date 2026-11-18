@@ -35,6 +35,7 @@ import {
   REXONANCE_SUIT_SIZE,
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
+import { prepareRexonanceClasps } from "@/lib/rexonance-clasp-atlas";
 import type { RexonanceScrollSwarm } from "@/lib/rexonance-scroll-swarm";
 import type { SkinCells, SkinField, SkinFrame, SkinRenderer } from "@/lib/rexonance-suit-skin";
 import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK, SuitLeave, isSeek } from "@/lib/rexonance-suit-leave";
@@ -339,6 +340,7 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
         }),
         REXONANCE_SUIT_SIZE.width / field.w,
         [REXONANCE_SUIT_SIZE.width, REXONANCE_SUIT_SIZE.height],
+        prepareRexonanceClasps(),
       ),
     });
   })().catch(() => undefined);

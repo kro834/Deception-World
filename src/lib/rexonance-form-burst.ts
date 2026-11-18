@@ -624,6 +624,13 @@ export type FormBurstContext = {
   globalCompositeOperation: string;
 };
 
+/** Draws one 128 px tile into the transform the player set for this fitting. */
+function drawClasp(context: FormBurstContext, atlas: CanvasImageSource, tone: number, closure: number) {
+  const side = 128;
+  const row = Math.min(3, Math.floor(closure * 4));
+  context.drawImage(atlas, tone * side, row * side, side, side, -0.5, -0.5, 1, 1);
+}
+
 /** Where the art stands on the particles' canvas (backing px), the canvas's
  * px a CSS px, and the reactor in the art. */
 export type FormBurstView = {
@@ -819,6 +826,7 @@ export class FormBurstParticles {
     sheet: CanvasImageSource | null,
     cells: FormBurstCells,
     share = 1,
+    clasps: CanvasImageSource | null = null,
   ) {
     let live = 0;
     const { x: left, y: top, w, h, px } = view;
@@ -859,7 +867,14 @@ export class FormBurstParticles {
           const sin = Math.sin(turn) * size;
           context.globalAlpha = Math.min(1, t / 36) * (p < 0.54 ? 1 : 1 - smooth((p - 0.54) / 0.46));
           context.setTransform(cos, sin, -sin * tumble, cos * tumble, cx, cy);
-          context.drawImage(source, (n % kinds) * side, 0, side, side, -0.5, -0.5, 1, 1);
+          // The intact fittings release in reverse. MAX keeps its broken,
+          // charred fragments between the complete clasps.
+          if (clasps && (kind === "ultra" || n % kinds === 0)) {
+            const tone = (kind === "max" ? Math.floor(n / kinds) : n) % cells.plates;
+            drawClasp(context, clasps, tone, 1 - p);
+          } else {
+            context.drawImage(source, (n % kinds) * side, 0, side, side, -0.5, -0.5, 1, 1);
+          }
           live += 1;
         }
     }
@@ -947,7 +962,9 @@ export class FormBurstParticles {
             const cos = Math.cos(turn) * size;
             const sin = Math.sin(turn) * size;
             context.setTransform(cos, sin, -sin * tilt, cos * tilt, cx, cy);
-            context.drawImage(sheet, (n % cells.plates) * cells.plate, 0, cells.plate, cells.plate, -0.5, -0.5, 1, 1);
+            const tone = n % cells.plates;
+            if (clasps) drawClasp(context, clasps, tone, p);
+            else context.drawImage(sheet, tone * cells.plate, 0, cells.plate, cells.plate, -0.5, -0.5, 1, 1);
           } else {
             context.setTransform(size, 0, 0, size, cx, cy);
             context.drawImage(
@@ -988,17 +1005,22 @@ export class FormBurstParticles {
           left + data[e] * w + (data[e + 2] * far - data[e + 3] * curl) * h,
           top + data[e + 1] * h + (data[e + 3] * far + data[e + 2] * curl) * h,
         );
-        context.drawImage(
-          sheet,
-          (n % cells.turns) * cells.speck,
-          cells.speckY + (n % cells.tones) * cells.speck,
-          cells.speck,
-          cells.speck,
-          -0.5,
-          -0.5,
-          1,
-          1,
-        );
+        if (clasps && n % 4 === 0) {
+          const tone = Math.floor(n / 4) % cells.plates;
+          drawClasp(context, clasps, tone, 1 - p);
+        } else {
+          context.drawImage(
+            sheet,
+            (n % cells.turns) * cells.speck,
+            cells.speckY + (n % cells.tones) * cells.speck,
+            cells.speck,
+            cells.speck,
+            -0.5,
+            -0.5,
+            1,
+            1,
+          );
+        }
         live += 1;
       }
     }

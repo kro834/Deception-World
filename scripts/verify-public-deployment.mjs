@@ -1,3 +1,4 @@
+import { NANITE_FORGE_DELIVERIES } from "../src/lib/nanite-surface-assets.js";
 import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
@@ -310,7 +311,8 @@ export async function verifyPublicDeployment({
       });
       for (const asset of identity.assets) {
         if (
-          (!/^\/rexonance-flame-(?:natural-)?20261019\/(?:flame\.webp|manifest\.json)(?![\s\S])/u.test(
+          (!NANITE_FORGE_DELIVERIES.includes(asset.path) &&
+            !/^\/rexonance-flame-(?:natural-)?20261019\/(?:flame\.webp|manifest\.json)(?![\s\S])/u.test(
             asset.path,
           ) &&
             !/^\/ciel-inferno-20261019\/(?:ciel-(?:216|720|1080)\.webp|jet\.webp|(?:artwork|jet)-manifest\.json)(?![\s\S])/u.test(

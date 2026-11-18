@@ -98,6 +98,7 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
 /** This form's nanite skin (nanite-skin.ts; owner, 2026-11-11): violet
  * steel under ice light, hexagonal cells, pink droplets. */
 export const ILLUSIONCULUM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
+  alloy: "illusionculum",
   steel: "rgb(24 22 40)",
   steelAlpha: 0.86,
   line: "rgb(166 230 255)",

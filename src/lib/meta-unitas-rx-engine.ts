@@ -103,6 +103,7 @@ export const META_UNITAS_PALETTE = Object.freeze({
 /** Meta Unitas' nanite skin (nanite-skin.ts; owner, 2026-11-11): dark teal
  * steel under its scale's light, hexagonal cells. */
 export const META_UNITAS_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
+  alloy: "meta-unitas",
   steel: "rgb(16 30 34)",
   steelAlpha: 0.84,
   line: "rgb(120 226 220)",

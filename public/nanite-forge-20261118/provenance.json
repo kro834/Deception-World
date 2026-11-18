@@ -1,0 +1,39 @@
+{
+  "blender": "5.2.3 LTS / Cycles CPU",
+  "scene": "scripts/blender/nanite_forge.py",
+  "sceneSha256": "fc7a1729752a1bf98e195d0de3285d2f37a9c9606f27570c6c41c0fc68fcfe99",
+  "assets": {
+    "rexonance": {
+      "width": 768,
+      "height": 224,
+      "cell": 32,
+      "frames": 24,
+      "bytes": 95452,
+      "sha256": "dad04926980dcb6e529aff84cf9eed2c0f1dc28bdb50246246e503d772944372"
+    },
+    "far-from": {
+      "width": 768,
+      "height": 224,
+      "cell": 32,
+      "frames": 24,
+      "bytes": 95638,
+      "sha256": "df4e7ea4da0a4dd23bf5a73bab7ad0b72d47ebc3166bbf77d67909f51cc98e53"
+    },
+    "illusionculum": {
+      "width": 768,
+      "height": 224,
+      "cell": 32,
+      "frames": 24,
+      "bytes": 99682,
+      "sha256": "b062b19f6dc2ef68d0bc3d06c844b6793270d6cfd42785ed7ffc90e236766830"
+    },
+    "rexonance-clasps": {
+      "width": 512,
+      "height": 512,
+      "cell": 128,
+      "frames": 4,
+      "bytes": 69976,
+      "sha256": "2567ba04a8958a8d7c53a4ebfaef8f29f3bf70145b9566a2afe21cbff8acf01c"
+    }
+  }
+}

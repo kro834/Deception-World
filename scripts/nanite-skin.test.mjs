@@ -47,7 +47,11 @@ const fakeContext = (calls, pixel) =>
             return { data };
           };
         if (name === "createImageData")
-          return (width, height) => ({ data: new Uint8ClampedArray(width * height * 4), width, height });
+          return (width, height) => ({
+            data: new Uint8ClampedArray(width * height * 4),
+            width,
+            height,
+          });
         if (name === "createLinearGradient") return () => ({ addColorStop() {} });
         return (...args) => {
           calls.push([name, ...args]);
@@ -265,7 +269,10 @@ test("the droplets' budget: few, by pointer, and never cut to nothing", () => {
       assert.ok(budget >= 80, "the lip still glitters at the leanest level");
       last = budget;
     }
-    assert.equal(naniteLiveBudget(coarse, 99), naniteLiveBudget(coarse, NANITE_SKIN.levels.length - 1));
+    assert.equal(
+      naniteLiveBudget(coarse, 99),
+      naniteLiveBudget(coarse, NANITE_SKIN.levels.length - 1),
+    );
   }
   // The leanest level keeps the surface whole: only droplets and the ripple go.
   assert.equal(NANITE_SKIN.levels.at(-1).ripple, false);
@@ -278,7 +285,8 @@ test("the field: out from the reactor — chest, waist, arms, legs — the helme
   const { width, height, time } = layer.field;
   assert.equal(width, Math.ceil(SIZE.width / NANITE_SKIN.grid));
   assert.equal(height, Math.ceil(SIZE.height / NANITE_SKIN.grid));
-  const at = (x, y) => time[Math.floor(y / NANITE_SKIN.grid) * width + Math.floor(x / NANITE_SKIN.grid)];
+  const at = (x, y) =>
+    time[Math.floor(y / NANITE_SKIN.grid) * width + Math.floor(x / NANITE_SKIN.grid)];
   // Off the armour: no time.
   assert.ok(Number.isNaN(at(5, 5)));
   const slack = 0.03;
@@ -375,9 +383,26 @@ test("a change of form and the retract run on the same front, from and to the re
   const from = { width: SIZE.width, height: SIZE.height };
   const to = { width: SIZE.width, height: SIZE.height };
   const start = [];
-  assert.equal(layer.form(fakeContext(start, figurePixel), from, to, "standard", "high", 0, "#fff", false, 1, 1), true);
+  assert.equal(
+    layer.form(
+      fakeContext(start, figurePixel),
+      from,
+      to,
+      "standard",
+      "high",
+      0,
+      "#fff",
+      false,
+      1,
+      1,
+    ),
+    true,
+  );
   // At 0 the last form stands whole.
-  assert.deepEqual(start.filter(([name]) => name === "drawImage").map((call) => call[1]), [from]);
+  assert.deepEqual(
+    start.filter(([name]) => name === "drawImage").map((call) => call[1]),
+    [from],
+  );
   const mid = [];
   layer.form(fakeContext(mid, figurePixel), from, to, "standard", "high", 0.5, "#fff", false, 1, 1);
   assert.ok(layer.stats.band > 0);
@@ -461,5 +486,95 @@ test("the three suit-ups grow as a nanite skin, each in its own light", () => {
     skin.indexOf("/* -- end of the draw passes -- */"),
   );
   assert.ok(passes.length > 2000);
-  assert.doesNotMatch(passes, /\bnew \w|\.map\(|\.filter\(|\[\.\.\.|Array\.from|getImageData|shadowBlur|\.filter =/);
+  assert.doesNotMatch(
+    passes,
+    /\bnew \w|\.map\(|\.filter\(|\[\.\.\.|Array\.from|getImageData|shadowBlur|\.filter =/,
+  );
+});
+
+test("alloy cells tumble, unfold, and stay sparse on the skin's real front", () => {
+  for (const [alloy, expectedSheet] of [
+    ["illusionculum", "illusionculum"],
+    ["meta-unitas", "rexonance"],
+    ["far-from", "far-from"],
+  ]) {
+    const document = fakeDocument(figurePixel);
+    const createElement = document.createElement;
+    const atlas = { complete: false, naturalWidth: 768, naturalHeight: 224 };
+    document.createElement = (tag) => (tag === "img" ? atlas : createElement(tag));
+    const { layer } = makeSkin({ document, style: { ...STYLE, alloy } });
+    assert.equal(atlas.src, `/nanite-forge-20261118/${expectedSheet}.webp`);
+
+    const calls = [];
+    const context = fakeContext(calls, figurePixel);
+    const draw = (p) => {
+      calls.length = 0;
+      layer.draw(context, p, false, 1.5, 2);
+      return calls.filter(([op, image]) => op === "drawImage" && image === atlas);
+    };
+    assert.deepEqual(draw(0.3), [], "the optional sheet cannot gate the front");
+    assert.ok(layer.stats.drawn > 0);
+
+    atlas.complete = true;
+    const middle = draw(0.3);
+    assert.ok(middle.length > 0);
+    assert.ok(middle.length <= 8);
+    assert.ok(middle.every(([, , , , w, h, , , dw]) => w === 32 && h === 32 && dw >= 11));
+    const leading = [];
+    for (let p = 0.16; p < 0.82; p += 0.009) leading.push(...draw(p));
+    assert.ok(
+      leading.some(([, , sx, sy]) => sx >= 32 && sy < 128),
+      "the cell tumbles toward its seat",
+    );
+    assert.ok(
+      leading.some(([, , , sy]) => sy === 160),
+      "the cell unfolds at the lip",
+    );
+    assert.deepEqual(draw(0.3), middle, "scrubbing resamples the same figure path");
+    assert.deepEqual(draw(0.9), [], "the assembled art needs no cells on top");
+    layer.release();
+  }
+});
+
+test("a custom wireframe flow takes priority over optional alloy cells", () => {
+  const document = fakeDocument(figurePixel);
+  const createElement = document.createElement;
+  const atlas = { complete: true, naturalWidth: 768, naturalHeight: 224 };
+  document.createElement = (tag) => (tag === "img" ? atlas : createElement(tag));
+  const { layer } = makeSkin({
+    document,
+    style: { ...STYLE, alloy: "far-from" },
+    *prepareFlow() {
+      yield;
+      return { draw: () => 17, release() {} };
+    },
+  });
+  const calls = [];
+  layer.draw(fakeContext(calls, figurePixel), 0.3, false, 1.5, 2);
+  assert.ok(!calls.some(([op, image]) => op === "drawImage" && image === atlas));
+  assert.equal(layer.stats.drawn, 17);
+  layer.release();
+});
+
+
+test("each cast alloy shades the same forming surface differently before the seal", () => {
+  const material = (alloy) => {
+    const { layer, document } = makeSkin({ style: { ...STYLE, alloy } });
+    // The relief is written to the fibre picture during preparation, before
+    // the moving masks are first touched by draw().
+    const pixels = document.canvases.flatMap((canvas) => canvas.calls)
+      .find(([op]) => op === "putImageData")[1].data;
+    const chest = [];
+    for (let y = 48; y < 77; y++)
+      for (let x = 45; x < 76; x++)
+        chest.push(pixels[(y * layer.field.width + x) * 4 + 3]);
+    layer.release();
+    return chest;
+  };
+  const pictures = ["far-from", "illusionculum", "meta-unitas"].map(material);
+  for (const [index, picture] of pictures.entries()) {
+    assert.ok(new Set(picture).size > 15);
+    const other = pictures[(index + 1) % pictures.length];
+    assert.ok(picture.filter((value, i) => Math.abs(value - other[i]) > 10).length > picture.length / 9);
+  }
 });

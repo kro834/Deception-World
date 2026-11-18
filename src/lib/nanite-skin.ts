@@ -38,7 +38,11 @@
  * into that canvas every frame).
  */
 
+import { NANITE_RELIEF, NANITE_RELIEF_SIZE } from "./nanite-relief-data.ts";
+import { assemblyCellsReady, drawAssemblyCell, loadAssemblyCells } from "./nanite-assembly-cells.ts";
+
 export type NaniteSkinStyle = {
+  readonly alloy?: keyof typeof NANITE_RELIEF;
   /** The liquid's body: laid over the art (CSS colour) at `steelAlpha`. */
   readonly steel: string;
   readonly steelAlpha: number;
@@ -425,6 +429,7 @@ type Front = {
   readonly mfx: Float32Array;
   readonly mfy: Float32Array;
   readonly ms: Float32Array;
+  readonly carriers: Uint8Array;
 };
 
 export type NaniteSkinLayer = {
@@ -678,6 +683,11 @@ export function* prepareNaniteSkin(
   // when asked. Each pixel's cell, by a hash of its lattice place.
   const R = Math.max(3, style.cell);
   const cellOf = new Int32Array(n);
+  // Left and right reflections traced on the rider's 3D fastener. Register
+  // one copy to each actual lattice socket, including during reverse play.
+  const tile = atob(NANITE_RELIEF[style.alloy ?? (style.triangles ? "far-from" : "meta-unitas")]);
+  const relief = new Uint8Array(n);
+  const tileScale = NANITE_RELIEF_SIZE / (2 * R);
   let cellCount = 0;
   {
     const sqrt3 = Math.sqrt(3);
@@ -695,9 +705,12 @@ export function* prepareNaniteSkin(
       if (dq > dr && dq > ds) rq = -rr - rs;
       else if (dr > ds) rr = -rq - rs;
       let id = (rq + 512) * 2048 + (rr + 512);
+      const cx = R * sqrt3 * (rq + rr / 2);
+      const cy = R * 1.5 * rr;
+      const tx = Math.min(NANITE_RELIEF_SIZE - 1, Math.max(0, Math.floor((px - cx + R) * tileScale)));
+      const ty = Math.min(NANITE_RELIEF_SIZE - 1, Math.max(0, Math.floor((py - cy + R) * tileScale)));
+      relief[i] = tile.charCodeAt(ty * NANITE_RELIEF_SIZE + tx);
       if (style.triangles) {
-        const cx = R * sqrt3 * (rq + rr / 2);
-        const cy = R * 1.5 * rr;
         let sector = Math.floor((Math.atan2(py - cy, px - cx) + Math.PI) / (Math.PI / 3));
         if (sector > 5) sector = 5;
         id = id * 6 + sector;
@@ -780,8 +793,10 @@ export function* prepareNaniteSkin(
       const key = cellOf[i] * 8 + (whole ? 0 : region[i] & 7);
       const mean = sum[key] / (num[key] || 1);
       t[k] = field[i];
-      th[k] =
-        field[i] + Math.max(-dev, Math.min(dev, mean - field[i])) + timing.lag + timing.click * hash(key, 31);
+      // The raised face catches first; the recessed joint closes just after.
+      const face = ((relief[i] >> 4) + (relief[i] & 15)) / 30;
+      const seat = hash(key, 31) * 0.78 + (1 - face) * 0.22;
+      th[k] = field[i] + Math.max(-dev, Math.min(dev, mean - field[i])) + timing.lag + timing.click * seat;
       const x = i % gw;
       const y = (i - x) / gw;
       if (x < x0) x0 = x;
@@ -829,10 +844,22 @@ export function* prepareNaniteSkin(
       ms.push(hash(i, 83));
       if (k % 16384 === 16383) yield;
     }
+    // Give each featured carrier a complete flight. Taking the first N live
+    // motes every frame picked almost exclusively the ones already fading.
+    const carriers = new Uint8Array(mt.length);
+    const spacing = timing.lead / (input.coarse ? 3 : 7);
+    let nextCarrier = -Infinity;
+    let serial = 0;
+    for (let k = 0; k < mt.length; k++) {
+      if (mt[k] < nextCarrier) continue;
+      carriers[k] = 1 + (serial++ % 2);
+      nextCarrier = mt[k] + spacing;
+    }
     yield;
     return {
       timing,
       count,
+      carriers,
       idx: order,
       t,
       th,
@@ -909,10 +936,15 @@ export function* prepareNaniteSkin(
       // A fibre every ~3.5 field px, and the cell's facet.
       const stripe = 0.5 + 0.5 * Math.cos(edge[i] * 1.8);
       const facet = hash(cellOf[i], 41);
-      const dark = stripe * stripe * 0.42 + (facet < 0.4 ? (0.4 - facet) * 0.4 : 0);
-      const lightUp = facet > 0.86 ? (facet - 0.86) * 1.2 : 0;
-      if (lightUp > dark) data[i] = ((Math.round(lightUp * 255) & 255) << 24) | 0xfff2e6;
-      else data[i] = ((Math.round(Math.min(0.8, dark) * 255) & 255) << 24) | 0x0c0806;
+      // Turn the twin reflections with the limb's contour. The milled rim,
+      // iris or shingle only belongs to the liquid mask, never the final art.
+      const slope = (edge[i - 1] ?? edge[i]) - (edge[i + 1] ?? edge[i]);
+      const left = 0.60 + Math.max(-1, Math.min(1, slope * 0.45)) * 0.23;
+      const gleam = ((relief[i] >> 4) * left + (relief[i] & 15) * (1 - left)) / 15;
+      const value = (gleam - 0.38) * 1.48 + facet * 0.12 - stripe * stripe * 0.23;
+      const opacity = Math.round(Math.min(0.78, Math.abs(value)) * 255);
+      data[i] = (opacity << 24) | (value > 0 ? 0xfff2e6 : 0x0c0806);
+      if (i % 16384 === 16383) yield;
     }
     context.putImageData(image, 0, 0);
   }
@@ -1078,7 +1110,6 @@ export function* prepareNaniteSkin(
       grow(dirty, x, (i - x) / gw);
     }
     const K = T.ripple * Math.PI * 2;
-    const tick = Math.floor(q * T.ripple * 3);
     for (let k = lo; k < hi; k += 1) {
       const i = idx[k];
       const dt = q - t[k];
@@ -1089,7 +1120,7 @@ export function* prepareNaniteSkin(
       let line = dc <= -T.rise ? 0 : dc >= 0 ? 1 : 1 + dc / T.rise;
       if (dc > T.pop) line *= 0.62 * (1 - clamp01((dc - T.pop) / T.grain));
       // The light: the lip, the cell's flash, the liquid's ripple and
-      // glitter.
+      // reflection across the bevel.
       const lipAt = dt - T.lip * 0.3;
       let light = lipAt > -T.lip && lipAt < T.lip ? 1 - Math.abs(lipAt) / T.lip : 0;
       light *= light;
@@ -1098,9 +1129,9 @@ export function* prepareNaniteSkin(
         const wet = liquid * (1 - colour);
         if (ripple) {
           const wave = Math.sin(K * (t[k] - q * T.rippleRun));
-          if (wave > 0.5) light += wet * 0.34 * (wave - 0.5) * (wave - 0.5) * 4;
+          const facet = wave > 0 ? relief[i] >> 4 : relief[i] & 15;
+          light += wet * wave * wave * Math.max(0, facet - 5) * 0.058;
         }
-        if (((i * 2654435761 + tick * 40503) >>> 0) % 89 === 0) light += wet * 0.45;
       }
       const a = liquid >= 1 ? 255 : (liquid * 255) | 0;
       L[i] = (a << 24) | WHITE;
@@ -1166,6 +1197,7 @@ export function* prepareNaniteSkin(
     scratchContext.restore();
     context.drawImage(scratch, x, y, w, h, x, y, w, h);
   };
+  let cells = loadAssemblyCells(document, style.alloy);
   /** The droplets of `front` at `q`: skimming ahead of the lip to their
    * place (`back` false), or taken back with it (`back` true). */
   const droplets = (
@@ -1183,8 +1215,13 @@ export function* prepareNaniteSkin(
     batchCount[0] = batchCount[1] = batchCount[2] = 0;
     const cap = batch[0].length / 3;
     const small = Math.max(device, 0.62 * px);
+    const atlas = !back && assemblyCellsReady(cells) ? cells : null;
+    const heroCap = input.coarse || governor.level > 0 ? 4 : 8;
+    let heroes = 0;
+    if (atlas) context.globalCompositeOperation = "source-over";
     for (let k = from; k < to; k += 1) {
-      if (share < 1 && ((k * 7) % 25) / 25 >= share) continue;
+      const carrier = front.carriers[k];
+      if (!carrier && share < 1 && ((k * 7) % 25) / 25 >= share) continue;
       const seed = front.ms[k];
       // 0 at the lip … 1 at its place (and the reverse, taken back).
       const a = back ? (front.mt[k] - q) / lead : 1 - (front.mt[k] - q) / lead;
@@ -1199,6 +1236,12 @@ export function* prepareNaniteSkin(
       const arc = Math.sin(Math.PI * a) * (seed - 0.5) * 0.7;
       const x = back ? hx - dx * e * 0.8 - dy * arc : fx + dx * e - dy * arc;
       const y = back ? hy - dy * e * 0.8 + dx * arc : fy + dy * e + dx * arc - 5 * Math.sin(Math.PI * a) * seed;
+      if (atlas && carrier && (governor.level === 0 || carrier === 1) && heroes < heroCap && a > 0 && a < 1) {
+        const size = px * (17 + seed * 7) * (1 - a * 0.22);
+        drawAssemblyCell(context, atlas, x, y, size, a, seed, style.alloy === "meta-unitas");
+        heroes++;
+        continue;
+      }
       const blink = (seed * 9.7 + q * (back ? 26 : 70)) % 1;
       const tone = blink < 0.16 ? 2 : seed < 0.42 ? 1 : 0;
       const at = batchCount[tone];
@@ -1225,7 +1268,7 @@ export function* prepareNaniteSkin(
     }
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = 1;
-    stats.drawn = batchCount[0] + batchCount[1] + batchCount[2];
+    stats.drawn = heroes + batchCount[0] + batchCount[1] + batchCount[2];
   };
   /** The bands of `front` at `q`: `art` resolving out of `liquid`. */
   const bands = (
@@ -1390,6 +1433,7 @@ export function* prepareNaniteSkin(
       owner = null;
       flow?.release();
       flow = null;
+      cells = null;
       for (const canvas of [probe, fibres, lines, metal, scratch, otherMetal, held, ...maskCanvas])
         if (canvas) canvas.width = canvas.height = 0;
       otherMetal = held = null;

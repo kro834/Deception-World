@@ -434,6 +434,29 @@ test("the play's chunk is fetched on demand, by Rexonance's own pages only", asy
   assert.equal(imports, 2);
 });
 
+test("MAX, ULTRA and release sample all sixteen physical clasp tiles alongside their effects", () => {
+  const atlas = {};
+  const seen = new Set();
+  const context = {
+    globalAlpha: 1,
+    globalCompositeOperation: "source-over",
+    setTransform() {},
+    drawImage(image, sx, sy, sw, sh) {
+      if (image !== atlas) return;
+      assert.equal(sw, 128);
+      assert.equal(sh, 128);
+      seen.add(sx + "," + sy);
+    },
+  };
+  const particles = cast(desktop);
+  for (const kind of ["max", "ultra", "release"]) {
+    seen.clear();
+    for (let ms = 0; ms < FORM_BURST_MS[kind]; ms += 13)
+      particles.draw(context, kind, ms, ms, VIEW, {}, {}, CELLS, 1, atlas);
+    assert.equal(seen.size, 16, kind);
+  }
+});
+
 test("particles are sheet sprites and nothing else: no path, no stroke, no trail", () => {
   for (const environment of [desktop, phone, low]) {
     const particles = cast(environment);

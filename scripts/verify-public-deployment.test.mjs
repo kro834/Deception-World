@@ -1,3 +1,4 @@
+import { NANITE_FORGE_DELIVERIES } from "../src/lib/nanite-surface-assets.js";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -776,6 +777,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
   ).replace(/^import .*;\n/gmu, "");
   let written;
   runInNewContext(source, {
+    NANITE_FORGE_DELIVERIES,
     process: { env: { PUBLIC_RELEASE_SHA: SHA } },
     createHash,
     execFileSync: () => {
@@ -804,6 +806,8 @@ test("new release identity requires shared gallery readiness and preserves artwo
     console: { log() {} },
   });
   assert.equal(written.sharedGallery, true);
+  for (const path of NANITE_FORGE_DELIVERIES)
+    assert.ok(written.assets.some((asset) => asset.path === path), path);
   assert.equal(written.sha, SHA);
   assert.equal(written.artworks, 113);
   assert.ok(written.assets.some((asset) => asset.path === "/gallery/g79-1672.webp"));
@@ -1008,9 +1012,11 @@ test("shared-gallery gate accepts all 113 static titles together with the 1000-p
 test("renewal verifies both new routes and exact Blender asset paths with delivered hashes", async () => {
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/world-map"));
   assert.ok(PUBLIC_SMOKE_ROUTES.includes("/transformation-lab"));
-  const paths = ["rexonance.webp", "far-from.webp", "illusionculum.webp", "provenance.json"].map(
-    (name) => `/nanite-surface-20261031/${name}`,
-  );
+  const materialNames = ["rexonance.webp", "far-from.webp", "illusionculum.webp", "provenance.json"];
+  const paths = [
+    ...materialNames.map((name) => `/nanite-surface-20261031/${name}`),
+    ...[...materialNames, "rexonance-clasps.webp"].map((name) => `/nanite-forge-20261118/${name}`),
+  ];
   const bytes = Buffer.from("material delivery");
   const sha256 = createHash("sha256").update(bytes).digest("hex");
   for (const path of [

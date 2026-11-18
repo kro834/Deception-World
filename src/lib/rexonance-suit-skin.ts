@@ -529,6 +529,9 @@ const FLASH_R = 24;
 const MICRO_R = 14;
 const SPECK_R = 9;
 const ROOT3 = 1.7320508;
+// Centre, then the six neighbouring sockets. Opposing jaws close together.
+const SOCKET_X = [0, 1, 0.5, -0.5, -1, -0.5, 0.5];
+const SOCKET_Y = [0, 0, ROOT3 / 2, ROOT3 / 2, 0, -ROOT3 / 2, -ROOT3 / 2];
 /** The plates' rims: ice, pink, white and the armour's gold. */
 const CELL_RIMS = ["214 246 255", "255 190 232", "246 250 255", "250 224 168"] as const;
 /** Each plate's honeycomb: the cells' rings about its middle (0: the one
@@ -697,6 +700,7 @@ export class SkinCells {
   /** The cells drawn last frame. */
   live = 0;
   private sheet: CanvasImageSource | null;
+  private clasps?: { current: CanvasImageSource | null };
   private cell: number;
   private width: number;
   private height: number;
@@ -721,7 +725,9 @@ export class SkinCells {
     sheet: CanvasImageSource | null,
     cell: number,
     figure: readonly [number, number],
+    clasps?: { current: CanvasImageSource | null },
   ) {
+    this.clasps = clasps;
     this.large = Math.max(0, Math.floor(large));
     this.fine = Math.max(0, Math.floor(fine));
     this.count = this.large + this.fine;
@@ -979,9 +985,10 @@ export class SkinCells {
       sx = Math.min(bounds[2] + 30, Math.max(bounds[0] - 30, sx));
       sy = Math.min(bounds[3] + 30, Math.max(bounds[1] - 30, sy));
     }
-    // The spiral: the way in turns as it shortens (and breathes a little on
-    // wall time); the turn never changes the distance left.
-    const turn = (s[o + 4] + 0.05 * Math.sin(now * 0.0021 + phase)) * left;
+    // Bank across the current in mid-flight, then roll flat into the socket.
+    // The clock owns the geometry, including when the movie is paused or scrubbed.
+    const bank = 4 * p * (1 - p);
+    const turn = s[o + 4] * left * (1 + 0.42 * bank);
     const cos = Math.cos(turn);
     const sin = Math.sin(turn);
     const dx = (sx - memo[m + 1]) * left;
@@ -1007,7 +1014,7 @@ export class SkinCells {
     }
     out[3] = alpha * (big ? 1 : 0.72 + 0.28 * Math.sin(now * 0.009 + phase * 7));
     out[4] = left > 0 ? s[o + 5] * left * left : 0;
-    out[5] = 1 - 0.42 * left * (0.4 + 0.6 * s[o + 1]);
+    out[5] = 1 - left * (0.42 + 0.39 * bank) * (0.4 + 0.6 * s[o + 1]);
     out[6] = k;
     out[7] = p;
     return true;
@@ -1048,6 +1055,7 @@ export class SkinCells {
     // (smaller and dimmer there: depth).
     front.globalCompositeOperation = "source-over";
     back.globalCompositeOperation = "source-over";
+    const clasps = this.clasps?.current;
     const plate = SHEET.plate;
     const plateDraw = plate / (ROOT3 * PLATE_R);
     for (let i = 0; i < large; i += 1) {
@@ -1056,7 +1064,10 @@ export class SkinCells {
       const behind = this.slots[i * SLOT + 7] > 0;
       const context = behind ? back : front;
       const k = pose[6];
-      let width = pose[2] * plateDraw * (behind ? CELL_SMALL : 1);
+      // The forged face is solid metal. Pull its footprint in as it crosses
+      // the silhouette to keep the forearm, waist and knee detailing visible.
+      const landingScale = clasps ? 1 - 0.16 * smooth(pose[7]) : 1;
+      let width = pose[2] * plateDraw * (behind ? CELL_SMALL : 1) * landingScale;
       let alpha = pose[3] * gain * (behind ? 0.62 : 1);
       if (k >= 0) {
         // Taken in: it shrinks into the surface under its own flash (a
@@ -1079,9 +1090,9 @@ export class SkinCells {
       context.scale(1, pose[5]);
       context.globalAlpha = alpha;
       context.drawImage(
-        sheet,
+        clasps ?? sheet,
         this.slots[i * SLOT + 6] * plate,
-        0,
+        clasps ? Math.min(3, Math.floor(pose[7] * 4)) * plate : 0,
         plate,
         plate,
         -width / 2,
@@ -1127,15 +1138,16 @@ export class SkinCells {
       const first = Math.hypot(bx - ax, by - ay) < Math.hypot(bx - ox, by - oy);
       const gx = first ? ax : ox;
       const gy = first ? ay : oy;
-      const set = smooth(k);
       const from = size * 0.36;
-      const width = (from + (hex - from) * set) * microDraw;
       for (let j = 0; j < 7; j += 1) {
-        const light = smooth(k / 0.22) * (1 - smooth((k - (0.36 + 0.05 * j)) / 0.3));
+        const delay = j ? 0.09 + ((j - 1) % 3) * 0.085 : 0;
+        const closure = (k - delay) / (1 - delay);
+        const light = smooth(closure / 0.24) * (1 - smooth((closure - 0.46) / 0.54));
         if (light <= 0.01) continue;
-        const angle = ((j - 1) * Math.PI) / 3;
-        const ux = j ? Math.cos(angle) : 0;
-        const uy = j ? Math.sin(angle) : 0;
+        const set = smooth(closure / 0.72);
+        const width = (from + (hex - from) * set) * microDraw;
+        const ux = SOCKET_X[j];
+        const uy = SOCKET_Y[j];
         const mx = bx + ux * from + (gx + ux * hex - (bx + ux * from)) * set;
         const my = by + uy * from + (gy + uy * hex - (by + uy * from)) * set;
         front.globalAlpha = 0.62 * light * gain;
@@ -1290,15 +1302,28 @@ void main() {
     texture2D(uField, vUv + vec2(uCell.x, 0.0)).r - texture2D(uField, vUv - vec2(uCell.x, 0.0)).r,
     texture2D(uField, vUv + vec2(0.0, uCell.y)).r - texture2D(uField, vUv - vec2(0.0, uCell.y)).r);
   vec2 flow = length(g) > 0.0005 ? normalize(g) : vec2(0.0, 1.0);
-  if (a < 0.0) {
+  // Resolve the same two staggered socket grids as the arriving Canvas cells.
+  vec2 hs = vec2(1.0, 1.7320508);
+  vec2 hp = p / uHex;
+  vec2 centreA = (floor(hp / hs) + 0.5) * hs;
+  vec2 centreB = floor(hp / hs + 0.5) * hs;
+  vec2 deltaA = hp - centreA;
+  vec2 deltaB = hp - centreB;
+  vec2 local = dot(deltaA, deltaA) < dot(deltaB, deltaB) ? deltaA : deltaB;
+  float threshold = hash(floor(2.0 * (hp - local) / hs + 0.5));
+  // Neighbouring sockets receive the bead at slightly different depths.
+  // Its contact line rolls across each face along the field gradient.
+  float deposit = a + (0.19 * dot(local, flow) + 0.22 * (threshold - 0.5))
+    * (1.0 - smoothstep(0.5, 1.8, a));
+  if (deposit < 0.0) {
     // The lip's shadow, just ahead of it.
-    float shade = smoothstep(-0.6, 0.0, a);
+    float shade = smoothstep(-0.4, 0.0, deposit);
     gl_FragColor = vec4(base.rgb * (1.0 - 0.5 * shade * art.a), max(base.a, 0.42 * shade * art.a)) * uAlpha;
     return;
   }
   // Liquid chrome: a raised bead, lit from the upper left, with the room's
   // reflection sliding over it.
-  float bead = cos(clamp(a, 0.0, 1.0) * 3.14159);
+  float bead = cos(clamp(deposit, 0.0, 1.0) * 3.14159);
   float facing = 0.5 + 0.5 * bead * dot(flow, normalize(vec2(-0.5, -0.8)));
   float room = 0.5 + 0.5 * sin(p.y * 0.11 + p.x * 0.05 + uTime * 2.6 + fld.r * 40.0);
   vec3 chrome = mix(vec3(0.085, 0.095, 0.115), vec3(0.6, 0.64, 0.68), facing * (0.55 + 0.45 * room));
@@ -1310,25 +1335,23 @@ void main() {
   vec3 metal = mix(chrome, fibre, smoothstep(0.8, 1.5, a));
   // The cells: a hexagonal micro-tessellation, each cell clicking solid on
   // its own threshold and taking the art's colour.
-  vec2 hs = vec2(1.0, 1.7320508);
-  vec2 hp = p / uHex;
-  vec4 hc = floor(vec4(hp, hp - vec2(0.5, 1.0)) / hs.xyxy) + 0.5;
-  vec4 hh = vec4(hp - hc.xy * hs, hp - (hc.zw + 0.5) * hs);
-  vec4 cell = dot(hh.xy, hh.xy) < dot(hh.zw, hh.zw) ? vec4(hh.xy, hc.xy) : vec4(hh.zw, hc.zw + 0.5);
-  vec2 q = abs(cell.xy);
+  vec2 q = abs(local);
   float rim = max(dot(q, hs * 0.5), q.x);
-  float threshold = hash(cell.zw);
   float k = (a - 2.4) / 2.5;
   float age = (k - threshold * 0.82) / 0.18;
   float solid = step(0.0, age);
   float paint = smoothstep(0.0, 1.0, age);
-  float tilt = hash(cell.zw + 7.31) - 0.5;
+  float tilt = fract(threshold * 17.31) - 0.5;
   vec3 facet = metal * (0.9 + 0.7 * tilt) + vec3(0.07, 0.09, 0.11);
   float tess = smoothstep(1.7, 2.4, a);
   float edge = smoothstep(0.4, 0.5, rim);
   // Still liquid: the tessellation shows through as facets and dark seams.
   vec3 liquid = mix(metal, facet, 0.5 * tess);
   liquid = mix(liquid, liquid * 0.5, edge * tess * 0.7);
+  // A bevel on the light-facing side catches the key as each plate seats.
+  float bevel = smoothstep(0.28, 0.42, rim) * (1.0 - edge);
+  float keySide = dot(local, vec2(-0.55, -0.83));
+  liquid += vec3(0.48, 0.55, 0.61) * bevel * smoothstep(-0.08, 0.32, keySide) * tess;
   vec3 celled = mix(facet, armour * (1.0 + 0.1 * tilt * (1.0 - smoothstep(1.0, 3.0, age))), paint);
   // The click: a brightness pop that decays.
   celled += (0.35 * exp(-max(age, 0.0) * 2.6)) * mix(vec3(0.8, 0.9, 1.0), armour, 0.4);
@@ -1345,12 +1368,12 @@ void main() {
     outc += mix(ICE, vec3(1.0), 0.35) * line * glow * 0.75;
   }
   // The lip: white-hot at the very edge.
-  float lip = 1.0 - smoothstep(0.0, 0.2, a);
+  float lip = 1.0 - smoothstep(0.0, 0.18, deposit);
   outc += vec3(0.91, 0.95, 1.0) * lip * 0.95;
   outc += mix(ICE, PINK, hash(floor(p / 9.0))) * lip * 0.22;
   // The veins, bright while liquid.
   outc += vec3(0.8, 0.9, 1.0) * fld.g * (1.0 - smoothstep(0.3, 1.6, a)) * 0.5;
-  float alpha = art.a * smoothstep(0.0, 0.06, a);
+  float alpha = art.a * smoothstep(0.0, 0.08, deposit);
   // Once the armour has faded: the lit emitters alone, over the scene's own.
   float lone = art.a * glowing * lit * step(${SKIN_BANDS.toFixed(1)}, a) * uGlow.x * (1.0 - uAlpha);
   gl_FragColor = vec4(outc * alpha + base.rgb * (1.0 - alpha), alpha + base.a * (1.0 - alpha)) * uAlpha

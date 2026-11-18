@@ -18,6 +18,7 @@
    change may play in full motion (rexonance-form-burst-loader.ts). */
 
 import { buildNoiseTable, NOISE_SIZE } from "./rexonance-fire/fire-noise.js";
+import { prepareRexonanceClasps } from "./rexonance-clasp-atlas";
 import { SKIN_CELL_SHEET, buildSkinCellSheet } from "./rexonance-suit-skin";
 import {
   FORM_BURST_BAND,
@@ -747,6 +748,7 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
   }
   ownSheet ??= buildFormBurstSheet(makeCanvas);
   cellSheet ??= buildSkinCellSheet(makeCanvas);
+  const clasps = prepareRexonanceClasps();
   const particles = new FormBurstParticles(budget, field.points, aspect, options.origin, reach);
   const governor = new FormBurstGovernor();
   const frame = createFormBurstFrame();
@@ -897,6 +899,7 @@ export function playFormBurst(options: FormBurstOptions): FormBurstPlay | null {
         cellSheet,
         CELLS,
         FORM_BURST_SHARE[governor.level],
+        clasps.current,
       );
     }
     options.onFrame?.(layer);

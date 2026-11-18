@@ -894,7 +894,7 @@ const spriteContext = () => {
     globalCompositeOperation: "source-over",
     drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh) {
       assert.ok(Number.isFinite(dx + dy + dw + dh) && dw > 0 && dh > 0);
-      calls.push({ sx, sy, sw, sh, dx, dy, dw, dh, alpha: context.globalAlpha, mode: context.globalCompositeOperation });
+      calls.push({ image, sx, sy, sw, sh, dx, dy, dw, dh, alpha: context.globalAlpha, mode: context.globalCompositeOperation });
     },
     save() {
       depth += 1;
@@ -915,6 +915,65 @@ const spriteContext = () => {
   return context;
 };
 const SHEET = { sheet: true };
+
+test("clasp loading is optional, shared across players and retried after a missing or invalid sheet", async (t) => {
+  const requests = [];
+  class FakeImage {
+    set src(value) { requests.push(this); this.url = value; }
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "Image");
+  Object.defineProperty(globalThis, "Image", { configurable: true, value: FakeImage });
+  t.after(() => {
+    if (descriptor) Object.defineProperty(globalThis, "Image", descriptor);
+    else delete globalThis.Image;
+  });
+  const { prepareRexonanceClasps } = await import("../src/lib/rexonance-clasp-atlas.ts");
+  assert.equal(requests.length, 0);
+  const material = prepareRexonanceClasps();
+  assert.equal(material.current, null);
+  assert.equal(prepareRexonanceClasps(), material);
+  assert.equal(requests.length, 1);
+  requests[0].onerror();
+  prepareRexonanceClasps();
+  requests[1].naturalWidth = requests[1].naturalHeight = 128;
+  requests[1].onload();
+  assert.equal(material.current, null);
+  prepareRexonanceClasps();
+  requests[2].naturalWidth = requests[2].naturalHeight = 512;
+  requests[2].onload();
+  assert.equal(material.current, requests[2]);
+  assert.equal(material.current.url, "/nanite-forge-20261118/rexonance-clasps.webp");
+  assert.equal(prepareRexonanceClasps(), material);
+  assert.equal(requests.length, 3);
+  assert.ok(requests.every((img) => img.onload === null && img.onerror === null));
+});
+
+test("entry, scroll movie and retract use all four clasp poses after a late material load", () => {
+  const budget = skinBudget(cellDevice(true, 390, 844));
+  const field = skinSamples(cellRgba, W, H, budget.samples);
+  const atlas = { current: null };
+  const cells = new SkinCells(budget.large, 0, SHEET, CELL, FIGURE, atlas);
+  const back = spriteContext();
+  const front = spriteContext();
+  cells.draw(back, front, field, SKIN_ENTRY, 900, 900, PHONE_SCALE, HEX);
+  assert.ok([...back.calls, ...front.calls].some((call) => call.image === SHEET && call.sw === 128));
+  atlas.current = {};
+  for (const timeline of [SKIN_ENTRY, SKIN_SCROLL, null]) {
+    const end = timeline?.light ?? SKIN_RETRACT_MS;
+    const sampled = new Set();
+    for (let i = 0; i < 350; i++) {
+      back.calls.length = front.calls.length = 0;
+      cells.draw(back, front, field, timeline, (end * i) / 350, 0, PHONE_SCALE, HEX);
+      for (const call of [...back.calls, ...front.calls]) {
+        if (call.sw !== 128) continue;
+        assert.equal(call.image, atlas.current);
+        assert.equal(call.sh, 128);
+        sampled.add(call.sx + "," + call.sy);
+      }
+    }
+    assert.equal(sampled.size, 16, "four tones rotate through all four physical poses");
+  }
+});
 
 test("the cells: budgeted per device in two sizes, shed by the governor, none under reduced motion", () => {
   const desktop = skinBudget(cellDevice(false, 1440, 900));
@@ -1148,8 +1207,8 @@ test("the cells come out of the air all round, only ever inward, and settle flat
   for (let i = 0; i < cells.count; i += 1) {
     if (!cells.poseAt(pose, i, false, field, SKIN_ENTRY, 900, 1000, PHONE_SCALE)) continue;
     if (!cells.poseAt(other, i, false, field, SKIN_ENTRY, 900, 91000, PHONE_SCALE)) continue;
-    assert.ok(Math.hypot(pose[0] - other[0], pose[1] - other[1]) * PHONE_SCALE < 12);
-    assert.equal(pose[2], other[2]);
+    assert.deepEqual(pose.slice(0, 3), other.slice(0, 3), "paused cell stays at its socket approach");
+    assert.deepEqual(pose.slice(4), other.slice(4), "paused bank and roll stay registered");
     compared += 1;
   }
   assert.ok(compared > 20);
