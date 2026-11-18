@@ -1,0 +1,246 @@
+@import "./styles-far-from-opening.css";
+@import "./styles-far-from-processor.css";
+@import "./styles-far-from-workbench.css";
+@import "./styles-far-from-exhibit.css";
+
+/* The two striking-power measurements form a pair in the specification
+   sheet. Their source order and the accessible term/value pairs stay intact. */
+#top.ffs-page #specs .ffs-specs > div {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(14px, 1.6vw, 23px) 0;
+  border: 0;
+  border-block-start: 1px solid #70829370;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#top.ffs-page #specs .ffs-specs > div::before {
+  content: none;
+}
+
+#top.ffs-page #specs .ffs-specs {
+  gap: 0 clamp(16px, 2.3vw, 36px);
+}
+
+#top.ffs-page #specs .ffs-specs > [data-strike] {
+  border-block-start: 2px solid var(--fft-gold);
+}
+
+#top.ffs-page #specs .ffs-specs > [data-strike] dd {
+  font-size: clamp(29px, 4vw, 60px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.035em;
+  line-height: 1.1;
+}
+
+#top.ffs-page #performance .ffs-console {
+  padding: clamp(14px, 2vw, 30px) 0 0;
+  border: 0;
+  border-top: 1px solid #85afbf;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) {
+  padding: clamp(14px, 1.5vw, 25px);
+  gap: 13px;
+  border: 0;
+  border-block-start: 2px solid #d7c395;
+  border-radius: 0;
+  background: linear-gradient(145deg, #1b2d3b, #101924 70%);
+  box-shadow: none;
+}
+
+#top.ffs-page #performance .ffs-metric:is([data-metric="punch"], [data-metric="kick"]) > header strong {
+  font-size: clamp(32px, 3.6vw, 54px);
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+#top.ffs-page #performance .ffs-metric-result {
+  text-shadow: none;
+}
+
+/* The full P16 dossier extends well past a phone screen. These are native
+   fragment links, including when the page is read with motion turned off. */
+#top.ffs-page #p16 .ffs-p16-index {
+  width: min(100%, 1312px);
+  margin: 0 auto clamp(16px, 2.2vw, 32px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 clamp(15px, 2.2vw, 36px);
+  border-block: 1px solid #7e9ca75c;
+}
+
+#top.ffs-page #p16 .ffs-p16-index a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: .45em;
+  font-size: clamp(12px, 1.15vw, 16px);
+  font-weight: 650;
+  color: #dfebf6;
+  text-underline-offset: .28em;
+}
+
+#top.ffs-page #p16 .ffs-p16-index a::after {
+  content: "";
+  width: .42em;
+  height: .42em;
+  margin: -.22em .18em 0 0;
+  border: solid var(--fft-gold);
+  border-width: 0 1px 1px 0;
+  transform: rotate(45deg);
+}
+
+#top.ffs-page #p16 .ffs-p16-index a:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+
+#top.ffs-page #p16 h3[tabindex="-1"] {
+  scroll-margin-block-start: calc(var(--rxs-local-nav-reserve) + 18px);
+}
+
+/* A fragment must be measured at its resting position. The ordinary section
+   reveal starts 32px lower and would slide the heading under the fixed bar. */
+#top.ffs-page #p16 .rxs-reveal:has(h3:target) {
+  translate: none;
+  opacity: 1;
+  transition: none;
+}
+
+/* At compact widths the current chapter is the same link used on desktop.
+   Leave keyboard focus on its link if scrolling changes the current chapter. */
+@media (max-width: 900px) {
+  #top.ffs-page .rxs-local-nav .rxs-local-nav-inner {
+    grid-template-columns: minmax(0, 1fr) auto 48px;
+    gap: clamp(4px, 1.4vw, 12px);
+  }
+
+  #top.ffs-page .rxs-local-nav nav {
+    display: grid;
+    min-width: 0;
+  }
+
+  #top.ffs-page .rxs-local-nav nav a {
+    grid-area: 1 / 1;
+    padding-inline: 7px;
+    white-space: nowrap;
+  }
+
+  #top.ffs-page .rxs-local-nav nav a:not([aria-current="location"]):not(:focus-visible),
+  #top.ffs-page .rxs-local-nav nav:has(a:focus-visible:not([aria-current])) a[aria-current] {
+    display: none;
+  }
+
+  #top.ffs-page .rxs-local-nav nav:not(:has(a:is([aria-current], :focus-visible))) {
+    visibility: hidden;
+  }
+}
+
+/* The closing still uses the complete Ultra silhouette. The art has its own
+   space beside the invitation, so even its pale interfaces can keep their contrast. */
+html[data-family="special"] #top.ffs-page .ffs-footer {
+  background:
+    radial-gradient(ellipse at 77% 82%, rgb(83 100 154 / 25%), transparent 39%),
+    linear-gradient(135deg, #080e18, #101924 50%, #070b13);
+}
+
+html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
+  opacity: 1;
+  -webkit-mask-image: none;
+  mask-image: none;
+  transform: none;
+  object-fit: contain;
+}
+
+#top.ffs-page .ffs-footer h2 > span {
+  display: inline-block;
+  max-width: 100%;
+}
+
+@media (min-width: 901px) {
+  html[data-family="special"] #top.ffs-page .ffs-footer {
+    min-height: clamp(430px, 38vw, 610px);
+    align-content: center;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
+    right: max(2vw, calc((100% - 1360px) / 2));
+    width: min(37vw, 460px);
+    height: 94%;
+    bottom: 3%;
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-family="special"] body #top.ffs-page .rxs-footer.ffs-footer {
+    grid-template-columns: minmax(0, 1fr) 35%;
+    grid-auto-rows: auto;
+    align-content: center;
+    column-gap: clamp(8px, 2vw, 18px);
+    row-gap: 12px;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
+    position: static;
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 100%;
+    height: clamp(158px, 51vw, 340px);
+    object-position: center;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-footer-top {
+    grid-area: 1 / 1;
+    margin: 0;
+    align-self: end;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > div {
+    grid-area: 2 / 1;
+    align-self: start;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer h2 {
+    font-size: clamp(22px, 5.6vw, 40px);
+    line-height: 1.27;
+    letter-spacing: 0;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > a {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  html[data-family="special"] body #top.ffs-page .rxs-footer.ffs-footer {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    padding-block-start: 28px;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-end-figure {
+    grid-area: 1 / 2;
+    height: clamp(150px, 46vw, 224px);
+    object-position: left center;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > .ffs-footer-top {
+    align-self: center;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer > div {
+    grid-area: 2 / 1 / 3 / -1;
+    margin-bottom: 6px;
+  }
+
+  html[data-family="special"] #top.ffs-page .ffs-footer h2 {
+    max-width: calc(100% - 36px);
+  }
+}

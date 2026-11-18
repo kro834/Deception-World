@@ -11,6 +11,7 @@ import { mountRexonanceAnchorNavigation as mountChapterNavigation } from "@/lib/
 import { mountLocalNavCurrent } from "@/lib/local-nav-current";
 import { mountFarFromFonts } from "@/lib/far-from-fonts";
 import { FAR_FROM_SAGA, type Article } from "@/components/final-stage/final-stage-data";
+import { FAR_FROM_ULTRA_FIGURE, farFromUltraSrc } from "@/lib/far-from-ultra-art";
 import {
   FAR_FROM_SAGA_ARTWORK,
   FAR_FROM_SAGA_STAGE_ORDER,
@@ -325,7 +326,7 @@ export function FarFromSaga() {
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;
 
   useLayoutEffect(() => mountNavReserve(pageRef.current), []);
-  useEffect(() => mountChapterNavigation(pageRef.current), []);
+  useEffect(() => mountChapterNavigation(pageRef.current, window, '#p16 h3[tabindex="-1"]'), []);
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);
 
   // The Japanese display face, applied after paint (src/lib/far-from-fonts.ts),
@@ -514,9 +515,7 @@ export function FarFromSaga() {
 
       <section className="rxs-hero ffs-hero" aria-labelledby="ffs-title">
         <div className="rxs-hero-ambient" aria-hidden="true">
-          <i />
-          <i />
-          <i />
+          <FarFromAperture />
         </div>
         {/* Owner (2026-10-23): no secondary labels — the name leads the copy
             (no eyebrow, no Latin duplicate: the FAR FROM ghost behind it is
@@ -543,7 +542,6 @@ export function FarFromSaga() {
           </span>
         </div>
         <div className="rxs-hero-visual" aria-hidden="true">
-          <FarFromAperture />
           <i className="ffs-ring is-ice" />
           <i className="ffs-ring is-gold" />
           <i className="ffs-ring is-violet" />
@@ -598,7 +596,11 @@ export function FarFromSaga() {
         </header>
         <dl className="ffs-specs rxs-reveal" aria-label="ファーフロムサーガ スペック">
           {FAR_FROM_SAGA.specs.map((row) => (
-            <div key={row.dt} data-long={row.dd.length > LONG_SPEC || undefined}>
+            <div
+              key={row.dt}
+              data-long={row.dd.length > LONG_SPEC || undefined}
+              data-strike={(row.dt === "パンチ力" || row.dt === "キック力") || undefined}
+            >
               <dt>{row.dt}</dt>
               <dd>{row.dd}</dd>
             </div>
@@ -647,6 +649,8 @@ export function FarFromSaga() {
       <section id="stages" className="rxs-stages rxs-section" aria-labelledby="ffs-stages-title">
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-stages-title">選べ。<wbr />どこまで<wbr />遠くへ<wbr />行くか。</h2>
+          <img className="ffs-exhibit-forms" src="/far-from-exhibit-20261119/forms.webp"
+            width={1040} height={208} alt="" loading="lazy" decoding="async" />
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
@@ -742,6 +746,10 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-theories-title">離れた<wbr />力を、<wbr />一つの<wbr />拳に。</h2>
+          <div className="ffs-exhibit-core" aria-hidden="true">
+            <img src="/far-from-exhibit-20261119/core.webp" width={700} height={288}
+              alt="" loading="lazy" decoding="async" />
+          </div>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
@@ -819,16 +827,16 @@ export function FarFromSaga() {
       </section>
 
       <footer className="rxs-footer ffs-footer" role="contentinfo">
-        {/* The end card: ウルトラ stands behind the last line (lazy; decorative). */}
+        {/* The end card shows the complete suit with its painted interfaces. */}
         <img
           className="ffs-end-figure"
-          src={FAR_FROM_SAGA_ARTWORK.ultra.src}
-          srcSet={farFromImage("ultra").srcSet}
-          sizes="(max-width: 760px) 70vw, 36vw"
+          src={farFromUltraSrc("interface", 768)}
+          srcSet={`${farFromUltraSrc("interface", 768)} 768w, ${farFromUltraSrc("interface", 1024)} 1024w`}
+          sizes="(max-width: 900px) 35vw, (min-width: 1244px) 460px, 37vw"
           alt=""
           aria-hidden="true"
-          width={FAR_FROM_SAGA_ARTWORK.ultra.width}
-          height={FAR_FROM_SAGA_ARTWORK.ultra.height}
+          width={FAR_FROM_ULTRA_FIGURE.width}
+          height={FAR_FROM_ULTRA_FIGURE.height}
           loading="lazy"
           decoding="async"
         />
@@ -842,9 +850,9 @@ export function FarFromSaga() {
         </p>
         <div>
           <h2>
-            ファーフロムサーガの<wbr />活躍は、
+            <span>ファーフロム</span><span>サーガの</span><span>活躍は、</span>
             <br />
-            ファイナルステージで。
+            <span>ファイナル</span><span>ステージで。</span>
           </h2>
         </div>
         <GuardedLink to="/final-stage" hash="far-from-saga" assets={FINAL_STAGE_ENTER_ASSETS}>

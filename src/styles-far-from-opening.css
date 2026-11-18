@@ -1,0 +1,371 @@
+/* The original Middle portrait, the orbit plate and the title share one stage.
+   At desktop sizes the existing left stage remains pinned through chapter 01. */
+#top.ffs-page > .ffs-hero {
+  --ffs-opening-ink: #050b13;
+  --ffs-opening-gutter: clamp(22px, 4.5vw, 76px);
+}
+
+#top.ffs-page > .ffs-hero::before,
+#top.ffs-page > .ffs-hero .rxs-hero-copy::before {
+  content: none;
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-ambient {
+  display: block;
+  isolation: isolate;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 73% 65%, #14283366, transparent 48%),
+    radial-gradient(ellipse at 15% 35%, #1c3344 0%, #101e2d 37%, transparent 69%),
+    linear-gradient(126deg, #0b1321, var(--ffs-opening-ink) 75%);
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-ambient .ffs-aperture {
+  inset: auto;
+  left: -13%;
+  top: 14%;
+  width: 120%;
+  max-width: none;
+  height: 76%;
+  aspect-ratio: auto;
+  opacity: 0.45;
+  transform-box: border-box;
+  transform-origin: center;
+  transform: rotate(-17deg);
+  filter: none;
+  mask-image: linear-gradient(100deg, transparent 6%, #000 29% 76%, transparent 97%);
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-visual {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-visual img {
+  filter: none;
+  mask-image:
+    linear-gradient(90deg, #000 0% 66%, transparent 100%),
+    linear-gradient(180deg, #000 0% 67%, transparent 100%);
+  mask-composite: intersect;
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-visual::after {
+  inset: auto 0 0;
+  height: 35%;
+  background: radial-gradient(ellipse farthest-side at 40% 110%, #a2824f25, transparent);
+  z-index: 0;
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-copy {
+  min-width: 0;
+  text-align: left;
+}
+
+#top.ffs-page > .ffs-hero h1 {
+  width: max-content;
+  max-width: 100%;
+  margin: 0;
+  color: #f4f5f3;
+  -webkit-text-fill-color: currentColor;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+  text-shadow: 0 3px 20px #050b135e;
+}
+
+#top.ffs-page > .ffs-hero h1 .name-word {
+  margin: 0;
+  background: none;
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+#top.ffs-page > .ffs-hero .ffs-mark {
+  inset: auto auto calc(100% + 12px) 0;
+  translate: none;
+  margin: 0;
+  color: transparent;
+  font-size: clamp(34px, 5vw, 86px);
+  letter-spacing: 0.065em;
+  -webkit-text-stroke: 1px rgb(175 200 207 / 31%);
+  text-shadow: none;
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-lede {
+  margin: clamp(17px, 2.8vh, 29px) 0 0;
+  max-width: 32em;
+  color: #f1e8d8;
+  font-size: clamp(18px, 1.45vw, 25px);
+  line-height: 1.55;
+  letter-spacing: 0.045em;
+}
+
+#top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span {
+  max-width: 32em;
+  margin-top: 0.62em;
+  font-size: clamp(13px, 0.94vw, 16px);
+  line-height: 1.65;
+  color: #bfccd3;
+  letter-spacing: 0.025em;
+}
+
+#top.ffs-page > .ffs-hero .ffs-stages-line {
+  justify-content: flex-start;
+  gap: 8px;
+  margin: clamp(15px, 2.5vh, 27px) 0 0;
+  color: #a6bbc4;
+  font-size: clamp(10px, 0.8vw, 13px);
+  letter-spacing: 0.065em;
+}
+
+#top.ffs-page > .ffs-hero .ffs-stages-line::before {
+  width: 25px;
+  height: 2px;
+  background: linear-gradient(90deg, #8ed5ec, #86cc9c 26%, #e18d9f 51%, #dfc48a 74%, #dee9fd);
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-rail {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px 26px;
+  margin: clamp(17px, 3vh, 32px) 0 0;
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-rail a {
+  letter-spacing: 0.035em;
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary {
+  min-width: 160px;
+  min-height: 48px;
+  border-color: #e5d7b3;
+  color: #121b23;
+  background: linear-gradient(112deg, #fff7dc, #e6d4a9 78%, #c6a86d);
+  box-shadow: inset 0 1px rgb(255 255 250 / 60%);
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary {
+  min-width: 0;
+  min-height: 44px;
+  gap: 8px;
+  padding-inline: 2px;
+  border: 0;
+  background: transparent;
+  color: #d7e5e9;
+  box-shadow: none;
+  clip-path: none;
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-secondary span {
+  text-decoration: underline;
+  text-underline-offset: 0.45em;
+  text-decoration-color: #71848a;
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-rail a:focus-visible {
+  clip-path: none;
+  outline: 2px solid #e8fafc;
+  outline-offset: 3px;
+}
+
+@media (min-width: 1100px) {
+  #top.ffs-page > .ffs-hero > .rxs-hero-ambient {
+    grid-column: 1 / -1;
+    grid-row: title;
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-visual {
+    width: 118%;
+    background: linear-gradient(90deg, #0c1925 0% 68%, transparent);
+    mask-image: linear-gradient(90deg, #000 0% 79%, transparent);
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-visual img {
+    object-position: 50% 9%;
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-copy {
+    align-self: center;
+    padding: clamp(32px, 4vh, 56px) var(--ffs-opening-gutter) 0 clamp(38px, 5.4vw, 100px);
+  }
+
+  #top.ffs-page > .ffs-hero h1 {
+    font-size: clamp(64px, 5.65vw, 105px);
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-mark {
+    left: clamp(38px, 5.4vw, 100px);
+  }
+}
+
+/* A portrait phone opens on helmet, chest and title in one composition. */
+@media (max-width: 1099px) and (orientation: portrait), (max-width: 567px) {
+  #top.ffs-page > .ffs-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: clamp(164px, min(40svh, 77vw), 460px) auto auto;
+    gap: 0;
+    align-items: start;
+    min-height: 0;
+    padding: 0;
+    background: var(--ffs-opening-ink);
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-ambient {
+    z-index: 0;
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-ambient .ffs-aperture {
+    width: 165%;
+    height: 54%;
+    left: -37%;
+    top: 17%;
+    opacity: 0.24;
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-visual {
+    grid-area: 1 / 1 / 3;
+    align-self: start;
+    justify-self: center;
+    inset: auto;
+    width: 100%;
+    max-width: 860px;
+    height: clamp(240px, min(62svh, 113vw), 660px);
+    min-height: 0;
+    aspect-ratio: auto;
+    margin: 0;
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-visual img {
+    object-position: 50% 8%;
+    mask-image:
+      linear-gradient(180deg, #000 0% 51%, rgb(0 0 0 / 86%) 62%, transparent 94%),
+      linear-gradient(90deg, rgb(0 0 0 / 70%), #000 13% 85%, rgb(0 0 0 / 60%));
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-copy {
+    grid-area: 2 / 1;
+    justify-self: center;
+    width: min(100%, 730px);
+    padding: 0 var(--ffs-opening-gutter);
+    box-sizing: border-box;
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-mark {
+    inset: 0 var(--ffs-opening-gutter) auto auto;
+    translate: 0 0.08em;
+    font-size: clamp(28px, 8.7vw, 55px);
+    -webkit-text-stroke-color: rgb(160 187 199 / 16%);
+  }
+
+  #top.ffs-page > .ffs-hero h1 {
+    font-size: clamp(36px, 10.5vw, 70px);
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-lede {
+    margin-top: 15px;
+    font-size: clamp(16px, 4.5vw, 22px);
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span {
+    margin-top: 5px;
+    max-width: 34em;
+    font-size: clamp(12px, 2.9vw, 14px);
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-stages-line {
+    gap: 6px;
+    margin-top: 12px;
+    font-size: clamp(10px, 2.5vw, 13px);
+    letter-spacing: 0;
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-stages-line::before {
+    width: 16px;
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-hero-rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 16px;
+    margin-top: 16px;
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary {
+    min-width: 128px;
+    min-height: 44px;
+    padding: 10px 15px;
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-scroll-cue {
+    grid-area: 3 / 1;
+    justify-self: start;
+    margin: 12px 0 14px var(--ffs-opening-gutter);
+  }
+}
+
+/* Keep the approved short-landscape title and tap controls together. */
+@media (min-width: 568px) and (max-width: 1099px) and (orientation: landscape) {
+  #top.ffs-page > .ffs-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    gap: 0;
+    align-items: center;
+    min-height: calc(100svh - var(--rxs-local-nav-reserve));
+    padding: 8px clamp(12px, 3.2vw, 42px) 8px 0;
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-visual {
+    grid-area: 1 / 1 / 3;
+    align-self: stretch;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 170px;
+    aspect-ratio: auto;
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-visual img {
+    object-position: 50% 10%;
+  }
+
+  #top.ffs-page > .ffs-hero > .rxs-hero-copy {
+    grid-area: 1 / 2;
+    align-self: center;
+    width: 100%;
+    padding: 6px 0 0 8px;
+  }
+
+  #top.ffs-page > .ffs-hero h1 {
+    font-size: clamp(29px, 7.5svh, 58px);
+  }
+
+  #top.ffs-page > .ffs-hero .ffs-mark {
+    inset: -0.24em 0 auto auto;
+    font-size: clamp(23px, 4.7vw, 44px);
+    -webkit-text-stroke-color: rgb(160 187 199 / 16%);
+  }
+
+  #top.ffs-page > .ffs-hero .rxs-hero-lede { margin-top: 8px; font-size: clamp(14px, 2.8vh, 19px); }
+  #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span { margin-top: 3px; font-size: 12px; line-height: 1.45; }
+  #top.ffs-page > .ffs-hero .ffs-stages-line { margin-top: 6px; font-size: 10px; }
+  #top.ffs-page > .ffs-hero .ffs-hero-rail { display: flex; gap: 2px 12px; margin-top: 9px; }
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a { min-height: 44px; padding: 8px 12px; }
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary { min-width: 112px; min-height: 44px; }
+  #top.ffs-page > .ffs-hero > .rxs-scroll-cue { grid-area: 2 / 2; margin: 4px 0 0 8px; }
+}
+
+@media (min-width: 568px) and (max-width: 1099px) and (orientation: landscape) and (max-height: 420px) {
+  #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span {
+    padding-inline-end: 54px;
+  }
+}
+
+@media (forced-colors: active) {
+  #top.ffs-page > .ffs-hero .ffs-mark { visibility: hidden; }
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a { border: 1px solid ButtonText; color: LinkText; }
+}

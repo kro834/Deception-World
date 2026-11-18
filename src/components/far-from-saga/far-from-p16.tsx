@@ -205,7 +205,7 @@ function P16Comparator() {
     <div className="ffs-p16-comparator rxs-reveal">
       <header>
         <div>
-          <h3>
+          <h3 id="ffs-p16-benchmarks-title" tabIndex={-1}>
             P16 / <UnitName value={`${title}比`} />
           </h3>
         </div>
@@ -310,16 +310,20 @@ function Generations() {
       aria-labelledby="ffs-p16-generations-title"
     >
       <header>
-        <h3 id="ffs-p16-generations-title">{P16_GENERATIONS_TITLE}</h3>
+        <h3 id="ffs-p16-generations-title" tabIndex={-1}>{P16_GENERATIONS_TITLE}</h3>
       </header>
       <div>
         {P16_DESCRIPTIONS.map((item) => (
           <article key={item.unit.key} data-unit={item.unit.key}>
-            <small>{item.unit.form}</small>
-            <h4>{item.heading}</h4>
-            {item.paragraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+            <header>
+              <small>{item.unit.form}</small>
+              <h4>{item.heading}</h4>
+            </header>
+            <div className="ffs-p16-generation-copy">
+              {item.paragraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
           </article>
         ))}
       </div>
@@ -371,7 +375,7 @@ function Summary() {
   return (
     <section className="ffs-p16-summary rxs-reveal" aria-labelledby="ffs-p16-summary-title">
       <header>
-        <h3 id="ffs-p16-summary-title">{P16_SUMMARY_TITLE}</h3>
+        <h3 id="ffs-p16-summary-title" tabIndex={-1}>{P16_SUMMARY_TITLE}</h3>
       </header>
       {P16_SUMMARY.map((paragraph) => (
         <p key={paragraph}>{paragraph}</p>
@@ -383,6 +387,11 @@ function Summary() {
 export function FarFromP16() {
   return (
     <>
+      <nav className="ffs-p16-index" aria-label="P16のページ内目次">
+        <a href="#ffs-p16-benchmarks-title">暫定ベンチマーク</a>
+        <a href="#ffs-p16-generations-title">世代の違い</a>
+        <a href="#ffs-p16-summary-title">{P16_SUMMARY_TITLE}</a>
+      </nav>
       <div className="ffs-p16-overview rxs-reveal">
         <P16Core />
         <div className="ffs-p16-copy">
@@ -394,25 +403,25 @@ export function FarFromP16() {
               <li key={item}>{item}</li>
             ))}
           </ul>
-          <div className="ffs-p16-figures">
-            <p>
-              <ProvisionalTag />
-              <span>
-                <UnitName value="P14 Extreme Tuning比" />
-              </span>
-            </p>
-            <dl aria-label="P16の暫定ベンチマーク（P14 Extreme Tuning比）">
-              {P16_OFFICIAL_METRICS.map((metric) => (
-                <div key={metric.key}>
-                  <dt>{metric.label}</dt>
-                  <dd>
-                    {signedPercent(p16ChangeAgainst(metric, "tuning"))}
-                    <small>{metric.verb}</small>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+        </div>
+        <div className="ffs-p16-figures">
+          <p>
+            <ProvisionalTag />
+            <span>
+              <UnitName value="P14 Extreme Tuning比" />
+            </span>
+          </p>
+          <dl aria-label="P16の暫定ベンチマーク（P14 Extreme Tuning比）">
+            {P16_OFFICIAL_METRICS.map((metric) => (
+              <div key={metric.key}>
+                <dt>{metric.label}</dt>
+                <dd>
+                  {signedPercent(p16ChangeAgainst(metric, "tuning"))}
+                  <small>{metric.verb}</small>
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </div>
 

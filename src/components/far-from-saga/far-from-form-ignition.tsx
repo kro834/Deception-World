@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { mountFarFromFormIgnition, type FarFromIgnitionOptions } from "@/lib/far-from-form-ignition";
+import { farFromCompletedSuit, mountFarFromFormIgnition, type FarFromIgnitionOptions } from "@/lib/far-from-form-ignition";
 import { FAR_FROM_SAGA_ARTWORK, farFromImage } from "@/lib/far-from-saga-artwork";
 
 export function FarFromFormIgnition({
@@ -30,7 +30,7 @@ export function FarFromFormIgnition({
           // A rapid switch can start from a full-body fallback whose original
           // portrait failed. Reuse that cutout while the next form loads.
           if (!currentTarget.hasAttribute("srcset")) return;
-          currentTarget.src = previous === "ultra" ? farFromUltraSrc("interface", 768) : SUITS[previous];
+          currentTarget.src = farFromCompletedSuit(previous);
           currentTarget.removeAttribute("srcset");
           currentTarget.style.objectFit = "contain";
         }}

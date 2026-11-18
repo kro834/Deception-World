@@ -9,6 +9,10 @@ import { farFromUltraSrc } from "./far-from-ultra-art.ts";
 export const FAR_FROM_FORM_IGNITION_MS = 1850;
 const SUITS = { middle: FAR_FROM_SUIT_FIGURE, ...FAR_FROM_SUIT_FORMS, ultra: farFromUltraSrc("body", 768) };
 
+export function farFromCompletedSuit(stage: FarFromStageKey) {
+  return stage === "ultra" ? farFromUltraSrc("interface", 768) : SUITS[stage];
+}
+
 function fade(from: number, to: number, u: number) {
   const t = Math.max(0, Math.min(1, (u - from) / (to - from)));
   return t * t * (3 - 2 * t);
@@ -76,7 +80,7 @@ export function mountFarFromFormIgnition(
     const warmHandle = idle ? window.requestIdleCallback(prepare) : window.setTimeout(prepare, 0);
     const from = new Image();
     const to = new Image();
-    from.src = previous === "ultra" ? farFromUltraSrc("interface", 768) : SUITS[previous];
+    from.src = farFromCompletedSuit(previous);
     to.src = SUITS[stage];
     const earliest = performance.now() + delayMs;
     let frame = 0;

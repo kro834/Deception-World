@@ -315,6 +315,8 @@ export async function verifyPublicDeployment({
           (!NANITE_FORGE_DELIVERIES.includes(asset.path) &&
             !DOG_ARCHIVE_ART_PATHS.includes(asset.path) &&
             asset.path !== "/far-from-fire-20261118/plumes.webp" &&
+            asset.path !== "/far-from-exhibit-20261119/forms.webp" &&
+            asset.path !== "/far-from-exhibit-20261119/core.webp" &&
             !/^\/rexonance-flame-(?:natural-)?20261019\/(?:flame\.webp|manifest\.json)(?![\s\S])/u.test(
               asset.path,
             ) &&

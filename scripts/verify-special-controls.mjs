@@ -144,9 +144,68 @@ async function checkLandscapeHero(route, actionSelector) {
   }
 }
 
+async function checkFarFromChapterLinks() {
+  const page = await browser.newPage({ viewport: { width: 320, height: 667 }, hasTouch: true });
+  try {
+    await page.goto(base + "/far-from-saga", { waitUntil: "domcontentloaded" });
+    const index = page.locator(".ffs-p16-index");
+    await index.getByRole("link").first().waitFor();
+    assert.equal(await index.getByRole("link").count(), 3);
+    for (const link of await index.getByRole("link").all()) {
+      const hash = await link.getAttribute("href");
+      await link.click();
+      await page.waitForFunction((hash) => location.hash === hash &&
+        document.activeElement === document.querySelector(hash), hash);
+      if (hash === "#ffs-p16-benchmarks-title") {
+        // A late Japanese font can grow the sections above a cold deep link.
+        // Force the same geometry change even with the font already cached.
+        await page.evaluate(() => {
+          const spacer = document.createElement("div");
+          spacer.id = "probe-late-font-growth";
+          spacer.style.height = "145px";
+          document.getElementById("p16").before(spacer);
+        });
+      }
+      await page.waitForFunction((hash) => {
+        const heading = document.querySelector(hash);
+        const inset = parseFloat(getComputedStyle(heading).scrollMarginTop);
+        return Math.abs(heading.getBoundingClientRect().top - inset) < 2;
+      }, hash, { timeout: 5000 });
+      const gap = await page.locator(hash).evaluate(async (heading) => {
+        const section = heading.closest(".rxs-reveal");
+        await Promise.all(section.getAnimations().map((animation) => animation.finished.catch(() => {})));
+        await new Promise(requestAnimationFrame);
+        const bar = document.querySelector(".rxs-local-nav");
+        return heading.getBoundingClientRect().top - bar.getBoundingClientRect().bottom;
+      });
+      assert.ok(gap >= 0 && gap < 60, `${hash}: heading gap ${gap}`);
+      await page.locator('.rxs-local-nav a[href="#p16"][aria-current="location"]').waitFor({ state: "visible" });
+      if (hash === "#ffs-p16-benchmarks-title")
+        await page.locator("#probe-late-font-growth").evaluate((element) => element.remove());
+    }
+    for (const [id, artwork] of [
+      ["suitup", ".ffs-armour-section"],
+      ["stages", ".ffs-exhibit-forms"],
+      ["theories", ".ffs-exhibit-core"],
+    ]) {
+      const heading = page.locator(`#${id} > .rxs-section-heading`);
+      await heading.scrollIntoViewIfNeeded();
+      const clearance = await heading.evaluate((header, artwork) => {
+        const picture = header.querySelector(artwork).getBoundingClientRect();
+        const title = header.querySelector("h2").getBoundingClientRect();
+        return picture.top - title.bottom;
+      }, artwork);
+      assert.ok(clearance >= 0, `${id}: 320px artwork overlaps its title by ${-clearance}px`);
+    }
+  } finally {
+    await page.close();
+  }
+}
+
 try {
   await checkLandscapeHero("/rexonance-saga", ".rxe-hero-primary");
   await checkLandscapeHero("/far-from-saga", ".ffs-hero-primary");
+  await checkFarFromChapterLinks();
   for (const width of [320, 390, 834, 1024, 1440, 1920]) {
     const page = await browser.newPage({
       viewport: { width, height: 844 },

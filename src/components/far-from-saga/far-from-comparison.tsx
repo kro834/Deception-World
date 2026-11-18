@@ -93,7 +93,7 @@ function PairMetric({ metric, baseline }: { metric: BasicMetric; baseline: Basel
     ? `${metric.label}、${base.name}を基準にした速さは${formatMultiplier(result.multiplier)}、所要時間は${formatPercent(result.timeCut ?? 0)}短縮`
     : `${metric.label}、${base.name}を基準にした値は${formatChange(result.change)}、${formatMultiplier(result.multiplier)}`;
   return (
-    <article className="ffs-metric">
+    <article className="ffs-metric" data-metric={metric.key}>
       <header>
         <div>
           <small>{metric.label}</small>

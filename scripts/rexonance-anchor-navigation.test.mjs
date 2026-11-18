@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mountRexonanceAnchorNavigation } from "../src/lib/rexonance-anchor-navigation.js";
 
-function fixture() {
+function fixture(resizeSelector) {
   const listeners = new Map();
   const rootListeners = new Map();
   const frames = new Map();
@@ -14,7 +14,10 @@ function fixture() {
     getAttribute: (key) => attributes.get(key) ?? null,
     hasAttribute: (key) => attributes.has(key),
   };
-  const target = { getBoundingClientRect: () => (reads++, { top: 500 }) };
+  const target = {
+    matches: (selector) => selector === ".late-font-heading",
+    getBoundingClientRect: () => (reads++, { top: 500 }),
+  };
   const root = {
     isConnected: true,
     contains: (node) => node === link || node === target,
@@ -39,7 +42,7 @@ function fixture() {
     getComputedStyle: () => ({ scrollMarginTop: "101px" }),
     scrollTo: (options) => scrolls.push(options),
   };
-  const dispose = mountRexonanceAnchorNavigation(root, environment);
+  const dispose = mountRexonanceAnchorNavigation(root, environment, resizeSelector);
   const click = (overrides = {}) => {
     const event = {
       button: 0,
@@ -150,4 +153,31 @@ test("new user input and disposal cancel pending work and release every listener
 
 test("an absent page is a safe no-op", () => {
   mountRexonanceAnchorNavigation(null, {})();
+});
+
+test("a selected long-chapter heading follows font reflow until the reader moves on", () => {
+  const f = fixture(".late-font-heading");
+  let notify;
+  let observed;
+  f.environment.ResizeObserver = class {
+    constructor(callback) { notify = callback; }
+    observe(node) { observed = node; }
+    disconnect() { observed = null; }
+  };
+  const shifts = [];
+  f.environment.scrollBy = (options) => shifts.push(options);
+  f.click();
+  f.tick();
+  assert.equal(observed, f.root);
+  notify();
+  assert.deepEqual(shifts, [{ top: 399, behavior: "instant" }]);
+  f.listeners.get("wheel")();
+  assert.equal(observed, null);
+  assert.equal(f.listeners.has("hashchange"), false);
+  f.click();
+  f.tick();
+  f.environment.location.hash = "#system";
+  f.listeners.get("hashchange")();
+  assert.equal(observed, null);
+  f.dispose();
 });

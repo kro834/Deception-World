@@ -23,12 +23,16 @@ export const FAR_FROM_CHAPTERS = [
 /** Static page map under the hero: real anchors, no scroll listeners. */
 export function FarFromChapterMap() {
   return (
-    <nav className="rxs-chapter-index ffs-chapter-map" aria-label="ファーフロムサーガの見どころ">
+    <nav className="rxs-chapter-index ffs-chapter-map" id="ffs-chapter-map" aria-label="ファーフロムサーガの見どころ">
       {FAR_FROM_CHAPTERS.map((chapter) => (
         <a key={chapter.href} href={chapter.href}>
           <b aria-hidden="true">{chapter.number}</b>
           <span>{chapter.label}</span>
           <i aria-hidden="true">↗</i>
+          {chapter.href === "#overview" && (
+            <img src="/far-from-exhibit-20261119/core.webp" width="700" height="288"
+              alt="" loading="lazy" decoding="async" />
+          )}
         </a>
       ))}
     </nav>
@@ -58,6 +62,7 @@ export function FarFromAperture() {
     <svg
       className="ffs-aperture"
       viewBox="0 0 720 800"
+      preserveAspectRatio="none"
       fill="none"
       aria-hidden="true"
       focusable="false"

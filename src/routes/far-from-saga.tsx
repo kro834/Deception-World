@@ -16,6 +16,7 @@ import farFromSagaCssUrl from "@/styles-far-from-saga.css?url";
 import farFromSuitupCssUrl from "@/styles-far-from-suitup.css?url";
 import assemblyMovieCssUrl from "@/styles-assembly-movie.css?url";
 import farFromZenithCssUrl from "@/styles-far-from-zenith.css?url";
+import farFromExhibitionCssUrl from "@/styles-far-from-edition.css?url";
 import { FAR_FROM_SAGA_KEY_VISUAL, farFromImage } from "@/lib/far-from-saga-artwork";
 import { syncRexonanceLayoutGate } from "@/lib/rexonance-layout-gate.js";
 
@@ -68,6 +69,7 @@ export const Route = createFileRoute("/far-from-saga")({
       { rel: "stylesheet", href: visualAstraCssUrl },
       { rel: "stylesheet", href: commandSpecialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
+      { rel: "stylesheet", href: farFromExhibitionCssUrl },
       {
         rel: "preload",
         as: "image",

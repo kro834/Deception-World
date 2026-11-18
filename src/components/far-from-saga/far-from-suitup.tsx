@@ -234,6 +234,10 @@ export const FarFromSuitUp = memo(function FarFromSuitUp({
     <section id="suitup" className="rxs-section ffs-suitup" aria-labelledby="ffs-suitup-title">
       <header className="rxs-section-heading rxs-reveal">
         <h2 id="ffs-suitup-title">一瞬で、<wbr />果てまで<wbr />纏う。</h2>
+        <div className="ffs-armour-section" aria-hidden="true">
+          <img src={FAR_FROM_SUIT_UNDERSUIT} alt="" width={693} height={1040} loading="lazy" decoding="async" />
+          <img src={FAR_FROM_SUIT_FIGURE} alt="" width={693} height={1040} loading="lazy" decoding="async" />
+        </div>
       </header>
       <FarFromAssemblyGuide runwayRef={runwayRef} />
       {/* The auto transformation movie's control (owner, 2026-10-23), the

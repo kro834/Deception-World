@@ -295,7 +295,9 @@ test("the form ignition paints the previous form, then reveals the selected art 
   assert.match(page, /const previousArt = shownStageRef\.current;/);
   const controller = read("src/lib/far-from-form-ignition.ts");
   assert.match(controller, /Promise\.all\(\[from\.decode\(\), to\.decode\(\)\]\)/);
-  assert.match(controller, /from\.src = previous === "ultra" \? farFromUltraSrc\("interface", 768\) : SUITS\[previous\]/);
+  assert.match(controller, /from\.src = farFromCompletedSuit\(previous\)/);
+  assert.equal(load("src/lib/far-from-form-ignition.ts").farFromCompletedSuit("ultra"),
+    "/far-from-ultra-20261022/ultra-interface-768.webp");
   const draws = [...controller.matchAll(/context\.drawImage\((from|to), 0, 0, figureW, figureH\)/g)].map((m) => m[1]);
   assert.deepEqual(draws, ["from", "to"]);
   assert.match(controller, /drawFarFromFormCombustion\(context, stage, u, figureW, figureH, coarse, undefined, previous\)/);
