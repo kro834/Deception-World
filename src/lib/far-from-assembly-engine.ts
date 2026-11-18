@@ -67,6 +67,7 @@ import {
   type FarFromShiftBeats,
   type FarFromShiftFrame,
 } from "./far-from-form-shift.ts";
+import { drawFarFromFormCombustion } from "./far-from-form-combustion.ts";
 import { drawFarFromSettle } from "./far-from-form-settle.ts";
 import { createNaniteSkinGeneration, type NaniteSkinLayer } from "./nanite-skin.ts";
 import { FAR_FROM_SKIN_STYLE } from "./far-from-skin-style.ts";
@@ -147,12 +148,38 @@ export const FAR_FROM_FIRE_TONE = 1;
 let farFromSkin: NaniteSkinLayer | null = null;
 
 /** The armour's generation: the nanite skin growing from the reactor. */
-export const farFromSkinGeneration = createNaniteSkinGeneration({
+const baseSkinGeneration = createNaniteSkinGeneration({
   style: FAR_FROM_SKIN_STYLE,
   beats: ASSEMBLY_BEATS,
   prepareFlow: prepareFarFromWireframeFlow,
   onLayer(layer) {
     farFromSkin = layer;
+  },
+});
+
+export const farFromSkinGeneration = Object.freeze({
+  overlay: false as const,
+  *prepare(input: Parameters<typeof baseSkinGeneration.prepare>[0]) {
+    const layer = yield* baseSkinGeneration.prepare(input);
+    if (!layer) return null;
+    const skinForm = layer.form;
+    layer.form = (context, from, to, fromKey, key, u, tone, calm, vs, ratio) => {
+      // Ultra first gathers material into the white body. Its final pass
+      // installs the interface on that body without igniting it a second time.
+      if (fromKey === "ultra-body" && key === "ultra")
+        return skinForm(context, from, to, fromKey, key, u, tone, calm, vs, ratio);
+      const change = Math.max(0, Math.min(1, (u - 0.42) / 0.48));
+      if (!skinForm(context, from, to, fromKey, key, change, tone, calm, vs, ratio)) {
+        context.save();
+        context.drawImage(from, 0, 0, input.size.width, input.size.height);
+        context.globalAlpha = change;
+        context.drawImage(to, 0, 0, input.size.width, input.size.height);
+        context.restore();
+      }
+      drawFarFromFormCombustion(context, key, u, input.size.width, input.size.height, input.coarse);
+      return true;
+    };
+    return layer;
   },
 });
 

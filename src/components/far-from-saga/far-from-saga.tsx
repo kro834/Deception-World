@@ -26,6 +26,11 @@ import { FarFromReport } from "./far-from-report";
 import { FarFromSuitUp } from "./far-from-suitup";
 import { FarFromFormComparison } from "./far-from-form-comparison";
 import { FAR_FROM_STAGE_CALL_MS, FarFromFormCall, FarFromSwitchFx } from "./far-from-stage-switch";
+import {
+  FAR_FROM_FORM_DEPLOY_MS,
+  FAR_FROM_FORM_IGNITION_MS,
+  FarFromFormIgnition,
+} from "./far-from-form-ignition";
 import { FarFromInterfaceDeploy } from "./far-from-ultra-deploy";
 import { FarFromAperture, FarFromChapterMap, FarFromHeroRail } from "./far-from-editorial";
 import { withCallBreaks, withSlashBreaks } from "./far-from-phrase";
@@ -161,7 +166,7 @@ export function FarFromSaga() {
   // 切り替え効果が出る様にして。スクロールも同様に。」): the Rexonance page's
   // card and entrance (far-from-stage-switch.tsx), on its rest guard.
   const [stageCall, setStageCall] = useState<{ id: number; stage: FarFromStageKey } | null>(null);
-  const [stageEntrance, setStageEntrance] = useState<RexonanceStageEntrance | null>(null);
+  const [stageEntrance, setStageEntrance] = useState<(RexonanceStageEntrance & { previous?: FarFromStageKey }) | null>(null);
   const latestStageRef = useRef<FarFromStageKey>("middle");
   const stageCallId = useRef(0);
   const stageCallTimer = useRef(0);
@@ -184,7 +189,8 @@ export function FarFromSaga() {
     (next: FarFromStageKey, card = true) => {
       // initRail emits railselect from a native click before React's onClick;
       // this synchronous ref also makes rapid swipes last-request-wins.
-      if (latestStageRef.current === next) return;
+      const previous = latestStageRef.current;
+      if (previous === next) return;
       latestStageRef.current = next;
       // No switch moves the page (owner, 2026-10-23: 「『03 形態』でウルトラ
       // 切り替え時のみ勝手に画面が上下するのも修正して。」): note where the
@@ -207,7 +213,12 @@ export function FarFromSaga() {
         sinceNaturalExitMs: now - stageCallExitedAt.current,
       });
       setStageState(next);
-      setStageEntrance(motionAllowed ? plan.entrance : null);
+      setStageEntrance((entrance) => {
+        if (!motionAllowed) return null;
+        if (plan.entrance.kind === "quiet") return plan.entrance;
+        const previousArt = plan.action === "retarget" ? entrance?.previous ?? previous : previous;
+        return { ...plan.entrance, previous: previousArt };
+      });
       if (plan.action === "retarget") {
         setStageCall((call) => call && { id: call.id, stage: next });
         return;
@@ -258,12 +269,13 @@ export function FarFromSaga() {
   // A card never outlives the terms it was shown on (as on the Rexonance page).
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const cancelOnPreference = () => {
-      if (media.matches || document.documentElement.dataset.worldEffects === "economy")
-        cancelStageCall();
+    const forced = window.matchMedia("(forced-colors: active)");
+    const cancelMotion = () => {
+      cancelStageCall();
+      setStageEntrance(null);
     };
-    const cancelWhenHidden = () => {
-      if (document.hidden) cancelStageCall();
+    const cancelOnPreference = () => {
+      if (!stageMotionAllowed()) cancelMotion();
     };
     const observer = new MutationObserver(cancelOnPreference);
     observer.observe(document.documentElement, {
@@ -271,13 +283,15 @@ export function FarFromSaga() {
       attributeFilter: ["data-world-effects"],
     });
     media.addEventListener("change", cancelOnPreference);
-    document.addEventListener("visibilitychange", cancelWhenHidden);
-    window.addEventListener("pagehide", cancelStageCall);
+    forced.addEventListener("change", cancelOnPreference);
+    document.addEventListener("visibilitychange", cancelOnPreference);
+    window.addEventListener("pagehide", cancelMotion);
     return () => {
       observer.disconnect();
       media.removeEventListener("change", cancelOnPreference);
-      document.removeEventListener("visibilitychange", cancelWhenHidden);
-      window.removeEventListener("pagehide", cancelStageCall);
+      forced.removeEventListener("change", cancelOnPreference);
+      document.removeEventListener("visibilitychange", cancelOnPreference);
+      window.removeEventListener("pagehide", cancelMotion);
       stageCallId.current += 1;
       window.clearTimeout(stageCallTimer.current);
     };
@@ -299,6 +313,9 @@ export function FarFromSaga() {
     return () => window.removeEventListener("hashchange", follow);
   }, [selectStage]);
 
+  const ignition = motionReady && stage !== "middle" && stageEntrance?.kind === "card" && stageEntrance.previous
+    ? stageEntrance
+    : null;
   const activeStage = FAR_FROM_SAGA.stages[stage];
   // ウルトラ shows its base first and deploys its interfaces where motion is
   // allowed; the calm tiers keep the painted ウルトラ (interfaces drawn).
@@ -663,9 +680,11 @@ export function FarFromSaga() {
             aria-labelledby={`ffs-stage-tab-${stage}`}
             aria-live="polite"
             data-entrance={stageEntrance?.kind}
+            data-ignition={ignition ? stage : undefined}
             style={{
               ["--ffs-accent" as string]: activeStage.accent,
               ["--ffs-entrance-delay" as string]: `${stageEntrance?.delayMs ?? 0}ms`,
+              ["--ffs-ignition-duration" as string]: ignition ? `${FAR_FROM_FORM_IGNITION_MS}ms` : undefined,
             }}
           >
             {/* Keyed by form: every switch mounts a fresh figure, so its
@@ -683,13 +702,18 @@ export function FarFromSaga() {
                   width={activeArt.width}
                   height={activeArt.height}
                   // ミドル is the hero's own file, already decoded by now.
-                  loading={stage === "middle" ? "eager" : "lazy"}
+                  loading={stage === "middle" || ignition ? "eager" : "lazy"}
                   decoding="async"
                 />
                 {ultraDeploys ? (
                   <FarFromInterfaceDeploy
-                    delayMs={stageEntrance?.kind === "card" ? stageEntrance.delayMs + 260 : 160}
+                    delayMs={ignition
+                      ? ignition.delayMs + FAR_FROM_FORM_DEPLOY_MS
+                      : stageEntrance?.kind === "card" ? stageEntrance.delayMs + 260 : 160}
                   />
+                ) : null}
+                {ignition?.previous ? (
+                  <FarFromFormIgnition previous={ignition.previous} stage={stage} delayMs={ignition.delayMs} />
                 ) : null}
               </div>
               <FarFromSwitchFx />

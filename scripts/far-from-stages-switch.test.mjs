@@ -192,7 +192,7 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
     planStageCall({ motionAllowed: false, cardMounted: false, cardElapsedMs: 0, sinceNaturalExitMs: Infinity }),
     { action: "skip", entrance: { kind: "quiet", delayMs: 0 } },
   );
-  assert.match(page, /setStageEntrance\(motionAllowed \? plan\.entrance : null\);/);
+  assert.match(page, /setStageEntrance\(\(entrance\) => \{\s*if \(!motionAllowed\) return null;/);
   // The picture: the painted ウルトラ (FAR_FROM_SAGA_ARTWORK.ultra) when calm.
   assert.match(page, /const activeArt = ultraDeploys \? FAR_FROM_SAGA_ULTRA_BASE : FAR_FROM_SAGA_ARTWORK\[stage\];/);
   // The sheet: every switch animation sits under no-preference / no forced
@@ -279,4 +279,20 @@ test("the switch effect: the Rexonance card and entrance in FAR FROM's palette, 
   assert.match(page, /panel\.dataset\.tune = key;/);
   assert.match(styles, /\.ffs-stage-panel\[data-tune\] \.ffs-stage-tune \{\s*opacity: 1;/);
   assert.match(styles, /left: calc\(var\(--ffs-tune-x, 0\) \* 74%\);/);
+});
+
+
+test("the form ignition paints the previous form, then reveals the selected art under the burst", () => {
+  const ignition = load("src/components/far-from-saga/far-from-form-ignition.tsx");
+  const markup = render(React.createElement(ignition.FarFromFormIgnition, {
+    previous: "middle", stage: "high", delayMs: 380,
+  }));
+  assert.match(markup, /class="ffs-ignition" aria-hidden="true"/);
+  assert.match(markup, /<img[^>]*alt=""/);
+  assert.match(markup, /<canvas><\/canvas>/);
+  assert.match(page, /const previous = latestStageRef\.current;\s*if \(previous === next\) return;\s*latestStageRef\.current = next;/);
+  assert.match(page, /ignition\.delayMs \+ FAR_FROM_FORM_DEPLOY_MS/);
+  assert.match(page, /plan\.action === "retarget" \? entrance\?\.previous \?\? previous : previous/);
+  assert.match(styles, /@keyframes ffs-ignition-disperse \{\s*0%, 38% \{ opacity: 1; }\s*53%, 100% \{ opacity: 0; }/);
+  assert.match(styles, /@keyframes ffs-ignition-reveal-ultra \{\s*0%, 54% \{ opacity: 0; }\s*71% \{ opacity: 0.42; }/);
 });

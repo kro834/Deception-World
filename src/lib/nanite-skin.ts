@@ -1173,6 +1173,7 @@ export function* prepareNaniteSkin(
     x1: number,
     y1: number,
     out: boolean,
+    silhouette?: CanvasImageSource,
   ) => {
     const fx = Math.max(0, x0 - 2);
     const fy = Math.max(0, y0 - 2);
@@ -1194,6 +1195,10 @@ export function* prepareNaniteSkin(
     scratchContext.rect(x, y, w, h);
     scratchContext.clip();
     scratchContext.drawImage(maskCanvas[m], fx, fy, fw, fh, x, y, fw * S, fh * S);
+    if (silhouette) {
+      scratchContext.globalCompositeOperation = "destination-in";
+      scratchContext.drawImage(silhouette, x, y, w, h, x, y, w, h);
+    }
     scratchContext.restore();
     context.drawImage(scratch, x, y, w, h, x, y, w, h);
   };
@@ -1278,6 +1283,7 @@ export function* prepareNaniteSkin(
     sx: number,
     sy: number,
     liquid: CanvasImageSource,
+    clipFormEdges = false,
   ) => {
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = 1;
@@ -1286,7 +1292,14 @@ export function* prepareNaniteSkin(
     through(context, art, sx, sy, 1, x0, y0, x1, y1, false);
     if (band[2] > band[0]) {
       context.globalCompositeOperation = "lighter";
-      through(context, lines, 1, 1, 2, band[0], band[1], band[2], band[3], false);
+      through(context, lines, 1, 1, 2, band[0], band[1], band[2], band[3], false, clipFormEdges ? liquid : undefined);
+      if (clipFormEdges) {
+        // The change field spans transparent air to reach wider forms.
+        // Keep the moving highlights on the incoming armour.
+        through(context, liquid, 1, 1, 3, band[0], band[1], band[2], band[3], false);
+        context.globalCompositeOperation = "source-over";
+        return;
+      }
       const fx = Math.max(0, band[0] - 2);
       const fy = Math.max(0, band[1] - 2);
       const fw = Math.min(gw, band[2] + 2) - fx;
@@ -1364,7 +1377,7 @@ export function* prepareNaniteSkin(
     }
     // The last form, where the liquid has not come.
     through(context, from, fromW ? fromW / W : 1, fromH ? fromH / H : 1, 0, 0, 0, gw, gh, true);
-    bands(context, changeFront, to, toW ? toW / W : 1, toH ? toH / H : 1, liquid);
+    bands(context, changeFront, to, toW ? toW / W : 1, toH ? toH / H : 1, liquid, style.alloy === "far-from");
     const device = 1 / Math.max(1e-6, vs);
     const drawn = flow && (u <= 0 || u >= 1) ? 0 : flow?.draw(context, q, governor.level, vs, ratio, toKey, tone);
     if (drawn != null) stats.drawn = drawn;

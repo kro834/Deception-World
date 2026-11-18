@@ -839,3 +839,39 @@ test("the ウルトラ note stands with ウルトラ alone, and no space is rese
   );
   assert.match(page, /if \(Math\.abs\(delta\) >= 1\) window\.scrollBy\(\{ top: delta, left: 0, behavior: "instant" \}\);/);
 });
+
+test("form combustion retraces the same flames and burst; Ultra takes material in during the burst", async () => {
+  const { drawFarFromFormCombustion } = await import("../src/lib/far-from-form-combustion.ts");
+  const paint = (key, u, coarse = true) => {
+    const commands = [];
+    const gradient = { addColorStop: (...args) => commands.push(["stop", ...args]) };
+    const context = new Proxy({}, {
+      get: (_target, name) => (...args) => {
+        commands.push([name, ...args]);
+        if (name === "createRadialGradient") return gradient;
+      },
+      set: (_target, name, value) => {
+        commands.push([name, value === gradient ? "gradient" : value]);
+        return true;
+      },
+    });
+    drawFarFromFormCombustion(context, key, u, 693, 1040, coarse);
+    return commands;
+  };
+  for (const [key, color] of [["high", "#49f681"], ["xhigh", "#ff4252"], ["max", "#ffc647"]]) {
+    const fire = paint(key, 0.24);
+    assert.ok(fire.some(([name, value]) => name === "fillStyle" && value === color));
+    assert.ok(fire.some(([name]) => name === "bezierCurveTo"));
+    const burst = paint(key, 0.62);
+    assert.ok(burst.some(([name]) => name === "createRadialGradient"));
+    assert.ok(!burst.some(([name]) => name === "rect"));
+    assert.deepEqual(paint(key, 1), []);
+    assert.deepEqual(paint(key, 0.24), fire);
+    assert.deepEqual(paint(key, 0), []);
+  }
+  const ultra = paint("ultra-body", 0.62);
+  assert.equal(ultra.filter(([name]) => name === "rect").length, 90);
+  assert.equal(ultra.filter(([name]) => name === "createRadialGradient").length, 3);
+  assert.equal(paint("ultra", 0.62, false).filter(([name]) => name === "rect").length, 180);
+  assert.deepEqual(paint("standard", 0.5), []);
+});
