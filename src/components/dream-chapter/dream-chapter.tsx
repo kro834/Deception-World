@@ -2132,6 +2132,7 @@ export function DreamChapter() {
         <div className="dream-reading-doors">
           <DreamReadingLauncher />
           <nav className="dream-reading-crosslinks" aria-label="物語の案内">
+            <a href="#dream-chapter-stage">舞台で章をめくる</a>
             <a href="#dream-chapter-index">六章の目次</a>
             <a href="#dream-reading-archive">読んだところまでの資料室</a>
             <a href="#dream-research-notes">引用と思索</a>
