@@ -213,6 +213,25 @@ type Skin = {
 };
 /** The call's cells fade in over this long once the skin engages. */
 const CELLS_IN_MS = 200;
+
+/** Leave the travelling metal visible through the foreground chips as the face seals. */
+function clearVisorGlare(front: CanvasRenderingContext2D, frame: SkinFrame) {
+  const gain = Math.min(1, (frame.head - 0.55) / 0.13, (1.29 - frame.head) / 0.13);
+  if (frame.flow <= 0 || gain <= 0 || !frame.shell) return;
+  const { x, y, w, h } = REXONANCE_SUIT_FACE;
+  front.save();
+  front.translate(x + w / 2, y + h / 2);
+  front.scale(w * 0.95, h * 0.88);
+  const feather = front.createRadialGradient(0, 0, 0, 0, 0, 1);
+  feather.addColorStop(0, "black");
+  feather.addColorStop(0.62, "black");
+  feather.addColorStop(1, "transparent");
+  front.globalCompositeOperation = "destination-out";
+  front.globalAlpha = gain * 0.94;
+  front.fillStyle = feather;
+  front.fillRect(-1, -1, 2, 2);
+  front.restore();
+}
 /** The surge canvases' reach about the reactor as the cells' bounds. */
 const CELL_BOUNDS = new Float32Array(4);
 const cellBounds = (layers: { reachX: number; reachUp: number; reachDown: number }) => {
@@ -563,6 +582,7 @@ export function EntrySurge() {
           );
           made.engine.draw(layers, growing?.shell ? made.lib.quietCrescendo(pass) : pass);
         }
+        if (growing && layers) clearVisorGlare(layers.front, growing);
         // The locks' shake rides the bank's camera (one transform).
         const [x, y] = engine.shake(now);
         henshin.frame(t, x, y);
@@ -1077,6 +1097,7 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         }
         // Surge aura and shell blend tracking across form burst transitions
         if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
+        if (growing && surfaces) clearVisorGlare(surfaces.front, growing);
         // The lean in is for fine pointers: on touch screens a transform on
         // the scene's large canvases every scrolled frame cost WebKit its
         // frame rate; there only the locks' brief shake moves them.
