@@ -847,7 +847,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
       L.jx[i] = hash(i, 1301) * 2 - 1;
       L.jy[i] = hash(i, 1409) * 2 - 1;
       L.bow[i] = hash(i, 1511) - 0.5;
-      L.size[i] = 8.6 * (0.9 + 0.25 * h2);
+      L.size[i] = 8.6 * REXONANCE_NANITES.grainScale * (0.9 + 0.25 * h2);
       L.tone[i] = cx < W / 2 ? ICE : PINK;
       L.tflags[i] = (i % 3 === 0 ? 1 : 0) | (h3 < 1 / 6 ? 2 : 0) | (h1 < 0.55 ? 4 : 0);
       const col = Math.round((tile.dx - piece.x) / T);
@@ -1166,7 +1166,7 @@ function* layoutSteps(all: Plate[], gold: Cells): Generator<undefined, Layout, u
     L.chipF0[c] = FRAMES * hash(c, 2557);
     L.chipSpin[c] = 1.2 + 1.4 * hash(c, 2663);
     // A scale hierarchy (2026-10-21): parts at several sizes, a few heroes.
-    L.chipSize[c] = (TOUCH ? 6 : 8) * sizeScale(hash(c, 2777));
+    L.chipSize[c] = (TOUCH ? 6 : 8) * REXONANCE_NANITES.grainScale * sizeScale(hash(c, 2777));
     L.chipTone[c] =
       c % 9 === 0
         ? WHITE

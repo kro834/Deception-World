@@ -58,6 +58,7 @@ import {
   SKIN_SCROLL,
   SKIN_CELL_POSE,
   SKIN_CELL_SHARE,
+  SKIN_CELL_SHEET,
   SKIN_CELL_SIZE,
   SKIN_RETRACT_CELLS,
   SKIN_WHOLE,
@@ -1133,6 +1134,23 @@ test("the cells are sprites from a sheet drawn once: no stroke, no line, no trai
   assert.ok(seen.plates > 0 && seen.specks > seen.plates * 4 && seen.flashes > 0);
   assert.ok(seen.micros > 0, "a plate breaks into micro-cells as it is taken in");
   assert.ok(seen.behind > 0 && seen.behind < seen.plates * 0.6, "some plates pass behind the figure");
+
+  // Advancing particles share the subdivided strip, keeping one sprite per
+  // slot. The retract continues to use the original hexagons.
+  for (const timeline of [SKIN_ENTRY, SKIN_SCROLL, null]) {
+    const end = timeline?.light ?? SKIN_RETRACT_MS;
+    let specks = 0;
+    for (let i = 1; i < 24; i += 1) {
+      const [back, front] = [spriteContext(), spriteContext()];
+      cells.draw(back, front, field, timeline, (end * i) / 24, 5000, PHONE_SCALE, HEX);
+      for (const call of [...back.calls, ...front.calls]) {
+        if (call.sw !== SKIN_CELL_SHEET.speck) continue;
+        assert.equal(call.sx >= SKIN_CELL_SHEET.speck * SKIN_CELL_SHEET.turns, Boolean(timeline));
+        specks += 1;
+      }
+    }
+    assert.ok(specks > 0);
+  }
 
   const lib = read("src/lib/rexonance-suit-skin.ts");
   const drawn = lib.slice(lib.indexOf("export class SkinCells"), lib.indexOf("/* ---------------- the shader"));

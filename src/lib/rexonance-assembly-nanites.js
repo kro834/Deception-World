@@ -2466,7 +2466,7 @@ export function createAssemblyNanites({
       }
       if (canvas && !primers[src]) canvas.width = canvas.height = 0;
     }
-  const s0 = 10;
+  const s0 = 10 * (kit?.grainScale ?? 1);
   const T0 = nano.T0;
   const T1 = nano.T1;
   const M = nano.M;

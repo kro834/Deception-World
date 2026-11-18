@@ -289,9 +289,9 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
       picture(REXONANCE_SUIT_FIGURE),
       picture(lib.REXONANCE_SKIN_FIELD),
       under ? picture(REXONANCE_SUIT_UNDERSUIT) : null,
-      under ? picture(DRIVER_STANDIN) : null,
+      picture(DRIVER_STANDIN),
     ]);
-    if (cancelled || !art || !fieldPicture || (under && (!undersuit || !driver))) return;
+    if (cancelled || !art || !fieldPicture || !driver || (under && !undersuit)) return;
     // The field's pixels, for the droplets' samples.
     const scratch = document.createElement("canvas");
     scratch.width = fieldPicture.naturalWidth;
@@ -300,9 +300,22 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
     if (!context) return;
     context.drawImage(fieldPicture, 0, 0);
     const pixels = context.getImageData(0, 0, scratch.width, scratch.height);
+    // A driver cell already belongs to the finished belt. Exclude it from
+    // the particle targets on both clocks using the registered SAM cutout.
+    context.clearRect(0, 0, scratch.width, scratch.height);
+    context.drawImage(driver, 0, 0, scratch.width, scratch.height);
+    const driverMask = context.getImageData(0, 0, scratch.width, scratch.height).data;
+    for (let i = 3; i < driverMask.length; i += 4) {
+      if (driverMask[i]) pixels.data[i - 1] = 0;
+    }
     const field = lib.skinSamples(pixels.data, scratch.width, scratch.height, budget.samples);
-    scratch.width = 0;
-    scratch.height = 0;
+    // The entry's DOM plates and the scroll's base already carry the belt.
+    // Keep their native silhouette visible through the growing WebGL shell.
+    scratch.width = art.naturalWidth;
+    scratch.height = art.naturalHeight;
+    context.drawImage(art, 0, 0);
+    context.globalCompositeOperation = "destination-out";
+    context.drawImage(driver, 0, 0, scratch.width, scratch.height);
     let base: HTMLCanvasElement | null = null;
     if (undersuit && driver) {
       base = document.createElement("canvas");
@@ -318,7 +331,7 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
     renderer = lib.SkinRenderer.create(
       canvas,
       {
-        art,
+        art: scratch,
         base,
         field: fieldPicture,
         fieldSize: [field.w, field.h],
@@ -332,6 +345,8 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
       },
       [REXONANCE_SUIT_SIZE.width, REXONANCE_SUIT_SIZE.height],
     );
+    scratch.width = 0;
+    scratch.height = 0;
     if (base) {
       base.width = 0;
       base.height = 0;

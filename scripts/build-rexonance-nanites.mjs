@@ -1403,6 +1403,7 @@ export const REXONANCE_NANITE_SOURCE = {
 
 /** The config bundle the scroll suit-up (SUIT_UP) and the call import. */
 export const REXONANCE_NANITES = {
+  grainScale: 0.62,
   cells: REXONANCE_NANITE_CELLS,
   comets: REXONANCE_NANITE_COMETS,
   fx: REXONANCE_NANITE_FX,

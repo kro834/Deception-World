@@ -423,6 +423,7 @@ export function drawSkinDroplets(
 ) {
   const s = field.samples;
   const way = frame.flow;
+  const grain = way > 0 ? 0.68 : 1;
   const pass = (first: number, count: number, front: number) => {
     if (front <= 0 || front >= SKIN_WHOLE || !count) return;
     const low = front - DROPLET_BEHIND * SKIN_BAND;
@@ -453,7 +454,7 @@ export function drawSkinDroplets(
       const x = s[o] * cell + s[o + 3] * lead - s[o + 4] * sway;
       const y = s[o + 1] * cell + s[o + 4] * lead + s[o + 3] * sway;
       // (Round: squares read as confetti in a close look.)
-      const r = (0.56 + 0.9 * seed) * px * (0.6 + 0.4 * Math.sin(Math.PI * life));
+      const r = (0.56 + 0.9 * seed) * px * grain * (0.6 + 0.4 * Math.sin(Math.PI * life));
       context.moveTo(x + r, y);
       context.arc(x, y, r, 0, 6.2832);
       bright = true;
@@ -531,6 +532,12 @@ const PLATE_R = 58;
 const FLASH_R = 24;
 const MICRO_R = 14;
 const SPECK_R = 9;
+const SPECK_GRAIN_X = SHEET.speck * SHEET.turns;
+const SPECK_GRAINS = [
+  [-0.46, -0.08, 0.43],
+  [0.39, -0.43, 0.29],
+  [0.28, 0.46, 0.23],
+] as const;
 const ROOT3 = 1.7320508;
 // Centre, then the six neighbouring sockets. Opposing jaws close together.
 const SOCKET_X = [0, 1, 0.5, -0.5, -1, -0.5, 0.5];
@@ -643,7 +650,8 @@ export function buildSkinCellSheet(
     context.strokeStyle = "rgb(236 250 255 / 0.9)";
     context.stroke();
   }
-  // The specks: a bright hexagon with a white heart.
+  // The specks: the original hexagon for the retract and form burst, and
+  // three offset grains in a single sprite for the advancing skin.
   for (let tone = 0; tone < 3; tone += 1)
     for (let turn = 0; turn < SHEET.turns; turn += 1) {
       const x = turn * SHEET.speck + SHEET.speck / 2;
@@ -655,6 +663,18 @@ export function buildSkinCellSheet(
       hex(x, y, SPECK_R * 0.5, angle);
       context.fillStyle = "rgb(255 255 255 / 0.95)";
       context.fill();
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      for (const [dx, dy, radius] of SPECK_GRAINS) {
+        const gx = x + SPECK_GRAIN_X + SPECK_R * (dx * cos - dy * sin);
+        const gy = y + SPECK_R * (dx * sin + dy * cos);
+        hex(gx, gy, SPECK_R * radius, angle);
+        context.fillStyle = `rgb(${CELL_FILLS[tone]} / 0.92)`;
+        context.fill();
+        hex(gx, gy, SPECK_R * radius * 0.48, angle);
+        context.fillStyle = "rgb(255 255 255 / 0.95)";
+        context.fill();
+      }
     }
   return canvas;
 }
@@ -1061,6 +1081,7 @@ export class SkinCells {
     const clasps = this.clasps?.current;
     const plate = SHEET.plate;
     const plateDraw = plate / (ROOT3 * PLATE_R);
+    const plateScale = timeline ? 0.82 : 1;
     for (let i = 0; i < large; i += 1) {
       if (!this.poseAt(pose, i, false, field, timeline, x, now, scale, bounds)) continue;
       live += 1;
@@ -1070,7 +1091,8 @@ export class SkinCells {
       // The forged face is solid metal. Pull its footprint in as it crosses
       // the silhouette to keep the forearm, waist and knee detailing visible.
       const landingScale = clasps ? 1 - 0.16 * smooth(pose[7]) : 1;
-      let width = pose[2] * plateDraw * (behind ? CELL_SMALL : 1) * landingScale;
+      const size = pose[2] * plateScale;
+      let width = size * plateDraw * (behind ? CELL_SMALL : 1) * landingScale;
       let alpha = pose[3] * gain * (behind ? 0.62 : 1);
       if (k >= 0) {
         // Taken in: it shrinks into the surface under its own flash (a
@@ -1081,7 +1103,7 @@ export class SkinCells {
           const b = bursts * 4;
           burst[b] = pose[0];
           burst[b + 1] = pose[1];
-          burst[b + 2] = pose[2];
+          burst[b + 2] = size;
           burst[b + 3] = k;
           bursts += 1;
         }
@@ -1167,10 +1189,11 @@ export class SkinCells {
         );
       }
     }
-    // The specks: one sprite each, a glint; a small flash as each is taken.
+    // One sprite per slot: a group of grains on the way in, a single speck on retract.
     const speck = SHEET.speck;
     const speckDraw = speck / (ROOT3 * SPECK_R);
     const sixth = Math.PI / 3;
+    const speckColumn = timeline ? SPECK_GRAIN_X : 0;
     for (let n = 0; n < fine; n += 1) {
       const i = this.large + n;
       const o = i * SLOT;
@@ -1182,8 +1205,8 @@ export class SkinCells {
         let size = pose[2];
         let alpha = pose[3] * gain;
         if (k >= 0) {
-          const ring = hex * (1.1 + 0.9 * k) * flashDraw;
-          context.globalAlpha = 0.45 * (1 - k) * (1 - k) * gain;
+          const ring = hex * (1.1 + 0.9 * k) * flashDraw * (timeline ? 0.72 : 1);
+          context.globalAlpha = (timeline ? 0.32 : 0.45) * (1 - k) * (1 - k) * gain;
           context.drawImage(
             sheet,
             0,
@@ -1195,7 +1218,8 @@ export class SkinCells {
             ring,
             ring,
           );
-          size += (hex - size) * smooth(k);
+          const socket = timeline ? Math.min(size, hex * 0.48) : hex;
+          size += (socket - size) * smooth(k);
           alpha *= 1 - k;
         }
         const turn = pose[4] - Math.floor(pose[4] / sixth) * sixth;
@@ -1203,7 +1227,7 @@ export class SkinCells {
         context.globalAlpha = alpha;
         context.drawImage(
           sheet,
-          Math.min(SHEET.turns - 1, Math.floor((turn / sixth) * SHEET.turns)) * speck,
+          speckColumn + Math.min(SHEET.turns - 1, Math.floor((turn / sixth) * SHEET.turns)) * speck,
           plate + SHEET.flash + this.slots[o + 6] * speck,
           speck,
           speck,
@@ -1387,8 +1411,11 @@ void main() {
   }
   // The lip: white-hot at the very edge.
   float lip = 1.0 - smoothstep(0.0, 0.18, deposit);
-  outc += vec3(0.91, 0.95, 1.0) * lip * 0.95;
-  outc += mix(ICE, PINK, hash(floor(p / 9.0))) * lip * 0.22;
+  float forming = 1.0 - step(BAND, uFront.z);
+  float lipGrain = hash(floor(p / mix(9.0, 3.0, forming)));
+  float lipShine = mix(0.95, mix(0.56, 1.12, lipGrain), forming);
+  outc += vec3(0.91, 0.95, 1.0) * lip * lipShine;
+  outc += mix(ICE, PINK, lipGrain) * lip * 0.22;
   // The veins, bright while liquid.
   outc += vec3(0.8, 0.9, 1.0) * fld.g * (1.0 - smoothstep(0.3, 1.6, a)) * 0.5;
   float alpha = art.a * smoothstep(0.0, 0.08, deposit);

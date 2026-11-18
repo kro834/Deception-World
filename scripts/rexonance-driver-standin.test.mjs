@@ -33,3 +33,12 @@ test("driver stand-in matches the live unlit composite within native rounding", 
   }
   assert.ok(painted > 5000, "driver is not blank");
 });
+
+test("both skin clocks leave the registered driver to its finished layer", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../src/components/rexonance-saga/rexonance-suit-surge.tsx", import.meta.url), "utf8");
+  assert.match(source, /^\s*picture\(DRIVER_STANDIN\),$/m);
+  assert.match(source, /if \(driverMask\[i\]\) pixels\.data\[i - 1\] = 0;[\s\S]*?lib\.skinSamples\(pixels\.data/);
+  assert.match(source, /context\.drawImage\(art, 0, 0\);\s*context\.globalCompositeOperation = "destination-out";\s*context\.drawImage\(driver, 0, 0, scratch\.width, scratch\.height\);/);
+  assert.match(source, /SkinRenderer\.create\(\s*canvas,\s*\{\s*art: scratch,/);
+});

@@ -109,6 +109,8 @@ export interface RexonanceAssemblyCells {
 
 /** The nanite kit's sheet geometry (REXONANCE_NANITES, generated). */
 export interface RexonanceAssemblyNanites {
+  /** Size of travelling grains relative to the original sprite scale. */
+  readonly grainScale?: number;
   readonly cells: RexonanceAssemblyCells;
   /** A second kind of chip (FAR FROM): the chips split between the kits. */
   readonly cellsB?: RexonanceAssemblyCells;
