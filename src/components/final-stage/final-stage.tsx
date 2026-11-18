@@ -620,10 +620,8 @@ export function FinalStage() {
           </h1>
           <p className="rxs-hero-lede">{STORY.lead}</p>
         </div>
-        {/* The cue is its line: the way down; its words name it for
-            assistive tech only. */}
         <a className="rxs-scroll-cue" href="#story">
-          <span className="visually-hidden">あらすじを読む</span>
+          <span>あらすじを読む</span>
           <i aria-hidden="true" />
         </a>
       </section>
