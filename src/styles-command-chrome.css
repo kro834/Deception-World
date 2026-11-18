@@ -480,6 +480,9 @@ html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
   --sp-pad-inline: max(clamp(16px, 4vw, 68px), calc((100vw - 1520px) / 2));
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "head" "find" "sec" "spe" "sto" "rid" "rik" "rel" "unm" "inf" "sys";
+  /* This grid scrolls inside a fixed viewport. Each row must reserve the
+     whole destination, even when a rounded artwork frame clips its paint. */
+  grid-auto-rows: max-content;
   gap: clamp(28px, 4vw, 62px);
   background: var(--atlas-ink) !important;
   color: var(--atlas-light);
@@ -802,7 +805,7 @@ html[data-family]
   #site-side-panel#site-side-panel[data-command-atlas]
   [data-atlas-group="sections"] {
   align-self: start;
-  overflow: hidden;
+  overflow: clip;
   padding: 0 14px 12px;
   border: 1px solid var(--atlas-line);
   background: var(--atlas-raised);
