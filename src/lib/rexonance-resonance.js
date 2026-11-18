@@ -4168,10 +4168,18 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (closure > 0) {
         if (closure < 1) {
           const gap = (closingVisor.w / 2) * (1 - closure);
-          const edge = visorX + gap;
+          // The fronts curve round each cheek and meet at the nose bridge.
+          const bend = closingVisor.w * 0.22 * Math.sin(Math.PI * closure);
           context.beginPath();
-          context.rect(left, top, Math.max(0, visorX - gap - left), h);
-          context.rect(edge, top, Math.max(0, right - edge), h);
+          for (const side of [-1, 1]) {
+            const outside = side < 0 ? left : right;
+            const edge = visorX + side * gap;
+            context.moveTo(outside, top);
+            context.lineTo(edge, top);
+            context.quadraticCurveTo(edge - side * bend, visorY, edge, bottom);
+            context.lineTo(outside, bottom);
+            context.closePath();
+          }
           context.clip();
         }
         for (const p of coldHelmet)

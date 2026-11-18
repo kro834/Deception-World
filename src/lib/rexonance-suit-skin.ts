@@ -1280,7 +1280,15 @@ void main() {
   float front = mix(uFront.x, uFront.y, crown);
   float visor = crown * smoothstep(${FACE_FROM.toFixed(2)}, 0.82, fld.r);
   float band = mix(BAND, uFront.z, visor);
-  float a = (front - fld.r) / band;
+  // Paired streams wrap up over the cheekbones and knit together on the
+  // bridge. Anchor the lamellae to the artwork so scrubbing retraces them.
+  vec2 face = (vUv - 0.5 * (uEyes.xy + uEyes.zw)) / max(uEyes.zw - uEyes.xy, vec2(0.001));
+  float cheek = abs(face.x);
+  float arc = face.y - 0.58 * cheek + 0.56 * cheek * cheek;
+  float ridge = 0.5 + 0.5 * cos(arc * 48.0);
+  float growth = visor * (1.0 - smoothstep(0.02, BAND, uFront.z));
+  float lead = growth * (0.026 * ridge + 0.018 * smoothstep(0.02, 0.45, cheek));
+  float a = (front - fld.r + lead) / band;
   if (art.a < 0.004 || a < -0.6) {
     gl_FragColor = base * uAlpha;
     return;
@@ -1363,6 +1371,11 @@ void main() {
   // The cells' seams, until the paint has set.
   celled = mix(celled, celled * 0.42 + ICE * 0.12, edge * (1.0 - smoothstep(0.6, 2.4, age)));
   vec3 outc = mix(liquid, celled, solid);
+  // Narrow interlocking metal ribs give way to the original painted shell
+  // immediately behind the travelling edge.
+  float wet = growth * (1.0 - smoothstep(0.8, 3.3, a));
+  vec3 film = mix(armour * 0.52, chrome, 0.32) + vec3(0.58, 0.67, 0.76) * pow(ridge, 7.0);
+  outc = mix(outc, film, wet * 0.88);
   // The panel lines draw in as the cells set, light, and cool.
   float glow = smoothstep(3.0, 4.2, a) * (1.0 - smoothstep(4.8, 7.5, a));
   if (glow > 0.01) {
