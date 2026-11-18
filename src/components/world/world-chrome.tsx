@@ -1225,7 +1225,7 @@ export function SideMenuLayer({
                   decoding="async"
                 />
               ) : null}
-              <span>変身・フォーム研究室</span>
+              <span>変身・<wbr />フォーム研究室</span>
               <i>LAB</i>
             </GuardedLink>
             <GuardedLink
@@ -1261,7 +1261,7 @@ export function SideMenuLayer({
                   decoding="async"
                 />
               ) : null}
-              <span>フォームアーカイブ</span>
+              <span>フォーム<wbr />アーカイブ</span>
               <i>SAGA / REALM</i>
             </GuardedLink>
             <GuardedLink

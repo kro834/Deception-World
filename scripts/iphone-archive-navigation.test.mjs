@@ -53,10 +53,16 @@ const worldHomeSourceParts = worldHomeSourcePartNames
   .join("");
 
 test("the iPhone archive entry closes its menu and never waits for the full standalone document", () => {
+  const archiveLink = [...worldChrome.matchAll(/<GuardedLink\b[^>]*>/g)].find(([tag]) =>
+    tag.includes('to="/form-archive"'),
+  )?.[0];
+  assert.ok(archiveLink, "the research menu has a guarded form archive link");
+  assert.match(archiveLink, /\bassets=\{\[\]\}/);
+  assert.match(archiveLink, /\bbeforeNavigate=\{close\}/);
+  // The research-group link also marks its current page.
   assert.match(
-    worldChrome,
-    // Owner (2026-10-27): the research-group link also marks its current page.
-    /<GuardedLink\s+to="\/form-archive"\s+assets=\{\[\]\}\s+beforeNavigate=\{close\}\s+aria-current=\{pathname === "\/form-archive" \? "page" : undefined\}\s*>/,
+    archiveLink,
+    /\baria-current=\{pathname === "\/form-archive" \? "page" : undefined\}/,
   );
   assert.doesNotMatch(loadGate, /preloadArchiveDocument/);
   assert.doesNotMatch(loadGate, /saga-form-archive-standalone\.html/);

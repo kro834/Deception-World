@@ -221,8 +221,8 @@ html[data-family="world"]:root
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 4px 10px;
+  justify-content: flex-start;
+  gap: 4px 14px;
   width: 100%;
   padding-top: 7px;
   border-top: 1px solid var(--poster-line);
@@ -277,6 +277,17 @@ html[data-family="world"]:root
 
   #top.world-artwork-hero .world-stage-copy h1 {
     font-size: clamp(24px, 6.75vw, 43px);
+  }
+
+  #top.world-artwork-hero .world-stage-actions .primary-action {
+    gap: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    letter-spacing: 0.09em;
+  }
+
+  #top.world-artwork-hero .world-stage-actions .primary-action > span {
+    white-space: nowrap;
   }
 }
 

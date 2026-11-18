@@ -621,7 +621,17 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                 >
                   <span>
                     <strong>{item.name}</strong>
-                    <span className="command-deck-scene-ja">{item.japanese}</span>
+                    <span className="command-deck-scene-ja">
+                      {item.id === "world" ? (
+                        <>
+                          ディセプション
+                          <wbr />
+                          ワールド
+                        </>
+                      ) : (
+                        item.japanese
+                      )}
+                    </span>
                   </span>
                 </a>
               ))}

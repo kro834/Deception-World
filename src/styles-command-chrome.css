@@ -765,6 +765,8 @@ html[data-family]
   grid-row: 2;
   margin: 8px 10px 2px;
   line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 html[data-family]
   body
