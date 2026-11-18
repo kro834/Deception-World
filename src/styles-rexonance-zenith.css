@@ -3331,7 +3331,10 @@ html[data-family="special"]
     > .rzn-frame {
     --rzn-fig-b: 0.18;
   }
+}
 
+/* Leave the bottom-right corner beside the completed form code for playback. */
+@media (max-width: 640px) and (orientation: portrait) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-hud {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto auto;
@@ -3340,7 +3343,7 @@ html[data-family="special"]
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-stamp {
     grid-column: 1 / -1;
     grid-row: 3;
-    justify-self: end;
+    justify-self: start;
     margin: 0;
   }
 

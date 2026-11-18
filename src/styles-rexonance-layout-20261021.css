@@ -47,6 +47,15 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page 
     0 24px 60px -32px rgb(0 0 0 / 80%);
 }
 
+/* With viewport-fit=cover, the landscape notch can overlap chapter copy.
+   The fixed header has its own safe-area padding. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 540px) {
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
 /* ----------------------------------------------------------------------
    The chapter slates: every section heading rules the full content width
    (the edition sheets ended the rule at 240 px, so each chapter opened on
