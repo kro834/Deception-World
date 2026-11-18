@@ -113,6 +113,17 @@
   transition: none;
 }
 
+/* The printed headings sit directly above their artwork on a phone. Let
+   the whole spread enter together; keep the title's own rise in its gap. */
+@media screen and (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  #top.ffs-page[data-motion-ready="true"] > :is(#suitup, #stages, #theories) > .rxs-section-heading > h2 {
+    animation-name: none;
+  }
+  #top.ffs-page[data-motion-ready="true"] > :is(#suitup, #stages, #theories) > .rxs-section-heading:not(.is-visible) > h2 {
+    translate: 0 7px;
+  }
+}
+
 /* At compact widths the current chapter is the same link used on desktop.
    Leave keyboard focus on its link if scrolling changes the current chapter. */
 @media (max-width: 900px) {
