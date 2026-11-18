@@ -117,7 +117,7 @@ test("ウルトラ shows its base first; the interfaces start hidden and deploy 
   assert.match(page, /const ultraDeploys = stage === "ultra" && motionReady && stageMotionAllowed\(\);/);
   assert.match(page, /const artKey = ultraDeploys \? "ultraBase" : stage;/);
   assert.match(page, /\{\.\.\.farFromImage\(artKey, stage !== "middle"\)\}/);
-  assert.match(page, /\{ultraDeploys \? \(\s*<FarFromInterfaceDeploy/);
+  assert.match(page, /: ultraDeploys \? \(\s*<FarFromInterfaceDeploy/);
   // Server / first render: no data-run, so every part is hidden.
   const markup = render(React.createElement(deploy.FarFromInterfaceDeploy, { delayMs: 640 }));
   assert.match(markup, /^<svg class="ffs-ultra-deploy" viewBox="0 0 1083 1452" aria-hidden="true"/);
@@ -192,7 +192,7 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
     planStageCall({ motionAllowed: false, cardMounted: false, cardElapsedMs: 0, sinceNaturalExitMs: Infinity }),
     { action: "skip", entrance: { kind: "quiet", delayMs: 0 } },
   );
-  assert.match(page, /setStageEntrance\(\(entrance\) => \{\s*if \(!motionAllowed\) return null;/);
+  assert.match(page, /setStageEntrance\(motionAllowed \? \{ \.\.\.plan.entrance, previous: previousArt \} : null\)/);
   // The picture: the painted ウルトラ (FAR_FROM_SAGA_ARTWORK.ultra) when calm.
   assert.match(page, /const activeArt = ultraDeploys \? FAR_FROM_SAGA_ULTRA_BASE : FAR_FROM_SAGA_ARTWORK\[stage\];/);
   // The sheet: every switch animation sits under no-preference / no forced
@@ -291,8 +291,154 @@ test("the form ignition paints the previous form, then reveals the selected art 
   assert.match(markup, /<img[^>]*alt=""/);
   assert.match(markup, /<canvas><\/canvas>/);
   assert.match(page, /const previous = latestStageRef\.current;\s*if \(previous === next\) return;\s*latestStageRef\.current = next;/);
-  assert.match(page, /ignition\.delayMs \+ FAR_FROM_FORM_DEPLOY_MS/);
-  assert.match(page, /plan\.action === "retarget" \? entrance\?\.previous \?\? previous : previous/);
-  assert.match(styles, /@keyframes ffs-ignition-disperse \{\s*0%, 38% \{ opacity: 1; }\s*53%, 100% \{ opacity: 0; }/);
-  assert.match(styles, /@keyframes ffs-ignition-reveal-ultra \{\s*0%, 54% \{ opacity: 0; }\s*71% \{ opacity: 0.42; }/);
+  assert.ok(load("src/lib/far-from-form-ignition.ts").FAR_FROM_FORM_IGNITION_MS >= 1500);
+  assert.match(page, /const previousArt = shownStageRef\.current;/);
+  const controller = read("src/lib/far-from-form-ignition.ts");
+  assert.match(controller, /Promise\.all\(\[from\.decode\(\), to\.decode\(\)\]\)/);
+  assert.match(controller, /from\.src = previous === "ultra" \? farFromUltraSrc\("interface", 768\) : SUITS\[previous\]/);
+  const draws = [...controller.matchAll(/context\.drawImage\((from|to), 0, 0, figureW, figureH\)/g)].map((m) => m[1]);
+  assert.deepEqual(draws, ["from", "to"]);
+  assert.match(controller, /drawFarFromFormCombustion\(context, stage, u, figureW, figureH, coarse, undefined, previous\)/);
+  // No separately timed handoff can unveil Ultra interfaces through an outgoing portrait.
+  assert.match(read("src/components/far-from-saga/far-from-form-ignition.tsx"), /if \(finished\) return children/);
+  assert.match(page, /<FarFromFormIgnition[^>]*>[\s\S]*?<FarFromInterfaceDeploy delayMs=\{0\} \/>[\s\S]*?<\/FarFromFormIgnition>/);
+});
+
+function mountIgnition(t) {
+  const { mountFarFromFormIgnition } = load("src/lib/far-from-form-ignition.ts");
+  const timers = new Map();
+  const frames = new Map();
+  const loaders = [];
+  let id = 0;
+  const fakeWindow = {
+    matchMedia: () => ({ matches: true }),
+    requestIdleCallback: () => ++id, cancelIdleCallback() {},
+    requestAnimationFrame: (fn) => { frames.set(++id, fn); return id; },
+    cancelAnimationFrame: (key) => frames.delete(key),
+    setTimeout: (fn) => { timers.set(++id, fn); return id; },
+    clearTimeout: (key) => timers.delete(key),
+  };
+  class Loader {
+    complete = false;
+    decoded = Promise.withResolvers();
+    constructor() { loaders.push(this); }
+    decode() { return this.decoded.promise; }
+    removeAttribute(name) { delete this[name]; }
+  }
+  for (const [key, value] of Object.entries({ window: fakeWindow, Image: Loader })) {
+    const old = Object.getOwnPropertyDescriptor(globalThis, key);
+    Object.defineProperty(globalThis, key, { value, configurable: true });
+    t.after(() => old ? Object.defineProperty(globalThis, key, old) : Reflect.deleteProperty(globalThis, key));
+  }
+  const destination = Object.assign(new EventTarget(), {
+    complete: false, naturalWidth: 0, currentSrc: "/high-640.webp",
+    decoded: Promise.withResolvers(), decode() { return this.decoded.promise; },
+  });
+  const portrait = { style: {} }, scene = { style: {} };
+  const blits = [];
+  const ctx = new Proxy({
+    drawImage(image) { blits.push({ image, alpha: this.globalAlpha }); },
+  }, { get: (obj, key) => obj[key] ?? (() => {}) });
+  const canvas = { clientWidth: 390, clientHeight: 520, parentElement: scene, getContext: () => ctx };
+  const revealed = [];
+  let finished = 0;
+  const dispose = mountFarFromFormIgnition(canvas, portrait, destination, {
+    previous: "middle", stage: "high", delayMs: 0, onReveal: (stage) => revealed.push(stage),
+  }, () => finished++);
+  t.after(dispose);
+  const nextFrame = (time) => {
+    const [key, fn] = frames.entries().next().value;
+    frames.delete(key);
+    fn(time);
+  };
+  return { loaders, frames, timers, nextFrame, destination, portrait, scene, blits, revealed, dispose,
+    finished: () => finished };
+}
+
+test("after the last fire frame the selected full body stays painted until the displayed portrait decodes", async (t) => {
+  const p = mountIgnition(t);
+  for (const image of p.loaders) { image.complete = true; image.decoded.resolve(); }
+  await new Promise(setImmediate);
+  const start = Math.ceil(performance.now());
+  p.nextFrame(start);
+  p.nextFrame(start + 2000);
+  assert.equal(p.frames.size, 0);
+  assert.equal(p.timers.size, 0);
+  assert.equal(p.scene.style.opacity, "1");
+  assert.equal(p.portrait.style.opacity, "0");
+  assert.deepEqual(p.blits.at(-1), { image: p.loaders[1], alpha: 1 });
+  assert.deepEqual(p.revealed, ["high"]);
+  p.destination.dispatchEvent(new Event("error"));
+  assert.equal(p.finished(), 0);
+  p.destination.complete = true;
+  p.destination.naturalWidth = 640;
+  p.destination.dispatchEvent(new Event("load"));
+  assert.equal(p.finished(), 0);
+  p.destination.decoded.resolve();
+  await p.destination.decoded.promise;
+  assert.equal(p.finished(), 1);
+  assert.deepEqual(p.revealed, ["high"]);
+});
+
+test("an already decoded selected portrait takes over on the normal 1850 ms clock", async (t) => {
+  const p = mountIgnition(t);
+  p.destination.complete = true;
+  p.destination.naturalWidth = 640;
+  p.destination.dispatchEvent(new Event("load"));
+  p.destination.decoded.resolve();
+  for (const image of p.loaders) { image.complete = true; image.decoded.resolve(); }
+  await new Promise(setImmediate);
+  const start = Math.ceil(performance.now());
+  p.nextFrame(start);
+  p.nextFrame(start + 1730);
+  assert.ok(Number(p.scene.style.opacity) > 0 && Number(p.scene.style.opacity) < 1);
+  assert.equal(p.finished(), 0);
+  p.nextFrame(start + 1850);
+  assert.equal(p.finished(), 1);
+  assert.equal(p.frames.size, 0);
+  assert.deepEqual(p.revealed, ["high"]);
+});
+
+test("a stalled cutout keeps the previous portrait, releases both requests and ignores an obsolete selection", async (t) => {
+  const p = mountIgnition(t);
+  const deadline = p.timers.values().next().value;
+  deadline();
+  assert.equal(p.finished(), 0);
+  assert.equal(p.portrait.style.opacity, undefined);
+  assert.deepEqual(p.revealed, []);
+  assert.deepEqual(p.loaders.map((image) => image.src), ["", ""]);
+  for (const image of p.loaders) image.decoded.resolve();
+  await new Promise(setImmediate);
+  assert.equal(p.frames.size, 0);
+  p.destination.complete = true;
+  p.destination.naturalWidth = 640;
+  p.destination.dispatchEvent(new Event("load"));
+  p.dispose();
+  p.destination.decoded.resolve();
+  await p.destination.decoded.promise;
+  assert.equal(p.finished(), 0);
+  assert.deepEqual(p.revealed, []);
+});
+
+test("a failed cutout yields to the selected portrait when its active responsive candidate recovers", async (t) => {
+  const p = mountIgnition(t);
+  p.loaders[0].decoded.reject(new Error("cutout unavailable"));
+  await new Promise(setImmediate);
+  assert.equal(p.frames.size, 0);
+  assert.equal(p.timers.size, 0);
+  assert.equal(p.finished(), 0);
+  p.destination.complete = true;
+  p.destination.naturalWidth = 640;
+  p.destination.dispatchEvent(new Event("load"));
+  const small = p.destination.decoded;
+  p.destination.currentSrc = "/high-960.webp";
+  p.destination.decoded = Promise.withResolvers();
+  p.destination.dispatchEvent(new Event("load"));
+  small.resolve();
+  await small.promise;
+  assert.equal(p.finished(), 0);
+  p.destination.decoded.resolve();
+  await p.destination.decoded.promise;
+  assert.equal(p.finished(), 1);
+  assert.deepEqual(p.revealed, ["high"]);
 });

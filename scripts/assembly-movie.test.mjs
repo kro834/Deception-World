@@ -1548,3 +1548,24 @@ test("a play from the start asks the runway first: a page whose suit leaves on i
     dispose();
   }
 });
+
+test("Far From plays distinct subpixel fire frames and returns the runway to the reader on pause", () => {
+  const t = environment({ travel: 1800 });
+  t.runway.id = "far-from-assembly-runway";
+  t.runway.dataset.form = "ultra";
+  const values = [];
+  t.runway.addEventListener("rexonance:assembly-film-frame", (event) => values.push(event.detail));
+  const dispose = mountAssemblyMovie(t.control, t.runway, t.env);
+  t.seek.value = String(Math.round(0.92 * MOVIE_SEEK_STEPS));
+  t.seek.fire("input");
+  t.play.fire("click");
+  for (let k = 0; k < 31; k++) t.tick();
+  assert.ok(values.length >= 28);
+  assert.ok(values.at(-1) > values[0] && values.at(-1) < 0.925);
+  assert.equal(new Set(values).size, values.length);
+  assert.ok(new Set(values.map((p) => Math.round(p * t.travel))).size < values.length / 2);
+  t.user.wheel();
+  assert.equal(t.control.dataset.state, "paused");
+  assert.equal(values.at(-1), null);
+  dispose();
+});

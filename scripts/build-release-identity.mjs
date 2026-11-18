@@ -24,6 +24,7 @@ const paths = [
   "/ciel-inferno-20261019/jet-manifest.json",
   "/rexonance-flame-20261019/flame.webp",
   "/rexonance-flame-20261019/manifest.json",
+  "/far-from-fire-20261118/plumes.webp",
   "/rexonance-flame-natural-20261019/flame.webp",
   "/rexonance-flame-natural-20261019/manifest.json",
   "/ciel-button-20261018-144.webp",

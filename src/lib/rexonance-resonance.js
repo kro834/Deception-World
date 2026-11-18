@@ -3158,7 +3158,9 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     pinTop = Number.parseFloat(environment.getComputedStyle(frameBox).top) || 0;
     travel = runway.offsetHeight - frameBox.offsetHeight;
   };
+  let filmProgress = null;
   const readProgress = () => {
+    if (filmProgress !== null) return filmProgress;
     if (config.progress) {
       const progress = config.progress();
       return Number.isFinite(progress) ? clamp01(progress) : 0;
@@ -3827,6 +3829,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
           const key = formPath[k];
           const from = k === 0 ? forms.fig : forms.sheets[formPath[k - 1]];
           const start = a + k * seg;
+          const hold = config.forms.stepHold == null ? 0.004 : seg * config.forms.stepHold;
+          const local = span(progress, [start, start + seg - hold]);
           // A page's own generation draws the change its way (FAR FROM: the
           // next form's wireframe over the last, then its facets filling).
           if (
@@ -3838,7 +3842,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               forms.sheets[key],
               k === 0 ? "standard" : formPath[k - 1],
               key,
-              span(progress, [start, start + seg - 0.004]),
+              local,
               forms.tones[key],
               calm,
               vs,
@@ -3850,7 +3854,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               forms.plans[key],
               from,
               forms.sheets[key],
-              span(progress, [start, start + seg - 0.004]),
+              local,
               span(progress, [start + seg * 0.45, start + seg]),
               forms.tones[key],
               calm,
@@ -3863,7 +3867,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               forms.sheets[key],
               k === 0 ? "standard" : formPath[k - 1],
               key,
-              span(progress, [start, start + seg - 0.004]),
+              local,
               forms.tones[key],
               calm,
               vs,
@@ -4433,9 +4437,12 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // The MAX / ULTRA figures and their overwrite plans, loaded the first time
   // a form other than Rexonance is chosen (null until then).
   let formsState = null;
+  let releaseFormArt = null;
   let formsLoading = false;
   let formsRetryAt = 0;
   const formFigures = () => {
+    if (!releaseFormArt && live && images && !document.hidden && config.forms?.prepare)
+      releaseFormArt = config.forms.prepare();
     if (formsState || formsLoading || !config.forms || !images || clock() < formsRetryAt)
       return formsState;
     formsLoading = true;
@@ -4712,7 +4719,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       lastProgress = -1;
     }
     let shown = progress;
-    if (lastProgress >= 0 && !config.directProgress) {
+    if (lastProgress >= 0 && !config.directProgress && filmProgress === null) {
       if (
         !force &&
         head.settled &&
@@ -5071,6 +5078,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     schedule();
   };
   const goStill = () => {
+    releaseFormArt?.();
+    releaseFormArt = null;
     cancelPreparation();
     live = false;
     runway.dataset.rznLoad = motionAllowed() ? "waiting" : "static";
@@ -5432,6 +5441,11 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     render(environment.performance?.now?.());
   };
   runway.addEventListener?.("rexonance:assembly-redraw", redrawAssembly);
+  const onFilmFrame = (event) => {
+    filmProgress = Number.isFinite(event.detail) ? clamp01(event.detail) : null;
+    schedule();
+  };
+  if (formShiftKit) runway.addEventListener?.("rexonance:assembly-film-frame", onFilmFrame);
   runway.addEventListener?.("rexonance:assembly-frame", schedule);
   environment.addEventListener("pagehide", onPageHide);
   environment.addEventListener("pageshow", onPageShow);
@@ -5469,6 +5483,7 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     runway.removeEventListener?.("rexonance:assembly-retry", retryAssembly);
     runway.removeEventListener?.("rexonance:assembly-wake", wakeAssembly);
     runway.removeEventListener?.("rexonance:assembly-redraw", redrawAssembly);
+    if (formShiftKit) runway.removeEventListener?.("rexonance:assembly-film-frame", onFilmFrame);
     runway.removeEventListener?.("rexonance:assembly-frame", schedule);
     inflight.clear();
     if (config.directProgress) {
@@ -5502,6 +5517,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     loaders.clear();
     for (const cancel of decodeWaiters) cancel();
     decodeWaiters.clear();
+    releaseFormArt?.();
+    releaseFormArt = null;
     // A form chain's sheets (one per form, figure-sized) are freed first.
     for (const sheet of Object.values(formsState?.sheets ?? {})) sheet.width = sheet.height = 0;
     if (formsState)

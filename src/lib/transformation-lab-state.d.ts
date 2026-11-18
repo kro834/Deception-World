@@ -26,6 +26,8 @@ export function advanceLab(
   milliseconds: number,
   speed: number,
   direction: number,
+  rider?: LabRider,
+  form?: string,
 ): number;
 
 export const LAB_NAMES: Record<LabRider, string>;

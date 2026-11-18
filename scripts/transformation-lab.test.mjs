@@ -73,7 +73,7 @@ test("direct playhead is opt in and cannot run the scroll spring or resting fire
     new URL("../src/lib/rexonance-resonance.js", import.meta.url),
     "utf8",
   );
-  assert.match(engine, /if \(lastProgress >= 0 && !config.directProgress\)/);
+  assert.match(engine, /if \(lastProgress >= 0 && !config.directProgress && filmProgress === null\)/);
   assert.match(engine, /const flameClock =\s*config.directProgress\s*\? progress \* 12/);
   assert.match(engine, /if \(config.directProgress\) return;\s*\/\/ Resting with the fire/);
 });

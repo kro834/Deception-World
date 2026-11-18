@@ -1,3 +1,5 @@
+import { advanceFarFromPlayback } from "./far-from-form-playback.ts";
+
 /** Pure transport and URL contract. All engines share the established 0..1 beats. */
 export const LAB_RIDERS = ["rexonance", "far-from", "illusionculum", "meta-unitas"];
 export const LAB_ZOOMS = ["full", "head", "reactor", "legs"];
@@ -46,11 +48,11 @@ export function labSearch(state) {
   if (state.compare) p.set("compare", state.compare);
   return p.toString();
 }
-export function advanceLab(progress, milliseconds, speed, direction) {
-  // A presentation clock only. The established engine's beat positions stay intact.
-  return clampProgress(
-    progress + (Math.max(0, Math.min(milliseconds, 100)) / 12000) * speed * direction,
-  );
+export function advanceLab(progress, milliseconds, speed, direction, rider, form) {
+  const elapsed = Math.max(0, Math.min(milliseconds, 100)) * speed * direction;
+  return rider === "far-from"
+    ? advanceFarFromPlayback(progress, elapsed, 12000, form)
+    : clampProgress(progress + elapsed / 12000);
 }
 
 export const LAB_NAMES = {

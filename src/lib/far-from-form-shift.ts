@@ -33,6 +33,8 @@
  * Pure: no DOM, no timers, no allocation in `frame` (it writes one object).
  */
 
+import { FAR_FROM_FORM_CHAIN, FAR_FROM_FORM_STEP_MS } from "./far-from-form-playback.ts";
+
 export type FarFromShiftBeats = {
   readonly light: readonly [number, number];
   readonly form: readonly [number, number];
@@ -52,9 +54,9 @@ export const FAR_FROM_SHIFT = Object.freeze({
   /** The build eases in over this share of itself. */
   buildEase: 0.1,
   /** The chain: per form of the path, within these bounds; ミドル has none. */
-  stepMs: 560,
+  stepMs: FAR_FROM_FORM_STEP_MS,
   chainMinMs: 380,
-  chainMaxMs: 2600,
+  chainMaxMs: FAR_FROM_FORM_CHAIN.length * FAR_FROM_FORM_STEP_MS,
   /** From the chain's end to the scroll's own progress. */
   tailMs: 420,
   /** The finished form's flash. */

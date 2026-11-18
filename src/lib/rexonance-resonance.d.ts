@@ -443,6 +443,10 @@ export interface RexonanceAssemblyConfig {
       }
     | ({
         readonly chain: readonly string[];
+        /** Optional still at the end of each segment as a share of that segment. */
+        readonly stepHold?: number;
+        /** Warm the chain's optional art alongside its figure sheets. */
+        readonly prepare?: () => () => void;
         /** Each form's light (CSS colour) as its cells overwrite the last. */
         readonly tones?: Readonly<Record<string, string>>;
         /** A form's own route through the chain (its keys in order); without

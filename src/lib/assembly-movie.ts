@@ -49,7 +49,9 @@
  * page is idle, or sooner on the reader's approach.
  */
 
-/** The movie's length at 1× (ms): the suit-up's twelve beats at a pace
+import { advanceFarFromPlayback, FAR_FROM_FORM_WINDOW } from "./far-from-form-playback.ts";
+
+/** The movie's base length at 1× (ms): the suit-up's twelve beats at a pace
  * the eye can follow — the fire about 3 s, each armour group about 3 s,
  * the seal, the ignition and the chosen form's change about 3 s. */
 export const MOVIE_DURATION_MS = 24000;
@@ -364,7 +366,15 @@ export function mountAssemblyMovie(
   };
 
   /* ---------------- the clock ---------------- */
+  const farFrom = runway.id === "far-from-assembly-runway";
+  let preciseFrame = false;
+  const syncFilmFrame = (at: number | null) => {
+    if (!farFrom || (at === null && !preciseFrame)) return;
+    preciseFrame = at !== null;
+    runway.dispatchEvent(new CustomEvent("rexonance:assembly-film-frame", { detail: at }));
+  };
   const stop = () => {
+    syncFilmFrame(null);
     if (rafId) environment.cancelAnimationFrame(rafId);
     rafId = 0;
     lastStamp = 0;
@@ -381,7 +391,9 @@ export function mountAssemblyMovie(
       // A hitch is caught up (the movie keeps its length on a slow device);
       // a stall is not jumped over.
       const dt = Math.min(MOVIE_MAX_STEP_MS, Math.max(0, stamp - lastStamp));
-      progress = clamp01(progress + (dt * speed) / MOVIE_DURATION_MS);
+      progress = farFrom
+        ? advanceFarFromPlayback(progress, dt * speed, MOVIE_DURATION_MS, runway.dataset.form ?? "standard")
+        : clamp01(progress + (dt * speed) / MOVIE_DURATION_MS);
     }
     lastStamp = stamp;
     // The runway is measured each frame: the page above it may settle
@@ -390,6 +402,10 @@ export function mountAssemblyMovie(
     // offset.
     measure();
     scrollTo(progress);
+    // Pixel-rounded scrolling can give a whole Ultra segment only 20–30
+    // distinct positions. The engine can paint the movie's exact fraction.
+    const [a, b] = FAR_FROM_FORM_WINDOW;
+    syncFilmFrame(runway.dataset.form !== "standard" && progress >= a && progress < b ? progress : null);
     syncSeek(progress);
     if (progress >= 1) {
       stop();

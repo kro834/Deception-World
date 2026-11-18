@@ -10,6 +10,8 @@ import {
   farFromShiftUnder,
 } from "../src/lib/far-from-form-shift.ts";
 import { FAR_FROM_FORM_CHAIN, farFromAssemblyConfig } from "../src/lib/far-from-assembly-engine.ts";
+import { advanceFarFromPlayback, FAR_FROM_FORM_STEP_MS } from "../src/lib/far-from-form-playback.ts";
+import { advanceLab } from "../src/lib/transformation-lab-state.js";
 import { drawFarFromSettle } from "../src/lib/far-from-form-settle.ts";
 
 /* FAR FROM SAGA — the form change on the suit-up's runway (owner, 2026-11-11: 「ナノマシン装着アニメーションを強化して。また、
@@ -341,4 +343,28 @@ test("the still tiers crossfade between forms, at a calm length under reduced mo
   const reduced = /@media \(prefers-reduced-motion: reduce\) \{\s+html\[data-family="special"\][^{]*\.ffs-still-left \{([^}]*)\}/.exec(sheet);
   assert.ok(reduced, "the reduced-motion rule");
   assert.match(reduced[1], new RegExp(`animation-duration: ${ms}ms !important;`));
+});
+
+
+test("the film and lab keep a readable burn per form and retrace every frame across beat boundaries", () => {
+  const [start, end] = ASSEMBLY_BEATS.form;
+  const first = advanceFarFromPlayback(0, start * 24000, 24000, "ultra");
+  assert.ok(Math.abs(first - start) < 1e-12);
+  const n = steps("ultra");
+  for (const base of [12000, 24000]) {
+    const advance = (p, dt) => advanceFarFromPlayback(p, dt, base, "ultra");
+    for (let k = 0; k <= n; k++) {
+      const expected = start + (end - start) * k / n;
+      const actual = advance(start, k * FAR_FROM_FORM_STEP_MS);
+      assert.ok(Math.abs(actual - expected) < 1e-10, `step ${k}`);
+      for (const dt of [16, 63, 250]) {
+        assert.ok(Math.abs(advance(advance(expected, dt), -dt) - expected) < 1e-10);
+        assert.ok(Math.abs(advance(advance(expected, -dt), dt) - expected) < 1e-10);
+      }
+    }
+  }
+  const perFrame = advanceLab(start, 16, 1, 1, "far-from", "ultra");
+  assert.ok(Math.abs(perFrame - advanceFarFromPlayback(start, 16, 12000, "ultra")) < 1e-12);
+  assert.ok(Math.abs(advanceLab(perFrame, 16, 1, -1, "far-from", "ultra") - start) < 1e-12);
+  assert.equal(advanceFarFromPlayback(.5, 480, 24000, "standard"), .52);
 });

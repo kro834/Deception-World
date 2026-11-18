@@ -94,7 +94,8 @@ export function TransformationLab() {
     const tick = (now: number) => {
       const elapsed = previous ? now - previous : 0;
       previous = now;
-      const next = advanceLab(current.current.progress, elapsed, current.current.speed, direction);
+      const { progress, speed, rider, form } = current.current;
+      const next = advanceLab(progress, elapsed, speed, direction, rider, form);
       current.current = { ...current.current, progress: next };
       setState(current.current);
       if (next === (direction > 0 ? 1 : 0)) {

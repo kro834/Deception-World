@@ -840,38 +840,144 @@ test("the ウルトラ note stands with ウルトラ alone, and no space is rese
   assert.match(page, /if \(Math\.abs\(delta\) >= 1\) window\.scrollBy\(\{ top: delta, left: 0, behavior: "instant" \}\);/);
 });
 
-test("form combustion retraces the same flames and burst; Ultra takes material in during the burst", async () => {
+test("the form fire climbs from boots to crown, engulfs the suit and tears outward on both tiers", async () => {
+  const { FIRE_BOUNDS: box, FIRE_GRID, rasterFarFromFire } = await import("../src/lib/far-from-flame-field.ts");
+  for (const [w, h] of Object.values(FIRE_GRID)) {
+    const raster = new Uint32Array(w * h);
+    const bytes = new Uint8ClampedArray(raster.buffer);
+    const sample = (phase, tone) => {
+      rasterFarFromFire(raster, w, h, phase, tone);
+      const lit = [0, 0, 0, 0, 0, 0];
+      const totals = [0, 0, 0];
+      let reach = 0;
+      for (let row = 0; row < h; row++) for (let col = 0; col < w; col++) {
+        const i = (row * w + col) * 4;
+        if (!row || !col || row === h - 1 || col === w - 1) assert.equal(bytes[i + 3], 0, "soft exterior edge");
+        if (bytes[i + 3] < 75) continue;
+        const x = box.left + (col + .5) * box.width / w;
+        const y = box.top + (row + .5) * box.height / h;
+        const index = [0, .2, .38, .55, .8, 1.05].findIndex((edge) => y < edge);
+        if (index >= 0) lit[index]++;
+        reach = Math.max(reach, Math.abs(x - .5));
+        for (let c = 0; c < 3; c++) totals[c] += bytes[i + c];
+      }
+      return { lit, reach, totals };
+    };
+    assert.equal(sample(.08, 0).lit[0], 0);
+    for (let tone = 0; tone < 3; tone++) {
+      const { lit, reach, totals: [red, green, blue] } = sample(.32, tone);
+      // Crown plume, head, chest, arms/waist, thighs, shins/feet all burn.
+      assert.ok(lit.every((n) => n > w * h * .01), String(lit));
+      if (tone === 0) assert.ok(green > red * 1.5 && green > blue * 1.4);
+      if (tone === 1) assert.ok(red > green * 2 && red > blue * 3);
+      if (tone === 2) assert.ok(red > green && green > blue * 2);
+      const initial = raster.slice();
+      assert.ok(sample(.62, tone).reach > reach + .09, "burning mantle expands before extinction");
+      sample(.32, tone);
+      assert.deepEqual(raster, initial, "reverse scrub retraces the mantle");
+    }
+  }
+});
+
+test("Ultra gathers a separate swarm during the shell's outward burst and releases its final frame", async () => {
   const { drawFarFromFormCombustion } = await import("../src/lib/far-from-form-combustion.ts");
   const paint = (key, u, coarse = true) => {
-    const commands = [];
-    const gradient = { addColorStop: (...args) => commands.push(["stop", ...args]) };
-    const context = new Proxy({}, {
-      get: (_target, name) => (...args) => {
-        commands.push([name, ...args]);
-        if (name === "createRadialGradient") return gradient;
+    const calls = [];
+    const offscreen = {
+      createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+      putImageData() {},
+    };
+    const canvas = { ownerDocument: { createElement: () => ({ getContext: () => offscreen }) } };
+    const ctx = new Proxy({ canvas }, {
+      get: (target, name) => name === "canvas" ? target.canvas : (...args) => {
+        calls.push([name, ...args]);
+        if (name === "createRadialGradient") return { addColorStop() {} };
       },
-      set: (_target, name, value) => {
-        commands.push([name, value === gradient ? "gradient" : value]);
-        return true;
-      },
+      set: (_target, name, value) => { calls.push([name, value]); return true; },
     });
-    drawFarFromFormCombustion(context, key, u, 693, 1040, coarse);
-    return commands;
+    drawFarFromFormCombustion(ctx, key, u, 693, 1040, coarse);
+    return calls;
   };
-  for (const [key, color] of [["high", "#49f681"], ["xhigh", "#ff4252"], ["max", "#ffc647"]]) {
-    const fire = paint(key, 0.24);
-    assert.ok(fire.some(([name, value]) => name === "fillStyle" && value === color));
-    assert.ok(fire.some(([name]) => name === "bezierCurveTo"));
-    const burst = paint(key, 0.62);
-    assert.ok(burst.some(([name]) => name === "createRadialGradient"));
-    assert.ok(!burst.some(([name]) => name === "rect"));
-    assert.deepEqual(paint(key, 1), []);
-    assert.deepEqual(paint(key, 0.24), fire);
-    assert.deepEqual(paint(key, 0), []);
+  const count = (cmds, name) => cmds.filter(([op]) => op === name).length;
+  for (const coarse of [true, false]) {
+    const normal = paint("max", .61, coarse);
+    const ultra = paint("ultra-body", .61, coarse);
+    assert.equal(count(normal, "drawImage"), 1);
+    assert.equal(count(ultra, "drawImage"), 1);
+    assert.ok(count(ultra, "lineTo") > count(normal, "lineTo") + (coarse ? 300 : 500));
+    assert.equal(count(ultra, "createRadialGradient"), 1);
+    assert.deepEqual(paint("high", 0, coarse), []);
+    assert.deepEqual(paint("ultra", 1, coarse), []);
+    assert.deepEqual(paint("standard", .5, coarse), []);
   }
-  const ultra = paint("ultra-body", 0.62);
-  assert.equal(ultra.filter(([name]) => name === "rect").length, 90);
-  assert.equal(ultra.filter(([name]) => name === "createRadialGradient").length, 3);
-  assert.equal(paint("ultra", 0.62, false).filter(([name]) => name === "rect").length, 180);
-  assert.deepEqual(paint("standard", 0.5), []);
+});
+
+test("the detached arm blades and boots burn on the actual pixels of each outgoing suit", async () => {
+  const { default: sharp } = await import("sharp");
+  const { FIRE_BOUNDS: box, FIRE_GRID, rasterFarFromFire, farFromFractureOrigins } =
+    await import("../src/lib/far-from-flame-field.ts");
+  const assets = { middle: FAR_FROM_SUIT_FIGURE, ...FAR_FROM_SUIT_FORMS, ultra: "/far-from-ultra-20261022/ultra-interface-768.webp" };
+  const zones = [
+    ["crown", .44, .02, .56, .18], ["left outer blade", 0, .28, .155, .54],
+    ["right outer blade", .845, .28, 1, .54], ["left arm", .17, .27, .32, .52],
+    ["right arm", .68, .27, .83, .52], ["chest", .44, .21, .56, .48],
+    ["left boot", .21, .83, .40, .97], ["right boot", .60, .83, .79, .97],
+  ];
+  const [w, h] = FIRE_GRID.touch;
+  const raster = new Uint32Array(w * h);
+  const bytes = new Uint8Array(raster.buffer);
+  for (const [form, url] of Object.entries(assets)) {
+    const mask = await sharp(readFileSync(new URL("../public" + url, import.meta.url)))
+      .resize(96, 144, { fit: "fill" }).extractChannel("alpha").raw().toBuffer();
+    const origins = farFromFractureOrigins(form);
+    let onArmour = 0;
+    for (let i = 0; i < origins.length; i += 3) {
+      const x = Math.floor(origins[i] * 96), y = Math.floor(origins[i + 1] * 144);
+      if (mask[y * 96 + x] > 96) onArmour++;
+    }
+    assert.ok(origins.length > 100 && onArmour > origins.length / 3 * .96, form + " burst is born on the suit");
+    rasterFarFromFire(raster, w, h, .40, 0, form);
+    for (const [name, x0, y0, x1, y1] of zones) {
+      let artwork = 0, burning = 0, glowing = 0, shaded = 0;
+      for (let row = 0; row < h; row++) for (let col = 0; col < w; col++) {
+        const x = box.left + (col + .5) * box.width / w;
+        const y = box.top + (row + .5) * box.height / h;
+        if (x < x0 || x >= x1 || y < y0 || y >= y1 || mask[(y * 144 | 0) * 96 + (x * 96 | 0)] <= 96) continue;
+        const i = (row * w + col) * 4;
+        artwork++;
+        if (bytes[i + 3] > 55) burning++;
+        if (bytes[i + 1] > 200) glowing++;
+        if (bytes[i + 1] < 165) shaded++;
+      }
+      // Ultra's HUD and satellites differ from the four nearly aligned suits.
+      if (!artwork) { assert.equal(form, "ultra"); continue; }
+      assert.ok(burning / artwork > .63, form + " " + name + " coverage " + burning / artwork);
+      assert.ok(glowing > 0 && shaded > 0, form + " " + name + " retains hot edges and dark folds");
+    }
+  }
+});
+
+test("the bright departing shell thins into the air instead of staying opaque over the next suit", async () => {
+  const { FIRE_BOUNDS: box, FIRE_GRID, rasterFarFromFire } = await import("../src/lib/far-from-flame-field.ts");
+  for (const [w, h] of Object.values(FIRE_GRID)) {
+    const pixels = new Uint32Array(w * h), rgba = new Uint8Array(pixels.buffer);
+    const measure = (u) => {
+      rasterFarFromFire(pixels, w, h, u, 0, "middle");
+      let light = 0, floatingLight = 0, opaqueOutside = 0;
+      for (let i = 0; i < pixels.length; i++) {
+        const alpha = rgba[4 * i + 3];
+        light += alpha;
+        const x = box.left + (i % w + .5) * box.width / w;
+        if (x > .12 && x < .88) continue;
+        floatingLight += alpha;
+        if (alpha > 190) opaqueOutside++;
+      }
+      return { light, floatingLight, opaqueOutside };
+    };
+    const peak = measure(.46), rupture = measure(.58), detached = measure(.70);
+    assert.ok(rupture.floatingLight > peak.floatingLight, "the shell moves off the armour");
+    assert.ok(detached.light < peak.light * .15 && detached.floatingLight > 0, "a few glowing strands survive");
+    assert.ok(detached.opaqueOutside < w * h * .001, "the outer fringe has broken up");
+    assert.equal(measure(.88).light, 0, "the next armour is clear");
+  }
 });

@@ -485,6 +485,7 @@ test("public verification hashes exhibition, cinema and authored Rexonance asset
     ...CIEL_INFERNO_PATHS,
     "/rexonance-flame-20261019/flame.webp",
     "/rexonance-flame-20261019/manifest.json",
+    "/far-from-fire-20261118/plumes.webp",
     "/rexonance-flame-natural-20261019/flame.webp",
     "/rexonance-flame-natural-20261019/manifest.json",
     ...CIEL_BUTTON_PATHS,

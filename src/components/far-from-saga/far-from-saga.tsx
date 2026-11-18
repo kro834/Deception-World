@@ -27,8 +27,6 @@ import { FarFromSuitUp } from "./far-from-suitup";
 import { FarFromFormComparison } from "./far-from-form-comparison";
 import { FAR_FROM_STAGE_CALL_MS, FarFromFormCall, FarFromSwitchFx } from "./far-from-stage-switch";
 import {
-  FAR_FROM_FORM_DEPLOY_MS,
-  FAR_FROM_FORM_IGNITION_MS,
   FarFromFormIgnition,
 } from "./far-from-form-ignition";
 import { FarFromInterfaceDeploy } from "./far-from-ultra-deploy";
@@ -161,6 +159,7 @@ export function FarFromSaga() {
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const stagePanelRef = useRef<HTMLDivElement | null>(null);
+  const stagePortraitRef = useRef<HTMLImageElement>(null);
 
   // The form switch (owner, 2026-10-23: 「これらの切り替えもレクソナンスの様な
   // 切り替え効果が出る様にして。スクロールも同様に。」): the Rexonance page's
@@ -168,6 +167,8 @@ export function FarFromSaga() {
   const [stageCall, setStageCall] = useState<{ id: number; stage: FarFromStageKey } | null>(null);
   const [stageEntrance, setStageEntrance] = useState<(RexonanceStageEntrance & { previous?: FarFromStageKey }) | null>(null);
   const latestStageRef = useRef<FarFromStageKey>("middle");
+  const shownStageRef = useRef<FarFromStageKey>("middle");
+  const recordShownStage = useCallback((stage: FarFromStageKey) => { shownStageRef.current = stage; }, []);
   const stageCallId = useRef(0);
   const stageCallTimer = useRef(0);
   const stageCallStartedAt = useRef(0);
@@ -200,6 +201,7 @@ export function FarFromSaga() {
         panel && panel.bottom > 0 && panel.top < window.innerHeight ? panel.top : null;
       const motionAllowed = stageMotionAllowed();
       if (!card) {
+        shownStageRef.current = next;
         cancelStageCall();
         setStageState(next);
         setStageEntrance(motionAllowed ? { kind: "quiet", delayMs: 0 } : null);
@@ -213,12 +215,9 @@ export function FarFromSaga() {
         sinceNaturalExitMs: now - stageCallExitedAt.current,
       });
       setStageState(next);
-      setStageEntrance((entrance) => {
-        if (!motionAllowed) return null;
-        if (plan.entrance.kind === "quiet") return plan.entrance;
-        const previousArt = plan.action === "retarget" ? entrance?.previous ?? previous : previous;
-        return { ...plan.entrance, previous: previousArt };
-      });
+      const previousArt = shownStageRef.current;
+      if (!motionAllowed || plan.entrance.kind === "quiet" || next === "middle") shownStageRef.current = next;
+      setStageEntrance(motionAllowed ? { ...plan.entrance, previous: previousArt } : null);
       if (plan.action === "retarget") {
         setStageCall((call) => call && { id: call.id, stage: next });
         return;
@@ -272,6 +271,7 @@ export function FarFromSaga() {
     const forced = window.matchMedia("(forced-colors: active)");
     const cancelMotion = () => {
       cancelStageCall();
+      shownStageRef.current = latestStageRef.current;
       setStageEntrance(null);
     };
     const cancelOnPreference = () => {
@@ -684,7 +684,6 @@ export function FarFromSaga() {
             style={{
               ["--ffs-accent" as string]: activeStage.accent,
               ["--ffs-entrance-delay" as string]: `${stageEntrance?.delayMs ?? 0}ms`,
-              ["--ffs-ignition-duration" as string]: ignition ? `${FAR_FROM_FORM_IGNITION_MS}ms` : undefined,
             }}
           >
             {/* Keyed by form: every switch mounts a fresh figure, so its
@@ -696,6 +695,7 @@ export function FarFromSaga() {
                   scroll settle), so the panels stay on the arms. */}
               <div className="ffs-stage-art">
                 <img
+                  ref={stagePortraitRef}
                   src={activeArt.src}
                   {...farFromImage(artKey, stage !== "middle")}
                   alt={activeStage.alt}
@@ -705,15 +705,13 @@ export function FarFromSaga() {
                   loading={stage === "middle" || ignition ? "eager" : "lazy"}
                   decoding="async"
                 />
-                {ultraDeploys ? (
-                  <FarFromInterfaceDeploy
-                    delayMs={ignition
-                      ? ignition.delayMs + FAR_FROM_FORM_DEPLOY_MS
-                      : stageEntrance?.kind === "card" ? stageEntrance.delayMs + 260 : 160}
-                  />
-                ) : null}
                 {ignition?.previous ? (
-                  <FarFromFormIgnition previous={ignition.previous} stage={stage} delayMs={ignition.delayMs} />
+                  <FarFromFormIgnition previous={ignition.previous} stage={stage}
+                    delayMs={ignition.delayMs} onReveal={recordShownStage} destinationRef={stagePortraitRef}>
+                    {ultraDeploys ? <FarFromInterfaceDeploy delayMs={0} /> : null}
+                  </FarFromFormIgnition>
+                ) : ultraDeploys ? (
+                  <FarFromInterfaceDeploy delayMs={stageEntrance?.kind === "card" ? stageEntrance.delayMs + 260 : 160} />
                 ) : null}
               </div>
               <FarFromSwitchFx />

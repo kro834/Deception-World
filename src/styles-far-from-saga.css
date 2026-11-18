@@ -3795,6 +3795,7 @@ html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-
 
 .ffs-stage-art > .ffs-ignition {
   z-index: 2;
+  background: radial-gradient(ellipse at 50% 64%, #273541 0%, #101923 40%, #080b13 78%);
 }
 
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
@@ -3808,36 +3809,10 @@ html[data-world-effects="economy"] .ffs-page :is(.ffs-switch-rings, .ffs-switch-
     display: none;
   }
 
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page
-    #ffs-stage-panel[data-ignition] .ffs-stage-art > img {
-    animation: ffs-ignition-reveal var(--ffs-ignition-duration) linear var(--ffs-entrance-delay) backwards;
+  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page[data-motion-ready="true"]
+    #ffs-stage-panel[data-ignition] .ffs-stage-art {
+    animation: none;
   }
-
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page
-    #ffs-stage-panel[data-ignition="ultra"] .ffs-stage-art > img {
-    animation-name: ffs-ignition-reveal-ultra;
-  }
-
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ffs-page
-    #ffs-stage-panel[data-ignition] .ffs-ignition > img {
-    animation: ffs-ignition-disperse var(--ffs-ignition-duration) linear var(--ffs-entrance-delay) both;
-  }
-}
-
-@keyframes ffs-ignition-disperse {
-  0%, 38% { opacity: 1; }
-  53%, 100% { opacity: 0; }
-}
-
-@keyframes ffs-ignition-reveal {
-  0%, 52% { opacity: 0; }
-  80%, 100% { opacity: 1; }
-}
-
-@keyframes ffs-ignition-reveal-ultra {
-  0%, 54% { opacity: 0; }
-  71% { opacity: 0.42; }
-  90%, 100% { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {

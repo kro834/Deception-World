@@ -67,6 +67,8 @@ import {
   type FarFromShiftBeats,
   type FarFromShiftFrame,
 } from "./far-from-form-shift.ts";
+import { FAR_FROM_FORM_CHAIN } from "./far-from-form-playback.ts";
+import { warmFarFromFormPlumes } from "./far-from-form-plumes.ts";
 import { drawFarFromFormCombustion } from "./far-from-form-combustion.ts";
 import { drawFarFromSettle } from "./far-from-form-settle.ts";
 import { createNaniteSkinGeneration, type NaniteSkinLayer } from "./nanite-skin.ts";
@@ -86,13 +88,7 @@ export const FAR_FROM_FORM_TONES = Object.freeze({
  * runway's data-form (the selector's choice). "ultra-body" is ウルトラ's
  * first overwrite (never chosen by itself): the white body and its added
  * parts, before the interfaces of "ultra". */
-export const FAR_FROM_FORM_CHAIN = Object.freeze([
-  "high",
-  "xhigh",
-  "max",
-  "ultra-body",
-  "ultra",
-] as const);
+export { FAR_FROM_FORM_CHAIN };
 
 /** ウルトラ's two sheets, the owner's cutouts on the same 1024 × 1536 grid as
  * the suit's forms (far-from-ultra-art.ts). The 768 delivery is enough: the
@@ -166,17 +162,23 @@ export const farFromSkinGeneration = Object.freeze({
     layer.form = (context, from, to, fromKey, key, u, tone, calm, vs, ratio) => {
       // Ultra first gathers material into the white body. Its final pass
       // installs the interface on that body without igniting it a second time.
+      // The sealed middle form was drawn beneath this pass. Clear it so
+      // transparent areas of the active armour show the stage behind it.
+      context.clearRect(0, 0, input.size.width, input.size.height);
       if (fromKey === "ultra-body" && key === "ultra")
         return skinForm(context, from, to, fromKey, key, u, tone, calm, vs, ratio);
-      const change = Math.max(0, Math.min(1, (u - 0.42) / 0.48));
-      if (!skinForm(context, from, to, fromKey, key, change, tone, calm, vs, ratio)) {
+      const change = Math.max(0, Math.min(1, (u - 0.51) / 0.39));
+      if (change === 0 || change === 1) {
+        context.drawImage(change === 0 ? from : to, 0, 0, input.size.width, input.size.height);
+      } else if (!skinForm(context, from, to, fromKey, key, change, tone, calm, vs, ratio)) {
         context.save();
+        context.globalAlpha = 1 - change;
         context.drawImage(from, 0, 0, input.size.width, input.size.height);
         context.globalAlpha = change;
         context.drawImage(to, 0, 0, input.size.width, input.size.height);
         context.restore();
       }
-      drawFarFromFormCombustion(context, key, u, input.size.width, input.size.height, input.coarse);
+      drawFarFromFormCombustion(context, key, u, input.size.width, input.size.height, input.coarse, undefined, fromKey);
       return true;
     };
     return layer;
@@ -283,6 +285,8 @@ export function farFromAssemblyConfig(): RexonanceAssemblyConfig {
     formShift: farFromFormShiftKit,
     forms: {
       chain: FAR_FROM_FORM_CHAIN,
+      stepHold: 0.08,
+      prepare: warmFarFromFormPlumes,
       tones: FAR_FROM_FORM_TONES,
       ...FAR_FROM_SUIT_FORMS,
       ...FAR_FROM_ULTRA_FORMS,
