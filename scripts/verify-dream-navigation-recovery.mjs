@@ -52,7 +52,9 @@ try {
       await page.keyboard.press("Escape");
       await dialog.waitFor({ state: "detached" });
       const historyLength = await page.evaluate(() => history.length);
-      await page.locator(`a[href="#${id}"]`).first().click();
+      // Use the cast credits link. Chapter companion links to the same record
+      // are only actionable after opening their chapter and companion panel.
+      await page.locator(`.dream-footer .dream-credits a[href="#${id}"]`).click();
       await dialog.waitFor({ state: "visible", timeout: 3000 });
       assert.equal(new URL(page.url()).hash, `#${id}`);
       assert.equal(
