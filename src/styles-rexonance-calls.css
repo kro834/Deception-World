@@ -1398,6 +1398,16 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   background-repeat: no-repeat;
 }
 
+/* Two crops of the same registered plate for the first, DOM-only entry. */
+.rx-call-sequence .rx-suit-plate[data-piece="helmet-visor"] > .rx-suit-art {
+  --rx-visor-from: -50%;
+  clip-path: inset(0 50% 0 0);
+}
+.rx-call-sequence .rx-suit-plate[data-piece="helmet-visor"] > .rx-suit-art.is-right {
+  --rx-visor-from: 50%;
+  clip-path: inset(0 0 0 50%);
+}
+
 /* The clank: a four-point glint at the seam as a plate bites; the
    accents' is larger. */
 .rx-call-sequence .rx-suit-build > .rx-suit-spark {
@@ -2036,6 +2046,19 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
       var(--rx-suit-t) both;
   }
 
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-plate[data-piece="helmet-visor"] {
+    animation: none;
+  }
+  html:not([data-world-effects="economy"])
+    .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
+    .rx-suit-plate[data-piece="helmet-visor"]
+    > .rx-suit-art {
+    animation: rxSuitVisorSeal calc(var(--rx-suit-grow-duration, 100ms) * 0.35) ease-out
+      var(--rx-suit-t) both;
+  }
+
   /* Cold DOM fallback: the isolated painted coil shares the reactor's
      formation window. Separate wrapper/art transforms give the same
      smoothstep turn and ease-out growth as the scalar canvas helper. */
@@ -2376,6 +2399,14 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
 @keyframes rxSuitCoilTurn {
   from {
     transform: rotate(-225deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes rxSuitVisorSeal {
+  from {
+    transform: translateX(var(--rx-visor-from));
   }
   to {
     transform: none;

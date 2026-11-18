@@ -33,6 +33,11 @@
 
 /** The bands' depth in field units (wider reads as a cross-fade). */
 export const SKIN_BAND = 0.06;
+/** Behind the closing visor the painted metal follows the lip within a few
+ * cells. The body and the opening visor keep their deeper material bands. */
+export const SKIN_FACE_BAND = 0.014;
+/** Start of the face in the baked head field (see SKIN_FACE_FROM). */
+const FACE_FROM = 0.72;
 /** A texel is finished armour this many bands behind the front. */
 export const SKIN_BANDS = 5;
 /** The front's value once every texel is finished. */
@@ -206,10 +211,13 @@ export const createSkinFrame = (): SkinFrame => ({
 /** The body's front: fast off the chest, easing as it reaches the hands and
  * feet, never linear and never stepped; then the bands' flush. */
 const bodyFront = (u: number, ease: number) => SKIN_WHOLE * (1 - Math.pow(1 - clamp01(u), ease));
-/** The head's: the skull rises (ease in and out), the face closes. */
+/** The jaw rises first. As it reaches the cheeks, both sides sweep straight
+ * through to the visor seam; the last part of the clock settles the shell. */
 const headFront = (u: number) => {
   const k = clamp01(u);
-  return SKIN_WHOLE * (k * k * (3 - 2 * k) * 0.72 + k * 0.28);
+  const rise = smooth(k) * 0.72 + k * 0.28;
+  const sweep = smooth((k - 0.18) / 0.5);
+  return SKIN_WHOLE * (rise + (1 - rise) * 0.72 * sweep);
 };
 
 export type SkinTimeline = {
@@ -271,8 +279,7 @@ export const SKIN_ENTRY: SkinTimeline = {
 /** The scroll scene, in its progress: after the fire's end (0.14), closed
  * before the seal (0.86) and the light (0.9). */
 export const SKIN_SCROLL: SkinTimeline = {
-  // (Nine tenths of the body is finished by 0.54, the helmet by 0.83, and
-  // the last wave gathers from 0.8: no stretch of the scroll is still.)
+  // The final specks gather as the visor seats and land up to the light.
   body: [0.15, 0.74],
   head: [0.535, 0.852],
   ease: 1.3,
@@ -288,7 +295,7 @@ export const SKIN_SCROLL: SkinTimeline = {
     fine: [0.03, 0.055],
     large: [0.045, 0.075],
     absorb: [0.006, 0.01],
-    wave: [0.85, 0.8955],
+    wave: [0.78, 0.8955],
     from: [0.1, 0.12],
     out: [0.8968, 0.8998],
   },
@@ -368,10 +375,6 @@ export const SKIN_RETRACT_PULL = 2.4;
  * left the body untouched for half a second (450 – 1000 ms). */
 export const SKIN_RETRACT_FLUSH = [200, 560] as const;
 const RETRACT_FROM = 1.02;
-/** The head's field where the face begins (rexonance-suit-skin-field.ts
- * SKIN_FACE_FROM): the face is open once the front is back to it. */
-const FACE_FROM = 0.72;
-
 /** The retract at `ms` since it began. Closed-form and monotone: the fronts
  * only recede. The skin draws everything (the classic engines stand down). */
 export function skinRetractFrame(out: SkinFrame, ms: number) {
@@ -1235,7 +1238,7 @@ varying vec2 vUv;
 uniform sampler2D uArt;
 uniform sampler2D uField;
 uniform sampler2D uBase;
-uniform vec2 uFront;
+uniform vec3 uFront; // body front, head front, visor band depth
 uniform vec2 uLit;
 uniform vec4 uGlow;
 uniform vec4 uEyes;
@@ -1275,7 +1278,9 @@ void main() {
   // Blue: the head from 224 up (its dilated edge and itself), the body below.
   float crown = step(0.69, fld.b);
   float front = mix(uFront.x, uFront.y, crown);
-  float a = (front - fld.r) / BAND;
+  float visor = crown * smoothstep(${FACE_FROM.toFixed(2)}, 0.82, fld.r);
+  float band = mix(BAND, uFront.z, visor);
+  float a = (front - fld.r) / band;
   if (art.a < 0.004 || a < -0.6) {
     gl_FragColor = base * uAlpha;
     return;
@@ -1551,7 +1556,12 @@ export class SkinRenderer {
       gl.clear(gl.COLOR_BUFFER_BIT);
       return;
     }
-    gl.uniform2f(this.uniforms.uFront, frame.body, frame.head);
+    gl.uniform3f(
+      this.uniforms.uFront,
+      frame.body,
+      frame.head,
+      frame.flow > 0 ? SKIN_FACE_BAND : SKIN_BAND,
+    );
     gl.uniform2f(this.uniforms.uLit, frame.litBody, frame.litHead);
     gl.uniform4f(this.uniforms.uGlow, frame.glow, frame.lights, frame.eyes, frame.reactor);
     gl.uniform1f(this.uniforms.uTime, seconds % 1000);

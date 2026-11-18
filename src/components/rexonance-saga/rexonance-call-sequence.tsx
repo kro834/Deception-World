@@ -658,6 +658,9 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
               style={pieceClock(piece)}
             >
               <i className="rx-suit-art" style={atlasCell(piece, 0)} />
+              {piece.id === "helmet-visor" ? (
+                <i className="rx-suit-art is-right" style={atlasCell(piece, 0)} />
+              ) : null}
             </i>
           ))}
           {/* ... or, at full motion, its micro-tiles stream in and lock, and

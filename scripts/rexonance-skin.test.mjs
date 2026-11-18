@@ -46,6 +46,7 @@ import {
   REXONANCE_SKIN_FIELD,
   SKIN_BAND,
   SKIN_BANDS,
+  SKIN_FACE_BAND,
   SKIN_ENTRY,
   SKIN_QUALITY,
   SKIN_RETRACT,
@@ -262,6 +263,37 @@ test("the bake is deterministic and survives an empty or headless figure", () =>
     ),
   });
   assert.ok(noHead.head.every((value) => value === 0));
+});
+
+test("both cheeks reach the visor seam in one sweep and painted metal follows immediately", () => {
+  // Sample the delivered field across the eye line using the actual visor width.
+  const visor = REXONANCE_SUIT_PIECES.find((p) => p.id === "helmet-visor");
+  const half = (visor.w * W) / (2 * REXONANCE_SUIT_SIZE.width);
+  const [cx, cy] = input.visor;
+  const left = [], centre = [], right = [];
+  for (let i = 0; i < W * H; i += 1) {
+    if (!bake.head[i] || regions[i] !== SKIN_REGION.face) continue;
+    if (Math.abs(Math.floor(i / W) - cy) > half * 0.2) continue;
+    const x = ((i % W) - cx) / half;
+    const value = bake.texture[i * 3] / 255;
+    if (Math.abs(x) < 0.15) centre.push(value);
+    if (x > 0.4 && x < 0.7) right.push(value);
+    if (x < -0.4 && x > -0.7) left.push(value);
+  }
+  for (const samples of [left, centre, right]) {
+    assert.ok(samples.length > 10);
+    samples.sort((a, b) => a - b);
+  }
+  const median = (samples) => samples[Math.floor(samples.length / 2)];
+  const painted = centre[Math.floor(centre.length * 0.9)] + SKIN_FACE_BAND * SKIN_BANDS;
+  for (const [clock, toSeam, toPaint] of [[SKIN_ENTRY, 35, 60], [SKIN_SCROLL, 0.015, 0.028]]) {
+    const at = (field) => skinReach(clock, field, true);
+    const sides = [at(median(left)), at(median(right))];
+    const seam = at(median(centre));
+    assert.ok(seam > Math.max(...sides) && seam - Math.min(...sides) < toSeam);
+    assert.ok(at(painted) - Math.min(...sides) < toPaint);
+    assert.ok(at(painted) < clock.light);
+  }
 });
 
 const sweep = (timeline, from, to, step) => {

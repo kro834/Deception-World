@@ -97,6 +97,20 @@ const declaration = (body, property) =>
 
 const sheet = parse(css);
 
+test("the 2D visor closes from both edges to the middle during a single short scroll interval", () => {
+  const visor = { id: "helmet-visor", group: "helm", x: 0, y: 0, w: 90, h: 18, seat: [45, 16] };
+  const options = { size: { width: 90, height: 18 }, core: [45, 17], visor: [45, 9], tile: 9 };
+  const plan = planAssembly({ ...options, pieces: [{ ...visor, closeFromSides: true }] });
+  const at = (column) => plan.tiles.find((t) => t.sx === column && t.sy === 0).t1;
+  assert.equal(at(0), at(81));
+  assert.equal(at(36), at(45));
+  assert.ok(at(0) < at(18) && at(18) < at(36));
+  assert.ok(at(0) >= 0.675 && at(36) <= 0.7);
+  assert.ok(at(36) - at(0) < 0.025);
+  const regular = planAssembly({ ...options, pieces: [visor] });
+  assert.ok(regular.tiles.at(-1).t1 > plan.tiles.at(-1).t1);
+});
+
 test("scroll tile depth is seeded, reversible and lands exactly on its texture rectangle", () => {
   const options = {
     size: { width: 300, height: 300 },
@@ -389,6 +403,65 @@ test("failed sampling falls back to authored masks, never the transparent backgr
   assert.equal(plan.tiles.length, 1);
   assert.equal(plan.tiles[0].pieceId, "plate");
   assert.deepEqual([plan.tiles[0].sx, plan.tiles[0].sy], [0, 0]);
+});
+
+test("the closed 2D face shows fitted glass until ignition and exposes the undersuit on rewind", async () => {
+  const t = scrollAssemblyEnvironment();
+  const dispose = mountRexonanceAssembly(
+    t.runway,
+    {
+      figure: "/figure",
+      undersuit: "/undersuit",
+      atlas: "/atlas",
+      size: { width: 60, height: 120 },
+      pieces: [
+        {
+          id: "visor",
+          group: "helm",
+          x: 10,
+          y: 0,
+          w: 40,
+          h: 24,
+          seat: [30, 18],
+          ax: 15,
+          ay: 25,
+          closeFromSides: true,
+        },
+      ],
+      core: [30, 60],
+      visor: [30, 10],
+      glow: [
+        [12, 5],
+        [48, 5],
+        [30, 22],
+      ],
+    },
+    t.env,
+  );
+  const faceAt = (progress) =>
+    [...t.scroll(progress), ...t.settle()]
+      .filter(
+        ({ target, method, args }) =>
+          target === t.canvas &&
+          method === "drawImage" &&
+          args.length === 9 &&
+          ((args[0]?.url === "/atlas" && args[1] === 15) ||
+            (args[0]?.url === "/undersuit" && args[1] === 9)),
+      )
+      .map(({ args }) => args[0].url);
+  try {
+    t.observers[0].callback([{ isIntersecting: true }]);
+    for (let i = 0; i < 200 && t.runway.dataset.rznState !== "live"; i += 1)
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    assert.equal(t.runway.dataset.rznState, "live");
+    assert.equal(faceAt(0.65).at(-1), "/undersuit");
+    assert.equal(faceAt(0.71).at(-1), "/atlas");
+    const closed = faceAt(0.8);
+    assert.ok(closed.includes("/atlas") && !closed.includes("/undersuit"));
+    assert.equal(faceAt(0.65).at(-1), "/undersuit");
+  } finally {
+    dispose();
+  }
 });
 
 test("blank bitmap samples retry full decoded art once and never install a zero-tile plan", async () => {

@@ -469,6 +469,7 @@ const SUIT_UP: RexonanceAssemblyConfig = {
     tiles,
     ax,
     ay,
+    closeFromSides: id === "helmet-visor",
     // The driver is on the body, finished, from the start (owner).
     preset: REXONANCE_SUIT_DRIVER.includes(id),
   })),

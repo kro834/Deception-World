@@ -465,6 +465,7 @@ async function extrasRuntime({ touch, prepare = true }) {
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-suit-gold") return gold;
+      if (name === "@/lib/rexonance-ignition.js") return ignition;
       if (name === "@/lib/rexonance-unlit.js")
         return { splitLights: () => null, createSplitLightsJob: () => null };
       if (name === "@/lib/rexonance-suit-warmup")

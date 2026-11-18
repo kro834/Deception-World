@@ -4099,7 +4099,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         shadowDraw(silhouette, p, 1.6, 2);
       }
       flight.globalAlpha = 1;
-      plateDraw(metal, p, 0, 0);
+      // Each half fits with its unlit glass already in place.
+      plateDraw(plate.piece.id === "helmet-visor" ? source : metal, p, 0, 0);
     }
     flight.restore();
     // As it swings down onto its seat, its conduit prints onto it.
@@ -4349,7 +4350,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // forms exactly where the finished suit has it.
     const paintEnd = F + SW.paint[0] + (L.kind[p] === 3 ? SW.paint[2] : SW.paint[1]);
     flight.globalAlpha = 1;
-    if (L.kind[p] < 0 || t >= paintEnd) {
+    if (L.kind[p] < 0 || plate.piece.id === "helmet-visor" || t >= paintEnd) {
       plateDraw(source, p, 0, 0);
       return;
     }

@@ -6,6 +6,7 @@ import ts from "typescript";
 import * as calls from "../src/lib/rexonance-calls.ts";
 import * as suit from "../src/lib/rexonance-suit.ts";
 import * as gold from "../src/lib/rexonance-suit-gold.ts";
+import * as ignition from "../src/lib/rexonance-ignition.js";
 
 const source = readFileSync(
   new URL("../src/components/rexonance-saga/rexonance-suit-plan.ts", import.meta.url),
@@ -95,6 +96,7 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-suit-gold") return gold;
+      if (name === "@/lib/rexonance-ignition.js") return ignition;
       if (name === "@/lib/rexonance-unlit.js")
         return {
           splitLights: (...args) => {
@@ -243,6 +245,20 @@ const expectedGoldCount = ({ includeDriver = false } = {}) =>
       count + (includeDriver || !calls.REXONANCE_SUIT_DRIVER.includes(piece.id) ? grid.length : 0)
     );
   }, 0);
+
+test("the entry visor tiles fly from both temples and meet at the centre in one beat", () => {
+  const visor = planRuntime().plan.plates().find((plate) => plate.piece.id === "helmet-visor");
+  const cx = suit.REXONANCE_SUIT_MARKS.visor[0];
+  const tiles = visor.tiles.map((tile) => ({ x: tile.dx + tile.tw / 2 - cx, ...tile }));
+  const left = tiles.filter((tile) => tile.x < -30);
+  const right = tiles.filter((tile) => tile.x > 30);
+  const centre = tiles.filter((tile) => Math.abs(tile.x) < 8);
+  assert.ok(left.length && right.length && centre.length);
+  assert.ok(left.every((tile) => tile.ox < 0) && right.every((tile) => tile.ox > 0));
+  const sides = [...left, ...right].map((tile) => tile.land);
+  assert.ok(Math.min(...centre.map((tile) => tile.land)) > Math.max(...sides));
+  assert.ok(Math.max(...centre.map((tile) => tile.land)) - Math.min(...sides) <= 21);
+});
 
 test("overlapping warm/intention preparations share one build and one queued slice", async () => {
   const ui = planRuntime();

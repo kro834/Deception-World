@@ -15,7 +15,7 @@ import {
   prepareBodyFlame,
   warmNaniteFlame,
 } from "./rexonance-flame.js";
-import { naniteFlameEnvelope } from "./rexonance-ignition.js";
+import { naniteFlameEnvelope, visorSweepOrder } from "./rexonance-ignition.js";
 import { releasePendingImage } from "./release-pending-images.js";
 import { importWithRetry } from "./chunk-retry.js";
 import {
@@ -589,6 +589,8 @@ export const ASSEMBLY_BEATS = {
 };
 /** The HUD's parts, in the order they land (one per beat). */
 export const ASSEMBLY_PARTS = ["LEGS", "ARMS", "CHEST", "WAIST", "TAIL", "HEAD"];
+// Rexonance's unlit face plates seal from temple to seam on the scroll clock.
+const VISOR_CLOSE = [0.678, 0.7];
 
 // The beat each group lands on: the four DEUS！ (legs, arms, chest and
 // shoulders, waist — the call's snap order), REXONANCE！ (tail, ribbons)
@@ -1044,15 +1046,20 @@ function* assemblyPlanSteps({
     // tiles spread along the scroll from its seat outward (owner,
     // 2026-10-15: a slow scroll lands a band at a time, not a whole piece at
     // one notch), so neighbouring pieces overlap in flight.
+    const scatter = random();
     const key = clamp01(
       beat === 5
-        ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + random() * 0.1
+        ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + scatter * 0.1
         : (item.owner?.rank ?? 0) * 0.36 +
             (item.reach / (item.owner?.reach ?? 1)) * 0.62 +
-            random() * 0.02,
+            scatter * 0.02,
     );
     item.beat = beat;
     item.t0 = from + key * (to - from - flight);
+    if (item.owner?.piece.closeFromSides) {
+      const order = visorSweepOrder(item.cx, eyeX, item.owner.piece.w);
+      item.t0 = VISOR_CLOSE[0] + order * (VISOR_CLOSE[1] - VISOR_CLOSE[0]) - flight;
+    }
     // Formed in place: the helmet no longer hovers and drops onto the head.
     item.hover = 0;
     item.t1 = item.t0 + flight;
@@ -1673,6 +1680,17 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
   // (every other page) everything below is as it was.
   const hudPartsOf = typeof config.hudParts === "function" ? config.hudParts : null;
   const coveredAt = typeof config.covered === "function" ? config.covered : null;
+  const closingVisor = config.pieces?.find((piece) => piece.closeFromSides);
+  const coldHelmet = closingVisor
+    ? config.pieces.filter((piece) => piece.group === closingVisor.group).reverse()
+    : [];
+  const eyeOutline = config.glow;
+  const eyeBounds = eyeOutline?.length > 2 && {
+    left: Math.min(...eyeOutline.map(([x]) => x)) - 3,
+    right: Math.max(...eyeOutline.map(([x]) => x)) + 3,
+    top: Math.min(...eyeOutline.map(([, y]) => y)) - 3,
+    bottom: Math.max(...eyeOutline.map(([, y]) => y)) + 3,
+  };
   let coveredDrawn = false;
   let formShift = null;
   let shiftForm = runway.dataset.form || "standard";
@@ -4126,30 +4144,39 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
     // REXONANCE DEUS！: the face fills with pixel squares, which scatter.
     const [visorX, visorY] = config.visor;
     const [fillFrom, burstTo] = B.pixels;
-    // The compound eyes do not exist until the pixels fill them (owner,
-    // 2026-10-17): from the helmet's beat the visor is empty dark glass,
-    // which gives way as the squares arrive.
-    const glow = config.glow;
+    // Keep the eyes unlit until the pixel burst. Rexonance's fitted glass
+    // advances on the same clock as the face tiles underneath it.
     const hollow = 1 - clamp01((progress - fillFrom) / 0.03);
-    if (glow?.length > 2 && undersuit && progress >= B.rexonance[0] && hollow > 0) {
-      // Not a black patch: the undersuit's own visor shows through.
-      const ux = (undersuit.width || W) / W;
-      const uy = (undersuit.height || H) / H;
-      const xs = glow.map(([x]) => x);
-      const ys = glow.map(([, y]) => y);
-      const x0 = Math.min(...xs) - 3;
-      const y0 = Math.min(...ys) - 3;
-      const w = Math.max(...xs) - x0 + 6;
-      const h = Math.max(...ys) - y0 + 6;
+    if (eyeBounds && undersuit && progress >= B.rexonance[0] && hollow > 0) {
+      const closure = closingVisor && images.atlas ? span(progress, VISOR_CLOSE) : 0;
+      const { left, right, top, bottom } = eyeBounds;
+      const w = right - left;
+      const h = bottom - top;
       context.save();
       context.globalAlpha = hollow;
       context.beginPath();
-      context.moveTo(glow[0][0], glow[0][1]);
-      for (let i = 1; i < glow.length; i += 1) context.lineTo(glow[i][0], glow[i][1]);
+      context.moveTo(eyeOutline[0][0], eyeOutline[0][1]);
+      for (let i = 1; i < eyeOutline.length; i += 1)
+        context.lineTo(eyeOutline[i][0], eyeOutline[i][1]);
       context.closePath();
-      context.lineWidth = 3;
       context.clip();
-      context.drawImage(undersuit, x0 * ux, y0 * uy, w * ux, h * uy, x0, y0, w, h);
+      if (closure < 1) {
+        const ux = (undersuit.width || W) / W;
+        const uy = (undersuit.height || H) / H;
+        context.drawImage(undersuit, left * ux, top * uy, w * ux, h * uy, left, top, w, h);
+      }
+      if (closure > 0) {
+        if (closure < 1) {
+          const gap = (closingVisor.w / 2) * (1 - closure);
+          const edge = visorX + gap;
+          context.beginPath();
+          context.rect(left, top, Math.max(0, visorX - gap - left), h);
+          context.rect(edge, top, Math.max(0, right - edge), h);
+          context.clip();
+        }
+        for (const p of coldHelmet)
+          context.drawImage(images.atlas, p.ax, p.ay, p.w, p.h, p.x, p.y, p.w, p.h);
+      }
       context.restore();
     }
     if (progress >= fillFrom && progress < burstTo) {

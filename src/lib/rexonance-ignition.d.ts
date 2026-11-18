@@ -9,6 +9,7 @@ export const NANITE_FIRE_PHASES: Readonly<{
   flameEnd: number;
 }>;
 export function naniteMaterialLanding(land: number, fit: number): number;
+export function visorSweepOrder(x: number, centre: number, width: number): number;
 export const REXONANCE_ENTRY_VORTEX_HOLD_MS: 360;
 export function entryCanonicalTime(elapsedMs: number): number;
 export function entryElapsedTime(canonicalMs: number): number;

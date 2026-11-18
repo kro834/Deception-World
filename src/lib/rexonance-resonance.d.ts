@@ -25,6 +25,8 @@ export interface RexonanceAssemblyPiece {
   readonly h: number;
   readonly seat: readonly [number, number];
   readonly tiles?: string;
+  /** The visor tiles sweep in from both temples. */
+  readonly closeFromSides?: boolean;
   /** Its cell in the plates' atlas (and in the gold atlas). */
   readonly ax?: number;
   readonly ay?: number;

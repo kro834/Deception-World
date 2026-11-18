@@ -127,6 +127,11 @@ export function naniteMaterialLanding(land, fit) {
   return newFrom === oldFrom ? land : newFrom + ((land - oldFrom) * (fit - newFrom)) / 100;
 }
 
+/** The two temples start together (0) and meet at the visor seam (1). */
+export function visorSweepOrder(x, centre, width) {
+  return Math.max(0, 1 - (2 * Math.abs(x - centre)) / width);
+}
+
 /** Seed is periodic (0 and 1 agree); invalid input safely samples the head.
  * Returns the supplied buffer: [normalized x, y, outward normal x, y].
  * Sampling the surface's interior, not a halo, means every emitted chip

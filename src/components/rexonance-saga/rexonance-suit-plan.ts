@@ -9,6 +9,7 @@ import {
 import {
   REXONANCE_SUIT_ATLAS,
   REXONANCE_SUIT_GOLD_ATLAS,
+  REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
   REXONANCE_SUIT_SIZE,
   REXONANCE_SUIT_TILE,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/rexonance-suit";
 import { REXONANCE_SUIT_GOLD_CELL, REXONANCE_SUIT_GOLD_CELLS } from "@/lib/rexonance-suit-gold";
 import { createSplitLightsJob, splitLights } from "@/lib/rexonance-unlit.js";
+import { visorSweepOrder } from "@/lib/rexonance-ignition.js";
 import {
   rexonanceSuitSource,
   isRexonancePreparationSuspended,
@@ -131,6 +133,8 @@ export const cells = () =>
 // the plate's growth) and where they stream in from.
 function tilesOf(piece: RexonanceSuitPiece, index: number, fit: number) {
   const [gx, gy] = GROW[piece.dir];
+  const visor = piece.id === "helmet-visor";
+  const visorX = REXONANCE_SUIT_MARKS.visor[0];
   const cols = Math.ceil(piece.w / T);
   const rows = Math.ceil(piece.h / T);
   const bits = bitsOf(piece.tiles);
@@ -162,10 +166,14 @@ function tilesOf(piece: RexonanceSuitPiece, index: number, fit: number) {
               : cx / piece.w;
       const k = hash(index * 131 + col, row * 17 + index);
       const k2 = hash(row + index * 7, col * 29 + 3);
-      const progress = Math.min(1, Math.max(0, along + (k - 0.5) * 0.28));
+      const progress = visor
+        ? 0.2 * visorSweepOrder(piece.x + cx, visorX, piece.w)
+        : Math.min(1, Math.max(0, along + (k - 0.5) * 0.28));
       // Behind the seam, a little to the side: streaming along the body.
       const reach = FIG.height * (0.016 + 0.02 * k2);
       const side = FIG.height * (k - 0.5) * 0.024;
+      const flowX = visor ? Math.sign(visorX - piece.x - cx) : gx;
+      const flowY = visor ? 0 : gy;
       tiles.push({
         sx: piece.ax + col * T,
         sy: piece.ay + row * T,
@@ -174,8 +182,8 @@ function tilesOf(piece: RexonanceSuitPiece, index: number, fit: number) {
         tw: Math.min(T, piece.w - col * T),
         th: Math.min(T, piece.h - row * T),
         land: fit - REXONANCE_SUIT_REVEAL_MS + progress * REXONANCE_SUIT_REVEAL_MS,
-        ox: -gx * reach + gy * side,
-        oy: -gy * reach + gx * side,
+        ox: -flowX * reach + flowY * side,
+        oy: -flowY * reach + flowX * side,
         tone: TONES[Math.floor(k2 * TONES.length)],
       });
     }
