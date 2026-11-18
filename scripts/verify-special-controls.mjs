@@ -130,23 +130,14 @@ async function checkLandscapeHero(route, actionSelector) {
     await page.evaluate(() => document.fonts.ready);
     for (const viewport of [{ width: 568, height: 320 }, { width: 667, height: 375 }, { width: 844, height: 390 }]) {
       await page.setViewportSize(viewport);
-      const geometry = await page.evaluate((action) => {
+      // Rotation updates the measured header reserve and may start the hero reveal.
+      await page.waitForFunction((action) => {
         const rect = (selector) => document.querySelector(selector).getBoundingClientRect();
         const title = rect(".rxs-hero h1");
         const button = rect(action);
-        return {
-          top: title.top,
-          bottom: title.bottom,
-          buttonBottom: button.bottom,
-          navBottom: rect(".rxs-local-nav").bottom,
-          viewportHeight: innerHeight,
-        };
-      }, actionSelector);
-      assert.ok(
-        geometry.top >= geometry.navBottom - 1 && geometry.bottom <= viewport.height &&
-          geometry.buttonBottom <= viewport.height,
-        `${route} landscape ${viewport.width}px: ${JSON.stringify(geometry)}`,
-      );
+        return title.top >= rect(".rxs-local-nav").bottom - 1 &&
+          title.bottom <= innerHeight && button.bottom <= innerHeight;
+      }, actionSelector, { timeout: 5000 });
     }
   } finally {
     await page.close();

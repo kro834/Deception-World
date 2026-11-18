@@ -675,9 +675,22 @@
   }
 }
 
-/* At the lowest viewport heights, keep both lines of the chapter title
-   on screen on arrival. The measured navigation clearance still applies. */
-@media (pointer: coarse) and (orientation: landscape) and (min-width: 568px) and (max-height: 360px) {
+/* Use the copy column for reading and controls when height is at a premium. */
+@media (pointer: coarse) and (orientation: landscape) and (min-width: 568px) and (max-width: 1099px) and (max-height: 360px) {
+  .rxs-page.rxs-page.ffs-page > .ffs-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+
+  .rxs-page.rxs-page.ffs-page > .ffs-hero .rxs-hero-lede {
+    margin-block-start: 8px;
+    text-wrap: wrap;
+  }
+
+  .rxs-page.rxs-page.ffs-page > .ffs-hero :is(.ffs-stages-line, .ffs-hero-rail) {
+    margin-block-start: 8px;
+  }
+
+  /* Keep both lines of the chapter title in view after an anchor jump. */
   .rxs-page.rxs-page.ffs-page > .rxs-section:not(.ffs-subchapter, .ffs-suitup) {
     padding-block-start: clamp(48px, 16svh, 64px);
   }

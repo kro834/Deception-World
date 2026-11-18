@@ -1110,9 +1110,10 @@ html[data-family="special"]
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero .rxe-hero-rail a {
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
-    padding: 8px 12px;
+    padding: 8px 10px;
+    text-wrap: wrap;
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page > .rxs-hero > .rxs-scroll-cue {
