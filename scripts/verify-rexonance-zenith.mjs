@@ -232,8 +232,8 @@ const canvasEvidence = async (page) =>
 
 const hudGeometry = async (page) =>
   page.evaluate(() => {
-    const names = ["stamp", "nanites", "count", "zeus"];
-    const selectors = [".rzn-stamp", ".rzn-nanites", ".rzn-count", ".zeus-button"];
+    const names = ["stamp", "nanites", "count", "zeus", "movie"];
+    const selectors = [".rzn-stamp", ".rzn-nanites", ".rzn-count", ".zeus-button", ".rzn-movie-pill"];
     const boxes = Object.fromEntries(
       selectors.map((selector, index) => {
         const element = document.querySelector(selector);
@@ -695,6 +695,25 @@ async function functional(engine, label, profile, { connection, noTimeline = fal
           convergence: finalConvergence || convergence,
           screenshot,
         });
+      }
+      // Probe the physical end of the sticky runway as well as the animation
+      // milestones above: the movie control can change sides as the frame lifts.
+      if (!captureBaseline && profile.viewport.width <= 540 && profile.viewport.width < profile.viewport.height) {
+        for (const progress of [0.98, 0.99, 1]) {
+          await page.evaluate(
+            ({ start, progress }) =>
+              scrollTo({ top: Math.ceil(start.top + progress * (start.height - start.frameHeight)), behavior: "instant" }),
+            { start, progress },
+          );
+          await page.waitForFunction(() => document.querySelector('.rzn-suitup')?.hasAttribute('data-rzn-complete'));
+          await page.waitForTimeout(500);
+          const geometry = await hudGeometry(page);
+          assert.ok(geometry.boxes.stamp && geometry.boxes.movie, `${label} runway ${progress}: missing visible controls ${JSON.stringify(geometry)}`);
+          const { stamp, movie } = geometry.boxes;
+          const overlapWidth = Math.min(stamp.right, movie.right) - Math.max(stamp.left, movie.left);
+          const overlapHeight = Math.min(stamp.bottom, movie.bottom) - Math.max(stamp.top, movie.top);
+          assert.ok(overlapWidth <= 1 || overlapHeight <= 1, `${label} runway ${progress}: stamp overlaps movie control ${JSON.stringify(geometry)}`);
+        }
       }
       if (process.env.CAPTURE_BASELINE !== "1")
         assert.ok(

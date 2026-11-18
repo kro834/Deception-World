@@ -3347,6 +3347,15 @@ html[data-family="special"]
     margin: 0;
   }
 
+  /* The playback control moves left as the form selector enters the viewport. */
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.rxs-rexonance-page:has(.rzn-movie[data-lifted])
+    > .rzn-suitup
+    .rzn-stamp {
+    justify-self: end;
+  }
+
   html[data-family="special"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
