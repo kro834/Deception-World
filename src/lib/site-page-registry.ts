@@ -71,8 +71,8 @@ export const SITE_PAGE_ENTRIES: readonly SitePageEntry[] = [
     title: "DOGS ARCHIVE",
     path: "/dogs-archive",
     searchHash: "dogs-selector",
-    description: "5体の“犬”の個体セレクター。第五の“犬”を立体で鑑賞する。",
-    aliases: ["dogs archive", "犬", "個体記録", "立体", "3D"],
+    description: "アルケオン、ヴァルグ、アガサ、エウレル、シエルの個体記録。",
+    aliases: ["dogs archive", "犬", "個体記録", "立体", "3D", "アルケオン", "ヴァルグ", "アガサ", "エウレル", "シエル"],
   },
   {
     id: "extreme",

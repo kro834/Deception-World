@@ -1,3 +1,4 @@
+import { DOG_ARCHIVE_ART_PATHS } from "../src/lib/dogs-archive/entries.ts";
 import { NANITE_FORGE_DELIVERIES } from "../src/lib/nanite-surface-assets.js";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -9,11 +10,12 @@ test("public verification rejects an old commit or changed delivered artwork", a
   const expectedSha = "a".repeat(40);
   const image = Buffer.from("current artwork");
   const sha256 = createHash("sha256").update(image).digest("hex");
+  const paths = ["/gallery/g69-1536.webp", ...DOG_ARCHIVE_ART_PATHS];
   const fetchFor = (sha, delivered) => async (url) => {
     const path = new URL(url).pathname;
     if (path === "/release-identity.json")
-      return Response.json({ sha, assets: [{ path: "/gallery/g69-1536.webp", sha256 }] });
-    if (path.startsWith("/gallery/")) return new Response(delivered);
+      return Response.json({ sha, assets: paths.map((path) => ({ path, sha256 })) });
+    if (paths.includes(path)) return new Response(delivered);
     if (RETIRED_AI_ROUTES.includes(path)) return new Response("not found", { status: 404 });
     return new Response("Deception World");
   };
@@ -777,6 +779,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
   ).replace(/^import .*;\n/gmu, "");
   let written;
   runInNewContext(source, {
+    DOG_ARCHIVE_ART_PATHS,
     NANITE_FORGE_DELIVERIES,
     process: { env: { PUBLIC_RELEASE_SHA: SHA } },
     createHash,
@@ -806,7 +809,7 @@ test("new release identity requires shared gallery readiness and preserves artwo
     console: { log() {} },
   });
   assert.equal(written.sharedGallery, true);
-  for (const path of NANITE_FORGE_DELIVERIES)
+  for (const path of [...NANITE_FORGE_DELIVERIES, ...DOG_ARCHIVE_ART_PATHS])
     assert.ok(written.assets.some((asset) => asset.path === path), path);
   assert.equal(written.sha, SHA);
   assert.equal(written.artworks, 113);

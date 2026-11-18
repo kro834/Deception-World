@@ -1,3 +1,4 @@
+import { DOG_ARCHIVE_ART_PATHS } from "../src/lib/dogs-archive/entries.ts";
 import { NANITE_FORGE_DELIVERIES } from "../src/lib/nanite-surface-assets.js";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -10,6 +11,7 @@ if (!/^[0-9a-f]{40}$/u.test(sha)) throw new Error("Release identity requires an 
 const gallery = JSON.parse(readFileSync("public/gallery/asset-manifest.json", "utf8"));
 const paths = [
   ...NANITE_FORGE_DELIVERIES,
+  ...DOG_ARCHIVE_ART_PATHS,
   "/nanite-surface-20261031/rexonance.webp",
   "/nanite-surface-20261031/far-from.webp",
   "/nanite-surface-20261031/illusionculum.webp",

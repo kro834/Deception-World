@@ -83,7 +83,7 @@
   border: 1px solid transparent;
   border-radius: 3px;
   background: transparent;
-  color: #84998c;
+  color: #b5cbbd;
   cursor: pointer;
   transition:
     color 0.2s,
@@ -99,19 +99,8 @@
 }
 .dogs-archive-selector button span {
   font-size: 12px;
+  white-space: nowrap;
   letter-spacing: 0.06em;
-}
-.dogs-archive-selector button[data-released] {
-  color: #b5cbbd;
-}
-.dogs-archive-selector button[data-released]::after {
-  content: "";
-  width: 6px;
-  height: 6px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #4ad88a;
-  box-shadow: 0 0 8px #4ad88a99;
 }
 .dogs-archive-selector button[aria-selected="true"] {
   background: #142f22;
@@ -137,6 +126,8 @@
 }
 .dogs-archive-stage {
   position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
   isolation: isolate;
@@ -146,81 +137,91 @@
   min-height: 0;
 }
 .dogs-archive-record {
-  position: absolute;
-  z-index: 4;
-  left: var(--dogs-edge);
-  top: 24px;
-  pointer-events: none;
-  text-shadow: 0 2px 20px #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-height: 64px;
+  padding: 6px var(--dogs-edge);
+  border-bottom: 1px solid var(--dogs-line);
+  background: #07130d;
 }
 .dogs-archive-record h2 {
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.13em;
   margin: 0;
   color: #d8e7dc;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.dogs-archive-record h2 span {
+  color: #f1faf3;
+  font-weight: 600;
 }
 .dogs-archive-record p {
+  margin: 3px 0 0;
+  color: #a9c6b1;
   font-size: 12px;
-  color: #9fb5a5;
-  margin: 8px 0 0;
 }
+.dogs-archive-record-actions,
+.dogs-archive-forms {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dogs-archive-forms button,
 .dogs-archive-reference {
-  position: absolute;
-  z-index: 4;
-  top: 17px;
-  right: var(--dogs-edge);
-  min-width: 52px;
+  min-width: 44px;
   min-height: 44px;
-  padding: 8px 14px;
-  border: 1px solid #a4c7ac2b;
-  border-radius: 24px;
-  background: #0a1a10ba;
+  padding: 0 12px;
+  border: 1px solid #a4c7ac42;
+  border-radius: 6px;
+  background: #0a1a10;
   color: #c7d9cc;
   font-size: 12px;
+  white-space: nowrap;
   cursor: pointer;
 }
-.dogs-archive-varg {
-  box-sizing: border-box;
-  height: 100%;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  place-items: center;
-  padding: 76px var(--dogs-edge) 20px;
-  gap: 16px;
+.dogs-archive-forms button[aria-pressed="true"] {
+  border-color: #95caa4;
+  background: #244535;
+  color: #f0fff4;
 }
-.dogs-archive-varg__frame {
-  position: relative;
-  height: 100%;
-  max-width: 100%;
+.dogs-archive-portrait {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  justify-items: center;
+  padding: 12px var(--dogs-edge) max(16px, env(safe-area-inset-bottom));
   min-height: 0;
+}
+.dogs-archive-varg {
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+.dogs-archive-portrait__frame {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px;
-  background: radial-gradient(ellipse at 50% 50%, #30131955 0%, #0d0608aa 75%, transparent 100%);
-  border: 1px solid #bd907d44;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 8px;
+  border: 1px solid #a4c7ac42;
   border-radius: 4px;
-  box-shadow:
-    0 16px 48px #000c,
-    0 0 32px #e6452218,
-    inset 0 0 24px #2b0b1066;
+  background: #08130e;
+  box-shadow: 0 16px 48px #000c;
 }
-.dogs-archive-varg__frame > img {
+.dogs-archive-varg .dogs-archive-portrait__frame {
+  border-color: #bd907d55;
+  background: radial-gradient(ellipse, #30131988, #150b0d);
+}
+.dogs-archive-portrait__frame > img {
   display: block;
+  width: auto;
   height: 100%;
   max-width: 100%;
   min-height: 0;
   object-fit: contain;
-  filter: drop-shadow(0 12px 28px #000e);
-}
-.dogs-archive-varg__aura {
-  position: absolute;
-  inset: -1px;
-  pointer-events: none;
-  border-radius: inherit;
-  border: 1px solid #e2a89033;
-  box-shadow: inset 0 1px 0 #ffcfbe33;
 }
 .dogs-archive-varg > a {
   display: inline-flex;
@@ -245,63 +246,6 @@
     background-color 0.25s ease,
     border-color 0.25s ease,
     box-shadow 0.25s ease;
-}
-.dogs-archive-unreleased {
-  box-sizing: border-box;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  padding: 60px var(--dogs-edge) 24px;
-  text-align: center;
-  isolation: isolate;
-}
-.dogs-archive-seal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  pointer-events: none;
-}
-.dogs-archive-seal__ring {
-  width: 44px;
-  height: 44px;
-  border: 1px dashed #72b28966;
-  border-radius: 50%;
-  box-shadow:
-    0 0 20px #4ad88a22,
-    inset 0 0 12px #4ad88a14;
-}
-.dogs-archive-seal__label {
-  font-family: "Cinzel", Georgia, serif;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: #92c5a7;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px #4ad88a33;
-}
-.dogs-archive-seal__code {
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: #70937e;
-}
-.dogs-archive-unreleased > span {
-  font:
-    400 clamp(80px, 16vw, 180px)/1 "Cinzel",
-    Georgia,
-    "Times New Roman",
-    serif;
-  color: #7a9f8626;
-  text-shadow: 0 0 40px #4ad88a14;
-  user-select: none;
-}
-.dogs-archive-unreleased p {
-  font-size: 13px;
-  color: #a4beae;
-  letter-spacing: 0.08em;
-  margin: 0;
 }
 .dogs-archive-reference-dialog {
   width: min(1240px, calc(100vw - 80px));
@@ -405,47 +349,21 @@ html[data-dogs-archive] .zeus-button {
     padding-block: 9px;
   }
   .dogs-archive-selector button {
-    gap: 6px;
     min-height: 44px;
-    padding: 4px;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 2px;
   }
   .dogs-archive-selector button span {
-    display: none;
-  }
-  .dogs-archive-record {
-    top: 19px;
+    font-size: 10px;
+    letter-spacing: 0;
   }
   .dogs-archive-record h2 {
     font-size: 13px;
   }
-  .dogs-archive-unreleased {
-    gap: 10px;
-    padding-top: 54px;
-  }
-  .dogs-archive-seal {
-    gap: 4px;
-  }
-  .dogs-archive-seal__ring {
-    width: 34px;
-    height: 34px;
-  }
-  .dogs-archive-seal__label {
-    font-size: 11px;
-    letter-spacing: 0.16em;
-  }
-  .dogs-archive-seal__code {
-    font-size: 11px;
-  }
-  .dogs-archive-unreleased > span {
-    font-size: clamp(48px, 12vw, 84px);
-  }
-  .dogs-archive-varg {
-    padding-top: 68px;
-  }
+  .dogs-archive-forms button,
   .dogs-archive-reference {
-    font-size: 12px;
-    min-width: 46px;
-    padding-inline: 10px;
+    padding-inline: 8px;
   }
   .dogs-archive-reference-dialog {
     width: calc(100vw - 24px);
@@ -502,31 +420,11 @@ html[data-dogs-archive] .zeus-button {
     min-height: 44px;
   }
   .dogs-archive-record {
-    top: 15px;
+    min-height: 52px;
+    padding-block: 4px;
   }
-  .dogs-archive-unreleased {
-    gap: 6px;
-    padding: 38px var(--dogs-edge) 10px;
-  }
-  .dogs-archive-seal {
-    gap: 2px;
-  }
-  .dogs-archive-seal__ring {
-    width: 26px;
-    height: 26px;
-  }
-  .dogs-archive-seal__label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-  }
-  .dogs-archive-seal__code {
-    font-size: 11px;
-  }
-  .dogs-archive-unreleased > span {
-    font-size: clamp(32px, 8vh, 50px);
-  }
-  .dogs-archive-varg {
-    padding-block: 16px 12px;
+  .dogs-archive-portrait {
+    padding-block: 6px 12px;
   }
   .dogs-archive .dogs-viewer__toolbar {
     bottom: 12px;
@@ -541,18 +439,13 @@ html[data-dogs-archive] .zeus-button {
 @media (forced-colors: active) {
   .dogs-archive-selector button,
   .dogs-archive-reference,
-  .dogs-archive-varg__frame,
+  .dogs-archive-forms button,
+  .dogs-archive-portrait__frame,
   .dogs-archive-varg > a {
     border: 1px solid ButtonText;
   }
-  .dogs-archive-selector button[data-released]::after {
-    background: Highlight;
-    box-shadow: none;
-  }
-  .dogs-archive-selector button[aria-selected="true"] {
+  .dogs-archive-selector button[aria-selected="true"],
+  .dogs-archive-forms button[aria-pressed="true"] {
     outline: 2px solid Highlight;
-  }
-  .dogs-archive-unreleased > span {
-    color: GrayText;
   }
 }

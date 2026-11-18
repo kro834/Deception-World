@@ -69,6 +69,32 @@ test("all five individuals have stable deep links; absent or malformed searches 
   assert.deepEqual(parseDogArchiveSearch({}), { dog: 5 });
 });
 
+test("published records map the five numbers to the supplied identities", () => {
+  assert.deepEqual(
+    DOG_ARCHIVE_ENTRIES.map(({ id, name, human }) => [id, name, human?.name]),
+    [
+      [1, "アルケオン", undefined],
+      [2, "ヴァルグ", undefined],
+      [3, "アガサ", "かつての六詠"],
+      [4, "エウレル", "ゼウス"],
+      [5, "シエル", "月城悠真"],
+    ],
+  );
+});
+
+test("only records with human artwork accept a direct human-form link", () => {
+  for (const dog of [3, 4, 5]) {
+    assert.deepEqual(parseDogArchiveSearch({ dog: String(dog), form: "human" }), {
+      dog,
+      form: "human",
+    });
+    assert.deepEqual(parseDogArchiveSearch({ dog, form: "unknown" }), { dog });
+  }
+  for (const dog of [1, 2]) {
+    assert.deepEqual(parseDogArchiveSearch({ dog, form: "human" }), { dog });
+  }
+});
+
 test("edge cancellation is installed before input with non-passive capture listeners", () => {
   const { doc, release } = fixture();
   for (const type of ["touchstart", "touchmove", "wheel"]) {

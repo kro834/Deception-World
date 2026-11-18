@@ -5,6 +5,7 @@ import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-d
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { DogViewer } from "@/components/dogs-archive/dog-viewer";
 import {
+  CIEL_DOG_ORIGINAL,
   DOG_ARCHIVE_ENTRIES,
   type DogArchiveId,
   parseDogArchiveSearch,
@@ -20,8 +21,8 @@ export const Route = createFileRoute("/dogs-archive")({
   head: () =>
     createWorldHead({
       title: "DOGS ARCHIVE｜Deception World",
-      description: "終の来訪者“犬”の個体記録。第五の“犬”を、あらゆる方向から見つめる。",
-      image: "/dogs-archive-20261028/reference/guardian-rest.jpg",
+      description: "第一から第五までの“犬”の個体記録。第五のシエルは原画と立体で鑑賞できる。",
+      image: CIEL_DOG_ORIGINAL,
       stylesheetLinks: [
         ...WORLD_CORE_STYLESHEET_LINKS,
         { rel: "stylesheet", href: viewerCss },
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/dogs-archive")({
 });
 
 function DogsArchive() {
-  const { dog } = Route.useSearch();
+  const { dog, form } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [referenceOpen, setReferenceOpen] = useState(false);
@@ -39,6 +40,9 @@ function DogsArchive() {
   const referenceButton = useRef<HTMLButtonElement>(null);
   const tabs = useRef<HTMLDivElement>(null);
   const entry = DOG_ARCHIVE_ENTRIES[dog - 1];
+  const human = form === "human" ? entry.human : undefined;
+  const portrait = human ?? entry.portrait;
+  const showViewer = dog === 5 && !human;
   useDialogHistoryDismiss(dialogRef, () => setReferenceOpen(false));
 
   useEffect(() => {
@@ -62,6 +66,11 @@ function DogsArchive() {
 
   const choose = (next: DogArchiveId) => {
     if (next !== dog) void navigate({ search: { dog: next }, replace: true, resetScroll: false });
+  };
+  const chooseForm = (next: typeof form) => {
+    if (next !== form) {
+      void navigate({ search: { dog, form: next }, replace: true, resetScroll: false });
+    }
   };
   const onTabKey = (event: KeyboardEvent<HTMLButtonElement>, id: DogArchiveId) => {
     const next =
@@ -121,17 +130,16 @@ function DogsArchive() {
             type="button"
             role="tab"
             data-dog={item.id}
-            data-released={item.id === 2 || item.id === 5 ? "true" : undefined}
             id={`dog-tab-${item.id}`}
-            aria-label={item.title}
+            aria-label={`${item.id} ${item.title} ${item.name}`}
             aria-selected={dog === item.id}
             aria-controls="dogs-archive-panel"
             tabIndex={dog === item.id ? 0 : -1}
             onClick={() => choose(item.id)}
             onKeyDown={(event) => onTabKey(event, item.id)}
           >
-            <b aria-hidden="true">{item.numeral}</b>
-            <span>{item.title}</span>
+            <b aria-hidden="true">{item.id}</b>
+            <span>{item.name}</span>
           </button>
         ))}
       </div>
@@ -143,51 +151,69 @@ function DogsArchive() {
         tabIndex={-1}
       >
         <div className="dogs-archive-record">
-          <h2>{entry.title}</h2>
-          {entry.name ? <p>{entry.name}</p> : null}
+          <div>
+            <h2>
+              {entry.title} <span>{entry.name}</span>
+            </h2>
+            {human ? <p>{human.name}</p> : null}
+          </div>
+          {entry.human ? (
+            <div className="dogs-archive-record-actions">
+              <div className="dogs-archive-forms" role="group" aria-label="形態を選ぶ">
+                <button type="button" aria-pressed={!human} onClick={() => chooseForm(undefined)}>
+                  犬の姿
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={Boolean(human)}
+                  onClick={() => chooseForm("human")}
+                >
+                  人間態
+                </button>
+              </div>
+              {showViewer ? (
+                <button
+                  className="dogs-archive-reference"
+                  ref={referenceButton}
+                  type="button"
+                  onClick={() => setReferenceOpen(true)}
+                  aria-haspopup="dialog"
+                >
+                  原画
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
-        {dog === 5 ? (
-          <>
-            <DogViewer active />
-            <button
-              className="dogs-archive-reference"
-              ref={referenceButton}
-              type="button"
-              onClick={() => setReferenceOpen(true)}
-              aria-haspopup="dialog"
-            >
-              原画
-            </button>
-          </>
-        ) : dog === 2 ? (
-          <div className="dogs-archive-varg">
-            <div className="dogs-archive-varg__frame">
+        {showViewer ? (
+          <DogViewer active />
+        ) : portrait ? (
+          <div
+            className={
+              dog === 2 ? "dogs-archive-portrait dogs-archive-varg" : "dogs-archive-portrait"
+            }
+          >
+            <div className="dogs-archive-portrait__frame">
               <img
-                src="/character-varg-20261021.webp"
-                srcSet="/character-varg-20261021-360.webp 360w, /character-varg-20261021-720.webp 720w, /character-varg-20261021.webp 1088w"
-                sizes="(max-width: 700px) calc(100vw - 32px), 720px"
-                alt="第二の犬・ヴァルグの本来形態"
-                width={1088}
-                height={1445}
+                key={portrait.src}
+                src={portrait.src}
+                srcSet={portrait.srcSet}
+                sizes={portrait.srcSet ? "(max-width: 700px) calc(100vw - 32px), 720px" : undefined}
+                alt={
+                  human ? `${entry.name}の人間態・${human.name}` : `${entry.title}・${entry.name}`
+                }
+                width={portrait.width}
+                height={portrait.height}
                 decoding="async"
               />
-              <div className="dogs-archive-varg__aura" aria-hidden="true" />
             </div>
-            <Link to="/characters/dante" hash="character-section-04">
-              人物資料へ <span aria-hidden="true">↗</span>
-            </Link>
+            {dog === 2 ? (
+              <Link to="/characters/dante" hash="character-section-04">
+                人物資料へ <span aria-hidden="true">↗</span>
+              </Link>
+            ) : null}
           </div>
-        ) : (
-          <div className="dogs-archive-unreleased">
-            <div className="dogs-archive-seal" aria-hidden="true">
-              <span className="dogs-archive-seal__ring" />
-              <span className="dogs-archive-seal__label">CLASSIFIED ARCHIVE</span>
-              <span className="dogs-archive-seal__code">第{entry.numeral}観測領域・封印指定</span>
-            </div>
-            <span aria-hidden="true">{entry.numeral}</span>
-            <p>個体資料は未公開です。</p>
-          </div>
-        )}
+        ) : null}
       </section>
       <dialog
         className="dogs-archive-reference-dialog"
@@ -203,7 +229,7 @@ function DogsArchive() {
         onClose={() => setReferenceOpen(false)}
       >
         <header>
-          <h2 id="dogs-reference-title">第五の“犬” — 原画</h2>
+          <h2 id="dogs-reference-title">第五の“犬” シエルの原画</h2>
           <button type="button" onClick={() => setReferenceOpen(false)} aria-label="原画を閉じる">
             ×
           </button>
@@ -212,7 +238,7 @@ function DogsArchive() {
           <div className="dogs-reference-pair">
             <figure>
               <img
-                src="/dogs-archive-20261028/reference/guardian-rest.jpg"
+                src={CIEL_DOG_ORIGINAL}
                 alt="巻き触手と渦状の胴体を持つ第五の犬の静止姿勢"
                 width={920}
                 height={1280}
