@@ -3,7 +3,7 @@ import {
   rememberGalleryStagePreview,
   resolveGalleryStageArtwork,
 } from "./gallery-stage-state";
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { useGallerySelectionMotion } from "./gallery-selection-motion";
 import { ArtworkStage } from "@/components/artwork-stage/artwork-stage";
 import { gallerySelectFocus } from "./gallery-select-focus";
@@ -142,6 +142,7 @@ export function GalleryPage() {
   const titleInputRef = useRef<HTMLInputElement>(null);
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const restoreEditFocusRef = useRef(false);
+  const favoritesFilterRef = useRef<HTMLButtonElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const selectionFiltersRef = useRef<HTMLElement>(null);
   const selectionStageRef = useRef<HTMLDivElement>(null);
@@ -434,6 +435,7 @@ export function GalleryPage() {
     if (!viewerOpen || !dialog) return;
     // Capture before native modal focus can scroll Safari's page.
     const readingAt = readingAtRef.current;
+    const favoritesFilter = favoritesFilterRef.current;
     finishReturnRef.current?.();
     finishReturnRef.current = null;
     viewerActiveRef.current = true;
@@ -525,8 +527,13 @@ export function GalleryPage() {
             left: readingAt.left,
             behavior: "instant",
           });
-        if (restoreFocus && opener?.isConnected) opener.focus({ preventScroll: true });
-        else if (document.activeElement === opener) opener?.blur();
+        if (restoreFocus) {
+          const returnTarget =
+            opener?.isConnected && !opener.matches(":disabled") ? opener : favoritesFilter;
+          returnTarget?.focus({ preventScroll: true });
+        } else if (document.activeElement === opener) {
+          opener?.blur();
+        }
       };
       if (router.history.location.pathname !== "/gallery") {
         finish();
@@ -552,6 +559,16 @@ export function GalleryPage() {
     };
     // Changing artworks must not release/reacquire the session's page lock.
   }, [viewerOpen, router]);
+
+  useLayoutEffect(() => {
+    const dialog = dialogRef.current;
+    if (!selectedId || !dialog?.open) return;
+    // An artwork change can replace a focused control or disable a navigation button.
+    const active = document.activeElement;
+    if (!dialog.contains(active) || active?.matches(":disabled")) {
+      dialog.focus({ preventScroll: true });
+    }
+  }, [selectedId]);
 
   useEffect(() => {
     if (!viewerOpen) return;
@@ -601,7 +618,7 @@ export function GalleryPage() {
         communityFailed: Boolean(communityLoadError),
       });
       if (plan.kind === "none") {
-        restoreFocusRef.current = false;
+        // Back closes the viewer; its cleanup still needs the opener's focus policy.
         setSelectedId(null);
         return;
       }
@@ -767,11 +784,6 @@ export function GalleryPage() {
     );
     if (next) {
       selectionDirectionRef.current = step < 0 ? -1 : 1;
-      // The artwork's keyed image controls disappear on navigation. Hand their
-      // focus to the persistent dialog so the next arrow key still reaches it.
-      const dialog = dialogRef.current;
-      if (dialog?.querySelector(".gallery-viewer-image")?.contains(document.activeElement))
-        dialog.focus({ preventScroll: true });
       resetEditor();
       viewerIdRef.current = next;
       setSelectedId(next);
@@ -1260,6 +1272,7 @@ export function GalleryPage() {
               <GallerySearchControls query={query} onQueryChange={setQuery} />
               <button
                 type="button"
+                ref={favoritesFilterRef}
                 className="gallery-favorites-filter"
                 aria-pressed={favoritesOnly}
                 onClick={() => setFavoritesOnly((current) => !current)}

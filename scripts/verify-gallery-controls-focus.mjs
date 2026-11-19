@@ -80,6 +80,54 @@ for (const engine of ["chromium", "webkit"]) {
         assert.ok(steps[0].headerScroll > before.headerScroll, "End never revealed lower choices");
         assert.deepEqual(errors, []);
         await page.screenshot({ path: `${output}/${engine}-${width}-home.png` });
+        const artwork = () => new URL(page.url()).searchParams.get("work");
+        const initialId = artwork();
+        assert.ok(initialId, "viewer URL contains the displayed artwork");
+        await dialog.locator(".gallery-share-control button").focus();
+        await page.keyboard.press("ArrowRight");
+        await page.waitForFunction(
+          (id) => new URL(location.href).searchParams.get("work") !== id,
+          initialId,
+        );
+        await page.waitForFunction(() => document.activeElement?.matches(".gallery-viewer[open]"));
+        await page.keyboard.press("ArrowLeft");
+        await page.waitForFunction(
+          (id) => new URL(location.href).searchParams.get("work") === id,
+          initialId,
+        );
+        await page.keyboard.press("Escape");
+        await page.waitForFunction(() => document.activeElement?.matches(".gallery-work-open"));
+
+        const card = opener.locator("xpath=ancestor::*[@data-gallery-artwork][1]");
+        const favorite = card.locator(".gallery-favorite-toggle");
+        const filter = page.locator(".gallery-favorites-filter");
+        for (const closeMethod of ["Escape", "Back"]) {
+          await favorite.press("Enter");
+          if ((await filter.getAttribute("aria-pressed")) !== "true") await filter.press("Enter");
+          await opener.press("Enter");
+          await dialog.waitFor();
+          await tools.press("Enter");
+          await dialog.getByRole("button", { name: /お気に入り$/, pressed: true }).press("Enter");
+          await opener.waitFor({ state: "detached" });
+          if (closeMethod === "Escape") await page.keyboard.press("Escape");
+          else await page.goBack();
+          await dialog.waitFor({ state: "hidden" });
+          await page
+            .waitForFunction(
+              () => document.activeElement?.matches(".gallery-favorites-filter"),
+              undefined,
+              { timeout: 4000 },
+            )
+            .catch(async (error) => {
+              throw new Error(
+                `${engine} ${width} ${closeMethod}: ${await page.evaluate(() => document.activeElement?.className)}`,
+                { cause: error },
+              );
+            });
+          await filter.press("Enter");
+          await opener.waitFor();
+        }
+        assert.deepEqual(errors, []);
         results.push({ engine, width, height: 640, before, steps, documentBefore, pass: true });
       } finally {
         await context.close();
