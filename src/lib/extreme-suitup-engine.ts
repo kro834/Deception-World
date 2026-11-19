@@ -26,6 +26,7 @@ import {
   EXTREME_SUITUP_END_MS,
   EXTREME_SUITUP_HOLD_MS,
   extremeSuitupDpr,
+  extremeSuitupFigure,
   extremeSuitupSource,
   pickExtremeSuitupWidth,
 } from "./extreme-entry.ts";
@@ -350,7 +351,8 @@ function star(ctx: Ctx, x: number, y: number, r: number, alpha: number) {
 }
 
 export type ExtremeSuitupOptions = {
-  /** Called with the phase each frame (for tests and the frame strips). */
+  /** Called with the phase each painted frame (the layer's pilot light hands
+   * over on the first; tests and the frame strips read the rest). */
   onFrame?: (t: number) => void;
 };
 
@@ -386,10 +388,10 @@ export function mountExtremeSuitup(
     const areaW = Math.max(1, box.width || window.innerWidth);
     const areaH = Math.max(1, box.height || window.innerHeight);
     dpr = Math.min(dprLimit, extremeSuitupDpr(window.devicePixelRatio, coarse));
-    const portrait = areaH > areaW;
-    scale = Math.min((areaH * (portrait ? 0.8 : 0.9)) / ART_H, (areaW * 1.02) / ART_W);
-    const fx = (areaW - ART_W * scale) / 2;
-    const fy = (areaH - ART_H * scale) * (portrait ? 0.42 : 0.5);
+    const figure = extremeSuitupFigure(areaW, areaH);
+    scale = figure.scale;
+    const fx = figure.x;
+    const fy = figure.y;
     const margin = 24;
     const x0 = Math.max(0, Math.floor(fx - margin));
     const y0 = Math.max(0, Math.floor(fy - margin));

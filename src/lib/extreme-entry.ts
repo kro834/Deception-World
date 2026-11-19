@@ -25,6 +25,25 @@ export function extremeSuitupSource(width: (typeof EXTREME_SUITUP_WIDTHS)[number
   return `${EXTREME_SUITUP_FOLDER}/expreme-${width}.webp`;
 }
 
+/** The belt core, in the art's own pixels: where the suit-up ignites. */
+export const EXTREME_SUITUP_CORE = [512, 582] as const;
+
+/** Where the figure stands in an `areaW` × `areaH` cover: the art's scale
+ * and its top-left corner, in CSS px. One rule for the engine's canvas and
+ * for the pilot light the layer shows before the engine's first frame. */
+export function extremeSuitupFigure(areaW: number, areaH: number) {
+  const portrait = areaH > areaW;
+  const scale = Math.min(
+    (areaH * (portrait ? 0.8 : 0.9)) / EXTREME_SUITUP_SIZE.height,
+    (areaW * 1.02) / EXTREME_SUITUP_SIZE.width,
+  );
+  return {
+    scale,
+    x: (areaW - EXTREME_SUITUP_SIZE.width * scale) / 2,
+    y: (areaH - EXTREME_SUITUP_SIZE.height * scale) * (portrait ? 0.42 : 0.5),
+  };
+}
+
 /** The art width for a figure shown `figureHeight` CSS px tall at `dpr`. */
 export function pickExtremeSuitupWidth(
   figureHeight: number,

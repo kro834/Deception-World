@@ -2920,26 +2920,46 @@ export function GuardedLink({
     // The dedicated doorway is far below the reader's initial viewport.
     // Its approach gives the call time to prepare without loading a second
     // page for someone reading a chapter or browsing the gallery.
-    if (
-      to !== "/rexonance-saga" ||
-      !link?.closest(".ws-doors") ||
-      typeof IntersectionObserver !== "function"
-    )
-      return;
+    // Owner (2026-11-20): the side menu is the other doorway. Its opening is
+    // near-intent: the call, its layers and its plan are prepared then, so
+    // the tap finds them and the cover starts at once (a cold tap spent
+    // 400 ms preparing before the cover appeared). The menu's own scroller
+    // keeps this link out of the viewport until it is scrolled to, so the
+    // menu's data-open starts it, not an intersection. Nothing loads for a
+    // reader who never opens the menu.
+    if (to !== "/rexonance-saga" || !link) return;
+    const panel = link.closest<HTMLElement>(".side-panel");
+    if (!panel && !link.closest(".ws-doors")) return;
     let stopSuit: (() => void) | undefined;
     let stopPage: (() => void) | undefined;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting) || stopSuit) return;
-        observer.disconnect();
-        stopSuit = scheduleRexonanceSuitWarm(0);
-        stopPage = scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" }));
-      },
-      { rootMargin: "280px" },
-    );
-    observer.observe(link);
+    let stopWatch = () => {};
+    const start = () => {
+      if (stopSuit) return;
+      stopWatch();
+      stopSuit = scheduleRexonanceSuitWarm(0);
+      stopPage = scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" }));
+    };
+    if (panel) {
+      if (panel.dataset.open === "true") start();
+      else if (typeof MutationObserver === "function") {
+        const panelWatch = new MutationObserver(() => {
+          if (panel.dataset.open === "true") start();
+        });
+        panelWatch.observe(panel, { attributes: true, attributeFilter: ["data-open"] });
+        stopWatch = () => panelWatch.disconnect();
+      }
+    } else if (typeof IntersectionObserver === "function") {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) start();
+        },
+        { rootMargin: "280px" },
+      );
+      observer.observe(link);
+      stopWatch = () => observer.disconnect();
+    }
     return () => {
-      observer.disconnect();
+      stopWatch();
       stopPage?.();
       stopSuit?.();
     };

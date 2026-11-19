@@ -95,6 +95,14 @@ const RELEASE_BUDGET_MS = 1800;
 const META_REAL_GONE_MS = 4500;
 const META_REAL_RELEASE_MS = 5200;
 
+// Owner (2026-11-20): EXTREME's entry is its suit-up (owner, 2026-11-11:
+// the mechanical plates deploy in the route transition only). Its cover is
+// held by that playback — 3720 ms to the light sweep and a 120 ms hold — and
+// its layer then fades over 520 ms; the plain dive's 1300/1800 no longer
+// describe it. The cover is still there from the press (coverAt 17).
+const EXTREME_GONE_MS = 3900;
+const EXTREME_RELEASE_MS = 4500;
+
 const pick = (list, all) =>
   list
     ? list
@@ -321,7 +329,10 @@ async function audit(browser, analyser, profileName, name) {
   let releasedAt = null;
   // Meta Unitas starts its call only after its canvas is prepared; other
   // entries retain their original click-to-release budgets.
-  for (let frame = 0; frame < (metaUnitasEntry ? 1440 : 240); frame += 1) {
+  // Owner (2026-11-20): EXTREME's suit-up releases after the 4 s the other
+  // frozen entries are sampled for.
+  const extremeEntry = scenario.dest === "/extreme-saga";
+  for (let frame = 0; frame < (metaUnitasEntry ? 1440 : extremeEntry ? 300 : 240); frame += 1) {
     if (metaUnitasEntry) await page.waitForTimeout(STEP);
     else await page.clock.runFor(STEP);
     const t = metaUnitasEntry
@@ -438,13 +449,13 @@ async function audit(browser, analyser, profileName, name) {
   assert.ok(
     doneAt &&
       doneAt <=
-        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3580 : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_GONE_MS : GONE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3580 : extremeEntry ? EXTREME_GONE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_GONE_MS : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
     releasedAt &&
       releasedAt <=
-        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3780 : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_RELEASE_MS : RELEASE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3780 : extremeEntry ? EXTREME_RELEASE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_RELEASE_MS : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);
