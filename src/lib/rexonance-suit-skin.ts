@@ -498,9 +498,11 @@ export function drawSkinDroplets(
 export const SKIN_CELL_SHARE = [1, 0.75, 0.55, 0.4] as const;
 /** The cells' widths in figure px (flat to flat), and their least width in
  * CSS px whatever the figure's scale. */
+// (Nanosuit pass, 2026-11-20: finer, the largest plate 80 from 92 and the
+// largest speck 9 from 11; the smallest of each as before.)
 export const SKIN_CELL_SIZE = {
-  large: [46, 92],
-  fine: [4.5, 11],
+  large: [46, 80],
+  fine: [4.5, 9],
   largeMin: 16,
   fineMin: 2,
 } as const;
@@ -549,10 +551,10 @@ const CELL_RIMS = ["214 246 255", "255 190 232", "246 250 255", "250 224 168"] a
 /** Each plate's honeycomb: the cells' rings about its middle (0: the one
  * cell; 1: seven; 2: nineteen), and whether the middle cells are left out. */
 const PLATE_COMBS = [
+  [3, false],
   [2, false],
-  [1, false],
-  [2, true],
-  [2, false],
+  [3, true],
+  [3, false],
 ] as const;
 const CELL_FILLS = ["178 238 255", "255 170 224", "246 251 255"] as const;
 
@@ -607,8 +609,10 @@ export function buildSkinCellSheet(
     context.fill();
     // The honeycomb inside: the skin's own cells, fine and faint.
     const [rings, open] = PLATE_COMBS[tone];
-    const inner = PLATE_R * 0.168;
-    context.lineWidth = 1.1;
+    // (Finer, 2026-11-20: a ring more at two thirds of the size, so a
+    // plate is a patch of the skin's own fine weave rather than a tile.)
+    const inner = PLATE_R * 0.118;
+    context.lineWidth = 0.9;
     context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.24)`;
     for (let q = -rings; q <= rings; q += 1)
       for (let r = Math.max(-rings, -q - rings); r <= Math.min(rings, -q + rings); r += 1) {
@@ -976,8 +980,9 @@ export class SkinCells {
     const [low, high] = big ? clock.large : clock.fine;
     const life = low + (high - low) * s[o];
     const phase = s[o + 8];
-    // The air's flicker (wall time): now and then a cell dims as it forms.
-    const flicker = hash3(i, Math.floor(now / 70), 41) < 0.4 ? 0.3 : 1;
+    // The air's flicker (wall time): a cell shimmers as it forms. (Smooth
+    // since 2026-11-20: a 70 ms on/off step read as popping.)
+    const flicker = 0.62 + 0.38 * Math.sin(now * 0.021 + phase * 9.7);
     let p = 1;
     let k = -1;
     let alpha = 1;
@@ -1116,10 +1121,15 @@ export class SkinCells {
       context.rotate(pose[4]);
       context.scale(1, pose[5]);
       context.globalAlpha = alpha;
+      // The clasp's four forging frames cross-dissolve over the flight (they
+      // switched in one frame before, 2026-11-20): the next is laid over
+      // the current one as it comes, so the plate never thins between them.
+      const forge = clasps ? Math.min(3, Math.max(0, pose[7] * 4 - 0.5)) : 0;
+      const frameAt = Math.floor(forge);
       context.drawImage(
         clasps ?? sheet,
         this.slots[i * SLOT + 6] * plate,
-        clasps ? Math.min(3, Math.floor(pose[7] * 4)) * plate : 0,
+        frameAt * plate,
         plate,
         plate,
         -width / 2,
@@ -1127,6 +1137,21 @@ export class SkinCells {
         width,
         width,
       );
+      const next = smooth(forge - frameAt);
+      if (clasps && frameAt < 3 && next > 0.01) {
+        context.globalAlpha = alpha * next;
+        context.drawImage(
+          clasps,
+          this.slots[i * SLOT + 6] * plate,
+          (frameAt + 1) * plate,
+          plate,
+          plate,
+          -width / 2,
+          -width / 2,
+          width,
+          width,
+        );
+      }
       context.restore();
     }
     front.globalCompositeOperation = "lighter";
@@ -1255,7 +1280,10 @@ void main() {
   gl_Position = vec4(aPosition, 0.0, 1.0);
 }`;
 
-const FRAGMENT = `#ifdef GL_FRAGMENT_PRECISION_HIGH
+const FRAGMENT = `#ifdef DERIV
+#extension GL_OES_standard_derivatives : enable
+#endif
+#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
@@ -1275,6 +1303,9 @@ uniform float uTime;
 uniform float uAlpha;
 uniform float uBase01;
 uniform float uHex;
+// One backing pixel, in figure px: every edge below is drawn this soft and
+// no softer, so the finer lattice stays sub-pixel smooth at any DPR.
+uniform float uPx;
 #ifdef SEAT
 // The entry's seat (rexonance-entry-seat.ts): when each plate's texel is
 // let go to set, and the call's clock now and a lag ago, in the map's
@@ -1291,6 +1322,15 @@ float hash(vec2 p) {
   return fract(p.x * p.y);
 }
 float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
+// Smooth value noise (nanosuit pass, 2026-11-20): the lip's grain was a
+// hash of square blocks, which read as pixels at the front.
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
 // The armour's emitters: its ice and pink light (never its gold).
 float emitter(vec3 c) {
   float hi = max(c.r, max(c.g, c.b));
@@ -1372,11 +1412,20 @@ void main() {
   vec2 deltaB = hp - centreB;
   vec2 local = dot(deltaA, deltaA) < dot(deltaB, deltaB) ? deltaA : deltaB;
   float threshold = hash(floor(2.0 * (hp - local) / hs + 0.5));
-  // Neighbouring sockets receive the bead at slightly different depths.
-  // Its contact line rolls across each face along the field gradient.
-  float deposit = a + (0.19 * dot(local, flow) + 0.22 * (threshold - 0.5))
-    * (1.0 - smoothstep(0.5, 1.8, a));
-  if (deposit < 0.0) {
+  // The bead's contact line wanders in a fine, continuous fingering (two
+  // octaves of smooth noise at the lattice's scale). (Nanosuit pass,
+  // 2026-11-20: it was stepped per socket, which made the lip a stair of
+  // hexagons that read as square blocks at a phone's pixel ratio.)
+  float finger = 0.2 * (vnoise(p / (uHex * 0.8)) - 0.5) + 0.16 * (vnoise(p / (uHex * 2.6) + 7.3) - 0.5);
+  float deposit = a + finger * (1.0 - smoothstep(0.5, 1.8, a));
+  // How far one backing pixel moves the deposit: the lip is never sharper
+  // than that (a sub-pixel front, not a stair of texels).
+#ifdef DERIV
+  float dw = clamp(fwidth(deposit), 0.0, 0.5);
+#else
+  float dw = 0.0;
+#endif
+  if (deposit < -dw) {
     // The lip's shadow, just ahead of it.
     float shade = smoothstep(-0.4, 0.0, deposit);
     gl_FragColor = vec4(base.rgb * (1.0 - 0.5 * shade * art.a), max(base.a, 0.42 * shade * art.a)) * uAlpha;
@@ -1387,37 +1436,74 @@ void main() {
   float bead = cos(clamp(deposit, 0.0, 1.0) * 3.14159);
   float facing = 0.5 + 0.5 * bead * dot(flow, normalize(vec2(-0.5, -0.8)));
   float room = 0.5 + 0.5 * sin(p.y * 0.11 + p.x * 0.05 + uTime * 2.6 + fld.r * 40.0);
+  // Capillary ripples parallel to the lip, locked to the distance behind it
+  // (closed-form: they ride with the front forward and back), dying out as
+  // the sheet thickens and wherever they would be finer than a pixel.
+  float wave = 0.5 + 0.5 * cos(a * 7.5 - 1.2);
+#ifdef DERIV
+  float rippleAa = 1.0 - smoothstep(0.35, 0.9, fwidth(a) * 7.5);
+#else
+  float rippleAa = 0.0;
+#endif
+  float ripple = (wave - 0.5) * (1.0 - smoothstep(0.2, 1.4, a)) * smoothstep(0.0, 0.25, a) * rippleAa;
+  facing = clamp(facing + 0.42 * ripple, 0.0, 1.0);
   vec3 chrome = mix(vec3(0.085, 0.095, 0.115), vec3(0.6, 0.64, 0.68), facing * (0.55 + 0.45 * room));
   chrome = mix(chrome, chrome * (0.6 + 0.9 * light), 0.5);
   // The fibres: striations along the flow.
-  float stripe = smoothstep(0.4, 0.5, abs(fract(dot(p, vec2(-flow.y, flow.x)) * 0.33) - 0.5) * 2.0);
-  vec3 fibre = mix(vec3(0.1, 0.11, 0.13), vec3(light) * vec3(0.8, 0.87, 0.95), 0.42) * (0.66 + 0.5 * stripe);
+  // (Finer, 2026-11-20: a 2.2 px pitch, antialiased by the pixel's own
+  // width, and dashed along the flow so they stream as the front advances.)
+  float sw = uPx * 0.45;
+  float stripe = smoothstep(0.5 - sw, 0.5 + sw, abs(fract(dot(p, vec2(-flow.y, flow.x)) * 0.45) - 0.5) * 2.0);
+  stripe = mix(0.5, stripe, 1.0 - smoothstep(0.3, 0.6, sw));
+  float dash = 0.5 + 0.5 * sin(dot(p, flow) * 0.21 - a * 5.0 + fld.g * 6.0);
+  vec3 fibre = mix(vec3(0.1, 0.11, 0.13), vec3(light) * vec3(0.8, 0.87, 0.95), 0.42) * (0.66 + 0.5 * stripe) * (0.84 + 0.3 * dash);
   fibre += ICE * 0.1 * fld.g;
   vec3 metal = mix(chrome, fibre, smoothstep(0.8, 1.5, a));
   // The cells: a hexagonal micro-tessellation, each cell clicking solid on
   // its own threshold and taking the art's colour.
   vec2 q = abs(local);
   float rim = max(dot(q, hs * 0.5), q.x);
+  // Half a backing pixel in the cell's units: the seams' and fills' softness.
+  float w = 0.5 * uPx / uHex;
   float k = (a - 2.4) / 2.5;
   float age = (k - threshold * 0.82) / 0.18;
-  float solid = step(0.0, age);
+  // A cell no longer pops solid: it fills from its centre out to its rim
+  // on an eased radius, the edge a pixel soft (2026-11-20).
+  float grow = smoothstep(0.0, 0.6, age);
+  float solid = smoothstep(-w, w, grow * (0.5 + 2.0 * w) - rim - w);
   float paint = smoothstep(0.0, 1.0, age);
-  float tilt = fract(threshold * 17.31) - 0.5;
-  vec3 facet = metal * (0.9 + 0.7 * tilt) + vec3(0.07, 0.09, 0.11);
+  // Each hex is cut into six triangular facets (the finer lattice): each
+  // catches the key at its own angle while the metal is still unpainted.
+  float sector = floor(atan(local.y, local.x) / 1.0471976);
+  float tilt = fract(threshold * 17.31 + sector * 0.137) - 0.5;
+  vec3 facet = metal * (0.9 + 0.6 * tilt) + vec3(0.07, 0.09, 0.11);
   float tess = smoothstep(1.7, 2.4, a);
-  float edge = smoothstep(0.4, 0.5, rim);
+  // Seams thin as the lattice: a fixed share of the cell, never under a
+  // pixel's softness, and fainter where they would crowd the pixels.
+  float seamFade = 1.0 - smoothstep(0.16, 0.34, w);
+  // (Their strength drifts in broad patches, so the resolving weave never
+  // reads as one uniform net laid over the figure.)
+  float seamPatch = 0.55 + 0.45 * vnoise(p / (uHex * 4.5) + 3.1);
+  float edge = smoothstep(0.455 - w, 0.455 + w, rim) * seamFade * seamPatch;
+  vec2 d30 = vec2(0.8660254, 0.5);
+  float spoke = min(abs(local.x), min(abs(dot(local, vec2(d30.y, -d30.x))), abs(dot(local, vec2(d30.y, d30.x)))));
+  float tri = (1.0 - smoothstep(0.0, 0.03 + w, spoke)) * (1.0 - edge) * seamFade;
   // Still liquid: the tessellation shows through as facets and dark seams.
   vec3 liquid = mix(metal, facet, 0.5 * tess);
   liquid = mix(liquid, liquid * 0.5, edge * tess * 0.7);
+  liquid = mix(liquid, liquid * 0.72, tri * tess * 0.5);
   // A bevel on the light-facing side catches the key as each plate seats.
   float bevel = smoothstep(0.28, 0.42, rim) * (1.0 - edge);
   float keySide = dot(local, vec2(-0.55, -0.83));
   liquid += vec3(0.48, 0.55, 0.61) * bevel * smoothstep(-0.08, 0.32, keySide) * tess;
   vec3 celled = mix(facet, armour * (1.0 + 0.1 * tilt * (1.0 - smoothstep(1.0, 3.0, age))), paint);
-  // The click: a brightness pop that decays.
-  celled += (0.35 * exp(-max(age, 0.0) * 2.6)) * mix(vec3(0.8, 0.9, 1.0), armour, 0.4);
-  // The cells' seams, until the paint has set.
-  celled = mix(celled, celled * 0.42 + ICE * 0.12, edge * (1.0 - smoothstep(0.6, 2.4, age)));
+  // The click: a brightness glint that swells with the fill and decays
+  // (it rose in one frame before).
+  celled += (0.3 * smoothstep(0.0, 0.3, age) * exp(-max(age - 0.15, 0.0) * 2.4)) * mix(vec3(0.8, 0.9, 1.0), armour, 0.4);
+  // The cells' seams and facets, until the paint has set.
+  float unset = 1.0 - smoothstep(0.6, 2.4, age);
+  celled = mix(celled, celled * 0.42 + ICE * 0.12, edge * unset);
+  celled = mix(celled, celled * 0.8 + ICE * 0.05, tri * unset * 0.6);
   vec3 outc = mix(liquid, celled, solid);
   // Narrow interlocking metal ribs give way to the original painted shell
   // immediately behind the travelling edge.
@@ -1434,15 +1520,19 @@ void main() {
     outc += mix(ICE, vec3(1.0), 0.35) * line * glow * 0.75;
   }
   // The lip: white-hot at the very edge.
-  float lip = 1.0 - smoothstep(0.0, 0.18, deposit);
+  float lip = 1.0 - smoothstep(0.0, 0.18 + dw, deposit);
   float forming = 1.0 - step(BAND, uFront.z);
-  float lipGrain = hash(floor(p / mix(9.0, 3.0, forming)));
+  float lipGrain = vnoise(p / mix(6.0, 2.5, forming));
   float lipShine = mix(0.95, mix(0.56, 1.12, lipGrain), forming);
   outc += vec3(0.91, 0.95, 1.0) * lip * lipShine;
   outc += mix(ICE, PINK, lipGrain) * lip * 0.22;
   // The veins, bright while liquid.
   outc += vec3(0.8, 0.9, 1.0) * fld.g * (1.0 - smoothstep(0.3, 1.6, a)) * 0.5;
-  float alpha = art.a * smoothstep(0.0, 0.08, deposit);
+  float alpha = art.a * smoothstep(-dw, 0.08 + dw, deposit);
+  // The lip's shadow carries on under the thinnest metal, so the front has
+  // no seam where the shadow branch above hands over.
+  float under = (1.0 - smoothstep(-dw, 0.1 + dw, deposit)) * art.a;
+  base = vec4(base.rgb * (1.0 - 0.5 * under), max(base.a, 0.42 * under));
   // Once the armour has faded: the lit emitters alone, over the scene's own.
   float lone = art.a * glowing * lit * step(${SKIN_BANDS.toFixed(1)}, a) * uGlow.x * (1.0 - uAlpha);
   gl_FragColor = vec4(outc * alpha + base.rgb * (1.0 - alpha), alpha + base.a * (1.0 - alpha)) * uAlpha
@@ -1525,9 +1615,15 @@ export class SkinRenderer {
     gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX));
     const seat = sources.seat ?? null;
     this.seated = Boolean(seat);
+    // Screen-space derivatives antialias the front and the ripples by the
+    // pixel's own footprint; without them the ripples stay off.
+    const deriv = Boolean(gl.getExtension("OES_standard_derivatives"));
     gl.attachShader(
       program,
-      compile(gl.FRAGMENT_SHADER, seat ? `#define SEAT\n${FRAGMENT}` : FRAGMENT),
+      compile(
+        gl.FRAGMENT_SHADER,
+        `${deriv ? "#define DERIV\n" : ""}${seat ? "#define SEAT\n" : ""}${FRAGMENT}`,
+      ),
     );
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS))
@@ -1555,6 +1651,7 @@ export class SkinRenderer {
       "uAlpha",
       "uBase01",
       "uHex",
+      "uPx",
       "uSeatMap",
       "uSeat",
     ])
@@ -1642,9 +1739,12 @@ export class SkinRenderer {
     if (this.canvas.height !== height) this.canvas.height = height;
   }
 
-  /** The hex cells' width, figure px (the loose cells merge into it). */
+  /** The hex cells' width, figure px (the loose cells merge into it).
+   * (Nanosuit pass, 2026-11-20: finer, 6 figure px and at least 3.5 backing
+   * px, from 8.5 and 4; each is also cut into six facets, and every seam is
+   * antialiased by uPx, so the lattice reads as a fine weave, not tiles.) */
   get hex() {
-    return Math.max(8.5, 4 / Math.max(0.1, this.scale));
+    return Math.max(6, 3.5 / Math.max(0.1, this.scale));
   }
 
   /** The entry's seat clock: now and the emitters' lag ago, one band of the
@@ -1674,8 +1774,9 @@ export class SkinRenderer {
     gl.uniform1f(this.uniforms.uTime, seconds % 1000);
     gl.uniform1f(this.uniforms.uAlpha, frame.alpha);
     gl.uniform1f(this.uniforms.uBase01, this.hasBase ? base01 : 0);
-    // Cells of four backing px across at the least, 8.5 figure px.
+    // Cells of 3.5 backing px across at the least, 6 figure px.
     gl.uniform1f(this.uniforms.uHex, this.hex);
+    gl.uniform1f(this.uniforms.uPx, 1 / Math.max(0.05, this.scale));
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 

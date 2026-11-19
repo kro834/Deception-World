@@ -108,7 +108,9 @@ test("the shader's SEAT block is the entry's alone and leaves the scroll's progr
   assert.doesNotMatch(outside, /uSeat|seatAt|gated|seated/);
   assert.equal(fragment.match(/#ifdef SEAT/g).length, 3);
   // Compiled only when a seat map is passed; the scroll's mount passes none.
-  assert.match(skin, /compile\(gl\.FRAGMENT_SHADER, seat \? `#define SEAT\\n\$\{FRAGMENT\}` : FRAGMENT\)/);
+  // (2026-11-20, nanosuit pass: the program may also define DERIV, for the
+  // derivatives extension; SEAT is still defined only with a seat map.)
+  assert.match(skin, /`\$\{deriv \? "#define DERIV\\n" : ""\}\$\{seat \? "#define SEAT\\n" : ""\}\$\{FRAGMENT\}`/);
   assert.match(skin, /if \(this\.lost \|\| !this\.seated\) return;/);
   const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
   assert.equal(surge.match(/buildEntrySeatMap\(\)/g).length, 1);
