@@ -157,9 +157,8 @@ const GUARDIAN_TONES_GLSL = `{
 #endif
 #ifdef GUARDIAN_BONE
  gTone*=mix(vec3(1.),vec3(.62,.8,.65),gVein);
- // a soft inner light on jade-like bone with subtle warm rim translucency (SSS warmth)
- float gBoneWarm=pow(1.-gNdV,2.5)*gWrapLight;
- gTone+=mix(vec3(.2,.34,.2),vec3(.32,.36,.22),gBoneWarm)*gWrapLight*.36*uTranslucency*gBone;
+ // a soft inner light on jade-like bone, not a realistic subsurface
+ gTone+=vec3(.2,.34,.2)*gWrapLight*.3*uTranslucency*gBone;
 #endif
  // the skin rim is a little stronger since the skin went black: the silhouette must hold
  // against the dark green backdrop
@@ -177,8 +176,7 @@ const GUARDIAN_TONES_GLSL = `{
  // the scales and off the gaps; the scale normals make the band break along the rims.
  float gGloss=mix(.15,1.,1.-smoothstep(.3,.85,roughnessFactor));
  float gSheen=smoothstep(.26,.6,pow(gNdH,mix(4.,10.,gGloss)))*gGloss;
- float gWetFres=pow(1.-gNdV,4.2)*gGloss;
- vec3 gSkinSpec=vec3(.05,.08,.06)*gSheen+vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.12*gGloss+vec3(.09,.15,.11)*gWetFres*.22;
+ vec3 gSkinSpec=vec3(.05,.08,.06)*gSheen+vec3(.5,.72,.56)*smoothstep(.55,.65,gSpec)*.12*gGloss;
  reflectedLight.directSpecular=mix(gSkinSpec,vec3(.3,.44,.3)*gSpec*.2,gBone)*gMid;
  reflectedLight.indirectSpecular=vec3(0.);
 }`;
