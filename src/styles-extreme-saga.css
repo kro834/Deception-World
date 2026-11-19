@@ -5,6 +5,27 @@
   background: radial-gradient(circle at 50% 12%, rgb(29 112 183 / 24%), transparent 31rem), #010308;
 }
 
+/* The bar's height is reserved before the page measures it (the measure
+   still follows text zoom and unusual safe areas), so the hero does not
+   drop under the bar after the first paint: 77px with the links in the
+   bar, 65px on the one-row tablet bar, 97px with the phone's chapter row
+   under the brand (styles-extreme-editorial.css). */
+.rxs-page.rxs-page.exs-page {
+  --rxs-local-nav-reserve: calc(77px + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.exs-page {
+    --rxs-local-nav-reserve: calc(65px + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (max-width: 680px) {
+  .rxs-page.rxs-page.exs-page {
+    --rxs-local-nav-reserve: calc(97px + env(safe-area-inset-top, 0px));
+  }
+}
+
 .exs-page .rxs-local-nav {
   border-bottom-color: rgb(117 211 255 / 14%);
   background: rgb(2 5 12 / 78%);
@@ -376,5 +397,20 @@
   .exs-page .rxs-hero-visual {
     translate: 50% 18px;
     scale: 1;
+  }
+}
+
+/* Site audit (2026-11-20): the form rail's names keep the site's 12px reading
+   floor on the narrowest phones (the shared slider drops them to 11px at
+   360px and under, styles-form-slider.css). The tabs already give up their
+   side padding there; the names fit at 12px with no tracking. */
+@media (max-width: 360px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page
+    .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    span {
+    font-size: 12px !important;
   }
 }

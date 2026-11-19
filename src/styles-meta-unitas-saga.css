@@ -79,6 +79,20 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   counter-reset: mus-chapter;
 }
 
+/* The bar's height is reserved before the page measures it (the measure
+   still follows text zoom and unusual safe areas), so the hero does not
+   drop under the bar after the first paint: 77px on the wide bar, 65px on
+   the compact one. */
+.rxs-page.rxs-page.mus-page {
+  --rxs-local-nav-reserve: calc(77px + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.mus-page {
+    --rxs-local-nav-reserve: calc(65px + env(safe-area-inset-top, 0px));
+  }
+}
+
 .mus-page :focus-visible {
   outline: 2px solid var(--mus-orange-hot);
   outline-offset: 3px;
@@ -1364,6 +1378,21 @@ html[data-world-effects="economy"] .mus-page *::after {
   }
 }
 
+/* A phone's first screen holds the page's name whole: the key visual
+   gives up the height the name needs under it (the top padding, the gap,
+   仮面ライダー and the name's two lines), measured against the small
+   viewport, so the name is not cut at the fold while Safari's toolbar
+   shows (390 × 664). */
+@media (max-width: 860px) and (orientation: portrait) {
+  .mus-hero-visual {
+    width: min(
+      100%,
+      520px,
+      max(220px, calc((100svh - var(--rxs-local-nav-reserve, 65px) - 162px) * 0.75))
+    );
+  }
+}
+
 @media (max-width: 560px) {
   .mus-weapons {
     grid-template-columns: 1fr;
@@ -2504,5 +2533,18 @@ html[data-rzn-constrained] .mus-weapons li::after {
     background: Canvas;
     box-shadow: none;
     border: 1px solid CanvasText;
+  }
+}
+
+/* Site audit (2026-11-20): the form rails' names keep the site's 12px reading
+   floor on the narrowest phones (the shared slider drops them to 11px at
+   360px and under, styles-form-slider.css). */
+@media (max-width: 360px) {
+  :root
+    .mus-page
+    .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]
+    span {
+    font-size: 12px !important;
   }
 }
