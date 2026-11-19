@@ -151,3 +151,31 @@ test("the lab writes its URL through the throttled writer, never per input", () 
   assert.match(source, /createLabUrlWriter\(window\.history\)/);
   assert.doesNotMatch(source, /window\.history\.replaceState/);
 });
+
+// Owner (2026-11-20): 「サイトも大きく改善します」 — the lab's choices are its own
+// pressed buttons (no bare OS select), its bar stands in the site's lane, and
+// a visit that asks for no moment opens on the suit-up, played once.
+test("the lab chooses by its own buttons, in the site's bar lane, and opens on the suit-up", () => {
+  const read = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8");
+  const lab = read("components/transformation-lab/transformation-lab.tsx");
+  assert.doesNotMatch(lab, /<select\b/);
+  for (const label of ["ライダー", "フォーム", "同じ瞬間を比較", "比較フォーム", "速度"])
+    assert.ok(lab.includes(`label="${label}"`), `${label} keeps its name`);
+  assert.match(lab, /\["", "比較しない"\]/);
+  // Play and the playhead stand directly under the stage.
+  assert.ok(lab.indexOf('className="lab-controls"') < lab.indexOf('className="lab-zoom"'));
+  // The opening play: only with no `at` and no comparison asked for, never
+  // under reduced motion or on an economy device, never after the reader's hand.
+  assert.match(
+    lab,
+    /opening\.current =\s*!asked\.has\("at"\) &&\s*!asked\.has\("compare"\) &&\s*!matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches &&\s*root\.dataset\.worldEffects !== "economy" &&\s*!\("rznConstrained" in root\.dataset\);/,
+  );
+  assert.match(lab, /if \(!ready \|\| !opening\.current\) return;\s*opening\.current = false;/);
+  assert.match(lab, /leave\.cancel\(\);\s*opening\.current = false;\s*setPlaying\(false\);/);
+  const sheet = read("styles-transformation-lab.css");
+  assert.match(sheet, /\.lab-topbar \{[^}]*min-height: calc\(var\(--sh-bar-h, 76px\) \+ env\(safe-area-inset-top, 0px\)\);/);
+  assert.match(sheet, /--lab-pad: var\(--sh-gutter, clamp\(16px, 4vw, 72px\)\);/);
+  assert.match(sheet, /\.lab-topbar > \.side-panel-trigger \{[^}]*width: 48px;[^}]*height: 48px;/);
+  // The stage's light leaves as the armour arrives; the scene is not touched.
+  assert.match(sheet, /\.lab-stage::before \{[^}]*opacity: clamp\(0, calc\(1 - var\(--lab-progress, 0\) \* 1\.5\), 1\);/);
+});

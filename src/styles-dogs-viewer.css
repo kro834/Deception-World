@@ -38,11 +38,24 @@
   overflow: hidden;
 }
 .dogs-viewer__fallback > img {
+  /* Out of the grid's flow: an auto row let the picture's own height win
+     and the stage cropped it. */
+  position: absolute;
+  inset: 0;
   height: 100%;
   width: 100%;
   object-fit: contain;
   opacity: 0.58;
   filter: saturate(0.65);
+}
+/* Before the visitor asks for the model the still stands at full strength;
+   it dims as the model loads. */
+.dogs-viewer[data-viewer-status="idle"] {
+  cursor: pointer;
+}
+.dogs-viewer[data-viewer-status="idle"] .dogs-viewer__fallback > img {
+  opacity: 1;
+  filter: none;
 }
 .dogs-viewer.is-ready .dogs-viewer__fallback {
   opacity: 0;
@@ -256,14 +269,16 @@
   .dogs-viewer {
     min-height: 390px;
   }
+  /* One row along the stage's lower edge, so the figure stays in view. */
   .dogs-viewer__toolbar {
     gap: 6px;
-    bottom: max(16px, env(safe-area-inset-bottom, 16px));
-    flex-wrap: wrap;
+    bottom: max(10px, env(safe-area-inset-bottom, 10px));
+    width: max-content;
+    max-width: calc(100% - 12px);
+    flex-wrap: nowrap;
     justify-content: center;
-    row-gap: 8px;
     border-radius: 14px;
-    padding: 8px 10px;
+    padding: 6px 8px;
   }
   .dogs-viewer__toolbar .dogs-viewer__pose {
     padding: 10px 30px 10px 12px;
@@ -279,11 +294,27 @@
     display: none;
   }
   .dogs-viewer__toolbar .dogs-viewer__breathe {
-    padding-inline: 20px;
+    padding-inline: 14px;
   }
   .dogs-viewer__loading {
+    inset-block-end: 78px;
     font-size: 12px;
     letter-spacing: 0.03em;
+  }
+}
+@media (max-width: 350px) {
+  .dogs-viewer__toolbar {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+  .dogs-viewer__toolbar .dogs-viewer__breathe {
+    padding-inline: 10px;
+  }
+  .dogs-viewer__toolbar .dogs-viewer__pose {
+    padding-inline: 10px 26px;
+    background-position:
+      right 9px center,
+      0 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

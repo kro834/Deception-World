@@ -40,6 +40,9 @@ export type CastEntry = {
   body: readonly string[];
   image?: string;
   pos?: string;
+  /* Where the face is in the picture, when it is not at `pos` (the cast
+     rail's close-up is drawn about it). A position, not text. */
+  face?: string;
   width?: number;
   height?: number;
   monogram?: string;
@@ -168,6 +171,7 @@ export const CAST: readonly CastEntry[] = [
     ],
     image: "/manager-zeus-detail.jpeg",
     pos: "50% 42%",
+    face: "47% 15%",
     width: 1122,
     height: 1402,
     to: "/managers/zeus",
@@ -187,6 +191,7 @@ export const CAST: readonly CastEntry[] = [
     ],
     image: "/nightmare-machiavel-gore.jpeg",
     pos: "48% 8%",
+    face: "40% 8%",
     width: 1023,
     height: 1537,
     to: "/riders/saga",
