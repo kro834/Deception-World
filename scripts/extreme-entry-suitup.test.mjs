@@ -159,11 +159,15 @@ test("the choreography: belt first, then chest, shoulders/arms, legs/boots, gaun
   assert.ok(EXTREME_SUITUP_END_MS >= 2500 && EXTREME_SUITUP_END_MS <= 4000);
 
   const plates = buildSuitupPlates();
-  assert.ok(plates.length > 250 && plates.length < 1200, String(plates.length));
+  // 2026-11-20 (nanosuit pass, owner: finer and smoother): the plates are
+  // ~0.6× their 11-11 size, about 2 000 of them; the bound still keeps the
+  // count sane for a phone's frame (918 before).
+  assert.ok(plates.length > 1200 && plates.length < 3000, String(plates.length));
   for (const plate of plates) {
     const [begin, end] = b[plate.group];
     assert.ok(plate.start >= begin && plate.lock <= end, `${plate.region} in its beat`);
     assert.ok(plate.glow > plate.lock, "glow traces on after the lock");
+    assert.ok(plate.via.every(Number.isFinite), "a curved flight");
   }
   // The same plates every time.
   assert.deepEqual(buildSuitupPlates().slice(0, 5), plates.slice(0, 5));

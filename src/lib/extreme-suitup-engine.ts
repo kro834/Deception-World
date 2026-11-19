@@ -76,11 +76,49 @@ function tracePoly(ctx: Ctx | Path2D, poly: readonly Point[], k = 1, dx = 0, dy 
 /** The horns' box in art units: x, y, width, height. */
 const HORN_BOX = [424, 0, 176, 130] as const;
 
-/** Sprites are cut a touch larger than their cells (no hairline seams). */
-const GROW = 1.07;
+/** Sprites are cut a touch larger than their cells (no hairline seams). The
+ * overlap is a fixed width in art px, not a ratio: since the nanosuit pass
+ * (2026-11-20) the plates are small, and a 7 % ratio of a 9 px plate is
+ * under a device pixel on a phone, which let the baked lattice show. */
+const GROW_PX = 1.6;
 function grown(plate: { poly: readonly Point[]; at: Point }): Point[] {
   const [cx, cy] = plate.at;
-  return plate.poly.map(([x, y]) => [cx + (x - cx) * GROW, cy + (y - cy) * GROW] as const);
+  const r = Math.hypot(plate.poly[0][0] - cx, plate.poly[0][1] - cy) || 1;
+  const f = 1 + GROW_PX / r;
+  return plate.poly.map(([x, y]) => [cx + (x - cx) * f, cy + (y - cy) * f] as const);
+}
+/** Smooth 0 → 1 with zero slope at both ends (no visible start or stop). */
+const smooth = (v: number) => {
+  const x = clamp01(v);
+  return x * x * (3 - 2 * x);
+};
+/** The flight's travel overshoot (easeOutBack's `s`): a few art px past the
+ * rest point on a typical path, settling back by 90 % of the flight. */
+const SETTLE_S = 0.6;
+/** How long a glow line takes to trace on before it is baked. */
+const GLOW_MS = 200;
+/** How long a lock glint runs along a plate's gold edge. */
+const GLINT_MS = 240;
+/** Glints are batched into this many alpha steps (one stroke each). */
+const GLINT_STEPS = 4;
+/** A glint's envelope: a quick smooth rise, then a long ease out (no on/off). */
+const glintEnvelope = (v: number) => (v < 0.2 ? smooth(v / 0.2) : (1 - (v - 0.2) / 0.8) ** 2);
+
+/** One plate's pose in flight, written into one shared record (no
+ * allocation per plate per frame): centre (art px), turn (rad), scale. */
+const POSE = { x: 0, y: 0, turn: 0, sx: 1, sy: 1 };
+function pose(plate: SuitupPlate, u: number) {
+  // Travel along the quadratic arc from `from` through `via` to `at`; the
+  // eased parameter passes 1 by a few percent (the overshoot) and settles
+  // back by u = 0.9, with a continuous velocity throughout.
+  const q = easeOutBack(clamp01(u / 0.9), SETTLE_S);
+  const r = 1 - q;
+  POSE.x = r * r * plate.from[0] + 2 * r * q * plate.via[0] + q * q * plate.at[0];
+  POSE.y = r * r * plate.from[1] + 2 * r * q * plate.via[1] + q * q * plate.at[1];
+  POSE.turn = plate.spin * (1 - easeOutCubic(clamp01(u / 0.8)));
+  // It unfolds edge-on into its face as it travels.
+  POSE.sx = 0.08 + 0.92 * easeOutCubic(clamp01(u / 0.62));
+  POSE.sy = 0.5 + 0.5 * easeOutCubic(clamp01(u / 0.5));
 }
 
 function bodyPath(k: number, withHorns: boolean) {
@@ -196,8 +234,8 @@ function prepare(art: HTMLImageElement): Prepared {
   const geometry = buildSuitupPlates({ opaque: alphaAt });
 
   // One fixed slot per plate (every hexagon is the same size).
-  const slotW = Math.ceil(Math.sqrt(3) * SUITUP_PLATE_RADIUS_MAX * k * GROW) + 4;
-  const slotH = Math.ceil(2 * SUITUP_PLATE_RADIUS_MAX * k * GROW) + 4;
+  const slotW = Math.ceil(Math.sqrt(3) * (SUITUP_PLATE_RADIUS_MAX + GROW_PX) * k) + 4;
+  const slotH = Math.ceil(2 * (SUITUP_PLATE_RADIUS_MAX + GROW_PX) * k) + 4;
   const perRow = Math.max(1, Math.floor(2048 / slotW));
   const rows = Math.ceil(geometry.length / perRow);
   const [atlas, actx] = makeCanvas(perRow * slotW, rows * slotH);
@@ -567,7 +605,7 @@ export function mountExtremeSuitup(
         bake(p, d, plate, false);
         plate.baked = plate.hasGlow ? 1 : 2;
       }
-      if (plate.baked === 1 && now >= plate.glow + 260) {
+      if (plate.baked === 1 && now >= plate.glow + GLOW_MS) {
         bake(p, d, plate, true);
         plate.baked = 2;
       }
@@ -584,65 +622,45 @@ export function mountExtremeSuitup(
     const unit = 1 / p.k;
     for (const plate of p.plates) {
       if (plate.baked !== 1 || now < plate.glow) continue;
-      const v = clamp01((now - plate.glow) / 260);
+      const v = clamp01((now - plate.glow) / GLOW_MS);
       const sx = (plate.slot % perRow) * p.slotW;
       const sy = Math.floor(plate.slot / perRow) * p.slotH;
       const dx = plate.at[0] - hw * unit;
       const dy = plate.at[1] - hh * unit;
-      c.globalAlpha = easeOutCubic(v);
+      c.globalAlpha = smooth(v * 1.25);
       c.drawImage(p.glowAtlas, sx, sy, p.slotW, p.slotH, dx, dy, p.slotW * unit, p.slotH * unit);
-      c.globalCompositeOperation = "lighter";
-      c.globalAlpha = Math.sin(Math.PI * v) * 0.9;
-      c.drawImage(p.glowAtlas, sx, sy, p.slotW, p.slotH, dx, dy, p.slotW * unit, p.slotH * unit);
-      c.globalCompositeOperation = "source-over";
+      // The bright pass rises and falls within the first half only: half as
+      // many draws as plates tracing (they are many more since 11-20), and
+      // the line has settled to its own colour well before it is baked.
+      if (v < 0.5) {
+        c.globalCompositeOperation = "lighter";
+        c.globalAlpha = Math.sin(Math.PI * 2 * v) * 0.8;
+        c.drawImage(p.glowAtlas, sx, sy, p.slotW, p.slotH, dx, dy, p.slotW * unit, p.slotH * unit);
+        c.globalCompositeOperation = "source-over";
+      }
     }
     c.globalAlpha = 1;
 
-    // Plates in the air: unfold, turn, slide, overshoot and lock.
-    c.lineJoin = "round";
-    // Linkage hinge guide lines (mechanical precision deployment tracking)
-    base();
-    c.globalCompositeOperation = "lighter";
-    for (const plate of p.plates) {
-      if (now < plate.start || now >= plate.lock || !plate.solid) continue;
-      const u = (now - plate.start) / (plate.lock - plate.start);
-      if (u < 0.1 || u > 0.88) continue;
-      const travel = easeOutBack(clamp01(u / 0.86), 1.35);
-      const x = plate.from[0] + (plate.at[0] - plate.from[0]) * travel;
-      const y = plate.from[1] + (plate.at[1] - plate.from[1]) * travel;
-      c.globalAlpha = 0.32 * Math.sin(Math.PI * clamp01((u - 0.1) / 0.78));
-      c.strokeStyle = "rgba(105,219,255,0.55)";
-      c.lineWidth = 0.75;
-      c.beginPath();
-      c.moveTo(plate.from[0], plate.from[1]);
-      c.lineTo(x, y);
-      c.stroke();
-    }
-    c.globalCompositeOperation = "source-over";
-
+    // Plates in the air: they stream out of the belt side along curved
+    // paths, unfold and turn as they go, ease a few px past their place and
+    // settle into it; at the lock the pose is exactly the rest pose, so the
+    // bake that follows changes no pixel (no pop).
+    const m = dpr * scale;
     for (const plate of p.plates) {
       if (now < plate.start || now >= plate.lock) continue;
       const u = (now - plate.start) / (plate.lock - plate.start);
-      const travel = easeOutBack(clamp01(u / 0.86), 1.35);
-      const x = plate.from[0] + (plate.at[0] - plate.from[0]) * travel;
-      const y = plate.from[1] + (plate.at[1] - plate.from[1]) * travel;
-      const turn = plate.spin * (1 - easeOutBack(clamp01(u / 0.8), 1.1));
-      const unfold = easeOutCubic(clamp01(u / 0.62));
-      const punch = 1 + 0.08 * Math.sin(Math.PI * clamp01((u - 0.8) / 0.2));
-      const sxs = (0.08 + 0.92 * unfold) * punch;
-      const sys = (0.5 + 0.5 * easeOutCubic(clamp01(u / 0.5))) * punch;
-      const cos = Math.cos(turn);
-      const sin = Math.sin(turn);
-      const m = dpr * scale;
+      pose(plate, u);
+      const cos = Math.cos(POSE.turn);
+      const sin = Math.sin(POSE.turn);
       c.setTransform(
-        m * cos * sxs,
-        m * sin * sxs,
-        -m * sin * sys,
-        m * cos * sys,
-        dpr * ox + m * x,
-        dpr * oy + m * y,
+        m * cos * POSE.sx,
+        m * sin * POSE.sx,
+        -m * sin * POSE.sy,
+        m * cos * POSE.sy,
+        dpr * ox + m * POSE.x,
+        dpr * oy + m * POSE.y,
       );
-      c.globalAlpha = clamp01(u / 0.16);
+      c.globalAlpha = smooth(u / 0.2);
       const sx = (plate.slot % perRow) * p.slotW;
       const sy = Math.floor(plate.slot / perRow) * p.slotH;
       c.drawImage(
@@ -656,60 +674,107 @@ export function mountExtremeSuitup(
         p.slotW * unit,
         p.slotH * unit,
       );
-      // The machined edge, catching the light as it turns.
-      if (!plate.solid) continue;
-      c.globalAlpha = (0.12 + 0.5 * Math.abs(sin)) * (1 - clamp01((u - 0.7) / 0.3));
-      c.strokeStyle = "rgb(170,205,255)";
-      c.lineWidth = 0.9;
-      c.beginPath();
-      tracePoly(c, plate.poly, 1, -plate.at[0], -plate.at[1]);
-      c.stroke();
     }
     base();
     c.globalAlpha = 1;
 
-    // The lock: a glint runs along the plate's upper gold edges & magnetic latch micro-arcs flash.
+    // The linkage guides and the machined edges catching the light, each
+    // batched into one path for the whole frame (the plates are many since
+    // the nanosuit pass; one stroke per plate cost more than the plates).
     c.globalCompositeOperation = "lighter";
+    c.lineJoin = "round";
     c.lineCap = "round";
+    c.beginPath();
     for (const plate of p.plates) {
-      const v = (now - plate.lock) / 240;
-      if (v < 0 || v >= 1 || !plate.solid) continue;
-      const [a, b, d] = [plate.poly[5], plate.poly[0], plate.poly[1]];
-      c.globalAlpha = 0.8 * (1 - v) ** 1.5;
-      c.strokeStyle = "rgb(255,214,128)";
-      c.lineWidth = 1.3;
-      c.beginPath();
-      c.moveTo(a[0], a[1]);
-      c.lineTo(b[0], b[1]);
-      c.lineTo(d[0], d[1]);
-      c.stroke();
-      // The spark that rides it.
-      const q = easeOutCubic(v);
-      const sx = q < 0.5 ? a[0] + (b[0] - a[0]) * q * 2 : b[0] + (d[0] - b[0]) * (q - 0.5) * 2;
-      const sy = q < 0.5 ? a[1] + (b[1] - a[1]) * q * 2 : b[1] + (d[1] - b[1]) * (q - 0.5) * 2;
-      c.fillStyle = "rgb(255,246,220)";
-      c.beginPath();
-      c.arc(sx, sy, 2.2 * (1 - v) + 0.6, 0, Math.PI * 2);
-      c.fill();
-
-      // Magnetic latch micro-arc flash at mechanical seating points
-      if (v < 0.35) {
-        const arcAlpha = (1 - v / 0.35) * 0.95;
-        c.globalAlpha = arcAlpha;
-        c.strokeStyle = "rgb(190,230,255)";
-        c.lineWidth = 1.0;
-        const p2 = plate.poly[2];
-        const p4 = plate.poly[4];
-        c.beginPath();
-        c.moveTo(p2[0] - 1.5, p2[1]);
-        c.lineTo(p2[0] + 0.5, p2[1] - 2);
-        c.lineTo(p2[0] + 1.5, p2[1] + 1);
-        c.moveTo(p4[0] + 1.5, p4[1]);
-        c.lineTo(p4[0] - 0.5, p4[1] + 2);
-        c.lineTo(p4[0] - 1.5, p4[1] - 1);
-        c.stroke();
-      }
+      if (now < plate.start || now >= plate.lock || !plate.solid) continue;
+      const u = (now - plate.start) / (plate.lock - plate.start);
+      if (u < 0.1 || u > 0.8) continue;
+      pose(plate, u);
+      // The guide follows the plate's own arc back to where it left.
+      c.moveTo(plate.from[0], plate.from[1]);
+      c.quadraticCurveTo(plate.via[0], plate.via[1], POSE.x, POSE.y);
     }
+    c.globalAlpha = 0.14;
+    c.strokeStyle = "rgb(105,219,255)";
+    c.lineWidth = 0.6;
+    c.stroke();
+    c.beginPath();
+    for (const plate of p.plates) {
+      if (now < plate.start || now >= plate.lock || !plate.solid) continue;
+      const u = (now - plate.start) / (plate.lock - plate.start);
+      // Only while it is still turning: a settled plate's outline would draw
+      // the lattice the bake is there to hide.
+      if (u > 0.6) continue;
+      pose(plate, u);
+      const cos = Math.cos(POSE.turn);
+      const sin = Math.sin(POSE.turn);
+      for (let i = 0; i < 6; i += 1) {
+        const lx = (plate.poly[i][0] - plate.at[0]) * POSE.sx;
+        const ly = (plate.poly[i][1] - plate.at[1]) * POSE.sy;
+        const px = POSE.x + lx * cos - ly * sin;
+        const py = POSE.y + lx * sin + ly * cos;
+        if (i === 0) c.moveTo(px, py);
+        else c.lineTo(px, py);
+      }
+      c.closePath();
+    }
+    c.globalAlpha = 0.2;
+    c.strokeStyle = "rgb(170,205,255)";
+    c.lineWidth = 0.7;
+    c.stroke();
+
+    // The lock: a glint runs along the plate's upper gold edges, with a
+    // spark riding it and the latch points flicking; batched by alpha step.
+    for (let step = 0; step < GLINT_STEPS; step += 1) {
+      c.beginPath();
+      let any = false;
+      for (const plate of p.plates) {
+        const v = (now - plate.lock) / GLINT_MS;
+        if (v < 0 || v >= 1 || !plate.solid) continue;
+        const e = glintEnvelope(v);
+        if (Math.min(GLINT_STEPS - 1, Math.floor(e * GLINT_STEPS)) !== step || e < 0.04) continue;
+        any = true;
+        const a = plate.poly[5];
+        const b = plate.poly[0];
+        const d = plate.poly[1];
+        c.moveTo(a[0], a[1]);
+        c.lineTo(b[0], b[1]);
+        c.lineTo(d[0], d[1]);
+        if (v < 0.35) {
+          const p2 = plate.poly[2];
+          const p4 = plate.poly[4];
+          c.moveTo(p2[0] - 1, p2[1]);
+          c.lineTo(p2[0] + 0.4, p2[1] - 1.4);
+          c.moveTo(p4[0] + 1, p4[1]);
+          c.lineTo(p4[0] - 0.4, p4[1] + 1.4);
+        }
+      }
+      if (!any) continue;
+      const level = (step + 0.5) / GLINT_STEPS;
+      c.globalAlpha = 0.75 * level;
+      c.strokeStyle = "rgb(255,214,128)";
+      c.lineWidth = 1;
+      c.stroke();
+      // The sparks: one small square each, filled together.
+      c.beginPath();
+      for (const plate of p.plates) {
+        const v = (now - plate.lock) / GLINT_MS;
+        if (v < 0 || v >= 1 || !plate.solid) continue;
+        const e = glintEnvelope(v);
+        if (Math.min(GLINT_STEPS - 1, Math.floor(e * GLINT_STEPS)) !== step || e < 0.04) continue;
+        const a = plate.poly[5];
+        const b = plate.poly[0];
+        const d = plate.poly[1];
+        const q = smooth(v);
+        const sx = q < 0.5 ? a[0] + (b[0] - a[0]) * q * 2 : b[0] + (d[0] - b[0]) * (q - 0.5) * 2;
+        const sy = q < 0.5 ? a[1] + (b[1] - a[1]) * q * 2 : b[1] + (d[1] - b[1]) * (q - 0.5) * 2;
+        const r = 0.6 + 1.2 * e;
+        c.rect(sx - r, sy - r, r * 2, r * 2);
+      }
+      c.fillStyle = "rgb(255,246,220)";
+      c.fill();
+    }
+    c.globalAlpha = 1;
 
     // The belt core: it ignites, then breathes with every wave.
     const ignite = beat("core", now);
