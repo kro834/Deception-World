@@ -109,7 +109,8 @@ export const META_UNITAS_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   line: "rgb(120 226 220)",
   glint: [226, 252, 248] as const,
   motes: ["rgb(140 176 178)", "rgb(255 170 96)", "rgb(244 248 250)"] as const,
-  cell: 7,
+  // (5, from 7: finer, nanosuit pass 2026-11-20.)
+  cell: 5,
   triangles: false,
 });
 

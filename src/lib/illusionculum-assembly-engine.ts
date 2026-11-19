@@ -104,7 +104,8 @@ export const ILLUSIONCULUM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   line: "rgb(166 230 255)",
   glint: [242, 250, 255] as const,
   motes: ["rgb(160 172 210)", "rgb(255 143 210)", "rgb(240 250 255)"] as const,
-  cell: 7,
+  // (5, from 7: finer, nanosuit pass 2026-11-20.)
+  cell: 5,
   triangles: false,
 });
 
