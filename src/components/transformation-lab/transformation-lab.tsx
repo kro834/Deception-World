@@ -1,7 +1,7 @@
 import { GuardedLink } from "@/components/load-gate";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
-import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useId, useRef, useState } from "react";
 import {
   LAB_BEATS,
   LAB_NAMES,
@@ -19,6 +19,55 @@ import {
 import { LAB_LEAVE_FROM, createLabLeave } from "@/lib/transformation-lab-leave";
 import { LabPartRecord } from "./lab-part-record";
 import { LabStage } from "./lab-stage";
+
+/** One choice among a few, as the lab's own pressed buttons on a rail (it
+ * scrolls sideways on a phone; the chosen one is kept in sight). */
+function LabChips<T extends string | number>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: readonly (readonly [T, string])[];
+  onChange: (value: T) => void;
+}) {
+  const id = useId();
+  const rail = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const box = rail.current;
+    const chip = box?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!box || !chip) return;
+    const frame = box.getBoundingClientRect();
+    const at = chip.getBoundingClientRect();
+    if (at.left < frame.left) box.scrollLeft += at.left - frame.left - 12;
+    else if (at.right > frame.right) box.scrollLeft += at.right - frame.right + 12;
+  }, [value, options]);
+  return (
+    <div className="lab-field" role="group" aria-labelledby={id}>
+      <span id={id} className="lab-field-label">
+        {label}
+      </span>
+      <div ref={rail} className="lab-chips">
+        {options.map(([key, text]) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={key === value}
+            onClick={() => onChange(key)}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const LAB_RIDER_OPTIONS = LAB_RIDERS.map((rider) => [rider, LAB_NAMES[rider]] as const);
+const LAB_COMPARE_OPTIONS = [["", "比較しない"] as const, ...LAB_RIDER_OPTIONS];
+const LAB_SPEED_OPTIONS = [0.25, 0.5, 1, 1.5, 2].map((speed) => [speed, `${speed}×`] as const);
 
 export function TransformationLab() {
   useWorldMode();
@@ -61,6 +110,10 @@ export function TransformationLab() {
   useEffect(() => () => leave.cancel(), [leave]);
   // One write per seek input flooded WebKit's history (see createLabUrlWriter).
   const urlWriter = useRef<ReturnType<typeof createLabUrlWriter> | null>(null);
+  // A visit with no moment asked for (no `at`, no comparison) opens on the
+  // suit-up itself, played once when its pictures are ready — never under
+  // reduced motion or on an economy device, and never after the reader's hand.
+  const opening = useRef(false);
   useEffect(() => {
     const writer = createLabUrlWriter(window.history);
     urlWriter.current = writer;
@@ -69,8 +122,17 @@ export function TransformationLab() {
       leave.cancel();
       setState(parseLabState(location.search));
       setPlaying(false);
+      opening.current = false;
     };
     restore();
+    const asked = new URLSearchParams(location.search);
+    const root = document.documentElement;
+    opening.current =
+      !asked.has("at") &&
+      !asked.has("compare") &&
+      !matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      root.dataset.worldEffects !== "economy" &&
+      !("rznConstrained" in root.dataset);
     setHydrated(true);
     window.addEventListener("popstate", restore);
     return () => {
@@ -136,11 +198,18 @@ export function TransformationLab() {
       document.removeEventListener("visibilitychange", hide);
     };
   }, [playing, ready, direction, state.compare, leaveThen]);
+  useEffect(() => {
+    if (!ready || !opening.current) return;
+    opening.current = false;
+    if (document.hidden || current.current.compare || current.current.progress !== 0) return;
+    setPlaying(true);
+  }, [ready]);
   const primaryReady = useCallback((value: boolean) => setReady(value), []);
   const comparisonReady = useCallback(() => {}, []);
   const change = (patch: Partial<LabState>) => {
     // The reader's hand on the playhead or the stage ends a leave in play.
     if ("progress" in patch || "rider" in patch || "compare" in patch) leave.cancel();
+    opening.current = false;
     setPlaying(false);
     setCopyResult(null);
     setState((value) => {
@@ -151,6 +220,7 @@ export function TransformationLab() {
     });
   };
   const play = () => {
+    opening.current = false;
     if (playing) {
       setPlaying(false);
       return;
@@ -208,65 +278,24 @@ export function TransformationLab() {
             </GuardedLink>
             <SideMenuTrigger open={menuOpen} onOpenChange={setMenuOpen} />
           </div>
-          <h1>変身・フォーム研究室</h1>
-          <p>変身の一瞬を、手元で確かめる。</p>
+          <div className="lab-title">
+            <h1>変身・フォーム研究室</h1>
+            <p>変身の一瞬を、手元で確かめる。</p>
+          </div>
         </header>
         <div className="lab-selectors">
-          <label>
-            ライダー
-            <select
-              value={state.rider}
-              onChange={(event) => change({ rider: event.target.value as LabRider })}
-            >
-              {LAB_RIDERS.map((rider) => (
-                <option key={rider} value={rider}>
-                  {LAB_NAMES[rider]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            フォーム
-            <select value={state.form} onChange={(event) => change({ form: event.target.value })}>
-              {LAB_FORMS[state.rider].map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            同じ瞬間を比較
-            <select
-              value={state.compare}
-              onChange={(event) => {
-                setSide("a");
-                change({ compare: event.target.value as LabState["compare"] });
-              }}
-            >
-              <option value="">比較しない</option>
-              {LAB_RIDERS.map((rider) => (
-                <option key={rider} value={rider}>
-                  {LAB_NAMES[rider]}
-                </option>
-              ))}
-            </select>
-          </label>
-          {state.compare && (
-            <label>
-              比較フォーム
-              <select
-                value={state.compareForm}
-                onChange={(event) => change({ compareForm: event.target.value })}
-              >
-                {LAB_FORMS[state.compare].map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+          <LabChips
+            label="ライダー"
+            value={state.rider}
+            options={LAB_RIDER_OPTIONS}
+            onChange={(rider) => change({ rider: rider as LabRider })}
+          />
+          <LabChips
+            label="フォーム"
+            value={state.form}
+            options={LAB_FORMS[state.rider]}
+            onChange={(form) => change({ form })}
+          />
         </div>
         {state.compare && (
           <div className="lab-mobile-switch" role="group" aria-label="比較するライダーを切り替え">
@@ -311,24 +340,6 @@ export function TransformationLab() {
             </div>
           )}
         </div>
-        <div className="lab-zoom" role="group" aria-label="拡大する部位">
-          {(
-            [
-              ["full", "全身"],
-              ["head", "頭部"],
-              ["reactor", "リアクター"],
-              ["legs", "脚部"],
-            ] as [LabZoom, string][]
-          ).map(([zoom, label]) => (
-            <button key={zoom} aria-pressed={state.zoom === zoom} onClick={() => change({ zoom })}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <LabPartRecord
-          rider={side === "b" && state.compare ? state.compare : state.rider}
-          zoom={state.zoom}
-        />
         <div className="lab-controls">
           <div className="lab-transport">
             <button onClick={play} disabled={!ready || Boolean(state.compare)}>
@@ -351,22 +362,6 @@ export function TransformationLab() {
             >
               ループ
             </button>
-            <label>
-              速度
-              <select
-                value={state.speed}
-                onChange={(event) =>
-                  setState((value) => ({ ...value, speed: Number(event.target.value) }))
-                }
-              >
-                {[0.25, 0.5, 1, 1.5, 2].map((speed) => (
-                  <option key={speed} value={speed}>
-                    {speed}×
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button onClick={copy}>{copied ? "コピーしました" : "この瞬間のURLをコピー"}</button>
           </div>
           <p role="status" className={copyFailed ? "lab-note" : "sr-only"}>
             {copyFailed
@@ -416,6 +411,15 @@ export function TransformationLab() {
               })}
             </span>
           </label>
+          <div className="lab-transport lab-transport-more">
+            <LabChips
+              label="速度"
+              value={state.speed}
+              options={LAB_SPEED_OPTIONS}
+              onChange={(speed) => setState((value) => ({ ...value, speed }))}
+            />
+            <button onClick={copy}>{copied ? "コピーしました" : "この瞬間のURLをコピー"}</button>
+          </div>
           <div className="lab-beats" role="group" aria-label="変身の段階">
             {LAB_BEATS.map((beat) => (
               <button
@@ -428,6 +432,43 @@ export function TransformationLab() {
             ))}
           </div>
         </div>
+        <div className="lab-selectors lab-compare">
+          <LabChips
+            label="同じ瞬間を比較"
+            value={state.compare}
+            options={LAB_COMPARE_OPTIONS}
+            onChange={(compare) => {
+              setSide("a");
+              change({ compare: compare as LabState["compare"] });
+            }}
+          />
+          {state.compare && (
+            <LabChips
+              label="比較フォーム"
+              value={state.compareForm}
+              options={LAB_FORMS[state.compare]}
+              onChange={(compareForm) => change({ compareForm })}
+            />
+          )}
+        </div>
+        <div className="lab-zoom" role="group" aria-label="拡大する部位">
+          {(
+            [
+              ["full", "全身"],
+              ["head", "頭部"],
+              ["reactor", "リアクター"],
+              ["legs", "脚部"],
+            ] as [LabZoom, string][]
+          ).map(([zoom, label]) => (
+            <button key={zoom} aria-pressed={state.zoom === zoom} onClick={() => change({ zoom })}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <LabPartRecord
+          rider={side === "b" && state.compare ? state.compare : state.rider}
+          zoom={state.zoom}
+        />
       </main>
     </>
   );
