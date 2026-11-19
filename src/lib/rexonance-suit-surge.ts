@@ -173,8 +173,13 @@ export function surgeTier(): SurgeTier {
   if (!coarse) return { swarm: 1100, shards: 160, dpr: Math.min(ratio, 1.5), name: "desktop" };
   if ((memory !== undefined && memory <= 4) || (cores > 0 && cores <= 4))
     return { swarm: 240, shards: 48, dpr: 1, name: "low" };
-  if (short >= 700) return { swarm: 560, shards: 96, dpr: 1, name: "tablet" };
-  return { swarm: 380, shards: 64, dpr: 1, name: "phone" };
+  // (Nanosuit pass, 2026-11-20: full-tier touch screens draw the loose cells
+  // and droplets at up to 1.5x. At 1x a two-pixel speck was a soft square
+  // blown up three times; the draw calls are the same, only the clear grows.
+  // The constrained tier above stays at 1x.)
+  const touch = Math.min(ratio, 1.5);
+  if (short >= 700) return { swarm: 560, shards: 96, dpr: touch, name: "tablet" };
+  return { swarm: 380, shards: 64, dpr: touch, name: "phone" };
 }
 
 /* ---------------- the frame's inputs ---------------- */
