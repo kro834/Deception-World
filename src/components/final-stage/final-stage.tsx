@@ -327,6 +327,10 @@ function RiderPickup({
    fetches and decodes the file the keyed figure will paint. */
 const castImage = (source: string) => ({ ...dossierImage(source), ...rexonanceImage(source) });
 
+/* A cast tab is a quarter of the rail on phones and tablets and a 1/8 slot
+   beyond: its face asks for that width, so the smallest candidate serves. */
+const CAST_FACE_SIZES = "(max-width: 1099.98px) 25vw, 150px";
+
 /* The Realm Royal form visuals' candidates: the record-art cuts (480, 960)
    of the same 1200px files (scripts/build-record-art.mjs), then the file
    itself. The card and the record's figure list the same set and both stay
@@ -686,6 +690,29 @@ export function FinalStage() {
                 onClick={() => setCastIndex(index)}
                 onPointerUp={(event) => releaseControlFocus(event.currentTarget)}
               >
+                {/* The person's face at the chapter's door (site audit,
+                    2026-11-20): the portrait the panel shows, small, behind
+                    the number and the name. Ornament only: no text, silent,
+                    lazy, never a drag or tap target of its own. */}
+                {person.image ? (
+                  <img
+                    className="fst-cast-face"
+                    src={person.image}
+                    {...castImage(person.image)}
+                    sizes={CAST_FACE_SIZES}
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                    style={{
+                      objectPosition: person.face ?? person.pos,
+                      transformOrigin: person.face ?? person.pos,
+                    }}
+                    width={person.width}
+                    height={person.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : null}
                 <span>{person.no}</span>
                 <small>{person.name}</small>
               </button>
