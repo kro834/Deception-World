@@ -1228,6 +1228,20 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* ================================================================
    The bar: the chapter links on tablets and phones
    ================================================================ */
+/* Beyond 900px the links wear the plate's side padding the other special
+   sites' links wear (10px on Extreme, 600–900px here): the words sat
+   flush on the plate's edges. */
+@media (min-width: 900.02px) {
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav {
+    gap: 8px;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-local-nav nav a {
+    padding-inline: 14px;
+    white-space: nowrap;
+  }
+}
+
 /* 600–900px (iPad mini and iPad Pro portrait among them): the links stay
    in the bar between the brand and the menu. */
 @media (min-width: 600px) and (max-width: 900px) {

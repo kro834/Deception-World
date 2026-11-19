@@ -14,6 +14,27 @@
     radial-gradient(circle at 12% 70%, rgb(160 120 255 / 10%), transparent 30rem), #01030a;
 }
 
+/* The bar's height is reserved before the page's observer measures it
+   (it still measures text zoom and unusual safe areas), so the hero does
+   not drop under the bar after the first paint: 77px with the links in
+   the bar, 65px on the one-row tablet bar, 102px with the phone's chapter
+   strip under the brand (styles-final-stage-zenith.css). */
+.rxs-page.rxs-page.fst-page {
+  --rxs-local-nav-reserve: calc(77px + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 760px) {
+  .rxs-page.rxs-page.fst-page {
+    --rxs-local-nav-reserve: calc(65px + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (max-width: 599.98px) {
+  .rxs-page.rxs-page.fst-page {
+    --rxs-local-nav-reserve: calc(102px + env(safe-area-inset-top, 0px));
+  }
+}
+
 .fst-page .rxs-local-nav {
   border-bottom-color: var(--fst-line);
   background: rgb(1 4 12 / 82%);

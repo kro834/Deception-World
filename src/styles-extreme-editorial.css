@@ -174,8 +174,9 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
   padding: 6px 15px 5px 12px;
   color: #080807;
   background: var(--exe-gold-pill);
-  font: 700 11px/1 var(--exe-etch);
-  letter-spacing: 0.18em;
+  /* 12px: the site's reading floor (the pill's tracking gives the room). */
+  font: 700 12px/1 var(--exe-etch);
+  letter-spacing: 0.14em;
   clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   box-shadow: 0 6px 20px rgb(244 204 123 / 32%);
 }
@@ -2634,7 +2635,11 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page :is(a, button, summ
     --ext-gutter: 16px;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand span {
-    font-size: 10px;
+    /* The narrowest phones keep 12px too; the pill gives up tracking and
+       side padding instead of size. */
+    padding-inline: 9px 12px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
   }
   html[data-family="special"] body .rxs-page.rxs-page.exs-page .rxs-brand b {
     font-size: 12px;
