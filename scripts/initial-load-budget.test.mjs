@@ -114,9 +114,15 @@ test("opening the side menu warms the Rexonance call, and nothing does before", 
   );
   assert.match(doorway, /const panel = link\.closest<HTMLElement>\("\.side-panel"\);/);
   assert.match(doorway, /if \(!panel && !link\.closest\("\.ws-doors"\)\) return;/);
+  // Every opening arms a fresh schedule: one made on another page, or
+  // aborted by an unrelated go(), must not leave the menu's link cold.
   assert.match(
     doorway,
-    /if \(panel\) \{\s*if \(panel\.dataset\.open === "true"\) start\(\);\s*else if[\s\S]*?new MutationObserver\(\(\) => \{\s*if \(panel\.dataset\.open === "true"\) start\(\);/,
+    /const start = \(\) => \{[\s\S]*?stopSuit\?\.\(\);\s*stopSuit = scheduleRexonanceSuitWarm\(0\);\s*stopPage \?\?= scheduleRexonancePagePreload\(/,
+  );
+  assert.match(
+    doorway,
+    /if \(panel\) \{\s*if \(panel\.dataset\.open === "true"\) start\(\);\s*if \(typeof MutationObserver[\s\S]*?new MutationObserver\(\(\) => \{\s*if \(panel\.dataset\.open === "true"\) start\(\);/,
   );
   assert.match(doorway, /attributeFilter: \["data-open"\]/);
   // One start: the suit (its chunk, layers and plan) and the page, cancellable.

@@ -2934,14 +2934,16 @@ export function GuardedLink({
     let stopPage: (() => void) | undefined;
     let stopWatch = () => {};
     const start = () => {
-      if (stopSuit) return;
-      stopWatch();
+      // A schedule belongs to the page it was made on and an unrelated go()
+      // may abort its batch: the menu's link outlives both, so each opening
+      // arms a fresh one (a finished warm-up costs nothing to arm again).
+      stopSuit?.();
       stopSuit = scheduleRexonanceSuitWarm(0);
-      stopPage = scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" }));
+      stopPage ??= scheduleRexonancePagePreload(() => router.preloadRoute({ to: "/rexonance-saga" }));
     };
     if (panel) {
       if (panel.dataset.open === "true") start();
-      else if (typeof MutationObserver === "function") {
+      if (typeof MutationObserver === "function") {
         const panelWatch = new MutationObserver(() => {
           if (panel.dataset.open === "true") start();
         });
@@ -2951,7 +2953,9 @@ export function GuardedLink({
     } else if (typeof IntersectionObserver === "function") {
       const observer = new IntersectionObserver(
         (entries) => {
-          if (entries.some((entry) => entry.isIntersecting)) start();
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          start();
         },
         { rootMargin: "280px" },
       );
