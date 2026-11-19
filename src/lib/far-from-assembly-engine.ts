@@ -299,5 +299,8 @@ export function mountFarFromAssemblyEngine(
   runway: HTMLElement,
   environment: typeof globalThis = window,
 ): () => void {
-  return mountRexonanceAssembly(runway, farFromAssemblyConfig(), environment);
+  // This runway sits after several reading chapters. Do its preparation in
+  // the engine's bounded idle slices after page load, before the first scroll.
+  // Lab and entry callers still use their own start conditions.
+  return mountRexonanceAssembly(runway, { ...farFromAssemblyConfig(), prewarm: true }, environment);
 }

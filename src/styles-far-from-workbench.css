@@ -91,7 +91,7 @@
   #top.ffs-page > #suitup .rzn-crown::after { border-color: #c8b8e746 #c8b8e710 #c8b8e728 #c8b8e708; }
   #top.ffs-page > #suitup .rzn-kicker {
     color: #b3c7cf;
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: .19em;
   }
   #top.ffs-page > #suitup .rzn-phase {
@@ -250,7 +250,7 @@
     column-gap: 12px;
     padding: .42rem 0;
     border-bottom: 1px solid #9cb7c52b;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.3;
   }
   #top.ffs-page > #suitup .rzn-hud .rzn-part::after {
@@ -285,8 +285,14 @@
   #top.ffs-page > #suitup .rzn-part { font-family: var(--dx-mono); letter-spacing: .055em; }
   #top.ffs-page > #suitup .rzn-readout { font-size: clamp(32px,8.9vw,43px); }
 }
-@media (max-width: 380px) {
-  #top.ffs-page > #suitup .ffs-ending-tabs > button[role="tab"] { padding-inline: 0; }
-  #top.ffs-page > #suitup .ffs-ending-tabs > button[role="tab"] > span { font-size: 11px; letter-spacing: 0; }
-  #top.ffs-page > #suitup #ffs-ending-tab-xhigh > span { display: inline-block; font-size: 10px; letter-spacing: -.06em; transform: scaleX(.88); }
+@media (max-width: 480px) {
+  #top.ffs-page > #suitup .ffs-ending-tabs > button[role="tab"] > span {
+    min-width: 0;
+    font-size: 12px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
 }

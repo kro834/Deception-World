@@ -218,7 +218,7 @@ html:has(.rxs-page.ffs-page) {
   margin-inline-end: 6px;
   color: var(--fft-gold);
   font-family: var(--fft-forge);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums lining-nums;
@@ -1179,7 +1179,7 @@ html:has(.rxs-page.ffs-page) {
    Japanese set 0.3em apart read as spaced letters. */
 .rxs-page.rxs-page.ffs-page .ffs-specs dt {
   color: var(--fft-text-kicker);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: var(--fft-track-label);
 }
 
@@ -1227,7 +1227,7 @@ html:has(.rxs-page.ffs-page) {
 
 .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
   font-family: var(--fft-etch);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.16em;
 }
 
@@ -1250,7 +1250,7 @@ html:has(.rxs-page.ffs-page) {
   padding: 4px 10px;
   color: #04131a;
   background: var(--ffs-accent);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: var(--fft-track-label);
   clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
 }
@@ -1341,7 +1341,7 @@ html:has(.rxs-page.ffs-page) {
   grid-column: 1;
   grid-row: 1;
   color: var(--fft-text-kicker);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .rxs-page.rxs-page.ffs-page .ffs-form-comparison > summary > strong {
@@ -1366,7 +1366,7 @@ html:has(.rxs-page.ffs-page) {
   border: 1px solid color-mix(in srgb, var(--ffs-code-accent, var(--fft-ice)) 45%, transparent);
   color: var(--ffs-code-accent, var(--fft-ice));
   font-family: var(--fft-etch);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1;
   letter-spacing: var(--fft-track-label);
@@ -1487,7 +1487,7 @@ html:has(.rxs-page.ffs-page) {
   gap: 8px;
   margin: 0;
   font-family: var(--fft-etch);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: var(--fft-track-label);
 }
 
@@ -1612,7 +1612,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   gap: 12px;
   margin-bottom: 14px;
   color: var(--fft-gold);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .ffs-articles article header > span {
@@ -1902,7 +1902,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   .rxs-page.rxs-page.ffs-page .ffs-comparison-card button {
     align-self: stretch;
     padding: 10px 8px;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.02em;
   }
 }
@@ -1963,7 +1963,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   }
 
   .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] small {
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 0.08em;
   }
 
@@ -2219,7 +2219,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   }
 
   .rxs-page.rxs-page.ffs-page .ffs-footer > div > p {
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.2em;
     text-wrap: balance;
   }
@@ -2450,7 +2450,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
 }
 
 .ffs-ultra-deploy .ffd-title {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.02em;
 }
 
@@ -2857,7 +2857,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
   justify-content: space-between;
   margin: 0;
   color: color-mix(in srgb, var(--ffs-call-ice) 80%, white);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.24em;
 }
 
@@ -2893,7 +2893,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
 
 .ffs-form-call .ffs-call-form > small {
   color: color-mix(in srgb, var(--ffs-call-ice) 75%, white);
-  font-size: clamp(10px, 1.2vw, 13px);
+  font-size: clamp(12px, 1.2vw, 13px);
   letter-spacing: 0.22em;
 }
 

@@ -1834,7 +1834,7 @@ html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-ultra > .ffs-not
 
   /* 11px: エックスハイ (the widest name) fits a 70px column at 441px. */
   html[data-family="special"] body .rxs-page.ffs-page .ffs-ending-route span {
-    font-size: 11px;
+    font-size: 12px;
     word-break: keep-all;
   }
 
@@ -1912,7 +1912,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-kicker {
   gap: 2px 12px;
   margin: 0;
   color: #7fe6ff;
-  font: 400 10px / 1.3 var(--dx-hud);
+  font: 400 12px / 1.3 var(--dx-hud);
   letter-spacing: 0.26em;
   text-transform: uppercase;
 }
@@ -2079,7 +2079,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-seek > input::-mo
   html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-speeds > button {
     min-width: 38px;
     padding: 0 4px;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
@@ -2096,7 +2096,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-seek > input::-mo
     flex-wrap: nowrap;
     gap: 0 10px;
     margin-bottom: 0;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.4;
     letter-spacing: 0.1em;
     white-space: nowrap;
@@ -2123,7 +2123,7 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-movie-seek > input::-mo
     top: 19px;
     right: 0;
     margin: 0;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.5;
     letter-spacing: 0.06em;
   }

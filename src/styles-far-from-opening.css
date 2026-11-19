@@ -117,7 +117,7 @@
   gap: 8px;
   margin: clamp(15px, 2.5vh, 27px) 0 0;
   color: #a6bbc4;
-  font-size: clamp(10px, 0.8vw, 13px);
+  font-size: clamp(12px, 0.8vw, 13px);
   letter-spacing: 0.065em;
 }
 
@@ -279,7 +279,7 @@
   #top.ffs-page > .ffs-hero .ffs-stages-line {
     gap: 6px;
     margin-top: 12px;
-    font-size: clamp(10px, 2.5vw, 13px);
+    font-size: clamp(12px, 2.5vw, 13px);
     letter-spacing: 0;
   }
 
@@ -304,6 +304,15 @@
     grid-area: 3 / 1;
     justify-self: start;
     margin: 12px 0 14px var(--ffs-opening-gutter);
+  }
+}
+
+/* At phone widths the heading and description already occupy two lines.
+   Reserve their line boxes while the Japanese display face is loading. */
+@media (max-width: 480px) and (orientation: portrait) {
+  #top.ffs-page > .ffs-hero h1,
+  #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span {
+    min-block-size: 2lh;
   }
 }
 
@@ -352,7 +361,7 @@
 
   #top.ffs-page > .ffs-hero .rxs-hero-lede { margin-top: 8px; font-size: clamp(14px, 2.8vh, 19px); }
   #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span { margin-top: 3px; font-size: 12px; line-height: 1.45; }
-  #top.ffs-page > .ffs-hero .ffs-stages-line { margin-top: 6px; font-size: 10px; }
+  #top.ffs-page > .ffs-hero .ffs-stages-line { margin-top: 6px; font-size: 12px; }
   #top.ffs-page > .ffs-hero .ffs-hero-rail { display: flex; gap: 2px 12px; margin-top: 9px; }
   #top.ffs-page > .ffs-hero .ffs-hero-rail a { min-height: 44px; padding: 8px 12px; }
   #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary { min-width: 112px; min-height: 44px; }

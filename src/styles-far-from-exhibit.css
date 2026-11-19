@@ -283,20 +283,15 @@
   #top.ffs-page > #report .ffs-report-body { padding-inline-start: 0; }
 }
 
-@media (max-width: 380px) {
-  #top.ffs-page > #stages .ffs-stage-tabs > button[role="tab"] {
-    padding-inline: 0;
-  }
+@media (max-width: 480px) {
   #top.ffs-page > #stages .ffs-stage-tabs > button[role="tab"] > span {
-    font-size: 11px;
-    letter-spacing: 0;
-    white-space: nowrap;
-  }
-  #top.ffs-page > #stages #ffs-stage-tab-xhigh > span {
-    display: inline-block;
-    font-size: 10px;
-    letter-spacing: -.06em;
-    transform: scaleX(.88);
+    min-width: 0;
+    font-size: 12px !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
   }
 }
 
