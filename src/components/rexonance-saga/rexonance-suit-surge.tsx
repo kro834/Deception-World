@@ -450,7 +450,8 @@ export function EntrySurge() {
     const tier = surgeTier();
     const engine = new SurgeEngine(back, front, tier);
     // The cells each seating plate takes in (2026-11-19), under the skin.
-    const seatCells = new EntrySeatCells(tier.name);
+    const seatMap = buildEntrySeatMap();
+    const seatCells = new EntrySeatCells(tier.name, undefined, seatMap);
     // The bank's direction (owner, 2026-11-01: 「装着アニメーションを大きく
     // 改善して」): the camera on the figure, the overlay over the stage, on
     // the call's own beats (rexonance-henshin.ts).
@@ -495,7 +496,7 @@ export function EntrySurge() {
             skin = made;
           },
           // The plates seat on their own fits under the front (2026-11-19).
-          buildEntrySeatMap(),
+          seatMap,
         )
       : () => {};
     const showClassic = (value: number) => {

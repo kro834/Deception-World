@@ -149,7 +149,13 @@ export class EntrySeatCells {
   readonly from: number;
   readonly to: number;
 
-  constructor(tier: string, pieces: readonly RexonanceSuitPiece[] = REXONANCE_SUIT_PIECES) {
+  constructor(
+    tier: string,
+    pieces: readonly RexonanceSuitPiece[] = REXONANCE_SUIT_PIECES,
+    // A cell lands when the map says its texel opens: where another plate
+    // lies over this one, on that plate's clock (or, never held, not at all).
+    map: EntrySeatMap = buildEntrySeatMap(pieces),
+  ) {
     const budget = ENTRY_SEAT_CELLS[tier as keyof typeof ENTRY_SEAT_CELLS] ?? ENTRY_SEAT_CELLS.low;
     const tile = REXONANCE_SUIT_TILE;
     const axis = REXONANCE_SUIT_SIZE.width / 2;
@@ -165,9 +171,6 @@ export class EntrySeatCells {
     });
     const all = tiles.reduce((sum, list) => sum + list.length, 0) || 1;
     const rows: number[] = [];
-    // A cell lands when the map says its texel opens: where another plate
-    // lies over this one, on that plate's clock (or, never held, not at all).
-    const map = buildEntrySeatMap(pieces);
     held.forEach((piece, p) => {
       const list = tiles[p];
       if (!list.length) return;

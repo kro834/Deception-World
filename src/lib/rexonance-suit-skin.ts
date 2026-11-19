@@ -1604,8 +1604,8 @@ export class SkinRenderer {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       gl.uniform1i(this.uniforms.uSeatMap, 3);
-      // Until the caller sets a clock nothing is held.
-      gl.uniform4f(this.uniforms.uSeat, 1e3, 1e3, 1, 0);
+      // (The caller sets the clock before every render: seat().)
+      gl.uniform4f(this.uniforms.uSeat, 0, 0, 1, 0);
     }
     gl.uniform1i(this.uniforms.uArt, 0);
     gl.uniform1i(this.uniforms.uField, 1);
