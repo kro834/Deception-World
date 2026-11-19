@@ -25,6 +25,9 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page]
   .gallery-screening-heading
   .gallery-intro-copy {
+  /* Grow into the row beside the nav: with min-width 0 and no basis the copy
+     shrank to 0px and its lead text stacked one character per line. */
+  flex: 1 1 auto;
   min-width: 0;
   padding: 0;
   animation: none;
