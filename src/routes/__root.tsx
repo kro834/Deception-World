@@ -76,7 +76,7 @@ const LazyIpadMenuMode =
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { LiquidGlassDefs } from "@/components/liquid-glass-defs";
-import { BUTTON_STYLE_SCRIPT } from "@/lib/button-style.js";
+import { BUTTON_STYLE_SCRIPT, liquidGlassSheetsScript } from "@/lib/button-style.js";
 import { PhoneLandscapeMenu } from "@/components/phone-landscape-menu";
 import { RETIRED_ULTRA_MODE_SCRIPT } from "@/lib/retired-ultra-mode";
 import { REXONANCE_LAYOUT_BOOT_SCRIPT } from "@/lib/rexonance-layout-gate.js";
@@ -313,6 +313,14 @@ export const Route = createRootRoute({
       { children: DEVICE_PROFILE_SCRIPT },
       { children: RETIRED_ULTRA_MODE_SCRIPT },
       { children: BUTTON_STYLE_SCRIPT },
+      // Owner (2026-11-20): the glass's three sheets are linked by this
+      // script only while the option is on (see the links below).
+      {
+        children: liquidGlassSheetsScript(
+          [liquidGlassCss, liquidGlassControlsCss, liquidGlassSurfacesCss],
+          openingFontsCss,
+        ),
+      },
       { children: REXONANCE_LAYOUT_BOOT_SCRIPT },
       { children: SIDE_MENU_EARLY_INPUT_SCRIPT },
     ],
@@ -397,16 +405,15 @@ export const Route = createRootRoute({
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
         : [{ rel: "stylesheet", href: futureSpectrumCss }]),
-      // Owner (2026-10-30): the buttons' optional liquid glass, the last sheet.
-      // Every rule waits for html[data-button-style="liquid"] (the side menu's
-      // option), so with it off nothing here applies.
-      { rel: "stylesheet", href: liquidGlassCss },
-      // Owner (2026-10-31): the glass spread to the sliders, tabs, rails,
-      // switches and selects; likewise inert while the option is off.
-      { rel: "stylesheet", href: liquidGlassControlsCss },
-      // Owner (2026-10-31): the same glass on the surfaces and chrome (bars,
-      // menus, dialog shells), after the buttons' sheet; scoped the same way.
-      { rel: "stylesheet", href: liquidGlassSurfacesCss },
+      // Owner (2026-10-30, 10-31): the optional liquid glass (buttons, then
+      // the sliders, tabs, rails, switches and selects, then the surfaces and
+      // chrome) belongs here, after the spectrum and before the faces. Every
+      // rule waits for html[data-button-style="liquid"], so with the option
+      // off the three sheets applied nothing.
+      // Owner (2026-11-20): they are therefore not linked here any more. The
+      // head script (liquidGlassSheetsScript) links them in this same place,
+      // before the first face sheet, only while the option is on, and the
+      // side menu's switch loads them before it turns the glass on.
       ...(matches.some((match) => (match.routeId as string) === "/")
         ? []
         : [{ rel: "preconnect", href: "https://fonts.googleapis.com" }]),

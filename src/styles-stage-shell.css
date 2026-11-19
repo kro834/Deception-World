@@ -3691,7 +3691,10 @@ html[data-family="special"]
   > .rxs-local-nav-inner {
   box-sizing: border-box;
   width: 100%;
-  min-height: calc(var(--sh-bar-h) + env(safe-area-inset-top, 0px));
+  /* Owner (2026-11-20): the nav draws its 1px rule outside this lane, which
+     made the special sites' bar 77px (65px on phones) beside the 76px (64px)
+     bars. The rule now counts inside the bar's height. */
+  min-height: calc(var(--sh-bar-h) - 1px + env(safe-area-inset-top, 0px));
   padding-block: env(safe-area-inset-top, 0px) 0;
   padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
     max(var(--sh-gutter), env(safe-area-inset-right, 0px));
@@ -3848,7 +3851,9 @@ html[data-family="archive"]
   .form-archive-page
   > header.form-archive-toolbar
   > .side-panel-trigger.form-archive-menu-trigger {
-  top: calc(env(safe-area-inset-top, 0px) + (var(--sh-bar-h) - 48px) / 2);
+  /* Owner (2026-11-20): centred above the bar's 1px rule, as the trigger is
+     in every other bar (13.5px down, 7.5px on phones; it was 14px and 8px). */
+  top: calc(env(safe-area-inset-top, 0px) + (var(--sh-bar-h) - 1px - 48px) / 2);
   right: max(var(--sh-gutter), env(safe-area-inset-right, 0px));
   bottom: auto;
 }
@@ -3888,4 +3893,51 @@ html[data-family="archive"]
   html[data-family="archive"] body .form-archive-page {
     --sh-bar-h: 62px;
   }
+}
+
+/* ================================================================
+   9. One bar, one trigger place on every page (owner, 2026-11-20)
+   「メニューボタンの位置とヘッダーの高さをページ間でそろえる（ギャラリーも含む）」
+   Measured before (1440px / iPhone 13), the launcher square's top edge:
+   13.5 / 7.5 on the World, the files, the library and search; 14 / 8 on
+   the special sites and the form archive; 14.5 / 12 on the galleries
+   (60px in from the right instead of the gutter); 16.5 / 11.5 on Saga
+   Cinema; 24 / 16 on the world map. Bars: 76 / 64, but 77 / 65 on the
+   special sites, 78 / 73 on the galleries, 82 / 72 on Saga Cinema.
+   Now: one 48px square, one gutter in from the right edge, centred above
+   the bar's 1px rule (13.5 / 7.5) in a 76px bar (64px on phones). Dream
+   keeps its own 58px programme bar, the second and only other height,
+   with the square centred in it and on the same gutter.
+   The tokens below are for the pages that still place their own trigger
+   (the transformation lab, DOGS ARCHIVE): top = --sh-trigger-top below
+   the safe area, right = --sh-gutter, size = --sh-trigger-size.
+   A second block, so the first one stays identical to the title's
+   (styles-opening-shell.css; startup-styles-budget.test.mjs).
+   ================================================================ */
+html[data-family] {
+  --sh-trigger-size: 48px;
+  --sh-trigger-top: calc((var(--sh-bar-h) - 1px - var(--sh-trigger-size)) / 2);
+}
+
+/* Saga Cinema: its header was 82px (72px on phones). */
+html[data-family="special"] body .saga-cinema .site-header {
+  height: calc(var(--sh-bar-h) + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* The world map: its header is the first block of the page, 24px (16px)
+   down. It becomes the bar's lane at the top of the page. */
+html[data-family] body main.wm-page {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+html[data-family] body main.wm-page > header.wm-header {
+  box-sizing: border-box;
+  min-height: var(--sh-bar-h);
+  padding-block: 0;
+}
+
+/* Dream: the programme bar's own gutter put the square 4px further in. */
+html[data-family="dream"] body main#top.dream-page.dream-image-cinema > header.dream-site-header {
+  padding-inline-end: max(var(--sh-gutter), env(safe-area-inset-right, 0px));
 }

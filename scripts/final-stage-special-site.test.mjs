@@ -51,7 +51,9 @@ test("Final Stage is listed under STORIES after Dream Chapter, not under SPECIAL
   const finalStagePosition = stories.indexOf("<span>ファイナルステージ</span>");
   assert.ok(dreamPosition >= 0);
   assert.ok(finalStagePosition > dreamPosition);
-  assert.match(stories, /<i>FINAL STAGE<\/i>/);
+  // Owner (2026-11-20): 残っていた英字ラベルを削除（10-23「セカンダリラベルを置かない」）。
+  // The row is its Japanese name alone (its English subtitle FINAL STAGE is gone).
+  assert.doesNotMatch(stories, /<i>FINAL STAGE<\/i>/);
   // rx6: the chapter list moved to src/lib/special-site-sections.ts, which the
   // side menu and the site search share.
   const sections = readFileSync(

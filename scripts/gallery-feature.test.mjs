@@ -104,5 +104,7 @@ test("the fixed header reserves and covers the status-bar safe area", () => {
     /\[data-viewport-chrome="gallery"\]\s*\{\s*--viewport-chrome-color: #171614;/,
   );
   assert.match(chromeCss, /\.viewport-chrome-cover::before \{[\s\S]*?background: inherit;/);
-  assert.match(css, /padding: calc\(12px \+ env\(safe-area-inset-top, 0px\)\)/);
+  // Owner (2026-11-20): the galleries take the site's bar (76px / 64px) and its
+  // gutter; the bar's top padding is the safe area alone, its lane centres the row.
+  assert.match(css, /padding: env\(safe-area-inset-top, 0px\)\s+max\(var\(--sh-gutter, 32px\), env\(safe-area-inset-right, 0px\)\) 0/);
 });

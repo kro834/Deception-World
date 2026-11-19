@@ -2096,8 +2096,7 @@ export function WorldHome() {
             </p>
           </div>
         </ArtworkStage>
-        <a className="scroll-cue" href="#story">
-          <span>SCROLL TO DESCEND</span>
+        <a className="scroll-cue" href="#story" aria-label="ストーリー">
           <i />
         </a>
       </section>

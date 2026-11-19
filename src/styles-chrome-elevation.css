@@ -1897,16 +1897,42 @@ html body .zeus-button[data-parked="true"]:not([data-navigating="true"]):not(:fo
   }
 }
 
-/* Hide only during phone reading scrolls; keyboard focus and held navigation stay usable. */
+/* Owner (2026-11-20): phone reading scrolls tuck the button toward the nearer
+   side edge instead of hiding it, and it slides back when the scrolling
+   stops. zeus-button.tsx says which edge and how far its centre is from it
+   (--zeus-tuck-side, --zeus-tuck-x); the move is transform alone, on the
+   button's own transform transition (styles.css). 34px of it stays on
+   screen and it keeps taking taps. A drag, a hold, its own navigation and
+   keyboard focus keep it at its spot. */
 @media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
   html
     body
-    .zeus-button[data-scrolling="true"]:not([data-dragging="true"]):not(
+    .zeus-button[data-scrolling="true"]:not([data-dragging="true"]):not([data-holding="true"]):not(
       [data-navigating="true"]
     ):not(:focus-visible) {
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
+    transform: translate3d(
+        calc(
+          -50% + var(--zeus-tuck-x, 0px) + var(--zeus-tuck-side, 1) *
+            (var(--zeus-button-size) / 2 - 34px)
+        ),
+        -50%,
+        0
+      )
+      scale(1);
+  }
+}
+
+/* Reduced motion: no slide. It stays at its spot and only draws smaller
+   while the page scrolls. */
+@media (prefers-reduced-motion: reduce) {
+  @media (max-width: 760px), (max-height: 500px) and (pointer: coarse) {
+    html
+      body
+      .zeus-button[data-scrolling="true"]:not([data-dragging="true"]):not(
+        [data-holding="true"]
+      ):not([data-navigating="true"]):not(:focus-visible) {
+      transform: translate3d(-50%, -50%, 0) scale(0.78);
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+                      </svg>
                     )}
                   </span>
                   <b>{locked ? "固定中" : "自動切替"}</b>
@@ -66,8 +67,7 @@
             </p>
           </div>
         </ArtworkStage>
-        <a className="scroll-cue" href="#story">
-          <span>SCROLL TO DESCEND</span>
+        <a className="scroll-cue" href="#story" aria-label="ストーリー">
           <i />
         </a>
       </section>

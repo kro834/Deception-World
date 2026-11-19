@@ -127,7 +127,12 @@ main.form-archive-page[data-archive-kind]::before {
   opacity: 0.78;
 }
 
-/* FORM INTERFACE // LINKED: a 12px HUD label. It never runs wider than
+/* Owner (2026-11-20): the bar's English status words (FORM INTERFACE // SAGA
+   LINKED, … LINKING, and SAGA / REALM on wide phones) are removed (10-23: no
+   secondary labels). The lamp stays: gold while the frame loads, the
+   archive's own light once it reports ready. The notes below describe the
+   box the words used to fill; it now holds the lamp alone.
+   FORM INTERFACE // LINKED: a 12px HUD label. It never runs wider than
    the gutter beside the rail (the rail is 310px wide and centred; the label
    starts 22px in and keeps 16px clear of it, its lamp included), so the
    rail never moves and the label never reaches it:
@@ -152,6 +157,8 @@ main.form-archive-page[data-archive-kind]::before {
     line-height: 1.4;
     letter-spacing: 0.06em;
     translate: 0 -50%;
+    /* No words now: the box keeps a line's height so the lamp still shows. */
+    min-height: 1.4em;
   }
 }
 
@@ -174,19 +181,19 @@ main.form-archive-page[data-archive-kind]::before {
   }
 
   main.form-archive-page[data-archive-kind="saga"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE // SAGA LINKED";
+    content: "";
   }
 
   main.form-archive-page[data-archive-kind="realm"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE // REALM LINKED";
+    content: "";
   }
 
   main.form-archive-page[data-archive-kind="saga"][data-archive-ready="false"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE // SAGA LINKING";
+    content: "";
   }
 
   main.form-archive-page[data-archive-kind="realm"][data-archive-ready="false"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE // REALM LINKING";
+    content: "";
   }
 
   main.form-archive-page[data-archive-ready="false"] .form-archive-toolbar::before {
@@ -206,19 +213,19 @@ main.form-archive-page[data-archive-kind]::before {
   }
 
   main.form-archive-page[data-archive-kind="saga"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE\A// SAGA LINKED";
+    content: "";
   }
 
   main.form-archive-page[data-archive-kind="realm"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE\A// REALM LINKED";
+    content: "";
   }
 
   main.form-archive-page[data-archive-kind="saga"][data-archive-ready="false"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE\A// SAGA LINKING";
+    content: "";
   }
 
   main.form-archive-page[data-archive-kind="realm"][data-archive-ready="false"] .form-archive-toolbar::before {
-    content: "FORM INTERFACE\A// REALM LINKING";
+    content: "";
   }
 }
 
@@ -891,20 +898,21 @@ html[data-family]
     text-overflow: ellipsis;
     translate: 0 -50%;
     pointer-events: none;
+    min-height: 1.4em;
   }
 
   html[data-family]
     body
     main.form-archive-page.command-archive[data-archive-kind="saga"]
     > header.form-archive-toolbar::before {
-    content: "SAGA";
+    content: "";
   }
 
   html[data-family]
     body
     main.form-archive-page.command-archive[data-archive-kind="realm"]
     > header.form-archive-toolbar::before {
-    content: "REALM";
+    content: "";
   }
 
   html[data-family]

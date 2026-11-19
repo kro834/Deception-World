@@ -5,6 +5,7 @@ import test from "node:test";
 import ts from "typescript";
 import * as fonts from "../src/lib/site-fonts.ts";
 import { compactStylesheetGroups } from "../src/lib/compact-stylesheet-groups.ts";
+import * as buttonStyle from "../src/lib/button-style.js";
 
 const read = (file) => readFileSync(new URL("../" + file, import.meta.url), "utf8");
 const source = read("src/routes/__root.tsx").replaceAll("import.meta.env", "({})");
@@ -18,6 +19,7 @@ runInNewContext(code, {
     if (name === "@tanstack/react-router") return { createRootRoute: (config) => config };
     if (name === "@/lib/site-fonts") return fonts;
     if (name === "@/lib/compact-stylesheet-groups") return { compactStylesheetGroups };
+    if (name === "@/lib/button-style.js") return buttonStyle;
     if (name === "@/lib/world-head") return { DOSSIER_HUD_FONTS_URL: "hud-fonts" };
     if (name === "@/lib/viewport-chrome") return { getViewportChromeColor: () => "#000" };
     if (name.endsWith("?url")) return { default: name };
@@ -66,13 +68,11 @@ const original = [
   "../styles-fx-motion.css?url",
   // Owner (2026-10-30): 未来的でダイナミックな色合い — the future spectrum's colour and surfaces, after the kit.
   "../styles-future-spectrum.css?url",
-  // Owner (2026-10-30): the buttons' optional liquid glass, scoped to
-  // html[data-button-style="liquid"], the last sheet.
-  "../styles-liquid-glass.css?url",
-  // Owner (2026-10-31): the glass spread to the selection controls, same scope.
-  "../styles-liquid-glass-controls.css?url",
-  // Owner (2026-10-31): the same glass on the surfaces and chrome, scoped the same way.
-  "../styles-liquid-glass-surfaces.css?url",
+  // Owner (2026-11-20): the optional liquid glass's three sheets (about 160 KB,
+  // every rule scoped to html[data-button-style="liquid"]) are no longer linked
+  // on every page. Their place in the cascade is still here, after the spectrum
+  // and before the faces: the head script links them there only while the
+  // option is on (pinned below).
   fonts.SITE_CORE_FONTS_URL,
   // Zen Kaku Gothic New: the Google sheet served from this origin with metric overrides.
   "../styles-site-display-fonts.css?url",
@@ -143,7 +143,8 @@ test("opening removes only unused record UI CSS and preserves the same shell tok
     "bundles expand to the complete unchanged title/dashboard cascade",
   );
   assert.equal(actual.length, expected.length - 18);
-  assert.equal(actual.filter((href) => href.startsWith("../")).length, 8);
+  // Owner (2026-11-20): 8 before; the three glass sheets load only with the option on.
+  assert.equal(actual.filter((href) => href.startsWith("../")).length, 5);
   const tokenBlock = (file) => read(file).match(/html\[data-family\] \{[\s\S]*?\n\}/)[0];
   assert.equal(
     tokenBlock("src/styles-opening-shell.css"),
@@ -183,4 +184,114 @@ test("opening bundles inline every rule in original order without runtime import
     assert.ok(!members.includes("src/styles.css"), "Tailwind keeps its own compilation");
     assert.ok(members.every((path) => !path.includes("styles-liquid-glass")), "filename-sensitive glass transform keeps its original input");
   }
+});
+
+// Owner (2026-11-20): the liquid glass loads only while its option is on.
+const GLASS_SHEETS = [
+  "../styles-liquid-glass.css?url",
+  "../styles-liquid-glass-controls.css?url",
+  "../styles-liquid-glass-surfaces.css?url",
+];
+const glassScript = (routeId) =>
+  Array.from(exports.Route.head({ matches: [{ routeId }] }).scripts)
+    .map((script) => script.children)
+    .filter((children) => children?.includes(buttonStyle.LIQUID_GLASS_SHEETS_GLOBAL));
+
+/* A head for the loader: stylesheet links in order, and the calls it makes. */
+function runGlassScript(children, hrefs, { liquid }) {
+  const links = hrefs.map((href) => ({ href, sheet: {}, getAttribute: () => href }));
+  const made = [];
+  const head = {
+    insertBefore(node, before) {
+      links.splice(before ? links.indexOf(before) : links.length, 0, node);
+    },
+  };
+  for (const link of links) link.parentNode = head;
+  const window = { setTimeout: () => 0 };
+  runInNewContext(children, {
+    window,
+    document: {
+      head,
+      documentElement: { getAttribute: () => (liquid ? "liquid" : null) },
+      querySelectorAll: () => links.filter((link) => !made.includes(link)),
+      createElement: () => {
+        const attributes = {};
+        const listeners = {};
+        const node = {
+          sheet: null,
+          attributes,
+          setAttribute: (name, value) => (attributes[name] = value),
+          getAttribute: (name) => (name === "href" ? node.href : attributes[name]),
+          addEventListener: (type, listener) => (listeners[type] = listener),
+          load() {
+            node.sheet = {};
+            listeners.load?.();
+          },
+        };
+        made.push(node);
+        return node;
+      },
+    },
+  });
+  return { links, made, load: window[buttonStyle.LIQUID_GLASS_SHEETS_GLOBAL] };
+}
+
+test("no page links the liquid glass sheets until the option is on", () => {
+  for (const route of ["/", "/world", "/gallery", "/rexonance-saga", "/characters/ciel"]) {
+    assert.ok(styles(route).every((href) => !href.includes("liquid-glass")), route);
+    const scripts = glassScript(route);
+    assert.equal(scripts.length, 1, route);
+    // The same script on every route, so a navigation never runs it again.
+    assert.equal(scripts[0], glassScript("/world")[0]);
+    const head = Array.from(exports.Route.head({ matches: [{ routeId: route }] }).scripts);
+    const at = (text) => head.findIndex((script) => script.children === text);
+    assert.ok(at(scripts[0]) > at(buttonStyle.BUTTON_STYLE_SCRIPT), "after the style is decided");
+  }
+});
+
+test("with the option on the glass sheets take their old place in the cascade, in order", () => {
+  for (const route of ["/", "/world", "/gallery"]) {
+    const [children] = glassScript(route);
+    const hrefs = styles(route);
+    const off = runGlassScript(children, hrefs, { liquid: false });
+    assert.equal(off.made.length, 0, "off: nothing is requested");
+    assert.equal(typeof off.load, "function");
+    const on = runGlassScript(children, hrefs, { liquid: true });
+    assert.deepEqual(on.made.map((link) => link.href), GLASS_SHEETS);
+    for (const link of on.made) {
+      assert.equal(link.rel, "stylesheet");
+      assert.equal(link.attributes.blocking, "render", "the first paint waits for the glass");
+    }
+    const order = on.links.map((link) => link.href);
+    const first = order.indexOf(GLASS_SHEETS[0]);
+    assert.deepEqual(order.slice(first, first + 3), GLASS_SHEETS);
+    // After the spectrum (the interface bundle on the title), before the faces.
+    assert.equal(
+      order[first - 1],
+      route === "/" ? "../styles-opening-interface.css?url" : "../styles-future-spectrum.css?url",
+    );
+    assert.equal(order[first + 3], "../styles-opening-fonts.css?url");
+    assert.deepEqual(order.filter((href) => !href.includes("liquid-glass")), hrefs);
+  }
+});
+
+test("the switch links the sheets once and turns the glass on only when all three have loaded", () => {
+  const [children] = glassScript("/world");
+  const page = runGlassScript(children, styles("/world"), { liquid: false });
+  let done = 0;
+  page.load(() => (done += 1));
+  assert.equal(page.made.length, 3);
+  assert.equal(done, 0);
+  page.made[0].load();
+  page.made[1].load();
+  assert.equal(done, 0);
+  page.made[2].load();
+  assert.equal(done, 1);
+  // A second switch reuses the loaded sheets and answers at once.
+  page.load(() => (done += 1));
+  assert.equal(page.made.length, 3);
+  assert.equal(done, 2);
+  const source = read("src/lib/button-style.js");
+  assert.match(source, /load\(\(\) => \{\s*settled = true;\s*turnOn\(\);/);
+  assert.match(source, /if \(wantedButtonStyle !== "liquid"\) return;/);
 });

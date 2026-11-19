@@ -104,6 +104,10 @@ function runtime(reference = false) {
     exports.readText = readAvoidText;
     exports.choose = (context) => {
       const { buttonRef, getViewport, restingSize, readBounds, stepAway, droppedHere } = context;
+      // Owner (2026-11-20): the placement reads the button through untuckedRect
+      // (a phone scroll's edge tuck must not count as its spot). At rest that is
+      // the same single getBoundingClientRect read as before.
+      const untuckedRect = (button) => button.getBoundingClientRect();
       ${text.slice(start, end)}
       return avoidCriticalControls(context.preferred);
     };`),

@@ -869,9 +869,8 @@ export function OpeningHandoffLayer({ snapshot, onCovered, onComplete }: Opening
       />
       <div ref={trailsRef} data-opening-handoff-trails />
       <div ref={speedRef} data-opening-handoff-speed />
+      {/* Owner (2026-11-20): the ring carries no codes (10-23: no secondary labels). */}
       <div ref={hudRef} data-opening-handoff-hud>
-        <span>DW // OPENING HANDOFF</span>
-        <b>WORLD LINK</b>
         <i />
         <i />
         <i />

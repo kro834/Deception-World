@@ -282,12 +282,9 @@ const CinematicEditorialFrame = memo(function CinematicEditorialFrame() {
         <i className="cine-editorial-frame-bottom" />
         <i className="cine-editorial-frame-left" />
       </div>
+      {/* Owner (2026-11-20): the frame's English file code and coordinates
+          are gone (10-23: no secondary labels). The title's own words stay. */}
       <div className="cine-editorial-type">
-        <p className="cine-editorial-kicker">
-          <span>KAMEN RIDER SAGA</span>
-          <i />
-          <span>WORLD FILE / 02</span>
-        </p>
         <div className="cine-editorial-word" aria-hidden="true">
           <span>
             <b>DECEPTION</b>
@@ -298,12 +295,6 @@ const CinematicEditorialFrame = memo(function CinematicEditorialFrame() {
         </div>
         <p className="cine-editorial-caption">THE WORLD IS MADE OF DECEPTION.</p>
       </div>
-      <span className="cine-editorial-coordinate cine-editorial-coordinate-left">
-        35°41′ // REALITY
-      </span>
-      <span className="cine-editorial-coordinate cine-editorial-coordinate-right">
-        SIGNAL 07 // LOCKED
-      </span>
     </div>
   );
 });
@@ -974,11 +965,6 @@ export function TitleSequence() {
 
       <div ref={lineRef} className="cine-line" />
 
-      <div className="cine-sequence-meta" aria-hidden="true">
-        <span>DW // OPENING 02</span>
-        <span>WORLD SIGNAL 07</span>
-      </div>
-
       <div className="cine-stack">
         <div ref={lockupRef} className="cine-title-lockup">
           <div ref={logoBoxRef} className="cine-logo-wrap">
@@ -1049,15 +1035,8 @@ export function TitleSequence() {
         <i />
         <i />
       </div>
-      <div className="cine-cue" aria-hidden="true">
-        <span>INITIALIZE SIGNAL</span>
-        <span>TRACE DECEPTION</span>
-        <span>WORLD LOCKED</span>
-      </div>
-
-      <div className="cine-enter-hint">
-        <p className="cine-pulse cine-kicker">Opening</p>
-      </div>
+      {/* Owner (2026-11-20): no sequence code, signal cue or "Opening" hint.
+          The progress rule and the logo's arrival show where the opening is. */}
 
       <button
         ref={skipRef}

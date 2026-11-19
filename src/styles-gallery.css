@@ -95,7 +95,10 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side
 }
 
 .gallery-page {
-  --gallery-bar: 78px;
+  /* Owner (2026-11-20): the galleries take the site's bar height (76px, 64px
+     on phones; it was 78px and 73px) and its gutter, so the menu button
+     stands where it does on every other page. */
+  --gallery-bar: var(--sh-bar-h, 76px);
   padding-top: calc(var(--gallery-bar) + env(safe-area-inset-top, 0px));
   touch-action: pan-y pinch-zoom;
 }
@@ -111,7 +114,9 @@ html[data-mode="world"]:not([data-rail-lock]):not([data-loading]):not([data-side
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: calc(12px + env(safe-area-inset-top, 0px)) max(32px, calc((100vw - 1320px) / 2)) 12px;
+  padding: env(safe-area-inset-top, 0px)
+    max(var(--sh-gutter, 32px), env(safe-area-inset-right, 0px)) 0
+    max(var(--sh-gutter, 32px), env(safe-area-inset-left, 0px));
   border-bottom: 1px solid rgb(222 205 171 / 0.13);
   background: #171614;
   -webkit-backdrop-filter: none;
@@ -1524,7 +1529,7 @@ html[data-route-cover] .gallery-arrival {
 
 @media (max-width: 700px) {
   .gallery-page {
-    --gallery-bar: 68px;
+    --gallery-bar: var(--sh-bar-h, 64px);
   }
 }
 

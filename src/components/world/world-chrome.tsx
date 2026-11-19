@@ -174,12 +174,6 @@ function PhrasedTitle({ text }: { text: string }) {
   ));
 }
 
-const FILE_CHAPTER_CODES: Record<string, string> = {
-  "dossier-profile": "PROFILE",
-  "identity-records": "RECORDS",
-  "dossier-index": "DOSSIER",
-  "form-records": "FORMS",
-};
 const YOAKE_MAMORI_LINK = {
   name: "夜明護尊",
   href: "/characters/yoake-mamori",
@@ -423,13 +417,11 @@ function MenuSectionLink({
   pathname,
   id,
   label,
-  code,
   onNavigate,
 }: {
   pathname: string;
   id: string;
   label: string;
-  code: string;
   onNavigate: () => void;
 }) {
   const router = useRouter();
@@ -467,7 +459,6 @@ function MenuSectionLink({
       }}
     >
       <span>{label}</span>
-      <i>{code}</i>
     </Link>
   );
 }
@@ -1189,7 +1180,7 @@ export function SideMenuLayer({
             >
               <span>クイック検索</span>
               <i>
-                QUICK <kbd aria-hidden="true">/</kbd>
+                <kbd aria-hidden="true">/</kbd>
               </i>
             </button>
             <GuardedLink
@@ -1199,7 +1190,6 @@ export function SideMenuLayer({
               aria-current={pathname === "/search" ? "page" : undefined}
             >
               <span>全文検索</span>
-              <i>SEARCH</i>
             </GuardedLink>
             <GuardedLink
               to="/library"
@@ -1208,7 +1198,6 @@ export function SideMenuLayer({
               aria-current={pathname === "/library" ? "page" : undefined}
             >
               <span>資料室・しおり</span>
-              <i>LIBRARY</i>
             </GuardedLink>
             <GuardedLink
               className="command-atlas-record"
@@ -1226,7 +1215,6 @@ export function SideMenuLayer({
                 />
               ) : null}
               <span>変身・<wbr />フォーム研究室</span>
-              <i>LAB</i>
             </GuardedLink>
             <GuardedLink
               className="command-atlas-record"
@@ -1244,7 +1232,6 @@ export function SideMenuLayer({
                 />
               ) : null}
               <span>世界関係図</span>
-              <i>CONNECTIONS</i>
             </GuardedLink>
             <GuardedLink
               className="command-atlas-record"
@@ -1262,7 +1249,6 @@ export function SideMenuLayer({
                 />
               ) : null}
               <span>フォーム<wbr />アーカイブ</span>
-              <i>SAGA / REALM</i>
             </GuardedLink>
             <GuardedLink
               className="command-atlas-record"
@@ -1299,13 +1285,12 @@ export function SideMenuLayer({
             {menuPage ? (
               menuPage.sections
                 .filter(([id]) => !availableSectionIds || availableSectionIds.includes(id))
-                .map(([id, label, code]) => (
+                .map(([id, label]) => (
                   <MenuSectionLink
                     key={id}
                     pathname={pathname}
                     id={id}
                     label={label}
-                    code={code}
                     onNavigate={close}
                   />
                 ))
@@ -1314,12 +1299,10 @@ export function SideMenuLayer({
                 {fileChapters.map(({ id, label }) => (
                   <GuardedLink key={id} to={pathname} hash={id} assets={[]} beforeNavigate={close}>
                     <span>{label}</span>
-                    <i>{FILE_CHAPTER_CODES[id] ?? "SECTION"}</i>
                   </GuardedLink>
                 ))}
                 <GuardedLink to="/world" assets={[]} beforeNavigate={close}>
                   <span>ワールドへ戻る</span>
-                  <i>WORLD</i>
                 </GuardedLink>
               </>
             ) : isSpecialSite ? (
@@ -1336,7 +1319,7 @@ export function SideMenuLayer({
                           : context === "meta-unitas"
                             ? "meta-unitas"
                             : "final-stage"
-                ].map(([hash, label, code]) => (
+                ].map(([hash, label]) => (
                   <GuardedLink
                     key={hash}
                     to={
@@ -1359,19 +1342,18 @@ export function SideMenuLayer({
                     beforeNavigate={close}
                   >
                     <span>{label}</span>
-                    <i>{code}</i>
                   </GuardedLink>
                 ))}
               </>
             ) : context === "cinema" ? (
               <>
                 {[
-                  ["top", "トップ", "TOP"],
-                  ["introduction", "作品について", "INTRODUCTION"],
-                  ["films", "映画4部作", "THE FOUR FILMS"],
-                  ["visuals", "ビジュアル", "VISUAL ARCHIVE"],
-                  ["information", "公開情報", "INFORMATION"],
-                ].map(([hash, label, code]) => (
+                  ["top", "トップ"],
+                  ["introduction", "作品について"],
+                  ["films", "映画4部作"],
+                  ["visuals", "ビジュアル"],
+                  ["information", "公開情報"],
+                ].map(([hash, label]) => (
                   <GuardedLink
                     key={hash}
                     to="/saga-cinema"
@@ -1380,7 +1362,6 @@ export function SideMenuLayer({
                     beforeNavigate={close}
                   >
                     <span>{label}</span>
-                    <i>{code}</i>
                   </GuardedLink>
                 ))}
               </>
@@ -1388,11 +1369,9 @@ export function SideMenuLayer({
               <>
                 <GuardedLink to="/dream-chapter" hash="top" assets={[]} beforeNavigate={close}>
                   <span>トップ</span>
-                  <i>TOP</i>
                 </GuardedLink>
                 <GuardedLink to="/dream-chapter" hash="posters" assets={[]} beforeNavigate={close}>
                   <span>ポスター</span>
-                  <i>POSTERS</i>
                 </GuardedLink>
                 <GuardedLink
                   to="/dream-chapter"
@@ -1401,7 +1380,6 @@ export function SideMenuLayer({
                   beforeNavigate={close}
                 >
                   <span>キャラクター</span>
-                  <i>CAST</i>
                 </GuardedLink>
                 <GuardedLink
                   to="/dream-chapter"
@@ -1410,34 +1388,27 @@ export function SideMenuLayer({
                   beforeNavigate={close}
                 >
                   <span>ドルミネンス</span>
-                  <i>DOLMINENCE</i>
                 </GuardedLink>
                 <GuardedLink to="/dream-chapter" hash="cases" assets={[]} beforeNavigate={close}>
                   <span>エピソード</span>
-                  <i>CASES</i>
                 </GuardedLink>
               </>
             ) : (
               <>
                 <GuardedLink to="/world" hash="top" assets={[]} beforeNavigate={close}>
                   <span>トップ</span>
-                  <i>TOP</i>
                 </GuardedLink>
                 <GuardedLink to="/world" hash="story" assets={[]} beforeNavigate={close}>
                   <span>ストーリー</span>
-                  <i>STORY</i>
                 </GuardedLink>
                 <GuardedLink to="/world" hash="manager-archive" assets={[]} beforeNavigate={close}>
                   <span>六詠</span>
-                  <i>ARCHIVE</i>
                 </GuardedLink>
                 <GuardedLink to="/world" hash="riders" assets={[]} beforeNavigate={close}>
                   <span>八人のライダー</span>
-                  <i>RIDERS</i>
                 </GuardedLink>
                 <GuardedLink to="/world" hash="records" assets={[]} beforeNavigate={close}>
                   <span>レコード</span>
-                  <i>RECORDS</i>
                 </GuardedLink>
                 {reDiveReached ? (
                   <GuardedLink to="/world" hash="re-dive" assets={[]} beforeNavigate={close}>
@@ -1535,7 +1506,6 @@ export function SideMenuLayer({
                     <wbr />
                     <span className="side-panel-phrase">「ドリームチャプター」</span>
                   </span>
-                  <i>MOVIE 01</i>
                 </GuardedLink>
                 <GuardedLink
                   to="/world"
@@ -1549,7 +1519,6 @@ export function SideMenuLayer({
                     <wbr />
                     <span className="side-panel-phrase">ワールド</span>
                   </span>
-                  <i>MAIN SITE</i>
                 </GuardedLink>
               </>
             ) : (
@@ -1564,7 +1533,6 @@ export function SideMenuLayer({
                     <wbr />
                     <span className="side-panel-phrase">「ドリームチャプター」</span>
                   </span>
-                  <i>MOVIE 01</i>
                 </GuardedLink>
                 {/* The special sites stand apart from the World: its way home
                     sits in story order, as it does on the Dream Chapter. */}
@@ -1580,7 +1548,6 @@ export function SideMenuLayer({
                       <wbr />
                       <span className="side-panel-phrase">ワールド</span>
                     </span>
-                    <i>MAIN SITE</i>
                   </GuardedLink>
                 ) : null}
               </>
@@ -1593,7 +1560,6 @@ export function SideMenuLayer({
               aria-current={context === "final-stage" ? "page" : undefined}
             >
               <span>ファイナルステージ</span>
-              <i>FINAL STAGE</i>
             </GuardedLink>
           </div>
         </div>
@@ -1673,7 +1639,6 @@ export function SideMenuLayer({
                       <img src={launcherTile(file.href)} alt="" loading="lazy" decoding="async" />
                     ) : null}
                     <span>{file.name}</span>
-                    <i>FILE</i>
                   </GuardedLink>
                 ))}
               </div>
@@ -1708,7 +1673,6 @@ export function SideMenuLayer({
               aria-current={pathname === "/gallery" ? "page" : undefined}
             >
               <span>ギャラリー</span>
-              <i>VISUAL COLLECTION</i>
             </GuardedLink>
             <button
               ref={announcementTriggerRef}
@@ -1719,7 +1683,6 @@ export function SideMenuLayer({
               onClick={openAnnouncements}
             >
               <span>お知らせ</span>
-              <i>NOTICE</i>
             </button>
           </div>
         </div>
@@ -1732,7 +1695,6 @@ export function SideMenuLayer({
             <RenderQualityControl />
             <GuardedLink to="/" assets={[]} beforeNavigate={close}>
               <span>トップ</span>
-              <i>DECEPTION WORLD</i>
             </GuardedLink>
             <Link
               to="/"
@@ -1753,7 +1715,6 @@ export function SideMenuLayer({
               }}
             >
               <span>オープニング</span>
-              <i>OPENING</i>
             </Link>
           </div>
         </div>

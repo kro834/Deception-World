@@ -17,6 +17,10 @@ const zeusBridgeScript = '<script src="/archive-zeus-bridge.js?v=20261026-z3" de
 // sandboxed frame (the page passes them in the frame's #fragment).
 const stateBridgeScript = '<script src="/archive-state-bridge.js?v=20261022-s2" defer></script>';
 const nameWordAssets = '<link rel="stylesheet" href="/name-words.css?v=20261006-names">\n<script src="/archive-name-words.generated.js?v=20261006-names" defer></script>';
+// Owner (2026-11-20): the archives without their English HUD captions (the
+// 2026-10-23 no-secondary-labels plan). Linked last, after every archive
+// sheet, so it takes the captions out over all of them.
+const labelsStylesheet = '<link rel="stylesheet" href="/archive-labels.css?v=20261120-labels1">';
 // The frame intentionally has an opaque sandbox origin. Classic scripts
 // preserve that boundary; ES module fetches would require CORS permission.
 const nameRules = readFileSync(resolve(root, "src/lib/name-break-rules.js"), "utf8").replace(/^export /gm, "");
@@ -114,9 +118,12 @@ for (const archive of archives) {
   const withNameWords = withStateBridge.includes(nameWordAssets)
     ? withStateBridge
     : withStateBridge.replace("</head>", `${nameWordAssets}\n</head>`);
-  const withReadySignal = withNameWords.includes("data-archive-ready-signal")
+  const withLabels = withNameWords.includes(labelsStylesheet)
     ? withNameWords
-    : withNameWords.replace("</body>", `${readySignal}\n</body>`);
+    : withNameWords.replace("</head>", `${labelsStylesheet}\n</head>`);
+  const withReadySignal = withLabels.includes("data-archive-ready-signal")
+    ? withLabels
+    : withLabels.replace("</body>", `${readySignal}\n</body>`);
 
   writeFileSync(archive.output, withReadySignal);
   console.log(

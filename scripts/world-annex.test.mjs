@@ -40,7 +40,19 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   // Keep the original content/markup pins intact outside that explicit new component.
   assert.match(home, /<WorldContents \/>\s*<WorldExploration \/>/);
   assert.equal((home.match(/<WorldExploration \/>/g) || []).length, 1);
-  const preservedHomeView = homeView.replace("      <WorldExploration />\n", "");
+  // Owner (2026-11-20): 残っていた英字ラベルを削除（10-23「セカンダリラベルを置かない」）。
+  // The hero's scroll cue lost its English instruction (SCROLL TO DESCEND) and
+  // names its target for assistive tech instead. Exactly that one edit is
+  // undone here, so every other pin below still reads the page unchanged.
+  const scrollCue = '        <a className="scroll-cue" href="#story" aria-label="ストーリー">\n';
+  assert.equal(homeView.split(scrollCue).length, 2, "the scroll cue, once, without its English words");
+  assert.doesNotMatch(home, /SCROLL TO DESCEND/);
+  const preservedHomeView = homeView
+    .replace("      <WorldExploration />\n", "")
+    .replace(
+      scrollCue,
+      '        <a className="scroll-cue" href="#story">\n          <span>SCROLL TO DESCEND</span>\n',
+    );
   assert.deepEqual(worldViewContract(preservedHomeView), {
     // 2026-10-12: three owner-requested EP4 pickups; all other records retained.
     // 2026-10-17: the owner's column 06 『？？？』 (a spoiler warning, the 『犬』

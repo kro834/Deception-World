@@ -181,8 +181,10 @@ test("the SCP notice keeps its slip: only a painted pane around it", () => {
 });
 
 test("the root links the surfaces sheet after the buttons' and the controls' sheets", () => {
+  // Owner (2026-11-20): the glass's sheets load only while the option is on;
+  // the head script keeps this order (the surfaces last).
   assert.match(
     root,
-    /\{ rel: "stylesheet", href: liquidGlassCss \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassControlsCss \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassSurfacesCss \},/,
+    /liquidGlassSheetsScript\(\s*\[liquidGlassCss, liquidGlassControlsCss, liquidGlassSurfacesCss\],/,
   );
 });

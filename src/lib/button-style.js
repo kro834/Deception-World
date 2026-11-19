@@ -28,11 +28,56 @@ export function readButtonStyle() {
   }
 }
 
+/* Owner (2026-11-20): the glass's three sheets (about 160 KB) are no longer
+   linked on every page. The head script below links them, in their own place
+   in the cascade, only when the option is on. */
+export const LIQUID_GLASS_SHEETS_GLOBAL = "__dwLiquidGlassSheets";
+
+/** The head script that owns the glass's stylesheet links. It runs after
+    BUTTON_STYLE_SCRIPT, while <head> is parsed. With the option on it links
+    the sheets at once, before `before` (the sheet that follows the glass in
+    the cascade), marked render-blocking, so the first paint already has them.
+    It also leaves a loader on window for the side menu's switch: the loader
+    links the sheets once and calls back when all three have loaded.
+    @param {readonly string[]} sheets @param {string} before */
+export function liquidGlassSheetsScript(sheets, before) {
+  return `(function(u,b){try{var d=document,w=window,k=${JSON.stringify(LIQUID_GLASS_SHEETS_GLOBAL)},s=null;if(w[k])return;w[k]=function(done){try{var i,a=null,l,e,p;if(!s){s=[];l=d.querySelectorAll('link[rel="stylesheet"]');for(i=0;i<l.length;i++)if(l[i].getAttribute("href")===b){a=l[i];break}p=a?a.parentNode:d.head;for(i=0;i<u.length;i++){e=d.createElement("link");e.rel="stylesheet";e.setAttribute("data-precedence","default");e.setAttribute("data-liquid-glass-sheet","");e.setAttribute("blocking","render");e.href=u[i];p.insertBefore(e,a);s.push(e)}}if(!done)return;var n=0,c=false,f=function(){if(!c){c=true;done()}},g=function(){if(++n>=s.length)f()};for(i=0;i<s.length;i++){if(s[i].sheet)n++;else{s[i].addEventListener("load",g);s[i].addEventListener("error",g)}}if(n>=s.length)f();else w.setTimeout(f,4000)}catch(_){if(done)done()}};if(d.documentElement.getAttribute(${JSON.stringify(BUTTON_STYLE_ATTRIBUTE)})==="liquid")w[k]()}catch(_){}})(${JSON.stringify(sheets)},${JSON.stringify(before)});`;
+}
+
+/* The style the page should end on. A switch flipped back before the sheets
+   have arrived must not turn the glass on afterwards. */
+let wantedButtonStyle = "default";
+
 /** @param {"liquid" | "default"} style */
 export function applyButtonStyle(style) {
   if (typeof document === "undefined") return;
-  if (style === "liquid") document.documentElement.dataset.buttonStyle = "liquid";
-  else delete document.documentElement.dataset.buttonStyle;
+  wantedButtonStyle = style === "liquid" ? "liquid" : "default";
+  if (style !== "liquid") {
+    delete document.documentElement.dataset.buttonStyle;
+    return;
+  }
+  if (document.documentElement.dataset.buttonStyle === "liquid") return;
+  const turnOn = () => {
+    if (wantedButtonStyle !== "liquid") return;
+    document.documentElement.dataset.buttonStyle = "liquid";
+  };
+  /** @type {unknown} */
+  const load = /** @type {any} */ (window)[LIQUID_GLASS_SHEETS_GLOBAL];
+  if (typeof load !== "function") {
+    turnOn();
+    return;
+  }
+  // The attribute waits for the sheets: other sheets and the lens read it,
+  // and the glass must not be half-dressed for a frame. Already loaded, the
+  // loader calls back at once, so the switch stays synchronous.
+  let waited = false;
+  let settled = false;
+  load(() => {
+    settled = true;
+    turnOn();
+    if (waited) window.dispatchEvent(new Event("dw-button-style-change"));
+  });
+  waited = !settled;
 }
 
 /** @param {"liquid" | "default"} style */

@@ -70,6 +70,31 @@ const GLIDE_MS = 260;
 // straight to the hidden move.
 const FADE_OUT_MS = 120;
 const SCROLL_REVEAL_MS = 180;
+// Owner (2026-11-20): on phones the button no longer disappears while the
+// page scrolls. It tucks toward the nearer side edge and slides back when
+// the scrolling stops (styles-chrome-elevation.css moves it with transform
+// alone; this file only says which way and how far). While it is tucked, or
+// still sliding back, its drawn rectangle is off its resting spot, so every
+// placement reads the rectangle through untuckedRect below.
+const TUCK_SETTLE_MS = 340;
+type ZeusDrawnRect = Pick<DOMRect, "left" | "right" | "top" | "bottom" | "width" | "height">;
+
+/* How far the tuck currently draws the button from its resting spot, read
+   from the transform as it is drawn (mid-slide included). The button's own
+   transform is translate(-50%, -50%) plus the tuck, so the rest is the tuck. */
+function readTuckShift(button: HTMLElement) {
+  try {
+    const transform = window.getComputedStyle(button).transform;
+    if (typeof transform !== "string") return 0;
+    const matrix = /^matrix(3d)?\(([^)]+)\)$/.exec(transform);
+    if (!matrix) return 0;
+    const values = matrix[2].split(",").map(Number);
+    const shift = (matrix[1] ? values[12] : values[4]) + button.offsetWidth / 2;
+    return Number.isFinite(shift) && Math.abs(shift) >= 0.05 ? shift : 0;
+  } catch {
+    return 0;
+  }
+}
 // A drop this close to a side edge docks on it; a brisk horizontal flick
 // toward that rail widens the magnetic capture reach without touching slow drops.
 const EDGE_SNAP_PX = 48;
@@ -1017,6 +1042,9 @@ function ZeusButton({
   // A safe temporary spot stays put until the reader moves on or that spot
   // becomes obstructed. Passive layout/frame reports must not send it home.
   const stepAway = useRef<{ scrollTop: number } | null>(null);
+  // Until when a phone scroll's tuck may still be drawn (Infinity while the
+  // page is scrolling, then the slide back; 0 when the button is at rest).
+  const tuckedUntil = useRef(0);
   const dragVelocity = useRef<{ x: number; at: number; prevX: number; prevAt: number } | null>(
     null,
   );
@@ -1032,6 +1060,26 @@ function ZeusButton({
     const button = buttonRef.current;
     if (button?.dataset.parked) delete button.dataset.parked;
   }, [routeKey]);
+
+  /* The button's rectangle at its resting spot: as drawn, minus a tuck. */
+  const untuckedRect = useCallback((button: HTMLElement): ZeusDrawnRect => {
+    const rect = button.getBoundingClientRect();
+    if (tuckedUntil.current === 0) return rect;
+    if (Date.now() > tuckedUntil.current) {
+      tuckedUntil.current = 0;
+      return rect;
+    }
+    const shift = readTuckShift(button);
+    if (shift === 0) return rect;
+    return {
+      left: rect.left - shift,
+      right: rect.right - shift,
+      top: rect.top,
+      bottom: rect.bottom,
+      width: rect.width,
+      height: rect.height,
+    };
+  }, []);
 
   const cancelDragFrame = useCallback(() => {
     if (dragFrame.current != null) window.cancelAnimationFrame(dragFrame.current);
@@ -1221,7 +1269,7 @@ function ZeusButton({
       // A sheet's dock (readDock) is kept free for the button.
       if (!button || docked) return preferred;
       const viewport = getViewport();
-      const drawnRect = button.getBoundingClientRect();
+      const drawnRect = untuckedRect(button);
       const size = restingSize(button);
       const shown = {
         x: drawnRect.left + drawnRect.width / 2,
@@ -1407,14 +1455,14 @@ function ZeusButton({
       if (report && !droppedHere.current) report.crowded = true;
       return fallback?.candidate ?? candidates[0] ?? preferred;
     },
-    [readBounds, getViewport, restingSize],
+    [readBounds, getViewport, restingSize, untuckedRect],
   );
 
   const setVisualCenter = useCallback((targetX: number, targetY: number) => {
     const button = buttonRef.current;
     if (!button) return { x: targetX, y: targetY };
 
-    const currentRect = button.getBoundingClientRect();
+    const currentRect = untuckedRect(button);
     const currentX = currentRect.left + currentRect.width / 2;
     const currentY = currentRect.top + currentRect.height / 2;
     if (Math.abs(targetX - currentX) < 0.25 && Math.abs(targetY - currentY) < 0.25) {
@@ -1433,7 +1481,7 @@ function ZeusButton({
     for (let attempt = 0; attempt < 3; attempt += 1) {
       button.style.left = `${left}px`;
       button.style.top = `${top}px`;
-      const rect = button.getBoundingClientRect();
+      const rect = untuckedRect(button);
       const deltaX = targetX - (rect.left + rect.width / 2);
       const deltaY = targetY - (rect.top + rect.height / 2);
       if (Math.abs(deltaX) < 0.25 && Math.abs(deltaY) < 0.25) break;
@@ -1450,9 +1498,9 @@ function ZeusButton({
       top += deltaY / scaleY;
     }
 
-    const rect = button.getBoundingClientRect();
+    const rect = untuckedRect(button);
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  }, []);
+  }, [untuckedRect]);
 
   const placeButton = useCallback(
     (next: ZeusButtonPosition) => {
@@ -1465,7 +1513,7 @@ function ZeusButton({
       // Where it is drawn now, mid-glide included; then settle any glide so
       // the placement below measures the real spot. A hand-off still fading
       // out keeps fading: this placement replaces its pending move.
-      const drawn = button.getBoundingClientRect();
+      const drawn = untuckedRect(button);
       const fading = button.dataset.relocating === "fade-out";
       if (!fading) endFade();
       endGlide();
@@ -1586,6 +1634,7 @@ function ZeusButton({
       startGlide,
       startFade,
       restingSize,
+      untuckedRect,
     ],
   );
 
@@ -1619,6 +1668,19 @@ function ZeusButton({
       if (scrollRevealTimer != null) window.clearTimeout(scrollRevealTimer);
       scrollRevealTimer = null;
       if (buttonRef.current) delete buttonRef.current.dataset.scrolling;
+      // The slide back is still drawn for a moment.
+      if (tuckedUntil.current !== 0) tuckedUntil.current = Date.now() + TUCK_SETTLE_MS;
+    };
+    /* Which side edge is nearer, and how far the button's centre is from it:
+       from the position it was last placed at, so a scroll reads no layout. */
+    const aimTuck = (button: HTMLElement) => {
+      const width = Math.max(1, window.innerWidth);
+      const centre = Math.max(0, Math.min(width, pendingPosition.current.x * width));
+      const side = centre >= width / 2 ? 1 : -1;
+      const style = button.style as CSSStyleDeclaration | undefined;
+      style?.setProperty?.("--zeus-tuck-x", `${(side > 0 ? width - centre : -centre).toFixed(1)}px`);
+      style?.setProperty?.("--zeus-tuck-side", String(side));
+      tuckedUntil.current = Number.POSITIVE_INFINITY;
     };
     let railPlacementPending = false;
     let placementSuspended = document.hidden;
@@ -1667,7 +1729,10 @@ function ZeusButton({
       entranceSince.current = null;
       if (phone?.matches ?? window.innerWidth <= 760) {
         const button = buttonRef.current;
-        if (button) button.dataset.scrolling = "true";
+        if (button) {
+          if (button.dataset.scrolling !== "true") aimTuck(button);
+          button.dataset.scrolling = "true";
+        }
         if (scrollRevealTimer != null) window.clearTimeout(scrollRevealTimer);
         scrollRevealTimer = window.setTimeout(revealAfterScroll, SCROLL_REVEAL_MS);
       }
@@ -2228,7 +2293,7 @@ function ZeusButton({
         // destination first made an iPad-sized dodge jump out from under the
         // finger before the hold even began.
         const glidingRect =
-          target.dataset.relocating === "true" ? target.getBoundingClientRect() : null;
+          target.dataset.relocating === "true" ? untuckedRect(target) : null;
         endGlide();
         // A hand-off still fading out stays where it is (its move is dropped).
         endFade();
@@ -2248,7 +2313,7 @@ function ZeusButton({
         activePointer.current = event.pointerId;
         start.current = { x: event.clientX, y: event.clientY };
         latestPointer.current = { x: event.clientX, y: event.clientY };
-        const rect = event.currentTarget.getBoundingClientRect();
+        const rect = untuckedRect(event.currentTarget);
         grabOffset.current = {
           x: event.clientX - (rect.left + rect.width / 2),
           y: event.clientY - (rect.top + rect.height / 2),
@@ -2281,7 +2346,7 @@ function ZeusButton({
           if (holdTimer.current != null) window.clearTimeout(holdTimer.current);
           holdTimer.current = null;
           holdActivate.current = null;
-          const rect = target.getBoundingClientRect();
+          const rect = untuckedRect(target);
           const viewport = getViewport();
           const parent = target.offsetParent;
           const scale = { x: 1, y: 1 };

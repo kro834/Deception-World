@@ -144,9 +144,12 @@ test("wayfinding: the special sites show their way home", () => {
   const home = stories.lastIndexOf(phrase("ディセプション"));
   const finale = stories.indexOf("<span>ファイナルステージ</span>");
   assert.ok(dream >= 0 && home > dream && finale > home, "Dream → MAIN SITE → Final Stage");
+  // Owner (2026-11-20): 残っていた英字ラベルを削除（10-23「セカンダリラベルを置かない」）。
+  // The rows' English subtitles (MOVIE 01, MAIN SITE) are gone, so a name
+  // ends where its link does.
   const joined = (from) => {
     const start = stories.indexOf("<span>", from - 30);
-    const end = stories.indexOf("<i>", start);
+    const end = stories.indexOf("</GuardedLink>", start);
     return stories
       .slice(start, end)
       .replace(/<[^>]*>/g, "")
@@ -157,7 +160,7 @@ test("wayfinding: the special sites show their way home", () => {
   // Owner (2026-10-27): local menus retain the World return in STORIES instead of their local chapters.
   assert.match(
     stories,
-    /\{isSpecialSite \|\| context === "cinema" \|\| Boolean\(menuPage\) \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>\s*<span className="side-panel-phrase">ディセプション<\/span>\s*<wbr \/>\s*<span className="side-panel-phrase">ワールド<\/span>\s*<\/span>\s*<i>MAIN SITE<\/i>/,
+    /\{isSpecialSite \|\| context === "cinema" \|\| Boolean\(menuPage\) \? \(\s*<GuardedLink\s+to="\/world"\s+hash="top"\s+assets=\{WORLD_ENTER_ASSETS\}\s+beforeNavigate=\{close\}\s*>\s*<span>\s*<span className="side-panel-phrase">ディセプション<\/span>\s*<wbr \/>\s*<span className="side-panel-phrase">ワールド<\/span>\s*<\/span>\s*<\/GuardedLink>/,
   );
   assert.match(
     chrome,

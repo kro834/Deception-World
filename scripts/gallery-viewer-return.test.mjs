@@ -115,7 +115,9 @@ test("the refresh control: in the pinned bar, busy rather than disabled, announc
   assert.match(bar, /position: fixed;/);
   assert.match(
     css,
-    /\.gallery-page \{\s*--gallery-bar: 78px;\s*padding-top: calc\(var\(--gallery-bar\)/,
+    // Owner (2026-11-20): the galleries take the site's bar height (76px; 64px on
+    // phones) instead of their own 78px, so the menu button stands where it does elsewhere.
+    /\.gallery-page \{\s*(?:\/\*[\s\S]*?\*\/\s*)?--gallery-bar: var\(--sh-bar-h, 76px\);\s*padding-top: calc\(var\(--gallery-bar\)/,
   );
   const button = css.match(/\.gallery-refresh \{[\s\S]*?\n\}/)[0];
   assert.match(button, /min-width: 44px;/);

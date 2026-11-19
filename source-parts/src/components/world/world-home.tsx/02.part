@@ -505,4 +505,3 @@ export function WorldHome() {
       managerTab > previous ? 1 : -1,
     );
   }, [managerTab]);
-  const [columnTab, setColumnTab] = useState(0);

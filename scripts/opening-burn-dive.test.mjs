@@ -233,25 +233,31 @@ test("only existing words appear in the opening and its handoff", async () => {
           !/&&|\|\||\?\?|\w\.\w/.test(word) &&
           !/^(?:null|string|number|Animation|HTMLElement|Promise)$/.test(word),
       );
-  assert.deepEqual(words(handoff), ["DW // OPENING HANDOFF", "WORLD LINK"]);
+  // Owner (2026-11-20): 残っていた英字ラベルを削除（10-23「セカンダリラベルを置かない」）。
+  // The handoff ring carries no codes now (DW // OPENING HANDOFF, WORLD LINK),
+  // and the opening lost its file code, coordinates, sequence codes, signal
+  // cue and "Opening" hint. The title's own words and the controls stay.
+  assert.deepEqual(words(handoff), []);
+  assert.deepEqual(
+    words(title).filter((word) => !/[\u3040-\u30ff\u4e00-\u9fff]/.test(word)),
+    [
+      "DECEPTION",
+      "WORLD",
+      "THE WORLD IS MADE OF DECEPTION.",
+      "THE SECOND SAGA",
+      "DECEPTION WORLD",
+      "ESC",
+      "ENTER THE WORLD",
+    ],
+  );
   for (const word of words(title)) {
     assert.ok(
       [
-        "KAMEN RIDER SAGA",
-        "WORLD FILE / 02",
         "DECEPTION",
         "WORLD",
         "THE WORLD IS MADE OF DECEPTION.",
-        "35°41′ // REALITY",
-        "SIGNAL 07 // LOCKED",
-        "DW // OPENING 02",
-        "WORLD SIGNAL 07",
         "THE SECOND SAGA",
         "DECEPTION WORLD",
-        "INITIALIZE SIGNAL",
-        "TRACE DECEPTION",
-        "WORLD LOCKED",
-        "Opening",
         "スキップ",
         "ESC",
         "ENTER THE WORLD",

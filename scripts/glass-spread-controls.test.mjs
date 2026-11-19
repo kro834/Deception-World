@@ -63,10 +63,9 @@ test("every rule waits for the option: html[data-button-style=\"liquid\"]", () =
 });
 
 test("the root links the sheet after the buttons' glass, and the defs start the script only while on", () => {
-  assert.match(
-    root,
-    /\{ rel: "stylesheet", href: liquidGlassCss \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassControlsCss \},/,
-  );
+  // Owner (2026-11-20): the glass's sheets load only while the option is on;
+  // the head script keeps this order (the controls after the buttons' glass).
+  assert.match(root, /liquidGlassSheetsScript\(\s*\[liquidGlassCss, liquidGlassControlsCss,/);
   // The script starts inside the effect that runs only while `on`.
   const effect = defs.slice(defs.indexOf("if (!on) return;"));
   assert.match(effect, /watchLiquidControls\(document\)/);

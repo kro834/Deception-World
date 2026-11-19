@@ -1,0 +1,56 @@
+/* The form archives without their English HUD captions.
+   Owner (2026-10-23): 「不要なセカンダリラベルや説明を避ける。レイアウトに説明させるように」
+   Owner (2026-11-20): the labels that plan meant to remove are removed now.
+
+   Linked last by scripts/build-embedded-archives.mjs, after every archive
+   sheet, in both documents (Saga and Realm share these classes). Only
+   English captions that restate what the layout already shows are taken
+   out. No Japanese text is touched, nothing is moved or re-parented (the
+   archive scripts keep finding every element they write to), and each
+   element that carried a state still reads it out (the boot loader's and
+   the controls' aria-labels). The selectors carry the archive sheets' own
+   ID prefix, so they outrank their !important rules.
+
+   Out:
+   - the wordmark's system line over the archive's name (CELESTIAL SYSTEM,
+     REALMS SYSTEM) and the boot loader's CELESTIAL SYSTEM / ARCHIVE
+     INITIALIZING (its ring stays; its role="status" label reads the state);
+   - the hero's eyebrow (… / COMPLETE FORM INDEX), its FORMS / TIERS / STATUS
+     read-out, the key visual's caption (… / KEY VISUAL) and the database
+     stamp on its edge (FORM DATABASE / 2026.08; the edge's rule stays);
+   - the selector's kicker (… RELAY / FORM SELECTOR) and its count
+     (22 FORMS / 07 TIERS), each tier's count (02 FORMS, 04 SYSTEMS);
+   - the detail bar's ACTIVE FORM / DETAIL VIEW (the form's name and its
+     n / N stay), the English kickers over the Japanese profile titles
+     (POWER PROFILE over 性能プロファイル, VS PROFILE over 性能プロファイル比較);
+   - the comparison's kicker (DUAL FORM ANALYZER / IOS RESILIENT, REALMS /
+     DUAL ANALYSIS), its ANALYSIS STATUS / OFFLINE READY badge, the sides'
+     CYAN / VIOLET CHANNEL codes and CATALOG EDGE over 優位項目;
+   - the phone dock's OPEN SELECTOR under the form's name;
+   - the footer's count line (N FORMS / N TIERS / DECEPTION WORLD; the mark
+     and PAGE TOP stay). */
+html[data-embedded-archive][data-archive-kind] :is(#saga-boot-loader, .saga-boot-loader) > :is(span, strong),
+html[data-embedded-archive][data-archive-kind] .dock-current.dock-current.dock-current > small,
+html[data-embedded-archive][data-archive-kind]
+  :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .archive-wordmark small,
+    .hero-eyebrow,
+    .hero-metrics,
+    .solo-cover-caption-v14,
+    .hero-edge > span,
+    .selector-kicker,
+    .selector-count,
+    .stage-head > .stage-meta,
+    .detail-toolbar-copy > span,
+    .archive-profile__head > .archive-profile__kicker,
+    .archive-versus-profile__head > .archive-profile__kicker,
+    .compare-kicker,
+    .compare-ready-badge,
+    .compare-side > legend > small,
+    .compare-advantage-summary > span,
+    .dock-current > small,
+    .archive-footer > p
+  ) {
+  display: none !important;
+}

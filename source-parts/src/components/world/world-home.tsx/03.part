@@ -1,3 +1,4 @@
+  const [columnTab, setColumnTab] = useState(0);
   const [riderTab, setRiderTab] = useState(0);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);

@@ -184,9 +184,13 @@ test("motion, economy, forced colours and touch budgets", () => {
 });
 
 test("the root links the sheet last and mounts the defs, which run nothing while off", () => {
+  // Owner (2026-11-20): the glass's sheets load only while the option is on.
+  // The root no longer links them; its head script links them in the same
+  // place, the buttons' sheet first (startup-styles-budget.test.mjs runs it).
+  assert.doesNotMatch(root, /\{ rel: "stylesheet", href: liquidGlass\w*Css \}/);
   assert.match(
     root,
-    /\[\{ rel: "stylesheet", href: futureSpectrumCss \}\]\),\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: liquidGlassCss \},/,
+    /liquidGlassSheetsScript\(\s*\[liquidGlassCss, liquidGlassControlsCss, liquidGlassSurfacesCss\],\s*openingFontsCss,\s*\)/,
   );
   assert.match(root, /<LiquidGlassDefs \/>/);
   // The filters are static markup from the server on (the head script

@@ -1127,8 +1127,11 @@
   margin: 12px auto 0;
 }
 
+/* Owner (2026-11-20): the kicker above (KAMEN RIDER SAGA — WORLD FILE / 02)
+   is removed, so the motto holds the frame's foot by its own top margin
+   rather than by the pair's space-between. Its place is unchanged. */
 .cine-editorial-caption {
-  margin: 0 auto 12px;
+  margin: auto auto 12px;
 }
 
 /* Under 1140 px the centred lines would meet the SOUND plate and the cue on

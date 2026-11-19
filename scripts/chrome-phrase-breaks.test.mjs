@@ -16,9 +16,13 @@ const text = (markup) => markup.replace(/<[^>]*>/g, "").replace(/\s+/g, "");
 
 test("the films' and the site's names are marked up in their phrases, text unchanged", () => {
   const stories = chrome.slice(chrome.indexOf("<p>STORIES</p>"), chrome.indexOf("<p>RIDERS</p>"));
+  // Owner (2026-11-20): 残っていた英字ラベルを削除（10-23「セカンダリラベルを置かない」）。
+  // The English subtitle that followed each name (<i>MOVIE 01</i>, <i>MAIN SITE</i>)
+  // is gone; the name is now the last thing in its link.
+  assert.doesNotMatch(stories, /<i>(?:MOVIE 01|MAIN SITE|FINAL STAGE)<\/i>/);
   const spans = [
     ...stories.matchAll(
-      /<span>\s*<span className="side-panel-phrase">[\s\S]*?<\/span>\s*<\/span>\s*<i>/g,
+      /<span>\s*<span className="side-panel-phrase">[\s\S]*?<\/span>\s*<\/span>\s*(?=<\/GuardedLink>)/g,
     ),
   ];
   assert.deepEqual(

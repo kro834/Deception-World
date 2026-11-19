@@ -154,7 +154,9 @@ test("Dream Chapter renders its movie logo and maps all four Dolminence records"
   assert.match(pageSource, /DREAM_DOLMINENCE\.map/);
   assert.match(pageSource, /id=["']dolminence["']/);
   assert.match(menuSource, /to=["']\/dream-chapter["']\s+hash=["']dolminence["']/);
-  assert.match(menuSource, /DOLMINENCE/);
+  // Owner (2026-11-20): 残っていた英字ラベルを削除（10-23「セカンダリラベルを置かない」）。
+  // The row keeps its Japanese name; its English subtitle DOLMINENCE is gone.
+  assert.match(menuSource, /hash=["']dolminence["'][\s\S]{0,120}?<span>ドルミネンス<\/span>\s*<\/GuardedLink>/);
 });
 
 test("Dream Chapter data contains fifteen posters and three mapped characters", () => {

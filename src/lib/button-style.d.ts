@@ -3,6 +3,8 @@ export const BUTTON_STYLE_STORAGE_KEY: string;
 export const BUTTON_STYLE_ATTRIBUTE: string;
 export const BUTTON_STYLE_SCRIPT: string;
 export const LIQUID_LENS_ATTRIBUTE: string;
+export const LIQUID_GLASS_SHEETS_GLOBAL: string;
+export function liquidGlassSheetsScript(sheets: readonly string[], before: string): string;
 export function normalizeButtonStyle(value: string | null | undefined): ButtonStyle;
 export function readButtonStyle(): ButtonStyle;
 export function applyButtonStyle(style: ButtonStyle): void;
