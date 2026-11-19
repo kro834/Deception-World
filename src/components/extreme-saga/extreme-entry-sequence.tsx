@@ -1,6 +1,10 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import type { EntryPlayback } from "@/lib/entry-playback";
-import { EXTREME_ENTRY_TIMINGS } from "@/lib/extreme-entry";
+import {
+  EXTREME_ENTRY_TIMINGS,
+  EXTREME_SUITUP_CORE,
+  extremeSuitupFigure,
+} from "@/lib/extreme-entry";
 
 /* EXTREME SAGA's entry suit-up (owner, 2026-11-11: 「エクスプリームに変身
    アニメーションを遷移アニメーションのみに追加して。ナノマシンではなく、細かい
@@ -42,6 +46,26 @@ const FILL: CSSProperties = {
   height: "100%",
 };
 
+/* The pilot light. The stage starts unlit and the engine and its art load
+   only once this layer is up, so the cover's first frames were an empty dark
+   field (verify-route-transitions: 7–9 flat frames from 17 ms, longer on a
+   cold load). The belt core is where the suit-up begins: the layer shows it
+   alight from the cover's first frame, in the engine's own core colours and
+   place, and lets it go as the engine's first painted frame takes the core
+   over. No part of the suit-up's clock or beats changes. */
+const PILOT_RADIUS = 96; // in the art's pixels: the engine's core, part lit
+const PILOT_HANDOVER_MS = 320;
+const PILOT: CSSProperties = {
+  position: "absolute",
+  borderRadius: "50%",
+  // Over the canvas, as light: the undersuit fading up must not put it out
+  // before the engine's own core has lit.
+  mixBlendMode: "screen",
+  background:
+    "radial-gradient(circle, rgb(255 255 255) 0%, rgb(190 220 255 / 0.95) 18%, rgb(70 130 255 / 0.45) 45%, rgb(20 60 255 / 0) 100%)",
+  transition: `opacity ${PILOT_HANDOVER_MS}ms cubic-bezier(0.4, 0, 1, 1)`,
+};
+
 export function ExtremeEntrySequence({
   phase,
   playback,
@@ -50,15 +74,47 @@ export function ExtremeEntrySequence({
   playback: EntryPlayback;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const pilotRef = useRef<HTMLSpanElement | null>(null);
+  // The pilot sits on the belt core by the engine's own rule for the figure,
+  // before the first paint and through a resize.
+  useLayoutEffect(() => {
+    const pilot = pilotRef.current;
+    const layer = pilot?.parentElement;
+    if (!pilot || !layer) return;
+    const place = () => {
+      const box = layer.getBoundingClientRect();
+      const figure = extremeSuitupFigure(
+        Math.max(1, box.width || window.innerWidth),
+        Math.max(1, box.height || window.innerHeight),
+      );
+      const radius = PILOT_RADIUS * figure.scale;
+      Object.assign(pilot.style, {
+        left: `${figure.x + EXTREME_SUITUP_CORE[0] * figure.scale - radius}px`,
+        top: `${figure.y + EXTREME_SUITUP_CORE[1] * figure.scale - radius}px`,
+        width: `${radius * 2}px`,
+        height: `${radius * 2}px`,
+      });
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, []);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let disposed = false;
     let dispose: (() => void) | null = null;
+    let lit = false;
     void import("@/lib/extreme-suitup-engine")
       .then((engine) => {
         if (disposed) return;
-        dispose = engine.mountExtremeSuitup(canvas, playback);
+        dispose = engine.mountExtremeSuitup(canvas, playback, {
+          onFrame: () => {
+            if (lit) return;
+            lit = true;
+            if (pilotRef.current) pilotRef.current.style.opacity = "0";
+          },
+        });
       })
       .catch(() => {
         if (!disposed) playback.fail();
@@ -84,6 +140,7 @@ export function ExtremeEntrySequence({
       }}
     >
       <canvas ref={canvasRef} width={0} height={0} style={FILL} />
+      <span ref={pilotRef} style={PILOT} />
     </div>
   );
 }

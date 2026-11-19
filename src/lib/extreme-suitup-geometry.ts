@@ -11,7 +11,7 @@
    (extreme-suitup-engine.ts) draws it and scripts/extreme-entry-suitup.test.mjs
    checks it. */
 
-import { EXTREME_SUITUP_BEATS } from "./extreme-entry.ts";
+import { EXTREME_SUITUP_BEATS, EXTREME_SUITUP_CORE } from "./extreme-entry.ts";
 
 export type Point = readonly [number, number];
 export type SuitupGroup =
@@ -31,7 +31,7 @@ const mirror = (poly: readonly Point[]): Point[] =>
   poly.map(([x, y]) => [1024 - x, y] as const).reverse();
 const mirrorPoint = ([x, y]: Point): Point => [1024 - x, y];
 
-export const SUITUP_CORE: Point = [512, 582];
+export const SUITUP_CORE: Point = [EXTREME_SUITUP_CORE[0], EXTREME_SUITUP_CORE[1]];
 
 const SHOULDER_L: Point[] = [
   [186, 300],
