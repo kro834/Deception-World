@@ -3910,17 +3910,9 @@ html[data-family="archive"]
    with the square centred in it and on the same gutter. The special
    sites' local nav keeps its rule outside the lane (77 / 65, the square
    at 14 / 8): their pages reserve that height before first paint.
-   The tokens below are for the pages that still place their own trigger
-   (the transformation lab, DOGS ARCHIVE): top = --sh-trigger-top below
-   the safe area, right = --sh-gutter, size = --sh-trigger-size.
-   A second block, so the first one stays identical to the title's
-   (styles-opening-shell.css; startup-styles-budget.test.mjs).
+   The transformation lab and DOGS ARCHIVE take the same lane in their own
+   sheets (--sh-bar-h, --sh-gutter).
    ================================================================ */
-html[data-family] {
-  --sh-trigger-size: 48px;
-  --sh-trigger-top: calc((var(--sh-bar-h) - 1px - var(--sh-trigger-size)) / 2);
-}
-
 /* Saga Cinema: its header was 82px (72px on phones). */
 html[data-family="special"] body .saga-cinema .site-header {
   height: calc(var(--sh-bar-h) + env(safe-area-inset-top, 0px));
@@ -3933,10 +3925,17 @@ html[data-family] body main.wm-page {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+/* The page centres a 1440px column, so on wider screens its header ended
+   240px in (at 1920px). The bar runs the full width instead, out through
+   the page's own side padding, and takes the gutter like every other bar. */
 html[data-family] body main.wm-page > header.wm-header {
+  --sh-wm-pad: max(clamp(16px, 4vw, 68px), calc((100vw - 1440px) / 2));
   box-sizing: border-box;
   min-height: var(--sh-bar-h);
+  margin-inline: calc(-1 * var(--sh-wm-pad));
   padding-block: 0;
+  padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
+    max(var(--sh-gutter), env(safe-area-inset-right, 0px));
 }
 
 /* Dream: the programme bar's own gutter put the square 4px further in. */
