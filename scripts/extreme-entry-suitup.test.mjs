@@ -7,13 +7,16 @@ import { createEntryPlayback, ENTRY_PREPARE_MS } from "../src/lib/entry-playback
 import {
   EXTREME_ENTRY_TIMINGS,
   EXTREME_SUITUP_BEATS,
+  EXTREME_SUITUP_CORE,
   EXTREME_SUITUP_END_MS,
   EXTREME_SUITUP_WIDTHS,
   extremeSuitupDpr,
+  extremeSuitupFigure,
   extremeSuitupSource,
   pickExtremeSuitupWidth,
 } from "../src/lib/extreme-entry.ts";
 import {
+  SUITUP_CORE,
   SUITUP_GEMS,
   SUITUP_HORNS,
   SUITUP_REGIONS,
@@ -180,4 +183,37 @@ test("every region winds one way (the body's nonzero union has no holes)", () =>
 test("no borrowed assets or sound: the suit-up draws only the owner's art", () => {
   assert.doesNotMatch(engine, /new Audio|AudioContext|\.mp3|\.wav/);
   assert.doesNotMatch(engine + sequence, /iron ?man|marvel|stark/i);
+});
+
+// Owner (2026-11-20): the cover is never an empty dark field. The stage
+// starts unlit and the engine loads after the layer is up, so the layer
+// itself shows the belt core alight from its first frame and hands it to
+// the engine's first painted frame (verify-route-transitions: 7–9 flat
+// frames from 17 ms before this).
+test("a pilot light on the belt core carries the cover until the engine's first frame", () => {
+  // One rule places the figure for the engine's canvas and the pilot.
+  assert.deepEqual([...SUITUP_CORE], [...EXTREME_SUITUP_CORE]);
+  assert.match(engine, /const figure = extremeSuitupFigure\(areaW, areaH\);/);
+  assert.match(sequence, /extremeSuitupFigure\(/);
+  const wide = extremeSuitupFigure(1440, 900);
+  assert.ok(Math.abs(wide.scale - (900 * 0.9) / 1536) < 1e-9);
+  assert.ok(Math.abs(wide.x - (1440 - 1024 * wide.scale) / 2) < 1e-9);
+  assert.ok(Math.abs(wide.y - (900 - 1536 * wide.scale) * 0.5) < 1e-9);
+  const tall = extremeSuitupFigure(390, 844);
+  assert.ok(Math.abs(tall.scale - (390 * 1.02) / 1024) < 1e-9);
+  assert.ok(Math.abs(tall.y - (844 - 1536 * tall.scale) * 0.42) < 1e-9);
+  // Placed before the first paint, over the canvas, in the core's colours.
+  assert.match(sequence, /useLayoutEffect\(\(\) => \{[\s\S]*?EXTREME_SUITUP_CORE\[0\] \* figure\.scale/);
+  assert.match(
+    sequence,
+    /<canvas ref=\{canvasRef\}[^>]*\/>\s*<span ref=\{pilotRef\} style=\{PILOT\} \/>/,
+  );
+  assert.match(sequence, /mixBlendMode: "screen"/);
+  // It lets go once, on the engine's first painted frame; nothing else of
+  // the suit-up's clock, beats or loading changes.
+  assert.match(
+    sequence,
+    /onFrame: \(\) => \{\s*if \(lit\) return;\s*lit = true;\s*if \(pilotRef\.current\) pilotRef\.current\.style\.opacity = "0";/,
+  );
+  assert.match(engine, /draw\(prepared, t\);\s*options\.onFrame\?\.\(t\);/);
 });

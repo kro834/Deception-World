@@ -102,6 +102,34 @@ test("opening never downloads the unrelated suit atlas", async (t) => {
   assert.match(gate, /closest\("\.ws-doors"\)[\s\S]*?scheduleRexonanceSuitWarm\(0\)/);
 });
 
+// Owner (2026-11-20): the side menu is Rexonance's other doorway. Without
+// the per-page warm-up a menu tap prepared the call cold and the cover came
+// 400 ms after the press; the menu's opening now prepares it (its scroller
+// hides the link from an IntersectionObserver, so data-open starts it).
+test("opening the side menu warms the Rexonance call, and nothing does before", () => {
+  const gate = readFileSync(new URL("../src/components/load-gate.tsx", import.meta.url), "utf8");
+  const doorway = gate.slice(
+    gate.indexOf("// The dedicated doorway is far below"),
+    gate.indexOf("// FAR FROM's entry, speculatively"),
+  );
+  assert.match(doorway, /const panel = link\.closest<HTMLElement>\("\.side-panel"\);/);
+  assert.match(doorway, /if \(!panel && !link\.closest\("\.ws-doors"\)\) return;/);
+  // Every opening arms a fresh schedule: one made on another page, or
+  // aborted by an unrelated go(), must not leave the menu's link cold.
+  assert.match(
+    doorway,
+    /const start = \(\) => \{[\s\S]*?stopSuit\?\.\(\);\s*stopSuit = scheduleRexonanceSuitWarm\(0\);\s*stopPage \?\?= scheduleRexonancePagePreload\(/,
+  );
+  assert.match(
+    doorway,
+    /if \(panel\) \{\s*if \(panel\.dataset\.open === "true"\) start\(\);\s*if \(typeof MutationObserver[\s\S]*?new MutationObserver\(\(\) => \{\s*if \(panel\.dataset\.open === "true"\) start\(\);/,
+  );
+  assert.match(doorway, /attributeFilter: \["data-open"\]/);
+  // One start: the suit (its chunk, layers and plan) and the page, cancellable.
+  assert.equal(doorway.match(/scheduleRexonanceSuitWarm\(0\)/g)?.length, 1);
+  assert.match(doorway, /stopWatch\(\);\s*stopPage\?\.\(\);\s*stopSuit\?\.\(\);/);
+});
+
 test("approaching the World doorway can warm the suit at low priority", async (t) => {
   const f = await suitSchedule(t, "/world");
   assert.equal(f.images.length, 0);
