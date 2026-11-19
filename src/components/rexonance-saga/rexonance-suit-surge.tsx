@@ -35,6 +35,14 @@ import {
   REXONANCE_SUIT_UNDERSUIT,
 } from "@/lib/rexonance-suit";
 import { prepareRexonanceClasps } from "@/lib/rexonance-clasp-atlas";
+import {
+  ENTRY_SEAT_GATE,
+  ENTRY_SEAT_SCALE_MS,
+  ENTRY_SEAT_UNIT_MS,
+  EntrySeatCells,
+  buildEntrySeatMap,
+  type EntrySeatMap,
+} from "@/lib/rexonance-entry-seat";
 import type { RexonanceScrollSwarm } from "@/lib/rexonance-scroll-swarm";
 import type { SkinCells, SkinField, SkinFrame, SkinRenderer } from "@/lib/rexonance-suit-skin";
 import { LEAVE_FADE_MS, LEAVE_FROM, LEAVE_SLACK, SuitLeave, isSeek } from "@/lib/rexonance-suit-leave";
@@ -277,7 +285,12 @@ const picture = (source: string) =>
 /** Loads the skin for a canvas. `under`: the scroll scene, whose classic
  * canvas also carries the undersuit and the driver — the skin then draws
  * them itself while that canvas stands down. Returns its canceller. */
-function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin) => void) {
+function mountSkin(
+  canvas: HTMLCanvasElement,
+  under: boolean,
+  ready: (skin: Skin) => void,
+  seat: EntrySeatMap | null = null,
+) {
   let cancelled = false;
   let renderer: SkinRenderer | null = null;
   void (async () => {
@@ -341,6 +354,7 @@ function mountSkin(canvas: HTMLCanvasElement, under: boolean, ready: (skin: Skin
           REXONANCE_SUIT_FACE.y + REXONANCE_SUIT_FACE.h,
         ],
         reactor: [REXONANCE_SUIT_MARKS.core[0], REXONANCE_SUIT_MARKS.core[1], REACTOR_DISC],
+        seat,
       },
       [REXONANCE_SUIT_SIZE.width, REXONANCE_SUIT_SIZE.height],
     );
@@ -433,7 +447,10 @@ export function EntrySurge() {
       windows[g * 2 + 1] = step?.to ?? 0;
     });
     const final = REXONANCE_CALL_BEATS[4].start;
-    const engine = new SurgeEngine(back, front, surgeTier());
+    const tier = surgeTier();
+    const engine = new SurgeEngine(back, front, tier);
+    // The cells each seating plate takes in (2026-11-19), under the skin.
+    const seatCells = new EntrySeatCells(tier.name);
     // The bank's direction (owner, 2026-11-01: 「装着アニメーションを大きく
     // 改善して」): the camera on the figure, the overlay over the stage, on
     // the call's own beats (rexonance-henshin.ts).
@@ -471,9 +488,15 @@ export function EntrySurge() {
     let engaged = false;
     let classicShown = "";
     const dropSkin = skinCanvas
-      ? mountSkin(skinCanvas, false, (made) => {
-          skin = made;
-        })
+      ? mountSkin(
+          skinCanvas,
+          false,
+          (made) => {
+            skin = made;
+          },
+          // The plates seat on their own fits under the front (2026-11-19).
+          buildEntrySeatMap(),
+        )
       : () => {};
     const showClassic = (value: number) => {
       const next = value >= 0.999 ? "" : value.toFixed(3);
@@ -555,6 +578,12 @@ export function EntrySurge() {
               grown.ratio,
               grown.lib.SKIN_QUALITY[level],
             );
+            grown.renderer.seat(
+              t / ENTRY_SEAT_SCALE_MS,
+              (t - grown.lib.SKIN_ENTRY.lag) / ENTRY_SEAT_SCALE_MS,
+              ENTRY_SEAT_UNIT_MS / ENTRY_SEAT_SCALE_MS,
+              ENTRY_SEAT_GATE,
+            );
             grown.renderer.render(growing, now / 1000, 0);
             showClassic(growing.classic);
             if (layers) {
@@ -578,8 +607,16 @@ export function EntrySurge() {
                 // (A skin that engages late: its cells fade in, never pop.)
                 Math.min(1, (now - engagedAt) / CELLS_IN_MS),
               );
-              if (growing.shell)
+              if (growing.shell) {
                 grown.lib.drawSkinDroplets(layers.front, grown.field, growing, cell, now, px);
+                seatCells.draw(
+                  layers.front,
+                  t,
+                  grown.lib.SKIN_CELL_SHARE[level],
+                  growing.alpha * Math.min(1, (now - engagedAt) / CELLS_IN_MS),
+                  1.5 * px,
+                );
+              }
               layers.back.globalCompositeOperation = "source-over";
               layers.front.globalCompositeOperation = "source-over";
             }

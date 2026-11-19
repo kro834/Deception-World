@@ -485,7 +485,15 @@ test("each HUD label lights when the front reaches the part it names", () => {
   // The call: each label carries its mark, used only under the skin; the
   // classic call keeps its beats (the plates' own snaps), and LOCK its own.
   const call = read("src/components/rexonance-saga/rexonance-call-sequence.tsx");
-  assert.match(call, /"--rx-suit-skin-lock": `\$\{entryElapsedTime\(SKIN_ENTRY_PARTS\[part\]\)\}ms`,/);
+  // Owner (2026-11-19): 「レクソナンスのナノマシンの装着アニメーションをさらに
+  // 強化します」 — under the skin a body part's plates now seat on the call's
+  // own fits (rexonance-entry-seat.ts), so its label lights on its DEUS！;
+  // the helmet's label still carries the head front's mark.
+  assert.match(call, /"--rx-suit-skin-lock": `\$\{entryElapsedTime\(SUIT_SKIN_LOCK\[part\]\)\}ms`,/);
+  assert.match(
+    call,
+    /const SUIT_SKIN_LOCK = \{\s*LEGS: REXONANCE_SUIT_SNAP\.legs,\s*ARMS: REXONANCE_SUIT_SNAP\.arms,\s*CHEST: REXONANCE_SUIT_SNAP\.chest,\s*HEAD: SKIN_ENTRY_PARTS\.HEAD,\s*\} as const;/,
+  );
   const css = read("src/styles-rexonance-calls.css");
   assert.match(
     css,

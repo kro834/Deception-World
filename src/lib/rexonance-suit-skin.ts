@@ -257,6 +257,8 @@ export type SkinTimeline = {
 export const SKIN_ENTRY: SkinTimeline = {
   // (The helmet starts to rise as the limbs' armour sets: nine tenths of
   // the body is finished by 1110, and no beat stands still between them.)
+  // (Owner, 2026-11-19: under this front each plate seats on its own fit,
+  // rexonance-entry-seat.ts; the front's own clock is unchanged.)
   body: [470, 1750],
   head: [1230, 1880],
   ease: 2,
@@ -1273,6 +1275,13 @@ uniform float uTime;
 uniform float uAlpha;
 uniform float uBase01;
 uniform float uHex;
+#ifdef SEAT
+// The entry's seat (rexonance-entry-seat.ts): when each plate's texel is
+// let go to set, and the call's clock now and a lag ago, in the map's
+// units; z is one band of the material in those units, w the gate.
+uniform sampler2D uSeatMap;
+uniform vec4 uSeat;
+#endif
 const float BAND = ${SKIN_BAND.toFixed(3)};
 const vec3 ICE = vec3(0.59, 0.925, 1.0);
 const vec3 PINK = vec3(1.0, 0.56, 0.85);
@@ -1313,6 +1322,16 @@ void main() {
   float growth = visor * (1.0 - smoothstep(0.02, BAND, uFront.z));
   float lead = growth * (0.026 * ridge + 0.018 * smoothstep(0.02, 0.45, cheek));
   float a = (front - fld.r + lead) / band;
+#ifdef SEAT
+  // A held plate stays liquid nanite metal under the front until its own
+  // fit; from there its bands run on the call's clock, seam first. Where
+  // the front has not come yet (the boots), the plate grows from its seam
+  // on that clock by itself: a lip of its own runs across it.
+  float seatAt = texture2D(uSeatMap, vUv).r;
+  float gated = (1.0 - crown) * step(0.002, seatAt);
+  float seated = (uSeat.x - seatAt) / uSeat.z;
+  a = mix(a, max(min(a, uSeat.w + max(seated, 0.0)), seated * 1.6), gated);
+#endif
   if (art.a < 0.004 || a < -0.6) {
     gl_FragColor = base * uAlpha;
     return;
@@ -1326,6 +1345,11 @@ void main() {
   // eyes' on their own gain (growing: the scene lights them, last).
   float glowing = emitter(colour);
   float since = (mix(uLit.x, uLit.y, crown) - fld.r) / BAND - ${SKIN_BANDS.toFixed(1)};
+#ifdef SEAT
+  float seatLit = (uSeat.y - seatAt) / uSeat.z;
+  float flowLit = since + ${SKIN_BANDS.toFixed(1)};
+  since = mix(since, max(min(flowLit, uSeat.w + max(seatLit, 0.0)), seatLit * 1.6) - ${SKIN_BANDS.toFixed(1)}, gated);
+#endif
   float eyes = step(uEyes.x, vUv.x) * step(vUv.x, uEyes.z) * step(uEyes.y, vUv.y) * step(vUv.y, uEyes.w);
   float lamp = smoothstep(0.0, 0.6, since);
   float gain = mix(uGlow.y, uGlow.z, eyes);
@@ -1436,6 +1460,10 @@ export type SkinSources = {
    * in figure px. */
   eyes: readonly [number, number, number, number];
   reactor: readonly [number, number, number];
+  /** The entry's seat map (rexonance-entry-seat.ts): one byte a texel, the
+   * clock value its plate is let go to set at over `scale`; with it the
+   * program compiles its SEAT block. The scroll scene passes none. */
+  seat?: { data: Uint8Array; width: number; height: number } | null;
 };
 
 /** The skin's canvas. Null where WebGL is not to be had. */
@@ -1448,6 +1476,7 @@ export class SkinRenderer {
   private figure: readonly [number, number];
   private hasBase: boolean;
   private scale = 1;
+  private seated = false;
   lost = false;
   private onLost: (event: Event) => void;
 
@@ -1494,7 +1523,12 @@ export class SkinRenderer {
     const program = gl.createProgram();
     if (!program) throw new Error("program");
     gl.attachShader(program, compile(gl.VERTEX_SHADER, VERTEX));
-    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAGMENT));
+    const seat = sources.seat ?? null;
+    this.seated = Boolean(seat);
+    gl.attachShader(
+      program,
+      compile(gl.FRAGMENT_SHADER, seat ? `#define SEAT\n${FRAGMENT}` : FRAGMENT),
+    );
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS))
       throw new Error(gl.getProgramInfoLog(program) ?? "link");
@@ -1521,6 +1555,8 @@ export class SkinRenderer {
       "uAlpha",
       "uBase01",
       "uHex",
+      "uSeatMap",
+      "uSeat",
     ])
       this.uniforms[name] = gl.getUniformLocation(program, name);
     const texture = (unit: number, premultiply: boolean, upload: () => void) => {
@@ -1548,6 +1584,29 @@ export class SkinRenderer {
       texture(2, true, () =>
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, base),
       );
+    if (seat) {
+      texture(3, false, () => {
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.LUMINANCE,
+          seat.width,
+          seat.height,
+          0,
+          gl.LUMINANCE,
+          gl.UNSIGNED_BYTE,
+          seat.data,
+        );
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+      });
+      // A plate's edge is its own: never a blend of two plates' fits.
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.uniform1i(this.uniforms.uSeatMap, 3);
+      // Until the caller sets a clock nothing is held.
+      gl.uniform4f(this.uniforms.uSeat, 1e3, 1e3, 1, 0);
+    }
     gl.uniform1i(this.uniforms.uArt, 0);
     gl.uniform1i(this.uniforms.uField, 1);
     gl.uniform1i(this.uniforms.uBase, base ? 2 : 0);
@@ -1586,6 +1645,14 @@ export class SkinRenderer {
   /** The hex cells' width, figure px (the loose cells merge into it). */
   get hex() {
     return Math.max(8.5, 4 / Math.max(0.1, this.scale));
+  }
+
+  /** The entry's seat clock: now and the emitters' lag ago, one band of the
+   * material, all in the map's units (a byte of 255 is 1), and the gate a
+   * held plate waits at. Nothing where the program has no SEAT block. */
+  seat(now: number, lit: number, unit: number, gate: number) {
+    if (this.lost || !this.seated) return;
+    this.gl.uniform4f(this.uniforms.uSeat, now, lit, unit, gate);
   }
 
   render(frame: SkinFrame, seconds: number, base01: number) {
