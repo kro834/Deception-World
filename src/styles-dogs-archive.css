@@ -2,7 +2,13 @@
   --dogs-ink: #020806;
   --dogs-text: #dce9df;
   --dogs-line: #9ed6b126;
-  --dogs-edge: max(clamp(16px, 4vw, 40px), env(safe-area-inset-left), env(safe-area-inset-right));
+  /* The site's own gutter (stage-shell), so the bar and its trigger stand
+     where they do on every other page. */
+  --dogs-edge: max(
+    var(--sh-gutter, clamp(16px, 4vw, 72px)),
+    env(safe-area-inset-left),
+    env(safe-area-inset-right)
+  );
   box-sizing: border-box;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
@@ -22,8 +28,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: calc(88px + env(safe-area-inset-top, 0px));
-  padding: calc(14px + env(safe-area-inset-top, 0px)) var(--dogs-edge) 14px;
+  box-sizing: border-box;
+  min-height: calc(var(--sh-bar-h, 76px) + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) var(--dogs-edge) 0;
   border-bottom: 1px solid var(--dogs-line);
   background: #030b08;
   z-index: 3;
@@ -56,9 +63,10 @@
   height: 20px;
 }
 .dogs-archive-header .side-panel-trigger {
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
   border: 1px solid #a6cdb833;
   border-radius: 50%;
   background: #11251a;
@@ -329,10 +337,7 @@ html[data-dogs-archive] .zeus-button {
 }
 @media (max-width: 700px) {
   .dogs-archive-header {
-    min-height: calc(76px + env(safe-area-inset-top, 0px));
     gap: 9px;
-    padding-top: calc(12px + env(safe-area-inset-top, 0px));
-    padding-bottom: 12px;
   }
   .dogs-archive-header h1 {
     font-size: 22px;
@@ -355,7 +360,7 @@ html[data-dogs-archive] .zeus-button {
     padding: 4px 2px;
   }
   .dogs-archive-selector button span {
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0;
   }
   .dogs-archive-record h2 {
@@ -392,11 +397,6 @@ html[data-dogs-archive] .zeus-button {
   .dogs-archive-exit {
     min-width: 44px;
   }
-  .dogs-archive-header .side-panel-trigger {
-    min-width: 44px;
-    width: 44px;
-    height: 44px;
-  }
   .dogs-archive-header {
     gap: 2px;
   }
@@ -404,11 +404,21 @@ html[data-dogs-archive] .zeus-button {
     gap: 0;
   }
 }
+/* The names stay 12px on the narrowest phones: the row takes the room. */
+@media (max-width: 350px) {
+  .dogs-archive-selector {
+    padding-inline: 6px;
+  }
+  .dogs-archive-selector button {
+    padding-inline: 0;
+  }
+  .dogs-archive-selector button span {
+    letter-spacing: -0.04em;
+  }
+}
 @media (max-height: 550px) and (orientation: landscape) {
   .dogs-archive-header {
     min-height: calc(62px + env(safe-area-inset-top, 0px));
-    padding-top: calc(9px + env(safe-area-inset-top, 0px));
-    padding-bottom: 9px;
   }
   .dogs-archive-header h1 {
     font-size: 22px;
@@ -427,7 +437,7 @@ html[data-dogs-archive] .zeus-button {
     padding-block: 6px 12px;
   }
   .dogs-archive .dogs-viewer__toolbar {
-    bottom: 12px;
+    bottom: 8px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
