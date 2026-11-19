@@ -9,23 +9,32 @@ import {
 
 export type DogViewerProps = {
   active: boolean;
+  /** Load the model at once. Without it the still stands until the visitor
+   * touches the stage or one of its controls: the model, its decoder and the
+   * scene's code are over 6 MB, and a visit that only passes through should
+   * not pay for them. */
+  eager?: boolean;
   onStatus?: (status: GuardianStatus) => void;
   className?: string;
 };
 
-export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) {
+export function DogViewer({ active, eager = false, onStatus, className = "" }: DogViewerProps) {
   const host = useRef<HTMLDivElement>(null);
   const runtime = useRef<GuardianScene | null>(null);
   const statusCallback = useRef(onStatus);
   statusCallback.current = onStatus;
-  const [status, setStatus] = useState<GuardianStatus>("loading");
+  const [touched, setTouched] = useState(false);
+  const wanted = eager || touched;
+  // 炎を吐く asked of the still: the model loads, then breathes.
+  const breatheWhenReady = useRef(false);
+  const [status, setStatus] = useState<GuardianStatus | "idle">(wanted ? "loading" : "idle");
   const [action, setAction] = useState(false);
   const [paused, setPaused] = useState(false);
   const [poses, setPoses] = useState<GuardianPose[]>([]);
   const [pose, setPose] = useState("Rest");
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    if (!active || !host.current) return;
+    if (!active || !wanted || !host.current) return;
     let cancelled = false;
     let visible = false,
       pending = false,
@@ -40,6 +49,8 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
       if (next === "ready" && runtime.current) {
         setPoses(runtime.current.listPoses());
         setPose(runtime.current.getPose());
+        if (breatheWhenReady.current) runtime.current.breathe();
+        breatheWhenReady.current = false;
       }
       statusCallback.current?.(next);
     };
@@ -100,12 +111,13 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
       runtime.current?.dispose();
       runtime.current = null;
     };
-  }, [active, attempt]);
+  }, [active, attempt, wanted]);
 
   return (
     <div
       className={`dogs-viewer ${status === "ready" ? "is-ready" : ""} ${className}`}
       data-viewer-status={status}
+      onPointerDown={wanted ? undefined : () => setTouched(true)}
     >
       <div className="dogs-viewer__surface" ref={host} />
       <div className="dogs-viewer__fallback" aria-hidden={status === "ready"}>
@@ -127,7 +139,7 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
                 再読み込み
               </button>
             </>
-          ) : (
+          ) : status === "idle" ? null : (
             <span>立体模型を読み込み中</span>
           )}
         </div>
@@ -140,8 +152,14 @@ export function DogViewer({ active, onStatus, className = "" }: DogViewerProps) 
         <button
           className="dogs-viewer__breathe"
           type="button"
-          disabled={status !== "ready" || action}
-          onClick={() => runtime.current?.breathe()}
+          disabled={(status !== "ready" && status !== "idle") || action}
+          onClick={() => {
+            if (runtime.current) runtime.current.breathe();
+            else {
+              breatheWhenReady.current = true;
+              setTouched(true);
+            }
+          }}
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path

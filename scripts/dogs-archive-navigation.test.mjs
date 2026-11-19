@@ -177,3 +177,27 @@ test("cancelling touch defaults preserves pointer input, propagation and non-can
   assert.deepEqual([pointer, observed], [1, 1]);
   release();
 });
+
+// Owner (2026-11-20): 「サイトも大きく改善します」 — arriving on the page no longer
+// pulls the fifth dog's model (over 6 MB with its decoder and scene): its
+// still stands until the visitor touches the stage or chooses here.
+test("the model waits for the visitor; names are 12px; the phone's controls are one row", async () => {
+  const { readFileSync } = await import("node:fs");
+  const read = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8");
+  const viewer = read("components/dogs-archive/dog-viewer.tsx");
+  assert.match(viewer, /const wanted = eager \|\| touched;/);
+  assert.match(viewer, /if \(!active \|\| !wanted \|\| !host\.current\) return;/);
+  assert.match(viewer, /onPointerDown=\{wanted \? undefined : \(\) => setTouched\(true\)\}/);
+  assert.match(viewer, /status === "idle" \? null : \(\s*<span>立体模型を読み込み中<\/span>/);
+  // The scene's code stays behind its dynamic import, inside the gated effect.
+  assert.doesNotMatch(viewer, /^import (?!type)[^;]*dogs-archive\/scene/m);
+  const route = read("routes/dogs-archive.tsx");
+  assert.match(route, /const \[eager, setEager\] = useState\(false\);/);
+  assert.match(route, /<DogViewer active eager=\{eager\} \/>/);
+  const sheet = read("styles-dogs-archive.css");
+  assert.doesNotMatch(sheet, /font-size:\s*(?:[0-9]|1[01])(?:\.\d+)?px/);
+  assert.match(sheet, /min-height: calc\(var\(--sh-bar-h, 76px\) \+ env\(safe-area-inset-top, 0px\)\);/);
+  const stage = read("styles-dogs-viewer.css");
+  const phone = stage.slice(stage.indexOf("@media (max-width: 560px) {\n  .dogs-viewer {"));
+  assert.match(phone, /\.dogs-viewer__toolbar \{[^}]*width: max-content;[^}]*flex-wrap: nowrap;/);
+});

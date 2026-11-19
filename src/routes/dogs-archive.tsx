@@ -43,6 +43,11 @@ function DogsArchive() {
   const human = form === "human" ? entry.human : undefined;
   const portrait = human ?? entry.portrait;
   const showViewer = dog === 5 && !human;
+  // The fifth dog's model is over 6 MB with its decoder and scene. Arriving
+  // on the page shows its still until the visitor touches it (every arrival
+  // is ?dog=5: the router writes the default into the URL); a choice made
+  // here, a tab or a form, loads it at once.
+  const [eager, setEager] = useState(false);
   useDialogHistoryDismiss(dialogRef, () => setReferenceOpen(false));
 
   useEffect(() => {
@@ -65,9 +70,11 @@ function DogsArchive() {
   }, [referenceOpen]);
 
   const choose = (next: DogArchiveId) => {
+    setEager(true);
     if (next !== dog) void navigate({ search: { dog: next }, replace: true, resetScroll: false });
   };
   const chooseForm = (next: typeof form) => {
+    setEager(true);
     if (next !== form) {
       void navigate({ search: { dog, form: next }, replace: true, resetScroll: false });
     }
@@ -186,7 +193,7 @@ function DogsArchive() {
           ) : null}
         </div>
         {showViewer ? (
-          <DogViewer active />
+          <DogViewer active eager={eager} />
         ) : portrait ? (
           <div
             className={
