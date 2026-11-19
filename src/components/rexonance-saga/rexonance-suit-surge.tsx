@@ -13,7 +13,6 @@ import {
   entrySurgeFrame,
   figureIn,
   scrollPieceWindows,
-  scrollPush,
   scrollSurgeFrame,
   scrollWindows,
   surgePieces,
@@ -633,17 +632,6 @@ export function ScrollSurgeCanvas({ layer }: { layer: "back" | "front" }) {
   return <canvas className={`rzn-surge is-${layer}`} aria-hidden="true" width={0} height={0} style={SCROLL_CANVAS} />;
 }
 
-// The HUD's parts (ASSEMBLY_PARTS: LEGS, ARMS, CHEST, WAIST, TAIL, HEAD) and
-// the groups each one seats.
-const PART_GROUPS = [
-  [SURGE_GROUPS.indexOf("legs")],
-  [SURGE_GROUPS.indexOf("arms")],
-  [SURGE_GROUPS.indexOf("chest"), SURGE_GROUPS.indexOf("shoulders")],
-  [SURGE_GROUPS.indexOf("waist")],
-  [SURGE_GROUPS.indexOf("tail"), SURGE_GROUPS.indexOf("ribbon")],
-  [SURGE_GROUPS.indexOf("helm")],
-];
-
 /** Where the scene is not the page's scroll runway (the transformation lab,
  * 2026-11-11): the same layer on the lab's own stage. */
 export type ScrollSurgeOptions = {
@@ -678,8 +666,6 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
     const coarse = Boolean(globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches);
     const windows = scrollWindows();
     const pieceWindows = scrollPieceWindows(windows);
-    const parts = Array.from(runway.querySelectorAll<HTMLElement>(".rzn-part"));
-    const partOn = parts.map(() => false);
     let engine: SurgeEngine | null = null;
     let crescendo: Crescendo | null = null;
     let crescendoClock: InstanceType<CrescendoLib["CrescendoScrollClock"]> | null = null;
@@ -809,24 +795,10 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
     let lastQ = -1;
     let lastStamp = 0;
     let lastDraw = -Infinity;
+    let lastFinaleAt = -Infinity;
     let size = "";
-    let moved: HTMLElement[] = [];
-    let camera = "";
     let pinTop = 0;
     let travel = 0;
-    const layers = () =>
-      Array.from(
-        layerBox.querySelectorAll<HTMLElement>(":scope > :is(.rzn-canvas, .rzn-field, .rzn-surge)"),
-      );
-    const restCamera = () => {
-      for (const element of moved) {
-        element.style.scale = "";
-        element.style.translate = "";
-        element.style.transformOrigin = "";
-      }
-      moved = [];
-      camera = "";
-    };
     const measure = () => {
       if (size || !engine) return;
       const width = scene.clientWidth;
@@ -847,14 +819,12 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         read("--rzn-fig-b", 0.05),
       );
       engine.resize({ width, height, ...figure });
-      restCamera();
     };
     const live = () =>
       runway.dataset.rznState === "live" && !document.hidden && visible && !reducedMotion();
     const stop = () => {
       cancelAnimationFrame(raf);
       raf = 0;
-      restCamera();
       engine?.clear();
       skin?.renderer.clear();
       skin?.cells.clear();
@@ -919,14 +889,6 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
       const grown = skin as Skin | null;
       const skinLive = Boolean(grown && !grown.renderer.lost);
       flagSkin(skinLive);
-      // A part that seats as the reader moves forward strikes its lock
-      // (under the skin its label lights with the front: no plate clanks).
-      parts.forEach((part, index) => {
-        const on = part.hasAttribute("data-on");
-        if (on && !partOn[index] && lastQ >= 0 && q >= lastQ - 0.001 && !skinLive)
-          for (const g of PART_GROUPS[index]) if (g >= 0) engine?.lock(g, now);
-        partOn[index] = on;
-      });
       const moving = lastQ < 0 || Math.abs(q - lastQ) > 0.00005;
       // A seek (the scrubber, a jump): the cells in the air were the old
       // playhead's.
@@ -1045,7 +1007,13 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         crescendo && crescendoClock
           ? crescendoClock.frame(crescendo.frame, q, now)
           : null;
-      if (pass && shellOn) crescendo?.lib.quietCrescendo(pass);
+      if (pass && crescendo) {
+        // Seating is shown by the swarm and the surface. Skip the old
+        // plate flashes and rate-limit the completion pulse on re-scrubs.
+        crescendo.lib.quietCrescendo(pass);
+        if (pass.finale === 0 && now - lastFinaleAt >= 1000) lastFinaleAt = now;
+        if (pass.finale >= 0 && now - pass.finale > lastFinaleAt + 0.1) pass.finale = -1;
+      }
       const playing = Boolean(pass && crescendo?.lib.crescendoBusy(pass));
       const busy = engine.busy(now) || playing;
       // At rest the swarm keeps flowing (touch screens at about 30 fps).
@@ -1105,41 +1073,14 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
           } else if (grown.cells.live) grown.cells.clear();
         } else if (bursting) showClassic(0);
         else showClassic(1);
+        // Keep the surrounding effects off the active face before drawing
+        // the few cheek/visor packets, which protect the eye line themselves.
+        if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
+        if (growing && surfaces) clearVisorGlare(surfaces.front, growing);
         if (surfaces && scrollSwarm && !leaving && !bursting) {
           const share = Math.min(engine.swarmShare, grown && crescendo
             ? grown.lib.SKIN_CELL_SHARE[crescendo.engine.governor.level] : 1);
           scrollSwarm.draw(surfaces.back, surfaces.front, q, skinLive, surfaces.scale, share);
-        }
-        // Surge aura and shell blend tracking across form burst transitions
-        if (crescendo && pass && surfaces) crescendo.engine.draw(surfaces, pass, paced);
-        if (growing && surfaces) clearVisorGlare(surfaces.front, growing);
-        // The lean in is for fine pointers: on touch screens a transform on
-        // the scene's large canvases every scrolled frame cost WebKit its
-        // frame rate; there only the locks' brief shake moves them.
-        // (Nor on a stage with a playhead of its own: the lab holds the
-        // figure at one size, for its zooms and its side-by-side.)
-        const push = coarse || direct ? 1 : scrollPush(q);
-        const [x, y] = engine.shake(now);
-        // The bank's director owns the camera: the locks' shake joins it.
-        if (director) {
-          if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) director.shake(x, y);
-          raf = requestAnimationFrame(tick);
-          return;
-        }
-        const key = `${push.toFixed(4)}|${x.toFixed(1)}|${y.toFixed(1)}`;
-        if (key !== camera) {
-          camera = key;
-          if (push === 1 && Math.abs(x) < 0.05 && Math.abs(y) < 0.05) restCamera();
-          else {
-            if (!moved.length) {
-              moved = layers();
-              for (const element of moved) element.style.transformOrigin = "50% 58%";
-            }
-            for (const element of moved) {
-              element.style.scale = push === 1 ? "" : push.toFixed(4);
-              element.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
-            }
-          }
         }
       }
       raf = requestAnimationFrame(tick);

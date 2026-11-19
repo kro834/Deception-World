@@ -16,6 +16,9 @@ const [eyeX, eyeY] = REXONANCE_SUIT_MARKS.visor;
 const tau = Math.PI * 2;
 const families = { desktop: 192, tablet: 96, phone: 60, low: 24 };
 const perFamily = 12;
+const grainStride = 6;
+const facetStride = 3;
+const dockHold = 0.006;
 const colours = ["#66c7ed", "#ce8bd4", "#e1f8ff"];
 const ease = (x: number) => {
   const u = Math.min(1, Math.max(0, x));
@@ -24,6 +27,7 @@ const ease = (x: number) => {
 
 type Family = {
   head: boolean;
+  face: boolean;
   birth: number;
   x: number;
   y: number;
@@ -35,6 +39,9 @@ type Family = {
   drift: number;
   targetX: number;
   targetY: number;
+  seamAngle: number;
+  facetCos: number;
+  facetSin: number;
   classic: number;
   skin: number;
 };
@@ -58,7 +65,7 @@ export class RexonanceScrollSwarm {
   private groups: Family[] = [];
   // Each grain's landing offset, two orbital offsets, phase lag and size.
   private grains: Float32Array;
-  // Once per frame: projected centre and facet width. Signed width selects
+  // Once per frame: projected centre, facet width. Signed width selects
   // the far/near canvas. The six colour/depth batches reuse these buffers.
   private screen: Float32Array;
 
@@ -69,26 +76,47 @@ export class RexonanceScrollSwarm {
   ) {
     const groups = pieces.length ? (families[tier as keyof typeof families] ?? families.low) : 0;
     this.count = groups * perFamily;
-    this.grains = new Float32Array(this.count * 6);
-    this.screen = new Float32Array(this.count * 3);
+    this.grains = new Float32Array(this.count * grainStride);
+    this.screen = new Float32Array(this.count * facetStride);
     const contours = pieces.map((piece) => decodeNaniteSeam(REXONANCE_NANITE_SEAMS[piece.id])[0]);
     const helmet = pieces
       .map((piece, i) => (piece.id.startsWith("helmet-") ? i : -1))
       .filter((i) => i >= 0);
+    const jaw = pieces.findIndex((piece) => piece.id === "helmet-jaw");
+    const visor = pieces.findIndex((piece) => piece.id === "helmet-visor");
     const pose = new Float64Array(6);
     for (let g = 0; g < groups; g++) {
-      // Include the helmet in the late beats even in the smallest prefix.
-      const p =
-        g % 7 === 0 && helmet.length
+      // Reserve the first four families for a pair at each of the cheeks
+      // and the inner visor. Both sides survive the mobile budget governor.
+      const face = jaw >= 0 && visor >= 0 && g < 4;
+      const side = g % 2 === 0 ? -1 : 1;
+      const p = face
+        ? (g < 2 ? jaw : visor)
+        : g % 7 === 0 && helmet.length
           ? helmet[(g / 7) % helmet.length]
           : Math.floor(naniteHash(g, 71) * pieces.length);
       const piece = pieces[p];
       const loop = contours[p];
       const points = loop ? loop.length / 2 : 0;
-      const seam = points && g % 5 !== 0;
-      const index = Math.floor(naniteHash(g, 7) * points);
+      const seam = points > 0 && (face || g % 5 !== 0);
+      let index = Math.floor(naniteHash(g, 7) * points);
+      if (face && seam) {
+        const aimX = eyeX + side * (p === jaw ? 43 : 9);
+        const aimY = eyeY + (p === jaw ? 38 : 15);
+        let nearest = Infinity;
+        for (let j = 0; j < points; j++) {
+          const distance = (loop[j * 2] - aimX) ** 2 + (loop[j * 2 + 1] - aimY) ** 2;
+          if (distance >= nearest) continue;
+          nearest = distance;
+          index = j;
+        }
+      }
       const tx = seam ? loop[index * 2] : piece.seat[0];
       const ty = seam ? loop[index * 2 + 1] : piece.seat[1];
+      const next = (index + 1) % points;
+      const angle = seam ? Math.atan2(loop[next * 2 + 1] - ty, loop[next * 2] - tx) : 0;
+      // Align the long edge without turning the packet through a half circle.
+      const seamAngle = angle > Math.PI / 2 ? angle - Math.PI : angle < -Math.PI / 2 ? angle + Math.PI : angle;
       const seed = (((g * 79) % NANITE_FIRE_FRAGMENTS) + 0.5) / NANITE_FIRE_FRAGMENTS;
       // The first cold position and velocity of the very same visible ember.
       let low: number = NANITE_FIRE_PHASES.materialStart;
@@ -104,23 +132,27 @@ export class RexonanceScrollSwarm {
         windows[p * 2] + (windows[p * 2 + 1] - windows[p * 2]) * (0.25 + 0.72 * naniteHash(g, 9));
       this.groups.push({
         head: piece.id.startsWith("helmet-"),
+        face,
         birth: scrollFlameAt(high),
         x: width * pose[0],
         y: height * pose[1],
         vx: (width * pose[2]) / REXONANCE_SCROLL_FLAME.span,
         vy: (height * pose[3]) / REXONANCE_SCROLL_FLAME.span,
         phase: tau * naniteHash(g, 13),
-        side: tx < axis ? -1 : 1,
+        side: face ? side : tx < axis ? -1 : 1,
         radius: 230 + 207 * naniteHash(g, 14),
         drift: 0.6 + naniteHash(g, 15),
         targetX: tx,
         targetY: ty,
+        seamAngle,
+        facetCos: 1,
+        facetSin: 0,
         classic,
         skin: classic,
       });
       for (let k = 0; k < perFamily; k++) {
         const i = g * perFamily + k;
-        const a = i * 6;
+        const a = i * grainStride;
         // Fan along adjacent outline segments. The packet on a seat clicks
         // into a much smaller socket instead.
         const along = (k / (perFamily - 1) - 0.5) * Math.min(points / 3, 3);
@@ -140,6 +172,16 @@ export class RexonanceScrollSwarm {
         this.grains[a + 5] = 1.9 + naniteHash(i, 23) ** 2 * 4.1;
       }
     }
+    this.orderFaceSeats("classic");
+  }
+
+  private orderFaceSeats(clock: "classic" | "skin") {
+    const [leftCheek, rightCheek, leftVisor, rightVisor] = this.groups;
+    if (!rightVisor?.face) return;
+    const close = Math.max(leftVisor[clock], rightVisor[clock]);
+    const cheek = Math.min(leftCheek[clock], rightCheek[clock], close - 0.035);
+    leftCheek[clock] = rightCheek[clock] = cheek;
+    leftVisor[clock] = rightVisor[clock] = close;
   }
 
   /** Sample the same signed body/head front as the skin. Resolve once after
@@ -161,6 +203,7 @@ export class RexonanceScrollSwarm {
       }
       if (best < Infinity) group.skin = reach(group.skin, group.head);
     }
+    this.orderFaceSeats("skin");
   }
 
   draw(back: Context, front: Context, q: number, skin: boolean, scale: number, share: number) {
@@ -175,13 +218,19 @@ export class RexonanceScrollSwarm {
       const land = skin ? group.skin : group.classic;
       const age = q - group.birth;
       const first = g * perFamily;
-      if (age <= 0 || q >= land + 0.005) {
-        for (let i = first; i < first + perFamily; i++) screen[i * 3 + 2] = 0;
+      if (age <= 0 || land <= group.birth || q >= land + dockHold) {
+        for (let i = first; i < first + perFamily; i++) screen[i * facetStride + 2] = 0;
         continue;
       }
       const open = ease(age / 0.042);
       const capture = Math.min(0.195, (land - group.birth) * 0.72);
-      const dock = ease(1 - (land - q) / capture);
+      // Seat just ahead of the surface and let it take over at the same
+      // mark. The hold follows scroll progress in both directions.
+      const lead = Math.min(0.026, capture * 0.4);
+      const dock = ease(1 - (land - lead - q) / (capture - lead));
+      const facetAngle = group.seamAngle * dock;
+      group.facetCos = Math.cos(facetAngle);
+      group.facetSin = Math.sin(facetAngle);
       const angle = group.phase + age * (16 + 8 * group.drift);
       const cos = Math.cos(angle),
         sin = Math.sin(angle);
@@ -197,21 +246,24 @@ export class RexonanceScrollSwarm {
       const y = startY + (orbitY - startY) * open;
       // The incoming stream bends parallel to the contour at an outside
       // gate. Its two branches close on neighbouring samples of the edge.
-      const gateX = group.targetX + group.side * (78 + 50 * group.drift);
-      const gateY = group.targetY + 96 * cos;
+      const gateX = group.face
+        ? eyeX + group.side * 49
+        : group.targetX + group.side * (78 + 50 * group.drift);
+      const gateY = group.face ? eyeY + 39 : group.targetY + 96 * cos;
       for (let i = first; i < first + perFamily; i++) {
-        const a = i * 6,
-          b = i * 3;
+        const a = i * grainStride,
+          b = i * facetStride;
         const lag = grains[a + 4];
-        const snap = ease((q - land + 0.006 * lag) / 0.005);
-        const presence = ease(age / 0.007) * (1 - snap);
+        const fadeStart = land - 0.004 * lag;
+        const fade = ease((q - fadeStart) / (land + dockHold - fadeStart));
+        const presence = ease(age / 0.007) * (1 - fade);
         const approach = dock * (1 - 0.65 * lag * (1 - dock));
         const free = 1 - approach;
         const spread = free * (0.12 + 1.18 * open);
         const dx = grains[a + 2],
           dy = grains[a + 3];
         const bend = 2 * free * approach;
-        const fork = (i % 2 ? 1 : -1) * bend * (21 + 18 * lag);
+        const fork = (i % 2 ? 1 : -1) * bend * (group.face ? 8 : 21 + 18 * lag);
         const px =
           free * free * x +
           bend * gateX +
@@ -229,7 +281,7 @@ export class RexonanceScrollSwarm {
         const behind =
           (sin < -0.24 && approach < 0.75) ||
           (px - axis) ** 2 + (py - coreY) ** 2 < 38 ** 2 ||
-          ((px - eyeX) / 39) ** 2 + ((py - eyeY) / 20) ** 2 < 1;
+          ((px - eyeX) / 39) ** 2 + ((py - eyeY) / (group.face ? 9 : 20)) ** 2 < 1;
         const width = Math.max(minWidth, grains[a + 5] * (behind ? 0.7 : 1)) * presence;
         screen[b] = px;
         screen[b + 1] = py;
@@ -244,17 +296,23 @@ export class RexonanceScrollSwarm {
       context.globalAlpha = side ? 0.92 : 0.56;
       for (let tone = 0; tone < colours.length; tone++) {
         context.beginPath();
-        for (let i = tone; i < groups * perFamily; i += colours.length) {
-          const b = i * 3;
-          const r = screen[b + 2] * (side ? 1 : -1);
-          if (r <= 0) continue;
-          const x = screen[b],
-            y = screen[b + 1];
-          context.moveTo(x - r, y);
-          context.lineTo(x - r * 0.45, y - r * 0.65);
-          context.lineTo(x + r, y - r * 0.2);
-          context.lineTo(x + r * 0.5, y + r * 0.63);
-          context.closePath();
+        for (let g = 0; g < groups; g++) {
+          const { facetCos, facetSin } = this.groups[g];
+          const first = g * perFamily;
+          for (let i = first + tone; i < first + perFamily; i += colours.length) {
+            const b = i * facetStride;
+            const r = screen[b + 2] * (side ? 1 : -1);
+            if (r <= 0) continue;
+            const x = screen[b],
+              y = screen[b + 1];
+            const dx = r * facetCos;
+            const dy = r * facetSin;
+            context.moveTo(x - dx, y - dy);
+            context.lineTo(x - dx * 0.45 + dy * 0.65, y - dy * 0.45 - dx * 0.65);
+            context.lineTo(x + dx + dy * 0.2, y + dy - dx * 0.2);
+            context.lineTo(x + dx * 0.5 - dy * 0.63, y + dy * 0.5 + dx * 0.63);
+            context.closePath();
+          }
         }
         context.fillStyle = colours[tone];
         context.fill();

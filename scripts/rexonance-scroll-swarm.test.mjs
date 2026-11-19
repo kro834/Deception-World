@@ -97,13 +97,40 @@ test("a drawn packet reaches the boot's decoded edge or assembly seat before dis
     }
     return best;
   };
-  const positions = draw(swarm, 0.4).positions;
-  assert.ok(positions.length > 300);
+  const seated = draw(swarm, 0.387);
+  const handedOff = draw(swarm, 0.4);
+  assert.ok(seated.count > 300);
+  assert.ok(handedOff.count > 300);
   // moveTo gives the left edge of each facet (up to six figure pixels
   // wide), including the three-pixel socket inset.
-  for (let i = 0; i < positions.length; i += 2)
-    assert.ok(distance(positions[i], positions[i + 1]) < 11);
+  for (const { positions } of [seated, handedOff]) {
+    for (let i = 0; i < positions.length; i += 2)
+      assert.ok(distance(positions[i], positions[i + 1]) < 11);
+  }
   assert.equal(draw(swarm, 0.407).count, 0);
   const airborne = draw(swarm, 0.27).positions;
   assert.ok(airborne.some((x, i) => i % 2 === 0 && distance(x, airborne[i + 1]) > 100));
+});
+
+test("a coarse scroll still catches both cheeks before the inner visor at the low budget", () => {
+  const reducedSwarm = new RexonanceScrollSwarm("low", pieces, windows);
+  bind(reducedSwarm);
+  const faceShare = 0.17; // Four families at the smallest device tier.
+  const sample = (q) => {
+    const { positions } = draw(reducedSwarm, q, true, faceShare);
+    return Array.from({ length: positions.length / 2 }, (_, i) => ({
+      x: positions[i * 2],
+      y: positions[i * 2 + 1],
+    }));
+  };
+  const frames = Array.from({ length: 20 }, (_, i) => sample(0.52 + i * 0.015));
+  const cheeks = frames.findIndex((points) =>
+    points.some(({ x, y }) => x >= 216 && x <= 255 && y >= 172 && y <= 205) &&
+    points.some(({ x, y }) => x >= 316 && x <= 351 && y >= 172 && y <= 205),
+  );
+  const visor = frames.findIndex((points) =>
+    points.some(({ x, y }) => x >= 261 && x < 283 && y >= 151 && y <= 168) &&
+    points.some(({ x, y }) => x > 285 && x <= 305 && y >= 151 && y <= 168),
+  );
+  assert.ok(cheeks >= 0 && visor > cheeks, "the two sides seat on the cheeks and then close inward");
 });

@@ -504,8 +504,11 @@ test("each HUD label lights when the front reaches the part it names", () => {
   const surge = read("src/components/rexonance-saga/rexonance-suit-surge.tsx");
   assert.match(surge, /flagSkin\(skinLive\);/);
   assert.match(surge, /endLeave\(true\);\s*flagSkin\(false\);/);
-  // Under the skin a label lighting strikes no plate lock (and no shake).
-  assert.match(surge, /q >= lastQ - 0\.001 && !skinLive\)/);
+  // Scroll reads the same labels without replaying the plate flash or lock.
+  const scroll = surge.slice(surge.indexOf("export function mountScrollSurge"));
+  assert.doesNotMatch(scroll, /engine\??\.lock\(/);
+  assert.match(scroll, /crescendo\.lib\.quietCrescendo\(pass\);/);
+  assert.match(scroll, /now - lastFinaleAt >= 1000/);
 });
 
 test("the shared scene stops drawing while the skin covers it whole — Rexonance's config only", () => {
