@@ -2111,8 +2111,9 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
     --rx-suit-lock: calc(var(--rx-call-final-start) + 80ms);
   }
 
-  /* Under the skin (rexonance-suit-skin.ts) each label lights as the front
-     reaches the part it names (rexonance-suit-skin-marks.ts). */
+  /* Under the skin (rexonance-suit-skin.ts) each body label lights as its
+     part's plates seat (2026-11-19, rexonance-entry-seat.ts), the helmet's
+     as the head's front reaches it (rexonance-suit-skin-marks.ts). */
   html:not([data-world-effects="economy"])
     .rx-call-sequence[data-mode="entry"][data-tier="full"][data-phase="covering"]
     .rx-suit[data-skin]

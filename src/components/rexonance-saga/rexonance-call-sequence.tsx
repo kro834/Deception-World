@@ -11,6 +11,7 @@ import {
   REXONANCE_SUIT_PARTS,
   REXONANCE_SUIT_PIXELS,
   REXONANCE_SUIT_REVEAL_MS,
+  REXONANCE_SUIT_SNAP,
   REXONANCE_SUIT_SPARKS,
   REXONANCE_SUIT_SYSTEMS,
   type RexonanceStage,
@@ -526,9 +527,17 @@ function SquarePaths({ squares }: { squares: Squares }) {
 
 // Each label lands on the line its group snaps on (the helmet's on the
 // last call). Under the skin (2026-11-11: the armour grows from the reactor
-// as one front, .rx-suit[data-skin]) each lights as the front reaches the
-// part it names instead: the chest, the arms, the legs, the helmet.
+// as one front, .rx-suit[data-skin]) each lights by SUIT_SKIN_LOCK instead.
 const SUIT_PART_LINE = { LEGS: 0, ARMS: 2, CHEST: 3, HEAD: 3 } as const;
+// Owner (2026-11-19): under the skin a body part's plates now seat on the
+// call's own fits (rexonance-entry-seat.ts), so its label lights on its
+// DEUS！ again; the helmet's still lights as the head's front reaches it.
+const SUIT_SKIN_LOCK = {
+  LEGS: REXONANCE_SUIT_SNAP.legs,
+  ARMS: REXONANCE_SUIT_SNAP.arms,
+  CHEST: REXONANCE_SUIT_SNAP.chest,
+  HEAD: SKIN_ENTRY_PARTS.HEAD,
+} as const;
 // The halos' places and widths (figure pixels): the core and the eyes.
 const SUIT_HALOS = [
   { name: "core", at: REXONANCE_SUIT_MARKS.core, size: 150 },
@@ -778,7 +787,7 @@ function Suit({ suit, animate }: { suit: "build" | "whole"; animate: boolean }) 
             style={
               {
                 "--rx-suit-i": SUIT_PART_LINE[part],
-                "--rx-suit-skin-lock": `${entryElapsedTime(SKIN_ENTRY_PARTS[part])}ms`,
+                "--rx-suit-skin-lock": `${entryElapsedTime(SUIT_SKIN_LOCK[part])}ms`,
               } as CSSProperties
             }
           >
