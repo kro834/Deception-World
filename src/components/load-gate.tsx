@@ -635,7 +635,13 @@ function composeScene({
     platePosition: null,
     hold: null,
     art: art?.src ?? null,
-    artRect: art?.rect ?? null,
+    // A picture mostly scrolled away (a phone's rider art above its open
+    // control) comes up from the control instead, fading in as it rises
+    // (has-carry-far): flown from its off-screen box, the whole art crossed
+    // the top of the screen larger than it rests, then shrank into the held
+    // frame and grew again onto the portrait, a double turn of light over a
+    // bright plate (Saga's, 2/s on a phone).
+    artRect: art?.inView ? art.rect : null,
     artPosition: art?.position ?? "center",
     // Without a picture to lift, the held frame shows the destination's
     // file; a cut-in keeps it under its stage for the reveal.
@@ -818,6 +824,8 @@ function handOverDockedFile(scene: CineScene) {
 function cineClass(scene: CineScene | null | undefined) {
   if (!scene) return "";
   return ` has-cine is-cine-${scene.kind} is-cine-${scene.tier}${scene.art ? " has-carry-art" : ""}${
+    scene.art && !scene.artRect ? " has-carry-far" : ""
+  }${
     scene.file ? " has-carry-file" : ""
   }${scene.landing ? " has-landing" : ""}${dockGeometry(scene) ? " has-dock" : ""}`;
 }

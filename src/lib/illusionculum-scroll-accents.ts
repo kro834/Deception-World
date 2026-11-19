@@ -811,11 +811,16 @@ export function createIllusionculumScrollAccents(options: {
       context.stroke();
     }
     if (calm) return;
-    const w = clamp01((p - at) / 0.035);
+    // The bloom lasts, and stays lit, until the reactor's light (.9) has
+    // begun: gone at .895 (and mostly gone well before), the chest went dark
+    // for a few frames between the two and the entry read as two flashes in
+    // a second on a phone (verify-route-transitions); now the light takes
+    // over from it, one rise and one fall.
+    const w = clamp01((p - at) / 0.06);
     if (w < 1 && glows[groupCount]) {
       // The seal's bloom, from the reactor: the one larger glow, once.
       context.fillStyle = glows[groupCount] as CanvasGradient;
-      context.globalAlpha = 0.42 * Math.pow(1 - w, 1.6);
+      context.globalAlpha = 0.42 * Math.pow(1 - w, 0.8);
       const r = glowRadius[groupCount];
       context.fillRect(coreX - r, coreY - r, r * 2, r * 2);
       context.strokeStyle = WHITE;

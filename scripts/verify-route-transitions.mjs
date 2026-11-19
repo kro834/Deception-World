@@ -103,6 +103,13 @@ const META_REAL_RELEASE_MS = 5200;
 const EXTREME_GONE_MS = 3900;
 const EXTREME_RELEASE_MS = 4500;
 
+// ILLUSIONCULUM's entry has held its cover for 5300 ms since 81de70a4
+// (2026-10-27, ILLUSIONCULUM_ENTRY_TIMINGS; its playback clock runs to
+// 4740 ms), not the 3090 ms these budgets were copied from on 10-24. It is
+// sampled for 7 s and held to its own clock.
+const ILLUSIONCULUM_GONE_MS = 5300;
+const ILLUSIONCULUM_RELEASE_MS = 5900;
+
 const pick = (list, all) =>
   list
     ? list
@@ -332,7 +339,12 @@ async function audit(browser, analyser, profileName, name) {
   // Owner (2026-11-20): EXTREME's suit-up releases after the 4 s the other
   // frozen entries are sampled for.
   const extremeEntry = scenario.dest === "/extreme-saga";
-  for (let frame = 0; frame < (metaUnitasEntry ? 1440 : extremeEntry ? 300 : 240); frame += 1) {
+  const illusionculumEntry = scenario.dest === "/illusionculum-saga";
+  for (
+    let frame = 0;
+    frame < (metaUnitasEntry ? 1440 : illusionculumEntry ? 420 : extremeEntry ? 300 : 240);
+    frame += 1
+  ) {
     if (metaUnitasEntry) await page.waitForTimeout(STEP);
     else await page.clock.runFor(STEP);
     const t = metaUnitasEntry
@@ -449,13 +461,13 @@ async function audit(browser, analyser, profileName, name) {
   assert.ok(
     doneAt &&
       doneAt <=
-        (scenario.dest === "/rexonance-saga" ? 3580 : scenario.dest === "/illusionculum-saga" ? 3580 : extremeEntry ? EXTREME_GONE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_GONE_MS : GONE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3580 : illusionculumEntry ? ILLUSIONCULUM_GONE_MS : extremeEntry ? EXTREME_GONE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_GONE_MS : GONE_BUDGET_MS),
     `${profileName} ${name}: the shutter is gone by ${doneAt} ms`,
   );
   assert.ok(
     releasedAt &&
       releasedAt <=
-        (scenario.dest === "/rexonance-saga" ? 3780 : scenario.dest === "/illusionculum-saga" ? 3780 : extremeEntry ? EXTREME_RELEASE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_RELEASE_MS : RELEASE_BUDGET_MS),
+        (scenario.dest === "/rexonance-saga" ? 3780 : illusionculumEntry ? ILLUSIONCULUM_RELEASE_MS : extremeEntry ? EXTREME_RELEASE_MS : metaUnitasEntry ? (playbackAt ?? 0) + META_REAL_RELEASE_MS : RELEASE_BUDGET_MS),
     `${profileName} ${name}: the gate is released by ${releasedAt} ms`,
   );
   assert.deepEqual(errors, [], `${profileName} ${name}: page errors`);
