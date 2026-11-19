@@ -3691,10 +3691,10 @@ html[data-family="special"]
   > .rxs-local-nav-inner {
   box-sizing: border-box;
   width: 100%;
-  /* Owner (2026-11-20): the nav draws its 1px rule outside this lane, which
-     made the special sites' bar 77px (65px on phones) beside the 76px (64px)
-     bars. The rule now counts inside the bar's height. */
-  min-height: calc(var(--sh-bar-h) - 1px + env(safe-area-inset-top, 0px));
+  /* The nav draws its 1px rule under this lane, so the special sites' bar is
+     77px (65px on phones). It stays so: each special page reserves exactly
+     that height before first paint (--rxs-local-nav-reserve, 2026-11-20). */
+  min-height: calc(var(--sh-bar-h) + env(safe-area-inset-top, 0px));
   padding-block: env(safe-area-inset-top, 0px) 0;
   padding-inline: max(var(--sh-gutter), env(safe-area-inset-left, 0px))
     max(var(--sh-gutter), env(safe-area-inset-right, 0px));
@@ -3907,7 +3907,9 @@ html[data-family="archive"]
    Now: one 48px square, one gutter in from the right edge, centred above
    the bar's 1px rule (13.5 / 7.5) in a 76px bar (64px on phones). Dream
    keeps its own 58px programme bar, the second and only other height,
-   with the square centred in it and on the same gutter.
+   with the square centred in it and on the same gutter. The special
+   sites' local nav keeps its rule outside the lane (77 / 65, the square
+   at 14 / 8): their pages reserve that height before first paint.
    The tokens below are for the pages that still place their own trigger
    (the transformation lab, DOGS ARCHIVE): top = --sh-trigger-top below
    the safe area, right = --sh-gutter, size = --sh-trigger-size.
