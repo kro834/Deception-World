@@ -9,10 +9,10 @@ import {
 
 export type DogViewerProps = {
   active: boolean;
-  /** Load the model at once. Without it the still stands until the visitor
-   * touches the stage or one of its controls: the model, its decoder and the
-   * scene's code are over 6 MB, and a visit that only passes through should
-   * not pay for them. */
+  /** Load the model at once. Without it the still stands first and the
+   * model (over 6 MB with its decoder and the scene's code) starts by itself
+   * once the page has painted and is idle, so it does not compete with the
+   * page's own arrival; a touch on the stage or a control starts it sooner. */
   eager?: boolean;
   onStatus?: (status: GuardianStatus) => void;
   className?: string;
@@ -33,6 +33,24 @@ export function DogViewer({ active, eager = false, onStatus, className = "" }: D
   const [poses, setPoses] = useState<GuardianPose[]>([]);
   const [pose, setPose] = useState("Rest");
   const [attempt, setAttempt] = useState(0);
+  // Owner (2026-11-20): Ciel does not wait for a tap. After the first paint,
+  // when the browser is idle (or 1.5 s at the latest), the model starts.
+  useEffect(() => {
+    if (!active || wanted) return;
+    let idle = 0;
+    let timer = 0;
+    const start = () => setTouched(true);
+    const frame = requestAnimationFrame(() => {
+      if (typeof window.requestIdleCallback === "function")
+        idle = window.requestIdleCallback(start, { timeout: 1500 });
+      else timer = window.setTimeout(start, 600);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (idle) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
+    };
+  }, [active, wanted]);
   useEffect(() => {
     if (!active || !wanted || !host.current) return;
     let cancelled = false;

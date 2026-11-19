@@ -44,9 +44,9 @@ function DogsArchive() {
   const portrait = human ?? entry.portrait;
   const showViewer = dog === 5 && !human;
   // The fifth dog's model is over 6 MB with its decoder and scene. Arriving
-  // on the page shows its still until the visitor touches it (every arrival
-  // is ?dog=5: the router writes the default into the URL); a choice made
-  // here, a tab or a form, loads it at once.
+  // on the page shows its still first and the model starts by itself once
+  // the page is idle (dog-viewer.tsx); a choice made here, a tab or a form,
+  // loads it at once.
   const [eager, setEager] = useState(false);
   useDialogHistoryDismiss(dialogRef, () => setReferenceOpen(false));
 

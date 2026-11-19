@@ -178,15 +178,21 @@ test("cancelling touch defaults preserves pointer input, propagation and non-can
   release();
 });
 
-// Owner (2026-11-20): 「サイトも大きく改善します」 — arriving on the page no longer
-// pulls the fifth dog's model (over 6 MB with its decoder and scene): its
-// still stands until the visitor touches the stage or chooses here.
-test("the model waits for the visitor; names are 12px; the phone's controls are one row", async () => {
+// Owner (2026-11-20): 「サイトも大きく改善します」 — the fifth dog's model (over
+// 6 MB with its decoder and scene) no longer competes with the page's
+// arrival: its still stands first, and the model starts by itself once the
+// page has painted and is idle (Ciel does not wait for a tap); a touch, a
+// tab or 炎を吐く starts it sooner.
+test("the model starts after the page is idle; names are 12px; the phone's controls are one row", async () => {
   const { readFileSync } = await import("node:fs");
   const read = (path) => readFileSync(new URL(`../src/${path}`, import.meta.url), "utf8");
   const viewer = read("components/dogs-archive/dog-viewer.tsx");
   assert.match(viewer, /const wanted = eager \|\| touched;/);
   assert.match(viewer, /if \(!active \|\| !wanted \|\| !host\.current\) return;/);
+  assert.match(
+    viewer,
+    /if \(!active \|\| wanted\) return;[\s\S]*?requestAnimationFrame\(\(\) => \{\s*if \(typeof window\.requestIdleCallback === "function"\)\s*idle = window\.requestIdleCallback\(start, \{ timeout: 1500 \}\);\s*else timer = window\.setTimeout\(start, 600\);/,
+  );
   assert.match(viewer, /onPointerDown=\{wanted \? undefined : \(\) => setTouched\(true\)\}/);
   assert.match(viewer, /status === "idle" \? null : \(\s*<span>立体模型を読み込み中<\/span>/);
   // The scene's code stays behind its dynamic import, inside the gated effect.
