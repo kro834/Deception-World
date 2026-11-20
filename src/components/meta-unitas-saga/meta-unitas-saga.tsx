@@ -496,6 +496,11 @@ export function MetaUnitasSaga() {
               ) : null}
             </figure>
             <div key={`${stage}-copy`} className="mus-stage-copy">
+              {/* The plate names its form large, as /illusionculum-saga's
+                  #forms; the ghost is the form's name, drawn (decorative). */}
+              <span className="mus-stage-mark" aria-hidden="true">
+                {FORM_LABELS[stage]}
+              </span>
               <h3>
                 <Bracketed text={`《 ${activeStage.title} 》`} />
               </h3>
@@ -506,11 +511,7 @@ export function MetaUnitasSaga() {
       </section>
 
       {/* 04 — 装甲: the armour and support mechanisms. */}
-      <section
-        id="armor"
-        className="mus-chapter mus-armor"
-        aria-labelledby="mus-armor-title"
-      >
+      <section id="armor" className="mus-chapter mus-armor" aria-labelledby="mus-armor-title">
         <header className="mus-head rxs-reveal">
           <h2 id="mus-armor-title">装甲・支援機構</h2>
         </header>
@@ -524,7 +525,10 @@ export function MetaUnitasSaga() {
         </header>
         <ul className="mus-weapons rxs-reveal" aria-label="専用武装">
           {META_UNITAS_SAGA.arsenal.map((weapon) => (
-            <li key={weapon}>{jp(weapon)}</li>
+            <li key={weapon}>
+              {/* One flex item: the name breaks only between its phrases. */}
+              <span>{jp(weapon)}</span>
+            </li>
           ))}
         </ul>
         <Lead body={META_UNITAS_SAGA.arsenalNote} className="mus-arsenal-note rxs-reveal" />
@@ -562,6 +566,9 @@ export function MetaUnitasSaga() {
         <div className="mus-finisher-list">
           {META_UNITAS_SAGA.finishers.map((finisher, index) => (
             <article key={finisher.name} className="mus-finisher rxs-reveal" data-tier={index}>
+              <span className="mus-article-no" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <h3>{jp(finisher.name)}</h3>
               <FinisherCalls name={finisher.name} calls={finisher.calls} />
               <Lead body={finisher.body} />

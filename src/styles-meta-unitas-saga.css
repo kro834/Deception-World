@@ -1395,7 +1395,6 @@ html[data-family="special"]
 }
 
 .mus-article,
-.mus-article-grid article,
 .mus-articles article {
   box-shadow:
     0 0 0 1px rgb(255 154 74 / 26%),
@@ -1774,13 +1773,6 @@ html:not([data-world-effects="economy"])
 .mus-performance[data-stage="ultra"] .mus-table tr[data-self]:not([data-ultra]),
 .mus-performance[data-stage="middle"] .mus-table tr[data-ultra] {
   opacity: 0.6;
-}
-
-/* q-mu2 (2026-10-24): an opened 「詳しく」 takes its own full row on the
-   multi-column widths, so the neighbouring plate no longer stands over a
-   blank; the remaining plates close up around it. */
-.mus-article[data-wide] {
-  grid-column: 1 / -1;
 }
 
 /* ================================================================
@@ -2516,5 +2508,395 @@ html[data-world-effects="economy"] .mus-ignition {
 
   #top.rxs-page.mus-page .mus-specs dd > b {
     font-size: clamp(17px, 4.8vw, 20px);
+  }
+}
+
+/* ---------- 03 形態: the head, the selector centred, one wide plate ---------- */
+/* As /illusionculum-saga's #forms: the chapter's head over the selector,
+   the tabs centred under it, then one plate — the form named large in its
+   own light beside the picture, which fills its half. The picture keeps its
+   four bands, its blurred field and the white fire over them (contain: the
+   figure is whole, and the fire's canvas meets it pixel for pixel). */
+#top.rxs-page.mus-page .mus-stage-switcher {
+  gap: clamp(28px, 3.4vw, 44px);
+}
+
+#top.rxs-page.mus-page .mus-stage-switcher > .mus-tabs {
+  justify-self: center;
+}
+
+#top.rxs-page.mus-page .mus-stage-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "art"
+    "copy";
+  gap: 0;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgb(233 239 242 / 18%);
+  border-radius: 4px;
+  background:
+    radial-gradient(
+      70% 60% at 0% 0%,
+      color-mix(in srgb, var(--mus-accent, #ff9a4a) 10%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #0b171c, #061014 56%, #03080b);
+  box-shadow:
+    inset 0 1px 0 rgb(240 250 255 / 12%),
+    0 18px 40px -24px rgb(0 0 0 / 86%);
+}
+
+/* The plate's lit top edge: the form's light into teal. */
+#top.rxs-page.mus-page .mus-stage-panel::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 5;
+  height: 2px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--mus-accent, #ff9a4a),
+    rgb(55 198 192 / 60%) 52%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+#top.rxs-page.mus-page .mus-stage-panel > figure {
+  grid-area: art;
+  justify-self: stretch;
+  width: auto;
+  aspect-ratio: 4 / 5;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+#top.rxs-page.mus-page .mus-stage-copy {
+  position: relative;
+  grid-area: copy;
+  align-content: start;
+  gap: 20px;
+  padding: clamp(26px, 6vw, 40px) clamp(20px, 5.6vw, 36px) clamp(30px, 7vw, 44px);
+}
+
+#top.rxs-page.mus-page .mus-stage-copy h3 {
+  position: relative;
+  z-index: 1;
+  padding: 0 0 18px;
+  font-size: clamp(26px, 7vw, 46px);
+  line-height: 1.22;
+  text-shadow: 0 2px 18px rgb(0 0 0 / 70%);
+}
+
+/* A short rule in the form's light under the name. */
+#top.rxs-page.mus-page .mus-stage-copy h3::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 52px;
+  height: 2px;
+  content: "";
+  background: var(--mus-accent, #ff9a4a);
+}
+
+/* The name's ghost behind it, outlined (decorative). */
+#top.rxs-page.mus-page .mus-stage-mark {
+  position: absolute;
+  top: clamp(14px, 3vw, 28px);
+  right: clamp(12px, 3vw, 28px);
+  max-width: 70%;
+  overflow: hidden;
+  color: transparent;
+  font-family: var(--rxs-font-display, inherit);
+  font-size: clamp(44px, 9vw, 88px);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 16%);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%);
+  mask-image: linear-gradient(90deg, transparent, #000 30%);
+}
+
+#top.rxs-page.mus-page .mus-stage-panel[data-stage="ultra"] .mus-stage-mark {
+  -webkit-text-stroke-color: rgb(233 216 255 / 18%);
+}
+
+#top.rxs-page.mus-page .mus-stage-copy .mus-copy p {
+  max-width: 34em;
+}
+
+@media (max-width: 860px) {
+  #top.rxs-page.mus-page .mus-stage-panel > figure {
+    width: auto;
+  }
+}
+
+@media (min-width: 900px) {
+  #top.rxs-page.mus-page .mus-stage-panel {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    grid-template-areas: "copy art";
+    min-height: clamp(560px, 70svh, 760px);
+  }
+
+  #top.rxs-page.mus-page .mus-stage-panel > figure {
+    aspect-ratio: auto;
+    min-height: 100%;
+    border-left: 1px solid rgb(233 239 242 / 14%);
+  }
+
+  #top.rxs-page.mus-page .mus-stage-copy {
+    align-content: center;
+    padding: clamp(40px, 4.6vw, 72px) clamp(32px, 4vw, 64px);
+  }
+
+  /* 《 メタ・ウニタス／ stays one line: the name breaks at its ／ only. */
+  #top.rxs-page.mus-page .mus-stage-copy h3 {
+    font-size: clamp(28px, 2.6vw, 40px);
+  }
+}
+
+/* ---------- 04–06 the record: rows on hairlines ---------- */
+/* As /illusionculum-saga's record (and Far From's #system): no boxed
+   cells — each article is a row on a lit hairline, its number, name and
+   diagram in the left column, the owner's prose in the right column from
+   the top. Phones read it in one column. */
+#top.rxs-page.mus-page .mus-articles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid rgb(55 198 192 / 12%);
+  border-radius: 0;
+  background: none;
+}
+
+#top.rxs-page.mus-page .mus-article {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  padding: clamp(30px, 4vw, 56px) 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* The row's hairline: teal into orange, fading. */
+#top.rxs-page.mus-page :is(.mus-article, .mus-finisher)::before {
+  position: absolute;
+  inset: 0 0 auto;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: 1px;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    rgb(55 198 192 / 46%),
+    rgb(255 154 74 / 34%) 38%,
+    rgb(55 198 192 / 10%) 76%,
+    transparent
+  );
+  box-shadow: none;
+  transform: none;
+}
+
+#top.rxs-page.mus-page :is(.mus-article, .mus-finisher)::after {
+  display: none;
+}
+
+#top.rxs-page.mus-page .mus-article-head {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-width: 0;
+}
+
+/* The row's number: an outlined numeral, as the chapter's own. */
+#top.rxs-page.mus-page .mus-article-no {
+  display: block;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  color: transparent;
+  background: none;
+  font-family: var(--mus-latin);
+  font-size: clamp(34px, 3.2vw, 48px);
+  font-weight: 300;
+  line-height: 0.9;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 72%);
+  clip-path: none;
+  box-shadow: none;
+}
+
+#top.rxs-page.mus-page .mus-article h3 {
+  padding: 0;
+  border: 0;
+}
+
+#top.rxs-page.mus-page .mus-article-name {
+  font-size: clamp(20px, 1.9vw, 28px);
+}
+
+#top.rxs-page.mus-page .mus-article .mus-diagram {
+  width: 100%;
+  max-width: 400px;
+  margin: 0;
+}
+
+#top.rxs-page.mus-page .mus-article .mus-copy p {
+  max-width: 40em;
+}
+
+@media (min-width: 900px) {
+  #top.rxs-page.mus-page .mus-article {
+    grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr);
+    column-gap: clamp(36px, 5vw, 88px);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.rxs-page.mus-page :is(.mus-article, .mus-finisher):hover {
+    box-shadow: none;
+  }
+}
+
+/* ---------- 05 専用武装: the arms as rows ---------- */
+/* The record names the arms without prose: each one a numbered row on a
+   hairline (two abreast where the page is wide), the owner's note under
+   them as the chapter's prose. */
+#top.rxs-page.mus-page .mus-weapons {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 clamp(20px, 2.4vw, 36px);
+  margin: 0 0 clamp(28px, 3vw, 44px);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  counter-reset: mus-arm;
+}
+
+#top.rxs-page.mus-page .mus-weapons li {
+  gap: 18px;
+  min-height: 64px;
+  padding: 16px 0;
+  border-top: 1px solid rgb(55 198 192 / 16%);
+  background: none;
+  box-shadow: none;
+  font-size: clamp(16px, 1.3vw, 18px);
+  counter-increment: mus-arm;
+}
+
+#top.rxs-page.mus-page .mus-weapons li::before {
+  flex: none;
+  min-width: 2ch;
+  color: transparent;
+  content: counter(mus-arm, decimal-leading-zero);
+  font-family: var(--mus-latin);
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+  -webkit-text-stroke: 1px rgb(255 154 74 / 72%);
+}
+
+#top.rxs-page.mus-page .mus-weapons li::after {
+  display: none;
+}
+
+@media (min-width: 700px) {
+  #top.rxs-page.mus-page .mus-weapons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.rxs-page.mus-page .mus-weapons li:hover {
+    border-top-color: rgb(255 154 74 / 46%);
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* ---------- 06 必殺技: rows, as the record ---------- */
+/* As /illusionculum-saga's finishers: number, name and calls at the left,
+   the prose at the right, on the record's hairlines; the last (ウルトラ's
+   own) lit in its iris. */
+#top.rxs-page.mus-page .mus-finisher-list {
+  gap: 0;
+  border-bottom: 1px solid rgb(55 198 192 / 12%);
+}
+
+#top.rxs-page.mus-page .mus-finisher {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "no"
+    "name"
+    "calls"
+    "prose";
+  gap: 18px clamp(36px, 5vw, 88px);
+  padding: clamp(30px, 4vw, 56px) 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#top.rxs-page.mus-page .mus-finisher[data-tier="2"]::before {
+  background: linear-gradient(
+    90deg,
+    #f0deff,
+    rgb(216 236 255 / 60%) 34%,
+    rgb(55 198 192 / 22%) 70%,
+    transparent
+  );
+}
+
+#top.rxs-page.mus-page .mus-finisher > .mus-article-no {
+  grid-area: no;
+}
+
+#top.rxs-page.mus-page .mus-finisher > h3 {
+  grid-area: name;
+  font-size: clamp(22px, 2.3vw, 32px);
+  line-height: 1.3;
+}
+
+#top.rxs-page.mus-page .mus-finisher > .mus-finisher-calls {
+  grid-area: calls;
+  grid-column: auto;
+}
+
+#top.rxs-page.mus-page .mus-finisher > .mus-copy {
+  grid-area: prose;
+  grid-column: auto;
+  grid-row: auto;
+}
+
+@media (min-width: 900px) {
+  #top.rxs-page.mus-page .mus-finisher {
+    grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "no prose"
+      "name prose"
+      "calls prose";
+  }
+
+  #top.rxs-page.mus-page .mus-finisher > .mus-copy {
+    align-self: start;
   }
 }

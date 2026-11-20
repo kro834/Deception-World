@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import type { MetaUnitasArticle } from "./meta-unitas-data";
 
 /* META UNITAS SAGA — small shared pieces of the page (2026-10-23). Every
@@ -71,8 +71,10 @@ export function phrase(text: string): ReactNode {
   ));
 }
 
-/** The record's articles (systems, abilities, armour): plates, each its own
- * independent cell of one grid — the form's own idea, laid out. */
+/** The record's articles (armour, abilities, systems) as /illusionculum-saga
+ * sets its record (owner, 2026-11-20: 「イリュージョンクルムサーガと同等の構成
+ * にして。」): rows on lit hairlines — the number, the name and its drawn
+ * diagram at the left, the owner's prose at the right from the row's top. */
 export function Articles({
   items,
   label,
@@ -82,47 +84,26 @@ export function Articles({
   label: string;
   variant: "system" | "ability" | "armor";
 }) {
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  // An opened 「詳しく」 widens its whole row to full width, in order, so no
-  // neighbouring plate stands over a blank on the multi-column widths.
-  useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
-    const plates = () => Array.from(grid.children) as HTMLElement[];
-    const relayout = () => {
-      const all = plates();
-      all.forEach((plate) => plate.removeAttribute("data-wide"));
-      const tops = all.map((plate) => plate.offsetTop);
-      const openTops = new Set(
-        all.filter((plate) => plate.querySelector("details[open]")).map((plate) => plate.offsetTop),
-      );
-      all.forEach((plate, i) => {
-        if (openTops.has(tops[i])) plate.setAttribute("data-wide", "");
-      });
-    };
-    grid.addEventListener("toggle", relayout, true);
-    window.addEventListener("resize", relayout);
-    return () => {
-      grid.removeEventListener("toggle", relayout, true);
-      window.removeEventListener("resize", relayout);
-    };
-  }, []);
   return (
-    <div ref={gridRef} className={`mus-articles is-${variant}`} role="list" aria-label={label}>
+    <div className={`mus-articles is-${variant}`} role="list" aria-label={label}>
       {items.map((item, index) => (
         <article key={item.title} className="mus-article rxs-reveal" role="listitem">
-          <span className="mus-article-no" aria-hidden="true">
-            {String(index + 1).padStart(2, "0")}
-          </span>
-          <h3>
-            <span className="mus-article-name" lang="en">
-              <span className="mus-bracket">『 </span>
-              {phrase(item.name)}
-              <span className="mus-bracket"> 』</span>
+          <div className="mus-article-head">
+            <span className="mus-article-no" aria-hidden="true">
+              {String(index + 1).padStart(2, "0")}
             </span>
-            {item.reading ? <span className="mus-article-reading">（{item.reading}）</span> : null}
-          </h3>
-          <ArticleDiagram name={item.name} />
+            <h3>
+              <span className="mus-article-name" lang="en">
+                <span className="mus-bracket">『 </span>
+                {phrase(item.name)}
+                <span className="mus-bracket"> 』</span>
+              </span>
+              {item.reading ? (
+                <span className="mus-article-reading">（{item.reading}）</span>
+              ) : null}
+            </h3>
+            <ArticleDiagram name={item.name} />
+          </div>
           <Lead body={item.body} />
         </article>
       ))}
