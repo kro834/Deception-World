@@ -2900,3 +2900,11 @@ html[data-world-effects="economy"] .mus-ignition {
     align-self: start;
   }
 }
+
+/* The chapter targets reserve the measured bar height themselves
+   (.mus-chapter's scroll-margin-top), as the Far From page keeps them: the
+   document adds no second offset, so a chapter key or an old link (#system,
+   #stages-ultra) lands its chapter right under the bar, as on the siblings. */
+html:has(.rxs-page.mus-page) {
+  scroll-padding-top: 0;
+}
