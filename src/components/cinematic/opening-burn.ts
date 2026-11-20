@@ -62,9 +62,10 @@ export function prepareOpeningBurn(first: string, final: string, maxWidth: numbe
     releasePreparedBitmaps();
     preparedKey = key;
     const natural = { width: 1536, height: 1024 };
+    const firstLoad = loadGlImage(first, natural, maxWidth);
     const pending: Promise<BurnAssets> = Promise.allSettled([
-      loadGlImage(first, natural, maxWidth),
-      loadGlImage(final, natural, maxWidth),
+      firstLoad,
+      first === final ? firstLoad : loadGlImage(final, natural, maxWidth),
     ] as const).then(([firstResult, finalResult]) => {
       if (firstResult.status === "rejected" || finalResult.status === "rejected") {
         if (firstResult.status === "fulfilled") closeGlImage(firstResult.value);
@@ -82,7 +83,7 @@ export function prepareOpeningBurn(first: string, final: string, maxWidth: numbe
       if (prepared === pending) preparedValue = assets;
       else {
         closeGlImage(firstImage);
-        closeGlImage(finalImage);
+        if (finalImage !== firstImage) closeGlImage(finalImage);
       }
       return assets;
     });
@@ -97,7 +98,7 @@ function releasePreparedBitmaps() {
   preparedKey = "";
   preparedValue = null;
   closeGlImage(value?.first);
-  closeGlImage(value?.final);
+  if (value && value.final !== value.first) closeGlImage(value.final);
 }
 
 // ---- Priming: the GL context, the uploads and the (parallel) compile happen

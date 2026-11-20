@@ -257,7 +257,9 @@ test("an uncommitted import can still be cancelled without persisting a burned f
 
 test("Ciel branding uses the supplied illustration in both states and preserves personal preferences", () => {
   const source = read("src/components/zeus-button.tsx");
-  assert.match(source, /<b>シエルボタン<\/b>/);
+  const toggle = read("src/components/zeus-button-toggle.tsx");
+  assert.match(toggle, /<b>シエルボタン<\/b>/);
+  assert.match(toggle, /aria-pressed=\{settings.enabled\}/);
   const tree = ts.createSourceFile(
     "zeus-button.tsx",
     source,

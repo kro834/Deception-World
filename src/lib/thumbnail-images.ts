@@ -13,7 +13,7 @@
 
 // `from`: a larger supplied file of the same picture to draw the variant from
 // (the card's own source is narrower than the step it serves).
-type Variant = { path: string; width: number; build?: boolean; from?: string };
+type Variant = { path: string; width: number; build?: boolean; from?: string; quality?: number };
 type ImageSet = { source: string; variants: Variant[]; fallback?: string };
 
 const launcher = (stem: string, source = `${stem}.webp`): ImageSet => ({
@@ -300,11 +300,13 @@ const POSTER_SOURCES: readonly (readonly [string, number])[] = [
 
 export const POSTER_IMAGES: Record<string, ImageSet> = {
   "/deception-world-poster-delivery.webp": {
-    source: "/deception-world-poster-delivery.webp",
+    // Derive each delivery directly from the supplied master so regeneration
+    // does not resize or encode a previously lossy delivery image.
+    source: "/deception-world-poster.webp",
     variants: [
-      { path: "/deception-world-poster-delivery-640.webp", width: 640, build: true },
-      { path: "/deception-world-poster-delivery-720.webp", width: 720, build: true },
-      { path: "/deception-world-poster-delivery.webp", width: 1024 },
+      { path: "/deception-world-poster-delivery-640.webp", width: 640, build: true, quality: 0.78 },
+      { path: "/deception-world-poster-delivery-720.webp", width: 720, build: true, quality: 0.78 },
+      { path: "/deception-world-poster-delivery.webp", width: 1024, build: true },
     ],
   },
   ...Object.fromEntries(

@@ -25,7 +25,7 @@ import {
 } from "@/lib/asset-loader";
 import { GuardedLink } from "@/components/load-gate";
 import { prefetchMetaUnitasEntry } from "@/lib/meta-unitas-entry-gate";
-import { ZeusButtonToggle } from "@/components/zeus-button";
+import { ZeusButtonToggle } from "@/components/zeus-button-toggle";
 import { acquireViewportScrollLock } from "@/lib/viewport-scroll-lock.js";
 import { watchSideMenuSwipeLifecycle } from "@/lib/side-menu-swipe-lifecycle.js";
 import { RE_DIVE_RIKUEI_NAV, RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "./dossier-nav";

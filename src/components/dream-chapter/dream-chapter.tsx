@@ -14,7 +14,7 @@ import { DreamSceneMaterial } from "./dream-scene-material";
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
-import { bootLiquidGlass } from "@/lib/liquid/boot.js";
+import { bootLiquidGlassAfterPaint } from "@/lib/liquid/boot-after-paint";
 import { LiquidPointerGlow } from "@/components/world/liquid-rail";
 import { settlePickupScroll } from "@/components/world/pickup-scroll-reset";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
@@ -1098,13 +1098,9 @@ export function DreamChapter() {
 
   useEffect(() => {
     document.documentElement.dataset.dreamChapter = "true";
-    let disposeGlass: (() => void) | undefined;
-    const frame = window.requestAnimationFrame(() => {
-      disposeGlass = bootLiquidGlass(document);
-    });
+    const disposeGlass = bootLiquidGlassAfterPaint();
     return () => {
-      window.cancelAnimationFrame(frame);
-      disposeGlass?.();
+      disposeGlass();
       delete document.documentElement.dataset.dreamChapter;
     };
   }, []);

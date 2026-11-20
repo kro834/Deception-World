@@ -138,7 +138,7 @@ export class ShaderPass {
   private readonly options: ShaderPassOptions;
   private readonly parallel: { COMPLETION_STATUS_KHR: number } | null;
   private readonly buffer: WebGLBuffer | null;
-  private readonly textures: { name: string; texture: WebGLTexture | null }[] = [];
+  private readonly textures: { names: string[]; texture: WebGLTexture | null }[] = [];
   private program: WebGLProgram | null = null;
   private locations = new Map<string, WebGLUniformLocation | null>();
   private compiling: Promise<void> | null = null;
@@ -173,7 +173,13 @@ export class ShaderPass {
     // an <img> fallback is premultiplied by the upload, like the bitmaps.
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    const uploaded = new Map<GlImage, string[]>();
     for (const [name, image] of Object.entries(options.textures)) {
+      const aliases = uploaded.get(image);
+      if (aliases) {
+        aliases.push(name);
+        continue;
+      }
       const texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image.source);
@@ -181,7 +187,9 @@ export class ShaderPass {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      this.textures.push({ name, texture });
+      const names = [name];
+      uploaded.set(image, names);
+      this.textures.push({ names, texture });
     }
   }
 
@@ -239,10 +247,10 @@ export class ShaderPass {
     this.locations = new Map(
       this.options.uniforms.map((name) => [name, gl.getUniformLocation(program, name)]),
     );
-    this.textures.forEach(({ name, texture }, unit) => {
+    this.textures.forEach(({ names, texture }, unit) => {
       gl.activeTexture(gl.TEXTURE0 + unit);
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.uniform1i(gl.getUniformLocation(program, name), unit);
+      for (const name of names) gl.uniform1i(gl.getUniformLocation(program, name), unit);
     });
     if (this.cssSize.width) this.resize(this.cssSize.width, this.cssSize.height);
   }

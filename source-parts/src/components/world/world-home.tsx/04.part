@@ -1,8 +1,3 @@
-      scheduleSettle();
-      if (frame) return;
-      frame = requestAnimationFrame(syncFromScroll);
-    };
-    grid.addEventListener("touchstart", startTouch, { passive: true });
     grid.addEventListener("touchend", endTouch, { passive: true });
     grid.addEventListener("touchcancel", endTouch, { passive: true });
     grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
@@ -55,6 +50,7 @@
       }
       cancelEpisodePickupScrollReset.current?.();
       cancelColumnPickupScrollReset.current?.();
+      cancelPickupGlass.current?.();
     };
   }, []);
   const current = POSTERS[poster];
@@ -235,6 +231,7 @@
     }
     delete dlg.dataset.closing;
     cancelColumnPickupScrollReset.current?.();
+    cancelPickupGlass.current?.();
     if (!dlg.open) {
       try {
         dlg.showModal();
@@ -253,8 +250,11 @@
       dlg,
       [".world-column-dialog-card"],
       () => {
-        bootLiquidGlass(dlg);
-        pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+        cancelPickupGlass.current = scheduleLiquidGlassBoot((boot) => {
+          if (!dlg.open || !dlg.isConnected) return;
+          boot(dlg);
+          pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+        });
         dlg.focus({ preventScroll: true });
       },
     );
@@ -269,6 +269,7 @@
     }
     if (dlg.dataset.closing === "true") return;
     cancelColumnPickupScrollReset.current?.();
+    cancelPickupGlass.current?.();
     cancelColumnPickupScrollReset.current = null;
     dlg.dataset.closing = "true";
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
@@ -294,6 +295,7 @@
   });
   useDialogHistoryDismiss(pickupDialogRef, () => {
     cancelColumnPickupScrollReset.current?.();
+    cancelPickupGlass.current?.();
     cancelColumnPickupScrollReset.current = null;
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
     pickupCloseTimer.current = null;
@@ -504,4 +506,3 @@
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="1.8"
-                        />

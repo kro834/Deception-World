@@ -2,7 +2,7 @@ import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useS
 import { startTransition } from "react";
 import { animateSelectionArrival } from "@/lib/selection-arrival.js";
 import { useRouterState } from "@tanstack/react-router";
-import { bootLiquidGlass } from "@/lib/liquid/boot.js";
+import { bootLiquidGlassAfterPaint, scheduleLiquidGlassBoot } from "@/lib/liquid/boot-after-paint";
 import { MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
@@ -505,3 +505,4 @@ const EPISODES: EpisodeRecord[] = [
         width: 1085,
         height: 1449,
         to: "/managers/shuza",
+        assets: MANAGER_ASSETS.shuza,

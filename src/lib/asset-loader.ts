@@ -10,7 +10,7 @@ import { dossierImage } from "./dossier-images.ts";
 import { posterImage } from "./thumbnail-images.ts";
 
 const KNOWN_BYTES: Record<string, number> = {
-  "/deception-world-poster-delivery.webp": 270310,
+  "/deception-world-poster-delivery.webp": 314382,
   "/poster-card-03.jpeg": 293500,
   "/poster-card-04.jpeg": 369600,
   "/poster-card-05.jpeg": 537900,

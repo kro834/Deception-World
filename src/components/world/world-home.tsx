@@ -2,7 +2,7 @@ import { forwardRef, memo, useCallback, useEffect, useLayoutEffect, useRef, useS
 import { startTransition } from "react";
 import { animateSelectionArrival } from "@/lib/selection-arrival.js";
 import { useRouterState } from "@tanstack/react-router";
-import { bootLiquidGlass } from "@/lib/liquid/boot.js";
+import { bootLiquidGlassAfterPaint, scheduleLiquidGlassBoot } from "@/lib/liquid/boot-after-paint";
 import { MANAGER_ASSETS, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useWorldMode } from "./use-world-mode";
@@ -1038,6 +1038,7 @@ export function WorldHome() {
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
+  const cancelPickupGlass = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
@@ -1268,17 +1269,13 @@ export function WorldHome() {
       revealRiderPanel();
     });
     const off4 = bindRail(pickupRail.current, setColumnTab);
-    let disposeGlass: (() => void) | undefined;
-    const id = requestAnimationFrame(() => {
-      disposeGlass = bootLiquidGlass(document);
-    });
+    const disposeGlass = bootLiquidGlassAfterPaint();
     return () => {
       off1();
       off2();
       off3();
       off4();
-      cancelAnimationFrame(id);
-      disposeGlass?.();
+      disposeGlass();
     };
   }, [selectRider, revealRiderPanel]);
 
@@ -1577,6 +1574,7 @@ export function WorldHome() {
       }
       cancelEpisodePickupScrollReset.current?.();
       cancelColumnPickupScrollReset.current?.();
+      cancelPickupGlass.current?.();
     };
   }, []);
   const current = POSTERS[poster];
@@ -1757,6 +1755,7 @@ export function WorldHome() {
     }
     delete dlg.dataset.closing;
     cancelColumnPickupScrollReset.current?.();
+    cancelPickupGlass.current?.();
     if (!dlg.open) {
       try {
         dlg.showModal();
@@ -1775,8 +1774,11 @@ export function WorldHome() {
       dlg,
       [".world-column-dialog-card"],
       () => {
-        bootLiquidGlass(dlg);
-        pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+        cancelPickupGlass.current = scheduleLiquidGlassBoot((boot) => {
+          if (!dlg.open || !dlg.isConnected) return;
+          boot(dlg);
+          pickupRail.current?.dispatchEvent(new Event("liquidrelayout"));
+        });
         dlg.focus({ preventScroll: true });
       },
     );
@@ -1791,6 +1793,7 @@ export function WorldHome() {
     }
     if (dlg.dataset.closing === "true") return;
     cancelColumnPickupScrollReset.current?.();
+    cancelPickupGlass.current?.();
     cancelColumnPickupScrollReset.current = null;
     dlg.dataset.closing = "true";
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
@@ -1816,6 +1819,7 @@ export function WorldHome() {
   });
   useDialogHistoryDismiss(pickupDialogRef, () => {
     cancelColumnPickupScrollReset.current?.();
+    cancelPickupGlass.current?.();
     cancelColumnPickupScrollReset.current = null;
     if (pickupCloseTimer.current != null) window.clearTimeout(pickupCloseTimer.current);
     pickupCloseTimer.current = null;

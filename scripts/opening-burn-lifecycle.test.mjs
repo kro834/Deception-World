@@ -129,3 +129,15 @@ test("release during pending decode prevents adoption and closes late successes"
   ui.engine.releaseOpeningBurn();
   assert.deepEqual(ui.closed, [abandonedFirst, abandonedFinal, activeFirst, activeFinal]);
 });
+
+test("the current opening's identical logo layers share one owned bitmap", async () => {
+  const ui = runtime();
+  const pending = ui.engine.prepareOpeningBurn("saga.webp", "saga.webp", 1024);
+  assert.equal(ui.requests.length, 1);
+  const logo = image("saga");
+  ui.requests[0].resolve(logo);
+  const assets = await pending;
+  assert.equal(assets.first, assets.final);
+  ui.engine.releaseOpeningBurn();
+  assert.deepEqual(ui.closed, [logo]);
+});

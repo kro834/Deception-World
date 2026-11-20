@@ -1,5 +1,3 @@
-  const [columnTab, setColumnTab] = useState(0);
-  const [riderTab, setRiderTab] = useState(0);
   const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
   const [episode, setEpisode] = useState(0);
   const [episodePickup, setEpisodePickup] = useState<number | null>(null);
@@ -24,6 +22,7 @@
   const pickupRail = useRef<HTMLDivElement>(null);
   const pickupCloseTimer = useRef<number | null>(null);
   const cancelColumnPickupScrollReset = useRef<(() => void) | null>(null);
+  const cancelPickupGlass = useRef<(() => void) | null>(null);
   const shuffleTimers = useRef<number[]>([]);
   const shuffleActive = useRef(false);
   const shuffleRunId = useRef(0);
@@ -254,17 +253,13 @@
       revealRiderPanel();
     });
     const off4 = bindRail(pickupRail.current, setColumnTab);
-    let disposeGlass: (() => void) | undefined;
-    const id = requestAnimationFrame(() => {
-      disposeGlass = bootLiquidGlass(document);
-    });
+    const disposeGlass = bootLiquidGlassAfterPaint();
     return () => {
       off1();
       off2();
       off3();
       off4();
-      cancelAnimationFrame(id);
-      disposeGlass?.();
+      disposeGlass();
     };
   }, [selectRider, revealRiderPanel]);
 
@@ -506,3 +501,8 @@
       scheduleSettle();
     };
     const onScroll = () => {
+      scheduleSettle();
+      if (frame) return;
+      frame = requestAnimationFrame(syncFromScroll);
+    };
+    grid.addEventListener("touchstart", startTouch, { passive: true });
