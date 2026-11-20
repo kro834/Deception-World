@@ -715,8 +715,12 @@ test("the bands are narrow (a front, never a cross-fade)", () => {
   assert.ok(Math.abs(SKIN_WHOLE - (1 + 5.4 * SKIN_BAND)) < 1e-9);
   const shader = read("src/lib/rexonance-suit-skin.ts");
   assert.match(shader, new RegExp(`const float BAND = \\$\\{SKIN_BAND\\.toFixed\\(3\\)\\};`));
-  for (const stage of ["Liquid chrome", "The fibres", "The cells", "The panel lines", "The lip"])
+  // (Nano pass, 2026-11-21: the fibres became the swarm's sheen and the
+  // hex cells a collective setting — no unit is drawn at nanite scale.)
+  for (const stage of ["Liquid chrome", "The sheen", "Setting:", "The panel lines", "The lip"])
     assert.ok(shader.includes(stage), stage);
+  assert.doesNotMatch(shader, /uHex|hexagonal micro-tessellation/);
+  assert.match(shader, /LINEAR_MIPMAP_LINEAR/);
   assert.match(shader, /precision highp float;/);
 });
 
