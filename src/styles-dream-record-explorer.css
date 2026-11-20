@@ -722,17 +722,19 @@
 
 /* Keep the search desk readable above the later programme skin's compact controls. */
 .dream-page.dream-page #dream-record-explorer .dream-record-search-field {
-  border: 1px solid rgb(238 205 142 / 58%);
+  border: 1px solid rgb(240 206 138 / 68%);
   border-radius: 3px;
   background:
-    linear-gradient(#f3dc9f 0 0) 0 0 / 18px 1.5px no-repeat,
-    linear-gradient(#f3dc9f 0 0) 100% 100% / 18px 1.5px no-repeat,
-    radial-gradient(50% 90% at 0% 50%, rgb(230 194 142 / 14%), transparent 70%),
-    linear-gradient(180deg, #0e0a14 0%, #171120 100%);
+    linear-gradient(135deg, #fae2a8, #c4984e) 0 0 / 22px 2px no-repeat,
+    linear-gradient(135deg, #fae2a8, #c4984e) 0 0 / 2px 18px no-repeat,
+    linear-gradient(315deg, #fae2a8, #c4984e) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(315deg, #fae2a8, #c4984e) 100% 100% / 2px 18px no-repeat,
+    radial-gradient(54% 95% at 0% 50%, rgb(244 206 138 / 20%), transparent 70%),
+    linear-gradient(180deg, #0d0914 0%, #191224 100%);
   box-shadow:
-    inset 0 2px 8px rgb(0 0 0 / 68%),
-    inset 0 -1px 0 rgb(243 224 176 / 14%),
-    0 10px 24px rgb(0 0 0 / 32%);
+    inset 0 2px 10px rgb(0 0 0 / 74%),
+    inset 0 -1px 0 rgb(252 234 188 / 20%),
+    0 12px 28px rgb(0 0 0 / 40%);
 }
 
 .dream-page.dream-page #dream-record-explorer .dream-record-search-field:focus-within {
@@ -794,21 +796,22 @@
 
 /* Archival manuscript index card with subtle corner hairlines (古文書インデックスカード四隅金罫) */
 .dream-page.dream-page #dream-record-explorer .dream-record-card {
-  border: 1px solid rgb(225 190 124 / 42%);
+  border: 1px solid rgb(232 196 128 / 52%);
   background:
-    linear-gradient(#efd29a 0 0) 0 0 / 18px 1px no-repeat,
-    linear-gradient(#efd29a 0 0) 0 0 / 1px 18px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 0 / 18px 1px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 0 / 1px 18px no-repeat,
-    linear-gradient(#efd29a 0 0) 0 100% / 18px 1px no-repeat,
-    linear-gradient(#efd29a 0 0) 0 100% / 1px 18px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 100% / 18px 1px no-repeat,
-    linear-gradient(#efd29a 0 0) 100% 100% / 1px 18px no-repeat,
-    radial-gradient(80% 55% at 15% 0%, rgb(243 224 176 / 9%), transparent 72%),
-    linear-gradient(180deg, rgb(34 24 41 / 94%) 0%, rgb(20 14 26 / 96%) 100%);
+    linear-gradient(90deg, #f5dca0, #c9483b 65%, transparent) 0 0 / 68px 2px no-repeat,
+    linear-gradient(#f5dca0 0 0) 0 0 / 1.5px 22px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 0 / 18px 1.5px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 0 / 1.5px 18px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 100% / 18px 1.5px no-repeat,
+    linear-gradient(#efd29a 0 0) 0 100% / 1.5px 18px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 22px 1.5px no-repeat,
+    linear-gradient(#efd29a 0 0) 100% 100% / 1.5px 22px no-repeat,
+    radial-gradient(80% 58% at 15% 0%, rgb(248 220 162 / 14%), transparent 72%),
+    radial-gradient(56% 48% at 90% 100%, rgb(196 66 56 / 10%), transparent 72%),
+    linear-gradient(180deg, rgb(38 25 46 / 95%) 0%, rgb(20 13 27 / 97%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(243 224 176 / 14%),
-    0 14px 32px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(252 236 196 / 20%),
+    0 16px 36px rgb(0 0 0 / 42%);
 }
 
 .dream-page.dream-page #dream-record-explorer .dream-record-card[data-saved="true"] {

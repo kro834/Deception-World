@@ -31,8 +31,13 @@
   box-sizing: border-box;
   min-height: calc(var(--sh-bar-h, 76px) + env(safe-area-inset-top, 0px));
   padding: env(safe-area-inset-top, 0px) var(--dogs-edge) 0;
-  border-bottom: 1px solid var(--dogs-line);
-  background: #030b08;
+  border-bottom: 1px solid #9ed6b138;
+  background:
+    linear-gradient(90deg, transparent 4%, #7ae2a466 28%, #d4ffe388 50%, #7ae2a466 72%, transparent 96%)
+      0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 52% 90% at 18% 0%, #1d4d3448, transparent 70%),
+    linear-gradient(180deg, #06150f 0%, #030b08 100%);
+  box-shadow: 0 10px 28px -12px #000d;
   z-index: 3;
 }
 .dogs-archive-header h1 {
@@ -40,8 +45,12 @@
   font-family: "Cinzel", Georgia, "Times New Roman", serif;
   font-size: clamp(22px, 3vw, 35px);
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   line-height: 1.1;
+  color: #edf8ef;
+  text-shadow:
+    0 2px 18px #000e,
+    0 0 28px #4ad88a2e;
 }
 .dogs-archive-header-actions {
   display: flex;
@@ -54,9 +63,23 @@
   gap: 9px;
   min-width: 44px;
   min-height: 44px;
-  color: #c0d1c4;
+  padding: 0 14px;
+  border: 1px solid #8ec6a03d;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, #163324cc 0%, #08160fe6 100%);
+  box-shadow:
+    inset 0 1px 0 #c8f5d62e,
+    0 4px 14px #0008;
+  color: #d0e4d5;
   font-size: 12px;
+  letter-spacing: 0.04em;
   text-decoration: none;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .dogs-archive-exit svg {
   width: 20px;
@@ -67,19 +90,24 @@
   min-width: 48px;
   height: 48px;
   min-height: 48px;
-  border: 1px solid #a6cdb833;
+  border: 1px solid #9fd4b24d;
   border-radius: 50%;
-  background: #11251a;
-  box-shadow: none;
+  background: linear-gradient(180deg, #173525 0%, #0b1c13 100%);
+  box-shadow:
+    inset 0 1px 0 #d2fce033,
+    0 4px 14px #0008;
 }
 .dogs-archive-selector {
   display: grid;
   grid-template-columns: repeat(5, minmax(44px, 1fr));
-  gap: 6px;
+  gap: 8px;
   padding: 12px var(--dogs-edge);
   z-index: 2;
-  background: #030b08;
+  background:
+    linear-gradient(90deg, transparent 6%, #6ec89238 50%, transparent 94%) 0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, #040e0a 0%, #020906 100%);
   border-bottom: 1px solid var(--dogs-line);
+  box-shadow: 0 14px 32px -14px #000e;
 }
 .dogs-archive-selector button {
   position: relative;
@@ -88,15 +116,22 @@
   justify-content: center;
   gap: 12px;
   min-height: 48px;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  background: transparent;
-  color: #b5cbbd;
+  border: 1px solid #79be9148;
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 0%, #245c3c38, transparent 72%),
+    linear-gradient(180deg, #132e20d8 0%, #081710eb 100%);
+  box-shadow:
+    inset 0 1px 0 #d4ffe029,
+    inset 0 -1px 0 #000b,
+    0 8px 18px -8px #000d;
+  color: #c8dfd0;
   cursor: pointer;
   transition:
-    color 0.2s,
-    background 0.2s,
-    border-color 0.2s;
+    color 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
 }
 .dogs-archive-selector button b {
   font:
@@ -104,6 +139,7 @@
     Georgia,
     "Times New Roman",
     serif;
+  text-shadow: 0 2px 10px #000b;
 }
 .dogs-archive-selector button span {
   font-size: 12px;
@@ -111,20 +147,57 @@
   letter-spacing: 0.06em;
 }
 .dogs-archive-selector button[aria-selected="true"] {
-  background: #142f22;
-  border-color: #729f7d68;
-  color: #e5f6e8;
-  box-shadow: inset 0 -1px #a5d5ad;
+  background:
+    linear-gradient(90deg, transparent 10%, #a5f3c2aa 50%, transparent 90%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 92% 78% at 50% 0%, #3ae08538, transparent 70%),
+    linear-gradient(180deg, #1b432f 0%, #0d2519 100%);
+  border-color: #8ce3ab8c;
+  color: #f2fff5;
+  box-shadow:
+    inset 0 1px 0 #dcffe64d,
+    inset 0 -2px 0 #74eca1,
+    0 10px 26px -8px #000e,
+    0 0 22px -6px #4ad88a55;
 }
 @media (hover: hover) and (pointer: fine) {
+  .dogs-archive-exit:hover {
+    color: #f4fff7;
+    border-color: #9be8b480;
+    background: linear-gradient(180deg, #1e4632e6 0%, #0d2318f2 100%);
+    box-shadow:
+      inset 0 1px 0 #dcffe74d,
+      0 0 16px #4ad88a33,
+      0 6px 16px #000a;
+  }
   .dogs-archive-selector button:hover {
-    color: #f2fff4;
-    background: #143123a6;
+    color: #f5fff7;
+    border-color: #8adba673;
+    background:
+      radial-gradient(ellipse 85% 70% at 50% 0%, #348a5838, transparent 72%),
+      linear-gradient(180deg, #193c2ae6 0%, #0c2116f2 100%);
+    box-shadow:
+      inset 0 1px 0 #d8ffe438,
+      0 8px 20px -6px #000d,
+      0 0 16px -4px #4ad88a38;
+  }
+  .dogs-archive-forms button:hover,
+  .dogs-archive-reference:hover {
+    color: #f4fff7;
+    border-color: #9ceab580;
+    background: linear-gradient(180deg, #173a28eb 0%, #0b1f15f5 100%);
+    box-shadow:
+      inset 0 1px 0 #d8ffe445,
+      0 0 18px #4ad88a38,
+      0 8px 20px #000b;
   }
   .dogs-archive-varg > a:hover {
-    border-color: #d9a792b3;
-    background-color: #26181ce6;
-    color: #fff6f1;
+    border-color: #eeb59ecc;
+    background-color: #2c1a1ff2;
+    color: #fff8f4;
+    box-shadow:
+      0 8px 22px #000a,
+      0 0 20px #e6684238,
+      inset 0 1px 0 #ffe5dc55;
   }
 }
 .dogs-archive button:focus-visible,
@@ -139,7 +212,11 @@
   min-height: 0;
   overflow: hidden;
   isolation: isolate;
-  background: radial-gradient(ellipse at 50% 45%, #10251a55, transparent 65%), #020806;
+  background:
+    radial-gradient(ellipse 52% 26% at 50% 0%, #38b8701f, transparent 72%),
+    radial-gradient(ellipse 68% 56% at 50% 46%, #14332377, transparent 68%),
+    radial-gradient(ellipse 58% 18% at 50% 92%, #39c47622, transparent 76%),
+    #020806;
 }
 .dogs-archive-stage .dogs-viewer {
   min-height: 0;
@@ -152,24 +229,32 @@
   gap: 8px 16px;
   min-height: 64px;
   padding: 6px var(--dogs-edge);
-  border-bottom: 1px solid var(--dogs-line);
-  background: #07130d;
+  border-bottom: 1px solid #8cc8a03d;
+  background:
+    linear-gradient(90deg, transparent 4%, #74e8a455 32%, transparent 92%) 0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 65% 95% at 15% 0%, #246b432e, transparent 70%),
+    linear-gradient(180deg, #091a12 0%, #06110c 100%);
+  box-shadow:
+    inset 0 1px 0 #d6ffe31a,
+    0 10px 24px -10px #000b;
 }
 .dogs-archive-record h2 {
   margin: 0;
-  color: #d8e7dc;
+  color: #eaf7ed;
   font-size: 15px;
   font-weight: 400;
   letter-spacing: 0.08em;
+  text-shadow: 0 2px 14px #000c;
 }
 .dogs-archive-record h2 span {
-  color: #f1faf3;
+  color: #f4fff6;
   font-weight: 600;
 }
 .dogs-archive-record p {
   margin: 3px 0 0;
-  color: #a9c6b1;
+  color: #b2ccb9;
   font-size: 12px;
+  letter-spacing: 0.04em;
 }
 .dogs-archive-record-actions,
 .dogs-archive-forms {
@@ -181,19 +266,40 @@
 .dogs-archive-reference {
   min-width: 44px;
   min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid #a4c7ac42;
-  border-radius: 6px;
-  background: #0a1a10;
-  color: #c7d9cc;
+  padding: 0 14px;
+  border: 1px solid #96cfa84d;
+  border-radius: 7px;
+  background:
+    linear-gradient(90deg, transparent 15%, #9ef2ba55 50%, transparent 85%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #112a1de6 0%, #07140df0 100%);
+  box-shadow:
+    inset 0 1px 0 #d4ffe233,
+    inset 0 -1px 0 #000b,
+    0 4px 12px -2px #0009;
+  color: #dcf0e1;
   font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   white-space: nowrap;
   cursor: pointer;
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease;
 }
 .dogs-archive-forms button[aria-pressed="true"] {
-  border-color: #95caa4;
-  background: #244535;
-  color: #f0fff4;
+  border-color: #98e8b0b3;
+  background:
+    linear-gradient(90deg, transparent 10%, #dcffe8aa 50%, transparent 90%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 90% 80% at 50% 0%, #44d47644, transparent 70%),
+    linear-gradient(180deg, #215238 0%, #123321 100%);
+  color: #f4fff7;
+  box-shadow:
+    inset 0 1px 0 #e0ffe959,
+    inset 0 -1.5px 0 #74eca1,
+    0 0 16px -4px #4ad88a55,
+    0 4px 12px #000a;
 }
 .dogs-archive-portrait {
   display: grid;
@@ -213,15 +319,31 @@
   max-width: 100%;
   min-width: 0;
   min-height: 0;
-  padding: 8px;
-  border: 1px solid #a4c7ac42;
-  border-radius: 4px;
-  background: #08130e;
-  box-shadow: 0 16px 48px #000c;
+  padding: 12px;
+  border: 1px solid #8ec8a24d;
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, transparent 8%, #8ce6ad77 50%, transparent 92%) 0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 68% 44% at 50% 0%, #1d4f3444, transparent 72%),
+    radial-gradient(ellipse at 50% 50%, #122d1f66 0%, #07130dcc 74%, #040a07f0 100%);
+  box-shadow:
+    0 24px 60px #000e,
+    0 0 36px #4ad88a1c,
+    inset 0 1px 0 #d6ffe338,
+    inset 0 0 32px #0c241888;
 }
 .dogs-archive-varg .dogs-archive-portrait__frame {
-  border-color: #bd907d55;
-  background: radial-gradient(ellipse, #30131988, #150b0d);
+  border-color: #d49d8866;
+  background:
+    linear-gradient(90deg, transparent 8%, #f0b09788 50%, transparent 92%) 0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 65% 40% at 50% 0%, #61212b44, transparent 70%),
+    radial-gradient(ellipse at 50% 50%, #3b171f66 0%, #11070acc 74%, #070304f0 100%);
+  box-shadow:
+    0 24px 60px #000e,
+    0 0 42px #e6452229,
+    0 0 0 1px #471c2266,
+    inset 0 1px 0 #ffded244,
+    inset 0 0 34px #380e1588;
 }
 .dogs-archive-portrait__frame > img {
   display: block;
@@ -230,6 +352,7 @@
   max-width: 100%;
   min-height: 0;
   object-fit: contain;
+  filter: drop-shadow(0 16px 34px #000f);
 }
 .dogs-archive-varg > a {
   display: inline-flex;
@@ -238,17 +361,21 @@
   gap: 8px;
   box-sizing: border-box;
   min-height: 44px;
-  color: #f7ebe3;
-  padding: 10px 24px;
-  border: 1px solid #cf958066;
+  color: #f9eee7;
+  padding: 10px 26px;
+  border: 1px solid #de9f8880;
   border-radius: 999px;
-  background: linear-gradient(180deg, #241418f4 0%, #150a0df8 100%);
+  background:
+    linear-gradient(90deg, transparent 14%, #ffd4c477 50%, transparent 86%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #2b171cf6 0%, #160a0dfa 100%);
   text-decoration: none;
   font-size: 13px;
-  letter-spacing: 0.06em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   box-shadow:
-    0 4px 14px #0006,
-    inset 0 1px 0 #ffded233;
+    0 8px 22px #0009,
+    0 0 18px #d9533822,
+    inset 0 1px 0 #ffe3d845;
   transition:
     color 0.25s ease,
     background-color 0.25s ease,
@@ -264,14 +391,21 @@
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  border: 1px solid #87b19545;
-  background: #06100b;
+  border: 1px solid #8fc4a059;
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse 70% 35% at 50% 0%, #1c4a3138, transparent 70%),
+    #050f0a;
+  box-shadow:
+    0 32px 80px #000f,
+    0 0 40px #4ad88a1f,
+    inset 0 1px 0 #d4ffe233;
   color: #dce9df;
   overscroll-behavior: contain;
 }
 .dogs-archive-reference-dialog::backdrop {
   background: #000e;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
 }
 .dogs-archive-reference-dialog header {
   display: flex;
@@ -282,20 +416,26 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #06100bf5;
+  background:
+    linear-gradient(90deg, transparent 5%, #7de2a455 50%, transparent 95%) 0 100% / 100% 1px no-repeat,
+    #06110cf5;
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--dogs-line);
 }
 .dogs-archive-reference-dialog h2 {
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #ebf7ee;
   margin: 0;
 }
 .dogs-archive-reference-dialog header button {
   min-width: 44px;
   min-height: 44px;
-  background: transparent;
-  border: 1px solid #a8c6b044;
+  background: linear-gradient(180deg, #132c1f 0%, #08150e 100%);
+  border: 1px solid #a8c6b055;
   border-radius: 50%;
+  box-shadow: inset 0 1px 0 #d6ffe329;
   color: #e9f5eb;
   font-size: 24px;
   cursor: pointer;
@@ -310,6 +450,15 @@
 .dogs-reference-pair figure {
   margin: 0;
   min-width: 0;
+  padding: 16px;
+  border: 1px solid #88bd993d;
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, transparent 12%, #90e4b055 50%, transparent 88%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 75% 55% at 50% 40%, #173a2744, #030a07eb 78%);
+  box-shadow:
+    inset 0 1px 0 #d4ffe224,
+    0 18px 42px -12px #000d;
 }
 .dogs-reference-pair img {
   display: block;
@@ -317,10 +466,13 @@
   height: auto;
   max-height: 70svh;
   object-fit: contain;
+  border-radius: 4px;
+  filter: drop-shadow(0 12px 26px #000c);
 }
 .dogs-reference-pair figcaption {
   font-size: 12px;
-  color: #a7b9ac;
+  letter-spacing: 0.08em;
+  color: #b8cebe;
   text-align: center;
   margin-top: 12px;
 }
@@ -441,18 +593,24 @@ html[data-dogs-archive] .zeus-button {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .dogs-archive-exit,
   .dogs-archive-selector button,
+  .dogs-archive-forms button,
+  .dogs-archive-reference,
   .dogs-archive-varg > a {
     transition: none;
   }
 }
 @media (forced-colors: active) {
+  .dogs-archive-exit,
   .dogs-archive-selector button,
-  .dogs-archive-reference,
   .dogs-archive-forms button,
+  .dogs-archive-reference,
   .dogs-archive-portrait__frame,
-  .dogs-archive-varg > a {
+  .dogs-archive-varg > a,
+  .dogs-reference-pair figure {
     border: 1px solid ButtonText;
+    box-shadow: none;
   }
   .dogs-archive-selector button[aria-selected="true"],
   .dogs-archive-forms button[aria-pressed="true"] {

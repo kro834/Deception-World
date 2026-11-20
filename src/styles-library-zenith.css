@@ -36,8 +36,9 @@ html[data-family="library"] {
    ================================================================ */
 html[data-family="library"] .dxl-art::after {
   background:
-    linear-gradient(90deg, var(--tint), rgb(var(--tint-rgb) / 0%) 70%) 0 100% / 100% 2px no-repeat,
-    linear-gradient(180deg, rgb(3 6 12 / 0%) 58%, rgb(3 6 12 / 56%) 100%);
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0, transparent 1px),
+    linear-gradient(90deg, var(--tint), rgb(var(--tint-rgb) / 0%) 74%) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(3 6 12 / 0%) 54%, rgb(3 6 12 / 64%) 100%);
 }
 
 html[data-family="library"] .dxl-art > i {
@@ -82,23 +83,44 @@ html[data-family="library"]
   --dxz-rim-rgb: 216 178 122;
 }
 
-html[data-family="library"] .library-page .library-card:hover,
 html[data-family="library"]
   .search-page
-  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"]) {
-  border-color: rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 70%);
+  :is(.search-result-card, .search-more-option)[data-active="true"] {
+  border-color: rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 78%);
   box-shadow:
-    inset 0 1px 0 rgb(var(--dxz-pink-rgb) / 70%),
+    inset 0 1px 0 rgb(var(--dxz-pink-rgb) / 76%),
+    inset 0 -1px 0 rgb(var(--dxl-gold-rgb) / 24%),
     var(--dx-bevel),
-    0 26px 48px -26px rgb(var(--dxz-pink-rgb) / 38%),
+    0 26px 50px -24px rgb(var(--dxz-pink-rgb) / 42%),
     var(--dx-drop);
 }
 
-html[data-family="library"] .library-page .library-card:hover::before,
 html[data-family="library"]
   .search-page
-  :is(.search-result-card, .search-more-option):is(:hover, [data-active="true"])::before {
+  :is(.search-result-card, .search-more-option)[data-active="true"]::before {
   opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-card:hover,
+  html[data-family="library"]
+    .search-page
+    :is(.search-result-card, .search-more-option):hover {
+    border-color: rgb(var(--dxz-rim-rgb, var(--dx-edition-rgb)) / 78%);
+    box-shadow:
+      inset 0 1px 0 rgb(var(--dxz-pink-rgb) / 76%),
+      inset 0 -1px 0 rgb(var(--dxl-gold-rgb) / 24%),
+      var(--dx-bevel),
+      0 26px 50px -24px rgb(var(--dxz-pink-rgb) / 42%),
+      var(--dx-drop);
+  }
+
+  html[data-family="library"] .library-page .library-card:hover::before,
+  html[data-family="library"]
+    .search-page
+    :is(.search-result-card, .search-more-option):hover::before {
+    opacity: 1;
+  }
 }
 
 /* The listbox's active record: the focus ring and the lit seam together,
@@ -132,13 +154,15 @@ html[data-family="library"] .library-page .library-index-summary {
   justify-content: space-between;
   gap: 4px 12px;
   margin-top: 20px;
-  padding: 12px 14px 10px;
-  border: 1px solid var(--dxl-line-2);
+  padding: 13px 16px 11px;
+  border: 1px solid rgb(var(--dxl-gold-rgb) / 42%);
   border-bottom: 0;
   border-radius: 5px 5px 0 0;
   background:
-    linear-gradient(90deg, rgb(var(--dxl-gold-rgb) / 9%), transparent 55%),
-    rgb(3 6 12 / 62%);
+    linear-gradient(125deg, rgb(255 251 238 / 8%) 0%, transparent 48%),
+    linear-gradient(90deg, rgb(var(--dxl-gold-rgb) / 14%), rgb(var(--dx-edition-rgb) / 8%) 55%, transparent),
+    rgb(4 9 17 / 82%);
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 24%);
 }
 
 html[data-family="library"] .library-page .library-index-summary::before {
@@ -308,10 +332,12 @@ html[data-family="library"] .library-page .library-index-meter > button > b {
   }
 }
 
-html[data-family="library"] .library-page .library-index-meter > button:hover {
-  border-color: rgb(var(--kind-rgb) / 80%);
-  color: var(--dx-text);
-  background: linear-gradient(180deg, rgb(var(--kind-rgb) / 12%), rgb(var(--kind-rgb) / 4%));
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-index-meter > button:hover {
+    border-color: rgb(var(--kind-rgb) / 80%);
+    color: var(--dx-text);
+    background: linear-gradient(180deg, rgb(var(--kind-rgb) / 12%), rgb(var(--kind-rgb) / 4%));
+  }
 }
 
 html[data-family="library"] .library-page .library-index-meter > button:focus-visible {
@@ -355,27 +381,29 @@ html[data-family="library"] .library-page .library-index-meter > button:focus-vi
 }
 
 /* A file's tone lights its floor and its number under a pointer. */
-html[data-family="library"] .library-page .library-cast-tile:hover {
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    0 0 0 1px color-mix(in srgb, var(--cast-tone) 55%, transparent),
-    0 24px 44px -24px color-mix(in srgb, var(--cast-tone) 70%, transparent),
-    var(--dx-drop);
-}
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-cast-tile:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      0 0 0 1px color-mix(in srgb, var(--cast-tone) 55%, transparent),
+      0 24px 44px -24px color-mix(in srgb, var(--cast-tone) 70%, transparent),
+      var(--dx-drop);
+  }
 
-html[data-family="library"] .library-page .library-cast-tile:hover .library-cast-no {
-  color: var(--cast-tone);
-}
+  html[data-family="library"] .library-page .library-cast-tile:hover .library-cast-no {
+    color: var(--cast-tone);
+  }
 
-html[data-family="library"] .library-page .library-cast-tile:hover .library-cast-art::after {
-  background:
-    linear-gradient(90deg, var(--cast-tone), transparent 80%) 0 100% / 100% 3px no-repeat,
-    radial-gradient(
-      70% 40% at 50% 100%,
-      color-mix(in srgb, var(--cast-tone) 38%, transparent),
-      transparent 70%
-    ),
-    linear-gradient(180deg, transparent 58%, rgb(3 6 12 / 72%));
+  html[data-family="library"] .library-page .library-cast-tile:hover .library-cast-art::after {
+    background:
+      linear-gradient(90deg, var(--cast-tone), transparent 80%) 0 100% / 100% 3px no-repeat,
+      radial-gradient(
+        70% 40% at 50% 100%,
+        color-mix(in srgb, var(--cast-tone) 38%, transparent),
+        transparent 70%
+      ),
+      linear-gradient(180deg, transparent 58%, rgb(3 6 12 / 72%));
+  }
 }
 
 /* ================================================================
@@ -396,15 +424,17 @@ html[data-family="library"] .library-page .library-hub-grid > .library-continue 
   box-shadow: inset 0 1px 0 rgb(var(--dxz-pink-rgb) / 55%);
 }
 
-html[data-family="library"] .library-page .library-rows > li > a:hover {
-  background: linear-gradient(90deg, rgb(var(--dx-edition-rgb) / 10%), transparent 80%);
-}
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-rows > li > a:hover {
+    background: linear-gradient(90deg, rgb(var(--dx-edition-rgb) / 10%), transparent 80%);
+  }
 
-html[data-family="library"] .library-page .library-rows button:hover,
-html[data-family="library"] .library-page .library-data-controls > button:hover:not(:disabled),
-html[data-family="library"] .library-page .library-search-chips a:hover {
-  border-color: var(--dx-edition);
-  color: var(--dx-text);
+  html[data-family="library"] .library-page .library-rows button:hover,
+  html[data-family="library"] .library-page .library-data-controls > button:hover:not(:disabled),
+  html[data-family="library"] .library-page .library-search-chips a:hover {
+    border-color: var(--dx-edition);
+    color: var(--dx-text);
+  }
 }
 
 html[data-family="library"] .library-page .library-primary-link {
@@ -416,7 +446,6 @@ html[data-family="library"] .library-page .library-primary-link {
 /* ================================================================
    /library — 問いから辿る: the tiles' light, and the strips on phones
    ================================================================ */
-html[data-family="library"] .library-page .inquiry-choice:hover .inquiry-choice-art::after,
 html[data-family="library"]
   .library-page
   .inquiry-choice[aria-pressed="true"]
@@ -430,12 +459,20 @@ html[data-family="library"] .library-page .inquiry-choice-action {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
 }
 
-html[data-family="library"] .library-page .inquiry-choice:hover .inquiry-choice-action {
-  background: color-mix(in srgb, var(--inquiry-accent) 14%, rgb(3 6 12 / 60%));
-}
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .inquiry-choice:hover .inquiry-choice-art::after {
+    background:
+      linear-gradient(180deg, rgb(3 6 12 / 4%) 0%, rgb(3 6 12 / 38%) 38%, rgb(3 6 12 / 92%) 74%),
+      linear-gradient(90deg, rgb(3 6 12 / 62%), transparent 70%);
+  }
 
-html[data-family="library"] .library-page .inquiry-stop-body:hover {
-  border-color: color-mix(in srgb, var(--inquiry-accent) 55%, transparent);
+  html[data-family="library"] .library-page .inquiry-choice:hover .inquiry-choice-action {
+    background: color-mix(in srgb, var(--inquiry-accent) 14%, rgb(3 6 12 / 60%));
+  }
+
+  html[data-family="library"] .library-page .inquiry-stop-body:hover {
+    border-color: color-mix(in srgb, var(--inquiry-accent) 55%, transparent);
+  }
 }
 
 @media (max-width: 699px) {
@@ -488,12 +525,13 @@ html[data-family="library"] .library-page .library-search-label {
 
 html[data-family="library"] .library-page .library-browse-controls .library-search {
   background:
-    linear-gradient(90deg, var(--dx-edition), rgb(var(--dxz-pink-rgb) / 70%) 60%, transparent) 0 0 /
-      160px 1px no-repeat,
-    rgb(2 5 10 / 85%);
+    linear-gradient(90deg, var(--dx-edition), rgb(var(--dxz-pink-rgb) / 76%) 55%, rgb(var(--dxl-gold-rgb) / 48%) 85%, transparent) 0 0 /
+      220px 1px no-repeat,
+    rgb(3 8 15 / 90%);
   box-shadow:
-    inset 0 0 0 1px rgb(3 6 12 / 80%),
-    0 0 0 4px rgb(var(--dx-edition-rgb) / 6%);
+    inset 0 2px 12px rgb(0 0 0 / 68%),
+    inset 0 0 0 1px rgb(3 6 12 / 84%),
+    0 0 0 4px rgb(var(--dx-edition-rgb) / 8%);
 }
 
 html[data-family="library"] .library-page .library-browse-controls .library-browse-submit {
@@ -579,15 +617,17 @@ html[data-family="library"]
   font: 500 12px / 1 var(--dx-mono);
 }
 
-html[data-family="library"] .library-page .library-browse-controls .library-filter-row button:hover,
-html[data-family="library"] .search-page .search-categories button:hover,
-html[data-family="library"] .search-page .search-suggestions button:hover,
-html[data-family="library"] .library-page .library-active-filters button:hover,
-html[data-family="library"] .library-page .library-empty button:hover,
-html[data-family="library"] .search-page .search-empty button:hover,
-html[data-family="library"] .search-page .search-close-matches button:hover {
-  border-color: var(--dx-edition);
-  color: var(--dx-text);
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-browse-controls .library-filter-row button:hover,
+  html[data-family="library"] .search-page .search-categories button:hover,
+  html[data-family="library"] .search-page .search-suggestions button:hover,
+  html[data-family="library"] .library-page .library-active-filters button:hover,
+  html[data-family="library"] .library-page .library-empty button:hover,
+  html[data-family="library"] .search-page .search-empty button:hover,
+  html[data-family="library"] .search-page .search-close-matches button:hover {
+    border-color: var(--dx-edition);
+    color: var(--dx-text);
+  }
 }
 
 html[data-family="library"]
@@ -681,8 +721,10 @@ html[data-family="library"] .library-page .library-fulltext-inline {
   font-size: 13px;
 }
 
-html[data-family="library"] .library-page .library-fulltext-inline:hover {
-  border-color: var(--dx-edition);
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-fulltext-inline:hover {
+    border-color: var(--dx-edition);
+  }
 }
 
 html[data-family="library"] .library-page .library-fulltext-inline > span {
@@ -817,9 +859,11 @@ html[data-family="library"] .library-page .library-empty-actions button > span {
   font: 600 13px / 1 var(--dx-mono);
 }
 
-html[data-family="library"] .library-page .library-empty-kinds button:hover,
-html[data-family="library"] .search-page .search-empty-kinds button:hover {
-  border-color: var(--dx-gold);
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page .library-empty-kinds button:hover,
+  html[data-family="library"] .search-page .search-empty-kinds button:hover {
+    border-color: var(--dx-gold);
+  }
 }
 
 html[data-family="library"] .library-page .library-empty-actions,
@@ -895,8 +939,10 @@ html[data-family="library"] .search-page .search-input-row:focus-within .search-
 
 html[data-family="library"] .search-page .search-input-row:focus-within {
   box-shadow:
+    inset 0 2px 10px rgb(0 0 0 / 58%),
     0 0 0 2px var(--dx-focus),
-    0 0 0 6px rgb(var(--dx-edition-rgb) / 10%);
+    0 0 26px -2px rgb(var(--dx-edition-rgb) / 34%),
+    0 0 48px -10px rgb(var(--dxl-gold-rgb) / 22%);
 }
 
 html[data-family="library"] .search-page .search-categories button span {
@@ -1140,8 +1186,10 @@ html[data-family="library"] .search-page .search-more::before {
   background: var(--dxz-prism-fade);
 }
 
-html[data-family="library"] .search-page .search-more:hover {
-  border-color: var(--dx-edition);
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .search-page .search-more:hover {
+    border-color: var(--dx-edition);
+  }
 }
 
 html[data-family="library"] .search-page .search-more > span {

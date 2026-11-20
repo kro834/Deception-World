@@ -49,12 +49,7 @@ html[data-family] {
   --fx-c: var(--sh-l2, #ff5fc8);
   --fx-ink: #040a14;
   --fx-ink-2: #071222;
-  --fx-scan: repeating-linear-gradient(
-    180deg,
-    rgb(236 249 255 / 3%) 0 0.75px,
-    rgb(157 134 255 / 1.1%) 0.75px 1.5px,
-    transparent 1.5px 3.5px
-  );
+  --fx-scan: linear-gradient(transparent, transparent);
 }
 
 html[data-family="dream"],
@@ -117,8 +112,8 @@ html:is(
 }
 
 /* ---------- 1. The command bars ----------
-   The foot becomes a three-stop neon line with a soft bloom under the
-   bar; the seam on the left keeps the chapter's own light on /world. */
+   The foot becomes a luminous neon prism line with a soft ambient bloom
+   under the bar; the seam on the left keeps the chapter's own light on /world. */
 @media (forced-colors: none) {
   html:is(
       [data-family="world"],
@@ -135,34 +130,35 @@ html:is(
       .search-page > header.search-topbar,
       .form-archive-page > header.form-archive-toolbar
     ) {
-    border-bottom-color: color-mix(in srgb, var(--fx-a) 40%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--fx-a) 44%, transparent);
     background-color: var(--fx-ink);
     background-image:
-      linear-gradient(90deg, var(--sh-bar-light, var(--fx-a)) 0 4px, transparent 4px),
+      linear-gradient(90deg, var(--sh-bar-light, var(--fx-a)) 0 3px, transparent 3px),
       linear-gradient(
         90deg,
-        transparent 0,
-        var(--sh-bar-light, var(--fx-a)) 14%,
-        var(--fx-b) 52%,
-        var(--fx-c) 84%,
+        transparent 0%,
+        var(--sh-bar-light, var(--fx-a)) 12%,
+        #eef9ff 34%,
+        var(--fx-b) 56%,
+        var(--fx-c) 82%,
+        color-mix(in srgb, #f2cf8d 72%, var(--fx-c)) 93%,
         transparent 100%
       ),
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--sh-bar-light, var(--fx-a)) 16%, transparent),
-        color-mix(in srgb, var(--fx-b) 7%, transparent) 46%,
-        color-mix(in srgb, var(--fx-c) 13%, transparent)
+        color-mix(in srgb, var(--sh-bar-light, var(--fx-a)) 15%, transparent),
+        color-mix(in srgb, var(--fx-b) 8%, transparent) 46%,
+        color-mix(in srgb, var(--fx-c) 12%, transparent)
       ),
       radial-gradient(
-        40% 180% at 100% 100%,
-        color-mix(in srgb, var(--fx-c) 14%, transparent),
-        transparent 70%
+        38% 180% at 100% 100%,
+        color-mix(in srgb, var(--fx-c) 16%, transparent),
+        transparent 72%
       ),
-      var(--command-metal), var(--command-ribs);
+      var(--command-metal);
     background-size:
       100% 100%,
-      100% 1px,
-      100% 100%,
+      100% 2px,
       100% 100%,
       100% 100%,
       100% 100%;
@@ -171,19 +167,44 @@ html:is(
       0 100%,
       0 0,
       0 0,
-      0 0,
       0 0;
     background-repeat: no-repeat;
     box-shadow:
-      inset 0 1px 0 rgb(233 240 241 / 18%),
-      0 1px 0 color-mix(in srgb, var(--fx-b) 28%, transparent),
-      0 14px 34px -20px
-        color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent),
-      0 4px 18px rgb(0 0 0 / 34%);
+      inset 0 1px 0 rgb(238 248 255 / 26%),
+      0 1px 0 color-mix(in srgb, var(--fx-b) 36%, transparent),
+      0 12px 32px -16px
+        color-mix(in srgb, var(--fx-a) calc(78% * var(--fx-bloom)), transparent),
+      0 6px 20px rgb(0 0 0 / 42%);
   }
 
-  /* The launcher trigger: the family's light lit from inside, a violet
-     rim instead of the flat offset. */
+  /* Spectrum jewel-cut rim light on the topbar DW sigil plates. */
+  html:is([data-family="world"], [data-family="dossier"], [data-family="library"])
+    body
+    :is(
+      main.site-shell.film-edition > header.topbar .brand-sigil,
+      .manager-page > header.manager-topbar .brand-sigil,
+      .library-page > header.library-topbar > a::before,
+      .search-page > header.search-topbar > a.search-brand::before
+    ) {
+    border-color: color-mix(in srgb, var(--fx-a) 72%, #f4fbff);
+    background:
+      radial-gradient(circle at 86% 14%, rgb(255 255 255 / 72%), color-mix(in srgb, var(--fx-a) 34%, transparent) 34%, transparent 66%),
+      radial-gradient(circle at 14% 88%, color-mix(in srgb, var(--fx-c) 30%, transparent), transparent 64%),
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--fx-a) 28%, rgb(255 255 255 / 14%)) 0%,
+        color-mix(in srgb, var(--fx-b) 18%, #071324) 54%,
+        color-mix(in srgb, var(--fx-c) 22%, #09172a) 100%
+      );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 84%),
+      inset 1px 0 0 color-mix(in srgb, var(--fx-a) 68%, transparent),
+      inset -1px -1px 0 color-mix(in srgb, var(--fx-c) 44%, transparent),
+      inset 0 0 14px color-mix(in srgb, var(--fx-b) 26%, transparent);
+  }
+
+  /* The launcher trigger: luminous crystal glass lit from inside, smooth
+     specular bevel and prismatic halo instead of flat corner cuts. */
   html:is(
       [data-family="world"],
       [data-family="dossier"],
@@ -194,20 +215,23 @@ html:is(
     body
     .side-panel-trigger.side-panel-trigger.side-panel-trigger {
     background:
-      linear-gradient(135deg, #f4fbff 0 6px, transparent 6px),
-      linear-gradient(315deg, var(--fx-ink) 0 7px, transparent 7px),
-      linear-gradient(120deg, transparent 24%, rgb(255 255 255 / 35%) 44%, transparent 68%),
+      radial-gradient(circle at 22% 16%, rgb(255 255 255 / 58%), transparent 54%),
+      linear-gradient(124deg, transparent 18%, rgb(255 255 255 / 38%) 44%, transparent 72%),
       linear-gradient(
         var(--fx-angle),
-        var(--fx-a) 0%,
-        color-mix(in srgb, var(--fx-a) 70%, var(--fx-b)) 52%,
-        color-mix(in srgb, var(--fx-c) 78%, var(--fx-a)) 100%
+        color-mix(in srgb, var(--fx-a) 92%, #ffffff) 0%,
+        color-mix(in srgb, var(--fx-a) 64%, var(--fx-b)) 52%,
+        color-mix(in srgb, var(--fx-c) 76%, var(--fx-a)) 100%
       ) !important;
     box-shadow:
-      inset 0 0 0 1px rgb(244 251 255 / 70%),
-      0 6px 16px -6px rgb(0 0 0 / 55%),
-      0 0 22px -6px
-        color-mix(in srgb, var(--fx-a) calc(75% * var(--fx-glow)), transparent) !important;
+      inset 0 1px 0 rgb(255 255 255 / 88%),
+      inset 0 0 0 1px rgb(244 251 255 / 72%),
+      inset 0 -1px 0 rgb(4 10 20 / 30%),
+      0 8px 20px -6px rgb(0 0 0 / 58%),
+      0 0 24px -5px
+        color-mix(in srgb, var(--fx-a) calc(82% * var(--fx-glow)), transparent),
+      4px 4px 20px -8px
+        color-mix(in srgb, var(--fx-c) calc(62% * var(--fx-glow)), transparent) !important;
   }
 }
 
@@ -280,9 +304,10 @@ html:is(
   border-color: var(--fx-a);
   box-shadow:
     inset 3px 0 0 var(--fx-a),
-    inset 0 1px 0 rgb(233 240 241 / 12%),
-    0 0 0 3px color-mix(in srgb, var(--fx-a) 18%, transparent),
-    0 0 24px -8px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-glow)), transparent);
+    inset 0 1px 0 rgb(244 252 255 / 26%),
+    0 0 0 3px color-mix(in srgb, var(--fx-a) 24%, transparent),
+    0 0 28px -4px color-mix(in srgb, var(--fx-a) calc(86% * var(--fx-glow)), transparent),
+    0 0 42px -12px color-mix(in srgb, var(--fx-b) calc(62% * var(--fx-glow)), transparent);
 }
 
 /* ---------- 4. /world: the shared plates ----------
@@ -451,7 +476,6 @@ html[data-family="dossier"]
     radial-gradient(80% 60% at 100% 0%, color-mix(in srgb, var(--fx-a) 12%, transparent), transparent 70%),
     radial-gradient(60% 50% at 0% 100%, color-mix(in srgb, var(--fx-b) 9%, transparent), transparent 70%),
     linear-gradient(rgb(255 255 255 / 4%), transparent 120px),
-    var(--fx-scan),
     var(--sd-plate);
 }
 
@@ -496,7 +520,6 @@ html[data-family="library"]
     radial-gradient(ellipse 50% 480px at 0% 22%, rgb(143 139 255 / 17%), transparent 72%),
     radial-gradient(ellipse 60% 620px at 100% 70%, rgb(255 111 207 / 11%), transparent 72%),
     radial-gradient(ellipse 50% 520px at 10% 100%, rgb(140 236 255 / 9%), transparent 72%),
-    repeating-linear-gradient(90deg, rgb(140 236 255 / 3.2%) 0 1px, transparent 1px 48px),
     linear-gradient(125deg, #040a12, #0a1828 48%, #060c18);
 }
 
@@ -571,8 +594,7 @@ html[data-family="archive"]
   background-image:
     linear-gradient(90deg, transparent, var(--fx-a) 20%, var(--fx-b) 60%, transparent) 0 100% / 100% 1px no-repeat,
     radial-gradient(50% 160% at 0% 0%, color-mix(in srgb, var(--fx-a) 10%, transparent), transparent 70%),
-    radial-gradient(40% 160% at 100% 100%, color-mix(in srgb, var(--fx-b) 7%, transparent), transparent 70%),
-    var(--fx-scan);
+    radial-gradient(40% 160% at 100% 100%, color-mix(in srgb, var(--fx-b) 7%, transparent), transparent 70%);
   box-shadow: 0 12px 30px -22px color-mix(in srgb, var(--fx-a) calc(70% * var(--fx-bloom)), transparent);
 }
 
@@ -615,11 +637,9 @@ html[data-family="archive"]
     main.site-shell.film-edition.mirage-edition
     > nav.ws-contents:not(#fx):not(#fx):not(#fx) {
     background:
-      linear-gradient(rgb(111 233 255 / 6%) 1px, transparent 1px) 0 0 / 40px 40px,
-      linear-gradient(90deg, rgb(111 233 255 / 6%) 1px, transparent 1px) 0 0 / 40px 40px,
-      radial-gradient(46% 70% at 12% 0%, rgb(111 233 255 / 24%), transparent 72%),
-      radial-gradient(40% 60% at 62% 46%, rgb(157 134 255 / 22%), transparent 72%),
-      radial-gradient(50% 70% at 92% 100%, rgb(255 95 200 / 24%), transparent 72%),
+      radial-gradient(48% 72% at 12% 0%, rgb(111 233 255 / 26%), transparent 72%),
+      radial-gradient(42% 62% at 62% 46%, rgb(157 134 255 / 24%), transparent 72%),
+      radial-gradient(52% 72% at 92% 100%, rgb(255 95 200 / 24%), transparent 72%),
       linear-gradient(170deg, #050b1a 0%, #0a1030 56%, #160b2c 100%);
   }
 
@@ -734,14 +754,13 @@ html[data-family="archive"]
       100% 2px,
       100% 100%,
       100% 100%,
-      100% 100%,
       100% 100%;
     box-shadow:
-      inset 0 1px 0 rgb(233 240 241 / 18%),
-      0 1px 0 color-mix(in srgb, var(--fx-b) 40%, transparent),
-      0 6px 18px -6px color-mix(in srgb, var(--fx-b) calc(55% * var(--fx-bloom)), transparent),
-      0 18px 40px -22px color-mix(in srgb, var(--fx-c) calc(70% * var(--fx-bloom)), transparent),
-      0 4px 18px rgb(0 0 0 / 34%);
+      inset 0 1px 0 rgb(238 248 255 / 28%),
+      0 1px 0 color-mix(in srgb, var(--fx-b) 48%, transparent),
+      0 8px 22px -6px color-mix(in srgb, var(--fx-a) calc(62% * var(--fx-bloom)), transparent),
+      0 18px 42px -20px color-mix(in srgb, var(--fx-c) calc(74% * var(--fx-bloom)), transparent),
+      0 6px 22px rgb(0 0 0 / 42%);
   }
 
   html[data-family="world"]
@@ -750,8 +769,8 @@ html[data-family="archive"]
     > header.topbar
     nav
     a:not(#fx):not(#fx)::after {
-    background: linear-gradient(90deg, var(--fx-a), var(--fx-b) 55%, var(--fx-c));
-    box-shadow: 0 0 12px color-mix(in srgb, var(--fx-a) calc(80% * var(--fx-bloom)), transparent);
+    background: linear-gradient(90deg, var(--fx-a), #eef9ff 36%, var(--fx-b) 66%, var(--fx-c));
+    box-shadow: 0 0 14px color-mix(in srgb, var(--fx-a) calc(86% * var(--fx-bloom)), transparent);
   }
 
   html[data-family="world"]
@@ -762,11 +781,32 @@ html[data-family="archive"]
     a[aria-current="location"]:not(#fx):not(#fx) {
     color: #fff;
     background:
-      linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 22%, transparent), color-mix(in srgb, var(--fx-b) 8%, transparent) 60%, transparent);
-    text-shadow: 0 0 14px color-mix(in srgb, var(--fx-a) calc(90% * var(--fx-bloom)), transparent);
+      linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 24%, transparent), color-mix(in srgb, var(--fx-b) 10%, transparent) 60%, transparent);
+    text-shadow: 0 0 16px color-mix(in srgb, var(--fx-a) calc(92% * var(--fx-bloom)), transparent);
   }
 }
 
+@media (hover: hover) and (pointer: fine) {
+  html:is(
+      [data-family="world"],
+      [data-family="dossier"],
+      [data-family="library"],
+      [data-family="archive"],
+      [data-family="utility"]
+    ):not([data-ipad-menu-scrolled="true"]):not([data-ipad-menu-motion])
+    body
+    .side-panel-trigger.side-panel-trigger.side-panel-trigger:hover:not([data-press]) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 96%),
+      inset 0 0 0 1px rgb(255 255 255 / 82%),
+      inset 0 -1px 0 rgb(4 10 20 / 26%),
+      0 10px 24px -6px rgb(0 0 0 / 62%),
+      0 0 32px -4px
+        color-mix(in srgb, var(--fx-a) calc(96% * var(--fx-glow)), transparent),
+      4px 6px 26px -6px
+        color-mix(in srgb, var(--fx-c) calc(78% * var(--fx-glow)), transparent) !important;
+  }
+}
 /* ---------- 9d. Primary and selected controls: the pastel spectrum ----------
    Dark text on a light cyan → lavender → pink fill (≥ 7:1), a spectrum
    stroke and a two-colour glow. */

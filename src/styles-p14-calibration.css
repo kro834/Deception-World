@@ -3,69 +3,88 @@
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-control {
   position: relative;
   overflow: hidden;
-  border-color: rgb(127 202 233 / 18%);
+  border-color: rgb(121 232 255 / 34%);
   background:
-    linear-gradient(90deg, rgb(214 247 255 / 0%), rgb(214 247 255 / 34%) 50%, rgb(214 247 255 / 0%)) 50% 0 /
-      70% 1px no-repeat,
-    radial-gradient(ellipse at 50% 0%, rgb(46 128 164 / 14%), transparent 68%),
-    linear-gradient(145deg, rgb(7 17 27 / 94%), rgb(4 9 17 / 88%));
+    linear-gradient(
+        90deg,
+        rgb(214 247 255 / 0%),
+        rgb(121 232 255 / 62%) 38.2%,
+        rgb(242 216 150 / 54%) 61.8%,
+        rgb(214 247 255 / 0%)
+      )
+      50% 0 / 82% 1.5px no-repeat,
+    radial-gradient(
+      ellipse 80% 65% at 50% 0%,
+      rgb(68 188 232 / 22%),
+      rgb(182 163 255 / 8%) 52%,
+      transparent 74%
+    ),
+    linear-gradient(155deg, rgb(10 23 36 / 96%), rgb(4 10 19 / 94%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 5%),
-    inset 0 -1px 0 rgb(0 0 0 / 45%),
-    inset 0 0 0 1px rgb(121 232 255 / 6%);
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    inset 0 0 0 1px rgb(121 232 255 / 14%),
+    0 16px 36px -16px rgb(0 0 0 / 72%);
 }
 
 /* Shared frosted sheets use html body + !important; keep the override scoped
    to this page's P14 slider shell and thumb. OPTICS (2026-11-14): the shell
-   carries a graduated scale under its track — a stop at each baseline, one
-   at the middle, the fine marks between — so the two points read as a
+   carries three discrete datum stops under its track — a stop at each
+   baseline and one at the equilibrium centre — so the two points read as a
    calibrated instrument, not a slider. */
 html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider {
   background:
-    linear-gradient(rgb(150 236 255 / 52%), rgb(150 236 255 / 52%)) 23px calc(50% + 14px) / 1px 9px
+    linear-gradient(rgb(150 236 255 / 68%), rgb(150 236 255 / 68%)) 23px calc(50% + 14px) / 1.5px
+      10px no-repeat,
+    linear-gradient(rgb(150 236 255 / 68%), rgb(150 236 255 / 68%)) calc(100% - 23px)
+      calc(50% + 14px) / 1.5px 10px no-repeat,
+    linear-gradient(rgb(242 216 150 / 62%), rgb(242 216 150 / 62%)) 50% calc(50% + 14px) / 1.5px 8px
       no-repeat,
-    linear-gradient(rgb(150 236 255 / 52%), rgb(150 236 255 / 52%)) calc(100% - 23px) calc(50% + 14px) /
-      1px 9px no-repeat,
-    linear-gradient(rgb(242 216 150 / 46%), rgb(242 216 150 / 46%)) 50% calc(50% + 14px) / 1px 7px no-repeat,
-    radial-gradient(ellipse at 30% 18%, rgb(86 218 255 / 19%), transparent 34%),
-    linear-gradient(145deg, #152a38, #07131e 72%) !important;
+    radial-gradient(ellipse at 24% 22%, rgb(86 218 255 / 26%), transparent 42%),
+    radial-gradient(ellipse at 76% 22%, rgb(242 216 150 / 16%), transparent 42%),
+    linear-gradient(145deg, #163042 0%, #0b1b28 52%, #061019 100%) !important;
   box-shadow:
-    inset 0 0 0 1px rgb(124 216 243 / 29%),
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    inset 0 -1px 0 rgb(0 0 0 / 40%),
-    inset 0 10px 18px -14px rgb(150 236 255 / 30%),
-    0 8px 22px rgb(0 0 0 / 34%) !important;
+    inset 0 0 0 1px rgb(124 216 243 / 38%),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 62%),
+    inset 0 12px 22px -14px rgb(150 236 255 / 38%),
+    0 12px 28px -6px rgb(0 0 0 / 54%),
+    0 0 22px -6px rgb(121 232 255 / 24%) !important;
 }
 
 html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   background: radial-gradient(
     circle at 36% 30%,
-    #fff 0 4%,
-    #b9f3ff 15%,
-    #42b8de 34%,
-    #123d53 68%,
+    #ffffff 0 6%,
+    #ccf7ff 18%,
+    #4cc8ef 38%,
+    #144660 70%,
     #071722 100%
   ) !important;
   box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 55%),
-    inset 0 -4px 7px rgb(1 14 22 / 55%),
-    0 2px 13px rgb(0 0 0 / 62%),
-    0 0 0 5px rgb(5 13 20 / 82%),
-    0 0 0 6px rgb(150 236 255 / 16%),
-    0 0 22px rgb(46 188 231 / 36%) !important;
+    inset 0 1px 1.5px rgb(255 255 255 / 72%),
+    inset 0 -4px 7px rgb(1 14 22 / 64%),
+    0 3px 15px rgb(0 0 0 / 72%),
+    0 0 0 5px rgb(5 13 20 / 88%),
+    0 0 0 6px rgb(150 236 255 / 28%),
+    0 0 26px rgb(56 204 248 / 48%) !important;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels {
   position: relative;
   z-index: 2;
   align-items: center;
-  color: #9baab6;
+  color: #a8bac7;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button {
   min-width: 88px;
-  border: 1px solid transparent;
-  color: #aebbc7;
+  border: 1px solid rgb(121 232 255 / 20%);
+  color: #bfd0dc;
+  background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(4 11 19 / 56%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    inset 0 -1px 0 rgb(0 0 0 / 48%);
   letter-spacing: 0.08em;
   transition:
     border-color 180ms ease,
@@ -78,14 +97,21 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
 /* The chosen baseline: a lit lip, the ice line under it and a cool glow;
    it reads as the stop the instrument is calibrated to. */
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-range-labels button.is-active {
-  border-color: rgb(100 221 255 / 56%);
-  color: #f4fcff;
-  background: linear-gradient(135deg, rgb(46 157 202 / 28%), rgb(23 91 133 / 13%));
+  border-color: rgb(132 235 255 / 78%);
+  color: #ffffff;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, transparent 28%),
+    linear-gradient(
+      135deg,
+      rgb(52 178 228 / 38%),
+      rgb(24 98 144 / 22%) 68%,
+      rgb(242 216 150 / 16%) 100%
+    );
   box-shadow:
-    inset 0 1px 0 rgb(214 247 255 / 26%),
-    inset 0 -2px 0 rgb(140 234 255 / 78%),
-    inset 0 0 0 1px rgb(145 229 255 / 8%),
-    0 0 20px rgb(34 157 205 / 18%);
+    inset 0 1px 0 rgb(235 252 255 / 44%),
+    inset 0 -2px 0 rgb(140 234 255 / 92%),
+    inset 0 0 0 1px rgb(145 229 255 / 16%),
+    0 0 24px rgb(46 188 231 / 32%);
 }
 
 /* A fine pointer finds the other stop before it presses it. */
@@ -118,18 +144,24 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   left: 23px;
   height: 4px;
   overflow: visible;
-  background: linear-gradient(90deg, #35505d, #425563 50%, #35505d);
+  background: linear-gradient(90deg, #3b5d6d, #56798c 38.2%, #688896 50%, #56798c 61.8%, #3b5d6d);
   box-shadow:
-    0 0 0 1px rgb(0 0 0 / 34%),
-    0 1px 7px rgb(0 0 0 / 45%);
+    0 0 0 1px rgb(0 0 0 / 48%),
+    0 1px 8px rgb(0 0 0 / 54%),
+    0 0 12px rgb(121 232 255 / 16%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-track i {
   width: 100%;
   height: 1px;
   margin-top: 1.5px;
-  background: rgb(170 224 242 / 36%);
-  box-shadow: none;
+  background: linear-gradient(
+    90deg,
+    rgb(150 236 255 / 42%),
+    rgb(242 216 150 / 54%) 50%,
+    rgb(150 236 255 / 42%)
+  );
+  box-shadow: 0 0 6px rgb(150 236 255 / 26%);
   transition: none;
 }
 
@@ -141,12 +173,13 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   width: 22px;
   height: 22px;
   place-items: center;
-  border: 1px solid rgb(154 190 205 / 52%);
+  border: 1px solid rgb(154 202 220 / 62%);
   border-radius: 50%;
-  background: #111e28;
+  background: radial-gradient(circle at 38% 34%, #1a2f3d, #0f1c26);
   box-shadow:
-    0 0 0 5px rgb(3 9 14 / 72%),
-    inset 0 0 0 3px #132733;
+    0 0 0 5px rgb(3 9 14 / 76%),
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 0 0 3px #142a38;
   translate: 0 -50%;
   transition:
     border-color 180ms ease,
@@ -169,19 +202,19 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #8298a4;
-  box-shadow: 0 0 5px rgb(132 175 194 / 24%);
+  background: #8ea9b6;
+  box-shadow: 0 0 6px rgb(132 185 206 / 34%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider[data-value="p1"] .rxs-p14-core-anchor-p1,
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider[data-value="p2"] .rxs-p14-core-anchor-p2 {
-  border-color: #8ceaff;
-  background: #14374a;
+  border-color: #a6f0ff;
+  background: radial-gradient(circle at 38% 34%, #1e4b64, #123346);
   box-shadow:
-    0 0 0 5px rgb(3 9 14 / 76%),
-    0 0 0 6px rgb(140 234 255 / 22%),
-    0 0 18px rgb(54 197 238 / 30%),
-    inset 0 0 0 3px #153547;
+    0 0 0 5px rgb(3 9 14 / 80%),
+    0 0 0 6px rgb(140 234 255 / 32%),
+    0 0 22px rgb(54 197 238 / 44%),
+    inset 0 0 0 3px #173d52;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page
@@ -192,27 +225,29 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   .rxs-p14-ios-slider[data-value="p2"]
   .rxs-p14-core-anchor-p2
   i {
-  background: #9cf1ff;
-  box-shadow: 0 0 8px #59dfff;
+  background: #b5f6ff;
+  box-shadow:
+    0 0 10px #79e8ff,
+    0 0 18px rgb(242 216 150 / 42%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
   left: 23px;
   width: 42px;
   height: 42px;
-  border: 1px solid rgb(185 239 255 / 88%);
+  border: 1px solid rgb(206 246 255 / 94%);
   background: radial-gradient(
     circle at 36% 30%,
-    #fff 0 4%,
-    #b9f3ff 15%,
-    #42b8de 34%,
-    #123d53 68%,
+    #fff 0 6%,
+    #ccf7ff 18%,
+    #4cc8ef 38%,
+    #144660 70%,
     #071722 100%
   );
   box-shadow:
-    0 2px 13px rgb(0 0 0 / 62%),
-    0 0 0 5px rgb(5 13 20 / 82%),
-    0 0 20px rgb(46 188 231 / 26%);
+    0 3px 15px rgb(0 0 0 / 70%),
+    0 0 0 5px rgb(5 13 20 / 86%),
+    0 0 24px rgb(56 204 248 / 38%);
   translate: -50% -50%;
   transition:
     translate 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -247,11 +282,12 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb i {
   position: absolute;
   inset: 11px;
-  border: 1px solid rgb(232 251 255 / 85%);
+  border: 1px solid rgb(238 253 255 / 92%);
   border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 255 255 / 32%) 0%, transparent 72%);
   box-shadow:
-    inset 0 0 7px rgb(224 250 255 / 55%),
-    0 0 9px rgb(195 243 255 / 44%);
+    inset 0 0 8px rgb(224 250 255 / 68%),
+    0 0 12px rgb(195 243 255 / 56%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-slider input[type="range"] {
@@ -264,11 +300,15 @@ html body .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-ios-thumb {
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-native-select select {
-  border-color: rgb(113 220 250 / 58%);
-  background: linear-gradient(145deg, #152a38, #07131e 72%);
+  border-color: rgb(121 232 255 / 68%);
+  background:
+    linear-gradient(90deg, rgb(242 216 150 / 64%) 0 24px, rgb(121 232 255 / 52%) 24px 60%, transparent)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(145deg, #162e3e, #07131e 72%);
   box-shadow:
-    inset 0 0 0 1px rgb(124 216 243 / 8%),
-    0 8px 22px rgb(0 0 0 / 24%);
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 0 0 1px rgb(124 216 243 / 14%),
+    0 10px 26px rgb(0 0 0 / 38%);
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxs-p14-native-rail {

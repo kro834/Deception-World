@@ -104,16 +104,17 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 10px;
-  border: 1px solid rgb(255 215 122 / 50%);
+  padding: 4px 12px;
+  border: 1px solid rgb(255 215 122 / 62%);
   border-radius: 999px;
-  color: #ffe2a1;
+  color: #fff0c4;
   background:
-    linear-gradient(180deg, rgb(255 215 122 / 16%), rgb(255 215 122 / 6%)),
-    rgb(20 16 8 / 60%);
+    linear-gradient(180deg, rgb(255 228 158 / 24%), rgb(255 215 122 / 8%)),
+    rgb(22 18 10 / 74%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 20%),
-    0 0 12px rgb(255 215 122 / 18%);
+    inset 0 1px 0 0 rgb(255 252 238 / 34%),
+    inset 0 -1px 0 0 rgb(118 76 16 / 40%),
+    0 0 16px rgb(255 215 122 / 26%);
   font-family: var(--fft-mono, "Oxanium", var(--fft-jp-display));
   font-size: 12px;
   font-weight: 700;
@@ -129,12 +130,16 @@
 
 .ffs-page .ffs-console {
   padding: clamp(18px, 3vw, 36px);
-  border: 1px solid rgb(127 230 255 / 16%);
+  border: 1px solid rgb(127 230 255 / 26%);
   border-radius: var(--sc-radius, 22px);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(46 128 196 / 14%), transparent 62%),
-    linear-gradient(160deg, rgb(8 16 30 / 94%), rgb(3 7 15 / 92%));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
+    radial-gradient(ellipse 72% 48% at 18% 0%, rgb(127 230 255 / 16%), transparent 62%),
+    radial-gradient(ellipse 64% 44% at 88% 100%, rgb(186 138 255 / 14%), transparent 64%),
+    linear-gradient(160deg, rgb(14 26 52 / 94%), rgb(6 12 28 / 96%) 55%, rgb(4 8 20 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(224 248 255 / 22%),
+    inset 0 0 0 1px rgb(201 155 255 / 10%),
+    0 24px 56px -18px rgb(0 4 18 / 82%);
 }
 
 .ffs-page .ffs-console-head {
@@ -164,15 +169,15 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border: 1px solid rgb(127 230 255 / 22%);
+  border: 1px solid rgb(127 230 255 / 32%);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 6%) 0%, transparent 40%),
-    rgb(0 0 0 / 48%);
+    linear-gradient(180deg, rgb(255 255 255 / 10%) 0%, transparent 44%),
+    rgb(4 10 24 / 76%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 16%),
-    inset 0 0 20px rgb(0 0 0 / 50%),
-    0 8px 24px -4px rgb(0 0 0 / 60%);
+    inset 0 1px 0 0 rgb(226 248 255 / 24%),
+    inset 0 2px 12px rgb(0 4 16 / 70%),
+    0 10px 28px -6px rgb(0 4 18 / 72%);
 }
 
 .ffs-page .ffs-p16-switch > div {
@@ -186,7 +191,7 @@
   min-height: 44px;
   padding: 6px 10px;
   border-radius: 999px;
-  color: #aeb9c6;
+  color: #bac7d8;
   font-size: 13px;
   font-weight: 650;
   line-height: 1.3;
@@ -201,22 +206,24 @@
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-views label:hover:not(.is-active) {
     color: var(--ffs-text);
-    background: rgb(127 230 255 / 8%);
-    box-shadow: inset 0 0 0 1px rgb(127 230 255 / 22%);
+    background: rgb(127 230 255 / 12%);
+    box-shadow: inset 0 0 0 1px rgb(127 230 255 / 30%);
   }
 }
 
 .ffs-page .ffs-views label.is-active {
   background:
-    linear-gradient(180deg, rgb(127 230 255 / 30%), rgb(127 230 255 / 12%)),
-    rgb(10 32 52 / 65%);
-  color: #fff;
-  border: 1px solid rgb(127 230 255 / 55%);
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgb(255 255 255 / 26%), transparent 62%),
+    linear-gradient(180deg, rgb(127 230 255 / 38%), rgb(104 176 255 / 20%) 56%, rgb(168 124 255 / 22%)),
+    rgb(14 42 74 / 84%);
+  color: #ffffff;
+  border: 1px solid rgb(156 241 255 / 72%);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 35%),
-    0 0 18px rgb(127 230 255 / 32%),
-    0 0 2px rgb(127 230 255 / 60%);
-  text-shadow: 0 0 10px rgb(127 230 255 / 40%);
+    inset 0 1px 0 0 rgb(255 255 255 / 52%),
+    inset 0 -1px 0 0 rgb(127 230 255 / 40%),
+    0 0 22px rgb(127 230 255 / 42%),
+    0 4px 14px -2px rgb(0 4 18 / 65%);
+  text-shadow: 0 0 12px rgb(127 230 255 / 55%);
 }
 
 /* The native radio stays in the tab order and keeps arrow-key selection. */
@@ -377,16 +384,18 @@
   align-content: start;
   gap: 14px;
   min-width: 0;
-  padding: 18px;
-  border: 1px solid rgb(127 230 255 / 18%);
+  padding: 20px;
+  border: 1px solid rgb(127 230 255 / 28%);
   border-radius: 16px;
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(127 230 255 / 10%), transparent 60%),
-    linear-gradient(160deg, rgb(255 255 255 / 5%) 0%, rgb(127 230 255 / 2%) 45%, transparent 100%),
-    rgb(7 14 28 / 75%);
+    radial-gradient(ellipse 84% 56% at 14% 0%, rgb(127 230 255 / 16%), transparent 62%),
+    radial-gradient(ellipse 76% 52% at 92% 100%, rgb(186 138 255 / 13%), transparent 64%),
+    linear-gradient(160deg, rgb(255 255 255 / 7%) 0%, rgb(127 230 255 / 3%) 45%, transparent 100%),
+    linear-gradient(180deg, rgb(14 26 52 / 86%), rgb(6 12 28 / 94%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    0 16px 36px -12px rgb(0 0 0 / 75%);
+    inset 0 1px 0 rgb(228 248 255 / 26%),
+    inset 0 0 0 1px rgb(201 155 255 / 10%),
+    0 18px 40px -14px rgb(0 4 18 / 84%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -399,11 +408,12 @@
 
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-metric:hover {
-    border-color: rgb(127 230 255 / 45%);
+    border-color: rgb(156 241 255 / 58%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 26%),
-      0 20px 44px -12px rgb(0 0 0 / 85%),
-      0 0 20px -4px rgb(127 230 255 / 22%);
+      inset 0 1px 0 rgb(255 255 255 / 36%),
+      inset 0 0 0 1px rgb(201 155 255 / 18%),
+      0 22px 48px -14px rgb(0 4 18 / 90%),
+      0 0 26px -4px rgb(127 230 255 / 32%);
   }
 }
 
@@ -472,7 +482,7 @@
 
 .ffs-page .ffs-bars {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .ffs-page .ffs-bars span,
@@ -481,11 +491,15 @@
 .ffs-page .ffs-p16-trio-track {
   display: block;
   position: relative;
-  height: 8px;
+  height: 10px;
   overflow: hidden;
+  border: 1px solid rgb(127 230 255 / 18%);
   border-radius: 999px;
-  background: rgb(255 255 255 / 6%);
-  box-shadow: inset 0 1px 2px rgb(0 0 0 / 60%);
+  background:
+    linear-gradient(180deg, rgb(2 6 18 / 86%), rgb(10 20 42 / 72%));
+  box-shadow:
+    inset 0 1px 3px rgb(0 2 10 / 78%),
+    0 1px 0 rgb(226 248 255 / 8%);
 }
 
 .ffs-page .ffs-bar-calib,
@@ -494,8 +508,8 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 15%) 50%, transparent);
-  opacity: 0.7;
+  background: linear-gradient(90deg, transparent, rgb(226 248 255 / 18%) 50%, transparent);
+  opacity: 0.72;
 }
 
 .ffs-page .ffs-bars i,
@@ -505,17 +519,17 @@
 .ffs-page .ffs-p16-trio-track i {
   display: block;
   position: relative;
-  min-width: 3px;
+  min-width: 4px;
   height: 100%;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, transparent 84%, rgb(255 255 255 / 80%) 96%, #fff 100%),
-    linear-gradient(180deg, rgb(255 255 255 / 30%) 0%, transparent 50%, rgb(0 0 0 / 20%) 100%),
+    linear-gradient(90deg, transparent 78%, rgb(255 255 255 / 72%) 94%, #ffffff 100%),
+    linear-gradient(180deg, rgb(255 255 255 / 44%) 0%, rgb(255 255 255 / 8%) 48%, rgb(0 4 16 / 26%) 100%),
     var(--ffs-col-accent);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 45%),
-    0 0 12px color-mix(in srgb, var(--ffs-col-accent) 55%, transparent),
-    0 0 24px color-mix(in srgb, var(--ffs-col-accent) 22%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    0 0 14px color-mix(in srgb, var(--ffs-col-accent) 68%, transparent),
+    0 0 28px color-mix(in srgb, var(--ffs-col-accent) 30%, transparent);
   transform: scaleX(var(--ffs-bar, 0));
   transform-origin: left center;
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -587,7 +601,7 @@
 
 .ffs-page .ffs-all-bar {
   grid-column: 1 / -1;
-  height: 6px;
+  height: 8px;
 }
 
 /* 加速機構 / 戦闘OS: names, not figures. */
@@ -600,10 +614,15 @@
 
 .ffs-page .ffs-text-row {
   min-width: 0;
-  padding: 16px 18px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  padding: 18px 20px;
+  border: 1px solid rgb(127 230 255 / 22%);
   border-radius: 16px;
-  background: rgb(255 255 255 / 2.5%);
+  background:
+    radial-gradient(ellipse 80% 50% at 12% 0%, rgb(127 230 255 / 12%), transparent 60%),
+    linear-gradient(160deg, rgb(14 25 48 / 82%), rgb(6 12 26 / 90%));
+  box-shadow:
+    inset 0 1px 0 rgb(228 248 255 / 20%),
+    0 12px 28px -12px rgb(0 4 18 / 70%);
 }
 
 .ffs-page .ffs-text-row h4 {
@@ -660,10 +679,16 @@
 .ffs-page .ffs-accel-compare {
   grid-column: 1 / -1;
   min-width: 0;
-  padding: 16px 18px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  padding: 18px 20px;
+  border: 1px solid rgb(138 232 255 / 22%);
   border-radius: 16px;
-  background: rgb(255 255 255 / 2.5%);
+  background:
+    radial-gradient(110% 80% at 0% 0%, rgb(127 230 255 / 12%), transparent 56%),
+    radial-gradient(90% 70% at 100% 100%, rgb(168 120 255 / 10%), transparent 58%),
+    linear-gradient(166deg, rgb(12 22 48 / 86%), rgb(5 10 24 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 20%),
+    0 12px 28px -14px rgb(0 4 16 / 78%);
 }
 
 .ffs-page .ffs-accel-compare > header {
@@ -935,9 +960,11 @@
 .ffs-page .ffs-bench-track {
   position: relative;
   display: block;
-  height: 10px;
-  border-radius: 0 4px 4px 0;
-  background: rgb(255 255 255 / 4%);
+  height: 12px;
+  border: 1px solid rgb(138 232 255 / 16%);
+  border-radius: 0 5px 5px 0;
+  background: rgb(3 7 18 / 88%);
+  box-shadow: inset 0 1px 4px rgb(0 2 10 / 82%);
 }
 
 .ffs-page .ffs-bench-track i {
@@ -947,18 +974,23 @@
 /* The 100 line: レクソナンス・ハイ. */
 .ffs-page .ffs-bench-track::after {
   position: absolute;
-  top: -3px;
-  bottom: -3px;
+  top: -4px;
+  bottom: -4px;
   left: calc(var(--ffs-ref) * 100%);
-  border-left: 1px dashed rgb(255 255 255 / 50%);
+  border-left: 1px dashed rgb(232 250 255 / 68%);
+  box-shadow: 0 0 8px rgb(127 230 255 / 38%);
   content: "";
 }
 
-/* Heat load reads the other way: hatched, so it never passes for a gain. */
+/* Heat load reads the other way: distinct warm thermal amber-coral glow,
+   never mistaken for a cool starlight gain. */
 .ffs-page .ffs-bench-rows > li[data-reading="load"] .ffs-bench-track i {
   background:
-    repeating-linear-gradient(135deg, rgb(1 3 8 / 55%) 0 2px, transparent 2px 6px),
-    var(--ffs-col-accent);
+    linear-gradient(180deg, rgb(255 244 220 / 48%) 0%, transparent 48%),
+    linear-gradient(90deg, color-mix(in srgb, var(--ffs-col-accent) 62%, #b84222), #ff9c54 68%, #ffd18a 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 220 / 45%),
+    0 0 14px -1px rgb(255 156 84 / 48%);
 }
 
 .ffs-page .ffs-bench-rows > li[data-reading="load"] {
@@ -991,16 +1023,17 @@
   position: relative;
   min-width: 0;
   padding: clamp(22px, 4vw, 52px) clamp(18px, 4.4vw, 60px);
-  border: 1px solid color-mix(in srgb, var(--ffs-accent) 22%, var(--ffs-line));
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 34%, rgb(138 232 255 / 26%));
   border-radius: var(--sc-radius, 22px);
   background:
-    radial-gradient(ellipse at 0% 0%, rgb(46 128 196 / 16%), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgb(127 230 255 / 4%), transparent 40%),
-    linear-gradient(170deg, rgb(9 15 26 / 94%), rgb(3 6 13 / 92%));
+    radial-gradient(ellipse 68% 48% at 0% 0%, rgb(96 206 255 / 22%), transparent 58%),
+    radial-gradient(circle at 100% 100%, rgb(168 120 255 / 14%), transparent 46%),
+    linear-gradient(168deg, rgb(13 24 52 / 95%), rgb(5 10 24 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(127 230 255 / 16%),
-    inset 0 0 40px rgb(0 0 0 / 50%),
-    0 16px 44px -16px rgb(0 0 0 / 80%);
+    inset 0 1px 0 rgb(232 250 255 / 26%),
+    inset 0 0 0 1px rgb(168 120 255 / 10%),
+    inset 0 0 44px rgb(2 6 18 / 52%),
+    0 20px 52px -18px rgb(0 4 16 / 86%);
 }
 
 .ffs-page .ffs-report::before {
@@ -1244,9 +1277,13 @@
 .ffs-page .ffs-table-scroll {
   max-width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--ffs-line);
+  border: 1px solid rgb(138 232 255 / 26%);
   border-radius: 14px;
-  background: rgb(0 0 0 / 22%);
+  background:
+    linear-gradient(180deg, rgb(12 22 48 / 76%), rgb(4 9 22 / 86%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 18%),
+    0 12px 30px -16px rgb(0 4 16 / 75%);
 }
 
 .ffs-page .ffs-report-table table {
@@ -1270,9 +1307,10 @@
 }
 
 .ffs-page .ffs-report-table thead th {
-  color: var(--ffs-muted);
+  color: #b8daee;
+  background: rgb(16 30 62 / 58%);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
@@ -1295,30 +1333,30 @@
 }
 
 .ffs-page .ffs-report-table [data-current] {
-  color: #fff;
+  color: #f8fdff;
   background: linear-gradient(
     180deg,
-    rgb(127 230 255 / 14%) 0%,
-    rgb(127 230 255 / 7%) 40%,
-    rgb(127 230 255 / 5%) 100%
+    rgb(127 230 255 / 20%) 0%,
+    rgb(127 230 255 / 11%) 46%,
+    rgb(168 120 255 / 8%) 100%
   );
   box-shadow:
-    inset 1px 0 0 rgb(127 230 255 / 16%),
-    inset -1px 0 0 rgb(127 230 255 / 16%);
+    inset 1px 0 0 rgb(138 232 255 / 28%),
+    inset -1px 0 0 rgb(138 232 255 / 28%);
 }
 
 .ffs-page .ffs-report-table thead [data-current] {
-  color: var(--ffs-accent, #9cf1ff);
+  color: #e6fbff;
   background: linear-gradient(
     180deg,
-    rgb(127 230 255 / 22%) 0%,
-    rgb(127 230 255 / 10%) 100%
+    rgb(127 230 255 / 32%) 0%,
+    rgb(127 230 255 / 14%) 100%
   );
   box-shadow:
-    inset 0 2.5px 0 0 var(--ffs-accent, #9cf1ff),
-    inset 1px 0 0 rgb(127 230 255 / 20%),
-    inset -1px 0 0 rgb(127 230 255 / 20%),
-    0 0 14px rgb(127 230 255 / 25%);
+    inset 0 2px 0 0 var(--ffs-accent, #9cf1ff),
+    inset 1px 0 0 rgb(138 232 255 / 34%),
+    inset -1px 0 0 rgb(138 232 255 / 34%),
+    0 0 18px rgb(127 230 255 / 32%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1351,12 +1389,17 @@
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: clamp(24px, 4vw, 56px);
   align-items: center;
-  padding: clamp(20px, 3.4vw, 44px);
-  border: 1px solid rgb(127 230 255 / 14%);
+  padding: clamp(22px, 3.4vw, 46px);
+  border: 1px solid rgb(138 232 255 / 28%);
   border-radius: var(--sc-radius, 22px);
   background:
-    radial-gradient(circle at 22% 40%, rgb(46 128 196 / 16%), transparent 50%),
-    linear-gradient(160deg, rgb(8 16 30 / 90%), rgb(3 7 15 / 88%));
+    radial-gradient(circle at 20% 42%, rgb(96 206 255 / 24%), transparent 52%),
+    radial-gradient(circle at 86% 18%, rgb(168 120 255 / 16%), transparent 46%),
+    linear-gradient(160deg, rgb(13 24 52 / 94%), rgb(5 10 24 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 24%),
+    inset 0 0 0 1px rgb(168 120 255 / 10%),
+    0 24px 56px -22px rgb(0 4 16 / 86%);
 }
 
 /* The P16 core: the owner's artwork (2026-10-23). */
@@ -1387,12 +1430,12 @@
   width: 100%;
   height: auto;
   aspect-ratio: 1;
-  border: 1px solid rgb(127 230 255 / 28%);
+  border: 1px solid rgb(138 232 255 / 44%);
   border-radius: 6px;
   box-shadow:
-    0 24px 60px -32px rgb(0 0 0 / 90%),
-    0 0 44px -8px rgb(127 230 255 / 28%),
-    0 0 64px -8px rgb(168 120 255 / 22%);
+    0 24px 60px -28px rgb(0 4 16 / 92%),
+    0 0 54px -4px rgb(127 230 255 / 42%),
+    0 0 78px -6px rgb(168 120 255 / 32%);
 }
 
 .ffs-page .ffs-p16-core-specular {
@@ -1453,13 +1496,17 @@
 }
 
 .ffs-page .ffs-p16-functions li {
-  padding: 6px 12px;
-  border: 1px solid rgb(127 230 255 / 26%);
+  padding: 6px 13px;
+  border: 1px solid rgb(138 232 255 / 38%);
   border-radius: 999px;
-  color: var(--ffs-text);
-  background: rgb(127 230 255 / 5%);
+  color: #edf9ff;
+  background:
+    linear-gradient(180deg, rgb(127 230 255 / 16%), rgb(127 230 255 / 5%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 26%),
+    0 4px 12px -6px rgb(127 230 255 / 26%);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
   line-height: 1.4;
 }
 
@@ -1525,12 +1572,16 @@
    P14 Extreme Tuning / P2 → P16). */
 .ffs-page .ffs-p16-comparator {
   margin-top: clamp(28px, 4vw, 44px);
-  padding: clamp(20px, 3.4vw, 40px);
-  border: 1px solid rgb(127 202 233 / 18%);
+  padding: clamp(22px, 3.4vw, 42px);
+  border: 1px solid rgb(138 232 255 / 28%);
   border-radius: var(--sc-radius, 22px);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(46 128 164 / 12%), transparent 68%),
-    linear-gradient(145deg, rgb(7 17 27 / 94%), rgb(4 9 17 / 88%));
+    radial-gradient(ellipse 74% 48% at 50% 0%, rgb(110 218 255 / 18%), transparent 66%),
+    radial-gradient(ellipse 52% 40% at 96% 100%, rgb(168 120 255 / 14%), transparent 64%),
+    linear-gradient(155deg, rgb(12 24 52 / 95%), rgb(5 10 24 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 22%),
+    0 22px 54px -22px rgb(0 4 16 / 86%);
 }
 
 .ffs-page .ffs-p16-comparator > header {
@@ -1570,15 +1621,16 @@
   gap: 12px;
   min-width: 0;
   padding: 18px;
-  border: 1px solid rgb(127 230 255 / 18%);
+  border: 1px solid rgb(138 232 255 / 28%);
   border-radius: 16px;
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(127 230 255 / 8%), transparent 60%),
-    linear-gradient(160deg, rgb(255 255 255 / 5%) 0%, rgb(127 230 255 / 2%) 40%, transparent 100%),
-    linear-gradient(180deg, rgb(10 22 42 / 75%), rgb(4 10 22 / 85%));
+    radial-gradient(ellipse 84% 58% at 50% 0%, rgb(127 230 255 / 16%), transparent 62%),
+    radial-gradient(ellipse 68% 52% at 100% 100%, rgb(168 120 255 / 12%), transparent 64%),
+    linear-gradient(172deg, rgb(14 28 58 / 88%), rgb(5 11 26 / 94%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 16px 36px -12px rgb(0 0 0 / 70%);
+    inset 0 1px 0 rgb(238 251 255 / 24%),
+    inset 0 0 0 1px rgb(168 120 255 / 10%),
+    0 18px 40px -14px rgb(0 4 16 / 80%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1591,11 +1643,12 @@
 
 @media (hover: hover) and (pointer: fine) {
   .ffs-page .ffs-p16-metric:hover {
-    border-color: rgb(127 230 255 / 45%);
+    border-color: rgb(142 238 255 / 58%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 24%),
-      0 20px 44px -12px rgb(0 0 0 / 80%),
-      0 0 24px -6px rgb(127 230 255 / 26%);
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      inset 0 0 22px rgb(127 230 255 / 12%),
+      0 22px 46px -14px rgb(0 4 16 / 86%),
+      0 0 28px -6px rgb(127 230 255 / 38%);
   }
 }
 
@@ -1660,20 +1713,20 @@
 
 .ffs-page .ffs-p16-bars {
   display: grid;
-  gap: 5px;
+  gap: 6px;
 }
 
 .ffs-page .ffs-p16-bars span {
-  height: 7px;
+  height: 9px;
 }
 
-/* P2's bar in gray; P16 in FAR FROM's hue. */
+/* P2's bar in cool slate; P16 in vivid starlight cyan. */
 .ffs-page .ffs-p16-bars [data-unit="p2"] {
-  --ffs-col-accent: #7d8a9c;
+  --ffs-col-accent: #8296b0;
 }
 
 .ffs-page .ffs-p16-bars [data-unit="p16"] {
-  --ffs-col-accent: #2a9fe0;
+  --ffs-col-accent: #6ce4ff;
 }
 
 .ffs-page .ffs-p16-metric > p {
@@ -1776,8 +1829,8 @@
   position: relative;
   display: grid;
   gap: 2px;
-  padding: 16px 0 0;
-  border-top: 2px solid rgb(255 255 255 / 14%);
+  padding: 18px 8px 0 0;
+  border-top: 2px solid rgb(138 232 255 / 22%);
 }
 
 .ffs-page .ffs-p16-lineage ol li::before {
@@ -1786,19 +1839,23 @@
   left: 0;
   width: 12px;
   height: 12px;
-  border: 2px solid #7d8a9c;
+  border: 2px solid #8aa6c4;
   border-radius: 50%;
-  background: #02050b;
+  background: #061024;
+  box-shadow: 0 0 10px rgb(127 230 255 / 24%);
   content: "";
 }
 
 .ffs-page .ffs-p16-lineage ol li[data-current] {
-  border-top-color: rgb(127 230 255 / 55%);
+  border-top-color: rgb(127 230 255 / 88%);
 }
 
 .ffs-page .ffs-p16-lineage ol li[data-current]::before {
-  border-color: var(--ffs-accent);
+  border-color: #ecfbff;
   background: var(--ffs-accent);
+  box-shadow:
+    0 0 0 4px rgb(127 230 255 / 22%),
+    0 0 18px rgb(127 230 255 / 78%);
 }
 
 .ffs-page .ffs-p16-lineage ol b {
@@ -1870,25 +1927,32 @@
 .ffs-page .ffs-p16-trio-track {
   grid-column: 1 / -1;
   display: block;
-  height: 7px;
+  height: 9px;
   overflow: hidden;
+  border: 1px solid rgb(138 232 255 / 16%);
   border-radius: 999px;
-  background: rgb(255 255 255 / 6%);
+  background: rgb(3 7 18 / 88%);
+  box-shadow: inset 0 1px 4px rgb(0 2 10 / 82%);
 }
 
 .ffs-page .ffs-p16-trio-track i {
   display: block;
-  min-width: 3px;
+  min-width: 4px;
   height: 100%;
   border-radius: inherit;
-  background: var(--ffs-col-accent);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 44%) 0%, transparent 48%),
+    linear-gradient(90deg, color-mix(in srgb, var(--ffs-col-accent) 72%, #13284a), var(--ffs-col-accent) 78%, color-mix(in srgb, var(--ffs-col-accent) 48%, #fff) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    0 0 14px -1px color-mix(in srgb, var(--ffs-col-accent) 55%, transparent);
   transform: scaleX(var(--ffs-bar, 0));
   transform-origin: left center;
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ffs-page .ffs-p16-trio li[data-base] {
-  --ffs-col-accent: #9aa7b8;
+  --ffs-col-accent: #9eb4cc;
 }
 
 .ffs-page .ffs-p16-trio li[data-base] > span:first-child,
@@ -1897,7 +1961,7 @@
 }
 
 .ffs-page .ffs-p16-trio li[data-unit="p16"] {
-  --ffs-col-accent: #2a9fe0;
+  --ffs-col-accent: #6ce4ff;
 }
 
 .ffs-page .ffs-p16-trio li[data-unit="p16"] > span:first-child,
@@ -1908,10 +1972,14 @@
 /* The owner's table, P14 Standard = 100; the base's column marked. */
 .ffs-page .ffs-p16-table {
   margin: 18px 0 0;
-  padding: 16px 18px;
-  border: 1px solid rgb(255 255 255 / 8%);
+  padding: 18px 20px;
+  border: 1px solid rgb(138 232 255 / 24%);
   border-radius: 16px;
-  background: rgb(0 0 0 / 22%);
+  background:
+    linear-gradient(180deg, rgb(12 22 48 / 78%), rgb(4 9 22 / 90%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 18%),
+    0 12px 30px -16px rgb(0 4 16 / 75%);
 }
 
 .ffs-page .ffs-p16-table figcaption {
@@ -2035,16 +2103,26 @@
   gap: 10px;
   min-width: 0;
   padding: 22px;
-  border: 1px solid var(--ffs-line);
+  border: 1px solid rgb(138 232 255 / 22%);
   border-radius: var(--sc-radius, 22px);
-  background: var(--ffs-surface);
+  background:
+    radial-gradient(100% 70% at 0% 0%, rgb(127 230 255 / 10%), transparent 56%),
+    linear-gradient(166deg, rgb(13 24 52 / 92%), rgb(5 10 24 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 18%),
+    0 14px 32px -16px rgb(0 4 16 / 80%);
 }
 
 .ffs-page .ffs-p16-generations article[data-unit="p16"] {
-  border-color: rgb(127 230 255 / 30%);
+  border-color: rgb(138 232 255 / 46%);
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--ffs-accent) 8%, transparent), transparent 55%),
-    var(--ffs-surface);
+    radial-gradient(110% 78% at 14% 0%, rgb(127 230 255 / 20%), transparent 58%),
+    radial-gradient(90% 65% at 100% 100%, rgb(168 120 255 / 14%), transparent 60%),
+    linear-gradient(166deg, rgb(16 30 64 / 94%), rgb(6 12 28 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(242 252 255 / 30%),
+    0 0 28px -10px rgb(127 230 255 / 32%),
+    0 16px 36px -16px rgb(0 4 16 / 84%);
 }
 
 .ffs-page .ffs-p16-generations article > small {
@@ -2107,10 +2185,16 @@
 }
 
 .ffs-page .ffs-p16-summary {
-  padding: clamp(20px, 3.4vw, 36px);
-  border: 1px solid rgb(127 230 255 / 18%);
+  padding: clamp(22px, 3.4vw, 38px);
+  border: 1px solid rgb(138 232 255 / 26%);
   border-radius: var(--sc-radius, 22px);
-  background: linear-gradient(160deg, rgb(8 16 30 / 90%), rgb(3 7 15 / 88%));
+  background:
+    radial-gradient(ellipse 68% 54% at 0% 0%, rgb(127 230 255 / 16%), transparent 56%),
+    radial-gradient(ellipse 56% 48% at 100% 100%, rgb(168 120 255 / 12%), transparent 58%),
+    linear-gradient(160deg, rgb(13 24 52 / 94%), rgb(5 10 24 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 22%),
+    0 20px 48px -20px rgb(0 4 16 / 84%);
 }
 
 /* The lineage, 主演算性能 and 各世代 title plates are machined panels (zenith)
@@ -2136,11 +2220,15 @@
 .ffs-page .ffs-p16-topics article {
   min-width: 0;
   padding: 24px;
-  border: 1px solid var(--ffs-line);
+  border: 1px solid rgb(138 232 255 / 24%);
   border-radius: var(--sc-radius, 22px);
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--ffs-accent) 7%, transparent), transparent 52%),
-    var(--ffs-surface);
+    radial-gradient(100% 68% at 0% 0%, color-mix(in srgb, var(--ffs-accent) 16%, transparent), transparent 56%),
+    radial-gradient(85% 60% at 100% 100%, rgb(168 120 255 / 11%), transparent 60%),
+    linear-gradient(166deg, rgb(13 24 52 / 92%), rgb(5 10 24 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 20%),
+    0 14px 34px -16px rgb(0 4 16 / 82%);
 }
 
 .ffs-page .ffs-p16-topics header {
@@ -2180,9 +2268,14 @@
 .ffs-page .ffs-p16-note {
   margin-top: 14px;
   padding: 22px 24px;
-  border: 1px solid rgb(255 215 122 / 30%);
+  border: 1px solid rgb(255 215 122 / 42%);
   border-radius: var(--sc-radius, 22px);
-  background: rgb(255 215 122 / 4%);
+  background:
+    radial-gradient(80% 70% at 0% 0%, rgb(255 215 122 / 14%), transparent 60%),
+    linear-gradient(166deg, rgb(24 22 36 / 90%), rgb(9 11 22 / 94%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 184 / 24%),
+    0 14px 34px -16px rgb(0 4 16 / 80%);
 }
 
 .ffs-page .ffs-p16-note h3 {

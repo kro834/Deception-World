@@ -6,18 +6,31 @@
 }
 
 .quote-exhibition-header {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px 40px;
   margin-bottom: 24px;
-  padding: 24px 0 20px;
+  padding: 28px 0 22px;
   border-top: 1px solid var(--gallery-rule, #6b6353);
 }
 
+.quote-exhibition-header::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(90deg, #ead1a2, #c9dce6 68%, transparent);
+  box-shadow: 0 0 14px rgb(234 209 162 / 0.32);
+  pointer-events: none;
+}
+
 .gallery-tours-page.command-support-tours .quote-exhibition-header {
-  border-top-color: rgb(156 182 198 / 0.28);
+  border-top-color: rgb(186 208 220 / 0.34);
 }
 
 .quote-exhibition-heading {
@@ -67,12 +80,19 @@
 .quote-plaque[data-open="true"] {
   background:
     radial-gradient(
-      ellipse 64% 46% at 26% 0%,
-      color-mix(in srgb, var(--quote-ink) 12%, transparent),
-      transparent 74%
+      ellipse 68% 54% at 24% 0%,
+      color-mix(in srgb, var(--quote-ink) 20%, transparent),
+      transparent 72%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 0.02), transparent);
-  box-shadow: inset 2px 0 0 var(--quote-ink);
+    radial-gradient(
+      ellipse 46% 38% at 72% 8%,
+      rgb(244 222 178 / 0.08),
+      transparent 70%
+    ),
+    linear-gradient(180deg, rgb(255 252 244 / 0.04), transparent 56%);
+  box-shadow:
+    inset 3px 0 0 var(--quote-ink),
+    inset 0 1px 0 rgb(255 252 244 / 0.14);
 }
 
 .quote-scene h3,
@@ -98,11 +118,18 @@
 
 .quote-plaque-index {
   display: grid;
-  min-width: 34px;
-  height: 28px;
-  padding-inline: 6px;
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 32%, rgb(156 182 198 / 0.24));
-  background: rgb(11 18 25 / 0.56);
+  min-width: 36px;
+  height: 30px;
+  padding-inline: 7px;
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 44%, rgb(224 206 172 / 0.34));
+  border-top-color: color-mix(in srgb, var(--quote-ink) 64%, #f4dfb6);
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, color-mix(in srgb, var(--quote-ink) 18%, transparent), transparent 72%),
+    linear-gradient(180deg, rgb(16 25 35 / 0.88), rgb(9 14 21 / 0.94));
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.2),
+    0 4px 12px rgb(0 0 0 / 0.32);
   color: var(--quote-ink);
   font-size: 12px;
   font-weight: 600;
@@ -117,7 +144,7 @@
   gap: 7px;
   min-width: 0;
   padding-inline-start: clamp(12px, 1.8vw, 20px);
-  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 36%, rgb(156 182 198 / 0.22));
+  border-inline-start: 2px solid color-mix(in srgb, var(--quote-ink) 42%, rgb(156 182 198 / 0.24));
 }
 
 .quote-scene[data-open="true"] .quote-words {
@@ -135,7 +162,8 @@
 }
 
 .quote-scene[data-open="true"] .quote-line {
-  color: var(--quote-ink);
+  color: color-mix(in srgb, var(--quote-ink) 88%, #ffffff);
+  text-shadow: 0 2px 26px color-mix(in srgb, var(--quote-ink) 32%, transparent);
 }
 
 .quote-plaque-meta {
@@ -150,7 +178,7 @@
 }
 
 .quote-plaque-meta > span:first-child {
-  color: color-mix(in srgb, var(--quote-ink) 78%, #eef4f6);
+  color: color-mix(in srgb, var(--quote-ink) 82%, #f4f8fa);
   font-weight: 500;
 }
 
@@ -173,7 +201,7 @@
   grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.16fr);
   align-items: center;
   gap: clamp(20px, 4vw, 52px);
-  padding: 6px clamp(12px, 2.2vw, 24px) clamp(24px, 4vw, 40px);
+  padding: 8px clamp(12px, 2.2vw, 24px) clamp(26px, 4vw, 42px);
 }
 
 .quote-leaf figure {
@@ -181,14 +209,17 @@
   place-items: center;
   position: relative;
   overflow: hidden;
-  padding: clamp(10px, 1.4vw, 16px);
-  border: 1px solid #6a6050;
+  padding: clamp(10px, 1.5vw, 18px);
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 44%, rgb(232 208 164 / 0.42));
   background:
     radial-gradient(
-      ellipse 76% 54% at 50% 14%,
-      color-mix(in srgb, var(--quote-ink) 18%, #262523),
-      #101010 80%
+      ellipse 80% 56% at 50% 8%,
+      color-mix(in srgb, var(--quote-ink) 24%, #2a2926),
+      #0c0d10 82%
     );
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.24),
+    0 20px 46px -8px rgb(0 0 0 / 0.56);
 }
 
 .quote-leaf-mat {
@@ -196,9 +227,18 @@
   place-items: center;
   width: 100%;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: clamp(8px, 1.2vw, 14px);
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 32%, rgb(242 222 182 / 0.28));
+  background:
+    radial-gradient(
+      ellipse 74% 58% at 50% 18%,
+      color-mix(in srgb, var(--quote-ink) 14%, #121b26),
+      #06090f 84%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.2),
+    inset 0 0 0 4px rgb(4 7 12 / 0.86),
+    inset 0 12px 28px rgb(0 0 0 / 0.54);
 }
 
 .quote-leaf img {
@@ -249,13 +289,19 @@
 }
 
 .quote-leaf-copy a.quote-source {
-  padding: 10px 16px;
-  border: 1px solid color-mix(in srgb, var(--quote-ink) 40%, rgb(156 182 198 / 0.28));
-  background: linear-gradient(180deg, rgb(20 31 41 / 0.88), rgb(11 18 25 / 0.92));
+  padding: 10px 18px;
+  border: 1px solid color-mix(in srgb, var(--quote-ink) 52%, rgb(224 206 172 / 0.36));
+  border-top-color: color-mix(in srgb, var(--quote-ink) 70%, #f4dfb6);
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, color-mix(in srgb, var(--quote-ink) 18%, transparent), transparent 72%),
+    linear-gradient(180deg, rgb(22 34 46 / 0.92), rgb(11 18 26 / 0.96));
   font-size: 13px;
   letter-spacing: 0.04em;
   text-decoration: none;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.22),
+    0 8px 20px rgb(0 0 0 / 0.38);
 }
 
 .quote-ambience {
@@ -263,14 +309,23 @@
   flex-wrap: wrap;
   align-items: center;
   max-width: 100%;
-  padding: 0 14px;
-  border: 1px solid rgb(156 182 198 / 0.26);
-  background: linear-gradient(180deg, rgb(15 23 32 / 0.78), rgb(9 14 21 / 0.88));
+  padding: 0 15px;
+  border: 1px solid rgb(186 208 220 / 0.34);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(18 28 38 / 0.88), rgb(9 15 23 / 0.94));
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.14),
+    0 6px 16px rgb(0 0 0 / 0.3);
 }
 
 .quote-ambience[data-playing="true"] {
-  border-color: color-mix(in srgb, var(--quote-ink) 74%, #c9dce6);
-  background: linear-gradient(180deg, rgb(20 32 43 / 0.9), rgb(11 18 26 / 0.94));
+  border-color: color-mix(in srgb, var(--quote-ink) 78%, #eaf4f8);
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, color-mix(in srgb, var(--quote-ink) 22%, transparent), transparent 72%),
+    linear-gradient(180deg, rgb(22 36 48 / 0.94), rgb(11 19 28 / 0.96));
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.24),
+    0 0 20px -6px color-mix(in srgb, var(--quote-ink) 40%, transparent);
 }
 
 .quote-scene-ambience {
@@ -327,6 +382,10 @@
     padding: 8px;
   }
 
+  .quote-leaf-mat {
+    padding: 5px;
+  }
+
   .quote-leaf img {
     height: clamp(12.5rem, 58vw, 19rem);
   }
@@ -376,25 +435,31 @@
 }
 
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-plaque[data-open="true"] {
-  border-top-color: color-mix(in srgb, var(--quote-ink) 50%, #6b808d);
+  border-top-color: color-mix(in srgb, var(--quote-ink) 64%, #e6d0a4);
   background:
     radial-gradient(
-      ellipse 64% 50% at 24% 0%,
-      color-mix(in srgb, var(--quote-ink) 14%, transparent),
+      ellipse 68% 54% at 22% 0%,
+      color-mix(in srgb, var(--quote-ink) 22%, transparent),
       transparent 74%
     ),
-    linear-gradient(180deg, rgb(16 26 35 / 0.72), rgb(9 15 22 / 0.5));
+    radial-gradient(
+      ellipse 48% 42% at 76% 12%,
+      rgb(244 222 178 / 0.1),
+      transparent 70%
+    ),
+    linear-gradient(180deg, rgb(18 29 40 / 0.82), rgb(9 15 23 / 0.62));
   box-shadow:
-    inset 2px 0 0 var(--quote-ink),
-    inset 0 1px 0 rgb(255 255 255 / 0.08);
+    inset 3px 0 0 var(--quote-ink),
+    inset 0 1px 0 rgb(255 252 244 / 0.2),
+    0 18px 42px -12px rgb(0 0 0 / 0.52);
 }
 
 .command-support-tours .quote-exhibition .quote-fold,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-fold {
-  border-color: #6b808d;
-  background: #111c25;
-  box-shadow: inset 0 1px rgb(224 244 252 / 14%);
-  color: #cfe0e8;
+  border-color: rgb(186 208 220 / 0.42);
+  background: linear-gradient(180deg, #162430, #0d161f);
+  box-shadow: inset 0 1px rgb(255 252 244 / 0.2);
+  color: #dceaf0;
 }
 
 .command-support-tours .quote-exhibition .quote-scene[data-open="true"] .quote-fold,
@@ -403,23 +468,28 @@
   .quote-scene[data-open="true"]
   .quote-fold {
   border-color: var(--quote-ink, #b7dce7);
-  background: linear-gradient(180deg, #1d3140, #101c26);
-  box-shadow: inset 0 1px rgb(235 249 255 / 22%);
+  background: linear-gradient(180deg, #213748, #111e29);
+  box-shadow:
+    inset 0 1px rgb(255 253 246 / 0.34),
+    0 0 14px -4px color-mix(in srgb, var(--quote-ink) 52%, transparent);
   color: var(--quote-ink, #eef8fc);
 }
 
 .command-support-tours .quote-exhibition .quote-leaf figure,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-leaf figure {
-  border-color: color-mix(in srgb, var(--quote-ink) 38%, #6d818e);
+  border-color: color-mix(in srgb, var(--quote-ink) 52%, rgb(236 214 170 / 0.48));
+  border-top-color: color-mix(in srgb, var(--quote-ink) 68%, #f5e2bc);
   background:
     radial-gradient(
-      ellipse 78% 54% at 50% 14%,
-      color-mix(in srgb, var(--quote-ink) 20%, #1d2e3a),
-      #070c12 80%
+      ellipse 80% 56% at 50% 10%,
+      color-mix(in srgb, var(--quote-ink) 26%, #1f3342),
+      #070c13 82%
     );
   box-shadow:
-    inset 0 1px rgb(255 255 255 / 14%),
-    0 16px 36px rgb(0 0 0 / 44%);
+    inset 0 1px 0 rgb(255 253 246 / 0.3),
+    inset 0 0 0 3px rgb(5 8 14 / 0.82),
+    inset 0 0 0 4px color-mix(in srgb, var(--quote-ink) 22%, rgb(236 212 166 / 0.18)),
+    0 22px 50px -6px rgb(0 0 0 / 0.62);
 }
 
 .command-support-tours .quote-exhibition .quote-leaf-copy p.quote-leaf-caption,
@@ -471,6 +541,14 @@
 }
 
 @media (forced-colors: active) {
+  .quote-exhibition-header::before {
+    display: none;
+  }
+
+  .quote-scene[data-open="true"] .quote-line {
+    text-shadow: none;
+  }
+
   .quote-exhibition-header,
   .gallery-tours-page.command-support-tours .quote-exhibition-header,
   .quote-scene,

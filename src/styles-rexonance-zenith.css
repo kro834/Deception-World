@@ -76,7 +76,7 @@ html[data-family="special"]
   pointer-events: none;
 }
 
-/* The prism stage: shafts falling on the figure, a precision optical lattice. */
+/* The prism stage: shafts falling on the figure, a precision optical aura. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.rxs-rexonance-page
@@ -86,12 +86,12 @@ html[data-family="special"]
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(101deg, transparent 0 41%, rgb(var(--rzn-ice) / 8%) 41% 44%, transparent 44%),
-    linear-gradient(79deg, transparent 0 55%, rgb(var(--rzn-pink) / 7%) 55% 58%, transparent 58%),
-    linear-gradient(112deg, transparent 0 34%, rgb(var(--rzn-violet) / 5.5%) 34% 37%, transparent 37%),
-    linear-gradient(94deg, transparent 0 49%, rgb(var(--rzn-white) / 6%) 49% 50.2%, transparent 50.2%),
-    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 4.5%) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 3.5%) 0 1px, transparent 1px 64px);
+    linear-gradient(101deg, transparent 36%, rgb(var(--rzn-ice) / 10%) 42.5%, transparent 49%),
+    linear-gradient(79deg, transparent 50%, rgb(var(--rzn-pink) / 9%) 56.5%, transparent 63%),
+    linear-gradient(112deg, transparent 29%, rgb(var(--rzn-violet) / 8%) 35.5%, transparent 42%),
+    linear-gradient(94deg, transparent 46%, rgb(var(--rzn-white) / 7.5%) 49.6%, transparent 53%),
+    radial-gradient(54% 48% at 50% 42%, rgb(var(--rzn-ice) / 10%), transparent 74%),
+    radial-gradient(42% 34% at 50% 78%, rgb(var(--rzn-gold) / 8%), transparent 72%);
   -webkit-mask-image: radial-gradient(72% 82% at 50% 46%, #000 32%, transparent 88%);
   mask-image: radial-gradient(72% 82% at 50% 46%, #000 32%, transparent 88%);
 }
@@ -2102,6 +2102,32 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > #system
   width: var(--rzn-s);
   height: var(--rzn-s);
   margin: clamp(-12px, -1vw, 0px) auto clamp(28px, 5vw, 44px);
+  background:
+    radial-gradient(
+      closest-side,
+      rgb(var(--rzn-ice) / 22%) 0%,
+      rgb(var(--rzn-violet) / 14%) 36%,
+      rgb(var(--rzn-gold) / 9%) 64%,
+      transparent 88%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent 33.4%,
+      rgb(var(--rzn-ice) / 20%) 34%,
+      transparent 34.6%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent 59.4%,
+      rgb(var(--rzn-violet) / 18%) 60%,
+      transparent 60.6%
+    ),
+    radial-gradient(
+      closest-side,
+      transparent 85.4%,
+      rgb(var(--rzn-gold) / 20%) 86%,
+      transparent 86.6%
+    );
   pointer-events: none;
 }
 
@@ -2116,8 +2142,15 @@ html[data-family="special"]
   top: 0;
   bottom: 50%;
   left: 50%;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, rgb(var(--rzn-white) / 34%) 40%, transparent);
+  width: 1.5px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(var(--rzn-gold) / 52%) 22%,
+    rgb(var(--rzn-white) / 86%) 62%,
+    rgb(var(--rzn-ice) / 76%) 100%
+  );
+  box-shadow: 0 0 14px rgb(var(--rzn-ice) / 48%);
   translate: -50% 0;
 }
 
@@ -2136,11 +2169,12 @@ html[data-family="special"]
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(var(--rzn-ice) / 22%) 30%,
-    rgb(var(--rzn-violet) / 18%) 50%,
-    rgb(var(--rzn-gold) / 22%) 70%,
+    rgb(var(--rzn-ice) / 36%) 26%,
+    rgb(var(--rzn-white) / 52%) 50%,
+    rgb(var(--rzn-gold) / 36%) 74%,
     transparent
   );
+  box-shadow: 0 0 12px rgb(var(--rzn-violet) / 30%);
 }
 
 /* Each system: a carrier at the centre (it travels), the ring on it
@@ -2203,17 +2237,22 @@ html[data-family="special"]
   left: calc(var(--rzn-r) * var(--rzn-s) * -1);
   width: calc(var(--rzn-r) * var(--rzn-s) * 2);
   height: calc(var(--rzn-r) * var(--rzn-s) * 2);
-  border: 1.5px solid rgb(var(--rzn-c) / 74%);
+  border: 2px solid rgb(var(--rzn-c) / 90%);
   border-radius: 50%;
   background: radial-gradient(
     closest-side,
-    transparent 58%,
-    rgb(var(--rzn-c) / 8%) 84%,
-    rgb(var(--rzn-c) / 18%) 100%
+    transparent 52%,
+    rgb(var(--rzn-c) / 7%) 74%,
+    rgb(var(--rzn-c) / 22%) 89%,
+    rgb(var(--rzn-white) / 28%) 96%,
+    rgb(var(--rzn-c) / 34%) 100%
   );
   box-shadow:
-    0 0 22px rgb(var(--rzn-c) / 20%),
-    inset 0 0 16px rgb(var(--rzn-c) / 12%);
+    0 0 0 1px rgb(var(--rzn-white) / 18%),
+    0 0 28px rgb(var(--rzn-c) / 42%),
+    0 0 54px -8px rgb(var(--rzn-c) / 28%),
+    inset 0 0 22px rgb(var(--rzn-c) / 26%),
+    inset 0 1px 0 rgb(var(--rzn-white) / 42%);
 }
 
 /* The ring's mark: where it stands in phase. */
@@ -2226,12 +2265,15 @@ html[data-family="special"]
   > .rzn-tri-ring::before {
   content: "";
   position: absolute;
-  top: -8px;
+  top: -9px;
   left: 50%;
-  width: 3px;
-  height: 15px;
-  background: rgb(var(--rzn-c));
-  box-shadow: 0 0 12px rgb(var(--rzn-c) / 70%);
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(180deg, #ffffff, rgb(var(--rzn-c)));
+  box-shadow:
+    0 0 0 1px rgb(var(--rzn-white) / 48%),
+    0 0 16px rgb(var(--rzn-c) / 92%),
+    0 0 28px rgb(var(--rzn-c) / 60%);
   translate: -50% 0;
 }
 
@@ -2245,12 +2287,13 @@ html[data-family="special"]
   > .rzn-tri-ring::after {
   content: "";
   position: absolute;
-  bottom: -3px;
+  bottom: -3.5px;
   left: 50%;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: rgb(var(--rzn-c) / 60%);
+  background: radial-gradient(circle, #ffffff 0 34%, rgb(var(--rzn-c)) 76%);
+  box-shadow: 0 0 10px rgb(var(--rzn-c) / 80%);
   translate: -50% 0;
 }
 
@@ -2264,13 +2307,15 @@ html[data-family="special"]
   > .rzn-tri-ring
   > b {
   position: absolute;
-  top: -10px;
-  left: calc(50% + 9px);
-  color: rgb(var(--rzn-c));
+  top: -11px;
+  left: calc(50% + 10px);
+  color: #ffffff;
   font: 600 12px / 1 var(--dx-mono);
   letter-spacing: 0.14em;
-  text-shadow: 0 0 10px rgb(var(--rzn-c) / 60%);
-  transform-origin: -9px 10px;
+  text-shadow:
+    0 0 8px rgb(var(--rzn-c)),
+    0 0 18px rgb(var(--rzn-c) / 85%);
+  transform-origin: -10px 11px;
 }
 
 /* The core between them, and the wave it sends once the three lock. */
@@ -2283,19 +2328,23 @@ html[data-family="special"]
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 1.5px solid rgb(var(--rzn-white) / 92%);
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgb(var(--rzn-white)),
-    rgb(var(--rzn-ice)) 60%,
-    rgb(var(--rzn-violet))
+    #ffffff 0 32%,
+    rgb(var(--rzn-ice)) 64%,
+    rgb(var(--rzn-violet)) 100%
   );
   box-shadow:
-    0 0 18px rgb(var(--rzn-ice) / 80%),
-    0 0 40px rgb(var(--rzn-violet) / 40%);
+    0 0 0 4px rgb(var(--rzn-ice) / 22%),
+    0 0 0 9px rgb(var(--rzn-gold) / 14%),
+    0 0 24px rgb(var(--rzn-ice) / 95%),
+    0 0 48px rgb(var(--rzn-violet) / 62%),
+    0 0 72px rgb(var(--rzn-gold) / 40%);
 }
 
 html[data-family="special"]

@@ -38,6 +38,10 @@
 html[data-family="special"] body .rxs-page.rxs-page.fst-page {
   --fsz-lamp: var(--fsx-lamp, #e9d3a0);
   --fsz-lamp-rgb: 233 211 160;
+  --fsz-gold: #ffd996;
+  --fsz-gold-rgb: 255 217 150;
+  --fsz-cyan: #7ae8ff;
+  --fsz-cyan-rgb: 122 232 255;
   --fsz-route: repeating-linear-gradient(
     180deg,
     rgb(var(--fsx-violet-rgb) / 46%) 0 6px,
@@ -130,29 +134,82 @@ html[data-family="special"]
     0 10px 26px rgb(0 0 0 / 42%);
 }
 
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .rxs-section-heading {
+  background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--fsz-gold-rgb) / 68%) 28%,
+      rgb(var(--fsz-cyan-rgb) / 68%) 72%,
+      transparent
+    )
+    50% 100% / min(460px, 84%) 1px no-repeat;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading
+  > h2 {
+  color: #fffdf8;
+  text-shadow:
+    0 4px 30px rgb(0 0 0 / 82%),
+    0 0 40px rgb(var(--fsz-gold-rgb) / 24%),
+    0 0 68px rgb(var(--fsz-cyan-rgb) / 18%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > .rxs-section
+  > .rxs-section-heading
+  > span {
+  color: #dce4f4;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 64%);
+}
+
 /* ================================================================
    Cold open
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
   background:
-    radial-gradient(52% 42% at 50% 34%, rgb(var(--fsx-violet-rgb) / 16%), transparent 72%),
-    radial-gradient(40% 24% at 50% 68%, rgb(var(--fsz-lamp-rgb) / 9%), transparent 70%),
-    radial-gradient(64% 32% at 50% 100%, rgb(var(--fsx-lilac-rgb) / 12%), transparent 74%),
+    radial-gradient(54% 44% at 50% 34%, rgb(var(--fsz-cyan-rgb) / 14%), transparent 68%),
+    radial-gradient(46% 36% at 50% 40%, rgb(var(--fsx-violet-rgb) / 18%), transparent 72%),
+    radial-gradient(44% 28% at 50% 72%, rgb(var(--fsz-gold-rgb) / 15%), transparent 70%),
+    radial-gradient(66% 34% at 50% 100%, rgb(var(--fsz-cyan-rgb) / 11%), transparent 74%),
     var(--fsx-house);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
-  border-top: 1px solid rgb(var(--fsx-violet-rgb) / 42%);
-  border-bottom: 1px solid rgb(var(--fsz-lamp-rgb) / 38%);
+  border-top: 1px solid rgb(var(--fsz-gold-rgb) / 66%);
+  border-bottom: 1px solid rgb(var(--fsz-cyan-rgb) / 60%);
+  border-inline: 1px solid rgb(var(--fsx-violet-rgb) / 28%);
+  border-radius: 3px;
   background:
-    radial-gradient(54% 72% at 50% 48%, rgb(var(--fsx-violet-rgb) / 20%), transparent 72%),
-    radial-gradient(38% 48% at 50% 94%, rgb(var(--fsz-lamp-rgb) / 11%), transparent 70%),
-    radial-gradient(34% 52% at 50% 100%, rgb(var(--fsx-lilac-rgb) / 14%), transparent 72%),
-    linear-gradient(180deg, #0a0d2e 0%, #05061a 100%);
+    radial-gradient(56% 74% at 50% 46%, rgb(var(--fsz-cyan-rgb) / 18%), transparent 70%),
+    radial-gradient(48% 64% at 50% 54%, rgb(var(--fsx-violet-rgb) / 22%), transparent 74%),
+    radial-gradient(42% 52% at 50% 96%, rgb(var(--fsz-gold-rgb) / 18%), transparent 72%),
+    linear-gradient(180deg, #0b1033 0%, #05071c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 232 / 10%),
-    inset 0 -1px 0 rgb(var(--fsz-lamp-rgb) / 14%),
-    0 22px 60px rgb(0 0 0 / 62%);
+    inset 0 1px 0 rgb(255 248 228 / 36%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 34%),
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 16%),
+    0 30px 84px rgb(0 0 0 / 78%),
+    0 0 76px -10px rgb(var(--fsz-cyan-rgb) / 28%),
+    0 0 100px -16px rgb(var(--fsz-gold-rgb) / 22%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::before {
+  background:
+    linear-gradient(var(--fsz-gold) 0 0) 0 0 / 26px 1.5px no-repeat,
+    linear-gradient(var(--fsz-gold) 0 0) 0 0 / 1.5px 26px no-repeat,
+    linear-gradient(var(--fsz-gold) 0 0) 100% 0 / 26px 1.5px no-repeat,
+    linear-gradient(var(--fsz-gold) 0 0) 100% 0 / 1.5px 26px no-repeat,
+    linear-gradient(var(--fsz-cyan) 0 0) 0 100% / 26px 1.5px no-repeat,
+    linear-gradient(var(--fsz-cyan) 0 0) 0 100% / 1.5px 26px no-repeat,
+    linear-gradient(var(--fsz-cyan) 0 0) 100% 100% / 26px 1.5px no-repeat,
+    linear-gradient(var(--fsz-cyan) 0 0) 100% 100% / 1.5px 26px no-repeat;
+  filter: drop-shadow(0 0 6px rgb(var(--fsz-gold-rgb) / 42%));
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo::after {
@@ -163,8 +220,24 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   display: block;
   pointer-events: none;
   background:
-    radial-gradient(58% 1px at 50% 0%, rgb(255 246 222 / 46%), transparent 82%),
-    radial-gradient(50% 1px at 50% 100%, rgb(var(--fsx-lilac-rgb) / 44%), transparent 82%);
+    radial-gradient(64% 2px at 50% 0%, rgb(255 248 224 / 72%), transparent 82%),
+    radial-gradient(58% 2px at 50% 100%, rgb(var(--fsz-cyan-rgb) / 68%), transparent 82%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
+  color: #fffdf8;
+  text-shadow:
+    0 4px 28px rgb(0 0 0 / 88%),
+    0 0 38px rgb(var(--fsz-gold-rgb) / 28%),
+    0 0 68px rgb(var(--fsz-cyan-rgb) / 22%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-lede {
+  color: #ede6d8;
+  border-top-color: rgb(var(--fsz-gold-rgb) / 38%);
+  text-shadow:
+    0 2px 18px rgb(0 0 0 / 78%),
+    0 0 24px rgb(var(--fsz-gold-rgb) / 14%);
 }
 
 /* Nagi's 12-stroke Kiro map and the Lamplight sweep hand, locked inside the
@@ -273,8 +346,55 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
 }
 
 /* ================================================================
-   01 STORY: room between the reel mark and the first lamp
+   01 STORY: elevated gold x cyan reading plate & luminous stations
    ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding: clamp(28px, 4vw, 56px) clamp(20px, 3.6vw, 48px);
+  border: 1px solid rgb(var(--fsz-gold-rgb) / 36%);
+  border-radius: 6px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 2%,
+        rgb(var(--fsz-gold-rgb) / 78%) 26%,
+        rgb(var(--fsz-cyan-rgb) / 72%) 74%,
+        transparent 98%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(52% 44% at 4% 0%, rgb(var(--fsz-gold-rgb) / 14%), transparent 70%),
+    radial-gradient(48% 42% at 96% 100%, rgb(var(--fsz-cyan-rgb) / 13%), transparent 72%),
+    linear-gradient(150deg, #10182b 0%, #090e1d 55%, #070b17 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 24%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 22%),
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 10%),
+    0 28px 72px rgb(0 0 0 / 62%),
+    0 0 56px -14px rgb(var(--fsz-cyan-rgb) / 18%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-index span {
+  -webkit-text-stroke: 1px rgb(var(--fsz-gold-rgb) / 76%);
+  text-shadow: 0 0 24px rgb(var(--fsz-cyan-rgb) / 24%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-index i {
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--fsz-gold), var(--fsz-cyan));
+  box-shadow: 0 0 12px rgb(var(--fsz-cyan-rgb) / 36%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #story
+  .fst-story-copy
+  p:first-child {
+  color: #fffbf2;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 66%);
+}
+
 /* 761–1099px: the gap (clamp(24px, 4vw, 64px), 33px on an iPad) left the
    first paragraph's lamp 8px from the mark's last letter, so it read
    "FINAL○". A wider gap gives the lamp its own air; the measure gives way. */
@@ -287,6 +407,29 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
 /* ================================================================
    02 CHARACTERS: the billing slots and the still
    ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-console {
+  padding: clamp(18px, 2.6vw, 34px);
+  border: 1px solid rgb(var(--fsz-cyan-rgb) / 32%);
+  border-radius: 8px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 3%,
+        rgb(var(--fsz-gold-rgb) / 72%) 28%,
+        rgb(var(--fsz-cyan-rgb) / 72%) 72%,
+        transparent 97%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(50% 38% at 10% 0%, rgb(var(--fsz-gold-rgb) / 11%), transparent 70%),
+    radial-gradient(52% 40% at 92% 100%, rgb(var(--fsz-cyan-rgb) / 11%), transparent 72%),
+    linear-gradient(160deg, #0f1628 0%, #080c1b 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 20%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 20%),
+    0 28px 72px rgb(0 0 0 / 60%),
+    0 0 48px -12px rgb(var(--fsz-cyan-rgb) / 18%);
+}
+
 /* Every slot shows its frame and the role's colour as a tick at its head
    (the liquid lens still draws the chosen one). */
 html[data-family="special"]
@@ -296,11 +439,12 @@ html[data-family="special"]
   .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
   > button[role="tab"] {
   border-radius: 4px;
-  background: linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 24px 2px
-    no-repeat;
+  background:
+    linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 28px 2px no-repeat,
+    linear-gradient(180deg, rgb(255 248 228 / 4%), transparent 60%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 232 / 7%),
-    inset 0 0 0 1px rgb(var(--fsx-violet-rgb) / 15%);
+    inset 0 1px 0 rgb(255 248 232 / 14%),
+    inset 0 0 0 1px rgb(var(--fsz-cyan-rgb) / 18%);
 }
 
 html[data-family="special"]
@@ -310,40 +454,43 @@ html[data-family="special"]
   .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
   > button[role="tab"][aria-selected="true"] {
   background:
-    linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 36px 2px no-repeat,
+    linear-gradient(var(--liquid-accent, var(--fsx-violet)) 0 0) 50% 0 / 42px 2.5px no-repeat,
     radial-gradient(
-      82% 56% at 50% 0%,
-      color-mix(in srgb, var(--liquid-accent, var(--fsx-violet)) 16%, transparent),
-      transparent 72%
+      88% 66% at 50% 0%,
+      color-mix(in srgb, var(--liquid-accent, var(--fsx-violet)) 26%, transparent),
+      transparent 74%
     );
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 28%),
+    0 0 22px -4px color-mix(in srgb, var(--liquid-accent, var(--fsx-violet)) 38%, transparent);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail {
-  border-color: color-mix(
-    in srgb,
-    var(--fst-accent, var(--fsx-violet)) 28%,
-    rgb(247 235 208 / 18%)
-  );
+  border: 1px solid
+    color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 44%, rgb(var(--fsz-gold-rgb) / 42%));
+  border-radius: 6px;
   background:
     linear-gradient(
         90deg,
-        transparent,
-        color-mix(in srgb, var(--fst-accent, var(--fsx-violet)) 56%, var(--fsz-lamp)) 24%,
-        transparent 78%
+        transparent 2%,
+        rgb(var(--fsz-gold-rgb) / 76%) 24%,
+        color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 78%, var(--fsz-cyan)) 74%,
+        transparent 98%
       )
-      0 0 / 100% 1px no-repeat,
+      0 0 / 100% 1.5px no-repeat,
     radial-gradient(
-      54% 46% at 100% 0%,
-      color-mix(in srgb, var(--fst-accent, var(--fsx-violet)) 10%, transparent),
+      56% 48% at 100% 0%,
+      color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 18%, transparent),
       transparent 68%
     ),
-    radial-gradient(48% 42% at 0% 100%, rgb(var(--fsz-lamp-rgb) / 8%), transparent 68%),
+    radial-gradient(48% 42% at 0% 100%, rgb(var(--fsz-gold-rgb) / 13%), transparent 68%),
     #0b1124;
   box-shadow:
-    inset 0 1px 0 rgb(255 244 218 / 12%),
-    inset 0 0 0 1px rgb(255 255 255 / 4%),
-    0 22px 54px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 248 228 / 22%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 20%),
+    inset 0 0 0 1px rgb(255 255 255 / 6%),
+    0 28px 68px rgb(0 0 0 / 64%),
+    0 0 44px -10px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 26%, transparent);
 }
 
 html[data-family="special"]
@@ -353,8 +500,48 @@ html[data-family="special"]
   .fst-cast-detail
   > figure {
   box-shadow:
-    inset 0 0 0 1px rgb(255 246 226 / 14%),
-    0 12px 30px rgb(0 0 0 / 38%);
+    inset 0 1px 0 rgb(255 248 228 / 26%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 34%, rgb(var(--fsz-gold-rgb) / 28%)),
+    0 16px 38px rgb(0 0 0 / 54%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  .fst-cast-copy {
+  background:
+    radial-gradient(
+      68% 54% at 88% 12%,
+      color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 13%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(52% 44% at 10% 94%, rgb(var(--fsz-gold-rgb) / 9%), transparent 70%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  .fst-cast-copy
+  h3 {
+  color: #fffdf8;
+  text-shadow:
+    0 3px 22px rgb(0 0 0 / 74%),
+    0 0 28px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 28%, transparent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-detail
+  .fst-cast-copy
+  strong {
+  border-left-width: 2.5px;
+  border-left-color: color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 70%, var(--fsz-gold));
 }
 
 html[data-family="special"]
@@ -503,7 +690,13 @@ html[data-family="special"]
     inset: -1px 0 auto;
     width: auto;
     height: 2px;
-    background: repeating-linear-gradient(90deg, var(--fsl-chalk-40) 0 5px, transparent 5px 11px);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--fsz-gold-rgb) / 52%) 22%,
+      rgb(var(--fsz-cyan-rgb) / 48%) 78%,
+      transparent
+    );
   }
 }
 
@@ -649,11 +842,145 @@ html[data-family="special"]
   white-space: nowrap;
 }
 
-html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-visual {
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-card {
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid
+    color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 48%, rgb(var(--fsz-gold-rgb) / 48%));
+  border-radius: 6px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 3%,
+        rgb(var(--fsz-gold-rgb) / 82%) 26%,
+        color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 78%, var(--fsz-cyan)) 74%,
+        transparent 97%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      64% 48% at 88% 8%,
+      color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 20%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(54% 42% at 10% 96%, rgb(var(--fsz-gold-rgb) / 14%), transparent 70%),
+    linear-gradient(165deg, #10172b 0%, #080c1b 58%, #060916 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 230 / 16%),
-    inset 0 0 0 1px color-mix(in srgb, var(--fst-accent, var(--fsx-violet)) 24%, transparent),
-    0 18px 46px rgb(0 0 0 / 52%);
+    inset 0 1px 0 rgb(255 248 228 / 26%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 24%),
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 12%),
+    0 28px 72px rgb(0 0 0 / 68%),
+    0 0 52px -10px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 28%, transparent);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-visual {
+  border: 1px solid
+    color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 54%, rgb(var(--fsz-gold-rgb) / 46%));
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 232 / 32%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 36%, transparent),
+    0 24px 60px rgb(0 0 0 / 72%),
+    0 0 46px -8px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 32%, transparent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #riders
+  .fst-pickup-card
+  .fst-pickup-copy {
+  padding: clamp(22px, 2.6vw, 32px) clamp(10px, 1.6vw, 18px) 6px;
+  background: radial-gradient(
+    74% 62% at 50% 0%,
+    color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 12%, transparent),
+    transparent 74%
+  );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #riders
+  .fst-pickup-card
+  .fst-pickup-copy
+  h3 {
+  color: #fffdf8;
+  text-shadow:
+    0 3px 22px rgb(0 0 0 / 78%),
+    0 0 32px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 32%, transparent),
+    0 0 20px rgb(var(--fsz-gold-rgb) / 16%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #riders
+  .fst-pickup-card
+  .fst-pickup-copy
+  q {
+  color: #e4ebf6;
+  border-top-color: color-mix(
+    in srgb,
+    var(--fst-accent, var(--fsz-cyan)) 38%,
+    rgb(var(--fsz-gold-rgb) / 36%)
+  );
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #riders
+  .fst-pickup-dialog
+  .fst-specs
+  > div {
+  border: 1px solid
+    color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 36%, rgb(var(--fsz-gold-rgb) / 34%));
+  border-radius: 4px;
+  background:
+    linear-gradient(
+        90deg,
+        rgb(var(--fsz-gold-rgb) / 86%),
+        color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 78%, var(--fsz-cyan)) 54%,
+        transparent 94%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(66% 52% at 14% 0%, rgb(var(--fsz-gold-rgb) / 11%), transparent 68%),
+    linear-gradient(165deg, #151f34 0%, #0b1120 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 22%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 18%),
+    0 14px 32px -10px rgb(0 0 0 / 70%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #riders
+  .fst-pickup-dialog
+  .fst-articles
+  > article {
+  padding: clamp(20px, 2.6vw, 30px);
+  border: 1px solid
+    color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 34%, rgb(var(--fsz-gold-rgb) / 30%));
+  border-radius: 5px;
+  background:
+    linear-gradient(
+        90deg,
+        rgb(var(--fsz-gold-rgb) / 76%),
+        color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 68%, var(--fsz-cyan)) 48%,
+        transparent 94%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      62% 50% at 92% 0%,
+      color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 14%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(50% 44% at 6% 100%, rgb(var(--fsz-gold-rgb) / 10%), transparent 72%),
+    linear-gradient(165deg, #11192d 0%, #090e1c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 20%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 16%),
+    0 18px 42px -10px rgb(0 0 0 / 68%);
 }
 
 /* The card's credit was a flex row for a kicker dash the credits no
@@ -1770,11 +2097,39 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-record 
     > .rxs-section
     > .rxs-section-heading
     > p,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-console,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-detail,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-card,
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-visual,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #riders
+    .fst-pickup-dialog
+    .fst-specs
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #riders
+    .fst-pickup-dialog
+    .fst-articles
+    > article,
   html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-site-door > a {
     background: Canvas;
     box-shadow: none;
     border: 1px solid CanvasText;
+  }
+
+  html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > .rxs-section
+    > .rxs-section-heading
+    > h2 {
+    text-shadow: none;
   }
 
   html[data-family="special"]

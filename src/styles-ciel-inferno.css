@@ -34,12 +34,13 @@
 }
 .ciel-inferno::before {
   background:
-    radial-gradient(ellipse at 72% 39%, rgb(121 255 93 / 0.18), transparent 28%),
-    radial-gradient(ellipse at 66% 44%, rgb(255 174 46 / 0.12), transparent 36%),
-    radial-gradient(ellipse at 42% 68%, rgb(28 207 157 / 0.14), transparent 42%),
-    linear-gradient(112deg, transparent 36%, rgb(104 206 76 / 0.065) 54%, transparent 74%);
+    radial-gradient(ellipse at 72% 39%, rgb(121 255 93 / 0.22), transparent 30%),
+    radial-gradient(ellipse at 66% 44%, rgb(255 174 46 / 0.14), transparent 38%),
+    radial-gradient(ellipse at 42% 68%, rgb(28 207 157 / 0.18), transparent 44%),
+    radial-gradient(ellipse at 28% 24%, rgb(134 217 255 / 0.1), transparent 38%),
+    linear-gradient(112deg, transparent 36%, rgb(104 206 76 / 0.08) 54%, transparent 74%);
   mix-blend-mode: screen;
-  opacity: 0.76;
+  opacity: 0.8;
   animation: ci-reflected-light var(--ci-duration) ease-in-out both;
 }
 .ciel-inferno::after {

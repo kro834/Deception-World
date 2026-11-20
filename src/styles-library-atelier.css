@@ -1,24 +1,23 @@
 /* Route-local layout for the screening room and archival reading desk.
    The library-specific selectors take precedence over shared index styling. */
 html[data-family="library"] .world.command-records.library-page.library-atelier {
-  --atelier-line: rgb(156 198 222 / 28%);
-  --atelier-line-strong: rgb(174 224 246 / 52%);
+  --atelier-line: rgb(156 198 222 / 30%);
+  --atelier-line-strong: rgb(174 224 246 / 56%);
   --atelier-paper: #0e1d2b;
-  --atelier-muted: #b8cad6;
-  --atelier-brass: #ecc98c;
-  --atelier-brass-rgb: 236 201 140;
+  --atelier-muted: #bdd0dc;
+  --atelier-brass: #f0cf8e;
+  --atelier-brass-rgb: 240 207 142;
   --atelier-ice: #9deafa;
   --atelier-ice-rgb: 157 234 250;
   --dxl-wrap: 1480px;
-  --dx-text: #eef6fa;
-  --dx-text-2: #ccdae4;
-  --dx-text-3: #b4c6d3;
+  --dx-text: #f0f8fc;
+  --dx-text-2: #d0dfe9;
+  --dx-text-3: #b6c8d5;
   background:
-    linear-gradient(90deg, rgb(157 234 250 / 2.2%) 1px, transparent 1px) 0 0 / 48px 48px,
-    linear-gradient(0deg, rgb(157 234 250 / 2.2%) 1px, transparent 1px) 0 0 / 48px 48px,
-    radial-gradient(ellipse 75% 42% at 72% 0%, rgb(31 78 104 / 44%) 0%, transparent 72%),
-    radial-gradient(ellipse 55% 36% at 14% 18%, rgb(236 201 140 / 8%) 0%, transparent 70%),
-    linear-gradient(135deg, #050b12, #0b1926 48%, #060e17);
+    radial-gradient(ellipse 78% 44% at 74% -2%, rgb(38 96 128 / 48%) 0%, transparent 72%),
+    radial-gradient(ellipse 56% 38% at 14% 16%, rgb(240 207 142 / 11%) 0%, transparent 70%),
+    radial-gradient(ellipse 64% 46% at 50% 62%, rgb(22 58 84 / 26%) 0%, transparent 74%),
+    linear-gradient(145deg, #040910 0%, #0b1927 46%, #050d16 100%);
 }
 
 html[data-family="library"] .world.command-records.library-page.library-atelier main#library-main {
@@ -89,22 +88,59 @@ html[data-family="library"]
   position: relative;
   margin-bottom: 28px;
   padding: clamp(20px, 2.8vw, 30px);
-  border: 1px solid rgb(157 234 250 / 36%);
+  border: 1px solid rgb(157 234 250 / 44%);
   border-top: 2px solid var(--atelier-ice);
   border-radius: 0;
   background:
-    linear-gradient(135deg, rgb(32 56 75 / 56%), rgb(11 24 37 / 92%) 50%, rgb(17 36 51 / 88%));
+    linear-gradient(var(--atelier-ice) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--atelier-ice) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--atelier-brass) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--atelier-brass) 0 0) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 6.5%) 0%, rgb(157 234 250 / 3%) 30%, transparent 54%),
+    radial-gradient(ellipse 75% 55% at 86% 0%, rgb(157 234 250 / 13%), transparent 68%),
+    linear-gradient(138deg, rgb(28 53 72 / 78%), rgb(9 21 34 / 96%) 50%, rgb(15 34 49 / 92%));
   box-shadow:
-    inset 0 1px 0 rgb(235 251 255 / 18%),
-    0 20px 44px -24px rgb(1 8 16 / 80%);
+    0 0 0 1px rgb(3 8 15 / 86%),
+    inset 0 1px 0 rgb(240 253 255 / 26%),
+    inset 0 -1px 0 rgb(240 207 142 / 18%),
+    0 24px 52px -24px rgb(1 8 16 / 86%);
 }
 
 html[data-family="library"] .world.command-records.library-page.library-atelier .library-search {
   min-height: 56px;
-  border: 1px solid rgb(178 216 236 / 58%);
+  border: 1px solid rgb(168 226 248 / 70%);
   border-radius: 0;
-  background: #050f19;
-  box-shadow: inset 0 2px 12px rgb(0 0 0 / 50%);
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 54%) 0%, transparent 16px),
+    linear-gradient(90deg, rgb(157 234 250 / 12%) 0%, rgb(240 207 142 / 5%) 52%, transparent 88%),
+    #040d17;
+  box-shadow:
+    0 0 0 1px rgb(3 9 17 / 90%),
+    0 0 22px -6px rgb(157 234 250 / 24%),
+    inset 0 3px 14px rgb(0 0 0 / 72%),
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 -1px 0 rgb(240 207 142 / 18%);
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-atelier
+  .library-search:focus-within {
+  border-color: #ebfdff;
+  outline: none;
+  box-shadow:
+    inset 0 3px 12px rgb(0 0 0 / 64%),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 0 0 2px rgb(157 234 250 / 54%),
+    0 0 28px -2px rgb(122 232 255 / 38%),
+    0 0 54px -10px rgb(240 207 142 / 26%);
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-atelier
+  .library-search
+  > span[aria-hidden="true"] {
+  color: var(--atelier-ice);
+  text-shadow: 0 0 12px rgb(157 234 250 / 48%);
 }
 
 html[data-family="library"]
@@ -112,6 +148,18 @@ html[data-family="library"]
   .library-search
   input {
   font-size: 17px;
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-atelier
+  .library-browse-submit {
+  border: 1px solid #eefcff;
+  color: #061824;
+  background: linear-gradient(132deg, #f8feff 0%, #c0e6f5 48%, #e6f8ff 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgb(240 207 142 / 32%),
+    0 8px 20px -8px rgb(122 232 255 / 32%);
 }
 
 html[data-family="library"]
@@ -232,12 +280,39 @@ html[data-family="library"]
 html[data-family="library"]
   .world.command-records.library-page.library-atelier
   .library-results-heading
+  > p {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 15px;
+  border: 1px solid rgb(240 207 142 / 46%);
+  border-left: 3px solid var(--atelier-brass);
+  background:
+    linear-gradient(
+      130deg,
+      rgb(240 207 142 / 14%) 0%,
+      rgb(157 234 250 / 9%) 52%,
+      rgb(7 18 29 / 94%) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 28%),
+    inset 0 -1px 0 rgb(157 234 250 / 18%),
+    0 12px 26px -14px rgb(0 0 0 / 78%);
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-atelier
+  .library-results-heading
   strong {
   margin-right: 4px;
-  color: var(--atelier-ice);
+  color: #fff6dc;
   font-family: "Oxanium", "Michroma", sans-serif;
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 0 18px rgb(240 207 142 / 36%),
+    0 0 8px rgb(157 234 250 / 26%);
 }
 
 html[data-family="library"]
@@ -256,18 +331,19 @@ html[data-family="library"]
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  padding: 1px 8px;
-  border: 1px solid rgb(236 201 140 / 38%);
-  background: rgb(236 201 140 / 10%);
-  color: var(--atelier-brass);
+  min-width: 30px;
+  padding: 2px 9px;
+  border: 1px solid rgb(240 207 142 / 48%);
+  background: linear-gradient(180deg, rgb(240 207 142 / 18%), rgb(240 207 142 / 6%));
+  box-shadow: inset 0 1px 0 rgb(255 250 235 / 26%);
+  color: #ffe8b8;
   font-family: "Oxanium", "Michroma", sans-serif;
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-/* Specimen Entry Cards */
+/* Specimen Entry Cards: Beveled museum glass & matted portrait framing */
 html[data-family="library"] .world.command-records.library-page.library-atelier .library-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
@@ -285,13 +361,18 @@ html[data-family="library"]
   gap: 7px 20px;
   min-height: 244px;
   padding: 20px;
-  border: 1px solid rgb(145 189 215 / 42%);
+  border: 1px solid rgb(157 210 236 / 46%);
   border-radius: 0;
   background:
-    linear-gradient(135deg, rgb(34 58 76 / 54%), rgb(11 24 37 / 92%) 48%, rgb(17 36 50 / 88%));
+    linear-gradient(126deg, rgb(255 255 255 / 6.5%) 0%, transparent 38%),
+    radial-gradient(ellipse 70% 50% at 92% 0%, rgb(157 234 250 / 8%), transparent 68%),
+    linear-gradient(138deg, rgb(32 58 78 / 68%), rgb(9 21 34 / 96%) 48%, rgb(16 35 50 / 92%));
   box-shadow:
-    inset 0 1px 0 rgb(228 248 255 / 16%),
-    0 18px 40px -22px rgb(1 8 16 / 78%);
+    0 0 0 1px rgb(3 8 15 / 86%),
+    inset 3px 0 0 rgb(157 234 250 / 58%),
+    inset 0 1px 0 rgb(238 252 255 / 24%),
+    inset 0 -1px 0 rgb(240 207 142 / 14%),
+    0 20px 44px -22px rgb(1 8 16 / 84%);
   container: none;
 }
 
@@ -308,9 +389,13 @@ html[data-family="library"]
   height: 186px;
   min-height: 0;
   aspect-ratio: auto;
-  border: 1px solid rgb(172 206 226 / 44%);
+  border: 1px solid rgb(186 226 246 / 58%);
   border-radius: 0;
-  box-shadow: 0 12px 26px -16px rgb(1 8 16 / 72%);
+  box-shadow:
+    0 0 0 3px rgb(4 11 19 / 94%),
+    0 0 0 4px rgb(240 207 142 / 32%),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 16px 32px -14px rgb(1 7 15 / 86%);
 }
 
 html[data-family="library"]
@@ -335,11 +420,13 @@ html[data-family="library"]
   .world.command-records.library-page.library-atelier
   .library-grid
   > .library-card[data-cast-card] {
-  border-color: color-mix(in srgb, var(--cast-tone, #9deafa) 48%, rgb(145 189 215 / 40%));
+  border-color: color-mix(in srgb, var(--cast-tone, #9deafa) 54%, rgb(145 189 215 / 42%));
   box-shadow:
+    0 0 0 1px rgb(3 8 15 / 86%),
     inset 3px 0 0 var(--cast-tone, #9deafa),
-    inset 0 1px 0 color-mix(in srgb, var(--cast-tone, #9deafa) 32%, transparent),
-    0 18px 40px -22px rgb(1 8 16 / 80%);
+    inset 0 1px 0 color-mix(in srgb, var(--cast-tone, #9deafa) 38%, rgb(255 255 255 / 14%)),
+    inset 0 -1px 0 rgb(240 207 142 / 14%),
+    0 20px 44px -22px rgb(1 8 16 / 86%);
 }
 
 html[data-family="library"]
@@ -347,7 +434,12 @@ html[data-family="library"]
   .library-grid
   > .library-card[data-cast-card]
   > .dxl-art {
-  border-color: color-mix(in srgb, var(--cast-tone, #9deafa) 62%, transparent);
+  border-color: color-mix(in srgb, var(--cast-tone, #9deafa) 70%, #ffffff 12%);
+  box-shadow:
+    0 0 0 3px rgb(4 11 19 / 94%),
+    0 0 0 4px color-mix(in srgb, var(--cast-tone, #9deafa) 48%, rgb(240 207 142 / 24%)),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 16px 32px -14px rgb(1 7 15 / 86%);
 }
 
 /* Saved specimen card: Amber-Gold Wax-Seal edge glow */
@@ -355,16 +447,17 @@ html[data-family="library"]
   .world.command-records.library-page.library-atelier
   .library-grid
   > .library-card[data-record-saved="true"] {
-  border-color: rgb(242 207 141 / 68%);
+  border-color: rgb(242 207 141 / 72%);
   border-top: 2px solid #f2cf8d;
   background:
-    radial-gradient(ellipse 80% 50% at 92% 0%, rgb(242 207 141 / 16%), transparent 68%),
-    linear-gradient(135deg, rgb(44 54 62 / 64%), rgb(14 25 36 / 94%) 52%, rgb(22 36 48 / 90%));
+    radial-gradient(ellipse 80% 50% at 92% 0%, rgb(242 207 141 / 20%), transparent 68%),
+    linear-gradient(135deg, rgb(46 56 64 / 70%), rgb(12 23 35 / 96%) 52%, rgb(20 35 48 / 92%));
   box-shadow:
+    0 0 0 1px rgb(3 8 15 / 88%),
     inset 3px 0 0 var(--cast-tone, #f2cf8d),
-    inset 0 1px 0 rgb(255 239 198 / 32%),
-    0 0 22px -6px rgb(242 207 141 / 34%),
-    0 18px 40px -22px rgb(1 8 16 / 82%);
+    inset 0 1px 0 rgb(255 242 206 / 38%),
+    0 0 24px -6px rgb(242 207 141 / 38%),
+    0 20px 44px -22px rgb(1 8 16 / 86%);
 }
 
 html[data-family="library"] .world.command-records.library-page.library-atelier .library-card h3 {
@@ -453,15 +546,17 @@ html[data-family="library"]
   gap: 4px 16px;
   min-height: 122px;
   padding: 15px;
-  border: 1px solid rgb(145 189 215 / 46%);
+  border: 1px solid rgb(157 210 236 / 48%);
   border-left: 3px solid var(--atelier-brass);
   border-radius: 0;
   color: var(--dx-text);
   background:
-    linear-gradient(135deg, rgb(34 58 76 / 58%), rgb(11 24 37 / 92%) 52%, rgb(17 36 50 / 88%));
+    linear-gradient(126deg, rgb(255 255 255 / 6%) 0%, transparent 42%),
+    linear-gradient(138deg, rgb(34 58 76 / 66%), rgb(10 22 35 / 95%) 52%, rgb(17 36 50 / 90%));
   box-shadow:
-    inset 0 1px 0 rgb(235 251 255 / 18%),
-    0 16px 36px -22px rgb(1 8 16 / 78%);
+    inset 0 1px 0 rgb(240 253 255 / 24%),
+    inset 0 -1px 0 rgb(240 207 142 / 14%),
+    0 18px 38px -22px rgb(1 8 16 / 84%);
 }
 
 html[data-family="library"]
@@ -493,7 +588,11 @@ html[data-family="library"]
   height: 88px;
   aspect-ratio: auto;
   border-radius: 0;
-  border: 1px solid rgb(172 206 226 / 40%);
+  border: 1px solid rgb(186 226 246 / 52%);
+  box-shadow:
+    0 0 0 2px rgb(4 11 19 / 90%),
+    0 0 0 3px rgb(240 207 142 / 26%),
+    0 10px 22px -12px rgb(0 0 0 / 80%);
 }
 
 html[data-family="library"]
@@ -547,15 +646,21 @@ html[data-family="library"] .world.command-records.library-page.library-atelier 
   position: relative;
   margin-bottom: clamp(56px, 7vw, 96px);
   padding: clamp(22px, 3vw, 40px);
-  border: 1px solid rgb(157 234 250 / 38%);
+  border: 1px solid rgb(157 234 250 / 42%);
   border-top: 2px solid var(--atelier-brass);
   border-radius: 0;
   background:
-    linear-gradient(90deg, rgb(157 234 250 / 2.5%) 1px, transparent 1px) 0 0 / 36px 36px,
-    linear-gradient(135deg, rgb(30 52 69 / 64%), rgb(10 22 34 / 94%) 54%, rgb(16 33 47 / 90%));
+    linear-gradient(var(--atelier-brass) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--atelier-brass) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--atelier-ice) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--atelier-ice) 0 0) 100% 100% / 2px 20px no-repeat,
+    radial-gradient(ellipse 72% 52% at 86% 6%, rgb(240 207 142 / 11%), transparent 68%),
+    linear-gradient(138deg, rgb(28 51 69 / 76%), rgb(9 20 32 / 96%) 54%, rgb(15 32 46 / 92%));
   box-shadow:
-    inset 0 1px 0 rgb(235 251 255 / 18%),
-    0 20px 44px -24px rgb(1 8 16 / 82%);
+    0 0 0 1px rgb(3 8 15 / 86%),
+    inset 0 1px 0 rgb(255 250 236 / 24%),
+    inset 0 -1px 0 rgb(157 234 250 / 18%),
+    0 22px 48px -24px rgb(1 8 16 / 86%);
 }
 
 html[data-family="library"]
@@ -917,10 +1022,20 @@ html[data-family="library"]
   .library-cast-board {
   min-width: 0;
   padding: 24px;
-  border: 1px solid rgb(174 224 246 / 44%);
+  border: 1px solid rgb(174 224 246 / 48%);
   border-top: 2px solid var(--atelier-brass);
   background:
-    linear-gradient(135deg, rgb(44 68 88 / 48%), rgb(8 19 30 / 94%) 48%, rgb(19 39 55 / 90%));
+    linear-gradient(var(--atelier-brass) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--atelier-brass) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--atelier-ice) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--atelier-ice) 0 0) 100% 100% / 2px 20px no-repeat,
+    radial-gradient(ellipse 75% 50% at 88% 0%, rgb(240 207 142 / 11%), transparent 68%),
+    linear-gradient(138deg, rgb(42 66 86 / 58%), rgb(7 18 29 / 96%) 48%, rgb(17 37 53 / 92%));
+  box-shadow:
+    0 0 0 1px rgb(3 8 15 / 88%),
+    inset 0 1px 0 rgb(255 250 236 / 26%),
+    inset 0 -1px 0 rgb(157 234 250 / 18%),
+    0 24px 52px -24px rgb(1 8 16 / 86%);
 }
 
 html[data-family="library"]
@@ -1023,8 +1138,12 @@ html[data-family="library"]
     .library-shelf-overview
     a:hover {
     border-color: var(--atelier-ice);
-    background: linear-gradient(135deg, rgb(28 58 80 / 92%), rgb(12 28 42 / 94%));
+    background: linear-gradient(135deg, rgb(30 62 86 / 94%), rgb(12 28 42 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(245 254 255 / 32%),
+      0 14px 28px -14px rgb(157 234 250 / 28%);
     color: #fff;
+    transform: translateY(-2px);
   }
 
   html[data-family="library"]
@@ -1032,10 +1151,10 @@ html[data-family="library"]
     .library-cast-tile[data-cast-card]:hover {
     border-color: var(--cast-tone, #bcebf1);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 18%),
-      0 0 18px -4px color-mix(in srgb, var(--cast-tone, #9deafa) 45%, transparent),
-      0 16px 34px -18px rgb(2 9 17 / 82%);
-    transform: translateY(-2px);
+      inset 0 1px 0 rgb(255 255 255 / 24%),
+      0 0 22px -4px color-mix(in srgb, var(--cast-tone, #9deafa) 52%, transparent),
+      0 18px 38px -18px rgb(2 9 17 / 86%);
+    transform: translateY(-3px);
   }
 
   html[data-family="library"]
@@ -1050,30 +1169,57 @@ html[data-family="library"]
     .library-index-meter
     > button:hover {
     border-color: var(--atelier-ice);
-    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 rgb(245 254 255 / 28%),
+      0 18px 38px -20px rgb(1 8 16 / 86%),
+      0 0 22px -6px rgb(157 234 250 / 32%);
+    transform: translateY(-3px);
   }
 
   html[data-family="library"]
     .world.command-records.library-page.library-atelier
     .library-grid
     > .library-card:hover {
-    border-color: #c4f0ff;
+    border-color: #d6f7ff;
+    background:
+      linear-gradient(126deg, rgb(255 255 255 / 9%) 0%, transparent 40%),
+      radial-gradient(ellipse 75% 55% at 90% 0%, rgb(157 234 250 / 14%), transparent 68%),
+      linear-gradient(138deg, rgb(38 68 90 / 78%), rgb(11 25 40 / 96%) 50%, rgb(19 41 58 / 94%));
     box-shadow:
+      0 0 0 1px rgb(157 234 250 / 28%),
       inset 3px 0 0 var(--cast-tone, var(--atelier-ice)),
-      inset 0 1px 0 rgb(235 251 255 / 24%),
-      0 20px 44px -22px rgb(1 8 16 / 84%);
+      inset 0 1px 0 rgb(245 254 255 / 34%),
+      inset 0 -1px 0 rgb(240 207 142 / 24%),
+      0 26px 52px -22px rgb(1 8 16 / 90%),
+      0 0 28px -8px color-mix(in srgb, var(--cast-tone, #9deafa) 36%, transparent);
+    transform: translateY(-4px);
+  }
+
+  html[data-family="library"]
+    .world.command-records.library-page.library-atelier
+    .library-grid
+    > .library-card:hover
+    > .dxl-art {
+    border-color: #e4fbff;
+    box-shadow:
+      0 0 0 3px rgb(4 11 19 / 96%),
+      0 0 0 4px color-mix(in srgb, var(--cast-tone, #f0cf8e) 68%, #9deafa),
+      inset 0 1px 0 rgb(255 255 255 / 32%),
+      0 18px 34px -12px rgb(0 0 0 / 88%);
   }
 
   html[data-family="library"]
     .world.command-records.library-page.library-atelier
     .library-grid
     > .library-card[data-record-saved="true"]:hover {
-    border-color: #ffe2a6;
+    border-color: #ffe7b3;
     box-shadow:
+      0 0 0 1px rgb(242 207 141 / 32%),
       inset 3px 0 0 var(--cast-tone, #f2cf8d),
-      inset 0 1px 0 rgb(255 244 214 / 36%),
-      0 0 26px -4px rgb(242 207 141 / 44%),
-      0 20px 44px -22px rgb(1 8 16 / 86%);
+      inset 0 1px 0 rgb(255 246 220 / 42%),
+      0 0 30px -4px rgb(242 207 141 / 48%),
+      0 26px 52px -22px rgb(1 8 16 / 90%);
+    transform: translateY(-4px);
   }
 
   html[data-family="library"]
@@ -1085,21 +1231,42 @@ html[data-family="library"]
   }
 }
 
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .world.command-records.library-page.library-atelier
+    .library-grid
+    > .library-card:hover
+    > .dxl-art
+    > img {
+    transform: scale(1.04);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"])[data-family="library"]
     .world.command-records.library-page.library-atelier
     :is(
       .library-card,
+      .library-card > .dxl-art,
       .library-cast-tile[data-cast-card],
       .library-index-meter > button,
       .library-jump-links a,
-      .library-shelf-overview a
+      .library-shelf-overview a,
+      .library-search
     ) {
     transition:
       border-color 200ms ease,
       background-color 200ms ease,
-      box-shadow 200ms ease,
-      transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow 220ms ease,
+      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .world.command-records.library-page.library-atelier
+    .library-card
+    > .dxl-art
+    > img {
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
@@ -1458,6 +1625,10 @@ html[data-world-effects="economy"][data-family="library"]
     .world.command-records.library-page.library-atelier
     :is(
       .library-hero,
+      .library-screen,
+      .library-results-heading > p,
+      .library-search,
+      .library-card > .dxl-art,
       .library-hub,
       .library-card,
       .library-browse-controls,
@@ -1550,17 +1721,20 @@ html[data-world-effects="economy"][data-family="library"]
 html[data-family="library"] .world.command-records.library-page.library-screening-room {
   --room-gold: #e6c895;
   --room-teal: #a4ddcf;
-  --room-line: #718b874f;
+  --room-line: #7ea09a5c;
   --room-surface: #121c21;
   --records-line: var(--room-line);
   --records-ice: var(--room-teal);
-  --records-panel: linear-gradient(155deg, #172427, #10171e 78%);
+  --records-panel:
+    linear-gradient(126deg, rgb(255 255 255 / 5.5%) 0%, transparent 40%),
+    linear-gradient(155deg, #19292d, #0f171e 78%);
   --atelier-ice: var(--room-teal);
   --atelier-brass: var(--room-gold);
   background:
-    radial-gradient(ellipse 740px 550px at 85% 6%, #22352f8c, transparent 80%),
-    radial-gradient(ellipse 760px 450px at 0% 30%, #41342538, transparent 86%),
-    #0b1015;
+    radial-gradient(ellipse 780px 560px at 85% 6%, rgb(38 66 58 / 62%), transparent 80%),
+    radial-gradient(ellipse 780px 480px at 4% 28%, rgb(76 58 38 / 28%), transparent 86%),
+    radial-gradient(ellipse 680px 460px at 50% 68%, rgb(22 42 46 / 32%), transparent 80%),
+    #0a0f14;
 }
 
 html[data-family="library"] .library-screening-room #library-main {
@@ -1574,12 +1748,23 @@ html[data-family="library"] .library-screening-room #library-main .library-hero 
   gap: clamp(24px, 5vw, 72px);
   margin: clamp(20px, 4vw, 48px) 0 var(--room-space);
   padding: clamp(20px, 3.3vw, 48px);
-  border: 1px solid var(--room-line);
-  border-block-start-color: #a4ddcf6b;
+  border: 1px solid rgb(164 221 207 / 34%);
+  border-block-start: 2px solid rgb(164 221 207 / 68%);
   background:
-    linear-gradient(112deg, #1a211f, #10171b 57%),
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 2px 22px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 6%) 0%, transparent 44%),
+    radial-gradient(ellipse 75% 58% at 84% 18%, rgb(164 221 207 / 13%), transparent 70%),
+    radial-gradient(ellipse 62% 52% at 12% 88%, rgb(230 200 149 / 11%), transparent 72%),
+    linear-gradient(118deg, #1b2423, #0e151a 58%),
     var(--room-surface);
-  box-shadow: 0 26px 54px -40px #000;
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 88%),
+    inset 0 1px 0 rgb(244 253 250 / 24%),
+    inset 0 -1px 0 rgb(230 200 149 / 18%),
+    0 28px 60px -32px rgb(0 0 0 / 90%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-intro-copy {
@@ -1593,11 +1778,11 @@ html[data-family="library"] .library-screening-room #library-main .library-intro
 
 html[data-family="library"] .library-screening-room #library-main .library-intro-copy::before {
   position: static;
-  width: 44px;
+  width: 48px;
   height: 2px;
   margin-bottom: 10px;
-  background: var(--room-gold);
-  box-shadow: none;
+  background: linear-gradient(90deg, var(--room-gold), var(--room-teal));
+  box-shadow: 0 0 14px rgb(230 200 149 / 32%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-intro h1 {
@@ -1607,17 +1792,18 @@ html[data-family="library"] .library-screening-room #library-main .library-intro
   align-self: flex-start;
   max-width: 100%;
   text-align: start;
-  color: #fff4e5;
+  color: #fff6ea;
   background: none;
   -webkit-text-fill-color: currentColor;
   filter: none;
   font-size: clamp(30px, 4.1vw, 62px);
   line-height: 1.23;
   letter-spacing: -0.055em;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 55%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-hero-lede {
-  color: #c8d0cb;
+  color: #ced8d3;
   font-size: clamp(14px, 1.3vw, 16px);
 }
 
@@ -1646,25 +1832,39 @@ html[data-family="library"] .library-screening-room #library-main .library-jump-
 
 html[data-family="library"] .library-screening-room #library-main .library-jump-links a:first-child {
   justify-content: center;
-  padding-inline: 16px;
-  border: 1px solid var(--room-gold);
-  background: var(--room-gold);
-  color: #1c1810;
+  padding-inline: 18px;
+  border: 1px solid #f7e2b8;
+  background: linear-gradient(135deg, #f3dcaf 0%, var(--room-gold) 52%, #d9b679 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 245 / 72%),
+    0 10px 24px -10px rgb(230 200 149 / 36%);
+  color: #19140c;
   font-weight: 750;
 }
 
-html[data-family="library"] .library-screening-room #library-main .library-jump-links a:hover {
-  text-decoration: underline;
-  text-underline-offset: 5px;
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-screening-room #library-main .library-jump-links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+  }
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-screen {
   position: relative;
   min-width: 0;
   padding: clamp(6px, 1vw, 12px);
-  border: 1px solid #af95635c;
-  background: #070b0d;
-  box-shadow: 0 22px 48px -29px #000;
+  border: 1px solid rgb(230 200 149 / 52%);
+  background:
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 16px 1.5px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 1.5px 16px no-repeat,
+    linear-gradient(145deg, #10181c, #060a0d);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    inset 0 1px 0 rgb(255 250 236 / 24%),
+    inset 0 -1px 0 rgb(164 221 207 / 18%),
+    0 26px 56px -24px rgb(0 0 0 / 90%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-screen > .dxl-art {
@@ -1730,10 +1930,15 @@ html[data-family="library"] .library-screening-room #library-main .library-hub-g
   align-items: center;
   gap: clamp(12px, 2vw, 24px);
   padding: clamp(14px, 2.1vw, 30px);
-  border: 1px solid var(--room-line) !important;
-  border-top-color: var(--room-teal) !important;
-  background: linear-gradient(145deg, #1e3434, #121c23 65%) !important;
-  box-shadow: none;
+  border: 1px solid rgb(164 221 207 / 42%) !important;
+  border-top: 2px solid var(--room-teal) !important;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 6.5%) 0%, transparent 42%),
+    linear-gradient(145deg, #1e3536, #101a21 68%) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(240 253 250 / 24%),
+    inset 0 -1px 0 rgb(230 200 149 / 16%),
+    0 20px 44px -22px rgb(0 0 0 / 82%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-continue > h3 {
@@ -1749,8 +1954,11 @@ html[data-family="library"] .library-screening-room #library-main .library-conti
   width: 100%;
   height: auto;
   aspect-ratio: 0.85;
-  border: 1px solid var(--room-line);
-  box-shadow: none;
+  border: 1px solid rgb(164 221 207 / 48%);
+  box-shadow:
+    0 0 0 2px rgb(5 11 16 / 90%),
+    0 0 0 3px rgb(230 200 149 / 28%),
+    0 14px 28px -14px rgb(0 0 0 / 82%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-continue-caption {
@@ -1765,7 +1973,8 @@ html[data-family="library"] .library-screening-room #library-main .library-conti
 
 html[data-family="library"] .library-screening-room #library-main .library-continue-actions > .library-primary-link {
   border-radius: 0;
-  background: var(--room-teal);
+  background: linear-gradient(135deg, #c6f0e5 0%, var(--room-teal) 60%, #86c8b8 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 68%);
   color: #071a19;
 }
 
@@ -1778,10 +1987,15 @@ html[data-family="library"] .library-screening-room #library-main .library-conti
 html[data-family="library"] .library-screening-room #library-main .library-hub-grid > .library-shelf {
   grid-column: auto;
   padding: clamp(14px, 2.1vw, 30px);
-  border: 1px solid var(--room-line);
-  border-top-color: var(--room-gold);
-  background: linear-gradient(155deg, #242520, #151a1c 70%);
-  box-shadow: none;
+  border: 1px solid rgb(230 200 149 / 38%);
+  border-top: 2px solid var(--room-gold);
+  background:
+    linear-gradient(128deg, rgb(255 250 236 / 6%) 0%, transparent 44%),
+    linear-gradient(155deg, #262721, #13181b 72%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 22%),
+    inset 0 -1px 0 rgb(164 221 207 / 14%),
+    0 20px 44px -22px rgb(0 0 0 / 82%);
 }
 
 html[data-family="library"] .library-screening-room #library-main .library-shelf .library-rows > li {
@@ -1829,9 +2043,14 @@ html[data-family="library"] .library-screening-room #library-main .library-index
   grid-template-rows: auto auto;
   min-height: clamp(124px, 17vw, 228px);
   padding: clamp(12px, 2vw, 22px);
-  border: 1px solid #8ca69b72;
+  border: 1px solid rgb(164 221 207 / 44%);
+  border-top: 2px solid rgb(230 200 149 / 68%);
   color: #fff8ec;
   background: #151d22;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 24%),
+    inset 0 -1px 0 rgb(164 221 207 / 18%),
+    0 18px 40px -20px rgb(0 0 0 / 84%);
   text-align: start;
 }
 
@@ -1958,6 +2177,7 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
     :is(.library-screen, .library-hero, .library-continue, .library-shelf, .library-index-meter > button) {
     border: 1px solid CanvasText !important;
     background: Canvas !important;
+    box-shadow: none !important;
   }
 
   html[data-family="library"] .library-screening-room #library-main .library-index-meter .dxl-art {

@@ -151,9 +151,10 @@ main.site-shell.film-edition.mirage-edition
   ) {
   --mr-line: color-mix(in srgb, var(--mr-ice) 24%, transparent);
   --mr-line-strong: color-mix(in srgb, var(--mr-ice) 56%, transparent);
-  --phase-rim: color-mix(in srgb, var(--mr-ice) 34%, transparent);
-  --phase-specular: color-mix(in srgb, var(--mr-ice-hi) 24%, transparent);
-  --phase-shadow: 0 20px 44px rgb(0 0 0 / 46%);
+  --phase-rim: color-mix(in srgb, var(--mr-ice) 44%, transparent);
+  --phase-specular: color-mix(in srgb, var(--mr-ice-hi) 38%, transparent);
+  --phase-glow: color-mix(in srgb, var(--mr-ice) 18%, transparent);
+  --phase-shadow: 0 28px 56px -14px rgb(0 0 0 / 66%), 0 8px 20px -6px rgb(0 0 0 / 48%);
   --mr-prism: linear-gradient(
     90deg,
     var(--mr-ice) 0%,
@@ -234,9 +235,10 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
      ================================================================ */
   main.site-shell.film-edition.mirage-edition #story {
     background:
-      radial-gradient(ellipse 64% 24% at 84% 3%, rgb(176 202 255 / 23%), transparent 74%),
-      radial-gradient(ellipse 42% 20% at 14% 18%, rgb(156 184 255 / 11%), transparent 72%),
-      radial-gradient(ellipse 90% 28% at 26% 100%, rgb(214 150 236 / 24%), transparent 74%),
+      radial-gradient(ellipse 68% 28% at 84% 3%, rgb(176 202 255 / 26%), transparent 74%),
+      radial-gradient(ellipse 46% 24% at 14% 18%, rgb(156 184 255 / 16%), transparent 72%),
+      radial-gradient(ellipse 56% 32% at 50% 52%, rgb(169 196 255 / 9%), transparent 76%),
+      radial-gradient(ellipse 90% 28% at 26% 100%, rgb(214 150 236 / 26%), transparent 74%),
       linear-gradient(180deg, #0a1126 0%, #101a3c 30%, #182046 62%, #241a46 100%);
   }
 
@@ -247,43 +249,44 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
      reading holds. */
   main.site-shell.film-edition.mirage-edition #riders {
     background:
-      radial-gradient(ellipse 52% 32% at 92% 12%, rgb(255 95 200 / 24%), transparent 72%),
-      radial-gradient(ellipse 46% 30% at 4% 88%, rgb(255 92 200 / 16%), transparent 70%),
-      radial-gradient(ellipse 58% 24% at 48% 4%, rgb(207 216 227 / 14%), transparent 72%),
+      radial-gradient(ellipse 54% 34% at 92% 12%, rgb(255 95 200 / 26%), transparent 72%),
+      radial-gradient(ellipse 48% 32% at 4% 88%, rgb(255 92 200 / 18%), transparent 70%),
+      radial-gradient(ellipse 62% 28% at 48% 4%, rgb(224 234 246 / 18%), transparent 72%),
       linear-gradient(180deg, #1b1f25 0%, #2c323b 38%, #343b45 58%, #20252c 100%);
   }
 
   main.site-shell.film-edition.mirage-edition #records {
     background:
-      radial-gradient(ellipse 66% 32% at 14% 5%, rgb(255 186 98 / 24%), transparent 72%),
-      radial-gradient(ellipse 52% 36% at 92% 78%, rgb(233 140 94 / 12%), transparent 72%),
+      radial-gradient(ellipse 68% 34% at 14% 5%, rgb(255 186 98 / 26%), transparent 72%),
+      radial-gradient(ellipse 54% 38% at 92% 78%, rgb(233 140 94 / 15%), transparent 72%),
+      radial-gradient(ellipse 58% 30% at 50% 42%, rgb(239 185 111 / 8%), transparent 74%),
       linear-gradient(180deg, #140d07 0%, #20160c 46%, #170f08 100%);
   }
 
   main.site-shell.film-edition.mirage-edition
     :is(.wa-contents, .world-annex:not(#glossary, #quotes)) {
     background:
-      radial-gradient(ellipse 56% 32% at 88% 8%, rgb(109 223 186 / 15%), transparent 74%),
-      radial-gradient(ellipse 52% 32% at 8% 92%, rgb(227 166 116 / 9%), transparent 74%),
+      radial-gradient(ellipse 58% 34% at 88% 8%, rgb(109 223 186 / 18%), transparent 74%),
+      radial-gradient(ellipse 54% 34% at 8% 92%, rgb(227 166 116 / 12%), transparent 74%),
       linear-gradient(180deg, #08150f, #0b1a15 50%, #08130f);
   }
 
   main.site-shell.film-edition.mirage-edition #glossary {
     background:
-      radial-gradient(ellipse 60% 34% at 50% 0%, rgb(28 107 86 / 6%), transparent 72%),
+      radial-gradient(ellipse 60% 34% at 50% 0%, rgb(28 107 86 / 8%), transparent 72%),
       var(--we-paper);
   }
 
   main.site-shell.film-edition.mirage-edition #quotes {
     background:
-      radial-gradient(ellipse 60% 34% at 50% 0%, rgb(109 223 186 / 10%), transparent 72%),
+      radial-gradient(ellipse 62% 36% at 50% 0%, rgb(109 223 186 / 13%), transparent 72%),
       linear-gradient(180deg, #0c1a15, #050b09);
   }
 
   main.site-shell.film-edition.mirage-edition .finale-section {
     background:
-      radial-gradient(ellipse 82% 46% at 50% 100%, rgb(255 154 64 / 28%), transparent 74%),
-      radial-gradient(ellipse 54% 26% at 50% 0%, rgb(255 194 116 / 10%), transparent 72%),
+      radial-gradient(ellipse 84% 48% at 50% 100%, rgb(255 154 64 / 30%), transparent 74%),
+      radial-gradient(ellipse 56% 28% at 50% 0%, rgb(255 194 116 / 14%), transparent 72%),
       #0c0604;
   }
 
@@ -432,39 +435,48 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
   }
 
   main.site-shell.film-edition.mirage-edition #records .episode-card.is-active .episode-card-surface {
-    border-color: color-mix(in srgb, var(--mr-ice) 56%, transparent);
+    border-color: color-mix(in srgb, var(--mr-ice-hi) 68%, transparent);
     box-shadow:
-      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 30%, transparent),
-      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 20%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 42%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 28%, transparent),
       0 0 0 1px var(--mr-deck),
-      0 18px 44px rgb(0 0 0 / 48%);
+      0 22px 48px rgb(0 0 0 / 58%),
+      0 0 30px -6px var(--phase-glow);
   }
 
   /* ================================================================
      7. The annex: verdigris plates, copper ghosts
      ================================================================ */
   main.site-shell.film-edition.mirage-edition .wa-contents a {
-    border-color: color-mix(in srgb, var(--mr-ice) 36%, transparent);
+    border-color: color-mix(in srgb, var(--mr-ice) 44%, transparent);
     background:
-      linear-gradient(var(--we-gold) 0 0) 0 100% / 28px 2px no-repeat,
-      linear-gradient(145deg, rgb(109 223 186 / 8%), transparent 46%),
+      linear-gradient(var(--we-gold) 0 0) 0 100% / 32px 2px no-repeat,
+      linear-gradient(145deg, rgb(109 223 186 / 14%), transparent 50%),
       #10221c;
     box-shadow:
-      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 18%, transparent),
-      0 10px 26px rgb(0 0 0 / 34%);
+      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 26%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 12%, transparent),
+      0 14px 30px -6px rgb(0 0 0 / 48%);
   }
 
   main.site-shell.film-edition.mirage-edition .world-annex .wa-brief {
     border-color: var(--phase-rim);
-    background-color: #0f201b;
+    background:
+      radial-gradient(ellipse 68% 48% at 100% 0%, rgb(109 223 186 / 9%), transparent 70%),
+      radial-gradient(ellipse 52% 40% at 0% 100%, rgb(227 166 116 / 6%), transparent 70%),
+      #0f201b;
     box-shadow:
-      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 16%, transparent),
-      0 14px 32px rgb(0 0 0 / 36%);
+      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 24%, transparent),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 12%, transparent),
+      0 20px 44px -10px rgb(0 0 0 / 56%),
+      0 0 32px -16px var(--phase-glow);
   }
 
   main.site-shell.film-edition.mirage-edition .world-annex .wa-doc {
     border-color: var(--phase-rim);
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 12%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--mr-ice-hi) 18%, transparent),
+      0 8px 20px -6px rgb(0 0 0 / 34%);
   }
 
   main.site-shell.film-edition.mirage-edition
@@ -522,11 +534,13 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     #manager-archive {
     border-color: var(--phase-rim);
     background:
-      radial-gradient(ellipse 70% 60% at 0% 0%, rgb(148 102 242 / 24%), transparent 64%),
-      radial-gradient(ellipse 60% 60% at 100% 100%, rgb(255 106 140 / 15%), transparent 64%),
+      radial-gradient(ellipse 72% 62% at 0% 0%, rgb(148 102 242 / 26%), transparent 64%),
+      radial-gradient(ellipse 64% 62% at 100% 100%, rgb(255 106 140 / 18%), transparent 64%),
       var(--mr-deck);
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 14%, transparent),
+      0 0 38px -14px var(--phase-glow),
       var(--phase-shadow);
   }
 
@@ -534,13 +548,15 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     main.site-shell.film-edition.mirage-edition
     #story
     .world-column {
-    border-color: rgb(201 171 255 / 32%);
+    border-color: rgb(201 171 255 / 38%);
     background:
-      radial-gradient(ellipse 60% 80% at 100% 0%, rgb(169 196 255 / 12%), transparent 70%),
-      linear-gradient(135deg, rgb(201 171 255 / 8%), transparent 42%),
+      radial-gradient(ellipse 64% 82% at 100% 0%, rgb(169 196 255 / 16%), transparent 70%),
+      linear-gradient(135deg, rgb(201 171 255 / 10%), transparent 46%),
       var(--mr-deck);
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 14%, transparent),
+      0 0 36px -14px var(--phase-glow),
       var(--phase-shadow);
   }
 
@@ -550,10 +566,13 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     .rider-console {
     border-color: var(--phase-rim);
     background:
-      linear-gradient(172deg, rgb(228 236 248 / 8%), transparent 32%),
+      radial-gradient(ellipse 60% 42% at 75% 0%, rgb(224 234 246 / 10%), transparent 68%),
+      linear-gradient(172deg, rgb(228 236 248 / 11%), transparent 34%),
       #12161c;
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 14%, transparent),
+      0 0 36px -14px var(--phase-glow),
       var(--phase-shadow);
   }
 
@@ -563,10 +582,13 @@ main.site-shell.film-edition.mirage-edition .topbar-actions::before {
     .episode-archive {
     border-color: var(--phase-rim);
     background:
-      radial-gradient(ellipse 52% 42% at 0% 0%, rgb(255 186 98 / 12%), transparent 72%),
+      radial-gradient(ellipse 56% 44% at 0% 0%, rgb(255 186 98 / 16%), transparent 72%),
+      radial-gradient(ellipse 48% 36% at 100% 100%, rgb(233 140 94 / 10%), transparent 72%),
       var(--mr-deck);
     box-shadow:
       inset 0 1px 0 var(--phase-specular),
+      inset 0 0 0 1px color-mix(in srgb, var(--mr-ice) 14%, transparent),
+      0 0 38px -14px var(--phase-glow),
       var(--phase-shadow);
   }
 

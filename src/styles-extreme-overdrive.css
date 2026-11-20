@@ -514,7 +514,7 @@
    figure, moved by the cut's own curve. Molten gold core with layered thermal edge glow. */
 .rxs-page.rxs-page.exs-page .rxs-stage-panel figure > .exo-slash {
   position: absolute;
-  z-index: 0;
+  z-index: -1;
   inset: 0;
   background:
     radial-gradient(ellipse at 50% 50%, rgb(255 213 122 / 12%), transparent 68%),

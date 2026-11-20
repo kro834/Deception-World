@@ -13,8 +13,9 @@
    ---------------------------------------------------------------- */
 html[data-family="dream"] main.dream-page.dream-page {
   background:
-    radial-gradient(42% 28% at 50% 0%, rgb(230 194 142 / 9%), transparent 70%),
-    radial-gradient(36% 22% at 100% 18%, rgb(204 73 59 / 7%), transparent 68%),
+    radial-gradient(48% 32% at 50% 0%, rgb(244 206 140 / 13%), transparent 72%),
+    radial-gradient(40% 26% at 96% 16%, rgb(212 78 60 / 11%), transparent 70%),
+    radial-gradient(44% 28% at 6% 42%, rgb(138 68 158 / 8%), transparent 72%),
     #0d0912;
 }
 
@@ -102,9 +103,12 @@ html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
   margin-top: 4px;
   padding: clamp(22px, 3vw, 36px) clamp(18px, 3vw, 40px) clamp(28px, 4vw, 44px);
   background:
-    linear-gradient(180deg, rgb(243 224 176 / 7%), transparent 28%),
-    #140e18;
-  box-shadow: inset 0 1px 0 rgb(243 224 176 / 28%);
+    radial-gradient(64% 42% at 18% 0%, rgb(246 214 148 / 11%), transparent 70%),
+    linear-gradient(180deg, rgb(243 224 176 / 8%), transparent 30%),
+    #150e1b;
+  box-shadow:
+    inset 0 1px 0 rgb(248 228 182 / 34%),
+    inset 0 0 28px rgb(218 164 88 / 7%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > h3 {
@@ -147,11 +151,17 @@ html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
   inline-size: auto;
   max-inline-size: 18em;
   padding: 22px 16px;
-  border-color: rgb(230 194 142 / 55%);
+  border-color: rgb(236 200 138 / 64%);
   background:
-    linear-gradient(180deg, rgb(243 224 176 / 10%), transparent 36%),
-    linear-gradient(270deg, rgb(110 44 53 / 28%), transparent 72%),
-    #161018;
+    linear-gradient(90deg, #e8c78a, #b84239 52%, #e8c78a) 0 0 / 100% 2px no-repeat,
+    linear-gradient(#f0d49a 0 0) 0 100% / 16px 1.5px no-repeat,
+    linear-gradient(#f0d49a 0 0) 100% 100% / 16px 1.5px no-repeat,
+    radial-gradient(76% 52% at 50% 0%, rgb(248 222 168 / 15%), transparent 68%),
+    linear-gradient(270deg, rgb(124 46 56 / 34%), transparent 74%),
+    linear-gradient(180deg, #211524 0%, #140d18 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(252 236 196 / 20%),
+    0 16px 36px -14px rgb(0 0 0 / 72%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-quote-band .dream-annex-quote blockquote p {
@@ -244,13 +254,18 @@ html[data-family="dream"] main.dream-page.dream-page .dream-section-heading h2 {
   html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li {
     transition:
       border-color 180ms ease,
-      background-color 180ms ease;
+      background-color 180ms ease,
+      box-shadow 200ms ease;
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-programme-ticket:hover,
-  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip:hover {
-    border-color: #e6c28e;
-    background-color: #24182c;
+  html[data-family="dream"] main.dream-page.dream-page .dream-programme-dossier-chip:hover,
+  html[data-family="dream"] main.dream-page.dream-page .dream-quote-band > li:hover {
+    border-color: #f3dc9f;
+    background-color: #291a32;
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 204 / 28%),
+      0 18px 38px -12px rgb(0 0 0 / 78%);
   }
 }
 

@@ -4,28 +4,29 @@
    so the astrolabe optics, meridian arcs, declination hairlines, constellation
    sector keys, and observation specimen plates govern the surface cleanly. */
 html[data-family="library"] .world.command-records.search-page.search-observatory {
-  --search-ink: #ecf6fb;
-  --search-muted: #b8cbd8;
-  --search-faint: #8fa6b8;
+  --search-ink: #eef8fc;
+  --search-muted: #bcd0dd;
+  --search-faint: #93abc0;
   --search-accent: #9deafa;
   --search-gold: #f2cf8d;
   --search-prism: linear-gradient(90deg, #7ae8ff 0%, #5c88ff 34%, #ff58c6 68%, #f2cf8d 100%);
   color: var(--search-ink);
   background:
     radial-gradient(circle at 86% 6%, transparent 0 138px, rgb(157 234 250 / 8%) 139px 140px, transparent 141px),
-    radial-gradient(circle at 86% 6%, transparent 0 264px, rgb(242 207 141 / 6%) 265px 266px, transparent 267px),
+    radial-gradient(circle at 86% 6%, transparent 0 264px, rgb(242 207 141 / 6.5%) 265px 266px, transparent 267px),
     radial-gradient(circle at 86% 6%, transparent 0 412px, rgb(157 234 250 / 5%) 413px 414px, transparent 415px),
-    radial-gradient(ellipse 68% 42% at 84% 0%, rgb(41 96 132 / 36%), transparent 72%),
-    radial-gradient(ellipse 52% 34% at 8% 18%, rgb(242 207 141 / 6%), transparent 68%),
-    repeating-linear-gradient(90deg, rgb(157 234 250 / 2.2%) 0 1px, transparent 1px 64px),
+    radial-gradient(ellipse 72% 44% at 84% -2%, rgb(42 100 136 / 44%), transparent 72%),
+    radial-gradient(ellipse 54% 36% at 8% 16%, rgb(242 207 141 / 10%), transparent 68%),
+    radial-gradient(ellipse 62% 46% at 50% 64%, rgb(20 56 82 / 24%), transparent 74%),
     linear-gradient(155deg, #040912 0%, #0a1826 48%, #050c16 100%);
 }
 html[data-family="library"] .world.command-records.search-page.search-observatory .search-topbar {
-  border-bottom: 1px solid rgb(157 234 250 / 26%);
+  border-bottom: 1px solid rgb(157 234 250 / 32%);
   background: linear-gradient(180deg, rgb(4 10 20 / 98%), rgb(5 12 22 / 97%));
   box-shadow:
-    inset 0 1px 0 rgb(235 251 255 / 12%),
-    0 10px 28px -12px rgb(0 0 0 / 72%);
+    inset 0 1px 0 rgb(235 251 255 / 16%),
+    inset 0 -1px 0 rgb(242 207 141 / 14%),
+    0 12px 30px -12px rgb(0 0 0 / 78%);
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
@@ -130,15 +131,18 @@ html[data-family="library"]
   min-height: 68px;
   margin-top: 26px;
   padding: 14px 18px;
-  border: 1px solid rgb(157 234 250 / 34%);
-  border-left: 3px solid var(--search-accent);
+  border: 1px solid rgb(242 207 141 / 44%);
+  border-left: 3px solid var(--search-gold);
   color: var(--search-ink);
   background:
-    linear-gradient(125deg, rgb(255 255 255 / 6%) 0%, transparent 38%),
-    linear-gradient(135deg, rgb(32 58 78 / 64%), rgb(9 21 34 / 92%) 56%, rgb(18 39 56 / 84%));
+    linear-gradient(125deg, rgb(255 250 236 / 8%) 0%, transparent 42%),
+    radial-gradient(ellipse 75% 65% at 92% 50%, rgb(242 207 141 / 12%), transparent 70%),
+    linear-gradient(135deg, rgb(32 58 78 / 74%), rgb(8 20 33 / 95%) 56%, rgb(17 38 54 / 88%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 16px 36px -22px rgb(1 8 16 / 76%);
+    0 0 0 1px rgb(3 8 15 / 86%),
+    inset 0 1px 0 rgb(255 250 236 / 24%),
+    inset 0 -1px 0 rgb(157 234 250 / 16%),
+    0 18px 40px -20px rgb(1 8 16 / 84%);
   text-decoration: none;
   font-size: 15px;
   font-weight: 600;
@@ -161,6 +165,7 @@ html[data-family="library"]
   color: var(--search-gold);
   font-size: 22px;
   line-height: 1;
+  text-shadow: 0 0 14px rgb(242 207 141 / 38%);
 }
 
 /* ---------- Optical Reticle Workbench & Search Well ---------- */
@@ -173,17 +178,25 @@ html[data-family="library"]
   min-width: 0;
   margin: 0;
   padding: 26px;
-  border: 1px solid rgb(168 220 242 / 44%);
+  border: 1px solid rgb(168 224 246 / 50%);
   border-radius: 3px;
   background:
-    radial-gradient(circle at 92% 14%, transparent 0 68px, rgb(157 234 250 / 6%) 69px 70px, transparent 71px),
-    linear-gradient(126deg, rgb(255 255 255 / 6%) 0%, rgb(157 234 250 / 3%) 26%, transparent 48%),
-    linear-gradient(135deg, rgb(32 58 78 / 64%) 0%, rgb(8 20 33 / 96%) 48%, rgb(15 35 51 / 92%) 100%);
+    linear-gradient(var(--search-accent) 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(var(--search-accent) 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--search-gold) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--search-gold) 0 0) 100% 100% / 2px 22px no-repeat,
+    radial-gradient(circle at 92% 14%, transparent 0 68px, rgb(157 234 250 / 8%) 69px 70px, transparent 71px),
+    linear-gradient(126deg, rgb(255 255 255 / 8%) 0%, rgb(157 234 250 / 4%) 28%, transparent 52%),
+    radial-gradient(ellipse 75% 55% at 88% 6%, rgb(242 207 141 / 12%), transparent 68%),
+    linear-gradient(138deg, rgb(34 62 84 / 76%) 0%, rgb(7 19 32 / 97%) 48%, rgb(15 35 51 / 94%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 24px 56px -24px rgb(0 0 0 / 72%);
+    0 0 0 1px rgb(3 8 15 / 90%),
+    inset 0 1px 0 rgb(244 253 255 / 30%),
+    inset 0 -1px 0 rgb(242 207 141 / 22%),
+    inset 0 0 36px rgb(157 234 250 / 5%),
+    0 28px 62px -24px rgb(0 0 0 / 84%);
 }
-/* Subtle top specular bevel. */
+/* Bimetallic top specular bevel. */
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
   .search-workbench::before {
@@ -192,13 +205,13 @@ html[data-family="library"]
   position: absolute;
   inset: -1px -1px auto -1px;
   width: auto;
-  height: 1px;
+  height: 2px;
   border-radius: 3px 3px 0 0;
   background: linear-gradient(
     90deg,
-    rgb(157 234 250 / 72%),
-    rgb(242 207 141 / 46%) 55%,
-    transparent
+    rgb(157 234 250 / 88%),
+    rgb(242 207 141 / 68%) 52%,
+    transparent 94%
   );
   pointer-events: none;
 }
@@ -218,25 +231,29 @@ html[data-family="library"]
   .search-input-row {
   min-height: 74px;
   padding: 6px 8px 6px 18px;
-  border: 1px solid rgb(166 218 238 / 64%);
+  border: 1px solid rgb(168 228 250 / 74%);
   border-radius: 3px;
   background:
-    linear-gradient(180deg, rgb(0 0 0 / 48%) 0%, transparent 16px),
-    linear-gradient(90deg, rgb(157 234 250 / 10%) 0%, rgb(242 207 141 / 4%) 52%, transparent 86%),
-    #040d17;
+    linear-gradient(180deg, rgb(0 0 0 / 56%) 0%, transparent 18px),
+    linear-gradient(90deg, rgb(157 234 250 / 13%) 0%, rgb(242 207 141 / 6%) 54%, transparent 88%),
+    #040c16;
   box-shadow:
-    inset 0 2px 10px rgb(0 0 0 / 62%),
-    inset 0 1px 0 rgb(255 255 255 / 10%);
+    0 0 0 1px rgb(3 9 17 / 92%),
+    0 0 24px -6px rgb(157 234 250 / 26%),
+    inset 0 3px 14px rgb(0 0 0 / 74%),
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 -1px 0 rgb(242 207 141 / 20%);
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
   .search-input-row:focus-within {
-  border-color: #d8f8ff;
+  border-color: #ecfcff;
   box-shadow:
-    inset 0 2px 8px rgb(0 0 0 / 54%),
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 0 0 2px rgb(157 234 250 / 44%),
-    0 0 22px rgb(122 232 255 / 24%);
+    inset 0 3px 12px rgb(0 0 0 / 64%),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 0 0 2px rgb(157 234 250 / 56%),
+    0 0 32px -2px rgb(122 232 255 / 42%),
+    0 0 58px -10px rgb(242 207 141 / 28%);
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
@@ -246,7 +263,7 @@ html[data-family="library"]
   height: 18px;
   flex-shrink: 0;
   color: var(--search-accent);
-  filter: drop-shadow(0 0 8px rgb(157 234 250 / 34%));
+  filter: drop-shadow(0 0 10px rgb(157 234 250 / 52%));
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
@@ -263,12 +280,14 @@ html[data-family="library"] .world.command-records.search-page.search-observator
   min-height: 52px;
   padding-inline: 18px;
   border-radius: 2px;
-  border: 1px solid #ebfcff;
-  color: #071925;
-  background: linear-gradient(132deg, #f5fdff 0%, #bce4f3 48%, #e4f7ff 100%);
+  border: 1px solid #f0fdff;
+  color: #061824;
+  background: linear-gradient(132deg, #f9feff 0%, #c0e6f5 48%, #e6f8ff 100%);
   box-shadow:
     inset 0 1px 0 #fff,
-    0 4px 14px rgb(0 0 0 / 36%);
+    inset 0 -1px 0 rgb(242 207 141 / 34%),
+    0 6px 18px rgb(0 0 0 / 44%),
+    0 0 18px -6px rgb(157 234 250 / 34%);
   font-weight: 750;
 }
 html[data-family="library"]
@@ -323,15 +342,17 @@ html[data-family="library"]
   min-width: 0;
   min-height: 50px;
   padding: 8px 12px;
-  border: 1px solid rgb(157 234 250 / 34%);
+  border: 1px solid rgb(157 234 250 / 40%);
+  border-left: 2px solid rgb(242 207 141 / 62%);
   border-radius: 2px;
   color: var(--search-ink);
   background:
-    linear-gradient(125deg, rgb(255 255 255 / 6%) 0%, transparent 42%),
-    linear-gradient(135deg, rgb(28 52 70 / 72%), rgb(9 22 35 / 94%));
+    linear-gradient(125deg, rgb(255 255 255 / 7.5%) 0%, transparent 44%),
+    linear-gradient(138deg, rgb(28 54 74 / 78%), rgb(8 20 33 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 10px 22px -14px rgb(1 8 16 / 74%);
+    inset 0 1px 0 rgb(242 253 255 / 20%),
+    inset 0 -1px 0 rgb(242 207 141 / 12%),
+    0 12px 24px -14px rgb(1 8 16 / 80%);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0;
@@ -345,16 +366,17 @@ html[data-family="library"]
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
+  min-width: 28px;
   min-height: 22px;
   padding: 1px 7px;
-  border: 1px solid rgb(142 186 210 / 36%);
+  border: 1px solid rgb(242 207 141 / 42%);
   border-radius: 999px;
-  background: #05101a;
-  color: #cfe4f0;
+  background: linear-gradient(180deg, rgb(242 207 141 / 14%), rgb(5 16 26 / 94%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 22%);
+  color: #f8efd8;
   font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 700;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
@@ -362,22 +384,23 @@ html[data-family="library"]
   .world.command-records.search-page.search-observatory
   .search-categories
   button[aria-pressed="true"] {
-  border-color: #e8fcff;
+  border-color: #ecfdff;
+  border-left-color: #2ca8c6;
   color: #081c28;
-  background: linear-gradient(128deg, #f3fdff 0%, #bfe0ef 49%, #e6f7ff 100%);
+  background: linear-gradient(128deg, #f7feff 0%, #c2e4f3 49%, #eaf9ff 100%);
   box-shadow:
     inset 3px 0 0 #2ca8c6,
     inset 0 1px 0 #fff,
-    0 10px 24px -12px rgb(122 232 255 / 28%);
+    0 12px 26px -12px rgb(122 232 255 / 38%);
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
   .search-categories
   button[aria-pressed="true"]
   span {
-  border-color: rgb(11 36 52 / 45%);
-  background: #091f2e;
-  color: #eefbff;
+  border-color: rgb(242 207 141 / 56%);
+  background: #081e2d;
+  color: #ffe9b8;
 }
 
 /* ---------- Active Filter Strip ---------- */
@@ -423,8 +446,14 @@ html[data-family="library"]
   min-width: 0;
   padding-block: 0 16px;
   margin-bottom: 12px;
-  border-bottom: 1px solid rgb(157 234 250 / 28%);
-  background: none;
+  border-bottom: 1px solid rgb(157 234 250 / 32%);
+  background: linear-gradient(
+      90deg,
+      var(--search-gold) 0%,
+      var(--search-accent) 48%,
+      transparent 92%
+    )
+    0 100% / min(260px, 48%) 1px no-repeat;
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
@@ -433,15 +462,49 @@ html[data-family="library"]
   font-size: clamp(23px, 2.5vw, 34px);
   font-weight: 750;
 }
+/* Sculpted Gold x Cyan Beveled Glass Telemetry Plate ("211 件" etc.) */
+html[data-family="library"]
+  .world.command-records.search-page.search-observatory
+  .search-results-heading
+  > p {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 15px;
+  border: 1px solid rgb(242 207 141 / 52%);
+  border-left: 3px solid var(--search-gold);
+  border-radius: 2px;
+  background:
+    linear-gradient(125deg, rgb(255 251 238 / 10%) 0%, transparent 46%),
+    linear-gradient(
+      135deg,
+      rgb(242 207 141 / 16%) 0%,
+      rgb(157 234 250 / 11%) 52%,
+      rgb(6 17 28 / 95%) 100%
+    );
+  box-shadow:
+    0 0 0 1px rgb(3 8 15 / 88%),
+    inset 0 1px 0 rgb(255 251 238 / 32%),
+    inset 0 -1px 0 rgb(157 234 250 / 22%),
+    0 12px 28px -14px rgb(0 0 0 / 82%),
+    0 0 22px -8px rgb(242 207 141 / 24%);
+}
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
   .search-results-heading
   > p
   strong {
-  color: var(--search-accent);
+  color: #fff8e6;
   font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
   font-size: 28px;
+  font-weight: 700;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 1px 0 rgb(3 9 16 / 90%),
+    0 0 18px rgb(242 207 141 / 42%),
+    0 0 8px rgb(157 234 250 / 32%);
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
@@ -541,11 +604,12 @@ html[data-family="library"]
   > b {
   order: 3;
   margin-left: 0;
-  padding: 2px 9px;
-  border: 1px solid rgb(157 234 250 / 36%);
+  padding: 3px 10px;
+  border: 1px solid rgb(242 207 141 / 48%);
   border-radius: 999px;
-  background: #05111c;
-  color: var(--search-accent);
+  background: linear-gradient(180deg, rgb(242 207 141 / 16%), rgb(5 15 26 / 94%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 24%);
+  color: #ffeab8;
   font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -573,14 +637,17 @@ html[data-family="library"]
   align-content: stretch;
   min-height: 244px;
   padding: 0;
-  border: 1px solid rgb(157 234 250 / 38%);
+  border: 1px solid rgb(157 224 246 / 46%);
   border-radius: 2px;
   background:
-    linear-gradient(128deg, rgb(255 255 255 / 5.5%) 0%, transparent 36%),
-    linear-gradient(135deg, rgb(34 58 78 / 64%) 0%, rgb(10 23 36 / 95%) 50%, rgb(18 39 55 / 90%) 100%);
+    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 38%),
+    radial-gradient(ellipse 70% 50% at 92% 0%, rgb(157 234 250 / 9%), transparent 68%),
+    linear-gradient(138deg, rgb(34 60 80 / 72%) 0%, rgb(9 22 35 / 96%) 50%, rgb(17 38 54 / 92%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    0 18px 40px -22px rgb(1 8 16 / 78%);
+    0 0 0 1px rgb(3 8 15 / 88%),
+    inset 0 1px 0 rgb(242 253 255 / 24%),
+    inset 0 -1px 0 rgb(242 207 141 / 15%),
+    0 20px 44px -22px rgb(1 8 16 / 84%);
   container-type: normal;
   container-name: none;
   transform: none;
@@ -605,8 +672,12 @@ html[data-family="library"]
   max-height: none;
   aspect-ratio: auto;
   border: 0;
-  border-right: 1px solid rgb(166 206 222 / 40%);
+  border-right: 1px solid rgb(186 226 246 / 52%);
   background: #06121c;
+  box-shadow:
+    inset -1px 0 0 rgb(242 207 141 / 28%),
+    inset 0 0 0 1px rgb(255 255 255 / 12%),
+    inset 0 0 22px rgb(2 8 16 / 52%);
 }
 html[data-family="library"]
   .world.command-records.search-page.search-observatory
@@ -827,34 +898,48 @@ html[data-family="library"]
       .search-input-row
     ) {
     transition:
-      border-color 180ms ease,
-      background-color 180ms ease,
-      box-shadow 200ms ease;
+      border-color 200ms ease,
+      background-color 200ms ease,
+      box-shadow 220ms ease,
+      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    .search-result-card
+    > .dxl-art
+    > img {
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
   html[data-family="library"]
     .world.command-records.search-page.search-observatory
-    :is(.search-result-card, .search-more-option):hover {
-    border-color: #c9f3ff;
+    .search-result-grid
+    > :is(.search-result-card, .search-more-option):nth-child(n):hover {
+    border-color: #dcf9ff;
     background:
-      linear-gradient(90deg, rgb(157 234 250 / 12%) 0%, transparent 62%),
-      linear-gradient(125deg, #214257, #0e2638 60%, #183649);
+      linear-gradient(90deg, rgb(157 234 250 / 14%) 0%, rgb(242 207 141 / 6%) 54%, transparent 82%),
+      linear-gradient(128deg, #254a62, #0f293c 60%, #1a3b50);
     box-shadow:
+      0 0 0 1px rgb(157 234 250 / 28%),
       inset 3px 0 var(--search-accent),
-      inset 0 1px 0 rgb(255 255 255 / 22%),
-      0 20px 44px -22px rgb(1 8 16 / 84%);
-    transform: none;
+      inset 0 1px 0 rgb(245 254 255 / 32%),
+      inset 0 -1px 0 rgb(242 207 141 / 24%),
+      0 26px 52px -22px rgb(1 8 16 / 90%),
+      0 0 28px -8px rgb(157 234 250 / 34%);
+    transform: translateY(-4px);
   }
   html[data-family="library"]
     .world.command-records.search-page.search-observatory
     .search-categories
     button:not([aria-pressed="true"]):hover {
-    border-color: rgb(188 238 252 / 68%);
+    border-color: rgb(198 242 255 / 78%);
     background:
-      linear-gradient(125deg, rgb(255 255 255 / 10%) 0%, transparent 45%),
-      linear-gradient(135deg, rgb(36 66 88 / 82%), rgb(12 28 44 / 96%));
+      linear-gradient(125deg, rgb(255 255 255 / 12%) 0%, transparent 45%),
+      linear-gradient(135deg, rgb(38 70 92 / 86%), rgb(12 28 44 / 96%));
+    transform: translateY(-2px);
   }
   html[data-family="library"]
     .world.command-records.search-page.search-observatory
@@ -865,8 +950,19 @@ html[data-family="library"]
       .search-library-door,
       .search-suggestions button
     ):hover {
-    border-color: #c8faff;
-    background: #143247;
+    border-color: #d6f9ff;
+    background: #15354b;
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .world.command-records.search-page.search-observatory
+    .search-result-card:hover
+    > .dxl-art
+    > img {
+    transform: scale(1.04);
   }
 }
 
@@ -1212,6 +1308,7 @@ html[data-family="library"]
     :is(
       .search-input-row,
       .search-empty,
+      .search-results-heading > p,
       .search-result-grid > .search-result-card:nth-child(n),
       .search-result-grid > .search-more-option:nth-child(n),
       .search-active-filter,

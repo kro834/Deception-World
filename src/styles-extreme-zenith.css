@@ -1747,3 +1747,699 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page .exs-core-flow > sp
     min-height: 96px;
   }
 }
+
+/* ================================================================
+   15. Arena Plate Authority Layer — Gold × Cyan Championship Finish
+   Outranks downstream generic command-special overrides (1,3,2) with
+   #top[data-command-special] (1,5,2) while keeping every selector
+   strictly within the zenith scope and zero-animation contract.
+   ================================================================ */
+html[data-family="special"] body .rxs-page.rxs-page.exs-page#top[data-command-special] > .exs-hero {
+  background:
+    radial-gradient(64% 70% at 66% 40%, rgb(255 218 134 / 38%), transparent 66%),
+    radial-gradient(50% 48% at 18% 22%, rgb(228 150 42 / 24%), transparent 64%),
+    radial-gradient(46% 42% at 88% 82%, rgb(114 228 255 / 18%), transparent 64%),
+    radial-gradient(66% 36% at 50% 100%, rgb(244 204 123 / 32%), transparent 70%),
+    linear-gradient(180deg, #0b0906 0%, #17120a 52%, #070706 100%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > .exs-chapter-index {
+  background:
+    linear-gradient(
+      90deg,
+      rgb(244 204 123 / 16%),
+      rgb(20 17 12 / 98%) 20%,
+      rgb(20 17 12 / 98%) 80%,
+      rgb(114 228 255 / 14%)
+    ),
+    #0d0c09;
+  border-block: 2px solid rgb(244 204 123 / 68%);
+  box-shadow:
+    0 28px 64px rgb(0 0 0 / 82%),
+    inset 0 1px 0 rgb(255 250 236 / 26%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > .exs-chapter-index
+  a {
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(90% 60% at 16% 0%, rgb(244 204 123 / 12%), transparent 64%),
+    linear-gradient(180deg, rgb(28 23 15 / 86%), rgb(12 11 9 / 94%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 14%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > .exs-chapter-index
+  a
+  + a {
+  border-left: 1px solid rgb(244 204 123 / 34%);
+}
+
+/* 01 IMPACT — Dual heavy forged stat plates (205.6 t〜 / 0.002 SEC) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  .exi-band {
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article {
+  border-top: 4px solid #ffe7a8;
+  background: var(--exe-surface-gold);
+  box-shadow:
+    0 34px 82px -18px rgb(0 0 0 / 96%),
+    0 0 54px -10px rgb(244 204 123 / 36%),
+    inset 0 1px 0 rgb(255 253 244 / 58%),
+    inset 0 -2px 0 rgb(212 136 42 / 38%),
+    inset 0 0 0 1px rgb(244 204 123 / 72%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  #performance
+  .exi-stage
+  > article:nth-child(2) {
+  border-top: 4px solid #b4f3ff;
+  background: var(--exe-surface-cyan);
+  box-shadow:
+    0 34px 82px -18px rgb(0 0 0 / 96%),
+    0 0 54px -10px rgb(114 228 255 / 38%),
+    inset 0 1px 0 rgb(240 253 255 / 58%),
+    inset 0 -2px 0 rgb(34 156 208 / 40%),
+    inset 0 0 0 1px rgb(114 228 255 / 72%);
+}
+
+/* Tale of the Tape console & comparison cards (defeating command-special slate) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison {
+  border: 1px solid rgb(244 204 123 / 52%);
+  border-top: 4px solid #ffe4a0;
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse 62% 52% at 14% 0%, rgb(255 218 134 / 22%), transparent 66%),
+    radial-gradient(ellipse 60% 50% at 88% 0%, rgb(114 228 255 / 18%), transparent 66%),
+    var(--exe-surface-1);
+  box-shadow: var(--exe-card-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  > article {
+  border: 0;
+  border-top: 3px solid #ffe4a0;
+  background-color: #100e0b;
+  background-image:
+    radial-gradient(ellipse 86% 60% at 10% 0%, rgb(255 220 138 / 22%), transparent 60%),
+    linear-gradient(162deg, rgb(38 32 21 / 97%), rgb(13 11 9 / 99%));
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 100% 100%;
+  box-shadow:
+    0 24px 52px -18px rgb(0 0 0 / 94%),
+    0 0 32px -12px rgb(244 204 123 / 28%),
+    inset 0 1px 0 rgb(255 251 238 / 38%),
+    inset 0 -1px 0 rgb(212 136 42 / 24%),
+    inset 0 0 0 1px rgb(244 204 123 / 48%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  > article[data-exf-win="rival"] {
+  border-top-color: #b4f3ff;
+  background-color: #090e14;
+  background-image:
+    radial-gradient(ellipse 86% 60% at 10% 0%, rgb(130 236 255 / 22%), transparent 60%),
+    linear-gradient(162deg, rgb(16 30 42 / 97%), rgb(8 13 19 / 99%));
+  box-shadow:
+    0 24px 52px -18px rgb(0 0 0 / 94%),
+    0 0 32px -12px rgb(114 228 255 / 30%),
+    inset 0 1px 0 rgb(240 253 255 / 38%),
+    inset 0 -1px 0 rgb(36 154 206 / 26%),
+    inset 0 0 0 1px rgb(114 228 255 / 50%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  .rxs-comparison-result {
+  border: 1px solid rgb(255 228 156 / 84%);
+  background:
+    linear-gradient(180deg, rgb(255 248 224 / 28%) 0%, rgb(244 204 123 / 12%) 48%, rgb(156 98 20 / 28%) 100%),
+    rgb(24 18 10 / 96%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 244 / 52%),
+    0 10px 26px -8px rgb(244 204 123 / 52%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  > article[data-exf-win="rival"]
+  .rxs-comparison-result {
+  border-color: rgb(156 242 255 / 86%);
+  background:
+    linear-gradient(180deg, rgb(236 253 255 / 28%) 0%, rgb(114 228 255 / 14%) 48%, rgb(22 104 142 / 30%) 100%),
+    rgb(10 22 32 / 96%);
+  box-shadow:
+    inset 0 1px 0 rgb(244 254 255 / 54%),
+    0 10px 26px -8px rgb(114 228 255 / 52%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison
+  .rxs-bars {
+  border: 1px solid rgb(244 204 123 / 28%);
+  background: rgb(6 7 10 / 92%);
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 88%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .rxs-comparison-metrics
+  > article[data-exf-win="rival"]
+  .rxs-bars {
+  border-color: rgb(114 228 255 / 32%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #performance
+  .exs-catalog-details
+  .rxs-processing-comparison
+  > div {
+  background-image: none;
+}
+
+/* 02 P14 — Dual Reactor Core & Causal Conduit */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div {
+  border: 1px solid rgb(244 204 123 / 64%);
+  border-left: 4px solid #ffe4a0;
+  background:
+    radial-gradient(90% 70% at 0% 0%, rgb(255 220 138 / 24%), transparent 60%),
+    linear-gradient(150deg, rgb(32 26 17 / 96%), rgb(12 10 8 / 99%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 238 / 32%),
+    0 18px 38px -18px rgb(0 0 0 / 92%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .rxs-p14-copy
+  dl
+  > div:nth-child(2) {
+  border-color: rgb(114 228 255 / 64%);
+  border-left: 4px solid #b4f3ff;
+  background:
+    radial-gradient(90% 70% at 0% 0%, rgb(130 236 255 / 24%), transparent 60%),
+    linear-gradient(150deg, rgb(14 28 38 / 96%), rgb(8 13 18 / 99%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .exs-p14-comparison
+  > article {
+  border-top: 4px solid #ffe4a0;
+  box-shadow:
+    0 30px 72px -20px rgb(0 0 0 / 96%),
+    0 0 46px -12px rgb(244 204 123 / 32%),
+    inset 0 1px 0 rgb(255 252 240 / 46%),
+    inset 0 0 0 1px rgb(244 204 123 / 62%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #p14
+  .exs-p14-comparison
+  > article:last-of-type {
+  border-top: 4px solid #b4f3ff;
+  box-shadow:
+    0 30px 72px -20px rgb(0 0 0 / 96%),
+    0 0 46px -12px rgb(114 228 255 / 32%),
+    inset 0 1px 0 rgb(240 253 255 / 46%),
+    inset 0 0 0 1px rgb(114 228 255 / 62%);
+}
+
+/* 03 STAGES — Form-Reactive Championship Duel Arena (Gold Ultra / Cyan Middle) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  .rxs-stage-switcher {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  .rxs-stage-switcher
+  > .rxs-stage-tabs.liquid-swipe-tabs {
+  border: 1px solid rgb(244 204 123 / 64%);
+  background:
+    linear-gradient(180deg, rgb(28 23 15 / 96%), rgb(10 9 7 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 28%),
+    0 16px 38px rgb(0 0 0 / 72%),
+    0 0 24px -8px rgb(244 204 123 / 28%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel:has(> figure[data-form="middle"]) {
+  border-top-color: #b4f3ff;
+  background:
+    radial-gradient(ellipse 62% 74% at 76% 42%, rgb(114 228 255 / 30%), transparent 66%),
+    radial-gradient(ellipse 52% 58% at 16% 18%, rgb(34 156 208 / 22%), transparent 66%),
+    radial-gradient(ellipse 46% 44% at 88% 92%, rgb(244 204 123 / 12%), transparent 64%),
+    var(--exe-surface-cyan);
+  box-shadow:
+    0 34px 82px -18px rgb(0 0 0 / 96%),
+    0 0 54px -10px rgb(114 228 255 / 36%),
+    inset 0 1px 0 rgb(240 253 255 / 50%),
+    inset 0 0 0 1px rgb(114 228 255 / 66%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"] {
+  background:
+    radial-gradient(circle at 50% 34%, rgb(130 236 255 / 34%), transparent 64%),
+    radial-gradient(circle at 50% 88%, rgb(244 204 123 / 14%), transparent 58%),
+    rgb(8 12 16 / 92%);
+  box-shadow:
+    0 32px 72px rgb(0 0 0 / 88%),
+    0 0 58px -8px rgb(114 228 255 / 40%),
+    inset 0 0 0 1px rgb(114 228 255 / 70%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  + div
+  > h3 {
+  background: var(--exe-cyan-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 2px 0 rgb(14 68 92 / 92%))
+    drop-shadow(0 0 28px rgb(114 228 255 / 32%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  + div
+  > ul
+  > li {
+  border-color: rgb(114 228 255 / 54%);
+  border-left-color: #b4f3ff;
+  background: linear-gradient(90deg, rgb(16 32 44 / 96%), rgb(9 14 19 / 98%));
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #stages
+  #exs-stage-panel
+  > figure[data-form="middle"]
+  + div
+  .exs-form-facts
+  > div {
+  border-color: rgb(114 228 255 / 44%);
+  border-left-color: #b4f3ff;
+  background: rgb(9 16 22 / 88%);
+}
+
+/* 04 SYSTEM — Forged Armor Pillars & Twin Reactor Decks (defeating command-special reset) */
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-system-grid
+  > article {
+  border: 0;
+  border-top: 4px solid #ffe4a0;
+  border-radius: 0;
+  background: var(--exe-surface-2);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  box-shadow: var(--exe-card-shadow);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-specs
+  > div {
+  border: 0;
+  border-top: 4px solid #ffe4a0;
+  border-radius: 0;
+  background: var(--exe-surface-gold);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  box-shadow:
+    0 32px 78px -20px rgb(0 0 0 / 96%),
+    0 0 48px -10px rgb(244 204 123 / 32%),
+    inset 0 1px 0 rgb(255 252 240 / 48%),
+    inset 0 0 0 1px rgb(244 204 123 / 64%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > #system
+  .rxs-specs
+  > div:last-child {
+  border-top: 4px solid #b4f3ff;
+  background: var(--exe-surface-cyan);
+  box-shadow:
+    0 32px 78px -20px rgb(0 0 0 / 96%),
+    0 0 48px -10px rgb(114 228 255 / 34%),
+    inset 0 1px 0 rgb(240 253 255 / 48%),
+    inset 0 0 0 1px rgb(114 228 255 / 64%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.exs-page#top[data-command-special]
+  > .rxs-footer
+  > a.rxs-footer-return {
+  border: 1px solid rgb(244 204 123 / 62%);
+  border-radius: 0;
+  color: #f8f2e6;
+  background:
+    linear-gradient(180deg, rgb(38 32 21 / 96%), rgb(14 13 10 / 98%));
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  box-shadow:
+    0 16px 36px rgb(0 0 0 / 68%),
+    inset 0 1px 0 rgb(255 250 236 / 26%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a:hover {
+    background:
+      radial-gradient(90% 70% at 18% 0%, rgb(255 224 148 / 26%), transparent 66%),
+      linear-gradient(180deg, rgb(42 34 20 / 92%), rgb(16 14 10 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 240 / 34%),
+      inset 0 -2px 0 rgb(244 204 123 / 68%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article:hover {
+    box-shadow:
+      0 28px 58px -18px rgb(0 0 0 / 96%),
+      0 0 40px -10px rgb(244 204 123 / 40%),
+      inset 0 1px 0 rgb(255 253 244 / 48%),
+      inset 0 0 0 1px rgb(255 224 148 / 74%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article[data-exf-win="rival"]:hover {
+    box-shadow:
+      0 28px 58px -18px rgb(0 0 0 / 96%),
+      0 0 40px -10px rgb(114 228 255 / 42%),
+      inset 0 1px 0 rgb(242 254 255 / 50%),
+      inset 0 0 0 1px rgb(146 238 255 / 76%);
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-system-grid
+    > article:hover {
+    box-shadow:
+      0 38px 78px -20px rgb(0 0 0 / 98%),
+      0 0 42px -8px rgb(244 204 123 / 36%),
+      inset 0 1px 0 rgb(255 252 240 / 48%),
+      inset 0 0 0 1px rgb(255 224 148 / 76%);
+  }
+}
+
+@media (max-width: 900px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a:nth-child(3) {
+    border-left: 0;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a:nth-child(n + 3) {
+    border-top: 1px solid rgb(244 204 123 / 32%);
+  }
+}
+
+@media (max-width: 359px) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a
+    + a {
+    border-top: 1px solid rgb(244 204 123 / 32%);
+    border-left: 0;
+  }
+}
+
+@media (prefers-contrast: more) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > figure[data-form="middle"]
+    + div
+    > h3 {
+    color: #eafbff;
+    background: none;
+    -webkit-text-fill-color: currentcolor;
+    filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body .rxs-page.rxs-page.exs-page#top[data-command-special] > .exs-hero,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .exs-chapter-index
+    a,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    #performance
+    .exi-stage
+    > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    #performance
+    .exi-stage
+    > article:nth-child(2),
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    > article[data-exf-win="rival"],
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison-metrics
+    .rxs-comparison-result,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #performance
+    .rxs-comparison
+    .rxs-bars,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .rxs-p14-copy
+    dl
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #p14
+    .exs-p14-comparison
+    > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    .rxs-stage-switcher
+    > .rxs-stage-tabs.liquid-swipe-tabs,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel:has(> figure[data-form="middle"]),
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > figure[data-form="middle"],
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > figure[data-form="middle"]
+    + div
+    > ul
+    > li,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > figure[data-form="middle"]
+    + div
+    .exs-form-facts
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-system-grid
+    > article,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #system
+    .rxs-specs
+    > div:last-child,
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > .rxs-footer
+    > a.rxs-footer-return {
+    background: Canvas;
+    background-image: none;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+    clip-path: none;
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.exs-page#top[data-command-special]
+    > #stages
+    #exs-stage-panel
+    > figure[data-form="middle"]
+    + div
+    > h3 {
+    color: CanvasText;
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
+}

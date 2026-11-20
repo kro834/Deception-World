@@ -1,28 +1,183 @@
 .gallery-tours-page {
-  --gallery-tour-accent: #d3b985;
+  --gallery-tour-accent: #d8be8a;
 }
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"],
 .gallery-tours-page.command-support-tours {
-  --gallery-ivory: #eef4f6;
-  --gallery-muted: #bcc8d0;
+  --gallery-ivory: #f2f6f8;
+  --gallery-muted: #c2cfd7;
   --gallery-brass: #e8cf9e;
-  --gallery-rule: rgb(156 182 198 / 0.28);
+  --gallery-rule: rgb(168 194 210 / 0.3);
   --gallery-tour-accent: #e8cf9e;
-  background: radial-gradient(ellipse 75% 600px at 68% 0%, #202f48, transparent 100%), #090e18;
+  background:
+    radial-gradient(ellipse 78% 560px at 68% 0%, rgb(38 56 86 / 0.88), transparent 100%),
+    radial-gradient(ellipse 58% 36% at 18% 12%, rgb(232 207 158 / 0.12), transparent 68%),
+    linear-gradient(180deg, #0b111d 0%, #090e18 52%, #060a12 100%);
   color: var(--gallery-ivory);
 }
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"] .gallery-topbar,
 .gallery-tours-page.command-support-tours .gallery-topbar {
-  border-bottom-color: rgb(164 192 208 / 0.24);
-  background: linear-gradient(180deg, #101923f2, #090f16f2);
+  border-bottom-color: rgb(218 204 176 / 0.3);
+  background-color: #091018;
+  background-image:
+    linear-gradient(
+      90deg,
+      #e2c998 0 3px,
+      transparent 3px,
+      rgb(226 201 152 / 0.28) 20%,
+      rgb(183 224 238 / 0.3) 54%,
+      transparent 94%
+    ),
+    linear-gradient(180deg, rgb(244 250 255 / 0.08), transparent 68%);
   box-shadow:
-    inset 0 -1px 0 rgb(255 255 255 / 0.04),
-    0 10px 28px rgb(0 0 0 / 0.34);
+    inset 0 1px 0 rgb(255 252 244 / 0.1),
+    inset 0 -1px 0 rgb(183 224 238 / 0.14),
+    0 12px 32px rgb(0 0 0 / 0.48);
 }
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-topbar-actions
+  > a,
 .gallery-tours-page.command-support-tours .gallery-topbar-actions > a {
-  padding-inline: 14px;
-  border: 1px solid rgb(164 192 208 / 0.34);
-  background: linear-gradient(180deg, #16222d, #0e161f);
-  color: #eaf2f5;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  padding-inline: 15px;
+  border: 1px solid rgb(206 222 232 / 0.38);
+  border-top-color: rgb(238 224 196 / 0.52);
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(236 214 172 / 0.14), transparent 70%),
+    linear-gradient(180deg, #192734, #0e1721);
+  color: #f0f6f9;
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.18),
+    0 6px 16px rgb(0 0 0 / 0.32);
+}
+
+/* Museum Double-Mat Framing for Tour Entrance & Course Cards */
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-introduction {
+  border: 1px solid rgb(214 204 182 / 0.38);
+  border-top-color: rgb(242 224 186 / 0.58);
+  background:
+    radial-gradient(ellipse 66% 58% at 76% 16%, rgb(240 216 170 / 0.16), transparent 72%),
+    radial-gradient(ellipse 54% 48% at 14% 0%, rgb(183 224 238 / 0.13), transparent 70%),
+    linear-gradient(146deg, #1c2936 0%, #0f1823 44%, #080d15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.28),
+    inset 0 0 0 1px rgb(183 224 238 / 0.08),
+    0 0 0 5px #091018,
+    0 0 0 6px rgb(218 202 170 / 0.18),
+    0 28px 64px -8px rgb(0 0 0 / 0.62);
+}
+
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-opening-frame {
+  padding: clamp(14px, 2vw, 24px);
+  border: 1px solid rgb(236 214 170 / 0.52);
+  border-top-color: rgb(250 232 194 / 0.72);
+  background:
+    radial-gradient(ellipse 82% 56% at 50% 4%, rgb(246 224 180 / 0.22), transparent 72%),
+    linear-gradient(180deg, #1a2836 0%, #0b131d 60%, #060a10 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 0.36),
+    inset 0 0 0 3px rgb(6 10 16 / 0.84),
+    inset 0 0 0 4px rgb(236 212 166 / 0.22),
+    0 26px 60px -8px rgb(0 0 0 / 0.68);
+}
+
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-opening-mat {
+  padding: clamp(12px, 1.8vw, 20px);
+  border: 1px solid rgb(240 220 180 / 0.42);
+  background:
+    radial-gradient(ellipse 76% 60% at 50% 16%, rgb(246 226 184 / 0.14), transparent 70%),
+    radial-gradient(ellipse 72% 56% at 50% 24%, #152230, #060a10 84%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.28),
+    inset 0 0 0 5px rgb(4 7 12 / 0.88),
+    inset 0 0 0 6px rgb(196 228 240 / 0.22),
+    inset 0 14px 32px rgb(0 0 0 / 0.58),
+    0 14px 34px rgb(0 0 0 / 0.5);
+}
+
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-course {
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 42%, rgb(224 206 172 / 0.38));
+  background:
+    radial-gradient(
+      ellipse 88% 40% at 50% 0%,
+      color-mix(in srgb, var(--gallery-tour-course-accent) 18%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(162deg, #1d2b38 0%, #101924 48%, #090f17 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.24),
+    0 22px 48px -8px rgb(0 0 0 / 0.58);
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-course-visual {
+  padding: 13px 15px 15px;
+  border-bottom: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 34%, rgb(224 206 172 / 0.28));
+  background:
+    radial-gradient(
+      ellipse 78% 58% at 50% 8%,
+      color-mix(in srgb, var(--gallery-tour-course-accent) 26%, #283d4d),
+      #070c12 80%
+    );
+  box-shadow: inset 0 -1px 0 rgb(255 252 244 / 0.08);
+}
+
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-course-mat {
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-course-accent) 36%, rgb(242 222 182 / 0.32));
+  background:
+    radial-gradient(
+      ellipse 74% 58% at 50% 20%,
+      color-mix(in srgb, var(--gallery-tour-course-accent) 16%, #131f2b),
+      #05080d 84%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 244 / 0.22),
+    inset 0 0 0 4px rgb(5 8 13 / 0.86),
+    inset 0 0 0 5px color-mix(in srgb, var(--gallery-tour-course-accent) 24%, rgb(236 212 166 / 0.18)),
+    inset 0 10px 24px rgb(0 0 0 / 0.52);
+}
+
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-entrance
+  .gallery-tour-action-primary {
+  border-color: #f3dfb6;
+  background: linear-gradient(180deg, #faf3e4 0%, #e7cea0 54%, #d4b57e 100%);
+  box-shadow:
+    inset 0 1px 0 #fffdf9,
+    inset 0 -1px 0 rgb(104 78 36 / 0.28),
+    0 10px 24px rgb(0 0 0 / 0.36);
+  color: #16181f;
+  font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    .gallery-tour-entrance
+    .gallery-tour-action-primary:hover {
+    border-color: #fff7e2;
+    background: linear-gradient(180deg, #fffdf8 0%, #f1dcb2 54%, #dfc28c 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 12px 28px rgb(0 0 0 / 0.44);
+    color: #12141b;
+  }
+
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    .gallery-tour-course:hover {
+    border-color: color-mix(in srgb, var(--gallery-tour-course-accent) 72%, #f4dfb6);
+    box-shadow:
+      inset 0 1px 0 rgb(255 253 246 / 0.34),
+      0 26px 56px -6px rgb(0 0 0 / 0.66),
+      0 0 28px -10px color-mix(in srgb, var(--gallery-tour-course-accent) 36%, transparent);
+  }
 }
 .gallery-tours-main {
   width: min(1360px, 100%);
@@ -204,10 +359,48 @@
     overflow-wrap: anywhere;
   }
 }
+@media (max-width: 600px) {
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    .gallery-tour-introduction {
+    padding: 20px;
+  }
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    .gallery-tour-opening-frame {
+    padding: 8px;
+  }
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    .gallery-tour-opening-mat {
+    padding: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    .gallery-tour-course {
+    transition: none;
+  }
+}
 @media (forced-colors: active) {
-  .gallery-tours-page.command-support-tours .gallery-tour-sharing {
+  .gallery-tours-page.command-support-tours .gallery-tour-sharing,
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    :is(
+      .gallery-topbar,
+      .gallery-tour-introduction,
+      .gallery-tour-opening-frame,
+      .gallery-tour-opening-mat,
+      .gallery-tour-course,
+      .gallery-tour-course-visual,
+      .gallery-tour-course-mat
+    ) {
     border-color: CanvasText;
     background: Canvas;
+    background-image: none;
+    box-shadow: none;
+  }
+  .gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+    :is(.gallery-topbar-actions > a, .gallery-tour-action-primary) {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
     box-shadow: none;
   }
   .gallery-tours-colophon a {

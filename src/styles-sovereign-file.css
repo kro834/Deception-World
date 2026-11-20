@@ -226,31 +226,36 @@ main.manager-page.is-sovereign::after {
 /* One opaque ink plate, ruled in gold. The reading-progress hairline
    (::after, driven by --page-progress) keeps its geometry; it takes gold. */
 main.manager-page.is-sovereign .manager-topbar {
-  border-bottom-color: rgb(240 207 134 / 18%);
+  border-bottom-color: rgb(240 207 134 / 32%);
   background:
     linear-gradient(
       90deg,
-      rgb(240 207 134 / 8%),
-      transparent 30%,
-      transparent 72%,
-      rgb(122 232 255 / 4%)
+      rgb(240 207 134 / 14%),
+      transparent 32%,
+      transparent 68%,
+      rgb(255 248 232 / 6%) 86%,
+      rgb(122 232 255 / 5%)
     ),
     #03060c;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   box-shadow:
-    0 1px 0 rgb(240 207 134 / 6%),
-    0 18px 44px rgb(0 0 0 / 45%);
+    inset 0 1px 0 rgb(255 248 232 / 10%),
+    0 1px 0 rgb(240 207 134 / 14%),
+    0 20px 48px rgb(0 0 0 / 56%);
 }
 
 main.manager-page.is-sovereign .manager-topbar::after {
-  background: linear-gradient(90deg, var(--sv-ivory), var(--sv-gold) 58%, transparent 96%);
-  opacity: 0.62;
+  background: linear-gradient(90deg, var(--sv-ivory), var(--sv-gold-hi) 38%, var(--sv-gold) 68%, transparent 98%);
+  opacity: 0.78;
 }
 
 main.manager-page.is-sovereign .manager-topbar .brand-sigil {
-  border-color: rgb(240 207 134 / 72%);
-  color: var(--sv-gold-hi);
+  border-color: rgb(247 223 162 / 82%);
+  color: var(--sv-ivory);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 0 18px rgb(240 207 134 / 24%);
 }
 
 /* Every label at 12px or larger (the brand read 10-11px). */
@@ -273,17 +278,20 @@ main.manager-page.is-sovereign .manager-topbar .brand small {
 
 /* The return chip as a square plate with lock corners. */
 main.manager-page.is-sovereign .manager-topbar .manager-back {
-  border-color: rgb(240 207 134 / 38%);
+  border-color: rgb(240 207 134 / 48%);
   border-radius: 2px;
   background:
-    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 8px 1px no-repeat,
-    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 1px 8px no-repeat,
-    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 8px 1px no-repeat,
-    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 1px 8px no-repeat,
-    rgb(240 207 134 / 7%);
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 9px 1px no-repeat,
+    linear-gradient(var(--sv-ivory) 0 0) 0 0 / 1px 9px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 9px 1px no-repeat,
+    linear-gradient(var(--sv-gold) 0 0) 100% 100% / 1px 9px no-repeat,
+    linear-gradient(135deg, rgb(240 207 134 / 14%), rgb(240 207 134 / 4%)),
+    #070910;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 16%),
+    0 6px 18px rgb(0 0 0 / 38%);
 }
 
 main.manager-page.is-sovereign .manager-topbar .manager-back i {
@@ -567,15 +575,17 @@ main.manager-page.is-sovereign #dossier-profile .sovereign-apex-seal {
   gap: 2px;
   padding: 14px 12px 12px;
   overflow: hidden;
-  border: 1px solid rgb(240 207 134 / 62%);
-  border-radius: 2px;
+  border: 1px solid rgb(247 223 162 / 78%);
+  border-radius: 3px;
   background:
-    radial-gradient(circle at 50% 48%, rgb(246 220 154 / 16%), transparent 62%),
-    linear-gradient(160deg, rgb(22 18 11 / 94%), rgb(5 7 11 / 96%));
+    radial-gradient(circle at 50% 44%, rgb(255 244 206 / 24%), transparent 64%),
+    linear-gradient(155deg, rgb(28 22 12 / 96%), rgb(4 6 11 / 98%));
   box-shadow:
-    0 18px 40px rgb(0 0 0 / 42%),
-    inset 0 0 0 4px rgb(5 7 11 / 72%),
-    inset 0 0 0 5px rgb(240 207 134 / 26%);
+    0 22px 52px rgb(0 0 0 / 62%),
+    0 0 28px rgb(240 207 134 / 22%),
+    inset 0 1px 0 rgb(255 248 232 / 28%),
+    inset 0 0 0 4px rgb(4 6 11 / 82%),
+    inset 0 0 0 5px rgb(240 207 134 / 38%);
   text-align: center;
   animation: none;
 }
@@ -809,21 +819,25 @@ main.manager-page.is-sovereign #dossier-profile .dossier-read-link span {
    ================================================================ */
 main.manager-page.is-sovereign #dossier-profile .sovereign-status {
   margin: 30px 0 0;
-  padding: 20px 22px;
+  padding: 22px 24px;
   overflow: hidden;
-  border: 1px solid rgb(243 217 139 / 32%);
+  border: 1px solid rgb(247 223 162 / 46%);
+  border-top: 1px solid rgb(255 248 232 / 64%);
   border-radius: 4px;
-  outline: 1px solid rgb(240 207 134 / 8%);
+  outline: 1px solid rgb(240 207 134 / 16%);
   outline-offset: -6px;
   background:
-    var(--sv-prism) top / 100% 1px no-repeat,
-    radial-gradient(ellipse 170px 120% at 56px 50%, rgb(246 220 154 / 14%), transparent 70%),
-    linear-gradient(120deg, rgb(255 248 232 / 5%), transparent 40%),
-    linear-gradient(160deg, rgb(18 15 10 / 96%), rgb(4 6 11 / 97%));
+    var(--sv-prism) top / 100% 2px no-repeat,
+    radial-gradient(ellipse 210px 130% at 56px 50%, rgb(247 223 162 / 22%), transparent 72%),
+    radial-gradient(ellipse 60% 100px at 88% 0%, rgb(255 248 232 / 10%), transparent 70%),
+    linear-gradient(125deg, rgb(255 248 232 / 7%), transparent 42%),
+    linear-gradient(160deg, rgb(22 18 11 / 97%), rgb(4 6 11 / 98%));
   box-shadow:
-    0 24px 56px rgb(0 0 0 / 44%),
-    inset 0 1px 0 rgb(255 255 255 / 6%),
-    inset 0 0 20px rgb(0 0 0 / 60%);
+    0 28px 68px rgb(0 0 0 / 58%),
+    0 0 36px rgb(240 207 134 / 12%),
+    inset 0 1px 0 rgb(255 248 232 / 22%),
+    inset 0 -1px 0 rgb(240 207 134 / 20%),
+    inset 0 0 26px rgb(0 0 0 / 68%);
 }
 
 /* The scale wraps cleanly below the emblem and rank across mid-widths,
@@ -998,23 +1012,27 @@ main.manager-page.is-sovereign #dossier-profile .sovereign-scale .is-apex::after
 }
 
 /* ================================================================
-   Quotes and facts: gilded plates
+   Quotes and facts: gilded obsidian-and-gold-leaf plates
    ================================================================ */
 main.manager-page.is-sovereign #dossier-profile .manager-quotes {
   position: relative;
   margin: 34px 0;
-  padding: 28px 30px 26px;
-  border: 1px solid rgb(243 217 139 / 28%);
+  padding: 28px 30px 26px 32px;
+  border: 1px solid rgb(247 223 162 / 40%);
+  border-left: 3px solid var(--sv-gold-hi);
   border-radius: 4px;
   background:
     var(--sv-prism) top / 100% 1px no-repeat,
-    radial-gradient(ellipse 70% 160px at 0% 0%, rgb(243 217 139 / 9%), transparent 70%),
-    linear-gradient(180deg, rgb(255 255 255 / 1.5%) 0%, transparent 60px),
-    #03060e;
+    radial-gradient(ellipse 78% 180px at 0% 0%, rgb(247 223 162 / 16%), transparent 72%),
+    radial-gradient(ellipse 52% 120px at 100% 100%, rgb(240 207 134 / 8%), transparent 70%),
+    linear-gradient(180deg, rgb(255 248 232 / 5%) 0%, transparent 68px),
+    linear-gradient(160deg, #0b0d15 0%, #03050b 100%);
   box-shadow:
-    0 22px 52px rgb(0 0 0 / 38%),
-    inset 0 1px 0 rgb(255 255 255 / 6%),
-    inset 0 0 24px rgb(0 0 0 / 60%);
+    0 26px 64px rgb(0 0 0 / 54%),
+    0 0 32px rgb(240 207 134 / 9%),
+    inset 0 1px 0 rgb(255 248 232 / 18%),
+    inset 0 -1px 0 rgb(240 207 134 / 18%),
+    inset 0 0 28px rgb(0 0 0 / 64%);
 }
 
 main.manager-page.is-sovereign #dossier-profile .manager-quotes::after {
@@ -1029,19 +1047,20 @@ main.manager-page.is-sovereign #dossier-profile .manager-quotes::after {
 
 /* The first line is the file's voice: a pull quote. The rest step down. */
 main.manager-page.is-sovereign #dossier-profile .manager-quotes q:first-child {
-  color: #fbf6ea;
+  color: #fffaf0;
   font-size: clamp(18px, 1.6vw, 23px);
   font-weight: 600;
-  line-height: 1.6;
+  line-height: 1.65;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 48%);
 }
 
 main.manager-page.is-sovereign #dossier-profile .manager-quotes q:not(:first-child) {
-  color: rgb(238 231 214 / 78%);
+  color: rgb(242 235 218 / 82%);
 }
 
 main.manager-page.is-sovereign #dossier-profile .manager-quotes q::before,
 main.manager-page.is-sovereign #dossier-profile .manager-quotes q::after {
-  color: var(--sv-gold);
+  color: var(--sv-gold-hi);
 }
 
 /* The facts: one ruled spec sheet, each cell's rule its own top and left
@@ -1051,14 +1070,18 @@ main.manager-page.is-sovereign #dossier-profile .manager-facts {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   overflow: hidden;
-  border: 1px solid rgb(240 207 134 / 26%);
+  border: 1px solid rgb(247 223 162 / 40%);
+  border-top: 1px solid rgb(255 248 232 / 58%);
   border-radius: 4px;
   background:
     var(--sv-prism) top / 100% 1px no-repeat,
-    linear-gradient(125deg, rgb(240 207 134 / 8%), #080a10 78%);
+    radial-gradient(ellipse 68% 130px at 14% 0%, rgb(247 223 162 / 14%), transparent 72%),
+    linear-gradient(135deg, rgb(240 207 134 / 10%), #070910 74%, #03050b 100%);
   box-shadow:
-    0 18px 44px rgb(0 0 0 / 22%),
-    inset 0 1px 0 rgb(255 255 255 / 4%);
+    0 24px 56px rgb(0 0 0 / 48%),
+    0 0 28px rgb(240 207 134 / 8%),
+    inset 0 1px 0 rgb(255 248 232 / 16%),
+    inset 0 -1px 0 rgb(240 207 134 / 16%);
 }
 
 main.manager-page.is-sovereign #dossier-profile .manager-facts::after {
@@ -1077,14 +1100,15 @@ main.manager-page.is-sovereign #dossier-profile .manager-facts > div {
   border: 0;
   border-radius: 0;
   background:
-    linear-gradient(var(--sv-gold) 0 0) 0 0 / 6px 1px no-repeat,
-    linear-gradient(var(--sv-gold) 0 0) 0 0 / 1px 6px no-repeat;
-  box-shadow: -1px -1px 0 var(--sv-rule);
+    linear-gradient(var(--sv-gold-hi) 0 0) 0 0 / 8px 1px no-repeat,
+    linear-gradient(var(--sv-gold-hi) 0 0) 0 0 / 1px 8px no-repeat,
+    linear-gradient(180deg, rgb(240 207 134 / 4%), transparent 60%);
+  box-shadow: -1px -1px 0 rgb(240 207 134 / 18%);
 }
 
 main.manager-page.is-sovereign #dossier-profile .manager-facts dt {
   margin-bottom: 6px;
-  color: rgb(240 207 134 / 74%);
+  color: rgb(247 223 162 / 84%);
   font-family: var(--sv-hud);
   font-size: 12px;
   font-weight: 400;
@@ -1272,11 +1296,16 @@ main.manager-page.is-sovereign #dossier-index .manager-section-index > small {
 main.manager-page.is-sovereign #dossier-index .dossier-contents {
   position: relative;
   gap: 0;
-  border: 1px solid rgb(240 207 134 / 22%);
+  border: 1px solid rgb(247 223 162 / 36%);
   border-radius: 4px;
   background:
     var(--sv-prism) top / 100% 1px no-repeat,
-    rgb(8 10 15 / 82%);
+    radial-gradient(ellipse 68% 120px at 0% 0%, rgb(247 223 162 / 12%), transparent 72%),
+    linear-gradient(160deg, rgb(12 13 20 / 94%), rgb(4 6 11 / 96%));
+  box-shadow:
+    0 20px 48px rgb(0 0 0 / 48%),
+    inset 0 1px 0 rgb(255 248 232 / 14%),
+    inset 0 -1px 0 rgb(240 207 134 / 14%);
 }
 
 main.manager-page.is-sovereign #dossier-index .dossier-contents::after {
@@ -1325,28 +1354,33 @@ main.manager-page.is-sovereign #dossier-index .dossier-contents-arrow {
   }
 }
 
-/* The chapters: gilded plates that lock on. */
+/* The chapters: gilded obsidian-and-gold-leaf plates that lock on. */
 main.manager-page.is-sovereign #dossier-index .manager-copy-section {
-  border: 1px solid rgb(243 217 139 / 24%);
+  border: 1px solid rgb(247 223 162 / 34%);
   border-radius: 4px;
   background:
-    linear-gradient(#f3d98b 0 0) top 0px left 0 / 100% 1px no-repeat,
-    linear-gradient(rgb(243 217 139 / 45%) 0 0) top 3px left 0 / 100% 1px no-repeat,
-    radial-gradient(ellipse 70% 220px at 0% 0%, rgb(243 217 139 / 8%), transparent 70%),
-    linear-gradient(180deg, rgb(255 255 255 / 1.5%) 0%, transparent 80px),
-    #03060e;
+    linear-gradient(#f7dfa2 0 0) top 0px left 0 / 100% 1px no-repeat,
+    linear-gradient(rgb(243 217 139 / 52%) 0 0) top 3px left 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 74% 240px at 0% 0%, rgb(247 223 162 / 13%), transparent 72%),
+    radial-gradient(ellipse 50% 160px at 100% 100%, rgb(240 207 134 / 6%), transparent 70%),
+    linear-gradient(180deg, rgb(255 248 232 / 3.5%) 0%, transparent 96px),
+    linear-gradient(165deg, #090c14 0%, #03050b 100%);
   box-shadow:
-    0 24px 64px rgb(0 0 0 / 48%),
-    inset 0 1px 0 rgb(255 255 255 / 5%),
-    inset 0 0 24px rgb(0 0 0 / 64%);
+    0 28px 72px rgb(0 0 0 / 56%),
+    0 0 32px rgb(240 207 134 / 7%),
+    inset 0 1px 0 rgb(255 248 232 / 14%),
+    inset 0 -1px 0 rgb(240 207 134 / 16%),
+    inset 0 0 28px rgb(0 0 0 / 68%);
 }
 
 main.manager-page.is-sovereign #dossier-index .manager-copy-section[data-record-role="lead"] {
-  border-color: rgb(243 217 139 / 38%);
+  border-color: rgb(247 223 162 / 52%);
   box-shadow:
-    0 28px 72px rgb(0 0 0 / 56%),
-    inset 0 1px 0 rgb(255 255 255 / 8%),
-    inset 0 0 32px rgb(0 0 0 / 72%);
+    0 32px 84px rgb(0 0 0 / 64%),
+    0 0 40px rgb(240 207 134 / 12%),
+    inset 0 1px 0 rgb(255 248 232 / 22%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%),
+    inset 0 0 34px rgb(0 0 0 / 74%);
 }
 
 main.manager-page.is-sovereign #dossier-index .manager-copy-section::before {
@@ -1574,6 +1608,102 @@ main.manager-page.is-sovereign .sovereign-portrait-effects > i {
 }
 
 /* ================================================================
+   Sovereign STAGE aura & gold-foil integration
+   (outranks styles-stage-dossier.css on html[data-family="dossier"]
+   while keeping Zeus's floating-button clearances intact)
+   ================================================================ */
+html[data-family="dossier"] main.manager-page.is-sovereign.is-sovereign.is-sovereign {
+  --sd-accent: #f0cf86;
+  --sd-accent-2: #fff8e8;
+  --sd-foil: #f7dfa2;
+  --sd-bevel-hi: rgb(255 248 232 / 26%);
+  --sd-bevel-lo: rgb(240 207 134 / 24%);
+  --sd-rule: rgb(247 223 162 / 72%);
+  --sd-glow: rgb(240 207 134 / 38%);
+  --sd-glow-soft: rgb(240 207 134 / 16%);
+  background:
+    radial-gradient(
+      ellipse min(960px, 76vw) 780px at 26% 140px,
+      rgb(247 223 162 / 18%),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse min(700px, 56vw) 520px at 90% 0%,
+      rgb(255 248 232 / 9%),
+      transparent 70%
+    ),
+    radial-gradient(ellipse 62% 960px at 96% 56%, rgb(122 232 255 / 4%), transparent 70%),
+    radial-gradient(ellipse 72% 880px at 14% 94%, rgb(240 207 134 / 8%), transparent 72%),
+    linear-gradient(180deg, #060912 0%, #03050b 44%, #020408 100%);
+  background-color: #03050b;
+}
+
+html[data-family="dossier"]
+  main.manager-page.is-sovereign.is-sovereign.is-sovereign
+  #dossier-profile
+  .manager-portrait-column {
+  background:
+    radial-gradient(56% 42% at 50% 0%, rgb(255 248 232 / 24%), transparent 74%),
+    radial-gradient(64% 52% at 50% 34%, rgb(247 223 162 / 22%), transparent 72%),
+    radial-gradient(42% 32% at 20% 18%, rgb(240 207 134 / 16%), transparent 68%),
+    radial-gradient(80% 24% at 50% 100%, rgb(240 207 134 / 46%), transparent 74%),
+    linear-gradient(180deg, #0b0d15 0%, #04060c 60%, #020408 100%);
+  box-shadow:
+    inset 0 24px 64px rgb(0 0 0 / 56%),
+    inset 0 -1px 0 rgb(247 223 162 / 44%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.is-sovereign.is-sovereign.is-sovereign
+  #dossier-profile
+  .dossier-identity
+  .manager-title {
+  width: fit-content;
+  max-width: 100%;
+  padding: 7px 18px 7px 14px;
+  border-left: 2px solid var(--sv-gold-hi);
+  border-radius: 0 3px 3px 0;
+  color: #f9efda;
+  background:
+    linear-gradient(90deg, var(--sv-ivory) 0%, var(--sv-gold) 48%, transparent 88%) 0 0 / 100% 1px
+      no-repeat,
+    linear-gradient(90deg, rgb(240 207 134 / 16%), rgb(240 207 134 / 4%) 62%, transparent 100%);
+  box-shadow: inset 0 -1px 0 rgb(240 207 134 / 18%);
+}
+
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      main.manager-page.is-sovereign.is-sovereign.is-sovereign
+      #dossier-profile
+      .manager-portrait-column {
+      box-shadow:
+        24px 0 72px rgb(0 0 0 / 64%),
+        inset -1px 0 0 rgb(247 223 162 / 34%),
+        inset 0 28px 68px rgb(0 0 0 / 54%);
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.is-sovereign.is-sovereign.is-sovereign
+      #dossier-profile
+      .manager-portrait-column::after {
+      background: linear-gradient(
+        180deg,
+        transparent 2%,
+        rgb(240 207 134 / 46%) 20%,
+        var(--sv-gold-hi) 44%,
+        var(--sv-ivory) 52%,
+        var(--sv-gold) 66%,
+        rgb(240 207 134 / 36%) 86%,
+        transparent 98%
+      );
+      box-shadow: -2px 0 22px rgb(240 207 134 / 38%);
+    }
+  }
+}
+
+/* ================================================================
    Economy rendering: no ghost filters on the type
    ================================================================ */
 html[data-world-effects="economy"]
@@ -1647,6 +1777,24 @@ html[data-world-effects="economy"]
 
   main.manager-page.is-sovereign .ios-slide-open[data-keyboard-focus="true"]:focus-visible {
     outline-color: Highlight;
+  }
+
+  html[data-family="dossier"] main.manager-page.is-sovereign.is-sovereign.is-sovereign {
+    background: Canvas;
+    background-color: Canvas;
+  }
+
+  main.manager-page.is-sovereign
+    :is(
+      #dossier-profile .sovereign-status,
+      #dossier-profile .manager-quotes,
+      #dossier-profile .manager-facts,
+      #dossier-index .dossier-contents,
+      #dossier-index .manager-copy-section
+    ) {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
   }
 }
 

@@ -136,40 +136,37 @@
   }
 }
 
-/* The card: deck ink, an ice rim, ice ticks over gold, the prism on top
-   (::before) and the outlined 404 (::after, phones). It spans the recovery
-   row too: the three files are its foot. */
+/* The card: museum obsidian glass, beveled ice & gold rims, corner filigree,
+   the prism on top (::before) and the three recovery plaques as its foot. */
 .app-not-found.app-not-found > .app-not-found-plate {
   position: relative;
   z-index: 0;
   grid-column: plate-start / plate-end;
   grid-row: plate-start / recovery-end;
   overflow: hidden;
-  border: 1px solid rgb(122 232 255 / 26%);
+  border: 1px solid rgb(157 234 250 / 38%);
   border-radius: 6px;
   background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 22px 2px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 22px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 22px 2px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 2px 22px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 22px 2px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 22px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 22px 2px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 22px no-repeat,
-    linear-gradient(172deg, rgb(244 251 255 / 6%) 0, rgb(122 232 255 / 3%) 6%, transparent 28%),
-    linear-gradient(
-      112deg,
-      transparent 30%,
-      rgb(255 79 195 / 2.5%) 60%,
-      rgb(122 232 255 / 2.5%) 75%,
-      transparent 90%
-    ),
-    var(--lr-deck);
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 24px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 24px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 24px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 2px 24px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 24px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 24px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 24px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 24px no-repeat,
+    linear-gradient(168deg, rgb(245 253 255 / 9%) 0%, rgb(122 232 255 / 4%) 10%, transparent 34%),
+    radial-gradient(ellipse 75% 48% at 18% 8%, rgb(122 232 255 / 11%), transparent 68%),
+    radial-gradient(ellipse 68% 46% at 86% 92%, rgb(240 207 134 / 9%), transparent 70%),
+    linear-gradient(148deg, #0b1828 0%, #060e19 54%, #091523 100%);
   box-shadow:
-    0 0 0 1px rgb(3 6 12 / 85%),
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    inset 0 0 32px rgb(122 232 255 / 4%),
-    0 40px 100px rgb(0 0 0 / 60%);
+    0 0 0 1px rgb(2 5 11 / 92%),
+    0 0 0 4px rgb(5 11 20 / 78%),
+    0 0 0 5px rgb(240 207 134 / 22%),
+    inset 0 1px 0 rgb(245 253 255 / 28%),
+    inset 0 -1px 0 rgb(240 207 134 / 24%),
+    inset 0 0 40px rgb(122 232 255 / 6%),
+    0 44px 108px rgb(0 0 0 / 78%);
   pointer-events: none;
 }
 
@@ -208,8 +205,8 @@
   margin: 0;
 }
 
-/* The ID-photo slot, empty: lattice, ticks, a streamline of the key
-   visual's light crossing it, and the DW sigil in the picture's place. */
+/* The ID-photo slot: recessed museum specimen well, beveled corner filigree,
+   ambient celestial light, and the DW sigil in the picture's place. */
 .app-not-found.app-not-found > .app-not-found-sigil {
   grid-column: slot-start / slot-end;
   grid-row: slot-start / slot-end;
@@ -221,23 +218,21 @@
   margin-bottom: 22px;
   padding: 18px 22px;
   overflow: hidden;
-  border: 1px dashed rgb(122 232 255 / 30%);
+  border: 1px solid rgb(157 234 250 / 38%);
   border-radius: 4px;
   background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 14px 1px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 14px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 14px 1px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 14px no-repeat,
-    linear-gradient(
-      106deg,
-      transparent 20%,
-      rgb(122 232 255 / 5%) 45%,
-      rgb(255 79 195 / 6%) 55%,
-      rgb(240 207 134 / 4%) 65%,
-      transparent 85%
-    ),
-    radial-gradient(70% 90% at 30% 40%, rgb(122 232 255 / 12%), transparent 70%),
-    #050a12;
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 16px 1.5px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1.5px 16px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 6%) 0%, transparent 42%),
+    radial-gradient(75% 90% at 32% 36%, rgb(122 232 255 / 16%), transparent 70%),
+    radial-gradient(65% 75% at 82% 84%, rgb(240 207 134 / 10%), transparent 72%),
+    #040912;
+  box-shadow:
+    inset 0 3px 16px rgb(0 0 0 / 76%),
+    inset 0 1px 0 rgb(245 253 255 / 16%),
+    inset 0 -1px 0 rgb(240 207 134 / 20%);
 }
 
 /* The sigil: a cut diamond with DW, the World's brand mark. */
@@ -249,9 +244,10 @@
   place-items: center;
   width: 84px;
   height: 84px;
-  color: #dff9ff;
-  background: linear-gradient(135deg, var(--lr-ice), var(--lr-pink) 55%, var(--lr-gold));
+  color: #ebfcff;
+  background: linear-gradient(135deg, var(--lr-ice), var(--lr-pink) 52%, var(--lr-gold));
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  filter: drop-shadow(0 8px 20px rgb(0 0 0 / 72%)) drop-shadow(0 0 14px rgb(122 232 255 / 26%));
   font:
     700 20px / 1 "Oxanium",
     sans-serif;
@@ -457,9 +453,9 @@
   outline-offset: 4px;
 }
 
-/* The recovery files: the card's foot. Three files on the deck, their art
-   under an ink fall, the HUD code above the name, a prism rule on top. The
-   element selector outranks the recovery sheet's own placement. */
+/* The recovery files: the card's museum plaque foot. Three plaques on the
+   deck, their art under a velvet vignette, corner filigree and specular sheen
+   drawn on ::after above the art, the HUD code above the name. */
 .app-not-found.app-not-found > nav.recovery-tiles {
   grid-column: plate-start / plate-end;
   grid-row: plate-end / recovery-end;
@@ -469,9 +465,13 @@
   width: auto;
   box-sizing: border-box;
   margin: 0;
-  padding: 16px var(--lr-pad-x) var(--lr-pad-y);
-  border-top: 1px solid rgb(122 232 255 / 16%);
-  background: linear-gradient(180deg, rgb(122 232 255 / 4%), transparent 60%);
+  padding: 18px var(--lr-pad-x) var(--lr-pad-y);
+  border-top: 1px solid rgb(240 207 134 / 32%);
+  background:
+    linear-gradient(90deg, rgb(122 232 255 / 42%), rgb(240 207 134 / 42%) 52%, transparent) 0 0 /
+      min(260px, 52%) 1px no-repeat,
+    linear-gradient(180deg, rgb(14 30 46 / 52%), rgb(4 9 17 / 36%) 70%);
+  box-shadow: inset 0 1px 0 rgb(245 253 255 / 12%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a {
@@ -479,28 +479,49 @@
   min-height: 112px;
   margin: 0;
   padding: 12px;
-  border: 1px solid rgb(122 232 255 / 26%);
+  border: 1px solid rgb(157 234 250 / 44%);
   border-radius: 3px;
-  background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 12px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
-    #060c15;
+  background: #050c16;
+  box-shadow:
+    0 0 0 1px rgb(2 6 12 / 90%),
+    inset 0 1px 0 rgb(245 253 255 / 26%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%),
+    0 16px 34px -14px rgb(0 0 0 / 82%);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"] {
+  border-color: rgb(240 207 134 / 68%);
+  box-shadow:
+    0 0 0 1px rgb(2 6 12 / 90%),
+    inset 0 1px 0 rgb(255 248 224 / 34%),
+    inset 0 -1px 0 rgb(157 234 250 / 22%),
+    0 16px 34px -14px rgb(0 0 0 / 84%),
+    0 0 22px -8px rgb(240 207 134 / 28%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a > img {
-  opacity: 0.5;
+  opacity: 0.54;
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a::before {
-  background: linear-gradient(180deg, rgb(3 6 12 / 10%), rgb(3 6 12 / 92%) 78%);
+  background: linear-gradient(
+    180deg,
+    rgb(3 8 16 / 26%) 0%,
+    rgb(4 10 20 / 44%) 42%,
+    rgb(3 7 14 / 92%) 78%,
+    #03060c 100%
+  );
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a > small {
   font: 400 12px / 1.55 var(--lr-hud);
   letter-spacing: 0.16em;
   color: var(--lr-ice);
+  text-shadow: 0 1px 6px rgb(0 0 0 / 85%);
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"] > small {
+  color: #f6db9c;
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a[aria-label] > small {
@@ -514,19 +535,30 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-align: center;
-  color: #f2f7fb;
+  color: #f4faff;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 88%);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .app-not-found.app-not-found > nav.recovery-tiles > a:hover {
-    border-color: rgb(122 232 255 / 62%);
-    background:
-      linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1px no-repeat,
-      linear-gradient(var(--lr-ice) 0 0) 0 0 / 1px 12px no-repeat,
-      linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1px no-repeat,
-      linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1px 12px no-repeat,
-      #091423;
-    box-shadow: 0 0 24px rgb(122 232 255 / 14%);
+    border-color: #daf9ff;
+    background: #081322;
+    box-shadow:
+      0 0 0 1px rgb(157 234 250 / 34%),
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      inset 0 -1px 0 rgb(240 207 134 / 28%),
+      0 20px 40px -12px rgb(0 0 0 / 86%),
+      0 0 26px -4px rgb(122 232 255 / 28%);
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"]:hover {
+    border-color: #ffe8b5;
+    box-shadow:
+      0 0 0 1px rgb(240 207 134 / 38%),
+      inset 0 1px 0 rgb(255 250 232 / 38%),
+      inset 0 -1px 0 rgb(157 234 250 / 26%),
+      0 20px 40px -12px rgb(0 0 0 / 86%),
+      0 0 28px -4px rgb(240 207 134 / 36%);
   }
 }
 
@@ -1051,7 +1083,7 @@
     .app-not-found.app-not-found
     > nav.recovery-tiles
     > a:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
   }
 }
 
@@ -1131,6 +1163,7 @@
     color: CanvasText;
     background: Canvas;
     clip-path: none;
+    filter: none;
   }
 
   .app-not-found.app-not-found > .app-not-found-sigil > i::before,

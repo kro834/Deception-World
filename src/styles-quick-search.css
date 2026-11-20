@@ -60,8 +60,9 @@ html[data-family="dream"] dialog.quick-search {
 }
 dialog.quick-search::backdrop {
   background:
-    radial-gradient(ellipse 64% 40% at 50% 0%, rgb(122 232 255 / 0.08), transparent 72%),
-    rgb(2 5 12 / 0.86);
+    radial-gradient(ellipse 68% 42% at 50% 0%, rgb(122 232 255 / 0.12), transparent 72%),
+    radial-gradient(ellipse 50% 36% at 84% 24%, rgb(157 134 255 / 0.08), transparent 70%),
+    rgb(2 5 12 / 0.88);
 }
 dialog.quick-search *,
 dialog.quick-search *::before,
@@ -74,25 +75,35 @@ dialog.quick-search *::after {
   flex-direction: column;
   max-height: min(680px, calc(100dvh - var(--qs-top) - 24px));
   overflow: hidden;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.36);
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.44);
   border-radius: 10px;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 0.04) 0%, transparent 110px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.06) 0%, transparent 110px),
     var(--qs-trail, none) right top / min(54%, 380px) 140px no-repeat,
-    radial-gradient(ellipse 64% 36% at 16% 0%, rgb(var(--qs-ice-rgb) / 0.09), transparent 72%),
-    linear-gradient(165deg, #0a1524 0%, var(--qs-ink) 52%, #050a13 100%);
+    radial-gradient(ellipse 66% 38% at 16% 0%, rgb(var(--qs-ice-rgb) / 0.14), transparent 72%),
+    radial-gradient(ellipse 52% 36% at 92% 100%, rgb(var(--qs-pink-rgb) / 0.08), transparent 70%),
+    linear-gradient(165deg, #0b1829 0%, var(--qs-ink) 52%, #040912 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.2),
-    0 32px 88px rgb(0 0 0 / 0.82),
-    0 10px 28px rgb(0 0 0 / 0.56);
+    inset 0 1px 0 rgb(255 255 255 / 0.28),
+    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.14),
+    0 38px 96px rgb(0 0 0 / 0.88),
+    0 12px 32px rgb(0 0 0 / 0.62),
+    0 0 46px -18px rgb(var(--qs-ice-rgb) / 0.3);
 }
-/* Restrained specular hairline along the top edge. */
+/* Luminous prismatic specular hairline along the top edge. */
 .quick-search-panel::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgb(var(--qs-ice-rgb) / 0.45), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(var(--qs-ice-rgb) / 0.78) 26%,
+    rgb(255 255 255 / 0.86) 50%,
+    rgb(var(--qs-pink-rgb) / 0.62) 76%,
+    transparent 100%
+  );
   z-index: 2;
   pointer-events: none;
 }
@@ -125,13 +136,18 @@ dialog.quick-search *::after {
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.44);
+  border: 1px solid rgb(228 248 255 / 0.68);
   border-radius: 6px;
   background:
-    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.14), transparent 70%),
-    var(--qs-ink-2);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16);
-  color: var(--qs-ice);
+    radial-gradient(circle at 84% 16%, rgb(255 255 255 / 0.58), rgb(var(--qs-ice-rgb) / 0.26) 34%, transparent 66%),
+    radial-gradient(circle at 16% 86%, rgb(var(--qs-pink-rgb) / 0.22), transparent 62%),
+    linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.22) 0%, var(--qs-ink-2) 64%, rgb(var(--qs-ice-rgb) / 0.16) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.72),
+    inset 0 0 12px rgb(var(--qs-ice-rgb) / 0.2),
+    0 0 14px -4px rgb(var(--qs-ice-rgb) / 0.42);
+  color: #eefaff;
+  text-shadow: 0 0 10px rgb(var(--qs-ice-rgb) / 0.58);
   font-family: var(--qs-hud);
   font-size: 12px;
   font-weight: 400;
@@ -198,29 +214,38 @@ dialog.quick-search kbd {
   min-height: 62px;
   margin: 12px 16px 14px;
   padding: 2px 14px 2px 16px;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.46);
-  border-radius: 6px;
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.5);
+  border-radius: 7px;
   color: var(--qs-ice);
   background:
-    linear-gradient(180deg, rgb(0 0 0 / 0.42) 0%, transparent 14px),
-    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.09) 0%, transparent 72%),
-    #06111d;
+    linear-gradient(180deg, rgb(0 0 0 / 0.46) 0%, transparent 16px),
+    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.12) 0%, rgb(157 134 255 / 0.04) 48%, transparent 80%),
+    #05101c;
   box-shadow:
-    inset 0 2px 6px rgb(0 0 0 / 0.56),
-    inset 0 1px 0 rgb(255 255 255 / 0.1),
-    0 10px 26px -14px rgb(0 0 0 / 0.72);
+    inset 0 2px 8px rgb(0 0 0 / 0.62),
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 10px 26px -14px rgb(0 0 0 / 0.76);
 }
 .quick-search-field:focus-within {
   border-color: var(--qs-ice);
+  background:
+    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.08) 0%, transparent 24px),
+    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.16) 0%, rgb(157 134 255 / 0.08) 56%, rgb(var(--qs-pink-rgb) / 0.06) 100%),
+    #061322;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.2),
-    inset 0 2px 5px rgb(0 0 0 / 0.45),
-    0 0 0 2px rgb(var(--qs-ice-rgb) / 0.26);
+    inset 0 1px 0 rgb(255 255 255 / 0.34),
+    inset 0 2px 6px rgb(0 0 0 / 0.42),
+    0 0 0 3px rgb(var(--qs-ice-rgb) / 0.24),
+    0 0 28px -4px rgb(var(--qs-ice-rgb) / 0.48),
+    0 0 46px -14px rgb(var(--qs-pink-rgb) / 0.28);
 }
 .quick-search-field svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+}
+.quick-search-field:focus-within svg {
+  filter: drop-shadow(0 0 8px rgb(var(--qs-ice-rgb) / 0.75));
 }
 .quick-search-field input {
   flex: 1;
@@ -308,30 +333,65 @@ dialog.quick-search .quick-search-clear {
 }
 @media (hover: hover) and (pointer: fine) {
   .quick-search-option:hover {
-    background: linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.12) 0%, transparent 100%);
+    background: linear-gradient(
+      90deg,
+      rgb(var(--qs-ice-rgb) / 0.16) 0%,
+      rgb(157 134 255 / 0.07) 58%,
+      transparent 100%
+    );
     box-shadow:
-      inset 3px 0 0 rgb(var(--qs-ice-rgb) / 0.7),
-      inset 0 1px 0 rgb(255 255 255 / 0.08);
+      inset 3px 0 0 rgb(var(--qs-ice-rgb) / 0.88),
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.28),
+      0 8px 20px -10px rgb(0 0 0 / 0.62);
+  }
+  .quick-search-option:hover .quick-search-art {
+    border-color: rgb(var(--qs-ice-rgb) / 0.82);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.34),
+      0 0 16px rgb(var(--qs-ice-rgb) / 0.38);
+  }
+  .quick-search-option.is-link:hover {
+    border-color: rgb(var(--qs-ice-rgb) / 0.68);
+    background:
+      linear-gradient(128deg, rgb(255 255 255 / 0.1) 0%, transparent 46%),
+      linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.18), rgb(157 134 255 / 0.08) 70%),
+      var(--qs-ink-2);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 10px 22px -10px rgb(0 0 0 / 0.7),
+      0 0 22px -8px rgb(var(--qs-ice-rgb) / 0.4);
+  }
+  .quick-search-option.is-all:hover {
+    border-color: var(--qs-ice);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 0 22px -6px rgb(var(--qs-ice-rgb) / 0.42);
   }
   .quick-search-close:hover {
-    border-color: rgb(var(--qs-ice-rgb) / 0.72);
+    border-color: rgb(var(--qs-ice-rgb) / 0.8);
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.12), transparent 60%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.15), transparent 60%),
       var(--qs-ink-2);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 0 16px -4px rgb(var(--qs-ice-rgb) / 0.42);
   }
 }
 /* Selection row: crisp 3px ice beam + glass bevel */
 .quick-search-option[data-active="true"] {
   background: linear-gradient(
     90deg,
-    rgb(var(--qs-ice-rgb) / 0.2) 0%,
+    rgb(var(--qs-ice-rgb) / 0.24) 0%,
+    rgb(157 134 255 / 0.1) 56%,
     rgb(var(--qs-ice-rgb) / 0.04) 100%
   );
   box-shadow:
     inset 3px 0 0 var(--qs-ice),
-    inset 0 1px 0 rgb(255 255 255 / 0.16),
-    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.38),
-    0 6px 18px -6px rgb(0 0 0 / 0.55);
+    inset 0 1px 0 rgb(255 255 255 / 0.26),
+    inset 0 0 0 1px rgb(var(--qs-ice-rgb) / 0.48),
+    0 10px 24px -8px rgb(0 0 0 / 0.66),
+    0 0 22px -10px rgb(var(--qs-ice-rgb) / 0.36);
   outline: 0;
 }
 .quick-search-option.is-record {
@@ -439,12 +499,14 @@ dialog.quick-search .quick-search-clear {
   gap: 10px;
   min-height: 58px;
   padding: 10px 14px;
-  border: 1px solid rgb(var(--qs-ice-rgb) / 0.24);
+  border: 1px solid rgb(var(--qs-ice-rgb) / 0.3);
   background:
-    linear-gradient(128deg, rgb(255 255 255 / 0.06) 0%, transparent 44%),
-    linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.06), transparent 65%),
+    linear-gradient(128deg, rgb(255 255 255 / 0.08) 0%, transparent 46%),
+    linear-gradient(145deg, rgb(var(--qs-ice-rgb) / 0.09), transparent 66%),
     var(--qs-ink-2);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 8px 18px -10px rgb(0 0 0 / 0.58);
 }
 .quick-search-option.is-link .quick-search-option-place {
   flex: none;

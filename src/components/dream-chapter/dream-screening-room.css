@@ -45,19 +45,19 @@
   box-sizing: border-box;
   /* 映写室シアター頭上投影コーン光＆深緋ベルベット袖幕（Overhead 35mm booth cone & velvet drapes） */
   background:
-    radial-gradient(circle at 50% 0%, rgb(255 246 218 / 34%) 0 11px, transparent 62px),
+    radial-gradient(circle at 50% 0%, rgb(255 248 224 / 42%) 0 12px, transparent 68px),
     conic-gradient(
       from 154deg at 50% -2%,
       transparent 0deg,
-      rgb(246 214 156 / 11%) 16deg,
-      rgb(255 241 204 / 23%) 26deg,
-      rgb(246 214 156 / 11%) 36deg,
+      rgb(248 216 156 / 14%) 16deg,
+      rgb(255 243 208 / 28%) 26deg,
+      rgb(248 216 156 / 14%) 36deg,
       transparent 52deg
     ),
-    radial-gradient(68% 54% at 50% 6%, rgb(245 226 178 / 17%), transparent 76%),
-    radial-gradient(56% 42% at 50% 94%, rgb(204 73 59 / 13%), transparent 72%),
-    linear-gradient(90deg, rgb(56 18 30 / 42%), transparent 15% 85%, rgb(56 18 30 / 42%)),
-    #0c0811;
+    radial-gradient(70% 56% at 50% 6%, rgb(248 226 176 / 22%), transparent 76%),
+    radial-gradient(58% 44% at 50% 94%, rgb(212 76 60 / 18%), transparent 72%),
+    linear-gradient(90deg, rgb(68 20 34 / 52%), transparent 16% 84%, rgb(68 20 34 / 52%)),
+    #0b0711;
 }
 
 .dream-screening-header,
@@ -72,12 +72,14 @@
 .dream-screening-header {
   min-height: 60px;
   padding: 4px clamp(4px, 2vw, 28px) 8px;
-  border-bottom: 3px double rgb(214 176 104 / 54%);
+  border-bottom: 3px double rgb(228 190 114 / 64%);
   background:
-    linear-gradient(var(--screen-gilt-bright) 0 0) 8px 4px / 18px 1px no-repeat,
-    linear-gradient(var(--screen-gilt-bright) 0 0) calc(100% - 8px) 4px / 18px 1px no-repeat,
-    radial-gradient(52% 92% at 50% 0%, rgb(236 198 140 / 15%), transparent 74%),
-    linear-gradient(180deg, rgb(245 226 180 / 8%), transparent);
+    linear-gradient(var(--screen-gilt-bright) 0 0) 8px 4px / 22px 1.5px no-repeat,
+    linear-gradient(var(--screen-gilt-bright) 0 0) 8px 4px / 1.5px 14px no-repeat,
+    linear-gradient(var(--screen-gilt-bright) 0 0) calc(100% - 8px) 4px / 22px 1.5px no-repeat,
+    linear-gradient(var(--screen-gilt-bright) 0 0) calc(100% - 8px) 4px / 1.5px 14px no-repeat,
+    radial-gradient(56% 96% at 50% 0%, rgb(244 206 142 / 20%), transparent 74%),
+    linear-gradient(180deg, rgb(248 228 182 / 11%), transparent);
 }
 
 .dream-screening-title {
@@ -220,7 +222,7 @@
   height: 52px;
   font: 24px/1 var(--screen-latin);
 }
-/* プロセニアム暗色マット＋端正な一重金枠 */
+/* プロセニアム暗色マット＋金蒔絵二重額縁 */
 .dream-screening-picture {
   display: grid;
   grid-template: minmax(0, 1fr) / minmax(0, 1fr);
@@ -228,13 +230,23 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid rgb(228 190 116 / 46%);
+  border: 1px solid rgb(236 198 124 / 62%);
+  outline: 1px solid rgb(228 190 116 / 26%);
+  outline-offset: -5px;
   background:
-    radial-gradient(64% 62% at 50% 45%, rgb(246 226 178 / 10%), transparent 76%),
-    linear-gradient(180deg, #090611 0%, #050308 100%);
+    linear-gradient(135deg, #fae2a8, #b28742) 0 0 / 26px 2px no-repeat,
+    linear-gradient(135deg, #fae2a8, #b28742) 0 0 / 2px 26px no-repeat,
+    linear-gradient(225deg, #fae2a8, #b28742) 100% 0 / 26px 2px no-repeat,
+    linear-gradient(225deg, #fae2a8, #b28742) 100% 0 / 2px 26px no-repeat,
+    linear-gradient(45deg, #efd08e, #966e32) 0 100% / 26px 2px no-repeat,
+    linear-gradient(45deg, #efd08e, #966e32) 0 100% / 2px 26px no-repeat,
+    linear-gradient(315deg, #efd08e, #966e32) 100% 100% / 26px 2px no-repeat,
+    linear-gradient(315deg, #efd08e, #966e32) 100% 100% / 2px 26px no-repeat,
+    radial-gradient(66% 64% at 50% 45%, rgb(252 228 176 / 14%), transparent 76%),
+    linear-gradient(180deg, #0b0714 0%, #050308 100%);
   box-shadow:
-    inset 0 1px 0 rgb(248 229 182 / 14%),
-    0 22px 52px rgb(0 0 0 / 60%);
+    inset 0 1px 0 rgb(255 240 202 / 22%),
+    0 26px 60px rgb(0 0 0 / 68%);
 }
 .dream-screening-picture > img {
   display: block;
@@ -554,6 +566,7 @@
   .dream-screening-filmstrip {
     color: CanvasText;
     background: Canvas;
+    outline: 0;
     box-shadow: none;
   }
   .dream-screening-dialog button {

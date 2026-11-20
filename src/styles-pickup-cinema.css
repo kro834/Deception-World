@@ -122,11 +122,21 @@ html[data-mode="world"] .rider-nightmare-dialog.rider-nightmare-dialog::backdrop
 html body #episode-pickup-dialog::backdrop,
 html body #world-column-pickup::backdrop {
   background:
-    radial-gradient(ellipse 70% 46% at 50% 0%, rgb(122 232 255 / 7%), transparent 72%),
-    rgb(2 4 10 / 88%);
+    radial-gradient(ellipse 72% 48% at 50% 10%, rgb(122 232 255 / 14%), transparent 70%),
+    radial-gradient(ellipse 54% 42% at 15% 82%, rgb(240 207 134 / 8%), transparent 72%),
+    radial-gradient(ellipse 56% 42% at 86% 78%, rgb(255 92 200 / 9%), transparent 72%),
+    rgb(2 4 10 / 91%);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   animation: none;
+}
+
+html[data-mode="world"] .rider-nightmare-dialog.rider-nightmare-dialog::backdrop {
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 10%, rgb(255 92 200 / 16%), transparent 70%),
+    radial-gradient(ellipse 54% 42% at 18% 82%, rgb(122 232 255 / 9%), transparent 72%),
+    radial-gradient(ellipse 54% 42% at 84% 78%, rgb(240 207 134 / 7%), transparent 72%),
+    rgb(3 3 9 / 92%);
 }
 
 html[data-mode="world"]
@@ -145,7 +155,7 @@ html body #world-column-pickup {
   position: fixed;
   overflow: hidden;
   box-sizing: border-box;
-  border: 1px solid var(--pc-line-strong);
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 44%, transparent);
   border-radius: 6px;
   color: var(--pc-text);
   background:
@@ -158,20 +168,21 @@ html body #world-column-pickup {
     linear-gradient(var(--pc-gold) 0 0) right var(--pc-inset) bottom var(--pc-inset) / 2px
       var(--pc-arm) no-repeat,
     radial-gradient(
-      ellipse 72% 42% at 88% 0%,
-      color-mix(in srgb, var(--pc-accent) 13%, transparent),
+      ellipse 72% 44% at 88% 0%,
+      color-mix(in srgb, var(--pc-accent) 18%, transparent),
       transparent 72%
     ),
-    radial-gradient(ellipse 60% 36% at 0% 100%, rgb(240 207 134 / 5%), transparent 72%),
+    radial-gradient(ellipse 62% 38% at 0% 100%, rgb(240 207 134 / 9%), transparent 72%),
     linear-gradient(rgb(122 232 255 / 3.5%) 1px, transparent 1px) 0 0 / 96px 96px,
     linear-gradient(90deg, rgb(122 232 255 / 3.5%) 1px, transparent 1px) 0 0 / 96px 96px,
     var(--pc-ink);
   box-shadow:
-    0 0 0 1px rgb(0 0 0 / 80%),
-    0 0 0 2px rgb(122 232 255 / 14%),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    inset 0 0 40px rgb(122 232 255 / 3%),
-    0 40px 120px rgb(0 0 0 / 70%);
+    0 0 0 1px rgb(0 0 0 / 88%),
+    0 0 0 2px color-mix(in srgb, var(--pc-lock) 22%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 56px color-mix(in srgb, var(--pc-accent) 6%, transparent),
+    0 40px 120px rgb(0 0 0 / 84%),
+    0 0 60px -16px color-mix(in srgb, var(--pc-accent) 26%, transparent);
   timeline-scope: --pc-record;
   animation: none;
   transform: none;
@@ -210,13 +221,15 @@ html body #world-column-pickup {
   max-height: min(calc(100dvh - 48px), 940px) !important;
   margin: auto !important;
   padding: 0 !important;
-  border: 1px solid var(--pc-line-strong) !important;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 44%, transparent) !important;
   background-color: var(--pc-ink) !important;
   box-shadow:
-    0 0 0 1px rgb(0 0 0 / 80%),
-    0 0 0 2px rgb(122 232 255 / 14%),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 40px 120px rgb(0 0 0 / 70%) !important;
+    0 0 0 1px rgb(0 0 0 / 88%),
+    0 0 0 2px rgb(122 232 255 / 22%),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 56px rgb(122 232 255 / 6%),
+    0 40px 120px rgb(0 0 0 / 84%),
+    0 0 60px -16px rgb(122 232 255 / 24%) !important;
 }
 
 html body #world-column-pickup[open] {
@@ -226,8 +239,10 @@ html body #world-column-pickup[open] {
 
 html body #world-column-pickup::backdrop {
   background:
-    radial-gradient(ellipse 70% 46% at 50% 0%, rgb(122 232 255 / 7%), transparent 72%),
-    rgb(2 4 10 / 88%);
+    radial-gradient(ellipse 72% 48% at 50% 10%, rgb(122 232 255 / 14%), transparent 70%),
+    radial-gradient(ellipse 54% 42% at 15% 82%, rgb(240 207 134 / 8%), transparent 72%),
+    radial-gradient(ellipse 56% 42% at 86% 78%, rgb(255 92 200 / 9%), transparent 72%),
+    rgb(2 4 10 / 91%);
 }
 
 /* The world column's legacy ground layer (!important) is its colour only;
@@ -236,8 +251,8 @@ html body #world-column-pickup {
   background-image:
     linear-gradient(var(--pc-gold) 0 0), linear-gradient(var(--pc-gold) 0 0),
     linear-gradient(var(--pc-gold) 0 0), linear-gradient(var(--pc-gold) 0 0),
-    radial-gradient(ellipse 72% 42% at 88% 0%, rgb(122 232 255 / 12%), transparent 72%),
-    radial-gradient(ellipse 60% 36% at 0% 100%, rgb(240 207 134 / 5%), transparent 72%),
+    radial-gradient(ellipse 72% 44% at 88% 0%, rgb(122 232 255 / 17%), transparent 72%),
+    radial-gradient(ellipse 62% 38% at 0% 100%, rgb(240 207 134 / 9%), transparent 72%),
     linear-gradient(rgb(122 232 255 / 3.5%) 1px, transparent 1px),
     linear-gradient(90deg, rgb(122 232 255 / 3.5%) 1px, transparent 1px) !important;
   background-position:
@@ -323,12 +338,15 @@ html body #world-column-pickup::before {
     linear-gradient(transparent 0 0) left calc(var(--pc-pad) + 12px) bottom 0 / 0 0 no-repeat,
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--pc-accent) 10%, transparent),
-      transparent 38%,
-      transparent 72%,
-      rgb(255 92 200 / 5%)
+      color-mix(in srgb, var(--pc-accent) 15%, transparent),
+      rgb(122 232 255 / 4%) 36%,
+      transparent 70%,
+      rgb(255 92 200 / 8%)
     ),
-    rgb(3 7 13 / 96%);
+    rgb(4 9 17 / 97%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 10px 28px -8px rgb(0 0 0 / 72%);
   pointer-events: none;
 }
 
@@ -416,18 +434,23 @@ html body #world-column-pickup .world-column-dialog-close {
   margin: 0;
   padding: 0 6px 0 12px;
   overflow: visible;
-  border: 1px solid var(--pc-line-strong);
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 46%, transparent);
   border-radius: 4px;
   clip-path: none;
   color: var(--pc-text);
   background:
-    linear-gradient(180deg, rgb(122 232 255 / 8%), transparent 70%), var(--pc-deck) !important;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%) !important;
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-lock) 16%, transparent), transparent 64%),
+    var(--pc-deck) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 0 1px color-mix(in srgb, var(--pc-lock) 12%, transparent),
+    0 8px 20px -4px rgb(0 0 0 / 56%) !important;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   transition:
     border-color 160ms ease,
-    background-color 160ms ease;
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 /* The label is the plate's name on screen; the control keeps its 閉じる. */
@@ -476,6 +499,9 @@ html body #world-column-pickup .world-column-dialog-close > i {
   border-radius: 2px;
   color: #03141c;
   background: var(--pc-lock);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 45%),
+    0 0 14px -2px color-mix(in srgb, var(--pc-lock) 55%, transparent);
   font-style: normal;
   line-height: 0;
 }
@@ -498,6 +524,10 @@ html[data-mode="world"]
   html body #episode-pickup-dialog .episode-pickup-close:hover,
   html body #world-column-pickup .world-column-dialog-close:hover {
     border-color: var(--pc-lock);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      0 8px 24px -4px rgb(0 0 0 / 64%),
+      0 0 20px -4px color-mix(in srgb, var(--pc-lock) 48%, transparent) !important;
   }
 }
 
@@ -660,10 +690,15 @@ html[data-mode="world"]
   display: inline-block;
   max-width: 100%;
   margin: 14px 0 0;
-  padding: 5px 10px 5px 12px;
-  border-left: 2px solid var(--pc-gold);
+  padding: 5px 12px 5px 13px;
+  border: 1px solid rgb(240 207 134 / 36%);
+  border-left: 3px solid var(--pc-gold);
+  border-radius: 0 3px 3px 0;
   color: #f7e6bd;
-  background: linear-gradient(90deg, rgb(240 207 134 / 14%), rgb(240 207 134 / 2%));
+  background: linear-gradient(90deg, rgb(240 207 134 / 18%), rgb(240 207 134 / 4%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 204 / 22%),
+    0 6px 16px -6px rgb(0 0 0 / 54%);
   font-family: var(--pc-mono);
   font-size: 13px;
   font-style: normal;
@@ -713,12 +748,16 @@ html[data-mode="world"]
   max-width: 100%;
   margin: 0;
   padding: 7px 11px 7px 10px;
-  border: 1px solid var(--pc-edge);
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 32%, var(--pc-edge));
   border-left: 2px solid var(--pc-lock);
-  border-radius: 2px;
+  border-radius: 3px;
   color: color-mix(in srgb, var(--pc-lock) 70%, #ffffff);
-  background: var(--pc-plate);
-  box-shadow: none;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 10%, transparent), transparent 64%),
+    var(--pc-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 6px 16px -6px rgb(0 0 0 / 56%);
   font-family: var(--pc-mono);
   font-size: 12px;
   font-weight: 600;
@@ -753,22 +792,32 @@ html[data-mode="world"]
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  border: 1px solid var(--pc-edge);
-  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 40%, rgb(122 232 255 / 20%));
+  border-radius: 6px;
   background:
     radial-gradient(
-      ellipse 62% 46% at 50% 16%,
-      color-mix(in srgb, var(--pc-accent) 17%, transparent),
+      ellipse 68% 48% at 50% 14%,
+      color-mix(in srgb, var(--pc-accent) 24%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 70% 34% at 50% 96%,
+      rgb(240 207 134 / 9%),
       transparent 72%
     ),
     linear-gradient(
       180deg,
       transparent 64%,
-      color-mix(in srgb, var(--pc-accent) 7%, transparent) 86%,
-      rgb(0 0 0 / 34%)
+      color-mix(in srgb, var(--pc-accent) 10%, transparent) 86%,
+      rgb(0 0 0 / 42%)
     ),
     #060b14;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 36px color-mix(in srgb, var(--pc-accent) 8%, transparent),
+    0 0 0 1px rgb(0 0 0 / 82%),
+    0 26px 58px -12px rgb(0 0 0 / 84%),
+    0 0 42px -16px color-mix(in srgb, var(--pc-accent) 28%, transparent);
 }
 
 /* The stage's brackets: the accent above, gold at the foot. */
@@ -892,12 +941,16 @@ html[data-mode="world"]
   gap: 10px;
   min-width: 0;
   padding: 12px 14px 14px;
-  border: 1px solid var(--pc-line);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 28%, var(--pc-line));
+  border-radius: 4px;
   background:
-    linear-gradient(90deg, var(--pc-lock), transparent) left bottom / 42% 1px no-repeat,
-    linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 8%, transparent), transparent 64%),
+    linear-gradient(90deg, var(--pc-lock), transparent) left bottom / 48% 1px no-repeat,
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-accent) 12%, transparent), transparent 64%),
     var(--pc-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 0 18px color-mix(in srgb, var(--pc-accent) 5%, transparent),
+    0 12px 26px -8px rgb(0 0 0 / 62%);
 }
 
 html[data-mode="world"]
@@ -979,10 +1032,15 @@ html[data-mode="world"]
   > div {
   min-width: 0;
   padding: 14px 16px 16px 18px;
-  border: 1px solid var(--pc-line);
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 26%, var(--pc-line));
   border-left: 2px solid var(--pc-lock);
-  border-radius: 0 2px 2px 0;
-  background: var(--pc-plate);
+  border-radius: 0 4px 4px 0;
+  background:
+    linear-gradient(155deg, color-mix(in srgb, var(--pc-accent) 7%, transparent), transparent 48%),
+    var(--pc-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 12px 28px -8px rgb(0 0 0 / 60%);
 }
 
 html[data-mode="world"]
@@ -1014,7 +1072,15 @@ html[data-mode="world"]
   > section.is-finisher
   > div {
   border-left-color: var(--pc-gold);
-  background: linear-gradient(90deg, rgb(240 207 134 / 7%), transparent 42%), var(--pc-plate);
+  background:
+    radial-gradient(ellipse 68% 72% at 0% 0%, rgb(240 207 134 / 13%), transparent 68%),
+    linear-gradient(90deg, rgb(240 207 134 / 10%), transparent 48%),
+    var(--pc-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 204 / 24%),
+    inset 0 0 24px rgb(240 207 134 / 6%),
+    0 16px 36px -10px rgb(0 0 0 / 68%),
+    0 0 28px -12px rgb(240 207 134 / 24%);
 }
 
 /* The record's three kinds read by their shapes, not by captions
@@ -1050,10 +1116,13 @@ html[data-mode="world"]
   padding: 16px 18px 17px;
   border-left: 1px solid var(--pc-line);
   border-top: 2px solid var(--pc-lock);
-  border-radius: 0 0 2px 2px;
+  border-radius: 0 0 4px 4px;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--pc-lock) 8%, transparent), transparent 64%),
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-lock) 12%, transparent), transparent 64%),
     var(--pc-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 14px 30px -8px rgb(0 0 0 / 64%);
 }
 
 html[data-mode="world"]
@@ -1116,15 +1185,18 @@ html[data-mode="world"]
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  border: 1px solid var(--pc-line);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 28%, var(--pc-line));
+  border-radius: 4px;
   background:
     radial-gradient(
       ellipse 70% 50% at 50% 14%,
-      color-mix(in srgb, var(--pc-accent) 14%, transparent),
+      color-mix(in srgb, var(--pc-accent) 18%, transparent),
       transparent 72%
     ),
     #060b14;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 14px 30px -8px rgb(0 0 0 / 70%);
 }
 
 html[data-mode="world"]
@@ -1220,13 +1292,16 @@ html[data-mode="world"]
   gap: 14px;
   margin: clamp(32px, 4vw, 48px) 0 0;
   padding: 0 20px;
-  border: 1px solid var(--pc-line-strong);
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 44%, transparent);
   border-radius: 4px;
   color: var(--pc-text);
   background:
     var(--pc-prism) left top / 100% 1px no-repeat,
-    linear-gradient(180deg, rgb(122 232 255 / 7%), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--pc-lock) 14%, transparent), transparent 68%),
     var(--pc-deck);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 12px 26px -6px rgb(0 0 0 / 60%);
   font: 400 12px/1 var(--pc-hud);
   letter-spacing: 0.2em;
 }
@@ -1246,6 +1321,7 @@ html[data-mode="world"]
   border-radius: 2px;
   color: #03141c;
   background: var(--pc-lock);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1256,6 +1332,10 @@ html[data-mode="world"]
     .rider-nightmare-dialog.rider-nightmare-dialog
     .form-pickup-end-close:hover {
     border-color: var(--pc-lock);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 32%),
+      0 14px 30px -6px rgb(0 0 0 / 68%),
+      0 0 22px -4px color-mix(in srgb, var(--pc-lock) 42%, transparent);
   }
 }
 
@@ -1620,11 +1700,18 @@ html[data-mode="world"]
   min-height: 0;
   margin: 0;
   overflow: hidden;
-  border: 1px solid var(--pc-edge);
-  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 40%, rgb(255 92 200 / 24%));
+  border-radius: 6px;
   background:
-    radial-gradient(ellipse 62% 46% at 50% 16%, rgb(255 92 200 / 18%), transparent 72%),
-    linear-gradient(180deg, transparent 64%, rgb(255 92 200 / 7%) 86%, rgb(0 0 0 / 34%)), #0a0610;
+    radial-gradient(ellipse 68% 48% at 50% 14%, rgb(255 92 200 / 24%), transparent 72%),
+    radial-gradient(ellipse 70% 34% at 50% 96%, rgb(240 207 134 / 9%), transparent 72%),
+    linear-gradient(180deg, transparent 64%, rgb(255 92 200 / 10%) 86%, rgb(0 0 0 / 42%)), #0a0610;
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 250 / 22%),
+    inset 0 0 36px rgb(255 92 200 / 8%),
+    0 0 0 1px rgb(0 0 0 / 82%),
+    0 26px 58px -12px rgb(0 0 0 / 84%),
+    0 0 42px -16px rgb(255 92 200 / 28%);
 }
 
 html[data-mode="world"]
@@ -1737,12 +1824,16 @@ html[data-mode="world"]
   gap: 8px;
   min-width: 0;
   padding: 12px 14px 14px;
-  border: 1px solid var(--pc-line);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 28%, var(--pc-line));
+  border-radius: 4px;
   background:
-    linear-gradient(90deg, var(--pc-lock), transparent) left bottom / 42% 1px no-repeat,
-    linear-gradient(180deg, rgb(255 92 200 / 7%), transparent 64%),
-    rgb(14 8 20 / 78%);
+    linear-gradient(90deg, var(--pc-lock), transparent) left bottom / 48% 1px no-repeat,
+    linear-gradient(180deg, rgb(255 92 200 / 12%), transparent 64%),
+    rgb(14 8 20 / 84%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 250 / 18%),
+    inset 0 0 18px rgb(255 92 200 / 6%),
+    0 12px 26px -8px rgb(0 0 0 / 64%);
 }
 
 html[data-mode="world"]
@@ -1853,8 +1944,16 @@ html[data-mode="world"]
   .rider-nightmare-dialog-sections
   section
   > div {
-  padding-left: 16px;
-  border-left: 1px solid var(--pc-edge);
+  padding: 14px 16px 14px 18px;
+  border: 1px solid rgb(255 92 200 / 20%);
+  border-left: 2px solid var(--pc-lock);
+  border-radius: 0 4px 4px 0;
+  background:
+    linear-gradient(155deg, rgb(255 92 200 / 7%), transparent 46%),
+    rgb(12 7 18 / 64%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 250 / 12%),
+    0 12px 28px -10px rgb(0 0 0 / 56%);
 }
 
 html[data-mode="world"]
@@ -2080,13 +2179,19 @@ html body #episode-pickup-dialog .episode-pickup-item {
   min-width: 0;
   container-type: inline-size;
   overflow: hidden;
-  border: 1px solid var(--pc-line);
-  border-radius: 2px;
-  background: var(--pc-plate);
-  box-shadow: none;
+  border: 1px solid rgb(122 232 255 / 32%);
+  border-radius: 4px;
+  background:
+    linear-gradient(155deg, rgb(122 232 255 / 8%), transparent 46%),
+    var(--pc-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 20%),
+    inset 0 0 24px rgb(122 232 255 / 5%),
+    0 18px 40px -10px rgb(0 0 0 / 78%);
   animation: none;
   transition:
     border-color 180ms ease,
+    box-shadow 180ms ease,
     transform 220ms var(--pc-ease);
 }
 
@@ -2169,10 +2274,13 @@ html body #episode-pickup-dialog .episode-pickup-open {
   gap: 10px;
   margin: 6px 0 0;
   padding: 10px 12px;
-  border: 1px solid var(--pc-line-strong);
-  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--pc-lock) 44%, transparent);
+  border-radius: 3px;
   color: var(--pc-lock);
-  background: linear-gradient(180deg, rgb(122 232 255 / 8%), transparent 70%), var(--pc-deck);
+  background: linear-gradient(180deg, rgb(122 232 255 / 14%), transparent 70%), var(--pc-deck);
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 20%),
+    0 6px 14px -4px rgb(0 0 0 / 56%);
   font: 400 12px/1.2 var(--pc-hud);
   letter-spacing: 0.1em;
   white-space: nowrap;
@@ -2181,13 +2289,19 @@ html body #episode-pickup-dialog .episode-pickup-open {
 /* Hover lights the file; it lifts only where motion is welcome. */
 @media (hover: hover) and (pointer: fine) {
   html body #episode-pickup-dialog .episode-pickup-item:hover {
-    border-color: var(--pc-line-strong);
-    box-shadow: none;
+    border-color: rgb(156 238 255 / 72%);
+    box-shadow:
+      inset 0 1px 0 rgb(242 252 255 / 32%),
+      0 24px 48px -10px rgb(0 0 0 / 86%),
+      0 0 32px -10px rgb(122 232 255 / 34%);
     transform: none;
   }
 
   html body #episode-pickup-dialog .episode-pickup-item:hover .episode-pickup-open {
     border-color: var(--pc-lock);
+    box-shadow:
+      inset 0 1px 0 rgb(242 252 255 / 34%),
+      0 0 18px -4px rgb(122 232 255 / 44%);
   }
 }
 
@@ -2410,8 +2524,17 @@ html body #world-column-pickup .world-column-dialog-copy h3 {
 }
 
 html body #world-column-pickup .world-column-dialog-copy > div {
-  padding-left: 16px;
-  border-left: 1px solid var(--pc-line-strong);
+  box-sizing: border-box;
+  padding: clamp(14px, 2vw, 22px) clamp(16px, 2.2vw, 24px);
+  border: 1px solid rgb(122 232 255 / 16%);
+  border-left: 2px solid var(--pc-lock);
+  border-radius: 0 4px 4px 0;
+  background:
+    linear-gradient(155deg, rgb(122 232 255 / 6%), transparent 46%),
+    rgb(8 16 28 / 72%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 16px 36px -12px rgb(0 0 0 / 56%);
 }
 
 html body #world-column-pickup .world-column-dialog-copy > div p {
@@ -2891,6 +3014,46 @@ html[data-world-effects="economy"] body #world-column-pickup #world-column-picku
   html body #episode-pickup-dialog :is(.episode-pickup-close, .episode-pickup-item):focus-visible,
   html body #world-column-pickup .world-column-dialog-close:focus-visible {
     outline-color: Highlight !important;
+  }
+
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog),
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)::before,
+  html[data-mode="world"]
+    .form-pickup-dialog.form-pickup-dialog:not(.is-rexonance-dialog, .fst-pickup-dialog)
+    :is(
+      .form-pickup-close,
+      .form-pickup-end-close,
+      .form-pickup-heading > em,
+      .form-pickup-heading .rider-call b,
+      .form-pickup-layout > figure,
+      .form-pickup-stats > div,
+      .form-pickup-sections > section > div,
+      .form-pickup-gallery > figure
+    ),
+  html[data-mode="world"] .rider-nightmare-dialog.rider-nightmare-dialog,
+  html[data-mode="world"] .rider-nightmare-dialog.rider-nightmare-dialog::before,
+  html[data-mode="world"]
+    .rider-nightmare-dialog.rider-nightmare-dialog
+    :is(
+      .rider-nightmare-dialog-close,
+      .form-pickup-end-close,
+      .rider-nightmare-dialog-layout > figure,
+      .rider-nightmare-dialog-record > dl > div
+    ),
+  html body #episode-pickup-dialog,
+  html body #episode-pickup-dialog::before,
+  html body #episode-pickup-dialog :is(.episode-pickup-close, .episode-pickup-item, .episode-pickup-open),
+  html body #world-column-pickup,
+  html body #world-column-pickup::before,
+  html body #world-column-pickup :is(.world-column-dialog-close, .world-column-dialog-copy > div) {
+    box-shadow: none !important;
+  }
+
+  html body #world-column-pickup .world-column-dialog-copy > div {
+    border-color: CanvasText;
+    background: Canvas;
   }
 }
 

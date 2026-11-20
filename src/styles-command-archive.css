@@ -1,55 +1,139 @@
 /* Route-owned command surfaces; the shared menu and 3D scene keep their owners. */
 main.command-archive[data-archive-kind],
 main.command-exhibition {
-  --command-paper: #edf5fa;
-  --command-muted: #a9becd;
-  --command-edge: #91bbd64d;
+  --command-paper: #f0f7fc;
+  --command-muted: #b2c6d5;
+  --command-edge: rgb(162 208 236 / 36%);
   --command-key: #9be9fa;
-  --command-specular: rgba(225, 246, 255, 0.42);
-  --command-rim: rgba(155, 233, 250, 0.35);
-  --command-metal: linear-gradient(180deg, #192a39, #0d1722 55%, #0b131e);
+  --command-specular: rgb(236 250 255 / 48%);
+  --command-rim: rgb(155 233 250 / 40%);
+  --command-metal:
+    radial-gradient(ellipse 78% 54% at 50% 0%, rgb(155 233 250 / 10%), transparent 70%),
+    linear-gradient(180deg, rgb(255 253 248 / 5%), transparent 38%),
+    linear-gradient(180deg, #1b2d3e 0%, #0e1926 54%, #09111b 100%);
   color-scheme: dark;
 }
 main.command-archive[data-archive-kind] {
-  --fa-ink: #060c15;
+  --fa-ink: #040912;
   --fa-text: var(--command-paper);
-  --fa-text-2: #b9cddd;
-  --fa-text-3: #9fb6c8;
+  --fa-text-2: #c0d4e3;
+  --fa-text-3: #a4bccf;
   --fa-accent: var(--command-key);
-  --fa-lock: #c8f7ff;
+  --fa-lock: #d4f9ff;
   --archive-cyan: #9be9fa;
-  --archive-violet: #bccde9;
-  background: #060c15;
+  --archive-violet: #c2b0ff;
+  background: #040912;
 }
 html[data-family] body main.command-archive[data-archive-kind] > header.form-archive-toolbar.form-archive-toolbar {
-  border-bottom: 1px solid var(--command-edge);
-  background: linear-gradient(180deg, #101c27, #081018 70%);
-  box-shadow: inset 0 1px #e1f6ff1f, 0 8px 24px #0006;
+  border-bottom: 1px solid rgb(162 214 242 / 34%);
+  background:
+    radial-gradient(ellipse 56% 110% at 50% 0%, rgb(155 233 250 / 14%), transparent 70%),
+    radial-gradient(ellipse 42% 90% at 84% 100%, rgb(240 207 134 / 8%), transparent 70%),
+    linear-gradient(180deg, #142332 0%, #0a131e 58%, #060c15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 26%),
+    inset 0 -1px 0 rgb(155 233 250 / 14%),
+    0 12px 32px rgb(0 0 0 / 56%);
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
-  border-color: var(--command-edge);
-  background: rgb(6 12 20 / 0.94) !important;
-  box-shadow: inset 0 1px 0 rgb(155 233 250 / 0.12), 0 4px 16px rgb(0 0 0 / 0.45) !important;
+  border: 1px solid rgb(164 218 244 / 38%);
+  border-top-color: rgb(226 246 255 / 50%);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(155 233 250 / 10%), transparent 72%),
+    linear-gradient(180deg, rgb(18 31 45 / 0.96), rgb(6 12 20 / 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 22%),
+    inset 0 3px 10px rgb(0 0 0 / 0.58),
+    0 8px 22px rgb(0 0 0 / 0.52) !important;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
-  border-color: #a4e4f478;
-  background: linear-gradient(180deg, rgb(155 233 250 / 0.18), transparent 70%), #142838 !important;
-  box-shadow: inset 0 1px 0 rgb(236 251 255 / 0.35), inset 0 0 10px rgb(155 233 250 / 0.15), 0 2px 8px rgb(0 0 0 / 0.4) !important;
+  border: 1px solid rgb(182 238 255 / 62%);
+  border-top-color: rgb(242 252 255 / 82%);
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 0%, rgb(155 233 250 / 28%), transparent 72%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 52%),
+    linear-gradient(180deg, #1c364b 0%, #102130 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(246 253 255 / 0.54),
+    inset 0 0 14px rgb(155 233 250 / 0.2),
+    0 4px 14px rgb(0 0 0 / 0.5) !important;
+}
+html[data-family] body main.command-archive[data-archive-kind="realm"] > header.form-archive-toolbar.form-archive-toolbar {
+  border-bottom-color: rgb(204 186 255 / 40%);
+  background:
+    radial-gradient(ellipse 56% 110% at 50% 0%, rgb(184 162 255 / 16%), transparent 70%),
+    radial-gradient(ellipse 42% 90% at 84% 100%, rgb(245 213 139 / 11%), transparent 70%),
+    linear-gradient(180deg, #1e1838 0%, #110e24 58%, #0a0816 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(246 238 255 / 26%),
+    inset 0 -1px 0 rgb(245 213 139 / 16%),
+    0 12px 32px rgb(0 0 0 / 58%);
+}
+html body main.command-archive[data-archive-kind="realm"] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
+  border-color: rgb(204 186 255 / 40%);
+  border-top-color: rgb(242 228 255 / 52%);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(184 162 255 / 12%), transparent 72%),
+    linear-gradient(180deg, rgb(24 19 44 / 0.96), rgb(9 7 20 / 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(246 238 255 / 20%),
+    inset 0 3px 10px rgb(0 0 0 / 0.62),
+    0 8px 22px rgb(0 0 0 / 0.54) !important;
+}
+html body main.command-archive[data-archive-kind="realm"] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
+  border-color: rgb(245 213 139 / 66%);
+  border-top-color: rgb(255 240 200 / 84%);
+  background:
+    radial-gradient(ellipse 85% 75% at 50% 0%, rgb(196 176 255 / 32%), transparent 72%),
+    linear-gradient(135deg, rgb(245 213 139 / 0.14), transparent 62%),
+    linear-gradient(180deg, #2d2652 0%, #191533 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(252 246 255 / 0.52),
+    inset 0 -2px 0 rgb(245 213 139 / 0.64),
+    0 4px 14px rgb(0 0 0 / 0.54) !important;
+}
+html body main.command-archive[data-archive-kind] .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  border: 1px solid rgb(164 218 244 / 42%);
+  border-top-color: rgb(228 247 255 / 58%);
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(155 233 250 / 14%), transparent 72%),
+    linear-gradient(180deg, rgb(18 31 45 / 0.95), rgb(7 13 22 / 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 0.26),
+    inset 0 0 0 1px rgb(155 233 250 / 0.1),
+    0 6px 16px rgb(0 0 0 / 0.44) !important;
+}
+html body main.command-archive[data-archive-kind="realm"] .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  border-color: rgb(206 188 255 / 46%);
+  border-top-color: rgb(245 213 139 / 60%);
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(184 162 255 / 16%), transparent 72%),
+    linear-gradient(180deg, rgb(26 21 48 / 0.95), rgb(10 8 22 / 0.98)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(248 240 255 / 0.26),
+    inset 0 0 0 1px rgb(245 213 139 / 0.14),
+    0 6px 16px rgb(0 0 0 / 0.48) !important;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > button[role="tab"] {
   min-width: 80px;
   font-size: 14px;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > button[aria-selected="true"] b {
-  color: #e4fbff;
+  color: #ecfaff;
+}
+html body main.command-archive[data-archive-kind="realm"] #archive-switcher.form-archive-switcher > button[aria-selected="true"] b {
+  color: #f8f2ff;
 }
 main.command-exhibition.exhibition-room-curated {
   --room-ink: var(--command-paper);
   --room-muted: var(--command-muted);
   --room-rule: var(--command-edge);
-  --room-paper: #060b12;
+  --room-paper: #050a11;
   padding-top: calc(clamp(28px, 4vw, 60px) + env(safe-area-inset-top, 0px));
-  background: radial-gradient(ellipse at 90% 0, #23658a25, transparent 45rem), #060b12;
+  background:
+    radial-gradient(ellipse 72% 38% at 50% -4%, rgb(242 218 172 / 10%), transparent 66%),
+    radial-gradient(ellipse at 88% 2%, rgb(44 128 174 / 20%), transparent 46rem),
+    #050a11;
   color: var(--room-ink);
 }
 main.command-exhibition .exhibition-room-heading {
@@ -179,35 +263,62 @@ main.command-exhibition .exhibition-room-adjacent {
   padding-block: 16px;
 }
 main.command-exhibition .exhibition-room-adjacent button {
-  padding: 14px 18px;
-  border: 1px solid var(--room-rule);
+  padding: 15px 20px;
+  border: 1px solid rgb(164 214 240 / 34%);
+  border-top-color: rgb(228 246 255 / 48%);
+  border-radius: 4px;
   background: var(--command-metal);
-  box-shadow: inset 0 1px #ccecff1f;
+  box-shadow:
+    inset 0 1px 0 rgb(236 250 255 / 24%),
+    0 12px 28px rgb(0 0 0 / 38%);
 }
-main.command-exhibition .exhibition-room-adjacent button > span:first-child { font-size: 12px; color: #bdd5e3; }
-main.command-exhibition .exhibition-room-adjacent-number { font: 18px/1.4 "Michroma", sans-serif; color: #9cc8dd; }
+main.command-exhibition .exhibition-room-adjacent button > span:first-child { font-size: 12px; color: #c4dce9; }
+main.command-exhibition .exhibition-room-adjacent-number { font: 18px/1.4 "Michroma", sans-serif; color: #a4d2e8; }
 main.command-exhibition .exhibition-shelf { padding-top: clamp(48px, 6vw, 84px); }
 main.command-exhibition .exhibition-shelf-heading { padding-bottom: 24px; border-bottom: 1px solid var(--room-rule); }
 main.command-exhibition .exhibition-shelf-filters {
-  padding: clamp(16px, 2vw, 26px);
-  border: 1px solid var(--room-rule);
-  background: var(--command-metal);
-  box-shadow: inset 0 1px #d8f3ff24;
+  padding: clamp(18px, 2.2vw, 28px);
+  border: 1px solid rgb(164 214 240 / 34%);
+  border-top-color: rgb(236 220 186 / 48%);
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse 72% 64% at 50% 0%, rgb(155 233 250 / 10%), transparent 70%),
+    var(--command-metal);
+  box-shadow:
+    inset 0 1px 0 rgb(238 251 255 / 26%),
+    0 18px 42px -8px rgb(0 0 0 / 48%);
 }
 main.command-exhibition .exhibition-shelf-grid { gap: 20px; }
 main.command-exhibition .exhibition-shelf-work {
-  border: 1px solid var(--room-rule);
+  border: 1px solid rgb(168 216 240 / 32%);
+  border-top-color: rgb(232 222 198 / 46%);
+  border-radius: 4px;
+  overflow: hidden;
   background: var(--command-metal);
-  box-shadow: inset 0 1px #d6efff1f, 0 8px 16px #0003;
+  box-shadow:
+    inset 0 1px 0 rgb(238 251 255 / 24%),
+    0 14px 32px -6px rgb(0 0 0 / 48%);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 main.command-exhibition .exhibition-shelf-image {
   padding: clamp(12px, 2vw, 24px);
   border: 0;
-  background: radial-gradient(ellipse at 50% 40%, #263b4e, #0a121d 78%);
+  background:
+    radial-gradient(ellipse 76% 54% at 50% 8%, rgb(246 226 184 / 12%), transparent 68%),
+    radial-gradient(ellipse at 50% 40%, #263d52, #09121d 80%);
 }
 main.command-exhibition .exhibition-shelf-work-caption { min-height: 68px; padding: 14px 12px; border-top: 1px solid var(--room-rule); }
-main.command-exhibition .exhibition-shelf-work-caption > span:first-child { font-family: "Michroma", sans-serif; font-size: 12px; color: #a9c8dc; }
-main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border-color: #9be9fa; box-shadow: inset 0 -2px #9be9fa; }
+main.command-exhibition .exhibition-shelf-work-caption > span:first-child { font-family: "Michroma", sans-serif; font-size: 12px; color: #b0cfe2; }
+main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] {
+  border-color: #9be9fa;
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 255 / 42%),
+    inset 0 -2px 0 #9be9fa,
+    0 0 26px -6px rgb(155 233 250 / 34%),
+    0 16px 36px rgb(0 0 0 / 54%);
+}
 main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] .exhibition-shelf-image { border-color: transparent; box-shadow: none; }
 main.command-exhibition .exhibition-shelf-selected { font-size: 12px; color: #dffaff; background: #15364b; border: 1px solid #9be9fa80; }
 main.command-exhibition .exhibition-shelf-empty {
@@ -251,15 +362,40 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
 }
 @media (hover: hover) and (pointer: fine) {
   main.command-exhibition :is(a, button):not(:disabled):hover {
-    border-color: #b4ebffab;
-    color: #e8fbff;
+    border-color: rgb(190 240 255 / 72%);
+    color: #f0fcff;
     box-shadow: inset 0 1px 0 var(--command-specular);
   }
   main.command-exhibition .exhibition-shelf-work:hover {
-    border-color: #a4e4f488;
-    box-shadow: inset 0 1px 0 var(--command-specular), 0 10px 24px #0005;
+    border-color: rgb(182 238 255 / 68%);
+    box-shadow:
+      inset 0 1px 0 var(--command-specular),
+      0 18px 38px -6px rgb(0 0 0 / 56%),
+      0 0 22px -8px rgb(155 233 250 / 28%);
   }
-  main.command-exhibition .exhibition-shelf-work:hover .exhibition-shelf-image { background: radial-gradient(ellipse at 50% 40%, #2d485d, #0d1a28 80%); }
+  main.command-exhibition .exhibition-shelf-work:hover .exhibition-shelf-image {
+    background:
+      radial-gradient(ellipse 78% 58% at 50% 8%, rgb(250 232 192 / 18%), transparent 68%),
+      radial-gradient(ellipse at 50% 40%, #2f4d66, #0d1a28 80%);
+  }
+  html body main.command-archive[data-archive-kind] .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
+    border-color: rgb(196 244 255 / 78%);
+    background:
+      radial-gradient(ellipse 80% 80% at 50% 0%, rgb(155 233 250 / 24%), transparent 72%),
+      linear-gradient(180deg, rgb(24 42 58 / 0.96), rgb(10 18 28 / 0.98)) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(246 253 255 / 0.42),
+      0 0 18px -4px rgb(155 233 250 / 0.34) !important;
+  }
+  html body main.command-archive[data-archive-kind="realm"] .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
+    border-color: rgb(245 213 139 / 80%);
+    background:
+      radial-gradient(ellipse 80% 80% at 50% 0%, rgb(196 176 255 / 26%), transparent 72%),
+      linear-gradient(180deg, rgb(34 28 62 / 0.96), rgb(14 11 28 / 0.98)) !important;
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 0.42),
+      0 0 18px -4px rgb(245 213 139 / 0.32) !important;
+  }
 }
 @media (max-width: 900px) {
   main.command-exhibition .exhibition-room-heading { align-items: start; min-height: auto; }
@@ -288,14 +424,35 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
 }
 @media (prefers-reduced-motion: reduce) {
   main.command-exhibition *, main.command-archive[data-archive-kind] * { scroll-behavior: auto; }
-  main.command-exhibition .exhibition-shelf-image { transition: none; }
+  main.command-exhibition :is(.exhibition-shelf-image, .exhibition-shelf-work) { transition: none; }
 }
-html[data-world-effects="economy"] main.command-exhibition .exhibition-shelf-image { transition: none; }
+html[data-world-effects="economy"] main.command-exhibition :is(.exhibition-shelf-image, .exhibition-shelf-work) { transition: none; }
 @media (forced-colors: active) {
   main.command-exhibition.exhibition-room-curated, main.command-archive[data-archive-kind] { background: Canvas; color: CanvasText; }
+  html[data-family] body main.command-archive[data-archive-kind] > header.form-archive-toolbar.form-archive-toolbar {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
+    border-color: CanvasText;
+    background: Canvas !important;
+    box-shadow: none !important;
+  }
+  html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
+    border-color: Highlight;
+    background: Highlight !important;
+    box-shadow: none !important;
+  }
+  html body main.command-archive[data-archive-kind] .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+    border-color: ButtonText;
+    background: ButtonFace !important;
+    box-shadow: none !important;
+    color: ButtonText;
+  }
   main.command-exhibition :is(.exhibition-room-heading, .exhibition-room-view, .exhibition-studio-notice, .exhibition-shelf-filters, .exhibition-shelf-work, .exhibition-shelf-empty, a, input, select) { background: Canvas; color: CanvasText; border-color: CanvasText; box-shadow: none; }
   main.command-exhibition button { background: ButtonFace; color: ButtonText; border-color: ButtonText; box-shadow: none; }
   main.command-exhibition .exhibition-studio-tools button[aria-pressed="true"] { background: Highlight; color: HighlightText; border: 2px solid Highlight; forced-color-adjust: none; }
-  main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border: 2px solid Highlight; }
+  main.command-exhibition .exhibition-shelf-work[aria-pressed="true"] { border: 2px solid Highlight; box-shadow: none; }
   main.command-exhibition :is(a, button, input, select, h2, [tabindex]):focus-visible { outline-color: Highlight; }
 }

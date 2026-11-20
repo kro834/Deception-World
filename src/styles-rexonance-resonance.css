@@ -455,8 +455,17 @@ html[data-family="special"]
   display: block;
   width: calc(var(--rsn-figure-size) * 1.5);
   aspect-ratio: 1;
-  border: 1px solid rgb(var(--rsn-ice) / 26%);
+  border: 1px solid rgb(var(--rsn-ice) / 38%);
   border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgb(var(--rsn-ice) / 14%) 0%,
+    rgb(var(--rsn-violet) / 6%) 54%,
+    transparent 76%
+  );
+  box-shadow:
+    0 0 24px rgb(var(--rsn-ice) / 18%),
+    inset 0 0 18px rgb(var(--rsn-ice) / 14%);
   translate: -50% -50%;
   pointer-events: none;
 }
@@ -469,7 +478,14 @@ html[data-family="special"]
   > .rsn-field
   > i:nth-child(2) {
   width: calc(var(--rsn-figure-size) * 2.13);
-  border-color: rgb(var(--rsn-violet) / 20%);
+  border-color: rgb(var(--rsn-violet) / 28%);
+  background: radial-gradient(
+    circle,
+    transparent 48%,
+    rgb(var(--rsn-violet) / 8%) 78%,
+    rgb(var(--rsn-gold) / 10%) 100%
+  );
+  box-shadow: 0 0 28px rgb(var(--rsn-violet) / 14%);
 }
 
 html[data-family="special"]
@@ -480,7 +496,9 @@ html[data-family="special"]
   > .rsn-field
   > i:nth-child(3) {
   width: calc(var(--rsn-figure-size) * 2.91);
-  border-color: rgb(var(--rsn-ice) / 14%);
+  border-color: rgb(var(--rsn-gold) / 22%);
+  background: none;
+  box-shadow: none;
 }
 
 html[data-family="special"]
@@ -535,7 +553,16 @@ html[data-family="special"]
   article:nth-child(2)
   > .rsn-field
   > i:first-child {
-  border-color: rgb(var(--rsn-pink) / 30%);
+  border-color: rgb(var(--rsn-pink) / 42%);
+  background: radial-gradient(
+    circle,
+    rgb(var(--rsn-pink) / 15%) 0%,
+    rgb(var(--rsn-violet) / 7%) 54%,
+    transparent 76%
+  );
+  box-shadow:
+    0 0 24px rgb(var(--rsn-pink) / 20%),
+    inset 0 0 18px rgb(var(--rsn-pink) / 15%);
 }
 
 /* The prism edge each cut enters with (the motion sheet draws it). */
@@ -547,21 +574,43 @@ html[data-family="special"]
   article::before {
   content: "";
   position: absolute;
-  top: -1px;
+  top: 0;
   right: 0;
   left: 0;
   z-index: 2;
-  height: 2px;
+  height: 2.5px;
   background: linear-gradient(
     90deg,
-    rgb(var(--rsn-ice)),
-    rgb(var(--rsn-violet)) 55%,
-    rgb(var(--rsn-pink)) 88%,
-    rgb(var(--rsn-white)) 99%
+    rgb(var(--rsn-white)) 0%,
+    rgb(var(--rsn-ice)) 24%,
+    rgb(var(--rsn-violet)) 58%,
+    rgb(var(--rsn-gold)) 86%,
+    rgb(var(--rsn-white)) 100%
   );
-  box-shadow: 0 0 22px rgb(var(--rsn-ice) / 50%);
+  box-shadow:
+    0 1px 12px rgb(var(--rsn-ice) / 65%),
+    0 0 26px rgb(var(--rsn-ice) / 45%);
   transform-origin: 0 50%;
   pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-headline-metrics
+  article:nth-child(2)::before {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--rsn-white)) 0%,
+    rgb(var(--rsn-pink)) 26%,
+    rgb(var(--rsn-violet)) 58%,
+    rgb(var(--rsn-gold)) 86%,
+    rgb(var(--rsn-white)) 100%
+  );
+  box-shadow:
+    0 1px 12px rgb(var(--rsn-pink) / 65%),
+    0 0 26px rgb(var(--rsn-pink) / 45%);
 }
 
 /* ---------- 02: the chip's light ---------- */

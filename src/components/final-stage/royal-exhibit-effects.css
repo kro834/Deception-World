@@ -54,39 +54,45 @@
   vector-effect: non-scaling-stroke;
 }
 .rr-surge-route .rr-arc-aura {
-  stroke-width: 6.5;
-  opacity: 0.28;
+  stroke-width: 7.5;
+  opacity: 0.38;
+  filter: drop-shadow(0 0 8px var(--rr-energy));
 }
 .rr-surge-route .rr-arc-core {
-  stroke-width: 2.3;
+  stroke-width: 2.4;
+  filter: drop-shadow(0 0 4px var(--rr-energy));
 }
 .rr-surge-route .rr-arc-out {
   stroke: var(--rr-gold);
+  filter: drop-shadow(0 0 6px var(--rr-gold));
 }
 .rr-surge-route .rr-coronation-canopy {
   stroke: rgb(var(--rr-regalia-rgb));
-  stroke-width: 1.5;
-  stroke-dasharray: 0.08 0.03;
-  opacity: 0.68;
+  stroke-width: 1.75;
+  opacity: 0.78;
+  filter: drop-shadow(0 0 7px rgb(var(--rr-regalia-rgb) / 0.62));
 }
 .rr-reactor-charge {
-  fill: rgba(255, 244, 206, 0.12);
-  stroke: #fff2c0;
-  stroke-width: 2;
+  fill: rgba(255, 246, 214, 0.18);
+  stroke: #fff4c8;
+  stroke-width: 2.15;
   vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 8px var(--rr-gold));
 }
 .rr-reactor-ring {
   fill: none;
   stroke: var(--rr-energy);
-  stroke-width: 1.35;
+  stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 6px var(--rr-energy));
 }
 .rr-reactor-crest {
-  fill: rgba(255, 244, 208, 0.18);
+  fill: rgba(255, 246, 214, 0.24);
   stroke: var(--rr-gold);
-  stroke-width: 1.25;
+  stroke-width: 1.4;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 6px var(--rr-gold));
 }
 .rr-surge svg {
   display: block;
@@ -251,6 +257,7 @@ html[data-rzn-constrained] .rr-surge-sparks {
   .rr-surge-crown {
     stroke: Highlight;
     fill: none;
+    filter: none;
   }
 }
 

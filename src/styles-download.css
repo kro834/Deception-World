@@ -148,35 +148,38 @@ body:has(main.export-page) {
   align-self: stretch;
   z-index: 0;
   pointer-events: none;
-  border: 1px solid rgb(122 232 255 / 22%);
+  border: 1px solid rgb(157 234 250 / 38%);
   border-radius: 6px;
   background:
     var(--dl-prism) top / 100% 2px no-repeat,
-    linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
-    linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 22px,
-    linear-gradient(var(--dl-lock) 0 0) 100% 0 / 22px 2px,
-    linear-gradient(var(--dl-lock) 0 0) 100% 0 / 2px 22px,
-    linear-gradient(var(--dl-gold) 0 0) 0 100% / 22px 2px,
-    linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 22px,
-    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 22px 2px,
-    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 22px,
+    linear-gradient(var(--dl-lock) 0 0) 0 0 / 24px 2px,
+    linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 24px,
+    linear-gradient(var(--dl-lock) 0 0) 100% 0 / 24px 2px,
+    linear-gradient(var(--dl-lock) 0 0) 100% 0 / 2px 24px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 24px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 24px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 24px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 24px,
     linear-gradient(
         180deg,
         rgb(4 8 15 / 0%) 0,
-        rgb(4 8 15 / 30%) calc(var(--dl-art) * 0.45),
-        #070d16 calc(var(--dl-art) + 30px)
+        rgb(4 8 15 / 32%) calc(var(--dl-art) * 0.45),
+        #07101c calc(var(--dl-art) + 30px)
       )
       0 0 / 100% calc(var(--dl-art) + 31px),
-    linear-gradient(#070d16 0 0) 0 calc(var(--dl-art) + 30px) / 100% 100%,
+    linear-gradient(155deg, #0b1828 0%, #060d17 56%, #091422 100%) 0 calc(var(--dl-art) + 30px) /
+      100% 100%,
     url("/poster-card-03-delivery.webp") 50% 0 / 100% auto,
-    #070d16;
+    #07101c;
   background-repeat: no-repeat;
   box-shadow:
-    0 40px 90px rgb(0 0 0 / 70%),
-    0 0 0 1px rgb(122 232 255 / 16%),
-    0 0 0 3px rgb(3 6 12 / 85%),
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    inset 0 0 32px rgb(122 232 255 / 3%);
+    0 44px 104px rgb(0 0 0 / 78%),
+    0 0 0 1px rgb(2 5 11 / 92%),
+    0 0 0 4px rgb(6 12 22 / 86%),
+    0 0 0 5px rgb(240 207 134 / 26%),
+    inset 0 1px 0 rgb(245 253 255 / 26%),
+    inset 0 -1px 0 rgb(240 207 134 / 20%),
+    inset 0 0 36px rgb(122 232 255 / 5%);
 }
 
 /* The DW sigil: a cut diamond on the art's lower edge. */
@@ -186,13 +189,16 @@ body:has(main.export-page) {
   width: 64px;
   height: 64px;
   margin-top: -32px;
-  border: 1px solid rgb(122 232 255 / 70%);
-  color: #dff9ff;
-  background: linear-gradient(135deg, rgb(122 232 255 / 22%), rgb(122 232 255 / 4%) 60%), #070d16;
+  border: 1px solid rgb(157 234 250 / 78%);
+  color: #ebfcff;
+  background:
+    linear-gradient(135deg, rgb(157 234 250 / 28%), rgb(240 207 134 / 10%) 58%, transparent),
+    #07101c;
   box-shadow:
-    0 0 0 5px rgb(4 8 15 / 85%),
-    0 0 0 6px rgb(240 207 134 / 55%),
-    0 14px 30px rgb(0 0 0 / 60%);
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    0 0 0 5px rgb(4 8 15 / 90%),
+    0 0 0 6px rgb(240 207 134 / 62%),
+    0 16px 34px rgb(0 0 0 / 72%);
   rotate: 45deg;
 }
 
@@ -275,9 +281,20 @@ html[data-world-effects="economy"] .export-page h1 {
   font-synthesis: none;
   letter-spacing: 0.18em;
   line-height: 1.4;
-  color: var(--dl-lock);
-  border-left: 2px solid var(--dl-ice);
-  background: linear-gradient(90deg, rgb(122 232 255 / 16%), rgb(122 232 255 / 3%));
+  color: #f6fbff;
+  border: 1px solid rgb(240 207 134 / 42%);
+  border-left: 3px solid var(--dl-gold);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(240 207 134 / 16%) 0%,
+      rgb(122 232 255 / 11%) 54%,
+      rgb(5 13 22 / 90%) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 236 / 26%),
+    inset 0 -1px 0 rgb(122 232 255 / 18%),
+    0 10px 22px -12px rgb(0 0 0 / 72%);
 }
 
 /* ================================================================
@@ -651,11 +668,9 @@ html[data-world-effects="economy"] .export-page h1 {
     grid-template-rows: minmax(28px, 1fr) repeat(7, auto) minmax(28px, 1fr) auto;
     padding: clamp(24px, 5vh, 56px) 24px;
     background:
-      radial-gradient(ellipse 60% 40% at 78% 8%, rgb(122 232 255 / 12%), transparent 70%),
-      radial-gradient(ellipse 50% 36% at 14% 86%, rgb(255 79 195 / 9%), transparent 70%),
-      radial-gradient(ellipse 40% 30% at 50% 50%, rgb(79 123 255 / 6%), transparent 70%),
-      repeating-linear-gradient(90deg, rgb(122 232 255 / 2.5%) 0 1px, transparent 1px 28px),
-      repeating-linear-gradient(0deg, rgb(122 232 255 / 2.5%) 0 1px, transparent 1px 28px),
+      radial-gradient(ellipse 64% 42% at 78% 8%, rgb(122 232 255 / 15%), transparent 70%),
+      radial-gradient(ellipse 52% 38% at 14% 86%, rgb(240 207 134 / 10%), transparent 70%),
+      radial-gradient(ellipse 46% 34% at 50% 50%, rgb(41 92 138 / 18%), transparent 72%),
       var(--dl-ink);
   }
 
@@ -736,23 +751,27 @@ html[data-world-effects="economy"] .export-page h1 {
     grid-column: art-start / slip-end;
     background:
       var(--dl-prism) top / 100% 2px no-repeat,
-      linear-gradient(var(--dl-lock) 0 0) 0 0 / 22px 2px,
-      linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 22px,
-      linear-gradient(var(--dl-lock) 0 0) 100% 0 / 22px 2px,
-      linear-gradient(var(--dl-lock) 0 0) 100% 0 / 2px 22px,
-      linear-gradient(var(--dl-gold) 0 0) 0 100% / 22px 2px,
-      linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 22px,
-      linear-gradient(var(--dl-gold) 0 0) 100% 100% / 22px 2px,
-      linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 22px,
-      linear-gradient(172deg, rgb(244 251 255 / 7%) 0, rgb(122 232 255 / 3%) 6%, transparent 24%),
-      #070d16;
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 24px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 24px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 0 / 24px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 0 / 2px 24px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 24px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 24px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 100% / 24px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 24px,
+      linear-gradient(168deg, rgb(245 253 255 / 9%) 0%, rgb(122 232 255 / 4%) 10%, transparent 32%),
+      radial-gradient(ellipse 70% 50% at 82% 14%, rgb(122 232 255 / 9%), transparent 68%),
+      radial-gradient(ellipse 65% 48% at 78% 88%, rgb(240 207 134 / 8%), transparent 70%),
+      linear-gradient(150deg, #0b1828 0%, #060d17 54%, #091422 100%);
     background-repeat: no-repeat;
     box-shadow:
-      0 48px 110px rgb(0 0 0 / 72%),
-      0 0 0 1px rgb(122 232 255 / 18%),
-      0 0 0 3px rgb(3 6 12 / 85%),
-      inset 0 1px 0 rgb(255 255 255 / 14%),
-      inset 0 0 40px rgb(122 232 255 / 3%);
+      0 52px 118px rgb(0 0 0 / 80%),
+      0 0 0 1px rgb(2 5 11 / 92%),
+      0 0 0 4px rgb(6 12 22 / 86%),
+      0 0 0 5px rgb(240 207 134 / 26%),
+      inset 0 1px 0 rgb(245 253 255 / 26%),
+      inset 0 -1px 0 rgb(240 207 134 / 20%),
+      inset 0 0 42px rgb(122 232 255 / 5%);
   }
 
   /* The sigil heads the slip instead of straddling the art's edge. */
@@ -1143,16 +1162,78 @@ html[data-world-effects="economy"] .export-page h1 {
   }
 }
 
-/* Reading edition: the archive's scope is a readable receipt below the action. */
+/* Reading edition & Museum Plaque Elevation (outranks styles-command-support.css cleanly) */
+.export-page.command-support-download {
+  --dl-ice: #9deafa;
+  --dl-lock: #dff9ff;
+  --dl-gold: #f0cf86;
+  --dl-specular: rgb(248 254 255 / 62%);
+  --dl-chrome: linear-gradient(180deg, #ffffff 0%, #eefbff 36%, #b2ebff 68%, #ecc98c 100%);
+  background:
+    radial-gradient(ellipse 72% 42% at 82% 4%, rgb(157 234 250 / 16%), transparent 70%),
+    radial-gradient(ellipse 58% 38% at 14% 88%, rgb(240 207 134 / 11%), transparent 70%),
+    radial-gradient(ellipse 54% 40% at 50% 42%, rgb(32 76 112 / 22%), transparent 72%),
+    linear-gradient(155deg, #040810 0%, #0a1624 48%, #040912 100%);
+}
+.export-page.command-support-download::after {
+  border-color: rgb(157 234 250 / 42%);
+  border-radius: 5px;
+  box-shadow:
+    0 46px 108px rgb(0 0 0 / 82%),
+    0 0 0 1px rgb(2 5 11 / 92%),
+    0 0 0 5px #07101b,
+    0 0 0 6px rgb(240 207 134 / 38%),
+    inset 0 1px 0 rgb(248 254 255 / 30%),
+    inset 0 -1px 0 rgb(240 207 134 / 24%),
+    inset 0 0 38px rgb(157 234 250 / 6%);
+}
+.export-page.command-support-download .export-page-sigil {
+  border-color: rgb(186 240 255 / 84%);
+  background:
+    linear-gradient(135deg, rgb(157 234 250 / 32%), rgb(240 207 134 / 14%) 56%, transparent),
+    #081320;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    0 0 0 5px rgb(4 9 16 / 92%),
+    0 0 0 6px rgb(240 207 134 / 68%),
+    0 16px 34px rgb(0 0 0 / 76%);
+}
+.export-page.command-support-download .export-page-btn {
+  min-height: 56px;
+  line-height: 1.7;
+  border-radius: 3px;
+  border: 1px solid #f0fdff;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 55%) 0%, transparent 42%),
+    linear-gradient(135deg, #f9feff 0%, #c2ecfb 48%, #8be9ff 100%);
+  color: #04121c;
+  font-weight: 600;
+  box-shadow:
+    0 0 0 1px rgb(3 9 16 / 90%),
+    0 0 0 2px rgb(157 234 250 / 42%),
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(240 207 134 / 36%),
+    0 14px 36px -6px rgb(122 232 255 / 34%);
+}
+.export-page.command-support-download .export-page-btn::before {
+  content: "";
+}
 .export-page small#export-scope {
   justify-self: stretch;
   max-width: 100%;
   box-sizing: border-box;
   padding: 20px clamp(16px, 4vw, 28px);
   margin-inline: var(--dl-inset);
-  border-block: 1px solid rgb(122 232 255 / 22%);
-  background: linear-gradient(180deg, rgb(122 232 255 / 3%), transparent 60%);
-  color: #d0dce6;
+  border: 1px solid rgb(157 234 250 / 30%);
+  border-left: 3px solid var(--dl-gold);
+  background:
+    linear-gradient(128deg, rgb(255 251 238 / 6%) 0%, transparent 46%),
+    linear-gradient(180deg, rgb(14 30 46 / 68%), rgb(5 12 21 / 88%));
+  box-shadow:
+    inset 0 1px 0 rgb(245 253 255 / 18%),
+    inset 0 -1px 0 rgb(240 207 134 / 16%),
+    0 14px 30px -16px rgb(0 0 0 / 74%);
+  color: #d6e4ee;
   font-size: 14px;
   line-height: 1.9;
   text-align: left;
@@ -1172,24 +1253,86 @@ html[data-world-effects="economy"] .export-page h1 {
   padding-bottom: 4px;
 }
 .export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
-  border: 1px solid rgb(139 155 167 / 36%);
-  border-radius: 4px;
+  border: 1px solid rgb(157 234 250 / 38%);
+  border-radius: 3px;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 46%),
+    linear-gradient(180deg, rgb(18 38 56 / 74%), rgb(7 17 28 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(245 253 255 / 20%),
+    inset 0 -1px 0 rgb(240 207 134 / 14%),
+    0 10px 24px -14px rgb(0 0 0 / 76%);
 }
 .export-page .export-page-navigation > .export-page-back {
-  border-color: rgb(122 232 255 / 42%);
+  border-color: rgb(240 207 134 / 52%);
+  border-left: 2px solid var(--dl-gold);
+  background:
+    linear-gradient(128deg, rgb(255 250 236 / 9%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(24 48 68 / 84%), rgb(9 21 34 / 94%));
 }
 .export-page .export-page-navigation > .export-page-context {
-  border-color: rgb(139 155 167 / 28%);
+  border-color: rgb(157 234 250 / 34%);
+}
+@media (hover: hover) and (pointer: fine) {
+  .export-page.command-support-download .export-page-btn:hover {
+    border-color: #ffffff;
+    background: linear-gradient(135deg, #ffffff 0%, #daf6ff 48%, #a4efff 100%);
+    box-shadow:
+      0 0 0 1px rgb(3 9 16 / 86%),
+      0 0 0 3px rgb(157 234 250 / 54%),
+      inset 0 1px 0 #ffffff,
+      0 18px 44px -4px rgb(122 232 255 / 44%);
+    translate: 0 -2px;
+  }
+  .export-page.command-support-download .export-page-navigation > :is(.export-page-back, .export-page-context):hover {
+    border-color: #d6f8ff;
+    background: linear-gradient(180deg, rgb(28 58 82 / 90%), rgb(11 26 42 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 30%),
+      0 14px 28px -12px rgb(122 232 255 / 28%);
+    color: #fff;
+  }
 }
 @media (forced-colors: active) {
+  .export-page.command-support-download {
+    background: Canvas;
+  }
+  .export-page.command-support-download::after {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  .export-page.command-support-download .export-page-sigil {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  .export-page.command-support-download .export-page-btn {
+    color: ButtonText;
+    background: ButtonFace;
+    border: 2px solid ButtonText;
+    box-shadow: none;
+  }
+  .export-page.command-support-download .export-page-btn::before {
+    display: none;
+  }
   .export-page small#export-scope {
     color: CanvasText;
+    background: Canvas;
     border-color: CanvasText;
+    box-shadow: none;
+  }
+  .export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
+    border: 1px solid LinkText;
+    color: LinkText;
+    background: Canvas;
+    box-shadow: none;
   }
 }
 
 @media print {
-  .export-page {
+  .export-page,
+  .export-page.command-support-download {
     background: #ffffff;
     color: #000000;
     height: auto;
@@ -1203,7 +1346,8 @@ html[data-world-effects="economy"] .export-page h1 {
   .export-page::after {
     display: none !important;
   }
-  .export-page-sigil {
+  .export-page-sigil,
+  .export-page.command-support-download .export-page-sigil {
     border: 1px solid #000000;
     background: #ffffff;
     color: #000000;
@@ -1224,11 +1368,14 @@ html[data-world-effects="economy"] .export-page h1 {
   }
   .export-page b {
     color: #000000;
+    border: 1px solid #cccccc;
     border-left: 2px solid #000000;
     background: none;
+    box-shadow: none;
     font-size: 12px;
   }
-  .export-page-btn {
+  .export-page-btn,
+  .export-page.command-support-download .export-page-btn {
     border: 1px solid #000000;
     background: #f0f0f0;
     color: #000000;

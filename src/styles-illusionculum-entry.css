@@ -1079,7 +1079,21 @@
 }
 
 .ice-entry-sigil {
-  filter: drop-shadow(0 0 8px rgb(166 230 255 / 42%)) drop-shadow(0 0 16px rgb(233 184 102 / 28%));
+  filter: drop-shadow(0 0 9px rgb(166 230 255 / 46%)) drop-shadow(0 0 20px rgb(233 184 102 / 34%));
+}
+
+.ice-entry-figure::before {
+  border-color: rgb(233 184 102 / 48%);
+  background: radial-gradient(
+    closest-side,
+    rgb(166 230 255 / 26%),
+    rgb(47 79 216 / 14%) 58%,
+    transparent
+  );
+  box-shadow:
+    0 0 44px rgb(47 79 216 / 26%),
+    0 0 0 10px rgb(233 184 102 / 6%),
+    inset 0 0 22px rgb(255 143 210 / 14%);
 }
 
 .ice-entry-cells {

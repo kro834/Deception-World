@@ -155,35 +155,37 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   background-image:
     linear-gradient(
       90deg,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 68%),
-      rgb(var(--mc-lit-rgb, 242 216 150) / 56%) 46%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 24%) 78%,
-      transparent 96%
+      rgb(var(--mc-accent-rgb, 121 232 255) / 88%),
+      #ffffff 28%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 76%) 54%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 34%) 82%,
+      transparent 98%
     ),
     radial-gradient(
-      ellipse 78% 58% at 14% 0%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 14%),
+      ellipse 84% 64% at 14% 0%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
       transparent 68%
     ),
     radial-gradient(
-      ellipse 56% 44% at 88% 100%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 8%),
+      ellipse 64% 50% at 88% 100%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 14%),
       transparent 70%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 7%), transparent 38%, rgb(0 0 0 / 28%));
+    linear-gradient(180deg, rgb(255 255 255 / 12%), transparent 42%, rgb(0 0 0 / 34%));
   background-repeat: no-repeat;
   background-size:
-    100% 1px,
+    100% 1.5px,
     100% 100%,
     100% 100%,
     100% 100%;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    inset 0 -1px 0 rgb(0 0 0 / 74%),
-    inset 1px 0 0 rgb(var(--mc-accent-rgb, 121 232 255) / 12%),
-    inset -1px 0 0 rgb(var(--mc-lit-rgb, 242 216 150) / 10%),
-    0 0 0 0.5px rgb(0 0 0 / 75%),
-    0 16px 38px -10px rgb(0 0 0 / 74%);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1.5px 0 rgb(0 0 0 / 82%),
+    inset 1px 0 0 rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
+    inset -1px 0 0 rgb(var(--mc-lit-rgb, 242 216 150) / 16%),
+    0 0 0 0.5px rgb(0 0 0 / 80%),
+    0 20px 44px -10px rgb(0 0 0 / 84%),
+    0 0 28px -8px rgb(var(--mc-accent-rgb, 121 232 255) / 24%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {
@@ -204,33 +206,34 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   background:
     linear-gradient(
       90deg,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 42%) 18%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 48%) 62%,
-      transparent 92%
+      rgb(var(--mc-accent-rgb, 121 232 255) / 62%) 16%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 64%) 62%,
+      transparent 94%
     )
-      50% 0 / calc(100% - 22px) 1px no-repeat,
-    linear-gradient(180deg, rgb(255 255 255 / 11%), transparent 46%, rgb(0 0 0 / 32%)),
+      50% 0 / calc(100% - 22px) 1.5px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 46%, rgb(0 0 0 / 36%)),
     radial-gradient(
-      ellipse 92% 96% at 18% 50%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 14%),
-      transparent 66%
+      ellipse 94% 98% at 18% 50%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
+      transparent 68%
     ),
     radial-gradient(
-      ellipse 72% 84% at 86% 50%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 9%),
-      transparent 70%
+      ellipse 76% 86% at 86% 50%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 14%),
+      transparent 72%
     ),
     var(--mc-bg);
   border: 1px solid var(--mc-line);
   border-radius: 999px;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(0 0 0 / 68%),
-    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 9%),
-    0 0 0 0.5px rgb(0 0 0 / 72%),
-    0 12px 30px -6px rgb(0 0 0 / 64%);
-  -webkit-backdrop-filter: blur(16px) saturate(148%);
-  backdrop-filter: blur(16px) saturate(148%);
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1.5px 0 rgb(0 0 0 / 74%),
+    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 14%),
+    0 0 0 0.5px rgb(0 0 0 / 78%),
+    0 14px 34px -6px rgb(0 0 0 / 72%),
+    0 0 20px -6px rgb(var(--mc-accent-rgb, 121 232 255) / 22%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  backdrop-filter: blur(18px) saturate(155%);
   transition:
     border-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -241,13 +244,13 @@ html[data-family="special"]
   .rxs-page.rxs-page.rxs-page
   .rzn-movie[data-state="playing"]
   .rzn-movie-pill {
-  border-color: rgb(var(--mc-accent-rgb, 121 232 255) / 64%);
+  border-color: rgb(var(--mc-accent-rgb, 121 232 255) / 76%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 26%),
-    inset 0 -1px 0 rgb(0 0 0 / 68%),
-    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 20%),
-    0 0 18px -4px rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
-    0 12px 30px -6px rgb(0 0 0 / 68%);
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 -1.5px 0 rgb(0 0 0 / 74%),
+    inset 0 0 0 1px rgb(var(--mc-accent-rgb, 121 232 255) / 26%),
+    0 0 22px -3px rgb(var(--mc-accent-rgb, 121 232 255) / 38%),
+    0 14px 34px -6px rgb(0 0 0 / 76%);
 }
 
 html[data-family="special"]
@@ -551,7 +554,7 @@ html[data-family="special"]
   transform: translateY(-2px) rotate(225deg);
 }
 
-/* Precision Vernier calibration scale under the scrubber track, plus inner
+/* Smooth optical specular rail under the scrubber track, plus inner
    bevels on the sheet's buttons and slider thumb across every HUD skin. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-row > button,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-speeds > button {
@@ -574,11 +577,13 @@ html[data-family="special"]
   position: absolute;
   top: 3px;
   left: 50%;
-  width: 8px;
-  height: 1.5px;
+  width: 11px;
+  height: 2px;
   border-radius: 999px;
   background: var(--mc-lit);
-  box-shadow: 0 0 6px rgb(var(--mc-lit-rgb, 242 216 150) / 70%);
+  box-shadow:
+    0 0 8px rgb(var(--mc-lit-rgb, 242 216 150) / 86%),
+    0 0 3px #ffffff;
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -589,19 +594,15 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   background-image:
     linear-gradient(
       90deg,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 62%) 0 1px,
-      transparent 1px 25%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 48%) 25% calc(25% + 1px),
-      transparent calc(25% + 1px) 50%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 62%) 50% calc(50% + 1px),
-      transparent calc(50% + 1px) 75%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 48%) 75% calc(75% + 1px),
-      transparent calc(75% + 1px) calc(100% - 1px),
-      rgb(var(--mc-lit-rgb, 242 216 150) / 62%) calc(100% - 1px) 100%
+      transparent 4%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 52%) 26%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 72%) 50%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 52%) 74%,
+      transparent 96%
     );
   background-repeat: no-repeat;
   background-position: 0 100%;
-  background-size: 100% 5px;
+  background-size: 100% 1px;
 }
 
 html[data-family="special"]
@@ -610,7 +611,7 @@ html[data-family="special"]
   .rzn-movie
   .rzn-movie-seek
   > input::-webkit-slider-runnable-track {
-  opacity: 0.9;
+  opacity: 0.96;
 }
 
 html[data-family="special"]
@@ -619,7 +620,7 @@ html[data-family="special"]
   .rzn-movie
   .rzn-movie-seek
   > input::-moz-range-track {
-  opacity: 0.9;
+  opacity: 0.96;
 }
 
 html[data-family="special"]
@@ -629,9 +630,10 @@ html[data-family="special"]
   .rzn-movie-seek
   > input::-webkit-slider-thumb {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 56%),
-    0 0 0 2px rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
-    0 2px 7px rgb(0 0 0 / 60%);
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    0 0 0 2.5px rgb(var(--mc-accent-rgb, 121 232 255) / 36%),
+    0 0 12px rgb(var(--mc-accent-rgb, 121 232 255) / 62%),
+    0 3px 8px rgb(0 0 0 / 70%);
 }
 
 html[data-family="special"]
@@ -641,9 +643,10 @@ html[data-family="special"]
   .rzn-movie-seek
   > input::-moz-range-thumb {
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 56%),
-    0 0 0 2px rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
-    0 2px 7px rgb(0 0 0 / 60%);
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    0 0 0 2.5px rgb(var(--mc-accent-rgb, 121 232 255) / 36%),
+    0 0 12px rgb(var(--mc-accent-rgb, 121 232 255) / 62%),
+    0 3px 8px rgb(0 0 0 / 70%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie :is(button, input):focus-visible {

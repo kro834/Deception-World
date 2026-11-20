@@ -500,8 +500,8 @@ html[data-family="world"]:root
     bottom: -8%;
     background: radial-gradient(
       55% 50% at 50% 62%,
-      rgb(255 79 195 / 26%),
-      rgb(79 123 255 / 12%) 46%,
+      rgb(255 79 195 / 30%),
+      rgb(122 232 255 / 16%) 46%,
       transparent 74%
     );
   }
@@ -519,8 +519,8 @@ html[data-family="world"]:root
     height: 84px;
     background: radial-gradient(
       50% 50% at 50% 30%,
-      rgb(255 79 195 / 30%),
-      rgb(122 232 255 / 12%) 48%,
+      rgb(255 79 195 / 34%),
+      rgb(122 232 255 / 16%) 48%,
       transparent 72%
     );
   }
@@ -532,11 +532,11 @@ html[data-family="world"]:root
     > .poster-stage
     .poster-frame {
     box-shadow:
-      0 0 0 6px rgb(3 6 12 / 82%),
-      0 0 0 7px rgb(122 232 255 / 18%),
-      0 40px 60px -30px rgb(0 0 0 / 90%),
-      0 0 70px -14px rgb(255 79 195 / 34%),
-      0 0 120px -30px rgb(122 232 255 / 30%);
+      0 0 0 6px rgb(3 6 12 / 84%),
+      0 0 0 7px rgb(122 232 255 / 26%),
+      0 40px 60px -30px rgb(0 0 0 / 92%),
+      0 0 76px -14px rgb(255 79 195 / 40%),
+      0 0 128px -30px rgb(122 232 255 / 36%);
   }
 }
 

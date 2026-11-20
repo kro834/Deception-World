@@ -2,11 +2,12 @@
 .artwork-stage {
   --stage-duration: 560ms;
   --stage-art-height: clamp(360px, 65svh, 780px);
-  --stage-rim: rgb(172 208 228 / 32%);
-  --stage-rim-inner: rgb(224 244 255 / 14%);
-  --stage-reticle: rgb(168 232 252 / 78%);
-  --stage-halo-primary: rgb(124 204 238 / 14%);
-  --stage-halo-secondary: rgb(224 200 158 / 7%);
+  --stage-rim: rgb(148 228 255 / 42%);
+  --stage-rim-inner: rgb(228 248 255 / 20%);
+  --stage-reticle: rgb(188 242 255 / 92%);
+  --stage-halo-primary: rgb(122 232 255 / 22%);
+  --stage-halo-secondary: rgb(240 207 134 / 14%);
+  --stage-halo-accent: rgb(255 92 200 / 16%);
   position: relative;
   isolation: isolate;
   display: grid;
@@ -16,27 +17,41 @@
   padding: clamp(16px, 3vw, 44px);
   border-block: 1px solid var(--stage-rim);
   background:
-    radial-gradient(ellipse 68% 52% at 34% 0%, var(--stage-halo-primary), transparent 68%),
-    linear-gradient(125deg, rgb(12 26 39 / 68%), rgb(4 10 18 / 76%));
+    radial-gradient(ellipse 68% 56% at 28% 18%, var(--stage-halo-primary), transparent 68%),
+    radial-gradient(ellipse 52% 48% at 44% 78%, var(--stage-halo-accent), transparent 66%),
+    radial-gradient(ellipse 54% 46% at 84% 24%, var(--stage-halo-secondary), transparent 66%),
+    linear-gradient(135deg, rgb(14 29 46 / 84%), rgb(5 11 20 / 92%));
   box-shadow:
-    inset 0 1px 0 rgb(236 248 255 / 10%),
-    inset 0 -1px 0 rgb(156 218 242 / 10%);
+    inset 0 1px 0 rgb(236 250 255 / 22%),
+    inset 0 -1px 0 rgb(240 207 134 / 16%),
+    0 28px 72px -24px rgb(0 0 0 / 68%);
   perspective: 1400px;
 }
 
 .artwork-stage--gallery {
-  --stage-rim: rgb(222 200 161 / 30%);
-  --stage-rim-inner: rgb(255 248 232 / 12%);
-  --stage-reticle: rgb(230 207 166 / 84%);
-  --stage-halo-primary: rgb(232 210 168 / 13%);
-  --stage-halo-secondary: rgb(154 226 248 / 9%);
+  --stage-rim: rgb(228 206 164 / 38%);
+  --stage-rim-inner: rgb(255 248 232 / 18%);
+  --stage-reticle: rgb(240 216 172 / 92%);
+  --stage-halo-primary: rgb(236 212 168 / 18%);
+  --stage-halo-secondary: rgb(154 226 248 / 13%);
+  --stage-halo-accent: rgb(255 128 204 / 10%);
 }
 
 .artwork-stage--home {
-  --stage-rim: rgb(164 218 242 / 34%);
-  --stage-reticle: rgb(175 236 255 / 84%);
-  --stage-halo-primary: rgb(118 206 244 / 16%);
-  --stage-halo-secondary: rgb(230 206 164 / 8%);
+  --stage-rim: rgb(164 226 252 / 42%);
+  --stage-reticle: rgb(192 244 255 / 92%);
+  --stage-halo-primary: rgb(122 224 255 / 22%);
+  --stage-halo-secondary: rgb(240 207 134 / 14%);
+  --stage-halo-accent: rgb(255 92 200 / 14%);
+}
+
+.artwork-stage--world {
+  --stage-rim: rgb(144 232 255 / 46%);
+  --stage-rim-inner: rgb(228 249 255 / 24%);
+  --stage-reticle: rgb(206 248 255 / 96%);
+  --stage-halo-primary: rgb(122 232 255 / 26%);
+  --stage-halo-secondary: rgb(240 207 134 / 16%);
+  --stage-halo-accent: rgb(255 92 200 / 20%);
 }
 
 .artwork-stage,
@@ -52,13 +67,14 @@
 
 .artwork-stage__halo {
   position: absolute;
-  inset: -8px 2% auto;
-  height: calc(var(--stage-art-height) + 16px);
+  inset: -14px 1% auto;
+  height: calc(var(--stage-art-height) + 28px);
   pointer-events: none;
   background:
-    radial-gradient(ellipse 62% 56% at 50% 42%, var(--stage-halo-primary), transparent 70%),
-    radial-gradient(ellipse 46% 38% at 50% 14%, var(--stage-halo-secondary), transparent 64%);
-  opacity: 0.92;
+    radial-gradient(ellipse 64% 58% at 50% 44%, var(--stage-halo-primary), transparent 72%),
+    radial-gradient(ellipse 52% 46% at 24% 62%, var(--stage-halo-accent), transparent 68%),
+    radial-gradient(ellipse 50% 42% at 78% 24%, var(--stage-halo-secondary), transparent 66%);
+  opacity: 0.96;
 }
 
 .artwork-stage__plane {
@@ -68,29 +84,76 @@
   pointer-events: none;
   border: 1px solid var(--stage-rim);
   background:
-    linear-gradient(180deg, var(--stage-rim-inner), transparent 34%),
-    linear-gradient(160deg, rgb(154 197 223 / 7%), rgb(3 9 18 / 54%));
+    linear-gradient(180deg, var(--stage-rim-inner) 0%, rgb(122 232 255 / 5%) 24%, transparent 48%),
+    radial-gradient(
+      ellipse 56% 74% at 50% 48%,
+      rgb(122 232 255 / 22%),
+      rgb(255 92 200 / 12%) 46%,
+      transparent 76%
+    ),
+    radial-gradient(circle at 14% 30%, rgb(122 232 255 / 18%), transparent 52%),
+    radial-gradient(circle at 86% 68%, rgb(255 92 200 / 16%), transparent 54%),
+    radial-gradient(ellipse 68% 42% at 50% 96%, rgb(240 207 134 / 15%), transparent 68%),
+    linear-gradient(165deg, rgb(14 30 49 / 90%) 0%, rgb(6 13 24 / 95%) 52%, rgb(11 21 37 / 92%) 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 245 / 12%),
-    inset 0 0 32px rgb(0 0 0 / 24%),
-    0 18px 42px rgb(0 0 0 / 32%);
+    inset 0 1px 0 rgb(255 253 248 / 32%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%),
+    inset 0 0 0 1px rgb(122 232 255 / 14%),
+    inset 0 0 54px rgb(122 232 255 / 10%),
+    0 24px 56px -14px rgb(0 0 0 / 72%),
+    0 0 58px -18px rgb(122 232 255 / 24%);
 }
 
+.artwork-stage__frame,
 .artwork-stage__frame-bevel {
   position: absolute;
   inset: 0 2% auto;
   height: var(--stage-art-height);
   pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%),
+    inset 1px 0 0 rgb(122 232 255 / 18%),
+    inset -1px 0 0 rgb(255 92 200 / 16%);
+}
+
+.artwork-stage__frame::before,
+.artwork-stage__frame-bevel::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgb(198 245 255 / 14%);
+  background:
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(122 232 255 / 52%) 28%,
+        rgb(255 92 200 / 42%) 50%,
+        rgb(240 207 134 / 48%) 74%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        rgb(240 207 134 / 42%) 32%,
+        rgb(122 232 255 / 44%) 68%,
+        transparent 90%
+      )
+      0 100% / 100% 1px no-repeat;
+  box-shadow: inset 0 0 28px rgb(122 232 255 / 8%);
+  pointer-events: none;
 }
 
 .artwork-stage__reticle {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-color: var(--stage-reticle);
   border-style: solid;
   border-width: 0;
-  opacity: 0.86;
+  opacity: 0.94;
+  box-shadow: 0 0 12px rgb(122 232 255 / 26%);
   pointer-events: none;
 }
 
@@ -374,11 +437,14 @@ html[data-world-effects="economy"] .artwork-stage .artwork-stage__frame-bevel {
 }
 
 @media (forced-colors: active) {
-  .artwork-stage__halo {
+  .artwork-stage__halo,
+  .artwork-stage__frame::before,
+  .artwork-stage__frame-bevel::before {
     display: none;
   }
   .artwork-stage,
   .artwork-stage__plane,
+  .artwork-stage__frame,
   .artwork-stage__frame-bevel,
   .artwork-stage__error {
     border-color: CanvasText;
@@ -388,5 +454,6 @@ html[data-world-effects="economy"] .artwork-stage .artwork-stage__frame-bevel {
   }
   .artwork-stage__reticle {
     border-color: CanvasText;
+    box-shadow: none;
   }
 }

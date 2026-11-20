@@ -13,7 +13,12 @@
   box-sizing: border-box;
   overflow-x: clip;
   color: var(--wm-ink);
-  background: radial-gradient(ellipse at 16% 0%, #172523, transparent 48rem), #101619;
+  background:
+    radial-gradient(ellipse 68% 42% at 78% 0%, rgb(46 138 182 / 26%), transparent 66%),
+    radial-gradient(ellipse 52% 38% at 16% 0%, rgb(23 45 48 / 86%), transparent 48rem),
+    radial-gradient(ellipse 50% 36% at 88% 82%, rgb(146 118 228 / 12%), transparent 68%),
+    radial-gradient(ellipse 60% 36% at 50% 100%, rgb(215 186 136 / 10%), transparent 70%),
+    #0c1318;
   min-height: 100svh;
   padding: 24px max(clamp(16px, 4vw, 68px), calc((100% - 1440px) / 2)) 44px;
   font-family: var(--font-body, sans-serif);
@@ -37,6 +42,16 @@
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid var(--wm-seam);
+  background:
+    linear-gradient(
+        90deg,
+        var(--wm-accent) 0%,
+        #eef9ff 24%,
+        #a78eff 50%,
+        var(--wm-gold) 74%,
+        transparent 96%
+      )
+      0 100% / 100% 2px no-repeat;
   padding-bottom: 18px;
   font-size: 12px;
   letter-spacing: 0.12em;
@@ -53,25 +68,36 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 8px 14px;
-  border: 1px solid rgb(122 232 255 / 28%);
-  background: linear-gradient(145deg, rgb(122 232 255 / 10%), rgb(9 19 30 / 88%));
+  padding: 8px 15px;
+  border: 1px solid rgb(122 232 255 / 38%);
+  border-radius: 5px;
+  background:
+    radial-gradient(ellipse 70% 60% at 14% 0%, rgb(122 232 255 / 16%), transparent 68%),
+    linear-gradient(155deg, rgb(18 38 56 / 88%), rgb(8 18 30 / 94%));
+  box-shadow:
+    inset 0 1px 0 rgb(238 250 255 / 34%),
+    0 8px 20px -10px rgb(0 0 0 / 68%);
   font-family: "Oxanium", monospace;
   font-size: 12px;
   letter-spacing: 0.16em;
   white-space: nowrap;
-  color: #daf8ff;
+  color: #e6fbff;
 }
 
 .wm-lab-link {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 8px 14px;
-  border: 1px solid rgb(198 178 255 / 34%);
-  background: linear-gradient(145deg, rgb(198 178 255 / 12%), rgb(14 22 36 / 86%));
-  box-shadow: inset 0 1px 0 rgb(236 228 255 / 20%);
-  color: #ebe3ff;
+  padding: 8px 15px;
+  border: 1px solid rgb(198 178 255 / 44%);
+  border-radius: 5px;
+  background:
+    radial-gradient(ellipse 70% 60% at 14% 0%, rgb(198 178 255 / 20%), transparent 68%),
+    linear-gradient(155deg, rgb(24 30 56 / 88%), rgb(12 18 32 / 94%));
+  box-shadow:
+    inset 0 1px 0 rgb(240 232 255 / 32%),
+    0 8px 20px -10px rgb(0 0 0 / 68%);
+  color: #f0eaff;
   font-size: 12px;
   letter-spacing: 0.08em;
   white-space: nowrap;
@@ -118,8 +144,10 @@
   letter-spacing: 0.08em;
   line-height: 1.18;
   margin: 0;
-  color: #f4fbff;
-  text-shadow: 0 10px 32px rgb(0 0 0 / 52%);
+  color: #f5fcff;
+  text-shadow:
+    0 0 28px rgb(122 232 255 / 18%),
+    0 10px 32px rgb(0 0 0 / 56%);
 }
 
 .wm-intro h1 span {
@@ -146,9 +174,21 @@
   justify-content: space-between;
   gap: 14px 24px;
   align-items: center;
-  padding: 12px 0 16px;
-  margin-bottom: 12px;
-  border-block: 1px solid var(--wm-seam);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border: 1px solid var(--wm-seam);
+  border-radius: 6px;
+  background:
+    linear-gradient(var(--wm-accent) 0 0) 0 0 / 24px 1.5px no-repeat,
+    linear-gradient(var(--wm-accent) 0 0) 0 0 / 1.5px 24px no-repeat,
+    linear-gradient(var(--wm-gold) 0 0) 100% 100% / 24px 1.5px no-repeat,
+    linear-gradient(var(--wm-gold) 0 0) 100% 100% / 1.5px 24px no-repeat,
+    radial-gradient(ellipse 56% 70% at 8% 0%, rgb(162 219 211 / 10%), transparent 68%),
+    radial-gradient(ellipse 46% 64% at 94% 100%, rgb(215 186 136 / 8%), transparent 68%),
+    linear-gradient(165deg, rgb(16 27 36 / 95%), rgb(10 18 24 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(238 250 255 / 20%),
+    0 16px 36px -14px rgb(0 0 0 / 54%);
 }
 
 .wm-search-shell {
@@ -157,16 +197,22 @@
   gap: 6px;
   width: min(370px, 100%);
   padding: 0 4px 0 12px;
-  border: 1px solid rgb(146 184 204 / 32%);
-  background: rgb(4 10 18 / 86%);
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 48%);
+  border: 1px solid rgb(154 198 220 / 36%);
+  border-radius: 5px;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 38%), transparent 46%),
+    rgb(4 10 19 / 92%);
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 58%),
+    inset 0 1px 0 rgb(238 250 255 / 10%);
 }
 
 .wm-search-shell:focus-within {
   border-color: var(--wm-accent);
   box-shadow:
-    inset 0 0 0 1px rgb(122 232 255 / 24%),
-    0 0 18px rgb(122 232 255 / 16%);
+    inset 0 0 0 1px rgb(122 232 255 / 32%),
+    0 0 0 3px rgb(122 232 255 / 18%),
+    0 0 24px -4px rgb(122 232 255 / 38%);
 }
 
 .wm-search {
@@ -237,13 +283,17 @@
   gap: 8px;
   min-width: 44px;
   min-height: 44px;
-  background: linear-gradient(160deg, rgb(224 244 255 / 6%), rgb(9 18 28 / 92%));
-  border: 1px solid rgb(154 188 208 / 28%);
-  border-radius: 3px;
-  padding: 8px 13px;
+  background:
+    linear-gradient(180deg, rgb(238 250 255 / 10%) 0%, rgb(14 30 46 / 68%) 48%, rgb(7 16 28 / 96%) 100%);
+  border: 1px solid rgb(158 198 220 / 32%);
+  border-radius: 999px;
+  padding: 8px 14px;
   font-size: 12px;
-  color: #bfd2df;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  font-weight: 500;
+  color: #cfe0eb;
+  box-shadow:
+    inset 0 1px 0 rgb(244 252 255 / 20%),
+    0 6px 14px -8px rgb(0 0 0 / 68%);
 }
 
 .wm-filters button[data-kind]::before {
@@ -254,26 +304,32 @@
   border-radius: 50%;
   flex: none;
   background: #9eb4c2;
+  box-shadow: 0 0 6px rgb(158 180 194 / 40%);
 }
 
 .wm-filters button[data-kind="person"]::before {
   background: var(--wm-kind-person);
+  box-shadow: 0 0 8px rgb(122 232 255 / 55%);
 }
 
 .wm-filters button[data-kind="organization"]::before {
   background: var(--wm-kind-organization);
+  box-shadow: 0 0 8px rgb(240 196 136 / 55%);
 }
 
 .wm-filters button[data-kind="form"]::before {
   background: var(--wm-kind-form);
+  box-shadow: 0 0 8px rgb(198 178 255 / 55%);
 }
 
 .wm-filters button[data-kind="event"]::before {
   background: var(--wm-kind-event);
+  box-shadow: 0 0 8px rgb(142 197 255 / 55%);
 }
 
 .wm-filters button[data-kind="chapter"]::before {
   background: var(--wm-kind-chapter);
+  box-shadow: 0 0 8px rgb(230 207 164 / 55%);
 }
 
 .wm-filter-count {
@@ -282,30 +338,35 @@
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  padding: 3px 6px;
-  border-radius: 2px;
-  border: 1px solid rgb(158 180 194 / 24%);
-  background: rgb(4 10 18 / 72%);
-  color: var(--wm-muted);
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid rgb(158 188 206 / 28%);
+  background: rgb(4 10 18 / 82%);
+  color: #b8cedb;
 }
 
 .wm-filters button[aria-pressed="true"] {
-  background: linear-gradient(145deg, rgb(122 232 255 / 22%), rgb(18 46 62 / 94%));
+  background:
+    radial-gradient(ellipse 80% 70% at 18% 0%, rgb(255 255 255 / 20%), transparent 65%),
+    linear-gradient(145deg, rgb(122 232 255 / 32%) 0%, rgb(46 96 134 / 72%) 56%, rgb(16 44 66 / 96%) 100%);
   border-color: var(--wm-accent);
   color: #ffffff;
+  font-weight: 600;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 32%),
-    0 0 18px rgb(122 232 255 / 24%);
+    inset 0 1px 0 rgb(255 255 255 / 54%),
+    inset 0 0 0 1px rgb(122 232 255 / 34%),
+    0 8px 20px -8px rgb(0 0 0 / 74%),
+    0 0 22px -4px rgb(122 232 255 / 44%);
 }
 
 .wm-filters button[aria-pressed="true"] .wm-filter-count {
-  border-color: rgb(122 232 255 / 62%);
-  background: rgb(122 232 255 / 20%);
-  color: #e8fcff;
+  border-color: rgb(168 242 255 / 72%);
+  background: rgb(122 232 255 / 26%);
+  color: #f4fdff;
 }
 
 .wm-filters button[aria-pressed="true"]::before {
-  box-shadow: 0 0 8px currentColor;
+  box-shadow: 0 0 10px currentColor;
 }
 
 .wm-workspace {
@@ -314,8 +375,13 @@
   min-width: 0;
   border: 1px solid var(--wm-seam);
   border-top-color: var(--wm-gold);
-  background: #0c1318;
-  box-shadow: 0 22px 56px rgb(0 0 0 / 33%);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0a1219;
+  box-shadow:
+    inset 0 1px 0 rgb(238 250 255 / 22%),
+    0 28px 64px -12px rgb(0 0 0 / 68%),
+    0 0 44px -24px rgb(122 232 255 / 28%);
 }
 
 .wm-canvas {
@@ -323,7 +389,29 @@
   display: grid;
   grid-template-rows: 1fr auto;
   min-width: 0;
-  background: radial-gradient(ellipse at 50% 48%, #132c36, #09151d 72%, #080f15);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 48%, rgb(122 232 255 / 16%) 0%, rgb(44 114 160 / 14%) 26%, rgb(14 34 54 / 22%) 54%, #060e16 86%),
+    radial-gradient(ellipse 48% 42% at 18% 20%, rgb(157 134 255 / 13%), transparent 68%),
+    radial-gradient(ellipse 46% 40% at 82% 80%, rgb(215 186 136 / 10%), transparent 68%),
+    #060d14;
+}
+
+.wm-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 48%,
+      transparent 28%,
+      rgb(122 232 255 / 6%) 33%,
+      transparent 38%,
+      transparent 54%,
+      rgb(157 134 255 / 5%) 59%,
+      transparent 65%
+    );
 }
 
 .wm-canvas::after {
@@ -331,7 +419,11 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 74% 70% at 50% 50%, transparent 52%, rgb(4 9 16 / 82%) 100%);
+  background: radial-gradient(
+    ellipse 76% 72% at 50% 50%,
+    transparent 52%,
+    rgb(3 7 14 / 84%) 100%
+  );
 }
 
 .wm-canvas svg {
@@ -357,7 +449,10 @@
   min-width: 0;
   padding: 8px 12px;
   border-top: 1px solid var(--wm-seam);
-  background: #111c21;
+  background:
+    linear-gradient(180deg, rgb(238 250 255 / 5%), transparent 56%),
+    #0d1820;
+  box-shadow: inset 0 1px 0 rgb(238 250 255 / 12%);
 }
 
 .wm-legend {
@@ -365,7 +460,7 @@
   flex-wrap: wrap;
   gap: 4px 12px;
   font-size: 12px;
-  color: var(--wm-muted);
+  color: #c2d6e3;
 }
 
 .wm-legend span {
@@ -451,14 +546,14 @@
 
 .wm-line-glow {
   stroke: currentColor;
-  stroke-width: 4.5;
+  stroke-width: 5.5;
   stroke-linecap: round;
-  opacity: 0.16;
+  opacity: 0.24;
   color: var(--wm-kind-person);
 }
 
 .wm-line.is-active-edge {
-  stroke-width: 1.75;
+  stroke-width: 2;
   stroke-linecap: round;
 }
 
@@ -544,23 +639,37 @@
 @media (hover: hover) and (pointer: fine) {
   .wm-back:hover {
     border-color: var(--wm-accent);
-    background: linear-gradient(145deg, rgb(122 232 255 / 20%), rgb(12 28 42 / 94%));
+    background:
+      radial-gradient(ellipse 70% 60% at 14% 0%, rgb(122 232 255 / 26%), transparent 68%),
+      linear-gradient(155deg, rgb(22 50 74 / 94%), rgb(10 24 38 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 50%),
+      0 0 22px -6px rgb(122 232 255 / 44%);
   }
 
   .wm-lab-link:hover {
     border-color: var(--wm-kind-form);
-    background: linear-gradient(145deg, rgb(198 178 255 / 24%), rgb(18 28 46 / 94%));
+    background:
+      radial-gradient(ellipse 70% 60% at 14% 0%, rgb(198 178 255 / 30%), transparent 68%),
+      linear-gradient(155deg, rgb(32 38 72 / 94%), rgb(16 24 44 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 46%),
+      0 0 22px -6px rgb(198 178 255 / 44%);
   }
 
   .wm-filters button:not([aria-pressed="true"]):hover {
-    border-color: rgb(122 232 255 / 52%);
-    color: #f0faff;
-    background: linear-gradient(160deg, rgb(122 232 255 / 12%), rgb(12 24 38 / 94%));
+    border-color: rgb(122 232 255 / 62%);
+    color: #f4fbff;
+    background: linear-gradient(180deg, rgb(122 232 255 / 18%), rgb(12 28 44 / 94%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      0 8px 18px -8px rgb(0 0 0 / 74%),
+      0 0 18px -6px rgb(122 232 255 / 32%);
   }
 
   .wm-search-clear:hover {
     border-color: var(--wm-accent);
-    background: rgb(122 232 255 / 18%);
+    background: rgb(122 232 255 / 22%);
   }
 
   .wm-node:hover circle.wm-node-disc {
@@ -582,24 +691,39 @@
   }
 
   .wm-view-controls button:not(:disabled):hover {
-    background: rgb(122 232 255 / 14%);
+    background: rgb(122 232 255 / 18%);
     color: #ffffff;
   }
 
   .wm-source:hover {
-    border-color: rgb(122 232 255 / 82%);
-    background: linear-gradient(90deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 5%));
+    border-color: var(--wm-accent);
+    background:
+      radial-gradient(ellipse 68% 60% at 10% 0%, rgb(122 232 255 / 26%), transparent 68%),
+      linear-gradient(110deg, rgb(122 232 255 / 24%), rgb(157 134 255 / 10%) 66%, rgb(12 28 44 / 92%));
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 28%),
-      0 0 18px rgb(122 232 255 / 22%);
+      inset 3px 0 0 var(--wm-accent),
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      0 10px 24px -10px rgb(0 0 0 / 72%),
+      0 0 24px -4px rgb(122 232 255 / 44%);
+    color: #ffffff;
   }
 
   .wm-source[href*="/transformation-lab"]:hover {
-    border-color: rgb(198 178 255 / 88%);
-    background: linear-gradient(90deg, rgb(198 178 255 / 24%), rgb(198 178 255 / 7%));
+    border-color: var(--wm-kind-form);
+    background:
+      radial-gradient(ellipse 68% 60% at 10% 0%, rgb(198 178 255 / 28%), transparent 68%),
+      linear-gradient(110deg, rgb(198 178 255 / 28%), rgb(122 232 255 / 10%) 66%, rgb(18 24 44 / 92%));
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 28%),
-      0 0 18px rgb(198 178 255 / 26%);
+      inset 3px 0 0 var(--wm-kind-form),
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      0 10px 24px -10px rgb(0 0 0 / 72%),
+      0 0 24px -4px rgb(198 178 255 / 48%);
+    color: #ffffff;
+  }
+
+  .wm-detail li:hover {
+    background: linear-gradient(90deg, rgb(122 232 255 / 10%), transparent 88%);
+    box-shadow: inset 2px 0 0 rgb(122 232 255 / 72%);
   }
 
   .wm-detail li button:hover span {
@@ -611,14 +735,19 @@
   }
 
   .wm-detail li > a:hover {
-    border-color: rgb(122 232 255 / 52%);
-    color: #e8fcff;
-    background: rgb(122 232 255 / 12%);
+    border-color: rgb(122 232 255 / 68%);
+    color: #ffffff;
+    background: rgb(122 232 255 / 18%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 28%),
+      0 0 14px -4px rgb(122 232 255 / 42%);
   }
 
   .wm-index-grid button:not([aria-pressed="true"]):hover {
-    background: #122436;
-    box-shadow: inset 0 0 0 1px rgb(122 232 255 / 40%);
+    border-bottom-color: rgb(162 219 211 / 46%);
+    border-left-color: var(--wm-accent);
+    background: linear-gradient(90deg, rgb(162 219 211 / 12%), transparent 88%);
+    box-shadow: inset 0 1px 0 rgb(238 250 255 / 12%);
   }
 }
 
@@ -644,11 +773,13 @@
 .wm-view-controls {
   display: flex;
   align-items: center;
-  border: 1px solid rgb(122 232 255 / 34%);
-  background: rgb(6 14 24 / 94%);
+  border: 1px solid rgb(122 232 255 / 38%);
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgb(6 14 25 / 95%);
   box-shadow:
-    inset 0 1px 0 rgb(228 248 255 / 16%),
-    0 10px 24px rgb(0 0 0 / 46%);
+    inset 0 1px 0 rgb(238 250 255 / 22%),
+    0 12px 28px rgb(0 0 0 / 56%);
 }
 
 .wm-view-controls button {
@@ -689,7 +820,11 @@
 .wm-detail {
   border-left: 1px solid var(--wm-seam);
   padding: clamp(18px, 2vw, 32px);
-  background: linear-gradient(155deg, #1a2629, #141d22 62%);
+  background:
+    radial-gradient(ellipse 84% 34% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
+    radial-gradient(ellipse 70% 34% at 100% 100%, rgb(157 134 255 / 8%), transparent 72%),
+    linear-gradient(160deg, #13212c 0%, #0b141c 56%, #080f16 100%);
+  box-shadow: inset 1px 0 0 rgb(238 250 255 / 10%);
   max-height: calc(clamp(425px, 53svh, 610px) + 78px);
   overflow: auto;
   scroll-margin-top: 12px;
@@ -702,7 +837,10 @@
 
 .wm-detail-head {
   padding-bottom: 16px;
-  border-bottom: 1px solid rgb(122 232 255 / 18%);
+  border-bottom: 1px solid rgb(122 232 255 / 22%);
+  background:
+    linear-gradient(90deg, rgb(122 232 255 / 56%), rgb(198 178 255 / 34%) 52%, transparent 94%)
+      0 100% / 100% 1px no-repeat;
 }
 
 .wm-detail h2 {
@@ -711,13 +849,14 @@
   line-height: 1.5;
   overflow-wrap: anywhere;
   margin: 10px 0 8px;
-  color: #f5fcff;
+  color: #f6fdff;
+  text-shadow: 0 0 20px rgb(122 232 255 / 16%);
 }
 
 .wm-detail > p,
 .wm-detail-subtitle {
   font-size: 13px;
-  color: var(--wm-muted);
+  color: #b5cad8;
   line-height: 1.85;
   margin: 0;
 }
@@ -732,20 +871,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 46px;
-  border: 1px solid rgb(122 232 255 / 42%);
-  border-radius: 3px;
+  min-height: 48px;
+  border: 1px solid rgb(122 232 255 / 50%);
+  border-radius: 5px;
   padding: 11px 16px;
   font-size: 12px;
-  font-weight: 500;
-  color: #d8f8ff;
-  background: linear-gradient(
-    110deg,
-    rgb(122 232 255 / 14%),
-    rgb(122 232 255 / 3%) 72%,
-    transparent
-  );
-  box-shadow: inset 0 1px 0 rgb(228 248 255 / 18%);
+  font-weight: 600;
+  color: #eafbff;
+  background:
+    radial-gradient(ellipse 68% 60% at 10% 0%, rgb(122 232 255 / 20%), transparent 68%),
+    linear-gradient(110deg, rgb(122 232 255 / 18%), rgb(157 134 255 / 8%) 66%, rgb(9 21 34 / 88%));
+  box-shadow:
+    inset 3px 0 0 var(--wm-accent),
+    inset 0 1px 0 rgb(244 252 255 / 32%),
+    0 8px 20px -10px rgb(0 0 0 / 68%);
   letter-spacing: 0.05em;
 }
 
@@ -755,14 +894,15 @@
 }
 
 .wm-source[href*="/transformation-lab"] {
-  border-color: rgb(198 178 255 / 50%);
-  color: #ede6ff;
-  background: linear-gradient(
-    110deg,
-    rgb(198 178 255 / 16%),
-    rgb(198 178 255 / 4%) 72%,
-    transparent
-  );
+  border-color: rgb(198 178 255 / 56%);
+  color: #f2ecff;
+  background:
+    radial-gradient(ellipse 68% 60% at 10% 0%, rgb(198 178 255 / 22%), transparent 68%),
+    linear-gradient(110deg, rgb(198 178 255 / 20%), rgb(122 232 255 / 8%) 66%, rgb(14 20 38 / 88%));
+  box-shadow:
+    inset 3px 0 0 var(--wm-kind-form),
+    inset 0 1px 0 rgb(244 240 255 / 32%),
+    0 8px 20px -10px rgb(0 0 0 / 68%);
 }
 
 .wm-source[href*="/transformation-lab"] b {
@@ -771,22 +911,23 @@
 
 .wm-detail h3 {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.1em;
   margin: 26px 0 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #dcecf5;
+  color: #e4f2fa;
 }
 
 .wm-detail h3 span {
   font-family: "Oxanium", monospace;
   font-variant-numeric: tabular-nums;
-  padding: 2px 8px;
-  border: 1px solid rgb(122 232 255 / 26%);
-  border-radius: 2px;
-  background: rgb(5 12 20 / 78%);
+  padding: 2px 9px;
+  border: 1px solid rgb(122 232 255 / 38%);
+  border-radius: 999px;
+  background: rgb(6 15 26 / 86%);
+  box-shadow: inset 0 1px 0 rgb(238 250 255 / 16%);
   color: var(--wm-accent);
 }
 
@@ -797,8 +938,10 @@
 }
 
 .wm-detail li {
-  border-top: 1px solid rgb(158 180 194 / 16%);
-  padding: 12px 0;
+  border-top: 1px solid rgb(158 190 212 / 18%);
+  border-radius: 4px;
+  padding: 11px 8px;
+  margin-inline: -8px;
   display: flex;
   gap: 10px;
   align-items: center;
@@ -862,13 +1005,16 @@
   justify-content: center;
   min-width: 52px;
   min-height: 44px;
-  padding-inline: 10px;
-  border: 1px solid rgb(158 180 194 / 24%);
-  border-radius: 2px;
-  background: rgb(6 14 24 / 72%);
+  padding-inline: 11px;
+  border: 1px solid rgb(158 192 214 / 32%);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgb(238 250 255 / 7%), transparent 56%),
+    rgb(6 15 26 / 82%);
+  box-shadow: inset 0 1px 0 rgb(238 250 255 / 14%);
   font-size: 12px;
   white-space: nowrap;
-  color: #bfd4e2;
+  color: #cfe2ee;
 }
 
 /* Index rows echo the connection list, with the result shelf next to the query. */
@@ -933,6 +1079,7 @@
   padding: 9px 12px;
   border: 0;
   border-bottom: 1px solid var(--wm-seam);
+  border-left: 2px solid transparent;
   background: transparent;
   text-align: left;
 }
@@ -1149,6 +1296,7 @@
 }
 
 @media (forced-colors: active) {
+  .wm-canvas::before,
   .wm-canvas::after,
   .wm-line-glow {
     display: none;
@@ -1295,6 +1443,7 @@
     min-height: 400px;
   }
 
+  .wm-canvas::before,
   .wm-canvas::after,
   .wm-line-glow {
     display: none !important;

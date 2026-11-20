@@ -164,20 +164,20 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   isolation: isolate;
 }
 
-/* Depth behind the hero: the key visual's light spread as a field, and a
-   fine grid fading out (materials, not words). */
+/* Depth behind the hero: sacred teal-emerald x warm platinum-gold halo aura. */
 .mus-hero::before {
   content: "";
   position: absolute;
   z-index: -1;
   inset: 0 calc(50% - 50vw);
   background:
-    radial-gradient(50% 70% at 28% 52%, rgb(255 154 74 / 12%), transparent 70%),
-    radial-gradient(40% 60% at 30% 40%, rgb(55 198 192 / 14%), transparent 72%),
-    linear-gradient(rgb(233 239 242 / 4%) 1px, transparent 1px) 0 0 / 100% 64px,
-    linear-gradient(90deg, rgb(233 239 242 / 4%) 1px, transparent 1px) 0 0 / 64px 100%;
-  -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
-  mask-image: linear-gradient(180deg, #000 60%, transparent);
+    radial-gradient(46% 64% at 28% 48%, rgb(40 206 196 / 24%), rgb(16 112 114 / 12%) 48%, transparent 74%),
+    radial-gradient(36% 48% at 26% 22%, rgb(255 198 122 / 19%), transparent 68%),
+    radial-gradient(44% 56% at 76% 46%, rgb(242 182 102 / 12%), rgb(55 198 192 / 8%) 52%, transparent 76%),
+    radial-gradient(circle at 28% 46%, transparent 25%, rgb(255 204 134 / 11%) 25.3%, transparent 26.2%),
+    radial-gradient(circle at 28% 46%, transparent 33%, rgb(55 198 192 / 10%) 33.3%, transparent 34.2%);
+  -webkit-mask-image: linear-gradient(180deg, #000 68%, transparent);
+  mask-image: linear-gradient(180deg, #000 68%, transparent);
   pointer-events: none;
 }
 
@@ -2215,15 +2215,15 @@ html[data-rzn-constrained] .mus-weapons li::after {
 .mus-page .mus-article {
   background:
     var(--mus-forged-l),
-    radial-gradient(circle at 100% 0%, rgb(255 154 74 / 10%), transparent 46%),
-    radial-gradient(120% 60% at 0% 0%, rgb(55 198 192 / 13%), transparent 60%),
-    linear-gradient(115deg, transparent 60%, rgb(255 154 74 / 6%) 60.3%, transparent 70%),
-    #040b0f;
+    radial-gradient(circle at 100% 0%, rgb(255 186 106 / 12%), transparent 48%),
+    radial-gradient(120% 62% at 0% 0%, rgb(55 198 192 / 15%), transparent 62%),
+    radial-gradient(70% 55% at 88% 100%, rgb(55 198 192 / 8%), transparent 64%),
+    linear-gradient(165deg, #07151b 0%, #040b0f 60%, #03090d 100%);
   box-shadow:
-    0 0 0 1px rgb(255 154 74 / 28%),
-    inset 0 1px 0 0 rgb(255 255 255 / 18%),
-    inset 0 -1px 0 0 rgb(55 198 192 / 18%),
-    0 12px 28px -6px rgb(0 0 0 / 58%);
+    0 0 0 1px rgb(224 185 110 / 32%),
+    inset 0 1px 0 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 22%),
+    0 16px 36px -10px rgb(0 0 0 / 68%);
 }
 
 .mus-page .mus-article::after {
@@ -2907,4 +2907,683 @@ html[data-world-effects="economy"] .mus-ignition {
    #stages-ultra) lands its chapter right under the bar, as on the siblings. */
 html:has(.rxs-page.mus-page) {
   scroll-padding-top: 0;
+}
+
+/* ================================================================
+   2026-11 Neon Sacred Teal x Platinum Amber Elevation (Aligned):
+   - Hero sanctuary atmosphere: teal-emerald x warm platinum-gold halo
+     radiance & framed portrait illumination (keeping .mus-hero-seam at
+     opacity: 0 at rest so the portrait stays completely unobstructed).
+   - Right-side transformation calls (01..05): sculpted translucent glass
+     plate rows with platinum-amber index badges & teal-amber edge light.
+   - ミドル / ウルトラ open spec sheet (239.8cm / 249.8cm etc.): aligned
+     to upstream's .mus-specs-sheet / .mus-spec-forms / .mus-specs DOM
+     with dual-hue luminous rails, glowing numerals & amber-teal lead bar.
+   - Lower performance comparison table, wide #stages plate & 04-06
+     hairline rows: machined 3D bevels, luminous active gauges, glowing
+     outlined numerals & forged heading hierarchy.
+   ================================================================ */
+
+/* 1. Sacred Teal x Platinum Amber Ground & Hero Halo */
+.mus-page {
+  background:
+    radial-gradient(76rem 44rem at 70% -6rem, rgb(42 198 188 / 22%), transparent 70%),
+    radial-gradient(54rem 38rem at 20% 24rem, rgb(245 186 106 / 12%), transparent 72%),
+    radial-gradient(46rem 34rem at 86% 36rem, rgb(224 185 110 / 10%), transparent 70%),
+    linear-gradient(180deg, #030b10 0%, var(--mus-ink) 50rem);
+}
+
+.mus-page .mus-hero-halo {
+  border-color: rgb(255 198 126 / 44%);
+  box-shadow:
+    0 0 28px rgb(255 178 92 / 24%),
+    inset 0 0 24px rgb(55 198 192 / 16%);
+}
+
+.mus-page .mus-hero-halo::after {
+  border-color: rgb(64 218 210 / 42%);
+  box-shadow: 0 0 24px rgb(55 198 192 / 24%);
+}
+
+.mus-page .mus-hero-bands {
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 240 212 / 40%),
+    0 0 0 1px rgb(224 185 110 / 44%),
+    0 0 0 4px rgb(55 198 192 / 12%),
+    0 36px 110px -28px rgb(42 204 196 / 54%),
+    0 -14px 66px -22px rgb(255 186 106 / 34%);
+}
+
+.mus-page .mus-hero-rider {
+  color: #e6caa0;
+  text-shadow: 0 0 16px rgb(224 185 110 / 34%);
+}
+
+.mus-page .mus-hero-name {
+  background: linear-gradient(180deg, #ffffff 0%, #ebf6f6 52%, #7ae2da 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 8px 26px rgb(42 198 188 / 26%));
+}
+
+.mus-page .mus-hero-ultra {
+  filter: drop-shadow(0 0 18px rgb(240 222 255 / 28%));
+}
+
+/* 2. Transformation Calls 01..05 — Sculpted Sacred Teal x Platinum Amber Glass Plates */
+.mus-page .mus-calls {
+  gap: 8px;
+  border-top: 0;
+}
+
+.mus-page .mus-calls li {
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 46px;
+  padding: 10px 16px 10px 12px;
+  border: 1px solid rgb(120 222 216 / 26%);
+  border-radius: 5px;
+  background:
+    linear-gradient(180deg, #98f8f0 0%, #37c6c0 52%, #ffd49c 100%) 0 0 / 3px 100% no-repeat,
+    linear-gradient(
+        90deg,
+        rgb(255 255 255 / 32%) 0%,
+        rgb(55 198 192 / 24%) 46%,
+        transparent 90%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(110% 130% at 0% 50%, rgb(55 198 192 / 22%) 0%, transparent 68%),
+    radial-gradient(72% 110% at 100% 50%, rgb(255 178 96 / 12%) 0%, transparent 72%),
+    linear-gradient(125deg, rgb(9 26 32 / 86%) 0%, rgb(5 14 19 / 92%) 62%, rgb(8 19 24 / 88%) 100%);
+  color: #f4fafb;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 18%),
+    inset 16px 0 26px -16px rgb(55 198 192 / 42%),
+    0 10px 24px -14px rgb(0 0 0 / 82%);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 68%);
+}
+
+.mus-page .mus-calls li::before {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 26px;
+  border: 1px solid rgb(255 190 116 / 46%);
+  border-radius: 3px;
+  background: linear-gradient(155deg, rgb(255 186 106 / 22%), rgb(7 20 26 / 90%));
+  color: #ffdba6;
+  -webkit-text-stroke: 0;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 26%),
+    0 0 12px -3px rgb(255 154 74 / 46%);
+  text-shadow: 0 0 10px rgb(255 154 74 / 52%);
+}
+
+.mus-page .mus-calls li .mus-bracket {
+  color: #ffc17e;
+  opacity: 0.96;
+  text-shadow: 0 0 10px rgb(255 154 74 / 45%);
+}
+
+.mus-page .mus-calls li:last-child {
+  border-color: rgb(255 204 138 / 48%);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ffd49c 44%, #4ee6de 100%) 0 0 / 3px 100% no-repeat,
+    linear-gradient(
+        90deg,
+        rgb(255 216 164 / 44%) 0%,
+        rgb(55 198 192 / 28%) 52%,
+        transparent 92%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(115% 130% at 0% 50%, rgb(255 178 96 / 22%) 0%, transparent 68%),
+    radial-gradient(80% 120% at 96% 50%, rgb(55 198 192 / 20%) 0%, transparent 72%),
+    linear-gradient(125deg, rgb(16 32 36 / 90%) 0%, rgb(7 17 22 / 94%) 62%, rgb(15 22 24 / 90%) 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 242 218 / 26%),
+    inset 0 -1px 0 0 rgb(255 186 106 / 26%),
+    inset 18px 0 28px -16px rgb(255 178 96 / 46%),
+    0 12px 28px -14px rgb(0 0 0 / 86%),
+    0 0 26px -10px rgb(255 186 106 / 36%);
+}
+
+.mus-page .mus-calls li:last-child::before {
+  border-color: rgb(255 216 160 / 68%);
+  background: linear-gradient(155deg, rgb(255 204 132 / 30%), rgb(10 24 28 / 92%));
+  color: #fff2d6;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 34%),
+    0 0 16px -2px rgb(255 178 96 / 58%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mus-page .mus-calls li {
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+
+  .mus-page .mus-calls li:hover {
+    border-color: rgb(255 204 138 / 52%);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 28%),
+      inset 0 -1px 0 0 rgb(55 198 192 / 30%),
+      inset 20px 0 30px -14px rgb(55 198 192 / 54%),
+      0 12px 28px -12px rgb(0 0 0 / 86%),
+      0 0 24px -8px rgb(55 198 192 / 34%);
+  }
+}
+
+/* 3. Heading Hierarchy — Platinum Forged Titles & Luminous Dual-Hue Accents */
+.mus-page .mus-chapter:not(.mus-sub) > .mus-head::before {
+  -webkit-text-stroke: 1.5px rgb(255 194 118 / 90%);
+  filter: drop-shadow(0 0 16px rgb(255 162 78 / 42%));
+}
+
+.mus-page .mus-chapter:not(.mus-sub) > .mus-head h2 {
+  background: linear-gradient(180deg, #ffffff 0%, #eef7f7 58%, #9de4de 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 22px rgb(0 0 0 / 68%));
+}
+
+.mus-page .mus-head::after {
+  height: 2px;
+  background: linear-gradient(90deg, #ffbe78 0%, #4ee6de 58%, transparent 100%);
+  box-shadow: 0 0 14px rgb(255 168 86 / 46%);
+}
+
+.mus-page .mus-sub > .mus-head::before {
+  width: 3px;
+  background: linear-gradient(180deg, #ffbe78 0%, #4ee6de 66%, transparent 100%);
+  box-shadow: 0 0 12px rgb(255 168 86 / 42%);
+}
+
+.mus-page .mus-sub > .mus-head h2 {
+  color: #f3f9fa;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 65%);
+}
+
+.mus-page .mus-compare > h3 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #f2f9fa;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 60%);
+}
+
+.mus-page .mus-compare > h3::before {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  content: "";
+  background: linear-gradient(135deg, #ffd49c, #4ee6de);
+  rotate: 45deg;
+  box-shadow: 0 0 12px rgb(55 198 192 / 58%);
+}
+
+/* 4. ミドル / ウルトラ Open Spec Sheet (239.8cm / 249.8cm etc.) */
+#top.rxs-page.mus-page .mus-spec-forms > span {
+  padding: 10px 10px 11px;
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, #1ea8a2 0%, #4ee8e0 56%, #dcfffd 100%) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(55 198 192 / 14%) 0%, transparent 88%);
+  color: #ffe3ba;
+  box-shadow: 0 6px 18px -12px rgb(55 198 192 / 58%);
+  text-shadow: 0 0 14px rgb(255 186 106 / 44%);
+}
+
+#top.rxs-page.mus-page .mus-spec-forms > span + span {
+  background:
+    linear-gradient(90deg, #e5c6ff 0%, #b5f5ef 52%, #ffe1b5 100%) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(236 216 255 / 13%) 0%, transparent 88%);
+  color: #fcf6ff;
+  box-shadow: 0 6px 18px -12px rgb(233 216 255 / 54%);
+  text-shadow: 0 0 14px rgb(233 216 255 / 50%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div {
+  border-top: 0;
+  background: linear-gradient(
+      90deg,
+      rgb(55 198 192 / 34%) 0%,
+      rgb(255 186 106 / 22%) 52%,
+      transparent 100%
+    )
+    0 0 / 100% 1px no-repeat;
+}
+
+#top.rxs-page.mus-page .mus-specs dt {
+  color: #c5d6da;
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] {
+  background:
+    linear-gradient(90deg, #4ee6de 0%, #edf6f6 48%, #ffc17a 92%, transparent 100%) 0 0 / 100% 1px
+      no-repeat,
+    linear-gradient(180deg, rgb(55 198 192 / 8%) 0%, rgb(255 168 86 / 3%) 34%, transparent 72%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #f0e0c4;
+  text-shadow: 0 0 12px rgb(255 168 86 / 30%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] dt::before {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  content: "";
+  background: linear-gradient(135deg, #ffd49c, #4ee6de);
+  rotate: 45deg;
+  box-shadow: 0 0 8px rgb(55 198 192 / 60%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead]::after {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffbe78 0%, #4ee6de 52%, transparent 100%);
+  opacity: 0.94;
+  box-shadow: 0 0 12px rgb(255 168 86 / 42%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-dual] dd[data-form="middle"] > b {
+  color: #ecfffd;
+  text-shadow:
+    0 0 14px rgb(55 198 192 / 34%),
+    0 2px 3px rgb(0 0 0 / 74%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-dual] dd[data-form="ultra"] > b {
+  color: #faf4ff;
+  text-shadow:
+    0 0 14px rgb(236 214 255 / 38%),
+    0 2px 3px rgb(0 0 0 / 74%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] dd[data-form="middle"] > b {
+  color: #f2fffd;
+  text-shadow:
+    0 0 20px rgb(55 198 192 / 48%),
+    0 2px 5px rgb(0 0 0 / 78%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] dd[data-form="ultra"] > b {
+  color: #ffffff;
+  text-shadow:
+    0 0 20px rgb(236 214 255 / 52%),
+    0 2px 5px rgb(0 0 0 / 78%);
+}
+
+#top.rxs-page.mus-page .mus-spec-more {
+  color: #a9f7f2;
+  text-shadow: 0 0 10px rgb(55 198 192 / 34%);
+}
+
+/* 5. Lower Performance Comparison Table — 3D Console Bevel & Radiant Gauges */
+.mus-page .mus-compare-pick button:not([aria-pressed="true"]) {
+  border-color: rgb(120 222 216 / 26%);
+  background: linear-gradient(180deg, rgb(10 28 34 / 82%), rgb(5 13 18 / 90%));
+  color: #c7d9dc;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 14%),
+    0 8px 20px -12px rgb(0 0 0 / 74%);
+}
+
+.mus-page .mus-compare-pick button[aria-pressed="true"] {
+  border-color: var(--mus-accent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--mus-accent) 32%, #0a1f26),
+    color-mix(in srgb, var(--mus-accent) 14%, #051116)
+  );
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 38%),
+    0 0 24px -4px color-mix(in srgb, var(--mus-accent) 56%, transparent);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--mus-accent) 72%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mus-page .mus-compare-pick button:not([aria-pressed="true"]):hover {
+    color: #f2f9fa;
+    border-color: color-mix(in srgb, var(--mus-accent) 56%, var(--mus-hair));
+    background: linear-gradient(180deg, rgb(16 40 48 / 88%), rgb(7 18 24 / 92%));
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 22%),
+      0 0 16px -4px color-mix(in srgb, var(--mus-accent) 34%, transparent);
+  }
+}
+
+.mus-page .mus-lineup {
+  color: #b7cccf;
+}
+
+.mus-page .mus-table-wrap {
+  border-color: rgb(224 185 110 / 38%);
+  background:
+    linear-gradient(90deg, #4ee6de 0%, #edf6f6 48%, #ffc17a 100%) 0 0 / 100% 2px no-repeat,
+    var(--mus-forged-l),
+    radial-gradient(ellipse 68% 48% at 50% -10%, rgb(55 198 192 / 18%), transparent 70%),
+    linear-gradient(180deg, rgb(6 20 26 / 92%), rgb(3 10 14 / 96%));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 0 rgb(255 186 106 / 20%),
+    inset 0 0 42px -14px rgb(55 198 192 / 24%),
+    0 24px 54px -18px rgb(0 0 0 / 84%),
+    0 0 40px -20px rgb(55 198 192 / 28%);
+}
+
+.mus-page .mus-table thead th {
+  padding-block: 14px;
+  color: #def0f2;
+  background: linear-gradient(
+    180deg,
+    rgb(55 198 192 / 24%) 0%,
+    rgb(8 26 32 / 94%) 70%,
+    rgb(5 15 20 / 98%) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 18%),
+    inset 0 -1.5px 0 0 rgb(55 198 192 / 60%),
+    0 4px 14px -4px rgb(55 198 192 / 44%);
+  text-shadow: 0 1px 6px rgb(0 0 0 / 72%);
+}
+
+.mus-page .mus-table tbody tr[data-self] th::before {
+  display: none;
+}
+
+.mus-page .mus-table tbody tr[data-self] td {
+  color: #f8fbfc;
+  font-weight: 650;
+  background: linear-gradient(
+    90deg,
+    rgb(255 154 74 / 17%) 0%,
+    rgb(55 198 192 / 13%) 54%,
+    rgb(6 18 24 / 92%) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 196 130 / 34%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 34%);
+  text-shadow: 0 0 12px rgb(255 186 112 / 32%);
+}
+
+.mus-page .mus-table tbody tr[data-self] th {
+  color: #ffe2b8;
+  background: linear-gradient(90deg, rgb(255 154 74 / 24%), rgb(9 26 32 / 94%));
+  box-shadow:
+    inset 4px 0 0 var(--mus-orange-hot),
+    inset 16px 0 22px -12px rgb(255 154 74 / 52%),
+    inset 0 1px 0 0 rgb(255 196 130 / 38%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 36%);
+  text-shadow: 0 0 14px rgb(255 168 86 / 45%);
+}
+
+.mus-page .mus-table tbody tr[data-ultra] td {
+  color: #ffffff;
+  font-weight: 650;
+  background: linear-gradient(
+    90deg,
+    rgb(233 216 255 / 16%) 0%,
+    rgb(55 198 192 / 12%) 56%,
+    rgb(14 14 26 / 92%) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(233 216 255 / 38%),
+    inset 0 -1px 0 0 rgb(255 204 148 / 30%);
+  text-shadow: 0 0 12px rgb(233 216 255 / 36%);
+}
+
+.mus-page .mus-table tbody tr[data-ultra] th {
+  color: #f9f0ff;
+  background: linear-gradient(90deg, rgb(233 216 255 / 22%), rgb(16 18 32 / 94%));
+  box-shadow:
+    inset 4px 0 0 #f2e2ff,
+    inset 16px 0 22px -12px rgb(233 216 255 / 50%),
+    inset 0 1px 0 0 rgb(233 216 255 / 42%),
+    inset 0 -1px 0 0 rgb(255 204 148 / 30%);
+  text-shadow: 0 0 14px rgb(233 216 255 / 48%);
+}
+
+.mus-page .mus-performance[data-stage="ultra"] .mus-table tr[data-self]:not([data-ultra]),
+.mus-page .mus-performance[data-stage="middle"] .mus-table tr[data-ultra] {
+  opacity: 0.78;
+}
+
+.mus-page .mus-performance[data-stage="middle"] .mus-table tr[data-self]:not([data-ultra]) td,
+.mus-page .mus-performance[data-stage="ultra"] .mus-table tr[data-ultra] td {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.mus-page .mus-performance[data-stage="middle"] .mus-table tr[data-self]:not([data-ultra]) th {
+  box-shadow:
+    inset 4px 0 0 #ffd8a2,
+    inset 20px 0 26px -12px rgb(255 154 74 / 66%),
+    inset 0 1px 0 0 rgb(255 204 142 / 52%),
+    inset 0 -1px 0 0 rgb(55 198 192 / 46%);
+}
+
+.mus-page .mus-performance[data-stage="ultra"] .mus-table tr[data-ultra] th {
+  box-shadow:
+    inset 4px 0 0 #ffffff,
+    inset 20px 0 26px -12px rgb(233 216 255 / 66%),
+    inset 0 1px 0 0 rgb(233 216 255 / 56%),
+    inset 0 -1px 0 0 rgb(255 204 148 / 42%);
+}
+
+.mus-page .mus-table td[data-bar]::before {
+  bottom: 4px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.mus-page .mus-table td[data-bar]::after {
+  bottom: 5px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.mus-page .mus-table tbody tr[data-self] td[data-bar]::after {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 68%),
+    0 0 14px rgb(255 154 74 / 68%),
+    0 0 24px rgb(55 198 192 / 54%);
+}
+
+.mus-page .mus-table tbody tr[data-ultra] td[data-bar]::after {
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 76%),
+    0 0 16px rgb(233 216 255 / 72%),
+    0 0 26px rgb(255 204 148 / 46%);
+}
+
+@media (max-width: 560px) {
+  .mus-page .mus-table th:first-child {
+    background: #06141a;
+  }
+
+  .mus-page .mus-table tbody tr[data-self] th:first-child {
+    background: linear-gradient(90deg, #24190e, #0a1b20);
+  }
+
+  .mus-page .mus-table tbody tr[data-ultra] th:first-child {
+    background: linear-gradient(90deg, #201a2d, #0d1920);
+  }
+
+  .mus-page .mus-table td[data-bar]::before {
+    bottom: 2px;
+  }
+
+  .mus-page .mus-table td[data-bar]::after {
+    bottom: 3px;
+  }
+}
+
+/* 6. Wide #stages Plate & 04-06 Hairline Rows — Forged Bevel & Luminous Numerals */
+#top.rxs-page.mus-page .mus-stage-panel {
+  border-color: rgb(224 185 110 / 36%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 212 / 22%),
+    inset 0 0 42px -18px color-mix(in srgb, var(--mus-accent, #ff9a4a) 28%, transparent),
+    0 24px 56px -20px rgb(0 0 0 / 88%),
+    0 0 44px -22px rgb(55 198 192 / 32%);
+}
+
+#top.rxs-page.mus-page .mus-stage-panel::before {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--mus-accent, #ff9a4a) 58%, transparent);
+}
+
+#top.rxs-page.mus-page .mus-stage-copy h3::after {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--mus-accent, #ff9a4a) 68%, transparent);
+}
+
+#top.rxs-page.mus-page :is(.mus-article, .mus-finisher)::before {
+  box-shadow: 0 0 12px rgb(55 198 192 / 26%);
+}
+
+#top.rxs-page.mus-page .mus-article-no {
+  -webkit-text-stroke: 1.2px rgb(255 186 106 / 84%);
+  filter: drop-shadow(0 0 12px rgb(255 154 74 / 32%));
+}
+
+#top.rxs-page.mus-page .mus-weapons li {
+  border-top: 0;
+  background: linear-gradient(
+      90deg,
+      rgb(55 198 192 / 42%) 0%,
+      rgb(255 186 106 / 30%) 48%,
+      transparent 100%
+    )
+    0 0 / 100% 1px no-repeat;
+  color: #f4fbfc;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 68%);
+}
+
+#top.rxs-page.mus-page .mus-weapons li::before {
+  -webkit-text-stroke: 1.2px rgb(255 186 106 / 84%);
+  filter: drop-shadow(0 0 10px rgb(255 154 74 / 34%));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.rxs-page.mus-page .mus-weapons li {
+    transition: color 200ms ease;
+  }
+
+  #top.rxs-page.mus-page .mus-weapons li:hover {
+    color: #ffffff;
+    background:
+      linear-gradient(90deg, #ffbe78 0%, #4ee6de 58%, transparent 100%) 0 0 / 100% 2px no-repeat,
+      linear-gradient(90deg, rgb(255 168 86 / 10%) 0%, rgb(55 198 192 / 6%) 54%, transparent 100%);
+  }
+
+  #top.rxs-page.mus-page .mus-weapons li:hover::before {
+    -webkit-text-stroke: 1.3px #ffd8a2;
+    filter: drop-shadow(0 0 14px rgb(255 168 86 / 54%));
+  }
+}
+
+.mus-page .mus-more > summary {
+  border-color: rgb(255 186 106 / 48%);
+  background: linear-gradient(
+    135deg,
+    rgb(255 168 86 / 14%),
+    rgb(55 198 192 / 10%) 62%,
+    rgb(6 18 24 / 88%)
+  );
+  color: #ffd8a2;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 22%),
+    0 8px 20px -12px rgb(0 0 0 / 72%);
+}
+
+.mus-page .mus-more[open] > summary {
+  border-color: rgb(64 218 210 / 60%);
+  background: linear-gradient(
+    135deg,
+    rgb(55 198 192 / 20%),
+    rgb(255 168 86 / 12%) 62%,
+    rgb(6 18 24 / 92%)
+  );
+  color: #a9f7f2;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 28%),
+    0 0 18px -4px rgb(55 198 192 / 36%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mus-page .mus-calls li,
+  #top.rxs-page.mus-page .mus-weapons li {
+    transition: none !important;
+  }
+}
+
+html[data-world-effects="economy"]
+  .mus-page
+  :is(
+    .mus-hero-name,
+    .mus-hero-ultra,
+    .mus-chapter:not(.mus-sub) > .mus-head h2,
+    .mus-article-no,
+    .mus-weapons li::before
+  ),
+html[data-rzn-constrained]
+  .mus-page
+  :is(
+    .mus-hero-name,
+    .mus-hero-ultra,
+    .mus-chapter:not(.mus-sub) > .mus-head h2,
+    .mus-article-no,
+    .mus-weapons li::before
+  ) {
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  #top.rxs-page.mus-page
+    :is(
+      .mus-calls li,
+      .mus-calls li::before,
+      .mus-spec-forms > span,
+      .mus-specs > div,
+      .mus-table-wrap,
+      .mus-table thead th,
+      .mus-table tbody tr[data-self] :is(th, td),
+      .mus-table tbody tr[data-ultra] :is(th, td),
+      .mus-compare-pick button,
+      .mus-stage-panel,
+      .mus-weapons li,
+      .mus-more > summary
+    ) {
+    background: Canvas;
+    box-shadow: none;
+    border-color: CanvasText;
+    color: CanvasText;
+    text-shadow: none;
+  }
+
+  .mus-page :is(.mus-hero-name, .mus-chapter:not(.mus-sub) > .mus-head h2) {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
+
+  #top.rxs-page.mus-page
+    :is(.mus-compare > h3::before, .mus-hero-halo, .mus-specs > div[data-lead] dt::before) {
+    display: none;
+  }
 }

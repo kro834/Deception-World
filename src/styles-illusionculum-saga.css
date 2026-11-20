@@ -394,13 +394,13 @@
   pointer-events: none;
 }
 
-/* A projection: the figure's own silhouette as flat, scanned light. */
+/* A projection: the figure's own silhouette as translucent crystal light. */
 .rxs-page.rxs-page.ics-page :is(.ics-hero-ghost, .ics-projection-ghost) {
   position: absolute;
   inset: 0;
   display: block;
   background:
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 24%) 0 1px, transparent 1px 4px),
+    radial-gradient(64% 48% at 50% 24%, rgb(255 255 255 / 26%), transparent 72%),
     linear-gradient(
       180deg,
       var(--ics-ghost-a, var(--ics-pink)),
@@ -1852,10 +1852,10 @@
   inset: 0;
   content: "";
   background:
-    linear-gradient(90deg, rgb(166 230 255 / 6%) 1px, transparent 1px) 0 0 / 64px 64px,
-    linear-gradient(0deg, rgb(166 230 255 / 6%) 1px, transparent 1px) 0 0 / 64px 64px;
-  mask-image: radial-gradient(70% 60% at 68% 46%, #000, transparent 78%);
-  -webkit-mask-image: radial-gradient(70% 60% at 68% 46%, #000, transparent 78%);
+    radial-gradient(46% 58% at 72% 42%, rgb(166 230 255 / 12%), rgb(47 79 216 / 10%) 48%, transparent 76%),
+    radial-gradient(30% 38% at 68% 20%, rgb(255 225 163 / 11%), transparent 72%);
+  mask-image: radial-gradient(78% 72% at 68% 46%, #000, transparent 84%);
+  -webkit-mask-image: radial-gradient(78% 72% at 68% 46%, #000, transparent 84%);
 }
 
 .rxs-page.rxs-page.ics-page .ics-hero .ics-mark {
@@ -4377,5 +4377,629 @@ html[data-family="special"] body #top.ics-page[data-command-special] #forms .rxs
     flex: none;
     width: min(100%, 380px);
     justify-content: space-between;
+  }
+}
+
+/* ================================================================
+   2026-11 Neon Crystal Prism Optical Elevation (Family Edition aligned):
+   - Hero stage & ambient field: sapphire x astral-gold radiance + pinned
+     stage right-edge multi-layer prism rim glow (preserving the unframed
+     split architecture and icf-prism ::before light sweep).
+   - Transformation calls (01..04): faceted crystal prism plates with
+     tri-chromatic left accent edge & cobalt internal luminescence.
+   - Headline specs (242.8cm / 168.8kg / 328.8t / 405.8t): open hairline
+     rows elevated with top 2px prism rail, crystalline gradient numerals
+     & glowing gold-to-ice base bar.
+   - Basic performance comparison console: sculpted sapphire header,
+     3D beveled active rows (イリュージョンクルム / ウルトラ) & radiant bars.
+   - Forms wide plate & 04-06 record hairlines: refined prism edges and
+     subtle specular depth without altering layout or .ics-ignition.
+   ================================================================ */
+
+/* 1. Hero Sapphire x Astral Gold Field, Pinned Stage Rim Glow & Copy Polish */
+#top.rxs-page.ics-page .ics-hero-visual {
+  background:
+    radial-gradient(64% 48% at 50% 34%, rgb(47 79 216 / 34%), transparent 66%),
+    radial-gradient(46% 36% at 54% 16%, rgb(255 225 163 / 15%), transparent 68%),
+    radial-gradient(42% 38% at 24% 72%, rgb(166 230 255 / 12%), transparent 70%),
+    var(--ics-ink);
+}
+
+@media (min-width: 1100px) {
+  #top.rxs-page.ics-page > .ics-hero > .rxs-hero-ambient {
+    background:
+      radial-gradient(54rem 38rem at 74% 40%, rgb(47 79 216 / 32%), transparent 70%),
+      radial-gradient(30rem 24rem at 68% 18%, rgb(255 225 163 / 15%), transparent 68%),
+      radial-gradient(28rem 26rem at 82% 72%, rgb(166 230 255 / 12%), transparent 70%),
+      radial-gradient(34rem 26rem at 48% 66%, rgb(169 131 255 / 12%), transparent 72%);
+  }
+
+  #top.rxs-page.ics-page > .ics-hero > .ics-hero-visual {
+    border-right: 1px solid rgb(233 184 102 / 46%);
+    box-shadow:
+      inset -1px 0 0 0 rgb(255 244 218 / 38%),
+      inset -16px 0 34px -12px rgb(166 230 255 / 36%),
+      inset 0 1px 0 0 rgb(255 244 218 / 22%),
+      1px 0 0 0 rgb(2 3 10 / 92%),
+      18px 0 64px -26px rgb(47 79 216 / 68%),
+      10px 0 42px -22px rgb(233 184 102 / 36%);
+  }
+}
+
+#top.rxs-page.ics-page .ics-hero .ics-title-prefix {
+  color: #ffe5ad;
+  text-shadow: 0 0 18px rgb(233 184 102 / 48%);
+}
+
+#top.rxs-page.ics-page .ics-hero .ics-title-name {
+  text-shadow:
+    0 4px 28px rgb(0 0 0 / 88%),
+    0 0 32px rgb(166 230 255 / 22%);
+}
+
+#top.rxs-page.ics-page .ics-hero .ics-title-ultra {
+  border-top: 0;
+  background: linear-gradient(
+      90deg,
+      rgb(255 225 163 / 85%) 0%,
+      rgb(166 230 255 / 72%) 34%,
+      rgb(255 143 210 / 48%) 68%,
+      transparent 100%
+    )
+    0 0 / 100% 1px no-repeat;
+  color: #e4ebf9;
+}
+
+#top.rxs-page.ics-page :is(.ics-hero, .ics-footer) .ics-ultra-word {
+  text-shadow: 0 0 18px rgb(255 107 128 / 42%);
+}
+
+/* 2. Transformation Calls 01..04 — Crystal Prism Plates with Cobalt Inner Light */
+#top.rxs-page.ics-page :is(.ics-calls, .ics-hero-calls) {
+  gap: 10px;
+  border-top: 0;
+}
+
+#top.rxs-page.ics-page :is(.ics-calls, .ics-hero-calls) > li {
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 46px;
+  border-bottom: 0;
+}
+
+#top.rxs-page.ics-page :is(.ics-calls, .ics-hero-calls) > li::before {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 28px;
+  border: 1px solid rgb(233 184 102 / 44%);
+  border-radius: 2px;
+  background: linear-gradient(
+    155deg,
+    rgb(255 225 163 / 20%),
+    rgb(47 79 216 / 18%) 55%,
+    rgb(8 12 28 / 92%)
+  );
+  color: var(--ics-gold-hi);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 26%),
+    0 0 14px -4px rgb(233 184 102 / 46%);
+  text-shadow: 0 0 10px rgb(233 184 102 / 55%);
+}
+
+#top.rxs-page.ics-page :is(.ics-calls, .ics-hero-calls) b {
+  padding: 10px 18px 9px 18px;
+  border: 1px solid rgb(166 230 255 / 34%);
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, #f0fbff 0%, #a6e6ff 34%, #a983ff 70%, #ffe1a3 100%) 0 0 / 3px 100%
+      no-repeat,
+    linear-gradient(
+        90deg,
+        rgb(255 255 255 / 36%) 0%,
+        rgb(166 230 255 / 24%) 42%,
+        transparent 88%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(
+      118% 125% at 0% 50%,
+      rgb(47 79 216 / 42%) 0%,
+      rgb(166 230 255 / 14%) 36%,
+      transparent 74%
+    ),
+    radial-gradient(60% 100% at 100% 0%, rgb(169 131 255 / 12%), transparent 68%),
+    linear-gradient(125deg, rgb(14 21 50 / 90%) 0%, rgb(7 11 28 / 94%) 64%, rgb(11 14 34 / 90%) 100%);
+  color: #f4fbff;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 18%),
+    inset 0 -1px 0 0 rgb(47 79 216 / 34%),
+    inset 18px 0 28px -16px rgb(47 79 216 / 54%),
+    0 10px 26px -14px rgb(0 0 0 / 86%),
+    0 0 22px -10px rgb(47 79 216 / 50%);
+  text-shadow:
+    0 0 14px rgb(166 230 255 / 36%),
+    0 1px 4px rgb(0 0 0 / 72%);
+}
+
+#top.rxs-page.ics-page .ics-hero-calls > li:last-child::before {
+  border-color: rgb(255 225 163 / 64%);
+  background: linear-gradient(
+    155deg,
+    rgb(255 225 163 / 28%),
+    rgb(255 143 210 / 16%) 55%,
+    rgb(10 14 34 / 92%)
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 34%),
+    0 0 18px -2px rgb(233 184 102 / 58%);
+}
+
+#top.rxs-page.ics-page .ics-hero-calls > li:last-child b {
+  border-color: rgb(255 225 163 / 46%);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ff8fd2 42%, #ffe1a3 100%) 0 0 / 3px 100% no-repeat,
+    linear-gradient(
+        90deg,
+        rgb(255 225 163 / 44%) 0%,
+        rgb(255 143 210 / 28%) 48%,
+        transparent 90%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(
+      120% 130% at 0% 50%,
+      rgb(47 79 216 / 44%) 0%,
+      rgb(255 143 210 / 18%) 42%,
+      transparent 76%
+    ),
+    radial-gradient(75% 110% at 96% 100%, rgb(233 184 102 / 16%), transparent 70%),
+    linear-gradient(125deg, rgb(18 22 54 / 92%) 0%, rgb(9 12 30 / 95%) 62%, rgb(16 14 34 / 92%) 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 244 218 / 26%),
+    inset 0 -1px 0 0 rgb(233 184 102 / 28%),
+    inset 20px 0 30px -16px rgb(47 79 216 / 58%),
+    0 12px 30px -14px rgb(0 0 0 / 88%),
+    0 0 28px -10px rgb(233 184 102 / 42%);
+  text-shadow:
+    0 0 16px rgb(255 225 163 / 40%),
+    0 1px 4px rgb(0 0 0 / 78%);
+}
+
+#top.rxs-page.ics-page .ics-step-calls > li[data-lit] b {
+  border-color: rgb(255 225 163 / 78%);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ffe1a3 50%, #ff8fd2 100%) 0 0 / 3px 100% no-repeat,
+    radial-gradient(110% 130% at 0% 50%, rgb(233 184 102 / 34%), transparent 72%),
+    linear-gradient(125deg, rgb(32 24 14 / 90%), rgb(14 12 24 / 92%));
+  color: #fffaf0;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 38%),
+    inset 18px 0 28px -14px rgb(233 184 102 / 55%),
+    0 0 26px rgb(233 184 102 / 38%),
+    0 0 8px rgb(255 235 180 / 48%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.rxs-page.ics-page .ics-hero-calls b {
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+
+  #top.rxs-page.ics-page .ics-hero-calls > li:hover b {
+    border-color: rgb(255 225 163 / 58%);
+    box-shadow:
+      inset 0 1px 0 0 rgb(255 255 255 / 32%),
+      inset 0 -1px 0 0 rgb(166 230 255 / 38%),
+      inset 22px 0 32px -14px rgb(47 79 216 / 68%),
+      0 12px 30px -12px rgb(0 0 0 / 88%),
+      0 0 28px -8px rgb(166 230 255 / 44%);
+  }
+}
+
+/* 3. Headline Specs (242.8cm / 168.8kg / 328.8t / 405.8t) — Open Prism Rows */
+#top.rxs-page.ics-page .ics-specs > div {
+  border-top: 0;
+  background: linear-gradient(
+      90deg,
+      rgb(166 230 255 / 42%) 0%,
+      rgb(233 184 102 / 30%) 48%,
+      rgb(166 230 255 / 12%) 84%,
+      transparent 100%
+    )
+    0 0 / 100% 1px no-repeat;
+}
+
+#top.rxs-page.ics-page .ics-specs dt {
+  color: #cddaf0;
+}
+
+#top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) {
+  background:
+    linear-gradient(
+        90deg,
+        #a6e6ff 0%,
+        #c8a2ff 34%,
+        #ff8fd2 60%,
+        #ffe1a3 86%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(
+      180deg,
+      rgb(166 230 255 / 11%) 0%,
+      rgb(47 79 216 / 7%) 28%,
+      transparent 66%
+    ),
+    radial-gradient(75% 70% at 88% 12%, rgb(255 225 163 / 8%), transparent 64%);
+}
+
+#top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #efe2c4;
+  text-shadow: 0 0 12px rgb(233 184 102 / 34%);
+}
+
+#top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dt::before {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  content: "";
+  background: linear-gradient(135deg, var(--ics-ice-hi), var(--ics-gold-hi));
+  rotate: 45deg;
+  box-shadow: 0 0 8px rgb(166 230 255 / 65%);
+}
+
+#top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dd > b {
+  background: linear-gradient(176deg, #ffffff 0%, #f3f9ff 48%, #d9efff 72%, #ffe4ab 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 16px rgb(166 230 255 / 40%)) drop-shadow(0 3px 10px rgb(0 0 0 / 82%));
+}
+
+#top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4)::after {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #ffe1a3 0%,
+    #a6e6ff 42%,
+    rgb(169 131 255 / 54%) 76%,
+    transparent 100%
+  );
+  opacity: 0.94;
+  box-shadow: 0 0 12px rgb(166 230 255 / 44%);
+}
+
+#top.rxs-page.ics-page .ics-spec-sub > span {
+  color: #e4f7ff;
+  text-shadow: 0 0 10px rgb(166 230 255 / 32%);
+}
+
+/* 4. Basic Performance Comparison Console — Header, 3D Active Rows & Bar Glow */
+#top.rxs-page.ics-page .ics-compare-pick button:not([aria-pressed="true"]) {
+  border-color: rgb(166 230 255 / 28%);
+  background: linear-gradient(180deg, rgb(18 25 52 / 80%), rgb(8 12 28 / 90%));
+  color: #d6e0f2;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 14%),
+    0 8px 20px -12px rgb(0 0 0 / 74%);
+  transition:
+    border-color 200ms ease,
+    color 200ms ease,
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+#top.rxs-page.ics-page .ics-compare-pick button[aria-pressed="true"] {
+  border-color: var(--ics-pick);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ics-pick) 30%, #101734),
+    color-mix(in srgb, var(--ics-pick) 14%, #080c1e)
+  );
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 38%),
+    0 0 22px -4px color-mix(in srgb, var(--ics-pick) 62%, transparent);
+  text-shadow: 0 0 12px color-mix(in srgb, var(--ics-pick) 65%, transparent);
+}
+
+#top.rxs-page.ics-page .ics-table-scroll {
+  border-color: rgb(233 184 102 / 44%);
+  background:
+    linear-gradient(
+        90deg,
+        #a6e6ff 0%,
+        #c8a2ff 36%,
+        #ff8fd2 62%,
+        #ffe1a3 88%,
+        #a6e6ff 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(60% 35% at 50% 0%, rgb(47 79 216 / 24%), transparent 72%),
+    linear-gradient(160deg, rgb(16 23 48 / 96%), rgb(6 9 20 / 98%));
+  box-shadow:
+    inset 0 2px 0 0 rgb(166 230 255 / 72%),
+    inset 0 20px 36px -20px rgb(47 79 216 / 48%),
+    inset 0 -1px 0 0 rgb(233 184 102 / 24%),
+    0 24px 58px -22px rgb(0 0 0 / 88%),
+    0 0 44px -20px rgb(47 79 216 / 40%);
+}
+
+@media (max-width: 640px) {
+  #top.rxs-page.ics-page .ics-table-scroll {
+    background:
+      linear-gradient(270deg, rgb(7 9 20) 45%, rgb(7 9 20 / 0%)) right center / 40px 100% no-repeat
+        local,
+      radial-gradient(farthest-side at 100% 50%, rgb(166 230 255 / 28%), transparent) right center /
+        16px 100% no-repeat scroll,
+      linear-gradient(
+          90deg,
+          #a6e6ff 0%,
+          #c8a2ff 36%,
+          #ff8fd2 62%,
+          #ffe1a3 88%,
+          #a6e6ff 100%
+        )
+        0 0 / 100% 2px no-repeat,
+      linear-gradient(160deg, rgb(16 23 48 / 96%), rgb(6 9 20 / 98%));
+  }
+}
+
+#top.rxs-page.ics-page .ics-table thead th {
+  padding-block: 15px 14px;
+  color: #e6f0ff;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  background: linear-gradient(
+    180deg,
+    rgb(47 79 216 / 32%) 0%,
+    rgb(16 26 60 / 94%) 62%,
+    rgb(9 14 34 / 98%) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 20%),
+    inset 0 -1.5px 0 0 rgb(166 230 255 / 60%),
+    0 4px 16px -4px rgb(47 79 216 / 46%);
+  text-shadow: 0 1px 6px rgb(0 0 0 / 72%);
+}
+
+#top.rxs-page.ics-page .ics-table thead th:first-child {
+  background: linear-gradient(180deg, #1b2a62 0%, #0d1534 100%);
+  box-shadow:
+    4px 0 16px -2px rgb(0 0 0 / 82%),
+    inset -1px 0 0 rgb(233 184 102 / 38%),
+    inset 0 1px 0 0 rgb(255 255 255 / 20%),
+    inset 0 -1.5px 0 0 rgb(166 230 255 / 60%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-self] td {
+  color: #f6fbff;
+  font-weight: 600;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(47 79 216 / 40%) 0%,
+      rgb(166 230 255 / 16%) 38%,
+      rgb(169 131 255 / 11%) 74%,
+      rgb(12 19 46 / 94%) 100%
+    ),
+    #091026;
+  box-shadow:
+    inset 0 1px 0 0 rgb(166 230 255 / 40%),
+    inset 0 -1px 0 0 rgb(47 79 216 / 52%);
+  text-shadow: 0 0 12px rgb(166 230 255 / 28%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-self] th {
+  color: #f4fbff;
+  background: linear-gradient(90deg, #1c2f6e 0%, #101b42 100%);
+  box-shadow:
+    inset 4px 0 0 var(--ics-ice-hi),
+    inset 16px 0 24px -12px rgb(166 230 255 / 60%),
+    inset 0 1px 0 0 rgb(166 230 255 / 44%),
+    inset 0 -1px 0 0 rgb(47 79 216 / 56%),
+    4px 0 16px -2px rgb(0 0 0 / 80%);
+  text-shadow: 0 0 14px rgb(166 230 255 / 42%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-ultra] td {
+  color: #fff3f6;
+  font-weight: 600;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(184 31 58 / 42%) 0%,
+      rgb(255 107 128 / 17%) 42%,
+      rgb(233 184 102 / 12%) 78%,
+      rgb(22 10 22 / 94%) 100%
+    ),
+    #160914;
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 107 128 / 42%),
+    inset 0 -1px 0 0 rgb(184 31 58 / 52%);
+  text-shadow: 0 0 12px rgb(255 107 128 / 30%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-ultra] th {
+  color: #ffe8ee;
+  background: linear-gradient(90deg, #4f1326 0%, #260d19 100%);
+  box-shadow:
+    inset 4px 0 0 var(--ics-crimson-hi),
+    inset 16px 0 24px -12px rgb(255 107 128 / 60%),
+    inset 0 1px 0 0 rgb(255 107 128 / 46%),
+    inset 0 -1px 0 0 rgb(233 184 102 / 34%),
+    4px 0 16px -2px rgb(0 0 0 / 80%);
+  text-shadow: 0 0 14px rgb(255 107 128 / 46%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-self]:not([data-current]) :is(th, td) {
+  opacity: 0.84;
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-current] th {
+  color: #ffecbe;
+  text-shadow: 0 0 18px rgb(233 184 102 / 58%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-current] td {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 0 14px rgb(166 230 255 / 42%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-ultra][data-current] td {
+  text-shadow: 0 0 14px rgb(255 148 166 / 48%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-self]:where(:not([data-ultra])) td > i {
+  height: 5px;
+  --ics-bar-a: #c2f0ff;
+  --ics-bar-b: #a983ff;
+  background:
+    linear-gradient(180deg, #ffffff 0%, rgb(255 255 255 / 45%) 55%, transparent 100%),
+    linear-gradient(90deg, #8ad8ff 0%, #c8f3ff 42%, #b794ff 78%, #ffe1a3 100%);
+  box-shadow:
+    inset 0 1px 0 0 #ffffff,
+    0 0 14px rgb(166 230 255 / 76%),
+    0 0 26px rgb(47 79 216 / 52%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-ultra] td > i {
+  height: 5px;
+  --ics-bar-a: #ff788d;
+  --ics-bar-b: #ffe1a3;
+  background:
+    linear-gradient(180deg, #ffffff 0%, rgb(255 255 255 / 45%) 55%, transparent 100%),
+    linear-gradient(90deg, #e03556 0%, #ff788d 44%, #ffb47a 78%, #ffe7b2 100%);
+  box-shadow:
+    inset 0 1px 0 0 #ffffff,
+    0 0 14px rgb(255 107 128 / 78%),
+    0 0 26px rgb(233 184 102 / 50%);
+}
+
+#top.rxs-page.ics-page .ics-table tr[data-self][data-current] td > i {
+  height: 6px;
+  box-shadow:
+    inset 0 1px 0 0 #ffffff,
+    0 0 18px color-mix(in srgb, var(--ics-bar-a, var(--ics-ice-hi)) 88%, transparent),
+    0 0 34px color-mix(in srgb, var(--ics-bar-b, var(--ics-gold-hi)) 56%, transparent);
+}
+
+/* 5. Forms Wide Plate & 04-06 Hairline Polish */
+#top.rxs-page.ics-page .ics-form-panel {
+  border-color: rgb(233 184 102 / 34%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 22%),
+    inset 0 0 42px -18px color-mix(in srgb, var(--ics-accent) 32%, transparent),
+    0 24px 56px -22px rgb(0 0 0 / 88%),
+    0 0 44px -22px rgb(47 79 216 / 38%);
+}
+
+#top.rxs-page.ics-page .ics-form-panel::before {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--ics-accent) 62%, transparent);
+}
+
+#top.rxs-page.ics-page .ics-form-copy h3::after {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ics-accent) 70%, transparent);
+}
+
+#top.rxs-page.ics-page .ics-article::before {
+  box-shadow: 0 0 12px rgb(166 230 255 / 26%);
+}
+
+#top.rxs-page.ics-page .ics-finisher::before {
+  box-shadow: 0 0 12px rgb(233 184 102 / 30%);
+}
+
+#top.rxs-page.ics-page .ics-detail {
+  border-color: rgb(166 230 255 / 28%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 18px 40px -24px rgb(0 0 0 / 90%),
+    0 0 28px -16px rgb(47 79 216 / 40%);
+}
+
+#top.rxs-page.ics-page .ics-more > summary {
+  border-color: rgb(166 230 255 / 38%);
+  background: linear-gradient(135deg, rgb(47 79 216 / 18%), rgb(166 230 255 / 8%) 62%, rgb(7 11 26 / 86%));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 20%),
+    0 8px 20px -12px rgb(0 0 0 / 74%);
+}
+
+#top.rxs-page.ics-page .ics-more[open] > summary {
+  border-color: rgb(233 184 102 / 58%);
+  background: linear-gradient(135deg, rgb(233 184 102 / 18%), rgb(47 79 216 / 12%) 62%, rgb(10 12 28 / 90%));
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 244 218 / 28%),
+    0 0 18px -4px rgb(233 184 102 / 36%);
+}
+
+@media (max-width: 560px) {
+  #top.rxs-page.ics-page :is(.ics-calls, .ics-hero-calls) > li {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  #top.rxs-page.ics-page :is(.ics-calls, .ics-hero-calls) b {
+    padding: 9px 14px 8px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #top.rxs-page.ics-page :is(.ics-hero-calls b, .ics-compare-pick button) {
+    transition: none !important;
+  }
+}
+
+html[data-world-effects="economy"] #top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dd > b,
+html[data-rzn-constrained] #top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dd > b {
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  #top.rxs-page.ics-page
+    :is(
+      .ics-calls > li::before,
+      .ics-calls b,
+      .ics-hero-calls > li::before,
+      .ics-hero-calls b,
+      .ics-hero-visual,
+      .ics-specs > div,
+      .ics-table-scroll,
+      .ics-table thead th,
+      .ics-table tr[data-self] :is(th, td),
+      .ics-table tr[data-ultra] :is(th, td),
+      .ics-compare-pick button,
+      .ics-form-panel,
+      .ics-more > summary
+    ) {
+    background: Canvas;
+    box-shadow: none;
+    border-color: CanvasText;
+    color: CanvasText;
+    text-shadow: none;
+  }
+
+  #top.rxs-page.ics-page .ics-specs > div:nth-child(-n + 4) dd > b {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
+
+  #top.rxs-page.ics-page :is(.ics-specs > div:nth-child(-n + 4) dt::before, .ics-hero-visual::before) {
+    display: none;
   }
 }

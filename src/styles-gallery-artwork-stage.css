@@ -1,10 +1,10 @@
 /* The screening room owns /gallery; ArtworkStage still owns the image swap. */
 html[data-family="gallery"] .gallery-page[data-gallery-page] {
-  --screen-paper: #f4ecdd;
-  --screen-brass: #dac39b;
-  --screen-edge: #746751;
-  --screen-rule: #343744;
-  --screen-well: #06080d;
+  --screen-paper: #f6efe2;
+  --screen-brass: #e6cca0;
+  --screen-edge: #8a785c;
+  --screen-rule: rgb(228 206 168 / 24%);
+  --screen-well: #05080e;
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-intro.gallery-artwork-intro {
@@ -50,7 +50,7 @@ html[data-family="gallery"]
   .gallery-intro-description {
   margin: 0;
   padding: 0;
-  color: #c3beaf;
+  color: #cbc4b6;
   font-size: clamp(13px, 1.35vw, 16px);
   line-height: 1.6;
 }
@@ -72,10 +72,15 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-
   justify-content: space-between;
   gap: 12px;
   padding: 8px 14px;
-  border: 1px solid var(--screen-edge);
+  border: 1px solid rgb(232 208 162 / 42%);
+  border-top-color: rgb(248 228 188 / 62%);
   border-radius: 2px;
-  background: #111721;
-  box-shadow: none;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(244 220 174 / 16%), transparent 70%),
+    linear-gradient(180deg, #182334, #0d1420);
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 240 / 24%),
+    0 8px 20px rgb(0 0 0 / 36%);
   color: var(--screen-paper);
   font-size: 13px;
   line-height: 1.4;
@@ -83,9 +88,24 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-
   white-space: nowrap;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-nav .gallery-enter {
-  background: var(--screen-paper);
-  color: #151923;
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-nav
+  .gallery-enter {
+  border-color: #f0dab2;
+  background: linear-gradient(180deg, #faf5ea, #e3d2b2);
+  box-shadow:
+    inset 0 1px 0 #fffdf9,
+    0 8px 22px rgb(0 0 0 / 38%);
+  color: #121722;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-nav
+  .gallery-enter
+  span {
+  color: #121722;
 }
 
 /* The two entrances stand on one line (design brush-up, 2026-11-20): 作品一覧
@@ -114,7 +134,10 @@ html[data-family="gallery"]
   letter-spacing: 0.06em;
 }
 
-html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-artwork-intro .artwork-stage {
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-artwork-intro
+  .artwork-stage {
   --stage-art-height: clamp(340px, 59svh, 660px);
   display: grid;
   grid-template-columns: minmax(0, 2.2fr) minmax(214px, 1fr);
@@ -122,9 +145,16 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-artwork-in
   min-height: 0;
   gap: 0;
   padding: 0;
-  border: 1px solid var(--screen-edge);
-  background: #10141d;
-  box-shadow: 0 16px 40px rgb(0 0 0 / 30%);
+  border: 1px solid rgb(236 212 166 / 44%);
+  border-top-color: rgb(250 230 190 / 64%);
+  background:
+    radial-gradient(ellipse 64% 48% at 32% -4%, rgb(246 224 180 / 14%), transparent 68%),
+    linear-gradient(162deg, #141c2b 0%, #0b101a 56%, #070b12 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 28%),
+    inset 0 -1px 0 rgb(158 232 250 / 16%),
+    0 30px 72px -12px rgb(0 0 0 / 64%),
+    0 0 48px -18px rgb(236 210 160 / 18%);
   perspective: none;
 }
 
@@ -145,11 +175,19 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-artwork-in
 
 .gallery-artwork-intro .artwork-stage .artwork-stage__aperture {
   padding: 0;
-  background: radial-gradient(ellipse at 48% 22%, #1a2334, var(--screen-well) 74%);
+  background:
+    radial-gradient(ellipse 68% 52% at 50% -4%, rgb(248 226 182 / 22%), transparent 68%),
+    radial-gradient(ellipse 56% 52% at 84% 18%, rgb(158 232 250 / 10%), transparent 68%),
+    radial-gradient(ellipse 74% 68% at 48% 28%, #1d283c, var(--screen-well) 76%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 240 / 22%),
+    inset 0 0 0 6px rgb(5 8 14 / 82%),
+    inset 0 0 0 7px rgb(236 212 166 / 16%),
+    inset 0 -12px 32px rgb(0 0 0 / 52%);
 }
 
 .gallery-artwork-intro .artwork-stage__image {
-  inset: clamp(8px, 1.35vw, 22px);
+  inset: clamp(10px, 1.5vw, 24px);
 }
 
 html[data-family="gallery"]
@@ -184,12 +222,18 @@ html[data-family="gallery"]
   min-height: 0;
 }
 
+/* Gold-rimmed miniature filmstrip deck beneath the main spotlight aperture */
 .gallery-artwork-intro .gallery-stage-controls {
   width: 100%;
   min-width: 0;
-  padding: clamp(8px, 1.3vw, 16px);
-  border-top: 1px solid var(--screen-rule);
-  background: #0e121b;
+  padding: clamp(8px, 1.3vw, 15px);
+  border-top: 1px solid rgb(238 214 168 / 38%);
+  background:
+    radial-gradient(ellipse 74% 70% at 50% 0%, rgb(244 220 174 / 12%), transparent 70%),
+    linear-gradient(180deg, #101724 0%, #090e17 62%, #060910 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 240 / 18%),
+    inset 0 8px 20px rgb(0 0 0 / 46%);
 }
 
 .gallery-artwork-intro .gallery-stage-candidates {
@@ -199,7 +243,7 @@ html[data-family="gallery"]
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-stage-candidates
   button {
@@ -210,12 +254,22 @@ html[data-family="gallery"]
   place-items: center;
   gap: 3px;
   padding: 4px 2px;
-  border: 1px solid #48515f;
+  border: 1px solid rgb(232 208 162 / 36%);
+  border-top-color: rgb(246 226 184 / 52%);
   border-bottom-width: 2px;
   border-radius: 2px;
-  background: #0b0e15;
-  box-shadow: none;
-  color: #dad5c9;
+  background:
+    radial-gradient(ellipse 84% 62% at 50% -4%, rgb(244 222 178 / 15%), transparent 70%),
+    linear-gradient(180deg, #151f2f 0%, #0a101a 68%, #070b12 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 242 / 20%),
+    inset 0 0 0 2px rgb(6 9 15 / 82%),
+    0 6px 14px rgb(0 0 0 / 38%);
+  color: #ded7ca;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
 }
 
 .gallery-stage-candidates img {
@@ -232,20 +286,29 @@ html[data-family="gallery"]
 .gallery-stage-candidates span {
   display: block;
   max-width: 100%;
-  font-size: 11px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-stage-candidates
   button[aria-pressed="true"] {
-  border-color: var(--screen-brass);
-  background: #25222a;
-  color: #fff7ea;
+  border-color: #f3dfb6;
+  outline: 1px solid rgb(238 212 162 / 68%);
+  outline-offset: 1px;
+  background:
+    radial-gradient(ellipse 88% 68% at 50% -4%, rgb(250 230 188 / 32%), transparent 72%),
+    linear-gradient(180deg, #233247 0%, #121c2b 64%, #0b121d 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 44%),
+    inset 0 -2px 0 #9ee8fa,
+    0 0 18px -4px rgb(238 210 154 / 42%),
+    0 8px 18px rgb(0 0 0 / 48%);
+  color: #fffaf0;
 }
 
 .gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information {
@@ -253,8 +316,11 @@ html[data-family="gallery"]
   align-items: center;
   min-width: 0;
   padding: clamp(16px, 2.6vw, 40px);
-  border-inline-start: 1px solid var(--screen-rule);
-  background: linear-gradient(147deg, #222431, #131721 55%);
+  border-inline-start: 1px solid rgb(232 208 162 / 28%);
+  background:
+    radial-gradient(ellipse 80% 56% at 50% 0%, rgb(244 220 174 / 12%), transparent 70%),
+    linear-gradient(152deg, #1b2434 0%, #101622 56%, #0b0f18 100%);
+  box-shadow: inset 1px 0 0 rgb(255 251 240 / 10%);
 }
 
 html[data-family="gallery"]
@@ -318,7 +384,7 @@ html[data-family="gallery"]
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature-personal p {
-  color: #cec8bb;
+  color: #d6d0c3;
   font-size: 13px;
 }
 
@@ -341,39 +407,60 @@ html[data-family="gallery"]
   max-width: none;
   margin: 0;
   padding: 7px 9px;
-  border: 1px solid var(--screen-edge);
+  border: 1px solid rgb(232 208 162 / 40%);
+  border-top-color: rgb(246 226 184 / 58%);
   border-radius: 2px;
-  background: #151a25;
-  box-shadow: none;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(158 232 250 / 10%), transparent 70%),
+    linear-gradient(180deg, #172232, #0d1420);
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 240 / 20%),
+    0 6px 16px rgb(0 0 0 / 34%);
   color: var(--screen-paper);
   font-size: 13px;
   text-align: center;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease;
 }
 
+/* Curatorial brass plaque — "トップに飾る" */
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-feature-save {
-  background: var(--screen-brass);
-  color: #191a22;
+  border-color: #f2dcb2;
+  background: linear-gradient(180deg, #faf3e4 0%, #e6cea0 54%, #d3b47c 100%);
+  box-shadow:
+    inset 0 1px 0 #fffdf9,
+    inset 0 -1px 0 rgb(104 78 36 / 28%),
+    0 8px 22px rgb(0 0 0 / 42%),
+    0 0 22px -6px rgb(236 208 154 / 34%);
+  color: #151821;
   font-weight: 650;
+  letter-spacing: 0.04em;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-feature-save[aria-pressed="true"] {
-  background: #2b2930;
+  border-color: rgb(232 208 162 / 36%);
+  background: linear-gradient(180deg, #242938, #171b26);
+  box-shadow: inset 0 1px 0 rgb(255 250 238 / 14%);
   color: var(--screen-paper);
   cursor: default;
 }
 
 html[data-family="gallery"]
-  .gallery-page[data-gallery-page]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-feature-reset {
   border-color: transparent;
   background: transparent;
+  box-shadow: none;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -402,6 +489,7 @@ html[data-family="gallery"]
   margin: 4px 0 0;
   padding: 4px 8px;
   border-left: 2px solid var(--screen-brass);
+  background: rgb(10 15 24 / 58%);
 }
 
 html[data-family="gallery"]
@@ -432,14 +520,59 @@ html[data-family="gallery"]
   .gallery-work
   figcaption {
   margin-top: 0;
-  padding: 10px 2px 4px;
-  border-block: 1px solid var(--screen-rule);
-  background: none;
+  padding: 11px 2px 5px;
+  border-top: 1px solid rgb(236 212 166 / 34%);
+  border-bottom: 1px solid rgb(232 208 162 / 22%);
+  background: linear-gradient(90deg, rgb(242 218 172 / 58%) 0 32px, rgb(158 232 250 / 18%) 32px 100%)
+    0 3px / 100% 1px no-repeat;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-artwork-intro
+    .gallery-stage-candidates
+    button:hover:not([aria-pressed="true"]) {
+    border-color: rgb(244 222 178 / 76%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 244 / 36%),
+      inset 0 0 0 2px rgb(6 9 15 / 82%),
+      0 8px 18px rgb(0 0 0 / 48%);
+    color: #fcf9f2;
+  }
+
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-artwork-intro
+    .gallery-feature-save:not([aria-pressed="true"]):hover {
+    border-color: #fff6df;
+    background: linear-gradient(180deg, #fffdf8 0%, #f0dbb0 54%, #dec18b 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 10px 26px rgb(0 0 0 / 48%),
+      0 0 26px -4px rgb(242 216 164 / 46%);
+    color: #11141d;
+  }
+
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page]
+    .gallery-artwork-intro
+    .exhibition-room-entry:hover,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page]
+    .gallery-screening-nav
+    a:not(.gallery-enter):hover {
+    border-color: rgb(246 224 180 / 78%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 34%),
+      0 10px 24px rgb(0 0 0 / 44%);
+    color: #ffffff;
+  }
 }
 
 @media (max-width: 740px) {
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page]
+    .gallery-page[data-gallery-page][data-gallery-page]
     .gallery-artwork-intro
     .artwork-stage {
     --stage-art-height: clamp(222px, 64vw, 408px);
@@ -449,6 +582,7 @@ html[data-family="gallery"]
   .gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information {
     border-inline-start: 0;
     border-top: 1px solid var(--screen-rule);
+    box-shadow: inset 0 1px 0 rgb(255 251 240 / 10%);
   }
 
   html[data-family="gallery"]
@@ -483,7 +617,7 @@ html[data-family="gallery"]
 
 @media (max-height: 540px) and (orientation: landscape) and (min-width: 741px) {
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page]
+    .gallery-page[data-gallery-page][data-gallery-page]
     .gallery-artwork-intro
     .artwork-stage {
     --stage-art-height: clamp(214px, 67svh, 340px);
@@ -492,14 +626,38 @@ html[data-family="gallery"]
 
 @media (forced-colors: active) {
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    :is(
+      .gallery-screening-nav a,
+      .gallery-artwork-intro .artwork-stage,
+      .gallery-artwork-intro .artwork-stage__aperture,
+      .gallery-artwork-intro .artwork-stage__information,
+      .gallery-stage-controls,
+      .gallery-stage-candidates button,
+      .gallery-artwork-intro .gallery-feature-save,
+      .gallery-artwork-intro .exhibition-room-entry,
+      .gallery-work figcaption
+    ) {
+    border-color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-artwork-intro
     .gallery-stage-candidates
     button[aria-pressed="true"],
   html[data-family="gallery"]
-    .gallery-page[data-gallery-page]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-artwork-intro
     .gallery-feature-save[aria-pressed="true"] {
     border: 2px solid Highlight;
+    outline-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+    box-shadow: none;
+    forced-color-adjust: none;
   }
 }
