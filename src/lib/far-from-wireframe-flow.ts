@@ -159,12 +159,18 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
       const px = ratio / Math.max(vs, 1e-6);
       const budget = Math.round(limit * QUALITY[level]);
       const edgeBudget = Math.ceil(budget / 4);
-      const step = Math.max(1, Math.ceil((last - first) / edgeBudget));
+      // Thin the edges by a fixed rank of each (a golden-ratio sequence over
+      // the sorted edges), never by a stride: a stride that changed with the
+      // window's size swapped the whole drawn set between frames (a pop);
+      // a rank lets edges come and go one at a time (nanosuit pass,
+      // 2026-11-20).
+      const share = Math.min(1, edgeBudget / (last - first));
       const lift = form ? 18 : 24;
       let wireCount = 0;
       let drawn = 0;
       counts.fill(0);
-      for (let i = Math.ceil(first / step) * step; i < last; i += step) {
+      for (let i = first; i < last; i += 1) {
+        if (share < 1 && (i * 0.6180339887) % 1 >= share) continue;
         const edge = i * EDGE_STRIDE;
         const arrive = edges[edge];
         const age = q - arrive;
@@ -218,15 +224,17 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
           const index = counts[ink]++ * CHIP_STRIDE;
           batch[index] = sx + (ex - sx) * u + nx * lane;
           batch[index + 1] = sy + (ey - sy) * u + ny * lane;
+          // (Finer since the nanosuit pass, 2026-11-20: about two thirds the
+          // size, so a stream reads as fine grains, not as chunks.)
           batch[index + 2] =
-            px * (ink === 2 ? 1.35 : ink === 1 ? 0.96 : 0.66) * (0.76 + 0.24 * rise * feed);
+            px * (ink === 2 ? 0.95 : ink === 1 ? 0.68 : 0.48) * (0.76 + 0.24 * rise * feed);
           drawn += 1;
         }
         if (join && age >= 0 && age < tail * 0.34 && drawn < budget) {
           const index = counts[2]++ * CHIP_STRIDE;
           chips[2][index] = ex;
           chips[2][index + 1] = ey;
-          chips[2][index + 2] = px * (1.8 - (age / tail) * 2.2);
+          chips[2][index + 2] = px * (1.3 - (age / tail) * 1.6);
           drawn += 1;
         }
       }
@@ -234,7 +242,8 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
 
       context.save();
       context.globalCompositeOperation = "lighter";
-      context.lineWidth = px * 0.52;
+      // (Thinner wires since the nanosuit pass, 2026-11-20.)
+      context.lineWidth = px * 0.4;
       context.strokeStyle = tone;
       context.globalAlpha = 0.3;
       context.beginPath();
@@ -245,7 +254,7 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
       context.stroke();
       // Brighter channels follow the cutout and its larger mesh diagonals.
       // Keep these readable above the finer web and chip trains.
-      context.lineWidth = px * 0.96;
+      context.lineWidth = px * 0.7;
       context.globalAlpha = 0.46;
       context.beginPath();
       for (let i = 0; i < wireCount * WIRE_STRIDE; i += WIRE_STRIDE) {
@@ -254,7 +263,7 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
         context.lineTo(wires[i + 2], wires[i + 3]);
       }
       context.stroke();
-      context.lineWidth = px * 0.56;
+      context.lineWidth = px * 0.42;
       context.globalAlpha = 0.35;
       context.strokeStyle = GOLD;
       context.beginPath();

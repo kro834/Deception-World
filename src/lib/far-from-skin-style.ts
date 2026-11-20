@@ -12,6 +12,7 @@ export const FAR_FROM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   line: "rgb(150 236 255)",
   glint: [226, 248, 255] as const,
   motes: ["rgb(150 170 190)", "rgb(255 215 122)", "rgb(244 251 255)"] as const,
-  cell: 9,
+  // (6, from 9: finer, nanosuit pass 2026-11-20.)
+  cell: 6,
   triangles: true,
 });

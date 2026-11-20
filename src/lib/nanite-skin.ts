@@ -138,17 +138,26 @@ export const NANITE_SKIN = Object.freeze({
   /** Veins: how many, how far ahead of the front they run, their width in
    * field pixels, and the share of a vein over which the lead builds. */
   vein: Object.freeze({ count: 6, lead: 0.03, taper: 0.22 }),
+  /** The time field's smoothing: passes of a 3×3 average, and the most two
+   * neighbours' times may differ and still be averaged (nanosuit pass,
+   * 2026-11-20). */
+  smooth: Object.freeze({ passes: 3, tol: 0.012 }),
+  /** A cell's iris: its rim clicks this share of `pop` after its centre. */
+  iris: 0.4,
   front: Object.freeze({
     /** The liquid's edge (it is whole this long after the front). */
     soft: 0.004,
     /** The lip's bead. */
     lip: 0.0048,
     /** A cell clicks between `lag` and `lag + click` after the front… */
-    lag: 0.026,
+    // (Nanosuit pass, 2026-11-20: the click eases over a longer `pop`, its
+    // lag shorter by as much, so lag + click + pop — the helmet's close —
+    // is unchanged.)
+    lag: 0.0235,
     click: 0.034,
     /** …in `pop`, its flash fading over `flash`; its lines rise over `rise`
      * before it and linger `grain` after. */
-    pop: 0.0035,
+    pop: 0.006,
     flash: 0.009,
     rise: 0.008,
     grain: 0.042,
@@ -156,8 +165,11 @@ export const NANITE_SKIN = Object.freeze({
     lead: 0.026,
     /** The liquid's ripple: waves per unit time of the field, and how much
      * faster than the front they run. */
-    ripple: 520,
-    rippleRun: 1.7,
+    // (Nanosuit pass, 2026-11-20: 520 waves ran about 2.5 field px apart —
+    // the field's limit — and at 1.7× the front they strobed between frames
+    // of a scroll. Now ~4 px apart, drifting gently past the front.)
+    ripple: 300,
+    rippleRun: 1.15,
   }),
   /** The same bands on the field over the whole frame (0–1 of a change). */
   change: Object.freeze({
@@ -171,7 +183,7 @@ export const NANITE_SKIN = Object.freeze({
     grain: 0.12,
     lead: 0.08,
     ripple: 150,
-    rippleRun: 1.7,
+    rippleRun: 1.3,
   }),
   /** The helmet's share of the change's field (it is last, as in the
    * suit-up; first to go in a retract). */
@@ -190,6 +202,58 @@ export const NANITE_SKIN = Object.freeze({
 });
 
 export type NaniteFrontTiming = typeof NANITE_SKIN.front | typeof NANITE_SKIN.change;
+
+/** Smooths a time field in place (nanosuit pass, 2026-11-20: 「さらに細かく
+ * 滑らかに」). An 8-connected Dijkstra leaves octagonal facets and kinks in
+ * the front, and the veins left needle-thin spikes; a few passes of a 3×3
+ * average turn them into one continuous curved sheet. Only neighbours of the
+ * same `key` whose times are within `tol` are averaged, so time never leaks
+ * across a gap between limb and trunk, or between the helmet and the body,
+ * and the average is convex: no pixel ends later than the latest it had (the
+ * seal timings hold). NaN pixels stay NaN. */
+export function* naniteSmoothField(
+  field: Float32Array,
+  key: Uint8Array | null,
+  gw: number,
+  gh: number,
+  passes: number,
+  tol: number,
+): Generator<undefined, void, unknown> {
+  const n = gw * gh;
+  const next = new Float32Array(n);
+  for (let pass = 0; pass < passes; pass += 1) {
+    for (let y = 0; y < gh; y += 1) {
+      for (let x = 0; x < gw; x += 1) {
+        const i = y * gw + x;
+        const own = field[i];
+        if (own !== own) {
+          next[i] = own;
+          continue;
+        }
+        const k = key ? key[i] : 0;
+        let sum = 0;
+        let count = 0;
+        for (let dy = -1; dy <= 1; dy += 1) {
+          const ny = y + dy;
+          if (ny < 0 || ny >= gh) continue;
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const nx = x + dx;
+            if (nx < 0 || nx >= gw) continue;
+            const j = ny * gw + nx;
+            const value = field[j];
+            if (value !== value || (key && key[j] !== k)) continue;
+            if (value - own > tol || own - value > tol) continue;
+            sum += value;
+            count += 1;
+          }
+        }
+        next[i] = sum / count;
+      }
+      if (y % 64 === 63) yield;
+    }
+    field.set(next);
+  }
+}
 
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
 const hash = (i: number, salt: number) => {
@@ -613,6 +677,34 @@ export function* prepareNaniteSkin(
         }
       }
     }
+    // A vein one path wide leads the front as a needle; spread it over the
+    // body a few px each side (a 3×3 box, three passes, the body only) and
+    // lift it back, so the liquid runs ahead in a rounded tongue instead.
+    const spread = new Float32Array(n);
+    for (let pass = 0; pass < 3; pass += 1) {
+      for (let y = 0; y < gh; y += 1)
+        for (let x = 0; x < gw; x += 1) {
+          const i = y * gw + x;
+          if (!body[i]) {
+            spread[i] = 0;
+            continue;
+          }
+          let sum = 0;
+          let count = 0;
+          for (let dy = -1; dy <= 1; dy += 1)
+            for (let dx = -1; dx <= 1; dx += 1) {
+              const nx = x + dx;
+              const ny = y + dy;
+              if (nx < 0 || ny < 0 || nx >= gw || ny >= gh || !body[ny * gw + nx]) continue;
+              sum += vein[ny * gw + nx];
+              count += 1;
+            }
+          spread[i] = sum / count;
+        }
+      vein.set(spread);
+      yield;
+    }
+    for (let i = 0; i < n; i += 1) vein[i] = Math.min(1, vein[i] * 2.4);
   }
   yield;
 
@@ -656,6 +748,9 @@ export function* prepareNaniteSkin(
     }
     if (i % 16384 === 0) yield;
   }
+  // One continuous sheet: the front's facets and the veins' tips smoothed,
+  // within each group of the plan (its own times stay its own).
+  yield* naniteSmoothField(time, region, gw, gh, NANITE_SKIN.smooth.passes, NANITE_SKIN.smooth.tol);
 
   // The same front over the whole frame (a change of form, the retract):
   // the distance itself, the helmet's place last.
@@ -676,6 +771,10 @@ export function* prepareNaniteSkin(
         change[i] = Math.max(0, bodyShare * Math.pow(d, 0.85) + edge - 0.04 * vein[i]);
       }
     }
+    // (The helmet apart from the rest: it closes last, on its own.)
+    const helmKey = new Uint8Array(n);
+    for (let i = 0; i < n; i += 1) helmKey[i] = region[i] === timeline.helmBeat ? 1 : 0;
+    yield* naniteSmoothField(change, helmKey, gw, gh, NANITE_SKIN.smooth.passes, NANITE_SKIN.smooth.tol * 2.5);
   }
   yield;
 
@@ -687,6 +786,9 @@ export function* prepareNaniteSkin(
   // one copy to each actual lattice socket, including during reverse play.
   const tile = atob(NANITE_RELIEF[style.alloy ?? (style.triangles ? "far-from" : "meta-unitas")]);
   const relief = new Uint8Array(n);
+  // Each pixel's distance from its hexagon's centre (0 centre … 255 rim):
+  // the cell's iris as it clicks.
+  const radial = new Uint8Array(n);
   const tileScale = NANITE_RELIEF_SIZE / (2 * R);
   let cellCount = 0;
   {
@@ -710,10 +812,14 @@ export function* prepareNaniteSkin(
       const tx = Math.min(NANITE_RELIEF_SIZE - 1, Math.max(0, Math.floor((px - cx + R) * tileScale)));
       const ty = Math.min(NANITE_RELIEF_SIZE - 1, Math.max(0, Math.floor((py - cy + R) * tileScale)));
       relief[i] = tile.charCodeAt(ty * NANITE_RELIEF_SIZE + tx);
+      radial[i] = Math.min(255, Math.round((Math.hypot(px - cx, py - cy) / R) * 255));
       if (style.triangles) {
+        // The lines are the finer triangles; a click is a pair of them (a
+        // rhombus), so each clicking unit still covers enough of the 2 px
+        // field to read as a shape, not as a speck of salt.
         let sector = Math.floor((Math.atan2(py - cy, px - cx) + Math.PI) / (Math.PI / 3));
         if (sector > 5) sector = 5;
-        id = id * 6 + sector;
+        id = id * 3 + (sector >> 1);
       }
       cellOf[i] = id;
       if (i % 16384 === 16383) yield;
@@ -899,7 +1005,9 @@ export function* prepareNaniteSkin(
 
   // The baked layers. The fibres and facets (field-sized): dark lines along
   // the body's edges — the way the liquid runs — and each cell's own shade.
-  const fibres = make(gw, gh);
+  // (Baked at the figure's own size since the nanosuit pass, 2026-11-20:
+  // the field-sized picture scaled up showed its 2 px grid in the chrome.)
+  const fibres = make(W, H);
   {
     // The distance to the silhouette's edge (two chamfer passes).
     const edge = new Float32Array(n);
@@ -930,21 +1038,58 @@ export function* prepareNaniteSkin(
     yield;
     const context = fibres.getContext("2d");
     if (!context) return null;
-    const image = context.createImageData(gw, gh);
+    const image = context.createImageData(W, H);
     const data = new Uint32Array(image.data.buffer);
-    for (let i = 0; i < n; i += 1) {
-      // A fibre every ~3.5 field px, and the cell's facet.
-      const stripe = 0.5 + 0.5 * Math.cos(edge[i] * 1.8);
-      const facet = hash(cellOf[i], 41);
-      // Turn the twin reflections with the limb's contour. The milled rim,
-      // iris or shingle only belongs to the liquid mask, never the final art.
-      const slope = (edge[i - 1] ?? edge[i]) - (edge[i + 1] ?? edge[i]);
-      const left = 0.60 + Math.max(-1, Math.min(1, slope * 0.45)) * 0.23;
-      const gleam = ((relief[i] >> 4) * left + (relief[i] & 15) * (1 - left)) / 15;
-      const value = (gleam - 0.38) * 1.48 + facet * 0.12 - stripe * stripe * 0.23;
-      const opacity = Math.round(Math.min(0.78, Math.abs(value)) * 255);
-      data[i] = (opacity << 24) | (value > 0 ? 0xfff2e6 : 0x0c0806);
-      if (i % 16384 === 16383) yield;
+    const sqrt3 = Math.sqrt(3);
+    // The edge distance, read between the field's samples (figure px).
+    const edgeAt = (x: number, y: number) => {
+      const gx = Math.min(gw - 1.001, Math.max(0, x / S - 0.5));
+      const gy = Math.min(gh - 1.001, Math.max(0, y / S - 0.5));
+      const x0 = gx | 0;
+      const y0 = gy | 0;
+      const fx = gx - x0;
+      const fy = gy - y0;
+      const i = y0 * gw + x0;
+      const top = edge[i] + (edge[i + 1] - edge[i]) * fx;
+      const bottom = edge[i + gw] + (edge[i + gw + 1] - edge[i + gw]) * fx;
+      return (top + (bottom - top) * fy) * S;
+    };
+    for (let y = 0; y < H; y += 1) {
+      for (let x = 0; x < W; x += 1) {
+        const px = x + 0.5;
+        const py = y + 0.5;
+        const e = edgeAt(px, py);
+        if (e <= 0) continue;
+        // The cell under this pixel (as the field's cells), its facet and
+        // its relief, at the figure's resolution.
+        const fq = ((sqrt3 / 3) * px - py / 3) / R;
+        const fr = ((2 / 3) * py) / R;
+        let rq = Math.round(fq);
+        let rr = Math.round(fr);
+        const rs = Math.round(-fq - fr);
+        const dq = Math.abs(rq - fq);
+        const dr = Math.abs(rr - fr);
+        const dsum = Math.abs(rs + fq + fr);
+        if (dq > dr && dq > dsum) rq = -rr - rs;
+        else if (dr > dsum) rr = -rq - rs;
+        const cx = R * sqrt3 * (rq + rr / 2);
+        const cy = R * 1.5 * rr;
+        const tx = Math.min(NANITE_RELIEF_SIZE - 1, Math.max(0, Math.floor((px - cx + R) * tileScale)));
+        const ty = Math.min(NANITE_RELIEF_SIZE - 1, Math.max(0, Math.floor((py - cy + R) * tileScale)));
+        const lit = tile.charCodeAt(ty * NANITE_RELIEF_SIZE + tx);
+        const facet = hash((rq + 512) * 2048 + (rr + 512), 41);
+        // A fibre every ~5 figure px along the limb, the way it flows.
+        const stripe = 0.5 + 0.5 * Math.cos(e * 1.26);
+        // Turn the twin reflections with the limb's contour. The milled rim,
+        // iris or shingle only belongs to the liquid mask, never the final art.
+        const slope = (edgeAt(px - S, py) - edgeAt(px + S, py)) / S;
+        const left = 0.60 + Math.max(-1, Math.min(1, slope * 0.45)) * 0.23;
+        const gleam = ((lit >> 4) * left + (lit & 15) * (1 - left)) / 15;
+        const value = (gleam - 0.38) * 1.48 + facet * 0.12 - stripe * stripe * 0.23;
+        const opacity = Math.round(Math.min(0.78, Math.abs(value)) * 255);
+        data[y * W + x] = (opacity << 24) | (value > 0 ? 0xfff2e6 : 0x0c0806);
+      }
+      if (y % 24 === 23) yield;
     }
     context.putImageData(image, 0, 0);
   }
@@ -959,7 +1104,8 @@ export function* prepareNaniteSkin(
     const dx = R * sqrt3;
     const dy = R * 1.5;
     context.strokeStyle = style.line;
-    context.lineWidth = 0.7;
+    // (Finer since the nanosuit pass, 2026-11-20.)
+    context.lineWidth = 0.55;
     context.beginPath();
     let row = 0;
     for (let cy = -dy; cy < H + dy; cy += dy, row += 1) {
@@ -991,6 +1137,58 @@ export function* prepareNaniteSkin(
       }
     }
     context.stroke();
+    // A second, finer tessellation inside the cells (nanosuit pass,
+    // 2026-11-20): faint lines at half the pitch, baked here so they cost a
+    // frame nothing. Triangles: the same three families of lines halfway
+    // between the cells' own, so every triangle splits in four. Hexagons: an
+    // inset hexagon, a bevel inside each cell.
+    context.lineWidth = 0.4;
+    context.globalAlpha = 0.42;
+    context.beginPath();
+    if (style.triangles) {
+      const pitch = (R * sqrt3) / 2;
+      for (const angle of [Math.PI / 2, Math.PI / 6, -Math.PI / 6]) {
+        // Lines along `angle`, at offsets halfway between the lattice's own.
+        const ux = Math.cos(angle);
+        const uy = Math.sin(angle);
+        const nx = -uy;
+        const ny = ux;
+        const reach = Math.hypot(W, H);
+        const lo = Math.floor(Math.min(0, nx * W, ny * H, nx * W + ny * H) / pitch) - 1;
+        const hi = Math.ceil(Math.max(0, nx * W, ny * H, nx * W + ny * H) / pitch) + 1;
+        for (let k = lo; k <= hi; k += 1) {
+          const d = (k + 0.5) * pitch;
+          const ox = nx * d;
+          const oy = ny * d;
+          context.moveTo(ox - ux * reach, oy - uy * reach);
+          context.lineTo(ox + ux * reach, oy + uy * reach);
+        }
+      }
+    } else {
+      const inset = 0.5;
+      let micro = 0;
+      for (let cy = -dy; cy < H + dy; cy += dy, micro += 1) {
+        const shift = micro & 1 ? dx / 2 : 0;
+        for (let cx = -dx + shift; cx < W + dx; cx += dx) {
+          const r = R * inset;
+          const hw = (r * sqrt3) / 2;
+          context.moveTo(cx, cy - r);
+          context.lineTo(cx + hw, cy - r / 2);
+          context.lineTo(cx + hw, cy + r / 2);
+          context.lineTo(cx, cy + r);
+          context.lineTo(cx - hw, cy + r / 2);
+          context.lineTo(cx - hw, cy - r / 2);
+          context.closePath();
+        }
+        if (micro % 24 === 23) {
+          context.stroke();
+          context.beginPath();
+          yield;
+        }
+      }
+    }
+    context.stroke();
+    context.globalAlpha = 1;
   }
   yield;
 
@@ -1019,7 +1217,7 @@ export function* prepareNaniteSkin(
     context.fillStyle = style.steel;
     context.fillRect(0, 0, W, H);
     context.globalAlpha = 1;
-    context.drawImage(fibres, 0, 0, gw * S, gh * S);
+    context.drawImage(fibres, 0, 0);
     // The room in the chrome: soft bands of light across it.
     context.fillStyle = sheen ?? (sheen = makeSheen(context));
     context.fillRect(0, 0, W, H);
@@ -1110,21 +1308,48 @@ export function* prepareNaniteSkin(
       grow(dirty, x, (i - x) / gw);
     }
     const K = T.ripple * Math.PI * 2;
+    const iris = (T.pop * NANITE_SKIN.iris) / 255;
     for (let k = lo; k < hi; k += 1) {
       const i = idx[k];
       const dt = q - t[k];
       const dc = q - th[k];
-      const liquid = dt <= 0 ? 0 : dt >= T.soft ? 1 : dt / T.soft;
-      const colour = dc <= 0 ? 0 : dc >= T.pop ? 1 : dc / T.pop;
+      // Every ramp is eased (nanosuit pass, 2026-11-20: 「滑らかに」): a
+      // linear ramp on a 2 px field reads as a hard step once it is scaled
+      // up; smoothstep and ease-out curves keep the edges sub-pixel soft.
+      const lu = dt <= 0 ? 0 : dt >= T.soft ? 1 : dt / T.soft;
+      const liquid = lu * lu * (3 - 2 * lu);
+      // The cell clicks from its centre out (an iris), easing out: it snaps
+      // in and settles, never a linear fade.
+      const ds = dc - iris * radial[i];
+      const cu = ds <= 0 ? 0 : ds >= T.pop ? 1 : ds / T.pop;
+      const cv = 1 - cu;
+      const colour = 1 - cv * cv * cv;
       // The lines: up before the cell clicks, lingering after.
-      let line = dc <= -T.rise ? 0 : dc >= 0 ? 1 : 1 + dc / T.rise;
-      if (dc > T.pop) line *= 0.62 * (1 - clamp01((dc - T.pop) / T.grain));
-      // The light: the lip, the cell's flash, the liquid's ripple and
-      // reflection across the bevel.
-      const lipAt = dt - T.lip * 0.3;
-      let light = lipAt > -T.lip && lipAt < T.lip ? 1 - Math.abs(lipAt) / T.lip : 0;
-      light *= light;
-      if (dc > 0 && dc < T.flash) light += 0.62 * (1 - dc / T.flash);
+      let line = 1;
+      if (dc <= -T.rise) line = 0;
+      else if (dc < 0) {
+        const r = 1 + dc / T.rise;
+        line = r * r * (3 - 2 * r);
+      } else if (dc > T.pop) {
+        const g = clamp01((dc - T.pop) / T.grain);
+        line = 0.62 * (1 - g * g * (3 - 2 * g));
+      }
+      // The light: the lip (a smooth bell with a hot core, so the bead has
+      // no ridge), the cell's flash, the liquid's ripple and reflection
+      // across the bevel.
+      const lipAt = (dt - T.lip * 0.3) / T.lip;
+      let light = 0;
+      if (lipAt > -1 && lipAt < 1) {
+        const b = 1 - lipAt * lipAt;
+        const bell = b * b;
+        light = 0.7 * bell + 0.3 * bell * bell * bell;
+      }
+      if (ds > 0 && ds < T.flash) {
+        // A quick attack and a smooth fall: the flash swells with the iris.
+        const f = 1 - ds / T.flash;
+        const attack = ds < T.flash * 0.12 ? ds / (T.flash * 0.12) : 1;
+        light += 0.62 * attack * f * f;
+      }
       if (liquid > 0 && colour < 1) {
         const wet = liquid * (1 - colour);
         if (ripple) {
@@ -1219,7 +1444,8 @@ export function* prepareNaniteSkin(
     const to = lowerBound(front.mt, front.motes, q + lead);
     batchCount[0] = batchCount[1] = batchCount[2] = 0;
     const cap = batch[0].length / 3;
-    const small = Math.max(device, 0.62 * px);
+    // (Finer: half a CSS px, never under a device px.)
+    const small = Math.max(device, 0.5 * px);
     const atlas = !back && assemblyCellsReady(cells) ? cells : null;
     const heroCap = input.coarse || governor.level > 0 ? 4 : 8;
     let heroes = 0;
@@ -1247,7 +1473,10 @@ export function* prepareNaniteSkin(
         heroes++;
         continue;
       }
-      const blink = (seed * 9.7 + q * (back ? 26 : 70)) % 1;
+      // A droplet keeps its tone for its whole flight (nanosuit pass,
+      // 2026-11-20): a tone flipped by the progress popped between frames
+      // of a scroll. The white ones are the sparkle, by seed.
+      const blink = (seed * 9.7) % 1;
       const tone = blink < 0.16 ? 2 : seed < 0.42 ? 1 : 0;
       const at = batchCount[tone];
       if (at >= cap) continue;

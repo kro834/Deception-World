@@ -564,10 +564,12 @@ test("each cast alloy shades the same forming surface differently before the sea
     // the moving masks are first touched by draw().
     const pixels = document.canvases.flatMap((canvas) => canvas.calls)
       .find(([op]) => op === "putImageData")[1].data;
+    // (2026-11-20, nanosuit pass: the fibre picture is baked at the figure's
+    // own size, no longer the 2 px field's; the same chest, in figure px.)
     const chest = [];
-    for (let y = 48; y < 77; y++)
-      for (let x = 45; x < 76; x++)
-        chest.push(pixels[(y * layer.field.width + x) * 4 + 3]);
+    for (let y = 96; y < 154; y++)
+      for (let x = 90; x < 152; x++)
+        chest.push(pixels[(y * SIZE.width + x) * 4 + 3]);
     layer.release();
     return chest;
   };
