@@ -4309,3 +4309,73 @@ html[data-family="special"] body #top.ics-page[data-command-special] #forms .rxs
     box-shadow: none;
   }
 }
+
+/* ---------- End card: the doors beside the figure ---------- */
+/* As the Meta Unitas and Far From end cards: the way back and the doors at
+   the left, ウルトラ standing at the right on its crimson, the name's ghost
+   across the foot. Phones keep the figure over the doors. */
+#top.rxs-page.ics-page .ics-footer > .ics-end-mark {
+  position: absolute;
+  z-index: 0;
+  bottom: -0.12em;
+  left: 50%;
+  translate: -50% 0;
+  color: transparent;
+  font-family: var(--ics-forge);
+  font-size: clamp(56px, 13vw, 210px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(166 230 255 / 12%);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 92%);
+  mask-image: linear-gradient(180deg, #000 30%, transparent 92%);
+}
+
+@media (min-width: 900px) {
+  #top.rxs-page.ics-page .ics-footer {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 14px;
+    min-height: clamp(600px, 84svh, 880px);
+    padding: clamp(80px, 8vw, 120px) calc(var(--ics-gutter) + min(46vw, 600px)) clamp(96px, 10vw, 150px)
+      var(--ics-gutter);
+    background:
+      radial-gradient(circle at 74% 46%, transparent calc(clamp(170px, 17vw, 260px) - 1px), rgb(233 184 102 / 24%) clamp(170px, 17vw, 260px), transparent calc(clamp(170px, 17vw, 260px) + 1px)),
+      radial-gradient(circle at 74% 46%, transparent calc(clamp(230px, 24vw, 360px) - 1px), rgb(166 230 255 / 12%) clamp(230px, 24vw, 360px), transparent calc(clamp(230px, 24vw, 360px) + 1px)),
+      radial-gradient(36% 50% at 74% 46%, rgb(184 31 58 / 22%), transparent 72%),
+      radial-gradient(50% 50% at 10% 100%, rgb(47 79 216 / 16%), transparent 70%),
+      var(--ics-ink);
+  }
+
+  #top.rxs-page.ics-page .ics-footer > .ics-end-figure {
+    position: absolute;
+    z-index: 0;
+    top: clamp(40px, 5vw, 72px);
+    right: var(--ics-gutter);
+    bottom: 0;
+    left: auto;
+    flex: none;
+    width: min(46vw, 600px);
+    height: calc(100% - clamp(40px, 5vw, 72px));
+    margin: 0;
+    object-fit: contain;
+    object-position: 50% 100%;
+  }
+
+  #top.rxs-page.ics-page .ics-footer > p.ics-footer-top {
+    position: relative;
+    inset: auto;
+    flex: none;
+    margin: 0 0 clamp(20px, 3vw, 36px);
+  }
+
+  #top.rxs-page.ics-page .ics-footer > a {
+    flex: none;
+    width: min(100%, 380px);
+    justify-content: space-between;
+  }
+}

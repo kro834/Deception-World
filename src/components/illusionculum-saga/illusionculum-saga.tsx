@@ -701,6 +701,11 @@ export function IllusionculumSaga() {
       </section>
 
       <footer className="rxs-footer ics-footer" role="contentinfo">
+        {/* The name as the end card's watermark, as the Meta Unitas and
+            Extreme end cards set theirs (decorative). */}
+        <span className="ics-end-mark" aria-hidden="true">
+          ILLUSIONCULUM
+        </span>
         {/* The end card: ウルトラ with its リアクター・モア behind the last
             line (lazy; decorative). */}
         <img
