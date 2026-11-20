@@ -1372,13 +1372,34 @@ void main() {
   float seated = (uSeat.x - seatAt) / uSeat.z;
   a = mix(a, max(min(a, uSeat.w + max(seated, 0.0)), seated * 1.6), gated);
 #endif
+  vec2 p = vUv * uFigure;
+  // The bead's contact line wanders in a fine, continuous fingering (two
+  // octaves of smooth noise at the lattice's scale). (Nanosuit pass,
+  // 2026-11-20: it was stepped per socket, which made the lip a stair of
+  // hexagons that read as square blocks at a phone's pixel ratio.)
+  float finger = 0.2 * (vnoise(p / (uHex * 0.8)) - 0.5) + 0.16 * (vnoise(p / (uHex * 2.6) + 7.3) - 0.5);
+  float deposit = a + finger * (1.0 - smoothstep(0.5, 1.8, a));
+  // How far one backing pixel moves the deposit: the lip is never sharper
+  // than that (a sub-pixel front, not a stair of texels).
+#ifdef DERIV
+  float dw = clamp(fwidth(deposit), 0.0, 0.5);
+#else
+  float dw = 0.0;
+#endif
+  // The ripples' footprint, taken here too: derivatives are undefined once
+  // a neighbouring fragment of the quad has returned (the early outs below),
+  // which on some mobile GPUs speckles the lip along the silhouette.
+#ifdef DERIV
+  float aw = fwidth(a);
+#else
+  float aw = 0.0;
+#endif
   if (art.a < 0.004 || a < -0.6) {
     gl_FragColor = base * uAlpha;
     return;
   }
   vec3 colour = art.rgb / max(art.a, 0.001);
   float light = luma(colour);
-  vec2 p = vUv * uFigure;
   // The emitters: each lights once the shell over it has been whole a
   // moment (the lagged front, the bands behind it), with a bloom that
   // settles; the reactor's as soon as its cells set (the trigger); the
@@ -1412,19 +1433,6 @@ void main() {
   vec2 deltaB = hp - centreB;
   vec2 local = dot(deltaA, deltaA) < dot(deltaB, deltaB) ? deltaA : deltaB;
   float threshold = hash(floor(2.0 * (hp - local) / hs + 0.5));
-  // The bead's contact line wanders in a fine, continuous fingering (two
-  // octaves of smooth noise at the lattice's scale). (Nanosuit pass,
-  // 2026-11-20: it was stepped per socket, which made the lip a stair of
-  // hexagons that read as square blocks at a phone's pixel ratio.)
-  float finger = 0.2 * (vnoise(p / (uHex * 0.8)) - 0.5) + 0.16 * (vnoise(p / (uHex * 2.6) + 7.3) - 0.5);
-  float deposit = a + finger * (1.0 - smoothstep(0.5, 1.8, a));
-  // How far one backing pixel moves the deposit: the lip is never sharper
-  // than that (a sub-pixel front, not a stair of texels).
-#ifdef DERIV
-  float dw = clamp(fwidth(deposit), 0.0, 0.5);
-#else
-  float dw = 0.0;
-#endif
   if (deposit < -dw) {
     // The lip's shadow, just ahead of it.
     float shade = smoothstep(-0.4, 0.0, deposit);
@@ -1441,7 +1449,7 @@ void main() {
   // the sheet thickens and wherever they would be finer than a pixel.
   float wave = 0.5 + 0.5 * cos(a * 7.5 - 1.2);
 #ifdef DERIV
-  float rippleAa = 1.0 - smoothstep(0.35, 0.9, fwidth(a) * 7.5);
+  float rippleAa = 1.0 - smoothstep(0.35, 0.9, aw * 7.5);
 #else
   float rippleAa = 0.0;
 #endif

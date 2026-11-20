@@ -178,3 +178,18 @@ test("the seat cells: budgeted by device, each lands on its plate as its texel o
   const source = read("src/lib/rexonance-entry-seat.ts");
   assert.doesNotMatch(source, /document|new Image|getContext|stroke|shadowBlur/);
 });
+
+test("the skin's derivatives are all taken before any fragment of a quad returns", () => {
+  // fwidth() is undefined in non-uniform control flow (GLSL ES 1.00): taken
+  // after the early outs, a quad straddling the silhouette or the front read
+  // a returned neighbour's stale value and could speckle the lip (2026-11-21
+  // review).
+  const skin = readFileSync(new URL("../src/lib/rexonance-suit-skin.ts", import.meta.url), "utf8");
+  const fragment = skin.slice(skin.indexOf("const FRAGMENT = `"), skin.indexOf("export type SkinSources"));
+  const main = fragment.slice(fragment.indexOf("void main()"));
+  const firstReturn = main.indexOf("return;");
+  assert.ok(firstReturn > 0);
+  const uses = [...main.matchAll(/fwidth\(|dFdx\(|dFdy\(/g)].map((m) => m.index);
+  assert.ok(uses.length >= 2);
+  for (const at of uses) assert.ok(at < firstReturn, `derivative at ${at} after the first return`);
+});

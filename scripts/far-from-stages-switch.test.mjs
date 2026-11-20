@@ -188,7 +188,15 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
     page.slice(page.indexOf("function stageMotionAllowed"), page.indexOf("/** A deep link")),
     /connection|effectiveType|saveData/,
   );
-  assert.match(page, /const enabled = stageMotionAllowed\(\);\s*setStageMotionEnabled\(enabled\);\s*if \(!enabled\) cancelMotion\(\);/);
+  // Render state follows the preference, not the page's visibility: a tab
+  // switched away and back must not swap ウルトラ's picture or replay its
+  // deploy (2026-11-21 review); hidden still cancels a running card.
+  assert.match(page, /setStageMotionEnabled\(stageMotionPreferred\(\)\);\s*const enabled = stageMotionAllowed\(\);\s*if \(!enabled\) cancelMotion\(\);/);
+  assert.match(page, /return !document\.hidden && stageMotionPreferred\(\);/);
+  assert.doesNotMatch(
+    page.slice(page.indexOf("function stageMotionPreferred"), page.indexOf("/** A deep link")),
+    /document\.hidden/,
+  );
   assert.match(page, /media\.addEventListener\("change", syncStageMotion\);/);
   assert.match(page, /forced\.addEventListener\("change", syncStageMotion\);/);
   assert.match(page, /new MutationObserver\(syncStageMotion\)/);
