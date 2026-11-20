@@ -1150,6 +1150,23 @@
   line-height: 1.45;
 }
 
+/* A chapter's title keeps its words (design brush-up, 2026-11-20): on a
+   phone 同条件ベンチマーク・暫定評価 turned inside ベンチマーク (マー／ク) and
+   P16・第16世代演算加速機構 inside 世代. The title now turns only at ・ or a
+   space, and one step down in size the two 14-glyph titles sit on one line
+   at 390px. */
+.ffs-page .ffs-report summary h4 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .ffs-page .ffs-report summary h4 {
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+}
+
 /* The chevron: a plus that turns into a minus. */
 .ffs-page .ffs-report summary > i {
   position: relative;

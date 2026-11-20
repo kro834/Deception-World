@@ -896,6 +896,23 @@ html[data-family="world"]:root
   overflow-wrap: anywhere;
 }
 
+/* Three doors across on a narrow desk or an upright iPad (1000-1179px,
+   design brush-up, 2026-11-20): the name's column was 3px short of seven
+   katakana, so エクスプリーム and イリュージョン lost their last glyph to
+   the next line (エクスプリー／ムサーガ). A tighter gutter gives the name the
+   room, and it breaks only at its own seams again. */
+@media (min-width: 1000px) and (max-width: 1179.98px) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:not(.is-far-from) {
+    gap: 0 10px;
+    padding-right: 14px;
+  }
+}
+
 /* The arrow, drawn in the site's light. */
 html[data-family="world"]:root
   body

@@ -2204,6 +2204,22 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
     letter-spacing: 0;
   }
 
+  /* Each tab's share follows its name's length (design brush-up,
+     2026-11-20): in five equal cells エックスハイ ran 4px past its own
+     frame and met マックス, while ハイ sat in open space. Weighted, the gaps
+     between the names read even. */
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:nth-of-type(1) {
+    flex-grow: 0.95;
+  }
+
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:nth-of-type(2) {
+    flex-grow: 0.72;
+  }
+
+  .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:nth-of-type(3) {
+    flex-grow: 1.42;
+  }
+
   /* The end card on a phone: the title's cell may shrink below its longest
      phrase (the grid's auto minimum held it at the phrase's width and the
      line ran off the screen), its size fits ファイナルステージで。 on one

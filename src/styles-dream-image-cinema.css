@@ -377,6 +377,11 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     letter-spacing: normal;
     text-align: start;
     white-space: normal;
+    /* The film's title stays whole beside the lantern: the line turns before
+       『, not inside ディセプションワールド (ワール／ド on a phone, 2026-11-20).
+       WebKit turns after 『 instead; the title is whole there too. Under
+       the narrowest screens it may still break anywhere. */
+    word-break: keep-all;
     overflow-wrap: anywhere;
     writing-mode: horizontal-tb;
     opacity: 1;

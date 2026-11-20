@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { withWordBreaks } from "@/lib/name-breaks";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import {
@@ -189,7 +190,10 @@ export function WorldMap({
             onClick={() => choose(n.id)}
           >
             <small>{MAP_KINDS[n.kind]}</small>
-            <span>{n.title}</span>
+            {/* Names break at their own seams (仮面ライダー／サイファー), not
+                wherever the column ends. Zero-width seams only: the title's
+                own spaces and spelling render as stored. */}
+            <span>{withWordBreaks(n.title)}</span>
           </button>
         ))}
       </div>

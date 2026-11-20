@@ -88,6 +88,32 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-
   color: #151923;
 }
 
+/* The two entrances stand on one line (design brush-up, 2026-11-20): 作品一覧
+   kept a 22px top margin and its own width from an older hero, so it sat
+   lower and narrower than 鑑賞ツアー, which stretched to 70px beside it.
+   Both are now the same 48px control in the same cell, the label at the
+   leading edge and the arrow at the trailing one. */
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page]
+  .gallery-screening-nav {
+  align-items: center;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+  .gallery-screening-nav
+  > a {
+  justify-self: stretch;
+  align-self: center;
+  width: auto;
+  height: 48px;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 16px;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-artwork-intro .artwork-stage {
   --stage-art-height: clamp(340px, 59svh, 660px);
   display: grid;
