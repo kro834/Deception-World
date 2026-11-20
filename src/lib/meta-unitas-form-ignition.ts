@@ -10,6 +10,9 @@ import { bakeWhiteFireFuel, createWhiteFire, type WhiteFireFuel } from "./meta-u
 import { releasePendingImage } from "./release-pending-images.js";
 
 export const META_UNITAS_IGNITION_MS = 1850;
+/** How long the overlay may wait for its pictures before the burn, and for
+ * the panel's ウルトラ after it: neither ever holds the panel longer. */
+export const META_UNITAS_IGNITION_WAIT_MS = 2350;
 
 const CORE = [
   META_UNITAS_RX_MARKS.core[0] / META_UNITAS_RX_SIZE.width,
@@ -35,6 +38,7 @@ export function mountMetaUnitasFormIgnition(
   let ended = false;
   let decoded = false;
   let frame = 0;
+  let deadline = 0;
   const context = canvas.getContext("2d");
   const coarse = window.matchMedia("(pointer: coarse)").matches;
   const fire = context ? createWhiteFire(canvas.ownerDocument, coarse) : null;
@@ -71,7 +75,7 @@ export function mountMetaUnitasFormIgnition(
     onFinish();
   };
   // A stalled decode never holds the panel: ウルトラ is shown regardless.
-  const deadline = window.setTimeout(finish, 4200);
+  deadline = window.setTimeout(finish, META_UNITAS_IGNITION_MS + META_UNITAS_IGNITION_WAIT_MS);
 
   let startedAt = 0;
   let width = 0;
@@ -112,6 +116,12 @@ export function mountMetaUnitasFormIgnition(
       if (disposed || ended) return;
       fuel = bakeWhiteFireFuel(canvas.ownerDocument, from, CORE);
       if (!fuel) return finish();
+      // The burn plays whole once it starts (as FAR FROM's does): the
+      // deadline armed at mount would cut a burn whose pictures were slow to
+      // arrive mid-fire. It is re-armed to bound only the burn and the hold
+      // for the panel's ウルトラ after it.
+      window.clearTimeout(deadline);
+      deadline = window.setTimeout(finish, META_UNITAS_IGNITION_MS + META_UNITAS_IGNITION_WAIT_MS);
       frame = window.requestAnimationFrame(tick);
     }, finish);
   } else finish();

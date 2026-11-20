@@ -244,8 +244,10 @@ export function rasterWhiteFire(
       const x = box.left + ((col + 0.5) * box.width) / width;
       // The burn's key: ウルトラ shows where the front has passed it.
       const a = sample(arrival, x, y);
-      const grain = sampleNoise(x * 7.3 + 11, y * 6.1 + 5);
-      const key = a * 0.8 + grain * 0.2;
+      // The key's grain only matters once the reveal runs (`shown` and the
+      // lip read it only then): before it, ~40 % of the burn, a noise call a
+      // cell a frame is saved on the phones that draw this.
+      const key = revealing ? a * 0.8 + sampleNoise(x * 7.3 + 11, y * 6.1 + 5) * 0.2 : 0;
       const shown = revealing ? ramp(key - 0.035, key + 0.035, front) : 0;
       mask[i] = shown > 0 ? WHITE | ((shown * 255) << ALPHA_SHIFT) : 0;
       if (strength <= 0) {
