@@ -76,13 +76,22 @@
   --ics-accent: var(--ics-ice);
   --ics-wrap: 1180px;
   --ics-gutter: max(20px, calc((100vw - var(--ics-wrap)) / 2));
+  /* Type (2026-11-20, owner: 「フォントがチープ」): the page drew every
+     Japanese glyph in the system's gothic (Hiragino Sans W8 on Apple, Yu
+     Gothic elsewhere), so it looked like OS chrome and differed by device.
+     Now the site's own faces, as the sibling sagas set theirs: the Latin and
+     the figures in "Rexonance Forge" (Saira, preloaded on this route), the
+     Japanese in Noto Sans JP (the site's core face, 400–600, its own
+     subsets), titles at its 600 with proportional kana (palt) — the weight
+     Rexonance's titles draw at. Zen Kaku Gothic New was tried and set
+     aside: as served it has no palt, so the katakana names ran loose. No
+     new font file or request family; the system gothics stay as fallbacks. */
   --ics-display:
-    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+    "Rexonance Forge", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
   --ics-forge: "Rexonance Forge", "Oxanium", var(--ics-display);
   --ics-hud: "Oxanium", "Rexonance Forge", var(--ics-display);
   --ics-text:
-    -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
-    "Yu Gothic", system-ui, sans-serif;
+    "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   --rxs-cyan: var(--ics-ice);
   --rxs-pink: var(--ics-pink);
   --rxs-gold: var(--ics-gold);
@@ -4003,4 +4012,75 @@ html:not([data-world-effects="economy"])
 
 html[data-world-effects="economy"] .rxs-page.rxs-page.ics-page .ics-form-panel > figure > .ics-ignition {
   display: none;
+}
+
+/* ================================================================
+   Type and build pass (owner, 2026-11-20: 「イリュージョンクルムだけサイト
+   のつくりとかフォントとかがチープなので改善して。」)
+
+   Measured against the sibling sagas, the page read cheap for one main
+   reason and a few structural ones. Type: the page set its Japanese in
+   the system gothic at its heaviest cut (Hiragino Sans W8), the hero's
+   name inherited the shared bar's Michroma stack and fell through to it,
+   and the Latin inside titles was the system's. The faces are now the
+   site's own (the tokens above); this block sets the weights those faces
+   really have (Zen Kaku Gothic New 500/700, Noto Sans JP 400–600, Forge
+   300–800, no synthesis), one tracking per role, and the Latin in titles
+   in Forge at the same weight as the Japanese beside it.
+
+   Every rule is scoped :root body .rxs-page.rxs-page.ics-page, which
+   ties the page's strongest earlier rules (html:not(...) .rxs-page…) and
+   so wins by order as the last block of the sheet.
+   ================================================================ */
+
+/* ---------- Type: titles ---------- */
+:root body .rxs-page.rxs-page.ics-page :is(.ics-hero h1, .ics-hero h1 span) {
+  font-family: var(--ics-display);
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-hero .ics-title-name {
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  line-height: 1.1;
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-hero .ics-title-prefix {
+  font-weight: 500;
+  font-size: 0.36em;
+  letter-spacing: 0.3em;
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-hero .ics-title-ultra {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+:root body .rxs-page.rxs-page.ics-page .rxs-brand b {
+  font-family: var(--ics-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+:root body .rxs-page.rxs-page.ics-page
+  :is(.ics-heading h2, .ics-article-copy h3, .ics-finisher h3, .ics-table-block h3, .ics-evaluation h3) {
+  font-family: var(--ics-display);
+  font-weight: 600;
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-heading h2 {
+  letter-spacing: 0.06em;
+}
+
+:root body .rxs-page.rxs-page.ics-page :is(.ics-article-copy h3, .ics-finisher h3) {
+  letter-spacing: 0.04em;
+  line-height: 1.38;
+}
+
+/* ---------- Type: reading text and labels ---------- */
+:root body .rxs-page.rxs-page.ics-page .ics-lead-line {
+  font-weight: 500;
+}
+
+:root body .rxs-page.rxs-page.ics-page :is(.ics-specs dt, .ics-table th) {
+  font-weight: 500;
 }
