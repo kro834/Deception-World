@@ -29,7 +29,7 @@ test("the burn allocates nothing in a frame and reads no pixels back", () => {
 });
 
 test("the fire is red: crimson to scarlet with orange-white cores", () => {
-  const rows = [...fire.matchAll(/^  \[(\d+), (\d+), (\d+)\],$/gm)].map((m) => m.slice(1).map(Number));
+  const rows = [...fire.matchAll(/^ {2}\[(\d+), (\d+), (\d+)\],$/gm)].map((m) => m.slice(1).map(Number));
   assert.equal(rows.length, 6);
   for (const [r, g, b] of rows.slice(0, 4)) assert.ok(r > 2 * g && r > 2 * b, `${r},${g},${b}`);
 });
