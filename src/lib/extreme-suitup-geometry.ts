@@ -204,6 +204,9 @@ export type SuitupPlate = {
   at: Point;
   /** Where it emerges, and the turn it unfolds from (radians). */
   from: Point;
+  /** The control point of its curved flight (a quadratic arc from `from`
+   * to `at`): plates stream along the body in curves, not straight darts. */
+  via: Point;
   spin: number;
   /** Its flight, ms on the suit-up clock: leave at `start`, lock at `lock`. */
   start: number;
@@ -240,22 +243,27 @@ function seeded(seed: number) {
   };
 }
 
-export const SUITUP_FLIGHT_MS = 440;
+/* Nanosuit pass (owner, 2026-11-20: 「装着を本物のナノスーツの様にさらに細か
+   く滑らかにして」): the plates are ~0.6× their 11-11 size (about 2.1× as
+   many), and each flies for a shorter time, so the many small parts read as
+   one continuous stream out of the belt while the number in the air at once
+   (the frame's cost) stays near what it was. */
+export const SUITUP_FLIGHT_MS = 300;
 /** Plate circumradius per group, art px. */
 export const SUITUP_PLATE_RADIUS: Record<SuitupGroup, number> = {
-  belt: 13,
-  chest: 23,
-  hips: 21,
-  shoulders: 21,
-  arms: 18,
-  legs: 23,
-  boots: 18,
-  gauntlets: 15,
-  helmet: 14,
+  belt: 9,
+  chest: 14,
+  hips: 13,
+  shoulders: 13,
+  arms: 12,
+  legs: 14,
+  boots: 12,
+  gauntlets: 10,
+  helmet: 10,
 };
 /** The largest of them (the engine's atlas slot). */
-export const SUITUP_PLATE_RADIUS_MAX = 23;
-export const SUITUP_HELMET_FLIGHT_MS = 380;
+export const SUITUP_PLATE_RADIUS_MAX = 14;
+export const SUITUP_HELMET_FLIGHT_MS = 280;
 
 /** The plates: pointy-top hexagons over each region (SUITUP_PLATE_RADIUS ×
  * `scale`), kept where a sample of the hexagon falls in the region (and,
@@ -304,20 +312,29 @@ export function buildSuitupPlates(
         dx /= length;
         dy /= length;
         let from: Point;
+        let via: Point;
         let spin: number;
         if (region.group === "helmet") {
           // Segments fold over the head from the sides and the back.
           const side = cx < 512 ? -1 : 1;
           from = [cx + side * (34 + random() * 26), cy - 30 - random() * 30];
           spin = side * (0.9 + random() * 0.6);
+          // Over the top of the head and down: an arc that closes inward.
+          via = [cx + side * (10 + random() * 10), from[1] - 8 - random() * 10];
         } else {
           // Out of the belt side, sliding along the body.
           const travel = Math.min(length, 70 + random() * 90);
           const sway = (random() - 0.5) * 36;
           from = [cx + dx * travel - dy * sway, cy + dy * travel + dx * sway];
           spin = (random() < 0.5 ? -1 : 1) * (0.7 + random() * 1.6);
+          // The arc bows to the side it swayed to, so neighbours fan out of
+          // the belt like a stream and land along the body.
+          const bow = (sway >= 0 ? 1 : -1) * (6 + random() * 14);
+          const mx = (from[0] + cx) / 2;
+          const my = (from[1] + cy) / 2;
+          via = [mx - dy * bow, my + dx * bow];
         }
-        found.push({ region: region.id, group: region.group, poly, at: [cx, cy], from, spin });
+        found.push({ region: region.id, group: region.group, poly, at: [cx, cy], from, via, spin });
       }
     }
   }
