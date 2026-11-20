@@ -157,6 +157,11 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
       if (first === last) return 0;
 
       const px = ratio / Math.max(vs, 1e-6);
+      // One device px, in figure px: the chips' ceiling (nano pass,
+      // 2026-11-21: a nanite is far below a pixel, so a chip is a glint of
+      // a few thousand of them — never a square). The wires keep `px`: they
+      // are the armour's macro construction, not nanites.
+      const device = 1 / Math.max(vs, 1e-6);
       const budget = Math.round(limit * QUALITY[level]);
       const edgeBudget = Math.ceil(budget / 4);
       // Thin the edges by a fixed rank of each (a golden-ratio sequence over
@@ -211,7 +216,8 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
         // Several short, parallel streams feed the same contact. Smaller
         // chips follow behind the leading white chip and weld into the vertex.
         const feed = clamp(1 - age / (tail * 0.66));
-        const lanes = Math.min(18, 7 + Math.floor(length / 3));
+        // (More, finer lanes since the nano pass: a stream of dust.)
+        const lanes = Math.min(26, 10 + Math.floor(length / 2));
         const nx = (ay - by) / length;
         const ny = (bx - ax) / length;
         for (let k = 0; k < lanes && drawn < budget; k += 1) {
@@ -224,17 +230,16 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
           const index = counts[ink]++ * CHIP_STRIDE;
           batch[index] = sx + (ex - sx) * u + nx * lane;
           batch[index + 1] = sy + (ey - sy) * u + ny * lane;
-          // (Finer since the nanosuit pass, 2026-11-20: about two thirds the
-          // size, so a stream reads as fine grains, not as chunks.)
+          // (At most one device px since the nano pass, 2026-11-21.)
           batch[index + 2] =
-            px * (ink === 2 ? 0.95 : ink === 1 ? 0.68 : 0.48) * (0.76 + 0.24 * rise * feed);
+            device * (ink === 2 ? 1 : ink === 1 ? 0.9 : 0.8) * (0.76 + 0.24 * rise * feed);
           drawn += 1;
         }
         if (join && age >= 0 && age < tail * 0.34 && drawn < budget) {
           const index = counts[2]++ * CHIP_STRIDE;
           chips[2][index] = ex;
           chips[2][index + 1] = ey;
-          chips[2][index + 2] = px * (1.3 - (age / tail) * 1.6);
+          chips[2][index + 2] = device * Math.max(0, 1 - (age / tail) * 1.2);
           drawn += 1;
         }
       }
@@ -285,7 +290,8 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
         if (!counts[ink]) continue;
         const batch = chips[ink];
         context.fillStyle = ink === 0 ? tone : ink === 1 ? GOLD : WHITE;
-        context.globalAlpha = ink === 0 ? 0.57 : ink === 1 ? 0.76 : 0.92;
+        // (Dimmer since the nano pass: more of them, each a faint glint.)
+        context.globalAlpha = ink === 0 ? 0.42 : ink === 1 ? 0.58 : 0.74;
         context.beginPath();
         for (let i = 0; i < counts[ink] * CHIP_STRIDE; i += CHIP_STRIDE) {
           const half = batch[i + 2] / 2;
