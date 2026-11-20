@@ -2218,7 +2218,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained])
 
   .ffs-stage-tabs.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:nth-of-type(3) {
     flex-grow: 1.42;
-    min-width: 6em;
+    min-width: 4.75em;
   }
 
   /* The end card on a phone: the title's cell may shrink below its longest
