@@ -890,6 +890,30 @@ html[data-family]
   border-bottom: 1px solid var(--atlas-line);
   background: transparent;
 }
+/* A section's name keeps its words (design brush-up, 2026-11-20): in the
+   two-up rows a name one glyph too long for its half (ギャラリートップ on a
+   phone, 八人のライダー at 360px) dropped its last glyph to a second line.
+   The row now never narrows below the name's longest word, so its
+   neighbour gives up the few pixels, or the name takes a row of its own. */
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  .side-panel-links
+  > a {
+  /* The name's column may not shrink below its longest word either. */
+  grid-template-columns: 24px minmax(min-content, 1fr);
+  min-width: min-content;
+}
+html[data-family]
+  body
+  #site-side-panel#site-side-panel[data-command-atlas]
+  [data-atlas-group="sections"]
+  .side-panel-links
+  > a
+  > span {
+  overflow-wrap: break-word;
+}
 html[data-family]
   body
   #site-side-panel#site-side-panel[data-command-atlas]
