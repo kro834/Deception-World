@@ -4084,3 +4084,182 @@ html[data-world-effects="economy"] .rxs-page.rxs-page.ics-page .ics-form-panel >
 :root body .rxs-page.rxs-page.ics-page :is(.ics-specs dt, .ics-table th) {
   font-weight: 500;
 }
+
+/* ---------- Numerals: drawn, not stamped ---------- */
+/* The chapter numbers were 130px Forge Bold under a 1.2px gold stroke and a
+   gold glow, and every plate wore a filled gold trapezoid: the heaviest marks
+   on the page, and the ones that read as stock UI. The siblings draw their
+   numbers in a light, thin-stroked figure (Rexonance's system plates, Far
+   From's lists). The owner asked for large numbers (2026-10-24), so they stay
+   large: Forge Light, a hairline stroke, no glow. */
+:root body .rxs-page.rxs-page.ics-page .ics-numeral {
+  font-weight: 300;
+  font-size: clamp(56px, 7.4vw, 112px);
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1px rgb(233 184 102 / 78%);
+  text-shadow: none;
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-card-no {
+  display: block;
+  min-width: 0;
+  height: auto;
+  margin: 0 0 clamp(10px, 1.4vw, 16px);
+  padding: 0;
+  color: transparent;
+  background: none;
+  font-family: var(--ics-forge);
+  font-size: clamp(44px, 4.6vw, 64px);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+  line-height: 0.9;
+  -webkit-text-stroke: 1px rgb(166 230 255 / 62%);
+  clip-path: none;
+  box-shadow: none;
+}
+
+/* ---------- Plates: one surface, one rim ---------- */
+/* Each plate carried three surfaces at once (a metal gradient, two tinted
+   glows, an inner glow) and four corner brackets in four colours plus a
+   gold one: a kit of effects rather than a material. One quiet surface, the
+   prism hairline on top (kept from the prism pass) and a hairline border. */
+:root body .rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher) {
+  border: 1px solid rgb(255 255 255 / 7%);
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgb(47 79 216 / 9%), transparent 60%),
+    linear-gradient(180deg, rgb(255 255 255 / 3.5%), rgb(255 255 255 / 1%) 60%),
+    rgb(5 7 16 / 92%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 9%),
+    0 24px 48px -32px rgb(0 0 0 / 80%);
+}
+
+:root body .rxs-page.rxs-page.ics-page :is(.ics-article, .ics-finisher)::after {
+  display: none;
+}
+
+:root body .rxs-page.rxs-page.ics-page :is(.ics-finisher h3, .ics-article-copy h3) {
+  border-bottom-color: rgb(255 255 255 / 9%);
+}
+
+/* 装甲 on wide screens: the helm plate's picture takes the plate's spare
+   height, so the tall plate ends with its copy instead of an empty floor. */
+@media (min-width: 1100px) {
+  :root body .rxs-page.rxs-page.ics-page .ics-armour .ics-article.has-detail {
+    display: flex;
+    flex-direction: column;
+  }
+
+  :root body .rxs-page.rxs-page.ics-page .ics-armour .ics-article.has-detail .ics-detail {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 300px;
+    aspect-ratio: auto;
+  }
+
+  :root body .rxs-page.rxs-page.ics-page .ics-armour .ics-article.has-detail .ics-detail img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+  }
+}
+
+/* ---------- 詳しく ---------- */
+/* A calm outlined pill (the control the other sagas use), not a filled
+   cut-corner block repeated under every plate. Still 44px tall. */
+:root body .rxs-page.rxs-page.ics-page .ics-more > summary {
+  padding: 0 20px 0 22px;
+  border: 1px solid rgb(166 230 255 / 30%);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ics-ice-hi);
+  font-family: var(--ics-text);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  clip-path: none;
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-more[open] > summary {
+  border-color: rgb(233 184 102 / 48%);
+  background: rgb(233 184 102 / 6%);
+  color: var(--ics-gold-hi);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root body .rxs-page.rxs-page.ics-page .ics-more > summary:hover {
+    border-color: rgb(166 230 255 / 60%);
+    background: rgb(166 230 255 / 7%);
+  }
+}
+
+/* ---------- Calls: set on rules, not boxed ---------- */
+/* The hero's calls sat in four filled boxes with an inset bar; set as a
+   measured list on hairlines (each call still one unit, its number in gold). */
+:root body .rxs-page.rxs-page.ics-page .ics-hero-calls {
+  gap: 0;
+  border-top: 1px solid rgb(255 255 255 / 9%);
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-hero-calls > li {
+  grid-template-columns: 36px minmax(0, 1fr);
+  min-height: 48px;
+  border-bottom: 1px solid rgb(255 255 255 / 9%);
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-hero-calls b {
+  padding: 12px 0 11px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--ics-ice-hi);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+/* ---------- Chapter heads ---------- */
+/* The plate of the figure beside each head: unframed, its edges dissolved
+   into the ground, instead of a bordered cut-corner sticker. */
+:root body .rxs-page.rxs-page.ics-page .ics-heading-plate {
+  border: 0;
+  clip-path: none;
+  box-shadow: none;
+  -webkit-mask: radial-gradient(closest-side, #000 52%, transparent 100%);
+  mask: radial-gradient(closest-side, #000 52%, transparent 100%);
+}
+
+:root body .rxs-page.rxs-page.ics-page .ics-heading-plate::before,
+:root body .rxs-page.rxs-page.ics-page .ics-heading-plate::after {
+  display: none;
+}
+
+/* ---------- Ground ---------- */
+/* The chapters stood on flat black; the siblings stand on a measured field.
+   A faint ice grid on the page itself (one continuous field, so chapters
+   meet without a seam; the hero and the suit-up paint their own stages over
+   it), under the page's existing ultramarine light. The ink is unchanged. */
+:root body .rxs-page.rxs-page.ics-page {
+  background:
+    radial-gradient(120% 60rem at 50% -10rem, rgb(47 79 216 / 20%), transparent 70%),
+    linear-gradient(rgb(166 230 255 / 3%) 1px, transparent 1px) 50% 0 / 64px 64px,
+    linear-gradient(90deg, rgb(166 230 255 / 3%) 1px, transparent 1px) 50% 0 / 64px 64px,
+    var(--ics-ink);
+}
+
+/* The shared chapter grammar paints each chapter solid black over that
+   field; the chapters here let the page's ground through. */
+:root body .rxs-page.rxs-page.ics-page .ics-chapter:not(.ics-suitup) {
+  background-color: transparent;
+}
+
+/* ---------- Hero ---------- */
+/* On wide screens the name's ghost ran out of the copy column across the
+   framed art ("ILLUSIONCUL…" over the figure). It now fades out by the end
+   of the copy column; the art stays clear. */
+@media (min-width: 901px) {
+  :root body .rxs-page.rxs-page.ics-page .ics-hero .ics-mark {
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 26%, transparent 47%);
+    mask-image: linear-gradient(90deg, #000 0, #000 26%, transparent 47%);
+  }
+}
