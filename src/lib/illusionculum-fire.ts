@@ -119,12 +119,29 @@ export function buildIllusionculumFireBody(
 ): IllusionculumFireBody | null {
   const cached = bodies.get(form);
   if (cached) return cached;
+  // Two halving steps before the last: one large canvas downscale skips
+  // texels and leaves a jagged silhouette, which shows as stepped fire edges.
+  const mid = document.createElement("canvas");
+  mid.width = MASK_WIDTH * 4;
+  mid.height = MASK_HEIGHT * 4;
+  const half = document.createElement("canvas");
+  half.width = MASK_WIDTH * 2;
+  half.height = MASK_HEIGHT * 2;
   const canvas = document.createElement("canvas");
   canvas.width = MASK_WIDTH;
   canvas.height = MASK_HEIGHT;
+  const midContext = mid.getContext("2d");
+  const halfContext = half.getContext("2d");
   const context = canvas.getContext("2d", { willReadFrequently: true });
-  if (!context) return null;
-  context.drawImage(image, 0, 0, MASK_WIDTH, MASK_HEIGHT);
+  if (!context || !midContext || !halfContext) return null;
+  for (const c of [midContext, halfContext, context]) {
+    c.imageSmoothingEnabled = true;
+    c.imageSmoothingQuality = "high";
+  }
+  midContext.drawImage(image, 0, 0, mid.width, mid.height);
+  halfContext.drawImage(mid, 0, 0, half.width, half.height);
+  context.drawImage(half, 0, 0, MASK_WIDTH, MASK_HEIGHT);
+  mid.width = mid.height = half.width = half.height = 0;
   let pixels: Uint8ClampedArray;
   try {
     pixels = context.getImageData(0, 0, MASK_WIDTH, MASK_HEIGHT).data;

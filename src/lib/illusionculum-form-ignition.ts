@@ -146,3 +146,99 @@ export function mountIllusionculumFormIgnition(
     release?.();
   };
 }
+
+/** The suit-up runway at rest on its finished figure (owner, 2026-11-20):
+ * a form chosen there is past the scroll's chain, so the engine would show
+ * the new sheet at once. A choice into ウルトラ burns instead, on `canvas`
+ * (inset 0 over the engine's canvas, the same figure box the engine computes
+ * from the frame's --rzn-fig-*), with the engine's canvas hidden for the
+ * burn (`data-ics-burning` on the runway). Its last frame is the engine's
+ * own: the new sheet in the same place, so the hand-back is seamless. */
+export function mountIllusionculumRunwayIgnition(
+  runway: HTMLElement,
+  canvas: HTMLCanvasElement,
+  fromSrc: string,
+  toSrc: string,
+  previous: IllusionculumFormKey,
+  size: { readonly width: number; readonly height: number },
+  onFinish: () => void,
+) {
+  let disposed = false;
+  let ended = false;
+  let frame = 0;
+  const context = canvas.getContext("2d");
+  const from = new Image();
+  const to = new Image();
+  from.src = fromSrc;
+  to.src = toSrc;
+  const finish = () => {
+    if (ended) return;
+    ended = true;
+    window.cancelAnimationFrame(frame);
+    window.clearTimeout(deadline);
+    delete runway.dataset.icsBurning;
+    if (!disposed) onFinish();
+  };
+  const deadline = window.setTimeout(finish, 3200);
+  if (!context) {
+    finish();
+    return () => {};
+  }
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  let startedAt = 0;
+  const tick = (now: number) => {
+    if (disposed || ended) return;
+    if (!startedAt) startedAt = now;
+    const u = Math.min(1, Math.max(0, (now - startedAt) / ILLUSIONCULUM_FORM_IGNITION_MS));
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (!w || !h) {
+      finish();
+      return;
+    }
+    const ratio = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
+    const bw = Math.max(1, Math.round(w * ratio));
+    const bh = Math.max(1, Math.round(h * ratio));
+    if (canvas.width !== bw || canvas.height !== bh) {
+      canvas.width = bw;
+      canvas.height = bh;
+    }
+    // The engine's figure box (rexonance-resonance.js, its view).
+    const style = window.getComputedStyle(canvas);
+    const heightShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-h")) || 0.84;
+    const widthShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-w")) || 0.9;
+    const centreX = Number.parseFloat(style.getPropertyValue("--rzn-fig-x")) || 0.5;
+    const bottom = Number.parseFloat(style.getPropertyValue("--rzn-fig-b")) || 0.05;
+    const figureH = Math.min(h * heightShare, (w * widthShare * size.height) / size.width);
+    const figureW = (figureH * size.width) / size.height;
+    context.setTransform(bw / w, 0, 0, bh / h, 0, 0);
+    context.clearRect(0, 0, w, h);
+    context.translate(w * centreX - figureW / 2, h * (1 - bottom) - figureH);
+    const fades = illusionculumFireFades(u);
+    context.globalAlpha = fades.from;
+    if (fades.from > 0) context.drawImage(from, 0, 0, figureW, figureH);
+    context.globalAlpha = fades.to;
+    if (fades.to > 0) context.drawImage(to, 0, 0, figureW, figureH);
+    context.globalAlpha = 1;
+    drawIllusionculumFire(context, u, figureW, figureH, coarse, illusionculumFireBody(previous));
+    if (u === 1) finish();
+    else frame = window.requestAnimationFrame(tick);
+  };
+  const start = () => {
+    if (disposed || ended || runway.dataset.icsBurning) return;
+    buildIllusionculumFireBody(previous, from, document);
+    runway.dataset.icsBurning = "true";
+    tick(performance.now());
+  };
+  // The engine already holds both sheets: in the usual case they are
+  // complete now and the burn takes the frame before the engine's next
+  // draw shows the new form.
+  if (from.complete && from.naturalWidth && to.complete && to.naturalWidth) start();
+  else Promise.all([from.decode(), to.decode()]).then(start, finish);
+  return () => {
+    disposed = true;
+    finish();
+    releasePendingImage(from);
+    releasePendingImage(to);
+  };
+}

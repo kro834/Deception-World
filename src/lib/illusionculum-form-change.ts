@@ -106,14 +106,12 @@ export function createIllusionculumFormChange(
         // figure is revealed from the flame (illusionculum-fire.ts). The
         // sealed figure under this pass is cleared, so the cross-fade under
         // the fire never shows it through. u=0 is exactly `from`, u=1
-        // exactly `to`. The calm tier keeps a plain cross-fade.
+        // exactly `to`. The fire burns whatever `calm` says: the engine's
+        // calm frame is the frame at rest, which must draw the same moment
+        // as the moving one (reduced motion never mounts the engine).
         context.clearRect(0, 0, W, H);
-        if (calm || u <= 0 || u >= 1) {
-          context.globalAlpha = u <= 0 ? 1 : 1 - e;
-          if (u < 1) context.drawImage(from, 0, 0, W, H);
-          context.globalAlpha = u >= 1 ? 1 : u <= 0 ? 0 : e;
-          if (u > 0) context.drawImage(to, 0, 0, W, H);
-          context.globalAlpha = 1;
+        if (u <= 0 || u >= 1) {
+          context.drawImage(u <= 0 ? from : to, 0, 0, W, H);
           return true;
         }
         // The field is warmed ahead (forms.prepare); built here only if a

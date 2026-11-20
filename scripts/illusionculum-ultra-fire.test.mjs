@@ -38,7 +38,9 @@ test("the scroll chain's step into ウルトラ burns; the other changes keep th
   const change = read("src/lib/illusionculum-form-change.ts");
   const ultra = change.slice(change.indexOf("if (ultraIn) {"), change.indexOf("if (orbsIn) {"));
   assert.match(ultra, /drawIllusionculumFire\(context, u, W, H, coarse, body\)/);
-  assert.match(ultra, /if \(calm \|\| u <= 0 \|\| u >= 1\)/);
+  // At rest (the engine's calm frame) the same moment burns: no calm gate.
+  assert.match(ultra, /if \(u <= 0 \|\| u >= 1\)/);
+  assert.doesNotMatch(ultra, /calm \|\||\|\| calm|if \(calm|!calm/);
   assert.match(change, /const ultraIn = options\.ultraForms\.includes\(toKey\) && !options\.ultraForms\.includes\(fromKey\);/);
   // The field is warmed in idle time ahead of the chain.
   const engine = read("src/lib/illusionculum-assembly-engine.ts");
@@ -54,4 +56,14 @@ test("the forms panel burns only a seen switch into ウルトラ, where motion i
   assert.match(component, /import\("@\/lib\/illusionculum-form-ignition"\)/);
   const css = read("src/styles-illusionculum-saga.css");
   assert.match(css, /@media \(prefers-reduced-motion: reduce\), \(forced-colors: active\) \{\s*\.rxs-page\.rxs-page\.ics-page \.ics-form-panel > figure > \.ics-ignition \{\s*display: none;/);
+});
+
+test("the runway at rest on its finished figure: a choice into ウルトラ burns too", () => {
+  const suitup = read("src/components/illusionculum-saga/illusionculum-suitup.tsx");
+  assert.match(suitup, /isUltra\(form\) &&\s*!isUltra\(previous\) &&\s*runwayProgress\(runway!\) >= CHAIN_END/);
+  assert.match(suitup, /runway!\.dataset\.rznState === "live"/);
+  const ignition = read("src/lib/illusionculum-form-ignition.ts");
+  // The burn hands the frame back to the engine on the same picture.
+  assert.match(ignition, /delete runway\.dataset\.icsBurning;/);
+  assert.match(read("src/styles-illusionculum-suitup.css"), /\.rzn-suitup\[data-ics-burning\]\s*> \.rzn-frame\s*> \.rzn-canvas \{\s*visibility: hidden;/);
 });
