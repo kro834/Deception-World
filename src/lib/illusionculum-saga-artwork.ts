@@ -67,7 +67,9 @@ export function illusionculumHeroImage() {
       (width) =>
         `${ILLUSIONCULUM_ARTWORK_FOLDER}/${ILLUSIONCULUM_HERO_STEM}-${width}.webp ${width}w`,
     ).join(", "),
-    sizes: "(max-width: 899px) 100vw, 46vw",
+    // Full bleed over the name below 1100px, the pinned 44% stage above it
+    // (the family split, 2026-11-20).
+    sizes: "(max-width: 1099px) 100vw, 44vw",
   };
 }
 

@@ -1,3 +1,4 @@
+import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { IllusionculumSaga } from "@/components/illusionculum-saga/illusionculum-saga";
@@ -67,6 +68,10 @@ export const Route = createFileRoute("/illusionculum-saga")({
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
       { rel: "stylesheet", href: visualAstraCssUrl },
+      // The special sites' shared command-deck finish (the chapter keys, the
+      // menu and return doors, the instrument enclosures, the focus ring), as
+      // the Rexonance, Extreme and Far From routes load it (2026-11-20).
+      { rel: "stylesheet", href: commandSpecialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

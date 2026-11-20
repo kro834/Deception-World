@@ -355,6 +355,7 @@ export function IllusionculumSaga() {
       ref={pageRef}
       id="top"
       className="rxs-page ics-page dg-focus-scope"
+      data-command-special=""
       data-motion-ready={motionReady === null ? undefined : String(motionReady)}
       data-form={form}
       data-ultra={isUltra(form) ? "true" : undefined}
