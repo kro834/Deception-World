@@ -1,3 +1,4 @@
+import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
 import { MetaUnitasSaga } from "@/components/meta-unitas-saga/meta-unitas-saga";
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/meta-unitas-saga")({
       {
         name: "description",
         content:
-          "仮面ライダーメタ・ウニタスサーガの特設サイト。変身音声、スペック、性能比較、変身、基幹システム、固有能力、装甲・支援機構、形態段階、専用武装、必殺技を掲載。",
+          "仮面ライダーメタ・ウニタスサーガの特設サイト。変身音声、スペック、性能比較、変身、形態段階、装甲・支援機構、専用武装、固有能力、基幹システム、必殺技を掲載。",
       },
       { property: "og:title", content: "メタ・ウニタスサーガ｜META UNITAS SAGA — Deception World" },
       {
@@ -47,6 +48,11 @@ export const Route = createFileRoute("/meta-unitas-saga")({
       // The special sites' one form-slider shape (owner, 2026-10-24).
       { rel: "stylesheet", href: formSliderCssUrl },
       { rel: "stylesheet", href: visualAstraCssUrl },
+      // The special sites' shared command-deck finish (the chapter keys, the
+      // menu and return doors, the instrument enclosures, the focus ring), as
+      // the Rexonance, Extreme, Far From and Illusionculum routes load it
+      // (owner, 2026-11-20: 「イリュージョンクルムサーガと同等の構成にして。」).
+      { rel: "stylesheet", href: commandSpecialCssUrl },
       CINEMATIC_STYLESHEET_LINK,
       {
         rel: "preload",

@@ -90,8 +90,10 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["abilities", "能力", "ABILITY"],
     ["finishers", "必殺技", "FINISHER"],
   ],
-  // 2026-10-23: the owner's record in the page's order — five chapters
-  // (概要, 変身, 機構, 形態, 武装) with the record's own sections inside them.
+  // 2026-10-23: the owner's record in the page's order. Owner (2026-11-20):
+  // 「イリュージョンクルムサーガと同等の構成にして。」 — six chapters in the
+  // Illusionculum page's order (概要, 変身, 形態, 装甲, 武装, 能力), the
+  // record's own sections inside them.
   "meta-unitas": [
     ["top", "トップ", "TOP"],
     ["overview", "概要", "OVERVIEW"],
@@ -99,11 +101,11 @@ export const SPECIAL_SITE_SECTIONS: Record<SpecialSiteId, readonly SpecialSiteSe
     ["performance", "性能比較", "PERFORMANCE"],
     ["p16", "P14・P16", "PROCESSOR"],
     ["suitup", "変身", "SUIT-UP"],
-    ["system", "基幹システム", "SYSTEM"],
-    ["abilities", "固有能力", "ABILITY"],
-    ["armor", "装甲・支援機構", "ARMOR"],
     ["stages", "形態段階", "STAGES"],
+    ["armor", "装甲・支援機構", "ARMOR"],
     ["arsenal", "専用武装", "WEAPONS"],
+    ["abilities", "固有能力", "ABILITY"],
+    ["system", "基幹システム", "SYSTEM"],
     ["finishers", "必殺技", "FINISHER"],
   ],
 };

@@ -58,59 +58,54 @@ function motionAllowed() {
 
 const STAGE_LINK = /^#stages-(middle|ultra)$/;
 
-/** The two values of a ミドル／ウルトラ spec, or the one value over both. */
-function SpecTable() {
+/** The spec sheet as /illusionculum-saga sets its own (2026-11-20): open
+ * rows on hairlines, the label small over the figures, the first rows (the
+ * body and the blows) forged large. A ミドル／ウルトラ value stands as its two
+ * figures under the forms' names, set once over the sheet; a value of both
+ * forms spans the row. */
+function Specs() {
   return (
-    <div className="mus-specs-wrap rxs-reveal">
-      <table className="mus-specs">
-        <caption className="visually-hidden">メタ・ウニタスサーガ スペック</caption>
-        <thead>
-          <tr>
-            <td />
-            <th scope="col">{FORM_LABELS.middle}</th>
-            <th scope="col">{FORM_LABELS.ultra}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {META_UNITAS_SAGA.specs.map((row) => (
-            <tr
-              key={row.key}
-              data-dual={"middle" in row || undefined}
-              data-bar={
-                (["パンチ力", "キック力", "ジャンプ力"] as string[]).includes(row.key) || undefined
-              }
-              style={
-                "middle" in row && ["パンチ力", "キック力", "ジャンプ力"].includes(row.key)
-                  ? {
-                      ["--share" as string]: (
-                        Number.parseFloat(row.middle) / Number.parseFloat(row.ultra)
-                      ).toFixed(3),
-                    }
-                  : undefined
-              }
-            >
-              <th scope="row">{row.key}</th>
-              {"middle" in row ? (
-                <>
-                  <td>{jp(row.middle)}</td>
-                  <td>{jp(row.ultra)}</td>
-                </>
-              ) : (
-                <td colSpan={2}>
-                  <span>{jp(row.value)}</span>
-                  {"more" in row && row.more
-                    ? row.more.map((line) => (
-                        <span key={line} className="mus-spec-more">
-                          {line}
-                        </span>
-                      ))
-                    : null}
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="mus-specs-sheet rxs-reveal">
+      <p className="mus-spec-forms" aria-hidden="true">
+        <span>{FORM_LABELS.middle}</span>
+        <span>{FORM_LABELS.ultra}</span>
+      </p>
+      <dl className="mus-specs" aria-labelledby="mus-specs-title">
+        {META_UNITAS_SAGA.specs.map((row) => (
+          <div
+            key={row.key}
+            data-dual={"middle" in row || undefined}
+            data-lead={["身長", "体重", "パンチ力", "キック力"].includes(row.key) || undefined}
+          >
+            <dt>{row.key}</dt>
+            {"middle" in row ? (
+              <>
+                <dd data-form="middle">
+                  <span className="visually-hidden">{FORM_LABELS.middle}</span>
+                  <b>{jp(row.middle)}</b>
+                </dd>
+                <dd data-form="ultra">
+                  <span className="visually-hidden">{FORM_LABELS.ultra}</span>
+                  <b>{jp(row.ultra)}</b>
+                </dd>
+              </>
+            ) : (
+              <dd>
+                <b>{jp(row.value)}</b>
+                {"more" in row && row.more ? (
+                  <span className="mus-spec-more-list">
+                    {row.more.map((line) => (
+                      <span key={line} className="mus-spec-more" lang="en">
+                        {line}
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
+              </dd>
+            )}
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
@@ -309,6 +304,7 @@ export function MetaUnitasSaga() {
       ref={pageRef}
       id="top"
       className="rxs-page mus-page dg-focus-scope"
+      data-command-special=""
       data-motion-ready={motionReady ? "true" : "false"}
     >
       <header className="rxs-local-nav">
@@ -322,6 +318,8 @@ export function MetaUnitasSaga() {
           >
             <b>メタ・ウニタスサーガ</b>
           </GuardedLink>
+          {/* The six chapters, numbered, in /illusionculum-saga's order; a
+              chapter stays lit through its sub-chapters. */}
           <nav aria-label="メタ・ウニタスサーガ ページ内ナビゲーション">
             <a href="#overview" data-local-nav-through="specs performance" className="dg-control">
               <span aria-hidden="true">01</span> 概要
@@ -329,14 +327,17 @@ export function MetaUnitasSaga() {
             <a href="#suitup" data-local-nav-through="meta-unitas-runway" className="dg-control">
               <span aria-hidden="true">02</span> 変身
             </a>
-            <a href="#system" data-local-nav-through="abilities armor" className="dg-control">
-              <span aria-hidden="true">03</span> 機構
-            </a>
             <a href="#stages" className="dg-control">
-              <span aria-hidden="true">04</span> 形態
+              <span aria-hidden="true">03</span> 形態
             </a>
-            <a href="#arsenal" data-local-nav-through="finishers" className="dg-control">
+            <a href="#armor" className="dg-control">
+              <span aria-hidden="true">04</span> 装甲
+            </a>
+            <a href="#arsenal" className="dg-control">
               <span aria-hidden="true">05</span> 武装
+            </a>
+            <a href="#abilities" data-local-nav-through="system finishers" className="dg-control">
+              <span aria-hidden="true">06</span> 能力
             </a>
           </nav>
           <SideMenuTrigger
@@ -408,7 +409,7 @@ export function MetaUnitasSaga() {
             <h2 id="mus-specs-title" className="visually-hidden">
               スペック
             </h2>
-            <SpecTable />
+            <Specs />
           </section>
 
           <section
@@ -427,35 +428,7 @@ export function MetaUnitasSaga() {
       {/* 02 — the scroll suit-up and the form it ends on. */}
       <MetaUnitasSuitUp stage={stage} onChoose={chooseQuietly} />
 
-      {/* 03 — the systems, the abilities, the armour and support mechanisms. */}
-      <section id="system" className="mus-chapter mus-system" aria-labelledby="mus-system-title">
-        <header className="mus-head rxs-reveal">
-          <h2 id="mus-system-title">基幹システム</h2>
-        </header>
-        <Articles items={META_UNITAS_SAGA.systems} label="基幹システム" variant="system" />
-      </section>
-      <section
-        id="abilities"
-        className="mus-chapter mus-sub mus-abilities"
-        aria-labelledby="mus-abilities-title"
-      >
-        <header className="mus-head rxs-reveal">
-          <h2 id="mus-abilities-title">固有能力</h2>
-        </header>
-        <Articles items={META_UNITAS_SAGA.abilities} label="固有能力" variant="ability" />
-      </section>
-      <section
-        id="armor"
-        className="mus-chapter mus-sub mus-armor"
-        aria-labelledby="mus-armor-title"
-      >
-        <header className="mus-head rxs-reveal">
-          <h2 id="mus-armor-title">装甲・支援機構</h2>
-        </header>
-        <Articles items={META_UNITAS_SAGA.armor} label="装甲・支援機構" variant="armor" />
-      </section>
-
-      {/* 04 — the two forms. */}
+      {/* 03 — 形態: the two forms (the white-fire switch into ウルトラ). */}
       <section id="stages" className="mus-chapter mus-stages" aria-labelledby="mus-stages-title">
         <header className="mus-head rxs-reveal">
           <h2 id="mus-stages-title">形態段階</h2>
@@ -532,7 +505,19 @@ export function MetaUnitasSaga() {
         </div>
       </section>
 
-      {/* 05 — the armaments and the finishers. */}
+      {/* 04 — 装甲: the armour and support mechanisms. */}
+      <section
+        id="armor"
+        className="mus-chapter mus-armor"
+        aria-labelledby="mus-armor-title"
+      >
+        <header className="mus-head rxs-reveal">
+          <h2 id="mus-armor-title">装甲・支援機構</h2>
+        </header>
+        <Articles items={META_UNITAS_SAGA.armor} label="装甲・支援機構" variant="armor" />
+      </section>
+
+      {/* 05 — 武装: the armaments. */}
       <section id="arsenal" className="mus-chapter mus-arsenal" aria-labelledby="mus-arsenal-title">
         <header className="mus-head rxs-reveal">
           <h2 id="mus-arsenal-title">専用武装</h2>
@@ -543,6 +528,28 @@ export function MetaUnitasSaga() {
           ))}
         </ul>
         <Lead body={META_UNITAS_SAGA.arsenalNote} className="mus-arsenal-note rxs-reveal" />
+      </section>
+      {/* 06 — 能力: the abilities, then the systems they run on and the
+          finishers (sub-chapters keep the chapter's number). */}
+      <section
+        id="abilities"
+        className="mus-chapter mus-abilities"
+        aria-labelledby="mus-abilities-title"
+      >
+        <header className="mus-head rxs-reveal">
+          <h2 id="mus-abilities-title">固有能力</h2>
+        </header>
+        <Articles items={META_UNITAS_SAGA.abilities} label="固有能力" variant="ability" />
+      </section>
+      <section
+        id="system"
+        className="mus-chapter mus-sub mus-system"
+        aria-labelledby="mus-system-title"
+      >
+        <header className="mus-head rxs-reveal">
+          <h2 id="mus-system-title">基幹システム</h2>
+        </header>
+        <Articles items={META_UNITAS_SAGA.systems} label="基幹システム" variant="system" />
       </section>
       <section
         id="finishers"

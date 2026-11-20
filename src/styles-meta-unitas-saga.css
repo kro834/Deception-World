@@ -538,111 +538,6 @@ html[data-mode="world"][data-rail-lock]:not([data-loading]):not([data-side-menu-
   font-size: clamp(16px, 1.3vw, 18.5px);
 }
 
-/* The specs: ミドル and ウルトラ side by side; one value spans both. */
-.mus-specs-wrap {
-  position: relative;
-  border: 1px solid color-mix(in srgb, var(--mus-orange, #ff9a4a) 25%, var(--mus-hair));
-  border-radius: 6px;
-  background:
-    radial-gradient(circle at 0% 0%, rgb(55 198 192 / 12%), transparent 42%),
-    radial-gradient(circle at 100% 100%, rgb(255 154 74 / 10%), transparent 45%),
-    linear-gradient(90deg, rgb(55 198 192 / 6%), transparent 40%, rgb(240 222 255 / 5%)),
-    rgb(4 12 16 / 72%);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 16%),
-    0 12px 36px -8px rgb(0 0 0 / 60%);
-  overflow: hidden;
-}
-
-.mus-specs {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: clamp(14px, 1.15vw, 16px);
-}
-
-.mus-specs thead th {
-  padding: 16px clamp(12px, 2vw, 24px) 12px;
-  text-align: left;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  border-bottom: 1px solid var(--mus-hair);
-}
-
-.mus-specs thead th:nth-child(2) {
-  color: var(--mus-orange-hot);
-  box-shadow: inset 0 -2px 0 var(--mus-teal);
-}
-
-.mus-specs thead th:nth-child(3) {
-  box-shadow: inset 0 -2px 0 #e9d8ff;
-}
-
-.mus-specs thead th:nth-child(3),
-.mus-specs tbody td:nth-child(3) {
-  background-image: none;
-}
-
-.mus-specs thead th:nth-child(3) {
-  color: #f3e7ff;
-}
-
-.mus-specs tbody th,
-.mus-specs tbody td {
-  padding: 13px clamp(12px, 2vw, 24px);
-  text-align: left;
-  vertical-align: top;
-  border-bottom: 1px solid var(--mus-hair);
-}
-
-.mus-specs tbody tr:last-child > * {
-  border-bottom: 0;
-}
-
-.mus-specs tbody th {
-  width: 22%;
-  color: var(--mus-muted);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-
-.mus-specs tbody td {
-  font-variant-numeric: tabular-nums;
-  font-weight: 650;
-  overflow-wrap: anywhere;
-}
-
-/* The two forms' figures, set large in the Latin display face (the
-   Rexonance site's read-out numerals). */
-.mus-specs tbody tr[data-dual] td {
-  font-family: var(--mus-latin);
-  font-size: clamp(17px, 1.7vw, 26px);
-  font-weight: 640;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-}
-
-.mus-specs tbody tr[data-dual] td:nth-child(2) {
-  color: #e6fbf9;
-  text-shadow: 0 0 24px rgb(55 198 192 / 35%);
-}
-
-.mus-specs tbody tr[data-dual] td:nth-child(3) {
-  color: #f6eeff;
-  text-shadow: 0 0 24px rgb(240 222 255 / 30%);
-  border-left: 1px solid var(--mus-hair);
-}
-
-.mus-specs td > span {
-  display: block;
-}
-
-.mus-specs .mus-spec-more {
-  color: rgb(233 239 242 / 76%);
-  font-weight: 600;
-}
-
 /* ---------- The comparison ---------- */
 .mus-lineup {
   margin: 0 0 clamp(28px, 3vw, 40px);
@@ -1420,27 +1315,10 @@ html[data-world-effects="economy"] .mus-page *::after {
 }
 
 @media (max-width: 760px) {
-  .mus-specs tbody th {
-    width: auto;
-    white-space: nowrap;
-    font-size: 13px;
-  }
-  .mus-specs tbody th,
-  .mus-specs tbody td,
-  .mus-specs thead th {
-    padding-right: 10px;
-    padding-left: 12px;
-  }
+
   .mus-head {
     align-items: center;
   }
-}
-
-/* The run's distance (（100m）) reads as the figure's unit, a size down. */
-.mus-specs tbody tr[data-dual] td .mus-unit ~ .mus-unit {
-  font-size: max(12px, 0.62em);
-  letter-spacing: 0.04em;
-  opacity: 0.78;
 }
 
 @media (max-width: 560px) {
@@ -1475,48 +1353,6 @@ html[data-family="special"]
   ) {
   min-width: 44px;
   min-height: 44px;
-}
-
-/* ---------- 01: the strength rows read as measures (the figures large,
-   ミドル's share of ウルトラ drawn under them; the table carries the names) ---------- */
-.mus-specs tbody tr[data-bar] td {
-  position: relative;
-  padding-bottom: 22px;
-  font-size: clamp(20px, 2.4vw, 34px);
-}
-
-.mus-specs tbody tr[data-dual][data-bar] td::before {
-  content: "";
-  position: absolute;
-  left: clamp(12px, 2vw, 24px);
-  right: clamp(12px, 2vw, 24px);
-  bottom: 8px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgb(255 255 255 / 8%);
-}
-
-.mus-specs tbody tr[data-bar] td::after {
-  content: "";
-  position: absolute;
-  left: clamp(12px, 2vw, 24px);
-  bottom: 8px;
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--mus-teal), var(--mus-orange));
-  transform-origin: 0 50%;
-}
-
-.mus-specs tbody tr[data-dual][data-bar] td:nth-child(2)::after {
-  width: calc(var(--share, 1) * (100% - clamp(24px, 4vw, 48px)));
-  background: linear-gradient(90deg, var(--mus-teal), color-mix(in srgb, var(--mus-teal) 70%, #fff));
-  box-shadow: 0 0 10px rgb(55 198 192 / 50%);
-}
-
-.mus-specs tbody tr[data-dual][data-bar] td:nth-child(3)::after {
-  width: calc(100% - clamp(24px, 4vw, 48px));
-  background: linear-gradient(90deg, var(--mus-iris), #f6eeff);
-  box-shadow: 0 0 10px rgb(240 222 255 / 45%);
 }
 
 /* ---------- Chapter openings (the Extreme site's lit band) ---------- */
@@ -1947,29 +1783,6 @@ html:not([data-world-effects="economy"])
   grid-column: 1 / -1;
 }
 
-/* q-mu2: the specs fit a 390 phone — both forms' figures stay whole. */
-@media (max-width: 520px) {
-  .mus-specs {
-    table-layout: fixed;
-    font-size: 13px;
-  }
-  .mus-specs thead td,
-  .mus-specs tbody th {
-    width: 26%;
-  }
-  .mus-specs tbody th,
-  .mus-specs tbody td,
-  .mus-specs thead th {
-    padding-right: 6px;
-    padding-left: 8px;
-    overflow-wrap: anywhere;
-  }
-  .mus-specs tbody tr[data-dual] td {
-    font-size: 15px;
-    letter-spacing: 0;
-  }
-}
-
 /* ================================================================
    POLISH LAYER (2026-11-14) — the teal x amber instrument panel.
    Appended only; nothing above is rewritten. Static detail first
@@ -1995,22 +1808,6 @@ html:not([data-world-effects="economy"])
     linear-gradient(90deg, transparent, rgb(255 154 74 / 42%) 15%, rgb(55 198 192 / 38%) 85%, transparent) left 26px top 0 / calc(100% - 52px) 1px no-repeat;
 }
 
-.mus-specs-wrap {
-  background:
-    var(--mus-brk),
-    var(--mus-ruler),
-    radial-gradient(circle at 0% 0%, rgb(55 198 192 / 14%), transparent 42%),
-    radial-gradient(circle at 100% 100%, rgb(255 154 74 / 12%), transparent 45%),
-    linear-gradient(90deg, rgb(55 198 192 / 6%), transparent 40%, rgb(240 222 255 / 5%)),
-    rgb(4 12 16 / 78%);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 0 rgb(55 198 192 / 18%),
-    inset 1px 0 0 0 rgb(255 154 74 / 10%),
-    inset 0 0 44px -16px rgb(55 198 192 / 20%),
-    0 14px 38px -10px rgb(0 0 0 / 66%);
-}
-
 .mus-table-wrap {
   background:
     var(--mus-brk),
@@ -2026,7 +1823,7 @@ html:not([data-world-effects="economy"])
 }
 
 /* The scan: a teal line drawn once down a panel as it arrives. */
-:is(.mus-specs-wrap, .mus-table-wrap)::after {
+.mus-table-wrap::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -2043,16 +1840,9 @@ html:not([data-world-effects="economy"])
   pointer-events: none;
 }
 
-.mus-specs thead th,
 .mus-table thead th {
   background: linear-gradient(180deg, rgb(55 198 192 / 7%), transparent);
   box-shadow: inset 0 -1px 0 rgb(55 198 192 / 30%);
-}
-
-.mus-specs thead th:nth-child(2) {
-  box-shadow:
-    inset 0 -2px 0 var(--mus-teal),
-    0 1px 10px -4px rgb(55 198 192 / 60%);
 }
 
 .mus-table td[data-bar]::after {
@@ -2164,7 +1954,7 @@ html:not([data-world-effects="economy"])
   }
   html:not([data-world-effects="economy"]):not([data-rzn-constrained])
     .mus-page[data-motion-ready="true"]
-    :is(.mus-specs-wrap, .mus-table-wrap).is-visible::after {
+    .mus-table-wrap.is-visible::after {
     animation: mus-scan 1.15s cubic-bezier(0.3, 0.7, 0.1, 1) 0.2s both;
   }
   html:not([data-world-effects="economy"]):not([data-rzn-constrained])
@@ -2251,7 +2041,7 @@ html:not([data-world-effects="economy"])
    (the universal rule above does too); forced colours drop the
    decoration and leave the system's own plates. ---- */
 @media (prefers-reduced-motion: reduce) {
-  :is(.mus-specs-wrap, .mus-table-wrap)::after,
+  .mus-table-wrap::after,
   .mus-weapons li,
   .mus-weapons li::after,
   .mus-head::after {
@@ -2260,33 +2050,31 @@ html:not([data-world-effects="economy"])
   }
 }
 
-html[data-world-effects="economy"] :is(.mus-specs-wrap, .mus-table-wrap)::after,
+html[data-world-effects="economy"] .mus-table-wrap::after,
 html[data-world-effects="economy"] .mus-weapons li,
 html[data-world-effects="economy"] .mus-weapons li::after,
-html[data-rzn-constrained] :is(.mus-specs-wrap, .mus-table-wrap)::after,
+html[data-rzn-constrained] .mus-table-wrap::after,
 html[data-rzn-constrained] .mus-weapons li,
 html[data-rzn-constrained] .mus-weapons li::after {
   animation: none !important;
 }
 
 @media (forced-colors: active) {
-  :is(.mus-specs-wrap, .mus-table-wrap)::after,
+  .mus-table-wrap::after,
   .mus-weapons li::after,
   .mus-table tbody th::before {
     display: none;
   }
-  .mus-specs-wrap,
   .mus-table-wrap,
-  .mus-head,
-  .mus-weapons li,
-  .mus-page .mus-weapons li:hover {
+.mus-head,
+.mus-weapons li,
+.mus-page .mus-weapons li:hover {
     background: Canvas;
     box-shadow: none;
   }
   .mus-weapons li {
     border-left: 2px solid CanvasText;
   }
-  .mus-specs thead th,
   .mus-table thead th {
     background: none;
     border-bottom: 1px solid CanvasText;
@@ -2574,4 +2362,159 @@ html[data-rzn-constrained] .mus-weapons li::after {
 }
 html[data-world-effects="economy"] .mus-ignition {
   display: none;
+}
+
+/* ================================================================
+   THE ILLUSIONCULUM COMPOSITION (owner, 2026-11-20: 「イリュージョンクルム
+   サーガと同等の構成にして。」) — the chapters in /illusionculum-saga's
+   order (01 概要, 02 変身, 03 形態, 04 装甲, 05 武装, 06 能力 with 基幹シス
+   テム and 必殺技) and its section patterns, in this page's teal, orange and
+   iris: open spec rows, the forms' wide plate, the record and the finishers
+   as rows on lit hairlines. The shared command-deck sheet draws the bar.
+   ================================================================ */
+
+/* ---------- 01 スペック: open rows on hairlines ---------- */
+/* As the Illusionculum and Far From sheets set their numbers: no boxed
+   table — the label small over the figures, ミドル and ウルトラ in two
+   columns under the forms' names (set once, over the sheet), the body and
+   the blows forged large over an orange-to-teal rule. */
+#top.rxs-page.mus-page .mus-specs-sheet {
+  display: grid;
+  gap: 0;
+}
+
+#top.rxs-page.mus-page .mus-spec-forms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 clamp(20px, 2.4vw, 36px);
+  margin: 0 0 12px;
+  font-family: var(--rxs-font-text);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+#top.rxs-page.mus-page .mus-spec-forms > span {
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--mus-teal);
+  color: var(--mus-orange-hot);
+}
+
+#top.rxs-page.mus-page .mus-spec-forms > span + span {
+  border-bottom-color: #e9d8ff;
+  color: #f3e7ff;
+}
+
+#top.rxs-page.mus-page .mus-specs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+}
+
+#top.rxs-page.mus-page .mus-specs > div {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px clamp(20px, 2.4vw, 36px);
+  padding: clamp(16px, 1.6vw, 22px) 0 clamp(18px, 1.8vw, 24px);
+  border-top: 1px solid rgb(55 198 192 / 16%);
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] {
+  border-top-color: rgb(255 154 74 / 30%);
+}
+
+/* The lead figures' rule: orange into teal under the row. */
+#top.rxs-page.mus-page .mus-specs > div[data-lead]::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, var(--mus-orange), rgb(55 198 192 / 60%) 46%, transparent);
+  opacity: 0.72;
+}
+
+#top.rxs-page.mus-page .mus-specs dt {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--mus-muted);
+  font-family: var(--rxs-font-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
+}
+
+#top.rxs-page.mus-page .mus-specs dd {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+#top.rxs-page.mus-page .mus-specs > div:not([data-dual]) dd {
+  grid-column: 1 / -1;
+}
+
+#top.rxs-page.mus-page .mus-specs dd > b {
+  color: var(--mus-silver);
+  font-family: var(--mus-latin);
+  font-size: clamp(19px, 1.7vw, 26px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums lining-nums;
+  text-shadow: 0 2px 0 #000;
+}
+
+/* A value of both forms is the record's prose, in the reading face. */
+#top.rxs-page.mus-page .mus-specs > div:not([data-dual]) dd > b {
+  font-family: var(--rxs-font-text);
+  font-size: clamp(16px, 1.3vw, 19px);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.6;
+}
+
+#top.rxs-page.mus-page .mus-specs > div[data-lead] dd > b {
+  font-size: clamp(30px, 3vw, 44px);
+  letter-spacing: -0.005em;
+  line-height: 1.04;
+}
+
+#top.rxs-page.mus-page .mus-specs dd[data-form="ultra"] > b {
+  color: #f6eeff;
+}
+
+/* The run's distance (（100m）) reads as the figure's unit, a size down. */
+#top.rxs-page.mus-page .mus-specs dd[data-form] .mus-unit ~ .mus-unit {
+  font-size: max(12px, 0.62em);
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+}
+
+/* The processors named on the row, set as the figure's own footnote line. */
+#top.rxs-page.mus-page .mus-spec-more-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+#top.rxs-page.mus-page .mus-spec-more {
+  color: rgb(160 244 238 / 86%);
+  font-family: var(--mus-latin);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+@media (max-width: 560px) {
+  #top.rxs-page.mus-page .mus-specs > div[data-lead] dd > b {
+    font-size: clamp(26px, 7.6vw, 32px);
+  }
+
+  #top.rxs-page.mus-page .mus-specs dd > b {
+    font-size: clamp(17px, 4.8vw, 20px);
+  }
 }

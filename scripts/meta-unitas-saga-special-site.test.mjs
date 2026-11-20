@@ -66,18 +66,25 @@ test("every section the menu and the search list is a real anchor on the page", 
   for (const [hash] of sections.SPECIAL_SITE_SECTIONS["meta-unitas"]) {
     assert.ok(source.includes(`id="${hash}"`), hash);
   }
-  // The bar: five chapters, in the page's order.
+  // The bar: six chapters in /illusionculum-saga's order (owner, 2026-11-20:
+  // 「イリュージョンクルムサーガと同等の構成にして。」).
   const bar = [
     ...page.matchAll(/<a href="#([a-z]+)"[^>]*>\s*<span aria-hidden="true">(\d\d)<\/span>/g),
   ];
   assert.deepEqual(
     bar.map((m) => m[1]),
-    ["overview", "suitup", "system", "stages", "arsenal"],
+    ["overview", "suitup", "stages", "armor", "arsenal", "abilities"],
   );
   assert.deepEqual(
     bar.map((m) => m[2]),
-    ["01", "02", "03", "04", "05"],
+    ["01", "02", "03", "04", "05", "06"],
   );
+  // The page's sections stand in the menu's order.
+  const order = sections.SPECIAL_SITE_SECTIONS["meta-unitas"]
+    .map(([hash]) => hash)
+    .filter((hash) => !["top", "p16", "suitup"].includes(hash));
+  const at = order.map((hash) => page.indexOf(`id="${hash}"`));
+  assert.deepEqual([...at].sort((a, b) => a - b), at);
 });
 
 test("the menu thumbnail and the key visuals are one versioned, budgeted set", () => {
