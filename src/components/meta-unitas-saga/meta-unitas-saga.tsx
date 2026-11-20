@@ -180,17 +180,22 @@ export function MetaUnitasSaga() {
 
   // #stages-ultra / #stages-middle select the form and open #stages.
   useEffect(() => {
+    let frame = 0;
     const follow = () => {
+      window.cancelAnimationFrame(frame);
       const match = STAGE_LINK.exec(window.location.hash);
       if (!match) return;
       selectStage(match[1] as MetaUnitasStageKey, false);
-      window.requestAnimationFrame(() =>
-        document.getElementById("stages")?.scrollIntoView({ block: "start" }),
+      frame = window.requestAnimationFrame(() =>
+        pageRef.current?.querySelector("#stages")?.scrollIntoView({ block: "start" }),
       );
     };
     follow();
     window.addEventListener("hashchange", follow);
-    return () => window.removeEventListener("hashchange", follow);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", follow);
+    };
   }, [selectStage]);
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);

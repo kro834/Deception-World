@@ -157,6 +157,7 @@ export function FarFromSaga() {
   // the runway ends on it (as the Rexonance page's stage does).
   const [stage, setStageState] = useState<FarFromStageKey>("middle");
   const [motionReady, setMotionReady] = useState(false);
+  const [stageMotionEnabled, setStageMotionEnabled] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
   const stagePanelRef = useRef<HTMLDivElement | null>(null);
@@ -275,23 +276,26 @@ export function FarFromSaga() {
       shownStageRef.current = latestStageRef.current;
       setStageEntrance(null);
     };
-    const cancelOnPreference = () => {
-      if (!stageMotionAllowed()) cancelMotion();
+    const syncStageMotion = () => {
+      const enabled = stageMotionAllowed();
+      setStageMotionEnabled(enabled);
+      if (!enabled) cancelMotion();
     };
-    const observer = new MutationObserver(cancelOnPreference);
+    syncStageMotion();
+    const observer = new MutationObserver(syncStageMotion);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-world-effects"],
     });
-    media.addEventListener("change", cancelOnPreference);
-    forced.addEventListener("change", cancelOnPreference);
-    document.addEventListener("visibilitychange", cancelOnPreference);
+    media.addEventListener("change", syncStageMotion);
+    forced.addEventListener("change", syncStageMotion);
+    document.addEventListener("visibilitychange", syncStageMotion);
     window.addEventListener("pagehide", cancelMotion);
     return () => {
       observer.disconnect();
-      media.removeEventListener("change", cancelOnPreference);
-      forced.removeEventListener("change", cancelOnPreference);
-      document.removeEventListener("visibilitychange", cancelOnPreference);
+      media.removeEventListener("change", syncStageMotion);
+      forced.removeEventListener("change", syncStageMotion);
+      document.removeEventListener("visibilitychange", syncStageMotion);
       window.removeEventListener("pagehide", cancelMotion);
       stageCallId.current += 1;
       window.clearTimeout(stageCallTimer.current);
@@ -301,26 +305,31 @@ export function FarFromSaga() {
   // A deep link to one form (#stages-ultra …) selects it and opens #stages;
   // ウルトラ's interfaces then deploy as the panel comes on screen.
   useEffect(() => {
+    let scrollFrame = 0;
     const follow = () => {
+      window.cancelAnimationFrame(scrollFrame);
       const match = STAGE_LINK.exec(window.location.hash);
       if (!match) return;
       selectStage(match[1] as FarFromStageKey, false);
-      window.requestAnimationFrame(() =>
-        document.getElementById("stages")?.scrollIntoView({ block: "start" }),
+      scrollFrame = window.requestAnimationFrame(() =>
+        stageTabsRef.current?.closest("#stages")?.scrollIntoView({ block: "start" }),
       );
     };
     follow();
     window.addEventListener("hashchange", follow);
-    return () => window.removeEventListener("hashchange", follow);
+    return () => {
+      window.removeEventListener("hashchange", follow);
+      window.cancelAnimationFrame(scrollFrame);
+    };
   }, [selectStage]);
 
-  const ignition = motionReady && stage !== "middle" && stageEntrance?.kind === "card" && stageEntrance.previous
+  const ignition = motionReady && stageMotionEnabled && stage !== "middle" && stageEntrance?.kind === "card" && stageEntrance.previous
     ? stageEntrance
     : null;
   const activeStage = FAR_FROM_SAGA.stages[stage];
   // ウルトラ shows its base first and deploys its interfaces where motion is
   // allowed; the calm tiers keep the painted ウルトラ (interfaces drawn).
-  const ultraDeploys = stage === "ultra" && motionReady && stageMotionAllowed();
+  const ultraDeploys = stage === "ultra" && motionReady && stageMotionEnabled;
   const artKey = ultraDeploys ? "ultraBase" : stage;
   const activeArt = ultraDeploys ? FAR_FROM_SAGA_ULTRA_BASE : FAR_FROM_SAGA_ARTWORK[stage];
   const keyVisual = FAR_FROM_SAGA_ARTWORK.middle;

@@ -29,8 +29,8 @@ import { REXONANCE_STAGE_DURATION_MS } from "@/lib/rexonance-calls";
      the card as a tap does.
 
    Decorative only (aria-hidden): the tablist and the panel stay the record.
-   Reduced motion, forced colours, economy and Save-Data never mount the
-   card, and the sheet keeps the panel still there. */
+   Reduced motion, forced colours and economy never mount the card, and
+   the sheet keeps the panel still there. */
 
 export const FAR_FROM_STAGE_CALL_MS = REXONANCE_STAGE_DURATION_MS;
 

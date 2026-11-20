@@ -223,17 +223,22 @@ export function IllusionculumSaga() {
 
   // A deep link to one form selects it and opens #forms.
   useEffect(() => {
+    let frame = 0;
     const follow = () => {
+      window.cancelAnimationFrame(frame);
       const match = FORM_LINK.exec(window.location.hash);
       if (!match) return;
       selectForm(match[1] as IllusionculumFormKey);
-      window.requestAnimationFrame(() =>
-        document.getElementById("forms")?.scrollIntoView({ block: "start" }),
+      frame = window.requestAnimationFrame(() =>
+        pageRef.current?.querySelector("#forms")?.scrollIntoView({ block: "start" }),
       );
     };
     follow();
     window.addEventListener("hashchange", follow);
-    return () => window.removeEventListener("hashchange", follow);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", follow);
+    };
   }, [selectForm]);
 
   useEffect(() => mountLocalNavCurrent(pageRef.current?.querySelector(".rxs-local-nav nav")), []);

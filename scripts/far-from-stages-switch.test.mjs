@@ -114,7 +114,7 @@ test("ultraBase: ウルトラ before its interfaces, one more stem in the versio
 
 test("ウルトラ shows its base first; the interfaces start hidden and deploy once on screen", () => {
   // The panel takes the base picture wherever the deploy runs.
-  assert.match(page, /const ultraDeploys = stage === "ultra" && motionReady && stageMotionAllowed\(\);/);
+  assert.match(page, /const ultraDeploys = stage === "ultra" && motionReady && stageMotionEnabled;/);
   assert.match(page, /const artKey = ultraDeploys \? "ultraBase" : stage;/);
   assert.match(page, /\{\.\.\.farFromImage\(artKey, stage !== "middle"\)\}/);
   assert.match(page, /: ultraDeploys \? \(\s*<FarFromInterfaceDeploy/);
@@ -165,6 +165,7 @@ test("every switch back to ウルトラ deploys again: the figure is keyed by fo
   assert.match(deploySource, /observer\.observe\(figure\);\s*return \(\) => observer\.disconnect\(\);\s*\}, \[\]\);/);
   assert.match(page, /const STAGE_LINK = \/\^#stages-\(middle\|high\|xhigh\|max\|ultra\)\$\/;/);
   assert.match(page, /window\.addEventListener\("hashchange", follow\)/);
+  assert.match(page, /removeEventListener\("hashchange", follow\);\s*window\.cancelAnimationFrame\(scrollFrame\);/);
   // Owner (2026-10-24): one form-slider shape (src/components/special/form-slider.tsx).
   assert.match(page, /onSelect=\{selectStage\}/);
   assert.match(page, /if \(next\) selectStage\(next\);/);
@@ -187,6 +188,10 @@ test("the calm tiers: the painted ウルトラ at once, no card, no entrance, no
     page.slice(page.indexOf("function stageMotionAllowed"), page.indexOf("/** A deep link")),
     /connection|effectiveType|saveData/,
   );
+  assert.match(page, /const enabled = stageMotionAllowed\(\);\s*setStageMotionEnabled\(enabled\);\s*if \(!enabled\) cancelMotion\(\);/);
+  assert.match(page, /media\.addEventListener\("change", syncStageMotion\);/);
+  assert.match(page, /forced\.addEventListener\("change", syncStageMotion\);/);
+  assert.match(page, /new MutationObserver\(syncStageMotion\)/);
   // Not allowed: the rest guard never mounts a card.
   assert.deepEqual(
     planStageCall({ motionAllowed: false, cardMounted: false, cardElapsedMs: 0, sinceNaturalExitMs: Infinity }),
