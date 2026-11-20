@@ -62,6 +62,11 @@ html[data-family="library"]
   .world.command-records.library-page.library-atelier
   :is(.library-hub-heading, .inquiry-heading, .library-browser-heading)
   > p:last-child {
+  /* The heading is a block here, and its note reads under it from the same
+     edge. The older grid's justify-self: end still pushed the note to the
+     far edge in engines that align block boxes (Chrome), under the Ciel
+     button, while Safari kept it at the start (2026-11-20). */
+  justify-self: start;
   max-width: 50em;
   margin-top: 10px;
   color: var(--dx-text-2);

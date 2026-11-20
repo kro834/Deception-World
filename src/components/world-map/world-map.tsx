@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DisplayName } from "@/components/name-text";
 import { SideMenuLayer, SideMenuTrigger } from "@/components/world/world-chrome";
 import { useWorldMode } from "@/components/world/use-world-mode";
 import {
@@ -189,7 +190,11 @@ export function WorldMap({
             onClick={() => choose(n.id)}
           >
             <small>{MAP_KINDS[n.kind]}</small>
-            <span>{n.title}</span>
+            {/* Names break at their own seams (仮面ライダー／サイファー), not
+                wherever the column ends; the stored title is untouched. */}
+            <span>
+              <DisplayName value={n.title} />
+            </span>
           </button>
         ))}
       </div>
