@@ -44,15 +44,20 @@ export function mountMetaUnitasFormIgnition(
   to.src = META_UNITAS_RX_FORMS.ultra;
   let fuel: WhiteFireFuel | null = null;
 
-  const ready = () => decoded || !destination;
-  if (destination) {
+  // The panel's ウルトラ is ready once it is loaded and decoded (a rejected
+  // decode is not: the overlay holds until the deadline instead).
+  const ready = () =>
+    !destination || (decoded && destination.complete && destination.naturalWidth > 0);
+  const checkDestination = () => {
+    if (!destination || !destination.complete || !destination.naturalWidth) return;
     void destination.decode().then(() => {
       decoded = true;
-    }, () => {
-      decoded = true;
-    });
-  }
+    }, () => {});
+  };
+  destination?.addEventListener("load", checkDestination);
+  checkDestination();
   const release = () => {
+    destination?.removeEventListener("load", checkDestination);
     window.cancelAnimationFrame(frame);
     window.clearTimeout(deadline);
     fire?.release();

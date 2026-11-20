@@ -322,7 +322,7 @@ test("the engine: FAR FROM alone has the form change; the scene's own beats are 
   // Unitas has its own kit, a burn into ウルトラ only (meta-unitas-form-shift.ts),
   // never FAR FROM's dissolve.
   const metaUnitas = readFileSync(new URL("../src/lib/meta-unitas-rx-engine.ts", import.meta.url), "utf8");
-  assert.match(metaUnitas, /formShift: metaUnitasFormShiftKit,/);
+  assert.match(metaUnitas, /\{ formShift: metaUnitasFormShiftKit \}/);
   assert.doesNotMatch(metaUnitas, /far-from-form-shift/);
   // The chain's sheets are made ready in idle time once the suit stands
   // whole, behind the kit: choosing a form starts no long task.

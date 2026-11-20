@@ -71,7 +71,7 @@ test("the selector's burn plays only into ウルトラ, from a finished runway",
 test("every change into ウルトラ on the page is wired to the white fire", () => {
   const engine = read("src/lib/meta-unitas-rx-engine.ts");
   assert.match(engine, /if \(key !== "ultra"\) return skinForm\(/);
-  assert.match(engine, /formShift: metaUnitasFormShiftKit,/);
+  assert.match(engine, /\.\.\.\(options\.eager \? null : \{ formShift: metaUnitasFormShiftKit \}\),/);
   const page = read("src/components/meta-unitas-saga/meta-unitas-saga.tsx");
   assert.match(page, /const burn = animated && next === "ultra";/);
   assert.match(page, /<MetaUnitasIgnition destinationRef=\{stageArtRef\} onDone=\{endIgnition\} \/>/);

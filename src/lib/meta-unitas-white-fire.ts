@@ -197,6 +197,9 @@ function surface(document: Document, width: number, height: number): Surface | n
 function sample(field: Float32Array, x: number, y: number) {
   const gx = x * FUEL_W - 0.5;
   const gy = y * FUEL_H - 0.5;
+  // Below the figure's frame there is no armour: the bottom row is never
+  // extruded into the floor.
+  if (y > 1) return 0;
   if (gx < 0 || gy < 0 || gx >= FUEL_W - 1 || gy >= FUEL_H - 1) {
     const cx = Math.max(0, Math.min(FUEL_W - 1, Math.round(gx)));
     const cy = Math.max(0, Math.min(FUEL_H - 1, Math.round(gy)));

@@ -135,13 +135,18 @@ export const metaUnitasSkinGeneration = Object.freeze({
     const { width: W, height: H } = input.size;
     const core = [input.core[0] / W, input.core[1] / H] as const;
     let fuel: WhiteFireFuel | null = bakeWhiteFireFuel(input.document, input.unlit, core);
+    // One more try on the change's own sheet, once: never a read-back a frame.
+    let retried = false;
     const fire = createWhiteFire(input.document, input.coarse);
     const skinForm = layer.form;
     const skinRelease = layer.release;
     layer.form = (context, from, to, fromKey, key, u, tone, calm, vs, ratio) => {
       // Changes that are not into ウルトラ keep the skin's own look.
       if (key !== "ultra") return skinForm(context, from, to, fromKey, key, u, tone, calm, vs, ratio);
-      fuel ??= bakeWhiteFireFuel(input.document, from, core);
+      if (!fuel && !retried) {
+        retried = true;
+        fuel = bakeWhiteFireFuel(input.document, from, core);
+      }
       if (!fuel) return skinForm(context, from, to, fromKey, key, u, tone, calm, vs, ratio);
       // The sealed ミドル was drawn beneath this pass; the change draws it
       // itself, so its tail and halo never show through ウルトラ.
@@ -219,7 +224,6 @@ export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
     // The armour grows as a nanite skin from the reactor (owner,
     // 2026-11-11): no swarm kit and no gold atlas are fetched.
     generation: metaUnitasSkinGeneration,
-    formShift: metaUnitasFormShiftKit,
     forms: {
       chain: META_UNITAS_FORM_CHAIN,
       tones: META_UNITAS_FORM_TONES,
@@ -249,6 +253,9 @@ export function mountMetaUnitasAssemblyEngine(
     runway,
     {
       ...metaUnitasAssemblyConfig(),
+      // The page's runway burns into ウルトラ when the selector flips on a
+      // finished frame; the entry (data-form "standard") has no such change.
+      ...(options.eager ? null : { formShift: metaUnitasFormShiftKit }),
       // The scroll's canvases move by the boost's camera alone (FAR FROM's
       // round-2 camera rode the shared accents and fought it, frame by frame).
       ...(director ? null : { accents: farFromStillAccents }),
