@@ -362,6 +362,8 @@ export class SurgeEngine {
       back,
       front,
       scale: view.scale,
+      // Backing px per CSS px (the device tier's cap): the unit of a point.
+      ratio: this.ratio,
       reachX: Math.max(1, Math.min(left, right)),
       reachUp: Math.max(1, view.y / view.scale + cy),
       reachDown: Math.max(1, (view.height - view.y) / view.scale - cy),
