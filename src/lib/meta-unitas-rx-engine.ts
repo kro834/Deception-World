@@ -103,7 +103,7 @@ export const META_UNITAS_PALETTE = Object.freeze({
 } as const satisfies NonNullable<RexonanceAssemblyConfig["palette"]>);
 
 /** Meta Unitas' nanite skin (nanite-skin.ts; owner, 2026-11-11): dark teal
- * steel under its scale's light, hexagonal cells. */
+ * steel under its scale's light, its grain streaming along the flow. */
 export const META_UNITAS_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   alloy: "meta-unitas",
   steel: "rgb(16 30 34)",
@@ -111,8 +111,9 @@ export const META_UNITAS_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   line: "rgb(120 226 220)",
   glint: [226, 252, 248] as const,
   motes: ["rgb(140 176 178)", "rgb(255 170 96)", "rgb(244 248 250)"] as const,
-  // (5, from 7: finer, nanosuit pass 2026-11-20.)
-  cell: 5,
+  // (The grain's streak since the nano pass, 2026-11-21; it was the
+  // cells' radius, 5 from 7 in the nanosuit pass.)
+  streak: 5,
   triangles: false,
 });
 

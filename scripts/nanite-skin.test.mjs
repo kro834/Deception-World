@@ -108,7 +108,7 @@ const STYLE = {
   line: "rgb(150 236 255)",
   glint: [226, 248, 255],
   motes: ["rgb(150 170 190)", "rgb(255 215 122)", "rgb(244 251 255)"],
-  cell: 9,
+  streak: 6,
   triangles: true,
 };
 const makeSkin = (overrides = {}) => {
@@ -492,51 +492,49 @@ test("the three suit-ups grow as a nanite skin, each in its own light", () => {
   );
 });
 
-test("alloy cells tumble, unfold, and stay sparse on the skin's real front", () => {
-  for (const [alloy, expectedSheet] of [
-    ["illusionculum", "illusionculum"],
-    ["meta-unitas", "rexonance"],
-    ["far-from", "far-from"],
-  ]) {
+// (2026-11-21, nano pass: 「実際のナノマシンと同程度の大きさにして」. The
+// alloy sheets' tumbling hex cells — 17–24 CSS px sprites — are gone: a
+// nanite is far below a pixel, so the skin draws no cell sprites at all and
+// every droplet is at most one device px, a faint glint. This replaces the
+// 2026-11-18 test that pinned the sprites.)
+test("no cell sprites: the droplets are glints of at most one device px", () => {
+  for (const alloy of ["illusionculum", "meta-unitas", "far-from"]) {
     const document = fakeDocument(figurePixel);
     const createElement = document.createElement;
-    const atlas = { complete: false, naturalWidth: 768, naturalHeight: 224 };
-    document.createElement = (tag) => (tag === "img" ? atlas : createElement(tag));
+    let images = 0;
+    document.createElement = (tag) => {
+      if (tag === "img") images += 1;
+      return createElement(tag);
+    };
     const { layer } = makeSkin({ document, style: { ...STYLE, alloy } });
-    assert.equal(atlas.src, `/nanite-forge-20261118/${expectedSheet}.webp`);
-
+    assert.equal(images, 0, "no sprite sheet is loaded");
+    const vs = 1.5;
     const calls = [];
     const context = fakeContext(calls, figurePixel);
-    const draw = (p) => {
+    const rects = [];
+    for (let p = 0.16; p < 0.82; p += 0.009) {
       calls.length = 0;
-      layer.draw(context, p, false, 1.5, 2);
-      return calls.filter(([op, image]) => op === "drawImage" && image === atlas);
-    };
-    assert.deepEqual(draw(0.3), [], "the optional sheet cannot gate the front");
-    assert.ok(layer.stats.drawn > 0);
-
-    atlas.complete = true;
-    const middle = draw(0.3);
-    assert.ok(middle.length > 0);
-    assert.ok(middle.length <= 8);
-    assert.ok(middle.every(([, , , , w, h, , , dw]) => w === 32 && h === 32 && dw >= 11));
-    const leading = [];
-    for (let p = 0.16; p < 0.82; p += 0.009) leading.push(...draw(p));
+      layer.draw(context, p, false, vs, 2);
+      rects.push(...calls.filter(([op]) => op === "rect"));
+    }
+    assert.ok(rects.length > 100, "droplets still skim the lip");
     assert.ok(
-      leading.some(([, , sx, sy]) => sx >= 32 && sy < 128),
-      "the cell tumbles toward its seat",
+      rects.every(([, , , w, h]) => w <= 1 / vs + 1e-9 && h <= 1 / vs + 1e-9),
+      "each droplet at most one device px",
     );
-    assert.ok(
-      leading.some(([, , , sy]) => sy === 160),
-      "the cell unfolds at the lip",
-    );
-    assert.deepEqual(draw(0.3), middle, "scrubbing resamples the same figure path");
-    assert.deepEqual(draw(0.9), [], "the assembled art needs no cells on top");
+    // A scrub back resamples the same frame.
+    calls.length = 0;
+    layer.draw(context, 0.3, false, vs, 2);
+    const first = calls.slice();
+    layer.draw(fakeContext([], figurePixel), 0.6, false, vs, 2);
+    calls.length = 0;
+    layer.draw(context, 0.3, false, vs, 2);
+    assert.deepEqual(calls, first);
     layer.release();
   }
 });
 
-test("a custom wireframe flow takes priority over optional alloy cells", () => {
+test("a custom wireframe flow takes priority over the skin's own droplets", () => {
   const document = fakeDocument(figurePixel);
   const createElement = document.createElement;
   const atlas = { complete: true, naturalWidth: 768, naturalHeight: 224 };
