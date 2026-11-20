@@ -137,12 +137,15 @@ test("covered navigation waits for destination readiness and is cancellation-saf
     /Promise\.resolve\(\)\s*\.then\(\(\)\s*=>\s*preloadAssets/,
     "a synchronous asset-preload throw must be converted into a guarded rejection",
   );
-  const navigateIndex = coveredBranch.search(/await\s+navigate\s*\(/);
-  assert.notEqual(navigateIndex, -1, "covered navigation must commit the /world route");
-  const afterNavigate = coveredBranch.slice(navigateIndex);
-  const readyWaitIndex = afterNavigate.search(
-    /await[\s\S]{0,280}?(?:openingHandoff|handoff|destination|arrival|target)/i,
+  assert.match(
+    coveredBranch,
+    /const navigateOpeningDestination = \(\) => navigate\(\{ to, hash, search: navigationSearch \}\)/,
   );
+  const coverWait = coveredBranch.indexOf("Promise.all([routeWarmup, assetWarmup])");
+  const navigateIndex = coveredBranch.lastIndexOf("await navigateOpeningDestination()");
+  assert.ok(coverWait !== -1 && coverWait < navigateIndex, "covered navigation must commit /world after warming");
+  const afterNavigate = coveredBranch.slice(navigateIndex);
+  const readyWaitIndex = afterNavigate.search(/const destination = await Promise\.race/);
   assert.notEqual(
     readyWaitIndex,
     -1,
