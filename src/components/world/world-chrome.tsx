@@ -463,7 +463,13 @@ function MenuSectionLink({
   );
 }
 
-function MenuQuickSearch({ onOpen, compact = false }: { onOpen: () => void; compact?: boolean }) {
+function MenuQuickSearch({
+  onOpen,
+  compact = false,
+}: {
+  onOpen: (keyboard: boolean) => void;
+  compact?: boolean;
+}) {
   return (
     <button
       type="button"
@@ -472,7 +478,7 @@ function MenuQuickSearch({ onOpen, compact = false }: { onOpen: () => void; comp
       aria-keyshortcuts="/ Control+K Meta+K"
       onPointerEnter={prefetchQuickSearch}
       onFocus={prefetchQuickSearch}
-      onClick={onOpen}
+      onClick={(event) => onOpen(event.detail === 0)}
     >
       {compact ? (
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
@@ -1062,7 +1068,9 @@ export function SideMenuLayer({
     if (swipeRef.current?.id === event.pointerId) releaseSwipe();
   };
 
-  const openMenuSearch = () => {
+  const openMenuSearch = (keyboard: boolean) => {
+    // Let the native dialog remember the page's menu opener before it takes focus.
+    sideMenuRestoreFocusRef.current = keyboard;
     close();
     window.requestAnimationFrame(openQuickSearch);
   };
