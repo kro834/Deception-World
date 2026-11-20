@@ -35,6 +35,8 @@ import {
 } from "./meta-unitas-rx-suit.ts";
 import { farFromAccents, farFromStillAccents } from "./far-from-assembly-accents.ts";
 import { mountMetaUnitasBoost } from "./meta-unitas-boost.ts";
+import { bakeWhiteFireFuel, createWhiteFire, type WhiteFireFuel } from "./meta-unitas-white-fire.ts";
+import { META_UNITAS_SHIFT, createMetaUnitasFormShift } from "./meta-unitas-form-shift.ts";
 import {
   META_UNITAS_HENSHIN_PALETTE,
   mountHenshinDirector,
@@ -114,10 +116,78 @@ export const META_UNITAS_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   triangles: false,
 });
 
-/** The armour's generation: the nanite skin growing from the reactor. */
-export const metaUnitasSkinGeneration = createNaniteSkinGeneration({
+const baseSkinGeneration = createNaniteSkinGeneration({
   style: META_UNITAS_SKIN_STYLE,
   beats: ASSEMBLY_BEATS,
+});
+
+/** The armour's generation: the nanite skin growing from the reactor. Its
+ * change into ウルトラ is white fire (owner, 2026-11-20: 「メタ・ウニタス…の
+ * ウルトラへの切り替えも炎によって行います。…白い炎」;
+ * meta-unitas-white-fire.ts): ミドル engulfed from the reactor out, burning,
+ * ウルトラ revealed from the flame. The fuel (ミドル's body) is baked here,
+ * while the scene prepares, never on a frame. */
+export const metaUnitasSkinGeneration = Object.freeze({
+  overlay: false as const,
+  *prepare(input: Parameters<typeof baseSkinGeneration.prepare>[0]) {
+    const layer = yield* baseSkinGeneration.prepare(input);
+    if (!layer) return null;
+    const { width: W, height: H } = input.size;
+    const core = [input.core[0] / W, input.core[1] / H] as const;
+    let fuel: WhiteFireFuel | null = bakeWhiteFireFuel(input.document, input.unlit, core);
+    // One more try on the change's own sheet, once: never a read-back a frame.
+    let retried = false;
+    const fire = createWhiteFire(input.document, input.coarse);
+    const skinForm = layer.form;
+    const skinRelease = layer.release;
+    layer.form = (context, from, to, fromKey, key, u, tone, calm, vs, ratio) => {
+      // Changes that are not into ウルトラ keep the skin's own look.
+      if (key !== "ultra") return skinForm(context, from, to, fromKey, key, u, tone, calm, vs, ratio);
+      if (!fuel && !retried) {
+        retried = true;
+        fuel = bakeWhiteFireFuel(input.document, from, core);
+      }
+      if (!fuel) return skinForm(context, from, to, fromKey, key, u, tone, calm, vs, ratio);
+      // The sealed ミドル was drawn beneath this pass; the change draws it
+      // itself, so its tail and halo never show through ウルトラ.
+      context.clearRect(0, 0, W, H);
+      fire.draw(context, from, to, fuel, u, W, H);
+      return true;
+    };
+    layer.release = () => {
+      fire.release();
+      fuel = null;
+      skinRelease();
+    };
+    return layer;
+  },
+});
+
+/** The selector's change into ウルトラ on a finished runway (the engine's
+ * `formShift` hook; meta-unitas-form-shift.ts): the form window replayed
+ * in time, so the same white fire burns; every other change is instant. */
+export const metaUnitasFormShiftKit = Object.freeze({
+  visible: META_UNITAS_SHIFT.visible,
+  create(input: { beats: { readonly form: readonly [number, number] } }) {
+    const machine = createMetaUnitasFormShift(input.beats);
+    return {
+      get active() {
+        return machine.active;
+      },
+      get phase() {
+        return machine.phase;
+      },
+      request: machine.request,
+      frame: machine.frame,
+      cancel: machine.cancel,
+      // The scene draws every frame of the burn itself: no picture is held.
+      capture: () => true,
+      paint() {},
+      release() {
+        machine.cancel();
+      },
+    };
+  },
 });
 
 export function metaUnitasAssemblyConfig(): RexonanceAssemblyConfig {
@@ -183,6 +253,9 @@ export function mountMetaUnitasAssemblyEngine(
     runway,
     {
       ...metaUnitasAssemblyConfig(),
+      // The page's runway burns into ウルトラ when the selector flips on a
+      // finished frame; the entry (data-form "standard") has no such change.
+      ...(options.eager ? null : { formShift: metaUnitasFormShiftKit }),
       // The scroll's canvases move by the boost's camera alone (FAR FROM's
       // round-2 camera rode the shared accents and fought it, frame by frame).
       ...(director ? null : { accents: farFromStillAccents }),

@@ -316,8 +316,14 @@ test("the engine: FAR FROM alone has the form change; the scene's own beats are 
   assert.match(engine, /if \(formShift\?\.active\) \{/);
   for (const page of ["rexonance-saga/rexonance-saga.tsx"])
     assert.doesNotMatch(readFileSync(new URL(`../src/components/${page}`, import.meta.url), "utf8"), /formShift/);
-  for (const other of ["illusionculum-assembly-engine.ts", "meta-unitas-rx-engine.ts"])
+  for (const other of ["illusionculum-assembly-engine.ts"])
     assert.doesNotMatch(readFileSync(new URL(`../src/lib/${other}`, import.meta.url), "utf8"), /formShift/);
+  // 2026-11-20 (owner: Meta Unitas' change into ウルトラ by white fire): Meta
+  // Unitas has its own kit, a burn into ウルトラ only (meta-unitas-form-shift.ts),
+  // never FAR FROM's dissolve.
+  const metaUnitas = readFileSync(new URL("../src/lib/meta-unitas-rx-engine.ts", import.meta.url), "utf8");
+  assert.match(metaUnitas, /\{ formShift: metaUnitasFormShiftKit \}/);
+  assert.doesNotMatch(metaUnitas, /far-from-form-shift/);
   // The chain's sheets are made ready in idle time once the suit stands
   // whole, behind the kit: choosing a form starts no long task.
   assert.match(
