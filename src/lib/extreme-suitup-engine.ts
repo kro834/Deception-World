@@ -98,7 +98,6 @@ const smooth = (v: number) => {
 /** The flight's travel overshoot (easeOutBack's `s`): a few art px past the
  * rest point on a typical path, settling back by 90 % of the flight. */
 const SETTLE_S = 0.6;
-/** The liquid lip's colours: a cool steel sheet, its ripples, its rim. */
 /* The lip's coverage steps (only their alpha counts: the colour is the
    steel layer's): a thin film from the landing edge, ripples, a rim. */
 const LIP_CLEAR = "rgba(255,255,255,0)";
@@ -142,7 +141,14 @@ function bodyPath(k: number, withHorns: boolean) {
  * distance from the region's anchor, `min`…`min + span` art px, over
  * `room` ms from `begin`, each flying `flight` ms (extreme-suitup-geometry.ts
  * schedules them so, give or take a 30 ms jitter). */
-type Wave = { region: SuitupRegion; min: number; span: number; begin: number; room: number; flight: number };
+type Front = {
+  region: SuitupRegion;
+  min: number;
+  span: number;
+  begin: number;
+  room: number;
+  flight: number;
+};
 
 type Prepared = {
   k: number;
@@ -161,7 +167,7 @@ type Prepared = {
   })[];
   sparkles: { x: number; y: number; phase: number; size: number }[];
   /** Each region's wave, for the liquid lip (see `lip`). */
-  waves: Wave[];
+  fronts: Front[];
   shimmer: Canvas;
   shimmerCtx: Ctx;
   /** The liquid lip's own layer, at half the art's resolution (its rim is
@@ -320,12 +326,12 @@ function prepare(art: HTMLImageElement): Prepared {
     const range = keyRange.get(plate.group) ?? [Infinity, -Infinity];
     keyRange.set(plate.group, [Math.min(range[0], key), Math.max(range[1], key)]);
   }
-  const waves: Wave[] = [];
+  const fronts: Front[] = [];
   for (const region of SUITUP_REGIONS) {
     const range = keyRange.get(region.group);
     if (!range) continue;
     const [begin, end] = EXTREME_SUITUP_BEATS[region.group];
-    waves.push({
+    fronts.push({
       region,
       min: range[0],
       span: range[1] - range[0] || 1,
@@ -371,7 +377,7 @@ function prepare(art: HTMLImageElement): Prepared {
     slotH,
     plates,
     sparkles,
-    waves,
+    fronts,
     shimmer,
     shimmerCtx,
     sheet,
@@ -579,7 +585,16 @@ export function mountExtremeSuitup(
      resolution, so a frame blits them 1:1 instead of resampling the art:
      the build (the undersuit with every locked plate baked in), the cape
      and the finished art. Rebuilt on a resize. */
-  type Device = { s: number; build: Canvas; bctx: Ctx; cape: Canvas; art: Canvas };
+  type Device = {
+    s: number;
+    build: Canvas;
+    bctx: Ctx;
+    cape: Canvas;
+    art: Canvas;
+    /** Where the unfurling cape is assembled each frame of its beat. */
+    capeWork: Canvas;
+    capeCtx: Ctx;
+  };
   let device: Device | null = null;
   const slotOf = (p: Prepared, slot: number) => {
     const perRow = Math.floor(p.atlas.width / p.slotW);
@@ -601,7 +616,8 @@ export function mountExtremeSuitup(
     );
   };
   const buildDevice = (p: Prepared) => {
-    if (device) for (const layer of [device.build, device.cape, device.art]) layer.width = 0;
+    if (device)
+      for (const layer of [device.build, device.cape, device.art, device.capeWork]) layer.width = 0;
     const s = dpr * scale;
     const w = Math.ceil(ART_W * s);
     const h = Math.ceil(ART_H * s);
@@ -611,7 +627,8 @@ export function mountExtremeSuitup(
     cctx.drawImage(p.cape, 0, 0, w, h);
     const [art, actx] = makeCanvas(w, h);
     actx.drawImage(p.art, 0, 0, w, h);
-    device = { s, build, bctx, cape, art };
+    const [capeWork, capeCtx] = makeCanvas(w, h);
+    device = { s, build, bctx, cape, art, capeWork, capeCtx };
     for (const plate of p.plates) {
       if (plate.baked >= 1) bake(p, device, plate, false);
       if (plate.baked === 2 && plate.hasGlow) bake(p, device, plate, true);
@@ -626,6 +643,13 @@ export function mountExtremeSuitup(
     c.globalCompositeOperation = "source-over";
     c.globalAlpha = 1;
     c.clearRect(0, 0, canvas.width, canvas.height);
+    // Finished: the owner's art alone, so the build under its soft edges
+    // (the finer plates' overlaps) cannot tint a pixel of the final frame.
+    if (now >= EXTREME_SUITUP_BEATS.sweep[1]) {
+      blit();
+      c.drawImage(d.art, 0, 0);
+      return;
+    }
     base();
     const [cx, cy] = SUITUP_CORE;
 
@@ -639,17 +663,25 @@ export function mountExtremeSuitup(
         base();
       } else {
         const top = 220;
-        const strips = 30;
+        // Fine strips (30 until 2026-11-20): at 30 the unfurling edge and
+        // its ripple showed as a staircase; at 96 each step is a few CSS px.
+        // They are laid at full strength into a work layer (their 1.5 px
+        // overlaps then add nothing) and the soft front is cut from it in
+        // one gradient: per-strip alpha drew each overlap as a bright line.
+        const strips = 96;
         const step = (ART_H - top) / strips;
+        const wctx = d.capeCtx;
+        wctx.setTransform(1, 0, 0, 1, 0, 0);
+        wctx.globalCompositeOperation = "source-over";
+        wctx.clearRect(0, 0, d.capeWork.width, d.capeWork.height);
+        wctx.setTransform(d.s, 0, 0, d.s, 0, 0);
         for (let i = 0; i < strips; i += 1) {
           const y = top + i * step;
           const n = i / strips;
-          const a = clamp01((f - n) / 0.14);
-          if (a <= 0) break;
+          if (n >= f) break;
           const sx = 0.3 + 0.7 * easeOutCubic(clamp01((f - n * 0.75) / 0.6));
           const ripple = Math.sin(n * 10 - now * 0.014) * 16 * (1 - capeU);
-          c.globalAlpha = a;
-          c.drawImage(
+          wctx.drawImage(
             d.cape,
             0,
             y * d.s,
@@ -661,6 +693,20 @@ export function mountExtremeSuitup(
             step + 1.5,
           );
         }
+        // The front: full above f − 0.16, gone by f (as the strips' alpha was).
+        const y0 = top + (f - 0.16) * (ART_H - top);
+        const y1 = top + f * (ART_H - top);
+        const cut = wctx.createLinearGradient(0, y0, 0, y1);
+        cut.addColorStop(0, "rgba(0,0,0,0)");
+        cut.addColorStop(0.5, "rgba(0,0,0,0.5)");
+        cut.addColorStop(1, "rgba(0,0,0,1)");
+        wctx.globalCompositeOperation = "destination-out";
+        wctx.fillStyle = cut;
+        wctx.fillRect(0, y0, ART_W, ART_H - y0);
+        wctx.globalCompositeOperation = "source-over";
+        blit();
+        c.drawImage(d.capeWork, 0, 0);
+        base();
         c.globalAlpha = 1;
       }
     }
@@ -960,8 +1006,8 @@ export function mountExtremeSuitup(
     const h = p.sheet.height;
     const f = w / ART_W;
     let any = false;
-    for (const wave of p.waves) {
-      const life = (now - wave.begin) / (wave.room + wave.flight);
+    for (const run of p.fronts) {
+      const life = (now - run.begin) / (run.room + run.flight);
       if (life <= 0 || life >= 1) continue;
       if (!any) {
         s.setTransform(1, 0, 0, 1, 0, 0);
@@ -972,14 +1018,14 @@ export function mountExtremeSuitup(
         any = true;
       }
       // Where plates are locking now, and where they are leaving now.
-      const back = wave.min + (wave.span * (now - wave.begin - wave.flight)) / wave.room;
-      const front = wave.min + (wave.span * (now - wave.begin)) / wave.room;
+      const back = run.min + (run.span * (now - run.begin - run.flight)) / run.room;
+      const front = run.min + (run.span * (now - run.begin)) / run.room;
       // From the landing edge (the sheet flows into the plates) to a thin
       // bright rim just past the last plate leaving now.
       const r0 = Math.max(0, back - 4);
       const r1 = Math.max(r0 + 8, front + 5);
-      const ax = wave.region.anchor[0];
-      const ay = wave.region.anchor[1];
+      const ax = run.region.anchor[0];
+      const ay = run.region.anchor[1];
       const band = s.createRadialGradient(ax, ay, r0, ax, ay, r1);
       // Two ripples ride outward through the sheet, faster than its front.
       const ripple = (now * 0.0021) % 1;
@@ -1001,7 +1047,7 @@ export function mountExtremeSuitup(
       s.globalAlpha = smooth(life / 0.1) * smooth((1 - life) / 0.12);
       s.fillStyle = band;
       s.beginPath();
-      tracePoly(s, wave.region.poly);
+      tracePoly(s, run.region.poly);
       s.fill();
     }
     if (!any) return;
@@ -1070,7 +1116,9 @@ export function mountExtremeSuitup(
       prepared = null;
     }
     if (device) {
-      for (const layer of [device.build, device.cape, device.art]) layer.width = layer.height = 0;
+      for (const layer of [device.build, device.cape, device.art, device.capeWork]) {
+        layer.width = layer.height = 0;
+      }
       device = null;
     }
   };
