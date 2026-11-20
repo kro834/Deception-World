@@ -2458,7 +2458,7 @@
 }
 
 /* The fourth name (ウルトラ・リアクター・モア) is the longest: weighted for
-   it, all four sit on one line from 600px up (design brush-up, 2026-11-20;
+   it, all four sit on one line from 700px up (design brush-up, 2026-11-20;
    it used to wrap to two lines beside three single-line names). */
 .rxs-page.rxs-page.ics-page .ics-form-tabs > button:nth-of-type(4) {
   flex-grow: 1.62;
@@ -3931,14 +3931,14 @@ html:not([data-world-effects="economy"])
 /* ================================================================
    The four form names on a phone (design brush-up, 2026-11-20).
    The rail was weighted for three names; with ウルトラ・リアクター・モア
-   as a fourth, one row cannot hold them under 600px (the labels ran over
+   as a fourth, one row cannot hold them under 700px (the labels ran over
    each other, and the suit-up's ending rail grew wider than the screen,
    leaving its last form out of reach). Two rows of two keep every name
    whole on one line and every tab a full touch target. The shared rail is
    one row by contract (styles-frosted-controls.css), hence the !important
    here; its lens already steers a grid (boot.js measures x and y).
    ================================================================ */
-@media (max-width: 599.98px) {
+@media (max-width: 699.98px) {
   /* The ending rail's cell follows the screen, not the names' full length. */
   html[data-family="special"] body .rxs-page.ics-page .rxs-stage-switcher.ics-ending {
     grid-template-columns: minmax(0, 1fr);
