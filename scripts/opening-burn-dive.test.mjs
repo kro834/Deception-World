@@ -135,7 +135,7 @@ test("the dive swells amber once, grades ice only upwards, and lands still", asy
   );
   // The shader phase fits LoadGate's covered fail-safe with GL latency.
   const gate = await read("src/components/load-gate.tsx");
-  const failSafe = Number(gate.match(/runtime\.covered\.promise, wait\((\d+)\)/)[1]);
+  const failSafe = Number(gate.match(/runtime\.covered\.promise,\s*wait\((\d+)\)/)[1]);
   assert.ok(OPENING_DIVE_READY_TIMEOUT_MS + OPENING_DIVE.glEnd * 1000 < failSafe - 300);
 });
 

@@ -8,6 +8,7 @@ import {
   ROUTE_WARMUP_DEADLINE_MS,
 } from "../src/lib/route-warmup-deadline.ts";
 import { createTransitionDecorationClock } from "../src/lib/transition-decoration-clock.ts";
+import { failedChunkUrl, loaderChunkUrl } from "../src/lib/chunk-retry.js";
 import { guardedHref } from "../src/lib/guarded-href.ts";
 import { REXONANCE_ENTRY_TIMINGS } from "../src/lib/rexonance-calls.ts";
 
@@ -257,6 +258,7 @@ function mount(
           },
         };
       if (name === "@/lib/asset-loader") return { preloadAssets: async () => undefined };
+      if (name === "@/lib/chunk-retry.js") return { failedChunkUrl, loaderChunkUrl };
       if (name === "@/lib/guarded-href") return { guardedHref };
       if (name === "@/lib/transition-decoration-clock") return { createTransitionDecorationClock };
       if (name === "@/lib/route-warmup-deadline") return { preloadRouteWithDeadline };

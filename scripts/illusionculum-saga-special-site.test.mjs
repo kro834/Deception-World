@@ -235,7 +235,8 @@ test("the entry transformation plays in the route transition screen, the owner's
   const gate = read("src/components/load-gate.tsx");
   assert.match(gate, /"\/illusionculum-saga": "illusionculum"/);
   assert.match(gate, /illusionculum: ILLUSIONCULUM_ENTRY_TIMINGS,/);
-  assert.match(gate, /const illusionculum = variant === "illusionculum" && scene\?\.tier === "full";/);
+  assert.match(gate, /const IllusionculumEntrySequence =\s*variant === "illusionculum" && scene\?\.tier === "full"\s*\? illusionculumEntrySequence\.cached/);
+  assert.match(gate, /: IllusionculumEntrySequence && illusionculumPlayback \? \(/);
   assert.match(gate, /<IllusionculumEntrySequence phase=\{phase\} playback=\{illusionculumPlayback\} \/>/);
   const entry = await import("../src/lib/illusionculum-entry.ts");
   assert.deepEqual([...entry.ILLUSIONCULUM_ENTRY_CALLS], [...ILLUSIONCULUM_SAGA.calls]);

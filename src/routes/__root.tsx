@@ -17,22 +17,27 @@ import {
   Scripts,
   useRouterState,
 } from "@tanstack/react-router";
-const LibraryVisitTracker =
-  typeof lazy === "function"
-    ? lazy(() =>
-        import("@/components/library/library-controls").then((m) => ({
-          default: m.LibraryVisitTracker,
-        })),
-      )
-    : ((() => null) as unknown as ComponentType<{ pathname: string; hash: string }>);
-const LazyInquiryNavigation =
-  typeof lazy === "function"
-    ? lazy(() =>
-        import("@/components/library/inquiry-navigation").then((m) => ({
-          default: m.InquiryNavigation,
-        })),
-      )
-    : ((() => null) as unknown as ComponentType);
+function optionalLazy<P extends object>(
+  importModule: () => Promise<{ default: ComponentType<P> }>,
+): ComponentType<P> {
+  if (typeof lazy !== "function") return (() => null) as ComponentType<P>;
+  return lazy(() =>
+    importModule().catch(() => ({
+      default: (() => null) as ComponentType<P>,
+    })),
+  );
+}
+
+const LibraryVisitTracker = optionalLazy<{ pathname: string; hash?: string }>(() =>
+  import("@/components/library/library-controls").then((m) => ({
+    default: m.LibraryVisitTracker,
+  })),
+);
+const LazyInquiryNavigation = optionalLazy<Record<string, never>>(() =>
+  import("@/components/library/inquiry-navigation").then((m) => ({
+    default: m.InquiryNavigation,
+  })),
+);
 import { QuickSearchHost } from "@/components/search/quick-search-host";
 import inquiryNavigationCss from "@/styles-inquiry-navigation.css?url";
 import interactionChoreographyCss from "@/styles-interaction-choreography.css?url";
@@ -46,33 +51,24 @@ import {
   type ZeusButtonSettings,
 } from "@/lib/zeus-button-context";
 
-const LazyZeusButtonHost =
-  typeof lazy === "function"
-    ? lazy(() =>
-        import("@/components/zeus-button").then((m) => ({
-          default: m.ZeusButtonProvider,
-        })),
-      )
-    : ((() => null) as unknown as ComponentType<{
-        children: ReactNode;
-        externalSettings?: ZeusButtonSettings;
-      }>);
-const LazyOpeningNotice =
-  typeof lazy === "function"
-    ? lazy(() =>
-        import("@/components/opening-notice").then((m) => ({
-          default: m.OpeningNotice,
-        })),
-      )
-    : ((() => null) as unknown as ComponentType);
-const LazyIpadMenuMode =
-  typeof lazy === "function"
-    ? lazy(() =>
-        import("@/components/ipad-menu-mode").then((m) => ({
-          default: m.IpadMenuMode,
-        })),
-      )
-    : ((() => null) as unknown as ComponentType);
+const LazyZeusButtonHost = optionalLazy<{
+  children: ReactNode;
+  externalSettings?: ZeusButtonSettings;
+}>(() =>
+  import("@/components/zeus-button").then((m) => ({
+    default: m.ZeusButtonProvider,
+  })),
+);
+const LazyOpeningNotice = optionalLazy<Record<string, never>>(() =>
+  import("@/components/opening-notice").then((m) => ({
+    default: m.OpeningNotice,
+  })),
+);
+const LazyIpadMenuMode = optionalLazy<Record<string, never>>(() =>
+  import("@/components/ipad-menu-mode").then((m) => ({
+    default: m.IpadMenuMode,
+  })),
+);
 import { ContentProtection } from "@/components/content-protection";
 import { SkipLink } from "@/components/skip-link";
 import { LiquidGlassDefs } from "@/components/liquid-glass-defs";

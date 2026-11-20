@@ -30,18 +30,8 @@ type OpeningHandoffLayerComponent = ComponentType<{
   onComplete: (token: number) => void;
 }>;
 
-let cachedOpeningHandoffLayer: OpeningHandoffLayerComponent | null = null;
-let openingHandoffLayerPromise: Promise<OpeningHandoffLayerComponent> | null = null;
-
-function loadOpeningHandoffLayer(): Promise<OpeningHandoffLayerComponent> {
-  if (cachedOpeningHandoffLayer) return Promise.resolve(cachedOpeningHandoffLayer);
-  openingHandoffLayerPromise ??= import("@/components/cinematic/opening-handoff").then((m) => {
-    cachedOpeningHandoffLayer = m.OpeningHandoffLayer;
-    return m.OpeningHandoffLayer;
-  });
-  return openingHandoffLayerPromise;
-}
 import { preloadAssets, warmedSource } from "@/lib/asset-loader";
+import { failedChunkUrl, loaderChunkUrl } from "@/lib/chunk-retry.js";
 import { guardedHref, type GuardedSearch } from "@/lib/guarded-href";
 import { createTransitionDecorationClock } from "@/lib/transition-decoration-clock";
 import { preloadRouteWithDeadline } from "@/lib/route-warmup-deadline";
@@ -68,45 +58,68 @@ import { FAR_FROM_ENTRY_LATE_MS, FAR_FROM_ENTRY_TIMINGS } from "@/lib/far-from-e
 import { createEntryPlayback, type EntryPlayback } from "@/lib/entry-playback";
 import { ILLUSIONCULUM_ENTRY_TIMINGS } from "@/lib/illusionculum-entry";
 
-type IllusionculumEntrySequenceComponent = ComponentType<{
-  phase: "covering" | "revealing";
-  playback: EntryPlayback;
-}>;
-let cachedIllusionculumEntrySequence: IllusionculumEntrySequenceComponent | null = null;
-let illusionculumEntrySequencePromise: Promise<IllusionculumEntrySequenceComponent> | null = null;
+// Keep the current navigation moving after an import failure. Retry a
+// confirmed failure under a fresh URL on the next entry because the browser
+// can retain the rejection in its module map.
+function createTransitionLayerLoader<M, T>(
+  importLayer: () => Promise<M>,
+  selectLayer: (module: M) => T,
+  deadlineMs: number,
+) {
+  let cached: T | null = null;
+  let pending: Promise<T | null> | null = null;
+  let retryUrl: string | null = null;
+  let attempt = 0;
+  return {
+    get cached() {
+      return cached;
+    },
+    load() {
+      if (cached) return Promise.resolve(cached);
+      if (pending) return pending;
 
-function loadIllusionculumEntrySequence(): Promise<IllusionculumEntrySequenceComponent> {
-  if (cachedIllusionculumEntrySequence) return Promise.resolve(cachedIllusionculumEntrySequence);
-  illusionculumEntrySequencePromise ??=
-    import("@/components/illusionculum-saga/illusionculum-entry-sequence").then((m) => {
-      cachedIllusionculumEntrySequence = m.IllusionculumEntrySequence;
-      return m.IllusionculumEntrySequence;
-    });
-  return illusionculumEntrySequencePromise;
+      const request = ++attempt;
+      const load = () => {
+        if (!retryUrl) return importLayer();
+        const url = new URL(retryUrl);
+        url.searchParams.set("retry", `${Date.now().toString(36)}-${request}`);
+        return import(/* @vite-ignore */ url.href) as Promise<M>;
+      };
+      pending = new Promise<T | null>((resolve) => {
+        let settled = false;
+        const finish = (layer: T | null) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timer);
+          cached = layer;
+          pending = null;
+          resolve(layer);
+        };
+        const timer = window.setTimeout(() => finish(null), deadlineMs);
+        void Promise.resolve()
+          .then(load)
+          .then(selectLayer)
+          .then(finish, (error: unknown) => {
+            if (request === attempt)
+              retryUrl ??= loaderChunkUrl(importLayer) ?? failedChunkUrl(error);
+            finish(null);
+          });
+      });
+      return pending;
+    },
+  };
 }
 
-function IllusionculumEntrySequence({
-  phase,
-  playback,
-}: {
-  phase: "covering" | "revealing";
-  playback: EntryPlayback;
-}) {
-  const [Comp, setComp] = useState<IllusionculumEntrySequenceComponent | null>(
-    () => cachedIllusionculumEntrySequence,
-  );
-  useEffect(() => {
-    if (Comp) return;
-    let active = true;
-    void loadIllusionculumEntrySequence().then((Loaded) => {
-      if (active) setComp(() => Loaded);
-    });
-    return () => {
-      active = false;
-    };
-  }, [Comp]);
-  return Comp ? <Comp phase={phase} playback={playback} /> : null;
-}
+const openingHandoffLayer = createTransitionLayerLoader(
+  () => import("@/components/cinematic/opening-handoff"),
+  (module) => module.OpeningHandoffLayer,
+  3000,
+);
+const illusionculumEntrySequence = createTransitionLayerLoader(
+  () => import("@/components/illusionculum-saga/illusionculum-entry-sequence"),
+  (module) => module.IllusionculumEntrySequence,
+  1800,
+);
 // EXTREME SAGA's entry suit-up (owner, 2026-11-11): its plates deploy under
 // the same cover, on a playback like ILLUSIONCULUM's. Only the light layer
 // is in the gate's chunk; its engine and art load when it mounts.
@@ -874,7 +887,8 @@ type Deferred<T> = {
 type OpeningHandoffRuntime = {
   token: number;
   source: OpeningHandoffSource;
-  covered: Deferred<void>;
+  covered: Deferred<boolean>;
+  layer: Promise<OpeningHandoffLayerComponent | null>;
   destination: Deferred<OpeningHandoffDestination | null>;
   animation: Deferred<void>;
   destinationValue?: OpeningHandoffDestination;
@@ -1075,25 +1089,27 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const pathnameRef = useRef(pathname);
   const [openingSnapshot, setOpeningSnapshot] = useState<OpeningHandoffSnapshot | null>(null);
   const [OpeningHandoffLayerView, setOpeningHandoffLayerView] =
-    useState<OpeningHandoffLayerComponent | null>(() => cachedOpeningHandoffLayer);
+    useState<OpeningHandoffLayerComponent | null>(() => openingHandoffLayer.cached);
   useEffect(() => {
     if (OpeningHandoffLayerView) return;
+    let active = true;
+    const showLayer = (Comp: OpeningHandoffLayerComponent | null) => {
+      if (active && Comp) setOpeningHandoffLayerView(() => Comp);
+    };
     if (openingSnapshot) {
-      let active = true;
-      void loadOpeningHandoffLayer().then((Comp) => {
-        if (active) setOpeningHandoffLayerView(() => Comp);
-      });
+      void openingHandoff.current?.layer.then(showLayer);
       return () => {
         active = false;
       };
     }
     if (pathname !== "/") return;
     const timer = window.setTimeout(() => {
-      void loadOpeningHandoffLayer().then((Comp) => {
-        setOpeningHandoffLayerView(() => Comp);
-      });
+      void openingHandoffLayer.load().then(showLayer);
     }, 180);
-    return () => window.clearTimeout(timer);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, [OpeningHandoffLayerView, openingSnapshot, pathname]);
   const [signal, setSignal] = useState<"idle" | "running" | "done">("idle");
   const signalTimer = useRef(0);
@@ -1231,7 +1247,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
         window.cancelAnimationFrame(frame);
       }
       openingFocusFrames.current = [];
-      runtime.covered.resolve(undefined);
+      runtime.covered.resolve(false);
       runtime.destination.resolve(null);
       runtime.animation.resolve(undefined);
       openingHandoff.current = null;
@@ -1278,14 +1294,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       const runtime: OpeningHandoffRuntime = {
         token,
         source,
-        covered: createDeferred<void>(),
+        covered: createDeferred<boolean>(),
+        layer: openingHandoffLayer.load(),
         destination: createDeferred<OpeningHandoffDestination | null>(),
         animation: createDeferred<void>(),
       };
       openingHandoff.current = runtime;
       setDocumentLoading(true);
       dispatchOpeningHandoffState(true);
-      void loadOpeningHandoffLayer();
+      void runtime.layer.then((layer) => {
+        if (!layer) runtime.covered.resolve(false);
+      });
       setOpeningSnapshot({ token, phase: "covering", source });
       return true;
     },
@@ -1295,7 +1314,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
   const notifyOpeningHandoffCovered = useCallback((token: number) => {
     const runtime = openingHandoff.current;
     if (!runtime || runtime.token !== token) return;
-    runtime.covered.resolve(undefined);
+    runtime.covered.resolve(true);
   }, []);
 
   const notifyOpeningDestination = useCallback((destination: OpeningHandoffDestination) => {
@@ -1347,7 +1366,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       }
       openingFocusFrames.current = [];
       const runtime = openingHandoff.current;
-      runtime?.covered.resolve(undefined);
+      runtime?.covered.resolve(false);
       runtime?.destination.resolve(null);
       runtime?.animation.resolve(undefined);
       openingHandoff.current = null;
@@ -1414,7 +1433,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
       }
       openingFocusFrames.current = [];
       const runtime = openingHandoff.current;
-      runtime?.covered.resolve(undefined);
+      runtime?.covered.resolve(false);
       runtime?.destination.resolve(null);
       runtime?.animation.resolve(undefined);
       openingHandoff.current = null;
@@ -1482,6 +1501,8 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
           const isCurrent = () =>
             transitionId.current === requestId && openingHandoff.current?.token === requestId;
 
+          const navigateOpeningDestination = () => navigate({ to, hash, search: navigationSearch });
+
           try {
             // Build both warmups inside the guarded region. Besides turning a
             // synchronous router/preloader failure into a handled rejection,
@@ -1500,11 +1521,21 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             // 1.45 s, plus up to 0.45 s for GL). A fail-safe prevents a
             // permanently stuck route if the browser aborts animation callbacks
             // while backgrounded.
-            await Promise.race([runtime.covered.promise, wait(3000)]);
+            const hasHandoffLayer = await Promise.race([
+              runtime.covered.promise,
+              wait(3000).then(() => Boolean(openingHandoffLayer.cached)),
+            ]);
             if (!isCurrent()) return;
+            if (!hasHandoffLayer) {
+              finishOpeningHandoff(requestId, false);
+              await navigateOpeningDestination();
+              if (transitionId.current === requestId && focusDestination)
+                focusRouteDestination(hash);
+              return;
+            }
             await Promise.race([Promise.all([routeWarmup, assetWarmup]), wait(2400)]);
             if (!isCurrent()) return;
-            await navigate({ to, hash, search: navigationSearch });
+            await navigateOpeningDestination();
             if (!isCurrent()) return;
             const destination = await Promise.race([
               runtime.destination.promise,
@@ -1827,12 +1858,17 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             metaUnitasPlayback = createMetaUnitasEntryPlayback();
             rexonanceCoverCancel.current = metaUnitasPlayback.cancel;
           }
-          if (diveVariant === "illusionculum" && tier === "full") {
-            await loadIllusionculumEntrySequence();
+          const needsIllusionculumSequence = diveVariant === "illusionculum" && tier === "full";
+          if (needsIllusionculumSequence) {
+            const sequence = await clock.wait(illusionculumEntrySequence.load());
             if (!isCurrent()) return;
-            illusionculumTransition.current = requestId;
-            illusionculumPlayback = createEntryPlayback();
-            rexonanceCoverCancel.current = illusionculumPlayback.cancel;
+            if (sequence) {
+              illusionculumTransition.current = requestId;
+              illusionculumPlayback = createEntryPlayback();
+              rexonanceCoverCancel.current = illusionculumPlayback.cancel;
+            } else {
+              startedAt = performance.now();
+            }
           }
           if (diveVariant === "extreme" && tier === "full") {
             extremePlayback = createEntryPlayback();
@@ -1846,7 +1882,7 @@ export function LoadGateProvider({ children }: { children: ReactNode }) {
             Boolean(lastPress?.target.deref()?.closest(".manager-pagination"));
           const timings = reduceMotion
             ? { cover: 100, reveal: 160 }
-            : tier === "calm"
+            : tier === "calm" || (needsIllusionculumSequence && !illusionculumPlayback)
               ? CALM_TIMINGS
               : flip
                 ? FILE_FLIP_TIMINGS
@@ -2582,7 +2618,11 @@ function RiderRouteDive({
   const farFrom = variant === "far-from" && Boolean(FarFromCallSequence);
   // ILLUSIONCULUM's entry (illusionculum-entry-sequence.tsx): its projections
   // resolving into the figure, under the cover, on the full tier only.
-  const illusionculum = variant === "illusionculum" && scene?.tier === "full";
+  const IllusionculumEntrySequence =
+    variant === "illusionculum" && scene?.tier === "full"
+      ? illusionculumEntrySequence.cached
+      : null;
+  const illusionculum = Boolean(IllusionculumEntrySequence && illusionculumPlayback);
   const metaUnitas = variant === "meta-unitas" && Boolean(MetaUnitasCallSequence);
   // FAR FROM's call is skippable (owner, 2026-10-22): the button, or Escape
   // while it covers. META UNITAS's the same way.
@@ -2670,7 +2710,7 @@ function RiderRouteDive({
             </button>
           ) : null}
         </>
-      ) : illusionculum && illusionculumPlayback ? (
+      ) : IllusionculumEntrySequence && illusionculumPlayback ? (
         <>
           <IllusionculumEntrySequence phase={phase} playback={illusionculumPlayback} />
           {illusionculumSkippable ? (
