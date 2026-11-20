@@ -26,7 +26,7 @@ export const Route = createFileRoute("/meta-unitas-saga")({
       {
         name: "description",
         content:
-          "仮面ライダーメタ・ウニタスサーガの特設サイト。変身音声、スペック、性能比較、変身、形態段階、装甲・支援機構、専用武装、固有能力、基幹システム、必殺技を掲載。",
+          "仮面ライダーメタ・ウニタスサーガの特設サイト。変身音声、スペック、性能比較、変身、基幹システム、固有能力、装甲・支援機構、形態段階、専用武装、必殺技を掲載。",
       },
       { property: "og:title", content: "メタ・ウニタスサーガ｜META UNITAS SAGA — Deception World" },
       {
