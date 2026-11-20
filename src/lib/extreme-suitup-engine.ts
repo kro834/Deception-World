@@ -32,6 +32,7 @@ import {
 } from "./extreme-entry.ts";
 import {
   SUITUP_CORE,
+  SUITUP_FLIGHT_MS,
   SUITUP_GEMS,
   SUITUP_HORNS,
   SUITUP_HORN_BASE_Y,
@@ -40,7 +41,9 @@ import {
   buildSuitupPlates,
   pointInPoly,
   type Point,
+  type SuitupGroup,
   type SuitupPlate,
+  type SuitupRegion,
 } from "./extreme-suitup-geometry.ts";
 
 const ART_W = 1024;
@@ -95,6 +98,13 @@ const smooth = (v: number) => {
 /** The flight's travel overshoot (easeOutBack's `s`): a few art px past the
  * rest point on a typical path, settling back by 90 % of the flight. */
 const SETTLE_S = 0.6;
+/** The liquid lip's colours: a cool steel sheet, its ripples, its rim. */
+/* The lip's coverage steps (only their alpha counts: the colour is the
+   steel layer's): a thin film from the landing edge, ripples, a rim. */
+const LIP_CLEAR = "rgba(255,255,255,0)";
+const LIP_SHEET = "rgba(255,255,255,0.32)";
+const LIP_RIPPLE = "rgba(255,255,255,0.6)";
+const LIP_RIM = "rgba(255,255,255,0.9)";
 /** How long a glow line takes to trace on before it is baked. */
 const GLOW_MS = 200;
 /** How long a lock glint runs along a plate's gold edge. */
@@ -128,6 +138,12 @@ function bodyPath(k: number, withHorns: boolean) {
   return path;
 }
 
+/** A region's wave in closed form: its plates leave in order of their
+ * distance from the region's anchor, `min`…`min + span` art px, over
+ * `room` ms from `begin`, each flying `flight` ms (extreme-suitup-geometry.ts
+ * schedules them so, give or take a 30 ms jitter). */
+type Wave = { region: SuitupRegion; min: number; span: number; begin: number; room: number; flight: number };
+
 type Prepared = {
   k: number;
   under: Canvas;
@@ -144,8 +160,16 @@ type Prepared = {
     baked: 0 | 1 | 2;
   })[];
   sparkles: { x: number; y: number; phase: number; size: number }[];
+  /** Each region's wave, for the liquid lip (see `lip`). */
+  waves: Wave[];
   shimmer: Canvas;
   shimmerCtx: Ctx;
+  /** The liquid lip's own layer, at half the art's resolution (its rim is
+   * thin; the shimmer's quarter resolution blurred it into a halo). */
+  sheet: Canvas;
+  sheetCtx: Ctx;
+  /** The liquid metal itself (the armour as polished steel), sheet-sized. */
+  steel: Canvas;
   art: HTMLImageElement;
 };
 
@@ -161,6 +185,8 @@ function prepare(art: HTMLImageElement): Prepared {
   const armour = new ImageData(w, h);
   const glow = new ImageData(w, h);
   const shade = new ImageData(w, h);
+  const chrome = new ImageData(w, h);
+  const cd = chrome.data;
   const ad = armour.data;
   const gd = glow.data;
   const ud = shade.data;
@@ -190,6 +216,15 @@ function prepare(art: HTMLImageElement): Prepared {
     ud[i + 1] = lum * 0.95 + 10;
     ud[i + 2] = lum * 1.3 + 22;
     ud[i + 3] = a;
+    // The liquid metal: the armour's own relief as polished steel (its
+    // shading kept and its colour dropped), so the sheet ahead of the
+    // plates reads as metal that will set into them, not as fog.
+    const relief = ad[i] * 0.3 + ad[i + 1] * 0.5 + ad[i + 2] * 0.2;
+    const steel = Math.min(235, 34 + relief * 1.35);
+    cd[i] = steel * 0.8;
+    cd[i + 1] = steel * 0.88;
+    cd[i + 2] = Math.min(255, steel * 1.02 + 14);
+    cd[i + 3] = a;
     if (line > 0.35 && a > 128) {
       const x = p % w;
       const y = (p / w) | 0;
@@ -211,6 +246,7 @@ function prepare(art: HTMLImageElement): Prepared {
   const armourBody = layer(armour, body);
   const glowBody = layer(glow, body);
   const under = layer(shade, body);
+  const chromeBody = layer(chrome, body);
   const cape = layer(pixels, bodyWithHorns, "out");
   // The horns, cropped to their own box (HORN_BOX, art units).
   const [hx, hy, hw, hh] = HORN_BOX;
@@ -274,6 +310,31 @@ function prepare(art: HTMLImageElement): Prepared {
     return { ...plate, slot, hasGlow, solid, baked: 0 as 0 | 1 | 2 };
   });
 
+  // The waves, as the geometry scheduled them: per group, the distance key's
+  // range over all its regions; the helmet folds in its own order (no lip).
+  const keyRange = new Map<SuitupGroup, [number, number]>();
+  for (const plate of plates) {
+    if (plate.group === "helmet") continue;
+    const region = SUITUP_REGIONS.find((item) => item.id === plate.region)!;
+    const key = Math.hypot(plate.at[0] - region.anchor[0], plate.at[1] - region.anchor[1]);
+    const range = keyRange.get(plate.group) ?? [Infinity, -Infinity];
+    keyRange.set(plate.group, [Math.min(range[0], key), Math.max(range[1], key)]);
+  }
+  const waves: Wave[] = [];
+  for (const region of SUITUP_REGIONS) {
+    const range = keyRange.get(region.group);
+    if (!range) continue;
+    const [begin, end] = EXTREME_SUITUP_BEATS[region.group];
+    waves.push({
+      region,
+      min: range[0],
+      span: range[1] - range[0] || 1,
+      begin,
+      room: Math.max(1, end - begin - SUITUP_FLIGHT_MS),
+      flight: SUITUP_FLIGHT_MS,
+    });
+  }
+
   // The cape's stars: bright points on its deep blue.
   const sparkles: Prepared["sparkles"] = [];
   const capeCtx = cape.getContext("2d")!;
@@ -292,6 +353,10 @@ function prepare(art: HTMLImageElement): Prepared {
     sparkles.push({ x, y, phase: rand() * Math.PI * 2, size: 2 + rand() * 4.5 });
   }
   const [shimmer, shimmerCtx] = makeCanvas(Math.round(w / 4), Math.round(h / 4));
+  const [sheet, sheetCtx] = makeCanvas(Math.round(w / 2), Math.round(h / 2));
+  const [steel, steelCtx] = makeCanvas(sheet.width, sheet.height);
+  steelCtx.drawImage(chromeBody, 0, 0, steel.width, steel.height);
+  chromeBody.width = chromeBody.height = 0;
   source.width = source.height = 0;
   armourBody.width = armourBody.height = 0;
   glowBody.width = glowBody.height = 0;
@@ -306,8 +371,12 @@ function prepare(art: HTMLImageElement): Prepared {
     slotH,
     plates,
     sparkles,
+    waves,
     shimmer,
     shimmerCtx,
+    sheet,
+    sheetCtx,
+    steel,
     art,
   };
 }
@@ -641,6 +710,9 @@ export function mountExtremeSuitup(
     }
     c.globalAlpha = 1;
 
+    // The liquid-metal sheet runs just ahead of the landing plates.
+    lip(p, now);
+
     // Plates in the air: they stream out of the belt side along curved
     // paths, unfold and turn as they go, ease a few px past their place and
     // settle into it; at the lock the pose is exactly the rest pose, so the
@@ -873,6 +945,80 @@ export function mountExtremeSuitup(
     c.globalAlpha = 1;
   }
 
+  /* The liquid lip (nanosuit pass, 2026-11-20): over the band of each region
+     whose plates are in the air right now — from where they are locking to
+     where the last of them will land — a thin film of liquid steel (the
+     armour's own relief, polished) runs out from the belt side ahead of the
+     plates, firmest at its leading rim, with two ripples running outward
+     through it; the plates settle onto it and cover it. Closed form (the
+     wave's own schedule), drawn at half the art's resolution and laid over
+     the build once: one blit a frame however many plates there are. Under
+     the plates in the air, so the mechanical parts stay the subject. */
+  function lip(p: Prepared, now: number) {
+    const s = p.sheetCtx;
+    const w = p.sheet.width;
+    const h = p.sheet.height;
+    const f = w / ART_W;
+    let any = false;
+    for (const wave of p.waves) {
+      const life = (now - wave.begin) / (wave.room + wave.flight);
+      if (life <= 0 || life >= 1) continue;
+      if (!any) {
+        s.setTransform(1, 0, 0, 1, 0, 0);
+        s.globalCompositeOperation = "source-over";
+        s.globalAlpha = 1;
+        s.clearRect(0, 0, w, h);
+        s.setTransform(f, 0, 0, f, 0, 0);
+        any = true;
+      }
+      // Where plates are locking now, and where they are leaving now.
+      const back = wave.min + (wave.span * (now - wave.begin - wave.flight)) / wave.room;
+      const front = wave.min + (wave.span * (now - wave.begin)) / wave.room;
+      // From the landing edge (the sheet flows into the plates) to a thin
+      // bright rim just past the last plate leaving now.
+      const r0 = Math.max(0, back - 4);
+      const r1 = Math.max(r0 + 8, front + 5);
+      const ax = wave.region.anchor[0];
+      const ay = wave.region.anchor[1];
+      const band = s.createRadialGradient(ax, ay, r0, ax, ay, r1);
+      // Two ripples ride outward through the sheet, faster than its front.
+      const ripple = (now * 0.0021) % 1;
+      const a = 0.12 + 0.6 * ripple;
+      const b = 0.12 + 0.6 * ((ripple + 0.5) % 1);
+      const lo = Math.min(a, b);
+      const hi = Math.max(a, b);
+      band.addColorStop(0, LIP_CLEAR);
+      band.addColorStop(0.05, LIP_SHEET);
+      band.addColorStop(lo - 0.06, LIP_SHEET);
+      band.addColorStop(lo, LIP_RIPPLE);
+      band.addColorStop(lo + 0.06, LIP_SHEET);
+      band.addColorStop(hi - 0.06, LIP_SHEET);
+      band.addColorStop(hi, LIP_RIPPLE);
+      band.addColorStop(Math.min(0.8, hi + 0.06), LIP_SHEET);
+      band.addColorStop(0.93, LIP_RIM);
+      band.addColorStop(1, LIP_CLEAR);
+      // In and out with the wave itself: no pop as a region starts or ends.
+      s.globalAlpha = smooth(life / 0.1) * smooth((1 - life) / 0.12);
+      s.fillStyle = band;
+      s.beginPath();
+      tracePoly(s, wave.region.poly);
+      s.fill();
+    }
+    if (!any) return;
+    // The bands become liquid steel, only where the body is (the steel
+    // layer carries the body's alpha).
+    s.setTransform(1, 0, 0, 1, 0, 0);
+    s.globalAlpha = 1;
+    s.globalCompositeOperation = "source-in";
+    s.drawImage(p.steel, 0, 0);
+    s.globalCompositeOperation = "source-over";
+    const c = ctx!;
+    c.globalCompositeOperation = "source-over";
+    c.globalAlpha = 0.85;
+    c.drawImage(p.sheet, 0, 0, ART_W, ART_H);
+    c.globalAlpha = 1;
+  }
+
   /** A diagonal band of light across `layer`, through its own alpha. */
   function sheen(p: Prepared, layer: CanvasImageSource, u: number, strength: number) {
     const s = p.shimmerCtx;
@@ -916,6 +1062,8 @@ export function mountExtremeSuitup(
         prepared.atlas,
         prepared.glowAtlas,
         prepared.shimmer,
+        prepared.sheet,
+        prepared.steel,
       ]) {
         layer.width = layer.height = 0;
       }
