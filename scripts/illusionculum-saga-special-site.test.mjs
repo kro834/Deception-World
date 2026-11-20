@@ -21,7 +21,12 @@ const suitStyles = read("src/styles-illusionculum-suitup.css");
 // change the page makes to the owner's figures, so the sources are read with it.
 const yops = (text) => text.replace(/(?<![\d,])(50000|60000)YOPS/g, "$1〜YOPS");
 const ownerText = yops(read("design/illusionculum-saga-20261023/owner-text.md"));
-const comparisonText = yops(read("design/illusionculum-saga-20261023/comparison-owner.md"));
+// Owner (2026-11-20): 「メタ・ウニタスのウルトラだけ英語表記になっていたり…」
+// — on this page メタ・ウニタス's ウルトラ is written in katakana like every
+// other form, so the comparison source is read with that notation too.
+const ultraKana = (text) =>
+  text.replaceAll("メタ・ウニタスULTRA", "メタ・ウニタス・ウルトラ").replaceAll("持ち、ULTRAでは", "持ち、ウルトラでは");
+const comparisonText = ultraKana(yops(read("design/illusionculum-saga-20261023/comparison-owner.md")));
 const { ILLUSIONCULUM_SAGA, ILLUSIONCULUM_FORMS, ILLUSIONCULUM_COMPARISON } = await import(
   "../src/components/illusionculum-saga/illusionculum-data.ts"
 );
@@ -109,6 +114,9 @@ test("the comparison: the owner's passages with only the Rexonance comparisons r
   }
   const all = JSON.stringify(ILLUSIONCULUM_COMPARISON);
   assert.doesNotMatch(all, /レクソナンス|REXONANCE/);
+  // Every form name in katakana (owner, 2026-11-20): no メタ・ウニタスULTRA.
+  assert.doesNotMatch(all, /ウニタスULTRA|、ULTRAでは/);
+  assert.match(all, /メタ・ウニタス・ウルトラ/);
   assert.doesNotMatch(all, /未確定|暫定|設定案/);
   for (const title of ["基本性能比較", "統合演算・加速機構比較", "イリュージョンクルムサーガの性能評価", "支援・戦闘機能の比較", "P14・P16の技術的な差", "総合評価"])
     assert.ok(all.includes(title), title);
