@@ -125,6 +125,17 @@ export function bakeWhiteFireFuel(
       plume[i] = carried;
     }
   }
+  // Soften the columns sideways (a 1-2-1 pass, twice): a flame's air is
+  // continuous, never the fuel grid's bars.
+  const row = new Float32Array(FUEL_W);
+  for (let pass = 0; pass < 2; pass++) {
+    for (let y = 0; y < FUEL_H; y++) {
+      const o = y * FUEL_W;
+      for (let x = 0; x < FUEL_W; x++)
+        row[x] = (plume[o + Math.max(0, x - 1)] + 2 * plume[o + x] + plume[o + Math.min(FUEL_W - 1, x + 1)]) / 4;
+      plume.set(row, o);
+    }
+  }
   // The reactor's distance over the figure (its 2 : 3 frame).
   const arrival = new Float32Array(n);
   let far = 1e-6;
@@ -218,6 +229,9 @@ export function rasterWhiteFire(
   const front = -0.1 + 1.36 * ramp(B.reveal[0], B.reveal[1], u);
   const revealing = u > B.reveal[0];
   const lift = ramp(0.42, 0.9, u);
+  // The armour is wrapped in the fire as the change turns over (it hides
+  // the swap of the two forms beneath it), then bared again.
+  const veil = ramp(0.16, 0.4, u) * (1 - ramp(0.6, 0.86, u));
   const at = u * 6.2;
   const box = WHITE_FIRE_BOUNDS;
   let drawn = false;
@@ -254,20 +268,33 @@ export function rasterWhiteFire(
       const n1 = sampleNoise(x * 11.5 + q * 2.2, y * 7.4 + at * 2.1);
       const n2 = sampleNoise(x * 24 + n1 * 3.1, y * 15.5 + at * 2.9);
       const turb = n1 * 0.62 + n2 * 0.38;
-      // Tongues: tall where the fuel is near, torn where the air thins.
-      const tongue = ramp(0.3, 0.72, p * (0.95 - 0.25 * lift) + (turb - 0.5) * 0.95);
+      // Tongues: noise stretched upright and scrolling up; a tongue reaches
+      // as high above the armour as its noise is strong. `e` is the height
+      // above the fuel (0 on it).
+      const e = (1 - p) * (1.2 - 0.35 * lift);
+      const t1 = sampleNoise(x * 17 + q * 1.6 + 7, y * 4.6 + at * 2.5);
+      const t2 = sampleNoise(x * 36 + t1 * 2.4, y * 9.5 + at * 3.4);
+      const tn = t1 * 0.64 + t2 * 0.36;
+      const tongue = ramp(e - 0.06, e + 0.2, tn);
+      const tongueCore = ramp(e + 0.12, e + 0.42, tn);
+      // On the armour the fire is patchy and thin, so the plates read
+      // through it; above it, the tongues carry it up.
+      const sheet = b * (0.3 + 0.7 * ramp(0.38, 0.78, turb)) * (0.8 + 0.25 * veil) + b * 0.3 * veil;
       // The front's white-hot lip on the armour, and the revealed armour's
       // fire thinning to its edges as it lifts off.
-      const lip = revealing ? (1 - ramp(0.0, 0.06, Math.abs(front - key))) * ramp(0.15, 0.6, b) : 0;
-      const thin = 1 - 0.62 * shown * (1 - lip);
-      const density = clamp((tongue * (0.55 + 0.45 * b) + lip * 0.7) * lit * strength * thin);
+      const lip = revealing ? (1 - ramp(0.0, 0.085, Math.abs(front - key))) * ramp(0.15, 0.6, b) : 0;
+      const thin = 1 - 0.7 * shown * (1 - lip);
+      const above = tongue * (1 - 0.55 * b);
+      const trim = ramp(box.top, box.top + 0.16, y) * ramp(box.left, box.left + 0.08, x)
+        * (1 - ramp(box.left + box.width - 0.08, box.left + box.width, x));
+      const density = clamp((Math.max(above, sheet) + lip * 0.75) * lit * strength * thin * trim);
       if (density <= 0.01) {
         fire[i] = 0;
         continue;
       }
-      // Hot near the fuel and in the tongues' cores; violet as it rises.
-      const temp = clamp(0.18 + 0.36 * b + 0.3 * tongue * turb + 0.22 * (p - b) + 0.55 * lip - 0.1 * lift);
-      const alpha = clamp(density * (0.42 + 0.5 * temp));
+      // White in the tongues' cores and on the lip; violet as they thin.
+      const temp = clamp(0.16 + 0.5 * tongueCore + 0.22 * turb * sheet + 0.06 * veil * b + 0.2 * tongue * (1 - e) + 0.6 * lip - 0.1 * lift);
+      const alpha = clamp(density * (0.28 + 0.5 * temp));
       fire[i] = PALETTE[(temp * 255) | 0] | ((alpha * 255) << ALPHA_SHIFT);
       drawn = true;
     }
@@ -399,7 +426,7 @@ export function createWhiteFire(document: Document, coarse: boolean): WhiteFire 
         context.drawImage(f.canvas, box.left, box.top, box.width, box.height);
         // The white-hot glow: the same field added once more, faintly.
         context.globalCompositeOperation = "lighter";
-        context.globalAlpha = 0.22;
+        context.globalAlpha = 0.1;
         context.drawImage(f.canvas, box.left, box.top, box.width, box.height);
         context.globalAlpha = 1;
       }

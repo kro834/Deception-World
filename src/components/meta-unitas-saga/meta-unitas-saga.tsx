@@ -22,6 +22,7 @@ import { META_UNITAS_PERFORMANCE, META_UNITAS_SAGA } from "./meta-unitas-data";
 import { Articles, Bracketed, CallLine, FinisherCalls, Lead, jp } from "./meta-unitas-parts";
 import { MetaUnitasPerformance } from "./meta-unitas-performance";
 import { FORM_ACCENTS, FORM_LABELS, MetaUnitasSuitUp } from "./meta-unitas-suitup";
+import { MetaUnitasIgnition } from "./meta-unitas-ignition";
 import { META_UNITAS_CALL_LINES } from "@/lib/meta-unitas-assembly";
 
 /* META UNITAS SAGA special site (owner's record of 2026-10-23).
@@ -147,6 +148,15 @@ export function MetaUnitasSaga() {
   // rail both choose it, and the runway ends on it.
   const [stage, setStageState] = useState<MetaUnitasStageKey>("middle");
   const [entrance, setEntrance] = useState(0);
+  // #stages' switch into ウルトラ burns in white fire (owner, 2026-11-20);
+  // ウルトラ back to ミドル keeps the plates' entrance.
+  // `ignited`: the entrance that burned (its plates never play after it);
+  // `burning`: the fire is over the panel.
+  const [ignited, setIgnited] = useState(0);
+  const [burning, setBurning] = useState(false);
+  const entranceCount = useRef(0);
+  const stageArtRef = useRef<HTMLImageElement | null>(null);
+  const endIgnition = useCallback(() => setBurning(false), []);
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
   const stageTabsRef = useRef<HTMLDivElement | null>(null);
@@ -162,7 +172,12 @@ export function MetaUnitasSaga() {
     panelAnchor.current =
       panel && panel.bottom > 0 && panel.top < window.innerHeight ? panel.top : null;
     setStageState(next);
-    if (animate && motionAllowed()) setEntrance((value) => value + 1);
+    const animated = animate && motionAllowed();
+    if (animated) entranceCount.current += 1;
+    const burn = animated && next === "ultra";
+    setBurning(burn);
+    setIgnited(burn ? entranceCount.current : 0);
+    if (animated) setEntrance(entranceCount.current);
   }, []);
   const chooseQuietly = useCallback(
     (next: MetaUnitasStageKey) => selectStage(next, false),
@@ -466,7 +481,10 @@ export function MetaUnitasSaga() {
             aria-labelledby={`mus-stage-tab-${stage}`}
             data-stage={stage}
           >
-            <figure key={`${stage}-${entrance}`} data-entrance={entrance > 0 || undefined}>
+            <figure
+              key={`${stage}-${entrance}`}
+              data-entrance={(entrance > 0 && ignited !== entrance) || undefined}
+            >
               <img
                 className="mus-stage-backdrop"
                 src={activeArt.src}
@@ -482,6 +500,7 @@ export function MetaUnitasSaga() {
               {[0, 1, 2, 3].map((band) => (
                 <span key={band} className="mus-stage-band" style={{ ["--band" as string]: band }}>
                   <img
+                    ref={band === 0 ? stageArtRef : undefined}
                     src={activeArt.src}
                     srcSet={stageImage.srcSet}
                     sizes={stageImage.sizes}
@@ -494,6 +513,9 @@ export function MetaUnitasSaga() {
                   />
                 </span>
               ))}
+              {burning && stage === "ultra" ? (
+                <MetaUnitasIgnition destinationRef={stageArtRef} onDone={endIgnition} />
+              ) : null}
             </figure>
             <div key={`${stage}-copy`} className="mus-stage-copy">
               <h3>
