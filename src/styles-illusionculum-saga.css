@@ -2450,11 +2450,24 @@
 }
 
 .rxs-page.rxs-page.ics-page .ics-form-tabs > button:nth-of-type(1) {
-  flex-grow: 1.45;
+  flex-grow: 1.3;
 }
 
 .rxs-page.rxs-page.ics-page .ics-form-tabs > button:nth-of-type(3) {
-  flex-grow: 0.8;
+  flex-grow: 0.62;
+}
+
+/* The fourth name (ウルトラ・リアクター・モア) is the longest: weighted for
+   it, all four sit on one line from 600px up (design brush-up, 2026-11-20;
+   it used to wrap to two lines beside three single-line names). */
+.rxs-page.rxs-page.ics-page .ics-form-tabs > button:nth-of-type(4) {
+  flex-grow: 1.62;
+}
+
+/* A tab here holds the name alone, so it rests on the tab's centre line
+   (the shared rail stacks a name over a small caption from the top). */
+.rxs-page.rxs-page.ics-page .ics-form-tabs > button {
+  justify-content: center;
 }
 
 /* ================================================================
@@ -3912,5 +3925,40 @@ html:not([data-world-effects="economy"])
     background: none;
     box-shadow: none;
     border-left-color: CanvasText;
+  }
+}
+
+/* ================================================================
+   The four form names on a phone (design brush-up, 2026-11-20).
+   The rail was weighted for three names; with ウルトラ・リアクター・モア
+   as a fourth, one row cannot hold them under 600px (the labels ran over
+   each other, and the suit-up's ending rail grew wider than the screen,
+   leaving its last form out of reach). Two rows of two keep every name
+   whole on one line and every tab a full touch target. The shared rail is
+   one row by contract (styles-frosted-controls.css), hence the !important
+   here; its lens already steers a grid (boot.js measures x and y).
+   ================================================================ */
+@media (max-width: 599.98px) {
+  /* The ending rail's cell follows the screen, not the names' full length. */
+  html[data-family="special"] body .rxs-page.ics-page .rxs-stage-switcher.ics-ending {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html body .rxs-page.rxs-page.ics-page .ics-form-tabs.liquid-swipe-tabs {
+    flex-flow: row wrap !important;
+  }
+
+  html body .rxs-page.rxs-page.ics-page .ics-form-tabs.liquid-swipe-tabs > button[role="tab"],
+  html body
+    .rxs-page.rxs-page.ics-page
+    .ics-form-tabs.liquid-swipe-tabs
+    > button[role="tab"]:nth-of-type(n) {
+    flex: 1 1 calc(50% - 2px);
+  }
+
+  /* A name still too long for its cell (under 360px) breaks at its own seam. */
+  html body .rxs-page.rxs-page.ics-page .ics-form-tabs.liquid-swipe-tabs > button[role="tab"] > span {
+    white-space: normal;
+    line-height: 1.25;
   }
 }
