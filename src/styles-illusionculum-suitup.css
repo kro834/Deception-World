@@ -1394,3 +1394,25 @@ html[data-rzn-constrained] .rxs-page.ics-page .rzn-suitup {
     box-shadow: none;
   }
 }
+
+/* A choice into ウルトラ with the finished figure on the runway burns in red
+   fire (owner, 2026-11-20): the burn's canvas takes the engine's place for
+   its two seconds and hands the frame back on the same picture. */
+html[data-family="special"] body .rxs-page.ics-page .rzn-suitup > .rzn-frame > .ics-runway-burn {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.ics-page
+  .rzn-suitup[data-ics-burning]
+  > .rzn-frame
+  > .rzn-canvas {
+  visibility: hidden;
+}

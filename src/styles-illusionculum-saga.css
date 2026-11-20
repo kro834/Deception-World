@@ -3962,3 +3962,45 @@ html:not([data-world-effects="economy"])
     line-height: 1.25;
   }
 }
+
+/* The switch into ウルトラ by red fire (owner, 2026-11-20): the overlay
+   holds the old picture and the burn, over the new picture, in the same
+   frame; it goes once the new picture holds it (illusionculum-form-ignition). */
+.rxs-page.rxs-page.ics-page .ics-form-panel > figure > .ics-ignition,
+.rxs-page.rxs-page.ics-page .ics-ignition > :is(img, canvas) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.rxs-page.rxs-page.ics-page .ics-form-panel > figure > .ics-ignition {
+  z-index: 3;
+  background: radial-gradient(ellipse at 50% 60%, #22121b 0%, #110a12 42%, #07050a 80%);
+}
+
+.rxs-page.rxs-page.ics-page .ics-ignition > img {
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  html:not([data-world-effects="economy"])
+    .rxs-page.rxs-page.ics-page[data-motion-ready="true"]
+    .ics-form-panel[data-ignition]
+    > figure
+    :is(.ics-form-ghost, .ics-form-art) {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .rxs-page.rxs-page.ics-page .ics-form-panel > figure > .ics-ignition {
+    display: none;
+  }
+}
+
+html[data-world-effects="economy"] .rxs-page.rxs-page.ics-page .ics-form-panel > figure > .ics-ignition {
+  display: none;
+}

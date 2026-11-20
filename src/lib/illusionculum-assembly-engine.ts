@@ -13,7 +13,8 @@
  *   into the art — in place of the plates formed off the body and flown in
  *   (owner, 2026-10-23), the swarm, the gold pour and the field;
  * - `formChange`: the chain's changes drawn as this form's
- *   (src/lib/illusionculum-form-change.ts);
+ *   (src/lib/illusionculum-form-change.ts); the change into ウルトラ by red
+ *   fire (src/lib/illusionculum-fire.ts, owner 2026-11-20);
  * - `fire: false`: no fire (the armour is projected, not forged);
  * - the palette: ice, pink and violet (the light paths), gold;
  * - the reactor completes like the eyes: its disc fills with pixel squares
@@ -49,6 +50,7 @@ import {
   ILLUSIONCULUM_SUIT_UNDERSUIT,
 } from "./illusionculum-suit.ts";
 import { createIllusionculumFormChange } from "./illusionculum-form-change.ts";
+import { warmIllusionculumFire } from "./illusionculum-fire.ts";
 import {
   createIllusionculumScrollAccents,
   illusionculumScrollAccentBudget,
@@ -158,6 +160,9 @@ export function illusionculumAssemblyConfig(): RexonanceAssemblyConfig {
       chain: ILLUSIONCULUM_FORM_CHAIN,
       paths: ILLUSIONCULUM_FORM_PATHS,
       tones: ILLUSIONCULUM_FORM_TONES,
+      // The red fire into ウルトラ (illusionculum-fire.ts) burns the
+      // standard form: its field is built in idle time with the sheets.
+      prepare: () => warmIllusionculumFire([["standard", ILLUSIONCULUM_SUIT_FIGURE]]),
       ...ILLUSIONCULUM_SUIT_FORMS,
     },
   };
@@ -193,7 +198,14 @@ export function mountIllusionculumAssemblyEngine(
   if (compact) config.prewarm = !entry;
   try {
     const dispose = mountRexonanceAssembly(runway, config, environment);
+    // The scroll's change into ウルトラ burns the standard form: build its
+    // fire field in idle time now, long before the runway reaches the chain
+    // (the entry ends on the standard form and never burns).
+    const releaseFire = entry
+      ? () => {}
+      : warmIllusionculumFire([["standard", ILLUSIONCULUM_SUIT_FIGURE]]);
     return () => {
+      releaseFire();
       loader?.dispose();
       dispose();
     };

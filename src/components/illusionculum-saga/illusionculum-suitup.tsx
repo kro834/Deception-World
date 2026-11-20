@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState, type RefObject } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { withWordBreaks } from "@/lib/name-breaks";
 import { DisplayName } from "@/components/name-text";
 import { FormSlider } from "@/components/special/form-slider";
@@ -61,6 +61,70 @@ const STILLS: Record<IllusionculumFormKey, string> = {
 const REPLAY_AT = 0.835;
 
 const LINES = ILLUSIONCULUM_SUIT_CALLS.map((call) => illusionculumCallUnits(call));
+
+const isUltra = (key: IllusionculumFormKey) => key === "ultra" || key === "ultraMore";
+/** The engine's end of the chain of forms (ASSEMBLY_BEATS.form[1]). */
+const CHAIN_END = 0.975;
+
+type IgnitionModule = typeof import("@/lib/illusionculum-form-ignition");
+// The burn's chunk, fetched once the runway is live (a choice into ウルトラ
+// must take the frame before the engine's next draw, never after a fetch).
+let ignitionModule: IgnitionModule | null = null;
+let ignitionLoad: Promise<void> | null = null;
+const loadIgnition = () =>
+  (ignitionLoad ??= import("@/lib/illusionculum-form-ignition").then(
+    (module) => {
+      ignitionModule = module;
+    },
+    () => {
+      ignitionLoad = null;
+    },
+  ));
+
+/** Where the scroll stands on the runway (the engine's own measure). */
+function runwayProgress(runway: HTMLElement) {
+  const frame = runway.querySelector<HTMLElement>(".rzn-frame");
+  if (!frame) return 0;
+  const travel = runway.offsetHeight - frame.offsetHeight;
+  if (travel <= 0) return 1;
+  const pinTop = Number.parseFloat(window.getComputedStyle(frame).top) || 0;
+  return (pinTop - runway.getBoundingClientRect().top) / travel;
+}
+
+/** The runway at rest on its finished figure, a choice into ウルトラ: the
+ * old form burns in red fire into the new one (owner, 2026-11-20), drawn
+ * over the engine's hidden canvas (illusionculum-form-ignition.ts). */
+function RunwayBurn({
+  runwayRef,
+  previous,
+  stage,
+  onDone,
+}: {
+  runwayRef: RefObject<HTMLDivElement | null>;
+  previous: IllusionculumFormKey;
+  stage: IllusionculumFormKey;
+  onDone: () => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useLayoutEffect(() => {
+    const runway = runwayRef.current;
+    const canvas = canvasRef.current;
+    if (!runway || !canvas || !ignitionModule) {
+      onDone();
+      return;
+    }
+    return ignitionModule.mountIllusionculumRunwayIgnition(
+      runway,
+      canvas,
+      STILLS[previous],
+      STILLS[stage],
+      previous,
+      ILLUSIONCULUM_SUIT_SIZE,
+      onDone,
+    );
+  }, [runwayRef, previous, stage, onDone]);
+  return <canvas ref={canvasRef} className="ics-runway-burn" />;
+}
 
 function watchEnding(runway: HTMLElement | null) {
   if (!runway) return;
@@ -145,6 +209,43 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
   const runwayRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => mountIllusionculumAssembly(runwayRef.current), []);
+  // A choice into ウルトラ while the finished figure stands on the runway.
+  const shownForm = useRef(form);
+  const [burn, setBurn] = useState<{ previous: IllusionculumFormKey; stage: IllusionculumFormKey } | null>(null);
+  useEffect(() => {
+    const runway = runwayRef.current;
+    if (!runway) return;
+    // The chunk is fetched once the engine is live (the motion tier only).
+    const observer = new MutationObserver(() => {
+      if (runway.dataset.rznState === "live") void loadIgnition();
+    });
+    observer.observe(runway, { attributes: true, attributeFilter: ["data-rzn-state"] });
+    return () => observer.disconnect();
+  }, []);
+  useLayoutEffect(() => {
+    const previous = shownForm.current;
+    shownForm.current = form;
+    if (previous === form) return;
+    const runway = runwayRef.current;
+    const frame = runway?.querySelector<HTMLElement>(".rzn-frame")?.getBoundingClientRect();
+    const seen =
+      Boolean(runway && frame) &&
+      frame!.bottom > 0 &&
+      frame!.top < window.innerHeight &&
+      runway!.dataset.rznState === "live" &&
+      document.documentElement.dataset.worldEffects !== "economy" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setBurn(
+      seen &&
+        ignitionModule &&
+        isUltra(form) &&
+        !isUltra(previous) &&
+        runwayProgress(runway!) >= CHAIN_END
+        ? { previous, stage: form }
+        : null,
+    );
+  }, [form]);
+  const endBurn = useRef(() => setBurn(null)).current;
   useEffect(() => {
     const rail = tabsRef.current;
     if (!rail) return;
@@ -226,6 +327,15 @@ export const IllusionculumSuitUp = memo(function IllusionculumSuitUp({
             decoding="async"
           />
           <canvas className="rzn-canvas" width={0} height={0} />
+          {burn ? (
+            <RunwayBurn
+              key={`${burn.previous}-${burn.stage}`}
+              runwayRef={runwayRef}
+              previous={burn.previous}
+              stage={burn.stage}
+              onDone={endBurn}
+            />
+          ) : null}
           <div className="rzn-call">
             <ol className="rzn-lines">
               {LINES.map((units, index) => (

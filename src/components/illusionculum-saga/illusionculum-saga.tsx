@@ -28,6 +28,7 @@ import { withCallBreaks } from "@/components/far-from-saga/far-from-phrase";
 import { IllusionculumSuitUp } from "./illusionculum-suitup";
 import { IllusionculumEntryTransition } from "./illusionculum-entry-transition";
 import { IllusionculumProjection } from "./illusionculum-figures";
+import { IllusionculumFormIgnition } from "./illusionculum-form-ignition";
 
 /* ILLUSIONCULUM SAGA special site (owner, 2026-10-23: 「イリュージョンクルム
    サーガを追加。レクソナンスを参考に。」).
@@ -194,6 +195,13 @@ export function IllusionculumSaga() {
   // the hero's orbs and projections hidden only while it is undecided.
   const [motionReady, setMotionReady] = useState<boolean | null>(null);
   const [entrance, setEntrance] = useState(0);
+  // A switch into ウルトラ seen in the panel burns in red fire (owner,
+  // 2026-11-20): the form it burns away from, for the new figure.
+  const [ignition, setIgnition] = useState<{
+    previous: IllusionculumFormKey;
+    stage: IllusionculumFormKey;
+  } | null>(null);
+  const formArtRef = useRef<HTMLImageElement | null>(null);
   const pageRef = useRef<HTMLElement | null>(null);
   const formTabsRef = useRef<HTMLDivElement | null>(null);
   const formPanelRef = useRef<HTMLDivElement | null>(null);
@@ -203,11 +211,19 @@ export function IllusionculumSaga() {
   const panelAnchor = useRef<number | null>(null);
 
   const selectForm = useCallback((next: IllusionculumFormKey) => {
-    if (latestForm.current === next) return;
+    const previous = latestForm.current;
+    if (previous === next) return;
     latestForm.current = next;
     const panel = formPanelRef.current?.getBoundingClientRect();
     panelAnchor.current =
       panel && panel.bottom > 0 && panel.top < window.innerHeight ? panel.top : null;
+    // Only where it is seen: a choice made in the suit-up or the comparison
+    // with the panel off screen just swaps the picture.
+    setIgnition(
+      panelAnchor.current !== null && motionAllowed() && isUltra(next) && !isUltra(previous)
+        ? { previous, stage: next }
+        : null,
+    );
     setFormState(next);
     if (motionAllowed()) setEntrance((count) => count + 1);
   }, []);
@@ -548,6 +564,7 @@ export function IllusionculumSaga() {
             role="tabpanel"
             aria-labelledby={`ics-form-tab-${form}`}
             aria-live="polite"
+            data-ignition={ignition?.stage === form ? form : undefined}
             style={{ ["--ics-accent" as string]: active.accent }}
           >
             {/* Keyed by form and switch: every switch mounts a fresh figure,
@@ -565,16 +582,24 @@ export function IllusionculumSaga() {
                 decoding="async"
               />
               <img
+                ref={formArtRef}
                 className="ics-form-art"
                 src={activeArt.src}
                 {...illusionculumImage(form, form !== "standard")}
                 alt={`${active.name}${form === "more" || form === "ultraMore" ? "（リアクター・モア展開）" : ""}`}
                 width={activeArt.width}
                 height={activeArt.height}
-                loading={form === "standard" ? "eager" : "lazy"}
+                loading={form === "standard" || ignition?.stage === form ? "eager" : "lazy"}
                 decoding="async"
               />
               <i className="ics-form-scan" aria-hidden="true" />
+              {ignition?.stage === form ? (
+                <IllusionculumFormIgnition
+                  previous={ignition.previous}
+                  stage={form}
+                  destinationRef={formArtRef}
+                />
+              ) : null}
             </figure>
             <div key={`${form}-copy`} className="ics-form-copy">
               {/* The selector names the form, the hero the rider: the name
