@@ -35,7 +35,22 @@ const record = readFileSync(join(DESIGN, "owner-text.md"), "utf8");
 const comparison = readFileSync(join(DESIGN, "comparison-owner-20261023.md"), "utf8");
 
 const clean = (line) => line.replace(/[\u3000\s]+$/u, "").replace(/^[\u3000\s]+/u, "");
-const lines = record.split("\n").map(clean);
+
+/** The owner's notation of 2026-11-20 (「イリュージョンクルムサーガと同等の構成に
+ * して。」, after 「メタ・ウニタスのウルトラだけ英語表記になっていたり…」): on
+ * this page the ウルトラ form is written in katakana, as on /illusionculum-saga.
+ * Exact substrings only — the English names of equipment and the calls
+ * (『ULTRA PARTITION FIELD』, 『…ULTRA！』, 『Paranormal Realizer Ultra』) stay. */
+export const ULTRA_KANA = Object.freeze([
+  ["メタ・ウニタスULTRA", "メタ・ウニタス・ウルトラ"],
+  ["ULTRA移行時は", "ウルトラ移行時は"],
+  ["、ULTRAでは", "、ウルトラでは"],
+  ["ULTRA形態で", "ウルトラ形態で"],
+]);
+export const ultraKana = (text) =>
+  ULTRA_KANA.reduce((out, [from, to]) => out.replaceAll(from, to), text);
+
+const lines = record.split("\n").map(clean).map(ultraKana);
 
 // --- The record -----------------------------------------------------------------
 const names = lines
@@ -140,7 +155,7 @@ const data = {
 }
 
 // --- The comparison ------------------------------------------------------------------
-const C = comparison.split("\n").map(clean);
+const C = comparison.split("\n").map(clean).map(ultraKana);
 const chapters = {};
 let title = "";
 let subtitle = "";
@@ -190,7 +205,7 @@ const KEEP = {
 const ADDED_ROWS = {
   統合演算・加速機構比較: {
     after: "メタ・ウニタス",
-    row: ["メタ・ウニタスULTRA", "50000〜YOPS", "9000TOPS", "P16"],
+    row: ["メタ・ウニタス・ウルトラ", "50000〜YOPS", "9000TOPS", "P16"],
   },
 };
 

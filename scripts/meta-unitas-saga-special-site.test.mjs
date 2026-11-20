@@ -17,8 +17,18 @@ const parts = read("src/components/meta-unitas-saga/meta-unitas-parts.tsx");
 const route = read("src/routes/meta-unitas-saga.tsx");
 const styles = read("src/styles-meta-unitas-saga.css");
 const gate = read("src/components/load-gate.tsx");
-const owner = read("design/meta-unitas-saga-20261023/owner-text.md");
-const comparison = read("design/meta-unitas-saga-20261023/comparison-owner-20261023.md");
+// Owner (2026-11-20): 「イリュージョンクルムサーガと同等の構成にして。」 — as on
+// /illusionculum-saga, the ウルトラ form is written in katakana on this page
+// (scripts/build-meta-unitas-data.mjs ULTRA_KANA, exact substrings), so the
+// owner's sources are read with that one notation.
+const ultraKana = (text) =>
+  text
+    .replaceAll("メタ・ウニタスULTRA", "メタ・ウニタス・ウルトラ")
+    .replaceAll("ULTRA移行時は", "ウルトラ移行時は")
+    .replaceAll("、ULTRAでは", "、ウルトラでは")
+    .replaceAll("ULTRA形態で", "ウルトラ形態で");
+const owner = ultraKana(read("design/meta-unitas-saga-20261023/owner-text.md"));
+const comparison = ultraKana(read("design/meta-unitas-saga-20261023/comparison-owner-20261023.md"));
 
 const { META_UNITAS_SAGA, META_UNITAS_PERFORMANCE } =
   await import("../src/components/meta-unitas-saga/meta-unitas-data.ts");
@@ -172,17 +182,22 @@ test("the comparison: Meta Unitas's parts, no Rexonance, no provisos, removal on
       "エクスプリーム",
       "イリュージョンクルム",
       "メタ・ウニタス",
-      "メタ・ウニタスULTRA",
+      "メタ・ウニタス・ウルトラ",
       "ファーフロム",
     ],
   );
   // ULTRA keeps the standard form's computation (the owner's own words).
   assert.deepEqual(compute.table.rows[4], [
-    "メタ・ウニタスULTRA",
+    "メタ・ウニタス・ウルトラ",
     "50000〜YOPS",
     "9000TOPS",
     "P16",
   ]);
+  // No English ULTRA names the form in prose; the English names stay (2026-11-20).
+  const all = JSON.stringify({ ...META_UNITAS_SAGA, ...META_UNITAS_PERFORMANCE });
+  assert.doesNotMatch(all, /ウニタスULTRA|ULTRA(?:移行時|では|形態で)/);
+  for (const name of ["ULTRA PARTITION FIELD", "MAX！ULTRA！』", "Paranormal Realizer Ultra"])
+    assert.ok(all.includes(name), name);
   const p16 = META_UNITAS_PERFORMANCE.chapters.find((c) => c.title.startsWith("P14"));
   assert.ok(
     p16.body.some((p) => p.startsWith("P16はP14 Extreme Tuning比で実効演算加速性能50%向上")),
