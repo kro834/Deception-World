@@ -9,14 +9,11 @@
  * - リアクター・モア: the body is the same in both sheets, so the change is
  *   the two orbs — each rises out of the shoulder line, arcs out to its
  *   seat and resolves there out of its own projection of light;
- * - ウルトラ: the ウルトラ figure takes the body from the reactor out, inside a
- *   circle that grows over the change, its front a thin dim crimson ring
- *   (the art carries the colour; never a flash of red light).
+ * - ウルトラ: by red fire (owner, 2026-11-20; illusionculum-fire.ts): the
+ *   old form burns, the fire peaks and ウルトラ is revealed from the flame —
+ *   a sustained burn, never a flash of red light.
  *
- * 2026-11 prism pass: every change now reads as light through a crystal —
- * the ウルトラ circle's front is a refracting lens (a thin band of the
- * incoming figure magnified just outside the edge, three dispersed hairlines
- * ice / pink / gold around the dim crimson ring, a few prism glints on it);
+ * 2026-11 prism pass: the other changes read as light through a crystal —
  * the projections are flat ice and pink silhouettes of the incoming figure
  * (made once per figure, at half size) that part and close; each orb leaves a
  * short comet of itself and lands in a ring of dispersed light.
@@ -27,16 +24,17 @@
  */
 
 import type { RexonanceAssemblyFormChange } from "./rexonance-resonance.js";
+import {
+  buildIllusionculumFireBody,
+  drawIllusionculumFire,
+  illusionculumFireBody,
+  illusionculumFireFades,
+} from "./illusionculum-fire.ts";
 
 const ORB_TONES = ["rgb(166 230 255)", "rgb(169 131 255)"] as const;
 /** The prism's three dispersed hairlines: ice, pink, gold. */
 const PRISM_TONES = ["rgb(166 230 255)", "rgb(255 143 210)", "rgb(255 225 163)"] as const;
 const FROST_HI = "rgb(220 246 255)";
-const CRIMSON_FRONT = "rgb(184 31 58)";
-const CRIMSON_EMBER = "rgb(233 158 102)";
-const GOLDEN_ANGLE = 2.399963229728653;
-const GLINTS = 15;
-const FROST_FACETS = 16;
 const ARC_STEPS = 10;
 const TRAIL = 3;
 const clamp01 = (value: number) => (value < 0 ? 0 : value > 1 ? 1 : value);
@@ -58,8 +56,9 @@ export function createIllusionculumFormChange(
   options: IllusionculumFormChangeOptions,
 ): RexonanceAssemblyFormChange {
   const { width: W, height: H } = options.size;
-  const core = options.core;
   let orbGhosts: HTMLCanvasElement[] | null = null;
+  // Touch devices raster the fire on the coarse grid (read once).
+  let coarse: boolean | undefined;
   // The projections: ice and pink silhouettes of the incoming figure, half
   // size, made once per figure (the first frame that wants them).
   const TW = Math.max(1, Math.round(W / 2));
@@ -102,122 +101,38 @@ export function createIllusionculumFormChange(
       const orbsIn = options.orbForms.includes(toKey) && !options.orbForms.includes(fromKey);
       const ultraIn = options.ultraForms.includes(toKey) && !options.ultraForms.includes(fromKey);
       if (ultraIn) {
-        // ウルトラ from the reactor out: the ウルトラ figure inside a circle
-        // that grows over the change, its front a lens (a refracting band,
-        // dispersed hairlines, a few glints) around a thin dim crimson ring
-        // (the art itself carries the colour: no flash of red light).
-        context.drawImage(from, 0, 0, W, H);
-        const [cx, cy] = core;
-        const reach = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy));
-        const radius = Math.max(0.5, reach * e);
-        const pulse = Math.sin(Math.PI * u);
-        // Its projections first: ice and pink silhouettes, parted and closing.
-        if (!calm && u < 0.7) {
-          prepareSilhouettes(context.canvas.ownerDocument, to);
-          const left = silhouettes[0];
-          const right = silhouettes[1];
-          const shift = (1 - e) * W * 0.06;
-          const fade = 1 - u / 0.7;
-          context.globalCompositeOperation = "lighter";
-          context.globalAlpha = 0.1 * fade;
-          if (left) context.drawImage(left, -shift * 1.25, 0, W, H);
-          if (right) context.drawImage(right, shift * 1.25, 0, W, H);
-          context.globalAlpha = 0.16 * fade;
-          context.drawImage(to, -shift, 0, W, H);
-          context.drawImage(to, shift, 0, W, H);
-          context.globalCompositeOperation = "source-over";
-        }
-        context.save();
-        context.beginPath();
-        context.arc(cx, cy, radius, 0, Math.PI * 2);
-        context.clip();
+        // ウルトラ by red fire (owner, 2026-11-20): the old form is engulfed
+        // from the soles up and burns, the fire peaks, and the ウルトラ
+        // figure is revealed from the flame (illusionculum-fire.ts). The
+        // sealed figure under this pass is cleared, so the cross-fade under
+        // the fire never shows it through. u=0 is exactly `from`, u=1
+        // exactly `to`. The calm tier keeps a plain cross-fade.
         context.clearRect(0, 0, W, H);
-        context.globalAlpha = 1;
-        context.drawImage(to, 0, 0, W, H);
-        context.restore();
-        if (u > 0 && u < 1) {
-          if (!calm) {
-            // The lens: the figure magnified a little, in a band just
-            // outside the edge only.
-            const band = 8 + W * 0.03 * pulse;
-            const zoom = 1 + 0.022 * pulse;
-            context.save();
-            context.beginPath();
-            context.arc(cx, cy, radius + band, 0, Math.PI * 2);
-            context.moveTo(cx + radius, cy);
-            context.arc(cx, cy, radius, 0, Math.PI * 2, true);
-            context.clip();
-            context.globalAlpha = 0.34 * pulse;
-            context.drawImage(to, cx - cx * zoom, cy - cy * zoom, W * zoom, H * zoom);
-            context.restore();
-            // Crimson-frost erosion contrast: outer crystalline frost facets vs inner crimson-gold rim.
-            context.globalCompositeOperation = "lighter";
-            // 1. Retreating ice-crystal frost crown just ahead of the crimson wave front.
-            context.strokeStyle = FROST_HI;
-            context.lineWidth = 1.15;
-            context.globalAlpha = 0.42 * pulse;
-            context.beginPath();
-            for (let f = 0; f < FROST_FACETS; f += 1) {
-              const a = (f / FROST_FACETS) * Math.PI * 2 - e * 0.85;
-              const spread = 0.055 + ((f * 3) % 4) * 0.012;
-              const rIn = radius + 2.5;
-              const rTip = radius + 10 + ((f * 5) % 4) * 3.2 * pulse;
-              context.moveTo(cx + Math.cos(a - spread) * rIn, cy + Math.sin(a - spread) * rIn);
-              context.lineTo(cx + Math.cos(a) * rTip, cy + Math.sin(a) * rTip);
-              context.lineTo(cx + Math.cos(a + spread) * rIn, cy + Math.sin(a + spread) * rIn);
-            }
-            context.stroke();
-            // 2. Dispersed prism hairlines: ice outside, pink mid, warm gold hugging the erosion front.
-            context.lineWidth = 1.3;
-            context.globalAlpha = 0.38 * pulse;
-            for (let t = 0; t < 3; t += 1) {
-              context.strokeStyle = PRISM_TONES[t];
-              context.beginPath();
-              context.arc(
-                cx,
-                cy,
-                Math.max(0.5, radius + (1 - t) * (3.2 + 3.6 * pulse)),
-                0,
-                Math.PI * 2,
-              );
-              context.stroke();
-            }
-            // 3. Inner crimson-ember harmonic ring just inside the advancing wave.
-            if (radius > 8) {
-              context.strokeStyle = CRIMSON_EMBER;
-              context.lineWidth = 1.2;
-              context.globalAlpha = 0.34 * pulse;
-              context.beginPath();
-              context.arc(cx, cy, Math.max(0.5, radius - 3.5 - 2 * pulse), 0, Math.PI * 2);
-              context.stroke();
-            }
-            // 4. Glints on the front, ice / pink / gold in turn.
-            context.lineWidth = 1.5;
-            context.globalAlpha = 0.52 * pulse;
-            for (let t = 0; t < 3; t += 1) {
-              context.strokeStyle = PRISM_TONES[t];
-              context.beginPath();
-              for (let k = t; k < GLINTS; k += 3) {
-                const angle = k * GOLDEN_ANGLE + e * 1.6;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
-                const inner = Math.max(0, radius - 4);
-                const outer = radius + 8 + ((k * 7) % 5) * 3.2 * pulse;
-                context.moveTo(cx + cos * inner, cy + sin * inner);
-                context.lineTo(cx + cos * outer, cy + sin * outer);
-              }
-              context.stroke();
-            }
-            context.globalCompositeOperation = "source-over";
-          }
-          context.globalAlpha = 0.54 * pulse;
-          context.strokeStyle = CRIMSON_FRONT;
-          context.lineWidth = 2.2;
-          context.beginPath();
-          context.arc(cx, cy, radius, 0, Math.PI * 2);
-          context.stroke();
+        if (calm || u <= 0 || u >= 1) {
+          context.globalAlpha = u <= 0 ? 1 : 1 - e;
+          if (u < 1) context.drawImage(from, 0, 0, W, H);
+          context.globalAlpha = u >= 1 ? 1 : u <= 0 ? 0 : e;
+          if (u > 0) context.drawImage(to, 0, 0, W, H);
           context.globalAlpha = 1;
+          return true;
         }
+        // The field is warmed ahead (forms.prepare); built here only if a
+        // change starts before that idle task ran, once per form.
+        const body =
+          illusionculumFireBody(fromKey) ??
+          buildIllusionculumFireBody(fromKey, from, context.canvas.ownerDocument);
+        coarse ??= Boolean(
+          context.canvas.ownerDocument.defaultView?.matchMedia("(pointer: coarse)").matches,
+        );
+        const fades = illusionculumFireFades(u);
+        context.globalAlpha = fades.from;
+        if (fades.from > 0) context.drawImage(from, 0, 0, W, H);
+        context.globalAlpha = fades.to;
+        if (fades.to > 0) context.drawImage(to, 0, 0, W, H);
+        context.globalAlpha = 1;
+        drawIllusionculumFire(context, u, W, H, coarse, body);
+        context.globalAlpha = 1;
+        context.globalCompositeOperation = "source-over";
         return true;
       }
       if (orbsIn) {
