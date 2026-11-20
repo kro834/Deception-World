@@ -86,8 +86,15 @@ const releaseControlFocus = (control: HTMLElement) => {
  * and no explicit lightweight choice. */
 function stageMotionAllowed() {
   if (typeof window === "undefined") return false;
+  return !document.hidden && stageMotionPreferred();
+}
+
+/** The same terms without the page's visibility: what the reader and the
+ * tier allow. Render state follows this one, so a tab switched away and back
+ * does not swap ウルトラ's picture and replay its interfaces' deploy. */
+function stageMotionPreferred() {
+  if (typeof window === "undefined") return false;
   return !(
-    document.hidden ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
     window.matchMedia("(forced-colors: active)").matches ||
     document.documentElement.dataset.worldEffects === "economy"
@@ -277,8 +284,9 @@ export function FarFromSaga() {
       setStageEntrance(null);
     };
     const syncStageMotion = () => {
+      // A hidden page only stops a running card; the panel keeps its picture.
+      setStageMotionEnabled(stageMotionPreferred());
       const enabled = stageMotionAllowed();
-      setStageMotionEnabled(enabled);
       if (!enabled) cancelMotion();
     };
     syncStageMotion();
