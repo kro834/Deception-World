@@ -67,3 +67,72 @@ test("the runway at rest on its finished figure: a choice into ウルトラ burn
   assert.match(ignition, /delete runway\.dataset\.icsBurning;/);
   assert.match(read("src/styles-illusionculum-suitup.css"), /\.rzn-suitup\[data-ics-burning\]\s*> \.rzn-frame\s*> \.rzn-canvas \{\s*visibility: hidden;/);
 });
+
+// A fake panel picture: an EventTarget with the <img> fields the hand-off reads.
+function fakeDestination({ complete = false, naturalWidth = 0, decode = () => Promise.resolve() } = {}) {
+  const image = new EventTarget();
+  image.complete = complete;
+  image.naturalWidth = naturalWidth;
+  image.currentSrc = "/illusionculum-saga-20261023/ultra-1280.webp";
+  image.decode = decode;
+  return image;
+}
+// No 2D context: the burn ends at once and waits only for the new picture.
+const noContextCanvas = () => ({ getContext: () => null, parentElement: { style: {} } });
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+test("the panel's overlay never outstays a new picture that failed to load", async () => {
+  const { mountIllusionculumFormIgnition } = await import("../src/lib/illusionculum-form-ignition.ts");
+  // The picture errors after the burn: the overlay hands off.
+  const destination = fakeDestination();
+  let done = 0;
+  const dispose = mountIllusionculumFormIgnition(noContextCanvas(), {}, destination, "standard", "ultra", () => done++);
+  assert.equal(done, 0);
+  destination.dispatchEvent(new Event("error"));
+  assert.equal(done, 1);
+  dispose();
+  // Already broken when the burn mounts.
+  let broken = 0;
+  mountIllusionculumFormIgnition(
+    noContextCanvas(),
+    {},
+    fakeDestination({ complete: true, naturalWidth: 0 }),
+    "standard",
+    "ultra",
+    () => broken++,
+  )();
+  assert.equal(broken, 1);
+});
+
+test("a loaded panel picture whose decode() rejects still takes the frame", async () => {
+  const { mountIllusionculumFormIgnition } = await import("../src/lib/illusionculum-form-ignition.ts");
+  let done = 0;
+  const destination = fakeDestination({
+    complete: true,
+    naturalWidth: 1280,
+    decode: () => Promise.reject(new Error("EncodingError")),
+  });
+  mountIllusionculumFormIgnition(noContextCanvas(), {}, destination, "standard", "ultra", () => done++);
+  await flush();
+  assert.equal(done, 1);
+  // A disposed overlay never calls back.
+  let late = 0;
+  const pending = fakeDestination();
+  mountIllusionculumFormIgnition(noContextCanvas(), {}, pending, "standard", "ultra", () => late++)();
+  pending.dispatchEvent(new Event("error"));
+  assert.equal(late, 0);
+});
+
+test("the runway burn keeps the engine's pixel budget and leaves the chain to the scroll", () => {
+  const ignition = read("src/lib/illusionculum-form-ignition.ts");
+  const runway = ignition.slice(ignition.indexOf("export function mountIllusionculumRunwayIgnition"));
+  assert.match(ignition, /const RUNWAY_PIXEL_BUDGET = 2_600_000;/);
+  assert.match(runway, /Math\.sqrt\(RUNWAY_PIXEL_BUDGET \/ \(w \* h\)\)/);
+  // The figure box is read on a size change, not every frame.
+  const tick = runway.slice(runway.indexOf("const tick"), runway.indexOf("const start"));
+  assert.match(tick, /if \(w !== width \|\| h !== height\) \{[\s\S]*getComputedStyle\(canvas\)[\s\S]*\n {4}\}/);
+  // Scrolled back into the chain mid-burn, the engine's frame returns.
+  const suitup = read("src/components/illusionculum-saga/illusionculum-suitup.tsx");
+  assert.match(suitup, /if \(runwayProgress\(runway\) < CHAIN_END\) onDone\(\);/);
+  assert.match(suitup, /window\.removeEventListener\("scroll", onScroll\);/);
+});

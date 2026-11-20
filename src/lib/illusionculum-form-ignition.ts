@@ -19,6 +19,8 @@ import { illusionculumCutout, type IllusionculumFormKey } from "./illusionculum-
 import { releasePendingImage } from "./release-pending-images.js";
 
 export const ILLUSIONCULUM_FORM_IGNITION_MS = 2000;
+/** The runway engine's backing-store budget (rexonance-resonance.js). */
+const RUNWAY_PIXEL_BUDGET = 2_600_000;
 
 const ramp = (from: number, to: number, u: number) => {
   const t = Math.max(0, Math.min(1, (u - from) / (to - from)));
@@ -42,7 +44,11 @@ export function mountIllusionculumFormIgnition(
   let decoded = "";
   let release: (() => void) | undefined;
 
+  // A new picture that failed to load: the overlay (opaque, over the panel)
+  // must not stay on the panel for good, so the hand-off stops waiting.
+  let failed = false;
   const destinationReady = () =>
+    failed ||
     Boolean(decoded && destination.complete && destination.naturalWidth && decoded === destination.currentSrc);
   const handOff = () => {
     if (disposed || handedOff || !ended || !destinationReady()) return;
@@ -52,16 +58,26 @@ export function mountIllusionculumFormIgnition(
   const checkDestination = () => {
     if (!destination.complete || !destination.naturalWidth) return;
     const source = destination.currentSrc;
-    void destination.decode().then(
-      () => {
-        if (disposed || source !== destination.currentSrc) return;
-        decoded = source;
-        handOff();
-      },
-      () => {},
-    );
+    const settle = () => {
+      if (disposed || source !== destination.currentSrc) return;
+      decoded = source;
+      handOff();
+    };
+    // decode() can reject for a picture that is loaded all the same (a
+    // browser quirk, not a missing file): it is drawable, so it holds the
+    // frame; a source swapped meanwhile waits for its own load.
+    void destination.decode().then(settle, () => {
+      if (destination.complete && destination.naturalWidth) settle();
+    });
+  };
+  const destinationFailed = () => {
+    failed = true;
+    handOff();
   };
   destination.addEventListener("load", checkDestination);
+  destination.addEventListener("error", destinationFailed);
+  // Already broken before the burn mounted: no error event will come.
+  if (destination.complete && !destination.naturalWidth && destination.currentSrc) failed = true;
   checkDestination();
 
   const finish = () => {
@@ -143,6 +159,7 @@ export function mountIllusionculumFormIgnition(
   return () => {
     disposed = true;
     destination.removeEventListener("load", checkDestination);
+    destination.removeEventListener("error", destinationFailed);
     release?.();
   };
 }
@@ -186,6 +203,12 @@ export function mountIllusionculumRunwayIgnition(
   }
   const coarse = window.matchMedia("(pointer: coarse)").matches;
   let startedAt = 0;
+  let width = 0;
+  let height = 0;
+  let heightShare = 0.84;
+  let widthShare = 0.9;
+  let centreX = 0.5;
+  let bottom = 0.05;
   const tick = (now: number) => {
     if (disposed || ended) return;
     if (!startedAt) startedAt = now;
@@ -196,19 +219,29 @@ export function mountIllusionculumRunwayIgnition(
       finish();
       return;
     }
-    const ratio = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
-    const bw = Math.max(1, Math.round(w * ratio));
-    const bh = Math.max(1, Math.round(h * ratio));
-    if (canvas.width !== bw || canvas.height !== bh) {
-      canvas.width = bw;
-      canvas.height = bh;
+    if (w !== width || h !== height) {
+      width = w;
+      height = h;
+      // The engine's own backing-store budget (rexonance-resonance.js
+      // PIXEL_BUDGET): a full-frame canvas at 2x on a large screen is
+      // 5-15 MP, cleared and composited every frame of the burn.
+      const ratio = Math.min(
+        window.devicePixelRatio || 1,
+        coarse ? 1.5 : 2,
+        Math.sqrt(RUNWAY_PIXEL_BUDGET / (w * h)),
+      );
+      canvas.width = Math.max(1, Math.round(w * ratio));
+      canvas.height = Math.max(1, Math.round(h * ratio));
+      // The engine's figure box (rexonance-resonance.js, its view): read on
+      // a size change only, not a style read every frame.
+      const style = window.getComputedStyle(canvas);
+      heightShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-h")) || 0.84;
+      widthShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-w")) || 0.9;
+      centreX = Number.parseFloat(style.getPropertyValue("--rzn-fig-x")) || 0.5;
+      bottom = Number.parseFloat(style.getPropertyValue("--rzn-fig-b")) || 0.05;
     }
-    // The engine's figure box (rexonance-resonance.js, its view).
-    const style = window.getComputedStyle(canvas);
-    const heightShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-h")) || 0.84;
-    const widthShare = Number.parseFloat(style.getPropertyValue("--rzn-fig-w")) || 0.9;
-    const centreX = Number.parseFloat(style.getPropertyValue("--rzn-fig-x")) || 0.5;
-    const bottom = Number.parseFloat(style.getPropertyValue("--rzn-fig-b")) || 0.05;
+    const bw = canvas.width;
+    const bh = canvas.height;
     const figureH = Math.min(h * heightShare, (w * widthShare * size.height) / size.width);
     const figureW = (figureH * size.width) / size.height;
     context.setTransform(bw / w, 0, 0, bh / h, 0, 0);

@@ -113,7 +113,7 @@ function RunwayBurn({
       onDone();
       return;
     }
-    return ignitionModule.mountIllusionculumRunwayIgnition(
+    const dispose = ignitionModule.mountIllusionculumRunwayIgnition(
       runway,
       canvas,
       STILLS[previous],
@@ -122,6 +122,17 @@ function RunwayBurn({
       ILLUSIONCULUM_SUIT_SIZE,
       onDone,
     );
+    // Scrolled back into the chain mid-burn: the engine's scrubbed frame
+    // takes the frame at once (the burn hides the engine's canvas, and the
+    // scroll's mapping must show the same frame both ways).
+    const onScroll = () => {
+      if (runwayProgress(runway) < CHAIN_END) onDone();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      dispose();
+    };
   }, [runwayRef, previous, stage, onDone]);
   return <canvas ref={canvasRef} className="ics-runway-burn" />;
 }
