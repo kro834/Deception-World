@@ -539,13 +539,15 @@ export function IllusionculumSaga() {
         className="rxs-stages rxs-section ics-chapter ics-forms"
         aria-labelledby="ics-forms-title"
       >
+        {/* The chapter's head over the selector, as every chapter's (the
+            Far From and Meta Unitas #stages). */}
+        <header className="rxs-section-heading ics-heading rxs-reveal">
+          <b className="ics-numeral" aria-hidden="true">
+            03
+          </b>
+          <h2 id="ics-forms-title">形態</h2>
+        </header>
         <div className="rxs-stage-switcher ics-form-switcher rxs-reveal">
-          <header className="rxs-section-heading ics-heading rxs-reveal">
-            <b className="ics-numeral" aria-hidden="true">
-              03
-            </b>
-            <h2 id="ics-forms-title">形態</h2>
-          </header>
           <FormSlider
             ref={formTabsRef}
             className="ics-form-tabs"
@@ -603,9 +605,16 @@ export function IllusionculumSaga() {
               ) : null}
             </figure>
             <div key={`${form}-copy`} className="ics-form-copy">
-              {/* The selector names the form, the hero the rider: the name
-                  stays for assistive tech only. */}
-              <h3 className="ics-sr">{active.name}</h3>
+              {/* The plate names its form, as the siblings' #stages do; the
+                  rider's full name stays for assistive tech. The ghost is the
+                  same name, drawn (decorative). */}
+              <span className="ics-form-mark" aria-hidden="true">
+                {active.label}
+              </span>
+              <h3>
+                <span aria-hidden="true">{withWordBreaks(active.label)}</span>
+                <span className="ics-sr">{active.name}</span>
+              </h3>
               <IcLead body={active.body} />
             </div>
           </div>

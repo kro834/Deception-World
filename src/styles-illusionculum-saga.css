@@ -889,21 +889,6 @@
 }
 
 /* ---------- 03 形態 ---------- */
-.rxs-page.rxs-page.ics-page .ics-form-switcher {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: clamp(24px, 3vw, 40px) clamp(18px, 3vw, 40px);
-  align-items: center;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-switcher > .ics-heading {
-  margin: 0;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-switcher > .ics-form-panel {
-  grid-column: 1 / -1;
-}
-
 .rxs-page.rxs-page.ics-page .ics-form-tabs {
   --liquid-accent: var(--ics-ice);
   width: min(100%, 860px);
@@ -949,37 +934,6 @@
   text-wrap: balance;
 }
 
-.rxs-page.rxs-page.ics-page .ics-form-panel {
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: clamp(28px, 5vw, 80px);
-  align-items: center;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-panel > figure {
-  position: relative;
-  margin: 0;
-  aspect-ratio: 2 / 3;
-  justify-self: center;
-  width: min(100%, 580px, calc((100svh - 140px) * 2 / 3));
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--ics-accent) 38%, transparent);
-  background: var(--ics-ink-2);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 22%),
-    inset 0 0 36px -12px color-mix(in srgb, var(--ics-accent) 24%, transparent),
-    0 16px 48px -12px rgb(0 0 0 / 75%),
-    0 0 36px -6px color-mix(in srgb, var(--ics-accent) 28%, transparent);
-  transition: border-color 1600ms ease, box-shadow 1600ms ease;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-panel > figure img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .rxs-page.rxs-page.ics-page .ics-form-ghost {
   opacity: 0;
   mix-blend-mode: screen;
@@ -999,142 +953,10 @@
   opacity: 0;
 }
 
-.rxs-page.rxs-page.ics-page .ics-form-panel > figure::after {
-  position: absolute;
-  inset: 10px;
-  content: "";
-  border: 1px solid rgb(255 255 255 / 10%);
-  pointer-events: none;
-  clip-path: polygon(
-    0 0,
-    18px 0,
-    18px 1px,
-    1px 1px,
-    1px 18px,
-    0 18px,
-    0 100%,
-    18px 100%,
-    18px calc(100% - 1px),
-    1px calc(100% - 1px),
-    1px calc(100% - 18px),
-    0 calc(100% - 18px),
-    0 0,
-    100% 0,
-    calc(100% - 18px) 0,
-    calc(100% - 18px) 1px,
-    calc(100% - 1px) 1px,
-    calc(100% - 1px) 18px,
-    100% 18px,
-    100% 100%,
-    calc(100% - 18px) 100%,
-    calc(100% - 18px) calc(100% - 1px),
-    calc(100% - 1px) calc(100% - 1px),
-    calc(100% - 1px) calc(100% - 18px),
-    100% calc(100% - 18px)
-  );
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-copy {
-  display: grid;
-  gap: 18px;
-  align-content: center;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-copy h3 {
-  margin: 0;
-  padding-bottom: 18px;
-  border-bottom: 1px solid color-mix(in srgb, var(--ics-accent) 40%, transparent);
-  color: var(--ics-text-1);
-  font-size: clamp(24px, 2.6vw, 38px);
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  line-height: 1.3;
-  word-break: keep-all;
-  transition: border-color 1600ms ease;
-}
-
-.rxs-page.rxs-page.ics-page .ics-form-copy p {
-  margin: 0;
-  color: var(--ics-text-2);
-  font-size: 15.5px;
-  line-height: 2;
-  text-wrap: pretty;
-}
-
 /* ---------- 04–06 the record's articles ---------- */
 .rxs-page.rxs-page.ics-page .ics-articles {
   display: grid;
   gap: clamp(28px, 4vw, 48px);
-}
-
-.rxs-page.rxs-page.ics-page .ics-article {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 56px);
-  padding: clamp(24px, 3.4vw, 44px);
-  border: 1px solid var(--ics-line-soft);
-  background:
-    radial-gradient(ellipse at 90% 10%, rgb(169 131 255 / 7%), transparent 55%),
-    radial-gradient(ellipse at 10% 90%, rgb(233 184 102 / 5%), transparent 45%),
-    linear-gradient(160deg, rgb(255 255 255 / 4%), transparent 40%),
-    linear-gradient(180deg, var(--ics-metal), var(--ics-ink-2));
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 14%),
-    inset 0 0 32px -12px rgb(169 131 255 / 10%);
-}
-
-.rxs-page.rxs-page.ics-page .ics-article.has-detail {
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  align-items: start;
-}
-
-.rxs-page.rxs-page.ics-page .ics-article.has-detail:nth-child(even) {
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-}
-
-.rxs-page.rxs-page.ics-page .ics-article.has-detail:nth-child(even) .ics-detail {
-  order: 2;
-}
-
-.rxs-page.rxs-page.ics-page .ics-detail {
-  position: sticky;
-  top: 96px;
-  margin: 0;
-  overflow: hidden;
-  border: 1px solid var(--ics-line);
-  box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 20%),
-    0 8px 32px -8px rgb(2 3 10 / 80%),
-    0 0 20px -4px rgb(169 131 255 / 16%);
-}
-
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-article,
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-detail {
-    transition:
-      transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
-      border-color 260ms ease,
-      box-shadow 260ms ease;
-  }
-
-
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-article:hover {
-    transform: translateY(-2px);
-    border-color: rgb(233 184 102 / 36%);
-    box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 22%),
-      inset 0 0 36px -8px rgb(169 131 255 / 18%),
-      0 12px 36px -10px rgb(0 0 0 / 60%);
-  }
-
-  html:not([data-world-effects="economy"]) .rxs-page.rxs-page.ics-page .ics-detail:hover {
-    transform: translateY(-2px);
-    border-color: var(--ics-gold-hi);
-    box-shadow:
-      inset 0 1px 0 0 rgb(255 255 255 / 30%),
-      0 12px 36px -8px rgb(2 3 10 / 85%),
-      0 0 28px -2px rgb(169 131 255 / 26%);
-  }
 }
 
 .rxs-page.rxs-page.ics-page .ics-detail img {
@@ -1186,25 +1008,6 @@
   margin-bottom: 0;
 }
 
-/* 能力: the two abilities side by side on wide screens. */
-@media (min-width: 1100px) {
-  .rxs-page.rxs-page.ics-page .ics-abilities .ics-articles {
-    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
-    align-items: start;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-abilities .ics-article:last-child {
-    position: sticky;
-    top: 96px;
-  }
-}
-
-.rxs-page.rxs-page.ics-page .ics-abilities .ics-article:first-child {
-  border-color: rgb(255 143 210 / 18%);
-  background:
-    radial-gradient(60% 40% at 0% 0%, rgb(169 131 255 / 14%), transparent 70%),
-    linear-gradient(180deg, var(--ics-metal), var(--ics-ink-2));
-}
 
 /* ---------- 06 必殺技 ---------- */
 .rxs-page.rxs-page.ics-page .ics-finisher-list {
@@ -1356,18 +1159,6 @@
   .rxs-page.rxs-page.ics-page .ics-overview-body > .ics-projection {
     position: relative;
     top: auto;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-form-panel {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-form-panel > figure {
-    width: min(100%, 520px);
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-form-switcher {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .rxs-page.rxs-page.ics-page .ics-article.has-detail,
@@ -1979,19 +1770,6 @@
   }
 }
 
-/* #forms on wide screens (as Rexonance's #stages): the copy starts level with
-   the figure's top beside it, never left at the panel's foot. */
-@media (min-width: 901px) {
-  .rxs-page.rxs-page.ics-page .ics-form-panel {
-    align-items: start;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-form-copy {
-    align-content: start;
-    padding-top: clamp(12px, 3vw, 48px);
-  }
-}
-
 /* Finishers and articles (as Extreme's numbered system plates): an outlined
    numeral in the plate's corner, a gold rule under the title. */
 .rxs-page.rxs-page.ics-page .ics-finisher-list,
@@ -2034,8 +1812,7 @@
 
 /* Chapter heads (Extreme's grammar): a lit rule under each head, ice to
    gold, fading out. */
-.rxs-page.rxs-page.ics-page .ics-chapter > .ics-heading,
-.rxs-page.rxs-page.ics-page .ics-form-switcher > .ics-heading {
+.rxs-page.rxs-page.ics-page .ics-chapter > .ics-heading {
   position: relative;
   padding-bottom: clamp(16px, 2.2vw, 28px);
 }
@@ -2614,65 +2391,6 @@ html:not([data-world-effects="economy"])
   }
 }
 
-/* q-ic2 (2026-10-24): plates in a row share one height (Rexonance's
-   matched system plates). 能力's two and 装甲's two image-less plates sit
-   side by side; each copy column is a flex stack whose diagram takes the
-   spare height, centred, so the shorter plate's diagram breathes instead
-   of leaving a dead floor; 詳しく settles on the plate's base. */
-@media (min-width: 1100px) {
-  .rxs-page.rxs-page.ics-page .ics-abilities .ics-articles {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: stretch;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-abilities .ics-article:last-child {
-    position: relative;
-    top: auto;
-  }
-
-  /* 装甲: a bento — the helm plate tall on the left (image over copy), the
-     two image-less plates stacked beside it, the three sharing one height. */
-  .rxs-page.rxs-page.ics-page .ics-armour .ics-articles {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    grid-template-rows: 1fr 1fr;
-    align-items: stretch;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-armour .ics-article.has-detail {
-    grid-row: 1 / span 2;
-    grid-template-columns: minmax(0, 1fr);
-    align-content: start;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-armour .ics-article.has-detail .ics-detail {
-    position: relative;
-    top: auto;
-    aspect-ratio: 16 / 11;
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-armour .ics-article.has-detail .ics-detail img {
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 22%;
-  }
-
-  .rxs-page.rxs-page.ics-page :is(.ics-abilities, .ics-armour) .ics-article:not(.has-detail) .ics-article-copy {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  .rxs-page.rxs-page.ics-page :is(.ics-abilities, .ics-armour) .ics-article:not(.has-detail) .ics-diagram {
-    flex: 1 1 auto;
-    align-self: center;
-    min-height: 120px;
-  }
-
-  .rxs-page.rxs-page.ics-page :is(.ics-abilities, .ics-armour) .ics-article:not(.has-detail) .ics-article-copy:has(.ics-diagram) > :last-child {
-    margin-top: auto;
-  }
-}
-
 /* q-ic2 (2026-10-24): the hero's copy enters as Rexonance's does — staged,
    once, while the projections resolve: the prefix, the name rising out of
    a mask, the ULTRA line's rule drawing across, the calls one by one, the
@@ -2744,14 +2462,6 @@ html:not([data-world-effects="economy"])
   }
 }
 
-/* q-ic2: opening one plate's 詳しく never re-flows its neighbour — the row
-   lets go of the shared height while a disclosure is open. */
-@media (min-width: 1100px) {
-  .rxs-page.rxs-page.ics-page .ics-abilities .ics-articles:has(details[open]) {
-    align-items: start;
-  }
-}
-
 /* ================================================================
    2026-10-25 polish pass (「洗練させて」)
    ================================================================ */
@@ -2774,28 +2484,6 @@ html:not([data-world-effects="economy"])
     -webkit-text-stroke-color: rgb(166 230 255 / 18%);
     -webkit-mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 36%, transparent 64%, #000 84%, #000);
     mask-image: linear-gradient(90deg, #000 0, #000 16%, transparent 36%, transparent 64%, #000 84%, #000);
-  }
-}
-
-/* 専用武装 with art: the copy centres on the picture beside it, and tablets
-   keep the two side by side instead of a half-width picture over the text. */
-@media (min-width: 641px) {
-  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail {
-    align-items: center;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 900px) {
-  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail:nth-child(even) {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  }
-
-  .rxs-page.rxs-page.ics-page .ics-arsenal .ics-article.has-detail:nth-child(even) .ics-detail {
-    order: 2;
   }
 }
 
@@ -2896,25 +2584,6 @@ html:not([data-world-effects="economy"])
   content: "";
   border-right: 1px solid rgb(233 184 102 / 62%);
   border-bottom: 1px solid rgb(233 184 102 / 62%);
-  pointer-events: none;
-}
-
-/* The forms picture: the same rim over its frame. */
-.rxs-page.rxs-page.ics-page .ics-form-panel > figure::before {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  padding: 1px;
-  content: "";
-  background: var(--ics-prism-rim);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  opacity: 0.6;
   pointer-events: none;
 }
 
@@ -4225,4 +3894,418 @@ html[data-family="special"] body #top.ics-page[data-command-special] #suitup .rx
   border-radius: 0;
   background: none;
   box-shadow: none;
+}
+
+/* ---------- 03 形態: the head, the selector centred, one wide plate ---------- */
+/* As the Far From and Meta Unitas #stages: the chapter's head over the
+   selector, the tabs centred under it, then one plate — the form named
+   large in its own light beside the picture, which fills its half. */
+html[data-family="special"] body #top.ics-page[data-command-special] #forms .rxs-stage-switcher {
+  display: grid;
+  gap: clamp(28px, 3.4vw, 44px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+#top.rxs-page.ics-page #forms .ics-form-tabs {
+  justify-self: center;
+  width: min(100%, 860px);
+  margin: 0;
+}
+
+#top.rxs-page.ics-page .ics-form-panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "art"
+    "copy";
+  gap: 0;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgb(197 220 232 / 22%);
+  border-radius: 4px;
+  background:
+    radial-gradient(70% 60% at 0% 0%, color-mix(in srgb, var(--ics-accent) 10%, transparent), transparent 70%),
+    linear-gradient(180deg, #121a2a, #0a0f1b 56%, #070a14);
+  box-shadow:
+    inset 0 1px 0 rgb(240 250 255 / 12%),
+    0 18px 40px -24px rgb(0 0 0 / 86%);
+  transition: border-color 1600ms ease;
+}
+
+/* The plate's lit top edge: the form's light into gold. */
+#top.rxs-page.ics-page .ics-form-panel::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 5;
+  height: 2px;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    var(--ics-accent),
+    color-mix(in srgb, var(--ics-pink) 70%, transparent) 46%,
+    rgb(233 184 102 / 60%) 72%,
+    transparent
+  );
+  pointer-events: none;
+  transition: background-color 1600ms ease;
+}
+
+#top.rxs-page.ics-page .ics-form-panel > figure {
+  position: relative;
+  grid-area: art;
+  justify-self: stretch;
+  width: auto;
+  height: auto;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--ics-ink-2);
+  box-shadow: none;
+}
+
+#top.rxs-page.ics-page .ics-form-panel > figure img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 10%;
+}
+
+#top.rxs-page.ics-page .ics-form-copy {
+  position: relative;
+  grid-area: copy;
+  display: grid;
+  gap: 20px;
+  align-content: start;
+  padding: clamp(26px, 6vw, 40px) clamp(20px, 5.6vw, 36px) clamp(30px, 7vw, 44px);
+}
+
+#top.rxs-page.ics-page .ics-form-copy h3 {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 0 18px;
+  border: 0;
+  color: var(--ics-text-1);
+  font-family: var(--ics-display);
+  font-size: clamp(28px, 7.4vw, 52px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.16;
+  word-break: keep-all;
+  text-shadow: 0 2px 18px rgb(0 0 0 / 70%);
+}
+
+/* A short rule in the form's light under the name. */
+#top.rxs-page.ics-page .ics-form-copy h3::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 52px;
+  height: 2px;
+  content: "";
+  background: var(--ics-accent);
+  transition: background-color 1600ms ease;
+}
+
+/* The name's ghost behind it, outlined (decorative). */
+#top.rxs-page.ics-page .ics-form-mark {
+  position: absolute;
+  top: clamp(14px, 3vw, 28px);
+  right: clamp(12px, 3vw, 28px);
+  max-width: 70%;
+  overflow: hidden;
+  color: transparent;
+  font-family: var(--ics-display);
+  font-size: clamp(44px, 9vw, 88px);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-text-stroke: 1px rgb(166 230 255 / 12%);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%);
+  mask-image: linear-gradient(90deg, transparent, #000 30%);
+}
+
+#top.rxs-page.ics-page .ics-form-copy p {
+  max-width: 34em;
+  margin: 0;
+  color: var(--ics-text-2);
+  font-size: 15.5px;
+  line-height: 2;
+}
+
+@media (min-width: 900px) {
+  #top.rxs-page.ics-page .ics-form-panel {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    grid-template-areas: "copy art";
+    min-height: clamp(560px, 70svh, 760px);
+  }
+
+  #top.rxs-page.ics-page .ics-form-panel > figure {
+    aspect-ratio: auto;
+    min-height: 100%;
+    border-left: 1px solid rgb(197 220 232 / 16%);
+  }
+
+  #top.rxs-page.ics-page .ics-form-copy {
+    align-content: center;
+    padding: clamp(40px, 4.6vw, 72px) clamp(32px, 4vw, 64px);
+  }
+
+  #top.rxs-page.ics-page .ics-form-copy h3 {
+    font-size: clamp(34px, 3.4vw, 52px);
+  }
+}
+
+/* ---------- 04–06 the record: rows on hairlines ---------- */
+/* As the Far From record (#system, #authority): no boxed cards — each
+   article is a row on a lit hairline, its number and name in the left
+   column with its picture and diagram under them, the owner's prose in
+   the right column from the top. Phones read it in one column. */
+#top.rxs-page.ics-page .ics-articles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  border-bottom: 1px solid rgb(166 230 255 / 12%);
+}
+
+#top.rxs-page.ics-page .ics-article {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  padding: clamp(30px, 4vw, 56px) 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+/* The row's hairline: ice into gold, fading. */
+#top.rxs-page.ics-page .ics-article::before {
+  position: absolute;
+  inset: 0 0 auto;
+  width: auto;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  content: "";
+  background: linear-gradient(90deg, rgb(166 230 255 / 46%), rgb(233 184 102 / 34%) 38%, rgb(166 230 255 / 10%) 76%, transparent);
+  opacity: 1;
+  -webkit-mask: none;
+  mask: none;
+  transform: none;
+}
+
+#top.rxs-page.ics-page .ics-article::after {
+  display: none;
+}
+
+#top.rxs-page.ics-page .ics-article-copy {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-width: 0;
+  height: auto;
+}
+
+#top.rxs-page.ics-page .ics-article-copy > .ics-card-no {
+  position: static;
+  margin: 0;
+}
+
+#top.rxs-page.ics-page .ics-article-copy h3 {
+  margin: 0;
+  font-size: clamp(22px, 2.1vw, 32px);
+  font-weight: 600;
+  line-height: 1.32;
+}
+
+#top.rxs-page.ics-page .ics-article .ics-diagram {
+  width: 100%;
+  max-width: 400px;
+  min-height: 0;
+  margin: 0;
+}
+
+#top.rxs-page.ics-page .ics-detail {
+  position: relative;
+  top: auto;
+  width: 100%;
+  max-width: 520px;
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid rgb(197 220 232 / 18%);
+  border-radius: 3px;
+  box-shadow: 0 18px 40px -26px rgb(0 0 0 / 90%);
+  transform: none;
+}
+
+#top.rxs-page.ics-page .ics-detail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+#top.rxs-page.ics-page .ics-article-copy p {
+  max-width: 40em;
+}
+
+@media (min-width: 900px) {
+  /* Two columns on one subgrid: the head (number, name, picture, diagram)
+     at the left, the prose from the row's top at the right. */
+  #top.rxs-page.ics-page .ics-article {
+    grid-template-columns:
+      [head-start] minmax(0, 0.38fr) [head-end body-start] minmax(0, 0.62fr)
+      [body-end];
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: clamp(36px, 5vw, 88px);
+    row-gap: 18px;
+  }
+
+  #top.rxs-page.ics-page .ics-article-copy {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    grid-template-columns: subgrid;
+    grid-template-rows: subgrid;
+    gap: inherit;
+  }
+
+  #top.rxs-page.ics-page .ics-article-copy > .ics-card-no {
+    grid-column: head;
+    grid-row: 1;
+  }
+
+  #top.rxs-page.ics-page .ics-article-copy > h3 {
+    grid-column: head;
+    grid-row: 2;
+  }
+
+  #top.rxs-page.ics-page .ics-article > .ics-detail {
+    z-index: 1;
+    grid-column: head;
+    grid-row: 3;
+    align-self: start;
+    margin-top: 8px;
+  }
+
+  #top.rxs-page.ics-page .ics-article-copy > .ics-diagram {
+    grid-column: head;
+    grid-row: 4;
+  }
+
+  #top.rxs-page.ics-page .ics-article:not(.has-detail) .ics-article-copy > .ics-diagram {
+    grid-row: 3 / -1;
+  }
+
+  #top.rxs-page.ics-page .ics-article-copy > .ics-lead-block {
+    grid-column: body;
+    grid-row: 1 / -1;
+    align-self: start;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.rxs-page.ics-page .ics-article:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* ---------- 06 必殺技: rows, as the record ---------- */
+/* The finishers keep their order (number, name, calls | prose) but stand
+   as the record's rows on hairlines, as Meta Unitas sets its finishers
+   (name beside its prose), not as boxed cards with a gold bar. */
+#top.rxs-page.ics-page .ics-finisher-list {
+  display: grid;
+  gap: 0;
+  border-bottom: 1px solid rgb(166 230 255 / 12%);
+}
+
+#top.rxs-page.ics-page .ics-finisher {
+  position: relative;
+  column-gap: clamp(36px, 5vw, 88px);
+  row-gap: 18px;
+  padding: clamp(30px, 4vw, 56px) 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+  transform: none;
+}
+
+#top.rxs-page.ics-page .ics-finisher::before {
+  position: absolute;
+  inset: 0 0 auto;
+  width: auto;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  content: "";
+  background: linear-gradient(90deg, rgb(233 184 102 / 56%), rgb(255 143 210 / 30%) 40%, rgb(166 230 255 / 10%) 76%, transparent);
+  opacity: 1;
+  -webkit-mask: none;
+  mask: none;
+  transform: none;
+}
+
+/* The last, the form's own finale, lit in its iris. */
+#top.rxs-page.ics-page .ics-finisher[data-rank="3"]::before {
+  background: linear-gradient(90deg, var(--ics-pink), var(--ics-violet) 34%, rgb(166 230 255 / 22%) 70%, transparent);
+}
+
+#top.rxs-page.ics-page .ics-finisher::after {
+  display: none;
+}
+
+#top.rxs-page.ics-page .ics-finisher h3 {
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+@media (min-width: 900px) {
+  #top.rxs-page.ics-page .ics-finisher {
+    grid-template-columns: minmax(0, 0.38fr) minmax(0, 0.62fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "no prose"
+      "name prose"
+      "calls prose";
+  }
+}
+
+@media (max-width: 899.98px) {
+  #top.rxs-page.ics-page .ics-finisher {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      "no"
+      "name"
+      "calls"
+      "prose";
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #top.rxs-page.ics-page .ics-finisher:hover {
+    transform: none;
+    box-shadow: none;
+  }
 }
