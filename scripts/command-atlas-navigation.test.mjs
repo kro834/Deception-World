@@ -27,7 +27,13 @@ const compiled = ts.transpileModule(`globalThis.jumpAtlasGroup = ${jump.getText(
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
 }).outputText;
 
-function fixture({ missing = false, empty = false, height = 740, controlOffset = 70 } = {}) {
+function fixture({
+  missing = false,
+  empty = false,
+  height = 740,
+  controlOffset = 70,
+  hiddenFirst = false,
+} = {}) {
   const focusCalls = [];
   const panel = {
     scrollTop: 100,
@@ -40,11 +46,16 @@ function fixture({ missing = false, empty = false, height = 740, controlOffset =
   };
   const control = {
     getBoundingClientRect: () => ({ bottom: 500 + controlOffset - panel.scrollTop }),
+    getClientRects: () => [{}],
     focus: (options) => focusCalls.push(options),
   };
   const target = {
     getBoundingClientRect: () => ({ top: 500 - panel.scrollTop }),
-    querySelector: () => (empty ? null : control),
+    querySelectorAll: () => {
+      if (empty) return [];
+      if (hiddenFirst) return [{ getClientRects: () => [] }, control];
+      return [control];
+    },
   };
   const context = { panelRef: { current: panel }, SIDE_MENU_GROUP_CLEARANCE_PX: 36 };
   vm.runInNewContext(compiled, context);
@@ -147,4 +158,10 @@ test("the atlas keeps its full-width shell without enabling a panel-wide pointer
     !attributes.includes("data-liquid-pointer"),
     "the full panel does not own a pointer effect",
   );
+});
+
+test("compact atlas jumps skip the hidden desktop search control", () => {
+  const state = fixture({ hiddenFirst: true });
+  state.jump(true);
+  assert.equal(state.focusCalls.length, 1);
 });

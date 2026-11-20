@@ -905,3 +905,46 @@ dialog.quick-search :is(button, a):focus-visible {
     --qs-zeus: 72px;
   }
 }
+
+/* Share the phone menu's quiet surfaces without changing the dialog's viewport bounds. */
+@media (max-width: 560px) and (forced-colors: none),
+  (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) and (forced-colors: none) {
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-panel {
+    border-color: rgb(255 255 255 / 16%);
+    border-radius: 22px;
+    background: var(--qs-ink, #121719);
+    box-shadow: 0 20px 56px rgb(0 0 0 / 48%);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search::backdrop {
+    background: rgb(0 0 0 / 66%);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-panel::before {
+    display: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-field {
+    min-height: 48px;
+    border-color: rgb(255 255 255 / 18%);
+    border-radius: 14px;
+    background: var(--qs-ink-2);
+    box-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-field:focus-within {
+    border-color: var(--qs-ice);
+    box-shadow: 0 0 0 1px var(--qs-ice);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-close {
+    min-height: 44px;
+    border-radius: 999px;
+    background: var(--qs-ink-2);
+    box-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-foot {
+    background: var(--qs-ink);
+  }
+}

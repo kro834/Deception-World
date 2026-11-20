@@ -1548,3 +1548,394 @@ html[data-family]
     transform: none;
   }
 }
+
+/* Keep the original search placement for the larger command atlas. */
+html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head > .side-panel-search-dock {
+  display: none;
+}
+
+/* Phone menu. Use an opaque sheet so scrolling the list never samples the
+   artwork behind it. The atlas keeps its single scroll and focus container. */
+@media (orientation: portrait) and (max-width: 600px),
+       (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] {
+    --atlas-ink: #1b1d1f;
+    --atlas-raised: #26292b;
+    --atlas-light: #f5f1e9;
+    --atlas-muted: #b6bab9;
+    --atlas-line: #3d4244;
+    --atlas-gold: #efd4a0;
+    --atlas-accent: #b0d9d0;
+    --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 14px);
+    --sp-pad-inline: clamp(16px, 5vw, 24px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "find" "sec" "spe" "sto" "rid" "rik" "rel" "unm" "inf" "sys";
+    gap: 32px;
+    padding-inline: max(var(--sp-pad-inline), calc(env(safe-area-inset-left, 0px) + 10px))
+      max(var(--sp-pad-inline), calc(env(safe-area-inset-right, 0px) + 10px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+    background: var(--atlas-ink) !important;
+    color-scheme: dark;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 5px 8px;
+    padding-bottom: 4px;
+    background: var(--atlas-ink);
+    box-shadow: inset 0 -1px var(--atlas-line);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head::before {
+    background: linear-gradient(var(--atlas-ink) 0 36%, transparent);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head > .command-atlas-heading {
+    grid-column: 1 / -1;
+    padding-block: 2px 8px;
+    font-family: inherit;
+    font-size: 23px;
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: 0.015em;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head > .side-panel-search-dock {
+    display: block;
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head > .side-panel-search-dock::before,
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-group[data-atlas-group="find"] > .side-panel-links > .side-panel-quick-search {
+    display: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-search-dock > .side-panel-quick-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 13px;
+    border: 1px solid var(--atlas-line);
+    border-radius: 13px;
+    background: var(--atlas-raised);
+    color: var(--atlas-light);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-search-dock > .side-panel-quick-search:active {
+    background: #343839;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-close {
+    grid-column: 2;
+    grid-row: 2;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border: 1px solid var(--atlas-line) !important;
+    border-radius: 50% !important;
+    background: var(--atlas-raised) !important;
+    box-shadow: none !important;
+    color: var(--atlas-light);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-close .liquid-pointer-glow {
+    display: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-close > svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0 3px;
+    padding: 1px 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index button {
+    min-height: 48px;
+    padding: 4px 2px;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--atlas-muted);
+    font: 600 12px/1.4 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index [aria-controls="command-atlas-information"] {
+    grid-column: span 2;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index button:is(:active, :focus-visible) {
+    background: var(--atlas-raised);
+    color: var(--atlas-light);
+    box-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] :is(.side-panel-quick-search, .side-panel-close):focus-visible {
+    outline: 2px solid var(--atlas-gold);
+    outline-offset: -3px;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > p {
+    margin: 0 0 8px;
+    color: var(--atlas-accent);
+    font: 600 13px/1.4 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    font-style: normal;
+    letter-spacing: 0.04em;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > p::after {
+    background: var(--atlas-line);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+    gap: 1px;
+    padding: 0;
+    border: 0;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links > :is(a, button.side-panel-link-button) {
+    display: flex;
+    grid-column: auto;
+    align-items: center;
+    justify-content: flex-start;
+    flex-flow: row nowrap;
+    gap: 11px;
+    min-width: 0;
+    min-height: 47px;
+    padding: 7px 9px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--atlas-light);
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links > :is(a, button.side-panel-link-button) > span {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 540;
+    line-height: 1.45;
+    letter-spacing: 0.015em;
+    text-shadow: none;
+    overflow-wrap: anywhere;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links > :is(a, button.side-panel-link-button) > i {
+    position: static;
+    flex: 0 0 auto;
+    max-width: 40%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--atlas-muted);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-shadow: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links > :is(a, button.side-panel-link-button)::after,
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group:not([data-atlas-group="sections"], [data-atlas-group="special"])
+    > .side-panel-links > :is(a, button.side-panel-link-button)::before {
+    display: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links > :is(a, button.side-panel-link-button):active {
+    background: var(--atlas-raised);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+    border-color: #4d625f;
+    background: #293735;
+    color: #e2f4ee;
+    box-shadow: inset 2px 0 var(--atlas-accent);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > [data-atlas-group="sections"] {
+    display: block;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 62px;
+    margin: 0 0 16px;
+    padding: 7px 10px;
+    border: 1px solid var(--atlas-line);
+    border-radius: 11px;
+    background: var(--atlas-raised);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene::after {
+    display: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene img,
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-links > :is(.command-atlas-record, a) > img {
+    position: static;
+    z-index: auto;
+    display: block;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 34px;
+    margin: 0;
+    border: 0;
+    border-radius: 5px;
+    object-fit: cover;
+    object-position: 50% 32%;
+    opacity: 0.86;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene img {
+    flex-basis: 58px;
+    width: 58px;
+    height: 42px;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene figcaption {
+    padding: 0;
+    font: 650 16px/1.35 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    letter-spacing: 0.025em;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-atlas-group="sections"] .side-panel-links > a::before {
+    position: static;
+    flex: 0 0 22px;
+    width: auto;
+    height: auto;
+    color: var(--atlas-muted);
+    font-size: 12px;
+    opacity: 1;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-special-tiles] > a::before {
+    position: static;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 34px;
+    border-radius: 5px;
+    background:
+      var(--sh-art, none) var(--sh-art-pos, 50% 30%) / cover no-repeat,
+      var(--atlas-raised);
+    opacity: 0.86;
+    transform: none;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-links > .library-current-control > button,
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-atlas-group="system"] .side-panel-zeus-toggle {
+    min-height: 46px;
+    padding: 8px 9px;
+    border: 1px solid var(--atlas-line);
+    border-radius: 9px;
+    background: var(--atlas-raised);
+    box-shadow: none;
+    color: var(--atlas-light);
+    font-family: inherit;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-atlas-group="system"] .side-panel-links {
+    gap: 6px;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-atlas-group="system"] fieldset {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-atlas-group="system"] fieldset button {
+    min-height: 44px !important;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] [data-atlas-group="system"] .side-panel-zeus-toggle :is(b, small) {
+    color: var(--atlas-light);
+    text-shadow: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] {
+    --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 7px);
+    --sp-pad-inline: max(20px, calc((100vw - 620px) / 2));
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head > .command-atlas-heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head > .side-panel-search-dock,
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-head > .side-panel-close {
+    grid-row: 1;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index {
+    grid-row: 2;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(112px, 1.7fr) minmax(0, 1fr);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-index [aria-controls="command-atlas-information"] {
+    grid-column: auto;
+  }
+}
+
+@media (forced-colors: active) and (orientation: portrait) and (max-width: 600px),
+       (forced-colors: active) and (orientation: landscape) and (max-height: 500px)
+         and (max-width: 980px) and (pointer: coarse) {
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] {
+    --atlas-ink: Canvas;
+    --atlas-raised: ButtonFace;
+    --atlas-light: CanvasText;
+    --atlas-muted: CanvasText;
+    --atlas-line: ButtonText;
+    --atlas-gold: Highlight;
+    --atlas-accent: Highlight;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] > .side-panel-group > .side-panel-links
+    > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+}

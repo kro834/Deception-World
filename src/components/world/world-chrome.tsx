@@ -463,6 +463,33 @@ function MenuSectionLink({
   );
 }
 
+function MenuQuickSearch({ onOpen, compact = false }: { onOpen: () => void; compact?: boolean }) {
+  return (
+    <button
+      type="button"
+      className="side-panel-link-button side-panel-quick-search"
+      aria-haspopup="dialog"
+      aria-keyshortcuts="/ Control+K Meta+K"
+      onPointerEnter={prefetchQuickSearch}
+      onFocus={prefetchQuickSearch}
+      onClick={onOpen}
+    >
+      {compact ? (
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="5.8" stroke="currentColor" strokeWidth="1.7" />
+          <path d="m15 15 4.1 4.1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+        </svg>
+      ) : null}
+      <span>クイック検索</span>
+      {compact ? null : (
+        <i>
+          <kbd aria-hidden="true">/</kbd>
+        </i>
+      )}
+    </button>
+  );
+}
+
 export function SideMenuLayer({
   context = "world",
   open,
@@ -542,7 +569,9 @@ export function SideMenuLayer({
       head.getBoundingClientRect().bottom -
       SIDE_MENU_GROUP_CLEARANCE_PX;
     if (keyboard) {
-      const control = target.querySelector<HTMLElement>("a, button:not([disabled])");
+      const control = Array.from(
+        target.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"),
+      ).find((item) => item.getClientRects().length > 0);
       if (!control) return;
       // A short landscape screen may not fit the scene above the links.
       // Keep keyboard focus visible without moving the locked document.
@@ -1033,6 +1062,11 @@ export function SideMenuLayer({
     if (swipeRef.current?.id === event.pointerId) releaseSwipe();
   };
 
+  const openMenuSearch = () => {
+    close();
+    window.requestAnimationFrame(openQuickSearch);
+  };
+
   const onPanelKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (!controlled || !isOpen) return;
     if (event.key === "Escape") {
@@ -1049,7 +1083,12 @@ export function SideMenuLayer({
       panel.querySelectorAll<HTMLElement>(
         'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
       ),
-    ).filter((item) => item.tabIndex >= 0 && item.getAttribute("aria-hidden") !== "true");
+    ).filter(
+      (item) =>
+        item.tabIndex >= 0 &&
+        item.getAttribute("aria-hidden") !== "true" &&
+        item.getClientRects().length > 0,
+    );
     if (!focusable.length) {
       event.preventDefault();
       panel.focus({ preventScroll: true });
@@ -1142,6 +1181,9 @@ export function SideMenuLayer({
               />
             </svg>
           </button>
+          <div className="side-panel-search-dock">
+            <MenuQuickSearch onOpen={openMenuSearch} compact />
+          </div>
           <nav className="command-atlas-index" aria-label="メニューの領域">
             {[
               ["find", "資料"],
@@ -1166,23 +1208,7 @@ export function SideMenuLayer({
         <div className="side-panel-group" data-atlas-group="find" id="command-atlas-find">
           <p>FIND A RECORD</p>
           <div className="side-panel-links dg-focus-scope">
-            <button
-              type="button"
-              className="side-panel-link-button side-panel-quick-search"
-              aria-haspopup="dialog"
-              aria-keyshortcuts="/ Control+K Meta+K"
-              onPointerEnter={prefetchQuickSearch}
-              onFocus={prefetchQuickSearch}
-              onClick={() => {
-                close();
-                window.requestAnimationFrame(openQuickSearch);
-              }}
-            >
-              <span>クイック検索</span>
-              <i>
-                <kbd aria-hidden="true">/</kbd>
-              </i>
-            </button>
+            <MenuQuickSearch onOpen={openMenuSearch} />
             <GuardedLink
               to="/search"
               assets={[]}
@@ -1214,7 +1240,11 @@ export function SideMenuLayer({
                   decoding="async"
                 />
               ) : null}
-              <span>変身・<wbr />フォーム研究室</span>
+              <span>
+                変身・
+                <wbr />
+                フォーム研究室
+              </span>
             </GuardedLink>
             <GuardedLink
               className="command-atlas-record"
@@ -1248,7 +1278,11 @@ export function SideMenuLayer({
                   decoding="async"
                 />
               ) : null}
-              <span>フォーム<wbr />アーカイブ</span>
+              <span>
+                フォーム
+                <wbr />
+                アーカイブ
+              </span>
             </GuardedLink>
             <GuardedLink
               className="command-atlas-record"
