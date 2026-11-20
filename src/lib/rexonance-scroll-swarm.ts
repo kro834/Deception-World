@@ -206,12 +206,24 @@ export class RexonanceScrollSwarm {
     this.orderFaceSeats("skin");
   }
 
-  draw(back: Context, front: Context, q: number, skin: boolean, scale: number, share: number) {
+  draw(
+    back: Context,
+    front: Context,
+    q: number,
+    skin: boolean,
+    scale: number,
+    share: number,
+    ratio = 1.5,
+  ) {
     if (q <= scrollFlameAt(NANITE_FIRE_PHASES.materialStart) || q >= 0.86) return 0;
     const groups = Math.floor(this.groups.length * Math.max(0, Math.min(1, share)));
     const screen = this.screen;
     const grains = this.grains;
-    const minWidth = 1.2 / Math.max(0.05, scale);
+    // Nano pass (2026-11-21): a grain is a nanite cluster far below a
+    // pixel, so it is drawn a backing pixel at most (`ratio`: the layer's
+    // backing px per CSS px) and dimmer — a fine haze docking on the seam.
+    const point = 1 / Math.max(0.05, scale * ratio);
+    const minWidth = Math.min(1.2 / Math.max(0.05, scale), point);
     let live = 0;
     for (let g = 0; g < groups; g++) {
       const group = this.groups[g];
@@ -282,7 +294,8 @@ export class RexonanceScrollSwarm {
           (sin < -0.24 && approach < 0.75) ||
           (px - axis) ** 2 + (py - coreY) ** 2 < 38 ** 2 ||
           ((px - eyeX) / 39) ** 2 + ((py - eyeY) / (group.face ? 9 : 20)) ** 2 < 1;
-        const width = Math.max(minWidth, grains[a + 5] * (behind ? 0.7 : 1)) * presence;
+        const width =
+          Math.min(point, Math.max(minWidth, grains[a + 5] * (behind ? 0.7 : 1))) * presence;
         screen[b] = px;
         screen[b + 1] = py;
         screen[b + 2] = width < 0.25 ? 0 : behind ? -width : width;
@@ -293,7 +306,7 @@ export class RexonanceScrollSwarm {
     for (let side = 0; side < 2; side++) {
       const context = side ? front : back;
       context.globalCompositeOperation = "source-over";
-      context.globalAlpha = side ? 0.92 : 0.56;
+      context.globalAlpha = side ? 0.62 : 0.36;
       for (let tone = 0; tone < colours.length; tone++) {
         context.beginPath();
         for (let g = 0; g < groups; g++) {

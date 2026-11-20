@@ -489,7 +489,9 @@ export class SurgeEngine {
     const t = frame.now;
     const a = SCRATCH_A;
     const b = SCRATCH_B;
-    const px = 1 / Math.max(0.05, scale);
+    // One backing px in figure px (nano pass, 2026-11-21): each nanite is a
+    // point at most this wide; its streak is its motion, never its body.
+    const px = 1 / Math.max(0.05, scale * this.ratio);
     // Every cell's place now and 34 ms ago, once; then a stroke batch per
     // canvas (far half behind, near half in front), tone and depth band.
     const pos = this.pos;
@@ -532,9 +534,10 @@ export class SurgeEngine {
             any = true;
           }
           if (!any) continue;
-          context.lineWidth =
-            (layer === 1 ? (band ? 2.3 : 1.6) : band ? 0.9 : 1.2) * px * (scale < 0.6 ? 1.15 : 1);
+          context.lineWidth = (layer === 1 ? (band ? 1 : 0.85) : band ? 0.6 : 0.7) * px;
+          // (Dimmer than the old chips: a haze of many, not a cloud of dots.)
           const alpha =
+            0.62 *
             (this.bands === 1
               ? layer === 1
                 ? 0.76
@@ -551,9 +554,10 @@ export class SurgeEngine {
         }
       }
     }
-    // The near cells' heads glow (every third one, the nearest band).
-    const size = 9 * px;
-    front.globalAlpha = Math.min(1, presence * 0.8);
+    // The near cells' heads glow (every third one, the nearest band): the
+    // sprite's core a backing px, its halo faint.
+    const size = 2.4 * px;
+    front.globalAlpha = Math.min(1, presence * 0.45);
     for (let i = 0; i < live; i += 3) {
       const o = i * 5;
       if (pos[o + 2] < 0.5) continue;
@@ -564,7 +568,9 @@ export class SurgeEngine {
   }
 
   private drawShards(front: CanvasRenderingContext2D, frame: SurgeFrame, scale: number) {
-    const px = 1 / Math.max(0.05, scale);
+    // Backing px (nano pass, 2026-11-21): the debris is matter at nanite
+    // scale, a streak a pixel wide and a head under a pixel.
+    const px = 1 / Math.max(0.05, scale * this.ratio);
     const p = this.shards;
     front.lineCap = "round";
     for (let tone = 0; tone < 2; tone += 1) {
@@ -586,8 +592,8 @@ export class SurgeEngine {
         front.lineTo(SCRATCH_A[0], SCRATCH_A[1]);
       }
       if (!heads) continue;
-      front.lineWidth = 1.4 * px;
-      front.strokeStyle = tone ? "rgb(242 216 150 / 0.55)" : "rgb(150 236 255 / 0.6)";
+      front.lineWidth = px;
+      front.strokeStyle = tone ? "rgb(242 216 150 / 0.4)" : "rgb(150 236 255 / 0.44)";
       front.stroke();
       // The shards themselves: small turning diamonds.
       front.beginPath();
@@ -599,7 +605,7 @@ export class SurgeEngine {
         const u = surgeSpan(flight, p[o + 4], p[o + 4] + 0.38);
         if (u <= 0 || u >= 1) continue;
         shardAt(p, o, u, SCRATCH_A);
-        const k = p[o + 7] * px * (0.6 + 0.6 * (1 - u)) * Math.max(1, scale * 1.2);
+        const k = Math.min(0.6, p[o + 7] * 0.12) * px * (0.6 + 0.6 * (1 - u));
         const turn = p[o + 1] + u * 9;
         const c = Math.cos(turn) * k;
         const s = Math.sin(turn) * k;
@@ -609,7 +615,7 @@ export class SurgeEngine {
         front.lineTo(SCRATCH_A[0] + s * 0.5, SCRATCH_A[1] - c * 0.5);
         front.closePath();
       }
-      front.fillStyle = tone ? "rgb(255 236 190 / 0.85)" : "rgb(210 248 255 / 0.85)";
+      front.fillStyle = tone ? "rgb(255 236 190 / 0.6)" : "rgb(210 248 255 / 0.6)";
       front.fill();
     }
   }
@@ -617,7 +623,10 @@ export class SurgeEngine {
   private drawScans(front: CanvasRenderingContext2D, frame: SurgeFrame, scale: number) {
     const px = 1 / Math.max(0.05, scale);
     const band = 0.2;
-    // The band of outlined tiles, then the hot leading edge, then brackets.
+    // The band, then the hot leading edge, then brackets. (Nano pass,
+    // 2026-11-21: no tile is outlined or inset any more — the band is the
+    // plate's own texels filled edge to edge, a soft sheen sweeping over it,
+    // so no unit of the lattice ever shows.)
     front.beginPath();
     let any = false;
     for (let n = 0; n < this.pieces.length; n += 1) {
@@ -628,14 +637,13 @@ export class SurgeEngine {
       for (let i = 0; i < tiles.length; i += 3) {
         const along = tiles[i + 2];
         if (along > head || along < head - band) continue;
-        front.rect(tiles[i] + 0.5, tiles[i + 1] + 0.5, TILE - 1, TILE - 1);
+        front.rect(tiles[i], tiles[i + 1], TILE, TILE);
         any = true;
       }
     }
     if (!any) return;
-    front.lineWidth = 0.9 * px;
-    front.strokeStyle = "rgb(121 232 255 / 0.5)";
-    front.stroke();
+    front.fillStyle = "rgb(121 232 255 / 0.1)";
+    front.fill();
     front.beginPath();
     for (let n = 0; n < this.pieces.length; n += 1) {
       const u = frame.scans[n];
@@ -645,10 +653,10 @@ export class SurgeEngine {
       for (let i = 0; i < tiles.length; i += 3) {
         const along = tiles[i + 2];
         if (along > head || along < head - 0.05) continue;
-        front.rect(tiles[i] + 2, tiles[i + 1] + 2, TILE - 4, TILE - 4);
+        front.rect(tiles[i], tiles[i + 1], TILE, TILE);
       }
     }
-    front.fillStyle = "rgb(236 252 255 / 0.62)";
+    front.fillStyle = "rgb(236 252 255 / 0.22)";
     front.fill();
     front.beginPath();
     for (let n = 0; n < this.pieces.length; n += 1) {
@@ -780,16 +788,16 @@ export class SurgeEngine {
     if (!context) return null;
     context.scale(k, k);
     context.translate(8 - bx, 8 - by);
-    context.fillStyle = "rgb(121 232 255 / 0.22)";
-    context.strokeStyle = "rgb(190 245 255 / 0.75)";
-    context.lineWidth = 1.4;
+    // (Nano pass, 2026-11-21: the plates' glow, not their tile grid — the
+    // texels filled edge to edge and softened once here, at build time.)
+    context.fillStyle = "rgb(150 236 255 / 0.32)";
+    if ("filter" in context) context.filter = "blur(2.5px)";
     context.beginPath();
     for (const piece of own.pieces) {
       const tiles = piece.tiles;
-      for (let i = 0; i < tiles.length; i += 3) context.rect(tiles[i] + 1, tiles[i + 1] + 1, TILE - 2, TILE - 2);
+      for (let i = 0; i < tiles.length; i += 3) context.rect(tiles[i], tiles[i + 1], TILE, TILE);
     }
     context.fill();
-    context.stroke();
     const entry = { canvas, x: bx - 8, y: by - 8, k };
     this.glows.set(group, entry);
     return entry;

@@ -1126,7 +1126,15 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         if (surfaces && scrollSwarm && !leaving && !bursting) {
           const share = Math.min(engine.swarmShare, grown && crescendo
             ? grown.lib.SKIN_CELL_SHARE[crescendo.engine.governor.level] : 1);
-          scrollSwarm.draw(surfaces.back, surfaces.front, q, skinLive, surfaces.scale, share);
+          scrollSwarm.draw(
+            surfaces.back,
+            surfaces.front,
+            q,
+            skinLive,
+            surfaces.scale,
+            share,
+            surfaces.ratio,
+          );
         }
       }
       raf = requestAnimationFrame(tick);
