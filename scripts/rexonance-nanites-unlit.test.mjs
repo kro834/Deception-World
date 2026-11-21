@@ -55,7 +55,7 @@ function load() {
   const runtime = { document, performance: { now: () => (now += 2) } };
   runInNewContext(
     source.replaceAll("export function ", "function ") +
-      "\nglobalThis.api = { splitLights, createSplitLightsJob, createNaniteMetalJob, createNaniteGuideJob, createNaniteMoltenJob, naniteHexHeight, naniteHexLight };",
+      "\nglobalThis.api = { splitLights, createSplitLightsJob, createNaniteMetalJob, createNaniteGuideJob, createNaniteMoltenJob, naniteHexHeight, naniteHexLight, naniteGrain };",
     runtime,
   );
   return {
@@ -181,8 +181,10 @@ test("raw metal: the art's exact alpha, the spec's shading, a silhouette, slice-
         continue;
       }
       assert.deepEqual(Array.from(silhouette.pixels.subarray(i, i + 3)), [6, 10, 18]);
-      const hgt = api.naniteHexHeight(x + 0.5, y + 0.5);
-      const lit = api.naniteHexLight(x + 0.5, y + 0.5);
+      // (Nano pass follow-up, 2026-11-21: the metal's one-pixel grain, not
+      // the hex relief — no lattice a viewer could count.)
+      const hgt = api.naniteGrain(x, y);
+      const lit = 0;
       const at = (xx, yy) => (xx < 0 || yy < 0 || xx >= w || yy >= h ? 0 : pixels[(yy * w + xx) * 4 + 3]);
       const rim = Math.max(-1, Math.min(1, ((-(at(x + 1, y) - at(x - 1, y)) - (at(x, y + 1) - at(x, y - 1))) / 255) * 0.9));
       const v = (26 + 150 * luma(pixels, i)) * (0.74 + 0.26 * hgt) + 34 * lit + 70 * rim;

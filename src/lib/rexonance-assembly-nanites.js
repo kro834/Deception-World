@@ -28,7 +28,7 @@
    once; the draw passes below write typed arrays and batched paths only.
    ===================================================================== */
 
-import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
+import { naniteGrain } from "./rexonance-unlit.js";
 import { sampleFlameBirth } from "./rexonance-ignition.js";
 import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";
 import { scrollFlameAt } from "./rexonance-field/field-clock.js";
@@ -2133,8 +2133,9 @@ export function createAssemblyLayerJob({
           if (!alpha) continue;
           const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
           if (metal) {
-            const hgt = naniteHexHeight(x + 0.5, Y + 0.5, pitch);
-            const lit = naniteHexLight(x + 0.5, Y + 0.5, pitch);
+            // (Nano pass follow-up: a one-pixel grain, not a hex relief.)
+            const hgt = naniteGrain(x, Y);
+            const lit = 0 * pitch;
             const right = x + 1 < W ? a[i + 7] : 0;
             const left = x > 0 ? a[i - 1] : 0;
             const down = Y + 1 < H ? a[i + stride + 3] : 0;

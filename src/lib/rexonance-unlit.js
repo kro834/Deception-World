@@ -370,6 +370,18 @@ function naniteHexEdge(x, y, pitch) {
 
 const naniteUnit = (value) => (value < 0 ? 0 : value > 1 ? 1 : value);
 
+/** Pure: the raw nanite metal's grain at (x, y) (nano pass follow-up,
+ * 2026-11-21; owner: 「…実際のナノマシンと同程度の大きさに」). The metal used to
+ * carry a hex micro-relief of 4.6 px cells, a lattice a viewer could count;
+ * a nanite is far below a pixel, so the metal shows only a one-pixel grain
+ * of low amplitude (0.35–0.65, mean one half) and no bevel. */
+export function naniteGrain(x, y) {
+  let h = Math.imul(Math.floor(x) | 0, 0x27d4eb2d) ^ Math.imul(Math.floor(y) | 0, 0x165667b1);
+  h = Math.imul(h ^ (h >>> 15), 0x85ebca6b);
+  h ^= h >>> 13;
+  return 0.35 + 0.3 * ((h >>> 0) / 4294967296);
+}
+
 /** Pure: the hex micro-relief's height at (x, y) (px; sample a pixel at its
  * centre, x + 0.5): 1 on a hex's top, 0 in the 0.8 px groove between hexes
  * (a half-pixel ramp at the groove's walls). Pointy-top lattice, `pitch` px
@@ -514,8 +526,9 @@ export function naniteMetalRow(y, w, h, a, m, s, pitch = 4.6) {
     const alpha = a[i + 3];
     if (!alpha) continue;
     const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
-    const hgt = naniteHexHeight(x + 0.5, y + 0.5, pitch);
-    const lit = naniteHexLight(x + 0.5, y + 0.5, pitch);
+    // (Nano pass follow-up: the grain, not the hex relief; `pitch` unused.)
+    const hgt = naniteGrain(x, y);
+    const lit = 0 * pitch;
     const right = x + 1 < w ? a[i + 7] : 0;
     const left = x > 0 ? a[i - 1] : 0;
     const below = y + 1 < h ? a[i + stride + 3] : 0;
