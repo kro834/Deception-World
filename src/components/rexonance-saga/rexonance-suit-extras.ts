@@ -135,9 +135,9 @@ const FIREBRAND_STRIDE = Math.ceil(CHIPS / FIREBRANDS);
 /** The undersuit's occupancy, for the back chips (64 x 116 cells). */
 const OCC_W = 64;
 const OCC_H = 116;
-/** The tumble's frames; the mip below this device size. */
+/** The tumble's frames. (Every chip in flight draws the 16 px mip since
+ * the nano pass, 2026-11-21: it is a point.) */
 const FRAMES = KIT_CELLS.frames;
-const MIP_BELOW = 12;
 /** A chip's hex fills about 70% of its cell (room to tumble): sprites are
  * drawn this much larger than the chip's nominal size. */
 const SPRITE = 1.45;
@@ -2719,7 +2719,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       for (let k = 0; k < count; k += 1) {
         const o = (bucket * RECT_CAP + k) * 3;
         const d = rects[o + 2];
-        const off = d > 4 ? 0.22 * d : 1;
+        const off = d > 4 ? 0.22 * d : 0.5 * d;
         hexRects(rects[o] + off, rects[o + 1] + off, d);
       }
       flight.fill();
@@ -2797,12 +2797,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       else {
         if (alpha < 0.12) return;
         const pulse = 0.55 + 0.45 * Math.abs(Math.cos((TAU * frame) / FRAMES));
+        // (Nano pass, 2026-11-21: a device px at most — a nanite in
+        // flight is a point, never a visible chip.)
         const side = d * pulse * 0.9;
         rect(
           (tone < GOLD_TONE ? tone : GOLD_TONE) * 3 + (alpha < 0.4 ? 0 : alpha < 0.75 ? 1 : 2),
           x,
           y,
-          side > 2 ? side : 2,
+          side < 1 ? side : 1,
         );
         return;
       }
@@ -2811,10 +2813,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     draws += 1;
     flight.globalAlpha = alpha >= 1 ? 1 : alpha;
     const t = tone > GOLD_TONE ? ICE : tone;
-    const e = d * SPRITE;
-    const k = Math.round(e) || 1;
-    if (e <= MIP_BELOW) poseSprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, k);
-    else poseSprite(cellsImage, 32 * frame, 32 * t, 32, k);
+    // Nano pass (2026-11-21): the chip's sprite is filtered down to one
+    // device px and dimmed — the swarm reads as a fine haze, never chips.
+    if (d * SPRITE > 1) flight.globalAlpha *= 0.75;
+    poseSprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, 1);
   };
   // A chip unfolding into its tile (frame k), at the sprite slots.
   const unfold = (k: number, tone: number) => {

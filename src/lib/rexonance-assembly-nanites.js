@@ -2239,6 +2239,9 @@ const KIT = {
 };
 
 const goldCountOf = (gold) => gold?.count ?? 0;
+// A nanite in flight is drawn this many device px across at most (nano
+// pass, 2026-11-21): the 16 px mip sprite filtered down to a soft point.
+const NANO_POINT = 1.3;
 const TONE_CSS = ["rgb(121 232 255)", "rgb(255 143 216)", "rgb(244 251 255)"];
 const SHADE_CSS = ["rgb(22 58 74)", "rgb(74 34 62)", "rgb(58 64 76)"];
 // Touch's hex chips: the desktop sprites' pastel tones, their shade, and the
@@ -3307,8 +3310,12 @@ export function createAssemblyNanites({
     const base = b * RECT_CAP * 4 + at;
     chipRects[base] = X[slot];
     chipRects[base + 1] = Y[slot];
-    // (A hexagon of about the sprite chip's own footprint, ~3/4 of its cell.)
-    chipRects[base + 2] = coarse ? size * 0.38 : size / 2;
+    // (A hexagon of about the sprite chip's own footprint, ~3/4 of its cell —
+    // capped at half a device px since the nano pass, 2026-11-21: a nanite
+    // is far below a pixel, so in flight it is a point and never a shape.)
+    const half = 0.5 / SCALE;
+    const r = coarse ? size * 0.38 : size / 2;
+    chipRects[base + 2] = r < half ? r : half;
     chipRects[base + 3] = Math.floor(f) % 24;
     chipCounts[b] = at + 4;
   };
@@ -3382,21 +3389,28 @@ export function createAssemblyNanites({
     let cs = 32;
     let draw = size;
     let alpha = A[slot] < alphaCap ? A[slot] : alphaCap;
+    // Nano pass (2026-11-21): in flight a chip is drawn a point — its sprite
+    // shrunk to about a device px (the filter averages it to one soft dot)
+    // and dimmed, so the swarm reads as a dense fine haze, never as chips.
+    // The near ones' defocus is a faint two-pixel puff, not a disc. Only the
+    // unfold onto its tile (the plate's own build) keeps its footprint.
+    const point = NANO_POINT / SCALE;
     if (bokeh && Z[slot] > BOKEH_Z && bokehAt(X[slot], Y[slot])) {
       sx = bkX[t];
       sy = bkY[t];
-      draw = size * 1.3;
-      alpha = 0.22;
+      draw = size * 1.3 < 2 * point ? size * 1.3 : 2 * point;
+      alpha = 0.12;
     } else if (uf >= 0 && t < unX.length) {
       sx = unX[t] + 32 * uf;
       sy = unY;
-    } else if (size * SCALE <= 12) {
+    } else {
       sx = mipX[t] + 16 * f;
       sy = mipY[t];
       cs = 16;
-    } else {
-      sx = 32 * f;
-      sy = 32 * t;
+      if (size > point) {
+        draw = point;
+        alpha *= 0.75;
+      }
     }
     ctx.globalAlpha = alpha;
     ctx.drawImage(sheet, sx, sy, cs, cs, X[slot] - draw / 2, Y[slot] - draw / 2, draw, draw);
