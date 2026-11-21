@@ -2585,6 +2585,20 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     });
   const landFronts = fitFronts(false);
   const paintFronts = fitFronts(true);
+  // Each plate's gold under one front (round 3): its cells' lock times.
+  const goldFronts = all.map((plate, p) =>
+    fitLiquidFront(
+      plate.end - plate.first,
+      (k, out) => {
+        const i = plate.first + k;
+        out[0] = gold.fx[i] + gold.cw[i] / 2;
+        out[1] = gold.fy[i] + gold.ch[i] / 2;
+        out[2] = Math.max(gold.cw[i], gold.ch[i]) / 2;
+        out[3] = gold.lock[i];
+      },
+      p + 901,
+    ),
+  );
 
   const base = () => {
     flight.setTransform(1, 0, 0, 1, ox, oy);
@@ -3476,6 +3490,24 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       Math.round((tile.dy + tile.th) * s) - y0,
     );
   };
+  // The region a front covers at t (`set`) or not yet, as the current path.
+  const frontRegionS = (front: Float32Array, t: number, set: boolean) => {
+    if (liquidFrontPath(flight, front, t, set, 0, s) === 2) flight.rect(-1e5, -1e5, 2e5, 2e5);
+  };
+  // Clips to plate p's gold that locks in (ta, tb] by its gold front, not
+  // by cells (round 3). False when that band is empty.
+  const lockBand = (p: number, ta: number, tb: number) => {
+    const front = goldFronts[p];
+    if (!front || liquidProgress(front, tb) <= 0 || liquidProgress(front, ta) >= 1) return false;
+    cellClip(all[p].first, all[p].end);
+    flight.beginPath();
+    frontRegionS(front, tb, true);
+    flight.clip();
+    flight.beginPath();
+    frontRegionS(front, ta, false);
+    flight.clip();
+    return true;
+  };
   const cellClip = (from: number, to: number) => {
     flight.beginPath();
     for (let i = from; i < to; i += 1) cellRect(i);
@@ -3833,7 +3865,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const whole = front >= 1;
     flight.save();
     if (!whole) printClip(unc, plate.end, front, true);
-    else if (unc > plate.first) cellClip(unc, plate.end);
+    else if (unc > plate.first) lockBand(p, t - SW.recede, Infinity);
     conduitFace(p, t);
     if (rails && whole && L.hasBox[p] && !governed) {
       // A hard-light sheen runs across the conduit: its own hologram (rails and
@@ -4923,17 +4955,24 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           const coolFrom = firstLockAfter(p, t - SW.recede);
           if (coolTo > coolFrom) {
             flight.save();
-            cellClip(coolFrom, coolTo);
-            flight.globalAlpha = EMBER_A;
-            plateDraw(molten, p, 0, 0);
+            if (lockBand(p, t - SW.recede, t - SW.moltenAges[SW.moltenAges.length - 1])) {
+              flight.globalAlpha = EMBER_A;
+              plateDraw(molten, p, 0, 0);
+            }
             flight.restore();
           }
           let to = bandTo;
+          let tTo = t;
           for (let step = 0; step < SW.moltenAges.length; step += 1) {
             const from = firstLockAfter(p, t - SW.moltenAges[step]);
+            const tFrom = t - SW.moltenAges[step];
             if (to > from) {
               flight.save();
-              cellClip(from, to);
+              // (Round 3: the band's ring by the gold front, not its cells.)
+              if (!lockBand(p, tFrom, tTo)) {
+                flight.beginPath();
+                flight.clip();
+              }
               const under = hot ? MOLTEN_A[step] : Math.max(MOLTEN_A[step], HOT_A[step]);
               if (under > 0) {
                 flight.globalAlpha = under;
@@ -4946,6 +4985,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               flight.restore();
             }
             to = from;
+            tTo = tFrom;
           }
         }
         // The band's head (round 3): where a trim's channel locks, the newest

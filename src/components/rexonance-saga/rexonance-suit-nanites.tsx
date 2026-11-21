@@ -418,6 +418,20 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const surges = planSurges();
         const end = planEnd();
         const gold = cells();
+        // …and its gold's front, fitted to its cells' lock times (round 3).
+        const goldFronts = all.map((plate, p) =>
+          fitLiquidFront(
+            plate.end - plate.first,
+            (i, out) => {
+              const c = plate.first + i;
+              out[0] = gold.fx[c] + gold.cw[c] / 2;
+              out[1] = gold.fy[c] + gold.ch[c] / 2;
+              out[2] = Math.max(gold.cw[c], gold.ch[c]) / 2;
+              out[3] = gold.lock[c];
+            },
+            p + 901,
+          ),
+        );
         // Per plate: settled (its art painted whole), and its gold cells
         // locked into the working atlas so far.
         const done = new Uint8Array(all.length);
@@ -480,15 +494,20 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           flight.globalAlpha = alpha;
           flight.fillStyle = colour;
           flight.beginPath();
+          // Round 3 (nano pass, 2026-11-21): each grain is a point a device px
+          // across at most (still far smaller than its cell, so the trim and
+          // crystals stay legible: rx17), set off its cell's middle by a
+          // fixed hash so the grains never line up into a grid.
           for (let k = 0; k < count; k += 1) {
             const i = list[k];
-            const w = gold.cw[i] * size;
-            const h = gold.ch[i] * size;
+            const side = Math.min(1, Math.min(gold.cw[i], gold.ch[i]) * size * s);
+            const jx = (((i * 0.6180339) % 1) - 0.5) * gold.cw[i] * 0.6;
+            const jy = (((i * 0.7548777) % 1) - 0.5) * gold.ch[i] * 0.6;
             flight.rect(
-              (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
-              (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
-              w * s,
-              h * s,
+              (gold.fx[i] + gold.cw[i] / 2 + jx) * s - side / 2,
+              (gold.fy[i] + gold.ch[i] / 2 + jy) * s - side / 2,
+              side,
+              side,
             );
           }
           flight.fill();
@@ -686,11 +705,20 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                     piece.h * s,
                   );
                 if (locked[p] > plate.first) {
+                  // Round 3 (nano pass, 2026-11-21): the gold fills under
+                  // the plate's gold front (its cells' outline ∩ the front),
+                  // never cell by cell.
                   flight.save();
                   flight.beginPath();
-                  for (let i = plate.first; i < locked[p]; i += 1)
+                  for (let i = plate.first; i < plate.end; i += 1)
                     flight.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
                   flight.clip();
+                  const goldFront = goldFronts[p];
+                  if (goldFront && liquidProgress(goldFront, t) < 1) {
+                    flight.beginPath();
+                    liquidFrontPath(flight, goldFront, t, true, 0, s);
+                    flight.clip();
+                  }
                   flight.drawImage(
                     art,
                     piece.ax,
