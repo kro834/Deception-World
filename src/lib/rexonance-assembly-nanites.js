@@ -2242,6 +2242,8 @@ const goldCountOf = (gold) => gold?.count ?? 0;
 // A nanite in flight is drawn this many device px across at most (nano
 // pass, 2026-11-21): the 16 px mip sprite filtered down to a soft point.
 const NANO_POINT = 1.3;
+// The scaffold lattice under a staged plate: off since the nano pass.
+const SCAFFOLD_LATTICE = false;
 const TONE_CSS = ["rgb(121 232 255)", "rgb(255 143 216)", "rgb(244 251 255)"];
 const SHADE_CSS = ["rgb(22 58 74)", "rgb(74 34 62)", "rgb(58 64 76)"];
 // Touch's hex chips: the desktop sprites' pastel tones, their shade, and the
@@ -2320,14 +2322,10 @@ export function createAssemblyNanites({
   const ROW = Uint8Array.from(palette?.toneRows ?? [0, 1, 2]);
   const MIPX = Float64Array.from(k.cells.mip.x);
   const MIPY = Float64Array.from(k.cells.mip.y);
-  const UNX = Float64Array.from(k.cells.unfold.x);
-  const UNY = k.cells.unfold.y;
   const BKX = Float64Array.from(k.cells.bokeh.x);
   const BKY = Float64Array.from(k.cells.bokeh.y);
   const MIPXB = Float64Array.from((kB ?? k.cells).mip.x);
   const MIPYB = Float64Array.from((kB ?? k.cells).mip.y);
-  const UNXB = Float64Array.from((kB ?? k.cells).unfold.x);
-  const UNYB = (kB ?? k.cells).unfold.y;
   const BKXB = Float64Array.from((kB ?? k.cells).bokeh.x);
   const BKYB = Float64Array.from((kB ?? k.cells).bokeh.y);
   const BEADX = k.cells.bead.x;
@@ -3376,14 +3374,11 @@ export function createAssemblyNanites({
     const sheet = second ? cellsB : cells;
     const mipX = second ? MIPXB : MIPX;
     const mipY = second ? MIPYB : MIPY;
-    const unX = second ? UNXB : UNX;
-    const unY = second ? UNYB : UNY;
     const bkX = second ? BKXB : BKX;
     const bkY = second ? BKYB : BKY;
     let f = FR[slot] % 24;
     if (f < 0) f += 24;
     f = Math.floor(f) % 24;
-    const uf = UF[slot];
     let sx;
     let sy;
     let cs = 32;
@@ -3392,18 +3387,16 @@ export function createAssemblyNanites({
     // Nano pass (2026-11-21): in flight a chip is drawn a point — its sprite
     // shrunk to about a device px (the filter averages it to one soft dot)
     // and dimmed, so the swarm reads as a dense fine haze, never as chips.
-    // The near ones' defocus is a faint two-pixel puff, not a disc. Only the
-    // unfold onto its tile (the plate's own build) keeps its footprint.
+    // The near ones' defocus is a faint two-pixel puff, not a disc.
     const point = NANO_POINT / SCALE;
     if (bokeh && Z[slot] > BOKEH_Z && bokehAt(X[slot], Y[slot])) {
       sx = bkX[t];
       sy = bkY[t];
       draw = size * 1.3 < 2 * point ? size * 1.3 : 2 * point;
       alpha = 0.12;
-    } else if (uf >= 0 && t < unX.length) {
-      sx = unX[t] + 32 * uf;
-      sy = unY;
     } else {
+      // (Follow-up, 2026-11-21: the unfold onto its tile is a point too —
+      // the plate's liquid front shows the arrival, no hex opens.)
       sx = mipX[t] + 16 * f;
       sy = mipY[t];
       cs = 16;
@@ -4344,7 +4337,9 @@ export function createAssemblyNanites({
       if (jigged) setJig(ctx, p);
       const full = !coarse && RICH[p] === 1;
       // The scaffold lattice (A2), growing from the seat.
-      if (lattice && q < pc.to && (coarse ? LATTICED[p] === 1 : full)) {
+      // (Nano pass follow-up, 2026-11-21: the scaffold's hex lattice is a
+      // visible unit, so it no longer draws — SCAFFOLD_LATTICE.)
+      if (SCAFFOLD_LATTICE && lattice && q < pc.to && (coarse ? LATTICED[p] === 1 : full)) {
         const grow = easeOut(clamp01((q - (pc.from - 0.02)) / (pc.to - pc.from + 0.02)));
         ctx.save();
         ctx.beginPath();

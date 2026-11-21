@@ -175,7 +175,7 @@ const BUSY_W = 32;
 const BUSY_H = 58;
 const BUSY_DIM = 0.28;
 const LATCHES = 8;
-const LATTICE_A = 0.54;
+const LATTICE_A: number = 0;
 const LINK_MS = 40;
 /** The defocused front band (review 50): only the nearest chips (z past
  * BOKEH_Z), at BOKEH_A, never over a plate being built. */
@@ -217,7 +217,6 @@ const sizeScale = (h0: number) => {
 /** Chips drawn per hex frame: mip and cell columns, tone rows. */
 const MIP_X = Int16Array.from(KIT_CELLS.mip.x);
 const MIP_Y = Int16Array.from(KIT_CELLS.mip.y);
-const UNFOLD_X = Int16Array.from(KIT_CELLS.unfold.x);
 const BOKEH_X = Int16Array.from(KIT_CELLS.bokeh.x);
 const BOKEH_Y = Int16Array.from(KIT_CELLS.bokeh.y);
 // By tone (ice, pink, white, gold): white streaks ice, gold its own row (review 32).
@@ -2830,9 +2829,12 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     if (TOUCH) heroes += 1;
     if (draws >= limit[0]) return;
     draws += 1;
-    flight.globalAlpha = pose[SA];
+    // (Nano pass follow-up, 2026-11-21: no hex unfolds into a tile — the
+    // landing nanite stays a point, and the plate's liquid front is the
+    // only thing that shows it arrive.)
+    flight.globalAlpha = pose[SA] * (d * SPRITE > 1 ? 0.75 : 1);
     const t = tone >= 3 ? ICE : tone;
-    poseSprite(cellsImage, UNFOLD_X[t] + 32 * k, KIT_CELLS.unfold.y, 32, Math.round(d) || 1);
+    poseSprite(cellsImage, MIP_X[t] + 16 * (k % FRAMES), MIP_Y[t], 16, 1);
   };
   // A comet from the sprite slots' centre along their velocity (SVX, SVY).
   const comet = (tone: number) => {
@@ -4053,7 +4055,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const staged = jigged[p] === 1;
     // The staged plate: lattice, walls and the landed metal, under its jig.
     applyJig(p);
+    // (Nano pass follow-up, 2026-11-21: the scaffold's hex lattice is a
+    // visible unit and no longer draws: LATTICE_A is 0.)
     if (
+      LATTICE_A > 0 &&
       lattice &&
       (staged || L.flags[p] & 8) &&
       !governed &&
