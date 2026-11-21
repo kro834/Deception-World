@@ -5,9 +5,9 @@
 
 /** Where the front reaches each of the HUD's parts: the middle of the
  * part's own plates on the growth field (the helmet's on the head's). */
-export const SKIN_PART_REACH = { LEGS: 0.505, ARMS: 0.366, CHEST: 0.178, WAIST: 0.193, TAIL: 0.469, HEAD: 0.439 } as const;
+export const SKIN_PART_REACH = { LEGS: 0.505, ARMS: 0.366, CHEST: 0.178, WAIST: 0.193, TAIL: 0.469, HEAD: 0.546 } as const;
 /** When the front's lip is there in the entry (the call's canonical ms). */
-export const SKIN_ENTRY_PARTS = { LEGS: 743, ARMS: 661, CHEST: 559, HEAD: 1429 } as const;
+export const SKIN_ENTRY_PARTS = { LEGS: 743, ARMS: 661, CHEST: 559, HEAD: 1451 } as const;
 /** And in the scroll scene (its progress), in the HUD's order
  * (rexonance-resonance.js ASSEMBLY_PARTS). */
-export const SKIN_SCROLL_PARTS = [0.332, 0.28, 0.212, 0.217, 0.319, 0.632] as const;
+export const SKIN_SCROLL_PARTS = [0.332, 0.28, 0.212, 0.217, 0.319, 0.643] as const;

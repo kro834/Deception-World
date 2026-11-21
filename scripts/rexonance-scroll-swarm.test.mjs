@@ -53,11 +53,14 @@ test("the cooled fragment flocks follow skin and classic clocks and replay exact
   bind(swarm);
   for (const q of [0, 0.06, 0.1135, 0.86, 0.9, 1]) assert.equal(draw(swarm, q).count, 0);
   const snapshots = new Map();
-  for (const q of [0.125, 0.15, 0.2, 0.35, 0.48, 0.68]) snapshots.set(q, draw(swarm, q));
+  // 2026-11-21 (face seam): the head's field is spread evenly by rank so the
+  // face closes in one motion; the visor's flocks, which dock where the skin
+  // reaches their seat, now land by 0.68, so the last-flock probe is 0.67.
+  for (const q of [0.125, 0.15, 0.2, 0.35, 0.48, 0.67]) snapshots.set(q, draw(swarm, q));
   assert.ok(snapshots.get(0.125).count > 300);
   assert.ok(snapshots.get(0.15).count > 2000);
   assert.ok(snapshots.get(0.35).count > 400);
-  assert.ok(snapshots.get(0.68).count > 30);
+  assert.ok(snapshots.get(0.67).count > 30);
   assert.notDeepEqual(draw(swarm, 0.35, false), snapshots.get(0.35));
   for (const [q, frame] of [...snapshots].reverse()) assert.deepEqual(draw(swarm, q), frame);
 });

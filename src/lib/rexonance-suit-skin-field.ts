@@ -205,6 +205,28 @@ const HAND_FOOT_OFFSET = 0.04;
  * over the rest. */
 export const SKIN_FACE_FROM = 0.72;
 
+/** Spreads the head's shell values evenly over [their min, SKIN_FACE_FROM]
+ * and the face's over [SKIN_FACE_FROM, their max], each by rank (see the
+ * call in buildSkinField). In place; ties keep the cells' own order. */
+function evenHeadField(
+  field: Float32Array,
+  head: ArrayLike<number>,
+  region: ArrayLike<number>,
+  face: number,
+) {
+  for (const isFace of [false, true]) {
+    const cells: number[] = [];
+    for (let i = 0; i < field.length; i += 1)
+      if (head[i] && field[i] >= 0 && (region[i] === face) === isFace) cells.push(i);
+    if (cells.length < 2) continue;
+    cells.sort((a, b) => field[a] - field[b] || a - b);
+    const lo = isFace ? SKIN_FACE_FROM : field[cells[0]];
+    const hi = isFace ? Math.max(field[cells[cells.length - 1]], SKIN_FACE_FROM) : SKIN_FACE_FROM;
+    const last = cells.length - 1;
+    for (let k = 0; k <= last; k += 1) field[cells[k]] = lo + ((hi - lo) * k) / last;
+  }
+}
+
 /** Bakes the growth field (see the header). Pure: typed arrays in and out. */
 export function buildSkinField(input: SkinFieldInput): SkinBake {
   const { w, h, alpha } = input;
@@ -483,6 +505,20 @@ export function buildSkinField(input: SkinFieldInput): SkinBake {
     // The seed itself is the front's first cell.
     field[i] = Math.min(1, Math.max(0, t));
   }
+
+  // The head closes as one motion (owner, 2026-11-21: 「レクソナンスの顔は上下
+  // が完成してから僅かに間が空く…シームレスに顔が完成していない」). The shell's
+  // rise is by row over the whole head, but the rows the face fills carry
+  // almost no shell cells, so the shell's values had a hole (~0.27–0.36:
+  // the jaw done, nothing, then the skull); and the face's closure started
+  // near 0.76, not at SKIN_FACE_FROM (the shell done, nothing, then the
+  // face). The front sweeps those empty values at its own pace, so the
+  // coverage stood still twice. Each segment's values are now spread by
+  // rank: the order is kept (no cell overtakes another, so every moment's
+  // edge is one of the same isolines, fingering and all), only the spacing
+  // is even, and the face takes over at exactly the value the shell ends
+  // on. The start and the seam's last cell (which the eyes wait for) stay.
+  evenHeadField(field, head, region, SKIN_REGION.face);
 
   // The texture, RGB (an opaque picture: a browser must never premultiply
   // it): R the field dithered to 8 bits, G the veins, B the armour's mask
