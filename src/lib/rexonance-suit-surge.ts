@@ -6,6 +6,7 @@ import {
   type RexonanceSuitGroup,
 } from "./rexonance-suit";
 import { REXONANCE_SUIT_DRIVER } from "./rexonance-calls";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "./rexonance-liquid-front.js";
 
 /* REXONANCE SURGE (owner, 2026-10-30: 「ナノマシンの装着遷移アニメーションと
    スクロールアニメーションを強化して」). A light layer that plays over
@@ -236,6 +237,28 @@ export class SurgeEngine {
   view: SurgeView = { width: 0, height: 0, x: 0, y: 0, scale: 1 };
   private ratio = 1;
   private pieces = surgePieces();
+  /** Round 4 (nano pass, 2026-11-21): each piece's scan as a liquid front
+   * over its texels (fitted to the tiles' `along`), and its texels'
+   * outline as a Path2D where there is one — the scan sweeps as a band, no
+   * tile ever shows. */
+  private scanFronts = this.pieces.map((piece, n) =>
+    fitLiquidFront(
+      piece.tiles.length / 3,
+      (i, out) => {
+        out[0] = piece.tiles[i * 3] + TILE / 2;
+        out[1] = piece.tiles[i * 3 + 1] + TILE / 2;
+        out[2] = TILE / 2;
+        out[3] = piece.tiles[i * 3 + 2];
+      },
+      n + 1501,
+    ),
+  );
+  private scanMasks = this.pieces.map((piece) => {
+    if (typeof Path2D !== "function") return null;
+    const path = new Path2D();
+    for (let i = 0; i < piece.tiles.length; i += 3) path.rect(piece.tiles[i], piece.tiles[i + 1], TILE, TILE);
+    return path;
+  });
   private groups = groupFrames(surgePieces());
   /** Swarm: a0, angular speed, y0, rise speed, radius, tone, size, seed. */
   private swarm: Float32Array;
@@ -620,44 +643,44 @@ export class SurgeEngine {
     }
   }
 
+  /** Fills piece n's scan ring between `from` and `to` (its along). */
+  private scanBand(front: CanvasRenderingContext2D, n: number, to: number, from: number, style: string) {
+    const scan = this.scanFronts[n];
+    if (!scan || liquidProgress(scan, to) <= 0 || liquidProgress(scan, from) >= 1) return;
+    const piece = this.pieces[n];
+    front.save();
+    const mask = this.scanMasks[n];
+    if (mask) front.clip(mask);
+    else {
+      front.beginPath();
+      for (let i = 0; i < piece.tiles.length; i += 3) front.rect(piece.tiles[i], piece.tiles[i + 1], TILE, TILE);
+      front.clip();
+    }
+    front.beginPath();
+    if (liquidFrontPath(front, scan, to, true) === 2) front.rect(piece.x - 1, piece.y - 1, piece.w + 2, piece.h + 2);
+    front.clip();
+    front.beginPath();
+    if (liquidFrontPath(front, scan, from, false) === 2) front.rect(piece.x - 1, piece.y - 1, piece.w + 2, piece.h + 2);
+    front.clip();
+    front.fillStyle = style;
+    front.fillRect(piece.x, piece.y, piece.w, piece.h);
+    front.restore();
+  }
+
   private drawScans(front: CanvasRenderingContext2D, frame: SurgeFrame, scale: number) {
     const px = 1 / Math.max(0.05, scale);
     const band = 0.2;
-    // The band, then the hot leading edge, then brackets. (Nano pass,
-    // 2026-11-21: no tile is outlined or inset any more — the band is the
-    // plate's own texels filled edge to edge, a soft sheen sweeping over it,
-    // so no unit of the lattice ever shows.)
-    front.beginPath();
-    let any = false;
+    // The band, then the hot leading edge, then brackets. (Round 4, nano
+    // pass 2026-11-21: the band is the ring of the piece's scan front
+    // between its head and `band` behind, over the piece's own texels — a
+    // continuous sheen; it used to be its 9 px tiles filled one by one.)
     for (let n = 0; n < this.pieces.length; n += 1) {
       const u = frame.scans[n];
       if (u <= 0 || u >= 1) continue;
-      const tiles = this.pieces[n].tiles;
       const head = u * 1.15;
-      for (let i = 0; i < tiles.length; i += 3) {
-        const along = tiles[i + 2];
-        if (along > head || along < head - band) continue;
-        front.rect(tiles[i], tiles[i + 1], TILE, TILE);
-        any = true;
-      }
+      this.scanBand(front, n, head, head - band, "rgb(121 232 255 / 0.1)");
+      this.scanBand(front, n, head, head - 0.05, "rgb(236 252 255 / 0.22)");
     }
-    if (!any) return;
-    front.fillStyle = "rgb(121 232 255 / 0.1)";
-    front.fill();
-    front.beginPath();
-    for (let n = 0; n < this.pieces.length; n += 1) {
-      const u = frame.scans[n];
-      if (u <= 0 || u >= 1) continue;
-      const tiles = this.pieces[n].tiles;
-      const head = u * 1.15;
-      for (let i = 0; i < tiles.length; i += 3) {
-        const along = tiles[i + 2];
-        if (along > head || along < head - 0.05) continue;
-        front.rect(tiles[i], tiles[i + 1], TILE, TILE);
-      }
-    }
-    front.fillStyle = "rgb(236 252 255 / 0.22)";
-    front.fill();
     front.beginPath();
     for (let n = 0; n < this.pieces.length; n += 1) {
       const u = frame.scans[n];
