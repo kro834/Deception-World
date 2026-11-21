@@ -8,6 +8,11 @@ export interface RexonanceOverwritePlan {
   extra: Uint8Array;
   gone: Uint8Array;
   flight: Float32Array;
+  /** The liquid front (nano pass, 2026-11-21): origin, order, reach by u, lip. */
+  origin?: readonly [number, number];
+  order?: "radial" | "descend";
+  wave?: Float32Array;
+  rag?: Float32Array;
 }
 export function planOverwrite(options: {
   width: number;
