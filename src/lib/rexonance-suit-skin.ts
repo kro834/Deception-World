@@ -24,8 +24,9 @@
    fingered edge (noise) and veins that race ahead down each limb. One
    fragment shader draws it on a figure-sized WebGL canvas: one quad a frame,
    whatever the device. Droplets skim just ahead of the front and are drawn
-   back into it, and the matter itself comes in from the air as hexagonal
-   cells the front takes in (SkinCells).
+   back into it, and the matter itself comes in from the air as cells the
+   front takes in (SkinCells: since the nano pass, 2026-11-21, soft beads of
+   liquid metal and points a backing pixel across, never a hexagon).
 
    Everything is closed-form in the two fronts the caller passes (the body's
    and the head's), so the entry plays it on the call's clock and the scroll
@@ -476,9 +477,10 @@ export function drawSkinDroplets(
 
 /* REXONANCE CELLS (owner, 2026-11-11: the streams 「気持ち悪い」 — 「大きな
    セル状のものや細かいものが周囲から吸収されていくように」). The armour's
-   matter arrives as hexagonal cells, the skin's own tessellation seen loose:
-   a few large plates (a bevelled metal face, a thin bright rim, a fine
-   honeycomb inside) and many fine glinting specks. They come out of the air all round
+   matter arrives as cells: a few large plates and many fine glinting specks.
+   (Nano pass, 2026-11-21: a plate is drawn as a soft bead of liquid metal,
+   or the clasp atlas's forged hardware once it loads; a speck is a point a
+   backing pixel across. The rim, honeycomb and hexagons are gone.) They come out of the air all round
    the figure, some from past the canvas's edge: each flickers in, drifts,
    and is drawn to a point of the armour just ahead of the front on a short
    spiral, quickening on its last approach, its size and its turn settling
@@ -1232,6 +1234,9 @@ export const GRAIN_SIZE = 256;
 /** Grain texels per band of the front along the flow, per backing px of the
  * figure (the streaks' length: a band is ~60 figure px, so ~6 px long). */
 const GRAIN_ALONG = 10;
+/** Grain texels the streaks drift per band the front advances (~0.2 a
+ * frame at the entry's pace: a slow creep, never a boil). */
+const GRAIN_DRIFT = 0.8;
 
 /** The nanites' grain, baked once a renderer: white noise with every mip's
  * mean at one half (generateMipmap box-filters it), so a lookup finer than
@@ -1360,13 +1365,15 @@ void main() {
   float o1 = texture2D(uGrain, gp * (1.0 / (3.0 * ${GRAIN_SIZE}.0)) + vec2(0.53, 0.19)).r - 0.5;
   float o0 = texture2D(uGrain, gp * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.11, 0.71)).r - 0.5;
   // The sheen's streaks: stretched along the flow and carried with it. Their
-  // along-flow coordinate is the distance behind the front itself (a), so
-  // they bend with the flow and ride forward or back with the front
-  // (closed-form in the clock: a scrub retraces them); across the flow,
+  // along-flow coordinate is the field itself (so they bend with the flow),
+  // drifting with the front at a tenth of a texel or so a frame: the
+  // deposited sheet creeps, it never races at the lip's own speed (that
+  // shifted the grain several texels a frame and boiled). Closed-form in
+  // the front, so a scrub retraces it; across the flow,
   // three fixed orientations (0, 60, 120 degrees), blended below by how
   // close each lies to the flow's normal. (A lookup rotated per pixel by the
   // flow would break the mip selection wherever the flow turns.)
-  float along = a * ${GRAIN_ALONG.toFixed(1)} / uPx;
+  float along = (${GRAIN_DRIFT.toFixed(1)} * front - ${GRAIN_ALONG.toFixed(1)} / uPx * fld.r) / band;
   float s0 = texture2D(uGrain, vec2(along, gp.y) * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.37, 0.0)).r;
   float s1 = texture2D(uGrain, vec2(along, dot(gp, vec2(-0.8660254, 0.5))) * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.0, 0.41)).r;
   float s2 = texture2D(uGrain, vec2(along, dot(gp, vec2(0.8660254, 0.5))) * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.29, 0.83)).r;
