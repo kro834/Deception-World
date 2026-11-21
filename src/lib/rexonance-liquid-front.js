@@ -123,30 +123,31 @@ export function liquidProgress(front, t) {
  * (false) to the current path, as one ragged polygon. Returns 0 when that
  * region is empty, 2 when it is the whole plate, 1 otherwise (the caller
  * may skip the clip at 2). `ahead` moves the front on by that share of its
- * run (a seed condensing just ahead of its own landing).
+ * run (a seed condensing just ahead of its own landing); `k` scales the
+ * path's coordinates (figure px to the context's units).
  */
-export function liquidFrontPath(context, front, t, set = true, ahead = 0) {
-  const k = liquidProgress(front, t) + ahead;
-  if (set ? k <= 0 : k >= 1) return 0;
-  if (set ? k >= 1 : k <= 0) return 2;
+export function liquidFrontPath(context, front, t, set = true, ahead = 0, k = 1) {
+  const run = liquidProgress(front, t) + ahead;
+  if (set ? run <= 0 : run >= 1) return 0;
+  if (set ? run >= 1 : run <= 0) return 2;
   const nx = front[0];
   const ny = front[1];
   const rag = front[8];
   // The front runs from wholly before the plate to wholly past it.
   const lo = front[2] - rag;
   const hi = front[3] + rag;
-  const s = lo + (hi - lo) * k;
+  const s = lo + (hi - lo) * run;
   const ulo = front[6];
   const uhi = front[7];
   const back = set ? lo - 1 : hi + 1;
   // (x, y) = n·proj + τ·u, τ = (−ny, nx).
-  context.moveTo(nx * back - ny * ulo, ny * back + nx * ulo);
+  context.moveTo(k * (nx * back - ny * ulo), k * (ny * back + nx * ulo));
   for (let i = 0; i < LIQUID_RAG; i += 1) {
     const u = ulo + ((uhi - ulo) * i) / (LIQUID_RAG - 1);
     const p = s + front[HEAD + i];
-    context.lineTo(nx * p - ny * u, ny * p + nx * u);
+    context.lineTo(k * (nx * p - ny * u), k * (ny * p + nx * u));
   }
-  context.lineTo(nx * back - ny * uhi, ny * back + nx * uhi);
+  context.lineTo(k * (nx * back - ny * uhi), k * (ny * back + nx * uhi));
   context.closePath();
   return 1;
 }

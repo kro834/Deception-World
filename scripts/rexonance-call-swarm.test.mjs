@@ -8,6 +8,7 @@
 // fallback, allocates nothing in its draw passes, uses no timers,
 // randomness, filters or composite operations, stays inside its draw
 // budgets (desktop and touch), and that its timeline matches the brief.
+import * as liquidFront from "../src/lib/rexonance-liquid-front.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -128,7 +129,7 @@ test("the call decides once, gives the firestorm room on every pointer, and keep
   // (Nano pass follow-up, 2026-11-21: a forming plate is drawn from the
   // working atlas whole, through its own texels and its liquid front —
   // never tile by tile.)
-  assert.match(nanites, /liquidFrontPath\(flight, front, t\);/);
+  assert.match(nanites, /liquidFrontPath\(flight, front, t, true, 0, s\);/);
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*piece\.ax,\s*piece\.ay,/);
   // Every draw sits under the figure's offset on the bled canvas.
   assert.match(
@@ -474,6 +475,8 @@ async function extrasRuntime({ touch, prepare = true }) {
         return { splitLights: () => null, createSplitLightsJob: () => null };
       if (name === "@/lib/rexonance-suit-warmup")
         return { rexonanceSuitSource: (url) => suitSources.get(url) ?? null };
+      // (Nano pass follow-up, 2026-11-21: the plates' liquid fronts.)
+      if (name === "@/lib/rexonance-liquid-front.js") return liquidFront;
       throw new Error(`unexpected module ${name}`);
     },
   });
@@ -586,6 +589,8 @@ async function extrasRuntime({ touch, prepare = true }) {
       // Round 3: the extras register with the call's hook once loaded.
       if (name === "./rexonance-suit-extras-hook") return { registerSuitExtras() {} };
 
+      // (Nano pass follow-up, 2026-11-21: the plates' liquid fronts.)
+      if (name === "@/lib/rexonance-liquid-front.js") return liquidFront;
       throw new Error(`unexpected module ${name}`);
     },
   });

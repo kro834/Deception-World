@@ -279,7 +279,7 @@ test("rx17: the engine forms each plate's gold on it right after it seats and en
   // (Nano pass follow-up, 2026-11-21: a forming plate is drawn from the
   // working atlas whole, through its own texels and its liquid front —
   // never tile by tile.)
-  assert.match(nanites, /liquidFrontPath\(flight, front, t\);/);
+  assert.match(nanites, /liquidFrontPath\(flight, front, t, true, 0, s\);/);
   assert.match(nanites, /flight\.drawImage\(\s*source,\s*piece\.ax,\s*piece\.ay,/);
   // ... their gold cells lock into it on the gold's own clock ...
   assert.match(plan, /REXONANCE_SUIT_GOLD_AT\[piece\.id\]/);

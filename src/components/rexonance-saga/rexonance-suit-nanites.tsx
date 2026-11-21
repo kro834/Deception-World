@@ -632,16 +632,15 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               const reach = front ? liquidProgress(front, t) : 0;
               if (front && reach > 0) {
                 flight.save();
-                flight.scale(s, s);
                 flight.beginPath();
-                for (const tile of plate.tiles) flight.rect(tile.dx, tile.dy, tile.tw, tile.th);
+                for (const tile of plate.tiles)
+                  flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
                 flight.clip();
                 if (reach < 1) {
                   flight.beginPath();
-                  liquidFrontPath(flight, front, t);
+                  liquidFrontPath(flight, front, t, true, 0, s);
                   flight.clip();
                 }
-                flight.scale(1 / s, 1 / s);
                 flight.globalAlpha = 1;
                 flight.drawImage(
                   source,

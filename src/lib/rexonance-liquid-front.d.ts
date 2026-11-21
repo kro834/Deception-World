@@ -11,4 +11,5 @@ export function liquidFrontPath(
   t: number,
   set?: boolean,
   ahead?: number,
+  k?: number,
 ): 0 | 1 | 2;

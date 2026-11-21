@@ -35,6 +35,7 @@ import {
   sampleFlameBirth,
 } from "@/lib/rexonance-ignition.js";
 import { REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "@/lib/rexonance-liquid-front.js";
 import {
   FIG,
   FLIGHT,
@@ -2505,6 +2506,29 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   let conduits = 0;
   const pose = new Float64Array(POSE_SLOTS);
   pose[GLOW] = 1;
+  // Liquid fronts (nano pass follow-up, 2026-11-21): each plate lands and
+  // paints under one ragged front fitted to its tiles' times
+  // (rexonance-liquid-front.js), never tile by tile — a stair of 9 px
+  // squares was a unit a viewer could count. Fitted once a mount; the
+  // clip's antialiasing keeps the lip sub-pixel soft.
+  const fitFronts = (paint: boolean) =>
+    all.map((plate, p) => {
+      const first = L.tileFirst[p];
+      const times = paint ? L.tp : L.land;
+      return fitLiquidFront(
+        L.tileFirst[p + 1] - first,
+        (i, out) => {
+          const tile = plate.tiles[i];
+          out[0] = tile.dx + tile.tw / 2;
+          out[1] = tile.dy + tile.th / 2;
+          out[2] = Math.max(tile.tw, tile.th) / 2;
+          out[3] = times[first + i];
+        },
+        p + (paint ? 101 : 1),
+      );
+    });
+  const landFronts = fitFronts(false);
+  const paintFronts = fitFronts(true);
 
   const base = () => {
     flight.setTransform(1, 0, 0, 1, ox, oy);
@@ -3341,6 +3365,26 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       Math.round((gold.fy[i] + gold.ch[i]) * s + 0.5) - y0,
     );
   };
+  // Clips to plate p's own texels (the union of its tiles: a fixed outline)
+  // and to its land or paint front at t: `set` the region set by t, else
+  // the region still to set. False when that region is empty. (Call inside
+  // a save(); the clip ends at its restore().)
+  const frontClip = (p: number, t: number, paint: boolean, set: boolean) => {
+    const front = paint ? paintFronts[p] : landFronts[p];
+    if (!front) return false;
+    const reach = liquidProgress(front, t);
+    if (set ? reach <= 0 : reach >= 1) return false;
+    const tiles = all[p].tiles;
+    flight.beginPath();
+    for (const tile of tiles) flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+    flight.clip();
+    if (reach > 0 && reach < 1) {
+      flight.beginPath();
+      liquidFrontPath(flight, front, t, set, 0, s);
+      flight.clip();
+    }
+    return true;
+  };
   // A tile's rect on whole device pixels (as the landed clips draw it).
   const tileRect = (tile: Plate["tiles"][number]) => {
     const x0 = Math.round(tile.dx * s);
@@ -4051,7 +4095,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const F = plate.fit;
     const first = L.tileFirst[p];
     const end = L.tileFirst[p + 1];
-    const tiles = plate.tiles;
     const staged = jigged[p] === 1;
     // The staged plate: lattice, walls and the landed metal, under its jig.
     applyJig(p);
@@ -4083,23 +4126,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       flight.restore();
     }
     flight.save();
-    flight.beginPath();
-    let landed = 0;
-    for (let i = first; i < end; i += 1) {
-      if (L.land[i] > t) continue;
-      const tile = tiles[i - first];
-      const x0 = Math.round(tile.dx * s);
-      const y0 = Math.round(tile.dy * s);
-      flight.rect(
-        x0,
-        y0,
-        Math.round((tile.dx + tile.tw) * s) - x0,
-        Math.round((tile.dy + tile.th) * s) - y0,
-      );
-      landed += 1;
-    }
-    if (landed) {
-      flight.clip();
+    // The landed metal: the plate's texels under its liquid front.
+    if (frontClip(p, t, false, true)) {
       if (silhouette && staged && lam[p] > 0.02) {
         flight.globalAlpha = 0.9;
         shadowDraw(silhouette, p, 0.8, 1);
@@ -4300,53 +4328,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         }
       }
     }
+    // (Nano pass follow-up, 2026-11-21: no tile fades in or pops on its
+    // own any more — each was a 9 px square a viewer could count. The
+    // plate's liquid front shows the metal arrive; fades are only counted.)
     if (!fadeCount) return;
-    // The metal tiles fading in, and the recoil's pop, on the staged plate.
-    applyJig(p);
-    for (let k = 0; k < fadeCount; k += 1) {
-      if (draws >= limit[0]) break;
-      const i = fades[k];
-      const tile = tiles[i - first];
-      const a = fadeA[k];
-      draws += 1;
-      if (a >= 0) {
-        flight.globalAlpha = a;
-        // Its cell of the landed clip, on whole device pixels (see the
-        // sprite helper).
-        const x0 = Math.round(tile.dx * s);
-        const y0 = Math.round(tile.dy * s);
-        flight.drawImage(
-          metal,
-          tile.sx,
-          tile.sy,
-          tile.tw,
-          tile.th,
-          x0,
-          y0,
-          Math.round((tile.dx + tile.tw) * s) - x0,
-          Math.round((tile.dy + tile.th) * s) - y0,
-        );
-      } else {
-        const tau = -a;
-        const k2 = 1 + 0.14 * Math.exp(-5 * tau) * Math.cos(9.4 * tau);
-        const w = Math.round(tile.tw * s * k2) || 1;
-        const h = Math.round(tile.th * s * k2) || 1;
-        flight.globalAlpha = 1;
-        flight.drawImage(
-          metal,
-          tile.sx,
-          tile.sy,
-          tile.tw,
-          tile.th,
-          Math.round((tile.dx + tile.tw / 2) * s - w / 2),
-          Math.round((tile.dy + tile.th / 2) * s - h / 2),
-          w,
-          h,
-        );
-      }
-    }
-    base();
-    flight.globalAlpha = 1;
   };
 
   const seat = (p: number, t: number) => {
@@ -4363,7 +4348,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     }
     const first = L.tileFirst[p];
     const end = L.tileFirst[p + 1];
-    const tiles = plate.tiles;
     // A6: metal where the paint has not reached, the painted art behind it.
     // Keep the last receivers cooling across the forming → seated handoff;
     // their positions now use the same resting coordinates as the plate.
@@ -4383,43 +4367,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         dockCount += 1;
       }
     }
+    // Metal where the paint's front has not reached, the art behind it.
     for (let pass = 0; pass < 2; pass += 1) {
       flight.save();
-      flight.beginPath();
-      let any = false;
-      for (let i = first; i < end; i += 1) {
-        if (pass === 0 ? L.tp[i] <= t : L.tp[i] > t) continue;
-        const tile = tiles[i - first];
-        const x0 = Math.round(tile.dx * s);
-        const y0 = Math.round(tile.dy * s);
-        flight.rect(
-          x0,
-          y0,
-          Math.round((tile.dx + tile.tw) * s) - x0,
-          Math.round((tile.dy + tile.th) * s) - y0,
-        );
-        any = true;
-      }
-      if (any) {
-        flight.clip();
-        plateDraw(pass === 0 ? metal : source, p, 0, 0);
-      }
+      if (frontClip(p, t, true, pass === 1)) plateDraw(pass === 0 ? metal : source, p, 0, 0);
       flight.restore();
     }
     // The lacquer front: the paint's newest tiles in nanite light.
     if (TOUCH || governed) return;
+    // (A band behind the paint's front: set by now, not yet a lacquer ago.)
     flight.save();
-    flight.beginPath();
-    let any = false;
-    for (let i = first; i < end; i += 1) {
-      const age = t - L.tp[i];
-      if (age < 0 || age >= SW.lacquer) continue;
-      const tile = tiles[i - first];
-      tileRect(tile);
-      any = true;
-    }
-    if (any) {
-      flight.clip();
+    if (frontClip(p, t, true, true) && frontClip(p, t - SW.lacquer, true, false)) {
       flight.globalAlpha = 0.32;
       plateDraw(sheet, p, 0, 0);
     }
