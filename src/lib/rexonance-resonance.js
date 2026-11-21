@@ -1029,8 +1029,12 @@ function* assemblyPlanSteps({
   // closes in one motion). Keyed by straight distance, the few far tiles
   // (the crest's tips) spread thinly over the window's start, so landings
   // trickled there; by rank the same order lands at an even pace.
+  // Only a suit whose visor sweeps shut on its own window (VISOR_CLOSE:
+  // Rexonance's) waits for the rest of its helmet; the other suits' plans
+  // keep their schedules.
+  const sweptVisor = pieces.some((piece) => piece.closeFromSides);
   const helmRank = new Map();
-  {
+  if (sweptVisor) {
     const helm = [];
     for (const item of tiles) {
       const beat = item.owner ? item.owner.beat : item.cy < height * 0.2 ? 5 : -1;
@@ -1079,7 +1083,7 @@ function* assemblyPlanSteps({
     // (VISOR_CLOSE, landed by 0.7) nothing landed until 0.73: a hold. Now
     // they leave a flight early and land over [from, to]; the last still
     // lands at `to`.
-    if (beat === 5) item.t0 = from - flight + key * (to - from);
+    if (beat === 5 && sweptVisor) item.t0 = from - flight + key * (to - from);
     if (item.owner?.piece.closeFromSides) {
       const order = visorSweepOrder(item.cx, eyeX, item.owner.piece.w);
       item.t0 = VISOR_CLOSE[0] + order * (VISOR_CLOSE[1] - VISOR_CLOSE[0]) - flight;
