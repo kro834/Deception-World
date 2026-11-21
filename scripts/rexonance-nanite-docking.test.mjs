@@ -1,8 +1,9 @@
+import * as liquidFront from "../src/lib/rexonance-liquid-front.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
-import { naniteHexHeight, naniteHexLight } from "../src/lib/rexonance-unlit.js";
+import { naniteGrain } from "../src/lib/rexonance-unlit.js";
 import { sampleFlameBirth, NANITE_FIRE_PHASES } from "../src/lib/rexonance-ignition.js";
 import { scrollFlameAt } from "../src/lib/rexonance-field/field-clock.js";
 import { REXONANCE_NANITES } from "../src/lib/rexonance-nanites.ts";
@@ -35,11 +36,15 @@ let cachedFixture;
 
 function runtimeFactory() {
   if (cachedCreate) return cachedCreate;
-  const importLine = 'import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";';
+  // (Nano pass follow-up, 2026-11-21: the metal's grain, not its hex relief.)
+  const importLine = 'import { naniteGrain } from "./rexonance-unlit.js";';
   const fireImport = 'import { sampleFlameBirth } from "./rexonance-ignition.js";';
   const firePainterImport = 'import { drawNaniteFirebrand } from "./rexonance-flame.js";';
   const phaseImport = 'import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";';
   const clockImport = 'import { scrollFlameAt } from "./rexonance-field/field-clock.js";';
+  // (Nano pass follow-up, 2026-11-21: the plates' liquid fronts.)
+  const frontImport =
+    'import { fitLiquidFront, liquidFrontPath, liquidProgress } from "./rexonance-liquid-front.js";';
   assert.equal(
     source.split(importLine).length - 1,
     1,
@@ -57,6 +62,7 @@ function runtimeFactory() {
     .replace(firePainterImport, "")
     .replace(phaseImport, "")
     .replace(clockImport, "")
+    .replace(frontImport, "")
     .replace(/\bexport\s+(?=(?:const|function|class)\b)/g, "")
     .replace(
       returnMarker,
@@ -100,8 +106,7 @@ function runtimeFactory() {
     )
     .concat("\nglobalThis.__createAssemblyNanites = createAssemblyNanites;\n");
   const context = {
-    naniteHexHeight,
-    naniteHexLight,
+    naniteGrain,
     sampleFlameBirth,
     NANITE_FIRE_PHASES,
     drawNaniteFirebrand(ctx, x, y, strength, clock, scale = 1) {
@@ -110,6 +115,7 @@ function runtimeFactory() {
     },
   };
   context.scrollFlameAt = scrollFlameAt;
+  Object.assign(context, liquidFront);
   runInNewContext(instrumented, context);
   cachedCreate = context.__createAssemblyNanites;
   return cachedCreate;

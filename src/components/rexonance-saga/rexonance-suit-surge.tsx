@@ -591,7 +591,9 @@ export function EntrySurge() {
               // The cells the front takes in (they gather in the air before
               // it starts), then the droplets at its lip.
               const cell = REXONANCE_SUIT_SIZE.width / grown.field.w;
-              const px = 1 / Math.max(0.05, layers.scale);
+              // One backing px in figure px: the droplets' and the seat's
+              // points (nano pass, 2026-11-21).
+              const px = 1 / Math.max(0.05, layers.scale * layers.ratio);
               // (Nothing of them outlives the light: none after the flash.)
               if (t >= grown.lib.SKIN_ENTRY.light) grown.cells.clear();
               grown.cells.draw(
@@ -607,6 +609,7 @@ export function EntrySurge() {
                 grown.lib.SKIN_CELL_SHARE[level],
                 // (A skin that engages late: its cells fade in, never pop.)
                 Math.min(1, (now - engagedAt) / CELLS_IN_MS),
+                layers.ratio,
               );
               if (growing.shell) {
                 grown.lib.drawSkinDroplets(layers.front, grown.field, growing, cell, now, px);
@@ -615,7 +618,8 @@ export function EntrySurge() {
                   t,
                   grown.lib.SKIN_CELL_SHARE[level],
                   growing.alpha * Math.min(1, (now - engagedAt) / CELLS_IN_MS),
-                  1.5 * px,
+                  0,
+                  px,
                 );
               }
               layers.back.globalCompositeOperation = "source-over";
@@ -1089,7 +1093,9 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
             // The cells the front takes in (they gather in the air before
             // it starts; a retract sheds them), then the droplets at its lip.
             const cell = REXONANCE_SUIT_SIZE.width / grown.field.w;
-            const px = 1 / Math.max(0.05, surfaces.scale);
+            // One backing px in figure px: the droplets' and specks' unit
+            // (nano pass, 2026-11-21: they are points, not beads).
+            const px = 1 / Math.max(0.05, surfaces.scale * surfaces.ratio);
             // (Nothing of them outlives the light: none after the flash.)
             if (!leaving && q >= grown.lib.SKIN_SCROLL.light) grown.cells.clear();
             grown.cells.draw(
@@ -1103,6 +1109,8 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
               grown.renderer.hex,
               cellBounds(surfaces),
               grown.lib.SKIN_CELL_SHARE[crescendo ? crescendo.engine.governor.level : 0],
+              1,
+              surfaces.ratio,
             );
             if (shellOn)
               grown.lib.drawSkinDroplets(surfaces.front, grown.field, growing, cell, now, px);
@@ -1118,7 +1126,15 @@ export function mountScrollSurge(runway: HTMLElement, options: ScrollSurgeOption
         if (surfaces && scrollSwarm && !leaving && !bursting) {
           const share = Math.min(engine.swarmShare, grown && crescendo
             ? grown.lib.SKIN_CELL_SHARE[crescendo.engine.governor.level] : 1);
-          scrollSwarm.draw(surfaces.back, surfaces.front, q, skinLive, surfaces.scale, share);
+          scrollSwarm.draw(
+            surfaces.back,
+            surfaces.front,
+            q,
+            skinLive,
+            surfaces.scale,
+            share,
+            surfaces.ratio,
+          );
         }
       }
       raf = requestAnimationFrame(tick);

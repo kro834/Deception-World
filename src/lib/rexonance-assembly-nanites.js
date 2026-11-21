@@ -28,10 +28,11 @@
    once; the draw passes below write typed arrays and batched paths only.
    ===================================================================== */
 
-import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
+import { naniteGrain } from "./rexonance-unlit.js";
 import { sampleFlameBirth } from "./rexonance-ignition.js";
 import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";
 import { scrollFlameAt } from "./rexonance-field/field-clock.js";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "./rexonance-liquid-front.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -2132,8 +2133,9 @@ export function createAssemblyLayerJob({
           if (!alpha) continue;
           const L = (0.2126 * a[i] + 0.7152 * a[i + 1] + 0.0722 * a[i + 2]) / 255;
           if (metal) {
-            const hgt = naniteHexHeight(x + 0.5, Y + 0.5, pitch);
-            const lit = naniteHexLight(x + 0.5, Y + 0.5, pitch);
+            // (Nano pass follow-up: a one-pixel grain, not a hex relief.)
+            const hgt = naniteGrain(x, Y);
+            const lit = 0 * pitch;
             const right = x + 1 < W ? a[i + 7] : 0;
             const left = x > 0 ? a[i - 1] : 0;
             const down = Y + 1 < H ? a[i + stride + 3] : 0;
@@ -2239,6 +2241,11 @@ const KIT = {
 };
 
 const goldCountOf = (gold) => gold?.count ?? 0;
+// A nanite in flight is drawn this many device px across at most (nano
+// pass, 2026-11-21): the 16 px mip sprite filtered down to a soft point.
+const NANO_POINT = 1.3;
+// The scaffold lattice under a staged plate: off since the nano pass.
+const SCAFFOLD_LATTICE = false;
 const TONE_CSS = ["rgb(121 232 255)", "rgb(255 143 216)", "rgb(244 251 255)"];
 const SHADE_CSS = ["rgb(22 58 74)", "rgb(74 34 62)", "rgb(58 64 76)"];
 // Touch's hex chips: the desktop sprites' pastel tones, their shade, and the
@@ -2317,14 +2324,10 @@ export function createAssemblyNanites({
   const ROW = Uint8Array.from(palette?.toneRows ?? [0, 1, 2]);
   const MIPX = Float64Array.from(k.cells.mip.x);
   const MIPY = Float64Array.from(k.cells.mip.y);
-  const UNX = Float64Array.from(k.cells.unfold.x);
-  const UNY = k.cells.unfold.y;
   const BKX = Float64Array.from(k.cells.bokeh.x);
   const BKY = Float64Array.from(k.cells.bokeh.y);
   const MIPXB = Float64Array.from((kB ?? k.cells).mip.x);
   const MIPYB = Float64Array.from((kB ?? k.cells).mip.y);
-  const UNXB = Float64Array.from((kB ?? k.cells).unfold.x);
-  const UNYB = (kB ?? k.cells).unfold.y;
   const BKXB = Float64Array.from((kB ?? k.cells).bokeh.x);
   const BKYB = Float64Array.from((kB ?? k.cells).bokeh.y);
   const BEADX = k.cells.bead.x;
@@ -2491,6 +2494,37 @@ export function createAssemblyNanites({
   const HSH = nano.hsh;
   const TP = nano.tp;
   const PARENT = nano.parent;
+  // Liquid fronts (nano pass follow-up, 2026-11-21; owner: 「…実際のナノマシン
+  // と同程度の大きさに」): a staged plate's metal lands, and its dark seed
+  // condenses, under one ragged front per plate and source fitted to its
+  // tiles' times (rexonance-liquid-front.js) instead of a stair of 9 px
+  // squares. [p * 2 + src]: the landing (T1) and the seed's (T0) fronts.
+  const LANDF = [];
+  const SEEDF = [];
+  // …and the paint's front (TP), round 3: the painted art arrives under it.
+  const PAINTF = [];
+  for (let p = 0; p < NP; p += 1)
+    for (let src = 0; src < 2; src += 1) {
+      const ids = P[p].tiles.filter((i) => SRC[i] === src);
+      for (const [list, times] of [
+        [LANDF, T1],
+        [SEEDF, T0],
+        [PAINTF, TP],
+      ])
+        list.push(
+          fitLiquidFront(
+            ids.length,
+            (k, out) => {
+              const i = ids[k];
+              out[0] = SX[i] + TW[i] / 2;
+              out[1] = SY[i] + TH[i] / 2;
+              out[2] = Math.max(TW[i], TH[i]) / 2;
+              out[3] = times[i];
+            },
+            p * 2 + src + (times === T0 ? 301 : times === TP ? 601 : 1),
+          ),
+        );
+    }
   // A scale hierarchy (owner, 2026-10-21: 「ナノマシンのクオリティも上げて。」):
   // machine parts come in sizes. Each chip's own size by its hash — most
   // 0.78–1.12 × s0, one in twenty a larger hero part up to 1.75 × — so a
@@ -2537,6 +2571,68 @@ export function createAssemblyNanites({
   const BB = nano.buildB ?? new Float32Array(goldCountOf(gold));
   const BAT = nano.buildAt ?? new Float64Array(0);
   const BIDX = nano.buildIdx ?? new Int32Array(0);
+  // Each plate's gold under one front too (round 3): fitted to its cells'
+  // lock times, so the trims fill and their molten band runs as a front,
+  // not cell by cell.
+  const GOLDF = P.map((pc, p) => {
+    const first = pc.goldFirst ?? 0;
+    const end = pc.goldEnd ?? 0;
+    if (!gold || end <= first) return null;
+    return fitLiquidFront(
+      end - first,
+      (k, out) => {
+        const i = GIDX[first + k];
+        out[0] = gold.x[i] + gold.w[i] / 2;
+        out[1] = gold.y[i] + gold.h[i] / 2;
+        out[2] = Math.max(gold.w[i], gold.h[i]) / 2;
+        out[3] = gold.lock[i];
+      },
+      p + 901,
+    );
+  });
+  // Round 4 (nano pass): the guideway's build under a front too (its cells'
+  // build times, BAT), never cell by cell.
+  const BUILDF = P.map((pc, p) => {
+    const first = pc.goldFirst ?? 0;
+    const end = pc.goldEnd ?? 0;
+    if (!gold || end <= first || BAT.length < end) return null;
+    return fitLiquidFront(
+      end - first,
+      (k, out) => {
+        const i = BIDX[first + k];
+        out[0] = gold.x[i] + gold.w[i] / 2;
+        out[1] = gold.y[i] + gold.h[i] / 2;
+        out[2] = Math.max(gold.w[i], gold.h[i]) / 2;
+        out[3] = BAT[first + k];
+      },
+      p + 1201,
+    );
+  });
+  // Round 4: the fixed outlines (a plate's gold cells; its texels of each
+  // source) as Path2D, built once a plan, so a frame clips with one call
+  // instead of rebuilding hundreds of rects. (Where Path2D is missing —
+  // the tests' VM — the rects are drawn as before.)
+  const HAS_PATH2D = typeof Path2D === "function";
+  const GOLDMASK = P.map((pc) => {
+    if (!HAS_PATH2D || !gold || !(pc.goldEnd > pc.goldFirst)) return null;
+    const path = new Path2D();
+    for (let k = pc.goldFirst; k < pc.goldEnd; k += 1) {
+      const i = GIDX[k];
+      path.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+    }
+    return path;
+  });
+  const TILEMASK = [];
+  for (let p = 0; p < NP; p += 1)
+    for (let src = 0; src < 2; src += 1) {
+      if (!HAS_PATH2D) {
+        TILEMASK.push(null);
+        continue;
+      }
+      const path = new Path2D();
+      for (const i of P[p].tiles) if (SRC[i] === src) path.rect(SX[i], SY[i], TW[i], TH[i]);
+      TILEMASK.push(path);
+    }
   const BDX = nano.buildDX ?? new Int8Array(goldCountOf(gold));
   const BDY = nano.buildDY ?? new Int8Array(goldCountOf(gold));
   const SEAMX = nano.seams.x;
@@ -3149,18 +3245,6 @@ export function createAssemblyNanites({
     }
   };
 
-  // The tiles of plate p landed by q (its tiles sorted by landing).
-  const landedIn = (p, q) => {
-    const t1s = P[p].t1s;
-    let low = 0;
-    let high = t1s.length;
-    while (low < high) {
-      const mid = (low + high) >> 1;
-      if (t1s[mid] <= q) low = mid + 1;
-      else high = mid;
-    }
-    return low;
-  };
   const paintedBy = (q) => {
     let low = 0;
     let high = n;
@@ -3307,8 +3391,12 @@ export function createAssemblyNanites({
     const base = b * RECT_CAP * 4 + at;
     chipRects[base] = X[slot];
     chipRects[base + 1] = Y[slot];
-    // (A hexagon of about the sprite chip's own footprint, ~3/4 of its cell.)
-    chipRects[base + 2] = coarse ? size * 0.38 : size / 2;
+    // (A hexagon of about the sprite chip's own footprint, ~3/4 of its cell —
+    // capped at half a device px since the nano pass, 2026-11-21: a nanite
+    // is far below a pixel, so in flight it is a point and never a shape.)
+    const half = 0.5 / SCALE;
+    const r = coarse ? size * 0.38 : size / 2;
+    chipRects[base + 2] = r < half ? r : half;
     chipRects[base + 3] = Math.floor(f) % 24;
     chipCounts[b] = at + 4;
   };
@@ -3369,34 +3457,36 @@ export function createAssemblyNanites({
     const sheet = second ? cellsB : cells;
     const mipX = second ? MIPXB : MIPX;
     const mipY = second ? MIPYB : MIPY;
-    const unX = second ? UNXB : UNX;
-    const unY = second ? UNYB : UNY;
     const bkX = second ? BKXB : BKX;
     const bkY = second ? BKYB : BKY;
     let f = FR[slot] % 24;
     if (f < 0) f += 24;
     f = Math.floor(f) % 24;
-    const uf = UF[slot];
     let sx;
     let sy;
     let cs = 32;
     let draw = size;
     let alpha = A[slot] < alphaCap ? A[slot] : alphaCap;
+    // Nano pass (2026-11-21): in flight a chip is drawn a point — its sprite
+    // shrunk to about a device px (the filter averages it to one soft dot)
+    // and dimmed, so the swarm reads as a dense fine haze, never as chips.
+    // The near ones' defocus is a faint two-pixel puff, not a disc.
+    const point = NANO_POINT / SCALE;
     if (bokeh && Z[slot] > BOKEH_Z && bokehAt(X[slot], Y[slot])) {
       sx = bkX[t];
       sy = bkY[t];
-      draw = size * 1.3;
-      alpha = 0.22;
-    } else if (uf >= 0 && t < unX.length) {
-      sx = unX[t] + 32 * uf;
-      sy = unY;
-    } else if (size * SCALE <= 12) {
+      draw = size * 1.3 < 2 * point ? size * 1.3 : 2 * point;
+      alpha = 0.12;
+    } else {
+      // (Follow-up, 2026-11-21: the unfold onto its tile is a point too —
+      // the plate's liquid front shows the arrival, no hex opens.)
       sx = mipX[t] + 16 * f;
       sy = mipY[t];
       cs = 16;
-    } else {
-      sx = 32 * f;
-      sy = 32 * t;
+      if (size > point) {
+        draw = point;
+        alpha *= 0.75;
+      }
     }
     ctx.globalAlpha = alpha;
     ctx.drawImage(sheet, sx, sy, cs, cs, X[slot] - draw / 2, Y[slot] - draw / 2, draw, draw);
@@ -3774,19 +3864,31 @@ export function createAssemblyNanites({
     band(ctx, midList, nMid, false, false);
   };
 
-  /* 5: seated plates still in metal (the lacquer front is pass 11b). */
+  /* 5: seated plates still in metal (the lacquer front is pass 11b).
+     Round 3 (nano pass, 2026-11-21): a plate no stage holds lands under its
+     liquid front (its unpainted texels ∩ the landing front), not tile by
+     tile; a stray tile no plate claims keeps its own cell. */
   const seatedPass = (ctx, painted) => {
     const q = Q;
     for (let src = 0; src < 2; src += 1) {
       const sheet = metalOf(src);
       if (!sheet) continue;
+      for (let p = 0; p < NP; p += 1) {
+        if (STAGED[p] && q >= P[p].from) continue;
+        const front = LANDF[p * 2 + src];
+        if (!front || liquidProgress(PAINTF[p * 2 + src], q) >= 1) continue;
+        ctx.save();
+        if (frontPath(ctx, p, src, q, front, 0)) {
+          ctx.clip();
+          ctx.globalAlpha = 1;
+          ctx.drawImage(sheet, 0, 0, W, H);
+        }
+        ctx.restore();
+      }
       let any = false;
-      // Every landed, unpainted tile no stage holds (the helmet's all along).
       for (let kk = painted; kk < n && PAINT[kk] <= q + SEAT_LAG; kk += 1) {
         const i = ORDER[kk];
-        if (SRC[i] !== src || T1[i] > q) continue;
-        const p = PO[i];
-        if (p >= 0 && STAGED[p] && q >= P[p].from) continue;
+        if (SRC[i] !== src || T1[i] > q || PO[i] >= 0) continue;
         if (!any) {
           ctx.save();
           ctx.beginPath();
@@ -3804,6 +3906,44 @@ export function createAssemblyNanites({
     ctx.globalAlpha = 1;
   };
 
+  /* 5b (round 3): the painted art arriving under each plate's paint front,
+     over the metal and the settled layer's tile cache (which only ever holds
+     tiles the front has passed: the front's envelope covers every painted
+     tile, so the cache's stair lies under this draw). Only the plates whose
+     front is moving draw; a whole plate is the cache's. */
+  const paintPass = (ctx) => {
+    const q = Q;
+    for (let src = 0; src < 2; src += 1) {
+      const sheet = art[src];
+      if (!sheet) continue;
+      for (let p = 0; p < NP; p += 1) {
+        if (STAGED[p] && q >= P[p].from && q < P[p].to) continue;
+        const front = PAINTF[p * 2 + src];
+        if (!front) continue;
+        const k = liquidProgress(front, q);
+        if (k <= 0 || k >= 1) continue;
+        const ids = P[p].tiles;
+        ctx.save();
+        const mask = TILEMASK[p * 2 + src];
+        if (mask) ctx.clip(mask);
+        else {
+          ctx.beginPath();
+          for (let kk = 0; kk < ids.length; kk += 1) {
+            const i = ids[kk];
+            if (SRC[i] === src) ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+          }
+          ctx.clip();
+        }
+        ctx.beginPath();
+        liquidFrontPath(ctx, front, q, true);
+        ctx.clip();
+        ctx.globalAlpha = 1;
+        ctx.drawImage(sheet, 0, 0, W, H);
+        ctx.restore();
+      }
+    }
+  };
+
   /* 6: the molten band and the cooling cells (G6, G7), over the gold. The
      pour (round 3, reviews: no white-hot to amber band, a ragged row of
      yellow dashes): the cells by the age of their lock, oldest first —
@@ -3813,23 +3953,58 @@ export function createAssemblyNanites({
   const moltenPass = (ctx) => {
     if (!gold || !molten || !goldCount) return;
     const q = Q;
-    const last = coarse ? MOLTEN_TOUCH.length - 1 : MOLTEN_AGES.length - 1;
-    for (let b = last - 1; b >= 0; b -= 1) {
-      const from = goldBy(q - (coarse ? MOLTEN_TOUCH[b + 1] : MOLTEN_AGES[b + 1]));
-      const to = goldBy(q - (coarse ? MOLTEN_TOUCH[b] : MOLTEN_AGES[b]));
-      if (from >= to) continue;
-      ctx.save();
-      ctx.beginPath();
-      for (let i = from; i < to; i += 1) ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
-      ctx.clip();
-      ctx.globalAlpha = coarse ? MOLTEN_TOUCH_ALPHA[b] : MOLTEN_ALPHA[b];
-      ctx.drawImage(molten, 0, 0, W, H);
-      if (b === 0 && !coarse) {
-        // The leading edge, white-hot.
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.62;
+    const ages = coarse ? MOLTEN_TOUCH : MOLTEN_AGES;
+    const last = ages.length - 1;
+    // Round 3 (nano pass, 2026-11-21): each band is the ring between two
+    // moments of the plate's gold front — cells set by q − age[b], not yet
+    // by q − age[b + 1] — never a run of 4 px cells.
+    for (let p = 0; p < NP; p += 1) {
+      const front = goldFront(p);
+      if (!front) continue;
+      const newest = liquidProgress(front, q - ages[0]);
+      const oldest = liquidProgress(front, q - ages[last]);
+      if (newest <= 0 || oldest >= 1) continue;
+      for (let b = last - 1; b >= 0; b -= 1) {
+        const to = q - ages[b];
+        const from = q - ages[b + 1];
+        if (liquidProgress(front, to) <= 0 || liquidProgress(front, from) >= 1) continue;
+        ctx.save();
+        goldMask(ctx, p);
+        frontRegion(ctx, front, to, true);
+        ctx.clip();
+        ctx.beginPath();
+        frontRegion(ctx, front, from, false);
+        ctx.clip();
+        ctx.globalAlpha = coarse ? MOLTEN_TOUCH_ALPHA[b] : MOLTEN_ALPHA[b];
         ctx.drawImage(molten, 0, 0, W, H);
+        if (b === 0 && !coarse) {
+          // The leading edge, white-hot.
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = 0.62;
+          ctx.drawImage(molten, 0, 0, W, H);
+        }
+        ctx.restore();
       }
+    }
+  };
+
+  /* (Round 3) The gold arriving under each plate's gold front, over the
+     gold layer's cell cache (the front's envelope covers every locked cell,
+     so the cache's stair lies under it). Only moving fronts draw. */
+  const goldFrontPass = (ctx) => {
+    if (!gold || !goldArt) return;
+    const q = Q;
+    for (let p = 0; p < NP; p += 1) {
+      const front = goldFront(p);
+      if (!front) continue;
+      const k = liquidProgress(front, q);
+      if (k <= 0 || k >= 1) continue;
+      ctx.save();
+      goldMask(ctx, p);
+      liquidFrontPath(ctx, front, q, true);
+      ctx.clip();
+      ctx.globalAlpha = 1;
+      ctx.drawImage(goldArt, 0, 0, W, H);
       ctx.restore();
     }
   };
@@ -3846,7 +4021,24 @@ export function createAssemblyNanites({
     return low;
   };
   // The rects of plate p's build-ordered cells [first, end) as a clip.
-  const buildClip = (ctx, first, end) => {
+  // Plate p's guideway cells built in (BAT[first − 1], BAT[end − 1]] as one
+  // clip — round 4 (nano pass, 2026-11-21): the ring of its build front
+  // between those two moments over its cells' outline, never the cells'
+  // squares. (The cells stay the fallback where a plate has no front.)
+  const buildBand = (ctx, p, from, to) => {
+    const front = BUILDF[p];
+    goldMask(ctx, p);
+    frontRegion(ctx, front, to, true);
+    ctx.clip();
+    ctx.beginPath();
+    frontRegion(ctx, front, from, false);
+    ctx.clip();
+  };
+  const buildClip = (ctx, p, first, end) => {
+    if (BUILDF[p] && end > first) {
+      buildBand(ctx, p, first > P[p].goldFirst ? BAT[first - 1] : -Infinity, BAT[end - 1]);
+      return;
+    }
     ctx.beginPath();
     for (let k = first; k < end; k += 1) {
       const i = BIDX[k];
@@ -3854,33 +4046,15 @@ export function createAssemblyNanites({
     }
     ctx.clip();
   };
-  // The same clip at the build front (round 3, owner: 滑らかに): a cell the
-  // front reached less than one cell step ago (q − its build time < cellT)
-  // is filled only that fraction, from the side the front came in — the
-  // front moves sub-cell, never a 4 px square at a time. `q` the front's
-  // time (the hologram's lead uses its own).
+  // The same clip at the build front, moving sub-cell: built by `q` (the
+  // front's time; the hologram's lead uses its own), not before cell
+  // `first`'s neighbour.
   const buildClipFront = (ctx, p, first, end, q) => {
-    const T = P[p].cellT;
-    ctx.beginPath();
-    for (let k = first; k < end; k += 1) {
-      const i = BIDX[k];
-      const f = T > 0 ? (q - BAT[k]) / T : 1;
-      if (f <= 0) continue;
-      const x = gold.x[i];
-      const y = gold.y[i];
-      const w = gold.w[i];
-      const h = gold.h[i];
-      if (f >= 1) {
-        ctx.rect(x, y, w, h);
-        continue;
-      }
-      const dx = BDX[i];
-      const dy = BDY[i];
-      const rw = dx ? w * f : w;
-      const rh = dy ? h * f : h;
-      ctx.rect(dx < 0 ? x + w - rw : x, dy < 0 ? y + h - rh : y, rw, rh);
+    if (BUILDF[p]) {
+      buildBand(ctx, p, first > P[p].goldFirst ? BAT[first - 1] : -Infinity, q);
+      return;
     }
-    ctx.clip();
+    buildClip(ctx, p, first, end);
   };
   // The point the front has reached in build-ordered cell k (its partial
   // fill's leading edge), into RG[0], RG[1].
@@ -4044,14 +4218,14 @@ export function createAssemblyNanites({
         } else {
           if (solid > first) {
             ctx.save();
-            buildClip(ctx, first, solid);
+            buildClip(ctx, p, first, solid);
             conduitBody(ctx, p, faceSheet, wallSheet, atlas, a, q);
             conduitDraws += 1;
             ctx.restore();
           }
           if (mid > solid) {
             ctx.save();
-            buildClip(ctx, solid, mid);
+            buildClip(ctx, p, solid, mid);
             ctx.globalAlpha = 0.8 * a;
             plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
             conduitDraws += 1;
@@ -4088,7 +4262,7 @@ export function createAssemblyNanites({
             if (to <= from) continue;
             ctx.save();
             if (band) buildClipFront(ctx, p, from, to, q + GW.holo);
-            else buildClip(ctx, from, to);
+            else buildClip(ctx, p, from, to);
             if (holoSheet) {
               ctx.globalAlpha = (band ? 0.28 : 0.55) * a;
               plateDraw(ctx, holoSheet, atlas, p, 0, 0, pc.h);
@@ -4238,37 +4412,57 @@ export function createAssemblyNanites({
   // Unpainted cells condense locally ahead of their own landing front.
   // The dark seed expands through the cell; only the locked cell receives
   // full-thickness metal, rather than a complete plate popping into view.
-  const pendingPath = (ctx, p, src, q) => {
+  const goldFront = (p) => GOLDF[p];
+  // Clips to plate p's gold cells (a fixed outline: the gold art has gold
+  // only where the trim is) and leaves the current path empty.
+  const goldMask = (ctx, p) => {
+    const pc = P[p];
+    const cached = GOLDMASK[p];
+    if (cached) {
+      ctx.clip(cached);
+      ctx.beginPath();
+      return;
+    }
+    ctx.beginPath();
+    for (let k = pc.goldFirst; k < pc.goldEnd; k += 1) {
+      const i = GIDX[k];
+      ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+    }
+    ctx.clip();
+    ctx.beginPath();
+  };
+
+  // The region a front covers at q as a path (`set`: the part set by then);
+  // a whole region is a rect past the figure, an empty one nothing.
+  const frontRegion = (ctx, front, q, set, ahead = 0) => {
+    const r = liquidFrontPath(ctx, front, q, set, ahead);
+    if (r === 2) ctx.rect(-W, -H, 3 * W, 3 * H);
+    return r !== 0;
+  };
+  // Clips to plate p's unpainted texels of source `src` (a fixed outline but
+  // for the paint, which is the settled layer's), then leaves the front's
+  // region as the current path for the caller's clip. False when empty.
+  const frontPath = (ctx, p, src, q, front, ahead) => {
+    if (!front || liquidProgress(front, q) + ahead <= 0) return false;
     const ids = P[p].tiles;
     let any = false;
     ctx.beginPath();
     for (let kk = 0; kk < ids.length; kk += 1) {
       const i = ids[kk];
       if (SRC[i] !== src || TP[i] <= q) continue;
-      const age = (q - T0[i] + 0.008) / (T1[i] - T0[i] + 0.008);
-      if (age <= 0) continue;
-      const grow = 0.16 + 0.84 * smooth(clamp01(age));
-      const w = TW[i] * grow;
-      const h = TH[i] * grow;
-      ctx.rect(SX[i] + (TW[i] - w) / 2, SY[i] + (TH[i] - h) / 2, w, h);
-      any = true;
-    }
-    return any;
-  };
-  const landedPath = (ctx, p, src, q) => {
-    const pc = P[p];
-    const ids = pc.tiles;
-    const end = landedIn(p, q);
-    let any = false;
-    ctx.beginPath();
-    for (let kk = 0; kk < end; kk += 1) {
-      const i = ids[kk];
-      if (SRC[i] !== src || TP[i] <= q) continue;
       ctx.rect(SX[i], SY[i], TW[i], TH[i]);
       any = true;
     }
-    return any;
+    if (!any) return false;
+    ctx.clip();
+    ctx.beginPath();
+    return frontRegion(ctx, front, q, true, ahead);
   };
+  // The dark seed condenses just ahead of its own landing front (it used to
+  // grow tile by tile: squares).
+  const pendingPath = (ctx, p, src, q) => frontPath(ctx, p, src, q, SEEDF[p * 2 + src], 0.06);
+  // The landed, unpainted metal of plate p with source `src`.
+  const landedPath = (ctx, p, src, q) => frontPath(ctx, p, src, q, LANDF[p * 2 + src], 0);
 
   /* 9: each staged plate's contact shadow, on the body at its seat. */
   const shadowPass = (ctx) => {
@@ -4330,7 +4524,9 @@ export function createAssemblyNanites({
       if (jigged) setJig(ctx, p);
       const full = !coarse && RICH[p] === 1;
       // The scaffold lattice (A2), growing from the seat.
-      if (lattice && q < pc.to && (coarse ? LATTICED[p] === 1 : full)) {
+      // (Nano pass follow-up, 2026-11-21: the scaffold's hex lattice is a
+      // visible unit, so it no longer draws — SCAFFOLD_LATTICE.)
+      if (SCAFFOLD_LATTICE && lattice && q < pc.to && (coarse ? LATTICED[p] === 1 : full)) {
         const grow = easeOut(clamp01((q - (pc.from - 0.02)) / (pc.to - pc.from + 0.02)));
         ctx.save();
         ctx.beginPath();
@@ -4447,7 +4643,7 @@ export function createAssemblyNanites({
         const k1 = builtIn(p, pc.buildStart + sweep * len);
         if (k1 > k0) {
           ctx.save();
-          buildClip(ctx, k0, k1);
+          buildClip(ctx, p, k0, k1);
           ctx.globalCompositeOperation = "lighter";
           ctx.globalAlpha = 0.75;
           plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
@@ -5587,6 +5783,8 @@ export function createAssemblyNanites({
     backPass,
     midPass,
     seatedPass,
+    paintPass,
+    goldFrontPass,
     moltenPass,
     hologramPass,
     shadowPass,

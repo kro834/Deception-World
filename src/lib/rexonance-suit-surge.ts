@@ -6,6 +6,7 @@ import {
   type RexonanceSuitGroup,
 } from "./rexonance-suit";
 import { REXONANCE_SUIT_DRIVER } from "./rexonance-calls";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "./rexonance-liquid-front.js";
 
 /* REXONANCE SURGE (owner, 2026-10-30: 「ナノマシンの装着遷移アニメーションと
    スクロールアニメーションを強化して」). A light layer that plays over
@@ -236,6 +237,28 @@ export class SurgeEngine {
   view: SurgeView = { width: 0, height: 0, x: 0, y: 0, scale: 1 };
   private ratio = 1;
   private pieces = surgePieces();
+  /** Round 4 (nano pass, 2026-11-21): each piece's scan as a liquid front
+   * over its texels (fitted to the tiles' `along`), and its texels'
+   * outline as a Path2D where there is one — the scan sweeps as a band, no
+   * tile ever shows. */
+  private scanFronts = this.pieces.map((piece, n) =>
+    fitLiquidFront(
+      piece.tiles.length / 3,
+      (i, out) => {
+        out[0] = piece.tiles[i * 3] + TILE / 2;
+        out[1] = piece.tiles[i * 3 + 1] + TILE / 2;
+        out[2] = TILE / 2;
+        out[3] = piece.tiles[i * 3 + 2];
+      },
+      n + 1501,
+    ),
+  );
+  private scanMasks = this.pieces.map((piece) => {
+    if (typeof Path2D !== "function") return null;
+    const path = new Path2D();
+    for (let i = 0; i < piece.tiles.length; i += 3) path.rect(piece.tiles[i], piece.tiles[i + 1], TILE, TILE);
+    return path;
+  });
   private groups = groupFrames(surgePieces());
   /** Swarm: a0, angular speed, y0, rise speed, radius, tone, size, seed. */
   private swarm: Float32Array;
@@ -362,6 +385,8 @@ export class SurgeEngine {
       back,
       front,
       scale: view.scale,
+      // Backing px per CSS px (the device tier's cap): the unit of a point.
+      ratio: this.ratio,
       reachX: Math.max(1, Math.min(left, right)),
       reachUp: Math.max(1, view.y / view.scale + cy),
       reachDown: Math.max(1, (view.height - view.y) / view.scale - cy),
@@ -487,7 +512,9 @@ export class SurgeEngine {
     const t = frame.now;
     const a = SCRATCH_A;
     const b = SCRATCH_B;
-    const px = 1 / Math.max(0.05, scale);
+    // One backing px in figure px (nano pass, 2026-11-21): each nanite is a
+    // point at most this wide; its streak is its motion, never its body.
+    const px = 1 / Math.max(0.05, scale * this.ratio);
     // Every cell's place now and 34 ms ago, once; then a stroke batch per
     // canvas (far half behind, near half in front), tone and depth band.
     const pos = this.pos;
@@ -530,9 +557,10 @@ export class SurgeEngine {
             any = true;
           }
           if (!any) continue;
-          context.lineWidth =
-            (layer === 1 ? (band ? 2.3 : 1.6) : band ? 0.9 : 1.2) * px * (scale < 0.6 ? 1.15 : 1);
+          context.lineWidth = (layer === 1 ? (band ? 1 : 0.85) : band ? 0.6 : 0.7) * px;
+          // (Dimmer than the old chips: a haze of many, not a cloud of dots.)
           const alpha =
+            0.62 *
             (this.bands === 1
               ? layer === 1
                 ? 0.76
@@ -549,9 +577,10 @@ export class SurgeEngine {
         }
       }
     }
-    // The near cells' heads glow (every third one, the nearest band).
-    const size = 9 * px;
-    front.globalAlpha = Math.min(1, presence * 0.8);
+    // The near cells' heads glow (every third one, the nearest band): the
+    // sprite's core a backing px, its halo faint.
+    const size = 2.4 * px;
+    front.globalAlpha = Math.min(1, presence * 0.45);
     for (let i = 0; i < live; i += 3) {
       const o = i * 5;
       if (pos[o + 2] < 0.5) continue;
@@ -562,7 +591,9 @@ export class SurgeEngine {
   }
 
   private drawShards(front: CanvasRenderingContext2D, frame: SurgeFrame, scale: number) {
-    const px = 1 / Math.max(0.05, scale);
+    // Backing px (nano pass, 2026-11-21): the debris is matter at nanite
+    // scale, a streak a pixel wide and a head under a pixel.
+    const px = 1 / Math.max(0.05, scale * this.ratio);
     const p = this.shards;
     front.lineCap = "round";
     for (let tone = 0; tone < 2; tone += 1) {
@@ -584,8 +615,8 @@ export class SurgeEngine {
         front.lineTo(SCRATCH_A[0], SCRATCH_A[1]);
       }
       if (!heads) continue;
-      front.lineWidth = 1.4 * px;
-      front.strokeStyle = tone ? "rgb(242 216 150 / 0.55)" : "rgb(150 236 255 / 0.6)";
+      front.lineWidth = px;
+      front.strokeStyle = tone ? "rgb(242 216 150 / 0.4)" : "rgb(150 236 255 / 0.44)";
       front.stroke();
       // The shards themselves: small turning diamonds.
       front.beginPath();
@@ -597,7 +628,7 @@ export class SurgeEngine {
         const u = surgeSpan(flight, p[o + 4], p[o + 4] + 0.38);
         if (u <= 0 || u >= 1) continue;
         shardAt(p, o, u, SCRATCH_A);
-        const k = p[o + 7] * px * (0.6 + 0.6 * (1 - u)) * Math.max(1, scale * 1.2);
+        const k = Math.min(0.6, p[o + 7] * 0.12) * px * (0.6 + 0.6 * (1 - u));
         const turn = p[o + 1] + u * 9;
         const c = Math.cos(turn) * k;
         const s = Math.sin(turn) * k;
@@ -607,47 +638,49 @@ export class SurgeEngine {
         front.lineTo(SCRATCH_A[0] + s * 0.5, SCRATCH_A[1] - c * 0.5);
         front.closePath();
       }
-      front.fillStyle = tone ? "rgb(255 236 190 / 0.85)" : "rgb(210 248 255 / 0.85)";
+      front.fillStyle = tone ? "rgb(255 236 190 / 0.6)" : "rgb(210 248 255 / 0.6)";
       front.fill();
     }
+  }
+
+  /** Fills piece n's scan ring between `from` and `to` (its along). */
+  private scanBand(front: CanvasRenderingContext2D, n: number, to: number, from: number, style: string) {
+    const scan = this.scanFronts[n];
+    if (!scan || liquidProgress(scan, to) <= 0 || liquidProgress(scan, from) >= 1) return;
+    const piece = this.pieces[n];
+    front.save();
+    const mask = this.scanMasks[n];
+    if (mask) front.clip(mask);
+    else {
+      front.beginPath();
+      for (let i = 0; i < piece.tiles.length; i += 3) front.rect(piece.tiles[i], piece.tiles[i + 1], TILE, TILE);
+      front.clip();
+    }
+    front.beginPath();
+    if (liquidFrontPath(front, scan, to, true) === 2) front.rect(piece.x - 1, piece.y - 1, piece.w + 2, piece.h + 2);
+    front.clip();
+    front.beginPath();
+    if (liquidFrontPath(front, scan, from, false) === 2) front.rect(piece.x - 1, piece.y - 1, piece.w + 2, piece.h + 2);
+    front.clip();
+    front.fillStyle = style;
+    front.fillRect(piece.x, piece.y, piece.w, piece.h);
+    front.restore();
   }
 
   private drawScans(front: CanvasRenderingContext2D, frame: SurgeFrame, scale: number) {
     const px = 1 / Math.max(0.05, scale);
     const band = 0.2;
-    // The band of outlined tiles, then the hot leading edge, then brackets.
-    front.beginPath();
-    let any = false;
+    // The band, then the hot leading edge, then brackets. (Round 4, nano
+    // pass 2026-11-21: the band is the ring of the piece's scan front
+    // between its head and `band` behind, over the piece's own texels — a
+    // continuous sheen; it used to be its 9 px tiles filled one by one.)
     for (let n = 0; n < this.pieces.length; n += 1) {
       const u = frame.scans[n];
       if (u <= 0 || u >= 1) continue;
-      const tiles = this.pieces[n].tiles;
       const head = u * 1.15;
-      for (let i = 0; i < tiles.length; i += 3) {
-        const along = tiles[i + 2];
-        if (along > head || along < head - band) continue;
-        front.rect(tiles[i] + 0.5, tiles[i + 1] + 0.5, TILE - 1, TILE - 1);
-        any = true;
-      }
+      this.scanBand(front, n, head, head - band, "rgb(121 232 255 / 0.1)");
+      this.scanBand(front, n, head, head - 0.05, "rgb(236 252 255 / 0.22)");
     }
-    if (!any) return;
-    front.lineWidth = 0.9 * px;
-    front.strokeStyle = "rgb(121 232 255 / 0.5)";
-    front.stroke();
-    front.beginPath();
-    for (let n = 0; n < this.pieces.length; n += 1) {
-      const u = frame.scans[n];
-      if (u <= 0 || u >= 1) continue;
-      const tiles = this.pieces[n].tiles;
-      const head = u * 1.15;
-      for (let i = 0; i < tiles.length; i += 3) {
-        const along = tiles[i + 2];
-        if (along > head || along < head - 0.05) continue;
-        front.rect(tiles[i] + 2, tiles[i + 1] + 2, TILE - 4, TILE - 4);
-      }
-    }
-    front.fillStyle = "rgb(236 252 255 / 0.62)";
-    front.fill();
     front.beginPath();
     for (let n = 0; n < this.pieces.length; n += 1) {
       const u = frame.scans[n];
@@ -778,16 +811,16 @@ export class SurgeEngine {
     if (!context) return null;
     context.scale(k, k);
     context.translate(8 - bx, 8 - by);
-    context.fillStyle = "rgb(121 232 255 / 0.22)";
-    context.strokeStyle = "rgb(190 245 255 / 0.75)";
-    context.lineWidth = 1.4;
+    // (Nano pass, 2026-11-21: the plates' glow, not their tile grid — the
+    // texels filled edge to edge and softened once here, at build time.)
+    context.fillStyle = "rgb(150 236 255 / 0.32)";
+    if ("filter" in context) context.filter = "blur(2.5px)";
     context.beginPath();
     for (const piece of own.pieces) {
       const tiles = piece.tiles;
-      for (let i = 0; i < tiles.length; i += 3) context.rect(tiles[i] + 1, tiles[i + 1] + 1, TILE - 2, TILE - 2);
+      for (let i = 0; i < tiles.length; i += 3) context.rect(tiles[i], tiles[i + 1], TILE, TILE);
     }
     context.fill();
-    context.stroke();
     const entry = { canvas, x: bx - 8, y: by - 8, k };
     this.glows.set(group, entry);
     return entry;

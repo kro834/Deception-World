@@ -1,3 +1,4 @@
+import * as liquidFront from "../src/lib/rexonance-liquid-front.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -145,6 +146,8 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
             releasePreparation = release;
           },
         };
+      // (Nano pass follow-up, 2026-11-21: the plates' liquid fronts.)
+      if (name === "@/lib/rexonance-liquid-front.js") return liquidFront;
       throw new Error(`unexpected module ${name}`);
     },
   };

@@ -6,10 +6,12 @@
    Behind the front, four bands a few tens of pixels deep travel with it:
 
      the lip      dark chrome with a white-hot leading edge;
-     the fibres   striations along the flow, still unpainted metal;
-     the cells    a hexagonal micro-tessellation whose cells click solid one
-                  by one and take the art's colour, while the panel lines
-                  light and cool;
+     the sheen    the swarm's grain, a pixel across and streaked along the
+                  flow, still unpainted metal;
+     the setting  the sheet takes the art's colour where a slow density
+                  wave reaches it, while the panel lines light and cool
+                  (nano pass, 2026-11-21: no unit is ever drawn — a real
+                  nanite is far below a pixel, so only the collective shows);
      the armour   the art itself, each of its emitters (the glow lines,
                   the gems, the reactor's details) lighting a moment after
                   the shell over it is whole; the reactor's first, the
@@ -22,8 +24,9 @@
    fingered edge (noise) and veins that race ahead down each limb. One
    fragment shader draws it on a figure-sized WebGL canvas: one quad a frame,
    whatever the device. Droplets skim just ahead of the front and are drawn
-   back into it, and the matter itself comes in from the air as hexagonal
-   cells the front takes in (SkinCells).
+   back into it, and the matter itself comes in from the air as cells the
+   front takes in (SkinCells: since the nano pass, 2026-11-21, soft beads of
+   liquid metal and points a backing pixel across, never a hexagon).
 
    Everything is closed-form in the two fronts the caller passes (the body's
    and the head's), so the entry plays it on the call's clock and the scroll
@@ -455,15 +458,17 @@ export function drawSkinDroplets(
       const sway = Math.sin(now * 0.006 + seed * 40) * 2.2;
       const x = s[o] * cell + s[o + 3] * lead - s[o + 4] * sway;
       const y = s[o + 1] * cell + s[o + 4] * lead + s[o + 3] * sway;
-      // (Round: squares read as confetti in a close look.)
-      const r = (0.56 + 0.9 * seed) * px * grain * (0.6 + 0.4 * Math.sin(Math.PI * life));
+      // (Round: squares read as confetti in a close look. Nano pass,
+      // 2026-11-21: a point under a backing px — `px` is one backing px —
+      // so the lip sheds a fine mist, never beads.)
+      const r = (0.3 + 0.22 * seed) * px * grain * (0.6 + 0.4 * Math.sin(Math.PI * life));
       context.moveTo(x + r, y);
       context.arc(x, y, r, 0, 6.2832);
       bright = true;
     }
     if (bright) context.fill();
   };
-  context.fillStyle = `rgb(226 240 250 / ${(0.9 * frame.alpha).toFixed(3)})`;
+  context.fillStyle = `rgb(226 240 250 / ${(0.62 * frame.alpha).toFixed(3)})`;
   pass(0, field.bodySamples, frame.body);
   pass(field.bodySamples, field.headSamples, frame.head);
 }
@@ -472,9 +477,10 @@ export function drawSkinDroplets(
 
 /* REXONANCE CELLS (owner, 2026-11-11: the streams 「気持ち悪い」 — 「大きな
    セル状のものや細かいものが周囲から吸収されていくように」). The armour's
-   matter arrives as hexagonal cells, the skin's own tessellation seen loose:
-   a few large plates (a bevelled metal face, a thin bright rim, a fine
-   honeycomb inside) and many fine glinting specks. They come out of the air all round
+   matter arrives as cells: a few large plates and many fine glinting specks.
+   (Nano pass, 2026-11-21: a plate is drawn as a soft bead of liquid metal,
+   or the clasp atlas's forged hardware once it loads; a speck is a point a
+   backing pixel across. The rim, honeycomb and hexagons are gone.) They come out of the air all round
    the figure, some from past the canvas's edge: each flickers in, drifts,
    and is drawn to a point of the armour just ahead of the front on a short
    spiral, quickening on its last approach, its size and its turn settling
@@ -537,151 +543,83 @@ const FLASH_R = 24;
 const MICRO_R = 14;
 const SPECK_R = 9;
 const SPECK_GRAIN_X = SHEET.speck * SHEET.turns;
-const SPECK_GRAINS = [
-  [-0.46, -0.08, 0.43],
-  [0.39, -0.43, 0.29],
-  [0.28, 0.46, 0.23],
-] as const;
 const ROOT3 = 1.7320508;
 // Centre, then the six neighbouring sockets. Opposing jaws close together.
 const SOCKET_X = [0, 1, 0.5, -0.5, -1, -0.5, 0.5];
 const SOCKET_Y = [0, 0, ROOT3 / 2, ROOT3 / 2, 0, -ROOT3 / 2, -ROOT3 / 2];
 /** The plates' rims: ice, pink, white and the armour's gold. */
 const CELL_RIMS = ["214 246 255", "255 190 232", "246 250 255", "250 224 168"] as const;
-/** Each plate's honeycomb: the cells' rings about its middle (0: the one
- * cell; 1: seven; 2: nineteen), and whether the middle cells are left out. */
-const PLATE_COMBS = [
-  [3, false],
-  [2, false],
-  [3, true],
-  [3, false],
-] as const;
 const CELL_FILLS = ["178 238 255", "255 170 224", "246 251 255"] as const;
 
-/** Draws the cells' sheet into a canvas the caller makes (once a mount). */
+/** Draws the cells' sheet into a canvas the caller makes (once a mount).
+ * (Nano pass, 2026-11-21: no hexagon, rim or honeycomb is left on it. A
+ * nanite is far below a pixel, so what flies is only ever the collective:
+ * a plate is a soft bead of liquid metal (a dense cloud of them), the flash
+ * a soft round ring, the micro-cell and the specks gaussian points whose
+ * core is drawn a backing pixel across. Same layout, same slots.) */
 export function buildSkinCellSheet(
   make: (width: number, height: number) => HTMLCanvasElement | null,
 ): HTMLCanvasElement | null {
   const canvas = make(SHEET.width, SHEET.height);
   const context = canvas?.getContext("2d");
   if (!canvas || !context) return null;
-  // A pointy-top hexagon (the shader's cells), turned by `turn`.
-  const hex = (x: number, y: number, r: number, turn = 0) => {
-    context.beginPath();
-    for (let n = 0; n < 6; n += 1) {
-      const angle = turn + Math.PI / 6 + (n * Math.PI) / 3;
-      const px = x + Math.cos(angle) * r;
-      const py = y + Math.sin(angle) * r;
-      if (n) context.lineTo(px, py);
-      else context.moveTo(px, py);
-    }
-    context.closePath();
+  // A soft round spot: a radial gradient over its own square (no path).
+  const spot = (x: number, y: number, r: number, stops: readonly (readonly [number, string])[]) => {
+    const gradient = context.createRadialGradient(x, y, 0, x, y, r);
+    for (const [at, colour] of stops) gradient.addColorStop(at, colour);
+    context.fillStyle = gradient;
+    context.fillRect(x - r, y - r, r * 2, r * 2);
   };
-  context.lineJoin = "round";
   for (let tone = 0; tone < CELL_RIMS.length; tone += 1) {
     const x = tone * SHEET.plate + SHEET.plate / 2;
     const y = SHEET.plate / 2;
-    const across = () =>
-      context.createLinearGradient(x - PLATE_R, y - PLATE_R, x + PLATE_R, y + PLATE_R);
-    // The plate: dark metal, its bevel lit from the upper left.
-    const bevel = across();
-    bevel.addColorStop(0, "rgb(150 170 194 / 0.97)");
-    bevel.addColorStop(0.4, "rgb(50 61 80 / 0.96)");
-    bevel.addColorStop(1, "rgb(6 9 15 / 0.97)");
-    hex(x, y, PLATE_R);
-    context.fillStyle = bevel;
-    context.fill();
-    // Its face, set in: lit the other way (the bevel reads as depth).
-    const face = across();
-    face.addColorStop(0, "rgb(9 13 21 / 0.96)");
-    face.addColorStop(0.62, "rgb(24 31 44 / 0.96)");
-    face.addColorStop(1, "rgb(58 72 94 / 0.96)");
-    hex(x, y, PLATE_R - 10);
-    context.fillStyle = face;
-    context.fill();
-    // A broad, soft sheen (never a hard band: that read as glass).
-    const sheen = across();
-    sheen.addColorStop(0.16, "rgb(210 232 250 / 0)");
-    sheen.addColorStop(0.4, "rgb(210 232 250 / 0.15)");
-    sheen.addColorStop(0.66, "rgb(210 232 250 / 0)");
-    hex(x, y, PLATE_R - 10);
-    context.fillStyle = sheen;
-    context.fill();
-    // The honeycomb inside: the skin's own cells, fine and faint.
-    const [rings, open] = PLATE_COMBS[tone];
-    // (Finer, 2026-11-20: a ring more at two thirds of the size, so a
-    // plate is a patch of the skin's own fine weave rather than a tile.)
-    const inner = PLATE_R * 0.118;
-    context.lineWidth = 0.9;
-    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.24)`;
-    for (let q = -rings; q <= rings; q += 1)
-      for (let r = Math.max(-rings, -q - rings); r <= Math.min(rings, -q + rings); r += 1) {
-        if (open && Math.max(Math.abs(q), Math.abs(r), Math.abs(q + r)) < 2) continue;
-        hex(x + inner * ROOT3 * (q + r / 2), y + inner * 1.5 * r, inner);
-        context.stroke();
-      }
-    // The rim: thin and bright, with a soft inner light.
-    hex(x, y, PLATE_R - 3.5);
-    context.lineWidth = 6;
-    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.16)`;
-    context.stroke();
-    hex(x, y, PLATE_R - 1.4);
-    context.lineWidth = 2.4;
-    context.strokeStyle = `rgb(${CELL_RIMS[tone]} / 0.96)`;
-    context.stroke();
+    // The bead: dark liquid metal, thickest in its middle, its edge a soft
+    // falloff (a cloud's density, never an outline).
+    spot(x, y, PLATE_R, [
+      [0, "rgb(40 50 66 / 0.92)"],
+      [0.55, "rgb(24 31 44 / 0.78)"],
+      [0.82, "rgb(14 19 28 / 0.34)"],
+      [1, "rgb(10 14 22 / 0)"],
+    ]);
+    // The key's highlight on its upper left, and a faint tone of the
+    // armour's light in the sheen (the old rim's colour, as a glow).
+    spot(x - PLATE_R * 0.28, y - PLATE_R * 0.3, PLATE_R * 0.55, [
+      [0, "rgb(206 226 246 / 0.42)"],
+      [0.5, "rgb(150 172 196 / 0.14)"],
+      [1, "rgb(150 172 196 / 0)"],
+    ]);
+    spot(x + PLATE_R * 0.2, y + PLATE_R * 0.24, PLATE_R * 0.6, [
+      [0, `rgb(${CELL_RIMS[tone]} / 0.1)`],
+      [1, `rgb(${CELL_RIMS[tone]} / 0)`],
+    ]);
   }
-  // The flash: a hexagonal ring of light.
-  {
-    const x = SHEET.flash / 2;
-    const y = SHEET.plate + SHEET.flash / 2;
-    for (const [width, alpha] of [
-      [11, 0.07],
-      [6, 0.16],
-      [1.8, 0.85],
-    ]) {
-      hex(x, y, FLASH_R);
-      context.lineWidth = width;
-      context.strokeStyle = `rgb(226 246 255 / ${alpha})`;
-      context.stroke();
-    }
-  }
-  // The micro-cell: one cell of the skin's grid, clicking in.
-  {
-    const x = SHEET.flash + SHEET.micro / 2;
-    const y = SHEET.plate + SHEET.micro / 2;
-    hex(x, y, MICRO_R);
-    context.fillStyle = "rgb(150 214 246 / 0.3)";
-    context.fill();
-    context.lineWidth = 1.4;
-    context.strokeStyle = "rgb(236 250 255 / 0.9)";
-    context.stroke();
-  }
-  // The specks: the original hexagon for the retract and form burst, and
-  // three offset grains in a single sprite for the advancing skin.
+  // The flash: a soft round ring of light.
+  spot(SHEET.flash / 2, SHEET.plate + SHEET.flash / 2, FLASH_R * 1.25, [
+    [0, "rgb(226 246 255 / 0)"],
+    [0.55, "rgb(226 246 255 / 0.05)"],
+    [0.78, "rgb(226 246 255 / 0.34)"],
+    [0.9, "rgb(226 246 255 / 0.08)"],
+    [1, "rgb(226 246 255 / 0)"],
+  ]);
+  // The micro-cell: a gaussian point.
+  spot(SHEET.flash + SHEET.micro / 2, SHEET.plate + SHEET.micro / 2, MICRO_R, [
+    [0, "rgb(236 250 255 / 0.9)"],
+    [0.3, "rgb(150 214 246 / 0.35)"],
+    [1, "rgb(150 214 246 / 0)"],
+  ]);
+  // The specks: gaussian points in three tones (all eight turns alike now:
+  // a point has no turn), the advancing skin's column a touch fainter.
   for (let tone = 0; tone < 3; tone += 1)
-    for (let turn = 0; turn < SHEET.turns; turn += 1) {
-      const x = turn * SHEET.speck + SHEET.speck / 2;
-      const y = SHEET.plate + SHEET.flash + tone * SHEET.speck + SHEET.speck / 2;
-      const angle = (turn / SHEET.turns) * (Math.PI / 3);
-      hex(x, y, SPECK_R, angle);
-      context.fillStyle = `rgb(${CELL_FILLS[tone]} / 0.9)`;
-      context.fill();
-      hex(x, y, SPECK_R * 0.5, angle);
-      context.fillStyle = "rgb(255 255 255 / 0.95)";
-      context.fill();
-      const cos = Math.cos(angle);
-      const sin = Math.sin(angle);
-      for (const [dx, dy, radius] of SPECK_GRAINS) {
-        const gx = x + SPECK_GRAIN_X + SPECK_R * (dx * cos - dy * sin);
-        const gy = y + SPECK_R * (dx * sin + dy * cos);
-        hex(gx, gy, SPECK_R * radius, angle);
-        context.fillStyle = `rgb(${CELL_FILLS[tone]} / 0.92)`;
-        context.fill();
-        hex(gx, gy, SPECK_R * radius * 0.48, angle);
-        context.fillStyle = "rgb(255 255 255 / 0.95)";
-        context.fill();
+    for (let turn = 0; turn < SHEET.turns; turn += 1)
+      for (let column = 0; column < 2; column += 1) {
+        const x = column * SPECK_GRAIN_X + turn * SHEET.speck + SHEET.speck / 2;
+        const y = SHEET.plate + SHEET.flash + tone * SHEET.speck + SHEET.speck / 2;
+        spot(x, y, SPECK_R * 1.2, [
+          [0, `rgb(255 255 255 / ${column ? 0.8 : 0.9})`],
+          [0.28, `rgb(${CELL_FILLS[tone]} / ${column ? 0.42 : 0.5})`],
+          [1, `rgb(${CELL_FILLS[tone]} / 0)`],
+        ]);
       }
-    }
   return canvas;
 }
 
@@ -1053,7 +991,8 @@ export class SkinCells {
   /** Draws the cells at clock x (`timeline` null: the retract at x ms).
    * `now`: wall ms (the glints only); `scale`: CSS px per figure px; `hex`:
    * the skin's hex cell, figure px; `share`: the governor's; `gain`: the
-   * whole layer's opacity (the call raises it as the skin engages). Both contexts
+   * whole layer's opacity (the call raises it as the skin engages); `ratio`:
+   * the layers' backing px per CSS px (the specks are drawn a point). Both contexts
    * are in figure space; they are left compositing additively. */
   draw(
     back: CellContext,
@@ -1067,6 +1006,7 @@ export class SkinCells {
     bounds?: ArrayLike<number>,
     share = 1,
     gain = 1,
+    ratio = 1.5,
   ) {
     const sheet = this.sheet;
     this.live = 0;
@@ -1074,6 +1014,9 @@ export class SkinCells {
     back.globalCompositeOperation = "lighter";
     if (!sheet || gain <= 0.004) return;
     const keep = share < 0 ? 0 : share > 1 ? 1 : share;
+    // A point's drawn width: its gaussian's core one backing px (`ratio`:
+    // the layers' backing px per CSS px).
+    const point = 3.6 / Math.max(0.05, scale * ratio);
     const large = Math.floor(this.large * keep);
     const fine = Math.floor(this.fine * keep);
     const pose = this.pose;
@@ -1197,7 +1140,8 @@ export class SkinCells {
         const light = smooth(closure / 0.24) * (1 - smooth((closure - 0.46) / 0.54));
         if (light <= 0.01) continue;
         const set = smooth(closure / 0.72);
-        const width = (from + (hex - from) * set) * microDraw;
+        // (A point at nanite scale, 2026-11-21: never a visible disc.)
+        const width = Math.min((from + (hex - from) * set) * microDraw, point * 1.4);
         const ux = SOCKET_X[j];
         const uy = SOCKET_Y[j];
         const mx = bx + ux * from + (gx + ux * hex - (bx + ux * from)) * set;
@@ -1221,6 +1165,7 @@ export class SkinCells {
     const speckDraw = speck / (ROOT3 * SPECK_R);
     const sixth = Math.PI / 3;
     const speckColumn = timeline ? SPECK_GRAIN_X : 0;
+
     for (let n = 0; n < fine; n += 1) {
       const i = this.large + n;
       const o = i * SLOT;
@@ -1250,8 +1195,11 @@ export class SkinCells {
           alpha *= 1 - k;
         }
         const turn = pose[4] - Math.floor(pose[4] / sixth) * sixth;
-        const width = size * speckDraw;
-        context.globalAlpha = alpha;
+        // A point, not a chip (nano pass, 2026-11-21): the gaussian's core
+        // is a backing pixel across whatever the speck's size, its light
+        // spread thinner (more of them read as a haze, none as a dot).
+        const width = Math.min(size * speckDraw, point);
+        context.globalAlpha = alpha * 0.7;
         context.drawImage(
           sheet,
           speckColumn + Math.min(SHEET.turns - 1, Math.floor((turn / sixth) * SHEET.turns)) * speck,
@@ -1280,6 +1228,33 @@ void main() {
   gl_Position = vec4(aPosition, 0.0, 1.0);
 }`;
 
+/** The grain sheet's side, texels (a power of two: WebGL 1 repeats and
+ * mipmaps only those). One texel is drawn one backing px across. */
+export const GRAIN_SIZE = 256;
+/** Grain texels per band of the front along the flow, per backing px of the
+ * figure (the streaks' length: a band is ~60 figure px, so ~6 px long). */
+const GRAIN_ALONG = 10;
+/** Grain texels the streaks drift per band the front advances (~0.2 a
+ * frame at the entry's pace: a slow creep, never a boil). */
+const GRAIN_DRIFT = 0.8;
+
+/** The nanites' grain, baked once a renderer: white noise with every mip's
+ * mean at one half (generateMipmap box-filters it), so a lookup finer than
+ * a pixel resolves to the flat mean rather than to aliasing. Seeded: the
+ * same sheet every time. */
+export function buildSkinGrain(size = GRAIN_SIZE) {
+  const data = new Uint8Array(size * size);
+  let seed = 0x2f6e2b1;
+  for (let i = 0; i < data.length; i += 1) {
+    // xorshift32: cheap, and the same on every device.
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    data[i] = (seed >>> 0) % 256;
+  }
+  return data;
+}
+
 const FRAGMENT = `#ifdef DERIV
 #extension GL_OES_standard_derivatives : enable
 #endif
@@ -1302,10 +1277,15 @@ uniform vec2 uCell;
 uniform float uTime;
 uniform float uAlpha;
 uniform float uBase01;
-uniform float uHex;
 // One backing pixel, in figure px: every edge below is drawn this soft and
 // no softer, so the finer lattice stays sub-pixel smooth at any DPR.
 uniform float uPx;
+// The nanites' grain (nano pass, 2026-11-21): a tileable white-noise sheet
+// baked once (buildSkinGrain), REPEAT and mipmapped. One texel is one
+// backing pixel, so the finest structure anywhere is a pixel; wherever the
+// backing store is coarser than that (the governor), the mips average it to
+// its mean and it fades out instead of aliasing into moire.
+uniform sampler2D uGrain;
 #ifdef SEAT
 // The entry's seat (rexonance-entry-seat.ts): when each plate's texel is
 // let go to set, and the call's clock now and a lag ago, in the map's
@@ -1373,11 +1353,32 @@ void main() {
   a = mix(a, max(min(a, uSeat.w + max(seated, 0.0)), seated * 1.6), gated);
 #endif
   vec2 p = vUv * uFigure;
-  // The bead's contact line wanders in a fine, continuous fingering (two
-  // octaves of smooth noise at the lattice's scale). (Nanosuit pass,
-  // 2026-11-20: it was stepped per socket, which made the lip a stair of
-  // hexagons that read as square blocks at a phone's pixel ratio.)
-  float finger = 0.2 * (vnoise(p / (uHex * 0.8)) - 0.5) + 0.16 * (vnoise(p / (uHex * 2.6) + 7.3) - 0.5);
+  // Nanomachine scale (nano pass, 2026-11-21; owner: 「実際のナノマシンと
+  // 同程度の大きさに」). A real nanite is ~100 nm, far below a pixel, so no
+  // unit is ever drawn: only the collective, a wetting liquid-metal sheet.
+  // Its contact line is fractal: two smooth octaves for the macro fingering
+  // (figure px, so it is the same shape at any size) and two from the grain
+  // sheet at 3 and 1 backing px, the smallest structure a screen can show.
+  // Every grain lookup sits above the early returns below: the mip level is
+  // chosen from the quad's derivatives, undefined once a neighbour returns.
+  vec2 gp = p / uPx;
+  float o1 = texture2D(uGrain, gp * (1.0 / (3.0 * ${GRAIN_SIZE}.0)) + vec2(0.53, 0.19)).r - 0.5;
+  float o0 = texture2D(uGrain, gp * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.11, 0.71)).r - 0.5;
+  // The sheen's streaks: stretched along the flow and carried with it. Their
+  // along-flow coordinate is the field itself (so they bend with the flow),
+  // drifting with the front at a tenth of a texel or so a frame: the
+  // deposited sheet creeps, it never races at the lip's own speed (that
+  // shifted the grain several texels a frame and boiled). Closed-form in
+  // the front, so a scrub retraces it; across the flow,
+  // three fixed orientations (0, 60, 120 degrees), blended below by how
+  // close each lies to the flow's normal. (A lookup rotated per pixel by the
+  // flow would break the mip selection wherever the flow turns.)
+  float along = (${GRAIN_DRIFT.toFixed(1)} * front - ${GRAIN_ALONG.toFixed(1)} / uPx * fld.r) / band;
+  float s0 = texture2D(uGrain, vec2(along, gp.y) * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.37, 0.0)).r;
+  float s1 = texture2D(uGrain, vec2(along, dot(gp, vec2(-0.8660254, 0.5))) * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.0, 0.41)).r;
+  float s2 = texture2D(uGrain, vec2(along, dot(gp, vec2(0.8660254, 0.5))) * (1.0 / ${GRAIN_SIZE}.0) + vec2(0.29, 0.83)).r;
+  float finger = 0.2 * (vnoise(p * 0.045) - 0.5) + 0.13 * (vnoise(p * 0.12 + 7.3) - 0.5)
+    + 0.09 * o1 + 0.06 * o0;
   float deposit = a + finger * (1.0 - smoothstep(0.5, 1.8, a));
   // How far one backing pixel moves the deposit: the lip is never sharper
   // than that (a sub-pixel front, not a stair of texels).
@@ -1424,15 +1425,9 @@ void main() {
     texture2D(uField, vUv + vec2(uCell.x, 0.0)).r - texture2D(uField, vUv - vec2(uCell.x, 0.0)).r,
     texture2D(uField, vUv + vec2(0.0, uCell.y)).r - texture2D(uField, vUv - vec2(0.0, uCell.y)).r);
   vec2 flow = length(g) > 0.0005 ? normalize(g) : vec2(0.0, 1.0);
-  // Resolve the same two staggered socket grids as the arriving Canvas cells.
-  vec2 hs = vec2(1.0, 1.7320508);
-  vec2 hp = p / uHex;
-  vec2 centreA = (floor(hp / hs) + 0.5) * hs;
-  vec2 centreB = floor(hp / hs + 0.5) * hs;
-  vec2 deltaA = hp - centreA;
-  vec2 deltaB = hp - centreB;
-  vec2 local = dot(deltaA, deltaA) < dot(deltaB, deltaB) ? deltaA : deltaB;
-  float threshold = hash(floor(2.0 * (hp - local) / hs + 0.5));
+  // Settling is collective (no cell, no socket): a slow density wave
+  // decides where the sheet sets first, two smooth octaves in figure px.
+  float threshold = clamp(0.62 * vnoise(p * 0.055 + 3.7) + 0.38 * vnoise(p * 0.15 + 11.1), 0.0, 1.0);
   if (deposit < -dw) {
     // The lip's shadow, just ahead of it.
     float shade = smoothstep(-0.4, 0.0, deposit);
@@ -1457,62 +1452,35 @@ void main() {
   facing = clamp(facing + 0.42 * ripple, 0.0, 1.0);
   vec3 chrome = mix(vec3(0.085, 0.095, 0.115), vec3(0.6, 0.64, 0.68), facing * (0.55 + 0.45 * room));
   chrome = mix(chrome, chrome * (0.6 + 0.9 * light), 0.5);
-  // The fibres: striations along the flow.
-  // (Finer, 2026-11-20: a 2.2 px pitch, antialiased by the pixel's own
-  // width, and dashed along the flow so they stream as the front advances.)
-  float sw = uPx * 0.45;
-  float stripe = smoothstep(0.5 - sw, 0.5 + sw, abs(fract(dot(p, vec2(-flow.y, flow.x)) * 0.45) - 0.5) * 2.0);
-  stripe = mix(0.5, stripe, 1.0 - smoothstep(0.3, 0.6, sw));
-  float dash = 0.5 + 0.5 * sin(dot(p, flow) * 0.21 - a * 5.0 + fld.g * 6.0);
-  vec3 fibre = mix(vec3(0.1, 0.11, 0.13), vec3(light) * vec3(0.8, 0.87, 0.95), 0.42) * (0.66 + 0.5 * stripe) * (0.84 + 0.3 * dash);
+  // The sheen: the swarm's own grain, a pixel across and streaked along
+  // the flow (the three orientations' samples, each weighted by how close
+  // its across-axis lies to the flow's normal), with the 1 px grain over
+  // it. Low amplitude (a sheen, never a sparkle) and gone as the sheet sets.
+  float w0 = pow(abs(flow.x), 6.0);
+  float w1 = pow(abs(dot(flow, vec2(0.5, 0.8660254))), 6.0);
+  float w2 = pow(abs(dot(flow, vec2(-0.5, 0.8660254))), 6.0);
+  float streak = (s0 * w0 + s1 * w1 + s2 * w2) / max(w0 + w1 + w2, 0.0001) - 0.5;
+  float grain = 0.7 * streak + 0.3 * o0;
+  float settle = 1.0 - smoothstep(2.6, 4.9, a);
+  // Thickness waves: density travelling back from the lip, locked to the
+  // distance behind it (closed-form), broad as the collective is.
+  float swell = 0.5 + 0.5 * cos(a * 3.1 - 0.6 + 2.4 * (vnoise(p * 0.03) - 0.5));
+  vec3 fibre = mix(vec3(0.1, 0.11, 0.13), vec3(light) * vec3(0.8, 0.87, 0.95), 0.42) * (0.86 + 0.18 * swell);
   fibre += ICE * 0.1 * fld.g;
   vec3 metal = mix(chrome, fibre, smoothstep(0.8, 1.5, a));
-  // The cells: a hexagonal micro-tessellation, each cell clicking solid on
-  // its own threshold and taking the art's colour.
-  vec2 q = abs(local);
-  float rim = max(dot(q, hs * 0.5), q.x);
-  // Half a backing pixel in the cell's units: the seams' and fills' softness.
-  float w = 0.5 * uPx / uHex;
+  metal *= 1.0 + 0.3 * grain * settle;
+  // Setting: the sheet takes the art's colour continuously where the
+  // density wave reaches it (no unit pops in), the 1 px grain fading last.
   float k = (a - 2.4) / 2.5;
   float age = (k - threshold * 0.82) / 0.18;
-  // A cell no longer pops solid: it fills from its centre out to its rim
-  // on an eased radius, the edge a pixel soft (2026-11-20).
-  float grow = smoothstep(0.0, 0.6, age);
-  float solid = smoothstep(-w, w, grow * (0.5 + 2.0 * w) - rim - w);
+  float solid = smoothstep(0.0, 0.6, age);
   float paint = smoothstep(0.0, 1.0, age);
-  // Each hex is cut into six triangular facets (the finer lattice): each
-  // catches the key at its own angle while the metal is still unpainted.
-  float sector = floor(atan(local.y, local.x) / 1.0471976);
-  float tilt = fract(threshold * 17.31 + sector * 0.137) - 0.5;
-  vec3 facet = metal * (0.9 + 0.6 * tilt) + vec3(0.07, 0.09, 0.11);
-  float tess = smoothstep(1.7, 2.4, a);
-  // Seams thin as the lattice: a fixed share of the cell, never under a
-  // pixel's softness, and fainter where they would crowd the pixels.
-  float seamFade = 1.0 - smoothstep(0.16, 0.34, w);
-  // (Their strength drifts in broad patches, so the resolving weave never
-  // reads as one uniform net laid over the figure.)
-  float seamPatch = 0.55 + 0.45 * vnoise(p / (uHex * 4.5) + 3.1);
-  float edge = smoothstep(0.455 - w, 0.455 + w, rim) * seamFade * seamPatch;
-  vec2 d30 = vec2(0.8660254, 0.5);
-  float spoke = min(abs(local.x), min(abs(dot(local, vec2(d30.y, -d30.x))), abs(dot(local, vec2(d30.y, d30.x)))));
-  float tri = (1.0 - smoothstep(0.0, 0.03 + w, spoke)) * (1.0 - edge) * seamFade;
-  // Still liquid: the tessellation shows through as facets and dark seams.
-  vec3 liquid = mix(metal, facet, 0.5 * tess);
-  liquid = mix(liquid, liquid * 0.5, edge * tess * 0.7);
-  liquid = mix(liquid, liquid * 0.72, tri * tess * 0.5);
-  // A bevel on the light-facing side catches the key as each plate seats.
-  float bevel = smoothstep(0.28, 0.42, rim) * (1.0 - edge);
-  float keySide = dot(local, vec2(-0.55, -0.83));
-  liquid += vec3(0.48, 0.55, 0.61) * bevel * smoothstep(-0.08, 0.32, keySide) * tess;
-  vec3 celled = mix(facet, armour * (1.0 + 0.1 * tilt * (1.0 - smoothstep(1.0, 3.0, age))), paint);
-  // The click: a brightness glint that swells with the fill and decays
-  // (it rose in one frame before).
-  celled += (0.3 * smoothstep(0.0, 0.3, age) * exp(-max(age - 0.15, 0.0) * 2.4)) * mix(vec3(0.8, 0.9, 1.0), armour, 0.4);
-  // The cells' seams and facets, until the paint has set.
-  float unset = 1.0 - smoothstep(0.6, 2.4, age);
-  celled = mix(celled, celled * 0.42 + ICE * 0.12, edge * unset);
-  celled = mix(celled, celled * 0.8 + ICE * 0.05, tri * unset * 0.6);
-  vec3 outc = mix(liquid, celled, solid);
+  // A faint ice glint as each region sets (it swells and decays; area, not
+  // a flash: a tenth of the old click's).
+  vec3 celled = mix(metal, armour, paint);
+  celled += (0.12 * smoothstep(0.0, 0.3, age) * exp(-max(age - 0.15, 0.0) * 2.4)) * mix(vec3(0.8, 0.9, 1.0), armour, 0.4);
+  celled *= 1.0 + 0.16 * grain * (1.0 - paint);
+  vec3 outc = mix(metal, celled, solid);
   // Narrow interlocking metal ribs give way to the original painted shell
   // immediately behind the travelling edge.
   float wet = growth * (1.0 - smoothstep(0.8, 3.3, a));
@@ -1530,8 +1498,9 @@ void main() {
   // The lip: white-hot at the very edge.
   float lip = 1.0 - smoothstep(0.0, 0.18 + dw, deposit);
   float forming = 1.0 - step(BAND, uFront.z);
-  float lipGrain = vnoise(p / mix(6.0, 2.5, forming));
-  float lipShine = mix(0.95, mix(0.56, 1.12, lipGrain), forming);
+  // (Its grain is the swarm's: a pixel across, never a blotch.)
+  float lipGrain = clamp(0.5 + 1.2 * mix(o1, o0, 0.5), 0.0, 1.0);
+  float lipShine = mix(0.95, mix(0.76, 1.04, lipGrain), forming);
   outc += vec3(0.91, 0.95, 1.0) * lip * lipShine;
   outc += mix(ICE, PINK, lipGrain) * lip * 0.22;
   // The veins, bright while liquid.
@@ -1658,7 +1627,7 @@ export class SkinRenderer {
       "uTime",
       "uAlpha",
       "uBase01",
-      "uHex",
+      "uGrain",
       "uPx",
       "uSeatMap",
       "uSeat",
@@ -1712,6 +1681,35 @@ export class SkinRenderer {
       // (The caller sets the clock before every render: seat().)
       gl.uniform4f(this.uniforms.uSeat, 0, 0, 1, 0);
     }
+    {
+      // The grain (unit 4): repeated, and mipmapped so its octaves fade to
+      // their mean below a pixel instead of shimmering. Built once a mount.
+      const grain = gl.createTexture();
+      if (!grain) throw new Error("texture");
+      gl.activeTexture(gl.TEXTURE4);
+      gl.bindTexture(gl.TEXTURE_2D, grain);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.LUMINANCE,
+        GRAIN_SIZE,
+        GRAIN_SIZE,
+        0,
+        gl.LUMINANCE,
+        gl.UNSIGNED_BYTE,
+        buildSkinGrain(),
+      );
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      this.textures.push(grain);
+      gl.uniform1i(this.uniforms.uGrain, 4);
+    }
     gl.uniform1i(this.uniforms.uArt, 0);
     gl.uniform1i(this.uniforms.uField, 1);
     gl.uniform1i(this.uniforms.uBase, base ? 2 : 0);
@@ -1747,10 +1745,9 @@ export class SkinRenderer {
     if (this.canvas.height !== height) this.canvas.height = height;
   }
 
-  /** The hex cells' width, figure px (the loose cells merge into it).
-   * (Nanosuit pass, 2026-11-20: finer, 6 figure px and at least 3.5 backing
-   * px, from 8.5 and 4; each is also cut into six facets, and every seam is
-   * antialiased by uPx, so the lattice reads as a fine weave, not tiles.) */
+  /** The loose matter's landing pitch, figure px: where SkinCells' motes
+   * settle (the shader itself draws no lattice since the nano pass,
+   * 2026-11-21; this is only the spacing the absorbed motes spread to). */
   get hex() {
     return Math.max(6, 3.5 / Math.max(0.1, this.scale));
   }
@@ -1782,8 +1779,6 @@ export class SkinRenderer {
     gl.uniform1f(this.uniforms.uTime, seconds % 1000);
     gl.uniform1f(this.uniforms.uAlpha, frame.alpha);
     gl.uniform1f(this.uniforms.uBase01, this.hasBase ? base01 : 0);
-    // Cells of 3.5 backing px across at the least, 6 figure px.
-    gl.uniform1f(this.uniforms.uHex, this.hex);
     gl.uniform1f(this.uniforms.uPx, 1 / Math.max(0.05, this.scale));
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }

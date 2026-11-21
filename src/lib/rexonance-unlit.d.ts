@@ -110,6 +110,7 @@ export function createNaniteMoltenJob(
 
 /** Pure: the hex relief's height at (x, y): 1 on a hex top, 0 in the
  * 0.8 px groove. Sample a pixel at its centre (x + 0.5, y + 0.5). */
+export function naniteGrain(x: number, y: number): number;
 export function naniteHexHeight(x: number, y: number, pitch?: number): number;
 /** Pure: +1 on a hex's 0.8 px upper-left bevel rim, -1 on its lower-right
  * rim, else 0. */

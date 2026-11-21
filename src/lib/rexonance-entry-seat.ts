@@ -117,7 +117,7 @@ export function buildEntrySeatMap(
 /* ---------------- the cells a seating plate takes in ---------------- */
 
 /* With the liquid spread early, the air would stand empty while the plates
-   seat. Fine hexagonal cells (the skin's own, SkinCells' specks: no trail,
+   seat. Fine cells (since the nano pass, 2026-11-21, drawn as points) (the skin's own, SkinCells' specks: no trail,
    no line, no streak) come in from round each plate and each lands on one
    of its micro-tiles exactly as that texel's gate opens: the cell arrives,
    the metal under it clicks solid. Closed-form in the call's clock and
@@ -252,9 +252,11 @@ export class EntrySeatCells {
 
   /** Draws the cells in the air at `t` on a figure-space context: three
    * fills (one a tone), hexagons only. `share` sheds them with the
-   * governor; `least` is the smallest width worth a hexagon (one CSS px
-   * and a half, in figure px). Returns how many it drew. */
-  draw(context: CellContext, t: number, share = 1, alpha = 1, least = 0) {
+   * governor; `least` is the smallest width worth a hexagon, `most` the
+   * largest it is drawn (figure px). Nano pass (2026-11-21): the caller
+   * passes one backing px as `most`, so each lands as a point — a nanite is
+   * far below a pixel, and no unit's shape may show. Returns how many it drew. */
+  draw(context: CellContext, t: number, share = 1, alpha = 1, least = 0, most = Infinity) {
     if (t <= this.from || t >= this.to || alpha <= 0.004 || share <= 0) return 0;
     const pose = POSE;
     const c = this.cells;
@@ -274,7 +276,7 @@ export class EntrySeatCells {
           context.beginPath();
           any = true;
         }
-        const w = Math.max(least, pose[2]) * 0.5;
+        const w = Math.min(most, Math.max(least, pose[2])) * 0.5;
         const h = w * 1.1547;
         const x = pose[0];
         const y = pose[1];
@@ -288,7 +290,8 @@ export class EntrySeatCells {
         drawn += 1;
       }
       if (!any) continue;
-      context.globalAlpha = 0.82 * alpha;
+      // (Points, dimmer: their light spreads as a haze over the plate.)
+      context.globalAlpha = (most < Infinity ? 0.55 : 0.82) * alpha;
       context.fillStyle = TONES[tone];
       context.fill();
     }

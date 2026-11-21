@@ -1480,6 +1480,14 @@ export function planAssemblyGold(options) {
 // lights about the visor and (FAR FROM, owner 2026-10-22: the reactor
 // completes like the compound eyes, filling with pixels that scatter) the
 // reactor about the core.
+// The lights' pixel squares, figure px (nano pass, 2026-11-21; owner:
+// 「実際のナノマシンと同程度の大きさに」): they were 4–8 px squares, units a
+// viewer could count. A nanite is far below a pixel, so each is now about a
+// device px — the lights fill with a fine haze of points that scatters.
+const NANO_SQUARES = [0.6, 0.7, 0.8, 0.9];
+// …and three times as many of them, so the light still fills (a haze of
+// many dim points rather than a few bright tiles).
+const NANO_MORE = 3;
 export const glowPixels = (glow, centre, seed = 2010, count = 120) => {
   if (!glow?.length) return [];
   const random = seededRandom(seed);
@@ -1496,11 +1504,11 @@ export const glowPixels = (glow, centre, seed = 2010, count = 120) => {
     return hit;
   };
   const squares = [];
-  for (let tries = 0; squares.length < count && tries < 4000; tries += 1) {
+  for (let tries = 0; squares.length < count && tries < 4000 * Math.ceil(count / 120); tries += 1) {
     const x = x0 + random() * (x1 - x0);
     const y = y0 + random() * (y1 - y0);
     if (!inside(x, y)) continue;
-    const size = [4, 5, 6, 8][squares.length % 4];
+    const size = NANO_SQUARES[squares.length % 4];
     const middle = Math.abs(x - centre[0]) < 14 + (y - y0) * 0.12;
     const tone = squares.length % 7 === 0 ? 2 : middle ? 1 : 0;
     squares.push({ x, y, size, tone, group: squares.length % 6 });
@@ -1517,18 +1525,18 @@ const reactorPixels = (core) => {
   const [cx, cy] = core;
   const radius = REACTOR_RADIUS * 0.82;
   const squares = [];
-  for (let tries = 0; squares.length < 96 && tries < 2000; tries += 1) {
+  for (let tries = 0; squares.length < 96 * NANO_MORE && tries < 2000 * NANO_MORE; tries += 1) {
     const x = cx + (random() * 2 - 1) * radius;
     const y = cy + (random() * 2 - 1) * radius;
     const r = Math.hypot(x - cx, y - cy);
     if (r > radius) continue;
-    const size = [4, 5, 6, 8][squares.length % 4];
+    const size = NANO_SQUARES[squares.length % 4];
     const tone = squares.length % 7 === 0 ? 2 : r < radius * 0.45 ? 1 : 0;
     squares.push({ x: x - size / 2, y: y - size / 2, size, tone, group: squares.length % 6 });
   }
   return squares;
 };
-const facePixels = (glow, visor) => glowPixels(glow, visor);
+const facePixels = (glow, visor, count = 120) => glowPixels(glow, visor, 2010, count);
 // The body's held-back lights are generated like the eyes and the reactor
 // (owner, 2026-10-23: 「他も修正」 — they popped in whole at B.light): pixel
 // squares sampled from the lights' own art fill each light in burst groups
@@ -1573,21 +1581,23 @@ const lightPixels = (lights, core, W, H, document) => {
             around += 1;
         }
       if (keep > 0.42 * Math.min(1, 5 / around)) continue;
-      const px = (x + random()) * (W / cw);
-      const py = (y + random()) * (H / ch);
-      if (Math.hypot(px - cx, py - cy) < REACTOR_RADIUS) continue;
-      const size = [4, 5, 6, 8][squares.length % 4];
-      const tone = squares.length % 7 === 0 ? 2 : data[i] > data[i + 2] ? 1 : 0;
-      const d = Math.hypot(px - cx, py - cy) / reach;
-      squares.push({
-        x: px - size / 2,
-        y: py - size / 2,
-        size,
-        tone,
-        group: squares.length % 6,
-        d,
-      });
-      if (squares.length >= 900) return squares;
+      for (let more = 0; more < NANO_MORE; more += 1) {
+        const px = (x + random()) * (W / cw);
+        const py = (y + random()) * (H / ch);
+        if (Math.hypot(px - cx, py - cy) < REACTOR_RADIUS) continue;
+        const size = NANO_SQUARES[squares.length % 4];
+        const tone = squares.length % 7 === 0 ? 2 : data[i] > data[i + 2] ? 1 : 0;
+        const d = Math.hypot(px - cx, py - cy) / reach;
+        squares.push({
+          x: px - size / 2,
+          y: py - size / 2,
+          size,
+          tone,
+          group: squares.length % 6,
+          d,
+        });
+      }
+      if (squares.length >= 900 * NANO_MORE) return squares;
     }
   return squares;
 };
@@ -2599,7 +2609,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
               )
             : null;
         if (!active()) return;
-        const nextPixels = facePixels(config.glow, config.visor);
+        // (Rexonance's eyes: the nano pass's three times as many points;
+        // another page's suit keeps its own count.)
+        const nextPixels = facePixels(
+          config.glow,
+          config.visor,
+          config.reactorGlow ? 120 : 120 * NANO_MORE,
+        );
         // The reactor's pixel squares: Rexonance's own disc (owner,
         // 2026-10-23), or a page's reactor glow outline (FAR FROM).
         const nextReactorPixels = config.reactorGlow
@@ -3708,9 +3724,13 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       // Seated plates still in raw metal, and the lacquer front.
       if (nanites) nanites.seatedPass(context, painted);
+      // (Round 3: the paint arrives under each plate's liquid front.)
+      if (nanites) nanites.paintPass?.(context);
       if (goldLayer) {
         syncGold(progress);
         context.drawImage(goldLayer, 0, 0, W, H);
+        // (Round 3: the gold arrives under each plate's front.)
+        if (nanites) nanites.goldFrontPass?.(context);
         // The molten band and the cooling cells.
         if (nanites) nanites.moltenPass(context);
         // Touch screens (and a scene without the chips) keep the batched heat.

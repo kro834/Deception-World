@@ -715,8 +715,12 @@ test("the bands are narrow (a front, never a cross-fade)", () => {
   assert.ok(Math.abs(SKIN_WHOLE - (1 + 5.4 * SKIN_BAND)) < 1e-9);
   const shader = read("src/lib/rexonance-suit-skin.ts");
   assert.match(shader, new RegExp(`const float BAND = \\$\\{SKIN_BAND\\.toFixed\\(3\\)\\};`));
-  for (const stage of ["Liquid chrome", "The fibres", "The cells", "The panel lines", "The lip"])
+  // (Nano pass, 2026-11-21: the fibres became the swarm's sheen and the
+  // hex cells a collective setting — no unit is drawn at nanite scale.)
+  for (const stage of ["Liquid chrome", "The sheen", "Setting:", "The panel lines", "The lip"])
     assert.ok(shader.includes(stage), stage);
+  assert.doesNotMatch(shader, /uHex|hexagonal micro-tessellation/);
+  assert.match(shader, /LINEAR_MIPMAP_LINEAR/);
   assert.match(shader, /precision highp float;/);
 });
 
@@ -1073,16 +1077,20 @@ test("the cells: budgeted per device in two sizes, shed by the governor, none un
 });
 
 test("the cells are sprites from a sheet drawn once: no stroke, no line, no trail in a frame", () => {
-  // The sheet: hexagons only, built through the canvas the caller makes.
-  const built = { paths: 0, points: 0, fills: 0, strokes: 0 };
+  // The sheet, built through the canvas the caller makes. (Nano pass,
+  // 2026-11-21: soft round spots only — radial gradients over their own
+  // squares; no path, no outline, no hexagon: nothing a unit's shape.)
+  const built = { paths: 0, points: 0, rects: 0, gradients: 0, strokes: 0 };
   const sheetContext = {
     beginPath: () => (built.paths += 1),
     moveTo: () => (built.points += 1),
     lineTo: () => (built.points += 1),
     closePath() {},
-    fill: () => (built.fills += 1),
+    fill() {},
+    fillRect: () => (built.rects += 1),
     stroke: () => (built.strokes += 1),
     createLinearGradient: () => ({ addColorStop() {} }),
+    createRadialGradient: () => ((built.gradients += 1), { addColorStop() {} }),
   };
   let size = null;
   const canvas = { getContext: () => sheetContext };
@@ -1094,10 +1102,10 @@ test("the cells are sprites from a sheet drawn once: no stroke, no line, no trai
     canvas,
   );
   assert.ok(size[0] <= 512 && size[1] <= 512, "a small sheet");
-  assert.equal(built.points, built.paths * 6, "every shape on it is a hexagon");
-  // Four plates (a bevel, a face, a sheen each; a honeycomb and a rim),
-  // the flash, the micro-cell, the specks.
-  assert.ok(built.fills >= 4 * 3 + 1 + 24 && built.strokes >= 4 * 9);
+  assert.equal(built.points + built.paths + built.strokes, 0, "no outline anywhere on it");
+  // Four beads (three spots each), the flash, the micro-point, the specks.
+  assert.equal(built.rects, built.gradients);
+  assert.ok(built.rects >= 4 * 3 + 2 + 3 * 8 * 2);
   assert.equal(buildSkinCellSheet(() => null), null);
 
   const phone = skinBudget(cellDevice(true, 390, 844));

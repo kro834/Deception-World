@@ -11,11 +11,9 @@ import {
 } from "@/lib/rexonance-suit-warmup";
 import {
   FIG,
-  FLIGHT,
   G,
   GOLD,
   GOLD_TOTAL,
-  T,
   cells,
   forming,
   moteSheet,
@@ -44,6 +42,7 @@ import {
 } from "@/lib/rexonance-ignition.js";
 import type { SuitExtrasEnv } from "./rexonance-suit-extras";
 import { suitExtrasApi } from "./rexonance-suit-extras-hook";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "@/lib/rexonance-liquid-front.js";
 import { entryFieldScore } from "@/lib/rexonance-field/field-entry";
 import type { FieldLayer, FieldTake } from "@/lib/rexonance-field/index.js";
 
@@ -126,6 +125,8 @@ const GLINT = [
 const MOTE_MID = G * (0.22 + 0.42 * 0.6);
 const MOTE_NEAR = G * (0.22 + 0.42 * 0.9);
 const MOTE_A = [0.08, 0.22, 0.65] as const;
+/** The gold cells' outlines (off since the nano pass follow-up). */
+const CELL_RIMS: boolean = false;
 
 /** The light's wave is drawn in this many arcs (each fades near an edge). */
 const RING_ARCS = 48;
@@ -387,6 +388,30 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         );
         const source = work.canvas;
         const all = plates();
+        // Each plate's liquid front, fitted once to its tiles' landings.
+        const fronts = all.map((plate, p) =>
+          fitLiquidFront(
+            plate.tiles.length,
+            (i, out) => {
+              const tile = plate.tiles[i];
+              out[0] = tile.dx + tile.tw / 2;
+              out[1] = tile.dy + tile.th / 2;
+              out[2] = Math.max(tile.tw, tile.th) / 2;
+              out[3] = naniteMaterialLanding(tile.land, plate.fit);
+            },
+            p + 1,
+          ),
+        );
+        // Round 4: each plate's texels and gold cells as Path2D, built once
+        // a mount (device px), so a frame clips with one call.
+        const hasPath2D = typeof Path2D === "function";
+        const tileMasks = all.map((plate) => {
+          if (!hasPath2D) return null;
+          const path = new Path2D();
+          for (const tile of plate.tiles)
+            path.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+          return path;
+        });
         const sheet = moteSheet(atlas);
         if (!atlasWork || !source || !sheet || !settled || !flight) {
           box.replaceChildren();
@@ -403,6 +428,27 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const surges = planSurges();
         const end = planEnd();
         const gold = cells();
+        // …and its gold's front, fitted to its cells' lock times (round 3).
+        const goldMasks = all.map((plate) => {
+          if (typeof Path2D !== "function" || plate.end <= plate.first) return null;
+          const path = new Path2D();
+          for (let i = plate.first; i < plate.end; i += 1)
+            path.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
+          return path;
+        });
+        const goldFronts = all.map((plate, p) =>
+          fitLiquidFront(
+            plate.end - plate.first,
+            (i, out) => {
+              const c = plate.first + i;
+              out[0] = gold.fx[c] + gold.cw[c] / 2;
+              out[1] = gold.fy[c] + gold.ch[c] / 2;
+              out[2] = Math.max(gold.cw[c], gold.ch[c]) / 2;
+              out[3] = gold.lock[c];
+            },
+            p + 901,
+          ),
+        );
         // Per plate: settled (its art painted whole), and its gold cells
         // locked into the working atlas so far.
         const done = new Uint8Array(all.length);
@@ -465,22 +511,29 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           flight.globalAlpha = alpha;
           flight.fillStyle = colour;
           flight.beginPath();
+          // Round 3 (nano pass, 2026-11-21): each grain is a point a device px
+          // across at most (still far smaller than its cell, so the trim and
+          // crystals stay legible: rx17), set off its cell's middle by a
+          // fixed hash so the grains never line up into a grid.
           for (let k = 0; k < count; k += 1) {
             const i = list[k];
-            const w = gold.cw[i] * size;
-            const h = gold.ch[i] * size;
+            const side = Math.min(1, Math.min(gold.cw[i], gold.ch[i]) * size * s);
+            const jx = (((i * 0.6180339) % 1) - 0.5) * gold.cw[i] * 0.6;
+            const jy = (((i * 0.7548777) % 1) - 0.5) * gold.ch[i] * 0.6;
             flight.rect(
-              (gold.fx[i] + (gold.cw[i] - w) / 2) * s,
-              (gold.fy[i] + (gold.ch[i] - h) / 2) * s,
-              w * s,
-              h * s,
+              (gold.fx[i] + gold.cw[i] / 2 + jx) * s - side / 2,
+              (gold.fy[i] + gold.ch[i] / 2 + jy) * s - side / 2,
+              side,
+              side,
             );
           }
           flight.fill();
         };
         // Precision micro-highlight along golden nanite cell crystalline boundaries
+        // (Nano pass follow-up, 2026-11-21: off — an outlined cell is a unit a
+        // viewer can count. CELL_RIMS stays false.)
         const cellRim = (list: Int32Array, count: number, colour: string, alpha: number) => {
-          if (!count) return;
+          if (!CELL_RIMS || !count) return;
           flight.globalAlpha = alpha;
           flight.strokeStyle = colour;
           flight.lineWidth = Math.max(0.6, 0.8 * s);
@@ -515,12 +568,9 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             for (let k = 0; k < moteCount; k += 1) {
               const size = motes[k * 3 + 2];
               if (extras && (size < MOTE_MID ? 0 : size < MOTE_NEAR ? 1 : 2) !== pass) continue;
-              flight.rect(
-                motes[k * 3] * s,
-                motes[k * 3 + 1] * s,
-                motes[k * 3 + 2] * s,
-                motes[k * 3 + 2] * s,
-              );
+              // (A point a device px across at most: nano pass, 2026-11-21.)
+              const side = Math.min(1, motes[k * 3 + 2] * s);
+              flight.rect(motes[k * 3] * s, motes[k * 3 + 1] * s, side, side);
             }
             flight.fill();
           }
@@ -606,27 +656,32 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                   (coreY - sin * coreX - cos * coreY) * s + oy,
                 );
               }
-              // The tiles that have locked: one clip of their cells and one
-              // draw of the plate. Drawn one by one at the canvas's scale,
-              // their resampled edges left a dark lattice between them, so a
-              // forming plate looked chopped into squares (owner, 2026-10-15).
-              let locked = false;
-              flight.save();
-              flight.beginPath();
-              for (const tile of plate.tiles) {
-                if (t < naniteMaterialLanding(tile.land, plate.fit)) continue;
-                const x0 = Math.round(tile.dx * s);
-                const y0 = Math.round(tile.dy * s);
-                flight.rect(
-                  x0,
-                  y0,
-                  Math.round((tile.dx + tile.tw) * s) - x0,
-                  Math.round((tile.dy + tile.th) * s) - y0,
-                );
-                locked = true;
-              }
-              if (locked) {
-                flight.clip();
+              // The plate sets under one liquid front (nano pass follow-up,
+              // 2026-11-21): its own texels (the union of its tiles, a fixed
+              // outline) intersected with the front's ragged polygon, which
+              // sweeps from its first tile's landing to its last
+              // (rexonance-liquid-front.js). No tile is ever drawn alone — a
+              // stair of 9 px squares was a unit a viewer could count — and
+              // the clip's antialiasing keeps the lip sub-pixel soft. (Before
+              // 2026-10-15 the tiles were drawn one by one; then clipped as
+              // squares; now the squares only bound the plate.)
+              const front = fronts[p];
+              const reach = front ? liquidProgress(front, t) : 0;
+              if (front && reach > 0) {
+                flight.save();
+                const mask = tileMasks[p];
+                if (mask) flight.clip(mask);
+                else {
+                  flight.beginPath();
+                  for (const tile of plate.tiles)
+                    flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+                  flight.clip();
+                }
+                if (reach < 1) {
+                  flight.beginPath();
+                  liquidFrontPath(flight, front, t, true, 0, s);
+                  flight.clip();
+                }
                 flight.globalAlpha = 1;
                 flight.drawImage(
                   source,
@@ -639,52 +694,7 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                   piece.w * s,
                   piece.h * s,
                 );
-              }
-              flight.restore();
-              for (const tile of plate.tiles) {
-                const land = naniteMaterialLanding(tile.land, plate.fit);
-                const flightStart = Math.max(MATERIAL_FROM, land - FLIGHT);
-                const u = (t - flightStart) / (land - flightStart);
-                if (u <= 0 || u >= 1) continue;
-                const e = 1 - (1 - u) ** 3;
-                const x = (tile.dx + tile.ox * (1 - e)) * s;
-                const y = (tile.dy + tile.oy * (1 - e)) * s;
-                if (u < 0.62) {
-                  // A nanite mote, streaming in: its own tile of the art in
-                  // its tone (the mote sheet), so even now the suit's edge is
-                  // the artwork's edge (owner, 2026-10-15).
-                  const size = T * s * (0.3 + 0.4 * (u / 0.62));
-                  flight.globalAlpha = Math.min(1, u * 5) * 0.85;
-                  flight.drawImage(
-                    sheet,
-                    tile.sx,
-                    tile.sy,
-                    tile.tw,
-                    tile.th,
-                    x + (tile.tw * s - size * (tile.tw / T)) / 2,
-                    y + (tile.th * s - size * (tile.th / T)) / 2,
-                    size * (tile.tw / T),
-                    size * (tile.th / T),
-                  );
-                } else {
-                  // It turns into its piece of the plate (gold unformed) and
-                  // locks: whole and on the pixel grid, fading up, its mote's
-                  // light fading into it. (It used to grow into place from
-                  // 72%: the gaps that opened between neighbours, and the
-                  // seams of tiles drawn off the pixel grid, read as a plate
-                  // chopped into squares — owner, 2026-10-15.)
-                  const v = (u - 0.62) / 0.38;
-                  const x0 = Math.round(x);
-                  const y0 = Math.round(y);
-                  const w = Math.round(x + tile.tw * s) - x0;
-                  const h = Math.round(y + tile.th * s) - y0;
-                  // Tile landing bloom luminance curve: peaking as micro-tile locks into place
-                  const landingBloom = Math.sin(Math.min(1, v * 1.1) * Math.PI) * 0.32;
-                  flight.globalAlpha = Math.min(1, 0.55 + 0.45 * v + landingBloom);
-                  flight.drawImage(source, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
-                  flight.globalAlpha = Math.min(1, 0.6 * (1 - v) + landingBloom * 0.6);
-                  flight.drawImage(sheet, tile.sx, tile.sy, tile.tw, tile.th, x0, y0, w, h);
-                }
+                flight.restore();
               }
               if (coil) flight.restore();
               continue;
@@ -716,11 +726,24 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                     piece.h * s,
                   );
                 if (locked[p] > plate.first) {
+                  // Round 3 (nano pass, 2026-11-21): the gold fills under
+                  // the plate's gold front (its cells' outline ∩ the front),
+                  // never cell by cell.
                   flight.save();
-                  flight.beginPath();
-                  for (let i = plate.first; i < locked[p]; i += 1)
-                    flight.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
-                  flight.clip();
+                  const goldMask = goldMasks[p];
+                  if (goldMask) flight.clip(goldMask);
+                  else {
+                    flight.beginPath();
+                    for (let i = plate.first; i < plate.end; i += 1)
+                      flight.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
+                    flight.clip();
+                  }
+                  const goldFront = goldFronts[p];
+                  if (goldFront && liquidProgress(goldFront, t) < 1) {
+                    flight.beginPath();
+                    liquidFrontPath(flight, goldFront, t, true, 0, s);
+                    flight.clip();
+                  }
                   flight.drawImage(
                     art,
                     piece.ax,

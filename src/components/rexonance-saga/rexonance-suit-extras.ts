@@ -35,6 +35,7 @@ import {
   sampleFlameBirth,
 } from "@/lib/rexonance-ignition.js";
 import { REXONANCE_SUIT_REVEAL_MS } from "@/lib/rexonance-calls";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "@/lib/rexonance-liquid-front.js";
 import {
   FIG,
   FLIGHT,
@@ -135,9 +136,9 @@ const FIREBRAND_STRIDE = Math.ceil(CHIPS / FIREBRANDS);
 /** The undersuit's occupancy, for the back chips (64 x 116 cells). */
 const OCC_W = 64;
 const OCC_H = 116;
-/** The tumble's frames; the mip below this device size. */
+/** The tumble's frames. (Every chip in flight draws the 16 px mip since
+ * the nano pass, 2026-11-21: it is a point.) */
 const FRAMES = KIT_CELLS.frames;
-const MIP_BELOW = 12;
 /** A chip's hex fills about 70% of its cell (room to tumble): sprites are
  * drawn this much larger than the chip's nominal size. */
 const SPRITE = 1.45;
@@ -175,7 +176,7 @@ const BUSY_W = 32;
 const BUSY_H = 58;
 const BUSY_DIM = 0.28;
 const LATCHES = 8;
-const LATTICE_A = 0.54;
+const LATTICE_A: number = 0;
 const LINK_MS = 40;
 /** The defocused front band (review 50): only the nearest chips (z past
  * BOKEH_Z), at BOKEH_A, never over a plate being built. */
@@ -217,7 +218,6 @@ const sizeScale = (h0: number) => {
 /** Chips drawn per hex frame: mip and cell columns, tone rows. */
 const MIP_X = Int16Array.from(KIT_CELLS.mip.x);
 const MIP_Y = Int16Array.from(KIT_CELLS.mip.y);
-const UNFOLD_X = Int16Array.from(KIT_CELLS.unfold.x);
 const BOKEH_X = Int16Array.from(KIT_CELLS.bokeh.x);
 const BOKEH_Y = Int16Array.from(KIT_CELLS.bokeh.y);
 // By tone (ice, pink, white, gold): white streaks ice, gold its own row (review 32).
@@ -296,6 +296,61 @@ const WHITE = 2;
 const GOLD_TONE = 3;
 // Touch's two-tone rect chips: [tone, shade] per tone.
 const RECT_TONES = ["#8cefff", "#ff8fd8", "#eefcff", "#ffd27a"] as const;
+
+/* A nanite in flight as a point at its true sub-pixel place (nano pass
+   round 3, 2026-11-21). Drawn at whole device pixels a point jitters as it
+   moves; drawn at fractional ones, every argument is boxed into a fresh
+   heap number a call. So the point is baked once at 4 × 4 sub-pixel
+   phases per tone (POINT_CELL px cells, a gaussian a device px across):
+   a frame picks the phase and draws it at whole pixels — small integers
+   only, nothing allocated. */
+const POINT_CELL = 4;
+const POINT_PHASES = 4;
+const POINT_RGB = [
+  [176, 238, 255],
+  [255, 176, 226],
+  [244, 251, 255],
+  [255, 214, 140],
+] as const;
+// (Built once a page, held in a slot rather than a module let.)
+const POINT_SHEET: { canvas?: HTMLCanvasElement | null } = {};
+function nanoPointSheet(): HTMLCanvasElement | null {
+  if (POINT_SHEET.canvas !== undefined) return POINT_SHEET.canvas;
+  POINT_SHEET.canvas = null;
+  try {
+    const cells = POINT_PHASES * POINT_PHASES;
+    const width = POINT_CELL * cells * POINT_RGB.length;
+    const canvas = Object.assign(globalThis.document.createElement("canvas"), {
+      width,
+      height: POINT_CELL,
+    });
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    const image = context.createImageData(width, POINT_CELL);
+    for (let tone = 0; tone < POINT_RGB.length; tone += 1)
+      for (let phase = 0; phase < cells; phase += 1) {
+        const cx = POINT_CELL / 2 + ((phase % POINT_PHASES) + 0.5) / POINT_PHASES - 0.5;
+        const cy = POINT_CELL / 2 + (Math.floor(phase / POINT_PHASES) + 0.5) / POINT_PHASES - 0.5;
+        const left = (tone * cells + phase) * POINT_CELL;
+        for (let y = 0; y < POINT_CELL; y += 1)
+          for (let x = 0; x < POINT_CELL; x += 1) {
+            const dx = x + 0.5 - cx;
+            const dy = y + 0.5 - cy;
+            const a = Math.exp(-(dx * dx + dy * dy) / (2 * 0.42 * 0.42));
+            const o = (y * width + left + x) * 4;
+            image.data[o] = POINT_RGB[tone][0];
+            image.data[o + 1] = POINT_RGB[tone][1];
+            image.data[o + 2] = POINT_RGB[tone][2];
+            image.data[o + 3] = Math.round(255 * a);
+          }
+      }
+    context.putImageData(image, 0, 0);
+    POINT_SHEET.canvas = canvas;
+  } catch {
+    POINT_SHEET.canvas = null;
+  }
+  return POINT_SHEET.canvas;
+}
 const RECT_SHADES = ["#1d4f63", "#5a2350", "#3a4a5a", "#6a4a12"] as const;
 /** Their batches: four tones by three alpha levels. */
 const RECT_ALPHA = Float32Array.of(0.3, 0.6, 0.9);
@@ -2506,6 +2561,69 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   let conduits = 0;
   const pose = new Float64Array(POSE_SLOTS);
   pose[GLOW] = 1;
+  const points = nanoPointSheet();
+  // Liquid fronts (nano pass follow-up, 2026-11-21): each plate lands and
+  // paints under one ragged front fitted to its tiles' times
+  // (rexonance-liquid-front.js), never tile by tile — a stair of 9 px
+  // squares was a unit a viewer could count. Fitted once a mount; the
+  // clip's antialiasing keeps the lip sub-pixel soft.
+  const fitFronts = (paint: boolean) =>
+    all.map((plate, p) => {
+      const first = L.tileFirst[p];
+      const times = paint ? L.tp : L.land;
+      return fitLiquidFront(
+        L.tileFirst[p + 1] - first,
+        (i, out) => {
+          const tile = plate.tiles[i];
+          out[0] = tile.dx + tile.tw / 2;
+          out[1] = tile.dy + tile.th / 2;
+          out[2] = Math.max(tile.tw, tile.th) / 2;
+          out[3] = times[first + i];
+        },
+        p + (paint ? 101 : 1),
+      );
+    });
+  const landFronts = fitFronts(false);
+  const paintFronts = fitFronts(true);
+  // Round 4 (nano pass): each plate's fixed outlines — its texels and its
+  // gold cells, device px — as Path2D, built once a mount, so a frame clips
+  // with one call. (Without Path2D, as in the tests, the rects are drawn.)
+  const hasPath2D = typeof Path2D === "function";
+  const tileMasks = all.map((plate) => {
+    if (!hasPath2D) return null;
+    const path = new Path2D();
+    for (const tile of plate.tiles) path.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+    return path;
+  });
+  const cellMasks = all.map((plate) => {
+    if (!hasPath2D || plate.end <= plate.first) return null;
+    const path = new Path2D();
+    for (let i = plate.first; i < plate.end; i += 1) {
+      const x0 = Math.round(gold.fx[i] * s - 0.5);
+      const y0 = Math.round(gold.fy[i] * s - 0.5);
+      path.rect(
+        x0,
+        y0,
+        Math.round((gold.fx[i] + gold.cw[i]) * s + 0.5) - x0,
+        Math.round((gold.fy[i] + gold.ch[i]) * s + 0.5) - y0,
+      );
+    }
+    return path;
+  });
+  // Each plate's gold under one front (round 3): its cells' lock times.
+  const goldFronts = all.map((plate, p) =>
+    fitLiquidFront(
+      plate.end - plate.first,
+      (k, out) => {
+        const i = plate.first + k;
+        out[0] = gold.fx[i] + gold.cw[i] / 2;
+        out[1] = gold.fy[i] + gold.ch[i] / 2;
+        out[2] = Math.max(gold.cw[i], gold.ch[i]) / 2;
+        out[3] = gold.lock[i];
+      },
+      p + 901,
+    ),
+  );
 
   const base = () => {
     flight.setTransform(1, 0, 0, 1, ox, oy);
@@ -2719,7 +2837,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       for (let k = 0; k < count; k += 1) {
         const o = (bucket * RECT_CAP + k) * 3;
         const d = rects[o + 2];
-        const off = d > 4 ? 0.22 * d : 1;
+        const off = d > 4 ? 0.22 * d : 0.5 * d;
         hexRects(rects[o] + off, rects[o + 1] + off, d);
       }
       flight.fill();
@@ -2783,6 +2901,28 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       k,
     );
   };
+  // The pose's point at its sub-pixel place: the phase cell nearest the
+  // fraction, drawn 1:1 at whole pixels (nanoPointSheet).
+  const point = (tone: number) => {
+    const x = pose[SX] - 0.5;
+    const y = pose[SY] - 0.5;
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = ((x - ix) * POINT_PHASES) | 0;
+    const fy = ((y - iy) * POINT_PHASES) | 0;
+    const cell = (tone * POINT_PHASES + fy) * POINT_PHASES + fx;
+    flight.drawImage(
+      points as HTMLCanvasElement,
+      cell * POINT_CELL,
+      0,
+      POINT_CELL,
+      POINT_CELL,
+      ix - POINT_CELL / 2 + 1,
+      iy - POINT_CELL / 2 + 1,
+      POINT_CELL,
+      POINT_CELL,
+    );
+  };
   // A hex chip at the pose's sprite slots (SX, SY device centre, SD device
   // size, SA alpha), in its tumble frame.
   const chip = (frame: number, tone: number, hero = false) => {
@@ -2797,12 +2937,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       else {
         if (alpha < 0.12) return;
         const pulse = 0.55 + 0.45 * Math.abs(Math.cos((TAU * frame) / FRAMES));
+        // (Nano pass, 2026-11-21: a device px at most — a nanite in
+        // flight is a point, never a visible chip.)
         const side = d * pulse * 0.9;
         rect(
           (tone < GOLD_TONE ? tone : GOLD_TONE) * 3 + (alpha < 0.4 ? 0 : alpha < 0.75 ? 1 : 2),
           x,
           y,
-          side > 2 ? side : 2,
+          side < 1 ? side : 1,
         );
         return;
       }
@@ -2811,10 +2953,11 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     draws += 1;
     flight.globalAlpha = alpha >= 1 ? 1 : alpha;
     const t = tone > GOLD_TONE ? ICE : tone;
-    const e = d * SPRITE;
-    const k = Math.round(e) || 1;
-    if (e <= MIP_BELOW) poseSprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, k);
-    else poseSprite(cellsImage, 32 * frame, 32 * t, 32, k);
+    // Nano pass (2026-11-21): the chip's sprite is filtered down to one
+    // device px and dimmed — the swarm reads as a fine haze, never chips.
+    if (d * SPRITE > 1) flight.globalAlpha *= 0.75;
+    if (points) point(t);
+    else poseSprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, 1);
   };
   // A chip unfolding into its tile (frame k), at the sprite slots.
   const unfold = (k: number, tone: number) => {
@@ -2828,9 +2971,13 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     if (TOUCH) heroes += 1;
     if (draws >= limit[0]) return;
     draws += 1;
-    flight.globalAlpha = pose[SA];
+    // (Nano pass follow-up, 2026-11-21: no hex unfolds into a tile — the
+    // landing nanite stays a point, and the plate's liquid front is the
+    // only thing that shows it arrive.)
+    flight.globalAlpha = pose[SA] * (d * SPRITE > 1 ? 0.75 : 1);
     const t = tone >= 3 ? ICE : tone;
-    poseSprite(cellsImage, UNFOLD_X[t] + 32 * k, KIT_CELLS.unfold.y, 32, Math.round(d) || 1);
+    if (points) point(t);
+    else poseSprite(cellsImage, MIP_X[t] + 16 * (k % FRAMES), MIP_Y[t], 16, 1);
   };
   // A comet from the sprite slots' centre along their velocity (SVX, SVY).
   const comet = (tone: number) => {
@@ -3337,6 +3484,30 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       Math.round((gold.fy[i] + gold.ch[i]) * s + 0.5) - y0,
     );
   };
+  // Clips to plate p's own texels (the union of its tiles: a fixed outline)
+  // and to its land or paint front at t: `set` the region set by t, else
+  // the region still to set. False when that region is empty. (Call inside
+  // a save(); the clip ends at its restore().)
+  const frontClip = (p: number, t: number, paint: boolean, set: boolean) => {
+    const front = paint ? paintFronts[p] : landFronts[p];
+    if (!front) return false;
+    const reach = liquidProgress(front, t);
+    if (set ? reach <= 0 : reach >= 1) return false;
+    const mask = tileMasks[p];
+    if (mask) flight.clip(mask);
+    else {
+      const tiles = all[p].tiles;
+      flight.beginPath();
+      for (const tile of tiles) flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+      flight.clip();
+    }
+    if (reach > 0 && reach < 1) {
+      flight.beginPath();
+      liquidFrontPath(flight, front, t, set, 0, s);
+      flight.clip();
+    }
+    return true;
+  };
   // A tile's rect on whole device pixels (as the landed clips draw it).
   const tileRect = (tile: Plate["tiles"][number]) => {
     const x0 = Math.round(tile.dx * s);
@@ -3347,6 +3518,26 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       Math.round((tile.dx + tile.tw) * s) - x0,
       Math.round((tile.dy + tile.th) * s) - y0,
     );
+  };
+  // The region a front covers at t (`set`) or not yet, as the current path.
+  const frontRegionS = (front: Float32Array, t: number, set: boolean) => {
+    if (liquidFrontPath(flight, front, t, set, 0, s) === 2) flight.rect(-1e5, -1e5, 2e5, 2e5);
+  };
+  // Clips to plate p's gold that locks in (ta, tb] by its gold front, not
+  // by cells (round 3). False when that band is empty.
+  const lockBand = (p: number, ta: number, tb: number) => {
+    const front = goldFronts[p];
+    if (!front || liquidProgress(front, tb) <= 0 || liquidProgress(front, ta) >= 1) return false;
+    const cells = cellMasks[p];
+    if (cells) flight.clip(cells);
+    else cellClip(all[p].first, all[p].end);
+    flight.beginPath();
+    frontRegionS(front, tb, true);
+    flight.clip();
+    flight.beginPath();
+    frontRegionS(front, ta, false);
+    flight.clip();
+    return true;
   };
   const cellClip = (from: number, to: number) => {
     flight.beginPath();
@@ -3705,7 +3896,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const whole = front >= 1;
     flight.save();
     if (!whole) printClip(unc, plate.end, front, true);
-    else if (unc > plate.first) cellClip(unc, plate.end);
+    else if (unc > plate.first) lockBand(p, t - SW.recede, Infinity);
     conduitFace(p, t);
     if (rails && whole && L.hasBox[p] && !governed) {
       // A hard-light sheen runs across the conduit: its own hologram (rails and
@@ -4047,11 +4238,13 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     const F = plate.fit;
     const first = L.tileFirst[p];
     const end = L.tileFirst[p + 1];
-    const tiles = plate.tiles;
     const staged = jigged[p] === 1;
     // The staged plate: lattice, walls and the landed metal, under its jig.
     applyJig(p);
+    // (Nano pass follow-up, 2026-11-21: the scaffold's hex lattice is a
+    // visible unit and no longer draws: LATTICE_A is 0.)
     if (
+      LATTICE_A > 0 &&
       lattice &&
       (staged || L.flags[p] & 8) &&
       !governed &&
@@ -4076,23 +4269,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       flight.restore();
     }
     flight.save();
-    flight.beginPath();
-    let landed = 0;
-    for (let i = first; i < end; i += 1) {
-      if (L.land[i] > t) continue;
-      const tile = tiles[i - first];
-      const x0 = Math.round(tile.dx * s);
-      const y0 = Math.round(tile.dy * s);
-      flight.rect(
-        x0,
-        y0,
-        Math.round((tile.dx + tile.tw) * s) - x0,
-        Math.round((tile.dy + tile.th) * s) - y0,
-      );
-      landed += 1;
-    }
-    if (landed) {
-      flight.clip();
+    // The landed metal: the plate's texels under its liquid front.
+    if (frontClip(p, t, false, true)) {
       if (silhouette && staged && lam[p] > 0.02) {
         flight.globalAlpha = 0.9;
         shadowDraw(silhouette, p, 0.8, 1);
@@ -4293,53 +4471,10 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         }
       }
     }
+    // (Nano pass follow-up, 2026-11-21: no tile fades in or pops on its
+    // own any more — each was a 9 px square a viewer could count. The
+    // plate's liquid front shows the metal arrive; fades are only counted.)
     if (!fadeCount) return;
-    // The metal tiles fading in, and the recoil's pop, on the staged plate.
-    applyJig(p);
-    for (let k = 0; k < fadeCount; k += 1) {
-      if (draws >= limit[0]) break;
-      const i = fades[k];
-      const tile = tiles[i - first];
-      const a = fadeA[k];
-      draws += 1;
-      if (a >= 0) {
-        flight.globalAlpha = a;
-        // Its cell of the landed clip, on whole device pixels (see the
-        // sprite helper).
-        const x0 = Math.round(tile.dx * s);
-        const y0 = Math.round(tile.dy * s);
-        flight.drawImage(
-          metal,
-          tile.sx,
-          tile.sy,
-          tile.tw,
-          tile.th,
-          x0,
-          y0,
-          Math.round((tile.dx + tile.tw) * s) - x0,
-          Math.round((tile.dy + tile.th) * s) - y0,
-        );
-      } else {
-        const tau = -a;
-        const k2 = 1 + 0.14 * Math.exp(-5 * tau) * Math.cos(9.4 * tau);
-        const w = Math.round(tile.tw * s * k2) || 1;
-        const h = Math.round(tile.th * s * k2) || 1;
-        flight.globalAlpha = 1;
-        flight.drawImage(
-          metal,
-          tile.sx,
-          tile.sy,
-          tile.tw,
-          tile.th,
-          Math.round((tile.dx + tile.tw / 2) * s - w / 2),
-          Math.round((tile.dy + tile.th / 2) * s - h / 2),
-          w,
-          h,
-        );
-      }
-    }
-    base();
-    flight.globalAlpha = 1;
   };
 
   const seat = (p: number, t: number) => {
@@ -4356,7 +4491,6 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     }
     const first = L.tileFirst[p];
     const end = L.tileFirst[p + 1];
-    const tiles = plate.tiles;
     // A6: metal where the paint has not reached, the painted art behind it.
     // Keep the last receivers cooling across the forming → seated handoff;
     // their positions now use the same resting coordinates as the plate.
@@ -4376,43 +4510,17 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
         dockCount += 1;
       }
     }
+    // Metal where the paint's front has not reached, the art behind it.
     for (let pass = 0; pass < 2; pass += 1) {
       flight.save();
-      flight.beginPath();
-      let any = false;
-      for (let i = first; i < end; i += 1) {
-        if (pass === 0 ? L.tp[i] <= t : L.tp[i] > t) continue;
-        const tile = tiles[i - first];
-        const x0 = Math.round(tile.dx * s);
-        const y0 = Math.round(tile.dy * s);
-        flight.rect(
-          x0,
-          y0,
-          Math.round((tile.dx + tile.tw) * s) - x0,
-          Math.round((tile.dy + tile.th) * s) - y0,
-        );
-        any = true;
-      }
-      if (any) {
-        flight.clip();
-        plateDraw(pass === 0 ? metal : source, p, 0, 0);
-      }
+      if (frontClip(p, t, true, pass === 1)) plateDraw(pass === 0 ? metal : source, p, 0, 0);
       flight.restore();
     }
     // The lacquer front: the paint's newest tiles in nanite light.
     if (TOUCH || governed) return;
+    // (A band behind the paint's front: set by now, not yet a lacquer ago.)
     flight.save();
-    flight.beginPath();
-    let any = false;
-    for (let i = first; i < end; i += 1) {
-      const age = t - L.tp[i];
-      if (age < 0 || age >= SW.lacquer) continue;
-      const tile = tiles[i - first];
-      tileRect(tile);
-      any = true;
-    }
-    if (any) {
-      flight.clip();
+    if (frontClip(p, t, true, true) && frontClip(p, t - SW.lacquer, true, false)) {
       flight.globalAlpha = 0.32;
       plateDraw(sheet, p, 0, 0);
     }
@@ -4878,17 +4986,24 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
           const coolFrom = firstLockAfter(p, t - SW.recede);
           if (coolTo > coolFrom) {
             flight.save();
-            cellClip(coolFrom, coolTo);
-            flight.globalAlpha = EMBER_A;
-            plateDraw(molten, p, 0, 0);
+            if (lockBand(p, t - SW.recede, t - SW.moltenAges[SW.moltenAges.length - 1])) {
+              flight.globalAlpha = EMBER_A;
+              plateDraw(molten, p, 0, 0);
+            }
             flight.restore();
           }
           let to = bandTo;
+          let tTo = t;
           for (let step = 0; step < SW.moltenAges.length; step += 1) {
             const from = firstLockAfter(p, t - SW.moltenAges[step]);
+            const tFrom = t - SW.moltenAges[step];
             if (to > from) {
               flight.save();
-              cellClip(from, to);
+              // (Round 3: the band's ring by the gold front, not its cells.)
+              if (!lockBand(p, tFrom, tTo)) {
+                flight.beginPath();
+                flight.clip();
+              }
               const under = hot ? MOLTEN_A[step] : Math.max(MOLTEN_A[step], HOT_A[step]);
               if (under > 0) {
                 flight.globalAlpha = under;
@@ -4901,6 +5016,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
               flight.restore();
             }
             to = from;
+            tTo = tFrom;
           }
         }
         // The band's head (round 3): where a trim's channel locks, the newest
