@@ -13,6 +13,10 @@ export interface RexonanceOverwritePlan {
   order?: "radial" | "descend";
   wave?: Float32Array;
   rag?: Float32Array;
+  /** The added parts' own front, and their baked held-back mask. */
+  born?: Float32Array | null;
+  heldFrom?: unknown;
+  held?: { mask: HTMLCanvasElement; art: HTMLCanvasElement } | null;
 }
 export function planOverwrite(options: {
   width: number;
