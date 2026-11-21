@@ -299,6 +299,8 @@ export interface AssemblyNanites {
   seatedPass(context: CanvasRenderingContext2D, painted: number): void;
   /** Round 3 (nano pass): the painted art arriving under each plate's paint front. */
   paintPass(context: CanvasRenderingContext2D): void;
+  /** Round 3 (nano pass): the gold arriving under each plate's gold front. */
+  goldFrontPass(context: CanvasRenderingContext2D): void;
   moltenPass: Pass;
   /** `covered`: the guideways under staged plates (drawn after the shells). */
   hologramPass(context: CanvasRenderingContext2D, covered?: boolean): void;

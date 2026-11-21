@@ -3729,6 +3729,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       if (goldLayer) {
         syncGold(progress);
         context.drawImage(goldLayer, 0, 0, W, H);
+        // (Round 3: the gold arrives under each plate's front.)
+        if (nanites) nanites.goldFrontPass?.(context);
         // The molten band and the cooling cells.
         if (nanites) nanites.moltenPass(context);
         // Touch screens (and a scene without the chips) keep the batched heat.

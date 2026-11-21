@@ -2571,6 +2571,25 @@ export function createAssemblyNanites({
   const BB = nano.buildB ?? new Float32Array(goldCountOf(gold));
   const BAT = nano.buildAt ?? new Float64Array(0);
   const BIDX = nano.buildIdx ?? new Int32Array(0);
+  // Each plate's gold under one front too (round 3): fitted to its cells'
+  // lock times, so the trims fill and their molten band runs as a front,
+  // not cell by cell.
+  const GOLDF = P.map((pc, p) => {
+    const first = pc.goldFirst ?? 0;
+    const end = pc.goldEnd ?? 0;
+    if (!gold || end <= first) return null;
+    return fitLiquidFront(
+      end - first,
+      (k, out) => {
+        const i = GIDX[first + k];
+        out[0] = gold.x[i] + gold.w[i] / 2;
+        out[1] = gold.y[i] + gold.h[i] / 2;
+        out[2] = Math.max(gold.w[i], gold.h[i]) / 2;
+        out[3] = gold.lock[i];
+      },
+      p + 901,
+    );
+  });
   const BDX = nano.buildDX ?? new Int8Array(goldCountOf(gold));
   const BDY = nano.buildDY ?? new Int8Array(goldCountOf(gold));
   const SEAMX = nano.seams.x;
@@ -3887,23 +3906,58 @@ export function createAssemblyNanites({
   const moltenPass = (ctx) => {
     if (!gold || !molten || !goldCount) return;
     const q = Q;
-    const last = coarse ? MOLTEN_TOUCH.length - 1 : MOLTEN_AGES.length - 1;
-    for (let b = last - 1; b >= 0; b -= 1) {
-      const from = goldBy(q - (coarse ? MOLTEN_TOUCH[b + 1] : MOLTEN_AGES[b + 1]));
-      const to = goldBy(q - (coarse ? MOLTEN_TOUCH[b] : MOLTEN_AGES[b]));
-      if (from >= to) continue;
-      ctx.save();
-      ctx.beginPath();
-      for (let i = from; i < to; i += 1) ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
-      ctx.clip();
-      ctx.globalAlpha = coarse ? MOLTEN_TOUCH_ALPHA[b] : MOLTEN_ALPHA[b];
-      ctx.drawImage(molten, 0, 0, W, H);
-      if (b === 0 && !coarse) {
-        // The leading edge, white-hot.
-        ctx.globalCompositeOperation = "lighter";
-        ctx.globalAlpha = 0.62;
+    const ages = coarse ? MOLTEN_TOUCH : MOLTEN_AGES;
+    const last = ages.length - 1;
+    // Round 3 (nano pass, 2026-11-21): each band is the ring between two
+    // moments of the plate's gold front — cells set by q − age[b], not yet
+    // by q − age[b + 1] — never a run of 4 px cells.
+    for (let p = 0; p < NP; p += 1) {
+      const front = goldFront(p);
+      if (!front) continue;
+      const newest = liquidProgress(front, q - ages[0]);
+      const oldest = liquidProgress(front, q - ages[last]);
+      if (newest <= 0 || oldest >= 1) continue;
+      for (let b = last - 1; b >= 0; b -= 1) {
+        const to = q - ages[b];
+        const from = q - ages[b + 1];
+        if (liquidProgress(front, to) <= 0 || liquidProgress(front, from) >= 1) continue;
+        ctx.save();
+        goldMask(ctx, p);
+        frontRegion(ctx, front, to, true);
+        ctx.clip();
+        ctx.beginPath();
+        frontRegion(ctx, front, from, false);
+        ctx.clip();
+        ctx.globalAlpha = coarse ? MOLTEN_TOUCH_ALPHA[b] : MOLTEN_ALPHA[b];
         ctx.drawImage(molten, 0, 0, W, H);
+        if (b === 0 && !coarse) {
+          // The leading edge, white-hot.
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = 0.62;
+          ctx.drawImage(molten, 0, 0, W, H);
+        }
+        ctx.restore();
       }
+    }
+  };
+
+  /* (Round 3) The gold arriving under each plate's gold front, over the
+     gold layer's cell cache (the front's envelope covers every locked cell,
+     so the cache's stair lies under it). Only moving fronts draw. */
+  const goldFrontPass = (ctx) => {
+    if (!gold || !goldArt) return;
+    const q = Q;
+    for (let p = 0; p < NP; p += 1) {
+      const front = goldFront(p);
+      if (!front) continue;
+      const k = liquidProgress(front, q);
+      if (k <= 0 || k >= 1) continue;
+      ctx.save();
+      goldMask(ctx, p);
+      liquidFrontPath(ctx, front, q, true);
+      ctx.clip();
+      ctx.globalAlpha = 1;
+      ctx.drawImage(goldArt, 0, 0, W, H);
       ctx.restore();
     }
   };
@@ -4312,6 +4366,20 @@ export function createAssemblyNanites({
   // Unpainted cells condense locally ahead of their own landing front.
   // The dark seed expands through the cell; only the locked cell receives
   // full-thickness metal, rather than a complete plate popping into view.
+  const goldFront = (p) => GOLDF[p];
+  // Clips to plate p's gold cells (a fixed outline: the gold art has gold
+  // only where the trim is) and leaves the current path empty.
+  const goldMask = (ctx, p) => {
+    const pc = P[p];
+    ctx.beginPath();
+    for (let k = pc.goldFirst; k < pc.goldEnd; k += 1) {
+      const i = GIDX[k];
+      ctx.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+    }
+    ctx.clip();
+    ctx.beginPath();
+  };
+
   // The region a front covers at q as a path (`set`: the part set by then);
   // a whole region is a rect past the figure, an empty one nothing.
   const frontRegion = (ctx, front, q, set, ahead = 0) => {
@@ -5664,6 +5732,7 @@ export function createAssemblyNanites({
     midPass,
     seatedPass,
     paintPass,
+    goldFrontPass,
     moltenPass,
     hologramPass,
     shadowPass,
