@@ -1025,6 +1025,22 @@ function* assemblyPlanSteps({
       owner.reach = reach;
     }
   }
+  // The helmet's order outer→inner, by rank (owner, 2026-11-21: the face
+  // closes in one motion). Keyed by straight distance, the few far tiles
+  // (the crest's tips) spread thinly over the window's start, so landings
+  // trickled there; by rank the same order lands at an even pace.
+  const helmRank = new Map();
+  {
+    const helm = [];
+    for (const item of tiles) {
+      const beat = item.owner ? item.owner.beat : item.cy < height * 0.2 ? 5 : -1;
+      if (beat === 5 && !item.owner?.piece.closeFromSides)
+        helm.push([item, Math.hypot(item.cx - eyeX, item.cy - eyeY)]);
+    }
+    helm.sort((a, b) => b[1] - a[1]);
+    for (const [k, [item]] of helm.entries())
+      helmRank.set(item, helm.length > 1 ? k / (helm.length - 1) : 0);
+  }
   const partDone = ASSEMBLY_PARTS.map(() => 0);
   const centroids = ASSEMBLY_PARTS.map(() => [0, 0, 0]);
   // Each beat's last tile to land: its lock strikes where that tile's plate
@@ -1049,13 +1065,21 @@ function* assemblyPlanSteps({
     const scatter = random();
     const key = clamp01(
       beat === 5
-        ? (1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 + scatter * 0.1
+        ? (helmRank.get(item) ?? 1 - Math.hypot(item.cx - eyeX, item.cy - eyeY) / helmReach) * 0.9 +
+          scatter * 0.1
         : (item.owner?.rank ?? 0) * 0.36 +
             (item.reach / (item.owner?.reach ?? 1)) * 0.62 +
             scatter * 0.02,
     );
     item.beat = beat;
     item.t0 = from + key * (to - from - flight);
+    // The helmet lands over its whole window, from its first moment (owner,
+    // 2026-11-21: the face must close in one motion). Its motes used to
+    // leave at `from` and land a flight later, so after the visor's sweep
+    // (VISOR_CLOSE, landed by 0.7) nothing landed until 0.73: a hold. Now
+    // they leave a flight early and land over [from, to]; the last still
+    // lands at `to`.
+    if (beat === 5) item.t0 = from - flight + key * (to - from);
     if (item.owner?.piece.closeFromSides) {
       const order = visorSweepOrder(item.cx, eyeX, item.owner.piece.w);
       item.t0 = VISOR_CLOSE[0] + order * (VISOR_CLOSE[1] - VISOR_CLOSE[0]) - flight;
