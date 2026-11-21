@@ -277,19 +277,42 @@ const hash = (i: number, salt: number) => {
   h = Math.imul(h ^ (h >>> 12), 0x297a2d39) >>> 0;
   return ((h ^ (h >>> 15)) >>> 0) / 4294967296;
 };
-const valueNoise = (x: number, y: number, scale: number, salt: number) => {
-  const gx = x / scale;
-  const gy = y / scale;
-  const x0 = Math.floor(gx);
-  const y0 = Math.floor(gy);
-  const fx = gx - x0;
-  const fy = gy - y0;
-  const sx = fx * fx * (3 - 2 * fx);
-  const sy = fy * fy * (3 - 2 * fy);
-  const at = (cx: number, cy: number) => hash(cx * 7919 + cy * 104729, salt);
-  const top = at(x0, y0) + (at(x0 + 1, y0) - at(x0, y0)) * sx;
-  const bottom = at(x0, y0 + 1) + (at(x0 + 1, y0 + 1) - at(x0, y0 + 1)) * sx;
-  return top + (bottom - top) * sy;
+
+/** Smooth value noise (`period` figure px) over a whole grid at once, the
+ * grid's px `step` figure px apart from `offset`: its lattice hashed once
+ * instead of four hashes per pixel — the skin prepares inside the Far From
+ * entry's few-ms slices (nano pass, 2026-11-21). */
+const fieldNoise = (
+  out: Float32Array,
+  gw: number,
+  gh: number,
+  step: number,
+  offset: number,
+  period: number,
+  salt: number,
+) => {
+  const lw = Math.floor(((gw - 1) * step + offset) / period) + 2;
+  const lh = Math.floor(((gh - 1) * step + offset) / period) + 2;
+  const lattice = new Float32Array(lw * lh);
+  for (let cy = 0; cy < lh; cy += 1)
+    for (let cx = 0; cx < lw; cx += 1) lattice[cy * lw + cx] = hash(cx * 7919 + cy * 104729, salt);
+  for (let y = 0; y < gh; y += 1) {
+    const gy = (y * step + offset) / period;
+    const y0 = Math.floor(gy);
+    const fy = gy - y0;
+    const sy = fy * fy * (3 - 2 * fy);
+    for (let x = 0; x < gw; x += 1) {
+      const gx = (x * step + offset) / period;
+      const x0 = Math.floor(gx);
+      const fx = gx - x0;
+      const sx = fx * fx * (3 - 2 * fx);
+      const a = y0 * lw + x0;
+      const top = lattice[a] + (lattice[a + 1] - lattice[a]) * sx;
+      const bottom = lattice[a + lw] + (lattice[a + lw + 1] - lattice[a + lw]) * sx;
+      out[y * gw + x] = top + (bottom - top) * sy;
+    }
+  }
+  return out;
 };
 
 /** Each alloy's own grain (nano pass, 2026-11-21): the same surface,
@@ -626,61 +649,59 @@ export function* prepareNaniteSkin(
   // two groups: armour never becomes bare undersuit, nor the reverse, so
   // the finished art stays exactly the art.
   {
-    // First the staircase is rounded: each armour pixel takes the group
-    // most of its neighbourhood (a box a tile wide) belongs to — a
-    // separable running sum per group, cheap.
-    const r = Math.max(2, Math.round(input.tile / S / 2));
-    const votes = new Float32Array(n);
-    const tmp = new Float32Array(n);
-    const best = new Float32Array(n).fill(-1);
-    const rounded = region.slice();
-    const blur = (from: Float32Array, to: Float32Array, horizontal: boolean) => {
-      const lines = horizontal ? gh : gw;
-      const span = horizontal ? gw : gh;
-      const step = horizontal ? 1 : gw;
-      for (let l = 0; l < lines; l += 1) {
-        const base = horizontal ? l * gw : l;
-        let sum = 0;
-        for (let k = -r; k < span + r; k += 1) {
-          const add = k + r;
-          if (add < span) sum += from[base + add * step];
-          const drop = k - r - 1;
-          if (drop >= 0) sum -= from[base + drop * step];
-          if (k >= 0 && k < span) to[base + k * step] = sum;
-        }
+    // The groups on a coarse grid a tile apart (each cell takes the group
+    // at its centre); each armour pixel then takes the group with the most
+    // weight among the four cells round a place nearby — bilinear weights,
+    // so a staircase's corners become slopes — displaced by a smooth noise
+    // about a tile wide, so the seams bend.
+    const C = Math.max(2, Math.round(input.tile / S));
+    const cw = Math.ceil(gw / C) + 1;
+    const ch = Math.ceil(gh / C) + 1;
+    const coarse = new Uint8Array(cw * ch).fill(255);
+    for (let cy = 0; cy < ch; cy += 1)
+      for (let cx = 0; cx < cw; cx += 1) {
+        const px = Math.min(gw - 1, cx * C + (C >> 1));
+        const py = Math.min(gh - 1, cy * C + (C >> 1));
+        coarse[cy * cw + cx] = region[py * gw + px];
       }
-    };
-    for (let beat = 0; beat < 8; beat += 1) {
-      let any = false;
-      for (let i = 0; i < n; i += 1) {
-        const own = region[i] === beat;
-        votes[i] = own ? 1 : 0;
-        if (own) any = true;
-      }
-      if (!any) continue;
-      blur(votes, tmp, true);
-      blur(tmp, votes, false);
-      for (let i = 0; i < n; i += 1)
-        if (region[i] !== 255 && votes[i] > best[i]) {
-          best[i] = votes[i];
-          rounded[i] = beat;
-        }
-      yield;
-    }
-    region.set(rounded);
+    const reachW = Math.max(4, input.tile * 0.75) / S;
+    const warpX = fieldNoise(new Float32Array(n), gw, gh, S, 0, 26, 41);
+    const warpY = fieldNoise(new Float32Array(n), gw, gh, S, 0, 26, 43);
+    const votes = new Float32Array(8);
+    // (A pixel keeps its own group unless another outweighs it by this
+    // much: the corners round, the groups' areas barely change.)
+    const OWN = 0.25;
     const warped = region.slice();
-    const reach = Math.max(4, input.tile * 0.75) / S;
     for (let i = 0; i < n; i += 1) {
       if (region[i] === 255) continue;
       const x = i % gw;
       const y = (i - x) / gw;
-      const dx = (valueNoise(x * S, y * S, 26, 41) - 0.5) * 2 * reach;
-      const dy = (valueNoise(x * S, y * S, 26, 43) - 0.5) * 2 * reach;
-      const nx = Math.min(gw - 1, Math.max(0, Math.round(x + dx)));
-      const ny = Math.min(gh - 1, Math.max(0, Math.round(y + dy)));
-      const other = region[ny * gw + nx];
-      if (other !== 255) warped[i] = other;
-      if (i % 16384 === 16383) yield;
+      const u = Math.min(cw - 1.001, Math.max(0, (x + (warpX[i] - 0.5) * 2 * reachW - (C >> 1)) / C));
+      const v = Math.min(ch - 1.001, Math.max(0, (y + (warpY[i] - 0.5) * 2 * reachW - (C >> 1)) / C));
+      const x0 = u | 0;
+      const y0 = v | 0;
+      const fx = u - x0;
+      const fy = v - y0;
+      votes.fill(0);
+      votes[region[i] & 7] = OWN;
+      const c = y0 * cw + x0;
+      const b00 = coarse[c];
+      const b10 = coarse[c + 1];
+      const b01 = coarse[c + cw];
+      const b11 = coarse[c + cw + 1];
+      if (b00 !== 255) votes[b00 & 7] += (1 - fx) * (1 - fy);
+      if (b10 !== 255) votes[b10 & 7] += fx * (1 - fy);
+      if (b01 !== 255) votes[b01 & 7] += (1 - fx) * fy;
+      if (b11 !== 255) votes[b11 & 7] += fx * fy;
+      let best = -1;
+      let most = 0;
+      for (let k = 0; k < 8; k += 1)
+        if (votes[k] > most) {
+          most = votes[k];
+          best = k;
+        }
+      if (best >= 0) warped[i] = best;
+      if (i % 32768 === 32767) yield;
     }
     region.set(warped);
   }
@@ -805,15 +826,13 @@ export function* prepareNaniteSkin(
       faceFar = Math.max(faceFar, Math.hypot((i % gw) - visorX, Math.floor(i / gw) - visorY));
   const [n0, n1] = NANITE_SKIN.noise;
   // The edge's noise, both octaves, −1 … 1 each (the two fields share it).
-  const coarseNoise = new Float32Array(n);
-  const fineNoise = new Float32Array(n);
+  const coarseNoise = fieldNoise(new Float32Array(n), gw, gh, S, 0, n0[0], 5);
+  const fineNoise = fieldNoise(new Float32Array(n), gw, gh, S, 0, n1[0], 9);
   for (let i = 0; i < n; i += 1) {
-    const x = i % gw;
-    const y = (i - x) / gw;
-    coarseNoise[i] = (valueNoise(x * S, y * S, n0[0], 5) - 0.5) * 2;
-    fineNoise[i] = (valueNoise(x * S, y * S, n1[0], 9) - 0.5) * 2;
-    if (i % 8192 === 8191) yield;
+    coarseNoise[i] = (coarseNoise[i] - 0.5) * 2;
+    fineNoise[i] = (fineNoise[i] - 0.5) * 2;
   }
+  yield;
   for (let i = 0; i < n; i += 1) {
     const beat = region[i];
     if (beat === 255) continue;
@@ -839,9 +858,12 @@ export function* prepareNaniteSkin(
   yield* naniteSmoothField(time, region, gw, gh, NANITE_SKIN.smooth.passes, NANITE_SKIN.smooth.tol);
 
   // The same front over the whole frame (a change of form, the retract):
-  // the distance itself, the helmet's place last.
+  // the distance itself, the helmet's place last. (Made after the skin is
+  // ready, in its first frames: no change of form or retract is due until
+  // the suit-up is whole, and the Far From entry needs the skin ready by its
+  // first beat; nano pass, 2026-11-21.)
   const change = new Float32Array(n);
-  {
+  const makeChange = function* (): Generator<undefined, void, unknown> {
     const bodyShare = 1 - NANITE_SKIN.changeHelm;
     for (let i = 0; i < n; i += 1) {
       const x = i % gw;
@@ -861,8 +883,7 @@ export function* prepareNaniteSkin(
     const helmKey = new Uint8Array(n);
     for (let i = 0; i < n; i += 1) helmKey[i] = region[i] === timeline.helmBeat ? 1 : 0;
     yield* naniteSmoothField(change, helmKey, gw, gh, NANITE_SKIN.smooth.passes, NANITE_SKIN.smooth.tol * 2.5);
-  }
-  yield;
+  };
 
   // Where each field pixel settles within `click` (nano pass, 2026-11-21):
   // a smooth, low-slope noise in place of the cells' own hashed moments, so
@@ -873,20 +894,14 @@ export function* prepareNaniteSkin(
   const glow = new Float32Array(n);
   {
     const salt = ALLOY_SALT[style.alloy ?? "meta-unitas"];
-    for (let i = 0; i < n; i += 1) {
-      // (Armour only: nothing else is ever drawn.)
-      if (region[i] === 255) continue;
-      const x = ((i % gw) + 0.5) * S;
-      const y = (Math.floor(i / gw) + 0.5) * S;
-      let v = 0.5;
-      for (let o = 0; o < NANITE_SKIN.seat.length; o += 1) {
-        const [period, amp] = NANITE_SKIN.seat[o];
-        v += (valueNoise(x, y, period, salt + 11 * o) - 0.5) * 2 * amp;
-      }
-      seat[i] = clamp01(v);
-      glow[i] = valueNoise(x, y, 9, salt + 17);
-      if (i % 16384 === 16383) yield;
+    seat.fill(0.5);
+    for (let o = 0; o < NANITE_SKIN.seat.length; o += 1) {
+      const [period, amp] = NANITE_SKIN.seat[o];
+      fieldNoise(glow, gw, gh, S, S / 2, period, salt + 11 * o);
+      for (let i = 0; i < n; i += 1) seat[i] += (glow[i] - 0.5) * 2 * amp;
     }
+    for (let i = 0; i < n; i += 1) seat[i] = clamp01(seat[i]);
+    fieldNoise(glow, gw, gh, S, S / 2, 9, salt + 17);
   }
   yield;
 
@@ -1010,9 +1025,30 @@ export function* prepareNaniteSkin(
   const live = naniteLiveBudget(input.coarse, 0);
   const suit = yield* steps(time, NANITE_SKIN.front, live, false);
   if (!suit.count) return null;
-  const changeFront = yield* steps(change, NANITE_SKIN.change, live, true);
+  // The change's front, finished later (see `change`): stepped a little at
+  // the end of each draw, or at once when a change of form, a retract or a
+  // flow (which reads the change field) needs it.
+  let changeFront: Front | null = null;
+  const finishing = (function* (): Generator<undefined, void, unknown> {
+    yield* makeChange();
+    changeFront = yield* steps(change, NANITE_SKIN.change, live, true);
+  })();
+  let pending = true;
+  const finish = (budget: number) => {
+    if (!pending) return;
+    const from = now();
+    for (;;) {
+      if (finishing.next().done) {
+        pending = false;
+        return;
+      }
+      if (now() - from >= budget) return;
+    }
+  };
   let flow: NaniteFlow | null = null;
   if (input.prepareFlow) {
+    while (!finishing.next().done) yield;
+    pending = false;
     try {
       flow = yield* input.prepareFlow({
         width: gw,
@@ -1072,7 +1108,8 @@ export function* prepareNaniteSkin(
       }
     yield;
     // The flow: the time field's gradient (unit vectors per field px; zero
-    // off the armour), averaged once over 3×3 so the streaks bend smoothly.
+    // off the armour), averaged over 3×3 where it is read (below) so the
+    // streaks bend smoothly.
     const rawX = new Float32Array(n);
     const rawY = new Float32Array(n);
     for (let y = 0; y < gh; y += 1)
@@ -1094,27 +1131,6 @@ export function* prepareNaniteSkin(
         if (x === gw - 1 && y % 64 === 63) yield;
       }
     yield;
-    const dirX = new Float32Array(n);
-    const dirY = new Float32Array(n);
-    for (let y = 0; y < gh; y += 1)
-      for (let x = 0; x < gw; x += 1) {
-        let sx = 0;
-        let sy = 0;
-        for (let dy = -1; dy <= 1; dy += 1)
-          for (let dx = -1; dx <= 1; dx += 1) {
-            const nx = x + dx;
-            const ny = y + dy;
-            if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
-            sx += rawX[ny * gw + nx];
-            sy += rawY[ny * gw + nx];
-          }
-        const m = Math.hypot(sx, sy);
-        // (Nowhere to flow — the reactor, a seam: down the body.)
-        dirX[y * gw + x] = m > 1e-6 ? sx / m : 0;
-        dirY[y * gw + x] = m > 1e-6 ? sy / m : 1;
-        if (x === gw - 1 && y % 48 === 47) yield;
-      }
-    yield;
     // A field array read between its samples, at figure px.
     const sample = (values: Float32Array, x: number, y: number) => {
       const gx = Math.min(gw - 1.001, Math.max(0, x / S - 0.5));
@@ -1131,19 +1147,14 @@ export function* prepareNaniteSkin(
     const edgeAt = (x: number, y: number) => sample(edge, x, y) * S;
     // The grain, pre-baked as small tiles (the Far From entry prepares the
     // skin in 6–12 ms slices under its fire; a line integral per figure px
-    // made it a second late on a throttled phone). Three planes of white
-    // noise, TILE px square and wrapping, the alloy's own; for each of
-    // DIRS directions over the grain's period (180°, or 60° for the
-    // crystalline three-family grain, which repeats every 60°) its line
-    // integral along that direction, as unit-variance deviates. A pixel
-    // then reads the two directions either side of its flow and blends
-    // them: two lookups instead of dozens.
+    // made it a second late on a throttled phone). Two planes of white
+    // noise, TILE px square and wrapping, the alloy's own, integrated along
+    // a few directions; a pixel reads the two baked directions either side
+    // of its flow and blends them: two lookups instead of dozens.
     const salt = ALLOY_SALT[style.alloy ?? "meta-unitas"];
     const TILE = 128;
     const WRAP = TILE - 1;
-    const DIRS = 8;
     const whiteA = new Uint8Array(TILE * TILE);
-    const whiteB = new Uint8Array(TILE * TILE);
     const whiteC = new Uint8Array(TILE * TILE);
     {
       let state = (Math.imul(salt + 1, 0x9e3779b1) | 1) >>> 0;
@@ -1152,7 +1163,6 @@ export function* prepareNaniteSkin(
         state ^= state >>> 17;
         state ^= state << 5;
         whiteA[i] = state & 255;
-        whiteB[i] = (state >>> 8) & 255;
         whiteC[i] = (state >>> 16) & 255;
       }
     }
@@ -1181,38 +1191,37 @@ export function* prepareNaniteSkin(
       }
       return (73.6 * Math.sqrt(w2)) / w;
     };
-    const C60 = 0.5;
-    const S60 = Math.sqrt(3) / 2;
-    const reachA = Math.max(2, Math.round(style.triangles ? style.streak * 0.6 : style.streak));
-    const reachB = Math.max(2, Math.round(style.streak * 0.6));
-    const normA = deviate(reachA) * (style.triangles ? Math.sqrt(3) : 1);
-    const normB = deviate(reachB);
-    const periodA = style.triangles ? Math.PI / 3 : Math.PI;
-    const tilesA: Float32Array[] = [];
-    const tilesB: Float32Array[] = [];
-    for (let d = 0; d < DIRS; d += 1) {
-      const ta = new Float32Array(TILE * TILE);
-      const tb = new Float32Array(TILE * TILE);
-      const angleA = (periodA * d) / DIRS;
-      const angleB = (Math.PI * d) / DIRS;
-      const ux = Math.cos(angleA);
-      const uy = Math.sin(angleA);
-      const vx = Math.cos(angleB);
-      const vy = Math.sin(angleB);
+    // One family of line integrals over 180° (SD directions); the
+    // crystalline grain sums three of them 60° apart (SD is a multiple of
+    // 3, so they are baked directions too). The sheen reads the same
+    // single-family tiles half a tile away, so it is independent of the
+    // chrome's grain at no cost.
+    const SD = style.triangles ? 12 : 8;
+    const reach = Math.max(2, Math.round(style.triangles ? style.streak * 0.6 : style.streak));
+    const norm = deviate(reach);
+    const single: Float32Array[] = [];
+    for (let d = 0; d < SD; d += 1) {
+      const tile = new Float32Array(TILE * TILE);
+      const ux = Math.cos((Math.PI * d) / SD);
+      const uy = Math.sin((Math.PI * d) / SD);
       for (let y = 0; y < TILE; y += 1)
-        for (let x = 0; x < TILE; x += 1) {
-          let g = lic(whiteA, x, y, ux, uy, reachA);
-          if (style.triangles)
-            g +=
-              lic(whiteA, x, y, ux * C60 - uy * S60, ux * S60 + uy * C60, reachA) +
-              lic(whiteA, x, y, ux * C60 + uy * S60, -ux * S60 + uy * C60, reachA);
-          ta[y * TILE + x] = Math.max(-2.5, Math.min(2.5, g / normA));
-          tb[y * TILE + x] = Math.max(-2.5, Math.min(2.5, lic(whiteB, x, y, vx, vy, reachB) / normB));
-        }
-      tilesA.push(ta);
-      tilesB.push(tb);
+        for (let x = 0; x < TILE; x += 1)
+          tile[y * TILE + x] = Math.max(-2.5, Math.min(2.5, lic(whiteA, x, y, ux, uy, reach) / norm));
+      single.push(tile);
       yield;
     }
+    const DA = style.triangles ? SD / 3 : SD;
+    const periodA = style.triangles ? Math.PI / 3 : Math.PI;
+    const tilesA: Float32Array[] = [];
+    if (style.triangles)
+      for (let k = 0; k < DA; k += 1) {
+        const tile = new Float32Array(TILE * TILE);
+        const [p, q, r] = [single[k], single[k + DA], single[k + 2 * DA]];
+        for (let i = 0; i < TILE * TILE; i += 1) tile[i] = (p[i] + q[i] + r[i]) / Math.sqrt(3);
+        tilesA.push(tile);
+      }
+    else tilesA.push(...single);
+    const tilesB = single;
     // The slow noises (the flow lines' warp, the mottle, the sheen's 10 px
     // octave) at the field's resolution, read between its samples: their
     // periods are many field px, so nothing is lost.
@@ -1233,17 +1242,10 @@ export function* prepareNaniteSkin(
       if (y < by0) by0 = y;
       if (y > by1) by1 = y;
     }
-    for (let y = Math.max(0, by0 - 1); y <= Math.min(gh - 1, by1 + 1); y += 1) {
-      for (let x = Math.max(0, bx0 - 1); x <= Math.min(gw - 1, bx1 + 1); x += 1) {
-        const i = y * gw + x;
-        const fx = (x + 0.5) * S;
-        const fy = (y + 0.5) * S;
-        warpF[i] = valueNoise(fx, fy, 31, salt + 3);
-        mottleF[i] = valueNoise(fx, fy, 64, salt + 5);
-        tenF[i] = valueNoise(fx, fy, 10, salt + 9);
-      }
-      if (y % 32 === 31) yield;
-    }
+    fieldNoise(warpF, gw, gh, S, S / 2, 31, salt + 3);
+    fieldNoise(mottleF, gw, gh, S, S / 2, 64, salt + 5);
+    fieldNoise(tenF, gw, gh, S, S / 2, 10, salt + 9);
+    yield;
     const fibreContext = fibres.getContext("2d");
     const sheenContext = sheen.getContext("2d");
     if (!fibreContext || !sheenContext) return null;
@@ -1262,13 +1264,28 @@ export function* prepareNaniteSkin(
     const kB = new Uint8Array(n);
     const wB = new Float32Array(n);
     const slot = (period: number, angle: number, i: number, k: Uint8Array, w: Float32Array) => {
-      const f = ((((angle % period) + period) % period) / period) * DIRS;
-      k[i] = Math.floor(f) % DIRS;
+      const dirs = period === Math.PI ? SD : DA;
+      const f = ((((angle % period) + period) % period) / period) * dirs;
+      k[i] = Math.floor(f) % dirs;
       w[i] = f - Math.floor(f);
     };
+    // (Only on and next to the body: the bake reads nothing else.)
+    const near = new Uint8Array(n);
+    for (let y = Math.max(0, by0 - 1); y <= Math.min(gh - 1, by1 + 1); y += 1)
+      for (let x = Math.max(0, bx0 - 1); x <= Math.min(gw - 1, bx1 + 1); x += 1) {
+        const i = y * gw + x;
+        if (!body[i]) continue;
+        for (let dy = -1; dy <= 1; dy += 1)
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx >= 0 && ny >= 0 && nx < gw && ny < gh) near[ny * gw + nx] = 1;
+          }
+      }
     for (let y = Math.max(0, by0 - 1); y <= Math.min(gh - 1, by1 + 1); y += 1) {
       for (let x = Math.max(0, bx0 - 1); x <= Math.min(gw - 1, bx1 + 1); x += 1) {
         const i = y * gw + x;
+        if (!near[i]) continue;
         // The chrome turns with the limb's contour (a reflection across it).
         const slope = (x > 0 ? edge[i - 1] : 0) - (x < gw - 1 ? edge[i + 1] : 0);
         const contour = Math.max(-1, Math.min(1, slope * 0.45));
@@ -1278,7 +1295,18 @@ export function* prepareNaniteSkin(
         const stripe = 0.5 + 0.5 * Math.cos(edge[i] * S * 0.52 + (warpF[i] - 0.5) * 5);
         baseF[i] = 0.05 + contour * 0.2 + (mottleF[i] - 0.5) * 0.18 - stripe * stripe * 0.05;
         sheenF[i] = 0.5 + 0.3 * (tenF[i] - 0.5);
-        const angle = Math.atan2(dirY[i], dirX[i]);
+        let sx = 0;
+        let sy = 0;
+        for (let dy = -1; dy <= 1; dy += 1)
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
+            sx += rawX[ny * gw + nx];
+            sy += rawY[ny * gw + nx];
+          }
+        // (Nowhere to flow — the reactor, a seam: down the body.)
+        const angle = sx * sx + sy * sy > 1e-12 ? Math.atan2(sy, sx) : Math.PI / 2;
         slot(periodA, angle, i, kA, wA);
         slot(Math.PI, angle, i, kB, wB);
       }
@@ -1295,20 +1323,23 @@ export function* prepareNaniteSkin(
       const t0 = (y & WRAP) * TILE;
       const t1 = ((y + 1) & WRAP) * TILE;
       for (let x = xFrom; x < xTo; x += 1) {
+        const g = gy * gw + Math.min(gw - 1, (x / S) | 0);
+        if (!near[g]) continue;
         const px = x + 0.5;
         const py = y + 0.5;
         if (edgeAt(px, py) <= 0) continue;
-        const g = gy * gw + Math.min(gw - 1, (x / S) | 0);
         const at = t0 + (x & WRAP);
         const a0 = kA[g];
-        const a1 = (a0 + 1) % DIRS;
+        const a1 = (a0 + 1) % DA;
         const aw = wA[g];
         const gA = (tilesA[a0][at] * (1 - aw) + tilesA[a1][at] * aw) * spread(aw);
         const b0 = kB[g];
-        const b1 = (b0 + 1) % DIRS;
+        const b1 = (b0 + 1) % SD;
         const bw = wB[g];
-        // (The sheen's grain: one family along the flow, whatever the alloy.)
-        const gB = (tilesB[b0][at] * (1 - bw) + tilesB[b1][at] * bw) * spread(bw);
+        // (The sheen's grain: one family along the flow, whatever the
+        // alloy, read half a tile away.)
+        const bt = ((y + 64) & WRAP) * TILE + ((x + 37) & WRAP);
+        const gB = (tilesB[b0][bt] * (1 - bw) + tilesB[b1][bt] * bw) * spread(bw);
         const value = sample(baseF, px, py) + gA * 0.085;
         const opacity = Math.round(Math.min(0.78, Math.abs(value)) * 255);
         fibreData[y * W + x] = (opacity << 24) | (value > 0 ? 0xfff2e6 : 0x0c0806);
@@ -1412,7 +1443,9 @@ export function* prepareNaniteSkin(
   const now = input.now ?? (() => 0);
   const stats = { pixels: suit.count, motes: suit.motes, band: 0, drawn: 0, ms: 0 };
   // Droplets' batches: [x, y, size] by tone.
-  const moteCap = Math.max(suit.motes, changeFront.motes, 1);
+  // (The change's droplets are not counted yet: the batches take the most
+  // any front can draw at once.)
+  const moteCap = 4096;
   const batch = [0, 1, 2].map(() => new Float32Array(Math.min(moteCap, 4096) * 3));
   const batchCount = [0, 0, 0];
 
@@ -1739,6 +1772,7 @@ export function* prepareNaniteSkin(
     const hasSkin = q > suit.first - suit.ahead - suit.timing.lead;
     if (!hasSkin) {
       stats.drawn = flow?.draw(context, q, governor.level, vs, ratio) ?? 0;
+      finish(2);
       return;
     }
     const start = now();
@@ -1751,14 +1785,14 @@ export function* prepareNaniteSkin(
     const cost = now() - start;
     stats.ms = cost;
     if (stats.band) governor.feed(cost);
+    // (After the frame's own cost is taken: the governor never sees it.)
+    finish(1);
   };
 
   /** The change's clock on its field: before the first pixel at 0, every
    * band past the last at 1. */
-  const changeAt = (u: number) =>
-    changeFront.first -
-    changeFront.ahead +
-    clamp01(u) * (changeFront.last + changeFront.back - changeFront.first + changeFront.ahead + 1e-3);
+  const changeAt = (front: Front, u: number) =>
+    front.first - front.ahead + clamp01(u) * (front.last + front.back - front.first + front.ahead + 1e-3);
 
   const liquidOf = (source: CanvasImageSource, fit: boolean) => {
     if (otherOf === source && otherMetal) return otherMetal;
@@ -1781,26 +1815,29 @@ export function* prepareNaniteSkin(
     ratio: number,
   ) => {
     stats.drawn = 0;
+    finish(Infinity);
+    const front = changeFront as Front | null;
+    if (!front) return false;
     const liquid = liquidOf(to, true);
     if (!liquid) return false;
     const start = now();
-    const q = changeAt(u);
+    const q = changeAt(front, u);
     const [fromW, fromH] = sourceSize(from);
     const [toW, toH] = sourceSize(to);
     context.globalCompositeOperation = "source-over";
     context.globalAlpha = 1;
-    if (!update(changeFront, q, NANITE_SKIN.levels[governor.level].ripple)) {
+    if (!update(front, q, NANITE_SKIN.levels[governor.level].ripple)) {
       context.drawImage(from, 0, 0, W, H);
       if (u > 0 && u < 1) stats.drawn = flow?.draw(context, q, governor.level, vs, ratio, toKey, tone) ?? 0;
       return true;
     }
     // The last form, where the liquid has not come.
     through(context, from, fromW ? fromW / W : 1, fromH ? fromH / H : 1, 0, 0, 0, gw, gh, true);
-    bands(context, changeFront, to, toW ? toW / W : 1, toH ? toH / H : 1, liquid, style.alloy === "far-from");
+    bands(context, front, to, toW ? toW / W : 1, toH ? toH / H : 1, liquid, style.alloy === "far-from");
     const device = 1 / Math.max(1e-6, vs);
     const drawn = flow && (u <= 0 || u >= 1) ? 0 : flow?.draw(context, q, governor.level, vs, ratio, toKey, tone);
     if (drawn != null) stats.drawn = drawn;
-    else droplets(context, changeFront, q, false, ratio * device, device);
+    else droplets(context, front, q, false, ratio * device, device);
     const cost = now() - start;
     stats.ms = cost;
     if (stats.band) governor.feed(cost);
@@ -1837,14 +1874,17 @@ export function* prepareNaniteSkin(
       heldLive = false;
       return;
     }
+    finish(Infinity);
+    const front = changeFront as Front | null;
+    if (!front) return;
     const start = now();
     // Sucked in: slow to leave the far ends, quick into the reactor.
     const left = 1 - u * u * (0.55 + 0.45 * u);
-    const q = changeAt(left);
-    if (update(changeFront, q, NANITE_SKIN.levels[governor.level].ripple))
-      bands(context, changeFront, held, 1, 1, otherMetal);
+    const q = changeAt(front, left);
+    if (update(front, q, NANITE_SKIN.levels[governor.level].ripple))
+      bands(context, front, held, 1, 1, otherMetal);
     const device = 1 / Math.max(1e-6, vs);
-    droplets(context, changeFront, q, true, ratio * device, device);
+    droplets(context, front, q, true, ratio * device, device);
     const cost = now() - start;
     stats.ms = cost;
     if (stats.band) governor.feed(cost);
