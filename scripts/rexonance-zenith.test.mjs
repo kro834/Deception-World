@@ -2995,25 +2995,50 @@ test("a landed tile stays drawn until its paint: the helmet's, formed in place, 
     gold,
     layers: { metal },
   });
+  // (Nano pass follow-up, 2026-11-21: a staged plate's metal is clipped to
+  // its texels and then to its liquid front's polygon; a tile counts as
+  // drawn when it is in the texels and its centre inside every polygon.)
   let rects = [];
+  let poly = [];
   let clipped = [];
+  let polys = [];
   const draws = new Map();
   const noop = () => {};
+  const inside = (points, x, y) => {
+    let hit = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i, i += 1) {
+      const [xi, yi] = points[i];
+      const [xj, yj] = points[j];
+      if (yi > y !== yj > y && ((xj - xi) * (y - yi)) / (yj - yi) + xi - x > 0) hit = !hit;
+    }
+    return hit;
+  };
   const context = new Proxy(
     {
       beginPath() {
         rects = [];
+        poly = [];
       },
-      rect(x, y) {
-        rects.push([x, y]);
+      rect(x, y, w, h) {
+        if (w > 1e3) poly.push(null);
+        else rects.push([x, y, w, h]);
+      },
+      moveTo(x, y) {
+        poly.push([x, y]);
+      },
+      lineTo(x, y) {
+        poly.push([x, y]);
       },
       clip() {
-        clipped = rects;
+        if (poly.length) {
+          if (!poly.includes(null)) polys.push(poly);
+        } else clipped = rects;
       },
       drawImage(source) {
         const src = metal.indexOf(source);
         if (src < 0) return;
-        for (const [x, y] of clipped) {
+        for (const [x, y, w, h] of clipped) {
+          if (!polys.every((points) => inside(points, x + w / 2, y + h / 2))) continue;
           const key = `${src}:${x}:${y}`;
           draws.set(key, (draws.get(key) ?? 0) + 1);
         }
@@ -3021,6 +3046,7 @@ test("a landed tile stays drawn until its paint: the helmet's, formed in place, 
       save() {},
       restore() {
         clipped = [];
+        polys = [];
       },
     },
     { get: (target, key) => (key in target ? target[key] : noop), set: () => true },
@@ -3128,8 +3154,10 @@ test("no plate shifts when it completes: narrow hanging plates form in place, an
         rect(x, y, w, h) {
           rects.push([x, y, w, h]);
         },
+        // (Nano pass follow-up, 2026-11-21: a staged plate's second clip is
+        // its liquid front's polygon; the texels' rects stay the tiles.)
         clip() {
-          clipped = rects;
+          if (rects.length && rects[0][2] < 1e3) clipped = rects;
         },
         setTransform(a, b, c, d, e, f) {
           m = [a, b, c, d, e, f];

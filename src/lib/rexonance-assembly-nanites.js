@@ -32,6 +32,7 @@ import { naniteHexHeight, naniteHexLight } from "./rexonance-unlit.js";
 import { sampleFlameBirth } from "./rexonance-ignition.js";
 import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";
 import { scrollFlameAt } from "./rexonance-field/field-clock.js";
+import { fitLiquidFront, liquidFrontPath, liquidProgress } from "./rexonance-liquid-front.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -2492,6 +2493,34 @@ export function createAssemblyNanites({
   const HSH = nano.hsh;
   const TP = nano.tp;
   const PARENT = nano.parent;
+  // Liquid fronts (nano pass follow-up, 2026-11-21; owner: 「…実際のナノマシン
+  // と同程度の大きさに」): a staged plate's metal lands, and its dark seed
+  // condenses, under one ragged front per plate and source fitted to its
+  // tiles' times (rexonance-liquid-front.js) instead of a stair of 9 px
+  // squares. [p * 2 + src]: the landing (T1) and the seed's (T0) fronts.
+  const LANDF = [];
+  const SEEDF = [];
+  for (let p = 0; p < NP; p += 1)
+    for (let src = 0; src < 2; src += 1) {
+      const ids = P[p].tiles.filter((i) => SRC[i] === src);
+      for (const [list, times] of [
+        [LANDF, T1],
+        [SEEDF, T0],
+      ])
+        list.push(
+          fitLiquidFront(
+            ids.length,
+            (k, out) => {
+              const i = ids[k];
+              out[0] = SX[i] + TW[i] / 2;
+              out[1] = SY[i] + TH[i] / 2;
+              out[2] = Math.max(TW[i], TH[i]) / 2;
+              out[3] = times[i];
+            },
+            p * 2 + src + (times === T0 ? 301 : 1),
+          ),
+        );
+    }
   // A scale hierarchy (owner, 2026-10-21: 「ナノマシンのクオリティも上げて。」):
   // machine parts come in sizes. Each chip's own size by its hash — most
   // 0.78–1.12 × s0, one in twenty a larger hero part up to 1.75 × — so a
@@ -3150,18 +3179,6 @@ export function createAssemblyNanites({
     }
   };
 
-  // The tiles of plate p landed by q (its tiles sorted by landing).
-  const landedIn = (p, q) => {
-    const t1s = P[p].t1s;
-    let low = 0;
-    let high = t1s.length;
-    while (low < high) {
-      const mid = (low + high) >> 1;
-      if (t1s[mid] <= q) low = mid + 1;
-      else high = mid;
-    }
-    return low;
-  };
   const paintedBy = (q) => {
     let low = 0;
     let high = n;
@@ -4245,37 +4262,37 @@ export function createAssemblyNanites({
   // Unpainted cells condense locally ahead of their own landing front.
   // The dark seed expands through the cell; only the locked cell receives
   // full-thickness metal, rather than a complete plate popping into view.
-  const pendingPath = (ctx, p, src, q) => {
+  // The region a front covers at q as a path (`set`: the part set by then);
+  // a whole region is a rect past the figure, an empty one nothing.
+  const frontRegion = (ctx, front, q, set, ahead = 0) => {
+    const r = liquidFrontPath(ctx, front, q, set, ahead);
+    if (r === 2) ctx.rect(-W, -H, 3 * W, 3 * H);
+    return r !== 0;
+  };
+  // Clips to plate p's unpainted texels of source `src` (a fixed outline but
+  // for the paint, which is the settled layer's), then leaves the front's
+  // region as the current path for the caller's clip. False when empty.
+  const frontPath = (ctx, p, src, q, front, ahead) => {
+    if (!front || liquidProgress(front, q) + ahead <= 0) return false;
     const ids = P[p].tiles;
     let any = false;
     ctx.beginPath();
     for (let kk = 0; kk < ids.length; kk += 1) {
       const i = ids[kk];
       if (SRC[i] !== src || TP[i] <= q) continue;
-      const age = (q - T0[i] + 0.008) / (T1[i] - T0[i] + 0.008);
-      if (age <= 0) continue;
-      const grow = 0.16 + 0.84 * smooth(clamp01(age));
-      const w = TW[i] * grow;
-      const h = TH[i] * grow;
-      ctx.rect(SX[i] + (TW[i] - w) / 2, SY[i] + (TH[i] - h) / 2, w, h);
-      any = true;
-    }
-    return any;
-  };
-  const landedPath = (ctx, p, src, q) => {
-    const pc = P[p];
-    const ids = pc.tiles;
-    const end = landedIn(p, q);
-    let any = false;
-    ctx.beginPath();
-    for (let kk = 0; kk < end; kk += 1) {
-      const i = ids[kk];
-      if (SRC[i] !== src || TP[i] <= q) continue;
       ctx.rect(SX[i], SY[i], TW[i], TH[i]);
       any = true;
     }
-    return any;
+    if (!any) return false;
+    ctx.clip();
+    ctx.beginPath();
+    return frontRegion(ctx, front, q, true, ahead);
   };
+  // The dark seed condenses just ahead of its own landing front (it used to
+  // grow tile by tile: squares).
+  const pendingPath = (ctx, p, src, q) => frontPath(ctx, p, src, q, SEEDF[p * 2 + src], 0.06);
+  // The landed, unpainted metal of plate p with source `src`.
+  const landedPath = (ctx, p, src, q) => frontPath(ctx, p, src, q, LANDF[p * 2 + src], 0);
 
   /* 9: each staged plate's contact shadow, on the body at its seat. */
   const shadowPass = (ctx) => {

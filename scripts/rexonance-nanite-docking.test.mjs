@@ -1,3 +1,4 @@
+import * as liquidFront from "../src/lib/rexonance-liquid-front.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -40,6 +41,9 @@ function runtimeFactory() {
   const firePainterImport = 'import { drawNaniteFirebrand } from "./rexonance-flame.js";';
   const phaseImport = 'import { NANITE_FIRE_PHASES } from "./rexonance-ignition.js";';
   const clockImport = 'import { scrollFlameAt } from "./rexonance-field/field-clock.js";';
+  // (Nano pass follow-up, 2026-11-21: the plates' liquid fronts.)
+  const frontImport =
+    'import { fitLiquidFront, liquidFrontPath, liquidProgress } from "./rexonance-liquid-front.js";';
   assert.equal(
     source.split(importLine).length - 1,
     1,
@@ -57,6 +61,7 @@ function runtimeFactory() {
     .replace(firePainterImport, "")
     .replace(phaseImport, "")
     .replace(clockImport, "")
+    .replace(frontImport, "")
     .replace(/\bexport\s+(?=(?:const|function|class)\b)/g, "")
     .replace(
       returnMarker,
@@ -110,6 +115,7 @@ function runtimeFactory() {
     },
   };
   context.scrollFlameAt = scrollFlameAt;
+  Object.assign(context, liquidFront);
   runInNewContext(instrumented, context);
   cachedCreate = context.__createAssemblyNanites;
   return cachedCreate;

@@ -38,9 +38,11 @@ test("the front starts with the first tile, ends with the last, and runs the way
   assert.ok(front);
   const first = Math.min(...tiles.map((t) => t.t));
   const last = Math.max(...tiles.map((t) => t.t));
-  assert.equal(liquidProgress(front, first - 1), 0);
+  // (It starts a short lead before the first landing: no jump.)
+  const before = first - 0.13 * (last - first);
+  assert.equal(liquidProgress(front, before), 0);
   assert.equal(liquidProgress(front, last), 1);
-  assert.equal(liquidFrontPath(recorder(), front, first - 1), 0, "nothing before the first landing");
+  assert.equal(liquidFrontPath(recorder(), front, before), 0, "nothing before the first landing");
   assert.equal(liquidFrontPath(recorder(), front, last), 2, "the whole plate at the last: the art exactly");
   // Bottom first: the front's normal points up the figure.
   assert.ok(front[1] < -0.9);
@@ -61,4 +63,19 @@ test("one ragged polygon a frame, closed-form in the clock", () => {
   const rest = recorder();
   assert.equal(liquidFrontPath(rest, front, 1060, false), 1);
   assert.deepEqual(rest.points.slice(1, -1), a.points.slice(1, -1));
+});
+
+test("the front never leaves a landed tile behind, and only advances", () => {
+  const [nx, ny] = front;
+  let last = -Infinity;
+  for (let t = 990; t <= 1130; t += 2) {
+    const r = recorder();
+    if (liquidFrontPath(r, front, t) !== 1) continue;
+    // The lip's lowest point along the normal.
+    const lip = Math.min(...r.points.slice(1, -1).map(([x, y]) => nx * x + ny * y));
+    assert.ok(lip >= last - 1e-6, "it only advances");
+    last = lip;
+    for (const tile of tiles)
+      if (tile.t <= t) assert.ok(nx * tile.x + ny * tile.y + 4.5 <= lip + 1e-4, `tile landed at ${tile.t} covered at ${t}`);
+  }
 });
