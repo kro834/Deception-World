@@ -1229,6 +1229,10 @@ export function* prepareNaniteSkin(
   // The fraying edge's own box (field px): only where the liquid is thin —
   // far smaller than the bands' (it is what the fray pays to draw).
   const rim = [0, 0, 0, 0];
+  // (Last frame's rim, and the box mask E is written back over: E is zero
+  // outside the two rims, so only their union can have changed.)
+  const lastRim = [0, 0, 0, 0];
+  const rimDirty = [0, 0, 0, 0];
   const governor = createNaniteGovernor();
   const now = input.now ?? (() => 0);
   const stats = { pixels: suit.count, motes: suit.motes, band: 0, drawn: 0, ms: 0 };
@@ -1259,6 +1263,9 @@ export function* prepareNaniteSkin(
     rim[2] = rim[3] = 0;
     if (owner !== front) {
       for (let m = 0; m < 5; m += 1) mask[m].fill(0);
+      lastRim[0] = lastRim[1] = 0;
+      lastRim[2] = gw;
+      lastRim[3] = gh;
       owner = front;
       prevLo = prevHi = 0;
       dirty[0] = dirty[1] = 0;
@@ -1353,7 +1360,7 @@ export function* prepareNaniteSkin(
     prevHi = hi;
     stats.band = hi - lo;
     if (dirty[2] > dirty[0] && dirty[3] > dirty[1])
-      for (let m = 0; m < 5; m += 1)
+      for (let m = 0; m < 4; m += 1)
         maskContext[m]!.putImageData(
           maskImage[m],
           0,
@@ -1363,6 +1370,21 @@ export function* prepareNaniteSkin(
           dirty[2] - dirty[0],
           dirty[3] - dirty[1],
         );
+    rimDirty[0] = Math.min(rim[0], lastRim[0]);
+    rimDirty[1] = Math.min(rim[1], lastRim[1]);
+    rimDirty[2] = Math.max(rim[2], lastRim[2]);
+    rimDirty[3] = Math.max(rim[3], lastRim[3]);
+    if (rimDirty[2] > rimDirty[0] && rimDirty[3] > rimDirty[1])
+      maskContext[4]!.putImageData(
+        maskImage[4],
+        0,
+        0,
+        rimDirty[0],
+        rimDirty[1],
+        rimDirty[2] - rimDirty[0],
+        rimDirty[3] - rimDirty[1],
+      );
+    for (let j = 0; j < 4; j += 1) lastRim[j] = rim[j];
     return hi > 0;
   };
   /** `source` through mask `m` over the field box [x0, y0, x1, y1], drawn
