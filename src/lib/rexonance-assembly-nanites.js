@@ -2501,12 +2501,15 @@ export function createAssemblyNanites({
   // squares. [p * 2 + src]: the landing (T1) and the seed's (T0) fronts.
   const LANDF = [];
   const SEEDF = [];
+  // …and the paint's front (TP), round 3: the painted art arrives under it.
+  const PAINTF = [];
   for (let p = 0; p < NP; p += 1)
     for (let src = 0; src < 2; src += 1) {
       const ids = P[p].tiles.filter((i) => SRC[i] === src);
       for (const [list, times] of [
         [LANDF, T1],
         [SEEDF, T0],
+        [PAINTF, TP],
       ])
         list.push(
           fitLiquidFront(
@@ -2518,7 +2521,7 @@ export function createAssemblyNanites({
               out[2] = Math.max(TW[i], TH[i]) / 2;
               out[3] = times[i];
             },
-            p * 2 + src + (times === T0 ? 301 : 1),
+            p * 2 + src + (times === T0 ? 301 : times === TP ? 601 : 1),
           ),
         );
     }
@@ -3799,19 +3802,31 @@ export function createAssemblyNanites({
     band(ctx, midList, nMid, false, false);
   };
 
-  /* 5: seated plates still in metal (the lacquer front is pass 11b). */
+  /* 5: seated plates still in metal (the lacquer front is pass 11b).
+     Round 3 (nano pass, 2026-11-21): a plate no stage holds lands under its
+     liquid front (its unpainted texels ∩ the landing front), not tile by
+     tile; a stray tile no plate claims keeps its own cell. */
   const seatedPass = (ctx, painted) => {
     const q = Q;
     for (let src = 0; src < 2; src += 1) {
       const sheet = metalOf(src);
       if (!sheet) continue;
+      for (let p = 0; p < NP; p += 1) {
+        if (STAGED[p] && q >= P[p].from) continue;
+        const front = LANDF[p * 2 + src];
+        if (!front || liquidProgress(PAINTF[p * 2 + src], q) >= 1) continue;
+        ctx.save();
+        if (frontPath(ctx, p, src, q, front, 0)) {
+          ctx.clip();
+          ctx.globalAlpha = 1;
+          ctx.drawImage(sheet, 0, 0, W, H);
+        }
+        ctx.restore();
+      }
       let any = false;
-      // Every landed, unpainted tile no stage holds (the helmet's all along).
       for (let kk = painted; kk < n && PAINT[kk] <= q + SEAT_LAG; kk += 1) {
         const i = ORDER[kk];
-        if (SRC[i] !== src || T1[i] > q) continue;
-        const p = PO[i];
-        if (p >= 0 && STAGED[p] && q >= P[p].from) continue;
+        if (SRC[i] !== src || T1[i] > q || PO[i] >= 0) continue;
         if (!any) {
           ctx.save();
           ctx.beginPath();
@@ -3827,6 +3842,40 @@ export function createAssemblyNanites({
       }
     }
     ctx.globalAlpha = 1;
+  };
+
+  /* 5b (round 3): the painted art arriving under each plate's paint front,
+     over the metal and the settled layer's tile cache (which only ever holds
+     tiles the front has passed: the front's envelope covers every painted
+     tile, so the cache's stair lies under this draw). Only the plates whose
+     front is moving draw; a whole plate is the cache's. */
+  const paintPass = (ctx) => {
+    const q = Q;
+    for (let src = 0; src < 2; src += 1) {
+      const sheet = art[src];
+      if (!sheet) continue;
+      for (let p = 0; p < NP; p += 1) {
+        if (STAGED[p] && q >= P[p].from && q < P[p].to) continue;
+        const front = PAINTF[p * 2 + src];
+        if (!front) continue;
+        const k = liquidProgress(front, q);
+        if (k <= 0 || k >= 1) continue;
+        const ids = P[p].tiles;
+        ctx.save();
+        ctx.beginPath();
+        for (let kk = 0; kk < ids.length; kk += 1) {
+          const i = ids[kk];
+          if (SRC[i] === src) ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+        }
+        ctx.clip();
+        ctx.beginPath();
+        liquidFrontPath(ctx, front, q, true);
+        ctx.clip();
+        ctx.globalAlpha = 1;
+        ctx.drawImage(sheet, 0, 0, W, H);
+        ctx.restore();
+      }
+    }
   };
 
   /* 6: the molten band and the cooling cells (G6, G7), over the gold. The
@@ -5614,6 +5663,7 @@ export function createAssemblyNanites({
     backPass,
     midPass,
     seatedPass,
+    paintPass,
     moltenPass,
     hologramPass,
     shadowPass,

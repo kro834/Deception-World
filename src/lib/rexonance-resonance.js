@@ -3724,6 +3724,8 @@ export function mountRexonanceAssembly(runway, config, environment = window) {
       }
       // Seated plates still in raw metal, and the lacquer front.
       if (nanites) nanites.seatedPass(context, painted);
+      // (Round 3: the paint arrives under each plate's liquid front.)
+      if (nanites) nanites.paintPass?.(context);
       if (goldLayer) {
         syncGold(progress);
         context.drawImage(goldLayer, 0, 0, W, H);
