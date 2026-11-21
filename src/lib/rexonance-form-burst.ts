@@ -633,6 +633,9 @@ function drawClasp(context: FormBurstContext, atlas: CanvasImageSource, tone: nu
 
 /** Where the art stands on the particles' canvas (backing px), the canvas's
  * px a CSS px, and the reactor in the art. */
+/** A speck's drawn width, backing px: the skin sheet's gaussian point has
+ * its core about one backing px across at this width. */
+const NANO_SPECK = 3.6;
 export type FormBurstView = {
   x: number;
   y: number;
@@ -966,7 +969,11 @@ export class FormBurstParticles {
             if (clasps) drawClasp(context, clasps, tone, p);
             else context.drawImage(sheet, tone * cells.plate, 0, cells.plate, cells.plate, -0.5, -0.5, 1, 1);
           } else {
-            context.setTransform(size, 0, 0, size, cx, cy);
+            // A speck is a point (nano pass follow-up, 2026-11-21): the
+            // skin sheet's gaussian drawn so its core is one backing px.
+            const point = size < NANO_SPECK ? size : NANO_SPECK;
+            context.globalAlpha *= 0.75;
+            context.setTransform(point, 0, 0, point, cx, cy);
             context.drawImage(
               sheet,
               (n % cells.turns) * cells.speck,
@@ -994,9 +1001,13 @@ export class FormBurstParticles {
         const p = t / life;
         const far = data[e + 6] * (1 - (1 - p) * (1 - p));
         const curl = (n % 2 ? 1 : -1) * 0.2 * far * p;
-        const size = Math.max(FORM_BURST_CELL_SIZE.fineMin * px, data[e + 7] * h) * (1 - 0.4 * p);
+        const grown = Math.max(FORM_BURST_CELL_SIZE.fineMin * px, data[e + 7] * h) * (1 - 0.4 * p);
+        // A speck is a point (nano pass follow-up, 2026-11-21): its core one
+        // backing px, its light spread thinner. (The clasps keep their size.)
+        const speck = !(clasps && n % 4 === 0) && grown > NANO_SPECK;
+        const size = speck ? NANO_SPECK : grown;
         const glint = 0.84 + 0.16 * Math.sin(wall * 0.017 + n * 2.1);
-        context.globalAlpha = smooth(p * 5) * (1 - p) * 0.92 * glint;
+        context.globalAlpha = smooth(p * 5) * (1 - p) * 0.92 * glint * (speck ? 0.75 : 1);
         context.setTransform(
           size,
           0,
