@@ -617,6 +617,76 @@ export function* prepareNaniteSkin(
       for (let x = x0; x < x1; x += 1) if (body[y * gw + x]) region[y * gw + x] = beat;
   }
   yield;
+  // The plan's tiles are squares, and where two groups meet (the body and
+  // a part off it, the helmet) their times differ: the front stepped along
+  // the tiles' edges, a staircase of squares at the scale of a tile (nano
+  // pass, 2026-11-21: no visible tiles anywhere). Each armour pixel takes
+  // its group from a place nearby, displaced by a smooth noise about a tile
+  // wide, so the seams between groups run as organic curves. Only between
+  // two groups: armour never becomes bare undersuit, nor the reverse, so
+  // the finished art stays exactly the art.
+  {
+    // First the staircase is rounded: each armour pixel takes the group
+    // most of its neighbourhood (a box a tile wide, twice: a tent) belongs
+    // to — a separable running sum per group, cheap.
+    const r = Math.max(2, Math.round(input.tile / S / 2));
+    const votes = new Float32Array(n);
+    const tmp = new Float32Array(n);
+    const best = new Float32Array(n).fill(-1);
+    const rounded = region.slice();
+    const blur = (from: Float32Array, to: Float32Array, horizontal: boolean) => {
+      const lines = horizontal ? gh : gw;
+      const span = horizontal ? gw : gh;
+      const step = horizontal ? 1 : gw;
+      for (let l = 0; l < lines; l += 1) {
+        const base = horizontal ? l * gw : l;
+        let sum = 0;
+        for (let k = -r; k < span + r; k += 1) {
+          const add = k + r;
+          if (add < span) sum += from[base + add * step];
+          const drop = k - r - 1;
+          if (drop >= 0) sum -= from[base + drop * step];
+          if (k >= 0 && k < span) to[base + k * step] = sum;
+        }
+      }
+    };
+    for (let beat = 0; beat < 8; beat += 1) {
+      let any = false;
+      for (let i = 0; i < n; i += 1) {
+        const own = region[i] === beat;
+        votes[i] = own ? 1 : 0;
+        if (own) any = true;
+      }
+      if (!any) continue;
+      for (let pass = 0; pass < 2; pass += 1) {
+        blur(votes, tmp, true);
+        blur(tmp, votes, false);
+      }
+      for (let i = 0; i < n; i += 1)
+        if (region[i] !== 255 && votes[i] > best[i]) {
+          best[i] = votes[i];
+          rounded[i] = beat;
+        }
+      yield;
+    }
+    region.set(rounded);
+    const warped = region.slice();
+    const reach = Math.max(4, input.tile * 0.75) / S;
+    for (let i = 0; i < n; i += 1) {
+      if (region[i] === 255) continue;
+      const x = i % gw;
+      const y = (i - x) / gw;
+      const dx = (valueNoise(x * S, y * S, 26, 41) - 0.5) * 2 * reach;
+      const dy = (valueNoise(x * S, y * S, 26, 43) - 0.5) * 2 * reach;
+      const nx = Math.min(gw - 1, Math.max(0, Math.round(x + dx)));
+      const ny = Math.min(gh - 1, Math.max(0, Math.round(y + dy)));
+      const other = region[ny * gw + nx];
+      if (other !== 255) warped[i] = other;
+      if (i % 16384 === 16383) yield;
+    }
+    region.set(warped);
+  }
+  yield;
 
   const coreX = Math.min(gw - 1, Math.max(0, Math.round(input.core[0] / S)));
   const coreY = Math.min(gh - 1, Math.max(0, Math.round(input.core[1] / S)));
