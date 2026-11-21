@@ -43,9 +43,10 @@
   justify-self: start;
   margin-inline-start: 0;
   padding: 2px 10px;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  background: rgb(0 0 0 / 0.22);
-  color: var(--gallery-muted);
+  border: 1px solid rgb(238 212 162 / 0.34);
+  border-radius: 2px;
+  background: rgb(5 8 14 / 0.72);
+  color: #f1d9aa;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -55,8 +56,8 @@
   height: 9px;
   flex-shrink: 0;
   margin-inline-start: 4px;
-  border-right: 1.5px solid var(--gallery-brass);
-  border-bottom: 1.5px solid var(--gallery-brass);
+  border-right: 1.5px solid #ebd09d;
+  border-bottom: 1.5px solid #ebd09d;
   transform: rotate(45deg) translateY(-2px);
   transition: transform 180ms ease;
 }
@@ -69,7 +70,7 @@
   display: grid;
   gap: 18px;
   padding: 16px 0 22px;
-  border-top: 1px solid rgb(255 255 255 / 0.08);
+  border-top: 1px solid rgb(238 212 162 / 0.22);
 }
 
 .gallery-display-console-grid {
@@ -113,9 +114,12 @@
   min-width: 0;
   margin: 0;
   padding: 12px 14px;
-  border: 1px solid rgb(255 255 255 / 0.09);
-  background: rgb(0 0 0 / 0.18);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  border: 1px solid rgb(238 212 162 / 0.26);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #070b13, #0c121e);
+  box-shadow:
+    inset 0 2px 7px rgb(0 0 0 / 0.54),
+    inset 0 1px 0 rgb(255 251 240 / 0.06);
 }
 
 .gallery-display-field > legend {
@@ -142,26 +146,29 @@
   justify-content: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid rgb(224 210 184 / 0.32);
-  background: rgb(255 255 255 / 0.02);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  color: #e7dcc7;
+  border: 1px solid rgb(236 210 160 / 0.36);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #182334, #0c121d);
+  box-shadow: inset 0 1px 0 rgb(255 251 240 / 0.16);
+  color: #f4efe4;
   cursor: pointer;
   font-size: 12px;
   line-height: 1.5;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
-    color 160ms ease;
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .gallery-display-choice:has(input:checked) {
-  border-color: #c8a76b;
-  background: rgb(197 166 108 / 0.16);
+  border-color: #fae6be;
+  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 54%, #cfa968 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 232 / 0.2),
-    inset 0 -2px 0 #c8a76b;
-  color: #f4e4c3;
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(104 74 28 / 0.28);
+  color: #14151b;
+  font-weight: 600;
 }
 
 .gallery-display-choice:has(input:focus-visible),
@@ -184,7 +191,7 @@
   height: 13px;
   flex: none;
   border: 1px solid currentColor;
-  opacity: 0.78;
+  opacity: 0.84;
 }
 
 .gallery-display-density-glyph[data-density="standard"] {
@@ -202,12 +209,17 @@
 }
 
 .gallery-display-density-glyph[data-density="compact"] {
-  background: repeating-linear-gradient(
+  background: linear-gradient(
     90deg,
-    transparent 0 2px,
-    currentColor 2px 5px
+    transparent 0 1px,
+    currentColor 1px 4px,
+    transparent 4px 6px,
+    currentColor 6px 9px,
+    transparent 9px 11px,
+    currentColor 11px 14px,
+    transparent 14px 100%
   );
-  background-size: 14px 7px;
+  background-size: 15px 7px;
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -223,19 +235,19 @@
   width: 18px;
   height: 18px;
   flex: none;
-  border: 1px solid rgb(255 255 255 / 0.56);
+  border: 1px solid rgb(246 224 180 / 0.72);
   border-radius: 50%;
   box-shadow:
-    inset 0 0 0 2px rgb(0 0 0 / 0.28),
-    0 1px 3px rgb(0 0 0 / 0.35);
+    inset 0 0 0 2px rgb(0 0 0 / 0.32),
+    0 1px 4px rgb(0 0 0 / 0.42);
 }
 
 .gallery-display-swatch[data-background="ink"] {
-  background: radial-gradient(circle at 35% 30%, #262a33, #0b0c0f 72%);
+  background: radial-gradient(circle at 35% 30%, #2a313d, #0a0c10 72%);
 }
 
 .gallery-display-swatch[data-background="warm"] {
-  background: radial-gradient(circle at 35% 30%, #cfc2ac, #a89980 74%);
+  background: radial-gradient(circle at 35% 30%, #d8cbb4, #a89980 74%);
 }
 
 .gallery-display-swatch[data-background="light"] {
@@ -246,22 +258,112 @@
   justify-self: start;
   min-height: 44px;
   padding: 8px 14px;
-  border: 1px solid rgb(224 210 184 / 0.32);
-  background: rgb(255 255 255 / 0.02);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  color: #e7dcc7;
+  border: 1px solid rgb(236 210 160 / 0.36);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #182334, #0c121d);
+  box-shadow: inset 0 1px 0 rgb(255 251 240 / 0.16);
+  color: #f4efe4;
   cursor: pointer;
   font-size: 12px;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
-    color 160ms ease;
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+/* Obsidian Glass × Brass Specular Rim Display Console Elevation */
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-display-settings {
+  padding-inline: 14px;
+  border: 1px solid rgb(238 212 162 / 0.38);
+  border-top-color: rgb(252 234 194 / 0.64);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 82% 90% at 50% 0%, rgb(244 218 168 / 0.12), transparent 72%),
+    linear-gradient(180deg, #141e2d 0%, #0a1019 60%, #070b12 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 0.22),
+    0 10px 24px -4px rgb(0 0 0 / 0.44);
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-display-settings
+  > summary
+  > .gallery-display-current {
+  padding: 2px 10px;
+  border: 1px solid rgb(240 214 164 / 0.44);
+  border-radius: 2px;
+  background: rgb(5 8 14 / 0.86);
+  box-shadow: inset 0 1px 0 rgb(255 251 240 / 0.14);
+  color: #f4deaf;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-display-field {
+  border: 1px solid rgb(238 212 162 / 0.28);
+  border-top-color: rgb(250 230 190 / 0.44);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #070b13, #0c121e);
+  box-shadow:
+    inset 0 2px 8px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 251 240 / 0.08);
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  :is(.gallery-display-choice, .gallery-display-reset) {
+  border: 1px solid rgb(236 210 160 / 0.38);
+  border-top-color: rgb(252 232 192 / 0.62);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(244 218 168 / 0.12), transparent 70%),
+    linear-gradient(180deg, #1b2738 0%, #0d1420 62%, #080d16 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 0.22),
+    0 5px 14px rgb(0 0 0 / 0.38);
+  color: #f6f1e6;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-display-choice:has(input:checked) {
+  border-color: #fae6be;
+  border-top-color: #fff9eb;
+  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 54%, #cfa968 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(104 74 28 / 0.3),
+    0 6px 16px rgb(0 0 0 / 0.44),
+    0 0 18px -4px rgb(244 212 150 / 0.38);
+  color: #14151b;
+  font-weight: 650;
+}
+
+html[data-family="gallery"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  .gallery-display-choice
+  input {
+  accent-color: #17202c;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .gallery-display-choice:hover,
-  .gallery-display-reset:hover {
-    border-color: rgb(228 202 154 / 0.68);
+  .gallery-display-reset:hover,
+  html[data-family="gallery"]
+    #gallery-top.world.gallery-page[data-gallery-page]
+    :is(.gallery-display-choice:not(:has(input:checked)), .gallery-display-reset):hover {
+    border-color: rgb(248 224 176 / 0.84);
+    background:
+      radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 224 176 / 0.22), transparent 70%),
+      linear-gradient(180deg, #243448 0%, #131d2c 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 253 246 / 0.36),
+      0 8px 20px rgb(0 0 0 / 0.46);
+    color: #fffaf0;
   }
 }
 
@@ -282,38 +384,39 @@
 /* Only the image's surrounding mat changes; all dialog controls and artwork pixels stay pure. */
 .gallery-viewer[data-gallery-background="ink"] .gallery-image-viewport {
   --gallery-viewport-focus: #f0d18d;
-  border-color: rgb(216 194 152 / 0.24);
+  border-color: rgb(238 212 162 / 0.36);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(232 210 168 / 0.06), transparent 58%),
-    radial-gradient(ellipse at 50% 50%, #14171d 36%, #090b0f 100%);
+    radial-gradient(ellipse at 50% 0%, rgb(246 220 170 / 0.1), transparent 58%),
+    radial-gradient(ellipse at 50% 50%, #131821 34%, #07090e 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 250 240 / 0.09),
-    inset 0 0 0 6px rgb(224 205 170 / 0.03),
-    inset 0 18px 44px rgb(0 0 0 / 0.62);
+    inset 0 1px 0 rgb(255 251 240 / 0.16),
+    inset 0 0 0 5px rgb(4 7 12 / 0.82),
+    inset 0 0 0 6px rgb(238 212 162 / 0.14),
+    inset 0 18px 44px rgb(0 0 0 / 0.68);
 }
 
 .gallery-viewer[data-gallery-background="warm"] .gallery-image-viewport {
   --gallery-viewport-focus: #493310;
-  border-color: rgb(118 98 68 / 0.48);
+  border-color: rgb(118 98 68 / 0.54);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(248 240 225 / 0.28), transparent 62%),
-    linear-gradient(180deg, #c3b59e, #b1a28a);
+    radial-gradient(ellipse at 50% 0%, rgb(252 244 230 / 0.34), transparent 62%),
+    linear-gradient(180deg, #c6b8a1, #b1a28a);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 245 / 0.45),
-    inset 0 0 0 6px rgb(92 74 48 / 0.09),
-    inset 0 14px 32px rgb(38 28 16 / 0.24);
+    inset 0 1px 0 rgb(255 252 245 / 0.52),
+    inset 0 0 0 6px rgb(92 74 48 / 0.11),
+    inset 0 14px 32px rgb(38 28 16 / 0.26);
 }
 
 .gallery-viewer[data-gallery-background="light"] .gallery-image-viewport {
   --gallery-viewport-focus: #674716;
-  border-color: rgb(156 144 122 / 0.48);
+  border-color: rgb(156 144 122 / 0.54);
   background:
-    radial-gradient(ellipse at 50% 0%, rgb(255 255 255 / 0.7), transparent 65%),
-    linear-gradient(180deg, #f6f3ec, #eae5da);
+    radial-gradient(ellipse at 50% 0%, rgb(255 255 255 / 0.76), transparent 65%),
+    linear-gradient(180deg, #f7f4ed, #eae5da);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.85),
-    inset 0 0 0 6px rgb(120 106 82 / 0.08),
-    inset 0 12px 28px rgb(40 34 24 / 0.14);
+    inset 0 1px 0 rgb(255 255 255 / 0.88),
+    inset 0 0 0 6px rgb(120 106 82 / 0.09),
+    inset 0 12px 28px rgb(40 34 24 / 0.16);
 }
 
 .gallery-viewer[data-gallery-background] .gallery-image-viewport:focus-visible {
@@ -325,8 +428,8 @@
   inset: auto 12px 12px;
   min-height: 44px;
   padding: 12px 16px;
-  border: 1px solid #756344;
-  background: #171614;
+  border: 1px solid rgb(238 212 162 / 0.44);
+  background: #0d131d;
   color: #f8f2e5;
   text-shadow: none;
   font-size: 13px;
@@ -337,7 +440,7 @@
   inset: 12px;
   align-content: start;
   padding: 16px;
-  background: rgb(23 22 20 / 0.96);
+  background: rgb(14 19 28 / 0.96);
   color: #f8f2e5;
   text-shadow: none;
   overflow-y: auto;
@@ -392,13 +495,49 @@
   }
 }
 
+html[data-world-effects="economy"]
+  #gallery-top.world.gallery-page[data-gallery-page]
+  :is(
+    .gallery-display-settings,
+    .gallery-display-field,
+    .gallery-display-choice,
+    .gallery-display-reset
+  ) {
+  box-shadow: none;
+}
+
 @media (forced-colors: active) {
   .gallery-display-field,
   .gallery-display-settings > summary > .gallery-display-plate-tag,
-  .gallery-display-settings > summary > .gallery-display-current {
+  .gallery-display-settings > summary > .gallery-display-current,
+  html[data-family="gallery"]
+    #gallery-top.world.gallery-page[data-gallery-page]
+    :is(
+      .gallery-display-settings,
+      .gallery-display-field,
+      .gallery-display-settings > summary > .gallery-display-current
+    ) {
     border-color: CanvasText;
     background: Canvas;
     color: CanvasText;
+    box-shadow: none;
+  }
+
+  html[data-family="gallery"]
+    #gallery-top.world.gallery-page[data-gallery-page]
+    :is(.gallery-display-choice, .gallery-display-reset) {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  html[data-family="gallery"]
+    #gallery-top.world.gallery-page[data-gallery-page]
+    .gallery-display-choice:has(input:checked) {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
     box-shadow: none;
   }
 

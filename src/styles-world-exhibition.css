@@ -8,10 +8,11 @@ main.site-shell.film-edition.mirage-edition {
   --we-paper: #e8eef0;
   --we-print: #162632;
   --we-teal: #205b6a;
-  --we-rule: rgb(188 208 222 / 20%);
-  --we-gold: #dec28f;
+  --we-rule: rgb(188 208 222 / 26%);
+  --we-gold: #e6c788;
   background:
-    radial-gradient(ellipse 78% 20% at 90% 4%, rgb(78 106 134 / 10%), transparent 75%),
+    radial-gradient(ellipse 78% 22% at 88% 4%, rgb(96 142 184 / 14%), transparent 74%),
+    radial-gradient(ellipse 64% 18% at 12% 16%, rgb(230 199 136 / 8%), transparent 74%),
     var(--we-ink);
 }
 
@@ -22,9 +23,9 @@ main.site-shell.film-edition.mirage-edition > .ambient .ambient-grid {
 }
 
 main.site-shell.film-edition.mirage-edition .topbar {
-  background: rgb(6 11 18 / 98%);
+  background: var(--we-ink);
   border-bottom-color: var(--we-rule);
-  box-shadow: none;
+  box-shadow: 0 10px 26px -12px rgb(0 0 0 / 74%);
 }
 
 main.site-shell.film-edition.mirage-edition .hero-backdrop::after {
@@ -44,8 +45,12 @@ main.site-shell.film-edition.mirage-edition
   .primary-action.ios26-glass {
   color: var(--we-print);
   background:
-    linear-gradient(115deg, #f1f5f5, #d5e7ea) padding-box,
-    linear-gradient(90deg, var(--mr-ice), var(--we-gold)) border-box !important;
+    linear-gradient(124deg, #ffffff 0%, #eaf3f5 46%, #d5e7ea 100%) padding-box,
+    linear-gradient(96deg, var(--mr-ice), #ffffff 48%, var(--we-gold)) border-box !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 92%),
+    0 14px 32px -12px rgb(0 0 0 / 72%),
+    0 0 28px -8px rgb(230 199 136 / 34%);
 }
 
 /* Numerals remain the archive's voice; their face is crisp against the
@@ -120,20 +125,24 @@ main.site-shell.film-edition.mirage-edition .story-layout .story-copy > .story-l
    edge carries the index; image tiles keep their portraits and open cues. */
 main.site-shell.film-edition.mirage-edition .threat-panel {
   border-color: var(--we-rule);
-  background: linear-gradient(90deg, rgb(240 246 255 / 3%), transparent 38%), var(--we-panel);
-  box-shadow: none;
+  background:
+    radial-gradient(ellipse 64% 48% at 8% 0%, rgb(188 214 236 / 10%), transparent 68%),
+    linear-gradient(158deg, #14212e 0%, var(--we-panel) 58%, #0a1119 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(232 246 255 / 20%),
+    0 22px 48px -18px rgb(0 0 0 / 78%);
 }
 
 main.site-shell.film-edition.mirage-edition .threat-panel::after {
   background:
-    linear-gradient(var(--mr-ice) 0 0) 0 0 / 42px 2px,
-    linear-gradient(var(--we-gold) 0 0) 100% 100% / 42px 2px;
+    linear-gradient(var(--mr-ice) 0 0) 0 0 / 48px 2px,
+    linear-gradient(var(--we-gold) 0 0) 100% 100% / 48px 2px;
   background-repeat: no-repeat;
 }
 
 main.site-shell.film-edition.mirage-edition .threat-copy h3 {
   color: #e9f2f6;
-  text-shadow: none;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 42%);
 }
 
 main.site-shell.film-edition.mirage-edition .threat-copy > p {
@@ -143,9 +152,13 @@ main.site-shell.film-edition.mirage-edition .threat-copy > p {
 /* The column is a warm-neutral terminal between the cast and the riders,
    with a gold file edge. All stacked panes and controls keep their boxes. */
 main.site-shell.film-edition.mirage-edition .world-column {
-  border-color: rgb(222 194 143 / 28%);
-  background: #191e25;
-  box-shadow: none;
+  border-color: rgb(230 199 136 / 34%);
+  background:
+    radial-gradient(ellipse 68% 52% at 94% 0%, rgb(230 199 136 / 10%), transparent 70%),
+    linear-gradient(156deg, #1e242d 0%, #151a22 58%, #0e1218 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 246 226 / 22%),
+    0 24px 50px -18px rgb(0 0 0 / 80%);
 }
 
 main.site-shell.film-edition.mirage-edition .world-column::after {
@@ -230,10 +243,14 @@ main.site-shell.film-edition.mirage-edition .episode-card.is-active .episode-car
    dark archive's identity; document titles no longer need chrome ghosts. */
 main.site-shell.film-edition.mirage-edition .wa-contents a {
   position: relative;
-  border-color: rgb(222 194 143 / 32%);
+  border-color: rgb(230 199 136 / 38%);
   background:
-    linear-gradient(var(--we-gold) 0 0) 0 100% / 28px 2px no-repeat,
-    #171d25;
+    linear-gradient(var(--we-gold) 0 0) 0 100% / 36px 2px no-repeat,
+    linear-gradient(150deg, rgb(230 199 136 / 10%), transparent 56%),
+    #151c24;
+  box-shadow:
+    inset 0 1px 0 rgb(255 246 226 / 20%),
+    0 12px 28px -12px rgb(0 0 0 / 72%);
 }
 
 /* A drawn descent cue distinguishes chapter jumps from static catalogue
@@ -254,9 +271,16 @@ main.site-shell.film-edition.mirage-edition .wa-contents a::after {
 
 @media (hover: hover) and (pointer: fine) {
   main.site-shell.film-edition.mirage-edition .wa-contents a:hover {
-    color: #f0f5f7;
+    color: #f6fafc;
     border-color: var(--we-gold);
-    background: #25303a;
+    background:
+      linear-gradient(var(--we-gold) 0 0) 0 100% / 56px 2px no-repeat,
+      linear-gradient(150deg, rgb(230 199 136 / 18%), transparent 60%),
+      #222e39;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 236 / 32%),
+      0 16px 34px -12px rgb(0 0 0 / 82%),
+      0 0 22px -8px rgb(230 199 136 / 28%);
   }
 }
 

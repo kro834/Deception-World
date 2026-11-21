@@ -48,17 +48,15 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   --ext-bevel: inset 0 1px 0 rgb(255 240 200 / 24%), inset 0 -1px 0 rgb(0 0 0 / 85%);
   --ext-gutter: clamp(18px, 4vw, 64px);
   --ext-slant: clamp(28px, 4vw, 64px);
-  --ext-speed: repeating-linear-gradient(
-    112deg,
-    transparent 0 44px,
-    rgb(255 213 122 / 5.5%) 44px 45.5px,
-    transparent 45.5px 90px,
-    rgb(105 219 255 / 3.5%) 90px 91px
+  --ext-speed: radial-gradient(
+    ellipse 76% 52% at 84% 18%,
+    rgb(62 172 255 / 12%),
+    transparent 68%
   );
-  --ext-segments: repeating-linear-gradient(90deg, #000 0 7px, transparent 7px 9px);
+  --ext-segments: linear-gradient(90deg, #000 0%, #000 100%);
   background:
-    radial-gradient(70% 50% at 50% 0, rgb(255 157 74 / 11%), transparent 70%),
-    radial-gradient(50% 40% at 85% 20%, rgb(105 219 255 / 4%), transparent 60%),
+    radial-gradient(70% 50% at 50% 0, rgb(255 178 74 / 16%), transparent 70%),
+    radial-gradient(54% 44% at 85% 20%, rgb(62 172 255 / 12%), transparent 62%),
     var(--ext-speed),
     var(--ext-ink);
 }
@@ -1293,7 +1291,7 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page > .rxs-footer {
     clamp(56px, 6vw, 88px);
   color: var(--ext-ink);
   background:
-    repeating-linear-gradient(112deg, transparent 0 46px, rgb(5 4 3 / 6%) 46px 48px),
+    radial-gradient(ellipse 68% 58% at 82% 20%, rgb(255 248 220 / 26%), transparent 62%),
     linear-gradient(160deg, #ffe7a8, var(--ext-gold) 40%, #e9a94a);
   border: 0;
 }

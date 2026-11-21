@@ -1,21 +1,30 @@
-/* Dream Chapter uses the route's own exhibit and reading surfaces. */
+/* Dream Chapter — Taisho Kinema & Lamplight flagship surface sheet.
+   Preserves the route's responsive geometry, opaque fixed chrome, and approved
+   artwork framing while elevating every surface into deep lacquer, gilt maki-e,
+   warm amber/crimson lantern illumination, kinari washi, and sculpted brass. */
 html[data-family="dream"] {
   --dream-bar: 58px;
   --dream-tabs: 48px;
   --dream-nav-offset: calc(var(--dream-bar) + var(--dream-tabs) + env(safe-area-inset-top, 0px));
-  background: #090b12;
+  background: #0b0712;
 }
 
-html[data-family="dream"] main#top.dream-page.dream-image-cinema {
-  --dc-night: #090b12;
-  --dc-wall: #10131d;
-  --dc-panel: #151927;
-  --dc-deep: #1b1c31;
-  --dc-ink: #eeedf5;
-  --dc-muted: #b6bbcd;
-  --dc-line: #34394c;
-  --dc-violet: #c0b4ee;
-  --dc-cyan: #a7dcea;
+html[data-family="dream"] main#top.dream-page.dream-page.dream-image-cinema {
+  --dc-night: #0b0712;
+  --dc-wall: #130c1c;
+  --dc-panel: #1a1126;
+  --dc-deep: #241630;
+  --dc-ink: #f6eedc;
+  --dc-muted: #cfc3d4;
+  --dc-line: rgb(214 178 112 / 46%);
+  --dc-line-soft: rgb(214 178 112 / 24%);
+  --dc-gold: #d6b270;
+  --dc-gold-bright: #f4dca0;
+  --dc-gold-deep: #9c7436;
+  --dc-shu: #b83730;
+  --dc-shu-deep: #7a2126;
+  --dc-violet: #d6c0f7;
+  --dc-cyan: #f0cf86;
   --dc-measure: 1360px;
   --dc-gut: clamp(16px, 4.3vw, 72px);
   --dc-gap: clamp(24px, 5vw, 76px);
@@ -31,14 +40,18 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   --dr-inset: 0px;
   padding-top: var(--dream-nav-offset);
   color: var(--dc-ink);
-  background: var(--dc-night);
+  background:
+    radial-gradient(ellipse 72% 420px at 84% 120px, rgb(248 192 104 / 12%), transparent 72%),
+    radial-gradient(ellipse 58% 460px at 14% 480px, rgb(196 58 50 / 10%), transparent 74%),
+    linear-gradient(180deg, #0d0815 0%, #0b0712 42%, #0e0917 100%);
   font-family: "Shippori Mincho", "Yu Mincho", serif;
 
   & :is(a, button, summary, select, input, textarea):focus-visible {
-    outline: 2px solid var(--dc-cyan);
+    outline: 2px solid var(--dc-gold-bright);
     outline-offset: 3px;
   }
 
+  /* 1. Opaque lacquered fixed chrome & act navigation (zero bleed-through) */
   & > .dream-site-header {
     inset: 0 0 auto;
     box-sizing: border-box;
@@ -46,11 +59,17 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     gap: 8px;
     min-height: calc(var(--dream-bar) + env(safe-area-inset-top, 0px));
     height: calc(var(--dream-bar) + env(safe-area-inset-top, 0px));
-    padding: env(safe-area-inset-top, 0px) var(--dc-gut) 0;
-    background: var(--dc-wall);
+    padding: env(safe-area-inset-top, 0px)
+      max(var(--sh-gutter, var(--dc-gut)), env(safe-area-inset-right, 0px)) 0
+      max(var(--dc-gut), env(safe-area-inset-left, 0px));
+    background:
+      radial-gradient(54% 130% at 50% 0%, rgb(246 206 132 / 16%), transparent 74%),
+      linear-gradient(180deg, #191024 0%, #0f0917 100%);
     border: 0;
-    border-bottom: 1px solid var(--dc-line);
-    box-shadow: none;
+    border-bottom: 1px solid rgb(222 186 120 / 50%);
+    box-shadow:
+      inset 0 -1px 0 rgb(255 240 200 / 16%),
+      0 10px 28px rgb(0 0 0 / 58%);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -62,24 +81,32 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   & > .dream-site-header > p {
     display: block;
     margin: 0;
-    color: var(--dc-ink);
+    color: #f4e2b8;
     font-family: "Cinzel", "Shippori Mincho", serif;
     font-size: 13px;
     line-height: 1;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
+    text-shadow:
+      0 1px 14px rgb(242 194 108 / 34%),
+      0 1px 4px rgb(0 0 0 / 72%);
   }
 
   & .dream-back-link {
     min-height: 44px;
-    padding: 4px 10px 4px 4px;
+    padding: 4px 12px 4px 8px;
     gap: 8px;
-    border: 1px solid transparent;
-    border-radius: 0;
-    color: var(--dc-muted);
-    background: transparent;
-    box-shadow: none;
+    border: 1px solid rgb(220 184 118 / 42%);
+    border-radius: 2px;
+    color: #f3e6cc;
+    background:
+      linear-gradient(#f2d698 0 0) 0 0 / 10px 1.5px no-repeat,
+      linear-gradient(#f2d698 0 0) 0 0 / 1.5px 10px no-repeat,
+      linear-gradient(180deg, #271732 0%, #150c1d 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 18%),
+      0 4px 12px rgb(0 0 0 / 38%);
     font-size: 12px;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
   }
 
   & .dream-back-link > span:first-child {
@@ -87,7 +114,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     height: 28px;
     border: 0;
     background: transparent;
-    color: var(--dc-cyan);
+    color: var(--dc-gold-bright);
   }
 
   & > .dream-chapter-nav {
@@ -105,10 +132,21 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     padding: 0 max(var(--dc-gut), calc((100vw - 600px) / 2));
     margin: 0;
     overflow: visible;
-    background: var(--dc-night);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(218 182 114 / 52%) 22%,
+          rgb(252 228 172 / 78%) 50%,
+          rgb(218 182 114 / 52%) 78%,
+          transparent 96%
+        )
+        bottom / 100% 1px no-repeat,
+      radial-gradient(50% 120% at 50% 0%, rgb(206 72 56 / 14%), transparent 74%),
+      linear-gradient(180deg, #140c1d 0%, #0b0711 100%);
     border: 0;
-    border-bottom: 1px solid var(--dc-line);
-    box-shadow: none;
+    border-bottom: 1px solid rgb(212 178 114 / 36%);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 54%);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -121,11 +159,11 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     padding: 0 2px;
     border: 0;
     border-radius: 0;
-    color: var(--dc-muted);
+    color: #d7c9db;
     background: transparent;
     box-shadow: none;
     font-size: 13px;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     white-space: nowrap;
   }
 
@@ -135,14 +173,19 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   }
 
   & > .dream-chapter-nav a[aria-current="location"] {
-    color: var(--dc-ink);
-    background: linear-gradient(0deg, #30566636, transparent);
-    box-shadow: inset 0 -2px var(--dc-cyan);
+    color: #fff5dd;
+    background:
+      radial-gradient(76% 96% at 50% 100%, rgb(214 74 58 / 34%), transparent 72%),
+      linear-gradient(180deg, rgb(146 48 56 / 26%), transparent 78%);
+    box-shadow: inset 0 -2px var(--dc-gold-bright);
+    text-shadow: 0 0 14px rgb(248 206 126 / 42%);
   }
 
-  /* The cover holds the whole approved image at every width. */
+  /* 2. Hero stage: amber × crimson lantern atmosphere, gilt maki-e double frame,
+        sculpted corner hardware & approved art held whole at every width. */
   & > .dream-hero {
     position: relative;
+    box-sizing: border-box;
     isolation: isolate;
     display: grid;
     grid-template-areas: "art billing";
@@ -156,16 +199,47 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     min-height: 0;
     max-height: none;
     margin: clamp(20px, 4vw, 64px) auto 0;
-    padding: clamp(8px, 1.5vw, 20px);
+    padding: clamp(14px, 2vw, 28px);
     overflow: visible;
-    border: 1px solid var(--dc-line);
-    border-radius: 0;
-    background: radial-gradient(ellipse at 86% 18%, #282746 0, transparent 58%), var(--dc-wall);
-    box-shadow: none;
+    border: 1px solid rgb(232 196 126 / 60%);
+    border-radius: 2px;
+    background:
+      radial-gradient(ellipse 62% 54% at 84% 16%, rgb(252 200 108 / 22%), transparent 66%),
+      radial-gradient(ellipse 56% 50% at 18% 86%, rgb(208 66 56 / 19%), transparent 68%),
+      radial-gradient(ellipse 44% 48% at 88% 82%, rgb(172 48 54 / 16%), transparent 70%),
+      radial-gradient(ellipse 52% 40% at 48% 0%, rgb(248 220 158 / 12%), transparent 72%),
+      linear-gradient(138deg, #110a1a 0%, #1d1129 48%, #0e0916 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 210 / 28%),
+      inset 0 -1px 0 rgb(228 188 118 / 22%),
+      0 0 0 1px rgb(12 8 18 / 88%),
+      0 28px 72px rgb(0 0 0 / 74%);
     animation: none;
   }
 
-  & > .dream-hero::before,
+  /* Gilt maki-e double inset border + sculpted brass corner brackets */
+  & > .dream-hero::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset: clamp(6px, 0.9vw, 11px);
+    z-index: 3;
+    pointer-events: none;
+    border: 1px solid rgb(236 200 130 / 42%);
+    outline: 1px solid rgb(236 200 130 / 18%);
+    outline-offset: -4px;
+    background:
+      linear-gradient(135deg, #fff0c2, #b88c44) 0 0 / 34px 2.5px no-repeat,
+      linear-gradient(135deg, #fff0c2, #b88c44) 0 0 / 2.5px 34px no-repeat,
+      linear-gradient(225deg, #fff0c2, #b88c44) 100% 0 / 34px 2.5px no-repeat,
+      linear-gradient(225deg, #fff0c2, #b88c44) 100% 0 / 2.5px 34px no-repeat,
+      linear-gradient(45deg, #f2d392, #9c7234) 0 100% / 34px 2.5px no-repeat,
+      linear-gradient(45deg, #f2d392, #9c7234) 0 100% / 2.5px 34px no-repeat,
+      linear-gradient(315deg, #f2d392, #9c7234) 100% 100% / 34px 2.5px no-repeat,
+      linear-gradient(315deg, #f2d392, #9c7234) 100% 100% / 2.5px 34px no-repeat;
+    box-shadow: inset 0 0 44px rgb(252 196 104 / 10%);
+  }
+
   & > .dream-hero::after,
   & > .dream-hero > .dream-hero-title,
   & > .dream-hero > .dream-hero-vignette {
@@ -186,13 +260,29 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    border: 1px solid #596177;
-    border-radius: 0;
-    outline: 0;
-    background: var(--dc-night);
-    box-shadow: 0 12px 34px #05060b88;
+    border: 1px solid rgb(236 202 134 / 72%);
+    border-radius: 2px;
+    outline: 1px solid rgb(236 202 134 / 28%);
+    outline-offset: 4px;
+    background: #08050d;
+    box-shadow:
+      0 0 0 5px #110a1a,
+      0 0 38px rgb(252 194 102 / 18%),
+      0 20px 48px rgb(4 2 8 / 80%);
     clip-path: none;
     transform: none;
+  }
+
+  /* Subtle warm amber edge halation inside the artwork frame — center stays crystal clear */
+  & > .dream-hero > .dream-hero-field::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 28px rgb(255 198 108 / 18%),
+      inset 0 0 0 1px rgb(255 244 210 / 34%);
   }
 
   & > .dream-hero .dream-hero-art {
@@ -212,12 +302,25 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     mask-image: none;
   }
 
+  /* Warm amber × crimson lantern ambience controlled by DreamStageLantern */
   & > .dream-hero > .dream-hero-lamplight {
+    position: absolute;
+    inset: 0;
     z-index: 2;
     pointer-events: none;
-    background: radial-gradient(ellipse at 70% 12%, #c4b3f21c, transparent 65%);
+    background:
+      radial-gradient(ellipse 62% 52% at 78% 14%, rgb(255 204 114 / 30%), transparent 66%),
+      radial-gradient(ellipse 54% 46% at 16% 84%, rgb(216 68 54 / 22%), transparent 68%),
+      radial-gradient(ellipse 76% 32% at 50% 0%, rgb(255 232 172 / 18%), transparent 70%);
+    opacity: 1;
+    transition: opacity 650ms ease;
   }
 
+  & > .dream-hero[data-dream-lantern="dim"] > .dream-hero-lamplight {
+    opacity: 0;
+  }
+
+  /* Keep z-index: auto and no transform/filter/opacity so logo screen blend stays intact */
   & > .dream-hero > .dream-hero-copy {
     position: relative;
     grid-area: billing;
@@ -233,7 +336,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     height: auto;
     max-width: none;
     margin: 0;
-    padding: clamp(12px, 2vw, 30px) clamp(10px, 2vw, 28px) clamp(12px, 2vw, 30px) 0;
+    padding: clamp(12px, 2vw, 30px) clamp(12px, 2vw, 28px) clamp(12px, 2vw, 30px) 0;
     border: 0;
     background: transparent;
     text-align: left;
@@ -256,15 +359,28 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
 
   & .dream-hero-copy > .dream-hero-billing {
     width: 100%;
-    margin: 10px 0 clamp(18px, 3.5vw, 40px);
-    padding: 0;
+    margin: 12px 0 clamp(18px, 3.2vw, 36px);
+    padding: 0 0 12px;
     border: 0;
-    color: var(--dc-muted);
+    background:
+      linear-gradient(
+          90deg,
+          transparent 8%,
+          rgb(232 196 126 / 54%) 32%,
+          rgb(255 236 188 / 78%) 50%,
+          rgb(232 196 126 / 54%) 68%,
+          transparent 92%
+        )
+        bottom / 100% 1px no-repeat;
+    color: #ecd6a8;
     font-size: clamp(12px, 1.4vw, 15px);
+    font-weight: 500;
     line-height: 1.65;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     text-align: center;
-    text-shadow: none;
+    text-shadow:
+      0 1px 12px rgb(246 196 108 / 26%),
+      0 1px 6px rgb(0 0 0 / 72%);
     opacity: 1;
     animation: none;
     translate: none;
@@ -276,17 +392,22 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     display: block;
     width: 100%;
     height: auto;
-    margin: 0 0 clamp(16px, 2.8vw, 30px);
-    padding: 0;
+    margin: 0 0 clamp(18px, 2.8vw, 30px);
+    padding: 2px 0 4px 16px;
     border: 0;
-    color: var(--dc-ink);
+    border-left: 2px solid #ecc984;
+    background:
+      linear-gradient(180deg, #cc493b 0%, #ecc984 54%, transparent 100%) 3px 0 / 1px 100% no-repeat;
+    color: #fff9ec;
     font-family: "Shippori Mincho B1", "Shippori Mincho", serif;
     font-size: clamp(26px, 3.35vw, 55px);
     font-weight: 500;
     line-height: 1.34;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
     writing-mode: horizontal-tb;
-    text-shadow: none;
+    text-shadow:
+      0 0 26px rgb(252 202 114 / 32%),
+      0 2px 16px rgb(0 0 0 / 88%);
     clip-path: none;
     opacity: 1;
     animation: none;
@@ -312,7 +433,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   & .dream-hero-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 10px;
     width: 100%;
     margin: 0;
     opacity: 1;
@@ -326,27 +447,57 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     grid-area: auto;
     align-items: center;
     justify-content: space-between;
-    gap: 5px;
+    gap: 6px;
     width: 100%;
-    min-height: 48px;
-    padding: 10px clamp(8px, 1.3vw, 18px);
-    border: 1px solid var(--dc-line);
+    min-height: 50px;
+    padding: 10px clamp(10px, 1.4vw, 18px);
+    border: 1px solid rgb(232 196 126 / 64%);
     border-radius: 2px;
-    color: var(--dc-ink);
-    background: var(--dc-panel);
-    box-shadow: none;
+    color: #fbf2df;
+    background:
+      linear-gradient(135deg, #f8e0a4, #b68c46) 0 0 / 14px 2px no-repeat,
+      linear-gradient(135deg, #f8e0a4, #b68c46) 0 0 / 2px 14px no-repeat,
+      linear-gradient(315deg, #eed296, #9c7234) 100% 100% / 14px 2px no-repeat,
+      linear-gradient(315deg, #eed296, #9c7234) 100% 100% / 2px 14px no-repeat,
+      radial-gradient(82% 94% at 16% 0%, rgb(248 214 146 / 18%), transparent 70%),
+      linear-gradient(180deg, #271834 0%, #150c1f 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 212 / 26%),
+      inset 0 0 0 3px rgb(12 8 18 / 48%),
+      0 12px 26px rgb(0 0 0 / 54%);
     font:
       700 clamp(12px, 1.25vw, 15px) / 1.5 "Noto Sans JP",
       sans-serif;
-    letter-spacing: 0;
+    letter-spacing: 0.03em;
     text-decoration: none;
     clip-path: none;
   }
 
+  & .dream-hero-actions a > span:last-child {
+    color: var(--dc-gold-bright);
+  }
+
+  /* Vermilion lacquer × gilt rim primary CTA */
   & .dream-hero-actions .dream-cinema-primary {
-    border-color: var(--dc-cyan);
-    color: #111f2a;
-    background: var(--dc-cyan);
+    border-color: #f4d38c;
+    color: #fff8ea;
+    background:
+      linear-gradient(135deg, #fff2c6, #d4a65a) 0 0 / 16px 2px no-repeat,
+      linear-gradient(135deg, #fff2c6, #d4a65a) 0 0 / 2px 16px no-repeat,
+      linear-gradient(315deg, #f6da9c, #b68640) 100% 100% / 16px 2px no-repeat,
+      linear-gradient(315deg, #f6da9c, #b68640) 100% 100% / 2px 16px no-repeat,
+      radial-gradient(88% 96% at 24% 0%, rgb(255 204 118 / 34%), transparent 68%),
+      linear-gradient(135deg, #91292f 0%, #681c24 54%, #45121a 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 210 / 42%),
+      inset 0 0 22px rgb(242 110 78 / 24%),
+      0 14px 34px rgb(0 0 0 / 60%),
+      0 0 24px rgb(214 76 58 / 22%);
+    text-shadow: 0 1px 6px rgb(0 0 0 / 54%);
+  }
+
+  & .dream-hero-actions .dream-cinema-primary > span:last-child {
+    color: #fff0c2;
   }
 
   & .dream-hero-footer {
@@ -354,8 +505,8 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     flex-wrap: wrap;
     align-items: center;
     width: 100%;
-    margin: 14px 0 0;
-    gap: 0 14px;
+    margin: 16px 0 0;
+    gap: 6px 14px;
   }
 
   & .dream-hero-footer .dream-hero-obi {
@@ -369,7 +520,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     margin: 0;
     padding: 0;
     border: 0;
-    color: var(--dc-muted);
+    color: #dcd0be;
     background: transparent;
     font:
       500 12px / 1.75 "Noto Sans JP",
@@ -379,8 +530,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     white-space: normal;
     /* The film's title stays whole beside the lantern: the line turns before
        『, not inside ディセプションワールド (ワール／ド on a phone, 2026-11-20).
-       WebKit turns after 『 instead; the title is whole there too. Under
-       the narrowest screens it may still break anywhere. */
+       Under the narrowest screens it may still break anywhere. */
     word-break: keep-all;
     overflow-wrap: anywhere;
     writing-mode: horizontal-tb;
@@ -389,13 +539,57 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     translate: none;
   }
 
+  /* DreamStageLantern (夢灯り) — glowing amber gas-mantle toggle */
   & .dream-hero-footer .dream-stage-lantern {
     position: static;
     inset: auto;
-    min-height: 44px;
+    min-height: 48px;
     margin: 0;
+    border: 1px solid rgb(240 206 138 / 76%);
+    background:
+      linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
+      linear-gradient(#fff0c2 0 0) 0 0 / 2px 14px no-repeat,
+      linear-gradient(#e8c688 0 0) 100% 100% / 14px 1.5px no-repeat,
+      linear-gradient(#e8c688 0 0) 100% 100% / 1.5px 14px no-repeat,
+      radial-gradient(ellipse 68% 92% at 24% 50%, rgb(255 204 108 / 30%), transparent 72%),
+      linear-gradient(145deg, #2d1934, #170d1e);
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 214 / 32%),
+      inset 0 0 0 3px rgb(12 8 18 / 54%),
+      0 0 24px rgb(255 198 104 / 28%),
+      0 12px 26px rgb(0 0 0 / 54%);
   }
 
+  & .dream-hero-footer .dream-stage-lantern[aria-pressed="false"] {
+    border-color: rgb(186 154 104 / 44%);
+    background:
+      linear-gradient(#b2915b 0 0) 0 0 / 12px 1.5px no-repeat,
+      linear-gradient(#b2915b 0 0) 0 0 / 1.5px 12px no-repeat,
+      linear-gradient(145deg, #1a1120, #100a15);
+    box-shadow:
+      inset 0 1px 0 rgb(255 240 206 / 10%),
+      0 8px 18px rgb(0 0 0 / 48%);
+  }
+
+  & .dream-hero-footer .dream-stage-lantern[aria-pressed="true"] .dream-stage-lantern-shade {
+    box-shadow:
+      0 0 26px rgb(255 204 108 / 56%),
+      0 0 10px rgb(255 240 190 / 62%),
+      inset 0 2px 3px rgb(92 54 24 / 36%),
+      inset 0 -2px 3px rgb(92 54 24 / 40%);
+  }
+
+  & .dream-hero-footer .dream-stage-lantern-label strong {
+    color: #f8dfa4;
+    text-shadow: 0 0 12px rgb(255 206 116 / 34%);
+  }
+
+  & .dream-hero-footer .dream-stage-lantern[aria-pressed="false"] .dream-stage-lantern-label strong {
+    color: #c9bca8;
+    text-shadow: none;
+  }
+
+  /* 3. Opening desk: Kinari washi prologue scroll + lacquered contents & cinema console */
   & .dream-opening-desk {
     display: grid;
     grid-template-columns: minmax(0, 1.52fr) minmax(0, 1fr);
@@ -408,7 +602,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   & .dream-opening-tools {
     display: grid;
     min-width: 0;
-    gap: 10px;
+    gap: 12px;
   }
 
   & .dream-opening-desk > .dream-prologue {
@@ -422,24 +616,41 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     contain-intrinsic-size: none;
   }
 
+  /* Kinari washi surface paired strictly with dark sumi ink & vermilion heading */
   & .dream-prologue .dream-prologue-card {
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: clamp(14px, 3.6vw, 48px);
+    gap: clamp(14px, 3.2vw, 40px);
     align-items: start;
     width: 100%;
     max-width: none;
     height: auto;
     min-height: 0;
     margin: 0;
-    padding: clamp(18px, 3vw, 36px) 0;
-    border: 0;
-    border-block: 1px solid var(--dc-line);
-    border-radius: 0;
-    color: var(--dc-ink);
-    background: transparent;
+    padding: clamp(22px, 3vw, 36px) clamp(18px, 3vw, 34px);
+    border: 1px solid rgb(218 182 118 / 82%);
+    border-radius: 2px;
+    color: #291e2c;
+    background:
+      linear-gradient(#a67b36 0 0) 11px 11px / 22px 1.5px no-repeat,
+      linear-gradient(#a67b36 0 0) 11px 11px / 1.5px 22px no-repeat,
+      linear-gradient(#a67b36 0 0) calc(100% - 11px) 11px / 22px 1.5px no-repeat,
+      linear-gradient(#a67b36 0 0) calc(100% - 11px) 11px / 1.5px 22px no-repeat,
+      linear-gradient(#a67b36 0 0) 11px calc(100% - 11px) / 22px 1.5px no-repeat,
+      linear-gradient(#a67b36 0 0) 11px calc(100% - 11px) / 1.5px 22px no-repeat,
+      linear-gradient(#a67b36 0 0) calc(100% - 11px) calc(100% - 11px) / 22px 1.5px no-repeat,
+      linear-gradient(#a67b36 0 0) calc(100% - 11px) calc(100% - 11px) / 1.5px 22px no-repeat,
+      radial-gradient(ellipse 72% 54% at 14% 12%, rgb(255 253 246 / 80%), transparent 68%),
+      radial-gradient(ellipse 58% 46% at 88% 88%, rgb(206 164 98 / 22%), transparent 70%),
+      linear-gradient(120deg, #f6eedf 0%, #ede2cc 58%, #e4d6bb 100%);
     outline: 0;
-    box-shadow: none;
+    box-shadow:
+      inset 0 5px 0 #39272b,
+      inset 0 -5px 0 #39272b,
+      inset 0 6px 0 #c8a45c,
+      inset 0 -6px 0 #c8a45c,
+      0 24px 56px rgb(4 2 8 / 68%);
     text-align: left;
   }
 
@@ -460,17 +671,21 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   }
 
   & .dream-prologue-card h2 {
-    color: var(--dc-violet);
-    font-size: clamp(26px, 3vw, 44px);
-    line-height: 1.28;
+    padding: 4px 12px 6px;
+    border: 1px solid rgb(138 42 48 / 52%);
+    background: rgb(138 42 48 / 7%);
+    color: #82252d;
+    font-size: clamp(26px, 3vw, 42px);
+    line-height: 1.2;
   }
 
   & .dream-prologue-card > p {
     max-width: 41em;
-    color: var(--dc-ink);
+    color: #291e2c;
     font-size: clamp(15px, 1.4vw, 18px);
+    font-weight: 500;
     line-height: 2;
-    letter-spacing: 0.012em;
+    letter-spacing: 0.015em;
   }
 
   & .dream-opening-tools :is(.dream-contents, .dream-cinema-console) {
@@ -479,30 +694,39 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     max-width: none;
     margin: 0;
     padding: 0;
-    border: 1px solid var(--dc-line);
+    border: 1px solid rgb(224 188 120 / 54%);
     border-radius: 2px;
     color: var(--dc-ink);
-    background: var(--dc-panel);
+    background:
+      linear-gradient(135deg, #f5dca0, #a88040) 0 0 / 18px 2px no-repeat,
+      linear-gradient(135deg, #f5dca0, #a88040) 0 0 / 2px 18px no-repeat,
+      linear-gradient(315deg, #edd090, #9a7234) 100% 100% / 18px 2px no-repeat,
+      linear-gradient(315deg, #edd090, #9a7234) 100% 100% / 2px 18px no-repeat,
+      radial-gradient(66% 86% at 18% 0%, rgb(246 206 136 / 14%), transparent 72%),
+      linear-gradient(180deg, #1d1228 0%, #120b1a 100%);
     outline: 0;
-    box-shadow: none;
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 20%),
+      0 16px 36px rgb(0 0 0 / 50%);
   }
 
   & .dream-opening-tools :is(.dream-contents, .dream-cinema-console) > summary {
     box-sizing: border-box;
-    min-height: 48px;
-    padding: 8px 14px;
+    min-height: 50px;
+    padding: 10px 16px;
     border: 0;
-    color: var(--dc-ink);
+    color: #f8efdc;
     background: transparent;
     font:
-      600 14px / 1.45 "Noto Sans JP",
-      sans-serif;
-    letter-spacing: 0.03em;
+      600 14px / 1.45 "Shippori Mincho",
+      "Noto Sans JP",
+      serif;
+    letter-spacing: 0.08em;
     cursor: pointer;
   }
 
   & .dream-opening-tools .dream-contents > summary::after {
-    color: var(--dc-violet);
+    color: var(--dc-gold-bright);
   }
 
   & .dream-opening-tools .dream-contents nav,
@@ -513,7 +737,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
 
   & .dream-opening-tools .dream-contents ol {
     display: block;
-    padding: 0 14px 12px;
+    padding: 0 16px 14px;
   }
 
   & .dream-opening-tools .dream-contents li {
@@ -525,18 +749,18 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     margin: 0;
     padding: 0;
     border: 0;
-    border-top: 1px solid var(--dc-line);
+    border-top: 1px solid var(--dc-line-soft);
     background: transparent;
     box-shadow: none;
   }
 
   & .dream-opening-tools .dream-contents li > small {
-    min-width: 3em;
-    color: var(--dc-violet);
+    min-width: 3.4em;
+    color: var(--dc-gold-bright);
     font:
       700 12px / 1.6 "Noto Sans JP",
       sans-serif;
-    letter-spacing: 0;
+    letter-spacing: 0.06em;
   }
 
   & .dream-opening-tools .dream-contents li > a {
@@ -551,10 +775,10 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     background: transparent;
     box-shadow: none;
     font-size: 14px;
-    letter-spacing: 0;
+    letter-spacing: 0.02em;
     text-decoration: underline;
-    text-underline-offset: 0.26em;
-    text-decoration-color: var(--dc-line);
+    text-underline-offset: 0.28em;
+    text-decoration-color: rgb(224 188 118 / 46%);
   }
 
   & .dream-opening-tools .dream-cinema-effects {
@@ -577,7 +801,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     scroll-margin-top: calc(var(--dream-nav-offset) + 14px);
   }
 
-  /* A still and its intertitle share a frame, with the title on solid ink. */
+  /* 4. Act intertitle headers — still and title in one lacquered gilt frame */
   & > .dream-section > .dream-section-heading {
     position: relative;
     isolation: isolate;
@@ -587,15 +811,59 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     align-items: center;
     gap: 8px clamp(12px, 3vw, 42px);
     width: 100%;
-    min-height: clamp(115px, 16vw, 214px);
-    margin: 0 0 clamp(16px, 3vw, 34px);
+    min-height: clamp(118px, 16vw, 218px);
+    margin: 0 0 clamp(18px, 3vw, 36px);
     padding: 0;
     overflow: hidden;
     color: var(--dc-ink);
-    border: 1px solid var(--dc-line);
-    background: linear-gradient(110deg, var(--dc-wall), var(--dc-deep));
-    box-shadow: none;
+    border: 1px solid rgb(228 192 122 / 54%);
+    border-radius: 2px;
+    background:
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 28px 2px no-repeat,
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 2px 28px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 28px 2px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 2px 28px no-repeat,
+      radial-gradient(58% 92% at 16% 0%, rgb(248 206 130 / 20%), transparent 70%),
+      radial-gradient(48% 76% at 88% 100%, rgb(202 66 56 / 16%), transparent 72%),
+      linear-gradient(112deg, #180f23 0%, #241530 56%, #110a18 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 204 / 22%),
+      inset 0 -1px 0 rgb(220 184 116 / 16%),
+      0 20px 44px -14px rgb(0 0 0 / 74%);
     text-align: left;
+  }
+
+  & > .dream-character-section > .dream-section-heading {
+    background:
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 28px 2px no-repeat,
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 2px 28px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 28px 2px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 2px 28px no-repeat,
+      radial-gradient(58% 92% at 16% 0%, rgb(246 208 142 / 22%), transparent 70%),
+      radial-gradient(48% 76% at 88% 100%, rgb(186 58 76 / 20%), transparent 72%),
+      linear-gradient(112deg, #1b1024 0%, #29162e 56%, #110a18 100%);
+  }
+
+  & > .dream-dolminence-section > .dream-section-heading {
+    background:
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 28px 2px no-repeat,
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 2px 28px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 28px 2px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 2px 28px no-repeat,
+      radial-gradient(58% 92% at 16% 0%, rgb(222 76 58 / 26%), transparent 70%),
+      radial-gradient(48% 76% at 88% 100%, rgb(232 192 118 / 16%), transparent 72%),
+      linear-gradient(112deg, #240f1b 0%, #1d1020 56%, #100814 100%);
+  }
+
+  & > .dream-case-section > .dream-section-heading {
+    background:
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 28px 2px no-repeat,
+      linear-gradient(135deg, #f6dea2, #b48a42) 0 0 / 2px 28px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 28px 2px no-repeat,
+      linear-gradient(45deg, #ecd08e, #987032) 0 100% / 2px 28px no-repeat,
+      radial-gradient(58% 92% at 16% 0%, rgb(206 180 246 / 20%), transparent 70%),
+      radial-gradient(48% 76% at 88% 100%, rgb(236 196 122 / 18%), transparent 72%),
+      linear-gradient(112deg, #16122c 0%, #201633 56%, #0e0a1a 100%);
   }
 
   & > .dream-section > .dream-section-heading::before {
@@ -610,13 +878,14 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     align-self: end;
     justify-self: start;
     z-index: 1;
-    margin: 0 0 0 clamp(12px, 3vw, 42px);
-    color: var(--dc-violet);
+    margin: 0 0 0 clamp(14px, 3vw, 42px);
+    color: var(--dc-gold-bright);
     font:
       500 clamp(13px, 2vw, 25px) / 1.2 "Cinzel",
       Georgia,
       serif;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 16px rgb(246 202 122 / 34%);
     opacity: 1;
     -webkit-text-stroke: 0;
     transform: none;
@@ -633,8 +902,8 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     object-position: var(--dc-still-position, 50% 43%);
     opacity: 0.88;
     filter: none;
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%);
-    mask-image: linear-gradient(90deg, transparent, #000 25%);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 28%);
+    mask-image: linear-gradient(90deg, transparent, #000 28%);
   }
 
   & > .dream-character-section {
@@ -649,28 +918,42 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     grid-column: 1;
     grid-row: 2;
     min-width: 0;
-    margin: 0 0 0 clamp(12px, 3vw, 42px);
+    margin: 0 0 0 clamp(14px, 3vw, 42px);
     padding: 0;
-    color: var(--dc-ink);
+    color: #fff7e6;
     background: transparent;
     font-size: clamp(21px, 3.8vw, 56px);
     line-height: 1.22;
-    letter-spacing: 0.055em;
+    letter-spacing: 0.07em;
     -webkit-text-fill-color: currentColor;
-    text-shadow: none;
+    text-shadow:
+      0 2px 24px rgb(246 198 116 / 26%),
+      0 2px 12px rgb(0 0 0 / 78%);
     opacity: 1;
   }
 
+  /* Vermilion × gilt swallowtail act pennant (幟) */
   & > .dream-section > .dream-section-heading > .dream-act-mark {
     position: absolute;
     inset: 0 18px auto auto;
-    width: 10px;
-    height: 24px;
+    width: 18px;
+    height: 36px;
     margin: 0;
     border: 0;
-    background: var(--dc-violet);
-    box-shadow: none;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 79%, 0 100%);
+    border-top: 2.5px solid #f6dfa0;
+    background:
+      linear-gradient(
+        90deg,
+        transparent 2.5px,
+        rgb(252 234 188 / 88%) 2.5px 3.6px,
+        transparent 3.6px calc(100% - 3.6px),
+        rgb(252 234 188 / 88%) calc(100% - 3.6px) calc(100% - 2.5px),
+        transparent 0
+      ),
+      radial-gradient(76% 64% at 50% 22%, rgb(244 120 92 / 40%), transparent 74%),
+      linear-gradient(180deg, #bf3a31 0%, #86252a 58%, #54151d 100%);
+    box-shadow: 0 10px 22px rgb(0 0 0 / 64%);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
     translate: none;
   }
 
@@ -681,27 +964,48 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     grid-row: 3;
     align-self: start;
     justify-self: start;
-    width: 30px;
-    height: 1px;
-    margin: 0 0 0 clamp(12px, 3vw, 42px);
-    background: var(--dc-violet);
+    width: 56px;
+    height: 2px;
+    margin: 0 0 0 clamp(14px, 3vw, 42px);
+    background: linear-gradient(90deg, #cc493b 0%, #f2d492 52%, transparent 100%);
     transform: none;
   }
 
+  /* 5. Act I: E-kanban (絵看板) gallery — brass double-mat frame & projector halation */
   & .dream-poster-stage {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    outline: 0;
-    box-shadow: none;
+    box-sizing: border-box;
+    padding: clamp(10px, 1.5vw, 18px);
+    border: 1px solid rgb(232 196 126 / 58%);
+    border-radius: 2px;
+    outline: 1px solid rgb(232 196 126 / 24%);
+    outline-offset: -5px;
+    background:
+      linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 32px 2.5px no-repeat,
+      linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2.5px 32px no-repeat,
+      linear-gradient(225deg, #f8e2a6, #ad8340) 100% 0 / 32px 2.5px no-repeat,
+      linear-gradient(225deg, #f8e2a6, #ad8340) 100% 0 / 2.5px 32px no-repeat,
+      linear-gradient(45deg, #eed08e, #987032) 0 100% / 32px 2.5px no-repeat,
+      linear-gradient(45deg, #eed08e, #987032) 0 100% / 2.5px 32px no-repeat,
+      linear-gradient(315deg, #eed08e, #987032) 100% 100% / 32px 2.5px no-repeat,
+      linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2.5px 32px no-repeat,
+      radial-gradient(ellipse 68% 48% at 50% 16%, rgb(255 204 114 / 18%), transparent 68%),
+      radial-gradient(ellipse 56% 44% at 84% 92%, rgb(202 66 56 / 14%), transparent 70%),
+      linear-gradient(180deg, #1b1225 0%, #110b18 58%, #0b0811 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 208 / 28%),
+      inset 0 0 48px rgb(255 190 98 / 14%),
+      0 28px 68px rgb(0 0 0 / 70%);
   }
 
   & .dream-poster-stage > figure {
-    border: 1px solid var(--dc-line);
+    border: 1px solid rgb(236 202 134 / 58%);
     border-radius: 2px;
     outline: 0;
-    background: #06080d;
-    box-shadow: none;
+    background: #08050d;
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 26%),
+      inset 0 0 36px rgb(255 190 98 / 18%),
+      0 22px 52px rgb(0 0 0 / 64%);
   }
 
   & .dream-poster-stage > figure > img {
@@ -713,36 +1017,70 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   }
 
   & .dream-poster-stage figcaption {
-    color: var(--dc-ink);
-    background: var(--dc-panel);
-    border-color: var(--dc-line);
-    box-shadow: none;
+    color: #fbf2df;
+    border-top: 1px solid rgb(232 196 126 / 54%);
+    background:
+      linear-gradient(90deg, #f6dea0, #c89d54 50%, #f6dea0) 0 0 / 100% 1.5px no-repeat,
+      radial-gradient(66% 96% at 18% 0%, rgb(250 214 146 / 16%), transparent 72%),
+      linear-gradient(180deg, #22142b 0%, #130b1a 100%);
+    box-shadow: inset 0 1px 0 rgb(255 242 204 / 18%);
   }
 
   & .dream-poster-stage figcaption b {
-    color: inherit;
+    color: #fff6e4;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 56%);
   }
 
   & .dream-poster-progress {
-    background: var(--dc-cyan);
+    background: linear-gradient(90deg, #c23b32 0%, #e6bc70 58%, #fff0c2 100%);
+  }
+
+  & .dream-poster-thumbnails button {
+    border: 1px solid rgb(214 178 112 / 34%);
+    background: #140d1d;
   }
 
   & .dream-poster-thumbnails button[aria-selected="true"] {
-    outline: 2px solid var(--dc-cyan);
+    outline: 2px solid #f4d38a;
     outline-offset: -2px;
+    box-shadow:
+      0 0 18px rgb(250 198 106 / 46%),
+      0 8px 20px rgb(0 0 0 / 56%);
   }
 
   & .dream-poster-thumbnails button:focus-visible {
-    outline: 3px solid var(--dc-cyan);
+    outline: 3px solid var(--dc-gold-bright);
     outline-offset: 3px;
   }
 
-  /* Portrait and record title have their own surfaces, even at 320px. */
+  & .dream-poster-controls button,
+  & .dream-poster-hud-step button {
+    border: 1px solid rgb(228 192 122 / 58%);
+    color: #fbf1de;
+    background:
+      linear-gradient(#f5dca0 0 0) 0 0 / 12px 1.5px no-repeat,
+      linear-gradient(#f5dca0 0 0) 100% 100% / 12px 1.5px no-repeat,
+      linear-gradient(180deg, #2c1a36 0%, #180e21 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 24%),
+      0 8px 20px rgb(0 0 0 / 48%);
+  }
+
+  & .dream-poster-controls button[aria-pressed="true"] {
+    border-color: #f4d38c;
+    background:
+      linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
+      linear-gradient(#fff0c2 0 0) 100% 100% / 14px 2px no-repeat,
+      linear-gradient(135deg, #86262c 0%, #561820 100%);
+  }
+
+  /* 6. Act II & III: Cast & Dolminence portrait plates — gilt lacquer double framing
+        with clean separate surfaces for artwork and typography at every width. */
   & :is(.dream-character-grid, .dream-dolminence-grid) {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     direction: ltr;
-    gap: clamp(12px, 1.7vw, 24px);
+    gap: clamp(14px, 1.8vw, 26px);
     max-width: none;
     margin: 0;
     padding: 0;
@@ -765,7 +1103,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     padding: 0;
     border: 0;
     border-radius: 2px;
-    background: var(--dc-panel);
+    background: transparent;
     box-shadow: none;
   }
 
@@ -786,13 +1124,47 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    border: 1px solid var(--dc-line);
+    border: 1px solid rgb(232 196 126 / 62%);
     border-radius: 2px;
     color: var(--dc-ink);
-    background: var(--dc-panel);
-    box-shadow: none;
+    background:
+      linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 26px 2.5px no-repeat,
+      linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2.5px 26px no-repeat,
+      linear-gradient(315deg, #f8e2a6, #ad8340) 100% 100% / 26px 2.5px no-repeat,
+      linear-gradient(315deg, #f8e2a6, #ad8340) 100% 100% / 2.5px 26px no-repeat,
+      radial-gradient(
+        76% 64% at 80% 14%,
+        color-mix(in srgb, var(--dream-accent, #e6c28e) 22%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(56% 52% at 18% 92%, rgb(206 72 58 / 14%), transparent 72%),
+      linear-gradient(156deg, #24152e 0%, #160d1e 56%, #0f0915 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 210 / 26%),
+      inset 0 0 0 4px rgb(12 8 18 / 54%),
+      inset 0 0 0 5px rgb(228 192 122 / 22%),
+      0 22px 52px -12px rgb(0 0 0 / 74%);
     clip-path: none;
     text-align: left;
+  }
+
+  & .dream-dolminence-grid > article > button {
+    border-color: rgb(228 188 118 / 58%);
+    background:
+      linear-gradient(90deg, #f6dea0, #c84438 52%, #c8a056) top / 100% 2.5px no-repeat,
+      linear-gradient(315deg, #f4d89a, #9e7434) 100% 100% / 22px 2px no-repeat,
+      linear-gradient(315deg, #f4d89a, #9e7434) 100% 100% / 2px 22px no-repeat,
+      radial-gradient(
+        78% 62% at 50% 0%,
+        color-mix(in srgb, var(--dream-accent, #cc493b) 24%, transparent),
+        transparent 72%
+      ),
+      linear-gradient(180deg, #221121 0%, #120916 64%, #0d0711 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 204 / 22%),
+      inset 0 0 0 4px rgb(11 7 16 / 54%),
+      inset 0 0 0 5px rgb(214 176 108 / 20%),
+      0 20px 48px -12px rgb(0 0 0 / 78%);
   }
 
   & :is(.dream-character-grid, .dream-dolminence-grid) > article > button > img {
@@ -808,7 +1180,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     object-fit: cover;
     border: 0;
     border-radius: 0;
-    background: var(--dc-wall);
+    background: #100916;
     -webkit-mask-image: none;
     mask-image: none;
     filter: none;
@@ -818,6 +1190,12 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   & .dream-dolminence-grid > article > button > img {
     aspect-ratio: 4 / 5;
     object-fit: contain;
+    background:
+      radial-gradient(
+        ellipse 74% 62% at 50% 42%,
+        color-mix(in srgb, var(--dream-accent, #cc493b) 20%, #190e20),
+        #0b0711 76%
+      );
   }
 
   & :is(.dream-character-copy, .dream-dolminence-copy) {
@@ -833,33 +1211,76 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     height: auto;
     min-height: 0;
     margin: 0;
-    padding: clamp(12px, 2vw, 24px);
+    padding: clamp(14px, 2vw, 24px);
     border: 0;
     border-top: 2px solid
-      color-mix(in srgb, var(--dream-accent, var(--dc-violet)) 54%, var(--dc-line));
-    background: transparent;
-    box-shadow: none;
+      color-mix(in srgb, var(--dream-accent, var(--dc-gold)) 58%, #e8c480);
+    background:
+      linear-gradient(180deg, rgb(252 222 164 / 8%) 0%, transparent 44%),
+      linear-gradient(180deg, #1b1126 0%, #120b1b 100%);
+    box-shadow: inset 0 1px 0 rgb(255 244 212 / 16%);
     writing-mode: horizontal-tb;
     text-align: start;
     translate: none;
   }
 
-  & :is(.dream-character-copy, .dream-dolminence-copy) b,
+  /* Crimson ribbon nameplate for cast cards (dark vermilion for protagonist) */
+  & .dream-character-copy b {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 7px 14px 8px 14px;
+    border: 0;
+    border-left: 3.5px solid #f5dea2;
+    color: #fff8ea;
+    background:
+      linear-gradient(
+        180deg,
+        transparent 2.5px,
+        rgb(252 234 188 / 76%) 2.5px 3.5px,
+        transparent 3.5px calc(100% - 3.5px),
+        rgb(252 234 188 / 76%) calc(100% - 3.5px) calc(100% - 2.5px),
+        transparent 0
+      ),
+      linear-gradient(90deg, #7e2c39 0%, #541d29 66%, #331320 100%);
+    font-size: clamp(18px, 2.2vw, 28px);
+    line-height: 1.38;
+    letter-spacing: 0.045em;
+    writing-mode: horizontal-tb;
+    clip-path: none;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 56%);
+    opacity: 1;
+  }
+
   & .dream-character-grid > article:first-child .dream-character-copy b {
+    background:
+      linear-gradient(
+        180deg,
+        transparent 2.5px,
+        rgb(252 234 188 / 82%) 2.5px 3.5px,
+        transparent 3.5px calc(100% - 3.5px),
+        rgb(252 234 188 / 82%) calc(100% - 3.5px) calc(100% - 2.5px),
+        transparent 0
+      ),
+      linear-gradient(90deg, #8a2b25 0%, var(--ts-shu-banner, #7a2620) 60%, #4d1616 100%);
+  }
+
+  & .dream-dolminence-copy b {
     display: block;
     width: auto;
     min-height: 0;
     margin: 0;
     padding: 0;
     border: 0;
-    color: var(--dc-ink);
+    color: #fff6e4;
     background: transparent;
-    font-size: clamp(18px, 2.3vw, 31px);
+    font-size: clamp(18px, 2.1vw, 26px);
     line-height: 1.4;
-    letter-spacing: 0.035em;
+    letter-spacing: 0.04em;
     writing-mode: horizontal-tb;
     clip-path: none;
-    text-shadow: none;
+    text-shadow: 0 1px 10px rgb(0 0 0 / 62%);
     opacity: 1;
   }
 
@@ -867,40 +1288,80 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     margin: 0;
     padding: 0;
     border: 0;
-    color: var(--dc-muted);
+    color: #dcd0c0;
     background: transparent;
-    font-size: clamp(12px, 1.3vw, 15px);
+    font-size: clamp(12px, 1.25vw, 14px);
     line-height: 1.65;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
     writing-mode: horizontal-tb;
     opacity: 1;
   }
 
+  & .dream-dolminence-copy small {
+    color: #e8c78a;
+    letter-spacing: 0.04em;
+  }
+
   & .dream-cinema-record-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    min-height: 28px;
+    min-height: 40px;
     margin-top: auto;
-    color: var(--dc-cyan);
+    padding: 6px 14px;
+    border: 1px solid rgb(232 196 126 / 58%);
+    border-radius: 2px;
+    color: #fbe8be;
+    background:
+      linear-gradient(#f5dca0 0 0) 0 0 / 10px 1.5px no-repeat,
+      linear-gradient(#f5dca0 0 0) 100% 100% / 10px 1.5px no-repeat,
+      linear-gradient(180deg, #321d3d 0%, #1c1026 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 22%),
+      0 6px 16px rgb(0 0 0 / 42%);
     font-size: 13px;
-    line-height: 1.55;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
   }
 
   & .dream-cinema-record-link i {
     font-style: normal;
+    color: var(--dc-gold-bright);
   }
 
+  /* 7. Annex headers & cast roster toolbar */
   & > .dream-annex > header {
     margin: 0 0 24px;
-    padding-block: 16px;
-    border-block: 1px solid var(--dc-line);
+    padding: 16px 0;
+    border-top: 2px solid rgb(224 188 118 / 58%);
+    border-bottom: 1px solid rgb(224 188 118 / 34%);
+    background: radial-gradient(52% 100% at 14% 0%, rgb(246 206 132 / 12%), transparent 74%);
   }
 
   & > .dream-annex h2 {
-    color: var(--dc-ink);
+    color: #faf0da;
+    text-shadow: 0 2px 16px rgb(240 194 114 / 22%);
   }
 
+  & .dream-roster-toolbar button {
+    border: 1px solid rgb(224 188 118 / 46%);
+    color: #f6ecda;
+    background: linear-gradient(180deg, #251731 0%, #150d1e 100%);
+    box-shadow: inset 0 1px 0 rgb(255 242 206 / 16%);
+  }
+
+  & .dream-roster-toolbar button[aria-pressed="true"] {
+    border-color: #f4d38c;
+    color: #fff7e6;
+    background: linear-gradient(135deg, #86262c 0%, #5a1922 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 32%),
+      0 6px 16px rgb(0 0 0 / 42%);
+  }
+
+  /* 8. Act IV: Story desk, reading doors, chapter cases (Case 0-5) & crossings */
   & .dream-story-intro {
     max-width: 52rem;
     margin: 0 0 24px;
@@ -913,43 +1374,60 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   }
 
   & .dream-story-intro .dream-story-scope {
-    color: var(--dc-muted);
+    color: #d8c8b6;
   }
 
   & .dream-reading-doors {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-    gap: 12px;
+    gap: 14px;
     margin-bottom: clamp(26px, 5vw, 66px);
   }
 
   & .dream-reading-doors .dream-reading-entry#dream-reading-room-entry {
     min-width: 0;
     margin: 0;
-    padding: clamp(14px, 2.6vw, 26px);
-    gap: 12px;
-    border: 1px solid var(--dc-line);
+    padding: clamp(18px, 2.8vw, 30px);
+    gap: 14px;
+    border: 1px solid rgb(232 196 126 / 60%);
+    border-radius: 2px;
     color: var(--dc-ink);
-    background: var(--dc-deep);
-    box-shadow: none;
+    background:
+      linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 34px 2.5px no-repeat,
+      linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2.5px 34px no-repeat,
+      linear-gradient(315deg, #eed08e, #987032) 100% 100% / 34px 2.5px no-repeat,
+      linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2.5px 34px no-repeat,
+      radial-gradient(72% 94% at 14% 0%, rgb(248 208 136 / 22%), transparent 70%),
+      radial-gradient(48% 76% at 92% 100%, rgb(212 72 56 / 18%), transparent 70%),
+      linear-gradient(135deg, #2d1b38 0%, #1c1227 56%, #130c1c 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 210 / 26%),
+      inset 0 0 0 4px rgb(12 8 18 / 50%),
+      0 18px 42px rgb(0 0 0 / 56%);
   }
 
   & .dream-reading-doors .dream-reading-entry#dream-reading-room-entry h3 {
     margin: 0;
-    color: var(--dc-ink);
+    color: #fff7e6;
     font-size: clamp(17px, 2.5vw, 29px);
     line-height: 1.5;
-    letter-spacing: 0.03em;
-    text-shadow: none;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 16px rgb(246 200 118 / 24%);
   }
 
+  /* Kinari washi × gilt rim button inside the dark lacquer reading-room door */
   & .dream-reading-doors .dream-reading-entry#dream-reading-room-entry button {
-    border-color: var(--dc-cyan);
-    padding-inline: 12px;
-    color: #111f2a;
-    background: var(--dc-cyan);
-    box-shadow: none;
+    border: 1px solid #f5dca2;
+    padding-inline: 18px;
+    color: #241628;
+    background:
+      linear-gradient(#8f262c 0 0) 0 0 / 16px 2.5px no-repeat,
+      linear-gradient(180deg, #fcf3de 0%, #e7cfa0 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 254 248 / 86%),
+      0 10px 26px rgb(0 0 0 / 44%);
     font-size: 14px;
+    font-weight: 700;
   }
 
   & .dream-reading-crosslinks {
@@ -959,13 +1437,17 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     gap: 8px;
   }
 
+  & .dream-reading-crosslinks a {
+    border-left: 3px solid #e4be76;
+  }
+
   & .dream-reading-crosslinks a::after {
     content: "";
     flex: none;
     width: 0.45em;
     height: 0.45em;
-    border-right: 1px solid currentColor;
-    border-bottom: 1px solid currentColor;
+    border-right: 1.5px solid var(--dc-gold-bright);
+    border-bottom: 1.5px solid var(--dc-gold-bright);
     rotate: 45deg;
   }
 
@@ -978,82 +1460,124 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   }
 
   & .dream-story-crossings {
+    box-sizing: border-box;
     min-width: 0;
-    padding: clamp(16px, 2.7vw, 30px);
-    border: 1px solid var(--dc-line);
+    padding: clamp(18px, 2.7vw, 30px);
+    border: 1px solid rgb(224 188 120 / 50%);
     border-radius: 2px;
-    color: var(--dc-muted);
-    background: var(--dc-wall);
-    box-shadow: none;
+    color: #e4d9cd;
+    background:
+      linear-gradient(135deg, #f4da9e, #a88040) 0 0 / 22px 2px no-repeat,
+      linear-gradient(135deg, #f4da9e, #a88040) 0 0 / 2px 22px no-repeat,
+      linear-gradient(315deg, #ead08e, #946d30) 100% 100% / 22px 2px no-repeat,
+      linear-gradient(315deg, #ead08e, #946d30) 100% 100% / 2px 22px no-repeat,
+      radial-gradient(70% 56% at 80% 0%, rgb(246 206 132 / 12%), transparent 72%),
+      linear-gradient(180deg, #1b1226 0%, #110b19 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 18%),
+      0 16px 36px rgb(0 0 0 / 52%);
   }
 
   & .dream-story-crossings :is(h3, dt, dd > strong) {
-    color: var(--dc-violet);
+    color: var(--dc-gold-bright);
   }
 
   & .dream-story-crossings dl > div {
-    border-color: var(--dc-line);
+    border-color: var(--dc-line-soft);
   }
 
+  /* Story Case 0-5 cards — lacquered gilt plates with vermilion open state */
   & .dream-story-case {
-    margin: 0 0 12px;
-    border: 1px solid var(--dc-line);
+    margin: 0 0 14px;
+    border: 1px solid rgb(224 188 120 / 52%);
+    border-left: 3px solid #e6c27e;
     border-radius: 2px;
     outline: 0;
     color: var(--dc-ink);
-    background: var(--dc-wall);
-    box-shadow: none;
+    background: #140d1d;
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 18%),
+      0 14px 34px rgb(0 0 0 / 52%);
   }
 
   & .dream-story-case > summary {
-    min-height: 64px;
-    padding: clamp(13px, 2.5vw, 28px);
-    color: var(--dc-ink);
-    background: var(--dc-panel);
-    box-shadow: none;
+    min-height: 66px;
+    padding: clamp(14px, 2.5vw, 28px);
+    color: #fff6e4;
+    background:
+      linear-gradient(225deg, #f4da9e, transparent 70%) 100% 0 / 22px 1.5px no-repeat,
+      radial-gradient(64% 92% at 10% 50%, rgb(246 206 132 / 14%), transparent 68%),
+      linear-gradient(110deg, #251731 0%, #181022 68%, #130c1c 100%);
+    box-shadow: inset 0 1px 0 rgb(255 242 206 / 16%);
+  }
+
+  & .dream-story-case-number b,
+  & .dream-story-case-toggle {
+    color: var(--dc-gold-bright);
   }
 
   & .dream-story-case[open] {
-    border-color: #716a91;
+    border-color: #f2cf8c;
+    border-left-color: #cc493b;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 210 / 24%),
+      0 20px 48px rgb(0 0 0 / 64%);
   }
 
   & .dream-story-case[open] > summary {
-    border-bottom: 1px solid var(--dc-line);
-    background: var(--dc-deep);
+    border-bottom: 1px solid rgb(228 192 122 / 46%);
+    background:
+      radial-gradient(64% 94% at 14% 50%, rgb(224 84 64 / 20%), transparent 68%),
+      radial-gradient(56% 86% at 88% 0%, rgb(248 208 134 / 14%), transparent 70%),
+      linear-gradient(110deg, #331c2e 0%, #211328 100%);
   }
 
-  & .dream-story-case-heading > span,
-  & .dream-story-case-body > h3 {
-    color: var(--dc-ink);
+  & .dream-story-case-heading > span {
+    color: #fff7e6;
+    text-shadow: 0 1px 10px rgb(0 0 0 / 56%);
   }
 
   & .dream-story-case-body {
-    color: var(--dc-ink);
-    background: var(--dc-wall);
+    color: #f3eadb;
+    background:
+      radial-gradient(70% 42% at 50% 0%, rgb(244 202 128 / 7%), transparent 72%),
+      #140d1d;
   }
 
   & .dream-story-case-body > h3 {
-    border-color: var(--dc-line);
+    color: #f4dca2;
+    border-color: rgb(220 184 116 / 38%);
   }
 
   & .dream-reader-index#dream-chapter-index {
-    background: var(--dc-wall);
-    border-color: var(--dc-line);
-    box-shadow: none;
+    border: 1px solid rgb(224 188 120 / 50%);
+    border-radius: 2px;
+    background:
+      linear-gradient(135deg, #f4da9e, #a88040) 0 0 / 24px 2px no-repeat,
+      linear-gradient(135deg, #f4da9e, #a88040) 0 0 / 2px 24px no-repeat,
+      linear-gradient(315deg, #ead08e, #946d30) 100% 100% / 24px 2px no-repeat,
+      linear-gradient(315deg, #ead08e, #946d30) 100% 100% / 2px 24px no-repeat,
+      radial-gradient(64% 80% at 16% 0%, rgb(246 206 132 / 12%), transparent 72%),
+      linear-gradient(180deg, #1b1126 0%, #120b1a 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 18%),
+      0 16px 38px rgb(0 0 0 / 50%);
   }
 
   & .dream-reader-index#dream-chapter-index > ol > li > a {
-    border-bottom-color: var(--dc-line);
+    border-bottom-color: var(--dc-line-soft);
   }
 
   & .dream-reader-index#dream-chapter-index > ol > li > a[aria-current="location"] {
-    border-bottom-color: var(--dc-cyan);
-    background: var(--dc-deep);
+    border-bottom-color: var(--dc-gold-bright);
+    background:
+      radial-gradient(70% 96% at 10% 50%, rgb(214 74 58 / 22%), transparent 72%),
+      #271732;
   }
 
   & .dream-reader-index .dream-reader-index-number {
-    color: var(--dc-violet);
-    text-shadow: none;
+    color: var(--dc-gold-bright);
+    text-shadow: 0 0 12px rgb(246 202 122 / 28%);
   }
 
   & .dream-reading-tools {
@@ -1068,10 +1592,19 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     min-width: 0;
     max-width: none;
     margin: 0;
-    border: 1px solid var(--dc-line);
+    border: 1px solid rgb(224 188 120 / 52%);
+    border-radius: 2px;
     color: var(--dc-ink);
-    background: var(--dc-wall);
-    box-shadow: none;
+    background:
+      linear-gradient(135deg, #f4da9e, #a88040) 0 0 / 24px 2px no-repeat,
+      linear-gradient(135deg, #f4da9e, #a88040) 0 0 / 2px 24px no-repeat,
+      linear-gradient(315deg, #ead08e, #946d30) 100% 100% / 24px 2px no-repeat,
+      linear-gradient(315deg, #ead08e, #946d30) 100% 100% / 2px 24px no-repeat,
+      radial-gradient(62% 58% at 16% 0%, rgb(246 206 132 / 12%), transparent 72%),
+      linear-gradient(180deg, #1a1125 0%, #110b19 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 206 / 18%),
+      0 18px 40px rgb(0 0 0 / 52%);
     scroll-margin-top: calc(var(--dream-nav-offset) + 14px);
   }
 
@@ -1084,14 +1617,19 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   }
 
   & .dream-reading-tools :is(.dream-reading-archive-plate, .dream-research-header) h2 {
-    color: var(--dc-ink);
-    text-shadow: none;
+    color: #fff6e4;
+    text-shadow: 0 2px 14px rgb(242 196 116 / 22%);
   }
 
+  /* 9. Curtain-call footer */
   & .dream-footer {
     margin: 0;
-    border-top: 1px solid var(--dc-line);
-    background: var(--dc-wall);
+    border-top: 1px solid rgb(232 196 126 / 60%);
+    background:
+      radial-gradient(56% 62% at 50% 0%, rgb(248 206 132 / 18%), transparent 72%),
+      radial-gradient(52% 58% at 50% 100%, rgb(206 72 56 / 18%), transparent 72%),
+      linear-gradient(180deg, #180f23 0%, #0d0815 56%, #090610 100%);
+    box-shadow: inset 0 1px 0 rgb(255 242 204 / 24%);
   }
 
   @media (min-width: 1000px) {
@@ -1117,7 +1655,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     }
 
     & > .dream-hero > .dream-hero-copy {
-      padding: 18px clamp(6px, 3vw, 22px) 8px;
+      padding: 18px clamp(6px, 3vw, 22px) 10px;
     }
 
     & .dream-hero-copy .dream-title-logo {
@@ -1125,6 +1663,9 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     }
 
     & .dream-hero-copy > .dream-hero-catch {
+      padding: 0;
+      border-left: 0;
+      background: transparent;
       font-size: clamp(24px, 5.2vw, 42px);
       text-align: center;
     }
@@ -1140,6 +1681,21 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
 
     & .dream-dolminence-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 699px) {
+    & > .dream-hero::before {
+      inset: 6px;
+      background:
+        linear-gradient(135deg, #fff0c2, #b88c44) 0 0 / 20px 2px no-repeat,
+        linear-gradient(135deg, #fff0c2, #b88c44) 0 0 / 2px 20px no-repeat,
+        linear-gradient(225deg, #fff0c2, #b88c44) 100% 0 / 20px 2px no-repeat,
+        linear-gradient(225deg, #fff0c2, #b88c44) 100% 0 / 2px 20px no-repeat,
+        linear-gradient(45deg, #f2d392, #9c7234) 0 100% / 20px 2px no-repeat,
+        linear-gradient(45deg, #f2d392, #9c7234) 0 100% / 2px 20px no-repeat,
+        linear-gradient(315deg, #f2d392, #9c7234) 100% 100% / 20px 2px no-repeat,
+        linear-gradient(315deg, #f2d392, #9c7234) 100% 100% / 2px 20px no-repeat;
     }
   }
 
@@ -1160,12 +1716,29 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
       font-size: 12px;
     }
 
+    & > .dream-hero {
+      padding: 8px;
+    }
+
+    & > .dream-hero::before {
+      inset: 4px;
+    }
+
+    & > .dream-hero > .dream-hero-field {
+      outline-offset: 2px;
+      box-shadow:
+        0 0 0 3px #110a1a,
+        0 0 24px rgb(252 194 102 / 16%),
+        0 14px 34px rgb(4 2 8 / 76%);
+    }
+
     & .dream-hero-copy .dream-title-logo {
       max-height: 108px;
     }
 
     & .dream-hero-copy > .dream-hero-billing {
       margin-block: 10px 16px;
+      padding-bottom: 8px;
     }
 
     & .dream-hero-footer {
@@ -1175,12 +1748,18 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
 
     & .dream-hero-footer .dream-stage-lantern {
       flex: 0 0 auto;
-      padding-inline: 6px;
+      gap: 6px;
+      padding: 6px;
     }
 
     & .dream-prologue .dream-prologue-card {
       grid-template-columns: minmax(0, 1fr);
-      gap: 6px;
+      gap: 10px;
+      padding: 20px 16px;
+    }
+
+    & .dream-prologue-card h2 {
+      width: fit-content;
     }
 
     & > .dream-section > .dream-section-heading {
@@ -1200,6 +1779,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
   @media (max-width: 360px) {
     & > .dream-hero {
       margin-top: 14px;
+      padding: 8px;
     }
 
     & > .dream-hero > .dream-hero-copy {
@@ -1212,6 +1792,7 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
 
     & .dream-hero-copy > .dream-hero-billing {
       margin: 4px 0 10px;
+      padding-bottom: 6px;
       background: transparent;
       line-height: 1.45;
       letter-spacing: 0;
@@ -1228,27 +1809,104 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
     & .dream-hero-catch > span {
       display: block;
     }
+
+    & .dream-hero-footer .dream-stage-lantern {
+      padding: 5px 6px;
+      gap: 6px;
+    }
   }
 
   @media (hover: hover) and (pointer: fine) {
     & :is(.dream-back-link, .dream-hero-actions a, .dream-reading-crosslinks a):hover {
-      border-color: var(--dc-cyan);
+      border-color: #fff0c2;
+      box-shadow:
+        inset 0 1px 0 rgb(255 248 224 / 40%),
+        0 14px 32px rgb(0 0 0 / 64%);
     }
 
-    & .dream-hero-actions .dream-cinema-primary:hover,
+    & .dream-hero-actions .dream-cinema-primary:hover {
+      border-color: #fff4ce;
+      background:
+        linear-gradient(135deg, #fff6d4, #e2b666) 0 0 / 18px 2px no-repeat,
+        linear-gradient(135deg, #fff6d4, #e2b666) 0 0 / 2px 18px no-repeat,
+        linear-gradient(315deg, #fce2a4, #c69648) 100% 100% / 18px 2px no-repeat,
+        linear-gradient(315deg, #fce2a4, #c69648) 100% 100% / 2px 18px no-repeat,
+        radial-gradient(88% 96% at 24% 0%, rgb(255 214 134 / 42%), transparent 68%),
+        linear-gradient(135deg, #a83035 0%, #7a212a 54%, #52151f 100%);
+      box-shadow:
+        inset 0 1px 0 rgb(255 248 220 / 50%),
+        inset 0 0 26px rgb(252 126 90 / 28%),
+        0 16px 38px rgb(0 0 0 / 66%),
+        0 0 30px rgb(224 84 62 / 32%);
+    }
+
     &
       .dream-reading-doors
       .dream-reading-entry#dream-reading-room-entry
       button:not(:disabled):hover {
-      background: #ceeff6;
+      border-color: #fff7dd;
+      background:
+        linear-gradient(#a62c32 0 0) 0 0 / 20px 2.5px no-repeat,
+        linear-gradient(180deg, #fff9ea 0%, #f0daac 100%);
+      box-shadow:
+        inset 0 1px 0 #fff,
+        0 14px 32px rgb(0 0 0 / 54%);
+    }
+
+    & .dream-hero-footer .dream-stage-lantern:hover {
+      border-color: #fff0c2;
+      box-shadow:
+        inset 0 1px 0 rgb(255 248 220 / 40%),
+        0 0 28px rgb(255 204 114 / 36%),
+        0 14px 30px rgb(0 0 0 / 60%);
     }
 
     & :is(.dream-character-grid, .dream-dolminence-grid) > article > button:hover {
-      border-color: color-mix(in srgb, var(--dream-accent, var(--dc-violet)) 66%, var(--dc-line));
+      border-color: #f8e2aa;
+      box-shadow:
+        inset 0 1px 0 rgb(255 246 218 / 36%),
+        inset 0 0 0 4px rgb(12 8 18 / 54%),
+        inset 0 0 0 5px rgb(246 214 148 / 42%),
+        0 26px 60px -10px rgb(0 0 0 / 80%);
+    }
+
+    & .dream-character-grid > article > button:hover .dream-cinema-record-link {
+      border-color: #fff0c4;
+      color: #fff8ea;
+      background:
+        linear-gradient(#fff0c2 0 0) 0 0 / 12px 1.5px no-repeat,
+        linear-gradient(#fff0c2 0 0) 100% 100% / 12px 1.5px no-repeat,
+        linear-gradient(180deg, #4a2648 0%, #2a1530 100%);
+    }
+
+    & .dream-opening-tools .dream-contents li > a:hover {
+      color: #fff8e6;
+      text-decoration-color: var(--dc-gold-bright);
+    }
+
+    & .dream-poster-controls button:not(:disabled):not([aria-disabled="true"]):hover,
+    & .dream-poster-hud-step button:hover {
+      border-color: #fff0c2;
+      background:
+        linear-gradient(#fff0c2 0 0) 0 0 / 14px 1.5px no-repeat,
+        linear-gradient(#fff0c2 0 0) 100% 100% / 14px 1.5px no-repeat,
+        linear-gradient(180deg, #3c2448 0%, #22142d 100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & > .dream-hero > .dream-hero-lamplight {
+      transition: none;
     }
   }
 
   @media (forced-colors: active) {
+    & > .dream-hero::before,
+    & > .dream-hero > .dream-hero-field::after,
+    & > .dream-hero > .dream-hero-lamplight {
+      display: none;
+    }
+
     & > .dream-section > .dream-section-heading > .dream-act-still {
       opacity: 0;
     }
@@ -1259,14 +1917,44 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
 
     &
       :is(
+        .dream-site-header,
+        .dream-chapter-nav,
+        .dream-back-link,
         .dream-hero-actions a,
         .dream-reading-crosslinks a,
         .dream-hero,
+        .dream-hero-field,
+        .dream-stage-lantern,
         .dream-prologue-card,
+        .dream-contents,
+        .dream-section-heading,
+        .dream-poster-stage,
+        .dream-poster-stage > figure,
+        .dream-poster-stage figcaption,
+        .dream-character-grid > article > button,
+        .dream-dolminence-grid > article > button,
+        .dream-character-copy b,
+        .dream-cinema-record-link,
+        .dream-reading-entry#dream-reading-room-entry,
+        .dream-reading-entry#dream-reading-room-entry button,
+        .dream-story-crossings,
         .dream-story-case,
+        .dream-story-case > summary,
+        .dream-story-case-body,
+        .dream-reader-index#dream-chapter-index,
         .dream-reading-archive,
-        .dream-research-notes
+        .dream-research-notes,
+        .dream-footer
       ) {
+      color: CanvasText;
+      border-color: CanvasText;
+      background: Canvas;
+      box-shadow: none;
+      text-shadow: none;
+    }
+
+    & .dream-prologue-card h2,
+    & .dream-prologue-card > p {
       color: CanvasText;
       border-color: CanvasText;
       background: Canvas;
@@ -1277,4 +1965,15 @@ html[data-family="dream"] main#top.dream-page.dream-image-cinema {
       border-bottom: 2px solid Highlight;
     }
   }
+}
+
+html[data-family="dream"][data-world-effects="economy"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  > .dream-hero
+  > .dream-hero-lamplight,
+html[data-family="dream"][data-motion-enabled="false"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  > .dream-hero
+  > .dream-hero-lamplight {
+  transition: none;
 }

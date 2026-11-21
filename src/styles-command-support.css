@@ -2,23 +2,29 @@
 .command-support-download {
   --dl-ice: #b9d9e5;
   --dl-lock: #d7e6ea;
-  --dl-gold: #d8c9a6;
-  --dl-specular: rgba(255, 255, 255, 0.45);
-  --dl-chrome: linear-gradient(180deg, #fff 0%, #cbd4da 45%, #8799a5 100%);
-  background: radial-gradient(ellipse at 50% 0%, #273441 0%, #0b1119 45%, #05080d 100%);
+  --dl-gold: #e0cfa8;
+  --dl-specular: rgba(255, 255, 255, 0.52);
+  --dl-chrome: linear-gradient(180deg, #fff 0%, #d4dee4 45%, #8d9fab 100%);
+  background:
+    radial-gradient(ellipse 68% 48% at 85% 92%, rgb(224 207 168 / 10%), transparent 64%),
+    radial-gradient(ellipse 84% 56% at 50% 0%, #2c3d4c 0%, #0d1520 46%, #05080d 100%);
 }
 .command-support-download::after {
-  border-color: #8b9ba7;
-  border-radius: 2px;
+  border-color: #98aab6;
+  border-radius: 3px;
   box-shadow:
-    0 20px 46px #000b,
-    0 0 0 5px #101923,
-    0 0 0 6px #62717c,
-    inset 0 1px #fff5;
+    0 24px 56px #000c,
+    0 0 0 5px #0f1822,
+    0 0 0 6px #6e808c,
+    inset 0 1px 0 rgb(255 255 255 / 44%),
+    inset 0 0 0 1px rgb(185 217 229 / 18%);
 }
 .command-support-download .export-page-sigil {
-  border-color: #cedde2;
-  background: linear-gradient(135deg, #71808b, #161f29 55%, #090e14);
+  border-color: #d6e6eb;
+  background: linear-gradient(135deg, #7c8d99 0%, #1a2531 54%, #090e14 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    0 10px 24px -8px rgb(0 0 0 / 75%);
 }
 .command-support-download :is(.export-page-btn, .export-page-alt, .export-page-navigation a) {
   min-height: 44px;
@@ -26,29 +32,19 @@
 .command-support-download .export-page-btn {
   min-height: 56px;
   border-radius: 4px;
-  border: 1px solid rgb(122 232 255 / 80%);
+  border: 1px solid rgb(122 232 255 / 86%);
   background:
-    linear-gradient(180deg, #ffffff 0%, #c4f3ff 46%, #7ae8ff 100%);
+    linear-gradient(180deg, #ffffff 0%, #c8f4ff 46%, #7ae8ff 100%);
   color: #04080f;
   font-weight: 600;
   box-shadow:
-    0 0 0 1px rgb(4 8 15 / 85%),
-    0 0 0 2px rgb(122 232 255 / 35%),
-    inset 0 1px 0 #ffffff,
-    0 8px 24px rgb(122 232 255 / 28%);
+    0 0 0 1px rgb(4 8 15 / 88%),
+    0 0 0 2px rgb(122 232 255 / 42%),
+    inset 0 1.5px 0 #ffffff,
+    0 10px 28px rgb(122 232 255 / 32%);
 }
 .command-support-download .export-page-btn::before {
   content: none;
-}
-@media (hover: hover) and (pointer: fine) {
-  .command-support-download .export-page-btn:hover {
-    background: linear-gradient(180deg, #ffffff 0%, #d8f7ff 46%, #9beaff 100%);
-    box-shadow:
-      0 0 0 1px rgb(4 8 15 / 85%),
-      0 0 0 2px rgb(122 232 255 / 55%),
-      inset 0 1px 0 #ffffff,
-      0 12px 32px rgb(122 232 255 / 40%);
-  }
 }
 .command-support-download :is(.export-page-alt, .export-page-navigation a):focus-visible,
 .command-support-download .export-page-btn:focus-visible {
@@ -57,83 +53,107 @@
 }
 
 .command-support-tours {
-  --gallery-ivory: #eef4f5;
-  --gallery-muted: #c0cbd1;
-  --gallery-brass: #b7dce7;
-  --gallery-rule: #637581;
-  --gallery-tour-accent: #b7dce7;
-  background: radial-gradient(ellipse at 50% 0%, #24313b, #0c1219 43%, #080c11 100%);
+  --gallery-ivory: #f2f7f8;
+  --gallery-muted: #c5d1d7;
+  --gallery-brass: #bfe2ed;
+  --gallery-rule: #6c7f8c;
+  --gallery-tour-accent: #bfe2ed;
+  background:
+    radial-gradient(ellipse 70% 50% at 86% 94%, rgb(214 190 132 / 9%), transparent 66%),
+    radial-gradient(ellipse 84% 56% at 50% 0%, #283844 0%, #0d141c 45%, #070b10 100%);
   color: var(--gallery-ivory);
 }
 .command-support-tours .gallery-topbar {
-  border-bottom-color: #637581;
-  background: linear-gradient(180deg, #16222ceb, #0b1219e6);
+  border-bottom-color: #6c7f8c;
+  background: linear-gradient(180deg, #16222c 0%, #0b1219 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 15%),
+    0 1px 0 #000,
+    0 10px 26px -10px rgb(0 0 0 / 78%);
 }
 .command-support-tours .gallery-brand {
-  color: #eef4f5;
+  color: #f2f7f8;
 }
 .command-support-tours .gallery-brand span {
-  color: #b7dce7;
+  color: #bfe2ed;
 }
 .command-support-tours .gallery-topbar-actions > a {
-  border-color: #5b707d;
-  background: #131e27;
-  color: #e4eef2;
+  border-color: #667c8a;
+  background: linear-gradient(180deg, #1a2834 0%, #111b24 100%);
+  color: #eaf3f6;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 4px 12px -4px rgb(0 0 0 / 62%);
 }
 .command-support-tours .gallery-tour-entrance {
-  --gallery-ivory: #eef4f5;
-  --gallery-muted: #c0cbd1;
-  --gallery-brass: #b7dce7;
-  --gallery-rule: #637581;
+  --gallery-ivory: #f2f7f8;
+  --gallery-muted: #c5d1d7;
+  --gallery-brass: #bfe2ed;
+  --gallery-rule: #6c7f8c;
 }
 .command-support-tours .gallery-tour-introduction {
   position: relative;
   padding: clamp(22px, 3.5vw, 48px);
-  border: 1px solid #7a8b96;
-  background: linear-gradient(135deg, #293741 0%, #121b24 34%, #0a1017 100%);
+  border: 1px solid #8698a4;
+  background:
+    linear-gradient(90deg, #bfe2ed, #e2cfa4 48%, transparent 92%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 76% 52% at 16% 0%, rgb(191 226 237 / 14%), transparent 64%),
+    linear-gradient(135deg, #2c3b46 0%, #141e28 36%, #0a1017 100%);
   box-shadow:
-    inset 0 1px #ffffff55,
-    0 18px 46px #0008,
-    0 0 0 5px #101922;
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    inset 0 0 0 1px rgb(191 226 237 / 14%),
+    0 22px 52px #0009,
+    0 0 0 5px #0f1821,
+    0 0 0 6px rgb(183 220 231 / 24%);
 }
 .command-support-tours .gallery-tour-introduction h1,
 .command-support-tours .gallery-tour-catalogue-heading h2,
 .command-support-tours .gallery-tour-course h3 {
-  color: #f3f6f6;
+  color: #f5f8f9;
 }
 .command-support-tours .gallery-tour-opening-frame {
-  border: 1px solid #9aabb3;
-  background: radial-gradient(ellipse at 50% 25%, #273b48, #080d12 75%);
+  border: 1px solid #a4b6bf;
+  background:
+    radial-gradient(ellipse 78% 58% at 50% 22%, #2c4352 0%, #0e161f 62%, #070b10 100%);
   box-shadow:
-    inset 0 1px #fff5,
-    0 14px 30px #0009;
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 0 0 1px rgb(191 226 237 / 14%),
+    0 18px 38px #000a;
 }
 .command-support-tours .gallery-tour-catalogue {
   margin-top: clamp(36px, 6vw, 80px);
-  border-color: #748792;
+  border-color: #7c909c;
 }
 .command-support-tours .gallery-tour-course-index a {
   padding-inline: 12px;
-  border: 1px solid #526675;
-  background: linear-gradient(180deg, #283843, #141f28);
-  box-shadow: inset 0 1px #ffffff26;
+  border: 1px solid #5e7484;
+  background: linear-gradient(180deg, #2d3f4c 0%, #15212b 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    0 4px 12px -4px rgb(0 0 0 / 60%);
 }
 .command-support-tours .gallery-tour-course {
-  border: 1px solid #748791;
-  background: linear-gradient(155deg, #26343e, #101820 48%, #0c1219);
+  border: 1px solid #7f939e;
+  background:
+    linear-gradient(90deg, rgb(191 226 237 / 65%), rgb(226 207 164 / 42%) 48%, transparent 92%) 0 0 /
+      100% 1px no-repeat,
+    radial-gradient(ellipse 74% 50% at 16% 0%, rgb(191 226 237 / 12%), transparent 64%),
+    linear-gradient(155deg, #293843 0%, #111a23 48%, #0b1118 100%);
   box-shadow:
-    inset 0 1px #ffffff45,
-    0 14px 30px #0007;
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 0 0 1px rgb(191 226 237 / 12%),
+    0 18px 38px #0008;
 }
 .command-support-tours .gallery-tour-course-visual {
-  border-bottom: 1px solid #7b8d97;
-  background: radial-gradient(ellipse at 50% 20%, #263c49, #090e14 75%);
+  border-bottom: 1px solid #8497a2;
+  background: radial-gradient(ellipse at 50% 20%, #2a4250, #090e14 75%);
 }
 .command-support-tours .gallery-tour-course-number {
-  border-color: #9caeb7;
-  background: #141e27;
-  color: #e6eff1;
+  border-color: #a8bac4;
+  background: linear-gradient(180deg, #1b2834 0%, #111a22 100%);
+  color: #edf5f7;
   font-size: 12px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
 }
 .command-support-tours .gallery-tour-course-kicker,
 .command-support-tours .gallery-tour-course-position,
@@ -143,41 +163,48 @@
   font-size: 12px;
 }
 .command-support-tours .gallery-tour-course-preview-image {
-  border: 1px solid #4d606c;
+  border: 1px solid #586c79;
   background: #090f15;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
 }
 .command-support-tours .gallery-tour-entrance .gallery-tour-action-primary {
-  border-color: #d9e5e8;
-  background: linear-gradient(180deg, #e4ecee, #aabdc6 48%, #8296a1);
-  color: #111a20;
+  border-color: #e2eef1;
+  background: linear-gradient(180deg, #eef5f7 0%, #b4c8d1 48%, #879ca8 100%);
+  color: #0e171d;
   box-shadow:
-    inset 0 1px #fff,
-    0 3px 0 #3d4d57;
+    inset 0 1.5px 0 #fff,
+    0 3px 0 #3d4d57,
+    0 10px 22px -6px rgb(0 0 0 / 65%);
 }
 .command-support-tours .gallery-tour-entrance .gallery-tour-action-text {
   padding-inline: 14px;
-  border-color: #596e7b;
-  background: #18242d;
-  color: #e4edef;
+  border-color: #647b89;
+  background: linear-gradient(180deg, #1e2c37 0%, #141f27 100%);
+  color: #eaf2f4;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 16%);
 }
 .command-support-tours .gallery-tour-theatre {
-  --gallery-tour-accent: #b7dce7;
-  --gallery-tour-text: #eef4f5;
-  --gallery-tour-muted: #c0cbd1;
+  --gallery-tour-accent: #bfe2ed;
+  --gallery-tour-text: #f2f7f8;
+  --gallery-tour-muted: #c5d1d7;
 }
 .command-support-tours .gallery-tour-stage {
-  border: 1px solid #7b8d97;
-  background: radial-gradient(ellipse at 50% 25%, #233643, #080d13 76%);
+  border: 1px solid #8699a4;
+  background:
+    radial-gradient(ellipse 80% 56% at 50% 24%, #273c4a 0%, #0c131c 64%, #070b10 100%);
   box-shadow:
-    inset 0 1px #ffffff38,
-    0 20px 46px #0009;
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 0 0 1px rgb(191 226 237 / 14%),
+    0 24px 54px #000a;
 }
 .command-support-tours .gallery-tour-theatre .gallery-tour-theatre-button,
 .command-support-tours .gallery-tour-sharing button {
-  border-color: #637885;
-  background: linear-gradient(180deg, #1d2a35, #111922);
-  color: #eef4f5;
-  box-shadow: inset 0 1px #ffffff1f;
+  border-color: #6d8391;
+  background: linear-gradient(180deg, #21303c 0%, #121b24 100%);
+  color: #f2f7f8;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    0 4px 10px -4px rgb(0 0 0 / 58%);
 }
 .command-support-tours .gallery-tour-theatre .gallery-tour-view-controls button {
   border-color: #4f6370;
@@ -250,53 +277,70 @@
 }
 @media (hover: hover) and (pointer: fine) {
   .command-support-download .export-page-btn:hover {
-    border-color: #eef6f9;
-    background: linear-gradient(180deg, #f2f7f9, #b7cad3 48%, #889fab);
+    border-color: rgb(186 246 255 / 95%);
+    background: linear-gradient(180deg, #ffffff 0%, #dbf8ff 46%, #94ecff 100%);
     box-shadow:
-      inset 0 1px 0 var(--dl-specular, #fff),
-      0 5px 0 #35424b,
-      0 12px 24px #0008;
+      0 0 0 1px rgb(4 8 15 / 88%),
+      0 0 0 2px rgb(122 232 255 / 64%),
+      inset 0 1.5px 0 #ffffff,
+      0 14px 36px rgb(122 232 255 / 44%);
   }
   .command-support-download :is(.export-page-alt, .export-page-navigation a):hover {
-    border-color: #b9d9e5;
-    color: #eef6f9;
-    box-shadow: inset 0 1px 0 var(--dl-specular, rgba(255, 255, 255, 0.3));
+    border-color: #bfe2ed;
+    color: #f4f9fb;
+    box-shadow:
+      inset 0 1px 0 var(--dl-specular, rgba(255, 255, 255, 0.36)),
+      0 6px 16px -6px rgb(185 217 229 / 28%);
   }
   .command-support-tours .gallery-topbar-actions > a:hover,
   .command-support-tours .gallery-tour-course-index a:hover,
   .command-support-tours .gallery-tour-entrance .gallery-tour-action-text:hover {
-    border-color: #b7dce7;
-    background: #1e2d39;
-    color: #f4f9fb;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    border-color: #bfe2ed;
+    background: linear-gradient(180deg, #253846 0%, #17232d 100%);
+    color: #f6fbfd;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.34),
+      0 8px 20px -6px rgb(0 0 0 / 70%),
+      0 0 16px -4px rgb(191 226 237 / 26%);
   }
   .command-support-tours .gallery-tour-entrance .gallery-tour-action-primary:hover {
-    border-color: #eff7fa;
-    background: linear-gradient(180deg, #f0f6f8, #b8ccd5 48%, #8ea4b0);
+    border-color: #f5fbfd;
+    background: linear-gradient(180deg, #f5fafc 0%, #c0d4dd 48%, #94aab6 100%);
+    box-shadow:
+      inset 0 1.5px 0 #fff,
+      0 3px 0 #3d4d57,
+      0 12px 28px -6px rgb(191 226 237 / 34%);
   }
   .command-support-tours
     .gallery-tour-theatre
     .gallery-tour-theatre-button:not([aria-pressed="true"]):hover:not(:disabled),
   .command-support-tours .gallery-tour-sharing button:hover:not(:disabled) {
-    border-color: #b7dce7;
-    background: linear-gradient(180deg, #263846, #16222d);
-    color: #f4f9fb;
+    border-color: #bfe2ed;
+    background: linear-gradient(180deg, #2a3e4d 0%, #182531 100%);
+    color: #f6fbfd;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.32),
+      0 6px 16px -4px rgb(0 0 0 / 68%);
   }
   .command-support-tours
     .gallery-tour-theatre
     :is(.gallery-tour-play-button, .gallery-tour-view-controls button)[aria-pressed="true"]:hover:not(:disabled) {
-    border-color: #f2fafe;
-    background: linear-gradient(180deg, #eaf6fa, #b4d3e0 52%, #8dadbb);
+    border-color: #f5fbff;
+    background: linear-gradient(180deg, #eff8fc 0%, #bad9e6 52%, #92b2c0 100%);
   }
   .command-support-tours
     .gallery-tour-theatre
     .gallery-tour-thumbnail:not([aria-current="step"]):hover {
-    border-color: #9dc2cf;
-    color: #eef4f5;
+    border-color: #a6cbd8;
+    color: #f2f7f8;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
   }
   .command-support-tours .gallery-tour-theatre .gallery-tour-next-tour:hover {
-    border-color: #b7dce7;
-    background: linear-gradient(155deg, #293c49, #131e29);
+    border-color: #bfe2ed;
+    background: linear-gradient(155deg, #2d4250 0%, #15212d 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.34),
+      0 14px 32px -10px rgb(0 0 0 / 76%);
   }
 }
 @media (max-width: 600px) {

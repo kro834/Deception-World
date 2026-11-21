@@ -171,27 +171,29 @@
   outline-offset: 5px;
 }
 
+.gallery-page.gallery-tours-page.command-support-tours[data-gallery-tours="true"]
+  .gallery-tour-stage,
 .gallery-tours-page.command-support-tours .gallery-tour-stage {
-  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 52%, rgb(206 186 148 / 0.56));
-  border-top-color: color-mix(in srgb, var(--gallery-tour-accent) 72%, #f7e6c4);
+  border: 1px solid color-mix(in srgb, var(--gallery-tour-accent) 66%, rgb(242 216 164 / 0.68));
+  border-top-color: color-mix(in srgb, var(--gallery-tour-accent) 84%, #fff8e6);
   background:
     radial-gradient(
-      ellipse 58% 28% at 50% -2%,
-      color-mix(in srgb, var(--gallery-tour-accent) 30%, rgb(248 228 186 / 0.2)),
+      ellipse 64% 36% at 50% -2%,
+      color-mix(in srgb, var(--gallery-tour-accent) 42%, rgb(254 232 184 / 0.32)),
       transparent 76%
     ),
     radial-gradient(
-      ellipse 72% 82% at 50% 22%,
-      color-mix(in srgb, var(--gallery-tour-accent) 16%, #162233),
-      #04060b 92%
+      ellipse 74% 82% at 50% 24%,
+      color-mix(in srgb, var(--gallery-tour-accent) 22%, #1b2b40),
+      #04070d 92%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 0.34),
-    inset 0 0 0 5px #070a11,
-    inset 0 0 0 6px color-mix(in srgb, var(--gallery-tour-accent) 28%, rgb(238 214 168 / 0.22)),
-    inset 0 16px 38px rgb(0 0 0 / 0.52),
-    0 0 48px -12px color-mix(in srgb, var(--gallery-tour-accent) 30%, transparent),
-    0 28px 72px rgb(0 0 0 / 0.64);
+    inset 0 1px 0 rgb(255 254 248 / 0.46),
+    inset 0 0 0 5px #05080f,
+    inset 0 0 0 6px color-mix(in srgb, var(--gallery-tour-accent) 38%, rgb(242 216 164 / 0.32)),
+    inset 0 18px 42px rgb(0 0 0 / 0.58),
+    0 0 64px -10px color-mix(in srgb, var(--gallery-tour-accent) 42%, transparent),
+    0 34px 82px rgb(0 0 0 / 0.76);
 }
 
 .gallery-tour-stage::before {

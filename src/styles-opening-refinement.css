@@ -5,9 +5,9 @@
   --op-halo-rest: 1;
   --op-rays-rest: 0.72;
   background:
-    radial-gradient(ellipse 64% 52% at 24% 65%, rgb(74 168 214 / 20%), transparent 58%),
-    radial-gradient(ellipse 56% 48% at 82% 28%, rgb(206 94 176 / 15%), transparent 52%),
-    radial-gradient(ellipse 60% 42% at 50% 88%, rgb(240 207 134 / 10%), transparent 60%),
+    radial-gradient(ellipse 66% 54% at 24% 65%, rgb(78 176 224 / 24%), transparent 60%),
+    radial-gradient(ellipse 58% 50% at 82% 28%, rgb(218 96 184 / 18%), transparent 54%),
+    radial-gradient(ellipse 62% 44% at 50% 88%, rgb(240 207 134 / 13%), transparent 62%),
     #04080f;
 }
 

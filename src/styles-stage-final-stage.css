@@ -523,7 +523,9 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-sc
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story {
   background:
-    radial-gradient(60% 28% at 50% 0, rgb(170 178 255 / 9%), transparent 72%), var(--fsx-house);
+    radial-gradient(64% 32% at 50% 0, rgb(233 211 160 / 13%), transparent 70%),
+    radial-gradient(52% 30% at 88% 82%, rgb(122 232 255 / 10%), transparent 72%),
+    var(--fsx-house);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
@@ -877,7 +879,10 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders {
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(40px, 5vw, 64px);
   background:
-    radial-gradient(50% 30% at 50% 100%, rgb(201 155 255 / 8%), transparent 72%), var(--fsx-ink);
+    radial-gradient(54% 30% at 24% 16%, rgb(122 232 255 / 12%), transparent 72%),
+    radial-gradient(54% 30% at 78% 22%, rgb(255 111 141 / 11%), transparent 72%),
+    radial-gradient(56% 32% at 50% 100%, rgb(233 211 160 / 12%), transparent 74%),
+    var(--fsx-ink);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders > .rxs-section-heading {

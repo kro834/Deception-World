@@ -42,27 +42,27 @@ html[data-family] {
       .saga-cinema .site-header
     ),
   html[data-family="special"] body .rxs-page.rxs-page.rxs-page > header.rxs-local-nav {
-    border-bottom-color: var(--command-edge);
+    border-bottom-color: rgb(var(--sh-l1-rgb) / 58%);
     background-color: #040a14;
     background-image:
       linear-gradient(90deg, var(--sh-l1) 0 3px, transparent 3px),
       linear-gradient(
         90deg,
-        rgb(var(--sh-l1-rgb) / 86%) 0%,
-        rgb(238 249 255 / 80%) 18%,
-        rgb(157 134 255 / 66%) 46%,
-        rgb(var(--sh-l2-rgb) / 72%) 74%,
-        rgb(242 207 141 / 78%) 90%,
+        var(--sh-l1) 0%,
+        #f2fbff 22%,
+        #a88fff 48%,
+        var(--sh-l2) 74%,
+        #f6d99e 90%,
         transparent 100%
       ),
       radial-gradient(
-        34% 160% at 8% 0%,
-        rgb(var(--sh-l1-rgb) / 14%),
+        38% 180% at 8% 0%,
+        rgb(var(--sh-l1-rgb) / 22%),
         transparent 72%
       ),
       radial-gradient(
-        28% 160% at 96% 100%,
-        rgb(var(--sh-l2-rgb) / 12%),
+        32% 180% at 96% 100%,
+        rgb(var(--sh-l2-rgb) / 18%),
         transparent 72%
       ),
       var(--command-metal);
@@ -80,10 +80,10 @@ html[data-family] {
       0 0;
     background-repeat: no-repeat;
     box-shadow:
-      inset 0 1px 0 rgb(238 248 255 / 34%),
-      inset 0 -1px 0 rgb(var(--sh-l1-rgb) / 36%),
-      0 10px 28px -14px rgb(var(--sh-l1-rgb) / 30%),
-      0 8px 24px rgb(0 0 0 / 44%);
+      inset 0 1px 0 rgb(244 252 255 / 40%),
+      inset 0 -1px 0 rgb(var(--sh-l1-rgb) / 48%),
+      0 10px 30px -10px rgb(var(--sh-l1-rgb) / 42%),
+      0 10px 26px rgb(0 0 0 / 52%);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -93,31 +93,31 @@ html[data-family] {
   html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil,
   html[data-family="library"] body .library-page > header.library-topbar > a::before,
   html[data-family="library"] body .search-page > header.search-topbar > a.search-brand::before {
-    border-color: rgb(224 247 255 / 74%);
+    border-color: rgb(236 250 255 / 86%);
     background:
-      radial-gradient(circle at 86% 14%, rgb(255 255 255 / 62%), rgb(var(--sh-l1-rgb) / 28%) 34%, transparent 66%),
-      radial-gradient(circle at 14% 88%, rgb(var(--sh-l2-rgb) / 24%), transparent 62%),
+      radial-gradient(circle at 86% 14%, rgb(255 255 255 / 82%), rgb(var(--sh-l1-rgb) / 42%) 32%, transparent 64%),
+      radial-gradient(circle at 14% 88%, rgb(var(--sh-l2-rgb) / 36%), transparent 60%),
       linear-gradient(
         135deg,
-        rgb(238 250 255 / 26%) 0%,
-        rgb(var(--sh-l1-rgb) / 16%) 32%,
-        rgb(10 22 38 / 88%) 62%,
-        rgb(var(--sh-l1-rgb) / 22%) 100%
+        rgb(246 252 255 / 34%) 0%,
+        rgb(var(--sh-l1-rgb) / 22%) 32%,
+        rgb(9 20 36 / 90%) 62%,
+        rgb(var(--sh-l1-rgb) / 30%) 100%
       ),
       var(--sh-ink-2);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 76%),
-      inset 1px 0 0 rgb(var(--sh-l1-rgb) / 56%),
-      inset -1px -1px 0 rgb(var(--sh-l2-rgb) / 34%),
-      inset 0 0 14px rgb(var(--sh-l1-rgb) / 22%);
-    color: #eefaff;
-    text-shadow: 0 0 12px rgb(var(--sh-l1-rgb) / 62%);
+      inset 0 1px 0 rgb(255 255 255 / 88%),
+      inset 1px 0 0 rgb(var(--sh-l1-rgb) / 70%),
+      inset -1px -1px 0 rgb(var(--sh-l2-rgb) / 48%),
+      inset 0 0 16px rgb(var(--sh-l1-rgb) / 30%);
+    color: #f4fcff;
+    text-shadow: 0 0 14px rgb(var(--sh-l1-rgb) / 78%);
   }
 
   html[data-family="world"] body main.site-shell.film-edition > header.topbar .brand-sigil i,
   html[data-family="dossier"] body .manager-page > header.manager-topbar .brand-sigil i {
-    color: #eefaff;
-    text-shadow: 0 0 12px rgb(var(--sh-l1-rgb) / 62%);
+    color: #f4fcff;
+    text-shadow: 0 0 14px rgb(var(--sh-l1-rgb) / 78%);
   }
 
   /* Active topbar route links receive a paint-only lock-on reticle and prism bar. */
@@ -179,19 +179,19 @@ html[data-family] {
     body
     .side-panel-trigger.side-panel-trigger.side-panel-trigger {
     border: 0 !important;
-    border-radius: 4px !important;
+    border-radius: 5px !important;
     color: var(--sh-on-l1) !important;
     background:
-      radial-gradient(circle at 22% 16%, rgb(255 255 255 / 54%), transparent 56%),
-      linear-gradient(125deg, transparent 18%, rgb(255 255 255 / 34%) 44%, transparent 74%),
-      linear-gradient(180deg, rgb(244 252 255 / 52%) 0%, rgb(233 240 241 / 12%) 50%, rgb(4 10 20 / 24%) 100%),
+      radial-gradient(circle at 20% 14%, rgb(255 255 255 / 72%), transparent 52%),
+      linear-gradient(125deg, transparent 16%, rgb(255 255 255 / 42%) 44%, transparent 72%),
+      linear-gradient(180deg, rgb(246 253 255 / 60%) 0%, rgb(233 240 241 / 14%) 48%, rgb(4 10 20 / 26%) 100%),
       var(--sh-l1) !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 84%),
-      inset 0 0 0 1px rgb(238 248 255 / 66%),
+      inset 0 1px 0 rgb(255 255 255 / 92%),
+      inset 0 0 0 1px rgb(244 251 255 / 74%),
       inset 0 -1px 0 rgb(2 8 16 / 34%),
-      0 6px 18px -6px rgb(0 0 0 / 56%),
-      0 0 18px -5px rgb(var(--sh-l1-rgb) / 42%) !important;
+      0 8px 20px -6px rgb(0 0 0 / 60%),
+      0 0 24px -4px rgb(var(--sh-l1-rgb) / 56%) !important;
   }
 
   /* The sheet is still opaque. Smooth subtle gradients replace the old hard-stop cuts. */
@@ -573,12 +573,12 @@ html[data-family] {
    each destination in reading order at every width. The doubled ID resolves
    the older route-specific launcher rules without changing the routes. */
 html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
-  --atlas-ink: #0a1119;
-  --atlas-raised: #111b26;
-  --atlas-light: #f0f1eb;
-  --atlas-muted: #bac5cd;
-  --atlas-line: #43505b;
-  --atlas-gold: #e6c388;
+  --atlas-ink: #070e17;
+  --atlas-raised: #0f1a28;
+  --atlas-light: #f2f5f2;
+  --atlas-muted: #bfccd6;
+  --atlas-line: rgb(146 186 208 / 32%);
+  --atlas-gold: #edd095;
   --atlas-accent: var(--sh-l1, #80d3cb);
   --sp-pad-inline: max(clamp(16px, 4vw, 68px), calc((100vw - 1520px) / 2));
   grid-template-columns: minmax(0, 1fr);
@@ -588,8 +588,9 @@ html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] {
   grid-auto-rows: max-content;
   gap: clamp(28px, 4vw, 62px);
   background:
-    radial-gradient(ellipse 56% 36% at 96% 0%, rgb(128 211 203 / 10%), transparent 70%),
-    radial-gradient(ellipse 48% 34% at 4% 100%, rgb(230 195 136 / 8%), transparent 70%),
+    radial-gradient(ellipse 60% 42% at 96% 0%, rgb(122 232 255 / 16%), transparent 70%),
+    radial-gradient(ellipse 46% 36% at 48% 28%, rgb(157 134 255 / 10%), transparent 72%),
+    radial-gradient(ellipse 52% 38% at 4% 100%, rgb(237 208 149 / 12%), transparent 70%),
     var(--atlas-ink) !important;
   color: var(--atlas-light);
 }
@@ -600,10 +601,18 @@ html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] > .s
   align-items: center;
   padding-bottom: 8px;
   background:
-    linear-gradient(90deg, var(--atlas-gold) 0%, var(--atlas-accent) 44%, var(--atlas-line) 82%, transparent 100%)
-      var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 1px no-repeat,
+    linear-gradient(
+        90deg,
+        var(--atlas-gold) 0%,
+        #f4fbff 26%,
+        var(--atlas-accent) 56%,
+        rgb(157 134 255 / 56%) 82%,
+        transparent 100%
+      )
+      var(--sp-pad-inline) 100% / calc(100% - 2 * var(--sp-pad-inline)) 2px no-repeat,
+    radial-gradient(48% 150% at 14% 0%, rgb(237 208 149 / 12%), transparent 72%),
     var(--atlas-ink);
-  box-shadow: 0 8px 22px -14px rgb(0 0 0 / 72%);
+  box-shadow: 0 10px 26px -14px rgb(0 0 0 / 78%);
 }
 html[data-family]
   body
@@ -913,7 +922,14 @@ html[data-family]
   .side-panel-quick-search {
   grid-column: 1 / -1;
   min-height: 56px;
+  border-color: rgb(237 208 149 / 44%);
   border-inline-start: 3px solid var(--atlas-gold);
+  background:
+    linear-gradient(90deg, rgb(237 208 149 / 14%) 0%, rgb(122 232 255 / 6%) 48%, transparent 86%),
+    var(--atlas-raised);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 232 / 26%),
+    0 12px 26px -14px rgb(0 0 0 / 78%);
 }
 
 /* The current page has one title, on its own artwork. At large widths the
@@ -926,13 +942,16 @@ html[data-family]
   align-self: start;
   overflow: clip;
   padding: 0 14px 12px;
-  border: 1px solid var(--atlas-line);
+  border: 1px solid rgb(158 202 224 / 34%);
+  border-top-color: rgb(237 208 149 / 64%);
+  border-radius: 5px;
   background:
-    radial-gradient(ellipse 75% 44% at 0% 0%, rgb(128 211 203 / 10%), transparent 68%),
+    radial-gradient(ellipse 75% 44% at 0% 0%, rgb(122 232 255 / 14%), transparent 68%),
+    radial-gradient(ellipse 60% 42% at 100% 100%, rgb(237 208 149 / 9%), transparent 70%),
     var(--atlas-raised);
   box-shadow:
-    inset 0 1px 0 rgb(240 241 235 / 16%),
-    0 18px 36px -20px rgb(0 0 0 / 74%);
+    inset 0 1px 0 rgb(244 252 255 / 24%),
+    0 22px 44px -20px rgb(0 0 0 / 82%);
 }
 html[data-family] body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene {
   position: relative;
@@ -1559,13 +1578,13 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
 @media (orientation: portrait) and (max-width: 600px),
        (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) {
   html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] {
-    --atlas-ink: #1b1d1f;
-    --atlas-raised: #26292b;
-    --atlas-light: #f5f1e9;
-    --atlas-muted: #b6bab9;
-    --atlas-line: #3d4244;
-    --atlas-gold: #efd4a0;
-    --atlas-accent: #b0d9d0;
+    --atlas-ink: #0f1620;
+    --atlas-raised: #172230;
+    --atlas-light: #f4f7f5;
+    --atlas-muted: #b6c4ce;
+    --atlas-line: rgb(148 188 210 / 28%);
+    --atlas-gold: #f0d59e;
+    --atlas-accent: #9ce4db;
     --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 14px);
     --sp-pad-inline: clamp(16px, 5vw, 24px);
     grid-template-columns: minmax(0, 1fr);
@@ -1574,7 +1593,10 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
     padding-inline: max(var(--sp-pad-inline), calc(env(safe-area-inset-left, 0px) + 10px))
       max(var(--sp-pad-inline), calc(env(safe-area-inset-right, 0px) + 10px));
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
-    background: var(--atlas-ink) !important;
+    background:
+      radial-gradient(ellipse 75% 32% at 92% 0%, rgb(122 232 255 / 14%), transparent 68%),
+      radial-gradient(ellipse 68% 30% at 8% 100%, rgb(240 213 158 / 10%), transparent 70%),
+      var(--atlas-ink) !important;
     color-scheme: dark;
     font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
   }
@@ -1583,7 +1605,10 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
     grid-template-columns: minmax(0, 1fr) 44px;
     gap: 5px 8px;
     padding-bottom: 4px;
-    background: var(--atlas-ink);
+    background:
+      linear-gradient(90deg, var(--atlas-accent), var(--atlas-gold) 56%, transparent 94%)
+        0 100% / 100% 1px no-repeat,
+      var(--atlas-ink);
     box-shadow: inset 0 -1px var(--atlas-line);
   }
 
@@ -1619,9 +1644,14 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
     width: 100%;
     min-height: 44px;
     padding: 8px 13px;
-    border: 1px solid var(--atlas-line);
+    border: 1px solid rgb(156 228 219 / 34%);
     border-radius: 13px;
-    background: var(--atlas-raised);
+    background:
+      linear-gradient(180deg, rgb(244 252 255 / 9%) 0%, transparent 56%),
+      var(--atlas-raised);
+    box-shadow:
+      inset 0 1px 0 rgb(244 252 255 / 20%),
+      0 6px 16px -8px rgb(0 0 0 / 60%);
     color: var(--atlas-light);
     font-family: inherit;
     font-size: 15px;
@@ -1632,7 +1662,7 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-search-dock > .side-panel-quick-search:active {
-    background: #343839;
+    background: #223344;
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .side-panel-close {
@@ -1641,10 +1671,12 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
     width: 44px;
     height: 44px;
     min-height: 44px;
-    border: 1px solid var(--atlas-line) !important;
+    border: 1px solid rgb(156 228 219 / 36%) !important;
     border-radius: 50% !important;
-    background: var(--atlas-raised) !important;
-    box-shadow: none !important;
+    background:
+      linear-gradient(180deg, rgb(244 252 255 / 12%), transparent 56%),
+      var(--atlas-raised) !important;
+    box-shadow: inset 0 1px 0 rgb(244 252 255 / 24%) !important;
     color: var(--atlas-light);
   }
 
@@ -1797,9 +1829,14 @@ html[data-family] body #site-side-panel[data-command-atlas] > .side-panel-head >
     min-height: 62px;
     margin: 0 0 16px;
     padding: 7px 10px;
-    border: 1px solid var(--atlas-line);
+    border: 1px solid rgb(156 228 219 / 34%);
     border-radius: 11px;
-    background: var(--atlas-raised);
+    background:
+      linear-gradient(125deg, rgb(156 228 219 / 10%), transparent 56%),
+      var(--atlas-raised);
+    box-shadow:
+      inset 0 1px 0 rgb(244 252 255 / 20%),
+      0 10px 22px -12px rgb(0 0 0 / 62%);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body #site-side-panel#site-side-panel[data-command-atlas] .command-atlas-scene::after {

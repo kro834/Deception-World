@@ -2199,3 +2199,107 @@ html[data-family="special"][data-rzn-constrained] body .rxs-page.mus-page .rzn-s
     text-shadow: none;
   }
 }
+
+/* ================================================================
+   2026-11 Wave-6 Suit-Up White Fire x Emerald Platinum Polish:
+   Elevates runway corner rims, triple floor halo, ending route and
+   controls while preserving all motion, scroll-paint and a11y gates.
+   ================================================================ */
+html[data-family="special"]
+  body
+  #top.rxs-page.mus-page[data-command-special]
+  .rzn-suitup
+  > .rzn-frame::before {
+  background:
+    linear-gradient(#ffffff, #ffffff) left top / 26px 1.5px no-repeat,
+    linear-gradient(#ffffff, #ffffff) left top / 1.5px 26px no-repeat,
+    linear-gradient(#ffd49c, #ffd49c) right top / 26px 1.5px no-repeat,
+    linear-gradient(#ffd49c, #ffd49c) right top / 1.5px 26px no-repeat,
+    linear-gradient(#62eee6, #62eee6) left bottom / 26px 1.5px no-repeat,
+    linear-gradient(#62eee6, #62eee6) left bottom / 1.5px 26px no-repeat,
+    linear-gradient(#f0deff, #f0deff) right bottom / 26px 1.5px no-repeat,
+    linear-gradient(#f0deff, #f0deff) right bottom / 1.5px 26px no-repeat,
+    linear-gradient(rgb(255 255 255 / 42%), rgb(255 255 255 / 42%)) center top / 1.5px 10px
+      no-repeat,
+    linear-gradient(rgb(64 226 218 / 42%), rgb(64 226 218 / 42%)) center bottom / 1.5px 10px
+      no-repeat;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.mus-page[data-command-special]
+  .rzn-suitup
+  > .rzn-frame::after {
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(64 226 218 / 64%) 20%,
+    rgb(255 255 255 / 88%) 50%,
+    rgb(255 204 138 / 68%) 80%,
+    transparent
+  );
+  box-shadow: 0 0 14px rgb(240 222 255 / 38%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.mus-page[data-command-special]
+  .rzn-suitup
+  > .rzn-frame
+  > .rzn-floor {
+  border-color: rgb(244 236 255 / 62%);
+  box-shadow:
+    0 0 0 10px rgb(64 226 218 / 10%),
+    0 0 0 22px rgb(240 222 255 / 8%),
+    0 0 54px rgb(64 226 218 / 30%),
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    inset 0 0 34px rgb(240 222 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.mus-page[data-command-special]
+  .ffs-assembly-controls
+  > :is(a, button) {
+  border-color: rgb(240 222 255 / 46%);
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 34%), rgb(64 226 218 / 24%) 58%, transparent) 0 0 /
+      100% 1px no-repeat,
+    linear-gradient(180deg, #0b242c 0%, #041016 100%);
+  color: #f4fcfd;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(64 226 218 / 28%),
+    0 10px 24px -10px rgb(0 0 0 / 84%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.mus-page[data-command-special]
+  .ffs-ending-route
+  > li[data-current] {
+  box-shadow:
+    0 -8px 18px -6px var(--ffs-node),
+    inset 0 1px 0 rgb(255 255 255 / 36%);
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]
+    .ffs-assembly-controls
+    > :is(a, button) {
+    background: Canvas;
+    box-shadow: none;
+    border-color: CanvasText;
+    color: CanvasText;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.mus-page[data-command-special]
+    :is(.rzn-suitup > .rzn-frame::before, .rzn-suitup > .rzn-frame::after) {
+    display: none;
+  }
+}

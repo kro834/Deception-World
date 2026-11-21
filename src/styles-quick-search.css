@@ -95,13 +95,13 @@ dialog.quick-search *::after {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 1px;
+  height: 2px;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(var(--qs-ice-rgb) / 0.78) 26%,
-    rgb(255 255 255 / 0.86) 50%,
-    rgb(var(--qs-pink-rgb) / 0.62) 76%,
+    rgb(var(--qs-ice-rgb) / 0.88) 24%,
+    rgb(255 255 255 / 0.94) 50%,
+    rgb(var(--qs-pink-rgb) / 0.78) 76%,
     transparent 100%
   );
   z-index: 2;
@@ -229,15 +229,17 @@ dialog.quick-search kbd {
 .quick-search-field:focus-within {
   border-color: var(--qs-ice);
   background:
-    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.08) 0%, transparent 24px),
-    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.16) 0%, rgb(157 134 255 / 0.08) 56%, rgb(var(--qs-pink-rgb) / 0.06) 100%),
-    #061322;
+    linear-gradient(90deg, var(--qs-ice) 0%, #9d86ff 56%, var(--qs-pink) 100%) 0 100% / 100% 1.5px
+      no-repeat,
+    linear-gradient(180deg, rgb(var(--qs-ice-rgb) / 0.12) 0%, transparent 26px),
+    linear-gradient(90deg, rgb(var(--qs-ice-rgb) / 0.18) 0%, rgb(157 134 255 / 0.1) 56%, rgb(var(--qs-pink-rgb) / 0.08) 100%),
+    #061424;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.34),
+    inset 0 1px 0 rgb(255 255 255 / 0.42),
     inset 0 2px 6px rgb(0 0 0 / 0.42),
-    0 0 0 3px rgb(var(--qs-ice-rgb) / 0.24),
-    0 0 28px -4px rgb(var(--qs-ice-rgb) / 0.48),
-    0 0 46px -14px rgb(var(--qs-pink-rgb) / 0.28);
+    0 0 0 3px rgb(var(--qs-ice-rgb) / 0.28),
+    0 0 34px -4px rgb(var(--qs-ice-rgb) / 0.56),
+    0 0 54px -12px rgb(var(--qs-pink-rgb) / 0.34);
 }
 .quick-search-field svg {
   width: 18px;
@@ -910,14 +912,18 @@ dialog.quick-search :is(button, a):focus-visible {
 @media (max-width: 560px) and (forced-colors: none),
   (orientation: landscape) and (max-height: 500px) and (max-width: 980px) and (pointer: coarse) and (forced-colors: none) {
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-panel {
-    border-color: rgb(255 255 255 / 16%);
+    border-color: rgb(220 245 255 / 24%);
     border-radius: 22px;
-    background: var(--qs-ink, #121719);
-    box-shadow: 0 20px 56px rgb(0 0 0 / 48%);
+    background:
+      radial-gradient(ellipse 75% 32% at 88% 0%, rgb(var(--qs-ice-rgb) / 0.12), transparent 68%),
+      var(--qs-ink, #0f1620);
+    box-shadow:
+      inset 0 1px 0 rgb(244 252 255 / 22%),
+      0 24px 64px rgb(0 0 0 / 62%);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search::backdrop {
-    background: rgb(0 0 0 / 66%);
+    background: rgb(2 6 14 / 74%);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-panel::before {
@@ -926,22 +932,25 @@ dialog.quick-search :is(button, a):focus-visible {
 
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-field {
     min-height: 48px;
-    border-color: rgb(255 255 255 / 18%);
+    border-color: rgb(var(--qs-ice-rgb) / 0.28);
     border-radius: 14px;
     background: var(--qs-ink-2);
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgb(244 252 255 / 14%);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-field:focus-within {
     border-color: var(--qs-ice);
-    box-shadow: 0 0 0 1px var(--qs-ice);
+    box-shadow:
+      0 0 0 2px rgb(var(--qs-ice-rgb) / 0.34),
+      0 0 20px -4px rgb(var(--qs-ice-rgb) / 0.44);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-close {
     min-height: 44px;
     border-radius: 999px;
+    border-color: rgb(220 245 255 / 24%);
     background: var(--qs-ink-2);
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgb(244 252 255 / 16%);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"]) body dialog.quick-search .quick-search-foot {

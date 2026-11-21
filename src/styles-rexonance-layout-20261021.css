@@ -25,26 +25,29 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page.rxs-rexonance-page 
   --rxl-wrap: 1240px;
   --rxl-gutter: var(--rxt-gutter, clamp(20px, 3.4vw, 56px));
   --rxl-section: clamp(64px, 8vw, 120px);
-  --rxl-line: rgb(121 232 255 / 18%);
-  --rxl-line-soft: rgb(121 232 255 / 10%);
-  --rxl-plate: linear-gradient(180deg, rgb(10 18 29 / 86%), rgb(3 8 14 / 92%));
-  --rxl-plate-edge: rgb(121 232 255 / 22%);
-  --rxl-tick: rgb(242 216 150 / 90%);
-  --rxl-tick-size: 18px;
+  --rxl-line: rgb(121 232 255 / 26%);
+  --rxl-line-soft: rgb(121 232 255 / 16%);
+  --rxl-plate: linear-gradient(168deg, rgb(14 27 42 / 92%) 0%, rgb(7 15 26 / 95%) 54%, rgb(3 8 15 / 97%) 100%);
+  --rxl-plate-edge: rgb(121 232 255 / 32%);
+  --rxl-tick: rgb(242 216 150 / 96%);
+  --rxl-tick-size: 20px;
   /* Four corner ticks, drawn as background layers so no element is needed. */
   --rxl-corners:
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 0 / var(--rxl-tick-size) 1px no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 0 / 1px var(--rxl-tick-size) no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / var(--rxl-tick-size) 1px no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / 1px var(--rxl-tick-size) no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / var(--rxl-tick-size) 1px no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / 1px var(--rxl-tick-size) no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / var(--rxl-tick-size) 1px no-repeat,
-    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / 1px var(--rxl-tick-size) no-repeat;
-  /* The inner hairline of a plate: a lit top edge and a dark base. */
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 0 / var(--rxl-tick-size) 1.5px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 0 / 1.5px var(--rxl-tick-size) no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / var(--rxl-tick-size) 1.5px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 0 / 1.5px var(--rxl-tick-size) no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / var(--rxl-tick-size) 1.5px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 0 100% / 1.5px var(--rxl-tick-size) no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / var(--rxl-tick-size) 1.5px no-repeat,
+    linear-gradient(var(--rxl-tick), var(--rxl-tick)) 100% 100% / 1.5px var(--rxl-tick-size) no-repeat;
+  /* The inner hairline of a plate: a double specular rim and a dark base. */
   --rxl-plate-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%), inset 0 0 0 1px var(--rxl-plate-edge),
-    0 24px 60px -32px rgb(0 0 0 / 80%);
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 2px 0 rgb(121 232 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    inset 0 0 0 1px var(--rxl-plate-edge),
+    0 28px 68px -28px rgb(0 0 0 / 88%);
 }
 
 /* With viewport-fit=cover, the landscape notch can overlap chapter copy.
@@ -2311,5 +2314,1277 @@ html[data-family="special"]
       .rxe-chapter-map a > b
     ) {
     box-shadow: none !important;
+  }
+}
+
+/* ======================================================================
+   WAVE-6 FLAGSHIP CASCADE ELEVATION (2026-11-21)
+   Outranks #top.rxs-page rules in apex.css and command-special.css with
+   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl).
+   Delivers forged-gold × reactor-ice × violet lightning spatial illumination,
+   precision chamfered glass framing, double specular rims, and deep shadows.
+   ====================================================================== */
+
+/* 1. Top Local Navigation Bar & Menu Trigger */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > header.rxs-local-nav {
+  border-bottom: 1px solid rgb(121 232 255 / 36%);
+  background:
+    linear-gradient(
+      90deg,
+      #79e8ff 0%,
+      #b6a3ff 34%,
+      #ff8fd8 64%,
+      #f2d896 100%
+    )
+      0 100% / 100% 1.5px no-repeat,
+    linear-gradient(
+      90deg,
+      transparent 6%,
+      rgb(255 255 255 / 42%) 38.2%,
+      rgb(242 216 150 / 38%) 61.8%,
+      transparent 94%
+    )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 68% 120% at 32% 0%, rgb(121 232 255 / 16%), transparent 72%),
+    radial-gradient(ellipse 56% 120% at 76% 0%, rgb(242 216 150 / 12%), transparent 72%),
+    linear-gradient(180deg, #060e19 0%, #03080f 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    0 14px 36px -10px rgb(0 0 0 / 86%),
+    0 2px 24px -4px rgb(121 232 255 / 32%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > header.rxs-local-nav
+  .rxs-menu-trigger {
+  border: 1px solid rgb(121 232 255 / 62%);
+  background:
+    linear-gradient(#f2d896, #f2d896) 0 100% / 12px 2px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 100% / 2px 12px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 0 / 12px 2px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 0 / 2px 12px no-repeat,
+    radial-gradient(100% 100% at 24% 0%, rgb(121 232 255 / 26%), transparent 72%),
+    linear-gradient(155deg, #13283d 0%, #081320 58%, #040912 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    inset 0 0 0 1px rgb(242 216 150 / 22%),
+    0 8px 22px -6px rgb(0 0 0 / 78%),
+    0 0 18px -4px rgb(121 232 255 / 34%);
+}
+
+/* 2. Hero Stage Spatial Illumination, Chamfered Glass Framing & Outline Ghost */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero {
+  background:
+    radial-gradient(ellipse 14% 34% at 72% 36%, rgb(255 248 222 / 24%), transparent 72%),
+    radial-gradient(ellipse 36% 72% at 58% 38%, rgb(121 232 255 / 16%), transparent 72%),
+    radial-gradient(ellipse 34% 68% at 86% 42%, rgb(182 163 255 / 16%), rgb(255 143 216 / 10%) 48%, transparent 74%),
+    radial-gradient(ellipse 46% 52% at 26% 44%, rgb(121 232 255 / 13%), rgb(242 216 150 / 7%) 52%, transparent 76%),
+    radial-gradient(ellipse 34% 6% at 72% 94%, rgb(121 232 255 / 30%), transparent 72%),
+    radial-gradient(ellipse 24% 3.5% at 72% 94%, rgb(242 216 150 / 24%), transparent 72%),
+    linear-gradient(
+      180deg,
+      transparent 93.4%,
+      rgb(121 232 255 / 72%) 93.8%,
+      rgb(242 216 150 / 68%) 94.05%,
+      rgb(255 143 216 / 64%) 94.25%,
+      transparent 94.6%
+    )
+      72% 0 / 40% 100% no-repeat,
+    radial-gradient(ellipse 56% 68% at 72% 44%, rgb(46 78 124 / 42%), transparent 72%),
+    #02050a;
+}
+
+/* Precision chamfered glass-metal frame behind the hero copy block */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxs-hero-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -20px -22px -22px;
+  border-radius: 3px;
+  border: 1px solid rgb(121 232 255 / 34%);
+  pointer-events: none;
+  filter: none;
+  background:
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 20px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 1.5px 20px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 0 / 20px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 0 / 1.5px 20px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 100% / 20px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 100% / 1.5px 20px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 20px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 1.5px 20px no-repeat,
+    linear-gradient(
+      90deg,
+      #ffffff 0 6px,
+      #79e8ff 6px 38.2%,
+      #f2d896 64%,
+      #b6a3ff 88%,
+      transparent 100%
+    )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(
+      90deg,
+      transparent 8%,
+      rgb(242 216 150 / 52%) 38.2%,
+      rgb(121 232 255 / 48%) 68%,
+      transparent 94%
+    )
+      0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 76% 68% at 24% 22%, rgb(121 232 255 / 18%), transparent 70%),
+    radial-gradient(ellipse 64% 58% at 78% 76%, rgb(242 216 150 / 14%), rgb(182 163 255 / 10%) 52%, transparent 74%),
+    linear-gradient(156deg, rgb(10 22 37 / 80%) 0%, rgb(5 12 22 / 86%) 54%, rgb(2 6 13 / 92%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 2px 0 rgb(121 232 255 / 18%),
+    inset 0 -1px 0 rgb(242 216 150 / 24%),
+    inset 0 0 0 1px rgb(121 232 255 / 16%),
+    0 28px 68px -18px rgb(0 0 0 / 90%),
+    0 0 42px -10px rgb(121 232 255 / 26%),
+    0 0 64px -16px rgb(242 216 150 / 18%);
+}
+
+@media (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    .rxs-hero-copy::before {
+    inset: -14px -8px -16px;
+  }
+}
+
+@media (max-width: 420px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    .rxs-hero-copy::before {
+    inset: -12px -4px -14px;
+  }
+}
+
+/* Cosmic reactor halo behind the framed hero copy */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxs-hero-copy::after {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: -18% 0 -14% 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      60% 56% at 24% 36%,
+      rgb(121 232 255 / 26%),
+      rgb(182 163 255 / 16%) 46%,
+      transparent 76%
+    ),
+    radial-gradient(
+      52% 48% at 68% 26%,
+      rgb(242 216 150 / 22%),
+      rgb(121 232 255 / 10%) 50%,
+      transparent 74%
+    ),
+    radial-gradient(
+      56% 52% at 42% 74%,
+      rgb(182 163 255 / 18%),
+      rgb(255 143 216 / 10%) 48%,
+      transparent 76%
+    );
+}
+
+/* Forged gold wordmark (REXONANCE SAGA) & Lede datum rail */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  h1
+  > span::before {
+  text-shadow:
+    0 0 26px rgb(242 216 150 / 54%),
+    0 0 52px rgb(121 232 255 / 32%),
+    0 10px 24px rgb(0 0 0 / 88%);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    h1
+    > span::after {
+    background: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fff7db 24%,
+      #f2d896 52%,
+      #cf9234 76%,
+      #ffefc4 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxs-hero-lede::before {
+  width: 44px;
+  height: 2.5px;
+  background: linear-gradient(90deg, #ffffff 0 5px, #f2d896 5px 48%, #79e8ff 100%);
+  box-shadow:
+    0 0 14px rgb(242 216 150 / 68%),
+    0 0 26px rgb(121 232 255 / 44%);
+}
+
+/* Outlined ghost mark (.rxf-mark > i): sculptural double-tone stroke & inner reactor gradient */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxs-hero-copy
+  > .rxf-mark
+  > i {
+  -webkit-text-stroke: 1.35px rgb(121 232 255 / 54%);
+  text-shadow:
+    0 0 22px rgb(121 232 255 / 26%),
+    0 0 46px rgb(182 163 255 / 16%),
+    0 12px 28px rgb(0 0 0 / 68%);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    .rxs-hero-copy
+    > .rxf-mark
+    > i {
+    background: linear-gradient(
+      180deg,
+      rgb(220 250 255 / 26%) 6%,
+      rgb(121 232 255 / 14%) 44%,
+      rgb(182 163 255 / 12%) 72%,
+      rgb(242 216 150 / 28%) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@media (min-width: 1100px) and (max-width: 1279.98px) and (max-height: 799.98px),
+  (min-width: 1280px) and (max-width: 1365.98px) and (max-height: 839.98px),
+  (min-width: 1366px) and (max-width: 1439.98px) and (max-height: 864.98px),
+  (min-width: 1440px) and (max-width: 1535.98px) and (max-height: 894.98px),
+  (min-width: 1536px) and (max-width: 1679.98px) and (max-height: 944.98px),
+  (min-width: 1680px) and (max-width: 1919.98px) and (max-height: 994.98px),
+  (min-width: 1920px) and (max-width: 2239.98px) and (max-height: 1039.98px),
+  (min-width: 2240px) and (max-height: 1084.98px),
+  (max-width: 1099.98px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    .rxs-hero-copy
+    > .rxf-mark
+    > i {
+    -webkit-text-stroke: 1.15px rgb(121 232 255 / 34%);
+    text-shadow:
+      0 0 18px rgb(121 232 255 / 18%),
+      0 8px 20px rgb(0 0 0 / 56%);
+  }
+
+  @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+    html[data-family="special"]
+      body
+      #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+      > .rxs-hero
+      .rxs-hero-copy
+      > .rxf-mark
+      > i {
+      background: linear-gradient(
+        180deg,
+        rgb(190 245 255 / 16%) 8%,
+        rgb(121 232 255 / 8%) 54%,
+        rgb(242 216 150 / 16%) 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+}
+
+/* Hero CTAs: double-specular bullion primary & obsidian reactor-glass secondary */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxe-hero-rail
+  a
+  > u.rxe-hero-glint {
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 9px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 0 / 1.5px 9px no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 100% / 9px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) 100% 100% / 1.5px 9px no-repeat;
+  opacity: 0.86;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxe-hero-primary {
+  color: #020912;
+  border: 1px solid #ffffff;
+  background:
+    linear-gradient(90deg, #ffffff 0%, #fff7df 38.2%, #79e8ff 76%, transparent 100%) 0 0 / 100%
+      2px no-repeat,
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(242 216 150 / 92%) 38.2%,
+      rgb(121 232 255 / 84%) 78%,
+      transparent
+    )
+      0 100% / 100% 1.5px no-repeat,
+    radial-gradient(125% 95% at 18% 0%, rgb(255 255 255 / 88%), transparent 58%),
+    linear-gradient(132deg, #f8feff 0%, #aeeeff 38%, #ebd39a 74%, #ffe3a3 100%);
+  box-shadow:
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -2px 0 rgb(82 52 10 / 54%),
+    inset 0 0 0 1px rgb(255 255 255 / 64%),
+    0 18px 40px -8px rgb(0 0 0 / 82%),
+    0 0 30px -4px rgb(121 232 255 / 52%),
+    0 0 52px -10px rgb(242 216 150 / 40%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-hero
+  .rxe-hero-secondary {
+  color: #f4fbff;
+  border: 1px solid rgb(156 234 252 / 72%);
+  background:
+    linear-gradient(90deg, #ffffff 0 4px, #79e8ff 4px 38.2%, #f2d896 68%, #b6a3ff 92%, transparent)
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(90deg, transparent 10%, rgb(242 216 150 / 48%) 50%, transparent 90%) 0 100% /
+      100% 1px no-repeat,
+    radial-gradient(
+      90% 95% at 22% 0%,
+      rgb(121 232 255 / 26%),
+      rgb(182 163 255 / 12%) 54%,
+      transparent 78%
+    ),
+    linear-gradient(160deg, rgb(14 30 47 / 94%) 0%, rgb(5 13 24 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 36%),
+    inset 0 2px 0 rgb(121 232 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(121 232 255 / 22%),
+    0 18px 38px -8px rgb(0 0 0 / 80%),
+    0 0 26px -6px rgb(121 232 255 / 32%);
+}
+
+/* 3. Chapter Map (01..05): Sculpted Command Console */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-chapter-index.rxe-chapter-map {
+  border-block: 1px solid rgb(121 232 255 / 44%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 2%,
+      #79e8ff 24%,
+      #f2d896 50%,
+      #b6a3ff 76%,
+      transparent 98%
+    )
+      top / 100% 2px no-repeat,
+    linear-gradient(
+      90deg,
+      transparent 8%,
+      rgb(242 216 150 / 44%) 38.2%,
+      rgb(121 232 255 / 44%) 61.8%,
+      transparent 92%
+    )
+      bottom / 100% 1px no-repeat,
+    radial-gradient(ellipse 84% 64% at 38.2% 0%, rgb(121 232 255 / 18%), transparent 74%),
+    linear-gradient(180deg, rgb(8 18 31 / 95%), rgb(3 8 15 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    0 28px 64px -22px rgb(0 0 0 / 86%),
+    0 0 36px -12px rgb(121 232 255 / 24%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxe-chapter-map
+  a {
+  border: 1px solid rgb(121 232 255 / 28%);
+  background:
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 14px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 1.5px 14px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 14px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 1.5px 14px no-repeat,
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 22%) 0%,
+      rgb(121 232 255 / 24%) 38.2%,
+      rgb(242 216 150 / 18%) 68%,
+      transparent 100%
+    )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 72% 86% at 14% 50%, rgb(121 232 255 / 15%), transparent 72%),
+    linear-gradient(135deg, rgb(15 30 46 / 92%) 0%, rgb(8 17 29 / 94%) 58%, rgb(4 9 17 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(121 232 255 / 12%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxe-chapter-map
+  a
+  > b {
+  color: #fff3cb;
+  border: 1px solid rgb(242 216 150 / 74%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 32%) 0%, transparent 38%),
+    linear-gradient(145deg, rgb(242 216 150 / 34%), rgb(121 232 255 / 16%) 62%, rgb(6 14 25 / 94%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 48%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    0 0 0 0.5px rgb(242 216 150 / 44%),
+    0 6px 16px -4px rgb(242 216 150 / 58%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxe-chapter-map
+  a
+  > i {
+  color: #f6dfa4;
+  text-shadow:
+    0 0 12px rgb(242 216 150 / 62%),
+    0 0 22px rgb(121 232 255 / 32%);
+}
+
+/* 4. Chapter Headings & Outlined Forged Numerals (01..05) */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-section
+  > .rxs-section-heading {
+  background:
+    linear-gradient(90deg, #ffffff 0 5px, var(--rxt-gold, #f2d896) 5px 44px) 0 100% / 44px 3px
+      no-repeat,
+    linear-gradient(var(--rxt-ice, #79e8ff), var(--rxt-ice, #79e8ff)) 48px 100% / 14px 3px
+      no-repeat,
+    linear-gradient(
+      90deg,
+      var(--rxt-ice, #79e8ff),
+      rgb(182 163 255 / 74%) 32%,
+      rgb(255 143 216 / 68%) 52%,
+      rgb(242 216 150 / 58%) 72%,
+      var(--rxl-line) 88%,
+      transparent
+    )
+      no-repeat 0 100% / 100% 1.5px,
+    linear-gradient(rgb(242 216 150 / 78%), rgb(242 216 150 / 78%)) calc(100% - 10px) 100% / 10px
+      1.5px no-repeat,
+    linear-gradient(rgb(121 232 255 / 72%), rgb(121 232 255 / 72%)) 100% 100% / 1.5px 14px
+      no-repeat;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-section
+  > .rxs-section-heading::before,
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-assembly-heading
+  > div:first-child::before {
+  -webkit-text-stroke: 1.25px rgb(242 216 150 / 90%);
+  text-shadow:
+    0 0 22px rgb(242 216 150 / 34%),
+    0 0 42px rgb(121 232 255 / 20%);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-section
+    > .rxs-section-heading::before,
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-assembly-heading
+    > div:first-child::before {
+    background: linear-gradient(
+      180deg,
+      rgb(255 248 220 / 38%) 0%,
+      rgb(242 216 150 / 22%) 46%,
+      rgb(121 232 255 / 12%) 78%,
+      transparent 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* 5. 01 Performance & 02 P14 Plates, Spec Rows & Processing Comparison */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #performance
+  .rxs-headline-metrics
+  > article {
+  border-block: 1px solid rgb(121 232 255 / 44%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 2.5px 0 rgb(121 232 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 86%),
+    inset 0 0 0 1px rgb(121 232 255 / 28%),
+    inset 0 34px 58px -32px rgb(121 232 255 / 32%),
+    0 28px 60px -22px rgb(0 0 0 / 90%),
+    0 0 36px -10px rgb(121 232 255 / 24%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #performance
+  .rxs-headline-metrics
+  > article
+  + article {
+  border-block-color: rgb(255 143 216 / 46%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 2.5px 0 rgb(255 143 216 / 28%),
+    inset 0 -1px 0 rgb(0 0 0 / 86%),
+    inset 0 0 0 1px rgb(255 143 216 / 28%),
+    inset 0 34px 58px -32px rgb(255 143 216 / 32%),
+    0 28px 60px -22px rgb(0 0 0 / 90%),
+    0 0 36px -10px rgb(255 143 216 / 24%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > :is(#performance, #p14)
+  :is(.rxs-comparison, .rxs-p14-comparator) {
+  border: 1px solid rgb(121 232 255 / 40%);
+  background:
+    var(--rxl-corners),
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      #79e8ff 28%,
+      #ffffff 48%,
+      #f2d896 68%,
+      transparent 96%
+    )
+      50% 0 / 88% 2px no-repeat,
+    linear-gradient(
+      90deg,
+      transparent 10%,
+      rgb(242 216 150 / 48%) 38.2%,
+      rgb(121 232 255 / 48%) 61.8%,
+      transparent 90%
+    )
+      50% 100% / 84% 1px no-repeat,
+    radial-gradient(ellipse 80% 52% at 24% 0%, rgb(121 232 255 / 16%), transparent 70%),
+    radial-gradient(ellipse 72% 48% at 80% 100%, rgb(242 216 150 / 12%), rgb(182 163 255 / 8%) 52%, transparent 72%),
+    linear-gradient(165deg, rgb(13 26 41 / 95%) 0%, rgb(6 14 24 / 96%) 54%, rgb(3 8 15 / 98%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 2px 0 rgb(121 232 255 / 18%),
+    inset 0 -1px 0 rgb(0 0 0 / 84%),
+    inset 0 0 0 1px rgb(121 232 255 / 22%),
+    inset 0 36px 56px -38px rgb(121 232 255 / 28%),
+    0 32px 72px -28px rgb(0 0 0 / 92%),
+    0 0 42px -12px rgb(121 232 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section {
+  border: 1px solid rgb(121 232 255 / 34%);
+  background:
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(90deg, #ffffff 0 4px, #79e8ff 4px 64%, transparent) 0 0 / 100% 2px no-repeat,
+    radial-gradient(80% 70% at 20% 0%, rgb(121 232 255 / 16%), transparent 72%),
+    linear-gradient(162deg, rgb(12 24 38 / 92%), rgb(4 10 19 / 95%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(121 232 255 / 14%),
+    0 18px 40px -20px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #performance
+  .rxs-processing-comparison
+  > div
+  > section:last-child {
+  border-color: rgb(242 216 150 / 48%);
+  background:
+    linear-gradient(#f2d896, #f2d896) 0 0 / 18px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 0 / 1.5px 18px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 18px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 1.5px 18px no-repeat,
+    linear-gradient(90deg, #ffffff 0 5px, #ff8fd8 5px 38.2%, #f2d896 74%, #79e8ff 100%) 0 0 / 100%
+      2.5px no-repeat,
+    radial-gradient(84% 74% at 24% 0%, rgb(242 216 150 / 20%), rgb(255 143 216 / 12%) 52%, transparent 76%),
+    linear-gradient(162deg, rgb(20 22 38 / 94%), rgb(6 11 21 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(242 216 150 / 24%),
+    0 20px 44px -18px rgb(0 0 0 / 86%),
+    0 0 28px -8px rgb(242 216 150 / 26%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #p14
+  .rxs-p14-overview
+  > figure {
+  border: 1px solid rgb(121 232 255 / 54%);
+  box-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 42%),
+    inset 0 0 0 1px rgb(121 232 255 / 28%),
+    0 0 0 1px rgb(242 216 150 / 24%),
+    0 30px 64px -22px rgb(0 0 0 / 92%),
+    0 0 44px -6px rgb(121 232 255 / 36%),
+    0 0 68px -16px rgb(242 216 150 / 22%);
+}
+
+/* 6. 03 Assembly Bands & 04 Stages Pedestal & Form Comparison Drawer */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  :is(.rxs-assembly-heading, .rxs-assembly-footer) {
+  border-block: 1px solid rgb(121 232 255 / 38%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      rgb(255 255 255 / 56%) 24%,
+      rgb(121 232 255 / 64%) 46%,
+      rgb(242 216 150 / 62%) 72%,
+      transparent 96%
+    )
+      50% 0 / 92% 1.5px no-repeat,
+    linear-gradient(
+      90deg,
+      var(--rxt-ice, #79e8ff),
+      rgb(182 163 255 / 68%) 34%,
+      rgb(255 143 216 / 64%) 56%,
+      rgb(242 216 150 / 54%) 78%,
+      transparent 94%
+    )
+      no-repeat 0 100% / 100% 1.5px,
+    radial-gradient(
+      ellipse var(--rxl-depth-spread-x) 84% at 38.2% 0%,
+      rgb(121 232 255 / 16%),
+      rgb(242 216 150 / 7%) 54%,
+      transparent 74%
+    ),
+    linear-gradient(180deg, rgb(13 25 39), rgb(5 10 19));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(0 0 0 / 76%),
+    0 20px 48px -20px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #stages
+  .rxs-stage-panel
+  > figure {
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 52%, rgb(242 216 150 / 34%));
+  background:
+    var(--rxl-corners),
+    linear-gradient(
+      90deg,
+      transparent 8%,
+      #ffffff 32%,
+      var(--rxs-stage-accent, #63e2ff) 54%,
+      #f2d896 78%,
+      transparent 92%
+    )
+      50% 0 / 88% 2px no-repeat,
+    radial-gradient(
+      68% 34% at 50% 100%,
+      var(--rxe-stage-floor, color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 42%, transparent)),
+      transparent 76%
+    ),
+    radial-gradient(
+      76% 62% at 50% 38.2%,
+      var(--rxe-stage-halo, color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 28%, transparent)),
+      transparent 74%
+    ),
+    radial-gradient(
+      88% 56% at 61.8% 23.6%,
+      var(--rxe-stage-counter, rgb(242 216 150 / 18%)),
+      transparent 76%
+    ),
+    linear-gradient(180deg, rgb(10 20 34 / 76%), rgb(2 6 13 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 36%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 32%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 26%, transparent),
+    0 34px 80px -30px rgb(0 0 0 / 92%),
+    0 18px 54px -22px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 48%, transparent);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #stages
+  :is(.rxe-form-comparison, .rxe-form-status) {
+  border: 1px solid rgb(121 232 255 / 40%);
+  background:
+    var(--rxl-corners),
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      #79e8ff 28%,
+      #f2d896 52%,
+      #ff72da 76%,
+      transparent 96%
+    )
+      50% 0 / 90% 2px no-repeat,
+    radial-gradient(ellipse 76% 52% at 50% 0%, rgb(121 232 255 / 14%), transparent 72%),
+    var(--rxl-plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 2px 0 rgb(121 232 255 / 16%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    inset 0 0 0 1px rgb(121 232 255 / 20%),
+    0 28px 64px -26px rgb(0 0 0 / 88%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #stages
+  .rxe-comparison-card[data-selected="true"] {
+  background:
+    radial-gradient(
+      84% 46% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 26%, transparent),
+      transparent 74%
+    ),
+    linear-gradient(180deg, rgb(14 29 45 / 84%), rgb(4 10 18 / 94%));
+  box-shadow:
+    inset 0 3px 0 var(--rxs-stage-accent, #63e2ff),
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 6px 24px -8px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 82%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 36%, transparent);
+}
+
+/* 7. 05 System Trinity Plates, Dual Processor Chambers & Finale End Card */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-system-grid {
+  border: 1px solid rgb(121 232 255 / 42%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 0 0 1px rgb(121 232 255 / 22%),
+    0 32px 74px -28px rgb(0 0 0 / 90%),
+    0 0 42px -14px rgb(121 232 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-system-grid
+  > article:nth-child(1) {
+  background:
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(90deg, #ffffff 0 5px, #79e8ff 5px 74%, transparent) 0 0 / 100% 3px no-repeat,
+    radial-gradient(88% 64% at 24% 0%, rgb(121 232 255 / 24%), transparent 74%),
+    linear-gradient(165deg, rgb(14 30 47 / 94%) 0%, rgb(5 12 22 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 4px 20px -10px rgb(121 232 255 / 44%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(121 232 255 / 26%),
+    0 20px 44px -20px rgb(0 0 0 / 84%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-system-grid
+  > article:nth-child(2) {
+  background:
+    linear-gradient(#b6a3ff, #b6a3ff) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(#b6a3ff, #b6a3ff) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(90deg, #ffffff 0 5px, #b6a3ff 5px 58%, #79e8ff 88%, transparent) 0 0 / 100%
+      3px no-repeat,
+    radial-gradient(
+      88% 64% at 50% 0%,
+      rgb(182 163 255 / 26%),
+      rgb(121 232 255 / 10%) 54%,
+      transparent 76%
+    ),
+    linear-gradient(165deg, rgb(18 26 47 / 94%) 0%, rgb(6 11 22 / 96%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 4px 20px -10px rgb(182 163 255 / 46%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(182 163 255 / 28%),
+    0 20px 44px -20px rgb(0 0 0 / 84%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-system-grid
+  > article:nth-child(3) {
+  background:
+    linear-gradient(#f2d896, #f2d896) 0 0 / 18px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 0 / 1.5px 18px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 18px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 1.5px 18px no-repeat,
+    linear-gradient(90deg, #ffffff 0 6px, #f2d896 6px 62%, #79e8ff 92%, transparent) 0 0 / 100%
+      3px no-repeat,
+    radial-gradient(
+      90% 66% at 50% 0%,
+      rgb(242 216 150 / 28%),
+      rgb(121 232 255 / 12%) 56%,
+      transparent 78%
+    ),
+    linear-gradient(165deg, rgb(28 26 34 / 94%) 0%, rgb(8 12 21 / 97%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 36%),
+    inset 0 6px 26px -10px rgb(242 216 150 / 64%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(242 216 150 / 42%),
+    0 22px 48px -20px rgb(0 0 0 / 88%),
+    0 0 32px -10px rgb(242 216 150 / 28%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-specs {
+  border: 1px solid rgb(121 232 255 / 40%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 0 0 1px rgb(121 232 255 / 20%),
+    0 30px 68px -28px rgb(0 0 0 / 90%),
+    0 0 38px -12px rgb(121 232 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-specs
+  > div {
+  border: 1px solid rgb(121 232 255 / 38%);
+  background:
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 16px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 1.5px 16px no-repeat,
+    linear-gradient(90deg, #ffffff 0 5px, #79e8ff 5px 46%, #f2d896 84%, transparent) 0 0 / 100%
+      2.5px no-repeat,
+    radial-gradient(68% 76% at 28% 52%, rgb(121 232 255 / 22%), transparent 74%),
+    linear-gradient(160deg, rgb(14 28 44 / 94%), rgb(4 10 19 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(121 232 255 / 20%),
+    0 20px 44px -20px rgb(0 0 0 / 86%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #system
+  > .rxs-specs
+  > div:last-child {
+  border-color: rgb(242 216 150 / 44%);
+  background:
+    linear-gradient(#f2d896, #f2d896) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 16px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 1.5px 16px no-repeat,
+    linear-gradient(90deg, #ffffff 0 5px, #f2d896 5px 48%, #b6a3ff 76%, #79e8ff 96%, transparent) 0
+      0 / 100% 2.5px no-repeat,
+    radial-gradient(
+      68% 76% at 28% 52%,
+      rgb(242 216 150 / 22%),
+      rgb(182 163 255 / 12%) 52%,
+      transparent 76%
+    ),
+    linear-gradient(160deg, rgb(22 25 40 / 94%), rgb(5 10 19 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(242 216 150 / 22%),
+    0 20px 44px -20px rgb(0 0 0 / 86%);
+}
+
+/* Finale End Card (.rxs-footer) & Doors */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-footer {
+  border-block-start: 1px solid rgb(242 216 150 / 42%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      #79e8ff 26%,
+      #f2d896 50%,
+      #b6a3ff 74%,
+      transparent 96%
+    )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 46% 58% at 26% 52%, rgb(242 216 150 / 14%), rgb(121 232 255 / 8%) 52%, transparent 76%),
+    radial-gradient(ellipse 54% 76% at 84% 64%, rgb(121 232 255 / 18%), rgb(182 163 255 / 12%) 48%, transparent 74%),
+    radial-gradient(ellipse 64% 84% at 86% 100%, rgb(48 78 122 / 28%), transparent 72%),
+    #02050a;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-footer
+  > a:first-of-type {
+  color: #030a12;
+  border: 1px solid #ffffff;
+  background:
+    linear-gradient(90deg, #ffffff 0%, #fff6dc 42%, #79e8ff 84%, transparent 100%) 0 0 / 100% 2px
+      no-repeat,
+    radial-gradient(120% 95% at 20% 0%, rgb(255 255 255 / 86%), transparent 58%),
+    linear-gradient(135deg, #fffdf4 0%, #f5e5bd 38%, #e6cb8e 74%, #c2effc 100%);
+  box-shadow:
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1.5px 0 rgb(84 56 14 / 52%),
+    0 0 0 1px rgb(242 216 150 / 76%),
+    0 20px 44px -10px rgb(0 0 0 / 84%),
+    0 0 34px -6px rgb(242 216 150 / 48%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-footer
+  > a:not(.rxs-footer-return, :first-of-type) {
+  color: #f4fbff;
+  border: 1px solid rgb(121 232 255 / 56%);
+  background:
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 24px 2px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 100% / 16px 2px no-repeat,
+    linear-gradient(90deg, #ffffff 0 4px, #79e8ff 4px 48%, #f2d896 84%, transparent) 0 0 / 100%
+      1.5px no-repeat,
+    radial-gradient(90% 95% at 22% 0%, rgb(121 232 255 / 24%), transparent 74%),
+    linear-gradient(160deg, rgb(14 29 45 / 94%), rgb(5 12 22 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 -1px 0 rgb(0 0 0 / 80%),
+    inset 0 0 0 1px rgb(121 232 255 / 20%),
+    0 18px 40px -10px rgb(0 0 0 / 82%),
+    0 0 26px -6px rgb(121 232 255 / 28%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > .rxs-footer
+  > a.rxs-footer-return {
+  color: #e6f4fb;
+  border: 1px solid rgb(242 216 150 / 48%);
+  background:
+    linear-gradient(90deg, #f2d896 0 22px, rgb(121 232 255 / 54%) 22px 68%, transparent) 0 0 / 100%
+      1.5px no-repeat,
+    radial-gradient(85% 90% at 20% 0%, rgb(242 216 150 / 18%), transparent 74%),
+    linear-gradient(160deg, rgb(14 24 38 / 92%), rgb(4 10 18 / 95%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    0 16px 36px -10px rgb(0 0 0 / 80%);
+}
+
+/* Telemetry Spec Rows, Bars, Select Instrument & Hero Stage Slate */
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    .rxs-hero-visual
+    > .rxl-stage-slate {
+    padding: 8px 16px 8px 14px;
+    border-inline-start: 2.5px solid var(--rxt-gold, #f2d896);
+    background:
+      linear-gradient(90deg, rgb(242 216 150 / 22%), rgb(121 232 255 / 12%) 58%, transparent),
+      linear-gradient(160deg, rgb(7 16 28 / 82%), rgb(3 8 15 / 72%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 24%),
+      inset 0 -1px 0 rgb(0 0 0 / 64%),
+      0 14px 32px -12px rgb(0 0 0 / 78%);
+  }
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  .rxs-comparison-selector
+  select {
+  color: #f4fbff;
+  border: 1px solid rgb(121 232 255 / 64%);
+  border-radius: 3px;
+  background-color: #0b1826;
+  background-image:
+    linear-gradient(90deg, #ffffff 0 4px, #f2d896 4px 36px, #79e8ff 36px 76%, transparent 100%),
+    radial-gradient(95% 135% at 18% 0%, rgb(121 232 255 / 26%), transparent 66%),
+    linear-gradient(145deg, #193347 0%, #0d1d2c 56%, #06101a 100%);
+  background-position:
+    0 0,
+    0 0,
+    0 0;
+  background-size:
+    100% 2px,
+    100% 100%,
+    100% 100%;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(121 232 255 / 18%),
+    0 12px 28px -8px rgb(0 0 0 / 76%),
+    0 0 22px -4px rgb(121 232 255 / 30%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  .rxs-comparison
+  .rxs-bars {
+  padding: 3px;
+  border: 1px solid rgb(121 232 255 / 32%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgb(2 7 14 / 95%), rgb(10 22 36 / 88%));
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 88%),
+    0 1px 0 rgb(255 255 255 / 14%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  .rxs-bars
+  i.is-rexonance,
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  .rxs-comparison-key
+  i.is-rexonance {
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #79e8ff 24%,
+    #b6a3ff 52%,
+    #ff8fd8 76%,
+    #f2d896 94%,
+    #ffffff 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 88%),
+    0 0 16px rgb(121 232 255 / 62%),
+    0 0 28px -4px rgb(255 143 216 / 46%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  .rxs-comparison-metrics
+  > article,
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #p14
+  .rxs-p14-metrics
+  > article {
+  border-bottom: 1px solid rgb(121 232 255 / 26%);
+  background-image:
+    linear-gradient(180deg, #79e8ff, #b6a3ff 52%, #f2d896),
+    radial-gradient(44% 90% at 90% 46%, rgb(121 232 255 / 14%), transparent 74%),
+    linear-gradient(90deg, rgb(121 232 255 / 10%), rgb(242 216 150 / 4%) 54%, transparent 82%);
+  background-position:
+    0 12%,
+    0 0,
+    0 0;
+  background-size:
+    2.5px 76%,
+    100% 100%,
+    100% 100%;
+  background-repeat: no-repeat;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #p14
+  .rxs-p14-copy
+  > dl {
+  border-block: 1px solid rgb(121 232 255 / 38%);
+  background:
+    radial-gradient(ellipse 84% 74% at 50% 50%, rgb(121 232 255 / 13%), transparent 76%),
+    linear-gradient(180deg, rgb(10 22 36 / 84%), rgb(4 10 19 / 90%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -1px 0 rgb(0 0 0 / 74%),
+    0 16px 36px -18px rgb(0 0 0 / 80%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #p14
+  .rxs-p14-metrics
+  > article
+  > p
+  > b {
+  border: 1px solid rgb(121 232 255 / 44%);
+  background: linear-gradient(90deg, rgb(121 232 255 / 20%), rgb(242 216 150 / 12%));
+  color: #b4f5ff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 0 14px -4px rgb(121 232 255 / 34%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+  > #stages
+  .rxe-comparison-card {
+  background:
+    radial-gradient(
+      84% 46% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 20%, transparent),
+      transparent 74%
+    ),
+    linear-gradient(180deg, rgb(12 24 38 / 80%), rgb(4 9 17 / 92%));
+  box-shadow:
+    inset 0 3px 0 var(--rxs-stage-accent, #63e2ff),
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 26%, transparent);
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    > .rxs-hero
+    :is(.rxs-hero-copy::before, .rxs-hero-copy::after, .rxs-hero-copy > .rxf-mark) {
+    display: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    :is(
+      > header.rxs-local-nav,
+      > header.rxs-local-nav .rxs-menu-trigger,
+      > .rxs-hero,
+      > .rxs-hero .rxe-hero-primary,
+      > .rxs-hero .rxe-hero-secondary,
+      > .rxs-chapter-index.rxe-chapter-map,
+      > .rxe-chapter-map a,
+      > .rxe-chapter-map a > b,
+      > #performance .rxs-headline-metrics > article,
+      > #performance .rxs-comparison,
+      > #performance .rxs-processing-comparison > div > section,
+      > #p14 .rxs-p14-overview > figure,
+      > #p14 .rxs-p14-comparator,
+      .rxs-assembly-heading,
+      .rxs-assembly-footer,
+      > #stages .rxs-stage-panel > figure,
+      > #stages .rxe-form-comparison,
+      > #stages .rxe-form-status,
+      > #stages .rxe-comparison-card,
+      > #system > .rxs-system-grid,
+      > #system > .rxs-system-grid > article,
+      > #system > .rxs-specs,
+      > #system > .rxs-specs > div,
+      > .rxs-footer,
+      > .rxs-footer > a
+    ) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none !important;
+    text-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]:not(#rxl)
+    :is(
+      > .rxs-section > .rxs-section-heading::before,
+      > .rxs-assembly-heading > div:first-child::before
+    ) {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 1px CanvasText;
+    background: none;
+    text-shadow: none;
   }
 }

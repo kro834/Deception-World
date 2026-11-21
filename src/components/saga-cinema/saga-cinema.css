@@ -479,19 +479,25 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 
 /* Header projection bar & navigation hairlines. */
 .saga-cinema.saga-cinema .site-header {
-  border-bottom-color: rgba(var(--saga-accent-rgb), 0.24);
-  background: linear-gradient(180deg, rgba(8, 12, 18, 0.92) 0%, rgba(5, 8, 12, 0.86) 100%);
+  border-bottom-color: rgba(var(--saga-accent-rgb), 0.36);
+  background:
+    linear-gradient(90deg, transparent 4%, rgba(var(--saga-accent-rgb), 0.14) 50%, transparent 96%) 0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(6, 10, 16, 0.96) 0%, rgba(4, 7, 12, 0.93) 100%);
   box-shadow:
-    inset 0 -1px 0 rgba(255, 248, 240, 0.05),
-    0 14px 36px rgba(0, 0, 0, 0.44);
+    inset 0 -1px 0 rgba(255, 248, 240, 0.1),
+    0 18px 44px rgba(0, 0, 0, 0.58),
+    0 1px 22px rgba(var(--saga-accent-rgb), 0.14);
 }
 
 .saga-cinema.saga-cinema .brand-mark {
-  border-color: rgba(var(--saga-accent-rgb), 0.62);
-  background: linear-gradient(155deg, rgba(var(--saga-accent-rgb), 0.16), rgba(10, 15, 22, 0.78));
+  border-color: rgba(var(--saga-accent-rgb), 0.78);
+  background:
+    radial-gradient(120% 90% at 30% 10%, rgba(255, 248, 236, 0.2), transparent 60%),
+    linear-gradient(155deg, rgba(var(--saga-accent-rgb), 0.26), rgba(8, 13, 20, 0.88));
   box-shadow:
-    inset 0 1px 0 var(--saga-ivory-edge),
-    0 8px 20px rgba(0, 0, 0, 0.36);
+    inset 0 1px 0 rgba(255, 250, 240, 0.32),
+    0 10px 24px rgba(0, 0, 0, 0.48),
+    0 0 18px -4px rgba(var(--saga-accent-rgb), 0.34);
 }
 
 .saga-cinema.saga-cinema .desktop-nav a {
@@ -643,14 +649,15 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 
 .saga-cinema.saga-cinema .hero::before {
   background:
-    radial-gradient(ellipse 56% 52% at 73% 36%, rgba(var(--saga-accent-rgb), 0.28), transparent 64%),
+    radial-gradient(ellipse 62% 56% at 73% 36%, rgba(var(--saga-accent-rgb), 0.36), transparent 64%),
     radial-gradient(
-      ellipse 58% 48% at 24% 38%,
-      rgba(var(--saga-accent-rgb), 0.17),
-      rgba(255, 245, 228, 0.06) 36%,
-      transparent 72%
+      ellipse 64% 52% at 24% 38%,
+      rgba(var(--saga-accent-rgb), 0.24),
+      rgba(255, 245, 228, 0.09) 38%,
+      transparent 74%
     ),
-    radial-gradient(ellipse 42% 30% at 18% 62%, rgba(164, 212, 240, 0.09), transparent 74%);
+    radial-gradient(ellipse 48% 34% at 18% 64%, rgba(164, 212, 240, 0.14), transparent 74%),
+    radial-gradient(ellipse 76% 24% at 50% 94%, rgba(var(--saga-accent-rgb), 0.14), transparent 76%);
 }
 
 .saga-cinema.saga-cinema .hero::after {
@@ -659,9 +666,17 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
   left: 7%;
   right: 7%;
   bottom: 0;
-  height: 1px;
+  height: 1.5px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(var(--saga-accent-rgb), 0.68) 50%, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(var(--saga-accent-rgb), 0.78) 32%,
+    rgba(255, 248, 236, 0.85) 50%,
+    rgba(var(--saga-accent-rgb), 0.78) 68%,
+    transparent
+  );
+  box-shadow: 0 0 18px rgba(var(--saga-accent-rgb), 0.42);
 }
 
 .saga-cinema.saga-cinema .hero-copy {
@@ -673,57 +688,68 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 .saga-cinema.saga-cinema .hero-copy::after {
   content: "";
   position: absolute;
-  inset: -44px -52px -32px -44px;
+  inset: -52px -60px -40px -48px;
   z-index: -1;
   pointer-events: none;
   border-radius: 50%;
   background:
     radial-gradient(
-      ellipse 64% 56% at 44% 38%,
-      rgba(var(--saga-accent-rgb), 0.18),
-      rgba(255, 244, 226, 0.05) 42%,
-      transparent 72%
+      ellipse 68% 60% at 44% 38%,
+      rgba(var(--saga-accent-rgb), 0.25),
+      rgba(255, 244, 226, 0.08) 44%,
+      transparent 74%
     ),
     radial-gradient(
-      ellipse 46% 42% at 72% 52%,
-      rgba(var(--saga-accent-rgb), 0.12),
-      transparent 70%
+      ellipse 52% 46% at 76% 52%,
+      rgba(var(--saga-accent-rgb), 0.18),
+      transparent 72%
     );
 }
 
 .saga-cinema.saga-cinema .hero-project {
-  color: #f3e6da;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 15px;
+  border: 1px solid rgba(var(--saga-accent-rgb), 0.56);
+  border-left: 3px solid var(--saga-accent);
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.2), rgba(8, 12, 20, 0.82));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.28),
+    0 10px 26px rgba(0, 0, 0, 0.52),
+    0 0 22px -6px rgba(var(--saga-accent-rgb), 0.34);
+  color: #fff6ec;
   text-shadow:
-    0 2px 14px rgba(0, 0, 0, 0.8),
-    0 0 22px rgba(var(--saga-accent-rgb), 0.34);
+    0 2px 14px rgba(0, 0, 0, 0.84),
+    0 0 22px rgba(var(--saga-accent-rgb), 0.42);
 }
 
 .saga-cinema.saga-cinema .hero-copy > .logo-crop img {
   filter:
-    drop-shadow(0 12px 30px rgba(0, 0, 0, 0.78))
-    drop-shadow(0 0 28px rgba(var(--saga-accent-rgb), 0.28));
+    drop-shadow(0 14px 34px rgba(0, 0, 0, 0.84))
+    drop-shadow(0 0 34px rgba(var(--saga-accent-rgb), 0.36));
 }
 
 .saga-cinema.saga-cinema .hero-catch {
-  color: #fffbf6;
+  color: #fffdf9;
   text-shadow:
-    0 4px 28px rgba(0, 0, 0, 0.92),
-    0 0 38px rgba(var(--saga-accent-rgb), 0.28),
-    0 0 14px rgba(255, 246, 232, 0.18);
+    0 4px 30px rgba(0, 0, 0, 0.94),
+    0 0 44px rgba(var(--saga-accent-rgb), 0.36),
+    0 0 16px rgba(255, 246, 232, 0.24);
 }
 
 .saga-cinema.saga-cinema .hero-rings {
-  opacity: 0.38;
-  border-color: rgba(var(--saga-accent-rgb), 0.24);
+  opacity: 0.42;
+  border-color: rgba(var(--saga-accent-rgb), 0.28);
 }
 
 .saga-cinema.saga-cinema .hero-rings::before {
   border-style: solid;
-  border-color: rgba(var(--saga-accent-rgb), 0.15);
+  border-color: rgba(var(--saga-accent-rgb), 0.18);
 }
 
 .saga-cinema.saga-cinema .hero-rings::after {
-  background: linear-gradient(90deg, transparent, rgba(var(--saga-accent-rgb), 0.26), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--saga-accent-rgb), 0.3), transparent);
 }
 
 .saga-cinema.saga-cinema .hero-backdrop img {
@@ -750,13 +776,26 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 }
 
 .saga-cinema.saga-cinema .project-data {
-  border-top-color: rgba(var(--saga-accent-rgb), 0.42);
-  background: linear-gradient(180deg, rgba(var(--saga-accent-rgb), 0.08), transparent 88%);
-  box-shadow: inset 0 1px 0 rgba(255, 248, 240, 0.14);
+  padding: 0 18px 16px;
+  border: 1px solid rgba(var(--saga-accent-rgb), 0.36);
+  border-top: 1.5px solid rgba(var(--saga-accent-rgb), 0.68);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.14), transparent 55%, rgba(255, 248, 238, 0.05)),
+    linear-gradient(180deg, rgba(16, 23, 34, 0.86) 0%, rgba(7, 10, 16, 0.94) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.24),
+    0 18px 42px rgba(0, 0, 0, 0.52),
+    0 0 32px -10px rgba(var(--saga-accent-rgb), 0.2);
 }
 
 .saga-cinema.saga-cinema .project-data > div + div {
-  border-left-color: rgba(var(--saga-accent-rgb), 0.24);
+  border-left-color: rgba(var(--saga-accent-rgb), 0.28);
+}
+
+.saga-cinema.saga-cinema .project-data p {
+  color: #fff8f0;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
 }
 
 .saga-cinema.saga-cinema .hero-poster-area {
@@ -767,37 +806,37 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 .saga-cinema.saga-cinema .hero-poster-area::before {
   content: "";
   position: absolute;
-  inset: -26px -34px auto;
-  height: 76%;
+  inset: -32px -42px auto;
+  height: 78%;
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 68% 62% at 50% 42%,
-    rgba(var(--saga-accent-rgb), 0.24),
-    rgba(255, 246, 232, 0.05) 40%,
-    transparent 74%
+    ellipse 72% 66% at 50% 42%,
+    rgba(var(--saga-accent-rgb), 0.34),
+    rgba(255, 246, 232, 0.08) 42%,
+    transparent 76%
   );
 }
 
 /* Theater exhibition screen frame (#hero-poster) with double-rim illumination & deep shadow. */
 .saga-cinema.saga-cinema .hero-poster {
-  padding: 10px;
-  border-radius: 3px;
+  padding: 11px;
+  border-radius: 4px;
   background:
-    radial-gradient(120% 78% at 50% 0%, rgba(255, 248, 238, 0.14), transparent 58%),
-    linear-gradient(165deg, rgba(22, 29, 41, 0.96) 0%, rgba(7, 10, 16, 0.99) 100%);
-  border: 1px solid rgba(var(--saga-accent-rgb), 0.72);
+    radial-gradient(120% 78% at 50% 0%, rgba(255, 248, 238, 0.2), transparent 58%),
+    linear-gradient(165deg, rgba(26, 35, 50, 0.97) 0%, rgba(7, 10, 16, 0.99) 100%);
+  border: 1px solid rgba(var(--saga-accent-rgb), 0.84);
   box-shadow:
-    inset 0 1px 0 rgba(255, 250, 240, 0.34),
-    inset 0 -1px 0 rgba(var(--saga-accent-rgb), 0.3),
-    inset 0 0 0 4px rgba(5, 8, 13, 0.92),
-    inset 0 0 0 5px rgba(var(--saga-accent-rgb), 0.42),
-    0 0 0 1px rgba(4, 6, 10, 0.86),
-    0 0 0 5px rgba(255, 248, 238, 0.045),
-    0 0 0 6px rgba(var(--saga-accent-rgb), 0.22),
-    0 36px 96px rgba(0, 0, 0, 0.88),
-    0 16px 38px rgba(0, 0, 0, 0.72),
-    0 0 68px rgba(var(--saga-accent-rgb), 0.24);
+    inset 0 1.5px 0 rgba(255, 250, 240, 0.44),
+    inset 0 -1px 0 rgba(var(--saga-accent-rgb), 0.4),
+    inset 0 0 0 4px rgba(5, 8, 13, 0.94),
+    inset 0 0 0 5.5px rgba(var(--saga-accent-rgb), 0.56),
+    0 0 0 1px rgba(4, 6, 10, 0.9),
+    0 0 0 5px rgba(255, 248, 238, 0.06),
+    0 0 0 6.5px rgba(var(--saga-accent-rgb), 0.34),
+    0 40px 108px rgba(0, 0, 0, 0.92),
+    0 18px 42px rgba(0, 0, 0, 0.78),
+    0 0 92px rgba(var(--saga-accent-rgb), 0.34);
   transition:
     border-color 200ms var(--saga-ease),
     box-shadow 200ms var(--saga-ease),
@@ -1036,21 +1075,21 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
 .saga-cinema.saga-cinema .chapter-reel button:focus-visible,
 .saga-cinema.saga-cinema .chapter-reel button[aria-pressed="true"] {
   background:
-    radial-gradient(98% 90% at 50% 0%, rgba(var(--chapter-rgb), 0.38), transparent 72%),
-    linear-gradient(180deg, rgba(var(--chapter-rgb), 0.22) 0%, rgba(10, 15, 23, 0.96) 100%);
+    radial-gradient(104% 94% at 50% 0%, rgba(var(--chapter-rgb), 0.46), transparent 74%),
+    linear-gradient(180deg, rgba(var(--chapter-rgb), 0.28) 0%, rgba(10, 15, 23, 0.96) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 250, 240, 0.32),
-    inset 0 12px 30px rgba(var(--chapter-rgb), 0.22),
-    inset 0 -10px 22px rgba(var(--chapter-rgb), 0.14),
-    0 12px 32px rgba(0, 0, 0, 0.5),
-    0 0 30px rgba(var(--chapter-rgb), 0.26);
+    inset 0 1.5px 0 rgba(255, 250, 240, 0.42),
+    inset 0 14px 36px rgba(var(--chapter-rgb), 0.28),
+    inset 0 -12px 26px rgba(var(--chapter-rgb), 0.18),
+    0 14px 36px rgba(0, 0, 0, 0.56),
+    0 0 38px rgba(var(--chapter-rgb), 0.34);
 }
 
 .saga-cinema.saga-cinema .chapter-reel button[aria-pressed="true"] strong {
-  color: #fffdf9;
+  color: #ffffff;
   text-shadow:
-    0 2px 14px rgba(0, 0, 0, 0.78),
-    0 0 24px rgba(var(--chapter-rgb), 0.48);
+    0 2px 16px rgba(0, 0, 0, 0.84),
+    0 0 28px rgba(var(--chapter-rgb), 0.62);
 }
 
 .saga-cinema.saga-cinema .chapter-reel button:focus-visible::before,
@@ -1208,35 +1247,45 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
     scale 150ms var(--saga-ease);
 }
 
+.saga-cinema.saga-cinema .section-label {
+  border-top-color: rgba(var(--saga-accent-rgb), 0.44);
+  box-shadow: inset 0 1px 0 rgba(255, 248, 238, 0.12);
+}
+
 .saga-cinema.saga-cinema .section-label::before {
-  width: 40px;
+  width: 56px;
   height: 2px;
+  background: linear-gradient(90deg, #fff4e4, var(--saga-accent));
+  box-shadow: 0 0 14px rgba(var(--saga-accent-rgb), 0.65);
 }
 
 .saga-cinema.saga-cinema .intro-art-image {
-  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.64);
+  border: 1px solid rgba(var(--saga-accent-rgb), 0.52);
+  box-shadow:
+    0 34px 86px rgba(0, 0, 0, 0.78),
+    0 0 54px -10px rgba(var(--saga-accent-rgb), 0.24);
 }
 
 .saga-cinema.saga-cinema .intro-art-image::after {
   pointer-events: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 248, 240, 0.14),
-    inset 0 0 0 1px rgba(var(--saga-accent-rgb), 0.26);
+    inset 0 1.5px 0 rgba(255, 250, 240, 0.28),
+    inset 0 0 0 1px rgba(var(--saga-accent-rgb), 0.42);
 }
 
 .saga-cinema.saga-cinema .film-poster {
-  padding: 7px;
-  border-radius: 3px;
+  padding: 8px;
+  border-radius: 4px;
   background:
-    radial-gradient(120% 70% at 50% 0%, rgba(255, 248, 238, 0.08), transparent 60%),
-    linear-gradient(165deg, #151d2a 0%, #070a0f 100%);
-  border-color: rgba(var(--saga-accent-rgb), 0.54);
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 248, 238, 0.14), transparent 60%),
+    linear-gradient(165deg, #1a2434 0%, #070a0f 100%);
+  border-color: rgba(var(--saga-accent-rgb), 0.68);
   box-shadow:
-    inset 0 1px 0 rgba(255, 250, 240, 0.24),
-    inset 0 0 0 3px rgba(5, 8, 13, 0.9),
-    inset 0 0 0 4px rgba(var(--saga-accent-rgb), 0.28),
-    0 32px 76px rgba(0, 0, 0, 0.78),
-    0 0 36px -8px rgba(var(--saga-accent-rgb), 0.16);
+    inset 0 1.5px 0 rgba(255, 250, 240, 0.34),
+    inset 0 0 0 3px rgba(5, 8, 13, 0.92),
+    inset 0 0 0 4.5px rgba(var(--saga-accent-rgb), 0.4),
+    0 36px 86px rgba(0, 0, 0, 0.84),
+    0 0 48px -8px rgba(var(--saga-accent-rgb), 0.24);
   transition:
     border-color 200ms var(--saga-ease),
     box-shadow 200ms var(--saga-ease);
@@ -1302,8 +1351,29 @@ html[data-world-effects="economy"] .saga-cinema.saga-cinema [data-reveal] {
   pointer-events: none;
 }
 
+.saga-cinema.saga-cinema .information-content {
+  padding: clamp(24px, 3.6vw, 44px);
+  border: 1px solid rgba(var(--saga-accent-rgb), 0.38);
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, rgba(var(--saga-accent-rgb), 0.68), rgba(255, 248, 238, 0.45) 45%, transparent 92%) 0 0 / 100% 1.5px no-repeat,
+    radial-gradient(56% 48% at 8% 0%, rgba(var(--saga-accent-rgb), 0.12), transparent 68%),
+    linear-gradient(165deg, rgba(16, 22, 33, 0.88) 0%, rgba(7, 10, 16, 0.95) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.18),
+    0 24px 62px rgba(0, 0, 0, 0.6);
+}
+
 .saga-cinema.saga-cinema .information-rows > div {
-  border-bottom-color: rgba(var(--saga-accent-rgb), 0.22);
+  border-bottom-color: rgba(var(--saga-accent-rgb), 0.28);
+}
+
+.saga-cinema.saga-cinema .site-footer {
+  border-top-color: rgba(var(--saga-accent-rgb), 0.42);
+  background:
+    linear-gradient(90deg, transparent 4%, rgba(var(--saga-accent-rgb), 0.56) 50%, transparent 96%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(60% 80% at 50% 0%, rgba(var(--saga-accent-rgb), 0.1), transparent 72%),
+    #04070ce8;
 }
 
 .saga-cinema.saga-cinema .film-dialog {
@@ -1581,12 +1651,15 @@ html[data-rzn-constrained] .saga-cinema.saga-cinema [data-reveal] {
   }
   .saga-cinema.saga-cinema .site-header,
   .saga-cinema.saga-cinema .site-footer,
+  .saga-cinema.saga-cinema .hero-project,
+  .saga-cinema.saga-cinema .project-data,
   .saga-cinema.saga-cinema .hero-poster,
   .saga-cinema.saga-cinema .poster-controls,
   .saga-cinema.saga-cinema .chapter-reel,
   .saga-cinema.saga-cinema .chapter-reel button,
   .saga-cinema.saga-cinema .film-poster,
   .saga-cinema.saga-cinema .visual-feature,
+  .saga-cinema.saga-cinema .information-content,
   .saga-cinema.saga-cinema .film-dialog,
   .saga-cinema.saga-cinema .gallery-dialog,
   .saga-cinema.saga-cinema .toast {

@@ -1,24 +1,42 @@
 /* The screening room owns /gallery; ArtworkStage still owns the image swap. */
 html[data-family="gallery"] .gallery-page[data-gallery-page] {
-  --screen-paper: #f6efe2;
-  --screen-brass: #e6cca0;
-  --screen-edge: #8a785c;
-  --screen-rule: rgb(228 206 168 / 24%);
-  --screen-well: #05080e;
+  --screen-paper: #f8f2e6;
+  --screen-brass: #eed4a2;
+  --screen-gold-bright: #fff2d2;
+  --screen-cyan: #9ee8fa;
+  --screen-edge: #a48d68;
+  --screen-rule: rgb(238 212 162 / 32%);
+  --screen-well: #05080f;
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-intro.gallery-artwork-intro {
   display: block;
   min-height: 0;
-  padding-block: clamp(20px, 4vw, 55px) clamp(32px, 5vw, 72px);
+  padding-block: clamp(22px, 4vw, 56px) clamp(34px, 5vw, 76px);
 }
 
 .gallery-screening-heading {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: end;
   gap: 12px 36px;
-  margin-bottom: clamp(16px, 2vw, 30px);
+  margin-bottom: clamp(18px, 2.4vw, 32px);
+  padding-bottom: clamp(14px, 1.8vw, 24px);
+  border-bottom: 1px solid rgb(238 212 162 / 36%);
+  box-shadow: inset 0 -3px 0 -2px rgb(158 232 250 / 18%);
+}
+
+.gallery-screening-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: min(168px, 42%);
+  height: 2px;
+  background: linear-gradient(90deg, #f7e1b4 0%, #e5c488 48%, #9ee8fa 82%, transparent 100%);
+  box-shadow: 0 0 18px rgb(244 216 162 / 46%);
+  pointer-events: none;
 }
 
 html[data-family="gallery"]
@@ -35,8 +53,12 @@ html[data-family="gallery"]
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-heading h1 {
   margin: 0 0 8px;
+  color: #fbf7ee;
   font-family: var(--gallery-serif);
   font-size: clamp(28px, 4.7vw, 68px);
+  text-shadow:
+    0 2px 28px rgb(246 218 164 / 26%),
+    0 1px 2px rgb(0 0 0 / 65%);
   text-wrap: initial;
 }
 
@@ -47,19 +69,28 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-
 html[data-family="gallery"]
   .gallery-page[data-gallery-page]
   .gallery-screening-heading
+  h1
+  .gallery-title-opening {
+  color: #f6e4be;
+}
+
+html[data-family="gallery"]
+  .gallery-page[data-gallery-page]
+  .gallery-screening-heading
   .gallery-intro-description {
   margin: 0;
   padding: 0;
-  color: #cbc4b6;
+  color: #dcd4c4;
   font-size: clamp(13px, 1.35vw, 16px);
-  line-height: 1.6;
+  letter-spacing: 0.03em;
+  line-height: 1.65;
 }
 
 .gallery-screening-nav {
   display: flex;
   flex: none;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-nav a {
@@ -71,18 +102,20 @@ html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-screening-
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 14px;
-  border: 1px solid rgb(232 208 162 / 42%);
-  border-top-color: rgb(248 228 188 / 62%);
+  padding: 8px 16px;
+  border: 1px solid rgb(240 214 164 / 54%);
+  border-top-color: rgb(254 238 202 / 78%);
   border-radius: 2px;
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(244 220 174 / 16%), transparent 70%),
-    linear-gradient(180deg, #182334, #0d1420);
+    radial-gradient(ellipse 86% 86% at 50% 0%, rgb(248 224 176 / 24%), transparent 70%),
+    linear-gradient(180deg, #1d2a3d 0%, #101826 58%, #0a101a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 24%),
-    0 8px 20px rgb(0 0 0 / 36%);
+    inset 0 1px 0 rgb(255 252 244 / 36%),
+    inset 0 -1px 0 rgb(158 232 250 / 20%),
+    0 10px 26px rgb(0 0 0 / 48%);
   color: var(--screen-paper);
   font-size: 13px;
+  font-weight: 550;
   line-height: 1.4;
   text-decoration: none;
   white-space: nowrap;
@@ -92,12 +125,16 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-screening-nav
   .gallery-enter {
-  border-color: #f0dab2;
-  background: linear-gradient(180deg, #faf5ea, #e3d2b2);
+  border-color: #f7e2b6;
+  border-top-color: #fffaf0;
+  background: linear-gradient(180deg, #fff9ec 0%, #efd6a4 52%, #d4b278 100%);
   box-shadow:
-    inset 0 1px 0 #fffdf9,
-    0 8px 22px rgb(0 0 0 / 38%);
-  color: #121722;
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(96 70 28 / 32%),
+    0 10px 26px rgb(0 0 0 / 48%),
+    0 0 26px -6px rgb(242 212 154 / 42%);
+  color: #121620;
+  font-weight: 650;
 }
 
 html[data-family="gallery"]
@@ -105,14 +142,10 @@ html[data-family="gallery"]
   .gallery-screening-nav
   .gallery-enter
   span {
-  color: #121722;
+  color: #121620;
 }
 
-/* The two entrances stand on one line (design brush-up, 2026-11-20): 作品一覧
-   kept a 22px top margin and its own width from an older hero, so it sat
-   lower and narrower than 鑑賞ツアー, which stretched to 70px beside it.
-   Both are now the same 48px control in the same cell, the label at the
-   leading edge and the arrow at the trailing one. */
+/* The two entrances stand on one line: both keep the same 48px control height. */
 html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page]
   .gallery-screening-nav {
@@ -129,11 +162,12 @@ html[data-family="gallery"]
   height: 48px;
   min-height: 48px;
   margin: 0;
-  padding: 0 16px;
+  padding: 0 18px;
   font-size: 14px;
   letter-spacing: 0.06em;
 }
 
+/* Museum Special Exhibition Vitrine — 2-column spotlight stage + curatorial lectern */
 html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
@@ -145,16 +179,19 @@ html[data-family="gallery"]
   min-height: 0;
   gap: 0;
   padding: 0;
-  border: 1px solid rgb(236 212 166 / 44%);
-  border-top-color: rgb(250 230 190 / 64%);
+  border: 1px solid rgb(242 216 164 / 58%);
+  border-top-color: rgb(255 238 198 / 84%);
   background:
-    radial-gradient(ellipse 64% 48% at 32% -4%, rgb(246 224 180 / 14%), transparent 68%),
-    linear-gradient(162deg, #141c2b 0%, #0b101a 56%, #070b12 100%);
+    radial-gradient(ellipse 68% 52% at 30% -4%, rgb(250 226 178 / 24%), transparent 68%),
+    radial-gradient(ellipse 52% 46% at 88% 8%, rgb(158 232 250 / 12%), transparent 70%),
+    linear-gradient(162deg, #172234 0%, #0c121e 54%, #060a12 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 252 242 / 28%),
-    inset 0 -1px 0 rgb(158 232 250 / 16%),
-    0 30px 72px -12px rgb(0 0 0 / 64%),
-    0 0 48px -18px rgb(236 210 160 / 18%);
+    inset 0 1px 0 rgb(255 253 245 / 42%),
+    inset 0 -1px 0 rgb(158 232 250 / 22%),
+    0 0 0 4px #05080f,
+    0 0 0 5px rgb(238 212 162 / 32%),
+    0 36px 88px -10px rgb(0 0 0 / 80%),
+    0 0 76px -14px rgb(242 212 154 / 34%);
   perspective: none;
 }
 
@@ -176,18 +213,25 @@ html[data-family="gallery"]
 .gallery-artwork-intro .artwork-stage .artwork-stage__aperture {
   padding: 0;
   background:
-    radial-gradient(ellipse 68% 52% at 50% -4%, rgb(248 226 182 / 22%), transparent 68%),
-    radial-gradient(ellipse 56% 52% at 84% 18%, rgb(158 232 250 / 10%), transparent 68%),
-    radial-gradient(ellipse 74% 68% at 48% 28%, #1d283c, var(--screen-well) 76%);
+    radial-gradient(
+      ellipse 72% 58% at 50% -2%,
+      rgb(254 232 184 / 40%),
+      rgb(214 176 112 / 15%) 48%,
+      transparent 76%
+    ),
+    radial-gradient(ellipse 56% 52% at 86% 16%, rgb(158 232 250 / 14%), transparent 68%),
+    radial-gradient(ellipse 76% 68% at 48% 30%, #24334b, #090e18 68%, var(--screen-well) 92%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 22%),
-    inset 0 0 0 6px rgb(5 8 14 / 82%),
-    inset 0 0 0 7px rgb(236 212 166 / 16%),
-    inset 0 -12px 32px rgb(0 0 0 / 52%);
+    inset 0 1px 0 rgb(255 253 245 / 38%),
+    inset 0 0 0 8px #05080f,
+    inset 0 0 0 9px rgb(242 216 164 / 44%),
+    inset 0 0 0 14px #0b121e,
+    inset 0 0 0 15px rgb(158 232 250 / 24%),
+    inset 0 -18px 40px rgb(0 0 0 / 62%);
 }
 
 .gallery-artwork-intro .artwork-stage__image {
-  inset: clamp(10px, 1.5vw, 24px);
+  inset: clamp(16px, 2vw, 28px);
 }
 
 html[data-family="gallery"]
@@ -226,20 +270,20 @@ html[data-family="gallery"]
 .gallery-artwork-intro .gallery-stage-controls {
   width: 100%;
   min-width: 0;
-  padding: clamp(8px, 1.3vw, 15px);
-  border-top: 1px solid rgb(238 214 168 / 38%);
+  padding: clamp(9px, 1.35vw, 16px);
+  border-top: 1px solid rgb(242 216 164 / 52%);
   background:
-    radial-gradient(ellipse 74% 70% at 50% 0%, rgb(244 220 174 / 12%), transparent 70%),
-    linear-gradient(180deg, #101724 0%, #090e17 62%, #060910 100%);
+    radial-gradient(ellipse 78% 80% at 50% 0%, rgb(248 224 176 / 22%), transparent 72%),
+    linear-gradient(180deg, #141e2e 0%, #0b111c 58%, #060a12 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 18%),
-    inset 0 8px 20px rgb(0 0 0 / 46%);
+    inset 0 1px 0 rgb(255 252 244 / 30%),
+    inset 0 10px 24px rgb(0 0 0 / 52%);
 }
 
 .gallery-artwork-intro .gallery-stage-candidates {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: clamp(4px, 1vw, 12px);
+  gap: clamp(5px, 1vw, 12px);
 }
 
 html[data-family="gallery"]
@@ -253,19 +297,19 @@ html[data-family="gallery"]
   grid-template-rows: clamp(30px, 5.4vw, 68px) auto;
   place-items: center;
   gap: 3px;
-  padding: 4px 2px;
-  border: 1px solid rgb(232 208 162 / 36%);
-  border-top-color: rgb(246 226 184 / 52%);
-  border-bottom-width: 2px;
+  padding: 5px 3px 4px;
+  border: 1px solid rgb(238 212 162 / 48%);
+  border-top-color: rgb(252 234 194 / 70%);
+  border-bottom: 2px solid rgb(236 210 160 / 42%);
   border-radius: 2px;
   background:
-    radial-gradient(ellipse 84% 62% at 50% -4%, rgb(244 222 178 / 15%), transparent 70%),
-    linear-gradient(180deg, #151f2f 0%, #0a101a 68%, #070b12 100%);
+    radial-gradient(ellipse 86% 64% at 50% -4%, rgb(248 224 178 / 22%), transparent 70%),
+    linear-gradient(180deg, #192538 0%, #0d1422 66%, #070b13 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 242 / 20%),
-    inset 0 0 0 2px rgb(6 9 15 / 82%),
-    0 6px 14px rgb(0 0 0 / 38%);
-  color: #ded7ca;
+    inset 0 1px 0 rgb(255 252 244 / 28%),
+    inset 0 0 0 2px rgb(5 8 14 / 88%),
+    0 8px 18px rgb(0 0 0 / 48%);
+  color: #ebe3d4;
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
@@ -297,18 +341,19 @@ html[data-family="gallery"]
   .gallery-artwork-intro
   .gallery-stage-candidates
   button[aria-pressed="true"] {
-  border-color: #f3dfb6;
-  outline: 1px solid rgb(238 212 162 / 68%);
+  border-color: #fae4b8;
+  border-top-color: #ffffff;
+  outline: 1px solid rgb(246 220 168 / 82%);
   outline-offset: 1px;
   background:
-    radial-gradient(ellipse 88% 68% at 50% -4%, rgb(250 230 188 / 32%), transparent 72%),
-    linear-gradient(180deg, #233247 0%, #121c2b 64%, #0b121d 100%);
+    radial-gradient(ellipse 90% 72% at 50% -4%, rgb(255 236 194 / 42%), transparent 72%),
+    linear-gradient(180deg, #2a3c56 0%, #162336 62%, #0c1422 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 44%),
-    inset 0 -2px 0 #9ee8fa,
-    0 0 18px -4px rgb(238 210 154 / 42%),
-    0 8px 18px rgb(0 0 0 / 48%);
-  color: #fffaf0;
+    inset 0 1px 0 rgb(255 254 248 / 58%),
+    inset 0 -2px 0 #eed4a2,
+    0 0 24px -2px rgb(244 214 156 / 54%),
+    0 10px 22px rgb(0 0 0 / 58%);
+  color: #fffcf4;
 }
 
 .gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information {
@@ -316,11 +361,14 @@ html[data-family="gallery"]
   align-items: center;
   min-width: 0;
   padding: clamp(16px, 2.6vw, 40px);
-  border-inline-start: 1px solid rgb(232 208 162 / 28%);
+  border-inline-start: 1px solid rgb(240 214 164 / 42%);
   background:
-    radial-gradient(ellipse 80% 56% at 50% 0%, rgb(244 220 174 / 12%), transparent 70%),
-    linear-gradient(152deg, #1b2434 0%, #101622 56%, #0b0f18 100%);
-  box-shadow: inset 1px 0 0 rgb(255 251 240 / 10%);
+    radial-gradient(ellipse 84% 58% at 50% 0%, rgb(248 224 176 / 20%), transparent 70%),
+    radial-gradient(ellipse 68% 48% at 88% 100%, rgb(158 232 250 / 10%), transparent 72%),
+    linear-gradient(156deg, #202c40 0%, #121a28 54%, #090e18 100%);
+  box-shadow:
+    inset 2px 0 0 rgb(238 212 162 / 24%),
+    inset 0 1px 0 rgb(255 252 244 / 18%);
 }
 
 html[data-family="gallery"]
@@ -358,10 +406,16 @@ html[data-family="gallery"]
 }
 
 .gallery-artwork-intro .gallery-feature figcaption span:first-child {
-  display: block;
+  display: inline-block;
   margin-bottom: 7px;
-  color: var(--screen-brass);
+  padding: 2px 8px;
+  border: 1px solid rgb(242 216 164 / 46%);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgb(246 220 168 / 18%), rgb(12 18 28 / 86%));
+  color: #f7e1b4;
   font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 html[data-family="gallery"]
@@ -373,7 +427,8 @@ html[data-family="gallery"]
   gap: 10px;
   margin: 0;
   padding-top: 14px;
-  border-top: 1px solid var(--screen-rule);
+  border-top: 1px solid rgb(240 214 164 / 38%);
+  box-shadow: inset 0 1px 0 rgb(255 252 244 / 10%);
 }
 
 .gallery-feature-personal {
@@ -384,7 +439,7 @@ html[data-family="gallery"]
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page] .gallery-feature-personal p {
-  color: #d6d0c3;
+  color: #e2dacb;
   font-size: 13px;
 }
 
@@ -406,18 +461,19 @@ html[data-family="gallery"]
   min-height: 44px;
   max-width: none;
   margin: 0;
-  padding: 7px 9px;
-  border: 1px solid rgb(232 208 162 / 40%);
-  border-top-color: rgb(246 226 184 / 58%);
+  padding: 7px 10px;
+  border: 1px solid rgb(240 214 164 / 52%);
+  border-top-color: rgb(254 238 200 / 74%);
   border-radius: 2px;
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(158 232 250 / 10%), transparent 70%),
-    linear-gradient(180deg, #172232, #0d1420);
+    radial-gradient(ellipse 84% 84% at 50% 0%, rgb(158 232 250 / 16%), transparent 70%),
+    linear-gradient(180deg, #1c293c 0%, #0e1624 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 251 240 / 20%),
-    0 6px 16px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(255 252 244 / 28%),
+    0 8px 20px rgb(0 0 0 / 42%);
   color: var(--screen-paper);
   font-size: 13px;
+  font-weight: 550;
   text-align: center;
   transition:
     border-color 180ms ease,
@@ -431,25 +487,26 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-feature-save {
-  border-color: #f2dcb2;
-  background: linear-gradient(180deg, #faf3e4 0%, #e6cea0 54%, #d3b47c 100%);
+  border-color: #f8e3b8;
+  border-top-color: #fffaf0;
+  background: linear-gradient(180deg, #fffaf0 0%, #efd5a2 52%, #cfa96a 100%);
   box-shadow:
-    inset 0 1px 0 #fffdf9,
-    inset 0 -1px 0 rgb(104 78 36 / 28%),
-    0 8px 22px rgb(0 0 0 / 42%),
-    0 0 22px -6px rgb(236 208 154 / 34%);
-  color: #151821;
-  font-weight: 650;
-  letter-spacing: 0.04em;
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(96 70 28 / 34%),
+    0 10px 26px rgb(0 0 0 / 48%),
+    0 0 28px -4px rgb(244 214 156 / 46%);
+  color: #131720;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
 html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
   .gallery-artwork-intro
   .gallery-feature-save[aria-pressed="true"] {
-  border-color: rgb(232 208 162 / 36%);
-  background: linear-gradient(180deg, #242938, #171b26);
-  box-shadow: inset 0 1px 0 rgb(255 250 238 / 14%);
+  border-color: rgb(240 214 164 / 48%);
+  background: linear-gradient(180deg, #283042, #181e2b);
+  box-shadow: inset 0 1px 0 rgb(255 251 240 / 20%);
   color: var(--screen-paper);
   cursor: default;
 }
@@ -480,7 +537,7 @@ html[data-family="gallery"]
   margin: 0;
   overflow: auto;
   scrollbar-gutter: stable;
-  color: #d6d1c6;
+  color: #ded8cc;
   font-size: 12px;
   line-height: 1.55;
 }
@@ -489,7 +546,7 @@ html[data-family="gallery"]
   margin: 4px 0 0;
   padding: 4px 8px;
   border-left: 2px solid var(--screen-brass);
-  background: rgb(10 15 24 / 58%);
+  background: rgb(10 15 24 / 68%);
 }
 
 html[data-family="gallery"]
@@ -500,7 +557,7 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page]
   .gallery-screening-nav
   a:focus-visible {
-  outline: 2px solid #f4dba4;
+  outline: 2px solid #f7dfa8;
   outline-offset: 2px;
 }
 
@@ -519,11 +576,11 @@ html[data-family="gallery"]
   .gallery-page[data-gallery-page][data-gallery-page]
   .gallery-work
   figcaption {
-  margin-top: 0;
-  padding: 11px 2px 5px;
-  border-top: 1px solid rgb(236 212 166 / 34%);
-  border-bottom: 1px solid rgb(232 208 162 / 22%);
-  background: linear-gradient(90deg, rgb(242 218 172 / 58%) 0 32px, rgb(158 232 250 / 18%) 32px 100%)
+  margin-top: 10px;
+  padding: 12px 4px 6px;
+  border-top: 1px solid rgb(240 214 164 / 44%);
+  border-bottom: 1px solid rgb(236 210 160 / 28%);
+  background: linear-gradient(90deg, rgb(246 220 170 / 74%) 0 40px, rgb(158 232 250 / 26%) 40px 100%)
     0 3px / 100% 1px no-repeat;
 }
 
@@ -533,25 +590,30 @@ html[data-family="gallery"]
     .gallery-artwork-intro
     .gallery-stage-candidates
     button:hover:not([aria-pressed="true"]) {
-    border-color: rgb(244 222 178 / 76%);
+    border-color: rgb(250 228 184 / 86%);
     box-shadow:
-      inset 0 1px 0 rgb(255 252 244 / 36%),
-      inset 0 0 0 2px rgb(6 9 15 / 82%),
-      0 8px 18px rgb(0 0 0 / 48%);
-    color: #fcf9f2;
+      inset 0 1px 0 rgb(255 253 246 / 44%),
+      inset 0 0 0 2px rgb(6 9 15 / 84%),
+      0 10px 22px rgb(0 0 0 / 54%),
+      0 0 18px -6px rgb(242 214 158 / 36%);
+    color: #fffdf8;
   }
 
   html[data-family="gallery"]
     .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     .gallery-artwork-intro
-    .gallery-feature-save:not([aria-pressed="true"]):hover {
-    border-color: #fff6df;
-    background: linear-gradient(180deg, #fffdf8 0%, #f0dbb0 54%, #dec18b 100%);
+    .gallery-feature-save:not([aria-pressed="true"]):hover,
+  html[data-family="gallery"]
+    .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
+    .gallery-screening-nav
+    .gallery-enter:hover {
+    border-color: #fff9e6;
+    background: linear-gradient(180deg, #ffffff 0%, #f5e1b8 52%, #e0c188 100%);
     box-shadow:
       inset 0 1px 0 #ffffff,
-      0 10px 26px rgb(0 0 0 / 48%),
-      0 0 26px -4px rgb(242 216 164 / 46%);
-    color: #11141d;
+      0 12px 28px rgb(0 0 0 / 52%),
+      0 0 30px -4px rgb(246 218 164 / 54%);
+    color: #10131c;
   }
 
   html[data-family="gallery"]
@@ -562,10 +624,11 @@ html[data-family="gallery"]
     .gallery-page[data-gallery-page]
     .gallery-screening-nav
     a:not(.gallery-enter):hover {
-    border-color: rgb(246 224 180 / 78%);
+    border-color: rgb(250 228 184 / 86%);
     box-shadow:
-      inset 0 1px 0 rgb(255 252 242 / 34%),
-      0 10px 24px rgb(0 0 0 / 44%);
+      inset 0 1px 0 rgb(255 253 245 / 44%),
+      0 12px 28px rgb(0 0 0 / 50%),
+      0 0 22px -6px rgb(158 232 250 / 34%);
     color: #ffffff;
   }
 }
@@ -579,10 +642,14 @@ html[data-family="gallery"]
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .gallery-artwork-intro .artwork-stage__image {
+    inset: clamp(12px, 2.4vw, 18px);
+  }
+
   .gallery-artwork-intro .artwork-stage[data-format] .artwork-stage__information {
     border-inline-start: 0;
     border-top: 1px solid var(--screen-rule);
-    box-shadow: inset 0 1px 0 rgb(255 251 240 / 10%);
+    box-shadow: inset 0 1px 0 rgb(255 251 240 / 14%);
   }
 
   html[data-family="gallery"]
@@ -625,6 +692,10 @@ html[data-family="gallery"]
 }
 
 @media (forced-colors: active) {
+  .gallery-screening-heading::after {
+    display: none;
+  }
+
   html[data-family="gallery"]
     .gallery-page[data-gallery-page][data-gallery-page][data-gallery-page]
     :is(

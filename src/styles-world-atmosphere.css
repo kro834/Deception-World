@@ -37,30 +37,30 @@
   background:
     linear-gradient(
         90deg,
-        transparent 3%,
-        color-mix(in srgb, var(--atmosphere-light) 22%, transparent) 20%,
-        color-mix(in srgb, var(--atmosphere-aurora) 18%, transparent) 50%,
-        color-mix(in srgb, var(--atmosphere-warm) 18%, transparent) 82%,
-        transparent 97%
+        transparent 2%,
+        color-mix(in srgb, var(--atmosphere-light) 36%, transparent) 18%,
+        color-mix(in srgb, var(--atmosphere-aurora) 30%, transparent) 50%,
+        color-mix(in srgb, var(--atmosphere-warm) 30%, transparent) 82%,
+        transparent 98%
       )
-      0 0 / 100% 1px no-repeat,
+      0 0 / 100% 1.5px no-repeat,
     radial-gradient(
-      ellipse 84% 88% at 13% -4%,
-      color-mix(in srgb, var(--atmosphere-light) 13%, transparent) 0%,
-      color-mix(in srgb, var(--atmosphere-light) 6.2%, transparent) 38%,
-      color-mix(in srgb, var(--atmosphere-light) 1.8%, transparent) 66%,
+      ellipse 88% 92% at 14% -4%,
+      color-mix(in srgb, var(--atmosphere-light) 20%, transparent) 0%,
+      color-mix(in srgb, var(--atmosphere-light) 9.5%, transparent) 38%,
+      color-mix(in srgb, var(--atmosphere-light) 2.8%, transparent) 66%,
       transparent 84%
     ),
     radial-gradient(
-      ellipse 56% 64% at 52% -8%,
-      color-mix(in srgb, var(--atmosphere-aurora) 8.5%, transparent) 0%,
-      color-mix(in srgb, var(--atmosphere-horizon) 3.4%, transparent) 46%,
+      ellipse 62% 70% at 50% -10%,
+      color-mix(in srgb, var(--atmosphere-aurora) 14%, transparent) 0%,
+      color-mix(in srgb, var(--atmosphere-horizon) 5.6%, transparent) 46%,
       transparent 78%
     ),
     radial-gradient(
-      ellipse 58% 78% at 96% -2%,
-      color-mix(in srgb, var(--atmosphere-warm) 8.2%, transparent) 0%,
-      color-mix(in srgb, var(--atmosphere-warm) 3.2%, transparent) 42%,
+      ellipse 62% 82% at 94% -2%,
+      color-mix(in srgb, var(--atmosphere-warm) 14%, transparent) 0%,
+      color-mix(in srgb, var(--atmosphere-warm) 5.2%, transparent) 42%,
       transparent 78%
     );
 }
@@ -81,16 +81,23 @@
     background-color: var(--world-atmosphere-base, #03060c);
     border-bottom-color: color-mix(
       in srgb,
-      var(--world-atmosphere-accent, #7ae8ff) 44%,
+      var(--world-atmosphere-accent, #7ae8ff) 56%,
       transparent
     );
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 24%, transparent),
+      0 14px 32px -12px rgb(0 0 0 / 78%),
+      0 2px 18px -6px color-mix(in srgb, var(--world-atmosphere-accent, #7ae8ff) 28%, transparent);
   }
 
   .site-shell.film-edition.mirage-edition[data-world-phase]
     .topbar
     :is(.brand-sigil, .side-panel-trigger) {
     color: var(--world-atmosphere-bar-accent, #7ae8ff);
-    border-color: color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 56%, transparent);
+    border-color: color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 64%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 18%),
+      0 0 16px -6px color-mix(in srgb, var(--world-atmosphere-bar-accent, #7ae8ff) 44%, transparent);
   }
 }
 

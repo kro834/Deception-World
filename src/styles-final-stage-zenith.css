@@ -1409,12 +1409,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer {
   padding-bottom: calc(var(--fsz-bar) + clamp(40px, 6svh, 72px));
   overflow: clip;
   background:
-    radial-gradient(38% 24% at 50% 44%, rgb(var(--fsz-lamp-rgb) / 8%), transparent 70%),
-    radial-gradient(48% 36% at 50% 50%, rgb(var(--fsx-violet-rgb) / 13%), transparent 72%),
+    radial-gradient(46% 30% at 50% 42%, rgb(var(--fsz-gold-rgb) / 16%), transparent 70%),
+    radial-gradient(54% 40% at 50% 52%, rgb(var(--fsz-cyan-rgb) / 14%), transparent 74%),
     radial-gradient(
-      38% 26% at 50% calc(100% - var(--fsz-bar)),
-      rgb(var(--fsx-lilac-rgb) / 10%),
-      transparent 72%
+      44% 30% at 50% calc(100% - var(--fsz-bar)),
+      rgb(var(--fsx-lilac-rgb) / 14%),
+      transparent 74%
     ),
     var(--fsx-house);
   border-top: 0;
@@ -1451,18 +1451,21 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::afte
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::before {
   top: 0;
-  box-shadow: 0 1px 0 rgb(var(--fsx-violet-rgb) / 24%);
+  box-shadow:
+    0 1px 0 rgb(var(--fsz-gold-rgb) / 48%),
+    0 2px 18px rgb(var(--fsz-gold-rgb) / 18%);
   transform-origin: 50% 0;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer::after {
   bottom: 0;
-  box-shadow: 0 -1px 0 rgb(var(--fsx-violet-rgb) / 18%);
+  box-shadow:
+    0 -1px 0 rgb(var(--fsz-cyan-rgb) / 42%),
+    0 -2px 18px rgb(var(--fsz-cyan-rgb) / 16%);
   transform-origin: 50% 100%;
 }
 
-/* The route home: a dashed line from the records down to the last board,
-   drawn on the board itself so it always meets its top edge. */
+/* The route home: a luminous gold-to-cyan filament from the records down to the last board. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div {
   position: relative;
 }
@@ -1476,7 +1479,8 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div
   width: 2px;
   height: 100vh;
   margin: 0;
-  background: var(--fsz-route);
+  background: linear-gradient(180deg, transparent, rgb(var(--fsz-cyan-rgb) / 62%) 42%, rgb(var(--fsz-gold-rgb) / 86%) 100%);
+  box-shadow: 0 0 12px rgb(var(--fsz-gold-rgb) / 34%);
   translate: -50% 0;
   transform-origin: 50% 100%;
   pointer-events: none;
@@ -1493,12 +1497,21 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > div
   height: 14px;
   margin: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--fsz-lamp) 0 2.2px, transparent 3px), var(--fsx-house);
+  background: radial-gradient(circle, #fff8e2 0 2.6px, var(--fsz-gold) 3px 4.2px, transparent 5px), var(--fsx-house);
   box-shadow:
-    0 0 0 1px rgb(var(--fsx-violet-rgb) / 70%),
-    0 0 18px 3px rgb(var(--fsz-lamp-rgb) / 28%);
+    0 0 0 1.5px rgb(var(--fsz-cyan-rgb) / 76%),
+    0 0 24px 5px rgb(var(--fsz-gold-rgb) / 46%),
+    0 0 42px 8px rgb(var(--fsz-cyan-rgb) / 24%);
   translate: -50% 0;
   pointer-events: none;
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer h2 {
+  color: #fffdf8;
+  text-shadow:
+    0 6px 34px rgb(0 0 0 / 86%),
+    0 0 44px rgb(var(--fsz-gold-rgb) / 30%),
+    0 0 74px rgb(var(--fsz-cyan-rgb) / 20%);
 }
 
 /* The dash under the title sits under its visible run: the title's
@@ -1514,10 +1527,15 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a {
   position: relative;
   min-height: 52px;
   padding: 0 24px;
-  border-color: rgb(var(--fsx-violet-rgb) / 38%);
+  border-color: rgb(var(--fsz-gold-rgb) / 52%);
+  border-radius: 3px;
   background:
-    linear-gradient(var(--fsx-violet) 0 0) 0 0 / 16px 2px no-repeat,
-    rgb(var(--fsx-violet-rgb) / 6%);
+    linear-gradient(90deg, var(--fsz-gold), var(--fsz-cyan)) 0 0 / 32px 2px no-repeat,
+    linear-gradient(165deg, rgb(28 36 62 / 90%), rgb(10 14 28 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 26%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 22%),
+    0 14px 34px rgb(0 0 0 / 54%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.rxs-footer-return {
@@ -1843,24 +1861,33 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-footer > a.r
 /* Reading order and typography are independent of the station's motion. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero {
   background:
-    radial-gradient(66% 84% at 77% 34%, rgb(50 58 104 / 40%), transparent 74%),
-    radial-gradient(46% 52% at 60% 100%, rgb(112 72 60 / 19%), transparent 78%),
-    #0a0e19;
+    radial-gradient(64% 74% at 72% 38%, rgb(82 104 206 / 46%), transparent 72%),
+    radial-gradient(50% 44% at 70% 42%, rgb(var(--fsz-cyan-rgb) / 20%), transparent 68%),
+    radial-gradient(48% 42% at 24% 48%, rgb(var(--fsz-gold-rgb) / 14%), transparent 72%),
+    radial-gradient(56% 40% at 62% 100%, rgb(var(--fsz-gold-rgb) / 22%), transparent 76%),
+    linear-gradient(180deg, #060916 0%, #090e20 55%, #050712 100%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero h1 {
-  color: var(--fsz-paper);
+  color: #fffdf8;
   background: none;
   filter: none;
   letter-spacing: 0.1em;
   text-indent: 0;
+  text-shadow:
+    0 6px 32px rgb(0 0 0 / 92%),
+    0 0 42px rgb(var(--fsz-gold-rgb) / 34%),
+    0 0 76px rgb(var(--fsz-cyan-rgb) / 24%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-hero-lede {
-  color: var(--fsz-copy);
-  border-color: var(--fsz-brass-line);
+  color: #f0e8da;
+  border-color: rgb(var(--fsz-gold-rgb) / 54%);
   letter-spacing: 0.06em;
   text-wrap: balance;
+  text-shadow:
+    0 2px 18px rgb(0 0 0 / 82%),
+    0 0 26px rgb(var(--fsz-gold-rgb) / 18%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-scroll-cue {
@@ -1869,14 +1896,22 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-sc
   align-items: center;
   gap: 14px;
   min-height: 48px;
-  padding: 8px 16px;
-  color: var(--fsz-paper);
+  padding: 9px 20px;
+  color: #fffbf2;
   font-size: 14px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-decoration: none;
-  border: 1px solid #9b825d;
+  border: 1px solid rgb(var(--fsz-gold-rgb) / 72%);
   border-radius: 3px;
-  background: #1b1d29;
+  background:
+    linear-gradient(90deg, rgb(var(--fsz-gold-rgb) / 20%), rgb(var(--fsz-cyan-rgb) / 10%) 60%, transparent),
+    linear-gradient(180deg, #24293d 0%, #131726 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 232 / 38%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 28%),
+    0 14px 34px rgb(0 0 0 / 62%),
+    0 0 28px -6px rgb(var(--fsz-gold-rgb) / 30%);
+  text-shadow: 0 1px 10px rgb(0 0 0 / 74%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-scroll-cue::before {
@@ -1887,24 +1922,32 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-sc
   width: 8px;
   height: 8px;
   margin-block-start: -4px;
-  color: var(--fsz-brass);
+  color: var(--fsz-gold);
   border: solid currentColor;
-  border-width: 0 1px 1px 0;
+  border-width: 0 1.5px 1.5px 0;
   background: none;
   rotate: 45deg;
+  filter: drop-shadow(0 0 6px rgb(var(--fsz-gold-rgb) / 60%));
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-scroll-cue:focus-visible {
   outline: 2px solid var(--fsz-paper);
   outline-offset: 4px;
-  border-color: var(--fsz-brass);
+  border-color: var(--fsz-gold);
 }
 
 @media (hover: hover) and (pointer: fine) {
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .rxs-scroll-cue:hover {
-    color: var(--fsz-paper);
-    border-color: var(--fsz-brass);
-    background: #292735;
+    color: #ffffff;
+    border-color: #fff2cc;
+    background:
+      linear-gradient(90deg, rgb(var(--fsz-gold-rgb) / 34%), rgb(var(--fsz-cyan-rgb) / 20%) 64%, transparent),
+      linear-gradient(180deg, #2f3550 0%, #181e33 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 240 / 48%),
+      inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 42%),
+      0 18px 40px rgb(0 0 0 / 68%),
+      0 0 38px -4px rgb(var(--fsz-gold-rgb) / 44%);
   }
 }
 
@@ -1993,8 +2036,15 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .rxs-section > .r
   width: 100%;
   padding-block-end: clamp(18px, 2.7vw, 36px);
   text-align: start;
-  border-bottom: 1px solid var(--fsz-brass-line);
-  background: none;
+  border-bottom: 1px solid rgb(var(--fsz-gold-rgb) / 48%);
+  background:
+    linear-gradient(
+        90deg,
+        rgb(var(--fsz-gold-rgb) / 92%) 0%,
+        rgb(var(--fsz-cyan-rgb) / 76%) 46%,
+        transparent 94%
+      )
+      0 100% / 100% 1.5px no-repeat;
 }
 
 html[data-family="special"]
@@ -2004,11 +2054,15 @@ html[data-family="special"]
   > .rxs-section-heading
   > h2 {
   justify-self: start;
-  color: var(--fsz-paper);
+  color: #fffdf8;
   background: none;
   font-size: clamp(27px, 4.3vw, 58px);
   letter-spacing: 0.025em;
   text-align: start;
+  text-shadow:
+    0 4px 30px rgb(0 0 0 / 84%),
+    0 0 42px rgb(var(--fsz-gold-rgb) / 28%),
+    0 0 72px rgb(var(--fsz-cyan-rgb) / 20%);
 }
 
 html[data-family="special"]
@@ -2019,32 +2073,55 @@ html[data-family="special"]
   > span {
   justify-self: start;
   margin: clamp(10px, 2vw, 20px) 0 0;
-  color: var(--fsz-copy);
+  color: #e4ded3;
   text-align: start;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 68%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-layout {
   max-width: 1040px;
   margin-inline: auto;
-  padding: clamp(14px, 3.5vw, 44px);
-  border: 1px solid var(--fsz-brass-line);
-  background: linear-gradient(145deg, #161e2f, #101521 70%);
+  padding: clamp(24px, 3.8vw, 50px);
+  border: 1px solid rgb(var(--fsz-gold-rgb) / 48%);
+  border-radius: 6px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 2%,
+        rgb(var(--fsz-gold-rgb) / 92%) 22%,
+        rgb(var(--fsz-cyan-rgb) / 82%) 78%,
+        transparent 98%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(56% 48% at 4% 0%, rgb(var(--fsz-gold-rgb) / 18%), transparent 70%),
+    radial-gradient(52% 44% at 96% 100%, rgb(var(--fsz-cyan-rgb) / 16%), transparent 72%),
+    linear-gradient(148deg, #161f36 0%, #0c1224 56%, #080c19 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 232 / 32%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 28%),
+    inset 0 0 0 1px rgb(var(--fsz-gold-rgb) / 14%),
+    0 32px 80px rgb(0 0 0 / 70%),
+    0 0 64px -12px rgb(var(--fsz-cyan-rgb) / 24%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-copy p {
-  color: var(--fsz-copy);
+  color: #e5dfd5;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #story .fst-story-copy p:first-child {
-  color: var(--fsz-paper);
+  color: #fffcf5;
+  text-shadow: 0 2px 16px rgb(0 0 0 / 70%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-copy h3 {
-  color: var(--fsz-paper);
+  color: #fffdf8;
+  text-shadow:
+    0 4px 24px rgb(0 0 0 / 78%),
+    0 0 32px color-mix(in srgb, var(--fst-accent, var(--fsz-cyan)) 34%, transparent);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #characters .fst-cast-copy p {
-  color: var(--fsz-copy);
+  color: #e3ded5;
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders > .rxs-section-heading {
@@ -2052,8 +2129,12 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders > .rxs-se
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > #riders .fst-pickup-copy q {
-  color: var(--fsz-copy);
-  border-color: var(--fsz-brass-line);
+  color: #e8e2d8;
+  border-color: color-mix(
+    in srgb,
+    var(--fst-accent, var(--fsz-cyan)) 46%,
+    rgb(var(--fsz-gold-rgb) / 48%)
+  );
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-pickup-record .fst-subheading h3 {
@@ -2248,7 +2329,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero > .rxs-
   animation: none;
 }
 
-/* The floor: route lines in perspective, fading to the horizon. */
+/* The floor: polished dark theater marble with luminous perspective sheen. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.fst-page
@@ -2260,23 +2341,25 @@ html[data-family="special"]
   left: -30%;
   height: 24%;
   background:
+    radial-gradient(ellipse 56% 72% at 54% 10%, rgb(var(--fsz-gold-rgb) / 28%), transparent 72%),
+    radial-gradient(ellipse 46% 64% at 64% 22%, rgb(var(--fsz-cyan-rgb) / 22%), transparent 74%),
     repeating-linear-gradient(
       90deg,
-      rgb(var(--fsx-violet-rgb) / 42%) 0 1px,
+      rgb(var(--fsx-violet-rgb) / 48%) 0 1px,
       transparent 1px 96px
     ),
     repeating-linear-gradient(
       0deg,
-      rgb(var(--fsx-violet-rgb) / 32%) 0 1px,
+      rgb(var(--fsz-gold-rgb) / 24%) 0 1px,
       transparent 1px 56px
     );
   transform: perspective(520px) rotateX(66deg);
   transform-origin: 50% 100%;
-  -webkit-mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 55%) 46%, transparent 92%);
-  mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 55%) 46%, transparent 92%);
+  -webkit-mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 62%) 48%, transparent 94%);
+  mask-image: linear-gradient(0deg, #000 0%, rgb(0 0 0 / 62%) 48%, transparent 94%);
 }
 
-/* The light: two projector shafts and the logo's colours on the dark. */
+/* The light: twin volumetric projector shafts and the logo's colours spilling on the house. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.fst-page
@@ -2287,23 +2370,24 @@ html[data-family="special"]
   background:
     linear-gradient(
       112deg,
-      transparent 38%,
-      rgb(var(--fsx-lilac-rgb) / 7%) 46%,
-      rgb(var(--fsx-violet-rgb) / 3%) 52%,
-      transparent 58%
+      transparent 34%,
+      rgb(var(--fsz-cyan-rgb) / 14%) 45%,
+      rgb(var(--fsx-lilac-rgb) / 11%) 52%,
+      transparent 62%
     ),
     linear-gradient(
       74deg,
-      transparent 50%,
-      rgb(var(--fsz-lamp-rgb) / 5%) 57%,
-      transparent 65%
+      transparent 46%,
+      rgb(var(--fsz-gold-rgb) / 14%) 56%,
+      rgb(var(--fsz-lamp-rgb) / 6%) 62%,
+      transparent 69%
     ),
-    radial-gradient(34% 40% at 22% 58%, rgb(92 214 255 / 9%), transparent 72%),
-    radial-gradient(30% 38% at 84% 38%, rgb(255 110 196 / 8%), transparent 72%),
-    radial-gradient(40% 26% at 60% 86%, rgb(var(--fsz-lamp-rgb) / 9%), transparent 74%);
+    radial-gradient(38% 44% at 20% 56%, rgb(92 214 255 / 17%), transparent 72%),
+    radial-gradient(36% 42% at 84% 36%, rgb(255 110 196 / 14%), transparent 72%),
+    radial-gradient(46% 32% at 62% 86%, rgb(var(--fsz-gold-rgb) / 19%), transparent 74%);
 }
 
-/* The horizon: one lit hairline where the floor meets the dark. */
+/* The horizon: gleaming gold-core x cyan-violet prism seam where the floor meets the dark. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.fst-page
@@ -2316,27 +2400,36 @@ html[data-family="special"]
   right: 0;
   bottom: 24%;
   left: 0;
-  height: 1px;
+  height: 1.5px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(var(--fsx-violet-rgb) / 46%) 22%,
-    rgb(var(--fsz-lamp-rgb) / 70%) 50%,
-    rgb(var(--fsx-lilac-rgb) / 46%) 78%,
+    rgb(var(--fsz-cyan-rgb) / 62%) 18%,
+    rgb(255 246 216 / 92%) 50%,
+    rgb(var(--fsz-gold-rgb) / 72%) 78%,
     transparent
   );
-  box-shadow: 0 0 24px 2px rgb(var(--fsx-violet-rgb) / 24%);
+  box-shadow:
+    0 0 28px 3px rgb(var(--fsz-gold-rgb) / 36%),
+    0 0 48px 6px rgb(var(--fsz-cyan-rgb) / 24%);
 }
 
-/* The screen stands lit in the house. */
+/* The screen stands lit in the house: double-rimmed CinemaScope gold x cyan mount. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
+  border-top: 1.5px solid rgb(var(--fsz-gold-rgb) / 86%);
+  border-bottom: 1.5px solid rgb(var(--fsz-cyan-rgb) / 78%);
+  border-inline: 1px solid rgb(var(--fsx-violet-rgb) / 42%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 232 / 10%),
-    inset 0 -1px 0 rgb(var(--fsz-lamp-rgb) / 14%),
-    0 0 0 1px rgb(var(--fsx-violet-rgb) / 16%),
-    0 22px 60px rgb(0 0 0 / 62%),
-    0 0 90px rgb(var(--fsx-violet-rgb) / 22%),
-    0 0 220px rgb(var(--fsx-lilac-rgb) / 14%);
+    inset 0 1px 0 rgb(255 250 234 / 48%),
+    inset 0 -1px 0 rgb(var(--fsz-cyan-rgb) / 44%),
+    inset 0 0 0 4px rgb(5 7 18 / 88%),
+    inset 0 0 0 5px rgb(var(--fsz-gold-rgb) / 30%),
+    inset 0 0 56px rgb(var(--fsz-cyan-rgb) / 14%),
+    0 0 0 1px rgb(var(--fsz-gold-rgb) / 34%),
+    0 32px 92px rgb(0 0 0 / 84%),
+    0 0 84px -6px rgb(var(--fsz-cyan-rgb) / 34%),
+    0 0 140px -10px rgb(var(--fsz-gold-rgb) / 28%),
+    0 0 220px rgb(var(--fsx-lilac-rgb) / 20%);
 }
 
 @media (min-width: 1100px) and (min-height: 620px) {
@@ -2355,7 +2448,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo {
-    -webkit-box-reflect: below 14px linear-gradient(transparent 62%, rgb(0 0 0 / 20%));
+    -webkit-box-reflect: below 14px linear-gradient(transparent 56%, rgb(0 0 0 / 28%));
   }
 
   html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-hero-logo img {
@@ -2383,7 +2476,7 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page > .fst-hero .fst-he
   }
 }
 
-/* ---------- The cast's faces in their slots ---------- */
+/* ---------- The cast's faces in their slots: illuminated theater billing plates ---------- */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.fst-page
@@ -2394,6 +2487,10 @@ html[data-family="special"]
   isolation: isolate;
   align-items: flex-start;
   padding-inline: 12px 4px;
+  border: 1px solid color-mix(in srgb, var(--liquid-accent, #aab2ff) 32%, rgb(var(--fsz-gold-rgb) / 24%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 22%),
+    0 10px 24px -8px rgb(0 0 0 / 56%);
 }
 
 html[data-family="special"]
@@ -2414,14 +2511,14 @@ html[data-family="special"]
   /* Drawn large about the face (the origin is the portrait's own focus,
      set on the element), so the slot holds a face, not a whole figure. */
   scale: var(--fsz-face-scale, 2.1);
-  opacity: 0.6;
+  opacity: 0.68;
   pointer-events: none;
   -webkit-user-drag: none;
   user-select: none;
 }
 
-/* The slot's shade: dark where the number and the name stand, clear over
-   the face, a foot in the person's colour. */
+/* The slot's shade: dark where the number and the name stand, luminous rim over
+   the portrait, and a glowing foot in the person's colour. */
 html[data-family="special"]
   body
   .rxs-page.rxs-page.fst-page
@@ -2433,10 +2530,26 @@ html[data-family="special"]
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(90deg, rgb(4 5 20 / 88%) 0, rgb(4 5 20 / 62%) 34px, rgb(4 5 20 / 8%) 62px),
-    linear-gradient(180deg, rgb(4 5 20 / 46%) 0, transparent 34%, transparent 62%, rgb(4 5 20 / 70%));
-  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--liquid-accent, #aab2ff) 46%, transparent);
+    linear-gradient(var(--liquid-accent, #aab2ff) 0 0) 50% 0 / 60% 2px no-repeat,
+    linear-gradient(90deg, rgb(4 6 20 / 90%) 0, rgb(4 6 20 / 62%) 34px, rgb(4 6 20 / 8%) 64px),
+    linear-gradient(180deg, rgb(4 6 20 / 42%) 0, transparent 32%, transparent 62%, rgb(4 6 20 / 74%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 20%),
+    inset 0 -3px 0 color-mix(in srgb, var(--liquid-accent, #aab2ff) 64%, transparent),
+    inset 0 -34px 28px -22px color-mix(in srgb, var(--liquid-accent, #aab2ff) 28%, transparent);
   pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"] {
+  border-color: color-mix(in srgb, var(--liquid-accent, #aab2ff) 86%, #fff4d6);
+  box-shadow:
+    0 14px 32px -6px rgb(0 0 0 / 68%),
+    0 0 28px -4px color-mix(in srgb, var(--liquid-accent, #aab2ff) 52%, transparent);
 }
 
 html[data-family="special"]
@@ -2447,6 +2560,7 @@ html[data-family="special"]
   > button[role="tab"][aria-selected="true"]
   > .fst-cast-face {
   opacity: 1;
+  filter: contrast(1.06) saturate(1.1);
 }
 
 html[data-family="special"]
@@ -2456,12 +2570,47 @@ html[data-family="special"]
   .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
   > button[role="tab"][aria-selected="true"]::after {
   background:
-    linear-gradient(90deg, rgb(4 5 20 / 82%) 0, rgb(4 5 20 / 50%) 34px, transparent 60px),
-    linear-gradient(180deg, rgb(4 5 20 / 30%) 0, transparent 30%, transparent 70%, rgb(4 5 20 / 50%));
+    linear-gradient(90deg, transparent, var(--liquid-accent, #aab2ff) 24%, #fff6df 50%, var(--liquid-accent, #aab2ff) 76%, transparent) 0 0 / 100% 2.5px no-repeat,
+    linear-gradient(90deg, rgb(4 6 20 / 84%) 0, rgb(4 6 20 / 48%) 34px, transparent 62px),
+    linear-gradient(180deg, rgb(4 6 20 / 26%) 0, transparent 28%, transparent 68%, rgb(4 6 20 / 52%));
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--liquid-accent, #aab2ff) 78%, transparent),
-    inset 0 -3px 0 var(--liquid-accent, #aab2ff),
-    inset 0 -46px 40px -30px color-mix(in srgb, var(--liquid-accent, #aab2ff) 40%, transparent);
+    inset 0 0 0 1.5px color-mix(in srgb, var(--liquid-accent, #aab2ff) 86%, #fff4d6),
+    inset 0 -4px 0 var(--liquid-accent, #aab2ff),
+    inset 0 -64px 48px -26px color-mix(in srgb, var(--liquid-accent, #aab2ff) 56%, transparent);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.fst-page
+  > #characters
+  .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+  > button[role="tab"][aria-selected="true"]
+  :is(span, small) {
+  color: #fffdf8;
+  text-shadow:
+    0 2px 10px rgb(0 0 0 / 88%),
+    0 0 16px color-mix(in srgb, var(--liquid-accent, #aab2ff) 54%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover {
+    border-color: color-mix(in srgb, var(--liquid-accent, #aab2ff) 68%, rgb(var(--fsz-gold-rgb) / 48%));
+  }
+
+  html[data-family="special"]
+    body
+    .rxs-page.rxs-page.fst-page
+    > #characters
+    .fst-cast-tabs.rxs-stage-tabs.liquid-swipe-tabs
+    > button[role="tab"]:not([aria-selected="true"]):hover
+    > .fst-cast-face {
+    opacity: 0.9;
+  }
 }
 
 @media (min-width: 1100px) {

@@ -6,25 +6,33 @@
 .dream-page.dream-page .dream-archive-index {
   min-width: 0;
   margin: 0 0 clamp(18px, 2.5vw, 28px);
-  padding: clamp(14px, 2vw, 22px);
-  border: 1px solid rgb(225 190 124 / 40%);
+  padding: clamp(16px, 2.2vw, 24px);
+  border: 1px solid rgb(228 192 122 / 54%);
+  border-radius: 2px;
+  outline: 1px solid rgb(228 192 122 / 20%);
+  outline-offset: -4px;
   background:
-    linear-gradient(180deg, rgb(28 21 38 / 92%) 0%, rgb(16 12 24 / 96%) 100%),
-    var(--dr-plate-fill, var(--ts-night));
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 22px 2px no-repeat,
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2px 22px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 22px no-repeat,
+    radial-gradient(64% 88% at 16% 0%, rgb(246 206 132 / 14%), transparent 72%),
+    linear-gradient(180deg, #21152c 0%, #120c1a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 14%),
-    0 12px 28px rgb(0 0 0 / 30%);
+    inset 0 1px 0 rgb(255 244 210 / 20%),
+    0 16px 36px rgb(0 0 0 / 44%);
 }
 
 .dream-page.dream-page .dream-archive-explore > label {
   display: block;
   margin: 0 0 12px;
-  color: var(--ts-kin-light);
+  color: #f4d898;
   font-family: var(--ts-display);
   font-size: 16px;
   font-weight: 800;
   line-height: 1.5;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 12px rgb(242 196 116 / 24%);
 }
 
 .dream-page.dream-page .dream-archive-index ol {
@@ -45,13 +53,16 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 9px 13px;
-  border: 1px solid rgb(225 190 124 / 38%);
-  color: var(--ts-kinari);
+  padding: 9px 14px;
+  border: 1px solid rgb(228 192 122 / 48%);
+  border-radius: 2px;
+  color: #faf0dd;
   background:
-    linear-gradient(#e6c28e 0 0) 0 0 / 10px 2px no-repeat,
-    linear-gradient(180deg, rgb(28 22 40 / 82%) 0%, rgb(15 13 25 / 88%) 100%);
-  box-shadow: inset 0 1px 0 rgb(255 248 228 / 16%);
+    linear-gradient(#f4d898 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(180deg, #281935 0%, #150d20 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 212 / 20%),
+    0 5px 14px rgb(0 0 0 / 34%);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.4;
@@ -68,80 +79,94 @@ html[data-family="dream"] main.dream-page.dream-page .dream-scene-material {
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-scene-material > button {
-  border: 1px solid rgb(242 212 152 / 58%);
-  color: #fbf2df;
+  border: 1px solid rgb(242 210 148 / 64%);
+  border-radius: 2px;
+  color: #fff7e6;
   background:
-    linear-gradient(#f8e7ba 0 0) 0 0 / 16px 2px no-repeat,
-    linear-gradient(180deg, rgb(48 33 58 / 94%) 0%, rgb(25 17 34 / 96%) 100%);
+    linear-gradient(#fff0c2 0 0) 0 0 / 18px 2px no-repeat,
+    linear-gradient(#f4d898 0 0) 100% 100% / 14px 1.5px no-repeat,
+    radial-gradient(64% 92% at 14% 0%, rgb(246 206 130 / 18%), transparent 70%),
+    linear-gradient(180deg, #321f40 0%, #190f24 100%);
   box-shadow:
-    inset 3px 0 0 #e6bd70,
-    inset 0 1px 0 rgb(255 248 228 / 22%),
-    0 6px 18px rgb(0 0 0 / 34%);
+    inset 3px 0 0 #ebc476,
+    inset 0 1px 0 rgb(255 244 212 / 26%),
+    0 8px 20px rgb(0 0 0 / 42%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry#dream-reading-room-entry {
-  border-color: rgb(235 201 142 / 48%);
+  border-color: rgb(236 200 130 / 58%);
   background:
-    radial-gradient(70% 90% at 12% 0%, rgb(230 194 142 / 14%), transparent 70%),
-    radial-gradient(40% 70% at 92% 100%, rgb(204 73 59 / 10%), transparent 70%),
-    linear-gradient(145deg, #2a1b33 0%, #1c1325 58%, #140e1b 100%);
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 30px 2px no-repeat,
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2px 30px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 30px 2px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 30px no-repeat,
+    radial-gradient(70% 90% at 12% 0%, rgb(248 208 136 / 20%), transparent 70%),
+    radial-gradient(44% 72% at 92% 100%, rgb(208 72 56 / 16%), transparent 70%),
+    linear-gradient(145deg, #2d1b38 0%, #1c1227 58%, #130c1c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 20%),
-    0 14px 32px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(255 244 210 / 24%),
+    0 18px 40px rgb(0 0 0 / 48%);
 }
 
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-reading-entry#dream-reading-room-entry
   > button {
-  color: #241728;
-  border-color: #eed6a4;
+  color: #241628;
+  border-color: #f5dca2;
   background:
-    linear-gradient(#8f262c 0 0) 0 0 / 16px 2px no-repeat,
-    linear-gradient(180deg, #fbf1da 0%, #e6cea0 100%);
+    linear-gradient(#8f262c 0 0) 0 0 / 16px 2.5px no-repeat,
+    linear-gradient(180deg, #fcf3de 0%, #e7cfa0 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 84%),
-    0 10px 24px rgb(0 0 0 / 38%);
+    inset 0 1px 0 rgb(255 253 246 / 86%),
+    0 10px 26px rgb(0 0 0 / 44%);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .dream-page.dream-page .dream-archive-index a:hover,
   .dream-page.dream-page .dream-archive-related a:hover {
-    border-color: var(--ts-kin-light);
+    border-color: #f6df9e;
+    color: #fff8ea;
     background:
-      linear-gradient(#f5dfab 0 0) 0 0 / 14px 2px no-repeat,
-      linear-gradient(180deg, rgb(78 50 56 / 84%) 0%, rgb(48 30 38 / 90%) 100%);
+      linear-gradient(#fff0c2 0 0) 0 0 / 16px 2px no-repeat,
+      linear-gradient(145deg, #6b2430 0%, #3a1727 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 248 228 / 28%),
-      0 6px 16px rgb(0 0 0 / 34%);
+      inset 0 1px 0 rgb(255 246 218 / 32%),
+      0 8px 20px rgb(0 0 0 / 44%);
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-scene-material > button:hover {
-    border-color: #fae6b4;
+    border-color: #fff0c2;
     background:
-      linear-gradient(#fae6b4 0 0) 0 0 / 20px 2px no-repeat,
-      linear-gradient(180deg, #432f52 0%, #261b33 100%);
+      linear-gradient(#fff2c6 0 0) 0 0 / 22px 2px no-repeat,
+      linear-gradient(#f8e0a4 0 0) 100% 100% / 18px 1.5px no-repeat,
+      linear-gradient(180deg, #472852 0%, #271633 100%);
     box-shadow:
-      inset 3px 0 0 #fae6b4,
-      inset 0 1px 0 rgb(255 250 232 / 34%),
-      0 10px 24px rgb(0 0 0 / 42%);
+      inset 3px 0 0 #fff0c2,
+      inset 0 1px 0 rgb(255 250 232 / 38%),
+      0 12px 26px rgb(0 0 0 / 50%);
   }
 
   html[data-family="dream"]
     main.dream-page.dream-page
     .dream-reading-entry#dream-reading-room-entry
     > button:not(:disabled):hover {
-    border-color: #fff5d9;
+    border-color: #fff7dd;
     box-shadow:
       inset 0 1px 0 #fff,
-      0 16px 34px rgb(0 0 0 / 52%);
+      0 16px 34px rgb(0 0 0 / 54%);
+  }
+
+  .dream-page.dream-page .dream-archive-explore :is(input, select):hover,
+  .dream-page.dream-page .dream-archive-empty button:hover {
+    border-color: #f4d692;
   }
 }
 
 .dream-page.dream-page .dream-archive-index a:focus-visible,
 .dream-page.dream-page .dream-archive-related a:focus-visible,
 .dream-page.dream-page .dream-archive-explore :is(input, select):focus-visible {
-  outline: 2px solid var(--ts-fuji);
+  outline: 2px solid #f4dca0;
   outline-offset: 2px;
 }
 
@@ -151,15 +176,23 @@ html[data-family="dream"]
   gap: 0 18px;
   align-items: end;
   min-width: 0;
-  margin: 0 0 12px;
-  padding: clamp(14px, 2vw, 20px);
-  border: 1px solid rgb(225 190 124 / 40%);
+  margin: 0 0 14px;
+  padding: clamp(16px, 2.2vw, 24px);
+  border: 1px solid rgb(228 192 122 / 54%);
+  border-radius: 2px;
+  outline: 1px solid rgb(228 192 122 / 20%);
+  outline-offset: -4px;
   background:
-    linear-gradient(180deg, rgb(28 21 38 / 92%) 0%, rgb(16 12 24 / 96%) 100%),
-    var(--dr-plate-fill, var(--ts-night));
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 22px 2px no-repeat,
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2px 22px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 22px no-repeat,
+    radial-gradient(64% 88% at 16% 0%, rgb(246 206 132 / 14%), transparent 72%),
+    radial-gradient(48% 72% at 88% 100%, rgb(206 72 56 / 12%), transparent 72%),
+    linear-gradient(180deg, #21152c 0%, #120c1a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 14%),
-    0 12px 28px rgb(0 0 0 / 30%);
+    inset 0 1px 0 rgb(255 244 210 / 20%),
+    0 16px 36px rgb(0 0 0 / 44%);
 }
 
 .dream-page.dream-page .dream-archive-explore > label {
@@ -172,10 +205,14 @@ html[data-family="dream"]
   min-width: 0;
   min-height: 48px;
   padding: 9px 14px;
-  border: 1px solid var(--ts-hair);
-  border-radius: 0;
-  color: var(--ts-kinari);
-  background: rgb(12 10 20 / 92%);
+  border: 1px solid rgb(224 188 118 / 58%);
+  border-radius: 2px;
+  color: #fff6e4;
+  background-color: #130b1c;
+  background-image: linear-gradient(180deg, #1b1126 0%, #100918 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 242 206 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 56%);
   font: inherit;
   font-size: 16px;
   line-height: 1.5;
@@ -183,29 +220,37 @@ html[data-family="dream"]
 }
 
 .dream-page.dream-page .dream-archive-explore input::placeholder {
-  color: var(--ts-ginnezu);
+  color: #c8bdd0;
   opacity: 1;
 }
 
 /* Native WebKit menulists collapse the existing 48px touch surface. Keep
-   native selection while painting the field and its disclosure arrow. */
+   native selection while painting the field and its gilt disclosure arrow. */
 .dream-page.dream-page .dream-archive-explore select {
   -webkit-appearance: none;
   appearance: none;
-  padding-inline-end: 38px;
+  padding-inline-end: 40px;
   background-image:
-    linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%);
+    linear-gradient(45deg, transparent 50%, #f4da9c 50%),
+    linear-gradient(135deg, #f4da9c 50%, transparent 50%),
+    linear-gradient(180deg, transparent 22%, rgb(224 188 118 / 42%) 22% 78%, transparent 78%),
+    linear-gradient(180deg, #1d1229 0%, #110a19 100%);
   background-position:
     right 18px center,
-    right 12px center;
-  background-size: 6px 6px;
+    right 12px center,
+    right 33px center,
+    0 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    1px 100%,
+    100% 100%;
   background-repeat: no-repeat;
 }
 
 .dream-page.dream-page .dream-archive-explore > p {
   margin: 0 0 9px;
-  color: var(--ts-zoge);
+  color: #ecd8b0;
   font-size: 14px;
   line-height: 1.5;
   white-space: nowrap;
@@ -221,16 +266,16 @@ html[data-family="dream"]
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   min-width: 0;
   margin-top: 16px;
   padding-top: 14px;
-  border-top: 1px solid var(--ts-hair-soft);
+  border-top: 1px solid rgb(224 188 118 / 30%);
 }
 
 .dream-page.dream-page .dream-archive-related > span {
   width: 100%;
-  color: var(--ts-ginnezu);
+  color: #dfd0b8;
   font-size: 13px;
   line-height: 1.5;
 }
@@ -243,8 +288,8 @@ html[data-family="dream"]
 
 .dream-page.dream-page .dream-archive-empty {
   margin: 0;
-  padding: 12px 18px 18px;
-  color: var(--ts-zoge);
+  padding: 14px 18px 18px;
+  color: #efe2ca;
   font-size: 14px;
   line-height: 1.7;
 }
@@ -253,23 +298,25 @@ html[data-family="dream"]
   display: block;
   min-height: 44px;
   margin-top: 10px;
-  padding: 8px 12px;
-  border: 1px solid var(--ts-hair);
-  color: var(--ts-kinari);
-  background: rgb(15 13 25 / 75%);
+  padding: 8px 14px;
+  border: 1px solid rgb(228 192 122 / 58%);
+  border-radius: 2px;
+  color: #fff6e4;
+  background: linear-gradient(135deg, #6e232c 0%, #441623 100%);
+  box-shadow: inset 0 1px 0 rgb(255 244 212 / 24%);
   font: inherit;
   font-size: 14px;
   cursor: pointer;
 }
 
 .dream-page.dream-page .dream-archive-empty button:focus-visible {
-  outline: 2px solid var(--ts-fuji);
+  outline: 2px solid #f4dca0;
   outline-offset: 2px;
 }
 
 .dream-page.dream-page .dream-archive-no-results {
   margin-bottom: 12px;
-  border: 1px solid var(--ts-hair-soft);
+  border: 1px solid rgb(224 188 118 / 34%);
 }
 
 @media (min-width: 1181px) and (min-height: 700px) {
@@ -285,7 +332,7 @@ html[data-family="dream"]
 
 .dream-page.dream-page .dream-atlas-grid article:target,
 .dream-page.dream-page .dream-archive-fold:target > summary {
-  outline: 2px solid var(--ts-fuji);
+  outline: 2px solid #f4dca0;
   outline-offset: 4px;
 }
 
@@ -323,6 +370,7 @@ html[data-family="dream"]
   .dream-page.dream-page .dream-archive-explore,
   .dream-page.dream-page .dream-archive-index a,
   .dream-page.dream-page .dream-archive-related a,
+  .dream-page.dream-page .dream-archive-empty button,
   html[data-family="dream"] main.dream-page.dream-page .dream-scene-material,
   html[data-family="dream"] main.dream-page.dream-page .dream-scene-material > button,
   html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry#dream-reading-room-entry,
@@ -334,6 +382,7 @@ html[data-family="dream"]
     background: Canvas;
     border-color: CanvasText;
     box-shadow: none;
+    outline-color: CanvasText;
   }
 
   .dream-page.dream-page .dream-archive-index a,

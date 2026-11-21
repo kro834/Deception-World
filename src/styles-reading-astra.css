@@ -1,35 +1,57 @@
 /* The film's plum and warm paper remain; hierarchy is carried by type and rules. */
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case {
-  border: 1px solid #876b58;
+  border: 1px solid #9c7d66;
+  border-radius: 4px;
   background:
-    linear-gradient(135deg, rgba(243, 217, 172, 0.04) 0%, transparent 40%),
-    #211925;
+    linear-gradient(90deg, rgba(243, 217, 172, 0.78), transparent) 0 0 / 16px 1.5px no-repeat,
+    linear-gradient(180deg, rgba(243, 217, 172, 0.78), transparent) 0 0 / 1.5px 16px no-repeat,
+    linear-gradient(270deg, rgba(224, 97, 79, 0.65), transparent) 100% 100% / 16px 1.5px no-repeat,
+    linear-gradient(0deg, rgba(224, 97, 79, 0.65), transparent) 100% 100% / 1.5px 16px no-repeat,
+    radial-gradient(ellipse 78% 52% at 15% 0%, rgba(243, 217, 172, 0.1), transparent 64%),
+    radial-gradient(ellipse 68% 48% at 88% 100%, rgba(224, 97, 79, 0.08), transparent 66%),
+    linear-gradient(145deg, #261c2b 0%, #1e1623 56%, #17111c 100%);
   box-shadow:
-    inset 0 1px 0 rgba(243, 217, 172, 0.28),
-    0 12px 28px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255, 242, 216, 0.36),
+    inset 0 0 0 1px rgba(243, 217, 172, 0.12),
+    0 18px 42px -12px rgba(0, 0, 0, 0.66);
   margin-bottom: 24px;
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary {
   padding: clamp(20px, 3.2vw, 36px);
-  background: linear-gradient(110deg, #3a2735, #241c2d);
-  box-shadow: inset 0 1px 0 rgba(243, 217, 172, 0.2);
+  background:
+    linear-gradient(
+        90deg,
+        rgba(243, 217, 172, 0.68),
+        rgba(224, 97, 79, 0.42) 48%,
+        transparent 92%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 72% 60% at 16% 0%, rgba(243, 217, 172, 0.14), transparent 64%),
+    linear-gradient(110deg, #402a3a 0%, #2a1f32 54%, #211828 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 216, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.52);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-heading > span {
   font-size: clamp(21px, 2.5vw, 31px);
   line-height: 1.65;
   letter-spacing: 0.06em;
-  color: #fff0d7;
+  color: #fff3de;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body {
   padding: clamp(22px, 4vw, 52px) clamp(18px, 4vw, 56px);
-  background: #211925;
+  background:
+    radial-gradient(ellipse 80% 44% at 50% 0%, rgba(243, 217, 172, 0.06), transparent 66%),
+    linear-gradient(180deg, #231a27 0%, #1d1522 100%);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case-body > h3 {
   max-width: 34em;
   margin: 0 auto 2em;
   padding-bottom: 1.3em;
-  border-bottom: 1px solid #876b58;
-  color: #f3d9ac;
+  border-bottom: 1px solid #967761;
+  box-shadow: 0 1px 0 rgba(243, 217, 172, 0.12);
+  color: #f6dfB4;
   font-size: clamp(18px, 2vw, 23px);
   line-height: 1.9;
   text-wrap: pretty;
@@ -40,7 +62,7 @@ html[data-family="dream"]
   > [data-dream-reading-paragraph] {
   max-width: 36em;
   margin: 0 auto 1.8em;
-  color: #eee5d9;
+  color: #f1e8dc;
   font-size: 17px;
   line-height: 2.15;
   letter-spacing: 0.035em;
@@ -63,7 +85,10 @@ html[data-family="dream"]
   margin-inline: auto;
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-story-case[open] > summary {
-  border-bottom: 2px solid #c3a171;
+  border-bottom: 2px solid #d1af7c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 216, 0.34),
+    0 6px 18px rgba(0, 0, 0, 0.36);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-footer {
   max-width: 44em;
@@ -145,8 +170,11 @@ html[data-family="dream"]
   > ol
   > li
   > a[aria-current="location"] {
-  border-bottom: 3px solid #f1d39e;
-  background: #382735;
+  border-bottom: 3px solid #f4d8a4;
+  background: linear-gradient(180deg, rgba(243, 217, 172, 0.1) 0%, #3b2838 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 216, 0.24),
+    0 8px 20px -8px rgba(0, 0, 0, 0.52);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-glossary-search-results {
   gap: 14px;
@@ -159,9 +187,14 @@ html[data-family="dream"]
   a {
   padding: 20px;
   border-width: 0 0 1px;
-  border-color: #947c5c;
-  border-radius: 0;
-  background: #2b2230;
+  border-color: #9e8463;
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse 74% 50% at 15% 0%, rgba(243, 217, 172, 0.08), transparent 62%),
+    linear-gradient(150deg, #302536 0%, #261d2b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 242, 216, 0.18),
+    0 10px 24px -10px rgba(0, 0, 0, 0.55);
 }
 html[data-family="dream"] main.dream-page.dream-page .dream-glossary-search-word strong {
   font-size: 20px;
@@ -171,9 +204,25 @@ html[data-family="dream"] main.dream-page.dream-page :is(a, summary):focus-visib
   outline-offset: 3px;
 }
 @media (hover: hover) and (pointer: fine) {
+  html[data-family="dream"] main.dream-page.dream-page .dream-story-case > summary:hover {
+    background:
+      linear-gradient(
+          90deg,
+          rgba(243, 217, 172, 0.86),
+          rgba(224, 97, 79, 0.56) 48%,
+          transparent 92%
+        )
+        0 0 / 100% 1px no-repeat,
+      radial-gradient(ellipse 74% 62% at 16% 0%, rgba(243, 217, 172, 0.2), transparent 64%),
+      linear-gradient(110deg, #472f40 0%, #30233a 54%, #251b2d 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 244, 222, 0.42),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.55);
+  }
   html[data-family="dream"] main.dream-page.dream-page .dream-reader-index > ol > li > a:hover {
-    border-bottom-color: #f1d39e;
-    background: rgba(56, 39, 53, 0.5);
+    border-bottom-color: #f4d8a4;
+    background: linear-gradient(180deg, rgba(243, 217, 172, 0.08) 0%, rgba(62, 43, 58, 0.65) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 242, 216, 0.18);
   }
   html[data-family="dream"]
     main.dream-page.dream-page
@@ -181,9 +230,13 @@ html[data-family="dream"] main.dream-page.dream-page :is(a, summary):focus-visib
     .dream-glossary-jump
     .dream-glossary-search-results
     a:hover {
-    border-color: #c3a171;
-    background: #362a3d;
-    box-shadow: inset 0 1px 0 rgba(243, 217, 172, 0.25);
+    border-color: #d4b17e;
+    background:
+      radial-gradient(ellipse 76% 52% at 15% 0%, rgba(243, 217, 172, 0.14), transparent 64%),
+      linear-gradient(150deg, #3a2d42 0%, #2d2234 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(243, 217, 172, 0.34),
+      0 14px 30px -10px rgba(0, 0, 0, 0.65);
   }
 }
 @media (max-width: 600px) {

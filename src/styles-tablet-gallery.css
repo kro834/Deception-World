@@ -3,7 +3,12 @@
 @media (min-width: 560px) and (max-width: 1100px) and (min-height: 320px) and (max-height: 650px) and (orientation: landscape) and (max-aspect-ratio: 2 / 1) {
   html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-shell {
     padding: 12px;
-    box-shadow: 0 20px 50px rgb(0 0 0 / 70%);
+    background:
+      radial-gradient(ellipse 70% 44% at 50% -6%, rgb(246 220 170 / 0.12), transparent 66%),
+      linear-gradient(180deg, #0d1420 0%, #070b12 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 252 242 / 0.24),
+      0 22px 54px rgb(0 0 0 / 76%);
   }
 
   html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-header {
@@ -13,6 +18,7 @@
     max-height: 30dvh;
     gap: 0 8px;
     padding-bottom: 8px;
+    border-bottom: 1px solid rgb(238 212 162 / 0.34);
   }
 
   html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-tools:not([open]) {
@@ -26,7 +32,7 @@
     grid-column: 3;
     grid-row: 1 / span 2;
     order: 2;
-    border-radius: 4px;
+    border-radius: 3px;
   }
 
   html[data-family="gallery"] .gallery-page .gallery-viewer .gallery-viewer-tools[open] {

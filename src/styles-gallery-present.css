@@ -17,16 +17,16 @@ html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] 
   --gallery-rule: rgb(232 208 164 / 22%);
   --gallery-rule-cool: rgb(158 232 250 / 22%);
   --gallery-console-plate:
-    linear-gradient(180deg, rgb(255 251 242 / 7%), transparent 36%),
-    radial-gradient(ellipse 84% 58% at 50% -6%, rgb(242 218 172 / 10%), transparent 68%),
-    radial-gradient(ellipse 72% 48% at 86% 0%, rgb(158 232 250 / 6%), transparent 70%),
-    linear-gradient(180deg, #131c2b 0%, #0b111b 56%, #070b13 100%);
+    linear-gradient(180deg, rgb(255 252 244 / 9%), transparent 36%),
+    radial-gradient(ellipse 84% 58% at 50% -4%, rgb(248 224 176 / 20%), transparent 68%),
+    radial-gradient(ellipse 72% 48% at 86% 0%, rgb(158 232 250 / 12%), transparent 70%),
+    linear-gradient(180deg, #172336 0%, #0d1522 56%, #070b13 100%);
   background:
-    radial-gradient(ellipse 72% 36% at 50% -4%, rgb(244 220 174 / 14%), transparent 70%),
-    radial-gradient(ellipse 50% 36% at 86% 2%, rgb(138 214 242 / 10%), transparent 68%),
-    radial-gradient(ellipse 48% 32% at 14% 5%, rgb(228 198 148 / 8%), transparent 66%),
-    linear-gradient(180deg, #0b1019 0%, #06090f 38%, #04070c 100%);
-  color: #f5f2ea;
+    radial-gradient(ellipse 72% 440px at 38% -2%, rgb(248 218 160 / 26%), transparent 76%),
+    radial-gradient(ellipse 54% 380px at 88% 4%, rgb(138 224 250 / 18%), transparent 70%),
+    radial-gradient(ellipse 48% 340px at 14% 18%, rgb(232 198 142 / 11%), transparent 68%),
+    linear-gradient(180deg, #0f1724 0%, #070c15 38%, #04070d 100%);
+  color: #f8f3e8;
 }
 
 html[data-family="gallery"] .gallery-page[data-gallery-page][data-gallery-page] .gallery-topbar {

@@ -613,25 +613,26 @@ html[data-family="special"]
   gap: 10px;
   margin-top: 14px;
   padding: 8px 14px;
-  border: 1px solid color-mix(in srgb, var(--rxs-load-color, #79e8ff) 48%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rxs-load-color, #79e8ff) 64%, transparent);
   background:
-    linear-gradient(var(--rxs-load-color, #79e8ff), var(--rxs-load-color, #79e8ff)) 0 0 / 10px 1px
+    linear-gradient(var(--rxs-load-color, #79e8ff), var(--rxs-load-color, #79e8ff)) 0 0 / 12px 1.5px
       no-repeat,
-    linear-gradient(var(--rxs-load-color, #79e8ff), var(--rxs-load-color, #79e8ff)) 0 0 / 1px 10px
+    linear-gradient(var(--rxs-load-color, #79e8ff), var(--rxs-load-color, #79e8ff)) 0 0 / 1.5px 12px
       no-repeat,
-    linear-gradient(var(--rxs-load-color, #79e8ff), var(--rxs-load-color, #79e8ff)) 100% 100% /
-      10px 1px no-repeat,
-    linear-gradient(var(--rxs-load-color, #79e8ff), var(--rxs-load-color, #79e8ff)) 100% 100% /
-      1px 10px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 12px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 1.5px 12px no-repeat,
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--rxs-load-color, #79e8ff) 16%, transparent),
-      rgb(4 10 17 / 82%) 78%
+      color-mix(in srgb, var(--rxs-load-color, #79e8ff) 24%, transparent),
+      rgb(242 216 150 / 8%) 54%,
+      rgb(4 10 17 / 88%) 86%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 8px 22px -8px rgb(0 0 0 / 58%);
-  color: #eaf6fa;
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    0 10px 26px -8px rgb(0 0 0 / 72%),
+    0 0 18px -6px color-mix(in srgb, var(--rxs-load-color, #79e8ff) 38%, transparent);
+  color: #f2fbff;
   font: 500 12px / 1.5 var(--dx-body);
 }
 
@@ -647,8 +648,8 @@ html[data-family="special"]
   border-radius: 999px;
   background: var(--rxs-load-color, #79e8ff);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--rxs-load-color, #79e8ff) 26%, transparent),
-    0 0 12px var(--rxs-load-color, #79e8ff);
+    0 0 0 2px color-mix(in srgb, var(--rxs-load-color, #79e8ff) 32%, transparent),
+    0 0 14px var(--rxs-load-color, #79e8ff);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-assembly-controls {
@@ -670,18 +671,20 @@ html[data-family="special"]
   gap: 8px;
   min-height: 44px;
   padding: 10px 18px;
-  border: 1px solid rgb(195 236 246 / 60%);
+  border: 1px solid rgb(164 236 252 / 72%);
   border-radius: 3px;
-  color: #f2f7fb;
+  color: #f4fbff;
   background:
-    linear-gradient(90deg, rgb(121 232 255 / 45%), rgb(242 216 150 / 38%) 55%, transparent) 0 0 /
-      100% 1px no-repeat,
-    linear-gradient(180deg, rgb(121 232 255 / 18%), transparent 62%),
-    #0c1923;
+    linear-gradient(90deg, #ffffff 0 3px, rgb(121 232 255 / 68%) 3px 46%, rgb(242 216 150 / 54%) 74%, transparent)
+      0 0 / 100% 1.5px no-repeat,
+    linear-gradient(180deg, rgb(121 232 255 / 24%), transparent 64%),
+    linear-gradient(160deg, #13283a 0%, #091521 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 rgb(0 0 0 / 48%),
-    0 10px 22px -6px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    inset 0 0 0 1px rgb(121 232 255 / 16%),
+    0 12px 26px -6px rgb(0 0 0 / 68%),
+    0 0 18px -6px rgb(121 232 255 / 28%);
   font: 600 12px / 1.4 var(--dx-display);
   letter-spacing: 0.06em;
   text-decoration: none;
@@ -1487,13 +1490,24 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rzn-movi
   box-sizing: border-box;
   margin: 0;
   padding: 11px 16px 13px;
-  color: #f2f7fb;
-  background: rgb(3 8 15 / 88%);
-  border: 1px solid rgb(var(--rzn-ice) / 34%);
+  color: #f4fbff;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 6%,
+      rgb(var(--rzn-ice) / 72%) 34%,
+      rgb(var(--rzn-gold) / 68%) 66%,
+      transparent 94%
+    )
+      50% 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 80% 70% at 24% 0%, rgb(var(--rzn-ice) / 18%), transparent 72%),
+    linear-gradient(160deg, rgb(8 19 32 / 92%), rgb(3 8 15 / 92%));
+  border: 1px solid rgb(var(--rzn-ice) / 48%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    inset 0 0 0 1px rgb(var(--rzn-gold) / 10%),
-    0 14px 42px rgb(0 0 0 / 54%);
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 0 0 1px rgb(var(--rzn-gold) / 16%),
+    0 18px 46px -8px rgb(0 0 0 / 76%),
+    0 0 26px -8px rgb(var(--rzn-ice) / 30%);
   clip-path: polygon(
     14px 0,
     100% 0,

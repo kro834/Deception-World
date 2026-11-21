@@ -1,20 +1,21 @@
 /* /library — the reference room and the reader's own shelf. Ice on ink with
-   the site prism; gold marks what the reader saved. Text is 12px or more. */
+   bimetallic glass & brass bevels; gold marks what the reader saved. Text is 12px or more. */
 .library-page {
-  --library-ink: #e8f0f5;
-  --library-muted: #aebdca;
-  --library-faint: #8397a8;
-  --library-ice: #7ae8ff;
-  --library-gold: #e6c27f;
-  --library-line: rgb(122 232 255 / 0.16);
-  --library-prism: linear-gradient(90deg, #7ae8ff 0%, #ff5fc8 34%, #ff5cc8 66%, #f0cf86 100%);
+  --library-ink: #eef6fb;
+  --library-muted: #bccdd9;
+  --library-faint: #92a8ba;
+  --library-ice: #8ceeff;
+  --library-gold: #f2cf8d;
+  --library-line: rgb(157 234 250 / 0.24);
+  --library-prism: linear-gradient(90deg, #8ceeff 0%, #6b96ff 34%, #ff5cc8 66%, #f2cf8d 100%);
   --library-hud: "Michroma", "Oxanium", "Helvetica Neue", sans-serif;
   min-height: 100svh;
   padding-bottom: 3rem;
   color: var(--library-ink);
   background:
-    radial-gradient(ellipse at 78% -4%, rgb(122 232 255 / 0.11), transparent 44%),
-    radial-gradient(ellipse at 6% 40%, rgb(240 207 134 / 0.05), transparent 38%), #05090f;
+    radial-gradient(ellipse 74% 44% at 78% -4%, rgb(122 232 255 / 0.16), transparent 68%),
+    radial-gradient(ellipse 54% 38% at 8% 36%, rgb(242 207 141 / 0.09), transparent 66%),
+    linear-gradient(155deg, #040911 0%, #091624 50%, #050b14 100%);
 }
 .library-topbar,
 .library-footer {
@@ -25,6 +26,10 @@
   gap: 1rem;
   padding: 0.9rem max(5vw, 1rem);
   border-bottom: 1px solid var(--library-line);
+  background: linear-gradient(180deg, rgb(4 10 19 / 0.96), rgb(6 14 24 / 0.94));
+  box-shadow:
+    inset 0 1px 0 rgb(240 253 255 / 0.14),
+    inset 0 -1px 0 rgb(242 207 141 / 0.12);
   font-size: 13px;
   letter-spacing: 0.1em;
 }
@@ -78,20 +83,29 @@
 .library-page button {
   min-height: 44px;
   padding: 0.6rem 1rem;
-  border: 1px solid rgb(167 200 214 / 0.3);
+  border: 1px solid rgb(167 214 236 / 0.38);
+  border-bottom-color: rgb(242 207 141 / 0.3);
   border-radius: 3px;
   color: inherit;
-  background: rgb(4 8 14 / 0.6);
+  background:
+    linear-gradient(130deg, rgb(255 255 255 / 0.06) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(16 34 50 / 0.72), rgb(6 14 24 / 0.88));
+  box-shadow: inset 0 1px 0 rgb(240 253 255 / 0.14);
   cursor: pointer;
 }
 .library-page button:hover {
-  border-color: rgb(122 232 255 / 0.55);
-  background: rgb(122 232 255 / 0.08);
+  border-color: rgb(140 238 255 / 0.72);
+  background:
+    linear-gradient(130deg, rgb(255 255 255 / 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, rgb(24 52 74 / 0.84), rgb(9 22 36 / 0.92));
 }
 .library-page button[aria-pressed="true"] {
-  border-color: var(--library-ice);
-  color: #04121a;
-  background: var(--library-ice);
+  border-color: #eefdff;
+  color: #04141e;
+  background: linear-gradient(132deg, #f6feff 0%, var(--library-ice) 68%, #f4da9c 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 8px 20px -8px rgb(122 232 255 / 0.45);
 }
 .library-page button:disabled {
   opacity: 0.5;
@@ -142,9 +156,16 @@
   position: relative;
   margin-bottom: 3rem;
   padding: clamp(1.25rem, 3vw, 2rem);
-  border: 1px solid var(--library-line);
+  border: 1px solid rgb(157 234 250 / 0.34);
   border-radius: 4px;
-  background: linear-gradient(180deg, rgb(122 232 255 / 0.04), transparent 35%), #08101a;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 0.06) 0%, transparent 42%),
+    radial-gradient(ellipse 72% 52% at 86% 0%, rgb(242 207 141 / 0.1), transparent 68%),
+    linear-gradient(150deg, #0d1e2e 0%, #07111c 56%, #0a1826 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 255 / 0.2),
+    inset 0 -1px 0 rgb(242 207 141 / 0.16),
+    0 22px 48px -24px rgb(0 0 0 / 0.82);
 }
 .library-hub::before {
   content: "";
@@ -470,13 +491,23 @@
   align-items: center;
   gap: 1rem;
   padding: 0.3rem 1rem;
-  border: 1px solid rgb(167 200 214 / 0.34);
+  border: 1px solid rgb(164 228 248 / 0.56);
   border-radius: 4px;
-  background: #04080e;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.54) 0%, transparent 16px),
+    linear-gradient(90deg, rgb(140 238 255 / 0.11) 0%, rgb(242 207 141 / 0.05) 54%, transparent 88%),
+    #040b14;
+  box-shadow:
+    inset 0 3px 12px rgb(0 0 0 / 0.7),
+    inset 0 1px 0 rgb(240 253 255 / 0.14),
+    inset 0 -1px 0 rgb(242 207 141 / 0.18);
 }
 .library-search:focus-within {
-  border-color: var(--library-ice);
-  box-shadow: 0 0 0 3px rgb(122 232 255 / 0.14);
+  border-color: #ecfcff;
+  box-shadow:
+    inset 0 3px 12px rgb(0 0 0 / 0.62),
+    0 0 0 2px rgb(140 238 255 / 0.54),
+    0 0 26px -4px rgb(122 232 255 / 0.36);
 }
 .library-search > span {
   color: var(--library-ice);
@@ -562,9 +593,16 @@
   flex-direction: column;
   min-width: 0;
   padding: 1.4rem;
-  border: 1px solid rgb(167 200 214 / 0.18);
+  border: 1px solid rgb(164 222 244 / 0.32);
+  border-bottom-color: rgb(242 207 141 / 0.24);
   border-radius: 4px;
-  background: linear-gradient(140deg, rgb(122 232 255 / 0.045), transparent 50%), #09111a;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 0.06) 0%, transparent 42%),
+    linear-gradient(145deg, rgb(24 48 68 / 0.68), #08121d 56%, #0c1b2a 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(242 253 255 / 0.18),
+    inset 0 -1px 0 rgb(242 207 141 / 0.14),
+    0 18px 40px -22px rgb(0 0 0 / 0.82);
 }
 .library-card-kind {
   margin: 0;

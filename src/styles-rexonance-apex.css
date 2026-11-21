@@ -1477,13 +1477,18 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
   .rxs-comparison
   .rxs-bars {
-  padding: 3px;
-  border: 1px solid rgb(121 232 255 / 24%);
+  padding: 3.5px;
+  border: 1px solid rgb(121 232 255 / 34%);
   border-radius: 3px;
-  background: linear-gradient(180deg, rgb(2 7 14 / 92%), rgb(9 20 32 / 86%));
+  background:
+    linear-gradient(90deg, rgb(121 232 255 / 16%), rgb(242 216 150 / 12%) 50%, rgb(182 163 255 / 16%))
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(2 7 15 / 95%), rgb(10 22 36 / 90%));
   box-shadow:
-    inset 0 1px 3px rgb(0 0 0 / 84%),
-    0 1px 0 rgb(255 255 255 / 10%);
+    inset 0 1.5px 4px rgb(0 0 0 / 88%),
+    inset 0 0 0 1px rgb(121 232 255 / 10%),
+    0 1px 0 rgb(255 255 255 / 14%),
+    0 0 18px -6px rgb(121 232 255 / 22%);
 }
 
 html[data-family="special"]
@@ -1496,19 +1501,23 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
   .rxs-comparison-key
   i.is-rexonance {
-  background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    #88eeff 24%,
-    #b6a3ff 54%,
-    #ff8fd8 78%,
-    #f2d896 95%,
-    #ffffff 100%
-  );
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 88%) 0%, transparent 45%),
+    linear-gradient(
+      90deg,
+      #ffffff 0%,
+      #79e8ff 22%,
+      #b6a3ff 52%,
+      #ff8fd8 76%,
+      #f2d896 93%,
+      #ffffff 100%
+    );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 82%),
-    0 0 14px rgb(121 232 255 / 54%),
-    0 0 26px -4px rgb(255 143 216 / 40%);
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(0 38 64 / 44%),
+    0 0 16px rgb(121 232 255 / 64%),
+    0 0 28px -3px rgb(255 143 216 / 46%),
+    0 0 38px -8px rgb(242 216 150 / 36%);
 }
 
 html[data-family="special"]
@@ -1521,15 +1530,17 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
   .rxs-comparison-key
   i.is-extreme {
-  background: linear-gradient(
-    90deg,
-    rgb(154 192 210 / 56%),
-    rgb(206 232 244 / 76%) 86%,
-    rgb(255 255 255 / 88%) 100%
-  );
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 36%) 0%, transparent 48%),
+    linear-gradient(
+      90deg,
+      rgb(138 182 204 / 62%),
+      rgb(198 228 242 / 82%) 84%,
+      rgb(255 255 255 / 92%) 100%
+    );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 38%),
-    0 0 8px rgb(121 232 255 / 18%);
+    inset 0 1px 0 rgb(255 255 255 / 46%),
+    0 0 10px rgb(121 232 255 / 24%);
 }
 
 html[data-family="special"]
@@ -1537,18 +1548,18 @@ html[data-family="special"]
   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
   .rxs-comparison-metrics
   > article {
-  padding-inline: 14px 10px;
-  border-bottom: 1px solid rgb(121 232 255 / 22%);
+  padding-inline: 16px 12px;
+  border-bottom: 1px solid rgb(121 232 255 / 26%);
   background-image:
-    linear-gradient(180deg, #79e8ff, #f2d896 76%, transparent),
-    radial-gradient(46% 90% at 88% 42%, rgb(121 232 255 / 10%), transparent 72%),
-    linear-gradient(90deg, rgb(121 232 255 / 8%), transparent 74%);
+    linear-gradient(180deg, #ffffff 0 3px, #79e8ff 3px 48%, #f2d896 84%, transparent),
+    radial-gradient(48% 92% at 88% 42%, rgb(121 232 255 / 13%), transparent 74%),
+    linear-gradient(90deg, rgb(121 232 255 / 10%), transparent 76%);
   background-position:
-    0 14%,
+    0 12%,
     0 0,
     0 0;
   background-size:
-    2.5px 72%,
+    3px 76%,
     100% 100%,
     100% 100%;
   background-repeat: no-repeat;
@@ -1560,7 +1571,43 @@ html[data-family="special"]
   .rxs-comparison-result
   em {
   color: #f6dfa4;
-  text-shadow: 0 0 12px rgb(242 216 150 / 28%);
+  text-shadow: 0 0 12px rgb(242 216 150 / 34%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  .rxs-processing-comparison
+  > div
+  > section {
+  padding: clamp(14px, 1.8vw, 20px);
+  border: 1px solid rgb(121 232 255 / 24%);
+  background:
+    linear-gradient(90deg, rgb(121 232 255 / 62%) 0 36%, transparent 88%) 0 0 / 100% 1.5px
+      no-repeat,
+    linear-gradient(165deg, rgb(10 21 34 / 86%), rgb(4 10 18 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    inset 0 -1px 0 rgb(0 0 0 / 72%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  .rxs-processing-comparison
+  > div
+  > section:last-child {
+  border-color: rgb(242 216 150 / 42%);
+  background:
+    linear-gradient(90deg, #ffffff 0 4px, #f2d896 4px 48%, #79e8ff 84%, transparent) 0 0 / 100%
+      2px no-repeat,
+    radial-gradient(76% 68% at 24% 0%, rgb(242 216 150 / 16%), rgb(121 232 255 / 8%) 54%, transparent 76%),
+    linear-gradient(165deg, rgb(16 26 40 / 92%), rgb(6 12 22 / 95%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 76%),
+    inset 0 0 0 1px rgb(242 216 150 / 18%),
+    0 14px 32px -18px rgb(0 0 0 / 80%);
 }
 
 /* 3A. 02 P14: specimen frame, telemetry cells & calibration rows */
@@ -1570,13 +1617,13 @@ html[data-family="special"]
   > #p14
   .rxs-p14-overview
   > figure {
-  border: 1px solid rgb(121 232 255 / 44%);
+  border: 1px solid rgb(121 232 255 / 48%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 34%),
-    inset 0 0 0 1px rgb(121 232 255 / 20%),
-    0 0 0 1px rgb(242 216 150 / 16%),
-    0 26px 56px -24px rgb(0 0 0 / 88%),
-    0 0 36px -8px rgb(121 232 255 / 28%);
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 0 0 1px rgb(121 232 255 / 24%),
+    0 0 0 1px rgb(242 216 150 / 18%),
+    0 28px 60px -24px rgb(0 0 0 / 90%),
+    0 0 40px -8px rgb(121 232 255 / 32%);
 }
 
 html[data-family="special"]
@@ -1585,13 +1632,13 @@ html[data-family="special"]
   > #p14
   .rxs-p14-copy
   > dl {
-  border-block: 1px solid rgb(121 232 255 / 32%);
+  border-block: 1px solid rgb(121 232 255 / 36%);
   background:
-    radial-gradient(ellipse 80% 70% at 50% 50%, rgb(121 232 255 / 9%), transparent 74%),
-    linear-gradient(180deg, rgb(9 20 32 / 76%), rgb(4 10 18 / 84%));
+    radial-gradient(ellipse 82% 74% at 50% 50%, rgb(121 232 255 / 12%), transparent 74%),
+    linear-gradient(180deg, rgb(10 22 36 / 84%), rgb(4 10 18 / 90%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    inset 0 -1px 0 rgb(0 0 0 / 68%);
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 72%);
 }
 
 html[data-family="special"]
@@ -1603,9 +1650,22 @@ html[data-family="special"]
   > div {
   padding: 16px 14px;
   background:
-    linear-gradient(90deg, #ffffff 0 3px, var(--rxa-gold) 3px 30px) 14px 0 / 30px 2px no-repeat,
-    linear-gradient(90deg, var(--rxa-ice), var(--rxa-ice)) 48px 0 / 8px 2px no-repeat,
-    radial-gradient(75% 70% at 32% 65%, rgb(121 232 255 / 14%), transparent 74%);
+    linear-gradient(90deg, #ffffff 0 3px, var(--rxa-gold) 3px 32px) 14px 0 / 32px 2px no-repeat,
+    linear-gradient(90deg, var(--rxa-ice), var(--rxa-ice)) 50px 0 / 10px 2px no-repeat,
+    radial-gradient(78% 72% at 32% 65%, rgb(121 232 255 / 16%), transparent 74%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #p14
+  .rxs-p14-comparator
+  > header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgb(121 232 255 / 24%);
+  background:
+    linear-gradient(90deg, #ffffff 0 4px, #79e8ff 4px 36%, #f2d896 74%, transparent) 0 100% / 100%
+      1.5px no-repeat;
 }
 
 html[data-family="special"]
@@ -1614,21 +1674,39 @@ html[data-family="special"]
   > #p14
   .rxs-p14-metrics
   > article {
-  padding-inline: 14px 10px;
-  border-bottom: 1px solid rgb(121 232 255 / 20%);
+  padding-inline: 16px 12px;
+  border-bottom: 1px solid rgb(121 232 255 / 24%);
   background-image:
-    linear-gradient(180deg, #79e8ff, #b6a3ff 54%, #f2d896),
-    radial-gradient(38% 88% at 92% 50%, rgb(121 232 255 / 11%), transparent 74%),
-    linear-gradient(90deg, rgb(121 232 255 / 7%), transparent 76%);
+    linear-gradient(180deg, #ffffff 0 3px, #79e8ff 3px 48%, #b6a3ff 74%, #f2d896),
+    radial-gradient(42% 90% at 90% 50%, rgb(121 232 255 / 14%), rgb(242 216 150 / 5%) 54%, transparent 76%),
+    linear-gradient(90deg, rgb(121 232 255 / 9%), transparent 78%);
   background-position:
-    0 15%,
+    0 13%,
     0 0,
     0 0;
   background-size:
-    2px 70%,
+    2.5px 74%,
     100% 100%,
     100% 100%;
   background-repeat: no-repeat;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #p14
+  .rxs-p14-values
+  > span:last-child {
+  padding: 4px 10px;
+  border: 1px solid rgb(121 232 255 / 28%);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, #ffffff 0 3px, #79e8ff 3px 54%, #f2d896 92%, transparent) 0 0 / 100% 1px
+      no-repeat,
+    radial-gradient(88% 92% at 50% 0%, rgb(121 232 255 / 16%), rgb(242 216 150 / 6%) 62%, rgb(5 13 24 / 72%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 -1px 0 rgb(0 0 0 / 64%);
 }
 
 html[data-family="special"]
@@ -1639,15 +1717,163 @@ html[data-family="special"]
   > article
   > p
   > b {
-  padding: 2px 8px;
-  border: 1px solid rgb(121 232 255 / 34%);
+  padding: 2.5px 9px;
+  border: 1px solid rgb(121 232 255 / 42%);
   border-radius: 2px;
-  background: linear-gradient(90deg, rgb(121 232 255 / 14%), rgb(242 216 150 / 8%));
-  color: #9cf1ff;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 16%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, transparent 45%),
+    linear-gradient(90deg, rgb(121 232 255 / 20%), rgb(242 216 150 / 12%));
+  color: #b4f5ff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    0 0 14px -4px rgb(121 232 255 / 32%);
 }
 
-/* 3B. 04 Three Forms & 05 Trinity resonance plates and dual processor cores */
+/* 3B. 03 Suit-up bands, 04 Three Forms & 05 Trinity resonance plates and dual processor cores */
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > :is(.rxs-assembly-heading, .rxs-assembly-footer) {
+  border-block: 1px solid rgb(121 232 255 / 34%);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 4%,
+      rgb(121 232 255 / 72%) 28%,
+      rgb(242 216 150 / 76%) 52%,
+      rgb(255 143 216 / 62%) 76%,
+      transparent 96%
+    )
+      0 0 / 100% 1.5px no-repeat,
+    linear-gradient(
+      90deg,
+      var(--rxt-ice, #79e8ff),
+      rgb(255 143 216 / 68%) 42%,
+      rgb(242 216 150 / 54%) 74%,
+      transparent 92%
+    )
+      0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 72% 80% at 32% 50%, rgb(121 232 255 / 14%), transparent 72%),
+    linear-gradient(180deg, rgb(11 22 36 / 95%), rgb(5 11 20 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 76%),
+    0 20px 48px -24px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #stages
+  .rxs-stage-panel
+  > figure {
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 48%, rgb(121 232 255 / 26%));
+  background:
+    linear-gradient(
+      90deg,
+      #ffffff 0 4px,
+      var(--rxs-stage-accent, #63e2ff) 4px 52%,
+      #f2d896 86%,
+      transparent
+    )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--rxs-stage-accent, #63e2ff), var(--rxs-stage-accent, #63e2ff)) 0 0 / 16px
+      1.5px no-repeat,
+    linear-gradient(var(--rxs-stage-accent, #63e2ff), var(--rxs-stage-accent, #63e2ff)) 0 0 / 1.5px
+      16px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 16px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 1.5px 16px no-repeat,
+    radial-gradient(
+      62% 30% at 50% 100%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 32%, transparent),
+      transparent 74%
+    ),
+    radial-gradient(
+      72% 64% at 50% 40%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 18%, rgb(182 163 255 / 12%)),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(10 20 34 / 76%), rgb(3 7 14 / 95%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 24%, transparent),
+    0 28px 64px -26px rgb(0 0 0 / 90%),
+    0 0 42px -12px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 34%, transparent);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #stages
+  .rxs-stage-panel
+  > figure
+  > span[aria-hidden] {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--rxs-stage-accent, #63e2ff) 32%,
+    #ffffff 50%,
+    var(--rxs-stage-accent, #63e2ff) 68%,
+    transparent
+  );
+  box-shadow: 0 0 18px var(--rxs-stage-accent, #63e2ff);
+  opacity: 0.96;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #stages
+  .rxs-stage-panel
+  > div
+  > ul
+  > li {
+  border: 1px solid color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 36%, rgb(121 232 255 / 18%));
+  background:
+    linear-gradient(180deg, #ffffff 0 3px, var(--rxs-stage-accent, #63e2ff) 3px 100%) 0 0 / 2.5px
+      100% no-repeat,
+    radial-gradient(
+      90% 100% at 15% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 18%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(160deg, rgb(12 24 38 / 88%), rgb(4 10 18 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(0 0 0 / 68%),
+    0 10px 24px -12px rgb(0 0 0 / 76%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #stages
+  :is(.rxe-form-status, .rxe-form-comparison) {
+  border: 1px solid rgb(121 232 255 / 34%);
+  background:
+    var(--rxl-corners),
+    linear-gradient(
+      90deg,
+      #ffffff 0 4px,
+      var(--rxs-stage-accent, #63e2ff) 4px 44%,
+      #f2d896 78%,
+      transparent
+    )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      ellipse 72% 54% at 24% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 14%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(165deg, rgb(11 22 36 / 94%), rgb(4 10 18 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -1px 0 rgb(0 0 0 / 76%),
+    inset 0 0 0 1px rgb(121 232 255 / 16%),
+    0 26px 58px -28px rgb(0 0 0 / 88%);
+}
+
 html[data-family="special"]
   body
   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
@@ -1679,15 +1905,16 @@ html[data-family="special"]
   .rxe-comparison-card {
   background:
     radial-gradient(
-      82% 44% at 50% 0%,
-      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 16%, transparent),
-      transparent 74%
+      84% 48% at 50% 0%,
+      color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 20%, transparent),
+      transparent 76%
     ),
-    linear-gradient(180deg, rgb(11 22 35 / 72%), rgb(4 9 16 / 90%));
+    linear-gradient(180deg, rgb(12 24 38 / 78%), rgb(4 9 16 / 92%));
   box-shadow:
     inset 0 2.5px 0 var(--rxs-stage-accent, #63e2ff),
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 22%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 0 0 1px color-mix(in srgb, var(--rxs-stage-accent, #63e2ff) 26%, transparent),
+    0 18px 38px -20px rgb(0 0 0 / 80%);
 }
 
 html[data-family="special"]
@@ -1785,20 +2012,69 @@ html[data-family="special"]
   body
   #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
   > #system
+  > .rxs-specs {
+  border: 1px solid rgb(121 232 255 / 38%);
+  background:
+    var(--rxl-corners),
+    linear-gradient(
+      90deg,
+      transparent 6%,
+      rgb(121 232 255 / 72%) 32%,
+      rgb(242 216 150 / 78%) 52%,
+      rgb(182 163 255 / 64%) 72%,
+      transparent 94%
+    )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 68% 58% at 26% 50%, rgb(121 232 255 / 12%), transparent 70%),
+    radial-gradient(ellipse 68% 58% at 74% 50%, rgb(242 216 150 / 12%), transparent 70%),
+    linear-gradient(165deg, rgb(10 21 34 / 94%), rgb(3 8 15 / 97%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(121 232 255 / 16%),
+    0 30px 68px -30px rgb(0 0 0 / 90%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #system
+  > .rxs-specs
+  > i {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    #79e8ff 24%,
+    #ffffff 50%,
+    #f2d896 76%,
+    transparent
+  );
+  box-shadow: 0 0 12px rgb(121 232 255 / 42%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
+  > #system
   > .rxs-specs
   > div {
   padding: clamp(18px, 2.4vw, 28px);
-  border: 1px solid rgb(121 232 255 / 32%);
+  border: 1px solid rgb(121 232 255 / 36%);
   background:
-    linear-gradient(90deg, #ffffff 0 4px, #79e8ff 4px 44%, #f2d896 82%, transparent) 0 0 / 100% 2px
-      no-repeat,
-    radial-gradient(64% 72% at 28% 55%, rgb(121 232 255 / 16%), transparent 74%),
-    linear-gradient(160deg, rgb(12 24 38 / 92%), rgb(4 10 18 / 95%));
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 14px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 0 0 / 1.5px 14px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 14px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 100% 100% / 1.5px 14px no-repeat,
+    linear-gradient(90deg, #ffffff 0 4px, #79e8ff 4px 46%, #f2d896 84%, transparent) 0 0 / 100%
+      2.5px no-repeat,
+    radial-gradient(66% 76% at 28% 55%, rgb(121 232 255 / 20%), transparent 74%),
+    linear-gradient(160deg, rgb(13 26 42 / 94%), rgb(4 10 18 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 rgb(0 0 0 / 76%),
-    inset 0 0 0 1px rgb(121 232 255 / 14%),
-    0 18px 40px -22px rgb(0 0 0 / 82%);
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(121 232 255 / 18%),
+    0 20px 44px -22px rgb(0 0 0 / 84%),
+    0 0 28px -10px rgb(121 232 255 / 24%);
 }
 
 html[data-family="special"]
@@ -1807,12 +2083,22 @@ html[data-family="special"]
   > #system
   > .rxs-specs
   > div:last-child {
-  border-color: rgb(242 216 150 / 34%);
+  border-color: rgb(242 216 150 / 40%);
   background:
-    linear-gradient(90deg, #ffffff 0 4px, #f2d896 4px 46%, #79e8ff 84%, transparent) 0 0 / 100% 2px
-      no-repeat,
-    radial-gradient(64% 72% at 28% 55%, rgb(242 216 150 / 15%), rgb(121 232 255 / 8%) 52%, transparent 74%),
-    linear-gradient(160deg, rgb(18 23 36 / 92%), rgb(5 10 18 / 95%));
+    linear-gradient(#f2d896, #f2d896) 0 0 / 14px 1.5px no-repeat,
+    linear-gradient(#f2d896, #f2d896) 0 0 / 1.5px 14px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 14px 1.5px no-repeat,
+    linear-gradient(#79e8ff, #79e8ff) 100% 100% / 1.5px 14px no-repeat,
+    linear-gradient(90deg, #ffffff 0 4px, #f2d896 4px 48%, #79e8ff 86%, transparent) 0 0 / 100%
+      2.5px no-repeat,
+    radial-gradient(66% 76% at 28% 55%, rgb(242 216 150 / 18%), rgb(121 232 255 / 9%) 52%, transparent 74%),
+    linear-gradient(160deg, rgb(19 24 38 / 94%), rgb(5 10 18 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(0 0 0 / 78%),
+    inset 0 0 0 1px rgb(242 216 150 / 20%),
+    0 20px 44px -22px rgb(0 0 0 / 84%),
+    0 0 28px -10px rgb(242 216 150 / 22%);
 }
 
 /* ================================================================
@@ -1839,17 +2125,27 @@ html[data-family="special"]
       .rxs-headline-metrics > article,
       .rxs-comparison,
       .rxs-p14-comparator,
+      .rxs-p14-comparator > header,
       .rxs-comparison-selector select,
       .rxs-comparison .rxs-bars,
       .rxs-comparison-metrics > article,
+      .rxs-processing-comparison > div > section,
       .rxs-p14-overview > figure,
       .rxs-p14-copy > dl,
       .rxs-p14-copy > dl > div,
       .rxs-p14-metrics > article,
+      .rxs-p14-values > span:last-child,
       .rxs-p14-metrics > article > p > b,
+      .rxs-assembly-heading,
+      .rxs-assembly-footer,
+      .rxs-stage-panel > figure,
+      .rxs-stage-panel > div > ul > li,
+      .rxe-form-status,
+      .rxe-form-comparison,
       .rxe-comparison-card,
       .rxs-system-grid,
       .rxs-system-grid > article,
+      .rxs-specs,
       .rxs-specs > div
     ) {
     background: Canvas;
@@ -1862,7 +2158,13 @@ html[data-family="special"]
   html[data-family="special"]
     body
     #top.rxs-page.rxs-page.rxs-page.rxs-rexonance-page[data-command-special]
-    :is(.rxs-bars i.is-rexonance, .rxs-bars i.is-extreme, .rxs-comparison-key i) {
+    :is(
+      .rxs-bars i.is-rexonance,
+      .rxs-bars i.is-extreme,
+      .rxs-comparison-key i,
+      .rxs-stage-panel > figure > span[aria-hidden],
+      .rxs-specs > i
+    ) {
     background: CanvasText;
     box-shadow: none;
   }

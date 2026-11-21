@@ -1,5 +1,7 @@
 /* The five portraits are a single plate. The form control below keeps the
-   common glass rail, the same five labels and its original interaction area. */
+   common glass rail, the same five labels and its original interaction area,
+   upgraded into a multi-layer titanium-glass exhibition vitrine with a divine
+   celestial sanctuary stage for Ultra. */
 #top.ffs-page > :is(#stages, #theories) > .rxs-section-heading {
   grid-template-columns: auto minmax(0, 1fr) minmax(0, .95fr);
   grid-template-rows: auto;
@@ -7,8 +9,8 @@
   row-gap: 12px;
   margin-bottom: clamp(20px, 2.7vw, 42px);
 }
-#top.ffs-page > :is(#stages,#theories) > .rxs-section-heading::before { grid-area: 1 / 1; }
-#top.ffs-page > :is(#stages,#theories) > .rxs-section-heading > h2 { grid-area: 1 / 2; }
+#top.ffs-page > :is(#stages, #theories) > .rxs-section-heading::before { grid-area: 1 / 1; }
+#top.ffs-page > :is(#stages, #theories) > .rxs-section-heading > h2 { grid-area: 1 / 2; }
 #top.ffs-page .ffs-exhibit-forms,
 #top.ffs-page .ffs-exhibit-core {
   grid-column: 3;
@@ -22,14 +24,19 @@
 #top.ffs-page .ffs-exhibit-forms {
   height: auto;
   aspect-ratio: 5 / 1;
-  clip-path: polygon(2.3% 0,100% 0,97.7% 100%,0 100%);
+  clip-path: polygon(2.3% 0, 100% 0, 97.7% 100%, 0 100%);
+  filter:
+    drop-shadow(0 12px 28px rgb(0 4 18 / 74%))
+    drop-shadow(0 0 20px rgb(127 230 255 / 26%));
 }
 #top.ffs-page .ffs-exhibit-core {
   position: relative;
   isolation: isolate;
   max-width: 600px;
   aspect-ratio: 700 / 288;
-  background: radial-gradient(ellipse at 48% 56%, #4288af27, transparent 52%);
+  background:
+    radial-gradient(ellipse 66% 62% at 48% 54%, rgb(92 178 255 / 32%), rgb(162 114 255 / 18%) 46%, transparent 72%),
+    radial-gradient(ellipse 36% 34% at 50% 42%, rgb(255 215 122 / 16%), transparent 66%);
 }
 #top.ffs-page .ffs-exhibit-core img {
   position: absolute;
@@ -37,47 +44,178 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  filter: drop-shadow(0 0 24px rgb(127 230 255 / 32%));
 }
 #top.ffs-page .ffs-exhibit-core::before,
 #top.ffs-page .ffs-exhibit-core::after {
   content: "";
   position: absolute;
   inset: 27% 7% 24%;
-  border: 1px solid #87dffb70;
-  border-left-color: #87dffb16;
+  border: 1px solid rgb(138 232 255 / 62%);
+  border-left-color: rgb(138 232 255 / 16%);
   border-radius: 50%;
+  box-shadow: 0 0 18px rgb(127 230 255 / 22%);
   transform: rotate(-9deg);
 }
 #top.ffs-page .ffs-exhibit-core::after {
   inset: 23% 12% 22%;
-  border-color: #d4b18868 #b194d219 #b194d26b #d4b18824;
+  border-color: rgb(255 215 122 / 64%) rgb(201 155 255 / 18%) rgb(201 155 255 / 56%) rgb(255 215 122 / 22%);
+  box-shadow: 0 0 22px rgb(255 215 122 / 18%);
   transform: rotate(14deg);
 }
+
+/* Luminous Form Switcher Tabs across #suitup and #stages */
+#top.ffs-page .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs,
+#top.ffs-page .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  border-radius: 6px !important;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 12%) 0%, rgb(255 255 255 / 2%) 36%, rgb(2 6 18 / 48%) 100%),
+    radial-gradient(ellipse 84% 120% at 50% 108%, rgb(127 230 255 / 18%), rgb(192 142 255 / 12%) 56%, transparent 78%),
+    rgb(7 14 34) !important;
+  box-shadow:
+    inset 0 0 0 1px rgb(138 232 255 / 38%),
+    inset 0 1px 0 rgb(242 252 255 / 26%),
+    inset 0 -1px 0 rgb(2 6 18 / 88%),
+    inset 0 4px 12px -4px rgb(0 4 16 / 74%),
+    0 16px 36px -14px rgb(0 4 18 / 86%),
+    0 0 28px -10px rgb(127 230 255 / 24%) !important;
+}
+#top.ffs-page .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
+  clip-path: inset(0 round 6px) !important;
+}
+#top.ffs-page .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
+  background:
+    radial-gradient(ellipse 92% 58% at 28% 0%, rgb(255 255 255 / 42%), transparent 58%),
+    radial-gradient(ellipse 88% 72% at 50% 108%, rgb(127 230 255 / 58%), rgb(201 155 255 / 26%) 54%, transparent 74%),
+    linear-gradient(180deg, rgb(127 230 255 / 42%) 0%, rgb(104 166 255 / 20%) 52%, rgb(201 155 255 / 30%) 100%) !important;
+  box-shadow:
+    inset 0 -2px 0 #9cf1ff,
+    inset 0 0 0 1px rgb(196 246 255 / 82%),
+    inset 0 1px 0 rgb(255 255 255 / 62%),
+    inset 0 0 22px -2px rgb(127 230 255 / 44%),
+    0 6px 22px -4px rgb(127 230 255 / 54%),
+    0 0 16px -2px rgb(201 155 255 / 34%) !important;
+}
+#top.ffs-page .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"][aria-selected="true"] span {
+  color: #ffffff;
+  text-shadow:
+    0 1px 2px rgb(2 6 18 / 86%),
+    0 0 14px rgb(127 230 255 / 68%),
+    0 0 24px rgb(255 215 122 / 28%);
+}
+
 #top.ffs-page > #stages .rxs-stage-switcher {
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
+
+/* Multi-layer titanium-glass form exhibition stage */
 #top.ffs-page > #stages #ffs-stage-panel {
-  margin: clamp(14px, 1.6vw, 23px) auto 0;
+  position: relative;
+  margin: clamp(16px, 1.8vw, 26px) auto 0;
   padding: 0;
   gap: 0;
   overflow: hidden;
   clip-path: none;
-  border-radius: 0;
-  border: 1px solid color-mix(in srgb, var(--ffs-accent) 25%, #28323c);
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 44%, rgb(138 232 255 / 26%));
+  border-top: 2px solid color-mix(in srgb, var(--ffs-accent) 88%, #ffffff);
   background:
-    radial-gradient(ellipse at 65% 10%,color-mix(in srgb, var(--ffs-accent) 10%, transparent),transparent 64%),
-    #0a101a;
-  box-shadow: none;
+    radial-gradient(ellipse 74% 64% at 74% 38%, color-mix(in srgb, var(--ffs-accent) 26%, transparent), transparent 64%),
+    radial-gradient(ellipse 60% 54% at 14% 12%, color-mix(in srgb, var(--ffs-accent) 16%, transparent), transparent 60%),
+    radial-gradient(ellipse 56% 50% at 88% 92%, rgb(168 120 255 / 16%), transparent 64%),
+    linear-gradient(156deg, rgb(14 26 58 / 96%) 0%, rgb(8 15 36 / 98%) 54%, rgb(4 9 22 / 99%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(242 252 255 / 34%),
+    inset 0 0 0 1px color-mix(in srgb, var(--ffs-accent) 22%, transparent),
+    0 28px 72px -20px rgb(0 4 18 / 92%),
+    0 0 52px -14px color-mix(in srgb, var(--ffs-accent) 36%, transparent);
+}
+#top.ffs-page > #stages #ffs-stage-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  z-index: 3;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ffs-accent) 88%, white),
+    #7fe6ff 34%,
+    #c99bff 68%,
+    #ffd77a 94%,
+    transparent
+  );
+  box-shadow: 0 0 20px color-mix(in srgb, var(--ffs-accent) 68%, transparent);
+  pointer-events: none;
 }
 #top.ffs-page > #stages #ffs-stage-panel > figure {
   min-width: 0;
   margin: 0;
   border: 0;
+  border-inline-start: 1px solid color-mix(in srgb, var(--ffs-accent) 26%, rgb(138 232 255 / 16%));
   border-radius: 0;
+  background:
+    radial-gradient(ellipse 72% 62% at 50% 42%, color-mix(in srgb, var(--ffs-accent) 24%, transparent), transparent 68%),
+    radial-gradient(ellipse 68% 30% at 50% 98%, color-mix(in srgb, var(--ffs-accent) 22%, transparent), transparent 72%),
+    linear-gradient(180deg, rgb(8 16 38 / 86%), rgb(4 8 20 / 96%));
+  box-shadow:
+    inset 0 0 42px rgb(2 6 18 / 72%),
+    inset 0 1px 0 rgb(242 252 255 / 22%);
 }
+
+/* Divine Ultra Special Exhibition Stage: celestial white-sapphire-gold aura
+   and double-matted museum framing when Ultra is selected */
+#top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) {
+  border-color: rgb(255 224 148 / 68%);
+  border-top-color: #fff6dc;
+  background:
+    radial-gradient(ellipse 56% 62% at 74% 38%, rgb(245 253 255 / 24%), rgb(140 236 255 / 28%) 34%, rgb(255 220 138 / 18%) 56%, transparent 76%),
+    radial-gradient(ellipse 50% 46% at 74% 16%, rgb(255 226 150 / 26%), transparent 66%),
+    radial-gradient(ellipse 64% 58% at 14% 14%, rgb(156 241 255 / 20%), transparent 62%),
+    radial-gradient(ellipse 58% 54% at 86% 90%, rgb(198 152 255 / 24%), transparent 66%),
+    linear-gradient(150deg, #101e46 0%, #091330 52%, #050a1c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 58%),
+    inset 0 0 0 1px rgb(156 241 255 / 34%),
+    inset 0 0 54px rgb(156 241 255 / 16%),
+    0 34px 86px -16px rgb(0 4 18 / 96%),
+    0 0 76px -12px rgb(156 241 255 / 44%),
+    0 0 48px -10px rgb(255 222 138 / 34%);
+}
+#top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"])::before {
+  height: 3px;
+  background: linear-gradient(90deg, #ffffff, #9cf1ff 28%, #ffe49e 58%, #d6b6ff 84%, #ffffff);
+  box-shadow:
+    0 0 24px rgb(156 241 255 / 82%),
+    0 0 40px rgb(255 224 148 / 54%);
+}
+#top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) > figure {
+  border-inline-start-color: rgb(255 224 148 / 46%);
+  background:
+    radial-gradient(ellipse 68% 58% at 50% 40%, rgb(245 253 255 / 26%), rgb(148 236 255 / 24%) 42%, rgb(255 220 138 / 14%) 64%, transparent 78%),
+    radial-gradient(ellipse 62% 30% at 50% 96%, rgb(255 220 138 / 28%), rgb(156 241 255 / 18%) 50%, transparent 74%),
+    linear-gradient(180deg, #0b1738, #050b1f);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 244 214 / 24%),
+    inset 0 0 48px rgb(156 241 255 / 18%);
+}
+#top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) .ffs-stage-copy h3 {
+  color: #ffffff;
+  text-shadow:
+    0 2px 6px rgb(2 6 18 / 86%),
+    0 0 32px rgb(156 241 255 / 72%),
+    0 0 58px rgb(255 224 148 / 44%);
+}
+#top.ffs-page > #stages #ffs-stage-panel:has(> figure[data-art^="ultra"]) .ffs-stage-copy h3::after {
+  width: 1.8em;
+  background: linear-gradient(90deg, #ffffff, #9cf1ff 42%, #ffd77a);
+  box-shadow:
+    0 0 18px rgb(156 241 255 / 78%),
+    0 0 28px rgb(255 215 122 / 48%);
+}
+
 #top.ffs-page > #stages #ffs-stage-panel > .ffs-stage-copy {
   align-self: start;
   min-width: 0;
@@ -86,31 +224,54 @@
 #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy h3 {
   width: fit-content;
   margin: 0 0 .62em;
+  color: #f8fbff;
   font-size: clamp(30px, 3.25vw, 58px);
   font-weight: 800;
   letter-spacing: .015em;
-  text-shadow: none;
+  text-shadow:
+    0 2px 6px rgb(2 6 18 / 82%),
+    0 0 28px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
 }
 #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy h3::after {
   display: block;
-  width: 1.1em;
+  width: 1.4em;
   height: 3px;
   margin-top: .43em;
   content: "";
-  background: var(--ffs-accent);
+  background: linear-gradient(90deg, #ffffff, var(--ffs-accent) 44%, #ffd77a);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--ffs-accent) 62%, transparent);
 }
 #top.ffs-page > #stages #ffs-stage-panel .ffs-stage-copy p {
   max-width: 36em;
-  color: #e2e8f0;
+  color: #e4edf8;
   font-size: clamp(15px, 1.07vw, 18px);
   line-height: 1.95;
 }
 #top.ffs-page > #stages .ffs-form-code {
-  top: .25em;
+  top: .22em;
   right: .12em;
-  opacity: .17;
-  filter: none;
+  opacity: .28;
+  -webkit-text-stroke: 1.25px color-mix(in srgb, var(--ffs-accent) 72%, white);
+  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--ffs-accent) 44%, transparent));
 }
+
+/* Comparison drawer titanium-glass reinforcement */
+#top.ffs-page > #stages .ffs-form-comparison {
+  border: 1px solid rgb(138 232 255 / 34%);
+  border-top: 2px solid rgb(127 230 255 / 72%);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse 76% 56% at 14% 0%, rgb(127 230 255 / 16%), transparent 60%),
+    radial-gradient(ellipse 68% 52% at 90% 100%, rgb(192 142 255 / 14%), transparent 62%),
+    linear-gradient(164deg, rgb(14 26 58 / 94%), rgb(6 12 28 / 97%));
+  box-shadow:
+    inset 0 1px 0 rgb(240 252 255 / 26%),
+    0 22px 54px -20px rgb(0 4 18 / 88%);
+}
+#top.ffs-page > #stages .ffs-comparison-card {
+  border-radius: 8px;
+}
+
 @media (min-width: 901px) {
   #top.ffs-page > #stages #ffs-stage-panel {
     grid-template-columns: minmax(0, .98fr) minmax(0, 1.02fr);
@@ -125,156 +286,196 @@
   }
 }
 
-/* Numerals stay on a common baseline with the mechanism titles. Paragraphs
-   read as a sequence of sections, with each source document's own headings. */
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles {
+/* Numerals stay on a common baseline with the mechanism titles inside
+   sculpted obsidian-sapphire titanium-glass editorial plates. */
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles {
   grid-template-columns: minmax(0, 1fr);
-  gap: 0;
+  gap: 14px;
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article {
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article {
   display: grid;
-  grid-template-columns: 3.4rem minmax(0,.80fr) minmax(0,1.55fr);
+  grid-template-columns: 3.6rem minmax(0, .80fr) minmax(0, 1.55fr);
   grid-template-rows: auto;
   align-content: start;
   align-items: start;
   column-gap: clamp(16px, 3.1vw, 54px);
   row-gap: 0;
-  padding: clamp(25px, 3.8vw, 54px) 0;
-  border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--ffs-accent) 36%, #25313b);
-  background: transparent;
-  box-shadow: none;
-  border-radius: 0;
+  padding: clamp(24px, 3.4vw, 48px) clamp(18px, 3vw, 40px);
+  border: 1px solid color-mix(in srgb, var(--ffs-accent) 28%, rgb(138 232 255 / 20%));
+  border-top: 2px solid color-mix(in srgb, var(--ffs-accent) 82%, #ffd77a);
+  border-radius: 10px;
   clip-path: none;
+  background:
+    radial-gradient(ellipse 72% 58% at 8% 0%, color-mix(in srgb, var(--ffs-accent) 16%, transparent), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 94% 100%, rgb(168 120 255 / 12%), transparent 62%),
+    linear-gradient(158deg, rgb(14 26 58 / 92%), rgb(6 12 28 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(238 251 255 / 24%),
+    inset 0 0 0 1px rgb(192 142 255 / 10%),
+    0 20px 50px -20px rgb(0 4 18 / 86%);
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article::before,
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article::after { content: none; }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > header {
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article::before,
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article::after { content: none; }
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > header {
   grid-row: 1;
   grid-column: 1;
   margin: 0;
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles header > span {
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles header > span {
   display: block;
   min-width: 0;
   height: auto;
   padding: 0;
   clip-path: none;
-  color: var(--ffs-accent);
+  color: color-mix(in srgb, var(--ffs-accent) 80%, #ffd77a);
   font-size: clamp(22px, 2.8vw, 42px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   background: none;
   box-shadow: none;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--ffs-accent) 52%, transparent);
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > h3 {
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > h3 {
   grid-column: 2;
   grid-row: 1;
   margin: 0;
+  color: #f6f9ff;
   font-size: clamp(22px, 2.25vw, 34px);
   line-height: 1.37;
   text-wrap: pretty;
+  text-shadow: 0 2px 12px rgb(2 6 18 / 72%);
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > p {
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > p {
   grid-column: 3;
   grid-row: auto;
   max-width: 46em;
   margin: 0;
-  color: #d3dce7;
+  color: #d6e2ef;
   font-size: clamp(15px, 1.12vw, 18px);
   line-height: 1.92;
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > p:first-of-type {
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > p:first-of-type {
   grid-row: 1;
-  color: #f0f3fa;
+  color: #f4f8ff;
 }
-#top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > p + p { margin-top: 1.12em; }
+#top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > p + p { margin-top: 1.12em; }
 
-/* Reports, weapons and the closing calls each get their own reading density. */
+/* Reports, weapons and finishers: archival titanium-glass dossiers & armament plates */
 #top.ffs-page > #report .ffs-report {
-  padding: clamp(22px, 2.5vw, 42px) clamp(16px, 2.6vw, 42px);
-  border: 0;
-  border-block-start: 2px solid #a2d3e1;
-  border-radius: 0;
-  background: linear-gradient(125deg, #172731 0%, #101923 37%, #0b101a 91%);
-  box-shadow: none;
+  padding: clamp(22px, 2.8vw, 44px) clamp(18px, 2.8vw, 44px);
+  border: 1px solid rgb(138 232 255 / 32%);
+  border-block-start: 2px solid #7fe6ff;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse 74% 52% at 6% 0%, rgb(112 214 255 / 20%), transparent 58%),
+    radial-gradient(ellipse 62% 48% at 94% 100%, rgb(168 120 255 / 14%), transparent 62%),
+    linear-gradient(155deg, rgb(14 26 58 / 95%) 0%, rgb(8 16 36 / 97%) 46%, rgb(5 10 24 / 99%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(238 251 255 / 28%),
+    inset 0 0 0 1px rgb(192 142 255 / 12%),
+    0 24px 58px -20px rgb(0 4 18 / 90%);
 }
 /* ReportDocument retains the official title and subtitle. Its retired chrome
    caption was still being painted by the older comparison-console sheet. */
 #top.ffs-page > #report .ffs-report::before { content: none; }
 #top.ffs-page > #report .ffs-report + .ffs-report {
-  border-block-start-color: #d4bca6;
-  background: linear-gradient(125deg, #292532 0%, #191b27 40%, #10111b 91%);
+  border-color: rgb(201 155 255 / 34%);
+  border-block-start-color: #ffd77a;
+  background:
+    radial-gradient(ellipse 74% 52% at 6% 0%, rgb(201 155 255 / 20%), transparent 58%),
+    radial-gradient(ellipse 62% 48% at 94% 100%, rgb(255 215 122 / 14%), transparent 62%),
+    linear-gradient(155deg, rgb(22 24 54 / 95%) 0%, rgb(11 16 36 / 97%) 46%, rgb(6 10 24 / 99%) 100%);
 }
 #top.ffs-page > #report .ffs-report details[open] > summary {
-  background: #addbfc0a;
+  background:
+    linear-gradient(90deg, rgb(127 230 255 / 14%), rgb(192 142 255 / 6%) 65%, transparent);
+  box-shadow: inset 0 0 0 1px rgb(138 232 255 / 22%);
 }
 #top.ffs-page > #report .ffs-report-body { padding-top: 1rem; }
-#top.ffs-page > #report .ffs-report-body > p { font-size: 1rem; color: #dce4ed; line-height: 1.94; }
+#top.ffs-page > #report .ffs-report-body > p { font-size: 1rem; color: #dfe8f3; line-height: 1.94; }
+
 #top.ffs-page > #arsenal .ffs-weapons {
-  gap: 0 clamp(20px, 3vw, 52px);
+  gap: 12px clamp(14px, 2vw, 24px);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 #top.ffs-page > #arsenal .ffs-weapons > li {
-  min-height: 3.7rem;
-  padding: .85rem 0;
-  border: 0;
-  border-top: 1px solid #8c9dac5b;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
+  min-height: 4rem;
+  padding: 16px 20px;
+  border: 1px solid rgb(138 232 255 / 26%);
+  border-top: 2px solid rgb(255 215 122 / 64%);
+  border-radius: 8px;
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 76% 64% at 0% 0%, rgb(127 230 255 / 14%), transparent 60%),
+    linear-gradient(156deg, rgb(15 28 60 / 90%), rgb(6 12 28 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(238 251 255 / 22%),
+    0 14px 32px -16px rgb(0 4 18 / 84%);
 }
 #top.ffs-page > #arsenal .ffs-weapons > li::before { content: none; }
+
 #top.ffs-page > #finishers .ffs-finisher {
-  border: 0;
-  border-top: 1px solid #bc9b72;
-  border-radius: 0;
-  background: linear-gradient(115deg,#29243288, #141c2960 58%, transparent);
-  box-shadow: none;
+  padding: clamp(26px, 3.4vw, 44px) clamp(20px, 3.2vw, 42px);
+  border: 1px solid rgb(255 156 218 / 36%);
+  border-top: 2px solid #ffd77a;
+  border-radius: 12px;
+  clip-path: none;
+  background:
+    radial-gradient(ellipse 74% 60% at 10% 0%, rgb(255 143 216 / 20%), transparent 58%),
+    radial-gradient(ellipse 68% 56% at 92% 100%, rgb(168 120 255 / 18%), transparent 62%),
+    radial-gradient(ellipse 46% 42% at 62% 12%, rgb(255 215 122 / 14%), transparent 60%),
+    linear-gradient(148deg, rgb(24 22 52 / 94%) 0%, rgb(11 16 36 / 96%) 54%, rgb(6 10 24 / 98%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 248 / 28%),
+    inset 0 0 0 1px rgb(255 215 122 / 12%),
+    0 24px 58px -18px rgb(0 4 18 / 90%);
 }
+#top.ffs-page > #finishers .ffs-finisher::before { content: none; }
 #top.ffs-page > #finishers .ffs-finisher .ffs-copy { max-width: 44em; }
 #top.ffs-page > #finishers .ffs-finisher .ffs-copy p { font-size: clamp(15px, 1.12vw, 18px); line-height: 1.95; }
 
 @media (max-width: 760px) {
-  #top.ffs-page > :is(#stages,#theories) > .rxs-section-heading {
+  #top.ffs-page > :is(#stages, #theories) > .rxs-section-heading {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto;
     row-gap: 17px;
   }
-  #top.ffs-page > :is(#stages,#theories) > .rxs-section-heading::before {
+  #top.ffs-page > :is(#stages, #theories) > .rxs-section-heading::before {
     grid-column: 1;
     grid-row: 1;
     margin: 0;
     align-self: center;
     font-size: clamp(34px, 8vw, 54px);
   }
-  #top.ffs-page > :is(#stages,#theories) > .rxs-section-heading > h2 {
+  #top.ffs-page > :is(#stages, #theories) > .rxs-section-heading > h2 {
     grid-column: 2;
     grid-row: 1;
     align-self: center;
     font-size: clamp(26px, 5.9vw, 42px);
     line-height: 1.17;
   }
-  #top.ffs-page > :is(#stages,#theories) > .rxs-section-heading > :is(.ffs-exhibit-forms,.ffs-exhibit-core) {
+  #top.ffs-page > :is(#stages, #theories) > .rxs-section-heading > :is(.ffs-exhibit-forms, .ffs-exhibit-core) {
     grid-column: 1 / -1;
     grid-row: 2;
   }
   #top.ffs-page .ffs-exhibit-core { width: min(100%, 440px); justify-self: center; }
-  #top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article {
+  #top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article {
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 13px;
-    padding: 28px 0 29px;
+    padding: 24px 16px 26px;
   }
-  #top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > p {
+  #top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > p {
     grid-column: 1 / -1;
     font-size: 16px;
   }
-  #top.ffs-page > :is(#theories,#system,#authority) .ffs-articles > article > p:first-of-type {
+  #top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article > p:first-of-type {
     grid-row: 2;
     margin-top: 16px;
   }
   #top.ffs-page > #stages #ffs-stage-panel > .ffs-stage-copy { padding: 20px 17px 25px; }
   #top.ffs-page > #stages #ffs-stage-panel > figure {
+    border-inline-start: 0;
+    border-block-end: 1px solid color-mix(in srgb, var(--ffs-accent) 26%, rgb(138 232 255 / 16%));
     min-height: 0;
     height: auto;
     aspect-ratio: 1.05;
@@ -284,6 +485,7 @@
 }
 
 @media (max-width: 480px) {
+  #top.ffs-page .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] > span,
   #top.ffs-page > #stages .ffs-stage-tabs > button[role="tab"] > span {
     min-width: 0;
     font-size: 12px !important;
@@ -295,10 +497,26 @@
   }
 }
 
+html:is([data-world-effects="economy"], [data-rzn-constrained])
+  #top.ffs-page
+  :is(.ffs-exhibit-forms, .ffs-exhibit-core img, .ffs-form-code) {
+  filter: none;
+}
+
 @media (forced-colors: active) {
   #top.ffs-page > #stages #ffs-stage-panel,
+  #top.ffs-page > #stages .ffs-form-comparison,
+  #top.ffs-page > :is(#theories, #system, #authority) .ffs-articles > article,
+  #top.ffs-page > #arsenal .ffs-weapons > li,
   #top.ffs-page > #finishers .ffs-finisher,
-  #top.ffs-page > #report .ffs-report { border: 1px solid CanvasText; background: Canvas; }
+  #top.ffs-page > #report .ffs-report {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  #top.ffs-page > #stages #ffs-stage-panel::before { display: none; }
   #top.ffs-page .ffs-exhibit-core::before,
-  #top.ffs-page .ffs-exhibit-core::after { border-color: CanvasText; }
+  #top.ffs-page .ffs-exhibit-core::after { border-color: CanvasText; box-shadow: none; }
+  #top.ffs-page .ffs-exhibit-forms,
+  #top.ffs-page .ffs-exhibit-core img { filter: none; }
 }

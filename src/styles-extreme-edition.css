@@ -182,9 +182,10 @@ html[data-mode="world"]:has(.exs-page) {
   left: 50%;
   width: 104%;
   aspect-ratio: 1;
-  border: 1px solid rgb(255 213 122 / 26%);
+  border: 1px solid rgb(255 218 134 / 42%);
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 213 122 / 9%), transparent 62%);
+  background:
+    radial-gradient(circle at 50% 48%, rgb(255 216 124 / 18%) 0%, rgb(58 168 255 / 12%) 42%, transparent 68%);
   translate: -50% 0;
   pointer-events: none;
 }

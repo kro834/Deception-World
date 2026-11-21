@@ -315,18 +315,20 @@
 .site-shell.film-edition.mirage-edition .wa-plate {
   position: relative;
   padding: var(--wa-plate-pad);
-  border: 1px solid var(--mr-line);
+  border: 1px solid color-mix(in srgb, var(--mr-ice) 34%, transparent);
   border-radius: 4px;
   background:
     var(--wa-brackets),
-    linear-gradient(135deg, rgb(122 232 255 / 8%), transparent 46%),
+    radial-gradient(ellipse 68% 48% at 100% 0%, rgb(122 232 255 / 12%), transparent 68%),
+    linear-gradient(135deg, rgb(122 232 255 / 14%), rgb(240 207 134 / 5%) 38%, transparent 56%),
     var(--mr-deck);
   background-repeat: no-repeat;
   background-origin: border-box;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    inset 0 0 28px rgb(122 232 255 / 4%),
-    0 20px 44px -12px rgb(0 0 0 / 62%);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 0 36px rgb(122 232 255 / 8%),
+    0 26px 56px -12px rgb(0 0 0 / 74%),
+    0 0 34px -16px color-mix(in srgb, var(--mr-ice) 24%, transparent);
 }
 
 /* Prism top rule, inside the brackets (documents only). */
@@ -338,7 +340,7 @@
   left: calc(var(--wa-bracket) + 8px);
   height: 1px;
   background: var(--mr-prism);
-  opacity: 0.55;
+  opacity: 0.78;
   pointer-events: none;
 }
 
@@ -506,15 +508,16 @@
   min-height: 44px;
   align-items: center;
   padding: 0 16px;
-  border: 1px solid var(--mr-line-strong);
+  border: 1px solid color-mix(in srgb, var(--mr-ice) 48%, transparent);
   border-radius: 3px;
   background:
-    linear-gradient(var(--mr-gold) 0 0) 0 100% / 12px 2px no-repeat,
-    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 12px 2px no-repeat,
-    linear-gradient(180deg, rgb(122 232 255 / 11%), rgb(122 232 255 / 3%));
+    linear-gradient(var(--mr-gold) 0 0) 0 100% / 14px 2px no-repeat,
+    linear-gradient(var(--mr-gold) 0 0) 100% 100% / 14px 2px no-repeat,
+    linear-gradient(180deg, rgb(122 232 255 / 18%), rgb(122 232 255 / 5%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    0 8px 20px -6px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 10px 24px -6px rgb(0 0 0 / 56%),
+    0 0 18px -8px color-mix(in srgb, var(--mr-ice) 26%, transparent);
   color: var(--mr-text);
   font-size: 14px;
   font-weight: 600;
@@ -631,10 +634,16 @@
   flex-direction: column;
   min-width: 0;
   padding: 0;
-  border-radius: 2px;
-  background: var(--wa-gold-brackets), var(--mr-deck);
+  border-radius: 4px;
+  background:
+    var(--wa-gold-brackets),
+    linear-gradient(160deg, color-mix(in srgb, var(--wa-kind) 10%, transparent), transparent 44%),
+    var(--mr-deck);
   background-repeat: no-repeat;
   background-origin: border-box;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 20px 44px -12px rgb(0 0 0 / 68%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-person::before {
@@ -1470,8 +1479,10 @@ html[data-world-effects="economy"]
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, rgb(4 8 15 / 56%), transparent 34%);
-  box-shadow: inset 0 0 0 1px rgb(122 232 255 / 18%);
+  background: linear-gradient(0deg, rgb(4 8 15 / 52%), transparent 38%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 0 0 1px rgb(122 232 255 / 32%);
   pointer-events: none;
 }
 
@@ -1524,14 +1535,15 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   gap: 4px;
   margin: 0 0 4px;
   padding: 12px 16px;
-  border: 1px solid rgb(255 90 126 / 26%);
-  border-left: 2px solid var(--mr-signal);
-  border-radius: 0 3px 3px 0;
+  border: 1px solid rgb(255 90 126 / 38%);
+  border-left: 3px solid var(--mr-signal);
+  border-radius: 0 4px 4px 0;
   background:
-    linear-gradient(90deg, rgb(255 90 126 / 12%), rgb(255 90 126 / 3%) 68%);
+    linear-gradient(90deg, rgb(255 90 126 / 20%), rgb(255 90 126 / 5%) 72%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 10px 24px -8px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 224 232 / 20%),
+    inset 0 0 24px rgb(255 90 126 / 6%),
+    0 14px 30px -8px rgb(0 0 0 / 58%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-mission b {
@@ -1554,16 +1566,17 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
   gap: 4px;
   margin: 18px 0 0;
   padding: 12px 16px;
-  border: 1px solid rgb(255 90 126 / 42%);
-  border-radius: 3px;
+  border: 1px solid rgb(255 90 126 / 54%);
+  border-radius: 4px;
   list-style: none;
   background:
-    linear-gradient(155deg, rgb(255 90 126 / 10%), transparent 56%),
-    rgb(255 90 126 / 5%);
+    linear-gradient(155deg, rgb(255 90 126 / 18%), transparent 58%),
+    rgb(255 90 126 / 7%);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    inset 0 0 22px rgb(255 90 126 / 6%),
-    0 10px 26px -8px rgb(0 0 0 / 54%);
+    inset 0 1px 0 rgb(255 224 232 / 22%),
+    inset 0 0 28px rgb(255 90 126 / 10%),
+    0 14px 32px -8px rgb(0 0 0 / 62%),
+    0 0 24px -10px rgb(255 90 126 / 28%);
 }
 
 .site-shell.film-edition.mirage-edition .wa-readout li {
@@ -2047,20 +2060,24 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
     flex: 0 0 48px;
     height: 48px;
     padding: 0;
-    border: 1px solid var(--mr-line-strong);
-    border-radius: 3px;
+    border: 1px solid color-mix(in srgb, var(--mr-ice) 46%, transparent);
+    border-radius: 4px;
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 10%), transparent 56%),
+      linear-gradient(180deg, rgb(198 246 229 / 18%), transparent 56%),
       var(--mr-deck-raised);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 18%),
-      0 8px 18px -6px rgb(0 0 0 / 54%);
+      inset 0 1px 0 rgb(255 255 255 / 26%),
+      0 10px 22px -6px rgb(0 0 0 / 62%);
     color: var(--mr-text);
     cursor: pointer;
   }
 
   .site-shell.film-edition.mirage-edition .wa-quote-controls button:not(:disabled):hover {
     border-color: var(--mr-ice-hi);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      0 12px 26px -6px rgb(0 0 0 / 70%),
+      0 0 20px -4px color-mix(in srgb, var(--mr-ice) 46%, transparent);
   }
 
   .site-shell.film-edition.mirage-edition .wa-quote-controls button:disabled {
@@ -2098,15 +2115,16 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-i
     align-content: start;
     gap: 12px;
     padding: 16px 14px 16px 16px;
-    border: 1px solid var(--mr-line);
-    border-left: 2px solid var(--mr-ice);
+    border: 1px solid color-mix(in srgb, var(--mr-ice) 34%, transparent);
+    border-left: 3px solid var(--mr-ice);
     border-radius: 0 4px 4px 0;
     background:
-      linear-gradient(155deg, rgb(109 223 186 / 8%), transparent 46%),
-      rgb(8 18 15 / 72%);
+      linear-gradient(155deg, rgb(109 223 186 / 14%), rgb(227 166 116 / 5%) 42%, transparent 64%),
+      rgb(8 20 16 / 82%);
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 16%),
-      0 12px 28px -10px rgb(0 0 0 / 60%);
+      inset 0 1px 0 rgb(198 246 229 / 26%),
+      inset 0 0 22px rgb(109 223 186 / 6%),
+      0 16px 34px -10px rgb(0 0 0 / 68%);
     scroll-snap-align: start;
   }
 
@@ -2514,6 +2532,7 @@ html[data-world-effects="economy"] .site-shell.film-edition.mirage-edition .wa-l
       .wa-readout,
       .wa-contents a,
       .wa-open,
+      .wa-person,
       .wa-quote-controls button,
       .wa-quote-band > li
     ) {

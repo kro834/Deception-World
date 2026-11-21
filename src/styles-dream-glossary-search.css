@@ -1,33 +1,36 @@
-/* A readable index above the unchanged canonical glossary and archive fold. */
+/* A readable Taisho study-box index above the canonical glossary and archive fold. */
 .dream-page.dream-page .dream-glossary-search {
-  --gls-gold: #d4b272;
-  --gls-gold-bright: #f0d79c;
-  --gls-gold-rule: rgb(212 178 114 / 44%);
-  --gls-fuji: #dcc2fc;
+  --gls-gold: #d8b574;
+  --gls-gold-bright: #f6df9e;
+  --gls-gold-rule: rgb(232 196 126 / 62%);
+  --gls-fuji: #dfc6ff;
   position: relative;
   min-width: 0;
   margin: -12px 0 28px;
-  padding: clamp(18px, 3vw, 30px);
-  border: 1px solid rgb(198 164 102 / 52%);
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid rgb(228 192 122 / 60%);
   border-radius: 3px;
+  outline: 1px solid rgb(228 192 122 / 22%);
+  outline-offset: -5px;
   background:
-    linear-gradient(var(--gls-gold-rule) 0 0) 0 0 / 16px 1px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 0 0 / 1px 16px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 100% 0 / 16px 1px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 100% 0 / 1px 16px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 0 100% / 16px 1px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 0 100% / 1px 16px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 100% 100% / 16px 1px no-repeat,
-    linear-gradient(var(--gls-gold-rule) 0 0) 100% 100% / 1px 16px no-repeat,
-    radial-gradient(64% 58% at 18% 0%, rgb(220 194 252 / 10%), transparent 72%),
-    radial-gradient(60% 52% at 88% 0%, rgb(218 178 106 / 12%), transparent 70%),
-    linear-gradient(142deg, #241d2f 0%, #1a1523 54%, #14101c 100%);
-  color: #f6eedc;
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 26px 2px no-repeat,
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2px 26px no-repeat,
+    linear-gradient(225deg, #f8e2a6, #ad8340) 100% 0 / 26px 2px no-repeat,
+    linear-gradient(225deg, #f8e2a6, #ad8340) 100% 0 / 2px 26px no-repeat,
+    linear-gradient(45deg, #eed08e, #987032) 0 100% / 26px 2px no-repeat,
+    linear-gradient(45deg, #eed08e, #987032) 0 100% / 2px 26px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 26px 2px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 26px no-repeat,
+    radial-gradient(64% 58% at 16% 0%, rgb(248 206 130 / 16%), transparent 72%),
+    radial-gradient(56% 52% at 88% 100%, rgb(206 72 56 / 14%), transparent 72%),
+    radial-gradient(54% 48% at 82% 8%, rgb(220 194 252 / 10%), transparent 72%),
+    linear-gradient(142deg, #251731 0%, #191024 54%, #110b19 100%);
+  color: #f8efde;
   font-family: var(--ts-text, serif);
   text-align: left;
   box-shadow:
-    inset 0 1px 0 rgb(255 240 206 / 16%),
-    0 18px 42px rgb(6 4 10 / 44%);
+    inset 0 1px 0 rgb(255 244 210 / 24%),
+    0 22px 50px rgb(5 3 10 / 60%);
   scroll-margin-top: 164px;
 }
 
@@ -35,23 +38,24 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
-  color: #f8efdc;
+  margin-bottom: 12px;
+  color: #fff6e4;
   font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 12px rgb(244 198 118 / 24%);
 }
 
 .dream-page.dream-page .dream-glossary-search-crest {
   flex: none;
-  color: #ebd097;
+  color: #f4d898;
 }
 
 .dream-page.dream-page .dream-glossary-search-field {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 8px;
+  gap: 10px;
 }
 
 .dream-page.dream-page .dream-glossary-search-input-wrap {
@@ -68,26 +72,29 @@
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #6d5539;
+  color: #745534;
 }
 
-.dream-page.dream-page .dream-glossary-search-input-wrap:focus-within .dream-glossary-search-loupe {
-  color: #8f621e;
+.dream-page.dream-page
+  .dream-glossary-search-input-wrap:focus-within
+  .dream-glossary-search-loupe {
+  color: #8f2d2e;
 }
 
+/* Kinari washi search field paired with crisp sumi ink */
 .dream-page.dream-page .dream-glossary-search-field input {
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
   min-height: 48px;
   padding: 10px 14px 10px 40px;
-  border: 1px solid #bfa476;
+  border: 1px solid #d2b072;
   border-radius: 3px;
-  background: linear-gradient(180deg, #fdf7ea 0%, #f6ebd6 100%);
-  color: #261b2a;
+  background: linear-gradient(180deg, #fef9ee 0%, #f4e8d0 100%);
+  color: #251929;
   box-shadow:
-    inset 0 1px 3px rgb(34 22 38 / 12%),
-    0 1px 0 rgb(255 243 214 / 10%);
+    inset 0 2px 4px rgb(38 24 38 / 14%),
+    0 1px 0 rgb(255 244 214 / 16%);
   font: inherit;
   font-size: 16px;
   line-height: 1.5;
@@ -105,7 +112,7 @@
 }
 
 .dream-page.dream-page .dream-glossary-search-field input::placeholder {
-  color: #675763;
+  color: #675562;
   opacity: 1;
 }
 
@@ -116,10 +123,10 @@
   transform: translateY(-50%);
   pointer-events: none;
   padding: 2px 6px;
-  border: 1px solid #b4996a;
+  border: 1px solid #b8965d;
   border-radius: 2px;
-  background: linear-gradient(180deg, #f3e7ce 0%, #e6d5b4 100%);
-  color: #4a3827;
+  background: linear-gradient(180deg, #f5e9d0 0%, #e5d2ad 100%);
+  color: #463222;
   font-family: var(--ts-latin, serif);
   font-size: 12px;
   font-weight: 700;
@@ -130,33 +137,35 @@
 .dream-page.dream-page .dream-glossary-search button {
   min-width: 48px;
   min-height: 48px;
-  padding: 10px 16px;
-  border: 1px solid #be9f68;
+  padding: 10px 18px;
+  border: 1px solid #e4c280;
   border-radius: 3px;
   background:
-    linear-gradient(#edd29a 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(180deg, #3c2e43 0%, #281e2f 100%);
-  color: #f8efdc;
+    linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
+    linear-gradient(#f2d492 0 0) 100% 100% / 14px 1.5px no-repeat,
+    linear-gradient(135deg, #7c242c 0%, #4b1725 58%, #31101d 100%);
+  color: #fff7e6;
   box-shadow:
-    inset 0 1px 0 rgb(255 242 212 / 18%),
-    0 4px 12px rgb(8 5 12 / 34%);
+    inset 0 1px 0 rgb(255 244 214 / 30%),
+    0 6px 16px rgb(8 5 12 / 44%);
   font: inherit;
   font-size: 15px;
+  font-weight: 600;
   line-height: 1.5;
   cursor: pointer;
 }
 
 .dream-page.dream-page .dream-glossary-search button:disabled {
-  border-color: #6d5f72;
-  background: #211a28;
-  color: #bcb0c0;
+  border-color: rgb(162 140 166 / 42%);
+  background: linear-gradient(180deg, #251c2e 0%, #1a1322 100%);
+  color: #c4b8ca;
   box-shadow: none;
   cursor: default;
 }
 
 .dream-page.dream-page .dream-glossary-search-help {
   margin: 10px 0 0;
-  color: #d9cddc;
+  color: #ddd0df;
   font-size: 14px;
   line-height: 1.9;
   letter-spacing: 0.02em;
@@ -165,7 +174,7 @@
 /* The count speaks only while searching; idle, the field sits on the list. */
 .dream-page.dream-page .dream-glossary-search-count {
   margin: 14px 0 10px;
-  color: #efd7a5;
+  color: #f4d898;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.7;
@@ -184,7 +193,7 @@
 .dream-page.dream-page .dream-glossary-search-results {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -207,17 +216,19 @@
   gap: 10px;
   height: 100%;
   min-height: 54px;
-  padding: 12px 13px 12px 15px;
-  border: 1px solid #846c4c;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid rgb(214 178 112 / 48%);
   border-radius: 3px;
   background:
-    linear-gradient(#e7ca91 0 0) 100% 0 / 12px 1.5px no-repeat,
-    linear-gradient(#e7ca91 0 0) 100% 0 / 1.5px 12px no-repeat,
-    linear-gradient(155deg, #302538 0%, #241b2b 100%);
-  color: #f7eedc;
+    linear-gradient(#f5dca0 0 0) 100% 0 / 14px 1.5px no-repeat,
+    linear-gradient(#f5dca0 0 0) 100% 0 / 1.5px 14px no-repeat,
+    radial-gradient(64% 90% at 14% 0%, rgb(246 206 132 / 10%), transparent 72%),
+    linear-gradient(155deg, #2d1e39 0%, #1c1326 100%);
+  color: #faf1df;
   box-shadow:
-    inset 3px 0 0 #b8965d,
-    inset 0 1px 0 rgb(255 241 210 / 10%);
+    inset 3px 0 0 #d8b26a,
+    inset 0 1px 0 rgb(255 244 212 / 16%),
+    0 8px 18px rgb(6 3 10 / 38%);
   font-size: 16px;
   line-height: 1.7;
   text-decoration: none;
@@ -242,7 +253,7 @@
   small {
   display: block;
   margin-top: 2px;
-  color: #dfd2e3;
+  color: #e4d6e8;
   font-size: 14px;
 }
 
@@ -250,8 +261,8 @@
   display: block;
   margin-top: 7px;
   padding-top: 6px;
-  border-top: 1px solid rgb(212 178 114 / 22%);
-  color: #ece1ed;
+  border-top: 1px solid rgb(224 188 120 / 26%);
+  color: #f0e4ef;
   font-size: 15px;
   line-height: 1.9;
 }
@@ -263,42 +274,42 @@
   gap: 4px;
   flex-shrink: 0;
   align-self: center;
-  color: #ebd29f;
+  color: #f4d898;
   font-size: 15px;
   line-height: 1;
 }
 
 .dream-page.dream-page .dream-glossary-search-ribbon {
   flex: none;
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
 .dream-page.dream-page .dream-glossary-search mark {
-  padding: 0 2px;
-  border-bottom: 1px solid #9e762c;
+  padding: 0 3px;
+  border-bottom: 1px solid #966d24;
   border-radius: 1px;
-  background: linear-gradient(180deg, #f3dda5 0%, #e2c179 100%);
+  background: linear-gradient(180deg, #fae4ac 0%, #e4be72 100%);
   color: #221527;
 }
 
 .dream-page.dream-page .dream-glossary-search-empty {
   padding: 20px 18px;
-  border: 1px dashed #b49666;
+  border: 1px dashed rgb(224 188 118 / 68%);
   border-radius: 3px;
   background:
-    radial-gradient(56% 70% at 50% 0%, rgb(220 194 252 / 9%), transparent 75%),
-    #281f30;
+    radial-gradient(56% 70% at 50% 0%, rgb(246 206 132 / 12%), transparent 75%),
+    #23172c;
 }
 
 .dream-page.dream-page .dream-glossary-search-empty-ornament {
   display: block;
   margin: 0 0 10px;
-  color: #e2c58a;
+  color: #f0d08e;
 }
 
 .dream-page.dream-page .dream-glossary-search-empty p {
   margin: 0 0 14px;
-  color: #f6eedc;
+  color: #f8efde;
   font-size: 16px;
   line-height: 1.9;
 }
@@ -306,16 +317,16 @@
 /* 藤色×金彩フォーカスグロウ（Wisteria × gilt focus halo） */
 .dream-page.dream-page .dream-glossary-search :is(input, button, a):focus-visible,
 .dream-page.dream-page .dream-glossary > [data-dream-glossary-focused] {
-  outline: 3px solid var(--gls-fuji, #dcc2fc);
+  outline: 3px solid var(--gls-fuji, #dfc6ff);
   outline-offset: 2px;
   box-shadow:
-    0 0 0 1px #efd59a,
-    0 0 16px rgb(220 194 252 / 42%),
-    0 0 28px rgb(226 190 124 / 24%);
+    0 0 0 1px #f4d898,
+    0 0 18px rgb(223 198 255 / 44%),
+    0 0 30px rgb(236 196 122 / 28%);
 }
 
 .dream-page.dream-page .dream-glossary-search-field input:focus-visible {
-  border-color: #9e77c9;
+  border-color: #a67dd4;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -336,25 +347,27 @@
     .dream-glossary-jump
     .dream-glossary-search-results
     a:hover {
-    border-color: #ebd097;
+    border-color: #f6df9e;
     background:
-      linear-gradient(#f5e0b0 0 0) 100% 0 / 16px 1.5px no-repeat,
-      linear-gradient(#f5e0b0 0 0) 100% 0 / 1.5px 16px no-repeat,
-      linear-gradient(155deg, #3f2f49 0%, #2e2237 100%);
+      linear-gradient(#fff0c2 0 0) 100% 0 / 18px 1.5px no-repeat,
+      linear-gradient(#fff0c2 0 0) 100% 0 / 1.5px 18px no-repeat,
+      radial-gradient(64% 90% at 14% 0%, rgb(252 212 138 / 18%), transparent 72%),
+      linear-gradient(155deg, #3e2849 0%, #271a33 100%);
     box-shadow:
-      inset 3px 0 0 #ebd097,
-      inset 0 1px 0 rgb(255 244 218 / 18%),
-      0 6px 18px rgb(8 5 12 / 36%);
+      inset 3px 0 0 #f6df9e,
+      inset 0 1px 0 rgb(255 246 218 / 26%),
+      0 10px 24px rgb(8 5 12 / 48%);
   }
 
   .dream-page.dream-page .dream-glossary-search button:not(:disabled):hover {
-    border-color: #f0d79c;
+    border-color: #fff0c2;
     background:
-      linear-gradient(#f5e0b0 0 0) 0 0 / 16px 2px no-repeat,
-      linear-gradient(180deg, #4b3854 0%, #34263d 100%);
+      linear-gradient(#fff4cc 0 0) 0 0 / 18px 2px no-repeat,
+      linear-gradient(#fff0c2 0 0) 100% 100% / 18px 1.5px no-repeat,
+      linear-gradient(135deg, #982b33 0%, #641c2c 58%, #421322 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 244 218 / 24%),
-      0 6px 16px rgb(8 5 12 / 42%);
+      inset 0 1px 0 rgb(255 248 224 / 38%),
+      0 8px 20px rgb(8 5 12 / 52%);
   }
 }
 
@@ -389,6 +402,7 @@
     background: Canvas;
     color: CanvasText;
     box-shadow: none;
+    outline-color: CanvasText;
   }
 
   .dream-page.dream-page .dream-glossary-search mark {

@@ -14,10 +14,21 @@ html[data-family="special"]
   > #system
   > .rxs-system-grid
   > article:nth-child(n) {
+  border: 1px solid rgb(180 217 238 / 32%);
   border-top: 2px solid #b4d9ee;
+  border-radius: 4px;
   padding: clamp(24px, 3vw, 44px);
-  background: linear-gradient(155deg, #11202b, #080e17 70%);
-  box-shadow: inset 0 1px 0 rgba(180, 217, 238, 0.35);
+  background:
+    linear-gradient(90deg, #a6e7f4, #f0d39c 48%, transparent 92%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 80% 55% at 12% 0%, rgb(166 231 244 / 14%), transparent 64%),
+    radial-gradient(ellipse 70% 50% at 92% 100%, rgb(240 211 156 / 9%), transparent 66%),
+    linear-gradient(155deg, #132432 0%, #0c1622 52%, #070d15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(225 245 255 / 42%),
+    inset 0 0 0 1px rgb(166 231 244 / 12%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    0 18px 40px -16px rgb(0 0 0 / 84%),
+    0 0 24px -10px rgb(166 231 244 / 20%);
 }
 html[data-family="special"]
   body
@@ -26,7 +37,7 @@ html[data-family="special"]
   > .rxs-system-grid
   > article
   p {
-  color: #d0dce5;
+  color: #d6e3ec;
   line-height: 1.95;
 }
 html[data-family="special"]
@@ -35,10 +46,21 @@ html[data-family="special"]
   > #system
   .rxs-system-grid
   > article:nth-child(n) {
+  border: 1px solid rgb(244 204 123 / 34%);
   border-top: 3px solid #f4cc7b;
+  border-radius: 4px;
   padding: clamp(24px, 3vw, 40px);
-  background: linear-gradient(135deg, #292114, #101013 72%);
-  box-shadow: inset 0 1px 0 rgba(244, 204, 123, 0.35);
+  background:
+    linear-gradient(90deg, #f4cc7b, #dce5f2 52%, transparent 94%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 82% 56% at 14% 0%, rgb(244 204 123 / 16%), transparent 64%),
+    radial-gradient(ellipse 68% 48% at 90% 100%, rgb(220 229 242 / 10%), transparent 66%),
+    linear-gradient(135deg, #2d2314 0%, #171516 54%, #0d0e12 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 196 / 44%),
+    inset 0 0 0 1px rgb(244 204 123 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 84%),
+    0 18px 40px -16px rgb(0 0 0 / 86%),
+    0 0 26px -10px rgb(244 204 123 / 22%);
 }
 html[data-family="special"]
   body
@@ -47,7 +69,7 @@ html[data-family="special"]
   .rxs-system-grid
   > article
   p {
-  color: #e2d9c8;
+  color: #e6decb;
   line-height: 1.9;
 }
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-copy {
@@ -57,57 +79,101 @@ html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-copy {
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-copy p {
   font-size: clamp(16px, 1.45vw, 19px);
   line-height: 2.15;
-  color: #ece2d3;
+  color: #f0e6d8;
 }
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-subheading {
   margin-top: clamp(48px, 6vw, 88px);
   padding-bottom: 24px;
-  border-bottom: 1px solid #d9bc8259;
+  border-bottom: 1px solid rgb(217 188 130 / 44%);
+  box-shadow: 0 1px 0 rgb(215 198 250 / 14%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-article-copy p {
   font-size: 16px;
   line-height: 1.95;
-  color: #d7deeb;
+  color: #dce4f2;
 }
 html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-finisher {
+  border: 1px solid rgb(166 230 255 / 32%);
   border-left: 3px solid #b2cfff;
+  border-radius: 4px;
   padding: clamp(24px, 3vw, 44px);
-  background: linear-gradient(110deg, #11223a, #080d19 78%);
-  box-shadow: inset 0 1px 0 rgba(178, 207, 255, 0.35);
+  background:
+    linear-gradient(90deg, #a6e6ff, #e9b866 48%, transparent 92%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 78% 54% at 10% 0%, rgb(166 230 255 / 16%), transparent 64%),
+    radial-gradient(ellipse 64% 48% at 92% 100%, rgb(233 184 102 / 11%), transparent 66%),
+    linear-gradient(110deg, #132640 0%, #0b1424 54%, #070c18 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(215 242 255 / 42%),
+    inset 0 0 0 1px rgb(166 230 255 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    0 18px 42px -16px rgb(0 0 0 / 84%),
+    0 0 26px -10px rgb(166 230 255 / 22%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article {
   padding: clamp(24px, 3vw, 44px);
   gap: 24px;
+  border: 1px solid rgb(255 201 143 / 30%);
+  border-top: 2px solid #ffc98f;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, #ffc98f, #37c6c0 52%, transparent 94%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 76% 52% at 14% 0%, rgb(255 201 143 / 14%), transparent 64%),
+    radial-gradient(ellipse 68% 48% at 88% 100%, rgb(55 198 192 / 12%), transparent 66%),
+    linear-gradient(145deg, #1e1920 0%, #101720 56%, #080d14 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 232 204 / 38%),
+    inset 0 0 0 1px rgb(255 201 143 / 12%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    0 18px 40px -16px rgb(0 0 0 / 84%),
+    0 0 24px -10px rgb(255 201 143 / 18%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article-name {
   font-size: clamp(20px, 2vw, 27px);
   line-height: 1.45;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 75%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.mus-page .mus-article .mus-copy p {
-  color: #d1e2e2;
+  color: #d7e8e8;
   font-size: 16px;
   line-height: 1.95;
 }
 html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-articles > article {
+  border: 1px solid rgb(181 180 238 / 34%);
   border-top: 2px solid #b5b4ee;
+  border-radius: 4px;
   padding: clamp(24px, 3vw, 40px);
-  background: linear-gradient(150deg, #19192c, #080c17 70%);
-  box-shadow: inset 0 1px 0 rgba(181, 180, 238, 0.35);
+  background:
+    linear-gradient(90deg, #b6d9ff, #d8c5ff 50%, transparent 94%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 80% 54% at 14% 0%, rgb(182 217 255 / 15%), transparent 64%),
+    radial-gradient(ellipse 70% 50% at 88% 100%, rgb(216 197 255 / 12%), transparent 66%),
+    linear-gradient(150deg, #1b1b31 0%, #0e1324 54%, #070b15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(224 234 255 / 40%),
+    inset 0 0 0 1px rgb(181 180 238 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 82%),
+    0 18px 40px -16px rgb(0 0 0 / 84%),
+    0 0 24px -10px rgb(182 217 255 / 20%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-articles > article p {
-  color: #dadbed;
+  color: #dfe0f2;
   font-size: 16px;
   line-height: 1.95;
 }
 html[data-family="special"] body .rxs-page.rxs-page.ffs-page .ffs-finisher {
   padding-block: clamp(28px, 4vw, 52px);
-  border-top-color: #b8b4df70;
+  border-top-color: #b8b4df8c;
 }
 /* The quiet story opening is a reading page; the mechanical chapters retain
    their own panels and the assembly remains the full-width visual climax. */
 html[data-family="special"] body .rxs-page.rxs-page.fst-page .fst-story-layout {
-  background: linear-gradient(110deg, #211b14, #11100f 72%);
-  border-block: 1px solid #d9bc8240;
+  background:
+    radial-gradient(ellipse 76% 52% at 16% 0%, rgb(215 198 250 / 12%), transparent 64%),
+    radial-gradient(ellipse 68% 48% at 86% 100%, rgb(241 217 164 / 10%), transparent 66%),
+    linear-gradient(110deg, #241d15 0%, #151314 56%, #0e0d0f 100%);
+  border-block: 1px solid rgb(217 188 130 / 38%);
+  box-shadow:
+    inset 0 1px 0 rgb(241 217 164 / 26%),
+    0 18px 42px -16px rgb(0 0 0 / 82%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.ics-page .ics-finisher h3 {
   font-size: clamp(22px, 2.5vw, 34px);

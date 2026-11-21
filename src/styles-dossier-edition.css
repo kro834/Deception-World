@@ -75,42 +75,50 @@ main.manager-page:not(.is-sovereign) .manager-grid {
   opacity: 0.09;
 }
 
+html[data-family="dossier"]
+  main.manager-page:not(.is-sovereign).manager-page.manager-page
+  > header.manager-topbar,
 main.manager-page:not(.is-sovereign) .manager-topbar {
-  border-bottom-color: color-mix(in srgb, var(--dm-lock) 34%, rgb(240 207 134 / 18%));
+  border-bottom-color: color-mix(in srgb, var(--dm-lock) 44%, rgb(240 207 134 / 30%));
   background:
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 14%, transparent),
-      transparent 30%,
-      transparent 68%,
-      rgb(240 207 134 / 8%) 86%,
-      rgb(255 92 200 / 7%)
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, transparent) 0%,
+      transparent 32%,
+      transparent 66%,
+      rgb(240 207 134 / 12%) 86%,
+      rgb(255 92 200 / 9%) 100%
     ),
     #03060c;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 8%),
-    0 1px 0 rgb(122 232 255 / 12%),
-    0 20px 48px rgb(0 0 0 / 54%);
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 1px 0 color-mix(in srgb, var(--dm-lock) 26%, rgb(240 207 134 / 18%)),
+    0 20px 52px rgb(0 0 0 / 60%),
+    0 8px 28px -8px color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, transparent);
 }
 
 main.manager-page:not(.is-sovereign) .manager-topbar .brand-sigil {
-  border-color: color-mix(in srgb, var(--dm-lock) 58%, rgb(240 207 134 / 30%));
+  border-color: color-mix(in srgb, var(--dm-lock) 68%, rgb(240 207 134 / 42%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 0 16px color-mix(in srgb, var(--manager-accent, #7ae8ff) 18%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 20px color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, transparent);
 }
 
 main.manager-page:not(.is-sovereign) .manager-topbar .manager-back {
-  border-color: color-mix(in srgb, var(--dm-lock) 42%, rgb(240 207 134 / 24%));
+  border-color: color-mix(in srgb, var(--dm-lock) 52%, rgb(240 207 134 / 34%));
   background:
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 8px 1px no-repeat,
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 1px 8px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 8px 1px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 1px 8px no-repeat,
-    color-mix(in srgb, var(--manager-accent, #7ae8ff) 10%, #080f1c);
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 10px 1.5px no-repeat,
+    linear-gradient(var(--dm-lock) 0 0) 0 0 / 1.5px 10px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 10px 1.5px no-repeat,
+    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 1.5px 10px no-repeat,
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 18%, #0c1628),
+      #060c17 82%
+    );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 6px 18px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 8px 22px rgb(0 0 0 / 44%);
 }
 
 /* The brand reads at 12px or larger, as on the sovereign file: the sigil,
@@ -221,17 +229,19 @@ main.manager-page:not(.is-sovereign) .form-pickup:not(.is-rexonance-pickup) .for
 /* The special-site card already carries two corner marks; they take the
    bracket colours and an enriched multi-layered gold and silver foil bezel. */
 main.manager-page:not(.is-sovereign) :is(.rider-special-site, #special-site) .rider-special-site-card {
-  border: 1px solid color-mix(in srgb, var(--dm-gold) 48%, var(--dm-edge));
+  border: 1px solid color-mix(in srgb, var(--dm-gold) 58%, var(--dm-edge));
   background:
-    radial-gradient(ellipse 65% 55% at 88% 10%, rgb(240 207 134 / 18%), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 12% 90%, color-mix(in srgb, var(--dm-lock) 16%, transparent), transparent 60%),
-    linear-gradient(148deg, rgb(6 9 18 / 98%), rgb(12 8 22 / 96%));
+    linear-gradient(90deg, var(--dm-lock) 0%, var(--dm-gold) 52%, transparent 96%) 0 0 / 100% 2px
+      no-repeat,
+    radial-gradient(ellipse 68% 58% at 88% 10%, rgb(240 207 134 / 24%), transparent 62%),
+    radial-gradient(ellipse 62% 52% at 12% 90%, color-mix(in srgb, var(--dm-lock) 22%, transparent), transparent 62%),
+    linear-gradient(148deg, rgb(7 11 21 / 98%), rgb(13 9 24 / 96%));
   box-shadow:
-    0 34px 90px rgb(0 0 0 / 60%),
-    0 0 0 1px rgb(240 207 134 / 24%),
-    0 0 34px color-mix(in srgb, var(--dm-gold) 20%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 rgb(240 207 134 / 18%);
+    0 38px 96px rgb(0 0 0 / 68%),
+    0 0 0 1px rgb(240 207 134 / 30%),
+    0 0 42px color-mix(in srgb, var(--dm-gold) 26%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    inset 0 -1px 0 rgb(240 207 134 / 24%);
 }
 
 main.manager-page:not(.is-sovereign) .rider-special-site-card::before {
@@ -249,20 +259,20 @@ main.manager-page:not(.is-sovereign) .rider-special-site-card::after {
 /* Card and dialog specular edges: high-grade luminance rim and depth. */
 main.manager-page:not(.is-sovereign) :is(.form-pickup-card, .rider-nightmare-card, .rider-archive-civilian) {
   box-shadow:
-    0 24px 64px rgb(0 0 0 / 52%),
-    0 0 0 1px color-mix(in srgb, var(--dm-edge) 55%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 16%),
-    inset 0 0 28px color-mix(in srgb, var(--manager-accent, #7ae8ff) 5%, transparent);
+    0 26px 68px rgb(0 0 0 / 56%),
+    0 0 0 1px color-mix(in srgb, var(--dm-edge) 64%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 0 32px color-mix(in srgb, var(--manager-accent, #7ae8ff) 7%, transparent);
 }
 
 main.manager-page:not(.is-sovereign) :is(.form-pickup-dialog, .rider-nightmare-dialog) {
   box-shadow:
-    0 36px 104px rgb(0 0 0 / 78%),
-    0 0 0 1px color-mix(in srgb, var(--dm-lock) 44%, rgb(240 207 134 / 24%)),
-    0 0 42px color-mix(in srgb, var(--manager-accent, #7ae8ff) 14%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 26%),
-    inset 0 -1px 0 rgb(240 207 134 / 16%),
-    inset 0 0 38px color-mix(in srgb, var(--manager-accent, #7ae8ff) 8%, transparent);
+    0 40px 116px rgb(0 0 0 / 82%),
+    0 0 0 1px color-mix(in srgb, var(--dm-lock) 52%, rgb(240 207 134 / 32%)),
+    0 0 48px color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%),
+    inset 0 0 42px color-mix(in srgb, var(--manager-accent, #7ae8ff) 10%, transparent);
 }
 
 /* The portrait sits in a projection frame: the character's edge light and
@@ -1790,25 +1800,30 @@ main.manager-page:not(.is-sovereign) .rexonance-weapon-grid figure > div::after 
 }
 
 /* Special-site codenames (ROYAL / WRATH / ABYSS / BIRTH / ULTRA): framed as
-   a subtle gilded metallic tag beneath the Rider display name. */
+   a sculpted gilded metallic tag beneath the Rider display name. */
 html[data-family="dossier"]
   main.manager-page:not(.is-sovereign).manager-page.manager-page
   .rider-special-site-copy
   > em {
   width: fit-content;
   margin: 4px 0 0;
-  padding: 5px 12px;
-  border: 1px solid color-mix(in srgb, var(--dm-gold) 44%, var(--sd-line-2, rgb(122 232 255 / 24%)));
-  border-left: 2px solid var(--dm-gold);
+  padding: 5px 14px;
+  border: 1px solid color-mix(in srgb, var(--dm-gold) 56%, var(--sd-line-2, rgb(122 232 255 / 28%)));
+  border-left: 3px solid var(--dm-gold);
   border-radius: 2px;
-  color: #f5ebd2;
-  background: linear-gradient(
-    90deg,
-    rgb(240 207 134 / 14%),
-    rgb(122 232 255 / 5%) 68%,
-    rgb(8 13 22 / 76%)
-  );
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  color: #fff6e0;
+  background:
+    linear-gradient(90deg, #fff8e8 0%, var(--dm-gold) 48%, transparent 94%) 0 0 / 100% 1px
+      no-repeat,
+    linear-gradient(
+      90deg,
+      rgb(240 207 134 / 22%),
+      rgb(122 232 255 / 7%) 68%,
+      rgb(8 13 22 / 84%)
+    );
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 42%),
+    inset 0 1px 0 rgb(255 255 255 / 16%);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;

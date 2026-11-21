@@ -54,6 +54,11 @@ main.manager-page.rider-dossier-page:not(.is-sovereign) {
   --dm-rim: rgb(var(--rider-secondary-rgb, 240 207 134));
 }
 
+main.manager-page.related-character-page:not(.is-sovereign):not(.dante-page) {
+  --dm-key: var(--manager-accent, #86d9ff);
+  --dm-rim: color-mix(in srgb, var(--manager-accent, #86d9ff) 52%, #f0cf86);
+}
+
 main.manager-page:not(.is-sovereign):has(img[src*="character-yoake-mamori"]) {
   --dm-key: #a8c7ff;
   --dm-rim: #f0cf86;
@@ -204,23 +209,57 @@ main.manager-page.dante-page:not(.is-sovereign) .dossier-arrive-scan {
     linear-gradient(
         90deg,
         transparent 0%,
-        rgb(255 255 255 / 80%) 50%,
+        rgb(255 255 255 / 85%) 50%,
         transparent 100%
       )
       bottom / 100% 1px no-repeat,
     radial-gradient(
-        ellipse 70% 32px at 50% 100%,
-        rgb(237 102 126 / 32%),
+        ellipse 74% 34px at 50% 100%,
+        rgb(237 102 126 / 38%),
         transparent 72%
       )
-      bottom / 100% 52px no-repeat,
+      bottom / 100% 56px no-repeat,
     linear-gradient(
         0deg,
-        rgb(54 155 137 / 26%),
-        rgb(237 102 126 / 14%) 40px,
-        transparent 86px
+        rgb(54 155 137 / 28%),
+        rgb(237 102 126 / 16%) 42px,
+        transparent 92px
       )
-      bottom / 100% 86px no-repeat;
+      bottom / 100% 92px no-repeat;
+}
+
+main.manager-page.related-character-page:not(.is-sovereign):not(.dante-page) .dossier-arrive-scan,
+main.manager-page:not(.is-sovereign):has(img[src*="character-yoake-mamori"]) .dossier-arrive-scan {
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--dm-key) 14%,
+        #ffffff 50%,
+        var(--dm-rim) 86%,
+        transparent 100%
+      )
+      bottom / 100% 2px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        rgb(255 255 255 / 88%) 50%,
+        transparent 100%
+      )
+      bottom / 100% 1px no-repeat,
+    radial-gradient(
+        ellipse 74% 36px at 50% 100%,
+        color-mix(in srgb, var(--dm-key) 42%, rgb(240 207 134 / 30%)),
+        transparent 74%
+      )
+      bottom / 100% 56px no-repeat,
+    linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--dm-key) 30%, transparent),
+        color-mix(in srgb, var(--dm-rim) 14%, transparent) 44px,
+        transparent 94px
+      )
+      bottom / 100% 94px no-repeat;
 }
 
 /* ================================================================
@@ -348,6 +387,22 @@ html[data-world-effects="economy"]
     .manager-hero
     :is(.manager-facts, .rider-special-site-link) {
     animation-delay: calc(var(--dm-arrive-delay) + 400ms);
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-quotes
+    > q:nth-child(1) {
+    animation: dm-arrive-rise 420ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 340ms) both;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-loading])
+    main.manager-page:not(.is-sovereign)
+    .manager-hero
+    .manager-quotes
+    > q:nth-child(n + 2) {
+    animation: dm-arrive-rise 420ms var(--dm-arrive-out) calc(var(--dm-arrive-delay) + 420ms) both;
   }
 
   html:not([data-world-effects="economy"]):not([data-loading])
@@ -537,10 +592,12 @@ html[data-world-effects="economy"]
    otherwise trim its misregistered ghost. */
 @keyframes dm-arrive-name {
   from {
+    opacity: 0.25;
     clip-path: inset(-12px 100% -12px -12px);
     translate: -0.12em 0;
   }
   to {
+    opacity: 1;
     clip-path: inset(-12px -12px -12px -12px);
     translate: 0 0;
   }

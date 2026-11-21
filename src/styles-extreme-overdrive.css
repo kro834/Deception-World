@@ -374,7 +374,7 @@
   );
   -webkit-mask: radial-gradient(circle closest-side, transparent 0 34%, #000 46%, transparent 100%);
   mask: radial-gradient(circle closest-side, transparent 0 34%, #000 46%, transparent 100%);
-  opacity: 0.5;
+  opacity: 0.68;
   pointer-events: none;
 }
 
@@ -387,12 +387,12 @@
   bottom: 22%;
   left: 35%;
   background:
-    linear-gradient(270deg, transparent, var(--exo-gold) 60%, #fff) 0 8% / 78% 2.5px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-ice) 70%, #fff) 0 28% / 96% 1.5px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-gold) 55%, var(--exo-hot)) 0 52% / 68% 2px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-ice) 60%, #fff) 0 72% / 88% 1.5px no-repeat,
-    linear-gradient(270deg, transparent, var(--exo-gold) 45%, #fff) 0 94% / 54% 2px no-repeat;
-  opacity: 0.52;
+    linear-gradient(270deg, transparent, #3cb4ff 52%, #e6fbff) 0 8% / 84% 2.5px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-ice) 68%, #fff) 0 28% / 98% 2px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold) 55%, var(--exo-hot)) 0 52% / 72% 2px no-repeat,
+    linear-gradient(270deg, transparent, #44bfff 60%, #fff) 0 72% / 92% 2px no-repeat,
+    linear-gradient(270deg, transparent, var(--exo-gold) 45%, #fff) 0 94% / 58% 2px no-repeat;
+  opacity: 0.68;
   pointer-events: none;
 }
 

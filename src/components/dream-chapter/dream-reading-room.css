@@ -342,40 +342,32 @@
   min-height: 0;
   padding: clamp(20px, 4vw, 64px);
   background:
-    radial-gradient(62% 46% at 50% 0%, var(--room-amber-glow), transparent 72%),
-    radial-gradient(74% 62% at 50% 36%, rgb(216 168 92 / 9%), transparent 76%),
-    radial-gradient(50% 42% at 50% 100%, rgb(164 73 59 / 9%), transparent 70%),
-    radial-gradient(96% 92% at 50% 48%, transparent 56%, var(--room-vignette) 100%);
+    radial-gradient(64% 48% at 50% 0%, var(--room-amber-glow), transparent 72%),
+    radial-gradient(76% 64% at 50% 36%, rgb(224 176 96 / 12%), transparent 76%),
+    radial-gradient(52% 44% at 50% 100%, rgb(176 72 58 / 11%), transparent 70%),
+    radial-gradient(96% 92% at 50% 48%, transparent 54%, var(--room-vignette) 100%);
 }
-/* 控えめな単線枠と静かな紙面陰影（Quiet single-rule book sheet without margin collision） */
+/* 金蒔絵四隅飾り・二重罫の書物紙面（Double-ruled book sheet with gilt brass corner brackets） */
 .dream-reading-paper {
   max-width: 800px;
   margin: 0 auto;
   background:
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 0 0 / 24px 2px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 0 0 / 2px 24px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 100% 0 / 24px 2px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 100% 0 / 2px 24px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 0 100% / 24px 2px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 0 100% / 2px 24px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 100% 100% / 24px 2px
-      no-repeat,
-    linear-gradient(color-mix(in srgb, var(--room-brass) 78%, transparent) 0 0) 100% 100% / 2px 24px
-      no-repeat,
-    radial-gradient(74% 50% at 50% 0%, rgb(236 190 108 / 14%), transparent 74%),
-    radial-gradient(56% 42% at 88% 100%, rgb(184 68 58 / 8%), transparent 72%),
+    linear-gradient(135deg, var(--room-brass), var(--room-gilt)) 0 0 / 28px 2px no-repeat,
+    linear-gradient(135deg, var(--room-brass), var(--room-gilt)) 0 0 / 2px 28px no-repeat,
+    linear-gradient(225deg, var(--room-brass), var(--room-gilt)) 100% 0 / 28px 2px no-repeat,
+    linear-gradient(225deg, var(--room-brass), var(--room-gilt)) 100% 0 / 2px 28px no-repeat,
+    linear-gradient(45deg, var(--room-brass), var(--room-gilt)) 0 100% / 28px 2px no-repeat,
+    linear-gradient(45deg, var(--room-brass), var(--room-gilt)) 0 100% / 2px 28px no-repeat,
+    linear-gradient(315deg, var(--room-brass), var(--room-gilt)) 100% 100% / 28px 2px no-repeat,
+    linear-gradient(315deg, var(--room-brass), var(--room-gilt)) 100% 100% / 2px 28px no-repeat,
+    radial-gradient(76% 52% at 50% 0%, rgb(244 198 114 / 16%), transparent 74%),
+    radial-gradient(58% 44% at 88% 100%, rgb(192 68 58 / 10%), transparent 72%),
     var(--room-paper);
   box-shadow:
-    inset 0 1px 0 rgb(255 248 228 / 20%),
-    inset 0 0 0 5px color-mix(in srgb, var(--room-bg) 42%, transparent),
-    inset 0 0 0 6px color-mix(in srgb, var(--room-rule) 28%, transparent),
-    0 28px 64px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 248 228 / 26%),
+    inset 0 0 0 5px color-mix(in srgb, var(--room-bg) 46%, transparent),
+    inset 0 0 0 6px color-mix(in srgb, var(--room-rule) 36%, transparent),
+    0 32px 72px rgb(0 0 0 / 54%);
   border: 1px solid var(--room-rule);
   padding: clamp(24px, 5vw, 72px);
 }
@@ -489,26 +481,30 @@
   font-variant-numeric: tabular-nums;
   margin-bottom: 10px;
 }
-/* 茜×金の組紐しおりマーカー（Akane × gold kumihimo braided bookmark ribbon） */
+/* 茜×金の組紐しおりマーカー（Akane × gold-thread swallowtail bookmark ribbon, zero repeating-linear-gradient） */
 .dream-reading-paper > [data-room-paragraph][data-bookmarked="true"]::before {
   content: "";
   position: absolute;
   left: -14px;
   top: 0.24em;
-  width: 6px;
-  height: 2.35em;
+  width: 7px;
+  height: 2.38em;
   pointer-events: none;
   background:
-    linear-gradient(180deg, #f3d796 0 2px, transparent 2px),
-    repeating-linear-gradient(
-      135deg,
-      #9e2f32 0 3px,
-      #e6c17a 3px 4.5px,
-      #762024 4.5px 7.5px
-    );
+    linear-gradient(180deg, #fae2a8 0 2.5px, transparent 2.5px),
+    linear-gradient(
+      90deg,
+      transparent 1.3px,
+      rgb(252 234 188 / 88%) 1.3px 2.1px,
+      transparent 2.1px calc(100% - 2.1px),
+      rgb(252 234 188 / 88%) calc(100% - 2.1px) calc(100% - 1.3px),
+      transparent 0
+    ),
+    radial-gradient(75% 60% at 50% 24%, rgb(242 118 92 / 36%), transparent 75%),
+    linear-gradient(180deg, #b6362f 0%, #842327 60%, #58151a 100%);
   box-shadow:
-    0 2px 6px rgb(0 0 0 / 34%),
-    inset 0 0 0 0.5px rgb(244 212 148 / 52%);
+    0 3px 8px rgb(0 0 0 / 38%),
+    inset 0 0 0 0.5px rgb(248 218 156 / 58%);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 5px), 0 100%);
 }
 /* On a wide paper the numeral hangs in the margin, as a folio. */

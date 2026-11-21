@@ -704,15 +704,36 @@ html[data-family="special"]
   bottom: 0;
   left: auto;
   top: auto;
-  width: 42%;
-  height: 3px;
+  width: 48%;
+  height: 3.5px;
   margin: 0;
-  background: var(--rxt-cut);
+  background:
+    linear-gradient(90deg, #ffffff 0 6px, rgb(255 255 255 / 72%) 6px 36%, transparent 80%) 0 0 /
+      100% 1px no-repeat,
+    linear-gradient(90deg, #ffffff 0%, #79e8ff 28%, #b6a3ff 62%, #f2d896 100%);
   border: 0;
   border-radius: 0;
   box-shadow:
-    0 0 14px rgb(121 232 255 / 48%),
-    0 0 26px rgb(255 143 216 / 26%);
+    0 0 16px rgb(121 232 255 / 64%),
+    0 0 32px rgb(182 163 255 / 34%);
+}
+
+html[data-family="special"]
+  body
+  .rxs-page.rxs-page.rxs-rexonance-page
+  > #performance
+  .rxs-headline-metrics
+  > article
+  + article
+  .rxp-gauge {
+  width: 58%;
+  background:
+    linear-gradient(90deg, #ffffff 0 6px, rgb(255 255 255 / 74%) 6px 38%, transparent 82%) 0 0 /
+      100% 1px no-repeat,
+    linear-gradient(90deg, #ffffff 0%, #ff8fd8 30%, #f2d896 68%, #79e8ff 100%);
+  box-shadow:
+    0 0 18px rgb(255 143 216 / 64%),
+    0 0 34px rgb(242 216 150 / 34%);
 }
 
 /* The comparison: one armour plate, an instrument. */

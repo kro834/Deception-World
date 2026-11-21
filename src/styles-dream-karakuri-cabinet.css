@@ -32,23 +32,24 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-heading h2 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork {
   position: relative;
   padding: 18px;
-  border: 1px solid #bd975a;
+  border: 1px solid #d4ac6a;
   border-radius: 3px;
   /* 黒漆・溜塗（Tame-nuri lacquer: deep vermilion glowing through jet-black urushi + 金蒔絵 micro-flecks） */
   background:
-    radial-gradient(circle at 12% 18%, rgb(246 212 136 / 36%) 0 1px, transparent 1.8px),
-    radial-gradient(circle at 86% 14%, rgb(238 198 118 / 32%) 0 1.1px, transparent 1.9px),
-    radial-gradient(circle at 78% 84%, rgb(246 212 136 / 30%) 0 0.9px, transparent 1.7px),
-    radial-gradient(circle at 24% 88%, rgb(232 190 110 / 28%) 0 1px, transparent 1.8px),
-    linear-gradient(164deg, rgb(255 242 214 / 10%) 0%, transparent 30%),
-    radial-gradient(ellipse 70% 54% at 22% 18%, rgb(148 38 44 / 42%), transparent 68%),
-    radial-gradient(ellipse 66% 58% at 82% 82%, rgb(124 30 38 / 38%), transparent 70%),
-    linear-gradient(125deg, #0d080b 0%, #1f1116 38%, #31161c 54%, #100a0d 100%);
+    radial-gradient(circle at 12% 18%, rgb(250 218 144 / 44%) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 86% 14%, rgb(244 206 126 / 38%) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 78% 84%, rgb(250 218 144 / 36%) 0 1px, transparent 1.8px),
+    radial-gradient(circle at 24% 88%, rgb(238 196 116 / 34%) 0 1.1px, transparent 1.9px),
+    radial-gradient(circle at 52% 8%, rgb(252 224 156 / 28%) 0 0.9px, transparent 1.7px),
+    linear-gradient(164deg, rgb(255 244 216 / 13%) 0%, transparent 32%),
+    radial-gradient(ellipse 72% 56% at 20% 16%, rgb(164 42 48 / 48%), transparent 68%),
+    radial-gradient(ellipse 68% 60% at 84% 84%, rgb(138 32 40 / 42%), transparent 70%),
+    linear-gradient(125deg, #0d070a 0%, #221117 36%, #38181f 54%, #11090d 100%);
   box-shadow:
-    0 28px 64px rgb(0 0 0 / 68%),
-    inset 0 1px 0 rgb(255 240 202 / 24%),
-    inset 0 0 0 4px #0b0709dd,
-    inset 0 0 0 6px rgb(228 190 116 / 34%);
+    0 32px 72px rgb(0 0 0 / 74%),
+    inset 0 1px 0 rgb(255 244 210 / 32%),
+    inset 0 0 0 4px #0b0608e6,
+    inset 0 0 0 6px rgb(236 198 124 / 42%);
 }
 
 /* 四隅真鍮金具（Four-corner sculpted brass L-brackets & corner rivets） */
@@ -63,36 +64,36 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::a
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::before {
   background:
-    linear-gradient(135deg, #f2d598, #a57d41) 0 0 / 24px 3px no-repeat,
-    linear-gradient(135deg, #f2d598, #a57d41) 0 0 / 3px 24px no-repeat,
-    linear-gradient(225deg, #f2d598, #a57d41) 100% 0 / 24px 3px no-repeat,
-    linear-gradient(225deg, #f2d598, #a57d41) 100% 0 / 3px 24px no-repeat,
-    linear-gradient(45deg, #e5c382, #8f6932) 0 100% / 24px 3px no-repeat,
-    linear-gradient(45deg, #e5c382, #8f6932) 0 100% / 3px 24px no-repeat,
-    linear-gradient(315deg, #e5c382, #8f6932) 100% 100% / 24px 3px no-repeat,
-    linear-gradient(315deg, #e5c382, #8f6932) 100% 100% / 3px 24px no-repeat;
+    linear-gradient(135deg, #fae2a8, #ad8342) 0 0 / 28px 3px no-repeat,
+    linear-gradient(135deg, #fae2a8, #ad8342) 0 0 / 3px 28px no-repeat,
+    linear-gradient(225deg, #fae2a8, #ad8342) 100% 0 / 28px 3px no-repeat,
+    linear-gradient(225deg, #fae2a8, #ad8342) 100% 0 / 3px 28px no-repeat,
+    linear-gradient(45deg, #edd090, #946d34) 0 100% / 28px 3px no-repeat,
+    linear-gradient(45deg, #edd090, #946d34) 0 100% / 3px 28px no-repeat,
+    linear-gradient(315deg, #edd090, #946d34) 100% 100% / 28px 3px no-repeat,
+    linear-gradient(315deg, #edd090, #946d34) 100% 100% / 3px 28px no-repeat;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-woodwork::after {
   background:
-    radial-gradient(circle at 8px 8px, #f6dfb0 0 1.6px, #6e4f23 1.7px 2.6px, transparent 2.8px),
+    radial-gradient(circle at 9px 9px, #fff0c6 0 1.8px, #6e4f23 1.9px 2.9px, transparent 3.1px),
     radial-gradient(
-      circle at calc(100% - 8px) 8px,
-      #f6dfb0 0 1.6px,
-      #6e4f23 1.7px 2.6px,
-      transparent 2.8px
+      circle at calc(100% - 9px) 9px,
+      #fff0c6 0 1.8px,
+      #6e4f23 1.9px 2.9px,
+      transparent 3.1px
     ),
     radial-gradient(
-      circle at 8px calc(100% - 8px),
-      #ebd09a 0 1.6px,
-      #6e4f23 1.7px 2.6px,
-      transparent 2.8px
+      circle at 9px calc(100% - 9px),
+      #f2d8a2 0 1.8px,
+      #6e4f23 1.9px 2.9px,
+      transparent 3.1px
     ),
     radial-gradient(
-      circle at calc(100% - 8px) calc(100% - 8px),
-      #ebd09a 0 1.6px,
-      #6e4f23 1.7px 2.6px,
-      transparent 2.8px
+      circle at calc(100% - 9px) calc(100% - 9px),
+      #f2d8a2 0 1.8px,
+      #6e4f23 1.9px 2.9px,
+      transparent 3.1px
     );
 }
 
@@ -104,20 +105,23 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume {
   gap: 18px;
   margin: 1px 1px 23px;
   padding: 17px 20px;
-  border: 1px solid #c6a47066;
-  border-left: 4px solid #c3995c;
+  border: 1px solid rgb(216 180 116 / 52%);
+  border-left: 4px solid #d4a662;
   background:
-    radial-gradient(ellipse 55% 90% at 15% 50%, rgb(118 32 36 / 24%), transparent 70%),
-    linear-gradient(108deg, #170f13, #27161a 56%, #150e12);
+    linear-gradient(135deg, #f5dca0, #a88040) 100% 0 / 18px 1.5px no-repeat,
+    linear-gradient(135deg, #f5dca0, #a88040) 100% 0 / 1.5px 18px no-repeat,
+    radial-gradient(ellipse 58% 92% at 14% 50%, rgb(138 38 42 / 32%), transparent 70%),
+    linear-gradient(108deg, #190f14 0%, #2c181d 54%, #160d12 100%);
   box-shadow:
-    0 6px 16px #09050859,
-    inset 0 0 0 4px #cbb17b0a;
+    0 10px 24px rgb(6 3 6 / 52%),
+    inset 0 1px 0 rgb(255 240 204 / 18%),
+    inset 0 0 0 4px rgb(203 177 123 / 6%);
 }
 
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-karakuri-resume[data-has-bookmark="true"] {
-  border-left-color: #daa574;
+  border-left-color: #e6b578;
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-mark {
@@ -127,8 +131,14 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-mark
   min-width: 35px;
   min-height: 48px;
   padding: 5px;
-  border: 1px solid #bd9e6b;
-  color: #ecd6ae;
+  border: 1px solid #d4b074;
+  outline: 1px solid rgb(212 176 116 / 32%);
+  outline-offset: -4px;
+  color: #f8e6be;
+  background:
+    radial-gradient(circle at 50% 26%, rgb(228 96 76 / 28%), transparent 72%),
+    linear-gradient(180deg, #5c2024 0%, #381217 100%);
+  box-shadow: inset 0 1px 0 rgb(255 238 202 / 26%);
   font-family: var(--ts-display);
   font-size: 23px;
 }
@@ -140,7 +150,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy p {
   margin: 0 0 4px;
-  color: #f3e5c9;
+  color: #f6e9ce;
   font-family: var(--ts-display);
   font-size: 17px;
   font-weight: 600;
@@ -150,7 +160,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-copy > span {
   display: block;
-  color: #d8c6a7;
+  color: #dfd0b4;
   font-size: 13px;
   line-height: 1.9;
 }
@@ -162,9 +172,15 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-resume-link
   gap: 18px;
   min-height: 46px;
   padding: 10px 16px;
-  border: 1px solid #c8ab75;
-  background: #eadbb9;
-  color: #3c2b20;
+  border: 1px solid #d4b276;
+  background:
+    linear-gradient(#8e322c 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(#b68c46 0 0) 100% 100% / 12px 1.5px no-repeat,
+    linear-gradient(165deg, #f8eed6 0%, #eadac0 58%, #dcc8a4 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 245 / 84%),
+    0 6px 16px rgb(0 0 0 / 34%);
+  color: #38261b;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.8;
@@ -229,19 +245,19 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab {
   gap: 8px;
   position: relative;
   padding: 14px 5px 13px;
-  border: 1px solid rgb(206 168 104 / 62%);
+  border: 1px solid rgb(216 178 112 / 68%);
   border-radius: 2px;
   background:
-    linear-gradient(#f0d498 0 0) 0 0 / 12px 1.5px no-repeat,
-    linear-gradient(#f0d498 0 0) 100% 0 / 12px 1.5px no-repeat,
-    radial-gradient(ellipse 84% 64% at 50% 18%, rgb(156 42 46 / 34%), transparent 70%),
-    linear-gradient(155deg, #28151a 0%, #3a1c22 48%, #180e12 100%);
+    linear-gradient(135deg, #f8e0a4, #b08642) 0 0 / 14px 2px no-repeat,
+    linear-gradient(225deg, #f8e0a4, #b08642) 100% 0 / 14px 2px no-repeat,
+    radial-gradient(ellipse 84% 64% at 50% 18%, rgb(168 46 50 / 40%), transparent 70%),
+    linear-gradient(155deg, #2b161c 0%, #3f1d24 48%, #190e12 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 238 198 / 20%),
-    inset 0 0 0 3px #120b0eb3,
-    0 4px 0 #0a0608,
-    0 8px 18px rgb(0 0 0 / 42%);
-  color: #f3e6cc;
+    inset 0 1px 0 rgb(255 242 206 / 26%),
+    inset 0 0 0 3px #120b0eb8,
+    0 4px 0 #090507,
+    0 10px 22px rgb(0 0 0 / 46%);
+  color: #f6e9d0;
   cursor: pointer;
   transition:
     background-color 180ms,
@@ -254,7 +270,7 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab::before
   content: "";
   position: absolute;
   inset: 5px;
-  border: 1px solid #d4af6a2e;
+  border: 1px solid rgb(222 184 114 / 24%);
   pointer-events: none;
 }
 
@@ -278,8 +294,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle {
   justify-content: center;
   width: 40px;
   height: 16px;
-  color: #cca768;
-  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 48%));
+  color: #d8b270;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 54%));
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle-svg {
@@ -296,31 +312,31 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-handle-cog 
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab[aria-selected="true"] {
-  border-color: #f2d89c;
+  border-color: #f8dfa4;
   background:
-    linear-gradient(90deg, #8c352d, #c5984e 52%, #8c352d) 0 0 / 100% 2.5px no-repeat,
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgb(255 252 242 / 75%), transparent 68%),
-    linear-gradient(108deg, #f6ebd1, #dcc89e);
-  color: #36271c;
+    linear-gradient(90deg, #98362e, #cfa256 50%, #98362e) 0 0 / 100% 3px no-repeat,
+    radial-gradient(ellipse 82% 62% at 50% 0%, rgb(255 253 245 / 84%), transparent 68%),
+    linear-gradient(112deg, #faf0d8 0%, #ecdcc0 56%, #dcc69b 100%);
+  color: #342419;
   transform: translateY(3px);
   box-shadow:
-    inset 0 0 0 3px #fcf2daaa,
+    inset 0 0 0 3px #fff6e2bd,
     0 1px 0 #15100d,
-    0 0 20px rgb(242 196 112 / 24%);
+    0 0 24px rgb(246 200 116 / 30%);
 }
 
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-karakuri-tab[aria-selected="true"]::before {
-  border-color: #72572b45;
+  border-color: rgb(118 88 42 / 34%);
 }
 
 html[data-family="dream"]
   main.dream-page.dream-page
   .dream-karakuri-tab[aria-selected="true"]
   .dream-karakuri-handle {
-  color: #765533;
-  filter: drop-shadow(0 1px 1px rgb(58 38 18 / 28%));
+  color: #72502d;
+  filter: drop-shadow(0 1px 1px rgb(58 38 18 / 30%));
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -330,7 +346,12 @@ html[data-family="dream"]
   }
 
   html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-tab:hover {
-    border-color: #e6ca90;
+    border-color: #f0d498;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 214 / 34%),
+      inset 0 0 0 3px #120b0eb8,
+      0 4px 0 #090507,
+      0 14px 28px rgb(0 0 0 / 54%);
   }
 }
 
@@ -339,9 +360,11 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-theatre {
   position: relative;
   overflow: hidden;
   padding: 0 15px;
-  border: 1px solid #1c1712;
-  background: #211c16;
-  box-shadow: 0 1px 0 #cdb27930;
+  border: 1px solid #3a2a1d;
+  background: linear-gradient(180deg, #1b1511 0%, #241c16 50%, #18120e 100%);
+  box-shadow:
+    inset 0 2px 10px rgb(0 0 0 / 58%),
+    0 1px 0 rgb(216 184 122 / 26%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper {
@@ -350,17 +373,23 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper {
   min-height: 365px;
   padding: 23px clamp(22px, 3.5vw, 52px) 28px;
   background:
-    linear-gradient(#ad8442 0 0) 14px 14px / 22px 1.5px no-repeat,
-    linear-gradient(#ad8442 0 0) 14px 14px / 1.5px 22px no-repeat,
-    linear-gradient(#ad8442 0 0) calc(100% - 14px) calc(100% - 14px) / 22px 1.5px no-repeat,
-    linear-gradient(#ad8442 0 0) calc(100% - 14px) calc(100% - 14px) / 1.5px 22px no-repeat,
-    radial-gradient(ellipse 72% 54% at 12% 8%, rgb(255 252 243 / 68%), transparent 68%),
-    radial-gradient(ellipse 58% 48% at 90% 92%, rgb(198 158 96 / 20%), transparent 70%),
-    linear-gradient(162deg, #f5ecd8 0%, var(--karakuri-paper) 56%, #e1d2b4 100%);
+    linear-gradient(#b28844 0 0) 14px 14px / 26px 2px no-repeat,
+    linear-gradient(#b28844 0 0) 14px 14px / 2px 26px no-repeat,
+    linear-gradient(#b28844 0 0) calc(100% - 14px) 14px / 20px 1.5px no-repeat,
+    linear-gradient(#b28844 0 0) calc(100% - 14px) 14px / 1.5px 20px no-repeat,
+    linear-gradient(#b28844 0 0) 14px calc(100% - 14px) / 20px 1.5px no-repeat,
+    linear-gradient(#b28844 0 0) 14px calc(100% - 14px) / 1.5px 20px no-repeat,
+    linear-gradient(#b28844 0 0) calc(100% - 14px) calc(100% - 14px) / 26px 2px no-repeat,
+    linear-gradient(#b28844 0 0) calc(100% - 14px) calc(100% - 14px) / 2px 26px no-repeat,
+    radial-gradient(ellipse 74% 56% at 12% 8%, rgb(255 253 245 / 78%), transparent 68%),
+    radial-gradient(ellipse 60% 50% at 90% 92%, rgb(198 156 92 / 24%), transparent 70%),
+    linear-gradient(162deg, #f8f0de 0%, var(--karakuri-paper) 54%, #dfd0b0 100%);
   color: var(--karakuri-ink);
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 82%),
-    inset 0 0 34px rgb(106 75 40 / 14%);
+    inset 0 1px 0 rgb(255 254 248 / 88%),
+    inset 0 0 0 6px rgb(255 250 238 / 46%),
+    inset 0 0 0 7px rgb(172 132 70 / 22%),
+    inset 0 0 38px rgb(106 75 40 / 15%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper[data-selected="false"] {
@@ -373,8 +402,8 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-paper-topli
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #6d593430;
-  color: #695735;
+  border-bottom: 3px double rgb(124 96 52 / 34%);
+  color: #655231;
   font-size: 12px;
   letter-spacing: 0.13em;
   line-height: 1.6;
@@ -393,14 +422,15 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-seal {
   height: 56px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1.5px solid #8c3529;
-  outline: 1px solid #8c352999;
+  border: 2px solid #8e3226;
+  outline: 1px solid rgb(142 50 38 / 62%);
   outline-offset: -5px;
-  color: #842e23;
-  background: radial-gradient(circle at 38% 30%, rgb(255 248 236 / 74%), rgb(176 62 48 / 12%));
+  color: #822b20;
+  background:
+    radial-gradient(circle at 36% 28%, rgb(255 250 240 / 82%), rgb(184 58 44 / 16%));
   box-shadow:
-    inset 0 1px 0 rgb(255 252 244 / 70%),
-    0 3px 8px rgb(98 42 32 / 18%);
+    inset 0 1px 0 rgb(255 253 246 / 78%),
+    0 4px 12px rgb(98 38 28 / 22%);
   font-family: var(--ts-display);
   font-size: 25px;
   transform: rotate(-3deg);
@@ -478,16 +508,19 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a {
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-actions a:first-child {
   padding: 10px 19px;
-  border: 1px solid #5e261d;
+  border: 1px solid #5e221b;
   background:
-    linear-gradient(#f2d496 0 0) 0 0 / 12px 1.5px no-repeat,
-    linear-gradient(#f2d496 0 0) 100% 100% / 12px 1.5px no-repeat,
-    linear-gradient(180deg, #8f3d32 0%, #6b2920 100%);
-  color: #fff5e0;
+    linear-gradient(135deg, #f8dea2, #b88a42) 0 0 / 14px 2px no-repeat,
+    linear-gradient(135deg, #f8dea2, #b88a42) 0 0 / 2px 12px no-repeat,
+    linear-gradient(315deg, #f0d090, #9c7232) 100% 100% / 14px 2px no-repeat,
+    linear-gradient(315deg, #f0d090, #9c7232) 100% 100% / 2px 12px no-repeat,
+    radial-gradient(ellipse 75% 80% at 22% 0%, rgb(242 126 92 / 28%), transparent 70%),
+    linear-gradient(180deg, #963b30 0%, #6d261e 58%, #4d1914 100%);
+  color: #fff6e4;
   box-shadow:
-    inset 0 1px 0 rgb(255 236 202 / 36%),
-    inset 0 0 0 3px rgb(249 223 187 / 12%),
-    0 6px 16px rgb(74 28 22 / 26%);
+    inset 0 1px 0 rgb(255 240 206 / 42%),
+    inset 0 0 0 3px rgb(249 223 187 / 14%),
+    0 8px 20px rgb(74 28 22 / 32%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-scope {
@@ -517,28 +550,24 @@ html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-shoji-leaf 
   bottom: 0;
   width: 50%;
   border: 6px solid #4a3420;
-  /* 組子桟ベベル＋和紙透過暖色（Beveled cedar kumiko muntins + warm lantern-backlit washi） */
+  /* 組子桟ベベル＋和紙透過暖色（Beveled cedar kumiko muntins + warm lantern-backlit washi, zero repeating-linear-gradient） */
   background:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0 calc(25% - 3px),
-      #8e6e44 calc(25% - 3px) calc(25% - 2px),
-      #5c4328 calc(25% - 2px) calc(25% - 0.8px),
-      #362514 calc(25% - 0.8px) 25%
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent 0 calc(33.333% - 3px),
-      #8e6e44 calc(33.333% - 3px) calc(33.333% - 2px),
-      #5c4328 calc(33.333% - 2px) calc(33.333% - 0.8px),
-      #362514 calc(33.333% - 0.8px) 33.333%
-    ),
-    radial-gradient(ellipse 74% 64% at 50% 44%, #fff6df 0%, #f5e6c4 56%, #dcc8a0 100%);
+    linear-gradient(180deg, #8e6e44 0 1px, #5c4328 1px 2.2px, #362514 2.2px 3px) 0 25% / 100% 3px
+      no-repeat,
+    linear-gradient(180deg, #8e6e44 0 1px, #5c4328 1px 2.2px, #362514 2.2px 3px) 0 50% / 100% 3px
+      no-repeat,
+    linear-gradient(180deg, #8e6e44 0 1px, #5c4328 1px 2.2px, #362514 2.2px 3px) 0 75% / 100% 3px
+      no-repeat,
+    linear-gradient(90deg, #8e6e44 0 1px, #5c4328 1px 2.2px, #362514 2.2px 3px) 33.333% 0 / 3px
+      100% no-repeat,
+    linear-gradient(90deg, #8e6e44 0 1px, #5c4328 1px 2.2px, #362514 2.2px 3px) 66.667% 0 / 3px
+      100% no-repeat,
+    radial-gradient(ellipse 76% 66% at 50% 44%, #fff8e4 0%, #f5e6c4 56%, #dcc8a0 100%);
   box-shadow:
-    0 0 18px rgb(0 0 0 / 34%),
-    inset 0 1px 0 rgb(255 248 228 / 65%),
-    inset 0 0 0 1px #c7a264,
-    inset 0 0 26px rgb(224 166 82 / 22%);
+    0 0 20px rgb(0 0 0 / 38%),
+    inset 0 1px 0 rgb(255 248 228 / 68%),
+    inset 0 0 0 1px #cca666,
+    inset 0 0 28px rgb(228 170 84 / 24%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-karakuri-shoji-left {

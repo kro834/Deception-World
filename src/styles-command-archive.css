@@ -16,103 +16,311 @@ main.command-exhibition {
 main.command-archive[data-archive-kind] {
   --fa-ink: #040912;
   --fa-text: var(--command-paper);
-  --fa-text-2: #c0d4e3;
-  --fa-text-3: #a4bccf;
+  --fa-text-2: #c8dcea;
+  --fa-text-3: #abc4d8;
   --fa-accent: var(--command-key);
-  --fa-lock: #d4f9ff;
+  --fa-lock: #dffbff;
   --archive-cyan: #9be9fa;
-  --archive-violet: #c2b0ff;
+  --archive-violet: #c6b4ff;
   background: #040912;
 }
-html[data-family] body main.command-archive[data-archive-kind] > header.form-archive-toolbar.form-archive-toolbar {
-  border-bottom: 1px solid rgb(162 214 242 / 34%);
+/* Architectural chamber illumination & desktop vitrine framing around the embedded archive */
+html[data-family]
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind] {
   background:
-    radial-gradient(ellipse 56% 110% at 50% 0%, rgb(155 233 250 / 14%), transparent 70%),
-    radial-gradient(ellipse 42% 90% at 84% 100%, rgb(240 207 134 / 8%), transparent 70%),
-    linear-gradient(180deg, #142332 0%, #0a131e 58%, #060c15 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 26%),
-    inset 0 -1px 0 rgb(155 233 250 / 14%),
-    0 12px 32px rgb(0 0 0 / 56%);
+    radial-gradient(ellipse 70% 380px at 50% 0%, rgb(138 238 255 / 38%), transparent 72%),
+    radial-gradient(ellipse 46% 580px at 0% 36%, rgb(122 232 255 / 32%), transparent 68%),
+    radial-gradient(ellipse 46% 580px at 100% 36%, rgb(244 212 146 / 28%), transparent 68%),
+    radial-gradient(ellipse 64% 400px at 50% 102%, rgb(164 139 255 / 30%), transparent 72%),
+    linear-gradient(164deg, #132840 0%, #091628 48%, #0f0c24 100%);
 }
-html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
-  border: 1px solid rgb(164 218 244 / 38%);
-  border-top-color: rgb(226 246 255 / 50%);
+html[data-family]
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"] {
   background:
-    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(155 233 250 / 10%), transparent 72%),
-    linear-gradient(180deg, rgb(18 31 45 / 0.96), rgb(6 12 20 / 0.98)) !important;
-  box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 22%),
-    inset 0 3px 10px rgb(0 0 0 / 0.58),
-    0 8px 22px rgb(0 0 0 / 0.52) !important;
+    radial-gradient(ellipse 70% 380px at 50% 0%, rgb(204 182 255 / 40%), transparent 72%),
+    radial-gradient(ellipse 46% 580px at 0% 36%, rgb(184 162 255 / 32%), transparent 68%),
+    radial-gradient(ellipse 46% 580px at 100% 36%, rgb(245 213 139 / 30%), transparent 68%),
+    radial-gradient(ellipse 64% 400px at 50% 102%, rgb(245 213 139 / 24%), transparent 72%),
+    linear-gradient(164deg, #221a44 0%, #120d29 48%, #0a0818 100%);
 }
-html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
-  border: 1px solid rgb(182 238 255 / 62%);
-  border-top-color: rgb(242 252 255 / 82%);
-  background:
-    radial-gradient(ellipse 85% 75% at 50% 0%, rgb(155 233 250 / 28%), transparent 72%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.1), transparent 52%),
-    linear-gradient(180deg, #1c364b 0%, #102130 100%) !important;
-  box-shadow:
-    inset 0 1px 0 rgb(246 253 255 / 0.54),
-    inset 0 0 14px rgb(155 233 250 / 0.2),
-    0 4px 14px rgb(0 0 0 / 0.5) !important;
+@media (min-width: 900px) and (min-height: 620px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    > iframe#form-archive-frame {
+    --fa-stage-pad-x: clamp(26px, 3vw, 44px);
+    --fa-stage-pad-top: 18px;
+    --fa-stage-pad-bottom: 22px;
+    inset: calc(var(--archive-toolbar-height) + var(--fa-stage-pad-top)) var(--fa-stage-pad-x) auto;
+    width: calc(100% - 2 * var(--fa-stage-pad-x));
+    height: calc(
+      100% - var(--archive-toolbar-height) - var(--fa-stage-pad-top) - var(--fa-stage-pad-bottom)
+    );
+    box-sizing: border-box;
+    border: 1px solid rgb(176 238 255 / 74%);
+    border-top: 2px solid #ebfdff;
+    border-bottom-color: rgb(244 214 152 / 70%);
+    border-radius: 6px;
+    box-shadow:
+      0 0 0 5px rgb(4 10 20 / 90%),
+      0 0 0 6px rgb(242 212 150 / 44%),
+      0 -14px 40px -4px rgb(122 232 255 / 38%),
+      0 28px 72px rgb(0 0 0 / 84%),
+      0 0 64px -6px rgb(122 232 255 / 34%);
+  }
+  html[data-family]
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+    > iframe#form-archive-frame {
+    border-color: rgb(220 202 255 / 74%);
+    border-top-color: #fff8e4;
+    border-bottom-color: rgb(245 213 139 / 72%);
+    box-shadow:
+      0 0 0 5px rgb(6 4 16 / 90%),
+      0 0 0 6px rgb(245 213 139 / 48%),
+      0 -14px 40px -4px rgb(198 176 255 / 40%),
+      0 28px 72px rgb(0 0 0 / 86%),
+      0 0 64px -6px rgb(198 176 255 / 36%);
+  }
 }
-html[data-family] body main.command-archive[data-archive-kind="realm"] > header.form-archive-toolbar.form-archive-toolbar {
-  border-bottom-color: rgb(204 186 255 / 40%);
-  background:
-    radial-gradient(ellipse 56% 110% at 50% 0%, rgb(184 162 255 / 16%), transparent 70%),
-    radial-gradient(ellipse 42% 90% at 84% 100%, rgb(245 213 139 / 11%), transparent 70%),
-    linear-gradient(180deg, #1e1838 0%, #110e24 58%, #0a0816 100%);
+html[data-family]
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind]
+  > header.form-archive-toolbar.form-archive-toolbar {
+  border-bottom: 1px solid rgb(244 216 158 / 64%);
+  background-color: #0d1b2c;
+  background-image:
+    /* Left & right wing horizon light-guides framing the central switcher */
+    linear-gradient(
+      90deg,
+      transparent 0,
+      rgb(146 240 255 / 66%) 84px,
+      rgb(244 214 152 / 52%) calc(50% - 178px),
+      transparent calc(50% - 166px)
+    ),
+    linear-gradient(
+      270deg,
+      transparent 0,
+      rgb(244 214 152 / 64%) 88px,
+      rgb(146 240 255 / 52%) calc(50% - 178px),
+      transparent calc(50% - 166px)
+    ),
+    radial-gradient(ellipse 54% 175% at 50% -14%, rgb(155 242 255 / 52%), transparent 70%),
+    radial-gradient(ellipse 42% 140% at 14% 0%, rgb(122 232 255 / 30%), transparent 68%),
+    radial-gradient(ellipse 42% 140% at 86% 0%, rgb(244 214 152 / 30%), transparent 68%),
+    linear-gradient(180deg, #25435f 0%, #12253a 52%, #091423 100%);
+  background-size:
+    100% 1px,
+    100% 1px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-position:
+    0 50%,
+    0 50%,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-repeat: no-repeat;
   box-shadow:
-    inset 0 1px 0 rgb(246 238 255 / 26%),
-    inset 0 -1px 0 rgb(245 213 139 / 16%),
-    0 12px 32px rgb(0 0 0 / 58%);
+    inset 0 1px 0 rgb(250 254 255 / 62%),
+    inset 0 -1px 0 rgb(155 233 250 / 42%),
+    0 18px 46px rgb(0 0 0 / 74%);
 }
-html body main.command-archive[data-archive-kind="realm"] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
-  border-color: rgb(204 186 255 / 40%);
-  border-top-color: rgb(242 228 255 / 52%);
-  background:
-    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(184 162 255 / 12%), transparent 72%),
-    linear-gradient(180deg, rgb(24 19 44 / 0.96), rgb(9 7 20 / 0.98)) !important;
-  box-shadow:
-    inset 0 1px 0 rgb(246 238 255 / 20%),
-    inset 0 3px 10px rgb(0 0 0 / 0.62),
-    0 8px 22px rgb(0 0 0 / 0.54) !important;
+@media (max-width: 743.98px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    > header.form-archive-toolbar.form-archive-toolbar {
+    background-image:
+      radial-gradient(ellipse 68% 150% at 50% -12%, rgb(155 242 255 / 46%), transparent 72%),
+      radial-gradient(ellipse 46% 120% at 88% 100%, rgb(244 214 152 / 26%), transparent 70%),
+      linear-gradient(180deg, #233e59 0%, #102134 54%, #081220 100%);
+    background-size: 100% 100%;
+    background-position: 0 0;
+  }
 }
-html body main.command-archive[data-archive-kind="realm"] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
-  border-color: rgb(245 213 139 / 66%);
-  border-top-color: rgb(255 240 200 / 84%);
+html
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > .liquid-rail-surface {
+  border: 1px solid rgb(190 240 255 / 76%);
+  border-top-color: #f4fdff;
   background:
-    radial-gradient(ellipse 85% 75% at 50% 0%, rgb(196 176 255 / 32%), transparent 72%),
-    linear-gradient(135deg, rgb(245 213 139 / 0.14), transparent 62%),
-    linear-gradient(180deg, #2d2652 0%, #191533 100%) !important;
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        rgb(146 240 255 / 56%) 30%,
+        rgb(244 214 152 / 60%) 50%,
+        rgb(146 240 255 / 56%) 70%,
+        transparent 92%
+      )
+      50% 100% / 88% 1.5px no-repeat,
+    radial-gradient(ellipse 88% 76% at 50% -8%, rgb(155 238 255 / 32%), transparent 72%),
+    linear-gradient(180deg, rgb(26 46 66 / 0.98), rgb(8 16 28 / 0.99)) !important;
   box-shadow:
-    inset 0 1px 0 rgb(252 246 255 / 0.52),
-    inset 0 -2px 0 rgb(245 213 139 / 0.64),
-    0 4px 14px rgb(0 0 0 / 0.54) !important;
+    inset 0 1px 0 rgb(250 254 255 / 48%),
+    inset 0 3px 10px rgb(0 0 0 / 0.76),
+    0 0 0 3px rgb(4 10 20 / 0.92),
+    0 0 0 4px rgb(242 212 150 / 0.42),
+    0 10px 28px rgb(0 0 0 / 0.68),
+    0 0 30px -4px rgb(122 232 255 / 0.42) !important;
 }
-html body main.command-archive[data-archive-kind] .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
-  border: 1px solid rgb(164 218 244 / 42%);
-  border-top-color: rgb(228 247 255 / 58%);
+html
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind]
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border: 1px solid #dcfaFF;
+  border-top-color: #ffffff;
   background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(155 233 250 / 14%), transparent 72%),
-    linear-gradient(180deg, rgb(18 31 45 / 0.95), rgb(7 13 22 / 0.98)) !important;
+    radial-gradient(ellipse 92% 82% at 50% -8%, rgb(176 244 255 / 58%), transparent 70%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.22), transparent 50%),
+    linear-gradient(180deg, #36688a 0%, #1d405a 52%, #11273a 100%) !important;
   box-shadow:
-    inset 0 1px 0 rgb(236 250 255 / 0.26),
-    inset 0 0 0 1px rgb(155 233 250 / 0.1),
-    0 6px 16px rgb(0 0 0 / 0.44) !important;
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -2px 0 #f5d68e,
+    0 0 28px -2px rgb(122 232 255 / 0.56),
+    0 6px 16px rgb(0 0 0 / 0.64) !important;
 }
-html body main.command-archive[data-archive-kind="realm"] .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
-  border-color: rgb(206 188 255 / 46%);
-  border-top-color: rgb(245 213 139 / 60%);
-  background:
-    radial-gradient(ellipse 80% 80% at 50% 0%, rgb(184 162 255 / 16%), transparent 72%),
-    linear-gradient(180deg, rgb(26 21 48 / 0.95), rgb(10 8 22 / 0.98)) !important;
+html[data-family]
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+  > header.form-archive-toolbar.form-archive-toolbar {
+  border-bottom-color: rgb(245 213 139 / 66%);
+  background-color: #15102d;
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      rgb(212 192 255 / 64%) 84px,
+      rgb(245 213 139 / 52%) calc(50% - 178px),
+      transparent calc(50% - 166px)
+    ),
+    linear-gradient(
+      270deg,
+      transparent 0,
+      rgb(245 213 139 / 64%) 88px,
+      rgb(212 192 255 / 52%) calc(50% - 178px),
+      transparent calc(50% - 166px)
+    ),
+    radial-gradient(ellipse 54% 175% at 50% -14%, rgb(212 192 255 / 52%), transparent 70%),
+    radial-gradient(ellipse 42% 140% at 14% 0%, rgb(184 162 255 / 30%), transparent 68%),
+    radial-gradient(ellipse 42% 140% at 86% 0%, rgb(245 213 139 / 30%), transparent 68%),
+    linear-gradient(180deg, #32285d 0%, #1a1438 52%, #0d0a1f 100%);
+  background-size:
+    100% 1px,
+    100% 1px,
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-position:
+    0 50%,
+    0 50%,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
+  background-repeat: no-repeat;
   box-shadow:
-    inset 0 1px 0 rgb(248 240 255 / 0.26),
-    inset 0 0 0 1px rgb(245 213 139 / 0.14),
-    0 6px 16px rgb(0 0 0 / 0.48) !important;
+    inset 0 1px 0 rgb(255 249 238 / 58%),
+    inset 0 -1px 0 rgb(245 213 139 / 38%),
+    0 18px 46px rgb(0 0 0 / 76%);
+}
+@media (max-width: 743.98px) {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+    > header.form-archive-toolbar.form-archive-toolbar {
+    background-image:
+      radial-gradient(ellipse 68% 150% at 50% -12%, rgb(212 192 255 / 48%), transparent 72%),
+      radial-gradient(ellipse 46% 120% at 88% 100%, rgb(245 213 139 / 28%), transparent 70%),
+      linear-gradient(180deg, #302659 0%, #181335 54%, #0c091d 100%);
+    background-size: 100% 100%;
+    background-position: 0 0;
+  }
+}
+html
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+  #archive-switcher.form-archive-switcher
+  > .liquid-rail-surface {
+  border-color: rgb(228 212 255 / 74%);
+  border-top-color: #fff8e6;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        rgb(204 184 255 / 56%) 30%,
+        rgb(245 213 139 / 62%) 50%,
+        rgb(204 184 255 / 56%) 70%,
+        transparent 92%
+      )
+      50% 100% / 88% 1.5px no-repeat,
+    radial-gradient(ellipse 88% 76% at 50% -8%, rgb(212 192 255 / 34%), transparent 72%),
+    linear-gradient(180deg, rgb(38 29 68 / 0.98), rgb(12 9 26 / 0.99)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 249 238 / 46%),
+    inset 0 3px 10px rgb(0 0 0 / 0.76),
+    0 0 0 3px rgb(6 4 16 / 0.92),
+    0 0 0 4px rgb(245 213 139 / 0.44),
+    0 10px 28px rgb(0 0 0 / 0.7),
+    0 0 30px -4px rgb(198 176 255 / 0.42) !important;
+}
+html
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+  #archive-switcher.form-archive-switcher
+  > .liquid-selection-lens
+  > .liquid-selection-surface {
+  border-color: #fbe4ad;
+  border-top-color: #fffaf0;
+  background:
+    radial-gradient(ellipse 92% 82% at 50% -8%, rgb(220 202 255 / 56%), transparent 70%),
+    linear-gradient(135deg, rgb(245 213 139 / 0.26), transparent 62%),
+    linear-gradient(180deg, #4f4088 0%, #2c2356 52%, #191336 100%) !important;
+  box-shadow:
+    inset 0 1.5px 0 #fffdf8,
+    inset 0 -2px 0 #f5d58b,
+    0 0 28px -2px rgb(198 176 255 / 0.56),
+    0 6px 16px rgb(0 0 0 / 0.64) !important;
+}
+html
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind]
+  .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  border: 1px solid rgb(244 216 158 / 72%);
+  border-top-color: #fff8e4;
+  background:
+    radial-gradient(ellipse 88% 88% at 50% 0%, rgb(155 238 255 / 34%), transparent 70%),
+    linear-gradient(180deg, rgb(30 52 72 / 0.97), rgb(10 19 32 / 0.99)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 245 / 0.56),
+    0 0 0 2px rgb(4 10 20 / 0.9),
+    0 0 0 3px rgb(138 238 255 / 0.32),
+    0 8px 22px rgb(0 0 0 / 0.62) !important;
+}
+html
+  body
+  main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+  .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  border-color: rgb(245 213 139 / 76%);
+  border-top-color: #fff9e8;
+  background:
+    radial-gradient(ellipse 88% 88% at 50% 0%, rgb(212 192 255 / 36%), transparent 70%),
+    linear-gradient(180deg, rgb(40 32 72 / 0.97), rgb(13 10 28 / 0.99)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 238 / 0.56),
+    0 0 0 2px rgb(6 4 16 / 0.9),
+    0 0 0 3px rgb(212 192 255 / 0.34),
+    0 8px 22px rgb(0 0 0 / 0.64) !important;
 }
 html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > button[role="tab"] {
   min-width: 80px;
@@ -378,23 +586,29 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
       radial-gradient(ellipse 78% 58% at 50% 8%, rgb(250 232 192 / 18%), transparent 68%),
       radial-gradient(ellipse at 50% 40%, #2f4d66, #0d1a28 80%);
   }
-  html body main.command-archive[data-archive-kind] .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
-    border-color: rgb(196 244 255 / 78%);
+  html
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
+    border-color: #fff6dc;
     background:
-      radial-gradient(ellipse 80% 80% at 50% 0%, rgb(155 233 250 / 24%), transparent 72%),
-      linear-gradient(180deg, rgb(24 42 58 / 0.96), rgb(10 18 28 / 0.98)) !important;
+      radial-gradient(ellipse 88% 88% at 50% 0%, rgb(155 238 255 / 44%), transparent 72%),
+      linear-gradient(180deg, rgb(36 60 84 / 0.98), rgb(12 22 36 / 0.99)) !important;
     box-shadow:
-      inset 0 1px 0 rgb(246 253 255 / 0.42),
-      0 0 18px -4px rgb(155 233 250 / 0.34) !important;
+      inset 0 1px 0 #ffffff,
+      0 0 22px -2px rgb(155 233 250 / 0.48) !important;
   }
-  html body main.command-archive[data-archive-kind="realm"] .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
-    border-color: rgb(245 213 139 / 80%);
+  html
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind="realm"]
+    .side-panel-trigger.form-archive-menu-trigger.ios26-glass:hover {
+    border-color: #fff6dc;
     background:
-      radial-gradient(ellipse 80% 80% at 50% 0%, rgb(196 176 255 / 26%), transparent 72%),
-      linear-gradient(180deg, rgb(34 28 62 / 0.96), rgb(14 11 28 / 0.98)) !important;
+      radial-gradient(ellipse 88% 88% at 50% 0%, rgb(212 192 255 / 46%), transparent 72%),
+      linear-gradient(180deg, rgb(46 36 82 / 0.98), rgb(16 12 34 / 0.99)) !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 248 228 / 0.42),
-      0 0 18px -4px rgb(245 213 139 / 0.32) !important;
+      inset 0 1px 0 #ffffff,
+      0 0 22px -2px rgb(245 213 139 / 0.46) !important;
   }
 }
 @media (max-width: 900px) {
@@ -428,23 +642,51 @@ main.command-archive[data-archive-kind] :is(button, [tabindex]):focus-visible {
 }
 html[data-world-effects="economy"] main.command-exhibition :is(.exhibition-shelf-image, .exhibition-shelf-work) { transition: none; }
 @media (forced-colors: active) {
-  main.command-exhibition.exhibition-room-curated, main.command-archive[data-archive-kind] { background: Canvas; color: CanvasText; }
-  html[data-family] body main.command-archive[data-archive-kind] > header.form-archive-toolbar.form-archive-toolbar {
-    border-color: CanvasText;
+  main.command-exhibition.exhibition-room-curated,
+  main.command-archive[data-archive-kind],
+  html[data-family] body main.form-archive-page.command-archive.command-archive[data-archive-kind] {
     background: Canvas;
+    color: CanvasText;
+  }
+  html[data-family]
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    > iframe#form-archive-frame {
+    border-color: CanvasText;
     box-shadow: none;
   }
-  html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-rail-surface {
+  html[data-family]
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    > header.form-archive-toolbar.form-archive-toolbar {
+    border-color: CanvasText;
+    background: Canvas;
+    background-image: none;
+    box-shadow: none;
+  }
+  html
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    #archive-switcher.form-archive-switcher
+    > .liquid-rail-surface {
     border-color: CanvasText;
     background: Canvas !important;
     box-shadow: none !important;
   }
-  html body main.command-archive[data-archive-kind] #archive-switcher.form-archive-switcher > .liquid-selection-lens > .liquid-selection-surface {
+  html
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    #archive-switcher.form-archive-switcher
+    > .liquid-selection-lens
+    > .liquid-selection-surface {
     border-color: Highlight;
     background: Highlight !important;
     box-shadow: none !important;
   }
-  html body main.command-archive[data-archive-kind] .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
+  html
+    body
+    main.form-archive-page.command-archive.command-archive[data-archive-kind]
+    .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
     border-color: ButtonText;
     background: ButtonFace !important;
     box-shadow: none !important;

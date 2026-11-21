@@ -1,7 +1,8 @@
-/* The guide stays inside its dossier; jumps never replace the route fragment. */
+/* The guide stays inside its dossier; jumps never replace the route fragment.
+   Opaque maki-e lacquer sticky plate prevents any bleed-through while scrolling. */
 .dream-page.dream-page .dream-dossier-guide {
-  --dg-gold: #cfa963;
-  --dg-gold-bright: #f2da9f;
+  --dg-gold: #d6b270;
+  --dg-gold-bright: #f6df9e;
   position: sticky;
   z-index: 8;
   top: max(76px, calc(env(safe-area-inset-top) + 60px));
@@ -11,16 +12,23 @@
   gap: 8px;
   min-width: 0;
   margin: 0 0 28px;
-  padding: 12px;
-  border: 1px solid rgb(207 169 99 / 64%);
-  border-radius: 6px;
-  /* 蒔絵風の漆黒×金砂子プレート */
+  padding: 13px;
+  border: 1px solid rgb(232 196 126 / 68%);
+  border-radius: 4px;
+  /* Opaque maki-e lacquer × gilt corner hardware (zero bleed-through) */
   background:
-    radial-gradient(62% 95% at 16% 0%, rgb(236 198 124 / 12%), transparent 72%),
-    linear-gradient(148deg, #181020 0%, #0e0914 56%, #160e1d 100%);
+    linear-gradient(135deg, #fff0c2, #b48a42) 0 0 / 16px 2px no-repeat,
+    linear-gradient(135deg, #fff0c2, #b48a42) 0 0 / 2px 16px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 16px no-repeat,
+    radial-gradient(64% 96% at 16% 0%, rgb(248 206 130 / 16%), transparent 72%),
+    radial-gradient(48% 82% at 92% 100%, rgb(206 72 56 / 14%), transparent 72%),
+    linear-gradient(148deg, #1f132a 0%, #120b1a 56%, #180f22 100%);
   box-shadow:
-    0 10px 26px rgb(6 4 10 / 76%),
-    inset 0 1px 0 rgb(255 240 204 / 16%);
+    0 14px 32px rgb(4 2 8 / 82%),
+    inset 0 1px 0 rgb(255 244 210 / 22%);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .dream-page.dream-page .dream-dossier-guide label {
@@ -32,12 +40,12 @@
 .dream-page.dream-page .dream-dossier-guide label > span {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #f0dbb0;
+  gap: 7px;
+  color: #f6e2b6;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.5;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
 }
 
 .dream-page.dream-page .dream-dossier-guide label > span::before {
@@ -45,8 +53,8 @@
   flex: none;
   width: 6px;
   height: 6px;
-  border: 1px solid #e4c17a;
-  background: rgb(228 193 122 / 34%);
+  border: 1px solid #f4d692;
+  background: rgb(204 73 59 / 58%);
   transform: rotate(45deg);
 }
 
@@ -54,10 +62,10 @@
   box-sizing: border-box;
   min-width: 0;
   min-height: 44px;
-  border: 1px solid #c9a45f;
+  border: 1px solid #d4b06a;
   border-radius: 3px;
-  color: #fff5e1;
-  background-color: #160f1e;
+  color: #fff6e4;
+  background-color: #160e20;
   font: inherit;
   font-size: 16px;
   line-height: 1.5;
@@ -69,14 +77,14 @@
   appearance: none;
   width: 100%;
   padding: 8px 40px 8px 12px;
-  border-color: #cca660;
-  background-color: #120b18;
+  border-color: rgb(228 192 122 / 74%);
+  background-color: #120b19;
   background-image:
-    linear-gradient(45deg, transparent 50%, #f3dfb0 50%),
-    linear-gradient(135deg, #f3dfb0 50%, transparent 50%),
-    linear-gradient(180deg, transparent 22%, rgb(216 178 106 / 44%) 22% 78%, transparent 78%),
-    radial-gradient(80% 120% at 0% 0%, rgb(232 194 120 / 12%), transparent 68%),
-    linear-gradient(180deg, #1b1224 0%, #100a16 100%);
+    linear-gradient(45deg, transparent 50%, #f8e2a8 50%),
+    linear-gradient(135deg, #f8e2a8 50%, transparent 50%),
+    linear-gradient(180deg, transparent 20%, rgb(228 192 122 / 48%) 20% 80%, transparent 80%),
+    radial-gradient(80% 120% at 0% 0%, rgb(246 206 130 / 14%), transparent 68%),
+    linear-gradient(180deg, #1f132a 0%, #110a18 100%);
   background-position:
     right 19px center,
     right 13px center,
@@ -91,20 +99,24 @@
     100% 100%;
   background-repeat: no-repeat;
   box-shadow:
-    inset 0 1px 0 rgb(255 241 206 / 16%),
-    inset 0 -1px 0 rgb(0 0 0 / 56%);
+    inset 0 1px 0 rgb(255 244 210 / 20%),
+    inset 0 -1px 0 rgb(0 0 0 / 58%);
   text-overflow: ellipsis;
   cursor: pointer;
 }
 
-/* 調書案内ボタン — 端正な一重金枠プレート */
+/* 調書案内ボタン — 朱漆×金縁プレート */
 .dream-page.dream-page .dream-dossier-guide button {
   padding: 8px 16px;
-  border-color: #dfc07c;
-  background: linear-gradient(180deg, #422338 0%, #261222 100%);
+  border-color: #f2cf88;
+  background:
+    linear-gradient(#fff0c2 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(#f2d492 0 0) 100% 100% / 12px 1.5px no-repeat,
+    radial-gradient(80% 90% at 24% 0%, rgb(255 202 114 / 28%), transparent 70%),
+    linear-gradient(135deg, #8e282e 0%, #641b23 56%, #41111a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 244 216 / 24%),
-    0 4px 12px rgb(5 3 9 / 42%);
+    inset 0 1px 0 rgb(255 244 212 / 34%),
+    0 6px 16px rgb(5 3 9 / 50%);
   font-weight: 700;
   letter-spacing: 0.08em;
   cursor: pointer;
@@ -113,6 +125,7 @@
 
 .dream-page.dream-page .dream-dossier-guide :is(select, button):disabled {
   border-color: #6a5b6e;
+  background: #22192b;
   color: #b7abbe;
   box-shadow: none;
   cursor: default;
@@ -132,23 +145,27 @@
 
 @media (hover: hover) and (pointer: fine) {
   .dream-page.dream-page .dream-dossier-guide select:not(:disabled):hover {
-    border-color: #f6e4b8;
+    border-color: #fff0c2;
     box-shadow:
-      inset 0 1px 0 rgb(255 245 218 / 26%),
-      0 4px 14px rgb(6 3 10 / 42%);
+      inset 0 1px 0 rgb(255 246 218 / 30%),
+      0 6px 16px rgb(6 3 10 / 48%);
   }
 
   .dream-page.dream-page .dream-dossier-guide button:not(:disabled):hover {
-    border-color: #fff3d6;
-    background: linear-gradient(180deg, #562d49 0%, #34192f 100%);
+    border-color: #fff4ce;
+    background:
+      linear-gradient(#fff6d4 0 0) 0 0 / 16px 2px no-repeat,
+      linear-gradient(#fce2a4 0 0) 100% 100% / 16px 1.5px no-repeat,
+      radial-gradient(80% 90% at 24% 0%, rgb(255 214 134 / 36%), transparent 70%),
+      linear-gradient(135deg, #a62f35 0%, #782029 56%, #501520 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 248 228 / 32%),
-      0 6px 16px rgb(6 3 10 / 50%);
+      inset 0 1px 0 rgb(255 248 228 / 44%),
+      0 8px 20px rgb(6 3 10 / 56%);
   }
 }
 
 .dream-page.dream-page .dream-dossier-guide :is(select, button):focus-visible {
-  outline: 2px solid #e0bef5;
+  outline: 2px solid #f4dca0;
   outline-offset: 3px;
 }
 
@@ -157,7 +174,7 @@
 }
 
 .dream-page.dream-page .dream-dossier-copy :is(h2, h3)[tabindex="-1"]:focus-visible {
-  outline: 2px solid #e0bef5;
+  outline: 2px solid #f4dca0;
   outline-offset: 5px;
 }
 

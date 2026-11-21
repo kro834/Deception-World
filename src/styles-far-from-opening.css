@@ -1,13 +1,21 @@
 /* The original Middle portrait, the orbit plate and the title share one stage.
-   At desktop sizes the existing left stage remains pinned through chapter 01. */
+   At desktop sizes the existing left stage remains pinned through chapter 01.
+   Cosmic Sovereign Edition: deep-space sapphire, royal indigo, aurora violet
+   and starlight gold nebula illumination with prism-chamfered controls. */
 #top.ffs-page > .ffs-hero {
-  --ffs-opening-ink: #050b13;
+  --ffs-opening-ink: #040816;
   --ffs-opening-gutter: clamp(22px, 4.5vw, 76px);
 }
 
+html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero::before,
 #top.ffs-page > .ffs-hero::before,
 #top.ffs-page > .ffs-hero .rxs-hero-copy::before {
   content: none;
+}
+
+html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero,
+#top.ffs-page > .ffs-hero {
+  background: var(--ffs-opening-ink);
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-ambient {
@@ -15,9 +23,18 @@
   isolation: isolate;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 73% 65%, #14283366, transparent 48%),
-    radial-gradient(ellipse at 15% 35%, #1c3344 0%, #101e2d 37%, transparent 69%),
-    linear-gradient(126deg, #0b1321, var(--ffs-opening-ink) 75%);
+    radial-gradient(2px 2px at 19% 18%, rgb(244 252 255 / 82%), transparent 62%),
+    radial-gradient(1.5px 1.5px at 74% 16%, rgb(255 236 184 / 80%), transparent 62%),
+    radial-gradient(1.5px 1.5px at 87% 28%, rgb(156 240 255 / 78%), transparent 62%),
+    radial-gradient(2px 2px at 63% 24%, rgb(216 186 255 / 72%), transparent 62%),
+    radial-gradient(1.5px 1.5px at 91% 66%, rgb(255 224 152 / 72%), transparent 62%),
+    radial-gradient(1.5px 1.5px at 68% 78%, rgb(146 236 255 / 66%), transparent 62%),
+    radial-gradient(1.5px 1.5px at 34% 80%, rgb(198 164 255 / 60%), transparent 62%),
+    radial-gradient(ellipse 52% 44% at 82% 76%, rgb(255 215 122 / 22%), rgb(127 230 255 / 12%) 42%, transparent 72%),
+    radial-gradient(ellipse 66% 58% at 74% 28%, rgb(92 134 255 / 34%), rgb(154 96 255 / 22%) 44%, transparent 74%),
+    radial-gradient(ellipse 38% 34% at 22% 16%, rgb(255 224 148 / 22%), transparent 66%),
+    radial-gradient(ellipse 68% 58% at 22% 40%, rgb(52 146 255 / 44%), rgb(28 68 176 / 30%) 40%, transparent 74%),
+    linear-gradient(128deg, #0b183c 0%, #07112c 44%, #050a1e 76%, var(--ffs-opening-ink) 100%);
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-ambient .ffs-aperture {
@@ -28,12 +45,12 @@
   max-width: none;
   height: 76%;
   aspect-ratio: auto;
-  opacity: 0.45;
+  opacity: 0.66;
   transform-box: border-box;
   transform-origin: center;
   transform: rotate(-17deg);
-  filter: none;
-  mask-image: linear-gradient(100deg, transparent 6%, #000 29% 76%, transparent 97%);
+  filter: drop-shadow(0 0 18px rgb(127 230 255 / 36%));
+  mask-image: linear-gradient(100deg, transparent 5%, #000 26% 78%, transparent 97%);
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-visual {
@@ -44,17 +61,23 @@
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-visual img {
-  filter: none;
+  filter:
+    saturate(1.06)
+    contrast(1.04)
+    drop-shadow(0 0 38px rgb(104 206 255 / 32%))
+    drop-shadow(0 0 64px rgb(255 215 122 / 14%));
   mask-image:
-    linear-gradient(90deg, #000 0% 66%, transparent 100%),
-    linear-gradient(180deg, #000 0% 67%, transparent 100%);
+    linear-gradient(90deg, #000 0% 68%, transparent 100%),
+    linear-gradient(180deg, #000 0% 70%, transparent 100%);
   mask-composite: intersect;
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-visual::after {
   inset: auto 0 0;
-  height: 35%;
-  background: radial-gradient(ellipse farthest-side at 40% 110%, #a2824f25, transparent);
+  height: 44%;
+  background:
+    radial-gradient(ellipse farthest-side at 44% 108%, rgb(255 215 122 / 30%), rgb(127 230 255 / 20%) 44%, transparent 78%),
+    radial-gradient(ellipse 68% 72% at 50% 62%, rgb(134 106 255 / 16%), transparent 72%);
   z-index: 0;
 }
 
@@ -63,15 +86,20 @@
   text-align: left;
 }
 
+html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero h1,
 #top.ffs-page > .ffs-hero h1 {
   width: max-content;
   max-width: 100%;
   margin: 0;
-  color: #f4f5f3;
+  color: #f8fbff;
   -webkit-text-fill-color: currentColor;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
   line-height: 1.04;
-  text-shadow: 0 3px 20px #050b135e;
+  text-shadow:
+    0 2px 0 rgb(3 8 24 / 92%),
+    0 0 28px rgb(127 230 255 / 46%),
+    0 0 60px rgb(132 108 255 / 34%),
+    0 14px 36px rgb(2 5 18 / 84%);
 }
 
 #top.ffs-page > .ffs-hero h1 .name-word {
@@ -83,24 +111,40 @@
   letter-spacing: inherit;
 }
 
+html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-mark,
 #top.ffs-page > .ffs-hero .ffs-mark {
   inset: auto auto calc(100% + 12px) 0;
   translate: none;
   margin: 0;
   color: transparent;
+  background: linear-gradient(
+    180deg,
+    rgb(228 248 255 / 24%) 0%,
+    rgb(142 224 255 / 14%) 54%,
+    rgb(255 215 122 / 14%) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-size: clamp(34px, 5vw, 86px);
   letter-spacing: 0.065em;
-  -webkit-text-stroke: 1px rgb(175 200 207 / 31%);
+  -webkit-text-stroke: 1.5px rgb(156 238 255 / 56%);
   text-shadow: none;
+  filter:
+    drop-shadow(0 0 20px rgb(104 206 255 / 38%))
+    drop-shadow(0 0 42px rgb(255 215 122 / 22%));
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-lede {
   margin: clamp(17px, 2.8vh, 29px) 0 0;
   max-width: 32em;
-  color: #f1e8d8;
+  color: #fff4d9;
   font-size: clamp(18px, 1.45vw, 25px);
   line-height: 1.55;
   letter-spacing: 0.045em;
+  text-shadow:
+    0 2px 14px rgb(3 8 24 / 90%),
+    0 0 26px rgb(255 215 122 / 28%);
 }
 
 #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span {
@@ -108,61 +152,119 @@
   margin-top: 0.62em;
   font-size: clamp(13px, 0.94vw, 16px);
   line-height: 1.65;
-  color: #bfccd3;
+  color: #d6e6f5;
   letter-spacing: 0.025em;
+  text-shadow: 0 2px 12px rgb(3 8 24 / 86%);
 }
 
 #top.ffs-page > .ffs-hero .ffs-stages-line {
   justify-content: flex-start;
-  gap: 8px;
+  gap: 10px;
   margin: clamp(15px, 2.5vh, 27px) 0 0;
-  color: #a6bbc4;
+  color: #d6e9f8;
   font-size: clamp(12px, 0.8vw, 13px);
-  letter-spacing: 0.065em;
+  letter-spacing: 0.07em;
+  text-shadow: 0 1px 10px rgb(3 8 24 / 82%);
 }
 
 #top.ffs-page > .ffs-hero .ffs-stages-line::before {
-  width: 25px;
+  width: 34px;
   height: 2px;
-  background: linear-gradient(90deg, #8ed5ec, #86cc9c 26%, #e18d9f 51%, #dfc48a 74%, #dee9fd);
+  background: linear-gradient(90deg, #7fe6ff, #ffd77a 26%, #ff6f8d 52%, #c99bff 76%, #eef8ff);
+  box-shadow:
+    0 0 12px rgb(127 230 255 / 62%),
+    0 0 22px rgb(255 215 122 / 34%);
 }
 
 #top.ffs-page > .ffs-hero .ffs-hero-rail {
   justify-content: flex-start;
   align-items: center;
-  gap: 12px 26px;
+  gap: 12px 16px;
   margin: clamp(17px, 3vh, 32px) 0 0;
 }
 
 #top.ffs-page > .ffs-hero .ffs-hero-rail a {
-  letter-spacing: 0.035em;
+  letter-spacing: 0.05em;
 }
 
+html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-primary,
 #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary {
-  min-width: 160px;
-  min-height: 48px;
-  border-color: #e5d7b3;
-  color: #121b23;
-  background: linear-gradient(112deg, #fff7dc, #e6d4a9 78%, #c6a86d);
-  box-shadow: inset 0 1px rgb(255 255 250 / 60%);
+  min-width: 176px;
+  min-height: 50px;
+  padding: 12px 24px 12px 20px;
+  border: 1px solid #fff3cf;
+  color: #071222;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 68%) 0%, rgb(255 255 255 / 8%) 48%, rgb(150 96 18 / 22%) 100%),
+    linear-gradient(112deg, #fffdf4 0%, #ffe6a6 42%, #f4c663 76%, #ddf7ff 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 96%),
+    inset 0 -2px 0 rgb(118 76 16 / 48%),
+    inset 0 0 0 1px rgb(255 248 220 / 70%);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  filter:
+    drop-shadow(0 10px 26px rgb(255 215 122 / 42%))
+    drop-shadow(0 0 18px rgb(127 230 255 / 34%));
 }
 
+html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary,
 #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary {
-  min-width: 0;
-  min-height: 44px;
-  gap: 8px;
-  padding-inline: 2px;
-  border: 0;
-  background: transparent;
-  color: #d7e5e9;
-  box-shadow: none;
-  clip-path: none;
+  min-width: 176px;
+  min-height: 50px;
+  gap: 12px;
+  padding: 12px 22px 12px 20px;
+  border: 1px solid rgb(138 232 255 / 54%);
+  color: #eef7ff;
+  background:
+    radial-gradient(ellipse 92% 78% at 18% 0%, rgb(127 230 255 / 26%), transparent 62%),
+    radial-gradient(ellipse 82% 72% at 88% 100%, rgb(192 142 255 / 22%), transparent 64%),
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0%, rgb(255 255 255 / 2%) 46%, rgb(2 6 20 / 42%) 100%),
+    rgb(11 22 52 / 86%);
+  box-shadow:
+    inset 0 1px 0 rgb(232 250 255 / 44%),
+    inset 0 -2px 0 rgb(4 10 28 / 78%),
+    inset 0 0 0 1px rgb(201 155 255 / 18%);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  filter: drop-shadow(0 8px 22px rgb(104 204 255 / 24%));
 }
 
 #top.ffs-page > .ffs-hero .ffs-hero-secondary span {
-  text-decoration: underline;
-  text-underline-offset: 0.45em;
-  text-decoration-color: #71848a;
+  text-decoration: none;
+}
+
+#top.ffs-page > .ffs-hero .ffs-hero-secondary i {
+  color: #ffd77a;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-primary:hover,
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary:hover {
+    border-color: #ffffff;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 80%) 0%, rgb(255 255 255 / 12%) 50%, rgb(150 96 18 / 16%) 100%),
+      linear-gradient(112deg, #ffffff 0%, #fff0c2 40%, #ffd574 74%, #ecfbff 100%);
+    filter:
+      drop-shadow(0 12px 30px rgb(255 215 122 / 58%))
+      drop-shadow(0 0 24px rgb(127 230 255 / 46%));
+  }
+
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary:hover,
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary:hover {
+    border-color: rgb(186 244 255 / 88%);
+    color: #ffffff;
+    background:
+      radial-gradient(ellipse 96% 80% at 18% 0%, rgb(146 238 255 / 34%), transparent 62%),
+      radial-gradient(ellipse 84% 74% at 88% 100%, rgb(206 158 255 / 28%), transparent 64%),
+      linear-gradient(180deg, rgb(255 255 255 / 24%) 0%, rgb(255 255 255 / 4%) 48%, rgb(2 6 20 / 38%) 100%),
+      rgb(16 32 72 / 92%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 60%),
+      inset 0 -2px 0 rgb(4 10 28 / 76%),
+      inset 0 0 22px rgb(127 230 255 / 22%);
+    filter:
+      drop-shadow(0 10px 26px rgb(127 230 255 / 38%))
+      drop-shadow(0 0 20px rgb(201 155 255 / 26%));
+  }
 }
 
 #top.ffs-page > .ffs-hero .ffs-hero-rail a:focus-visible {
@@ -179,7 +281,12 @@
 
   #top.ffs-page > .ffs-hero > .rxs-hero-visual {
     width: 118%;
-    background: linear-gradient(90deg, #0c1925 0% 68%, transparent);
+    border-right: 0;
+    box-shadow: none;
+    background:
+      radial-gradient(ellipse 72% 48% at 46% 36%, rgb(58 148 255 / 34%), rgb(134 94 255 / 20%) 48%, transparent 74%),
+      radial-gradient(ellipse 46% 32% at 44% 14%, rgb(255 224 148 / 20%), transparent 66%),
+      linear-gradient(90deg, #08132d 0% 70%, transparent);
     mask-image: linear-gradient(90deg, #000 0% 79%, transparent);
   }
 
@@ -196,6 +303,7 @@
     font-size: clamp(64px, 5.65vw, 105px);
   }
 
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-mark,
   #top.ffs-page > .ffs-hero .ffs-mark {
     left: clamp(38px, 5.4vw, 100px);
   }
@@ -203,6 +311,7 @@
 
 /* A portrait phone opens on helmet, chest and title in one composition. */
 @media (max-width: 1099px) and (orientation: portrait), (max-width: 567px) {
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero,
   #top.ffs-page > .ffs-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -223,7 +332,7 @@
     height: 54%;
     left: -37%;
     top: 17%;
-    opacity: 0.24;
+    opacity: 0.42;
   }
 
   #top.ffs-page > .ffs-hero > .rxs-hero-visual {
@@ -254,11 +363,12 @@
     box-sizing: border-box;
   }
 
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-mark,
   #top.ffs-page > .ffs-hero .ffs-mark {
     inset: 0 var(--ffs-opening-gutter) auto auto;
     translate: 0 0.08em;
     font-size: clamp(28px, 8.7vw, 55px);
-    -webkit-text-stroke-color: rgb(160 187 199 / 16%);
+    -webkit-text-stroke-color: rgb(156 238 255 / 34%);
   }
 
   #top.ffs-page > .ffs-hero h1 {
@@ -284,20 +394,28 @@
   }
 
   #top.ffs-page > .ffs-hero .ffs-stages-line::before {
-    width: 16px;
+    width: 20px;
   }
 
   #top.ffs-page > .ffs-hero .ffs-hero-rail {
     display: flex;
     flex-wrap: wrap;
-    gap: 3px 16px;
+    gap: 10px 12px;
     margin-top: 16px;
   }
 
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-primary,
   #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary {
     min-width: 128px;
     min-height: 44px;
-    padding: 10px 15px;
+    padding: 10px 16px;
+  }
+
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary,
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-secondary {
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 14px;
   }
 
   #top.ffs-page > .ffs-hero > .rxs-scroll-cue {
@@ -318,6 +436,7 @@
 
 /* Keep the approved short-landscape title and tap controls together. */
 @media (min-width: 568px) and (max-width: 1099px) and (orientation: landscape) {
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero,
   #top.ffs-page > .ffs-hero {
     display: grid;
     grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
@@ -353,17 +472,20 @@
     font-size: clamp(29px, 7.5svh, 58px);
   }
 
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-mark,
   #top.ffs-page > .ffs-hero .ffs-mark {
     inset: -0.24em 0 auto auto;
     font-size: clamp(23px, 4.7vw, 44px);
-    -webkit-text-stroke-color: rgb(160 187 199 / 16%);
+    -webkit-text-stroke-color: rgb(156 238 255 / 32%);
   }
 
   #top.ffs-page > .ffs-hero .rxs-hero-lede { margin-top: 8px; font-size: clamp(14px, 2.8vh, 19px); }
   #top.ffs-page > .ffs-hero .rxs-hero-lede-text > span + span { margin-top: 3px; font-size: 12px; line-height: 1.45; }
   #top.ffs-page > .ffs-hero .ffs-stages-line { margin-top: 6px; font-size: 12px; }
-  #top.ffs-page > .ffs-hero .ffs-hero-rail { display: flex; gap: 2px 12px; margin-top: 9px; }
-  #top.ffs-page > .ffs-hero .ffs-hero-rail a { min-height: 44px; padding: 8px 12px; }
+  #top.ffs-page > .ffs-hero .ffs-hero-rail { display: flex; gap: 6px 10px; margin-top: 9px; }
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a,
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a { min-width: 0; min-height: 44px; padding: 8px 13px; }
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a.ffs-hero-primary,
   #top.ffs-page > .ffs-hero .ffs-hero-rail a.ffs-hero-primary { min-width: 112px; min-height: 44px; }
   #top.ffs-page > .ffs-hero > .rxs-scroll-cue { grid-area: 2 / 2; margin: 4px 0 0 8px; }
 }
@@ -374,7 +496,23 @@
   }
 }
 
+html[data-family="special"]:is([data-world-effects="economy"], [data-rzn-constrained])
+  body
+  #top.rxs-page.rxs-page.ffs-page[data-command-special]
+  > .ffs-hero
+  :is(.ffs-aperture, .rxs-hero-visual img, .ffs-mark, .ffs-hero-rail a, .ffs-hero-rail a.ffs-hero-primary, .ffs-hero-rail a.ffs-hero-secondary) {
+  filter: none;
+}
+
 @media (forced-colors: active) {
   #top.ffs-page > .ffs-hero .ffs-mark { visibility: hidden; }
-  #top.ffs-page > .ffs-hero .ffs-hero-rail a { border: 1px solid ButtonText; color: LinkText; }
+  html[data-family="special"] body #top.rxs-page.rxs-page.ffs-page[data-command-special] > .ffs-hero .ffs-hero-rail a,
+  #top.ffs-page > .ffs-hero .ffs-hero-rail a {
+    border: 1px solid ButtonText;
+    background: Canvas;
+    color: LinkText;
+    box-shadow: none;
+    filter: none;
+    clip-path: none;
+  }
 }

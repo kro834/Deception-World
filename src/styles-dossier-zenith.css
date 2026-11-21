@@ -102,21 +102,23 @@ html[data-family="dossier"]
   min-width: 0;
   min-height: 32px;
   margin: 0;
-  padding: 5px 12px 5px 10px;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 26%, var(--sd-line-2));
+  padding: 5px 13px 5px 11px;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 34%, var(--sd-line-2));
   border-left: 2px solid var(--sd-accent);
   border-radius: 3px;
   background:
+    linear-gradient(90deg, var(--sd-accent) 0%, var(--sd-foil, #f3d999) 48%, transparent 92%) 0 0 /
+      100% 1px no-repeat,
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--sd-accent) 15%, transparent),
-      color-mix(in srgb, var(--sd-foil, #f3d999) 4%, transparent) 48%,
-      transparent 82%
+      color-mix(in srgb, var(--sd-accent) 20%, transparent),
+      color-mix(in srgb, var(--sd-foil, #f3d999) 6%, transparent) 52%,
+      transparent 86%
     ),
-    linear-gradient(165deg, #0d1625 0%, var(--sd-plate) 100%);
+    linear-gradient(165deg, #0f192b 0%, var(--sd-plate) 100%);
   box-shadow:
-    0 4px 14px rgb(0 0 0 / 34%),
-    inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 20%, rgb(255 255 255 / 12%));
+    0 6px 18px rgb(0 0 0 / 42%),
+    inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 28%, rgb(255 255 255 / 16%));
 }
 
 html[data-family="dossier"]
@@ -156,14 +158,14 @@ html[data-family="dossier"]
   gap: 1px;
   margin: 0;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 28%, var(--sd-line-2));
-  border-top: 1px solid color-mix(in srgb, var(--sd-foil, #f3d999) 48%, var(--sd-accent));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 34%, var(--sd-line-2));
+  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f3d999) 56%, var(--sd-accent));
   border-radius: 4px;
-  background: color-mix(in srgb, var(--sd-accent) 18%, var(--sd-line));
+  background: color-mix(in srgb, var(--sd-accent) 24%, var(--sd-line));
   box-shadow:
-    0 12px 32px rgb(0 0 0 / 40%),
-    0 0 20px color-mix(in srgb, var(--sd-accent) 7%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 10%);
+    0 16px 40px rgb(0 0 0 / 48%),
+    0 0 26px color-mix(in srgb, var(--sd-accent) 11%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 14%);
   overflow: clip;
 }
 
@@ -635,6 +637,12 @@ html[data-family="dossier"]
 }
 
 html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  > nav.manager-pagination
+  .dossier-roster
+  > li,
+html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
   .dossier-roster
@@ -646,29 +654,49 @@ html[data-family="dossier"]
   /* A card narrower than the numeral and the longest name side by side
      sets the numeral over the name (section's end). */
   container: roster-tile / inline-size;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 16%, var(--sd-line));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 22%, var(--sd-line));
+  border-top-color: color-mix(in srgb, var(--sd-foil, #f3d999) 32%, var(--sd-line-2));
   border-radius: 4px;
-  background: linear-gradient(160deg, #0d1522 0%, var(--sd-plate) 100%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--sd-accent) 8%, rgb(255 255 255 / 4%)) 0%,
+      transparent 44%
+    ),
+    linear-gradient(160deg, #0e1828 0%, var(--sd-plate) 100%);
   box-shadow:
-    0 6px 18px rgb(0 0 0 / 36%),
-    inset 0 1px 0 rgb(255 255 255 / 8%);
+    0 10px 26px rgb(0 0 0 / 46%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
   overflow: clip;
 }
 
 /* The file at hand: its tile edged in the file's light and foil. */
 html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  > nav.manager-pagination
+  .dossier-roster
+  > li.is-current,
+html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
   .dossier-roster
   > li.is-current {
-  border-color: color-mix(in srgb, var(--sd-accent) 62%, var(--sd-foil, #f3d999));
+  border-color: color-mix(in srgb, var(--sd-accent) 68%, var(--sd-foil, #f3d999));
   box-shadow:
-    0 8px 24px rgb(0 0 0 / 48%),
-    0 0 22px color-mix(in srgb, var(--sd-accent) 28%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 22%);
+    0 14px 34px rgb(0 0 0 / 56%),
+    0 0 26px color-mix(in srgb, var(--sd-accent) 34%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f3d999) 34%, transparent);
 }
 
 /* 欠番: a dashed, empty slot. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  > nav.manager-pagination
+  .dossier-roster
+  > li.is-void,
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   > .manager-pagination
@@ -676,6 +704,7 @@ html[data-family="dossier"]
   > li.is-void {
   border-style: dashed;
   background: none;
+  box-shadow: none;
 }
 
 html[data-family="dossier"]
@@ -2169,8 +2198,10 @@ html[data-family="dossier"]
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
   /* Its light in the stroke (not opacity: the arrival's rise ends at 1). */
-  -webkit-text-stroke: 1.25px color-mix(in srgb, var(--sd-accent) 76%, var(--sd-foil, #f3d999));
-  text-shadow: 0 0 28px color-mix(in srgb, var(--sd-accent) 24%, transparent);
+  -webkit-text-stroke: 1.45px color-mix(in srgb, var(--sd-accent) 78%, var(--sd-foil, #f6dea1));
+  text-shadow:
+    0.04em 0.04em 0 color-mix(in srgb, var(--sd-accent-2, var(--sd-accent)) 22%, transparent),
+    0 0 34px color-mix(in srgb, var(--sd-accent) 32%, transparent);
   pointer-events: none;
   user-select: none;
 }
@@ -2184,18 +2215,19 @@ html[data-family="dossier"]
   > .dossier-file-numeral::after {
   content: "";
   display: block;
-  width: 44%;
-  min-width: 34px;
+  width: 52%;
+  min-width: 40px;
   height: 2px;
   margin: 0.16em auto 0 0;
   background: linear-gradient(
     90deg,
-    var(--sd-accent) 0%,
-    var(--sd-foil, #f3d999) 52%,
+    #ffffff 0%,
+    var(--sd-accent) 22%,
+    var(--sd-foil, #f6dea1) 64%,
     transparent 100%
   );
-  box-shadow: 0 0 12px color-mix(in srgb, var(--sd-accent) 34%, transparent);
-  opacity: 0.88;
+  box-shadow: 0 0 16px color-mix(in srgb, var(--sd-accent) 44%, transparent);
+  opacity: 0.94;
 }
 
 /* 六詠's (and シエル's) Roman numerals in the site's Roman face. */
@@ -2258,9 +2290,23 @@ html[data-family="dossier"]
       position: relative;
       top: auto;
       left: auto;
-      margin: 0 0 clamp(16px, 2.8svh, 28px);
-      font-size: clamp(64px, min(8vw, 16svh), 144px);
+      margin: 0 0 clamp(10px, 1.4svh, 16px);
+      font-size: clamp(46px, min(4.8vw, 8.5svh), 72px);
+      -webkit-text-stroke: 1.6px color-mix(in srgb, var(--sd-accent) 82%, var(--sd-foil, #f6dea1));
+      text-shadow:
+        0.04em 0.04em 0 color-mix(in srgb, var(--sd-accent-2, var(--sd-accent)) 28%, transparent),
+        0 0 38px color-mix(in srgb, var(--sd-accent) 44%, transparent);
       transform: none;
+    }
+
+    html[data-family="dossier"]
+      main.manager-page.manager-page.manager-page
+      #dossier-profile
+      .dossier-identity
+      > .dossier-file-numeral::after {
+      width: 68%;
+      min-width: 56px;
+      margin-top: 0.14em;
     }
   }
 }
@@ -2977,20 +3023,43 @@ html[data-family="dossier"]
 
 /* Cipher SCARS terminal optics: cyan/magenta hairline & #8be9ff telemetry keys. */
 html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page[data-rider="cipher"]
+  #dossier-index
+  :is(.manager-copy-section, #zenith-stage-boost),
+html[data-family="dossier"]
   main.manager-page.manager-page.manager-page[data-rider="cipher"]
   #dossier-index
   .manager-copy-section {
+  border-color: rgb(139 233 255 / 34%);
   background:
-    linear-gradient(90deg, #8be9ff 0%, #c95cff 52%, transparent 100%) 0 0 / 100% 2px no-repeat,
-    linear-gradient(180deg, rgb(139 233 255 / 4%), transparent 120px),
-    var(--sd-plate);
+    linear-gradient(90deg, #8be9ff 0%, #c95cff 54%, transparent 100%) 0 0 / 100% 2px no-repeat,
+    linear-gradient(#8be9ff 0 0) 0 0 / 18px 2px no-repeat,
+    linear-gradient(#8be9ff 0 0) 0 0 / 2px 18px no-repeat,
+    linear-gradient(#c95cff 0 0) 100% 100% / 18px 2px no-repeat,
+    linear-gradient(#c95cff 0 0) 100% 100% / 2px 18px no-repeat,
+    radial-gradient(76% 180px at 0% 0%, rgb(139 233 255 / 16%), transparent 72%),
+    radial-gradient(64% 150px at 100% 100%, rgb(201 92 255 / 12%), transparent 72%),
+    linear-gradient(164deg, #0b1424 0%, #060a14 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(196 244 255 / 26%),
+    inset 0 -1px 0 rgb(201 92 255 / 26%),
+    0 28px 68px rgb(0 0 0 / 58%),
+    0 0 34px rgb(139 233 255 / 12%);
 }
 
 html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page[data-rider="cipher"]
+  :is(#dossier-profile .manager-facts, .form-pickup-record .form-pickup-spec),
+html[data-family="dossier"]
   main.manager-page.manager-page.manager-page[data-rider="cipher"]
   :is(#dossier-profile .manager-facts, .form-pickup-record .form-pickup-spec) {
-  border-top-color: rgb(139 233 255 / 38%);
-  box-shadow: inset 0 1px 0 rgb(201 92 255 / 26%);
+  border-top-color: rgb(139 233 255 / 54%);
+  box-shadow:
+    0 22px 54px rgb(0 0 0 / 54%),
+    0 0 28px rgb(139 233 255 / 12%),
+    inset 0 1px 0 rgb(201 92 255 / 32%);
 }
 
 html[data-family="dossier"]
@@ -3009,9 +3078,9 @@ html[data-family="dossier"]
   .rider-partner-forms {
   --sd-accent: #f44f58;
   --sd-accent-2: #8dffb7;
-  --sd-glow: color-mix(in srgb, #f44f58 34%, transparent);
-  --sd-glow-soft: color-mix(in srgb, #f44f58 14%, transparent);
-  --sd-rule: color-mix(in srgb, #f44f58 62%, transparent);
+  --sd-glow: color-mix(in srgb, #f44f58 42%, transparent);
+  --sd-glow-soft: color-mix(in srgb, #f44f58 18%, transparent);
+  --sd-rule: color-mix(in srgb, #f44f58 72%, #ffffff);
 }
 
 /* Yoake Mamori divine redaction seal chip. */
@@ -3025,17 +3094,17 @@ html[data-family="dossier"]
   width: fit-content;
   max-width: 100%;
   padding: 2px 10px;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 38%, var(--sd-line-2));
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 44%, var(--sd-line-2));
   border-left: 2px solid var(--sd-accent);
   border-radius: 2px;
   background:
     repeating-linear-gradient(
       -45deg,
-      color-mix(in srgb, var(--sd-accent) 14%, transparent) 0 4px,
-      rgb(4 7 13 / 72%) 4px 9px
+      color-mix(in srgb, var(--sd-accent) 16%, transparent) 0 4px,
+      rgb(4 7 13 / 74%) 4px 9px
     ),
     var(--sd-plate);
-  color: color-mix(in srgb, var(--sd-accent) 68%, var(--sd-text-2));
+  color: color-mix(in srgb, var(--sd-accent) 72%, var(--sd-text-2));
   font-size: 13px;
   letter-spacing: 0.16em;
 }
@@ -3077,27 +3146,361 @@ html[data-family="dossier"]
 }
 
 /* ----------------------------------------------------------------
-   8. Artbook deluxe finish: desktop 1440px typography hierarchy &
-      full-tier optical depth
+   8. Artbook Special Edition: bevelled obsidian-glass, champagne-foil
+      corner locks & 1440px desktop hierarchy (outranks future-spectrum)
    ---------------------------------------------------------------- */
+html:not([data-world-effects="economy"])[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name,
 html:not([data-world-effects="economy"])[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-profile
   .dossier-identity
   .manager-display-name {
   filter:
-    drop-shadow(0 8px 26px rgb(0 0 0 / 56%))
-    drop-shadow(0 0 22px color-mix(in srgb, var(--sd-accent) 22%, transparent));
+    drop-shadow(0 10px 28px rgb(0 0 0 / 62%))
+    drop-shadow(0 0 26px color-mix(in srgb, var(--sd-accent) 30%, transparent));
 }
 
+/* Hero quote reliquary: 2px prism-foil crown, bottom-right champagne corner
+   lock, deep obsidian glass & left specular light bar. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  :is(.manager-quotes, #zenith-stage-boost) {
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 36%, rgb(255 255 255 / 16%));
+  border-left: 3px solid var(--sd-accent);
+  border-radius: 2px var(--dx-radius, 6px) var(--dx-radius, 6px) 2px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--sd-accent) 0%,
+        var(--sd-foil, #f6dea1) 42%,
+        color-mix(in srgb, var(--sd-accent-2, var(--sd-accent)) 32%, transparent) 80%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 20px 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 1.5px 20px no-repeat,
+    radial-gradient(
+      82% 140px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 22%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      64% 110px at 100% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 11%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(168deg, rgb(255 255 255 / 6.5%) 0%, transparent 68px),
+    linear-gradient(155deg, #0e1829 0%, #060b14 100%);
+  box-shadow:
+    inset 0 1px 0 var(--sd-bevel-hi),
+    inset 0 -1px 0 var(--sd-bevel-lo),
+    inset 4px 0 24px -8px color-mix(in srgb, var(--sd-accent) 34%, transparent),
+    0 26px 64px rgb(0 0 0 / 56%),
+    0 0 36px -4px color-mix(in srgb, var(--sd-accent) 16%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes
+  q + q {
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--sd-accent) 20%, var(--sd-line));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+/* Specification ledger (.manager-facts): champagne-foil crown & micro corner
+   locks over deep obsidian plate. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  :is(#dossier-profile, #dossier-index .manager-copy-body)
+  .manager-facts {
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 32%, var(--sd-line-2));
+  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 58%, var(--sd-accent));
+  background:
+    linear-gradient(var(--sd-accent) 0 0) 0 0 / 14px 1.5px no-repeat,
+    linear-gradient(var(--sd-accent) 0 0) 0 0 / 1.5px 14px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 14px 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 1.5px 14px no-repeat,
+    radial-gradient(
+      72% 130px at 12% 0%,
+      color-mix(in srgb, var(--sd-accent) 18%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      56% 110px at 92% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 12%, transparent),
+      transparent 74%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 5%) 0%, transparent 58px),
+    linear-gradient(155deg, #0d1727 0%, #060b14 100%);
+  box-shadow:
+    inset 0 1px 0 var(--sd-bevel-hi),
+    inset 0 -1px 0 var(--sd-bevel-lo),
+    0 24px 58px rgb(0 0 0 / 52%),
+    0 0 30px -4px color-mix(in srgb, var(--sd-accent) 13%, transparent);
+}
+
+/* Sticky chapter ruler (.dossier-reader) & jewel-lit active section tab:
+   strictly opaque obsidian ground, outranking future-spectrum. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .dante-page
+  )
+  > :is(.dossier-reader, #zenith-stage-boost) {
+  border-top: 1px solid color-mix(in srgb, var(--sd-accent) 26%, rgb(255 255 255 / 12%));
+  border-bottom: 1px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 42%, var(--sd-line-2));
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--sd-accent) 16%, transparent) 0%,
+      transparent 34%,
+      transparent 68%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 12%, transparent) 100%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 4%) 0%, transparent 56%),
+    #050912;
+  background-color: #050912;
+  box-shadow:
+    0 18px 46px rgb(0 0 0 / 64%),
+    0 2px 18px color-mix(in srgb, var(--sd-accent) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--sd-accent) 22%, rgb(255 255 255 / 14%)),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 34%, var(--sd-accent));
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .dante-page
+  )
+  > .dossier-reader
+  .dossier-reader-links
+  a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]) {
+  border-top-color: color-mix(in srgb, var(--sd-accent) 72%, #ffffff);
+  color: #ffffff;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        color-mix(in srgb, var(--sd-accent) 88%, #ffffff) 50%,
+        transparent 92%
+      )
+      50% 0 / 100% 2px no-repeat,
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--sd-accent) 28%, transparent) 0%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 9%, transparent) 56%,
+      transparent 96%
+    );
+  box-shadow:
+    0 6px 16px rgb(0 0 0 / 44%),
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -2px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 62%, var(--sd-accent));
+  text-shadow: 0 0 14px color-mix(in srgb, var(--sd-accent) 42%, transparent);
+}
+
+@media (min-width: 761px) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .dante-page
+    )
+    > .dossier-reader
+    .dossier-reader-links {
+    gap: 8px;
+    padding-block: 6px;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .dante-page
+    )
+    > .dossier-reader
+    .dossier-reader-links
+    a {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 26%, var(--sd-line-2));
+    border-top: 2px solid color-mix(in srgb, var(--sd-accent) 44%, rgb(255 255 255 / 16%));
+    border-radius: 3px;
+    color: var(--sd-text-2);
+    background:
+      linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 8px 1px no-repeat,
+      linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 1px 8px no-repeat,
+      linear-gradient(
+        165deg,
+        color-mix(in srgb, var(--sd-accent) 10%, #0d1728) 0%,
+        #070c16 100%
+      );
+    box-shadow:
+      0 4px 12px rgb(0 0 0 / 38%),
+      inset 0 1px 0 rgb(255 255 255 / 10%);
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+      .dante-page
+    )
+    > .dossier-reader
+    .dossier-reader-links
+    a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]) {
+    border-color: color-mix(in srgb, var(--sd-foil, #f6dea1) 56%, var(--sd-accent));
+    border-top: 2px solid #ffffff;
+    color: #ffffff;
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--sd-accent) 34%, #101e34) 0%,
+        color-mix(in srgb, var(--sd-foil, #f6dea1) 14%, #0b1424) 100%
+      );
+    box-shadow:
+      0 8px 20px rgb(0 0 0 / 48%),
+      0 0 20px -4px color-mix(in srgb, var(--sd-accent) 32%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 28%),
+      inset 0 -2px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 70%, var(--sd-accent));
+  }
+}
+
+/* TOC jump tiles & chapter spreads: corner locks, champagne-foil spine &
+   deep museum shadows. */
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-index
   .dossier-contents
   a {
-  padding: 12px 14px;
-  border-color: color-mix(in srgb, var(--sd-accent) 20%, var(--sd-line));
-  border-left-color: color-mix(in srgb, var(--sd-accent) 72%, var(--sd-foil, #f3d999));
+  padding: 12px 15px;
+  border-color: color-mix(in srgb, var(--sd-accent) 26%, var(--sd-line));
+  border-left: 3px solid color-mix(in srgb, var(--sd-accent) 78%, var(--sd-foil, #f6dea1));
+  background:
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 12px 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 1.5px 12px no-repeat,
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--sd-accent) 14%, transparent),
+      transparent 54%
+    ),
+    linear-gradient(160deg, #0e1828 0%, #070c15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 12px 30px rgb(0 0 0 / 42%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page):not([data-rider="cipher"])
+  #dossier-index
+  :is(.manager-copy-section, #zenith-stage-boost) {
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 26%, var(--sd-line));
+  border-top: 1px solid color-mix(in srgb, var(--sd-accent) 44%, var(--sd-foil, #f6dea1));
+  background:
+    linear-gradient(90deg, var(--sd-accent) 0%, var(--sd-foil, #f6dea1) 52%, transparent 100%) 0 0 /
+      min(240px, 64%) 2px no-repeat,
+    linear-gradient(var(--sd-accent) 0 0) 0 0 / 18px 2px no-repeat,
+    linear-gradient(var(--sd-accent) 0 0) 0 0 / 2px 18px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 18px 2px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 2px 18px no-repeat,
+    radial-gradient(
+      74% 170px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 15%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      58% 140px at 100% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 8%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 120px),
+    linear-gradient(162deg, #0d1626 0%, #060b14 100%);
+  box-shadow:
+    inset 0 1px 0 var(--sd-bevel-hi),
+    inset 0 -1px 0 var(--sd-bevel-lo),
+    0 26px 64px rgb(0 0 0 / 52%),
+    0 0 30px -6px color-mix(in srgb, var(--sd-accent) 12%, transparent);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page):not([data-rider="cipher"])
+  #dossier-index
+  :is(.manager-copy-section[data-record-role="lead"], #zenith-stage-boost) {
+  border-color: color-mix(in srgb, var(--sd-accent) 42%, var(--sd-foil, #f6dea1));
+  background:
+    linear-gradient(
+        90deg,
+        var(--sd-accent) 0%,
+        var(--sd-foil, #f6dea1) 56%,
+        color-mix(in srgb, var(--sd-accent-2, var(--sd-accent)) 36%, transparent) 88%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(#ffffff 0 0) 0 0 / 22px 2px no-repeat,
+    linear-gradient(#ffffff 0 0) 0 0 / 2px 22px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 22px 2px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 2px 22px no-repeat,
+    radial-gradient(
+      80% 200px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 22%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      64% 160px at 100% 100%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 12%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 6.5%), transparent 140px),
+    linear-gradient(160deg, #0f1a2c 0%, #060b14 100%);
+  box-shadow:
+    inset 0 1px 0 var(--sd-bevel-hi),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 34%, transparent),
+    0 32px 76px rgb(0 0 0 / 60%),
+    0 0 38px -4px color-mix(in srgb, var(--sd-accent) 18%, transparent);
+}
+
+/* Related records (#identity-records): bevelled museum cards above future-spectrum. */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #identity-records
+  > :is(.rider-archive-civilian, .rider-nightmare-card, #zenith-stage-boost) {
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 32%, var(--sd-line-2));
+  border-top: 2px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 54%, var(--sd-accent));
+  background:
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 18px 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 1.5px 18px no-repeat,
+    radial-gradient(
+      74% 160px at 0% 0%,
+      color-mix(in srgb, var(--sd-accent) 18%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(160deg, #0e1828 0%, #060b14 100%);
+  box-shadow:
+    inset 0 1px 0 var(--sd-bevel-hi),
+    inset 0 -1px 0 var(--sd-bevel-lo),
+    0 26px 62px rgb(0 0 0 / 54%),
+    0 0 32px -6px color-mix(in srgb, var(--sd-accent) 14%, transparent);
 }
 
 html[data-family="dossier"]
@@ -3106,11 +3509,50 @@ html[data-family="dossier"]
   .manager-copy-section
   .manager-copy-heading
   > span {
-  padding: 2px 8px;
-  border: 1px solid color-mix(in srgb, var(--sd-accent) 38%, transparent);
+  padding: 2px 9px;
+  border: 1px solid color-mix(in srgb, var(--sd-accent) 46%, var(--sd-foil, #f6dea1));
+  border-left: 2px solid var(--sd-accent);
   border-radius: 2px;
-  background: color-mix(in srgb, var(--sd-accent) 10%, var(--sd-plate));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--sd-accent) 18%, var(--sd-plate)),
+    var(--sd-plate)
+  );
+  box-shadow:
+    0 4px 12px rgb(0 0 0 / 34%),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign):not(
+    .ciel-dossier-page
+  ):not(.dante-page)
+  #dossier-profile
+  .dossier-identity
+  .manager-title {
+  border: 1px solid color-mix(in srgb, var(--sd-foil, #f6dea1) 52%, var(--sd-accent));
+  border-left: 3px solid var(--sd-accent);
+  border-radius: 2px 4px 4px 2px;
+  color: #f8fbff;
+  background:
+    linear-gradient(90deg, #ffffff 0%, var(--sd-accent) 34%, var(--sd-foil, #f6dea1) 74%, transparent 100%)
+      0 0 / 100% 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 0 / 10px 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 0 / 1.5px 10px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 12px 1.5px no-repeat,
+    linear-gradient(var(--sd-foil, #f6dea1) 0 0) 100% 100% / 1.5px 12px no-repeat,
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--sd-accent) 30%, #0d182a) 0%,
+      color-mix(in srgb, var(--sd-foil, #f6dea1) 14%, #08111f) 62%,
+      #060c17 100%
+    );
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 48%),
+    0 0 22px -4px color-mix(in srgb, var(--sd-accent) 26%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 color-mix(in srgb, var(--sd-foil, #f6dea1) 28%, transparent);
 }
 
 @media (min-width: 1280px) and (min-height: 700px) {
@@ -3119,20 +3561,28 @@ html[data-family="dossier"]
     #dossier-profile
     .dossier-identity
     .manager-title {
-    margin-top: 22px;
-    padding: 8px 20px 8px 16px;
-    font-size: clamp(16px, 1.28vw, 20px);
+    margin-top: 14px;
+    padding: 7px 20px 7px 16px;
+    font-size: clamp(15px, 1.18vw, 18px);
     letter-spacing: 0.06em;
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
     .manager-quotes {
-    gap: 14px;
-    margin-top: 36px;
-    padding: 26px 28px 26px 30px;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 18px 24px 18px 26px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-quotes
+    q + q {
+    padding-top: 8px;
   }
 
   html[data-family="dossier"]
@@ -3140,15 +3590,24 @@ html[data-family="dossier"]
     #dossier-profile
     .manager-quotes
     q:first-child {
-    font-size: clamp(18px, 1.45vw, 22px);
-    line-height: 1.72;
+    font-size: clamp(17px, 1.32vw, 20px);
+    line-height: 1.65;
   }
 
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
     .manager-facts {
-    padding: 8px 24px 10px;
+    margin-top: 16px;
+    padding: 4px 22px 6px;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-facts
+    > div {
+    padding: 9px 0 10px;
   }
 }
 
@@ -3164,6 +3623,12 @@ html[data-family="dossier"]
 
 @media (forced-colors: active) {
   html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name,
+  html[data-family="dossier"]
     main.manager-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
     .dossier-identity
@@ -3171,6 +3636,29 @@ html[data-family="dossier"]
     filter: none;
   }
 
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(
+      #dossier-profile .dossier-identity .manager-title,
+      #dossier-profile .manager-quotes,
+      #dossier-profile .manager-facts,
+      .dossier-reader .dossier-reader-links a:not([aria-current]),
+      #dossier-index .manager-copy-body .manager-facts,
+      #dossier-index .manager-copy-section,
+      #dossier-index .dossier-contents a,
+      #identity-records > .rider-archive-civilian,
+      #identity-records > .rider-nightmare-card
+    ) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader,
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page.is-sovereign
     > .dossier-reader {
@@ -3180,6 +3668,12 @@ html[data-family="dossier"]
   }
 
   html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]),
+  html[data-family="dossier"]
     main.manager-page.manager-page.manager-page.is-sovereign
     > .dossier-reader
     .dossier-reader-links
@@ -3188,6 +3682,18 @@ html[data-family="dossier"]
     color: HighlightText;
     background: Highlight;
     border-color: Highlight;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page
+    > nav.manager-pagination
+    .dossier-roster
+    > li {
+    border-color: CanvasText;
+    background: Canvas;
     box-shadow: none;
   }
 

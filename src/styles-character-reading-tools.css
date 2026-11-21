@@ -1,13 +1,698 @@
-/* Character routes only: dimensional bookmark continuation plate & optical spine records. */
+/* Character routes only (/characters/ciel, dante, terra, luna, yoake-mamori):
+   Topmost cascade sheet loaded after dossier-zenith and character page sheets.
+   Elevates the reading experience (sticky navigation with reading progress,
+   table of contents tiles, hero quotes, chapter spreads, chapter continuation
+   plates and related records) to an artbook special edition while preserving
+   the 13px narrow reader navigation pin and character palettes. */
+
+/* ================================================================
+   0. Character-route tokens & ambient optical reading ground
+   ================================================================ */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign) {
+  --crt-accent: var(--sd-accent, var(--manager-accent, #86d9ff));
+  --crt-accent-2: var(--sd-accent-2, var(--manager-accent-soft, var(--crt-accent)));
+  --crt-foil: var(--sd-foil, color-mix(in srgb, var(--crt-accent) 44%, #f2d590));
+  --crt-rim-hi: color-mix(in srgb, var(--crt-accent) 32%, rgb(255 255 255 / 26%));
+  --crt-rim-lo: color-mix(in srgb, var(--crt-foil) 28%, rgb(0 0 0 / 50%));
+  --crt-plate: #09111d;
+  --crt-plate-deep: #060b14;
+}
+
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign) {
+  --crt-accent: #1ccf9d;
+  --crt-accent-2: #86d9ff;
+  --crt-foil: #b9f4e6;
+  --crt-plate: #06141a;
+  --crt-plate-deep: #030b0f;
+}
+
+html[data-family="dossier"]
+  main.manager-page.dante-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign) {
+  --crt-accent: #ed667e;
+  --crt-accent-2: #369b89;
+  --crt-foil: #ffb8c5;
+  --crt-plate: #120911;
+  --crt-plate-deep: #06060b;
+}
+
+/* ================================================================
+   1. Sticky Dossier Reader & Scroll-Linked Reading Progress Bar
+      (Keeps 13px on narrow screens; opaque ground prevents bleed-through)
+   ================================================================ */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  > .dossier-reader {
+  position: sticky;
+  border-top: 1px solid color-mix(in srgb, var(--crt-accent) 26%, rgb(255 255 255 / 14%));
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-foil) 42%, rgb(255 255 255 / 16%));
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--crt-accent) 16%, transparent) 0%,
+      color-mix(in srgb, var(--crt-accent-2) 6%, transparent) 28%,
+      transparent 54%,
+      color-mix(in srgb, var(--crt-foil) 11%, transparent) 100%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 4%) 0%, transparent 56%),
+    var(--crt-plate-deep);
+  background-color: var(--crt-plate-deep);
+  box-shadow:
+    0 18px 46px rgb(0 0 0 / 64%),
+    0 2px 18px color-mix(in srgb, var(--crt-accent) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--crt-accent) 24%, rgb(255 255 255 / 16%)),
+    inset 0 -1px 0 color-mix(in srgb, var(--crt-foil) 34%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  > .dossier-reader::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--crt-accent) 0%,
+    color-mix(in srgb, var(--crt-accent) 52%, #ffffff) 44%,
+    var(--crt-foil) 82%,
+    var(--crt-accent-2) 100%
+  );
+  box-shadow: 0 0 12px color-mix(in srgb, var(--crt-accent) 42%, transparent);
+  opacity: 0.72;
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-world-effects="economy"]):not([data-side-menu-open]):not([data-loading]):not(
+        [data-dialog-open]
+      )[data-family="dossier"]
+      main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+      > .dossier-reader::after {
+      opacity: 0.96;
+      transform-origin: left center;
+      animation: crt-reading-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes crt-reading-progress {
+  from {
+    transform: scaleX(0.06);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  > .dossier-reader
+  .dossier-reader-links
+  a {
+  position: relative;
+  border-top: 2px solid rgb(255 255 255 / 12%);
+  font-size: 13px;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  > .dossier-reader
+  .dossier-reader-links
+  a[aria-current] {
+  border-top-color: color-mix(in srgb, var(--crt-accent) 72%, #ffffff);
+  color: #ffffff;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        color-mix(in srgb, var(--crt-accent) 88%, #ffffff) 50%,
+        transparent 94%
+      )
+      50% 0 / 100% 2px no-repeat,
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--crt-accent) 26%, transparent) 0%,
+      color-mix(in srgb, var(--crt-foil) 9%, transparent) 58%,
+      transparent 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -2px 0 color-mix(in srgb, var(--crt-foil) 75%, var(--crt-accent)),
+    0 6px 16px rgb(0 0 0 / 42%);
+  text-shadow: 0 0 14px color-mix(in srgb, var(--crt-accent) 44%, transparent);
+}
+
+/* Preserve 13px pin on narrow dossier navigation (75b1fbe8). */
+@media (max-width: 420px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a {
+    font-size: 13px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 389px) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a {
+    padding-inline: 2px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+}
+
+/* ================================================================
+   1b. Hero Title Slip, Spec Sheet & Divine Redaction Seal
+   ================================================================ */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity
+  .manager-title {
+  display: inline-block;
+  padding: 6px 14px 6px 12px;
+  border-left: 2px solid var(--crt-accent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--crt-accent) 14%, transparent) 0%,
+    color-mix(in srgb, var(--crt-foil) 6%, transparent) 58%,
+    transparent 100%
+  );
+  color: color-mix(in srgb, var(--crt-accent) 62%, #f4f8fc);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--crt-accent) 26%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity
+  .manager-title {
+  color: var(--crt-accent-2);
+  text-shadow: 0 0 18px rgb(134 217 255 / 26%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  :is(#dossier-profile, #dossier-index .manager-copy-body)
+  .manager-facts {
+  border-color: color-mix(in srgb, var(--crt-accent) 34%, rgb(255 255 255 / 14%));
+  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 58%, var(--crt-accent));
+  box-shadow:
+    inset 0 1px 0 var(--crt-rim-hi),
+    inset 0 -1px 0 var(--crt-rim-lo),
+    0 22px 54px rgb(0 0 0 / 50%),
+    0 0 28px -6px color-mix(in srgb, var(--crt-accent) 14%, transparent);
+}
+
+/* Divine redaction seal without diagonal stripe noise (Yoake Mamori) */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-facts
+  dd.is-redacted {
+  border: 1px solid color-mix(in srgb, var(--crt-foil) 48%, var(--crt-accent));
+  border-left: 2px solid var(--crt-accent);
+  border-radius: 3px;
+  background:
+    linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--crt-accent) 76%, #ffffff) 0%,
+        var(--crt-foil) 54%,
+        transparent 96%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(
+      80% 100% at 15% 50%,
+      color-mix(in srgb, var(--crt-accent) 18%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(155deg, #0b1422 0%, #050912 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 4px 12px rgb(0 0 0 / 38%);
+  color: color-mix(in srgb, var(--crt-foil) 76%, #ffffff);
+  letter-spacing: 0.16em;
+}
+
+/* ================================================================
+   2. Hero Quote Plate (#dossier-profile .manager-quotes)
+   ================================================================ */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 36%, rgb(255 255 255 / 18%));
+  border-left: 3px solid var(--crt-accent);
+  border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--crt-accent) 0%,
+        var(--crt-foil) 42%,
+        color-mix(in srgb, var(--crt-accent-2) 32%, transparent) 78%,
+        transparent 100%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    linear-gradient(var(--crt-foil) 0 0) 100% 100% / 20px 1.5px no-repeat,
+    linear-gradient(var(--crt-foil) 0 0) 100% 100% / 1.5px 20px no-repeat,
+    radial-gradient(
+      82% 130px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      68% 100px at 100% 100%,
+      color-mix(in srgb, var(--crt-foil) 12%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(168deg, rgb(255 255 255 / 6.5%) 0%, transparent 68px),
+    linear-gradient(154deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 var(--crt-rim-hi),
+    inset 0 -1px 0 var(--crt-rim-lo),
+    inset 4px 0 24px -8px color-mix(in srgb, var(--crt-accent) 34%, transparent),
+    0 24px 56px rgb(0 0 0 / 54%),
+    0 0 34px -4px color-mix(in srgb, var(--crt-accent) 16%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes
+  q:first-child {
+  color: #ffffff;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 50%),
+    0 0 22px color-mix(in srgb, var(--crt-accent) 24%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-quotes
+  q + q {
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--crt-accent) 20%, rgb(255 255 255 / 10%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+/* ================================================================
+   3. Table of Contents Jump Deck (#dossier-index .dossier-contents)
+   ================================================================ */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents {
+  position: relative;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 26%, rgb(255 255 255 / 12%));
+  border-radius: calc(var(--dx-radius, 6px) + 2px);
+  background:
+    linear-gradient(
+        90deg,
+        var(--crt-accent) 0%,
+        var(--crt-foil) 46%,
+        color-mix(in srgb, var(--crt-accent-2) 32%, transparent) 84%,
+        transparent 100%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      76% 140px at 14% 0%,
+      color-mix(in srgb, var(--crt-accent) 12%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(164deg, color-mix(in srgb, var(--crt-plate) 92%, #000) 0%, #050a12 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    inset 0 -1px 0 rgb(0 0 0 / 50%),
+    0 22px 54px rgb(0 0 0 / 48%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents
+  > a {
+  position: relative;
+  grid-template-columns: 38px minmax(0, 1fr) 32px;
+  gap: 14px;
+  min-height: 68px;
+  padding: 13px 14px 13px 15px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 24%, rgb(255 255 255 / 12%));
+  border-left: 3px solid color-mix(in srgb, var(--crt-accent) 84%, var(--crt-foil));
+  border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
+  background:
+    linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--crt-foil) 72%, var(--crt-accent)) 0%,
+        transparent 72%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--crt-accent) 13%, transparent) 0%,
+      transparent 52%
+    ),
+    linear-gradient(158deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    inset 0 -1px 0 rgb(0 0 0 / 48%),
+    0 10px 26px rgb(0 0 0 / 38%);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents
+  > a
+  .dossier-contents-number {
+  display: inline-grid;
+  place-items: center;
+  min-width: 36px;
+  min-height: 30px;
+  padding: 0 5px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 44%, rgb(255 255 255 / 16%));
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 10%), transparent 56%),
+    color-mix(in srgb, var(--crt-accent) 14%, #050a12);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 0 14px -4px color-mix(in srgb, var(--crt-accent) 28%, transparent);
+  color: color-mix(in srgb, var(--crt-accent) 72%, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents
+  > a
+  .dossier-contents-copy
+  small {
+  color: color-mix(in srgb, var(--crt-foil) 48%, #a6b9cb);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents
+  > a
+  .dossier-contents-copy
+  b {
+  color: #f6faff;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 42%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .dossier-contents
+  > a
+  .dossier-contents-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 34%, rgb(255 255 255 / 14%));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--crt-accent) 9%, rgb(5 10 18 / 80%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
+  color: var(--crt-accent);
+  font-size: 14px;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+/* ================================================================
+   4. Chapter Reading Cards, Section Headings & Prose Framing
+   ================================================================ */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 30%, rgb(255 255 255 / 14%));
+  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 52%, var(--crt-accent));
+  border-left: 3px solid color-mix(in srgb, var(--crt-accent) 82%, var(--crt-foil));
+  border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--crt-accent) 0%,
+        var(--crt-foil) 48%,
+        color-mix(in srgb, var(--crt-accent-2) 28%, transparent) 82%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(
+      76% 180px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 16%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      62% 140px at 100% 100%,
+      color-mix(in srgb, var(--crt-foil) 9%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 5.5%) 0%, transparent 130px),
+    linear-gradient(160deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 var(--crt-rim-hi),
+    inset 0 -1px 0 var(--crt-rim-lo),
+    inset 4px 0 26px -10px color-mix(in srgb, var(--crt-accent) 28%, transparent),
+    0 24px 60px rgb(0 0 0 / 50%),
+    0 0 32px -8px color-mix(in srgb, var(--crt-accent) 12%, transparent);
+}
+
+/* Precision corner optical brackets inside chapter cards (silent, no grid noise) */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--crt-foil) 0 0) 100% 0 / 18px 1.5px no-repeat,
+    linear-gradient(var(--crt-foil) 0 0) 100% 0 / 1.5px 18px no-repeat,
+    linear-gradient(var(--crt-accent) 0 0) 100% 100% / 18px 1.5px no-repeat,
+    linear-gradient(var(--crt-accent) 0 0) 100% 100% / 1.5px 18px no-repeat;
+  opacity: 0.66;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section[data-record-role="lead"],
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section:first-child {
+  border-color: color-mix(in srgb, var(--crt-foil) 46%, var(--crt-accent));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--crt-foil) 46%, rgb(255 255 255 / 26%)),
+    inset 0 -1px 0 color-mix(in srgb, var(--crt-foil) 34%, transparent),
+    inset 4px 0 30px -8px color-mix(in srgb, var(--crt-accent) 36%, transparent),
+    0 28px 68px rgb(0 0 0 / 56%),
+    0 0 42px -6px color-mix(in srgb, var(--crt-accent) 18%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.dante-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  #character-section-04.manager-copy-section {
+  border-color: rgb(237 102 126 / 54%);
+  border-left-color: #ed667e;
+  background:
+    linear-gradient(90deg, #ed667e 0%, #ffb8c5 44%, #369b89 88%, transparent 100%) 0 0 / 100% 2px
+      no-repeat,
+    radial-gradient(78% 190px at 0% 0%, rgb(237 102 126 / 22%), transparent 72%),
+    radial-gradient(58% 160px at 100% 100%, rgb(54 155 137 / 14%), transparent 72%),
+    linear-gradient(160deg, #140912 0%, #06060b 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 204 214 / 32%),
+    inset 0 -1px 0 rgb(186 65 91 / 32%),
+    0 30px 72px rgb(0 0 0 / 64%),
+    0 0 40px rgb(186 65 91 / 18%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section:target {
+  border-color: color-mix(in srgb, var(--crt-accent) 82%, #ffffff);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    0 0 0 1px color-mix(in srgb, var(--crt-accent) 68%, transparent),
+    0 24px 64px rgb(0 0 0 / 56%),
+    0 0 46px color-mix(in srgb, var(--crt-accent) 24%, transparent);
+}
+
+/* Chapter Heading: engraved index badge + kicker + illuminated hairline divider */
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading {
+  position: relative;
+  margin: 0 0 20px;
+  padding: 0 0 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 20%, rgb(255 255 255 / 10%));
+  background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--crt-accent) 68%, var(--crt-foil)) 0%,
+      color-mix(in srgb, var(--crt-foil) 40%, transparent) 42%,
+      transparent 88%
+    )
+    0 100% / 100% 1px no-repeat;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading
+  > span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 48%, rgb(255 255 255 / 16%));
+  border-radius: 3px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 10%), transparent 56%),
+    color-mix(in srgb, var(--crt-accent) 14%, #060b14);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 0 14px -4px color-mix(in srgb, var(--crt-accent) 26%, transparent);
+  color: color-mix(in srgb, var(--crt-accent) 72%, #ffffff);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading
+  > p {
+  color: color-mix(in srgb, var(--crt-foil) 56%, #b2c3d4);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading
+  h2 {
+  color: #f8fbff;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 48%),
+    0 0 26px color-mix(in srgb, var(--crt-accent) 14%, transparent);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-body
+  p {
+  color: color-mix(in srgb, var(--sd-text-2, #c8d4e0) 92%, #f4f8fc);
+}
+
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-body
+  :is(strong, b, h3, h4) {
+  color: #ffffff;
+}
+
+/* Dante Varg specimen portrait inside chapter 04: museum double-mat bezel */
+html[data-family="dossier"]
+  main.manager-page.dante-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .varg-portrait {
+  padding: 12px;
+  border: 1px solid rgb(237 102 126 / 46%);
+  border-top: 1px solid rgb(255 184 197 / 64%);
+  border-radius: var(--dx-radius, 6px);
+  background:
+    linear-gradient(90deg, #ed667e 0%, #ffb8c5 48%, #369b89 92%, transparent 100%) 0 0 / 100% 1.5px
+      no-repeat,
+    radial-gradient(ellipse 75% 48% at 50% 0%, rgb(237 102 126 / 16%), transparent 70%),
+    linear-gradient(160deg, #130912 0%, #05050a 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 204 214 / 24%),
+    inset 0 -1px 0 rgb(186 65 91 / 28%),
+    0 24px 56px rgb(0 0 0 / 62%);
+}
+
+html[data-family="dossier"]
+  main.manager-page.dante-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-index
+  .varg-portrait
+  img {
+  border-radius: 3px;
+  border: 1px solid rgb(255 204 214 / 16%);
+}
+
+/* ================================================================
+   5. Chapter End Tools (Test-pinned specificity & colour contracts)
+   ================================================================ */
 main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
   .manager-copy-section
   .character-chapter-tools {
   display: grid;
-  gap: 8px;
-  margin: 26px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px solid var(--sd-line, #354451);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  gap: 10px;
+  margin: 28px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--crt-accent) 26%, var(--sd-line, #354451));
+  background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--crt-accent) 52%, transparent) 0%,
+      color-mix(in srgb, var(--crt-foil) 32%, transparent) 44%,
+      transparent 90%
+    )
+    0 0 / 100% 1px no-repeat;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
 }
 
 main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
@@ -15,7 +700,7 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   .character-chapter-shortcuts {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
+  gap: 8px 12px;
 }
 
 main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
@@ -42,16 +727,22 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   a {
   display: inline-flex;
   align-items: center;
-  padding: 8px 10px;
-  border: 1px solid transparent;
+  padding: 8px 16px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 26%, rgb(255 255 255 / 14%));
   border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 7%) 0%, transparent 56%),
+    color-mix(in srgb, var(--crt-accent) 7%, #08101c);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 4px 12px rgb(0 0 0 / 28%);
   color: var(--sd-text-2, #bac8d6);
   font-size: 13px;
   line-height: 1.6;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 
-/* 3D Bookmark Continuation Plate (章末コンティニュエーション栞プレート) */
+/* 3D Bookmark Continuation Plate */
 main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
   .manager-copy-section
   .character-chapter-tools
@@ -62,23 +753,31 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   justify-content: space-between;
   gap: 16px;
   margin: 2px 0 0;
-  padding: 15px 16px 15px 20px;
-  border: 1px solid
-    color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 26%, var(--sd-line, #354451));
-  border-left: 3px solid var(--sd-accent, var(--manager-accent, #86d9ff));
-  border-radius: 2px var(--dx-radius, 6px) var(--dx-radius, 6px) 2px;
+  padding: 16px 18px 16px 22px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 34%, rgb(255 255 255 / 16%));
+  border-top-color: color-mix(in srgb, var(--crt-foil) 46%, var(--crt-accent));
+  border-left: 3px solid var(--crt-accent);
+  border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 4.8%) 0%, transparent 58%),
+    linear-gradient(
+        90deg,
+        var(--crt-accent) 0%,
+        var(--crt-foil) 48%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 6%) 0%, transparent 58%),
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 12%, transparent) 0%,
-      transparent 56%
+      color-mix(in srgb, var(--crt-accent) 15%, transparent) 0%,
+      transparent 58%
     ),
-    var(--sd-plate, #0b111c);
+    var(--crt-plate);
   box-shadow:
-    0 12px 28px rgb(0 0 0 / 34%),
-    inset 0 1px 0 rgb(255 255 255 / 10%),
-    inset 0 -1px 0 rgb(0 0 0 / 48%);
+    0 14px 34px rgb(0 0 0 / 42%),
+    0 0 22px -6px color-mix(in srgb, var(--crt-accent) 14%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 50%);
 }
 
 /* Swallowtail ribbon bookmark notch hung from the plate's top edge (silent). */
@@ -89,16 +788,17 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   content: "";
   position: absolute;
   top: -1px;
-  right: 18px;
-  width: 11px;
-  height: 15px;
+  right: 20px;
+  width: 12px;
+  height: 17px;
   background: linear-gradient(
     180deg,
-    var(--sd-accent, var(--manager-accent, #86d9ff)) 0%,
-    color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 38%, transparent) 100%
+    var(--crt-foil) 0%,
+    var(--crt-accent) 52%,
+    color-mix(in srgb, var(--crt-accent) 44%, transparent) 100%
   );
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
-  opacity: 0.78;
+  opacity: 0.88;
   pointer-events: none;
 }
 
@@ -108,10 +808,11 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 4px 0;
-  padding: 14px 14px 14px 16px;
-  border: 1px solid transparent;
+  margin: 6px 0;
+  padding: 14px 16px 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 16%, rgb(255 255 255 / 8%));
   border-radius: 4px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 2.5%) 0%, transparent 64%);
 }
 
 main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
@@ -143,19 +844,16 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
 .character-related-arrow {
   display: inline-grid;
   place-items: center;
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  border: 1px solid
-    color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 34%, transparent);
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 42%, rgb(255 255 255 / 16%));
   border-radius: 999px;
-  background-color: color-mix(
-    in srgb,
-    var(--sd-accent, var(--manager-accent, #86d9ff)) 8%,
-    rgb(4 9 16 / 72%)
-  );
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
-  color: var(--sd-accent, var(--manager-accent, #86d9ff));
+  background-color: color-mix(in srgb, var(--crt-accent) 11%, rgb(4 9 16 / 78%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    0 0 12px -4px color-mix(in srgb, var(--crt-accent) 28%, transparent);
+  color: color-mix(in srgb, var(--crt-accent) 82%, #ffffff);
   font-size: 16px;
   line-height: 1;
   text-align: center;
@@ -165,40 +863,52 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
     box-shadow 180ms ease;
 }
 
-/* Related Records Folio with Left Accent Spine & Optical Graduation Ticks */
+/* Related Records Folio with Left Accent Spine & Optical Hairlines */
 .manager-page .character-related-records {
   position: relative;
   overflow: hidden;
-  margin: 32px 0 0;
-  padding: clamp(20px, 4.5vw, 28px) clamp(18px, 4.5vw, 32px) clamp(16px, 3vw, 24px)
+  margin: 34px 0 0;
+  padding: clamp(22px, 4.5vw, 30px) clamp(18px, 4.5vw, 32px) clamp(18px, 3vw, 24px)
     clamp(24px, 5vw, 38px);
-  border: 1px solid var(--sd-line, #354451);
-  border-top: 1px solid var(--sd-line-2, rgb(122 232 255 / 26%));
-  border-left: 3px solid var(--sd-accent, var(--manager-accent, #86d9ff));
-  border-radius: 2px var(--dx-radius, 6px) var(--dx-radius, 6px) 2px;
+  border: 1px solid color-mix(in srgb, var(--crt-accent) 30%, rgb(255 255 255 / 14%));
+  border-top: 1px solid color-mix(in srgb, var(--crt-foil) 50%, var(--crt-accent));
+  border-left: 3px solid var(--crt-accent);
+  border-radius: 3px var(--dx-radius, 6px) var(--dx-radius, 6px) 3px;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 4.2%), transparent 120px),
     linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 9%, transparent) 0%,
-      transparent 44%
+        90deg,
+        var(--crt-accent) 0%,
+        var(--crt-foil) 48%,
+        transparent 94%
+      )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 120px),
+    radial-gradient(
+      76% 140px at 0% 0%,
+      color-mix(in srgb, var(--crt-accent) 14%, transparent),
+      transparent 72%
     ),
-    linear-gradient(90deg, var(--sd-accent, var(--manager-accent, #86d9ff)) 0 0) 0 0 / 72px 2px
-      no-repeat,
-    var(--sd-plate, #0b111c);
+    linear-gradient(158deg, var(--crt-plate) 0%, var(--crt-plate-deep) 100%);
   box-shadow:
-    0 18px 42px rgb(0 0 0 / 36%),
-    inset 0 1px 0 rgb(255 255 255 / 8%);
+    0 22px 54px rgb(0 0 0 / 48%),
+    0 0 28px -8px color-mix(in srgb, var(--crt-accent) 14%, transparent),
+    inset 0 1px 0 var(--crt-rim-hi),
+    inset 0 -1px 0 var(--crt-rim-lo);
 }
 
 .character-related-spine {
   position: absolute;
   top: 18px;
   bottom: 18px;
-  left: 8px;
+  left: 9px;
   width: 1px;
-  background: color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 28%, transparent);
-  opacity: 0.6;
+  background: linear-gradient(
+    180deg,
+    var(--crt-foil) 0%,
+    color-mix(in srgb, var(--crt-accent) 44%, transparent) 55%,
+    transparent 100%
+  );
+  opacity: 0.72;
   pointer-events: none;
 }
 
@@ -214,8 +924,10 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
 }
 
 .character-related-records h2 {
-  margin: 0 0 14px;
-  color: var(--sd-text, #eef4fa);
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--crt-accent) 18%, rgb(255 255 255 / 10%));
+  color: #f8fbff;
   font-family: var(--sd-display, inherit);
   font-size: 18px;
   font-weight: 600;
@@ -224,6 +936,7 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
 
 .character-related-records ul {
   display: grid;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -231,7 +944,6 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
 
 .character-related-records li {
   min-width: 0;
-  border-top: 1px solid var(--sd-line, #354451);
 }
 
 .character-related-copy > span {
@@ -249,7 +961,57 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   outline-offset: 2px;
 }
 
+/* ================================================================
+   6. Hover States (Fine pointer only)
+   ================================================================ */
 @media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a:not([aria-current]):hover {
+    color: #ffffff;
+    border-top-color: color-mix(in srgb, var(--crt-accent) 76%, var(--crt-foil));
+    background-color: color-mix(in srgb, var(--crt-accent) 10%, transparent);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a:hover {
+    border-color: color-mix(in srgb, var(--crt-accent) 62%, var(--crt-foil));
+    background:
+      linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--crt-foil) 86%, #ffffff) 0%,
+          transparent 84%
+        )
+        0 0 / 100% 1px no-repeat,
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--crt-accent) 22%, transparent) 0%,
+        transparent 68%
+      ),
+      linear-gradient(158deg, color-mix(in srgb, var(--crt-plate) 90%, #182a42) 0%, var(--crt-plate-deep) 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      0 14px 34px rgb(0 0 0 / 48%),
+      0 0 24px -4px color-mix(in srgb, var(--crt-accent) 22%, transparent);
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a:hover
+    .dossier-contents-arrow {
+    border-color: var(--crt-accent);
+    background-color: color-mix(in srgb, var(--crt-accent) 22%, #050a12);
+    color: #ffffff;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--crt-accent) 32%, transparent);
+  }
+
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
     .manager-copy-section
     .character-chapter-tools
@@ -266,14 +1028,17 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
     a:hover {
     border-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 36%,
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 54%,
       transparent
     );
     background-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 8%,
-      transparent
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 14%,
+      #08101c
     );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 22%),
+      0 0 14px color-mix(in srgb, var(--crt-accent) 18%, transparent);
   }
 
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
@@ -282,36 +1047,36 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
     .character-chapter-next:hover {
     border-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 54%,
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 64%,
       var(--sd-line, #354451)
     );
     border-left-color: var(--sd-accent, var(--manager-accent, #86d9ff));
     background-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 6%,
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 9%,
       var(--sd-plate, #0b111c)
     );
     box-shadow:
-      0 14px 32px rgb(0 0 0 / 44%),
-      0 0 22px color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 14%, transparent),
-      inset 0 1px 0 rgb(255 255 255 / 16%);
+      0 18px 38px rgb(0 0 0 / 50%),
+      0 0 28px color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 20%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 22%);
   }
 
   .character-related-records li > a:hover {
     border-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 44%,
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 56%,
       transparent
     );
     background-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 7%,
-      rgb(255 255 255 / 3%)
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 10%,
+      rgb(255 255 255 / 4%)
     );
     box-shadow:
-      0 8px 22px rgb(0 0 0 / 28%),
-      inset 0 1px 0 rgb(255 255 255 / 14%),
-      inset 2px 0 0 var(--sd-accent, var(--manager-accent, #86d9ff));
+      0 10px 26px rgb(0 0 0 / 36%),
+      inset 0 1px 0 rgb(255 255 255 / 18%),
+      inset 3px 0 0 var(--sd-accent, var(--manager-accent, #86d9ff));
   }
 
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
@@ -322,21 +1087,40 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
   .character-related-records li > a:hover .character-related-arrow {
     border-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 68%,
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 76%,
       transparent
     );
     background-color: color-mix(
       in srgb,
-      var(--sd-accent, var(--manager-accent, #86d9ff)) 18%,
-      rgb(4 9 16 / 84%)
+      var(--sd-accent, var(--manager-accent, #86d9ff)) 22%,
+      rgb(4 9 16 / 86%)
     );
     box-shadow:
-      0 0 14px color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 24%, transparent),
-      inset 0 1px 0 rgb(255 255 255 / 22%);
+      0 0 16px color-mix(in srgb, var(--sd-accent, var(--manager-accent, #86d9ff)) 32%, transparent),
+      inset 0 1px 0 rgb(255 255 255 / 26%);
   }
 }
 
+/* ================================================================
+   7. Reduced Motion & Forced Colours
+   ================================================================ */
 @media (prefers-reduced-motion: reduce) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-arrow,
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
     .manager-copy-section
     .character-chapter-tools
@@ -351,6 +1135,95 @@ main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-so
 }
 
 @media (forced-colors: active) {
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader {
+    background: Canvas;
+    background-color: Canvas;
+    box-shadow: none;
+    border-color: CanvasText;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader::after,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section::before {
+    display: none;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    > .dossier-reader
+    .dossier-reader-links
+    a[aria-current] {
+    forced-color-adjust: none;
+    color: HighlightText;
+    background: Highlight;
+    border-top-color: Highlight;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    :is(
+      #dossier-profile .manager-quotes,
+      #dossier-profile .manager-facts,
+      #dossier-index .manager-copy-body .manager-facts,
+      #dossier-index .dossier-contents,
+      #dossier-index .dossier-contents > a,
+      #dossier-index .manager-copy-section,
+      #dossier-index #character-section-04.manager-copy-section,
+      #dossier-index .varg-portrait
+    ) {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .dossier-identity
+    .manager-title,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-profile
+    .manager-facts
+    dd.is-redacted {
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-number,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .dossier-contents
+    > a
+    .dossier-contents-arrow,
+  html[data-family="dossier"]
+    main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+    #dossier-index
+    .manager-copy-section
+    .manager-copy-heading
+    > span {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    box-shadow: none;
+    color: CanvasText;
+  }
+
   main.manager-page.manager-page.manager-page.manager-page.manager-page:not(.is-sovereign)
     .manager-copy-section
     .character-chapter-tools

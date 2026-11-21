@@ -105,13 +105,11 @@ html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(101deg, transparent 0 41%, rgb(var(--rzn-ice) / 7%) 41% 44%, transparent 44%),
-    linear-gradient(79deg, transparent 0 55%, rgb(var(--rzn-pink) / 6%) 55% 58%, transparent 58%),
-    linear-gradient(94deg, transparent 0 49%, rgb(var(--rzn-white) / 5%) 49% 50%, transparent 50%),
-    repeating-linear-gradient(90deg, rgb(var(--rzn-ice) / 4%) 0 1px, transparent 1px 64px),
-    repeating-linear-gradient(0deg, rgb(var(--rzn-ice) / 3%) 0 1px, transparent 1px 64px);
-  -webkit-mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
-  mask-image: radial-gradient(70% 80% at 50% 46%, #000 30%, transparent 86%);
+    linear-gradient(104deg, transparent 32%, rgb(var(--rzn-ice) / 11%) 42%, rgb(var(--rzn-white) / 7%) 46%, transparent 56%),
+    linear-gradient(76deg, transparent 44%, rgb(var(--rzn-pink) / 10%) 55%, rgb(var(--rzn-gold) / 7%) 60%, transparent 70%),
+    radial-gradient(ellipse 64% 56% at 50% 40%, rgb(var(--rzn-ice) / 14%), rgb(var(--rzn-violet) / 10%) 48%, transparent 76%);
+  -webkit-mask-image: radial-gradient(74% 82% at 50% 46%, #000 32%, transparent 88%);
+  mask-image: radial-gradient(74% 82% at 50% 46%, #000 32%, transparent 88%);
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup > .rzn-frame > .rzn-floor {
@@ -1016,9 +1014,9 @@ html[data-family="special"]
 
 html[data-family="special"] body .rxs-page.ffs-page .rzn-suitup {
   background:
-    radial-gradient(ellipse at 50% 42%, rgb(38 56 92 / 38%), transparent 68%),
-    radial-gradient(ellipse at 50% 88%, rgb(201 155 255 / 10%), transparent 60%),
-    linear-gradient(180deg, #020409, #070b16 48%, #020409);
+    radial-gradient(ellipse 66% 52% at 50% 38%, rgb(58 122 238 / 32%), rgb(138 92 246 / 14%) 52%, transparent 74%),
+    radial-gradient(ellipse 52% 40% at 50% 88%, rgb(255 215 122 / 14%), rgb(201 155 255 / 12%) 48%, transparent 70%),
+    linear-gradient(180deg, #040816, #08122c 48%, #040816);
 }
 
 html[data-family="special"]
@@ -1558,7 +1556,10 @@ html[data-family="special"]
    ================================================================ */
 html[data-family="special"] body .rxs-page.ffs-page .ffs-suitup {
   padding-bottom: clamp(60px, 7vw, 100px);
-  background: #02050b;
+  background:
+    radial-gradient(ellipse 72% 42% at 50% 0%, rgb(72 138 255 / 18%), transparent 68%),
+    radial-gradient(ellipse 54% 38% at 84% 94%, rgb(168 120 255 / 12%), transparent 66%),
+    linear-gradient(180deg, #040816, #060d22 50%, #040816);
 }
 
 html[data-family="special"] body .rxs-page.ffs-page .ffs-suitup > .rxs-section-heading {

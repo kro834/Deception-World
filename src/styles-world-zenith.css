@@ -671,17 +671,17 @@ html[data-family="world"]:root
           var(--sw-light) 0%,
           #4f7bff 26%,
           #ff4fc3 56%,
-          var(--sw-gold) 80%,
+          var(--sw-gold) 82%,
           transparent 100%
         )
-        0 100% / min(440px, 62%) 1px no-repeat,
+        0 100% / min(480px, 68%) 1.5px no-repeat,
       radial-gradient(
-          60% 100% at 22% 100%,
-          rgb(255 79 195 / 16%),
-          rgb(var(--sw-light-rgb) / 7%) 50%,
+          64% 100% at 24% 100%,
+          rgb(255 79 195 / 22%),
+          rgb(var(--sw-light-rgb) / 11%) 52%,
           transparent 100%
         )
-        0 100% / min(560px, 76%) 22px no-repeat;
+        0 100% / min(600px, 80%) 26px no-repeat;
   }
 
   /* The outlined numeral's pink echo: the wordmark's misregistered

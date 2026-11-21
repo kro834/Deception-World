@@ -22,15 +22,16 @@
   position: absolute;
   top: -1px;
   left: 0;
-  width: 120px;
+  width: 172px;
   height: 2px;
-  background: linear-gradient(90deg, #ead1a2, #c9dce6 68%, transparent);
-  box-shadow: 0 0 14px rgb(234 209 162 / 0.32);
+  background: linear-gradient(90deg, #fae4b8 0%, #e4c388 48%, #9ee8fa 84%, transparent 100%);
+  box-shadow: 0 0 18px rgb(246 218 164 / 0.48);
   pointer-events: none;
 }
 
 .gallery-tours-page.command-support-tours .quote-exhibition-header {
-  border-top-color: rgb(186 208 220 / 0.34);
+  border-top-color: rgb(240 214 164 / 0.44);
+  background: radial-gradient(ellipse 68% 90% at 24% 0%, rgb(248 222 172 / 0.14), transparent 72%);
 }
 
 .quote-exhibition-heading {
@@ -426,40 +427,45 @@
 
 .command-support-tours .quote-exhibition .quote-scene,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-scene {
-  border-top-color: rgb(156 182 198 / 0.26);
+  border-top-color: rgb(238 212 162 / 0.34);
+  background: linear-gradient(90deg, rgb(16 25 38 / 0.62), rgb(10 16 26 / 0.34) 68%, transparent);
 }
 
 .command-support-tours .quote-exhibition .quote-scene:last-child,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-scene:last-child {
-  border-bottom-color: rgb(156 182 198 / 0.26);
+  border-bottom-color: rgb(238 212 162 / 0.34);
 }
 
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-plaque[data-open="true"] {
-  border-top-color: color-mix(in srgb, var(--quote-ink) 64%, #e6d0a4);
+  border-top-color: color-mix(in srgb, var(--quote-ink) 72%, #f6e0b4);
   background:
     radial-gradient(
-      ellipse 68% 54% at 22% 0%,
-      color-mix(in srgb, var(--quote-ink) 22%, transparent),
+      ellipse 72% 58% at 22% 0%,
+      color-mix(in srgb, var(--quote-ink) 32%, transparent),
       transparent 74%
     ),
     radial-gradient(
-      ellipse 48% 42% at 76% 12%,
-      rgb(244 222 178 / 0.1),
+      ellipse 52% 46% at 78% 10%,
+      rgb(250 226 178 / 0.18),
       transparent 70%
     ),
-    linear-gradient(180deg, rgb(18 29 40 / 0.82), rgb(9 15 23 / 0.62));
+    linear-gradient(180deg, rgb(22 35 50 / 0.92), rgb(10 16 26 / 0.78));
   box-shadow:
-    inset 3px 0 0 var(--quote-ink),
-    inset 0 1px 0 rgb(255 252 244 / 0.2),
-    0 18px 42px -12px rgb(0 0 0 / 0.52);
+    inset 4px 0 0 var(--quote-ink),
+    inset 0 1px 0 rgb(255 253 245 / 0.32),
+    0 24px 54px -10px rgb(0 0 0 / 0.66);
 }
 
 .command-support-tours .quote-exhibition .quote-fold,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-fold {
-  border-color: rgb(186 208 220 / 0.42);
-  background: linear-gradient(180deg, #162430, #0d161f);
-  box-shadow: inset 0 1px rgb(255 252 244 / 0.2);
-  color: #dceaf0;
+  border-color: rgb(240 214 164 / 0.54);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(248 224 176 / 0.24), transparent 72%),
+    linear-gradient(180deg, #1d2d40, #0e1723);
+  box-shadow:
+    inset 0 1px rgb(255 253 245 / 0.3),
+    0 6px 14px rgb(0 0 0 / 0.4);
+  color: #f6e5c2;
 }
 
 .command-support-tours .quote-exhibition .quote-scene[data-open="true"] .quote-fold,
@@ -467,29 +473,29 @@
   .quote-exhibition
   .quote-scene[data-open="true"]
   .quote-fold {
-  border-color: var(--quote-ink, #b7dce7);
-  background: linear-gradient(180deg, #213748, #111e29);
+  border-color: var(--quote-ink, #efd5a2);
+  background: linear-gradient(180deg, #2a4258, #142332);
   box-shadow:
-    inset 0 1px rgb(255 253 246 / 0.34),
-    0 0 14px -4px color-mix(in srgb, var(--quote-ink) 52%, transparent);
-  color: var(--quote-ink, #eef8fc);
+    inset 0 1px rgb(255 254 248 / 0.46),
+    0 0 18px -2px color-mix(in srgb, var(--quote-ink) 64%, transparent);
+  color: var(--quote-ink, #fff9ec);
 }
 
 .command-support-tours .quote-exhibition .quote-leaf figure,
 .gallery-tours-page.command-support-tours .quote-exhibition .quote-leaf figure {
-  border-color: color-mix(in srgb, var(--quote-ink) 52%, rgb(236 214 170 / 0.48));
-  border-top-color: color-mix(in srgb, var(--quote-ink) 68%, #f5e2bc);
+  border-color: color-mix(in srgb, var(--quote-ink) 62%, rgb(244 218 168 / 0.58));
+  border-top-color: color-mix(in srgb, var(--quote-ink) 78%, #fff4da);
   background:
     radial-gradient(
-      ellipse 80% 56% at 50% 10%,
-      color-mix(in srgb, var(--quote-ink) 26%, #1f3342),
-      #070c13 82%
+      ellipse 84% 60% at 50% 8%,
+      color-mix(in srgb, var(--quote-ink) 34%, #243b4e),
+      #060b12 82%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 253 246 / 0.3),
-    inset 0 0 0 3px rgb(5 8 14 / 0.82),
-    inset 0 0 0 4px color-mix(in srgb, var(--quote-ink) 22%, rgb(236 212 166 / 0.18)),
-    0 22px 50px -6px rgb(0 0 0 / 0.62);
+    inset 0 1px 0 rgb(255 253 246 / 0.42),
+    inset 0 0 0 4px rgb(5 8 14 / 0.88),
+    inset 0 0 0 5px color-mix(in srgb, var(--quote-ink) 32%, rgb(240 214 164 / 0.28)),
+    0 28px 64px -6px rgb(0 0 0 / 0.72);
 }
 
 .command-support-tours .quote-exhibition .quote-leaf-copy p.quote-leaf-caption,

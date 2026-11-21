@@ -1,139 +1,273 @@
 /* Route-only practical effects. Every animation is finite; the art stays intact. */
-html[data-family="dream"] .dream-image-cinema .dream-cinema-effects {
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-effects {
   position: relative;
   z-index: 4;
-  width: min(100% - 32px, 720px);
+  width: 100%;
   margin: 0 auto;
-  color: #eae2d4;
+  color: #f4ead8;
   font-family: "Shippori Mincho B1", "Shippori Mincho", serif;
 }
-html[data-family="dream"] .dream-cinema-console {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console {
   position: relative;
-  border: 1px solid #cca96e66;
+  border: 1px solid rgb(228 192 122 / 58%);
+  border-radius: 2px;
   outline: 0;
   background:
-    radial-gradient(ellipse 65% 85% at 50% 0%, rgb(208 168 98 / 11%), transparent 72%),
-    linear-gradient(180deg, #161120 0%, #0c0a12 100%);
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 20px 2px no-repeat,
+    linear-gradient(135deg, #f8e2a6, #ad8340) 0 0 / 2px 20px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(315deg, #eed08e, #987032) 100% 100% / 2px 20px no-repeat,
+    radial-gradient(ellipse 68% 88% at 24% 0%, rgb(248 206 128 / 16%), transparent 72%),
+    radial-gradient(ellipse 56% 74% at 88% 100%, rgb(206 72 56 / 12%), transparent 72%),
+    linear-gradient(180deg, #1d1228 0%, #100a18 100%);
   box-shadow:
-    inset 0 1px 0 rgb(248 226 180 / 14%),
-    0 14px 32px rgb(0 0 0 / 42%);
+    inset 0 1px 0 rgb(255 244 208 / 22%),
+    inset 0 0 0 3px rgb(12 8 18 / 50%),
+    0 16px 36px rgb(0 0 0 / 52%);
 }
-html[data-family="dream"] .dream-cinema-console summary {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  summary {
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: 52px;
-  padding: 8px 14px;
+  padding: 8px 16px;
   cursor: pointer;
+  color: #fff6e4;
   font-size: 14px;
+  letter-spacing: 0.06em;
   list-style: none;
 }
-html[data-family="dream"] .dream-cinema-console summary::-webkit-details-marker {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  summary::-webkit-details-marker {
   display: none;
 }
-html[data-family="dream"] .dream-cinema-console-mark {
-  color: #cdb487;
-  font-size: 24px;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console-mark {
+  color: #f4d692;
+  font-size: 22px;
+  text-shadow: 0 0 14px rgb(250 202 114 / 48%);
 }
-html[data-family="dream"] .dream-cinema-console-current {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console-current {
   margin-left: auto;
-  color: #c5b9d2;
+  color: #dfc8a0;
   font-size: 12px;
+  letter-spacing: 0.04em;
 }
-html[data-family="dream"] .dream-cinema-console-chevron {
-  color: #cdb487;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console-chevron {
+  color: #ebd094;
 }
-html[data-family="dream"] .dream-cinema-console[open] .dream-cinema-console-chevron {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console[open]
+  .dream-cinema-console-chevron {
   transform: rotate(45deg);
 }
-html[data-family="dream"] .dream-cinema-console-body {
-  padding: 10px 16px 16px;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console-body {
+  padding: 12px 16px 16px;
+  border-top: 1px solid rgb(224 188 118 / 26%);
 }
-html[data-family="dream"] .dream-cinema-console fieldset {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  fieldset {
   min-width: 0;
   border: 0;
   padding: 0;
   margin: 0 0 12px;
 }
-html[data-family="dream"] .dream-cinema-console legend {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  legend {
   font-size: 12px;
   margin-bottom: 8px;
-  color: #cfbf9d;
+  color: #ebd098;
+  letter-spacing: 0.1em;
 }
-html[data-family="dream"] .dream-cinema-moods {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-moods {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
-html[data-family="dream"] .dream-cinema-console button {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  button {
   display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
   min-height: 48px;
   padding: 10px 12px;
-  border: 1px solid #c7b48c55;
+  border: 1px solid rgb(224 188 118 / 48%);
   border-radius: 2px;
-  color: #eae2d4;
-  background: #18151f;
+  color: #f6ecda;
+  background:
+    linear-gradient(#f0d294 0 0) 0 0 / 10px 1.5px no-repeat,
+    linear-gradient(180deg, #281833 0%, #160e20 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 242 206 / 18%),
+    0 6px 14px rgb(0 0 0 / 38%);
   font: inherit;
   font-size: 14px;
   cursor: pointer;
 }
-html[data-family="dream"] .dream-cinema-console button[aria-pressed="true"] {
-  border-color: #e6ca94;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  button[aria-pressed="true"] {
+  border-color: #f4d48e;
+  color: #fff8ea;
   background:
-    linear-gradient(#e6ca94 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(180deg, #3c2f4b 0%, #2a2036 100%);
-  box-shadow: inset 0 1px 0 rgb(255 236 196 / 22%);
+    linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
+    linear-gradient(#fff0c2 0 0) 100% 100% / 14px 2px no-repeat,
+    radial-gradient(80% 90% at 24% 0%, rgb(255 202 114 / 24%), transparent 70%),
+    linear-gradient(145deg, #6d232f 0%, #3d1627 64%, #26101f 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 212 / 34%),
+    0 8px 18px rgb(0 0 0 / 48%);
 }
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  button.dream-cinema-release {
+  border-color: rgb(238 202 132 / 64%);
+  background:
+    linear-gradient(#f8e0a4 0 0) 0 0 / 12px 2px no-repeat,
+    linear-gradient(#f8e0a4 0 0) 100% 100% / 12px 2px no-repeat,
+    radial-gradient(74% 88% at 20% 0%, rgb(246 206 130 / 18%), transparent 70%),
+    linear-gradient(180deg, #321d3d 0%, #1c1026 100%);
+}
+
 @media (hover: hover) and (pointer: fine) {
-  html[data-family="dream"] .dream-cinema-console button:hover {
-    border-color: #e8cc96;
-    background: #241d2f;
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    button:hover {
+    border-color: #fff0c2;
+    background:
+      linear-gradient(#fff0c2 0 0) 0 0 / 14px 2px no-repeat,
+      linear-gradient(180deg, #3a2346 0%, #22142d 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 246 218 / 28%),
+      0 8px 18px rgb(0 0 0 / 48%);
   }
-  html[data-family="dream"] .dream-cinema-scene-trail a:hover {
-    border-bottom-color: #e4c68e;
-    color: #f6ecdc;
+
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-scene-trail
+    a:hover {
+    border-color: #f4d48e;
+    background: rgb(244 202 126 / 12%);
+    color: #fff8ea;
   }
 }
-html[data-family="dream"] .dream-cinema-console :is(button, summary):focus-visible {
-  outline: 2px solid #f1cf90;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console
+  :is(button, summary):focus-visible {
+  outline: 2px solid #f4dca0;
   outline-offset: 4px;
 }
-html[data-family="dream"] .dream-cinema-mood-orb {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-mood-orb {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #bb94da;
-  box-shadow: 0 0 12px #bb94da66;
+  border: 1px solid rgb(255 244 216 / 54%);
+  background: radial-gradient(circle at 35% 32%, #f4e6ff 0%, #be92e4 56%, #6f429c 100%);
+  box-shadow: 0 0 14px rgb(194 146 232 / 72%);
 }
-html[data-family="dream"] .dream-cinema-mood-orb--dawn {
-  background: #ebce8c;
-  box-shadow: 0 0 12px #ebce8c66;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-mood-orb--dawn {
+  background: radial-gradient(circle at 35% 32%, #fff9e2 0%, #f4cc7c 56%, #b87e32 100%);
+  box-shadow: 0 0 14px rgb(244 202 118 / 76%);
 }
-html[data-family="dream"] .dream-cinema-mood-orb--night {
-  background: #90bddc;
-  box-shadow: 0 0 12px #90bddc66;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-mood-orb--night {
+  background: radial-gradient(circle at 35% 32%, #e8f4ff 0%, #8ec2e8 56%, #3f6d9e 100%);
+  box-shadow: 0 0 14px rgb(142 194 232 / 72%);
 }
-html[data-family="dream"] .dream-cinema-play-controls {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-play-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-html[data-family="dream"] .dream-cinema-play-controls > button {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-play-controls
+  > button {
   flex: 1 1 120px;
 }
-html[data-family="dream"] .dream-cinema-console-note,
-html[data-family="dream"] .dream-cinema-release-status {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-console-note,
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-release-status {
   margin: 10px 0 0;
-  color: #c5b9d2;
+  color: #d6c8dc;
   font-size: 12px;
   line-height: 1.8;
 }
-html[data-family="dream"] .dream-cinema-release-status:empty {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-release-status {
+  color: #f4d694;
+}
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-release-status:empty {
   display: none;
 }
+
+/* Hero atmospheric wash, pointer lantern light & finite butterfly burst */
 html[data-family="dream"] .dream-cinema-atmosphere {
   position: absolute;
   inset: 0;
@@ -141,65 +275,81 @@ html[data-family="dream"] .dream-cinema-atmosphere {
   pointer-events: none;
   overflow: hidden;
   contain: paint;
-  --dc-hue: 148, 101, 206;
+  --dc-hue: 196, 146, 224;
+  --dc-warm: 248, 198, 110;
 }
+
 html[data-family="dream"] .dream-cinema-atmosphere[data-mood="dawn"] {
-  --dc-hue: 231, 190, 105;
+  --dc-hue: 242, 194, 106;
+  --dc-warm: 224, 102, 72;
 }
+
 html[data-family="dream"] .dream-cinema-atmosphere[data-mood="night"] {
-  --dc-hue: 80, 151, 220;
+  --dc-hue: 108, 168, 228;
+  --dc-warm: 224, 192, 134;
 }
+
 html[data-family="dream"] .dream-cinema-wash {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 83% 22%, rgba(var(--dc-hue), 0.22), transparent 65%);
+  background:
+    radial-gradient(ellipse 62% 54% at 84% 20%, rgba(var(--dc-hue), 0.24), transparent 66%),
+    radial-gradient(ellipse 48% 44% at 14% 86%, rgba(var(--dc-warm), 0.14), transparent 68%);
 }
+
 html[data-family="dream"] .dream-cinema-pointer-light {
   position: absolute;
   inset: 0;
   opacity: 0;
   background: radial-gradient(
-    ellipse 220px 200px at var(--dc-x, 70%) var(--dc-y, 30%),
-    rgba(var(--dc-hue), 0.18),
-    transparent
+    ellipse 240px 210px at var(--dc-x, 70%) var(--dc-y, 30%),
+    rgba(var(--dc-warm), 0.18),
+    rgba(var(--dc-hue), 0.1) 46%,
+    transparent 74%
   );
 }
+
 html[data-family="dream"] .dream-cinema-mist {
   position: absolute;
   width: 70%;
-  height: 25%;
-  bottom: 8%;
+  height: 28%;
+  bottom: 6%;
   right: -10%;
-  opacity: 0.18;
-  background: radial-gradient(ellipse, rgba(var(--dc-hue), 0.7), transparent 68%);
+  opacity: 0.2;
+  background: radial-gradient(ellipse, rgba(var(--dc-hue), 0.65), transparent 68%);
 }
+
 html[data-family="dream"]
   .dream-cinema-atmosphere[data-motion="on"][data-visible="true"]
   .dream-cinema-mist {
   animation: dream-cinema-mist-arrive 3.8s ease-out both;
 }
+
 html[data-family="dream"] .dream-cinema-portal {
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: 124px;
+  height: 124px;
   bottom: 7%;
-  left: calc(50% - 60px);
-  border: 1px solid #dfc3ff80;
+  left: calc(50% - 62px);
+  border: 1px solid rgb(246 218 156 / 74%);
   border-radius: 50%;
   box-shadow:
-    0 0 24px #bc8ddd33,
-    inset 0 0 24px #bc8ddd33;
-  opacity: 0.5;
+    0 0 28px rgba(var(--dc-hue), 0.36),
+    inset 0 0 24px rgba(var(--dc-warm), 0.3);
+  opacity: 0.56;
 }
+
 html[data-family="dream"] [data-motion="on"] .dream-cinema-portal {
   animation: dream-cinema-portal-open 2s ease-out both;
 }
+
 html[data-family="dream"] .dream-cinema-butterflies {
   position: absolute;
   inset: -80px -12px 0;
   overflow: hidden;
   pointer-events: none;
 }
+
 /* 胡蝶の二枚翅立体感（Two-winged forewing + hindwing depth & gilt scale rim） */
 html[data-family="dream"] .dream-cinema-butterfly {
   position: absolute;
@@ -208,9 +358,10 @@ html[data-family="dream"] .dream-cinema-butterfly {
   width: 24px;
   height: 20px;
   transform: rotate(-24deg);
-  opacity: 0.86;
-  filter: drop-shadow(0 3px 6px rgb(12 7 22 / 52%));
+  opacity: 0.9;
+  filter: drop-shadow(0 3px 8px rgb(12 7 22 / 58%));
 }
+
 html[data-family="dream"] .dream-cinema-butterfly::after {
   content: "";
   position: absolute;
@@ -219,8 +370,9 @@ html[data-family="dream"] .dream-cinema-butterfly::after {
   width: 2px;
   height: 11px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #f8e4b8, #8c663a);
+  background: linear-gradient(180deg, #fff0c2, #8c663a);
 }
+
 html[data-family="dream"] .dream-cinema-butterfly i {
   position: absolute;
   left: 1px;
@@ -229,14 +381,15 @@ html[data-family="dream"] .dream-cinema-butterfly i {
   height: 16px;
   border-radius: 84% 22% 68% 18%;
   background:
-    radial-gradient(circle at 38% 30%, #fffaf0 0 18%, transparent 56%),
-    linear-gradient(140deg, #f3e6ff 0%, rgba(var(--dc-hue), 0.86) 58%, #5e3d7c 100%);
+    radial-gradient(circle at 38% 30%, #fffaf0 0 20%, transparent 56%),
+    linear-gradient(140deg, #fae8c8 0%, rgba(var(--dc-hue), 0.88) 58%, #5e3d7c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 242 206 / 78%),
-    inset -1px 0 0 rgb(238 206 144 / 42%);
+    inset 0 1px 0 rgb(255 246 214 / 84%),
+    inset -1px 0 0 rgb(242 208 144 / 48%);
   transform-origin: right 65%;
   transform: rotate(-24deg);
 }
+
 html[data-family="dream"] .dream-cinema-butterfly i::before {
   content: "";
   position: absolute;
@@ -246,18 +399,21 @@ html[data-family="dream"] .dream-cinema-butterfly i::before {
   height: 11px;
   border-radius: 62% 24% 86% 32%;
   background: linear-gradient(155deg, rgba(var(--dc-hue), 0.92), #432b5c);
-  box-shadow: inset 0 -1px 0 rgb(246 218 158 / 62%);
+  box-shadow: inset 0 -1px 0 rgb(248 220 160 / 68%);
   transform: rotate(-16deg);
 }
+
 html[data-family="dream"] .dream-cinema-butterfly i + i {
   left: 12px;
   transform-origin: left 65%;
   transform: scaleX(-1) rotate(-24deg);
 }
+
 html[data-family="dream"] [data-motion="on"] .dream-cinema-butterfly {
   animation: dream-cinema-butterfly-flight 2.2s ease-out both;
   animation-delay: calc(var(--dc-i) * 35ms);
 }
+
 @keyframes dream-cinema-mist-arrive {
   from {
     transform: translateX(8%);
@@ -265,35 +421,38 @@ html[data-family="dream"] [data-motion="on"] .dream-cinema-butterfly {
   }
   to {
     transform: translateX(0);
-    opacity: 0.18;
+    opacity: 0.2;
   }
 }
+
 @keyframes dream-cinema-portal-open {
   from {
     transform: scale(0.3);
     opacity: 0;
   }
   25% {
-    opacity: 0.55;
+    opacity: 0.58;
   }
   to {
     transform: scale(2.2);
     opacity: 0;
   }
 }
+
 @keyframes dream-cinema-butterfly-flight {
   from {
     transform: translateY(15px) rotate(-24deg);
     opacity: 0;
   }
   20% {
-    opacity: 0.9;
+    opacity: 0.92;
   }
   to {
     transform: translate(30px, -180px) rotate(20deg);
     opacity: 0;
   }
 }
+
 html[data-family="dream"][data-world-effects="economy"]
   .dream-cinema-atmosphere[data-motion="on"][data-visible="true"]
   .dream-cinema-mist,
@@ -302,6 +461,7 @@ html[data-family="dream"][data-world-effects="economy"]
   :is(.dream-cinema-portal, .dream-cinema-butterfly) {
   animation: none;
 }
+
 @media (prefers-reduced-motion: reduce) {
   html[data-family="dream"]
     .dream-cinema-atmosphere[data-motion="on"][data-visible="true"]
@@ -312,58 +472,125 @@ html[data-family="dream"][data-world-effects="economy"]
     animation: none;
   }
 }
+
 @media (max-width: 360px) {
-  html[data-family="dream"] .dream-cinema-console summary {
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    summary {
     gap: 8px;
-    padding-inline: 8px;
+    padding-inline: 10px;
   }
-  html[data-family="dream"] .dream-cinema-console-current {
+
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console-current {
     font-size: 12px;
   }
 }
-html[data-family="dream"] .dream-cinema-scene-trail {
+
+/* Scene trail — four lacquered bookmark stamps */
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-scene-trail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
-  padding: 12px 0;
+  gap: 6px;
+  padding: 12px 0 2px;
 }
-html[data-family="dream"] .dream-cinema-scene-trail a {
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-scene-trail
+  a {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
   min-height: 52px;
-  border-bottom: 1px solid #c5aa7038;
-  color: #c1b5cb;
+  padding: 6px 4px;
+  border: 1px solid rgb(214 178 112 / 28%);
+  border-bottom: 2px solid rgb(214 178 112 / 44%);
+  border-radius: 2px;
+  color: #dfd2e4;
+  background: linear-gradient(180deg, #20142c 0%, #140c1d 100%);
   font-size: 12px;
   text-decoration: none;
 }
-html[data-family="dream"] .dream-cinema-scene-trail a > span:first-child {
-  color: #b99e75;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-scene-trail
+  a
+  > span:first-child {
+  color: #e8c688;
 }
-html[data-family="dream"] .dream-cinema-scene-trail a[data-visited="true"] {
-  border-color: #c5aa70;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-scene-trail
+  a[data-visited="true"] {
+  border-color: rgb(232 196 126 / 68%);
+  box-shadow: inset 0 1px 0 rgb(255 242 206 / 18%);
 }
-html[data-family="dream"] .dream-cinema-scene-trail a[aria-current="location"] {
-  background: #b194d018;
-  color: #fff1dc;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-scene-trail
+  a[aria-current="location"] {
+  border-color: #f4d48e;
+  background:
+    radial-gradient(80% 90% at 50% 100%, rgb(214 74 58 / 30%), transparent 74%),
+    linear-gradient(180deg, #351b32 0%, #201023 100%);
+  color: #fff6e4;
+  box-shadow: inset 0 1px 0 rgb(255 244 210 / 28%);
 }
-html[data-family="dream"] .dream-cinema-scene-trail a:focus-visible {
-  outline: 2px solid #f1cf90;
+
+html[data-family="dream"]
+  main#top.dream-page.dream-page.dream-image-cinema
+  .dream-cinema-scene-trail
+  a:focus-visible {
+  outline: 2px solid #f4dca0;
   outline-offset: 2px;
 }
+
 @media (forced-colors: active) {
   html[data-family="dream"] .dream-cinema-atmosphere,
   html[data-family="dream"] .dream-cinema-butterflies {
     display: none;
   }
-  html[data-family="dream"] .dream-cinema-console button[aria-pressed="true"] {
+
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console,
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    button,
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-scene-trail
+    a {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-console
+    button[aria-pressed="true"] {
     border: 3px double ButtonText;
     padding: 8px 10px;
     font-weight: 700;
   }
-  html[data-family="dream"] .dream-cinema-scene-trail a[aria-current="location"] {
+
+  html[data-family="dream"]
+    main#top.dream-page.dream-page.dream-image-cinema
+    .dream-cinema-scene-trail
+    a[aria-current="location"] {
     border-bottom: 3px double LinkText;
     font-weight: 700;
   }

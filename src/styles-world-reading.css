@@ -20,8 +20,15 @@ html[data-family="world"]:root
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
+  border-bottom: 1px solid rgb(var(--sw-light-rgb) / 28%);
   background:
-    linear-gradient(140deg, rgb(var(--sw-light-rgb) / 9%), transparent 70%), var(--sw-deck-2);
+    linear-gradient(90deg, var(--sw-light), transparent 64%) 0 0 / 56% 1.5px no-repeat,
+    radial-gradient(ellipse 74% 58% at 50% 42%, rgb(var(--sw-light-rgb) / 16%), transparent 70%),
+    linear-gradient(148deg, rgb(var(--sw-light-rgb) / 12%), transparent 66%),
+    var(--sw-deck-2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 0 28px -12px rgb(var(--sw-light-rgb) / 22%);
 }
 html[data-family="world"]:root
   body
@@ -47,6 +54,9 @@ html[data-family="world"]:root
   font: 600 clamp(30px, 4vw, 56px) / 1.4 var(--sw-display);
   letter-spacing: 0.2em;
   color: var(--sw-text);
+  text-shadow:
+    0 2px 18px rgb(0 0 0 / 68%),
+    0 0 24px rgb(var(--sw-light-rgb) / 24%);
 }
 html[data-family="world"]:root
   body
@@ -58,10 +68,11 @@ html[data-family="world"]:root
   inset: auto 0 0 auto;
   padding: 8px 14px 8px 20px;
   clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
-  background: var(--sw-light);
+  background: linear-gradient(135deg, #c6f6e5 0%, var(--sw-light) 100%);
   color: #04110c;
   font: 700 12px / 1.4 var(--sw-mono);
   letter-spacing: 0.12em;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 62%);
 }
 
 /* rx14 O1: published episode art holds a quiet stage beside the files.
@@ -90,8 +101,13 @@ html[data-family="world"]:root
     top: calc(var(--sh-bar-h, 76px) + env(safe-area-inset-top, 0px) + 24px);
     height: min(65svh, 680px);
     min-height: 260px;
-    border: 1px solid rgb(var(--sw-light-rgb) / 24%);
+    border: 1px solid rgb(var(--sw-light-rgb) / 36%);
+    border-top: 2px solid #e6c38c;
     background: var(--sw-deck);
+    box-shadow:
+      inset 0 1px 0 rgb(255 248 228 / 32%),
+      0 26px 56px -18px rgb(0 0 0 / 84%),
+      0 8px 20px rgb(0 0 0 / 52%);
     overflow: hidden;
   }
   .wa-brief-art > img {
@@ -106,7 +122,13 @@ html[data-family="world"]:root
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(0deg, rgb(3 6 12 / 75%), transparent 45%);
+    background:
+      linear-gradient(var(--sw-light) 0 0) 12px 12px / 22px 1.5px no-repeat,
+      linear-gradient(var(--sw-light) 0 0) 12px 12px / 1.5px 22px no-repeat,
+      linear-gradient(#e6c38c 0 0) calc(100% - 12px) calc(100% - 12px) / 22px 1.5px no-repeat,
+      linear-gradient(#e6c38c 0 0) calc(100% - 12px) calc(100% - 12px) / 1.5px 22px no-repeat,
+      linear-gradient(0deg, rgb(3 6 12 / 80%), transparent 46%),
+      linear-gradient(180deg, rgb(3 6 12 / 34%), transparent 22%);
     pointer-events: none;
   }
   .wa-brief-documents {

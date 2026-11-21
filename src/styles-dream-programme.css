@@ -327,23 +327,25 @@
    joins under the title when the reader left one there. */
 .dream-page.dream-page .dream-reader-index a {
   display: grid;
-  grid-template-columns: 35px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
   align-content: center;
   align-items: center;
   gap: 8px 12px;
   min-height: 72px;
   padding: 15px;
-  border: 1px solid rgb(224 188 118 / 46%);
+  border: 1px solid rgb(232 196 126 / 54%);
   background:
-    linear-gradient(135deg, var(--ts-kin-hi, #f3e0b0), var(--ts-kin)) 0 0 / 38px 2px no-repeat,
-    linear-gradient(135deg, var(--ts-kin-hi, #f3e0b0), var(--ts-kin)) 0 0 / 2px 22px no-repeat,
-    linear-gradient(315deg, var(--ts-kin), transparent) 100% 100% / 18px 1.5px no-repeat,
-    linear-gradient(315deg, var(--ts-kin), transparent) 100% 100% / 1.5px 18px no-repeat,
-    radial-gradient(76% 64% at 15% 0%, rgb(246 214 148 / 12%), transparent 70%),
-    linear-gradient(180deg, #2d1e33 0%, #1d1323 100%);
+    linear-gradient(135deg, #fae2a8, var(--ts-kin)) 0 0 / 38px 2px no-repeat,
+    linear-gradient(135deg, #fae2a8, var(--ts-kin)) 0 0 / 2px 24px no-repeat,
+    linear-gradient(315deg, #efd08e, transparent) 100% 100% / 20px 1.5px no-repeat,
+    linear-gradient(315deg, #efd08e, transparent) 100% 100% / 1.5px 20px no-repeat,
+    radial-gradient(78% 66% at 14% 0%, rgb(250 218 152 / 16%), transparent 70%),
+    radial-gradient(54% 48% at 90% 100%, rgb(186 56 50 / 12%), transparent 72%),
+    linear-gradient(165deg, #311d36 0%, #201427 56%, #160e1c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(252 236 196 / 16%),
-    0 10px 24px rgb(0 0 0 / 32%);
+    inset 0 1px 0 rgb(255 242 206 / 22%),
+    inset 0 0 0 3px rgb(12 8 18 / 44%),
+    0 12px 28px rgb(0 0 0 / 38%);
   transition:
     translate 200ms cubic-bezier(0.22, 1, 0.36, 1),
     border-color 200ms ease,
@@ -354,16 +356,18 @@
 .dream-page.dream-page .dream-reader-index-number {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgb(238 202 138 / 58%);
-  color: #f6e2b3;
+  width: 35px;
+  height: 35px;
+  border: 1px solid rgb(244 210 144 / 68%);
+  outline: 1px solid rgb(228 190 118 / 28%);
+  outline-offset: -4px;
+  color: #fae6bc;
   background:
-    radial-gradient(circle at 50% 28%, rgb(244 206 140 / 22%), transparent 72%),
-    linear-gradient(180deg, #221428 0%, #120b18 100%);
+    radial-gradient(circle at 50% 26%, rgb(252 216 146 / 28%), transparent 72%),
+    linear-gradient(180deg, #2b182f 0%, #150c1b 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 240 202 / 22%),
-    0 4px 10px rgb(0 0 0 / 34%);
+    inset 0 1px 0 rgb(255 244 212 / 28%),
+    0 4px 12px rgb(0 0 0 / 42%);
   font-size: 18px;
   font-weight: 700;
 }
@@ -429,17 +433,22 @@
 /* A folded chapter reference never competes with the synopsis paragraphs. */
 .dream-page.dream-page .dream-chapter-companion {
   margin-top: 22px;
-  border: 1px solid rgb(126 45 52 / 46%);
+  border: 1px solid rgb(146 62 64 / 52%);
   border-left: 5px solid #8f262c;
-  color: #382638;
+  color: #362234;
   background:
-    linear-gradient(90deg, #9d241f 0%, #c99b49 58%, transparent 100%) 0 0 / 100% 2px no-repeat,
-    radial-gradient(220px 120px at 0% 0%, rgb(157 36 31 / 10%), transparent 75%),
-    linear-gradient(165deg, #f7efe0 0%, #ede0c8 56%, #e4d4b7 100%);
+    linear-gradient(90deg, #9d241f 0%, #c99b49 58%, transparent 100%) 0 0 / 100% 2.5px no-repeat,
+    linear-gradient(315deg, #c69a4e, transparent) calc(100% - 10px) calc(100% - 10px) / 18px 1.5px
+      no-repeat,
+    linear-gradient(315deg, #c69a4e, transparent) calc(100% - 10px) calc(100% - 10px) / 1.5px 18px
+      no-repeat,
+    radial-gradient(240px 130px at 0% 0%, rgb(164 42 36 / 12%), transparent 76%),
+    radial-gradient(220px 140px at 100% 100%, rgb(202 158 92 / 18%), transparent 74%),
+    linear-gradient(165deg, #faf2e3 0%, #eee1c9 54%, #e3d2b3 100%);
   box-shadow:
-    inset 3px 0 0 rgb(244 214 156 / 52%),
-    inset 0 1px 0 rgb(255 255 255 / 72%),
-    0 10px 26px rgb(28 14 22 / 16%);
+    inset 3px 0 0 rgb(246 218 160 / 60%),
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    0 12px 30px rgb(24 11 19 / 22%);
 }
 
 .dream-page.dream-page .dream-chapter-companion summary {

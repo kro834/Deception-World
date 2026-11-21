@@ -31,13 +31,24 @@
   box-sizing: border-box;
   min-height: calc(var(--sh-bar-h, 76px) + env(safe-area-inset-top, 0px));
   padding: env(safe-area-inset-top, 0px) var(--dogs-edge) 0;
-  border-bottom: 1px solid #9ed6b138;
+  border-bottom: 1px solid #9ed6b152;
   background:
-    linear-gradient(90deg, transparent 4%, #7ae2a466 28%, #d4ffe388 50%, #7ae2a466 72%, transparent 96%)
-      0 100% / 100% 1px no-repeat,
-    radial-gradient(ellipse 52% 90% at 18% 0%, #1d4d3448, transparent 70%),
-    linear-gradient(180deg, #06150f 0%, #030b08 100%);
-  box-shadow: 0 10px 28px -12px #000d;
+    linear-gradient(
+        90deg,
+        transparent 2%,
+        #7ae2a499 24%,
+        #ffffffcc 50%,
+        #7ae2a499 76%,
+        transparent 98%
+      )
+      0 100% / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 58% 95% at 18% 0%, #24634266, transparent 72%),
+    radial-gradient(ellipse 46% 80% at 84% 0%, #1b4d3844, transparent 70%),
+    linear-gradient(180deg, #081c14 0%, #030c08 100%);
+  box-shadow:
+    inset 0 1px 0 #d8ffe524,
+    0 12px 32px -10px #000e,
+    0 1px 22px -6px #4ad88a33;
   z-index: 3;
 }
 .dogs-archive-header h1 {
@@ -47,10 +58,11 @@
   font-weight: 400;
   letter-spacing: 0.12em;
   line-height: 1.1;
-  color: #edf8ef;
+  color: #f3fcf5;
   text-shadow:
-    0 2px 18px #000e,
-    0 0 28px #4ad88a2e;
+    0 2px 18px #000f,
+    0 0 32px #4ad88a4d,
+    0 0 10px #b8ffd033;
 }
 .dogs-archive-header-actions {
   display: flex;
@@ -63,17 +75,21 @@
   gap: 9px;
   min-width: 44px;
   min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid #8ec6a03d;
+  padding: 0 15px;
+  border: 1px solid #96d4aa59;
   border-radius: 999px;
   background:
-    linear-gradient(180deg, #163324cc 0%, #08160fe6 100%);
+    linear-gradient(90deg, transparent 14%, #b8ffd077 50%, transparent 86%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 85% 75% at 50% 0%, #2b6e4844, transparent 70%),
+    linear-gradient(180deg, #193b2ae0 0%, #081710f2 100%);
   box-shadow:
-    inset 0 1px 0 #c8f5d62e,
-    0 4px 14px #0008;
-  color: #d0e4d5;
+    inset 0 1px 0 #dcffe642,
+    inset 0 -1px 0 #000c,
+    0 6px 16px -4px #000b,
+    0 0 16px -6px #4ad88a38;
+  color: #dff2e4;
   font-size: 12px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-decoration: none;
   transition:
     color 0.2s ease,
@@ -90,12 +106,15 @@
   min-width: 48px;
   height: 48px;
   min-height: 48px;
-  border: 1px solid #9fd4b24d;
+  border: 1px solid #a2deb766;
   border-radius: 50%;
-  background: linear-gradient(180deg, #173525 0%, #0b1c13 100%);
+  background:
+    radial-gradient(circle at 50% 22%, #2d734b55, transparent 68%),
+    linear-gradient(180deg, #1a3d2b 0%, #0b1c13 100%);
   box-shadow:
-    inset 0 1px 0 #d2fce033,
-    0 4px 14px #0008;
+    inset 0 1px 0 #dcffe647,
+    0 6px 16px -4px #000b,
+    0 0 16px -6px #4ad88a38;
 }
 .dogs-archive-selector {
   display: grid;
@@ -104,28 +123,38 @@
   padding: 12px var(--dogs-edge);
   z-index: 2;
   background:
-    linear-gradient(90deg, transparent 6%, #6ec89238 50%, transparent 94%) 0 100% / 100% 1px no-repeat,
-    linear-gradient(180deg, #040e0a 0%, #020906 100%);
-  border-bottom: 1px solid var(--dogs-line);
-  box-shadow: 0 14px 32px -14px #000e;
+    linear-gradient(90deg, transparent 4%, #78dc9e52 50%, transparent 96%) 0 100% / 100% 1px
+      no-repeat,
+    radial-gradient(ellipse 65% 90% at 50% 0%, #173d2938, transparent 74%),
+    linear-gradient(180deg, #05120c 0%, #020906 100%);
+  border-bottom: 1px solid #9ed6b138;
+  box-shadow:
+    inset 0 1px 0 #d4ffe214,
+    0 16px 34px -14px #000f;
 }
 .dogs-archive-selector button {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  min-height: 48px;
-  border: 1px solid #79be9148;
-  border-radius: 8px;
+  gap: 10px;
+  min-height: 50px;
+  border: 1px solid #84ca9d5e;
+  border-radius: 9px;
   background:
-    radial-gradient(ellipse 85% 70% at 50% 0%, #245c3c38, transparent 72%),
-    linear-gradient(180deg, #132e20d8 0%, #081710eb 100%);
+    linear-gradient(#94e8b288, #94e8b288) 0 0 / 10px 1.5px no-repeat,
+    linear-gradient(#94e8b288, #94e8b288) 0 0 / 1.5px 10px no-repeat,
+    linear-gradient(#94e8b266, #94e8b266) 100% 100% / 10px 1.5px no-repeat,
+    linear-gradient(#94e8b266, #94e8b266) 100% 100% / 1.5px 10px no-repeat,
+    linear-gradient(90deg, transparent 12%, #a6f2c055 50%, transparent 88%) 0 0 / 100% 1px no-repeat,
+    radial-gradient(ellipse 88% 74% at 50% 0%, #2a6b4648, transparent 72%),
+    linear-gradient(180deg, #153424e6 0%, #07160ff2 100%);
   box-shadow:
-    inset 0 1px 0 #d4ffe029,
-    inset 0 -1px 0 #000b,
-    0 8px 18px -8px #000d;
-  color: #c8dfd0;
+    inset 0 1px 0 #d8ffe436,
+    inset 0 -1.5px 0 #000d,
+    0 10px 22px -8px #000e,
+    0 0 16px -8px #4ad88a2e;
+  color: #d4eadb;
   cursor: pointer;
   transition:
     color 0.22s ease,
@@ -134,30 +163,60 @@
     box-shadow 0.22s ease;
 }
 .dogs-archive-selector button b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding-inline: 3px;
+  border-radius: 999px;
+  border: 1px solid #8ce3ab59;
+  background:
+    radial-gradient(circle at 50% 24%, #2d754b66, #06130ce6 78%);
+  box-shadow:
+    inset 0 1px 0 #dcffe638,
+    0 2px 8px #000a;
+  color: #e4faea;
   font:
-    400 21px/1 "Cinzel",
+    600 15px/1 "Cinzel",
     Georgia,
     "Times New Roman",
     serif;
-  text-shadow: 0 2px 10px #000b;
+  text-shadow: 0 1px 6px #000c;
 }
 .dogs-archive-selector button span {
   font-size: 12px;
+  font-weight: 500;
   white-space: nowrap;
   letter-spacing: 0.06em;
 }
 .dogs-archive-selector button[aria-selected="true"] {
   background:
-    linear-gradient(90deg, transparent 10%, #a5f3c2aa 50%, transparent 90%) 0 0 / 100% 1px no-repeat,
-    radial-gradient(ellipse 92% 78% at 50% 0%, #3ae08538, transparent 70%),
-    linear-gradient(180deg, #1b432f 0%, #0d2519 100%);
-  border-color: #8ce3ab8c;
-  color: #f2fff5;
+    linear-gradient(#ffffff, #ffffff) 0 0 / 14px 2px no-repeat,
+    linear-gradient(#ffffff, #ffffff) 0 0 / 2px 14px no-repeat,
+    linear-gradient(#9effc0, #9effc0) 100% 100% / 14px 2px no-repeat,
+    linear-gradient(#9effc0, #9effc0) 100% 100% / 2px 14px no-repeat,
+    linear-gradient(90deg, transparent 6%, #b2ffcecc 28%, #ffffff 50%, #b2ffcecc 72%, transparent 94%)
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 95% 84% at 50% 0%, #44ea8d52, transparent 72%),
+    linear-gradient(180deg, #215239 0%, #0e2a1c 100%);
+  border-color: #a8f5c2cc;
+  color: #f7fff9;
   box-shadow:
-    inset 0 1px 0 #dcffe64d,
-    inset 0 -2px 0 #74eca1,
-    0 10px 26px -8px #000e,
-    0 0 22px -6px #4ad88a55;
+    inset 0 1px 0 #e6ffed73,
+    inset 0 -2.5px 0 #74eca1,
+    0 12px 28px -6px #000f,
+    0 0 26px -4px #4ad88a7a;
+}
+.dogs-archive-selector button[aria-selected="true"] b {
+  border-color: #e2ffec;
+  background: linear-gradient(180deg, #e8fff0 0%, #7ef0a9 46%, #29b866 100%);
+  color: #03170b;
+  text-shadow: 0 1px 0 #ffffff99;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 0 16px #4ad88a99,
+    0 2px 8px #000c;
 }
 @media (hover: hover) and (pointer: fine) {
   .dogs-archive-exit:hover {
@@ -213,9 +272,9 @@
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(ellipse 52% 26% at 50% 0%, #38b8701f, transparent 72%),
-    radial-gradient(ellipse 68% 56% at 50% 46%, #14332377, transparent 68%),
-    radial-gradient(ellipse 58% 18% at 50% 92%, #39c47622, transparent 76%),
+    radial-gradient(ellipse 56% 28% at 50% 0%, #44d47e2b, transparent 74%),
+    radial-gradient(ellipse 72% 58% at 50% 46%, #183d2a88, transparent 70%),
+    radial-gradient(ellipse 62% 20% at 50% 92%, #44d47e30, transparent 76%),
     #020806;
 }
 .dogs-archive-stage .dogs-viewer {
@@ -227,59 +286,85 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 16px;
-  min-height: 64px;
-  padding: 6px var(--dogs-edge);
-  border-bottom: 1px solid #8cc8a03d;
+  min-height: 66px;
+  padding: 7px var(--dogs-edge);
+  border-bottom: 1px solid #8ed4a652;
   background:
-    linear-gradient(90deg, transparent 4%, #74e8a455 32%, transparent 92%) 0 100% / 100% 1px no-repeat,
-    radial-gradient(ellipse 65% 95% at 15% 0%, #246b432e, transparent 70%),
-    linear-gradient(180deg, #091a12 0%, #06110c 100%);
+    linear-gradient(
+        90deg,
+        transparent 2%,
+        #74e8a488 26%,
+        #d6ffe5aa 50%,
+        #74e8a466 74%,
+        transparent 96%
+      )
+      0 100% / 100% 1px no-repeat,
+    radial-gradient(ellipse 68% 95% at 15% 0%, #2a7a4d42, transparent 70%),
+    radial-gradient(ellipse 52% 85% at 86% 50%, #1d543633, transparent 72%),
+    linear-gradient(180deg, #0b2117 0%, #05110c 100%);
   box-shadow:
-    inset 0 1px 0 #d6ffe31a,
-    0 10px 24px -10px #000b;
+    inset 0 1px 0 #dcffe729,
+    0 12px 28px -10px #000d;
 }
 .dogs-archive-record h2 {
   margin: 0;
-  color: #eaf7ed;
+  color: #eef9f0;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0.08em;
-  text-shadow: 0 2px 14px #000c;
+  text-shadow:
+    0 2px 14px #000e,
+    0 0 18px #4ad88a2e;
 }
 .dogs-archive-record h2 span {
-  color: #f4fff6;
-  font-weight: 600;
+  color: #f7fff9;
+  font-weight: 700;
+  text-shadow: 0 0 16px #66f09e3d;
 }
 .dogs-archive-record p {
   margin: 3px 0 0;
-  color: #b2ccb9;
+  color: #bed8c5;
   font-size: 12px;
   letter-spacing: 0.04em;
 }
-.dogs-archive-record-actions,
+.dogs-archive-record-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .dogs-archive-forms {
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 3px;
+  border: 1px solid #86cc9c4d;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, #030b07eb 0%, #07160ff2 100%);
+  box-shadow:
+    inset 0 1.5px 4px #000e,
+    0 1px 0 #d6ffe41f;
 }
 .dogs-archive-forms button,
 .dogs-archive-reference {
   min-width: 44px;
   min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid #96cfa84d;
+  padding: 0 15px;
+  border: 1px solid #96cfa859;
   border-radius: 7px;
   background:
-    linear-gradient(90deg, transparent 15%, #9ef2ba55 50%, transparent 85%) 0 0 / 100% 1px no-repeat,
-    linear-gradient(180deg, #112a1de6 0%, #07140df0 100%);
+    linear-gradient(#9ef2ba77, #9ef2ba77) 0 0 / 8px 1px no-repeat,
+    linear-gradient(#9ef2ba77, #9ef2ba77) 0 0 / 1px 8px no-repeat,
+    linear-gradient(90deg, transparent 15%, #9ef2ba66 50%, transparent 85%) 0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, #132f20eb 0%, #07150ef5 100%);
   box-shadow:
-    inset 0 1px 0 #d4ffe233,
-    inset 0 -1px 0 #000b,
-    0 4px 12px -2px #0009;
-  color: #dcf0e1;
+    inset 0 1px 0 #d8ffe43d,
+    inset 0 -1px 0 #000c,
+    0 4px 12px -2px #000b;
+  color: #e2f5e7;
   font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -289,17 +374,20 @@
     box-shadow 0.22s ease;
 }
 .dogs-archive-forms button[aria-pressed="true"] {
-  border-color: #98e8b0b3;
+  border-color: #b5ffd0d9;
   background:
-    linear-gradient(90deg, transparent 10%, #dcffe8aa 50%, transparent 90%) 0 0 / 100% 1px no-repeat,
-    radial-gradient(ellipse 90% 80% at 50% 0%, #44d47644, transparent 70%),
-    linear-gradient(180deg, #215238 0%, #123321 100%);
-  color: #f4fff7;
+    linear-gradient(#ffffff, #ffffff) 0 0 / 10px 1.5px no-repeat,
+    linear-gradient(#ffffff, #ffffff) 0 0 / 1.5px 10px no-repeat,
+    linear-gradient(90deg, transparent 8%, #ffffffcc 50%, transparent 92%) 0 0 / 100% 1.5px
+      no-repeat,
+    radial-gradient(ellipse 92% 82% at 50% 0%, #4ee88459, transparent 70%),
+    linear-gradient(180deg, #276142 0%, #143924 100%);
+  color: #ffffff;
   box-shadow:
-    inset 0 1px 0 #e0ffe959,
-    inset 0 -1.5px 0 #74eca1,
-    0 0 16px -4px #4ad88a55,
-    0 4px 12px #000a;
+    inset 0 1px 0 #eaffe980,
+    inset 0 -2px 0 #74eca1,
+    0 0 20px -3px #4ad88a73,
+    0 4px 12px #000c;
 }
 .dogs-archive-portrait {
   display: grid;
@@ -319,31 +407,50 @@
   max-width: 100%;
   min-width: 0;
   min-height: 0;
-  padding: 12px;
-  border: 1px solid #8ec8a24d;
-  border-radius: 10px;
+  padding: 14px;
+  border: 1px solid #98dbaed9;
+  border-radius: 12px;
   background:
-    linear-gradient(90deg, transparent 8%, #8ce6ad77 50%, transparent 92%) 0 0 / 100% 1.5px no-repeat,
-    radial-gradient(ellipse 68% 44% at 50% 0%, #1d4f3444, transparent 72%),
-    radial-gradient(ellipse at 50% 50%, #122d1f66 0%, #07130dcc 74%, #040a07f0 100%);
+    linear-gradient(#b8ffd0, #b8ffd0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(#b8ffd0, #b8ffd0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(#b8ffd0, #b8ffd0) 100% 0 / 20px 2px no-repeat,
+    linear-gradient(#b8ffd0, #b8ffd0) 100% 0 / 2px 20px no-repeat,
+    linear-gradient(#8ce6adcc, #8ce6adcc) 0 100% / 20px 2px no-repeat,
+    linear-gradient(#8ce6adcc, #8ce6adcc) 0 100% / 2px 20px no-repeat,
+    linear-gradient(#8ce6adcc, #8ce6adcc) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(#8ce6adcc, #8ce6adcc) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(90deg, transparent 6%, #a6f7c2aa 50%, transparent 94%) 0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 72% 48% at 50% 0%, #26664359, transparent 72%),
+    radial-gradient(ellipse at 50% 50%, #16382677 0%, #07130dd8 72%, #030906f5 100%);
   box-shadow:
-    0 24px 60px #000e,
-    0 0 36px #4ad88a1c,
-    inset 0 1px 0 #d6ffe338,
-    inset 0 0 32px #0c241888;
+    0 26px 64px #000f,
+    0 0 44px -4px #4ad88a38,
+    0 0 0 1px #4ad88a2e,
+    inset 0 1.5px 0 #e0ffe952,
+    inset 0 -1.5px 0 #4ad88a38,
+    inset 0 0 38px #0f2e1e99;
 }
 .dogs-archive-varg .dogs-archive-portrait__frame {
-  border-color: #d49d8866;
+  border-color: #e6a99299;
   background:
-    linear-gradient(90deg, transparent 8%, #f0b09788 50%, transparent 92%) 0 0 / 100% 1.5px no-repeat,
-    radial-gradient(ellipse 65% 40% at 50% 0%, #61212b44, transparent 70%),
-    radial-gradient(ellipse at 50% 50%, #3b171f66 0%, #11070acc 74%, #070304f0 100%);
+    linear-gradient(#ffd2c2, #ffd2c2) 0 0 / 20px 2px no-repeat,
+    linear-gradient(#ffd2c2, #ffd2c2) 0 0 / 2px 20px no-repeat,
+    linear-gradient(#ffd2c2, #ffd2c2) 100% 0 / 20px 2px no-repeat,
+    linear-gradient(#ffd2c2, #ffd2c2) 100% 0 / 2px 20px no-repeat,
+    linear-gradient(#f0b097cc, #f0b097cc) 0 100% / 20px 2px no-repeat,
+    linear-gradient(#f0b097cc, #f0b097cc) 0 100% / 2px 20px no-repeat,
+    linear-gradient(#f0b097cc, #f0b097cc) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(#f0b097cc, #f0b097cc) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(90deg, transparent 6%, #ffc4adbb 50%, transparent 94%) 0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 68% 44% at 50% 0%, #73263259, transparent 70%),
+    radial-gradient(ellipse at 50% 50%, #451a2377 0%, #11070ad8 72%, #070304f5 100%);
   box-shadow:
-    0 24px 60px #000e,
-    0 0 42px #e6452229,
-    0 0 0 1px #471c2266,
-    inset 0 1px 0 #ffded244,
-    inset 0 0 34px #380e1588;
+    0 26px 64px #000f,
+    0 0 48px -4px #e6452242,
+    0 0 0 1px #5c232b80,
+    inset 0 1.5px 0 #ffe4da59,
+    inset 0 -1.5px 0 #e6684238,
+    inset 0 0 38px #3f101899;
 }
 .dogs-archive-portrait__frame > img {
   display: block;
@@ -510,6 +617,11 @@ html[data-dogs-archive] .zeus-button {
     flex-direction: column;
     gap: 3px;
     padding: 4px 2px;
+  }
+  .dogs-archive-selector button b {
+    min-width: 22px;
+    height: 22px;
+    font-size: 13px;
   }
   .dogs-archive-selector button span {
     font-size: 12px;

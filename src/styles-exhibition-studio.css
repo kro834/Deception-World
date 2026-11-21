@@ -19,59 +19,77 @@ html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-
 }
 
 .exhibition-room {
+  --studio-obsidian: #06090f;
+  --studio-obsidian-soft: #101826;
+  --studio-brass: #ebd09d;
+  --studio-brass-bright: #fff4da;
+  --studio-brass-edge: rgb(238 212 162 / 0.44);
   min-height: 100svh;
   padding: calc(26px + env(safe-area-inset-top, 0px)) max(22px, env(safe-area-inset-right, 0px))
     calc(32px + env(safe-area-inset-bottom, 0px)) max(22px, env(safe-area-inset-left, 0px));
-  background: #191816;
-  color: #e8dfcd;
+  background:
+    radial-gradient(ellipse 74% 40% at 42% -4%, rgb(246 220 170 / 0.16), transparent 68%),
+    radial-gradient(ellipse 52% 36% at 88% 4%, rgb(158 232 250 / 0.09), transparent 68%),
+    linear-gradient(160deg, #161f2c 0%, #0c121c 46%, #06090f 100%);
+  color: #f4efe4;
   touch-action: pan-y pinch-zoom;
 }
+
 .exhibition-room-heading,
 .exhibition-room-caption {
   max-width: 1440px;
   margin-inline: auto;
 }
+
 .exhibition-room-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 22px;
 }
+
 .exhibition-room-heading p {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  color: #c7b28c;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: #d6c29d;
 }
+
 .exhibition-room-heading h1 {
   margin: 12px 0;
   font-size: clamp(24px, 3vw, 42px);
   font-family: serif;
   font-weight: 400;
 }
+
 .exhibition-room-heading a,
 .exhibition-room-caption a {
   font-size: 13px;
   text-decoration: underline;
   text-underline-offset: 5px;
 }
+
 .exhibition-room :is(a, button, select):focus-visible {
-  outline: 2px solid #efc77e;
+  outline: 2px solid #f2d59b;
   outline-offset: 4px;
 }
+
 .exhibition-room-view {
   max-width: 1440px;
   margin-inline: auto;
 }
+
 .exhibition-room-view .exhibition-studio-stage {
   height: clamp(350px, 70svh, 980px);
   aspect-ratio: auto;
 }
+
 .exhibition-room-source {
   display: block;
   width: 100%;
   height: min(70svh, 980px);
   object-fit: contain;
 }
+
 .exhibition-room-caption {
   display: block;
   font-size: 13px;
@@ -79,24 +97,28 @@ html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-
   padding: 18px 0 0;
   background: transparent;
   text-align: left;
-  color: #bfb5a4;
+  color: #c8c0b0;
 }
+
 .exhibition-room-caption p {
   font-size: 13px;
   line-height: 1.9;
   letter-spacing: normal;
   margin: 12px 0;
 }
+
 .exhibition-room-caption a {
   display: inline-block;
   padding: 6px 0;
   letter-spacing: normal;
 }
+
 .exhibition-room-caption b {
   margin-right: 14px;
   letter-spacing: 0.18em;
-  color: #ddc398;
+  color: #e6cca0;
 }
+
 .exhibition-room-entry {
   display: inline-flex;
   align-items: center;
@@ -104,10 +126,11 @@ html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-
   margin-top: 18px;
   padding-block: 10px;
   font-size: 13px;
-  color: #d0b788;
+  color: #e4c998;
   text-decoration: underline;
   text-underline-offset: 6px;
 }
+
 @media (max-width: 600px) {
   .exhibition-room-heading {
     align-items: start;
@@ -115,40 +138,105 @@ html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-
     gap: 6px;
   }
 }
+
 .exhibition-studio {
   width: 100%;
   min-width: 0;
 }
-.exhibition-studio-stage {
+
+/* Obsidian glass & brass specular lighting foundation for the studio stage */
+.exhibition-studio-stage,
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-room-view
+  .exhibition-studio-stage {
   position: relative;
   aspect-ratio: 4 / 3;
   width: 100%;
   isolation: isolate;
   overflow: hidden;
-  background: #25221d;
-  border: 1px solid #76664b70;
-  box-shadow: 0 25px 60px #0005;
+  border: 1px solid rgb(240 214 162 / 0.5);
+  border-top-color: rgb(254 238 202 / 0.78);
+  background:
+    radial-gradient(ellipse 76% 52% at 50% 2%, rgb(250 226 178 / 0.24), transparent 64%),
+    radial-gradient(ellipse 56% 42% at 86% 14%, rgb(158 232 250 / 0.08), transparent 68%),
+    radial-gradient(ellipse 68% 36% at 50% 102%, rgb(232 198 138 / 0.12), transparent 66%),
+    linear-gradient(180deg, #121b29 0%, #080d16 58%, #05080e 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 253 246 / 0.34),
+    0 28px 66px -8px rgb(0 0 0 / 0.72),
+    0 0 40px -14px rgb(240 208 148 / 0.22);
 }
+
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-room-view
+  .exhibition-studio-stage {
+  aspect-ratio: auto;
+}
+
+.exhibition-studio-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 4%,
+    rgb(238 210 156 / 0.68) 22%,
+    #fff6df 50%,
+    rgb(238 210 156 / 0.68) 78%,
+    transparent 96%
+  );
+  pointer-events: none;
+}
+
+.exhibition-studio-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-shadow:
+    inset 0 0 0 4px rgb(4 7 12 / 0.82),
+    inset 0 0 0 5px rgb(238 212 162 / 0.24),
+    inset 0 -18px 36px -14px rgb(0 0 0 / 0.48);
+  pointer-events: none;
+}
+
 .exhibition-studio-stage[data-studio-format="portrait"] {
   aspect-ratio: 4 / 5;
 }
+
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-room-view
+  .exhibition-studio-stage[data-studio-format="portrait"] {
+  aspect-ratio: auto;
+}
+
 .exhibition-studio-canvas {
   position: absolute;
   inset: 0;
+  z-index: 1;
   width: 100%;
   height: 100%;
   opacity: 0;
   pointer-events: none;
 }
+
 .exhibition-studio-stage[data-studio-ready="true"] .exhibition-studio-canvas {
   opacity: 1;
 }
+
 .exhibition-studio-original {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: grid;
   align-items: center;
 }
+
 .exhibition-studio .exhibition-studio-original > .gallery-feature-open {
   display: flex;
   align-items: center;
@@ -163,144 +251,316 @@ html[data-family="gallery"]:not([data-rail-lock]):not([data-loading]):not([data-
   outline-offset: -5px;
   transform: none;
 }
+
 .exhibition-studio .exhibition-studio-original > .gallery-feature-open::before,
 .exhibition-studio .exhibition-studio-original > .gallery-feature-open::after {
   display: none;
 }
+
 .exhibition-studio .exhibition-studio-original img {
   object-fit: contain;
   width: 100%;
   height: 100%;
 }
+
 .exhibition-studio-stage[data-studio-ready="true"] .exhibition-studio-original img {
   opacity: 0;
 }
+
 .exhibition-studio-hint {
   position: absolute;
   left: 50%;
-  bottom: 14px;
+  bottom: 16px;
+  z-index: 3;
   transform: translateX(-50%);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #faf5ea;
   white-space: nowrap;
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: #191916b8;
+  padding: 6px 14px;
+  border: 1px solid rgb(240 214 164 / 0.48);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(18 25 36 / 0.92), rgb(8 12 19 / 0.96));
+  box-shadow:
+    inset 0 1px 0 rgb(255 251 240 / 0.24),
+    0 8px 22px rgb(0 0 0 / 0.56);
   pointer-events: none;
 }
-.exhibition-studio-tools {
+
+/* Precision obsidian-glass & brass instrument bar for studio camera angles */
+.exhibition-studio-tools,
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-tools {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px 14px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgb(238 212 162 / 0.4);
+  border-top-color: rgb(252 234 196 / 0.68);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 82% 90% at 50% 0%, rgb(246 220 170 / 0.14), transparent 72%),
+    linear-gradient(180deg, #162030 0%, #0c121c 56%, #070b12 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 0.28),
+    inset 0 0 0 1px rgb(158 232 250 / 0.07),
+    0 16px 36px -6px rgb(0 0 0 / 0.58);
   font-size: 12px;
-  color: #c7b28c;
+  color: #e4cfa4;
 }
+
 .exhibition-studio-label {
-  letter-spacing: 0.16em;
-  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ebd3a3;
 }
-.exhibition-studio-tools [role="group"] {
+
+.exhibition-studio-tools [role="group"],
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-tools
+  [role="group"] {
   display: flex;
   flex-wrap: wrap;
   min-width: 0;
-  gap: 8px;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid rgb(232 206 158 / 0.24);
+  border-radius: 3px;
+  background: rgb(4 7 12 / 0.76);
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.68),
+    inset 0 -1px 0 rgb(255 250 238 / 0.08);
 }
-.exhibition-studio-tools button {
+
+.exhibition-studio-tools button,
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-tools
+  button {
   min-height: 44px;
   padding: 8px 16px;
-  color: #e5d8be;
-  background: linear-gradient(180deg, #2a2620f4 0%, #1e1b16f8 100%);
-  border: 1px solid #99835a77;
-  border-radius: 999px;
-  font-size: 12px;
-  letter-spacing: 0.06em;
+  color: #f4efe4;
+  background:
+    radial-gradient(ellipse 80% 90% at 50% 0%, rgb(244 218 168 / 0.12), transparent 70%),
+    linear-gradient(180deg, #1b2738 0%, #0e1520 62%, #090e16 100%);
+  border: 1px solid rgb(234 208 158 / 0.36);
+  border-top-color: rgb(250 230 190 / 0.58);
+  border-radius: 2px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
   box-shadow:
-    0 2px 6px #0004,
-    inset 0 1px 0 #d9c49d28;
+    inset 0 1px 0 rgb(255 251 240 / 0.22),
+    0 4px 12px rgb(0 0 0 / 0.4);
   cursor: pointer;
   transition:
-    background 0.25s ease,
-    border-color 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.25s ease;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
 @media (hover: hover) and (pointer: fine) {
-  .exhibition-studio-tools button:hover:not(:disabled) {
-    background: linear-gradient(180deg, #383329f8 0%, #29241cfc 100%);
-    border-color: #d1b882aa;
-    color: #fff9ea;
+  .exhibition-studio-tools button:hover:not(:disabled),
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-studio-tools
+    button:not([aria-pressed="true"]):hover:not(:disabled) {
+    background:
+      radial-gradient(ellipse 80% 90% at 50% 0%, rgb(248 224 176 / 0.22), transparent 70%),
+      linear-gradient(180deg, #243347 0%, #131d2b 100%);
+    border-color: rgb(248 224 176 / 0.8);
+    color: #fffaf0;
     box-shadow:
-      0 0 10px #c79e5633,
-      inset 0 1px 0 #fff0c744;
+      inset 0 1px 0 rgb(255 253 246 / 0.36),
+      0 8px 20px rgb(0 0 0 / 0.48),
+      0 0 16px -4px rgb(242 210 150 / 0.32);
+    text-decoration: none;
   }
 }
-.exhibition-studio-tools button[aria-pressed="true"] {
-  background: linear-gradient(180deg, #625234 0%, #443722 100%);
-  border-color: #efc77e;
-  color: #fff8e8;
+
+.exhibition-studio-tools button[aria-pressed="true"],
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-tools
+  button[aria-pressed="true"] {
+  background: linear-gradient(180deg, #fef8eb 0%, #ebd19e 54%, #cfa968 100%);
+  border-color: #fae6be;
+  border-top-color: #fffaf0;
+  color: #14151b;
+  font-weight: 650;
   box-shadow:
-    0 0 14px #efc77e44,
-    inset 0 1px 0 #ffe9b855;
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 rgb(104 74 28 / 0.3),
+    0 6px 18px rgb(0 0 0 / 0.48),
+    0 0 20px -4px rgb(244 212 150 / 0.44);
 }
-.exhibition-studio-tools button:disabled {
-  opacity: 0.4;
+
+.exhibition-studio-tools button:disabled,
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-tools
+  button:disabled {
+  opacity: 0.42;
   cursor: default;
 }
+
 .exhibition-studio-tools button:focus-visible {
-  outline: 2px solid #efc77e;
+  outline: 2px solid #f2d59b;
   outline-offset: 3px;
 }
-.exhibition-studio-notice {
-  color: #c7bda7;
+
+.exhibition-studio-notice,
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-notice {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgb(236 210 160 / 0.28);
+  border-left: 3px solid #ebd09d;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgb(242 214 158 / 0.08), rgb(9 14 22 / 0.86));
+  color: #d6cec0;
   font-size: 12px;
   line-height: 1.8;
 }
-.exhibition-studio-notice button {
+
+.exhibition-studio-notice button,
+html[data-family="gallery"]
+  .exhibition-room.exhibition-room-curated
+  .exhibition-studio-notice
+  button {
   min-height: 44px;
   margin: 8px 0 0 10px;
   padding: 8px 14px;
-  border: 1px solid #99835a88;
-  border-radius: 999px;
-  background: #25221c;
-  color: #e8dfcd;
+  border: 1px solid rgb(238 212 162 / 0.44);
+  border-top-color: rgb(252 234 196 / 0.66);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #1b2636, #0d141f);
+  box-shadow: inset 0 1px 0 rgb(255 251 240 / 0.2);
+  color: #f6f1e6;
   font: inherit;
   font-size: 12px;
   cursor: pointer;
 }
+
 .exhibition-studio-notice button:focus-visible {
-  outline: 2px solid #efc77e;
+  outline: 2px solid #f2d59b;
   outline-offset: 3px;
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .exhibition-studio-tools button {
+  .exhibition-studio-tools button,
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-studio-tools
+    button {
     transition: none;
   }
 }
+
+html[data-world-effects="economy"]
+  :is(.exhibition-studio-stage, .exhibition-studio-tools, .exhibition-studio-tools button) {
+  box-shadow: none;
+}
+
 @media (forced-colors: active) {
-  .exhibition-studio-tools button,
-  .exhibition-studio-notice button {
-    border: 1px solid ButtonBorder;
-    color: ButtonText;
+  .exhibition-studio-stage::before,
+  .exhibition-studio-stage::after {
+    display: none;
   }
-  .exhibition-studio-tools button[aria-pressed="true"] {
+
+  .exhibition-studio-stage,
+  .exhibition-studio-tools,
+  .exhibition-studio-tools [role="group"],
+  .exhibition-studio-notice,
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    :is(
+      .exhibition-studio-stage,
+      .exhibition-studio-tools,
+      .exhibition-studio-tools [role="group"],
+      .exhibition-studio-notice
+    ) {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .exhibition-studio-tools button,
+  .exhibition-studio-notice button,
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    :is(.exhibition-studio-tools button, .exhibition-studio-notice button) {
+    border: 1px solid ButtonBorder;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  .exhibition-studio-tools button[aria-pressed="true"],
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-studio-tools
+    button[aria-pressed="true"] {
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
     outline: 2px solid Highlight;
   }
 }
+
+@media (max-width: 620px) {
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-room-view
+    .exhibition-studio-stage {
+    height: clamp(260px, 46svh, 430px);
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-room-view
+    .exhibition-studio-stage {
+    height: clamp(190px, calc(100svh - 106px), 350px);
+  }
+}
+
 @media (max-width: 480px) {
   .exhibition-studio-label {
     flex-basis: 100%;
   }
-  .exhibition-studio-tools {
-    gap: 7px;
+
+  .exhibition-studio-tools,
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-studio-tools {
+    padding: 8px 10px;
+    gap: 8px;
   }
-  .exhibition-studio-tools [role="group"] {
+
+  .exhibition-studio-tools [role="group"],
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-studio-tools
+    [role="group"] {
     flex-basis: 100%;
   }
-  .exhibition-studio-tools [role="group"] button {
+
+  .exhibition-studio-tools [role="group"] button,
+  html[data-family="gallery"]
+    .exhibition-room.exhibition-room-curated
+    .exhibition-studio-tools
+    [role="group"]
+    button {
     flex: 1 1 auto;
     padding-inline: 9px;
     min-height: 44px;

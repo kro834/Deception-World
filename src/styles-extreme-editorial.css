@@ -64,36 +64,40 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   --exe-rule-subtle: rgb(255 246 224 / 12%);
   --exe-muted: #c8c2b6;
   --exe-ivory: #fbf6ec;
-  --exe-cyan: #72e4ff;
-  --exe-cyan-rgb: 114 228 255;
+  --exe-cyan: #7ceaff;
+  --exe-cyan-rgb: 124 234 255;
+  --exe-cobalt: #3cb4ff;
+  --exe-cobalt-rgb: 60 180 255;
   --exe-surface-1:
-    radial-gradient(ellipse 80% 56% at 14% 0%, rgb(244 204 123 / 12%), transparent 62%),
-    linear-gradient(164deg, rgb(30 26 19 / 97%) 0%, rgb(13 11 9 / 99%) 58%, rgb(8 7 6 / 100%) 100%);
+    radial-gradient(ellipse 76% 54% at 14% 0%, rgb(255 218 128 / 16%), transparent 60%),
+    radial-gradient(ellipse 68% 50% at 88% 100%, rgb(46 154 255 / 14%), transparent 62%),
+    linear-gradient(164deg, rgb(28 24 19 / 97%) 0%, rgb(12 13 18 / 99%) 58%, rgb(7 9 14 / 100%) 100%);
   --exe-surface-2:
-    radial-gradient(ellipse 84% 58% at 10% 0%, rgb(244 204 123 / 16%), transparent 58%),
+    radial-gradient(ellipse 84% 58% at 10% 0%, rgb(255 216 126 / 20%), transparent 58%),
+    radial-gradient(ellipse 64% 48% at 94% 100%, rgb(48 156 255 / 12%), transparent 62%),
     linear-gradient(
       146deg,
-      rgb(44 36 23 / 97%) 0%,
-      rgb(19 16 11 / 99%) 56%,
-      rgb(9 8 6 / 100%) 100%
+      rgb(44 35 21 / 97%) 0%,
+      rgb(18 16 14 / 99%) 56%,
+      rgb(8 10 15 / 100%) 100%
     );
   --exe-surface-gold:
-    radial-gradient(ellipse 90% 62% at 14% 0%, rgb(255 224 148 / 28%), transparent 62%),
-    radial-gradient(ellipse 70% 54% at 92% 100%, rgb(212 136 42 / 16%), transparent 64%),
+    radial-gradient(ellipse 92% 66% at 14% 0%, rgb(255 220 132 / 36%), transparent 62%),
+    radial-gradient(ellipse 72% 54% at 92% 100%, rgb(222 142 36 / 22%), transparent 64%),
     linear-gradient(
       142deg,
-      rgb(46 37 22 / 97%) 0%,
-      rgb(22 18 12 / 98%) 48%,
+      rgb(54 41 21 / 97%) 0%,
+      rgb(24 19 12 / 98%) 48%,
       rgb(10 9 7 / 100%) 100%
     );
   --exe-surface-cyan:
-    radial-gradient(ellipse 90% 62% at 14% 0%, rgb(130 236 255 / 26%), transparent 62%),
-    radial-gradient(ellipse 70% 54% at 92% 100%, rgb(46 154 214 / 18%), transparent 64%),
+    radial-gradient(ellipse 92% 66% at 14% 0%, rgb(96 220 255 / 36%), transparent 62%),
+    radial-gradient(ellipse 76% 58% at 90% 100%, rgb(34 128 246 / 28%), transparent 64%),
     linear-gradient(
       142deg,
-      rgb(16 32 44 / 97%) 0%,
-      rgb(10 19 28 / 98%) 48%,
-      rgb(7 11 16 / 100%) 100%
+      rgb(16 36 66 / 97%) 0%,
+      rgb(10 21 40 / 98%) 48%,
+      rgb(6 11 21 / 100%) 100%
     );
   --exe-gold-metal: linear-gradient(
     180deg,
@@ -119,23 +123,23 @@ html[data-family="special"] body .rxs-page.rxs-page.exs-page {
   --exe-cyan-metal: linear-gradient(
     180deg,
     #ffffff 0%,
-    #f2fdff 34%,
-    #b0f2ff 49%,
-    #3ab8da 51%,
-    #94e9fc 62%,
-    #ecfcff 88%,
+    #effcff 30%,
+    #a8f0ff 48%,
+    #2486db 51%,
+    #78d8ff 64%,
+    #e8fbff 88%,
     #ffffff 100%
   );
-  --exe-gold-pill: linear-gradient(135deg, #fff9e6 0%, #f8d382 44%, #cf8b28 100%);
-  --exe-cyan-pill: linear-gradient(135deg, #f2feff 0%, #86e9ff 46%, #2896be 100%);
-  --exe-rail-gold: linear-gradient(180deg, #fff6d9 0 1px, #f7d282 1px 2px, rgb(120 80 24) 2px 3px);
-  --exe-rail-cyan: linear-gradient(180deg, #f2feff 0 1px, #7ce8ff 1px 2px, rgb(20 92 122) 2px 3px);
+  --exe-gold-pill: linear-gradient(135deg, #fffbe8 0%, #fad47a 42%, #cf8820 100%);
+  --exe-cyan-pill: linear-gradient(135deg, #f4feff 0%, #84ecff 42%, #207ed6 100%);
+  --exe-rail-gold: linear-gradient(180deg, #fff8de 0 1px, #fad47a 1px 2px, rgb(126 82 22) 2px 3px);
+  --exe-rail-cyan: linear-gradient(180deg, #f2feff 0 1px, #7ceaff 1px 2px, rgb(22 92 168) 2px 3px);
   --exe-card-shadow:
-    0 32px 78px -20px rgb(0 0 0 / 96%),
-    0 0 42px -10px rgb(244 204 123 / 28%),
-    inset 0 1px 0 rgb(255 251 238 / 44%),
-    inset 0 -1px 0 rgb(244 204 123 / 18%),
-    inset 0 0 0 1px rgb(244 204 123 / 64%);
+    0 34px 82px -20px rgb(0 0 0 / 96%),
+    0 0 46px -10px rgb(244 204 123 / 32%),
+    inset 0 1px 0 rgb(255 252 240 / 48%),
+    inset 0 -1px 0 rgb(244 204 123 / 22%),
+    inset 0 0 0 1px rgb(244 204 123 / 68%);
   --exe-art-density: 1;
   --dxs-wrap: 1240px;
   background:
@@ -241,27 +245,29 @@ html[data-family="special"]
    ================================================================ */
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero {
   background:
-    radial-gradient(62% 68% at 66% 42%, rgb(255 216 132 / 34%), transparent 68%),
-    radial-gradient(48% 46% at 20% 24%, rgb(224 146 42 / 22%), transparent 66%),
-    radial-gradient(42% 38% at 88% 78%, rgb(114 228 255 / 14%), transparent 66%),
-    radial-gradient(64% 34% at 50% 100%, rgb(244 204 123 / 28%), transparent 72%),
-    linear-gradient(180deg, #0b0906 0%, #16110a 52%, #070706 100%);
+    radial-gradient(64% 70% at 64% 40%, rgb(255 214 116 / 44%), transparent 66%),
+    radial-gradient(50% 48% at 18% 22%, rgb(232 148 36 / 28%), transparent 64%),
+    radial-gradient(56% 52% at 86% 24%, rgb(46 150 255 / 32%), transparent 64%),
+    radial-gradient(54% 46% at 16% 84%, rgb(34 122 240 / 26%), transparent 66%),
+    radial-gradient(66% 36% at 50% 100%, rgb(255 204 102 / 34%), transparent 70%),
+    linear-gradient(180deg, #070b16 0%, #14110e 52%, #060912 100%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exf-billing {
   left: 50%;
   translate: -50% 0;
   font-family: var(--exe-forge-outline);
   font-weight: 800;
-  color: rgb(255 218 136 / 44%);
+  color: rgb(255 224 142 / 52%);
   -webkit-text-stroke: 0;
   text-shadow:
-    0 2px 0 rgb(118 78 22 / 54%),
-    0 0 36px rgb(244 204 123 / 26%),
-    0 24px 56px rgb(0 0 0 / 82%);
-  opacity: 0.96;
+    0 2px 0 rgb(118 78 22 / 62%),
+    0 0 42px rgb(255 212 114 / 36%),
+    0 0 72px rgb(56 168 255 / 26%),
+    0 24px 56px rgb(0 0 0 / 86%);
+  opacity: 0.98;
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-rays {
-  color: rgb(244 204 123 / 30%);
+  color: rgb(255 216 122 / 46%);
 }
 html[data-family="special"] body .rxs-page.rxs-page.exs-page > .exs-hero > .exi-shards {
   color: #ffe29c;

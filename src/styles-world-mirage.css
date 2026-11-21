@@ -694,8 +694,9 @@ html[data-mode="world"]:not([data-world-effects="economy"])
    ================================================================ */
 .site-shell.film-edition.mirage-edition .story-layout {
   background:
-    linear-gradient(135deg, rgb(122 232 255 / 6%), transparent 42%),
-    linear-gradient(315deg, rgb(255 95 200 / 6%), transparent 40%), var(--mr-deck);
+    radial-gradient(64% 48% at 14% 0%, rgb(122 232 255 / 12%), transparent 70%),
+    linear-gradient(135deg, rgb(122 232 255 / 10%), transparent 44%),
+    linear-gradient(315deg, rgb(255 95 200 / 10%), transparent 42%), var(--mr-deck);
   background-color: var(--mr-deck);
 }
 
@@ -743,7 +744,9 @@ html[data-mode="world"]:not([data-world-effects="economy"])
    Manager archive
    ================================================================ */
 .site-shell.film-edition.mirage-edition .threat-panel {
-  background: linear-gradient(135deg, rgb(122 232 255 / 5%), transparent 40%), var(--mr-deck);
+  background:
+    radial-gradient(60% 48% at 88% 0%, rgb(255 95 200 / 10%), transparent 70%),
+    linear-gradient(135deg, rgb(122 232 255 / 9%), transparent 42%), var(--mr-deck);
 }
 
 .site-shell.film-edition.mirage-edition .threat-panel::before {

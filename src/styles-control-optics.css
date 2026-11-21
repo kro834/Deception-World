@@ -121,3 +121,18 @@ html body .fst-page .rxs-local-nav nav a.dg-control:not(#a)::before {
     padding-block: 2px 3px;
   }
 }
+
+/* 6. Shared reading & recovery controls: fine optical centering of Japanese
+ * labels against icon/badge ink without touching paint or surface geometry. */
+html[data-family="dossier"] body .dossier-reader .dossier-reader-links a:not(#a) {
+  padding-block: 0.5px 1.5px;
+}
+html[data-family="dossier"] body .dossier-form-pills > a:not(#a) > b {
+  margin-block-end: 0.5px;
+}
+html[data-family="dossier"] body .character-chapter-shortcuts a:not(#a) {
+  padding-block: 7.5px 8.5px;
+}
+html body .app-load-error .app-load-error-actions :is(button, a):not(#a) {
+  padding-block: 11.5px 12.5px;
+}

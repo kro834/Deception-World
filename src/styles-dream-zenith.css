@@ -107,20 +107,22 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader .dream-story-
 html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry {
   margin: 0;
   padding: clamp(22px, 3.4vw, 36px) clamp(18px, 3.4vw, 40px);
-  border: 1px solid rgb(226 190 120 / 56%);
+  border: 1px solid rgb(234 198 128 / 64%);
   border-bottom: 0;
   background:
-    linear-gradient(135deg, var(--zn-kin-hi), var(--zn-kin)) 0 0 / 48px 2.5px no-repeat,
-    linear-gradient(135deg, var(--zn-kin-hi), var(--zn-kin)) 0 0 / 2.5px 48px no-repeat,
-    linear-gradient(225deg, var(--zn-kin-hi), var(--zn-kin)) 100% 0 / 48px 2.5px no-repeat,
-    linear-gradient(225deg, var(--zn-kin-hi), var(--zn-kin)) 100% 0 / 2.5px 48px no-repeat,
-    radial-gradient(72% 94% at 14% 0%, rgb(246 208 140 / 22%), transparent 70%),
-    radial-gradient(46% 74% at 92% 100%, rgb(214 78 60 / 16%), transparent 70%),
-    linear-gradient(125deg, #321f3b 0%, #20152a 56%, #150e1d 100%);
+    linear-gradient(135deg, #fae2a8, var(--zn-kin)) 0 0 / 52px 2.5px no-repeat,
+    linear-gradient(135deg, #fae2a8, var(--zn-kin)) 0 0 / 2.5px 52px no-repeat,
+    linear-gradient(225deg, #fae2a8, var(--zn-kin)) 100% 0 / 52px 2.5px no-repeat,
+    linear-gradient(225deg, #fae2a8, var(--zn-kin)) 100% 0 / 2.5px 52px no-repeat,
+    radial-gradient(circle at 18% 16%, rgb(252 222 152 / 28%) 0 1px, transparent 1.9px),
+    radial-gradient(circle at 86% 22%, rgb(246 212 138 / 24%) 0 1px, transparent 1.9px),
+    radial-gradient(74% 96% at 14% 0%, rgb(250 212 142 / 26%), transparent 70%),
+    radial-gradient(48% 76% at 92% 100%, rgb(214 74 58 / 20%), transparent 70%),
+    linear-gradient(125deg, #351f3d 0%, #21142b 54%, #150d1c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 242 206 / 26%),
-    inset 0 0 0 4px rgb(15 10 21 / 52%),
-    inset 0 0 0 5px rgb(224 188 118 / 18%);
+    inset 0 1px 0 rgb(255 244 212 / 30%),
+    inset 0 0 0 4px rgb(13 8 19 / 58%),
+    inset 0 0 0 5px rgb(232 196 124 / 24%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-reading-entry p {
@@ -208,18 +210,20 @@ html[data-family="dream"] main.dream-page.dream-page .dream-reader-storage-note 
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-index {
   margin: 0 0 32px;
   padding: clamp(16px, 2.4vw, 24px) clamp(18px, 3.4vw, 40px) clamp(20px, 3vw, 32px);
-  border: 1px solid rgb(226 190 120 / 56%);
-  border-top: 1px solid rgb(226 190 120 / 32%);
+  border: 1px solid rgb(232 196 126 / 62%);
+  border-top: 1px solid rgb(232 196 126 / 36%);
   background:
-    linear-gradient(45deg, var(--zn-kin-hi), var(--zn-kin)) 0 100% / 48px 2.5px no-repeat,
-    linear-gradient(45deg, var(--zn-kin-hi), var(--zn-kin)) 0 100% / 2.5px 48px no-repeat,
-    linear-gradient(315deg, var(--zn-kin-hi), var(--zn-kin)) 100% 100% / 48px 2.5px no-repeat,
-    linear-gradient(315deg, var(--zn-kin-hi), var(--zn-kin)) 100% 100% / 2.5px 48px no-repeat,
-    radial-gradient(64% 58% at 50% 0%, rgb(244 206 138 / 10%), transparent 72%),
-    linear-gradient(180deg, #1f1428 0%, #130c1a 100%);
+    linear-gradient(45deg, #fae2a8, var(--zn-kin)) 0 100% / 52px 2.5px no-repeat,
+    linear-gradient(45deg, #fae2a8, var(--zn-kin)) 0 100% / 2.5px 52px no-repeat,
+    linear-gradient(315deg, #fae2a8, var(--zn-kin)) 100% 100% / 52px 2.5px no-repeat,
+    linear-gradient(315deg, #fae2a8, var(--zn-kin)) 100% 100% / 2.5px 52px no-repeat,
+    radial-gradient(66% 60% at 50% 0%, rgb(248 212 144 / 14%), transparent 72%),
+    radial-gradient(50% 48% at 88% 100%, rgb(198 64 54 / 12%), transparent 72%),
+    linear-gradient(180deg, #22162b 0%, #140d1c 100%);
   box-shadow:
-    inset 0 -1px 0 rgb(246 220 166 / 22%),
-    0 28px 64px -14px rgb(0 0 0 / 58%);
+    inset 0 -1px 0 rgb(252 232 182 / 26%),
+    inset 0 0 0 4px rgb(13 8 19 / 48%),
+    0 30px 68px -14px rgb(0 0 0 / 64%);
 }
 
 html[data-family="dream"] main.dream-page.dream-page .dream-reader-index-head p {

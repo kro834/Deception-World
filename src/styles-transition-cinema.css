@@ -249,21 +249,21 @@ html body .load-gate.has-cine > .dwc-carry::before {
     linear-gradient(
       118deg,
       transparent 10%,
-      color-mix(in srgb, var(--dwc-accent) 5%, transparent) 28.5%,
-      color-mix(in srgb, var(--dwc-accent) 26%, rgb(176 228 242 / 0.2)) 31.2%,
-      color-mix(in srgb, var(--dwc-gold) 15%, transparent) 33.8%,
+      color-mix(in srgb, var(--dwc-accent) 8%, transparent) 28.5%,
+      color-mix(in srgb, var(--dwc-accent) 34%, rgb(176 228 242 / 0.28)) 31.2%,
+      color-mix(in srgb, var(--dwc-gold) 22%, transparent) 33.8%,
       transparent 54%
     ),
     radial-gradient(
       82% 44% at 50% 0%,
-      color-mix(in srgb, var(--dwc-accent) 18%, transparent),
+      color-mix(in srgb, var(--dwc-accent) 24%, transparent),
       transparent 72%
     );
   box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--dwc-accent) 48%, transparent),
-    inset 1px 1px 0 color-mix(in srgb, var(--dwc-lock) 54%, transparent),
-    inset -2px -2px 0 rgb(1 5 12 / 0.8),
-    inset 0 -28px 34px rgb(1 5 12 / 0.26);
+    inset 0 0 0 1px color-mix(in srgb, var(--dwc-accent) 58%, transparent),
+    inset 1px 1px 0 color-mix(in srgb, var(--dwc-lock) 64%, transparent),
+    inset -2px -2px 0 rgb(1 5 12 / 0.84),
+    inset 0 -28px 34px rgb(1 5 12 / 0.3);
   opacity: 1;
 }
 

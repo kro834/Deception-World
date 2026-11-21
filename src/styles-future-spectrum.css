@@ -130,29 +130,29 @@ html:is(
       .search-page > header.search-topbar,
       .form-archive-page > header.form-archive-toolbar
     ) {
-    border-bottom-color: color-mix(in srgb, var(--fx-a) 44%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--fx-a) 54%, transparent);
     background-color: var(--fx-ink);
     background-image:
       linear-gradient(90deg, var(--sh-bar-light, var(--fx-a)) 0 3px, transparent 3px),
       linear-gradient(
         90deg,
         transparent 0%,
-        var(--sh-bar-light, var(--fx-a)) 12%,
-        #eef9ff 34%,
+        var(--sh-bar-light, var(--fx-a)) 10%,
+        #ffffff 32%,
         var(--fx-b) 56%,
         var(--fx-c) 82%,
-        color-mix(in srgb, #f2cf8d 72%, var(--fx-c)) 93%,
+        color-mix(in srgb, #f6d89c 82%, var(--fx-c)) 93%,
         transparent 100%
       ),
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--sh-bar-light, var(--fx-a)) 15%, transparent),
-        color-mix(in srgb, var(--fx-b) 8%, transparent) 46%,
-        color-mix(in srgb, var(--fx-c) 12%, transparent)
+        color-mix(in srgb, var(--sh-bar-light, var(--fx-a)) 20%, transparent),
+        color-mix(in srgb, var(--fx-b) 11%, transparent) 46%,
+        color-mix(in srgb, var(--fx-c) 17%, transparent)
       ),
       radial-gradient(
-        38% 180% at 100% 100%,
-        color-mix(in srgb, var(--fx-c) 16%, transparent),
+        40% 180% at 100% 100%,
+        color-mix(in srgb, var(--fx-c) 22%, transparent),
         transparent 72%
       ),
       var(--command-metal);
@@ -170,11 +170,11 @@ html:is(
       0 0;
     background-repeat: no-repeat;
     box-shadow:
-      inset 0 1px 0 rgb(238 248 255 / 26%),
-      0 1px 0 color-mix(in srgb, var(--fx-b) 36%, transparent),
-      0 12px 32px -16px
-        color-mix(in srgb, var(--fx-a) calc(78% * var(--fx-bloom)), transparent),
-      0 6px 20px rgb(0 0 0 / 42%);
+      inset 0 1px 0 rgb(244 252 255 / 34%),
+      0 1px 0 color-mix(in srgb, var(--fx-b) 48%, transparent),
+      0 14px 36px -14px
+        color-mix(in srgb, var(--fx-a) calc(88% * var(--fx-bloom)), transparent),
+      0 8px 24px rgb(0 0 0 / 50%);
   }
 
   /* Spectrum jewel-cut rim light on the topbar DW sigil plates. */
@@ -186,21 +186,21 @@ html:is(
       .library-page > header.library-topbar > a::before,
       .search-page > header.search-topbar > a.search-brand::before
     ) {
-    border-color: color-mix(in srgb, var(--fx-a) 72%, #f4fbff);
+    border-color: color-mix(in srgb, var(--fx-a) 78%, #ffffff);
     background:
-      radial-gradient(circle at 86% 14%, rgb(255 255 255 / 72%), color-mix(in srgb, var(--fx-a) 34%, transparent) 34%, transparent 66%),
-      radial-gradient(circle at 14% 88%, color-mix(in srgb, var(--fx-c) 30%, transparent), transparent 64%),
+      radial-gradient(circle at 86% 14%, rgb(255 255 255 / 86%), color-mix(in srgb, var(--fx-a) 44%, transparent) 32%, transparent 64%),
+      radial-gradient(circle at 14% 88%, color-mix(in srgb, var(--fx-c) 38%, transparent), transparent 62%),
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--fx-a) 28%, rgb(255 255 255 / 14%)) 0%,
-        color-mix(in srgb, var(--fx-b) 18%, #071324) 54%,
-        color-mix(in srgb, var(--fx-c) 22%, #09172a) 100%
+        color-mix(in srgb, var(--fx-a) 36%, rgb(255 255 255 / 18%)) 0%,
+        color-mix(in srgb, var(--fx-b) 24%, #071324) 54%,
+        color-mix(in srgb, var(--fx-c) 28%, #09172a) 100%
       );
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 84%),
-      inset 1px 0 0 color-mix(in srgb, var(--fx-a) 68%, transparent),
-      inset -1px -1px 0 color-mix(in srgb, var(--fx-c) 44%, transparent),
-      inset 0 0 14px color-mix(in srgb, var(--fx-b) 26%, transparent);
+      inset 0 1px 0 rgb(255 255 255 / 92%),
+      inset 1px 0 0 color-mix(in srgb, var(--fx-a) 78%, transparent),
+      inset -1px -1px 0 color-mix(in srgb, var(--fx-c) 56%, transparent),
+      inset 0 0 16px color-mix(in srgb, var(--fx-b) 34%, transparent);
   }
 
   /* The launcher trigger: luminous crystal glass lit from inside, smooth
@@ -215,23 +215,23 @@ html:is(
     body
     .side-panel-trigger.side-panel-trigger.side-panel-trigger {
     background:
-      radial-gradient(circle at 22% 16%, rgb(255 255 255 / 58%), transparent 54%),
-      linear-gradient(124deg, transparent 18%, rgb(255 255 255 / 38%) 44%, transparent 72%),
+      radial-gradient(circle at 20% 14%, rgb(255 255 255 / 72%), transparent 52%),
+      linear-gradient(124deg, transparent 16%, rgb(255 255 255 / 44%) 44%, transparent 72%),
       linear-gradient(
         var(--fx-angle),
-        color-mix(in srgb, var(--fx-a) 92%, #ffffff) 0%,
-        color-mix(in srgb, var(--fx-a) 64%, var(--fx-b)) 52%,
-        color-mix(in srgb, var(--fx-c) 76%, var(--fx-a)) 100%
+        color-mix(in srgb, var(--fx-a) 94%, #ffffff) 0%,
+        color-mix(in srgb, var(--fx-a) 62%, var(--fx-b)) 52%,
+        color-mix(in srgb, var(--fx-c) 80%, var(--fx-a)) 100%
       ) !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 88%),
-      inset 0 0 0 1px rgb(244 251 255 / 72%),
-      inset 0 -1px 0 rgb(4 10 20 / 30%),
-      0 8px 20px -6px rgb(0 0 0 / 58%),
-      0 0 24px -5px
-        color-mix(in srgb, var(--fx-a) calc(82% * var(--fx-glow)), transparent),
-      4px 4px 20px -8px
-        color-mix(in srgb, var(--fx-c) calc(62% * var(--fx-glow)), transparent) !important;
+      inset 0 1px 0 rgb(255 255 255 / 94%),
+      inset 0 0 0 1px rgb(248 253 255 / 78%),
+      inset 0 -1px 0 rgb(4 10 20 / 28%),
+      0 8px 22px -6px rgb(0 0 0 / 62%),
+      0 0 28px -4px
+        color-mix(in srgb, var(--fx-a) calc(92% * var(--fx-glow)), transparent),
+      4px 5px 24px -6px
+        color-mix(in srgb, var(--fx-c) calc(74% * var(--fx-glow)), transparent) !important;
   }
 }
 
@@ -261,14 +261,16 @@ html:is(
   )
   body
   :is(#site-announcement-dialog .site-announcement-hub, dialog.quick-search .quick-search-panel) {
-  border-color: color-mix(in srgb, var(--fx-a) 42%, transparent);
+  border-color: color-mix(in srgb, var(--fx-a) 54%, transparent);
   background:
-    radial-gradient(65% 45% at 100% 0%, color-mix(in srgb, var(--fx-a) 8%, transparent), transparent 70%),
-    linear-gradient(180deg, #0a1422 0%, #060d17 48%, #050a13 100%);
+    radial-gradient(65% 45% at 100% 0%, color-mix(in srgb, var(--fx-a) 14%, transparent), transparent 70%),
+    radial-gradient(56% 40% at 6% 100%, color-mix(in srgb, var(--fx-c) 10%, transparent), transparent 70%),
+    linear-gradient(180deg, #0b1829 0%, #060e1a 48%, #040912 100%);
   box-shadow:
-    inset 0 1px 0 rgb(233 240 241 / 18%),
-    0 28px 80px rgb(0 0 0 / 78%),
-    0 10px 30px rgb(0 0 0 / 56%);
+    inset 0 1px 0 rgb(244 252 255 / 30%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 18%, transparent),
+    0 34px 92px rgb(0 0 0 / 86%),
+    0 0 54px -16px color-mix(in srgb, var(--fx-a) calc(52% * var(--fx-glow)), transparent);
 }
 
 html:is(
@@ -283,12 +285,13 @@ html:is(
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--fx-a) 32%, transparent),
-        color-mix(in srgb, var(--fx-a) 12%, transparent) 60%,
+        color-mix(in srgb, var(--fx-a) 54%, transparent),
+        color-mix(in srgb, var(--fx-b) 34%, transparent) 46%,
+        color-mix(in srgb, var(--fx-c) 24%, transparent) 78%,
         transparent
       )
       0 100% / 100% 1px no-repeat,
-    #060d17;
+    #060d18;
 }
 
 html:is(
@@ -756,11 +759,11 @@ html[data-family="archive"]
       100% 100%,
       100% 100%;
     box-shadow:
-      inset 0 1px 0 rgb(238 248 255 / 28%),
-      0 1px 0 color-mix(in srgb, var(--fx-b) 48%, transparent),
-      0 8px 22px -6px color-mix(in srgb, var(--fx-a) calc(62% * var(--fx-bloom)), transparent),
-      0 18px 42px -20px color-mix(in srgb, var(--fx-c) calc(74% * var(--fx-bloom)), transparent),
-      0 6px 22px rgb(0 0 0 / 42%);
+      inset 0 1px 0 rgb(244 252 255 / 34%),
+      0 1px 0 color-mix(in srgb, var(--fx-b) 56%, transparent),
+      0 10px 28px -6px color-mix(in srgb, var(--fx-a) calc(74% * var(--fx-bloom)), transparent),
+      0 20px 48px -18px color-mix(in srgb, var(--fx-c) calc(82% * var(--fx-bloom)), transparent),
+      0 8px 26px rgb(0 0 0 / 50%);
   }
 
   html[data-family="world"]
@@ -769,8 +772,8 @@ html[data-family="archive"]
     > header.topbar
     nav
     a:not(#fx):not(#fx)::after {
-    background: linear-gradient(90deg, var(--fx-a), #eef9ff 36%, var(--fx-b) 66%, var(--fx-c));
-    box-shadow: 0 0 14px color-mix(in srgb, var(--fx-a) calc(86% * var(--fx-bloom)), transparent);
+    background: linear-gradient(90deg, var(--fx-a), #ffffff 36%, var(--fx-b) 66%, var(--fx-c));
+    box-shadow: 0 0 16px color-mix(in srgb, var(--fx-a) calc(94% * var(--fx-bloom)), transparent);
   }
 
   html[data-family="world"]
@@ -781,8 +784,8 @@ html[data-family="archive"]
     a[aria-current="location"]:not(#fx):not(#fx) {
     color: #fff;
     background:
-      linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 24%, transparent), color-mix(in srgb, var(--fx-b) 10%, transparent) 60%, transparent);
-    text-shadow: 0 0 16px color-mix(in srgb, var(--fx-a) calc(92% * var(--fx-bloom)), transparent);
+      linear-gradient(0deg, color-mix(in srgb, var(--fx-a) 28%, transparent), color-mix(in srgb, var(--fx-b) 12%, transparent) 60%, transparent);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--fx-a) calc(96% * var(--fx-bloom)), transparent);
   }
 }
 

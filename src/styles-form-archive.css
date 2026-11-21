@@ -55,16 +55,41 @@
    carry the element and the kind attribute to outrank it.
    ================================================================ */
 main.form-archive-page[data-archive-kind]::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--archive-toolbar-height) + 6px) 8px 8px;
+  z-index: 2;
+  pointer-events: none;
   background:
-    linear-gradient(var(--fa-lock) 0 0) 0 0 / 28px 2px no-repeat,
-    linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 28px no-repeat,
-    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 28px 2px no-repeat,
-    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 28px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) 0 100% / 28px 2px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) 0 100% / 2px 28px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 28px 2px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 28px no-repeat;
-  opacity: 0.66;
+    linear-gradient(var(--fa-lock) 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 32px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 32px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 32px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 0 100% / 32px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 0 100% / 2px 32px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 32px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 32px no-repeat;
+  opacity: 0.92;
+}
+
+@media (min-width: 900px) and (min-height: 620px) {
+  main.form-archive-page[data-archive-kind]::before {
+    inset: calc(var(--archive-toolbar-height) + 6px) clamp(10px, 1.2vw, 18px) 8px;
+    background:
+      linear-gradient(var(--fa-lock) 0 0) 0 0 / 40px 2px no-repeat,
+      linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 40px no-repeat,
+      linear-gradient(var(--fa-lock) 0 0) 100% 0 / 40px 2px no-repeat,
+      linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 40px no-repeat,
+      linear-gradient(var(--fa-gold) 0 0) 0 100% / 40px 2px no-repeat,
+      linear-gradient(var(--fa-gold) 0 0) 0 100% / 2px 40px no-repeat,
+      linear-gradient(var(--fa-gold) 0 0) 100% 100% / 40px 2px no-repeat,
+      linear-gradient(var(--fa-gold) 0 0) 100% 100% / 2px 40px no-repeat,
+      linear-gradient(180deg, transparent 12%, rgb(122 232 255 / 32%) 50%, transparent 88%) 0 50% / 1px
+        68% no-repeat,
+      linear-gradient(180deg, transparent 12%, rgb(240 207 134 / 32%) 50%, transparent 88%) 100%
+        50% / 1px 68% no-repeat;
+    opacity: 0.96;
+  }
 }
 
 /* Phones: the gold lower brackets sat on the archive's own controls in
@@ -72,60 +97,81 @@ main.form-archive-page[data-archive-kind]::before {
    The frame drops that pair there; its upper pair stays (under the bar). */
 @media (max-width: 620px) {
   main.form-archive-page[data-archive-kind]::before {
+    inset: calc(var(--archive-toolbar-height) + 4px) 6px auto;
+    height: 28px;
     background:
-      linear-gradient(var(--fa-lock) 0 0) 0 0 / 26px 2px no-repeat,
-      linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 26px no-repeat,
-      linear-gradient(var(--fa-lock) 0 0) 100% 0 / 26px 2px no-repeat,
-      linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 26px no-repeat;
+      linear-gradient(var(--fa-lock) 0 0) 0 0 / 24px 2px no-repeat,
+      linear-gradient(var(--fa-lock) 0 0) 0 0 / 2px 24px no-repeat,
+      linear-gradient(var(--fa-lock) 0 0) 100% 0 / 24px 2px no-repeat,
+      linear-gradient(var(--fa-lock) 0 0) 100% 0 / 2px 24px no-repeat;
   }
 }
 
 @media (min-width: 720px) {
   main.form-archive-page[data-archive-kind]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    z-index: 2;
+    pointer-events: none;
     background:
-      linear-gradient(90deg, transparent, #7ae8ff 18%, #a48bff 40%, #ff5cc8 62%, #f0cf86 84%, transparent)
-        0 0 / 100% 1px no-repeat;
-    opacity: 0.46;
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          #7ae8ff 20%,
+          #a48bff 42%,
+          #f0cf86 66%,
+          #7ae8ff 86%,
+          transparent 96%
+        )
+        0 100% / 100% 2px no-repeat;
+    opacity: 0.88;
     animation: none;
   }
 }
 
 /* ================================================================
-   Toolbar: an ink bar ruled by the prism. No drop shadow: it is a bar,
-   not a floating sheet.
+   Toolbar: precision titanium × sapphire prism console.
    ================================================================ */
 .form-archive-page .form-archive-toolbar {
   border-bottom-color: transparent;
   background:
-    radial-gradient(ellipse 64% 120% at 50% 0%, rgb(122 232 255 / 12%), transparent 70%),
-    radial-gradient(ellipse 60% 120% at 50% 118%, rgb(122 232 255 / 10%), transparent 70%),
-    linear-gradient(180deg, #0b1420, var(--fa-head) 68%, rgb(4 8 15 / 98%));
-  box-shadow: inset 0 1px 0 rgb(232 248 255 / 22%);
+    radial-gradient(ellipse 52% 160% at 50% -14%, rgb(138 238 255 / 42%), transparent 72%),
+    radial-gradient(ellipse 46% 120% at 86% 110%, rgb(240 207 134 / 22%), transparent 70%),
+    linear-gradient(180deg, #1b334a, var(--fa-head) 72%, rgb(4 8 15 / 98%));
+  box-shadow: inset 0 1px 0 rgb(244 253 255 / 46%);
 }
 
 .form-archive-page .form-archive-toolbar::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
   right: 0;
   bottom: -1px;
   left: 0;
-  height: 8px;
+  height: 10px;
   background:
     /* Left & right HUD seam brackets */
-    linear-gradient(var(--fa-lock) 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 24px 2px no-repeat,
-    linear-gradient(var(--fa-lock) 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 2px 8px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 24px 2px no-repeat,
-    linear-gradient(var(--fa-gold) 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 2px 8px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) max(14px, env(safe-area-inset-left, 0px)) 100% / 36px 2px no-repeat,
+    linear-gradient(var(--fa-lock) 0 0) max(14px, env(safe-area-inset-left, 0px)) 100% / 2px 10px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) calc(100% - max(14px, env(safe-area-inset-right, 0px))) 100% / 36px 2px no-repeat,
+    linear-gradient(var(--fa-gold) 0 0) calc(100% - max(14px, env(safe-area-inset-right, 0px))) 100% / 2px 10px no-repeat,
     /* Lower prismatic seam */
     linear-gradient(
         90deg,
-        transparent,
+        transparent 2%,
         #7ae8ff 14%,
-        #a48bff 38%,
-        #ff5cc8 62%,
-        #f0cf86 86%,
-        transparent
+        #e8fbff 34%,
+        #a48bff 54%,
+        #f0cf86 82%,
+        transparent 98%
       )
-      0 100% / 100% 1px no-repeat;
-  opacity: 0.92;
+      0 100% / 100% 2px no-repeat;
+  box-shadow: 0 2px 18px rgb(122 232 255 / 36%);
+  opacity: 1;
 }
 
 /* Owner (2026-11-20): the bar's English status words (FORM INTERFACE // SAGA
@@ -174,11 +220,23 @@ main.form-archive-page[data-archive-kind]::before {
    it reports ready. The lamp is a still square; only its colour changes. */
 @media (min-width: 700px) {
   main.form-archive-page[data-archive-kind] .form-archive-toolbar::before {
+    position: absolute;
+    pointer-events: none;
     top: calc(env(safe-area-inset-top, 0px) + var(--fa-bar) / 2);
-    padding-left: 16px;
+    width: 46px;
+    height: 26px;
+    padding-left: 0;
+    border: 1px solid color-mix(in srgb, var(--fa-lamp) 56%, rgb(236 250 255 / 38%));
+    border-top-color: rgb(246 253 255 / 72%);
+    border-radius: 4px;
     background:
-      radial-gradient(circle at 3px 50%, color-mix(in srgb, var(--fa-lamp) 46%, transparent) 0 3px, transparent 8px),
-      linear-gradient(var(--fa-lamp) 0 0) 0 50% / 6px 6px no-repeat;
+      radial-gradient(circle at 14px 50%, var(--fa-lamp) 0 3.5px, color-mix(in srgb, var(--fa-lamp) 42%, transparent) 4px 8px, transparent 11px),
+      radial-gradient(circle at 31px 50%, var(--fa-gold) 0 2.5px, rgb(240 207 134 / 32%) 3px 6px, transparent 9px),
+      linear-gradient(180deg, rgb(22 38 56 / 94%), rgb(8 15 26 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 32%),
+      0 4px 12px rgb(0 0 0 / 48%),
+      0 0 16px -4px color-mix(in srgb, var(--fa-lamp) 48%, transparent);
   }
 
   main.form-archive-page[data-archive-kind="saga"] .form-archive-toolbar::before {
@@ -743,13 +801,15 @@ html[data-family]
   body
   main.form-archive-page.command-archive[data-archive-kind="realm"]
   > header.form-archive-toolbar.form-archive-toolbar {
-  border-bottom-color: rgb(196 176 255 / 36%);
+  border-bottom-color: rgb(214 196 255 / 54%);
   background:
-    linear-gradient(118deg, rgb(227 214 255 / 9%), transparent 38% 74%, rgb(245 213 139 / 9%)),
-    linear-gradient(180deg, #1b1633, #100d21 56%, #0b0918);
+    radial-gradient(ellipse 58% 140% at 50% -12%, rgb(198 176 255 / 34%), transparent 72%),
+    radial-gradient(ellipse 46% 110% at 86% 110%, rgb(245 213 139 / 20%), transparent 70%),
+    linear-gradient(180deg, #261f46 0%, #14102b 56%, #0b0819 100%);
   box-shadow:
-    inset 0 1px rgb(244 236 255 / 16%),
-    0 8px 24px rgb(0 0 0 / 45%);
+    inset 0 1px 0 rgb(252 246 255 / 40%),
+    inset 0 -1px 0 rgb(245 213 139 / 26%),
+    0 16px 40px rgb(0 0 0 / 68%);
 }
 
 /* REALM lower seam & brackets synchronize to Violet × Royal Gold. */
@@ -759,10 +819,10 @@ html[data-family]
   > header.form-archive-toolbar.form-archive-toolbar::after,
 .form-archive-page[data-archive-kind="realm"] .form-archive-toolbar::after {
   background:
-    linear-gradient(#e3d6ff 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 22px 2px no-repeat,
-    linear-gradient(#e3d6ff 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 2px 8px no-repeat,
-    linear-gradient(#f5d58b 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 22px 2px no-repeat,
-    linear-gradient(#f5d58b 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 2px 8px no-repeat,
+    linear-gradient(#e3d6ff 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 28px 2px no-repeat,
+    linear-gradient(#e3d6ff 0 0) max(12px, env(safe-area-inset-left, 0px)) 100% / 2px 9px no-repeat,
+    linear-gradient(#f5d58b 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 28px 2px no-repeat,
+    linear-gradient(#f5d58b 0 0) calc(100% - max(12px, env(safe-area-inset-right, 0px))) 100% / 2px 9px no-repeat,
     linear-gradient(
         90deg,
         transparent,
@@ -773,8 +833,8 @@ html[data-family]
         #e3be6c 88%,
         transparent
       )
-      0 100% / 100% 1px no-repeat;
-  opacity: 0.92;
+      0 100% / 100% 2px no-repeat;
+  opacity: 1;
 }
 
 @media (min-width: 720px) {
@@ -783,8 +843,8 @@ html[data-family]
     main.form-archive-page.command-archive[data-archive-kind="realm"]::after {
     background:
       linear-gradient(90deg, transparent, #b8a2ff 18%, #f5d58b 50%, #b8a2ff 82%, transparent)
-        0 0 / 100% 1px no-repeat;
-    opacity: 0.42;
+        0 0 / 100% 2px no-repeat;
+    opacity: 0.68;
   }
 }
 
@@ -793,9 +853,16 @@ html[data-family]
   main.form-archive-page.command-archive[data-archive-kind="realm"]
   #archive-switcher.form-archive-switcher
   > .liquid-rail-surface {
-  border-color: rgb(196 176 255 / 34%);
-  background: #0a0816 !important;
-  box-shadow: inset 0 1px 8px rgb(0 0 0 / 68%) !important;
+  border-color: rgb(214 196 255 / 56%);
+  border-top-color: rgb(248 238 255 / 78%);
+  background:
+    radial-gradient(ellipse 84% 72% at 50% -6%, rgb(196 176 255 / 22%), transparent 72%),
+    linear-gradient(180deg, rgb(28 22 52 / 97%), rgb(10 8 22 / 99%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(252 246 255 / 32%),
+    inset 0 3px 10px rgb(0 0 0 / 72%),
+    0 0 0 2px rgb(6 4 16 / 92%),
+    0 10px 26px rgb(0 0 0 / 64%) !important;
 }
 
 html[data-family]
@@ -804,14 +871,17 @@ html[data-family]
   #archive-switcher.form-archive-switcher
   > .liquid-selection-lens
   > .liquid-selection-surface {
-  border-color: rgb(245 213 139 / 58%);
+  border-color: #f7dc9c;
+  border-top-color: #fff8e2;
   background:
-    linear-gradient(135deg, rgb(184 162 255 / 28%), rgb(245 213 139 / 10%) 56%, transparent 78%),
-    #272247 !important;
+    radial-gradient(ellipse 90% 80% at 50% -6%, rgb(208 188 255 / 46%), transparent 72%),
+    linear-gradient(135deg, rgb(245 213 139 / 20%), transparent 62%),
+    linear-gradient(180deg, #3c316b 0%, #221b44 54%, #14102b 100%) !important;
   box-shadow:
-    inset 0 1px rgb(246 236 255 / 38%),
-    inset 0 -2px rgb(245 213 139 / 64%),
-    0 2px 8px rgb(0 0 0 / 50%) !important;
+    inset 0 1px 0 #fffaf0,
+    inset 0 -2px 0 #f5d58b,
+    0 0 22px -2px rgb(196 172 255 / 46%),
+    0 6px 16px rgb(0 0 0 / 62%) !important;
 }
 
 html[data-family]
@@ -821,16 +891,22 @@ html[data-family]
   > .liquid-selection-lens
   > .liquid-selection-surface::after {
   background: linear-gradient(90deg, transparent, #b8a2ff 20%, #f5d58b 50%, #b8a2ff 80%, transparent);
-  opacity: 0.92;
+  opacity: 0.96;
 }
 
 html[data-family]
   body
   main.form-archive-page.command-archive[data-archive-kind="realm"]
   .side-panel-trigger.form-archive-menu-trigger.ios26-glass {
-  border-color: rgb(196 176 255 / 42%);
-  background: rgb(10 8 22 / 94%) !important;
-  box-shadow: inset 0 0 0 1px rgb(245 213 139 / 12%) !important;
+  border-color: rgb(214 196 255 / 58%);
+  border-top-color: rgb(252 238 202 / 80%);
+  background:
+    radial-gradient(ellipse 84% 84% at 50% 0%, rgb(196 176 255 / 26%), transparent 72%),
+    linear-gradient(180deg, rgb(32 25 58 / 96%), rgb(12 9 26 / 99%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(252 246 255 / 38%),
+    inset 0 0 0 1px rgb(245 213 139 / 22%),
+    0 8px 20px rgb(0 0 0 / 56%) !important;
 }
 
 @media (hover: hover) and (pointer: fine) {

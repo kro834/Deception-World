@@ -1162,61 +1162,201 @@ html[data-world-effects="economy"] .export-page h1 {
   }
 }
 
-/* Reading edition & Museum Plaque Elevation (outranks styles-command-support.css cleanly) */
+/* Reading edition & Wave-6 Crystal-Brass Museum Monolith (outranks styles-command-support.css cleanly) */
 .export-page.command-support-download {
   --dl-ice: #9deafa;
-  --dl-lock: #dff9ff;
-  --dl-gold: #f0cf86;
-  --dl-specular: rgb(248 254 255 / 62%);
-  --dl-chrome: linear-gradient(180deg, #ffffff 0%, #eefbff 36%, #b2ebff 68%, #ecc98c 100%);
+  --dl-lock: #e8fcff;
+  --dl-gold: #f4d388;
+  --dl-specular: rgb(252 255 255 / 76%);
+  --dl-chrome: linear-gradient(180deg, #ffffff 0%, #fff9ea 36%, #f5d690 72%, #cfa04c 100%);
   background:
-    radial-gradient(ellipse 72% 42% at 82% 4%, rgb(157 234 250 / 16%), transparent 70%),
-    radial-gradient(ellipse 58% 38% at 14% 88%, rgb(240 207 134 / 11%), transparent 70%),
-    radial-gradient(ellipse 54% 40% at 50% 42%, rgb(32 76 112 / 22%), transparent 72%),
-    linear-gradient(155deg, #040810 0%, #0a1624 48%, #040912 100%);
+    radial-gradient(circle at 82% 8%, transparent 0 184px, rgb(157 234 250 / 15%) 185px 186.5px, transparent 188px),
+    radial-gradient(circle at 16% 88%, transparent 0 228px, rgb(244 211 136 / 14%) 229px 230.5px, transparent 232px),
+    radial-gradient(ellipse 76% 48% at 84% 4%, rgb(48 138 186 / 48%), transparent 70%),
+    radial-gradient(ellipse 64% 46% at 12% 90%, rgb(208 156 74 / 28%), transparent 70%),
+    radial-gradient(ellipse 62% 50% at 50% 48%, rgb(42 104 156 / 40%), transparent 72%),
+    linear-gradient(155deg, #06111f 0%, #0f243a 48%, #060e1b 100%);
 }
 .export-page.command-support-download::after {
-  border-color: rgb(157 234 250 / 42%);
+  border-color: rgb(244 211 136 / 68%);
   border-radius: 5px;
+  background:
+    var(--dl-prism) top / 100% 3px no-repeat,
+    linear-gradient(var(--dl-lock) 0 0) 0 0 / 28px 2px,
+    linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 28px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 0 / 28px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 100% 0 / 2px 28px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 28px 2px,
+    linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 28px,
+    linear-gradient(var(--dl-lock) 0 0) 100% 100% / 28px 2px,
+    linear-gradient(var(--dl-lock) 0 0) 100% 100% / 2px 28px,
+    linear-gradient(
+        180deg,
+        rgb(5 12 22 / 0%) 0,
+        rgb(6 15 28 / 34%) calc(var(--dl-art) * 0.45),
+        #0c1e31 calc(var(--dl-art) + 30px)
+      )
+      0 0 / 100% calc(var(--dl-art) + 31px),
+    radial-gradient(ellipse 84% 42% at 50% calc(var(--dl-art) + 64px), rgb(244 211 136 / 22%), transparent 70%),
+    radial-gradient(ellipse 76% 48% at 86% 62%, rgb(72 178 220 / 22%), transparent 72%),
+    linear-gradient(148deg, #152d46 0%, #091626 52%, #10243a 100%) 0 calc(var(--dl-art) + 30px) /
+      100% 100%,
+    url("/poster-card-03-delivery.webp") 50% 0 / 100% auto,
+    #0b1b2d;
+  background-repeat: no-repeat;
   box-shadow:
-    0 46px 108px rgb(0 0 0 / 82%),
-    0 0 0 1px rgb(2 5 11 / 92%),
-    0 0 0 5px #07101b,
-    0 0 0 6px rgb(240 207 134 / 38%),
-    inset 0 1px 0 rgb(248 254 255 / 30%),
-    inset 0 -1px 0 rgb(240 207 134 / 24%),
-    inset 0 0 38px rgb(157 234 250 / 6%);
+    0 54px 124px rgb(0 0 0 / 90%),
+    0 0 88px -10px rgb(122 232 255 / 32%),
+    0 0 120px -24px rgb(244 211 136 / 24%),
+    0 0 0 1px rgb(2 6 12 / 95%),
+    0 0 0 5px #071220,
+    0 0 0 6px rgb(244 211 136 / 62%),
+    inset 0 1px 0 rgb(255 253 244 / 48%),
+    inset 0 -1px 0 rgb(244 211 136 / 38%),
+    inset 0 0 0 6px rgb(5 12 22 / 78%),
+    inset 0 0 0 7px rgb(157 234 250 / 20%),
+    inset 0 0 56px rgb(122 232 255 / 12%);
+}
+@media (min-width: 960px) and (min-height: 600px) {
+  .export-page.command-support-download::before {
+    box-shadow:
+      inset 0 1px 0 rgb(255 253 244 / 36%),
+      inset 0 -1px 0 rgb(244 211 136 / 32%),
+      inset -2px 0 0 rgb(244 211 136 / 52%),
+      inset 0 0 42px rgb(6 16 28 / 48%);
+  }
+  .export-page.command-support-download::after {
+    background:
+      var(--dl-prism) top / 100% 3px no-repeat,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 32px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 32px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 0 / 32px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 0 / 2px 32px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 32px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 32px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 100% / 32px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 100% / 2px 32px,
+      linear-gradient(132deg, rgb(255 254 248 / 16%) 0%, rgb(157 234 250 / 8%) 18%, transparent 42%),
+      radial-gradient(ellipse 68% 44% at 74% 12%, rgb(244 211 136 / 26%), transparent 68%),
+      radial-gradient(ellipse 72% 52% at 88% 52%, rgb(64 168 214 / 26%), transparent 70%),
+      radial-gradient(ellipse 66% 48% at 74% 92%, rgb(224 176 92 / 20%), transparent 70%),
+      linear-gradient(148deg, #17314c 0%, #091728 52%, #11263e 100%);
+    background-repeat: no-repeat;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 560px) {
+  .export-page.command-support-download::after {
+    background:
+      var(--dl-prism) top / 100% 2.5px no-repeat,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 24px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 0 0 / 2px 24px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 0 / 24px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 100% 0 / 2px 24px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 24px 2px,
+      linear-gradient(var(--dl-gold) 0 0) 0 100% / 2px 24px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 100% / 24px 2px,
+      linear-gradient(var(--dl-lock) 0 0) 100% 100% / 2px 24px,
+      linear-gradient(135deg, rgb(255 254 248 / 14%) 0%, transparent 40%),
+      radial-gradient(ellipse 70% 50% at 78% 18%, rgb(244 211 136 / 22%), transparent 70%),
+      linear-gradient(148deg, #16304a 0%, #091627 54%, #10253c 100%);
+    background-repeat: no-repeat;
+  }
 }
 .export-page.command-support-download .export-page-sigil {
-  border-color: rgb(186 240 255 / 84%);
+  border-color: #fff4d6;
   background:
-    linear-gradient(135deg, rgb(157 234 250 / 32%), rgb(240 207 134 / 14%) 56%, transparent),
-    #081320;
+    radial-gradient(circle at 36% 32%, rgb(255 248 220 / 42%), transparent 62%),
+    linear-gradient(135deg, rgb(244 211 136 / 48%) 0%, rgb(122 232 255 / 34%) 52%, rgb(14 34 54 / 96%) 100%),
+    #0b1c2e;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 38%),
-    0 0 0 5px rgb(4 9 16 / 92%),
-    0 0 0 6px rgb(240 207 134 / 68%),
-    0 16px 34px rgb(0 0 0 / 76%);
+    inset 0 1px 0 rgb(255 255 255 / 68%),
+    inset 0 0 0 3px rgb(6 14 24 / 92%),
+    inset 0 0 0 4px rgb(244 211 136 / 68%),
+    0 0 0 5px rgb(5 11 20 / 94%),
+    0 0 0 6px rgb(244 211 136 / 88%),
+    0 0 34px -2px rgb(244 211 136 / 42%),
+    0 0 52px -6px rgb(122 232 255 / 36%),
+    0 18px 38px rgb(0 0 0 / 84%);
+}
+.export-page.command-support-download .export-page-sigil > i {
+  color: #fffdf6;
+  text-shadow:
+    0 1px 0 rgb(3 8 15 / 92%),
+    0 0 16px rgb(244 211 136 / 65%);
+}
+.export-page.command-support-download > p {
+  color: #ffecc0;
+  text-shadow: 0 0 16px rgb(244 211 136 / 42%);
+}
+.export-page.command-support-download > p::before,
+.export-page.command-support-download > p::after {
+  width: 46px;
+  height: 2px;
+  box-shadow: 0 0 12px rgb(244 211 136 / 45%);
+}
+.export-page.command-support-download > h1 {
+  filter:
+    drop-shadow(0 2px 0 rgb(3 9 18 / 92%))
+    drop-shadow(0 0 24px rgb(244 211 136 / 34%))
+    drop-shadow(2px 0 rgb(122 232 255 / 28%));
+}
+html[data-world-effects="economy"] .export-page.command-support-download > h1 {
+  filter: none;
+}
+.export-page.command-support-download > b {
+  border-color: rgb(244 211 136 / 74%);
+  border-left: 3px solid var(--dl-gold);
+  background:
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(125deg, rgb(255 252 240 / 18%) 0%, transparent 48%),
+    linear-gradient(
+      90deg,
+      rgb(244 211 136 / 32%) 0%,
+      rgb(122 232 255 / 20%) 54%,
+      rgb(12 28 46 / 95%) 100%
+    );
+  box-shadow:
+    0 0 0 1px rgb(3 8 15 / 92%),
+    inset 0 1px 0 rgb(255 253 242 / 44%),
+    inset 0 -1px 0 rgb(157 234 250 / 30%),
+    0 12px 28px -10px rgb(0 0 0 / 82%);
+  color: #fffbf0;
 }
 .export-page.command-support-download .export-page-btn {
   min-height: 56px;
   line-height: 1.7;
   border-radius: 3px;
-  border: 1px solid #f0fdff;
+  border: 1px solid #fff8e2;
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 55%) 0%, transparent 42%),
-    linear-gradient(135deg, #f9feff 0%, #c2ecfb 48%, #8be9ff 100%);
-  color: #04121c;
+    linear-gradient(180deg, rgb(255 255 255 / 66%) 0%, transparent 46%),
+    linear-gradient(135deg, #fffef8 0%, #fbe4b0 34%, #efc46e 70%, #dca94c 100%);
+  color: #160f04;
   font-weight: 600;
   box-shadow:
-    0 0 0 1px rgb(3 9 16 / 90%),
-    0 0 0 2px rgb(157 234 250 / 42%),
-    inset 0 1px 0 #ffffff,
-    inset 0 -1px 0 rgb(240 207 134 / 36%),
-    0 14px 36px -6px rgb(122 232 255 / 34%);
+    0 0 0 1px rgb(4 10 18 / 92%),
+    0 0 0 2px rgb(244 211 136 / 58%),
+    inset 0 1.5px 0 #ffffff,
+    inset 0 -1px 0 rgb(138 92 24 / 45%),
+    0 16px 42px -4px rgb(244 211 136 / 46%),
+    0 0 32px -6px rgb(122 232 255 / 32%);
 }
 .export-page.command-support-download .export-page-btn::before {
   content: "";
+  background:
+    linear-gradient(#fff4d4 0 0) 0 0 / 15px 2px,
+    linear-gradient(#fff4d4 0 0) 0 0 / 2px 15px,
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 15px 2px,
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 2px 15px,
+    linear-gradient(var(--dl-ice) 0 0) 0 100% / 15px 2px,
+    linear-gradient(var(--dl-ice) 0 0) 0 100% / 2px 15px,
+    linear-gradient(#fff4d4 0 0) 100% 100% / 15px 2px,
+    linear-gradient(#fff4d4 0 0) 100% 100% / 2px 15px;
+  background-repeat: no-repeat;
+}
+.export-page.command-support-download .export-page-alt {
+  color: #e8f6fd;
+  text-decoration-color: rgb(244 211 136 / 76%);
 }
 .export-page small#export-scope {
   justify-self: stretch;
@@ -1224,16 +1364,23 @@ html[data-world-effects="economy"] .export-page h1 {
   box-sizing: border-box;
   padding: 20px clamp(16px, 4vw, 28px);
   margin-inline: var(--dl-inset);
-  border: 1px solid rgb(157 234 250 / 30%);
+  border: 1px solid rgb(157 234 250 / 54%);
   border-left: 3px solid var(--dl-gold);
   background:
-    linear-gradient(128deg, rgb(255 251 238 / 6%) 0%, transparent 46%),
-    linear-gradient(180deg, rgb(14 30 46 / 68%), rgb(5 12 21 / 88%));
+    linear-gradient(90deg, var(--dl-gold), var(--dl-ice) 54%, transparent 96%) 0 0 / 100% 1.5px no-repeat,
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 16px 2px no-repeat,
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 2px 16px no-repeat,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(var(--dl-gold) 0 0) 100% 100% / 2px 16px no-repeat,
+    linear-gradient(128deg, rgb(255 253 242 / 12%) 0%, rgb(122 232 255 / 6%) 28%, transparent 52%),
+    radial-gradient(ellipse 80% 60% at 92% 14%, rgb(72 178 220 / 20%), transparent 70%),
+    linear-gradient(165deg, rgb(26 56 82 / 88%), rgb(10 24 40 / 95%));
   box-shadow:
-    inset 0 1px 0 rgb(245 253 255 / 18%),
-    inset 0 -1px 0 rgb(240 207 134 / 16%),
-    0 14px 30px -16px rgb(0 0 0 / 74%);
-  color: #d6e4ee;
+    0 0 0 1px rgb(2 6 12 / 92%),
+    inset 0 1px 0 rgb(250 254 255 / 32%),
+    inset 0 -1px 0 rgb(244 211 136 / 28%),
+    0 18px 38px -14px rgb(0 0 0 / 84%);
+  color: #eaf3f9;
   font-size: 14px;
   line-height: 1.9;
   text-align: left;
@@ -1253,43 +1400,55 @@ html[data-world-effects="economy"] .export-page h1 {
   padding-bottom: 4px;
 }
 .export-page .export-page-navigation > :is(.export-page-back, .export-page-context) {
-  border: 1px solid rgb(157 234 250 / 38%);
+  border: 1px solid rgb(157 234 250 / 56%);
   border-radius: 3px;
   background:
-    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 46%),
-    linear-gradient(180deg, rgb(18 38 56 / 74%), rgb(7 17 28 / 92%));
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(var(--dl-ice) 0 0) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 13%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(28 60 88 / 88%), rgb(11 26 42 / 96%));
   box-shadow:
-    inset 0 1px 0 rgb(245 253 255 / 20%),
-    inset 0 -1px 0 rgb(240 207 134 / 14%),
-    0 10px 24px -14px rgb(0 0 0 / 76%);
+    0 0 0 1px rgb(2 6 12 / 90%),
+    inset 0 1px 0 rgb(250 254 255 / 34%),
+    inset 0 -1px 0 rgb(244 211 136 / 24%),
+    0 14px 28px -12px rgb(0 0 0 / 84%);
 }
 .export-page .export-page-navigation > .export-page-back {
-  border-color: rgb(240 207 134 / 52%);
-  border-left: 2px solid var(--dl-gold);
+  border-color: rgb(244 211 136 / 78%);
+  border-left: 3px solid var(--dl-gold);
   background:
-    linear-gradient(128deg, rgb(255 250 236 / 9%) 0%, transparent 48%),
-    linear-gradient(180deg, rgb(24 48 68 / 84%), rgb(9 21 34 / 94%));
+    linear-gradient(var(--dl-gold) 0 0) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(var(--dl-gold) 0 0) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(128deg, rgb(255 248 226 / 18%) 0%, transparent 48%),
+    linear-gradient(165deg, rgb(54 52 38 / 90%), rgb(18 34 50 / 96%));
+  color: #fff6df;
 }
 .export-page .export-page-navigation > .export-page-context {
-  border-color: rgb(157 234 250 / 34%);
+  border-color: rgb(157 234 250 / 50%);
+  color: #def0fa;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .export-page.command-support-download > h1 {
+    filter: none;
+  }
 }
 @media (hover: hover) and (pointer: fine) {
   .export-page.command-support-download .export-page-btn:hover {
     border-color: #ffffff;
-    background: linear-gradient(135deg, #ffffff 0%, #daf6ff 48%, #a4efff 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #fff0c8 42%, #f6cf7e 100%);
     box-shadow:
-      0 0 0 1px rgb(3 9 16 / 86%),
-      0 0 0 3px rgb(157 234 250 / 54%),
-      inset 0 1px 0 #ffffff,
-      0 18px 44px -4px rgb(122 232 255 / 44%);
+      0 0 0 1px rgb(3 9 16 / 88%),
+      0 0 0 3px rgb(244 211 136 / 68%),
+      inset 0 1.5px 0 #ffffff,
+      0 20px 48px -4px rgb(244 211 136 / 56%);
     translate: 0 -2px;
   }
   .export-page.command-support-download .export-page-navigation > :is(.export-page-back, .export-page-context):hover {
-    border-color: #d6f8ff;
-    background: linear-gradient(180deg, rgb(28 58 82 / 90%), rgb(11 26 42 / 96%));
+    border-color: #fff2cc;
+    background: linear-gradient(180deg, rgb(42 78 108 / 94%), rgb(14 32 52 / 98%));
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 30%),
-      0 14px 28px -12px rgb(122 232 255 / 28%);
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      0 16px 32px -10px rgb(122 232 255 / 36%);
     color: #fff;
   }
 }
@@ -1297,9 +1456,26 @@ html[data-world-effects="economy"] .export-page h1 {
   .export-page.command-support-download {
     background: Canvas;
   }
+  .export-page.command-support-download::before {
+    box-shadow: none;
+  }
   .export-page.command-support-download::after {
     background: Canvas;
     border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  .export-page.command-support-download > h1 {
+    filter: none;
+  }
+  .export-page.command-support-download > p,
+  .export-page.command-support-download .export-page-sigil > i {
+    color: CanvasText;
+    text-shadow: none;
+  }
+  .export-page.command-support-download > b {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
     box-shadow: none;
   }
   .export-page.command-support-download .export-page-sigil {

@@ -18,8 +18,14 @@
 
 .other-artwork-card {
   padding: 0;
+  border: 1px solid rgb(156 218 242 / 46%);
   text-align: left;
   font: inherit;
+  box-shadow:
+    inset 0 1px 0 rgb(236 248 255 / 28%),
+    inset 0 0 0 1px rgb(240 207 134 / 18%),
+    0 22px 46px -12px rgb(0 0 0 / 80%),
+    0 0 28px -10px rgb(122 232 255 / 24%);
   cursor: pointer;
   touch-action: pan-y pinch-zoom;
   -webkit-tap-highlight-color: transparent;
@@ -29,15 +35,19 @@
   font-size: clamp(16px, 1.5vw, 20px);
   color: #fff;
   letter-spacing: 0.02em;
-  text-shadow: 0 2px 10px rgb(0 0 0 / 84%);
+  text-shadow:
+    0 2px 12px rgb(0 0 0 / 90%),
+    0 0 18px rgb(122 232 255 / 22%);
 }
 
 .other-artwork-card .other-card-copy i {
   font-size: 12px;
   font-style: normal;
   letter-spacing: 0.06em;
-  color: #dff7ff;
-  text-shadow: 0 1px 6px rgb(0 0 0 / 80%);
+  color: #e6f9ff;
+  text-shadow:
+    0 1px 8px rgb(0 0 0 / 88%),
+    0 0 12px rgb(122 232 255 / 24%);
 }
 
 .other-artwork-dialog {
@@ -68,10 +78,10 @@
 
 .other-artwork-dialog::backdrop {
   background:
-    radial-gradient(ellipse 68% 48% at 50% 18%, rgb(122 232 255 / 15%), transparent 70%),
-    radial-gradient(ellipse 52% 42% at 18% 76%, rgb(240 207 134 / 8%), transparent 72%),
-    radial-gradient(ellipse 56% 44% at 84% 74%, rgb(186 144 255 / 10%), transparent 72%),
-    radial-gradient(ellipse 92% 84% at 50% 50%, rgb(6 14 26 / 93%), rgb(2 5 11 / 98%));
+    radial-gradient(ellipse 70% 48% at 50% 16%, rgb(122 232 255 / 24%), transparent 68%),
+    radial-gradient(ellipse 54% 44% at 16% 78%, rgb(240 207 134 / 14%), transparent 70%),
+    radial-gradient(ellipse 58% 46% at 84% 72%, rgb(186 144 255 / 16%), transparent 70%),
+    radial-gradient(ellipse 92% 84% at 50% 50%, rgb(5 12 24 / 94%), rgb(2 5 11 / 99%));
 }
 
 .other-artwork-viewer {
@@ -89,24 +99,25 @@
   gap: 12px;
   min-height: 60px;
   padding: 8px 16px;
-  border: 1px solid rgb(155 216 242 / 38%);
-  border-top: 1px solid rgb(224 246 255 / 54%);
+  border: 1px solid rgb(168 228 250 / 48%);
+  border-top: 1px solid rgb(236 250 255 / 66%);
   border-radius: 6px;
   background:
     linear-gradient(
         90deg,
-        rgb(122 232 255 / 62%) 0%,
-        rgb(240 207 134 / 46%) 38%,
-        transparent 78%
+        rgb(122 232 255 / 84%) 0%,
+        rgb(240 207 134 / 68%) 36%,
+        rgb(186 144 255 / 44%) 68%,
+        transparent 94%
       )
       0 100% / 100% 1px no-repeat,
-    radial-gradient(ellipse 64% 110% at 50% 0%, rgb(155 233 250 / 16%), transparent 72%),
-    linear-gradient(180deg, #132333 0%, #09131e 100%);
+    radial-gradient(ellipse 68% 120% at 50% 0%, rgb(155 233 250 / 24%), transparent 72%),
+    linear-gradient(180deg, #162a3d 0%, #09131f 100%);
   box-shadow:
-    inset 0 1px 0 rgb(236 248 255 / 24%),
-    inset 0 0 0 1px rgb(155 233 250 / 10%),
-    0 16px 38px -8px rgb(0 0 0 / 68%),
-    0 0 28px -12px rgb(122 232 255 / 22%);
+    inset 0 1px 0 rgb(242 252 255 / 34%),
+    inset 0 0 0 1px rgb(240 207 134 / 14%),
+    0 20px 44px -8px rgb(0 0 0 / 78%),
+    0 0 34px -10px rgb(122 232 255 / 32%);
 }
 
 .other-artwork-viewer h2 {
@@ -116,7 +127,9 @@
   font-weight: 600;
   letter-spacing: 0.03em;
   line-height: 1.5;
-  text-shadow: 0 2px 12px rgb(122 232 255 / 20%);
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 72%),
+    0 0 18px rgb(122 232 255 / 28%);
 }
 
 .other-artwork-viewer button {
@@ -128,15 +141,16 @@
   min-width: 88px;
   min-height: 44px;
   padding: 8px 16px;
-  border: 1px solid rgb(156 218 242 / 72%);
+  border: 1px solid rgb(176 232 255 / 80%);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgb(236 250 255 / 24%), transparent 54%),
-    linear-gradient(180deg, #294964, #15293b);
+    linear-gradient(180deg, rgb(242 252 255 / 32%), transparent 54%),
+    linear-gradient(180deg, #305574, #162b3e);
   box-shadow:
-    inset 0 1px 0 rgb(242 252 255 / 40%),
-    inset 0 -1px 0 rgb(122 232 255 / 18%),
-    0 8px 20px -4px rgb(0 0 0 / 54%);
+    inset 0 1px 0 rgb(255 255 255 / 50%),
+    inset 0 -1px 0 rgb(240 207 134 / 24%),
+    0 10px 22px -4px rgb(0 0 0 / 62%),
+    0 0 18px -6px rgb(122 232 255 / 28%);
   color: #fff;
   font: inherit;
   font-size: 13px;
@@ -174,38 +188,53 @@
   );
   margin: 12px auto 0;
   padding: 10px;
-  border: 1px solid rgb(156 218 242 / 36%);
+  border: 1px solid rgb(168 228 250 / 50%);
   border-radius: 6px;
   background:
-    radial-gradient(ellipse 74% 48% at 50% 6%, rgb(168 232 255 / 14%), transparent 68%),
-    radial-gradient(ellipse 68% 36% at 50% 96%, rgb(240 207 134 / 8%), transparent 70%),
-    linear-gradient(180deg, #0c1622 0%, #050b13 100%);
+    radial-gradient(ellipse 76% 50% at 50% 4%, rgb(168 232 255 / 22%), transparent 68%),
+    radial-gradient(ellipse 70% 38% at 50% 96%, rgb(240 207 134 / 14%), transparent 70%),
+    linear-gradient(180deg, #0e1a28 0%, #050b13 100%);
   box-shadow:
-    inset 0 1px 0 rgb(236 248 255 / 24%),
-    inset 0 0 0 1px rgb(240 207 134 / 16%),
-    0 0 0 1px rgb(2 6 12 / 90%),
-    0 0 0 2px rgb(122 232 255 / 14%),
-    0 28px 68px -10px rgb(0 0 0 / 82%),
-    0 0 48px -14px rgb(122 232 255 / 22%);
+    inset 0 1px 0 rgb(242 252 255 / 34%),
+    inset 0 0 0 1px rgb(240 207 134 / 28%),
+    0 0 0 1px rgb(2 6 12 / 94%),
+    0 0 0 2px rgb(122 232 255 / 24%),
+    0 32px 76px -10px rgb(0 0 0 / 88%),
+    0 0 58px -12px rgb(122 232 255 / 34%);
   object-fit: contain;
   filter: none;
   transform: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .other-artwork-viewer button:hover {
-    border-color: #d6f7ff;
-    background:
-      linear-gradient(180deg, rgb(242 252 255 / 32%), transparent 54%),
-      linear-gradient(180deg, #325a7a, #1b364d);
+  .other-artwork-card:hover {
+    border-color: rgb(214 247 255 / 82%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 54%),
-      0 8px 22px -4px rgb(0 0 0 / 60%),
-      0 0 22px -4px rgb(122 232 255 / 42%);
+      inset 0 1px 0 rgb(255 255 255 / 42%),
+      inset 0 0 0 1px rgb(240 207 134 / 36%),
+      0 26px 56px -10px rgb(0 0 0 / 88%),
+      0 0 38px -8px rgb(122 232 255 / 44%);
+  }
+
+  .other-artwork-viewer button:hover {
+    border-color: #e4f9ff;
+    background:
+      linear-gradient(180deg, rgb(248 253 255 / 38%), transparent 54%),
+      linear-gradient(180deg, #366284, #1c3952);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 62%),
+      inset 0 -1px 0 rgb(240 207 134 / 32%),
+      0 10px 26px -4px rgb(0 0 0 / 68%),
+      0 0 28px -4px rgb(122 232 255 / 52%);
   }
 }
 
 @media (forced-colors: active) {
+  .other-artwork-card {
+    border-color: ButtonText;
+    box-shadow: none;
+  }
+
   .other-artwork-viewer header,
   .other-artwork-viewer > img {
     border-color: CanvasText;

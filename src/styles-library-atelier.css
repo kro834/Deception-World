@@ -2190,3 +2190,1018 @@ html[data-family="library"] .library-screening-room #library-main .library-cast-
     outline-offset: -2px;
   }
 }
+
+/* ================================================================
+   Wave-6: the screening room as a sculpted museum vault.
+   Covers the room shell (.library-topbar, .library-footer) and every
+   station inside #library-main: double-matted projection hero, bevelled
+   glass stat cabinets ("41 件" / "26 件"), inset search well aura,
+   double-matted specimen cards, inquiry triptychs, and cast plaques.
+   ================================================================ */
+html[data-family="library"] .world.command-records.library-page.library-screening-room {
+  background:
+    radial-gradient(ellipse 860px 600px at 86% 5%, rgb(46 88 78 / 68%), transparent 78%),
+    radial-gradient(ellipse 820px 520px at 6% 24%, rgb(96 72 42 / 34%), transparent 84%),
+    radial-gradient(ellipse 760px 520px at 50% 64%, rgb(26 54 58 / 38%), transparent 80%),
+    linear-gradient(165deg, #080d12 0%, #0d151b 48%, #070b10 100%);
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-screening-room
+  .library-topbar {
+  border-bottom: 1px solid rgb(164 221 207 / 42%);
+  background:
+    linear-gradient(
+        90deg,
+        rgb(230 200 149 / 76%) 0%,
+        rgb(164 221 207 / 72%) 48%,
+        rgb(230 200 149 / 44%) 100%
+      )
+      0 100% / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(6 11 16 / 99%), rgb(9 16 21 / 98%));
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 250 / 18%),
+    0 16px 36px -14px rgb(0 0 0 / 86%);
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-screening-room
+  .library-topbar-actions
+  > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 2px 12px;
+  border: 1px solid rgb(230 200 149 / 46%);
+  border-left: 2px solid var(--room-gold);
+  background:
+    linear-gradient(128deg, rgb(255 250 236 / 10%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(28 36 36 / 90%), rgb(11 18 22 / 94%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 24%);
+  color: #fff3dc;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-screening-room
+  .library-footer {
+  border-top: 1px solid rgb(164 221 207 / 36%);
+  background:
+    linear-gradient(90deg, var(--room-gold), var(--room-teal) 52%, transparent) 50% 0 /
+      min(520px, 78%) 2px no-repeat,
+    radial-gradient(ellipse 65% 80% at 50% 0%, rgb(164 221 207 / 9%), transparent 72%),
+    linear-gradient(180deg, rgb(14 23 28 / 92%), rgb(7 12 16 / 98%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 16%);
+}
+
+html[data-family="library"]
+  .world.command-records.library-page.library-screening-room
+  .library-footer
+  a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 1px solid rgb(230 200 149 / 56%);
+  border-left: 3px solid var(--room-gold);
+  background:
+    linear-gradient(128deg, rgb(255 250 236 / 12%) 0%, transparent 48%),
+    linear-gradient(145deg, rgb(30 46 46 / 92%), rgb(12 20 25 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 28%),
+    0 14px 30px -14px rgb(0 0 0 / 84%);
+  color: #fff5e4;
+  text-decoration: none;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-hero {
+  border-color: rgb(164 221 207 / 52%);
+  border-block-start: 2px solid rgb(230 200 149 / 82%);
+  background:
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 30px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 2px 30px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 0 / 30px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 0 / 2px 30px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 100% / 30px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 100% / 2px 30px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 30px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 2px 30px no-repeat,
+    linear-gradient(90deg, rgb(230 200 149 / 88%), rgb(164 221 207 / 78%) 52%, transparent 96%) 0 0 /
+      100% 1px no-repeat,
+    linear-gradient(126deg, rgb(255 255 255 / 9%) 0%, rgb(164 221 207 / 4%) 28%, transparent 52%),
+    radial-gradient(ellipse 64% 76% at 78% 46%, rgb(164 221 207 / 20%), transparent 70%),
+    radial-gradient(ellipse 58% 62% at 10% 92%, rgb(230 200 149 / 17%), transparent 72%),
+    linear-gradient(120deg, #1f2c2a 0%, #0d151a 56%, #132026 100%);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 94%),
+    0 0 0 5px rgb(10 16 20 / 88%),
+    0 0 0 6px rgb(230 200 149 / 32%),
+    inset 0 1px 0 rgb(248 254 252 / 34%),
+    inset 0 -1px 0 rgb(230 200 149 / 28%),
+    inset 0 0 52px rgb(164 221 207 / 7%),
+    0 38px 86px -32px rgb(0 0 0 / 94%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-intro-copy::before {
+  width: 64px;
+  height: 3px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, var(--room-gold) 0%, #fff4dc 42%, var(--room-teal) 100%);
+  box-shadow:
+    0 0 18px rgb(230 200 149 / 46%),
+    0 0 28px rgb(164 221 207 / 28%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-intro h1 {
+  color: #fff9ef;
+  text-shadow:
+    0 2px 0 rgb(3 7 11 / 92%),
+    0 0 30px rgb(230 200 149 / 28%),
+    0 0 58px rgb(164 221 207 / 16%);
+}
+
+/* The jump row: every way in is a sculpted glass plaque; the first is forged brass. */
+html[data-family="library"] .library-screening-room #library-main .library-jump-links {
+  gap: 10px;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-jump-links
+  > a:not(:first-child) {
+  justify-content: center;
+  padding-inline: 16px;
+  border: 1px solid rgb(164 221 207 / 50%);
+  border-left: 2px solid rgb(230 200 149 / 68%);
+  border-bottom-color: rgb(230 200 149 / 46%);
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 10%) 0%, transparent 46%),
+    linear-gradient(180deg, rgb(28 50 50 / 92%), rgb(10 19 24 / 96%));
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 86%),
+    inset 0 1px 0 rgb(244 253 250 / 28%),
+    inset 0 -1px 0 rgb(230 200 149 / 20%),
+    0 12px 24px -12px rgb(0 0 0 / 84%);
+  color: #e2f8f1;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-jump-links > a:first-child {
+  border-color: #fff0cf;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 42%) 0%, transparent 44%),
+    linear-gradient(135deg, #f8e5bd 0%, var(--room-gold) 52%, #cfa766 100%);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    inset 0 1px 0 rgb(255 254 248 / 88%),
+    inset 0 -1px 0 rgb(134 96 38 / 46%),
+    0 14px 30px -8px rgb(230 200 149 / 50%);
+}
+
+/* The projection screen: a double museum mat, brass lip, and optical throw. */
+html[data-family="library"] .library-screening-room #library-main .library-screen {
+  padding: clamp(9px, 1.25vw, 15px);
+  border: 1px solid rgb(230 200 149 / 72%);
+  background:
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 0 / 20px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 0 / 2px 20px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 0 100% / 20px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 0 100% / 2px 20px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(145deg, #131e23, #060a0e);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 95%),
+    0 0 0 6px rgb(11 17 21 / 92%),
+    0 0 0 7px rgb(164 221 207 / 36%),
+    inset 0 1px 0 rgb(255 250 236 / 34%),
+    inset 0 -1px 0 rgb(164 221 207 / 24%),
+    0 0 68px -16px rgb(164 221 207 / 34%),
+    0 34px 74px -26px rgb(0 0 0 / 95%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-screen > .dxl-art {
+  box-shadow:
+    0 0 0 1px rgb(230 200 149 / 54%),
+    0 0 0 3px rgb(4 8 11 / 96%),
+    0 0 0 4px rgb(164 221 207 / 28%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-screen > .dxl-art::after {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 24%) 0, transparent 2px),
+    linear-gradient(124deg, rgb(255 255 255 / 11%) 0%, transparent 34%),
+    radial-gradient(ellipse 90% 70% at 50% 120%, rgb(4 10 14 / 72%), transparent 70%),
+    linear-gradient(0deg, #07101484, transparent 46%);
+}
+
+/* Section heads: a gold-to-teal optical beam under each title, and a lit title. */
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  :is(.library-hub-heading, .library-browser-heading, .inquiry-heading) {
+  border-bottom-color: rgb(164 221 207 / 30%);
+  background: linear-gradient(90deg, var(--room-gold), var(--room-teal) 48%, transparent) 0 100% /
+    min(320px, 56%) 2px no-repeat;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  :is(.library-hub-heading, .library-browser-heading, .inquiry-heading)
+  h2,
+html[data-family="library"] .library-screening-room #library-main .library-discovery > h2 {
+  color: #fff7ec;
+  text-shadow:
+    0 1px 0 rgb(3 7 11 / 90%),
+    0 0 24px rgb(230 200 149 / 22%);
+}
+
+/* The shelf overview & My Library cabinets: bevelled gold x cyan glass plaques. */
+html[data-family="library"] .library-screening-room #library-main .library-shelf-overview {
+  gap: 8px 12px;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-shelf-overview a {
+  gap: 12px;
+  padding: 6px 14px;
+  border: 1px solid rgb(164 221 207 / 46%);
+  border-left: 3px solid var(--room-gold);
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 8.5%) 0%, transparent 46%),
+    linear-gradient(180deg, rgb(24 42 44 / 94%), rgb(9 16 21 / 97%));
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 88%),
+    inset 0 1px 0 rgb(244 253 250 / 26%),
+    inset 0 -1px 0 rgb(230 200 149 / 18%),
+    0 10px 22px -12px rgb(0 0 0 / 84%);
+  color: #e8f7f2;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-shelf-overview a b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 8px;
+  border: 1px solid rgb(230 200 149 / 62%);
+  background:
+    linear-gradient(180deg, rgb(255 250 236 / 18%) 0%, transparent 50%),
+    linear-gradient(135deg, rgb(230 200 149 / 26%), rgb(164 221 207 / 14%) 65%, rgb(7 14 19 / 92%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 242 / 34%),
+    0 0 14px -4px rgb(230 200 149 / 34%);
+  color: #ffedc6;
+  font-family: "Oxanium", "Michroma", sans-serif;
+  font-weight: 700;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-hub-grid > .library-continue {
+  background:
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 8%) 0%, transparent 42%),
+    radial-gradient(ellipse 70% 55% at 88% 12%, rgb(164 221 207 / 15%), transparent 70%),
+    linear-gradient(145deg, #20393a, #0f1920 68%) !important;
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 90%),
+    inset 0 1px 0 rgb(244 254 251 / 28%),
+    inset 0 -1px 0 rgb(230 200 149 / 22%),
+    0 24px 50px -22px rgb(0 0 0 / 88%);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-continue
+  > .library-start-reading {
+  padding: 16px 18px;
+  border: 1px solid rgb(164 221 207 / 32%);
+  border-left: 3px solid var(--room-gold);
+  background:
+    linear-gradient(125deg, rgb(255 250 236 / 6%) 0%, transparent 48%),
+    linear-gradient(145deg, rgb(14 26 30 / 82%), rgb(7 13 18 / 92%));
+  box-shadow: inset 0 1px 0 rgb(244 253 250 / 16%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-hub-grid > .library-shelf {
+  border-color: rgb(230 200 149 / 48%);
+  background:
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(128deg, rgb(255 250 236 / 8%) 0%, transparent 44%),
+    radial-gradient(ellipse 70% 55% at 88% 12%, rgb(230 200 149 / 14%), transparent 70%),
+    linear-gradient(155deg, #2a2b23, #11171b 72%);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 90%),
+    inset 0 1px 0 rgb(255 250 236 / 28%),
+    inset 0 -1px 0 rgb(164 221 207 / 18%),
+    0 24px 50px -22px rgb(0 0 0 / 88%);
+}
+
+/* History and recent searches: matching bevelled glass cabinets. */
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-hub-grid
+  > :is(.library-history, .library-searches) {
+  padding: clamp(14px, 2vw, 24px);
+  border: 1px solid rgb(164 221 207 / 38%);
+  border-top: 2px solid rgb(164 221 207 / 70%);
+  background:
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 0 0 / 2px 16px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 2px 16px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 6.5%) 0%, transparent 44%),
+    linear-gradient(160deg, #192629, #0c1318 74%);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 88%),
+    inset 0 1px 0 rgb(244 253 250 / 22%),
+    inset 0 -1px 0 rgb(230 200 149 / 16%),
+    0 20px 44px -22px rgb(0 0 0 / 86%);
+}
+
+/* The three kind plates: sculpted specimen vitrines with bevelled count pills. */
+html[data-family="library"] .library-screening-room #library-main .library-index-meter > button {
+  --plate-accent: var(--room-teal);
+  border: 1px solid rgb(164 221 207 / 56%);
+  border-top: 2px solid var(--plate-accent);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    0 0 0 4px rgb(9 15 19 / 84%),
+    0 0 0 5px rgb(230 200 149 / 22%),
+    inset 0 1px 0 rgb(255 252 242 / 32%),
+    inset 0 -1px 0 rgb(164 221 207 / 26%),
+    0 26px 54px -22px rgb(0 0 0 / 90%);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button[data-kind="person"] {
+  --plate-accent: var(--room-gold);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button[data-kind="chapter"] {
+  --plate-accent: #f09b84;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-index-meter > button::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background:
+    linear-gradient(var(--plate-accent) 0 0) 10px 10px / 20px 2px no-repeat,
+    linear-gradient(var(--plate-accent) 0 0) 10px 10px / 2px 20px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) calc(100% - 10px) 10px / 20px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) calc(100% - 10px) 10px / 2px 20px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) calc(100% - 10px) calc(100% - 10px) / 20px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) calc(100% - 10px) calc(100% - 10px) / 2px 20px no-repeat,
+    linear-gradient(126deg, rgb(255 255 255 / 14%) 0%, transparent 34%);
+  pointer-events: none;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button
+  > :not(.dxl-art) {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button
+  > .library-kind-name {
+  font-weight: 750;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 88%),
+    0 0 22px rgb(0 0 0 / 68%);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button
+  > .library-kind-count {
+  justify-self: start;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-top: 4px;
+  padding: 3px 11px 3px 10px;
+  border: 1px solid rgb(230 200 149 / 56%);
+  border-left: 2px solid var(--plate-accent);
+  background:
+    linear-gradient(128deg, rgb(255 252 242 / 14%) 0%, transparent 48%),
+    linear-gradient(135deg, rgb(230 200 149 / 20%), rgb(164 221 207 / 14%) 58%, rgb(6 12 17 / 88%));
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 86%),
+    inset 0 1px 0 rgb(255 252 242 / 32%),
+    0 8px 18px -8px rgb(0 0 0 / 82%);
+  color: #e6f2ed;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button
+  > .library-kind-count
+  > b {
+  color: #ffebb8;
+  font-family: "Oxanium", "Michroma", sans-serif;
+  font-size: 1.28em;
+  font-weight: 700;
+  text-shadow: 0 0 16px rgb(230 200 149 / 48%);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button
+  > .library-kind-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgb(164 221 207 / 52%);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 14%) 0%, transparent 52%),
+    rgb(7 15 20 / 82%);
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 250 / 28%),
+    0 8px 18px -8px rgb(0 0 0 / 80%);
+  color: #dff8f0;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-index-meter
+  > button[aria-pressed="true"] {
+  border-color: #d6f8ee;
+  box-shadow:
+    0 0 0 1px rgb(164 221 207 / 52%),
+    0 0 0 4px rgb(9 15 19 / 88%),
+    0 0 0 5px rgb(164 221 207 / 40%),
+    inset 0 -3px var(--room-teal),
+    inset 0 1px 0 rgb(255 255 255 / 34%),
+    0 0 34px -6px rgb(164 221 207 / 52%),
+    0 24px 50px -20px rgb(0 0 0 / 90%);
+}
+
+/* The browse console, glowing search well, filter keys, and sculpted stat cabinet ("41件の資料"). */
+html[data-family="library"] .library-screening-room #library-main .library-browse-controls {
+  border: 1px solid rgb(164 221 207 / 48%);
+  border-top: 2px solid var(--room-gold);
+  background:
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 24px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 2px 24px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 24px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 2px 24px no-repeat,
+    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 42%),
+    radial-gradient(ellipse 74% 52% at 86% 6%, rgb(164 221 207 / 13%), transparent 68%),
+    radial-gradient(ellipse 56% 48% at 12% 94%, rgb(230 200 149 / 11%), transparent 70%),
+    linear-gradient(150deg, #1b2c30 0%, #0d161c 56%, #132127 100%);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    0 0 0 4px rgb(9 15 19 / 84%),
+    0 0 0 5px rgb(230 200 149 / 22%),
+    inset 0 1px 0 rgb(248 254 252 / 28%),
+    inset 0 -1px 0 rgb(230 200 149 / 20%),
+    0 28px 60px -24px rgb(0 0 0 / 90%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-search {
+  border: 1px solid rgb(164 221 207 / 74%);
+  background:
+    linear-gradient(90deg, var(--room-teal) 0%, var(--room-gold) 52%, transparent 92%) 0 0 / 100%
+      1.5px no-repeat,
+    linear-gradient(180deg, rgb(0 0 0 / 60%) 0%, transparent 18px),
+    linear-gradient(90deg, rgb(164 221 207 / 13%) 0%, rgb(230 200 149 / 7%) 54%, transparent 88%),
+    #040b11;
+  box-shadow:
+    0 0 0 1px rgb(2 6 10 / 92%),
+    0 0 0 4px rgb(164 221 207 / 9%),
+    0 0 26px -6px rgb(164 221 207 / 28%),
+    inset 0 4px 16px rgb(0 0 0 / 78%),
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 -1px 0 rgb(230 200 149 / 22%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-search > span:first-child {
+  color: var(--room-gold);
+  text-shadow: 0 0 12px rgb(230 200 149 / 52%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-search:focus-within {
+  border-color: #ecfff9;
+  box-shadow:
+    inset 0 4px 14px rgb(0 0 0 / 68%),
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 0 2px rgb(164 221 207 / 62%),
+    0 0 34px -2px rgb(164 221 207 / 44%),
+    0 0 62px -8px rgb(230 200 149 / 32%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-browse-submit {
+  border-color: #e6fcf5;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 45%) 0%, transparent 46%),
+    linear-gradient(135deg, #e8fdf6 0%, var(--room-teal) 54%, #7ec2b1 100%);
+  box-shadow:
+    0 0 0 1px rgb(3 8 12 / 90%),
+    inset 0 1px 0 rgb(255 255 255 / 88%),
+    inset 0 -1px 0 rgb(230 200 149 / 44%),
+    0 12px 28px -8px rgb(164 221 207 / 46%);
+  color: #051815;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  :is(.library-scope-row, .library-filter-row)
+  button {
+  border: 1px solid rgb(164 221 207 / 38%);
+  border-left: 2px solid rgb(230 200 149 / 56%);
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 46%),
+    linear-gradient(160deg, rgb(22 38 42 / 90%), rgb(9 16 21 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 250 / 18%),
+    0 8px 18px -12px rgb(0 0 0 / 80%);
+  color: #e8f5f0;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  :is(.library-scope-row, .library-filter-row)
+  button
+  > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border: 1px solid rgb(230 200 149 / 44%);
+  background: rgb(6 13 18 / 82%);
+  color: #ffe8b8;
+  font-family: "Oxanium", "Michroma", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  :is(.library-scope-row, .library-filter-row)
+  button[aria-pressed="true"] {
+  border-color: #f6e5be;
+  border-left: 3px solid var(--room-gold);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 55%) 0%, transparent 45%),
+    linear-gradient(128deg, #f7fdfb 0%, #cbe9df 52%, #ebd7b0 100%);
+  box-shadow:
+    0 0 0 1px rgb(3 8 12 / 88%),
+    inset 0 1px 0 #fff,
+    0 12px 26px -10px rgb(164 221 207 / 40%);
+  color: #091a19;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  :is(.library-scope-row, .library-filter-row)
+  button[aria-pressed="true"]
+  > span {
+  border-color: rgb(230 200 149 / 64%);
+  background: #0a1b1d;
+  color: #ffeab8;
+}
+
+/* Sculpted Gold x Cyan Bevelled Stat Plate ("41件の資料") & Shelf Headers. */
+html[data-family="library"] .library-screening-room #library-main .library-results-heading {
+  align-items: center;
+  border-bottom-color: rgb(164 221 207 / 32%);
+  background: linear-gradient(90deg, var(--room-gold), var(--room-teal) 52%, transparent) 0 100% /
+    min(300px, 52%) 2px no-repeat;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-results-heading > p {
+  padding: 8px 18px 8px 16px;
+  border: 1px solid rgb(230 200 149 / 58%);
+  border-left: 3px solid var(--room-gold);
+  background:
+    linear-gradient(var(--room-teal) 0 0) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(126deg, rgb(255 252 242 / 12%) 0%, transparent 48%),
+    linear-gradient(
+      135deg,
+      rgb(230 200 149 / 18%) 0%,
+      rgb(164 221 207 / 12%) 54%,
+      rgb(8 16 21 / 96%) 100%
+    );
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 90%),
+    inset 0 1px 0 rgb(255 252 242 / 34%),
+    inset 0 -1px 0 rgb(164 221 207 / 24%),
+    0 14px 30px -14px rgb(0 0 0 / 84%),
+    0 0 24px -8px rgb(230 200 149 / 28%);
+  color: #e4f2ed;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-results-heading
+  > p
+  > strong {
+  color: #fff2cc;
+  font-family: "Oxanium", "Michroma", sans-serif;
+  font-weight: 700;
+  text-shadow:
+    0 1px 0 rgb(3 8 12 / 92%),
+    0 0 20px rgb(230 200 149 / 46%),
+    0 0 10px rgb(164 221 207 / 28%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-shelf-title {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgb(164 221 207 / 28%);
+  background: linear-gradient(90deg, var(--room-teal), var(--room-gold) 48%, transparent) 0 100% /
+    min(240px, 46%) 1.5px no-repeat;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-shelf-title > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  padding: 2px 9px;
+  border: 1px solid rgb(230 200 149 / 54%);
+  background: linear-gradient(180deg, rgb(230 200 149 / 20%), rgb(8 16 21 / 92%));
+  box-shadow: inset 0 1px 0 rgb(255 252 242 / 26%);
+  color: #ffebb8;
+  font-family: "Oxanium", "Michroma", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Specimen Record Cards: double-matted portrait frame, bevelled glass shell & hover elevation. */
+html[data-family="library"] .library-screening-room #library-main .library-card {
+  border: 1px solid rgb(164 221 207 / 48%);
+  border-top: 2px solid color-mix(in srgb, var(--cast-tone, var(--room-teal)) 76%, var(--room-gold));
+  background:
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 18px 1.5px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 100% 100% / 1.5px 18px no-repeat,
+    linear-gradient(126deg, rgb(255 255 255 / 8%) 0%, transparent 40%),
+    radial-gradient(
+      ellipse 72% 54% at 92% 0%,
+      color-mix(in srgb, var(--cast-tone, var(--room-teal)) 13%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(145deg, #1b2c31 0%, #0c151b 54%, #132128 100%);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    inset 3px 0 0 color-mix(in srgb, var(--cast-tone, var(--room-teal)) 78%, #fff),
+    inset 0 1px 0 rgb(248 254 252 / 28%),
+    inset 0 -1px 0 rgb(230 200 149 / 20%),
+    0 22px 48px -22px rgb(0 0 0 / 90%);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-card[data-record-saved="true"] {
+  border-color: rgb(230 200 149 / 72%);
+  border-top-color: #ffe2a6;
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    inset 3px 0 0 var(--room-gold),
+    inset 0 1px 0 rgb(255 250 232 / 36%),
+    inset 0 -1px 0 rgb(164 221 207 / 22%),
+    0 0 28px -8px rgb(230 200 149 / 32%),
+    0 22px 48px -22px rgb(0 0 0 / 90%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-card > .dxl-art {
+  border: 1px solid color-mix(in srgb, var(--cast-tone, var(--room-teal)) 62%, #eefbf7);
+  box-shadow:
+    0 0 0 3px rgb(4 9 13 / 96%),
+    0 0 0 4px rgb(230 200 149 / 42%),
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 18px 34px -14px rgb(0 0 0 / 88%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-card-kind {
+  justify-self: start;
+  padding: 2px 9px;
+  border: 1px solid rgb(230 200 149 / 38%);
+  border-left: 2px solid color-mix(in srgb, var(--cast-tone, var(--room-gold)) 75%, var(--room-gold));
+  background: rgb(7 14 19 / 76%);
+  color: #f3dfc0;
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-card-actions > a {
+  padding: 0 14px;
+  border: 1px solid rgb(164 221 207 / 44%);
+  border-left: 2px solid var(--room-teal);
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 8%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(22 40 42 / 86%), rgb(9 17 22 / 94%));
+  box-shadow: inset 0 1px 0 rgb(244 253 250 / 22%);
+  color: #e4faf3;
+  text-decoration: none;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-card-actions
+  > button:not([aria-pressed="true"]) {
+  border: 1px solid rgb(230 200 149 / 40%);
+  background: linear-gradient(180deg, rgb(26 32 34 / 88%), rgb(10 16 20 / 94%));
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 16%);
+  color: #efe4cf;
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-card-actions
+  > button[aria-pressed="true"] {
+  border-color: #f5d896;
+  background:
+    linear-gradient(180deg, rgb(255 250 230 / 18%) 0%, transparent 48%),
+    linear-gradient(135deg, #4b3b20, #281f11 72%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 220 / 38%),
+    0 0 18px -6px rgb(230 200 149 / 44%);
+  color: #ffebb6;
+}
+
+/* Cast board & Rider specimen plaques. */
+html[data-family="library"] .library-screening-room #library-main .library-cast-board {
+  border-color: rgb(164 221 207 / 48%);
+  border-top: 2px solid var(--room-gold);
+  background:
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 26px 2px no-repeat,
+    linear-gradient(var(--room-gold) 0 0) 0 0 / 2px 26px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 26px 2px no-repeat,
+    linear-gradient(var(--room-teal) 0 0) 100% 100% / 2px 26px no-repeat,
+    radial-gradient(ellipse 72% 52% at 86% 0%, rgb(230 200 149 / 12%), transparent 68%),
+    var(--records-panel);
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 92%),
+    0 0 0 4px rgb(9 15 19 / 84%),
+    0 0 0 5px rgb(230 200 149 / 20%),
+    inset 0 1px 0 rgb(255 250 236 / 26%),
+    inset 0 -1px 0 rgb(164 221 207 / 18%),
+    0 28px 60px -24px rgb(0 0 0 / 90%);
+}
+
+html[data-family="library"]
+  .library-screening-room
+  #library-main
+  .library-cast-tile[data-cast-card] {
+  border-color: color-mix(in srgb, var(--cast-tone, #9deafa) 48%, rgb(164 221 207 / 32%));
+  box-shadow:
+    0 0 0 1px rgb(3 7 11 / 88%),
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    inset 0 -1px 0 color-mix(in srgb, var(--cast-tone, #9deafa) 24%, transparent),
+    0 16px 34px -18px rgb(0 0 0 / 84%);
+}
+
+html[data-family="library"] .library-screening-room #library-main .library-cast-art {
+  box-shadow:
+    0 0 0 2px rgb(4 9 14 / 92%),
+    0 0 0 3px color-mix(in srgb, var(--cast-tone, #9deafa) 32%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"]
+    .world.command-records.library-page.library-screening-room
+    .library-footer
+    a:hover {
+    border-color: #ffe7b8;
+    background: linear-gradient(145deg, rgb(42 62 60 / 95%), rgb(16 28 34 / 98%));
+    color: #fff;
+  }
+
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    .library-jump-links
+    > a:not(:first-child):hover {
+    border-color: var(--room-teal);
+    background: linear-gradient(180deg, rgb(36 66 64 / 95%), rgb(12 23 28 / 97%));
+    color: #fff;
+    text-decoration: none;
+  }
+
+  html[data-family="library"] .library-screening-room #library-main .library-shelf-overview a:hover {
+    border-color: var(--room-teal);
+    color: #fff;
+  }
+
+  html[data-family="library"] .library-screening-room #library-main .library-index-meter > button:hover {
+    border-color: #dffaf2;
+    box-shadow:
+      0 0 0 1px rgb(164 221 207 / 48%),
+      0 0 0 4px rgb(9 15 19 / 88%),
+      0 0 0 5px rgb(230 200 149 / 38%),
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      0 0 36px -6px rgb(164 221 207 / 44%),
+      0 30px 60px -22px rgb(0 0 0 / 92%);
+  }
+
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    :is(.library-scope-row, .library-filter-row)
+    button:not([aria-pressed="true"]):hover {
+    border-color: var(--room-teal);
+    background: linear-gradient(160deg, rgb(30 52 56 / 94%), rgb(12 22 28 / 96%));
+    color: #fff;
+  }
+
+  html[data-family="library"] .library-screening-room #library-main .library-card:hover {
+    border-color: #dffaf2;
+    box-shadow:
+      0 0 0 1px rgb(164 221 207 / 38%),
+      inset 3px 0 0 color-mix(in srgb, var(--cast-tone, var(--room-teal)) 88%, #fff),
+      inset 0 1px 0 rgb(255 255 255 / 36%),
+      inset 0 -1px 0 rgb(230 200 149 / 28%),
+      0 28px 56px -20px rgb(0 0 0 / 92%),
+      0 0 32px -6px color-mix(in srgb, var(--cast-tone, var(--room-teal)) 42%, transparent);
+  }
+
+  html[data-family="library"] .library-screening-room #library-main .library-card:hover > .dxl-art {
+    border-color: #f0fffb;
+    box-shadow:
+      0 0 0 3px rgb(4 9 13 / 96%),
+      0 0 0 4px rgb(230 200 149 / 68%),
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      0 20px 38px -12px rgb(0 0 0 / 90%);
+  }
+
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    .library-card-actions
+    > a:hover {
+    border-color: #dffaf2;
+    background: linear-gradient(180deg, rgb(32 58 60 / 94%), rgb(12 23 28 / 96%));
+    color: #fff;
+  }
+
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    .library-card[data-record-saved="true"]:hover {
+    border-color: #ffebc2;
+    box-shadow:
+      0 0 0 1px rgb(230 200 149 / 44%),
+      inset 3px 0 0 #ffe2a6,
+      inset 0 1px 0 rgb(255 252 238 / 44%),
+      0 0 34px -4px rgb(230 200 149 / 48%),
+      0 28px 56px -20px rgb(0 0 0 / 92%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-screening-room
+    #library-main
+    .library-index-meter
+    > button:hover {
+    transform: translateY(-4px);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-screening-room
+    #library-main
+    .library-index-meter
+    > button:hover
+    > .dxl-art
+    img {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-screening-room
+    #library-main
+    :is(
+      .library-jump-links > a,
+      .library-shelf-overview a,
+      .library-index-meter > button,
+      .library-card-actions > a
+    ) {
+    transition:
+      border-color 200ms ease,
+      background-color 200ms ease,
+      box-shadow 220ms ease,
+      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html:not([data-world-effects="economy"])[data-family="library"]
+    .library-screening-room
+    #library-main
+    .library-index-meter
+    > button
+    > .dxl-art
+    img {
+    transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="library"]
+    .world.command-records.library-page.library-screening-room
+    :is(.library-topbar-actions > span, .library-footer, .library-footer a),
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    :is(
+      .library-jump-links > a,
+      .library-shelf-overview a,
+      .library-shelf-overview a b,
+      .library-continue > .library-start-reading,
+      .library-hub-grid > .library-history,
+      .library-hub-grid > .library-searches,
+      .library-index-meter > button > .library-kind-count,
+      .library-index-meter > button > .library-kind-arrow,
+      .library-results-heading > p,
+      .library-shelf-title > span,
+      .library-card-kind,
+      .library-card-actions > a,
+      .library-card-actions > button,
+      .library-cast-board,
+      .library-browse-submit
+    ) {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    :is(
+      .library-hub-heading,
+      .library-browser-heading,
+      .inquiry-heading,
+      .library-results-heading,
+      .library-shelf-title
+    ) {
+    background: none;
+  }
+
+  html[data-family="library"] .library-screening-room #library-main .library-index-meter > button::before {
+    display: none;
+  }
+
+  html[data-family="library"]
+    .library-screening-room
+    #library-main
+    :is(
+      .library-intro h1,
+      h2,
+      .library-kind-name,
+      .library-kind-count > b,
+      .library-results-heading > p > strong
+    ) {
+    text-shadow: none;
+  }
+}

@@ -76,8 +76,10 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 }
 .rx-call-ground {
   background:
-    radial-gradient(ellipse at 10% 50%, rgb(50 142 184 / 16%), transparent 48%),
-    radial-gradient(ellipse at 90% 50%, rgb(171 49 123 / 13%), transparent 48%), #02050b;
+    radial-gradient(ellipse 48% 54% at 50% 48%, rgb(182 163 255 / 14%), rgb(242 216 150 / 8%) 48%, transparent 74%),
+    radial-gradient(ellipse at 12% 50%, rgb(62 168 214 / 24%), transparent 52%),
+    radial-gradient(ellipse at 88% 50%, rgb(196 58 144 / 20%), transparent 52%),
+    #02050b;
 }
 .rx-call-frame {
   inset: max(24px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
@@ -98,16 +100,19 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgb(121 232 255 / 22%) 14%,
-    var(--rx-call-cyan) 38%,
+    rgb(121 232 255 / 28%) 12%,
+    var(--rx-call-cyan) 34%,
+    #f2d896 46%,
     #ffffff 50%,
-    var(--rx-call-pink) 62%,
-    rgb(255 114 218 / 22%) 86%,
+    #b6a3ff 54%,
+    var(--rx-call-pink) 66%,
+    rgb(255 114 218 / 28%) 88%,
     transparent 100%
   );
   box-shadow:
-    0 0 8px 1px rgb(121 232 255 / 45%),
-    0 0 22px 2px rgb(255 114 218 / 28%);
+    0 0 10px 1px rgb(121 232 255 / 55%),
+    0 0 26px 2px rgb(255 114 218 / 36%),
+    0 0 40px 2px rgb(242 216 150 / 24%);
 }
 .rx-call-axis-vertical {
   top: 0;
@@ -117,27 +122,30 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgb(121 232 255 / 20%) 16%,
-    var(--rx-call-cyan) 40%,
+    rgb(121 232 255 / 26%) 14%,
+    var(--rx-call-cyan) 38%,
+    #f2d896 47%,
     #ffffff 50%,
-    var(--rx-call-pink) 60%,
-    rgb(255 114 218 / 20%) 84%,
+    var(--rx-call-pink) 62%,
+    rgb(255 114 218 / 26%) 86%,
     transparent 100%
   );
-  box-shadow: 0 0 8px 1px rgb(121 232 255 / 35%);
+  box-shadow:
+    0 0 10px 1px rgb(121 232 255 / 45%),
+    0 0 24px 2px rgb(182 163 255 / 28%);
 }
 .rx-call-brackets {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(var(--rx-call-cyan) 0 0) 0 0 / 24px 1px,
-    linear-gradient(var(--rx-call-cyan) 0 0) 0 0 / 1px 24px,
-    linear-gradient(var(--rx-call-pink) 0 0) 100% 0 / 24px 1px,
-    linear-gradient(var(--rx-call-pink) 0 0) 100% 0 / 1px 24px,
-    linear-gradient(var(--rx-call-cyan) 0 0) 0 100% / 24px 1px,
-    linear-gradient(var(--rx-call-cyan) 0 0) 0 100% / 1px 24px,
-    linear-gradient(var(--rx-call-pink) 0 0) 100% 100% / 24px 1px,
-    linear-gradient(var(--rx-call-pink) 0 0) 100% 100% / 1px 24px;
+    linear-gradient(var(--rx-call-cyan) 0 0) 0 0 / 26px 1.5px,
+    linear-gradient(var(--rx-call-cyan) 0 0) 0 0 / 1.5px 26px,
+    linear-gradient(#f2d896 0 0) 100% 0 / 26px 1.5px,
+    linear-gradient(#f2d896 0 0) 100% 0 / 1.5px 26px,
+    linear-gradient(#f2d896 0 0) 0 100% / 26px 1.5px,
+    linear-gradient(#f2d896 0 0) 0 100% / 1.5px 26px,
+    linear-gradient(var(--rx-call-pink) 0 0) 100% 100% / 26px 1.5px,
+    linear-gradient(var(--rx-call-pink) 0 0) 100% 100% / 1.5px 26px;
   background-repeat: no-repeat;
 }
 .rx-call-caption {
@@ -149,11 +157,12 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   display: flex;
   justify-content: space-between;
   gap: 18px;
-  color: #b0c9d6;
+  color: #c2dce9;
   font-family: "Oxanium", "Helvetica Neue", sans-serif;
   font-size: clamp(12px, 0.84vw, 13px);
   font-weight: 500;
   letter-spacing: 0.2em;
+  text-shadow: 0 0 14px rgb(121 232 255 / 28%);
 }
 .rx-call-words {
   display: grid;
@@ -177,8 +186,12 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   line-height: 1.18;
   letter-spacing: -0.045em;
   text-shadow:
-    -1px 0 rgb(121 232 255 / 55%),
-    1px 0 rgb(255 130 213 / 48%);
+    -1.5px 0 rgb(121 232 255 / 68%),
+    1.5px 0 rgb(255 130 213 / 58%),
+    0 2px 0 rgb(2 6 14 / 90%),
+    0 14px 36px rgb(0 0 0 / 82%),
+    0 0 26px rgb(121 232 255 / 32%),
+    0 0 54px rgb(182 163 255 / 22%);
   transform-origin: center;
 }
 .rx-call-beat > span {
@@ -206,7 +219,11 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 }
 /* The chant's answer: DEUS！ in gold after each SA-GA！. */
 .rx-call-chant .rx-call-answer {
-  color: #f2d896;
+  color: #f6dfa4;
+  text-shadow:
+    0 0 20px rgb(242 216 150 / 64%),
+    0 0 42px rgb(242 216 150 / 34%),
+    0 4px 16px rgb(0 0 0 / 80%);
 }
 .rx-call-chant > span:nth-child(1) .rx-call-answer {
   --rx-call-answer-n: 0;
@@ -221,26 +238,33 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   --rx-call-answer-n: 3;
 }
 .rx-call-final {
-  color: #f2fbff;
+  color: #f6fcff;
 }
 .rx-call-final > span:nth-child(2) {
   color: var(--rx-call-accent);
   font-size: 0.8em;
   letter-spacing: 0.12em;
+  text-shadow:
+    0 0 22px color-mix(in srgb, var(--rx-call-accent) 62%, transparent),
+    0 0 48px rgb(242 216 150 / 32%),
+    0 6px 20px rgb(0 0 0 / 82%);
 }
 .rx-call-meter {
   position: absolute;
   bottom: max(40px, calc(env(safe-area-inset-bottom) + 20px));
   left: 25%;
   width: 50%;
-  height: 1px;
-  background: rgb(168 202 220 / 13%);
+  height: 1.5px;
+  background: rgb(168 202 220 / 20%);
 }
 .rx-call-meter > i {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--rx-call-cyan), #c1baff 56%, var(--rx-call-pink));
+  background: linear-gradient(90deg, var(--rx-call-cyan), #c1baff 42%, var(--rx-call-pink) 76%, #f2d896);
+  box-shadow:
+    0 0 12px rgb(121 232 255 / 56%),
+    0 0 24px rgb(255 130 213 / 36%);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -249,7 +273,7 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
   align-items: center;
   gap: 1.25em;
   margin-top: 1.4em;
-  color: #b5c5d0;
+  color: #c2d4df;
   font-family: "Oxanium", "Helvetica Neue", sans-serif;
   font-size: clamp(12px, 1vw, 14px);
   font-weight: 500;
@@ -259,10 +283,11 @@ html body:has(.rx-call-sequence[data-mode="stage"]) .zeus-button {
 }
 .rx-call-operating-stage b {
   padding-left: 1em;
-  border-left: 1px solid var(--rx-call-accent);
+  border-left: 1.5px solid var(--rx-call-accent);
   color: var(--rx-call-accent);
   font-size: 1.5em;
   font-weight: 600;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--rx-call-accent) 56%, transparent);
 }
 
 /* Adjacent beats replace each other on the same frame: no empty fade between
@@ -2755,13 +2780,12 @@ html[data-world-effects="economy"] .rx-call-sequence[data-phase="revealing"] {
   left: var(--rx-suit-cx);
   width: calc(var(--rx-suit-h) * 0.95);
   height: calc(var(--rx-suit-h) * 1.12);
-  opacity: 0.85;
+  opacity: 0.88;
   background:
-    radial-gradient(ellipse 34% 40% at 36% 32%, rgb(121 232 255 / 17%), transparent 70%),
-    radial-gradient(ellipse 34% 40% at 64% 32%, rgb(255 130 213 / 15%), transparent 70%),
-    radial-gradient(ellipse 50% 56% at 50% 44%, rgb(44 70 110 / 34%), transparent 72%),
-    repeating-linear-gradient(90deg, rgb(121 232 255 / 3%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(0deg, rgb(121 232 255 / 3%) 0 1px, transparent 1px 28px);
+    radial-gradient(ellipse 34% 40% at 36% 32%, rgb(121 232 255 / 22%), transparent 70%),
+    radial-gradient(ellipse 34% 40% at 64% 32%, rgb(255 130 213 / 18%), transparent 70%),
+    radial-gradient(ellipse 38% 36% at 50% 28%, rgb(242 216 150 / 16%), transparent 68%),
+    radial-gradient(ellipse 52% 58% at 50% 44%, rgb(48 78 122 / 38%), transparent 72%);
   -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 100%);
   mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 40%, transparent 100%);
   translate: -50% -50%;

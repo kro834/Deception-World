@@ -155,37 +155,37 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-mov
   background-image:
     linear-gradient(
       90deg,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 88%),
+      rgb(var(--mc-accent-rgb, 121 232 255) / 96%),
       #ffffff 28%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 76%) 54%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 34%) 82%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 86%) 56%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 44%) 84%,
       transparent 98%
     ),
     radial-gradient(
-      ellipse 84% 64% at 14% 0%,
-      rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
-      transparent 68%
-    ),
-    radial-gradient(
-      ellipse 64% 50% at 88% 100%,
-      rgb(var(--mc-lit-rgb, 242 216 150) / 14%),
+      ellipse 86% 68% at 14% 0%,
+      rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
       transparent 70%
     ),
-    linear-gradient(180deg, rgb(255 255 255 / 12%), transparent 42%, rgb(0 0 0 / 34%));
+    radial-gradient(
+      ellipse 68% 54% at 88% 100%,
+      rgb(var(--mc-lit-rgb, 242 216 150) / 18%),
+      transparent 72%
+    ),
+    linear-gradient(180deg, rgb(255 255 255 / 15%), transparent 42%, rgb(0 0 0 / 38%));
   background-repeat: no-repeat;
   background-size:
-    100% 1.5px,
+    100% 2px,
     100% 100%,
     100% 100%,
     100% 100%;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 26%),
-    inset 0 -1.5px 0 rgb(0 0 0 / 82%),
-    inset 1px 0 0 rgb(var(--mc-accent-rgb, 121 232 255) / 22%),
-    inset -1px 0 0 rgb(var(--mc-lit-rgb, 242 216 150) / 16%),
-    0 0 0 0.5px rgb(0 0 0 / 80%),
-    0 20px 44px -10px rgb(0 0 0 / 84%),
-    0 0 28px -8px rgb(var(--mc-accent-rgb, 121 232 255) / 24%);
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    inset 0 -1.5px 0 rgb(0 0 0 / 84%),
+    inset 1px 0 0 rgb(var(--mc-accent-rgb, 121 232 255) / 28%),
+    inset -1px 0 0 rgb(var(--mc-lit-rgb, 242 216 150) / 22%),
+    0 0 0 0.5px rgb(0 0 0 / 82%),
+    0 22px 48px -10px rgb(0 0 0 / 88%),
+    0 0 32px -6px rgb(var(--mc-accent-rgb, 121 232 255) / 32%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-page .rzn-movie .rzn-movie-pill {

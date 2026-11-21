@@ -3541,19 +3541,20 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #story
     > .story-layout {
-    border: 1px solid rgb(217 188 128 / 50%);
-    border-top: 3px solid #e4c687;
+    border: 1px solid rgb(228 198 135 / 66%);
+    border-top: 3px solid #eed092;
     border-radius: 4px;
     background:
-      radial-gradient(ellipse 68% 52% at 10% 0%, rgb(255 250 238 / 60%), transparent 68%),
-      radial-gradient(ellipse 56% 52% at 96% 100%, rgb(169 196 255 / 20%), transparent 70%),
-      linear-gradient(90deg, #d9bc80, #a9c4ff 48%, transparent 82%) 0 100% / 100% 1px no-repeat,
-      linear-gradient(155deg, #f2ede3 0%, #e7e2d6 55%, #ded6c5 100%);
+      radial-gradient(ellipse 72% 54% at 10% 0%, rgb(255 252 242 / 72%), transparent 66%),
+      radial-gradient(ellipse 58% 54% at 96% 100%, rgb(169 196 255 / 26%), transparent 68%),
+      linear-gradient(90deg, #e4c687, #a9c4ff 52%, transparent 86%) 0 100% / 100% 1px no-repeat,
+      linear-gradient(155deg, #f5f0e6 0%, #eae4d8 55%, #e1d9c8 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 78%),
-      inset 0 0 0 1px rgb(217 188 128 / 28%),
-      0 32px 72px -18px rgb(2 5 18 / 82%),
-      0 0 46px -16px rgb(169 196 255 / 26%);
+      inset 0 1px 0 rgb(255 255 255 / 88%),
+      inset 0 0 0 1px rgb(217 188 128 / 38%),
+      0 40px 88px -18px rgb(2 5 18 / 88%),
+      0 0 64px -16px rgb(169 196 255 / 38%),
+      0 0 28px -8px rgb(228 198 135 / 30%);
   }
 
   html[data-family="world"]:root
@@ -3563,17 +3564,36 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > .story-layout
     > .story-copy
     > .story-lead-sequel {
-    padding: 8px 14px;
-    border: 1px solid rgb(157 122 54 / 32%);
-    border-left: 3px solid #9d7a36;
+    padding: 10px 16px;
+    border: 1px solid rgb(157 122 54 / 42%);
+    border-left: 3px solid #a88236;
     border-radius: 0 3px 3px 0;
-    background: linear-gradient(90deg, rgb(217 188 128 / 26%), rgb(217 188 128 / 6%));
+    background: linear-gradient(90deg, rgb(217 188 128 / 34%), rgb(217 188 128 / 8%));
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 55%),
-      0 6px 16px -6px rgb(48 40 24 / 16%);
+      inset 0 1px 0 rgb(255 255 255 / 68%),
+      0 8px 20px -6px rgb(48 40 24 / 22%);
   }
 
-  /* 六詠 archive: stage floor bounce, dogs heading & quiet optical placeholder */
+  /* 六詠 archive: restore illuminated violet/rose sanctuary above Astra's flat ground */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #story
+    > #manager-archive {
+    border: 1px solid rgb(200 163 255 / 44%);
+    border-top: 2px solid rgb(237 188 124 / 76%);
+    border-radius: 4px;
+    background:
+      radial-gradient(ellipse 76% 62% at 0% 0%, rgb(148 102 242 / 28%), transparent 64%),
+      radial-gradient(ellipse 68% 62% at 100% 100%, rgb(255 106 140 / 20%), transparent 64%),
+      linear-gradient(180deg, #1b0d28 0%, #100718 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(240 227 255 / 30%),
+      inset 0 0 42px rgb(200 163 255 / 10%),
+      0 36px 76px -16px rgb(0 0 0 / 88%),
+      0 0 54px -16px rgb(200 163 255 / 26%);
+  }
+
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition.mirage-edition
@@ -3582,33 +3602,35 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     .manager-archive-panel.is-dogs
     > h4 {
     display: inline-block;
-    padding: 6px 14px;
-    border: 1px solid rgb(237 102 126 / 34%);
-    border-left: 3px solid #ed667e;
+    padding: 7px 16px;
+    border: 1px solid rgb(237 102 126 / 46%);
+    border-left: 3px solid #ff6a8c;
     border-radius: 0 3px 3px 0;
-    background: linear-gradient(90deg, rgb(237 102 126 / 14%), transparent 84%);
+    background: linear-gradient(90deg, rgb(237 102 126 / 22%), transparent 86%);
     box-shadow:
-      inset 0 1px 0 rgb(255 220 228 / 16%),
-      0 8px 20px -8px rgb(0 0 0 / 56%);
+      inset 0 1px 0 rgb(255 224 232 / 26%),
+      0 10px 24px -8px rgb(0 0 0 / 64%),
+      0 0 20px -8px rgb(255 106 140 / 26%);
   }
+
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #story
     > #manager-archive
     .manager-slot-grid::after {
-    height: 26px;
+    height: 30px;
     background:
       linear-gradient(
           90deg,
           transparent 2%,
-          rgb(200 163 255 / 74%) 26%,
-          rgb(255 127 164 / 72%) 56%,
-          rgb(240 207 134 / 64%) 82%,
+          rgb(200 163 255 / 86%) 26%,
+          rgb(255 127 164 / 82%) 56%,
+          rgb(240 207 134 / 76%) 82%,
           transparent 98%
         )
         50% 0 / 100% 1px no-repeat,
-      radial-gradient(56% 100% at 50% 0, rgb(200 163 255 / 28%), transparent 82%);
+      radial-gradient(60% 100% at 50% 0, rgb(200 163 255 / 36%), transparent 82%);
   }
 
   html[data-family="world"]:root
@@ -3618,7 +3640,7 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #manager-archive
     .manager-slot-grid
     > .signal::after {
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 26%);
   }
 
   html[data-family="world"]:root
@@ -3629,8 +3651,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     .manager-slot-grid
     > .archive-placeholder {
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 12%),
-      inset 0 0 28px rgb(var(--sw-light-rgb) / 8%);
+      inset 0 1px 0 rgb(255 255 255 / 18%),
+      inset 0 0 34px rgb(var(--sw-light-rgb) / 14%),
+      0 14px 30px -10px rgb(0 0 0 / 64%);
   }
 
   /* WORLD COLUMN: elevated dusk console & tab lens specular */
@@ -3639,14 +3662,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #story
     > .world-column {
-    border: 1px solid rgb(169 196 255 / 38%);
-    border-top: 2px solid rgb(240 207 134 / 72%);
+    border: 1px solid rgb(169 196 255 / 48%);
+    border-top: 2px solid rgb(240 207 134 / 84%);
     border-radius: 4px;
     box-shadow:
-      inset 0 1px 0 rgb(224 233 255 / 28%),
-      inset 0 0 36px rgb(169 196 255 / 7%),
-      0 34px 72px -16px rgb(0 0 0 / 86%),
-      0 0 44px -16px rgb(255 79 195 / 20%);
+      inset 0 1px 0 rgb(232 240 255 / 38%),
+      inset 0 0 44px rgb(169 196 255 / 12%),
+      0 38px 82px -16px rgb(0 0 0 / 90%),
+      0 0 56px -14px rgb(255 79 195 / 28%);
   }
 
   html[data-family="world"]:root
@@ -3656,11 +3679,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > .world-column
     .world-column-index
     > .world-column-tabs.liquid-swipe-tabs {
-    border-color: rgb(169 196 255 / 36%) !important;
+    border-color: rgb(169 196 255 / 46%) !important;
     border-radius: 3px !important;
     box-shadow:
       inset 0 2px 8px rgb(0 0 0 / 54%),
-      0 8px 20px -6px rgb(0 0 0 / 60%) !important;
+      0 10px 24px -6px rgb(0 0 0 / 66%) !important;
   }
 
   html[data-family="world"]:root
@@ -3673,14 +3696,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     .liquid-selection-surface {
     background:
       linear-gradient(var(--sw-gold) 0 0) 0 100% / 100% 2px no-repeat,
-      linear-gradient(180deg, rgb(201 171 255 / 24%), rgb(169 196 255 / 8%)) !important;
+      linear-gradient(180deg, rgb(201 171 255 / 32%), rgb(169 196 255 / 12%)) !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 30%),
-      inset 0 0 0 1px rgb(201 171 255 / 46%),
-      0 0 18px -4px rgb(169 196 255 / 38%) !important;
+      inset 0 1px 0 rgb(255 255 255 / 42%),
+      inset 0 0 0 1px rgb(201 171 255 / 56%),
+      0 0 24px -4px rgb(169 196 255 / 48%) !important;
   }
 
-  /* 02 RIDERS: stage floor tone seam & copy rule glow */
+  /* 02 RIDERS: lit steel hangar console & rider tone vitrine */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition.mirage-edition
@@ -3688,23 +3711,47 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > .section-title
     > p {
     padding: 6px 0 6px 18px;
-    border-left: 2px solid rgb(224 234 246 / 46%);
+    border-left: 2px solid rgb(224 234 246 / 58%);
   }
 
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #riders
-    .rider-detail::before {
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 4%,
-      color-mix(in srgb, var(--rider-tone, #cfd8e3) 88%, #ffffff) 40%,
-      color-mix(in srgb, var(--rider-tone, #cfd8e3) 44%, transparent) 72%,
-      transparent 96%
-    );
-    box-shadow: 0 0 18px color-mix(in srgb, var(--rider-tone, #cfd8e3) 50%, transparent);
+    > .rider-console {
+    border: 1px solid rgb(207 216 227 / 44%);
+    border-top: 2px solid rgb(228 198 135 / 72%);
+    border-radius: 4px;
+    background:
+      radial-gradient(ellipse 66% 48% at 76% 0%, rgb(224 234 246 / 18%), transparent 66%),
+      radial-gradient(ellipse 54% 40% at 6% 100%, rgb(255 95 200 / 12%), transparent 70%),
+      linear-gradient(176deg, #212730 0%, #12161d 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(245 248 252 / 30%),
+      inset 0 0 36px rgb(207 216 227 / 8%),
+      0 38px 80px -16px rgb(0 0 0 / 88%),
+      0 0 52px -18px rgb(255 95 200 / 24%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #riders
+    .rider-detail {
+    border: 1px solid color-mix(in srgb, var(--rider-tone, #cfd8e3) 42%, rgb(217 188 128 / 36%));
+    border-radius: 4px;
+    background:
+      radial-gradient(
+        ellipse 64% 48% at 100% 0%,
+        color-mix(in srgb, var(--rider-tone, #cfd8e3) 14%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(ellipse 52% 40% at 0% 100%, rgb(217 188 128 / 8%), transparent 70%),
+      linear-gradient(180deg, #101620, #080c12);
+    box-shadow:
+      inset 0 1px 0 rgb(245 248 252 / 24%),
+      inset 0 0 28px color-mix(in srgb, var(--rider-tone, #cfd8e3) 8%, transparent),
+      0 24px 52px -12px rgb(0 0 0 / 84%);
   }
 
   /* 03 RECORDS: sepia archive bay, contact frames & active card framing */
@@ -3713,19 +3760,19 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #records
     > .episode-archive {
-    border: 1px solid rgb(239 185 111 / 38%);
-    border-top: 2px solid rgb(255 212 150 / 74%);
+    border: 1px solid rgb(239 185 111 / 48%);
+    border-top: 2px solid rgb(255 222 164 / 84%);
     border-radius: 4px;
     background:
       var(--sw-ticks),
-      radial-gradient(ellipse 68% 36% at 50% 0, rgb(255 196 112 / 18%), transparent 72%),
-      radial-gradient(ellipse 52% 28% at 96% 100%, rgb(233 140 94 / 10%), transparent 72%),
-      linear-gradient(180deg, #1b1108, #0c0804);
+      radial-gradient(ellipse 72% 40% at 50% 0, rgb(255 196 112 / 26%), transparent 70%),
+      radial-gradient(ellipse 56% 32% at 96% 100%, rgb(233 140 94 / 16%), transparent 70%),
+      linear-gradient(180deg, #1f1309, #0c0804);
     box-shadow:
-      inset 0 1px 0 rgb(255 232 192 / 28%),
-      inset 0 0 42px rgb(239 185 111 / 6%),
-      0 36px 76px -16px rgb(0 0 0 / 88%),
-      0 0 48px -18px rgb(239 185 111 / 22%);
+      inset 0 1px 0 rgb(255 236 200 / 36%),
+      inset 0 0 48px rgb(239 185 111 / 10%),
+      0 40px 84px -16px rgb(0 0 0 / 90%),
+      0 0 58px -16px rgb(239 185 111 / 32%);
   }
 
   html[data-family="world"]:root
@@ -3734,14 +3781,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #records
     .episode-controls
     > button {
-    border: 1px solid rgb(239 185 111 / 48%) !important;
+    border: 1px solid rgb(239 185 111 / 58%) !important;
     border-radius: 3px !important;
     background:
-      linear-gradient(180deg, rgb(255 227 184 / 15%), transparent 56%),
-      #160e07 !important;
+      linear-gradient(180deg, rgb(255 227 184 / 22%), transparent 56%),
+      #191008 !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 240 212 / 28%),
-      0 8px 18px -4px rgb(0 0 0 / 60%) !important;
+      inset 0 1px 0 rgb(255 244 220 / 38%),
+      0 10px 22px -4px rgb(0 0 0 / 68%) !important;
   }
 
   html[data-family="world"]:root
@@ -3750,8 +3797,8 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #records
     .episode-grid {
     box-shadow:
-      inset 0 16px 32px -14px rgb(0 0 0 / 86%),
-      inset 0 -16px 32px -14px rgb(0 0 0 / 86%);
+      inset 0 16px 32px -14px rgb(0 0 0 / 88%),
+      inset 0 -16px 32px -14px rgb(0 0 0 / 88%);
   }
 
   html[data-family="world"]:root
@@ -3759,12 +3806,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #records
     .episode-card-surface {
-    border: 1px solid rgb(239 185 111 / 32%);
+    border: 1px solid rgb(239 185 111 / 42%);
     border-radius: 4px;
-    background: #0d0804;
+    background:
+      linear-gradient(160deg, rgb(239 185 111 / 10%), transparent 46%),
+      #0f0904;
     box-shadow:
-      inset 0 1px 0 rgb(255 227 184 / 18%),
-      0 16px 36px -10px rgb(0 0 0 / 80%);
+      inset 0 1px 0 rgb(255 232 194 / 26%),
+      0 18px 40px -10px rgb(0 0 0 / 84%);
   }
 
   html[data-family="world"]:root
@@ -3773,13 +3822,13 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #records
     .episode-card.is-active
     .episode-card-surface {
-    border-color: rgb(255 227 184 / 84%);
+    border-color: rgb(255 234 196 / 92%);
     box-shadow:
-      inset 0 1px 0 rgb(255 246 226 / 50%),
-      inset 0 0 0 1px rgb(239 185 111 / 44%),
-      0 0 0 1px rgb(16 10 5 / 92%),
-      0 24px 54px -10px rgb(0 0 0 / 90%),
-      0 0 38px -6px rgb(239 185 111 / 40%);
+      inset 0 1px 0 rgb(255 250 236 / 62%),
+      inset 0 0 0 1px rgb(239 185 111 / 54%),
+      0 0 0 1px rgb(16 10 5 / 94%),
+      0 26px 58px -10px rgb(0 0 0 / 92%),
+      0 0 46px -4px rgb(239 185 111 / 52%);
   }
 
   html[data-family="world"]:root
@@ -3791,9 +3840,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > .episode-card-surface
     > .episode-card-copy {
     background:
-      linear-gradient(90deg, #ffe3b8, rgb(239 185 111 / 38%) 64%, transparent) 0 0 / 100% 1px no-repeat,
-      radial-gradient(ellipse 80% 90% at 50% 0%, rgb(255 196 112 / 14%), transparent 70%),
-      linear-gradient(180deg, #281a0b, #120b05);
+      linear-gradient(90deg, #ffe8c2, rgb(239 185 111 / 50%) 64%, transparent) 0 0 / 100% 1px no-repeat,
+      radial-gradient(ellipse 84% 92% at 50% 0%, rgb(255 196 112 / 22%), transparent 70%),
+      linear-gradient(180deg, #2d1d0c, #140c05);
   }
 
   html[data-family="world"]:root
@@ -3802,10 +3851,10 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #records
     .episode-thumbnail
     > span {
-    border-color: rgb(255 227 184 / 62%);
+    border-color: rgb(255 227 184 / 72%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 26%),
-      0 6px 14px rgb(0 0 0 / 68%);
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      0 8px 16px rgb(0 0 0 / 74%);
   }
 
   html[data-family="world"]:root
@@ -3813,12 +3862,70 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #records
     .episode-pickup-plus {
-    border: 1px solid rgb(255 227 184 / 74%) !important;
+    border: 1px solid rgb(255 232 192 / 84%) !important;
     border-radius: 3px !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 244 220 / 34%),
-      0 8px 20px rgb(0 0 0 / 78%),
-      0 0 18px -2px rgb(239 185 111 / 42%) !important;
+      inset 0 1px 0 rgb(255 248 228 / 46%),
+      0 10px 24px rgb(0 0 0 / 82%),
+      0 0 24px -2px rgb(239 185 111 / 52%) !important;
+  }
+
+  /* 04 CAST ROSTER: lift obsidian emerald cards above Astra flat dark ground */
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #cast-roster
+    .wa-directory-controls
+    button {
+    border: 1px solid rgb(109 223 186 / 38%);
+    border-radius: 3px;
+    background: linear-gradient(180deg, rgb(109 223 186 / 12%), rgb(6 14 12 / 78%));
+    box-shadow:
+      inset 0 1px 0 rgb(198 246 229 / 20%),
+      0 8px 18px -6px rgb(0 0 0 / 60%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #cast-roster
+    .wa-directory-controls
+    button[aria-pressed="true"] {
+    border-color: #eed092;
+    background: linear-gradient(180deg, #ecd092, #cfa962);
+    color: #10171b;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 232 / 64%),
+      0 10px 24px -4px rgb(0 0 0 / 68%),
+      0 0 22px -4px rgb(217 188 128 / 44%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #cast-roster
+    .wa-person {
+    border: 1px solid rgb(109 223 186 / 36%);
+    border-top: 2px solid rgb(217 188 128 / 68%);
+    border-radius: 4px;
+    background:
+      radial-gradient(ellipse 68% 44% at 100% 0%, rgb(109 223 186 / 12%), transparent 68%),
+      linear-gradient(180deg, #101e1b 0%, #091114 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(198 246 229 / 24%),
+      inset 0 0 24px rgb(109 223 186 / 6%),
+      0 22px 48px -12px rgb(0 0 0 / 82%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #cast-roster
+    .wa-person
+    .wa-open {
+    border-top: 1px solid rgb(109 223 186 / 42%);
+    background: linear-gradient(180deg, rgb(109 223 186 / 14%), rgb(8 20 17 / 84%));
+    box-shadow: inset 0 1px 0 rgb(198 246 229 / 24%);
   }
 
   /* 04-06 ANNEX: contents strip, world files, episode notes, glossary, quotes */
@@ -3827,13 +3934,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > .wa-contents
     > .wa-contents-inner {
-    border: 1px solid rgb(109 223 186 / 36%);
-    border-top: 2px solid rgb(109 223 186 / 70%);
+    border: 1px solid rgb(109 223 186 / 48%);
+    border-top: 2px solid rgb(109 223 186 / 84%);
     border-radius: 4px;
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 28%),
-      inset 0 0 36px rgb(109 223 186 / 6%),
-      0 28px 60px -16px rgb(0 0 0 / 84%);
+      inset 0 1px 0 rgb(198 246 229 / 36%),
+      inset 0 0 42px rgb(109 223 186 / 10%),
+      0 32px 68px -16px rgb(0 0 0 / 88%),
+      0 0 44px -16px rgb(109 223 186 / 24%);
   }
 
   html[data-family="world"]:root
@@ -3842,14 +3950,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > .wa-contents
     ol
     a {
-    border: 1px solid rgb(109 223 186 / 36%);
+    border: 1px solid rgb(109 223 186 / 48%);
     border-radius: 4px;
     background:
-      linear-gradient(var(--sw-gold) 0 0) 0 100% / 28px 2px no-repeat,
-      linear-gradient(155deg, rgb(109 223 186 / 12%), rgb(4 10 8 / 68%));
+      linear-gradient(var(--sw-gold) 0 0) 0 100% / 32px 2px no-repeat,
+      linear-gradient(155deg, rgb(109 223 186 / 18%), rgb(4 10 8 / 76%));
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 24%),
-      0 10px 24px -8px rgb(0 0 0 / 64%);
+      inset 0 1px 0 rgb(198 246 229 / 34%),
+      0 12px 28px -8px rgb(0 0 0 / 70%);
   }
 
   html[data-family="world"]:root
@@ -3857,13 +3965,17 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > .world-annex
     .wa-plate {
-    border: 1px solid rgb(109 223 186 / 30%);
+    border: 1px solid rgb(109 223 186 / 42%);
     border-radius: 4px;
+    background:
+      radial-gradient(ellipse 68% 48% at 100% 0%, rgb(109 223 186 / 14%), transparent 68%),
+      radial-gradient(ellipse 56% 42% at 0% 100%, rgb(227 166 116 / 9%), transparent 68%),
+      linear-gradient(180deg, #0f211b, #091511);
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 24%),
-      inset 0 0 34px rgb(109 223 186 / 5%),
-      0 26px 56px -14px rgb(0 0 0 / 80%),
-      0 0 36px -18px rgb(109 223 186 / 16%);
+      inset 0 1px 0 rgb(198 246 229 / 32%),
+      inset 0 0 38px rgb(109 223 186 / 8%),
+      0 30px 64px -14px rgb(0 0 0 / 86%),
+      0 0 44px -16px rgb(109 223 186 / 24%);
   }
 
   html[data-family="world"]:root
@@ -3871,12 +3983,12 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #world-brief
     .wa-brief-art {
-    border-color: rgb(109 223 186 / 38%);
+    border: 1px solid rgb(109 223 186 / 48%);
     border-radius: 4px;
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 24%),
-      0 26px 56px -12px rgb(0 0 0 / 84%),
-      0 0 36px -16px rgb(109 223 186 / 24%);
+      inset 0 1px 0 rgb(198 246 229 / 32%),
+      0 30px 64px -12px rgb(0 0 0 / 88%),
+      0 0 44px -14px rgb(109 223 186 / 30%);
   }
 
   html[data-family="world"]:root
@@ -3884,11 +3996,45 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #world-brief
     .wa-locations {
-    border: 1px solid rgb(109 223 186 / 32%);
+    border: 1px solid rgb(109 223 186 / 42%);
+    border-radius: 4px;
+    background:
+      radial-gradient(ellipse 68% 46% at 100% 0%, rgb(109 223 186 / 14%), transparent 68%),
+      linear-gradient(180deg, #0f211b, #091511);
+    box-shadow:
+      inset 0 1px 0 rgb(198 246 229 / 30%),
+      inset 0 0 32px rgb(109 223 186 / 7%),
+      0 28px 60px -14px rgb(0 0 0 / 84%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #episode-notes
+    .wa-episode {
+    border: 1px solid rgb(109 223 186 / 38%);
+    border-top: 2px solid rgb(227 166 116 / 72%);
+    border-radius: 4px;
+    background:
+      radial-gradient(ellipse 66% 48% at 100% 0%, rgb(109 223 186 / 12%), transparent 68%),
+      linear-gradient(180deg, #0f211b, #091410);
+    box-shadow:
+      inset 0 1px 0 rgb(198 246 229 / 28%),
+      inset 0 0 36px rgb(109 223 186 / 6%),
+      0 30px 64px -14px rgb(0 0 0 / 86%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #episode-notes
+    .wa-episode-art {
+    border: 1px solid rgb(109 223 186 / 48%);
     border-radius: 4px;
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 22%),
-      0 24px 52px -14px rgb(0 0 0 / 78%);
+      inset 0 1px 0 rgb(198 246 229 / 30%),
+      0 24px 52px -12px rgb(0 0 0 / 86%),
+      0 0 36px -14px rgb(109 223 186 / 26%);
   }
 
   html[data-family="world"]:root
@@ -3896,9 +4042,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > .world-annex:not(#quotes)
     .wa-quote {
-    padding: 8px 12px 8px 16px;
+    padding: 10px 14px 10px 18px;
     border-radius: 0 3px 3px 0;
-    background: linear-gradient(90deg, rgb(109 223 186 / 7%), transparent 76%);
+    background: linear-gradient(90deg, rgb(109 223 186 / 11%), transparent 78%);
   }
 
   html[data-family="world"]:root
@@ -3907,12 +4053,12 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #glossary
     .wa-term-index
     a {
-    border: 1px solid rgb(109 223 186 / 36%);
+    border: 1px solid rgb(109 223 186 / 48%);
     border-radius: 3px;
-    background: linear-gradient(180deg, rgb(109 223 186 / 12%), rgb(4 12 10 / 84%));
+    background: linear-gradient(180deg, rgb(109 223 186 / 18%), rgb(4 12 10 / 88%));
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 22%),
-      0 8px 18px -6px rgb(0 0 0 / 58%);
+      inset 0 1px 0 rgb(198 246 229 / 30%),
+      0 10px 22px -6px rgb(0 0 0 / 64%);
   }
 
   html[data-family="world"]:root
@@ -3920,14 +4066,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #glossary
     .wa-glossary {
-    border: 1px solid rgb(109 223 186 / 34%);
-    border-top: 2px solid rgb(109 223 186 / 64%);
+    border: 1px solid rgb(109 223 186 / 44%);
+    border-top: 2px solid rgb(109 223 186 / 76%);
     border-radius: 4px;
     box-shadow:
-      inset 0 1px 0 rgb(198 246 229 / 26%),
-      inset 0 0 36px rgb(109 223 186 / 5%),
-      0 30px 64px -16px rgb(0 0 0 / 84%),
-      0 0 40px -18px rgb(109 223 186 / 18%);
+      inset 0 1px 0 rgb(198 246 229 / 32%),
+      inset 0 0 40px rgb(109 223 186 / 8%),
+      0 32px 68px -16px rgb(0 0 0 / 88%),
+      0 0 44px -16px rgb(109 223 186 / 24%);
   }
 
   html[data-family="world"]:root
@@ -3935,11 +4081,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #quotes
     .wa-voice {
-    border-color: rgb(109 223 186 / 50%);
+    border-color: rgb(109 223 186 / 62%);
     border-radius: 3px;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 22%),
-      0 6px 14px rgb(0 0 0 / 64%);
+      inset 0 1px 0 rgb(255 255 255 / 30%),
+      0 8px 18px rgb(0 0 0 / 70%);
   }
 
   /* Finale & footer: warm ember casing */
@@ -3948,11 +4094,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > .finale-section
     > .finale-sticky::after {
-    border-color: rgb(255 194 122 / 34%);
+    border-color: rgb(255 194 122 / 46%);
     box-shadow:
-      inset 0 1px 0 rgb(255 220 184 / 26%),
-      inset 0 0 56px rgb(255 171 102 / 12%),
-      0 0 0 100vmax rgb(10 5 3 / 88%);
+      inset 0 1px 0 rgb(255 224 188 / 34%),
+      inset 0 0 68px rgb(255 171 102 / 18%),
+      0 0 0 100vmax rgb(10 5 3 / 90%);
   }
 
   html[data-family="world"]:root
@@ -3960,12 +4106,13 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > footer
     > a {
-    border: 1px solid rgb(255 171 102 / 60%);
+    border: 1px solid rgb(255 171 102 / 72%);
     border-radius: 3px;
-    background: linear-gradient(180deg, rgb(255 210 140 / 16%), rgb(255 171 102 / 5%));
+    background: linear-gradient(180deg, rgb(255 210 140 / 24%), rgb(255 171 102 / 8%));
     box-shadow:
-      inset 0 1px 0 rgb(255 236 208 / 28%),
-      0 10px 24px -6px rgb(0 0 0 / 66%);
+      inset 0 1px 0 rgb(255 240 216 / 38%),
+      0 12px 28px -6px rgb(0 0 0 / 72%),
+      0 0 22px -8px rgb(255 171 102 / 28%);
   }
 }
 
@@ -3985,14 +4132,41 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #cast-roster
+    .wa-directory-controls
+    button[aria-pressed="false"]:hover {
+    border-color: rgb(198 246 229 / 76%);
+    box-shadow:
+      inset 0 1px 0 rgb(224 252 242 / 34%),
+      0 10px 22px -6px rgb(0 0 0 / 68%),
+      0 0 18px -4px rgb(109 223 186 / 38%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
+    > #cast-roster
+    .wa-person
+    .wa-open:hover {
+    border-top-color: #c6f6e5;
+    background: linear-gradient(180deg, rgb(109 223 186 / 26%), rgb(8 20 17 / 90%));
+    box-shadow:
+      inset 0 1px 0 rgb(224 252 242 / 40%),
+      0 0 22px -6px rgb(109 223 186 / 46%);
+    color: #ffffff;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition.mirage-edition
     > #records
     .episode-controls
     > button:not(:disabled):hover {
-    border-color: #ffe3b8 !important;
+    border-color: #ffe8c2 !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 248 232 / 42%),
-      0 8px 22px -4px rgb(0 0 0 / 68%),
-      0 0 20px -2px rgb(239 185 111 / 46%) !important;
+      inset 0 1px 0 rgb(255 250 236 / 52%),
+      0 10px 26px -4px rgb(0 0 0 / 74%),
+      0 0 26px -2px rgb(239 185 111 / 56%) !important;
   }
 
   html[data-family="world"]:root
@@ -4001,11 +4175,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #records
     .episode-card:not(.is-active):hover
     .episode-card-surface {
-    border-color: rgb(239 185 111 / 62%);
+    border-color: rgb(239 185 111 / 74%);
     box-shadow:
-      inset 0 1px 0 rgb(255 236 204 / 32%),
-      0 20px 44px -10px rgb(0 0 0 / 84%),
-      0 0 24px -8px rgb(239 185 111 / 26%);
+      inset 0 1px 0 rgb(255 240 212 / 40%),
+      0 22px 48px -10px rgb(0 0 0 / 88%),
+      0 0 30px -6px rgb(239 185 111 / 36%);
   }
 
   html[data-family="world"]:root
@@ -4013,11 +4187,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > #records
     .episode-pickup-plus:hover {
-    border-color: #fff2d6 !important;
+    border-color: #fff6e0 !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 48%),
-      0 8px 22px rgb(0 0 0 / 82%),
-      0 0 26px rgb(239 185 111 / 64%) !important;
+      inset 0 1px 0 rgb(255 255 255 / 56%),
+      0 10px 26px rgb(0 0 0 / 86%),
+      0 0 32px rgb(239 185 111 / 72%) !important;
   }
 
   html[data-family="world"]:root
@@ -4026,14 +4200,14 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > .wa-contents
     ol
     a:hover {
-    border-color: rgb(198 246 229 / 78%);
+    border-color: rgb(198 246 229 / 86%);
     background:
       linear-gradient(var(--sw-light) 0 0) 0 100% / 100% 2px no-repeat,
-      linear-gradient(155deg, rgb(109 223 186 / 18%), rgb(4 10 8 / 76%));
+      linear-gradient(155deg, rgb(109 223 186 / 24%), rgb(4 10 8 / 80%));
     box-shadow:
-      inset 0 1px 0 rgb(224 252 242 / 38%),
-      0 14px 30px -8px rgb(0 0 0 / 72%),
-      0 0 22px -6px rgb(109 223 186 / 42%);
+      inset 0 1px 0 rgb(224 252 242 / 46%),
+      0 16px 34px -8px rgb(0 0 0 / 76%),
+      0 0 28px -4px rgb(109 223 186 / 52%);
     color: #ffffff;
   }
 
@@ -4043,11 +4217,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #glossary
     .wa-term-index
     a:hover {
-    border-color: rgb(198 246 229 / 80%);
+    border-color: rgb(198 246 229 / 88%);
     box-shadow:
-      inset 0 1px 0 rgb(224 252 242 / 36%),
-      0 10px 22px -6px rgb(0 0 0 / 64%),
-      0 0 20px -4px rgb(109 223 186 / 44%);
+      inset 0 1px 0 rgb(224 252 242 / 44%),
+      0 12px 26px -6px rgb(0 0 0 / 68%),
+      0 0 24px -4px rgb(109 223 186 / 52%);
   }
 
   html[data-family="world"]:root
@@ -4055,11 +4229,11 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     main.site-shell.film-edition.mirage-edition.mirage-edition
     > footer
     > a:hover {
-    border-color: #ffdcb8;
+    border-color: #ffe4c4;
     box-shadow:
-      inset 0 1px 0 rgb(255 246 232 / 42%),
-      0 12px 28px -6px rgb(0 0 0 / 72%),
-      0 0 26px -4px rgb(255 171 102 / 46%);
+      inset 0 1px 0 rgb(255 248 236 / 52%),
+      0 14px 32px -6px rgb(0 0 0 / 78%),
+      0 0 32px -4px rgb(255 171 102 / 56%);
     color: #ffffff;
   }
 }
@@ -4071,8 +4245,8 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     > #quotes
     .wa-quote-band
     > li:hover {
-    background: linear-gradient(90deg, rgb(109 223 186 / 6%), transparent 88%);
-    box-shadow: inset 2px 0 0 rgb(109 223 186 / 68%);
+    background: linear-gradient(90deg, rgb(109 223 186 / 10%), transparent 88%);
+    box-shadow: inset 3px 0 0 rgb(109 223 186 / 78%);
   }
 }
 
@@ -4083,13 +4257,21 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     :is(
       .story-layout,
       .story-lead-sequel,
+      #manager-archive,
       .world-column,
+      .rider-console,
+      .rider-detail,
       .episode-archive,
       .episode-card-surface,
+      .wa-directory-controls button,
+      .wa-person,
+      .wa-person .wa-open,
       .wa-contents-inner,
       .wa-plate,
       .wa-brief-art,
       .wa-locations,
+      .wa-episode,
+      .wa-episode-art,
       .wa-glossary,
       .wa-voice
     ) {

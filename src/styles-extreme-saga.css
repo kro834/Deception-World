@@ -40,15 +40,16 @@
 .exs-hero {
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 32%, rgb(42 141 220 / 14%), transparent 28rem),
-    linear-gradient(180deg, #01040a, #02040a 72%, #010308);
+    radial-gradient(ellipse 68% 62% at 62% 38%, rgb(255 212 118 / 22%), transparent 66%),
+    radial-gradient(ellipse 56% 52% at 24% 30%, rgb(48 148 255 / 22%), transparent 64%),
+    linear-gradient(180deg, #060912, #090c16 68%, #05070e);
 }
 
 .exs-hero::before {
   background:
-    linear-gradient(180deg, transparent 60%, #010308 97%),
-    repeating-linear-gradient(90deg, transparent 0 89px, rgb(118 212 255 / 2.5%) 90px),
-    repeating-linear-gradient(0deg, transparent 0 89px, rgb(255 210 120 / 2.2%) 90px);
+    linear-gradient(180deg, transparent 58%, #05070e 97%),
+    radial-gradient(ellipse 72% 46% at 50% 18%, rgb(68 176 255 / 12%), transparent 68%),
+    radial-gradient(ellipse 62% 42% at 72% 76%, rgb(255 208 112 / 12%), transparent 68%);
 }
 
 .exs-page .rxs-hero-copy::before {
@@ -160,11 +161,11 @@
 
 .exs-unavailable li {
   padding: 12px 15px;
-  border: 1px solid rgb(255 204 112 / 13%);
+  border: 1px solid rgb(255 204 112 / 18%);
   border-radius: 13px;
-  color: #8c929c;
-  background: rgb(255 204 112 / 3%);
-  font-size: 10px;
+  color: #a8b2c2;
+  background: rgb(255 204 112 / 4%);
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -215,9 +216,9 @@
 
 .exs-p14-comparison small {
   color: #72dcff;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 760;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
 }
 
 .exs-p14-comparison article:last-child small {
@@ -374,7 +375,7 @@
   }
 
   .exs-unavailable li {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .exs-p14-comparison article {

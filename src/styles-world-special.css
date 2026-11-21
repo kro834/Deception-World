@@ -54,43 +54,117 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
 
 /* 1. The story chapters use art cards; the archive remains a short index. */
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition > .ws-contents {
-  --ws-map-line: #8295a45e;
-  --ws-map-ink: #f4f3eb;
-  --ws-map-accent: #eccc96;
+  --ws-map-line: rgb(166 206 232 / 34%);
+  --ws-map-ink: #f4f6fb;
+  --ws-map-accent: #f0cf86;
+  --ws-map-accent-rgb: 240 207 134;
   width: min(100%, 1576px);
   margin-inline: auto;
   padding: clamp(30px, 5vw, 84px) var(--sw-gutter, 20px);
 }
 
 .ws-contents > h2 {
-  margin: 0 0 clamp(14px, 2.4vw, 30px);
+  margin: 0 0 clamp(16px, 2.6vw, 34px);
+  padding-bottom: 12px;
   color: var(--ws-map-ink);
   font-size: clamp(22px, 2.65vw, 39px);
   font-weight: 600;
   line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 20px rgb(122 232 255 / 22%);
+}
+
+@media (forced-colors: none) {
+  .ws-contents > h2 {
+    background: var(--ws-prism) 0 100% / min(300px, 54%) 2px no-repeat;
+  }
 }
 
 .ws-contents > .ws-map {
   display: grid;
   grid-template-columns: minmax(0, 1.38fr) repeat(2, minmax(0, 1fr));
-  gap: clamp(8px, 1.35vw, 19px);
+  gap: clamp(10px, 1.45vw, 22px);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .ws-map > li {
+  --ws-card-tone: #a9c4ff;
+  --ws-card-tone-rgb: 169 196 255;
+  --ws-card-warm-rgb: 240 207 134;
   min-width: 0;
 }
 
+.ws-map > li[data-phase="story"] {
+  --ws-card-tone: #a9c4ff;
+  --ws-card-tone-rgb: 169 196 255;
+  --ws-card-warm-rgb: 201 171 255;
+}
+
+.ws-map > li[data-phase="riders"] {
+  --ws-card-tone: #d8e4f2;
+  --ws-card-tone-rgb: 216 228 242;
+  --ws-card-warm-rgb: 255 95 200;
+}
+
+.ws-map > li[data-phase="records"] {
+  --ws-card-tone: #efb96f;
+  --ws-card-tone-rgb: 239 185 111;
+  --ws-card-warm-rgb: 233 140 94;
+}
+
+.ws-map > li[data-phase="annex"] {
+  --ws-card-tone: #6ddfba;
+  --ws-card-tone-rgb: 109 223 186;
+  --ws-card-warm-rgb: 227 166 116;
+}
+
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition .ws-map > li > a {
+  position: relative;
   display: grid;
   height: 100%;
   min-height: 48px;
   text-decoration: none;
   color: var(--ws-map-ink);
-  border: 1px solid var(--ws-map-line);
-  background: #121d28;
+  border: 1px solid rgb(var(--ws-card-tone-rgb) / 34%);
+  background: #0d1622;
+  transition:
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    background-color 240ms ease;
+}
+
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    .ws-map
+    > li:not([data-phase="annex"])
+    > a {
+    border-top-color: rgb(var(--ws-card-tone-rgb) / 62%);
+    background:
+      linear-gradient(var(--ws-card-tone) 0 0) 0 0 / 18px 2px no-repeat,
+      linear-gradient(var(--ws-card-tone) 0 0) 0 0 / 2px 18px no-repeat,
+      linear-gradient(var(--ws-map-accent) 0 0) 100% 100% / 18px 2px no-repeat,
+      linear-gradient(var(--ws-map-accent) 0 0) 100% 100% / 2px 18px no-repeat,
+      radial-gradient(
+        80% 60% at 18% 100%,
+        rgb(var(--ws-card-tone-rgb) / 16%),
+        transparent 72%
+      ),
+      radial-gradient(
+        60% 50% at 92% 96%,
+        rgb(var(--ws-card-warm-rgb) / 12%),
+        transparent 74%
+      ),
+      linear-gradient(162deg, #132132 0%, #0b1320 58%, #070d16 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 26%),
+      inset 0 0 0 1px rgb(var(--ws-card-tone-rgb) / 16%),
+      0 22px 44px -18px rgb(0 0 0 / 82%),
+      0 6px 18px rgb(0 0 0 / 50%);
+  }
 }
 
 .ws-map > li > a > img {
@@ -99,8 +173,9 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   height: clamp(124px, 16vw, 256px);
   object-fit: cover;
   object-position: center 29%;
-  background: #182738;
-  border-bottom: 1px solid var(--ws-map-line);
+  background: #142233;
+  border-bottom: 1px solid rgb(var(--ws-card-tone-rgb) / 36%);
+  transition: filter 260ms ease;
 }
 
 .ws-map > li[data-phase="riders"] img {
@@ -114,18 +189,20 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   align-self: stretch;
   gap: clamp(8px, 1.1vw, 18px);
   min-height: 56px;
-  padding: 10px clamp(10px, 1.65vw, 22px);
+  padding: 12px clamp(12px, 1.65vw, 24px);
   font-size: clamp(13px, 1.28vw, 18px);
   font-weight: 600;
   line-height: 1.4;
+  text-shadow: 0 2px 10px rgb(0 0 0 / 58%);
 }
 
 .ws-map-label b {
-  color: var(--ws-map-accent);
+  color: var(--ws-card-tone);
   font-family: var(--font-hud, "Michroma", sans-serif);
   font-size: clamp(12px, 1.25vw, 17px);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px rgb(var(--ws-card-tone-rgb) / 38%);
 }
 
 .ws-map-label i {
@@ -133,15 +210,18 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
   display: block;
   width: 10px;
   height: 10px;
-  border-block-start: 1px solid var(--ws-map-accent);
-  border-inline-end: 1px solid var(--ws-map-accent);
+  border-block-start: 1.5px solid var(--ws-map-accent);
+  border-inline-end: 1.5px solid var(--ws-map-accent);
+  transition:
+    translate 220ms ease,
+    border-color 220ms ease;
 }
 
 .ws-map-label i::before {
   position: absolute;
   content: "";
   width: 13px;
-  height: 1px;
+  height: 1.5px;
   inset: 3px -3px auto auto;
   background: var(--ws-map-accent);
   transform: rotate(-45deg);
@@ -155,12 +235,21 @@ html[data-family="world"]:root
   > a {
   border-inline: 0;
   border-block-start: 0;
-  background: none;
+  border-block-end: 1px solid rgb(109 223 186 / 34%);
+  background:
+    linear-gradient(
+        90deg,
+        rgb(109 223 186 / 70%) 0%,
+        rgb(240 207 134 / 45%) 42%,
+        transparent 100%
+      )
+      0 100% / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(109 223 186 / 8%), transparent 68%);
   box-shadow: none;
 }
 
 .ws-map > li[data-phase="annex"] .ws-map-label {
-  padding-inline-start: 0;
+  padding-inline: 12px 14px;
 }
 
 .ws-map > li > a:focus-visible {
@@ -169,10 +258,79 @@ html[data-family="world"]:root
 }
 
 @media (hover: hover) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    .ws-map
+    > li:not([data-phase="annex"])
+    > a:hover {
+    border-color: rgb(var(--ws-card-tone-rgb) / 86%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 42%),
+      inset 0 0 0 1px rgb(var(--ws-card-tone-rgb) / 34%),
+      0 26px 52px -18px rgb(0 0 0 / 90%),
+      0 0 32px -8px rgb(var(--ws-card-tone-rgb) / 42%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    .ws-map
+    > li[data-phase="annex"]
+    > a:hover {
+    border-block-end-color: #6ddfba;
+    background:
+      linear-gradient(90deg, #6ddfba 0%, var(--ws-map-accent) 56%, transparent 100%) 0 100% / 100%
+        2px no-repeat,
+      linear-gradient(90deg, rgb(109 223 186 / 16%), rgb(109 223 186 / 4%) 66%, transparent 100%);
+  }
+
+  .ws-map > li > a:hover > img {
+    filter: brightness(1.08) saturate(1.06);
+  }
+
   .ws-map > li > a:hover .ws-map-label {
     color: var(--ws-map-accent);
     text-decoration: underline;
     text-underline-offset: 0.25em;
+  }
+
+  .ws-map > li > a:hover .ws-map-label i {
+    border-color: #fff;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition
+    .ws-map
+    > li:not([data-phase="annex"])
+    > a {
+    transition:
+      border-color 240ms ease,
+      box-shadow 240ms ease,
+      translate 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition
+    .ws-map
+    > li:not([data-phase="annex"])
+    > a:hover {
+    translate: 0 -3px;
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"]):root
+    body
+    main.site-shell.film-edition.mirage-edition
+    .ws-map
+    > li
+    > a:hover
+    .ws-map-label
+    i {
+    translate: 3px -3px;
   }
 }
 
@@ -226,9 +384,9 @@ html[data-family="world"]:root
 }
 
 /* ----------------------------------------------------------------
-   2. The chapter slates: the zenith prism seam, a pink bloom and a scale
-      of ticks under the right end (01-03 .section-index, 04-06
-      .wa-chapter). The stage-streamline sheet sets the 01-03 seam with an
+   2. The chapter slates: the zenith prism seam, soft stage bloom and a
+      champagne-ice optical filament under the right end (01-03 .section-index,
+      04-06 .wa-chapter). The stage-streamline sheet sets the 01-03 seam with an
       ID-weighted :not(); the slate answers with one of its own.
    ---------------------------------------------------------------- */
 @media (forced-colors: none) {
@@ -243,16 +401,27 @@ html[data-family="world"]:root
     > .world-annex
     .wa-chapter {
     background:
-      var(--ws-prism) 0 100% / min(440px, 62%) 1px no-repeat,
-      repeating-linear-gradient(90deg, rgb(var(--sw-light-rgb) / 46%) 0 1px, transparent 1px 12px)
-        100% 100% / min(240px, 30%) 5px no-repeat,
-      radial-gradient(
-          60% 100% at 22% 100%,
-          rgb(var(--ws-pink-rgb) / 16%),
-          rgb(var(--sw-light-rgb) / 7%) 50%,
+      var(--ws-prism) 0 100% / min(520px, 68%) 2px no-repeat,
+      linear-gradient(
+          270deg,
+          rgb(var(--sw-gold-rgb, 240 207 134) / 72%) 0%,
+          rgb(var(--sw-light-rgb) / 36%) 46%,
           transparent 100%
         )
-        0 100% / min(560px, 76%) 22px no-repeat;
+        100% 100% / min(260px, 32%) 1px no-repeat,
+      radial-gradient(
+          56% 100% at 18% 100%,
+          rgb(var(--sw-light-rgb) / 20%),
+          rgb(var(--ws-pink-rgb) / 14%) 46%,
+          transparent 100%
+        )
+        0 100% / min(640px, 82%) 28px no-repeat,
+      radial-gradient(
+          42% 100% at 92% 100%,
+          rgb(var(--sw-gold-rgb, 240 207 134) / 14%),
+          transparent 100%
+        )
+        100% 100% / min(300px, 38%) 18px no-repeat;
   }
 }
 
@@ -333,8 +502,10 @@ html[data-family="world"]:root
     main.site-shell.film-edition.mirage-edition
     > .world-annex
     .wa-heading.has-no::before {
+    height: 2px;
     background: var(--ws-prism);
-    opacity: 0.7;
+    opacity: 0.88;
+    box-shadow: 0 0 12px rgb(var(--sw-light-rgb) / 28%);
   }
 }
 
@@ -346,8 +517,11 @@ html[data-family="world"]:root
     > #world-brief
     .wa-locations
     > h3 {
-    padding-bottom: 12px;
-    background: var(--ws-prism) 0 100% / min(220px, 60%) 1px no-repeat;
+    padding-bottom: 14px;
+    background:
+      var(--ws-prism) 0 100% / min(280px, 68%) 2px no-repeat,
+      radial-gradient(50% 100% at 24% 100%, rgb(var(--sw-light-rgb) / 14%), transparent 100%) 0
+        100% / min(280px, 68%) 16px no-repeat;
   }
 }
 
@@ -394,7 +568,7 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     opacity: 0;
   }
 
-  /* Precision Vernier scale ticks alongside the chapter rail. */
+  /* Continuous optical prism filament alongside the chapter rail. */
   html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
@@ -403,12 +577,15 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     position: absolute;
     top: 3px;
     right: -8px;
-    width: 4px;
+    width: 1px;
     height: calc(100% - 6px);
-    background: repeating-linear-gradient(
+    background: linear-gradient(
       180deg,
-      rgb(122 232 255 / 32%) 0 1px,
-      transparent 1px 6px
+      transparent 0%,
+      rgb(122 232 255 / 44%) 22%,
+      rgb(255 79 195 / 38%) 54%,
+      rgb(240 207 134 / 44%) 82%,
+      transparent 100%
     );
     pointer-events: none;
   }
@@ -519,9 +696,10 @@ html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition 
     border-color: #fff;
     background: var(--ws-dot);
     box-shadow:
-      0 0 0 3px rgb(var(--ws-pink-rgb) / 26%),
-      0 0 14px rgb(var(--ws-pink-rgb) / 56%);
-    scale: 1.45;
+      0 0 0 3px rgb(var(--ws-pink-rgb) / 30%),
+      0 0 16px rgb(var(--ws-pink-rgb) / 62%),
+      0 0 28px rgb(var(--sw-light-rgb) / 36%);
+    scale: 1.5;
   }
 
   html[data-family="world"]:root
@@ -684,26 +862,69 @@ html[data-family="world"]:root
     > footer
     > .ws-doors
     > a {
+    border-color: rgb(var(--ws-door-rgb) / 48%);
     background:
-      linear-gradient(var(--ws-door) 0 0) 0 0 / 16px 1.5px no-repeat,
-      linear-gradient(var(--ws-door) 0 0) 0 0 / 1.5px 16px no-repeat,
-      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 16px 1.5px no-repeat,
-      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 1.5px 16px no-repeat,
-      linear-gradient(90deg, var(--ws-door), var(--ws-door-2) 58%, transparent) 0 0 / 74% 1px
+      linear-gradient(var(--ws-door) 0 0) 0 0 / 20px 2px no-repeat,
+      linear-gradient(var(--ws-door) 0 0) 0 0 / 2px 20px no-repeat,
+      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 20px 2px no-repeat,
+      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 2px 20px no-repeat,
+      linear-gradient(90deg, var(--ws-door), var(--ws-door-2) 58%, transparent) 0 0 / 82% 1.5px
         no-repeat,
-      linear-gradient(270deg, var(--ws-door-2), var(--ws-door) 54%, transparent) 100% 100% / 64% 1px
-        no-repeat,
-      radial-gradient(82% 125% at 0 50%, rgb(var(--ws-door-rgb) / 16%), transparent 70%),
-      radial-gradient(64% 100% at 100% 100%, rgb(var(--ws-door-2-rgb) / 10%), transparent 72%),
-      rgb(8 10 16 / 88%);
+      linear-gradient(270deg, var(--ws-door-2), var(--ws-door) 54%, transparent) 100% 100% / 74%
+        1.5px no-repeat,
+      linear-gradient(
+        132deg,
+        rgb(255 255 255 / 9%) 0%,
+        transparent 38%,
+        rgb(var(--ws-door-2-rgb) / 12%) 100%
+      ),
+      radial-gradient(88% 132% at 6% 48%, rgb(var(--ws-door-rgb) / 24%), transparent 68%),
+      radial-gradient(68% 106% at 96% 96%, rgb(var(--ws-door-2-rgb) / 16%), transparent 70%),
+      linear-gradient(156deg, #0d121d 0%, #070a12 58%, #04060b 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 20%),
-      inset 1px 0 0 rgb(var(--ws-door-rgb) / 36%),
-      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 30%),
-      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 40%),
-      inset 0 0 0 1px rgb(var(--ws-door-rgb) / 18%),
-      inset 0 0 22px -8px rgb(var(--ws-door-rgb) / 32%),
-      0 6px 22px rgb(0 0 0 / 58%);
+      inset 0 1px 0 rgb(255 255 255 / 28%),
+      inset 1px 0 0 rgb(var(--ws-door-rgb) / 46%),
+      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 38%),
+      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 50%),
+      inset 0 0 0 1px rgb(var(--ws-door-rgb) / 22%),
+      inset 0 0 28px -8px rgb(var(--ws-door-rgb) / 38%),
+      0 14px 32px -8px rgb(0 0 0 / 76%),
+      0 4px 12px rgb(0 0 0 / 54%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a.is-far-from {
+    border-color: rgb(var(--ws-door-rgb) / 56%);
+    background:
+      linear-gradient(var(--ws-door) 0 0) 0 0 / 24px 2px no-repeat,
+      linear-gradient(var(--ws-door) 0 0) 0 0 / 2px 24px no-repeat,
+      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 24px 2px no-repeat,
+      linear-gradient(var(--ws-door-2) 0 0) 100% 100% / 2px 24px no-repeat,
+      linear-gradient(90deg, var(--ws-door), #fff 36%, var(--ws-door-2) 70%, transparent) 0 0 / 88%
+        1.5px no-repeat,
+      linear-gradient(270deg, var(--ws-door-2), var(--ws-door) 56%, transparent) 100% 100% / 80%
+        1.5px no-repeat,
+      linear-gradient(
+        136deg,
+        rgb(255 255 255 / 11%) 0%,
+        transparent 40%,
+        rgb(var(--ws-door-2-rgb) / 14%) 100%
+      ),
+      radial-gradient(92% 118% at 14% 26%, rgb(var(--ws-door-rgb) / 28%), transparent 68%),
+      radial-gradient(76% 96% at 92% 88%, rgb(var(--ws-door-2-rgb) / 20%), transparent 70%),
+      linear-gradient(156deg, #110e22 0%, #090b18 54%, #050710 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      inset 1px 0 0 rgb(var(--ws-door-rgb) / 54%),
+      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 44%),
+      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 56%),
+      inset 0 0 36px -8px rgb(var(--ws-door-rgb) / 42%),
+      0 18px 42px -10px rgb(0 0 0 / 84%),
+      0 0 28px -10px rgb(var(--ws-door-rgb) / 30%);
   }
 
   /* Silent numeral watermarks (01-05) in each door's prism light. */
@@ -720,9 +941,10 @@ html[data-family="world"]:root
     color: transparent;
     font: 700 clamp(44px, 4.4vw, 60px) / 0.82 var(--sw-mono);
     letter-spacing: -0.04em;
-    -webkit-text-stroke: 1px rgb(var(--ws-door-rgb) / 22%);
+    -webkit-text-stroke: 1px rgb(var(--ws-door-rgb) / 28%);
     pointer-events: none;
     user-select: none;
+    transition: -webkit-text-stroke-color 240ms ease;
   }
 
   html[data-family="world"]:root
@@ -810,7 +1032,10 @@ html[data-family="world"]:root
   height: 96px;
   object-fit: cover;
   object-position: 50% 18%;
-  border: 1px solid rgb(var(--ws-door-rgb) / 38%);
+  border: 1px solid rgb(var(--ws-door-rgb) / 52%);
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 68%),
+    0 0 0 1px rgb(255 255 255 / 12%);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
   transition: filter 240ms ease;
 }
@@ -892,6 +1117,7 @@ html[data-family="world"]:root
   min-width: 0;
   font: 700 clamp(16px, 1.5vw, 19px) / 1.4 var(--sw-display);
   letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 72%);
   word-break: keep-all;
   overflow-wrap: anywhere;
 }
@@ -987,16 +1213,38 @@ html[data-family="world"]:root
     > .ws-doors
     > a:hover {
     border-color: var(--ws-door);
-    background-color: rgb(var(--ws-door-rgb) / 16%);
+    background-color: rgb(var(--ws-door-rgb) / 18%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 32%),
-      inset 1px 0 0 rgb(var(--ws-door-rgb) / 56%),
-      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 48%),
-      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 62%),
-      inset 0 0 28px -6px rgb(var(--ws-door-rgb) / 44%),
-      0 8px 28px rgb(0 0 0 / 64%),
-      0 0 24px -4px rgb(var(--ws-door-rgb) / 38%);
-    translate: 0 -2px;
+      inset 0 1px 0 rgb(255 255 255 / 44%),
+      inset 1px 0 0 rgb(var(--ws-door-rgb) / 68%),
+      inset -1px -1px 0 rgb(var(--ws-door-2-rgb) / 56%),
+      inset 0 -2px 0 rgb(var(--ws-door-2-rgb) / 70%),
+      inset 0 0 36px -6px rgb(var(--ws-door-rgb) / 50%),
+      0 18px 42px -8px rgb(0 0 0 / 82%),
+      0 0 34px -4px rgb(var(--ws-door-rgb) / 48%);
+    translate: 0 -4px;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:hover::before {
+    -webkit-text-stroke-color: rgb(var(--ws-door-rgb) / 44%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > footer
+    > .ws-doors
+    > a:hover
+    > span {
+    color: #fff;
+    text-shadow:
+      0 0 18px rgb(var(--ws-door-rgb) / 44%),
+      0 2px 12px rgb(0 0 0 / 76%);
   }
 
   @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
@@ -1055,6 +1303,16 @@ html[data-family="world"]:root
     opacity: 0;
     transform: translateX(125%) skewX(-22deg);
   }
+}
+
+html[data-family="world"][data-world-effects="economy"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > footer
+  > .ws-doors
+  > a {
+  translate: none;
+  transition: none;
 }
 
 html[data-family="world"][data-world-effects="economy"]:root
@@ -1143,12 +1401,12 @@ html[data-family="world"]:root
     letter-spacing: -0.02em;
     text-align: center;
     white-space: nowrap;
-    -webkit-text-stroke: 1px rgb(var(--sw-light-rgb) / 15%);
+    -webkit-text-stroke: 1px rgb(var(--sw-light-rgb) / 22%);
     background: linear-gradient(
       90deg,
-      rgb(var(--sw-light-rgb) / 6%),
-      rgb(var(--ws-pink-rgb) / 8%) 50%,
-      rgb(var(--sw-gold-rgb) / 6%)
+      rgb(var(--sw-light-rgb) / 9%),
+      rgb(var(--ws-pink-rgb) / 11%) 50%,
+      rgb(var(--sw-gold-rgb) / 10%)
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -1199,9 +1457,10 @@ html[data-family="world"]:root
     left: 22px;
     z-index: 3;
     display: block;
-    width: min(420px, 46%);
-    height: 1px;
+    width: min(460px, 52%);
+    height: 2px;
     background: var(--ws-prism);
+    box-shadow: 0 0 14px rgb(var(--sw-light-rgb) / 38%);
     pointer-events: none;
     animation: none;
   }
@@ -1329,4 +1588,141 @@ html[data-family="world"]:root
   .episode-card
   .episode-card-copy {
   justify-content: center;
+}
+
+/* ----------------------------------------------------------------
+   12. Annex exhibition plates (05 WORLD FILES, 06 ARCHIVE LOG,
+       GLOSSARY, QUOTES): museum-grade verdigris x champagne bevels,
+       layered atmospheric light and deep sculpted drop shadows
+   ---------------------------------------------------------------- */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #world-brief
+    .wa-brief {
+    border-color: rgb(109 223 186 / 38%);
+    border-top-color: rgb(230 195 140 / 68%);
+    background:
+      linear-gradient(90deg, #6ddfba 0%, #e6c38c 54%, transparent 100%) 0 0 / 62% 2px no-repeat,
+      radial-gradient(ellipse 68% 52% at 96% 4%, rgb(109 223 186 / 14%), transparent 68%),
+      radial-gradient(ellipse 56% 44% at 4% 96%, rgb(230 195 140 / 10%), transparent 70%),
+      linear-gradient(156deg, #10241d 0%, #091612 58%, #060f0c 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(216 252 239 / 26%),
+      inset 0 0 0 1px rgb(109 223 186 / 14%),
+      0 24px 52px -18px rgb(0 0 0 / 78%),
+      0 6px 18px rgb(0 0 0 / 48%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-doc {
+    border-color: rgb(109 223 186 / 32%);
+    border-top-color: rgb(198 246 229 / 46%);
+    background:
+      radial-gradient(ellipse 72% 48% at 10% 0%, rgb(109 223 186 / 10%), transparent 68%),
+      linear-gradient(160deg, #0f211b 0%, #091511 60%, #060e0b 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(216 252 239 / 22%),
+      inset 0 0 0 1px rgb(109 223 186 / 12%),
+      0 18px 36px -14px rgb(0 0 0 / 72%),
+      0 4px 12px rgb(0 0 0 / 42%);
+    transition:
+      border-color 220ms ease,
+      box-shadow 220ms ease;
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-doc[open] {
+    border-color: rgb(109 223 186 / 62%);
+    border-top-color: #e6c38c;
+    box-shadow:
+      inset 0 1px 0 rgb(255 245 220 / 34%),
+      inset 0 0 0 1px rgb(109 223 186 / 24%),
+      0 24px 48px -16px rgb(0 0 0 / 84%),
+      0 0 28px -10px rgb(109 223 186 / 26%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #world-brief
+    .wa-locations
+    > ul
+    > li {
+    border-color: rgb(109 223 186 / 28%);
+    border-top-color: rgb(230 195 140 / 48%);
+    background:
+      radial-gradient(ellipse 74% 56% at 14% 0%, rgb(109 223 186 / 11%), transparent 68%),
+      linear-gradient(158deg, #0f201a 0%, #08130f 62%, #050c0a 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(216 252 239 / 20%),
+      0 16px 32px -14px rgb(0 0 0 / 70%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #quotes
+    .wa-quote-band
+    > li {
+    border-color: rgb(109 223 186 / 28%);
+    border-left-color: #e6c38c;
+    background:
+      linear-gradient(90deg, rgb(230 195 140 / 11%), transparent 38%),
+      radial-gradient(ellipse 64% 54% at 92% 100%, rgb(109 223 186 / 10%), transparent 70%),
+      linear-gradient(155deg, #0f1d18 0%, #08110e 60%, #050a08 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 245 220 / 18%),
+      inset 0 0 0 1px rgb(109 223 186 / 10%),
+      0 20px 44px -16px rgb(0 0 0 / 80%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary {
+    border-color: rgb(109 223 186 / 34%);
+    border-top-color: rgb(230 195 140 / 62%);
+    background:
+      var(--ws-ticks),
+      radial-gradient(ellipse 68% 42% at 92% 0%, rgb(109 223 186 / 12%), transparent 68%),
+      radial-gradient(ellipse 52% 38% at 8% 100%, rgb(230 195 140 / 9%), transparent 70%),
+      linear-gradient(164deg, #0f211b 0%, #091511 58%, #060e0b 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(216 252 239 / 24%),
+      inset 0 0 0 1px rgb(109 223 186 / 12%),
+      0 24px 52px -18px rgb(0 0 0 / 80%),
+      0 6px 18px rgb(0 0 0 / 48%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #glossary
+    .wa-glossary
+    > div {
+    background: linear-gradient(90deg, rgb(109 223 186 / 6%), transparent 46%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > .world-annex
+    .wa-doc:hover {
+    border-color: rgb(109 223 186 / 58%);
+    box-shadow:
+      inset 0 1px 0 rgb(216 252 239 / 30%),
+      0 22px 44px -14px rgb(0 0 0 / 82%),
+      0 0 24px -10px rgb(109 223 186 / 26%);
+  }
 }

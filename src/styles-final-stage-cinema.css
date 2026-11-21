@@ -144,14 +144,17 @@ html body .load-gate.has-cine.is-cine-full.rider-route-dive.is-final-stage-dive.
   gap: 16px;
   min-height: 48px;
   padding: 9px 10px 9px 18px;
-  border: 1px solid color-mix(in srgb, var(--fsc-door) 50%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fsc-door) 64%, var(--fst-gold));
   border-radius: 4px;
   color: var(--fst-text);
   background:
-    linear-gradient(var(--fsc-door) 0 0) 0 0 / 28px 2px no-repeat,
-    linear-gradient(var(--fst-gold) 0 0) 0 100% / 10px 2px no-repeat,
-    linear-gradient(var(--fst-gold) 0 0) 100% 100% / 10px 2px no-repeat,
-    color-mix(in srgb, var(--fsc-door) 8%, var(--fst-ink));
+    linear-gradient(90deg, var(--fsc-door), var(--fst-gold)) 0 0 / 34px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 0 100% / 12px 2px no-repeat,
+    linear-gradient(var(--fst-gold) 0 0) 100% 100% / 12px 2px no-repeat,
+    color-mix(in srgb, var(--fsc-door) 12%, var(--fst-ink));
+  box-shadow:
+    inset 0 1px 0 rgb(255 248 228 / 24%),
+    0 12px 28px rgb(0 0 0 / 48%);
 }
 
 .fst-page.fst-page .rxs-footer > a:not(.rxs-footer-return) {

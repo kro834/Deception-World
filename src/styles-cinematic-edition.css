@@ -18,8 +18,11 @@
   background: var(--cinema-ink);
 }
 .site-shell.film-edition .topbar {
-  background: linear-gradient(115deg, #132330, #080f18 45%);
-  box-shadow: none;
+  background: linear-gradient(115deg, #142534 0%, #0a131e 48%, #070d15 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 1px 0 #000,
+    0 10px 26px -10px rgb(0 0 0 / 74%);
   border-color: var(--cinema-rule);
 }
 .site-shell.film-edition > .hero {
@@ -29,9 +32,10 @@
   min-height: 100svh;
   padding: calc(110px + env(safe-area-inset-top)) 6vw 48px;
   background:
-    linear-gradient(90deg, transparent 42%, rgb(119 211 228 / 3%) 50%, transparent 58%),
-    radial-gradient(ellipse at 80% 35%, #14304470, transparent 48%),
-    linear-gradient(115deg, #101b25, var(--cinema-ink) 64%);
+    linear-gradient(90deg, transparent 42%, rgb(119 211 228 / 4%) 50%, transparent 58%),
+    radial-gradient(ellipse 68% 52% at 80% 35%, rgb(24 58 82 / 56%), transparent 54%),
+    radial-gradient(ellipse 54% 44% at 16% 80%, rgb(199 70 81 / 12%), transparent 58%),
+    linear-gradient(115deg, #111e29 0%, #0a121b 46%, var(--cinema-ink) 74%);
 }
 .site-shell.film-edition .film-hero-identity {
   align-self: end;
@@ -44,6 +48,7 @@
   left: 0;
   right: auto;
   background: linear-gradient(90deg, var(--cinema-cyan) 0%, var(--cinema-cyan) 56%, transparent 64%, transparent 68%, var(--cinema-scarlet) 76%, var(--cinema-scarlet) 100%);
+  box-shadow: 0 0 12px rgb(119 211 228 / 28%);
 }
 .site-shell.film-edition .film-hero-identity .anime-work-title b {
   font-family: var(--cinema-display);
@@ -52,7 +57,7 @@
   line-height: 1.04;
   letter-spacing: -0.035em;
   color: var(--cinema-type);
-  text-shadow: 0 2px 0 #77d3e41a;
+  text-shadow: 0 2px 0 #77d3e41a, 0 10px 28px rgb(0 0 0 / 55%);
   text-wrap: balance;
 }
 .site-shell.film-edition .hero-copy { align-self: start; }
@@ -65,15 +70,21 @@
   letter-spacing: -0.025em;
   text-shadow: none;
 }
-.site-shell.film-edition .hero-lead { color: #c7cdd4; line-height: 1.9; }
+.site-shell.film-edition .hero-lead { color: #ced5dc; line-height: 1.9; }
 .site-shell.film-edition .hero-actions { margin-top: 24px; }
 .site-shell.film-edition .primary-action {
   min-height: 52px;
-  background: linear-gradient(135deg, #233b49, #122330 70%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 14%) 0%, transparent 45%),
+    linear-gradient(135deg, #274455 0%, #152a39 62%, #0e1c27 100%);
   border: 1px solid var(--cinema-cyan);
   color: var(--cinema-type);
   border-radius: 4px;
-  box-shadow: inset 0 0 0 3px #070c12, 0 0 20px #77d3e414;
+  box-shadow:
+    inset 0 1px 0 rgb(214 247 255 / 38%),
+    inset 0 0 0 3px #070c12,
+    0 12px 28px -10px rgb(0 0 0 / 76%),
+    0 0 22px rgb(119 211 228 / 18%);
   font-size: 0.875rem;
   letter-spacing: 0.12em;
 }
@@ -84,27 +95,38 @@
   gap: 12px;
 }
 .site-shell.film-edition .poster-frame {
-  border-color: #77d3e482;
-  box-shadow: 5px 5px 0 #070c12, 6px 6px 0 #c746515c;
+  border-color: #77d3e49e;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    5px 5px 0 #070c12,
+    6px 6px 0 #c7465175,
+    0 20px 44px -14px rgb(0 0 0 / 80%);
 }
 .site-shell.film-edition .poster-back-card { opacity: 0; }
 .site-shell.film-edition .is-shuffling .poster-back-card { opacity: 0.2; }
 .site-shell.film-edition .hero .poster-controls { width: var(--poster-width); max-width: 100%; }
 .site-shell.film-edition .poster-control-cluster > button {
   min-height: 44px;
-  background: var(--cinema-control);
+  background: linear-gradient(180deg, #1b2837 0%, var(--cinema-control) 100%);
   color: var(--cinema-type);
   border-color: var(--cinema-rule);
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 70%),
+    0 4px 12px -4px rgb(0 0 0 / 60%);
 }
 
 /* Light story sheet has its own ink; never inherit dark-surface white type. */
 .site-shell.film-edition .story-layout {
-  background: #e9ecea;
+  background: linear-gradient(165deg, #f1f3f1 0%, #e9ecea 56%, #dfe4e2 100%);
   color: #17202a;
   border-radius: 4px;
   border: 0;
   border-top: 4px solid var(--cinema-scarlet);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    inset 0 0 0 1px rgb(23 32 42 / 8%),
+    0 22px 48px -16px rgb(0 0 0 / 62%);
 }
 .site-shell.film-edition .story-layout .story-heading h2 {
   color: #17202a;
@@ -117,8 +139,13 @@
 .site-shell.film-edition :is(.threat-panel, .rider-console, .world-column-content, .episode-archive) {
   border-radius: 8px;
   border-color: var(--cinema-rule);
-  background: linear-gradient(135deg, #142634, var(--cinema-surface) 40%);
-  box-shadow: inset 0 3px #77d3e41a;
+  background:
+    radial-gradient(ellipse 74% 50% at 14% 0%, rgb(119 211 228 / 11%), transparent 62%),
+    linear-gradient(135deg, #162938 0%, var(--cinema-surface) 44%, #091019 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    inset 0 3px 0 #77d3e424,
+    0 18px 42px -16px rgb(0 0 0 / 76%);
 }
 .site-shell.film-edition .section-index {
   background: linear-gradient(90deg, var(--cinema-cyan) 0 52px, transparent 52px 58px, var(--cinema-scarlet) 58px 82px, transparent 82px) left bottom / 100% 2px no-repeat;
@@ -165,10 +192,14 @@
 /* Dossier typography is editorial, while each character keeps their accent. */
 .manager-page .dossier-reader {
   border-radius: 12px;
-  background: #101a26;
+  background:
+    radial-gradient(ellipse 72% 48% at 14% 0%, rgb(119 211 228 / 10%), transparent 62%),
+    linear-gradient(155deg, #13202f 0%, #0d1621 56%, #080e16 100%);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  box-shadow: 0 8px 24px #0003;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 16%),
+    0 18px 42px -14px rgb(0 0 0 / 72%);
 }
 .manager-page .dossier-contents { gap: 0; border-top: 1px solid var(--cinema-rule); }
 .manager-page .dossier-contents a {
@@ -177,31 +208,40 @@
   border: 0;
   border-bottom: 1px solid var(--cinema-rule);
   border-radius: 0;
-  background: #0e1823;
-  box-shadow: none;
+  background: linear-gradient(180deg, #111c29 0%, #0d1620 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
 }
 .manager-page .dossier-contents-copy small { font-size: 12px; }
 .manager-page .dossier-contents-copy b { font-size: 1rem; line-height: 1.55; }
 .manager-page :is(.manager-copy-section, .manager-rider-record) {
-  background: #0d1621;
+  background:
+    radial-gradient(ellipse 70% 45% at 16% 0%, rgb(119 211 228 / 8%), transparent 62%),
+    linear-gradient(150deg, #121e2c 0%, #0c141f 62%, #080e16 100%);
   border-color: var(--cinema-rule);
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 16px 36px -14px rgb(0 0 0 / 72%);
 }
 .manager-page :is(.manager-copy-body p, .manager-copy-section p) { line-height: 1.95; }
 
 /* Dream: shrine architecture and restrained spectral instrument markings.
    Decorative layers remain pointer-transparent and do not animate forever. */
 .dream-page {
-  --dream-tech-line: rgb(198 181 214 / 30%);
-  --dream-tech-panel: #171420;
+  --dream-tech-line: rgb(206 188 220 / 34%);
+  --dream-tech-panel: #181422;
   background:
-    radial-gradient(ellipse at 90% 30%, #54376638, transparent 50%),
-    linear-gradient(135deg, #100b16, #1b0e1d 60%, #110b16);
+    radial-gradient(ellipse at 90% 30%, #58396b45, transparent 52%),
+    radial-gradient(ellipse at 12% 76%, #74252d26, transparent 55%),
+    linear-gradient(135deg, #110b17, #1d0f1f 58%, #100a15);
 }
 .dream-page .dream-site-header {
   background: #140f1c;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgb(248 229 201 / 12%),
+    0 1px 0 #000,
+    0 10px 26px -10px rgb(0 0 0 / 76%);
 }
 /* The shared economy fallback uses !important on glass surfaces. Blurring the
    JPEG logo's parent isolates its screen blend and exposes a black rectangle. */
@@ -215,7 +255,7 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   inset: 148px 18px 18px;
   z-index: 2;
   pointer-events: none;
-  border: 1px solid #e6c28e52;
+  border: 1px solid #e6c28e5c;
   background:
     linear-gradient(var(--dream-gold), var(--dream-gold)) left top / 46px 2px no-repeat,
     linear-gradient(var(--dream-gold), var(--dream-gold)) left top / 2px 46px no-repeat,
@@ -231,7 +271,11 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
 }
 .dream-page .dream-chapter-nav a { min-height: 48px; }
 .dream-page .dream-chapter-nav a > span { font-size: 0.875rem; }
-.dream-page .dream-character-copy { border-top: 2px solid var(--dream-scarlet); background: #18121d; }
+.dream-page .dream-character-copy {
+  border-top: 2px solid var(--dream-scarlet);
+  background: linear-gradient(180deg, #1d1523 0%, #15101b 100%);
+  box-shadow: inset 0 1px 0 rgb(248 229 201 / 14%);
+}
 .dream-page .dream-section-heading { padding: 0 0 24px 18px; border-left: 3px solid var(--dream-scarlet); }
 .dream-page .dream-section-heading::after {
   width: min(420px, 85%);
@@ -240,8 +284,12 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
 .dream-page :is(.dream-character-grid, .dream-dolminence-grid) article {
   border-radius: 12px;
   border: 1px solid var(--dream-tech-line);
-  box-shadow: none;
-  background: var(--dream-tech-panel);
+  box-shadow:
+    inset 0 1px 0 rgb(248 229 201 / 22%),
+    0 18px 40px -16px rgb(0 0 0 / 78%);
+  background:
+    radial-gradient(ellipse 75% 48% at 18% 0%, rgb(230 194 142 / 10%), transparent 62%),
+    linear-gradient(155deg, #21192a 0%, var(--dream-tech-panel) 54%, #110d18 100%);
 }
 .dream-page :is(.dream-character-grid, .dream-dolminence-grid) article::before {
   content: "";
@@ -249,34 +297,62 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
   inset: 6px;
   z-index: 2;
   pointer-events: none;
-  border: 1px solid #e6c28e38;
+  border: 1px solid #e6c28e45;
   border-radius: 8px;
-  background: linear-gradient(90deg, var(--dream-gold), transparent) left top / 48px 1px no-repeat;
+  background: linear-gradient(90deg, var(--dream-gold), transparent) left top / 54px 1px no-repeat;
 }
 .dream-page :is(.dream-character-number, .dream-dolminence-number) {
   background: #140f1cf2;
-  border: 1px solid #e6c28e66;
+  border: 1px solid #e6c28e78;
   color: #f8e5c9;
+  box-shadow:
+    inset 0 1px 0 rgb(255 245 224 / 24%),
+    0 4px 12px rgb(0 0 0 / 52%);
 }
 .dream-page .dream-case-list li { padding: 28px; }
 .dream-page .dream-case-list :is(small, li > span) { font-size: 12px; }
 .dream-page .dream-hero-actions a {
   min-height: 56px;
-  border: 1px solid #d5b5a566;
-  background: linear-gradient(135deg, #322035, #1e1425);
-  box-shadow: inset 0 0 0 3px #140f1c80;
+  border: 1px solid #d5b5a578;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 12%) 0%, transparent 45%),
+    linear-gradient(135deg, #36223a 0%, #1e1425 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(248 229 201 / 28%),
+    inset 0 0 0 3px #140f1c80,
+    0 12px 28px -10px rgb(0 0 0 / 74%);
 }
-.dream-page .dream-hero-actions a:first-child { background: linear-gradient(135deg, #ab3a34, #74252d); border-color: #eb8b73; }
+.dream-page .dream-hero-actions a:first-child {
+  background:
+    linear-gradient(180deg, rgb(255 235 220 / 22%) 0%, transparent 46%),
+    linear-gradient(135deg, #b53d37 0%, #76252e 100%);
+  border-color: #f0947c;
+  box-shadow:
+    inset 0 1px 0 rgb(255 236 224 / 44%),
+    inset 0 0 0 3px #140f1c80,
+    0 14px 32px -10px rgb(171 58 52 / 48%);
+}
 .dream-page .dream-hero-actions a b { font-size: 12px; }
 .dream-page .dream-hero-actions a span { font-size: 0.875rem; }
 .dream-page .dream-dossier-copy { color: #eee8e2; background: #17121e; }
 .dream-page :is(.dream-profile-grid, .dream-ability-list article) {
   border-color: var(--dream-tech-line);
-  background: #211827;
+  background:
+    radial-gradient(ellipse 72% 48% at 15% 0%, rgb(230 194 142 / 9%), transparent 62%),
+    linear-gradient(150deg, #261c2e 0%, #1c1423 100%);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+  box-shadow:
+    inset 0 1px 0 rgb(248 229 201 / 20%),
+    0 12px 28px -12px rgb(0 0 0 / 72%);
 }
-.dream-page .dream-dossier-close { background: #241b2e; border-color: #bfa5d58c; }
+.dream-page .dream-dossier-close {
+  background: linear-gradient(180deg, #2b2037 0%, #1f1728 100%);
+  border-color: #bfa5d599;
+  box-shadow:
+    inset 0 1px 0 rgb(248 229 201 / 22%),
+    0 4px 12px rgb(0 0 0 / 56%);
+}
 .dream-page .dream-dossier-close > span { font-size: 12px; }
 .dream-page .dream-dossier-title > p { font-size: 12px; }
 .dream-page .dream-poster-thumbnails button[aria-selected="true"] { border-color: var(--dream-gold); box-shadow: inset 0 0 0 2px var(--dream-scarlet); }
@@ -286,12 +362,39 @@ html[data-dream-chapter="true"] .dream-page .dream-hero-copy {
 .rxs-page :is(.rxs-headline-metrics article, .rxs-system-grid article, .rxs-stage-panel) {
   border-color: var(--cinema-rule);
   border-radius: 12px;
-  box-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 18%),
+    inset 0 0 0 1px rgb(167 190 205 / 10%),
+    0 18px 40px -16px rgb(0 0 0 / 80%);
 }
 .rxs-page .rxs-section-heading h2 { line-height: 1.15; letter-spacing: -0.035em; }
 .rxs-page .rxs-system-grid p { font-size: 1rem; line-height: 1.85; }
 .rxs-page .rxs-footer > a { min-height: 44px; font-size: 0.875rem; }
-.form-archive-page .form-archive-switcher { border-color: var(--cinema-rule); background: var(--cinema-surface); }
+.form-archive-page .form-archive-switcher {
+  border-color: var(--cinema-rule);
+  background: var(--cinema-surface);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 14%),
+    0 12px 28px -12px rgb(0 0 0 / 72%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .site-shell.film-edition .primary-action:hover {
+    border-color: #b8eff9;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 52%),
+      inset 0 0 0 3px #070c12,
+      0 14px 32px -8px rgb(0 0 0 / 82%),
+      0 0 28px rgb(119 211 228 / 32%);
+  }
+  .dream-page :is(.dream-character-grid, .dream-dolminence-grid) article:hover {
+    border-color: rgb(230 194 142 / 58%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 242 216 / 34%),
+      0 22px 48px -16px rgb(0 0 0 / 84%),
+      0 0 24px -8px rgb(230 194 142 / 24%);
+  }
+}
 
 @media (min-width: 761px) and (max-width: 1440px) and (orientation: landscape) {
   .site-shell.film-edition > .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); padding-top: 104px; }

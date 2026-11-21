@@ -7,23 +7,33 @@
    light: --form-slider-light (an "r g b" triple; Rexonance's ice by default).
    Fonts stay each site's own. */
 
+:where(.rxs-page) {
+  --form-slider-light: 121 232 255;
+  --form-slider-accent: 240 211 156;
+}
 :where(.exs-page) {
   --form-slider-light: 243 208 146;
+  --form-slider-accent: 220 229 242;
 }
 :where(.ffs-page) {
   --form-slider-light: 127 230 255;
+  --form-slider-accent: 216 197 255;
 }
 :where(.ics-page) {
   --form-slider-light: 166 230 255;
+  --form-slider-accent: 233 184 102;
 }
 :where(.mus-page) {
   --form-slider-light: 255 162 84;
+  --form-slider-accent: 55 198 192;
 }
 :where(.fst-page) {
   --form-slider-light: 170 178 255;
+  --form-slider-accent: 241 217 164;
 }
 :where(#realm-royal, #realm-royal-pickup, .fst-rr, .fst-rr-form-tabs) {
   --form-slider-light: 233 211 160;
+  --form-slider-accent: 215 198 250;
 }
 
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs,
@@ -31,25 +41,50 @@
   border-radius: 4px !important;
   background:
     linear-gradient(
+        90deg,
+        transparent 3%,
+        rgb(var(--form-slider-light, 121 232 255) / 0.72) 22%,
+        rgb(var(--form-slider-accent, 240 211 156) / 0.56) 50%,
+        rgb(var(--form-slider-light, 121 232 255) / 0.72) 78%,
+        transparent 97%
+      )
+      50% 0 / 94% 1px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(var(--form-slider-light, 121 232 255) / 0.42) 30%,
+        rgb(var(--form-slider-accent, 240 211 156) / 0.38) 50%,
+        rgb(var(--form-slider-light, 121 232 255) / 0.42) 70%,
+        transparent 94%
+      )
+      50% 100% / 88% 2px no-repeat,
+    linear-gradient(
       180deg,
-      rgb(255 255 255 / 0.08) 0%,
-      rgb(255 255 255 / 0.018) 32%,
-      rgb(0 0 0 / 0.36) 100%
+      rgb(255 255 255 / 0.1) 0%,
+      rgb(255 255 255 / 0.022) 34%,
+      rgb(0 0 0 / 0.44) 100%
     ),
     radial-gradient(
-      ellipse 84% 120% at 50% 108%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.095),
+      ellipse 86% 124% at 50% 108%,
+      rgb(var(--form-slider-light, 121 232 255) / 0.16),
       transparent 72%
     ),
-    rgb(7 13 22) !important;
+    radial-gradient(
+      ellipse 64% 90% at 16% 0%,
+      rgb(var(--form-slider-accent, 240 211 156) / 0.09),
+      transparent 66%
+    ),
+    linear-gradient(180deg, #060b13 0%, #091320 48%, #050911 100%) !important;
   box-shadow:
-    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.28),
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
-    inset 0 -1px 0 rgb(0 0 0 / 0.85),
-    inset 1px 0 0 rgb(255 255 255 / 0.08),
-    inset -1px 0 0 rgb(0 0 0 / 0.6),
-    inset 0 3px 10px -3px rgb(0 0 0 / 0.62),
-    0 12px 28px -16px rgb(0 0 0 / 0.8) !important;
+    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.36),
+    inset 0 1px 0 rgb(255 255 255 / 0.24),
+    inset 0 -1px 0 rgb(0 0 0 / 0.9),
+    inset 1px 0 0 rgb(var(--form-slider-light, 121 232 255) / 0.16),
+    inset -1px 0 0 rgb(var(--form-slider-accent, 240 211 156) / 0.14),
+    inset 0 4px 12px -2px rgb(0 0 0 / 0.76),
+    inset 0 -3px 10px -3px rgb(var(--form-slider-light, 121 232 255) / 0.16),
+    0 16px 34px -14px rgb(0 0 0 / 0.86),
+    0 0 24px -10px rgb(var(--form-slider-light, 121 232 255) / 0.22) !important;
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-rail-surface {
   clip-path: inset(0 round 4px) !important;
@@ -65,80 +100,100 @@
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface {
   background:
-    radial-gradient(ellipse 92% 54% at 28% 0%, rgb(255 255 255 / 0.28), transparent 58%),
+    radial-gradient(ellipse 94% 56% at 26% 0%, rgb(255 255 255 / 0.34), transparent 58%),
     radial-gradient(
-      ellipse 88% 64% at 50% 108%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.42),
+      ellipse 90% 68% at 50% 108%,
+      rgb(var(--form-slider-light, 121 232 255) / 0.5),
       transparent 68%
+    ),
+    radial-gradient(
+      ellipse 72% 54% at 88% 16%,
+      rgb(var(--form-slider-accent, 240 211 156) / 0.24),
+      transparent 62%
+    ),
+    linear-gradient(
+      135deg,
+      rgb(var(--form-slider-light, 121 232 255) / 0.28) 0%,
+      rgb(12 22 36 / 0.42) 48%,
+      rgb(var(--form-slider-accent, 240 211 156) / 0.22) 100%
     ),
     linear-gradient(
       180deg,
-      rgb(var(--form-slider-light, 121 232 255) / 0.3) 0%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.11) 54%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.22) 100%
+      rgb(var(--form-slider-light, 121 232 255) / 0.34) 0%,
+      rgb(var(--form-slider-light, 121 232 255) / 0.13) 54%,
+      rgb(var(--form-slider-light, 121 232 255) / 0.26) 100%
     ) !important;
   box-shadow:
     inset 0 -2px 0 rgb(var(--form-slider-light, 121 232 255)),
-    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.65),
-    inset 0 1px 0 rgb(255 255 255 / 0.38),
-    inset 0 0 16px -4px rgb(var(--form-slider-light, 121 232 255) / 0.32),
-    0 4px 14px -5px rgb(var(--form-slider-light, 121 232 255) / 0.36),
-    0 2px 8px rgb(0 0 0 / 0.52) !important;
+    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.74),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.46),
+    inset 1px 0 0 rgb(var(--form-slider-light, 121 232 255) / 0.48),
+    inset -1px 0 0 rgb(var(--form-slider-accent, 240 211 156) / 0.42),
+    inset 0 0 18px -3px rgb(var(--form-slider-light, 121 232 255) / 0.38),
+    0 6px 18px -4px rgb(var(--form-slider-light, 121 232 255) / 0.42),
+    0 3px 10px rgb(0 0 0 / 0.62) !important;
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface::before {
   inset: 1px;
   background:
-    radial-gradient(ellipse at 22% -6%, rgb(255 255 255 / 0.3), transparent 44%),
+    radial-gradient(ellipse at 22% -6%, rgb(255 255 255 / 0.36), transparent 46%),
     linear-gradient(
       152deg,
-      rgb(255 255 255 / 0.2),
+      rgb(255 255 255 / 0.24),
       transparent 34%,
-      rgb(255 255 255 / 0.03) 58%,
-      transparent 74%
+      rgb(var(--form-slider-accent, 240 211 156) / 0.08) 58%,
+      transparent 76%
     ),
     radial-gradient(
       ellipse at 78% 112%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.28),
+      rgb(var(--form-slider-light, 121 232 255) / 0.34),
       transparent 56%
     );
-  opacity: 0.92;
+  opacity: 0.95;
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > .liquid-selection-lens > .liquid-selection-surface::after {
-  right: 8%;
+  right: 6%;
   bottom: 2px;
-  left: 8%;
-  height: 1px;
+  left: 6%;
+  height: 1.5px;
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 0.55) 50%,
+    rgb(var(--form-slider-light, 121 232 255) / 0.78) 24%,
+    rgb(255 255 255 / 0.86) 50%,
+    rgb(var(--form-slider-accent, 240 211 156) / 0.76) 76%,
     transparent
   );
-  opacity: 0.78;
+  opacity: 0.88;
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs:is([data-liquid-pressed="true"], [data-liquid-held="true"], [data-liquid-dragging="true"]) > .liquid-selection-lens > .liquid-selection-surface {
   background:
-    radial-gradient(ellipse 90% 50% at 30% 0%, rgb(255 255 255 / 0.35), transparent 56%),
-    linear-gradient(118deg, transparent 18%, rgb(255 255 255 / 0.22) 35%, transparent 50%),
+    radial-gradient(ellipse 90% 50% at 30% 0%, rgb(255 255 255 / 0.42), transparent 56%),
+    linear-gradient(118deg, transparent 18%, rgb(255 255 255 / 0.26) 35%, transparent 52%),
     radial-gradient(
       ellipse 90% 70% at 50% 108%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.58),
+      rgb(var(--form-slider-light, 121 232 255) / 0.64),
       transparent 65%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 85% 15%,
+      rgb(var(--form-slider-accent, 240 211 156) / 0.32),
+      transparent 60%
     ),
     linear-gradient(
       180deg,
-      rgb(var(--form-slider-light, 121 232 255) / 0.38) 0%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.16) 52%,
-      rgb(var(--form-slider-light, 121 232 255) / 0.28) 100%
+      rgb(var(--form-slider-light, 121 232 255) / 0.42) 0%,
+      rgb(var(--form-slider-light, 121 232 255) / 0.18) 52%,
+      rgb(var(--form-slider-light, 121 232 255) / 0.32) 100%
     ) !important;
   box-shadow:
     inset 0 -2px 0 rgb(var(--form-slider-light, 121 232 255)),
-    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.85),
-    inset 0 1px 0 rgb(255 255 255 / 0.55),
-    inset 0 0 24px -2px rgb(var(--form-slider-light, 121 232 255) / 0.48),
-    0 8px 24px -4px rgb(var(--form-slider-light, 121 232 255) / 0.58),
-    0 0 14px -2px rgb(var(--form-slider-light, 121 232 255) / 0.36),
-    0 3px 8px rgb(0 0 0 / 0.55) !important;
+    inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.9),
+    inset 0 1.5px 0 rgb(255 255 255 / 0.62),
+    inset 0 0 26px -2px rgb(var(--form-slider-light, 121 232 255) / 0.54),
+    0 10px 26px -4px rgb(var(--form-slider-light, 121 232 255) / 0.62),
+    0 0 16px -2px rgb(var(--form-slider-light, 121 232 255) / 0.42),
+    0 4px 10px rgb(0 0 0 / 0.6) !important;
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] {
   position: relative;
@@ -153,7 +208,7 @@
   font-size: 13px !important;
   font-weight: 700 !important;
   letter-spacing: 0.1em !important;
-  color: rgb(232 242 249 / 0.82);
+  color: rgb(232 242 249 / 0.84);
   transition:
     color 160ms cubic-bezier(0.22, 1, 0.36, 1),
     text-shadow 160ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -162,31 +217,35 @@
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"][aria-selected="true"] span {
   color: #ffffff;
   text-shadow:
-    0 1px 2px rgb(0 0 0 / 0.72),
-    0 0 8px rgb(var(--form-slider-light, 121 232 255) / 0.16);
+    0 1px 2px rgb(0 0 0 / 0.84),
+    0 0 10px rgb(var(--form-slider-light, 121 232 255) / 0.34),
+    0 0 20px rgb(var(--form-slider-accent, 240 211 156) / 0.18);
 }
 :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:focus-visible {
   outline: 2px solid rgb(var(--form-slider-light, 121 232 255));
   outline-offset: -3px;
   box-shadow:
-    inset 0 0 0 4px rgb(7 13 22 / 0.82),
-    0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.4) !important;
+    inset 0 0 0 4px rgb(7 13 22 / 0.88),
+    inset 0 0 12px rgb(var(--form-slider-light, 121 232 255) / 0.28),
+    0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.52),
+    0 0 14px rgb(var(--form-slider-light, 121 232 255) / 0.32) !important;
 }
 
 @media (hover: hover) and (pointer: fine) and (forced-colors: none) {
   :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:not([aria-selected="true"]):hover {
     background: linear-gradient(
       180deg,
-      rgb(255 255 255 / 0.055),
-      rgb(var(--form-slider-light, 121 232 255) / 0.045)
+      rgb(255 255 255 / 0.08),
+      rgb(var(--form-slider-light, 121 232 255) / 0.07)
     ) !important;
     box-shadow:
-      inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.22),
-      inset 0 1px 0 rgb(255 255 255 / 0.12) !important;
+      inset 0 0 0 1px rgb(var(--form-slider-light, 121 232 255) / 0.32),
+      inset 0 1px 0 rgb(255 255 255 / 0.18),
+      0 2px 8px rgb(0 0 0 / 0.35) !important;
   }
   :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"]:not([aria-selected="true"]):hover span {
-    color: #f5fbff;
-    text-shadow: 0 0 6px rgb(var(--form-slider-light, 121 232 255) / 0.14);
+    color: #f8fcff;
+    text-shadow: 0 0 10px rgb(var(--form-slider-light, 121 232 255) / 0.26);
   }
 }
 
@@ -259,7 +318,7 @@ html:is([data-world-effects="economy"], [data-rzn-constrained]) .form-slider.for
     padding-inline: 2px !important;
   }
   :root .form-slider.form-slider.form-slider.rxs-stage-tabs.liquid-swipe-tabs > button[role="tab"] span {
-    font-size: 11px !important;
+    font-size: 12px !important;
     letter-spacing: 0 !important;
   }
 }

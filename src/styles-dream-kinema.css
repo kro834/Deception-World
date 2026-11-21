@@ -488,55 +488,62 @@
 }
 
 .dream-page.dream-page .dream-dossier-shell {
-  border: 1px solid rgb(228 192 124 / 68%);
-  outline: 1px solid rgb(228 192 124 / 30%);
+  border: 1px solid rgb(236 200 130 / 74%);
+  outline: 1px solid rgb(236 200 130 / 34%);
   outline-offset: -6px;
   background:
-    radial-gradient(62% 48% at 24% 0%, rgb(244 206 138 / 12%), transparent 70%),
-    radial-gradient(50% 42% at 88% 100%, rgb(196 68 56 / 10%), transparent 70%),
-    linear-gradient(180deg, #191022 0%, #100a17 100%);
+    linear-gradient(135deg, #fae2a8, #b68c46) 0 0 / 34px 2.5px no-repeat,
+    linear-gradient(135deg, #fae2a8, #b68c46) 0 0 / 2.5px 34px no-repeat,
+    linear-gradient(225deg, #fae2a8, #b68c46) 100% 0 / 34px 2.5px no-repeat,
+    linear-gradient(225deg, #fae2a8, #b68c46) 100% 0 / 2.5px 34px no-repeat,
+    radial-gradient(64% 50% at 22% 0%, rgb(250 212 142 / 16%), transparent 70%),
+    radial-gradient(52% 44% at 88% 100%, rgb(206 70 58 / 14%), transparent 70%),
+    linear-gradient(180deg, #1d1226 0%, #110b19 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 240 202 / 26%),
-    inset 0 0 0 2px rgb(200 164 92 / 12%),
-    0 34px 76px -18px rgb(0 0 0 / 92%);
+    inset 0 1px 0 rgb(255 244 212 / 30%),
+    inset 0 0 0 2px rgb(216 180 108 / 16%),
+    0 36px 82px -18px rgb(0 0 0 / 94%);
 }
 
 .dream-page.dream-page .dream-dossier-visuals figure {
-  border: 1px solid rgb(228 192 124 / 58%);
-  outline: 1px solid rgb(228 192 124 / 24%);
+  border: 1px solid rgb(236 200 130 / 64%);
+  outline: 1px solid rgb(236 200 130 / 28%);
   outline-offset: -5px;
+  background:
+    radial-gradient(66% 58% at 50% 24%, rgb(250 210 136 / 14%), transparent 72%),
+    #0d0814;
   box-shadow:
-    inset 0 0 28px rgb(244 200 124 / 12%),
-    0 22px 46px -16px rgb(0 0 0 / 88%);
+    inset 0 0 32px rgb(248 202 124 / 16%),
+    0 24px 52px -16px rgb(0 0 0 / 90%);
 }
 
 .dream-page.dream-page .dream-dossier-title > span {
   border: 1px solid var(--ts-shu);
-  outline: 1px solid rgb(224 102 79 / 48%);
+  outline: 1px solid rgb(232 110 86 / 52%);
   outline-offset: 2px;
   color: var(--ts-kinari);
   background:
-    linear-gradient(90deg, #f3dc9f 0 10px, transparent 10px) 0 0 / 100% 1.5px no-repeat,
-    radial-gradient(74% 64% at 50% 25%, rgb(236 112 88 / 34%), transparent 75%),
-    linear-gradient(180deg, #a8352c 0%, #74201b 100%);
+    linear-gradient(90deg, #fae2a8 0 12px, transparent 12px) 0 0 / 100% 2px no-repeat,
+    radial-gradient(74% 64% at 50% 25%, rgb(244 118 92 / 38%), transparent 75%),
+    linear-gradient(180deg, #b2382e 0%, #78201b 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 236 200 / 28%),
-    0 6px 16px rgb(0 0 0 / 42%);
+    inset 0 1px 0 rgb(255 240 206 / 34%),
+    0 8px 18px rgb(0 0 0 / 46%);
 }
 
 .dream-page.dream-page :is(.dream-profile-grid, .dream-ability-list article) {
-  border: 1px solid rgb(220 184 114 / 44%);
+  border: 1px solid rgb(228 192 122 / 50%);
   background:
-    linear-gradient(135deg, var(--ts-kin-hi, #f3e0b0), var(--ts-kin)) 0 0 / 24px 2px no-repeat,
-    linear-gradient(135deg, var(--ts-kin-hi, #f3e0b0), var(--ts-kin)) 0 0 / 2px 24px no-repeat,
-    linear-gradient(315deg, var(--ts-kin), transparent) 100% 100% / 18px 1px no-repeat,
-    linear-gradient(315deg, var(--ts-kin), transparent) 100% 100% / 1px 18px no-repeat,
-    radial-gradient(70% 56% at 12% 0%, rgb(243 220 168 / 10%), transparent 68%),
-    linear-gradient(174deg, rgb(243 224 176 / 7%) 0, transparent 42%),
-    #130c19;
+    linear-gradient(135deg, #fae2a8, var(--ts-kin)) 0 0 / 26px 2px no-repeat,
+    linear-gradient(135deg, #fae2a8, var(--ts-kin)) 0 0 / 2px 26px no-repeat,
+    linear-gradient(315deg, var(--ts-kin), transparent) 100% 100% / 20px 1.5px no-repeat,
+    linear-gradient(315deg, var(--ts-kin), transparent) 100% 100% / 1.5px 20px no-repeat,
+    radial-gradient(72% 58% at 12% 0%, rgb(248 222 168 / 13%), transparent 68%),
+    linear-gradient(174deg, rgb(246 226 180 / 9%) 0, transparent 44%),
+    #150d1c;
   box-shadow:
-    inset 0 1px 0 rgb(252 236 196 / 16%),
-    0 12px 28px -12px rgb(0 0 0 / 56%);
+    inset 0 1px 0 rgb(255 242 206 / 20%),
+    0 14px 32px -12px rgb(0 0 0 / 62%);
 }
 
 .dream-page.dream-page .dream-dossier-switcher {

@@ -71,26 +71,27 @@
   color: #f2f7fb;
   text-align: left;
   background:
-    radial-gradient(ellipse 70% 42% at 50% 0%, rgb(122 232 255 / 11%), transparent 70%),
-    radial-gradient(ellipse 60% 34% at 50% 104%, rgb(255 95 200 / 8%), transparent 70%),
+    radial-gradient(ellipse 76% 48% at 24% 8%, rgb(48 138 186 / 38%), transparent 70%),
+    radial-gradient(ellipse 64% 44% at 18% 96%, rgb(208 156 74 / 24%), transparent 70%),
     var(--lr-ink);
 }
 
 /* The World's key visual behind the recovery card: the sky above it on a
-   phone, falling to ink under the card. The copy and controls remain on
-   their opaque plate. */
+   phone, falling to a lit sapphire-and-gold museum hall under the card. */
 .app-not-found.app-not-found::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
+    radial-gradient(ellipse 80% 42% at 50% 0%, rgb(62 162 212 / 26%), transparent 70%),
+    radial-gradient(ellipse 76% 38% at 24% 96%, rgb(212 162 78 / 22%), transparent 72%),
     linear-gradient(
       180deg,
-      rgb(3 6 12 / 42%),
-      rgb(3 6 12 / 58%) 34%,
-      rgb(3 6 12 / 88%) 62%,
-      var(--lr-ink) 84%
+      rgb(5 12 22 / 36%),
+      rgb(7 17 30 / 56%) 34%,
+      rgb(8 19 34 / 88%) 62%,
+      #06101d 86%
     ),
     url("/deception-world-poster-delivery-720.webp") center 16% / cover no-repeat;
   pointer-events: none;
@@ -136,37 +137,41 @@
   }
 }
 
-/* The card: museum obsidian glass, beveled ice & gold rims, corner filigree,
-   the prism on top (::before) and the three recovery plaques as its foot. */
+/* The card: sculpted museum sapphire-obsidian case, stepped gold & cyan bevels,
+   forged corner filigree, prism beam on top (::before), and three plaques at its foot. */
 .app-not-found.app-not-found > .app-not-found-plate {
   position: relative;
   z-index: 0;
   grid-column: plate-start / plate-end;
   grid-row: plate-start / recovery-end;
   overflow: hidden;
-  border: 1px solid rgb(157 234 250 / 38%);
+  border: 1px solid rgb(240 207 134 / 64%);
   border-radius: 6px;
   background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 24px 2px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 24px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 24px 2px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 2px 24px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 24px 2px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 24px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 24px 2px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 2px 24px no-repeat,
-    linear-gradient(168deg, rgb(245 253 255 / 9%) 0%, rgb(122 232 255 / 4%) 10%, transparent 34%),
-    radial-gradient(ellipse 75% 48% at 18% 8%, rgb(122 232 255 / 11%), transparent 68%),
-    radial-gradient(ellipse 68% 46% at 86% 92%, rgb(240 207 134 / 9%), transparent 70%),
-    linear-gradient(148deg, #0b1828 0%, #060e19 54%, #091523 100%);
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 32px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 32px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 0 / 32px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 0 / 2px 32px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 32px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 32px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 100% / 32px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 100% / 2px 32px no-repeat,
+    linear-gradient(132deg, rgb(255 254 248 / 15%) 0%, rgb(122 232 255 / 7%) 18%, transparent 44%),
+    radial-gradient(ellipse 76% 54% at 24% 12%, rgb(62 162 212 / 34%), transparent 68%),
+    radial-gradient(ellipse 72% 52% at 84% 88%, rgb(232 186 102 / 24%), transparent 70%),
+    linear-gradient(148deg, #16304b 0%, #091728 52%, #10253c 100%);
   box-shadow:
-    0 0 0 1px rgb(2 5 11 / 92%),
-    0 0 0 4px rgb(5 11 20 / 78%),
-    0 0 0 5px rgb(240 207 134 / 22%),
-    inset 0 1px 0 rgb(245 253 255 / 28%),
-    inset 0 -1px 0 rgb(240 207 134 / 24%),
-    inset 0 0 40px rgb(122 232 255 / 6%),
-    0 44px 108px rgb(0 0 0 / 78%);
+    0 0 0 1px rgb(2 5 11 / 95%),
+    0 0 0 5px rgb(6 14 24 / 90%),
+    0 0 0 6px rgb(240 207 134 / 58%),
+    0 0 84px -10px rgb(122 232 255 / 30%),
+    0 0 116px -24px rgb(240 207 134 / 22%),
+    inset 0 1px 0 rgb(255 253 244 / 44%),
+    inset 0 -1px 0 rgb(240 207 134 / 36%),
+    inset 0 0 0 6px rgb(4 10 18 / 80%),
+    inset 0 0 0 7px rgb(157 234 250 / 22%),
+    inset 0 0 54px rgb(122 232 255 / 11%),
+    0 52px 120px rgb(0 0 0 / 88%);
   pointer-events: none;
 }
 
@@ -175,9 +180,10 @@
   top: 0;
   right: 0;
   left: 0;
-  height: 2px;
+  height: 3px;
   content: "";
   background: var(--lr-prism);
+  box-shadow: 0 2px 20px rgb(122 232 255 / 52%);
   transform-origin: 0 50%;
 }
 
@@ -205,8 +211,8 @@
   margin: 0;
 }
 
-/* The ID-photo slot: recessed museum specimen well, beveled corner filigree,
-   ambient celestial light, and the DW sigil in the picture's place. */
+/* The ID-photo slot: recessed museum specimen vitrine, four-corner bimetallic
+   filigree, ambient celestial spotlight, and the DW crystal sigil. */
 .app-not-found.app-not-found > .app-not-found-sigil {
   grid-column: slot-start / slot-end;
   grid-row: slot-start / slot-end;
@@ -218,24 +224,31 @@
   margin-bottom: 22px;
   padding: 18px 22px;
   overflow: hidden;
-  border: 1px solid rgb(157 234 250 / 38%);
+  border: 1px solid rgb(240 207 134 / 60%);
   border-radius: 4px;
   background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 16px 1.5px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1.5px 16px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 16px 1.5px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1.5px 16px no-repeat,
-    linear-gradient(128deg, rgb(255 255 255 / 6%) 0%, transparent 42%),
-    radial-gradient(75% 90% at 32% 36%, rgb(122 232 255 / 16%), transparent 70%),
-    radial-gradient(65% 75% at 82% 84%, rgb(240 207 134 / 10%), transparent 72%),
-    #040912;
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 20px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 0 0 / 2px 20px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 0 / 20px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 0 / 2px 20px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 20px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 20px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 100% / 20px 2px no-repeat,
+    linear-gradient(var(--lr-ice) 0 0) 100% 100% / 2px 20px no-repeat,
+    linear-gradient(128deg, rgb(255 253 242 / 12%) 0%, transparent 44%),
+    radial-gradient(75% 88% at 34% 32%, rgb(72 182 230 / 34%), transparent 70%),
+    radial-gradient(68% 76% at 80% 82%, rgb(240 207 134 / 26%), transparent 72%),
+    linear-gradient(160deg, #0b1c2e 0%, #050e1a 64%, #091728 100%);
   box-shadow:
-    inset 0 3px 16px rgb(0 0 0 / 76%),
-    inset 0 1px 0 rgb(245 253 255 / 16%),
-    inset 0 -1px 0 rgb(240 207 134 / 20%);
+    0 0 0 1px rgb(2 5 10 / 94%),
+    0 0 0 3px rgb(6 14 24 / 88%),
+    0 0 0 4px rgb(157 234 250 / 30%),
+    inset 0 4px 18px rgb(0 0 0 / 78%),
+    inset 0 1px 0 rgb(252 255 255 / 30%),
+    inset 0 -1px 0 rgb(240 207 134 / 34%);
 }
 
-/* The sigil: a cut diamond with DW, the World's brand mark. */
+/* The sigil: a cut gold-and-crystal diamond with DW, the World's brand mark. */
 .app-not-found.app-not-found > .app-not-found-sigil > i {
   position: relative;
   isolation: isolate;
@@ -244,33 +257,40 @@
   place-items: center;
   width: 84px;
   height: 84px;
-  color: #ebfcff;
-  background: linear-gradient(135deg, var(--lr-ice), var(--lr-pink) 52%, var(--lr-gold));
+  color: #fffdf6;
+  background: linear-gradient(135deg, #fff5d8 0%, var(--lr-gold) 34%, var(--lr-ice) 68%, var(--lr-pink) 100%);
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-  filter: drop-shadow(0 8px 20px rgb(0 0 0 / 72%)) drop-shadow(0 0 14px rgb(122 232 255 / 26%));
+  filter:
+    drop-shadow(0 10px 22px rgb(0 0 0 / 82%))
+    drop-shadow(0 0 22px rgb(240 207 134 / 44%))
+    drop-shadow(0 0 32px rgb(122 232 255 / 34%));
   font:
     700 20px / 1 "Oxanium",
     sans-serif;
   font-style: normal;
   letter-spacing: 0.08em;
   text-indent: 0.08em;
+  text-shadow: 0 0 14px rgb(240 207 134 / 58%);
 }
 
 .app-not-found.app-not-found > .app-not-found-sigil > i::before {
   position: absolute;
-  inset: 1px;
+  inset: 2px;
   z-index: -1;
   content: "";
-  background: linear-gradient(135deg, rgb(122 232 255 / 20%), rgb(122 232 255 / 2%) 60%), #070d16;
+  background:
+    radial-gradient(circle at 38% 34%, rgb(240 207 134 / 38%), transparent 62%),
+    linear-gradient(135deg, rgb(122 232 255 / 34%), rgb(14 34 54 / 92%) 62%),
+    #0b1b2d;
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
 .app-not-found.app-not-found > .app-not-found-sigil > i::after {
   position: absolute;
-  inset: 14px;
+  inset: 12px;
   z-index: -1;
   content: "";
-  background: linear-gradient(135deg, rgb(122 232 255 / 16%), rgb(255 95 200 / 6%));
+  background: linear-gradient(135deg, rgb(255 244 206 / 32%), rgb(122 232 255 / 22%));
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
@@ -285,7 +305,7 @@
     700 64px / 1 "Oxanium",
     sans-serif;
   letter-spacing: -0.02em;
-  -webkit-text-stroke: 1px rgb(122 232 255 / 34%);
+  -webkit-text-stroke: 1.5px rgb(240 207 134 / 52%);
 }
 
 /* The header: the record's status on the left, the archive on the right. */
@@ -295,9 +315,10 @@
   align-items: center;
   gap: 10px;
   justify-self: start;
-  color: var(--lr-ice);
+  color: #ffeab8;
   font: 400 12px / 1.4 var(--lr-hud);
   letter-spacing: 0.18em;
+  text-shadow: 0 0 14px rgb(240 207 134 / 36%);
 }
 
 /* Signal red marks where the record is missing: a still cell, no blink. */
@@ -307,16 +328,21 @@
   height: 8px;
   content: "";
   background: var(--lr-signal);
-  box-shadow: 0 0 10px rgb(255 90 126 / 50%);
+  box-shadow:
+    0 0 0 1px rgb(255 210 220 / 55%),
+    0 0 12px rgb(255 90 126 / 75%);
 }
 
 .app-not-found.app-not-found > p:first-of-type {
   grid-row: 5;
   margin-top: 8px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgb(122 232 255 / 16%);
-  background: linear-gradient(180deg, transparent, rgb(122 232 255 / 3%));
-  color: var(--lr-text-3);
+  border-bottom: 1px solid rgb(240 207 134 / 38%);
+  background:
+    linear-gradient(90deg, var(--lr-gold), var(--lr-ice) 54%, transparent) 0 100% / 100% 1.5px
+      no-repeat,
+    linear-gradient(180deg, transparent, rgb(122 232 255 / 6%));
+  color: #bed3e3;
   font: 400 12px / 1.4 var(--lr-hud);
   letter-spacing: 0.18em;
 }
@@ -324,7 +350,7 @@
 .app-not-found.app-not-found > h1 {
   grid-row: 6;
   margin: clamp(20px, 4vw, 30px) 0 0;
-  color: var(--lr-ice-hi);
+  color: #fff9ee;
   font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
   font-size: clamp(20px, 6.6vw, 42px);
   font-weight: 700;
@@ -333,7 +359,10 @@
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: anywhere;
-  text-shadow: 0 0 20px rgb(122 232 255 / 22%);
+  text-shadow:
+    0 2px 0 rgb(4 10 18 / 90%),
+    0 0 24px rgb(240 207 134 / 28%),
+    0 0 40px rgb(122 232 255 / 22%);
 }
 
 .app-not-found.app-not-found > p:last-of-type {
@@ -365,15 +394,16 @@
   min-height: 48px;
   margin: clamp(24px, 4vw, 30px) 6px 6px;
   padding: 0 24px 0 20px;
-  border: 0;
+  border: 1px solid #f0fdff;
   border-radius: 0;
   color: #03141c;
   background:
-    linear-gradient(rgb(255 255 255 / 55%) 0 0) 0 0 / 100% 1px no-repeat,
-    linear-gradient(180deg, #b2f3ff, var(--lr-ice));
+    linear-gradient(rgb(255 255 255 / 72%) 0 0) 0 0 / 100% 1px no-repeat,
+    linear-gradient(135deg, #ffffff 0%, #c6f6ff 48%, var(--lr-ice) 100%);
   box-shadow:
-    0 0 0 1px rgb(3 20 28 / 60%),
-    0 0 32px rgb(122 232 255 / 26%);
+    0 0 0 1px rgb(3 16 24 / 86%),
+    inset 0 -1px 0 rgb(240 207 134 / 42%),
+    0 14px 36px -6px rgb(122 232 255 / 38%);
   font: 400 13px / 1.2 var(--lr-hud);
   letter-spacing: 0.12em;
   text-decoration: none;
@@ -385,14 +415,14 @@
   inset: -6px;
   content: "";
   background:
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 12px 1.5px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 0 0 / 1.5px 12px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 12px 1.5px no-repeat,
-    linear-gradient(var(--lr-ice) 0 0) 100% 0 / 1.5px 12px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 12px 1.5px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 0 100% / 1.5px 12px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 12px 1.5px no-repeat,
-    linear-gradient(var(--lr-gold) 0 0) 100% 100% / 1.5px 12px no-repeat;
+    linear-gradient(#e4fbff 0 0) 0 0 / 14px 2px no-repeat,
+    linear-gradient(#e4fbff 0 0) 0 0 / 2px 14px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 0 / 14px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 100% 0 / 2px 14px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 14px 2px no-repeat,
+    linear-gradient(var(--lr-gold) 0 0) 0 100% / 2px 14px no-repeat,
+    linear-gradient(#e4fbff 0 0) 100% 100% / 14px 2px no-repeat,
+    linear-gradient(#e4fbff 0 0) 100% 100% / 2px 14px no-repeat;
   pointer-events: none;
 }
 
@@ -408,16 +438,23 @@
   rotate: 45deg;
 }
 
-/* The second way: the record index, a quiet outlined plate. */
+/* The second way: the record index, a sculpted gold-accented glass plaque. */
 .app-not-found.app-not-found > a.app-not-found-search {
   grid-row: 9;
   gap: 12px;
   margin-top: 14px;
   padding: 0 20px;
-  border: 1px solid rgb(122 232 255 / 45%);
-  color: var(--lr-ice-hi);
-  background: rgb(122 232 255 / 6%);
-  box-shadow: none;
+  border: 1px solid rgb(157 234 250 / 52%);
+  border-left: 3px solid var(--lr-gold);
+  color: #ebfbff;
+  background:
+    linear-gradient(128deg, rgb(255 252 240 / 10%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(20 42 62 / 84%), rgb(7 16 28 / 95%));
+  box-shadow:
+    0 0 0 1px rgb(2 6 12 / 88%),
+    inset 0 1px 0 rgb(248 254 255 / 24%),
+    inset 0 -1px 0 rgb(240 207 134 / 20%),
+    0 12px 26px -14px rgb(0 0 0 / 82%);
   font:
     600 14px / 1.2 "Noto Sans JP",
     sans-serif;
@@ -431,15 +468,17 @@
 
 @media (hover: hover) and (pointer: fine) {
   .app-not-found.app-not-found > a:hover {
-    border-color: transparent;
+    border-color: #ffffff;
     background:
-      linear-gradient(rgb(255 255 255 / 60%) 0 0) 0 0 / 100% 1px no-repeat,
-      linear-gradient(180deg, #c6f5ff, #8eedff);
+      linear-gradient(rgb(255 255 255 / 80%) 0 0) 0 0 / 100% 1px no-repeat,
+      linear-gradient(135deg, #ffffff 0%, #d8f8ff 48%, #98effe 100%);
     transform: none;
   }
 
   .app-not-found.app-not-found > a.app-not-found-search:hover {
-    background: rgb(122 232 255 / 14%);
+    border-color: #dffaff;
+    background: linear-gradient(180deg, rgb(30 62 88 / 92%), rgb(10 24 40 / 97%));
+    color: #ffffff;
   }
 }
 
@@ -466,12 +505,15 @@
   box-sizing: border-box;
   margin: 0;
   padding: 18px var(--lr-pad-x) var(--lr-pad-y);
-  border-top: 1px solid rgb(240 207 134 / 32%);
+  border-top: 1px solid rgb(240 207 134 / 62%);
   background:
-    linear-gradient(90deg, rgb(122 232 255 / 42%), rgb(240 207 134 / 42%) 52%, transparent) 0 0 /
-      min(260px, 52%) 1px no-repeat,
-    linear-gradient(180deg, rgb(14 30 46 / 52%), rgb(4 9 17 / 36%) 70%);
-  box-shadow: inset 0 1px 0 rgb(245 253 255 / 12%);
+    linear-gradient(90deg, var(--lr-gold), var(--lr-ice) 50%, var(--lr-gold) 92%, transparent) 0 0 /
+      100% 2px no-repeat,
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgb(240 207 134 / 16%), transparent 72%),
+    linear-gradient(180deg, rgb(28 56 82 / 78%), rgb(10 23 38 / 86%) 74%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 252 240 / 28%),
+    inset 0 16px 28px -18px rgb(122 232 255 / 22%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a {
@@ -479,49 +521,79 @@
   min-height: 112px;
   margin: 0;
   padding: 12px;
-  border: 1px solid rgb(157 234 250 / 44%);
+  border: 1px solid rgb(168 238 252 / 64%);
   border-radius: 3px;
-  background: #050c16;
+  background:
+    radial-gradient(ellipse 86% 72% at 50% 24%, rgb(56 138 188 / 52%), transparent 72%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgb(232 188 106 / 26%), transparent 70%),
+    linear-gradient(160deg, #122a42 0%, #081526 60%, #0e2238 100%);
   box-shadow:
-    0 0 0 1px rgb(2 6 12 / 90%),
-    inset 0 1px 0 rgb(245 253 255 / 26%),
-    inset 0 -1px 0 rgb(240 207 134 / 22%),
-    0 16px 34px -14px rgb(0 0 0 / 82%);
+    0 0 0 1px rgb(2 6 12 / 94%),
+    0 0 0 3px rgb(6 14 24 / 86%),
+    0 0 0 4px rgb(240 207 134 / 32%),
+    inset 0 1px 0 rgb(252 255 255 / 42%),
+    inset 0 -1px 0 rgb(240 207 134 / 34%),
+    0 20px 42px -12px rgb(0 0 0 / 88%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"] {
-  border-color: rgb(240 207 134 / 68%);
+  border-color: #f6d992;
+  background:
+    radial-gradient(ellipse 88% 72% at 50% 22%, rgb(232 186 98 / 48%), transparent 72%),
+    radial-gradient(ellipse 76% 60% at 50% 100%, rgb(86 198 228 / 28%), transparent 70%),
+    linear-gradient(160deg, #322b1c 0%, #111c2b 60%, #212628 100%);
   box-shadow:
-    0 0 0 1px rgb(2 6 12 / 90%),
-    inset 0 1px 0 rgb(255 248 224 / 34%),
-    inset 0 -1px 0 rgb(157 234 250 / 22%),
-    0 16px 34px -14px rgb(0 0 0 / 84%),
-    0 0 22px -8px rgb(240 207 134 / 28%);
+    0 0 0 1px rgb(2 6 12 / 94%),
+    0 0 0 3px rgb(7 14 22 / 88%),
+    0 0 0 4px rgb(244 211 136 / 54%),
+    inset 0 1px 0 rgb(255 252 238 / 50%),
+    inset 0 -1px 0 rgb(157 234 250 / 34%),
+    0 20px 42px -12px rgb(0 0 0 / 90%),
+    0 0 32px -4px rgb(244 211 136 / 44%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a > img {
-  opacity: 0.54;
+  opacity: 0.68;
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a::before {
-  background: linear-gradient(
-    180deg,
-    rgb(3 8 16 / 26%) 0%,
-    rgb(4 10 20 / 44%) 42%,
-    rgb(3 7 14 / 92%) 78%,
-    #03060c 100%
-  );
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 18%, rgb(122 232 255 / 16%), transparent 70%),
+    linear-gradient(
+      180deg,
+      rgb(6 16 28 / 12%) 0%,
+      rgb(8 20 34 / 26%) 38%,
+      rgb(9 22 38 / 86%) 72%,
+      rgb(7 16 28 / 95%) 100%
+    );
+}
+
+.app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"]::before {
+  background:
+    radial-gradient(ellipse 90% 58% at 50% 20%, rgb(244 211 136 / 26%), transparent 70%),
+    linear-gradient(
+      180deg,
+      rgb(24 20 12 / 10%) 0%,
+      rgb(18 22 28 / 26%) 38%,
+      rgb(18 24 34 / 86%) 72%,
+      rgb(12 18 28 / 95%) 100%
+    );
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a > small {
   font: 400 12px / 1.55 var(--lr-hud);
   letter-spacing: 0.16em;
-  color: var(--lr-ice);
-  text-shadow: 0 1px 6px rgb(0 0 0 / 85%);
+  color: #bdf4ff;
+  text-shadow:
+    0 1px 6px rgb(0 0 0 / 90%),
+    0 0 12px rgb(122 232 255 / 38%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"] > small {
-  color: #f6db9c;
+  color: #ffeab4;
+  text-shadow:
+    0 1px 6px rgb(0 0 0 / 90%),
+    0 0 14px rgb(240 207 134 / 48%);
 }
 
 .app-not-found.app-not-found > nav.recovery-tiles > a[aria-label] > small {
@@ -535,30 +607,34 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-align: center;
-  color: #f4faff;
-  text-shadow: 0 1px 10px rgb(0 0 0 / 88%);
+  color: #fffdf8;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 92%);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .app-not-found.app-not-found > nav.recovery-tiles > a:hover {
-    border-color: #daf9ff;
-    background: #081322;
+    border-color: #e2fbff;
+    background: #081526;
     box-shadow:
-      0 0 0 1px rgb(157 234 250 / 34%),
-      inset 0 1px 0 rgb(255 255 255 / 34%),
-      inset 0 -1px 0 rgb(240 207 134 / 28%),
-      0 20px 40px -12px rgb(0 0 0 / 86%),
-      0 0 26px -4px rgb(122 232 255 / 28%);
+      0 0 0 1px rgb(157 234 250 / 42%),
+      0 0 0 3px rgb(5 11 20 / 86%),
+      0 0 0 4px rgb(240 207 134 / 34%),
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      inset 0 -1px 0 rgb(240 207 134 / 32%),
+      0 22px 44px -12px rgb(0 0 0 / 88%),
+      0 0 28px -4px rgb(122 232 255 / 34%);
   }
 
   .app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"]:hover {
-    border-color: #ffe8b5;
+    border-color: #ffecbe;
     box-shadow:
-      0 0 0 1px rgb(240 207 134 / 38%),
-      inset 0 1px 0 rgb(255 250 232 / 38%),
-      inset 0 -1px 0 rgb(157 234 250 / 26%),
-      0 20px 40px -12px rgb(0 0 0 / 86%),
-      0 0 28px -4px rgb(240 207 134 / 36%);
+      0 0 0 1px rgb(240 207 134 / 46%),
+      0 0 0 3px rgb(5 11 20 / 86%),
+      0 0 0 4px rgb(240 207 134 / 48%),
+      inset 0 1px 0 rgb(255 250 232 / 44%),
+      inset 0 -1px 0 rgb(157 234 250 / 30%),
+      0 22px 44px -12px rgb(0 0 0 / 88%),
+      0 0 30px -4px rgb(240 207 134 / 42%);
   }
 }
 
@@ -788,8 +864,11 @@
   .app-not-found.app-not-found > h1 {
     padding-top: clamp(20px, 4vw, 30px);
     margin-top: 0;
-    border-top: 1px solid rgb(122 232 255 / 16%);
-    background: linear-gradient(180deg, rgb(122 232 255 / 3%), transparent 12px);
+    border-top: 1px solid rgb(240 207 134 / 42%);
+    background:
+      linear-gradient(90deg, var(--lr-gold), var(--lr-ice) 54%, transparent) 0 0 / 100% 1.5px
+        no-repeat,
+      linear-gradient(180deg, rgb(240 207 134 / 7%), transparent 18px);
   }
 }
 
@@ -856,19 +935,23 @@
 
   /* Round 2 (2026-10-22): the poster (112vh tall, so 74.7vh wide, on the
      right) ended in a hard vertical edge mid-screen (x 768 at 1440 x 900,
-     1114 at 1920 x 1080); the first layer is solid ink up to that edge and
-     fades over 24vh into the picture. */
+     1114 at 1920 x 1080); the ink fade conceals that edge cleanly while
+     sapphire & champagne-gold gallery spotlights illuminate the hall. */
   .app-not-found.app-not-found::before {
     background:
-      linear-gradient(90deg, var(--lr-ink) calc(100% - 74.7vh), transparent calc(100% - 50.7vh)),
+      radial-gradient(circle at 18% 12%, transparent 0 210px, rgb(157 234 250 / 12%) 211px 212.5px, transparent 214px),
+      radial-gradient(ellipse 58% 52% at 24% 12%, rgb(54 148 198 / 42%), transparent 70%),
+      radial-gradient(ellipse 52% 48% at 18% 92%, rgb(212 162 76 / 28%), transparent 70%),
+      radial-gradient(ellipse 46% 54% at 38% 52%, rgb(42 108 162 / 34%), transparent 72%),
+      linear-gradient(90deg, #06101d calc(100% - 74.7vh), transparent calc(100% - 50.7vh)),
       linear-gradient(
         90deg,
-        var(--lr-ink) 0 30%,
-        rgb(3 6 12 / 84%) 46%,
-        rgb(3 6 12 / 46%) 64%,
-        rgb(3 6 12 / 28%) 100%
+        #06101d 0 30%,
+        rgb(6 16 29 / 84%) 46%,
+        rgb(5 12 22 / 46%) 64%,
+        rgb(4 9 17 / 26%) 100%
       ),
-      linear-gradient(180deg, rgb(3 6 12 / 10%), transparent 30%, rgb(3 6 12 / 70%) 100%),
+      linear-gradient(180deg, rgb(6 15 28 / 12%), transparent 30%, rgb(5 12 22 / 72%) 100%),
       url("/deception-world-poster-delivery.webp") right 12% / auto 112% no-repeat;
   }
 
@@ -1173,6 +1256,7 @@
 
   .app-not-found.app-not-found > :is(span, p, h1) {
     color: CanvasText;
+    background: none;
     text-shadow: none;
   }
 
@@ -1180,6 +1264,14 @@
     border: 1px solid LinkText;
     color: LinkText;
     background: Canvas;
+    box-shadow: none;
+  }
+
+  .app-not-found.app-not-found > a.app-not-found-search {
+    border: 1px solid LinkText;
+    color: LinkText;
+    background: Canvas;
+    box-shadow: none;
   }
 
   .app-not-found.app-not-found > a::after {
@@ -1189,16 +1281,24 @@
   .app-not-found.app-not-found > nav.recovery-tiles {
     border-top: 1px solid CanvasText;
     background: Canvas;
+    box-shadow: none;
   }
 
-  .app-not-found.app-not-found > nav.recovery-tiles > a {
+  .app-not-found.app-not-found > nav.recovery-tiles > a,
+  .app-not-found.app-not-found > nav.recovery-tiles > a[data-recent="true"] {
     border: 1px solid LinkText;
     background: Canvas;
+    box-shadow: none;
+  }
+
+  .app-not-found.app-not-found > nav.recovery-tiles > a::before {
+    display: none;
   }
 
   .app-not-found.app-not-found > nav.recovery-tiles > a > small,
   .app-not-found.app-not-found > nav.recovery-tiles > a > b {
     color: LinkText;
+    text-shadow: none;
   }
 
   .app-not-found.app-not-found > a:hover,

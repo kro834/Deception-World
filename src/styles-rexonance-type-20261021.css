@@ -867,35 +867,96 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
 }
 
 /* ================================================================
-   OPTICS (2026-11-14): the titles catch the light
+   OPTICS (2026-11-14 / Wave-6 Flagship Elevation): the titles catch the light
    ================================================================ */
-/* A hair of ice rim at each stroke (the specular edge), the short deep
-   drop that seats the line, and a faint ambient of the page's light: ice
-   for the hero and the chapters, gold for the last word (the decision is
-   his). Shadows only; the faces, sizes and words are untouched. */
+/* Double specular rim at each stroke, deep multi-layered drop shadow that
+   seats the line over the dark obsidian plates, and forged-gold × reactor-ice
+   × violet lightning spatial luminescence. Shadows only; faces and sizes untouched. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 {
   text-shadow:
-    0 0 1px rgb(150 236 255 / 42%),
-    0 2px 0 rgb(0 2 7 / 55%),
-    0 18px 48px rgb(0 0 0 / 45%),
-    0 0 24px rgb(150 236 255 / 10%);
+    0 -1px 0 rgb(255 255 255 / 34%),
+    0 0 2px rgb(150 236 255 / 72%),
+    0 2px 0 rgb(2 6 14 / 94%),
+    0 6px 14px rgb(0 2 8 / 86%),
+    0 20px 48px rgb(0 0 0 / 82%),
+    0 0 28px rgb(121 232 255 / 32%),
+    0 0 58px rgb(182 163 255 / 22%),
+    0 0 86px rgb(242 216 150 / 16%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 > span {
+  text-shadow:
+    0 -0.5px 0 rgb(255 255 255 / 45%),
+    0 1px 0 rgb(4 10 18 / 90%),
+    0 0 18px rgb(242 216 150 / 44%),
+    0 0 38px rgb(121 232 255 / 26%),
+    0 12px 28px rgb(0 0 0 / 72%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero .rxs-hero-lede {
+  text-shadow:
+    0 1px 2px rgb(0 2 8 / 92%),
+    0 8px 24px rgb(0 0 0 / 76%),
+    0 0 20px rgb(121 232 255 / 28%),
+    0 0 42px rgb(242 216 150 / 16%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title {
   text-shadow:
-    0 0 1px rgb(150 236 255 / 38%),
-    0 2px 0 rgb(0 2 7 / 60%),
-    0 12px 30px rgb(0 0 0 / 40%),
-    0 0 26px rgb(150 236 255 / 8%);
+    0 -1px 0 rgb(255 255 255 / 28%),
+    0 0 1.5px rgb(150 236 255 / 58%),
+    0 2px 0 rgb(2 6 14 / 90%),
+    0 14px 34px rgb(0 0 0 / 74%),
+    0 0 28px rgb(150 236 255 / 24%),
+    0 0 54px rgb(182 163 255 / 15%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy h3,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid h3 {
+  text-shadow:
+    0 -0.5px 0 rgb(255 255 255 / 22%),
+    0 2px 0 rgb(2 6 14 / 86%),
+    0 10px 26px rgb(0 0 0 / 68%),
+    0 0 22px rgb(121 232 255 / 18%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-brand b {
+  text-shadow:
+    0 1px 2px rgb(0 2 8 / 84%),
+    0 0 16px rgb(121 232 255 / 18%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-copy > p:first-child,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-eyebrow,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > span,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate > b {
+  text-shadow:
+    0 1px 2px rgb(0 2 8 / 90%),
+    0 0 14px rgb(150 236 255 / 34%),
+    0 0 28px rgb(242 216 150 / 16%);
+}
+
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > div > p,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b small,
+html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate > small {
+  text-shadow:
+    0 1px 2px rgb(0 2 8 / 90%),
+    0 0 16px rgb(242 216 150 / 42%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2 {
   text-shadow:
-    0 0 1px rgb(242 216 150 / 45%),
-    0 2px 0 rgb(0 2 7 / 60%),
-    0 16px 40px rgb(0 0 0 / 45%),
-    0 0 30px rgb(242 216 150 / 11%);
+    0 -1px 0 rgb(255 255 255 / 32%),
+    0 0 2px rgb(242 216 150 / 68%),
+    0 2px 0 rgb(2 6 14 / 92%),
+    0 16px 42px rgb(0 0 0 / 78%),
+    0 0 32px rgb(242 216 150 / 28%),
+    0 0 64px rgb(121 232 255 / 18%);
 }
 
 /* ================================================================
@@ -903,8 +964,24 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt)
    ================================================================ */
 @media (forced-colors: active) {
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero h1 > span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero .rxs-hero-lede,
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading h2,
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) #rxs-assembly-title,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-stage-panel > div > h3,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-p14-copy h3,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-system-grid h3,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map a > span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-brand b,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-copy > p:first-child,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-section-heading > p,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-assembly-eyebrow,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxe-chapter-map-heading > span,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rzn-callout b small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate > b,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-hero-visual > .rxl-stage-slate > small,
+  html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer > div > p,
   html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page:not(#rxt):not(#rxt) .rxs-footer h2 {
     text-shadow: none;
   }

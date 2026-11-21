@@ -119,7 +119,9 @@
   width: 28px;
   height: 28px;
   color: var(--rr-brass-bright);
-  filter: drop-shadow(0 0 8px rgb(var(--rr-regalia-rgb) / 0.26));
+  filter:
+    drop-shadow(0 0 10px rgb(var(--rr-regalia-rgb) / 0.44))
+    drop-shadow(0 0 16px rgb(var(--rr-cyan-rgb) / 0.24));
 }
 .rr-exhibit-select {
   display: inline-flex;
@@ -127,7 +129,7 @@
   flex-wrap: wrap;
   gap: 4px 8px;
   max-width: 100%;
-  color: var(--rr-brass);
+  color: var(--rr-brass-bright);
   font-weight: 600;
   letter-spacing: 0.03em;
   line-height: 1.4;
@@ -138,21 +140,19 @@
   display: inline-grid;
   align-items: center;
   max-width: 100%;
-  border: 1px solid var(--rr-rule-strong);
-  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--rr-brass-bright) 68%, var(--rr-cyan));
+  border-radius: 4px;
   background:
-    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 7px 1px no-repeat,
-    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 1px 7px no-repeat,
-    linear-gradient(rgb(var(--rr-regalia-rgb)), rgb(var(--rr-regalia-rgb))) right bottom / 7px 1px
-      no-repeat,
-    linear-gradient(rgb(var(--rr-regalia-rgb)), rgb(var(--rr-regalia-rgb))) right bottom / 1px 7px
-      no-repeat,
-    linear-gradient(180deg, #25232e 0%, #151620 56%, #101119 100%);
+    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 9px 1.5px no-repeat,
+    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 1.5px 9px no-repeat,
+    linear-gradient(var(--rr-cyan), var(--rr-cyan)) right bottom / 9px 1.5px no-repeat,
+    linear-gradient(var(--rr-cyan), var(--rr-cyan)) right bottom / 1.5px 9px no-repeat,
+    linear-gradient(180deg, #2b2938 0%, #161826 56%, #0f111c 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 248, 228, 0.16),
-    inset 0 0 0 1px rgba(8, 8, 13, 0.78),
-    inset 0 -1px 0 rgb(var(--rr-regalia-rgb) / 0.26),
-    0 3px 10px rgba(0, 0, 0, 0.34);
+    inset 0 1px 0 rgba(255, 250, 232, 0.28),
+    inset 0 0 0 1px rgba(8, 8, 14, 0.82),
+    inset 0 -1px 0 rgb(var(--rr-cyan-rgb) / 0.34),
+    0 6px 16px rgba(0, 0, 0, 0.44);
 }
 .rr-exhibit-select select {
   appearance: none;
@@ -162,7 +162,7 @@
   padding: 0 32px 0 11px;
   border: 0;
   border-radius: 2px;
-  color: #fbf6e9;
+  color: #fffbf0;
   background-color: transparent;
   font: inherit;
   font-size: 16px;
@@ -191,18 +191,21 @@
   justify-content: center;
   gap: 7px;
   min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--rr-rule-strong);
-  border-radius: 3px;
+  padding: 0 13px;
+  border: 1px solid color-mix(in srgb, var(--rr-brass-bright) 68%, var(--rr-cyan));
+  border-radius: 4px;
   background:
-    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 6px 1px no-repeat,
-    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 1px 6px no-repeat,
-    linear-gradient(180deg, #2b2732 0%, #181720 100%);
+    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 8px 1.5px no-repeat,
+    linear-gradient(var(--rr-brass-bright), var(--rr-brass-bright)) left top / 1.5px 8px no-repeat,
+    linear-gradient(var(--rr-cyan), var(--rr-cyan)) right bottom / 8px 1.5px no-repeat,
+    linear-gradient(var(--rr-cyan), var(--rr-cyan)) right bottom / 1.5px 8px no-repeat,
+    linear-gradient(180deg, #302d3d 0%, #171926 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 245, 220, 0.15),
-    inset 0 0 0 1px rgba(9, 8, 14, 0.7),
-    0 2px 8px rgba(0, 0, 0, 0.3);
-  color: #f6e9ce;
+    inset 0 1px 0 rgba(255, 250, 232, 0.26),
+    inset 0 0 0 1px rgba(8, 8, 14, 0.78),
+    inset 0 -1px 0 rgb(var(--rr-cyan-rgb) / 0.28),
+    0 6px 16px rgba(0, 0, 0, 0.42);
+  color: #fff6e0;
   font-size: 13px;
   font-weight: 650;
 }

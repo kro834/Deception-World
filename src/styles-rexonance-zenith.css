@@ -546,8 +546,9 @@ html[data-family="special"]
   height: 9px;
   background: radial-gradient(circle at 35% 35%, rgb(var(--rzn-white)), rgb(var(--rzn-ice)) 72%);
   box-shadow:
-    0 0 0 3px rgb(var(--rzn-ice) / 20%),
-    0 0 10px rgb(var(--rzn-ice) / 36%);
+    inset 0 1px 0 rgb(var(--rzn-white) / 80%),
+    0 0 0 3px rgb(var(--rzn-ice) / 28%),
+    0 0 14px rgb(var(--rzn-ice) / 56%);
 }
 
 html[data-family="special"]
@@ -557,8 +558,9 @@ html[data-family="special"]
   .rzn-part:nth-child(even)::after {
   background: radial-gradient(circle at 35% 35%, rgb(var(--rzn-white)), rgb(var(--rzn-pink)) 72%);
   box-shadow:
-    0 0 0 3px rgb(var(--rzn-pink) / 20%),
-    0 0 10px rgb(var(--rzn-pink) / 36%);
+    inset 0 1px 0 rgb(var(--rzn-white) / 80%),
+    0 0 0 3px rgb(var(--rzn-pink) / 28%),
+    0 0 14px rgb(var(--rzn-pink) / 56%);
 }
 
 /* The stamp lands under the parts, high in the column: the Zeus button
@@ -585,7 +587,10 @@ html[data-family="special"]
   color: #02050a;
   font: 400 clamp(18px, 1.8vw, 28px) / 1.1 var(--dx-hud);
   letter-spacing: 0.16em;
-  background: rgb(var(--rzn-ice));
+  background: linear-gradient(135deg, #ffffff 0%, rgb(var(--rzn-ice)) 46%, rgb(var(--rzn-gold)) 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 0 22px rgb(var(--rzn-ice) / 48%);
   clip-path: polygon(
     10px 0,
     100% 0,
@@ -604,8 +609,8 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   left: calc(var(--rzn-gutter) - 14px);
   z-index: 2;
   display: none;
-  width: 1px;
-  background: rgb(var(--rzn-ice) / 18%);
+  width: 1.5px;
+  background: rgb(var(--rzn-ice) / 24%);
 }
 
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup .rzn-rail > i {
@@ -614,12 +619,15 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-su
   display: block;
   background: linear-gradient(
     180deg,
-    rgb(var(--rzn-ice)),
-    rgb(var(--rzn-violet)) 38%,
-    rgb(var(--rzn-pink)) 72%,
-    rgb(var(--rzn-gold))
+    #ffffff 0%,
+    rgb(var(--rzn-ice)) 18%,
+    rgb(var(--rzn-violet)) 46%,
+    rgb(var(--rzn-pink)) 74%,
+    rgb(var(--rzn-gold)) 100%
   );
-  box-shadow: 0 0 10px rgb(var(--rzn-ice) / 48%);
+  box-shadow:
+    0 0 14px rgb(var(--rzn-ice) / 68%),
+    0 0 26px rgb(var(--rzn-gold) / 38%);
   transform-origin: 50% 0;
 }
 
@@ -2867,9 +2875,10 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page .rxs-stag
    figure's fit, and phase changes use only opacity and transforms. */
 html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page > .rzn-suitup {
   background:
-    radial-gradient(ellipse at 50% 44%, rgb(33 46 73 / 36%), transparent 68%),
-    radial-gradient(ellipse at 50% 88%, rgb(var(--rzn-ice) / 8%), transparent 56%),
-    linear-gradient(180deg, #020409, #070b16 48%, #020409);
+    radial-gradient(ellipse 68% 54% at 50% 42%, rgb(46 72 114 / 44%), transparent 70%),
+    radial-gradient(ellipse 52% 36% at 50% 90%, rgb(var(--rzn-ice) / 16%), rgb(var(--rzn-gold) / 6%) 54%, transparent 74%),
+    radial-gradient(ellipse 54% 38% at 50% 8%, rgb(var(--rzn-violet) / 12%), transparent 68%),
+    linear-gradient(180deg, #02050b, #070d1b 48%, #02050b);
 }
 
 html[data-family="special"]
@@ -2892,9 +2901,10 @@ html[data-family="special"]
   > .rzn-depth {
   inset: 0;
   background:
-    linear-gradient(90deg, #020409 0%, transparent 28% 72%, #020409 100%),
-    radial-gradient(ellipse at 50% 105%, rgb(121 232 255 / 10%), transparent 46%),
-    linear-gradient(180deg, rgb(2 4 9 / 68%), transparent 24% 76%, rgb(2 4 9 / 72%));
+    linear-gradient(90deg, #020409 0%, transparent 26% 74%, #020409 100%),
+    radial-gradient(ellipse 56% 32% at 50% 102%, rgb(121 232 255 / 18%), rgb(242 216 150 / 7%) 48%, transparent 72%),
+    radial-gradient(ellipse 46% 36% at 50% 0%, rgb(121 232 255 / 12%), transparent 66%),
+    linear-gradient(180deg, rgb(2 4 9 / 64%), transparent 22% 78%, rgb(2 4 9 / 68%));
 }
 
 html[data-family="special"]
@@ -2903,7 +2913,7 @@ html[data-family="special"]
   > .rzn-suitup
   > .rzn-frame
   > .rzn-light {
-  opacity: 0.46;
+  opacity: 0.64;
 }
 
 html[data-family="special"]
@@ -2914,11 +2924,11 @@ html[data-family="special"]
   > .rzn-aura {
   inset: 4% 14% 0;
   background:
-    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 24%), transparent 49%),
-    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 22%), transparent 49%),
-    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 13%), transparent 40%),
-    radial-gradient(ellipse at 50% 54%, rgb(var(--rzn-violet) / 10%), transparent 54%);
-  opacity: 0.82;
+    radial-gradient(ellipse at 32% 43%, rgb(var(--rzn-ice) / 30%), transparent 52%),
+    radial-gradient(ellipse at 68% 43%, rgb(var(--rzn-pink) / 28%), transparent 52%),
+    radial-gradient(ellipse at 50% 24%, rgb(var(--rzn-gold) / 18%), transparent 44%),
+    radial-gradient(ellipse at 50% 54%, rgb(var(--rzn-violet) / 14%), transparent 58%);
+  opacity: 0.88;
   scale: 1;
 }
 
@@ -2932,13 +2942,14 @@ html[data-family="special"]
   left: 50%;
   width: min(42%, 580px);
   height: 64%;
-  border: 1px solid rgb(var(--rzn-gold) / 28%);
+  border: 1px solid rgb(var(--rzn-gold) / 42%);
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 11%), transparent 40%);
+  background: radial-gradient(ellipse at 50% 0%, rgb(var(--rzn-gold) / 16%), rgb(var(--rzn-ice) / 6%) 32%, transparent 48%);
   box-shadow:
-    0 0 28px rgb(var(--rzn-gold) / 10%),
-    inset 0 0 22px rgb(var(--rzn-ice) / 8%);
-  opacity: 0.74;
+    inset 0 1px 0 rgb(var(--rzn-white) / 28%),
+    0 0 36px rgb(var(--rzn-gold) / 16%),
+    inset 0 0 28px rgb(var(--rzn-ice) / 14%);
+  opacity: 0.84;
   translate: -50% 0;
   scale: 1;
 }
@@ -2956,8 +2967,9 @@ html[data-family="special"]
   content: "";
   position: absolute;
   inset: 8% -16%;
-  border: 1px solid rgb(var(--rzn-gold) / 18%);
+  border: 1px solid rgb(var(--rzn-gold) / 28%);
   border-radius: 50%;
+  box-shadow: 0 0 18px rgb(var(--rzn-gold) / 12%);
   transform: rotate(25deg);
 }
 
@@ -2967,7 +2979,8 @@ html[data-family="special"]
   > .rzn-suitup
   .rzn-crown::after {
   inset: 20% -28%;
-  border-color: rgb(var(--rzn-ice) / 18%);
+  border-color: rgb(var(--rzn-ice) / 28%);
+  box-shadow: 0 0 18px rgb(var(--rzn-ice) / 12%);
   transform: rotate(-25deg);
 }
 
@@ -2977,17 +2990,20 @@ html[data-family="special"]
   > .rzn-suitup
   > .rzn-frame
   > .rzn-floor {
-  border-color: rgb(var(--rzn-ice) / 28%);
+  border-color: rgb(var(--rzn-ice) / 46%);
   background: radial-gradient(
     closest-side,
-    rgb(var(--rzn-ice) / 16%),
-    rgb(var(--rzn-violet) / 6%) 64%,
+    rgb(var(--rzn-ice) / 26%),
+    rgb(var(--rzn-violet) / 12%) 56%,
+    rgb(var(--rzn-gold) / 6%) 76%,
     transparent
   );
   box-shadow:
-    0 0 0 10px rgb(var(--rzn-ice) / 4%),
-    0 0 0 30px rgb(var(--rzn-gold) / 2.5%),
-    inset 0 0 18px rgb(var(--rzn-ice) / 10%);
+    inset 0 1px 0 rgb(var(--rzn-white) / 34%),
+    0 0 24px rgb(var(--rzn-ice) / 24%),
+    0 0 0 10px rgb(var(--rzn-ice) / 7%),
+    0 0 0 30px rgb(var(--rzn-gold) / 4%),
+    inset 0 0 22px rgb(var(--rzn-ice) / 18%);
 }
 
 /* A single, honest phase caption. The static fallback shows completion;

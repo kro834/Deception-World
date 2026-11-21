@@ -28,18 +28,20 @@ html[data-family="world"]
   grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   padding: clamp(20px, 3.4vw, 48px);
-  border: 1px solid var(--directory-seam);
-  border-top: 2px solid var(--directory-titanium);
-  border-radius: 6px;
+  border: 1px solid rgb(168 214 238 / 38%);
+  border-top: 2px solid #e4f6ff;
+  border-radius: 7px;
   background:
-    var(--directory-sheen),
-    radial-gradient(ellipse 52% 40% at 94% 100%, rgb(116 217 236 / 9%), transparent 70%),
-    linear-gradient(158deg, #0f2133 0%, #07111e 56%, #040912 100%);
+    linear-gradient(90deg, #74d9ec 0%, #f4fbff 32%, #9d86ff 64%, #f2cf8d 88%, transparent 100%)
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 68% 42% at 14% 0%, rgb(116 217 236 / 16%), transparent 66%),
+    radial-gradient(ellipse 54% 40% at 92% 100%, rgb(157 134 255 / 12%), transparent 70%),
+    linear-gradient(158deg, #102438 0%, #071220 56%, #040912 100%);
   box-shadow:
-    inset 0 1px 0 var(--directory-specular),
-    inset 0 0 0 1px rgb(233 246 251 / 8%),
-    0 24px 52px -20px rgb(1 5 12 / 84%),
-    0 6px 18px rgb(0 0 0 / 48%);
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    inset 0 0 0 1px rgb(233 246 251 / 11%),
+    0 28px 60px -18px rgb(1 5 12 / 88%),
+    0 0 42px -24px rgb(116 217 236 / 34%);
 }
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
@@ -159,18 +161,18 @@ html[data-family="world"]
   #manager-archive#manager-archive#manager-archive
   .manager-slot-grid
   > :is(.signal, .dante-archive, .other-archive-card, .archive-placeholder) {
-  border-radius: 5px;
-  border-color: rgb(168 214 236 / 36%);
-  border-top: 2px solid var(--directory-titanium);
+  border-radius: 6px;
+  border-color: rgb(172 222 246 / 44%);
+  border-top: 2px solid #e4f6ff;
   background-color: var(--directory-ink);
   background-image:
-    radial-gradient(ellipse 72% 48% at 14% 0%, rgb(238 248 255 / 10%), transparent 68%),
-    linear-gradient(150deg, rgb(18 36 54 / 72%), rgb(5 11 18 / 96%) 62%);
+    radial-gradient(ellipse 76% 48% at 14% 0%, rgb(116 217 236 / 16%), transparent 68%),
+    linear-gradient(150deg, rgb(20 42 62 / 78%), rgb(5 11 19 / 96%) 62%);
   box-shadow:
-    inset 0 1px 0 var(--directory-specular),
-    inset 0 0 0 1px rgb(168 214 236 / 20%),
-    0 16px 34px -16px rgb(1 5 12 / 86%),
-    0 4px 12px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 255 255 / 62%),
+    inset 0 0 0 1px rgb(172 222 246 / 26%),
+    0 18px 38px -16px rgb(1 5 12 / 90%),
+    0 0 24px -14px rgb(116 217 236 / 28%);
 }
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
@@ -234,17 +236,19 @@ html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
   #riders#riders
   > .rider-console {
-  border: 1px solid var(--directory-seam);
-  border-top: 2px solid var(--directory-titanium);
-  border-radius: 6px;
+  border: 1px solid rgb(168 214 238 / 38%);
+  border-top: 2px solid #e4f6ff;
+  border-radius: 7px;
   background:
+    linear-gradient(90deg, #74d9ec 0%, #f4fbff 32%, #9d86ff 66%, transparent 96%)
+      0 0 / 100% 2px no-repeat,
     var(--directory-sheen),
     var(--directory-ink);
   box-shadow:
-    inset 0 1px 0 var(--directory-specular),
-    inset 0 0 0 1px rgb(233 246 251 / 8%),
-    0 24px 52px -20px rgb(1 5 12 / 86%),
-    0 6px 18px rgb(0 0 0 / 52%);
+    inset 0 1px 0 rgb(255 255 255 / 58%),
+    inset 0 0 0 1px rgb(233 246 251 / 10%),
+    0 28px 60px -18px rgb(1 5 12 / 90%),
+    0 0 42px -24px rgb(116 217 236 / 34%);
 }
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
@@ -437,17 +441,18 @@ html[data-family="world"]
   main.site-shell.film-edition.mirage-edition
   #cast-roster#cast-roster
   .wa-person {
-  border: 1px solid rgb(168 214 236 / 34%);
-  border-top: 2px solid var(--directory-titanium);
+  border: 1px solid rgb(168 220 240 / 40%);
+  border-top: 2px solid #e2f5ff;
   border-radius: 6px;
   background:
-    radial-gradient(ellipse 76% 44% at 14% 0%, rgb(238 249 255 / 11%), transparent 66%),
-    linear-gradient(154deg, #132839 0%, #091522 56%, #050b14 100%);
+    radial-gradient(ellipse 76% 44% at 14% 0%, rgb(109 223 186 / 14%), transparent 66%),
+    radial-gradient(ellipse 64% 40% at 92% 100%, rgb(116 217 236 / 10%), transparent 68%),
+    linear-gradient(154deg, #142c3e 0%, #091624 56%, #050b14 100%);
   box-shadow:
-    inset 0 1px 0 var(--directory-specular),
-    inset 0 0 0 1px rgb(168 214 236 / 16%),
-    0 18px 36px -18px rgb(1 5 12 / 86%),
-    0 4px 12px rgb(0 0 0 / 50%);
+    inset 0 1px 0 rgb(255 255 255 / 60%),
+    inset 0 0 0 1px rgb(168 220 240 / 20%),
+    0 20px 42px -16px rgb(1 5 12 / 90%),
+    0 0 26px -14px rgb(109 223 186 / 28%);
 }
 html[data-family="world"]
   main.site-shell.film-edition.mirage-edition

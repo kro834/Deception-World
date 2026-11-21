@@ -5,12 +5,18 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section {
   --record-ink: #17252f;
   --record-copy: #334653;
   --record-accent: color-mix(in srgb, var(--manager-accent, #205b6a) 35%, #163641);
+  --record-foil: #88714b;
   color: var(--record-ink);
-  border-color: #aab9bf;
+  border-color: color-mix(in srgb, var(--record-accent) 26%, #aab9bf);
   background:
-    linear-gradient(var(--record-accent) 0 0) 0 0 / 72px 3px no-repeat,
-    linear-gradient(120deg, #f0f3f2, #e5eae9);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 16%);
+    linear-gradient(90deg, var(--record-accent) 0%, var(--record-foil) 52%, transparent 92%) 0 0 /
+      110px 3px no-repeat,
+    radial-gradient(ellipse 70% 42% at 6% 0%, rgb(255 255 255 / 45%), transparent 72%),
+    linear-gradient(124deg, #f3f5f3 0%, #e5ebea 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 72%),
+    inset 0 -1px 0 rgb(23 37 47 / 8%),
+    0 16px 38px rgb(0 0 0 / 20%);
 }
 
 /* One opening spread per person; subsequent records are quiet reading pages.
@@ -19,8 +25,14 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section[data-rec
   padding-block: clamp(32px, 5vw, 72px);
   border-inline: 0;
   border-radius: 0;
-  background: linear-gradient(120deg, #f5f6f2, #e5ecea);
-  box-shadow: none;
+  background:
+    linear-gradient(90deg, var(--record-accent) 0%, var(--record-foil) 48%, transparent 88%) 0 0 /
+      100% 2px no-repeat,
+    radial-gradient(ellipse 68% 40% at 12% 0%, rgb(255 255 255 / 54%), transparent 72%),
+    linear-gradient(124deg, #f6f7f3 0%, #e4ecea 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    inset 0 -1px 0 rgb(23 37 47 / 9%);
 }
 main.manager-page.manager-page:not(.is-sovereign)
   .manager-copy-section[data-record-role="lead"]::before,
@@ -32,8 +44,12 @@ main.manager-page.manager-page:not(.is-sovereign)
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section[data-record-role="detail"] {
   border-inline: 0;
   border-radius: 0;
-  background: #eaf0ee;
-  box-shadow: none;
+  background:
+    radial-gradient(ellipse 72% 38% at 88% 100%, rgb(255 255 255 / 32%), transparent 74%),
+    linear-gradient(160deg, #ecf2f0 0%, #e4ecea 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 58%),
+    inset 0 -1px 0 rgb(23 37 47 / 7%);
 }
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-body {
   max-width: 68ch;
@@ -41,15 +57,17 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section:target {
   border-color: var(--record-accent);
-  box-shadow: 0 0 0 2px var(--record-accent);
+  box-shadow:
+    0 0 0 2px var(--record-accent),
+    0 18px 42px rgb(0 0 0 / 24%);
 }
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section::before {
   background:
-    linear-gradient(var(--record-accent) 0 0) 0 0 / 22px 2px,
-    linear-gradient(var(--record-accent) 0 0) 0 0 / 2px 22px,
-    linear-gradient(#88714b 0 0) 100% 100% / 22px 2px,
-    linear-gradient(#88714b 0 0) 100% 100% / 2px 22px;
+    linear-gradient(var(--record-accent) 0 0) 0 0 / 24px 2px,
+    linear-gradient(var(--record-accent) 0 0) 0 0 / 2px 24px,
+    linear-gradient(var(--record-foil) 0 0) 100% 100% / 24px 2px,
+    linear-gradient(var(--record-foil) 0 0) 100% 100% / 2px 24px;
   background-repeat: no-repeat;
 }
 
@@ -66,11 +84,12 @@ main.manager-page.manager-page:not(.is-sovereign)
   .manager-copy-section
   .manager-copy-heading
   > span::after {
-  background: linear-gradient(90deg, var(--record-accent), #88714b);
+  background: linear-gradient(90deg, var(--record-accent), var(--record-foil));
 }
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-heading > p {
   color: var(--record-accent);
+  letter-spacing: 0.14em;
 }
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-heading h2 {
@@ -80,6 +99,7 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section .manager-copy-body p {
   color: var(--record-copy);
+  text-wrap: pretty;
 }
 
 main.manager-page.manager-page:not(.is-sovereign)
@@ -87,12 +107,15 @@ main.manager-page.manager-page:not(.is-sovereign)
   .manager-copy-body
   :is(strong, b, h3, h4) {
   color: var(--record-ink);
+  text-decoration: underline 1px color-mix(in srgb, var(--record-foil) 42%, transparent);
+  text-underline-offset: 0.22em;
 }
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a {
   color: var(--record-accent);
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--record-accent) 62%, transparent);
+  text-underline-offset: 0.24em;
 }
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a:focus-visible {
@@ -102,7 +125,7 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section a:focus-
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section ::selection {
   color: #fff;
-  background: #215568;
+  background: color-mix(in srgb, var(--manager-accent, #215568) 72%, #133645);
 }
 
 @media (prefers-contrast: more) {

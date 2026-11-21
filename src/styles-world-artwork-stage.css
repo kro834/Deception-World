@@ -106,6 +106,70 @@ html[data-family="world"]:root
   inset: 0;
 }
 
+#top.world-artwork-hero .world-poster-media {
+  border: 1px solid rgb(156 234 255 / 46%);
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgb(232 250 255 / 20%) 0%, rgb(122 232 255 / 5%) 24%, transparent 48%),
+    radial-gradient(
+      ellipse 58% 76% at 50% 48%,
+      rgb(122 232 255 / 26%),
+      rgb(255 92 200 / 15%) 46%,
+      rgb(240 207 134 / 9%) 68%,
+      transparent 84%
+    ),
+    radial-gradient(circle at 14% 28%, rgb(122 232 255 / 22%), transparent 52%),
+    radial-gradient(circle at 86% 72%, rgb(255 92 200 / 20%), transparent 54%),
+    radial-gradient(ellipse 68% 42% at 50% 96%, rgb(240 207 134 / 18%), transparent 68%),
+    linear-gradient(165deg, rgb(14 31 52 / 90%) 0%, rgb(6 13 25 / 95%) 52%, rgb(11 22 38 / 92%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 38%),
+    inset 0 -1px 0 rgb(240 207 134 / 28%),
+    inset 1px 0 0 rgb(122 232 255 / 22%),
+    inset -1px 0 0 rgb(255 92 200 / 18%),
+    inset 0 0 56px rgb(122 232 255 / 12%),
+    0 28px 68px -18px rgb(0 0 0 / 82%),
+    0 0 64px -16px rgb(122 232 255 / 28%),
+    0 0 96px -24px rgb(255 92 200 / 20%);
+}
+
+#top.world-artwork-hero .world-poster-media::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  z-index: 3;
+  pointer-events: none;
+  border: 1px solid rgb(198 245 255 / 14%);
+  border-radius: 4px;
+  background:
+    linear-gradient(#7ae8ff 0 0) 0 0 / 16px 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 0 0 / 2px 16px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 100% 0 / 16px 2px no-repeat,
+    linear-gradient(#7ae8ff 0 0) 100% 0 / 2px 16px no-repeat,
+    linear-gradient(#f0cf86 0 0) 0 100% / 16px 2px no-repeat,
+    linear-gradient(#f0cf86 0 0) 0 100% / 2px 16px no-repeat,
+    linear-gradient(#f0cf86 0 0) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(#f0cf86 0 0) 100% 100% / 2px 16px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 6%,
+        rgb(122 232 255 / 56%) 26%,
+        rgb(255 92 200 / 46%) 50%,
+        rgb(240 207 134 / 52%) 74%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        rgb(240 207 134 / 44%) 32%,
+        rgb(122 232 255 / 46%) 68%,
+        transparent 90%
+      )
+      0 100% / 100% 1px no-repeat;
+}
+
 #top.world-artwork-hero .world-stage-media::before {
   content: "";
   position: absolute;
@@ -115,9 +179,9 @@ html[data-family="world"]:root
   border-radius: 50%;
   background: radial-gradient(
     ellipse 58% 72% at 50% 50%,
-    rgb(122 232 255 / 22%),
-    rgb(255 92 200 / 13%) 48%,
-    rgb(240 207 134 / 9%) 68%,
+    rgb(122 232 255 / 26%),
+    rgb(255 92 200 / 16%) 48%,
+    rgb(240 207 134 / 11%) 68%,
     transparent 84%
   );
 }
@@ -128,15 +192,16 @@ html[data-family="world"]:root
   inset: 0;
   width: auto;
   height: auto;
-  max-width: calc(100% - 2px);
-  max-height: calc(100% - 2px);
+  max-width: calc(100% - 16px);
+  max-height: calc(100% - 16px);
   margin: auto;
-  outline: 1px solid var(--poster-line);
+  outline: 1px solid rgb(214 248 255 / 58%);
   box-shadow:
-    0 0 0 1px rgb(255 255 255 / 12%),
-    0 22px 54px rgb(0 0 0 / 74%),
-    0 0 48px -12px rgb(122 232 255 / 26%),
-    0 0 76px -22px rgb(255 92 200 / 18%);
+    0 0 0 3px rgb(4 10 20 / 82%),
+    0 0 0 4px rgb(240 207 134 / 32%),
+    0 24px 58px rgb(0 0 0 / 84%),
+    0 0 52px -10px rgb(122 232 255 / 34%),
+    0 0 82px -20px rgb(255 92 200 / 24%);
   object-fit: contain;
   object-position: center;
 }
@@ -158,6 +223,16 @@ html[data-family="world"]:root
 
 #top.world-artwork-hero .world-stage-identity {
   margin: 0 0 clamp(12px, 2vw, 26px);
+  padding-top: 14px;
+  background:
+    linear-gradient(
+        90deg,
+        #f0cf86 0%,
+        #7ae8ff 38%,
+        #ff5fc8 72%,
+        transparent 100%
+      )
+      0 0 / min(240px, 72%) 2px no-repeat;
 }
 
 #top.world-artwork-hero .world-stage-identity .anime-work-title {
@@ -171,13 +246,13 @@ html[data-family="world"]:root
 
 #top.world-artwork-hero .world-stage-identity .anime-work-title > span {
   display: block;
-  color: #f0d098;
+  color: #f6dcab;
   font-size: clamp(12px, 1.05vw, 15px);
   line-height: 1.6;
   letter-spacing: 0.09em;
   text-shadow:
-    0 0 18px rgb(240 207 134 / 36%),
-    0 0 32px rgb(122 232 255 / 18%);
+    0 0 20px rgb(240 207 134 / 48%),
+    0 0 36px rgb(122 232 255 / 24%);
 }
 
 #top.world-artwork-hero .world-stage-identity .anime-work-title > b {
@@ -187,15 +262,15 @@ html[data-family="world"]:root
   font-size: clamp(21px, 2.85vw, 46px);
   line-height: 1.15;
   letter-spacing: 0.025em;
-  filter: drop-shadow(0 4px 20px rgb(3 8 18 / 72%));
+  filter: drop-shadow(0 6px 24px rgb(3 8 18 / 82%));
 }
 
 #top.world-artwork-hero .world-stage-identity .mr-word::after {
-  opacity: 0.62;
+  opacity: 0.68;
   text-shadow:
-    -3px 0 rgb(122 232 255 / 78%),
-    0 0 32px rgb(122 232 255 / 45%),
-    0 0 58px rgb(255 92 200 / 28%);
+    -3px 0 rgb(122 232 255 / 84%),
+    0 0 36px rgb(122 232 255 / 52%),
+    0 0 64px rgb(255 92 200 / 34%);
 }
 
 #top.world-artwork-hero .world-stage-copy {
@@ -205,12 +280,19 @@ html[data-family="world"]:root
   background:
     linear-gradient(
         90deg,
-        rgb(122 232 255 / 72%) 0%,
-        rgb(255 92 200 / 52%) 42%,
-        rgb(240 207 134 / 48%) 76%,
+        #7ae8ff 0%,
+        #ffffff 18%,
+        #ff5fc8 48%,
+        #f0cf86 78%,
         transparent 100%
       )
-      0 0 / 100% 1px no-repeat;
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(
+      ellipse 70% 46% at 24% 0%,
+      rgb(122 232 255 / 16%),
+      rgb(255 92 200 / 8%) 52%,
+      transparent 82%
+    );
 }
 
 #top.world-artwork-hero .world-stage-copy h1 {
@@ -218,13 +300,13 @@ html[data-family="world"]:root
   width: auto;
   max-width: none;
   margin: 0 0 clamp(14px, 2vw, 30px);
-  color: #f6fbff;
+  color: #f8fcff;
   font-size: clamp(25px, 3.8vw, 59px);
   line-height: 1.24;
   letter-spacing: 0.028em;
   text-shadow:
-    0 2px 24px rgb(2 6 14 / 88%),
-    0 0 38px rgb(122 232 255 / 22%);
+    0 2px 26px rgb(2 6 14 / 92%),
+    0 0 42px rgb(122 232 255 / 28%);
 }
 
 #top.world-artwork-hero .world-stage-copy h1 > :is(span, strong) {
@@ -237,20 +319,27 @@ html[data-family="world"]:root
   text-wrap: balance;
 }
 
+#top.world-artwork-hero .world-stage-copy h1 > strong {
+  color: #dff8ff;
+  text-shadow:
+    0 0 32px rgb(122 232 255 / 38%),
+    0 0 56px rgb(255 92 200 / 20%);
+}
+
 #top.world-artwork-hero .world-stage-copy h1 .mr-redact {
   color: #ffffff;
   text-shadow:
-    -2px 0 rgb(255 90 126 / 88%),
-    2px 0 rgb(122 232 255 / 92%),
-    0 0 26px rgb(255 90 126 / 45%);
+    -2.5px 0 rgb(255 90 126 / 92%),
+    2.5px 0 rgb(122 232 255 / 95%),
+    0 0 30px rgb(255 90 126 / 52%);
 }
 
 #top.world-artwork-hero .world-stage-copy h1 .mr-redact::after {
-  height: 2.5px;
-  background: linear-gradient(90deg, #ff5a7e 0%, #ff8aa5 52%, #f0cf86 100%);
+  height: 3px;
+  background: linear-gradient(90deg, #ff5a7e 0%, #ff8aa5 48%, #f0cf86 100%);
   box-shadow:
-    0 0 14px rgb(255 90 126 / 78%),
-    0 0 28px rgb(255 92 200 / 42%);
+    0 0 16px rgb(255 90 126 / 84%),
+    0 0 32px rgb(255 92 200 / 48%);
 }
 
 #top.world-artwork-hero .world-stage-copy .eyebrow {
@@ -353,14 +442,23 @@ html[data-family="world"]:root
 
 #top.world-artwork-hero .world-stage-context {
   margin-top: clamp(10px, 2vw, 27px);
-  padding-left: 14px;
-  border-left: 2px solid rgb(122 232 255 / 42%);
-  background: linear-gradient(90deg, rgb(122 232 255 / 7%), transparent 75%);
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid rgb(148 228 255 / 32%);
+  border-left: 3px solid #7ae8ff;
+  background:
+    linear-gradient(180deg, rgb(224 248 255 / 12%) 0%, transparent 48%),
+    linear-gradient(135deg, rgb(16 34 56 / 82%) 0%, rgb(8 17 30 / 90%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(240 207 134 / 16%),
+    0 16px 36px -14px rgb(0 0 0 / 74%),
+    0 0 28px -10px rgb(122 232 255 / 22%);
 }
 
 #top.world-artwork-hero .world-stage-lead {
   margin: 0;
-  color: #d6e4ee;
+  color: #e0edf6;
   font-size: clamp(13px, 1.25vw, 17px);
   line-height: 1.85;
   text-wrap: pretty;
@@ -376,10 +474,19 @@ html[data-family="world"]:root
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 4px 14px;
+  gap: 6px 14px;
   width: 100%;
-  padding-top: 7px;
-  border-top: 1px solid var(--poster-line);
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid rgb(152 228 255 / 36%);
+  background:
+    linear-gradient(180deg, rgb(224 248 255 / 14%) 0%, transparent 48%),
+    linear-gradient(135deg, rgb(12 25 42 / 88%) 0%, rgb(6 13 24 / 94%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 24%),
+    inset 0 -1px 0 rgb(240 207 134 / 18%),
+    0 16px 38px -14px rgb(0 0 0 / 78%),
+    0 0 28px -10px rgb(122 232 255 / 22%);
 }
 
 #top.world-artwork-hero .world-stage-control-cluster {
@@ -775,22 +882,25 @@ html[data-world-effects="economy"] .world-exploration-card b {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgb(156 226 250 / 38%);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgb(164 234 255 / 46%);
   background:
     linear-gradient(
         90deg,
         transparent 4%,
-        rgb(122 232 255 / 85%) 24%,
-        rgb(255 92 200 / 78%) 52%,
-        rgb(240 207 134 / 82%) 78%,
+        rgb(122 232 255 / 92%) 24%,
+        rgb(255 92 200 / 86%) 52%,
+        rgb(240 207 134 / 90%) 78%,
         transparent 96%
       )
-      0 0 / 100% 2px no-repeat,
+      0 0 / 100% 2.5px no-repeat,
     #0a1020;
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 20%),
-    0 22px 48px -18px rgb(0 0 0 / 82%),
-    0 0 36px -14px rgb(122 232 255 / 22%);
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%),
+    0 26px 58px -18px rgb(0 0 0 / 86%),
+    0 0 46px -14px rgb(122 232 255 / 28%);
   color: #eff6ff;
 }
 .world-assembly-heading {
@@ -799,13 +909,20 @@ html[data-world-effects="economy"] .world-exploration-card b {
   justify-content: space-between;
   gap: 4px 16px;
   flex-wrap: wrap;
-  padding: 8px clamp(12px, 2vw, 30px);
-  border-bottom: 1px solid #dcd6ff42;
+  padding: 10px clamp(12px, 2vw, 30px);
+  border-bottom: 1px solid rgb(164 232 255 / 34%);
+  background:
+    linear-gradient(180deg, rgb(224 248 255 / 14%) 0%, transparent 56%),
+    linear-gradient(90deg, rgb(16 32 54 / 94%) 0%, rgb(22 19 44 / 94%) 52%, rgb(14 28 48 / 94%) 100%);
+  box-shadow: inset 0 -1px 0 rgb(240 207 134 / 16%);
 }
 .world-assembly-heading h2 {
   margin: 0;
   font-size: clamp(17px, 1.8vw, 28px);
   line-height: 1.35;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 80%),
+    0 0 24px rgb(122 232 255 / 32%);
 }
 .world-assembly-heading a {
   display: inline-flex;
@@ -817,14 +934,24 @@ html[data-world-effects="economy"] .world-exploration-card b {
 }
 .world-assembly-heading h2 span {
   font-size: 0.65em;
-  color: #bed6e9;
+  color: #96ecff;
 }
 .world-assembly-heading .assembly-comparison-link {
-  color: #cdeaff;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1px solid rgb(240 207 134 / 48%);
+  background:
+    linear-gradient(180deg, rgb(255 244 214 / 18%), transparent 56%),
+    rgb(14 26 44 / 88%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 250 235 / 30%),
+    0 0 18px -4px rgb(240 207 134 / 32%);
+  color: #fff3d1;
   font-size: 0.86rem;
-  text-decoration: underline;
-  text-decoration-color: #6c8395;
-  text-underline-offset: 0.35em;
+  text-decoration: none;
 }
 .world-assembly-scenes {
   display: grid;
@@ -834,7 +961,7 @@ html[data-world-effects="economy"] .world-exploration-card b {
   overflow: hidden;
 }
 .world-assembly-scene {
-  --scene-light: #db9bdb;
+  --scene-light: #ff8ae2;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -844,13 +971,19 @@ html[data-world-effects="economy"] .world-exploration-card b {
   text-decoration: none;
   color: #fff;
   background:
-    radial-gradient(ellipse at 48% 62%, #6c4864 0%, #34283c 40%, transparent 75%), #10101b;
+    radial-gradient(ellipse 68% 58% at 48% 52%, rgb(216 96 196 / 38%) 0%, rgb(82 48 98 / 32%) 46%, transparent 76%),
+    radial-gradient(ellipse 60% 36% at 50% 94%, rgb(240 207 134 / 22%), transparent 70%),
+    linear-gradient(165deg, #171228 0%, #0d0e1a 100%);
+  box-shadow: inset 0 1px 0 rgb(255 220 248 / 18%);
 }
 .world-assembly-scene + .world-assembly-scene {
-  --scene-light: #9adfff;
-  border-inline-start: 1px solid #e2d0ff87;
+  --scene-light: #96ecff;
+  border-inline-start: 1px solid rgb(186 240 255 / 48%);
   background:
-    radial-gradient(ellipse at 53% 58%, #315e8b 0%, #142f49 44%, transparent 76%), #080f1b;
+    radial-gradient(ellipse 68% 58% at 52% 52%, rgb(88 206 255 / 38%) 0%, rgb(28 76 128 / 34%) 46%, transparent 76%),
+    radial-gradient(ellipse 60% 36% at 50% 94%, rgb(240 207 134 / 20%), transparent 70%),
+    linear-gradient(165deg, #0e1c30 0%, #070e1b 100%);
+  box-shadow: inset 0 1px 0 rgb(214 248 255 / 20%);
 }
 .world-assembly-scene::before,
 .world-assembly-scene::after {
@@ -860,20 +993,17 @@ html[data-world-effects="economy"] .world-exploration-card b {
   pointer-events: none;
 }
 .world-assembly-scene::before {
-  background: repeating-radial-gradient(
-    ellipse at 50% 78%,
-    transparent 0 35px,
-    #e9c7df25 36px,
-    transparent 37px 56px
-  );
+  background:
+    radial-gradient(ellipse 56% 42% at 50% 34%, rgb(255 138 226 / 22%), transparent 72%),
+    linear-gradient(180deg, rgb(255 214 246 / 12%) 0%, transparent 28%);
 }
 .world-assembly-scene + .world-assembly-scene::before {
   background:
-    repeating-linear-gradient(60deg, transparent 0 35px, #c2eeff27 36px, transparent 37px),
-    repeating-linear-gradient(-60deg, transparent 0 35px, #c2eeff27 36px, transparent 37px);
+    radial-gradient(ellipse 56% 42% at 50% 34%, rgb(122 232 255 / 24%), transparent 72%),
+    linear-gradient(180deg, rgb(214 248 255 / 14%) 0%, transparent 28%);
 }
 .world-assembly-scene::after {
-  background: linear-gradient(0deg, #070b15 0%, #070b15be 10%, transparent 37%);
+  background: linear-gradient(0deg, #050913 0%, #060b16cc 16%, transparent 44%);
 }
 .world-assembly-scene img {
   position: absolute;
@@ -883,6 +1013,9 @@ html[data-world-effects="economy"] .world-exploration-card b {
   max-width: none;
   height: auto;
   transform: translateX(-50%);
+  filter:
+    drop-shadow(0 14px 28px rgb(0 0 0 / 78%))
+    drop-shadow(0 0 24px rgb(122 232 255 / 20%));
 }
 .world-assembly-scene span {
   z-index: 1;
@@ -896,11 +1029,15 @@ html[data-world-effects="economy"] .world-exploration-card b {
   font-size: clamp(14px, 2vw, 30px);
   line-height: 1.4;
   color: #fff;
+  text-shadow:
+    0 2px 16px rgb(0 0 0 / 90%),
+    0 0 24px rgb(122 232 255 / 32%);
 }
 .world-assembly-scene i {
   font-style: normal;
   color: var(--scene-light);
   font-size: 0.8em;
+  text-shadow: 0 0 16px var(--scene-light);
 }
 .world-assembly-heading a:focus-visible,
 .world-assembly-scene:focus-visible {
@@ -910,17 +1047,26 @@ html[data-world-effects="economy"] .world-exploration-card b {
 .world-exploration-index {
   display: grid;
   grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 #world-exploration .world-exploration-index .world-exploration-card {
   min-height: 84px;
-  padding: 12px 18px;
+  padding: 14px 18px;
   align-items: center;
-  border-radius: 3px;
+  border-radius: 10px;
+  border: 1px solid rgb(var(--we-accent) / 48%);
+  border-left: 3px solid rgb(var(--we-accent));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(var(--we-accent) / 22%),
+    0 18px 38px -14px rgb(0 0 0 / 82%),
+    0 0 30px -12px rgb(var(--we-accent) / 28%);
 }
 #world-exploration .world-exploration-index .world-exploration-card::after {
-  background: linear-gradient(98deg, #040a13ed 4%, #040a13bd 56%, #040a133d 100%);
+  background:
+    radial-gradient(ellipse 72% 80% at 18% 50%, rgb(var(--we-accent) / 24%), transparent 68%),
+    linear-gradient(98deg, rgb(4 10 20 / 95%) 4%, rgb(6 15 28 / 80%) 54%, rgb(4 10 19 / 28%) 100%);
 }
 @media (min-width: 680px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .world-assembly-scenes {
@@ -992,12 +1138,16 @@ html[data-world-effects="economy"] .world-exploration-card b {
     color: LinkText;
   }
   .world-exploration-card::before,
+  #top.world-artwork-hero .world-poster-media::before,
   #top.world-artwork-hero .world-stage-media::before {
     display: none;
   }
   .world-assembly-feature,
   .world-exploration-card,
   .world-exploration-card b,
+  #top.world-artwork-hero .world-poster-media,
+  #top.world-artwork-hero .world-stage-context,
+  #top.world-artwork-hero .world-stage-controls,
   #top.world-artwork-hero .world-stage-controls :is(.poster-shuffle, .poster-reset, .poster-lock),
   #top.world-artwork-hero .world-stage-controls output {
     border-color: CanvasText;

@@ -230,23 +230,24 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid rgb(236 198 124 / 62%);
-  outline: 1px solid rgb(228 190 116 / 26%);
+  border: 1px solid rgb(242 206 132 / 70%);
+  outline: 1px solid rgb(232 194 120 / 32%);
   outline-offset: -5px;
   background:
-    linear-gradient(135deg, #fae2a8, #b28742) 0 0 / 26px 2px no-repeat,
-    linear-gradient(135deg, #fae2a8, #b28742) 0 0 / 2px 26px no-repeat,
-    linear-gradient(225deg, #fae2a8, #b28742) 100% 0 / 26px 2px no-repeat,
-    linear-gradient(225deg, #fae2a8, #b28742) 100% 0 / 2px 26px no-repeat,
-    linear-gradient(45deg, #efd08e, #966e32) 0 100% / 26px 2px no-repeat,
-    linear-gradient(45deg, #efd08e, #966e32) 0 100% / 2px 26px no-repeat,
-    linear-gradient(315deg, #efd08e, #966e32) 100% 100% / 26px 2px no-repeat,
-    linear-gradient(315deg, #efd08e, #966e32) 100% 100% / 2px 26px no-repeat,
-    radial-gradient(66% 64% at 50% 45%, rgb(252 228 176 / 14%), transparent 76%),
-    linear-gradient(180deg, #0b0714 0%, #050308 100%);
+    linear-gradient(135deg, #fff0c2, #b88c44) 0 0 / 30px 2.5px no-repeat,
+    linear-gradient(135deg, #fff0c2, #b88c44) 0 0 / 2.5px 30px no-repeat,
+    linear-gradient(225deg, #fff0c2, #b88c44) 100% 0 / 30px 2.5px no-repeat,
+    linear-gradient(225deg, #fff0c2, #b88c44) 100% 0 / 2.5px 30px no-repeat,
+    linear-gradient(45deg, #f2d494, #9a7032) 0 100% / 30px 2.5px no-repeat,
+    linear-gradient(45deg, #f2d494, #9a7032) 0 100% / 2.5px 30px no-repeat,
+    linear-gradient(315deg, #f2d494, #9a7032) 100% 100% / 30px 2.5px no-repeat,
+    linear-gradient(315deg, #f2d494, #9a7032) 100% 100% / 2.5px 30px no-repeat,
+    radial-gradient(68% 66% at 50% 44%, rgb(255 232 180 / 18%), transparent 76%),
+    radial-gradient(54% 48% at 50% 100%, rgb(198 64 54 / 12%), transparent 74%),
+    linear-gradient(180deg, #0d0817 0%, #050309 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 240 202 / 22%),
-    0 26px 60px rgb(0 0 0 / 68%);
+    inset 0 1px 0 rgb(255 244 212 / 28%),
+    0 30px 68px rgb(0 0 0 / 74%);
 }
 .dream-screening-picture > img {
   display: block;
@@ -342,7 +343,7 @@
 .dream-screening-retry {
   padding: 0 12px;
 }
-/* 35mmフィルムパーフォレーション風サムネイル列＆ライトボックス透過アンバー光 */
+/* 35mmフィルムパーフォレーション風サムネイル列＆ライトボックス透過アンバー光（zero repeating-linear-gradient） */
 .dream-screening-filmstrip {
   display: flex;
   gap: 7px;
@@ -351,39 +352,37 @@
   padding: 6px 8px;
   overflow-x: auto;
   overflow-y: hidden;
-  border-top: 1px solid rgb(224 184 110 / 50%);
-  border-bottom: 1px solid rgb(224 184 110 / 34%);
+  border-top: 1px solid rgb(232 192 118 / 58%);
+  border-bottom: 1px solid rgb(232 192 118 / 40%);
   background:
-    repeating-linear-gradient(
-        90deg,
-        #06040b 0 3.5px,
-        rgb(252 218 148 / 62%) 3.5px 9.5px,
-        #06040b 9.5px 14px
+    radial-gradient(
+        ellipse 3.2px 1.6px at 50% 50%,
+        rgb(255 228 164 / 72%) 0 88%,
+        transparent 100%
       )
       0 1.5px / 14px 3.5px repeat-x,
-    repeating-linear-gradient(
-        90deg,
-        #06040b 0 3.5px,
-        rgb(252 218 148 / 56%) 3.5px 9.5px,
-        #06040b 9.5px 14px
+    radial-gradient(
+        ellipse 3.2px 1.6px at 50% 50%,
+        rgb(255 228 164 / 64%) 0 88%,
+        transparent 100%
       )
       0 calc(100% - 1.5px) / 14px 3.5px repeat-x,
-    linear-gradient(rgb(232 190 112 / 28%) 0 0) 0 6px / 100% 1px no-repeat,
-    linear-gradient(rgb(232 190 112 / 26%) 0 0) 0 calc(100% - 6px) / 100% 1px no-repeat,
+    linear-gradient(rgb(238 198 120 / 34%) 0 0) 0 6px / 100% 1px no-repeat,
+    linear-gradient(rgb(238 198 120 / 30%) 0 0) 0 calc(100% - 6px) / 100% 1px no-repeat,
     radial-gradient(
-      68% 96% at 50% 50%,
-      rgb(250 190 98 / 28%),
-      rgb(198 118 46 / 12%) 66%,
+      70% 96% at 50% 50%,
+      rgb(252 194 102 / 32%),
+      rgb(204 122 48 / 14%) 66%,
       transparent 94%
     ),
     linear-gradient(
       180deg,
-      #06040b 0 6px,
-      #1f1319 6px calc(100% - 6px),
-      #06040b calc(100% - 6px) 100%
+      #05030a 0 6px,
+      #23141b 6px calc(100% - 6px),
+      #05030a calc(100% - 6px) 100%
     );
-  box-shadow: inset 0 0 24px rgb(248 186 92 / 16%);
-  scrollbar-color: #9b7635 #120c17;
+  box-shadow: inset 0 0 28px rgb(252 190 96 / 20%);
+  scrollbar-color: #ad853e #120c17;
   scroll-snap-type: x proximity;
 }
 .dream-screening-filmstrip > button {

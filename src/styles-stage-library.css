@@ -32,20 +32,20 @@ html[data-family="library"] {
   --dx-body:
     "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic",
     "Noto Sans CJK JP", sans-serif;
-  --dxl-deck: #08111c;
-  --dxl-deck-2: #0c1828;
-  --dxl-well: rgb(2 5 10 / 62%);
-  --dxl-line: rgb(var(--dx-edition-rgb) / 15%);
-  --dxl-line-2: rgb(var(--dx-edition-rgb) / 32%);
-  --dxl-hot: rgb(var(--dx-edition-rgb) / 72%);
-  --dxl-gold-rgb: 240 207 134;
+  --dxl-deck: #091524;
+  --dxl-deck-2: #0e1e32;
+  --dxl-well: rgb(3 8 16 / 74%);
+  --dxl-line: rgb(var(--dx-edition-rgb) / 20%);
+  --dxl-line-2: rgb(var(--dx-edition-rgb) / 38%);
+  --dxl-hot: rgb(var(--dx-edition-rgb) / 80%);
+  --dxl-gold-rgb: 242 207 141;
   --dxl-wrap: 1320px;
   --dxl-gap: clamp(10px, 1.1vw, 16px);
   --dxl-ticks:
-    linear-gradient(var(--dx-edition) 0 0) 0 0 / 14px 1px,
-    linear-gradient(var(--dx-edition) 0 0) 0 0 / 1px 14px,
-    linear-gradient(var(--dx-gold) 0 0) 100% 100% / 14px 1px,
-    linear-gradient(var(--dx-gold) 0 0) 100% 100% / 1px 14px;
+    linear-gradient(var(--dx-edition) 0 0) 0 0 / 16px 1.5px,
+    linear-gradient(var(--dx-edition) 0 0) 0 0 / 1.5px 16px,
+    linear-gradient(var(--dx-gold) 0 0) 100% 100% / 16px 1.5px,
+    linear-gradient(var(--dx-gold) 0 0) 100% 100% / 1.5px 16px;
   background-color: var(--dx-ink);
 }
 
@@ -61,9 +61,9 @@ html[data-family="library"] :is(.library-page, .search-page) {
   color: var(--dx-text);
   font-family: var(--dx-body);
   background:
-    radial-gradient(90% 520px at 50% -140px, rgb(var(--dx-edition-rgb) / 14%), transparent 72%),
-    radial-gradient(50% 40% at 104% 22%, rgb(var(--dx-edition-2-rgb) / 8%), transparent 70%),
-    radial-gradient(40% 30% at -6% 64%, rgb(var(--dxl-gold-rgb) / 4%), transparent 70%),
+    radial-gradient(92% 540px at 50% -130px, rgb(var(--dx-edition-rgb) / 18%), transparent 72%),
+    radial-gradient(54% 42% at 102% 20%, rgb(var(--dx-edition-2-rgb) / 10%), transparent 70%),
+    radial-gradient(46% 34% at -4% 62%, rgb(var(--dxl-gold-rgb) / 8%), transparent 70%),
     var(--dx-lattice), var(--dx-ink);
 }
 
@@ -219,31 +219,32 @@ html[data-family="library"] .dxl-art {
   overflow: hidden;
   aspect-ratio: 4 / 5;
   background:
-    radial-gradient(80% 60% at 50% 18%, rgb(var(--tint-rgb) / 14%), transparent 70%),
-    linear-gradient(180deg, rgb(var(--tint-rgb) / 5%), transparent 45%),
-    #060c15;
+    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 42%),
+    radial-gradient(84% 64% at 50% 18%, rgb(var(--tint-rgb) / 22%), transparent 72%),
+    radial-gradient(70% 50% at 86% 92%, rgb(var(--dxl-gold-rgb) / 12%), transparent 70%),
+    linear-gradient(180deg, rgb(var(--tint-rgb) / 8%), #07111e 56%, #050a13 100%);
   pointer-events: none;
   user-select: none;
 }
 
 html[data-family="library"] .dxl-art[data-edition="dream"] {
-  --tint: #e0614f;
-  --tint-rgb: 224 97 79;
+  --tint: #ec6d5a;
+  --tint-rgb: 236 109 90;
 }
 
 html[data-family="library"] .dxl-art[data-edition="extreme"] {
-  --tint: #f0cf86;
-  --tint-rgb: 240 207 134;
+  --tint: #f2cf8d;
+  --tint-rgb: 242 207 141;
 }
 
 html[data-family="library"] .dxl-art[data-edition="final"] {
-  --tint: #9d8cff;
-  --tint-rgb: 157 140 255;
+  --tint: #a898ff;
+  --tint-rgb: 168 152 255;
 }
 
 html[data-family="library"] .dxl-art[data-edition="gallery"] {
-  --tint: #d8b27a;
-  --tint-rgb: 216 178 122;
+  --tint: #e4bc82;
+  --tint-rgb: 228 188 130;
 }
 
 html[data-family="library"] .dxl-art > img {
@@ -261,7 +262,8 @@ html[data-family="library"] .dxl-art::after {
   inset: 0;
   content: "";
   background:
-    linear-gradient(90deg, var(--tint), rgb(var(--tint-rgb) / 0%) 70%) 0 100% / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(255 255 255 / 16%) 0, transparent 1px),
+    linear-gradient(90deg, var(--tint), rgb(var(--dxl-gold-rgb) / 48%) 52%, rgb(var(--tint-rgb) / 0%) 86%) 0 100% / 100% 2px no-repeat,
     linear-gradient(180deg, rgb(3 6 12 / 0%) 52%, rgb(3 6 12 / 72%) 100%);
 }
 
@@ -273,7 +275,8 @@ html[data-family="library"] .dxl-art > i {
   z-index: 1;
   padding: 5px 12px 5px 8px;
   color: var(--tint);
-  background: rgb(3 6 12 / 82%);
+  background: linear-gradient(135deg, rgb(8 18 30 / 92%), rgb(3 7 14 / 88%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
   clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   font: 400 12px / 1.3 var(--dx-hud);
   font-style: normal;
@@ -292,20 +295,24 @@ html[data-family="library"] .dxl-art[data-plate="type"] > b {
   right: 10%;
   bottom: 10px;
   overflow: hidden;
-  color: rgb(var(--tint-rgb) / 66%);
+  color: rgb(var(--tint-rgb) / 82%);
+  text-shadow: 0 2px 16px rgb(var(--tint-rgb) / 28%);
   font: 700 clamp(16px, 12.5cqi, 32px) / 1.1 var(--dx-display);
   letter-spacing: 0.08em;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   white-space: nowrap;
-  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
-  mask-image: linear-gradient(180deg, #000 70%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 74%, transparent);
+  mask-image: linear-gradient(180deg, #000 74%, transparent);
 }
 
 /* Dream's plates in Mincho, as the Dream Chapter sets its names (system
    Mincho faces only: no web font is added). */
 html[data-family="library"] .dxl-art[data-edition="dream"][data-plate="type"] > b {
-  color: rgb(var(--tint-rgb) / 84%);
+  color: #f6c4b8;
+  text-shadow:
+    0 0 18px rgb(var(--tint-rgb) / 38%),
+    0 2px 12px rgb(0 0 0 / 70%);
   font-family:
     "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", "Noto Serif CJK JP", serif;
   font-weight: 600;
@@ -332,11 +339,12 @@ html[data-family="library"]
 
 html[data-family="library"] .dxl-art[data-plate="type"]::before {
   position: absolute;
-  inset: 34px auto 10px 12px;
-  width: 1px;
+  inset: 28px auto 10px 11px;
+  width: 1.5px;
   content: "";
-  background: linear-gradient(180deg, var(--tint), transparent);
-  opacity: 0.6;
+  background: linear-gradient(180deg, var(--tint), rgb(var(--dxl-gold-rgb) / 68%) 58%, transparent);
+  box-shadow: 0 0 10px rgb(var(--tint-rgb) / 48%);
+  opacity: 0.85;
 }
 
 /* ================================================================
@@ -558,27 +566,41 @@ html[data-family="library"] .library-page .library-card-actions > a {
   gap: 6px;
   min-height: 44px;
   color: var(--dx-edition);
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 650;
   letter-spacing: 0.06em;
   text-decoration: none;
 }
 
+html[data-family="library"] .library-page .library-card-actions > a > span {
+  color: var(--dx-gold);
+}
+
 html[data-family="library"] .library-page .library-card-actions button {
   min-height: 44px;
-  padding: 0 10px;
+  padding: 0 12px;
   border: 1px solid var(--dxl-line-2);
-  border-radius: 4px;
-  color: var(--dx-text-2);
-  background: rgb(3 6 12 / 60%);
+  border-bottom-color: rgb(var(--dxl-gold-rgb) / 36%);
+  border-radius: 3px;
+  color: var(--dx-text);
+  background:
+    linear-gradient(130deg, rgb(255 255 255 / 7%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(18 38 56 / 74%), rgb(6 14 24 / 90%));
+  box-shadow: inset 0 1px 0 rgb(242 253 255 / 16%);
   font-size: 12px;
+  font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
 }
 
 html[data-family="library"] .library-page .library-card-actions button[aria-pressed="true"] {
-  border-color: rgb(var(--dxl-gold-rgb) / 70%);
-  color: #1a1305;
-  background: var(--dx-gold);
+  border-color: #ffedc4;
+  color: #181105;
+  background: linear-gradient(135deg, #fff5dc 0%, var(--dx-gold) 56%, #deb468 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 8px 20px -8px rgb(var(--dxl-gold-rgb) / 52%);
+  font-weight: 700;
 }
 
 html[data-family="library"] .search-page mark {
@@ -1096,29 +1118,42 @@ html[data-family="library"] .library-page .library-rows > li {
 html[data-family="library"] .library-page .library-rows > li > a {
   display: grid;
   flex: 1;
-  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
   grid-template-rows: auto auto;
-  column-gap: 10px;
+  column-gap: 11px;
   align-content: center;
   min-width: 0;
-  min-height: 48px;
-  padding: 4px 6px 4px 4px;
-  border-radius: 4px;
+  min-height: 50px;
+  padding: 5px 8px 5px 5px;
+  border: 1px solid transparent;
+  border-radius: 3px;
   color: var(--dx-text);
-  font-size: 13px;
+  font-size: 13.5px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
 html[data-family="library"] .library-page .library-rows > li > a:hover {
-  color: var(--dx-text);
-  background: rgb(var(--dx-edition-rgb) / 7%);
+  border-color: rgb(var(--dx-edition-rgb) / 34%);
+  color: #ffffff;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--dx-edition-rgb) / 14%),
+    rgb(var(--dxl-gold-rgb) / 6%) 62%,
+    transparent
+  );
+  box-shadow: inset 2px 0 0 var(--dx-edition);
 }
 
 html[data-family="library"] .library-page .dxl-art.is-row {
   grid-row: 1 / span 2;
-  width: 34px;
+  width: 36px;
   aspect-ratio: 4 / 5;
-  border-radius: 3px;
+  border: 1px solid rgb(186 230 250 / 50%);
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px rgb(3 8 15 / 88%),
+    0 0 0 2px rgb(var(--dxl-gold-rgb) / 26%);
 }
 
 html[data-family="library"] .library-page .dxl-art.is-row > :is(i, b),
@@ -1130,6 +1165,7 @@ html[data-family="library"] .library-page .library-rows small {
   grid-column: 2;
   color: var(--dx-text-3);
   font-size: 12px;
+  font-weight: 500;
   line-height: 1.4;
 }
 
@@ -1145,18 +1181,23 @@ html[data-family="library"] .library-page .library-rows > li > a > span:last-chi
 html[data-family="library"] .library-page .library-rows button {
   flex: none;
   min-height: 44px;
-  padding: 0 10px;
-  border: 1px solid var(--dxl-line);
-  border-radius: 4px;
-  color: var(--dx-text-3);
-  background: transparent;
+  padding: 0 11px;
+  border: 1px solid var(--dxl-line-2);
+  border-bottom-color: rgb(var(--dxl-gold-rgb) / 30%);
+  border-radius: 3px;
+  color: var(--dx-text-2);
+  background:
+    linear-gradient(130deg, rgb(255 255 255 / 5%) 0%, transparent 50%),
+    rgb(6 14 24 / 72%);
+  box-shadow: inset 0 1px 0 rgb(242 253 255 / 12%);
   font-size: 12px;
 }
 
 html[data-family="library"] .library-page .library-history-day > p {
-  margin: 8px 0 2px;
+  margin: 10px 0 4px;
   color: var(--dx-edition);
   font-size: 12px;
+  font-weight: 600;
   letter-spacing: 0.12em;
 }
 
@@ -1165,8 +1206,9 @@ html[data-family="library"] .library-page .library-text-button {
   margin: 4px 0 0;
   padding: 0;
   border: 0;
-  color: var(--dx-text-3);
+  color: var(--dx-text-2);
   background: none;
+  box-shadow: none;
   font-size: 12px;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -1175,7 +1217,7 @@ html[data-family="library"] .library-page .library-text-button {
 html[data-family="library"] .library-page .library-search-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
   margin: 4px 0 0;
   padding: 0;
   list-style: none;
@@ -1185,12 +1227,19 @@ html[data-family="library"] .library-page .library-search-chips a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  padding: 0 12px;
+  padding: 0 13px;
   border: 1px solid var(--dxl-line-2);
-  border-radius: 4px;
+  border-left: 2px solid rgb(var(--dxl-gold-rgb) / 68%);
+  border-radius: 3px;
   color: var(--dx-text);
-  background: rgb(var(--dx-edition-rgb) / 5%);
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 6.5%) 0%, transparent 48%),
+    linear-gradient(150deg, rgb(22 44 64 / 74%), rgb(7 17 28 / 90%));
+  box-shadow:
+    inset 0 1px 0 rgb(242 253 255 / 16%),
+    0 8px 18px -12px rgb(0 0 0 / 76%);
   font-size: 13px;
+  font-weight: 600;
 }
 
 /* The instrument's foot: the saved data's two controls. */
@@ -1200,15 +1249,15 @@ html[data-family="library"] .library-page .library-data-controls {
   grid-column: 1 / -1;
   align-items: center;
   gap: 6px 10px;
-  margin-top: 2px;
-  padding: 10px 2px 0;
-  border-top: 1px dashed var(--dxl-line);
+  margin-top: 4px;
+  padding: 12px 2px 0;
+  border-top: 1px solid var(--dxl-line);
 }
 
 html[data-family="library"] .library-page .library-data-controls > p:first-child {
   margin: 0 6px 0 0;
   color: var(--dx-text-3);
-  font: 400 12px / 1.4 var(--dx-body);
+  font: 600 12px / 1.4 var(--dx-body);
   letter-spacing: 0.12em;
 }
 
@@ -1216,10 +1265,15 @@ html[data-family="library"] .library-page .library-data-controls > button {
   min-height: 44px;
   padding: 0 14px;
   border: 1px solid var(--dxl-line-2);
-  border-radius: 4px;
-  color: var(--dx-text-2);
-  background: rgb(3 6 12 / 55%);
-  font-size: 12px;
+  border-bottom-color: rgb(var(--dxl-gold-rgb) / 34%);
+  border-radius: 3px;
+  color: var(--dx-text);
+  background:
+    linear-gradient(130deg, rgb(255 255 255 / 6%) 0%, transparent 48%),
+    linear-gradient(180deg, rgb(18 38 56 / 74%), rgb(6 14 24 / 90%));
+  box-shadow: inset 0 1px 0 rgb(242 253 255 / 16%);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 html[data-family="library"] .library-page .library-data-controls > .library-danger {
@@ -1377,12 +1431,19 @@ html[data-family="library"] .library-page .inquiry-start-note {
 html[data-family="library"] .library-page .inquiry-route {
   container-type: inline-size;
   margin-top: var(--dxl-gap);
-  padding: clamp(16px, 2.4vw, 28px);
+  padding: clamp(18px, 2.5vw, 30px);
   border: 1px solid var(--dxl-line-2);
   border-top: 2px solid var(--inquiry-accent);
   border-radius: var(--dx-radius);
-  background: var(--dx-plate);
-  box-shadow: var(--dx-bevel), var(--dx-drop);
+  background:
+    var(--dxl-ticks),
+    radial-gradient(ellipse 74% 52% at 50% 0%, color-mix(in srgb, var(--inquiry-accent) 14%, transparent), transparent 70%),
+    linear-gradient(142deg, rgb(22 44 64 / 82%), rgb(7 16 27 / 96%) 56%, rgb(13 28 42 / 92%));
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 1px 0 rgb(244 253 255 / 22%),
+    inset 0 -1px 0 rgb(var(--dxl-gold-rgb) / 18%),
+    var(--dx-drop);
 }
 
 html[data-family="library"] .library-page .inquiry-route-heading {
@@ -1432,10 +1493,15 @@ html[data-family="library"] .library-page .inquiry-stop-number {
   width: 44px;
   height: 44px;
   border: 0;
+  border-left: 1px solid rgb(255 255 255 / 38%);
+  border-bottom: 1px solid rgb(255 255 255 / 38%);
   border-bottom-left-radius: 4px;
   color: #120d04;
-  background: var(--inquiry-accent);
-  font: 600 18px / 1 var(--dx-mono);
+  background: linear-gradient(135deg, #ffffff 0%, var(--inquiry-accent) 62%, #d8ae64 100%);
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 10px 22px -8px rgb(0 0 0 / 76%);
+  font: 700 18px / 1 var(--dx-mono);
 }
 
 html[data-family="library"] .library-page .inquiry-stop-body {
@@ -1465,6 +1531,7 @@ html[data-family="library"] .library-page .inquiry-stop-label {
   margin-top: 12px;
   color: var(--inquiry-accent);
   font-size: 12px;
+  font-weight: 600;
 }
 
 html[data-family="library"] .library-page .inquiry-stop-body h4 {
@@ -1483,9 +1550,14 @@ html[data-family="library"] .library-page .inquiry-look-for {
 html[data-family="library"] .library-page .inquiry-stop-body blockquote {
   margin-top: 10px;
   margin-bottom: 0;
-  padding: 10px 12px;
-  border-left: 2px solid var(--inquiry-accent);
-  background: rgb(255 255 255 / 3%);
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 26%, transparent);
+  border-left: 3px solid var(--inquiry-accent);
+  border-radius: 0 3px 3px 0;
+  background:
+    linear-gradient(125deg, rgb(255 255 255 / 5%) 0%, transparent 48%),
+    linear-gradient(95deg, color-mix(in srgb, var(--inquiry-accent) 12%, transparent), rgb(4 11 20 / 68%) 86%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
 }
 
 html[data-family="library"] .library-page .inquiry-stop-body blockquote p {
@@ -1708,22 +1780,25 @@ html[data-family="library"] .library-page footer.library-footer {
   grid-template-columns: minmax(0, 1fr);
   justify-content: stretch;
   justify-items: center;
-  gap: 14px;
+  gap: 16px;
   margin: 0;
-  padding: clamp(36px, 5vw, 56px) var(--dx-gutter) clamp(72px, 9vw, 112px);
+  padding: clamp(40px, 5vw, 60px) var(--dx-gutter) clamp(72px, 9vw, 112px);
   border: 0;
-  border-top: 1px solid var(--dxl-line);
+  border-top: 1px solid rgb(var(--dx-edition-rgb) / 32%);
   background:
     linear-gradient(
         90deg,
         transparent,
+        var(--dx-gold),
         var(--dx-edition),
         var(--dx-edition-2),
         var(--dx-gold),
         transparent
       )
-      50% 0 / min(560px, 80%) 1px no-repeat,
-    radial-gradient(50% 120px at 50% 0, rgb(var(--dx-edition-rgb) / 9%), transparent 80%);
+      50% 0 / min(640px, 84%) 1.5px no-repeat,
+    radial-gradient(56% 140px at 50% 0, rgb(var(--dx-edition-rgb) / 14%), transparent 78%),
+    radial-gradient(40% 100px at 50% 0, rgb(var(--dxl-gold-rgb) / 10%), transparent 72%);
+  box-shadow: inset 0 1px 0 rgb(255 250 236 / 14%);
   text-align: center;
 }
 
@@ -1736,7 +1811,7 @@ html[data-family="library"] .library-page footer.library-footer a {
 html[data-family="library"] .library-page footer.library-footer p {
   margin: 0;
   color: var(--dx-text-2);
-  line-height: 1.8;
+  line-height: 1.85;
 }
 
 html[data-family="library"] .library-page footer.library-footer > a {
@@ -1744,15 +1819,34 @@ html[data-family="library"] .library-page footer.library-footer > a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: min(100%, 240px);
+  min-width: min(100%, 248px);
   min-height: 48px;
-  padding: 0 20px;
+  padding: 0 22px;
   border: 1px solid var(--dxl-hot);
-  border-radius: 4px;
-  color: var(--dx-text);
-  background: rgb(var(--dx-edition-rgb) / 8%);
-  font-weight: 600;
+  border-bottom-color: rgb(var(--dxl-gold-rgb) / 56%);
+  border-radius: 3px;
+  color: #f4fbff;
+  background:
+    linear-gradient(128deg, rgb(255 255 255 / 9%) 0%, transparent 46%),
+    linear-gradient(145deg, rgb(26 54 76 / 84%), rgb(8 20 33 / 95%));
+  box-shadow:
+    inset 0 1px 0 rgb(244 254 255 / 24%),
+    inset 0 -1px 0 rgb(var(--dxl-gold-rgb) / 22%),
+    0 14px 32px -14px rgb(0 0 0 / 82%);
+  font-weight: 700;
   transition: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="library"] .library-page footer.library-footer > a:hover {
+    border-color: #f0fdff;
+    background:
+      linear-gradient(128deg, rgb(255 255 255 / 14%) 0%, transparent 48%),
+      linear-gradient(145deg, rgb(34 70 98 / 90%), rgb(11 27 44 / 96%));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 34%),
+      0 16px 36px -12px rgb(var(--dx-edition-rgb) / 38%);
+  }
 }
 
 /* ================================================================

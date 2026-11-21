@@ -15,8 +15,9 @@ html[data-family="world"]:root
   transform: none;
 }
 html[data-family="world"]:root body main.site-shell.film-edition.mirage-edition {
-  --astra-gold: #d9bc80;
-  --astra-rule: rgb(217 188 128 / 32%);
+  --astra-gold: #e6c786;
+  --astra-gold-rgb: 230 199 134;
+  --astra-rule: rgb(230 199 134 / 38%);
 }
 html[data-family="world"]:root
   body
@@ -31,8 +32,10 @@ html[data-family="world"]:root
   main.site-shell.film-edition.mirage-edition
   > .hero
   > .film-hero-identity::after {
-  width: 38%;
-  background: linear-gradient(90deg, #d9bc80, transparent);
+  width: 48%;
+  height: 2px;
+  background: linear-gradient(90deg, #f0d494 0%, rgb(122 232 255 / 66%) 46%, transparent 100%);
+  box-shadow: 0 0 14px rgb(230 199 134 / 32%);
 }
 html[data-family="world"]:root
   body
@@ -48,6 +51,9 @@ html[data-family="world"]:root
   > .hero-copy
   h1 {
   letter-spacing: 0.045em;
+  text-shadow:
+    0 2px 24px rgb(0 0 0 / 56%),
+    0 0 28px rgb(230 199 134 / 16%);
 }
 html[data-family="world"]:root
   body
@@ -55,14 +61,16 @@ html[data-family="world"]:root
   > .hero
   > .poster-stage
   .poster-frame {
-  border-color: rgb(217 188 128 / 55%);
+  border-color: rgb(230 199 134 / 64%);
   box-shadow:
+    inset 0 1px 0 rgb(255 250 235 / 32%),
     0 0 0 6px #06090e,
-    0 0 0 7px rgb(217 188 128 / 28%),
-    0 30px 70px -25px #000;
+    0 0 0 7px rgb(230 199 134 / 42%),
+    0 0 46px -12px rgb(230 199 134 / 28%),
+    0 34px 76px -22px rgb(0 0 0 / 88%);
 }
-/* A quiet, warm page is a deliberate break from the illuminated stages.
-   Existing reveal spans inherit the reading colour, including their final
+/* A quiet, warm archival vellum plate is a deliberate break from the illuminated
+   stages. Existing reveal spans inherit the reading colour, including their final
    opacity. The paragraphs and their order are unchanged. */
 html[data-family="world"]:root
   body
@@ -73,12 +81,23 @@ html[data-family="world"]:root
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   gap: clamp(32px, 6vw, 100px);
   padding: clamp(28px, 5vw, 80px);
-  border: 0;
+  border: 1px solid rgb(196 172 122 / 46%);
   border-top: 3px solid #d9bc80;
   border-radius: 0;
-  background: #e7e2d6;
-  color: #202725;
-  box-shadow: none;
+  background:
+    linear-gradient(#9b7838 0 0) 0 0 / 28px 2px no-repeat,
+    linear-gradient(#9b7838 0 0) 0 0 / 2px 28px no-repeat,
+    linear-gradient(#9b7838 0 0) 100% 100% / 28px 2px no-repeat,
+    linear-gradient(#9b7838 0 0) 100% 100% / 2px 28px no-repeat,
+    radial-gradient(ellipse 76% 48% at 14% 0%, rgb(255 253 246 / 82%), transparent 68%),
+    radial-gradient(ellipse 62% 54% at 92% 100%, rgb(217 188 128 / 22%), transparent 72%),
+    linear-gradient(154deg, #efebe1 0%, #e7e1d4 58%, #ddd6c5 100%);
+  color: #1e2624;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 78%),
+    inset 0 0 0 1px rgb(166 138 82 / 20%),
+    0 32px 68px -22px rgb(0 0 0 / 78%),
+    0 10px 26px -8px rgb(0 0 0 / 50%);
 }
 html[data-family="world"]:root
   body
@@ -87,12 +106,12 @@ html[data-family="world"]:root
   > .story-layout
   > .story-heading
   h2 {
-  color: #172321;
+  color: #162220;
   font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
   font-size: clamp(32px, 3.5vw, 58px);
   line-height: 1.55;
   letter-spacing: 0.06em;
-  text-shadow: none;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 55%);
 }
 html[data-family="world"]:root
   body
@@ -103,7 +122,7 @@ html[data-family="world"]:root
   gap: 1.65em;
   padding-left: 0;
   border: 0;
-  color: #303832;
+  color: #2b342e;
 }
 html[data-family="world"]:root
   body
@@ -112,7 +131,7 @@ html[data-family="world"]:root
   > .story-layout
   > .story-copy
   > p {
-  color: #303832;
+  color: #2b342e;
   font-size: clamp(15px, 1.22vw, 17px);
   line-height: 2.15;
   letter-spacing: 0.035em;
@@ -126,10 +145,10 @@ html[data-family="world"]:root
   > .story-lead-sequel {
   padding: 0 0 16px;
   border: 0;
-  border-bottom: 1px solid #aaa48f;
+  border-bottom: 1px solid rgb(155 128 74 / 42%);
   border-radius: 0;
   background: transparent;
-  color: #303832;
+  color: #2b342e;
   font-size: 13px;
 }
 html[data-family="world"]:root
@@ -141,7 +160,25 @@ html[data-family="world"]:root
   > .story-lead-sequel
   > span
   + span {
-  color: #705829;
+  color: #6b501f;
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #story
+  .world-column {
+  border-color: rgb(169 196 255 / 38%);
+  border-top: 2px solid var(--astra-gold);
+  background:
+    linear-gradient(90deg, #a9c4ff 0%, #e6c786 58%, transparent 100%) 0 0 / 56% 2px no-repeat,
+    radial-gradient(ellipse 68% 60% at 96% 4%, rgb(169 196 255 / 16%), transparent 68%),
+    radial-gradient(ellipse 56% 52% at 6% 96%, rgb(201 171 255 / 14%), transparent 70%),
+    linear-gradient(156deg, #131d3a 0%, #0b1227 58%, #070c1b 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(232 242 255 / 26%),
+    inset 0 0 0 1px rgb(169 196 255 / 14%),
+    0 28px 58px -20px rgb(0 0 0 / 84%),
+    0 6px 20px rgb(0 0 0 / 52%);
 }
 html[data-family="world"]:root
   body
@@ -170,8 +207,7 @@ html[data-family="world"]:root
   #manager-archive
   .signal {
   border-radius: 0;
-  border-color: rgb(217 188 128 / 25%);
-  box-shadow: none;
+  border-color: rgb(230 199 134 / 36%);
 }
 html[data-family="world"]:root
   body
@@ -183,15 +219,124 @@ html[data-family="world"]:root
   padding-block: 12px;
   letter-spacing: 0.1em;
 }
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > #riders
-  .rider-detail {
-  border-radius: 0;
-  border-color: var(--astra-rule);
-  background: #080c12;
+/* Sculpted amethyst-obsidian vault paint for the 六詠 archive (outranks
+   command-directory on surface paint while keeping its layout intact). */
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    #manager-archive#manager-archive#manager-archive {
+    border-color: rgb(200 163 255 / 36%);
+    border-top: 2px solid var(--astra-gold);
+    background:
+      linear-gradient(90deg, #c8a3ff 0%, #ff7fa4 48%, #e6c786 84%, transparent 100%) 0 0 / 68% 2px
+        no-repeat,
+      radial-gradient(ellipse 68% 48% at 6% 4%, rgb(172 118 255 / 22%), transparent 68%),
+      radial-gradient(ellipse 56% 44% at 94% 96%, rgb(255 110 156 / 16%), transparent 70%),
+      linear-gradient(158deg, #1a102b 0%, #0e0a1a 56%, #07050f 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(246 236 255 / 32%),
+      inset 0 0 0 1px rgb(200 163 255 / 14%),
+      0 30px 64px -22px rgb(0 0 0 / 88%),
+      0 0 42px -16px rgb(172 118 255 / 26%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > :is(.signal, .dante-archive, .other-archive-card, .archive-placeholder) {
+    border-color: rgb(200 163 255 / 34%);
+    border-top: 2px solid rgb(230 199 134 / 72%);
+    background-color: #0b0714;
+    background-image:
+      radial-gradient(ellipse 76% 48% at 14% 0%, rgb(224 202 255 / 14%), transparent 66%),
+      radial-gradient(ellipse 60% 42% at 92% 100%, rgb(255 127 164 / 12%), transparent 70%),
+      linear-gradient(154deg, rgb(28 16 44 / 78%), rgb(8 5 16 / 96%) 64%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 255 / 34%),
+      inset 0 0 0 1px rgb(200 163 255 / 18%),
+      0 20px 40px -16px rgb(0 0 0 / 90%),
+      0 4px 14px rgb(0 0 0 / 54%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders#riders
+    > .rider-console {
+    border-color: rgb(207 216 227 / 38%);
+    border-top: 2px solid var(--astra-gold);
+    background:
+      radial-gradient(ellipse 68% 42% at 14% 0%, rgb(236 244 255 / 14%), transparent 66%),
+      radial-gradient(ellipse 52% 40% at 92% 100%, rgb(255 95 200 / 12%), transparent 70%),
+      linear-gradient(158deg, #161d27 0%, #0b1018 58%, #06090f 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(244 250 255 / 34%),
+      inset 0 0 0 1px rgb(207 216 227 / 14%),
+      0 30px 64px -22px rgb(0 0 0 / 88%),
+      0 8px 22px rgb(0 0 0 / 56%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders#riders
+    .rider-detail {
+    border-radius: 0;
+    border-color: var(--astra-rule);
+    background:
+      radial-gradient(
+        ellipse 64% 62% at 78% 12%,
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 22%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(ellipse 52% 46% at 14% 94%, rgb(230 199 134 / 10%), transparent 70%),
+      linear-gradient(132deg, #131c28 0%, #090e16 58%, #05080e 100%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #riders#riders
+    .rider-copy-block {
+    border-color: rgb(207 216 227 / 34%);
+    border-left: 3px solid var(--rider-tone, var(--astra-gold));
+    background:
+      radial-gradient(
+        ellipse 74% 48% at 12% 0%,
+        color-mix(in srgb, var(--rider-tone, #7ae8ff) 14%, transparent),
+        transparent 68%
+      ),
+      linear-gradient(150deg, rgb(22 33 48 / 86%), rgb(8 12 20 / 96%) 64%);
+    box-shadow:
+      inset 0 1px 0 rgb(244 250 255 / 32%),
+      inset 0 0 0 1px rgb(207 216 227 / 12%),
+      0 22px 44px -16px rgb(0 0 0 / 86%);
+  }
 }
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
+    #manager-archive#manager-archive#manager-archive
+    .manager-slot-grid
+    > :is(.signal, .dante-archive, .other-archive-card):hover {
+    border-color: rgb(224 196 255 / 78%);
+    border-top-color: #fff3d2;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 54%),
+      inset 0 0 0 1px rgb(200 163 255 / 36%),
+      0 26px 50px -16px rgb(0 0 0 / 94%),
+      0 0 34px -8px rgb(200 163 255 / 46%);
+  }
+}
+
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
@@ -243,13 +388,35 @@ html[data-family="world"]:root
 html[data-family="world"]:root
   body
   main.site-shell.film-edition.mirage-edition
-  > #cast-roster
+  > #cast-roster#cast-roster
   .wa-person {
-  border: 0;
-  border-top: 1px solid var(--astra-rule);
-  border-radius: 0;
-  background: #0a1017;
-  box-shadow: none;
+  border: 1px solid rgb(109 223 186 / 32%);
+  border-top: 2px solid var(--astra-gold);
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse 74% 46% at 14% 0%, rgb(109 223 186 / 14%), transparent 66%),
+    radial-gradient(ellipse 56% 42% at 92% 100%, rgb(230 199 134 / 10%), transparent 70%),
+    linear-gradient(156deg, #102421 0%, #081414 58%, #050c0c 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(232 252 246 / 32%),
+    inset 0 0 0 1px rgb(109 223 186 / 14%),
+    0 20px 42px -18px rgb(0 0 0 / 88%),
+    0 4px 14px rgb(0 0 0 / 50%);
+}
+html[data-family="world"]:root
+  body
+  main.site-shell.film-edition.mirage-edition
+  > #cast-roster#cast-roster
+  .wa-person:has(.wa-profile[open]) {
+  border-color: #6ddfba;
+  border-top-color: #fff3d2;
+  background:
+    radial-gradient(ellipse 80% 48% at 16% 0%, rgb(109 223 186 / 22%), transparent 68%),
+    linear-gradient(154deg, #14322d 0%, #0a1b19 58%, #061010 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 54%),
+    0 24px 48px -16px rgb(0 0 0 / 90%),
+    0 0 32px -8px rgb(109 223 186 / 34%);
 }
 html[data-family="world"]:root
   body
@@ -264,8 +431,11 @@ html[data-family="world"]:root
   > #cast-roster
   .wa-person
   .wa-index {
-  background: #d9bc80;
-  color: #171b1d;
+  background: linear-gradient(155deg, #f2da9c, #d9bc80);
+  color: #14191b;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 62%),
+    0 4px 10px rgb(0 0 0 / 42%);
   clip-path: none;
 }
 html[data-family="world"]:root
@@ -274,7 +444,7 @@ html[data-family="world"]:root
   > #cast-roster
   .wa-person
   .wa-open {
-  background: transparent;
+  background: linear-gradient(120deg, rgb(109 223 186 / 12%), transparent 70%);
   border-top-color: var(--astra-rule);
 }
 html[data-family="world"]:root
@@ -288,14 +458,68 @@ html[data-family="world"]:root
   display: flex;
   align-items: center;
 }
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > #records
-  .episode-card-surface {
-  border-radius: 0;
-  border-color: var(--astra-rule);
-  box-shadow: none;
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster#cast-roster
+    .wa-person:has(.wa-open:hover) {
+    border-color: #6ddfba;
+    border-top-color: #fff3d2;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 56%),
+      inset 0 0 0 1px rgb(109 223 186 / 32%),
+      0 24px 46px -16px rgb(0 0 0 / 92%),
+      0 0 32px -8px rgb(109 223 186 / 40%);
+  }
+}
+@media (forced-colors: none) {
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-archive {
+    border-color: rgb(239 185 111 / 38%);
+    border-top: 2px solid #f0cf86;
+    background:
+      linear-gradient(90deg, #efb96f 0%, #e98c5e 52%, transparent 100%) 0 0 / 60% 2px no-repeat,
+      radial-gradient(ellipse 68% 48% at 10% 0%, rgb(255 196 112 / 18%), transparent 68%),
+      radial-gradient(ellipse 56% 42% at 92% 100%, rgb(233 140 94 / 14%), transparent 70%),
+      linear-gradient(158deg, #24190e 0%, #150e08 58%, #0d0805 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 238 202 / 28%),
+      inset 0 0 0 1px rgb(239 185 111 / 14%),
+      0 28px 60px -20px rgb(0 0 0 / 86%),
+      0 0 40px -16px rgb(239 185 111 / 24%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card-surface {
+    border-radius: 2px;
+    border-color: rgb(239 185 111 / 44%);
+    border-top-color: rgb(255 232 184 / 68%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 32%),
+      0 18px 36px -14px rgb(0 0 0 / 78%),
+      0 4px 12px rgb(0 0 0 / 48%);
+  }
+
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #records
+    .episode-card.is-active
+    .episode-card-surface {
+    border-color: #f6d58f;
+    box-shadow:
+      inset 0 1px 0 rgb(255 250 232 / 56%),
+      inset 0 0 0 1px rgb(239 185 111 / 34%),
+      0 24px 48px -14px rgb(0 0 0 / 86%),
+      0 0 36px -8px rgb(239 185 111 / 42%);
+  }
 }
 html[data-family="world"]:root
   body
@@ -389,6 +613,16 @@ html[data-family="world"]:root
     body
     main.site-shell.film-edition.mirage-edition
     > #story
+    .world-column,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #cast-roster#cast-roster
+    .wa-person,
+  html[data-family="world"]:root
+    body
+    main.site-shell.film-edition.mirage-edition
+    > #story
     > .story-layout
     > .story-heading
     h2,
@@ -401,6 +635,7 @@ html[data-family="world"]:root
     > p {
     background: Canvas;
     color: CanvasText;
+    box-shadow: none;
   }
 }
 
@@ -412,16 +647,7 @@ html[data-family="world"]:root
   .story-heading
   h2
   em {
-  color: #765724;
+  color: #70501b;
   -webkit-text-fill-color: currentColor;
   background: none;
-}
-html[data-family="world"]:root
-  body
-  main.site-shell.film-edition.mirage-edition
-  > #story
-  > #manager-archive {
-  background: #0a0e14;
-  border-color: rgb(217 188 128 / 32%);
-  box-shadow: none;
 }

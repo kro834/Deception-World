@@ -122,12 +122,14 @@
   left: max(24px, env(safe-area-inset-left));
   top: max(27px, calc(env(safe-area-inset-top) + 12px));
   margin: 0;
-  color: #cce8c8;
+  color: #d8f4d4;
   font-family: ui-monospace, monospace;
   font-size: clamp(11px, 1.15vw, 15px);
   line-height: 1.5;
   letter-spacing: 0.26em;
-  text-shadow: 0 2px 12px #000;
+  text-shadow:
+    0 2px 12px #000,
+    0 0 18px rgb(28 207 157 / 0.36);
   animation: ci-kicker var(--ci-duration) linear both;
 }
 .ciel-inferno-kicker span {

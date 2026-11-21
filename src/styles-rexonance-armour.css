@@ -27,27 +27,30 @@
   --ra-white: #f4fbff;
   /* The plate: a specular edge, a short tinted falloff, a near-black body. */
   --ra-plate: linear-gradient(
-    172deg,
-    rgb(244 251 255 / 14%) 0,
-    rgb(122 232 255 / 7%) 3%,
-    #0d1826 11%,
-    #070d16 46%,
+    170deg,
+    rgb(244 251 255 / 18%) 0,
+    rgb(122 232 255 / 10%) 3.5%,
+    #0e1b2b 12%,
+    #070e18 48%,
     #03060c 100%
   );
   /* Diagonal sheen softened to a calm, unified surface without hard banding. */
-  --ra-sheen: linear-gradient(180deg, transparent, transparent);
-  /* The bevel: a lit top edge, a dark lower edge, a faint lit left edge. */
+  --ra-sheen: linear-gradient(180deg, rgb(255 255 255 / 4%), transparent 38%);
+  /* The bevel: a double lit top edge, a dark lower edge, a faint lit left edge. */
   --ra-bevel:
-    inset 0 1px 0 rgb(255 255 255 / 34%), inset 1px 0 0 rgb(255 255 255 / 9%),
-    inset 0 -1px 0 rgb(0 0 0 / 85%), inset -1px 0 0 rgb(0 0 0 / 55%);
-  --ra-rim-ice: 0 0 0 1px rgb(122 232 255 / 26%);
-  --ra-rim-pink: 0 0 0 1px rgb(255 143 216 / 26%);
-  --ra-rim-gold: 0 0 0 1px rgb(242 216 150 / 34%);
-  --ra-drop: 0 24px 48px -26px rgb(0 0 0 / 90%);
-  /* The lattice: a 28px grid of ice hairlines at 3%, under the grain. */
+    inset 0 1px 0 rgb(255 255 255 / 42%),
+    inset 0 2px 0 rgb(122 232 255 / 18%),
+    inset 1px 0 0 rgb(255 255 255 / 12%),
+    inset 0 -1px 0 rgb(0 0 0 / 88%),
+    inset -1px 0 0 rgb(0 0 0 / 62%);
+  --ra-rim-ice: 0 0 0 1px rgb(122 232 255 / 34%);
+  --ra-rim-pink: 0 0 0 1px rgb(255 143 216 / 34%);
+  --ra-rim-gold: 0 0 0 1px rgb(242 216 150 / 44%);
+  --ra-drop: 0 26px 56px -24px rgb(0 0 0 / 92%);
+  /* Ambient spatial field (replaces repeating grid lines). */
   --ra-lattice:
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 3%) 0 1px, transparent 1px 28px);
+    radial-gradient(ellipse 72% 54% at 50% 24%, rgb(122 232 255 / 6%), transparent 74%),
+    radial-gradient(ellipse 58% 46% at 78% 68%, rgb(242 216 150 / 4.5%), transparent 72%);
   --rc-plate: #070d16;
   --rc-plate-hi: #0d1826;
   background:

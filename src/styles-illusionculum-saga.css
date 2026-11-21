@@ -5003,3 +5003,981 @@ html[data-rzn-constrained] #top.rxs-page.ics-page .ics-specs > div:nth-child(-n 
     display: none;
   }
 }
+
+/* ================================================================
+   2026-11 Wave-6 Neon Crimson x Astral Gold Sacred Geometry Edition:
+   Scoped to html[data-family="special"] body #top.rxs-page.ics-page[data-command-special]
+   (1,4,2) so it cleanly outranks downstream command-special.css (1,3,2)
+   and visual-astra.css (0,4,2) while preserving every Family Edition
+   layout rule, .ics-ignition red-fire pin, and .ics-proj-shear hidden rule.
+   ================================================================ */
+
+/* 1. Local Command Bar — Opaque Sapphire-Obsidian Ground & Crimson x Gold Keys */
+@media (forced-colors: none) {
+  html[data-family="special"] body #top.rxs-page.ics-page[data-command-special] .rxs-local-nav {
+    border-bottom: 0;
+    background:
+      linear-gradient(
+          90deg,
+          transparent 0%,
+          rgb(233 184 102 / 78%) 18%,
+          rgb(218 46 82 / 74%) 50%,
+          rgb(166 230 255 / 72%) 82%,
+          transparent 100%
+        )
+        0 100% / 100% 1px no-repeat,
+      linear-gradient(180deg, #070b1d 0%, #040714 100%);
+    box-shadow:
+      inset 0 -1px 0 rgb(255 225 163 / 18%),
+      0 10px 30px -10px rgb(0 0 0 / 90%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .rxs-local-nav
+    nav
+    a {
+    border: 1px solid rgb(233 184 102 / 30%);
+    border-radius: 3px;
+    background:
+      linear-gradient(90deg, rgb(255 225 163 / 62%), rgb(218 46 82 / 40%) 55%, transparent) 0 0 /
+        100% 1px no-repeat,
+      linear-gradient(180deg, #121836 0%, #090d22 100%);
+    color: #edf3ff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 16%),
+      inset 0 -1px 0 rgb(0 0 0 / 74%),
+      0 3px 10px -4px rgb(0 0 0 / 82%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .rxs-local-nav
+    nav
+    a[aria-current] {
+    border-color: rgb(255 225 163 / 74%);
+    background:
+      linear-gradient(90deg, #ffe1a3 0%, #ff6b80 54%, #a6e6ff 100%) 0 100% / 100% 2px no-repeat,
+      radial-gradient(110% 120% at 50% 100%, rgb(184 31 58 / 38%), transparent 72%),
+      linear-gradient(180deg, #25152c 0%, #101534 100%);
+    color: #fff6e0;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 36%),
+      inset 0 0 16px -4px rgb(218 46 82 / 44%),
+      0 0 18px -6px rgb(233 184 102 / 56%);
+    text-shadow: 0 0 12px rgb(255 225 163 / 52%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .rxs-menu-trigger {
+    border: 1px solid rgb(233 184 102 / 58%);
+    border-radius: 3px;
+    background:
+      linear-gradient(#ffe1a3, #ffe1a3) 0 0 / 10px 1.5px no-repeat,
+      linear-gradient(#ffe1a3, #ffe1a3) 0 0 / 1.5px 10px no-repeat,
+      linear-gradient(#ff6b80, #ff6b80) 100% 100% / 10px 1.5px no-repeat,
+      linear-gradient(#ff6b80, #ff6b80) 100% 100% / 1.5px 10px no-repeat,
+      radial-gradient(90% 90% at 15% 0%, rgb(233 184 102 / 18%), transparent 68%),
+      linear-gradient(180deg, #1b1734 0%, #0b0e24 100%);
+    color: #fff5e0;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 28%),
+      inset 0 -1px 0 rgb(184 31 58 / 46%),
+      0 6px 18px -8px rgb(0 0 0 / 88%),
+      0 0 16px -6px rgb(233 184 102 / 36%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .rxs-local-nav
+    nav
+    a:not([aria-current]):hover {
+    border-color: rgb(255 225 163 / 64%);
+    color: #ffffff;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 32%),
+      inset 0 -1px 0 rgb(218 46 82 / 44%),
+      0 0 14px -4px rgb(233 184 102 / 42%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .rxs-menu-trigger:hover {
+    border-color: #ffe1a3;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      inset 0 0 18px -6px rgb(218 46 82 / 42%),
+      0 0 22px -4px rgb(233 184 102 / 54%);
+  }
+}
+
+/* 2. Split Hero — Crimson x Astral Gold Sacred Geometry Halos & Stage Rim */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  > .ics-hero
+  > .rxs-hero-ambient {
+  overflow: hidden;
+  background:
+    radial-gradient(46rem 34rem at 76% 36%, rgb(184 31 58 / 24%), transparent 68%),
+    radial-gradient(54rem 38rem at 64% 48%, rgb(47 79 216 / 34%), transparent 72%),
+    radial-gradient(32rem 26rem at 72% 16%, rgb(255 225 163 / 18%), transparent 66%),
+    radial-gradient(28rem 24rem at 88% 76%, rgb(255 107 128 / 14%), transparent 68%);
+}
+
+/* Sacred concentric compass geometry floating behind hero copy (never over art). */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  > .ics-hero
+  > .rxs-hero-ambient::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(
+      circle at 78% 42%,
+      transparent 17.6%,
+      rgb(255 225 163 / 24%) 17.85%,
+      rgb(255 225 163 / 24%) 18.1%,
+      transparent 18.45%
+    ),
+    radial-gradient(
+      circle at 78% 42%,
+      transparent 24.4%,
+      rgb(255 107 128 / 20%) 24.65%,
+      rgb(255 107 128 / 20%) 24.9%,
+      transparent 25.25%
+    ),
+    radial-gradient(
+      circle at 78% 42%,
+      transparent 31.8%,
+      rgb(166 230 255 / 16%) 32%,
+      rgb(166 230 255 / 16%) 32.2%,
+      transparent 32.55%
+    ),
+    radial-gradient(
+      circle at 78% 42%,
+      rgb(184 31 58 / 18%) 0%,
+      rgb(47 79 216 / 12%) 34%,
+      transparent 58%
+    );
+  pointer-events: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  > .ics-hero
+  > .rxs-hero-ambient::after {
+  background:
+    radial-gradient(52% 62% at 74% 38%, rgb(233 184 102 / 14%), rgb(184 31 58 / 14%) 46%, transparent 74%),
+    radial-gradient(36% 44% at 62% 24%, rgb(166 230 255 / 14%), transparent 70%);
+  opacity: 0.95;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero-visual {
+  background:
+    radial-gradient(64% 52% at 50% 34%, rgb(47 79 216 / 38%), transparent 66%),
+    radial-gradient(48% 40% at 54% 18%, rgb(255 225 163 / 20%), transparent 64%),
+    radial-gradient(44% 40% at 50% 68%, rgb(184 31 58 / 22%), transparent 68%),
+    var(--ics-ink);
+}
+
+@media (min-width: 1100px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    > .ics-hero
+    > .ics-hero-visual {
+    border-right: 1.5px solid rgb(255 225 163 / 62%);
+    box-shadow:
+      inset -1px 0 0 0 rgb(255 244 218 / 52%),
+      inset -3px 0 0 0 rgb(184 31 58 / 38%),
+      inset -20px 0 42px -12px rgb(233 184 102 / 34%),
+      inset 0 1px 0 0 rgb(255 244 218 / 30%),
+      1px 0 0 0 rgb(2 3 10 / 96%),
+      4px 0 0 0 rgb(218 46 82 / 26%),
+      22px 0 72px -22px rgb(184 31 58 / 64%),
+      14px 0 48px -18px rgb(233 184 102 / 48%);
+  }
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero
+  .ics-mark {
+  -webkit-text-stroke: 1px rgb(255 225 163 / 30%);
+  filter: drop-shadow(0 0 18px rgb(218 46 82 / 22%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero
+  .ics-title-prefix {
+  color: #ffebbd;
+  text-shadow:
+    0 0 22px rgb(233 184 102 / 64%),
+    0 1px 6px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero
+  .ics-title-name {
+  text-shadow:
+    0 6px 32px rgb(0 0 0 / 92%),
+    0 0 36px rgb(166 230 255 / 26%),
+    0 0 18px rgb(233 184 102 / 18%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero
+  .ics-title-ultra {
+  padding-top: 14px;
+  border-top: 0;
+  background:
+    linear-gradient(
+        90deg,
+        #ffe1a3 0%,
+        #ff6b80 34%,
+        #a6e6ff 66%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(90deg, rgb(184 31 58 / 18%) 0%, rgb(233 184 102 / 8%) 48%, transparent 88%);
+  color: #f4f6ff;
+  text-shadow: 0 2px 14px rgb(0 0 0 / 82%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  :is(.ics-hero, .ics-footer)
+  .ics-ultra-word {
+  color: #ff8ea0;
+  text-shadow:
+    0 0 22px rgb(255 88 118 / 68%),
+    0 0 8px rgb(255 225 163 / 36%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-scroll-cue {
+  border-color: rgb(255 225 163 / 44%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 24%),
+    0 0 20px -6px rgb(233 184 102 / 42%);
+}
+
+/* 3. Transformation Calls 01..04 — Crimson x Gold Sacred Rim Plates */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  :is(.ics-calls, .ics-hero-calls)
+  > li::before {
+  border: 1px solid rgb(255 225 163 / 62%);
+  background:
+    linear-gradient(#ffe1a3, #ffe1a3) 0 0 / 6px 1px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 0 0 / 1px 6px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 100% 100% / 6px 1px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 100% 100% / 1px 6px no-repeat,
+    linear-gradient(155deg, rgb(255 225 163 / 28%), rgb(184 31 58 / 22%) 58%, rgb(8 11 26 / 94%));
+  color: #fff2ce;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 32%),
+    0 0 18px -4px rgb(233 184 102 / 58%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  :is(.ics-calls, .ics-hero-calls)
+  b {
+  border: 1px solid rgb(233 184 102 / 44%);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ffe1a3 32%, #a6e6ff 68%, #ff6b80 100%) 0 0 / 3px 100%
+      no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 10px 1px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 1px 10px no-repeat,
+    linear-gradient(
+        90deg,
+        rgb(255 244 218 / 44%) 0%,
+        rgb(166 230 255 / 26%) 46%,
+        transparent 90%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(
+      115% 130% at 0% 50%,
+      rgb(47 79 216 / 46%) 0%,
+      rgb(166 230 255 / 16%) 38%,
+      transparent 74%
+    ),
+    radial-gradient(64% 110% at 100% 100%, rgb(184 31 58 / 20%), transparent 70%),
+    linear-gradient(125deg, rgb(16 22 52 / 94%) 0%, rgb(8 11 28 / 96%) 62%, rgb(18 12 28 / 92%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 24%),
+    inset 0 -1px 0 rgb(218 46 82 / 34%),
+    inset 18px 0 30px -16px rgb(47 79 216 / 58%),
+    0 12px 28px -14px rgb(0 0 0 / 90%),
+    0 0 24px -10px rgb(233 184 102 / 36%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero-calls
+  > li:last-child::before {
+  border-color: rgb(255 225 163 / 84%);
+  background: linear-gradient(155deg, rgb(255 225 163 / 36%), rgb(184 31 58 / 40%) 58%, rgb(16 8 18 / 96%));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 44%),
+    0 0 22px -2px rgb(255 107 128 / 64%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-hero-calls
+  > li:last-child
+  b {
+  border-color: rgb(255 130 150 / 64%);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ffe1a3 36%, #ff6b80 74%, #b81f3a 100%) 0 0 / 4px 100%
+      no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 100% 100% / 12px 1.5px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 100% 100% / 1.5px 12px no-repeat,
+    linear-gradient(
+        90deg,
+        rgb(255 225 163 / 62%) 0%,
+        rgb(255 107 128 / 46%) 52%,
+        transparent 94%
+      )
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(
+      115% 130% at 0% 50%,
+      rgb(184 31 58 / 50%) 0%,
+      rgb(255 107 128 / 20%) 44%,
+      transparent 78%
+    ),
+    radial-gradient(76% 110% at 96% 100%, rgb(233 184 102 / 24%), transparent 70%),
+    linear-gradient(125deg, rgb(38 14 28 / 95%) 0%, rgb(15 9 24 / 97%) 62%, rgb(26 12 22 / 94%) 100%);
+  color: #ffffff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 38%),
+    inset 0 -1px 0 rgb(233 184 102 / 42%),
+    inset 22px 0 34px -16px rgb(218 46 82 / 64%),
+    0 14px 34px -14px rgb(0 0 0 / 92%),
+    0 0 32px -8px rgb(218 46 82 / 54%);
+  text-shadow:
+    0 0 18px rgb(255 225 163 / 52%),
+    0 1px 4px rgb(0 0 0 / 82%);
+}
+
+/* 4. Chapter Headings & Open Hairline Specs — Sacred Geometry Framing */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-heading {
+  border-bottom: 0;
+  padding-bottom: 18px;
+  background:
+    linear-gradient(
+        90deg,
+        #ffe1a3 0%,
+        #ff6b80 28%,
+        #a6e6ff 58%,
+        rgb(166 230 255 / 14%) 84%,
+        transparent 100%
+      )
+      0 100% / 100% 1.5px no-repeat;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-numeral {
+  -webkit-text-stroke: 1.5px rgb(240 196 108 / 88%);
+  filter: drop-shadow(0 0 16px rgb(218 46 82 / 34%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-specs
+  > div {
+  padding-inline: clamp(4px, 1.4vw, 12px);
+  background:
+    linear-gradient(
+        90deg,
+        rgb(233 184 102 / 54%) 0%,
+        rgb(166 230 255 / 34%) 52%,
+        transparent 100%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(180deg, rgb(14 20 44 / 42%) 0%, transparent 86%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-specs
+  > div:nth-child(-n + 4) {
+  padding-inline: clamp(4px, 1.6vw, 14px);
+  background:
+    linear-gradient(
+        90deg,
+        #ffe1a3 0%,
+        #ff6b80 34%,
+        #c8a2ff 62%,
+        #a6e6ff 88%,
+        transparent 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 12px 1.5px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 1.5px 12px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 0 100% / 12px 1.5px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 0 100% / 1.5px 12px no-repeat,
+    linear-gradient(
+      180deg,
+      rgb(184 31 58 / 16%) 0%,
+      rgb(47 79 216 / 12%) 38%,
+      rgb(8 11 26 / 44%) 100%
+    ),
+    radial-gradient(84% 72% at 90% 10%, rgb(255 225 163 / 15%), transparent 66%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 26%),
+    inset 0 14px 28px -18px rgb(218 46 82 / 42%),
+    0 12px 28px -20px rgb(0 0 0 / 88%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-specs
+  > div:nth-child(-n + 4)
+  dt {
+  color: #ffebc2;
+  text-shadow: 0 0 14px rgb(233 184 102 / 48%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-specs
+  > div:nth-child(-n + 4)
+  dt::before {
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(135deg, #ffe1a3, #ff6b80);
+  box-shadow: 0 0 10px rgb(255 107 128 / 76%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-specs
+  > div:nth-child(-n + 4)
+  dd
+  > b {
+  background: linear-gradient(174deg, #ffffff 0%, #fff7e6 42%, #d8f1ff 70%, #ffd88d 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 18px rgb(233 184 102 / 44%)) drop-shadow(0 4px 12px rgb(0 0 0 / 88%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-specs
+  > div:nth-child(-n + 4)::after {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    #ff6b80 0%,
+    #ffe1a3 40%,
+    #a6e6ff 74%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 14px rgb(255 107 128 / 50%),
+    0 0 22px rgb(233 184 102 / 34%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-spec-sub
+  > span {
+  padding: 2px 9px;
+  border: 1px solid rgb(233 184 102 / 36%);
+  border-radius: 2px;
+  background: linear-gradient(135deg, rgb(47 79 216 / 24%), rgb(184 31 58 / 12%) 72%, rgb(7 10 24 / 88%));
+  color: #f4faff;
+  box-shadow: inset 0 1px 0 rgb(255 244 218 / 20%);
+}
+
+/* 5. Comparison Console & Evaluations — Corner Mounts & Radiant Gauges */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-table-scroll {
+  border-color: rgb(255 225 163 / 54%);
+  background:
+    linear-gradient(#ffe1a3, #ffe1a3) 0 0 / 16px 2px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 0 0 / 2px 16px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 16px 2px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 2px 16px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 0 100% / 16px 2px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 0 100% / 2px 16px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 100% 100% / 16px 2px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) 100% 100% / 2px 16px no-repeat,
+    linear-gradient(
+        90deg,
+        #ffe1a3 0%,
+        #ff6b80 34%,
+        #a6e6ff 68%,
+        #ffe1a3 100%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(64% 40% at 50% 0%, rgb(184 31 58 / 22%), transparent 72%),
+    linear-gradient(160deg, rgb(16 20 46 / 98%), rgb(6 8 20 / 99%));
+  box-shadow:
+    inset 0 2px 0 rgb(255 244 218 / 40%),
+    inset 0 22px 40px -20px rgb(184 31 58 / 38%),
+    inset 0 -1px 0 rgb(233 184 102 / 36%),
+    0 26px 64px -20px rgb(0 0 0 / 92%),
+    0 0 48px -18px rgb(233 184 102 / 34%);
+}
+
+@media (max-width: 640px) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-table-scroll {
+    background:
+      linear-gradient(270deg, rgb(7 9 20) 45%, rgb(7 9 20 / 0%)) right center / 40px 100% no-repeat
+        local,
+      radial-gradient(farthest-side at 100% 50%, rgb(255 225 163 / 30%), transparent) right center /
+        16px 100% no-repeat scroll,
+      linear-gradient(
+          90deg,
+          #ffe1a3 0%,
+          #ff6b80 34%,
+          #a6e6ff 68%,
+          #ffe1a3 100%
+        )
+        0 0 / 100% 2px no-repeat,
+      linear-gradient(160deg, rgb(16 20 46 / 98%), rgb(6 8 20 / 99%));
+  }
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  :is(.ics-table-block, .ics-evaluation)
+  h3::before {
+  width: 9px;
+  height: 9px;
+  border-color: #ffe1a3;
+  background: linear-gradient(135deg, #ffe1a3, #ff6b80);
+  box-shadow: 0 0 12px rgb(255 107 128 / 68%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-evaluation {
+  padding: clamp(20px, 2.4vw, 26px) clamp(14px, 2.2vw, 22px) clamp(18px, 2vw, 24px);
+  border-top: 0;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, #ffe1a3 0%, #ff6b80 42%, rgb(166 230 255 / 38%) 82%, transparent 100%)
+      0 0 / 100% 2px no-repeat,
+    linear-gradient(180deg, rgb(20 18 42 / 52%) 0%, rgb(6 8 20 / 26%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 16%),
+    0 14px 32px -20px rgb(0 0 0 / 86%);
+}
+
+/* 6. 03 Forms Large Stage Plate — Sacred Geometry Architecture (Preserving .ics-ignition) */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-form-panel {
+  border: 1px solid rgb(255 225 163 / 56%);
+  border-radius: 5px;
+  background:
+    linear-gradient(#ffe1a3, #ffe1a3) left 10px top 10px / 18px 1.5px no-repeat,
+    linear-gradient(#ffe1a3, #ffe1a3) left 10px top 10px / 1.5px 18px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) left 10px bottom 10px / 18px 1.5px no-repeat,
+    linear-gradient(#ff6b80, #ff6b80) left 10px bottom 10px / 1.5px 18px no-repeat,
+    radial-gradient(
+      68% 64% at 0% 0%,
+      color-mix(in srgb, var(--ics-accent) 20%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(56% 58% at 16% 100%, rgb(184 31 58 / 18%), transparent 72%),
+    radial-gradient(48% 52% at 50% 42%, rgb(233 184 102 / 10%), transparent 70%),
+    linear-gradient(165deg, #161b34 0%, #0b0e20 56%, #060712 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 34%),
+    inset 0 -1px 0 rgb(218 46 82 / 34%),
+    inset 0 0 54px -18px color-mix(in srgb, var(--ics-accent) 44%, transparent),
+    0 0 0 1px rgb(2 3 10 / 94%),
+    0 0 0 3px rgb(233 184 102 / 14%),
+    0 28px 68px -20px rgb(0 0 0 / 92%),
+    0 0 56px -20px color-mix(in srgb, var(--ics-accent) 46%, transparent);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special][data-ultra="true"]
+  .ics-form-panel {
+  border-color: rgb(255 112 134 / 72%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 40%),
+    inset 0 -1px 0 rgb(255 107 128 / 50%),
+    inset 0 0 64px -16px rgb(218 46 82 / 48%),
+    0 0 0 1px rgb(2 3 10 / 96%),
+    0 0 0 3px rgb(255 107 128 / 24%),
+    0 30px 72px -18px rgb(0 0 0 / 94%),
+    0 0 68px -18px rgb(218 46 82 / 58%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-form-panel::before {
+  height: 2.5px;
+  background: linear-gradient(
+    90deg,
+    #ffe1a3 0%,
+    var(--ics-accent) 36%,
+    #ff6b80 68%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--ics-accent) 76%, transparent),
+    0 0 28px rgb(233 184 102 / 40%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-form-copy
+  h3 {
+  background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 54%, #ffe2a8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 16px rgb(0 0 0 / 82%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-form-copy
+  h3::after {
+  width: 74px;
+  height: 2.5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffe1a3 0%, var(--ics-accent) 60%, #ff6b80 100%);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--ics-accent) 82%, transparent);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-form-mark {
+  -webkit-text-stroke: 1px rgb(255 225 163 / 22%);
+}
+
+/* 7. 04-06 Record & Finishers — Outranking visual-astra.css Blue Box Override */
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-finisher {
+  padding: clamp(30px, 4vw, 56px) 0;
+  border: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-article::before {
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    #ffe1a3 0%,
+    #a6e6ff 30%,
+    rgb(255 107 128 / 46%) 62%,
+    transparent 100%
+  );
+  box-shadow: 0 0 14px rgb(233 184 102 / 36%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-finisher::before {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    #ffe1a3 0%,
+    #ff6b80 38%,
+    rgb(166 230 255 / 44%) 74%,
+    transparent 100%
+  );
+  box-shadow: 0 0 16px rgb(255 107 128 / 44%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-finisher[data-rank="3"]::before {
+  height: 2.5px;
+  background: linear-gradient(
+    90deg,
+    #ffffff 0%,
+    #ff6b80 24%,
+    #ffe1a3 56%,
+    #a983ff 82%,
+    transparent 100%
+  );
+  box-shadow: 0 0 20px rgb(255 107 128 / 62%);
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-card-no {
+  -webkit-text-stroke: 1.25px rgb(240 196 108 / 88%);
+  filter: drop-shadow(0 0 12px rgb(218 46 82 / 32%));
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-detail {
+  border-color: rgb(255 225 163 / 44%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 244 218 / 32%),
+    0 0 0 1px rgb(2 3 10 / 90%),
+    0 0 0 3px rgb(233 184 102 / 14%),
+    0 22px 48px -22px rgb(0 0 0 / 92%),
+    0 0 36px -16px rgb(184 31 58 / 44%);
+}
+
+/* 8. End Card & Doors — Outranking command-special.css .rxs-footer-return */
+@media (min-width: 900px) {
+  html[data-family="special"] body #top.rxs-page.ics-page[data-command-special] .ics-footer {
+    background:
+      radial-gradient(
+        circle at 74% 46%,
+        transparent calc(clamp(165px, 16.5vw, 255px) - 1.5px),
+        rgb(255 225 163 / 42%) clamp(165px, 16.5vw, 255px),
+        transparent calc(clamp(165px, 16.5vw, 255px) + 1.5px)
+      ),
+      radial-gradient(
+        circle at 74% 46%,
+        transparent calc(clamp(228px, 23.5vw, 355px) - 1px),
+        rgb(255 107 128 / 28%) clamp(228px, 23.5vw, 355px),
+        transparent calc(clamp(228px, 23.5vw, 355px) + 1.5px)
+      ),
+      radial-gradient(
+        circle at 74% 46%,
+        transparent calc(clamp(290px, 30vw, 450px) - 1px),
+        rgb(166 230 255 / 16%) clamp(290px, 30vw, 450px),
+        transparent calc(clamp(290px, 30vw, 450px) + 1px)
+      ),
+      radial-gradient(40% 54% at 74% 46%, rgb(184 31 58 / 34%), transparent 72%),
+      radial-gradient(50% 52% at 12% 96%, rgb(47 79 216 / 24%), transparent 72%),
+      var(--ics-ink);
+  }
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  .ics-footer
+  > .ics-end-mark {
+  -webkit-text-stroke: 1px rgb(255 225 163 / 22%);
+}
+
+@media (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer
+    > a,
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer
+    > a.rxs-footer-return {
+    box-sizing: border-box;
+    min-height: 52px;
+    padding: 0 20px;
+    border: 1px solid rgb(255 225 163 / 52%);
+    border-radius: 4px;
+    background:
+      linear-gradient(180deg, #ffe1a3 0%, #ff6b80 58%, #a6e6ff 100%) 0 0 / 3px 100% no-repeat,
+      linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 12px 1.5px no-repeat,
+      linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 1.5px 12px no-repeat,
+      linear-gradient(#ff6b80, #ff6b80) 100% 100% / 12px 1.5px no-repeat,
+      linear-gradient(#ff6b80, #ff6b80) 100% 100% / 1.5px 12px no-repeat,
+      radial-gradient(100% 120% at 0% 50%, rgb(184 31 58 / 28%), transparent 70%),
+      linear-gradient(135deg, rgb(22 18 42 / 94%) 0%, rgb(8 10 24 / 96%) 65%, rgb(18 10 22 / 94%) 100%);
+    color: #fff6e6;
+    box-shadow:
+      inset 0 1px 0 rgb(255 244 218 / 28%),
+      inset 0 -1px 0 rgb(218 46 82 / 34%),
+      0 14px 32px -14px rgb(0 0 0 / 90%),
+      0 0 24px -10px rgb(233 184 102 / 36%);
+    text-shadow: 0 1px 6px rgb(0 0 0 / 80%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer
+    > a.rxs-footer-return {
+    border-color: rgb(255 120 144 / 64%);
+    background:
+      linear-gradient(180deg, #ffffff 0%, #ff6b80 48%, #ffe1a3 100%) 0 0 / 3.5px 100% no-repeat,
+      linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 12px 1.5px no-repeat,
+      linear-gradient(#ffe1a3, #ffe1a3) 100% 0 / 1.5px 12px no-repeat,
+      linear-gradient(#ff6b80, #ff6b80) 100% 100% / 12px 1.5px no-repeat,
+      linear-gradient(#ff6b80, #ff6b80) 100% 100% / 1.5px 12px no-repeat,
+      radial-gradient(105% 130% at 0% 50%, rgb(218 46 82 / 36%), transparent 72%),
+      linear-gradient(135deg, rgb(34 14 28 / 95%) 0%, rgb(12 9 22 / 96%) 64%, rgb(24 12 20 / 95%) 100%);
+    color: #ffffff;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer
+    > a
+    i {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgb(255 225 163 / 44%);
+    border-radius: 2px;
+    background: rgb(255 225 163 / 10%);
+    color: #ffe1a3;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer-top
+    a {
+    padding: 0 16px;
+    border: 1px solid rgb(233 184 102 / 34%);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgb(18 22 46 / 82%), rgb(8 10 24 / 92%));
+    color: #f4e6c8;
+    box-shadow: inset 0 1px 0 rgb(255 244 218 / 20%);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer
+    > a:hover,
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    .ics-footer
+    > a.rxs-footer-return:hover {
+    border-color: #ffe1a3;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 38%),
+      inset 0 -1px 0 rgb(255 107 128 / 50%),
+      inset 20px 0 32px -14px rgb(218 46 82 / 56%),
+      0 16px 36px -12px rgb(0 0 0 / 92%),
+      0 0 32px -6px rgb(233 184 102 / 54%);
+  }
+}
+
+/* 9. Wave-6 Fallbacks: Economy, Constrained, Reduced Motion, Forced Colors */
+html:is([data-world-effects="economy"], [data-rzn-constrained])[data-family="special"]
+  body
+  #top.rxs-page.ics-page[data-command-special]
+  :is(.ics-hero .ics-mark, .ics-numeral, .ics-card-no, .ics-form-copy h3, .ics-specs > div:nth-child(-n + 4) dd > b) {
+  filter: none;
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    :is(
+      .rxs-local-nav,
+      .rxs-local-nav nav a,
+      .rxs-menu-trigger,
+      .ics-specs > div,
+      .ics-spec-sub > span,
+      .ics-evaluation,
+      .ics-form-panel,
+      .ics-footer > a,
+      .ics-footer-top a
+    ) {
+    background: Canvas;
+    box-shadow: none;
+    border-color: CanvasText;
+    color: CanvasText;
+    text-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    :is(.ics-form-copy h3, .ics-specs > div:nth-child(-n + 4) dd > b) {
+    background: none;
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    filter: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page.ics-page[data-command-special]
+    > .ics-hero
+    > .rxs-hero-ambient::before {
+    display: none;
+  }
+}
