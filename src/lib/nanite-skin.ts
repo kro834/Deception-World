@@ -627,8 +627,8 @@ export function* prepareNaniteSkin(
   // the finished art stays exactly the art.
   {
     // First the staircase is rounded: each armour pixel takes the group
-    // most of its neighbourhood (a box a tile wide, twice: a tent) belongs
-    // to — a separable running sum per group, cheap.
+    // most of its neighbourhood (a box a tile wide) belongs to — a
+    // separable running sum per group, cheap.
     const r = Math.max(2, Math.round(input.tile / S / 2));
     const votes = new Float32Array(n);
     const tmp = new Float32Array(n);
@@ -658,10 +658,8 @@ export function* prepareNaniteSkin(
         if (own) any = true;
       }
       if (!any) continue;
-      for (let pass = 0; pass < 2; pass += 1) {
-        blur(votes, tmp, true);
-        blur(tmp, votes, false);
-      }
+      blur(votes, tmp, true);
+      blur(tmp, votes, false);
       for (let i = 0; i < n; i += 1)
         if (region[i] !== 255 && votes[i] > best[i]) {
           best[i] = votes[i];
@@ -876,6 +874,8 @@ export function* prepareNaniteSkin(
   {
     const salt = ALLOY_SALT[style.alloy ?? "meta-unitas"];
     for (let i = 0; i < n; i += 1) {
+      // (Armour only: nothing else is ever drawn.)
+      if (region[i] === 255) continue;
       const x = ((i % gw) + 0.5) * S;
       const y = (Math.floor(i / gw) + 0.5) * S;
       let v = 0.5;
@@ -1129,17 +1129,48 @@ export function* prepareNaniteSkin(
       return top + (bottom - top) * fy;
     };
     const edgeAt = (x: number, y: number) => sample(edge, x, y) * S;
-    // White noise at one figure px, one per picture, the alloy's own.
+    // The grain, pre-baked as small tiles (the Far From entry prepares the
+    // skin in 6–12 ms slices under its fire; a line integral per figure px
+    // made it a second late on a throttled phone). Three planes of white
+    // noise, TILE px square and wrapping, the alloy's own; for each of
+    // DIRS directions over the grain's period (180°, or 60° for the
+    // crystalline three-family grain, which repeats every 60°) its line
+    // integral along that direction, as unit-variance deviates. A pixel
+    // then reads the two directions either side of its flow and blends
+    // them: two lookups instead of dozens.
     const salt = ALLOY_SALT[style.alloy ?? "meta-unitas"];
-    const whiteA = new Uint8Array(W * H);
-    const whiteB = new Uint8Array(W * H);
-    for (let i = 0; i < W * H; i += 1) {
-      whiteA[i] = (hash(i, salt) * 256) | 0;
-      whiteB[i] = (hash(i, salt + 1) * 256) | 0;
-      if (i % 32768 === 32767) yield;
+    const TILE = 128;
+    const WRAP = TILE - 1;
+    const DIRS = 8;
+    const whiteA = new Uint8Array(TILE * TILE);
+    const whiteB = new Uint8Array(TILE * TILE);
+    const whiteC = new Uint8Array(TILE * TILE);
+    {
+      let state = (Math.imul(salt + 1, 0x9e3779b1) | 1) >>> 0;
+      for (let i = 0; i < TILE * TILE; i += 1) {
+        state ^= state << 13;
+        state ^= state >>> 17;
+        state ^= state << 5;
+        whiteA[i] = state & 255;
+        whiteB[i] = (state >>> 8) & 255;
+        whiteC[i] = (state >>> 16) & 255;
+      }
     }
     // A tent-weighted line integral of `noise` through (x, y) along (ux,
-    // uy), `reach` px each way, as a unit-variance deviate.
+    // uy), `reach` px each way, about its mean.
+    const lic = (noise: Uint8Array, x: number, y: number, ux: number, uy: number, reach: number) => {
+      let sum = 0;
+      let weight = 0;
+      for (let k = -reach; k <= reach; k += 1) {
+        const nx = (x + Math.round(ux * k)) & WRAP;
+        const ny = (y + Math.round(uy * k)) & WRAP;
+        const tent = reach + 1 - Math.abs(k);
+        sum += noise[ny * TILE + nx] * tent;
+        weight += tent;
+      }
+      return sum / weight - 127.5;
+    };
+    // The uniform byte's spread, shrunk by the kernel's effective count.
     const deviate = (reach: number) => {
       let w = 0;
       let w2 = 0;
@@ -1148,37 +1179,71 @@ export function* prepareNaniteSkin(
         w += tent;
         w2 += tent * tent;
       }
-      // The uniform byte's spread, shrunk by the kernel's effective count.
       return (73.6 * Math.sqrt(w2)) / w;
-    };
-    const lic = (noise: Uint8Array, x: number, y: number, ux: number, uy: number, reach: number) => {
-      let sum = 0;
-      let weight = 0;
-      for (let k = -reach; k <= reach; k += 1) {
-        const nx = Math.min(W - 1, Math.max(0, x + Math.round(ux * k)));
-        const ny = Math.min(H - 1, Math.max(0, y + Math.round(uy * k)));
-        const tent = reach + 1 - Math.abs(k);
-        sum += noise[ny * W + nx] * tent;
-        weight += tent;
-      }
-      return sum / weight - 127.5;
     };
     const C60 = 0.5;
     const S60 = Math.sqrt(3) / 2;
-    // The grain along the flow: one family, or three crossing at 60°.
-    const grain = (noise: Uint8Array, x: number, y: number, ux: number, uy: number, reach: number) => {
-      if (!style.triangles) return lic(noise, x, y, ux, uy, reach);
-      return (
-        (lic(noise, x, y, ux, uy, reach) +
-          lic(noise, x, y, ux * C60 - uy * S60, ux * S60 + uy * C60, reach) +
-          lic(noise, x, y, ux * C60 + uy * S60, -ux * S60 + uy * C60, reach)) /
-        Math.sqrt(3)
-      );
-    };
-    const reachA = Math.max(2, Math.round(style.streak));
+    const reachA = Math.max(2, Math.round(style.triangles ? style.streak * 0.6 : style.streak));
     const reachB = Math.max(2, Math.round(style.streak * 0.6));
-    const normA = deviate(reachA);
+    const normA = deviate(reachA) * (style.triangles ? Math.sqrt(3) : 1);
     const normB = deviate(reachB);
+    const periodA = style.triangles ? Math.PI / 3 : Math.PI;
+    const tilesA: Float32Array[] = [];
+    const tilesB: Float32Array[] = [];
+    for (let d = 0; d < DIRS; d += 1) {
+      const ta = new Float32Array(TILE * TILE);
+      const tb = new Float32Array(TILE * TILE);
+      const angleA = (periodA * d) / DIRS;
+      const angleB = (Math.PI * d) / DIRS;
+      const ux = Math.cos(angleA);
+      const uy = Math.sin(angleA);
+      const vx = Math.cos(angleB);
+      const vy = Math.sin(angleB);
+      for (let y = 0; y < TILE; y += 1)
+        for (let x = 0; x < TILE; x += 1) {
+          let g = lic(whiteA, x, y, ux, uy, reachA);
+          if (style.triangles)
+            g +=
+              lic(whiteA, x, y, ux * C60 - uy * S60, ux * S60 + uy * C60, reachA) +
+              lic(whiteA, x, y, ux * C60 + uy * S60, -ux * S60 + uy * C60, reachA);
+          ta[y * TILE + x] = Math.max(-2.5, Math.min(2.5, g / normA));
+          tb[y * TILE + x] = Math.max(-2.5, Math.min(2.5, lic(whiteB, x, y, vx, vy, reachB) / normB));
+        }
+      tilesA.push(ta);
+      tilesB.push(tb);
+      yield;
+    }
+    // The slow noises (the flow lines' warp, the mottle, the sheen's 10 px
+    // octave) at the field's resolution, read between its samples: their
+    // periods are many field px, so nothing is lost.
+    const warpF = new Float32Array(n);
+    const mottleF = new Float32Array(n);
+    const tenF = new Float32Array(n);
+    // Only the body's box is baked.
+    let bx0 = gw;
+    let by0 = gh;
+    let bx1 = 0;
+    let by1 = 0;
+    for (let i = 0; i < n; i += 1) {
+      if (!body[i]) continue;
+      const x = i % gw;
+      const y = (i - x) / gw;
+      if (x < bx0) bx0 = x;
+      if (x > bx1) bx1 = x;
+      if (y < by0) by0 = y;
+      if (y > by1) by1 = y;
+    }
+    for (let y = Math.max(0, by0 - 1); y <= Math.min(gh - 1, by1 + 1); y += 1) {
+      for (let x = Math.max(0, bx0 - 1); x <= Math.min(gw - 1, bx1 + 1); x += 1) {
+        const i = y * gw + x;
+        const fx = (x + 0.5) * S;
+        const fy = (y + 0.5) * S;
+        warpF[i] = valueNoise(fx, fy, 31, salt + 3);
+        mottleF[i] = valueNoise(fx, fy, 64, salt + 5);
+        tenF[i] = valueNoise(fx, fy, 10, salt + 9);
+      }
+      if (y % 32 === 31) yield;
+    }
     const fibreContext = fibres.getContext("2d");
     const sheenContext = sheen.getContext("2d");
     if (!fibreContext || !sheenContext) return null;
@@ -1186,40 +1251,78 @@ export function* prepareNaniteSkin(
     const sheenImage = sheenContext.createImageData(W, H);
     const fibreData = new Uint32Array(fibreImage.data.buffer);
     const sheenData = new Uint32Array(sheenImage.data.buffer);
-    for (let y = 0; y < H; y += 1) {
-      for (let x = 0; x < W; x += 1) {
+    // Everything slow, per field px: the chrome's base (its contour sheen,
+    // mottle and faint flow lines), the sheen's base, and which two baked
+    // directions the grain blends here. A figure px then reads two of these
+    // between their samples and four tile values — nothing else.
+    const baseF = new Float32Array(n);
+    const sheenF = new Float32Array(n);
+    const kA = new Uint8Array(n);
+    const wA = new Float32Array(n);
+    const kB = new Uint8Array(n);
+    const wB = new Float32Array(n);
+    const slot = (period: number, angle: number, i: number, k: Uint8Array, w: Float32Array) => {
+      const f = ((((angle % period) + period) % period) / period) * DIRS;
+      k[i] = Math.floor(f) % DIRS;
+      w[i] = f - Math.floor(f);
+    };
+    for (let y = Math.max(0, by0 - 1); y <= Math.min(gh - 1, by1 + 1); y += 1) {
+      for (let x = Math.max(0, bx0 - 1); x <= Math.min(gw - 1, bx1 + 1); x += 1) {
+        const i = y * gw + x;
+        // The chrome turns with the limb's contour (a reflection across it).
+        const slope = (x > 0 ? edge[i - 1] : 0) - (x < gw - 1 ? edge[i + 1] : 0);
+        const contour = Math.max(-1, Math.min(1, slope * 0.45));
+        // Flow lines along the limb, ~12 figure px apart, their phase
+        // warped; kept faint (at a phone's upscale they read as wood grain,
+        // not as a liquid).
+        const stripe = 0.5 + 0.5 * Math.cos(edge[i] * S * 0.52 + (warpF[i] - 0.5) * 5);
+        baseF[i] = 0.05 + contour * 0.2 + (mottleF[i] - 0.5) * 0.18 - stripe * stripe * 0.05;
+        sheenF[i] = 0.5 + 0.3 * (tenF[i] - 0.5);
+        const angle = Math.atan2(dirY[i], dirX[i]);
+        slot(periodA, angle, i, kA, wA);
+        slot(Math.PI, angle, i, kB, wB);
+      }
+      if (y % 32 === 31) yield;
+    }
+    // Two blended deviates spread less than one: restore it.
+    const spread = (w: number) => 1 / Math.sqrt((1 - w) * (1 - w) + w * w);
+    const yFrom = Math.max(0, (by0 - 1) * S);
+    const yTo = Math.min(H, (by1 + 2) * S);
+    const xFrom = Math.max(0, (bx0 - 1) * S);
+    const xTo = Math.min(W, (bx1 + 2) * S);
+    for (let y = yFrom; y < yTo; y += 1) {
+      const gy = Math.min(gh - 1, (y / S) | 0);
+      const t0 = (y & WRAP) * TILE;
+      const t1 = ((y + 1) & WRAP) * TILE;
+      for (let x = xFrom; x < xTo; x += 1) {
         const px = x + 0.5;
         const py = y + 0.5;
-        const e = edgeAt(px, py);
-        if (e <= 0) continue;
-        const ux = sample(dirX, px, py);
-        const uy = sample(dirY, px, py);
-        const um = Math.hypot(ux, uy) || 1;
-        const gA = Math.max(-2.5, Math.min(2.5, grain(whiteA, x, y, ux / um, uy / um, reachA) / normA));
-        const gB = Math.max(-2.5, Math.min(2.5, grain(whiteB, x, y, ux / um, uy / um, reachB) / normB));
-        // The chrome turns with the limb's contour (a reflection across it).
-        const slope = (edgeAt(px - S, py) - edgeAt(px + S, py)) / S;
-        const contour = Math.max(-1, Math.min(1, slope * 0.45));
-        // Flow lines along the limb, ~12 figure px apart, their phase warped.
-        const warp = (valueNoise(px, py, 31, salt + 3) - 0.5) * 5;
-        const stripe = 0.5 + 0.5 * Math.cos(e * 0.52 + warp);
-        const mottle = valueNoise(px, py, 64, salt + 5) - 0.5;
-        // (The flow lines kept faint: at a phone's upscale they read as
-        // wood grain, not as a liquid.)
-        const value = 0.05 + contour * 0.2 + mottle * 0.18 + gA * 0.085 - stripe * stripe * 0.05;
+        if (edgeAt(px, py) <= 0) continue;
+        const g = gy * gw + Math.min(gw - 1, (x / S) | 0);
+        const at = t0 + (x & WRAP);
+        const a0 = kA[g];
+        const a1 = (a0 + 1) % DIRS;
+        const aw = wA[g];
+        const gA = (tilesA[a0][at] * (1 - aw) + tilesA[a1][at] * aw) * spread(aw);
+        const b0 = kB[g];
+        const b1 = (b0 + 1) % DIRS;
+        const bw = wB[g];
+        // (The sheen's grain: one family along the flow, whatever the alloy.)
+        const gB = (tilesB[b0][at] * (1 - bw) + tilesB[b1][at] * bw) * spread(bw);
+        const value = sample(baseF, px, py) + gA * 0.085;
         const opacity = Math.round(Math.min(0.78, Math.abs(value)) * 255);
         fibreData[y * W + x] = (opacity << 24) | (value > 0 ? 0xfff2e6 : 0x0c0806);
-        // The sheen: the finer grain, fractal (1, ~3.5 and ~10 figure px),
-        // pushed to a high contrast so it can fray an edge.
-        const f =
-          0.5 +
-          0.16 * gB +
-          0.32 * (valueNoise(px, py, 3.5, salt + 7) - 0.5) +
-          0.3 * (valueNoise(px, py, 10, salt + 9) - 0.5);
+        // The sheen: the finer grain, fractal (1, ~2 and ~10 figure px),
+        // pushed to a high contrast so it can fray an edge. (The 2 px
+        // octave: a 2×2 average of white noise.)
+        const xa = x & WRAP;
+        const xb = (x + 1) & WRAP;
+        const two = (whiteC[t0 + xa] + whiteC[t0 + xb] + whiteC[t1 + xa] + whiteC[t1 + xb]) / 1020;
+        const f = sample(sheenF, px, py) + 0.16 * gB + 0.45 * (two - 0.5);
         const r = clamp01((f - 0.38) / 0.3);
         sheenData[y * W + x] = (Math.round(r * r * (3 - 2 * r) * 255) << 24) | 0xffffff;
       }
-      if (y % 8 === 7) yield;
+      if (y % 16 === 15) yield;
     }
     fibreContext.putImageData(fibreImage, 0, 0);
     sheenContext.putImageData(sheenImage, 0, 0);
