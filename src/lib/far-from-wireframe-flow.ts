@@ -216,8 +216,10 @@ export function* prepareFarFromWireframeFlow(field: Field): ReturnType<PrepareFl
         // Several short, parallel streams feed the same contact. Smaller
         // chips follow behind the leading white chip and weld into the vertex.
         const feed = clamp(1 - age / (tail * 0.66));
-        // (More, finer lanes since the nano pass: a stream of dust.)
-        const lanes = Math.min(26, 10 + Math.floor(length / 2));
+        // (The lanes' count is the nanosuit pass's: more of them, at one
+        // device px each, cost the desktop scroll ~13% of its frame —
+        // measured, nano pass 2026-11-21.)
+        const lanes = Math.min(18, 7 + Math.floor(length / 3));
         const nx = (ay - by) / length;
         const ny = (bx - ax) / length;
         for (let k = 0; k < lanes && drawn < budget; k += 1) {
