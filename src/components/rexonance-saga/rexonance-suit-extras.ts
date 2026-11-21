@@ -296,6 +296,61 @@ const WHITE = 2;
 const GOLD_TONE = 3;
 // Touch's two-tone rect chips: [tone, shade] per tone.
 const RECT_TONES = ["#8cefff", "#ff8fd8", "#eefcff", "#ffd27a"] as const;
+
+/* A nanite in flight as a point at its true sub-pixel place (nano pass
+   round 3, 2026-11-21). Drawn at whole device pixels a point jitters as it
+   moves; drawn at fractional ones, every argument is boxed into a fresh
+   heap number a call. So the point is baked once at 4 × 4 sub-pixel
+   phases per tone (POINT_CELL px cells, a gaussian a device px across):
+   a frame picks the phase and draws it at whole pixels — small integers
+   only, nothing allocated. */
+const POINT_CELL = 4;
+const POINT_PHASES = 4;
+const POINT_RGB = [
+  [176, 238, 255],
+  [255, 176, 226],
+  [244, 251, 255],
+  [255, 214, 140],
+] as const;
+// (Built once a page, held in a slot rather than a module let.)
+const POINT_SHEET: { canvas?: HTMLCanvasElement | null } = {};
+function nanoPointSheet(): HTMLCanvasElement | null {
+  if (POINT_SHEET.canvas !== undefined) return POINT_SHEET.canvas;
+  POINT_SHEET.canvas = null;
+  try {
+    const cells = POINT_PHASES * POINT_PHASES;
+    const width = POINT_CELL * cells * POINT_RGB.length;
+    const canvas = Object.assign(globalThis.document.createElement("canvas"), {
+      width,
+      height: POINT_CELL,
+    });
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+    const image = context.createImageData(width, POINT_CELL);
+    for (let tone = 0; tone < POINT_RGB.length; tone += 1)
+      for (let phase = 0; phase < cells; phase += 1) {
+        const cx = POINT_CELL / 2 + ((phase % POINT_PHASES) + 0.5) / POINT_PHASES - 0.5;
+        const cy = POINT_CELL / 2 + (Math.floor(phase / POINT_PHASES) + 0.5) / POINT_PHASES - 0.5;
+        const left = (tone * cells + phase) * POINT_CELL;
+        for (let y = 0; y < POINT_CELL; y += 1)
+          for (let x = 0; x < POINT_CELL; x += 1) {
+            const dx = x + 0.5 - cx;
+            const dy = y + 0.5 - cy;
+            const a = Math.exp(-(dx * dx + dy * dy) / (2 * 0.42 * 0.42));
+            const o = (y * width + left + x) * 4;
+            image.data[o] = POINT_RGB[tone][0];
+            image.data[o + 1] = POINT_RGB[tone][1];
+            image.data[o + 2] = POINT_RGB[tone][2];
+            image.data[o + 3] = Math.round(255 * a);
+          }
+      }
+    context.putImageData(image, 0, 0);
+    POINT_SHEET.canvas = canvas;
+  } catch {
+    POINT_SHEET.canvas = null;
+  }
+  return POINT_SHEET.canvas;
+}
 const RECT_SHADES = ["#1d4f63", "#5a2350", "#3a4a5a", "#6a4a12"] as const;
 /** Their batches: four tones by three alpha levels. */
 const RECT_ALPHA = Float32Array.of(0.3, 0.6, 0.9);
@@ -2506,6 +2561,7 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   let conduits = 0;
   const pose = new Float64Array(POSE_SLOTS);
   pose[GLOW] = 1;
+  const points = nanoPointSheet();
   // Liquid fronts (nano pass follow-up, 2026-11-21): each plate lands and
   // paints under one ragged front fitted to its tiles' times
   // (rexonance-liquid-front.js), never tile by tile — a stair of 9 px
@@ -2806,6 +2862,28 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
       k,
     );
   };
+  // The pose's point at its sub-pixel place: the phase cell nearest the
+  // fraction, drawn 1:1 at whole pixels (nanoPointSheet).
+  const point = (tone: number) => {
+    const x = pose[SX] - 0.5;
+    const y = pose[SY] - 0.5;
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = ((x - ix) * POINT_PHASES) | 0;
+    const fy = ((y - iy) * POINT_PHASES) | 0;
+    const cell = (tone * POINT_PHASES + fy) * POINT_PHASES + fx;
+    flight.drawImage(
+      points as HTMLCanvasElement,
+      cell * POINT_CELL,
+      0,
+      POINT_CELL,
+      POINT_CELL,
+      ix - POINT_CELL / 2 + 1,
+      iy - POINT_CELL / 2 + 1,
+      POINT_CELL,
+      POINT_CELL,
+    );
+  };
   // A hex chip at the pose's sprite slots (SX, SY device centre, SD device
   // size, SA alpha), in its tumble frame.
   const chip = (frame: number, tone: number, hero = false) => {
@@ -2839,7 +2917,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // Nano pass (2026-11-21): the chip's sprite is filtered down to one
     // device px and dimmed — the swarm reads as a fine haze, never chips.
     if (d * SPRITE > 1) flight.globalAlpha *= 0.75;
-    poseSprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, 1);
+    if (points) point(t);
+    else poseSprite(cellsImage, MIP_X[t] + 16 * frame, MIP_Y[t], 16, 1);
   };
   // A chip unfolding into its tile (frame k), at the sprite slots.
   const unfold = (k: number, tone: number) => {
@@ -2858,7 +2937,8 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     // only thing that shows it arrive.)
     flight.globalAlpha = pose[SA] * (d * SPRITE > 1 ? 0.75 : 1);
     const t = tone >= 3 ? ICE : tone;
-    poseSprite(cellsImage, MIP_X[t] + 16 * (k % FRAMES), MIP_Y[t], 16, 1);
+    if (points) point(t);
+    else poseSprite(cellsImage, MIP_X[t] + 16 * (k % FRAMES), MIP_Y[t], 16, 1);
   };
   // A comet from the sprite slots' centre along their velocity (SVX, SVY).
   const comet = (tone: number) => {
