@@ -1480,6 +1480,11 @@ export function planAssemblyGold(options) {
 // lights about the visor and (FAR FROM, owner 2026-10-22: the reactor
 // completes like the compound eyes, filling with pixels that scatter) the
 // reactor about the core.
+// The lights' pixel squares, figure px (nano pass, 2026-11-21; owner:
+// 「実際のナノマシンと同程度の大きさに」): they were 4–8 px squares, units a
+// viewer could count. A nanite is far below a pixel, so each is now about a
+// device px — the lights fill with a fine haze of points that scatters.
+const NANO_SQUARES = [0.6, 0.7, 0.8, 0.9];
 export const glowPixels = (glow, centre, seed = 2010, count = 120) => {
   if (!glow?.length) return [];
   const random = seededRandom(seed);
@@ -1500,7 +1505,7 @@ export const glowPixels = (glow, centre, seed = 2010, count = 120) => {
     const x = x0 + random() * (x1 - x0);
     const y = y0 + random() * (y1 - y0);
     if (!inside(x, y)) continue;
-    const size = [4, 5, 6, 8][squares.length % 4];
+    const size = NANO_SQUARES[squares.length % 4];
     const middle = Math.abs(x - centre[0]) < 14 + (y - y0) * 0.12;
     const tone = squares.length % 7 === 0 ? 2 : middle ? 1 : 0;
     squares.push({ x, y, size, tone, group: squares.length % 6 });
@@ -1522,7 +1527,7 @@ const reactorPixels = (core) => {
     const y = cy + (random() * 2 - 1) * radius;
     const r = Math.hypot(x - cx, y - cy);
     if (r > radius) continue;
-    const size = [4, 5, 6, 8][squares.length % 4];
+    const size = NANO_SQUARES[squares.length % 4];
     const tone = squares.length % 7 === 0 ? 2 : r < radius * 0.45 ? 1 : 0;
     squares.push({ x: x - size / 2, y: y - size / 2, size, tone, group: squares.length % 6 });
   }
@@ -1576,7 +1581,7 @@ const lightPixels = (lights, core, W, H, document) => {
       const px = (x + random()) * (W / cw);
       const py = (y + random()) * (H / ch);
       if (Math.hypot(px - cx, py - cy) < REACTOR_RADIUS) continue;
-      const size = [4, 5, 6, 8][squares.length % 4];
+      const size = NANO_SQUARES[squares.length % 4];
       const tone = squares.length % 7 === 0 ? 2 : data[i] > data[i + 2] ? 1 : 0;
       const d = Math.hypot(px - cx, py - cy) / reach;
       squares.push({

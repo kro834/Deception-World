@@ -412,13 +412,20 @@ const inside = (polygon: readonly (readonly [number, number])[], px: number, py:
   return hit;
 };
 const square = (x: number, y: number, size: number) =>
-  `M${x.toFixed(1)} ${y.toFixed(1)}h${size}v${size}h-${size}z`;
-// A pointy-top hexagon of that width about (x, y): the skin's own cell
-// (the armour's tessellation), for the reactor's light.
+  `M${x.toFixed(2)} ${y.toFixed(2)}h${size}v${size}h-${size}z`;
+// Nano pass (2026-11-21; owner: 「実際のナノマシンと同程度の大きさに」): the
+// call's motes and light cells were 3–8 figure px — squares and hexagons a
+// viewer could count. A nanite is far below a pixel, so each is now about a
+// device px (figure px ~1.3–2 device px here), three times as many: the
+// air and the lights fill with a fine haze of points, never a mosaic.
+const NANO_SIZES = [0.5, 0.6, 0.7, 0.8] as const;
+const NANO_MORE = 3;
+// A pointy-top hexagon of that width about (x, y), for the reactor's light
+// (since the nano pass a point under a device px: its shape never shows).
 const hexagon = (x: number, y: number, size: number) => {
   const r = size * 0.58;
   const w = r * 0.866;
-  const f = (value: number) => value.toFixed(1);
+  const f = (value: number) => value.toFixed(2);
   return `M${f(x)} ${f(y - r)}L${f(x + w)} ${f(y - r / 2)}L${f(x + w)} ${f(y + r / 2)}L${f(x)} ${f(y + r)}L${f(x - w)} ${f(y + r / 2)}L${f(x - w)} ${f(y - r / 2)}z`;
 };
 type Squares = { cyan: string; pink: string; white: string };
@@ -427,12 +434,12 @@ type Squares = { cyan: string; pink: string; white: string };
 const suitMotes = (): Squares => {
   const random = seeded(1410);
   const out: Squares = { cyan: "", pink: "", white: "" };
-  for (let n = 0; n < 220; n += 1) {
+  for (let n = 0; n < 220 * NANO_MORE; n += 1) {
     const angle = random() * Math.PI * 2;
     const reach = 0.28 + 0.72 * Math.sqrt(random());
     const x = FIG.width / 2 + Math.cos(angle) * reach * FIG.width * 0.62;
     const y = FIG.height * 0.47 + Math.sin(angle) * reach * FIG.height * 0.52;
-    const size = [3, 4, 5, 7][n % 4];
+    const size = NANO_SIZES[n % 4];
     const tone = n % 9 === 0 ? "white" : x < FIG.width / 2 ? "cyan" : "pink";
     out[tone] += square(x, y, size);
   }
@@ -451,11 +458,11 @@ const suitPixels = (): Squares[] => {
     pink: "",
     white: "",
   }));
-  for (let found = 0, tries = 0; found < 156 && tries < 4000; tries += 1) {
+  for (let found = 0, tries = 0; found < 156 * NANO_MORE && tries < 4000 * NANO_MORE; tries += 1) {
     const x = x0 + random() * (x1 - x0);
     const y = y0 + random() * (y1 - y0);
     if (!inside(glow, x, y)) continue;
-    const size = [4, 5, 6, 8][found % 4];
+    const size = NANO_SIZES[found % 4];
     // Ice along the outer wings, pink down the centre, a few burn white.
     const centre = Math.abs(x - REXONANCE_SUIT_MARKS.visor[0]) < 14 + (y - y0) * 0.12;
     const tone = found % 7 === 0 ? "white" : centre ? "pink" : "cyan";
@@ -478,12 +485,12 @@ const suitReactorPixels = (): Squares[] => {
     pink: "",
     white: "",
   }));
-  for (let found = 0, tries = 0; found < 96 && tries < 2000; tries += 1) {
+  for (let found = 0, tries = 0; found < 96 * NANO_MORE && tries < 2000 * NANO_MORE; tries += 1) {
     const x = cx + (random() * 2 - 1) * REACTOR_REACH;
     const y = cy + (random() * 2 - 1) * REACTOR_REACH;
     const r = Math.hypot(x - cx, y - cy);
     if (Math.max(r, REACTOR_REACH) !== REACTOR_REACH) continue;
-    const size = [4, 5, 6, 8][found % 4];
+    const size = NANO_SIZES[found % 4];
     const inner = Math.min(r, REACTOR_REACH * 0.45) === r;
     const tone = found % 7 === 0 ? "white" : inner ? "pink" : "cyan";
     groups[found % groups.length][tone] += hexagon(x, y, size);
