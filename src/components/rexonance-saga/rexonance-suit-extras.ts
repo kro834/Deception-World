@@ -2585,6 +2585,31 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     });
   const landFronts = fitFronts(false);
   const paintFronts = fitFronts(true);
+  // Round 4 (nano pass): each plate's fixed outlines — its texels and its
+  // gold cells, device px — as Path2D, built once a mount, so a frame clips
+  // with one call. (Without Path2D, as in the tests, the rects are drawn.)
+  const hasPath2D = typeof Path2D === "function";
+  const tileMasks = all.map((plate) => {
+    if (!hasPath2D) return null;
+    const path = new Path2D();
+    for (const tile of plate.tiles) path.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+    return path;
+  });
+  const cellMasks = all.map((plate) => {
+    if (!hasPath2D || plate.end <= plate.first) return null;
+    const path = new Path2D();
+    for (let i = plate.first; i < plate.end; i += 1) {
+      const x0 = Math.round(gold.fx[i] * s - 0.5);
+      const y0 = Math.round(gold.fy[i] * s - 0.5);
+      path.rect(
+        x0,
+        y0,
+        Math.round((gold.fx[i] + gold.cw[i]) * s + 0.5) - x0,
+        Math.round((gold.fy[i] + gold.ch[i]) * s + 0.5) - y0,
+      );
+    }
+    return path;
+  });
   // Each plate's gold under one front (round 3): its cells' lock times.
   const goldFronts = all.map((plate, p) =>
     fitLiquidFront(
@@ -3468,10 +3493,14 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
     if (!front) return false;
     const reach = liquidProgress(front, t);
     if (set ? reach <= 0 : reach >= 1) return false;
-    const tiles = all[p].tiles;
-    flight.beginPath();
-    for (const tile of tiles) flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
-    flight.clip();
+    const mask = tileMasks[p];
+    if (mask) flight.clip(mask);
+    else {
+      const tiles = all[p].tiles;
+      flight.beginPath();
+      for (const tile of tiles) flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+      flight.clip();
+    }
     if (reach > 0 && reach < 1) {
       flight.beginPath();
       liquidFrontPath(flight, front, t, set, 0, s);
@@ -3499,7 +3528,9 @@ export function createSuitExtras(env: SuitExtrasEnv, priming = false): SuitExtra
   const lockBand = (p: number, ta: number, tb: number) => {
     const front = goldFronts[p];
     if (!front || liquidProgress(front, tb) <= 0 || liquidProgress(front, ta) >= 1) return false;
-    cellClip(all[p].first, all[p].end);
+    const cells = cellMasks[p];
+    if (cells) flight.clip(cells);
+    else cellClip(all[p].first, all[p].end);
     flight.beginPath();
     frontRegionS(front, tb, true);
     flight.clip();

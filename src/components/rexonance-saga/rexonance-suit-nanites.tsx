@@ -402,6 +402,16 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             p + 1,
           ),
         );
+        // Round 4: each plate's texels and gold cells as Path2D, built once
+        // a mount (device px), so a frame clips with one call.
+        const hasPath2D = typeof Path2D === "function";
+        const tileMasks = all.map((plate) => {
+          if (!hasPath2D) return null;
+          const path = new Path2D();
+          for (const tile of plate.tiles)
+            path.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+          return path;
+        });
         const sheet = moteSheet(atlas);
         if (!atlasWork || !source || !sheet || !settled || !flight) {
           box.replaceChildren();
@@ -419,6 +429,13 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
         const end = planEnd();
         const gold = cells();
         // …and its gold's front, fitted to its cells' lock times (round 3).
+        const goldMasks = all.map((plate) => {
+          if (typeof Path2D !== "function" || plate.end <= plate.first) return null;
+          const path = new Path2D();
+          for (let i = plate.first; i < plate.end; i += 1)
+            path.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
+          return path;
+        });
         const goldFronts = all.map((plate, p) =>
           fitLiquidFront(
             plate.end - plate.first,
@@ -652,10 +669,14 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
               const reach = front ? liquidProgress(front, t) : 0;
               if (front && reach > 0) {
                 flight.save();
-                flight.beginPath();
-                for (const tile of plate.tiles)
-                  flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
-                flight.clip();
+                const mask = tileMasks[p];
+                if (mask) flight.clip(mask);
+                else {
+                  flight.beginPath();
+                  for (const tile of plate.tiles)
+                    flight.rect(tile.dx * s, tile.dy * s, tile.tw * s, tile.th * s);
+                  flight.clip();
+                }
                 if (reach < 1) {
                   flight.beginPath();
                   liquidFrontPath(flight, front, t, true, 0, s);
@@ -709,10 +730,14 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
                   // the plate's gold front (its cells' outline ∩ the front),
                   // never cell by cell.
                   flight.save();
-                  flight.beginPath();
-                  for (let i = plate.first; i < plate.end; i += 1)
-                    flight.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
-                  flight.clip();
+                  const goldMask = goldMasks[p];
+                  if (goldMask) flight.clip(goldMask);
+                  else {
+                    flight.beginPath();
+                    for (let i = plate.first; i < plate.end; i += 1)
+                      flight.rect(gold.fx[i] * s, gold.fy[i] * s, gold.cw[i] * s, gold.ch[i] * s);
+                    flight.clip();
+                  }
                   const goldFront = goldFronts[p];
                   if (goldFront && liquidProgress(goldFront, t) < 1) {
                     flight.beginPath();

@@ -2832,29 +2832,60 @@ test("the gold guideway is built from the toe tips up, along the trims, never la
     gold,
     layers: { face: { id: "guide" }, holo: { id: "holo" } },
   });
+  // (Round 4, nano pass 2026-11-21: the guideway is clipped to its cells'
+  // outline and then to its build front's polygons; a cell counts as built
+  // in a draw when its centre lies inside every polygon of that clip.)
+  const inside = (points, x, y) => {
+    let hit = false;
+    for (let i = 0, j = points.length - 1; i < points.length; j = i, i += 1) {
+      const [xi, yi] = points[i];
+      const [xj, yj] = points[j];
+      if (yi > y !== yj > y && ((xj - xi) * (y - yi)) / (yj - yi) + xi - x > 0) hit = !hit;
+    }
+    return hit;
+  };
   const clipsFor = (q) => {
     const calls = [];
     let rects = [];
+    let poly = [];
+    let whole = false;
+    let mask = [];
+    let polys = [];
     const context = {
       save() {},
-      restore() {},
+      restore() {
+        mask = [];
+        polys = [];
+      },
       beginPath() {
         rects = [];
+        poly = [];
+        whole = false;
       },
       rect(x, y, w, h) {
-        rects.push([x, y, w, h]);
+        if (w > 1e3) whole = true;
+        else rects.push([x, y, w, h]);
       },
+      moveTo(x, y) {
+        poly.push([x, y]);
+      },
+      lineTo(x, y) {
+        poly.push([x, y]);
+      },
+      closePath() {},
       clip() {
-        calls.push({ rects });
+        if (poly.length) {
+          if (!whole) polys.push(poly);
+        } else if (rects.length) mask = rects;
       },
       drawImage(source, sx, sy) {
-        const last = calls[calls.length - 1];
-        if (last && !last.source) Object.assign(last, { source: source.id, sx, sy });
+        const kept = mask.filter(([x, y, w, h]) =>
+          polys.every((points) => inside(points, x + w / 2, y + h / 2)),
+        );
+        calls.push({ rects: kept, source: source.id, sx, sy });
       },
       fill() {},
       stroke() {},
-      moveTo() {},
-      lineTo() {},
     };
     swarm.frame(q, 0, true, 1, false);
     swarm.hologramPass(context);

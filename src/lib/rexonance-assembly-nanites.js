@@ -2590,6 +2590,49 @@ export function createAssemblyNanites({
       p + 901,
     );
   });
+  // Round 4 (nano pass): the guideway's build under a front too (its cells'
+  // build times, BAT), never cell by cell.
+  const BUILDF = P.map((pc, p) => {
+    const first = pc.goldFirst ?? 0;
+    const end = pc.goldEnd ?? 0;
+    if (!gold || end <= first || BAT.length < end) return null;
+    return fitLiquidFront(
+      end - first,
+      (k, out) => {
+        const i = BIDX[first + k];
+        out[0] = gold.x[i] + gold.w[i] / 2;
+        out[1] = gold.y[i] + gold.h[i] / 2;
+        out[2] = Math.max(gold.w[i], gold.h[i]) / 2;
+        out[3] = BAT[first + k];
+      },
+      p + 1201,
+    );
+  });
+  // Round 4: the fixed outlines (a plate's gold cells; its texels of each
+  // source) as Path2D, built once a plan, so a frame clips with one call
+  // instead of rebuilding hundreds of rects. (Where Path2D is missing —
+  // the tests' VM — the rects are drawn as before.)
+  const HAS_PATH2D = typeof Path2D === "function";
+  const GOLDMASK = P.map((pc) => {
+    if (!HAS_PATH2D || !gold || !(pc.goldEnd > pc.goldFirst)) return null;
+    const path = new Path2D();
+    for (let k = pc.goldFirst; k < pc.goldEnd; k += 1) {
+      const i = GIDX[k];
+      path.rect(gold.x[i], gold.y[i], gold.w[i], gold.h[i]);
+    }
+    return path;
+  });
+  const TILEMASK = [];
+  for (let p = 0; p < NP; p += 1)
+    for (let src = 0; src < 2; src += 1) {
+      if (!HAS_PATH2D) {
+        TILEMASK.push(null);
+        continue;
+      }
+      const path = new Path2D();
+      for (const i of P[p].tiles) if (SRC[i] === src) path.rect(SX[i], SY[i], TW[i], TH[i]);
+      TILEMASK.push(path);
+    }
   const BDX = nano.buildDX ?? new Int8Array(goldCountOf(gold));
   const BDY = nano.buildDY ?? new Int8Array(goldCountOf(gold));
   const SEAMX = nano.seams.x;
@@ -3881,12 +3924,16 @@ export function createAssemblyNanites({
         if (k <= 0 || k >= 1) continue;
         const ids = P[p].tiles;
         ctx.save();
-        ctx.beginPath();
-        for (let kk = 0; kk < ids.length; kk += 1) {
-          const i = ids[kk];
-          if (SRC[i] === src) ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+        const mask = TILEMASK[p * 2 + src];
+        if (mask) ctx.clip(mask);
+        else {
+          ctx.beginPath();
+          for (let kk = 0; kk < ids.length; kk += 1) {
+            const i = ids[kk];
+            if (SRC[i] === src) ctx.rect(SX[i], SY[i], TW[i], TH[i]);
+          }
+          ctx.clip();
         }
-        ctx.clip();
         ctx.beginPath();
         liquidFrontPath(ctx, front, q, true);
         ctx.clip();
@@ -3974,7 +4021,24 @@ export function createAssemblyNanites({
     return low;
   };
   // The rects of plate p's build-ordered cells [first, end) as a clip.
-  const buildClip = (ctx, first, end) => {
+  // Plate p's guideway cells built in (BAT[first − 1], BAT[end − 1]] as one
+  // clip — round 4 (nano pass, 2026-11-21): the ring of its build front
+  // between those two moments over its cells' outline, never the cells'
+  // squares. (The cells stay the fallback where a plate has no front.)
+  const buildBand = (ctx, p, from, to) => {
+    const front = BUILDF[p];
+    goldMask(ctx, p);
+    frontRegion(ctx, front, to, true);
+    ctx.clip();
+    ctx.beginPath();
+    frontRegion(ctx, front, from, false);
+    ctx.clip();
+  };
+  const buildClip = (ctx, p, first, end) => {
+    if (BUILDF[p] && end > first) {
+      buildBand(ctx, p, first > P[p].goldFirst ? BAT[first - 1] : -Infinity, BAT[end - 1]);
+      return;
+    }
     ctx.beginPath();
     for (let k = first; k < end; k += 1) {
       const i = BIDX[k];
@@ -3982,33 +4046,15 @@ export function createAssemblyNanites({
     }
     ctx.clip();
   };
-  // The same clip at the build front (round 3, owner: 滑らかに): a cell the
-  // front reached less than one cell step ago (q − its build time < cellT)
-  // is filled only that fraction, from the side the front came in — the
-  // front moves sub-cell, never a 4 px square at a time. `q` the front's
-  // time (the hologram's lead uses its own).
+  // The same clip at the build front, moving sub-cell: built by `q` (the
+  // front's time; the hologram's lead uses its own), not before cell
+  // `first`'s neighbour.
   const buildClipFront = (ctx, p, first, end, q) => {
-    const T = P[p].cellT;
-    ctx.beginPath();
-    for (let k = first; k < end; k += 1) {
-      const i = BIDX[k];
-      const f = T > 0 ? (q - BAT[k]) / T : 1;
-      if (f <= 0) continue;
-      const x = gold.x[i];
-      const y = gold.y[i];
-      const w = gold.w[i];
-      const h = gold.h[i];
-      if (f >= 1) {
-        ctx.rect(x, y, w, h);
-        continue;
-      }
-      const dx = BDX[i];
-      const dy = BDY[i];
-      const rw = dx ? w * f : w;
-      const rh = dy ? h * f : h;
-      ctx.rect(dx < 0 ? x + w - rw : x, dy < 0 ? y + h - rh : y, rw, rh);
+    if (BUILDF[p]) {
+      buildBand(ctx, p, first > P[p].goldFirst ? BAT[first - 1] : -Infinity, q);
+      return;
     }
-    ctx.clip();
+    buildClip(ctx, p, first, end);
   };
   // The point the front has reached in build-ordered cell k (its partial
   // fill's leading edge), into RG[0], RG[1].
@@ -4172,14 +4218,14 @@ export function createAssemblyNanites({
         } else {
           if (solid > first) {
             ctx.save();
-            buildClip(ctx, first, solid);
+            buildClip(ctx, p, first, solid);
             conduitBody(ctx, p, faceSheet, wallSheet, atlas, a, q);
             conduitDraws += 1;
             ctx.restore();
           }
           if (mid > solid) {
             ctx.save();
-            buildClip(ctx, solid, mid);
+            buildClip(ctx, p, solid, mid);
             ctx.globalAlpha = 0.8 * a;
             plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
             conduitDraws += 1;
@@ -4216,7 +4262,7 @@ export function createAssemblyNanites({
             if (to <= from) continue;
             ctx.save();
             if (band) buildClipFront(ctx, p, from, to, q + GW.holo);
-            else buildClip(ctx, from, to);
+            else buildClip(ctx, p, from, to);
             if (holoSheet) {
               ctx.globalAlpha = (band ? 0.28 : 0.55) * a;
               plateDraw(ctx, holoSheet, atlas, p, 0, 0, pc.h);
@@ -4371,6 +4417,12 @@ export function createAssemblyNanites({
   // only where the trim is) and leaves the current path empty.
   const goldMask = (ctx, p) => {
     const pc = P[p];
+    const cached = GOLDMASK[p];
+    if (cached) {
+      ctx.clip(cached);
+      ctx.beginPath();
+      return;
+    }
     ctx.beginPath();
     for (let k = pc.goldFirst; k < pc.goldEnd; k += 1) {
       const i = GIDX[k];
@@ -4591,7 +4643,7 @@ export function createAssemblyNanites({
         const k1 = builtIn(p, pc.buildStart + sweep * len);
         if (k1 > k0) {
           ctx.save();
-          buildClip(ctx, k0, k1);
+          buildClip(ctx, p, k0, k1);
           ctx.globalCompositeOperation = "lighter";
           ctx.globalAlpha = 0.75;
           plateDraw(ctx, faceSheet, atlas, p, 0, 0, pc.h);
