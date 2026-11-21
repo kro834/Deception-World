@@ -125,6 +125,8 @@ const GLINT = [
 const MOTE_MID = G * (0.22 + 0.42 * 0.6);
 const MOTE_NEAR = G * (0.22 + 0.42 * 0.9);
 const MOTE_A = [0.08, 0.22, 0.65] as const;
+/** The gold cells' outlines (off since the nano pass follow-up). */
+const CELL_RIMS: boolean = false;
 
 /** The light's wave is drawn in this many arcs (each fades near an edge). */
 const RING_ARCS = 48;
@@ -492,8 +494,10 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
           flight.fill();
         };
         // Precision micro-highlight along golden nanite cell crystalline boundaries
+        // (Nano pass follow-up, 2026-11-21: off — an outlined cell is a unit a
+        // viewer can count. CELL_RIMS stays false.)
         const cellRim = (list: Int32Array, count: number, colour: string, alpha: number) => {
-          if (!count) return;
+          if (!CELL_RIMS || !count) return;
           flight.globalAlpha = alpha;
           flight.strokeStyle = colour;
           flight.lineWidth = Math.max(0.6, 0.8 * s);
@@ -528,12 +532,9 @@ export function SuitNanites({ onReady }: { onReady: (rich: boolean) => void }) {
             for (let k = 0; k < moteCount; k += 1) {
               const size = motes[k * 3 + 2];
               if (extras && (size < MOTE_MID ? 0 : size < MOTE_NEAR ? 1 : 2) !== pass) continue;
-              flight.rect(
-                motes[k * 3] * s,
-                motes[k * 3 + 1] * s,
-                motes[k * 3 + 2] * s,
-                motes[k * 3 + 2] * s,
-              );
+              // (A point a device px across at most: nano pass, 2026-11-21.)
+              const side = Math.min(1, motes[k * 3 + 2] * s);
+              flight.rect(motes[k * 3] * s, motes[k * 3 + 1] * s, side, side);
             }
             flight.fill();
           }
