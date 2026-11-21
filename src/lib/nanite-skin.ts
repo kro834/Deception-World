@@ -1204,7 +1204,9 @@ export function* prepareNaniteSkin(
         const warp = (valueNoise(px, py, 31, salt + 3) - 0.5) * 5;
         const stripe = 0.5 + 0.5 * Math.cos(e * 0.52 + warp);
         const mottle = valueNoise(px, py, 64, salt + 5) - 0.5;
-        const value = 0.05 + contour * 0.2 + mottle * 0.18 + gA * 0.085 - stripe * stripe * 0.1;
+        // (The flow lines kept faint: at a phone's upscale they read as
+        // wood grain, not as a liquid.)
+        const value = 0.05 + contour * 0.2 + mottle * 0.18 + gA * 0.085 - stripe * stripe * 0.05;
         const opacity = Math.round(Math.min(0.78, Math.abs(value)) * 255);
         fibreData[y * W + x] = (opacity << 24) | (value > 0 ? 0xfff2e6 : 0x0c0806);
         // The sheen: the finer grain, fractal (1, ~3.5 and ~10 figure px),
