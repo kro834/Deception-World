@@ -65,8 +65,10 @@ test("Blender material deliveries retain every approved alpha pixel and original
   }
 });
 
-test("the current Cycles sheets and Three.js relief match their authoring sources", () => {
-  for (const script of ["build-nanite-forge.mjs", "build-nanite-relief.mjs"]) {
+// (2026-11-21, nano pass: the Three.js cell relief and its bake script are
+// gone with the skin's cells — nothing reads them; the Cycles sheets stay.)
+test("the current Cycles sheets match their authoring sources", () => {
+  for (const script of ["build-nanite-forge.mjs"]) {
     execFileSync(process.execPath, [`scripts/${script}`, "--check"], { cwd: root });
   }
 });

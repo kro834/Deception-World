@@ -98,7 +98,8 @@ export const ILLUSIONCULUM_PALETTE = Object.freeze({
 } as const satisfies NonNullable<RexonanceAssemblyConfig["palette"]>);
 
 /** This form's nanite skin (nanite-skin.ts; owner, 2026-11-11): violet
- * steel under ice light, hexagonal cells, pink droplets. */
+ * steel under ice light, its grain streaming along the flow, pink
+ * droplets. */
 export const ILLUSIONCULUM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   alloy: "illusionculum",
   steel: "rgb(24 22 40)",
@@ -106,8 +107,9 @@ export const ILLUSIONCULUM_SKIN_STYLE: NaniteSkinStyle = Object.freeze({
   line: "rgb(166 230 255)",
   glint: [242, 250, 255] as const,
   motes: ["rgb(160 172 210)", "rgb(255 143 210)", "rgb(240 250 255)"] as const,
-  // (5, from 7: finer, nanosuit pass 2026-11-20.)
-  cell: 5,
+  // (The grain's streak since the nano pass, 2026-11-21; it was the
+  // cells' radius, 5 from 7 in the nanosuit pass.)
+  streak: 7,
   triangles: false,
 });
 
