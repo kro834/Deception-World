@@ -9,6 +9,7 @@
  * A lazy chunk: the panel imports it only when a switch into ウルトラ starts
  * where motion is allowed. */
 
+import { usesTouchBudget } from "./rendering-profile.js";
 import {
   buildIllusionculumFireBody,
   drawIllusionculumFire,
@@ -91,7 +92,8 @@ export function mountIllusionculumFormIgnition(
   const context = canvas.getContext("2d");
   if (!context) finish();
   else {
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    // (Owner, 2026-11-23: touch screens in high quality draw the desktop fire.)
+    const coarse = usesTouchBudget(window.matchMedia("(pointer: coarse)").matches);
     const size = coarse ? 480 : 960;
     const from = new Image();
     const to = new Image();
@@ -201,7 +203,7 @@ export function mountIllusionculumRunwayIgnition(
     finish();
     return () => {};
   }
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const coarse = usesTouchBudget(window.matchMedia("(pointer: coarse)").matches);
   let startedAt = 0;
   let width = 0;
   let height = 0;

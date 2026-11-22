@@ -43,6 +43,7 @@
  * counts scale with the device (`illusionculumScrollAccentBudget`).
  */
 
+import { prefersLightweightRendering } from "./rendering-profile.js";
 import type { RexonanceAssemblyAccents, RexonanceAssemblyPiece } from "./rexonance-resonance.js";
 
 const TAU = Math.PI * 2;
@@ -88,21 +89,24 @@ export const ILLUSIONCULUM_ACCENT_GROUPS = Object.freeze(
 /** How many motes and sparks a device draws. */
 export type IllusionculumAccentBudget = { motes: number; sparks: number };
 
-/** The device's budget: desktop full; touch / narrow screens about 40%,
- * less for the short entry beside the departing page; a low-core or
- * low-memory device 60% of that. */
+/** The budget: full in high quality on every device (owner, 2026-11-23:
+ * a phone draws what a desktop draws). The lightweight renderer keeps the old
+ * touch / narrow budget (about 40%, less for the short entry beside the
+ * departing page), and 60% of that on a low-core or low-memory device. */
 export function illusionculumScrollAccentBudget(
   environment: typeof globalThis,
-  options: { compact: boolean; entry: boolean },
+  options: { compact: boolean; entry: boolean; renderQuality?: string },
 ): IllusionculumAccentBudget {
   const navigator = environment.navigator as Navigator & { deviceMemory?: number };
   const cores = navigator?.hardwareConcurrency || 8;
   const memory = navigator?.deviceMemory || 8;
-  const low = cores <= 4 || memory <= 3 ? 0.6 : 1;
-  const base = options.compact ? (options.entry ? 340 : 460) : 1100;
+  const light = prefersLightweightRendering({ renderQuality: options.renderQuality });
+  const compact = options.compact && light;
+  const low = light && (cores <= 4 || memory <= 3) ? 0.6 : 1;
+  const base = compact ? (options.entry ? 340 : 460) : 1100;
   return {
     motes: Math.round(base * low),
-    sparks: options.compact ? 10 : 18,
+    sparks: compact ? 10 : 18,
   };
 }
 

@@ -107,9 +107,32 @@ test("the budget scales with the device", () => {
     navigator: { hardwareConcurrency: cores, deviceMemory: memory },
   });
   const desktop = illusionculumAccentBudget(env(8, 8), { compact: false, entry: false });
-  const phone = illusionculumAccentBudget(env(6, 6), { compact: true, entry: false });
-  const phoneEntry = illusionculumAccentBudget(env(6, 6), { compact: true, entry: true });
-  const low = illusionculumAccentBudget(env(4, 2), { compact: true, entry: true });
+  // (2026-11-23, owner: in high quality a phone draws the desktop budget,
+  // whatever its cores or memory; the reduced budgets are lightweight's.)
+  const light = "lightweight";
+  for (const options of [
+    { compact: true, entry: false },
+    { compact: true, entry: true },
+  ])
+    assert.deepEqual(
+      illusionculumAccentBudget(env(4, 2), { ...options, renderQuality: "high" }),
+      desktop,
+    );
+  const phone = illusionculumAccentBudget(env(6, 6), {
+    compact: true,
+    entry: false,
+    renderQuality: light,
+  });
+  const phoneEntry = illusionculumAccentBudget(env(6, 6), {
+    compact: true,
+    entry: true,
+    renderQuality: light,
+  });
+  const low = illusionculumAccentBudget(env(4, 2), {
+    compact: true,
+    entry: true,
+    renderQuality: light,
+  });
   assert.ok(
     desktop.motes > phone.motes && phone.motes > phoneEntry.motes && phoneEntry.motes > low.motes,
   );

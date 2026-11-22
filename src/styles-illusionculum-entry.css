@@ -650,8 +650,10 @@
   height: 6px;
 }
 
+/* (Owner, 2026-11-23: a phone in high quality keeps every chip; only the
+   lightweight renderer drops the 61st on.) */
 @media (max-width: 760px) {
-  .ice-entry-chips > i:nth-child(n + 61) {
+  html[data-world-effects="economy"] .ice-entry-chips > i:nth-child(n + 61) {
     display: none;
   }
 }
