@@ -1732,9 +1732,12 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   }
 
   /* THE EXPANSION RULE: a part springs open as it comes into the layout
-     (display: none to shown restarts the animation). Backwards fill only;
-     the part's own blocks keep their reveal (and take the shared section
-     chain of ring-motion.js as any section does). */
+     (display: none to shown restarts the animation). Backwards fill only.
+     Inside the part, a plain block still below the fold (the related
+     records, the form records' header) arrives by the shared amber
+     pulley-and-thread chain (ring-motion.js, DESIGN.md section 10); the
+     chapters (.dg-reveal), the cards with their own entrance and the form
+     stages keep their own arrival, as section 10 rules. */
   html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
       #r
     ):not(#r)

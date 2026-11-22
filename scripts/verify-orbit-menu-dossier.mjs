@@ -157,6 +157,17 @@ try {
       selected.y > height * 0.45,
       String(Math.round(selected.y)),
     );
+    // 2026-11-23: the far planets are found without a caption. Each one
+    // keeps part of itself on screen (it peeks in at the dial's rim).
+    const peeks = await page.evaluate(() =>
+      [...document.querySelectorAll('#site-side-panel [role="tab"]')].map((tab) => {
+        const box = tab.getBoundingClientRect();
+        const w = Math.min(box.right, innerWidth) - Math.max(box.left, 0);
+        const h = Math.min(box.bottom, innerHeight) - Math.max(box.top, 0);
+        return w > 4 && h > 4;
+      }),
+    );
+    check(`${width}: every planet peeks in on screen`, peeks.every(Boolean), peeks.join());
     for (const id of ["find", "riders", "system"]) {
       await page.evaluate((key) => document.getElementById(`command-atlas-tab-${key}`).click(), id);
       await settle(page, 900);
@@ -282,8 +293,68 @@ try {
       const tabs = await page.locator('.dossier-orbit [role="tab"]').count();
       check(`${path}: ${count} parts on the orbit`, tabs === count, String(tabs));
       check(`${path}: no sideways overflow`, (await overflow(page)) <= 0);
+      // 2026-11-23: the tabs pattern. Every tab names a panel that exists.
+      const panels = await page.evaluate(() =>
+        [...document.querySelectorAll('.dossier-orbit [role="tab"]')].map((tab) => {
+          const panel = document.getElementById(tab.getAttribute("aria-controls") ?? "");
+          return (
+            panel?.getAttribute("role") === "tabpanel" &&
+            panel.getAttribute("aria-labelledby") === tab.id
+          );
+        }),
+      );
+      check(`${path}: every tab controls its tabpanel`, panels.every(Boolean), panels.join());
+      // The shared section chain: a part closed mid-scroll leaves nothing
+      // held or invisible behind when it opens again.
+      const ids = await page.$$eval('.dossier-orbit [role="tab"]', (els) => els.map((el) => el.id));
+      for (const id of [...ids.slice(1), ...ids]) {
+        await page.evaluate((tab) => document.getElementById(tab).click(), id);
+        await settle(page, 500);
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight / 2));
+        await settle(page, 260);
+      }
+      await settle(page, 1200);
+      const stuck = await page.evaluate(
+        () =>
+          [...document.querySelectorAll("main [data-ring-link]")].filter((el) => {
+            const box = el.getBoundingClientRect();
+            return box.height > 0 && box.bottom > 0 && box.top < innerHeight * 0.6;
+          }).length,
+      );
+      check(`${path}: no chain part is left held on screen`, stuck === 0, String(stuck));
     }
     await page.close();
+  }
+
+  // ---- Phone menu: the first open of a session nudges the dial once ----
+  {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+      isMobile: true,
+    });
+    const page = await context.newPage();
+    await page.goto(`${base}/riders/saga`, { waitUntil: "networkidle" });
+    await settle(page, 1500);
+    const turns = async () => {
+      await page.locator(".side-panel-trigger").first().click();
+      await page.locator('#site-side-panel[data-open="true"]').waitFor();
+      const seen = new Set();
+      for (let i = 0; i < 24; i += 1) {
+        seen.add(
+          await page.evaluate(() =>
+            document.getElementById("site-side-panel")?.style.getPropertyValue("--orbit-turn"),
+          ),
+        );
+        await page.waitForTimeout(60);
+      }
+      await page.keyboard.press("Escape");
+      await settle(page, 900);
+      return [...seen].filter((value) => value && !Number.isInteger(Number(value))).length;
+    };
+    check("phone: the first open nudges the dial", (await turns()) > 0);
+    check("phone: the nudge is once a session", (await turns()) === 0);
+    await context.close();
   }
 
   // ---- Reduced motion: no motion ----

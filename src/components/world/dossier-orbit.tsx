@@ -70,6 +70,26 @@ export function DossierOrbit({
     });
   }, [index, count]);
 
+  // The tabs pattern: each part's own section is the tab's panel (2026-11-23).
+  // The sections are the pages' markup; only the role and its name are added.
+  const partIds = parts.map((item) => item.id).join(" ");
+  useEffect(() => {
+    const marked: HTMLElement[] = [];
+    for (const id of partIds.split(" ")) {
+      const panel = document.getElementById(id);
+      if (!panel || panel.hasAttribute("role")) continue;
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", `dossier-orbit-tab-${id}`);
+      marked.push(panel);
+    }
+    return () => {
+      for (const panel of marked) {
+        panel.removeAttribute("role");
+        panel.removeAttribute("aria-labelledby");
+      }
+    };
+  }, [partIds]);
+
   useEffect(() => {
     const art = document.querySelector<HTMLImageElement>(
       "#form-records .form-pickup-visual img, #form-records img",
