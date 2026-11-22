@@ -44,6 +44,20 @@ html[data-family="dream"]
   clip-path: none;
 }
 
+/* A file's own controls: the switcher is a row of pills, the close a
+   circle. !important: the Taisho and image-cinema sheets square them from
+   selectors that carry the dialog's own ids. Shape only. */
+html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-switcher :is(a, button),
+html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-plate-controls :is(a, button) {
+  border-radius: var(--ring-radius-pill) !important;
+  clip-path: none !important;
+}
+
+html[data-family="dream"] body .dream-dossier-dialog .dream-dossier-close {
+  border-radius: 50% !important;
+  clip-path: none !important;
+}
+
 /* ---------------------------------------------------------------
    2. 円窓: the three leads in round windows on one arc.
    The card's frame dissolves; the portrait is the window (a thumbnail of
@@ -189,6 +203,13 @@ html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-
    4. Motion: THE EXPANSION RULE and the windows' answer to the hand.
    --------------------------------------------------------------- */
 
+@keyframes ring-dream-rise {
+  from {
+    opacity: 0;
+    translate: 0 30px;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   /* Folds, drawers and the contents: the body springs open under its bar
      (it replaces the folds' short slide; closing stays the element's own). */
@@ -209,21 +230,23 @@ html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-
     transform-origin: 50% 0%;
   }
 
-  /* A person's or an agent's file: the sheet is the full screen and does
-     not overshoot; its parts spring in, staggered. */
+  /* A person's or an agent's file: the sheet is the full screen and keeps
+     its own arrival; its columns rise on the bounce spring, staggered (a
+     rise only: a column is taller than the screen and must not scale), and
+     the round close button pops. */
   html[data-family="dream"]:not([data-world-effects="economy"])
     body
     .dream-dossier-dialog[open]
-    > .dream-dossier-shell
+    .dream-dossier-layout
     > * {
-    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    animation-delay: calc(40ms + var(--ring-i, 0) * 60ms);
+    animation: ring-dream-rise var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(80ms + var(--ring-i, 0) * 70ms);
   }
 
   html[data-family="dream"]:not([data-world-effects="economy"])
     body
     .dream-dossier-dialog
-    > .dream-dossier-shell
+    .dream-dossier-layout
     > :nth-child(2) {
     --ring-i: 1;
   }
@@ -231,17 +254,16 @@ html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-
   html[data-family="dream"]:not([data-world-effects="economy"])
     body
     .dream-dossier-dialog
-    > .dream-dossier-shell
-    > :nth-child(3) {
+    .dream-dossier-layout
+    > :nth-child(n + 3) {
     --ring-i: 2;
   }
 
   html[data-family="dream"]:not([data-world-effects="economy"])
     body
-    .dream-dossier-dialog
-    > .dream-dossier-shell
-    > :nth-child(n + 4) {
-    --ring-i: 3;
+    .dream-dossier-dialog[open]
+    .dream-dossier-close {
+    animation: ring-pop-in var(--ring-dur-elastic) var(--ring-spring-elastic) 120ms backwards;
   }
 
   html[data-family="dream"]:not([data-world-effects="economy"])

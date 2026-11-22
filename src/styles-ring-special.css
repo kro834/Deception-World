@@ -253,6 +253,15 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     box-shadow: 0 18px 36px -18px rgb(0 0 0 / 0.9);
   }
 
+  /* Rows that ran edge to edge as flat bands now sit inside a round
+     corner: they take a gutter so no numeral or line meets the curve. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.ics-articles > article, .ics-finisher, .mus-article, .mus-finisher) {
+    padding-inline: clamp(18px, 2.4vw, 32px);
+  }
+
   /* Controls are pills. */
   html[data-family="special"]
     body
@@ -361,6 +370,65 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     border-radius: var(--ring-radius-pill) !important;
     clip-path: none !important;
   }
+}
+
+/* ---------------------------------------------------------------
+   3c. Rexonance's chapter map: an arc list. The five doors follow the
+   edge of one ring (radius 180px: a 256px chord, a 54px rise), their
+   numerals are the ring's nodes, and only the arc beside them is drawn,
+   so the ring never crosses the figure. Indents are margins: the doors'
+   own entrance owns their transforms.
+   --------------------------------------------------------------- */
+
+html[data-family="special"]
+  body
+  #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+  .rxe-chapter-map
+  > a:is(:nth-child(2), :nth-child(4)) {
+  margin-left: 42px;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+  .rxe-chapter-map
+  > a:nth-child(3) {
+  margin-left: 54px;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+  .rxe-chapter-map
+  > a
+  > b {
+  border-radius: 50% !important; /* the editions' square numeral plate */
+  clip-path: none !important;
+}
+
+html[data-family="special"]
+  body
+  #top.rxs-rexonance-page[data-command-special]:not(#ring-b)
+  .rxe-chapter-map::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 180px);
+  left: -264px;
+  z-index: 1;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 38deg,
+    transparent 0turn,
+    var(--cs-key) 0.03turn,
+    #f4fbff 0.145turn,
+    var(--cs-secondary) 0.26turn,
+    transparent 0.29turn
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  pointer-events: none;
 }
 
 /* ---------------------------------------------------------------
