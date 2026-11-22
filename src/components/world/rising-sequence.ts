@@ -46,9 +46,6 @@ export function currentRisingTier(): RisingTier {
   });
 }
 
-const isCompact = () =>
-  window.matchMedia("(any-pointer: coarse)").matches || window.innerWidth < 760;
-
 const decoded = new Map<string, Promise<void>>();
 function decode(src: string) {
   let pending = decoded.get(src);
@@ -126,7 +123,7 @@ export function primeRising(world: string, rider: string) {
   const canvas = createCanvas();
   let renderer: FireRenderer;
   try {
-    renderer = new FireRenderer(canvas, { assets, compact: isCompact() });
+    renderer = new FireRenderer(canvas, { assets });
   } catch {
     return; // no (hardware) WebGL: the run tries once more, then goes calm
   }
@@ -857,7 +854,7 @@ export function runRising({
           const assets = await withDeadline(prepareRisingAssets(world, rider), deadline);
           if (stale()) return;
           canvas = createCanvas();
-          renderer = new FireRenderer(canvas, { assets, compact: isCompact() });
+          renderer = new FireRenderer(canvas, { assets });
           compiled = renderer.compile();
           compiled.catch(() => undefined);
         }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, type MutableRefObject, type RefObject } from "react";
+import { prefersLightweightRendering } from "@/lib/rendering-profile";
 
 type ParticleTone = "ice" | "gold" | "prism";
 
@@ -275,8 +276,10 @@ export function Particles({
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const lowPower = (navigator.hardwareConcurrency || 4) <= 4;
-      const small = w < 600 || lowPower;
+      // 2026-11-23 (owner: phones equal PC in high quality mode): phones and
+      // 4-core devices draw the PC dust and condensation; only the
+      // lightweight renderer takes the smaller set.
+      const small = prefersLightweightRendering();
       // The condensation only exists while the title is still arriving; a
       // resize later in the sequence reseeds plain dust.
       const elapsed = audit ? simulated : (performance.now() - startedAt - clockOffset) / 1000;

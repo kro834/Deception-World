@@ -59,7 +59,6 @@ const BURN_ROWS = 72;
 type Options = {
   field: HTMLCanvasElement;
   detail: HTMLCanvasElement;
-  coarse: boolean;
   onFailure: () => void;
   onAtlasState?: (state: "ready" | "fallback") => void;
 };
@@ -393,7 +392,7 @@ function paintFallback(
 }
 
 export function createCielInfernoRenderer(options: Options) {
-  const { field, detail, coarse, onFailure } = options;
+  const { field, detail, onFailure } = options;
   const context = detail.getContext("2d", { alpha: true });
   if (!context) throw new Error("Ciel canvas unavailable");
   const background = createField(field);
@@ -457,12 +456,15 @@ export function createCielInfernoRenderer(options: Options) {
         }
     }
     // Limited pixel count, DPR and cadence prevent a nine-second effect
-    // becoming an unbounded high-DPR tablet workload.
+    // becoming an unbounded high-DPR tablet workload. 2026-11-23 (owner:
+    // phones equal PC in high quality mode): one budget for every device; the
+    // slow-frame governor below lowers `quality` where a GPU cannot hold it,
+    // and the lightweight renderer never starts this engine (calm).
     ratio =
       Math.min(
-        coarse ? 1 : 1.35,
+        1.35,
         globalThis.devicePixelRatio || 1,
-        Math.sqrt((coarse ? 780000 : 1300000) / (next.width * next.height)),
+        Math.sqrt(1300000 / (next.width * next.height)),
       ) * quality;
     field.width = Math.max(1, Math.round(next.width * ratio));
     field.height = Math.max(1, Math.round(next.height * ratio));
@@ -518,7 +520,7 @@ export function createCielInfernoRenderer(options: Options) {
     if (disposed) return;
     const seconds = milliseconds / 1000;
     const delta = milliseconds - lastFrame;
-    if (delta < 1000 / (coarse ? 40 : 50)) return;
+    if (delta < 1000 / 50) return;
     if (lastFrame > 0 && delta > 48) slowFrames++;
     else slowFrames = Math.max(0, slowFrames - 1);
     if (slowFrames > 15 && quality > 0.65) {
@@ -548,7 +550,7 @@ export function createCielInfernoRenderer(options: Options) {
         const sway = Math.sin(seconds * 1.8) * 0.025;
         context.globalCompositeOperation = "screen";
         sprite(x, y, throat, throat * 0.48, angle + sway, seconds * 16, pressure * atlasMix * 0.85);
-        const packets = coarse ? 4 : 6;
+        const packets = 6;
         for (let i = 0; i < packets; i++) {
           const k = i * 6;
           const age =
@@ -621,7 +623,7 @@ export function createCielInfernoRenderer(options: Options) {
     // The burn front is one continuous shader volume (or the 2D field),
     // never a circular necklace of isolated, leaf-shaped jet sprites.
     // Embers become fine ash and fall; no random state or React updates.
-    const count = coarse ? 52 : 84;
+    const count = 84;
     const ash = ease(4.2, 6.5, seconds);
     context.globalCompositeOperation = "source-over";
     for (let i = 0; i < count; i++) {

@@ -684,7 +684,6 @@ async function getDevice() {
 }
 
 const isCoarse = () => matchMedia("(pointer: coarse)").matches;
-const isSmall = () => isCoarse() || Math.min(innerWidth, innerHeight) < 700;
 
 function makePointer() {
   const coarse = isCoarse();
@@ -1085,14 +1084,26 @@ export async function startLamplightOverlay(canvas, { getDeskRect, signal } = {}
   const u = new Float32Array(UNIFORM_FLOATS);
   const pointer = makePointer();
   const { th, release } = acquireTheatre();
-  const small = isSmall();
   const coarse = isCoarse();
   const feed = makeGuiFeed();
-  // Phones and tablets render at ≤ 1 device px per CSS px (memory + fill rate).
-  const scale = () => Math.min(devicePixelRatio || 1, small ? 1 : 1.5) * (small ? 0.75 : 1);
+  // 2026-11-23 (owner: phones equal PC in high quality mode): phones and
+  // tablets start at the PC scale (up to 1.5 device px per CSS px) with the
+  // third dust layer on. Where a GPU cannot hold that, the resolution steps
+  // down (never the layers): after about a quarter second of frames over
+  // 24 ms the scale drops by 15%, to at most half, and it never climbs back
+  // within the run, so it cannot oscillate.
+  let quality = 1;
+  let slowFrames = 0;
+  const scale = () => Math.min(devicePixelRatio || 1, 1.5) * quality;
   let start = 0;
   const stopLoop = loop((t, dt) => {
     if (!start) start = t;
+    else if (dt > 0.024) {
+      if (++slowFrames > 15 && quality > 0.5) {
+        quality = Math.max(0.5, quality * 0.85);
+        slowFrames = 0;
+      }
+    } else slowFrames = Math.max(0, slowFrames - 1);
     pointer.step(dt, t);
     th.step(dt);
     const s = scale();
@@ -1108,7 +1119,7 @@ export async function startLamplightOverlay(canvas, { getDeskRect, signal } = {}
     if (deskVisible) u.set([r.left * s, r.top * s, r.width * s, r.height * s], 8);
     else u.set([0, 0, 0, 0], 8);
     const enter = th.enter();
-    u.set([scrollY * s, small ? 1 : 0, pointer.state.seed, enter < 0 ? 0 : enter], 12);
+    u.set([scrollY * s, 0, pointer.state.seed, enter < 0 ? 0 : enter], 12);
     const tr = th.trans();
     u.set([tr.t, tr.kind, tr.dir, 0], 16);
     const tre = tr.el && tr.t < 1 ? tr.el.getBoundingClientRect() : null;

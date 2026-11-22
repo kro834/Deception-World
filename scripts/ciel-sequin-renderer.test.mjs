@@ -372,9 +372,12 @@ test("pressed discs are watertight, outward-facing and truly bevelled within the
       assert.ok(Math.abs(n.length() - 1) < 1e-6);
       if (wall.getX(i) === 1 && Math.abs(n.z) > 0.05 && Math.abs(n.z) < 0.95) bevel++;
     }
-    assert.ok(bevel >= (coarse ? 16 : 24) * 2, "rounded rim has genuine sloped geometry normals");
-    assert.ok(position.count <= (coarse ? 130 : 194));
-    assert.equal(index.length / 3, coarse ? 192 : 288);
+    // 2026-11-23 (owner: phones equal PC in high quality mode): touch screens
+    // draw the PC disc (24 segments); only the lightweight renderer's budget
+    // is smaller.
+    assert.ok(bevel >= 24 * 2, "rounded rim has genuine sloped geometry normals");
+    assert.ok(position.count <= 194);
+    assert.equal(index.length / 3, 288);
     assert.equal(h.canvas.dataset.sequinDrawCalls, "1");
     h.api.dispose();
   }
@@ -431,7 +434,8 @@ test("hex packing has staggered equal neighbours and gap-free back-cap coverage 
 test("GPU centres and interactive fallback circles share the same packing, while resize retains local painted regions", () => {
   const h = harness({ coarse: true });
   h.tick(0);
-  const original = physics.sequinGrid(320, 740, true);
+  // 2026-11-23: a touch screen packs the PC grid in high quality mode.
+  const original = physics.sequinGrid(320, 740, false);
   const center = new Float64Array(2),
     gpuCenters = h.gpu.mesh.geometry.getAttribute("aCenter");
   for (let i = 0; i < original.count; i++) {
@@ -449,7 +453,7 @@ test("GPU centres and interactive fallback circles share the same packing, while
   const oldTargets = h.gpu.mesh.geometry.getAttribute("aMotion").array.slice();
   h.api.resize(834, 1194);
   h.tick(120);
-  const resized = physics.sequinGrid(834, 1194, true),
+  const resized = physics.sequinGrid(834, 1194, false),
     targets = h.gpu.mesh.geometry.getAttribute("aMotion").array;
   for (let i = 0; i < resized.count; i += 13) {
     physics.sequinGridCenter(resized, i, center);
@@ -461,19 +465,23 @@ test("GPU centres and interactive fallback circles share the same packing, while
     assert.equal(targets[i * 4 + 2], oldTargets[old * 4 + 2]);
   }
   h.api.dispose();
+  // The 2D fallback keeps the small packing on every device (it has no GPU),
+  // as the desktop's always did; since 2026-11-23 the touch GPU packs the PC
+  // grid, so each is checked against its own packing.
+  const fallbackGrid = physics.sequinGrid(320, 740, true);
   const fallback = harness({ coarse: true, reducedMotion: true });
   fallback.tick(0);
-  assert.equal(fallback.stats.ellipses.length, original.count);
-  for (let i = 0; i < original.count; i += 7) {
-    physics.sequinGridCenter(original, i, center);
+  assert.equal(fallback.stats.ellipses.length, fallbackGrid.count);
+  for (let i = 0; i < fallbackGrid.count; i += 7) {
+    physics.sequinGridCenter(fallbackGrid, i, center);
     const [x, y, rx, ry] = fallback.stats.ellipses[i];
     assert.deepEqual(
       [x, y, rx, ry],
       [
         center[0],
         center[1],
-        original.pitch * physics.SEQUIN_RADIUS_RATIO,
-        original.pitch * physics.SEQUIN_RADIUS_RATIO,
+        fallbackGrid.pitch * physics.SEQUIN_RADIUS_RATIO,
+        fallbackGrid.pitch * physics.SEQUIN_RADIUS_RATIO,
       ],
     );
   }
@@ -481,7 +489,7 @@ test("GPU centres and interactive fallback circles share the same packing, while
   fallback.load();
   fallback.tick(30);
   assert.equal(fallback.fallback.dataset.sequinBack, fallback.fallback.dataset.sequinCount);
-  assert.equal(fallback.stats.images, 1, "full back paints the entire original image once");
+  assert.equal(fallback.stats.images, 1, "full back paints the entire fallbackGrid image once");
   fallback.api.dispose();
 });
 

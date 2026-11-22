@@ -28,6 +28,7 @@ import {
   OPENING_LOGO_WIDTH,
 } from "@/lib/opening-logo";
 import { useLoadGate } from "@/components/load-gate";
+import { prefersLightweightRendering } from "@/lib/rendering-profile";
 import { armOpeningNotice, disarmOpeningNotice } from "@/lib/opening-notice";
 import { Particles } from "./particles";
 import { OPENING_BURN } from "./opening-timing";
@@ -52,11 +53,11 @@ const DIVE_TOUCH_PRIME_DELAY_MS = 60;
 
 function playAtmosphere(video: HTMLVideoElement) {
   if (!video.src) {
-    // Keep the same composition and frame rate. A small screen needs fewer
-    // pixels for the blurred background layer than the desktop edition.
-    video.src = window.matchMedia("(max-width: 767px)").matches
-      ? "/atmosphere-960.mp4"
-      : "/atmosphere.mp4";
+    // Keep the same composition and frame rate. 2026-11-23 (owner: phones
+    // equal PC in high quality mode): phones play the desktop edition too (a
+    // portrait screen covers the 16:9 frame at well over 960 device pixels);
+    // only the lightweight renderer takes the 960 px edition.
+    video.src = prefersLightweightRendering() ? "/atmosphere-960.mp4" : "/atmosphere.mp4";
   }
   void video.play().catch(() => undefined);
 }

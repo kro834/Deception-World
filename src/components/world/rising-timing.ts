@@ -95,13 +95,13 @@ export const RISING_WORLD_FOCUS = [0.5, 0.71] as const;
 
 /**
  * Render pixels per frame (CSS px; the device pixel ratio is ignored: the fire
- * is soft and the DOM title stays at native resolution). Compact screens are
- * coarse-pointer or narrow ones (rising-sequence.ts). Phones fit at one pixel
- * per CSS pixel (412 x 915 is 377k), so the print is as sharp as the portal it
- * takes over from; a 1440 x 900 window renders 1145 x 716, more pixels across
- * than the 1024 px texture holds.
+ * is soft and the DOM title stays at native resolution). Phones fit at one
+ * pixel per CSS pixel (412 x 915 is 377k), so the print is as sharp as the
+ * portal it takes over from; a 1440 x 900 window renders 1145 x 716, more
+ * pixels across than the 1024 px texture holds. 2026-11-23 (owner: phones
+ * equal PC in high quality mode): tablets share the PC budget too (the
+ * compact 420k budget is gone).
  */
-export const RISING_COMPACT_PIXEL_BUDGET = 420_000;
 export const RISING_WIDE_PIXEL_BUDGET = 820_000;
 
 /**

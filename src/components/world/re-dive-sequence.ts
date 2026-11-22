@@ -117,11 +117,11 @@ const UNIFORMS = [
   "uGroundTop",
 ] as const;
 
-const COMPACT_BUDGET = 520_000;
+// 2026-11-23 (owner: phones equal PC in high quality mode): phones and
+// tablets get the PC pixel budget. The ShaderPass ladder (opening-gl.ts) still
+// steps down a rung under real frame pressure, and the lightweight renderer
+// takes its own tier.
 const WIDE_BUDGET = 1_200_000;
-
-const isCompact = () =>
-  window.matchMedia("(any-pointer: coarse)").matches || window.innerWidth < 760;
 
 export type ReDiveOptions = {
   /** The dialog's RE DIVE stage (.rw-redive): the canvas goes here. */
@@ -350,7 +350,7 @@ export function runReDive({
       fragment: SOURCE,
       uniforms: UNIFORMS,
       textures: { uArt: assets.art, uChar: assets.char, uEdgeTex: assets.edge },
-      budget: isCompact() ? COMPACT_BUDGET : WIDE_BUDGET,
+      budget: WIDE_BUDGET,
       dprCap: 2,
       startRung: 0,
     });

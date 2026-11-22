@@ -119,7 +119,12 @@ function discGeometry(coarse: boolean) {
  * No DOM beyond the two supplied canvases is changed. */
 export function createCielSequinRenderer(options: CielSequinOptions) {
   const { canvas, fallback } = options;
+  // `coarse` shapes input only (a finger-sized brush, no hover light). The
+  // budget (sequin count, disc segments, pixel ratio) is the PC one on every
+  // device in high quality mode and the small one only for the lightweight
+  // renderer (2026-11-23, owner: phones equal PC in high quality mode).
   const coarse = Boolean(options.coarse),
+    lite = Boolean(options.economy),
     calm = Boolean(options.reducedMotion || options.economy);
   let disposed = false,
     manualPause = false,
@@ -131,7 +136,7 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     lightUntil = 0,
     lastFrameTime = 0,
     fit: SequinFit = "cover";
-  let grid = sequinGrid(1, 1, coarse),
+  let grid = sequinGrid(1, 1, lite),
     motion = new Float32Array(4),
     axes = new Float32Array([0, 1]);
   let motionAttribute: InstancedBufferAttribute | null = null,
@@ -349,7 +354,7 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
       previous = motion,
       previousAxes = axes,
       time = clock();
-    grid = sequinGrid(width, height, coarse || !renderer);
+    grid = sequinGrid(width, height, lite || !renderer);
     motion = new Float32Array(grid.count * 4);
     axes = new Float32Array(grid.count * 2);
     const centers = new Float32Array(grid.count * 2),
@@ -383,13 +388,13 @@ export function createCielSequinRenderer(options: CielSequinOptions) {
     }
     const ratio = Math.min(
       devicePixelRatio || 1,
-      coarse ? 1.35 : 1.7,
-      Math.sqrt((coarse ? 1100000 : 2200000) / (grid.width * grid.height)),
+      lite ? 1.35 : 1.7,
+      Math.sqrt((lite ? 1100000 : 2200000) / (grid.width * grid.height)),
     );
     if (renderer && material) {
       if (mesh) scene.remove(mesh);
       geometry?.dispose();
-      geometry = discGeometry(coarse);
+      geometry = discGeometry(lite);
       motionAttribute = new InstancedBufferAttribute(motion, 4).setUsage(DynamicDrawUsage);
       axisAttribute = new InstancedBufferAttribute(axes, 2).setUsage(DynamicDrawUsage);
       geometry.setAttribute("aMotion", motionAttribute);

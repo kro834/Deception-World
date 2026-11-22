@@ -6481,11 +6481,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!root) return;
 
   const reducedQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)') || { matches: false };
-  const compactQuery = window.matchMedia?.('(max-width: 620px)') || { matches: false };
   const connection = navigator.connection;
-  const lowCoreDevice = Number.isFinite(navigator.hardwareConcurrency)
-    && navigator.hardwareConcurrency > 0
-    && navigator.hardwareConcurrency <= 4;
+  // 2026-11-23 (owner: phones equal PC in high quality mode): the balanced
+  // profile follows the site's lightweight renderer, Save-Data or measured
+  // frame pressure; never the screen width or the core count. The archive is
+  // a sandboxed frame, so the page passes its render quality in the
+  // fragment (quality=lightweight).
+  const lightweightRenderer = (() => {
+    try {
+      return new URLSearchParams(window.location.hash.slice(1)).get('quality') === 'lightweight';
+    } catch (error) {
+      return false;
+    }
+  })();
   let framePressure = false;
   let sampling = false;
 
@@ -6493,8 +6501,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reducedQuery.matches) return { profile: 'reduced', reason: 'reduced-motion' };
     if (framePressure) return { profile: 'balanced', reason: 'frame-pressure' };
     if (connection?.saveData === true) return { profile: 'balanced', reason: 'save-data' };
-    if (lowCoreDevice) return { profile: 'balanced', reason: 'low-core' };
-    if (compactQuery.matches) return { profile: 'balanced', reason: 'compact-viewport' };
+    if (lightweightRenderer) return { profile: 'balanced', reason: 'lightweight' };
     return { profile: 'full', reason: 'full-capability' };
   }
 
@@ -6555,7 +6562,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   reducedQuery.addEventListener?.('change', refresh);
-  compactQuery.addEventListener?.('change', refresh);
   connection?.addEventListener?.('change', refresh);
   apply();
 

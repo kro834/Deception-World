@@ -40,6 +40,11 @@ function archiveFrameHash({ form, compare }: ArchiveFrameState) {
   const params = new URLSearchParams();
   if (form) params.set("form", form);
   if (compare) params.set("compare", compare);
+  // The sandboxed archive cannot read the page's render quality, so the
+  // lightweight renderer is passed along: only it (with Save-Data and frame
+  // pressure) picks the archive's balanced motion profile (2026-11-23).
+  if (typeof document !== "undefined" && document.documentElement.dataset.worldEffects === "economy")
+    params.set("quality", "lightweight");
   const fragment = params.toString();
   return fragment ? `#${fragment}` : "";
 }

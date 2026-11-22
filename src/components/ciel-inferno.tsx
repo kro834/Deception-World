@@ -373,7 +373,6 @@ export default function CielInferno({
           renderer = createCielInfernoRenderer({
             field: backdrop,
             detail: foreground,
-            coarse: matchMedia("(pointer: coarse), (any-pointer: coarse)").matches,
             onFailure: settleBurned,
             onAtlasState: (state) => {
               if (!disposed && !burnedRef.current) modal.dataset.jet = state;

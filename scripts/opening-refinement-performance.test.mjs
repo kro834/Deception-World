@@ -170,6 +170,11 @@ function entryRuntime({
       if (name === "./particles") return { Particles };
       if (name === "@/lib/opening-notice")
         return { armOpeningNotice() {}, disarmOpeningNotice() {} };
+      // 2026-11-23: the atmosphere video picks its edition by render quality.
+      if (name === "@/lib/rendering-profile")
+        return {
+          prefersLightweightRendering: () => document.documentElement.dataset.worldEffects === "economy",
+        };
       if (name === "./opening-burn" || name === "./opening-dive") {
         chunkRequests.push(name);
         return name === "./opening-dive"

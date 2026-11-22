@@ -15,7 +15,7 @@ const compiled = ts.transpileModule(source, {
   },
 }).outputText;
 
-function harness({ coarse = false, dpr = 1, webgl = true } = {}) {
+function harness({ dpr = 1, webgl = true } = {}) {
   const stats = {
     fieldDraws: 0,
     fieldDisposals: 0,
@@ -147,7 +147,6 @@ function harness({ coarse = false, dpr = 1, webgl = true } = {}) {
   const renderer = exports.createCielInfernoRenderer({
     field,
     detail,
-    coarse,
     onFailure() {
       stats.failureCount = (stats.failureCount || 0) + 1;
     },
@@ -308,8 +307,10 @@ const dimensions = (field, detail) => ({
 
 test("canvas backing stores respect DPR and per-surface pixel budgets", () => {
   for (const profile of [
-    { coarse: false, dpr: 3, width: 2560, height: 1600, budget: 1_300_000, maxRatio: 1.35 },
-    { coarse: true, dpr: 3, width: 1280, height: 800, budget: 780_000, maxRatio: 1 },
+    // 2026-11-23 (owner: phones equal PC in high quality mode): a phone uses
+    // the PC budget too (the coarse 780k / 1x budget is gone).
+    { dpr: 3, width: 2560, height: 1600, budget: 1_300_000, maxRatio: 1.35 },
+    { dpr: 3, width: 390, height: 844, budget: 1_300_000, maxRatio: 1.35 },
   ]) {
     const host = harness(profile);
     host.renderer.resize({
