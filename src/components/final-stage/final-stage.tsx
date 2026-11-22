@@ -638,6 +638,9 @@ export function FinalStage() {
             帰り道を切り拓く。
           </h2>
           <span>{STORY.title}</span>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="fst-story-layout rxs-reveal">
           <div className="fst-story-index" aria-hidden="true">
@@ -664,6 +667,9 @@ export function FinalStage() {
             八人の登場人物。
           </h2>
           <span>悠真と仲間たちが、案内係ナギとともにアーカイヴの異変に立ち向かう。</span>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="fst-cast-console rxs-reveal">
           <div
@@ -761,6 +767,9 @@ export function FinalStage() {
       <section id="riders" className="rxs-section fst-riders-section" aria-label="ライダー記録">
         <header className="rxs-section-heading rxs-reveal">
           <h2>二つの究極形態。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
 
         <RiderPickup

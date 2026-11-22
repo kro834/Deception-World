@@ -470,6 +470,9 @@ export function IllusionculumSaga() {
           </b>
           <h2 id="ics-overview-title">概要</h2>
           <span className="ics-heading-plate" data-plate="figure" aria-hidden="true" />
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="ics-overview-body">
           {/* The owner's first sentence leads; the rest, complete and in
@@ -546,6 +549,9 @@ export function IllusionculumSaga() {
             03
           </b>
           <h2 id="ics-forms-title">形態</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="rxs-stage-switcher ics-form-switcher rxs-reveal">
           <FormSlider
@@ -633,6 +639,9 @@ export function IllusionculumSaga() {
           </b>
           <h2 id="ics-armour-title">装甲・外観</h2>
           <span className="ics-heading-plate" data-plate="helm" aria-hidden="true" />
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={ILLUSIONCULUM_SAGA.armour} label="装甲・外観" details={{ 0: "helm" }} />
       </section>
@@ -649,6 +658,9 @@ export function IllusionculumSaga() {
           </b>
           <h2 id="ics-arsenal-title">専用武装</h2>
           <span className="ics-heading-plate" data-plate="orb" aria-hidden="true" />
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles
           items={ILLUSIONCULUM_SAGA.arsenal}
@@ -669,6 +681,9 @@ export function IllusionculumSaga() {
           </b>
           <h2 id="ics-abilities-title">能力</h2>
           <span className="ics-heading-plate" data-plate="reactor" aria-hidden="true" />
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={ILLUSIONCULUM_SAGA.abilities} label="能力" />
       </section>
@@ -681,6 +696,9 @@ export function IllusionculumSaga() {
       >
         <header className="rxs-section-heading ics-heading rxs-reveal">
           <h2 id="ics-finishers-title">必殺技</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="ics-finisher-list">
           {ILLUSIONCULUM_SAGA.finishers.map((finisher, index) => (

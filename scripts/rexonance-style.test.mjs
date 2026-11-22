@@ -242,7 +242,9 @@ test("the colour story is ice, violet and gold; magenta stays ULTRA's own", () =
 
 test("the P14 intro keeps its exact text; only phrase units were wrapped", () => {
   const intro = page.match(
-    /<h2 id="rxs-p14-title">[\s\S]*?<\/h2>\s*<span>([\s\S]*?)<\/span>\s*<\/header>/,
+    // 2026-11-23 (ring update): the heading ends with its text-free chapter
+    // ring (styles-ring-special.css); the intro's text is pinned as before.
+    /<h2 id="rxs-p14-title">[\s\S]*?<\/h2>\s*<span>([\s\S]*?)<\/span>\s*<i className="rb-ring[^>]*>\s*<b \/>\s*<\/i>\s*<\/header>/,
   )?.[1];
   assert.ok(intro);
   const text = intro.replace(/<[^>]+>/g, "").replace(/\s*\n\s*/g, "");

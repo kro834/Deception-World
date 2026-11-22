@@ -1,0 +1,358 @@
+/* ================================================================
+   The ring system on the special sites (2026-11-23, phase 2 group B).
+   Linked by the six special routes (Rexonance, Extreme, Far From,
+   Illusionculum, Meta Unitas, Final Stage) and the saga cinema.
+
+   Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
+   アニメーションにして」. The pages' chrome is re-cut from circles: the
+   chapter bar is a pill track, every chapter heading sits on its own ring,
+   panels and plates are ring cards, controls are pills, disclosures spring
+   open. Final Stage's eight people stand on an orbit around the portrait and
+   the cinema's four films are an orbit around their heading.
+
+   Never selected here: the suit-up, entry and call stages, their covers and
+   their drawing surfaces (scripts/ring-system.test.mjs). The form sliders
+   (styles-form-slider.css, owner 2026-10-24) keep their geometry.
+
+   Weight: the command-deck finish (styles-command-special.css) paints the
+   same chrome through `#top…[data-command-special]`; `:not(#ring-b)` adds
+   one id's weight so this sheet wins wherever it is linked.
+   Motion gates as in styles-ring.css.
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   0. Tokens: each site's one light becomes the ring's key.
+   --------------------------------------------------------------- */
+
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) {
+  --ring-key: var(--cs-key);
+  --ring-key-rgb: var(--cs-key-rgb);
+  --ring-gold: var(--cs-secondary);
+  --ring-gold-rgb: var(--cs-secondary-rgb);
+  --ring-track: rgb(var(--cs-key-rgb) / 0.2);
+  /* The ring stroke in the site's two lights (the foundation's prism is
+     resolved on :root, so it is restated where the tokens change). */
+  --ring-prism: conic-gradient(
+    from var(--ring-from, 210deg),
+    var(--cs-key) 0turn,
+    #f4fbff 0.16turn,
+    var(--cs-secondary) 0.42turn,
+    rgb(var(--cs-secondary-rgb) / 0.35) 0.6turn,
+    rgb(var(--cs-key-rgb) / 0.35) 0.8turn,
+    var(--cs-key) 1turn
+  );
+  /* A dark lens: the lit surface of a ring control. */
+  --rb-lens:
+    radial-gradient(120% 120% at 22% 0%, rgb(var(--cs-key-rgb) / 0.26), transparent 62%),
+    linear-gradient(180deg, #111b29, #070c14);
+}
+
+/* ---------------------------------------------------------------
+   1. The chapter bar: a pill track; the current chapter is a lit ring.
+   --------------------------------------------------------------- */
+
+@media (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    nav {
+    border-radius: var(--ring-radius-pill);
+    background: linear-gradient(180deg, rgb(3 7 13 / 0.82), rgb(12 20 31 / 0.82));
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--cs-key-rgb) / 0.26),
+      inset 0 2px 6px rgb(0 0 0 / 0.7);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    nav
+    a {
+    border-color: transparent;
+    border-radius: var(--ring-radius-pill);
+    background: none;
+    box-shadow: none;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    nav
+    a[aria-current] {
+    border-color: transparent;
+    background:
+      var(--rb-lens) padding-box,
+      var(--ring-prism) border-box;
+    box-shadow:
+      0 0 0 1px rgb(var(--cs-key-rgb) / 0.2),
+      0 6px 16px -6px rgb(var(--cs-key-rgb) / 0.5);
+  }
+
+  /* The DW sigil at the bar's head is a ring, as on the World. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    > .rxs-local-nav
+    .rxs-brand::before {
+    border-color: transparent !important; /* the shell's square plate */
+    border-radius: 50% !important;
+    clip-path: none !important;
+    background:
+      var(--rb-lens) padding-box,
+      var(--ring-prism) border-box !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   2. The chapter ring: every chapter heading sits on a ring of its own.
+   A text-free ornament at the end of each heading (the headings' own
+   pseudo-elements carry the numerals and rules). The heading isolates so
+   the ring paints behind its type; a heading holds no pinned stage.
+   --------------------------------------------------------------- */
+
+html[data-family="special"]
+  body
+  #top.rxs-page[data-command-special]:not(#ring-b)
+  :is(.rxs-section-heading, .mus-head) {
+  isolation: isolate;
+}
+
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring {
+  --rb-size: clamp(168px, 17vw, 264px);
+  position: absolute;
+  top: 50%;
+  left: calc(var(--rb-size) * -0.36);
+  z-index: -1;
+  display: block;
+  width: var(--rb-size);
+  height: var(--rb-size);
+  margin: calc(var(--rb-size) / -2) 0 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* The lit arc over its track, and an inner ring in the second light. */
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::before,
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+}
+
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::before {
+  inset: 0;
+  background: conic-gradient(
+    from 200deg,
+    var(--cs-key) 0turn,
+    #f4fbff 0.12turn,
+    var(--cs-secondary) 0.34turn,
+    rgb(var(--cs-key-rgb) / 0.16) 0.46turn 1turn
+  );
+}
+
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring::after {
+  inset: 19%;
+  background: conic-gradient(
+    from 20deg,
+    rgb(var(--cs-secondary-rgb) / 0.7) 0turn,
+    rgb(var(--cs-secondary-rgb) / 0.12) 0.3turn 1turn
+  );
+}
+
+/* The ring's node: where the lit arc begins. */
+html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring > b {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--cs-key);
+  box-shadow: 0 0 0 4px rgb(6 12 20 / 0.7);
+  /* 200deg on the conic = the lower left of the ring. */
+  transform: rotate(110deg) translateX(calc(var(--rb-size) / 2 - 1px));
+}
+
+/* ---------------------------------------------------------------
+   3. Panels, plates and reading cards: ring cards.
+   The corner ticks of the command deck give way to one continuous stroke.
+   No overflow is set, so focus rings and long prose are never clipped.
+   --------------------------------------------------------------- */
+
+@media (forced-colors: none) {
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-comparison,
+      .rxs-p14-comparator,
+      .rxs-stage-switcher,
+      .ffs-form-comparison,
+      .fst-cast-console,
+      .fst-pickup-card,
+      .ics-finisher,
+      .mus-finisher,
+      .mus-stage-switcher,
+      .fst-story-layout
+    ) {
+    border: 2px solid transparent;
+    border-radius: var(--ring-radius-card);
+    background:
+      var(--cs-face) padding-box,
+      var(--ring-prism) border-box;
+    box-shadow:
+      0 22px 44px -18px rgb(0 0 0 / 0.9),
+      0 0 30px -12px rgb(var(--cs-key-rgb) / 0.3);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-specs > div,
+      .ffs-specs > div,
+      .ffs-weapons > li,
+      .ffs-finisher,
+      .fst-specs > div,
+      .ics-specs > div,
+      .mus-specs > div,
+      .mus-weapons > li,
+      .rxs-headline-metrics > article
+    ) {
+    border: 2px solid transparent;
+    border-radius: 22px;
+    background:
+      var(--cs-face) padding-box,
+      var(--ring-prism) border-box;
+    box-shadow: 0 14px 30px -16px rgb(0 0 0 / 0.9);
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-system-grid > article,
+      .ffs-articles > article,
+      .fst-articles > article,
+      .ics-articles > article,
+      .ics-evaluations > article,
+      .mus-article
+    ) {
+    border: 2px solid transparent;
+    border-radius: var(--ring-radius-card);
+    background:
+      var(--cs-face) padding-box,
+      var(--ring-prism) border-box;
+    box-shadow: 0 18px 36px -18px rgb(0 0 0 / 0.9);
+  }
+
+  /* Controls are pills. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(
+      .rxs-footer-return,
+      .rxs-footer > a,
+      .rxs-footer-top > a,
+      .fst-site-door a,
+      .fst-cast-copy > a,
+      .mus-end-doors a,
+      .rxe-hero-primary,
+      .rxe-hero-secondary,
+      .ffs-hero-primary,
+      .ffs-hero-secondary,
+      .rxs-comparison-selector select
+    ) {
+    border-radius: var(--ring-radius-pill) !important; /* the editions' square keys */
+    clip-path: none !important;
+  }
+
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.rxs-footer-return, .fst-site-door a, .fst-cast-copy > a) {
+    border-color: transparent;
+    background:
+      var(--rb-lens) padding-box,
+      var(--ring-prism) border-box;
+    box-shadow: 0 10px 22px -10px rgb(0 0 0 / 0.8);
+  }
+
+  /* The chapter doors under a hero: keys become ring nodes' pills. */
+  html[data-family="special"]
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    .rxs-chapter-index
+    a {
+    border: 2px solid transparent;
+    border-radius: var(--ring-radius-pill);
+    clip-path: none;
+    background:
+      var(--cs-face) padding-box,
+      var(--ring-prism) border-box;
+  }
+}
+
+/* ---------------------------------------------------------------
+   4. Motion.
+   --------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Chapter headings and data lists arrive on the spring instead of an
+     ease (leaf chrome only: none of them holds a pinned stage). Rexonance's
+     own choreography keeps its headings. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page)
+    :is(.rxs-section-heading, .mus-head, dl, ul).rxs-reveal {
+    transition-timing-function: var(--ring-spring);
+    transition-duration: var(--ring-dur-spring);
+  }
+
+  /* THE EXPANSION RULE: a disclosure's body springs open under its bar;
+     closing is the element's own (instant). */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.ics-more, .mus-more, .exs-catalog-details, .rxe-form-comparison, .ffs-form-comparison)[open]
+    > :not(summary) {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  /* Pills answer a press: a quick sink, an elastic release. */
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.rxs-footer > a, .rxs-footer-top > a, .mus-end-doors a, .fst-site-door a, .fst-cast-copy > a) {
+    transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
+  }
+
+  html[data-family="special"]:not([data-world-effects="economy"])
+    body
+    #top.rxs-page[data-command-special]:not(#ring-b)
+    :is(.rxs-footer > a, .rxs-footer-top > a, .mus-end-doors a, .fst-site-door a, .fst-cast-copy > a):active {
+    scale: 0.94;
+    transition: scale 90ms ease-out;
+  }
+}
+
+@media (max-width: 560px) {
+  html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring {
+    --rb-size: 148px;
+    left: -62px;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b) .rb-ring {
+    display: none;
+  }
+}

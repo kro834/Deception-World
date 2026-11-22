@@ -1248,6 +1248,9 @@ const RexonancePerformance = memo(function RexonancePerformance() {
             <span>未公表です。</span>
           </span>
         </span>
+        <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+          <b />
+        </i>
       </header>
 
       {/* RESONANCE (rx11): each cut holds the screen. The figure keeps the
@@ -2104,6 +2107,9 @@ export function RexonanceSaga() {
               <span className="rxp-nowrap">第14世代</span>
               演算基盤を、第五の犬の能力へ特化させた専用仕様です。同じエーテル量からP1の9倍に相当する性能を引き出し、熱・位相ノイズ・能力間干渉による損失を合計7%まで抑えます。
             </span>
+            <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+              <b />
+            </i>
           </header>
 
           <div className="rxs-p14-overview rxs-reveal">
@@ -2173,6 +2179,9 @@ export function RexonanceSaga() {
           <section id="stages" className="rxs-stages rxs-section">
             <header className="rxs-section-heading rxs-reveal">
               <h2>まだ、次元は変わる。</h2>
+              <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+                <b />
+              </i>
             </header>
 
             <div className="rxs-stage-switcher rxs-reveal">
@@ -2291,6 +2300,9 @@ export function RexonanceSaga() {
                 <br />
                 終焉を制御する。
               </h2>
+              <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+                <b />
+              </i>
             </header>
 
             {/* Three system layers converge on Yuma's self-resonance. */}

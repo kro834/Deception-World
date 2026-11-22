@@ -1,5 +1,6 @@
 import cinemaArchiveAstraCssUrl from "@/styles-cinema-archive-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
+import ringSpecialCssUrl from "@/styles-ring-special.css?url";
 import { SagaCinema } from "@/components/saga-cinema/saga-cinema";
 import {
   SAGA_CINEMA_LOGO,
@@ -27,6 +28,8 @@ export const Route = createFileRoute("/saga-cinema")({
       CINEMATIC_STYLESHEET_LINK,
       { rel: "stylesheet", href: cinemaCss },
       { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
+      // The ring system on the cinema (2026-11-23): the four films as an orbit.
+      { rel: "stylesheet", href: ringSpecialCssUrl },
       { rel: "preload", as: "image", href: "/saga-cinema-assets/chapter-4.jpg" },
       {
         rel: "preload",
