@@ -151,7 +151,7 @@ test("forced colours: system colours on every glassed surface, nothing painted",
   assert.ok(surfaces);
   for (const name of [...block("bars"), ...block("frames"), ...block("panels"), ...block("wells")])
     assert.ok(surfaces.selector.includes(name), name);
-  for (const name of [".manager-facts", ".toast", ".opening-notice"])
+  for (const name of [".manager-facts", ".toast"])
     assert.ok(surfaces.selector.includes(name));
   assert.match(surfaces.body, /box-shadow: none !important/);
   assert.match(surfaces.body, /backdrop-filter: none !important/);
@@ -166,18 +166,6 @@ test("forced colours: system colours on every glassed surface, nothing painted",
 
 test("reduced motion: there is no motion to reduce (no swell, no spring)", () => {
   assert.doesNotMatch(clean, /--lg-spring|linear\(|cubic-bezier|@keyframes/);
-});
-
-test("the SCP notice keeps its slip: only a painted pane around it", () => {
-  const notice = all.filter((r) => r.selector.includes(".opening-notice") && !r.at.length);
-  assert.equal(notice.length, 1);
-  assert.deepEqual(
-    notice[0].body
-      .split(";")
-      .map((d) => d.split(":")[0].trim())
-      .filter(Boolean),
-    ["box-shadow"],
-  );
 });
 
 test("the root links the surfaces sheet after the buttons' and the controls' sheets", () => {

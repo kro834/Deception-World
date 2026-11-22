@@ -62,7 +62,7 @@ test("source parts and generated paths plan the same checks and deduplicate pair
   const source = "src/components/cinematic/title-sequence.tsx";
   const part = `source-parts/${source}/000.part`;
   write(part);
-  write("scripts/opening-notice.test.mjs");
+  write("scripts/opening-refinement-performance.test.mjs");
   const plan = planChecks({ root, files: [source] });
   assert.equal(plan.checks[0].id, "sync-source-parts");
   assert.deepEqual(planChecks({ root, files: [part] }), plan);

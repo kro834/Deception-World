@@ -24,6 +24,7 @@ import { rexonanceImage } from "@/lib/rexonance-images";
 import { GuardedLink, useLoadGate } from "@/components/load-gate";
 import { useRouter } from "@tanstack/react-router";
 import { waitForVisualPaint } from "@/lib/visual-paint";
+import { ScreeningEndedBadge, isScreeningEnded } from "@/components/screening-ended";
 import {
   DREAM_CHAPTER_ENTER_ASSETS,
   FINAL_STAGE_ENTER_ASSETS,
@@ -632,6 +633,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                         item.japanese
                       )}
                     </span>
+                    {isScreeningEnded(item.href) ? <ScreeningEndedBadge /> : null}
                   </span>
                 </a>
               ))}

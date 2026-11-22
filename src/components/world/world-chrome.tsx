@@ -50,6 +50,7 @@ import { IpadMenuToggle } from "@/components/ipad-menu-mode";
 import { RenderQualityControl } from "./render-quality-control";
 import { ButtonStyleToggle } from "@/components/button-style-toggle";
 import { CinemaLink } from "./external-cinema-link";
+import { ScreeningEndedBadge } from "@/components/screening-ended";
 import {
   claimSideMenuEarlyInput,
   isSideMenuEarlyInputValid,
@@ -1550,6 +1551,7 @@ export function SideMenuLayer({
                     <span className="side-panel-phrase">映画第一作</span>
                     <wbr />
                     <span className="side-panel-phrase">「ドリームチャプター」</span>
+                    <ScreeningEndedBadge />
                   </span>
                 </GuardedLink>
                 <GuardedLink
@@ -1577,6 +1579,7 @@ export function SideMenuLayer({
                     <span className="side-panel-phrase">映画第一作</span>
                     <wbr />
                     <span className="side-panel-phrase">「ドリームチャプター」</span>
+                    <ScreeningEndedBadge />
                   </span>
                 </GuardedLink>
                 {/* The special sites stand apart from the World: its way home

@@ -93,7 +93,6 @@ test("the sheet's target list and the pointer light's list are the same", async 
     ".command-deck-enter",
     ".zeus-button",
     ".rxs-local-nav nav a",
-    ".opening-notice .opening-notice-close",
   ])
     assert.ok(
       fromCss.some((s) => s.startsWith(control)),

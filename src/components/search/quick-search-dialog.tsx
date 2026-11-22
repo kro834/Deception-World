@@ -18,6 +18,7 @@ import {
 import { clearRecentSearches, rememberSearch, useRecentSearches } from "./search-recent";
 import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
 import { isSearchCompositionKey, placeLabel, stepActive } from "./search-ui-helpers";
+import { ScreeningEndedBadge, isScreeningEnded } from "@/components/screening-ended";
 import { useOpenResult } from "./use-open-result";
 import { documentArt } from "@/lib/record-art";
 import { recordImage } from "@/lib/record-images";
@@ -354,6 +355,12 @@ export default function QuickSearchDialog({
                         <span className="quick-search-option-place">
                           {placeLabel(result.document)}
                           {result.section ? ` · ${result.section}` : ""}
+                          {isScreeningEnded(result.document.to) ? (
+                            <>
+                              {" "}
+                              <ScreeningEndedBadge />
+                            </>
+                          ) : null}
                         </span>
                         <span className="quick-search-option-snippet">
                           <Highlighted text={result.snippet} ranges={result.snippetRanges} />
@@ -391,7 +398,15 @@ export default function QuickSearchDialog({
                       <span className="quick-search-option-title">{option.query}</span>
                     ) : (
                       <>
-                        <span className="quick-search-option-title">{option.label}</span>
+                        <span className="quick-search-option-title">
+                          {option.label}
+                          {isScreeningEnded(option.to) ? (
+                            <>
+                              {" "}
+                              <ScreeningEndedBadge />
+                            </>
+                          ) : null}
+                        </span>
                         <span className="quick-search-option-place" aria-hidden="true">
                           ↗
                         </span>

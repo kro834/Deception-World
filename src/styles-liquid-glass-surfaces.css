@@ -320,19 +320,6 @@ html[data-button-style="liquid"] body .zeus-button:not(#lg-glass):not(#lg-glass)
 }
 
 /* ---------------------------------------------------------------
-   The SCP notice keeps its grey slip, its strip and its Verdana; a glass
-   pane shows only around it, under the slip (paint only, nothing sampled).
-   --------------------------------------------------------------- */
-html[data-button-style="liquid"] body .opening-notice:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  box-shadow:
-    0 2px 0 rgb(0 0 0 / 0.35),
-    0 0 0 6px rgb(214 226 236 / 0.09),
-    0 0 0 6.5px rgb(255 255 255 / 0.26),
-    -4px -4px 10px -4px rgb(255 255 255 / 0.1),
-    0 12px 30px rgb(0 0 0 / 0.5) !important;
-}
-
-/* ---------------------------------------------------------------
    The iPad compact launcher and the phone-landscape trigger (the round
    menu button that stands in for the bar once it has scrolled away). They
    keep their box, place and colours of text; the solid disc turns to a
@@ -440,8 +427,7 @@ html[data-button-style="liquid"][data-world-effects="economy"]
       .manager-facts,
       .quick-search-field,
       .search-input-row,
-      .saga-cinema .toast,
-      .opening-notice
+      .saga-cinema .toast
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     border-color: CanvasText !important;
     background-color: Canvas !important;
