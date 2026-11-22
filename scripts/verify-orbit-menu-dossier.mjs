@@ -225,17 +225,15 @@ try {
       await page.keyboard.press("Home");
       await settle(page, 900);
       check("Home goes to the first part", (await part(page)) === "dossier-profile");
+      // 2026-11-23 (review): 人物紹介 keeps its facts in the reading column,
+      // so the first screen is never blank there (the callouts are gone).
       const facts = await page.evaluate(() => {
         const figure = document.querySelector(".manager-portrait-frame").getBoundingClientRect();
-        return [...document.querySelectorAll(".manager-facts > div")].map((fact) => {
-          const box = fact.getBoundingClientRect();
-          return box.right <= figure.left + 1 || box.left >= figure.right - 1;
-        });
+        return [...document.querySelectorAll(".manager-facts > div")].map(
+          (fact) => fact.getBoundingClientRect().left >= figure.right,
+        );
       });
-      check(
-        "the facts stand beside the figure as callouts",
-        facts.length > 0 && facts.every(Boolean),
-      );
+      check("the facts stand in the reading column", facts.length > 0 && facts.every(Boolean));
     } else {
       await page.evaluate(() => document.getElementById("dossier-orbit-tab-dossier-index").click());
       await settle(page);
@@ -274,6 +272,47 @@ try {
     check(`${width}: the dossier has no sideways overflow`, (await overflow(page)) <= 0);
     check(`${width}: no runtime errors`, errors.length === 0, errors.join(" | "));
     await context.close();
+  }
+
+  // ---- Split stage: every part opens with content in the first screen ----
+  // 2026-11-23 (review): no blank first screen in the reading column.
+  for (const [width, height] of [
+    [1440, 900],
+    [1194, 834],
+    [1024, 768],
+  ]) {
+    const page = await browser.newPage({ viewport: { width, height } });
+    for (const path of ["/riders/leddic", "/managers/lejas", "/characters/ciel"]) {
+      await page.goto(`${base}${path}`, { waitUntil: "networkidle" });
+      await settle(page, 1500);
+      const ids = await page.$$eval('.dossier-orbit [role="tab"]', (els) => els.map((el) => el.id));
+      for (const id of ids) {
+        await page.evaluate((tab) => document.getElementById(tab).click(), id);
+        await settle(page, 1400);
+        // The lowest piece of text or art in the reading column (right of
+        // the stage; cropped art may start under it) that is on the first screen.
+        const reach = await page.evaluate(() => {
+          const stage = document.querySelector(".dossier-orbit-stage").getBoundingClientRect();
+          let low = 0;
+          for (const el of document.querySelectorAll(
+            "main :is(p, h1, h2, h3, dd, dt, li, a, img, q, blockquote, span)",
+          )) {
+            const box = el.getBoundingClientRect();
+            if (box.width < 4 || box.height < 4 || box.right <= stage.right + 40) continue;
+            if (box.top >= innerHeight || box.bottom <= 0) continue;
+            if (getComputedStyle(el).visibility === "hidden") continue;
+            low = Math.max(low, Math.min(box.bottom, innerHeight));
+          }
+          return Math.round((low / innerHeight) * 100);
+        });
+        check(
+          `${width} ${path} ${id.replace("dossier-orbit-tab-", "")}: the first screen is filled`,
+          reach >= 60,
+          `${reach}%`,
+        );
+      }
+    }
+    await page.close();
   }
 
   // ---- Every family of file keeps its parts ----

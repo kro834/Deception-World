@@ -1011,9 +1011,31 @@ html[data-family]:not([data-family="dream"])
     max-width: none;
   }
 
+  /* 2026-11-23 (review): 人物 on a phone packs both columns from the top,
+     and the unmanaged file sits under the riders, so neither column leaves
+     an empty run above its list. */
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
     > .side-panel-group[data-atlas-group="riders"] {
-    grid-area: 2 / 1 / 5 / 2;
+    grid-area: 2 / 1 / 4 / 2;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="unmanaged"] {
+    grid-area: 4 / 1 / 5 / 2;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="rikuei"] {
+    grid-area: 2 / 2 / 3 / 3;
+    align-self: start;
+  }
+
+  #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu][data-orbit-region="riders"]
+    > .side-panel-group[data-atlas-group="related"] {
+    grid-area: 3 / 2 / 5 / 3;
+    align-self: start;
   }
 
   #site-side-panel#site-side-panel#site-side-panel#site-side-panel[data-orbit-menu]
