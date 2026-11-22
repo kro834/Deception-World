@@ -184,10 +184,11 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
    3. Panels, plates and reading cards: ring cards.
    The corner ticks of the command deck give way to one continuous stroke.
    No overflow is set, so focus rings and long prose are never clipped.
-   The border widths are the command deck's own (1px; 2px on a reading
-   card's top): several of these hold a form slider or stand inside a
-   suit-up chapter, whose geometry and scroll length must not move by a
-   pixel. An inset line doubles the stroke without taking layout.
+   Border widths are never set here, only their colour: several of these
+   hold a form slider or stand inside a suit-up chapter, whose geometry
+   and scroll length must not move by a pixel (each page keeps whatever
+   width its own sheets gave the plate). The ring stroke shows through the
+   border where there is one; an inset line draws it where there is none.
    Rexonance and Extreme paint these plates from their own editions and
    are left to them here: they take the ring's cut only (3b).
    --------------------------------------------------------------- */
@@ -208,7 +209,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .mus-stage-switcher,
       .fst-story-layout
     ) {
-    border: 1px solid transparent;
+    border-color: transparent;
     border-radius: var(--ring-radius-card);
     background:
       var(--cs-face) padding-box,
@@ -233,7 +234,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .mus-weapons > li,
       .rxs-headline-metrics > article
     ) {
-    border: 1px solid transparent;
+    border-color: transparent;
     border-radius: 22px;
     background:
       var(--cs-face) padding-box,
@@ -254,8 +255,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
       .ics-evaluations > article,
       .mus-article
     ) {
-    border: 1px solid transparent;
-    border-top-width: 2px;
+    border-color: transparent;
     border-radius: var(--ring-radius-card);
     background:
       var(--cs-face) padding-box,
@@ -310,7 +310,7 @@ html[data-family="special"] body #top.rxs-page[data-command-special]:not(#ring-b
     #top.rxs-page[data-command-special]:not(#ring-b):not(.rxs-rexonance-page, .exs-page)
     .rxs-chapter-index
     a {
-    border: 1px solid transparent;
+    border-color: transparent;
     border-radius: var(--ring-radius-pill);
     clip-path: none;
     background:
@@ -765,6 +765,13 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero
   border-radius: 18px;
 }
 
+@keyframes ring-special-rise {
+  from {
+    opacity: 0;
+    translate: 0 26px;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   /* The films pop along the ring as the orbit arrives (the page pins the
      cards' opacity, so only their scale springs; the grid carries the fade). */
@@ -820,21 +827,25 @@ html[data-family="special"] body .saga-cinema.saga-cinema:not(#ring-b) :is(.hero
     transition: scale 90ms ease-out;
   }
 
-  /* THE EXPANSION RULE: the film sheet and the gallery spring open from the
-     centre; the film sheet's rows follow, staggered. Closing is the
-     dialog's own. */
+  /* THE EXPANSION RULE: the film sheet springs open from the centre and
+     its rows follow, staggered. The gallery's stage is as wide as the
+     screen, so it only rises on the critically damped spring (a full-width
+     layer must not overshoot). Closing is the dialog's own. */
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .saga-cinema.saga-cinema:not(#ring-b)
     .film-dialog[open]
-    > *,
+    > .dialog-layout {
+    animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 50%;
+  }
+
   html[data-family="special"]:not([data-world-effects="economy"])
     body
     .saga-cinema.saga-cinema:not(#ring-b)
     .gallery-dialog[open]
     .gallery-stage {
-    animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
-    transform-origin: 50% 50%;
+    animation: ring-special-rise var(--ring-dur-soft) var(--ring-spring-soft) backwards;
   }
 
   html[data-family="special"]:not([data-world-effects="economy"])
@@ -942,7 +953,8 @@ html[data-family="special"]
   place-self: center;
   max-width: calc(var(--fst-inner, 240px));
   margin: 0;
-  font-size: clamp(16px, 2.3vw, 34px);
+  /* Nine characters a line must fit inside the ring at every width. */
+  font-size: clamp(13px, calc(var(--fst-inner, 240px) / 9.4), 34px);
   line-height: 1.45;
   text-align: center;
   pointer-events: none;
