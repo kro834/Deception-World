@@ -1,12 +1,3 @@
-    grid.addEventListener("touchend", endTouch, { passive: true });
-    grid.addEventListener("touchcancel", endTouch, { passive: true });
-    grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
-    grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
-    grid.addEventListener("scroll", onScroll, { passive: true });
-    grid.addEventListener("scrollend", settleScroll);
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      window.clearTimeout(settleTimer);
       grid.removeEventListener("touchstart", startTouch);
       grid.removeEventListener("touchend", endTouch);
       grid.removeEventListener("touchcancel", endTouch);
@@ -506,3 +497,15 @@
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="1.8"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  <b>{locked ? "固定中" : "自動切替"}</b>
+                </button>
+              </div>
+              <output
+                aria-label="表示中のポスター"
+                aria-live={locked || posterControlsFocused ? "polite" : "off"}
+                aria-atomic="true"
+                aria-busy={shuffling}

@@ -2629,6 +2629,24 @@ export function WorldHome() {
                   />
                 ) : null,
               )}
+              {/* The ring system: the eight riders as nodes on one ring
+                  around the portrait. The ring turns so the chosen rider's
+                  node comes to rest at the portrait's edge, on a spring; decorative, the tablist
+                  beside it stays the control. */}
+              <span className="rider-ring-dial" aria-hidden="true">
+                <span
+                  className="rider-ring-dial-ring"
+                  style={{ ["--ring-turn" as string]: riderTab }}
+                >
+                  {RIDERS.map((r, i) => (
+                    <i
+                      key={r.id}
+                      className={i === riderTab ? "is-on" : undefined}
+                      style={{ ["--ring-i" as string]: i }}
+                    />
+                  ))}
+                </span>
+              </span>
             </div>
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}

@@ -33,6 +33,7 @@ import worldArchiveToolsCssUrl from "@/styles-world-archive-tools.css?url";
 import worldSpecialCssUrl from "@/styles-world-special.css?url";
 import tabletWorldCssUrl from "@/styles-tablet-world.css?url";
 import commandDirectoryCssUrl from "@/styles-command-directory.css?url";
+import ringWorldCssUrl from "@/styles-ring-world.css?url";
 import { MIRAGE_BOOT_GATE_SCRIPT } from "@/lib/mirage-boot-gate";
 
 // Michroma carries the Mirage HUD labels. The subset holds only the capitals,
@@ -85,6 +86,9 @@ export const Route = createFileRoute("/world")({
         { rel: "stylesheet", href: worldAstraCssUrl },
         // Section-scoped command material outranks the final Mirage sheet.
         { rel: "stylesheet", href: commandDirectoryCssUrl },
+        // The ring system on the World (the rider ring around the portrait):
+        // its own elements and tokens, ahead of the HUD face and the last sheet.
+        { rel: "stylesheet", href: ringWorldCssUrl },
         { rel: "stylesheet", href: MIRAGE_FONTS_URL },
         { rel: "stylesheet", href: worldMirageCssUrl },
         { rel: "stylesheet", href: artworkStageCssUrl },

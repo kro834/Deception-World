@@ -1,9 +1,3 @@
-  const [previousRiderTab, setPreviousRiderTab] = useState<number | null>(null);
-  const [episode, setEpisode] = useState(0);
-  const [episodePickup, setEpisodePickup] = useState<number | null>(null);
-  const [pickupOpen, setPickupOpen] = useState(false);
-  const [sideMenuOpen, setSideMenuOpen] = useState(false);
-  const [heroVisible, setHeroVisible] = useState(true);
   // Read by the poster timer at once; the state follows when scrolling settles.
   const heroInViewRef = useRef(true);
   const [motionReduced, setMotionReduced] = useState(false);
@@ -506,3 +500,12 @@
       frame = requestAnimationFrame(syncFromScroll);
     };
     grid.addEventListener("touchstart", startTouch, { passive: true });
+    grid.addEventListener("touchend", endTouch, { passive: true });
+    grid.addEventListener("touchcancel", endTouch, { passive: true });
+    grid.addEventListener("pointerdown", releaseProgrammaticScroll, { passive: true });
+    grid.addEventListener("wheel", releaseProgrammaticScroll, { passive: true });
+    grid.addEventListener("scroll", onScroll, { passive: true });
+    grid.addEventListener("scrollend", settleScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settleTimer);

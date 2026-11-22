@@ -47,7 +47,17 @@ test("world-home preserves its layout and copy outside explicitly approved edits
   const scrollCue = '        <a className="scroll-cue" href="#story" aria-label="ストーリー">\n';
   assert.equal(homeView.split(scrollCue).length, 2, "the scroll cue, once, without its English words");
   assert.doesNotMatch(home, /SCROLL TO DESCEND/);
+  // Owner (2026-11-22): 円環型の構成 — the riders hub gains one aria-hidden
+  // ring of eight nodes around the portrait (.rider-ring-dial, styles-ring-world.css).
+  // It adds no text and no control. Exactly that block is removed here, so
+  // every pin below still reads the page as it was.
+  const ringDial = / {14}\{\/\* The ring system: the eight riders[\s\S]*?\n {14}<\/span>\n/;
+  assert.equal(homeView.split(ringDial).length, 2, "the rider ring, once");
+  const dialBlock = homeView.match(ringDial)[0];
+  assert.match(dialBlock, /className="rider-ring-dial" aria-hidden="true"/);
+  assert.doesNotMatch(dialBlock.replace(/\{\/\*[\s\S]*?\*\/\}/, ""), />[^<>{}\s][^<>{}]*</, "the ring carries no text");
   const preservedHomeView = homeView
+    .replace(ringDial, "")
     .replace("      <WorldExploration />\n", "")
     .replace(
       scrollCue,

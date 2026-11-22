@@ -1,0 +1,118 @@
+/* ================================================================
+   The ring system on the World (2026-11-22).
+   Linked last by src/routes/world.tsx. The riders hub (#riders) is where
+   /riders lands, so it carries the ring: the eight riders are nodes on one
+   ring around the portrait, and choosing a rider turns the ring until that
+   node rests at the portrait's edge, on the bounce spring.
+   The rider rail itself (the tablist, its ids, its geometry, long-press
+   slide-select) is pinned by the owner and is not touched: only the small
+   marker in each tab becomes a ring.
+   Motion gates as in styles-ring.css.
+   ================================================================ */
+
+/* The dial fills the portrait and takes no input. */
+html[data-family="world"] body .rider-console .rider-visual > .rider-ring-dial {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  container-type: size;
+  pointer-events: none;
+}
+
+html[data-family="world"] body .rider-console .rider-ring-dial-ring {
+  --ring-turn: 0;
+  --ring-tone: var(--rider-tone, var(--ring-key));
+  position: relative;
+  display: block;
+  width: min(96cqw, 96cqh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* The chosen node rests at the right edge, clear of the face; the ring's
+     left half fades into the panel with the picture's own mask. */
+  rotate: calc(var(--ring-turn) * -45deg + 90deg);
+}
+
+/* The track and, over it, the lit arc from the first rider to the chosen
+   one: how far round the eight the reader is. */
+html[data-family="world"] body .rider-console .rider-ring-dial-ring::before,
+html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+}
+
+html[data-family="world"] body .rider-console .rider-ring-dial-ring::before {
+  background: rgb(255 255 255 / 0.3);
+}
+
+html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-tone) calc(var(--ring-turn) * 0.125turn),
+    transparent calc(var(--ring-turn) * 0.125turn)
+  );
+}
+
+/* Each node is a full-size arm turned to its place; the dot sits at its top. */
+html[data-family="world"] body .rider-console .rider-ring-dial-ring > i {
+  position: absolute;
+  inset: 0;
+  rotate: calc(var(--ring-i) * 45deg);
+}
+
+html[data-family="world"] body .rider-console .rider-ring-dial-ring > i::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid rgb(255 255 255 / 0.7);
+  border-radius: 50%;
+  background: rgb(6 16 27 / 0.55);
+  box-sizing: border-box;
+}
+
+html[data-family="world"] body .rider-console .rider-ring-dial-ring > i.is-on::before {
+  border-color: #fff;
+  background: var(--ring-tone);
+  scale: 2;
+  box-shadow: 0 0 0 4px rgb(6 16 27 / 0.6);
+}
+
+/* The rail's markers: a ring instead of a diamond (paint only). */
+html[data-family="world"] body .rider-console .rider-tabs > button > i {
+  border-radius: 50%;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-family="world"]:not([data-world-effects="economy"])
+    body
+    .rider-console
+    .rider-ring-dial-ring {
+    transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
+  html[data-family="world"]:not([data-world-effects="economy"])
+    body
+    .rider-console
+    .rider-ring-dial-ring
+    > i::before {
+    transition:
+      scale var(--ring-dur-elastic) var(--ring-spring-elastic),
+      background-color 200ms ease;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="world"] body .rider-console .rider-ring-dial-ring::before {
+    background: CanvasText;
+  }
+}

@@ -1,18 +1,3 @@
-                {COLUMNS.map((item, index) => (
-                  <p
-                    key={item.no}
-                    className={`world-column-number world-column-stack-item${index === columnTab ? " is-active" : ""}`}
-                    aria-hidden={index !== columnTab}
-                  >
-                    コラム{item.no}
-                  </p>
-                ))}
-              </div>
-              <div className="world-column-heading-stack">
-                {COLUMNS.map((item, index) => (
-                  <h3
-                    key={item.no}
-                    id={`world-column-${item.no}`}
                     className={`world-column-stack-item${index === columnTab ? " is-active" : ""}`}
                     aria-hidden={index !== columnTab}
                   >
@@ -89,6 +74,24 @@
                   />
                 ) : null,
               )}
+              {/* The ring system: the eight riders as nodes on one ring
+                  around the portrait. The ring turns so the chosen rider's
+                  node comes to rest at the portrait's edge, on a spring; decorative, the tablist
+                  beside it stays the control. */}
+              <span className="rider-ring-dial" aria-hidden="true">
+                <span
+                  className="rider-ring-dial-ring"
+                  style={{ ["--ring-turn" as string]: riderTab }}
+                >
+                  {RIDERS.map((r, i) => (
+                    <i
+                      key={r.id}
+                      className={i === riderTab ? "is-on" : undefined}
+                      style={{ ["--ring-i" as string]: i }}
+                    />
+                  ))}
+                </span>
+              </span>
             </div>
             <div className="rider-monogram" aria-hidden="true">
               {rider.name.slice(0, 1)}
