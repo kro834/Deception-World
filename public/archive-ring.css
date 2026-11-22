@@ -1,0 +1,251 @@
+/* The ring system inside the form archives (2026-11-23).
+   Owner: 「サイト全体に、円環型の構成と動的で弾んだアニメーションを」
+          「展開時は弾む様なアニメーションにして。」
+
+   Linked by scripts/build-embedded-archives.mjs in both documents (Saga and
+   Realm share these classes), after every archive sheet and before
+   archive-labels.css, which stays last.
+
+   Additive and paint-only. It changes corner radii, the stroke of a few
+   marks and how two surfaces open. It never changes a box's size, order,
+   overflow or scrolling, so the archive keeps its invariants: one scroller
+   (the document), the chip order, the comparison's row parity and the
+   runtime art swap. Nothing is moved or re-parented and no text is touched.
+
+   The selectors carry the archive sheets' own ID prefix plus
+   :not(#ring-x#ring-x), so they outrank those sheets' !important rules.
+   Motion sits behind prefers-reduced-motion: no-preference, moves only
+   opacity / scale / translate, never loops and leaves nothing at rest.
+   The page's topbar ring follows this document's scroll: archive-ring.js
+   reports it to the page. */
+
+html[data-embedded-archive] {
+  --ring-key: #7ae8ff;
+  --ring-key-rgb: 122 232 255;
+  --ring-gold: #f0cf86;
+  --ring-gold-rgb: 240 207 134;
+  --ring-pink: #ff5fc8;
+  --ring-pink-rgb: 255 95 200;
+  --ring-prism: conic-gradient(
+    from 210deg,
+    var(--ring-key) 0turn,
+    #d4f6ff 0.14turn,
+    var(--ring-pink) 0.36turn,
+    var(--ring-gold) 0.62turn,
+    #fae6b6 0.8turn,
+    var(--ring-key) 1turn
+  );
+  --ring-total: 22;
+}
+
+html[data-embedded-archive][data-archive-kind="realm"] {
+  --ring-key: #b99cff;
+  --ring-key-rgb: 185 156 255;
+  --ring-total: 9;
+}
+
+/* ---- Panels: the 28px ring card ------------------------------------- */
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .archive-hero,
+    .section,
+    .selector-console,
+    .saga-compare-section,
+    .archive-footer,
+    .motion-transition-fx,
+    .solo-cover-v14
+  ):not(#ring-x#ring-x) {
+  border-radius: 28px !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .selected-telemetry,
+    .stage,
+    .detail-toolbar,
+    .detail-card,
+    .compare-toolbar,
+    .compare-side,
+    .compare-form-card,
+    .table-responsive,
+    .archive-profile,
+    .archive-versus-profile,
+    .ability-panel,
+    .operation-panel,
+    .rexonance-setting-hero,
+    .rexonance-setting-block,
+    .rexonance-compare-revision,
+    .selector-empty,
+    .lightbox-inner
+  ):not(#ring-x#ring-x) {
+  border-radius: 22px !important;
+}
+
+/* Form chips: a round corner cut from the same circle; their order, size
+   and rows are the archive's own. */
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .form-chip
+  ):not(#ring-x#ring-x) {
+  border-radius: 18px !important;
+}
+
+/* ---- Controls: pills ------------------------------------------------ */
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .archive-nav,
+    .archive-nav a,
+    .hero-action,
+    .selector-collapse,
+    .selector-sheet-close,
+    .selector-empty-reset,
+    .search-clear,
+    .selector-search input,
+    .compare-swap,
+    .compare-native-select,
+    .toolbar-index,
+    .viz-badge,
+    .data-badge,
+    .telemetry-status,
+    .mobile-dock,
+    .dock-current,
+    .lightbox-close,
+    .detail-toolbar button,
+    .detail-toolbar a
+  ):not(#ring-x#ring-x) {
+  border-radius: 999px !important;
+}
+
+/* ---- The wordmark's sigil: a ring ------------------------------------ */
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .wordmark-sigil
+  ):not(#ring-x#ring-x) {
+  border: 2px solid transparent !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.3), transparent 62%) padding-box,
+    linear-gradient(#07101c, #07101c) padding-box,
+    var(--ring-prism) border-box !important;
+}
+
+/* ---- The selected form's place among the forms: a lit ring ---------- */
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  :is(
+    .telemetry-index
+  ):not(#ring-x#ring-x) {
+  position: relative;
+  display: inline-grid !important;
+  place-items: center;
+  box-sizing: border-box;
+  width: 46px !important;
+  min-width: 46px;
+  height: 46px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 30% 24%, rgb(var(--ring-key-rgb) / 0.22), transparent 62%), #07101c !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  .telemetry-index:not(#ring-x#ring-x)::before,
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  .telemetry-index:not(#ring-x#ring-x)::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: none;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.1px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3.1px), #000 calc(100% - 2.5px));
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  .telemetry-index:not(#ring-x#ring-x)::before {
+  background: rgb(var(--ring-key-rgb) / 0.2) !important;
+}
+
+html[data-embedded-archive] :is(#saga-forms-performance-v5, #edition-panel-realm #realm--saga-forms-performance-v5)
+  .telemetry-index:not(#ring-x#ring-x)::after {
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-key) 0turn,
+    var(--ring-pink) calc(var(--ring-p, 0) * 0.6turn),
+    var(--ring-gold) calc(var(--ring-p, 0) * 1turn),
+    transparent calc(var(--ring-p, 0) * 1turn)
+  ) !important;
+}
+
+/* Each state is the k-th form: its ring is lit k / total round. */
+html[data-embedded-archive] .telemetry-state:nth-child(1) { --ring-p: calc(1 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(2) { --ring-p: calc(2 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(3) { --ring-p: calc(3 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(4) { --ring-p: calc(4 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(5) { --ring-p: calc(5 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(6) { --ring-p: calc(6 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(7) { --ring-p: calc(7 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(8) { --ring-p: calc(8 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(9) { --ring-p: calc(9 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(10) { --ring-p: calc(10 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(11) { --ring-p: calc(11 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(12) { --ring-p: calc(12 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(13) { --ring-p: calc(13 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(14) { --ring-p: calc(14 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(15) { --ring-p: calc(15 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(16) { --ring-p: calc(16 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(17) { --ring-p: calc(17 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(18) { --ring-p: calc(18 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(19) { --ring-p: calc(19 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(20) { --ring-p: calc(20 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(21) { --ring-p: calc(21 / var(--ring-total)); }
+html[data-embedded-archive] .telemetry-state:nth-child(22) { --ring-p: calc(22 / var(--ring-total)); }
+
+/* ---- Motion: the expansion rule ---------------------------------------
+   A surface that opens springs in with overshoot; closing stays the
+   archive's own. From-only keyframes with backwards fill. */
+
+@keyframes archive-ring-unfold {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+    scale: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-embedded-archive] {
+    /* The site's expansion spring (stiffness 320, damping 16), as a fallback
+       curve and, where linear() exists, sampled. */
+    --ring-spring-bounce: cubic-bezier(0.3, 1.6, 0.42, 1);
+  }
+
+  @supports (transition-timing-function: linear(0, 1)) {
+    html[data-embedded-archive] {
+      --ring-spring-bounce: linear(0, 0.054, 0.191, 0.375, 0.574, 0.763, 0.927, 1.054, 1.141, 1.191, 1.208, 1.199, 1.171, 1.134, 1.093, 1.053, 1.018, 0.991, 0.972, 0.961, 0.957, 0.958, 0.964, 0.971, 0.98, 0.988, 0.996, 1.001, 1.006, 1.008, 1.009, 1.009, 1.008, 1.006, 1.004, 1.003, 1);
+    }
+  }
+
+  /* The picture viewer: its inner sheet springs open from the centre. */
+  html[data-embedded-archive] dialog.image-lightbox[open] .lightbox-inner {
+    animation: archive-ring-unfold 700ms var(--ring-spring-bounce) backwards;
+  }
+
+  /* The chosen form's ring settles when the selection changes. */
+  html[data-embedded-archive] .telemetry-state.is-current .telemetry-index {
+    animation: archive-ring-unfold 700ms var(--ring-spring-bounce) backwards;
+  }
+}
