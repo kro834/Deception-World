@@ -216,6 +216,7 @@ test("the helper never blocks input and writes only the ring's own properties", 
     "--ring-pulley-from",
     "--ring-thread-from",
     "--ring-thread-to",
+    "animation-delay",
   ]);
   // The scroll bounce moves opted-in elements, never the document.
   assert.doesNotMatch(code, /(?:body|root|documentElement)\.style/);
@@ -278,12 +279,16 @@ test("linked sections: a pulley-and-thread chain, timed by the helper and run by
   // It never takes a suit-up stage, a pinned scene or a box with its own arrival.
   const forbid = code.match(/const LINK_FORBID =\s*\/(.+)\/;/);
   assert.ok(forbid);
-  for (const word of ["suitup", "henshin", "assembly", "entry", "nanite", "vortex", "engine", "canvas", "stage", "sticky", "reveal", "ring-(?:enter"])
+  for (const word of ["suitup", "henshin", "assembly", "entry", "nanite", "vortex", "engine", "canvas", "stage", "sticky", "reveal", "ring-(?:stagger", "ring-enter-(?:pop|spin)"])
     assert.ok(forbid[1].includes(word), word);
   assert.match(code, /cs\.animationName !== "none"/);
   assert.match(code, /cs\.position !== "static" && cs\.position !== "relative"/);
   assert.match(code, /child\.querySelector\("canvas, iframe"\) !== null/);
   // Held parts are always let go: a safety sweep, print, and reduced motion switched on.
   assert.match(code, /view\.setTimeout\(sweepHeld, SAFETY_MS\)/);
+  // A plain .ring-enter joins the chain: the helper gives it data-ring-in at its slot.
+  assert.match(code, /style\.setProperty\("animation-delay", `\$\{delay\}ms`\);\s*part\.el\.setAttribute\(IN, ""\);/);
+  // A thread never spans a wide gap (a skipped stage or full-bleed block).
+  assert.match(code, /if \(b\.top - a\.bottom > 96\) return null;/);
   assert.match(code, /addEventListener\("beforeprint", releaseAllLinks\)/);
 });

@@ -799,6 +799,12 @@
     animation-delay: var(--ring-link-a, 0ms);
   }
 
+  /* The lifted part is a .ring-enter: its own rise is on the default spring. */
+  html:not([data-world-effects="economy"]) .ring-link[data-ring-run="enter"] > :is(.ring-thread:not(.ring-thread-pull), .ring-pulley) {
+    animation-duration: var(--ring-dur-spring);
+    animation-timing-function: var(--ring-spring);
+  }
+
   html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-pulley {
     animation: ring-pulley-turn var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards;
   }

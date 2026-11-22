@@ -149,9 +149,11 @@ const LINK_OFF = 'dialog, nav, aside, [hidden], [aria-hidden="true"], [data-ring
 // Never a part, and never searched for parts: the suit-up, entry and call
 // staging (the contract test's list), every stage (the World annex's
 // `wa-…-stage` boxes are plain layout grids, so they stay), pinned scroll
-// scenes, and everything that already owns its own arrival.
+// scenes, and everything that already owns its own arrival. A plain
+// `.ring-enter` is not in this list: it joins the chain as a part (the helper
+// gives it `data-ring-in` at its slot, and its own rise plays there).
 const LINK_FORBID =
-  /suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call|(?:^|\s)(?!wa-)\S*stage|sticky|pinned|scene|reveal|ring-(?:enter|stagger|expand|bounce|glass|orbit|arc|divider|halo)/;
+  /suitup|suit-up|henshin|assembly|entry|ignition|nanite|wire|burst|reactor|vortex|swarm|flame|engine|canvas|call|(?:^|\s)(?!wa-)\S*stage|sticky|pinned|scene|reveal|ring-(?:stagger|expand|bounce|glass|orbit|arc|divider|halo)|ring-enter-(?:pop|spin)/;
 // Moved as one piece, never taken apart: measured rails, sliders, control
 // rows. Their inner geometry is read by their own engines.
 const LINK_WHOLE =
@@ -179,6 +181,8 @@ export const RING_LINK_STEP_MS = (() => {
   return 130;
 })();
 const LINK_PULLEY_R = 8;
+// A .ring-enter part rises by its own keyframe (ring-rise-in: 26px).
+const LINK_ENTER_RISE = 26;
 const LINK_THREAD_BASE = 100;
 const LINK_GATE = 0.92;
 
@@ -338,7 +342,7 @@ export function watchRingMotion(doc = document) {
   // viewport tall. Only chains that are near and still below the fold are
   // armed (held, measured, threaded). Everything else is untouched.
   /**
-   * @typedef {{ el: HTMLElement, chain: LinkChain, i: number, figure: boolean, head: boolean,
+   * @typedef {{ el: HTMLElement, chain: LinkChain, i: number, figure: boolean, head: boolean, own: boolean, once: boolean,
    *   state: 0 | 1 | 2, start: number, top: number, bottom: number, left: number, right: number }} LinkPart
    * @typedef {{ parts: LinkPart[], links: (HTMLElement | null)[], near: boolean, armed: boolean,
    *   lastStart: number, top: number, body: boolean }} LinkChain
@@ -406,6 +410,11 @@ export function watchRingMotion(doc = document) {
         continue;
       const cls = child.className;
       if (cls && LINK_FORBID.test(cls)) continue;
+      // A plain .ring-enter that has not arrived yet: it keeps its own rise,
+      // and the chain decides when (it is held by its own rule until then).
+      // Once it has arrived it is never held again (its own rule would outrank the lift).
+      const enter = cls !== "" && /(?:^|\s)ring-enter(?:\s|$)/.test(cls);
+      const own = enter && !child.hasAttribute(IN);
       const cs = view.getComputedStyle(child);
       const display = cs.display;
       if (display === "none") continue;
@@ -421,7 +430,7 @@ export function watchRingMotion(doc = document) {
         cs.animationName !== "none" ||
         cs.translate !== "none" ||
         cs.visibility === "hidden" ||
-        parseFloat(cs.opacity) < 0.99 ||
+        (!own && parseFloat(cs.opacity) < 0.99) ||
         cs.overflowY === "auto" ||
         cs.overflowY === "scroll"
       )
@@ -434,6 +443,7 @@ export function watchRingMotion(doc = document) {
         (cs.borderTopStyle !== "none" && parseFloat(cs.borderTopWidth) > 0) ||
         cs.boxShadow !== "none";
       const whole =
+        own ||
         card ||
         LINK_ATOMS.has(tag) ||
         depth >= LINK_MAX_DEPTH ||
@@ -464,6 +474,8 @@ export function watchRingMotion(doc = document) {
         head:
           LINK_HEADS.has(tag) ||
           (!card && rect.height < 320 && child.querySelector("h1, h2, h3, h4") !== null),
+        own,
+        once: enter && !own,
         state: 0,
         start: 0,
         top: rect.top + sy,
@@ -479,9 +491,15 @@ export function watchRingMotion(doc = document) {
     if (part.state === 1) {
       held.delete(part);
       gateIO.unobserve(part.el);
+      // A .ring-enter the chain was holding goes back to its own observer.
+      if (part.own && !part.el.hasAttribute(IN)) io.observe(part.el);
     }
     if (part.state !== 0) {
       part.state = 0;
+      if (part.own) {
+        part.el.style.removeProperty("animation-delay");
+        return;
+      }
       part.el.removeAttribute(LINK);
       part.el.style.removeProperty("--ring-link-d");
       part.el.style.removeProperty("--ring-link-f");
@@ -520,12 +538,19 @@ export function watchRingMotion(doc = document) {
     let l1 = NaN;
     let l2 = 0;
     if (b.top >= a.bottom - 4) {
-      // Stacked: the thread runs down the left edge of the two boxes, past a
-      // pulley in the gap between them: in the gutter where there is room,
-      // astride the edge where there is not (a phone's 16px gutter).
+      // Stacked: the thread runs down beside the left edge of the two boxes,
+      // past a pulley in the gap between them. With a wide gutter the wheel
+      // sits beside the thread; in a phone's 16px gutter the thread runs
+      // through its centre. Never over the text. A wide gap means something
+      // the chain must not cross (a stage, full-bleed media) lies between.
+      if (b.top - a.bottom > 96) return null;
       const edge = Math.max(a.left, b.left);
-      const x = edge >= 2 * r + 8 ? edge - 6 : edge + 6;
-      cx = x - r;
+      if (edge < r + 6) return null;
+      const beside = edge >= 2 * r + 8;
+      const x = beside ? edge - 6 : edge - 4;
+      cx = beside ? x - r : x;
+      x1 = x - cx;
+      x2 = x1;
       cy = (a.bottom + b.top) / 2;
       // The pulling end is tied up the side of the part above (at most 140px
       // up), so the taut thread is long enough to be read as a thread.
@@ -539,6 +564,7 @@ export function watchRingMotion(doc = document) {
       cx = a.right + gap / 2;
       cy = Math.min(a.top, b.top) - 3;
       x1 = -r;
+      x2 = r;
       l1 = a.top - cy;
       l2 = b.top - cy;
     }
@@ -553,9 +579,9 @@ export function watchRingMotion(doc = document) {
     node.className = "ring-link";
     node.style.left = `${cx.toFixed(1)}px`;
     node.style.top = `${cy.toFixed(1)}px`;
-    const hangB = b.figure ? RING_LINK_HANG.figure : RING_LINK_HANG.text;
+    const hangB = b.own ? LINK_ENTER_RISE : b.figure ? RING_LINK_HANG.figure : RING_LINK_HANG.text;
     if (l1 === l1) {
-      const hangA = a.figure ? RING_LINK_HANG.figure : RING_LINK_HANG.text;
+      const hangA = a.own ? LINK_ENTER_RISE : a.figure ? RING_LINK_HANG.figure : RING_LINK_HANG.text;
       const pull = doc.createElement("i");
       pull.className = "ring-thread ring-thread-pull";
       pull.style.left = `${x1}px`;
@@ -596,23 +622,33 @@ export function watchRingMotion(doc = document) {
       part.left = rect.left;
       part.right = rect.right;
       part.start = 0;
-      part.state = rect.height > 0 && rect.top > line ? 1 : 0;
+      part.state = !part.once && rect.height > 0 && rect.top > line ? 1 : 0;
     }
     for (const part of parts) {
       if (part.state !== 1) continue;
-      part.el.setAttribute(LINK, "hold");
+      if (part.own) {
+        // Arrived already (its own observer was first): it is simply there.
+        if (part.el.hasAttribute(IN)) {
+          part.own = false;
+          part.once = true;
+          part.state = 0;
+          continue;
+        }
+        io.unobserve(part.el);
+      } else part.el.setAttribute(LINK, "hold");
       held.add(part);
       gateIO.observe(part.el);
       any = true;
     }
+    chain.armed = any;
+    chain.lastStart = 0;
+    // The safety sweep is set before any thread is built.
+    if (any && !linkSafety) linkSafety = view.setTimeout(sweepHeld, SAFETY_MS);
     if (any && bounces()) {
       for (let i = 1; i < parts.length; i += 1) {
         if (parts[i].state === 1) chain.links[i] = makeThread(parts[i - 1], parts[i]);
       }
     }
-    chain.armed = any;
-    chain.lastStart = 0;
-    if (any && !linkSafety) linkSafety = view.setTimeout(sweepHeld, SAFETY_MS);
   };
 
   /**
@@ -634,10 +670,22 @@ export function watchRingMotion(doc = document) {
     gateIO.unobserve(part.el);
     const delay = Math.round(start - now);
     const style = part.el.style;
-    style.setProperty("--ring-link-d", `${delay}ms`);
-    // The part shows on its hook one step early, as its thread goes taut.
-    style.setProperty("--ring-link-f", `${Math.max(0, delay - RING_LINK_STEP_MS)}ms`);
-    part.el.setAttribute(LINK, part.figure ? "figure" : "text");
+    if (part.own) {
+      // Its own rise, at the chain's moment.
+      style.setProperty("animation-delay", `${delay}ms`);
+      part.el.setAttribute(IN, "");
+      // Economy has no rise to wait for.
+      if (!bounces()) {
+        clearPart(part);
+        part.own = false;
+        part.once = true;
+      }
+    } else {
+      style.setProperty("--ring-link-d", `${delay}ms`);
+      // The part shows on its hook one step early, as its thread goes taut.
+      style.setProperty("--ring-link-f", `${Math.max(0, delay - RING_LINK_STEP_MS)}ms`);
+      part.el.setAttribute(LINK, part.figure ? "figure" : "text");
+    }
     const node = chain.links[part.i];
     if (!node) return;
     const puller = chain.parts[part.i - 1];
@@ -645,7 +693,7 @@ export function watchRingMotion(doc = document) {
     node.style.setProperty("--ring-link-f", `${delay - RING_LINK_STEP_MS}ms`);
     // The pulling end follows the part above, wherever that is in its own lift.
     node.style.setProperty("--ring-link-a", `${puller.start ? Math.round(puller.start - now) : -9999}ms`);
-    node.setAttribute("data-ring-run", "");
+    node.setAttribute("data-ring-run", part.own ? "enter" : "");
   };
 
   /** A part has landed: hand it back to the page with nothing left on it. @param {Event} event */
@@ -653,6 +701,13 @@ export function watchRingMotion(doc = document) {
     const part = partOf.get(/** @type {Element} */ (event.target));
     if (!part || part.state !== 2) return;
     const name = /** @type {AnimationEvent} */ (event).animationName;
+    if (part.own) {
+      // It has arrived for good: from here on it is an ordinary box.
+      clearPart(part);
+      part.own = false;
+      part.once = true;
+      return;
+    }
     if (event.type === "animationcancel" || name === "ring-link-lift-text" || name === "ring-link-lift-figure" || (name === "ring-link-seen" && !bounces()))
       clearPart(part);
   };
