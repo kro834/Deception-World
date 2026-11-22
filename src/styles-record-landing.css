@@ -6,12 +6,12 @@
    src/lib/record-arrival.ts once the route and its cover have settled,
    and keeps the mark for six seconds or until focus moves on.
 
-   The mark is a specimen reticle on its own fixed layer (.record-landing-layer,
-   aria-hidden, pointer-events: none): four optical clasps and a dual-stage
-   caliper ring that close in on the words once, pink to ice with a brass
-   secondary resonance halo, a single light sweep, and a slip tag that says
-   what found it (HIT / FILE / GUIDE). Under reduced motion or economy
-   rendering the same frame stands still.
+   The mark is an optical loupe reticle on its own fixed layer
+   (.record-landing-layer, aria-hidden, pointer-events: none): delicate
+   filleted jewel clasps and a beveled crystal halo that close in on the
+   words once, pink to ice with champagne-brass refraction, a single light
+   sweep, and an obsidian-foil slip tag (HIT / FILE / GUIDE). Under reduced
+   motion or economy rendering the same frame stands still.
 
    Without the layer (forced colours, or before it is drawn) the element
    itself carries a dual optical ring: the site's ice with warm brass and
@@ -19,16 +19,16 @@
    ================================================================ */
 html [data-record-landing][data-record-landing][data-record-landing],
 html [data-record-arrival][data-record-arrival][data-record-arrival] {
-  --rl-ice: 122 232 255;
+  --rl-ice: 140 236 255;
   --rl-pink: 240 92 207;
-  --rl-brass: 242 207 141;
-  outline: 2px solid rgb(var(--rl-ice) / 96%);
+  --rl-brass: 240 208 148;
+  outline: 1.5px solid rgb(var(--rl-ice) / 94%);
   outline-offset: 10px;
   box-shadow:
-    0 0 0 4px rgb(var(--rl-ice) / 18%),
-    0 0 0 9px rgb(var(--rl-brass) / 32%),
-    0 0 0 12px rgb(var(--rl-pink) / 22%),
-    0 24px 58px -16px rgb(var(--rl-pink) / 54%);
+    0 0 0 4px rgb(var(--rl-ice) / 16%),
+    0 0 0 9px rgb(var(--rl-brass) / 28%),
+    0 0 0 12px rgb(var(--rl-pink) / 18%),
+    0 24px 58px -16px rgb(var(--rl-pink) / 48%);
 }
 
 /* A whole <main> or embedded document (a page without a heading) is framed
@@ -84,20 +84,20 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
     outline-color: rgb(var(--rl-ice) / 100%);
     outline-offset: 7px;
     box-shadow:
-      0 0 0 3px rgb(var(--rl-ice) / 32%),
-      0 0 0 7px rgb(var(--rl-brass) / 46%),
-      0 0 0 13px rgb(var(--rl-pink) / 26%),
-      0 24px 58px -16px rgb(var(--rl-pink) / 64%);
+      0 0 0 3px rgb(var(--rl-ice) / 30%),
+      0 0 0 7px rgb(var(--rl-brass) / 44%),
+      0 0 0 13px rgb(var(--rl-pink) / 24%),
+      0 24px 58px -16px rgb(var(--rl-pink) / 60%);
   }
 
   74% {
-    outline-color: rgb(var(--rl-ice) / 96%);
+    outline-color: rgb(var(--rl-ice) / 94%);
     outline-offset: 11px;
     box-shadow:
-      0 0 0 6px rgb(var(--rl-ice) / 20%),
-      0 0 0 13px rgb(var(--rl-brass) / 34%),
-      0 0 0 18px rgb(var(--rl-pink) / 12%),
-      0 24px 58px -16px rgb(var(--rl-pink) / 56%);
+      0 0 0 6px rgb(var(--rl-ice) / 18%),
+      0 0 0 13px rgb(var(--rl-brass) / 30%),
+      0 0 0 18px rgb(var(--rl-pink) / 10%),
+      0 24px 58px -16px rgb(var(--rl-pink) / 52%);
   }
 }
 
@@ -108,13 +108,13 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 }
 
 /* ================================================================
-   The reticle layer
+   The reticle layer — filleted crystal loupe & obsidian-foil slip tag
    ================================================================ */
 .record-landing-layer {
   --record-landing-visible: 1;
-  --rl-ice: 122 232 255;
+  --rl-ice: 140 236 255;
   --rl-pink: 240 92 207;
-  --rl-gold: 242 207 141;
+  --rl-gold: 240 208 148;
   position: fixed;
   inset: 0;
   z-index: 29;
@@ -132,28 +132,36 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   will-change: transform;
 }
 
-/* Primary specimen glass frame: an ice hairline with warm brass bevel rim light. */
+/* Beveled crystal loupe frame: soft filleted corners with ice-to-brass specular rim. */
 .record-landing-reticle::before {
   position: absolute;
   inset: 0;
   content: "";
-  border: 1px solid rgb(var(--rl-ice) / 48%);
-  border-bottom-color: rgb(var(--rl-gold) / 44%);
-  border-radius: 3px;
+  border: 1px solid rgb(var(--rl-ice) / 42%);
+  border-bottom-color: rgb(var(--rl-gold) / 38%);
+  border-radius: 8px;
   background:
-    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 42%),
-    linear-gradient(90deg, rgb(var(--rl-ice) / 10%), rgb(var(--rl-ice) / 0%) 58%),
-    linear-gradient(180deg, rgb(var(--rl-gold) / 7%), transparent 62%);
+    linear-gradient(
+        90deg,
+        transparent 10%,
+        rgb(var(--rl-ice) / 62%) 42%,
+        rgb(var(--rl-gold) / 54%) 72%,
+        transparent 94%
+      )
+      top / 100% 1px no-repeat,
+    linear-gradient(132deg, rgb(255 255 255 / 6%) 0%, transparent 40%),
+    linear-gradient(90deg, rgb(var(--rl-ice) / 8%), rgb(var(--rl-ice) / 0%) 58%),
+    linear-gradient(180deg, rgb(var(--rl-gold) / 5%), transparent 62%);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 18%),
-    inset 0 -1px 0 rgb(var(--rl-gold) / 22%),
-    0 0 0 1px rgb(3 8 16 / 54%),
-    0 18px 44px -18px rgb(var(--rl-ice) / 48%);
+    inset 0 -1px 0 rgb(var(--rl-gold) / 18%),
+    0 0 0 1px rgb(3 8 16 / 48%),
+    0 20px 48px -20px rgb(var(--rl-ice) / 44%);
 }
 
 /* A frame round the on-screen part of a destination with no heading in
    view is nearly the screen: no floor and no sweep over the page, only the
-   hairline and the brackets. */
+   hairline and the clasps. */
 .record-landing-reticle[data-whole]::before {
   background: none;
   box-shadow: 0 0 0 1px rgb(3 6 12 / 40%);
@@ -163,59 +171,63 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   display: none;
 }
 
-/* The brackets: ice & brass optical clasps, 2px, crisp glow. */
+/* Delicate filleted jewel clasps (1.5px, curved radius) instead of harsh square brackets. */
 .record-landing-reticle > i {
   --rl-dx: 0px;
   --rl-dy: 0px;
   position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 0 solid rgb(var(--rl-ice));
+  width: 14px;
+  height: 14px;
+  border: 0 solid rgb(var(--rl-ice) / 88%);
   filter:
-    drop-shadow(0 0 6px rgb(var(--rl-ice) / 62%))
-    drop-shadow(0 0 12px rgb(var(--rl-gold) / 32%));
+    drop-shadow(0 0 6px rgb(var(--rl-ice) / 54%))
+    drop-shadow(0 0 12px rgb(var(--rl-gold) / 28%));
 }
 
 .record-landing-reticle > i[data-corner="tl"] {
   --rl-dx: -18px;
   --rl-dy: -18px;
-  top: -2px;
-  left: -2px;
-  border-width: 2px 0 0 2px;
+  top: -1px;
+  left: -1px;
+  border-width: 1.5px 0 0 1.5px;
+  border-top-left-radius: 8px;
 }
 
 .record-landing-reticle > i[data-corner="tr"] {
   --rl-dx: 18px;
   --rl-dy: -18px;
-  top: -2px;
-  right: -2px;
-  border-width: 2px 2px 0 0;
-  border-color: rgb(var(--rl-gold));
+  top: -1px;
+  right: -1px;
+  border-width: 1.5px 1.5px 0 0;
+  border-top-right-radius: 8px;
+  border-color: rgb(var(--rl-gold) / 90%);
 }
 
 .record-landing-reticle > i[data-corner="bl"] {
   --rl-dx: -18px;
   --rl-dy: 18px;
-  bottom: -2px;
-  left: -2px;
-  border-width: 0 0 2px 2px;
-  border-color: rgb(var(--rl-gold));
+  bottom: -1px;
+  left: -1px;
+  border-width: 0 0 1.5px 1.5px;
+  border-bottom-left-radius: 8px;
+  border-color: rgb(var(--rl-gold) / 90%);
 }
 
 .record-landing-reticle > i[data-corner="br"] {
   --rl-dx: 18px;
   --rl-dy: 18px;
-  right: -2px;
-  bottom: -2px;
-  border-width: 0 2px 2px 0;
+  right: -1px;
+  bottom: -1px;
+  border-width: 0 1.5px 1.5px 0;
+  border-bottom-right-radius: 8px;
 }
 
-/* The sweep: one pass of light, its leading edge ice with brass refraction. */
+/* The sweep: one pass of light, its leading edge ice with champagne-brass refraction. */
 .record-landing-scan {
   position: absolute;
   inset: 1px;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 7px;
   opacity: 0;
 }
 
@@ -228,13 +240,13 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
     rgb(var(--rl-ice) / 0%) 0%,
     rgb(var(--rl-ice) / 0%) 70%,
     rgb(var(--rl-gold) / 18%) 86%,
-    rgb(var(--rl-pink) / 20%) 94%,
-    rgb(var(--rl-ice) / 72%) 100%
+    rgb(var(--rl-pink) / 18%) 94%,
+    rgb(var(--rl-ice) / 68%) 100%
   );
   transform: translateX(-100%);
 }
 
-/* The tag: the HUD code on an ice-brass key, then what found it. */
+/* Editorial capsule slip tag: obsidian glass & champagne-ice foil badge. */
 .record-landing-tag {
   --rl-tag-y: -50%;
   position: absolute;
@@ -244,23 +256,24 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   align-items: center;
   gap: 8px;
   max-width: min(30em, calc(100vw - 48px));
-  padding: 2px 10px 2px 2px;
-  border: 1px solid rgb(var(--rl-ice) / 70%);
-  border-bottom-color: rgb(var(--rl-gold) / 56%);
-  border-radius: 3px;
-  color: #f2fcff;
+  padding: 2px 10px 2px 3px;
+  border: 1px solid rgb(var(--rl-ice) / 56%);
+  border-bottom-color: rgb(var(--rl-gold) / 48%);
+  border-radius: 999px;
+  color: #f4fbff;
   background:
-    linear-gradient(90deg, transparent, rgb(var(--rl-gold) / 56%), transparent) top / 100% 1px
-      no-repeat,
-    linear-gradient(128deg, rgb(255 255 255 / 9%) 0%, transparent 46%),
-    linear-gradient(110deg, rgb(10 24 38 / 97%), rgb(6 14 26 / 96%));
+    linear-gradient(90deg, transparent 12%, rgb(var(--rl-gold) / 58%), transparent 88%) top / 100%
+      1px no-repeat,
+    linear-gradient(132deg, rgb(255 255 255 / 9%) 0%, transparent 46%),
+    linear-gradient(160deg, rgb(14 26 42 / 97%), rgb(6 12 22 / 96%));
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 22%),
-    inset 0 -1px 0 rgb(var(--rl-gold) / 24%),
-    0 0 0 1px rgb(3 8 16 / 84%),
-    0 14px 32px -10px rgb(0 0 0 / 88%);
+    inset 0 -1px 0 rgb(var(--rl-gold) / 22%),
+    0 0 0 1px rgb(2 6 12 / 86%),
+    0 14px 32px -8px rgb(0 0 0 / 88%);
   font:
-    600 12px / 1.4 "Noto Sans JP",
+    600 12px / 1.4 "Zen Kaku Gothic New",
+    "Noto Sans JP",
     "Hiragino Sans",
     sans-serif;
   letter-spacing: 0.04em;
@@ -279,7 +292,7 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 
 .record-landing-tag[data-compact] {
   gap: 0;
-  padding-right: 2px;
+  padding-right: 3px;
 }
 
 .record-landing-tag[data-compact] > span {
@@ -306,10 +319,10 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
 
 .record-landing-tag > b {
   flex: none;
-  padding: 3px 7px 2px;
-  border-radius: 2px;
-  color: #04151e;
-  background: linear-gradient(125deg, #ffffff 0%, rgb(var(--rl-ice)) 54%, rgb(var(--rl-gold)) 100%);
+  padding: 3px 8px 2px;
+  border-radius: 999px;
+  color: #051622;
+  background: linear-gradient(128deg, #ffffff 0%, rgb(var(--rl-ice)) 52%, rgb(var(--rl-gold)) 100%);
   box-shadow: inset 0 1px 0 #ffffff;
   font:
     600 12px / 1 "Michroma",
@@ -372,7 +385,7 @@ html [data-skip-mark][data-record-reticle][data-record-reticle] {
   }
 }
 
-/* Each bracket comes in from outside its corner, pink, and settles ice/brass. */
+/* Each clasp comes in from outside its corner, pink, and settles ice/brass. */
 @keyframes record-reticle-close {
   from {
     border-color: rgb(var(--rl-pink));

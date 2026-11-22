@@ -191,15 +191,19 @@
 
 /* Dossier typography is editorial, while each character keeps their accent. */
 .manager-page .dossier-reader {
-  border-radius: 12px;
+  border-radius: 10px;
   background:
-    radial-gradient(ellipse 72% 48% at 14% 0%, rgb(119 211 228 / 10%), transparent 62%),
-    linear-gradient(155deg, #13202f 0%, #0d1621 56%, #080e16 100%);
+    radial-gradient(
+      ellipse 74% 52% at 18% 0%,
+      color-mix(in srgb, var(--rider-accent, var(--cinema-cyan)) 14%, transparent),
+      transparent 64%
+    ),
+    linear-gradient(180deg, #101b28 0%, #09101a 100%);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 16%),
-    0 18px 42px -14px rgb(0 0 0 / 72%);
+    0 18px 42px -14px rgb(0 0 0 / 74%);
 }
 .manager-page .dossier-contents { gap: 0; border-top: 1px solid var(--cinema-rule); }
 .manager-page .dossier-contents a {
@@ -208,19 +212,23 @@
   border: 0;
   border-bottom: 1px solid var(--cinema-rule);
   border-radius: 0;
-  background: linear-gradient(180deg, #111c29 0%, #0d1620 100%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  background: linear-gradient(180deg, #0f1926 0%, #0b131e 100%);
+  box-shadow: none;
 }
 .manager-page .dossier-contents-copy small { font-size: 12px; }
 .manager-page .dossier-contents-copy b { font-size: 1rem; line-height: 1.55; }
 .manager-page :is(.manager-copy-section, .manager-rider-record) {
   background:
-    radial-gradient(ellipse 70% 45% at 16% 0%, rgb(119 211 228 / 8%), transparent 62%),
-    linear-gradient(150deg, #121e2c 0%, #0c141f 62%, #080e16 100%);
-  border-color: var(--cinema-rule);
+    radial-gradient(
+      ellipse 72% 48% at 14% 0%,
+      color-mix(in srgb, var(--rider-accent, var(--cinema-cyan)) 11%, transparent),
+      transparent 64%
+    ),
+    linear-gradient(155deg, #121e2c 0%, #0c141f 62%, #080e16 100%);
+  border-color: color-mix(in srgb, var(--rider-accent, var(--cinema-cyan)) 28%, var(--cinema-rule));
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 16px 36px -14px rgb(0 0 0 / 72%);
+    0 16px 38px -14px rgb(0 0 0 / 72%);
 }
 .manager-page :is(.manager-copy-body p, .manager-copy-section p) { line-height: 1.95; }
 

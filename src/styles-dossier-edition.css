@@ -105,20 +105,20 @@ main.manager-page:not(.is-sovereign) .manager-topbar .brand-sigil {
 }
 
 main.manager-page:not(.is-sovereign) .manager-topbar .manager-back {
-  border-color: color-mix(in srgb, var(--dm-lock) 52%, rgb(240 207 134 / 34%));
+  border-color: color-mix(in srgb, var(--dm-lock) 46%, rgb(240 207 134 / 30%));
+  border-radius: 6px;
   background:
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 10px 1.5px no-repeat,
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 1.5px 10px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 10px 1.5px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 1.5px 10px no-repeat,
+    linear-gradient(90deg, transparent 8%, var(--dm-lock) 44%, var(--dm-gold) 76%, transparent 94%)
+      50% 0 / 100% 1px no-repeat,
     linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 18%, #0c1628),
-      #060c17 82%
+      145deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, #0e192c),
+      #060c17 84%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 18%),
-    0 8px 22px rgb(0 0 0 / 44%);
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(240 207 134 / 16%),
+    0 8px 22px rgb(0 0 0 / 46%);
 }
 
 /* The brand reads at 12px or larger, as on the sovereign file: the sigil,
@@ -343,20 +343,21 @@ main.manager-page:not(.is-sovereign)
 }
 
 main.manager-page:not(.is-sovereign) :is(.dossier-read-link, .rider-special-site-link) {
-  border-color: color-mix(in srgb, var(--dm-lock) 52%, rgb(240 207 134 / 26%));
+  border-color: color-mix(in srgb, var(--dm-lock) 50%, rgb(240 207 134 / 30%));
+  border-radius: 6px;
   background:
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px 12px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 12px 2px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 12px no-repeat,
+    linear-gradient(90deg, var(--dm-lock) 0%, var(--dm-gold) 58%, transparent 96%) 0 0 / 100%
+      1.5px no-repeat,
     linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 16%, #0d182a),
-      #08101d 78%
+      140deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 20%, #101d32),
+      #08101d 80%
     );
   box-shadow:
-    0 10px 26px rgb(0 0 0 / 42%),
-    inset 0 1px 0 rgb(255 255 255 / 16%);
+    0 12px 28px rgb(0 0 0 / 46%),
+    0 0 20px -6px color-mix(in srgb, var(--manager-accent, #7ae8ff) 24%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 rgb(240 207 134 / 18%);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1165,39 +1166,54 @@ main.manager-page:not(.is-sovereign) #form-records::after {
 main.manager-page:not(.is-sovereign) .ios-slide-open,
 main.manager-page:not(.is-sovereign) .ios-slide-open::before,
 main.manager-page:not(.is-sovereign) .ios-slide-open::after {
-  border-radius: 4px !important;
+  border-radius: 8px !important;
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-fill,
 main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb {
-  border-radius: 2px !important;
+  border-radius: 6px !important;
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb {
-  border-color: color-mix(in srgb, var(--dm-lock) 58%, #eaf8ff);
+  border-color: color-mix(in srgb, var(--dm-lock) 68%, #f4fbff);
+  box-shadow:
+    0 6px 16px rgb(0 0 0 / 48%),
+    0 0 16px color-mix(in srgb, var(--manager-accent, #7ae8ff) 28%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 38%);
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open .ios-slide-open-thumb > i {
-  border-radius: 1px;
+  border-radius: 2px;
 }
 
 main.manager-page:not(.is-sovereign) .ios-slide-open {
-  border-color: color-mix(in srgb, var(--dm-lock) 54%, rgb(240 207 134 / 24%));
+  border-color: color-mix(in srgb, var(--dm-lock) 56%, rgb(240 207 134 / 34%));
   background:
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 12px 2px no-repeat,
-    linear-gradient(var(--dm-lock) 0 0) 0 0 / 2px 12px no-repeat,
-    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 12px 2px no-repeat,
-    linear-gradient(var(--dm-lock) 0 0) 100% 0 / 2px 12px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 0 100% / 12px 2px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 0 100% / 2px 12px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 12px 2px no-repeat,
-    linear-gradient(var(--dm-gold) 0 0) 100% 100% / 2px 12px no-repeat,
     linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--manager-accent, #7ae8ff) 16%, #2c3a48),
-      #141d2a 68%,
-      #1b2736
+        90deg,
+        transparent 4%,
+        #ffffff 22%,
+        var(--dm-lock) 52%,
+        var(--dm-gold) 82%,
+        transparent 96%
+      )
+      50% 0 / 100% 1.5px no-repeat,
+    radial-gradient(
+      90% 140% at 14% 50%,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--manager-accent, #7ae8ff) 22%, #1a283c) 0%,
+      #0d1624 58%,
+      #142033 100%
     ) !important;
+  box-shadow:
+    0 14px 34px rgb(0 0 0 / 56%),
+    0 0 24px -4px color-mix(in srgb, var(--manager-accent, #7ae8ff) 26%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    inset 0 -1px 0 rgb(240 207 134 / 24%);
 }
 
 main.manager-page:not(.is-sovereign)

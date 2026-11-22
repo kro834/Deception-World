@@ -261,16 +261,20 @@ html:is(
   )
   body
   :is(#site-announcement-dialog .site-announcement-hub, dialog.quick-search .quick-search-panel) {
-  border-color: color-mix(in srgb, var(--fx-a) 54%, transparent);
+  border-color: color-mix(in srgb, var(--fx-a) 56%, rgb(244 252 255 / 24%));
+  border-radius: 14px;
   background:
-    radial-gradient(65% 45% at 100% 0%, color-mix(in srgb, var(--fx-a) 14%, transparent), transparent 70%),
-    radial-gradient(56% 40% at 6% 100%, color-mix(in srgb, var(--fx-c) 10%, transparent), transparent 70%),
-    linear-gradient(180deg, #0b1829 0%, #060e1a 48%, #040912 100%);
+    radial-gradient(66% 44% at 92% 0%, color-mix(in srgb, var(--fx-a) 18%, transparent), transparent 68%),
+    radial-gradient(56% 42% at 14% 12%, color-mix(in srgb, var(--fx-b) 15%, transparent), transparent 70%),
+    radial-gradient(58% 40% at 8% 100%, color-mix(in srgb, var(--fx-c) 12%, transparent), transparent 70%),
+    radial-gradient(52% 36% at 90% 96%, rgb(242 207 141 / 9%), transparent 70%),
+    linear-gradient(168deg, #0c192d 0%, #07101f 52%, #050a14 100%);
   box-shadow:
-    inset 0 1px 0 rgb(244 252 255 / 30%),
-    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 18%, transparent),
-    0 34px 92px rgb(0 0 0 / 86%),
-    0 0 54px -16px color-mix(in srgb, var(--fx-a) calc(52% * var(--fx-glow)), transparent);
+    inset 0 1px 0 rgb(248 253 255 / 36%),
+    inset 0 0 0 1px color-mix(in srgb, var(--fx-a) 20%, transparent),
+    0 38px 98px rgb(0 0 0 / 88%),
+    0 0 64px -14px color-mix(in srgb, var(--fx-a) calc(62% * var(--fx-glow)), transparent),
+    0 0 48px -18px color-mix(in srgb, var(--fx-b) calc(46% * var(--fx-glow)), transparent);
 }
 
 html:is(
@@ -285,13 +289,15 @@ html:is(
   background:
     linear-gradient(
         90deg,
-        color-mix(in srgb, var(--fx-a) 54%, transparent),
-        color-mix(in srgb, var(--fx-b) 34%, transparent) 46%,
-        color-mix(in srgb, var(--fx-c) 24%, transparent) 78%,
+        color-mix(in srgb, var(--fx-a) 62%, transparent),
+        rgb(248 253 255 / 44%) 30%,
+        color-mix(in srgb, var(--fx-b) 48%, transparent) 58%,
+        color-mix(in srgb, var(--fx-c) 34%, transparent) 82%,
         transparent
       )
-      0 100% / 100% 1px no-repeat,
-    #060d18;
+      0 100% / 100% 1.5px no-repeat,
+    linear-gradient(180deg, rgb(244 252 255 / 6%) 0%, transparent 100%),
+    rgb(7 14 25 / 72%);
 }
 
 html:is(
@@ -304,13 +310,25 @@ html:is(
   body
   dialog.quick-search
   .quick-search-field:focus-within {
-  border-color: var(--fx-a);
+  border-color: color-mix(in srgb, var(--fx-a) 88%, #ffffff);
+  background:
+    linear-gradient(90deg, var(--fx-a) 0%, #ffffff 30%, var(--fx-b) 62%, var(--fx-c) 100%) 0 100% / 100% 2px
+      no-repeat,
+    linear-gradient(180deg, color-mix(in srgb, var(--fx-a) 16%, transparent) 0%, transparent 30px),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--fx-a) 20%, transparent) 0%,
+      color-mix(in srgb, var(--fx-b) 13%, transparent) 54%,
+      color-mix(in srgb, var(--fx-c) 11%, transparent) 100%
+    ),
+    #071628;
   box-shadow:
     inset 3px 0 0 var(--fx-a),
-    inset 0 1px 0 rgb(244 252 255 / 26%),
-    0 0 0 3px color-mix(in srgb, var(--fx-a) 24%, transparent),
-    0 0 28px -4px color-mix(in srgb, var(--fx-a) calc(86% * var(--fx-glow)), transparent),
-    0 0 42px -12px color-mix(in srgb, var(--fx-b) calc(62% * var(--fx-glow)), transparent);
+    inset 0 1px 0 rgb(255 255 255 / 52%),
+    inset 0 2px 8px rgb(0 0 0 / 48%),
+    0 0 0 3px color-mix(in srgb, var(--fx-a) 30%, transparent),
+    0 0 40px -4px color-mix(in srgb, var(--fx-a) calc(92% * var(--fx-glow)), transparent),
+    0 0 58px -12px color-mix(in srgb, var(--fx-b) calc(74% * var(--fx-glow)), transparent);
 }
 
 /* ---------- 4. /world: the shared plates ----------

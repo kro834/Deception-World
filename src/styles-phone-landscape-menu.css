@@ -295,6 +295,10 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
   html[data-family]:not([data-ipad-viewport="contained"])
     body
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas] {
+    --sp-pad-top: calc(env(safe-area-inset-top, 0px) + 2px);
+    --sp-pad-inline: max(12px, calc((100vw - 720px) / 2));
+    row-gap: 12px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
     background:
       radial-gradient(64% 48% at 14% 0%, rgb(128 211 203 / 12%), transparent 70%),
       radial-gradient(52% 40% at 88% 4%, rgb(230 195 136 / 9%), transparent 72%),
@@ -305,31 +309,72 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
     body
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
     > .side-panel-head {
-    border-bottom: 1px solid rgb(128 211 203 / 22%);
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 5px 10px;
+    align-items: center;
+    margin-bottom: 0;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgb(128 211 203 / 24%);
     background:
       linear-gradient(
           90deg,
-          rgb(128 211 203 / 64%) 0%,
-          rgb(230 195 136 / 54%) 46%,
+          rgb(128 211 203 / 72%) 0%,
+          rgb(230 195 136 / 58%) 46%,
           transparent 92%
         )
         0 100% / 100% 1px no-repeat,
       linear-gradient(180deg, #0d1623 0%, #08101a 100%);
     box-shadow:
-      0 12px 28px rgb(0 0 0 / 54%),
-      inset 0 1px 0 rgb(255 255 255 / 8%);
+      0 10px 22px rgb(0 0 0 / 54%),
+      inset 0 1px 0 rgb(255 255 255 / 10%);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
+    > .side-panel-head::before {
+    height: 10px;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
+    > .side-panel-head
+    > .side-panel-search-dock {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    min-height: 44px;
+    height: 44px;
+    margin: 0;
   }
 
   html[data-family]:not([data-ipad-viewport="contained"])
     body
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
     .side-panel-quick-search {
-    border: 1px solid rgb(128 211 203 / 34%);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0 14px;
+    border: 1px solid rgb(128 211 203 / 36%);
+    border-top-color: rgb(224 246 255 / 26%);
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 7%) 0%, transparent 56%),
+      linear-gradient(
+          90deg,
+          transparent 4%,
+          rgb(210 245 255 / 32%) 28%,
+          rgb(255 248 232 / 24%) 66%,
+          transparent 96%
+        )
+        0 0 / 100% 1px no-repeat,
+      linear-gradient(180deg, rgb(255 255 255 / 8%) 0%, transparent 56%),
       linear-gradient(155deg, #122030 0%, #0b1420 100%);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 16%),
+      inset 0 1px 0 rgb(255 255 255 / 18%),
       inset 0 -1px 0 rgb(0 0 0 / 48%),
       0 4px 12px rgb(0 0 0 / 34%);
   }
@@ -338,26 +383,45 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
     body
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
     .side-panel-close {
-    border: 1px solid rgb(230 195 136 / 46%) !important;
+    box-sizing: border-box;
+    align-self: center;
+    justify-self: end;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+    border: 1px solid rgb(230 195 136 / 52%) !important;
     background:
-      radial-gradient(circle at 32% 28%, rgb(255 248 232 / 14%), transparent 56%),
-      #101a27 !important;
+      radial-gradient(circle at 32% 28%, rgb(255 248 232 / 18%), transparent 56%),
+      linear-gradient(160deg, #162334 0%, #0d1623 100%) !important;
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 22%),
+      inset 0 1px 0 rgb(255 255 255 / 26%),
+      inset 0 -1px 0 rgb(0 0 0 / 44%),
       0 4px 14px rgb(0 0 0 / 48%) !important;
   }
 
-  /* Sculpted 7-column quick index console dock */
+  /* Sculpted 7-column quick index console dock (compact <= 28% total head height) */
   html[data-family]:not([data-ipad-viewport="contained"])
     body
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
     .command-atlas-index {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(112px, 1.7fr) minmax(0, 1fr);
+    grid-template-columns:
+      minmax(0, 0.95fr)
+      minmax(0, 1.05fr)
+      minmax(0, 0.85fr)
+      minmax(0, 0.85fr)
+      minmax(0, 1.05fr)
+      minmax(144px, 2.15fr)
+      minmax(0, 0.85fr);
     gap: 3px;
-    padding: 3px;
-    border: 1px solid rgb(128 211 203 / 28%);
-    border-top-color: rgb(230 195 136 / 44%);
-    border-radius: 10px;
+    padding: 1px;
+    border: 0;
+    border-radius: 9px;
     background:
       linear-gradient(
           90deg,
@@ -368,8 +432,8 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
         0 0 / 100% 1px no-repeat,
       linear-gradient(180deg, #060b13 0%, #0b1420 100%);
     box-shadow:
+      inset 0 0 0 1px rgb(128 211 203 / 24%),
       inset 0 2px 6px rgb(0 0 0 / 72%),
-      inset 0 -1px 0 rgb(255 255 255 / 7%),
       0 8px 20px -8px rgb(0 0 0 / 56%);
   }
 
@@ -386,8 +450,9 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
     .command-atlas-index
     button {
-    min-height: 44px;
-    padding: 4px 3px;
+    min-height: 48px;
+    height: 48px;
+    padding: 4px 6px;
     border: 1px solid rgb(255 255 255 / 11%);
     border-top-color: rgb(210 245 255 / 20%);
     border-radius: 7px;
@@ -420,11 +485,32 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
       0 0 14px rgb(230 195 136 / 26%);
   }
 
-  /* Elevated scene preview & active destination plates in landscape drawer */
+  /* Compact kicker & sleek obsidian glass card list so 4+ rows stay above the fold */
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
+    > .side-panel-group
+    > p {
+    margin: 0 0 6px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
+    > .side-panel-group
+    > .side-panel-links {
+    gap: 5px;
+  }
+
   html[data-family]:not([data-ipad-viewport="contained"])
     body
     #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
     .command-atlas-scene {
+    min-height: 54px;
+    margin: 0 0 10px;
+    padding: 6px 10px;
     border: 1px solid rgb(128 211 203 / 28%);
     border-left: 3px solid rgb(128 211 203 / 78%);
     background:
@@ -441,8 +527,64 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
     > .side-panel-group
     > .side-panel-links
     > :is(a, button.side-panel-link-button) {
-    border-color: rgb(255 255 255 / 6%);
-    background: linear-gradient(180deg, rgb(255 255 255 / 2.5%) 0%, transparent 60%);
+    min-height: 44px;
+    padding: 6px 12px 6px 15px;
+    gap: 10px;
+    border: 1px solid rgb(148 188 210 / 20%);
+    border-top-color: rgb(224 246 255 / 26%);
+    border-radius: 10px;
+    background:
+      linear-gradient(
+          90deg,
+          rgb(128 211 203 / 64%) 0%,
+          rgb(255 248 232 / 44%) 32%,
+          rgb(156 228 219 / 18%) 68%,
+          transparent 94%
+        )
+        0 0 / 100% 1px no-repeat,
+      radial-gradient(42% 110% at 0% 50%, rgb(128 211 203 / 10%), transparent 74%),
+      linear-gradient(180deg, rgb(255 255 255 / 6.5%) 0%, transparent 56%),
+      linear-gradient(160deg, rgb(22 35 52 / 92%) 0%, rgb(10 17 27 / 96%) 100%);
+    box-shadow:
+      inset 3px 0 0 rgb(128 211 203 / 70%),
+      inset 0 1px 0 rgb(255 255 255 / 14%),
+      inset 0 -1px 0 rgb(0 0 0 / 44%),
+      0 4px 12px -4px rgb(0 0 0 / 50%);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
+    > .side-panel-group
+    > .side-panel-links
+    > button.side-panel-link-button {
+    background:
+      linear-gradient(
+          90deg,
+          rgb(230 195 136 / 70%) 0%,
+          rgb(255 248 232 / 46%) 34%,
+          rgb(128 211 203 / 22%) 72%,
+          transparent 96%
+        )
+        0 0 / 100% 1px no-repeat,
+      radial-gradient(42% 110% at 0% 50%, rgb(230 195 136 / 11%), transparent 74%),
+      linear-gradient(180deg, rgb(255 255 255 / 7%) 0%, transparent 56%),
+      linear-gradient(160deg, rgb(24 35 52 / 92%) 0%, rgb(11 17 27 / 96%) 100%);
+    box-shadow:
+      inset 3px 0 0 rgb(230 195 136 / 78%),
+      inset 0 1px 0 rgb(255 255 255 / 16%),
+      inset 0 -1px 0 rgb(0 0 0 / 44%),
+      0 4px 12px -4px rgb(0 0 0 / 50%);
+  }
+
+  html[data-family]:not([data-ipad-viewport="contained"])
+    body
+    #site-side-panel#site-side-panel#site-side-panel[data-command-atlas]
+    .side-panel-links
+    > :is(.command-atlas-record, a)
+    > img {
+    border: 1px solid rgb(224 246 255 / 22%);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 48%);
   }
 
   html[data-family]:not([data-ipad-viewport="contained"])
@@ -451,15 +593,23 @@ html:root[data-phone-landscape-menu="true"][data-phone-landscape-hidden="true"]
     > .side-panel-group
     > .side-panel-links
     > :is(a, button.side-panel-link-button):is([aria-current="page"], [aria-current="location"]) {
-    border-color: rgb(128 211 203 / 62%);
+    border-color: rgb(128 211 203 / 68%);
+    border-top-color: rgb(255 248 232 / 52%);
     background:
-      linear-gradient(90deg, rgb(128 211 203 / 18%) 0%, rgb(230 195 136 / 6%) 64%, transparent 100%),
+      linear-gradient(
+          90deg,
+          rgb(255 248 232 / 78%) 0%,
+          rgb(128 211 203 / 66%) 48%,
+          transparent 94%
+        )
+        0 0 / 100% 1px no-repeat,
+      linear-gradient(90deg, rgb(128 211 203 / 22%) 0%, rgb(230 195 136 / 8%) 64%, transparent 100%),
       #1a2b2f;
     color: #f4fffc;
     box-shadow:
       inset 3px 0 0 #80d3cb,
-      inset 0 1px 0 rgb(255 255 255 / 18%),
-      0 6px 16px rgb(0 0 0 / 38%);
+      inset 0 1px 0 rgb(255 255 255 / 24%),
+      0 6px 16px rgb(0 0 0 / 42%);
   }
 }
 

@@ -71,8 +71,8 @@
     drop-shadow(3px 0 rgb(122 232 255 / 34%))
     drop-shadow(-2px 0 rgb(255 92 200 / 26%));
   --dwc-grid:
-    repeating-linear-gradient(90deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px),
-    repeating-linear-gradient(0deg, rgb(122 232 255 / 2.6%) 0 1px, transparent 1px 96px);
+    repeating-linear-gradient(90deg, rgb(122 232 255 / 1.4%) 0 1px, transparent 1px 96px),
+    repeating-linear-gradient(0deg, rgb(122 232 255 / 1.4%) 0 1px, transparent 1px 96px);
   --dwc-hud: "Michroma", "Oxanium", "Noto Sans JP", sans-serif;
   --dwc-mono: "Oxanium", "Noto Sans JP", sans-serif;
   --dwc-display-jp: "Oxanium", "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
@@ -84,7 +84,6 @@
    pins. Arm length per frame in --dwc-arm. Everything framed here sits
    in a dialog, a scroll container or a cover, so the brackets are static.
    ================================================================ */
-html body #site-side-panel > .side-panel-head::after,
 html body #site-announcement-dialog .site-announcement-hub::after,
 html body #site-announcement-dialog .site-announcement-visual::before,
 html body .load-gate .cine-dive-status::after {
@@ -189,27 +188,34 @@ html body #site-side-panel > .side-panel-head {
     var(--dwc-ink);
 }
 
-/* The head locks on: brackets around its title and close plate. */
+/* The head's top specular seam (replacing the old 4-corner L-brackets). */
 html body #site-side-panel > .side-panel-head::after {
-  --dwc-arm: 18px;
-  inset: calc(var(--sp-pad-top) - 12px) calc(var(--sp-pad-inline) - 10px) 8px;
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: 0 var(--sp-pad-inline, 18px) auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(122 232 255 / 32%) 20%,
+    rgb(240 207 134 / 24%) 80%,
+    transparent
+  );
 }
 
 /* The menu opens scrolled to the reader's file, so a row can stand half
-   under the head. The head's ink runs on below its prism rule and fades out
-   over 32px (a row's line box is 20-21px), so a sliced glyph line reads as
-   passing under the head rather than cut. Textless, and it takes no hits.
-   At the top of the list the first kicker sits 44px under the head, clear
-   of it. */
+   under the head. A restrained contact fade below the prism rule avoids
+   darkening the first visible row on mobile while keeping the 24px box. */
 html body #site-side-panel > .side-panel-head::before {
   content: "";
   position: absolute;
   top: 100%;
   right: 0;
   left: 0;
-  height: 32px;
+  height: 24px;
   pointer-events: none;
-  background: linear-gradient(180deg, var(--dwc-ink) 0 45%, rgb(4 8 15 / 0%));
+  background: linear-gradient(180deg, rgb(4 8 15 / 14%) 0%, rgb(4 8 15 / 0%) 20%);
 }
 
 /* The compact landscape head leaves 30px above the first kicker. */

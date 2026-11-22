@@ -1,27 +1,33 @@
 /* Kept on the left: the movable Zeus control starts on the right.
-   Precision specimen compass & bimetallic glass route instrument for curated inquiry trails. */
+   Editorial obsidian-glass & champagne-brass route dock for curated inquiry trails.
+   Unified with the artbook dossier language (no repeated corner-bracket boxes). */
 .inquiry-navigation {
-  --inquiry-accent: #f2cf8d;
-  --inquiry-ice: #9deafa;
-  --inquiry-surface-top: #14283b;
-  --inquiry-surface-mid: #0a1726;
-  --inquiry-surface-bottom: #060e18;
+  --inquiry-accent: #f0d094;
+  --inquiry-ice: #9cebfa;
+  --inquiry-surface-top: #101d2d;
+  --inquiry-surface-mid: #08111d;
+  --inquiry-surface-bottom: #040911;
+  --inquiry-display:
+    "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --inquiry-body:
+    "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
   position: fixed;
   bottom: max(16px, env(safe-area-inset-bottom));
   left: max(16px, env(safe-area-inset-left));
   z-index: 70;
   color: #f4f8fc;
-  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+  font-family: var(--inquiry-body);
   font-size: 14px;
   line-height: 1.8;
   text-align: left;
 }
 
 .inquiry-navigation[data-tone="blue"] {
-  --inquiry-accent: #8ceeff;
-  --inquiry-ice: #f2cf8d;
+  --inquiry-accent: #8eeeff;
+  --inquiry-ice: #f0d094;
 }
 
+/* Unified obsidian-glass capsule dock */
 .inquiry-navigation > summary {
   position: relative;
   display: flex;
@@ -29,55 +35,58 @@
   gap: 11px;
   width: max-content;
   min-height: 48px;
-  padding: 8px 16px 8px 14px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 72%, rgb(157 234 250 / 32%));
-  border-radius: 3px;
+  padding: 8px 17px 8px 15px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 52%, rgb(255 255 255 / 16%));
+  border-radius: 10px;
   background:
-    linear-gradient(var(--inquiry-accent) 0 0) 0 0 / 14px 1.5px no-repeat,
-    linear-gradient(var(--inquiry-ice) 0 0) 100% 100% / 14px 1.5px no-repeat,
-    linear-gradient(var(--inquiry-ice) 0 0) 100% 100% / 1.5px 14px no-repeat,
     linear-gradient(
         90deg,
-        transparent,
-        color-mix(in srgb, var(--inquiry-accent) 74%, #ffffff 18%),
-        color-mix(in srgb, var(--inquiry-ice) 48%, transparent),
-        transparent
+        transparent 6%,
+        color-mix(in srgb, var(--inquiry-accent) 78%, #ffffff 22%) 38%,
+        color-mix(in srgb, var(--inquiry-ice) 52%, transparent) 72%,
+        transparent 94%
       )
       top / 100% 1px no-repeat,
-    linear-gradient(128deg, rgb(255 255 255 / 9%) 0%, transparent 46%),
+    radial-gradient(
+      ellipse 68% 90% at 12% 50%,
+      color-mix(in srgb, var(--inquiry-accent) 20%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(132deg, rgb(255 255 255 / 8%) 0%, transparent 44%),
     linear-gradient(
-      138deg,
-      color-mix(in srgb, var(--inquiry-accent) 16%, var(--inquiry-surface-top)) 0%,
-      var(--inquiry-surface-mid) 54%,
+      165deg,
+      var(--inquiry-surface-top) 0%,
+      var(--inquiry-surface-mid) 56%,
       var(--inquiry-surface-bottom) 100%
     );
   box-shadow:
-    inset 3px 0 0 var(--inquiry-accent),
-    inset 0 1px 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 color-mix(in srgb, var(--inquiry-ice) 24%, transparent),
-    0 0 0 1px rgb(3 8 16 / 84%),
-    0 14px 34px -6px rgb(0 0 0 / 78%),
-    0 0 20px -8px color-mix(in srgb, var(--inquiry-accent) 34%, transparent);
-  color: var(--inquiry-accent);
+    inset 0 1px 0 rgb(255 255 255 / 22%),
+    inset 0 -1px 0 color-mix(in srgb, var(--inquiry-accent) 24%, transparent),
+    0 0 0 1px rgb(2 6 12 / 86%),
+    0 16px 38px -8px rgb(0 0 0 / 82%),
+    0 0 24px -10px color-mix(in srgb, var(--inquiry-accent) 36%, transparent);
+  color: #f7f4ec;
+  font-family: var(--inquiry-display);
   font-weight: 650;
+  letter-spacing: 0.04em;
   cursor: pointer;
   list-style: none;
 }
 
 .inquiry-navigation > summary > span:first-child {
   color: var(--inquiry-accent);
-  text-shadow: 0 0 12px color-mix(in srgb, var(--inquiry-accent) 72%, transparent);
+  font-size: 13px;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--inquiry-accent) 76%, transparent);
 }
 
 .inquiry-navigation[open] > summary {
-  border-color: color-mix(in srgb, var(--inquiry-accent) 92%, #ffffff);
+  border-color: color-mix(in srgb, var(--inquiry-accent) 86%, #ffffff);
   box-shadow:
-    inset 3px 0 0 var(--inquiry-accent),
-    inset 0 1px 0 rgb(255 255 255 / 32%),
-    inset 0 -1px 0 color-mix(in srgb, var(--inquiry-ice) 32%, transparent),
-    0 0 0 1px rgb(3 8 16 / 88%),
-    0 16px 38px -6px rgb(0 0 0 / 82%),
-    0 0 24px -2px color-mix(in srgb, var(--inquiry-accent) 36%, transparent);
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    inset 0 -2px 0 var(--inquiry-accent),
+    0 0 0 1px rgb(2 6 12 / 90%),
+    0 18px 42px -8px rgb(0 0 0 / 86%),
+    0 0 26px -4px color-mix(in srgb, var(--inquiry-accent) 38%, transparent);
 }
 
 .inquiry-navigation > summary::-webkit-details-marker {
@@ -87,19 +96,17 @@
 @media (hover: hover) and (pointer: fine) {
   .inquiry-navigation > summary:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--inquiry-accent) 92%, #ffffff);
+    border-color: color-mix(in srgb, var(--inquiry-accent) 88%, #ffffff);
     box-shadow:
-      inset 3px 0 0 var(--inquiry-accent),
-      inset 0 1px 0 rgb(255 255 255 / 34%),
-      inset 0 -1px 0 color-mix(in srgb, var(--inquiry-ice) 34%, transparent),
-      0 0 0 1px rgb(3 8 16 / 88%),
-      0 18px 40px -6px rgb(0 0 0 / 84%),
-      0 0 26px -2px color-mix(in srgb, var(--inquiry-accent) 38%, transparent);
+      inset 0 1px 0 rgb(255 255 255 / 32%),
+      inset 0 -1.5px 0 var(--inquiry-accent),
+      0 0 0 1px rgb(2 6 12 / 90%),
+      0 20px 44px -8px rgb(0 0 0 / 86%),
+      0 0 28px -4px color-mix(in srgb, var(--inquiry-accent) 40%, transparent);
   }
 }
 
-/* The plate carries the guide's tone down its leading edge, and the route's
-   stops as a track: passed, here (lit), ahead. */
+/* Jewel progress beads: passed, here (illuminated), ahead. */
 .inquiry-navigation-track {
   display: inline-flex;
   gap: 4px;
@@ -107,38 +114,36 @@
 }
 
 .inquiry-navigation-track > i {
-  width: 14px;
+  width: 12px;
   height: 3.5px;
-  border-radius: 1.5px;
-  background: color-mix(in srgb, var(--inquiry-accent) 24%, rgb(157 234 250 / 12%));
+  border-radius: 999px;
+  background: rgb(255 255 255 / 16%);
 }
 
 .inquiry-navigation-track > i[data-step="past"] {
-  background: color-mix(in srgb, var(--inquiry-accent) 68%, transparent);
+  background: color-mix(in srgb, var(--inquiry-accent) 64%, transparent);
 }
 
 .inquiry-navigation-track > i[data-step="here"] {
   width: 22px;
-  background: linear-gradient(90deg, #ffffff 0%, var(--inquiry-accent) 55%, var(--inquiry-ice) 100%);
+  background: linear-gradient(90deg, #ffffff 0%, var(--inquiry-accent) 60%, var(--inquiry-ice) 100%);
   box-shadow:
-    0 0 10px color-mix(in srgb, var(--inquiry-accent) 82%, transparent),
-    0 0 4px rgb(255 255 255 / 60%);
+    0 0 10px color-mix(in srgb, var(--inquiry-accent) 80%, transparent),
+    0 0 4px rgb(255 255 255 / 55%);
 }
 
 .inquiry-navigation small {
-  padding: 2px 8px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 56%, transparent);
+  padding: 2px 9px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 48%, rgb(255 255 255 / 14%));
   border-radius: 999px;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--inquiry-accent) 24%, transparent),
-    rgb(4 12 22 / 86%)
+    color-mix(in srgb, var(--inquiry-accent) 22%, rgb(255 255 255 / 6%)),
+    rgb(4 10 19 / 88%)
   );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 22%),
-    0 2px 6px rgb(0 0 0 / 45%);
-  color: #fff8ea;
-  font-family: "Oxanium", "Michroma", "Noto Sans JP", sans-serif;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 20%);
+  color: var(--inquiry-accent);
+  font-family: "Oxanium", "Michroma", var(--inquiry-body);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.3;
@@ -146,102 +151,112 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Editorial folio sheet — seamless obsidian crystal, zero corner brackets */
 .inquiry-navigation-panel {
   position: absolute;
   left: 0;
-  bottom: calc(100% + 10px);
-  width: min(362px, calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  bottom: calc(100% + 12px);
+  width: min(368px, calc(100vw - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)));
   box-sizing: border-box;
-  max-height: min(556px, calc(100svh - 180px));
+  max-height: min(560px, calc(100svh - 180px));
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 20px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 50%, rgb(157 234 250 / 38%));
-  border-top: 2px solid var(--inquiry-accent);
-  border-radius: 4px;
+  padding: 22px 22px 20px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 38%, rgb(255 255 255 / 16%));
+  border-radius: 12px;
   background:
-    linear-gradient(var(--inquiry-accent) 0 0) 0 0 / 18px 2px no-repeat,
-    linear-gradient(var(--inquiry-accent) 0 0) 0 0 / 2px 18px no-repeat,
-    linear-gradient(var(--inquiry-ice) 0 0) 100% 100% / 18px 2px no-repeat,
-    linear-gradient(var(--inquiry-ice) 0 0) 100% 100% / 2px 18px no-repeat,
-    linear-gradient(128deg, rgb(255 255 255 / 7%) 0%, transparent 42%),
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        var(--inquiry-accent) 36%,
+        color-mix(in srgb, var(--inquiry-ice) 72%, #ffffff) 66%,
+        transparent 92%
+      )
+      top / 100% 1.5px no-repeat,
     radial-gradient(
-      ellipse 90% 46% at 50% 0%,
+      ellipse 88% 42% at 50% 0%,
       color-mix(in srgb, var(--inquiry-accent) 18%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      ellipse 68% 44% at 92% 96%,
-      color-mix(in srgb, var(--inquiry-ice) 12%, transparent),
       transparent 72%
     ),
+    radial-gradient(
+      ellipse 64% 40% at 90% 100%,
+      color-mix(in srgb, var(--inquiry-ice) 11%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(135deg, rgb(255 255 255 / 6%) 0%, transparent 38%),
     linear-gradient(
-      148deg,
-      var(--inquiry-surface-top) 0%,
-      var(--inquiry-surface-mid) 52%,
-      var(--inquiry-surface-bottom) 100%
+      165deg,
+      #111f31 0%,
+      #08111d 52%,
+      #040810 100%
     );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 24%),
-    inset 0 -1px 0 color-mix(in srgb, var(--inquiry-ice) 20%, transparent),
-    0 0 0 1px rgb(3 8 16 / 90%),
-    0 28px 64px -8px rgb(0 0 0 / 88%);
+    inset 0 1px 0 rgb(255 255 255 / 20%),
+    inset 0 -1px 0 color-mix(in srgb, var(--inquiry-accent) 18%, transparent),
+    0 0 0 1px rgb(2 5 11 / 92%),
+    0 30px 68px -10px rgb(0 0 0 / 90%);
+}
+
+.inquiry-navigation-panel .inquiry-navigation-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--inquiry-accent);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.inquiry-navigation-panel .inquiry-navigation-label::before {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  content: "";
+  background: var(--inquiry-accent);
+  box-shadow: 0 0 10px var(--inquiry-accent);
 }
 
 .inquiry-navigation-panel h2 {
-  font-size: 18px;
+  margin: 8px 0 12px;
+  color: #f8fafd;
+  font-family: var(--inquiry-display);
+  font-size: 18.5px;
   font-weight: 700;
-  line-height: 1.62;
-  margin: 7px 0 11px;
-  color: #f8fbff;
+  line-height: 1.58;
+  letter-spacing: 0.02em;
   text-wrap: pretty;
 }
 
 .inquiry-navigation-panel p {
-  margin: 8px 0 14px;
+  margin: 8px 0 16px;
 }
 
-/* What to look for at this stop: the panel's one instruction, set as an
-   illuminated specimen slip in the guide's tone. */
+/* Editorial lead note: luminous vertical light bar without a boxed border */
 .inquiry-navigation-panel > p:not([class]) {
-  padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 34%, rgb(157 234 250 / 20%));
-  border-left: 3px solid var(--inquiry-accent);
-  border-radius: 0 3px 3px 0;
-  background:
-    linear-gradient(125deg, rgb(255 255 255 / 5%) 0%, transparent 48%),
-    linear-gradient(
-      95deg,
-      color-mix(in srgb, var(--inquiry-accent) 16%, transparent),
-      rgb(5 13 22 / 78%) 86%
-    );
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 12%),
-    0 10px 22px -14px rgb(0 0 0 / 72%);
-  color: #e9f2f8;
+  position: relative;
+  padding: 8px 12px 8px 15px;
+  border: 0;
+  border-left: 2px solid var(--inquiry-accent);
+  border-radius: 0 6px 6px 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--inquiry-accent) 13%, transparent) 0%,
+    color-mix(in srgb, var(--inquiry-accent) 3%, transparent) 68%,
+    transparent 100%
+  );
+  color: #e4eef6;
   font-size: 13px;
-  line-height: 1.85;
-}
-
-.inquiry-navigation-panel .inquiry-navigation-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 9px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 42%, transparent);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--inquiry-accent) 12%, rgb(4 12 21 / 80%));
-  color: var(--inquiry-accent);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin: 0;
-  font-variant-numeric: tabular-nums;
+  line-height: 1.88;
 }
 
 .inquiry-navigation-panel nav {
   display: grid;
   gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgb(255 255 255 / 10%);
 }
 
 /* Back and on, their direction drawn at the side they lead to. */
@@ -251,11 +266,11 @@
 }
 
 .inquiry-navigation-panel a[data-step="previous"] {
-  padding-left: 34px;
+  padding-left: 36px;
 }
 
 .inquiry-navigation-panel a[data-step="next"] {
-  padding-right: 34px;
+  padding-right: 36px;
   text-align: right;
 }
 
@@ -263,8 +278,8 @@
   position: absolute;
   top: 50%;
   color: var(--inquiry-accent);
-  text-shadow: 0 0 10px color-mix(in srgb, var(--inquiry-accent) 55%, transparent);
-  font-family: "Oxanium", "Noto Sans JP", sans-serif;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--inquiry-accent) 52%, transparent);
+  font-family: "Oxanium", var(--inquiry-body);
   font-size: 15px;
   font-weight: 700;
   line-height: 1;
@@ -272,12 +287,12 @@
 }
 
 .inquiry-navigation-panel a[data-step="previous"]::after {
-  left: 11px;
+  left: 12px;
   content: "←" / "";
 }
 
 .inquiry-navigation-panel a[data-step="next"]::after {
-  right: 11px;
+  right: 12px;
   content: "→" / "";
 }
 
@@ -286,14 +301,14 @@
   gap: 2px;
   min-height: 48px;
   padding: 9px 14px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 36%, rgb(157 234 250 / 28%));
-  border-radius: 3px;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 8px;
   background:
-    linear-gradient(128deg, rgb(255 255 255 / 6.5%) 0%, transparent 48%),
-    linear-gradient(150deg, rgb(24 46 66 / 72%), rgb(7 17 28 / 92%));
+    linear-gradient(132deg, rgb(255 255 255 / 6%) 0%, transparent 48%),
+    linear-gradient(160deg, rgb(20 38 56 / 68%), rgb(7 15 26 / 88%));
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 14%),
-    0 8px 18px -12px rgb(0 0 0 / 74%);
+    inset 0 1px 0 rgb(255 255 255 / 12%),
+    0 8px 20px -12px rgb(0 0 0 / 72%);
   color: #f4f8fc;
   text-decoration: none;
 }
@@ -302,25 +317,33 @@
   color: var(--inquiry-accent);
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .inquiry-navigation-panel a strong {
+  font-family: var(--inquiry-display);
   font-size: 13.5px;
   font-weight: 650;
   line-height: 1.5;
+  letter-spacing: 0.015em;
 }
 
 .inquiry-navigation-panel .inquiry-navigation-return {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-color: color-mix(in srgb, var(--inquiry-ice) 46%, rgb(242 207 141 / 28%));
-  border-left: 2px solid var(--inquiry-ice);
+  border-color: color-mix(in srgb, var(--inquiry-ice) 34%, rgb(255 255 255 / 12%));
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--inquiry-ice) 10%, transparent),
+      rgb(8 18 30 / 82%) 80%
+    );
 }
 
 .inquiry-navigation-panel .inquiry-navigation-note {
-  color: #bdcedb;
+  margin: 12px 0 12px;
+  color: #a9bccb;
   font-size: 12px;
   line-height: 1.75;
 }
@@ -328,38 +351,40 @@
 .inquiry-navigation-panel button {
   width: 100%;
   min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 44%, rgb(157 234 250 / 30%));
-  border-radius: 3px;
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--inquiry-accent) 34%, rgb(255 255 255 / 14%));
+  border-radius: 8px;
   background:
-    linear-gradient(128deg, rgb(255 255 255 / 6%) 0%, transparent 50%),
-    linear-gradient(180deg, rgb(20 40 58 / 68%), rgb(7 16 26 / 90%));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
-  color: inherit;
+    linear-gradient(132deg, rgb(255 255 255 / 5%) 0%, transparent 50%),
+    linear-gradient(180deg, rgb(18 32 48 / 64%), rgb(6 13 22 / 88%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
+  color: #dce7f0;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.04em;
   cursor: pointer;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .inquiry-navigation-panel a:hover {
-    border-color: color-mix(in srgb, var(--inquiry-accent) 84%, #ffffff);
+    border-color: color-mix(in srgb, var(--inquiry-accent) 76%, #ffffff);
     background: linear-gradient(
       95deg,
-      color-mix(in srgb, var(--inquiry-accent) 20%, rgb(28 54 76 / 84%)),
-      rgb(10 23 36 / 94%) 86%
+      color-mix(in srgb, var(--inquiry-accent) 18%, rgb(24 46 68 / 82%)),
+      rgb(9 20 33 / 92%) 86%
     );
     box-shadow:
-      inset 3px 0 0 var(--inquiry-accent),
       inset 0 1px 0 rgb(255 255 255 / 22%),
-      0 12px 24px -12px rgb(0 0 0 / 82%);
+      0 12px 26px -12px rgb(0 0 0 / 82%),
+      0 0 18px -8px color-mix(in srgb, var(--inquiry-accent) 34%, transparent);
   }
 
   .inquiry-navigation-panel button:hover {
-    border-color: var(--inquiry-accent);
-    background: color-mix(in srgb, var(--inquiry-accent) 18%, rgb(14 30 46 / 92%));
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 22%);
+    border-color: color-mix(in srgb, var(--inquiry-accent) 78%, #ffffff);
+    color: #ffffff;
+    background: color-mix(in srgb, var(--inquiry-accent) 16%, rgb(14 28 44 / 92%));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 20%);
   }
 }
 
@@ -376,7 +401,7 @@
       350px,
       calc(100vw - 32px - 72px - env(safe-area-inset-left) - env(safe-area-inset-right))
     );
-    padding: 16px;
+    padding: 18px 16px 16px;
   }
 }
 
@@ -392,7 +417,8 @@
     transition:
       border-color 160ms ease,
       background-color 160ms ease,
-      box-shadow 160ms ease;
+      box-shadow 160ms ease,
+      color 160ms ease;
   }
 
   html:not([data-world-effects="economy"]) .inquiry-navigation[open] .inquiry-navigation-panel {
@@ -425,6 +451,12 @@ body:has(.side-panel[data-open="true"]) .inquiry-navigation {
     color: CanvasText;
     border-color: ButtonText;
     box-shadow: none;
+  }
+
+  .inquiry-navigation-panel > p:not([class]) {
+    background: Canvas;
+    color: CanvasText;
+    border-left: 3px solid Highlight;
   }
 
   .inquiry-navigation-panel a {

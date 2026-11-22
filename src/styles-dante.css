@@ -1,32 +1,26 @@
 /* The illustration is shown whole (contain) on its own paper; the frame
    takes that paper so the room below the figure reads as part of it. The
    shared dark frame rule is more specific than a page class alone.
-   Chapter 05 Varg: Museum specimen glass display case framing. */
+   Chapter 04 Varg: Museum specimen glass display case framing (no corner brackets). */
 .dante-page .varg-portrait {
   position: relative;
   width: min(100%, 640px);
   margin: 0 0 32px;
-  border: 1px solid rgb(237 102 126 / 64%);
-  border-top: 2px solid rgb(255 184 198 / 84%);
-  border-radius: 4px;
+  border: 1px solid rgb(237 102 126 / 40%);
+  border-top: 0;
+  border-radius: 3px;
   background:
-    linear-gradient(90deg, #ed667e 0%, #ffc2cf 38%, rgb(54 155 137 / 74%) 84%, transparent 100%)
+    linear-gradient(90deg, #ed667e 0%, #ffc2cf 38%, rgb(54 155 137 / 82%) 84%, transparent 100%)
       top / 100% 2px no-repeat,
-    linear-gradient(#ffb3c1 0 0) 0 0 / 18px 2px no-repeat,
-    linear-gradient(#ffb3c1 0 0) 0 0 / 2px 18px no-repeat,
-    linear-gradient(#369b89 0 0) 100% 100% / 18px 2px no-repeat,
-    linear-gradient(#369b89 0 0) 100% 100% / 2px 18px no-repeat,
-    radial-gradient(ellipse 92% 62% at 50% 18%, rgb(237 102 126 / 20%), transparent 74%),
-    linear-gradient(135deg, rgb(237 102 126 / 15%), transparent 46%),
-    linear-gradient(315deg, rgb(54 155 137 / 14%), transparent 44%),
-    linear-gradient(165deg, #120912 0%, #05050a 100%);
+    radial-gradient(ellipse 88% 54% at 50% 14%, rgb(237 102 126 / 16%), transparent 74%),
+    radial-gradient(ellipse 56% 42% at 96% 96%, rgb(54 155 137 / 14%), transparent 72%),
+    linear-gradient(168deg, #130912 0%, #05050a 100%);
   box-shadow:
-    0 32px 76px rgb(0 0 0 / 74%),
-    0 0 44px rgb(186 65 91 / 24%),
-    inset 0 1px 0 rgb(255 214 224 / 32%),
-    inset 0 -1px 0 rgb(186 65 91 / 36%),
-    inset 0 0 0 1px rgb(237 102 126 / 32%),
-    inset 0 0 36px rgb(0 0 0 / 60%);
+    0 28px 70px rgb(0 0 0 / 70%),
+    0 0 38px rgb(186 65 91 / 18%),
+    inset 0 1px 0 rgb(255 214 224 / 24%),
+    inset 0 -1px 0 rgb(54 155 137 / 24%),
+    inset 0 0 32px rgb(0 0 0 / 56%);
 }
 .dante-page .varg-portrait::before {
   content: "";
@@ -35,8 +29,8 @@
   pointer-events: none;
   background: linear-gradient(
     118deg,
-    rgb(255 232 238 / 11%) 0%,
-    rgb(255 255 255 / 3%) 24%,
+    rgb(255 232 238 / 9%) 0%,
+    rgb(255 255 255 / 2.5%) 24%,
     transparent 48%,
     transparent 100%
   );
@@ -54,11 +48,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px 16px;
-  padding: 15px 18px;
-  border-top: 1px solid rgb(237 102 126 / 34%);
-  background: linear-gradient(90deg, rgb(186 65 91 / 16%), rgb(6 7 12 / 92%) 72%);
+  padding: 14px 18px;
+  border-top: 1px solid rgb(237 102 126 / 28%);
+  background:
+    linear-gradient(90deg, rgb(237 102 126 / 14%) 0%, rgb(54 155 137 / 7%) 62%, rgb(6 7 12 / 94%) 100%);
   box-shadow: inset 0 1px 0 rgb(255 214 222 / 10%);
-  color: #f6a4b4;
+  color: #f6b2c0;
   font-size: 13px;
   line-height: 1.7;
   overflow-wrap: anywhere;
@@ -74,9 +69,9 @@
   box-sizing: border-box;
   min-height: 44px;
   padding: 8px 18px;
-  border: 1px solid rgb(237 102 126 / 58%);
+  border: 1px solid rgb(237 102 126 / 52%);
   border-radius: 999px;
-  background: linear-gradient(160deg, rgb(237 102 126 / 22%), rgb(120 26 48 / 28%));
+  background: linear-gradient(155deg, rgb(237 102 126 / 20%), rgb(54 155 137 / 14%) 68%, rgb(120 26 48 / 26%));
   box-shadow:
     0 6px 18px rgb(0 0 0 / 42%),
     inset 0 1px 0 rgb(255 220 228 / 22%);
@@ -113,27 +108,27 @@ html[data-family="dossier"]
   main.dante-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-profile
   .manager-portrait-frame {
-  border: 1px solid #e05270;
+  border: 1px solid rgb(237 102 126 / 46%);
   box-shadow:
-    0 34px 82px rgb(0 0 0 / 72%),
-    0 0 46px rgb(186 65 91 / 28%),
-    inset 0 0 0 1px rgb(237 102 126 / 52%),
-    inset 0 0 32px rgb(24 10 15 / 16%);
+    0 32px 78px rgb(0 0 0 / 70%),
+    0 0 42px rgb(186 65 91 / 22%),
+    inset 0 0 0 1px rgb(237 102 126 / 32%),
+    inset 0 0 28px rgb(24 10 15 / 14%);
 }
 html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page
   .form-pickup-visual {
   background: #ede8ea;
-  border-bottom: 1px solid rgb(237 102 126 / 54%);
+  border-bottom: 1px solid rgb(237 102 126 / 46%);
   box-shadow:
-    28px 0 76px rgb(0 0 0 / 66%),
-    inset 0 0 38px rgb(18 10 14 / 18%),
-    inset 0 0 0 1px rgb(237 102 126 / 46%);
+    28px 0 76px rgb(0 0 0 / 64%),
+    inset 0 0 34px rgb(18 10 14 / 16%),
+    inset 0 0 0 1px rgb(237 102 126 / 36%);
 }
 html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page
   .form-pickup-visual::after {
-  background: linear-gradient(180deg, transparent 76%, rgb(10 4 8 / 32%) 100%);
+  background: linear-gradient(180deg, transparent 78%, rgb(14 5 10 / 28%) 100%);
 }
 html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page
@@ -152,34 +147,36 @@ html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page.manager-page
   .form-pickup-card,
 .dante-page .form-pickup-card {
-  border-color: rgb(237 102 126 / 56%);
-  border-top: 2px solid rgb(255 180 196 / 74%);
+  border-color: rgb(237 102 126 / 44%);
+  border-top: 2px solid rgb(255 184 198 / 70%);
   box-shadow:
-    0 28px 68px rgb(0 0 0 / 64%),
-    0 0 38px rgb(186 65 91 / 18%),
-    inset 0 1px 0 rgb(255 214 224 / 26%),
-    inset 0 -1px 0 rgb(186 65 91 / 28%);
+    0 26px 64px rgb(0 0 0 / 62%),
+    0 0 36px rgb(186 65 91 / 16%),
+    inset 0 1px 0 rgb(255 214 224 / 22%),
+    inset 0 -1px 0 rgb(54 155 137 / 24%);
 }
 
 /* ================================================================
-   Crimson & Obsidian three-dimensional rims and shadows on STAGE
-   (outranks styles-future-spectrum.css and character-reading-tools)
+   Crimson, Obsidian & Abyssal-Teal Monograph Hierarchy on STAGE
+   (outranks styles-stage-dossier, styles-dossier-zenith,
+   styles-future-spectrum, and styles-character-reading-tools
+   without touching chapter grid/position layout)
    ================================================================ */
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page,
 html[data-family="dossier"] main.dante-page.manager-page.manager-page.manager-page {
   --sd-accent: #ed667e;
-  --sd-accent-2: #ff9eb0;
+  --sd-accent-2: #369b89;
   --sd-foil: #ffc0cc;
-  --sd-bevel-hi: rgb(255 208 218 / 36%);
-  --sd-bevel-lo: rgb(186 65 91 / 42%);
-  --sd-rule: rgb(237 102 126 / 84%);
+  --sd-bevel-hi: rgb(255 208 218 / 32%);
+  --sd-bevel-lo: rgb(54 155 137 / 34%);
+  --sd-rule: rgb(237 102 126 / 82%);
   background:
-    radial-gradient(86% 56% at 96% 0%, rgb(219 56 88 / 30%), transparent 64%),
-    radial-gradient(60% 680px at 8% 30%, rgb(237 102 126 / 16%), transparent 68%),
-    radial-gradient(66% 740px at 88% 74%, rgb(54 155 137 / 13%), transparent 70%),
-    radial-gradient(54% 580px at 22% 100%, rgb(186 65 91 / 16%), transparent 72%),
+    radial-gradient(84% 54% at 96% 0%, rgb(219 56 88 / 26%), transparent 64%),
+    radial-gradient(60% 680px at 8% 30%, rgb(237 102 126 / 14%), transparent 68%),
+    radial-gradient(68% 760px at 90% 74%, rgb(54 155 137 / 16%), transparent 70%),
+    radial-gradient(54% 580px at 22% 100%, rgb(186 65 91 / 14%), transparent 72%),
     linear-gradient(180deg, #10060d 0%, #050409 44%, #020307 100%);
   background-color: #050409;
 }
@@ -190,22 +187,42 @@ html[data-family="dossier"]
   #dossier-profile
   .manager-portrait-column {
   background:
-    radial-gradient(58% 42% at 50% -4%, rgb(237 102 126 / 46%), transparent 74%),
+    radial-gradient(58% 42% at 50% -4%, rgb(237 102 126 / 38%), transparent 74%),
     conic-gradient(
       from 154deg at 50% -10%,
       transparent 0deg,
-      rgb(237 102 126 / 20%) 18deg,
-      rgb(255 192 204 / 24%) 26deg,
-      rgb(54 155 137 / 16%) 34deg,
+      rgb(237 102 126 / 16%) 18deg,
+      rgb(255 192 204 / 20%) 26deg,
+      rgb(54 155 137 / 18%) 34deg,
       transparent 52deg
     ),
-    radial-gradient(82% 26% at 50% 100%, rgb(186 65 91 / 62%), transparent 74%),
+    radial-gradient(82% 24% at 50% 100%, rgb(186 65 91 / 52%), transparent 74%),
     linear-gradient(180deg, #150811 0%, #050408 100%);
 }
 
 @supports (grid-template-rows: subgrid) {
   @media (min-width: 1100px) and (min-height: 540px),
     (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    /* Clean gallery mat rim over Dante's #ede8ea paper (removes noisy 26px corner L-brackets). */
+    html[data-family="dossier"]
+      body
+      main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+      #dossier-profile
+      .manager-portrait-frame:has(> img[src*="character-dante"])::after {
+      box-shadow:
+        inset 0 2px 0 rgb(237 102 126 / 58%),
+        inset 0 0 0 1px rgb(237 102 126 / 20%);
+      background:
+        linear-gradient(
+          270deg,
+          rgb(237 102 126 / 24%) 0%,
+          rgb(54 155 137 / 8%) 48px,
+          transparent 118px
+        ),
+        radial-gradient(66% 20% at 50% 0%, rgb(237 102 126 / 16%), transparent 72%),
+        radial-gradient(84% 22% at 50% 104%, rgb(186 65 91 / 38%), transparent 74%);
+    }
+
     html[data-family="dossier"]
       body
       main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
@@ -218,64 +235,78 @@ html[data-family="dossier"]
         rgb(237 102 126 / 68%) 20%,
         #ffc0cc 46%,
         #ffffff 50%,
-        #369b89 66%,
-        rgb(186 65 91 / 62%) 86%,
+        #369b89 68%,
+        rgb(54 155 137 / 56%) 86%,
         transparent 98%
       );
       box-shadow:
-        -4px 0 28px rgb(237 102 126 / 52%),
-        -1px 0 10px rgb(255 192 204 / 36%);
+        -4px 0 28px rgb(237 102 126 / 46%),
+        -1px 0 10px rgb(54 155 137 / 32%);
     }
 
+    /* Refined split-stage vertical rhythm so all 4 quotes, 8 facts and the sticky
+       reader dock sit cleanly inside the 1440x900 first screen. */
     html[data-family="dossier"]
       body
       main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
       #dossier-profile
       .manager-introduction {
+      align-self: start;
+      padding: calc(var(--sd-head) + clamp(14px, 2svh, 22px)) var(--sd-pad-end) 14px var(--sd-pad);
       background:
-        linear-gradient(180deg, #ed667e 0%, #ffc0cc 48%, rgb(54 155 137 / 44%) 100%)
-          calc(var(--sd-pad) - 18px) calc(var(--sd-head) + 24px) / 2px
-          calc(100% - var(--sd-head) - 44px) no-repeat,
         radial-gradient(
-          74% 380px at 24% calc(var(--sd-head) + 150px),
-          rgb(237 102 126 / 26%),
+          74% 340px at 20% calc(var(--sd-head) + 120px),
+          rgb(237 102 126 / 22%),
           transparent 72%
         ),
         radial-gradient(
-          58% 300px at 88% calc(var(--sd-head) + 100px),
-          rgb(54 155 137 / 16%),
-          transparent 70%
+          58% 280px at 88% calc(var(--sd-head) + 90px),
+          rgb(54 155 137 / 18%),
+          transparent 72%
         ),
-        linear-gradient(90deg, rgb(237 102 126 / 14%) 0%, transparent 112px);
+        linear-gradient(90deg, rgb(237 102 126 / 10%) 0%, transparent 104px);
+    }
+
+    /* Tier 1: Open sculpted monograph heading (no heavy black box or 4-corner brackets). */
+    html[data-family="dossier"]
+      body
+      main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+      #dossier-profile
+      :is(.dossier-identity, #dante-stage-boost) {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 6px 0 12px;
+      border: 0;
+      border-bottom: 1px solid rgb(237 102 126 / 24%);
+      border-radius: 0;
+      background:
+        linear-gradient(90deg, #ffffff 0%, #ed667e 52%, #369b89 100%) 0 0 / 48px 2px no-repeat,
+        linear-gradient(
+            90deg,
+            #ed667e 0%,
+            #ffe0e6 34%,
+            #369b89 76%,
+            transparent 100%
+          )
+          0 100% / 100% 1.5px no-repeat;
+      box-shadow: none;
     }
 
     html[data-family="dossier"]
       body
       main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
       #dossier-profile
-      .dossier-identity {
-      border: 1px solid rgb(237 102 126 / 52%);
-      border-left: 3px solid #ed667e;
-      background:
-        linear-gradient(90deg, #ffffff 0%, #ed667e 26%, #ffc0cc 58%, #369b89 90%, transparent 100%)
-          0 0 / 100% 2px no-repeat,
-        linear-gradient(#ffc0cc 0 0) 0 0 / 20px 2px no-repeat,
-        linear-gradient(#ffc0cc 0 0) 0 0 / 2px 20px no-repeat,
-        linear-gradient(#ed667e 0 0) 100% 0 / 20px 2px no-repeat,
-        linear-gradient(#ed667e 0 0) 100% 0 / 2px 20px no-repeat,
-        linear-gradient(#ed667e 0 0) 0 100% / 20px 2px no-repeat,
-        linear-gradient(#ed667e 0 0) 0 100% / 2px 20px no-repeat,
-        linear-gradient(#369b89 0 0) 100% 100% / 20px 2px no-repeat,
-        linear-gradient(#369b89 0 0) 100% 100% / 2px 20px no-repeat,
-        radial-gradient(80% 180px at 0% 0%, rgb(237 102 126 / 26%), transparent 72%),
-        radial-gradient(64% 140px at 100% 100%, rgb(54 155 137 / 14%), transparent 72%),
-        linear-gradient(155deg, #170812 0%, #05050a 100%);
-      box-shadow:
-        inset 0 1px 0 rgb(255 214 224 / 30%),
-        inset 0 -1px 0 rgb(186 65 91 / 34%),
-        inset 4px 0 26px -8px rgb(237 102 126 / 42%),
-        0 28px 66px rgb(0 0 0 / 64%),
-        0 0 40px rgb(186 65 91 / 20%);
+      .dossier-identity
+      .dossier-file-numeral {
+      margin: 0 0 4px;
+      font-size: clamp(26px, 2.2vw, 34px);
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: 1px rgb(255 204 214 / 78%);
+      text-shadow:
+        0 0 22px rgb(237 102 126 / 34%),
+        1px 0 0 rgb(54 155 137 / 24%);
     }
   }
 }
@@ -289,102 +320,241 @@ html[data-family="dossier"]
   background: linear-gradient(
     176deg,
     #ffffff 0%,
-    #fff2f5 32%,
-    #f9bbc8 70%,
+    #fff4f6 30%,
+    #f9bbc8 66%,
     #ed667e 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 8px 22px rgb(237 102 126 / 28%))
+    drop-shadow(1px 0 0 rgb(54 155 137 / 18%));
 }
 
+@media (min-width: 1100px) and (min-height: 540px) {
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name {
+    font-size: clamp(36px, 3.6vw, 52px);
+    line-height: 1.08;
+  }
+}
+
+/* Open-right crimson-to-abyssal-teal jewel ribbon tag (no box or corner tick). */
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   #dossier-profile
   .dossier-identity
-  .manager-title {
-  border: 1px solid rgb(237 102 126 / 46%);
-  border-left: 3px solid #ed667e;
+  :is(.manager-title, #dante-stage-boost) {
+  width: fit-content;
+  max-width: 100%;
+  margin: 10px 0 0;
+  padding: 5px 16px 5px 13px;
+  border: 0;
+  border-left: 2.5px solid #ed667e;
+  border-radius: 0;
+  color: #fff4f6;
   background:
-    linear-gradient(90deg, #ed667e 0%, #ffc0cc 48%, transparent 92%) 0 0 / 100% 1.5px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 100% 100% / 12px 1.5px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 100% 100% / 1.5px 12px no-repeat,
-    linear-gradient(90deg, rgb(237 102 126 / 24%), rgb(54 155 137 / 8%) 66%, rgb(8 5 10 / 84%) 100%);
-  box-shadow:
-    0 12px 30px rgb(0 0 0 / 48%),
-    inset 0 1px 0 rgb(255 214 224 / 24%),
-    inset 0 -1px 0 rgb(186 65 91 / 28%);
+    linear-gradient(
+        90deg,
+        #ffe0e6 0%,
+        rgb(255 192 204 / 52%) 34%,
+        rgb(54 155 137 / 44%) 70%,
+        transparent 100%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(237 102 126 / 20%) 0%, rgb(54 155 137 / 10%) 62%, transparent 100%);
+  box-shadow: inset 1px 0 0 rgb(255 232 238 / 26%);
+  font-size: clamp(14px, 1.08vw, 16px);
+  line-height: 1.45;
+  letter-spacing: 0.08em;
+}
+
+/* Tier 2: Open-sided crimson-to-teal luminous blade editorial quotes (single crisp blade, no box or brackets). */
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  #dossier-profile
+  :is(.manager-quotes, #dante-stage-boost) {
+  margin: 16px 0 0;
+  padding: 10px 4px 10px 20px;
+  border: 0;
+  border-left: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, #ffe2e8 0%, #ed667e 44%, #369b89 96%, rgb(54 155 137 / 24%) 100%)
+      0 0 / 2.5px 100% no-repeat,
+    radial-gradient(ellipse 68% 90% at 0% 22%, rgb(237 102 126 / 18%), transparent 74%),
+    radial-gradient(ellipse 56% 72% at 0% 88%, rgb(54 155 137 / 14%), transparent 72%),
+    linear-gradient(90deg, rgb(237 102 126 / 10%) 0%, rgb(54 155 137 / 5.5%) 56%, transparent 96%);
+  box-shadow: none;
 }
 
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   #dossier-profile
-  :is(.manager-quotes, #dante-stage-boost) {
-  border: 1px solid rgb(237 102 126 / 52%);
-  border-left: 3px solid #ed667e;
+  .manager-quotes
+  q:first-child {
+  color: #fff6f8;
+  font-size: clamp(16px, 1.28vw, 19px);
+  font-weight: 600;
+  line-height: 1.54;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 50%),
+    0 0 22px rgb(237 102 126 / 26%);
+}
+
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  #dossier-profile
+  .manager-quotes
+  q + q {
+  padding-top: 6px;
+  border-top: 1px solid rgb(237 102 126 / 15%);
+  box-shadow: none;
+  color: rgb(238 224 230 / 85%);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* Tier 3: Architectural Crimson x Obsidian x Abyssal-Teal Spec Ledger (no corner brackets). */
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  :is(#dossier-profile, #dossier-index .manager-copy-body)
+  :is(.manager-facts, #dante-stage-boost) {
+  border: 1px solid rgb(237 102 126 / 32%);
+  border-top: 0;
+  border-radius: 3px;
   background:
-    linear-gradient(90deg, #ed667e 0%, #ffc0cc 40%, rgb(54 155 137 / 54%) 82%, transparent 100%)
-      0 0 / 100% 2px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 100% 100% / 20px 1.5px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 100% 100% / 1.5px 20px no-repeat,
-    radial-gradient(82% 150px at 0% 0%, rgb(237 102 126 / 26%), transparent 72%),
-    radial-gradient(64% 120px at 100% 100%, rgb(54 155 137 / 14%), transparent 72%),
-    linear-gradient(168deg, rgb(255 224 232 / 7%) 0%, transparent 68px),
-    linear-gradient(155deg, #160812 0%, #05050a 100%);
+    linear-gradient(90deg, #ed667e 0%, #ffe2e8 36%, #369b89 82%, transparent 100%)
+      top / 100% 2px no-repeat,
+    radial-gradient(66% 120px at 12% 0%, rgb(237 102 126 / 17%), transparent 74%),
+    radial-gradient(56% 110px at 94% 100%, rgb(54 155 137 / 18%), transparent 74%),
+    linear-gradient(164deg, #150912 0%, #06060c 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 214 224 / 30%),
-    inset 0 -1px 0 rgb(186 65 91 / 34%),
-    inset 4px 0 26px -8px rgb(237 102 126 / 40%),
-    inset 0 0 28px rgb(0 0 0 / 58%),
-    0 28px 66px rgb(0 0 0 / 64%),
-    0 0 40px rgb(186 65 91 / 20%);
+    inset 0 1px 0 rgb(255 224 232 / 24%),
+    inset 0 -1px 0 rgb(54 155 137 / 28%),
+    inset 0 0 0 1px rgb(237 102 126 / 10%),
+    0 22px 54px rgb(0 0 0 / 58%),
+    0 0 32px rgb(186 65 91 / 14%);
 }
 
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   :is(#dossier-profile, #dossier-index .manager-copy-body)
-  .manager-facts {
-  border: 1px solid rgb(237 102 126 / 48%);
-  border-top: 2px solid rgb(255 186 200 / 78%);
-  background:
-    linear-gradient(#ed667e 0 0) 0 0 / 14px 1.5px no-repeat,
-    linear-gradient(#ed667e 0 0) 0 0 / 1.5px 14px no-repeat,
-    linear-gradient(#369b89 0 0) 100% 100% / 14px 1.5px no-repeat,
-    linear-gradient(#369b89 0 0) 100% 100% / 1.5px 14px no-repeat,
-    radial-gradient(72% 130px at 14% 0%, rgb(237 102 126 / 24%), transparent 72%),
-    radial-gradient(56% 110px at 92% 100%, rgb(54 155 137 / 14%), transparent 74%),
-    linear-gradient(155deg, #150811 0%, #05050a 100%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 214 224 / 28%),
-    inset 0 -1px 0 rgb(186 65 91 / 32%),
-    0 26px 60px rgb(0 0 0 / 60%),
-    0 0 34px rgb(186 65 91 / 16%);
+  .manager-facts
+  > div {
+  background: none;
+  border-top-color: rgb(237 102 126 / 17%);
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    :is(#dossier-profile, #dossier-index .manager-copy-body)
+    .manager-facts
+    > div:hover {
+    background-color: rgb(237 102 126 / 8%);
+  }
 }
 
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  :is(#dossier-profile, #dossier-index .manager-copy-body)
+  .manager-facts
+  dt {
+  color: rgb(250 176 192 / 86%);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  :is(#dossier-profile, #dossier-index .manager-copy-body)
+  .manager-facts
+  dd {
+  color: #fff6f8;
+  font-weight: 600;
+}
+
+/* Tightened desktop first-screen cadence (1280px+ x 700px+) so Dante's 4 quotes,
+   8 facts and sticky reader console compose together within 900px viewport height. */
+@media (min-width: 1100px) and (min-height: 700px) {
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    #dossier-profile
+    :is(.manager-quotes, #dante-stage-boost) {
+    gap: 5px;
+    margin-top: 12px;
+    padding: 6px 4px 6px 18px;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    #dossier-profile
+    :is(.manager-facts, #dante-stage-boost) {
+    margin-top: 12px;
+    padding: 4px 20px 6px;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-facts
+    > div {
+    gap: 2px;
+    padding: 7px 0 8px;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    #dossier-profile
+    .manager-facts
+    dd {
+    font-size: 14.5px;
+    line-height: 1.35;
+  }
+}
+
+/* Unified opaque obsidian-crimson-teal sticky reader dock (zero boxed tabs). */
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   > :is(.dossier-reader, #dante-stage-boost) {
-  border-top: 1px solid rgb(255 204 214 / 18%);
-  border-bottom: 1px solid rgb(237 102 126 / 56%);
+  border-top: 1px solid rgb(255 208 218 / 20%);
+  border-bottom: 1px solid rgb(237 102 126 / 48%);
   background:
     linear-gradient(
       90deg,
-      rgb(237 102 126 / 20%) 0%,
-      transparent 36%,
-      transparent 70%,
-      rgb(54 155 137 / 12%) 100%
+      rgb(237 102 126 / 18%) 0%,
+      transparent 38%,
+      transparent 66%,
+      rgb(54 155 137 / 16%) 100%
     ),
-    #06050b;
-  background-color: #06050b;
+    #06040b;
+  background-color: #06040b;
   box-shadow:
-    0 20px 48px rgb(0 0 0 / 68%),
-    0 2px 20px rgb(186 65 91 / 18%),
-    inset 0 1px 0 rgb(255 214 224 / 18%),
-    inset 0 -1px 0 rgb(186 65 91 / 44%);
+    0 20px 46px rgb(0 0 0 / 70%),
+    0 2px 20px rgb(186 65 91 / 16%),
+    inset 0 1px 0 rgb(255 224 232 / 20%),
+    inset 0 -1px 0 rgb(54 155 137 / 36%);
 }
 
 html[data-family="dossier"]
@@ -392,42 +562,71 @@ html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   > .dossier-reader
   .dossier-reader-links
-  a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]) {
-  border-top-color: #ffc0cc;
-  color: #ffffff;
-  background:
-    linear-gradient(90deg, transparent 8%, #ffb3c1 50%, transparent 92%) 50% 0 / 100% 2px
-      no-repeat,
-    linear-gradient(180deg, rgb(237 102 126 / 32%) 0%, rgb(186 65 91 / 10%) 62%, transparent 100%);
-  box-shadow:
-    0 6px 16px rgb(0 0 0 / 48%),
-    inset 0 1px 0 rgb(255 220 228 / 28%),
-    inset 0 -2px 0 #ed667e;
-  text-shadow: 0 0 14px rgb(237 102 126 / 48%);
+  :is(a, #dante-stage-boost) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: rgb(236 220 226 / 70%);
+  transition: color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    > .dossier-reader
+    .dossier-reader-links
+    :is(a, #dante-stage-boost):hover {
+    color: #fff2f5;
+  }
 }
 
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  > .dossier-reader
+  .dossier-reader-links
+  :is(a[aria-current], a[aria-current="location"], a[aria-current="page"], a[aria-current="true"], #dante-stage-boost) {
+  border: 0;
+  color: #ffffff;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 4%,
+        #ed667e 22%,
+        #ffe4ea 50%,
+        #369b89 78%,
+        transparent 96%
+      )
+      50% 100% / 100% 2px no-repeat,
+    radial-gradient(ellipse 84% 72% at 50% 100%, rgb(237 102 126 / 30%), transparent 78%);
+  box-shadow: none;
+  text-shadow: 0 0 16px rgb(237 102 126 / 54%);
+}
+
+/* Chapter Folios: Crimson x Obsidian x Abyssal-Teal (surface paint only; preserves
+   layout & heading/body separation from styles-character-reading-tools.css). */
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   #dossier-index
   :is(.manager-copy-section, #dante-stage-boost) {
-  border: 1px solid rgb(237 102 126 / 40%);
-  border-top: 1px solid rgb(255 186 200 / 64%);
+  border: 1px solid rgb(237 102 126 / 26%);
+  border-top: 0;
+  border-left: 2.5px solid #ed667e;
+  border-radius: 3px;
   background:
-    linear-gradient(90deg, #ed667e 0%, #ffc0cc 48%, transparent 100%) 0 0 / min(240px, 62%) 2px
-      no-repeat,
-    linear-gradient(#ed667e 0 0) 0 0 / 18px 2px no-repeat,
-    linear-gradient(#ed667e 0 0) 0 0 / 2px 18px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 100% 100% / 18px 2px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 100% 100% / 2px 18px no-repeat,
-    radial-gradient(76% 180px at 0% 0%, rgb(237 102 126 / 20%), transparent 72%),
-    radial-gradient(58% 140px at 100% 100%, rgb(54 155 137 / 10%), transparent 72%),
-    linear-gradient(160deg, #140811 0%, #05050a 100%);
+    linear-gradient(90deg, #ed667e 0%, #ffc0cc 38%, rgb(54 155 137 / 66%) 82%, transparent 100%)
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(72% 180px at 0% 0%, rgb(237 102 126 / 16%), transparent 72%),
+    radial-gradient(56% 150px at 100% 100%, rgb(54 155 137 / 12%), transparent 72%),
+    linear-gradient(164deg, #130811 0%, #05050a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 214 224 / 26%),
-    inset 0 -1px 0 rgb(186 65 91 / 28%),
-    0 28px 66px rgb(0 0 0 / 60%),
-    0 0 32px -4px rgb(186 65 91 / 16%);
+    inset 0 1px 0 rgb(255 214 224 / 18%),
+    inset 0 -1px 0 rgb(54 155 137 / 18%),
+    0 24px 58px rgb(0 0 0 / 56%),
+    0 0 28px -4px rgb(186 65 91 / 14%);
 }
 
 html[data-family="dossier"]
@@ -435,22 +634,40 @@ html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   #dossier-index
   #character-section-04.manager-copy-section {
-  border-color: rgb(237 102 126 / 58%);
+  border: 1px solid rgb(237 102 126 / 46%);
+  border-top: 0;
+  border-left: 3px solid #ed667e;
   background:
-    linear-gradient(90deg, #ed667e 0%, #ffc0cc 42%, #369b89 86%, transparent 100%) 0 0 / 100% 2px
+    linear-gradient(90deg, #ed667e 0%, #ffc0cc 42%, #369b89 88%, transparent 100%) 0 0 / 100% 2px
       no-repeat,
-    linear-gradient(#ffc0cc 0 0) 0 0 / 22px 2px no-repeat,
-    linear-gradient(#ffc0cc 0 0) 0 0 / 2px 22px no-repeat,
-    linear-gradient(#369b89 0 0) 100% 100% / 22px 2px no-repeat,
-    linear-gradient(#369b89 0 0) 100% 100% / 2px 22px no-repeat,
-    radial-gradient(80% 210px at 0% 0%, rgb(237 102 126 / 26%), transparent 72%),
-    radial-gradient(60% 170px at 100% 100%, rgb(54 155 137 / 16%), transparent 72%),
-    linear-gradient(160deg, #180913 0%, #05050a 100%);
+    radial-gradient(78% 210px at 0% 0%, rgb(237 102 126 / 22%), transparent 72%),
+    radial-gradient(62% 170px at 100% 100%, rgb(54 155 137 / 18%), transparent 72%),
+    linear-gradient(162deg, #170813 0%, #05050a 100%);
   box-shadow:
-    inset 0 1px 0 rgb(255 214 224 / 32%),
-    inset 0 -1px 0 rgb(186 65 91 / 34%),
-    0 32px 78px rgb(0 0 0 / 68%),
-    0 0 42px rgb(186 65 91 / 20%);
+    inset 0 1px 0 rgb(255 214 224 / 26%),
+    inset 0 -1px 0 rgb(54 155 137 / 28%),
+    0 28px 72px rgb(0 0 0 / 64%),
+    0 0 38px rgb(186 65 91 / 18%);
+}
+
+/* Ruler Form Switcher Pills & Stage Instrumentation */
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  .dossier-form-pills
+  > a {
+  border-color: rgb(237 102 126 / 42%);
+  background:
+    linear-gradient(90deg, #ffe0e6 0%, #ed667e 44%, rgb(54 155 137 / 72%) 84%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(237 102 126 / 22%) 0%, rgb(54 155 137 / 12%) 72%, transparent 100%),
+    linear-gradient(165deg, #170913 0%, #06060b 100%);
+  box-shadow:
+    0 10px 26px rgb(0 0 0 / 52%),
+    0 0 18px rgb(237 102 126 / 12%),
+    inset 0 1px 0 rgb(255 224 232 / 26%),
+    inset 0 -1px 0 rgb(54 155 137 / 22%);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
 html[data-family="dossier"]
@@ -459,14 +676,35 @@ html[data-family="dossier"]
   .form-pickup-record
   .form-pickup-calls
   > li {
-  border-color: rgb(237 102 126 / 46%);
-  border-left: 2px solid #ed667e;
+  border-color: rgb(237 102 126 / 44%);
+  border-left: 3px solid #ed667e;
   background:
-    linear-gradient(90deg, rgb(237 102 126 / 22%), transparent 68%),
-    linear-gradient(165deg, #170912 0%, #07060b 100%);
+    linear-gradient(90deg, #ffe2e8 0%, #ed667e 44%, rgb(54 155 137 / 76%) 86%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(64% 140% at 12% 50%, rgb(237 102 126 / 26%), transparent 72%),
+    linear-gradient(90deg, rgb(237 102 126 / 18%), rgb(54 155 137 / 8%) 72%, transparent 100%),
+    linear-gradient(166deg, #180914 0%, #06060b 100%);
   box-shadow:
-    0 6px 18px rgb(0 0 0 / 48%),
-    inset 0 1px 0 rgb(255 214 224 / 22%);
+    0 10px 24px rgb(0 0 0 / 56%),
+    0 0 18px rgb(237 102 126 / 14%),
+    inset 0 1px 0 rgb(255 226 234 / 28%),
+    inset 0 -1px 0 rgb(0 0 0 / 56%),
+    inset 1px 0 0 rgb(255 226 234 / 14%);
+}
+
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-calls
+  > li
+  > i {
+  border-color: rgb(255 192 204 / 52%);
+  background: linear-gradient(180deg, rgb(237 102 126 / 26%), rgb(20 7 15 / 92%));
+  color: #ffe8ee;
+  box-shadow:
+    inset 0 1px 0 rgb(255 232 238 / 26%),
+    0 0 12px rgb(237 102 126 / 26%);
 }
 
 html[data-family="dossier"]
@@ -474,24 +712,75 @@ html[data-family="dossier"]
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   .form-pickup-record
   .form-pickup-spec {
-  border-color: rgb(237 102 126 / 48%);
-  border-top: 2px solid rgb(255 186 200 / 78%);
+  border-color: rgb(237 102 126 / 44%);
+  border-top: 2px solid rgb(255 204 214 / 82%);
+  background: rgb(237 102 126 / 26%);
   box-shadow:
-    0 18px 44px rgb(0 0 0 / 58%),
-    0 0 28px rgb(186 65 91 / 18%),
-    inset 0 1px 0 rgb(255 214 224 / 22%);
+    0 22px 52px rgb(0 0 0 / 64%),
+    0 0 34px rgb(186 65 91 / 18%),
+    inset 0 1px 0 rgb(255 224 232 / 28%);
+}
+
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  > div {
+  background-color: #09060d;
+  background-image:
+    radial-gradient(76% 68% at 14% 0%, rgb(237 102 126 / 16%), transparent 72%),
+    linear-gradient(180deg, rgb(255 214 224 / 6%) 0%, transparent 46%, rgb(0 0 0 / 32%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 220 228 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 46%);
+  transition: background-color 180ms ease;
+}
+
+html[data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  .form-pickup-record
+  .form-pickup-spec
+  > div::before {
+  width: 28px;
+  background: linear-gradient(90deg, #ffe4ea 0%, #ed667e 52%, #369b89 100%);
+  box-shadow: 0 0 10px rgb(237 102 126 / 44%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    .dossier-form-pills
+    > a:hover {
+    border-color: rgb(255 192 204 / 76%);
+    box-shadow:
+      0 12px 30px rgb(0 0 0 / 58%),
+      0 0 24px rgb(237 102 126 / 26%),
+      inset 0 1px 0 rgb(255 232 238 / 38%);
+  }
+
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    .form-pickup-record
+    .form-pickup-spec
+    > div:hover {
+    background-color: #140a16;
+  }
 }
 
 html[data-family="dossier"]
   body
   main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
   .form-pickup-dialog {
-  border-color: rgb(237 102 126 / 60%);
+  border-color: rgb(237 102 126 / 54%);
   box-shadow:
     0 40px 112px rgb(0 0 0 / 84%),
-    0 0 50px rgb(186 65 91 / 26%),
-    inset 0 1px 0 rgb(255 214 224 / 30%),
-    inset 0 -1px 0 rgb(186 65 91 / 34%);
+    0 0 46px rgb(186 65 91 / 24%),
+    inset 0 1px 0 rgb(255 214 224 / 28%),
+    inset 0 -1px 0 rgb(54 155 137 / 28%);
 }
 .dante-page #dossier-profile .dossier-identity h1 {
   overflow: visible;
@@ -620,6 +909,15 @@ html[data-family="dossier"]
     transition: none;
   }
 }
+html[data-world-effects="economy"][data-family="dossier"]
+  body
+  main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name {
+  filter: none;
+}
+
 @media (forced-colors: active) {
   .dante-page .varg-portrait figcaption a {
     border: 1px solid LinkText;
@@ -643,7 +941,19 @@ html[data-family="dossier"]
     .manager-display-name {
     background: none;
     color: CanvasText;
+    filter: none;
     -webkit-text-fill-color: CanvasText;
+  }
+
+  html[data-family="dossier"]
+    body
+    main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
+    #dossier-profile
+    .dossier-identity
+    .dossier-file-numeral {
+    color: CanvasText;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
   }
 
   html[data-family="dossier"]
@@ -658,16 +968,19 @@ html[data-family="dossier"]
     body
     main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
     :is(
-      #dossier-profile .dossier-identity,
-      #dossier-profile .dossier-identity .manager-title,
-      #dossier-profile .manager-quotes,
-      #dossier-profile .manager-facts,
-      #dossier-index .manager-copy-body .manager-facts,
-      #dossier-index .manager-copy-section,
+      #dossier-profile :is(.dossier-identity, #dante-stage-boost),
+      #dossier-profile .dossier-identity :is(.manager-title, #dante-stage-boost),
+      #dossier-profile :is(.manager-quotes, #dante-stage-boost),
+      #dossier-profile :is(.manager-facts, #dante-stage-boost),
+      #dossier-index .manager-copy-body :is(.manager-facts, #dante-stage-boost),
+      #dossier-index :is(.manager-copy-section, #dante-stage-boost),
       #dossier-index #character-section-04.manager-copy-section,
+      .dossier-form-pills > a,
       .form-pickup-card,
       .form-pickup-record .form-pickup-calls > li,
+      .form-pickup-record .form-pickup-calls > li > i,
       .form-pickup-record .form-pickup-spec,
+      .form-pickup-record .form-pickup-spec > div,
       .varg-portrait
     ) {
     border: 1px solid CanvasText;
@@ -689,7 +1002,13 @@ html[data-family="dossier"]
     main.dante-page.manager-page.manager-page.manager-page.manager-page.manager-page
     > .dossier-reader
     .dossier-reader-links
-    a:is([aria-current], [aria-current="location"], [aria-current="page"], [aria-current="true"]) {
+    :is(
+      a[aria-current],
+      a[aria-current="location"],
+      a[aria-current="page"],
+      a[aria-current="true"],
+      #dante-stage-boost
+    ) {
     forced-color-adjust: none;
     color: HighlightText;
     background: Highlight;

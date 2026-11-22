@@ -408,7 +408,7 @@ html[data-family="dossier"]
    an ember in it and claw marks through it.
    ================================================================ */
 
-/* ── Explom ── */
+/* ── Explom: electric cyan fracture flare x crimson detonation core ── */
 html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page
@@ -418,31 +418,27 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="explom"]
   .form-pickup-card {
-  border: 1px solid rgb(255 74 96 / 48%);
+  border: 1px solid rgb(255 74 96 / 34%);
   border-top: 0;
   background:
     linear-gradient(
         90deg,
         var(--signature-light) 0%,
-        #ffffff 24%,
-        var(--signature-hot) 58%,
-        rgb(255 74 96 / 34%) 88%,
+        #e8fffd 22%,
+        var(--signature-hot) 56%,
+        rgb(255 74 96 / 32%) 86%,
         transparent 100%
       )
       top / 100% 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 0 0 / 20px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 0 0 / 2px 20px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 20px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 20px no-repeat,
-    radial-gradient(ellipse 58% 52% at 46% 40%, rgb(114 242 236 / 16%), transparent 70%),
-    radial-gradient(ellipse 50% 42% at 100% 100%, rgb(255 74 96 / 20%), transparent 72%),
-    linear-gradient(165deg, #0b1c22 0%, #04090d 100%);
+    radial-gradient(ellipse 58% 58% at 44% 34%, rgb(114 242 236 / 18%), transparent 72%),
+    radial-gradient(ellipse 54% 48% at 96% 86%, rgb(255 74 96 / 24%), transparent 72%),
+    radial-gradient(ellipse 44% 36% at 88% 12%, rgb(114 242 236 / 12%), transparent 70%),
+    linear-gradient(164deg, #0b1c22 0%, #050c11 54%, #03070a 100%);
   box-shadow:
-    0 32px 76px rgb(0 0 0 / 70%),
-    0 0 44px rgb(255 74 96 / 18%),
-    inset 0 1px 0 rgb(214 255 252 / 30%),
-    inset 0 -1px 0 rgb(255 74 96 / 34%),
-    inset 0 0 36px rgb(0 0 0 / 56%);
+    0 30px 76px rgb(0 0 0 / 70%),
+    0 0 46px rgb(255 74 96 / 16%),
+    inset 0 1px 0 rgb(214 255 252 / 26%),
+    inset 0 -1px 0 rgb(255 74 96 / 30%);
 }
 
 html[data-family="dossier"]
@@ -451,13 +447,13 @@ html[data-family="dossier"]
   .form-pickup[data-form-theme="explom"]
   .form-pickup-visual {
   background:
-    radial-gradient(58% 44% at 50% -4%, rgb(114 242 236 / 40%), transparent 74%),
-    radial-gradient(54% 44% at 50% 42%, rgb(114 242 236 / 22%), transparent 72%),
-    radial-gradient(80% 24% at 50% 100%, rgb(255 74 96 / 48%), transparent 74%),
-    linear-gradient(180deg, #09191f 0%, #03070a 100%);
+    radial-gradient(58% 44% at 50% -4%, rgb(114 242 236 / 44%), transparent 74%),
+    radial-gradient(54% 44% at 50% 42%, rgb(114 242 236 / 24%), transparent 72%),
+    radial-gradient(80% 26% at 50% 100%, rgb(255 74 96 / 52%), transparent 74%),
+    linear-gradient(180deg, #0a1b22 0%, #03070a 100%);
   box-shadow:
     28px 0 76px rgb(0 0 0 / 68%),
-    inset -1px 0 0 rgb(114 242 236 / 34%),
+    inset -1px 0 0 rgb(114 242 236 / 36%),
     inset 0 24px 64px rgb(0 0 0 / 56%);
 }
 
@@ -465,17 +461,146 @@ html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="explom"]
-  :is(.form-pickup-calls > li, .form-pickup-spec),
+  .form-pickup-copy
+  > .form-pickup-record {
+  border-top: 1px solid rgb(114 242 236 / 22%);
+  background:
+    linear-gradient(90deg, var(--signature-light) 0%, #ffffff 30%, var(--signature-hot) 68%, transparent 100%)
+      0 0 / 100% 1.5px no-repeat;
+  box-shadow: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-calls
+  > li,
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="explom"]
-  :is(.form-pickup-calls > li, .form-pickup-spec) {
-  border-color: rgb(255 74 96 / 44%);
+  .form-pickup-calls
+  > li {
+  border: 1px solid rgb(114 242 236 / 38%);
+  border-left: 3px solid var(--signature-hot);
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--signature-light) 0%, #ffffff 30%, var(--signature-hot) 74%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(64% 140% at 14% 50%, rgb(114 242 236 / 24%), transparent 72%),
+    linear-gradient(90deg, rgb(255 74 96 / 22%) 0%, rgb(114 242 236 / 10%) 54%, transparent 94%),
+    linear-gradient(166deg, #0d232b 0%, #050b0f 100%);
   box-shadow:
-    0 12px 32px rgb(0 0 0 / 52%),
-    0 0 22px rgb(255 74 96 / 12%),
-    inset 0 1px 0 rgb(214 255 252 / 24%),
-    inset 0 -1px 0 rgb(255 74 96 / 26%);
+    0 12px 26px rgb(0 0 0 / 58%),
+    0 0 20px rgb(255 74 96 / 14%),
+    inset 0 1px 0 rgb(232 255 253 / 34%),
+    inset 0 -1px 0 rgb(0 0 0 / 58%),
+    inset 1px 0 0 rgb(214 255 252 / 14%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-calls
+  > li
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(114 242 236 / 54%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgb(114 242 236 / 24%), rgb(4 16 20 / 92%));
+  color: #e8fffe;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 12px rgb(114 242 236 / 28%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-calls
+  > li
+  > b {
+  color: #f4fffe;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 54%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-spec,
+html[data-family="dossier"]
+  main.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-spec {
+  border: 1px solid rgb(114 242 236 / 40%);
+  border-top: 2px solid var(--signature-light);
+  border-radius: 4px;
+  background: rgb(114 242 236 / 26%);
+  box-shadow:
+    0 24px 56px rgb(0 0 0 / 64%),
+    0 0 38px rgb(255 74 96 / 16%),
+    inset 0 1px 0 rgb(232 255 253 / 36%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-spec
+  > div {
+  background-color: #061217;
+  background-image:
+    radial-gradient(76% 68% at 14% 0%, rgb(114 242 236 / 18%), transparent 72%),
+    linear-gradient(180deg, rgb(214 255 252 / 6%) 0%, rgb(255 74 96 / 5%) 46%, rgb(0 0 0 / 34%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(214 255 252 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 48%);
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page
+    .form-pickup[data-form-theme="explom"]
+    .form-pickup-spec
+    > div:hover {
+    background-color: #0b1f27;
+  }
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-spec
+  > div::before {
+  width: 28px;
+  background: linear-gradient(90deg, #e8fffd 0%, var(--signature-light) 48%, var(--signature-hot) 100%);
+  box-shadow: 0 0 10px rgb(114 242 236 / 48%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-spec
+  dt {
+  color: rgb(156 248 242 / 84%);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="explom"]
+  .form-pickup-spec
+  dd {
+  color: #f6fffe;
+  text-shadow: 0 0 16px rgb(114 242 236 / 20%);
 }
 
 /* Its name, struck through by the crack it is named for. */
@@ -728,7 +853,7 @@ html[data-family="dossier"]
   }
 }
 
-/* ── 犭 ── */
+/* ── 犭: predatory abyssal ember stage x claw scars x bone-crimson telemetry ── */
 html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page
@@ -738,31 +863,28 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="kemonohen"]
   .form-pickup-card {
-  border: 1px solid rgb(219 38 62 / 60%);
+  border: 1px solid rgb(219 38 62 / 44%);
   border-top: 0;
   background:
     linear-gradient(
         90deg,
         transparent 2%,
-        var(--signature-hot) 20%,
-        #ffd4ce 50%,
-        var(--signature-hot) 80%,
+        var(--signature-hot) 18%,
+        #ffe2da 48%,
+        var(--signature-hot) 78%,
         transparent 98%
       )
       top / 100% 2px no-repeat,
-    linear-gradient(#ffb3ad 0 0) 0 0 / 20px 2px no-repeat,
-    linear-gradient(#ffb3ad 0 0) 0 0 / 2px 20px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 20px 2px no-repeat,
-    linear-gradient(var(--signature-hot) 0 0) 100% 100% / 2px 20px no-repeat,
-    radial-gradient(ellipse 60% 52% at 86% 18%, rgb(219 38 62 / 28%), transparent 72%),
-    radial-gradient(ellipse 48% 44% at 16% 88%, rgb(138 12 32 / 24%), transparent 70%),
-    linear-gradient(165deg, #1b0a10 0%, #060205 100%);
+    radial-gradient(ellipse 62% 54% at 86% 18%, rgb(219 38 62 / 30%), transparent 72%),
+    radial-gradient(ellipse 46% 44% at 46% 52%, rgb(255 155 148 / 12%), transparent 70%),
+    radial-gradient(ellipse 52% 46% at 14% 88%, rgb(138 12 32 / 26%), transparent 72%),
+    linear-gradient(164deg, #1c080f 0%, #0b0306 54%, #050204 100%);
   box-shadow:
-    0 36px 86px rgb(0 0 0 / 76%),
-    0 0 52px rgb(219 38 62 / 26%),
-    inset 0 1px 0 rgb(255 208 200 / 32%),
-    inset 0 -1px 0 rgb(219 38 62 / 42%),
-    inset 0 0 42px rgb(72 4 14 / 42%);
+    0 34px 82px rgb(0 0 0 / 76%),
+    0 0 54px rgb(219 38 62 / 24%),
+    inset 0 1px 0 rgb(255 212 204 / 28%),
+    inset 0 -1px 0 rgb(219 38 62 / 38%),
+    inset 0 0 42px rgb(72 4 14 / 38%);
 }
 
 html[data-family="dossier"]
@@ -775,14 +897,27 @@ html[data-family="dossier"]
   .form-pickup[data-form-theme="kemonohen"]
   .form-pickup-visual {
   background:
-    radial-gradient(58% 42% at 50% -4%, rgb(255 155 148 / 30%), transparent 74%),
-    radial-gradient(56% 46% at 50% 36%, rgb(219 38 62 / 38%), transparent 72%),
-    radial-gradient(82% 26% at 50% 100%, rgb(219 38 62 / 58%), transparent 74%),
-    linear-gradient(180deg, #16070b 0%, #050204 100%);
+    radial-gradient(58% 42% at 50% -4%, rgb(255 155 148 / 34%), transparent 74%),
+    radial-gradient(56% 46% at 50% 36%, rgb(219 38 62 / 40%), transparent 72%),
+    radial-gradient(82% 28% at 50% 100%, rgb(219 38 62 / 60%), transparent 74%),
+    linear-gradient(180deg, #18070c 0%, #050204 100%);
   box-shadow:
     28px 0 76px rgb(0 0 0 / 70%),
-    inset -1px 0 0 rgb(255 155 148 / 36%),
+    inset -1px 0 0 rgb(255 155 148 / 38%),
     inset 0 26px 64px rgb(0 0 0 / 62%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-copy
+  > .form-pickup-record {
+  border-top: 1px solid rgb(219 38 62 / 28%);
+  background:
+    linear-gradient(90deg, var(--signature-hot) 0%, #ffe2da 36%, rgb(219 38 62 / 44%) 74%, transparent 100%)
+      0 0 / 100% 1.5px no-repeat;
+  box-shadow: none;
 }
 
 html[data-family="dossier"]
@@ -796,17 +931,49 @@ html[data-family="dossier"]
   .form-pickup[data-form-theme="kemonohen"]
   .form-pickup-calls
   > li {
-  border-color: rgb(219 38 62 / 54%);
-  border-left: 2px solid var(--signature-hot);
+  border: 1px solid rgb(219 38 62 / 48%);
+  border-left: 3px solid var(--signature-hot);
+  border-radius: 4px;
   background:
-    linear-gradient(90deg, #ffb3ad 0%, var(--signature-hot) 56%, transparent 94%) 0 0 / 100% 1px
+    linear-gradient(90deg, #ffe2da 0%, var(--signature-hot) 54%, transparent 94%) 0 0 / 100% 1px
       no-repeat,
-    linear-gradient(90deg, rgb(219 38 62 / 28%), transparent 68%),
-    linear-gradient(165deg, #1e0b11 0%, #090306 100%);
+    radial-gradient(64% 140% at 14% 50%, rgb(219 38 62 / 30%), transparent 72%),
+    linear-gradient(90deg, rgb(219 38 62 / 26%), rgb(255 155 148 / 8%) 54%, transparent 90%),
+    linear-gradient(166deg, #240b14 0%, #080305 100%);
   box-shadow:
-    0 8px 22px rgb(0 0 0 / 54%),
-    inset 0 1px 0 rgb(255 208 200 / 26%),
-    inset 0 -1px 0 rgb(219 38 62 / 28%);
+    0 12px 26px rgb(0 0 0 / 60%),
+    0 0 20px rgb(219 38 62 / 16%),
+    inset 0 1px 0 rgb(255 216 208 / 32%),
+    inset 0 -1px 0 rgb(0 0 0 / 60%),
+    inset 1px 0 0 rgb(255 208 200 / 14%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-calls
+  > li
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(255 155 148 / 54%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgb(219 38 62 / 30%), rgb(20 4 8 / 92%));
+  color: #ffece6;
+  box-shadow:
+    inset 0 1px 0 rgb(255 232 226 / 26%),
+    0 0 12px rgb(219 38 62 / 32%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-calls
+  > li
+  > b {
+  color: #fff3ee;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 58%);
 }
 
 html[data-family="dossier"]
@@ -818,22 +985,77 @@ html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="kemonohen"]
   .form-pickup-spec {
-  border-color: rgb(219 38 62 / 54%);
-  border-top: 2px solid rgb(255 182 174 / 78%);
-  background: rgb(219 38 62 / 30%);
+  border: 1px solid rgb(219 38 62 / 50%);
+  border-top: 2px solid #ffc6bc;
+  border-radius: 4px;
+  background: rgb(219 38 62 / 34%);
   box-shadow:
-    0 18px 44px rgb(0 0 0 / 60%),
-    0 0 30px rgb(219 38 62 / 18%),
-    inset 0 1px 0 rgb(255 208 200 / 26%);
+    0 24px 56px rgb(0 0 0 / 66%),
+    0 0 38px rgb(219 38 62 / 22%),
+    inset 0 1px 0 rgb(255 218 210 / 34%);
 }
 
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-spec
+  > div,
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="kemonohen"]
   .form-pickup-spec
   > div {
-  background-color: #0b0508;
-  background-image: linear-gradient(180deg, rgb(219 38 62 / 16%), transparent 74%);
+  background-color: #0c0407;
+  background-image:
+    radial-gradient(76% 68% at 14% 0%, rgb(219 38 62 / 22%), transparent 72%),
+    linear-gradient(180deg, rgb(255 196 188 / 6%) 0%, rgb(138 12 32 / 7%) 46%, rgb(0 0 0 / 36%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 206 198 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 50%);
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page
+    .form-pickup[data-form-theme="kemonohen"]
+    .form-pickup-spec
+    > div:hover {
+    background-color: #19070d;
+  }
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-spec
+  > div::before {
+  width: 28px;
+  background: linear-gradient(90deg, #fff0ea 0%, #ffb4a8 44%, var(--signature-hot) 100%);
+  box-shadow: 0 0 10px rgb(219 38 62 / 52%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-spec
+  dt {
+  color: rgb(255 186 178 / 84%);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="kemonohen"]
+  .form-pickup-spec
+  dd {
+  color: #fff6f2;
+  text-shadow: 0 0 16px rgb(219 38 62 / 24%);
 }
 
 html[data-family="dossier"]
@@ -2364,9 +2586,8 @@ html[data-world-effects="economy"]
   }
 }
 
-/* ── オーバーゼッツ カスタム: the names in the mechanical face, cut by a
-   cyan instrument line; reading text keeps the site's gothic on a clear dark
-   ink plate. ── */
+/* ── オーバーゼッツ カスタム: precision cyan prototype bay x 4-attribute
+   dream-spectrum optical bezel x machined telemetry console ── */
 [data-form-theme="custom"] {
   --custom-calipers: none;
 }
@@ -2390,21 +2611,29 @@ html[data-family="dossier"]
   .form-pickup[data-form-theme="custom"]
   .form-pickup-card {
   position: relative;
-  border: 1px solid rgb(79 243 255 / 44%);
-  border-top: 2px solid var(--signature-light);
+  border: 1px solid rgb(79 243 255 / 36%);
+  border-top: 0;
   background:
-    linear-gradient(#d8fcff 0 0) 0 0 / 20px 2px no-repeat,
-    linear-gradient(#d8fcff 0 0) 0 0 / 2px 20px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 100% / 20px 2px no-repeat,
-    linear-gradient(var(--signature-light) 0 0) 100% 100% / 2px 20px no-repeat,
-    radial-gradient(ellipse 60% 50% at 88% 20%, rgb(79 243 255 / 16%), transparent 68%),
-    radial-gradient(ellipse 48% 42% at 14% 88%, rgb(31 184 214 / 12%), transparent 70%),
-    linear-gradient(165deg, #0b1723 0%, var(--signature-ink) 68%);
+    linear-gradient(
+        90deg,
+        #d8fcff 0%,
+        var(--signature-light) 26%,
+        #ff4a4a 44%,
+        #3f8cff 60%,
+        #35d46a 76%,
+        #a45cff 90%,
+        transparent 100%
+      )
+      top / 100% 2px no-repeat,
+    radial-gradient(ellipse 62% 54% at 88% 18%, rgb(79 243 255 / 20%), transparent 70%),
+    radial-gradient(ellipse 46% 42% at 46% 54%, rgb(63 140 255 / 12%), transparent 72%),
+    radial-gradient(ellipse 52% 44% at 14% 88%, rgb(31 184 214 / 18%), transparent 72%),
+    linear-gradient(164deg, #0b1926 0%, #050d15 56%, var(--signature-ink) 100%);
   box-shadow:
-    0 30px 72px rgb(0 0 0 / 66%),
-    0 0 38px rgb(79 243 255 / 16%),
-    inset 0 1px 0 rgb(216 252 255 / 34%),
-    inset 0 -1px 0 rgb(79 243 255 / 26%);
+    0 32px 76px rgb(0 0 0 / 68%),
+    0 0 42px rgb(79 243 255 / 16%),
+    inset 0 1px 0 rgb(216 252 255 / 30%),
+    inset 0 -1px 0 rgb(79 243 255 / 24%);
 }
 
 html[data-family="dossier"]
@@ -2413,13 +2642,13 @@ html[data-family="dossier"]
   .form-pickup[data-form-theme="custom"]
   .form-pickup-visual {
   background:
-    radial-gradient(58% 42% at 50% -4%, rgb(79 243 255 / 36%), transparent 74%),
-    radial-gradient(54% 44% at 50% 40%, rgb(79 243 255 / 20%), transparent 72%),
-    radial-gradient(80% 24% at 50% 100%, rgb(31 184 214 / 46%), transparent 74%),
-    linear-gradient(180deg, #091520 0%, #03070b 100%);
+    radial-gradient(58% 42% at 50% -4%, rgb(79 243 255 / 42%), transparent 74%),
+    radial-gradient(54% 44% at 50% 40%, rgb(79 243 255 / 22%), transparent 72%),
+    radial-gradient(80% 26% at 50% 100%, rgb(31 184 214 / 52%), transparent 74%),
+    linear-gradient(180deg, #0a1724 0%, #03070b 100%);
   box-shadow:
     28px 0 76px rgb(0 0 0 / 66%),
-    inset -1px 0 0 rgb(79 243 255 / 32%),
+    inset -1px 0 0 rgb(79 243 255 / 36%),
     inset 0 24px 64px rgb(0 0 0 / 56%);
 }
 
@@ -2427,20 +2656,151 @@ html[data-family="dossier"]
   body
   main.manager-page.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="custom"]
-  :is(.form-pickup-calls > li, .form-pickup-spec) {
-  border-color: rgb(79 243 255 / 42%);
+  .form-pickup-copy
+  > .form-pickup-record {
+  border-top: 1px solid rgb(79 243 255 / 22%);
+  background:
+    linear-gradient(
+        90deg,
+        var(--signature-light) 0%,
+        #d8fcff 28%,
+        #3f8cff 62%,
+        #a45cff 84%,
+        transparent 100%
+      )
+      0 0 / 100% 1.5px no-repeat;
+  box-shadow: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-calls
+  > li {
+  border: 1px solid rgb(79 243 255 / 40%);
+  border-left: 3px solid var(--signature-light);
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, #e8feff 0%, var(--signature-light) 48%, #3f8cff 84%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(64% 140% at 14% 50%, rgb(79 243 255 / 24%), transparent 72%),
+    linear-gradient(90deg, rgb(79 243 255 / 18%) 0%, rgb(63 140 255 / 10%) 56%, transparent 94%),
+    linear-gradient(166deg, #0c1d2c 0%, #050b11 100%);
   box-shadow:
-    0 12px 30px rgb(0 0 0 / 50%),
-    0 0 22px rgb(79 243 255 / 12%),
-    inset 0 1px 0 rgb(216 252 255 / 26%),
-    inset 0 -1px 0 rgb(79 243 255 / 22%);
+    0 12px 26px rgb(0 0 0 / 56%),
+    0 0 20px rgb(79 243 255 / 14%),
+    inset 0 1px 0 rgb(224 252 255 / 34%),
+    inset 0 -1px 0 rgb(0 0 0 / 58%),
+    inset 1px 0 0 rgb(216 252 255 / 14%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-calls
+  > li
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(79 243 255 / 56%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgb(79 243 255 / 24%), rgb(4 14 24 / 92%));
+  color: #ecfeff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 28%),
+    0 0 12px rgb(79 243 255 / 30%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-calls
+  > li
+  > b {
+  color: #f0feff;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 52%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-spec {
+  border: 1px solid rgb(79 243 255 / 42%);
+  border-top: 2px solid var(--signature-light);
+  border-radius: 4px;
+  background: rgb(79 243 255 / 28%);
+  box-shadow:
+    0 24px 56px rgb(0 0 0 / 62%),
+    0 0 38px rgb(79 243 255 / 18%),
+    inset 0 1px 0 rgb(224 252 255 / 36%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-spec
+  > div {
+  background-color: #06111c;
+  background-image:
+    radial-gradient(76% 68% at 14% 0%, rgb(79 243 255 / 18%), transparent 72%),
+    linear-gradient(180deg, rgb(216 252 255 / 6%) 0%, rgb(63 140 255 / 6%) 48%, rgb(0 0 0 / 34%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(216 252 255 / 15%),
+    inset 0 -1px 0 rgb(0 0 0 / 48%);
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page
+    .form-pickup[data-form-theme="custom"]
+    .form-pickup-spec
+    > div:hover {
+    background-color: #0b1e2f;
+  }
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-spec
+  > div::before {
+  width: 28px;
+  background: linear-gradient(90deg, #e8feff 0%, var(--signature-light) 48%, #3f8cff 100%);
+  box-shadow: 0 0 10px rgb(79 243 255 / 50%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-spec
+  dt {
+  color: rgb(146 244 255 / 86%);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page
+  .form-pickup[data-form-theme="custom"]
+  .form-pickup-spec
+  dd {
+  color: #f4feff;
+  text-shadow: 0 0 16px rgb(79 243 255 / 22%);
 }
 
 html[data-family="dossier"]
   main.manager-page.manager-page.manager-page
   .form-pickup[data-form-theme="custom"]
   .form-pickup-copy {
-  border-bottom: 1px solid rgb(79 243 255 / 32%);
+  border-bottom: 1px solid rgb(79 243 255 / 26%);
 }
 
 html[data-family="dossier"]
@@ -2493,7 +2853,7 @@ html[data-family="dossier"]
   > .form-pickup-panel {
   position: relative;
   background:
-    radial-gradient(ellipse 52% 38% at 92% 0%, rgb(79 243 255 / 10%), transparent 68%),
+    radial-gradient(ellipse 52% 38% at 92% 0%, rgb(79 243 255 / 12%), transparent 68%),
     linear-gradient(180deg, #08121b 0%, var(--signature-ink) 48%);
   box-shadow: inset 0 1px 0 rgb(206 252 255 / 22%);
 }
@@ -2538,6 +2898,571 @@ html[data-family="dossier"]
   .form-pickup-gallery
   > figure[data-form-theme="custom"] {
   border-color: var(--signature-light);
+}
+
+/* ================================================================
+   Over-Zeztz & Leddic Transformation Stage Atmosphere
+   (strictly scoped by [data-rider="over-zeztz"] / [data-rider="leddic"]
+   so route CSS persistence never leaks onto other riders).
+   Eliminates the flat black void on #form-records and harmonizes the
+   form switcher deck, default form cyclorama, call chips and 6-cell
+   telemetry console with Explom, Custom and Kemonohen.
+   ================================================================ */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  > #form-records {
+  background:
+    radial-gradient(64% 480px at 78% 120px, rgb(50 225 208 / 15%), transparent 72%),
+    radial-gradient(54% 420px at 94% 380px, rgb(255 59 82 / 14%), transparent 72%),
+    linear-gradient(180deg, #061116 0%, #04080d 55%, #03060a 100%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  > #form-records {
+  background:
+    radial-gradient(64% 480px at 78% 120px, rgb(105 223 116 / 14%), transparent 72%),
+    radial-gradient(54% 420px at 94% 380px, rgb(240 207 134 / 10%), transparent 72%),
+    linear-gradient(180deg, #06120b 0%, #040907 55%, #030605 100%);
+}
+
+/* Form Switcher Deck: sculpted glass selector capsules with glowing counters */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .dossier-form-pills {
+  border-bottom: 1px solid rgb(50 225 208 / 18%);
+  background:
+    linear-gradient(90deg, rgb(50 225 208 / 12%) 0%, rgb(255 59 82 / 7%) 62%, transparent 100%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .dossier-form-pills
+  > a {
+  border: 1px solid rgb(50 225 208 / 40%);
+  background:
+    linear-gradient(90deg, #e4fffe 0%, #5ff5e6 34%, rgb(255 74 96 / 70%) 72%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(135deg, rgb(50 225 208 / 18%) 0%, rgb(255 59 82 / 9%) 64%, transparent 100%),
+    linear-gradient(166deg, #0d2128 0%, #050b10 100%);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 54%),
+    0 0 20px rgb(50 225 208 / 12%),
+    inset 0 1px 0 rgb(224 255 252 / 28%),
+    inset 0 -1px 0 rgb(255 74 96 / 20%);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .dossier-form-pills
+  > a
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(50 225 208 / 52%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(50 225 208 / 24%), rgb(4 16 20 / 92%));
+  color: #e8fffe;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 10px rgb(50 225 208 / 26%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .dossier-form-pills
+  > a {
+  border: 1px solid rgb(105 223 116 / 40%);
+  background:
+    linear-gradient(90deg, #eefff0 0%, #8df096 36%, rgb(240 207 134 / 70%) 72%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(135deg, rgb(105 223 116 / 17%) 0%, rgb(240 207 134 / 8%) 64%, transparent 100%),
+    linear-gradient(166deg, #0b1f12 0%, #050a07 100%);
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 54%),
+    0 0 20px rgb(105 223 116 / 12%),
+    inset 0 1px 0 rgb(232 255 235 / 28%),
+    inset 0 -1px 0 rgb(240 207 134 / 20%);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .dossier-form-pills
+  > a
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(105 223 116 / 52%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(105 223 116 / 24%), rgb(5 18 10 / 92%));
+  color: #eefff0;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 10px rgb(105 223 116 / 26%);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+    .dossier-form-pills
+    > a:hover {
+    border-color: rgb(114 242 236 / 74%);
+    box-shadow:
+      0 14px 32px rgb(0 0 0 / 60%),
+      0 0 26px rgb(50 225 208 / 24%),
+      inset 0 1px 0 rgb(232 255 253 / 40%);
+  }
+
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+    .dossier-form-pills
+    > a:hover {
+    border-color: rgb(141 240 150 / 74%);
+    box-shadow:
+      0 14px 32px rgb(0 0 0 / 60%),
+      0 0 26px rgb(105 223 116 / 24%),
+      inset 0 1px 0 rgb(236 255 239 / 40%);
+  }
+}
+
+/* Over-Zeztz Default Form (Physicam Impact): Crimson cape x Turquoise armor studio stage */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-card {
+  border-top: 0;
+  background:
+    linear-gradient(
+        90deg,
+        #32e1d0 0%,
+        #e4fffe 28%,
+        #ff4a60 66%,
+        rgb(255 74 96 / 26%) 92%,
+        transparent 100%
+      )
+      top / 100% 2px no-repeat,
+    radial-gradient(ellipse 66% 58% at 54% 24%, rgb(50 225 208 / 20%), transparent 72%),
+    radial-gradient(ellipse 58% 54% at 96% 80%, rgb(255 59 82 / 24%), transparent 72%),
+    radial-gradient(ellipse 48% 42% at 52% 84%, rgb(50 225 208 / 10%), transparent 70%),
+    radial-gradient(ellipse 46% 38% at 88% 12%, rgb(50 225 208 / 12%), transparent 70%),
+    linear-gradient(164deg, #091b22 0%, #050c12 52%, #07050a 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(224 255 252 / 26%),
+    inset 0 -1px 0 rgb(255 74 96 / 26%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-copy
+  > em {
+  display: inline-block;
+  padding: 2px 0 8px;
+  border-bottom: 0;
+  background: linear-gradient(
+      90deg,
+      #32e1d0 0%,
+      #e4fffe 34%,
+      #ff4a60 76%,
+      transparent 100%
+    )
+    0 100% / 100% 2px no-repeat;
+  color: #f0fffe;
+  font-size: clamp(16px, 1.35vw, 20px);
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 16px rgb(50 225 208 / 22%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-copy
+  > .form-pickup-record {
+  border-top: 1px solid rgb(50 225 208 / 22%);
+  background:
+    linear-gradient(90deg, #32e1d0 0%, #d6fffa 34%, #ff4a60 72%, transparent 100%)
+      0 0 / 100% 1.5px no-repeat;
+  box-shadow: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-calls
+  > li {
+  border: 1px solid rgb(50 225 208 / 40%);
+  border-left: 3px solid #32e1d0;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, #e4fffe 0%, #32e1d0 38%, #ff4a60 80%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(64% 140% at 14% 50%, rgb(50 225 208 / 26%), transparent 72%),
+    linear-gradient(90deg, rgb(50 225 208 / 18%) 0%, rgb(255 74 96 / 10%) 62%, transparent 96%),
+    linear-gradient(166deg, #0d232a 0%, #050a0f 100%);
+  box-shadow:
+    0 12px 26px rgb(0 0 0 / 58%),
+    0 0 20px rgb(50 225 208 / 14%),
+    inset 0 1px 0 rgb(224 255 252 / 34%),
+    inset 0 -1px 0 rgb(0 0 0 / 58%),
+    inset 1px 0 0 rgb(214 255 252 / 14%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-calls
+  > li
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(50 225 208 / 54%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgb(50 225 208 / 24%), rgb(4 16 20 / 92%));
+  color: #e8fffe;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 12px rgb(50 225 208 / 28%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec {
+  border: 1px solid rgb(50 225 208 / 40%);
+  border-top: 2px solid #32e1d0;
+  border-radius: 4px;
+  background: rgb(50 225 208 / 28%);
+  box-shadow:
+    0 24px 56px rgb(0 0 0 / 64%),
+    0 0 36px rgb(50 225 208 / 16%),
+    inset 0 1px 0 rgb(224 255 252 / 34%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec
+  > div {
+  background-color: #061318;
+  background-image:
+    radial-gradient(76% 68% at 14% 0%, rgb(50 225 208 / 18%), transparent 72%),
+    linear-gradient(180deg, rgb(214 255 252 / 6%) 0%, rgb(255 74 96 / 4%) 48%, rgb(0 0 0 / 34%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(214 255 252 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 48%);
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+    .form-pickup:not([data-form-theme])
+    .form-pickup-spec
+    > div:hover {
+    background-color: #0b2028;
+  }
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec
+  > div::before {
+  width: 28px;
+  background: linear-gradient(90deg, #e4fffe 0%, #32e1d0 48%, #ff4a60 100%);
+  box-shadow: 0 0 10px rgb(50 225 208 / 48%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec
+  dt {
+  color: rgb(156 246 238 / 86%);
+  letter-spacing: 0.12em;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec
+  dd {
+  color: #f6fffe;
+  text-shadow: 0 0 16px rgb(50 225 208 / 22%);
+}
+
+/* Leddic Default Forms: Emerald-jade x Champagne-gold studio stage */
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-card {
+  border-top: 0;
+  background:
+    linear-gradient(
+        90deg,
+        #69df74 0%,
+        #ecffef 28%,
+        #f0cf86 68%,
+        transparent 100%
+      )
+      top / 100% 2px no-repeat,
+    radial-gradient(ellipse 64% 56% at 54% 24%, rgb(105 223 116 / 18%), transparent 72%),
+    radial-gradient(ellipse 54% 50% at 94% 82%, rgb(240 207 134 / 16%), transparent 72%),
+    radial-gradient(ellipse 46% 40% at 52% 84%, rgb(105 223 116 / 9%), transparent 70%),
+    linear-gradient(164deg, #081a0f 0%, #050c08 54%, #030605 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(232 255 235 / 24%),
+    inset 0 -1px 0 rgb(240 207 134 / 22%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-copy
+  > em {
+  display: inline-block;
+  padding: 2px 0 8px;
+  border-bottom: 0;
+  background: linear-gradient(
+      90deg,
+      #69df74 0%,
+      #ecffef 36%,
+      #f0cf86 78%,
+      transparent 100%
+    )
+    0 100% / 100% 2px no-repeat;
+  color: #f0fff2;
+  text-shadow: 0 0 16px rgb(105 223 116 / 22%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-calls
+  > li {
+  border: 1px solid rgb(105 223 116 / 40%);
+  border-left: 3px solid #69df74;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, #eefff0 0%, #69df74 40%, #f0cf86 82%, transparent 100%)
+      0 0 / 100% 1px no-repeat,
+    radial-gradient(64% 140% at 14% 50%, rgb(105 223 116 / 24%), transparent 72%),
+    linear-gradient(90deg, rgb(105 223 116 / 16%) 0%, rgb(240 207 134 / 8%) 62%, transparent 96%),
+    linear-gradient(166deg, #0b1f12 0%, #050a07 100%);
+  box-shadow:
+    0 12px 26px rgb(0 0 0 / 56%),
+    0 0 20px rgb(105 223 116 / 12%),
+    inset 0 1px 0 rgb(232 255 235 / 32%),
+    inset 0 -1px 0 rgb(0 0 0 / 58%),
+    inset 1px 0 0 rgb(224 255 228 / 14%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-calls
+  > li
+  > i {
+  padding: 3px 6px;
+  border: 1px solid rgb(105 223 116 / 52%);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgb(105 223 116 / 24%), rgb(5 18 10 / 92%));
+  color: #eefff0;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 26%),
+    0 0 12px rgb(105 223 116 / 26%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec {
+  border: 1px solid rgb(105 223 116 / 38%);
+  border-top: 2px solid #69df74;
+  border-radius: 4px;
+  background: rgb(105 223 116 / 26%);
+  box-shadow:
+    0 24px 54px rgb(0 0 0 / 62%),
+    0 0 34px rgb(105 223 116 / 15%),
+    inset 0 1px 0 rgb(232 255 235 / 32%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec
+  > div {
+  background-color: #06130b;
+  background-image:
+    radial-gradient(76% 68% at 14% 0%, rgb(105 223 116 / 17%), transparent 72%),
+    linear-gradient(180deg, rgb(224 255 228 / 6%) 0%, rgb(240 207 134 / 4%) 50%, rgb(0 0 0 / 34%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(224 255 228 / 14%),
+    inset 0 -1px 0 rgb(0 0 0 / 48%);
+  transition: background-color 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+    .form-pickup:not([data-form-theme])
+    .form-pickup-spec
+    > div:hover {
+    background-color: #0b2113;
+  }
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+  .form-pickup:not([data-form-theme])
+  .form-pickup-spec
+  > div::before {
+  width: 28px;
+  background: linear-gradient(90deg, #eefff0 0%, #69df74 50%, #f0cf86 100%);
+  box-shadow: 0 0 10px rgb(105 223 116 / 46%);
+}
+
+/* Split-stage vertical composition on Over-Zeztz & Leddic: anchors the form readout
+   harmoniously beneath the form-switcher pills with seamless radial falloff (no hard
+   bottom edge where the sticky copy block meets the full-height card). */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 1100px) and (min-height: 540px),
+    (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
+    html[data-family="dossier"]
+      body
+      main.manager-page.manager-page.manager-page.manager-page:is(
+        [data-rider="over-zeztz"],
+        [data-rider="leddic"]
+      )
+      .form-pickup-card
+      > .form-pickup-copy {
+      justify-content: flex-start;
+      padding: clamp(56px, 7svh, 76px) var(--sd-pad-end) 48px var(--sd-pad);
+      background:
+        radial-gradient(
+          82% 280px at 14% 96px,
+          color-mix(in srgb, var(--sd-accent) 14%, transparent),
+          transparent 70%
+        );
+    }
+
+    html[data-family="dossier"]
+      body
+      main.manager-page.manager-page.manager-page.manager-page[data-rider="over-zeztz"]
+      .form-pickup:not([data-form-theme])
+      .form-pickup-visual::before {
+      background: linear-gradient(
+        180deg,
+        transparent 2%,
+        #32e1d0 22%,
+        #e8fffe 48%,
+        #ff4a60 76%,
+        transparent 98%
+      );
+      box-shadow:
+        -4px 0 26px rgb(50 225 208 / 46%),
+        -1px 0 10px rgb(255 74 96 / 36%);
+    }
+
+    html[data-family="dossier"]
+      body
+      main.manager-page.manager-page.manager-page.manager-page[data-rider="leddic"]
+      .form-pickup:not([data-form-theme])
+      .form-pickup-visual::before {
+      background: linear-gradient(
+        180deg,
+        transparent 2%,
+        #69df74 22%,
+        #eefff0 48%,
+        #f0cf86 76%,
+        transparent 98%
+      );
+      box-shadow:
+        -4px 0 26px rgb(105 223 116 / 44%),
+        -1px 0 10px rgb(240 207 134 / 34%);
+    }
+
+    html[data-family="dossier"]
+      body
+      main.manager-page.manager-page.manager-page.manager-page
+      .form-pickup[data-form-theme="explom"]
+      .form-pickup-visual::before {
+      background: linear-gradient(
+        180deg,
+        transparent 2%,
+        var(--signature-light) 22%,
+        #ffffff 48%,
+        var(--signature-hot) 74%,
+        transparent 98%
+      );
+      box-shadow:
+        -4px 0 26px rgb(114 242 236 / 46%),
+        -1px 0 10px rgb(255 74 96 / 38%);
+    }
+
+    html[data-family="dossier"]
+      body
+      main.manager-page.manager-page.manager-page.manager-page
+      .form-pickup[data-form-theme="kemonohen"]
+      .form-pickup-visual::before {
+      background: linear-gradient(
+        180deg,
+        transparent 2%,
+        var(--signature-hot) 20%,
+        #ffe2da 48%,
+        var(--signature-hot) 78%,
+        transparent 98%
+      );
+      box-shadow:
+        -4px 0 28px rgb(219 38 62 / 54%),
+        -1px 0 10px rgb(255 155 148 / 38%);
+    }
+
+    html[data-family="dossier"]
+      body
+      main.manager-page.manager-page.manager-page.manager-page
+      .form-pickup[data-form-theme="custom"]
+      .form-pickup-visual::before {
+      background: linear-gradient(
+        180deg,
+        transparent 2%,
+        var(--signature-light) 22%,
+        #e4fdff 50%,
+        #3f8cff 76%,
+        transparent 98%
+      );
+      box-shadow:
+        -4px 0 26px rgb(79 243 255 / 48%),
+        -1px 0 10px rgb(216 252 255 / 34%);
+    }
+  }
 }
 
 /* Attribute groups (e.g. Over Zeztz Custom's four dream attributes). */
@@ -2607,18 +3532,61 @@ html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     :where([data-form-theme="explom"], [data-form-theme="kemonohen"], [data-form-theme="custom"])
     :is(.form-pickup-copy, .form-pickup-heading)
+    > em,
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page:is(
+      [data-rider="over-zeztz"],
+      [data-rider="leddic"]
+    )
+    .form-pickup:not([data-form-theme])
+    .form-pickup-copy
     > em {
     color: CanvasText;
     background: none;
     text-shadow: none;
+    border-bottom: 1px solid CanvasText;
     border-color: CanvasText;
   }
 
   html[data-family="dossier"]
     body
+    main.manager-page.manager-page.manager-page.manager-page:is(
+      [data-rider="over-zeztz"],
+      [data-rider="leddic"]
+    )
+    > #form-records,
+  html[data-family="dossier"]
+    body
+    main.manager-page.manager-page.manager-page.manager-page:is(
+      [data-rider="over-zeztz"],
+      [data-rider="leddic"]
+    )
+    :is(
+      .dossier-form-pills,
+      .dossier-form-pills > a,
+      .dossier-form-pills > a > i,
+      .form-pickup-card,
+      .form-pickup-copy,
+      .form-pickup-copy > .form-pickup-record,
+      .form-pickup-calls > li,
+      .form-pickup-calls > li > i,
+      .form-pickup-spec,
+      .form-pickup-spec > div
+    ),
+  html[data-family="dossier"]
+    body
     main.manager-page.manager-page.manager-page.manager-page
     .form-pickup:where([data-form-theme="explom"], [data-form-theme="kemonohen"], [data-form-theme="custom"])
-    :is(.form-pickup-card, .form-pickup-visual, .form-pickup-calls > li, .form-pickup-spec, .form-pickup-spec > div),
+    :is(
+      .form-pickup-card,
+      .form-pickup-visual,
+      .form-pickup-copy > .form-pickup-record,
+      .form-pickup-calls > li,
+      .form-pickup-calls > li > i,
+      .form-pickup-spec,
+      .form-pickup-spec > div
+    ),
   html[data-family="dossier"]
     main.manager-page.manager-page.manager-page
     .form-pickup:where([data-form-theme="explom"], [data-form-theme="kemonohen"], [data-form-theme="custom"])
@@ -2644,6 +3612,7 @@ html[data-family="dossier"]
     color: CanvasText;
     border-color: CanvasText;
     box-shadow: none;
+    text-shadow: none;
   }
 
   html[data-family="dossier"]

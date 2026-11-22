@@ -7,7 +7,7 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section {
   --record-accent: color-mix(in srgb, var(--manager-accent, #205b6a) 35%, #163641);
   --record-foil: #88714b;
   color: var(--record-ink);
-  border-color: color-mix(in srgb, var(--record-accent) 26%, #aab9bf);
+  border-color: color-mix(in srgb, var(--record-accent) 18%, #b2c1c7);
   background:
     linear-gradient(90deg, var(--record-accent) 0%, var(--record-foil) 52%, transparent 92%) 0 0 /
       110px 3px no-repeat,
@@ -63,12 +63,7 @@ main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section:target {
 }
 
 main.manager-page.manager-page:not(.is-sovereign) .manager-copy-section::before {
-  background:
-    linear-gradient(var(--record-accent) 0 0) 0 0 / 24px 2px,
-    linear-gradient(var(--record-accent) 0 0) 0 0 / 2px 24px,
-    linear-gradient(var(--record-foil) 0 0) 100% 100% / 24px 2px,
-    linear-gradient(var(--record-foil) 0 0) 100% 100% / 2px 24px;
-  background-repeat: no-repeat;
+  content: none;
 }
 
 main.manager-page.manager-page:not(.is-sovereign)

@@ -15,19 +15,33 @@ main.manager-page.ciel-dossier-page {
 }
 
 html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  ),
+html[data-family="dossier"]
   main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign) {
   --rider-secondary-rgb: 134 217 255;
   --sd-accent: var(--ciel-emerald);
   --sd-accent-2: var(--ciel-aqua);
   --sd-foil: var(--ciel-aqua-pale);
   --sd-glow: rgb(28 207 157 / 0.44);
+  --sd-glow-soft: rgb(28 207 157 / 0.22);
   --sd-glow-2: rgb(134 217 255 / 0.28);
+  --sd-rule: #a4f9e3;
+  --sd-plate: #06151c;
+  --sd-plate-2: #091e27;
   --dm-lock: var(--ciel-emerald);
   --dm-gold: var(--ciel-aqua);
   --dm-violet: #54e8c4;
   --dm-magenta: var(--ciel-aqua-pale);
+  --crt-accent: #1ccf9d;
+  --crt-accent-2: #86d9ff;
+  --crt-foil: #c7f7ec;
+  --crt-plate: #06151c;
+  --crt-plate-deep: #030b0f;
   background:
-    radial-gradient(ellipse 72% 40% at 50% 0%, rgb(134 217 255 / 0.24), transparent 70%),
+    radial-gradient(ellipse 74% 42% at 50% 0%, rgb(134 217 255 / 0.24), transparent 70%),
     radial-gradient(circle at 86% 4%, rgb(134 217 255 / 0.32), transparent 40rem),
     radial-gradient(circle at 6% 24%, rgb(28 207 157 / 0.28), transparent 42rem),
     radial-gradient(circle at 94% 58%, rgb(134 217 255 / 0.2), transparent 38rem),
@@ -35,21 +49,59 @@ html[data-family="dossier"]
     linear-gradient(180deg, #031714 0%, #041420 48%, #030b0e 100%);
 }
 
-html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
-  .manager-topbar {
-  border-bottom-color: rgb(134 217 255 / 0.38);
-  box-shadow:
-    inset 0 1px 0 rgb(211 243 255 / 0.24),
-    0 12px 34px -12px rgb(0 0 0 / 0.76),
-    0 1px 24px -6px rgb(28 207 157 / 0.34);
-}
-
 /* The strip below the file (the pagination's collapsed margin, painted by
    the root) ends on the same ink as the ground above it. */
 html:has(> body > main.manager-page.ciel-dossier-page),
 body:has(> main.manager-page.ciel-dossier-page) {
   background-color: #030b0e;
+}
+
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-topbar {
+  border-bottom-color: rgb(134 217 255 / 0.42);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(28 207 157 / 0.22) 0%,
+      transparent 34%,
+      transparent 66%,
+      rgb(134 217 255 / 0.18) 100%
+    ),
+    #030c10;
+  box-shadow:
+    inset 0 1px 0 rgb(211 243 255 / 0.24),
+    0 12px 34px -12px rgb(0 0 0 / 0.78),
+    0 1px 24px -6px rgb(28 207 157 / 0.36);
+}
+
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-topbar
+  .manager-back {
+  border-color: rgb(134 217 255 / 0.48);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 14%,
+      rgb(211 243 255 / 0.55) 50%,
+      transparent 86%
+    )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(135deg, rgb(28 207 157 / 0.22), rgb(134 217 255 / 0.12) 58%, #051319 92%);
+  box-shadow:
+    inset 0 1px 0 rgb(224 248 255 / 0.32),
+    0 8px 22px rgb(0 0 0 / 0.48),
+    0 0 18px -6px rgb(28 207 157 / 0.32);
+}
+
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page
+  .manager-topbar
+  .brand
+  small {
+  color: var(--ciel-aqua-pale);
 }
 
 html[data-family="dossier"]
@@ -73,12 +125,105 @@ html[data-family="dossier"]
   background: linear-gradient(
     180deg,
     transparent,
-    rgb(28 207 157 / 0.52) 18%,
-    rgb(134 217 255 / 0.64) 50%,
-    rgb(28 207 157 / 0.48) 82%,
+    rgb(28 207 157 / 0.56) 18%,
+    rgb(134 217 255 / 0.72) 50%,
+    rgb(28 207 157 / 0.52) 82%,
     transparent
   );
-  box-shadow: 0 0 16px rgb(28 207 157 / 0.28);
+  box-shadow: 0 0 18px rgb(28 207 157 / 0.34);
+}
+
+/* ================================================================
+   Portrait Stage & Sanctuary Lighting (No Box / No L-Bracket Clutter)
+   ================================================================ */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-portrait-frame,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-portrait-frame {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-portrait-frame::after,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-portrait-frame::after {
+  box-shadow: inset 0 2px 0 rgb(134 217 255 / 0.42);
+  background:
+    linear-gradient(
+      270deg,
+      rgb(28 207 157 / 0.36),
+      rgb(134 217 255 / 0.14) 52px,
+      transparent 136px
+    ),
+    radial-gradient(72% 30% at 50% 0%, rgb(134 217 255 / 0.28), transparent 72%),
+    radial-gradient(88% 26% at 50% 104%, rgb(28 207 157 / 0.58), transparent 72%);
+}
+
+/* ================================================================
+   Right Column Tier 1: Sculpted Open Monument Identity (.dossier-identity)
+   Removes the heavy dark box and 4-corner L-brackets.
+   ================================================================ */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .dossier-identity,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .dossier-identity {
+  padding: 8px 4px 20px 0;
+  border: 0;
+  border-bottom: 1px solid rgb(134 217 255 / 0.28);
+  border-radius: 0;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald) 0%,
+        #b8f9e8 28%,
+        var(--ciel-aqua) 58%,
+        transparent 96%
+      )
+      0 100% / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 78% 92% at 0% 50%, rgb(28 207 157 / 0.2), transparent 72%);
+  box-shadow: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .dossier-identity::before,
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .dossier-identity::after {
+  content: none;
+  display: none;
 }
 
 html[data-family="dossier"]
@@ -86,13 +231,21 @@ html[data-family="dossier"]
   #dossier-profile
   .dossier-identity
   .dossier-file-numeral {
-  color: rgb(134 217 255 / 0.26);
+  color: rgb(134 217 255 / 0.44);
   text-shadow:
-    0 0 28px rgb(28 207 157 / 0.28),
-    0 0 12px rgb(134 217 255 / 0.22);
+    0 0 30px rgb(28 207 157 / 0.38),
+    0 0 12px rgb(134 217 255 / 0.28);
 }
 
 /* The name reads from emerald into light blue. */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .dossier-identity
+  .manager-display-name,
 html[data-family="dossier"]
   main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-profile
@@ -101,15 +254,15 @@ html[data-family="dossier"]
   background: linear-gradient(
     102deg,
     var(--ciel-emerald) 0%,
-    #66ebd0 32%,
-    var(--ciel-aqua) 68%,
-    #eefaff 100%
+    #74f2d6 30%,
+    var(--ciel-aqua) 66%,
+    #f2fbff 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 24px rgb(28 207 157 / 0.24));
+  filter: drop-shadow(0 6px 26px rgb(28 207 157 / 0.3));
 }
 
 html[data-family="dossier"]
@@ -129,8 +282,42 @@ html[data-family="dossier"]
   #dossier-profile
   .dossier-identity
   .manager-file-number {
-  color: var(--ciel-aqua);
-  text-shadow: 0 0 18px rgb(134 217 255 / 0.24);
+  color: var(--ciel-aqua-pale);
+  text-shadow: 0 0 18px rgb(134 217 255 / 0.28);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .dossier-identity
+  .manager-title {
+  margin-top: 14px;
+  padding: 6px 18px 6px 15px;
+  border: 1px solid rgb(134 217 255 / 0.52);
+  border-left: 3px solid var(--ciel-emerald);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 12%,
+      rgb(224 248 255 / 0.65) 50%,
+      transparent 88%
+    )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
+      90deg,
+      rgb(28 207 157 / 0.26) 0%,
+      rgb(134 217 255 / 0.14) 58%,
+      rgb(5 19 25 / 0.88) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(224 248 255 / 0.38),
+    0 8px 22px -6px rgb(0 0 0 / 0.56),
+    0 0 20px -6px rgb(28 207 157 / 0.34);
+  color: #effbff;
 }
 
 html[data-family="dossier"]
@@ -139,211 +326,195 @@ html[data-family="dossier"]
   .dossier-identity
   .manager-file-number {
   border-left-color: var(--ciel-emerald);
-  background: linear-gradient(90deg, rgb(28 207 157 / 0.16), rgb(134 217 255 / 0.06));
+  background: linear-gradient(90deg, rgb(28 207 157 / 0.18), rgb(134 217 255 / 0.06));
 }
 
+/* ================================================================
+   Right Column Tier 2: Open-Side Editorial Quote Plate (.manager-quotes)
+   No corner L-brackets; vertical emerald light spine + delicate hairlines.
+   ================================================================ */
 html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
   #dossier-profile
-  .manager-portrait-frame {
-  border-color: rgb(134 217 255 / 0.84);
-  background:
-    linear-gradient(rgb(28 207 157 / 0.96), rgb(28 207 157 / 0.96)) 0 0 / 24px 2px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.96), rgb(28 207 157 / 0.96)) 0 0 / 2px 24px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.96), rgb(134 217 255 / 0.96)) 100% 0 / 24px 2px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.96), rgb(134 217 255 / 0.96)) 100% 0 / 2px 24px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.92), rgb(134 217 255 / 0.92)) 0 100% / 24px 2px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.92), rgb(134 217 255 / 0.92)) 0 100% / 2px 24px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.92), rgb(28 207 157 / 0.92)) 100% 100% / 24px 2px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.92), rgb(28 207 157 / 0.92)) 100% 100% / 2px 24px no-repeat,
-    linear-gradient(
-        90deg,
-        rgb(28 207 157 / 0.96),
-        #ffffff 50%,
-        rgb(134 217 255 / 0.96)
-      )
-      0 0 / 100% 2px no-repeat,
-    radial-gradient(ellipse 86% 68% at 85% 14%, rgb(134 217 255 / 0.3), transparent 64%),
-    radial-gradient(ellipse 86% 68% at 15% 86%, rgb(28 207 157 / 0.28), transparent 64%),
-    linear-gradient(135deg, rgb(28 207 157 / 0.18), rgb(134 217 255 / 0.15) 50%, #030b0e);
-  box-shadow:
-    0 36px 92px rgb(0 0 0 / 0.74),
-    -26px -8px 82px rgb(28 207 157 / 0.36),
-    26px 8px 82px rgb(134 217 255 / 0.36),
-    0 0 0 1px rgb(28 207 157 / 0.54),
-    inset 0 1.5px 0 rgb(232 251 255 / 0.72),
-    inset 0 -2px 0 rgb(28 207 157 / 0.56),
-    inset 0 0 46px rgb(28 207 157 / 0.18),
-    inset 0 0 22px rgb(134 217 255 / 0.16);
-}
-
+  .manager-quotes,
 html[data-family="dossier"]
   main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-profile
   .manager-quotes {
-  border-color: rgb(134 217 255 / 0.64);
-  border-left: 3.5px solid var(--ciel-emerald);
-  background:
-    linear-gradient(rgb(134 217 255 / 0.9), rgb(134 217 255 / 0.9)) 100% 0 / 16px 1.5px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.9), rgb(134 217 255 / 0.9)) 100% 0 / 1.5px 16px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.86), rgb(28 207 157 / 0.86)) 100% 100% / 16px 1.5px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.86), rgb(28 207 157 / 0.86)) 100% 100% / 1.5px 16px no-repeat,
-    linear-gradient(
-        90deg,
-        rgb(28 207 157 / 0.95),
-        #e6f9ff 36%,
-        rgb(134 217 255 / 0.82) 68%,
-        transparent 98%
-      )
-      0 0 / 100% 2px no-repeat,
-    radial-gradient(ellipse 88% 62% at 0% 0%, rgb(28 207 157 / 0.28), transparent 72%),
-    radial-gradient(ellipse 88% 62% at 100% 100%, rgb(134 217 255 / 0.22), transparent 72%),
-    linear-gradient(
-      135deg,
-      rgb(28 207 157 / 0.19),
-      rgb(134 217 255 / 0.13) 58%,
-      var(--sd-plate, #071319)
-    );
-  box-shadow:
-    0 24px 60px rgb(0 0 0 / 0.62),
-    0 0 34px -6px rgb(28 207 157 / 0.32),
-    0 0 0 1px rgb(28 207 157 / 0.38),
-    inset 0 1px 0 rgb(228 249 255 / 0.52),
-    inset 0 -1.5px 0 rgb(28 207 157 / 0.36),
-    inset 6px 0 26px -6px rgb(28 207 157 / 0.44);
-}
-
-html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
-  .form-pickup-card {
-  border-color: rgb(134 217 255 / 0.72);
-  background:
-    linear-gradient(rgb(28 207 157 / 0.94), rgb(28 207 157 / 0.94)) 0 0 / 22px 2px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.94), rgb(28 207 157 / 0.94)) 0 0 / 2px 22px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.94), rgb(134 217 255 / 0.94)) 100% 100% / 22px 2px
-      no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.94), rgb(134 217 255 / 0.94)) 100% 100% / 2px 22px
-      no-repeat,
-    linear-gradient(
-        90deg,
-        rgb(28 207 157 / 0.96),
-        #ffffff 46%,
-        rgb(134 217 255 / 0.92) 78%,
-        transparent 98%
-      )
-      0 0 / 100% 2px no-repeat,
-    radial-gradient(ellipse 82% 62% at 92% 8%, rgb(134 217 255 / 0.28), transparent 64%),
-    radial-gradient(ellipse 78% 58% at 8% 92%, rgb(28 207 157 / 0.26), transparent 64%),
-    linear-gradient(142deg, rgb(3 17 20 / 0.98), rgb(5 21 27 / 0.96));
-  box-shadow:
-    0 34px 84px rgb(0 0 0 / 0.72),
-    -18px 0 60px -10px rgb(28 207 157 / 0.3),
-    18px 0 60px -10px rgb(134 217 255 / 0.3),
-    0 0 0 1px rgb(28 207 157 / 0.46),
-    inset 0 1.5px 0 rgb(230 250 255 / 0.58),
-    inset 0 -1.5px 0 rgb(28 207 157 / 0.42),
-    inset 0 0 42px rgb(134 217 255 / 0.14);
-}
-
-html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
-  .rider-special-site-card {
-  border-color: rgb(134 217 255 / 0.72);
-  background:
-    linear-gradient(rgb(28 207 157 / 0.94), rgb(28 207 157 / 0.94)) 0 0 / 22px 2px no-repeat,
-    linear-gradient(rgb(28 207 157 / 0.94), rgb(28 207 157 / 0.94)) 0 0 / 2px 22px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.94), rgb(134 217 255 / 0.94)) 100% 100% / 22px 2px
-      no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.94), rgb(134 217 255 / 0.94)) 100% 100% / 2px 22px
-      no-repeat,
-    linear-gradient(
-        90deg,
-        rgb(28 207 157 / 0.96),
-        #ffffff 46%,
-        rgb(134 217 255 / 0.92) 78%,
-        transparent 98%
-      )
-      0 0 / 100% 2px no-repeat,
-    radial-gradient(ellipse 82% 62% at 92% 8%, rgb(134 217 255 / 0.28), transparent 64%),
-    radial-gradient(ellipse 78% 58% at 8% 92%, rgb(28 207 157 / 0.26), transparent 64%),
-    linear-gradient(142deg, rgb(3 17 20 / 0.98), rgb(5 21 27 / 0.96));
-  box-shadow:
-    0 34px 84px rgb(0 0 0 / 0.72),
-    -18px 0 60px -10px rgb(28 207 157 / 0.3),
-    18px 0 60px -10px rgb(134 217 255 / 0.3),
-    0 0 0 1px rgb(28 207 157 / 0.46),
-    inset 0 1.5px 0 rgb(230 250 255 / 0.58),
-    inset 0 -1.5px 0 rgb(28 207 157 / 0.42),
-    inset 0 0 42px rgb(134 217 255 / 0.14);
-}
-
-html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
-  .rider-archive-civilian {
-  border-color: rgb(134 217 255 / 0.56);
+  margin-top: 20px;
+  padding: 18px 22px 18px 24px;
+  border: 0;
   border-left: 3px solid var(--ciel-emerald);
+  border-radius: 0 12px 12px 0;
   background:
-    linear-gradient(rgb(134 217 255 / 0.88), rgb(134 217 255 / 0.88)) 100% 0 / 18px 1.5px
-      no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.88), rgb(134 217 255 / 0.88)) 100% 0 / 1.5px 18px
-      no-repeat,
     linear-gradient(
         90deg,
-        rgb(28 207 157 / 0.9),
-        #e4f8ff 42%,
-        rgb(134 217 255 / 0.74) 72%,
-        transparent 98%
-      )
-      0 0 / 100% 1.5px no-repeat,
-    radial-gradient(ellipse 84% 54% at 88% 10%, rgb(134 217 255 / 0.22), transparent 66%),
-    radial-gradient(ellipse 78% 54% at 12% 90%, rgb(28 207 157 / 0.2), transparent 66%),
-    linear-gradient(138deg, rgb(3 17 20 / 0.96), rgb(5 15 22 / 0.95));
-  box-shadow:
-    0 26px 68px rgb(0 0 0 / 0.6),
-    0 0 32px -8px rgb(28 207 157 / 0.24),
-    0 0 0 1px rgb(28 207 157 / 0.34),
-    inset 0 1px 0 rgb(224 248 255 / 0.42),
-    inset 0 -1px 0 rgb(28 207 157 / 0.3),
-    inset 5px 0 22px -6px rgb(28 207 157 / 0.36);
-}
-
-html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
-  .manager-copy-section {
-  border-color: rgb(134 217 255 / 0.52);
-  border-left: 3px solid rgb(28 207 157 / 0.84);
-  background:
-    linear-gradient(rgb(134 217 255 / 0.84), rgb(134 217 255 / 0.84)) 100% 0 / 16px 1.5px
-      no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.84), rgb(134 217 255 / 0.84)) 100% 0 / 1.5px 16px
-      no-repeat,
-    linear-gradient(
-        90deg,
-        rgb(28 207 157 / 0.88),
-        #e2f8ff 38%,
-        rgb(134 217 255 / 0.68) 68%,
+        rgb(28 207 157 / 0.68) 0%,
+        rgb(134 217 255 / 0.28) 54%,
         transparent 96%
       )
-      0 0 / 100% 1.5px no-repeat,
-    radial-gradient(ellipse 92% 48% at 10% 0%, rgb(28 207 157 / 0.2), transparent 68%),
-    radial-gradient(ellipse 92% 48% at 90% 100%, rgb(134 217 255 / 0.18), transparent 68%),
-    linear-gradient(135deg, rgb(3 17 20 / 0.96), rgb(5 15 21 / 0.95));
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(90deg, rgb(134 217 255 / 0.36) 0%, transparent 82%) 0 100% / 100% 1px
+      no-repeat,
+    radial-gradient(ellipse 82% 88% at 0% 50%, rgb(28 207 157 / 0.22), transparent 72%),
+    linear-gradient(
+      90deg,
+      rgb(6 25 30 / 0.88) 0%,
+      rgb(5 18 24 / 0.56) 68%,
+      transparent 100%
+    );
   box-shadow:
-    0 22px 56px rgb(0 0 0 / 0.54),
-    0 0 32px -10px rgb(28 207 157 / 0.24),
-    0 0 0 1px rgb(28 207 157 / 0.32),
-    inset 0 1px 0 rgb(224 248 255 / 0.38),
-    inset 0 -1px 0 rgb(28 207 157 / 0.26),
-    inset 4px 0 20px -6px rgb(28 207 157 / 0.32);
+    inset 6px 0 24px -8px rgb(28 207 157 / 0.44),
+    0 14px 36px -12px rgb(0 0 0 / 0.5);
 }
 
 html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page:not(.is-sovereign)
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-quotes::before,
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-quotes::after {
+  content: none;
+  display: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
   #dossier-profile
   .manager-quotes
   q {
   color: var(--ciel-aqua-pale);
-  text-shadow: 0 1px 14px rgb(134 217 255 / 0.2);
+  text-shadow: 0 1px 14px rgb(134 217 255 / 0.22);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-quotes
+  q:first-child {
+  color: #ffffff;
+  text-shadow:
+    0 2px 14px rgb(0 0 0 / 0.52),
+    0 0 22px rgb(28 207 157 / 0.3);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-quotes
+  q
+  + q {
+  padding-top: 10px;
+  border-top: 1px solid rgb(134 217 255 / 0.18);
+  box-shadow: none;
+}
+
+/* ================================================================
+   Right Column Tier 3: Architectural Spec Ledger (.manager-facts)
+   Eliminates per-row boxes and 375px L-corner brackets completely.
+   ================================================================ */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-facts,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-facts {
+  margin-top: 20px;
+  padding: 6px 22px 8px;
+  border: 1px solid rgb(134 217 255 / 0.38);
+  border-top: 2px solid var(--ciel-emerald);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald) 0%,
+        #e6f9ff 48%,
+        var(--ciel-aqua) 100%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 80% 60% at 15% 0%, rgb(28 207 157 / 0.16), transparent 70%),
+    radial-gradient(ellipse 70% 55% at 88% 100%, rgb(134 217 255 / 0.12), transparent 72%),
+    linear-gradient(162deg, rgb(6 22 27 / 0.94) 0%, rgb(3 12 16 / 0.97) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(224 248 255 / 0.32),
+    inset 0 -1px 0 rgb(28 207 157 / 0.24),
+    0 22px 52px -12px rgb(0 0 0 / 0.64),
+    0 0 28px -8px rgb(28 207 157 / 0.22);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-facts::before,
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-facts::after {
+  content: none;
+  display: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-facts
+  > div,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  #dossier-profile
+  .manager-facts
+  > div {
+  padding: 11px 2px 12px;
+  border: 0;
+  border-bottom: 1px solid rgb(134 217 255 / 0.18);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-profile
+  .manager-facts
+  > div:last-child {
+  border-bottom: 0;
 }
 
 html[data-family="dossier"]
@@ -367,49 +538,394 @@ html[data-family="dossier"]
   color: var(--ciel-aqua);
 }
 
+/* ================================================================
+   Unified Obsidian-Crystal Sticky Reader Dock (.dossier-reader)
+   Replaces the 4 separate bracketed boxes with a single jewel dock.
+   ================================================================ */
 html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
-  #dossier-profile
-  .manager-facts
-  > div {
-  border-color: rgb(134 217 255 / 0.46);
-  border-left: 2.5px solid rgb(28 207 157 / 0.86);
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  > .dossier-reader {
+  border-top: 1px solid rgb(134 217 255 / 0.3);
+  border-bottom: 1px solid rgb(28 207 157 / 0.44);
   background:
-    linear-gradient(rgb(134 217 255 / 0.78), rgb(134 217 255 / 0.78)) 100% 0 / 10px 1px no-repeat,
-    linear-gradient(rgb(134 217 255 / 0.78), rgb(134 217 255 / 0.78)) 100% 0 / 1px 10px no-repeat,
-    linear-gradient(90deg, rgb(28 207 157 / 0.76), rgb(134 217 255 / 0.54) 60%, transparent 94%) 0 0 /
-      100% 1px no-repeat,
     linear-gradient(
-      145deg,
-      rgb(28 207 157 / 0.13),
-      rgb(134 217 255 / 0.08) 55%,
-      rgb(4 15 21 / 0.84)
-    );
+      90deg,
+      rgb(28 207 157 / 0.18) 0%,
+      rgb(134 217 255 / 0.08) 48%,
+      rgb(28 207 157 / 0.14) 100%
+    ),
+    #041015;
+  background-color: #041015;
   box-shadow:
-    inset 0 1px 0 rgb(218 246 255 / 0.3),
-    inset 3px 0 14px -5px rgb(28 207 157 / 0.32),
-    0 12px 28px -10px rgb(0 0 0 / 0.58);
+    0 18px 44px rgb(0 0 0 / 0.68),
+    0 2px 20px rgb(28 207 157 / 0.14),
+    inset 0 1px 0 rgb(224 248 255 / 0.22);
 }
 
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  > .dossier-reader
+  .dossier-reader-links
+  a {
+  border: 0;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  box-shadow: none;
+  color: #a4c7d6;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  > .dossier-reader
+  .dossier-reader-links
+  a[aria-current] {
+  border: 0;
+  border-top: 2px solid transparent;
+  border-bottom: 2.5px solid var(--ciel-emerald);
+  color: #ffffff;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 8%,
+        var(--ciel-emerald) 28%,
+        #e6f9ff 50%,
+        var(--ciel-aqua) 72%,
+        transparent 92%
+      )
+      50% 100% / 100% 2.5px no-repeat,
+    radial-gradient(
+      ellipse 88% 78% at 50% 100%,
+      rgb(28 207 157 / 0.34),
+      rgb(134 217 255 / 0.12) 58%,
+      transparent 88%
+    );
+  box-shadow: none;
+  text-shadow: 0 0 16px rgb(28 207 157 / 0.48);
+}
+
+/* ================================================================
+   Civilian Record, Table of Contents & Monograph Chapter Cards
+   ================================================================ */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  .rider-archive-civilian,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .rider-archive-civilian {
+  border: 1px solid rgb(134 217 255 / 0.46);
+  border-left: 3px solid var(--ciel-emerald);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald),
+        #e4f8ff 44%,
+        var(--ciel-aqua) 76%,
+        transparent 98%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 84% 54% at 88% 10%, rgb(134 217 255 / 0.22), transparent 66%),
+    radial-gradient(ellipse 78% 54% at 12% 90%, rgb(28 207 157 / 0.2), transparent 66%),
+    linear-gradient(138deg, rgb(4 18 22 / 0.96), rgb(4 14 20 / 0.96));
+  box-shadow:
+    0 26px 68px rgb(0 0 0 / 0.6),
+    0 0 32px -8px rgb(28 207 157 / 0.24),
+    inset 0 1px 0 rgb(224 248 255 / 0.38),
+    inset 0 -1px 0 rgb(28 207 157 / 0.26);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .dossier-contents {
+  border: 1px solid rgb(134 217 255 / 0.34);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald) 0%,
+        #e4f8ff 46%,
+        var(--ciel-aqua) 84%,
+        transparent 100%
+      )
+      0 0 / 100% 1.5px no-repeat,
+    radial-gradient(ellipse 76% 140px at 14% 0%, rgb(28 207 157 / 0.16), transparent 72%),
+    linear-gradient(164deg, rgb(5 20 25 / 0.94) 0%, rgb(3 11 15 / 0.96) 100%);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .dossier-contents::after {
+  content: none;
+  display: none;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .dossier-contents
+  > a,
 html[data-family="dossier"]
   main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
   #dossier-index
   .dossier-contents
   a {
-  border-color: rgb(134 217 255 / 0.42);
-  border-left: 2.5px solid rgb(28 207 157 / 0.82);
+  border: 1px solid rgb(134 217 255 / 0.36);
+  border-left: 3px solid var(--ciel-emerald);
+  border-radius: 8px;
   background:
-    linear-gradient(90deg, rgb(28 207 157 / 0.68), rgb(134 217 255 / 0.46) 62%, transparent 95%) 0 0 /
-      100% 1px no-repeat,
+    linear-gradient(90deg, rgb(28 207 157 / 0.56), rgb(134 217 255 / 0.36) 62%, transparent 95%) 0
+      0 / 100% 1px no-repeat,
     linear-gradient(
       138deg,
-      rgb(28 207 157 / 0.12),
-      rgb(134 217 255 / 0.07) 58%,
-      rgb(4 15 20 / 0.82)
+      rgb(28 207 157 / 0.14),
+      rgb(134 217 255 / 0.08) 58%,
+      rgb(4 15 20 / 0.88)
     );
   box-shadow:
     inset 0 1px 0 rgb(218 246 255 / 0.26),
     0 10px 26px -10px rgb(0 0 0 / 0.56);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .manager-copy-section,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .manager-copy-section {
+  border: 1px solid rgb(134 217 255 / 0.42);
+  border-top: 1px solid rgb(211 243 255 / 0.58);
+  border-left: 3px solid var(--ciel-emerald);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald) 0%,
+        #e4f8ff 42%,
+        var(--ciel-aqua) 76%,
+        transparent 98%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 88% 48% at 10% 0%, rgb(28 207 157 / 0.2), transparent 68%),
+    radial-gradient(ellipse 88% 48% at 90% 100%, rgb(134 217 255 / 0.16), transparent 68%),
+    linear-gradient(155deg, rgb(4 19 23 / 0.96) 0%, rgb(4 13 19 / 0.96) 100%);
+  box-shadow:
+    0 24px 60px rgb(0 0 0 / 0.56),
+    0 0 32px -10px rgb(28 207 157 / 0.22),
+    inset 0 1px 0 rgb(224 248 255 / 0.38),
+    inset 0 -1px 0 rgb(28 207 157 / 0.24),
+    inset 4px 0 22px -6px rgb(28 207 157 / 0.32);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .manager-copy-section::before,
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .manager-copy-section::after {
+  content: none;
+  display: none;
+}
+
+/* Guarantee zero sticky/relative heading offset overlap on chapter headings */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading {
+  position: static;
+  top: auto;
+  inset: auto;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .manager-copy-section
+  .manager-copy-heading
+  > span {
+  border: 1px solid rgb(134 217 255 / 0.54);
+  border-left: 2.5px solid var(--ciel-emerald);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.14), transparent 58%),
+    linear-gradient(135deg, rgb(28 207 157 / 0.24), rgb(134 217 255 / 0.1) 68%, #041218);
+  box-shadow:
+    inset 0 1px 0 rgb(224 248 255 / 0.32),
+    0 0 16px -4px rgb(28 207 157 / 0.36);
+  color: #ebfbff;
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .manager-copy-section
+  .character-chapter-tools
+  .character-chapter-next {
+  border: 1px solid rgb(134 217 255 / 0.42);
+  border-left: 3px solid var(--ciel-emerald);
+  border-radius: 10px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald) 0%,
+        #e4f8ff 46%,
+        var(--ciel-aqua) 84%,
+        transparent 100%
+      )
+      0 0 / 100% 1px no-repeat,
+    linear-gradient(
+      90deg,
+      rgb(28 207 157 / 0.2) 0%,
+      rgb(134 217 255 / 0.08) 54%,
+      rgb(4 16 21 / 0.92) 100%
+    );
+  box-shadow:
+    0 14px 34px rgb(0 0 0 / 0.48),
+    0 0 24px -6px rgb(28 207 157 / 0.22),
+    inset 0 1px 0 rgb(224 248 255 / 0.26);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  #dossier-index
+  .character-related-records {
+  border: 1px solid rgb(134 217 255 / 0.42);
+  border-top: 1px solid rgb(211 243 255 / 0.56);
+  border-left: 3px solid var(--ciel-emerald);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald) 0%,
+        #e4f8ff 44%,
+        var(--ciel-aqua) 80%,
+        transparent 98%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 78% 140px at 0% 0%, rgb(28 207 157 / 0.2), transparent 72%),
+    linear-gradient(158deg, rgb(5 21 26 / 0.96) 0%, rgb(3 11 15 / 0.97) 100%);
+  box-shadow:
+    0 24px 58px rgb(0 0 0 / 0.54),
+    0 0 30px -8px rgb(28 207 157 / 0.22),
+    inset 0 1px 0 rgb(224 248 255 / 0.34);
+}
+
+/* ================================================================
+   Transformation Records & Special-Site Card
+   ================================================================ */
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  .form-pickup-card,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .form-pickup-card {
+  border-color: rgb(134 217 255 / 0.64);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald),
+        #ffffff 46%,
+        var(--ciel-aqua) 78%,
+        transparent 98%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 82% 62% at 92% 8%, rgb(134 217 255 / 0.26), transparent 64%),
+    radial-gradient(ellipse 78% 58% at 8% 92%, rgb(28 207 157 / 0.24), transparent 64%),
+    linear-gradient(142deg, rgb(3 17 20 / 0.98), rgb(5 21 27 / 0.96));
+  box-shadow:
+    0 34px 84px rgb(0 0 0 / 0.72),
+    -18px 0 60px -10px rgb(28 207 157 / 0.28),
+    18px 0 60px -10px rgb(134 217 255 / 0.28),
+    0 0 0 1px rgb(28 207 157 / 0.42),
+    inset 0 1.5px 0 rgb(230 250 255 / 0.54),
+    inset 0 -1.5px 0 rgb(28 207 157 / 0.38),
+    inset 0 0 42px rgb(134 217 255 / 0.14);
+}
+
+html[data-family="dossier"]
+  body
+  main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+    .is-sovereign
+  )
+  .rider-special-site-card,
+html[data-family="dossier"]
+  main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
+  .rider-special-site-card {
+  border-color: rgb(134 217 255 / 0.64);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+        90deg,
+        var(--ciel-emerald),
+        #ffffff 46%,
+        var(--ciel-aqua) 78%,
+        transparent 98%
+      )
+      0 0 / 100% 2px no-repeat,
+    radial-gradient(ellipse 82% 62% at 92% 8%, rgb(134 217 255 / 0.26), transparent 64%),
+    radial-gradient(ellipse 78% 58% at 8% 92%, rgb(28 207 157 / 0.24), transparent 64%),
+    linear-gradient(142deg, rgb(3 17 20 / 0.98), rgb(5 21 27 / 0.96));
+  box-shadow:
+    0 34px 84px rgb(0 0 0 / 0.72),
+    -18px 0 60px -10px rgb(28 207 157 / 0.28),
+    18px 0 60px -10px rgb(134 217 255 / 0.28),
+    0 0 0 1px rgb(28 207 157 / 0.42),
+    inset 0 1.5px 0 rgb(230 250 255 / 0.54),
+    inset 0 -1.5px 0 rgb(28 207 157 / 0.38),
+    inset 0 0 42px rgb(134 217 255 / 0.14);
 }
 
 html[data-family="dossier"]
@@ -418,16 +934,30 @@ html[data-family="dossier"]
   > li {
   border-color: rgb(134 217 255 / 0.48);
   border-left: 2.5px solid var(--ciel-emerald);
+  border-radius: 6px;
   background:
-    linear-gradient(90deg, rgb(28 207 157 / 0.72), rgb(134 217 255 / 0.5) 64%, transparent 96%) 0 0 /
-      100% 1px no-repeat,
-    linear-gradient(140deg, rgb(28 207 157 / 0.14), rgb(134 217 255 / 0.08) 62%, rgb(4 16 22 / 0.86));
+    linear-gradient(90deg, rgb(28 207 157 / 0.72), rgb(134 217 255 / 0.5) 64%, transparent 96%) 0
+      0 / 100% 1px no-repeat,
+    linear-gradient(
+      140deg,
+      rgb(28 207 157 / 0.16),
+      rgb(134 217 255 / 0.09) 62%,
+      rgb(4 16 22 / 0.88)
+    );
   box-shadow:
     inset 0 1px 0 rgb(224 248 255 / 0.3),
     0 10px 26px -10px rgb(0 0 0 / 0.6);
 }
 
 @media (forced-colors: active) {
+  html[data-family="dossier"]
+    body
+    main.manager-page.ciel-dossier-page.manager-page.manager-page.manager-page.manager-page:not(
+      .is-sovereign
+    )
+    #dossier-profile
+    .dossier-identity
+    .manager-display-name,
   html[data-family="dossier"]
     main.manager-page.ciel-dossier-page.manager-page.manager-page:not(.is-sovereign)
     #dossier-profile
@@ -438,12 +968,4 @@ html[data-family="dossier"]
     -webkit-text-fill-color: CanvasText;
     filter: none;
   }
-}
-
-html[data-family="dossier"]
-  main.manager-page.ciel-dossier-page.manager-page.manager-page
-  .manager-topbar
-  .brand
-  small {
-  color: var(--ciel-aqua-pale);
 }
