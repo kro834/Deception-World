@@ -406,9 +406,10 @@ html[data-family]:not([data-button-style="liquid"])
   }
 }
 
-/* Tiles pop inside their group on a desktop pointer only: a phone's menu
-   holds dozens of pictures, and one layer per group is its budget. */
-@media (forced-colors: none) and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) and (min-width: 900px) {
+/* Tiles pop inside their group on every device (owner, 2026-11-23:
+   「スマホでもPC版と同クオリティ」; the pop is a compositor-only scale and
+   fade, and lightweight rendering is the one reduced tier). */
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) {
   html[data-family]:not([data-world-effects="economy"])
     body
     #site-side-panel#site-side-panel.side-panel[data-open="true"]
@@ -418,6 +419,10 @@ html[data-family]:not([data-button-style="liquid"])
     animation: ring-menu-tile var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
     animation-delay: calc(140ms + var(--ring-g, 0) * 60ms + var(--fx-row, 0) * 36ms);
   }
+}
+
+/* Hover belongs to a mouse. */
+@media (forced-colors: none) and (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) and (min-width: 900px) {
 
   /* A tile leans up on hover and lands back on the spring. */
   html[data-family]:not([data-world-effects="economy"])
