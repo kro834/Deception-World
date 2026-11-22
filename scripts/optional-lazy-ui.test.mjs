@@ -13,7 +13,6 @@ test("optional root UI turns rejected lazy imports into an empty component", () 
   for (const component of [
     "LibraryVisitTracker",
     "LazyInquiryNavigation",
-    "LazyOpeningNotice",
     "LazyIpadMenuMode",
     "LazyZeusButtonHost",
   ]) {
@@ -25,7 +24,6 @@ test("optional UI keeps its lazy split, pending fallback, and primary route cont
   for (const component of [
     "LibraryVisitTracker",
     "LazyInquiryNavigation",
-    "LazyOpeningNotice",
     "LazyIpadMenuMode",
   ]) {
     assert.match(

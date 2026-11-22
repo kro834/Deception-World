@@ -56,7 +56,6 @@ export const LIQUID_GLASS_TARGETS = [
   ".rxe-hero-primary",
   ".rxe-hero-secondary",
   ".exo-door",
-  ".opening-notice .opening-notice-close",
 ] as const;
 
 const TARGET_SELECTOR = LIQUID_GLASS_TARGETS.join(", ");
