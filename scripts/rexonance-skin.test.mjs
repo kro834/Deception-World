@@ -732,7 +732,10 @@ test("the droplets are budgeted per device, sorted along the field, and live onl
     width = 1440,
     height = 900,
     memory,
+    quality,
   } = {}) => ({
+    // (2026-11-23: the touch tiers are the lightweight renderer's.)
+    renderQuality: quality ?? (coarse ? "lightweight" : undefined),
     matchMedia: (query) => ({
       matches: query.includes("reduced-motion")
         ? reduced
@@ -748,6 +751,11 @@ test("the droplets are budgeted per device, sorted along the field, and live onl
   const tablet = skinBudget(device({ coarse: true, width: 820, height: 1180 }));
   const phone = skinBudget(device({ coarse: true, width: 390, height: 844 }));
   const low = skinBudget(device({ coarse: true, width: 390, height: 844, cores: 4 }));
+  assert.deepEqual(
+    skinBudget(device({ coarse: true, width: 390, height: 844, cores: 4, memory: 4, quality: "high" })),
+    desktop,
+    "high quality on touch is the desktop budget",
+  );
   assert.ok(
     desktop.samples > tablet.samples &&
       tablet.samples > phone.samples &&
@@ -912,7 +920,11 @@ test("the marks the bake seeds from are the suit's own", () => {
 
 /* The cells (owner, 2026-11-11: the streams were 「気持ち悪い」; the matter
    is taken in from the air as hexagonal cells, large and fine). */
+// (2026-11-23, owner: in high quality a touch screen draws the desktop
+// budget. A coarse device here is on the lightweight renderer, which keeps
+// the touch tiers these tests pin.)
 const cellDevice = (coarse, width, height, cores = 8) => ({
+  renderQuality: coarse ? "lightweight" : undefined,
   matchMedia: (query) => ({ matches: query.includes("coarse") ? coarse : false }),
   navigator: { hardwareConcurrency: cores },
   innerWidth: width,

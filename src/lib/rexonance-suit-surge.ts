@@ -1,3 +1,4 @@
+import { usesTouchBudget } from "./rendering-profile.js";
 import {
   REXONANCE_SUIT_MARKS,
   REXONANCE_SUIT_PIECES,
@@ -158,13 +159,14 @@ function bodyHalf(y: number) {
 
 export type SurgeTier = { swarm: number; shards: number; dpr: number; name: string };
 
-/** Particle counts by device: desktop, tablet, phone, and constrained phones
- * (≤ 4 GB or ≤ 4 cores on touch). */
+/** Particle counts by device. (Owner, 2026-11-23: in high quality every
+ * device draws the desktop tier; tablet, phone and constrained phone (≤ 4 GB
+ * or ≤ 4 cores on touch) are the lightweight renderer's tiers.) */
 export function surgeTier(): SurgeTier {
   const nav = globalThis.navigator as
     | (Navigator & { deviceMemory?: number; hardwareConcurrency?: number })
     | undefined;
-  const coarse = Boolean(
+  const coarse = usesTouchBudget(
     globalThis.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches,
   );
   const memory = nav?.deviceMemory;

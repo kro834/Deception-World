@@ -2172,14 +2172,16 @@ html .rxs-page.rxs-page .rxs-scroll-cue::before {
 }
 
 @media (pointer: coarse) {
-  .rxs-hero-ambient i,
-  .rxs-orbit,
-  .rxs-scroll-cue i,
-  .rxs-stage-panel figure > span {
+  /* (Owner, 2026-11-23: only the lightweight renderer rests these; in high
+     quality a touch screen keeps the ambient motion and the copy's glow.) */
+  html[data-world-effects="economy"] .rxs-hero-ambient i,
+  html[data-world-effects="economy"] .rxs-orbit,
+  html[data-world-effects="economy"] .rxs-scroll-cue i,
+  html[data-world-effects="economy"] .rxs-stage-panel figure > span {
     animation: none;
   }
 
-  .rxs-hero-copy::before {
+  html[data-world-effects="economy"] .rxs-hero-copy::before {
     filter: none;
   }
 

@@ -436,14 +436,13 @@ const project = (m: Float64Array, view: HenshinView, fx: number, fy: number, out
 
 export type HenshinTier = { lines: number; sparks: number; dpr: number; lattice: boolean };
 export function henshinTier(environment: typeof globalThis = globalThis): HenshinTier {
-  const coarse = Boolean(
-    environment.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches,
-  );
   const nav = environment.navigator as Navigator | undefined;
   const constrained = Boolean(nav && hasConstrainedResources(nav));
   const dpr = environment.devicePixelRatio || 1;
   if (constrained) return { lines: 22, sparks: 5, dpr: 1, lattice: false };
-  if (coarse) return { lines: 34, sparks: 8, dpr: Math.min(dpr, 1.5), lattice: true };
+  // (Owner, 2026-11-23: touch screens in high quality draw the desktop
+  // overlay; the lightweight renderer is the constrained row above, so the
+  // old 34-line touch row has no caller left.)
   return { lines: 56, sparks: 12, dpr: Math.min(dpr, 1.5), lattice: true };
 }
 

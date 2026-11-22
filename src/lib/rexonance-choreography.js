@@ -300,7 +300,8 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
 
   // OPTICS: one run of light, in its own element (rxk-flare > rxk-flare-band),
   // over a host that already positions its children. Calm tiers, forced
-  // colours, the constrained and Android tiers and a hidden tab get none.
+  // colours, the constrained tier and a hidden tab get none. (Android in
+  // high quality draws them, as every other screen does: owner, 2026-11-23.)
   const forced = environment.matchMedia?.("(forced-colors: active)");
   const flares = new Set();
   const dim = () =>
@@ -309,8 +310,7 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     document.hidden ||
     !!forced?.matches ||
     root.dataset.worldEffects === "economy" ||
-    root.hasAttribute("data-rzn-constrained") ||
-    root.hasAttribute("data-android-renderer");
+    root.hasAttribute("data-rzn-constrained");
   const flare = (host, kind, delay) => {
     if (!host || dim()) return;
     const style = document.defaultView?.getComputedStyle(host);

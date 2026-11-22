@@ -1063,7 +1063,7 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
    scrolled through (the stage and chip settle the same way). */
 @supports (animation-timeline: view()) and (animation-range: entry 0% entry 100%) {
   @media (prefers-reduced-motion: no-preference) {
-    html[data-family="special"]:not([data-world-effects="economy"]):not([data-android-renderer])
+    html[data-family="special"]:not([data-world-effects="economy"])
       body
       .rxs-page.rxs-page.rxs-rexonance-page[data-motion-ready="true"]
       .rxe-comparison-card
@@ -1242,7 +1242,7 @@ html[data-world-effects="economy"] .rxs-page.rxs-page.rxs-rexonance-page > .rxs-
 
 /* The runs of light stand down on every calm tier, whatever the script
    decided when it made them. */
-html:is([data-world-effects="economy"], [data-rzn-constrained], [data-android-renderer])
+html:is([data-world-effects="economy"], [data-rzn-constrained])
   .rxs-page.rxs-page.rxs-rexonance-page
   .rxk-flare {
   display: none;

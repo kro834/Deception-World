@@ -94,6 +94,9 @@ function planRuntime({ idle = true, decoded = true, canCancelIdle = true } = {})
     requestAnimationFrame: (callback) => schedule("frame", () => callback(now)),
     cancelAnimationFrame: cancel,
     require(name) {
+      // (2026-11-23: the plan asks whether the lightweight touch budget
+      // applies; this harness has no touch screen.)
+      if (name === "@/lib/rendering-profile.js") return { usesTouchBudget: () => false };
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-suit-gold") return gold;

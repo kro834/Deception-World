@@ -818,6 +818,10 @@ function environment({
     navigator: {},
     innerHeight: 915,
     devicePixelRatio: 2,
+    // (2026-11-23: the touch budget is the lightweight renderer's; `coarse`
+    // here is a touch screen on that budget. High quality on touch is the
+    // desktop path, which the fine-pointer cases cover.)
+    renderQuality: coarse ? "lightweight" : undefined,
     matchMedia: (query) => ({
       matches: query.includes("reduce")
         ? reduced

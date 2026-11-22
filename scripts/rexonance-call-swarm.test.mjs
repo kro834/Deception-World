@@ -467,6 +467,11 @@ async function extrasRuntime({ touch, prepare = true }) {
     ...globals,
     exports: plan,
     require(name) {
+      // (2026-11-23: the 2 x 2 touch blocks and the touch sprite budget are
+      // the lightweight renderer's now; a "touch" harness here is a touch
+      // screen in lightweight. High quality on touch is the desktop harness.)
+      if (name === "@/lib/rendering-profile.js")
+        return { usesTouchBudget: (coarse) => Boolean(coarse) };
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-suit-gold") return gold;
@@ -542,6 +547,11 @@ async function extrasRuntime({ touch, prepare = true }) {
     ...globals,
     exports: extras,
     require(name) {
+      // (2026-11-23: the 2 x 2 touch blocks and the touch sprite budget are
+      // the lightweight renderer's now; a "touch" harness here is a touch
+      // screen in lightweight. High quality on touch is the desktop harness.)
+      if (name === "@/lib/rendering-profile.js")
+        return { usesTouchBudget: (coarse) => Boolean(coarse) };
       if (name === "@/lib/rexonance-calls") return calls;
       if (name === "@/lib/rexonance-suit") return suit;
       if (name === "@/lib/rexonance-nanites") return kit;

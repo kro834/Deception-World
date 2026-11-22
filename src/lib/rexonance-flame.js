@@ -16,6 +16,7 @@
 // drift wrapped into the noise's period on the CPU; a CPU kernel of the
 // same maths is the fallback and the unit tests' oracle. Every frame is a
 // closed-form function of (phase, clock), so scrubbing is exact.
+import { usesTouchBudget } from "./rendering-profile.js";
 import {
   NANITE_FIRE_FRAGMENTS,
   NANITE_FIRE_PHASES,
@@ -154,7 +155,11 @@ export function warmNaniteFlame(env = globalThis) {
     return Promise.resolve(false);
   environment = env;
   // Re-evaluate the input tier on a return visit too.
-  const touch = Boolean(env.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches);
+  // (Owner, 2026-11-23: the small touch raster is the lightweight renderer's.)
+  const touch = usesTouchBudget(
+    env.matchMedia?.("(pointer: coarse), (any-pointer: coarse)").matches,
+    env,
+  );
   if (touch !== coarse) {
     coarse = touch;
     releaseBodyFlame();

@@ -37,7 +37,9 @@ const device = ({
   height = 900,
   ratio = 1,
   saveData,
+  quality,
 } = {}) => ({
+  renderQuality: quality,
   matchMedia: (query) => ({
     matches: query.includes("reduced-motion") ? reduced : query.includes("coarse") ? coarse : false,
   }),
@@ -48,16 +50,34 @@ const device = ({
 });
 
 test("the budget scales by device, caps the pixel ratio, and reduced motion has none", () => {
+  // (2026-11-23, owner: in high quality a phone or tablet draws the desktop
+  // budget; the touch tiers are the lightweight renderer's.)
+  const light = "lightweight";
   const desktop = crescendoTier(device({ ratio: 3 }));
+  for (const touch of [
+    { coarse: true, width: 820, height: 1180, ratio: 2, cores: 8 },
+    { coarse: true, width: 390, height: 844, ratio: 3, cores: 6 },
+    { coarse: true, width: 390, height: 844, ratio: 3, cores: 4, memory: 4 },
+  ]) {
+    const high = crescendoTier(device({ ...touch, quality: "high" }));
+    assert.deepEqual(
+      { ...high, dpr: 0 },
+      { ...desktop, dpr: 0 },
+      "high quality on touch is the desktop tier",
+    );
+    assert.equal(high.dpr, Math.min(touch.ratio, 1.5), "never over the screen's own ratio");
+  }
   const tablet = crescendoTier(
-    device({ coarse: true, width: 820, height: 1180, ratio: 2, cores: 8 }),
+    device({ coarse: true, width: 820, height: 1180, ratio: 2, cores: 8, quality: light }),
   );
   const phone = crescendoTier(
-    device({ coarse: true, width: 390, height: 844, ratio: 3, cores: 6 }),
+    device({ coarse: true, width: 390, height: 844, ratio: 3, cores: 6, quality: light }),
   );
-  const low = crescendoTier(device({ coarse: true, width: 390, height: 844, ratio: 3, cores: 4 }));
+  const low = crescendoTier(
+    device({ coarse: true, width: 390, height: 844, ratio: 3, cores: 4, quality: light }),
+  );
   const saver = crescendoTier(
-    device({ coarse: true, width: 390, height: 844, cores: 8, saveData: true }),
+    device({ coarse: true, width: 390, height: 844, cores: 8, saveData: true, quality: light }),
   );
   assert.deepEqual(
     [desktop.name, tablet.name, phone.name, low.name, saver.name],

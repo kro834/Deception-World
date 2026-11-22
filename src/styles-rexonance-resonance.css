@@ -303,10 +303,11 @@ html[data-family="special"]
   opacity: 0.5;
 }
 
-/* Phones carry fewer layers: two shafts and three shards (less to
-   composite on the scroll; the depth reads the same at that size). */
+/* Lightweight phones carry fewer layers: two shafts and three shards (less
+   to composite on the scroll). In high quality a phone keeps them all
+   (owner, 2026-11-23). */
 @media (max-width: 760px) {
-  html[data-family="special"]
+  html[data-world-effects="economy"]
     body
     .rxs-page.rxs-page.rxs-rexonance-page
     .rxs-hero-visual
