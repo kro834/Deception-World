@@ -1396,7 +1396,8 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
   body
   main.site-shell
   :is(.episode-controls button, .episode-pickup-plus) {
-  border-radius: 50%;
+  /* A phone rule in the command sheets sets this radius with !important. */
+  border-radius: 50% !important;
   clip-path: none;
 }
 
