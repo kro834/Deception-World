@@ -991,25 +991,40 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 }
 
 /* One part in the layout. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
   > :is(#identity-records, #dossier-index, #form-records, #special-site, .rider-partner-forms),
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="identity-records"])
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit[data-part="identity-records"])
   > :is(#dossier-index, #form-records, #special-site, .rider-partner-forms),
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-index"])
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit[data-part="dossier-index"])
   > :is(#identity-records, #form-records, #special-site, .rider-partner-forms),
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="form-records"]) > :is(#identity-records, #dossier-index) {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit[data-part="form-records"])
+  > :is(#identity-records, #dossier-index) {
   display: none;
 }
 
 /* Outside 人物紹介 the hero keeps the name only. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
   .manager-introduction
   > :not(.dossier-identity) {
   display: none;
 }
 
 /* The figure: the art in a card at the orbit's centre. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-column {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit)
+  #dossier-profile
+  .manager-portrait-column {
   position: relative;
   display: block;
   height: var(--d1-stage-h);
@@ -1020,12 +1035,24 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   box-shadow: none;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-column::before,
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-column::after {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit)
+  #dossier-profile
+  .manager-portrait-column::before,
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit)
+  #dossier-profile
+  .manager-portrait-column::after {
   content: none;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-frame {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit)
+  #dossier-profile
+  .manager-portrait-frame {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1041,7 +1068,12 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   translate: -50% -50%;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-frame > img {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit)
+  #dossier-profile
+  .manager-portrait-frame
+  > img {
   display: block;
   width: 100%;
   height: 100%;
@@ -1050,13 +1082,21 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 
 /* The first rank's seal was cut for the full-height stage: on the card it
    keeps its corner at the card's scale. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-frame .sovereign-apex-seal {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page:has(> .dossier-orbit)
+  #dossier-profile
+  .manager-portrait-frame
+  .sovereign-apex-seal {
   transform-origin: 100% 100%;
   transform: scale(0.46);
 }
 
 /* The orbit: an overlay on the stage. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page > .dossier-orbit {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  > .dossier-orbit {
   position: absolute;
   z-index: 4;
   top: var(--d1-top);
@@ -1066,13 +1106,19 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   pointer-events: none;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-stage {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-stage {
   position: relative;
   height: 100%;
 }
 
 /* The orbit's line, and a halo beyond it. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-track {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-track {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1088,7 +1134,10 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 }
 
 /* The figure answers 変身記録: the first record's art over the portrait. */
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-art {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-art {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1101,11 +1150,18 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   translate: -50% -50%;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page > .dossier-orbit[data-part="form-records"] .dossier-orbit-art {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  > .dossier-orbit[data-part="form-records"]
+  .dossier-orbit-art {
   opacity: 1;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-ring {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-ring {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1113,7 +1169,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   height: 0;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-ring > button {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-ring
+  > button {
   --d1-a: calc(var(--d1-focus) + (var(--d1-i) - var(--d1-turn)) * var(--d1-step));
   --d1-s: 1;
   position: absolute;
@@ -1139,7 +1199,12 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
     scale(var(--d1-s));
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-ring > button > span {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-ring
+  > button
+  > span {
   width: 2.3em;
   font-size: 13.5px;
   font-weight: 800;
@@ -1149,7 +1214,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   word-break: break-all;
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-ring > button[aria-selected="true"] {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-ring
+  > button[aria-selected="true"] {
   --d1-s: 1.2;
   background:
     radial-gradient(
@@ -1162,7 +1231,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   box-shadow: 0 0 0 8px color-mix(in srgb, var(--ring-key) 22%, transparent);
 }
 
-html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-ring > button:focus-visible {
+html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.manager-page
+  .dossier-orbit-ring
+  > button:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 4px;
 }
@@ -1170,17 +1243,26 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 /* ---- Phones and every screen without the split stage ---- */
 @media not ((min-width: 1100px) and (min-height: 540px)) {
   @media not ((min-width: 900px) and (min-height: 600px) and (orientation: landscape)) {
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) > #dossier-profile.manager-hero {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit)
+      > #dossier-profile.manager-hero {
       padding-top: var(--d1-top);
     }
 
     /* Any part but 人物紹介 docks the figure: a small ring beside the name,
        the orbit away, the reading bar in reach. Reading starts at once. */
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"])) > .dossier-orbit {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+      > .dossier-orbit {
       display: none;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"])) > #dossier-profile.manager-hero {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+      > #dossier-profile.manager-hero {
       display: grid;
       grid-template-columns: 72px minmax(0, 1fr);
       align-items: center;
@@ -1189,14 +1271,18 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       padding: calc(var(--d1-top) + 14px) 20px 12px;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
       #dossier-profile
       .manager-portrait-column {
       width: 72px;
       height: 72px;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
       #dossier-profile
       .manager-portrait-frame {
       width: 68px;
@@ -1204,7 +1290,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       border-radius: 50%;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
       #dossier-profile
       .manager-introduction {
       min-width: 0;
@@ -1212,14 +1300,18 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       padding: 0;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
       #dossier-profile
       .dossier-identity {
       margin: 0;
       padding: 0;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
       #dossier-profile
       .manager-portrait-frame
       .sovereign-apex-seal {
@@ -1227,7 +1319,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
     }
 
     /* The file's numeral rides the docked ring as its badge. */
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit:not([data-part="dossier-profile"]))
       #dossier-profile
       .dossier-file-numeral {
       position: absolute;
@@ -1251,7 +1345,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       --d1-stage-h: var(--sd-stage-h);
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit) #dossier-profile .manager-portrait-column {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page:has(> .dossier-orbit)
+      #dossier-profile
+      .manager-portrait-column {
       position: sticky;
       top: var(--sd-head);
       height: var(--sd-stage-h);
@@ -1259,7 +1357,10 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
     }
 
     /* The orbit shares the hero's rows, and pins exactly as the figure does. */
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page > .dossier-orbit {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page
+      > .dossier-orbit {
       position: relative;
       top: auto;
       grid-column: stage;
@@ -1268,19 +1369,30 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       height: auto;
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-stage {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page
+      .dossier-orbit-stage {
       position: sticky;
       top: var(--sd-head);
       height: var(--sd-stage-h);
       margin-top: var(--sd-head);
     }
 
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-ring > button > span {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page
+      .dossier-orbit-ring
+      > button
+      > span {
       font-size: clamp(14px, 1.9vh, 17px);
     }
 
     /* The thread from the chosen part into the reading column. */
-    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page .dossier-orbit-stage::after {
+    html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+      body
+      main.manager-page
+      .dossier-orbit-stage::after {
       content: "";
       position: absolute;
       top: 50%;
@@ -1288,7 +1400,11 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       right: -18px;
       height: 2px;
       margin-top: -1px;
-      background: linear-gradient(90deg, color-mix(in srgb, var(--ring-key) 80%, #fff), transparent);
+      background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--ring-key) 80%, #fff),
+        transparent
+      );
     }
 
     /* 人物紹介 on a stage with room: the facts leave the reading column and
@@ -1296,20 +1412,34 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
        and its orbit are not pinned for this part, so the callouts (placed
        from the hero) can never drift from them. */
     @media (min-width: 1430px) and (min-height: 720px) {
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-portrait-column,
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page > .dossier-orbit[data-part="dossier-profile"] .dossier-orbit-stage {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page
+        > .dossier-orbit[data-part="dossier-profile"]
+        .dossier-orbit-stage {
         position: relative;
         top: auto;
       }
 
       /* The callouts are placed from the hero, not from the name block. */
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-introduction {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-introduction {
         position: static;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-facts {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-facts {
         position: static;
         display: block;
         margin: 0;
@@ -1324,12 +1454,25 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
         will-change: auto;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-facts::before,
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-facts::after {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-facts::before,
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-facts::after {
         content: none;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-facts > div {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-facts
+        > div {
         --d1-side: -1;
         --d1-slot: -170px;
         --d1-tag: calc(var(--sd-stage-w) / 2 - var(--d1-fig-w) / 2 - 40px);
@@ -1349,7 +1492,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
         translate: 0 -50%;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(even) {
@@ -1358,35 +1503,45 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
         text-align: left;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(n + 3) {
         --d1-slot: -85px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(n + 5) {
         --d1-slot: 85px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(n + 7) {
         --d1-slot: 170px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(n + 9) {
         --d1-slot: -255px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(n + 11) {
@@ -1394,7 +1549,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       }
 
       /* The leader line to the figure. */
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div::after {
@@ -1408,7 +1565,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
         background: color-mix(in srgb, var(--ring-key) 80%, #fff);
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
         #dossier-profile
         .manager-facts
         > div:nth-child(even)::after {
@@ -1416,14 +1575,24 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
         left: -28px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-facts dt {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-facts
+        dt {
         margin: 0;
         padding: 0;
         font-size: 10.5px;
         letter-spacing: 0.16em;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"]) #dossier-profile .manager-facts dd {
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
+        #dossier-profile
+        .manager-facts
+        dd {
         margin: 2px 0 0;
         padding: 0;
         font-size: 13px;
@@ -1433,28 +1602,36 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 
       /* Three parts stand at east, south-west and north-west: the left
          callouts close up between the two western nodes. */
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
         #dossier-profile
         .manager-facts
         > div:nth-child(odd) {
         --d1-slot: -120px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
         #dossier-profile
         .manager-facts
         > div:nth-child(odd):nth-child(n + 3) {
         --d1-slot: -40px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
         #dossier-profile
         .manager-facts
         > div:nth-child(odd):nth-child(n + 5) {
         --d1-slot: 40px;
       }
 
-      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
+      html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+        body
+        main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"][data-count="3"])
         #dossier-profile
         .manager-facts
         > div:nth-child(odd):nth-child(n + 7) {
@@ -1501,12 +1678,16 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
    callouts stand (in economy too; the callouts then simply appear). */
 @supports (grid-template-rows: subgrid) {
   @media (prefers-reduced-motion: no-preference) and (min-width: 1430px) and (min-height: 720px) {
-    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+        #r
+      ):not(#r)
       body
       main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
       #dossier-profile
       .manager-facts,
-    html[data-family="dossier"][data-world-effects="economy"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    html[data-family="dossier"][data-world-effects="economy"]:not(#r):not(#r):not(#r):not(#r):not(
+        #r
+      )
       body
       main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
       #dossier-profile
@@ -1519,7 +1700,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 @media (prefers-reduced-motion: no-preference) {
   /* A turn of the orbit: every part rides the bounce spring to its place;
      the chosen one grows on the same curve. */
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
     body
     main.manager-page
     .dossier-orbit-ring
@@ -1529,7 +1712,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
       box-shadow 220ms ease;
   }
 
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
     body
     main.manager-page
     .dossier-orbit-art {
@@ -1537,7 +1722,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   }
 
   /* The orbit turns into place when the file opens. */
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
     body
     main.manager-page
     :is(.dossier-orbit-ring, .dossier-orbit-track) {
@@ -1548,11 +1735,15 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
      (display: none to shown restarts the animation). Backwards fill only;
      the part's own blocks keep their reveal (and take the shared section
      chain of ring-motion.js as any section does). */
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
     body
     main.manager-page:has(> .dossier-orbit)
     > :is(#identity-records, #dossier-index, #form-records),
-  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+  html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+      #r
+    ):not(#r)
     body
     main.manager-page:has(> .dossier-orbit)
     .manager-introduction
@@ -1564,11 +1755,15 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
 @supports (grid-template-rows: subgrid) {
   @media (prefers-reduced-motion: no-preference) and (min-width: 1100px) and (min-height: 540px),
     (prefers-reduced-motion: no-preference) and (min-width: 900px) and (min-height: 600px) and (orientation: landscape) {
-    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+        #r
+      ):not(#r)
       body
       main.manager-page:has(> .dossier-orbit)
       > :is(#identity-records, #dossier-index),
-    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+        #r
+      ):not(#r)
       body
       main.manager-page:has(> .dossier-orbit)
       .manager-introduction
@@ -1578,7 +1773,9 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   }
 
   @media (prefers-reduced-motion: no-preference) and (min-width: 1430px) and (min-height: 720px) {
-    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r)
+    html[data-family="dossier"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(
+        #r
+      ):not(#r)
       body
       main.manager-page:has(> .dossier-orbit[data-part="dossier-profile"])
       #dossier-profile
@@ -1590,13 +1787,27 @@ html[data-family="dossier"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.ma
   }
 }
 
-main.manager-page .manager-facts > :nth-child(2) { --d1-k: 1; }
-main.manager-page .manager-facts > :nth-child(3) { --d1-k: 2; }
-main.manager-page .manager-facts > :nth-child(4) { --d1-k: 3; }
-main.manager-page .manager-facts > :nth-child(5) { --d1-k: 4; }
-main.manager-page .manager-facts > :nth-child(6) { --d1-k: 5; }
-main.manager-page .manager-facts > :nth-child(7) { --d1-k: 6; }
-main.manager-page .manager-facts > :nth-child(n + 8) { --d1-k: 7; }
+main.manager-page .manager-facts > :nth-child(2) {
+  --d1-k: 1;
+}
+main.manager-page .manager-facts > :nth-child(3) {
+  --d1-k: 2;
+}
+main.manager-page .manager-facts > :nth-child(4) {
+  --d1-k: 3;
+}
+main.manager-page .manager-facts > :nth-child(5) {
+  --d1-k: 4;
+}
+main.manager-page .manager-facts > :nth-child(6) {
+  --d1-k: 5;
+}
+main.manager-page .manager-facts > :nth-child(7) {
+  --d1-k: 6;
+}
+main.manager-page .manager-facts > :nth-child(n + 8) {
+  --d1-k: 7;
+}
 
 /* The split stage has room for the numeral's ring; it steps down so the
    ring clears the top bar. */

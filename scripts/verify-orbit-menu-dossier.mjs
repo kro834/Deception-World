@@ -59,7 +59,11 @@ try {
     await page.mouse.up();
     await settle(page);
     const dragged = await region(page);
-    check("a drag turns the dial to the next detent", dragged !== before, `${before} -> ${dragged}`);
+    check(
+      "a drag turns the dial to the next detent",
+      dragged !== before,
+      `${before} -> ${dragged}`,
+    );
     check("the menu stays open after a drag on the dial", Boolean(await region(page)));
     await page.mouse.move(cx, cy - r * 0.55);
     await page.mouse.wheel(0, 120);
@@ -217,14 +221,21 @@ try {
           return box.right <= figure.left + 1 || box.left >= figure.right - 1;
         });
       });
-      check("the facts stand beside the figure as callouts", facts.length > 0 && facts.every(Boolean));
+      check(
+        "the facts stand beside the figure as callouts",
+        facts.length > 0 && facts.every(Boolean),
+      );
     } else {
       await page.evaluate(() => document.getElementById("dossier-orbit-tab-dossier-index").click());
       await settle(page);
       const reading = await page.evaluate(() =>
         Math.round(document.getElementById("dossier-index").getBoundingClientRect().top),
       );
-      check("phone: the reading starts in the first half screen", reading < height * 0.45, `${reading}`);
+      check(
+        "phone: the reading starts in the first half screen",
+        reading < height * 0.45,
+        `${reading}`,
+      );
       await page.locator('.dossier-reader-links a[href="#dossier-profile"]').click();
       await settle(page);
       check("phone: the reading bar returns to 人物紹介", (await part(page)) === "dossier-profile");
@@ -236,13 +247,19 @@ try {
     const chapter = await page.evaluate(() =>
       Math.round(document.getElementById("character-section-03").getBoundingClientRect().top),
     );
-    check(`${width}: a chapter anchor lands inside its part`, chapter >= 0 && chapter < height * 0.6);
+    check(
+      `${width}: a chapter anchor lands inside its part`,
+      chapter >= 0 && chapter < height * 0.6,
+    );
     await openMenu(page);
     await page.evaluate(() => document.getElementById("command-atlas-tab-sections").click());
     await settle(page, 700);
     await page.locator('#command-atlas-sections a[href$="#form-records"]').click();
     await settle(page, 1800);
-    check(`${width}: the menu's page section opens its part`, (await part(page)) === "form-records");
+    check(
+      `${width}: the menu's page section opens its part`,
+      (await part(page)) === "form-records",
+    );
     check(`${width}: the dossier has no sideways overflow`, (await overflow(page)) <= 0);
     check(`${width}: no runtime errors`, errors.length === 0, errors.join(" | "));
     await context.close();
@@ -292,7 +309,10 @@ try {
     await page.evaluate(
       () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
     );
-    check("reduced motion: nothing runs in the menu", (await running(page, "#site-side-panel")) === 0);
+    check(
+      "reduced motion: nothing runs in the menu",
+      (await running(page, "#site-side-panel")) === 0,
+    );
     await context.close();
   }
 } finally {
@@ -300,5 +320,9 @@ try {
 }
 
 const failed = results.filter((row) => !row.pass);
-assert.equal(failed.length, 0, `${failed.length} checks failed: ${failed.map((row) => row.name).join("; ")}`);
+assert.equal(
+  failed.length,
+  0,
+  `${failed.length} checks failed: ${failed.map((row) => row.name).join("; ")}`,
+);
 console.log(`${results.length}/${results.length} orbit menu and dossier checks passed`);
