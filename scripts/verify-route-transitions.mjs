@@ -13,6 +13,7 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
 import { isFlatCoverFrame } from "./route-transition-frame.mjs";
+import { showMenuRow } from "./verify-menu-region.mjs";
 
 const BASE_URL = process.env.BASE_URL ?? "http://localhost:8082";
 const FPS = 60;
@@ -284,6 +285,8 @@ async function audit(browser, analyser, profileName, name) {
     if (touch) await trigger.tap();
     else await trigger.click();
     await page.waitForTimeout(1000);
+    // 2026-11-23: the menu is an orbital dial; turn it to the row's region first.
+    await showMenuRow(page, `a[href="${scenario.menu}"]`);
     target = page.locator(`#site-side-panel a[href="${scenario.menu}"]`).first();
     await target.evaluate((element) => element.scrollIntoView({ block: "center" }));
   } else {
