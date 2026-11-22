@@ -26,7 +26,7 @@
  */
 
 import { buildFireField, FIELD_D, FIELD_IN, FIELD_LIFT, FIRE_RECT } from "./rexonance-fire/fire-field.js";
-import { sampleNoise } from "./far-from-fire-noise.ts";
+import { fireGridStepped, fireRasterTook, sampleNoise } from "./far-from-fire-noise.ts";
 
 // FAR FROM's field layout: the 96 x 144 cutout inside a 160 x 204 field with
 // air above and beside it (the same FIRE_RECT scale, so the same kernel).
@@ -231,10 +231,27 @@ function rasterFire(
   const invW = 1 / (1 + 0.68 * burst);
   const invH = 1 / (1 + 0.23 * burst);
   const at = u * 6.2;
+  const attached = 1 - liftOff;
+  // (2026-11-23: the same picture for less work, so a phone can draw the
+  // desktop grid. Every shortcut below leaves each pixel's value exactly as
+  // the full expression gives it: only terms multiplied by an exact 0 are
+  // skipped.)
+  // Before the fire has risen and after it has faded, with no tears glowing,
+  // every density is 0: nothing is drawn.
+  if (fade === 0 && !(tearGlow > 0)) {
+    pixels.fill(0, 0, width * height);
+    return;
+  }
   for (let row = 0, i = 0; row < height; row++) {
     const fy = IC_FIRE_BOUNDS.top + ((row + 0.5) * IC_FIRE_BOUNDS.height) / height;
     const y = 0.39 + (fy - 0.39 + 0.066 * burst) * invH;
     const trimY = ramp(IC_FIRE_BOUNDS.top, -0.27, fy) * (1 - ramp(0.997, 1.075, fy));
+    // A row the trim takes whole.
+    if (trimY === 0) {
+      pixels.fill(0, i, i + width);
+      i += width;
+      continue;
+    }
     const gy = Math.max(0, Math.min(FH - 1.001, y * MASK_HEIGHT + TOP - 0.5));
     const sy = gy | 0;
     const ty = gy - sy;
@@ -262,6 +279,13 @@ function rasterFire(
         pixels[i] = 0;
         continue;
       }
+      // 1 inside the armour, 0 in the air, between them only on its edge.
+      const skin = 1 - ramp(-0.005, 0.005, d);
+      // Inside the armour only the attached sheet and the tears draw.
+      if (skin === 1 && attached === 0 && !(tearGlow > 0)) {
+        pixels[i] = 0;
+        continue;
+      }
       const q = sampleNoise(x * 5.3 + 17, y * 3.2 + at);
       const roll = sampleNoise(x * 8.4 + q * 2.1 + 41, y * 5.1 + at * 1.2);
       const reach = 0.15 + 0.14 * q + 0.074 * (1 - Math.min(1, Math.abs(x - 0.5) * 2));
@@ -282,43 +306,59 @@ function rasterFire(
         pixels[i] = 0;
         continue;
       }
-      const skin = 1 - ramp(-0.005, 0.005, d);
-      const rim = skin * (1 - ramp(0.002, 0.023, -d)) * (0.42 + 0.58 * ramp(0.27, 0.72, draft));
       const clean = complete * ramp(0, 0.3, spread - arrival);
-      const sheet = skin * (0.26 + 0.21 * clean + (0.69 - 0.16 * clean) * ramp(0.35, 0.71, sheetFlow));
       const fold = shear + 0.35 * detail + 0.12 * fine;
       const lip = 1 - ramp(0.013, 0.084, Math.abs(fold - 0.73));
       const channel = 1 - ramp(0.018, 0.13, Math.abs(fold - 0.615));
-      const billow = sampleNoise(x * 40 + shear * 5.5 + roll * 4.3, y * 21 + detail * 4.1 + at * 2.35);
-      const strands = shear * 0.42 + detail * 0.29 + billow * 0.2 + fine * 0.09;
-      const curledEdge = 1 - ramp(0.012, 0.094, Math.abs(strands - 0.58));
-      const threshold = 0.3 + 0.62 * fall + (1 - fresh) * 0.3;
-      const core = ramp(threshold, threshold + 0.22, draft);
-      const halo = ramp(threshold - 0.18, threshold + 0.21, draft);
-      const below = Math.max(0, (surface[low] - surface[fi]) * MASK_HEIGHT);
-      const heel = ramp(0.84, 0.945, y) * clamp(below * 1.2);
-      const ground = 1 - heel * ramp(0.001, 0.035, d + (roll - 0.5) * 0.019);
-      const peel = 1 - liftOff + liftOff * ramp(-0.001, 0.073, d + (shear - 0.5) * 0.085);
-      const strand = (1 - ramp(0.009, 0.06, Math.abs(strands - 0.595))) * ramp(0.34, 0.72, shear);
-      const breakup =
-        1 - liftOff * (0.34 + 0.6 * ramp(0.29, 0.71, billow * 0.52 + fine * 0.48)) * (1 - 0.84 * strand);
-      const depth = 0.19 + 0.37 * ramp(0.22, 0.8, strands) + 0.44 * curledEdge;
-      const plume =
-        (1 - skin) *
-        (0.69 * core + 0.31 * halo) *
-        depth *
-        (1 - 0.42 * fall) *
-        (1 - ramp(0.71, 1, fall)) *
-        ground *
-        peel *
-        breakup;
-      const attached = 1 - liftOff;
-      let density = (plume * (1 + 0.4 * liftOff * strand) + (sheet * 0.89 + rim * 0.56) * attached) * fresh * fade;
-      let temp =
-        (0.23 + 0.39 * strands + 0.42 * curledEdge + 0.15 * lip - 0.22 * channel - 0.16 * fall) *
+      let density: number;
+      let temp: number;
+      let plume = 0;
+      let strand = 0;
+      if (skin === 1) {
+        // The armour's own surface: the sheet and its rim (no plume).
+        const rim = (1 - ramp(0.002, 0.023, -d)) * (0.42 + 0.58 * ramp(0.27, 0.72, draft));
+        const sheet = 0.26 + 0.21 * clean + (0.69 - 0.16 * clean) * ramp(0.35, 0.71, sheetFlow);
+        density = (sheet * 0.89 + rim * 0.56) * attached * fresh * fade;
+        temp = (sheet * (0.32 + 0.3 * sheetFlow + 0.5 * lip - 0.34 * channel) + rim * 0.5) * attached;
+      } else {
+        const rim =
+          skin === 0
+            ? 0
+            : skin * (1 - ramp(0.002, 0.023, -d)) * (0.42 + 0.58 * ramp(0.27, 0.72, draft));
+        const sheet =
+          skin === 0
+            ? 0
+            : skin * (0.26 + 0.21 * clean + (0.69 - 0.16 * clean) * ramp(0.35, 0.71, sheetFlow));
+        const billow = sampleNoise(x * 40 + shear * 5.5 + roll * 4.3, y * 21 + detail * 4.1 + at * 2.35);
+        const strands = shear * 0.42 + detail * 0.29 + billow * 0.2 + fine * 0.09;
+        const curledEdge = 1 - ramp(0.012, 0.094, Math.abs(strands - 0.58));
+        const threshold = 0.3 + 0.62 * fall + (1 - fresh) * 0.3;
+        const core = ramp(threshold, threshold + 0.22, draft);
+        const halo = ramp(threshold - 0.18, threshold + 0.21, draft);
+        const below = Math.max(0, (surface[low] - surface[fi]) * MASK_HEIGHT);
+        const heel = ramp(0.84, 0.945, y) * clamp(below * 1.2);
+        const ground = 1 - heel * ramp(0.001, 0.035, d + (roll - 0.5) * 0.019);
+        const peel = 1 - liftOff + liftOff * ramp(-0.001, 0.073, d + (shear - 0.5) * 0.085);
+        strand = (1 - ramp(0.009, 0.06, Math.abs(strands - 0.595))) * ramp(0.34, 0.72, shear);
+        const breakup =
+          1 - liftOff * (0.34 + 0.6 * ramp(0.29, 0.71, billow * 0.52 + fine * 0.48)) * (1 - 0.84 * strand);
+        const depth = 0.19 + 0.37 * ramp(0.22, 0.8, strands) + 0.44 * curledEdge;
+        plume =
           (1 - skin) *
-          (0.45 + 0.55 * core) +
-        (sheet * (0.32 + 0.3 * sheetFlow + 0.5 * lip - 0.34 * channel) + rim * 0.5) * attached;
+          (0.69 * core + 0.31 * halo) *
+          depth *
+          (1 - 0.42 * fall) *
+          (1 - ramp(0.71, 1, fall)) *
+          ground *
+          peel *
+          breakup;
+        density = (plume * (1 + 0.4 * liftOff * strand) + (sheet * 0.89 + rim * 0.56) * attached) * fresh * fade;
+        temp =
+          (0.23 + 0.39 * strands + 0.42 * curledEdge + 0.15 * lip - 0.22 * channel - 0.16 * fall) *
+            (1 - skin) *
+            (0.45 + 0.55 * core) +
+          (sheet * (0.32 + 0.3 * sheetFlow + 0.5 * lip - 0.34 * channel) + rim * 0.5) * attached;
+      }
       temp = temp * (0.92 + 0.17 * clean) + 0.055 * fresh;
       if (tearGlow > 0) {
         // The fissures glow on the old armour while its fire flies outward.
@@ -365,7 +405,11 @@ type Raster = {
 const buffers = new WeakMap<CanvasRenderingContext2D, Raster>();
 
 function drawMantle(context: CanvasRenderingContext2D, u: number, coarse: boolean, body: IllusionculumFireBody) {
-  const [w, h] = coarse ? IC_FIRE_GRID.touch : IC_FIRE_GRID.desktop;
+  // The lightweight renderer's touch grid, or a touch screen that could not
+  // hold the desktop grid (far-from-fire-noise.ts: the governor).
+  const view = context.canvas.ownerDocument.defaultView;
+  const small = coarse || fireGridStepped(view);
+  const [w, h] = small ? IC_FIRE_GRID.touch : IC_FIRE_GRID.desktop;
   let buffer = buffers.get(context);
   if (!buffer || buffer.surface.width !== w || buffer.surface.height !== h) {
     // Made once per drawing context (and size), never per frame.
@@ -378,7 +422,9 @@ function drawMantle(context: CanvasRenderingContext2D, u: number, coarse: boolea
     buffer = { surface, ctx, image, words: new Uint32Array(image.data.buffer) };
     buffers.set(context, buffer);
   }
+  const began = small ? 0 : performance.now();
   rasterFire(buffer.words, buffer.image.data, w, h, u, body);
+  if (!small) fireRasterTook(performance.now() - began);
   buffer.ctx.putImageData(buffer.image, 0, 0);
   context.imageSmoothingEnabled = true;
   context.drawImage(
