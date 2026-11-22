@@ -1595,7 +1595,7 @@ html body .load-gate.rider-route-cutin .rider-cutin-caption small {
 
 @media (max-width: 560px) {
   html body .load-gate.rider-route-cutin .rider-cutin-caption small {
-    letter-spacing: 0.14em;
+    letter-spacing: 0.1em;
   }
 }
 
@@ -2274,6 +2274,28 @@ html[data-world-effects="economy"] body .load-gate .cine-dive-status::after {
   .side-panel-quick-search kbd {
     display: none;
   }
+}
+
+/* 上映終了: the small status badge wherever the Dream Chapter is listed
+   (menu, deck, library, search). A label only; the link is unchanged. */
+.screening-ended-badge {
+  display: inline-block;
+  box-sizing: border-box;
+  margin-inline: 0.55em 0;
+  padding: 0 6px 1px;
+  border: 1px solid rgb(226 96 78 / 72%);
+  border-radius: 3px;
+  color: #f6b9ac;
+  background: rgb(122 15 15 / 26%);
+  font:
+    700 12px / 1.4 "Noto Sans JP",
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-shadow: none;
+  text-transform: none;
+  white-space: nowrap;
+  vertical-align: 0.12em;
+  -webkit-text-fill-color: currentcolor;
 }
 
 /* Opening title: resolve inner bracket collision and tidy 375px HUD crowding */

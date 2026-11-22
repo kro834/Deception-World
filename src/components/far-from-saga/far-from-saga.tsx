@@ -592,6 +592,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-overview-title">届かない<wbr />距離は、<wbr />もう<wbr />無い。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <CallOuts calls={FAR_FROM_SAGA.calls} label="ファーフロムサーガ 変身音声" />
         <div className="ffs-copy rxs-reveal">
@@ -610,6 +613,9 @@ export function FarFromSaga() {
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-specs-title">数字が、<wbr />追いつかない。</h2>
           <span>標準稼働時の数値です。</span>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <dl className="ffs-specs rxs-reveal" aria-label="ファーフロムサーガ スペック">
           {FAR_FROM_SAGA.specs.map((row) => (
@@ -633,6 +639,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-performance-title">レクソナンス？<wbr />通過点だ。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <FarFromComparison />
       </section>
@@ -646,6 +655,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-report-title">差は、<wbr />桁で<wbr />見せる。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <FarFromReport />
       </section>
@@ -654,6 +666,9 @@ export function FarFromSaga() {
       <section id="p16" className="rxs-section ffs-p16" aria-labelledby="ffs-p16-title">
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-p16-title">韋駄天？<wbr />遅過ぎる</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <FarFromP16 />
       </section>
@@ -668,6 +683,9 @@ export function FarFromSaga() {
           <h2 id="ffs-stages-title">選べ。<wbr />どこまで<wbr />遠くへ<wbr />行くか。</h2>
           <img className="ffs-exhibit-forms" src="/far-from-exhibit-20261119/forms.webp"
             width={1040} height={208} alt="" loading="lazy" decoding="async" />
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
@@ -767,6 +785,9 @@ export function FarFromSaga() {
             <img src="/far-from-exhibit-20261119/core.webp" width={700} height={288}
               alt="" loading="lazy" decoding="async" />
           </div>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={FAR_FROM_SAGA.theories} columns={2} label="新規理論・中核機構" />
       </section>
@@ -779,6 +800,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-system-title">鎧も<wbr />頭脳も、<wbr />最終版。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles
           items={[FAR_FROM_SAGA.bits, FAR_FROM_SAGA.os]}
@@ -795,6 +819,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-authority-title">究極が<wbr />極まる</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <Articles items={FAR_FROM_SAGA.powers} columns={2} label="能力" />
       </section>
@@ -807,6 +834,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-arsenal-title">届く<wbr />場所すべてが、<wbr />射程。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <ul className="ffs-weapons rxs-reveal" aria-label="ファーフロムサーガ 追加武装">
           {FAR_FROM_SAGA.arsenal.map((weapon, index) => (
@@ -827,6 +857,9 @@ export function FarFromSaga() {
       >
         <header className="rxs-section-heading rxs-reveal">
           <h2 id="ffs-finishers-title">終幕は、<wbr />彼方から。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="ffs-finisher-list">
           {FAR_FROM_SAGA.finishers.map((finisher) => (

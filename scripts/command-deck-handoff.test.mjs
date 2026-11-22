@@ -56,6 +56,7 @@ function runtime({ reduced = false, economy = false, scene = 0, viewport, measur
       if (name === "@/lib/rexonance-images") return { rexonanceImage: () => ({}) };
       if (name === "@/lib/command-deck-selection") return { readDeckSelection: () => null, saveDeckSelection() {} };
       if (name === "@/components/artwork-stage/artwork-stage") return { ArtworkStage() {} };
+      if (name === "@/components/screening-ended") return { ScreeningEndedBadge() {}, isScreeningEnded: () => false };
       if (name === "lucide-react") return {};
       throw new Error(`Unexpected dependency ${name}`);
     },
@@ -221,6 +222,7 @@ function deckPauseRuntime() {
       if (name === "@/lib/opening-logo") return { OPENING_LOGO_FIRST: { src: "/logo.webp" } };
       if (name === "@/lib/thumbnail-images") return { posterImage: () => ({}), launcherTile: (value) => value };
       if (name === "@/lib/rexonance-images") return { rexonanceImage: () => ({}) };
+      if (name === "@/components/screening-ended") return { ScreeningEndedBadge() {}, isScreeningEnded: () => false };
       return {};
     },
   });

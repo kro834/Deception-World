@@ -12,7 +12,6 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
 const out = {};
 const queue = [...seeds]; const seen = new Set(seeds);
 const c = await b.newContext({ viewport: { width: 393, height: 852 }, isMobile: true, hasTouch: true, reducedMotion: "reduce" });
-await c.addInitScript(`try{localStorage.setItem("dw-opening-notice-seen","1")}catch(e){}`);
 while (queue.length && Object.keys(out).length < 90) {
   const r = queue.shift();
   const p = await c.newPage();

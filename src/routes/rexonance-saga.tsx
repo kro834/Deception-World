@@ -1,6 +1,7 @@
 import commandSpecialCssUrl from "@/styles-command-special.css?url";
 import visualAstraCssUrl from "@/styles-visual-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
+import ringSpecialCssUrl from "@/styles-ring-special.css?url";
 import { RexonanceSaga } from "@/components/rexonance-saga/rexonance-saga";
 import {
   WORLD_CORE_STYLESHEET_LINKS as WORLD_STYLESHEET_LINKS,
@@ -114,6 +115,11 @@ export const Route = createFileRoute("/rexonance-saga")({
       // feature's sheet).
       { rel: "stylesheet", href: visualAstraCssUrl },
       { rel: "stylesheet", href: commandSpecialCssUrl },
+      // The ring system on the special sites (2026-11-23): pill bar, chapter
+      // rings, ring cards, springing disclosures. Before the TYPE sheet, which
+      // stays the last of the page's sheets but the motion one; the ring rules
+      // win by weight, not by order (styles-ring-special.css).
+      { rel: "stylesheet", href: ringSpecialCssUrl },
       { rel: "stylesheet", href: rexonanceTypeCssUrl },
       // KINETIC (rxk, 2026-10-21): the chapters' entrances, the reading rail,
       // hover and press, the end card (styles-rexonance-motion-20261021.css;

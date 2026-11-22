@@ -204,8 +204,6 @@ const ZEUS_AVOID_SELECTOR = [
   // The load-error page's ways out (reload, home): on short phones the
   // panel fills the screen and its words left no clear spot but the buttons.
   ".app-load-error-actions :is(button, a)",
-  // 2026-10-28: the notice /world shows after the opening (opening-notice.tsx).
-  ".opening-notice :is(.opening-notice-open, .opening-notice-close)",
   ".wm-detail",
   ".exhibition-shelf-work",
   ".search-results-heading p",

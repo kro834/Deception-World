@@ -381,6 +381,16 @@ export function FinalStage() {
   const [royalOpen, setRoyalOpen] = useState(false);
   const [form, setForm] = useState<RrFormKey>("royal");
   const [castIndex, setCastIndex] = useState(0);
+  // The cast ring's turn, in eighths, by the short way round: stepping from
+  // the eighth person to the first turns one place on, not seven back.
+  const [castTurn, setCastTurn] = useState({ index: 0, turn: 0 });
+  if (castTurn.index !== castIndex) {
+    const step = (castIndex - castTurn.index + CAST.length) % CAST.length;
+    setCastTurn({
+      index: castIndex,
+      turn: castTurn.turn + (step > CAST.length / 2 ? step - CAST.length : step),
+    });
+  }
   const [motionReady, setMotionReady] = useState(false);
   const pageRef = useRef<HTMLElement | null>(null);
 
@@ -638,6 +648,9 @@ export function FinalStage() {
             帰り道を切り拓く。
           </h2>
           <span>{STORY.title}</span>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
         <div className="fst-story-layout rxs-reveal">
           <div className="fst-story-index" aria-hidden="true">
@@ -657,14 +670,61 @@ export function FinalStage() {
       </section>
 
       <section id="characters" className="rxs-section fst-cast-section">
-        <header className="rxs-section-heading rxs-reveal">
-          <h2>
-            悠真の帰還を巡る、
-            <br />
-            八人の登場人物。
-          </h2>
-          <span>悠真と仲間たちが、案内係ナギとともにアーカイヴの異変に立ち向かう。</span>
-        </header>
+        {/* The ring update (2026-11-23): the eight stand on one orbit around
+            the chapter's heading, and the ring turns on the bounce spring
+            until the chosen person rests at its top
+            (styles-ring-special.css). The orbit is a pointer shortcut and an
+            ornament: the rail below stays the tablist, so nothing in the
+            ring takes focus or speaks. */}
+        <div className="fst-cast-ring">
+          <div
+            className="fst-cast-orbit ring-orbit ring-orbit-keep ring-enter"
+            aria-hidden="true"
+            style={{ ["--ring-n" as string]: CAST.length, ["--fst-turn" as string]: castTurn.turn }}
+          >
+            <span className="ring-orbit-track" />
+            {CAST.map((person, index) => (
+              <span
+                key={person.id}
+                className={`ring-orbit-item fst-cast-node${castIndex === index ? " is-on" : ""}`}
+                style={{ ["--ring-i" as string]: index, ["--fst-accent" as string]: person.accent }}
+                onClick={() => setCastIndex(index)}
+              >
+                <span className="ring-frame">
+                  {person.image ? (
+                    <span className="ring-frame-media">
+                      <img
+                        src={person.image}
+                        {...castImage(person.image)}
+                        sizes={CAST_FACE_SIZES}
+                        alt=""
+                        draggable={false}
+                        style={{
+                          objectPosition: person.face ?? person.pos,
+                          transformOrigin: person.face ?? person.pos,
+                        }}
+                        width={person.width}
+                        height={person.height}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </span>
+                  ) : (
+                    <b className="ring-frame-media">{person.monogram}</b>
+                  )}
+                </span>
+              </span>
+            ))}
+          </div>
+          <header className="rxs-section-heading rxs-reveal">
+            <h2>
+              悠真の帰還を巡る、
+              <br />
+              八人の登場人物。
+            </h2>
+            <span>悠真と仲間たちが、案内係ナギとともにアーカイヴの異変に立ち向かう。</span>
+          </header>
+        </div>
         <div className="fst-cast-console rxs-reveal">
           <div
             ref={castTabsRef}
@@ -761,6 +821,9 @@ export function FinalStage() {
       <section id="riders" className="rxs-section fst-riders-section" aria-label="ライダー記録">
         <header className="rxs-section-heading rxs-reveal">
           <h2>二つの究極形態。</h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
 
         <RiderPickup

@@ -200,8 +200,7 @@ html[data-button-style="liquid"]
     .rxs-local-nav nav a,
     .rxe-hero-primary,
     .rxe-hero-secondary,
-    .exo-door,
-    .opening-notice .opening-notice-close
+    .exo-door
   ) {
   --lg-tint: 122 232 255;
   --lg-tint-a: 0.08;
@@ -259,8 +258,7 @@ html[data-button-style="liquid"]
     .rxs-local-nav nav a,
     .rxe-hero-primary,
     .rxe-hero-secondary,
-    .exo-door,
-    .opening-notice .opening-notice-close
+    .exo-door
     /* /lg:targets */
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   border-color: transparent !important;
@@ -491,21 +489,6 @@ html[data-button-style="liquid"]
   body
   .dream-back-link:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   --lg-tint: 200 164 92;
-}
-
-/* The SCP notice's ×: a small dark capsule in its dark strip, its red mark
-   for the accent. The slip itself keeps its wiki grammar. */
-html[data-button-style="liquid"]
-  body
-  .opening-notice
-  .opening-notice-close:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-  --lg-tint: 122 15 15;
-  --lg-tint-a: 0.24;
-  --lg-fill: rgb(30 30 30 / 0.5);
-  --lg-blur: 4px;
-  margin-right: 3px;
-  height: 22px !important;
-  width: 36px !important;
 }
 
 /* Filled plates stay filled: a light, milky glass under dark words. */
@@ -787,8 +770,7 @@ html[data-button-style="liquid"]
       .rxs-local-nav nav a,
       .rxe-hero-primary,
       .rxe-hero-secondary,
-      .exo-door,
-      .opening-notice .opening-notice-close
+      .exo-door
     ):hover:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     --lg-glow: 0.16;
     --lg-tint-a: 0.14;
@@ -836,8 +818,7 @@ html[data-button-style="liquid"]
     .rxs-local-nav nav a,
     .rxe-hero-primary,
     .rxe-hero-secondary,
-    .exo-door,
-    .opening-notice .opening-notice-close
+    .exo-door
   ):is(:active, [data-press="in"], [data-press="touch"], [data-holding="true"]):not(#lg-glass):not(
     #lg-glass
   ):not(#lg-glass) {
@@ -891,8 +872,7 @@ html[data-button-style="liquid"]
       .command-deck-down,
       .rxs-local-nav nav a,
       .rxe-hero-primary,
-      .rxe-hero-secondary,
-      .opening-notice .opening-notice-close
+      .rxe-hero-secondary
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     --dw-press-scale: 1.06;
   }
@@ -1131,8 +1111,7 @@ html[data-button-style="liquid"][data-world-effects="economy"]
     .rxs-local-nav nav a,
     .rxe-hero-primary,
     .rxe-hero-secondary,
-    .exo-door,
-    .opening-notice .opening-notice-close
+    .exo-door
   ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
   box-shadow:
     inset calc(var(--lg-lx) * -1.1px) calc(var(--lg-ly) * -1.1px) 0 -0.3px
@@ -1217,8 +1196,7 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
       .rxs-local-nav nav a,
       .rxe-hero-primary,
       .rxe-hero-secondary,
-      .exo-door,
-      .opening-notice .opening-notice-close
+      .exo-door
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     --lg-fill: rgb(0 0 0 / 0.9);
     --lg-tint-a: 0;
@@ -1288,8 +1266,7 @@ html[data-button-style="liquid"][data-world-effects="economy"][data-press-ready]
       .rxs-local-nav nav a,
       .rxe-hero-primary,
       .rxe-hero-secondary,
-      .exo-door,
-      .opening-notice .opening-notice-close
+      .exo-door
     ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
     border-color: ButtonText !important;
     background: ButtonFace !important;

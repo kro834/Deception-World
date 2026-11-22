@@ -264,6 +264,8 @@ function mount(initial = {}, savedState = {}) {
       if (name === "./library-hub") return { LibraryHub: Symbol("Hub") };
       if (name === "./library-inquiry") return { LibraryInquiry: Symbol("Inquiry") };
       if (name === "./record-art") return { RecordArtFrame: Symbol("Art") };
+      if (name === "@/components/screening-ended")
+        return { ScreeningEndedBadge: Symbol("Badge"), isScreeningEnded: () => false };
       throw new Error(`Unexpected dependency ${name}`);
     },
   });

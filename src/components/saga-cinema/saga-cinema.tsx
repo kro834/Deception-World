@@ -558,40 +558,51 @@ export function SagaCinema() {
             </section>
             <section className="films section" id="films">
               <SectionLabel number="02">映画4部作</SectionLabel>
-              <div className="section-heading" data-reveal>
-                <h3>邂逅から、終末へ。</h3>
-              </div>
-              <div className="film-grid">
-                {SAGA_CINEMA_FILMS.map((film, index) => (
-                  <button
-                    key={film.slug}
-                    className="film-card"
-                    data-detail={index}
-                    data-reveal
-                    aria-haspopup="dialog"
-                    onClick={() => openDetail(index)}
-                  >
-                    <div className="film-card-top">
-                      <span>{film.part}</span>
-                    </div>
-                    <div className="film-poster">
-                      <img
-                        src={film.image}
-                        width="853"
-                        height="1280"
-                        loading="lazy"
-                        alt={cinemaPosterAlt(index)}
-                      />
-                      <span className="film-open" aria-hidden="true">
-                        ↗
-                      </span>
-                    </div>
-                    <div className="film-name">
-                      <h4>{film.title}</h4>
-                      <span aria-hidden="true">＋</span>
-                    </div>
-                  </button>
-                ))}
+              {/* The ring update (2026-11-23): the four films are an orbit
+                  around their heading (styles-ring-special.css). The ring is
+                  a text-free ornament; the cards stay the buttons they were. */}
+              <div className="film-orbit">
+                <i className="film-orbit-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+                  <b />
+                  <b />
+                  <b />
+                  <b />
+                </i>
+                <div className="section-heading" data-reveal>
+                  <h3>邂逅から、終末へ。</h3>
+                </div>
+                <div className="film-grid ring-enter">
+                  {SAGA_CINEMA_FILMS.map((film, index) => (
+                    <button
+                      key={film.slug}
+                      className="film-card"
+                      data-detail={index}
+                      data-reveal
+                      aria-haspopup="dialog"
+                      onClick={() => openDetail(index)}
+                    >
+                      <div className="film-card-top">
+                        <span>{film.part}</span>
+                      </div>
+                      <div className="film-poster">
+                        <img
+                          src={film.image}
+                          width="853"
+                          height="1280"
+                          loading="lazy"
+                          alt={cinemaPosterAlt(index)}
+                        />
+                        <span className="film-open" aria-hidden="true">
+                          ↗
+                        </span>
+                      </div>
+                      <div className="film-name">
+                        <h4>{film.title}</h4>
+                        <span aria-hidden="true">＋</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </section>
             <section className="visuals section" id="visuals">

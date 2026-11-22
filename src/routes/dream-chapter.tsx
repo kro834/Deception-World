@@ -2,6 +2,7 @@ import dreamImageCinemaCssUrl from "@/styles-dream-image-cinema.css?url";
 import dreamCinemaEffectsCssUrl from "@/styles-dream-cinema-effects.css?url";
 import readingAstraCssUrl from "@/styles-reading-astra.css?url";
 import { createFileRoute } from "@tanstack/react-router";
+import ringDreamCssUrl from "@/styles-ring-dream.css?url";
 import { DreamChapter } from "@/components/dream-chapter/dream-chapter";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO } from "@/lib/asset-loader";
 import {
@@ -95,6 +96,9 @@ export const Route = createFileRoute("/dream-chapter")({
       CINEMATIC_STYLESHEET_LINK,
       { rel: "stylesheet", href: dreamImageCinemaCssUrl },
       { rel: "stylesheet", href: dreamCinemaEffectsCssUrl },
+      // The ring system on the programme (2026-11-23): round windows, gilt
+      // ring dividers, pills, springing folds (styles-ring-dream.css).
+      { rel: "stylesheet", href: ringDreamCssUrl },
       // The same files the dive warms and the hero shows.
       { rel: "preload", as: "image", href: DREAM_CHAPTER_HERO_ART },
       {

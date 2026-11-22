@@ -59,11 +59,6 @@ const LazyZeusButtonHost = optionalLazy<{
     default: m.ZeusButtonProvider,
   })),
 );
-const LazyOpeningNotice = optionalLazy<Record<string, never>>(() =>
-  import("@/components/opening-notice").then((m) => ({
-    default: m.OpeningNotice,
-  })),
-);
 const LazyIpadMenuMode = optionalLazy<Record<string, never>>(() =>
   import("@/components/ipad-menu-mode").then((m) => ({
     default: m.IpadMenuMode,
@@ -206,16 +201,6 @@ function InquiryNavigation() {
   return (
     <Suspense fallback={null}>
       <LazyInquiryNavigation />
-    </Suspense>
-  );
-}
-
-function OpeningNotice() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-  if (pathname === "/") return null;
-  return (
-    <Suspense fallback={null}>
-      <LazyOpeningNotice />
     </Suspense>
   );
 }
@@ -525,7 +510,6 @@ function RootDocument() {
               <GalleryStickerWarmup />
               <IpadMenuMode />
               <PhoneLandscapeMenu />
-              <OpeningNotice />
               <LiquidGlassDefs />
             </ZeusButtonProvider>
           </LoadGateProvider>

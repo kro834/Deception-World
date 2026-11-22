@@ -11,6 +11,7 @@ import {
   type MouseEvent,
 } from "react";
 import { DreamSceneMaterial } from "./dream-scene-material";
+import { ScreeningEndedNotice } from "@/components/screening-ended";
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -1508,6 +1509,8 @@ export function DreamChapter() {
         </div>
       </section>
 
+      <ScreeningEndedNotice />
+
       <div className="dream-opening-desk">
         <section className="dream-prologue" id="prologue" aria-labelledby="prologue-title">
           <div className="dream-prologue-card" data-dream-reveal>
@@ -1778,6 +1781,8 @@ export function DreamChapter() {
         className="dream-section dream-character-section"
         aria-labelledby="character-title"
       >
+        {/* The ring update (2026-11-23): a gilt ring parts the acts. */}
+        <i className="dream-act-ring ring-divider ring-enter" aria-hidden="true" />
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="II">
           <img
             className="dream-act-still"
@@ -1796,6 +1801,9 @@ export function DreamChapter() {
           <i className="film-boundary-line" aria-hidden="true" />
         </header>
         <div className="dream-character-grid" data-dream-reveal>
+          {/* The ring update (2026-11-23): the arc the three round windows
+              hang on (styles-ring-dream.css). Ornament only. */}
+          <i className="dream-cast-arc ring-enter ring-enter-spin" aria-hidden="true" />
           {DREAM_CHARACTERS.map((item) => (
             <article key={item.id} style={{ ["--dream-accent" as string]: item.accent }}>
               <button
@@ -1924,6 +1932,8 @@ export function DreamChapter() {
         className="dream-section dream-dolminence-section"
         aria-labelledby="dolminence-title"
       >
+        {/* The ring update (2026-11-23): a gilt ring parts the acts. */}
+        <i className="dream-act-ring ring-divider ring-enter" aria-hidden="true" />
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="III">
           <img
             className="dream-act-still"
@@ -2100,6 +2110,8 @@ export function DreamChapter() {
         className="dream-section dream-case-section dream-reader"
         aria-labelledby="case-title"
       >
+        {/* The ring update (2026-11-23): a gilt ring parts the acts. */}
+        <i className="dream-act-ring ring-divider ring-enter" aria-hidden="true" />
         <header className="dream-section-heading" data-film-reveal data-ts-numeral="IV">
           <img
             className="dream-act-still"

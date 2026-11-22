@@ -22,7 +22,7 @@ test("the films' and the site's names are marked up in their phrases, text uncha
   assert.doesNotMatch(stories, /<i>(?:MOVIE 01|MAIN SITE|FINAL STAGE)<\/i>/);
   const spans = [
     ...stories.matchAll(
-      /<span>\s*<span className="side-panel-phrase">[\s\S]*?<\/span>\s*<\/span>\s*(?=<\/GuardedLink>)/g,
+      /<span>\s*<span className="side-panel-phrase">[\s\S]*?<\/span>\s*(?:<ScreeningEndedBadge \/>\s*)?<\/span>\s*(?=<\/GuardedLink>)/g,
     ),
   ];
   assert.deepEqual(

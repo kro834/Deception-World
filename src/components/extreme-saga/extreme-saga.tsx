@@ -271,6 +271,9 @@ const ExtremePerformance = memo(function ExtremePerformance() {
           <span>既存の形態と並べた。</span>
           <span>負けた欄も、隠さない。</span>
         </span>
+        <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+          <b />
+        </i>
       </header>
 
       {/* IMPACT (rx11): the punch meter. The stage holds the two figures and
@@ -723,6 +726,9 @@ export function ExtremeSaga() {
             エクスプリームの『P14 Standard』は、第14世代の標準演算加速機構です。演算帯域の配分、優先処理の加速、神経同期、熱負荷の管理を統合し、KHAOS
             UltraとKOSMOS Ultraによる膨大な演算と高出力戦闘を安定して支えます。
           </span>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
 
         <div className="rxs-p14-overview rxs-reveal" data-exi-hit="">
@@ -820,6 +826,9 @@ export function ExtremeSaga() {
             <br />
             <span className="exo-line">ウルトラで決める。</span>
           </h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
 
         <div className="rxs-stage-switcher rxs-reveal">
@@ -943,6 +952,9 @@ export function ExtremeSaga() {
             <br />
             <span className="exo-line">結果固定。</span>
           </h2>
+          <i className="rb-ring ring-enter ring-enter-spin ring-bounce" aria-hidden="true">
+            <b />
+          </i>
         </header>
 
         <div className="rxs-system-grid">
