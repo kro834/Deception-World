@@ -10,7 +10,6 @@ import FRAGMENT_SOURCE from "./rising.frag.glsl?raw";
 import FLAMES_SOURCE from "./rising-flames.frag.glsl?raw";
 import NOISE_SOURCE from "./rising-noise.frag.glsl?raw";
 import {
-  RISING_COMPACT_PIXEL_BUDGET,
   RISING_PROBE_T,
   RISING_RESOLUTION_RUNGS,
   RISING_WIDE_PIXEL_BUDGET,
@@ -171,7 +170,6 @@ export function releaseRisingAssets() {
 
 export type FireRendererOptions = {
   assets: RisingAssets;
-  compact: boolean;
 };
 
 export class FireRenderer {
@@ -180,7 +178,6 @@ export class FireRenderer {
   size: { width: number; height: number; scale: number; rung: number };
   private gl: WebGLRenderingContext | null;
   private readonly parallel: { COMPLETION_STATUS_KHR: number } | null;
-  private readonly compact: boolean;
   private readonly buffer: WebGLBuffer | null;
   private readonly worldTexture: WebGLTexture | null;
   private readonly riderTexture: WebGLTexture | null;
@@ -198,9 +195,8 @@ export class FireRenderer {
   private compiling: Promise<void> | null = null;
 
   /** Throws when WebGL is unavailable or software-only; the caller goes calm. */
-  constructor(canvas: HTMLCanvasElement, { assets, compact }: FireRendererOptions) {
+  constructor(canvas: HTMLCanvasElement, { assets }: FireRendererOptions) {
     this.canvas = canvas;
-    this.compact = compact;
     this.rung = 0;
     this.size = { width: 0, height: 0, scale: 0, rung: this.rung };
     const gl = canvas.getContext("webgl", {
@@ -426,8 +422,9 @@ export class FireRenderer {
     const rect = this.canvas.getBoundingClientRect();
     const cssWidth = Math.max(1, rect.width || window.innerWidth);
     const cssHeight = Math.max(1, rect.height || window.innerHeight);
-    const budget = this.compact ? RISING_COMPACT_PIXEL_BUDGET : RISING_WIDE_PIXEL_BUDGET;
-    const budgetScale = Math.min(1, Math.sqrt(budget / (cssWidth * cssHeight)));
+    // 2026-11-23 (owner: phones equal PC in high quality mode): one budget for
+    // every screen; the GPU probe and the ladder still drop rungs when needed.
+    const budgetScale = Math.min(1, Math.sqrt(RISING_WIDE_PIXEL_BUDGET / (cssWidth * cssHeight)));
     const scale = budgetScale * RISING_LADDER[this.rung].scale;
     const width = Math.max(64, Math.round(cssWidth * scale));
     const height = Math.max(64, Math.round(cssHeight * scale));

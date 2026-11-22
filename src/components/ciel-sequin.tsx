@@ -72,10 +72,12 @@ export default function CielSequin() {
         renderer.current = createCielSequinRenderer({
           canvas: field,
           fallback: backup,
-          imageUrl:
-            coarse || innerWidth <= 768 || economy
-              ? "/ciel-sequin-20261028/ciel-768.webp"
-              : "/ciel-sequin-20261028/ciel-1536.webp",
+          // 2026-11-23 (owner: phones equal PC in high quality mode): a
+          // phone's sequin field is over 768 device pixels wide, so it takes
+          // the 1536 px art too; only the lightweight renderer takes 768.
+          imageUrl: economy
+            ? "/ciel-sequin-20261028/ciel-768.webp"
+            : "/ciel-sequin-20261028/ciel-1536.webp",
           coarse,
           reducedMotion: media.matches,
           economy,

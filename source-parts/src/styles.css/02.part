@@ -1,6 +1,3 @@
-  font: 600 0.5rem/1 var(--font-sans);
-  letter-spacing: 0.3em;
-}
 
 .cine-cue span {
   position: absolute;
@@ -1337,12 +1334,17 @@
    going, with every scene layer still composited (262 MB of tiles). The
    sequence, the burn and the dive are unchanged; the held title is still and
    its scene paints into a few layers. The dive keeps that (the scene holds
-   still under the dive; only the interface animates). */
-html[data-android-renderer] .cine-grain {
+   still under the dive; only the interface animates).
+   2026-11-23 (owner: phones equal PC in high quality mode): the grain and the
+   impact bloom are visible effects, so capable Android shows them as PC does;
+   only lightweight Android drops them. The held title's paused HUD and
+   flattened layers stay: they look the same as PC (styles-opening-refinement
+   pauses the HUD everywhere) and keep the held scene inside the tile budget. */
+html[data-world-effects="economy"][data-android-renderer] .cine-grain {
   display: none;
 }
 
-html[data-android-renderer] .cine-impact-bloom::before {
+html[data-world-effects="economy"][data-android-renderer] .cine-impact-bloom::before {
   filter: none;
 }
 

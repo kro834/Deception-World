@@ -1429,20 +1429,9 @@ html[data-route-scroll-settling="true"] {
   }
 }
 
-@media (max-width: 1180px), (any-pointer: coarse) {
-  .rider-dive-vector-field {
-    width: min(96vmax, 900px);
-    height: min(96vmax, 900px);
-    -webkit-mask-image: radial-gradient(circle, transparent 0 16%, #000 31% 72%, transparent 88%);
-    mask-image: radial-gradient(circle, transparent 0 16%, #000 31% 72%, transparent 88%);
-  }
-
-  .rider-dive-mark {
-    box-shadow:
-      0 0 0 7px rgb(var(--rider-dive-primary) / 0.08),
-      0 0 24px rgb(var(--rider-dive-primary) / 0.48);
-  }
-}
+/* 2026-11-23 (owner: phones equal PC in high quality mode): phones and
+   tablets draw the PC vector field and mark glow (the field is already
+   bounded by 136vmax there). */
 
 @media (max-width: 560px) {
   .rider-dive-mark {

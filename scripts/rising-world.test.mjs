@@ -15,11 +15,11 @@ import {
 } from "../src/components/world/rising-calm.ts";
 import {
   RISING_ART_ASPECT,
-  RISING_COMPACT_PIXEL_BUDGET,
   RISING_PROBE_BUDGET_MS,
   RISING_READY_TIMEOUT_MS,
   RISING_RESOLUTION_RUNGS,
   RISING_TIMING,
+  RISING_WIDE_PIXEL_BUDGET,
   RISING_WORLD_FOCUS,
   RISING_WORLD_POSITION,
   pickRisingTier,
@@ -878,7 +878,8 @@ test("the burning image is chosen by the pixels a cover fit needs, not by pointe
 });
 
 test("every run starts sharp; a GPU probe during the portal picks the rung; the ladder drops whole layers", async () => {
-  assert.ok(412 * 915 <= RISING_COMPACT_PIXEL_BUDGET, "Pixel: one pixel per CSS pixel");
+  // 2026-11-23: one budget for every screen (the compact one is gone).
+  assert.ok(412 * 915 <= RISING_WIDE_PIXEL_BUDGET, "Pixel: one pixel per CSS pixel");
   // A burn frame within the budget keeps rung 0 (the desktop's too: 1145 x 716
   // for a 1440 x 900 window, more pixels across than the 1024 px texture).
   assert.equal(risingProbeRung(0), 0);

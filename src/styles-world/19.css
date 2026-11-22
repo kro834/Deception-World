@@ -500,11 +500,8 @@
   }
 }
 
-@media (pointer: coarse) {
-  .side-panel > .liquid-pointer-glow {
-    display: none;
-  }
-}
+/* 2026-11-23 (owner: phones equal PC in high quality mode): touch screens
+   keep the side panel's pointer glow (it follows presses there). */
 
 @media (min-width: 768px) and (max-width: 1180px) {
   .side-panel {

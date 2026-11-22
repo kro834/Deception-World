@@ -34,13 +34,13 @@ export function currentOpeningTier(): OpeningTier {
   });
 }
 
-const isCompact = () =>
-  window.matchMedia("(any-pointer: coarse)").matches || window.innerWidth < 760;
-
 const UNIFORMS = ["uRes", "uLogo", "uTime", "uHeat", "uBurn", "uFlame", "uCool"] as const;
 
 // Render pixels per frame at the top rung (device pixels, ratio capped at 2).
-const COMPACT_BUDGET = 720_000;
+// 2026-11-23 (owner: phones equal PC in high quality mode): phones and
+// tablets get the PC pixel budget. The ShaderPass ladder (opening-gl.ts) still
+// steps down a rung under real frame pressure, and the lightweight renderer
+// takes its own tier.
 const WIDE_BUDGET = 2_400_000;
 
 /** The logo box's width in device pixels the canvas can draw it at. */
@@ -136,7 +136,7 @@ export function primeOpeningBurn() {
       fragment: BURN_SOURCE,
       uniforms: UNIFORMS,
       textures: { uFirst: assets.first, uFinal: assets.final },
-      budget: isCompact() ? COMPACT_BUDGET : WIDE_BUDGET,
+      budget: WIDE_BUDGET,
       dprCap: 2,
       startRung: 0,
     });

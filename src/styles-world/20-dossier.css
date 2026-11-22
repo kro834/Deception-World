@@ -577,7 +577,7 @@
     padding-left: 4px;
   }
 }
-html[data-android-renderer] .sovereign-apex-seal {
+html[data-world-effects="economy"][data-android-renderer] .sovereign-apex-seal {
   animation: sovereignSealIn 0.92s 0.44s cubic-bezier(0.16, 0.9, 0.2, 1) both;
 }
 

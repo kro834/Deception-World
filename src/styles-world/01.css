@@ -174,12 +174,27 @@ img {
   mask-image: radial-gradient(circle at 50% 40%, black, transparent 76%);
 }
 
+/* The orb is a disc of --orb-size blurred by 110px. Since 2026-11-23 the blur
+   is pre-rendered as a radial gradient (a Gaussian edge: full colour to
+   R - 2 sigma, half at R, clear at R + 2 sigma) on a box 2 x 220px larger, so
+   the drifting orb animates on the compositor with no filter pass. That lets
+   phones show the same orbs as PC in high quality mode. */
 .ambient-orb {
+  --orb-size: 46rem;
+  --orb-color: var(--blue);
   position: absolute;
-  width: 46rem;
-  height: 46rem;
+  width: calc(var(--orb-size) + 440px);
+  height: calc(var(--orb-size) + 440px);
+  margin: -220px;
   border-radius: 50%;
-  filter: blur(110px);
+  background: radial-gradient(
+    circle closest-side,
+    var(--orb-color) calc(var(--orb-size) / 2 - 220px),
+    color-mix(in srgb, var(--orb-color) 84%, transparent) calc(var(--orb-size) / 2 - 110px),
+    color-mix(in srgb, var(--orb-color) 50%, transparent) calc(var(--orb-size) / 2),
+    color-mix(in srgb, var(--orb-color) 16%, transparent) calc(var(--orb-size) / 2 + 110px),
+    transparent calc(var(--orb-size) / 2 + 220px)
+  );
   opacity: 0.1;
   animation: orbitalDrift 18s ease-in-out infinite alternate;
 }
@@ -187,13 +202,13 @@ img {
 .orb-a {
   top: -18rem;
   right: -12rem;
-  background: var(--blue);
+  --orb-color: var(--blue);
 }
 
 .orb-b {
   bottom: -24rem;
   left: -15rem;
-  background: var(--magenta);
+  --orb-color: var(--magenta);
   animation-delay: -7s;
 }
 

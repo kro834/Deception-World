@@ -1031,8 +1031,10 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
   box-shadow: 0 0 10px rgb(241 217 154 / 42%);
 }
 
+/* 2026-11-23 (owner: phones equal PC in high quality mode): Android gets
+   these transitions too; only the lightweight renderer drops them. */
 @media (prefers-reduced-motion: no-preference) {
-  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
+  html[data-family="dream"]:not([data-world-effects="economy"])
     main.dream-page.dream-page
     .dream-poster-progress {
     transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -1055,7 +1057,7 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
+  html[data-family="dream"]:not([data-world-effects="economy"])
     dialog.dream-dossier-dialog[open]
     .dream-dossier-visuals
     > figure {
@@ -1066,7 +1068,7 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
       box-shadow 280ms ease;
   }
 
-  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
+  html[data-family="dream"]:not([data-world-effects="economy"])
     main.dream-page.dream-page
     :is(
       .dream-character-card,
@@ -1096,7 +1098,7 @@ dialog.dream-dossier-dialog[open] .dream-profile-meter > i {
       box-shadow 280ms ease;
   }
 
-  html[data-family="dream"]:not([data-world-effects="economy"]):not([data-android-renderer])
+  html[data-family="dream"]:not([data-world-effects="economy"])
     main.dream-page.dream-page
     :is(.dream-character-portrait img, .dream-dolminence-card > figure > img) {
     transition: scale 520ms cubic-bezier(0.22, 1, 0.36, 1);

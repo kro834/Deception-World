@@ -552,15 +552,10 @@ html[data-button-style="liquid"]
       --lg-sat: 1.35;
     }
 
-    /* Touch screens keep a smaller blur (they pay for every sample). */
+    /* 2026-11-23 (owner: phones equal PC in high quality mode): touch
+       screens use the same 13px blur as PC. */
     html[data-button-style="liquid"][data-glass-variant="tinted"]:not([data-world-effects="economy"]) {
       --lg-blur: 13px;
-    }
-
-    @media (pointer: coarse) {
-      html[data-button-style="liquid"][data-glass-variant="tinted"]:not([data-world-effects="economy"]) {
-        --lg-blur: 9px;
-      }
     }
 
     html[data-button-style="liquid"][data-glass-variant="tinted"]
@@ -1033,34 +1028,9 @@ html[data-button-style="liquid"]
    Budgets and fallbacks
    --------------------------------------------------------------- */
 
-/* Touch screens (iOS above all) pay for every backdrop layer: a smaller
-   blur, and the large slabs paint their glass without sampling at all. */
-@media (pointer: coarse) {
-  html[data-button-style="liquid"] {
-    --lg-blur: 6px;
-    --lg-sat: 1.5;
-  }
-
-  html[data-button-style="liquid"]
-    body
-    :is(
-      .command-deck-scene-buttons > a,
-      .command-deck-enter,
-      .command-deck-gallery-link,
-      .exo-door
-    ):not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --lg-fill: rgb(10 20 31 / 0.72);
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  html[data-button-style="liquid"]
-    body
-    .command-deck-scene-buttons
-    > a.is-selected:not(#lg-glass):not(#lg-glass):not(#lg-glass) {
-    --lg-fill: rgb(236 246 249 / 0.9);
-  }
-}
+/* 2026-11-23 (owner: phones equal PC in high quality mode): touch screens
+   no longer get a smaller blur or unsampled deck buttons and doors; they
+   render the PC glass. Economy keeps its budget below. */
 
 /* Economy: blur and specular only. No lens (its rule requires
    :not([data-world-effects="economy"])), no inner pool, no accent glow,

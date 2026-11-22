@@ -288,6 +288,9 @@
     }
 
     /* ---------- Android lite tier ---------- */
+    /* Kept in high quality mode (2026-11-23) as part of the Android
+       tile-memory budget: with these two lifted, /world checkerboarded 2-4x
+       more tiles on a Galaxy profile (verify-samsung-performance --gpu). */
     /* An opacity animation keeps a render surface on a panel with composited
        children (the rider console, the column and episode rails), an extra
        full-panel pass on Android GPUs. The panels still slide up and settle,

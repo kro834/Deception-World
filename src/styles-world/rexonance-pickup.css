@@ -1436,7 +1436,9 @@ html[data-world-effects="economy"] .rexonance-weapon-grid figure > div::after {
   }
 }
 
-@media (pointer: coarse), (update: slow) {
+/* 2026-11-23 (owner: phones equal PC in high quality mode): touch screens
+   keep every star and prism; only slow-updating displays thin them. */
+@media (update: slow) {
   .rexonance-gate-stars i:nth-child(even),
   .rexonance-gate-prism i.is-three {
     display: none;

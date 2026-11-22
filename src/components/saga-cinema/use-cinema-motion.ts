@@ -79,7 +79,10 @@ export function useCinemaMotion(
     let height = 0;
     const [r, g, b] = SAGA_CINEMA_FILMS[chapter].palette;
     const color = `${r},${g},${b}`;
-    const dustCount = window.innerWidth < 768 ? 14 : 26;
+    // 2026-11-23 (owner: phones get PC quality in high mode): one dust count
+    // for every width; only the lightweight tier thins it.
+    const dustCount =
+      document.documentElement.getAttribute("data-world-effects") === "economy" ? 14 : 26;
     const particles = Array.from({ length: dustCount }, (_, index) => {
       const u = ((index * 0.61803398875) % 1 + Math.random() * 0.18) % 1;
       const v = ((index * 0.38196601125) % 1 + Math.random() * 0.18) % 1;

@@ -148,9 +148,11 @@ test("Android keeps compositor-driven reading progress, independent of economy",
 
 test("capable Android keeps the key art and the Mirage boot; only economy freezes decoration", () => {
   const css = readSource("src/styles-android-performance.css");
+  // 2026-11-23 (owner: phones equal PC in high quality mode): the grain, orbs
+  // and glows are hidden on lightweight Android only.
   const hidden =
     css.match(
-      /html\[data-android-renderer\]\s*:is\(([^)]*)\)\s*\{\s*display: none !important;/,
+      /html\[data-world-effects="economy"\]\[data-android-renderer\]\s*:is\(([^)]*)\)\s*\{\s*display: none !important;/,
     )?.[1] ?? "";
   assert.match(hidden, /\.grain/);
   assert.doesNotMatch(hidden, /\.hero-backdrop-layer/);
@@ -160,12 +162,25 @@ test("capable Android keeps the key art and the Mirage boot; only economy freeze
   const freezes = [...rules.matchAll(/([^{}]+)\{[^{}]*animation: none !important;/g)];
   assert.ok(freezes.length > 0);
   for (const [, selector] of freezes) {
-    assert.match(selector, /html\[data-android-renderer\]/);
-    assert.doesNotMatch(
-      selector,
-      /html\[data-android-renderer\](?!\[data-world-effects="economy"\])/,
-      selector,
+    assert.match(selector, /data-android-renderer/);
+    assert.match(selector, /data-world-effects="economy"/, selector);
+  }
+  // 2026-11-23: no rule of this file applies to Android in high quality mode
+  // except the Zeus button's tile-budget pair (its halo and its permanent
+  // layer); the native scroll-progress line is not a reduction.
+  const highAndroid = [...rules.matchAll(/([^{}]+)\{/g)]
+    .map(([, selector]) => selector.trim())
+    .filter((selector) => /data-android-renderer/.test(selector))
+    .filter(
+      (selector) =>
+        !/^html(?::not\(\[data-world-effects="economy"\]\))?\[data-android-renderer\]\s+\.zeus-button(?::not\([^)]*\))*$/.test(
+          selector.replace(/\s+/g, " "),
+        ),
     );
+  for (const selector of highAndroid) {
+    for (const part of selector.split(/,(?![^(]*\))/)) {
+      assert.match(part, /data-world-effects="economy"/, part);
+    }
   }
 });
 
@@ -198,26 +213,12 @@ test("the Android lite tier touches only the floor, halo, curtains, bracket over
     ":is(.story-layout, .threat-panel, .world-column) {background,background-repeat,background-blend-mode}",
     ".rider-console {background,background-repeat,background-blend-mode}",
     ".episode-archive {background,background-repeat,background-blend-mode}",
-    ":is( .section-index > small, .story-heading .eyebrow > span, .records-heading .eyebrow > span ) {animation,animation-timeline,animation-range}",
-    ".section-title .eyebrow > span {animation}",
-    ".threat-copy h3 {animation,animation-timeline,animation-range}",
-    ".threat-copy .system-label {animation,animation-timeline,animation-range}",
-    ":is(.signal > img, .other-archive-card > img, .dante-visual img) {animation}",
+    // 2026-11-23 (owner: phones equal PC in high quality mode): the
+    // clip-path stand-ins are gone (the PC reveals are
+    // compositor-only now; android-gpu-budget.test.mjs guards that). The
+    // iris stays at rest, as part of the tile-memory budget.
     ".finale-sticky::before {animation}",
-    ".finale-content > span {animation,animation-timeline,animation-range}",
-    ".mr-endmark :is(span, b) {animation,animation-timeline,animation-range}",
   ]);
-  // Every clip-path reveal it replaces keeps its timeline and range, on the compositor.
-  for (const { body } of rules) {
-    const name = body.match(/animation: (mr-[\w-]+) /)?.[1];
-    if (name) assert.ok(["mr-rise-in", "mr-fade-in"].includes(name), body);
-  }
-  assert.match(
-    tier,
-    /@keyframes mr-rise-in \{\s*from \{\s*opacity: 0;\s*translate: 0 8px;\s*\}\s*\}/,
-  );
-  // The inline archive label, which translate would not move, only fades.
-  assert.match(tier, /@keyframes mr-fade-in \{\s*from \{\s*opacity: 0;\s*\}\s*\}/);
   // The boot, the key art and the typed headings and copy are the same on every renderer.
   const boot = strip(
     mirage.slice(mirage.indexOf("Boot: finite"), mirage.indexOf("Scroll-linked choreography")),
@@ -227,6 +228,7 @@ test("the Android lite tier touches only the floor, halo, curtains, bracket over
     tier,
     /hero-backdrop|poster-media|poster-image|mr-word|mr-redact|tr-c|data-text-reveal/,
   );
+  // Kept as tile budget in high quality mode (2026-11-23).
   // Motion keeps every timeline; the panels only lose their fade and the finale art its settle.
   const motion = strip(readSource("src/styles-motion-edition.css"));
   const android = [...motion.matchAll(/\[data-android-renderer\]([^{]*)\{([^}]*)\}/g)].map(

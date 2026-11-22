@@ -580,7 +580,10 @@ html[data-mode="world"] .side-panel[data-open="true"] .side-panel-group:nth-of-t
   }
 }
 
-@media (pointer: coarse), (prefers-reduced-transparency: reduce) {
+/* 2026-11-23 (owner: phones equal PC in high quality mode): touch screens
+   keep the backdrop (here a plain, unfiltered image at 12%); only reduced
+   transparency hides it. */
+@media (prefers-reduced-transparency: reduce) {
   .film-edition .hero-backdrop {
     visibility: hidden;
   }

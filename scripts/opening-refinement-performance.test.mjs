@@ -168,6 +168,11 @@ function entryRuntime({
       if (name === "@/lib/opening-destination-styles") return { preloadOpeningDestinationStyles() {} };
       if (name === "./opening-timing") return { OPENING_BURN: { start: 2.6 } };
       if (name === "./particles") return { Particles };
+      // 2026-11-23: the atmosphere video picks its edition by render quality.
+      if (name === "@/lib/rendering-profile")
+        return {
+          prefersLightweightRendering: () => document.documentElement.dataset.worldEffects === "economy",
+        };
       if (name === "./opening-burn" || name === "./opening-dive") {
         chunkRequests.push(name);
         return name === "./opening-dive"

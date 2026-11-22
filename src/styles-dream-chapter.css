@@ -2118,7 +2118,12 @@ html[data-page-scrolled] .dream-site-header {
   }
 }
 
-@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+/* Touch screens: a clip-path transition repaints the whole section every
+   frame where it is not composited (WebKit; Samsung Internet 28-30), so they
+   reveal with opacity and transform only, as .dg-reveal does
+   (styles-fx-motion.css). A kept engine workaround. 2026-11-23: the
+   narrow-width arm is gone, so a narrow desktop window gets the PC reveal. */
+@media (hover: none) and (pointer: coarse) {
   html[data-dream-reveal-ready="true"] [data-dream-reveal]:not([data-dream-visible="true"]),
   [data-dream-reveal] {
     clip-path: none;

@@ -4,11 +4,13 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Android follows presses only in the liquid pointer light", () => {
+// 2026-11-23 (owner: phones equal PC in high quality mode): press-only
+// tracking and the hidden glows are for lightweight Android only.
+test("lightweight Android follows presses only in the liquid pointer light", () => {
   const pointer = read("src/components/world/use-liquid-pointer-light.ts");
   assert.match(
     pointer,
-    /if \(document\.documentElement\.hasAttribute\("data-android-renderer"\)\) return trackPressesOnly\(\);/,
+    /if \(root\.hasAttribute\("data-android-renderer"\) && root\.dataset\.worldEffects === "economy"\)\s*return trackPressesOnly\(\);/,
   );
   const presses = pointer.slice(
     pointer.indexOf("function trackPressesOnly"),
@@ -21,9 +23,9 @@ test("Android follows presses only in the liquid pointer light", () => {
   assert.equal(presses.match(/getBoundingClientRect\(\)/g)?.length, 1);
   assert.equal(presses.match(/requestAnimationFrame\(place\)/g)?.length, 1);
   assert.doesNotMatch(presses, /pointermove|pointerover|pointerout|focusin/);
-  // The World's own pointer glows are hidden on Android.
+  // The World's own pointer glows are hidden on lightweight Android.
   assert.match(
     read("src/styles-android-performance.css"),
-    /html\[data-android-renderer\]\s*:is\([^)]*\.liquid-pointer-glow[^)]*\)\s*\{\s*display: none !important;/,
+    /html\[data-world-effects="economy"\]\[data-android-renderer\]\s*:is\([^)]*\.liquid-pointer-glow[^)]*\)\s*\{\s*display: none !important;/,
   );
 });

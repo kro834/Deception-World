@@ -119,7 +119,9 @@ test("Dream Chapter pauses its hero offscreen and keeps ambient drift compositor
   );
   assert.match(
     dreamStyles,
-    /@media \(max-width:\s*760px\), \(hover:\s*none\) and \(pointer:\s*coarse\)[\s\S]*?clip-path:\s*none/,
+    // 2026-11-23: the touch fallback (a kept WebKit/Samsung clip-path
+    // workaround) stays; the narrow-width arm is gone.
+    /@media \(hover:\s*none\) and \(pointer:\s*coarse\) \{[\s\S]*?clip-path:\s*none/,
   );
 
   const starDriftStart = dreamStyles.indexOf("@keyframes dream-star-drift");

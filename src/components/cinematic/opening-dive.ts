@@ -35,9 +35,6 @@ export function currentDiveTier(): OpeningTier {
   });
 }
 
-const isCompact = () =>
-  window.matchMedia("(any-pointer: coarse)").matches || window.innerWidth < 760;
-
 const UNIFORMS = [
   "uRes",
   "uTime",
@@ -62,7 +59,10 @@ const UNIFORMS = [
 
 // Render pixels per frame at the top rung. The dive is soft almost throughout
 // (zoom blur), so it draws at about phone CSS resolution.
-const COMPACT_BUDGET = 520_000;
+// 2026-11-23 (owner: phones equal PC in high quality mode): phones and
+// tablets get the PC pixel budget. The ShaderPass ladder (opening-gl.ts) still
+// steps down a rung under real frame pressure, and the lightweight renderer
+// takes its own tier.
 const WIDE_BUDGET = 1_300_000;
 const PRIME_TTL_MS = 1500;
 // Starts at rest (the shader's forward deceleration ended at rest), then a
@@ -153,7 +153,7 @@ function createPass(canvas: HTMLCanvasElement, assets: DiveAssets) {
     fragment: DIVE_SOURCE,
     uniforms: UNIFORMS,
     textures: { uLogoTex: assets.logo, uAtmo: assets.atmosphere, uWorldTex: assets.world },
-    budget: isCompact() ? COMPACT_BUDGET : WIDE_BUDGET,
+    budget: WIDE_BUDGET,
     dprCap: 1.5,
     startRung: 0,
   });

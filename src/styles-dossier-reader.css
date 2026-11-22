@@ -1011,13 +1011,7 @@ main.manager-page.rider-dossier-page .rider-nightmare-card-shade {
       animation-timeline: view(block);
       animation-range: entry 0% entry 100%;
     }
-    html:not([data-world-effects="economy"])[data-android-renderer]:not([data-side-menu-open]):not(
-        [data-loading]
-      ):not([data-dialog-open])
-      .manager-page
-      :is(.form-pickup-card, .rider-special-site-card) {
-      animation-name: dossier-lift-flat;
-    }
+    /* 2026-11-23: Android keeps the PC fade (its flat lift is gone). */
   }
 }
 @keyframes dossier-rise {
@@ -1038,16 +1032,6 @@ main.manager-page.rider-dossier-page .rider-nightmare-card-shade {
   }
   to {
     opacity: 1;
-    translate: 0 0;
-    scale: 1;
-  }
-}
-@keyframes dossier-lift-flat {
-  from {
-    translate: 0 72px;
-    scale: 0.96;
-  }
-  to {
     translate: 0 0;
     scale: 1;
   }

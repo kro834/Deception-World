@@ -293,7 +293,7 @@
   }
 }
 
-html[data-android-renderer] .is-sovereign .manager-display-name {
+html[data-world-effects="economy"][data-android-renderer] .is-sovereign .manager-display-name {
   background-position: 0 50%;
   animation: none;
 }

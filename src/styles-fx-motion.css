@@ -148,9 +148,7 @@
    The kit's own hold and stagger (--dg-i) are kept.
    ================================================================ */
 @media (prefers-reduced-motion: no-preference) {
-  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"]):not(
-      [data-android-renderer]
-    ):not([data-ios18-renderer])
+  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"])
     .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
     animation: fx-scan-arrive 640ms var(--fx-ease-out) calc(var(--dg-i, 0) * 70ms) backwards;
   }
@@ -159,11 +157,24 @@
 /* Touch screens: the clip line and the light lift repaint the whole panel
    every frame (WebKit composites neither clip-path nor filter), which read
    as a hitch while scrolling a file on an iPhone. There the arrival keeps
-   its rise and fade only, on the compositor. */
+   its rise and fade only, on the compositor. (A kept WebKit workaround.)
+   2026-11-23: Android and iOS 18 no longer skip the arrival in high quality
+   mode; as touch screens they get this compositor rise and fade, which also
+   steers clear of Samsung Internet 28-30's main-thread clip-path. */
 @media (prefers-reduced-motion: no-preference) and (hover: none) and (pointer: coarse) {
-  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"]):not(
-      [data-android-renderer]
-    ):not([data-ios18-renderer])
+  html[data-dg-ready]:not([data-world-effects="economy"]):not([data-family="special"])
+    .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
+    animation-name: fx-rise-arrive;
+  }
+}
+
+/* Android in any pointer mode (DeX, desktop-site mode): Samsung Internet
+   28-30 runs clip-path animations on the main thread, so it keeps the same
+   compositor rise and fade (a kept engine workaround). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-dg-ready][data-android-renderer]:not([data-world-effects="economy"]):not(
+      [data-family="special"]
+    )
     .dg-reveal[data-dg-seen]:not(.dg-reveal-left, .dg-reveal-right, .dg-reveal-scale) {
     animation-name: fx-rise-arrive;
   }
@@ -296,7 +307,8 @@
     animation-delay: calc(var(--fx-row, 0) * 16ms);
   }
 
-  html:not([data-world-effects="economy"]):not([data-android-renderer])
+  /* 2026-11-23: Android scans its rows too (translate and opacity only). */
+  html:not([data-world-effects="economy"])
     body
     dialog.quick-search[open]
     .quick-search-group
