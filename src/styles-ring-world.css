@@ -42,7 +42,11 @@ html[data-family="world"] body .rider-console .rider-ring-dial-ring::after {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 2.6px),
+    #000 calc(100% - 2px)
+  );
   mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
 }
 
@@ -130,13 +134,19 @@ html[data-family="world"] body .rider-console .rider-tabs > button > i {
    ================================================================ */
 
 /* Unit-circle coordinates, clockwise from the top. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body :is(.ws-map, .signal-array, .ws-doors) > :nth-child(1) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  :is(.ws-map, .signal-array, .ws-doors)
+  > :nth-child(1) {
   --ring-x: 0;
   --ring-y: -1;
 }
 
 /* ---------- 1. 目次: the six chapters on one ring ---------- */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-contents {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > .ws-contents {
   --ws-ring-size: min(740px, 100vw - 32px);
   --ws-ring-item: calc(var(--ws-ring-size) * 0.225);
   display: grid;
@@ -168,20 +178,32 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-conte
 }
 
 /* The orbit's line (radius 38%) and a halo round the heading. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > .ws-map::before,
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > .ws-map::after {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::before,
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::after {
   content: "";
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > .ws-map::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::before {
   inset: 12%;
   border: 1px solid rgb(var(--ring-key-rgb) / 0.26);
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-contents > .ws-map::after {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-contents
+  > .ws-map::after {
   inset: 32%;
   background:
     radial-gradient(
@@ -294,7 +316,12 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   text-align: center;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li .ws-map-label > b {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li
+  .ws-map-label
+  > b {
   position: absolute;
   top: -39px;
   left: 50%;
@@ -310,12 +337,21 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   line-height: 1;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li[data-phase="annex"] .ws-map-label {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li[data-phase="annex"]
+  .ws-map-label {
   top: calc(100% + 16px);
   padding: 0;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li[data-phase="annex"] .ws-map-label > b {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li[data-phase="annex"]
+  .ws-map-label
+  > b {
   top: calc(-16px - var(--ws-ring-item) / 2);
   width: auto;
   height: auto;
@@ -325,66 +361,143 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map >
   font-size: clamp(18px, 2.7vw, 36px);
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li .ws-map-label > i {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li
+  .ws-map-label
+  > i {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a:focus-visible {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .ws-map
+  > li
+  > a:focus-visible {
   outline-offset: 11px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   /* The ring turns into place; the lenses counter-turn and pop along it. */
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in] {
     animation: ring-orbit-turn var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] > li > a {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li
+    > a {
     animation: ring-orbit-counter var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] > li:nth-child(2) > a {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(2)
+    > a {
     animation-delay: 40ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] > li:nth-child(3) > a {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(3)
+    > a {
     animation-delay: 80ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] > li:nth-child(4) > a {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(4)
+    > a {
     animation-delay: 120ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] > li:nth-child(5) > a {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(5)
+    > a {
     animation-delay: 160ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map.ring-enter[data-ring-in] > li:nth-child(6) > a {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-map.ring-enter[data-ring-in]
+    > li:nth-child(6)
+    > a {
     animation-delay: 200ms;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a {
     transition: scale var(--ring-dur-spring) var(--ring-spring);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a:hover {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:hover {
     translate: none;
     scale: 1.08;
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a::after {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a::after {
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-map > li > a:hover::after {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .ws-map
+    > li
+    > a:hover::after {
     rotate: 90deg;
   }
 }
 
 /* ---------- 2. 六詠: the six on one ring, their heading at its centre ---------- */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array {
   position: relative;
   display: block;
   width: min(660px, 100%);
@@ -395,11 +508,19 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
 }
 
 /* The old row's floor line has no place on a ring. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array::after {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array::after {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array::before {
   content: "";
   position: absolute;
   inset: 12%;
@@ -408,34 +529,54 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
   pointer-events: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .signal-array > :nth-child(2) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(2) {
   --ring-x: 0.866;
   --ring-y: -0.5;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .signal-array > :nth-child(3) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(3) {
   --ring-x: 0.866;
   --ring-y: 0.5;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .signal-array > :nth-child(4) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(4) {
   --ring-x: 0;
   --ring-y: 1;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .signal-array > :nth-child(5) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(5) {
   --ring-x: -0.866;
   --ring-y: 0.5;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .signal-array > :nth-child(6) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  .signal-array
+  > :nth-child(6) {
   --ring-x: -0.866;
   --ring-y: -0.5;
 }
 
 /* A round portrait in the ring frame. The card keeps its own arrival
    (mx-rise) and its picture stays the route cover's lift target. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal {
   position: absolute;
   top: calc(50% + var(--ring-y) * 38% - 11.25%);
   left: calc(50% + var(--ring-x) * 38% - 11.25%);
@@ -454,11 +595,21 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
   box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.8);
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal::before {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal::after {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal::after {
   content: "";
   position: absolute;
   inset: -7px;
@@ -478,7 +629,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
   pointer-events: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal > img {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -488,7 +645,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
 }
 
 /* The rank is a node on the frame; the name hangs under the portrait. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal > span {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > span {
   position: absolute;
   top: auto;
   bottom: -22px;
@@ -505,7 +668,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
   line-height: 1;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal > b {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > b {
   position: absolute;
   top: calc(100% + 28px);
   left: 50%;
@@ -518,39 +687,70 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
   text-align: center;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal > i {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > i {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal > em {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal
+  > em {
   inset: 2% 2% auto auto;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal:focus-visible {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers
+  .signal-array
+  > .signal:focus-visible {
   outline-offset: 11px;
 }
 
 /* The heading moves into the ring: same grid cell as the six. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive:has(.manager-archive-panel.is-managers) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers) {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive:has(.manager-archive-panel.is-managers) .manager-archive-tabs {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  .manager-archive-tabs {
   grid-area: 1 / 1;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive:has(.manager-archive-panel.is-managers) .manager-archive-panel {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  .manager-archive-panel {
   grid-area: 2 / 1;
 }
 
 /* The panel's fixed height held a row of cards; the ring sets its own. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive
+  .manager-archive-panel.is-managers {
   height: auto;
   min-height: 0;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive:has(.manager-archive-panel.is-managers) > .threat-copy {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  > .threat-copy {
   grid-area: 2 / 1;
   place-self: center;
   z-index: 2;
@@ -568,13 +768,21 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
   pointer-events: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive:has(.manager-archive-panel.is-managers) > .threat-copy > h3 {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  > .threat-copy
+  > h3 {
   margin: 0;
   font-size: clamp(14px, 2.1vw, 27px);
   line-height: 1.12;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive:has(.manager-archive-panel.is-managers) > .threat-copy > p {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #manager-archive:has(.manager-archive-panel.is-managers)
+  > .threat-copy
+  > p {
   margin: 0;
   padding: 0;
   border: 0;
@@ -583,18 +791,36 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal::after {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal::after {
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body #manager-archive .manager-archive-panel.is-managers .signal-array > .signal:hover::after {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #manager-archive
+    .manager-archive-panel.is-managers
+    .signal-array
+    > .signal:hover::after {
     rotate: 90deg;
   }
 }
 
 /* ---------- 3. The special sites' doors: four on a ring, ファーフロム
    (last, a little larger, as the owner set it) at the centre ---------- */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors {
   position: relative;
   display: block;
   width: min(600px, 100%);
@@ -602,7 +828,11 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
   margin: 28px auto 84px;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors::before {
   content: "";
   position: absolute;
   inset: 11%;
@@ -636,7 +866,12 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors
   --ring-y: 0;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a {
   --ws-door-size: 22%;
   position: absolute;
   top: calc(50% + var(--ring-y) * 39% - var(--ws-door-size) / 2);
@@ -656,11 +891,21 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
 }
 
 /* The ghost numeral and the sweep belonged to the plate. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a::before {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a::after {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a::after {
   content: "";
   position: absolute;
   inset: -7px;
@@ -688,7 +933,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
   pointer-events: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a > img {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a
+  > img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -701,7 +952,13 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
   clip-path: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a > span {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a
+  > span {
   position: absolute;
   top: calc(100% + 16px);
   left: 50%;
@@ -713,64 +970,148 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
   text-align: center;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a.is-far-from {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a.is-far-from {
   --ws-door-size: 30%;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a.is-far-from > span {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a.is-far-from
+  > span {
   max-width: 120%;
   font-size: clamp(12px, 1.3vw, 17px);
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a > i {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a
+  > i {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a:focus-visible {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  > footer
+  > .ws-doors
+  > a:focus-visible {
   outline-offset: 11px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors.ring-enter[data-ring-in] {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in] {
     animation: ring-orbit-turn var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors.ring-enter[data-ring-in] > a > img {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a
+    > img {
     animation: ring-pop-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors.ring-enter[data-ring-in] > a:nth-child(2) > img {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(2)
+    > img {
     animation-delay: 40ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors.ring-enter[data-ring-in] > a:nth-child(3) > img {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(3)
+    > img {
     animation-delay: 80ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors.ring-enter[data-ring-in] > a:nth-child(4) > img {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(4)
+    > img {
     animation-delay: 120ms;
   }
 
-  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .ws-doors.ring-enter[data-ring-in] > a:nth-child(5) > img {
+  html[data-ring-ready][data-family="world"]:not([data-world-effects="economy"]):not(#r):not(
+      #r
+    ):not(#r):not(#r):not(#r)
+    body
+    .ws-doors.ring-enter[data-ring-in]
+    > a:nth-child(5)
+    > img {
     animation-delay: 180ms;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a {
     transition: scale var(--ring-dur-spring) var(--ring-spring);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a:hover {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:hover {
     translate: none;
     scale: 1.08;
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a::after {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a::after {
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > footer > .ws-doors > a:hover::after {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > footer
+    > .ws-doors
+    > a:hover::after {
     rotate: 90deg;
   }
 }
@@ -778,16 +1119,26 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
 /* ---------- 4. The chapter rail: a dial of six nodes that turns to the
    chapter in view (it was a vertical dot rail) ---------- */
 @media (min-width: 1360px) and (min-height: 640px) and (forced-colors: none) {
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail {
     width: 58px;
     height: 58px;
   }
 
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail::before {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail::before {
     display: none;
   }
 
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail > ol {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol {
     position: absolute;
     inset: 0;
     display: block;
@@ -796,8 +1147,16 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
     rotate: calc((var(--ws-rail-at, 1) - 1) * -60deg - 90deg);
   }
 
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail > ol::before,
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail > ol::after {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::before,
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::after {
     inset: 0;
     top: 0;
     left: 0;
@@ -806,16 +1165,28 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
     border-radius: 50%;
     translate: none;
     scale: none;
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.1px), #000 calc(100% - 1.5px));
+    -webkit-mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - 2.1px),
+      #000 calc(100% - 1.5px)
+    );
     mask: radial-gradient(farthest-side, transparent calc(100% - 2.1px), #000 calc(100% - 1.5px));
   }
 
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail > ol::before {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::before {
     background: rgb(var(--ring-key-rgb) / 0.26);
   }
 
   /* The lit arc: from the first chapter round to the one in view. */
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail > ol::after {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    > ol::after {
     background: conic-gradient(
       from 0deg,
       var(--ring-key) 0turn,
@@ -824,13 +1195,21 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
     );
   }
 
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail li {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    li {
     position: absolute;
     top: calc(50% + var(--ring-y) * 50% - 3.5px);
     left: calc(50% + var(--ring-x) * 50% - 3.5px);
   }
 
-  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail li::before {
+  html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+    body
+    main.site-shell
+    > .ws-rail
+    li::before {
     display: none;
   }
 
@@ -866,11 +1245,23 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
 }
 
 @media (min-width: 1360px) and (min-height: 640px) and (forced-colors: none) and (prefers-reduced-motion: no-preference) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail > ol {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > .ws-rail
+    > ol {
     transition: rotate var(--ring-dur-bounce) var(--ring-spring-bounce);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell > .ws-rail li {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    > .ws-rail
+    li {
     transition:
       scale var(--ring-dur-elastic) var(--ring-spring-elastic),
       background-color 240ms ease,
@@ -880,11 +1271,19 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
 }
 
 /* ---------- 5. Chapter breaks: the numeral stands in a double ring ---------- */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell .section-index > span {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .section-index
+  > span {
   position: relative;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell .section-index > span::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .section-index
+  > span::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -912,11 +1311,17 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
    Panels 28px, dense cards 22px, artwork 18px (never a circle: the page
    shows it whole), controls pills or circles. Paint only: no geometry of a
    measured rail changes. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(#manager-archive, .world-column, .episode-archive, .wa-contents-inner, .wa-directory) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(#manager-archive, .world-column, .episode-archive, .wa-contents-inner, .wa-directory) {
   border-radius: var(--ring-radius-card);
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(
     .story-layout,
     #world-exploration > section,
     .world-exploration-index > *,
@@ -932,17 +1337,30 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
   border-radius: 22px;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.wa-plate, .dante-archive, .other-archive-card, #world-exploration > section) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.wa-plate, .dante-archive, .other-archive-card, #world-exploration > section) {
   overflow: hidden;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell .world-poster-media,
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell .world-poster-media::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .world-poster-media,
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .world-poster-media::before {
   border-radius: 18px;
 }
 
 /* The poster's halo: three rings behind the key visual. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell .artwork-stage--world .artwork-stage__halo {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  .artwork-stage--world
+  .artwork-stage__halo {
   background:
     radial-gradient(
       closest-side,
@@ -966,33 +1384,45 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site
 }
 
 /* Text controls are pills; icon controls are circles. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.primary-action, .world-stage-controls, .wa-open, footer > a) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.primary-action, .world-stage-controls, .wa-open, footer > a) {
   border-radius: var(--ring-radius-pill);
   clip-path: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.episode-controls button, .episode-pickup-plus) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.episode-controls button, .episode-pickup-plus) {
   border-radius: 50%;
   clip-path: none;
 }
 
 /* The measured rails (六詠 / 管理外 / その他 / 犬, the columns): a pill
    track, a pill lens. Radius only. */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.manager-archive-tabs, .world-column-tabs) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.manager-archive-tabs, .world-column-tabs) {
   border-radius: 22px;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.manager-archive-tabs, .world-column-tabs) :is(
-    .liquid-rail-surface,
-    .liquid-selection-lens,
-    .liquid-selection-surface,
-    button
-  ) {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  main.site-shell
+  :is(.manager-archive-tabs, .world-column-tabs)
+  :is(.liquid-rail-surface, .liquid-selection-lens, .liquid-selection-surface, button) {
   border-radius: 20px;
 }
 
 /* ---------- 7. 人物一覧: every portrait in a ring frame ---------- */
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-roster .wa-person > .wa-portrait {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait {
   width: min(82%, 260px);
   height: auto;
   aspect-ratio: 1;
@@ -1002,7 +1432,12 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-ros
   background: #07101c;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-roster .wa-person > .wa-portrait > img {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait
+  > img {
   position: absolute;
   inset: 7px;
   width: calc(100% - 14px);
@@ -1011,11 +1446,19 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-ros
   object-fit: cover;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-roster .wa-person > .wa-portrait::before {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait::before {
   display: none;
 }
 
-html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-roster .wa-person > .wa-portrait::after {
+html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r)
+  body
+  #cast-roster
+  .wa-person
+  > .wa-portrait::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -1040,42 +1483,92 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-ros
    the same elements now spring: the sheet scales in with overshoot, its
    rows cascade on the bounce. Closing keeps the viewers' own plain fade. */
 @media (prefers-reduced-motion: no-preference) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body #episode-pickup-dialog[open] .episode-pickup-panel,
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .world-column-dialog[open] .world-column-dialog-card {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #episode-pickup-dialog[open]
+    .episode-pickup-panel,
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .world-column-dialog[open]
+    .world-column-dialog-card {
     animation: ring-expand-in var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
     transform-origin: 50% 50%;
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body #episode-pickup-dialog[open] .episode-pickup-item {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #episode-pickup-dialog[open]
+    .episode-pickup-item {
     animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
     animation-delay: calc(100ms + var(--pc-step, 0) * var(--ring-stagger));
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .world-column-dialog[open] .world-column-dialog-copy-stack {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .world-column-dialog[open]
+    .world-column-dialog-copy-stack {
     animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) 140ms backwards;
   }
 
   /* Disclosures (a person's profile, an office's documents): the body
      drops open from its summary and settles. */
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body :is(.wa-profile, .wa-doc)[open] > :not(summary) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    :is(.wa-profile, .wa-doc)[open]
+    > :not(summary) {
     animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
     transform-origin: 50% 0%;
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body :is(.wa-profile, .wa-doc)[open] > :not(summary):nth-child(3) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    :is(.wa-profile, .wa-doc)[open]
+    > :not(summary):nth-child(3) {
     animation-delay: var(--ring-stagger);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body :is(.wa-profile, .wa-doc)[open] > :not(summary):nth-child(n + 4) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    :is(.wa-profile, .wa-doc)[open]
+    > :not(summary):nth-child(n + 4) {
     animation-delay: calc(var(--ring-stagger) * 2);
   }
 
   /* A press sinks a round control and lets it spring back. */
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.episode-controls button, .episode-pickup-plus, .wa-open, .wa-directory-controls button) {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    :is(.episode-controls button, .episode-pickup-plus, .wa-open, .wa-directory-controls button) {
     transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
   }
 
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body main.site-shell :is(.episode-controls button, .episode-pickup-plus, .wa-open, .wa-directory-controls button):active {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    main.site-shell
+    :is(
+      .episode-controls button,
+      .episode-pickup-plus,
+      .wa-open,
+      .wa-directory-controls button
+    ):active {
     scale: 0.93;
     transition: scale 90ms ease-out;
   }
@@ -1084,8 +1577,18 @@ html[data-family="world"]:not(#r):not(#r):not(#r):not(#r):not(#r) body #cast-ros
 /* A sheet that fills a phone never overshoots its edges: it rides the
    critically damped spring, and only its rows bounce. */
 @media (prefers-reduced-motion: no-preference) and (max-width: 700px) {
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body #episode-pickup-dialog[open] .episode-pickup-panel,
-  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(#r) body .world-column-dialog[open] .world-column-dialog-card {
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    #episode-pickup-dialog[open]
+    .episode-pickup-panel,
+  html[data-family="world"]:not([data-world-effects="economy"]):not(#r):not(#r):not(#r):not(#r):not(
+      #r
+    )
+    body
+    .world-column-dialog[open]
+    .world-column-dialog-card {
     animation-duration: var(--ring-dur-soft);
     animation-timing-function: var(--ring-spring-soft);
   }
