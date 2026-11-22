@@ -11,6 +11,7 @@ import {
   type MouseEvent,
 } from "react";
 import { DreamSceneMaterial } from "./dream-scene-material";
+import { ScreeningEndedNotice } from "@/components/screening-ended";
 import { useRouter, useRouterState } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { DREAM_CHAPTER_HERO_ART, DREAM_CHAPTER_LOGO, WORLD_ENTER_ASSETS } from "@/lib/asset-loader";
@@ -1507,6 +1508,8 @@ export function DreamChapter() {
           </div>
         </div>
       </section>
+
+      <ScreeningEndedNotice />
 
       <div className="dream-opening-desk">
         <section className="dream-prologue" id="prologue" aria-labelledby="prologue-title">

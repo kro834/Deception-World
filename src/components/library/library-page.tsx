@@ -34,6 +34,7 @@ import { filterLibraryBrowse } from "@/lib/library-browse-filter";
 import { toggleBookmark, useLibraryStore } from "./library-store";
 import { LibraryHub } from "./library-hub";
 import { RecordArtFrame } from "./record-art";
+import { ScreeningEndedBadge, isScreeningEnded } from "@/components/screening-ended";
 
 const byPath = new Map(LIBRARY_ENTRIES.map((entry) => [entry.path, entry]));
 // Counts on the three archive entrances.
@@ -127,7 +128,10 @@ function EntryCard({
       }}
     >
       <RecordArtFrame art={pathArt(entry.path, entry.hash)} title={entry.title} />
-      <p className="library-card-kind">{LIBRARY_KINDS[entry.kind]}</p>
+      <p className="library-card-kind">
+        {LIBRARY_KINDS[entry.kind]}
+        {isScreeningEnded(entry.path) ? <ScreeningEndedBadge /> : null}
+      </p>
       <h3 style={titleRunStyle(entry.title)}>
         <GuardedLink to={entry.path} hash={entry.hash} assets={[]} data-library-open="true">
           <DisplayName value={entry.title} />

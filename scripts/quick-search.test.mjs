@@ -99,6 +99,8 @@ function quickSearchFixture() {
           rememberSearch: (query) => events.push(["remember", query]),
         };
       if (name === "./search-ui-helpers") return searchHelpers;
+      if (name === "@/components/screening-ended")
+        return { ScreeningEndedBadge: () => null, isScreeningEnded: () => false };
       if (name === "./use-open-result") return { useOpenResult: () => () => {} };
       if (name === "@/lib/record-art") return { documentArt: () => ({}) };
       if (name === "./search-ui" || name === "@/lib/record-images" || name.endsWith("?url"))

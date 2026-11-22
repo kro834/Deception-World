@@ -29,6 +29,7 @@ import {
 } from "./search-recent";
 import { Highlighted, HighlightedName, ResultOption } from "./search-ui";
 import { isSearchCompositionKey, placeLabel, stepActive } from "./search-ui-helpers";
+import { ScreeningEndedBadge, isScreeningEnded } from "@/components/screening-ended";
 import { useOpenResult } from "./use-open-result";
 import { recordReturnCardId } from "@/lib/record-return-state";
 
@@ -607,6 +608,7 @@ const ResultCard = memo(function ResultCard({
         <span className="search-result-meta">
           <span>{categoryLabel(document.category)}</span>
           {place ? <span>{place}</span> : null}
+          {isScreeningEnded(document.to) ? <ScreeningEndedBadge /> : null}
         </span>
         <span className="search-result-title" style={titleRunStyle(document.title)}>
           <HighlightedName text={document.title} ranges={result.titleRanges} />
