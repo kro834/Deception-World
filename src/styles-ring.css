@@ -38,6 +38,11 @@
      .ring-divider          a section divider: a hairline that opens around a
                             small double ring.
      .ring-halo             decorative concentric rings behind a subject.
+     .ring-glass            the pre-rendered glass and hologram rings (Blender,
+                            scripts/blender/ring_glass.py): a stack of layers
+                            (.ring-glass-hero: four <i>) that turn slowly at
+                            different speeds. .ring-frame-glass: the glass
+                            portrait frame on a .ring-frame.
    MOTION
      .ring-enter            arrives on a spring the first time it is seen
                             (.ring-enter-pop / -rise / -spin pick the move).
@@ -53,7 +58,9 @@
      @media (prefers-reduced-motion: no-preference)
      html:not([data-world-effects="economy"])
    Reduced motion and economy get the resting state at once: no spring, no
-   stagger, no bounce. Nothing loops. Keyframes move only opacity, scale,
+   stagger, no bounce, no spin. Nothing loops except the glass rings' slow
+   turn (.ring-glass), which runs only while the stack is on screen in a
+   visible tab and on at most two layers on a phone. Keyframes move only opacity, scale,
    translate and rotate (compositor properties), with backwards fill, so no
    transform is left on an element at rest. No backdrop-filter, no blur.
    The special sites' suit-up engines are never selected here.
@@ -357,14 +364,11 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  border: 1.5px solid var(--ring-key);
-  border-radius: 50%;
-  /* The outer ring: an outline, so it never takes layout. */
-  outline: 1px solid rgb(var(--ring-gold-rgb) / 0.55);
-  outline-offset: 9px;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  /* The four-segment glass mark (pre-rendered, 192px for 2x). */
+  background: url("/ring-glass-20261123/mark.webp") center / contain no-repeat;
 }
 
 /* ================================================================
@@ -397,6 +401,64 @@
       transparent 56%
     );
   pointer-events: none;
+}
+
+/* ================================================================
+   5b. Glass rings (2026-11-23). Pre-rendered glass and hologram rings,
+   transparent WebP at 2x, each centred on its own image centre, so any
+   layer can turn about the box centre. They are pictures moved by
+   transform only: no filter, no blend mode, no per-frame paint.
+
+   .ring-glass          a square stack; its <i> children are the layers.
+   .ring-glass-hero     four layers: the ticked band, three arcs, the fine
+                        dash ring, and the hologram sweep.
+   The pictures are requested only once the stack has come near the
+   viewport (data-ring-seen, src/lib/ring-motion.js), so a page that never
+   scrolls to it never fetches them.
+   .ring-frame-glass    on a .ring-frame: the glass portrait frame. Its
+                        inner edge is at 73 % of the box, so the picture is
+                        inset to that and the frame fills the box.
+   ================================================================ */
+
+.ring-glass {
+  position: absolute;
+  display: block;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.ring-glass > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: center / contain no-repeat;
+}
+
+.ring-glass-hero[data-ring-seen] > i:nth-child(1) {
+  background-image: url("/ring-glass-20261123/hero-outer.webp");
+}
+
+.ring-glass-hero[data-ring-seen] > i:nth-child(2) {
+  background-image: url("/ring-glass-20261123/hero-mid.webp");
+}
+
+.ring-glass-hero[data-ring-seen] > i:nth-child(3) {
+  background-image: url("/ring-glass-20261123/hero-inner.webp");
+}
+
+.ring-glass-hero[data-ring-seen] > i:nth-child(4) {
+  background-image: url("/ring-glass-20261123/hero-holo.webp");
+}
+
+.ring-frame.ring-frame-glass {
+  padding: 13.5%;
+}
+
+.ring-frame.ring-frame-glass::before {
+  padding: 0;
+  background: url("/ring-glass-20261123/frame.webp") center / 100% 100% no-repeat;
+  -webkit-mask: none;
+  mask: none;
 }
 
 /* ================================================================
@@ -457,6 +519,19 @@
   }
 }
 
+@keyframes ring-glass-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes ring-glass-pop {
+  from {
+    opacity: 0;
+    scale: var(--ring-glass-from, 0.6);
+  }
+}
+
 @keyframes ring-line-draw {
   from {
     scale: 0 1;
@@ -514,9 +589,55 @@
     animation: ring-line-draw var(--ring-dur-soft) var(--ring-spring-soft) backwards;
   }
 
+  /* --- Glass rings: each layer turns at its own speed and direction. ---
+     The turn exists only once the pictures do (data-ring-seen) and runs
+     only while the stack is on screen in a visible tab (data-ring-live,
+     html[data-ring-hidden]); otherwise it is paused where it stands, so
+     coming back never jumps. The layers pop in on the bounce spring. */
+  html:not([data-world-effects="economy"]) .ring-glass[data-ring-seen] > i {
+    animation:
+      ring-glass-spin var(--ring-glass-turn, 80s) linear infinite,
+      ring-glass-pop var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-play-state: paused, running;
+  }
+
+  html:not([data-world-effects="economy"]):not([data-ring-hidden])
+    .ring-glass[data-ring-seen][data-ring-live]
+    > i {
+    animation-play-state: running, running;
+  }
+
+  html:not([data-world-effects="economy"]) .ring-glass-hero > i:nth-child(1) {
+    --ring-glass-turn: 96s;
+    --ring-glass-from: 1.3;
+  }
+
+  html:not([data-world-effects="economy"]) .ring-glass-hero > i:nth-child(2) {
+    --ring-glass-turn: 64s;
+    --ring-glass-from: 0.55;
+    animation-direction: reverse, normal;
+    animation-delay: 0s, 80ms;
+  }
+
+  html:not([data-world-effects="economy"]) .ring-glass-hero > i:nth-child(3) {
+    --ring-glass-turn: 44s;
+    --ring-glass-from: 1.5;
+    animation-delay: 0s, 160ms;
+  }
+
+  /* The hologram line has a bright head and a fading tail: a slow turn
+     reads as a sweep. */
+  html:not([data-world-effects="economy"]) .ring-glass-hero > i:nth-child(4) {
+    --ring-glass-turn: 14s;
+    --ring-glass-from: 0.4;
+    animation-direction: reverse, normal;
+    animation-delay: 0s, 240ms;
+  }
+
+  /* The divider's glass mark turns into place. */
   html[data-ring-ready]:not([data-world-effects="economy"])
     .ring-divider.ring-enter[data-ring-in]::after {
-    animation: ring-pop-in var(--ring-dur-elastic) var(--ring-spring-elastic) 160ms backwards;
+    animation: ring-spin-in var(--ring-dur-elastic) var(--ring-spring-elastic) 160ms backwards;
   }
 
   /* --- Stagger: a parent hands its children their place in the cascade. --- */
@@ -644,5 +765,15 @@
 
   .ring-orbit:not(.ring-orbit-keep) > :is(.ring-orbit-track, .ring-orbit-core) {
     display: none;
+  }
+}
+
+/* A phone turns two glass layers at most (the band and the hologram sweep);
+   the others rest as static pictures. */
+@media (prefers-reduced-motion: no-preference) and (max-width: 739px),
+  (prefers-reduced-motion: no-preference) and (pointer: coarse) {
+  html:not([data-world-effects="economy"]) .ring-glass-hero[data-ring-seen] > i:nth-child(2),
+  html:not([data-world-effects="economy"]) .ring-glass-hero[data-ring-seen] > i:nth-child(3) {
+    animation-name: none, ring-glass-pop;
   }
 }

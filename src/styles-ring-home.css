@@ -3,7 +3,9 @@
    Linked by src/routes/index.tsx after styles-command-deck.css, on the
    dashboard branch only (the title never loads it).
    The dashboard is recomposed around circles:
-     - the eight riders stand on one orbit, the section heading at its centre
+     - the eight riders stand on one orbit, the section heading at its centre,
+       inside the pre-rendered glass rings (2026-11-23), each rider in a
+       glass frame
      - round controls (a ring sigil, pill switches, ring buttons)
      - the key visual sits in a halo of three rings
      - sections are parted by ring dividers and arrive on springs
@@ -205,10 +207,29 @@
   grid-area: orbit;
 }
 
-.command-deck-rider-orbit {
-  --ring-item: clamp(92px, 9.4vw, 136px);
-  --ring-r: clamp(196px, 21vw, 292px);
+/* On the section too, so the centre can size itself from the same ring. */
+.command-deck-riders,
+.command-deck-riders .command-deck-rider-orbit {
+  /* The item box is the glass frame; the portrait fills its inner 73 %. */
+  --ring-item: clamp(112px, 11.4vw, 164px);
+  --ring-r: clamp(206px, 22vw, 300px);
   --ring-track: color-mix(in srgb, var(--deck-accent, #74d9ec) 34%, transparent);
+}
+
+/* The glass rings: the stack is centred on the orbit and sized so its ticked
+   band (0.88 of the picture's half-width) lies on the orbit line itself,
+   behind the riders. Margins centre it, so its translate stays free for the
+   scroll bounce. */
+.command-deck-rider-orbit > .ring-glass {
+  top: 50%;
+  left: 50%;
+  width: calc(var(--ring-r) * 2.27);
+  margin: calc(var(--ring-r) * -1.135) 0 0 calc(var(--ring-r) * -1.135);
+}
+
+/* The band replaces the plain orbit line once its picture is in. */
+.command-deck-rider-orbit:has(> .ring-glass[data-ring-seen]) > .ring-orbit-track {
+  opacity: 0;
 }
 
 .command-deck-riders .command-deck-rider-core {
@@ -220,7 +241,8 @@
   justify-content: center;
   gap: 6px;
   place-self: center;
-  width: clamp(190px, 21vw, 300px);
+  /* Inside the innermost glass ring (0.58 of the orbit radius). */
+  width: calc(var(--ring-r) * 1.02);
   aspect-ratio: 1;
   border-radius: 50%;
   text-align: center;
@@ -260,8 +282,9 @@
   overflow: visible;
   border: 0;
   border-radius: 50%;
-  background: #0b1624;
-  box-shadow: 0 18px 34px -16px rgb(0 0 0 / 0.9);
+  /* The disc sits under the portrait only; the glass frame around it is clear. */
+  background: #0b1624 content-box;
+  box-shadow: none;
 }
 
 .command-deck-rider .command-deck-rider-portrait img {
@@ -271,7 +294,11 @@
 
 .command-deck-rider strong {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 2px);
+  /* The name may sit over a glass ring: a small ink plate keeps it legible. */
+  padding: 1px 8px;
+  border-radius: var(--ring-radius-pill);
+  background: rgb(7 14 24 / 0.84);
   left: 50%;
   display: block;
   width: max-content;
@@ -285,14 +312,6 @@
 
 .command-deck-rider strong > span {
   display: inline-block;
-}
-
-@media (hover: hover) {
-  .command-deck-rider:hover .command-deck-rider-portrait {
-    box-shadow:
-      0 18px 34px -16px rgb(0 0 0 / 0.9),
-      0 0 26px -6px color-mix(in srgb, var(--deck-accent) 60%, transparent);
-  }
 }
 
 /* ---- Footer: pill links -------------------------------------------------- */
@@ -413,6 +432,12 @@
     animation-delay: calc(var(--ring-i, 0) * 70ms);
   }
 
+  /* The glass layers answer a hovered rider: each breathes a little, in
+     opposite senses, on the bounce spring. */
+  html:not([data-world-effects="economy"]) .command-deck-rider-orbit > .ring-glass > i {
+    transition: scale var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+
   /* The orbit's centre pops once the ring has turned in. */
   html[data-ring-ready]:not([data-world-effects="economy"])
     .command-deck-riders:has(.ring-orbit[data-ring-in])
@@ -431,6 +456,20 @@
 @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
   html:not([data-world-effects="economy"]) .command-deck-rider:hover {
     scale: 1.1;
+  }
+
+  html:not([data-world-effects="economy"])
+    .command-deck-rider-orbit:has(.command-deck-rider:hover)
+    > .ring-glass
+    > i:nth-child(odd) {
+    scale: 1.035;
+  }
+
+  html:not([data-world-effects="economy"])
+    .command-deck-rider-orbit:has(.command-deck-rider:hover)
+    > .ring-glass
+    > i:nth-child(even) {
+    scale: 0.95;
   }
 
   html:not([data-world-effects="economy"]) .command-deck-destinations a:hover {
@@ -466,24 +505,21 @@
 /* ---- Phone: the orbit is sized to the viewport, so it stays a ring ------ */
 
 @media (max-width: 739px) {
-  .command-deck-rider-orbit {
-    --ring-item: clamp(60px, 18vw, 76px);
+  .command-deck-riders,
+  .command-deck-riders .command-deck-rider-orbit {
+    --ring-item: clamp(72px, 21vw, 88px);
     --ring-r: min(150px, calc(50vw - var(--ring-item) / 2 - 22px));
+    /* Half a step round: no rider sits on the horizontal axis, so each
+       side has the full step of height for the name under its frame. */
+    --ring-start: -112.5deg;
   }
 
   .command-deck-riders .command-deck-rider-core {
-    width: calc(var(--ring-core, 170px));
     gap: 2px;
   }
 
   .command-deck-riders .command-deck-rider-core h2 {
     font-size: 19px;
-  }
-
-  /* The orbit's own line is the ring here; the inner halo would cross the
-     heading at this size. */
-  .command-deck-riders .command-deck-rider-core > .ring-halo {
-    display: none;
   }
 
   .command-deck-riders .command-deck-rider-core > a {
@@ -504,12 +540,10 @@
 /* The narrowest phones: smaller portraits (still above the 44px target) so a
    two-line name clears the next rider on the ring. */
 @media (max-width: 360px) {
-  .command-deck-rider-orbit {
-    --ring-item: 54px;
-    --ring-r: calc(50vw - var(--ring-item) / 2 - 26px);
-    /* Half a step round: no rider sits on the horizontal axis, so each
-       side has the full step of height for a two-line name. */
-    --ring-start: -112.5deg;
+  .command-deck-riders,
+  .command-deck-riders .command-deck-rider-orbit {
+    --ring-item: 64px;
+    --ring-r: calc(50vw - var(--ring-item) / 2 - 24px);
   }
 
   .command-deck-rider strong {
@@ -517,12 +551,12 @@
     line-height: 1.2;
   }
 
-  .command-deck-riders .command-deck-rider-core {
-    width: 140px;
-  }
-
   .command-deck-riders .command-deck-rider-core h2 {
     font-size: 17px;
+  }
+
+  .command-deck-riders .command-deck-rider-core > a {
+    padding-inline: 8px;
   }
 }
 

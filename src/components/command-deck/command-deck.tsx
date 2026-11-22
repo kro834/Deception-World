@@ -701,7 +701,6 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
               section's own heading sits at its centre, so the ring itself
               says "these eight belong together" without a caption. */}
           <header className="command-deck-rider-core">
-            <span className="ring-halo ring-bounce" aria-hidden="true" />
             <h2 id="command-deck-riders-title">ライダー</h2>
             <DeckLink href="/riders">
               すべて見る
@@ -714,6 +713,14 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
             style={{ "--ring-n": RIDERS.length } as CSSProperties}
           >
             <span className="ring-orbit-track" aria-hidden="true" />
+            {/* The pre-rendered glass rings (four layers, each turning at its
+                own speed). The band lies on the orbit itself, behind the riders. */}
+            <span className="ring-glass ring-glass-hero ring-bounce" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
             {RIDERS.map(([id, name], index) => (
               <div
                 className="ring-orbit-item"
@@ -721,7 +728,7 @@ export function CommandDeck({ onReplay }: { onReplay?: () => void }) {
                 key={id}
               >
                 <DeckLink href={`/riders/${id}`} aria-label={name} className="command-deck-rider">
-                  <span className="command-deck-rider-portrait ring-frame">
+                  <span className="command-deck-rider-portrait ring-frame ring-frame-glass">
                     <img
                       src={launcherTile(`/riders/${id}`)}
                       alt=""

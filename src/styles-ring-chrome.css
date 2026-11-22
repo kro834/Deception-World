@@ -518,39 +518,46 @@ html[data-family]:not([data-button-style="liquid"])
 
 /* ================================================================
    5. The route cover. The file shutter keeps its clocks, panels and
-   brackets; a ring now locks around the held file as the ink closes and
-   opens away as the page takes over. A 2px line on ink: no flash, no red.
-   Only the file, world and cut-in covers; the rider dives and the
-   suit-up entries (.rider-route-dive) are not selected.
+   brackets; a glass ring locks around the held file as the ink closes and
+   opens away as the page takes over. Pastel glass on ink, faded in and
+   out: no flash, no red.
+   Only the file and world shutters and the archive dive; the rider dives
+   and suit-up entries (.rider-route-dive), the cut-ins and the sovereign
+   gate are not selected.
    ================================================================ */
 
-html body .load-gate.has-cine:not(.rider-route-dive) > .dwc-lock::after {
-  --ring-d: calc(max(var(--fw, 240), var(--fh, 320)) * 1px + 72px);
+/* The sovereign gate keeps its own orbit mark and status lines at the
+   centre, and a cut-in fills the view with its own stage: the band would
+   cross them, so it stands aside there. */
+html body .load-gate.has-cine:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate) > .dwc-lock::after {
+  /* The glass band's inner edge is at about 0.78 of its half-width; the
+     picture is sized so that edge clears the carried file's corners. */
+  /* Never larger than the screen: when the held frame is the whole view
+     (the way back to the World), the ring stands at its centre instead of
+     moving a layer that would be entirely off screen. */
+  --ring-d: min(calc(hypot(var(--fw, 240) * 1px, var(--fh, 320) * 1px) * 1.3 + 24px), 92vmin);
   content: "";
   position: absolute;
   top: calc(var(--fy, 0) * 1px + var(--fh, 0) * 0.5px - var(--ring-d) / 2);
   left: calc(var(--fx, 0) * 1px + var(--fw, 0) * 0.5px - var(--ring-d) / 2);
   width: var(--ring-d);
   height: var(--ring-d);
-  padding: 2px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 210deg,
-    var(--dwc-accent, #7ae8ff),
-    #d4f6ff 0.2turn,
-    var(--dwc-gold, #f0cf86) 0.55turn,
-    transparent 0.56turn 0.66turn,
-    var(--dwc-accent, #7ae8ff) 0.67turn
-  );
+  /* The pre-rendered glass band with its hologram hairlines (1600px, fetched
+     on idle by src/lib/ring-motion.js). A picture moved by transform only. */
+  background: url("/ring-glass-20261123/cover.webp") center / contain no-repeat;
   opacity: 0;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
   pointer-events: none;
+}
+
+/* On the hand-over the brackets have moved to the destination's portrait
+   frame; the band lets go from around that frame, growing away from it. */
+html
+  body
+  .load-gate.has-cine.has-landing.is-revealing:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate)
+  > .dwc-lock::after {
+  --ring-d: min(calc(hypot(var(--lw, 240) * 1px, var(--lh, 320) * 1px) * 1.3 + 24px), 92vmin);
+  top: calc(var(--ly, 0) * 1px + var(--lh, 0) * 0.5px - var(--ring-d) / 2);
+  left: calc(var(--lx, 0) * 1px + var(--lw, 0) * 0.5px - var(--ring-d) / 2);
 }
 
 @keyframes ring-cover-lock {
@@ -581,14 +588,16 @@ html body .load-gate.has-cine:not(.rider-route-dive) > .dwc-lock::after {
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full:not(.rider-route-dive).is-covering
+    .load-gate.has-cine.is-cine-full:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate).is-covering
     > .dwc-lock::after {
-    animation: ring-cover-lock var(--ring-dur-bounce) var(--ring-spring-bounce) 120ms both;
+    /* Starts as the carried file is landing in the held frame (the carry
+       takes 320 ms), so the band closes around it instead of crossing it. */
+    animation: ring-cover-lock var(--ring-dur-bounce) var(--ring-spring-bounce) 220ms both;
   }
 
   html:not([data-world-effects="economy"])
     body
-    .load-gate.has-cine.is-cine-full:not(.rider-route-dive).is-revealing
+    .load-gate.has-cine.is-cine-full:not(.rider-route-dive):not(.rider-route-cutin):not(.is-sovereign-gate).is-revealing
     > .dwc-lock::after {
     animation: ring-cover-release 420ms cubic-bezier(0.3, 0, 0.2, 1) both;
   }

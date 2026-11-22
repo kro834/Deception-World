@@ -21,6 +21,14 @@
 //      a little behind a flick and settle with one overshoot. Individual
 //      elements only; the body and the scroll suit-ups are never moved.
 //
+//    - Glass rings. `.ring-glass` gets `data-ring-seen` once it comes within
+//      GLASS_MARGIN of the viewport (the sheet requests its pictures only
+//      then) and `data-ring-live` while it is on screen; a hidden tab sets
+//      `html[data-ring-hidden]`. The sheet turns the layers only while live
+//      and visible. The route cover's glass band is fetched on idle after
+//      the first paint (not under reduced motion, economy or data saver:
+//      the cover does not show it there).
+//
 // Nothing here calls preventDefault or reads layout per frame beyond
 // scrollTop/scrollHeight. The frame loop runs only while a spring is moving.
 // Reduced motion and economy rendering keep the arrivals (they are instant
@@ -109,6 +117,9 @@ const ENTER = ".ring-enter";
 const SCROLL = "[data-ring-scroll]";
 const BOUNCE = "ring-bounce";
 const SAFETY_MS = 2500;
+const GLASS = ".ring-glass";
+const GLASS_MARGIN = "280px";
+const COVER_IMAGE = "/ring-glass-20261123/cover.webp";
 // The scroll bounce: px of lag per px/ms of scroll speed, and its ceiling.
 const KICK_GAIN = 9;
 const KICK_MAX = 14;
@@ -140,6 +151,24 @@ export function watchRingMotion(doc = document) {
     { rootMargin: "0px 0px -6% 0px", threshold: 0 },
   );
 
+  // Glass rings: near the viewport once (their pictures), on screen now (their turn).
+  const glassNear = new view.IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.setAttribute("data-ring-seen", "");
+        glassNear.unobserve(entry.target);
+      }
+    },
+    { rootMargin: GLASS_MARGIN, threshold: 0 },
+  );
+  const glassLive = new view.IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) entry.target.toggleAttribute("data-ring-live", entry.isIntersecting);
+    },
+    { threshold: 0 },
+  );
+
   /** @param {ParentNode} scope */
   const observeEnters = (scope) => {
     const list =
@@ -147,6 +176,32 @@ export function watchRingMotion(doc = document) {
         ? [scope, ...scope.querySelectorAll(ENTER)]
         : [...scope.querySelectorAll(ENTER)];
     for (const el of list) if (!el.hasAttribute(IN)) io.observe(el);
+    const glass =
+      scope instanceof view.Element && scope.matches(GLASS)
+        ? [scope, ...scope.querySelectorAll(GLASS)]
+        : [...scope.querySelectorAll(GLASS)];
+    for (const el of glass) {
+      if (!el.hasAttribute("data-ring-seen")) glassNear.observe(el);
+      glassLive.observe(el);
+    }
+  };
+
+  const onVisibility = () => root.toggleAttribute("data-ring-hidden", doc.visibilityState === "hidden");
+
+  // The route cover's glass band: fetched when the page is idle, so the first
+  // covered route change already has it and the first paint never waits for it.
+  let coverIdle = 0;
+  const fetchCover = () => {
+    coverIdle = 0;
+    const saver = /** @type {{ connection?: { saveData?: boolean } }} */ (view.navigator).connection;
+    if (!bounces() || saver?.saveData) return;
+    new view.Image().src = COVER_IMAGE;
+  };
+  const scheduleCover = () => {
+    coverIdle =
+      typeof view.requestIdleCallback === "function"
+        ? view.requestIdleCallback(fetchCover, { timeout: 4000 })
+        : view.setTimeout(fetchCover, 1800);
   };
 
   // Live collections: a ring a later commit adds is fed on the next frame.
@@ -245,6 +300,10 @@ export function watchRingMotion(doc = document) {
   view.addEventListener("scroll", onScroll, { passive: true });
   view.addEventListener("resize", onScroll, { passive: true });
   mo.observe(body, { childList: true, subtree: true });
+  doc.addEventListener("visibilitychange", onVisibility);
+  onVisibility();
+  if (doc.readyState === "complete") scheduleCover();
+  else view.addEventListener("load", scheduleCover, { once: true });
   root.setAttribute(READY, "");
   writeProgress();
 
@@ -260,6 +319,15 @@ export function watchRingMotion(doc = document) {
     view.clearTimeout(safety);
     mo.disconnect();
     io.disconnect();
+    glassNear.disconnect();
+    glassLive.disconnect();
+    doc.removeEventListener("visibilitychange", onVisibility);
+    view.removeEventListener("load", scheduleCover);
+    if (coverIdle) {
+      if (typeof view.cancelIdleCallback === "function") view.cancelIdleCallback(coverIdle);
+      else view.clearTimeout(coverIdle);
+    }
+    root.removeAttribute("data-ring-hidden");
     view.removeEventListener("scroll", onScroll);
     view.removeEventListener("resize", onScroll);
     if (frame) view.cancelAnimationFrame(frame);

@@ -4,7 +4,7 @@
 // springs are the helper's own curves, motion is gated, nothing loops, only
 // compositor properties move, and the suit-up engines are never selected.
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 import {
   RING_SPRINGS,
@@ -93,7 +93,13 @@ test("every ring sheet gates its motion on reduced motion and economy, and never
       if (/^\s*(?:from|to|\d+%)/.test(rule[1])) continue;
       assert.match(rule[1], /data-world-effects="economy"/, `${file}: ${rule[1].trim()}`);
     }
-    assert.doesNotMatch(css, /\binfinite\b/, file);
+    // 2026-11-23: the one loop is the glass rings' slow turn (owner-approved
+    // pre-rendered rings). It may only be declared on .ring-glass layers whose
+    // pictures are in (data-ring-seen); see the glass test below for its gates.
+    for (const rule of css.matchAll(/([^{}]+)\{([^{}]*\binfinite\b[^{}]*)\}/g)) {
+      assert.match(rule[1], /\.ring-glass\[data-ring-seen\]/, `${file}: ${rule[1].trim()}`);
+      assert.match(rule[2], /ring-glass-spin/, file);
+    }
   }
 });
 
@@ -110,6 +116,46 @@ test("ring keyframes move compositor properties only, and no sheet blurs", () =>
     // No flash: nothing here animates brightness or paints a white field.
     assert.doesNotMatch(css, /brightness\(|invert\(/, file);
   }
+});
+
+test("the glass rings turn only on screen in a visible tab, two layers at most on a phone", () => {
+  const css = strip(foundation);
+  // Declared paused; running only while live and the tab is visible.
+  assert.match(
+    css,
+    /\.ring-glass\[data-ring-seen\] > i \{[^}]*animation-play-state: paused, running;/,
+  );
+  assert.match(
+    css,
+    /:not\(\[data-ring-hidden\]\)\s+\.ring-glass\[data-ring-seen\]\[data-ring-live\]\s+> i \{\s*animation-play-state: running, running;/,
+  );
+  // A phone (narrow or coarse pointer) keeps layers 2 and 3 still.
+  const phone = css.slice(css.lastIndexOf("@media (prefers-reduced-motion: no-preference) and (max-width: 739px)"));
+  assert.match(phone, /\(pointer: coarse\)/);
+  assert.match(phone, /i:nth-child\(2\),[\s\S]*i:nth-child\(3\) \{\s*animation-name: none, ring-glass-pop;/);
+  // The pictures are requested only once the stack is near the viewport.
+  for (const layer of ["hero-outer", "hero-mid", "hero-inner", "hero-holo"]) {
+    assert.match(
+      foundation,
+      new RegExp(`\\.ring-glass-hero\\[data-ring-seen\\] > i:nth-child\\(\\d\\) \\{\\s*background-image: url\\("/ring-glass-20261123/${layer}\\.webp"\\);`),
+      layer,
+    );
+  }
+  // Pictures only: no blend, no filter on them.
+  assert.doesNotMatch(css, /mix-blend-mode|(?:^|[\s;])filter:/m);
+  // The helper marks seen/live, flags a hidden tab and fetches the cover on idle.
+  assert.match(helper, /setAttribute\("data-ring-seen", ""\)/);
+  assert.match(helper, /toggleAttribute\("data-ring-live", entry\.isIntersecting\)/);
+  assert.match(helper, /toggleAttribute\("data-ring-hidden", doc\.visibilityState === "hidden"\)/);
+  assert.match(helper, /requestIdleCallback\(fetchCover/);
+  assert.match(helper, /if \(!bounces\(\) \|\| saver\?\.saveData\) return;/);
+  // Every picture the sheets name exists, and the generator is kept beside them.
+  for (const file of sheets) {
+    for (const url of read(file).matchAll(/url\("(\/ring-glass-20261123\/[a-z-]+\.webp)"\)/g)) {
+      assert.ok(existsSync(new URL(`../public${url[1]}`, import.meta.url)), url[1]);
+    }
+  }
+  assert.ok(existsSync(new URL("../scripts/blender/ring_glass.py", import.meta.url)));
 });
 
 test("the suit-up engines and their covers are never selected", () => {
