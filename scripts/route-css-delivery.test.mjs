@@ -113,10 +113,12 @@ test("special routes append their CSS after world base and addon styles", () => 
   // Astra refines only the archive wrapper after its original chrome;
   // the iframe and the ordered World styles remain intact.
   // Owner (2026-10-27): append the approved command material after the existing archive wrapper.
-  assert.match(archive, /links:\s*\[\s*\.\.\.WORLD_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: formArchiveCssUrl \},\s*\{ rel: "stylesheet", href: cinemaArchiveAstraCssUrl \},\s*\{ rel: "stylesheet", href: commandArchiveCssUrl \},?\s*\]/);
+  // Owner (2026-11-23, ring system): the route's ring sheet follows the command material, last.
+  assert.match(archive, /links:\s*\[\s*\.\.\.WORLD_STYLESHEET_LINKS,\s*\{ rel: "stylesheet", href: formArchiveCssUrl \},\s*\{ rel: "stylesheet", href: cinemaArchiveAstraCssUrl \},\s*\{ rel: "stylesheet", href: commandArchiveCssUrl \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: ringArchiveCssUrl \},?\s*\]/);
   // The download page gets the dossier HUD subset and its own sheet after the addon sheet.
   assert.match(
     download,
-    /stylesheetLinks:\s*\[\s*WORLD_ADDON_STYLESHEET_LINK,\s*\{ rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL \},\s*\{ rel: "stylesheet", href: downloadCssUrl \},\s*\{ rel: "stylesheet", href: commandSupportCssUrl \},?\s*\]/,
+    // 2026-11-23 (ring system): the page's ring sheet follows, last.
+    /stylesheetLinks:\s*\[\s*WORLD_ADDON_STYLESHEET_LINK,\s*\{ rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL \},\s*\{ rel: "stylesheet", href: downloadCssUrl \},\s*\{ rel: "stylesheet", href: commandSupportCssUrl \},\s*(?:\/\/[^\n]*\n\s*)*\{ rel: "stylesheet", href: ringArchiveCssUrl \},?\s*\]/,
   );
 });

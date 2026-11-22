@@ -9,6 +9,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import formArchiveCssUrl from "@/styles-form-archive.css?url";
 import commandArchiveCssUrl from "@/styles-command-archive.css?url";
+import ringArchiveCssUrl from "@/styles-ring-archive.css?url";
 
 type ArchiveKind = "saga" | "realm";
 
@@ -61,6 +62,8 @@ export const Route = createFileRoute("/form-archive")({
       { rel: "stylesheet", href: formArchiveCssUrl },
       { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
       { rel: "stylesheet", href: commandArchiveCssUrl },
+      // The ring system on this page (2026-11-23), after every older skin.
+      { rel: "stylesheet", href: ringArchiveCssUrl },
     ],
   }),
 });

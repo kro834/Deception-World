@@ -6,6 +6,7 @@ import {
 } from "@/lib/world-head";
 import downloadCssUrl from "@/styles-download.css?url";
 import commandSupportCssUrl from "@/styles-command-support.css?url";
+import ringArchiveCssUrl from "@/styles-ring-archive.css?url";
 
 const MAIN_ARCHIVE_URL = "https://github.com/kro834/Deception-World/archive/refs/heads/main.zip";
 
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/download")({
         { rel: "stylesheet", href: DOSSIER_HUD_FONTS_URL },
         { rel: "stylesheet", href: downloadCssUrl },
         { rel: "stylesheet", href: commandSupportCssUrl },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringArchiveCssUrl },
       ],
     }),
 });

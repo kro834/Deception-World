@@ -3,6 +3,7 @@ import { WorldMap } from "@/components/world-map/world-map";
 import { validateMapSearch } from "@/lib/world-map-data";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import css from "@/styles-world-map.css?url";
+import ringArchiveCss from "@/styles-ring-archive.css?url";
 type MapRequest = { q?: string; kind?: string; node?: string; source?: string };
 
 export const Route = createFileRoute("/world-map")({
@@ -18,7 +19,12 @@ export const Route = createFileRoute("/world-map")({
     createWorldHead({
       title: "世界関係図｜Deception World",
       description: "人物、組織、形態と章を、公開記録の接続から辿る。",
-      stylesheetLinks: [...WORLD_CORE_STYLESHEET_LINKS, { rel: "stylesheet", href: css }],
+      stylesheetLinks: [
+        ...WORLD_CORE_STYLESHEET_LINKS,
+        { rel: "stylesheet", href: css },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringArchiveCss },
+      ],
     }),
 });
 function WorldMapRoute() {
