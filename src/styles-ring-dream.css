@@ -1,0 +1,282 @@
+/* ================================================================
+   The ring system on DREAM CHAPTER (2026-11-23, phase 2 group B).
+   Linked last by src/routes/dream-chapter.tsx.
+
+   Owner: 「円環型の構成と動的で弾んだアニメーション」「展開時は弾む様な
+   アニメーションにして」. The programme keeps its Taisho letterpress and
+   gains the ring in its own idiom: the three leads look out of 円窓 (round
+   windows) hung on one gilt arc, gilt ring dividers part the four acts, the
+   act bar is a row of pills with a ring on the current act, and every
+   drawer, fold and file springs open.
+
+   The tokens are already gilt and vermilion (styles-ring-chrome.css maps
+   html[data-family="dream"]). `:not(#ring-b)` adds an id's weight over the
+   image-cinema sheet's `main#top…` rules.
+   Motion gates as in styles-ring.css.
+   ================================================================ */
+
+/* ---------------------------------------------------------------
+   1. The act bar and the page's controls: pills.
+   --------------------------------------------------------------- */
+
+html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) > .dream-chapter-nav a {
+  border-radius: var(--ring-radius-pill);
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  > .dream-chapter-nav
+  a[aria-current] {
+  background:
+    radial-gradient(120% 140% at 24% 0%, rgb(var(--ring-key-rgb) / 0.24), transparent 64%),
+    rgb(20 10 22 / 0.86);
+  box-shadow:
+    inset 0 0 0 2px rgb(var(--ring-key-rgb) / 0.86),
+    0 0 0 1px rgb(var(--ring-pink-rgb) / 0.3);
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  :is(.dream-back-link, .dream-hero-actions a, .dream-cinema-record-link) {
+  border-radius: var(--ring-radius-pill);
+  clip-path: none;
+}
+
+/* ---------------------------------------------------------------
+   2. 円窓: the three leads in round windows on one arc.
+   The card's frame dissolves; the portrait is the window (a thumbnail of
+   the file the button opens, where the portrait is shown whole), ringed in
+   gilt with a vermilion hairline. The outer two hang lower: an arc.
+   --------------------------------------------------------------- */
+
+html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) .dream-character-grid {
+  position: relative;
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  > article {
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  > article::before,
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  button.ios26-glass::after,
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  .dream-character-shade {
+  display: none;
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  button.ios26-glass {
+  justify-items: center;
+  border-color: transparent;
+  background: none;
+  box-shadow: none;
+  text-align: center;
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  button.ios26-glass
+  > img {
+  width: min(100% - 36px, 340px);
+  height: auto;
+  aspect-ratio: 1;
+  margin: 18px auto 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* The window's rings: a gap, the gilt ring, a wider gap, a vermilion
+     hairline. Box shadows: no layout, no filter on the portrait. */
+  box-shadow:
+    0 0 0 6px #160c18,
+    0 0 0 8px var(--ring-key),
+    0 0 0 15px #160c18,
+    0 0 0 16px rgb(var(--ring-pink-rgb) / 0.7),
+    0 26px 44px -12px rgb(0 0 0 / 0.8);
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  .dream-character-copy {
+  border-radius: 22px;
+}
+
+/* The arc the windows hang on: a text-free ornament behind them. */
+html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) .dream-cast-arc {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 0;
+  width: min(1500px, 190%);
+  aspect-ratio: 1;
+  margin-left: calc(min(1500px, 190%) / -2);
+  border-radius: 50%;
+  background: conic-gradient(
+    from -62deg,
+    transparent 0turn,
+    rgb(var(--ring-key-rgb) / 0.75) 0.08turn,
+    rgb(var(--ring-gold-rgb) / 0.9) 0.172turn,
+    rgb(var(--ring-key-rgb) / 0.75) 0.264turn,
+    transparent 0.344turn
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.6px), #000 calc(100% - 2px));
+  pointer-events: none;
+}
+
+html[data-family="dream"]
+  body
+  main#top.dream-page.dream-image-cinema:not(#ring-b)
+  .dream-character-grid
+  > article {
+  z-index: 1;
+}
+
+@media (min-width: 900px) {
+  html[data-family="dream"]
+    body
+    main#top.dream-page.dream-image-cinema:not(#ring-b)
+    .dream-character-grid {
+    margin-bottom: 64px;
+  }
+
+  /* `top`, not a transform: the cards' own arrival animates translate. */
+  html[data-family="dream"]
+    body
+    main#top.dream-page.dream-image-cinema:not(#ring-b)
+    .dream-character-grid
+    > article:is(:nth-of-type(1), :nth-of-type(3)) {
+    position: relative;
+    top: 64px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   3. The ring divider between the acts, in gilt.
+   --------------------------------------------------------------- */
+
+html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) .dream-act-ring {
+  grid-column: 1 / -1;
+  width: min(100%, 1180px);
+  margin: var(--ring-space-4) auto;
+}
+
+/* ---------------------------------------------------------------
+   4. Motion: THE EXPANSION RULE and the windows' answer to the hand.
+   --------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Folds, drawers and the contents: the body springs open under its bar
+     (it replaces the folds' short slide; closing stays the element's own). */
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    main#top.dream-page.dream-image-cinema:not(#ring-b)
+    :is(
+      .dream-contents,
+      .dream-story-case,
+      .dream-archive-fold,
+      .dream-reader-paragraph-guide,
+      .dream-chapter-companion,
+      .dream-record-reading,
+      .dream-record-clues
+    )[open]
+    > :not(summary) {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    transform-origin: 50% 0%;
+  }
+
+  /* A person's or an agent's file: the sheet is the full screen and does
+     not overshoot; its parts spring in, staggered. */
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    .dream-dossier-dialog[open]
+    > .dream-dossier-shell
+    > * {
+    animation: ring-expand-child var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+    animation-delay: calc(40ms + var(--ring-i, 0) * 60ms);
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    .dream-dossier-dialog
+    > .dream-dossier-shell
+    > :nth-child(2) {
+    --ring-i: 1;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    .dream-dossier-dialog
+    > .dream-dossier-shell
+    > :nth-child(3) {
+    --ring-i: 2;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    .dream-dossier-dialog
+    > .dream-dossier-shell
+    > :nth-child(n + 4) {
+    --ring-i: 3;
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    main#top.dream-page.dream-image-cinema:not(#ring-b)
+    .dream-character-grid
+    button.ios26-glass
+    > img {
+    transition: scale var(--ring-dur-spring) var(--ring-spring);
+  }
+
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    main#top.dream-page.dream-image-cinema:not(#ring-b)
+    .dream-character-grid
+    button.ios26-glass:active
+    > img {
+    scale: 0.95;
+    transition: scale 90ms ease-out;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-family="dream"]:not([data-world-effects="economy"])
+    body
+    main#top.dream-page.dream-image-cinema:not(#ring-b)
+    .dream-character-grid
+    button.ios26-glass:hover
+    > img {
+    scale: 1.05;
+  }
+}
+
+@media (forced-colors: active) {
+  html[data-family="dream"] body main#top.dream-page.dream-image-cinema:not(#ring-b) .dream-cast-arc {
+    display: none;
+  }
+}
