@@ -17,6 +17,7 @@ import galleryCurationCssUrl from "@/styles-gallery-curation.css?url";
 import galleryControlsPolishCssUrl from "@/styles-gallery-controls-polish.css?url";
 import tabletGalleryCssUrl from "@/styles-tablet-gallery.css?url";
 import commandGalleryCssUrl from "@/styles-command-gallery.css?url";
+import ringGalleryCssUrl from "@/styles-ring-gallery.css?url";
 import { GALLERY_HERO_PRELOAD_SCRIPT } from "@/components/gallery/gallery-hero-preload";
 import { GALLERY_CURTAIN_STICKERS } from "@/components/gallery/gallery-curtain";
 
@@ -62,6 +63,8 @@ export const Route = createFileRoute("/gallery")({
           href,
         })),
         { rel: "stylesheet", href: commandGalleryCssUrl },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringGalleryCssUrl },
       ],
     };
   },

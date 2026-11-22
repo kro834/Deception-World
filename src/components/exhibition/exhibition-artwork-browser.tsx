@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type CSSProperties } from "react";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
 import {
   exhibitionBrowsePage,
@@ -221,7 +221,11 @@ export function ExhibitionArtworkBrowser({
           <button type="button" disabled={page === 0} onClick={() => turnPage(page - 1)}>
             ← 前の12作品
           </button>
-          <span aria-label={`${count}ページ中${page + 1}ページ`}>
+          <span
+            className="exhibition-ring-page"
+            style={{ "--ring-p": ((page + 1) / Math.max(1, count)).toFixed(4) } as CSSProperties}
+            aria-label={`${count}ページ中${page + 1}ページ`}
+          >
             {page + 1} / {count}
           </span>
           <button type="button" disabled={page === count - 1} onClick={() => turnPage(page + 1)}>
