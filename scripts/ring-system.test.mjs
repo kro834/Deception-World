@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
 import {
+  RING_LINK_HANG,
+  RING_LINK_STEP_MS,
   RING_SPRINGS,
   ringSpringLinear,
   ringSpringPosition,
@@ -118,7 +120,7 @@ test("ring keyframes move compositor properties only, and no sheet blurs", () =>
   }
 });
 
-test("the glass rings turn only on screen in a visible tab, two layers at most on a phone", () => {
+test("the glass rings turn only on screen in a visible tab, all four layers on every device", () => {
   const css = strip(foundation);
   // Declared paused; running only while live and the tab is visible.
   assert.match(
@@ -129,10 +131,17 @@ test("the glass rings turn only on screen in a visible tab, two layers at most o
     css,
     /:not\(\[data-ring-hidden\]\)\s+\.ring-glass\[data-ring-seen\]\[data-ring-live\]\s+> i \{\s*animation-play-state: running, running;/,
   );
-  // A phone (narrow or coarse pointer) keeps layers 2 and 3 still.
-  const phone = css.slice(css.lastIndexOf("@media (prefers-reduced-motion: no-preference) and (max-width: 739px)"));
-  assert.match(phone, /\(pointer: coarse\)/);
-  assert.match(phone, /i:nth-child\(2\),[\s\S]*i:nth-child\(3\) \{\s*animation-name: none, ring-glass-pop;/);
+  // 2026-11-23 (owner: 「高品質モードで、スマホでもPC版と同クオリティ」): the old
+  // phone cap (layers 2 and 3 still on a narrow or coarse-pointer device) is
+  // gone. No ring sheet reduces an effect by device: a width, pointer or
+  // hover query may change layout and hover only, never an animation's name.
+  // (The side menu's rules in the chrome sheet belong to the side-menu owner.)
+  for (const file of sheets) {
+    const sheet = strip(read(file));
+    for (const [a, b] of blocksOf(sheet, /@media[^{]*(?:max-width|pointer: coarse)[^{]*\{/g)) {
+      assert.doesNotMatch(sheet.slice(a, b), /animation(?:-name)?:\s*none/, file);
+    }
+  }
   // The pictures are requested only once the stack is near the viewport.
   for (const layer of ["hero-outer", "hero-mid", "hero-inner", "hero-holo"]) {
     assert.match(
@@ -196,7 +205,90 @@ test("the helper never blocks input and writes only the ring's own properties", 
   assert.match(code, /prefers-reduced-motion: reduce/);
   assert.match(code, /data-world-effects/);
   const writes = [...code.matchAll(/style\.setProperty\(\s*"([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual([...new Set(writes)].sort(), ["--ring-kick", "--ring-p"]);
+  // 2026-11-23: the linked sections add the chain's delays (on a part and on
+  // its thread) and the thread's own geometry (on the helper's own nodes).
+  assert.deepEqual([...new Set(writes)].sort(), [
+    "--ring-kick",
+    "--ring-link-a",
+    "--ring-link-d",
+    "--ring-link-f",
+    "--ring-p",
+    "--ring-pulley-from",
+    "--ring-thread-from",
+    "--ring-thread-to",
+    "animation-delay",
+  ]);
   // The scroll bounce moves opted-in elements, never the document.
   assert.doesNotMatch(code, /(?:body|root|documentElement)\.style/);
+});
+
+// Owner, 2026-11-23: 「連鎖する感じにしたいです」「Gで。琥珀色の糸と滑車で頼みます」.
+test("linked sections: a pulley-and-thread chain, timed by the helper and run by the sheet", () => {
+  const css = strip(foundation);
+  const code = helper.replace(/^\s*\/\/.*$/gm, "");
+  // The hand-off is the bounce spring's first arrival at its seat: cause and effect.
+  let cross = 0;
+  for (let t = 0; t < 1; t += 1 / 2000) {
+    if (ringSpringPosition(RING_SPRINGS.bounce, t) >= 1) {
+      cross = Math.round(t * 1000);
+      break;
+    }
+  }
+  assert.equal(RING_LINK_STEP_MS, cross);
+  assert.ok(RING_LINK_STEP_MS > 100 && RING_LINK_STEP_MS < 160, String(RING_LINK_STEP_MS));
+  // One plain animation per property: additive composition would take the lift off the compositor.
+  assert.doesNotMatch(css, /animation-composition/);
+  // Text hangs less than figures and cards; the sheet and the helper agree.
+  assert.ok(RING_LINK_HANG.text < RING_LINK_HANG.figure && RING_LINK_HANG.text <= 32 && RING_LINK_HANG.figure <= 56);
+  for (const kind of ["text", "figure"]) {
+    assert.match(css, new RegExp(`@keyframes ring-link-lift-${kind} \\{\\s*from \\{\\s*translate: 0 ${RING_LINK_HANG[kind]}px;`), kind);
+  }
+  // Parts, threads and pulleys all ride the bounce spring on the helper's delays.
+  for (const name of ["ring-link-lift-text", "ring-link-lift-figure", "ring-thread-run", "ring-pulley-turn"]) {
+    assert.match(
+      css,
+      new RegExp(`animation:\\s*${name} var\\(--ring-dur-bounce\\) var\\(--ring-spring-bounce\\) var\\(--ring-link-d, 0ms\\) backwards`),
+      name,
+    );
+  }
+  // A part is held only by an attribute the helper sets, and only once the helper runs.
+  assert.match(css, /html\[data-ring-ready\] \[data-ring-link="hold"\] \{\s*opacity: 0;\s*\}/);
+  assert.equal((css.match(/\[data-ring-link="hold"\]/g) ?? []).length, 1);
+  assert.doesNotMatch(read("src/routes/__root.tsx"), /data-ring-link/);
+  // Economy: the order and a plain fade, no threads. Reduced motion: no thread layer at all.
+  assert.match(
+    css,
+    /html\[data-ring-ready\]\[data-world-effects="economy"\] :is\(\[data-ring-link="text"\], \[data-ring-link="figure"\]\) \{\s*animation: ring-link-seen 240ms ease-out/,
+  );
+  assert.match(css, /\.ring-links \{[^}]*display: none;/);
+  assert.match(
+    css,
+    /@media \(prefers-reduced-motion: no-preference\) \{\s*html:not\(\[data-world-effects="economy"\]\) \.ring-links \{\s*display: block;/,
+  );
+  assert.match(code, /if \(any && bounces\(\)\)/);
+  assert.match(code, /const linksOn = \(\) => !calm\.matches;/);
+  // Amber thread; decoration only; faint at rest.
+  assert.match(foundation, /--ring-amber: #f2b24a;/);
+  assert.match(css, /\.ring-thread \{[^}]*background: var\(--ring-amber\);/);
+  assert.match(css, /\.ring-links \{[^}]*pointer-events: none;/);
+  assert.match(code, /linkLayer\.setAttribute\("aria-hidden", "true"\)/);
+  const rest = css.match(/\.ring-link\[data-ring-run\] \{\s*opacity: ([\d.]+);/);
+  assert.ok(rest && Number(rest[1]) <= 0.3, "the seated thread is faint");
+  // No frame loop for the chain: the helper never animates a part itself.
+  assert.doesNotMatch(code, /style\.(?:translate|transform|opacity)\b|setProperty\(\s*"(?:translate|transform|opacity)"/);
+  // It never takes a suit-up stage, a pinned scene or a box with its own arrival.
+  const forbid = code.match(/const LINK_FORBID =\s*\/(.+)\/;/);
+  assert.ok(forbid);
+  for (const word of ["suitup", "henshin", "assembly", "entry", "nanite", "vortex", "engine", "canvas", "stage", "sticky", "reveal", "ring-(?:stagger", "ring-enter-(?:pop|spin)"])
+    assert.ok(forbid[1].includes(word), word);
+  assert.match(code, /cs\.animationName !== "none"/);
+  assert.match(code, /cs\.position !== "static" && cs\.position !== "relative"/);
+  assert.match(code, /child\.querySelector\("canvas, iframe"\) !== null/);
+  // Held parts are always let go: a safety sweep, print, and reduced motion switched on.
+  assert.match(code, /view\.setTimeout\(sweepHeld, SAFETY_MS\)/);
+  // A plain .ring-enter joins the chain: the helper gives it data-ring-in at its slot.
+  assert.match(code, /style\.setProperty\("animation-delay", `\$\{delay\}ms`\);\s*part\.el\.setAttribute\(IN, ""\);/);
+  // A thread never spans a wide gap (a skipped stage or full-bleed block).
+  assert.match(code, /if \(b\.top - a\.bottom > 96\) return null;/);
+  assert.match(code, /addEventListener\("beforeprint", releaseAllLinks\)/);
 });
