@@ -175,6 +175,15 @@ const ZEUS_AVOID_SELECTOR = [
   // index's field, and the /download and 404 cards' ways back, which the
   // button covered on phones.
   ".library-cast-tile",
+  // 2026-11-23 ring redesign: the rider files, kinds, search categories,
+  // tour courses, lab stages and dogs became ring nodes the button must not
+  // settle on either.
+  ".ring-cast-node",
+  ".ring-kind",
+  ".search-ring button",
+  ".gallery-tour-ring-node",
+  ".lab-ring button",
+  ".dogs-ring-node > button",
   ".library-card-actions button",
   ".search-input-row",
   ".export-page :is(.export-page-alt, .export-page-back)",

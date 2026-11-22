@@ -420,15 +420,48 @@ export function TransformationLab() {
             />
             <button onClick={copy}>{copied ? "コピーしました" : "この瞬間のURLをコピー"}</button>
           </div>
-          <div className="lab-beats" role="group" aria-label="変身の段階">
-            {LAB_BEATS.map((beat) => (
-              <button
+          {/* Ring system (2026-11-23): the stages of one suit-up are nodes on
+              one ring (chrome only: the engine is not touched). The ring in
+              the centre is lit up to the stage in progress: it changes only
+              when the stage does, so nothing repaints per frame beside the
+              engine. Each node is a wrapper, placed by the orbit; the button
+              keeps its own press. */}
+          <div
+            className="lab-ring ring-orbit ring-orbit-keep ring-enter"
+            role="group"
+            aria-label="変身の段階"
+            style={{ "--ring-n": LAB_BEATS.length } as CSSProperties}
+          >
+            <span className="ring-orbit-track" aria-hidden="true" />
+            <span
+              className="lab-ring-core"
+              aria-hidden="true"
+              style={
+                {
+                  "--ring-p": (LAB_BEATS.indexOf(currentBeat) / (LAB_BEATS.length - 1)).toFixed(4),
+                } as CSSProperties
+              }
+            />
+            {LAB_BEATS.map((beat, index) => (
+              <span
                 key={beat.at}
-                aria-pressed={Math.abs(state.progress - beat.at) < 0.001}
-                onClick={() => change({ progress: beat.at })}
+                className="ring-orbit-item"
+                style={{ "--ring-i": index } as CSSProperties}
               >
-                {beat.label}
-              </button>
+                <button
+                  aria-pressed={Math.abs(state.progress - beat.at) < 0.001}
+                  data-state={
+                    beat === currentBeat
+                      ? "active"
+                      : beat.at < currentBeat.at
+                        ? "passed"
+                        : "upcoming"
+                  }
+                  onClick={() => change({ progress: beat.at })}
+                >
+                  {beat.label}
+                </button>
+              </span>
             ))}
           </div>
         </div>

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { GALLERY_ARTWORKS } from "@/components/gallery/gallery-data";
 import { ExhibitionStudio } from "@/components/exhibition/exhibition-studio";
@@ -7,6 +8,7 @@ import { normalizeExhibitionSearch } from "@/lib/gallery-route-search";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import studioCssUrl from "@/styles-exhibition-studio.css?url";
 import roomCssUrl from "@/styles-exhibition-room.css?url";
+import ringGalleryCssUrl from "@/styles-ring-gallery.css?url";
 
 export const Route = createFileRoute("/exhibition")({
   validateSearch: normalizeExhibitionSearch,
@@ -19,6 +21,8 @@ export const Route = createFileRoute("/exhibition")({
         ...WORLD_CORE_STYLESHEET_LINKS,
         { rel: "stylesheet", href: studioCssUrl },
         { rel: "stylesheet", href: roomCssUrl },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringGalleryCssUrl },
       ],
     }),
 });
@@ -39,6 +43,7 @@ function ExhibitionRoom() {
   return (
     <main className="exhibition-room exhibition-room-curated dg-focus-scope" id="main">
       <header className="exhibition-room-heading dg-reveal">
+        <i className="exhibition-ring-halo ring-halo ring-bounce" aria-hidden="true" />
         <div className="exhibition-room-heading-copy">
           <h1>原画のある、展示室。</h1>
           <p className="exhibition-room-lead">光と素材に囲まれて、一枚と向き合う。</p>
@@ -80,7 +85,16 @@ function ExhibitionRoom() {
         </div>
         <div className="exhibition-room-work-heading">
           <div className="exhibition-room-work-title" aria-live="polite" aria-atomic="true">
-            <p className="exhibition-room-work-number">
+            {/* Ring system (2026-11-23): the number's ring is lit by its place
+                among the works. */}
+            <p
+              className="exhibition-room-work-number exhibition-ring-number"
+              style={
+                {
+                  "--ring-p": ((index + 1) / GALLERY_ARTWORKS.length).toFixed(4),
+                } as CSSProperties
+              }
+            >
               <span>{number}</span> / {GALLERY_ARTWORKS.length}
             </p>
             <h2 id="exhibition-current-title">{artwork.title}</h2>

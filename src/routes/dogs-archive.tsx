@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { GuardedLink } from "@/components/load-gate";
 import { useDialogHistoryDismiss } from "@/components/world/use-dialog-history-dismiss";
@@ -14,6 +14,7 @@ import { guardDogsArchiveNavigation } from "@/lib/dogs-archive/touch-guard";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import archiveCss from "@/styles-dogs-archive.css?url";
 import viewerCss from "@/styles-dogs-viewer.css?url";
+import ringArchiveCss from "@/styles-ring-archive.css?url";
 
 export const Route = createFileRoute("/dogs-archive")({
   validateSearch: parseDogArchiveSearch,
@@ -27,6 +28,8 @@ export const Route = createFileRoute("/dogs-archive")({
         ...WORLD_CORE_STYLESHEET_LINKS,
         { rel: "stylesheet", href: viewerCss },
         { rel: "stylesheet", href: archiveCss },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringArchiveCss },
       ],
     }),
 });
@@ -99,7 +102,14 @@ function DogsArchive() {
   };
 
   return (
-    <main className="dogs-archive" id="main">
+    // Ring system (2026-11-23): this page does not scroll, so the topbar's
+    // progress ring shows the chosen dog's place among the five instead
+    // (--ring-archive-p, mapped onto the trigger in styles-ring-archive.css).
+    <main
+      className="dogs-archive"
+      id="main"
+      style={{ "--ring-archive-p": dog / DOG_ARCHIVE_ENTRIES.length } as CSSProperties}
+    >
       <SideMenuLayer context="archive" open={menuOpen} onOpenChange={setMenuOpen} />
       <header className="dogs-archive-header">
         <h1>DOGS ARCHIVE</h1>
@@ -126,28 +136,37 @@ function DogsArchive() {
       </header>
       <div
         id="dogs-selector"
-        className="dogs-archive-selector"
+        className="dogs-ring"
         role="tablist"
         aria-label="犬の個体を選ぶ"
         ref={tabs}
       >
-        {DOG_ARCHIVE_ENTRIES.map((item) => (
-          <button
+        {/* The five dogs are nodes on one arc. Each node is a presentational
+            wrapper (the arc places it with a transform); the tab inside
+            keeps its own press, focus and keys. */}
+        {DOG_ARCHIVE_ENTRIES.map((item, index) => (
+          <span
             key={item.id}
-            type="button"
-            role="tab"
-            data-dog={item.id}
-            id={`dog-tab-${item.id}`}
-            aria-label={`${item.id} ${item.title} ${item.name}`}
-            aria-selected={dog === item.id}
-            aria-controls="dogs-archive-panel"
-            tabIndex={dog === item.id ? 0 : -1}
-            onClick={() => choose(item.id)}
-            onKeyDown={(event) => onTabKey(event, item.id)}
+            className="dogs-ring-node"
+            role="presentation"
+            style={{ "--ring-i": index } as CSSProperties}
           >
-            <b aria-hidden="true">{item.id}</b>
-            <span>{item.name}</span>
-          </button>
+            <button
+              type="button"
+              role="tab"
+              data-dog={item.id}
+              id={`dog-tab-${item.id}`}
+              aria-label={`${item.id} ${item.title} ${item.name}`}
+              aria-selected={dog === item.id}
+              aria-controls="dogs-archive-panel"
+              tabIndex={dog === item.id ? 0 : -1}
+              onClick={() => choose(item.id)}
+              onKeyDown={(event) => onTabKey(event, item.id)}
+            >
+              <b aria-hidden="true">{item.id}</b>
+              <span>{item.name}</span>
+            </button>
+          </span>
         ))}
       </div>
       <section
@@ -200,6 +219,7 @@ function DogsArchive() {
               dog === 2 ? "dogs-archive-portrait dogs-archive-varg" : "dogs-archive-portrait"
             }
           >
+            <i className="dogs-ring-halo ring-halo" aria-hidden="true" />
             <div className="dogs-archive-portrait__frame">
               <img
                 key={portrait.src}

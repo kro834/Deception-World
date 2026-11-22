@@ -3,7 +3,15 @@ import {
   rememberGalleryStagePreview,
   resolveGalleryStageArtwork,
 } from "./gallery-stage-state";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 import { useGallerySelectionMotion } from "./gallery-selection-motion";
 import { ArtworkStage } from "@/components/artwork-stage/artwork-stage";
 import { gallerySelectFocus } from "./gallery-select-focus";
@@ -1078,6 +1086,8 @@ export function GalleryPage() {
         )}
         <section className="gallery-intro gallery-artwork-intro" aria-labelledby="gallery-title">
           <header className="gallery-screening-heading">
+            {/* Ring system (2026-11-23): a halo behind the title; decorative. */}
+            <i className="gallery-ring-halo ring-halo ring-bounce" aria-hidden="true" />
             <div className="gallery-intro-copy">
               <h1 id="gallery-title">
                 <span className="gallery-title-opening">光と影の、</span>
@@ -1183,7 +1193,20 @@ export function GalleryPage() {
               }}
             >
               <figcaption tabIndex={0} aria-label="表示中の作品番号とタイトル">
-                <span>{numberFor(featured)}</span>
+                {/* The number sits in a ring lit by its place in the collection. */}
+                <span
+                  className="gallery-ring-number"
+                  style={
+                    {
+                      "--ring-p": (
+                        (allArtworks.findIndex((work) => work.id === featured.id) + 1) /
+                        Math.max(1, allArtworks.length)
+                      ).toFixed(4),
+                    } as CSSProperties
+                  }
+                >
+                  {numberFor(featured)}
+                </span>
                 {titles[featured.id] && <span>{titles[featured.id]}</span>}
               </figcaption>
               <div className="gallery-feature-settings">
@@ -1248,6 +1271,7 @@ export function GalleryPage() {
           className="gallery-collection"
           aria-labelledby="gallery-collection-title"
         >
+          <i className="ring-divider ring-enter" aria-hidden="true" />
           <div className="gallery-collection-heading">
             <div>
               <h2 id="gallery-collection-title">作品を巡る</h2>
@@ -1939,7 +1963,15 @@ export function GalleryPage() {
               >
                 ← 前の作品
               </button>
-              <p aria-live="polite">
+              <p
+                aria-live="polite"
+                className="gallery-ring-position"
+                style={
+                  {
+                    "--ring-p": ((selectedIndex + 1) / Math.max(1, viewerWorks.length)).toFixed(4),
+                  } as CSSProperties
+                }
+              >
                 {selectedIndex + 1} / {viewerWorks.length}
               </p>
               <button

@@ -13,6 +13,7 @@ import stageDossierCssUrl from "@/styles-stage-dossier.css?url";
 import formSignatureCssUrl from "@/styles-form-signature.css?url";
 import dossierZenithCssUrl from "@/styles-dossier-zenith.css?url";
 import tabletDossierCssUrl from "@/styles-tablet-dossier.css?url";
+import ringDossierCssUrl from "@/styles-ring-dossier.css?url";
 
 export type RouteStylesheetLink = {
   rel: "stylesheet";
@@ -42,6 +43,15 @@ export const CINEMATIC_STYLESHEET_LINK: RouteStylesheetLink = {
   rel: "stylesheet",
   href: cinematicEditionCssUrl,
 };
+// The ring system on the character files (2026-11-23): the roster orbit at
+// the end of a file, ring frames, pill tracks and the bouncing expansions.
+// It sits ahead of the pinned tail of each list (reading, stage, tablet,
+// zenith; the first-rank file's own sheet), so no "last sheet" pin moves; its
+// rules carry their own weight instead of relying on order.
+export const RING_DOSSIER_STYLESHEET_LINK: RouteStylesheetLink = {
+  rel: "stylesheet",
+  href: ringDossierCssUrl,
+};
 export const WORLD_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   ...WORLD_CORE_STYLESHEET_LINKS,
   CINEMATIC_STYLESHEET_LINK,
@@ -53,6 +63,7 @@ export const SOVEREIGN_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   { rel: "stylesheet", href: sovereignDetailCssUrl },
   ...WORLD_CORE_STYLESHEET_LINKS.slice(1),
   CINEMATIC_STYLESHEET_LINK,
+  RING_DOSSIER_STYLESHEET_LINK,
 ];
 
 // The record viewers (form, nightmare, episode and column pickups): linked
@@ -96,6 +107,7 @@ export const DOSSIER_STYLESHEET_LINKS: RouteStylesheetLink[] = [
   { rel: "stylesheet", href: dossierEditionCssUrl },
   { rel: "stylesheet", href: dossierCinemaCssUrl },
   PICKUP_CINEMA_STYLESHEET_LINK,
+  RING_DOSSIER_STYLESHEET_LINK,
   { rel: "stylesheet", href: dossierReadingCssUrl },
   STAGE_DOSSIER_STYLESHEET_LINK,
   TABLET_DOSSIER_STYLESHEET_LINK,

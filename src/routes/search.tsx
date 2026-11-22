@@ -3,6 +3,7 @@ import { SearchPage } from "@/components/search/search-page";
 import { validateSearchState } from "@/components/search/search-state";
 import { createWorldHead, WORLD_CORE_STYLESHEET_LINKS } from "@/lib/world-head";
 import searchCssUrl from "@/styles-search.css?url";
+import ringLibraryCssUrl from "@/styles-ring-library.css?url";
 
 export const Route = createFileRoute("/search")({
   validateSearch: validateSearchState,
@@ -12,7 +13,12 @@ export const Route = createFileRoute("/search")({
       title: "資料検索｜Deception World",
       description:
         "人物、ライダー、物語、世界設定を横断して、ディセプションワールドの公開資料を探す。",
-      stylesheetLinks: [...WORLD_CORE_STYLESHEET_LINKS, { rel: "stylesheet", href: searchCssUrl }],
+      stylesheetLinks: [
+        ...WORLD_CORE_STYLESHEET_LINKS,
+        { rel: "stylesheet", href: searchCssUrl },
+        // The ring system on this page (2026-11-23), after every older skin.
+        { rel: "stylesheet", href: ringLibraryCssUrl },
+      ],
     }),
 });
 

@@ -135,7 +135,9 @@ test("the roster rail lists the whole list: the current file marked, 欠番 iner
     nav.indexOf("function DossierRoster"),
     nav.indexOf("export function DossierNav"),
   );
-  assert.match(roster, /<ol className="dossier-roster" aria-label="この一覧の資料">/);
+  // Owner (2026-11-22: 円環型の構成と弾んだアニメーション), 2026-11-23: the
+  // roster also carries ring-enter, so its ring turns into place when seen.
+  assert.match(roster, /<ol className="dossier-roster ring-enter" aria-label="この一覧の資料">/);
   assert.match(roster, /<span aria-current="page">\{body\}<\/span>/);
   assert.match(
     roster,

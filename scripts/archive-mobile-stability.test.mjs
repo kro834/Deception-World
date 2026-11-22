@@ -30,8 +30,10 @@ test("the app uses memory-safe embedded archives and recreates the iframe when s
   // Owner (2026-10-27): the phone Zeus-button fix changed both embedded archives, so both re-version (zeus).
   // Owner (2026-11-20): 残っていた英字ラベルを削除。The archives link
   // archive-labels.css last, which re-versions both documents (labels1).
-  assert.match(route, /saga-form-archive-embedded\.html\?v=20261120-labels1/);
-  assert.match(route, /realm-form-archive-embedded\.html\?v=20261120-labels1/);
+  // 2026-11-23 (ring system): both documents link archive-ring.css / .js
+  // before the labels sheet, which re-versions them again (ring1).
+  assert.match(route, /saga-form-archive-embedded\.html\?v=20261123-ring1/);
+  assert.match(route, /realm-form-archive-embedded\.html\?v=20261123-ring1/);
   assert.match(route, /<iframe[\s\S]*?key=\{`\$\{archive\}:\$\{transitionGeneration\}`\}/);
   assert.doesNotMatch(route, /-standalone\.html/);
   // A history step to another form of the same archive reopens it (reopen).

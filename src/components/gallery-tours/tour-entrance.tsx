@@ -96,6 +96,7 @@ export function GalleryTourEntrance({
         </div>
         {openingArtwork && (
           <figure className="gallery-tour-opening-artwork">
+            <i className="gallery-tour-ring-halo ring-halo ring-bounce" aria-hidden="true" />
             <div className="gallery-tour-opening-frame">
               <div className="gallery-tour-opening-mat">
                 <img
@@ -123,24 +124,40 @@ export function GalleryTourEntrance({
         className="gallery-tour-catalogue"
         aria-labelledby="gallery-tour-catalogue-heading"
       >
-        <div className="gallery-tour-catalogue-heading">
-          <div>
-            <h2 id="gallery-tour-catalogue-heading">いま惹かれる景色から。</h2>
+        {/* Ring system (2026-11-23): the courses are peers, so they sit on one
+            orbit around the catalogue's heading. Each node is a wrapper (the
+            orbit places it); the link inside keeps its own press and focus. */}
+        <div className="gallery-tour-ring">
+          <div className="gallery-tour-catalogue-heading">
+            <div>
+              <h2 id="gallery-tour-catalogue-heading">いま惹かれる景色から。</h2>
+            </div>
+            <p>気になる光や仕草を入口に、全体を眺めながら一枚ずつ。途中の作品からも巡れます。</p>
           </div>
-          <p>気になる光や仕草を入口に、全体を眺めながら一枚ずつ。途中の作品からも巡れます。</p>
+          <nav
+            className="gallery-tour-ring-orbit ring-orbit ring-orbit-keep ring-enter"
+            aria-label="鑑賞コース"
+            style={{ "--ring-n": GALLERY_TOURS.length } as CSSProperties}
+          >
+            <span className="ring-orbit-track" aria-hidden="true" />
+            {GALLERY_TOURS.map((tour, index) => (
+              <span
+                key={tour.id}
+                className="ring-orbit-item"
+                style={{ "--ring-i": index } as CSSProperties}
+              >
+                <a
+                  href={`#gallery-tour-course-${tour.id}`}
+                  className="gallery-tour-ring-node"
+                  style={{ "--gallery-tour-course-accent": tour.accent } as CSSProperties}
+                >
+                  <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                  <b>{tour.title}</b>
+                </a>
+              </span>
+            ))}
+          </nav>
         </div>
-        <nav className="gallery-tour-course-index" aria-label="鑑賞コース">
-          {GALLERY_TOURS.map((tour, index) => (
-            <a
-              href={`#gallery-tour-course-${tour.id}`}
-              key={tour.id}
-              style={{ "--gallery-tour-course-accent": tour.accent } as CSSProperties}
-            >
-              <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-              {tour.title}
-            </a>
-          ))}
-        </nav>
         {storageMessage && (
           <p className="gallery-tour-entrance-message" role="status">
             {storageMessage}
@@ -241,6 +258,19 @@ export function GalleryTourEntrance({
                   </details>
                   <div className="gallery-tour-course-bottom">
                     <div className="gallery-tour-course-position">
+                      {/* The saved place in the course, as a ring (decorative:
+                          the words beside it say the same). */}
+                      {hasSavedPosition && (
+                        <i
+                          className="gallery-tour-ring-progress ring-progress"
+                          aria-hidden="true"
+                          style={
+                            {
+                              "--ring-p": ((stopIndex + 1) / tour.stops.length).toFixed(4),
+                            } as CSSProperties
+                          }
+                        />
+                      )}
                       <span>全{tour.stops.length}点</span>
                       {hasSavedPosition && (
                         <span>

@@ -9,6 +9,7 @@ import { initRail } from "@/lib/liquid/boot.js";
 import { WORLD_STYLESHEET_LINKS } from "@/lib/world-head";
 import formArchiveCssUrl from "@/styles-form-archive.css?url";
 import commandArchiveCssUrl from "@/styles-command-archive.css?url";
+import ringArchiveCssUrl from "@/styles-ring-archive.css?url";
 
 type ArchiveKind = "saga" | "realm";
 
@@ -17,6 +18,11 @@ type ArchiveKind = "saga" | "realm";
 // The sandboxed archive cannot read the page URL: the frame receives them in
 // its #fragment and reports each choice (public/archive-state-bridge.js).
 const ARCHIVE_STATE_MESSAGE = "deception-world:archive-state";
+// The ring system (2026-11-23): this page does not scroll, the frame does.
+// The frame reports its scroll progress (public/archive-ring.js) and the
+// topbar's progress ring follows it (--ring-archive-p, mapped onto the
+// trigger in styles-ring-archive.css).
+const ARCHIVE_PROGRESS_MESSAGE = "deception-world:archive-progress";
 const ARCHIVE_FORM_ID = /^[a-z0-9-]{1,40}$/;
 const ARCHIVE_COMPARE_PAIR = /^[a-z0-9-]{1,40}\.[a-z0-9-]{1,40}$/;
 
@@ -61,6 +67,8 @@ export const Route = createFileRoute("/form-archive")({
       { rel: "stylesheet", href: formArchiveCssUrl },
       { rel: "stylesheet", href: cinemaArchiveAstraCssUrl },
       { rel: "stylesheet", href: commandArchiveCssUrl },
+      // The ring system on this page (2026-11-23), after every older skin.
+      { rel: "stylesheet", href: ringArchiveCssUrl },
     ],
   }),
 });
@@ -162,6 +170,7 @@ function FormArchive() {
   const [loaded, setLoaded] = useState(false);
   const [clientReady, setClientReady] = useState(false);
   const switcherRef = useRef<HTMLDivElement | null>(null);
+  const toolbarRef = useRef<HTMLElement | null>(null);
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const transitionGenerationRef = useRef(0);
   const activeTransitionRef = useRef<ArchiveTransition>({
@@ -176,8 +185,8 @@ function FormArchive() {
   >(() => {});
   const isSaga = archive === "saga";
   const archiveDocument = isSaga
-    ? "/saga-form-archive-embedded.html?v=20261120-labels1"
-    : "/realm-form-archive-embedded.html?v=20261120-labels1";
+    ? "/saga-form-archive-embedded.html?v=20261123-ring1"
+    : "/realm-form-archive-embedded.html?v=20261123-ring1";
 
   // An SSR iframe can finish before hydration and lose its one-shot load
   // event. Mount it only after React can own that event and its ready fallback.
@@ -349,6 +358,32 @@ function FormArchive() {
     return () => window.removeEventListener("message", keepArchiveState);
   }, [navigate]);
 
+  // The current frame's scroll progress lights the topbar's ring. Written on
+  // the toolbar (the trigger's parent), so only the toolbar restyles; a new
+  // archive starts again from its own first report.
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    if (!toolbar) return;
+    const keepArchiveProgress = (event: MessageEvent) => {
+      const data = event.data as { type?: unknown; kind?: unknown; progress?: unknown };
+      if (data?.type !== ARCHIVE_PROGRESS_MESSAGE) return;
+      const frame = frameRef.current;
+      if (!frame || event.source === null || event.source !== frame.contentWindow) return;
+      if (data.kind !== activeTransitionRef.current.archive) return;
+      const progress = Number(data.progress);
+      if (!Number.isFinite(progress)) return;
+      toolbar.style.setProperty(
+        "--ring-archive-p",
+        Math.min(1, Math.max(0, progress)).toFixed(2),
+      );
+    };
+    window.addEventListener("message", keepArchiveProgress);
+    return () => {
+      window.removeEventListener("message", keepArchiveProgress);
+      toolbar.style.removeProperty("--ring-archive-p");
+    };
+  }, []);
+
   useEffect(() => {
     if (!loaded) return;
     const pending = restoreSwitcherFocusRef.current;
@@ -398,7 +433,7 @@ function FormArchive() {
       data-archive-kind={archive}
       data-archive-ready={loaded ? "true" : "false"}
     >
-      <header className="form-archive-toolbar" aria-label="フォームアーカイブ操作">
+      <header className="form-archive-toolbar" aria-label="フォームアーカイブ操作" ref={toolbarRef}>
         <div
           ref={switcherRef}
           id="archive-switcher"
