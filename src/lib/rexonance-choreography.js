@@ -311,10 +311,22 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     !!forced?.matches ||
     root.dataset.worldEffects === "economy" ||
     root.hasAttribute("data-rzn-constrained");
+  // Whether a host positions its children, read once when the page is set
+  // (prepare: with the other measures, at rest) and not as the run starts:
+  // that read forced a style pass in the middle of a scroll (2026-11-23).
+  const positioned = new WeakMap();
+  const positions = (host) => {
+    let known = positioned.get(host);
+    if (known === undefined) {
+      const style = document.defaultView?.getComputedStyle(host);
+      known = Boolean(style && style.position !== "static");
+      positioned.set(host, known);
+    }
+    return known;
+  };
   const flare = (host, kind, delay) => {
     if (!host || dim()) return;
-    const style = document.defaultView?.getComputedStyle(host);
-    if (!style || style.position === "static") return;
+    if (!positions(host)) return;
     const shell = document.createElement("rxk-flare");
     shell.className = `rxk-flare is-${kind}`;
     shell.setAttribute("aria-hidden", "true");
@@ -440,6 +452,12 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     // (watched with the rest, so under the cover only once it lifts).
     for (const plate of page.querySelectorAll(PLATES)) {
       if (covered() || belowFold(plate)) plates.push(plate);
+    }
+    // The flares' hosts, read here in one pass (no write between them).
+    for (const plate of plates) positions(plate);
+    for (const { node: title } of titles) {
+      const heading = title.closest(HEADING);
+      if (heading) positions(heading);
     }
     if (covered()) {
       // Observe once the cover lifts: what stands on the first screen then
