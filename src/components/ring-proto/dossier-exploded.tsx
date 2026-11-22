@@ -5,22 +5,8 @@
 // and its art changes to the chosen form for 変身記録.
 import { useState } from "react";
 import { protoRider } from "./rider";
-import { PhrasedText } from "@/components/world/dossier-reader";
+import { ProtoChapter, ProtoForms, ProtoIdentity, ProtoQuotes, ProtoTopbar } from "./dossier-parts";
 import { dossierImage } from "@/lib/dossier-images";
-
-export function ProtoTopbar() {
-  return (
-    <header className="rp-topbar">
-      <a className="rp-back" href="/world#riders-return">
-        <i aria-hidden="true">←</i>
-        <span>ライダー一覧へ戻る</span>
-      </a>
-      <button type="button" className="rp-trigger" aria-label="メニューを開く">
-        <i aria-hidden="true" />
-      </button>
-    </header>
-  );
-}
 
 export function DossierExploded({
   riderId,
@@ -136,79 +122,12 @@ export function DossierExploded({
           aria-labelledby={`rp-d1-tab-${part}`}
           key={part}
         >
-          {part === "profile" ? (
-            <div className="rp-quotes">
-              {rider.quotes.map((quote) => (
-                <q key={quote}>{quote}</q>
-              ))}
-            </div>
-          ) : null}
-          {part === "identity" ? (
-            <>
-              <article className="rp-card">
-                <p className="rp-kicker">{rider.civilian.kicker}</p>
-                <small>変身前の姿</small>
-                <h2>{rider.civilian.name}</h2>
-                <p>{rider.civilian.body}</p>
-                {rider.civilian.cv ? <p>CV {rider.civilian.cv}</p> : null}
-              </article>
-              {rider.partner ? (
-                <article className="rp-card">
-                  <p className="rp-kicker">{rider.partner.kicker}</p>
-                  <small>{rider.partner.tag}</small>
-                  <h2>{rider.partner.name}</h2>
-                  <q>{rider.partner.call}</q>
-                  {rider.partner.body.map((paragraph) => (
-                    <p key={paragraph.slice(0, 24)}>{paragraph}</p>
-                  ))}
-                </article>
-              ) : null}
-              {rider.nightmare ? (
-                <a className="rp-card rp-card-link" href={`/riders/${rider.id}#identity-records`}>
-                  <span className="rp-card-art">
-                    <img src={rider.nightmare.img} {...dossierImage(rider.nightmare.img)} alt="" />
-                  </span>
-                  <h2>{rider.nightmare.name}</h2>
-                  <q>{rider.nightmare.quote}</q>
-                </a>
-              ) : null}
-            </>
-          ) : null}
+          {part === "profile" ? <ProtoQuotes rider={rider} /> : null}
+          {part === "identity" ? <ProtoIdentity rider={rider} /> : null}
           {part === "index"
-            ? rider.sections.map((section) => (
-                <article className="rp-card rp-chapter" key={section.no}>
-                  <span className="rp-chapter-no" aria-hidden="true">
-                    {section.no}
-                  </span>
-                  <p className="rp-kicker">{section.kicker}</p>
-                  <h2>
-                    <PhrasedText text={section.title} />
-                  </h2>
-                  {section.body.map((paragraph) => (
-                    <p key={paragraph.slice(0, 24)}>{paragraph}</p>
-                  ))}
-                </article>
-              ))
+            ? rider.sections.map((section) => <ProtoChapter key={section.no} section={section} />)
             : null}
-          {part === "forms"
-            ? rider.forms.map((entry, index) => (
-                <a
-                  className="rp-card rp-card-link rp-form"
-                  key={`${entry.name}-${entry.sub ?? ""}`}
-                  href={`/riders/${rider.id}#form-records`}
-                  data-on={index === form}
-                  onMouseEnter={() => setForm(index)}
-                  onFocus={() => setForm(index)}
-                >
-                  <span className="rp-card-art">
-                    <img src={entry.img} {...dossierImage(entry.img)} alt="" loading="lazy" />
-                  </span>
-                  <h2>{entry.displayName ?? entry.name}</h2>
-                  {entry.sub ? <small>{entry.sub}</small> : null}
-                  {entry.quote ? <q>{entry.quote}</q> : null}
-                </a>
-              ))
-            : null}
+          {part === "forms" ? <ProtoForms rider={rider} active={form} onPick={setForm} /> : null}
         </div>
       </section>
     </main>

@@ -17,7 +17,8 @@
   background: var(--rp-ink);
   -webkit-tap-highlight-color: transparent;
 }
-.rp-root {
+.rp-root,
+.rp-doc.rp-doc-fixed {
   position: fixed;
   inset: 0;
   z-index: 2147483000;
@@ -852,6 +853,543 @@ body:has(.rp-root, .rp-doc) .zeus-button {
   }
 }
 
+/* ── m2 からくり箪笥 ────────────────────────────────────────────────────── */
+.rp-m2 {
+  --pitch: 84px;
+  --beam: 100px;
+  --thread: rgb(var(--rp-amber-rgb) / 0.85);
+}
+.rp-m2-sheet {
+  position: absolute;
+  inset: 0;
+  overflow: clip auto;
+  background:
+    radial-gradient(circle at 16% 40%, rgb(var(--rp-amber-rgb) / 0.1), transparent 44%),
+    var(--rp-ink);
+}
+.rp-m2-sheet[hidden],
+.rp-m2-tray[hidden] {
+  display: none;
+}
+.rp-m2-head h2 {
+  position: absolute;
+  left: 56px;
+  top: 30px;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+.rp-m2-head .rp-search {
+  position: absolute;
+  left: 300px;
+  top: 28px;
+  width: 260px;
+}
+.rp-m2-beam {
+  position: absolute;
+  left: 470px;
+  right: 48px;
+  top: var(--beam);
+  height: 3px;
+  margin-top: -1px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--rp-amber), rgb(var(--rp-amber-rgb) / 0.25));
+}
+.rp-m2-cabinet {
+  width: 320px;
+  margin: 140px 0 0 56px;
+  padding: 0;
+  list-style: none;
+}
+.rp-m2-cabinet > li {
+  margin-bottom: 10px;
+}
+.rp-m2-front {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: calc(var(--pitch) - 10px);
+  padding: 0 22px 0 26px;
+  border: 1px solid var(--rp-line);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #111f33, #0a1424);
+  font-size: 19px;
+  font-weight: 800;
+  text-align: left;
+}
+.rp-m2-pull {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--rp-amber);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 4px #0a1424,
+    inset 0 0 0 6px rgb(var(--rp-amber-rgb) / 0.5);
+}
+li[data-open="true"] > .rp-m2-front {
+  border-color: var(--rp-amber);
+  background: linear-gradient(180deg, #2a2415, #15202f);
+  translate: 30px 0;
+}
+/* The thread: down from the beam's pulley, then across to the pull. */
+.rp-m2-front::before,
+.rp-m2-front::after {
+  content: "";
+  position: absolute;
+  background: var(--thread);
+  opacity: 0;
+}
+.rp-m2-front::before {
+  left: calc(100% + 63px);
+  bottom: 50%;
+  width: 2px;
+  height: calc(var(--i) * var(--pitch) + var(--pitch) / 2 + 35px);
+  transform-origin: 50% 0;
+}
+.rp-m2-front::after {
+  left: 100%;
+  top: 50%;
+  width: 64px;
+  height: 2px;
+  margin-top: -1px;
+  transform-origin: 100% 50%;
+}
+li[data-open="true"] > .rp-m2-front::before,
+li[data-open="true"] > .rp-m2-front::after {
+  opacity: 1;
+}
+.rp-m2-tray {
+  position: absolute;
+  left: 540px;
+  right: 48px;
+  top: calc(var(--beam) + 34px);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 270px));
+  grid-auto-rows: 58px;
+  gap: 16px 22px;
+}
+.rp-m2-pulley {
+  position: absolute;
+  left: -86px;
+  top: -50px;
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--rp-amber);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--rp-amber) 0 3px, transparent 3.5px),
+    conic-gradient(
+      from 0deg,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 4%,
+      transparent 0 25%,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 29%,
+      transparent 0 50%,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 54%,
+      transparent 0 75%,
+      rgb(var(--rp-amber-rgb) / 0.55) 0 79%,
+      transparent 0
+    ),
+    #0a1424;
+}
+.rp-m2-tray .rp-moon {
+  position: relative;
+  border-color: rgb(var(--rp-amber-rgb) / 0.32);
+  border-radius: 18px;
+}
+/* Each plate hangs from the one above; the top row hangs from the beam. */
+.rp-m2-tray .rp-moon::before {
+  content: "";
+  position: absolute;
+  left: 26px;
+  bottom: 100%;
+  width: 2px;
+  height: 17px;
+  background: var(--thread);
+}
+.rp-m2-tray .rp-moon:nth-of-type(-n + 3)::before {
+  height: 34px;
+}
+.rp-m2-tray[data-cols="2"] .rp-moon:nth-of-type(3)::before,
+.rp-m2-tray[data-cols="1"] .rp-moon:nth-of-type(n + 2)::before {
+  height: 17px;
+}
+
+@media (max-width: 759px) {
+  .rp-m2 {
+    --pitch: 58px;
+  }
+  .rp-m2-head h2 {
+    left: 20px;
+    top: 20px;
+    font-size: 26px;
+  }
+  .rp-m2-head .rp-search {
+    left: 16px;
+    right: 16px;
+    top: 76px;
+    width: auto;
+    min-height: 44px;
+  }
+  .rp-m2-beam,
+  .rp-m2-front::before,
+  .rp-m2-front::after {
+    display: none;
+  }
+  .rp-m2-cabinet {
+    width: auto;
+    margin: 134px 16px 40px;
+  }
+  .rp-m2-cabinet > li {
+    margin-bottom: 6px;
+  }
+  .rp-m2-front {
+    height: 52px;
+    padding: 0 16px 0 20px;
+    border-radius: 16px;
+    font-size: 17px;
+  }
+  li[data-open="true"] > .rp-m2-front {
+    translate: none;
+  }
+  .rp-m2-tray {
+    position: relative;
+    inset: auto;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: minmax(44px, auto);
+    gap: 6px 8px;
+    margin: 0 0 12px 30px;
+    padding-top: 10px;
+  }
+  .rp-m2-tray[data-cols="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* The thread runs down the tray's left side; each plate is tied to it. */
+  .rp-m2-tray::before {
+    content: "";
+    position: absolute;
+    left: -15px;
+    top: 0;
+    bottom: 22px;
+    width: 2px;
+    background: var(--thread);
+    transform-origin: 50% 0;
+  }
+  .rp-m2-pulley {
+    display: none;
+  }
+  .rp-m2-tray .rp-moon,
+  .rp-m2-tray .rp-moon:nth-of-type(n) {
+    border-radius: 14px;
+  }
+  .rp-m2-tray .rp-moon::before,
+  .rp-m2-tray .rp-moon:nth-of-type(n)::before {
+    left: -15px;
+    top: 50%;
+    bottom: auto;
+    width: 15px;
+    height: 2px;
+  }
+  .rp-m2-tray[data-cols="3"] .rp-moon:nth-of-type(even)::before {
+    left: -9px;
+    width: 9px;
+  }
+  .rp-m2-tray[data-cols="3"] .rp-moon {
+    gap: 8px;
+    padding-right: 8px;
+  }
+  .rp-m2-tray[data-cols="3"] .rp-moon b {
+    font-size: 13px;
+  }
+  .rp-m2-tray[data-cols="3"] .rp-moon-art {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* ── d2 回転ファイル ────────────────────────────────────────────────────── */
+.rp-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.rp-facts > div {
+  padding: 8px 14px 9px;
+  border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent);
+  border-radius: 16px;
+}
+.rp-facts dt {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: color-mix(in srgb, var(--tone) 60%, #fff);
+}
+.rp-facts dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.rp-d2 {
+  --R: 560px;
+  --step: 52deg;
+  --card-h: min(500px, 58vh);
+  background:
+    radial-gradient(
+      circle at 18% 44%,
+      color-mix(in srgb, var(--tone) 30%, transparent),
+      transparent 40%
+    ),
+    var(--rp-ink);
+}
+.rp-d2-identity {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 36%;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0;
+  text-align: center;
+}
+.rp-d2-figure {
+  position: relative;
+  width: min(280px, 19vw);
+  aspect-ratio: 1 / 1.46;
+  margin-bottom: 44px;
+}
+.rp-d2-figure img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px 999px 28px 28px;
+  object-fit: cover;
+  object-position: 50% 10%;
+}
+/* The ring behind the figure: how far round the file you are. */
+.rp-d2-figure::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 166%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    color-mix(in srgb, var(--tone) 80%, #fff) calc(var(--p) * 360deg),
+    rgb(255 255 255 / 0.12) 0
+  );
+  -webkit-mask: radial-gradient(
+    circle closest-side,
+    transparent calc(100% - 3px),
+    #000 calc(100% - 2px)
+  );
+  mask: radial-gradient(circle closest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+}
+.rp-d2-identity h1 {
+  margin: 0;
+  font-size: clamp(34px, 3.4vw, 52px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.rp-d2-identity p {
+  margin: 12px 0 0;
+  padding: 6px 16px;
+  border: 1px solid color-mix(in srgb, var(--tone) 70%, #fff);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.rp-d2-drum {
+  position: absolute;
+  left: 36%;
+  right: 190px;
+  top: 0;
+  bottom: 0;
+  perspective: 1500px;
+}
+.rp-d2-axle {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--R) * -1));
+}
+.rp-d2-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--card-h);
+  margin-top: calc(var(--card-h) / -2);
+  border: 1px solid color-mix(in srgb, var(--tone) 55%, transparent);
+  border-radius: 28px;
+  background: linear-gradient(180deg, #101d31, #0a1322);
+  backface-visibility: hidden;
+  transform: rotateX(calc(var(--d) * -1 * var(--step))) translateZ(var(--R));
+  opacity: 0.5;
+  cursor: pointer;
+}
+.rp-d2-card[data-rel="0"] {
+  opacity: 1;
+  cursor: auto;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tone) 70%, #fff);
+}
+.rp-d2-card[data-rel="far"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.rp-d2-scroll {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  height: 100%;
+  padding: 28px 32px;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.rp-d2-card[data-rel="0"] .rp-d2-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.rp-d2-card:not([data-rel="0"]) .rp-d2-scroll {
+  pointer-events: none;
+}
+.rp-d2-card .rp-card:not(.rp-card-link) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.rp-d2-card .rp-chapter-no {
+  top: 0;
+  right: 0;
+}
+.rp-d2-rim {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  width: 150px;
+  height: 0;
+}
+.rp-d2-rim button {
+  position: absolute;
+  right: 0;
+  top: -22px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0.6;
+  translate: calc((1 - cos(var(--d) * 15deg)) * 130px) calc(var(--d) * 60px);
+}
+.rp-d2-rim button i {
+  width: 12px;
+  height: 12px;
+  border: 2px solid color-mix(in srgb, var(--tone) 70%, #fff);
+  border-radius: 50%;
+}
+.rp-d2-rim button[aria-selected="true"] {
+  font-size: 17px;
+  opacity: 1;
+}
+.rp-d2-rim button[aria-selected="true"] i {
+  background: color-mix(in srgb, var(--tone) 80%, #fff);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--tone) 25%, transparent);
+}
+
+@media (max-width: 899px) {
+  .rp-d2 {
+    --R: 520px;
+    --card-h: calc(100vh - 372px);
+  }
+  .rp-d2-identity {
+    left: 16px;
+    right: 16px;
+    top: 78px;
+    bottom: auto;
+    width: auto;
+    grid-template-columns: 76px minmax(0, 1fr);
+    column-gap: 16px;
+    justify-items: start;
+    align-items: center;
+    text-align: left;
+  }
+  .rp-d2-figure {
+    grid-row: 1 / span 2;
+    width: 76px;
+    aspect-ratio: 1;
+    margin: 0;
+  }
+  .rp-d2-figure img {
+    border-radius: 50%;
+    object-position: 50% 6%;
+    scale: 0.88;
+  }
+  .rp-d2-figure::before {
+    width: 100%;
+  }
+  .rp-d2-identity h1 {
+    align-self: end;
+    font-size: 30px;
+  }
+  .rp-d2-identity p {
+    align-self: start;
+    margin-top: 6px;
+    padding: 3px 12px;
+    font-size: 12.5px;
+  }
+  .rp-d2-drum {
+    left: 16px;
+    right: 16px;
+    top: 172px;
+    bottom: 84px;
+    overflow: clip;
+    perspective: 1100px;
+  }
+  .rp-d2-scroll {
+    padding: 20px;
+  }
+  .rp-d2-rim {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 62px;
+    width: 0;
+  }
+  .rp-d2-rim button {
+    right: auto;
+    left: 0;
+    top: 0;
+    flex-direction: column;
+    gap: 4px;
+    width: 96px;
+    margin-left: -48px;
+    padding: 4px 0;
+    font-size: 12px;
+    translate: calc(var(--d) * 80px) calc((1 - cos(var(--d) * 22deg)) * 30px);
+  }
+  .rp-d2-rim button[aria-selected="true"] {
+    font-size: 14px;
+  }
+}
+
 /* ── motion (never under reduced motion, never in economy) ──────────────── */
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-world-effects="economy"]) .rp-m1-ring,
@@ -924,6 +1462,39 @@ body:has(.rp-root, .rp-doc) .zeus-button {
   html:not([data-world-effects="economy"]) .rp-d1-panel .rp-quotes q:nth-child(3) {
     animation-delay: 140ms;
   }
+  html:not([data-world-effects="economy"]) .rp-m2-sheet,
+  html:not([data-world-effects="economy"]) .rp-d2 {
+    animation: rp-fade var(--ring-dur-soft) var(--ring-spring-soft) backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-m2-front {
+    transition: translate var(--ring-dur-bounce) var(--ring-spring-bounce);
+  }
+  html:not([data-world-effects="economy"]) li[data-open="true"] > .rp-m2-front::before {
+    animation: rp-m2-thread-y 260ms var(--ring-spring-soft) backwards;
+  }
+  html:not([data-world-effects="economy"]) li[data-open="true"] > .rp-m2-front::after {
+    animation: rp-m2-thread-x 200ms var(--ring-spring-soft) 200ms backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-m2-pulley {
+    animation: rp-m2-pulley var(--ring-dur-bounce) var(--ring-spring-bounce) backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-m2-tray::before {
+    animation: rp-m2-thread-y 420ms var(--ring-spring-soft) backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-m2-tray .rp-moon {
+    animation: rp-m2-drop var(--ring-dur-bounce) var(--ring-spring-bounce)
+      calc(var(--row) * 55ms + var(--col) * 30ms + 240ms) backwards;
+  }
+  html:not([data-world-effects="economy"]) .rp-d2-card {
+    transition:
+      transform var(--ring-dur-bounce) var(--ring-spring-bounce),
+      opacity 260ms linear;
+  }
+  html:not([data-world-effects="economy"]) .rp-d2-rim button {
+    transition:
+      translate var(--ring-dur-bounce) var(--ring-spring-bounce),
+      opacity 200ms linear;
+  }
 }
 @keyframes rp-fade {
   from {
@@ -978,5 +1549,26 @@ body:has(.rp-root, .rp-doc) .zeus-button {
       translate: 0 34px;
       scale: 0.86;
     }
+  }
+}
+@keyframes rp-m2-thread-y {
+  from {
+    scale: 1 0;
+  }
+}
+@keyframes rp-m2-thread-x {
+  from {
+    scale: 0 1;
+  }
+}
+@keyframes rp-m2-pulley {
+  from {
+    rotate: -300deg;
+  }
+}
+@keyframes rp-m2-drop {
+  from {
+    opacity: 0;
+    translate: 0 calc((var(--row) + 1) * -64px);
   }
 }
