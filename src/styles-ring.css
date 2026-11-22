@@ -53,6 +53,11 @@
      .ring-lift             hover lift on a spring (mouse only).
      .ring-press            press sink, elastic release.
      .ring-bounce           scroll-linked bounce (reads --ring-kick).
+     [data-ring-link]       linked sections: set by the helper on the parts
+                            of a heading's section (hold / text / figure);
+                            .ring-links holds their amber threads and pulleys.
+                            Opt out with data-ring-chain="off"; opt a wrapper
+                            in with data-ring-section.
 
    GATES. Every animation and transition sits behind
      @media (prefers-reduced-motion: no-preference)
@@ -84,6 +89,9 @@
   --ring-key-rgb: 122 232 255;
   --ring-gold: #f0cf86;
   --ring-gold-rgb: 240 207 134;
+  /* The thread and pulleys of the linked sections: a warmer, deeper gold. */
+  --ring-amber: #f2b24a;
+  --ring-amber-rgb: 242 178 74;
   --ring-pink: #ff5fc8;
   --ring-pink-rgb: 255 95 200;
   --ring-ink: #05080f;
@@ -532,6 +540,54 @@
   }
 }
 
+/* Linked sections. The lift is from-only, so a part lands on its own place;
+   the thread strips and the pulley read their start from the helper. */
+@keyframes ring-link-lift-text {
+  from {
+    translate: 0 30px;
+  }
+}
+
+@keyframes ring-link-lift-figure {
+  from {
+    translate: 0 52px;
+  }
+}
+
+@keyframes ring-link-seen {
+  from {
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes ring-thread-run {
+  from {
+    scale: 1 var(--ring-thread-from, 1);
+  }
+}
+
+@keyframes ring-pulley-turn {
+  from {
+    rotate: var(--ring-pulley-from, -360deg);
+  }
+}
+
+/* Taut and bright while it pulls, then back to a faint rest. */
+@keyframes ring-thread-show {
+  from {
+    opacity: 0;
+  }
+
+  7%,
+  58% {
+    opacity: 1;
+  }
+}
+
 @keyframes ring-line-draw {
   from {
     scale: 0 1;
@@ -698,6 +754,61 @@
   html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(8) { --ring-i: 7; }
   html:not([data-world-effects="economy"]) .ring-expand-stagger > :nth-child(n + 9) { --ring-i: 8; }
 
+  /* --- Linked sections: the pulley-and-thread chain (owner, 2026-11-23:
+     「連鎖する感じ」「琥珀色の糸と滑車で」). The helper holds only the parts
+     that are still below the fold ([data-ring-link="hold"]) and, at release,
+     writes each part's delay: one hand-off after the part above it. Every
+     part hangs below its place, shows on its hook as its
+     thread goes taut, and is lifted on the bounce spring (one plain
+     animation per property, so the compositor can run it). The thread strips stretch
+     and the pulley turns on the same curve and the same delays, so the
+     whole mechanism runs on the compositor with no frame loop. --- */
+  html[data-ring-ready] [data-ring-link="hold"] {
+    opacity: 0;
+  }
+
+  /* Text hangs 30px, figures and cards 52px (RING_LINK_HANG). Literal
+     keyframes, one animation per property: nothing here needs the main
+     thread once it has started. */
+  html[data-ring-ready]:not([data-world-effects="economy"]) [data-ring-link="text"] {
+    animation:
+      ring-link-lift-text var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
+      ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards;
+  }
+
+  html[data-ring-ready]:not([data-world-effects="economy"]) [data-ring-link="figure"] {
+    animation:
+      ring-link-lift-figure var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards,
+      ring-link-seen 320ms ease-out var(--ring-link-f, 0ms) backwards;
+  }
+
+  /* Economy keeps the order of the chain and nothing else: a plain fade. */
+  html[data-ring-ready][data-world-effects="economy"] :is([data-ring-link="text"], [data-ring-link="figure"]) {
+    animation: ring-link-seen 240ms ease-out var(--ring-link-f, 0ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ring-link[data-ring-run] {
+    animation: ring-thread-show 1500ms linear var(--ring-link-f, 0ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-thread {
+    animation: ring-thread-run var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards;
+  }
+
+  html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-thread-pull {
+    animation-delay: var(--ring-link-a, 0ms);
+  }
+
+  /* The lifted part is a .ring-enter: its own rise is on the default spring. */
+  html:not([data-world-effects="economy"]) .ring-link[data-ring-run="enter"] > :is(.ring-thread:not(.ring-thread-pull), .ring-pulley) {
+    animation-duration: var(--ring-dur-spring);
+    animation-timing-function: var(--ring-spring);
+  }
+
+  html:not([data-world-effects="economy"]) .ring-link[data-ring-run] > .ring-pulley {
+    animation: ring-pulley-turn var(--ring-dur-bounce) var(--ring-spring-bounce) var(--ring-link-d, 0ms) backwards;
+  }
+
   /* --- Press: a quick sink, an elastic release. --- */
   html:not([data-world-effects="economy"]) .ring-press {
     transition: scale var(--ring-dur-elastic) var(--ring-spring-elastic);
@@ -711,6 +822,71 @@
   /* --- Scroll-linked bounce: one spring value, written by the helper. --- */
   html:not([data-world-effects="economy"]) .ring-bounce {
     translate: 0 var(--ring-kick, 0px);
+  }
+}
+
+/* --- Linked sections: the thread layer. One aria-hidden box on the body,
+   in page coordinates, so it scrolls with the page for free. Each .ring-link
+   sits on its pulley's centre; a thread end is a 100px strip scaled to its
+   length from that centre. Shown only where the mechanism runs. --- */
+.ring-links {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: none;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.ring-link {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.ring-link[data-ring-run] {
+  opacity: 0.22;
+}
+
+.ring-thread {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--ring-amber);
+  box-shadow: 0 0 5px rgb(var(--ring-amber-rgb) / 0.55);
+  transform-origin: 50% 0;
+  scale: 1 var(--ring-thread-to, 0);
+}
+
+.ring-pulley {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--ring-amber);
+  border-radius: 50%;
+  /* A hub and four spokes, so the turn can be seen. */
+  background:
+    radial-gradient(circle, var(--ring-amber) 0 1.8px, transparent 2.3px),
+    linear-gradient(var(--ring-amber), var(--ring-amber)) 50% 50% / 1px 100% no-repeat,
+    linear-gradient(var(--ring-amber), var(--ring-amber)) 50% 50% / 100% 1px no-repeat,
+    rgb(5 8 15 / 0.9);
+  box-shadow:
+    0 0 0 1px rgb(5 8 15 / 0.7),
+    0 0 9px rgb(var(--ring-amber-rgb) / 0.5);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-world-effects="economy"]) .ring-links {
+    display: block;
   }
 }
 
@@ -768,12 +944,7 @@
   }
 }
 
-/* A phone turns two glass layers at most (the band and the hologram sweep);
-   the others rest as static pictures. */
-@media (prefers-reduced-motion: no-preference) and (max-width: 739px),
-  (prefers-reduced-motion: no-preference) and (pointer: coarse) {
-  html:not([data-world-effects="economy"]) .ring-glass-hero[data-ring-seen] > i:nth-child(2),
-  html:not([data-world-effects="economy"]) .ring-glass-hero[data-ring-seen] > i:nth-child(3) {
-    animation-name: none, ring-glass-pop;
-  }
-}
+/* Owner, 2026-11-23: 「高品質モードで、スマホでもPC版と同クオリティ」. There is
+   no phone tier: a phone or tablet turns all four glass layers and runs the
+   same linked sections as a desktop. Lightweight rendering
+   (html[data-world-effects="economy"]) is the only reduced tier. */
