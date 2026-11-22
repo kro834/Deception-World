@@ -6,6 +6,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { PROTO_REGIONS } from "./data";
 import { ProtoMoon } from "./menu-orbit";
+import { withGroupBreaks } from "./group-breaks";
 
 export function MenuCabinet({ initialRegion }: { initialRegion?: string }) {
   const [openId, setOpenId] = useState(initialRegion ?? "sections");
@@ -88,7 +89,10 @@ export function MenuCabinet({ initialRegion }: { initialRegion?: string }) {
                   style={{ ["--cols" as string]: columns }}
                 >
                   <i className="rp-m2-pulley" aria-hidden="true" />
-                  {region.items.map((item, itemIndex) => (
+                  {withGroupBreaks(region.items).flatMap(({ item, breakBefore }, itemIndex) => [
+                    breakBefore ? (
+                      <i className="rp-break" key={`break-${item.label}`} aria-hidden="true" />
+                    ) : null,
                     <ProtoMoon
                       key={item.label}
                       item={item}
@@ -96,8 +100,8 @@ export function MenuCabinet({ initialRegion }: { initialRegion?: string }) {
                         ["--row" as string]: Math.floor(itemIndex / columns),
                         ["--col" as string]: itemIndex % columns,
                       }}
-                    />
-                  ))}
+                    />,
+                  ])}
                 </div>
               </li>
             );

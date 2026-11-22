@@ -11,6 +11,7 @@ const STEP = 360 / N;
 // Rows hug a circle this far outside the planets' ring (desktop).
 const HUG_RADIUS = 400;
 const ROW_PITCH = 56;
+const GROUP_GAP = 14;
 
 export function ProtoMoon({ item, style }: { item: ProtoItem; style?: CSSProperties }) {
   return (
@@ -103,8 +104,15 @@ export function MenuOrbit({ initialRegion }: { initialRegion?: string }) {
   }, []);
 
   // More than eight moons share two columns so nothing scrolls on a phone.
-  const columns = region.items.length > 8 ? 2 : 1;
-  const perColumn = Math.ceil(region.items.length / columns);
+  // A grouped region (人物) keeps its first group in one column and breaks the
+  // second column at each group boundary.
+  const grouped = region.items.some((item) => item.group);
+  const half = Math.ceil(region.items.length / 2);
+  const columns: ProtoItem[][] = grouped
+    ? [region.items.filter((item) => !item.group), region.items.filter((item) => item.group)]
+    : region.items.length > 8
+      ? [region.items.slice(0, half), region.items.slice(half)]
+      : [region.items];
 
   return (
     <div className="rp-root rp-m1" data-open={open}>
@@ -183,22 +191,33 @@ export function MenuOrbit({ initialRegion }: { initialRegion?: string }) {
           aria-labelledby={`rp-m1-tab-${region.id}`}
           key={region.id}
         >
-          <div className="rp-m1-rows" data-cols={columns} style={{ ["--cols" as string]: columns }}>
-            {region.items.map((item, index) => {
-              const row = index % perColumn;
-              const y = (row - (perColumn - 1) / 2) * ROW_PITCH;
-              const hug = HUG_RADIUS - Math.sqrt(HUG_RADIUS * HUG_RADIUS - y * y);
+          <div className="rp-m1-rows" data-cols={columns.length}>
+            {columns.map((column, columnIndex) => {
+              const breaks = column.map(
+                (item, index) => index > 0 && item.group !== column[index - 1].group,
+              );
+              const height =
+                column.length * ROW_PITCH + breaks.filter(Boolean).length * GROUP_GAP - 6;
+              let offset = 0;
               return (
-                <ProtoMoon
-                  key={item.label}
-                  item={item}
-                  style={{
-                    ["--hug" as string]: `${-hug.toFixed(1)}px`,
-                    ["--j" as string]: row + Math.floor(index / perColumn) * 2,
-                    gridColumn: Math.floor(index / perColumn) + 1,
-                    gridRow: row + 1,
-                  }}
-                />
+                <div className="rp-m1-col" key={column[0].label}>
+                  {column.map((item, index) => {
+                    if (breaks[index]) offset += GROUP_GAP;
+                    const y = offset + index * ROW_PITCH + 25 - height / 2;
+                    const hug = HUG_RADIUS - Math.sqrt(HUG_RADIUS * HUG_RADIUS - y * y);
+                    return (
+                      <ProtoMoon
+                        key={item.label}
+                        item={item}
+                        style={{
+                          ["--hug" as string]: `${-hug.toFixed(1)}px`,
+                          ["--j" as string]: index + columnIndex * 2,
+                          ["--gap" as string]: breaks[index] ? 1 : 0,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
               );
             })}
           </div>

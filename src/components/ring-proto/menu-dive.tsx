@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PROTO_REGIONS } from "./data";
 import { ProtoMoon } from "./menu-orbit";
+import { withGroupBreaks } from "./group-breaks";
 
 // Desktop: ページ内 in the centre, six round it. Phone: a 2-3-2 honeycomb.
 // Units are lens pitches.
@@ -148,9 +149,12 @@ export function MenuDive({ initialRegion }: { initialRegion?: string }) {
               data-cols={columns}
               style={{ ["--cols" as string]: columns }}
             >
-              {region.items.map((item, index) => (
-                <ProtoMoon key={item.label} item={item} style={{ ["--j" as string]: index }} />
-              ))}
+              {withGroupBreaks(region.items).flatMap(({ item, breakBefore }, index) => [
+                breakBefore ? (
+                  <i className="rp-break" key={`break-${item.label}`} aria-hidden="true" />
+                ) : null,
+                <ProtoMoon key={item.label} item={item} style={{ ["--j" as string]: index }} />,
+              ])}
             </div>
           </div>
         ) : null}

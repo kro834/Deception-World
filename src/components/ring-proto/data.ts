@@ -4,13 +4,16 @@
 import { RELATED_NAV, RIDER_NAV, RIKUEI_NAV } from "@/components/world/dossier-nav";
 import { launcherTile } from "@/lib/thumbnail-images";
 
-export type ProtoItem = { label: string; href?: string; img?: string };
+// `group`: the real menu keeps 人物 in four groups (riders, 六詠, related,
+// unmanaged); a concept shows the boundary as a gap, never as a new label.
+export type ProtoItem = { label: string; href?: string; img?: string; group?: number };
 export type ProtoRegion = { id: string; label: string; items: ProtoItem[] };
 
-const file = (link: { name: string; href: string | null }): ProtoItem => ({
+const file = (link: { name: string; href: string | null }, group = 0): ProtoItem => ({
   label: link.name,
   href: link.href ?? undefined,
   img: launcherTile(link.href),
+  group,
 });
 
 export const PROTO_REGIONS: ProtoRegion[] = [
@@ -79,11 +82,16 @@ export const PROTO_REGIONS: ProtoRegion[] = [
     id: "people",
     label: "人物",
     items: [
-      ...RIDER_NAV.map(file),
-      ...RIKUEI_NAV.map(file),
-      ...RELATED_NAV.map(file),
-      file({ name: "夜明護尊", href: "/characters/yoake-mamori" }),
-      { label: "ダンテ／ヴァルグ", href: "/characters/dante", img: "/character-dante-thumb.webp" },
+      ...RIDER_NAV.map((link) => file(link, 0)),
+      ...RIKUEI_NAV.map((link) => file(link, 1)),
+      ...RELATED_NAV.map((link) => file(link, 2)),
+      file({ name: "夜明護尊", href: "/characters/yoake-mamori" }, 2),
+      {
+        label: "ダンテ／ヴァルグ",
+        href: "/characters/dante",
+        img: "/character-dante-thumb.webp",
+        group: 3,
+      },
     ],
   },
   {
