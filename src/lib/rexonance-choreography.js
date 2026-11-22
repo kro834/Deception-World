@@ -56,7 +56,7 @@ const OUT = "cubic-bezier(.16,1,.3,1)";
 // OPTICS (2026-11-14): the instrument plates catch one specular pass as
 // they come up, and a chapter's guideway carries one run of light as its
 // title lands. Decoration only: the light is the script's own element,
-// made for its run and removed when it ends (nothing rests in the page).
+// made once while the page is at rest and drawn only for its run.
 const PLATES = [
   "#performance .rxs-comparison",
   "#p14 .rxs-p14-overview > figure",
@@ -324,16 +324,35 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     }
     return known;
   };
+  // Each host's flare element is made once, when the page is set (at rest),
+  // and only lit for its run (a class: display none otherwise). Putting an
+  // element in, and taking it out, in the middle of a scroll restyled the
+  // whole document (the page's :has() rules) for a 50-70 ms frame on a slow
+  // phone, two per run (2026-11-23). It goes last in its host, except where
+  // the host styles its last child (the specs' last card), where it goes
+  // first: checked to leave every other box as it was.
+  const shells = new Map();
+  const shellOf = (host, kind) => {
+    let made = shells.get(host);
+    if (!made) {
+      const shell = document.createElement("rxk-flare");
+      shell.className = `rxk-flare is-${kind}`;
+      shell.setAttribute("aria-hidden", "true");
+      const band = document.createElement("rxk-flare-band");
+      band.className = "rxk-flare-band";
+      shell.appendChild(band);
+      if (host.matches(".rxs-specs")) host.prepend(shell);
+      else host.appendChild(shell);
+      made = { shell, band };
+      shells.set(host, made);
+    }
+    return made;
+  };
   const flare = (host, kind, delay) => {
     if (!host || dim()) return;
     if (!positions(host)) return;
-    const shell = document.createElement("rxk-flare");
-    shell.className = `rxk-flare is-${kind}`;
-    shell.setAttribute("aria-hidden", "true");
-    const band = document.createElement("rxk-flare-band");
-    band.className = "rxk-flare-band";
-    shell.appendChild(band);
-    host.appendChild(shell);
+    const { shell, band } = shellOf(host, kind);
+    shell.classList.add("rxk-flare-lit");
     const animation =
       kind === "rule"
         ? band.animate(
@@ -357,7 +376,8 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     flares.add(animation);
     const drop = () => {
       flares.delete(animation);
-      shell.remove();
+      shell.classList.remove("rxk-flare-lit");
+      animation.cancel();
     };
     animation.finished.then(drop, drop);
   };
@@ -453,11 +473,17 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     for (const plate of page.querySelectorAll(PLATES)) {
       if (covered() || belowFold(plate)) plates.push(plate);
     }
-    // The flares' hosts, read here in one pass (no write between them).
+    // The flares' hosts, read here in one pass (no write between them),
+    // then their elements made, unlit, while the page is still at rest.
+    const ruled = [];
     for (const plate of plates) positions(plate);
-    for (const { node: title } of titles) {
-      const heading = title.closest(HEADING);
-      if (heading) positions(heading);
+    for (const { node: title, lines } of titles) {
+      const heading = lines.length && !title.matches(END_TITLE) ? title.closest(HEADING) : null;
+      if (heading && positions(heading)) ruled.push(heading);
+    }
+    if (!dim()) {
+      for (const plate of plates) if (positions(plate)) shellOf(plate, "sheen");
+      for (const heading of ruled) shellOf(heading, "rule");
     }
     if (covered()) {
       // Observe once the cover lifts: what stands on the first screen then
@@ -605,6 +631,8 @@ export function mountRexonanceChoreography(page, environment = globalThis) {
     environment.clearTimeout?.(later);
     environment.clearTimeout?.(placeTimer);
     rail.remove();
+    shells.forEach(({ shell }) => shell.remove());
+    shells.clear();
     delete page.dataset.rxkChapter;
     media.removeEventListener?.("change", syncPreference);
     document.removeEventListener("visibilitychange", syncVisibility);

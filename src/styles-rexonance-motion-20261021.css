@@ -683,9 +683,9 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
 
 /* ---------------- OPTICS: the script's runs of light ---------------- */
 /* A specular pass over a plate as it comes up; a run of light along a
-   chapter's guideway as its title lands. The script makes each element for
-   its run and removes it after (src/lib/rexonance-choreography.js), so
-   nothing here rests in the page, hidden or drawn; the light takes no hit
+   chapter's guideway as its title lands. The script makes each element once,
+   while the page is at rest, and lights it only for its run
+   (src/lib/rexonance-choreography.js; unlit it is not drawn); the light takes no hit
    and adds its glow only (screen). */
 .rxs-page.rxs-page.rxs-rexonance-page .rxk-flare {
   position: absolute;
@@ -696,6 +696,11 @@ html[data-family="special"] body .rxs-page.rxs-page.rxs-rexonance-page {
   pointer-events: none;
   contain: layout paint style;
   mix-blend-mode: screen;
+}
+
+/* Made once when the page is set; drawn only while its run is lit. */
+.rxs-page.rxs-page.rxs-rexonance-page .rxk-flare:not(.rxk-flare-lit) {
+  display: none;
 }
 
 .rxs-page.rxs-page.rxs-rexonance-page .rxk-flare > .rxk-flare-band {
